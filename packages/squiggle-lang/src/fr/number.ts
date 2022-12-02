@@ -5,14 +5,14 @@ import * as Result from "../utility/result";
 import * as E_A_Floats from "../utility/E_A_Floats";
 import { Ok } from "../utility/result";
 import { Value, vArray, vNumber } from "../value";
-import { Message, REOther } from "../reducer/IError";
+import { ErrorMessage, REOther } from "../reducer/ErrorMessage";
 
 const maker = new FnFactory({
   nameSpace: "Number",
   requiresNamespace: false,
 });
 
-const emptyList = (): Result.result<Value, Message> =>
+const emptyList = (): Result.result<Value, ErrorMessage> =>
   Result.Error(REOther("List is empty"));
 
 const makeNumberArrayToNumberDefinition = (

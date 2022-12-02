@@ -22,7 +22,9 @@ describe("Scale logarithm", () => {
     // expected value of log of exponential distribution.
     const meanAnalytical = Math.log(rate) + 1;
     if (!meanResult.ok) {
-      expect(meanResult.value).toEqual(operationDistError(DivisionByZeroError));
+      expect(meanResult.value).toEqual(
+        operationDistError(new DivisionByZeroError())
+      );
     } else {
       expect(meanResult.value).toBeCloseTo(meanAnalytical);
     }

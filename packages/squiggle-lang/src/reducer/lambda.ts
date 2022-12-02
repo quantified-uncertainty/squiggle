@@ -4,6 +4,7 @@ import { ReducerFn, Value } from "../value";
 import { Bindings } from "./bindings";
 import * as Context from "./Context";
 import { ReducerContext } from "./Context";
+import { ErrorMessage, REArityError } from "./ErrorMessage";
 import * as SqError from "./IError";
 
 type LambdaBody = (
@@ -57,6 +58,7 @@ export class SquiggleLambda extends Lambda {
     body: Expression,
     location: LocationRange
   ) {
+    // creating inline functions is bad for performance; this should be refactored as a method
     const lambda = (
       args: Value[],
       context: ReducerContext,
@@ -65,8 +67,8 @@ export class SquiggleLambda extends Lambda {
       const argsLength = args.length;
       const parametersLength = parameters.length;
       if (argsLength !== parametersLength) {
-        SqError.Message.throw(
-          SqError.REArityError(undefined, parametersLength, argsLength)
+        ErrorMessage.throw(
+          REArityError(undefined, parametersLength, argsLength)
         );
       }
 
@@ -123,6 +125,6 @@ export class BuiltinLambda extends Lambda {
   }
 
   toString() {
-    return "Builtin function";
+    return "Builtin function"; // TODO - return name instead?
   }
 }

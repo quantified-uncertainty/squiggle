@@ -15,8 +15,8 @@ import {
 } from "../library/registry/helpers";
 import { Ok } from "../utility/result";
 import { vArray, vNumber } from "../value";
-import * as IError from "../reducer/IError";
 import { BaseDist } from "../dist/BaseDist";
+import { ErrorMessage, REExpectedType } from "../reducer/ErrorMessage";
 
 const maker = new FnFactory({
   nameSpace: "SampleSet",
@@ -31,9 +31,7 @@ function sampleSetAssert(
   if (dist instanceof SampleSetDist.SampleSetDist) {
     return;
   }
-  return IError.Message.throw(
-    IError.REExpectedType("SampleSetDist", dist.toString())
-  );
+  return ErrorMessage.throw(REExpectedType("SampleSetDist", dist.toString()));
 }
 
 const baseLibrary = [

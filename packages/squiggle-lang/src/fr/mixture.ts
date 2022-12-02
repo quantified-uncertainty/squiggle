@@ -1,7 +1,6 @@
 import { BaseDist } from "../dist/BaseDist";
 import { Env } from "../dist/env";
 import * as SymbolicDist from "../dist/SymbolicDist";
-import * as IError from "../reducer/IError";
 import * as Result from "../utility/result";
 import * as E_A from "../utility/E_A";
 import * as DistOperations from "../dist/DistOperations";
@@ -9,9 +8,10 @@ import { Value, vDist } from "../value";
 import { argumentError, DistError } from "../dist/DistError";
 import { unpackDistResult } from "../library/registry/helpers";
 import { BuiltinLambda } from "../reducer/Lambda";
+import { ErrorMessage, REDistributionError } from "../reducer/ErrorMessage";
 
 const raiseArgumentError = (message: string) =>
-  IError.Message.throw(IError.REDistributionError(argumentError(message)));
+  ErrorMessage.throw(REDistributionError(argumentError(message)));
 
 let parseNumber = (arg: Value): number => {
   if (arg.type === "Number") {

@@ -6,7 +6,6 @@ import {
   frNumber,
   frRecord,
 } from "../library/registry/frTypes";
-import * as IError from "../reducer/IError";
 import * as Continuous from "../PointSet/Continuous";
 import * as Discrete from "../PointSet/Discrete";
 import {
@@ -19,6 +18,11 @@ import { vDist, vNumber } from "../value";
 import * as XYShape from "../XYShape";
 import { xyShapeDistError } from "../dist/DistError";
 import { Ok } from "../utility/result";
+import {
+  ErrorMessage,
+  REDistributionError,
+  REExpectedType,
+} from "../reducer/ErrorMessage";
 
 const maker = new FnFactory({
   nameSpace: "PointSet",
@@ -30,8 +34,8 @@ const argsToXYShape = (inputs: { x: number; y: number }[]): XYShape.XYShape => {
     inputs.map(({ x, y }) => [x, y] as const)
   );
   if (!result.ok) {
-    return IError.Message.throw(
-      IError.REDistributionError(xyShapeDistError(result.value))
+    return ErrorMessage.throw(
+      REDistributionError(xyShapeDistError(result.value))
     );
   }
   return result.value;
@@ -58,8 +62,8 @@ export const library = [
         [frDist, frLambda],
         ([dist, lambda], context, reducer) => {
           if (!(dist instanceof PointSetDist)) {
-            return IError.Message.throw(
-              IError.REExpectedType("PointSetDist", dist.toString())
+            return ErrorMessage.throw(
+              REExpectedType("PointSetDist", dist.toString())
             );
           }
           return repackDistResult(

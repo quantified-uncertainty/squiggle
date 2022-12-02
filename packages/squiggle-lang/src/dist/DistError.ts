@@ -1,4 +1,4 @@
-import { OperationError, operationErrorToString } from "../OperationError";
+import { OperationError } from "../OperationError";
 import { XYShapeError } from "../XYShape";
 
 type SimpleError<S extends String> = { type: S };
@@ -50,7 +50,7 @@ export const distErrorToString = (e: DistError): string => {
     case "NonNumericInput":
       return `Found a non-number in input: ${e.message}`;
     case "OperationError":
-      return operationErrorToString(e.value);
+      return e.value.toString();
     case "TooFewSamplesForConversionToPointSet":
       return "Too Few Samples to convert to point set";
     case "SparklineError":

@@ -1,7 +1,7 @@
 import { ReducerFn, vArray, vLambda, vRecord, vVoid, Value } from "../value";
 import { Expression } from "../expression";
 import * as Context from "./Context";
-import * as IError from "./IError";
+import { IError } from "./IError";
 import { ImmutableMap } from "../utility/immutableMap";
 import { Ok, result } from "../utility/result";
 import * as Result from "../utility/result";
@@ -10,13 +10,20 @@ import { defaultEnv } from "../dist/env";
 import { parse } from "../ast/parse";
 import { expressionFromAst } from "../ast/toExpression";
 import { SquiggleLambda } from "./Lambda";
+import {
+  ErrorMessage,
+  REExpectedType,
+  RENotAFunction,
+  REOther,
+  RESymbolNotFound,
+} from "./ErrorMessage";
 
 const throwFrom = (
-  error: IError.Message,
+  error: ErrorMessage,
   expression: Expression,
   context: Context.ReducerContext
 ): never => {
-  return IError.throwMessageWithFrameStack(
+  throw IError.fromMessageWithFrameStack(
     error,
     context.frameStack.extend(
       Context.currentFunctionName(context),
@@ -75,7 +82,7 @@ export const evaluate: ReducerFn = (expression, context) => {
             const [key] = evaluate(eKey, context);
             if (key.type !== "String") {
               return throwFrom(
-                IError.REOther("Record keys must be strings"),
+                REOther("Record keys must be strings"),
                 expression,
                 context
               );
@@ -105,7 +112,7 @@ export const evaluate: ReducerFn = (expression, context) => {
       const value = context.bindings.get(name);
       if (value === undefined) {
         return throwFrom(
-          IError.RESymbolNotFound(expression.value),
+          RESymbolNotFound(expression.value),
           expression,
           context
         );
@@ -125,11 +132,7 @@ export const evaluate: ReducerFn = (expression, context) => {
           context
         );
       } else {
-        return throwFrom(
-          IError.REExpectedType("Boolean", ""),
-          expression,
-          context
-        );
+        return throwFrom(REExpectedType("Boolean", ""), expression, context);
       }
     }
 
@@ -165,7 +168,7 @@ export const evaluate: ReducerFn = (expression, context) => {
           return [result, context];
         default:
           return throwFrom(
-            IError.RENotAFunction(lambda.toString()),
+            RENotAFunction(lambda.toString()),
             expression,
             context
           );
@@ -180,19 +183,17 @@ const createDefaultContext = () => Context.createContext(stdLib, defaultEnv);
 
 export const evaluateExpressionToResult = (
   expression: Expression
-): result<Value, IError.IError> => {
+): result<Value, IError> => {
   const context = createDefaultContext();
   try {
     const [value] = evaluate(expression, context);
     return Ok(value);
   } catch (e) {
-    return Result.Error(IError.errorFromException(e));
+    return Result.Error(IError.fromException(e));
   }
 };
 
-export const evaluateStringToResult = (
-  code: string
-): result<Value, IError.IError> => {
+export const evaluateStringToResult = (code: string): result<Value, IError> => {
   const exprR = Result.fmap(parse(code, "main"), expressionFromAst);
 
   return Result.bind(

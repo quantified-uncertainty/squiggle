@@ -2,7 +2,6 @@ import { ReducerContext } from "../../reducer/Context";
 import { Lambda } from "../../reducer/Lambda";
 import { ReducerFn, Value } from "../../value";
 import { result } from "../../utility/result";
-import * as IError from "../../reducer/IError";
 import * as core from "./core";
 
 import { library as builtinLibrary } from "../../fr/builtin";
@@ -20,6 +19,7 @@ import { library as dateLibrary } from "../../fr/date";
 import { library as mathLibrary } from "../../fr/math";
 import { library as listLibrary } from "../../fr/list";
 import { mxLambda } from "../../fr/mixture";
+import { ErrorMessage } from "../../reducer/ErrorMessage";
 
 const fnList: core.FRFunction[] = [
   ...builtinLibrary,
@@ -44,7 +44,7 @@ export const call = (
   args: Value[],
   context: ReducerContext,
   reducer: ReducerFn
-): result<Value, IError.Message> => {
+): result<Value, ErrorMessage> => {
   return core.call(registry, fnName, args, context, reducer);
 };
 

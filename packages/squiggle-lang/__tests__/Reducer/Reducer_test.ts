@@ -1,4 +1,3 @@
-import * as IError from "../../src/reducer/IError";
 import { evaluateStringToResult } from "../../src/reducer";
 import {
   expectEvalToBe,
@@ -119,7 +118,7 @@ describe("stacktraces", () => {
     if (result.ok) {
       throw new Error("Expected code to fail");
     }
-    const error = IError.errorToStringWithStackTrace(result.value);
+    const error = result.value.toStringWithStackTrace();
 
     expect(error)
       .toBe(`Error: There are function matches for add(), but with different arguments: [add(number, number)]; [add(distribution, number)]; [add(number, distribution)]; [add(distribution, distribution)]; [add(date, duration)]; [add(duration, duration)]

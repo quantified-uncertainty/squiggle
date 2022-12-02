@@ -7,7 +7,7 @@ import { makeDefinition } from "../library/registry/fnDefinition";
 import { frArray, frLambda, frNumber } from "../library/registry/frTypes";
 import { FnFactory } from "../library/registry/helpers";
 import { ReducerContext } from "../reducer/Context";
-import * as IError from "../reducer/IError";
+import { ErrorMessage, REOther } from "../reducer/ErrorMessage";
 import { Lambda } from "../reducer/Lambda";
 import * as E_A from "../utility/E_A";
 import { Ok, result } from "../utility/result";
@@ -56,15 +56,15 @@ const integrateFunctionBetweenWithNumIntegrationPoints = (
   numIntegrationPoints: number,
   context: ReducerContext,
   reducer: ReducerFn
-): result<Value, IError.Message> => {
+): result<Value, ErrorMessage> => {
   const applyFunctionAtFloatToFloatOption = (point: number) => {
     // Defined here so that it has access to context, reducer
     const result = lambda.call([vNumber(point)], context, reducer);
     if (result.type === "Number") {
       return result.value;
     }
-    return IError.Message.throw(
-      IError.REOther(
+    return ErrorMessage.throw(
+      REOther(
         "Error 1 in Danger.integrate. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead"
       )
     );
@@ -141,8 +141,8 @@ const integrationLibrary: FRFunction[] = [
         [frLambda, frNumber, frNumber, frNumber],
         ([lambda, min, max, numIntegrationPoints], context, reducer) => {
           if (numIntegrationPoints === 0) {
-            return IError.Message.throw(
-              IError.REOther(
+            return ErrorMessage.throw(
+              REOther(
                 "Integration error 4 in Danger.integrate: Increment can't be 0."
               )
             );
@@ -176,8 +176,8 @@ const integrationLibrary: FRFunction[] = [
         [frLambda, frNumber, frNumber, frNumber],
         ([lambda, min, max, epsilon], context, reducer) => {
           if (epsilon === 0) {
-            return IError.Message.throw(
-              IError.REOther(
+            return ErrorMessage.throw(
+              REOther(
                 "Integration error in Danger.integrate: Increment can't be 0."
               )
             );
@@ -238,29 +238,29 @@ const diminishingReturnsLibrary = [
       2. O(n*(m-1)): Iterate through all possible spending combinations. The advantage of this option is that it wouldn't assume that the returns of marginal spending are diminishing.
  */
           if (lambdas.length <= 1) {
-            return IError.Message.throw(
-              IError.REOther(
+            return ErrorMessage.throw(
+              REOther(
                 "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, number of functions should be greater than 1."
               )
             );
           }
           if (funds <= 0) {
-            return IError.Message.throw(
-              IError.REOther(
+            return ErrorMessage.throw(
+              REOther(
                 "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, funds should be greater than 0."
               )
             );
           }
           if (approximateIncrement <= 0) {
-            return IError.Message.throw(
-              IError.REOther(
+            return ErrorMessage.throw(
+              REOther(
                 "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, approximateIncrement should be greater than 0."
               )
             );
           }
           if (approximateIncrement >= funds) {
-            return IError.Message.throw(
-              IError.REOther(
+            return ErrorMessage.throw(
+              REOther(
                 "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, approximateIncrement should be smaller than funds amount."
               )
             );
@@ -275,8 +275,8 @@ const diminishingReturnsLibrary = [
             if (lambdaResult.type === "Number") {
               return lambdaResult.value;
             }
-            return IError.Message.throw(
-              IError.REOther(
+            return ErrorMessage.throw(
+              REOther(
                 "Error 1 in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead"
               )
             );

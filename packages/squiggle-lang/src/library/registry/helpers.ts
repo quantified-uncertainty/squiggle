@@ -7,10 +7,14 @@ import { FRFunction } from "./core";
 import { FnDefinition, makeDefinition } from "./fnDefinition";
 import { frBool, frDist, frNumber } from "./frTypes";
 import * as Result from "../../utility/result";
-import * as IError from "../../reducer/IError";
 import { DistError } from "../../dist/DistError";
 import { ReducerContext } from "../../reducer/Context";
 import { SampleMapNeedsNtoNFunction } from "../../OperationError";
+import {
+  ErrorMessage,
+  REDistributionError,
+  REOperationError,
+} from "../../reducer/ErrorMessage";
 
 type SimplifiedArgs = Omit<FRFunction, "nameSpace" | "requiresNamespace"> &
   Partial<Pick<FRFunction, "nameSpace" | "requiresNamespace">>;
@@ -233,14 +237,14 @@ export class FnFactory {
 
 export const unpackDistResult = <T>(result: Result.result<T, DistError>): T => {
   if (!result.ok) {
-    return IError.Message.throw(IError.REDistributionError(result.value));
+    return ErrorMessage.throw(REDistributionError(result.value));
   }
   return result.value;
 };
 
 export const repackDistResult = (
   result: Result.result<BaseDist, DistError>
-): Result.result<Value, IError.Message> => {
+): Result.result<Value, ErrorMessage> => {
   const dist = unpackDistResult(result);
   return Ok(vDist(dist));
 };
@@ -255,7 +259,5 @@ export const doNumberLambdaCall = (
   if (value.type === "Number") {
     return value.value;
   }
-  return IError.Message.throw(
-    IError.REOperationError(SampleMapNeedsNtoNFunction)
-  );
+  return ErrorMessage.throw(REOperationError(SampleMapNeedsNtoNFunction));
 };

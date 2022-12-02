@@ -1,6 +1,5 @@
 import { FRFunction } from "../library/registry/core";
 import { FnFactory, unpackDistResult } from "../library/registry/helpers";
-import * as IError from "../reducer/IError";
 import * as SymbolicDist from "../dist/SymbolicDist";
 import * as Result from "../utility/result";
 import * as magicNumbers from "../magicNumbers";
@@ -16,6 +15,7 @@ import {
   scaleLog,
 } from "../dist/DistOperations";
 import { BaseDist } from "../dist/BaseDist";
+import { ErrorMessage, REDistributionError } from "../reducer/ErrorMessage";
 
 const maker = new FnFactory({
   nameSpace: "",
@@ -24,8 +24,8 @@ const maker = new FnFactory({
 
 const toValueResult = (
   result: Result.result<BaseDist, DistError>
-): Result.result<Value, IError.Message> => {
-  return Result.fmap2(result, vDist, (e) => IError.REDistributionError(e));
+): Result.result<Value, ErrorMessage> => {
+  return Result.fmap2(result, vDist, (e) => REDistributionError(e));
 };
 
 type OpPair = [string, BinaryOperation];
@@ -121,7 +121,7 @@ export const library: FRFunction[] = [
         Result.fmap2(
           SymbolicDist.Triangular.make({ low, medium, high }),
           vDist,
-          (e) => IError.REDistributionError(otherError(e))
+          (e) => REDistributionError(otherError(e))
         )
     )
   ),

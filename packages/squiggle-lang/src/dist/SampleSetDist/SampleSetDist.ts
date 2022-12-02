@@ -6,7 +6,7 @@ import * as E_A_Sorted from "../../utility/E_A_Sorted";
 import * as Discrete from "../../PointSet/Discrete";
 import * as XYShape from "../../XYShape";
 
-import { OperationError, operationErrorToString } from "../../OperationError";
+import { OperationError } from "../../OperationError";
 import { ContinuousShape } from "../../PointSet/Continuous";
 import { DiscreteShape } from "../../PointSet/Discrete";
 import { PointSetDist } from "../PointSetDist";
@@ -218,7 +218,7 @@ export const Error = {
       case "NonNumericInput":
         return `Found a non-number in input: ${err.value}`;
       case "OperationError":
-        return operationErrorToString(err.value);
+        return err.value.toString();
       default:
         throw new global.Error(
           `Internal error: unexpected error type ${(err as any).type}`

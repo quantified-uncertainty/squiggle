@@ -7,11 +7,12 @@ import * as ProjectItem from "./ProjectItem";
 import * as Topology from "./Topology";
 import { Resolver } from "./Resolver";
 import { defaultEnv, Env } from "../../dist/env";
-import * as IError from "../../reducer/IError";
+import { IError } from "../../reducer/IError";
 import * as Library from "../../library";
 import { Value, vRecord } from "../../value";
 import { createContext } from "../../reducer/Context";
 import { Namespace, NamespaceMap } from "../../reducer/bindings";
+import { ErrorMessage } from "../../reducer/ErrorMessage";
 
 type Options = {
   resolver?: Resolver;
@@ -177,9 +178,7 @@ export class SqProject {
     const result = this.getResultOption(sourceId);
     return (
       result ??
-      Result.Error(
-        new SqError(IError.errorFromMessage(IError.Message.needToRun()))
-      )
+      Result.Error(new SqError(IError.fromMessage(ErrorMessage.needToRun())))
     );
   }
 

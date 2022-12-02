@@ -1,5 +1,3 @@
-// Temporary; to be removed after Rescript conversion is done.
-
 export type result<V, E> =
   | {
       ok: true;

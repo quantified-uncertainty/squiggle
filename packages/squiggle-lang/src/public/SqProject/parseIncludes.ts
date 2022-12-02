@@ -1,6 +1,6 @@
 import { LocationRange } from "peggy";
 import { makeParseError } from "../../ast/parse";
-import { fromParseError } from "../../reducer/IError";
+import { IError } from "../../reducer/IError";
 import { SqError } from "../SqError";
 import * as Result from "../../utility/result";
 import { parse } from "./IncludeParser";
@@ -22,7 +22,9 @@ export const parseIncludes = (
     const peggyError = e as PeggySyntaxError;
     return Result.Error(
       new SqError(
-        fromParseError(makeParseError(peggyError.message, peggyError.location))
+        IError.fromParseError(
+          makeParseError(peggyError.message, peggyError.location)
+        )
       )
     );
   }

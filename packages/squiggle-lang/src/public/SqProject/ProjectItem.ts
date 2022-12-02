@@ -3,7 +3,7 @@ import * as Result from "../../utility/result";
 import { result, Ok } from "../../utility/result";
 import { Resolver } from "./Resolver";
 import { AST, parse, ParseError } from "../../ast/parse";
-import { errorFromException, fromParseError } from "../../reducer/IError";
+import { IError } from "../../reducer/IError";
 import { Expression } from "../../expression";
 import { Value } from "../../value";
 import { SqError } from "../SqError";
@@ -187,7 +187,7 @@ export const rawParse = (t: t): t => {
   }
   const rawParse = Result.errMap(
     parse(t.source, t.sourceId),
-    (e: ParseError) => new SqError(fromParseError(e))
+    (e: ParseError) => new SqError(IError.fromParseError(e))
   );
   return setRawParse(t, rawParse);
 };
@@ -233,6 +233,6 @@ export const run = (t: t, context: ReducerContext): t => {
       contextAfterEvaluation.bindings.locals()
     );
   } catch (e: unknown) {
-    return failRun(t, new SqError(errorFromException(e)));
+    return failRun(t, new SqError(IError.fromException(e)));
   }
 };

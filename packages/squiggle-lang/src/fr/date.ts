@@ -1,11 +1,11 @@
 import * as DateTime from "../utility/DateTime";
 import * as Result from "../utility/result";
-import * as IError from "../reducer/IError";
 import { FnFactory } from "../library/registry/helpers";
 import { makeDefinition } from "../library/registry/fnDefinition";
 import { vDate, vTimeDuration, vNumber, vString } from "../value";
 import { Ok } from "../utility/result";
 import { frDate, frNumber, frTimeDuration } from "../library/registry/frTypes";
+import { REOther } from "../reducer/ErrorMessage";
 
 const maker = new FnFactory({
   nameSpace: "",
@@ -42,11 +42,7 @@ export const library = [
   ),
   maker.fromDefinition(
     makeDefinition("makeDateFromYear", [frNumber], ([year]) => {
-      return Result.fmap2(
-        DateTime.Date.makeFromYear(year),
-        vDate,
-        IError.REOther
-      );
+      return Result.fmap2(DateTime.Date.makeFromYear(year), vDate, REOther);
     })
   ),
   maker.fromDefinition(
@@ -59,11 +55,7 @@ export const library = [
   ),
   maker.fromDefinition(
     makeDefinition("subtract", [frDate, frDate], ([d1, d2]) =>
-      Result.fmap2(
-        DateTime.Date.subtract(d1, d2),
-        vTimeDuration,
-        IError.REOther
-      )
+      Result.fmap2(DateTime.Date.subtract(d1, d2), vTimeDuration, REOther)
     )
   ),
   maker.fromDefinition(

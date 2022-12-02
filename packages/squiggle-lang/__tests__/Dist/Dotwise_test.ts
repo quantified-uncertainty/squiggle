@@ -1,8 +1,8 @@
 import * as fc from "fast-check";
 
 import { BinaryOperations } from "../../src/dist/DistOperations";
+import { DivisionByZeroError } from "../../src/OperationError";
 import { env, mkExponential, mkNormal, unpackResult } from "./distTestHelpers";
-import { SimpleOperationError } from "../../src/OperationError";
 
 describe("dotSubtract", () => {
   test("mean of normal minus exponential (unit)", () => {
@@ -39,8 +39,7 @@ describe("dotSubtract", () => {
             const err = dotDifferenceR.value;
             return (
               err.type === "OperationError" &&
-              err.value.type === "enum" &&
-              err.value.value === SimpleOperationError.DivisionByZeroError
+              err.value instanceof DivisionByZeroError
             );
           }
 

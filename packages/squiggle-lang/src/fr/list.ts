@@ -10,7 +10,7 @@ import { Ok } from "../utility/result";
 import * as Result from "../utility/result";
 import { vArray, vNumber } from "../value";
 import * as E_A_Floats from "../utility/E_A_Floats";
-import { REOther } from "../reducer/IError";
+import { REOther } from "../reducer/ErrorMessage";
 
 const maker = new FnFactory({
   nameSpace: "List",

@@ -1,7 +1,7 @@
 import {
   ComplexNumberError,
-  makeOtherError,
   OperationError,
+  OtherOperationError,
   PdfInvalidError,
 } from "../OperationError";
 import * as Result from "../utility/result";
@@ -80,7 +80,7 @@ export const WithDistAnswer = {
           combineAndIntegrate(estiContinuousPart, answContinuousPart)
         );
       } else {
-        return Result.Error(makeOtherError("unreachable state"));
+        return Result.Error(new OtherOperationError("unreachable state"));
       }
     };
 

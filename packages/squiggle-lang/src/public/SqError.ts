@@ -1,35 +1,28 @@
-import {
-  createOtherError,
-  errorToString,
-  errorToStringWithStackTrace,
-  getFrameArray,
-  getTopFrame,
-  IError,
-} from "../reducer/IError";
+import { IError } from "../reducer/IError";
 import { Frame } from "../reducer/FrameStack";
 
 export class SqError {
   constructor(private _value: IError) {}
 
   toString() {
-    return errorToString(this._value);
+    return this._value.toString();
   }
 
   toStringWithStackTrace() {
-    return errorToStringWithStackTrace(this._value);
+    return this._value.toStringWithStackTrace();
   }
 
   static createOtherError(v: string) {
-    return new SqError(createOtherError(v));
+    return new SqError(IError.other(v));
   }
 
   getTopFrame(): SqFrame | undefined {
-    const frame = getTopFrame(this._value);
+    const frame = this._value.getTopFrame();
     return frame ? new SqFrame(frame) : undefined;
   }
 
   getFrameArray(): SqFrame[] {
-    const frames = getFrameArray(this._value);
+    const frames = this._value.getFrameArray();
     return frames.map((frame) => new SqFrame(frame));
   }
 

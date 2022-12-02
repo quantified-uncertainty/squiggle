@@ -6,15 +6,15 @@ import {
   evaluateStringToResult,
 } from "../src/reducer";
 import * as Result from "../src/utility/result";
-import * as IError from "../src/reducer/IError";
+import { IError } from "../src/reducer/IError";
 import { Value } from "../src/value";
 
 const expectParseToBe = (expr: string, answer: string) => {
   expect(nodeResultToString(parse(expr, "test"))).toBe(answer);
 };
 
-const resultToString = (r: Result.result<Value, IError.IError>) =>
-  r.ok ? r.value.toString() : `Error(${IError.errorToString(r.value)})`;
+const resultToString = (r: Result.result<Value, IError>) =>
+  r.ok ? r.value.toString() : `Error(${r.value.toString()})`;
 
 export const testParse = (expr: string, answer: string) =>
   test(expr, () => expectParseToBe(expr, answer));
@@ -29,7 +29,7 @@ let expectExpressionToBe = (expr: string, answer: string, v?: string) => {
     expect(a1).toBe(answer);
   } else {
     const a2r = Result.bind(
-      Result.errMap(rExpr, IError.fromParseError),
+      Result.errMap(rExpr, (e) => IError.fromParseError(e)),
       evaluateExpressionToResult
     );
     const a2 = resultToString(a2r);

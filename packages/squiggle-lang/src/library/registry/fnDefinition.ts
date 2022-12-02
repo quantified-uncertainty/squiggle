@@ -1,5 +1,5 @@
 import { ReducerContext } from "../../reducer/Context";
-import * as IError from "../../reducer/IError";
+import { ErrorMessage } from "../../reducer/ErrorMessage";
 import { result } from "../../utility/result";
 import { ReducerFn, Value } from "../../value";
 import { FRType } from "./frTypes";
@@ -11,7 +11,7 @@ type FnDefinition1<T1> = {
     args: [T1],
     context: ReducerContext,
     reducerFn: ReducerFn
-  ) => result<Value, IError.Message>;
+  ) => result<Value, ErrorMessage>;
 };
 
 type FnDefinition2<T1, T2> = {
@@ -21,7 +21,7 @@ type FnDefinition2<T1, T2> = {
     args: [T1, T2],
     context: ReducerContext,
     reducerFn: ReducerFn
-  ) => result<Value, IError.Message>;
+  ) => result<Value, ErrorMessage>;
 };
 
 type FnDefinition3<T1, T2, T3> = {
@@ -31,7 +31,7 @@ type FnDefinition3<T1, T2, T3> = {
     args: [T1, T2, T3],
     context: ReducerContext,
     reducerFn: ReducerFn
-  ) => result<Value, IError.Message>;
+  ) => result<Value, ErrorMessage>;
 };
 
 type FnDefinition4<T1, T2, T3, T4> = {
@@ -41,7 +41,7 @@ type FnDefinition4<T1, T2, T3, T4> = {
     args: [T1, T2, T3, T4],
     context: ReducerContext,
     reducerFn: ReducerFn
-  ) => result<Value, IError.Message>;
+  ) => result<Value, ErrorMessage>;
 };
 
 // https://www.typescriptlang.org/docs/handbook/2/functions.html#function-overloads
@@ -53,7 +53,7 @@ export function makeDefinition<T1>(
     args: [T1],
     context: ReducerContext,
     reducerFn: ReducerFn
-  ) => result<Value, IError.Message>
+  ) => result<Value, ErrorMessage>
 ): FnDefinition1<T1>;
 
 export function makeDefinition<T1, T2>(
@@ -63,7 +63,7 @@ export function makeDefinition<T1, T2>(
     args: [T1, T2],
     context: ReducerContext,
     reducerFn: ReducerFn
-  ) => result<Value, IError.Message>
+  ) => result<Value, ErrorMessage>
 ): FnDefinition2<T1, T2>;
 
 export function makeDefinition<T1, T2, T3>(
@@ -73,7 +73,7 @@ export function makeDefinition<T1, T2, T3>(
     args: [T1, T2, T3],
     context: ReducerContext,
     reducerFn: ReducerFn
-  ) => result<Value, IError.Message>
+  ) => result<Value, ErrorMessage>
 ): FnDefinition3<T1, T2, T3>;
 
 export function makeDefinition<T1, T2, T3, T4>(
@@ -83,7 +83,7 @@ export function makeDefinition<T1, T2, T3, T4>(
     args: [T1, T2, T3, T4],
     context: ReducerContext,
     reducerFn: ReducerFn
-  ) => result<Value, IError.Message>
+  ) => result<Value, ErrorMessage>
 ): FnDefinition4<T1, T2, T3, T4>;
 
 // `any` here is fine, this signature won't be visible due to function overloads above
@@ -94,7 +94,7 @@ export function makeDefinition(
     args: any,
     context: ReducerContext,
     reducerFn: ReducerFn
-  ) => result<Value, IError.Message>
+  ) => result<Value, ErrorMessage>
 ): FnDefinition {
   return {
     name,
@@ -114,7 +114,7 @@ export const tryCallFnDefinition = (
   args: Value[],
   context: ReducerContext,
   reducerFn: ReducerFn
-): result<Value, IError.Message> | undefined => {
+): result<Value, ErrorMessage> | undefined => {
   if (args.length !== fn.inputs.length) {
     return; // args length mismatch
   }

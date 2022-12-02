@@ -2,11 +2,15 @@ import { makeDefinition } from "../library/registry/fnDefinition";
 import { frDist, frDistOrNumber, frRecord } from "../library/registry/frTypes";
 import { FnFactory } from "../library/registry/helpers";
 import { vNumber } from "../value";
-import * as IError from "../reducer/IError";
 import * as Result from "../utility/result";
 import * as DistOperations from "../dist/DistOperations";
 import { BaseDist } from "../dist/BaseDist";
 import { Env } from "../dist/env";
+import {
+  ErrorMessage,
+  REDistributionError,
+  REOther,
+} from "../reducer/ErrorMessage";
 
 const maker = new FnFactory({
   nameSpace: "Dist",
@@ -22,7 +26,7 @@ const runScoringScalarAnswer = (
   return Result.fmap2(
     DistOperations.logScoreScalarAnswer({ estimate, answer, prior, env }),
     vNumber,
-    IError.REDistributionError
+    REDistributionError
   );
 };
 
@@ -35,7 +39,7 @@ const runScoringDistAnswer = (
   return Result.fmap2(
     DistOperations.logScoreDistAnswer({ estimate, answer, prior, env }),
     vNumber,
-    IError.REDistributionError
+    REDistributionError
   );
 };
 
@@ -74,7 +78,7 @@ export const library = [
               context.environment
             );
           } else {
-            return IError.Message.throw(IError.REOther("Impossible type"));
+            return ErrorMessage.throw(REOther("Impossible type"));
           }
         }
       ),
@@ -97,7 +101,7 @@ export const library = [
               context.environment
             );
           } else {
-            return IError.Message.throw(IError.REOther("Impossible type"));
+            return ErrorMessage.throw(REOther("Impossible type"));
           }
         }
       ),

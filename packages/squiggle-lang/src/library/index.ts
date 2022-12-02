@@ -1,10 +1,15 @@
-import * as IError from "../reducer/IError";
 import { Value, vLambda } from "../value";
 import { makeMathConstants } from "./math";
 import { makeVersionConstant } from "./version";
 import * as registry from "./registry";
 import { Namespace, NamespaceMap } from "../reducer/bindings";
 import { BuiltinLambda } from "../reducer/Lambda";
+import {
+  ErrorMessage,
+  REArrayIndexNotFound,
+  REOther,
+  RERecordPropertyNotFound,
+} from "../reducer/ErrorMessage";
 
 const makeStdLib = (): Namespace => {
   let res = NamespaceMap<string, Value>();
@@ -28,8 +33,8 @@ const makeStdLib = (): Namespace => {
           if (index >= 0 && index < arr.length) {
             return arr[index];
           } else {
-            return IError.Message.throw(
-              IError.REArrayIndexNotFound("Array index not found", index)
+            return ErrorMessage.throw(
+              REArrayIndexNotFound("Array index not found", index)
             );
           }
         } else if (
@@ -41,16 +46,13 @@ const makeStdLib = (): Namespace => {
           const index = inputs[1].value;
           return (
             dict.get(index) ??
-            IError.Message.throw(
-              IError.RERecordPropertyNotFound(
-                "Record property not found",
-                index
-              )
+            ErrorMessage.throw(
+              RERecordPropertyNotFound("Record property not found", index)
             )
           );
         } else {
-          return IError.Message.throw(
-            IError.REOther("Trying to access key on wrong value")
+          return ErrorMessage.throw(
+            REOther("Trying to access key on wrong value")
           );
         }
       })
@@ -73,7 +75,7 @@ const makeStdLib = (): Namespace => {
           // But FunctionRegistry API is too limited for that to matter. Please take care not to violate that in the future by accident.
           const result = registry.call(name, args, context, reducer);
           if (!result.ok) {
-            return IError.Message.throw(result.value);
+            return ErrorMessage.throw(result.value);
           }
           return result.value;
         })
