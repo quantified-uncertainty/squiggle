@@ -1,4 +1,4 @@
-import { Lambda } from "./Lambda";
+import { Lambda } from "./lambda";
 import * as DateTime from "../utility/DateTime";
 
 type LambdaDeclarationArg =

@@ -9,7 +9,7 @@ import { stdLib } from "../library";
 import { defaultEnv } from "../dist/env";
 import { parse } from "../ast/parse";
 import { expressionFromAst } from "../ast/toExpression";
-import { SquiggleLambda } from "./Lambda";
+import { SquiggleLambda } from "./lambda";
 import {
   ErrorMessage,
   REExpectedType,
