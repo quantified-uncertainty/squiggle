@@ -1,4 +1,4 @@
-import { OperationError } from "../OperationError";
+import { OperationError } from "../operationError";
 import { XYShapeError } from "../XYShape";
 
 type SimpleError<S extends String> = { type: S };
@@ -20,52 +20,19 @@ export type DistError =
   | ValueError<"OperationError", OperationError>
   | ValueError<"XYShapeError", XYShapeError>;
 
-export const TooFewSamplesForConversionToPointSet = (): DistError => {
+export const tooFewSamplesForConversionToPointSet = (): DistError => {
   return {
     type: "TooFewSamplesForConversionToPointSet",
   };
 };
 
-export const DistOperationError = (
+export const distOperationError = (
   operationError: OperationError
 ): DistError => {
   return {
     type: "OperationError",
     value: operationError,
   };
-};
-
-export const distErrorToString = (e: DistError): string => {
-  switch (e.type) {
-    case "NotYetImplemented":
-      return "Function not yet implemented";
-    case "Unreachable":
-      return "Unreachable";
-    case "DistributionVerticalShiftIsInvalid":
-      return "Distribution vertical shift is invalid";
-    case "ArgumentError":
-      return `Argument Error ${e.message}`;
-    case "LogarithmOfDistributionError":
-      return `Logarithm of input error: ${e.message}`;
-    case "NonNumericInput":
-      return `Found a non-number in input: ${e.message}`;
-    case "OperationError":
-      return e.value.toString();
-    case "TooFewSamplesForConversionToPointSet":
-      return "Too Few Samples to convert to point set";
-    case "SparklineError":
-      return e.message;
-    case "RequestedStrategyInvalidError":
-      return `Requested strategy invalid: ${e.message}`;
-    case "XYShapeError":
-      return `XY Shape Error: ${XYShapeError.toString(e.value)}`;
-    case "OtherError":
-      return e.message;
-    case "TooFewSamples":
-      return "Too few samples when constructing sample set";
-    default:
-      return `Unknown error type ${(e as any).type}`;
-  }
 };
 
 export const notYetImplemented = (): DistError => ({
@@ -114,3 +81,36 @@ export const xyShapeDistError = (e: XYShapeError): DistError => ({
   type: "XYShapeError",
   value: e,
 });
+
+export const distErrorToString = (e: DistError): string => {
+  switch (e.type) {
+    case "NotYetImplemented":
+      return "Function not yet implemented";
+    case "Unreachable":
+      return "Unreachable";
+    case "DistributionVerticalShiftIsInvalid":
+      return "Distribution vertical shift is invalid";
+    case "ArgumentError":
+      return `Argument Error ${e.message}`;
+    case "LogarithmOfDistributionError":
+      return `Logarithm of input error: ${e.message}`;
+    case "NonNumericInput":
+      return `Found a non-number in input: ${e.message}`;
+    case "OperationError":
+      return e.value.toString();
+    case "TooFewSamplesForConversionToPointSet":
+      return "Too Few Samples to convert to point set";
+    case "SparklineError":
+      return e.message;
+    case "RequestedStrategyInvalidError":
+      return `Requested strategy invalid: ${e.message}`;
+    case "XYShapeError":
+      return `XY Shape Error: ${XYShapeError.toString(e.value)}`;
+    case "OtherError":
+      return e.message;
+    case "TooFewSamples":
+      return "Too few samples when constructing sample set";
+    default:
+      return `Unknown error type ${(e as any).type}`;
+  }
+};

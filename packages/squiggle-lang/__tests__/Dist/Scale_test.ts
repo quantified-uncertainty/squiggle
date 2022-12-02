@@ -3,7 +3,7 @@ import * as DistOperations from "../../src/dist/DistOperations";
 import {
   DivisionByZeroError,
   NegativeInfinityError,
-} from "../../src/OperationError";
+} from "../../src/operationError";
 import * as Result from "../../src/utility/result";
 import { env, mkExponential, mkUniform } from "./distTestHelpers";
 

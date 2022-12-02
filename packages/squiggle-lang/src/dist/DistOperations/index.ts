@@ -18,7 +18,7 @@ import {
 } from "./AlgebraicCombination";
 import { Env } from "../env";
 import * as SampleSetDist from "../SampleSetDist/SampleSetDist";
-import { OperationError } from "../../OperationError";
+import { OperationError } from "../../operationError";
 import { ContinuousShape } from "../../PointSet/Continuous";
 
 export const toSampleSetDist = (d: BaseDist, env: Env) => {

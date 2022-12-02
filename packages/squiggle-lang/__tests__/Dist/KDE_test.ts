@@ -1,5 +1,5 @@
 import * as fc from "fast-check";
-import { kde } from "../../src/dist/SampleSetDist/KdeLibrary";
+import { kde } from "../../src/Dist/SampleSetDist/kde";
 import range from "lodash/range";
 import sum from "lodash/sum";
 import sumBy from "lodash/sumBy";

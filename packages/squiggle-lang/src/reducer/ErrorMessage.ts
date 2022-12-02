@@ -1,5 +1,5 @@
 import { DistError, distErrorToString } from "../dist/DistError";
-import { OperationError } from "../OperationError";
+import { OperationError } from "../operationError";
 
 // This code is written in old data-oriented style.
 // It probably should be rewritten with classes, to match the coding style in the rest of the codebase.

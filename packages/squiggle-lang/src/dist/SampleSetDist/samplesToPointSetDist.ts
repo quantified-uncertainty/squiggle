@@ -1,7 +1,8 @@
-import { kde } from "./KdeLibrary";
+import { kde } from "./kde";
 import { XYShape } from "../../XYShape";
-import { nrd0 } from "./SampleSetDist_Bandwidth";
-import { splitContinuousAndDiscrete } from "./SplitContinuousAndDiscrete";
+import { nrd0 } from "./bandwidth";
+import { splitContinuousAndDiscrete } from "./splitContinuousAndDiscrete";
+import * as E_A_Floats from "../../utility/E_A_Floats";
 
 const minDiscreteToKeep = (samples: readonly number[]) =>
   Math.max(20, samples.length / 50);
@@ -11,12 +12,12 @@ type ConversionResult = {
   discreteDist: XYShape;
 };
 
-export const toPointSetDist = (
+export const samplesToPointSetDist = (
   samples: readonly number[],
   outputXYPoints: number,
   kernelWidth?: number
 ): ConversionResult => {
-  samples = Array.from(new Float64Array(samples).sort());
+  samples = E_A_Floats.sort(samples);
 
   const { continuousPart, discretePart } = splitContinuousAndDiscrete(
     samples,
@@ -27,7 +28,6 @@ export const toPointSetDist = (
   let pointWeight = 1 / samples.length;
 
   let continuousDist = undefined;
-  let samplingStats = undefined;
 
   if (contLength <= 5) {
     // Drop these points and adjust weight accordingly
@@ -37,21 +37,9 @@ export const toPointSetDist = (
     discretePart.xs.push(contLength);
     discretePart.ys.push(continuousPart[0]);
   } else {
-    // The only reason we compute _suggestedXWidth if kernelWidth is
-    // given is to log it. Unnecessary?
-    const bandwidthXSuggested = nrd0(continuousPart);
-    const width = kernelWidth || bandwidthXSuggested;
-    const {
-      usedWidth: bandwidthXImplemented,
-      xs,
-      ys,
-    } = kde(continuousPart, outputXYPoints, width, pointWeight);
+    const width = kernelWidth ?? nrd0(continuousPart);
+    const { xs, ys } = kde(continuousPart, outputXYPoints, width, pointWeight);
     continuousDist = { xs, ys };
-    samplingStats = {
-      outputXYPoints,
-      bandwidthXSuggested,
-      bandwidthXImplemented,
-    };
   }
 
   discretePart.ys = discretePart.ys.map((count: number) => count * pointWeight);

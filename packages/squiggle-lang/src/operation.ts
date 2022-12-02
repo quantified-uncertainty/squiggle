@@ -5,7 +5,7 @@ import {
   DivisionByZeroError,
   NegativeInfinityError,
   OperationError,
-} from "./OperationError";
+} from "./operationError";
 
 // matches algebraicOperation from Operation.res
 export type AlgebraicOperation =

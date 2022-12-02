@@ -1,24 +1,23 @@
 import * as Result from "../../utility/result";
-import * as SampleSetDist_ToPointSet from "./SampleSetDist_ToPointSet";
 import * as MixedShapeBuilder from "../../PointSet/MixedShapeBuilder";
 import * as E_A_Floats from "../../utility/E_A_Floats";
 import * as E_A_Sorted from "../../utility/E_A_Sorted";
 import * as Discrete from "../../PointSet/Discrete";
 import * as XYShape from "../../XYShape";
 
-import { OperationError } from "../../OperationError";
+import { OperationError } from "../../operationError";
 import { ContinuousShape } from "../../PointSet/Continuous";
 import { DiscreteShape } from "../../PointSet/Discrete";
 import { PointSetDist } from "../PointSetDist";
 import { BaseDist } from "../BaseDist";
 import {
   DistError,
-  DistOperationError,
-  notYetImplemented,
+  distOperationError,
   otherError,
-  TooFewSamplesForConversionToPointSet,
+  tooFewSamplesForConversionToPointSet,
 } from "../DistError";
 import { Env } from "../env";
+import { samplesToPointSetDist } from "./samplesToPointSetDist";
 
 export class SampleSetDist extends BaseDist {
   samples: readonly number[];
@@ -160,7 +159,7 @@ sample everything.
   }
 
   toPointSetDist(env: Env): Result.result<PointSetDist, DistError> {
-    const dists = SampleSetDist_ToPointSet.toPointSetDist(
+    const dists = samplesToPointSetDist(
       this.samples,
       env.xyPointLength,
       undefined
@@ -173,7 +172,7 @@ sample everything.
       discrete: new DiscreteShape({ xyShape: dists.discreteDist }),
     });
     if (!result) {
-      return Result.Error(TooFewSamplesForConversionToPointSet());
+      return Result.Error(tooFewSamplesForConversionToPointSet());
     }
     return Result.Ok(new PointSetDist(result));
   }
@@ -235,7 +234,7 @@ const buildSampleSetFromFn = (
   for (let i = 0; i < n; i++) {
     const result = fn(i);
     if (!result.ok) {
-      return Result.Error(DistOperationError(result.value));
+      return Result.Error(distOperationError(result.value));
     }
     samples.push(result.value);
   }

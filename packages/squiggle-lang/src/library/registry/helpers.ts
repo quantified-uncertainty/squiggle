@@ -9,7 +9,7 @@ import { frBool, frDist, frNumber } from "./frTypes";
 import * as Result from "../../utility/result";
 import { DistError } from "../../dist/DistError";
 import { ReducerContext } from "../../reducer/Context";
-import { SampleMapNeedsNtoNFunction } from "../../OperationError";
+import { SampleMapNeedsNtoNFunction } from "../../operationError";
 import {
   ErrorMessage,
   REDistributionError,

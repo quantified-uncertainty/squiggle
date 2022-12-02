@@ -9,7 +9,7 @@ import { PointSetDist } from "./PointSetDist";
 import { Ok, result } from "../utility/result";
 import { ContinuousShape } from "../PointSet/Continuous";
 import { DistError, xyShapeDistError } from "./DistError";
-import { OperationError } from "../OperationError";
+import { OperationError } from "../operationError";
 import { DiscreteShape } from "../PointSet/Discrete";
 import { Env } from "./env";
 

@@ -14,7 +14,7 @@ import { AlgebraicOperation } from "../../operation";
 import * as PointSetDist from "../PointSetDist";
 import * as SampleSetDist from "../SampleSetDist/SampleSetDist";
 import * as SymbolicDist from "../SymbolicDist";
-import { OperationError } from "../../OperationError";
+import { OperationError } from "../../operationError";
 import { Env } from "../env";
 
 export enum AsAlgebraicCombinationStrategy {

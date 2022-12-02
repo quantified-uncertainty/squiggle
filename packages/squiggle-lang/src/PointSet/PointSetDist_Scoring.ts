@@ -3,7 +3,7 @@ import {
   OperationError,
   OtherOperationError,
   PdfInvalidError,
-} from "../OperationError";
+} from "../operationError";
 import * as Result from "../utility/result";
 import { MixedPoint } from "./MixedPoint";
 import {

@@ -1,7 +1,4 @@
-import {
-  nrd,
-  nrd0,
-} from "../../src/dist/SampleSetDist/SampleSetDist_Bandwidth";
+import { nrd, nrd0 } from "../../src/dist/SampleSetDist/bandwidth";
 
 describe("Bandwidth", () => {
   test("nrd0()", () => {

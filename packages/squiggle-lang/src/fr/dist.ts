@@ -12,7 +12,7 @@ import {
   frRecord,
 } from "../library/registry/frTypes";
 import { FnFactory } from "../library/registry/helpers";
-import { OtherOperationError } from "../OperationError";
+import { OtherOperationError } from "../operationError";
 import * as Result from "../utility/result";
 import { Value, vDist } from "../value";
 import {
