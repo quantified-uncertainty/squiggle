@@ -1,5 +1,4 @@
 import * as Result from "../../utility/result";
-import * as MixedShapeBuilder from "../../PointSet/MixedShapeBuilder";
 import * as E_A_Floats from "../../utility/E_A_Floats";
 import * as E_A_Sorted from "../../utility/E_A_Sorted";
 import * as Discrete from "../../PointSet/Discrete";
