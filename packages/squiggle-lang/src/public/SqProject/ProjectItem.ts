@@ -5,12 +5,12 @@ import { Resolver } from "./Resolver";
 import { AST, parse, ParseError } from "../../ast/parse";
 import { errorFromException, fromParseError } from "../../reducer/IError";
 import { Expression } from "../../expression";
-import * as Namespace from "../../reducer/Namespace";
 import { Value } from "../../value";
 import { SqError } from "../SqError";
 import { expressionFromAst } from "../../ast/toExpression";
 import { ReducerContext } from "../../reducer/Context";
 import { evaluate } from "../../reducer";
+import { Namespace, NamespaceMap } from "../../reducer/bindings";
 
 // source -> rawParse -> includes -> expression -> bindings & result
 
@@ -19,7 +19,7 @@ export type ProjectItem = Readonly<{
   source: string;
   rawParse?: result<AST, SqError>;
   expression?: result<Expression, SqError>;
-  bindings: Namespace.Namespace;
+  bindings: Namespace;
   result?: result<Value, SqError>;
   continues: string[];
   includes: result<string[], SqError>; // For loader
@@ -32,7 +32,7 @@ type t = ProjectItem;
 export const emptyItem = (sourceId: string): t => ({
   sourceId,
   source: "",
-  bindings: Namespace.make(),
+  bindings: NamespaceMap(),
   continues: [],
   includes: Ok([]),
   directIncludes: [],
@@ -105,7 +105,7 @@ const setExpression = (
   return touchExpression({ ...t, expression: expression });
 };
 
-const setBindings = (t: t, bindings: Namespace.Namespace): t => {
+const setBindings = (t: t, bindings: Namespace): t => {
   return {
     ...t,
     bindings,
@@ -206,7 +206,7 @@ const buildExpression = (t: t): t => {
 };
 
 const failRun = (t: t, e: SqError): t =>
-  setBindings(setResult(t, Result.Error(e)), Namespace.make());
+  setBindings(setResult(t, Result.Error(e)), NamespaceMap());
 
 export const run = (t: t, context: ReducerContext): t => {
   t = buildExpression(t);

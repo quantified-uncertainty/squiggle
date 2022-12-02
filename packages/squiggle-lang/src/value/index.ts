@@ -1,5 +1,6 @@
 import { BaseDist } from "../Dist/BaseDist";
 import { Expression } from "../expression";
+import { Namespace } from "../reducer/bindings";
 import { ReducerContext } from "../reducer/Context";
 import { declarationToString, LambdaDeclaration } from "../reducer/Declaration";
 import { Lambda } from "../reducer/Lambda";
@@ -12,9 +13,8 @@ export type ReducerFn = (
   context: ReducerContext
 ) => [Value, ReducerContext];
 
-export type ValueMap = ImmutableMap<string, Value>;
-
 type KV<T extends string, V> = Readonly<{ type: T; value: V }>;
+export type ValueMap = Namespace;
 
 export type Value =
   | KV<"Array", Value[]>
@@ -62,7 +62,7 @@ export const vArray = (a: Value[]): Value => ({
   value: a,
 });
 
-export const valueMapToString = (v: ValueMap): string => {
+export const valueMapToString = (v: Namespace): string => {
   return (
     "{" +
     [...v.entries()].map(([k, v]) => `${k}: ${valueToString(v)}`).join(",") +

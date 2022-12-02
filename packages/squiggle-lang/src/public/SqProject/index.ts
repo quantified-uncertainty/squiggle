@@ -8,10 +8,10 @@ import * as Topology from "./Topology";
 import { Resolver } from "./Resolver";
 import { defaultEnv, Env } from "../../Dist/env";
 import * as IError from "../../reducer/IError";
-import * as Namespace from "../../reducer/Namespace";
 import * as Library from "../../library";
-import { Value } from "../../value";
+import { Value, vRecord } from "../../value";
 import { createContext } from "../../reducer/Context";
+import { Namespace, NamespaceMap } from "../../reducer/bindings";
 
 type Options = {
   resolver?: Resolver;
@@ -20,7 +20,7 @@ type Options = {
 // TODO: Auto clean project based on topology
 export class SqProject {
   private readonly items: Map<string, ProjectItem.ProjectItem>;
-  private stdLib: Namespace.Namespace;
+  private stdLib: Namespace;
   private environment: Env;
   private previousRunOrder: string[];
   private resolver?: Resolver; // if not present, includes are forbidden
@@ -45,11 +45,11 @@ export class SqProject {
     return this.environment;
   }
 
-  getStdLib(): Namespace.Namespace {
+  getStdLib(): Namespace {
     return this.stdLib;
   }
 
-  setStdLib(value: Namespace.Namespace) {
+  setStdLib(value: Namespace) {
     this.stdLib = value;
   }
 
@@ -220,7 +220,7 @@ export class SqProject {
     this.setItem(sourceId, newItem);
   }
 
-  private getRawBindings(sourceId: string): Namespace.Namespace {
+  private getRawBindings(sourceId: string): Namespace {
     return this.getItem(sourceId).bindings;
   }
 
@@ -234,9 +234,9 @@ export class SqProject {
     );
   }
 
-  private linkDependencies(sourceId: string): Namespace.Namespace {
+  private linkDependencies(sourceId: string): Namespace {
     const pastChain = this.getPastChain(sourceId);
-    const namespace = Namespace.mergeMany([
+    const namespace = NamespaceMap<string, Value>().merge(
       this.getStdLib(),
       ...pastChain.map((id) => this.getRawBindings(id)),
       ...pastChain.map((id) => {
@@ -244,18 +244,14 @@ export class SqProject {
         if (!result.ok) {
           throw result.value;
         }
-        return Namespace.fromArray([["__result__", result.value]]);
-      }),
-    ]);
+        return NamespaceMap([["__result__", result.value]]);
+      })
+    );
 
     const includesAsVariables = this.getIncludesAsVariables(sourceId);
     return includesAsVariables.reduce(
       (acc, [variable, includeFile]) =>
-        Namespace.set(
-          acc,
-          variable,
-          Namespace.toRecord(this.getRawBindings(includeFile))
-        ),
+        acc.set(variable, vRecord(this.getRawBindings(includeFile))),
       namespace
     );
   }

@@ -1,22 +1,20 @@
-import * as Namespace from "../reducer/Namespace";
 import * as Lambda from "../reducer/Lambda";
 import * as IError from "../reducer/IError";
-import { vLambda } from "../value";
-import * as Result from "../utility/result";
+import { Value, vLambda } from "../value";
 import { makeMathConstants } from "./math";
 import { makeVersionConstant } from "./version";
 import * as registry from "./registry";
+import { Namespace, NamespaceMap } from "../reducer/bindings";
 
-const makeStdLib = (): Namespace.Namespace => {
-  let res = Namespace.make();
+const makeStdLib = (): Namespace => {
+  let res = NamespaceMap<string, Value>();
 
   // constants
-  res = Namespace.mergeFrom(res, makeMathConstants());
-  res = Namespace.mergeFrom(res, makeVersionConstant());
+  res = res.merge(makeMathConstants());
+  res = res.merge(makeVersionConstant());
 
   // array and record lookups
-  res = Namespace.set(
-    res,
+  res = res.set(
     "$_atIndex_$",
     vLambda(
       Lambda.makeFFILambda("$_atIndex_$", (inputs) => {
@@ -61,14 +59,13 @@ const makeStdLib = (): Namespace.Namespace => {
 
   // some lambdas can't be expressed in function registry (e.g. `mx` with its variadic number of parameters)
   for (const [name, lambda] of registry.nonRegistryLambdas) {
-    res = Namespace.set(res, name, vLambda(lambda));
+    res = res.set(name, vLambda(lambda));
   }
 
   // bind the entire FunctionRegistry
 
   for (const name of registry.allNames()) {
-    res = Namespace.set(
-      res,
+    res = res.set(
       name,
       vLambda(
         Lambda.makeFFILambda(name, (args, context, reducer) => {

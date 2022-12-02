@@ -1,6 +1,6 @@
-import * as Namespace from "../reducer/Namespace";
+import { Namespace, NamespaceMap } from "../reducer/bindings";
 import { vString } from "../value";
 
-export const makeVersionConstant = (): Namespace.Namespace => {
-  return Namespace.fromArray([["System.version", vString("0.6.0")]]);
+export const makeVersionConstant = (): Namespace => {
+  return NamespaceMap([["System.version", vString("0.6.0")]]);
 };

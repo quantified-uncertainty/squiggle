@@ -1,8 +1,7 @@
 import { LocationRange } from "peggy";
 import { Expression } from "../expression";
 import { ReducerFn, Value } from "../value";
-import { Bindings } from "./bindings";
-import * as Namespace from "./Namespace";
+import { Bindings, NamespaceMap } from "./bindings";
 import * as Context from "./Context";
 import { ReducerContext } from "./Context";
 import * as FrameStack from "./FrameStack";
@@ -56,9 +55,7 @@ export const makeLambda = (
 
     // create new bindings scope
     const localBindings = bindings.extendWith(
-      Namespace.fromArray(
-        parameters.map((parameter, i) => [parameter, args[i]])
-      )
+      NamespaceMap(parameters.map((parameter, i) => [parameter, args[i]]))
     );
 
     const lambdaContext: ReducerContext = {

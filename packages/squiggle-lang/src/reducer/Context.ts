@@ -1,8 +1,7 @@
 import { Env } from "../Dist/env";
-import { Bindings } from "./bindings";
+import { Bindings, Namespace } from "./bindings";
 import * as FrameStack from "./FrameStack";
 import * as Lambda from "./Lambda";
-import { Namespace } from "./Namespace";
 
 export type ReducerContext = Readonly<{
   bindings: Bindings;

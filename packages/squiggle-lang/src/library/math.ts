@@ -1,4 +1,4 @@
-import * as Namespace from "../reducer/Namespace";
+import { Namespace, NamespaceMap } from "../reducer/bindings";
 import { vNumber } from "../value";
 
 const availableNumbers: [string, number][] = [
@@ -14,8 +14,6 @@ const availableNumbers: [string, number][] = [
   ["Math.tau", 6.283185307179586],
 ];
 
-export const makeMathConstants = (): Namespace.Namespace => {
-  return Namespace.fromArray(
-    availableNumbers.map(([name, v]) => [name, vNumber(v)])
-  );
+export const makeMathConstants = (): Namespace => {
+  return NamespaceMap(availableNumbers.map(([name, v]) => [name, vNumber(v)]));
 };

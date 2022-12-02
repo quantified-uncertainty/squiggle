@@ -4,25 +4,36 @@
   { localX: ..., localY: ... } <- { globalZ: ..., ... } <- { importedT: ..., ... } <- { stdlibFunction: ..., ... }
 */
 
-import { Value } from "../value";
-import * as Namespace from "./Namespace";
+import { Map as ImmutableMap } from "immutable";
+
+import { Value, valueToString } from "../value";
+
+// generics are hard, maybe there's an easier way to express this and specialize ImmutableMap on export, but I couldn't find it in 5 minutes
+type Namespace = ImmutableMap<string, Value>;
+export { Namespace, ImmutableMap as NamespaceMap };
+
+const namespaceToString = (namespace: Namespace): string => {
+  return [...namespace.entries()]
+    .map(([key, value]) => `${key}: ${valueToString(value)}`)
+    .join(",");
+};
 
 export class Bindings {
   private constructor(
-    private readonly namespace: Namespace.Namespace,
+    private readonly namespace: Namespace,
     private readonly parent?: Bindings
   ) {}
 
   static make(): Bindings {
-    return new Bindings(Namespace.make(), undefined);
+    return new Bindings(ImmutableMap(), undefined);
   }
 
-  static fromNamespace(namespace: Namespace.Namespace): Bindings {
+  static fromNamespace(namespace: Namespace): Bindings {
     return new Bindings(namespace, undefined);
   }
 
   get(id: string): Value | undefined {
-    const local = Namespace.get(this.namespace, id);
+    const local = this.namespace.get(id);
     if (local !== undefined) {
       return local;
     }
@@ -30,31 +41,28 @@ export class Bindings {
   }
 
   set(id: string, value: Value) {
-    return new Bindings(Namespace.set(this.namespace, id, value), this.parent);
+    return new Bindings(this.namespace.set(id, value), this.parent);
   }
 
   toString(): string {
-    const pairs = Namespace.toString(this.namespace);
+    const pairs = namespaceToString(this.namespace);
 
     return `{${pairs}}` + (this.parent ? `/ ${this.toString()}` : "");
   }
 
   extend(): Bindings {
-    return new Bindings(Namespace.make(), this);
+    return new Bindings(ImmutableMap(), this);
   }
 
-  extendWith(ns: Namespace.Namespace): Bindings {
+  extendWith(ns: Namespace): Bindings {
     return new Bindings(ns, this);
   }
 
   removeResult(): Bindings {
-    return new Bindings(
-      Namespace.remove(this.namespace, "__result__"),
-      this.parent
-    );
+    return new Bindings(this.namespace.delete("__result__"), this.parent);
   }
 
-  locals(): Namespace.Namespace {
+  locals(): Namespace {
     return this.namespace;
   }
 }

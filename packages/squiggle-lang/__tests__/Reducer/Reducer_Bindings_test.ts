@@ -1,6 +1,5 @@
 import { vNumber } from "../../src/value";
 import { Bindings } from "../../src/reducer/bindings";
-import * as Namespace from "../../src/reducer/Namespace";
 
 describe("Bindings", () => {
   const value = vNumber(1967);
@@ -18,13 +17,11 @@ describe("Bindings", () => {
   });
 
   test("locals", () => {
-    expect(Namespace.get(bindings.locals(), "value")).toEqual(value);
+    expect(bindings.locals().get("value")).toEqual(value);
   });
 
   test("locals on extendeed", () => {
-    expect(Namespace.get(bindings.extend().locals(), "value")).toEqual(
-      undefined
-    );
+    expect(bindings.extend().locals().get("value")).toEqual(undefined);
   });
 
   describe("extend", () => {
