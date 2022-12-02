@@ -1,17 +1,20 @@
 import { distributions, generateInt, generateFloatRange } from "./generators";
 import { test, expectEqual } from "./lib";
 
-let checkDistributionSame = (
+// this script is pretty old and it's unclear how useful it is
+// it can be run with `yarn build && node ./src/dist/benchmark/conversion_tests.ts` command
+
+const checkDistributionSame = (
   distribution: string,
   operation: (arg: string) => string
 ): void => {
   expectEqual(
     operation(distribution),
-    operation(`toPointSet(${distribution})`)
+    operation(`PointSet.fromDist(${distribution})`)
   );
   expectEqual(
     operation(distribution),
-    operation(`toSampleSet(${distribution})`)
+    operation(`SampleSet.fromDist(${distribution})`)
   );
 };
 

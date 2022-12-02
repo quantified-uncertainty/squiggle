@@ -44,6 +44,10 @@ abstract class SqAbstractDistribution<T extends BaseDist> {
     return this._value.toString();
   }
 
+  toSparkline(env: Env) {
+    return this._value.toSparkline(20, env);
+  }
+
   mean(env: Env): number {
     return this._value.mean();
   }

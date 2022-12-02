@@ -15,6 +15,6 @@
     "target": "ES6",
     "esModuleInterop": true
   },
-  "include": ["src/**/*", "scripts/**/*", "__tests__/**/*"],
+  "include": ["src/**/*", "scripts/**/*", "__tests__/**/*", "benchmark/**/*"],
   "exclude": ["**/*.spec.ts"]
 }
