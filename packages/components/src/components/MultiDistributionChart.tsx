@@ -220,7 +220,9 @@ const SummaryTableRow: React.FC<SummaryTableRowProps> = ({
   return (
     <tr>
       {showName && <Cell>{name}</Cell>}
-      <Cell>{mean}</Cell>
+      <Cell>
+        <NumberShower number={mean} />
+      </Cell>
       <Cell>{unwrapResult(stdev)}</Cell>
       <Cell>{unwrapResult(p5)}</Cell>
       <Cell>{unwrapResult(p10)}</Cell>
