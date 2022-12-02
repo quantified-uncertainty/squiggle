@@ -22,4 +22,4 @@ _coverage
 coverage
 .nyc_output/
 src/ast/peggyParser.js
-src/js/SqProject/IncludeParser.js
+src/public/SqProject/IncludeParser.js
