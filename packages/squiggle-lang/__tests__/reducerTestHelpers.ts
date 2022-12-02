@@ -7,14 +7,14 @@ import {
 } from "../src/reducer";
 import * as Result from "../src/utility/result";
 import * as IError from "../src/reducer/IError";
-import { Value, valueToString } from "../src/value";
+import { Value } from "../src/value";
 
 const expectParseToBe = (expr: string, answer: string) => {
   expect(nodeResultToString(parse(expr, "test"))).toBe(answer);
 };
 
 const resultToString = (r: Result.result<Value, IError.IError>) =>
-  r.ok ? valueToString(r.value) : `Error(${IError.errorToString(r.value)})`;
+  r.ok ? r.value.toString() : `Error(${IError.errorToString(r.value)})`;
 
 export const testParse = (expr: string, answer: string) =>
   test(expr, () => expectParseToBe(expr, answer));

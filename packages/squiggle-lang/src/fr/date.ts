@@ -3,7 +3,7 @@ import * as Result from "../utility/result";
 import * as IError from "../reducer/IError";
 import { FnFactory } from "../library/registry/helpers";
 import { makeDefinition } from "../library/registry/fnDefinition";
-import { vDate, vDuration, vNumber, vString, vTimeDuration } from "../value";
+import { vDate, vTimeDuration, vNumber, vString } from "../value";
 import { Ok } from "../utility/result";
 import { frDate, frNumber, frTimeDuration } from "../library/registry/frTypes";
 
@@ -19,7 +19,7 @@ const makeNumberToDurationFn = (
   maker.make({
     name,
     definitions: [
-      makeDefinition(name, [frNumber], ([t]) => Ok(vDuration(fn(t)))),
+      makeDefinition(name, [frNumber], ([t]) => Ok(vTimeDuration(fn(t)))),
     ],
   });
 

@@ -1,4 +1,4 @@
-import { ValueMap, valueMapToString, vRecord } from "../value";
+import { ValueMap, vRecord } from "../value";
 import { SqRecordValue, wrapValue } from "./SqValue";
 import { SqValueLocation } from "./SqValueLocation";
 
@@ -12,7 +12,7 @@ export class SqRecord {
   }
 
   toString() {
-    return valueMapToString(this._value);
+    return vRecord(this._value).toString();
   }
 
   asValue() {

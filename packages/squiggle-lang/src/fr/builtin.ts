@@ -8,7 +8,7 @@ import {
 } from "../library/registry/frTypes";
 import { FnFactory } from "../library/registry/helpers";
 import { Ok } from "../utility/result";
-import { valueToString, vArray, vBool, vNumber, vString } from "../value";
+import { vArray, vBool, vString } from "../value";
 
 const maker = new FnFactory({
   nameSpace: "", // no namespaced versions
@@ -48,15 +48,15 @@ export const library = [
       return Ok(vArray([...a, ...b]));
     }),
     makeDefinition("inspect", [frAny], ([value]) => {
-      console.log(valueToString(value));
+      console.log(value.toString());
       return Ok(value);
     }),
     makeDefinition("inspect", [frAny, frString], ([value, label]) => {
-      console.log(`${label}: ${valueToString(value)}`);
+      console.log(`${label}: ${value.toString()}`);
       return Ok(value);
     }),
     makeDefinition("javascriptraise", [frAny], ([msg]) => {
-      throw new Error(valueToString(msg));
+      throw new Error(msg.toString());
     }),
   ].map((d) => maker.fromDefinition(d)),
 ];

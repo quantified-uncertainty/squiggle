@@ -6,7 +6,7 @@
 
 import { Map as ImmutableMap } from "immutable";
 
-import { Value, valueToString } from "../value";
+import { Value } from "../value";
 
 // generics are hard, maybe there's an easier way to express this and specialize ImmutableMap on export, but I couldn't find it in 5 minutes
 type Namespace = ImmutableMap<string, Value>;
@@ -14,7 +14,7 @@ export { Namespace, ImmutableMap as NamespaceMap };
 
 const namespaceToString = (namespace: Namespace): string => {
   return [...namespace.entries()]
-    .map(([key, value]) => `${key}: ${valueToString(value)}`)
+    .map(([key, value]) => `${key}: ${value.toString()}`)
     .join(",");
 };
 

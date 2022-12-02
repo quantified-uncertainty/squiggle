@@ -3,7 +3,7 @@
   Expressions are evaluated by `Reducer_Expression.evaluate` function.
 */
 import { AST } from "../ast/parse";
-import { Value, valueToString, vBool, vNumber, vString, vVoid } from "../value";
+import { Value, vBool, vNumber, vString, vVoid } from "../value";
 
 export type ExpressionContent =
   | {
@@ -180,7 +180,7 @@ const toString = (expression: Expression): string => {
         expression.body
       )}}`;
     case "Value":
-      return valueToString(expression.value);
+      return expression.value.toString();
     default:
       return `Unknown expression ${expression}`;
   }

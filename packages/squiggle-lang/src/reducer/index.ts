@@ -1,12 +1,4 @@
-import {
-  ReducerFn,
-  vArray,
-  vLambda,
-  vRecord,
-  vVoid,
-  valueToString,
-  Value,
-} from "../value";
+import { ReducerFn, vArray, vLambda, vRecord, vVoid, Value } from "../value";
 import { Expression } from "../expression";
 import * as Context from "./Context";
 import * as IError from "./IError";
@@ -50,7 +42,7 @@ export const evaluate: ReducerFn = (expression, context) => {
         */
         // bindings: context.bindings.extend(),
       };
-      let currentValue = vVoid();
+      let currentValue: Value = vVoid();
       for (const statement of expression.value) {
         [currentValue, currentContext] = evaluate(statement, currentContext);
       }
@@ -60,7 +52,7 @@ export const evaluate: ReducerFn = (expression, context) => {
     case "Program": {
       // Js.log(`bindings: ${context.bindings->Bindings.locals->Reducer_Namespace.toString}`)
       let currentContext = context;
-      let currentValue = vVoid();
+      let currentValue: Value = vVoid();
       for (const statement of expression.value) {
         [currentValue, currentContext] = evaluate(statement, currentContext);
       }
@@ -173,7 +165,7 @@ export const evaluate: ReducerFn = (expression, context) => {
           return [result, context];
         default:
           return throwFrom(
-            IError.RENotAFunction(valueToString(lambda)),
+            IError.RENotAFunction(lambda.toString()),
             expression,
             context
           );

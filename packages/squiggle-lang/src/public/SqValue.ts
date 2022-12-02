@@ -6,7 +6,7 @@ import { SqRecord } from "./SqRecord";
 import { SqArray } from "./SqArray";
 import { SqValueLocation } from "./SqValueLocation";
 import { SqError } from "./SqError";
-import { Value, valueToString } from "../value";
+import { Value } from "../value";
 
 export const wrapValue = (value: Value, location: SqValueLocation): SqValue => {
   const tag = value.type;
@@ -48,7 +48,7 @@ export abstract class SqAbstractValue<T> {
   ) {}
 
   toString() {
-    return valueToString(this._value);
+    return this._value.toString();
   }
 }
 
