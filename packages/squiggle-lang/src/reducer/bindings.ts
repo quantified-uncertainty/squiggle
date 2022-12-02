@@ -33,11 +33,7 @@ export class Bindings {
   }
 
   get(id: string): Value | undefined {
-    const local = this.namespace.get(id);
-    if (local !== undefined) {
-      return local;
-    }
-    return this.parent?.get(id);
+    return this.namespace.get(id) ?? this.parent?.get(id);
   }
 
   set(id: string, value: Value) {

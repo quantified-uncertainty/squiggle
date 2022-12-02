@@ -79,10 +79,6 @@ export const sort = (t: readonly number[]): number[] => {
   return Array.from(new Float64Array(t).sort());
 };
 
-export const sorted = (t: readonly number[]): number[] => {
-  return [...t].sort((a, b) => a - b);
-};
-
 export const variance = (xs: readonly number[]) => {
   // Variance is shift-invariant; subtract the middle of the range for precision
   // https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Computing_shifted_data

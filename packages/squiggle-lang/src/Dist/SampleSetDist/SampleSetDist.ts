@@ -133,7 +133,7 @@ sample everything.
   }
 
   inv(f: number): number {
-    const sorted = E_A_Floats.sorted(this.samples);
+    const sorted = E_A_Floats.sort(this.samples);
     return E_A_Sorted.percentile(sorted, f);
   }
 
