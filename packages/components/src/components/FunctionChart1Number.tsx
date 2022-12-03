@@ -1,7 +1,7 @@
 import * as React from "react";
 import _ from "lodash";
 import type { Spec } from "vega";
-import { result, SqLambda, SqValueTag } from "@quri/squiggle-lang";
+import { result, SqLambda } from "@quri/squiggle-lang";
 import { createClassFromSpec } from "react-vega";
 import * as lineChartSpec from "../vega-specs/spec-line-chart.json";
 import { ErrorAlert } from "./Alert";
@@ -39,16 +39,16 @@ let getFunctionImage = ({
     settings.count
   );
 
-  let chartPointsData: point[] = chartPointsToRender.map((x) => {
+  const chartPointsData: point[] = chartPointsToRender.map((x) => {
     let result = fn.call([x]);
-    if (result.tag === "Ok") {
-      if (result.value.tag === SqValueTag.Number) {
-        return { x, value: { tag: "Ok", value: result.value.value } };
+    if (result.ok) {
+      if (result.value.tag === "Number") {
+        return { x, value: { ok: true, value: result.value.value } };
       } else {
         return {
           x,
           value: {
-            tag: "Error",
+            ok: false,
             value: "This component expected number outputs",
           },
         };
@@ -56,7 +56,7 @@ let getFunctionImage = ({
     } else {
       return {
         x,
-        value: { tag: "Error", value: result.value.toString() },
+        value: { ok: false, value: result.value.toString() },
       };
     }
   });
@@ -67,7 +67,7 @@ let getFunctionImage = ({
   ] = [[], []];
 
   let [functionImage, errors] = chartPointsData.reduce((acc, current) => {
-    if (current.value.tag === "Ok") {
+    if (current.value.ok) {
       acc[0].push({ x: current.x, value: current.value.value });
     } else {
       acc[1].push({ x: current.x, value: current.value.value });

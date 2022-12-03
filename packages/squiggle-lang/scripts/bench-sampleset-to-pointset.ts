@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-import { SqProject } from "../src/js";
-import { measure } from "../src/js/cli/utils";
+import { SqProject } from "../src";
+import { measure } from "../src/cli/utils";
 
-const maxP = 3;
+const maxP = 4;
 
 const sampleCount = process.env.SAMPLE_COUNT;
 
@@ -27,7 +27,7 @@ for (let p = 0; p <= maxP; p++) {
     project.run("main");
   });
   const result = project.getResult("main");
-  if (result.tag != "Ok") {
+  if (!result.ok) {
     throw new Error("Code failed: " + result.value.toString());
   }
   console.log(`1e${p}`, "\t", time);

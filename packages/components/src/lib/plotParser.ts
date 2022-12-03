@@ -1,11 +1,5 @@
 import * as yup from "yup";
-import {
-  SqValue,
-  SqValueTag,
-  SqDistribution,
-  result,
-  SqRecord,
-} from "@quri/squiggle-lang";
+import { SqValue, SqDistribution, result, SqRecord } from "@quri/squiggle-lang";
 
 export type LabeledDistribution = {
   name: string;
@@ -20,11 +14,11 @@ export type Plot = {
 };
 
 function error<a, b>(err: b): result<a, b> {
-  return { tag: "Error", value: err };
+  return { ok: false, value: err };
 }
 
 function ok<a, b>(x: a): result<a, b> {
-  return { tag: "Ok", value: x };
+  return { ok: true, value: x };
 }
 
 const schema = yup
@@ -55,13 +49,13 @@ type JsonObject =
   | SqDistribution;
 
 function toJson(val: SqValue): JsonObject {
-  if (val.tag === SqValueTag.String) {
+  if (val.tag === "String") {
     return val.value;
-  } else if (val.tag === SqValueTag.Record) {
+  } else if (val.tag === "Record") {
     return toJsonRecord(val.value);
-  } else if (val.tag === SqValueTag.Array) {
+  } else if (val.tag === "Array") {
     return val.value.getValues().map(toJson);
-  } else if (val.tag === SqValueTag.Distribution) {
+  } else if (val.tag === "Dist") {
     return val.value;
   } else {
     throw new Error("Could not parse object of type " + val.tag);

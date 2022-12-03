@@ -18,7 +18,7 @@ module.exports = {
   resolve: {
     extensions: [".js", ".tsx", ".ts"],
     alias: {
-      "@quri/squiggle-lang": path.resolve(__dirname, "../squiggle-lang/src/js"),
+      "@quri/squiggle-lang": path.resolve(__dirname, "../squiggle-lang/src"),
     },
   },
   output: {

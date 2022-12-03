@@ -1,14 +1,14 @@
 import * as vscode from "vscode";
 
 import { parse } from "@quri/squiggle-lang";
-import { AnyPeggyNode } from "@quri/squiggle-lang/dist/src/rescript/Reducer/Reducer_Peggy/helpers";
+import { AST } from "@quri/squiggle-lang/dist/src/ast/parse";
 
 const tokenTypes = ["enum", "function", "variable", "property"];
 const tokenModifiers = ["declaration", "documentation"];
 const legend = new vscode.SemanticTokensLegend(tokenTypes, tokenModifiers);
 
 const convertRange = (
-  range: Extract<AnyPeggyNode, { type: "Identifier" }>["location"]
+  range: Extract<AST, { type: "Identifier" }>["location"]
 ) =>
   new vscode.Range(
     new vscode.Position(range.start.line - 1, range.start.column - 1),
@@ -17,7 +17,7 @@ const convertRange = (
 
 const populateTokensBuilder = (
   tokensBuilder: vscode.SemanticTokensBuilder,
-  node: AnyPeggyNode
+  node: AST
   // bindings: { [key: string]: boolean }
 ) => {
   switch (node.type) {
@@ -75,7 +75,7 @@ export const registerSemanticHighlight = () => {
       const parseResult = parse(document.getText());
 
       const tokensBuilder = new vscode.SemanticTokensBuilder(legend);
-      if (parseResult.tag === "Ok") {
+      if (parseResult.ok) {
         populateTokensBuilder(
           tokensBuilder,
           parseResult.value

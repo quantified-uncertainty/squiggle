@@ -27,7 +27,7 @@ import {
 } from "@heroicons/react/solid";
 import clsx from "clsx";
 
-import { environment } from "@quri/squiggle-lang";
+import { Env } from "@quri/squiggle-lang";
 
 import { CodeEditor } from "../CodeEditor";
 import { SquiggleContainer } from "../SquiggleContainer";
@@ -194,7 +194,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     onSettingsChange?.(vars);
   }, [vars, onSettingsChange]);
 
-  const environment: environment = useMemo(
+  const environment: Env = useMemo(
     () => ({
       sampleCount: Number(vars.sampleCount),
       xyPointLength: Number(vars.xyPointLength),

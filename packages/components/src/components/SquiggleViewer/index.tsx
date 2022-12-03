@@ -74,7 +74,7 @@ export const SquiggleViewer: React.FC<SquiggleViewerProps> = ({
         enableLocalSettings,
       }}
     >
-      {result.tag === "Ok" ? (
+      {result.ok ? (
         <ExpressionViewer value={result.value} />
       ) : (
         <SquiggleErrorAlert error={result.value} />

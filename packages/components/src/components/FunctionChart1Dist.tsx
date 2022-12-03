@@ -5,10 +5,9 @@ import {
   SqDistribution,
   result,
   SqLambda,
-  environment,
+  Env,
   SqError,
   SqValue,
-  SqValueTag,
 } from "@quri/squiggle-lang";
 import { createClassFromSpec } from "react-vega";
 import * as percentilesSpec from "../vega-specs/spec-percentiles.json";
@@ -32,7 +31,7 @@ const _rangeByCount = (start: number, stop: number, count: number) => {
 };
 
 function unwrap<a, b>(x: result<a, b>): a {
-  if (x.tag === "Ok") {
+  if (x.ok) {
     return x.value;
   } else {
     throw Error("FAILURE TO UNWRAP");
@@ -42,7 +41,7 @@ type FunctionChart1DistProps = {
   fn: SqLambda;
   settings: FunctionChartSettings;
   distributionChartSettings: DistributionChartSettings;
-  environment: environment;
+  environment: Env;
   height: number;
 };
 
@@ -79,7 +78,7 @@ let getPercentiles = ({
 }: {
   settings: FunctionChartSettings;
   fn: SqLambda;
-  environment: environment;
+  environment: Env;
 }) => {
   let chartPointsToRender = _rangeByCount(
     settings.start,
@@ -87,16 +86,16 @@ let getPercentiles = ({
     settings.count
   );
 
-  let chartPointsData: point[] = chartPointsToRender.map((x) => {
+  const chartPointsData: point[] = chartPointsToRender.map((x) => {
     let result = fn.call([x]);
-    if (result.tag === "Ok") {
-      if (result.value.tag === SqValueTag.Distribution) {
-        return { x, value: { tag: "Ok", value: result.value.value } };
+    if (result.ok) {
+      if (result.value.tag === "Dist") {
+        return { x, value: { ok: true, value: result.value.value } };
       } else {
         return {
           x,
           value: {
-            tag: "Error",
+            ok: false,
             value:
               "Cannot currently render functions that don't return distributions",
           },
@@ -105,7 +104,7 @@ let getPercentiles = ({
     } else {
       return {
         x,
-        value: { tag: "Error", value: result.value.toString() },
+        value: { ok: false, value: result.value.toString() },
       };
     }
   });
@@ -116,7 +115,7 @@ let getPercentiles = ({
   ] = [[], []];
 
   let [functionImage, errors] = chartPointsData.reduce((acc, current) => {
-    if (current.value.tag === "Ok") {
+    if (current.value.ok) {
       acc[0].push({ x: current.x, value: current.value.value });
     } else {
       acc[1].push({ x: current.x, value: current.value.value });
@@ -169,14 +168,13 @@ export const FunctionChart1Dist: React.FC<FunctionChart1DistProps> = ({
   let mouseItem: result<SqValue, SqError> = !!mouseOverlay
     ? fn.call([mouseOverlay])
     : {
-        tag: "Error",
+        ok: false,
         value: SqError.createOtherError(
           "Hover x-coordinate returned NaN. Expected a number."
         ),
       };
   let showChart =
-    mouseItem.tag === "Ok" &&
-    mouseItem.value.tag === SqValueTag.Distribution ? (
+    mouseItem.ok && mouseItem.value.tag === "Dist" ? (
       <DistributionChart
         distribution={mouseItem.value.value}
         environment={environment}

@@ -12,6 +12,7 @@ import {
 import { parse } from "@quri/squiggle-lang";
 
 import { TextDocument } from "vscode-languageserver-textdocument";
+import { SqParseError } from "@quri/squiggle-lang";
 
 // Documentation:
 // - https://code.visualstudio.com/api/language-extensions/language-server-extension-guide
@@ -44,7 +45,10 @@ async function validateSquiggleDocument(
   const diagnostics: Diagnostic[] = [];
 
   const parseResult = parse(text);
-  if (parseResult.tag === "Error") {
+  if (
+    !parseResult.ok &&
+    parseResult.value instanceof SqParseError // `ok` check doesn't work as type guard here for some reason
+  ) {
     const location = parseResult.value.getLocation();
     diagnostics.push({
       severity: DiagnosticSeverity.Error,

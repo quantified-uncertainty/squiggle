@@ -16,11 +16,10 @@ yarn-error.log
 *.gen.ts
 *.gen.tsx
 *.gen.js
-dist
+/dist
 *.coverage
 _coverage
 coverage
 .nyc_output/
-src/rescript/Reducer/Reducer_Peggy/Reducer_Peggy_GeneratedParser.js
-src/rescript/Reducer/Reducer_Peggy/helpers.js
-src/rescript/ReducerProject/ReducerProject_IncludeParser.js
+src/ast/peggyParser.js
+src/public/SqProject/IncludeParser.js

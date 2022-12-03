@@ -1,20 +1,18 @@
-import { result, resultMap, SqValueTag } from "@quri/squiggle-lang";
+import { result, resultMap } from "@quri/squiggle-lang";
 import { ResultAndBindings } from "./hooks/useSquiggle";
 
 export function flattenResult<a, b>(x: result<a, b>[]): result<a[], b> {
   if (x.length === 0) {
-    return { tag: "Ok", value: [] };
+    return { ok: true, value: [] };
   } else {
-    if (x[0].tag === "Error") {
+    if (!x[0].ok) {
       return x[0];
-    } else {
-      let rest = flattenResult(x.splice(1));
-      if (rest.tag === "Error") {
-        return rest;
-      } else {
-        return { tag: "Ok", value: [x[0].value].concat(rest.value) };
-      }
     }
+    const rest = flattenResult(x.splice(1));
+    if (!rest.ok) {
+      return rest;
+    }
+    return { ok: true, value: [x[0].value].concat(rest.value) };
   }
 }
 
@@ -22,7 +20,7 @@ export function resultBind<a, b, c>(
   x: result<a, b>,
   fn: (y: a) => result<c, b>
 ): result<c, b> {
-  if (x.tag === "Ok") {
+  if (x.ok) {
     return fn(x.value);
   } else {
     return x;
@@ -39,12 +37,12 @@ export function some(arr: boolean[]): boolean {
 
 export function getValueToRender({ result, bindings }: ResultAndBindings) {
   return resultMap(result, (value) =>
-    value.tag === SqValueTag.Void ? bindings.asValue() : value
+    value.tag === "Void" ? bindings.asValue() : value
   );
 }
 
 export function getErrorLocations(result: ResultAndBindings["result"]) {
-  if (result.tag === "Error") {
+  if (!result.ok) {
     const location = result.value.location();
     return location ? [location] : [];
   } else {
