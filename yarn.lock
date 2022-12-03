@@ -1906,15 +1906,16 @@
   dependencies:
     "@floating-ui/core" "^1.0.2"
 
-"@floating-ui/react-dom-interactions@^0.10.3":
-  version "0.10.3"
-  resolved "https://registry.yarnpkg.com/@floating-ui/react-dom-interactions/-/react-dom-interactions-0.10.3.tgz#1d988aad169bf752b54c688db942f12e4fed61c5"
-  integrity sha512-UEHqdnzyoiWNU5az/tAljr9iXFzN18DcvpMqW+/cXz4FEhDEB1ogLtWldOWCujLerPBnSRocADALafelOReMpw==
+"@floating-ui/react-dom-interactions@^0.13.0":
+  version "0.13.0"
+  resolved "https://registry.yarnpkg.com/@floating-ui/react-dom-interactions/-/react-dom-interactions-0.13.0.tgz#2bff61f5c1c811e6ab5d6cd7003db531084fafbf"
+  integrity sha512-R+jXsv3eJ8LQn879NMO9ONvk9Hy0XQiPvBWK+wdWADZsrvu7FmmlSq5xG/qid745g+uNs3xvhf+lNnCIlEZpEA==
   dependencies:
-    "@floating-ui/react-dom" "^1.0.0"
+    "@floating-ui/react-dom" "^1.0.1"
     aria-hidden "^1.1.3"
+    tabbable "^6.0.1"
 
-"@floating-ui/react-dom@^1.0.0":
+"@floating-ui/react-dom@^1.0.0", "@floating-ui/react-dom@^1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@floating-ui/react-dom/-/react-dom-1.0.1.tgz#ee3524eab740b9380a00f4c2629a758093414325"
   integrity sha512-UW0t1Gi8ikbDRr8cQPVcqIDMBwUEENe5V4wlHWdrJ5egFnRQFBV9JirauTBFI6S8sM1qFUC1i+qa3g87E6CLTw==
@@ -16932,6 +16933,11 @@ synchronous-promise@^2.0.15:
   version "2.0.16"
   resolved "https://registry.yarnpkg.com/synchronous-promise/-/synchronous-promise-2.0.16.tgz#669b75e86b4295fdcc1bb0498de9ac1af6fd51a9"
   integrity sha512-qImOD23aDfnIDNqlG1NOehdB9IYsn1V9oByPjKY1nakv2MQYCEMyX033/q+aEtYCpmYK1cv2+NTmlH+ra6GA5A==
+
+tabbable@^6.0.1:
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/tabbable/-/tabbable-6.0.1.tgz#427a09b13c83ae41eed3e88abb76a4af28bde1a6"
+  integrity sha512-SYJSIgeyXW7EuX1ytdneO5e8jip42oHWg9xl/o3oTYhmXusZVgiA+VlPvjIN+kHii9v90AmzTZEBcsEvuAY+TA==
 
 tailwindcss@^3.0.2, tailwindcss@^3.2.4:
   version "3.2.4"
