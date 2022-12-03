@@ -1,8 +1,45 @@
-import { expectErrorToBeBounded, testRun } from "../testHelpers";
+import { expectErrorToBeBounded, testRun } from "../helpers/helpers";
 import * as fc from "fast-check";
+import { testEvalToBe } from "../helpers/reducerHelpers";
+
+describe("Various SampleSet functions", () => {
+  testEvalToBe(
+    "SampleSet.fromList([3,5,2,3,5,2,3,5,2,3,3,5])",
+    "Sample Set Distribution"
+  );
+  testEvalToBe(
+    "SampleSet.fromList([3,5,2,3,5,2,3,5,2,3,3,5])",
+    "Sample Set Distribution"
+  );
+  testEvalToBe(
+    "SampleSet.fromFn({|| sample(normal(5,2))})",
+    "Sample Set Distribution"
+  );
+  testEvalToBe(
+    "SampleSet.min(SampleSet.fromDist(normal(50,2)), 2)",
+    "Sample Set Distribution"
+  );
+  testEvalToBe("mean(SampleSet.min(SampleSet.fromDist(normal(50,2)), 2))", "2");
+  testEvalToBe(
+    "SampleSet.max(SampleSet.fromDist(normal(50,2)), 10)",
+    "Sample Set Distribution"
+  );
+  testEvalToBe(
+    "addOne(t)=t+1; SampleSet.toList(SampleSet.map(SampleSet.fromList([1,2,3,4,5,6]), addOne))",
+    "[2,3,4,5,6,7]"
+  );
+  testEvalToBe(
+    "SampleSet.toList(SampleSet.mapN([SampleSet.fromList([1,2,3,4,5,6]), SampleSet.fromList([6, 5, 4, 3, 2, 1])], {|x| x[0] > x[1] ? x[0] : x[1]}))",
+    "[6,5,4,4,5,6]"
+  );
+  testEvalToBe(
+    "SampleSet.fromList([1, 2, 3])",
+    "Error(Distribution Math Error: Too few samples when constructing sample set)"
+  );
+});
 
 // Beware: float64Array makes it appear in an infinite loop.
-let arrayGen = () =>
+const arrayGen = () =>
   fc
     .float64Array({
       minLength: 10,
@@ -16,9 +53,9 @@ let arrayGen = () =>
       (xs_) => Math.min(...Array.from(xs_)) != Math.max(...Array.from(xs_))
     );
 
-let makeSampleSet = (samples: number[]) => {
-  let sampleList = samples.map((x) => x.toFixed(20)).join(",");
-  let result = testRun(`SampleSet.fromList([${sampleList}])`);
+const makeSampleSet = (samples: number[]) => {
+  const sampleList = samples.map((x) => x.toFixed(20)).join(",");
+  const result = testRun(`SampleSet.fromList([${sampleList}])`);
   if (result.tag === "Dist") {
     return result.value;
   } else {
@@ -33,11 +70,11 @@ describe("cumulative density function", () => {
   test.skip("'s codomain is bounded above", () => {
     fc.assert(
       fc.property(arrayGen(), fc.float(), (xs_, x) => {
-        let xs = Array.from(xs_);
+        const xs = Array.from(xs_);
         // Should compute with squiggle strings once interpreter has `sample`
-        let result = makeSampleSet(xs);
-        let cdfValue = result.cdf(env, x).value;
-        let epsilon = 5e-7;
+        const result = makeSampleSet(xs);
+        const cdfValue = result.cdf(env, x).value;
+        const epsilon = 5e-7;
         expect(cdfValue).toBeLessThanOrEqual(1 + epsilon);
       })
     );
@@ -46,10 +83,10 @@ describe("cumulative density function", () => {
   test.skip("'s codomain is bounded below", () => {
     fc.assert(
       fc.property(arrayGen(), fc.float(), (xs_, x) => {
-        let xs = Array.from(xs_);
+        const xs = Array.from(xs_);
         // Should compute with squiggle strings once interpreter has `sample`
-        let result = makeSampleSet(xs);
-        let cdfValue = result.cdf(env, x).value;
+        const result = makeSampleSet(xs);
+        const cdfValue = result.cdf(env, x).value;
         expect(cdfValue).toBeGreaterThanOrEqual(0);
       })
     );
@@ -60,11 +97,11 @@ describe("cumulative density function", () => {
   test.skip("at the highest number in the sample is close to 1", () => {
     fc.assert(
       fc.property(arrayGen(), (xs_) => {
-        let xs = Array.from(xs_);
-        let max = Math.max(...xs);
+        const xs = Array.from(xs_);
+        const max = Math.max(...xs);
         // Should compute with squiggle strings once interpreter has `sample`
-        let result = makeSampleSet(xs);
-        let cdfValue = result.cdf(env, max).value;
+        const result = makeSampleSet(xs);
+        const cdfValue = result.cdf(env, max).value;
         expect(cdfValue).toBeCloseTo(1.0, 2);
       })
     );
@@ -74,13 +111,13 @@ describe("cumulative density function", () => {
   test.skip("at the lowest number in the distribution is within epsilon of 0", () => {
     fc.assert(
       fc.property(arrayGen(), (xs_) => {
-        let xs = Array.from(xs_);
-        let min = Math.min(...xs);
+        const xs = Array.from(xs_);
+        const min = Math.min(...xs);
         // Should compute with squiggle strings once interpreter has `sample`
-        let result = makeSampleSet(xs);
-        let cdfValue = result.cdf(env, min).value;
-        let max = Math.max(...xs);
-        let epsilon = 5e-3;
+        const result = makeSampleSet(xs);
+        const cdfValue = result.cdf(env, min).value;
+        const max = Math.max(...xs);
+        const epsilon = 5e-3;
         if (max - min < epsilon) {
           expect(cdfValue).toBeGreaterThan(4 * epsilon);
         } else {
@@ -94,10 +131,10 @@ describe("cumulative density function", () => {
   test.skip("is <= 1 everywhere with equality when x is higher than the max", () => {
     fc.assert(
       fc.property(arrayGen(), fc.float(), (xs_, x) => {
-        let xs = Array.from(xs_);
-        let dist = makeSampleSet(xs);
-        let cdfValue = dist.cdf(env, x).value;
-        let max = Math.max(...xs);
+        const xs = Array.from(xs_);
+        const dist = makeSampleSet(xs);
+        const cdfValue = dist.cdf(env, x).value;
+        const max = Math.max(...xs);
         if (x > max) {
           let epsilon = (x - max) / x;
           expect(cdfValue).toBeGreaterThan(1 * (1 - epsilon));
@@ -113,9 +150,9 @@ describe("cumulative density function", () => {
   test.skip("is non-negative everywhere with zero when x is lower than the min", () => {
     fc.assert(
       fc.property(arrayGen(), fc.float(), (xs_, x) => {
-        let xs = Array.from(xs_);
-        let dist = makeSampleSet(xs);
-        let cdfValue = dist.cdf(env, x).value;
+        const xs = Array.from(xs_);
+        const dist = makeSampleSet(xs);
+        const cdfValue = dist.cdf(env, x).value;
         expect(cdfValue).toBeGreaterThanOrEqual(0);
       })
     );
@@ -129,13 +166,13 @@ describe("probability density function", () => {
   test.skip("assigns to the max at most the weight of the mean", () => {
     fc.assert(
       fc.property(arrayGen(), (xs_) => {
-        let xs = Array.from(xs_);
-        let max = Math.max(...xs);
-        let mean = xs.reduce((a, b) => a + b, 0.0) / xs.length;
+        const xs = Array.from(xs_);
+        const max = Math.max(...xs);
+        const mean = xs.reduce((a, b) => a + b, 0.0) / xs.length;
         // Should be from squiggleString once interpreter exposes sampleset
-        let dist = makeSampleSet(xs);
-        let pdfValueMean = dist.pdf(env, mean).value;
-        let pdfValueMax = dist.pdf(env, max).value;
+        const dist = makeSampleSet(xs);
+        const pdfValueMean = dist.pdf(env, mean).value;
+        const pdfValueMax = dist.pdf(env, max).value;
         if (typeof pdfValueMean == "number" && typeof pdfValueMax == "number") {
           expect(pdfValueMax).toBeLessThanOrEqual(pdfValueMean);
         } else {
@@ -153,11 +190,11 @@ describe("mean is mean", () => {
       fc.property(
         fc.float64Array({ minLength: 10, maxLength: 100000 }),
         (xs_) => {
-          let xs = Array.from(xs_);
-          let n = xs.length;
-          let dist = makeSampleSet(xs);
-          let myEnv = { sampleCount: 2 * n, xyPointLength: 4 * n };
-          let mean = dist.mean(myEnv);
+          const xs = Array.from(xs_);
+          const n = xs.length;
+          const dist = makeSampleSet(xs);
+          const myEnv = { sampleCount: 2 * n, xyPointLength: 4 * n };
+          const mean = dist.mean(myEnv);
           if (typeof mean === "number") {
             expectErrorToBeBounded(mean, xs.reduce((a, b) => a + b, 0.0) / n, {
               epsilon: 5e-1,
@@ -175,11 +212,14 @@ describe("mean is mean", () => {
       fc.property(
         fc.float64Array({ minLength: 10, maxLength: 100000 }),
         (xs_) => {
-          let xs = Array.from(xs_);
-          let n = xs.length;
-          let dist = makeSampleSet(xs);
-          let myEnv = { sampleCount: Math.floor(n / 2), xyPointLength: 4 * n };
-          let mean = dist.mean(myEnv);
+          const xs = Array.from(xs_);
+          const n = xs.length;
+          const dist = makeSampleSet(xs);
+          const myEnv = {
+            sampleCount: Math.floor(n / 2),
+            xyPointLength: 4 * n,
+          };
+          const mean = dist.mean(myEnv);
           if (typeof mean === "number") {
             expectErrorToBeBounded(mean, xs.reduce((a, b) => a + b, 0.0) / n, {
               epsilon: 5e-1,
@@ -197,11 +237,11 @@ describe("fromSamples function", () => {
   test.skip("gives a mean near the mean of the input", () => {
     fc.assert(
       fc.property(arrayGen(), (xs_) => {
-        let xs = Array.from(xs_);
-        let xsString = xs.toString();
-        let squiggleString = `x = fromSamples([${xsString}]); mean(x)`;
-        let squiggleResult = testRun(squiggleString);
-        let mean = xs.reduce((a, b) => a + b, 0.0) / xs.length;
+        const xs = Array.from(xs_);
+        const xsString = xs.toString();
+        const squiggleString = `x = fromSamples([${xsString}]); mean(x)`;
+        const squiggleResult = testRun(squiggleString);
+        const mean = xs.reduce((a, b) => a + b, 0.0) / xs.length;
         expect(squiggleResult.value).toBeCloseTo(mean, 4);
       })
     );

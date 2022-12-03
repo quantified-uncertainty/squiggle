@@ -1,4 +1,4 @@
-import { testToExpression } from "../reducerTestHelpers";
+import { testToExpression } from "../helpers/reducerHelpers";
 
 describe("Peggy to Expression", () => {
   describe("literals operators parenthesis", () => {

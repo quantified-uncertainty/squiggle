@@ -1,4 +1,4 @@
-import { testToExpression } from "../reducerTestHelpers";
+import { testToExpression } from "../helpers/reducerHelpers";
 
 describe("Peggy Types to Expression", () => {
   describe("type of", () => {

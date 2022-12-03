@@ -1,7 +1,12 @@
 import { BaseDist } from "../../../src/dist/BaseDist";
 import { distErrorToString } from "../../../src/dist/DistError";
 import { logScoreDistAnswer, mixture } from "../../../src/dist/DistOperations";
-import { env, mkNormal, mkUniform, unpackResult } from "../distTestHelpers";
+import {
+  env,
+  mkNormal,
+  mkUniform,
+  unpackResult,
+} from "../../helpers/distHelpers";
 import {
   floatDist,
   normalDist10,
@@ -10,7 +15,7 @@ import {
   point3,
   uniformDist,
   uniformDist2,
-} from "../fixtures";
+} from "../../fixtures/distFixtures";
 
 const klDivergence = (prediction: BaseDist, answer: BaseDist): number => {
   const result = logScoreDistAnswer({

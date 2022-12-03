@@ -1,4 +1,4 @@
-import { testEvalToBe } from "../reducerTestHelpers";
+import { testEvalToBe } from "../helpers/reducerHelpers";
 
 describe("Math Library", () => {
   testEvalToBe("Math.e", "2.718281828459045");

@@ -1,5 +1,5 @@
 import { run, SqProject } from "../src";
-import { testRun } from "./testHelpers";
+import { testRun } from "./helpers/helpers";
 
 describe("Simple calculations and results", () => {
   test("mean(normal(5,2))", () => {

@@ -19,13 +19,13 @@ import {
   mkTriangular,
   mkUniform,
   unpackResult,
-} from "../distTestHelpers";
+} from "../../helpers/distHelpers";
 import {
   BinaryOperations,
   BinaryOperation,
 } from "../../../src/dist/DistOperations";
 import { Env } from "../../../src/dist/env";
-import { expectErrorToBeBounded } from "../../testHelpers";
+import { expectErrorToBeBounded } from "../../helpers/helpers";
 
 const epsilon = 5e1;
 

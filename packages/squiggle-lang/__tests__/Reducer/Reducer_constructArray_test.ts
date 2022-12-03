@@ -1,4 +1,4 @@
-import { testToExpression } from "../reducerTestHelpers";
+import { testToExpression } from "../helpers/reducerHelpers";
 
 describe("Construct Array", () => {
   testToExpression("[1,2]", "[1, 2]", "[1,2]");

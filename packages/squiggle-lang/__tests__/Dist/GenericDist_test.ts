@@ -4,7 +4,7 @@ import { SampleSetDist } from "../../src/dist/SampleSetDist/SampleSetDist";
 import { Env } from "../../src";
 import * as Result from "../../src/utility/result";
 import { Ok } from "../../src/utility/result";
-import { unpackResult } from "./distTestHelpers";
+import { unpackResult } from "../helpers/distHelpers";
 
 const env: Env = {
   sampleCount: 100,
@@ -20,7 +20,7 @@ import {
   cauchyDist,
   triangularDist,
   exponentialDist,
-} from "./fixtures";
+} from "../fixtures/distFixtures";
 
 describe("toPointSet", () => {
   test("on symbolic normal distribution", () => {

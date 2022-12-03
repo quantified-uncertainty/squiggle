@@ -1,4 +1,4 @@
-import { testParse } from "../reducerTestHelpers";
+import { testParse } from "../helpers/reducerHelpers";
 
 describe("Peggy parse type", () => {
   describe("type of", () => {

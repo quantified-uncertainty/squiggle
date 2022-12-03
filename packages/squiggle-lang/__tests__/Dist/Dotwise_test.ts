@@ -2,7 +2,12 @@ import * as fc from "fast-check";
 
 import { BinaryOperations } from "../../src/dist/DistOperations";
 import { DivisionByZeroError } from "../../src/operationError";
-import { env, mkExponential, mkNormal, unpackResult } from "./distTestHelpers";
+import {
+  env,
+  mkExponential,
+  mkNormal,
+  unpackResult,
+} from "../helpers/distHelpers";
 
 describe("dotSubtract", () => {
   test("mean of normal minus exponential (unit)", () => {

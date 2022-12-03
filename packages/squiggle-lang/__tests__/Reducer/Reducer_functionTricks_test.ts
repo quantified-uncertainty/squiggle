@@ -3,7 +3,7 @@ import {
   testEvalError,
   testEvalToBe,
   testToExpression,
-} from "../reducerTestHelpers";
+} from "../helpers/reducerHelpers";
 
 describe("Arity check", () => {
   testEvalToBe("f(x,y) = x + y; f(1,2)", "3");

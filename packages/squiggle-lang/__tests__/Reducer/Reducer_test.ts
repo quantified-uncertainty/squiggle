@@ -4,7 +4,7 @@ import {
   testDescriptionEvalToBe,
   testEvalError,
   testEvalToBe,
-} from "../reducerTestHelpers";
+} from "../helpers/reducerHelpers";
 
 describe("eval", () => {
   describe("expressions", () => {

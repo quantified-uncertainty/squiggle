@@ -17,10 +17,10 @@ import {
   cauchyDist, // local=1; scale=1
   triangularDist, // low=1; medium=2; high=3;
   exponentialDist, // rate=2
-} from "../fixtures";
+} from "../../fixtures/distFixtures";
 
 import { BinaryOperations } from "../../../src/dist/DistOperations";
-import { env, unpackResult } from "../distTestHelpers";
+import { env, unpackResult } from "../../helpers/distHelpers";
 const {
   algebraicAdd,
   algebraicMultiply,

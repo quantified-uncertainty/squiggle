@@ -1,4 +1,4 @@
-import { testEvalToBe } from "../reducerTestHelpers";
+import { testEvalToBe } from "../helpers/reducerHelpers";
 
 describe.skip("map reduce (sam)", () => {
   testEvalToBe("addone(x)=x+1; map(2, addone)", "Error???");

@@ -1,4 +1,16 @@
-import { MySkip, testEvalToBe, testToExpression } from "../reducerTestHelpers";
+import {
+  MySkip,
+  testEvalToBe,
+  testToExpression,
+} from "../helpers/reducerHelpers";
+
+describe("Symbolic constructors", () => {
+  testEvalToBe("Dist.normal(5,2)", "Normal(5,2)");
+  testEvalToBe("normal(5,2)", "Normal(5,2)");
+  testEvalToBe("normal({mean:5,stdev:2})", "Normal(5,2)");
+  testEvalToBe("-2 to 4", "Normal(1,1.8238704957353074)");
+  testEvalToBe("pointMass(5)", "PointMass(5)");
+});
 
 describe("eval on distribution functions", () => {
   describe("normal distribution", () => {

@@ -1,6 +1,6 @@
 // Note: these tests aren't useful anymore since outer block macro got deleted.
 
-import { testToExpression } from "../reducerTestHelpers";
+import { testToExpression } from "../helpers/reducerHelpers";
 
 // Probably can be removed or folded into other Peggy tests.
 describe("Peggy Outer Block", () => {

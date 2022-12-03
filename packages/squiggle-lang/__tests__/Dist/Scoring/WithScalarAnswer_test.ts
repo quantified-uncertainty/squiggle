@@ -2,7 +2,7 @@ import {
   logScoreScalarAnswer,
   mixture,
 } from "../../../src/dist/DistOperations";
-import { env, mkDelta, unpackResult } from "../distTestHelpers";
+import { env, mkDelta, unpackResult } from "../../helpers/distHelpers";
 
 describe("WithScalarAnswer: discrete -> scalar -> score", () => {
   const pointA = mkDelta(3.0);

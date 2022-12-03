@@ -1,4 +1,4 @@
-import { testRun } from "../testHelpers";
+import { testRun } from "../helpers/helpers";
 import * as fc from "fast-check";
 
 describe("Squiggle's parser is whitespace insensitive", () => {

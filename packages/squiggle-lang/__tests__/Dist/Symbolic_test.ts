@@ -8,7 +8,7 @@ import {
   mkNormal,
   mkTriangular,
   unpackResult,
-} from "./distTestHelpers";
+} from "../helpers/distHelpers";
 import * as SymbolicDist from "../../src/dist/SymbolicDist";
 import * as Result from "../../src/utility/result";
 import * as E_A_Floats from "../../src/utility/E_A_Floats";
