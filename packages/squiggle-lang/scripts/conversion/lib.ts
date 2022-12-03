@@ -1,5 +1,5 @@
-import { run } from "../src/index";
-import { blue, bold, green, red } from "../src/cli/colors";
+import { run } from "../../src/index";
+import { blue, bold, green, red } from "../../src/cli/colors";
 
 const testRun = (x: string) => {
   const { result } = run(x, {
