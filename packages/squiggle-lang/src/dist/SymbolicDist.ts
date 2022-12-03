@@ -134,9 +134,9 @@ export abstract class SymbolicDist extends BaseDist {
   }
 
   sampleN(n: number) {
-    const result: number[] = [];
+    const result: number[] = new Array(n);
     for (let i = 0; i < n; i++) {
-      result.push(this.sample());
+      result[i] = this.sample();
     }
     return result;
   }

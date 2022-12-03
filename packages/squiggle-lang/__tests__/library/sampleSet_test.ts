@@ -36,6 +36,12 @@ describe("Various SampleSet functions", () => {
     "SampleSet.fromList([1, 2, 3])",
     "Error(Distribution Math Error: Too few samples when constructing sample set)"
   );
+
+  testEvalToBe("SampleSet.fromList([5,5,5,5,5,5]) -> sampleN(10) -> sum", "50");
+  testEvalToBe(
+    "SampleSet.fromList([5,5,5,5,5,5]) -> sampleN(10) -> List.length",
+    "10"
+  );
 });
 
 // Beware: float64Array makes it appear in an infinite loop.

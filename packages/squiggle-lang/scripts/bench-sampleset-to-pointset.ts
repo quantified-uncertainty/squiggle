@@ -2,7 +2,7 @@
 import { SqProject } from "../src";
 import { measure } from "../src/cli/utils";
 
-const maxP = 3;
+const maxP = 4;
 
 const sampleCount = process.env.SAMPLE_COUNT;
 

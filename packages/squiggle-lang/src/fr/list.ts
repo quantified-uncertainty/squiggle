@@ -8,7 +8,7 @@ import {
 import { FnFactory } from "../library/registry/helpers";
 import { Ok } from "../utility/result";
 import * as Result from "../utility/result";
-import { vArray, vNumber } from "../value";
+import { Value, vArray, vNumber } from "../value";
 import * as E_A_Floats from "../utility/E_A_Floats";
 import { REOther } from "../reducer/ErrorMessage";
 
@@ -99,9 +99,11 @@ export const library = [
         "map",
         [frArray(frAny), frLambda],
         ([array, lambda], context, reducer) => {
-          return Ok(
-            vArray(array.map((value) => lambda.call([value], context, reducer)))
-          );
+          const mapped: Value[] = new Array(array.length);
+          for (let i = 0; i < array.length; i++) {
+            mapped[i] = lambda.call([array[i]], context, reducer);
+          }
+          return Ok(vArray(mapped));
         }
       ),
     ],

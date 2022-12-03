@@ -1,5 +1,13 @@
 import { testRun } from "../helpers/helpers";
 import * as fc from "fast-check";
+import { testEvalToBe } from "../helpers/reducerHelpers";
+
+describe("sampleN", () => {
+  testEvalToBe("pointMass(5) -> sampleN(10) -> sum", "50");
+  testEvalToBe("pointMass(5) -> sampleN(10) -> sum", "50");
+
+  testEvalToBe("normal(5, 2) -> sampleN(100) -> List.length", "100");
+});
 
 describe("Symbolic mean", () => {
   test("mean(triangular(x,y,z))", () => {

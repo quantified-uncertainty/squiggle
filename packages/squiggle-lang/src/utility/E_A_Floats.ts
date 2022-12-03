@@ -86,11 +86,11 @@ export const variance = (xs: readonly number[]) => {
   const offset = (xs[0] + xs[n - 1]) / 2;
   let sum = 0;
   let sumsq = 0;
-  xs.forEach((x) => {
-    let xOffset = x - offset;
+  for (let i = 0; i < n; i++) {
+    const xOffset = xs[i] - offset;
     sum += xOffset;
     sumsq += xOffset * xOffset;
-  });
+  }
   const mean = sum / n;
   return sumsq / n - mean * mean;
 };
