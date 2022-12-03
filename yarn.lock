@@ -4544,9 +4544,9 @@
     "@types/react" "*"
 
 "@types/react@*", "@types/react@^18.0.1", "@types/react@^18.0.21":
-  version "18.0.25"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.25.tgz#8b1dcd7e56fe7315535a4af25435e0bb55c8ae44"
-  integrity sha512-xD6c0KDT4m7n9uD4ZHi02lzskaiqcBxf4zi+tXZY98a04wvc0hi/TcCPC2FOESZi51Nd7tlUeOJY8RofL799/g==
+  version "18.0.26"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.26.tgz#8ad59fc01fef8eaf5c74f4ea392621749f0b7917"
+  integrity sha512-hCR3PJQsAIXyxhTNSiDFY//LhnMZWpNNr5etoCqx/iUfGc5gXWtQR2Phl908jVR6uPXacojQWTg4qRpkxTuGug==
   dependencies:
     "@types/prop-types" "*"
     "@types/scheduler" "*"
@@ -17520,10 +17520,10 @@ ts-jest@^29.0.3:
     semver "7.x"
     yargs-parser "^21.0.1"
 
-ts-loader@^9.4.1:
-  version "9.4.1"
-  resolved "https://registry.yarnpkg.com/ts-loader/-/ts-loader-9.4.1.tgz#b6f3d82db0eac5a8295994f8cb5e4940ff6b1060"
-  integrity sha512-384TYAqGs70rn9F0VBnh6BPTfhga7yFNdC5gXbQpDrBj9/KsT4iRkGqKXhziofHOlE2j6YEaiTYVGKKvPhGWvw==
+ts-loader@^9.4.2:
+  version "9.4.2"
+  resolved "https://registry.yarnpkg.com/ts-loader/-/ts-loader-9.4.2.tgz#80a45eee92dd5170b900b3d00abcfa14949aeb78"
+  integrity sha512-OmlC4WVmFv5I0PpaxYb+qGeGOdm5giHU7HwDDUjw59emP2UYMHy9fFSDcYgSNoH8sXcj4hGCSEhlDZ9ULeDraA==
   dependencies:
     chalk "^4.1.0"
     enhanced-resolve "^5.0.0"
