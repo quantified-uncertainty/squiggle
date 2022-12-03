@@ -34,11 +34,16 @@ describe("List functions", () => {
   });
 
   describe("map", () => {
+    testEvalToBe("arr=[1,2,3]; map(arr, {|x| x*2})", "[2,4,6]");
     testEvalToBe(
       "double(x)=2*x; arr=[1,2,3]; List.map(arr, double)",
       "[2,4,6]"
     );
     testEvalToBe("double(x)=2*x; arr=[1,2,3]; map(arr, double)", "[2,4,6]");
+
+    // wrong arg types
+    testEvalError("addone(x)=x+1; map(2, addone)");
+    testEvalError("addone(x)=x+1; map(2, {x: addone})");
   });
 
   describe("reduce", () => {

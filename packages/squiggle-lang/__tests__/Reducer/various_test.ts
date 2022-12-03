@@ -18,7 +18,7 @@ describe("eval", () => {
     testEvalToBe("concat([3,4], [5,6,7])", "[3,4,5,6,7]");
     testEvalToBe("log(10)", "2.302585092994046");
     testEvalToBe("Math.cos(10)", "-0.8390715290764524");
-    // TODO more built ins
+    // most library tests are in __tests__/library/
   });
 
   describe("missing function", () => {
