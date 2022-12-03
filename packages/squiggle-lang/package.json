@@ -30,7 +30,7 @@
     "@commander-js/extra-typings": "^9.4.1",
     "commander": "^9.4.1",
     "immutable": "^4.1.0",
-    "jstat": "^1.9.5",
+    "jstat": "^1.9.6",
     "lodash": "^4.17.21",
     "open": "^8.4.0"
   },
