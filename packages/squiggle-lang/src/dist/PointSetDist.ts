@@ -9,6 +9,8 @@ import * as Result from "../utility/result";
 import * as PointSet from "../PointSet/PointSet";
 
 import { BaseDist } from "./BaseDist";
+import { Env } from "./env";
+import { SampleSetDist } from "./SampleSetDist/SampleSetDist"
 import { AnyPointSet } from "../PointSet/PointSet";
 import { DistError, sparklineError } from "./DistError";
 import { createSparkline } from "../utility/sparklines";
@@ -17,6 +19,7 @@ export class PointSetDist<
   T extends AnyPointSet = AnyPointSet
 > extends BaseDist {
   pointSet: T;
+  private sampleSetDistCache: Result.result<SampleSetDist,DistError> | undefined = undefined;
 
   constructor(pointSet: T) {
     super();
@@ -90,6 +93,13 @@ export class PointSetDist<
   toPointSetDist(): Result.result<PointSetDist, DistError> {
     // TODO: If env.xyPointLength is different from what it has, it should change.
     return Result.Ok(this);
+  }
+
+  toSampleSetDist(env: Env): Result.result<SampleSetDist, DistError> {
+    if(this.sampleSetDistCache === undefined){
+      this.sampleSetDistCache = SampleSetDist.make(this.sampleN(env.sampleCount));
+    }
+    return this.sampleSetDistCache;
   }
 
   toSparkline(bucketCount: number): Result.result<string, DistError> {

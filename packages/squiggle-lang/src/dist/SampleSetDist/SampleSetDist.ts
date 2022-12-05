@@ -38,7 +38,6 @@ export class SampleSetDist extends BaseDist {
     fn: (i: number) => number,
     env: Env
   ): Result.result<SampleSetDist, DistError> {
-    const sampleCount = env.sampleCount;
     const samples: number[] = [];
     for (let i = 0; i < env.sampleCount; i++) {
       samples.push(fn(i));
@@ -65,13 +64,14 @@ export class SampleSetDist extends BaseDist {
     d: BaseDist,
     env: Env
   ): Result.result<SampleSetDist, DistError> {
-    return SampleSetDist.make(d.sampleN(env.sampleCount));
+    return d.toSampleSetDist(env);
   }
 
   integralEndY() {
     // sampleset is always normalized
     return 1;
   }
+
   normalize() {
     return this;
   }
@@ -156,6 +156,10 @@ sample everything.
         "Not implemented, https://github.com/quantified-uncertainty/squiggle/issues/1392"
       )
     );
+  }
+
+  toSampleSetDist(_: Env): Result.result<SampleSetDist, DistError> {
+    return Result.Ok(this);
   }
 
   toPointSetDist(env: Env): Result.result<PointSetDist, DistError> {

@@ -8,6 +8,7 @@ import * as Operation from "../operation";
 import { PointSetDist } from "./PointSetDist";
 import { Ok, result } from "../utility/result";
 import { ContinuousShape } from "../PointSet/Continuous";
+import { SampleSetDist } from "./SampleSetDist/SampleSetDist";
 import { DistError, xyShapeDistError } from "./DistError";
 import { OperationError } from "../operationError";
 import { DiscreteShape } from "../PointSet/Discrete";
@@ -25,6 +26,7 @@ type PointsetXSelection = "Linear" | "ByWeight";
 export abstract class SymbolicDist extends BaseDist {
   private static minCdfValue = 0.0001;
   private static maxCdfValue = 0.9999;
+  private sampleSetDistCache: result<SampleSetDist,DistError> | undefined = undefined;
 
   // all symbolic dists must override this
   abstract toString(): string;
@@ -79,6 +81,13 @@ export abstract class SymbolicDist extends BaseDist {
       default:
         throw new Error(`Unknown xSelection value ${xSelection}`);
     }
+  }
+
+  toSampleSetDist(env: Env): result<SampleSetDist, DistError>{
+    if(this.sampleSetDistCache === undefined){
+      this.sampleSetDistCache = SampleSetDist.make(this.sampleN(env.sampleCount));
+    }
+    return this.sampleSetDistCache;
   }
 
   toPointSetDist(

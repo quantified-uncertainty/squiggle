@@ -2,6 +2,7 @@ import { result } from "../utility/result";
 import * as Result from "../utility/result";
 import { DistError, notYetImplemented } from "./DistError";
 import { PointSetDist } from "./PointSetDist";
+import { SampleSetDist } from "./SampleSetDist/SampleSetDist";
 import * as magicNumbers from "../magicNumbers";
 import { Env } from "./env";
 
@@ -41,6 +42,7 @@ export abstract class BaseDist {
   }
 
   abstract toPointSetDist(env: Env): result<PointSetDist, DistError>;
+  abstract toSampleSetDist(env: Env): result<SampleSetDist, DistError>;
   abstract toSparkline(
     bucketCount: number,
     env: Env

@@ -3,6 +3,7 @@
     "module": "commonjs",
     "jsx": "react",
     "allowJs": true,
+    "resolveJsonModule": true,
     "noImplicitAny": true,
     "removeComments": true,
     "preserveConstEnums": true,
@@ -15,6 +16,7 @@
     "target": "ES6",
     "esModuleInterop": true
   },
+  "files": ["./__tests__/malaria_consortium.json"],
   "include": ["src/**/*", "scripts/**/*", "__tests__/**/*", "benchmark/**/*"],
   "exclude": ["**/*.spec.ts"]
 }
