@@ -3,7 +3,7 @@ import malariaConsortiumCells from "./malaria_consortium.json";
 
 test("Renders Malaria Consortium Notebook in reasonable amount of time", async () => {
   const project = SqProject.create();
-/*  project.setEnvironment({
+  /*  project.setEnvironment({
     sampleCount: 1000,
     xyPointLength: 1000,
   });*/
