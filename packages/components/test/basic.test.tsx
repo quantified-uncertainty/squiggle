@@ -53,5 +53,5 @@ test("Project dependencies work in playgrounds", async () => {
     />
   );
   // We must await here because SquigglePlayground loads results asynchronously
-  expect(await screen.findByRole("status")).toHaveTextContent("2");
+  expect(await screen.findByRole("playground-result")).toHaveTextContent("2");
 });
