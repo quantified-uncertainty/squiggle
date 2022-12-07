@@ -20,7 +20,7 @@ export const library = [
   maker.make({
     name: "dists",
     output: "Plot",
-    examples: [`Plot.dist({show: [{name: "dist", value: normal(0, 1)}]})`],
+    examples: [`Plot.dists({show: [{name: "dist", value: normal(0, 1)}]})`],
     definitions: [
       makeDefinition(
         "dists",
