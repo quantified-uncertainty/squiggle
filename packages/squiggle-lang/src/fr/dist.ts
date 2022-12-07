@@ -9,6 +9,7 @@ import { makeDefinition } from "../library/registry/fnDefinition";
 import {
   frDistOrNumber,
   frNumber,
+  frArray,
   frRecord,
 } from "../library/registry/frTypes";
 import { FnFactory } from "../library/registry/helpers";
@@ -18,6 +19,7 @@ import { Value, vDist } from "../value";
 import {
   ErrorMessage,
   REDistributionError,
+  REOperationError,
   REOther,
 } from "../reducer/ErrorMessage";
 
@@ -209,6 +211,18 @@ export const library: FRFunction[] = [
     definitions: [
       makeTwoArgsDist("cauchy", (local, scale) =>
         SymbolicDist.Cauchy.make({ local, scale })
+      ),
+    ],
+  }),
+  maker.make({
+    name: "metalog",
+    examples: [`metalog([5, 2, -5])`],
+    definitions: [
+      makeDefinition<number[]>("metalog", [frArray(frNumber)], ([a]) =>
+        Result.errMap(
+          Result.fmap(SymbolicDist.Metalog.make({ a }), vDist),
+          (x) => REOperationError(new OtherOperationError(x))
+        )
       ),
     ],
   }),

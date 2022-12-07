@@ -1,6 +1,7 @@
 import { BaseDist } from "./BaseDist";
 import * as Result from "../utility/result";
 import jstat from "jstat";
+import * as metalog from "@quri/metalog";
 import * as E_A_Floats from "../utility/E_A_Floats";
 import * as XYShape from "../XYShape";
 import * as magicNumbers from "../magicNumbers";
@@ -852,6 +853,51 @@ export class Bernoulli extends SymbolicDist {
         })
       )
     );
+  }
+}
+export class Metalog extends SymbolicDist {
+  a: number[];
+  private constructor({ a }: { a: number[] }) {
+    super();
+    this.a = a;
+  }
+
+  static make({
+    a,
+  }: {
+    a: number[];
+  }): result<Metalog, string> {
+    if (a.length > 1) {
+      return Ok(new Metalog({a}))
+    }
+    else {
+      return Result.Error("Terms array must have more than one element");
+    }
+  }
+
+  toString() {
+    return `(${this.a})`;
+  }
+
+  simplePdf(x: number) {
+    return metalog.pdf(this.a, x);
+  }
+  cdf(x: number) {
+    return metalog.cdf(this.a, x);
+  }
+  inv(x: number) {
+    return metalog.quantile(this.a, x);
+  }
+  sample() {
+    return metalog.quantile(this.a, Math.random());
+  }
+  mean() {
+    if(this.a.length > 2){
+      return this.a[0] + this.a[2] / 2;
+    }
+    else {
+      return this.a[0];
+    }
   }
 }
 

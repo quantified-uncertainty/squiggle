@@ -29,4 +29,6 @@ export const mkTriangular = (low: number, medium: number, high: number) =>
   unpackResult(SymbolicDist.Triangular.make({ low, medium, high }));
 export const mkBernoulli = (p: number) =>
   unpackResult(SymbolicDist.Bernoulli.make(p));
+export const mkMetalog = (a: number[]) =>
+  unpackResult(SymbolicDist.Metalog.make({ a }));
 export const mkDelta = (x: number) => unpackResult(SymbolicDist.Float.make(x));

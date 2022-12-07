@@ -1,6 +1,7 @@
 import {
   mkBernoulli,
   mkBeta,
+  mkMetalog,
   mkCauchy,
   mkExponential,
   mkLogistic,
@@ -250,5 +251,37 @@ describe("Bernoulli", () => {
       Math.sqrt(unpackResult(dist.variance())),
       5
     );
+  });
+});
+
+describe("Metalog", () => {
+  const dist = mkMetalog([5, 2]);
+  const iter = [0.0, 1.0];
+  const step = 1.0;
+
+  test("CDF only grows", () => {
+    const cdfValues = iter.map((v) => dist.cdf(v));
+    expect(E_A.pairwise(cdfValues, (a, b) => a <= b).every((v) => v)).toBe(
+      true
+    );
+  });
+
+  test("CDF conforms to PDF", () => {
+    expect(
+      E_A.pairwise(
+        iter.map((a) => [dist.cdf(a), unpackResult(dist.pdf(a))]),
+        (a, b) => [a, b]
+      ).every(
+        ([[cdf, pdf], [cdf2]]) => Math.abs(cdf2 - cdf - pdf * step) < 0.0001
+      )
+    ).toBe(true);
+  });
+
+  test("Quantile is inverse of CDF", () => {
+    expect(
+      iter
+        .map((p) => [p, dist.inv(dist.cdf(p))])
+        .every(([p, pp]) => Math.abs(p - pp) < 0.00001)
+    ).toBe(true);
   });
 });
