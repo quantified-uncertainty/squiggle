@@ -130,6 +130,30 @@ class VVoid {
 }
 export const vVoid = () => new VVoid();
 
+export type LabeledDistribution = {
+  name: string;
+  distribution: BaseDist;
+  opacity: number;
+};
+
+export type Plot = {
+  distributions: LabeledDistribution[];
+  showLegend: boolean;
+  colorScheme: string;
+};
+
+class VPlot {
+  readonly type = "Plot" as const;
+  constructor(public value: Plot) {}
+  toString() {
+    return `Plot containing ${this.value.distributions
+      .map((x) => x.name)
+      .join(", ")}`;
+  }
+}
+
+export const vPlot = (plot: Plot) => new VPlot(plot);
+
 export type Value =
   | VArray
   | VBool
@@ -141,4 +165,5 @@ export type Value =
   | VString
   | VRecord
   | VTimeDuration
+  | VPlot
   | VVoid;

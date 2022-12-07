@@ -7,6 +7,7 @@ import {
   result,
   SqDistributionError,
   SqDistribution,
+  SqPlot,
   Env,
 } from "@quri/squiggle-lang";
 import { Vega } from "react-vega";
@@ -19,7 +20,6 @@ import {
 import { flattenResult } from "../lib/utility";
 import { hasMassBelowZero } from "../lib/distributionUtils";
 import { NumberShower } from "./NumberShower";
-import { Plot, parsePlot, LabeledDistribution } from "../lib/plotParser";
 import { XIcon } from "@heroicons/react/solid";
 import { Tooltip } from "./ui/Tooltip";
 
@@ -35,15 +35,8 @@ export type DistributionChartSettings = yup.InferType<
   typeof distributionSettingsSchema
 >;
 
-export function makePlot(record: SqRecord): Plot | void {
-  const plotResult = parsePlot(record);
-  if (plotResult.ok) {
-    return plotResult.value;
-  }
-}
-
 export type MultiDistributionChartProps = {
-  plot: Plot;
+  plot: SqPlot;
   environment: Env;
   chartHeight?: number;
   settings: DistributionChartSettings;
@@ -57,7 +50,7 @@ export const MultiDistributionChart: React.FC<MultiDistributionChartProps> = ({
 }) => {
   const [containerRef, containerMeasure] = useMeasure<HTMLDivElement>();
 
-  const distributions: LabeledDistribution[] = plot.distributions;
+  const distributions = plot.distributions;
 
   let shapes = flattenResult(
     distributions.map((x) =>
@@ -106,21 +99,25 @@ export const MultiDistributionChart: React.FC<MultiDistributionChartProps> = ({
 
   return (
     <div ref={containerRef}>
-      {
-        settings.logX && shapes.value.some(hasMassBelowZero) ? (
-          <ErrorAlert heading="Log Domain Error">
-            Cannot graph distribution with negative values on logarithmic scale.
-          </ErrorAlert>
-        ) : containerMeasure.width ? (
-          <Vega
-            spec={spec}
-            data={vegaData}
-            width={containerMeasure.width - 22}
-            height={chartHeight}
-            actions={settings.vegaActions}
-          />
-        ) : null /* width can be 0 initially or when we're on the server side; that's fine, we don't want to pre-render charts with broken width */
-      }
+      {settings.logX && shapes.value.some(hasMassBelowZero) ? (
+        <ErrorAlert heading="Log Domain Error">
+          Cannot graph distribution with negative values on logarithmic scale.
+        </ErrorAlert>
+      ) : (
+        <figure>
+          {
+            containerMeasure.width ? (
+              <Vega
+                spec={spec}
+                data={vegaData}
+                width={containerMeasure.width - 22}
+                height={chartHeight}
+                actions={settings.vegaActions}
+              />
+            ) : null /* width can be 0 initially or when we're on the server side; that's fine, we don't want to pre-render charts with broken width */
+          }{" "}
+        </figure>
+      )}
       <div className="flex justify-center">
         {settings.showSummary && (
           <SummaryTable plot={plot} environment={environment} />
@@ -145,7 +142,7 @@ const Cell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 type SummaryTableProps = {
-  plot: Plot;
+  plot: SqPlot;
   environment: Env;
 };
 

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { SqDistribution } from "@quri/squiggle-lang";
+import { SqDistribution, SqPlot } from "@quri/squiggle-lang";
 import {
   MultiDistributionChart,
   MultiDistributionChartProps,
@@ -22,13 +22,15 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
 }) => {
   return (
     <MultiDistributionChart
-      plot={{
-        distributions: [
-          { name: "default", distribution: distribution, opacity: 1 },
-        ],
-        showLegend: false,
-        colorScheme: "blues",
-      }}
+      plot={
+        {
+          distributions: [
+            { name: "default", distribution: distribution, opacity: 1 },
+          ],
+          showLegend: false,
+          colorScheme: "blues",
+        } as unknown as SqPlot
+      }
       environment={environment}
       chartHeight={chartHeight}
       settings={settings}

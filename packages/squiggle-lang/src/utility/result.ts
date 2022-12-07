@@ -81,3 +81,13 @@ export function getError<T, E>(r: result<T, E>): E | undefined {
     return undefined;
   }
 }
+
+export function sequence<T, E>(r: result<T, E>[]): result<T[], E> {
+  let initial: result<T[], E> = Ok([]);
+  return r.reduce((acc, curr) => {
+    if (!acc.ok) return acc;
+    if (!curr.ok) return curr;
+    acc.value.push(curr.value);
+    return acc;
+  }, initial);
+}
