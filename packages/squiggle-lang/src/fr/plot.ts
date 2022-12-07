@@ -20,19 +20,19 @@ export const library = [
   maker.make({
     name: "dists",
     output: "Plot",
-    examples: [`Plot.dists({show: [{name: "dist", value: normal(0, 1)}]})`],
+    examples: [`Plot.dists({dists: [{name: "dist", value: normal(0, 1)}]})`],
     definitions: [
       makeDefinition(
         "dists",
         [
           frRecord([
-            "show",
+            "dists",
             frArray(frRecord(["name", frString], ["value", frDistOrNumber])),
           ]),
         ],
-        ([{ show }]) => {
+        ([{ dists }]) => {
           let distributionResult: result<LabeledDistribution, string>[] =
-            show.map(({ name, value }) =>
+            dists.map(({ name, value }) =>
               fmap(
                 typeof value === "number" ? Float.make(value) : Ok(value),
                 (distribution) => ({ name, distribution, opacity: 0.3 })
