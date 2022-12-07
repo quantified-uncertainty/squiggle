@@ -7,7 +7,11 @@ export class SqPlot {
   constructor(private _value: Plot, public location: SqValueLocation) {}
 
   get distributions() {
-    return this._value.distributions.map(({name, distribution, opacity}) => ({name, distribution: wrapDistribution(distribution), opacity}));
+    return this._value.distributions.map(({ name, distribution, opacity }) => ({
+      name,
+      distribution: wrapDistribution(distribution),
+      opacity,
+    }));
   }
 
   get showLegend() {
