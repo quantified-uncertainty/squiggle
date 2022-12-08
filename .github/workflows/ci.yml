@@ -30,7 +30,6 @@ jobs:
       - name: Turbo run
         run: npx turbo run build test profile lint bundle
       - name: Store performance data
-        run: packages/components
         uses: actions/upload-artifact@v3
         with:
           name: malaria_consortium_profile
