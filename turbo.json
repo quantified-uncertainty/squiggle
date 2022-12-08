@@ -24,6 +24,10 @@
       "dependsOn": ["build"],
       "outputs": []
     },
+    "profile": {
+      "dependsOn": ["@quri/squiggle-lang#build"],
+      "outputs": []
+    },
     "bundle": {
       "dependsOn": ["build"]
     },

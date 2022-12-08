@@ -28,7 +28,15 @@ jobs:
       - name: Install dependencies
         run: yarn --frozen-lockfile
       - name: Turbo run
-        run: npx turbo run build test lint bundle
+        run: npx turbo run build test profile lint bundle
+      - name: Store performance data
+        uses: actions/upload-artifact@v3
+        with:
+          name: malaria_consortium_profile
+          path: |
+            packages/squiggle-lang/CPU*
+
+
 
   coverage:
     name: Coverage

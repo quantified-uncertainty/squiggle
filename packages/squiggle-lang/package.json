@@ -12,6 +12,8 @@
     "clean": "rm -rf dist && rm -f src/ast/peggyParser.js && rm -f src/public/SqProject/IncludeParser.js",
     "benchmark": "ts-node benchmark/conversion_tests.ts",
     "test:reducer": "jest __tests__/Reducer*/",
+    "test:profile": "node --cpu-prof node_modules/.bin/jest --runInBand",
+    "profile": "yarn test:profile __tests__/Performance.test.ts",
     "test": "jest",
     "test:watch": "jest --watchAll",
     "test:fnRegistry": "jest __tests__/SquiggleLibrary*/",
