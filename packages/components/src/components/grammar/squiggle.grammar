@@ -1,0 +1,127 @@
+
+@precedence {
+    typeargs,
+    typeMember,
+    typePrefix,
+    intersection @left,
+    union @left,
+    typeExtends @right,
+    else @right,
+    member,
+    readonly,
+    newArgs,
+    call,
+    taggedTemplate,
+    prefix,
+    postfix,
+    typeof,
+    exp @left,
+    times @left,
+    plus @left,
+    shift @left,
+    loop,
+    rel @left,
+    satisfies,
+    equal @left,
+    bitOr @left,
+    bitXor @left,
+    bitAnd @left,
+    and @left,
+    or @left,
+    ternary @right,
+    assign @right,
+    comma @left,
+    statement @cut,
+    predicate
+}
+
+@top Program {
+    (statement (comment)?)+
+}
+
+@top Statement {
+    statement
+}
+
+s<term> { op<term> }
+kw<term> { @specialize[@name={term}]<identifier, term> }
+
+arith<term> { op<term> }
+logic<term> { op<term> }
+
+
+commaSep<content> {
+    "" | content ("," content?)*
+}
+LambdaExpr { s<"{"> s<"|"> commaSep<VariableName> s<"|"> expression s<"}"> }
+
+binop<operator> {
+    expression operator expression
+}
+
+expression {
+    String
+    | Boolean
+    | Number
+    | Void
+    | LambdaExpr
+    | IfExpr { if expression then expression else expression }
+    | InvokeExpr { FunctionName s<"("> commaSep<expression> s<")"> }
+    | ParenExpr { s<"("> expression s<")"> }
+    | VariableName
+    | BinOp { 
+        binop<!shift logic<"||">>
+        | binop<!shift logic<"&&">>
+    }
+    | FunOp { 
+        binop<!plus @specialize[@name="ControlOp"]<syntax, "|>">>
+    }
+    | ArithOp { 
+        binop<!times arith<"*">>
+        | binop<!times arith<"/">>
+        | binop<!times arith<"^">>
+        | binop<!plus arith<"+">>
+        | binop<!plus arith<"-">>
+    }
+}
+
+
+Assignment { identifier s<"="> expression "\n" }
+
+statement {
+    Assignment
+    | expression "\n"
+}
+
+FunctionName { identifier }
+VariableName { identifier }
+
+Boolean { @specialize[@name=boolean]<identifier, "true" | "false"> }
+
+if { kw<"if"> }
+then { kw<"then"> }
+else { kw<"else"> }
+
+@tokens {
+
+    String { '"' ![\"]* '"' }
+
+    Void { "()" }
+
+    syntax { "|" "{" "}" "(" ")" }
+
+    op[@name=term]<term> { term }
+
+    identifierChar { @asciiLetter | $[_$\u{a1}-\u{10ffff}] }
+
+    word { identifierChar (identifierChar | @digit)* }
+
+    identifier { word }
+
+    Number { 
+        (@digit (@digit)* ("." (@digit)*)? | "." (@digit)*) (("e" | "E") ("+" | "-")? (@digit)+)?
+    }
+    
+    comment { "#" ![\n]* }
+
+}

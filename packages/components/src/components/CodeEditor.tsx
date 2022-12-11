@@ -1,11 +1,67 @@
 import _ from "lodash";
-import React, { FC, useMemo, useRef } from "react";
-import AceEditor from "react-ace";
+import React, { FC, useEffect, useMemo, useRef } from "react";
 
-import "ace-builds/src-noconflict/mode-golang";
-import "ace-builds/src-noconflict/theme-github";
+import { LRLanguage, LanguageSupport } from "@codemirror/language";
+import { parser } from "./grammar/squiggle";
+
+import { basicSetup } from "codemirror";
+
+import { EditorState } from "@codemirror/state";
+import { EditorView, keymap } from "@codemirror/view";
+import { defaultKeymap } from "@codemirror/commands";
+import { completeAnyWord } from "@codemirror/autocomplete";
+import { styleTags, tags as t } from "@lezer/highlight";
 
 import { SqLocation } from "@quri/squiggle-lang";
+import { parseArgs } from "util";
+import CodeMirror, { useCodeMirror } from "@uiw/react-codemirror";
+
+const sqLang = LRLanguage.define({
+  name: "squiggle",
+  parser: parser.configure({
+    props: [
+      styleTags({
+        "if": t.keyword,
+        "then": t.keyword,
+        "else": t.keyword,
+        
+        "=": t.definitionOperator,
+        
+        "arith": t.arithmeticOperator,
+        "|": t.bitwiseOperator,
+        
+        "||": t.bitwiseOperator,
+        "&&": t.bitwiseOperator,
+
+        "|>": t.controlOperator,
+        
+        ArithOp: t.arithmeticOperator,
+        BinOp: t.logicOperator,
+        FunOp: t.controlOperator,
+        
+        Syntax: t.annotation,
+        Boolean: t.bool,
+        Number: t.integer,
+        String: t.string,
+        Comment: t.comment,
+        Void: t.atom,
+        Identifier: t.variableName,
+        Assignment: t.definitionOperator,
+        VariableName: t.variableName,
+        FunctionName: t.bool,
+        LambdaExpr: t.definitionKeyword
+      }),
+    ],
+  }),
+  languageData: {
+    commentTokens: {
+      line: "#",
+    },
+  },
+});
+function squiggle() {
+  return new LanguageSupport(sqLang, []);
+}
 
 interface CodeEditorProps {
   value: string;
@@ -27,50 +83,39 @@ export const CodeEditor: FC<CodeEditorProps> = ({
   showGutter = false,
   errorLocations = [],
 }) => {
-  const lineCount = value.split("\n").length;
   const id = useMemo(() => _.uniqueId(), []);
+  const editor = useRef<HTMLDivElement>(null);
 
-  // this is necessary because AceEditor binds commands on mount, see https://github.com/securingsincity/react-ace/issues/684
-  const onSubmitRef = useRef<typeof onSubmit | null>(null);
-  onSubmitRef.current = onSubmit;
-
-  const editorEl = useRef<AceEditor | null>(null);
-
-  return (
-    <AceEditor
-      ref={editorEl}
-      value={value}
-      mode="golang"
-      theme="github"
-      width="100%"
-      fontSize={14}
-      height={String(height) + "px"}
-      minLines={oneLine ? lineCount : undefined}
-      maxLines={oneLine ? lineCount : undefined}
-      showGutter={showGutter}
-      highlightActiveLine={false}
-      showPrintMargin={false}
-      onChange={onChange}
-      name={id}
-      editorProps={{
-        $blockScrolling: true,
-      }}
-      setOptions={{}}
-      commands={[
-        {
-          name: "submit",
-          bindKey: { mac: "Cmd-Enter", win: "Ctrl-Enter" },
-          exec: () => onSubmitRef.current?.(),
+  useEffect(() => {
+    if (editor.current != null) {
+      const theme = EditorView.theme({
+        "&": {
+          height: `${height}px`,
         },
-      ]}
-      markers={errorLocations?.map((location) => ({
-        startRow: location.start.line - 1,
-        startCol: location.start.column - 1,
-        endRow: location.end.line - 1,
-        endCol: location.end.column - 1,
-        className: "ace-error-marker",
-        type: "text",
-      }))}
-    />
-  );
+      });
+
+      const updateListener = EditorView.updateListener.of((update) => {
+        onChange(update.state.doc.toString());
+      });
+
+      const state = EditorState.create({
+        doc: value,
+        extensions: [
+          basicSetup,
+          updateListener,
+          keymap.of(defaultKeymap),
+          theme,
+          sqLang.data.of({ autocomplete: completeAnyWord }),
+          squiggle(),
+        ],
+      });
+      const view = new EditorView({ state, parent: editor.current });
+
+      return () => {
+        view.destroy();
+      };
+    }
+  }, []);
+
+  return <div id={id} onSubmit={onSubmit} ref={editor}></div>;
 };
