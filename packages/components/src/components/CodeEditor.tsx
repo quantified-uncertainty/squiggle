@@ -3,41 +3,45 @@ import React, { FC, useEffect, useMemo, useRef } from "react";
 
 import { parser } from "./grammar/squiggle";
 
-
 import { basicSetup } from "codemirror";
-import { LRLanguage, LanguageSupport, HighlightStyle, syntaxHighlighting } from "@codemirror/language";
+import {
+  LRLanguage,
+  LanguageSupport,
+  HighlightStyle,
+  syntaxHighlighting,
+} from "@codemirror/language";
 import { EditorState } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 import { defaultKeymap } from "@codemirror/commands";
-import { completeAnyWord, snippetCompletion } from "@codemirror/autocomplete";
-import { styleTags, tags as t, Tag } from "@lezer/highlight";
+import { snippetCompletion } from "@codemirror/autocomplete";
+import { linter } from "@codemirror/lint";
+import { styleTags, tags as t } from "@lezer/highlight";
 
 import { SqLocation } from "@quri/squiggle-lang";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { printTree } from "./grammar/lezer-debug";
-
 
 const sqLang = LRLanguage.define({
   name: "squiggle",
   parser: parser.configure({
     props: [
       styleTags({
-        "if": t.keyword,
-        "then": t.keyword,
-        "else": t.keyword,
-        
-        "Equals": t.definitionOperator,
+        if: t.keyword,
+        then: t.keyword,
+        else: t.keyword,
+
+        Equals: t.definitionOperator,
 
         ArithOp: t.arithmeticOperator,
         LogicOp: t.logicOperator,
         ControlOp: t.controlOperator,
-        
+
         "{ }": t.brace,
         "[ ]": t.squareBracket,
         "( )": t.paren,
         "|": t.squareBracket,
         ",": t.separator,
-        
+
         Syntax: t.annotation,
         Boolean: t.bool,
         Number: t.integer,
@@ -58,6 +62,15 @@ const sqLang = LRLanguage.define({
   languageData: {
     commentTokens: {
       line: "#",
+    },
+    autocomplete: [
+      snippetCompletion("{ |${args}| ${body} ", {
+        label: "{",
+        detail: "lambda function",
+      }),
+    ],
+    closeBrackets: {
+      brackets: ['"', "'", "(", "{", "|"],
     },
   },
 });
@@ -94,42 +107,52 @@ export const CodeEditor: FC<CodeEditorProps> = ({
         "&": {
           height: `${height}px`,
         },
-        ".cm-line span": {
-          position: "relative",
-        },
-        ".cm-line span:hover::after": {
-          position: "absolute",
-          bottom: "100%",
-          left: 0,
-          background: "black",
-          color: "white",
-          border: "solid 2px",
-          borderRadius: "5px",
-          content: "var(--tags)",
-          width: `max-content`,
-          padding: "1px 4px",
-          zIndex: 10,
-          pointerEvents: "none",
-        }
-      }, {dark: true});
+      });
+
+      // Needs propagating the state upwards
+      // const lint = linter(() =>
+      //   errorLocations.map((loc) => ({
+      //     from: loc.start.offset,
+      //     to: loc.end.offset,
+      //     severity: "error",
+      //     message: "Syntax error!",
+      //   }))
+      // );
 
       const updateListener = EditorView.updateListener.of((update) => {
-        // console.log(printTree(squiggle().language.parser.parse(update.state.doc.toString()), update.state.doc.toString(), { }))
+        console.log(
+          printTree(
+            squiggle().language.parser.parse(update.state.doc.toString()),
+            update.state.doc.toString(),
+            {}
+          )
+        );
         onChange(update.state.doc.toString());
       });
 
+      const submitListener = keymap.of(
+        onSubmit
+          ? [
+              {
+                key: "Ctrl-s",
+                run: () => {
+                  onSubmit();
+                  return true;
+                },
+              },
+            ]
+          : []
+      );
       const state = EditorState.create({
         doc: value,
         extensions: [
+          // lint,
           basicSetup,
           updateListener,
           keymap.of(defaultKeymap),
+          submitListener,
           theme,
-          oneDark,
           squiggle(),
-          sqLang.data.of({ autocomplete: [
-            snippetCompletion("{ |${args}| ${body} }", {label: "lambda"}),
-          ] }),
         ],
       });
       const view = new EditorView({ state, parent: editor.current });
