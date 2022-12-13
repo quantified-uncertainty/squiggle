@@ -1,127 +1,102 @@
 
 @precedence {
-    typeargs,
-    typeMember,
-    typePrefix,
-    intersection @left,
-    union @left,
-    typeExtends @right,
-    else @right,
-    member,
-    readonly,
-    newArgs,
+    deref,
     call,
-    taggedTemplate,
-    prefix,
-    postfix,
-    typeof,
+    unary @right,
+    control @left,
     exp @left,
     times @left,
     plus @left,
-    shift @left,
-    loop,
+    else @right,
     rel @left,
-    satisfies,
-    equal @left,
-    bitOr @left,
-    bitXor @left,
-    bitAnd @left,
     and @left,
-    or @left,
-    ternary @right,
-    assign @right,
-    comma @left,
-    statement @cut,
-    predicate
+    or @left
 }
 
 @top Program {
-    (statement (comment)?)+
+    (Binding newline | newline)* (expression newline*)?
 }
 
 @top Statement {
-    statement
+    expression
 }
-
-s<term> { op<term> }
-kw<term> { @specialize[@name={term}]<identifier, term> }
-
-arith<term> { op<term> }
-logic<term> { op<term> }
-
 
 commaSep<content> {
-    "" | content ("," content?)*
+    "" | content ("," content)*
 }
-LambdaExpr { s<"{"> s<"|"> commaSep<VariableName> s<"|"> expression s<"}"> }
 
-binop<operator> {
-    expression operator expression
+Binding { VariableName { identifier } "=" expression }
+
+LambdaArgs {
+    "" | LambdaParameter { identifier } ("," LambdaParameter { identifier })*
+}
+
+AccessIdentifier {
+    Field { identifier } (!deref "." Field { identifier })*
 }
 
 expression {
     String
     | Boolean
     | Number
-    | Void
-    | LambdaExpr
-    | IfExpr { if expression then expression else expression }
-    | InvokeExpr { FunctionName s<"("> commaSep<expression> s<")"> }
-    | ParenExpr { s<"("> expression s<")"> }
-    | VariableName
-    | BinOp { 
-        binop<!shift logic<"||">>
-        | binop<!shift logic<"&&">>
+    | LambdaExpr { "{" "|" LambdaArgs "|" expression "}" }
+    | IfExpr { if expression then expression !else else expression }
+    | ParenExpr { "(" expression ")" }
+    | AccessExpr { AccessIdentifier }
+    | CallExpr { expression !call "(" commaSep<Argument { expression }> ")" }
+    | Void { !deref "()" }
+    | UnaryExpr { !unary ArithOp { "-" } expression }
+    | LogicExpr { 
+          expression !or     LogicOp    { "||" }  expression
+        | expression !and    LogicOp    { "&&" }  expression
+        | expression !rel    LogicOp    { ">" }   expression
+        | expression !rel    LogicOp    { "<" }   expression
+        | expression !rel    LogicOp    { "<=" }  expression
+        | expression !rel    LogicOp    { ">=" }  expression
+        | expression !rel    LogicOp    { "==" }  expression
     }
-    | FunOp { 
-        binop<!plus @specialize[@name="ControlOp"]<syntax, "|>">>
+    | ControlExpr { 
+          expression !times  ControlOp  { "|>" }  expression
     }
-    | ArithOp { 
-        binop<!times arith<"*">>
-        | binop<!times arith<"/">>
-        | binop<!times arith<"^">>
-        | binop<!plus arith<"+">>
-        | binop<!plus arith<"-">>
+    | ArithExpr { 
+          expression !times  ArithOp    { "*" }   expression
+        | expression !times  ArithOp    { "/" }   expression
+        | expression !exp    ArithOp    { "^" }   expression
+        | expression !plus   ArithOp    { "+" }   expression
+        | expression !plus   ArithOp    { "-" }   expression
     }
 }
 
 
-Assignment { identifier s<"="> expression "\n" }
 
-statement {
-    Assignment
-    | expression "\n"
-}
+Boolean { @specialize[@name="Boolean"]<identifier, "true" | "false"> }
 
-FunctionName { identifier }
-VariableName { identifier }
-
-Boolean { @specialize[@name=boolean]<identifier, "true" | "false"> }
-
+kw<term> { @specialize[@name={term}]<identifier, term> }
 if { kw<"if"> }
 then { kw<"then"> }
 else { kw<"else"> }
 
+@skip { spaces | comment }
+
 @tokens {
 
+    spaces[@export] { $[ ]+ }
+    newline[@export] { $[\n] }
+    comment { "#" ![\n]* }
+    
     String { '"' ![\"]* '"' }
+    "{" "}" "(" ")" "," "." "="[@name="Equals"]
 
-    Void { "()" }
-
-    syntax { "|" "{" "}" "(" ")" }
-
-    op[@name=term]<term> { term }
-
+    "|>" "||" "&&" "*" "/" "^" "+" "-" "==" ">" "<" "<=" ">="
+    
     identifierChar { @asciiLetter | $[_$\u{a1}-\u{10ffff}] }
-
     word { identifierChar (identifierChar | @digit)* }
-
     identifier { word }
 
     Number { 
         (@digit (@digit)* ("." (@digit)*)? | "." (@digit)*) (("e" | "E") ("+" | "-")? (@digit)+)?
     }
     
-    comment { "#" ![\n]* }
+    @precedence { "." Number }
 
 }

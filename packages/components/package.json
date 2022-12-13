@@ -3,6 +3,7 @@
   "version": "0.6.0-alpha.1",
   "license": "MIT",
   "dependencies": {
+    "@codemirror/theme-one-dark": "^6.1.0",
     "@floating-ui/react-dom": "^1.0.0",
     "@floating-ui/react-dom-interactions": "^0.13.0",
     "@headlessui/react": "^1.7.4",

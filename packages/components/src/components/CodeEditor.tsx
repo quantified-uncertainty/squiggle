@@ -1,20 +1,21 @@
 import _ from "lodash";
 import React, { FC, useEffect, useMemo, useRef } from "react";
 
-import { LRLanguage, LanguageSupport } from "@codemirror/language";
 import { parser } from "./grammar/squiggle";
 
-import { basicSetup } from "codemirror";
 
+import { basicSetup } from "codemirror";
+import { LRLanguage, LanguageSupport, HighlightStyle, syntaxHighlighting } from "@codemirror/language";
 import { EditorState } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 import { defaultKeymap } from "@codemirror/commands";
-import { completeAnyWord } from "@codemirror/autocomplete";
-import { styleTags, tags as t } from "@lezer/highlight";
+import { completeAnyWord, snippetCompletion } from "@codemirror/autocomplete";
+import { styleTags, tags as t, Tag } from "@lezer/highlight";
 
 import { SqLocation } from "@quri/squiggle-lang";
-import { parseArgs } from "util";
-import CodeMirror, { useCodeMirror } from "@uiw/react-codemirror";
+import { oneDark } from "@codemirror/theme-one-dark";
+import { printTree } from "./grammar/lezer-debug";
+
 
 const sqLang = LRLanguage.define({
   name: "squiggle",
@@ -25,31 +26,32 @@ const sqLang = LRLanguage.define({
         "then": t.keyword,
         "else": t.keyword,
         
-        "=": t.definitionOperator,
-        
-        "arith": t.arithmeticOperator,
-        "|": t.bitwiseOperator,
-        
-        "||": t.bitwiseOperator,
-        "&&": t.bitwiseOperator,
+        "Equals": t.definitionOperator,
 
-        "|>": t.controlOperator,
-        
         ArithOp: t.arithmeticOperator,
-        BinOp: t.logicOperator,
-        FunOp: t.controlOperator,
+        LogicOp: t.logicOperator,
+        ControlOp: t.controlOperator,
+        
+        "{ }": t.brace,
+        "[ ]": t.squareBracket,
+        "( )": t.paren,
+        "|": t.squareBracket,
+        ",": t.separator,
         
         Syntax: t.annotation,
         Boolean: t.bool,
         Number: t.integer,
         String: t.string,
         Comment: t.comment,
-        Void: t.atom,
-        Identifier: t.variableName,
-        Assignment: t.definitionOperator,
+        Void: t.escape,
+
+        FunctionName: t.function(t.propertyName),
+
+        LambdaSyntax: t.blockComment,
+
         VariableName: t.variableName,
-        FunctionName: t.bool,
-        LambdaExpr: t.definitionKeyword
+        Field: t.variableName,
+        LambdaParameter: t.variableName,
       }),
     ],
   }),
@@ -92,9 +94,27 @@ export const CodeEditor: FC<CodeEditorProps> = ({
         "&": {
           height: `${height}px`,
         },
-      });
+        ".cm-line span": {
+          position: "relative",
+        },
+        ".cm-line span:hover::after": {
+          position: "absolute",
+          bottom: "100%",
+          left: 0,
+          background: "black",
+          color: "white",
+          border: "solid 2px",
+          borderRadius: "5px",
+          content: "var(--tags)",
+          width: `max-content`,
+          padding: "1px 4px",
+          zIndex: 10,
+          pointerEvents: "none",
+        }
+      }, {dark: true});
 
       const updateListener = EditorView.updateListener.of((update) => {
+        // console.log(printTree(squiggle().language.parser.parse(update.state.doc.toString()), update.state.doc.toString(), { }))
         onChange(update.state.doc.toString());
       });
 
@@ -105,8 +125,11 @@ export const CodeEditor: FC<CodeEditorProps> = ({
           updateListener,
           keymap.of(defaultKeymap),
           theme,
-          sqLang.data.of({ autocomplete: completeAnyWord }),
+          oneDark,
           squiggle(),
+          sqLang.data.of({ autocomplete: [
+            snippetCompletion("{ |${args}| ${body} }", {label: "lambda"}),
+          ] }),
         ],
       });
       const view = new EditorView({ state, parent: editor.current });
