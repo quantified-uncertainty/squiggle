@@ -1,5 +1,5 @@
 import * as React from "react";
-import { SqDistribution, SqPlot } from "@quri/squiggle-lang";
+import { SqDistribution } from "@quri/squiggle-lang";
 import {
   MultiDistributionChart,
   MultiDistributionChartProps,

@@ -7,7 +7,7 @@ import {
 } from "../library/registry/frTypes";
 import { Float } from "../dist/SymbolicDist";
 import { FnFactory } from "../library/registry/helpers";
-import { result, Ok, sequence, fmap, errMap } from "../utility/result";
+import * as Result from "../utility/result";
 import { vPlot, LabeledDistribution } from "../value";
 import { REOther } from "../reducer/ErrorMessage";
 
@@ -31,18 +31,20 @@ export const library = [
           ]),
         ],
         ([{ dists }]) => {
-          let distributionResult: result<LabeledDistribution, string>[] =
-            dists.map(({ name, value }) =>
-              fmap(
-                typeof value === "number" ? Float.make(value) : Ok(value),
-                (distribution) => ({ name, distribution })
-              )
-            );
-          let distributionResultMapped = errMap(
-            sequence(distributionResult),
-            (errMessage) => REOther(errMessage)
-          );
-          return fmap(distributionResultMapped, (distributions) =>
+          let distributions: LabeledDistribution[] = [];
+          dists.forEach(({ name, value }) => {
+            if (typeof value === "number") {
+              const deltaResult = Float.make(value);
+              if (deltaResult.ok === false) {
+                return Result.Error(REOther(deltaResult.value));
+              } else {
+                distributions.push({ name, distribution: deltaResult.value });
+              }
+            } else {
+              distributions.push({ name, distribution: value });
+            }
+          });
+          return Result.Ok(
             vPlot({
               distributions,
             })
