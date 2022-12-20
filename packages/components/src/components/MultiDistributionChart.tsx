@@ -2,8 +2,8 @@ import * as React from "react";
 import * as yup from "yup";
 import {
   resultMap,
-  SqRecord,
   SqDistributionTag,
+  SqPlot,
   result,
   SqDistributionError,
   SqDistribution,
@@ -19,7 +19,6 @@ import {
 import { flattenResult } from "../lib/utility";
 import { hasMassBelowZero } from "../lib/distributionUtils";
 import { NumberShower } from "./NumberShower";
-import { Plot, parsePlot, LabeledDistribution } from "../lib/plotParser";
 import { XIcon } from "@heroicons/react/solid";
 import { Tooltip } from "./ui/Tooltip";
 
@@ -35,11 +34,24 @@ export type DistributionChartSettings = yup.InferType<
   typeof distributionSettingsSchema
 >;
 
-export function makePlot(record: SqRecord): Plot | void {
-  const plotResult = parsePlot(record);
-  if (plotResult.ok) {
-    return plotResult.value;
-  }
+interface LabeledDistribution {
+  name: string;
+  distribution: SqDistribution;
+  opacity: number;
+}
+
+interface Plot {
+  distributions: LabeledDistribution[];
+  showLegend: boolean;
+  colorScheme: string;
+}
+
+export function sqPlotToPlot(sqPlot: SqPlot): Plot {
+  return {
+    distributions: sqPlot.distributions.map((x) => ({ ...x, opacity: 0.3 })),
+    colorScheme: "category10",
+    showLegend: true,
+  };
 }
 
 export type MultiDistributionChartProps = {
@@ -57,7 +69,7 @@ export const MultiDistributionChart: React.FC<MultiDistributionChartProps> = ({
 }) => {
   const [containerRef, containerMeasure] = useMeasure<HTMLDivElement>();
 
-  const distributions: LabeledDistribution[] = plot.distributions;
+  const distributions = plot.distributions;
 
   let shapes = flattenResult(
     distributions.map((x) =>
@@ -106,21 +118,25 @@ export const MultiDistributionChart: React.FC<MultiDistributionChartProps> = ({
 
   return (
     <div ref={containerRef}>
-      {
-        settings.logX && shapes.value.some(hasMassBelowZero) ? (
-          <ErrorAlert heading="Log Domain Error">
-            Cannot graph distribution with negative values on logarithmic scale.
-          </ErrorAlert>
-        ) : containerMeasure.width ? (
-          <Vega
-            spec={spec}
-            data={vegaData}
-            width={containerMeasure.width - 22}
-            height={chartHeight}
-            actions={settings.vegaActions}
-          />
-        ) : null /* width can be 0 initially or when we're on the server side; that's fine, we don't want to pre-render charts with broken width */
-      }
+      {settings.logX && shapes.value.some(hasMassBelowZero) ? (
+        <ErrorAlert heading="Log Domain Error">
+          Cannot graph distribution with negative values on logarithmic scale.
+        </ErrorAlert>
+      ) : (
+        <figure>
+          {
+            containerMeasure.width ? (
+              <Vega
+                spec={spec}
+                data={vegaData}
+                width={containerMeasure.width - 22}
+                height={chartHeight}
+                actions={settings.vegaActions}
+              />
+            ) : null /* width can be 0 initially or when we're on the server side; that's fine, we don't want to pre-render charts with broken width */
+          }{" "}
+        </figure>
+      )}
       <div className="flex justify-center">
         {settings.showSummary && (
           <SummaryTable plot={plot} environment={environment} />

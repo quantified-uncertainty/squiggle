@@ -1,8 +1,11 @@
 import React from "react";
-import { SqDistributionTag, SqValue } from "@quri/squiggle-lang";
+import { SqDistributionTag, SqValue, SqPlot } from "@quri/squiggle-lang";
 import { NumberShower } from "../NumberShower";
 import { DistributionChart } from "../DistributionChart";
-import { MultiDistributionChart, makePlot } from "../MultiDistributionChart";
+import {
+  sqPlotToPlot,
+  MultiDistributionChart,
+} from "../MultiDistributionChart";
 import { FunctionChart } from "../FunctionChart";
 import clsx from "clsx";
 import { VariableBox } from "./VariableBox";
@@ -192,57 +195,53 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
         </VariableBox>
       );
     }
+    case "Plot":
+      const plot: SqPlot = value.value;
+      return (
+        <VariableBox
+          value={value}
+          heading="Plot"
+          renderSettingsMenu={({ onChange }) => {
+            let disableLogX = plot.distributions.some((x) => {
+              let pointSet = x.distribution.pointSet(environment);
+              return pointSet.ok && hasMassBelowZero(pointSet.value.asShape());
+            });
+            return (
+              <ItemSettingsMenu
+                value={value}
+                onChange={onChange}
+                disableLogX={disableLogX}
+                withFunctionSettings={false}
+              />
+            );
+          }}
+        >
+          {(settings) => {
+            return (
+              <MultiDistributionChart
+                plot={sqPlotToPlot(plot)}
+                environment={environment}
+                chartHeight={settings.chartHeight}
+                settings={settings.distributionChartSettings}
+              />
+            );
+          }}
+        </VariableBox>
+      );
     case "Record":
-      const plot = makePlot(value.value);
-      if (plot) {
-        return (
-          <VariableBox
-            value={value}
-            heading="Plot"
-            renderSettingsMenu={({ onChange }) => {
-              let disableLogX = plot.distributions.some((x) => {
-                let pointSet = x.distribution.pointSet(environment);
-                return (
-                  pointSet.ok && hasMassBelowZero(pointSet.value.asShape())
-                );
-              });
-              return (
-                <ItemSettingsMenu
-                  value={value}
-                  onChange={onChange}
-                  disableLogX={disableLogX}
-                  withFunctionSettings={false}
-                />
-              );
-            }}
-          >
-            {(settings) => {
-              return (
-                <MultiDistributionChart
-                  plot={plot}
-                  environment={environment}
-                  chartHeight={settings.chartHeight}
-                  settings={settings.distributionChartSettings}
-                />
-              );
-            }}
-          </VariableBox>
-        );
-      } else {
-        return (
-          <VariableList value={value} heading="Record">
-            {() => {
-              const entries = value.value.entries();
-              if (!entries.length) {
-                return <div className="text-slate-400">Empty record</div>;
-              }
-              return entries.map(([key, r]) => (
-                <ExpressionViewer key={key} value={r} />
-              ));
-            }}
-          </VariableList>
-        );
-      }
+      return (
+        <VariableList value={value} heading="Record">
+          {() => {
+            const entries = value.value.entries();
+            if (!entries.length) {
+              return <div className="text-slate-400">Empty record</div>;
+            }
+            return entries.map(([key, r]) => (
+              <ExpressionViewer key={key} value={r} />
+            ));
+          }}
+        </VariableList>
+      );
     case "Array":
       return (
         <VariableList value={value} heading="Array">
