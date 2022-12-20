@@ -133,13 +133,10 @@ export const vVoid = () => new VVoid();
 export type LabeledDistribution = {
   name: string;
   distribution: BaseDist;
-  opacity: number;
 };
 
 export type Plot = {
   distributions: LabeledDistribution[];
-  showLegend: boolean;
-  colorScheme: string;
 };
 
 class VPlot {

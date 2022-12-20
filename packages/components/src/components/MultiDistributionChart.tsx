@@ -2,12 +2,11 @@ import * as React from "react";
 import * as yup from "yup";
 import {
   resultMap,
-  SqRecord,
   SqDistributionTag,
+  SqPlot,
   result,
   SqDistributionError,
   SqDistribution,
-  SqPlot,
   Env,
 } from "@quri/squiggle-lang";
 import { Vega } from "react-vega";
@@ -35,8 +34,28 @@ export type DistributionChartSettings = yup.InferType<
   typeof distributionSettingsSchema
 >;
 
+interface LabeledDistribution {
+  name: string;
+  distribution: SqDistribution;
+  opacity: number;
+}
+
+interface Plot {
+  distributions: LabeledDistribution[];
+  showLegend: boolean;
+  colorScheme: string;
+}
+
+export function sqPlotToPlot(sqPlot: SqPlot): Plot {
+  return {
+    distributions: sqPlot.distributions.map((x) => ({ ...x, opacity: 0.3 })),
+    colorScheme: "category10",
+    showLegend: true,
+  };
+}
+
 export type MultiDistributionChartProps = {
-  plot: SqPlot;
+  plot: Plot;
   environment: Env;
   chartHeight?: number;
   settings: DistributionChartSettings;
@@ -142,7 +161,7 @@ const Cell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 type SummaryTableProps = {
-  plot: SqPlot;
+  plot: Plot;
   environment: Env;
 };
 

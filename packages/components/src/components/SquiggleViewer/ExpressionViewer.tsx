@@ -2,7 +2,10 @@ import React from "react";
 import { SqDistributionTag, SqValue, SqPlot } from "@quri/squiggle-lang";
 import { NumberShower } from "../NumberShower";
 import { DistributionChart } from "../DistributionChart";
-import { MultiDistributionChart } from "../MultiDistributionChart";
+import {
+  sqPlotToPlot,
+  MultiDistributionChart,
+} from "../MultiDistributionChart";
 import { FunctionChart } from "../FunctionChart";
 import clsx from "clsx";
 import { VariableBox } from "./VariableBox";
@@ -216,7 +219,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
           {(settings) => {
             return (
               <MultiDistributionChart
-                plot={plot}
+                plot={sqPlotToPlot(plot)}
                 environment={environment}
                 chartHeight={settings.chartHeight}
                 settings={settings.distributionChartSettings}

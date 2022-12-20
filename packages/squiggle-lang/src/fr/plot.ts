@@ -35,7 +35,7 @@ export const library = [
             dists.map(({ name, value }) =>
               fmap(
                 typeof value === "number" ? Float.make(value) : Ok(value),
-                (distribution) => ({ name, distribution, opacity: 0.3 })
+                (distribution) => ({ name, distribution })
               )
             );
           let distributionResultMapped = errMap(
@@ -45,8 +45,6 @@ export const library = [
           return fmap(distributionResultMapped, (distributions) =>
             vPlot({
               distributions,
-              showLegend: true,
-              colorScheme: "category10",
             })
           );
         }

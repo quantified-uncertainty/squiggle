@@ -22,15 +22,13 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
 }) => {
   return (
     <MultiDistributionChart
-      plot={
-        {
-          distributions: [
-            { name: "default", distribution: distribution, opacity: 1 },
-          ],
-          showLegend: false,
-          colorScheme: "blues",
-        } as unknown as SqPlot
-      }
+      plot={{
+        distributions: [
+          { name: "default", distribution: distribution, opacity: 1 },
+        ],
+        showLegend: false,
+        colorScheme: "blues",
+      }}
       environment={environment}
       chartHeight={chartHeight}
       settings={settings}
