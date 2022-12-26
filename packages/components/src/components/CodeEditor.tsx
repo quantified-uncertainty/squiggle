@@ -21,6 +21,34 @@ import { SqLocation } from "@quri/squiggle-lang";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { printTree } from "./grammar/lezer-debug";
 
+// From basic setup
+import {
+  lineNumbers,
+  highlightActiveLineGutter,
+  highlightSpecialChars,
+  drawSelection,
+  dropCursor,
+  rectangularSelection,
+  crosshairCursor,
+  highlightActiveLine,
+} from "@codemirror/view";
+import { history, historyKeymap, indentWithTab } from "@codemirror/commands";
+import { highlightSelectionMatches, searchKeymap } from "@codemirror/search";
+import {
+  closeBrackets,
+  autocompletion,
+  closeBracketsKeymap,
+  completionKeymap,
+} from "@codemirror/autocomplete";
+import { lintKeymap } from "@codemirror/lint";
+import {
+  foldGutter,
+  indentOnInput,
+  defaultHighlightStyle,
+  bracketMatching,
+  foldKeymap,
+} from "@codemirror/language";
+
 const sqLang = LRLanguage.define({
   name: "squiggle",
   parser: parser.configure({
@@ -101,6 +129,10 @@ export const CodeEditor: FC<CodeEditorProps> = ({
   const id = useMemo(() => _.uniqueId(), []);
   const editor = useRef<HTMLDivElement>(null);
 
+  if (editor.current != null) {
+    
+  }
+
   useEffect(() => {
     if (editor.current != null) {
       const theme = EditorView.theme({
@@ -146,10 +178,39 @@ export const CodeEditor: FC<CodeEditorProps> = ({
       const state = EditorState.create({
         doc: value,
         extensions: [
-          // lint,
-          basicSetup,
+          ((showGutter) ? [
+            lineNumbers(),
+            highlightActiveLine(),
+            highlightActiveLineGutter(),
+            foldGutter(),  
+          ] : []),
+          
+          highlightSpecialChars(),
+          history(),
+          drawSelection(),
+          dropCursor(),
+          EditorState.allowMultipleSelections.of(true),
+          indentOnInput(),
+          syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+          bracketMatching(),
+          closeBrackets(),
+          autocompletion(),
+          // rectangularSelection(),
+          // crosshairCursor(),
+          highlightSelectionMatches(),
+
+          keymap.of([
+            ...closeBracketsKeymap,
+            ...defaultKeymap,
+            ...searchKeymap,
+            ...historyKeymap,
+            ...foldKeymap,
+            ...completionKeymap,
+            ...lintKeymap,
+            indentWithTab,
+          ]),
+
           updateListener,
-          keymap.of(defaultKeymap),
           submitListener,
           theme,
           squiggle(),
