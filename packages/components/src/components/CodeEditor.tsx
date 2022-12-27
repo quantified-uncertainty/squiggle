@@ -1,5 +1,5 @@
 import _ from "lodash";
-import React, { FC, useEffect, useMemo, useRef } from "react";
+import React, { FC, useEffect, useMemo, useRef, useReducer } from "react";
 
 import { parser } from "./grammar/squiggle";
 
@@ -10,11 +10,16 @@ import {
   HighlightStyle,
   syntaxHighlighting,
 } from "@codemirror/language";
-import { EditorState } from "@codemirror/state";
+import {
+  EditorState,
+  Facet,
+  TransactionSpec,
+  Compartment,
+} from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 import { defaultKeymap } from "@codemirror/commands";
 import { snippetCompletion } from "@codemirror/autocomplete";
-import { linter } from "@codemirror/lint";
+import { linter, Diagnostic, setDiagnostics } from "@codemirror/lint";
 import { styleTags, tags as t } from "@lezer/highlight";
 
 import { SqLocation } from "@quri/squiggle-lang";
@@ -102,6 +107,7 @@ const sqLang = LRLanguage.define({
     },
   },
 });
+
 function squiggle() {
   return new LanguageSupport(sqLang, []);
 }
@@ -117,74 +123,36 @@ interface CodeEditorProps {
   errorLocations?: SqLocation[];
 }
 
+const compTheme = new Compartment();
+const compLang = new Compartment();
+const compUpdateListener = new Compartment();
+const compSubmitListener = new Compartment();
+
 export const CodeEditor: FC<CodeEditorProps> = ({
   value,
   onChange,
   onSubmit,
+  width,
   height,
   oneLine = false,
   showGutter = false,
   errorLocations = [],
 }) => {
-  const id = useMemo(() => _.uniqueId(), []);
   const editor = useRef<HTMLDivElement>(null);
-
-  if (editor.current != null) {
-    
-  }
-
-  useEffect(() => {
-    if (editor.current != null) {
-      const theme = EditorView.theme({
-        "&": {
-          height: `${height}px`,
-        },
-      });
-
-      // Needs propagating the state upwards
-      // const lint = linter(() =>
-      //   errorLocations.map((loc) => ({
-      //     from: loc.start.offset,
-      //     to: loc.end.offset,
-      //     severity: "error",
-      //     message: "Syntax error!",
-      //   }))
-      // );
-
-      const updateListener = EditorView.updateListener.of((update) => {
-        console.log(
-          printTree(
-            squiggle().language.parser.parse(update.state.doc.toString()),
-            update.state.doc.toString(),
-            {}
-          )
-        );
-        onChange(update.state.doc.toString());
-      });
-
-      const submitListener = keymap.of(
-        onSubmit
-          ? [
-              {
-                key: "Ctrl-s",
-                run: () => {
-                  onSubmit();
-                  return true;
-                },
-              },
-            ]
-          : []
-      );
-      const state = EditorState.create({
+  const editorView = useRef<EditorView | null>(null);
+  const state = useMemo(
+    () =>
+      EditorState.create({
         doc: value,
         extensions: [
-          ((showGutter) ? [
-            lineNumbers(),
-            highlightActiveLine(),
-            highlightActiveLineGutter(),
-            foldGutter(),  
-          ] : []),
-          
+          showGutter
+            ? [
+                lineNumbers(),
+                highlightActiveLine(),
+                highlightActiveLineGutter(),
+                foldGutter(),
+              ]
+            : [],
           highlightSpecialChars(),
           history(),
           drawSelection(),
@@ -198,7 +166,6 @@ export const CodeEditor: FC<CodeEditorProps> = ({
           // rectangularSelection(),
           // crosshairCursor(),
           highlightSelectionMatches(),
-
           keymap.of([
             ...closeBracketsKeymap,
             ...defaultKeymap,
@@ -209,14 +176,21 @@ export const CodeEditor: FC<CodeEditorProps> = ({
             ...lintKeymap,
             indentWithTab,
           ]),
-
-          updateListener,
-          submitListener,
-          theme,
-          squiggle(),
+          compUpdateListener.of([]),
+          compSubmitListener.of([]),
+          compTheme.of([]),
+          compLang.of(squiggle()),
         ],
-      });
+      }),
+    []
+  );
+  
+  useEffect(() => {
+    if (editor.current != null && state != null) {
+      // Needs propagating the state upwards
+      console.log("recreate view");
       const view = new EditorView({ state, parent: editor.current });
+      editorView.current = view;
 
       return () => {
         view.destroy();
@@ -224,5 +198,69 @@ export const CodeEditor: FC<CodeEditorProps> = ({
     }
   }, []);
 
-  return <div id={id} onSubmit={onSubmit} ref={editor}></div>;
+  useEffect(() => {
+    editorView.current?.dispatch({
+      effects: compUpdateListener.reconfigure(
+        EditorView.updateListener.of((update) => {
+          console.log(
+            printTree(
+              squiggle().language.parser.parse(update.state.doc.toString()),
+              update.state.doc.toString(),
+              {}
+            )
+          );
+          onChange(update.state.doc.toString());
+        })
+      ),
+    });
+  }, [onChange]);
+  
+  useEffect(() => {
+    editorView.current?.dispatch({
+      effects: compTheme.reconfigure(
+        EditorView.theme({
+          "&": {
+            ...(width !== null ? { width: `${width}px` } : {}),
+            height: `${height}px`,
+          },
+        })
+      ),
+    });
+  }, [width, height]);
+
+  useEffect(() => {
+    editorView.current?.dispatch({
+      effects: compSubmitListener.reconfigure(
+        keymap.of(
+          onSubmit
+            ? [
+                {
+                  key: "Ctrl-s",
+                  run: () => {
+                    onSubmit();
+                    return true;
+                  },
+                },
+              ]
+            : []
+        )
+      ),
+    });
+  }, [onSubmit]);
+
+  useEffect(() => {
+    editorView.current?.dispatch(
+      setDiagnostics(
+        editorView.current.state,
+        errorLocations.map((loc) => ({
+          from: loc.start.offset,
+          to: loc.end.offset,
+          severity: "error",
+          message: "Syntax error!",
+        }))
+      )
+    );
+  }, [errorLocations]);
+
+  return <div ref={editor}></div>;
 };
