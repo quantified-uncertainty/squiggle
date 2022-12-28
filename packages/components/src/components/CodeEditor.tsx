@@ -184,7 +184,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({
       }),
     []
   );
-  
+
   useEffect(() => {
     if (editor.current != null && state != null) {
       // Needs propagating the state upwards
