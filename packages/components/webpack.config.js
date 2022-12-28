@@ -8,6 +8,10 @@ module.exports = {
   module: {
     rules: [
       {
+        test: /\.grammar$/,
+        loader: "lezer-loader",
+      },
+      {
         test: /\.tsx?$/,
         loader: "ts-loader",
         options: { projectReferences: true },

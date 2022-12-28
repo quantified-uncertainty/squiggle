@@ -1,30 +1,16 @@
 import _ from "lodash";
-import React, { FC, useEffect, useMemo, useRef, useReducer } from "react";
+import React, { FC, useEffect, useMemo, useRef } from "react";
 
-import { parser } from "./grammar/squiggle";
-
-import { basicSetup } from "codemirror";
-import {
-  LRLanguage,
-  LanguageSupport,
-  HighlightStyle,
-  syntaxHighlighting,
-} from "@codemirror/language";
-import {
-  EditorState,
-  Facet,
-  TransactionSpec,
-  Compartment,
-} from "@codemirror/state";
+import { syntaxHighlighting } from "@codemirror/language";
+import { EditorState, Compartment } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 import { defaultKeymap } from "@codemirror/commands";
-import { snippetCompletion } from "@codemirror/autocomplete";
-import { linter, Diagnostic, setDiagnostics } from "@codemirror/lint";
-import { styleTags, tags as t } from "@lezer/highlight";
+import { setDiagnostics } from "@codemirror/lint";
 
 import { SqLocation } from "@quri/squiggle-lang";
-import { oneDark } from "@codemirror/theme-one-dark";
 import { printTree } from "./grammar/lezer-debug";
+
+import squiggle from "./grammar/squiggle";
 
 // From basic setup
 import {
@@ -33,8 +19,6 @@ import {
   highlightSpecialChars,
   drawSelection,
   dropCursor,
-  rectangularSelection,
-  crosshairCursor,
   highlightActiveLine,
 } from "@codemirror/view";
 import { history, historyKeymap, indentWithTab } from "@codemirror/commands";
@@ -54,64 +38,6 @@ import {
   foldKeymap,
 } from "@codemirror/language";
 
-const sqLang = LRLanguage.define({
-  name: "squiggle",
-  parser: parser.configure({
-    props: [
-      styleTags({
-        if: t.keyword,
-        then: t.keyword,
-        else: t.keyword,
-
-        Equals: t.definitionOperator,
-
-        ArithOp: t.arithmeticOperator,
-        LogicOp: t.logicOperator,
-        ControlOp: t.controlOperator,
-
-        "{ }": t.brace,
-        "[ ]": t.squareBracket,
-        "( )": t.paren,
-        "|": t.squareBracket,
-        ",": t.separator,
-
-        Syntax: t.annotation,
-        Boolean: t.bool,
-        Number: t.integer,
-        String: t.string,
-        Comment: t.comment,
-        Void: t.escape,
-
-        FunctionName: t.function(t.propertyName),
-
-        LambdaSyntax: t.blockComment,
-
-        VariableName: t.variableName,
-        Field: t.variableName,
-        LambdaParameter: t.variableName,
-      }),
-    ],
-  }),
-  languageData: {
-    commentTokens: {
-      line: "#",
-    },
-    autocomplete: [
-      snippetCompletion("{ |${args}| ${body} ", {
-        label: "{",
-        detail: "lambda function",
-      }),
-    ],
-    closeBrackets: {
-      brackets: ['"', "'", "(", "{", "|"],
-    },
-  },
-});
-
-function squiggle() {
-  return new LanguageSupport(sqLang, []);
-}
-
 interface CodeEditorProps {
   value: string;
   onChange: (value: string) => void;
@@ -124,7 +50,7 @@ interface CodeEditorProps {
 }
 
 const compTheme = new Compartment();
-const compLang = new Compartment();
+const compGutter = new Compartment();
 const compUpdateListener = new Compartment();
 const compSubmitListener = new Compartment();
 
@@ -140,19 +66,12 @@ export const CodeEditor: FC<CodeEditorProps> = ({
 }) => {
   const editor = useRef<HTMLDivElement>(null);
   const editorView = useRef<EditorView | null>(null);
+  const languageSupport = useMemo(squiggle, []);
   const state = useMemo(
     () =>
       EditorState.create({
         doc: value,
         extensions: [
-          showGutter
-            ? [
-                lineNumbers(),
-                highlightActiveLine(),
-                highlightActiveLineGutter(),
-                foldGutter(),
-              ]
-            : [],
           highlightSpecialChars(),
           history(),
           drawSelection(),
@@ -176,10 +95,11 @@ export const CodeEditor: FC<CodeEditorProps> = ({
             ...lintKeymap,
             indentWithTab,
           ]),
+          compGutter.of([]),
           compUpdateListener.of([]),
           compSubmitListener.of([]),
           compTheme.of([]),
-          compLang.of(squiggle()),
+          languageSupport,
         ],
       }),
     []
@@ -187,8 +107,6 @@ export const CodeEditor: FC<CodeEditorProps> = ({
 
   useEffect(() => {
     if (editor.current != null && state != null) {
-      // Needs propagating the state upwards
-      console.log("recreate view");
       const view = new EditorView({ state, parent: editor.current });
       editorView.current = view;
 
@@ -196,7 +114,22 @@ export const CodeEditor: FC<CodeEditorProps> = ({
         view.destroy();
       };
     }
-  }, []);
+  }, [state]);
+
+  useEffect(() => {
+    editorView.current?.dispatch({
+      effects: compGutter.reconfigure(
+        showGutter
+          ? [
+              lineNumbers(),
+              highlightActiveLine(),
+              highlightActiveLineGutter(),
+              foldGutter(),
+            ]
+          : []
+      ),
+    });
+  }, [showGutter]);
 
   useEffect(() => {
     editorView.current?.dispatch({
@@ -204,7 +137,9 @@ export const CodeEditor: FC<CodeEditorProps> = ({
         EditorView.updateListener.of((update) => {
           console.log(
             printTree(
-              squiggle().language.parser.parse(update.state.doc.toString()),
+              languageSupport.language.parser.parse(
+                update.state.doc.toString()
+              ),
               update.state.doc.toString(),
               {}
             )
@@ -214,7 +149,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({
       ),
     });
   }, [onChange]);
-  
+
   useEffect(() => {
     editorView.current?.dispatch({
       effects: compTheme.reconfigure(
@@ -249,15 +184,21 @@ export const CodeEditor: FC<CodeEditorProps> = ({
   }, [onSubmit]);
 
   useEffect(() => {
+    const docLength = editorView.current
+      ? editorView.current.state.doc.length
+      : 0;
+
     editorView.current?.dispatch(
       setDiagnostics(
         editorView.current.state,
-        errorLocations.map((loc) => ({
-          from: loc.start.offset,
-          to: loc.end.offset,
-          severity: "error",
-          message: "Syntax error!",
-        }))
+        errorLocations
+          .filter((f) => f.end.offset < docLength)
+          .map((loc) => ({
+            from: loc.start.offset,
+            to: loc.end.offset,
+            severity: "error",
+            message: "Syntax error!",
+          }))
       )
     );
   }, [errorLocations]);

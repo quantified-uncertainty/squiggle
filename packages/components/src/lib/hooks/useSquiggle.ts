@@ -5,7 +5,6 @@ import {
   SqRecord,
   SqValue,
   Env,
-  parse,
 } from "@quri/squiggle-lang";
 import { useEffect, useMemo } from "react";
 import { JsImports, jsImportsToSquiggleCode } from "../jsImports";
@@ -69,7 +68,6 @@ export const useSquiggle = (args: SquiggleArgs): ResultAndBindings => {
         fullContinues = continues.concat(importSourceName(sourceName));
       }
       project.setContinues(sourceName, fullContinues);
-      console.log(parse(args.code))
       project.run(sourceName);
       const result = project.getResult(sourceName);
       const bindings = project.getBindings(sourceName);
