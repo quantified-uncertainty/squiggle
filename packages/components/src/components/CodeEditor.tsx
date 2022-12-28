@@ -1,4 +1,3 @@
-import _ from "lodash";
 import React, { FC, useEffect, useMemo, useRef } from "react";
 
 import { syntaxHighlighting } from "@codemirror/language";
@@ -8,7 +7,7 @@ import { defaultKeymap } from "@codemirror/commands";
 import { setDiagnostics } from "@codemirror/lint";
 
 import { SqLocation } from "@quri/squiggle-lang";
-import { printTree } from "./grammar/lezer-debug";
+// import { printTree } from "./grammar/lezer-debug";
 
 import squiggle from "./grammar/squiggle";
 
