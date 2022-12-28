@@ -135,15 +135,15 @@ export const CodeEditor: FC<CodeEditorProps> = ({
     editorView.current?.dispatch({
       effects: compUpdateListener.reconfigure(
         EditorView.updateListener.of((update) => {
-          console.log(
-            printTree(
-              languageSupport.language.parser.parse(
-                update.state.doc.toString()
-              ),
-              update.state.doc.toString(),
-              {}
-            )
-          );
+          // console.log(
+          //   printTree(
+          //     languageSupport.language.parser.parse(
+          //       update.state.doc.toString()
+          //     ),
+          //     update.state.doc.toString(),
+          //     {}
+          //   )
+          // );
           onChange(update.state.doc.toString());
         })
       ),
