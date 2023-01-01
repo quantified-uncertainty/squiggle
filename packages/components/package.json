@@ -5,7 +5,7 @@
   "dependencies": {
     "@floating-ui/react-dom": "^1.0.0",
     "@floating-ui/react-dom-interactions": "^0.13.0",
-    "@headlessui/react": "^1.7.4",
+    "@headlessui/react": "^1.7.7",
     "@heroicons/react": "^1.0.6",
     "@hookform/resolvers": "^2.9.10",
     "@quri/squiggle-lang": "^0.6.0-alpha.0",
