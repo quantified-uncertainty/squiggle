@@ -129,7 +129,7 @@
     "@types/glob": "^8.0.0",
     "@types/node": "18.x",
     "@types/vscode": "^1.70.0",
-    "esbuild": "^0.15.13",
+    "esbuild": "^0.16.12",
     "glob": "^8.0.3",
     "js-yaml": "^4.1.0",
     "typescript": "^4.8.4",
