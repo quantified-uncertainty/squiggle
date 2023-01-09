@@ -5,7 +5,7 @@
     "nodeclean": "rm -r node_modules && rm -r packages/*/node_modules"
   },
   "devDependencies": {
-    "prettier": "^2.7.1",
+    "prettier": "^2.8.1",
     "turbo": "^1.6.3"
   },
   "workspaces": [

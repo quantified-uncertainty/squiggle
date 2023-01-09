@@ -13,7 +13,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "chalk": "^5.1.2",
+    "chalk": "^5.2.0",
     "chokidar": "^3.5.3",
     "commander": "^9.4.1",
     "fs": "^0.0.1-security",
