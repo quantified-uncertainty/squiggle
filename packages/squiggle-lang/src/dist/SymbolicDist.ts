@@ -875,6 +875,19 @@ export class Metalog extends SymbolicDist {
     }
   }
 
+  static fitFromCDF(
+    points: {x: number, q:number}[],
+    terms?: number
+  ): result<Metalog, string> {
+    let termCount = terms ?? points.length
+    if (termCount > 1) {
+      return Ok(new Metalog({a: metalog.fitMetalog(points.map(({x, q}) => ({x, y: q})), termCount)}))
+    }
+    else {
+      return Result.Error("CDF must have more than 1 point");
+    }
+  }
+
   toString() {
     return `(${this.a})`;
   }

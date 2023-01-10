@@ -17,6 +17,7 @@ import * as E_A from "../../src/utility/E_A";
 import { createSparkline } from "../../src/utility/sparklines";
 import { Session } from "inspector"
 import * as fs from "fs";
+import { metalogBasisFunction } from "@quri/metalog";
 
 describe("(Symbolic) normalize", () => {
   test.each([-1e8, -1e-2, 0.0, 1e-4, 1e16])(
@@ -304,4 +305,13 @@ describe("Metalog", () => {
         .forEach(([p, pp]) => expect(p).toBeCloseTo(pp, 3))
     )
   });
+
+  test("Fails with too little terms", () => {
+      expect(() => mkMetalog([])).toThrowError();
+      expect(() => mkMetalog([2])).toThrowError();
+      expect(SymbolicDist.Metalog.fitFromCDF([{x: 0, q: 0.1}]).ok).toBe(false);
+      expect(SymbolicDist.Metalog.fitFromCDF([{x: 0, q: 0.1}, {x: 1, q: 0.5}, {x: 2, q: 0.7}], 1).ok).toBe(false);
+      expect(SymbolicDist.Metalog.fitFromCDF([{x: 0, q: 0.1}, {x: 1, q: 0.5}, {x: 2, q: 0.7}], 0).ok).toBe(false);
+      expect(SymbolicDist.Metalog.fitFromCDF([{x: 0, q: 0.1}, {x: 1, q: 0.5}, {x: 2, q: 0.7}], -1).ok).toBe(false);
+  })
 });

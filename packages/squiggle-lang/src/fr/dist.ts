@@ -216,11 +216,23 @@ export const library: FRFunction[] = [
   }),
   maker.make({
     name: "metalog",
-    examples: [`metalog([5, 2, -5])`],
+    examples: [`metalog([5, 2, 2])`, `metalog([{x: -2, q: 0.1}, {x: -1, q: 0.3}, {x: 0, q: 0.9}])`, `metalog([{x: -2, q: 0.1}, {x: -1, q: 0.3}, {x: 0, q: 0.9}], 2)`],
     definitions: [
       makeDefinition<number[]>("metalog", [frArray(frNumber)], ([a]) =>
         Result.errMap(
           Result.fmap(SymbolicDist.Metalog.make({ a }), vDist),
+          (x) => REOperationError(new OtherOperationError(x))
+        )
+      ),
+      makeDefinition<{x: number, q: number}[]>("metalog", [frArray(frRecord(["x", frNumber], ["q", frNumber]))], ([points]) =>
+        Result.errMap(
+          Result.fmap(SymbolicDist.Metalog.fitFromCDF(points), vDist),
+          (x) => REOperationError(new OtherOperationError(x))
+        )
+      ),
+      makeDefinition<{x: number, q: number}[], number>("metalog", [frArray(frRecord(["x", frNumber], ["q", frNumber])), frNumber], ([points, terms]) =>
+        Result.errMap(
+          Result.fmap(SymbolicDist.Metalog.fitFromCDF(points, terms), vDist),
           (x) => REOperationError(new OtherOperationError(x))
         )
       ),
