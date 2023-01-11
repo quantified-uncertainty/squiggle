@@ -1,6 +1,6 @@
 {
   "name": "@quri/squiggle-lang",
-  "version": "0.6.0-alpha.1",
+  "version": "0.6.0",
   "homepage": "https://squiggle-language.com",
   "license": "MIT",
   "scripts": {
