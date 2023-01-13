@@ -77,14 +77,15 @@
   "scripts": {
     "start": "cross-env REACT_APP_FAST_REFRESH=false && start-storybook -p 6006 -s public",
     "build:cjs": "rm -rf dist/src && rm -f dist/tsconfig.tsbuildinfo && tsc -b",
+    "build:esm": "tsc --project ./tsconfig.esm.json",
     "build:css": "postcss ./src/styles/main.css -o ./dist/main.css",
     "build:storybook": "build-storybook -s public",
-    "build": "yarn run build:cjs && yarn run build:css && yarn run build:storybook",
+    "build": "yarn run build:cjs && yarn build:esm && yarn run build:css && yarn run build:storybook",
     "bundle": "webpack",
     "all": "yarn bundle && yarn build",
     "lint": "prettier --check . && eslint --ignore-path .gitignore .",
     "format": "prettier --write .",
-    "prepack": "yarn run build:cjs && yarn run bundle",
+    "prepack": "yarn run build:cjs && yarn build:esm",
     "test": "jest",
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
     "test:profile": "node --cpu-prof node_modules/.bin/jest --runInBand"
@@ -126,5 +127,6 @@
   },
   "source": "./src/index.ts",
   "main": "./dist/src/index.js",
+  "module": "./dist/esm/src/index.js",
   "types": "./dist/src/index.d.ts"
 }

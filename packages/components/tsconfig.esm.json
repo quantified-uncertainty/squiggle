@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@quri/squiggle-lang": ["../squiggle-lang/src"]
+    },
+    "module": "esnext",
+    "jsx": "react",
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "noImplicitAny": false,
+    "esModuleInterop": true,
+    "removeComments": true,
+    "strict": true,
+    "moduleResolution": "node",
+    "preserveConstEnums": true,
+    "composite": true,
+    "outDir": "./dist/esm",
+    "declarationDir": "./dist",
+    "declaration": true,
+    "sourceMap": true
+  },
+  "files": [
+    "src/vega-specs/spec-distributions.json",
+    "src/vega-specs/spec-percentiles.json",
+    "src/vega-specs/spec-line-chart.json"
+  ],
+  "target": "es5",
+  "include": ["src/**/*", "src/*"],
+  "exclude": ["node_modules", "**/*.spec.ts", "webpack.config.js"],
+  "references": [
+    {
+      "path": "../squiggle-lang"
+    }
+  ]
+}
