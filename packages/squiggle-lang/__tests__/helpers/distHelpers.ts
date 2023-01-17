@@ -31,4 +31,6 @@ export const mkBernoulli = (p: number) =>
   unpackResult(SymbolicDist.Bernoulli.make(p));
 export const mkMetalog = (a: number[]) =>
   unpackResult(SymbolicDist.Metalog.make({ a }));
+export const mkMetalogCdf = (points: {x: number, q:number}[], terms?: number) =>
+  unpackResult(SymbolicDist.Metalog.fitFromCDF(points, terms));
 export const mkDelta = (x: number) => unpackResult(SymbolicDist.Float.make(x));

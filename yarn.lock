@@ -2678,12 +2678,13 @@
   resolved "https://registry.yarnpkg.com/@polka/url/-/url-1.0.0-next.21.tgz#5de5a2385a35309427f6011992b544514d559aa1"
   integrity sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==
 
-"@quri/metalog@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@quri/metalog/-/metalog-1.1.0.tgz#8c56cff4a54469672032bbfe047851cd8f1fdea0"
-  integrity sha512-JZntFRiG7w4TTXiZ/iAMuSdGA8GrTbowVNDOzt4PDv5+OwM1v0hpipPvmcpMLfXVQZ+J1RcvduEMdQhXsUGqjw==
+"@quri/metalog@1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@quri/metalog/-/metalog-1.1.1.tgz#6f3059021db71c108d891fd632c5afe7d49d9d07"
+  integrity sha512-5Rlp9zYYX/AP5Xm63s+E3wsmNrrvpZOpzXq0+ITJzBnE49gC3VZk1g9NQc0GjN14pD+tNu/9n+IEZbx+l+KK8Q==
   dependencies:
     mathjs "^11.5.0"
+    ulp "^1.0.1"
 
 "@react-hook/latest@^1.0.2":
   version "1.0.3"
@@ -4412,7 +4413,7 @@
     "@types/history" "^4.7.11"
     "@types/react" "*"
 
-"@types/react@*", "@types/react@^18.0.21":
+"@types/react@*", "@types/react@^18.0.1", "@types/react@^18.0.21":
   version "18.0.26"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.26.tgz#8ad59fc01fef8eaf5c74f4ea392621749f0b7917"
   integrity sha512-hCR3PJQsAIXyxhTNSiDFY//LhnMZWpNNr5etoCqx/iUfGc5gXWtQR2Phl908jVR6uPXacojQWTg4qRpkxTuGug==
@@ -15271,7 +15272,7 @@ react-vega@^7.6.0:
     prop-types "^15.8.1"
     vega-embed "^6.5.1"
 
-react@^18.1.0:
+react@^18.0.0, react@^18.1.0:
   version "18.2.0"
   resolved "https://registry.yarnpkg.com/react/-/react-18.2.0.tgz#555bd98592883255fa00de14f1151a917b5d77d5"
   integrity sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==
@@ -17653,6 +17654,11 @@ uglify-js@^3.1.4:
   version "3.17.4"
   resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-3.17.4.tgz#61678cf5fa3f5b7eb789bb345df29afb8257c22c"
   integrity sha512-T9q82TJI9e/C1TAxYvfb16xO120tMVFZrGA3f9/P4424DNu6ypK103y0GPFVa17yotwSyZW5iYXgjYHkGrJW/g==
+
+ulp@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/ulp/-/ulp-1.0.1.tgz#e3a4a5b4de9bd0faae63e4544ee63a0d9bd34bc5"
+  integrity sha512-fXPzKroJ6XJXrepjd4AIHfeN84qUtZfLojIPYExlF/rm/BWb8/2o64lsGEKSMSwjH9X6VKmDv9+zbd+ZNHa4nw==
 
 unbox-primitive@^1.0.2:
   version "1.0.2"

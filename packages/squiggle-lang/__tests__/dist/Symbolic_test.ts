@@ -2,6 +2,7 @@ import {
   mkBernoulli,
   mkBeta,
   mkMetalog,
+  mkMetalogCdf,
   mkCauchy,
   mkExponential,
   mkLogistic,
@@ -18,6 +19,7 @@ import { createSparkline } from "../../src/utility/sparklines";
 import { Session } from "inspector"
 import * as fs from "fs";
 import { metalogBasisFunction } from "@quri/metalog";
+import { defaultEnv } from "../../src/dist/env";
 
 describe("(Symbolic) normalize", () => {
   test.each([-1e8, -1e-2, 0.0, 1e-4, 1e16])(
@@ -313,5 +315,16 @@ describe("Metalog", () => {
       expect(SymbolicDist.Metalog.fitFromCDF([{x: 0, q: 0.1}, {x: 1, q: 0.5}, {x: 2, q: 0.7}], 1).ok).toBe(false);
       expect(SymbolicDist.Metalog.fitFromCDF([{x: 0, q: 0.1}, {x: 1, q: 0.5}, {x: 2, q: 0.7}], 0).ok).toBe(false);
       expect(SymbolicDist.Metalog.fitFromCDF([{x: 0, q: 0.1}, {x: 1, q: 0.5}, {x: 2, q: 0.7}], -1).ok).toBe(false);
+  })
+
+  test("CDF is close to fit", () => {
+      const metalogDist = mkMetalogCdf([{x: 0, q: 0.2}, {x: 2, q: 0.5}, {x: 3, q: 0.9}])
+      expect(metalogDist.cdf(0)).toBeCloseTo(0.2)
+      expect(metalogDist.cdf(2)).toBeCloseTo(0.5)
+      expect(metalogDist.cdf(3)).toBeCloseTo(0.9)
+  })
+  test("Can convert to pointset", () => {
+      const dist = mkMetalogCdf([{x: -1, q: 0.05}, {x: 4, q: 0.2}, {x: 6, q: 0.9}]);
+      expect(dist.toPointSetDist(defaultEnv).ok).toBe(true);
   })
 });
