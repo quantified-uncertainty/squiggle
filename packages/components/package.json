@@ -84,7 +84,7 @@
     "build:css": "postcss ./src/styles/main.css -o ./dist/main.css",
     "build:lezer": "cd ./src/components/grammar; mkdir -p generated; cd generated; lezer-generator ../squiggle.grammar --output squiggle.ts",
     "build:storybook": "build-storybook -s public",
-    "build": "yarn run build:cjs && yarn run build:css && yarn run build:storybook",
+    "build": "yarn run build:cjs && yarn run build:css && yarn run build:lezer && yarn run build:storybook",
     "bundle": "webpack",
     "all": "yarn bundle && yarn build",
     "lint": "prettier --check . && eslint --ignore-path .gitignore .",
