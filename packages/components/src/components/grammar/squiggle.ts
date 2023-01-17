@@ -61,4 +61,4 @@ function squiggle() {
   return new LanguageSupport(squiggleLang, []);
 }
 
-export default squiggle
+export default squiggle;
