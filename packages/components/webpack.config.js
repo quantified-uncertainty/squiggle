@@ -1,5 +1,4 @@
 const path = require("path");
-
 module.exports = {
   mode: "production",
   devtool: "source-map",
@@ -7,10 +6,6 @@ module.exports = {
   entry: "./src/index.ts",
   module: {
     rules: [
-      {
-        test: /\.grammar$/,
-        loader: "lezer-loader",
-      },
       {
         test: /\.tsx?$/,
         loader: "ts-loader",

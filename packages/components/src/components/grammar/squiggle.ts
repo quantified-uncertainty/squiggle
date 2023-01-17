@@ -1,7 +1,7 @@
 import { LRLanguage, LanguageSupport } from "@codemirror/language";
 import { styleTags, tags as t } from "@lezer/highlight";
 import { snippetCompletion } from "@codemirror/autocomplete";
-import parser from "./squiggle.grammar";
+import { parser } from "./generated/squiggle";
 
 const squiggleLang = LRLanguage.define({
   name: "squiggle",
