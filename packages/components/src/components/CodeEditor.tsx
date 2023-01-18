@@ -84,7 +84,10 @@ export const CodeEditor: FC<CodeEditorProps> = ({
           autocompletion(),
           // rectangularSelection(),
           // crosshairCursor(),
-          highlightSelectionMatches(),
+          highlightSelectionMatches({
+            wholeWords: true,
+            highlightWordAroundCursor: false, // Weird on numbers
+          }),
           keymap.of([
             ...closeBracketsKeymap,
             ...defaultKeymap,
