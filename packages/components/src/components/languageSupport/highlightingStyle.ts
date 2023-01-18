@@ -1,14 +1,16 @@
 import { HighlightStyle } from "@codemirror/language";
 import { tags } from "@lezer/highlight";
 
+// TODO: Freeze color theme after experimentation
+
 const clampComponent = (a: number) => (a < 255 ? (a >= 0 ? a : 0) : 255);
-const saturation = 1;
+const saturation = 0.7;
 const lightness = -10;
 
 const colors = [
   "#bea066", // numbers
   "#ba5a61", // names
-  "#4797a1", // operators
+  "#8797a1", // operators
   "#d4d4d4", // invalid
   "#8e949f", // separators
   "#68707f", // comments
@@ -90,6 +92,7 @@ export const lightThemeHighlightingStyle = HighlightStyle.define([
       tags.link,
       tags.special(tags.string),
     ],
+    fontWeight: "bold",
     color: operators,
   },
   { tag: [tags.meta, tags.comment], color: comments },

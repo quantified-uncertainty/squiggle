@@ -89,7 +89,7 @@ else { kw<"else"> }
     String { '"' ![\"]* '"' | "'" ![\']* "'" }
     "{" "}" "(" ")" "," "." "="[@name="Equals"]
 
-    "|>" "||" "&&" "*" "/" "^" "+" "-" "==" ">" "<" "<=" ">="
+    Operator { "|>" "||" "&&" "*" "/" "^" "+" "-" "==" ">" "<" "<=" ">=" }
     
     identifierChar { @asciiLetter | $[_$\u{a1}-\u{10ffff}] }
     word { identifierChar (identifierChar | @digit)* }
