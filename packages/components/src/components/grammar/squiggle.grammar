@@ -39,6 +39,7 @@ expression {
     String
     | Boolean
     | Number
+    | RecordExpr { "{" commaSep<Entry { Field {identifier} ":" expression } > "}" }
     | LambdaExpr { "{" "|" LambdaArgs "|" expression "}" }
     | IfExpr { if expression then expression !else else expression }
     | ParenExpr { "(" expression ")" }
