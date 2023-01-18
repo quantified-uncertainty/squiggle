@@ -52,7 +52,7 @@ const squiggleLang = LRLanguage.define({
       }),
     ],
     closeBrackets: {
-      brackets: ['"', "'", "(", "{", "|"],
+      brackets: ['"', "'", "(", "{"],
     },
   },
 });

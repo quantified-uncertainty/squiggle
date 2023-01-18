@@ -82,7 +82,7 @@
     "start": "cross-env REACT_APP_FAST_REFRESH=false && start-storybook -p 6006 -s public",
     "build:cjs": "rm -rf dist/src && rm -f dist/tsconfig.tsbuildinfo && tsc -b",
     "build:css": "postcss ./src/styles/main.css -o ./dist/main.css",
-    "build:lezer": "cd ./src/components/grammar; mkdir -p generated; cd generated; lezer-generator ../squiggle.grammar --output squiggle.ts",
+    "build:lezer": "cd ./src/components/languageSupport; mkdir -p generated; cd generated; lezer-generator ../squiggle.grammar --output squiggle.ts",
     "build:storybook": "build-storybook -s public",
     "build": "yarn run build:lezer && yarn run build:cjs && yarn run build:css && yarn run build:storybook",
     "bundle": "webpack",

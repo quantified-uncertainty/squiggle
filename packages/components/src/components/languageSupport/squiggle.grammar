@@ -39,7 +39,7 @@ expression {
     String
     | Boolean
     | Number
-    | RecordExpr { "{" commaSep<Entry { Field {identifier} ":" expression } > "}" }
+    | RecordExpr { "{" commaSep<Entry { Field {identifier} ":" expression }> "}" }
     | LambdaExpr { "{" "|" LambdaArgs "|" expression "}" }
     | IfExpr { if expression then expression !else else expression }
     | ParenExpr { "(" expression ")" }
@@ -78,13 +78,13 @@ if { kw<"if"> }
 then { kw<"then"> }
 else { kw<"else"> }
 
-@skip { spaces | comment }
+@skip { spaces | Comment }
 
 @tokens {
 
     spaces[@export] { $[ ]+ }
     newline[@export] { $[\n] }
-    comment { "#" ![\n]* }
+    Comment { "#" ![\n]* }
     
     String { '"' ![\"]* '"' | "'" ![\']* "'" }
     "{" "}" "(" ")" "," "." "="[@name="Equals"]

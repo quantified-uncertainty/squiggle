@@ -1,15 +1,15 @@
 import React, { FC, useEffect, useMemo, useRef } from "react";
 
+import squiggle from "./languageSupport/squiggle";
+
+import { SqLocation } from "@quri/squiggle-lang";
+import { printTree } from "./languageSupport/lezerDebug";
+
 import { syntaxHighlighting } from "@codemirror/language";
 import { EditorState, Compartment } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 import { defaultKeymap } from "@codemirror/commands";
 import { setDiagnostics } from "@codemirror/lint";
-
-import { SqLocation } from "@quri/squiggle-lang";
-// import { printTree } from "./grammar/lezer-debug";
-
-import squiggle from "./grammar/squiggle";
 
 // From basic setup
 import {
@@ -36,6 +36,7 @@ import {
   bracketMatching,
   foldKeymap,
 } from "@codemirror/language";
+import { lightThemeHighlightingStyle } from "./languageSupport/highlightingStyle";
 
 interface CodeEditorProps {
   value: string;
@@ -77,7 +78,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({
           dropCursor(),
           EditorState.allowMultipleSelections.of(true),
           indentOnInput(),
-          syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+          syntaxHighlighting(lightThemeHighlightingStyle, { fallback: true }),
           bracketMatching(),
           closeBrackets(),
           autocompletion(),
