@@ -14,10 +14,15 @@
 }
 
 @top Program {
-    (Binding newline | newline)* (expression newline*)?
+    (NonEmptyProgram)?
 }
 
-@top Statement {
+
+NonEmptyProgram {
+    (expression | (Binding (newline | semicolon) | newline)* (expression)) newline*?
+}
+
+Statement {
     expression
 }
 
@@ -39,6 +44,7 @@ expression {
     String
     | Boolean
     | Number
+    | BlockExpr { "{" NonEmptyProgram "}" }
     | RecordExpr { "{" commaSep<Entry { Field {identifier} ":" expression }> "}" }
     | LambdaExpr { "{" "|" LambdaArgs "|" expression "}" }
     | IfExpr { if expression then expression !else else expression }
@@ -84,12 +90,13 @@ else { kw<"else"> }
 
     spaces[@export] { $[ ]+ }
     newline[@export] { $[\n] }
-    Comment { "#" ![\n]* }
+    semicolon[@export] { $[;] }
+    Comment { ( "#" | "//" ) ![\n]* }
     
     String { '"' ![\"]* '"' | "'" ![\']* "'" }
     "{" "}" "(" ")" "," "." "="[@name="Equals"]
 
-    Operator { "|>" "||" "&&" "*" "/" "^" "+" "-" "==" ">" "<" "<=" ">=" }
+    Operator[@export] { "|>" "||" "&&" "*" "/" "^" "+" "-" "==" ">" "<" "<=" ">=" }
     
     identifierChar { @asciiLetter | $[_$\u{a1}-\u{10ffff}] }
     word { identifierChar (identifierChar | @digit)* }
@@ -100,5 +107,6 @@ else { kw<"else"> }
     }
     
     @precedence { "." Number }
+    @precedence { Comment "/"  }
 
 }
