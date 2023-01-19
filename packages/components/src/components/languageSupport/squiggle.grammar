@@ -36,13 +36,13 @@ Statement {
 }
 
 commaSep<content> {
-    "" | content ("," content)*
+    () | content ("," content)*
 }
 
 Binding { VariableName { identifier } "=" expression }
 
 LambdaArgs {
-    "" | LambdaParameter { identifier } ("," LambdaParameter { identifier })*
+    () | LambdaParameter { identifier } ("," LambdaParameter { identifier })*
 }
 
 FunDeclaration { FunctionName[@dynamicPrecedence=0] { identifier }  ~fieldAmbig "(" LambdaArgs ")" "=" expression }
@@ -61,7 +61,7 @@ expression {
     | IfExpr { if expression then expression !else else expression }
     | ParenExpr { "(" expression ")" }
     | AccessExpr[@dynamicPrecedence=1] { AccessIdentifier ~fieldAmbig }
-    | CallExpr { expression !call "(" commaSep<Argument { expression }> ")" }
+    | CallExpr { expression !call ("(" commaSep<Argument { expression }> ")"| "()") }
     | ArrayExpr { "[" commaSep<expression> "]" }
     | Void { !deref "()" }
     | UnaryExpr { !unary ArithOp { "-" } expression }
