@@ -1,5 +1,6 @@
 
 @precedence {
+    func @cut,
     deref,
     call,
     unary @right,
@@ -19,7 +20,15 @@
 
 
 NonEmptyProgram {
-    (expression | (Binding (newline | semicolon) | newline)* (expression)) newline*?
+    (expression | (
+        (     Binding
+            | FunDeclaration
+            (newline | semicolon)
+        )
+        | (newline | semicolon)
+        )*
+        (expression)
+    ) newline*?
 }
 
 Statement {
@@ -36,8 +45,10 @@ LambdaArgs {
     "" | LambdaParameter { identifier } ("," LambdaParameter { identifier })*
 }
 
+FunDeclaration { FunctionName[@dynamicPrecedence=0] { identifier }  ~fieldAmbig "(" LambdaArgs ")" "=" expression }
+
 AccessIdentifier {
-    Field { identifier } (!deref "." Field { identifier })*
+    Field { identifier } (!deref "." Record { identifier })*
 }
 
 expression {
@@ -49,12 +60,12 @@ expression {
     | LambdaExpr { "{" "|" LambdaArgs "|" expression "}" }
     | IfExpr { if expression then expression !else else expression }
     | ParenExpr { "(" expression ")" }
-    | AccessExpr { AccessIdentifier }
+    | AccessExpr[@dynamicPrecedence=1] { AccessIdentifier ~fieldAmbig }
     | CallExpr { expression !call "(" commaSep<Argument { expression }> ")" }
     | ArrayExpr { "[" commaSep<expression> "]" }
     | Void { !deref "()" }
     | UnaryExpr { !unary ArithOp { "-" } expression }
-    | LogicExpr { 
+    | LogicExpr {
           expression !or     LogicOp    { "||" }  expression
         | expression !and    LogicOp    { "&&" }  expression
         | expression !rel    LogicOp    { ">" }   expression
@@ -63,10 +74,10 @@ expression {
         | expression !rel    LogicOp    { ">=" }  expression
         | expression !rel    LogicOp    { "==" }  expression
     }
-    | ControlExpr { 
+    | ControlExpr {
           expression !times  ControlOp  { "|>" }  expression
     }
-    | ArithExpr { 
+    | ArithExpr {
           expression !times  ArithOp    { "*" }   expression
         | expression !times  ArithOp    { "/" }   expression
         | expression !exp    ArithOp    { "^" }   expression
@@ -92,20 +103,20 @@ else { kw<"else"> }
     newline[@export] { $[\n] }
     semicolon[@export] { $[;] }
     Comment { ( "#" | "//" ) ![\n]* }
-    
+
     String { '"' ![\"]* '"' | "'" ![\']* "'" }
     "{" "}" "(" ")" "," "." "="[@name="Equals"]
 
     Operator[@export] { "|>" "||" "&&" "*" "/" "^" "+" "-" "==" ">" "<" "<=" ">=" }
-    
+
     identifierChar { @asciiLetter | $[_$\u{a1}-\u{10ffff}] }
     word { identifierChar (identifierChar | @digit)* }
     identifier { word }
 
-    Number { 
+    Number {
         (@digit (@digit)* ("." (@digit)*)? | "." (@digit)*) (("e" | "E") ("+" | "-")? (@digit)+)?
     }
-    
+
     @precedence { "." Number }
     @precedence { Comment "/"  }
 
