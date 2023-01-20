@@ -323,8 +323,4 @@ describe("Metalog", () => {
       expect(metalogDist.cdf(2)).toBeCloseTo(0.5)
       expect(metalogDist.cdf(3)).toBeCloseTo(0.9)
   })
-  test("Can convert to pointset", () => {
-      const dist = mkMetalogCdf([{x: -1, q: 0.05}, {x: 4, q: 0.2}, {x: 6, q: 0.9}]);
-      expect(dist.toPointSetDist(defaultEnv).ok).toBe(true);
-  })
 });

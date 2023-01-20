@@ -867,11 +867,15 @@ export class Metalog extends SymbolicDist {
   }: {
     a: number[];
   }): result<Metalog, string> {
-    if (a.length > 1) {
+    const validationResult = metalog.validate(a);
+    if(validationResult === metalog.MetalogValidationStatus.Success){
       return Ok(new Metalog({a}))
     }
-    else {
+    else if(validationResult === metalog.MetalogValidationStatus.NotEnoughParamaters){
       return Result.Error("Terms array must have more than one element");
+    }
+    else {
+      return Result.Error("Invalid combination of a (pdf is negative in parts)");
     }
   }
 
@@ -881,7 +885,12 @@ export class Metalog extends SymbolicDist {
   ): result<Metalog, string> {
     let termCount = terms ?? points.length
     if (termCount > 1) {
-      return Ok(new Metalog({a: metalog.fitMetalog(points.map(({x, q}) => ({x, y: q})), termCount)}))
+      const a = metalog.fitMetalog(points.map(({x, q}) => ({x, y: q})), termCount);
+      if(a !== undefined){
+        return Ok(new Metalog({a }))
+      } else {
+        return Result.Error("Could not fit metalog from CDF points");
+      }
     }
     else {
       return Result.Error("CDF must have more than 1 point");
