@@ -4,14 +4,14 @@
     deref,
     call,
     unary @right,
-    control @left,
     exp @left,
     times @left,
     plus @left,
-    else @right,
     rel @left,
     and @left,
-    or @left
+    or @left,
+    control @right,
+    else @right
 }
 
 @top Program {
@@ -23,17 +23,15 @@ NonEmptyProgram {
     (expression | (
         (     Binding
             | FunDeclaration
-            (newline | semicolon)
-        )
-        | (newline | semicolon)
+            | semicolon)
         )*
         (expression)
-    ) newline*?
+    ) 
 }
 
-Statement {
-    expression
-}
+// Statement {
+//     expression
+// }
 
 commaSep<content> {
     () | content ("," content)*
@@ -51,7 +49,7 @@ AccessIdentifier {
     Field { identifier } (!deref "." Record { identifier })*
 }
 
-expression {
+expression[@isGroup="Expression"] {
     String
     | Boolean
     | Number
@@ -64,25 +62,26 @@ expression {
     | CallExpr { expression !call ("(" commaSep<Argument { expression }> ")"| "()") }
     | ArrayExpr { "[" commaSep<expression> "]" }
     | Void { !deref "()" }
-    | UnaryExpr { !unary ArithOp { "-" } expression }
+    | UnaryExpr { !unary ArithOp<"-"> expression }
     | LogicExpr {
-          expression !or     LogicOp    { "||" }  expression
-        | expression !and    LogicOp    { "&&" }  expression
-        | expression !rel    LogicOp    { ">" }   expression
-        | expression !rel    LogicOp    { "<" }   expression
-        | expression !rel    LogicOp    { "<=" }  expression
-        | expression !rel    LogicOp    { ">=" }  expression
-        | expression !rel    LogicOp    { "==" }  expression
+          expression !or     LogicOp<"||">  expression
+        | expression !and    LogicOp<"&&">  expression
+        | expression !rel    LogicOp<">">   expression
+        | expression !rel    LogicOp<"<">   expression
+        | expression !rel    LogicOp<"<=">  expression
+        | expression !rel    LogicOp<">=">  expression
+        | expression !rel    LogicOp<"==">  expression
     }
     | ControlExpr {
-          expression !times  ControlOp  { "|>" }  expression
+          expression !control  ControlOp<"|>">  expression
     }
     | ArithExpr {
-          expression !times  ArithOp    { "*" }   expression
-        | expression !times  ArithOp    { "/" }   expression
-        | expression !exp    ArithOp    { "^" }   expression
-        | expression !plus   ArithOp    { "+" }   expression
-        | expression !plus   ArithOp    { "-" }   expression
+          expression !times  ( ArithOp<"*"> | DotArithOp<".*"> )  expression
+        | expression !times  ( ArithOp<"/"> | DotArithOp<"./"> )  expression
+        | expression !exp    ( ArithOp<"^"> | DotArithOp<".^"> )  expression
+        | expression !plus   ( ArithOp<"+"> | DotArithOp<".+"> )  expression
+        | expression !plus   ( ArithOp<"-"> | DotArithOp<".-"> )  expression
+        | expression !plus     @specialize[@name="ArithOp"]<identifier, "to">                      expression
     }
 }
 
@@ -94,30 +93,42 @@ kw<term> { @specialize[@name={term}]<identifier, term> }
 if { kw<"if"> }
 then { kw<"then"> }
 else { kw<"else"> }
+@skip { spaces | newline | Comment | BlockComment }
 
-@skip { spaces | Comment }
+@local tokens {
+    blockCommentEnd { "*/" }
+    blockCommentNewline { "\n" }
+    @else blockCommentContent
+}
+@skip {} {
+    BlockComment[@name="Comment"] { '/*' (blockCommentContent | blockCommentNewline)* blockCommentEnd }
+}
 
 @tokens {
 
+    Comment { ( "#" | "//" ) ![\n]* }
     spaces[@export] { $[ ]+ }
     newline[@export] { $[\n] }
     semicolon[@export] { $[;] }
-    Comment { ( "#" | "//" ) ![\n]* }
 
     String { '"' ![\"]* '"' | "'" ![\']* "'" }
     "{" "}" "(" ")" "," "." "="[@name="Equals"]
 
-    Operator[@export] { "|>" "||" "&&" "*" "/" "^" "+" "-" "==" ">" "<" "<=" ">=" }
+    ArithOp<expr> { expr }
+    DotArithOp[@name="ArithOp"]<expr> { expr }
+    ControlOp<expr> { expr }
+    LogicOp<expr> { expr }
 
     identifierChar { @asciiLetter | $[_$\u{a1}-\u{10ffff}] }
     word { identifierChar (identifierChar | @digit)* }
     identifier { word }
 
     Number {
-        (@digit (@digit)* ("." (@digit)*)? | "." (@digit)*) (("e" | "E") ("+" | "-")? (@digit)+)?
+        (@digit (@digit)* ("." (@digit)*)? | "." (@digit)*) (("e" | "E") ("+" | "-")? (@digit)+)? ("k" | "m" | "M" | "B" | "T")?
     }
-
-    @precedence { "." Number }
-    @precedence { Comment "/"  }
+    
+    @precedence { identifier ArithOp }
+    @precedence { DotArithOp "." Number }
+    @precedence { Comment '/*' ArithOp  }
 
 }
