@@ -199,6 +199,10 @@ export class Normal extends SymbolicDist {
     return jstat.normal.mean(this._mean, this._stdev);
   }
 
+  stdev(): Result.result<number, DistError> {
+    return Ok(this._stdev);
+  }
+
   static from90PercentCI(low: number, high: number): result<Normal, string> {
     const mean = E_A_Floats.mean([low, high]);
     const stdev = (high - low) / (2 * normal95confidencePoint);
@@ -546,6 +550,9 @@ export class Lognormal extends SymbolicDist {
   }
   mean() {
     return jstat.lognormal.mean(this.mu, this.sigma);
+  }
+  stdev(): Result.result<number, DistError> {
+    return Ok(Math.sqrt((Math.exp(this.sigma * this.sigma) - 1) * Math.exp(2 * this.mu + this.sigma * this.sigma)));
   }
 
   static from90PercentCI(low: number, high: number) {
@@ -898,6 +905,9 @@ export class Gamma extends SymbolicDist {
   }
   mean() {
     return jstat.gamma.mean(this.shape, this.scale);
+  }
+  stdev(): Result.result<number, DistError> {
+    return Ok(Math.sqrt(this.shape) * this.scale);
   }
 }
 
