@@ -46,7 +46,7 @@ LambdaArgs {
 FunDeclaration { FunctionName[@dynamicPrecedence=0] { identifier }  ~fieldAmbig "(" LambdaArgs ")" "=" expression }
 
 AccessIdentifier {
-    Field { identifier } (!deref "." Record { identifier })*
+    Field { identifier } (!deref "." Field { identifier })*
 }
 
 expression[@isGroup="Expression"] {

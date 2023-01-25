@@ -31,11 +31,11 @@ const squiggleLang = LRLanguage.define({
         Comment: t.comment,
         Void: t.escape,
 
-        FunctionName: t.function(t.propertyName),
+        FunctionName: t.function(t.variableName),
 
         LambdaSyntax: t.blockComment,
 
-        VariableName: t.variableName,
+        VariableName: t.constant(t.variableName),
         Field: t.variableName,
         LambdaParameter: t.variableName,
       }),
