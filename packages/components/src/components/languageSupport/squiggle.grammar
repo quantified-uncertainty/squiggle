@@ -60,6 +60,7 @@ expression[@isGroup="Expression"] {
     | ParenExpr { "(" expression ")" }
     | AccessExpr[@dynamicPrecedence=1] { AccessIdentifier ~fieldAmbig }
     | CallExpr { expression !call ("(" commaSep<Argument { expression }> ")"| "()") }
+    | KVAccessExpr { expression !call ("[" Key { expression } "]") }
     | ArrayExpr { "[" commaSep<expression> "]" }
     | Void { !deref "()" }
     | UnaryExpr { !unary ArithOp<"-"> expression }
@@ -81,7 +82,7 @@ expression[@isGroup="Expression"] {
         | expression !exp    ( ArithOp<"^"> | DotArithOp<".^"> )  expression
         | expression !plus   ( ArithOp<"+"> | DotArithOp<".+"> )  expression
         | expression !plus   ( ArithOp<"-"> | DotArithOp<".-"> )  expression
-        | expression !plus     @specialize[@name="ArithOp"]<identifier, "to">                      expression
+        | expression !plus     @extend[@name="ArithOp"]<identifier, "to">                      expression
     }
 }
 
@@ -124,10 +125,9 @@ else { kw<"else"> }
     identifier { word }
 
     Number {
-        (@digit (@digit)* ("." (@digit)*)? | "." (@digit)*) (("e" | "E") ("+" | "-")? (@digit)+)? ("k" | "m" | "M" | "B" | "T")?
+        (@digit (@digit)* ("." (@digit)*)? | "." (@digit)*) (("e" | "E") ("+" | "-")? (@digit)+)? ("B" | "m" | "k" | "M" | "G" | "T")?
     }
     
-    @precedence { identifier ArithOp }
     @precedence { DotArithOp "." Number }
     @precedence { Comment '/*' ArithOp  }
 
