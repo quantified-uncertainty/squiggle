@@ -55,7 +55,7 @@ expression[@isGroup="Expression"] {
     | Number
     | BlockExpr { "{" NonEmptyProgram "}" }
     | RecordExpr { "{" commaSep<Entry { Field {identifier} ":" expression }> "}" }
-    | LambdaExpr { "{" "|" LambdaArgs "|" expression "}" }
+    | LambdaExpr { "{" "|" LambdaArgs "|" NonEmptyProgram "}" }
     | IfExpr { if expression then expression !else else expression }
     | ParenExpr { "(" expression ")" }
     | AccessExpr[@dynamicPrecedence=1] { AccessIdentifier ~fieldAmbig }
