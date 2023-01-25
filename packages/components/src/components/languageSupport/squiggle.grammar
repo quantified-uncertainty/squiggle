@@ -54,7 +54,7 @@ expression[@isGroup="Expression"] {
     | Boolean
     | Number
     | BlockExpr { "{" NonEmptyProgram "}" }
-    | RecordExpr { "{" commaSep<Entry { Field {identifier} ":" expression }> "}" }
+    | RecordExpr { "{" commaSep<Entry { Field {identifier | String} ":" expression }> "}" }
     | LambdaExpr { "{" "|" LambdaArgs "|" NonEmptyProgram "}" }
     | IfExpr { if expression then expression !else else expression }
     | ParenExpr { "(" expression ")" }
