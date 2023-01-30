@@ -28,7 +28,7 @@
   "author": "Quantified Uncertainty Research Institute",
   "dependencies": {
     "@commander-js/extra-typings": "^9.4.1",
-    "@quri/metalog": "^1.2.0",
+    "@quri/metalog": "^1.2.1",
     "commander": "^9.4.1",
     "immutable": "^4.1.0",
     "jstat": "^1.9.5",

@@ -2678,10 +2678,10 @@
   resolved "https://registry.yarnpkg.com/@polka/url/-/url-1.0.0-next.21.tgz#5de5a2385a35309427f6011992b544514d559aa1"
   integrity sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==
 
-"@quri/metalog@^1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@quri/metalog/-/metalog-1.2.0.tgz#754d98974a07ebc5fd170de58574011a232e1229"
-  integrity sha512-2t7003CZ8QTCEBFs3ZU5XonnrqU9hLTthopegWJ1LX5CPhv4zNl8PEY70BpWLe9+r/bu6PLkXuhIe36j5g840A==
+"@quri/metalog@^1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@quri/metalog/-/metalog-1.2.1.tgz#5d0651ed31d5cd4357dcbef75aba5c7a581c9b16"
+  integrity sha512-PWcR3Cgbx4lHo4xSuLZj944TwydquPCvb20erSePinfKj/qg/hU0sXt0FhEqhUOGTczNCP3VcLkaFde/QE9yxA==
   dependencies:
     glpk.js "^4.0.1"
     lpsolver "^1.0.2"
