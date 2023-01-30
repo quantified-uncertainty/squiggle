@@ -878,8 +878,38 @@ export class Metalog extends SymbolicDist {
       return Result.Error("Invalid combination of a (pdf is negative in parts)");
     }
   }
+  static fitFromCdf(
+    points: {x: number, q:number}[],
+    terms?: number
+  ): result<Metalog, string> {
+    const result = Metalog.fitFromCdfOLS(points, terms)
+    if(result.ok){
+      return result
+    }
+    else {
+      return Metalog.fitFromCdfLP(points, terms)
+    }
+  }
 
-  static fitFromCDF(
+  static fitFromCdfLP(
+    points: {x: number, q:number}[],
+    terms?: number
+  ): result<Metalog, string> {
+    let termCount = terms ?? points.length
+    if (termCount > 1) {
+      const a = metalog.fitMetalogLP(points.map(({x, q}) => ({x, y: q})), termCount);
+      if(a !== undefined){
+        return Ok(new Metalog({a }))
+      } else {
+        return Result.Error("Could not fit metalog from CDF points");
+      }
+    }
+    else {
+      return Result.Error("CDF must have more than 1 point");
+    }
+  }
+
+  static fitFromCdfOLS(
     points: {x: number, q:number}[],
     terms?: number
   ): result<Metalog, string> {

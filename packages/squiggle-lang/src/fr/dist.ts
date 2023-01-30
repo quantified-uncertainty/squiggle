@@ -233,7 +233,7 @@ export const library: FRFunction[] = [
         [frArray(frRecord(["x", frNumber], ["q", frNumber]))],
         ([points]) =>
           Result.errMap(
-            Result.fmap(SymbolicDist.Metalog.fitFromCDF(points), vDist),
+            Result.fmap(SymbolicDist.Metalog.fitFromCdf(points), vDist),
             (x) => REOperationError(new OtherOperationError(x))
           )
       ),
@@ -242,7 +242,7 @@ export const library: FRFunction[] = [
         [frArray(frRecord(["x", frNumber], ["q", frNumber])), frNumber],
         ([points, terms]) =>
           Result.errMap(
-            Result.fmap(SymbolicDist.Metalog.fitFromCDF(points, terms), vDist),
+            Result.fmap(SymbolicDist.Metalog.fitFromCdf(points, terms), vDist),
             (x) => REOperationError(new OtherOperationError(x))
           )
       ),
