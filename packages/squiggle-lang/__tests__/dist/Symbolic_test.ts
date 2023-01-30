@@ -311,10 +311,10 @@ describe("Metalog", () => {
   test("Fails with too little terms", () => {
       expect(() => mkMetalog([])).toThrowError();
       expect(() => mkMetalog([2])).toThrowError();
-      expect(SymbolicDist.Metalog.fitFromCDF([{x: 0, q: 0.1}]).ok).toBe(false);
-      expect(SymbolicDist.Metalog.fitFromCDF([{x: 0, q: 0.1}, {x: 1, q: 0.5}, {x: 2, q: 0.7}], 1).ok).toBe(false);
-      expect(SymbolicDist.Metalog.fitFromCDF([{x: 0, q: 0.1}, {x: 1, q: 0.5}, {x: 2, q: 0.7}], 0).ok).toBe(false);
-      expect(SymbolicDist.Metalog.fitFromCDF([{x: 0, q: 0.1}, {x: 1, q: 0.5}, {x: 2, q: 0.7}], -1).ok).toBe(false);
+      expect(SymbolicDist.Metalog.fitFromCdf([{x: 0, q: 0.1}]).ok).toBe(false);
+      expect(SymbolicDist.Metalog.fitFromCdf([{x: 0, q: 0.1}, {x: 1, q: 0.5}, {x: 2, q: 0.7}], 1).ok).toBe(false);
+      expect(SymbolicDist.Metalog.fitFromCdf([{x: 0, q: 0.1}, {x: 1, q: 0.5}, {x: 2, q: 0.7}], 0).ok).toBe(false);
+      expect(SymbolicDist.Metalog.fitFromCdf([{x: 0, q: 0.1}, {x: 1, q: 0.5}, {x: 2, q: 0.7}], -1).ok).toBe(false);
   })
 
   test("CDF is close to fit", () => {

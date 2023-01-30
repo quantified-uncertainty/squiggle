@@ -34,5 +34,5 @@ export const mkMetalog = (a: number[]) =>
 export const mkMetalogCdf = (
   points: { x: number; q: number }[],
   terms?: number
-) => unpackResult(SymbolicDist.Metalog.fitFromCDF(points, terms));
+) => unpackResult(SymbolicDist.Metalog.fitFromCdf(points, terms));
 export const mkDelta = (x: number) => unpackResult(SymbolicDist.Float.make(x));
