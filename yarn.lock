@@ -1311,6 +1311,11 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
+"@bygdle/javascript-lp-solver@^0.4.26":
+  version "0.4.26"
+  resolved "https://registry.yarnpkg.com/@bygdle/javascript-lp-solver/-/javascript-lp-solver-0.4.26.tgz#fa107b685338a67490df7c490c1a459e598ddde3"
+  integrity sha512-62dbbeeMcC/qkXyeTpjFSIkh/COTYGS4+VoHD6Pmns6HgzZt4ViAuNTkx46xJNVBC81ZVFtL42q9QjMZfMI+hA==
+
 "@cnakazawa/watch@^1.0.3":
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/@cnakazawa/watch/-/watch-1.0.4.tgz#f864ae85004d0fcab6f50be9141c4da368d1656a"
@@ -2678,15 +2683,21 @@
   resolved "https://registry.yarnpkg.com/@polka/url/-/url-1.0.0-next.21.tgz#5de5a2385a35309427f6011992b544514d559aa1"
   integrity sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==
 
-"@quri/metalog@^1.2.5":
-  version "1.2.5"
-  resolved "https://registry.yarnpkg.com/@quri/metalog/-/metalog-1.2.5.tgz#dd37ce87f3ca32a87472f31367a7bc06564abf97"
-  integrity sha512-3Nyg0xiLHJQ9ijPkFDI542QLPKozUk2Z/W0lu1uYntTnBK9aFiAUNsvBaFr0MLZ9OA0meWqjvGuC/ONLv1fmkQ==
+"@quri/metalog@^1.2.6":
+  version "1.2.6"
+  resolved "https://registry.yarnpkg.com/@quri/metalog/-/metalog-1.2.6.tgz#b99163c367848a3679e1b5bec32bb801baaa09bd"
+  integrity sha512-onBvrzTlkm478upfBqGzaLXnh14o/sA4kbNUbF65bk5plWUznCgdOAUqRuJHn+dgIktX+TOhrQA9lkWPNIiA3g==
   dependencies:
     javascript-lp-solver "^0.4.24"
-    lpsolver "^1.0.2"
     mathjs "^11.5.0"
-    ulp "^1.0.1"
+
+"@quri/metalog@^1.2.7":
+  version "1.2.7"
+  resolved "https://registry.yarnpkg.com/@quri/metalog/-/metalog-1.2.7.tgz#90cd5137144990de145cf8915c00828375de2e4b"
+  integrity sha512-ZK83r7Bxh1g88hq0bCfAvWc9gKVe01s+IondMVcpDwFfHSGZH5xh72Gm6SfGhtEoDkC91BgmM4wQLQPlJHJocw==
+  dependencies:
+    "@bygdle/javascript-lp-solver" "^0.4.26"
+    mathjs "^11.5.0"
 
 "@react-hook/latest@^1.0.2":
   version "1.0.3"
@@ -4416,9 +4427,9 @@
     "@types/react" "*"
 
 "@types/react@*", "@types/react@^18.0.1", "@types/react@^18.0.21":
-  version "18.0.26"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.26.tgz#8ad59fc01fef8eaf5c74f4ea392621749f0b7917"
-  integrity sha512-hCR3PJQsAIXyxhTNSiDFY//LhnMZWpNNr5etoCqx/iUfGc5gXWtQR2Phl908jVR6uPXacojQWTg4qRpkxTuGug==
+  version "18.0.27"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.27.tgz#d9425abe187a00f8a5ec182b010d4fd9da703b71"
+  integrity sha512-3vtRKHgVxu3Jp9t718R9BuzoD4NcQ8YJ5XRzsSKxNDiDonD2MXIT1TmSkenxuCycZJoQT5d2vE8LwWJxBC1gmA==
   dependencies:
     "@types/prop-types" "*"
     "@types/scheduler" "*"
@@ -12418,11 +12429,6 @@ lowercase-keys@^2.0.0:
   resolved "https://registry.yarnpkg.com/lowercase-keys/-/lowercase-keys-2.0.0.tgz#2603e78b7b4b0006cbca2fbcc8a3202558ac9479"
   integrity sha512-tqNXrS78oMOE73NMxK4EMLQsQowWf8jKooH9g7xPavRT706R6bkQJ6DY2Te7QukaZsulxa30wQ7bk0pm4XiHmA==
 
-lpsolver@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/lpsolver/-/lpsolver-1.0.2.tgz#b8510c2905c62191ac486afbf34101922701f590"
-  integrity sha512-ukka0ff7KKo4j1TUCUincmuY0OKIQoR0MohYb/17IYQ8ASOEA3NgSTIYE1GBEexCE9PPlx5QzXCsAyjFZoc/Cw==
-
 lru-cache@^5.1.1:
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-5.1.1.tgz#1da27e6710271947695daf6848e847f01d84b920"
@@ -17666,11 +17672,6 @@ uglify-js@^3.1.4:
   version "3.17.4"
   resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-3.17.4.tgz#61678cf5fa3f5b7eb789bb345df29afb8257c22c"
   integrity sha512-T9q82TJI9e/C1TAxYvfb16xO120tMVFZrGA3f9/P4424DNu6ypK103y0GPFVa17yotwSyZW5iYXgjYHkGrJW/g==
-
-ulp@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/ulp/-/ulp-1.0.1.tgz#e3a4a5b4de9bd0faae63e4544ee63a0d9bd34bc5"
-  integrity sha512-fXPzKroJ6XJXrepjd4AIHfeN84qUtZfLojIPYExlF/rm/BWb8/2o64lsGEKSMSwjH9X6VKmDv9+zbd+ZNHa4nw==
 
 unbox-primitive@^1.0.2:
   version "1.0.2"

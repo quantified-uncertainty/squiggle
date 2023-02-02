@@ -7,7 +7,6 @@ module.exports = {
     return {
       ...config,
       experiments: custom.experiments,
-      plugins: custom.plugins.concat(config.plugins),
       module: {
         ...config.module,
         rules: config.module.rules.concat(
