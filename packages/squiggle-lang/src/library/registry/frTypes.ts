@@ -122,7 +122,7 @@ export const frAny: FRType<Value> = {
 // The limit could be increased with the same pattern, but there might be a better solution for this.
 export function frRecord<K1 extends string, T1>(
   kv1: [K1, FRType<T1>]
-): FRType<{ K1: T1 }>;
+): FRType<{ [k in K1]: T1 }>;
 export function frRecord<K1 extends string, T1, K2 extends string, T2>(
   kv1: [K1, FRType<T1>],
   kv2: [K2, FRType<T2>]

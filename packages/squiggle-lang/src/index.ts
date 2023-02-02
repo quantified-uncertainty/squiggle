@@ -10,6 +10,7 @@ export { SqRecord } from "./public/SqRecord";
 export { SqLambda } from "./public/SqLambda";
 export { SqError, SqFrame } from "./public/SqError";
 export { SqShape } from "./public/SqPointSet";
+export { SqPlot } from "./public/SqPlot";
 export { SqParseError, parse } from "./public/parse";
 
 export { defaultEnv as defaultEnvironment } from "./dist/env";

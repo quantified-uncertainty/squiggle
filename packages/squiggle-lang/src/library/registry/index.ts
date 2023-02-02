@@ -18,6 +18,7 @@ import { library as unitsLibrary } from "../../fr/units";
 import { library as dateLibrary } from "../../fr/date";
 import { library as mathLibrary } from "../../fr/math";
 import { library as listLibrary } from "../../fr/list";
+import { library as plotLibrary } from "../../fr/plot";
 import { mxLambda } from "../../fr/mixture";
 import { ErrorMessage } from "../../reducer/ErrorMessage";
 
@@ -36,6 +37,7 @@ const fnList: core.FRFunction[] = [
   ...dateLibrary,
   ...mathLibrary,
   ...listLibrary,
+  ...plotLibrary,
 ];
 
 export const registry = core.make(fnList);

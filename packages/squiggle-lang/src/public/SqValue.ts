@@ -3,6 +3,7 @@ import { wrapDistribution } from "./SqDistribution";
 import { SqLambda } from "./SqLambda";
 import { SqLambdaDeclaration } from "./SqLambdaDeclaration";
 import { SqRecord } from "./SqRecord";
+import { SqPlot } from "./SqPlot";
 import { SqArray } from "./SqArray";
 import { SqValueLocation } from "./SqValueLocation";
 import { SqError } from "./SqError";
@@ -30,6 +31,8 @@ export const wrapValue = (value: Value, location: SqValueLocation): SqValue => {
       return new SqRecordValue(value, location);
     case "String":
       return new SqStringValue(value, location);
+    case "Plot":
+      return new SqPlotValue(value, location);
     case "TimeDuration":
       return new SqTimeDurationValue(value, location);
     case "Void":
@@ -132,6 +135,14 @@ export class SqTimeDurationValue extends SqAbstractValue<"TimeDuration"> {
   }
 }
 
+export class SqPlotValue extends SqAbstractValue<"Plot"> {
+  tag = "Plot" as const;
+
+  get value() {
+    return new SqPlot(this._value.value, this.location);
+  }
+}
+
 export class SqVoidValue extends SqAbstractValue<"Void"> {
   tag = "Void" as const;
 
@@ -153,6 +164,7 @@ export type SqValue =
   | SqRecordValue
   | SqStringValue
   | SqTimeDurationValue
+  | SqPlotValue
   | SqVoidValue;
 
 export const toStringResult = (result: result<SqValue, SqError>) => {
