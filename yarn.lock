@@ -2683,18 +2683,10 @@
   resolved "https://registry.yarnpkg.com/@polka/url/-/url-1.0.0-next.21.tgz#5de5a2385a35309427f6011992b544514d559aa1"
   integrity sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==
 
-"@quri/metalog@^1.2.6":
-  version "1.2.6"
-  resolved "https://registry.yarnpkg.com/@quri/metalog/-/metalog-1.2.6.tgz#b99163c367848a3679e1b5bec32bb801baaa09bd"
-  integrity sha512-onBvrzTlkm478upfBqGzaLXnh14o/sA4kbNUbF65bk5plWUznCgdOAUqRuJHn+dgIktX+TOhrQA9lkWPNIiA3g==
-  dependencies:
-    javascript-lp-solver "^0.4.24"
-    mathjs "^11.5.0"
-
-"@quri/metalog@^1.2.7":
-  version "1.2.7"
-  resolved "https://registry.yarnpkg.com/@quri/metalog/-/metalog-1.2.7.tgz#90cd5137144990de145cf8915c00828375de2e4b"
-  integrity sha512-ZK83r7Bxh1g88hq0bCfAvWc9gKVe01s+IondMVcpDwFfHSGZH5xh72Gm6SfGhtEoDkC91BgmM4wQLQPlJHJocw==
+"@quri/metalog@^1.2.8":
+  version "1.2.8"
+  resolved "https://registry.yarnpkg.com/@quri/metalog/-/metalog-1.2.8.tgz#da240509be15dd05a0073677095ed01c8ea0cca6"
+  integrity sha512-qOYINWRp4w467C1qxYGwar3VXynjOV7vGoKTVdC2I4MMotQPhOqxqZzLvcduhMYpgGPdj5rD4sJDPuqdFSGf2w==
   dependencies:
     "@bygdle/javascript-lp-solver" "^0.4.26"
     mathjs "^11.5.0"
@@ -4426,7 +4418,7 @@
     "@types/history" "^4.7.11"
     "@types/react" "*"
 
-"@types/react@*", "@types/react@^18.0.1", "@types/react@^18.0.21":
+"@types/react@*", "@types/react@^18.0.21":
   version "18.0.27"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.27.tgz#d9425abe187a00f8a5ec182b010d4fd9da703b71"
   integrity sha512-3vtRKHgVxu3Jp9t718R9BuzoD4NcQ8YJ5XRzsSKxNDiDonD2MXIT1TmSkenxuCycZJoQT5d2vE8LwWJxBC1gmA==
@@ -11039,11 +11031,6 @@ jake@^10.8.5:
     filelist "^1.0.1"
     minimatch "^3.0.4"
 
-javascript-lp-solver@^0.4.24:
-  version "0.4.24"
-  resolved "https://registry.yarnpkg.com/javascript-lp-solver/-/javascript-lp-solver-0.4.24.tgz#3bb5f8aa051f0bf04747e39130133a0f738f635c"
-  integrity sha512-5edoDKnMrt/u3M6GnZKDDIPxOyFOg+WrwDv8mjNiMC2DePhy2H9/FFQgf4ggywaXT1utvkxusJcjQUER72cZmA==
-
 javascript-natural-sort@^0.7.1:
   version "0.7.1"
   resolved "https://registry.yarnpkg.com/javascript-natural-sort/-/javascript-natural-sort-0.7.1.tgz#f9e2303d4507f6d74355a73664d1440fb5a0ef59"
@@ -15290,7 +15277,7 @@ react-vega@^7.6.0:
     prop-types "^15.8.1"
     vega-embed "^6.5.1"
 
-react@^18.0.0, react@^18.1.0:
+react@^18.1.0:
   version "18.2.0"
   resolved "https://registry.yarnpkg.com/react/-/react-18.2.0.tgz#555bd98592883255fa00de14f1151a917b5d77d5"
   integrity sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==
