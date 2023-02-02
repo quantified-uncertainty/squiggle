@@ -1,8 +1,12 @@
 const path = require("path");
+const webpack = require("webpack");
 
 module.exports = {
   mode: "production",
   devtool: "source-map",
+  experiments: {
+    topLevelAwait: true,
+  },
   profile: true,
   entry: "./src/index.ts",
   module: {
@@ -50,4 +54,9 @@ module.exports = {
       root: "ReactDOM",
     },
   },
+  plugins: [
+    new webpack.IgnorePlugin({
+      resourceRegExp: /^(fs|child_process)$/,
+    }),
+  ],
 };

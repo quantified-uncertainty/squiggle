@@ -308,6 +308,9 @@ describe("Metalog", () => {
     )
   });
 
+  test("Succeeds with OLS fails", () => {
+    const test = mkMetalogCdf([{x: -1.2, q: 0.05}, {x: 4, q: 0.2}, {x: 10, q: 0.9}, {x: 15, q: 0.95}])
+  })
   test("Fails with too little terms", () => {
       expect(() => mkMetalog([])).toThrowError();
       expect(() => mkMetalog([2])).toThrowError();

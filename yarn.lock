@@ -2678,12 +2678,12 @@
   resolved "https://registry.yarnpkg.com/@polka/url/-/url-1.0.0-next.21.tgz#5de5a2385a35309427f6011992b544514d559aa1"
   integrity sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==
 
-"@quri/metalog@^1.2.1":
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/@quri/metalog/-/metalog-1.2.1.tgz#5d0651ed31d5cd4357dcbef75aba5c7a581c9b16"
-  integrity sha512-PWcR3Cgbx4lHo4xSuLZj944TwydquPCvb20erSePinfKj/qg/hU0sXt0FhEqhUOGTczNCP3VcLkaFde/QE9yxA==
+"@quri/metalog@^1.2.5":
+  version "1.2.5"
+  resolved "https://registry.yarnpkg.com/@quri/metalog/-/metalog-1.2.5.tgz#dd37ce87f3ca32a87472f31367a7bc06564abf97"
+  integrity sha512-3Nyg0xiLHJQ9ijPkFDI542QLPKozUk2Z/W0lu1uYntTnBK9aFiAUNsvBaFr0MLZ9OA0meWqjvGuC/ONLv1fmkQ==
   dependencies:
-    glpk.js "^4.0.1"
+    javascript-lp-solver "^0.4.24"
     lpsolver "^1.0.2"
     mathjs "^11.5.0"
     ulp "^1.0.1"
@@ -9691,13 +9691,6 @@ globby@^9.2.0:
     pify "^4.0.1"
     slash "^2.0.0"
 
-glpk.js@^4.0.1:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/glpk.js/-/glpk.js-4.0.1.tgz#5ec021d5712fad8bd3c256d87a6e2b6b3003240b"
-  integrity sha512-sxb3UT9IP2NXCocvFoC4I4XcvyVRGTS48hRWWpSAnl8yrsSbKDF58HjR8BUu1YxXHkkZ3kq7ycs7RLvI7l1pYg==
-  dependencies:
-    pako "^2.0.4"
-
 gopd@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/gopd/-/gopd-1.0.1.tgz#29ff76de69dac7489b7c0918a5788e56477c332c"
@@ -11034,6 +11027,11 @@ jake@^10.8.5:
     chalk "^4.0.2"
     filelist "^1.0.1"
     minimatch "^3.0.4"
+
+javascript-lp-solver@^0.4.24:
+  version "0.4.24"
+  resolved "https://registry.yarnpkg.com/javascript-lp-solver/-/javascript-lp-solver-0.4.24.tgz#3bb5f8aa051f0bf04747e39130133a0f738f635c"
+  integrity sha512-5edoDKnMrt/u3M6GnZKDDIPxOyFOg+WrwDv8mjNiMC2DePhy2H9/FFQgf4ggywaXT1utvkxusJcjQUER72cZmA==
 
 javascript-natural-sort@^0.7.1:
   version "0.7.1"
@@ -13549,7 +13547,7 @@ package-json@^6.3.0:
     registry-url "^5.0.0"
     semver "^6.2.0"
 
-pako@^2.0.4, pako@^2.1.0:
+pako@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/pako/-/pako-2.1.0.tgz#266cc37f98c7d883545d11335c00fbd4062c9a86"
   integrity sha512-w+eufiZ1WuJYgPXbV/PO3NCMEc3xqylkKHzp8bxp1uW4qaSNQUkwmLLEc3kKsfz8lpV1F8Ht3U1Cm+9Srog2ug==
