@@ -29,7 +29,7 @@
   "dependencies": {
     "@commander-js/extra-typings": "^9.4.1",
     "commander": "^9.4.1",
-    "immutable": "^4.2.1",
+    "immutable": "^4.2.2",
     "jstat": "^1.9.5",
     "lodash": "^4.17.21",
     "open": "^8.4.0"
