@@ -9411,12 +9411,12 @@ extglob@^2.0.4:
     snapdragon "^0.8.1"
     to-regex "^3.0.1"
 
-fast-check@^3.5.0:
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/fast-check/-/fast-check-3.5.0.tgz#5d633f82b35a3d18c76574d3c38526f46a44f9fc"
-  integrity sha512-5Yk9kfPy1DR8+9nl+wgRbXGM+p7e25nDRuZ/4b3TjIaWu53p/KkwS4uyKFc+Ek2Ft5nF40KRCbPYGrWYp0SjPw==
+fast-check@^3.6.2:
+  version "3.6.2"
+  resolved "https://registry.yarnpkg.com/fast-check/-/fast-check-3.6.2.tgz#46956028e366715187e369e6019d10737b93e388"
+  integrity sha512-htRkbkw8B1yVfvrLNiJTnpcvpXrdcgpwZUQdC07dsiUGXaHHWK38t6VCnTmAUf68atyos1+XXXY60VUbSgorAQ==
   dependencies:
-    pure-rand "^5.0.2"
+    pure-rand "^6.0.0"
 
 fast-deep-equal@^3.1.1, fast-deep-equal@^3.1.3, fast-deep-equal@~3.1.3:
   version "3.1.3"
@@ -15386,10 +15386,10 @@ pure-color@^1.2.0:
   resolved "https://registry.yarnpkg.com/pure-color/-/pure-color-1.3.0.tgz#1fe064fb0ac851f0de61320a8bf796836422f33e"
   integrity sha512-QFADYnsVoBMw1srW7OVKEYjG+MbIa49s54w1MA1EDY6r2r/sTcKKYqRX1f4GYvnXP7eN/Pe9HFcX+hwzmrXRHA==
 
-pure-rand@^5.0.2:
-  version "5.0.5"
-  resolved "https://registry.yarnpkg.com/pure-rand/-/pure-rand-5.0.5.tgz#bda2a7f6a1fc0f284d78d78ca5902f26f2ad35cf"
-  integrity sha512-BwQpbqxSCBJVpamI6ydzcKqyFmnd5msMWUGvzXLm1aXvusbbgkbOto/EUPM00hjveJEaJtdbhUjKSzWRhQVkaw==
+pure-rand@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/pure-rand/-/pure-rand-6.0.0.tgz#701996ceefa253507923a0e864c17ab421c04a7c"
+  integrity sha512-rLSBxJjP+4DQOgcJAx6RZHT2he2pkhQdSnofG5VWyVl6GRq/K02ISOuOLcsMOrtKDIJb8JN2zm3FFzWNbezdPw==
 
 q@^1.1.2:
   version "1.5.1"
