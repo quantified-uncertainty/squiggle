@@ -1,4 +1,4 @@
-import { LRLanguage, LanguageSupport, foldNodeProp, foldInside } from "@codemirror/language";
+import { LRLanguage, LanguageSupport, indentNodeProp, foldNodeProp, foldInside } from "@codemirror/language";
 import { styleTags, tags as t } from "@lezer/highlight";
 import { snippetCompletion } from "@codemirror/autocomplete";
 import { parser } from "./generated/squiggle";
@@ -41,8 +41,16 @@ const squiggleLang = LRLanguage.define({
       }),
       foldNodeProp.add({
         LambdaExpr: context => ({from: context.getChild("NonEmptyProgram")?.from || 0, to: context.getChild("NonEmptyProgram")?.to || 0}),
-        BlockExpr: foldInside
-      })
+        BlockExpr: foldInside,
+        RecordExpr: foldInside,
+        ArrayExpr: foldInside,
+      }),
+      indentNodeProp.add({
+        RecordExpr: context => context.baseIndent + context.unit,
+        BlockExpr: context => context.baseIndent + context.unit,
+        LambdaExpr: context => context.baseIndent + context.unit,
+        ArrayExpr: context => context.baseIndent + context.unit
+      }),
     ],
   }),
   languageData: {
