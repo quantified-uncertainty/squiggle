@@ -11,7 +11,8 @@
     and @left,
     or @left,
     control @right,
-    else @right
+    else @right,
+    logop @right
 }
 
 @top Program {
@@ -60,10 +61,11 @@ expression[@isGroup="Expression"] {
     | ParenExpr { "(" expression ")" }
     | AccessExpr[@dynamicPrecedence=1] { AccessIdentifier ~fieldAmbig }
     | CallExpr { expression !call ("(" commaSep<Argument { expression }> ")"| "()") }
+    | TernaryExpr { expression !logop LogicOp<"?"> expression LogicOp<":"> expression }
     | KVAccessExpr { expression !call ("[" Key { expression } "]") }
     | ArrayExpr { "[" commaSep<expression> "]" }
     | Void { !deref "()" }
-    | UnaryExpr { !unary ArithOp<"-"> expression }
+    | UnaryExpr { !unary (ArithOp<"-"> | ArithOp<"!"> | DotArithOp<".-">) expression }
     | LogicExpr {
           expression !or     LogicOp<"||">  expression
         | expression !and    LogicOp<"&&">  expression
@@ -77,12 +79,12 @@ expression[@isGroup="Expression"] {
           expression !control  ControlOp<"|>">  expression
     }
     | ArithExpr {
-          expression !times  ( ArithOp<"*"> | DotArithOp<".*"> )  expression
-        | expression !times  ( ArithOp<"/"> | DotArithOp<"./"> )  expression
-        | expression !exp    ( ArithOp<"^"> | DotArithOp<".^"> )  expression
-        | expression !plus   ( ArithOp<"+"> | DotArithOp<".+"> )  expression
-        | expression !plus   ( ArithOp<"-"> | DotArithOp<".-"> )  expression
-        | expression !plus     @extend[@name="ArithOp"]<identifier, "to">                      expression
+          expression !times  ( ArithOp<"*"> | DotArithOp<".*"> )                expression
+        | expression !times  ( ArithOp<"/"> | DotArithOp<"./"> )                expression
+        | expression !exp    ( ArithOp<"^"> | DotArithOp<".^"> )                expression
+        | expression !plus   ( ArithOp<"+"> | DotArithOp<".+"> )                expression
+        | expression !plus   ( ArithOp<"-"> | DotArithOp<".-"> )                expression
+        | expression !plus     @extend[@name="ArithOp"]<identifier, "to">       expression
     }
 }
 
