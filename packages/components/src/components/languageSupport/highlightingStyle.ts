@@ -63,7 +63,14 @@ export const lightThemeHighlightingStyle = HighlightStyle.define([
     ],
     color: names,
   },
-  { tag: [tags.function(tags.variableName), tags.constant(tags.variableName), tags.labelName], color: variables },
+  {
+    tag: [
+      tags.function(tags.variableName),
+      tags.constant(tags.variableName),
+      tags.labelName,
+    ],
+    color: variables,
+  },
   {
     tag: [tags.color, tags.constant(tags.name), tags.standard(tags.name)],
     color: constants,
