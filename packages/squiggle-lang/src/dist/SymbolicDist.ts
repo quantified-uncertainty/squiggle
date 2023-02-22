@@ -874,48 +874,39 @@ export class Metalog extends SymbolicDist {
     else if(validationResult === metalog.MetalogValidationStatus.NotEnoughParamaters){
       return Result.Error("Terms array must have more than one element");
     }
-    else {
+    else if(validationResult === metalog.MetalogValidationStatus.NegativeDerivative) {
       return Result.Error("Invalid combination of a (pdf is negative in parts)");
+    } else {
+      return Result.Error("Unknown validation error");
     }
   }
   static fitFromCdf(
     points: {x: number, q:number}[],
-    terms?: number
+    terms?: number,
+    olsOnly?: boolean,
+    xyPointLength: number=1000,
   ): result<Metalog, string> {
-    const result = Metalog.fitFromCdfOLS(points, terms)
-    if(result.ok){
+    const result = Metalog.fitFromCdfMethod(points, xyPointLength, terms ?? points.length, 'OLS')
+    if(result.ok || olsOnly){
       return result
     }
     else {
-      return Metalog.fitFromCdfLP(points, terms)
+      return Metalog.fitFromCdfMethod(points, xyPointLength, terms ?? points.length, 'LP')
     }
   }
 
-  static fitFromCdfLP(
+  static fitFromCdfMethod(
     points: {x: number, q:number}[],
-    terms?: number
+    xyPointLength: number,
+    terms: number,
+    method: "OLS" | "LP"
   ): result<Metalog, string> {
     let termCount = terms ?? points.length
     if (termCount > 1) {
-      const a = metalog.fitMetalogLP(points.map(({x, q}) => ({x, y: q})), termCount);
-      if(a !== undefined){
-        return Ok(new Metalog({a }))
-      } else {
-        return Result.Error("Could not fit metalog from CDF points");
-      }
-    }
-    else {
-      return Result.Error("CDF must have more than 1 point");
-    }
-  }
-
-  static fitFromCdfOLS(
-    points: {x: number, q:number}[],
-    terms?: number
-  ): result<Metalog, string> {
-    let termCount = terms ?? points.length
-    if (termCount > 1) {
-      const a = metalog.fitMetalog(points.map(({x, q}) => ({x, y: q})), termCount);
+      const mappedPoints = points.map(({x, q}) => ({x, y: q}));
+      const a = method === "OLS" ? 
+        metalog.fitMetalog(mappedPoints, termCount) : 
+        metalog.fitMetalogLP(mappedPoints, termCount, 0, xyPointLength * 2);
       if(a !== undefined){
         return Ok(new Metalog({a }))
       } else {

@@ -13,6 +13,7 @@
     "benchmark": "ts-node benchmark/conversion_tests.ts",
     "test:reducer": "jest __tests__/Reducer*/",
     "test": "jest",
+    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
     "test:watch": "jest --watchAll",
     "test:fnRegistry": "jest __tests__/SquiggleLibrary*/",
     "coverage:local": "jest --coverage && echo && echo 'Open ./coverage/lcov-report/index.html to see the detailed report.'",
@@ -28,7 +29,7 @@
   "author": "Quantified Uncertainty Research Institute",
   "dependencies": {
     "@commander-js/extra-typings": "^9.4.1",
-    "@quri/metalog": "^1.2.8",
+    "@quri/metalog": "^1.2.9",
     "commander": "^9.4.1",
     "immutable": "^4.2.1",
     "jstat": "^1.9.5",

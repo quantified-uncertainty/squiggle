@@ -8,6 +8,8 @@ import { FRFunction } from "../library/registry/core";
 import { makeDefinition } from "../library/registry/fnDefinition";
 import {
   frDistOrNumber,
+  frBool,
+  frOptional,
   frNumber,
   frArray,
   frRecord,
@@ -231,18 +233,45 @@ export const library: FRFunction[] = [
       makeDefinition<{ x: number; q: number }[]>(
         "metalog",
         [frArray(frRecord(["x", frNumber], ["q", frNumber]))],
-        ([points]) =>
-          Result.errMap(
-            Result.fmap(SymbolicDist.Metalog.fitFromCdf(points), vDist),
+        ([points], { environment }) => {
+          debugger;
+          return Result.errMap(
+            Result.fmap(
+              SymbolicDist.Metalog.fitFromCdf(
+                points,
+                undefined,
+                false,
+                environment.xyPointLength
+              ),
+              vDist
+            ),
             (x) => REOperationError(new OtherOperationError(x))
-          )
+          );
+        }
       ),
-      makeDefinition<{ x: number; q: number }[], number>(
+      makeDefinition<
+        { x: number; q: number }[],
+        { terms?: number; ols?: boolean }
+      >(
         "metalog",
-        [frArray(frRecord(["x", frNumber], ["q", frNumber])), frNumber],
-        ([points, terms]) =>
+        [
+          frArray(frRecord(["x", frNumber], ["q", frNumber])),
+          frRecord(
+            ["terms", frOptional(frNumber)],
+            ["ols", frOptional(frBool)]
+          ),
+        ],
+        ([points, options], { environment }) =>
           Result.errMap(
-            Result.fmap(SymbolicDist.Metalog.fitFromCdf(points, terms), vDist),
+            Result.fmap(
+              SymbolicDist.Metalog.fitFromCdf(
+                points,
+                options.terms,
+                options.ols,
+                environment.xyPointLength
+              ),
+              vDist
+            ),
             (x) => REOperationError(new OtherOperationError(x))
           )
       ),

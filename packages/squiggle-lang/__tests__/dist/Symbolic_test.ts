@@ -10,14 +10,13 @@ import {
   mkNormal,
   mkTriangular,
   unpackResult,
+  env
 } from "../helpers/distHelpers";
 import * as SymbolicDist from "../../src/dist/SymbolicDist";
 import * as Result from "../../src/utility/result";
 import * as E_A_Floats from "../../src/utility/E_A_Floats";
 import * as E_A from "../../src/utility/E_A";
 import { createSparkline } from "../../src/utility/sparklines";
-import { Session } from "inspector"
-import * as fs from "fs";
 import { metalogBasisFunction } from "@quri/metalog";
 import { defaultEnv } from "../../src/dist/env";
 
@@ -273,21 +272,6 @@ describe("Metalog", () => {
     );
   });
 
-  test("Runs quickly", () => 
-    new Promise((resolve, reject) => {
-      const session = new Session();
-      session.connect();
-
-      session.post('Profiler.enable', () => {
-        session.post('Profiler.start', () => {
-          iter.forEach((v) => dist.pdf(v));
-          session.post('Profiler.stop', (err, {profile}) => {
-            fs.writeFileSync('./metalog_pdf.cpuprofile', JSON.stringify(profile));
-            resolve(undefined)
-      });
-    });
-  });
-  }), 1000);
 
   test("CDF conforms to PDF", () => {
     expect(
@@ -295,7 +279,7 @@ describe("Metalog", () => {
         iter.map((a) => [dist.cdf(a), unpackResult(dist.pdf(a))]),
         (a, b) => [a, b]
       ).forEach(
-        ([[cdf, pdf], [cdf2]]) => expect(cdf2).toBeCloseTo(cdf + pdf * step, 1) // This seems surprisingly not accurate even though our implementation matches rmetalog almost perfectly
+        ([[cdf, pdf], [cdf2]]) => expect(cdf2).toBeCloseTo(cdf + pdf * step)
       )
     )
   });
@@ -325,5 +309,18 @@ describe("Metalog", () => {
       expect(metalogDist.cdf(0)).toBeCloseTo(0.2)
       expect(metalogDist.cdf(2)).toBeCloseTo(0.5)
       expect(metalogDist.cdf(3)).toBeCloseTo(0.9)
+  })
+
+  test("Metalog Problem case, Xs out of order", () => {
+      const points = [{x: 2, q: 0.2}, {x: 4, q: 0.5}, {x: 6, q: 0.7}, {x: 8.8, q: 0.90}];
+      debugger;
+      const metalogDist = mkMetalogCdf(points);
+      const pointSetDist = metalogDist.toPointSetDist(defaultEnv);
+      expect(pointSetDist.ok).toBe(true);
+  })
+  test("Metalog Problem case, Xs out of order (with explicit a)", () => {
+    const a = [8.30161199, 0.80682723, -1.61734654, 14.36825478]
+      const pointSetDist = mkMetalog(a).toPointSetDist(defaultEnv);
+      expect(pointSetDist.ok).toBe(true);
   })
 });
