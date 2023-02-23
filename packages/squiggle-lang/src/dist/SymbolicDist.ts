@@ -908,10 +908,10 @@ export class Metalog extends SymbolicDist {
     let termCount = terms ?? points.length
     if (termCount > 1) {
       const mappedPoints = points.map(({x, q}) => ({x, y: q}));
-      const validationPoints = SymbolicDist.interpolateQuantiles(xyPointLength);
+      const validationPoints = undefined; //this.interpolateQuantiles(xyPointLength);
       const a = method === "OLS" ? 
         metalog.fitMetalog(mappedPoints, termCount, validationPoints) : 
-        metalog.fitMetalogLP(mappedPoints, termCount, 0.001, validationPoints);
+        metalog.fitMetalogLP(mappedPoints, termCount, 0.01, validationPoints);
       if(a !== undefined){
         return Ok(new Metalog({a }))
       } else {

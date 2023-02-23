@@ -2783,15 +2783,13 @@
   resolved "https://registry.yarnpkg.com/@polka/url/-/url-1.0.0-next.21.tgz#5de5a2385a35309427f6011992b544514d559aa1"
   integrity sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==
 
-"@quri/metalog@file:../metalog":
-  version "1.2.9"
+"@quri/metalog@^1.2.11":
+  version "1.2.11"
+  resolved "https://registry.yarnpkg.com/@quri/metalog/-/metalog-1.2.11.tgz#3f16fe3defd6f0dd9ac2351b734334fcdebe0423"
+  integrity sha512-t+HYRKoza44tvhBb8j3wDS2JFENQivDK1H9vcyTMYXNqP1nu1muem0LDAFpEFrcP9WC0KxM4Z6jm92LgEliOQA==
   dependencies:
     "@bygdle/javascript-lp-solver" "^0.4.26"
     mathjs "^11.5.0"
-
-"@quri/metalog@link:/home/sam/metalog":
-  version "0.0.0"
-  uid ""
 
 "@react-hook/latest@^1.0.2":
   version "1.0.3"

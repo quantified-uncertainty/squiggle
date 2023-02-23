@@ -224,13 +224,13 @@ export const library: FRFunction[] = [
       `metalog([{x: -2, q: 0.1}, {x: -1, q: 0.3}, {x: 0, q: 0.9}], 2)`,
     ],
     definitions: [
-      makeDefinition<number[]>("metalog", [frArray(frNumber)], ([a]) =>
+      makeDefinition("metalog", [frArray(frNumber)], ([a]) =>
         Result.errMap(
           Result.fmap(SymbolicDist.Metalog.make({ a }), vDist),
           (x) => REOperationError(new OtherOperationError(x))
         )
       ),
-      makeDefinition<{ x: number; q: number }[]>(
+      makeDefinition(
         "metalog",
         [frArray(frRecord(["x", frNumber], ["q", frNumber]))],
         ([points], { environment }) => {

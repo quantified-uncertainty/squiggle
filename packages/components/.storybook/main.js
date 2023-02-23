@@ -6,7 +6,6 @@ module.exports = {
     config.resolve.alias = custom.resolve.alias;
     return {
       ...config,
-      experiments: custom.experiments,
       module: {
         ...config.module,
         rules: config.module.rules.concat(
