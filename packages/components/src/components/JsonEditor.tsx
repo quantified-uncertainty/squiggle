@@ -1,9 +1,9 @@
-import _ from "lodash";
-import React, { FC } from "react";
-import AceEditor from "react-ace";
+import React, { FC, useEffect, useMemo, useRef } from "react";
 
-import "ace-builds/src-noconflict/mode-json";
-import "ace-builds/src-noconflict/theme-github";
+import { json as jsonLS } from "@codemirror/lang-json";
+import { EditorState, Compartment } from "@codemirror/state";
+import { EditorView, keymap } from "@codemirror/view";
+import { basicSetup } from "codemirror";
 
 interface CodeEditorProps {
   value: string;
@@ -11,39 +11,65 @@ interface CodeEditorProps {
   oneLine?: boolean;
   width?: number;
   height: number;
-  showGutter?: boolean;
 }
+
+const languageSupport = jsonLS();
+const compTheme = new Compartment();
+const compUpdateListener = new Compartment();
 
 export const JsonEditor: FC<CodeEditorProps> = ({
   value,
   onChange,
   oneLine = false,
-  showGutter = false,
+  width,
   height,
 }) => {
   const lineCount = value.split("\n").length;
-  const id = _.uniqueId();
-  return (
-    <AceEditor
-      value={value}
-      mode="json"
-      theme="github"
-      width={"100%"}
-      height={String(height) + "px"}
-      minLines={oneLine ? lineCount : undefined}
-      maxLines={oneLine ? lineCount : undefined}
-      showGutter={showGutter}
-      highlightActiveLine={false}
-      showPrintMargin={false}
-      onChange={onChange}
-      name={id}
-      editorProps={{
-        $blockScrolling: true,
-      }}
-      setOptions={{
-        enableBasicAutocompletion: false,
-        enableLiveAutocompletion: false,
-      }}
-    />
+  const editor = useRef<HTMLDivElement>(null);
+  const editorView = useRef<EditorView | null>(null);
+
+  const state = useMemo(
+    () =>
+      EditorState.create({
+        doc: value,
+        extensions: [basicSetup, compUpdateListener.of([]), languageSupport],
+      }),
+    []
   );
+
+  useEffect(() => {
+    if (editor.current != null && state != null) {
+      const view = new EditorView({ state, parent: editor.current });
+      editorView.current = view;
+
+      return () => {
+        view.destroy();
+      };
+    }
+  }, [state]);
+
+  useEffect(() => {
+    editorView.current?.dispatch({
+      effects: compTheme.reconfigure(
+        EditorView.theme({
+          "&": {
+            ...(width !== null ? { width: `${width}px` } : {}),
+            height: `${height}px`,
+          },
+        })
+      ),
+    });
+  }, [width, height]);
+
+  useEffect(() => {
+    editorView.current?.dispatch({
+      effects: compUpdateListener.reconfigure(
+        EditorView.updateListener.of((update) => {
+          onChange(update.state.doc.toString());
+        })
+      ),
+    });
+  }, [onChange]);
+
+  return <div ref={editor}></div>;
 };
