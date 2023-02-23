@@ -4,7 +4,7 @@
     deref,
     call,
     unary @right,
-    exp @left,
+    exp @right,
     times @left,
     plus @left,
     rel @left,
