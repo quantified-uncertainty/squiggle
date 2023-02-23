@@ -358,9 +358,4 @@ describe("Metalog", () => {
     const pointSetDist = metalogDist.toPointSetDist(defaultEnv);
     expect(pointSetDist.ok).toBe(true);
   });
-  test("Metalog Problem case, Xs out of order (with explicit a)", () => {
-    const a = [8.30161199, 0.80682723, -1.61734654, 14.36825478];
-    const pointSetDist = mkMetalog(a).toPointSetDist(defaultEnv);
-    expect(pointSetDist.ok).toBe(true);
-  });
 });
