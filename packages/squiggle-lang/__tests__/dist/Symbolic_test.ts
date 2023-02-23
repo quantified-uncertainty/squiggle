@@ -10,7 +10,7 @@ import {
   mkNormal,
   mkTriangular,
   unpackResult,
-  env
+  env,
 } from "../helpers/distHelpers";
 import * as SymbolicDist from "../../src/dist/SymbolicDist";
 import * as Result from "../../src/utility/result";
@@ -272,16 +272,15 @@ describe("Metalog", () => {
     );
   });
 
-
   test("CDF conforms to PDF", () => {
     expect(
       E_A.pairwise(
         iter.map((a) => [dist.cdf(a), unpackResult(dist.pdf(a))]),
         (a, b) => [a, b]
-      ).forEach(
-        ([[cdf, pdf], [cdf2]]) => expect(cdf2).toBeCloseTo(cdf + pdf * step)
+      ).forEach(([[cdf, pdf], [cdf2]]) =>
+        expect(cdf2).toBeCloseTo(cdf + pdf * step)
       )
-    )
+    );
   });
 
   test("Quantile is inverse of CDF", () => {
@@ -289,38 +288,79 @@ describe("Metalog", () => {
       iter
         .map((p) => [p, dist.inv(dist.cdf(p))])
         .forEach(([p, pp]) => expect(p).toBeCloseTo(pp, 3))
-    )
+    );
   });
 
   test("Succeeds with OLS fails", () => {
-    const test = mkMetalogCdf([{x: -1.2, q: 0.05}, {x: 4, q: 0.2}, {x: 10, q: 0.9}, {x: 15, q: 0.95}])
-  })
+    const test = mkMetalogCdf([
+      { x: -1.2, q: 0.05 },
+      { x: 4, q: 0.2 },
+      { x: 10, q: 0.9 },
+      { x: 15, q: 0.95 },
+    ]);
+  });
   test("Fails with too little terms", () => {
-      expect(() => mkMetalog([])).toThrowError();
-      expect(() => mkMetalog([2])).toThrowError();
-      expect(SymbolicDist.Metalog.fitFromCdf([{x: 0, q: 0.1}]).ok).toBe(false);
-      expect(SymbolicDist.Metalog.fitFromCdf([{x: 0, q: 0.1}, {x: 1, q: 0.5}, {x: 2, q: 0.7}], 1).ok).toBe(false);
-      expect(SymbolicDist.Metalog.fitFromCdf([{x: 0, q: 0.1}, {x: 1, q: 0.5}, {x: 2, q: 0.7}], 0).ok).toBe(false);
-      expect(SymbolicDist.Metalog.fitFromCdf([{x: 0, q: 0.1}, {x: 1, q: 0.5}, {x: 2, q: 0.7}], -1).ok).toBe(false);
-  })
+    expect(() => mkMetalog([])).toThrowError();
+    expect(() => mkMetalog([2])).toThrowError();
+    expect(SymbolicDist.Metalog.fitFromCdf([{ x: 0, q: 0.1 }]).ok).toBe(false);
+    expect(
+      SymbolicDist.Metalog.fitFromCdf(
+        [
+          { x: 0, q: 0.1 },
+          { x: 1, q: 0.5 },
+          { x: 2, q: 0.7 },
+        ],
+        1
+      ).ok
+    ).toBe(false);
+    expect(
+      SymbolicDist.Metalog.fitFromCdf(
+        [
+          { x: 0, q: 0.1 },
+          { x: 1, q: 0.5 },
+          { x: 2, q: 0.7 },
+        ],
+        0
+      ).ok
+    ).toBe(false);
+    expect(
+      SymbolicDist.Metalog.fitFromCdf(
+        [
+          { x: 0, q: 0.1 },
+          { x: 1, q: 0.5 },
+          { x: 2, q: 0.7 },
+        ],
+        -1
+      ).ok
+    ).toBe(false);
+  });
 
   test("CDF is close to fit", () => {
-      const metalogDist = mkMetalogCdf([{x: 0, q: 0.2}, {x: 2, q: 0.5}, {x: 3, q: 0.9}])
-      expect(metalogDist.cdf(0)).toBeCloseTo(0.2)
-      expect(metalogDist.cdf(2)).toBeCloseTo(0.5)
-      expect(metalogDist.cdf(3)).toBeCloseTo(0.9)
-  })
+    const metalogDist = mkMetalogCdf([
+      { x: 0, q: 0.2 },
+      { x: 2, q: 0.5 },
+      { x: 3, q: 0.9 },
+    ]);
+    expect(metalogDist.cdf(0)).toBeCloseTo(0.2);
+    expect(metalogDist.cdf(2)).toBeCloseTo(0.5);
+    expect(metalogDist.cdf(3)).toBeCloseTo(0.9);
+  });
 
   test("Metalog Problem case, Xs out of order", () => {
-      const points = [{x: 2, q: 0.2}, {x: 4, q: 0.5}, {x: 6, q: 0.7}, {x: 8.8, q: 0.90}];
-      debugger;
-      const metalogDist = mkMetalogCdf(points);
-      const pointSetDist = metalogDist.toPointSetDist(defaultEnv);
-      expect(pointSetDist.ok).toBe(true);
-  })
+    const points = [
+      { x: 2, q: 0.2 },
+      { x: 4, q: 0.5 },
+      { x: 6, q: 0.7 },
+      { x: 8.8, q: 0.9 },
+    ];
+    debugger;
+    const metalogDist = mkMetalogCdf(points);
+    const pointSetDist = metalogDist.toPointSetDist(defaultEnv);
+    expect(pointSetDist.ok).toBe(true);
+  });
   test("Metalog Problem case, Xs out of order (with explicit a)", () => {
-    const a = [8.30161199, 0.80682723, -1.61734654, 14.36825478]
-      const pointSetDist = mkMetalog(a).toPointSetDist(defaultEnv);
-      expect(pointSetDist.ok).toBe(true);
-  })
+    const a = [8.30161199, 0.80682723, -1.61734654, 14.36825478];
+    const pointSetDist = mkMetalog(a).toPointSetDist(defaultEnv);
+    expect(pointSetDist.ok).toBe(true);
+  });
 });

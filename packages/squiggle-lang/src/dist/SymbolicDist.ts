@@ -866,59 +866,73 @@ export class Metalog extends SymbolicDist {
     this.a = a;
   }
 
-  static make({
-    a,
-  }: {
-    a: number[];
-  }): result<Metalog, string> {
+  static make({ a }: { a: number[] }): result<Metalog, string> {
     const validationResult = metalog.validate(a);
-    if(validationResult === metalog.MetalogValidationStatus.Success){
-      return Ok(new Metalog({a}))
-    }
-    else if(validationResult === metalog.MetalogValidationStatus.NotEnoughParamaters){
+    if (validationResult === metalog.MetalogValidationStatus.Success) {
+      return Ok(new Metalog({ a }));
+    } else if (
+      validationResult === metalog.MetalogValidationStatus.NotEnoughParamaters
+    ) {
       return Result.Error("Terms array must have more than one element");
-    }
-    else if(validationResult === metalog.MetalogValidationStatus.NegativeDerivative) {
-      return Result.Error("Invalid combination of a (pdf is negative in parts)");
+    } else if (
+      validationResult === metalog.MetalogValidationStatus.NegativeDerivative
+    ) {
+      return Result.Error(
+        "Invalid combination of a (pdf is negative in parts)"
+      );
     } else {
       return Result.Error("Unknown validation error");
     }
   }
   static fitFromCdf(
-    points: {x: number, q:number}[],
+    points: { x: number; q: number }[],
     terms?: number,
     olsOnly?: boolean,
-    xyPointLength: number=1000,
+    xyPointLength: number = 1000
   ): result<Metalog, string> {
-    const result = Metalog.fitFromCdfMethod(points, xyPointLength, terms ?? points.length, 'OLS')
-    if(result.ok || olsOnly){
-      return result
-    }
-    else {
-      return Metalog.fitFromCdfMethod(points, xyPointLength, terms ?? points.length, 'LP')
+    const result = Metalog.fitFromCdfMethod(
+      points,
+      xyPointLength,
+      terms ?? points.length,
+      "OLS"
+    );
+    if (result.ok || olsOnly) {
+      return result;
+    } else {
+      return Metalog.fitFromCdfMethod(
+        points,
+        xyPointLength,
+        terms ?? points.length,
+        "LP"
+      );
     }
   }
 
   static fitFromCdfMethod(
-    points: {x: number, q:number}[],
+    points: { x: number; q: number }[],
     xyPointLength: number,
     terms: number,
     method: "OLS" | "LP"
   ): result<Metalog, string> {
-    let termCount = terms ?? points.length
+    let termCount = terms ?? points.length;
     if (termCount > 1) {
-      const mappedPoints = points.map(({x, q}) => ({x, y: q}));
+      const mappedPoints = points.map(({ x, q }) => ({ x, y: q }));
       const validationPoints = undefined; //this.interpolateQuantiles(xyPointLength);
-      const a = method === "OLS" ? 
-        metalog.fitMetalog(mappedPoints, termCount, validationPoints) : 
-        metalog.fitMetalogLP(mappedPoints, termCount, 0.01, validationPoints);
-      if(a !== undefined){
-        return Ok(new Metalog({a }))
+      const a =
+        method === "OLS"
+          ? metalog.fitMetalog(mappedPoints, termCount, validationPoints)
+          : metalog.fitMetalogLP(
+              mappedPoints,
+              termCount,
+              0.01,
+              validationPoints
+            );
+      if (a !== undefined) {
+        return Ok(new Metalog({ a }));
       } else {
         return Result.Error("Could not fit metalog from CDF points");
       }
-    }
-    else {
+    } else {
       return Result.Error("CDF must have more than 1 point");
     }
   }
@@ -940,10 +954,9 @@ export class Metalog extends SymbolicDist {
     return metalog.quantile(this.a, Math.random());
   }
   mean() {
-    if(this.a.length > 2){
+    if (this.a.length > 2) {
       return this.a[0] + this.a[2] / 2;
-    }
-    else {
+    } else {
       return this.a[0];
     }
   }
@@ -954,8 +967,8 @@ export class Metalog extends SymbolicDist {
     env: Env,
     xSelection: PointsetXSelection = "ByWeight"
   ): result<PointSetDist, DistError> {
-    if(xSelection === "ByWeight") {
-      const qs = Metalog.interpolateQuantiles(env.xyPointLength)
+    if (xSelection === "ByWeight") {
+      const qs = Metalog.interpolateQuantiles(env.xyPointLength);
       const xs = qs.map((q) => this.inv(q));
       const ys = qs.map((q) => 1 / metalog.quantileDiff(this.a, q));
       const xyShapeR = XYShape.T.make(xs, ys);
@@ -972,7 +985,7 @@ export class Metalog extends SymbolicDist {
         )
       );
     } else {
-      return super.toPointSetDist(env, xSelection)
+      return super.toPointSetDist(env, xSelection);
     }
   }
 }
