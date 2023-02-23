@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useSquiggle, SquiggleArgs } from "../lib/hooks/useSquiggle";
+import { SquiggleContainer } from "./SquiggleContainer";
 import { SquiggleViewer, SquiggleViewerProps } from "./SquiggleViewer";
 import { getValueToRender } from "../lib/utility";
 
@@ -12,5 +13,9 @@ export const SquiggleChart: React.FC<Props> = React.memo((props) => {
 
   const valueToRender = getValueToRender(resultAndBindings);
 
-  return <SquiggleViewer {...props} result={valueToRender} />;
+  return (
+    <SquiggleContainer>
+      <SquiggleViewer {...props} result={valueToRender} />
+    </SquiggleContainer>
+  );
 });
