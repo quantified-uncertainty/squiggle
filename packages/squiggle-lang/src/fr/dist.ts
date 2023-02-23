@@ -234,7 +234,6 @@ export const library: FRFunction[] = [
         "metalog",
         [frArray(frRecord(["x", frNumber], ["q", frNumber]))],
         ([points], { environment }) => {
-          debugger;
           return Result.errMap(
             Result.fmap(
               SymbolicDist.Metalog.fitFromCdf(

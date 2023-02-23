@@ -60,6 +60,14 @@ export abstract class SymbolicDist extends BaseDist {
     return Ok(this.simplePdf(f));
   }
 
+  static interpolateQuantiles(points: number): number[] {
+    return E_A_Floats.range(
+      SymbolicDist.minCdfValue,
+      SymbolicDist.maxCdfValue,
+      points
+    );
+  }
+
   protected interpolateXs(opts: {
     xSelection: PointsetXSelection;
     points: number;
@@ -71,11 +79,7 @@ export abstract class SymbolicDist extends BaseDist {
       case "Linear":
         return E_A_Floats.range(this.min(), this.max(), points);
       case "ByWeight":
-        const ys = E_A_Floats.range(
-          SymbolicDist.minCdfValue,
-          SymbolicDist.maxCdfValue,
-          points
-        );
+        const ys = SymbolicDist.interpolateQuantiles(points);
         return ys.map((y) => this.inv(y));
       default:
         throw new Error(`Unknown xSelection value ${xSelection}`);
@@ -904,9 +908,10 @@ export class Metalog extends SymbolicDist {
     let termCount = terms ?? points.length
     if (termCount > 1) {
       const mappedPoints = points.map(({x, q}) => ({x, y: q}));
+      const validationPoints = SymbolicDist.interpolateQuantiles(xyPointLength);
       const a = method === "OLS" ? 
-        metalog.fitMetalog(mappedPoints, termCount) : 
-        metalog.fitMetalogLP(mappedPoints, termCount, 0, xyPointLength * 2);
+        metalog.fitMetalog(mappedPoints, termCount, validationPoints) : 
+        metalog.fitMetalogLP(mappedPoints, termCount, 0.001, validationPoints);
       if(a !== undefined){
         return Ok(new Metalog({a }))
       } else {
@@ -940,6 +945,34 @@ export class Metalog extends SymbolicDist {
     }
     else {
       return this.a[0];
+    }
+  }
+
+  // Metalog has a faster way of converting to point set dists
+  // if you could use the quantile function.
+  toPointSetDist(
+    env: Env,
+    xSelection: PointsetXSelection = "ByWeight"
+  ): result<PointSetDist, DistError> {
+    if(xSelection === "ByWeight") {
+      const qs = Metalog.interpolateQuantiles(env.xyPointLength)
+      const xs = qs.map((q) => this.inv(q));
+      const ys = qs.map((q) => 1 / metalog.quantileDiff(this.a, q));
+      const xyShapeR = XYShape.T.make(xs, ys);
+      if (!xyShapeR.ok) {
+        return Result.Error(xyShapeDistError(xyShapeR.value));
+      }
+
+      return Ok(
+        new PointSetDist(
+          new ContinuousShape({
+            integralSumCache: 1.0,
+            xyShape: xyShapeR.value,
+          })
+        )
+      );
+    } else {
+      return super.toPointSetDist(env, xSelection)
     }
   }
 }
