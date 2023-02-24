@@ -221,7 +221,8 @@ export const library: FRFunction[] = [
     examples: [
       `metalog([5, 2, 2])`,
       `metalog([{x: -2, q: 0.1}, {x: -1, q: 0.3}, {x: 0, q: 0.9}])`,
-      `metalog([{x: -2, q: 0.1}, {x: -1, q: 0.3}, {x: 0, q: 0.9}], 2)`,
+      `metalog([{x: -2, q: 0.1}, {x: -1, q: 0.3}, {x: 0, q: 0.9}], {terms: 2})`,
+      `metalog([{x: -2, q: 0.1}, {x: -1, q: 0.3}, {x: 0, q: 0.9}], {ols: true})`,
     ],
     definitions: [
       makeDefinition("metalog", [frArray(frNumber)], ([a]) =>
