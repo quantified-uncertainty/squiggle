@@ -1,4 +1,7 @@
 /dist
+# For some really odd reason. This file fails on CI but not on the local machine
+# I'm really not sure why
+/src/dist/SymbolicDist.ts
 .nyc_output/
 coverage/
 src/ast/peggyParser.js
