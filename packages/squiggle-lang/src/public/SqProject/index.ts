@@ -8,6 +8,7 @@ import * as Topology from "./Topology";
 import { Resolver } from "./Resolver";
 import { defaultEnv, Env } from "../../dist/env";
 import { IError } from "../../reducer/IError";
+import { PerformanceMetrics, Profiler } from "../../reducer/Profiler";
 import * as Library from "../../library";
 import { Value, vRecord } from "../../value";
 import { createContext } from "../../reducer/Context";
@@ -25,6 +26,8 @@ export class SqProject {
   private environment: Env;
   private previousRunOrder: string[];
   private resolver?: Resolver; // if not present, includes are forbidden
+  private profilerEnabled: boolean;
+  private performanceMetrics?: PerformanceMetrics;
 
   constructor(options?: Options) {
     this.items = new Map();
@@ -32,6 +35,8 @@ export class SqProject {
     this.environment = defaultEnv;
     this.previousRunOrder = [];
     this.resolver = options?.resolver;
+    this.profilerEnabled = false;
+    this.performanceMetrics = undefined;
   }
 
   static create(options?: { resolver: Resolver }) {
@@ -256,13 +261,27 @@ export class SqProject {
   }
 
   private doLinkAndRun(sourceId: string): void {
-    const context = createContext(
-      this.linkDependencies(sourceId),
-      this.getEnvironment()
-    );
-    const newItem = ProjectItem.run(this.getItem(sourceId), context);
-    // console.log("after run " + newItem.bindings->Reducer_Bindings.toString)
+    let newItem: ProjectItem.ProjectItem;
+    if (this.profilerEnabled) {
+      const profiler = new Profiler();
+      const context = createContext(
+        this.linkDependencies(sourceId),
+        this.getEnvironment(),
+        profiler
+      );
+      profiler.startTimer("<root>");
+      newItem = ProjectItem.run(this.getItem(sourceId), context);
+      profiler.endTimer("<root>");
+      this.performanceMetrics = profiler.performanceMetrics;
+    } else {
+      const context = createContext(
+        this.linkDependencies(sourceId),
+        this.getEnvironment()
+      );
+      newItem = ProjectItem.run(this.getItem(sourceId), context);
+    }
     this.setItem(sourceId, newItem);
+    // console.log("after run " + newItem.bindings->Reducer_Bindings.toString)
   }
 
   private runFromRunOrder(runOrder: string[]) {
@@ -296,6 +315,15 @@ export class SqProject {
 
   run(sourceId: string) {
     this.runFromRunOrder(Topology.getRunOrderFor(this, sourceId));
+  }
+  enableProfiler() {
+    this.profilerEnabled = true;
+  }
+  disableProfiler() {
+    this.profilerEnabled = false;
+  }
+  getPerformanceMetrics(): PerformanceMetrics | undefined {
+    return this.performanceMetrics;
   }
 }
 

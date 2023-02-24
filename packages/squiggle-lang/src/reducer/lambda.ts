@@ -36,7 +36,12 @@ export abstract class Lambda {
     };
 
     return SqError.rethrowWithFrameStack(() => {
-      return this.body(args, newContext, reducer);
+      newContext.profiler?.startTimer(newContext.frameStack.toString());
+
+      let result = this.body(args, newContext, reducer);
+
+      newContext.profiler?.endTimer(newContext.frameStack.toString());
+      return result;
     }, newContext.frameStack);
   }
 
