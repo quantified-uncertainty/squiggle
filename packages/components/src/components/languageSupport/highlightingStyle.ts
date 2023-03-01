@@ -1,55 +1,16 @@
 import { HighlightStyle } from "@codemirror/language";
 import { tags } from "@lezer/highlight";
 
-// TODO: Freeze color theme after experimentation
-
-const clampComponent = (a: number) => (a < 255 ? (a >= 0 ? a : 0) : 255);
-const saturation = 0.7;
-const lightness = -10;
-
-const colors = [
-  "#bea066", // numbers
-  "#ba5a61", // names
-  "#8797a1", // operators
-  "#d4d4d4", // invalid
-  "#8e949f", // separators
-  "#68707f", // comments
-  "#5091c7", // variables
-  "#247ea2", // strings
-  "#ae8055", // constants
-  "#a564b8", // keywords
-].map(
-  (a) =>
-    "#" +
-    [
-      [1, 3],
-      [3, 5],
-      [5, 7],
-    ]
-      .map((s) =>
-        clampComponent(
-          Math.floor(
-            255 - parseInt(a.substring(s[0], s[1]), 16) / saturation + lightness
-          )
-        )
-          .toString(16)
-          .padStart(2, "0")
-      )
-      .join("")
-);
-
-const [
-  numbers,
-  names,
-  operators,
-  invalid,
-  separators,
-  comments,
-  variables,
-  strings,
-  constants,
-  keywords,
-] = colors;
+const numbers = "#001063";
+const names = "#00746a";
+const operators = "#341d0e";
+const invalid = "#000000";
+const separators = "#2a2111";
+const comments = "#60553f";
+const variables = "#822500";
+const strings = "#c1410d";
+const constants = "#003e7b";
+const keywords = "#096600";
 
 export const lightThemeHighlightingStyle = HighlightStyle.define([
   { tag: tags.keyword, fontWeight: "bold", color: keywords },
