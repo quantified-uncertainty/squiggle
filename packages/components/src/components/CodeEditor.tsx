@@ -138,6 +138,9 @@ export const CodeEditor: FC<CodeEditorProps> = ({
     editorView.current?.dispatch({
       effects: compUpdateListener.reconfigure(
         EditorView.updateListener.of((update) => {
+          if (update.docChanged) {
+            onChange(update.state.doc.toString());
+          }
           // console.log(
           //   printTree(
           //     languageSupport.language.parser.parse(
@@ -147,7 +150,6 @@ export const CodeEditor: FC<CodeEditorProps> = ({
           //     {}
           //   )
           // );
-          onChange(update.state.doc.toString());
         })
       ),
     });

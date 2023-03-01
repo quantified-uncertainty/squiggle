@@ -65,7 +65,9 @@ export const JsonEditor: FC<CodeEditorProps> = ({
     editorView.current?.dispatch({
       effects: compUpdateListener.reconfigure(
         EditorView.updateListener.of((update) => {
-          onChange(update.state.doc.toString());
+          if (update.docChanged) {
+            onChange(update.state.doc.toString());
+          }
         })
       ),
     });
