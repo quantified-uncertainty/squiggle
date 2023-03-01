@@ -3,7 +3,6 @@ import React, { FC, useEffect, useMemo, useRef } from "react";
 import squiggle from "./languageSupport/squiggle";
 
 import { SqLocation } from "@quri/squiggle-lang";
-import { printTree } from "./languageSupport/lezerDebug";
 
 import { syntaxHighlighting } from "@codemirror/language";
 import { EditorState, Compartment } from "@codemirror/state";
@@ -141,15 +140,6 @@ export const CodeEditor: FC<CodeEditorProps> = ({
           if (update.docChanged) {
             onChange(update.state.doc.toString());
           }
-          // console.log(
-          //   printTree(
-          //     languageSupport.language.parser.parse(
-          //       update.state.doc.toString()
-          //     ),
-          //     update.state.doc.toString(),
-          //     {}
-          //   )
-          // );
         })
       ),
     });
