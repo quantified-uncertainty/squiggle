@@ -31,7 +31,6 @@ import { lintKeymap } from "@codemirror/lint";
 import {
   foldGutter,
   indentOnInput,
-  defaultHighlightStyle,
   bracketMatching,
   foldKeymap,
 } from "@codemirror/language";

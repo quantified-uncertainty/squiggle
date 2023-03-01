@@ -1,8 +1,12 @@
 import React, { FC, useEffect, useMemo, useRef } from "react";
 
-import { json as jsonLS } from "@codemirror/lang-json";
+import {
+  json as jsonLS,
+  jsonParseLinter as jsonLint,
+} from "@codemirror/lang-json";
 import { EditorState, Compartment } from "@codemirror/state";
-import { EditorView, keymap } from "@codemirror/view";
+import { EditorView } from "@codemirror/view";
+import { linter } from "@codemirror/lint";
 import { basicSetup } from "codemirror";
 
 interface CodeEditorProps {
@@ -32,7 +36,12 @@ export const JsonEditor: FC<CodeEditorProps> = ({
     () =>
       EditorState.create({
         doc: value,
-        extensions: [basicSetup, compUpdateListener.of([]), languageSupport],
+        extensions: [
+          basicSetup,
+          compUpdateListener.of([]),
+          languageSupport,
+          linter(jsonLint()),
+        ],
       }),
     []
   );
