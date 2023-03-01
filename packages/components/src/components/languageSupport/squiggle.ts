@@ -55,10 +55,14 @@ const squiggleLang = LRLanguage.define({
         ArrayExpr: foldInside,
       }),
       indentNodeProp.add({
-        RecordExpr: (context) => context.baseIndent + context.unit,
-        BlockExpr: (context) => context.baseIndent + context.unit,
-        LambdaExpr: (context) => context.baseIndent + context.unit,
-        ArrayExpr: (context) => context.baseIndent + context.unit,
+        RecordExpr: (context) =>
+          context.baseIndent + (context.textAfter == "}" ? 0 : context.unit),
+        BlockExpr: (context) =>
+          context.baseIndent + (context.textAfter == "}" ? 0 : context.unit),
+        LambdaExpr: (context) =>
+          context.baseIndent + (context.textAfter == "}" ? 0 : context.unit),
+        ArrayExpr: (context) =>
+          context.baseIndent + (context.textAfter == "]" ? 0 : context.unit),
       }),
     ],
   }),
