@@ -4691,9 +4691,9 @@
     "@types/react" "*"
 
 "@types/react@*", "@types/react@^18.0.1", "@types/react@^18.0.21":
-  version "18.0.27"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.27.tgz#d9425abe187a00f8a5ec182b010d4fd9da703b71"
-  integrity sha512-3vtRKHgVxu3Jp9t718R9BuzoD4NcQ8YJ5XRzsSKxNDiDonD2MXIT1TmSkenxuCycZJoQT5d2vE8LwWJxBC1gmA==
+  version "18.0.28"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.28.tgz#accaeb8b86f4908057ad629a26635fe641480065"
+  integrity sha512-RD0ivG1kEztNBdoAK7lekI9M+azSnitIn85h4iOiaLjaTrMjzslhaqCGaI4IyCJ1RljWiLCEu4jyrLLgqxBTew==
   dependencies:
     "@types/prop-types" "*"
     "@types/scheduler" "*"
@@ -7030,7 +7030,7 @@ commander@^8.0.0, commander@^8.3.0:
   resolved "https://registry.yarnpkg.com/commander/-/commander-8.3.0.tgz#4837ea1b2da67b9c616a67afbb0fafee567bca66"
   integrity sha512-OkTL9umf+He2DZkUq8f8J9of7yL6RJKI24dVITBmNfZBmri9zYZQrKkuXiKhyfPSu8tUhnVBB1iKXevvnlR4Ww==
 
-commander@^9.3.0, commander@^9.4.1:
+commander@^9.4.1:
   version "9.4.1"
   resolved "https://registry.yarnpkg.com/commander/-/commander-9.4.1.tgz#d1dd8f2ce6faf93147295c0df13c7c21141cfbdd"
   integrity sha512-5EEkTNyHNGFPD2H+c/dXXfQZYa/scCKasxWcXJaWnNJ99pnQN9Vnmqow+p+PlFPE63Q6mThaZws1T+HxfpgtPw==
@@ -13987,12 +13987,12 @@ pbkdf2@^3.0.3:
     safe-buffer "^5.0.1"
     sha.js "^2.4.8"
 
-peggy@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/peggy/-/peggy-2.0.1.tgz#d9bfde03b18d6ec2b9b85b2aa5af51577850152c"
-  integrity sha512-mBqfmdUAOVn7RILpXTbcRBhLfTR4Go0SresSnivGDdRylBOyVFJncFiVyCNNpPWq8HmgeRleXHs/Go4o8kQVXA==
+peggy@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/peggy/-/peggy-3.0.0.tgz#d9d74bf42712ad8e4587452c1b600eba9cf0eb30"
+  integrity sha512-Z4wzPw+OhPO1X2nVM3rt4Uprn79lIV9AlkOar1JC+veI6q7f+X92k1pI+HBhkxncz5LCwvei+Xl1+oKjdlcxiQ==
   dependencies:
-    commander "^9.3.0"
+    commander "^10.0.0"
     source-map-generator "0.8.0"
 
 pend@~1.2.0:
