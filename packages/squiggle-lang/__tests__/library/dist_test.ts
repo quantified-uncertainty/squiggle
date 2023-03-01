@@ -42,6 +42,14 @@ describe("eval on distribution functions", () => {
     testEvalToBe("mean(bernoulli(0.8))", "0.8");
     testEvalToBe("mean(logistic(5,1))", "5");
   });
+  describe("stdev", () => {
+    testEvalToBe("stdev(normal(5,2))", "2");
+    testEvalToBe("stdev(lognormal(1,2))", "147.04773715128695");
+    testEvalToBe("stdev(gamma(5,5))", "11.180339887498949");
+    testEvalToBe("stdev(bernoulli(0.2))", "0.4");
+    testEvalToBe("stdev(bernoulli(0.8))", "0.39999999999999997");
+    testEvalToBe("stdev(logistic(5,1))", "1.8137993642342178");
+  });
   describe("toString", () => {
     testEvalToBe("toString(normal(5,2))", "'Normal(5,2)'");
   });
