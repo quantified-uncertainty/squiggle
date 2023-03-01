@@ -20,7 +20,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Install nix
-        uses: cachix/install-nix-action@v18
+        uses: cachix/install-nix-action@v20
         with:
           nix_path: nixpkgs=channel:nixos-22.05
       - name: Use cachix
@@ -48,7 +48,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Install nix
-        uses: cachix/install-nix-action@v18
+        uses: cachix/install-nix-action@v20
         with:
           nix_path: nixpkgs=channel:nixos-22.05
       - name: Use cachix
@@ -73,7 +73,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Install nix
-        uses: cachix/install-nix-action@v18
+        uses: cachix/install-nix-action@v20
         with:
           nix_path: nixpkgs=channel:nixos-22.05
       - name: Use cachix
