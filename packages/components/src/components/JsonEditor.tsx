@@ -14,7 +14,7 @@ interface CodeEditorProps {
   onChange: (value: string) => void;
   oneLine?: boolean;
   width?: number;
-  height: number;
+  height?: number;
 }
 
 const languageSupport = jsonLS();
@@ -63,7 +63,7 @@ export const JsonEditor: FC<CodeEditorProps> = ({
         EditorView.theme({
           "&": {
             ...(width !== null ? { width: `${width}px` } : {}),
-            height: `${height}px`,
+            ...(height !== null ? { height: `${height}px` } : {}),
           },
         })
       ),
