@@ -2,7 +2,7 @@ import { deflate, inflate } from "pako";
 import { toByteArray, fromByteArray } from "base64-js";
 import React from "react";
 import Layout from "@theme/Layout";
-import { SquigglePlayground } from "../components/SquigglePlayground";
+import { SquigglePlayground } from "@quri/squiggle-components";
 
 const HASH_PREFIX = "#code=";
 function getHashData() {
