@@ -127,7 +127,7 @@ else { kw<"else"> }
     identifier { word }
 
     Number {
-        (@digit (@digit)* ("." (@digit)*)? | "." (@digit)*) (("e" | "E") ("+" | "-")? (@digit)+)? ("B" | "m" | "k" | "M" | "G" | "T")?
+        (@digit (@digit)* ("." (@digit)*)? | "." (@digit)*) (("e" | "E") ("+" | "-")? (@digit)+)? (identifier)?
     }
     
     @precedence { DotArithOp "." Number }
