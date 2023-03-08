@@ -8973,10 +8973,10 @@ extglob@^2.0.4:
     snapdragon "^0.8.1"
     to-regex "^3.0.1"
 
-fast-check@^3.6.2:
-  version "3.6.2"
-  resolved "https://registry.yarnpkg.com/fast-check/-/fast-check-3.6.2.tgz#46956028e366715187e369e6019d10737b93e388"
-  integrity sha512-htRkbkw8B1yVfvrLNiJTnpcvpXrdcgpwZUQdC07dsiUGXaHHWK38t6VCnTmAUf68atyos1+XXXY60VUbSgorAQ==
+fast-check@^3.7.0:
+  version "3.7.0"
+  resolved "https://registry.yarnpkg.com/fast-check/-/fast-check-3.7.0.tgz#6ffbe5e0185f6e421ad29ad38e97b3ff8a4f5987"
+  integrity sha512-1QFnXC7UcTlSBk7523W99QbnP6mTrvUjEXLKODjjhh/QJUHAzzBow2POae7hV+Qrqjj4XaU0HbTfwEa8HprS5g==
   dependencies:
     pure-rand "^6.0.0"
 
