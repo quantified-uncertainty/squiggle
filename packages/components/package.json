@@ -21,7 +21,7 @@
     "react-vega": "^7.6.0",
     "uuid": "^9.0.0",
     "vega": "^5.22.1",
-    "vega-embed": "^6.21.0",
+    "vega-embed": "^6.21.3",
     "vega-lite": "^5.6.1",
     "vscode-uri": "^3.0.7",
     "yup": "^0.32.11"
