@@ -2089,17 +2089,17 @@
   resolved "https://registry.yarnpkg.com/@eslint/js/-/js-8.35.0.tgz#b7569632b0b788a0ca0e438235154e45d42813a7"
   integrity sha512-JXdzbRiWclLVoD8sNUjR443VVlYqiYmDVT6rGUEIEHU5YJW0gaVZwV2xgM7D4arkvASqD0IlLUVjHiFuxaftRw==
 
-"@floating-ui/core@^1.0.5":
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/@floating-ui/core/-/core-1.0.5.tgz#ada3cca622fe7b52d7b9ead97ddbed5b98925c66"
-  integrity sha512-iDdOsaCHZH/0FM0yNBYt+cJxJF9S5jrYWNtDZOiDFMiZ7uxMJ/71h8eTwoVifEAruv9p9rlMPYCGIgMjOz95FQ==
+"@floating-ui/core@^1.2.2":
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/@floating-ui/core/-/core-1.2.2.tgz#66f62cf1b7de2ed23a09c101808536e68caffaec"
+  integrity sha512-FaO9KVLFnxknZaGWGmNtjD2CVFuc0u4yeGEofoyXO2wgRA7fLtkngT6UB0vtWQWuhH3iMTZZ/Y89CMeyGfn8pA==
 
-"@floating-ui/dom@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@floating-ui/dom/-/dom-1.1.0.tgz#29fea1344fdef15b6ba270a733d20b7134fee5c2"
-  integrity sha512-TSogMPVxbRe77QCj1dt8NmRiJasPvuc+eT5jnJ6YpLqgOD2zXc5UA3S1qwybN+GVCDNdKfpKy1oj8RpzLJvh6A==
+"@floating-ui/dom@^1.2.1":
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/@floating-ui/dom/-/dom-1.2.3.tgz#8dc6fbf799fbb5c29f705b54bdd51f3ab0ee03a2"
+  integrity sha512-lK9cZUrHSJLMVAdCvDqs6Ug8gr0wmqksYiaoj/bxj2gweRQkSuhg2/V6Jswz2KiQ0RAULbqw1oQDJIMpQ5GfGA==
   dependencies:
-    "@floating-ui/core" "^1.0.5"
+    "@floating-ui/core" "^1.2.2"
 
 "@floating-ui/react-dom-interactions@^0.13.3":
   version "0.13.3"
@@ -2110,12 +2110,12 @@
     aria-hidden "^1.1.3"
     tabbable "^6.0.1"
 
-"@floating-ui/react-dom@^1.0.1", "@floating-ui/react-dom@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@floating-ui/react-dom/-/react-dom-1.1.0.tgz#cd212b9e98303ba76e59806e425217f40e33926d"
-  integrity sha512-xyP9dMqZouuQ7h10DvbEbxZItuUleKHXe7XQFvbpttjXZrfyQMaZVTnWsE/t3hrHakZy18HxEBZRzGNXQHd0GA==
+"@floating-ui/react-dom@^1.0.1", "@floating-ui/react-dom@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@floating-ui/react-dom/-/react-dom-1.3.0.tgz#4d35d416eb19811c2b0e9271100a6aa18c1579b3"
+  integrity sha512-htwHm67Ji5E/pROEAr7f8IKFShuiCKHwUC/UY4vC3I5jiSvGFAYnSYiZO5MlGmads+QqvUkR9ANHEguGrDv72g==
   dependencies:
-    "@floating-ui/dom" "^1.1.0"
+    "@floating-ui/dom" "^1.2.1"
 
 "@gar/promisify@^1.0.1":
   version "1.1.3"
