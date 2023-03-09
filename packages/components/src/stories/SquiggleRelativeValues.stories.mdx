@@ -18,7 +18,7 @@ export const Template = (props) => <SquiggleRelativeValues {...props} />;
       code: `
 blog_post_to_software = SampleSet.fromDist(0.1 to 100)
 items = {
-  quri_papers_1: {name:"External Evaluation of the EA Wiki", id: "quri_papers_1", value: 1},
+  quri_papers_1: {name:"External Evaluation of the EA Wiki", id: "quri_papers_1", value: pointMass(1)},
   quri_papers_2: {name:"Flimsy Pet Theories, Enormous Initiatives", id: "quri_papers_2", value: 0.1 to 2},
   quri_papers_3: {name:"Simple comparison polling to create utility functions", id: "quri_papers_3", value: 0.5 to 10},
   quri_papers_4: {name:"Prioritization Research for Advancing Wisdom and Intelligence", id: "quri_papers_4", value: 0.2 to 20},
@@ -43,10 +43,21 @@ items = {
   quri_ken: {name:"Ken", id: "quri_ken", value: (0.1 to 0.5)*blog_post_to_software},
   quri_guesstimate: {name:"Guesstimate", id: "quri_guesstimate", value: (50 to 10000)*blog_post_to_software}
 }
-choices = Dict.keys(items)
+withSampleSetValue(item) = {
+  {
+    name: item["name"],
+    value: SampleSet.fromDist(item["value"])
+  }
+}
+items = Dict.map(items, withSampleSetValue)
+choices = Dict.keys(items) -> map({
+  |id| {
+    id: id,
+    name: items[id].name
+  }
+})
 fn(intervention1, intervention2) = items[intervention1].value / items[intervention2].value
-fn
-      `,
+fn`,
     }}
   >
     {Template.bind({})}
