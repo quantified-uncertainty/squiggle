@@ -1,6 +1,5 @@
 {
-  "name": "relative-values",
-  "version": "0.1.0",
+  "name": "@quri/relative-values",
   "private": true,
   "scripts": {
     "dev": "next dev",
