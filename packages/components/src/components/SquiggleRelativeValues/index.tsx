@@ -4,16 +4,27 @@ import {
   SqDistributionTag,
   SqLambda,
   SqProject,
+  SqRecord,
 } from "@quri/squiggle-lang";
-import { SqValue } from "@quri/squiggle-lang/src/public/SqValue";
+import clsx from "clsx";
 import React, { useEffect, useMemo, useState } from "react";
 import { NumberShower } from "../NumberShower";
 import { SquiggleViewer } from "../SquiggleViewer";
 import { Histogram } from "./Histogram";
 
+type Cluster = {
+  name: string;
+  color: string;
+};
+
+type Clusters = {
+  [k: string]: Cluster;
+};
+
 type Choice = {
   id: string;
   name: string;
+  clusterId?: string;
 };
 
 const useRelativeValues = (code: string) => {
@@ -48,13 +59,7 @@ const useRelativeValues = (code: string) => {
 
     const bindings = project.getBindings(MAIN);
 
-    let choicesValue: SqValue | undefined;
-
-    for (let [k, v] of bindings.entries()) {
-      if (k === "choices") {
-        choicesValue = v;
-      }
-    }
+    let choicesValue = bindings.get("choices");
 
     if (!choicesValue) {
       setError(`choices should be defined`);
@@ -72,47 +77,52 @@ const useRelativeValues = (code: string) => {
         setError(`choice should be a record, got: ${choiceValue.tag}`);
         return;
       }
-      let id: string | undefined, name: string | undefined;
-      for (let [k, v] of choiceValue.value.entries()) {
-        if (k === "id") {
-          if (v.tag !== "String") {
-            setError("expected string for id");
-            return;
-          }
-          id = v.value;
-        }
-        if (k === "name") {
-          if (v.tag !== "String") {
-            setError("expected string for name");
-            return;
-          }
-          name = v.value;
-        }
-      }
 
+      const getStringValue = (record: SqRecord, key: string) => {
+        const value = record.get(key);
+        if (value?.tag !== "String") {
+          return;
+        }
+        return value.value;
+      };
+      const id = getStringValue(choiceValue.value, "id");
+      const name = getStringValue(choiceValue.value, "name");
       if (id === undefined) {
-        setError("id field not present");
+        setError("id field not found");
         return;
       }
       if (name === undefined) {
-        setError("name field not present");
+        setError("name field not found");
         return;
       }
 
       choices.push({
         id,
         name,
+        clusterId: id.startsWith("quri_papers_") ? "papers" : "software",
       });
     }
 
     setChoices(choices);
   }, [project, code]);
 
-  return { error, choices, fn, project };
+  // TODO
+  const clusters: Clusters = {
+    papers: {
+      name: "Papers",
+      color: "#DB828C",
+    },
+    software: {
+      name: "Software",
+      color: "#5D8CD3",
+    },
+  };
+
+  return { error, choices, clusters, fn, project };
 };
 
 const CellError: React.FC<{ error: string }> = ({ error }) => {
-  // TODO - truncate
+  // TODO - truncate?
   return <div className="text-red-500 text-xs">{error}</div>;
 };
 
@@ -135,6 +145,51 @@ const Cell: React.FC<{ dist: SqDistribution; env: Env }> = ({ dist, env }) => {
   );
 };
 
+const ClusterIcon: React.FC<{ cluster: Cluster }> = ({ cluster }) => {
+  return (
+    <div
+      className="w-3 h-3 rounded-full"
+      style={{ backgroundColor: cluster.color }}
+    />
+  );
+};
+
+const Header: React.FC<{
+  choice: Choice;
+  th?: boolean;
+  clusters: Clusters;
+}> = ({ choice, th, clusters }) => {
+  const Tag = th ? "th" : "td";
+  const cluster = choice.clusterId ? clusters[choice.clusterId] : undefined;
+  return (
+    <Tag className="font-bold border border-gray-200 bg-gray-50 p-1">
+      <div className={clsx("text-xs", th && "w-40")}>
+        {cluster ? (
+          <div className="float-right px-0.5">
+            <ClusterIcon cluster={cluster} />
+          </div>
+        ) : null}
+        {choice.name}
+      </div>
+    </Tag>
+  );
+};
+
+const HorizontalClusterFilter: React.FC<{ clusters: Clusters }> = ({
+  clusters,
+}) => {
+  return (
+    <div className="flex gap-2">
+      {Object.keys(clusters).map((clusterName) => (
+        <div className="flex gap-1 items-center">
+          <ClusterIcon cluster={clusters[clusterName]} />
+          <div className="text-xs font-bold">{clusterName}</div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 type Props = {
   code: string;
   showDebugViewer?: boolean;
@@ -144,7 +199,7 @@ export const SquiggleRelativeValues: React.FC<Props> = ({
   code,
   showDebugViewer,
 }) => {
-  const { error, choices, fn, project } = useRelativeValues(code);
+  const { error, choices, clusters, fn, project } = useRelativeValues(code);
 
   const renderCompare = (choice1: Choice, choice2: Choice) => {
     if (!fn) {
@@ -174,29 +229,27 @@ export const SquiggleRelativeValues: React.FC<Props> = ({
   return (
     <div>
       {error && <pre className="text-red-700">{error}</pre>}
-      <table className="text-xs table-fixed">
+      <table className="table-fixed">
         <thead>
           <tr>
             <th />
+            <td colSpan={100}>
+              <div className="mb-2">
+                <HorizontalClusterFilter clusters={clusters} />
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <th />
             {choices.map((choice) => (
-              <th
-                key={choice.id}
-                className="border border-gray-200 p-1 bg-gray-50"
-              >
-                <div className="w-40">{choice.name}</div>
-              </th>
+              <Header key={choice.id} choice={choice} th clusters={clusters} />
             ))}
           </tr>
         </thead>
         <tbody>
           {choices.map((choice1, i1) => (
             <tr key={choice1.id}>
-              <td
-                key={0}
-                className="font-bold border border-gray-200 bg-gray-50 p-1"
-              >
-                {choice1.name}
-              </td>
+              <Header key={0} choice={choice1} clusters={clusters} />
               {choices.map((choice2, i2) =>
                 i2 < i1 ? (
                   <td key={choice2.id} className="border border-gray-200 p-0">
