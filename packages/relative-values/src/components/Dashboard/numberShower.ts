@@ -8,11 +8,6 @@ const orderOfMagnitudeNum = (n: number) => {
   return Math.pow(10, n);
 };
 
-function largeNumberSigFigs(n: number, sig) {
-  const mult = Math.pow(10, sig - Math.floor(Math.log(n) / Math.LN10) - 1);
-  return Math.round(n * mult) / mult;
-}
-
 // 105 -> 3
 const orderOfMagnitude = (n: number) => {
   return Math.floor(Math.log(n) / Math.LN10 + 0.000000001);

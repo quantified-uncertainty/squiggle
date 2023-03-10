@@ -1,21 +1,14 @@
-import { SquiggleRelativeValues } from "../components/SquiggleRelativeValues";
-import { SquigglePlayground } from "../components/SquigglePlayground";
-import { Canvas, Meta, Story, Props } from "@storybook/addon-docs";
+import { SafeHydrate } from "@/components/SafeHydrate";
+import dynamic from "next/dynamic";
 
-<Meta
-  title="Squiggle/SquiggleRelativeValues"
-  component={SquiggleRelativeValues}
-/>
+const Dashboard =
+  typeof window === "undefined"
+    ? null
+    : dynamic(() =>
+        import("@/components/Dashboard").then((mod) => mod.Dashboard)
+      );
 
-export const Template = (props) => <SquiggleRelativeValues {...props} />;
-
-# Squiggle Relative Values
-
-<Canvas>
-  <Story
-    name="Basic"
-    args={{
-      code: `
+const code = `
 blog_post_to_software = SampleSet.fromDist(0.1 to 100)
 items = {
   quri_papers_1: {name:"External Evaluation of the EA Wiki", id: "quri_papers_1", value: pointMass(1)},
@@ -57,9 +50,15 @@ choices = Dict.keys(items) -> map({
   }
 })
 fn(intervention1, intervention2) = items[intervention1].value / items[intervention2].value
-fn`,
-    }}
-  >
-    {Template.bind({})}
-  </Story>
-</Canvas>
+fn
+`;
+
+export default function IndexPage() {
+  return (
+    <main>
+      <SafeHydrate>
+        {() => (Dashboard ? <Dashboard code={code} /> : null)}
+      </SafeHydrate>
+    </main>
+  );
+}

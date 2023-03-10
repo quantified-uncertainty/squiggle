@@ -1,3 +1,6 @@
+"use client";
+
+import { NumberShower, SquiggleContainer } from "@quri/squiggle-components";
 import {
   Env,
   SqDistribution,
@@ -8,8 +11,6 @@ import {
 } from "@quri/squiggle-lang";
 import clsx from "clsx";
 import React, { useEffect, useMemo, useState } from "react";
-import { NumberShower } from "../NumberShower";
-import { SquiggleViewer } from "../SquiggleViewer";
 import { Histogram } from "./Histogram";
 
 type Cluster = {
@@ -195,10 +196,7 @@ type Props = {
   showDebugViewer?: boolean;
 };
 
-export const SquiggleRelativeValues: React.FC<Props> = ({
-  code,
-  showDebugViewer,
-}) => {
+export const Dashboard: React.FC<Props> = ({ code, showDebugViewer }) => {
   const { error, choices, clusters, fn, project } = useRelativeValues(code);
 
   const renderCompare = (choice1: Choice, choice2: Choice) => {
@@ -218,51 +216,58 @@ export const SquiggleRelativeValues: React.FC<Props> = ({
 
     return (
       <div>
-        {showDebugViewer && (
+        {/* {showDebugViewer && (
           <SquiggleViewer result={result} enableLocalSettings={true} />
-        )}
+        )} */}
         <Cell dist={value.value} env={project.getEnvironment()} />
       </div>
     );
   };
 
   return (
-    <div>
-      {error && <pre className="text-red-700">{error}</pre>}
-      <table className="table-fixed">
-        <thead>
-          <tr>
-            <th />
-            <td colSpan={100}>
-              <div className="mb-2">
-                <HorizontalClusterFilter clusters={clusters} />
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <th />
-            {choices.map((choice) => (
-              <Header key={choice.id} choice={choice} th clusters={clusters} />
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {choices.map((choice1, i1) => (
-            <tr key={choice1.id}>
-              <Header key={0} choice={choice1} clusters={clusters} />
-              {choices.map((choice2, i2) =>
-                i2 < i1 ? (
-                  <td key={choice2.id} className="border border-gray-200 p-0">
-                    {renderCompare(choice1, choice2)}
-                  </td>
-                ) : (
-                  <td key={choice2.id} className="bg-gray-200" />
-                )
-              )}
+    <SquiggleContainer>
+      <div>
+        {error && <pre className="text-red-700">{error}</pre>}
+        <table className="table-fixed">
+          <thead>
+            <tr>
+              <th />
+              <td colSpan={100}>
+                <div className="mb-2">
+                  <HorizontalClusterFilter clusters={clusters} />
+                </div>
+              </td>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+            <tr>
+              <th />
+              {choices.map((choice) => (
+                <Header
+                  key={choice.id}
+                  choice={choice}
+                  th
+                  clusters={clusters}
+                />
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {choices.map((choice1, i1) => (
+              <tr key={choice1.id}>
+                <Header key={0} choice={choice1} clusters={clusters} />
+                {choices.map((choice2, i2) =>
+                  i2 < i1 ? (
+                    <td key={choice2.id} className="border border-gray-200 p-0">
+                      {renderCompare(choice1, choice2)}
+                    </td>
+                  ) : (
+                    <td key={choice2.id} className="bg-gray-200" />
+                  )
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </SquiggleContainer>
   );
 };
