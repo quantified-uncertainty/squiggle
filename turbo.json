@@ -15,6 +15,9 @@
       "dependsOn": ["^build"],
       "outputs": ["src/**/*.js", "dist/**"]
     },
+    "@quri/relative-values#build": {
+      "outputs": [".next/**"]
+    },
     "format": {},
     "lint": {
       "dependsOn": ["^build"],
