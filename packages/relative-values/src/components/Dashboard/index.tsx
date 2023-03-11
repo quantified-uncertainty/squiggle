@@ -1,10 +1,17 @@
 "use client";
 
 import { NumberShower, SquiggleContainer } from "@quri/squiggle-components";
-import { Env, SqDistribution, SqDistributionTag } from "@quri/squiggle-lang";
+import {
+  Env,
+  SqDistribution,
+  SqDistributionTag,
+  SqLambda,
+  SqProject,
+} from "@quri/squiggle-lang";
 import clsx from "clsx";
-import { FC } from "react";
+import { FC, useContext, useMemo, useReducer } from "react";
 import { ClusterIcon } from "./ClusterIcon";
+import { DashboardContext, DashboardProvider } from "./DashboardProvider";
 import { Histogram } from "./Histogram";
 import { useRelativeValues } from "./hooks";
 import { HorizontalClusterFilter } from "./HorizontalClusterFilter";
@@ -57,18 +64,20 @@ const Header: FC<{
   );
 };
 
-type Props = {
-  code: string;
-  showDebugViewer?: boolean;
-};
+const DashboardTable: FC<{
+  project: SqProject;
+  fn: SqLambda;
+  choices: Choice[];
+}> = ({ project, fn, choices }) => {
+  const { clusters, selectedClusters } = useContext(DashboardContext);
 
-export const Dashboard: FC<Props> = ({ code, showDebugViewer }) => {
-  const { error, choices, clusters, fn, project } = useRelativeValues(code);
+  const usedChoices = useMemo(() => {
+    return choices.filter((choice) =>
+      choice.clusterId ? selectedClusters.has(choice.clusterId) : true
+    );
+  }, [choices, selectedClusters]);
 
   const renderCompare = (choice1: Choice, choice2: Choice) => {
-    if (!fn) {
-      return null;
-    }
     const result = fn.call([choice1.id, choice2.id]);
     if (!result.ok) {
       return <CellError error={result.value.toString()} />;
@@ -90,52 +99,64 @@ export const Dashboard: FC<Props> = ({ code, showDebugViewer }) => {
   };
 
   return (
-    <SquiggleContainer>
-      <div>
-        {error && <pre className="text-red-700">{error}</pre>}
-        <table className="table-fixed">
-          <thead>
-            <tr>
-              <th />
-              <td colSpan={100}>
-                <div className="mb-2">
-                  <HorizontalClusterFilter clusters={clusters} />
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <th />
-              {choices.map((choice) => (
-                <Header
-                  key={choice.id}
-                  choice={choice}
-                  th
-                  clusters={clusters}
-                />
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {choices.map((choice1, i1) => (
-              <tr key={choice1.id}>
-                <Header key={0} choice={choice1} clusters={clusters} />
-                {choices.map((choice2, i2) =>
-                  i2 < i1 ? (
-                    <td
-                      key={choice2.id}
-                      className="border border-gray-200 p-0 align-bottom"
-                    >
-                      {renderCompare(choice1, choice2)}
-                    </td>
-                  ) : (
-                    <td key={choice2.id} className="bg-gray-200" />
-                  )
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </SquiggleContainer>
+    <table className="table-fixed">
+      <thead>
+        <tr>
+          <th />
+          <td colSpan={100}>
+            <div className="mb-2">
+              <HorizontalClusterFilter />
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <th />
+          {usedChoices.map((choice) => (
+            <Header key={choice.id} choice={choice} th clusters={clusters} />
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {usedChoices.map((choice1, i1) => (
+          <tr key={choice1.id}>
+            <Header key={0} choice={choice1} clusters={clusters} />
+            {usedChoices.map((choice2, i2) =>
+              i2 < i1 ? (
+                <td
+                  key={choice2.id}
+                  className="border border-gray-200 p-0 align-bottom"
+                >
+                  {renderCompare(choice1, choice2)}
+                </td>
+              ) : (
+                <td key={choice2.id} className="bg-gray-200" />
+              )
+            )}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+};
+type Props = {
+  code: string;
+  showDebugViewer?: boolean;
+};
+
+export const Dashboard: FC<Props> = ({ code, showDebugViewer }) => {
+  // TODO - store most of these in context? they're all global
+  const { error, choices, clusters, fn, project } = useRelativeValues(code);
+
+  return (
+    <DashboardProvider initialClusters={clusters}>
+      <SquiggleContainer>
+        <div>
+          {error && <pre className="text-red-700">{error}</pre>}
+          {fn ? (
+            <DashboardTable fn={fn} project={project} choices={choices} />
+          ) : null}
+        </div>
+      </SquiggleContainer>
+    </DashboardProvider>
   );
 };
