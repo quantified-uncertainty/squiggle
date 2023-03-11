@@ -10,7 +10,7 @@ import {
 import clsx from "clsx";
 import { FC, memo, useCallback, useContext, useMemo } from "react";
 import { ClusterIcon } from "./ClusterIcon";
-import { DashboardContext, Filter } from "./DashboardProvider";
+import { ViewContext, Filter } from "./ViewProvider";
 import { Histogram } from "./Histogram";
 import { ClusterFilter } from "./ClusterFilter";
 import { Choice, Clusters } from "./types";
@@ -128,7 +128,7 @@ export const RelativeValuesTable: FC<{
   fn: SqLambda;
   choices: Choice[];
 }> = ({ project, fn, choices }) => {
-  const { clusters, filters } = useContext(DashboardContext);
+  const { clusters, filters } = useContext(ViewContext);
 
   const rowChoices = useFilteredChoices(choices, filters.rows);
   const columnChoices = useFilteredChoices(choices, filters.columns);

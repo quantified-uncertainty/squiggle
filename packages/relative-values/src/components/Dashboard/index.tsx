@@ -1,27 +1,56 @@
-import { SquiggleContainer } from "@quri/squiggle-components";
 import { FC } from "react";
-import { DashboardProvider } from "./DashboardProvider";
-import { useRelativeValues } from "./hooks";
-import { RelativeValuesTable } from "./RelativeValuesTable";
+import { StyledTab } from "../ui/StyledTab";
+import { View } from "../View";
+import {
+  DashboardProvider,
+  useDashboardContext,
+  useDashboardDispatch,
+} from "./DashboardProvider";
 
-type Props = {
-  code: string;
+const Estimate: FC<{ code: string; setCode: (code: string) => void }> = ({
+  code,
+  setCode,
+}) => {
+  return (
+    <textarea
+      value={code}
+      onChange={(e) => setCode(e.currentTarget.value)}
+      className="text-xs w-full border p-2 min-h-[400px]"
+    />
+  );
 };
 
-export const Dashboard: FC<Props> = ({ code }) => {
-  // TODO - store most of these in context? they're all global
-  const { error, choices, clusters, fn, project } = useRelativeValues(code);
+const InnerDashboard: FC = () => {
+  const { code } = useDashboardContext();
+  const dispatch = useDashboardDispatch();
 
   return (
-    <DashboardProvider initialClusters={clusters}>
-      <SquiggleContainer>
-        <div>
-          {error && <pre className="text-red-700">{error}</pre>}
-          {fn ? (
-            <RelativeValuesTable fn={fn} project={project} choices={choices} />
-          ) : null}
-        </div>
-      </SquiggleContainer>
+    <StyledTab.Group>
+      <div className="mb-4">
+        <StyledTab.List>
+          <StyledTab name="View" icon={() => <div />} />
+          <StyledTab name="Estimate" icon={() => <div />} />
+        </StyledTab.List>
+      </div>
+      <StyledTab.Panels>
+        <StyledTab.Panel>
+          <View code={code} />
+        </StyledTab.Panel>
+        <StyledTab.Panel>
+          <Estimate
+            code={code}
+            setCode={(value) => dispatch({ type: "setCode", payload: value })}
+          />
+        </StyledTab.Panel>
+      </StyledTab.Panels>
+    </StyledTab.Group>
+  );
+};
+
+export const Dashboard: FC = () => {
+  return (
+    <DashboardProvider>
+      <InnerDashboard />
     </DashboardProvider>
   );
 };

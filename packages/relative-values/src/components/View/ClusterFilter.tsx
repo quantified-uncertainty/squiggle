@@ -1,10 +1,7 @@
 import clsx from "clsx";
 import { FC, useContext } from "react";
 import { ClusterIcon } from "./ClusterIcon";
-import {
-  DashboardContext,
-  DashboardDispatchContext,
-} from "./DashboardProvider";
+import { Axis, ViewContext, ViewDispatchContext } from "./ViewProvider";
 import { Cluster } from "./types";
 
 export const ClusterItem: React.FC<{
@@ -22,12 +19,12 @@ export const ClusterItem: React.FC<{
   );
 };
 
-export const ClusterFilter: FC<{ axis: "rows" | "columns" }> = ({ axis }) => {
+export const ClusterFilter: FC<{ axis: Axis }> = ({ axis }) => {
   const {
     clusters,
     filters: { [axis]: filter },
-  } = useContext(DashboardContext);
-  const dispatch = useContext(DashboardDispatchContext);
+  } = useContext(ViewContext);
+  const dispatch = useContext(ViewDispatchContext);
 
   return (
     <div className={clsx("flex gap-2", axis === "rows" && "flex-col")}>
