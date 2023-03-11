@@ -2,7 +2,7 @@ import { SquiggleContainer } from "@quri/squiggle-components";
 import { FC } from "react";
 import { ViewProvider } from "./ViewProvider";
 import { useRelativeValues } from "./hooks";
-import { RelativeValuesTable } from "./RelativeValuesTable";
+import { NxNView } from "./NxNView";
 
 type Props = {
   code: string;
@@ -17,9 +17,7 @@ export const View: FC<Props> = ({ code }) => {
       <SquiggleContainer>
         <div>
           {error && <pre className="text-red-700">{error}</pre>}
-          {fn ? (
-            <RelativeValuesTable fn={fn} project={project} choices={choices} />
-          ) : null}
+          {fn ? <NxNView fn={fn} project={project} choices={choices} /> : null}
         </div>
       </SquiggleContainer>
     </ViewProvider>

@@ -1,4 +1,10 @@
-import { createContext, FC, PropsWithChildren, useReducer } from "react";
+import {
+  createContext,
+  FC,
+  PropsWithChildren,
+  startTransition,
+  useReducer,
+} from "react";
 import { Clusters } from "./types";
 import { Set } from "immutable";
 
@@ -83,15 +89,15 @@ export const ViewProvider: FC<
     };
   });
 
-  // const transitionDispatch = (action: Action) => {
-  //   startTransition(() => {
-  //     dispatch(action);
-  //   });
-  // };
+  const transitionDispatch = (action: Action) => {
+    startTransition(() => {
+      dispatch(action);
+    });
+  };
 
   return (
     <ViewContext.Provider value={state}>
-      <ViewDispatchContext.Provider value={dispatch}>
+      <ViewDispatchContext.Provider value={transitionDispatch}>
         {children}
       </ViewDispatchContext.Provider>
     </ViewContext.Provider>

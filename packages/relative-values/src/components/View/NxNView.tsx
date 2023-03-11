@@ -14,6 +14,9 @@ import { ViewContext, Filter } from "./ViewProvider";
 import { Histogram } from "./Histogram";
 import { ClusterFilter } from "./ClusterFilter";
 import { Choice, Clusters } from "./types";
+import { Button } from "../ui/Button";
+import { DropdownButton } from "../ui/DropdownButton";
+import { AxisFilter } from "./AxisFilter";
 
 const CellError: FC<{ error: string }> = ({ error }) => {
   // TODO - truncate?
@@ -123,7 +126,7 @@ const CachedCell: FC<{
   return <Cell dist={result.value} env={project.getEnvironment()} />;
 });
 
-export const RelativeValuesTable: FC<{
+export const NxNView: FC<{
   project: SqProject;
   fn: SqLambda;
   choices: Choice[];
@@ -151,49 +154,49 @@ export const RelativeValuesTable: FC<{
   );
 
   return (
-    <table>
-      <thead>
-        <tr>
-          <th />
-          <td colSpan={100}>
-            <div className="mb-2">
-              <ClusterFilter axis="columns" />
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <th>
-            <ClusterFilter axis="rows" />
-          </th>
-          {columnChoices.map((choice) => (
-            <Header key={choice.id} choice={choice} th clusters={clusters} />
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {rowChoices.map((rowChoice) => (
-          <tr key={rowChoice.id}>
-            <Header key={0} choice={rowChoice} clusters={clusters} />
-            {columnChoices.map((columnChoice) =>
-              isHiddenPair(rowChoice, columnChoice) ? (
-                <td key={columnChoice.id} className="bg-gray-200" />
-              ) : (
-                <td
-                  key={columnChoice.id}
-                  className="border border-gray-200 p-0 align-bottom"
-                >
-                  <CachedCell
-                    id1={rowChoice.id}
-                    id2={columnChoice.id}
-                    cache={allPairs}
-                    project={project}
-                  />
-                </td>
-              )
-            )}
+    <div>
+      <div className="flex gap-2 mb-4">
+        <DropdownButton text="Columns">
+          {() => <AxisFilter axis="columns" />}
+        </DropdownButton>
+        <DropdownButton text="Rows">
+          {() => <AxisFilter axis="rows" />}
+        </DropdownButton>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th />
+            {columnChoices.map((choice) => (
+              <Header key={choice.id} choice={choice} th clusters={clusters} />
+            ))}
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {rowChoices.map((rowChoice) => (
+            <tr key={rowChoice.id}>
+              <Header key={0} choice={rowChoice} clusters={clusters} />
+              {columnChoices.map((columnChoice) =>
+                isHiddenPair(rowChoice, columnChoice) ? (
+                  <td key={columnChoice.id} className="bg-gray-200" />
+                ) : (
+                  <td
+                    key={columnChoice.id}
+                    className="border border-gray-200 p-0 align-bottom"
+                  >
+                    <CachedCell
+                      id1={rowChoice.id}
+                      id2={columnChoice.id}
+                      cache={allPairs}
+                      project={project}
+                    />
+                  </td>
+                )
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };

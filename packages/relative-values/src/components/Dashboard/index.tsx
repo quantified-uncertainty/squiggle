@@ -31,19 +31,19 @@ const InnerDashboard: FC = () => {
     <StyledTab.Group>
       <div className="mb-4">
         <StyledTab.List>
-          <StyledTab name="View" icon={() => <div />} />
           <StyledTab name="Estimate" icon={() => <div />} />
+          <StyledTab name="View" icon={() => <div />} />
         </StyledTab.List>
       </div>
       <StyledTab.Panels>
-        <StyledTab.Panel>
-          <View code={code} />
-        </StyledTab.Panel>
         <StyledTab.Panel>
           <Estimate
             code={code}
             setCode={(value) => dispatch({ type: "setCode", payload: value })}
           />
+        </StyledTab.Panel>
+        <StyledTab.Panel>
+          <View code={code} />
         </StyledTab.Panel>
       </StyledTab.Panels>
     </StyledTab.Group>
