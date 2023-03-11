@@ -55,7 +55,7 @@ fn
 
 export default function IndexPage() {
   return (
-    <main>
+    <main className="pt-4">
       <SafeHydrate>
         {() => (Dashboard ? <Dashboard code={code} /> : null)}
       </SafeHydrate>
