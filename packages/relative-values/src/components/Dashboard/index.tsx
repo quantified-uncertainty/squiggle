@@ -3,13 +3,15 @@
 import { NumberShower, SquiggleContainer } from "@quri/squiggle-components";
 import {
   Env,
+  result,
   SqDistribution,
   SqDistributionTag,
   SqLambda,
   SqProject,
+  SqValue,
 } from "@quri/squiggle-lang";
 import clsx from "clsx";
-import { FC, useContext, useMemo, useReducer } from "react";
+import { FC, memo, useContext, useMemo, useReducer } from "react";
 import { ClusterIcon } from "./ClusterIcon";
 import { DashboardContext, DashboardProvider } from "./DashboardProvider";
 import { Histogram } from "./Histogram";
@@ -22,11 +24,13 @@ const CellError: FC<{ error: string }> = ({ error }) => {
   return <div className="text-red-500 text-xs">{error}</div>;
 };
 
-const Cell: FC<{ dist: SqDistribution; env: Env }> = ({ dist, env }) => {
+const Cell: FC<{ dist: SqDistribution; env: Env }> = memo(({ dist, env }) => {
   if (dist.tag !== SqDistributionTag.SampleSet) {
     // TODO - convert automatically?
     return <CellError error="Expected sample set" />;
   }
+
+  console.log("Cell");
 
   const median = dist.inv(env, 0.5);
 
@@ -41,7 +45,7 @@ const Cell: FC<{ dist: SqDistribution; env: Env }> = ({ dist, env }) => {
       </div>
     </div>
   );
-};
+});
 
 const Header: FC<{
   choice: Choice;
@@ -77,25 +81,51 @@ const DashboardTable: FC<{
     );
   }, [choices, selectedClusters]);
 
+  type CachedItem = result<SqDistribution, string>;
+  type CachedPairs = {
+    [k: string]: { [k: string]: CachedItem };
+  };
+
+  const allPairs: CachedPairs = useMemo(() => {
+    console.log("caching pairs");
+    const pairs: CachedPairs = {};
+
+    for (let i = 0; i < usedChoices.length; i++) {
+      for (let j = 0; j < i; j++) {
+        const id1 = usedChoices[i].id;
+        const id2 = usedChoices[j].id;
+
+        const buildValue = (): CachedItem => {
+          const result = fn.call([id1, id2]);
+          if (!result.ok) {
+            return { ok: false, value: result.value.toString() };
+          }
+          const value = result.value;
+          if (value.tag !== "Dist") {
+            return { ok: false, value: "Expected dist" };
+          }
+          // note: value.value is build in-the-fly, so caching won't work if we called it outside of this useMemo function
+          return { ok: true, value: value.value };
+        };
+
+        pairs[id1] ??= {};
+        pairs[id1][id2] = buildValue();
+      }
+    }
+    return pairs;
+  }, [fn, choices]);
+
   const renderCompare = (choice1: Choice, choice2: Choice) => {
-    const result = fn.call([choice1.id, choice2.id]);
+    const result = allPairs[choice1.id][choice2.id];
+    if (!result) {
+      return <CellError error="Internal error, missing data" />;
+    }
+
     if (!result.ok) {
-      return <CellError error={result.value.toString()} />;
+      return <CellError error={result.value} />;
     }
 
-    const value = result.value;
-    if (value.tag !== "Dist") {
-      return <CellError error="Expected dist" />;
-    }
-
-    return (
-      <div>
-        {/* {showDebugViewer && (
-          <SquiggleViewer result={result} enableLocalSettings={true} />
-        )} */}
-        <Cell dist={value.value} env={project.getEnvironment()} />
-      </div>
-    );
+    return <Cell dist={result.value} env={project.getEnvironment()} />;
   };
 
   return (

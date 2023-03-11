@@ -1,4 +1,10 @@
-import { createContext, FC, PropsWithChildren, useReducer } from "react";
+import {
+  createContext,
+  FC,
+  PropsWithChildren,
+  startTransition,
+  useReducer,
+} from "react";
 import { Clusters } from "./types";
 import { Set } from "immutable";
 
@@ -43,6 +49,12 @@ export const DashboardProvider: FC<
     clusters: initialClusters,
     selectedClusters: Set(Object.keys(initialClusters)),
   }));
+
+  const transitionDispatch = (action: Action) => {
+    startTransition(() => {
+      dispatch(action);
+    });
+  };
 
   return (
     <DashboardContext.Provider value={state}>
