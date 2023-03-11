@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { FC, useContext } from "react";
 import { ClusterIcon } from "./ClusterIcon";
 import {
@@ -21,18 +22,28 @@ export const ClusterItem: React.FC<{
   );
 };
 
-export const HorizontalClusterFilter: FC = () => {
-  const { clusters, selectedClusters } = useContext(DashboardContext);
+export const ClusterFilter: FC<{ axis: "rows" | "columns" }> = ({ axis }) => {
+  const {
+    clusters,
+    filters: { [axis]: filter },
+  } = useContext(DashboardContext);
   const dispatch = useContext(DashboardDispatchContext);
 
   return (
-    <div className="flex gap-2">
+    <div className={clsx("flex gap-2", axis === "rows" && "flex-col")}>
       {Object.keys(clusters).map((id) => (
         <ClusterItem
+          key={id}
           cluster={clusters[id]}
-          selected={selectedClusters.has(id)}
+          selected={filter.selectedClusters.has(id)}
           toggle={() => {
-            dispatch({ type: "toggleCluster", payload: id });
+            dispatch({
+              type: "toggleCluster",
+              payload: {
+                id,
+                axis,
+              },
+            });
           }}
         />
       ))}
