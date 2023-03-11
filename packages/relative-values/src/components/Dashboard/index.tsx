@@ -7,10 +7,13 @@ import {
   useDashboardDispatch,
 } from "./DashboardProvider";
 
+// TODO - move to a separate file
 const Estimate: FC<{ code: string; setCode: (code: string) => void }> = ({
   code,
   setCode,
 }) => {
+  // TODO - autosize
+  // TODO - syntax highlight
   return (
     <textarea
       value={code}
