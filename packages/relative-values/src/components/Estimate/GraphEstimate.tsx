@@ -4,6 +4,7 @@ import {
   updateModelCommonCode,
   updateModelNode,
 } from "@/model/utils";
+import { SquiggleEditor } from "@quri/squiggle-components";
 import clsx from "clsx";
 import { FC, Fragment, PropsWithChildren, useMemo } from "react";
 import { useDashboardContext } from "../Dashboard/DashboardProvider";
@@ -41,20 +42,21 @@ export const GraphEstimate: FC<EstimateProps<GraphModel>> = ({
   return (
     <div>
       <div
-        className="grid grid-cols-2 gap-y-2 gap-x-4"
+        className="grid grid-cols-2 gap-x-4"
         style={{
           gridTemplateColumns: "minmax(200px, min-content) 600px",
         }}
       >
-        <Label>Common code</Label>
-        <textarea
-          value={model.commonCode}
-          onChange={(e) =>
-            setModel(
-              updateModelCommonCode({ model, code: e.currentTarget.value })
-            )
+        <div className="flex flex-col items-end mt-4">
+          <Label>Common code</Label>
+        </div>
+        <SquiggleEditor
+          code={model.commonCode}
+          onCodeChange={(code) =>
+            setModel(updateModelCommonCode({ model, code }))
           }
-          className="w-full border border-gray-200 rounded p-1"
+          hideViewer
+          // className="w-full border border-gray-200 rounded p-1"
         />
         <Separator />
 
@@ -64,10 +66,10 @@ export const GraphEstimate: FC<EstimateProps<GraphModel>> = ({
           return (
             <Fragment key={item.id}>
               <a id={getAnchor(item.id)}>
-                <div className="flex flex-col items-end">
+                <div className="flex flex-col items-end mt-4">
                   <Label error={model.invalidIds.has(item.id)}>{item.id}</Label>
                   {node && node.dependencies.length ? (
-                    <div className="text-xs">
+                    <div className="text-xs text-right mt-1">
                       Dependencies:{" "}
                       {node.dependencies.map((id, i) => (
                         <a
@@ -85,19 +87,19 @@ export const GraphEstimate: FC<EstimateProps<GraphModel>> = ({
                 </div>
               </a>
               {node ? (
-                <textarea
-                  value={node.code}
-                  onChange={(e) =>
+                <SquiggleEditor
+                  code={node.code}
+                  onCodeChange={(code) =>
                     setModel(
                       updateModelNode({
                         model,
                         nodeId: item.id,
-                        code: e.currentTarget.value,
+                        code,
                         catalog,
                       })
                     )
                   }
-                  className="w-full border border-gray-200 rounded p-1"
+                  hideViewer
                 />
               ) : (
                 <div className="text-red-500 col-span-2">missing node</div>
