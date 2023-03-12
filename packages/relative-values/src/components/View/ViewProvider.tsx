@@ -2,7 +2,9 @@ import {
   createContext,
   FC,
   PropsWithChildren,
+  Reducer,
   startTransition,
+  useContext,
   useReducer,
 } from "react";
 import { Clusters } from "./types";
@@ -14,8 +16,11 @@ export type Filter = {
 
 export type Axis = "rows" | "columns";
 
+export type GridMode = "full" | "half";
+
 type ViewContextShape = {
   clusters: Clusters;
+  gridMode: GridMode;
   filters: {
     [k in Axis]: Filter;
   };
@@ -23,6 +28,7 @@ type ViewContextShape = {
 
 export const ViewContext = createContext<ViewContextShape>({
   clusters: {},
+  gridMode: "half",
   filters: {
     rows: {
       selectedClusters: Set(),
@@ -37,18 +43,23 @@ export const ViewDispatchContext = createContext<(action: Action) => void>(
   () => {}
 );
 
-type Action = {
-  type: "toggleCluster";
-  payload: {
-    axis: "rows" | "columns";
-    id: string;
-  };
-};
+type Action =
+  | {
+      type: "toggleCluster";
+      payload: {
+        axis: "rows" | "columns";
+        id: string;
+      };
+    }
+  | {
+      type: "setGridMode";
+      payload: GridMode;
+    };
 
 const toggle = (set: Set<string>, id: string) =>
   set.has(id) ? set.delete(id) : set.add(id);
 
-const reducer = (state: ViewContextShape, action: Action): ViewContextShape => {
+const reducer: Reducer<ViewContextShape, Action> = (state, action) => {
   switch (action.type) {
     case "toggleCluster": {
       return {
@@ -65,16 +76,29 @@ const reducer = (state: ViewContextShape, action: Action): ViewContextShape => {
         },
       };
     }
+    case "setGridMode":
+      return {
+        ...state,
+        gridMode: action.payload,
+      };
     default:
       return state;
   }
+};
+
+export const useViewContext = () => {
+  return useContext(ViewContext);
+};
+
+export const useViewDispatch = () => {
+  return useContext(ViewDispatchContext);
 };
 
 export const ViewProvider: FC<
   PropsWithChildren<{ initialClusters: Clusters }>
 > = ({ initialClusters, children }) => {
   // TODO - when clusters change (e.g. when we update the underlying model), we should update the state
-  const [state, dispatch] = useReducer(reducer, null, () => {
+  const [state, dispatch] = useReducer(reducer, undefined, () => {
     const clusterIds = Set(Object.keys(initialClusters));
     const defaultFilter: Filter = {
       selectedClusters: clusterIds,
@@ -82,11 +106,12 @@ export const ViewProvider: FC<
 
     return {
       clusters: initialClusters,
+      gridMode: "half",
       filters: {
         rows: defaultFilter,
         columns: defaultFilter,
       },
-    };
+    } satisfies ViewContextShape;
   });
 
   const transitionDispatch = (action: Action) => {

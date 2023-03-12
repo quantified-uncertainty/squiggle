@@ -11,6 +11,7 @@ import { AxisFilter } from "./AxisFilter";
 import { Cell } from "./Cell";
 import { CellError } from "./CellError";
 import { ClusterIcon } from "./ClusterIcon";
+import { GridModeControls } from "./GridModeControls";
 import { Choice, Clusters } from "./types";
 import { Filter, ViewContext } from "./ViewProvider";
 
@@ -45,7 +46,8 @@ const useCachedPairs = (fn: SqLambda, choices: Choice[]): CachedPairs => {
     const pairs: CachedPairs = {};
 
     for (let i = 0; i < choices.length; i++) {
-      for (let j = 0; j < i; j++) {
+      // note: iterate up to `i` to cache only half of the grid
+      for (let j = 0; j < choices.length; j++) {
         const id1 = choices[i].id;
         const id2 = choices[j].id;
 
@@ -83,7 +85,7 @@ const CachedCell: FC<{
   id2: string;
   cache: CachedPairs;
   project: SqProject;
-}> = memo(({ id1, id2, cache, project }) => {
+}> = memo(function CachedCell({ id1, id2, cache, project }) {
   const result = cache[id1][id2];
   if (!result) {
     return <CellError error="Internal error, missing data" />;
@@ -101,7 +103,7 @@ export const NxNView: FC<{
   fn: SqLambda;
   choices: Choice[];
 }> = ({ project, fn, choices }) => {
-  const { clusters, filters } = useContext(ViewContext);
+  const { clusters, filters, gridMode } = useContext(ViewContext);
 
   const rowChoices = useFilteredChoices(choices, filters.rows);
   const columnChoices = useFilteredChoices(choices, filters.columns);
@@ -118,20 +120,26 @@ export const NxNView: FC<{
 
   const isHiddenPair = useCallback(
     (rowChoice: Choice, columnChoice: Choice) => {
+      if (gridMode === "full") {
+        return false;
+      }
       return idToPosition[rowChoice.id] <= idToPosition[columnChoice.id];
     },
-    [idToPosition]
+    [idToPosition, gridMode]
   );
 
   return (
     <div>
-      <div className="flex gap-2 mb-4">
-        <DropdownButton text="Columns">
-          {() => <AxisFilter axis="columns" />}
-        </DropdownButton>
-        <DropdownButton text="Rows">
-          {() => <AxisFilter axis="rows" />}
-        </DropdownButton>
+      <div className="flex gap-8 mb-4 items-center">
+        <div className="flex gap-2">
+          <DropdownButton text="Columns">
+            {() => <AxisFilter axis="columns" />}
+          </DropdownButton>
+          <DropdownButton text="Rows">
+            {() => <AxisFilter axis="rows" />}
+          </DropdownButton>
+        </div>
+        <GridModeControls />
       </div>
       <table>
         <thead>
