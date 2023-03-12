@@ -10,8 +10,16 @@ import { useDashboardContext } from "../Dashboard/DashboardProvider";
 import { Button } from "../ui/Button";
 import { EstimateProps } from "./types";
 
-const Label: FC<PropsWithChildren> = ({ children }) => (
-  <label className="font-mono font-bold text-xs pt-2 text-right">
+const Label: FC<PropsWithChildren<{ error?: boolean }>> = ({
+  children,
+  error,
+}) => (
+  <label
+    className={clsx(
+      "font-mono font-bold text-xs pt-2 text-right",
+      error && "text-red-500"
+    )}
+  >
     {children}
   </label>
 );
@@ -54,7 +62,7 @@ export const GraphEstimate: FC<EstimateProps<GraphModel>> = ({
           return (
             <Fragment key={item.id}>
               <div className="flex flex-col items-end">
-                <Label>{item.id}</Label>
+                <Label error={model.invalidIds.has(item.id)}>{item.id}</Label>
                 {node && node.dependencies.length ? (
                   <div className="text-xs">
                     Dependencies:{" "}
