@@ -1,6 +1,6 @@
 import { Choice } from "@/types";
 import { SqLambda, SqProject } from "@quri/squiggle-lang";
-import { FC, useCallback, useMemo } from "react";
+import { FC, Fragment, useCallback, useMemo } from "react";
 import { useDashboardContext } from "../../Dashboard/DashboardProvider";
 import { DropdownButton } from "../../ui/DropdownButton";
 import { Cell } from "../Cell";
@@ -56,40 +56,39 @@ export const GridView: FC<{
         </div>
         <GridModeControls />
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th />
-            {columnChoices.map((choice) => (
-              <Header key={choice.id} choice={choice} th clusters={clusters} />
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rowChoices.map((rowChoice) => (
-            <tr key={rowChoice.id}>
-              <Header key={0} choice={rowChoice} clusters={clusters} />
-              {columnChoices.map((columnChoice) =>
-                isHiddenPair(rowChoice, columnChoice) ? (
-                  <td key={columnChoice.id} className="bg-gray-200" />
-                ) : (
-                  <td
-                    key={columnChoice.id}
-                    className="border border-gray-200 p-0 align-bottom"
-                  >
-                    <Cell
-                      id1={rowChoice.id}
-                      id2={columnChoice.id}
-                      cache={allPairs}
-                      project={project}
-                    />
-                  </td>
-                )
-              )}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div
+        className="grid relative"
+        style={{
+          gridTemplateColumns: `repeat(${columnChoices.length + 1}, 180px)`,
+        }}
+      >
+        <div className="sticky bg-white top-0 left-0 z-20" />
+        {columnChoices.map((choice) => (
+          <Header key={choice.id} choice={choice} th clusters={clusters} />
+        ))}
+        {rowChoices.map((rowChoice) => (
+          <Fragment key={rowChoice.id}>
+            <Header key={0} choice={rowChoice} clusters={clusters} />
+            {columnChoices.map((columnChoice) =>
+              isHiddenPair(rowChoice, columnChoice) ? (
+                <div key={columnChoice.id} className="bg-gray-200" />
+              ) : (
+                <div
+                  key={columnChoice.id}
+                  className="border-t border-l border-gray-200"
+                >
+                  <Cell
+                    id1={rowChoice.id}
+                    id2={columnChoice.id}
+                    cache={allPairs}
+                    project={project}
+                  />
+                </div>
+              )
+            )}
+          </Fragment>
+        ))}
+      </div>
     </div>
   );
 };
