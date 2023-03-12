@@ -1,3 +1,4 @@
+import { getModelCode } from "@/model/utils";
 import { FC } from "react";
 import { Catalog } from "../Catalog";
 import { Estimate } from "../Estimate";
@@ -10,7 +11,7 @@ import {
 } from "./DashboardProvider";
 
 const InnerDashboard: FC = () => {
-  const { code } = useDashboardContext();
+  const { model } = useDashboardContext();
   const dispatch = useDashboardDispatch();
 
   return (
@@ -28,12 +29,14 @@ const InnerDashboard: FC = () => {
         </StyledTab.Panel>
         <StyledTab.Panel>
           <Estimate
-            code={code}
-            setCode={(value) => dispatch({ type: "setCode", payload: value })}
+            model={model}
+            setModel={(newModel) =>
+              dispatch({ type: "setModel", payload: newModel })
+            }
           />
         </StyledTab.Panel>
         <StyledTab.Panel>
-          <View code={code} />
+          <View code={getModelCode(model)} />
         </StyledTab.Panel>
       </StyledTab.Panels>
     </StyledTab.Group>

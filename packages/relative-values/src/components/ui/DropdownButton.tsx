@@ -1,6 +1,7 @@
 import {
   arrow,
   flip,
+  FloatingPortal,
   offset,
   useClick,
   useDismiss,
@@ -9,6 +10,7 @@ import {
 } from "@floating-ui/react";
 import clsx from "clsx";
 import { FC, useRef, useState } from "react";
+import { Tailwind } from "../Tailwind";
 
 import { Button } from "./Button";
 
@@ -46,38 +48,42 @@ export const DropdownButton: FC<Props> = ({ text, children }) => {
   }[placement.split("-")[0]];
 
   const renderTooltip = () => (
-    <div
-      ref={refs.setFloating}
-      className={clsx(
-        "z-10 rounded-sm px-3 py-2 bg-white shadow-dropdown",
-        text !== undefined && "text-sm"
-      )}
-      style={{
-        position: strategy,
-        top: y ?? 0,
-        left: x ?? 0,
-      }}
-      {...getFloatingProps()}
-    >
-      {children()}
-      <div
-        ref={arrowRef}
-        style={{
-          left: middlewareData.arrow?.x ?? "",
-          top: middlewareData.arrow?.y ?? "",
-          [staticSide!]: "-0.25rem",
-        }}
-        className={clsx("absolute h-2 w-2 rotate-45 bg-white")}
-      />
-    </div>
+    <FloatingPortal>
+      <Tailwind>
+        <div
+          ref={refs.setFloating}
+          className={clsx(
+            "z-50 rounded-sm px-3 py-2 bg-white shadow-dropdown",
+            text !== undefined && "text-sm"
+          )}
+          style={{
+            position: strategy,
+            top: y ?? 0,
+            left: x ?? 0,
+          }}
+          {...getFloatingProps()}
+        >
+          {children()}
+          <div
+            ref={arrowRef}
+            style={{
+              left: middlewareData.arrow?.x ?? "",
+              top: middlewareData.arrow?.y ?? "",
+              [staticSide!]: "-0.25rem",
+            }}
+            className="absolute h-2 w-2 rotate-45 bg-white"
+          />
+        </div>
+      </Tailwind>
+    </FloatingPortal>
   );
 
   return (
-    <>
+    <div className="relative z-0">
       <Button ref={refs.setReference} {...getReferenceProps()}>
         {text}
       </Button>
       {isOpen ? renderTooltip() : null}
-    </>
+    </div>
   );
 };
