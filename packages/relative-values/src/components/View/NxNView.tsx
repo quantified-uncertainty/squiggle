@@ -1,48 +1,18 @@
-import { NumberShower } from "@quri/squiggle-components";
 import {
-  Env,
   result,
   SqDistribution,
-  SqDistributionTag,
   SqLambda,
   SqProject,
 } from "@quri/squiggle-lang";
 import clsx from "clsx";
 import { FC, memo, useCallback, useContext, useMemo } from "react";
-import { ClusterIcon } from "./ClusterIcon";
-import { ViewContext, Filter } from "./ViewProvider";
-import { Histogram } from "./Histogram";
-import { ClusterFilter } from "./ClusterFilter";
-import { Choice, Clusters } from "./types";
-import { Button } from "../ui/Button";
 import { DropdownButton } from "../ui/DropdownButton";
 import { AxisFilter } from "./AxisFilter";
-
-const CellError: FC<{ error: string }> = ({ error }) => {
-  // TODO - truncate?
-  return <div className="text-red-500 text-xs">{error}</div>;
-};
-
-const Cell: FC<{ dist: SqDistribution; env: Env }> = memo(({ dist, env }) => {
-  if (dist.tag !== SqDistributionTag.SampleSet) {
-    // TODO - convert automatically?
-    return <CellError error="Expected sample set" />;
-  }
-
-  const median = dist.inv(env, 0.5);
-
-  const samples = [...dist.value().samples].sort((a, b) => a - b);
-  return (
-    <div className="h-full pt-[1px] relative">
-      <div className="absolute top-0 inset-x-0 text-center text-sm">
-        {median.ok ? <NumberShower number={median.value} /> : null}
-      </div>
-      <div className="h-8">
-        <Histogram data={samples} />
-      </div>
-    </div>
-  );
-});
+import { Cell } from "./Cell";
+import { CellError } from "./CellError";
+import { ClusterIcon } from "./ClusterIcon";
+import { Choice, Clusters } from "./types";
+import { Filter, ViewContext } from "./ViewProvider";
 
 const Header: FC<{
   choice: Choice;
