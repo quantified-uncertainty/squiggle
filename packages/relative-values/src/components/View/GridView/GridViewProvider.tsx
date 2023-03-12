@@ -9,26 +9,21 @@ import {
 } from "react";
 import { Clusters } from "@/types";
 import { Set } from "immutable";
-
-export type Filter = {
-  selectedClusters: Set<string>;
-};
+import { Filter } from "../types";
 
 export type Axis = "rows" | "columns";
 
 export type GridMode = "full" | "half";
 
-type ViewContextShape = {
-  clusters: Clusters;
+type GridViewContextShape = {
   gridMode: GridMode;
   filters: {
     [k in Axis]: Filter;
   };
 };
 
-export const ViewContext = createContext<ViewContextShape>({
-  clusters: {},
-  gridMode: "half",
+export const GridViewContext = createContext<GridViewContextShape>({
+  gridMode: "full",
   filters: {
     rows: {
       selectedClusters: Set(),
@@ -39,7 +34,7 @@ export const ViewContext = createContext<ViewContextShape>({
   },
 });
 
-export const ViewDispatchContext = createContext<(action: Action) => void>(
+export const GridViewDispatchContext = createContext<(action: Action) => void>(
   () => {}
 );
 
@@ -59,7 +54,7 @@ type Action =
 const toggle = (set: Set<string>, id: string) =>
   set.has(id) ? set.delete(id) : set.add(id);
 
-const reducer: Reducer<ViewContextShape, Action> = (state, action) => {
+const reducer: Reducer<GridViewContextShape, Action> = (state, action) => {
   switch (action.type) {
     case "toggleCluster": {
       return {
@@ -86,15 +81,15 @@ const reducer: Reducer<ViewContextShape, Action> = (state, action) => {
   }
 };
 
-export const useViewContext = () => {
-  return useContext(ViewContext);
+export const useGridViewContext = () => {
+  return useContext(GridViewContext);
 };
 
-export const useViewDispatch = () => {
-  return useContext(ViewDispatchContext);
+export const useGridViewDispatch = () => {
+  return useContext(GridViewDispatchContext);
 };
 
-export const ViewProvider: FC<
+export const GridViewProvider: FC<
   PropsWithChildren<{ initialClusters: Clusters }>
 > = ({ initialClusters, children }) => {
   // TODO - when clusters change (e.g. when we update the underlying model), we should update the state
@@ -105,13 +100,12 @@ export const ViewProvider: FC<
     };
 
     return {
-      clusters: initialClusters,
-      gridMode: "half",
+      gridMode: "full",
       filters: {
         rows: defaultFilter,
         columns: defaultFilter,
       },
-    } satisfies ViewContextShape;
+    } satisfies GridViewContextShape;
   });
 
   const transitionDispatch = (action: Action) => {
@@ -121,10 +115,10 @@ export const ViewProvider: FC<
   };
 
   return (
-    <ViewContext.Provider value={state}>
-      <ViewDispatchContext.Provider value={transitionDispatch}>
+    <GridViewContext.Provider value={state}>
+      <GridViewDispatchContext.Provider value={transitionDispatch}>
         {children}
-      </ViewDispatchContext.Provider>
-    </ViewContext.Provider>
+      </GridViewDispatchContext.Provider>
+    </GridViewContext.Provider>
   );
 };

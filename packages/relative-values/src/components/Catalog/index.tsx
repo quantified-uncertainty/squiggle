@@ -1,7 +1,6 @@
-import { Choice } from "@/types";
-import { FC } from "react";
+import { FC, Fragment } from "react";
 import { useDashboardContext } from "../Dashboard/DashboardProvider";
-import { ClusterIcon } from "../View/ClusterIcon";
+import { ClusterIcon } from "../common/ClusterIcon";
 
 const ClusterInfo: FC<{ clusterId: string }> = ({ clusterId }) => {
   const {
@@ -17,7 +16,7 @@ const ClusterInfo: FC<{ clusterId: string }> = ({ clusterId }) => {
   return (
     <div className="flex gap-1 items-center">
       <ClusterIcon cluster={cluster} />
-      <div>{cluster.name}</div>
+      <div className="text-sm font-bold">{cluster.name}</div>
     </div>
   );
 };
@@ -28,15 +27,24 @@ const CatalogItems: FC = () => {
   } = useDashboardContext();
 
   return (
-    <div className="grid grid-cols-[100px_minmax(min-content,120px)_1fr] gap-4">
+    <div
+      className="grid gap-x-4 gap-y-2"
+      style={{
+        gridTemplateColumns: "100px minmax(min-content, 120px) 1fr",
+      }}
+    >
+      <div>Cluster</div>
+      <div>ID</div>
+      <div>Description</div>
+      <div className="col-span-3 border-b border-gray-200" />
       {items.map((item) => (
-        <>
-          <div key={`${item.id}-cluster`}>
+        <Fragment key={item.id}>
+          <div>
             {item.clusterId ? <ClusterInfo clusterId={item.clusterId} /> : null}
           </div>
-          <div key={`${item.id}-id`}>{item.id}</div>
-          <div key={`${item.id}-name`}>{item.name}</div>
-        </>
+          <code>{item.id}</code>
+          <div>{item.name}</div>
+        </Fragment>
       ))}
     </div>
   );
@@ -49,7 +57,7 @@ export const Catalog: FC = () => {
     <div>
       <header className="text-3xl font-bold">{catalog.title}</header>
       <div className="mt-4">
-        <header className="text-xl font-bold">Items</header>
+        <header className="text-xl font-bold mb-4">Items</header>
         <CatalogItems />
       </div>
     </div>

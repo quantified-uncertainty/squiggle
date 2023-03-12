@@ -1,9 +1,10 @@
-import { SquiggleContainer } from "@quri/squiggle-components";
-import { FC } from "react";
-import { ViewProvider } from "./ViewProvider";
+import { FC, useState } from "react";
+import { GridViewProvider } from "./GridView/GridViewProvider";
 import { useRelativeValues } from "./hooks";
-import { NxNView } from "./NxNView";
+import { GridView } from "./GridView";
 import { useDashboardContext } from "../Dashboard/DashboardProvider";
+import { StyledTab } from "../ui/StyledTab";
+import { ListView } from "./ListView";
 
 type Props = {
   code: string;
@@ -17,13 +18,26 @@ export const View: FC<Props> = ({ code }) => {
   } = useDashboardContext();
 
   return (
-    <ViewProvider initialClusters={clusters}>
-      <SquiggleContainer>
-        <div>
-          {error && <pre className="text-red-700">{error}</pre>}
-          {fn ? <NxNView fn={fn} project={project} choices={choices} /> : null}
+    <GridViewProvider initialClusters={clusters}>
+      {error && <pre className="text-red-700">{error}</pre>}
+      <StyledTab.Group>
+        <div className="mb-4">
+          <StyledTab.List>
+            <StyledTab name="Grid" icon={() => <div />} />
+            <StyledTab name="List" icon={() => <div />} />
+          </StyledTab.List>
         </div>
-      </SquiggleContainer>
-    </ViewProvider>
+        <StyledTab.Panels>
+          <StyledTab.Panel>
+            {fn ? (
+              <GridView fn={fn} project={project} choices={choices} />
+            ) : null}
+          </StyledTab.Panel>
+          <StyledTab.Panel>
+            <ListView />
+          </StyledTab.Panel>
+        </StyledTab.Panels>
+      </StyledTab.Group>
+    </GridViewProvider>
   );
 };

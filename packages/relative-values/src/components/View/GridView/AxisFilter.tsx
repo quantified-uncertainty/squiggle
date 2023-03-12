@@ -1,6 +1,6 @@
 import { FC } from "react";
-import { ClusterFilter } from "./ClusterFilter";
-import { Axis } from "./ViewProvider";
+import { ClusterFilter } from "../ClusterFilter";
+import { Axis } from "./GridViewProvider";
 
 export const AxisFilter: FC<{ axis: Axis }> = ({ axis }) => {
   return (

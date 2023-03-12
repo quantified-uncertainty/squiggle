@@ -1,4 +1,3 @@
-import { SquiggleEditor } from "@quri/squiggle-components";
 import { FC } from "react";
 import { Catalog } from "../Catalog";
 import { Estimate } from "../Estimate";

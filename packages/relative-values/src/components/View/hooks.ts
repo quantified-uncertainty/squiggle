@@ -1,5 +1,12 @@
-import { SqLambda, SqProject, SqRecord } from "@quri/squiggle-lang";
+import { Choice } from "@/types";
+import {
+  result,
+  SqDistribution,
+  SqLambda,
+  SqProject,
+} from "@quri/squiggle-lang";
 import { useEffect, useMemo, useState } from "react";
+import { Filter } from "./types";
 
 export const useRelativeValues = (code: string) => {
   const project = useMemo(() => SqProject.create(), []);
@@ -31,4 +38,51 @@ export const useRelativeValues = (code: string) => {
   }, [project, code]);
 
   return { error, fn, project };
+};
+
+export const useFilteredChoices = (choices: Choice[], filter: Filter) => {
+  return useMemo(() => {
+    return choices.filter((choice) =>
+      choice.clusterId ? filter.selectedClusters.has(choice.clusterId) : true
+    );
+  }, [choices, filter]);
+};
+
+type CachedItem = result<SqDistribution, string>;
+export type CachedPairs = {
+  [k: string]: { [k: string]: CachedItem };
+};
+
+export const useCachedPairs = (
+  fn: SqLambda,
+  choices: Choice[]
+): CachedPairs => {
+  return useMemo(() => {
+    const pairs: CachedPairs = {};
+
+    for (let i = 0; i < choices.length; i++) {
+      // note: iterate up to `i` to cache only half of the grid
+      for (let j = 0; j < choices.length; j++) {
+        const id1 = choices[i].id;
+        const id2 = choices[j].id;
+
+        const buildValue = (): CachedItem => {
+          const result = fn.call([id1, id2]);
+          if (!result.ok) {
+            return { ok: false, value: result.value.toString() };
+          }
+          const value = result.value;
+          if (value.tag !== "Dist") {
+            return { ok: false, value: "Expected dist" };
+          }
+          // note: value.value is build in-the-fly, so caching won't work if we called it outside of this useMemo function
+          return { ok: true, value: value.value };
+        };
+
+        pairs[id1] ??= {};
+        pairs[id1][id2] = buildValue();
+      }
+    }
+    return pairs;
+  }, [fn, choices]);
 };

@@ -1,9 +1,9 @@
 import clsx from "clsx";
 import { FC } from "react";
-import { FullGridIcon } from "../ui/icons/FullGridIcon";
-import { HalfGridIcon } from "../ui/icons/HalfGridIcon";
-import { IconProps } from "../ui/icons/Icon";
-import { useViewContext, useViewDispatch } from "./ViewProvider";
+import { FullGridIcon } from "../../ui/icons/FullGridIcon";
+import { HalfGridIcon } from "../../ui/icons/HalfGridIcon";
+import { IconProps } from "../../ui/icons/Icon";
+import { useGridViewContext, useGridViewDispatch } from "./GridViewProvider";
 
 const SelectableIcon: FC<{
   icon: FC<IconProps>;
@@ -23,8 +23,8 @@ const SelectableIcon: FC<{
 };
 
 export const GridModeControls: FC = () => {
-  const { gridMode } = useViewContext();
-  const dispatch = useViewDispatch();
+  const { gridMode } = useGridViewContext();
+  const dispatch = useGridViewDispatch();
 
   return (
     <div className="flex gap-1">
