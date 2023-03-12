@@ -36,6 +36,8 @@ export const GraphEstimate: FC<EstimateProps<GraphModel>> = ({
 
   const code = useMemo(() => getModelCode(model), [model]);
 
+  const getAnchor = (id: string) => `estimate-${id}`;
+
   return (
     <div>
       <div
@@ -61,24 +63,27 @@ export const GraphEstimate: FC<EstimateProps<GraphModel>> = ({
 
           return (
             <Fragment key={item.id}>
-              <div className="flex flex-col items-end">
-                <Label error={model.invalidIds.has(item.id)}>{item.id}</Label>
-                {node && node.dependencies.length ? (
-                  <div className="text-xs">
-                    Dependencies:{" "}
-                    {node.dependencies.map((id, i) => (
-                      <span
-                        className={clsx(
-                          model.invalidIds.has(id) && "text-red-500"
-                        )}
-                      >
-                        {id}
-                        {i === node.dependencies.length - 1 ? "" : ", "}
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
-              </div>
+              <a id={getAnchor(item.id)}>
+                <div className="flex flex-col items-end">
+                  <Label error={model.invalidIds.has(item.id)}>{item.id}</Label>
+                  {node && node.dependencies.length ? (
+                    <div className="text-xs">
+                      Dependencies:{" "}
+                      {node.dependencies.map((id, i) => (
+                        <a
+                          href={`#${getAnchor(id)}`}
+                          className={clsx(
+                            model.invalidIds.has(id) && "text-red-500"
+                          )}
+                        >
+                          {id}
+                          {i === node.dependencies.length - 1 ? "" : ", "}
+                        </a>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              </a>
               {node ? (
                 <textarea
                   value={node.code}
