@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { Cluster } from "./types";
+import { Cluster } from "@/types";
 
 export const ClusterIcon: FC<{ cluster: Cluster; selected?: boolean }> = ({
   cluster,

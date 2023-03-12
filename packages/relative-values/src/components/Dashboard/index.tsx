@@ -1,5 +1,7 @@
 import { SquiggleEditor } from "@quri/squiggle-components";
 import { FC } from "react";
+import { Catalog } from "../Catalog";
+import { Estimate } from "../Estimate";
 import { StyledTab } from "../ui/StyledTab";
 import { View } from "../View";
 import {
@@ -7,16 +9,6 @@ import {
   useDashboardContext,
   useDashboardDispatch,
 } from "./DashboardProvider";
-
-// TODO - move to a separate file
-const Estimate: FC<{ code: string; setCode: (code: string) => void }> = ({
-  code,
-  setCode,
-}) => {
-  // TODO - autosize
-  // TODO - syntax highlight
-  return <SquiggleEditor code={code} onCodeChange={(code) => setCode(code)} />;
-};
 
 const InnerDashboard: FC = () => {
   const { code } = useDashboardContext();
@@ -26,11 +18,15 @@ const InnerDashboard: FC = () => {
     <StyledTab.Group>
       <div className="mb-4">
         <StyledTab.List>
+          <StyledTab name="Catalog" icon={() => <div />} />
           <StyledTab name="Estimate" icon={() => <div />} />
           <StyledTab name="View" icon={() => <div />} />
         </StyledTab.List>
       </div>
       <StyledTab.Panels>
+        <StyledTab.Panel>
+          <Catalog />
+        </StyledTab.Panel>
         <StyledTab.Panel>
           <Estimate
             code={code}

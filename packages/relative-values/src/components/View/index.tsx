@@ -3,6 +3,7 @@ import { FC } from "react";
 import { ViewProvider } from "./ViewProvider";
 import { useRelativeValues } from "./hooks";
 import { NxNView } from "./NxNView";
+import { useDashboardContext } from "../Dashboard/DashboardProvider";
 
 type Props = {
   code: string;
@@ -10,7 +11,10 @@ type Props = {
 
 export const View: FC<Props> = ({ code }) => {
   // TODO - store most of these in context? they're all global
-  const { error, choices, clusters, fn, project } = useRelativeValues(code);
+  const { error, fn, project } = useRelativeValues(code);
+  const {
+    catalog: { items: choices, clusters },
+  } = useDashboardContext();
 
   return (
     <ViewProvider initialClusters={clusters}>

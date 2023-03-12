@@ -12,7 +12,7 @@ import { Cell } from "./Cell";
 import { CellError } from "./CellError";
 import { ClusterIcon } from "./ClusterIcon";
 import { GridModeControls } from "./GridModeControls";
-import { Choice, Clusters } from "./types";
+import { Choice, Clusters } from "@/types";
 import { Filter, ViewContext } from "./ViewProvider";
 
 const Header: FC<{

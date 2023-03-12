@@ -7,7 +7,7 @@ import {
   useContext,
   useReducer,
 } from "react";
-import { Clusters } from "./types";
+import { Clusters } from "@/types";
 import { Set } from "immutable";
 
 export type Filter = {

@@ -2,7 +2,7 @@ import clsx from "clsx";
 import { FC, useContext } from "react";
 import { ClusterIcon } from "./ClusterIcon";
 import { Axis, ViewContext, ViewDispatchContext } from "./ViewProvider";
-import { Cluster } from "./types";
+import { Cluster } from "@/types";
 
 export const ClusterItem: React.FC<{
   cluster: Cluster;

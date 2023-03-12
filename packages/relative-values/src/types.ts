@@ -12,3 +12,9 @@ export type Choice = {
   name: string;
   clusterId?: string;
 };
+
+export type Catalog = {
+  title: string;
+  items: Choice[];
+  clusters: Clusters;
+};
