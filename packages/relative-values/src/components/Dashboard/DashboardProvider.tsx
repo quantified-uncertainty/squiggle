@@ -12,8 +12,7 @@ type DashboardContextShape = {
 
 const DashboardContext = createContext<DashboardContextShape>({ code: "" });
 
-const initialCode = `
-blog_post_to_software = SampleSet.fromDist(0.1 to 100)
+const initialCode = `blog_post_to_software = SampleSet.fromDist(0.1 to 100)
 items = {
   quri_papers_1: {name:"External Evaluation of the EA Wiki", id: "quri_papers_1", value: pointMass(1)},
   quri_papers_2: {name:"Flimsy Pet Theories, Enormous Initiatives", id: "quri_papers_2", value: 0.1 to 2},

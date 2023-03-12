@@ -1,3 +1,4 @@
+import { SquiggleEditor } from "@quri/squiggle-components";
 import { FC } from "react";
 import { StyledTab } from "../ui/StyledTab";
 import { View } from "../View";
@@ -14,13 +15,7 @@ const Estimate: FC<{ code: string; setCode: (code: string) => void }> = ({
 }) => {
   // TODO - autosize
   // TODO - syntax highlight
-  return (
-    <textarea
-      value={code}
-      onChange={(e) => setCode(e.currentTarget.value)}
-      className="text-xs w-full border p-2 min-h-[400px]"
-    />
-  );
+  return <SquiggleEditor code={code} onCodeChange={(code) => setCode(code)} />;
 };
 
 const InnerDashboard: FC = () => {
