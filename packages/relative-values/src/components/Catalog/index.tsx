@@ -11,7 +11,7 @@ const ClusterInfo: FC<{ clusterId: string }> = ({ clusterId }) => {
   const cluster = clusters[clusterId];
 
   if (!cluster) {
-    return "UNKNOWN CLUSTER";
+    return <div>UNKNOWN CLUSTER</div>;
   }
 
   return (

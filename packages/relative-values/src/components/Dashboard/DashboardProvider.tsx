@@ -49,59 +49,65 @@ fn
 
 const buildDefaultContext = () => {
   const items: Choice[] = [
-    { name: "External Evaluation of the EA Wiki", id: "quri_papers_1" },
     {
-      name: "Flimsy Pet Theories, Enormous Initiatives",
+      id: "quri_papers_1",
+      name: "External Evaluation of the EA Wiki",
+    },
+    {
       id: "quri_papers_2",
+      name: "Flimsy Pet Theories, Enormous Initiatives",
     },
     {
-      name: "Simple comparison polling to create utility functions",
       id: "quri_papers_3",
+      name: "Simple comparison polling to create utility functions",
     },
     {
-      name: "Prioritization Research for Advancing Wisdom and Intelligence",
       id: "quri_papers_4",
+      name: "Prioritization Research for Advancing Wisdom and Intelligence",
     },
     {
-      name: "Shallow evaluations of longtermist organizations",
       id: "quri_papers_5",
+      name: "Shallow evaluations of longtermist organizations",
     },
     {
-      name: "2018-2019 Long Term Future Fund Grantees: How did they do?",
       id: "quri_papers_6",
+      name: "2018-2019 Long Term Future Fund Grantees: How did they do?",
     },
     {
-      name: "Introducing Metaforecasting: A Forecast Aggregator and Search Tool",
       id: "quri_papers_7",
+      name: "Introducing Metaforecasting: A Forecast Aggregator and Search Tool",
     },
-    { name: "Big List of Cause Candidates", id: "quri_papers_8" },
     {
-      name: "Multivariate estimation & the Squiggly language",
+      id: "quri_papers_8",
+      name: "Big List of Cause Candidates",
+    },
+    {
       id: "quri_papers_9",
+      name: "Multivariate estimation & the Squiggly language",
     },
     {
-      name: "Amplifying generalist research via forecasting – results from a preliminary exploration Part 2",
       id: "quri_papers_10",
+      name: "Amplifying generalist research via forecasting – results from a preliminary exploration Part 2",
     },
     {
-      name: "Introducing http://foretold.io/: A New Open-Source Prediction Registry",
       id: "quri_papers_11",
+      name: "Introducing http://foretold.io/: A New Open-Source Prediction Registry",
     },
     {
-      name: "Conversation on forecasting with Vaniver and Ozzie Gooen",
       id: "quri_papers_12",
+      name: "Conversation on forecasting with Vaniver and Ozzie Gooen",
     },
     {
-      name: "Prediction-Augmented Evaluation Systems",
       id: "quri_papers_13",
+      name: "Prediction-Augmented Evaluation Systems",
     },
     {
-      name: "Five steps for quantifying speculative interventions",
       id: "quri_papers_14",
+      name: "Five steps for quantifying speculative interventions",
     },
     {
-      name: "Valuing research works by eliciting comparisons from EA researchers",
       id: "quri_papers_15",
+      name: "Valuing research works by eliciting comparisons from EA researchers",
     },
     { name: "Metaforecast", id: "quri_metaforecast" },
     { name: "Metaforecast Twitter Bot", id: "quri_metaforecast_twitter" },
@@ -114,7 +120,7 @@ const buildDefaultContext = () => {
     { name: "Guesstimate", id: "quri_guesstimate" },
   ].map((item) => ({
     ...item,
-    clusterId: item.name.startsWith("quri") ? "software" : "papers",
+    clusterId: item.id.startsWith("quri_papers_") ? "papers" : "software",
   }));
 
   return {
