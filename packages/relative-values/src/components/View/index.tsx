@@ -23,18 +23,16 @@ export const View: FC<Props> = ({ code }) => {
       <StyledTab.Group>
         <div className="mb-4">
           <StyledTab.List>
-            <StyledTab name="Grid" icon={() => <div />} />
             <StyledTab name="List" icon={() => <div />} />
+            <StyledTab name="Grid" icon={() => <div />} />
           </StyledTab.List>
         </div>
         <StyledTab.Panels>
           <StyledTab.Panel>
-            {fn ? (
-              <GridView fn={fn} project={project} choices={choices} />
-            ) : null}
+            {fn ? <ListView fn={fn} project={project} /> : null}
           </StyledTab.Panel>
           <StyledTab.Panel>
-            <ListView />
+            {fn ? <GridView fn={fn} project={project} /> : null}
           </StyledTab.Panel>
         </StyledTab.Panels>
       </StyledTab.Group>

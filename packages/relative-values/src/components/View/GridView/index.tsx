@@ -3,21 +3,21 @@ import { SqLambda, SqProject } from "@quri/squiggle-lang";
 import { FC, Fragment, useCallback, useMemo } from "react";
 import { useDashboardContext } from "../../Dashboard/DashboardProvider";
 import { DropdownButton } from "../../ui/DropdownButton";
-import { Cell } from "../Cell";
+import { RelativeCell } from "../RelativeCell";
 import { useCachedPairs, useFilteredChoices } from "../hooks";
 import { AxisFilter } from "./AxisFilter";
 import { GridModeControls } from "./GridModeControls";
 import { useGridViewContext } from "./GridViewProvider";
-import { Header } from "./Header";
+import { Header } from "../Header";
+import { CellBox } from "../CellBox";
 
 export const GridView: FC<{
   project: SqProject;
   fn: SqLambda;
-  choices: Choice[];
-}> = ({ project, fn, choices }) => {
+}> = ({ project, fn }) => {
   const { filters, gridMode } = useGridViewContext();
   const {
-    catalog: { clusters },
+    catalog: { items: choices },
   } = useDashboardContext();
 
   const rowChoices = useFilteredChoices(choices, filters.rows);
@@ -64,26 +64,22 @@ export const GridView: FC<{
       >
         <div className="sticky bg-white top-0 left-0 z-20" />
         {columnChoices.map((choice) => (
-          <Header key={choice.id} choice={choice} th clusters={clusters} />
+          <Header key={choice.id} choice={choice} />
         ))}
         {rowChoices.map((rowChoice) => (
           <Fragment key={rowChoice.id}>
-            <Header key={0} choice={rowChoice} clusters={clusters} />
+            <Header key={0} choice={rowChoice} />
             {columnChoices.map((columnChoice) =>
               isHiddenPair(rowChoice, columnChoice) ? (
                 <div key={columnChoice.id} className="bg-gray-200" />
               ) : (
-                <div
+                <RelativeCell
                   key={columnChoice.id}
-                  className="border-t border-l border-gray-200"
-                >
-                  <Cell
-                    id1={rowChoice.id}
-                    id2={columnChoice.id}
-                    cache={allPairs}
-                    project={project}
-                  />
-                </div>
+                  id1={rowChoice.id}
+                  id2={columnChoice.id}
+                  cache={allPairs}
+                  project={project}
+                />
               )
             )}
           </Fragment>

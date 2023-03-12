@@ -1,15 +1,20 @@
 import { ClusterIcon } from "@/components/common/ClusterIcon";
-import { Choice, Clusters } from "@/types";
+import { useDashboardContext } from "@/components/Dashboard/DashboardProvider";
+import { Choice } from "@/types";
 import { FC } from "react";
+import { CellBox } from "./CellBox";
 
 export const Header: FC<{
   choice: Choice;
-  clusters: Clusters;
-}> = ({ choice, clusters }) => {
+}> = ({ choice }) => {
+  const {
+    catalog: { clusters },
+  } = useDashboardContext();
+
   const cluster = choice.clusterId ? clusters[choice.clusterId] : undefined;
   return (
-    <div className="border-t border-l border-gray-200 bg-gray-50 p-1 sticky top-0 left-0 z-10">
-      <div className="text-xs font-bold">
+    <CellBox header>
+      <div className="text-xs font-bold p-1">
         {cluster ? (
           <div className="float-right px-0.5">
             <ClusterIcon cluster={cluster} />
@@ -17,6 +22,6 @@ export const Header: FC<{
         ) : null}
         {choice.name}
       </div>
-    </div>
+    </CellBox>
   );
 };

@@ -53,6 +53,41 @@ export type CachedPairs = {
   [k: string]: { [k: string]: CachedItem };
 };
 
+const buildCachedValue = (
+  fn: SqLambda,
+  id1: string,
+  id2: string
+): CachedItem => {
+  const result = fn.call([id1, id2]);
+  if (!result.ok) {
+    return { ok: false, value: result.value.toString() };
+  }
+  const value = result.value;
+  if (value.tag !== "Dist") {
+    return { ok: false, value: "Expected dist" };
+  }
+  // note: value.value is build in-the-fly, so caching won't work if we called it outside of this useMemo function
+  return { ok: true, value: value.value };
+};
+
+export const useCachedPairsToOneItem = (
+  fn: SqLambda,
+  choices: Choice[],
+  id2: string
+): CachedPairs => {
+  return useMemo(() => {
+    const pairs: CachedPairs = {};
+
+    for (let i = 0; i < choices.length; i++) {
+      const id1 = choices[i].id;
+
+      pairs[id1] ??= {};
+      pairs[id1][id2] = buildCachedValue(fn, id1, id2);
+    }
+    return pairs;
+  }, [fn, choices]);
+};
+
 export const useCachedPairs = (
   fn: SqLambda,
   choices: Choice[]
@@ -66,21 +101,8 @@ export const useCachedPairs = (
         const id1 = choices[i].id;
         const id2 = choices[j].id;
 
-        const buildValue = (): CachedItem => {
-          const result = fn.call([id1, id2]);
-          if (!result.ok) {
-            return { ok: false, value: result.value.toString() };
-          }
-          const value = result.value;
-          if (value.tag !== "Dist") {
-            return { ok: false, value: "Expected dist" };
-          }
-          // note: value.value is build in-the-fly, so caching won't work if we called it outside of this useMemo function
-          return { ok: true, value: value.value };
-        };
-
         pairs[id1] ??= {};
-        pairs[id1][id2] = buildValue();
+        pairs[id1][id2] = buildCachedValue(fn, id1, id2);
       }
     }
     return pairs;
