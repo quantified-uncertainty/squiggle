@@ -1,7 +1,5 @@
-import { getQuriCatalog } from "@/catalog/builtin";
-import { getQuriGraphModel, getQuriTextModel } from "@/model/builtin";
 import { Model } from "@/model/utils";
-import { Catalog, Choice } from "@/types";
+import { Catalog } from "@/types";
 import {
   createContext,
   FC,
@@ -16,20 +14,17 @@ type DashboardContextShape = {
   catalog: Catalog;
 };
 
-const buildDefaultContext = () => {
-  // const model = getQuriTextModel();
-  const model = getQuriGraphModel();
-  const catalog = getQuriCatalog();
-
-  return {
-    model,
-    catalog,
-  };
-};
-
-const defaultContext = buildDefaultContext();
-
-const DashboardContext = createContext<DashboardContextShape>(defaultContext);
+const DashboardContext = createContext<DashboardContextShape>({
+  model: {
+    mode: "text",
+    code: "",
+  },
+  catalog: {
+    title: "Undefined",
+    items: [],
+    clusters: {},
+  },
+});
 
 type Action = {
   type: "setModel";
@@ -63,8 +58,10 @@ export const useDashboardDispatch = () => {
   return useContext(DashboardDispatchContext);
 };
 
-export const DashboardProvider: FC<PropsWithChildren> = ({ children }) => {
-  const [state, dispatch] = useReducer(reducer, defaultContext);
+export const DashboardProvider: FC<
+  PropsWithChildren<{ getInitialValue(): DashboardContextShape }>
+> = ({ children, getInitialValue }) => {
+  const [state, dispatch] = useReducer(reducer, undefined, getInitialValue);
 
   const transitionDispatch = (action: Action) => {
     startTransition(() => {

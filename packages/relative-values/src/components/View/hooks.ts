@@ -1,10 +1,16 @@
 import { Choice } from "@/types";
 import {
+  Env,
   result,
-  SqDistribution,
+  SqDistributionError,
+  SqError,
   SqLambda,
   SqProject,
 } from "@quri/squiggle-lang";
+import {
+  SqDistributionTag,
+  SqSampleSetDistribution,
+} from "@quri/squiggle-lang/dist/src/public/SqDistribution";
 import { useEffect, useMemo, useState } from "react";
 import { Filter } from "./types";
 
@@ -48,16 +54,32 @@ export const useFilteredChoices = (choices: Choice[], filter: Filter) => {
   }, [choices, filter]);
 };
 
-type CachedItem = result<SqDistribution, string>;
-export type CachedPairs = {
-  [k: string]: { [k: string]: CachedItem };
+// TODO - rename?
+export type CachedItem = {
+  dist: SqSampleSetDistribution;
+  median: result<number, SqDistributionError>;
+  min: result<number, SqDistributionError>;
+  max: result<number, SqDistributionError>;
+  sortedSamples: number[];
 };
 
-const buildCachedValue = (
-  fn: SqLambda,
-  id1: string,
-  id2: string
-): CachedItem => {
+type CachedItemResult = result<CachedItem, string>;
+
+export type CachedPairs = {
+  [k: string]: { [k: string]: CachedItemResult };
+};
+
+const buildCachedValue = ({
+  fn,
+  id1,
+  id2,
+}: {
+  fn: SqLambda;
+  id1: string;
+  id2: string;
+}): CachedItemResult => {
+  const env = fn.location.project.getEnvironment();
+
   const result = fn.call([id1, id2]);
   if (!result.ok) {
     return { ok: false, value: result.value.toString() };
@@ -66,8 +88,28 @@ const buildCachedValue = (
   if (value.tag !== "Dist") {
     return { ok: false, value: "Expected dist" };
   }
-  // note: value.value is build in-the-fly, so caching won't work if we called it outside of this useMemo function
-  return { ok: true, value: value.value };
+  const dist = value.value;
+
+  if (dist.tag !== SqDistributionTag.SampleSet) {
+    // TODO - convert automatically?
+    return { ok: false, value: "Expected sample set" };
+  }
+
+  const median = dist.inv(env, 0.5);
+  const [min, max] = [0.05, 0.95].map((q) => dist.inv(env, q));
+
+  const sortedSamples = [...dist.value().samples].sort((a, b) => a - b);
+
+  return {
+    ok: true,
+    value: {
+      dist,
+      median,
+      min,
+      max,
+      sortedSamples,
+    },
+  };
 };
 
 export const useCachedPairsToOneItem = (
@@ -82,7 +124,7 @@ export const useCachedPairsToOneItem = (
       const id1 = choices[i].id;
 
       pairs[id1] ??= {};
-      pairs[id1][id2] = buildCachedValue(fn, id1, id2);
+      pairs[id1][id2] = buildCachedValue({ fn, id1, id2 });
     }
     return pairs;
   }, [fn, choices, id2]);
@@ -102,7 +144,7 @@ export const useCachedPairs = (
         const id2 = choices[j].id;
 
         pairs[id1] ??= {};
-        pairs[id1][id2] = buildCachedValue(fn, id1, id2);
+        pairs[id1][id2] = buildCachedValue({ fn, id1, id2 });
       }
     }
     return pairs;

@@ -15,7 +15,9 @@ const ClusterInfo: FC<{ clusterId: string }> = ({ clusterId }) => {
 
   return (
     <div className="flex gap-1 items-center">
-      <ClusterIcon cluster={cluster} />
+      <div className="flex-0">
+        <ClusterIcon cluster={cluster} />
+      </div>
       <div className="text-sm font-bold">{cluster.name}</div>
     </div>
   );
@@ -28,9 +30,10 @@ const CatalogItems: FC = () => {
 
   return (
     <div
-      className="grid gap-x-4 gap-y-2"
+      className="grid gap-x-8 gap-y-2"
       style={{
-        gridTemplateColumns: "100px minmax(min-content, 120px) 1fr",
+        gridTemplateColumns:
+          "minmax(100px, max-content) minmax(max-content, 120px) 1fr",
       }}
     >
       <div>Cluster</div>

@@ -19,5 +19,5 @@ export const RelativeCell: FC<{
     return <ErrorCell error={result.value} />;
   }
 
-  return <DistCell dist={result.value} env={project.getEnvironment()} />;
+  return <DistCell item={result.value} />;
 });

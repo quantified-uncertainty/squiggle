@@ -48,18 +48,20 @@ const ColumnHeader: FC<{
   setSelectedItem(choice: Choice): void;
 }> = ({ selectedItem, setSelectedItem }) => {
   return (
-    <Dropdown
-      render={({ close }) => (
-        <ColumnHeaderContextMenu
-          setSelectedItem={(item) => {
-            setSelectedItem(item);
-            close();
-          }}
-        />
-      )}
-    >
-      <Header choice={selectedItem} clickable />
-    </Dropdown>
+    <div className="sticky top-0 left-0 z-10">
+      <Dropdown
+        render={({ close }) => (
+          <ColumnHeaderContextMenu
+            setSelectedItem={(item) => {
+              setSelectedItem(item);
+              close();
+            }}
+          />
+        )}
+      >
+        <Header choice={selectedItem} clickable />
+      </Dropdown>
+    </div>
   );
 };
 
