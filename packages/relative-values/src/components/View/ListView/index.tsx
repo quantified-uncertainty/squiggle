@@ -58,7 +58,7 @@ const ColumnHeader: FC<{
         />
       )}
     >
-      <Header choice={selectedItem} />
+      <Header choice={selectedItem} clickable />
     </Dropdown>
   );
 };

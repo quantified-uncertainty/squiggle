@@ -6,14 +6,15 @@ import { CellBox } from "./CellBox";
 
 export const Header: FC<{
   choice: Choice;
-}> = ({ choice }) => {
+  clickable?: boolean;
+}> = ({ choice, clickable }) => {
   const {
     catalog: { clusters },
   } = useDashboardContext();
 
   const cluster = choice.clusterId ? clusters[choice.clusterId] : undefined;
   return (
-    <CellBox header>
+    <CellBox header clickable={clickable}>
       <div className="text-xs font-bold p-1">
         {cluster ? (
           <div className="float-right px-0.5">
