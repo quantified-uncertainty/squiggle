@@ -85,7 +85,7 @@ export const useCachedPairsToOneItem = (
       pairs[id1][id2] = buildCachedValue(fn, id1, id2);
     }
     return pairs;
-  }, [fn, choices]);
+  }, [fn, choices, id2]);
 };
 
 export const useCachedPairs = (
