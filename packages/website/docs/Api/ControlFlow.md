@@ -1,6 +1,6 @@
 ---
 sidebar_position: 11
-title: Flow
+title: Control Flow
 ---
 
 This page documents parts of the squiggle language that aren't related to distributions, but rather to flow structures. For now, it only deals with if/else constructs, and points to the reader to reduce/map constructs instead of for loops
@@ -13,9 +13,11 @@ This page documents parts of the squiggle language that aren't related to distri
 if condition then result else alternative
 ```
 
-```js
+<SquiggleEditor
+  defaultCode={`
 if x == 1 then 1 else 2
-```
+`}
+/>
 
 ### If-else as ternary operation
 
@@ -23,25 +25,31 @@ if x == 1 then 1 else 2
 test ? result : alternative
 ```
 
-```js
+<SquiggleEditor
+  defaultCode={`
+x = 10
 x == 0 ? 1 : 2
-```
+`}
+/>
 
 ### Tips and tricks
 
 #### Use brackets and parenthesis to simplify flow
 
-```js
+<SquiggleEditor
+  defaultCode={`
 if x == 1 then {
   1
 } else {
   2
 }
-```
+`}
+/>
 
 or
 
-```js
+<SquiggleEditor
+  defaultCode={`
 if x == 1 then {
   (
     if y == 0 then {
@@ -53,35 +61,40 @@ if x == 1 then {
 } else {
   3
 }
-```
+`}
+/>
 
 #### Save the result to a variable
 
 Assigning a value inside an if/else flow isn't possible:
 
-```js
-
+<SquiggleEditor
+  defaultCode={`
 if x == 1 then {
   y = 1
 } else {
   y = 2 * x
 }
 
-```
+`}
+/>
 
 Instead, you can do this:
 
-```js
+<SquiggleEditor
+  defaultCode={`
 y = if x == 1 then {
   1
 } else {
   2*x
 }
-```
+`}
+/>
 
 Likewise, for assigning more than one value, you can't do this:
 
-```js
+<SquiggleEditor
+  defaultCode={`
 y = 0
 z = 0 
 if x == 1 then {
@@ -89,12 +102,13 @@ if x == 1 then {
 } else {
   z = 4
 }
-```
+`}
+/>
 
 Instead, do:
 
-```js
-
+<SquiggleEditor
+  defaultCode={`
 result = if x == 1 then {
   {y: 2, z: 0}
 } else {
@@ -102,12 +116,13 @@ result = if x == 1 then {
 }
 y = result.y
 z = result.z
-```
+`}
+/>
 
 
 ## For loops
 
-For loops currently don't exist in Squiggle. instead, use a [map](https://www.squiggle-language.com/docs/Api/List#map) or a [reduce](https://www.squiggle-language.com/docs/Api/List#reduce) operator:
+For loops currently don't exist in Squiggle. instead, use a [map](/docs/Api/List#map) or a [reduce](/docs/Api/List#reduce) operator:
 
 
 Instead of:
@@ -121,7 +136,9 @@ for(i = 0; i < 10; i++){
 
 do:
 
-```js
+<SquiggleEditor
+  defaultCode={`
 ls = List.upTo(0,10)
 xs = List.map(l, {|l| f(l)})
-```
+`}
+/>
