@@ -33,7 +33,7 @@ export const ClusterFilter: FC<{ axis: Axis }> = ({ axis }) => {
   const dispatch = useGridViewDispatch();
 
   return (
-    <div className="flex flex-col gap-2 min-w-[24em]">
+    <div className="flex flex-col gap-2">
       {Object.keys(clusters).map((id) => (
         <ClusterItem
           key={id}

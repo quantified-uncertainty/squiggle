@@ -8,15 +8,17 @@ import {
   useFloating,
   useInteractions,
 } from "@floating-ui/react";
+import clsx from "clsx";
 import { FC, useRef, useState } from "react";
 import { Tailwind } from "../Tailwind";
 
 type Props = {
   render(options: { close(): void }): React.ReactNode;
+  fullHeight?: boolean;
   children: React.ReactNode;
 };
 
-export const Dropdown: FC<Props> = ({ render, children }) => {
+export const Dropdown: FC<Props> = ({ render, fullHeight, children }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const arrowRef = useRef<HTMLDivElement | null>(null);
@@ -49,7 +51,7 @@ export const Dropdown: FC<Props> = ({ render, children }) => {
       <Tailwind>
         <div
           ref={refs.setFloating}
-          className="z-50 rounded-sm px-3 py-2 bg-white shadow-dropdown"
+          className="z-50 rounded-sm bg-white shadow-dropdown"
           style={{
             position: strategy,
             top: y ?? 0,
@@ -73,8 +75,12 @@ export const Dropdown: FC<Props> = ({ render, children }) => {
   );
 
   return (
-    <div className="relative z-0">
-      <div ref={refs.setReference} {...getReferenceProps()}>
+    <div className={clsx("relative z-0", fullHeight && "h-full")}>
+      <div
+        className={clsx(fullHeight && "h-full grid place-items-stretch")}
+        ref={refs.setReference}
+        {...getReferenceProps()}
+      >
         {children}
       </div>
       {isOpen ? renderTooltip() : null}

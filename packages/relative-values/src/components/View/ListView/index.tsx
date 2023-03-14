@@ -18,7 +18,7 @@ const ColumnHeaderContextMenu: FC<{
   const [search, setSearch] = useState("");
 
   return (
-    <div className="w-96">
+    <div className="w-96 px-4 py-4">
       <input
         type="text"
         className="p-1 rounded border border-gray-200 w-full mb-4"
@@ -31,6 +31,7 @@ const ColumnHeaderContextMenu: FC<{
             .filter((item) => item.name.match(new RegExp(search, "i")))
             .map((item) => (
               <div
+                key={item.id}
                 className="hover:bg-gray-100 rounded p-1 cursor-pointer text-xs"
                 onClick={() => setSelectedItem(item)}
               >
@@ -48,7 +49,7 @@ const ColumnHeader: FC<{
   setSelectedItem(choice: Choice): void;
 }> = ({ selectedItem, setSelectedItem }) => {
   return (
-    <div className="sticky top-0 left-0 z-10">
+    <div className="sticky top-0 left-0 z-10 grid place-items-stretch h-full">
       <Dropdown
         render={({ close }) => (
           <ColumnHeaderContextMenu
@@ -58,6 +59,7 @@ const ColumnHeader: FC<{
             }}
           />
         )}
+        fullHeight
       >
         <Header choice={selectedItem} clickable />
       </Dropdown>

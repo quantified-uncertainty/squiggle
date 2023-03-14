@@ -108,7 +108,7 @@ const LoadJSONControls: FC<{
 const LoadButton: FC = () => {
   const renderMenu = ({ close }: { close(): void }) => {
     return (
-      <div className="p-1 w-80">
+      <div className="px-6 py-4 w-80">
         <div className="flex flex-col gap-4">
           <div>
             <FormHeader>Presets</FormHeader>

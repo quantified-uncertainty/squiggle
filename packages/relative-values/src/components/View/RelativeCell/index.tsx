@@ -1,8 +1,7 @@
-import { SqProject } from "@quri/squiggle-lang";
 import { FC, memo } from "react";
-import { ErrorCell } from "./ErrorCell";
 import { CachedPairs } from "../hooks";
 import { DistCell } from "./DistCell";
+import { ErrorCell } from "./ErrorCell";
 
 export const RelativeCell: FC<{
   id1: string;

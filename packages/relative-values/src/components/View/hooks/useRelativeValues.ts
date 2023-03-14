@@ -1,21 +1,38 @@
-import { SqLambda, SqProject } from "@quri/squiggle-lang";
+import { SqLambda, SqProject, sq } from "@quri/squiggle-lang";
 import { useEffect, useMemo, useState } from "react";
 
+const wrapper = sq`
+{|x, y|
+  dist = fn(x, y) -> SampleSet.fromDist
+  {
+    dist: dist,
+    median: inv(dist, 0.5),
+    min: inv(dist, 0.05),
+    max: inv(dist, 0.95),
+    db: 10 * (dist -> log10 -> stdev)
+  }
+}
+`;
+
 export const useRelativeValues = (code: string) => {
-  const project = useMemo(() => SqProject.create(), []);
+  const project = useMemo(() => {
+    const project = SqProject.create();
+    project.setSource("wrapper", wrapper);
+    project.setContinues("wrapper", ["model"]);
+
+    return project;
+  }, []);
 
   const [error, setError] = useState("");
   const [fn, setFn] = useState<SqLambda | undefined>();
 
   useEffect(() => {
-    project.setSource("main", code);
-
     setFn(undefined);
 
-    const MAIN = "main";
-    project.run(MAIN);
+    project.setSource("model", code);
+    project.run("wrapper");
+    const result = project.getResult("wrapper");
 
-    const result = project.getResult(MAIN);
     if (!result.ok) {
       setError(
         `Failed to evaluate Squiggle code: ${result.value.toStringWithStackTrace()}`
