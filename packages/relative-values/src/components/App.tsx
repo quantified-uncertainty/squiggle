@@ -14,23 +14,13 @@ const Dashboard =
         import("@/components/Dashboard").then((mod) => mod.Dashboard)
       );
 
-const builtins = {
-  quri: getQuriCatalogAndModel,
-  "quri-software": getQuriSoftwareCatalogAndModel,
-};
-
-export const App: FC<{ mode: keyof typeof builtins }> = ({ mode }) => {
+export const App: FC = () => {
   return (
     <main className="p-4">
-      <div className="mb-4">
-        <Link href="/">
-          <A>&larr; Index</A>
-        </Link>
-      </div>
       <SafeHydrate>
         {() =>
           Dashboard ? (
-            <DashboardProvider key={mode} getInitialValue={builtins[mode]}>
+            <DashboardProvider getInitialValue={getQuriCatalogAndModel}>
               <Dashboard />
             </DashboardProvider>
           ) : null

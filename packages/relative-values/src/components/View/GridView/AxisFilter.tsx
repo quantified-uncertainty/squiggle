@@ -1,3 +1,4 @@
+import { FormHeader } from "@/components/ui/FormHeader";
 import { FC } from "react";
 import { ClusterFilter } from "../ClusterFilter";
 import { Axis } from "./GridViewProvider";
@@ -5,9 +6,7 @@ import { Axis } from "./GridViewProvider";
 export const AxisFilter: FC<{ axis: Axis }> = ({ axis }) => {
   return (
     <div>
-      <header className="text-gray-500 capitalize font-medium mb-2">
-        Clusters
-      </header>
+      <FormHeader>Clusters</FormHeader>
       <ClusterFilter axis={axis} />
     </div>
   );

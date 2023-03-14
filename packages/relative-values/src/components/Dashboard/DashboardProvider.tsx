@@ -9,7 +9,7 @@ import {
   useReducer,
 } from "react";
 
-type DashboardContextShape = {
+export type DashboardContextShape = {
   model: Model;
   catalog: Catalog;
 };
@@ -26,10 +26,15 @@ const DashboardContext = createContext<DashboardContextShape>({
   },
 });
 
-type Action = {
-  type: "setModel";
-  payload: Model;
-};
+type Action =
+  | {
+      type: "setModel";
+      payload: Model;
+    }
+  | {
+      type: "load";
+      payload: DashboardContextShape;
+    };
 
 const reducer = (
   state: DashboardContextShape,
@@ -41,6 +46,8 @@ const reducer = (
         ...state,
         model: action.payload,
       };
+    case "load":
+      return action.payload;
     default:
       return state;
   }

@@ -202,3 +202,28 @@ export function buildGraphModel({
 
   return findInvalidIds(result);
 }
+
+export function modelToJSON(model: Model) {
+  if (model.mode === "text") {
+    return model;
+  }
+
+  return {
+    ...model,
+    nodes: [...model.nodes.entries()],
+    invalidIds: [...model.invalidIds.values()],
+  };
+}
+
+export function modelFromJSON(json: any) {
+  // TODO - validate
+  if (json.mode === "text") {
+    return json;
+  }
+
+  return {
+    ...json,
+    nodes: Map(json.nodes),
+    invalidIds: Set(json.invalidIds),
+  };
+}
