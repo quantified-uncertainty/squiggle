@@ -18,24 +18,31 @@ export const DistCell: FC<{ item: CachedItem }> = memo(function DistCell({
             <span className="text-lg">
               <NumberShower number={item.median} />
             </span>
-            <span>
-              {" "}
-              <span className="text-gray-400">±</span>{" "}
-              <span className="text-gray-600">
-                <NumberShower number={item.db} />
+            {item.db === 0 ? null : (
+              <span>
+                {" "}
+                <span className="text-gray-400">±</span>{" "}
+                <span className="text-gray-600">
+                  <NumberShower number={item.db} />
+                </span>
+                <span className="text-gray-500 text-xs"> dB</span>
               </span>
-              <span className="text-gray-500 text-xs"> dB</span>
-            </span>
+            )}
           </div>
 
-          <div className="text-xs text-gray-500">
-            <NumberShower number={item.min} /> to{" "}
-            <NumberShower number={item.max} />
+          {item.db === 0 ? null : (
+            <div className="text-xs text-gray-500">
+              <NumberShower number={item.min} /> to{" "}
+              <NumberShower number={item.max} />
+            </div>
+          )}
+        </div>
+
+        {item.db === 0 ? null : (
+          <div className="h-8 absolute bottom-0 inset-x-0 -z-10">
+            <Histogram data={item.sortedSamples} domain={[1e-3, 1e3]} />
           </div>
-        </div>
-        <div className="h-8 absolute bottom-0 inset-x-0 -z-10">
-          <Histogram data={item.sortedSamples} domain={[1e-3, 1e3]} />
-        </div>
+        )}
       </div>
     </CellBox>
   );

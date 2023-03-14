@@ -5,7 +5,7 @@ import { useDashboardContext } from "../../Dashboard/DashboardProvider";
 import { DropdownButton } from "../../ui/DropdownButton";
 import { RelativeCell } from "../RelativeCell";
 import { useCachedPairs, useFilteredChoices } from "../hooks";
-import { AxisFilter } from "./AxisFilter";
+import { AxisMenu } from "./AxisMenu";
 import { GridModeControls } from "./GridModeControls";
 import { useGridViewContext } from "./GridViewProvider";
 import { Header } from "../Header";
@@ -15,15 +15,23 @@ export const GridView: FC<{
   project: SqProject;
   fn: SqLambda;
 }> = ({ project, fn }) => {
-  const { filters, gridMode } = useGridViewContext();
+  const { axisConfig, gridMode } = useGridViewContext();
   const {
     catalog: { items: choices },
   } = useDashboardContext();
 
-  const rowChoices = useFilteredChoices(choices, filters.rows);
-  const columnChoices = useFilteredChoices(choices, filters.columns);
-
   const allPairs = useCachedPairs(fn, choices);
+
+  const rowChoices = useFilteredChoices({
+    choices,
+    config: axisConfig.rows,
+    cache: allPairs,
+  });
+  const columnChoices = useFilteredChoices({
+    choices,
+    config: axisConfig.columns,
+    cache: allPairs,
+  });
 
   const idToPosition = useMemo(() => {
     const result: { [k: string]: number } = {};
@@ -48,10 +56,10 @@ export const GridView: FC<{
       <div className="flex gap-8 mb-4 items-center">
         <div className="flex gap-2">
           <DropdownButton text="Rows">
-            {() => <AxisFilter axis="rows" />}
+            {() => <AxisMenu axis="rows" />}
           </DropdownButton>
           <DropdownButton text="Columns">
-            {() => <AxisFilter axis="columns" />}
+            {() => <AxisMenu axis="columns" />}
           </DropdownButton>
         </div>
         <GridModeControls />

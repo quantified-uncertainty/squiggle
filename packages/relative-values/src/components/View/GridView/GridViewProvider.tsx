@@ -15,21 +15,43 @@ export type Axis = "rows" | "columns";
 
 export type GridMode = "full" | "half";
 
+export type SortMode = "default" | "median" | "uncertainty";
+
+export type SortConfig = {
+  mode: SortMode;
+  desc: boolean;
+};
+
+export type AxisConfig = {
+  filter: Filter;
+  sort: SortConfig;
+};
+
 type GridViewContextShape = {
   gridMode: GridMode;
-  filters: {
-    [k in Axis]: Filter;
-  };
+  axisConfig: { [k in Axis]: AxisConfig };
 };
 
 export const GridViewContext = createContext<GridViewContextShape>({
   gridMode: "full",
-  filters: {
+  axisConfig: {
     rows: {
-      selectedClusters: Set(),
+      filter: {
+        selectedClusters: Set(),
+      },
+      sort: {
+        mode: "default",
+        desc: false,
+      },
     },
     columns: {
-      selectedClusters: Set(),
+      filter: {
+        selectedClusters: Set(),
+      },
+      sort: {
+        mode: "default",
+        desc: false,
+      },
     },
   },
 });
@@ -47,6 +69,13 @@ type Action =
       };
     }
   | {
+      type: "setSort";
+      payload: {
+        axis: "rows" | "columns";
+        sort: SortConfig;
+      };
+    }
+  | {
       type: "setGridMode";
       payload: GridMode;
     };
@@ -57,16 +86,33 @@ const toggle = (set: Set<string>, id: string) =>
 const reducer: Reducer<GridViewContextShape, Action> = (state, action) => {
   switch (action.type) {
     case "toggleCluster": {
+      const axisConfig = state.axisConfig[action.payload.axis];
       return {
         ...state,
-        filters: {
-          ...state.filters,
+        axisConfig: {
+          ...state.axisConfig,
           [action.payload.axis]: {
-            ...state.filters[action.payload.axis],
-            selectedClusters: toggle(
-              state.filters[action.payload.axis].selectedClusters,
-              action.payload.id
-            ),
+            ...axisConfig,
+            filter: {
+              ...axisConfig.filter,
+              selectedClusters: toggle(
+                axisConfig.filter.selectedClusters,
+                action.payload.id
+              ),
+            },
+          },
+        },
+      };
+    }
+    case "setSort": {
+      const axisConfig = state.axisConfig[action.payload.axis];
+      return {
+        ...state,
+        axisConfig: {
+          ...state.axisConfig,
+          [action.payload.axis]: {
+            ...axisConfig,
+            sort: action.payload.sort,
           },
         },
       };
@@ -95,15 +141,16 @@ export const GridViewProvider: FC<
   // TODO - when clusters change (e.g. when we update the underlying model), we should update the state
   const [state, dispatch] = useReducer(reducer, undefined, () => {
     const clusterIds = Set(Object.keys(initialClusters));
-    const defaultFilter: Filter = {
-      selectedClusters: clusterIds,
-    };
+    const defaultAxisConfig = {
+      filter: { selectedClusters: clusterIds },
+      sort: { mode: "default", desc: false },
+    } satisfies AxisConfig;
 
     return {
       gridMode: "full",
-      filters: {
-        rows: defaultFilter,
-        columns: defaultFilter,
+      axisConfig: {
+        rows: defaultAxisConfig,
+        columns: defaultAxisConfig,
       },
     } satisfies GridViewContextShape;
   });

@@ -110,9 +110,8 @@ export function getGraphModelCode(model: GraphModel) {
 withSampleSetValue(item) = SampleSet.fromDist(item)
 items = Dict.map(items, withSampleSetValue)
 
-fn(intervention1, intervention2) =
-  items[intervention1] / items[intervention2]
-fn`;
+fn(intervention1, intervention2) = items[intervention1] / items[intervention2]
+`;
 
   return code;
 }

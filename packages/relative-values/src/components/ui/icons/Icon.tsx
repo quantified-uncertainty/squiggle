@@ -8,7 +8,7 @@ export type IconProps = PropsWithChildren<{
 
 export const Icon: FC<IconProps> = ({
   size = 20,
-  className = "fill-black",
+  className = "fill-black stroke-black",
   onClick,
   children,
 }) => (

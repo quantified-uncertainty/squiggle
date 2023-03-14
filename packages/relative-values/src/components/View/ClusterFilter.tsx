@@ -16,7 +16,7 @@ export const ClusterItem: React.FC<{
   return (
     <div className="flex gap-1 items-center cursor-pointer" onClick={toggle}>
       <ClusterIcon cluster={cluster} selected={selected} />
-      <div className="text-xs text-gray-700 hover:text-blue-700 select-none">
+      <div className="text-xs text-gray-700 hover:text-blue-700">
         {cluster.name}
       </div>
     </div>
@@ -28,7 +28,9 @@ export const ClusterFilter: FC<{ axis: Axis }> = ({ axis }) => {
     catalog: { clusters },
   } = useDashboardContext();
   const {
-    filters: { [axis]: filter },
+    axisConfig: {
+      [axis]: { filter },
+    },
   } = useGridViewContext();
   const dispatch = useGridViewDispatch();
 
