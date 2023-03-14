@@ -67,17 +67,13 @@ if x == 1 then {
 #### Save the result to a variable
 
 Assigning a value inside an if/else flow isn't possible:
-
-<SquiggleEditor
-  defaultCode={`
+```js
 if x == 1 then {
   y = 1
 } else {
   y = 2 * x
 }
-
-`}
-/>
+```
 
 Instead, you can do this:
 
@@ -93,8 +89,7 @@ y = if x == 1 then {
 
 Likewise, for assigning more than one value, you can't do this:
 
-<SquiggleEditor
-  defaultCode={`
+```js
 y = 0
 z = 0 
 if x == 1 then {
@@ -102,8 +97,7 @@ if x == 1 then {
 } else {
   z = 4
 }
-`}
-/>
+```
 
 Instead, do:
 
