@@ -70,6 +70,7 @@ if x == 1 then {
 #### Save the result to a variable
 
 Assigning a value inside an if/else flow isn't possible:
+
 ```js
 if x == 1 then {
   y = 1
@@ -94,7 +95,7 @@ Likewise, for assigning more than one value, you can't do this:
 
 ```js
 y = 0
-z = 0 
+z = 0
 if x == 1 then {
   y = 2
 } else {
@@ -116,17 +117,15 @@ z = result.z
 `}
 />
 
-
 ## For loops
 
 For loops currently don't exist in Squiggle. instead, use a [map](/docs/Api/List#map) or a [reduce](/docs/Api/List#reduce) operator:
 
-
 Instead of:
 
 ```js
-xs = []
-for(i = 0; i < 10; i++){
+xs = [];
+for (i = 0; i < 10; i++) {
   xs[i] = f(x)
 }
 ```
