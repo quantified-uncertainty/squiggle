@@ -6,11 +6,11 @@ title: Control Flow
 import { SquiggleEditor } from "../../src/components/SquiggleEditor";
 import Admonition from "@theme/Admonition";
 
-This page documents parts of the squiggle language that aren't related to distributions, but rather to flow structures. For now, it only deals with if/else constructs, and points to the reader to reduce/map constructs instead of for loops
+This page documents control flow. Squiggle has with if/else statements. Use reduce/map constructs instead of for loops.
 
 ## If-else
 
-### If-else as a flow structure
+### If-else
 
 ```js
 if condition then result else alternative
@@ -22,7 +22,7 @@ if x == 1 then 1 else 2
 `}
 />
 
-### If-else as ternary operation
+### Ternary Operations
 
 ```js
 test ? result : alternative
@@ -37,7 +37,7 @@ x == 0 ? 1 : 2
 
 ### Tips and tricks
 
-#### Use brackets and parenthesis to simplify flow
+#### Use brackets and parenthesis to simplify control flow
 
 <SquiggleEditor
   defaultCode={`
@@ -86,7 +86,7 @@ Instead, you can do this:
 y = if x == 1 then {
   1
 } else {
-  2*x
+  2 * x
 }
 `}
 />
@@ -119,7 +119,7 @@ z = result.z
 
 ## For loops
 
-For loops currently don't exist in Squiggle. instead, use a [map](/docs/Api/List#map) or a [reduce](/docs/Api/List#reduce) operator:
+For loops aren't currently supported in Squiggle. Instead, use a [map](/docs/Api/List#map) or a [reduce](/docs/Api/List#reduce) operator.
 
 Instead of:
 
