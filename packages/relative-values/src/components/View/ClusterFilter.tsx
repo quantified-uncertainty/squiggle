@@ -7,6 +7,7 @@ import {
   useGridViewContext,
   useGridViewDispatch,
 } from "./GridView/GridViewProvider";
+import clsx from "clsx";
 
 export const ClusterItem: React.FC<{
   cluster: Cluster;
@@ -16,7 +17,12 @@ export const ClusterItem: React.FC<{
   return (
     <div className="flex gap-1 items-center cursor-pointer" onClick={toggle}>
       <ClusterIcon cluster={cluster} selected={selected} />
-      <div className="text-xs text-gray-700 hover:text-blue-700">
+      <div
+        className={clsx(
+          "text-xs hover:text-black font-medium",
+          selected ? "text-gray-600" : "text-gray-400"
+        )}
+      >
         {cluster.name}
       </div>
     </div>

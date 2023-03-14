@@ -59,7 +59,7 @@ const SortBy: FC<{
       />
       <div
         className={clsx(
-          "ml-2 text-xs font-semibold",
+          "ml-2 text-xs font-medium",
           isCurrentMode ? "text-black" : "text-gray-400 group-hover:text-black"
         )}
       >
@@ -76,7 +76,7 @@ export const AxisMenu: FC<{ axis: Axis }> = ({ axis }) => {
     },
   } = useGridViewContext();
   return (
-    <div className="px-6 py-4 min-w-[16em] flex flex-col gap-6">
+    <div className="px-6 py-6 min-w-[16em] flex flex-col gap-6">
       <div>
         <FormHeader>Clusters</FormHeader>
         <ClusterFilter axis={axis} />
