@@ -78,7 +78,6 @@ export const GridView: FC<{
                   id1={rowChoice.id}
                   id2={columnChoice.id}
                   cache={allPairs}
-                  project={project}
                 />
               )
             )}

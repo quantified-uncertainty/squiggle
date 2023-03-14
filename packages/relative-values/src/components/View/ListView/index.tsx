@@ -1,6 +1,6 @@
 import { useDashboardContext } from "@/components/Dashboard/DashboardProvider";
 import { SqLambda, SqProject } from "@quri/squiggle-lang";
-import { FC, Fragment, useState } from "react";
+import { FC, Fragment, useEffect, useState } from "react";
 import { RelativeCell } from "../RelativeCell";
 import { Header } from "../Header";
 import { CellBox } from "../CellBox";
@@ -77,6 +77,11 @@ export const ListView: FC<Props> = ({ fn, project }) => {
 
   const [selectedItem, setSelectedItem] = useState(items[0]);
 
+  useEffect(() => {
+    // when catalog changes selectedItem can become invalid so we reset it
+    setSelectedItem(items[0]);
+  }, [items]);
+
   const cachedPairs = useCachedPairsToOneItem(fn, items, selectedItem.id);
 
   return (
@@ -103,7 +108,6 @@ export const ListView: FC<Props> = ({ fn, project }) => {
               id1={item.id}
               id2={selectedItem.id}
               cache={cachedPairs}
-              project={project}
             />
             <CellBox>
               <div className="p-1 font-mono text-xs">{item.id}</div>

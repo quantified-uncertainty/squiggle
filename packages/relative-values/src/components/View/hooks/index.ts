@@ -1,50 +1,13 @@
 import { Choice } from "@/types";
-import {
-  Env,
-  result,
-  SqDistributionError,
-  SqError,
-  SqLambda,
-  SqProject,
-} from "@quri/squiggle-lang";
+import { result, SqDistributionError, SqLambda } from "@quri/squiggle-lang";
 import {
   SqDistributionTag,
   SqSampleSetDistribution,
 } from "@quri/squiggle-lang/dist/src/public/SqDistribution";
-import { useEffect, useMemo, useState } from "react";
-import { Filter } from "./types";
+import { useMemo } from "react";
+import { Filter } from "../types";
 
-export const useRelativeValues = (code: string) => {
-  const project = useMemo(() => SqProject.create(), []);
-
-  const [error, setError] = useState("");
-  const [fn, setFn] = useState<SqLambda | undefined>();
-
-  useEffect(() => {
-    project.setSource("main", code);
-
-    setFn(undefined);
-
-    const MAIN = "main";
-    project.run(MAIN);
-
-    const result = project.getResult(MAIN);
-    if (!result.ok) {
-      setError(
-        `Failed to evaluate Squiggle code: ${result.value.toStringWithStackTrace()}`
-      );
-      return;
-    }
-
-    if (result.value.tag !== "Lambda") {
-      setError(`Expected a function as result, got: ${result.value.tag}`);
-      return;
-    }
-    setFn(result.value.value);
-  }, [project, code]);
-
-  return { error, fn, project };
-};
+export { useRelativeValues } from "./useRelativeValues";
 
 export const useFilteredChoices = (choices: Choice[], filter: Filter) => {
   return useMemo(() => {
@@ -138,7 +101,7 @@ export const useCachedPairs = (
     const pairs: CachedPairs = {};
 
     for (let i = 0; i < choices.length; i++) {
-      // note: iterate up to `i` to cache only half of the grid
+      // note: we could iterate up to `i` in half-grid mode
       for (let j = 0; j < choices.length; j++) {
         const id1 = choices[i].id;
         const id2 = choices[j].id;

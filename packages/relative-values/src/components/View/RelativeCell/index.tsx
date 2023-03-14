@@ -8,8 +8,7 @@ export const RelativeCell: FC<{
   id1: string;
   id2: string;
   cache: CachedPairs;
-  project: SqProject;
-}> = memo(function CachedCell({ id1, id2, cache, project }) {
+}> = memo(function CachedCell({ id1, id2, cache }) {
   const result = cache[id1]?.[id2];
   if (!result) {
     return <ErrorCell error="Internal error, missing data" />;
