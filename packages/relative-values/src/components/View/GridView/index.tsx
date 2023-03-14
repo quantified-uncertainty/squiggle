@@ -4,7 +4,7 @@ import { FC, Fragment, useCallback, useMemo } from "react";
 import { useDashboardContext } from "../../Dashboard/DashboardProvider";
 import { DropdownButton } from "../../ui/DropdownButton";
 import { RelativeCell } from "../RelativeCell";
-import { useCachedPairs, useFilteredChoices } from "../hooks";
+import { useCachedPairs, useFilteredChoices, useSortedChoices } from "../hooks";
 import { AxisMenu } from "./AxisMenu";
 import { GridModeControls } from "./GridModeControls";
 import { useGridViewContext } from "./GridViewProvider";
@@ -22,15 +22,26 @@ export const GridView: FC<{
 
   const allPairs = useCachedPairs(fn, choices);
 
-  const rowChoices = useFilteredChoices({
+  const filteredRowChoices = useFilteredChoices({
     choices,
     config: axisConfig.rows,
-    cache: allPairs,
   });
-  const columnChoices = useFilteredChoices({
+  const filteredColumnChoices = useFilteredChoices({
     choices,
     config: axisConfig.columns,
+  });
+
+  const rowChoices = useSortedChoices({
+    choices: filteredRowChoices,
+    config: axisConfig.rows,
     cache: allPairs,
+    otherDimensionChoices: filteredColumnChoices,
+  });
+  const columnChoices = useSortedChoices({
+    choices: filteredColumnChoices,
+    config: axisConfig.columns,
+    cache: allPairs,
+    otherDimensionChoices: filteredRowChoices,
   });
 
   const idToPosition = useMemo(() => {
