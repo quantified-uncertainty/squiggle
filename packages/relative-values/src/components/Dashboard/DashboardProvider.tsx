@@ -1,14 +1,6 @@
 import { Model } from "@/model/utils";
 import { Catalog } from "@/types";
-import {
-  createContext,
-  FC,
-  PropsWithChildren,
-  Reducer,
-  startTransition,
-  useContext,
-  useReducer,
-} from "react";
+import { Reducer } from "react";
 import { generateProvider } from "../generateProvider";
 
 export type DashboardContextShape = {
@@ -20,6 +12,7 @@ const defaultValue: DashboardContextShape = {
   model: {
     mode: "text",
     code: "",
+    author: "unknown",
   },
   catalog: {
     title: "Undefined",

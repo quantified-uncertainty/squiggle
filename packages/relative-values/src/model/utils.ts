@@ -6,17 +6,21 @@ type Node = {
   dependencies: string[];
 };
 
+type ModelMetadata = {
+  author: string;
+}
+
 export type TextModel = {
   mode: "text";
   code: string;
-};
+} & ModelMetadata;
 
 export type GraphModel = {
   mode: "graph";
   commonCode: string;
   nodes: Map<string, Node>;
   invalidIds: Set<string>;
-};
+} & ModelMetadata;
 
 type GraphModelOrder =
   | {
@@ -35,7 +39,7 @@ function topologicalSort(model: GraphModel): GraphModelOrder {
   let globalSeen = Set<string>();
   let invalidIds = Set<string>();
 
-  for (let [id, node] of model.nodes.entries()) {
+  for (const id of model.nodes.keys()) {
     let seen = Set<string>();
 
     // returns the validity status of the current node
@@ -51,7 +55,7 @@ function topologicalSort(model: GraphModel): GraphModelOrder {
       seen = seen.add(currentId);
 
       let ok = true;
-      for (let dependencyId of model.nodes.get(currentId)?.dependencies || []) {
+      for (const dependencyId of model.nodes.get(currentId)?.dependencies || []) {
         if (!dfs(dependencyId)) {
           ok = false;
         }
@@ -179,9 +183,11 @@ export function buildGraphModel({
   items,
   catalog,
   commonCode = "",
+  metadata,
 }: {
   items: [string, string][];
   commonCode: string;
+  metadata: ModelMetadata;
   catalog: Catalog;
 }): GraphModel {
   const result = {
@@ -197,6 +203,7 @@ export function buildGraphModel({
       ])
     ),
     invalidIds: Set(),
+    ...metadata,
   } satisfies GraphModel;
 
   return findInvalidIds(result);

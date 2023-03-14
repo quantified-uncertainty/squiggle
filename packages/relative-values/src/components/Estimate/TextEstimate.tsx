@@ -10,7 +10,7 @@ export const TextEstimate: FC<EstimateProps<TextModel>> = ({
   return (
     <SquiggleEditor
       code={model.code}
-      onCodeChange={(code) => setModel({ mode: "text", code })}
+      onCodeChange={(code) => setModel({ ...model, code })}
       hideViewer
     />
   );

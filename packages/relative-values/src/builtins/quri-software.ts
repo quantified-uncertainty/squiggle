@@ -188,6 +188,9 @@ function getModel(): Model {
       ["standard_prob_models", "500 to 1k"],
     ],
     catalog: getCatalog(),
+    metadata: {
+      author: "Nuño Sempere",
+    },
   });
 }
 

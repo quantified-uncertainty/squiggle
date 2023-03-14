@@ -39,6 +39,8 @@ export const GraphEstimate: FC<EstimateProps<GraphModel>> = ({
 
   const getAnchor = (id: string) => `estimate-${id}`;
 
+  const eject = () => setModel({ mode: "text", code, author: model.author });
+
   return (
     <div>
       <div
@@ -112,9 +114,7 @@ export const GraphEstimate: FC<EstimateProps<GraphModel>> = ({
         <div className="flex flex-col items-end gap-2">
           <Label>Generated code</Label>
           {/* TODO - confirmation */}
-          <Button onClick={() => setModel({ mode: "text", code })}>
-            Eject
-          </Button>
+          <Button onClick={eject}>Eject</Button>
         </div>
         <pre className="p-2 bg-gray-100 text-xs overflow-auto">{code}</pre>
       </div>
