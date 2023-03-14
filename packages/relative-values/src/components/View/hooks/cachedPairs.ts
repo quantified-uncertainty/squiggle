@@ -1,4 +1,4 @@
-import { Choice } from "@/types";
+import { Item } from "@/types";
 import { result, SqLambda } from "@quri/squiggle-lang";
 import { SqSampleSetDistribution } from "@quri/squiggle-lang/dist/src/public/SqDistribution";
 import { useMemo } from "react";
@@ -93,39 +93,36 @@ const buildCachedValue = ({
 
 export const useCachedPairsToOneItem = (
   fn: SqLambda,
-  choices: Choice[],
+  items: Item[],
   id2: string
 ): CachedPairs => {
   return useMemo(() => {
     const pairs: CachedPairs = {};
 
-    for (let i = 0; i < choices.length; i++) {
-      const id1 = choices[i].id;
+    for (let i = 0; i < items.length; i++) {
+      const id1 = items[i].id;
 
       pairs[id1] ??= {};
       pairs[id1][id2] = buildCachedValue({ fn, id1, id2 });
     }
     return pairs;
-  }, [fn, choices, id2]);
+  }, [fn, items, id2]);
 };
 
-export const useCachedPairs = (
-  fn: SqLambda,
-  choices: Choice[]
-): CachedPairs => {
+export const useCachedPairs = (fn: SqLambda, items: Item[]): CachedPairs => {
   return useMemo(() => {
     const pairs: CachedPairs = {};
 
-    for (let i = 0; i < choices.length; i++) {
+    for (let i = 0; i < items.length; i++) {
       // note: we could iterate up to `i` in half-grid mode
-      for (let j = 0; j < choices.length; j++) {
-        const id1 = choices[i].id;
-        const id2 = choices[j].id;
+      for (let j = 0; j < items.length; j++) {
+        const id1 = items[i].id;
+        const id2 = items[j].id;
 
         pairs[id1] ??= {};
         pairs[id1][id2] = buildCachedValue({ fn, id1, id2 });
       }
     }
     return pairs;
-  }, [fn, choices]);
+  }, [fn, items]);
 };

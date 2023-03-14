@@ -6,5 +6,5 @@ export {
 } from "./cachedPairs";
 export { useRelativeValues } from "./useRelativeValues";
 
-export { useFilteredChoices } from './useFilteredChoices';
-export { useSortedChoices } from './useSortedChoices';
+export { useFilteredItems } from './useFilteredItems';
+export { useSortedItems } from './useSortedItems';

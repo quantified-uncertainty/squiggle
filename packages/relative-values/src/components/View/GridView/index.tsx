@@ -1,63 +1,61 @@
-import { Choice } from "@/types";
-import { SqLambda, SqProject } from "@quri/squiggle-lang";
+import { Item } from "@/types";
+import { SqLambda } from "@quri/squiggle-lang";
 import { FC, Fragment, useCallback, useMemo } from "react";
 import { useDashboardContext } from "../../Dashboard/DashboardProvider";
 import { DropdownButton } from "../../ui/DropdownButton";
+import { Header } from "../Header";
+import { useCachedPairs, useFilteredItems, useSortedItems } from "../hooks";
 import { RelativeCell } from "../RelativeCell";
-import { useCachedPairs, useFilteredChoices, useSortedChoices } from "../hooks";
+import { useViewContext } from "../ViewProvider";
 import { AxisMenu } from "./AxisMenu";
 import { GridModeControls } from "./GridModeControls";
-import { useGridViewContext } from "./GridViewProvider";
-import { Header } from "../Header";
-import { CellBox } from "../CellBox";
 
 export const GridView: FC<{
-  project: SqProject;
   fn: SqLambda;
-}> = ({ project, fn }) => {
-  const { axisConfig, gridMode } = useGridViewContext();
+}> = ({ fn }) => {
+  const { axisConfig, gridMode } = useViewContext();
   const {
-    catalog: { items: choices },
+    catalog: { items },
   } = useDashboardContext();
 
-  const allPairs = useCachedPairs(fn, choices);
+  const allPairs = useCachedPairs(fn, items);
 
-  const filteredRowChoices = useFilteredChoices({
-    choices,
+  const filteredRowItems = useFilteredItems({
+    items: items,
     config: axisConfig.rows,
   });
-  const filteredColumnChoices = useFilteredChoices({
-    choices,
+  const filteredColumnItems = useFilteredItems({
+    items: items,
     config: axisConfig.columns,
   });
 
-  const rowChoices = useSortedChoices({
-    choices: filteredRowChoices,
+  const rowItems = useSortedItems({
+    items: filteredRowItems,
     config: axisConfig.rows,
     cache: allPairs,
-    otherDimensionChoices: filteredColumnChoices,
+    otherDimensionItems: filteredColumnItems,
   });
-  const columnChoices = useSortedChoices({
-    choices: filteredColumnChoices,
+  const columnItems = useSortedItems({
+    items: filteredColumnItems,
     config: axisConfig.columns,
     cache: allPairs,
-    otherDimensionChoices: filteredRowChoices,
+    otherDimensionItems: filteredRowItems,
   });
 
   const idToPosition = useMemo(() => {
     const result: { [k: string]: number } = {};
-    for (let i = 0; i < choices.length; i++) {
-      result[choices[i].id] = i;
+    for (let i = 0; i < items.length; i++) {
+      result[items[i].id] = i;
     }
     return result;
-  }, [choices]);
+  }, [items]);
 
   const isHiddenPair = useCallback(
-    (rowChoice: Choice, columnChoice: Choice) => {
+    (rowItem: Item, columnItem: Item) => {
       if (gridMode === "full") {
         return false;
       }
-      return idToPosition[rowChoice.id] <= idToPosition[columnChoice.id];
+      return idToPosition[rowItem.id] <= idToPosition[columnItem.id];
     },
     [idToPosition, gridMode]
   );
@@ -78,24 +76,24 @@ export const GridView: FC<{
       <div
         className="grid relative"
         style={{
-          gridTemplateColumns: `repeat(${columnChoices.length + 1}, 180px)`,
+          gridTemplateColumns: `repeat(${columnItems.length + 1}, 180px)`,
         }}
       >
         <div className="sticky bg-white top-0 left-0 z-20" />
-        {columnChoices.map((choice) => (
-          <Header key={choice.id} choice={choice} />
+        {columnItems.map((item) => (
+          <Header key={item.id} item={item} />
         ))}
-        {rowChoices.map((rowChoice) => (
-          <Fragment key={rowChoice.id}>
-            <Header key={0} choice={rowChoice} />
-            {columnChoices.map((columnChoice) =>
-              isHiddenPair(rowChoice, columnChoice) ? (
-                <div key={columnChoice.id} className="bg-gray-200" />
+        {rowItems.map((rowItem) => (
+          <Fragment key={rowItem.id}>
+            <Header key={0} item={rowItem} />
+            {columnItems.map((columnItem) =>
+              isHiddenPair(rowItem, columnItem) ? (
+                <div key={columnItem.id} className="bg-gray-200" />
               ) : (
                 <RelativeCell
-                  key={columnChoice.id}
-                  id1={rowChoice.id}
-                  id2={columnChoice.id}
+                  key={columnItem.id}
+                  id1={rowItem.id}
+                  id2={columnItem.id}
                   cache={allPairs}
                 />
               )

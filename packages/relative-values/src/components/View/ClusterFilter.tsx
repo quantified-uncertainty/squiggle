@@ -2,11 +2,7 @@ import { Cluster } from "@/types";
 import { FC } from "react";
 import { useDashboardContext } from "../Dashboard/DashboardProvider";
 import { ClusterIcon } from "../common/ClusterIcon";
-import {
-  Axis,
-  useGridViewContext,
-  useGridViewDispatch,
-} from "./GridView/GridViewProvider";
+import { Axis, useViewContext, useViewDispatch } from "./ViewProvider";
 import clsx from "clsx";
 
 export const ClusterItem: React.FC<{
@@ -37,8 +33,8 @@ export const ClusterFilter: FC<{ axis: Axis }> = ({ axis }) => {
     axisConfig: {
       [axis]: { filter },
     },
-  } = useGridViewContext();
-  const dispatch = useGridViewDispatch();
+  } = useViewContext();
+  const dispatch = useViewDispatch();
 
   return (
     <div className="flex flex-col gap-2">

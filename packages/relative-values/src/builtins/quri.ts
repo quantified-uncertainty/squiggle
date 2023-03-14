@@ -1,8 +1,8 @@
 import { buildGraphModel, Model } from "@/model/utils";
-import { Catalog, Choice } from "@/types";
+import { Catalog, Item } from "@/types";
 
 function getCatalog(): Catalog {
-  const items: Choice[] = [
+  const items: Item[] = [
     {
       id: "quri_papers_1",
       name: "External Evaluation of the EA Wiki",

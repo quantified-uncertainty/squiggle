@@ -10,9 +10,9 @@ import {
   Axis,
   SortConfig,
   SortMode,
-  useGridViewContext,
-  useGridViewDispatch,
-} from "./GridViewProvider";
+  useViewContext,
+  useViewDispatch,
+} from "../ViewProvider";
 
 const SortBy: FC<{
   axis: Axis;
@@ -20,7 +20,7 @@ const SortBy: FC<{
   config: SortConfig; // current sort config for this axis
   text: string;
 }> = ({ axis, mode, config, text }) => {
-  const dispatch = useGridViewDispatch();
+  const dispatch = useViewDispatch();
 
   const isCurrentMode = mode === config.mode;
   const targetDesc = isCurrentMode ? !config.desc : false;
@@ -74,7 +74,7 @@ export const AxisMenu: FC<{ axis: Axis }> = ({ axis }) => {
     axisConfig: {
       [axis]: { sort },
     },
-  } = useGridViewContext();
+  } = useViewContext();
   return (
     <div className="px-6 py-6 min-w-[16em] flex flex-col gap-6">
       <div>

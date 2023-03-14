@@ -1,8 +1,8 @@
 import { buildGraphModel, Model } from "@/model/utils";
-import { Catalog, Choice } from "@/types";
+import { Catalog, Item } from "@/types";
 
 function getCatalog(): Catalog {
-  const items: Choice[] = [
+  const items: Item[] = [
     {
       id: "relative_values",
       name: "Squiggle relative values viewer",

@@ -20,7 +20,7 @@ export const App: FC = () => {
       <SafeHydrate>
         {() =>
           Dashboard ? (
-            <DashboardProvider getInitialValue={getQuriCatalogAndModel}>
+            <DashboardProvider generateInitialValue={getQuriCatalogAndModel}>
               <Dashboard />
             </DashboardProvider>
           ) : null

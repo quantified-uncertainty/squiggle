@@ -1,15 +1,8 @@
-import {
-  createContext,
-  FC,
-  PropsWithChildren,
-  Reducer,
-  startTransition,
-  useContext,
-  useReducer,
-} from "react";
+import { generateProvider } from "@/components/generateProvider";
 import { Clusters } from "@/types";
 import { Set } from "immutable";
-import { Filter } from "../types";
+import { FC, PropsWithChildren, Reducer } from "react";
+import { Filter } from "./types";
 
 export type Axis = "rows" | "columns";
 
@@ -27,12 +20,12 @@ export type AxisConfig = {
   sort: SortConfig;
 };
 
-type GridViewContextShape = {
+type ViewContextShape = {
   gridMode: GridMode;
   axisConfig: { [k in Axis]: AxisConfig };
 };
 
-export const GridViewContext = createContext<GridViewContextShape>({
+const defaultValue: ViewContextShape = {
   gridMode: "full",
   axisConfig: {
     rows: {
@@ -54,11 +47,7 @@ export const GridViewContext = createContext<GridViewContextShape>({
       },
     },
   },
-});
-
-export const GridViewDispatchContext = createContext<(action: Action) => void>(
-  () => {}
-);
+};
 
 type Action =
   | {
@@ -83,7 +72,7 @@ type Action =
 const toggle = (set: Set<string>, id: string) =>
   set.has(id) ? set.delete(id) : set.add(id);
 
-const reducer: Reducer<GridViewContextShape, Action> = (state, action) => {
+const reducer: Reducer<ViewContextShape, Action> = (state, action) => {
   switch (action.type) {
     case "toggleCluster": {
       const axisConfig = state.axisConfig[action.payload.axis];
@@ -127,45 +116,40 @@ const reducer: Reducer<GridViewContextShape, Action> = (state, action) => {
   }
 };
 
-export const useGridViewContext = () => {
-  return useContext(GridViewContext);
-};
+const {
+  Provider,
+  useContext: useViewContext,
+  useDispatch: useViewDispatch,
+} = generateProvider({
+  name: "View",
+  reducer,
+  defaultValue,
+});
 
-export const useGridViewDispatch = () => {
-  return useContext(GridViewDispatchContext);
-};
-
-export const GridViewProvider: FC<
+export const ViewProvider: FC<
   PropsWithChildren<{ initialClusters: Clusters }>
 > = ({ initialClusters, children }) => {
-  // TODO - when clusters change (e.g. when we update the underlying model), we should update the state
-  const [state, dispatch] = useReducer(reducer, undefined, () => {
-    const clusterIds = Set(Object.keys(initialClusters));
-    const defaultAxisConfig = {
-      filter: { selectedClusters: clusterIds },
-      sort: { mode: "default", desc: false },
-    } satisfies AxisConfig;
-
-    return {
-      gridMode: "full",
-      axisConfig: {
-        rows: defaultAxisConfig,
-        columns: defaultAxisConfig,
-      },
-    } satisfies GridViewContextShape;
-  });
-
-  const transitionDispatch = (action: Action) => {
-    startTransition(() => {
-      dispatch(action);
-    });
-  };
-
   return (
-    <GridViewContext.Provider value={state}>
-      <GridViewDispatchContext.Provider value={transitionDispatch}>
-        {children}
-      </GridViewDispatchContext.Provider>
-    </GridViewContext.Provider>
+    <Provider
+      generateInitialValue={() => {
+        const clusterIds = Set(Object.keys(initialClusters));
+        const defaultAxisConfig: AxisConfig = {
+          filter: { selectedClusters: clusterIds },
+          sort: { mode: "default", desc: false },
+        };
+
+        return {
+          gridMode: "full",
+          axisConfig: {
+            rows: defaultAxisConfig,
+            columns: defaultAxisConfig,
+          },
+        };
+      }}
+    >
+      {children}
+    </Provider>
   );
 };
+
+export { useViewContext, useViewDispatch };

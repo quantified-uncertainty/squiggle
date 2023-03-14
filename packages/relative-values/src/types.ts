@@ -7,7 +7,7 @@ export type Clusters = {
   [k: string]: Cluster;
 };
 
-export type Choice = {
+export type Item = {
   id: string;
   name: string;
   clusterId?: string;
@@ -15,6 +15,6 @@ export type Choice = {
 
 export type Catalog = {
   title: string;
-  items: Choice[];
+  items: Item[];
   clusters: Clusters;
 };

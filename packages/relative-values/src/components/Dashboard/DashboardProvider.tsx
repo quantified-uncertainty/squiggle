@@ -4,17 +4,19 @@ import {
   createContext,
   FC,
   PropsWithChildren,
+  Reducer,
   startTransition,
   useContext,
   useReducer,
 } from "react";
+import { generateProvider } from "../generateProvider";
 
 export type DashboardContextShape = {
   model: Model;
   catalog: Catalog;
 };
 
-const DashboardContext = createContext<DashboardContextShape>({
+const defaultValue: DashboardContextShape = {
   model: {
     mode: "text",
     code: "",
@@ -24,7 +26,7 @@ const DashboardContext = createContext<DashboardContextShape>({
     items: [],
     clusters: {},
   },
-});
+};
 
 type Action =
   | {
@@ -36,10 +38,7 @@ type Action =
       payload: DashboardContextShape;
     };
 
-const reducer = (
-  state: DashboardContextShape,
-  action: Action
-): DashboardContextShape => {
+const reducer: Reducer<DashboardContextShape, Action> = (state, action) => {
   switch (action.type) {
     case "setModel":
       return {
@@ -53,34 +52,12 @@ const reducer = (
   }
 };
 
-const DashboardDispatchContext = createContext<(action: Action) => void>(
-  () => {}
-);
-
-export const useDashboardContext = () => {
-  return useContext(DashboardContext);
-};
-
-export const useDashboardDispatch = () => {
-  return useContext(DashboardDispatchContext);
-};
-
-export const DashboardProvider: FC<
-  PropsWithChildren<{ getInitialValue(): DashboardContextShape }>
-> = ({ children, getInitialValue }) => {
-  const [state, dispatch] = useReducer(reducer, undefined, getInitialValue);
-
-  const transitionDispatch = (action: Action) => {
-    startTransition(() => {
-      dispatch(action);
-    });
-  };
-
-  return (
-    <DashboardContext.Provider value={state}>
-      <DashboardDispatchContext.Provider value={transitionDispatch}>
-        {children}
-      </DashboardDispatchContext.Provider>
-    </DashboardContext.Provider>
-  );
-};
+export const {
+  Provider: DashboardProvider,
+  useContext: useDashboardContext,
+  useDispatch: useDashboardDispatch,
+} = generateProvider({
+  name: "Dashboard",
+  reducer,
+  defaultValue,
+});

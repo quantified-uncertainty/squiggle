@@ -1,22 +1,22 @@
-import { Choice } from "@/types";
+import { Item } from "@/types";
 import { useMemo } from "react";
-import { AxisConfig } from "../GridView/GridViewProvider";
+import { AxisConfig } from "../ViewProvider";
 import { CachedItem, CachedPairs } from "./cachedPairs";
 
-export const useSortedChoices = ({
-  choices,
+export const useSortedItems = ({
+  items,
   config,
   cache,
-  otherDimensionChoices,
+  otherDimensionItems: otherDimensionChoices,
 }: {
-  choices: Choice[];
+  items: Item[];
   config: AxisConfig;
   cache: CachedPairs;
-  otherDimensionChoices: Choice[]; // used for calculating average median and average uncertainty
+  otherDimensionItems: Item[]; // used for calculating average median and average uncertainty
 }) => {
   return useMemo(() => {
     const averageMetric = (
-      item: Choice,
+      item: Item,
       getMetric: (item: CachedItem) => number
     ) => {
       return otherDimensionChoices.reduce((total, item2) => {
@@ -32,13 +32,13 @@ export const useSortedChoices = ({
       switch (config.sort.mode) {
         case "median": {
           const averageMedians = new Map<string, number>();
-          for (const choice of choices) {
+          for (const choice of items) {
             averageMedians.set(
               choice.id,
               averageMetric(choice, (item) => item.median)
             );
           }
-          return choices.sort((a, b) => {
+          return items.sort((a, b) => {
             return (
               (averageMedians.get(a.id) || 0) - (averageMedians.get(b.id) || 0)
             );
@@ -46,21 +46,21 @@ export const useSortedChoices = ({
         }
         case "uncertainty": {
           const averageDbs = new Map<string, number>();
-          for (const choice of choices) {
+          for (const choice of items) {
             averageDbs.set(
               choice.id,
               averageMetric(choice, (item) => item.db)
             );
           }
-          return choices.sort((a, b) => {
+          return items.sort((a, b) => {
             return (averageDbs.get(a.id) || 0) - (averageDbs.get(b.id) || 0);
           });
         }
         default:
-          return choices;
+          return items;
       }
     })();
 
     return config.sort.desc ? sorted.reverse() : sorted;
-  }, [choices, config, cache, otherDimensionChoices]);
+  }, [items, config, cache, otherDimensionChoices]);
 };
