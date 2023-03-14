@@ -1,0 +1,26 @@
+# based on https://github.com/graphql/graphiql/blob/main/packages/vscode-graphql-syntax/grammars/graphql.js.json
+fileTypes:
+  - js
+  - jsx
+  - mjs
+  - cjs
+  - ts
+  - tsx
+  - vue
+  - svelte
+injectionSelector: L:source -string -comment
+patterns:
+  - contentName: meta.embedded.block.squiggle
+    begin: "\\b(sq)(`)"
+    beginCaptures:
+      1:
+        name: "entity.name.function.tagged-template.js"
+      2:
+        name: "punctuation.definition.string.template.begin.js"
+    end: "`"
+    endCaptures:
+      0:
+        name: "punctuation.definition.string.template.end.js"
+    patterns:
+      - include: source.squiggle
+scopeName: inline.squiggle
