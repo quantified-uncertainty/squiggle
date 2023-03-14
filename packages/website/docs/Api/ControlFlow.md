@@ -34,7 +34,7 @@ x == 0 ? 1 : 2
 ```js
 if x == 1 then {
   1
-}else{
+} else {
   2
 }
 ```
@@ -50,7 +50,7 @@ if x == 1 then {
       2
     }
   )
-}else{
+} else {
   3
 }
 ```
@@ -74,7 +74,7 @@ Instead, you can do this:
 ```js
 y = if x == 1 then {
   1
-}else {
+} else {
   2*x
 }
 ```
