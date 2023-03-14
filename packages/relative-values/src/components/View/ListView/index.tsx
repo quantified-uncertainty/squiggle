@@ -5,8 +5,13 @@ import { FC, Fragment, useEffect, useState } from "react";
 import { CellBox } from "../CellBox";
 import { AxisMenu } from "../GridView/AxisMenu";
 import { Header } from "../Header";
-import { useCachedPairsToOneItem } from "../hooks";
+import {
+  useCachedPairsToOneItem,
+  useFilteredItems,
+  useSortedItems,
+} from "../hooks";
 import { RelativeCell } from "../RelativeCell";
+import { useViewContext } from "../ViewProvider";
 import { ColumnHeader } from "./ColumnHeader";
 
 type Props = {
@@ -17,6 +22,7 @@ export const ListView: FC<Props> = ({ fn }) => {
   const {
     catalog: { items },
   } = useDashboardContext();
+  const { axisConfig } = useViewContext();
 
   const [selectedItem, setSelectedItem] = useState(items[0]);
 
@@ -26,6 +32,14 @@ export const ListView: FC<Props> = ({ fn }) => {
   }, [items]);
 
   const cachedPairs = useCachedPairsToOneItem(fn, items, selectedItem.id);
+
+  const filteredItems = useFilteredItems({ items, config: axisConfig.rows });
+  const sortedItems = useSortedItems({
+    items: filteredItems,
+    config: axisConfig.rows,
+    cache: cachedPairs,
+    otherDimensionItems: [selectedItem],
+  });
 
   return (
     <div>
@@ -49,7 +63,7 @@ export const ListView: FC<Props> = ({ fn }) => {
         <CellBox header>
           <div className="p-1">ID</div>
         </CellBox>
-        {items.map((item) => (
+        {sortedItems.map((item) => (
           <Fragment key={item.id}>
             <Header item={item} />
             <RelativeCell
