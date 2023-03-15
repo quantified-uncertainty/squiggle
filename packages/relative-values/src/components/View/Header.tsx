@@ -1,5 +1,5 @@
 import { ClusterIcon } from "@/components/common/ClusterIcon";
-import { useDashboardContext } from "@/components/Dashboard/DashboardProvider";
+import { useInterfaceContext } from "@/components/Interface/InterfaceProvider";
 import { Item } from "@/types";
 import { FC } from "react";
 import { CellBox } from "./CellBox";
@@ -10,7 +10,7 @@ export const Header: FC<{
 }> = ({ item, clickable }) => {
   const {
     catalog: { clusters },
-  } = useDashboardContext();
+  } = useInterfaceContext();
 
   const cluster = item.clusterId ? clusters[item.clusterId] : undefined;
   return (

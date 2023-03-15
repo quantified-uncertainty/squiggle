@@ -1,4 +1,4 @@
-import { useDashboardContext } from "@/components/Dashboard/DashboardProvider";
+import { useInterfaceContext } from "@/components/Interface/InterfaceProvider";
 import { DropdownButton } from "@/components/ui/DropdownButton";
 import { SqLambda } from "@quri/squiggle-lang";
 import { FC, Fragment, useEffect, useState } from "react";
@@ -21,7 +21,7 @@ type Props = {
 export const ListView: FC<Props> = ({ fn }) => {
   const {
     catalog: { items },
-  } = useDashboardContext();
+  } = useInterfaceContext();
   const { axisConfig } = useViewContext();
 
   const [selectedItem, setSelectedItem] = useState(items[0]);

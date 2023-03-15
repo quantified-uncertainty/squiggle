@@ -7,7 +7,7 @@ import {
 import { SquiggleEditor } from "@quri/squiggle-components";
 import clsx from "clsx";
 import { FC, Fragment, PropsWithChildren, useMemo } from "react";
-import { useDashboardContext } from "../Dashboard/DashboardProvider";
+import { useInterfaceContext } from "../Interface/InterfaceProvider";
 import { Button } from "../ui/Button";
 import { EstimateProps } from "./types";
 
@@ -33,7 +33,7 @@ export const GraphEstimate: FC<EstimateProps<GraphModel>> = ({
   model,
   setModel,
 }) => {
-  const { catalog } = useDashboardContext();
+  const { catalog } = useInterfaceContext();
 
   const code = useMemo(() => getModelCode(model), [model]);
 

@@ -1,7 +1,7 @@
 import { Item } from "@/types";
 import { SqLambda } from "@quri/squiggle-lang";
 import { FC, Fragment, useCallback, useMemo } from "react";
-import { useDashboardContext } from "../../Dashboard/DashboardProvider";
+import { useInterfaceContext } from "../../Interface/InterfaceProvider";
 import { DropdownButton } from "../../ui/DropdownButton";
 import { Header } from "../Header";
 import { useCachedPairs, useFilteredItems, useSortedItems } from "../hooks";
@@ -16,7 +16,7 @@ export const GridView: FC<{
   const { axisConfig, gridMode } = useViewContext();
   const {
     catalog: { items },
-  } = useDashboardContext();
+  } = useInterfaceContext();
 
   const allPairs = useCachedPairs(fn, items);
 

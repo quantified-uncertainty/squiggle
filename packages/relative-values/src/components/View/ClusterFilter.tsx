@@ -1,6 +1,6 @@
 import { Cluster } from "@/types";
 import { FC } from "react";
-import { useDashboardContext } from "../Dashboard/DashboardProvider";
+import { useInterfaceContext } from "../Interface/InterfaceProvider";
 import { ClusterIcon } from "../common/ClusterIcon";
 import { Axis, useViewContext, useViewDispatch } from "./ViewProvider";
 import clsx from "clsx";
@@ -28,7 +28,7 @@ export const ClusterItem: React.FC<{
 export const ClusterFilter: FC<{ axis: Axis }> = ({ axis }) => {
   const {
     catalog: { clusters },
-  } = useDashboardContext();
+  } = useInterfaceContext();
   const {
     axisConfig: {
       [axis]: { filter },

@@ -1,3 +1,6 @@
+import { Model } from "./model/utils";
+import { Map } from "immutable";
+
 export type Cluster = {
   name: string;
   color: string;
@@ -14,7 +17,16 @@ export type Item = {
 };
 
 export type Catalog = {
+  id: string;
   title: string;
+  description?: string;
+  created?: Date;
+  author?: string;
   items: Item[];
   clusters: Clusters;
+};
+
+export type InterfaceWithModels = {
+  catalog: Catalog;
+  models: Map<string, Model>;
 };

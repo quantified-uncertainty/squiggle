@@ -1,5 +1,6 @@
 import { buildGraphModel, Model } from "@/model/utils";
-import { Catalog, Item } from "@/types";
+import { Catalog, InterfaceWithModels, Item } from "@/types";
+import { Map } from "immutable";
 
 function getCatalog(): Catalog {
   const items: Item[] = [
@@ -142,6 +143,7 @@ function getCatalog(): Catalog {
   ];
 
   return {
+    id: "quri-software",
     title: "QURI software projects",
     items,
     clusters: {
@@ -194,9 +196,9 @@ function getModel(): Model {
   });
 }
 
-export function getQuriSoftwareCatalogAndModel() {
+export function getQuriSoftwareBuiltin(): InterfaceWithModels {
   return {
     catalog: getCatalog(),
-    model: getModel(),
+    models: Map([["nuno", getModel()]]),
   };
 }

@@ -1,11 +1,11 @@
 import { FC, Fragment } from "react";
-import { useDashboardContext } from "../Dashboard/DashboardProvider";
+import { useInterfaceContext } from "../Interface/InterfaceProvider";
 import { ClusterIcon } from "../common/ClusterIcon";
 
 const ClusterInfo: FC<{ clusterId: string }> = ({ clusterId }) => {
   const {
     catalog: { clusters },
-  } = useDashboardContext();
+  } = useInterfaceContext();
 
   const cluster = clusters[clusterId];
 
@@ -26,7 +26,7 @@ const ClusterInfo: FC<{ clusterId: string }> = ({ clusterId }) => {
 const CatalogItems: FC = () => {
   const {
     catalog: { items },
-  } = useDashboardContext();
+  } = useInterfaceContext();
 
   return (
     <div
@@ -54,11 +54,8 @@ const CatalogItems: FC = () => {
 };
 
 export const Catalog: FC = () => {
-  const { catalog } = useDashboardContext();
-
   return (
     <div>
-      <header className="text-3xl font-bold">{catalog.title}</header>
       <div className="mt-4">
         <header className="text-xl font-bold mb-4">Items</header>
         <CatalogItems />

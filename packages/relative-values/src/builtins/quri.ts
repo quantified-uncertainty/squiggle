@@ -1,5 +1,6 @@
 import { buildGraphModel, Model } from "@/model/utils";
-import { Catalog, Item } from "@/types";
+import { Catalog, InterfaceWithModels, Item } from "@/types";
+import { Map } from "immutable";
 
 function getCatalog(): Catalog {
   const items: Item[] = [
@@ -78,6 +79,7 @@ function getCatalog(): Catalog {
   }));
 
   return {
+    id: "quri",
     title: "QURI projects [TEST]",
     items,
     clusters: {
@@ -166,9 +168,9 @@ function getGraphModel(): Model {
   });
 }
 
-export function getQuriCatalogAndModel() {
+export function getQuriBuiltin(): InterfaceWithModels {
   return {
     catalog: getCatalog(),
-    model: getGraphModel(),
+    models: Map([["quri", getGraphModel()]]),
   };
 }

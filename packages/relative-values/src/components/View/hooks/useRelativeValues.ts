@@ -44,6 +44,7 @@ export const useRelativeValues = (code: string) => {
       setError(`Expected a function as result, got: ${result.value.tag}`);
       return;
     }
+    setError("");
     setFn(result.value.value);
   }, [project, code]);
 
