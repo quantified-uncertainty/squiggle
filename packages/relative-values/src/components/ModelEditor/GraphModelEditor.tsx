@@ -29,7 +29,7 @@ const Separator: FC = () => (
   <div className="col-span-full border-b border-gray-200 my-8" />
 );
 
-export const GraphEstimate: FC<EstimateProps<GraphModel>> = ({
+export const GraphModelEditor: FC<EstimateProps<GraphModel>> = ({
   model,
   setModel,
 }) => {

@@ -1,6 +1,6 @@
 import { getModelCode, Model } from "@/model/utils";
 import { FC, useMemo } from "react";
-import { Estimate } from "../Estimate";
+import { ModelEditor } from "../ModelEditor";
 import { StyledTab } from "../ui/StyledTab";
 import { GridView } from "../View/GridView";
 import { useRelativeValues } from "../View/hooks";
@@ -32,7 +32,7 @@ const InnerModelSection: FC<{ model: Model }> = ({ model }) => {
           <StyledTab.Panel>{fn ? <ListView fn={fn} /> : null}</StyledTab.Panel>
           <StyledTab.Panel>{fn ? <GridView fn={fn} /> : null}</StyledTab.Panel>
           <StyledTab.Panel>
-            <Estimate
+            <ModelEditor
               model={model}
               setModel={(newModel) =>
                 dispatch({ type: "updateModel", payload: newModel })

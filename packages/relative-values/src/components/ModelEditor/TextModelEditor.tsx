@@ -3,7 +3,7 @@ import { SquiggleEditor } from "@quri/squiggle-components";
 import { FC } from "react";
 import { EstimateProps } from "./types";
 
-export const TextEstimate: FC<EstimateProps<TextModel>> = ({
+export const TextModelEditor: FC<EstimateProps<TextModel>> = ({
   model,
   setModel,
 }) => {
