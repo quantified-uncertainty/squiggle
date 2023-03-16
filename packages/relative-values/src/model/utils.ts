@@ -102,7 +102,7 @@ export function getGraphModelCode(model: GraphModel) {
       throw new Error(`Node ${id} not found`);
     }
     // TODO - add comments with item names
-    code += `${id} = ${node.code}\n`;
+    code += `${id} = { ${node.code} }\n`;
   }
 
   code +=
