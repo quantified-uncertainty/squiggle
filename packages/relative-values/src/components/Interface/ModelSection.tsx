@@ -4,6 +4,7 @@ import { StyledTab } from "../ui/StyledTab";
 import { GridView } from "../View/GridView";
 import { useRelativeValues } from "../View/hooks";
 import { ListView } from "../View/ListView";
+import { PlotView } from "../View/PlotView";
 import { ViewProvider } from "../View/ViewProvider";
 import {
   useInterfaceContext,
@@ -50,6 +51,7 @@ export const ModelSection: FC = () => {
               <StyledTab.List>
                 <StyledTab name="List" icon={() => <div />} />
                 <StyledTab name="Grid" icon={() => <div />} />
+                <StyledTab name="Plot" icon={() => <div />} />
                 <StyledTab name="Editor" icon={() => <div />} />
               </StyledTab.List>
             </div>
@@ -59,6 +61,9 @@ export const ModelSection: FC = () => {
               </StyledTab.Panel>
               <StyledTab.Panel>
                 {fn ? <GridView fn={fn} /> : null}
+              </StyledTab.Panel>
+              <StyledTab.Panel>
+                {fn ? <PlotView fn={fn} /> : null}
               </StyledTab.Panel>
               <StyledTab.Panel>
                 {model ? (

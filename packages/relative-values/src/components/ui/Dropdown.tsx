@@ -75,7 +75,7 @@ export const Dropdown: FC<Props> = ({ render, fullHeight, children }) => {
   );
 
   return (
-    <div className={clsx("relative z-0", fullHeight && "h-full")}>
+    <>
       <div
         className={clsx(fullHeight && "h-full grid place-items-stretch")}
         ref={refs.setReference}
@@ -84,6 +84,6 @@ export const Dropdown: FC<Props> = ({ render, fullHeight, children }) => {
         {children}
       </div>
       {isOpen ? renderTooltip() : null}
-    </div>
+    </>
   );
 };
