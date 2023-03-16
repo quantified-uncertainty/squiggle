@@ -25,6 +25,10 @@ const Label: FC<PropsWithChildren<{ error?: boolean }>> = ({
   </label>
 );
 
+const Description: FC<PropsWithChildren> = ({ children }) => (
+  <div className="mt-6 text-xs text-gray-700">{children}</div>
+);
+
 const Separator: FC = () => (
   <div className="col-span-full border-b border-gray-200 my-8" />
 );
@@ -44,9 +48,9 @@ export const GraphModelEditor: FC<EstimateProps<GraphModel>> = ({
   return (
     <div>
       <div
-        className="grid grid-cols-2 gap-x-4"
+        className="grid grid-cols-3 gap-x-4"
         style={{
-          gridTemplateColumns: "minmax(200px, min-content) 600px",
+          gridTemplateColumns: "minmax(200px, min-content) 1fr 1fr",
         }}
       >
         <div className="flex flex-col items-end mt-4">
@@ -60,6 +64,9 @@ export const GraphModelEditor: FC<EstimateProps<GraphModel>> = ({
           hideViewer
           // className="w-full border border-gray-200 rounded p-1"
         />
+        <Description>
+          Variables that can be used in other definitions
+        </Description>
         <Separator />
 
         {catalog.items.map((item) => {
@@ -106,6 +113,7 @@ export const GraphModelEditor: FC<EstimateProps<GraphModel>> = ({
               ) : (
                 <div className="text-red-500 col-span-2">missing node</div>
               )}
+              <Description>{item.name}</Description>
             </Fragment>
           );
         })}
