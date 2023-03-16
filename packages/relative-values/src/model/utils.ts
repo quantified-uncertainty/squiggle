@@ -233,3 +233,14 @@ export function modelFromJSON(json: any) {
     invalidIds: Set(json.invalidIds),
   };
 }
+
+export function createEmptyGraphModel({ author, catalog }: { author: string, catalog: Catalog }) {
+  return buildGraphModel({
+    items: catalog.items.map(item => [item.id, 'pointMass(1)']),
+    commonCode: '',
+    metadata: {
+      author,
+    },
+    catalog,
+  });
+}

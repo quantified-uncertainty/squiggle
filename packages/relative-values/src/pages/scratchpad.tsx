@@ -1,14 +1,16 @@
 import { Interface } from "@/components/Interface";
-import { InterfaceProvider } from "@/components/Interface/InterfaceProvider";
+import {
+  InterfaceContextShape,
+  InterfaceProvider,
+} from "@/components/Interface/InterfaceProvider";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/Button";
 import { modelFromJSON } from "@/model/utils";
-import { InterfaceWithModels } from "@/types";
 import { Map } from "immutable";
 import { FC, useMemo, useState } from "react";
 
 const LoadJSONForm: FC<{
-  setValue(value: InterfaceWithModels): void;
+  setValue(value: InterfaceContextShape): void;
 }> = ({ setValue }) => {
   const [text, setText] = useState("{}");
 
@@ -18,6 +20,7 @@ const LoadJSONForm: FC<{
       if (parsed.models && parsed.catalog) {
         // TODO - better validation
         return {
+          currentModel: { mode: "unselected" }, // default
           ...parsed,
           models: Map(
             parsed.models.map(([k, v]: any) => [k, modelFromJSON(v)])
@@ -51,7 +54,8 @@ const LoadJSONForm: FC<{
 };
 
 export default function ScratchpadPage() {
-  const [data, setData] = useState<InterfaceWithModels | undefined>(undefined);
+  const [data, setData] =
+    useState<InterfaceContextShape | undefined>(undefined);
 
   if (data) {
     return (

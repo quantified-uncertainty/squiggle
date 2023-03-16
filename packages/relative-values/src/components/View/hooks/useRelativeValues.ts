@@ -1,5 +1,6 @@
-import { SqLambda, SqProject, sq } from "@quri/squiggle-lang";
-import { useEffect, useMemo, useState } from "react";
+import { getModelCode, Model } from "@/model/utils";
+import { sq, SqProject } from "@quri/squiggle-lang";
+import { useMemo } from "react";
 
 const wrapper = sq`
 {|x, y|
@@ -14,7 +15,7 @@ const wrapper = sq`
 }
 `;
 
-export const useRelativeValues = (code: string) => {
+export const useRelativeValues = (model: Model | undefined) => {
   const project = useMemo(() => {
     const project = SqProject.create();
     project.setSource("wrapper", wrapper);
@@ -23,29 +24,38 @@ export const useRelativeValues = (code: string) => {
     return project;
   }, []);
 
-  const [error, setError] = useState("");
-  const [fn, setFn] = useState<SqLambda | undefined>();
+  const code = useMemo(() => {
+    if (!model) {
+      return undefined;
+    }
+    return getModelCode(model);
+  }, [model]);
 
-  useEffect(() => {
-    setFn(undefined);
+  const { fn, error } = useMemo(() => {
+    if (code === undefined) {
+      // no model selected
+      return { error: "" };
+    }
 
     project.setSource("model", code);
     project.run("wrapper");
     const result = project.getResult("wrapper");
 
     if (!result.ok) {
-      setError(
-        `Failed to evaluate Squiggle code: ${result.value.toStringWithStackTrace()}`
-      );
-      return;
+      return {
+        error: `Failed to evaluate Squiggle code: ${result.value.toStringWithStackTrace()}`,
+      };
     }
 
     if (result.value.tag !== "Lambda") {
-      setError(`Expected a function as result, got: ${result.value.tag}`);
-      return;
+      return {
+        error: `Expected a function as result, got: ${result.value.tag}`,
+      };
     }
-    setError("");
-    setFn(result.value.value);
+    return {
+      error: "",
+      fn: result.value.value,
+    };
   }, [project, code]);
 
   return { error, fn, project };

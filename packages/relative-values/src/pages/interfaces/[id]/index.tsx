@@ -23,7 +23,12 @@ export default function InterfaceByIdPage() {
           }
 
           return (
-            <InterfaceProvider initialValue={interfaceWithModels}>
+            <InterfaceProvider
+              initialValue={{
+                ...interfaceWithModels,
+                currentModel: { mode: "unselected" },
+              }}
+            >
               <Interface />
             </InterfaceProvider>
           );

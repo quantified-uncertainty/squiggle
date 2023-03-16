@@ -171,6 +171,9 @@ function getGraphModel(): Model {
 export function getQuriBuiltin(): InterfaceWithModels {
   return {
     catalog: getCatalog(),
-    models: Map([["quri", getGraphModel()]]),
+    models: Map([
+      ["text", getTextModel()],
+      ["graph", getGraphModel()],
+    ]),
   };
 }

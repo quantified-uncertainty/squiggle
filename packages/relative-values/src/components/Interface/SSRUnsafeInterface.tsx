@@ -15,7 +15,7 @@ export const SSRUnsafeInterface: FC = () => {
 
   return (
     <StyledTab.Group>
-      <div className="bg-blue-100 p-8">
+      <div className="bg-blue-100 py-8 px-4">
         <div className="flex justify-between items-start">
           <div>
             <header className="text-2xl font-bold mb-4">{catalog.title}</header>
