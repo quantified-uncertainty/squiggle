@@ -1,13 +1,10 @@
 import { NumberShower } from "@quri/squiggle-components";
-import { Env, SqDistribution, SqDistributionTag } from "@quri/squiggle-lang";
-import { FC, memo, useMemo } from "react";
-import { ErrorCell } from "./ErrorCell";
-import { Histogram } from "../Histogram";
+import { FC, memo } from "react";
 import { CellBox } from "../CellBox";
-import { SqSampleSetDistribution } from "@quri/squiggle-lang/dist/src/public/SqDistribution";
-import { CachedItem } from "../hooks";
+import { Histogram } from "../Histogram";
+import { RelativeValue } from "../hooks";
 
-export const DistCell: FC<{ item: CachedItem }> = memo(function DistCell({
+export const DistCell: FC<{ item: RelativeValue }> = memo(function DistCell({
   item,
 }) {
   return (

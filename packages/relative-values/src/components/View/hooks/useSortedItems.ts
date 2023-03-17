@@ -2,26 +2,26 @@ import { Item } from "@/types";
 import _ from "lodash";
 import { useMemo } from "react";
 import { AxisConfig } from "../ViewProvider";
-import { CachedItem, CachedPairs } from "./cachedPairs";
+import { RelativeValue, RV } from "./useRelativeValues";
 
 const averageMetric = ({
   item,
   comparedTo,
   getMetric,
-  cache,
+  rv,
 }: {
   item: Item;
   comparedTo: Item[];
-  getMetric: (item: CachedItem) => number;
-  cache: CachedPairs;
+  getMetric: (item: RelativeValue) => number;
+  rv: RV;
 }) => {
   return (
     comparedTo.reduce((total, item2) => {
-      const cachedValue = cache[item.id][item2.id];
-      if (!cachedValue.ok) {
+      const value = rv.compare(item.id, item2.id);
+      if (!value.ok) {
         return total; // TODO: +Inf?
       }
-      return total + getMetric(cachedValue.value);
+      return total + getMetric(value.value);
     }, 0) / comparedTo.length
   );
 };
@@ -29,36 +29,36 @@ const averageMetric = ({
 type AverageProps = {
   item: Item;
   comparedTo: Item[];
-  cache: CachedPairs;
+  rv: RV;
 };
 
-export function averageMedian({ item, comparedTo, cache }: AverageProps) {
+export function averageMedian({ item, comparedTo, rv }: AverageProps) {
   return averageMetric({
     item,
     getMetric: (item) => item.median,
     comparedTo,
-    cache,
+    rv,
   });
 }
 
-export function averageDb({ item, comparedTo, cache }: AverageProps) {
+export function averageDb({ item, comparedTo, rv }: AverageProps) {
   return averageMetric({
     item,
     getMetric: (item) => item.db,
     comparedTo,
-    cache,
+    rv,
   });
 }
 
 export const useSortedItems = ({
   items,
   config,
-  cache,
+  rv,
   otherDimensionItems: otherDimensionChoices,
 }: {
   items: Item[];
   config: AxisConfig;
-  cache: CachedPairs;
+  rv: RV;
   otherDimensionItems: Item[]; // used for calculating average median and average uncertainty
 }) => {
   return useMemo(() => {
@@ -66,12 +66,12 @@ export const useSortedItems = ({
       switch (config.sort.mode) {
         case "median": {
           return _.sortBy(items, (item) =>
-            averageMedian({ item, cache, comparedTo: otherDimensionChoices })
+            averageMedian({ item, rv, comparedTo: otherDimensionChoices })
           );
         }
         case "uncertainty": {
           return _.sortBy(items, (item) =>
-            averageDb({ item, cache, comparedTo: otherDimensionChoices })
+            averageDb({ item, rv, comparedTo: otherDimensionChoices })
           );
         }
         default:
@@ -80,5 +80,5 @@ export const useSortedItems = ({
     })();
 
     return config.sort.desc ? sorted.reverse() : sorted;
-  }, [items, config, cache, otherDimensionChoices]);
+  }, [items, config, rv, otherDimensionChoices]);
 };

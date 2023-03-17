@@ -1,24 +1,22 @@
 import { Item } from "@/types";
-import { SqLambda } from "@quri/squiggle-lang";
 import { FC, Fragment, useCallback, useMemo } from "react";
 import { useInterfaceContext } from "../../Interface/InterfaceProvider";
 import { DropdownButton } from "../../ui/DropdownButton";
 import { Header } from "../Header";
-import { useCachedPairs, useFilteredItems, useSortedItems } from "../hooks";
+import { useFilteredItems, useSortedItems } from "../hooks";
+import { RV } from "../hooks/useRelativeValues";
 import { RelativeCell } from "../RelativeCell";
 import { useViewContext } from "../ViewProvider";
 import { AxisMenu } from "./AxisMenu";
 import { GridModeControls } from "./GridModeControls";
 
 export const GridView: FC<{
-  fn: SqLambda;
-}> = ({ fn }) => {
+  rv: RV;
+}> = ({ rv }) => {
   const { axisConfig, gridMode } = useViewContext();
   const {
     catalog: { items },
   } = useInterfaceContext();
-
-  const allPairs = useCachedPairs(fn, items);
 
   const filteredRowItems = useFilteredItems({
     items: items,
@@ -32,13 +30,13 @@ export const GridView: FC<{
   const rowItems = useSortedItems({
     items: filteredRowItems,
     config: axisConfig.rows,
-    cache: allPairs,
+    rv,
     otherDimensionItems: filteredColumnItems,
   });
   const columnItems = useSortedItems({
     items: filteredColumnItems,
     config: axisConfig.columns,
-    cache: allPairs,
+    rv,
     otherDimensionItems: filteredRowItems,
   });
 
@@ -94,7 +92,7 @@ export const GridView: FC<{
                   key={columnItem.id}
                   id1={rowItem.id}
                   id2={columnItem.id}
-                  cache={allPairs}
+                  rv={rv}
                 />
               )
             )}

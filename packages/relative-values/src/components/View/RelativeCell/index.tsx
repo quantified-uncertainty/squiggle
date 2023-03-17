@@ -1,17 +1,14 @@
 import { FC, memo } from "react";
-import { CachedPairs } from "../hooks";
+import { RV } from "../hooks/useRelativeValues";
 import { DistCell } from "./DistCell";
 import { ErrorCell } from "./ErrorCell";
 
 export const RelativeCell: FC<{
   id1: string;
   id2: string;
-  cache: CachedPairs;
-}> = memo(function CachedCell({ id1, id2, cache }) {
-  const result = cache[id1]?.[id2];
-  if (!result) {
-    return <ErrorCell error="Internal error, missing data" />;
-  }
+  rv: RV;
+}> = memo(function RelativeCell({ id1, id2, rv }) {
+  const result = rv.compare(id1, id2);
 
   if (!result.ok) {
     return <ErrorCell error={result.value} />;

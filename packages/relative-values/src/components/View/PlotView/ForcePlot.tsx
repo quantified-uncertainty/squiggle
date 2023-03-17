@@ -1,14 +1,14 @@
 import { FC, useEffect, useMemo, useRef } from "react";
 
-import * as d3 from "d3";
 import { useInterfaceContext } from "@/components/Interface/InterfaceProvider";
+import * as d3 from "d3";
+import { useFilteredItems } from "../hooks";
+import { RV } from "../hooks/useRelativeValues";
 import { useViewContext } from "../ViewProvider";
-import { useCachedPairs, useFilteredItems } from "../hooks";
-import { SqLambda } from "@quri/squiggle-lang";
 
 export const ForcePlot: FC<{
-  fn: SqLambda;
-}> = ({ fn }) => {
+  rv: RV;
+}> = ({ rv }) => {
   const ref = useRef<SVGGElement>(null);
 
   const {
@@ -39,8 +39,6 @@ export const ForcePlot: FC<{
     [filteredItems]
   );
 
-  const allPairs = useCachedPairs(fn, items);
-
   const width = 400;
   const height = 400;
   const margin = { top: 10, bottom: 40, left: 60, right: 20 };
@@ -70,11 +68,14 @@ export const ForcePlot: FC<{
     const force = d3
       .forceLink<Node, d3.SimulationLinkDatum<Node>>()
       .distance((d) => {
-        const cache = allPairs[(d.source as Node).id][(d.target as Node).id];
-        if (!cache.ok) {
+        const relativeValueResult = rv.compare(
+          (d.source as Node).id,
+          (d.target as Node).id
+        );
+        if (!relativeValueResult.ok) {
           return 1e9; // ???
         }
-        return cache.value.db * 10;
+        return relativeValueResult.value.db * 10;
       });
 
     simulation.force("link", force);

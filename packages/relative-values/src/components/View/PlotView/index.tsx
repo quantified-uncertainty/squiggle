@@ -2,12 +2,13 @@ import { StyledTab } from "@/components/ui/StyledTab";
 import { SqLambda } from "@quri/squiggle-lang";
 import { FC } from "react";
 import { ClusterFilter } from "../ClusterFilter";
+import { RV } from "../hooks/useRelativeValues";
 import { ForcePlot } from "./ForcePlot";
 import { ValueAndUncertaintyPlot } from "./ValueAndUncertaintyPlot";
 
 export const PlotView: FC<{
-  fn: SqLambda;
-}> = ({ fn }) => {
+  rv: RV;
+}> = ({ rv }) => {
   return (
     <div className="flex gap-8">
       <div>
@@ -18,10 +19,10 @@ export const PlotView: FC<{
           </StyledTab.List>
           <StyledTab.Panels>
             <StyledTab.Panel>
-              <ValueAndUncertaintyPlot fn={fn} />
+              <ValueAndUncertaintyPlot rv={rv} />
             </StyledTab.Panel>
             <StyledTab.Panel>
-              <ForcePlot fn={fn} />
+              <ForcePlot rv={rv} />
             </StyledTab.Panel>
           </StyledTab.Panels>
         </StyledTab.Group>

@@ -129,8 +129,7 @@ const Tick: React.FC<{
   scale: d3.ScaleLinear<number, number>;
 }> = ({ value, scale }) => {
   const valueText = numberShow(value);
-  let text: any = _.isFinite(value) && valueText;
-  text = `${text.value}`;
+  let text = valueText.value;
   text += valueText.symbol ? valueText.symbol : "";
   text += valueText.power ? `e${valueText.power}` : "";
   if (text === "0.0") {

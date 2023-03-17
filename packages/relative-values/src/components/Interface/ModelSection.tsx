@@ -16,7 +16,7 @@ import { NewModelForm } from "./NewModelForm";
 
 export const ModelSection: FC = () => {
   const model = useSelectedModel();
-  const { error, fn } = useRelativeValues(model);
+  const { error, rv } = useRelativeValues(model);
   const {
     catalog: { clusters },
     currentModel,
@@ -57,13 +57,13 @@ export const ModelSection: FC = () => {
             </div>
             <StyledTab.Panels>
               <StyledTab.Panel>
-                {fn ? <ListView fn={fn} /> : null}
+                {rv ? <ListView rv={rv} /> : null}
               </StyledTab.Panel>
               <StyledTab.Panel>
-                {fn ? <GridView fn={fn} /> : null}
+                {rv ? <GridView rv={rv} /> : null}
               </StyledTab.Panel>
               <StyledTab.Panel>
-                {fn ? <PlotView fn={fn} /> : null}
+                {rv ? <PlotView rv={rv} /> : null}
               </StyledTab.Panel>
               <StyledTab.Panel>
                 {model ? (

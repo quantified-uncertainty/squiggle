@@ -1,8 +1,8 @@
-import { SqLambda } from "@quri/squiggle-lang";
 import * as d3 from "d3";
 import { FC, useEffect, useMemo, useRef } from "react";
 import { useInterfaceContext } from "../../Interface/InterfaceProvider";
-import { CachedPairs, useCachedPairs, useFilteredItems } from "../hooks";
+import { useFilteredItems } from "../hooks";
+import { RV } from "../hooks/useRelativeValues";
 import { averageDb, averageMedian } from "../hooks/useSortedItems";
 import { useViewContext } from "../ViewProvider";
 
@@ -13,7 +13,7 @@ type Datum = {
   clusterId: string | undefined;
 };
 
-const usePlotData = (cache: CachedPairs) => {
+const usePlotData = (rv: RV) => {
   const {
     catalog: { items },
   } = useInterfaceContext();
@@ -30,19 +30,19 @@ const usePlotData = (cache: CachedPairs) => {
     for (const item of filteredItems) {
       data.push({
         id: item.id,
-        median: averageMedian({ item, comparedTo: items, cache }),
-        db: averageDb({ item, comparedTo: items, cache }),
+        median: averageMedian({ item, comparedTo: items, rv }),
+        db: averageDb({ item, comparedTo: items, rv }),
         clusterId: item.clusterId,
       });
     }
     return data;
-  }, [filteredItems, cache]);
+  }, [filteredItems, rv]);
   return data;
 };
 
 export const ValueAndUncertaintyPlot: FC<{
-  fn: SqLambda;
-}> = ({ fn }) => {
+  rv: RV;
+}> = ({ rv }) => {
   const {
     catalog: { items, clusters },
   } = useInterfaceContext();
@@ -53,9 +53,7 @@ export const ValueAndUncertaintyPlot: FC<{
   const height = 400;
   const margin = { top: 10, bottom: 40, left: 60, right: 20 };
 
-  const allPairs = useCachedPairs(fn, items);
-
-  const data = usePlotData(allPairs);
+  const data = usePlotData(rv);
 
   type Obj = {
     xAxis: d3.Axis<d3.NumberValue>;

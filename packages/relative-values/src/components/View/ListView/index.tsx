@@ -1,24 +1,20 @@
 import { useInterfaceContext } from "@/components/Interface/InterfaceProvider";
 import { DropdownButton } from "@/components/ui/DropdownButton";
-import { SqLambda } from "@quri/squiggle-lang";
 import { FC, Fragment, useEffect, useState } from "react";
 import { CellBox } from "../CellBox";
 import { AxisMenu } from "../GridView/AxisMenu";
 import { Header } from "../Header";
-import {
-  useCachedPairsToOneItem,
-  useFilteredItems,
-  useSortedItems,
-} from "../hooks";
+import { useFilteredItems, useSortedItems } from "../hooks";
+import { RV } from "../hooks/useRelativeValues";
 import { RelativeCell } from "../RelativeCell";
 import { useViewContext } from "../ViewProvider";
 import { ColumnHeader } from "./ColumnHeader";
 
 type Props = {
-  fn: SqLambda;
+  rv: RV;
 };
 
-export const ListView: FC<Props> = ({ fn }) => {
+export const ListView: FC<Props> = ({ rv }) => {
   const {
     catalog: { items },
   } = useInterfaceContext();
@@ -31,13 +27,11 @@ export const ListView: FC<Props> = ({ fn }) => {
     setSelectedItem(items[0]);
   }, [items]);
 
-  const cachedPairs = useCachedPairsToOneItem(fn, items, selectedItem.id);
-
   const filteredItems = useFilteredItems({ items, config: axisConfig.rows });
   const sortedItems = useSortedItems({
     items: filteredItems,
     config: axisConfig.rows,
-    cache: cachedPairs,
+    rv,
     otherDimensionItems: [selectedItem],
   });
 
@@ -66,11 +60,7 @@ export const ListView: FC<Props> = ({ fn }) => {
         {sortedItems.map((item) => (
           <Fragment key={item.id}>
             <Header item={item} />
-            <RelativeCell
-              id1={item.id}
-              id2={selectedItem.id}
-              cache={cachedPairs}
-            />
+            <RelativeCell id1={item.id} id2={selectedItem.id} rv={rv} />
             <CellBox>
               <div className="p-1 font-mono text-xs">{item.id}</div>
             </CellBox>
