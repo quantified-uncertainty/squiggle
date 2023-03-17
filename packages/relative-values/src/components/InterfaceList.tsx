@@ -33,8 +33,8 @@ export const InterfaceList: FC = () => {
     <div className="max-w-6xl mx-auto">
       <header className="text-3xl mb-8">Interfaces</header>
       <div className="flex flex-col gap-8 mb-8">
-        {allInterfaces.map((interfaceWithModels) => (
-          <InterfaceCard data={interfaceWithModels} />
+        {allInterfaces.map((interfaceWithModels, i) => (
+          <InterfaceCard key={i} data={interfaceWithModels} />
         ))}
       </div>
       <StyledLink href="/scratchpad">From JSON</StyledLink>

@@ -1,11 +1,10 @@
 import { SqLambda } from "@quri/squiggle-lang";
 import * as d3 from "d3";
 import { FC, useEffect, useMemo, useRef } from "react";
-import { useInterfaceContext } from "../Interface/InterfaceProvider";
-import { ClusterFilter } from "./ClusterFilter";
-import { CachedPairs, useCachedPairs, useFilteredItems } from "./hooks";
-import { averageDb, averageMedian } from "./hooks/useSortedItems";
-import { useViewContext } from "./ViewProvider";
+import { useInterfaceContext } from "../../Interface/InterfaceProvider";
+import { CachedPairs, useCachedPairs, useFilteredItems } from "../hooks";
+import { averageDb, averageMedian } from "../hooks/useSortedItems";
+import { useViewContext } from "../ViewProvider";
 
 type Datum = {
   id: string;
@@ -41,7 +40,7 @@ const usePlotData = (cache: CachedPairs) => {
   return data;
 };
 
-export const PlotView: FC<{
+export const ValueAndUncertaintyPlot: FC<{
   fn: SqLambda;
 }> = ({ fn }) => {
   const {
@@ -181,14 +180,11 @@ export const PlotView: FC<{
   }, [ref.current, obj.current, data]);
 
   return (
-    <div className="flex gap-8">
-      <svg
-        width={width + margin.left + margin.right}
-        height={height + margin.top + margin.bottom}
-      >
-        <g transform={`translate(${margin.left},${margin.top})`} ref={ref} />
-      </svg>
-      <ClusterFilter axis="rows" />
-    </div>
+    <svg
+      width={width + margin.left + margin.right}
+      height={height + margin.top + margin.bottom}
+    >
+      <g transform={`translate(${margin.left},${margin.top})`} ref={ref} />
+    </svg>
   );
 };

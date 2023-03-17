@@ -6,6 +6,7 @@ export type Cluster = {
   color: string;
 };
 
+// TODO - should be Map
 export type Clusters = {
   [k: string]: Cluster;
 };
