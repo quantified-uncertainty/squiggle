@@ -2,7 +2,7 @@ import React, { FC, useEffect, useMemo, useRef } from "react";
 
 import squiggle from "./languageSupport/squiggle";
 
-import { SqLocation } from "@quri/squiggle-lang";
+import { SqLocation, SqProject } from "@quri/squiggle-lang";
 
 import { syntaxHighlighting } from "@codemirror/language";
 import { EditorState, Compartment } from "@codemirror/state";
@@ -45,6 +45,7 @@ interface CodeEditorProps {
   height?: number;
   showGutter?: boolean;
   errorLocations?: SqLocation[];
+  project: SqProject;
 }
 
 const compTheme = new Compartment();
@@ -61,10 +62,11 @@ export const CodeEditor: FC<CodeEditorProps> = ({
   oneLine = false,
   showGutter = false,
   errorLocations = [],
+  project,
 }) => {
   const editor = useRef<HTMLDivElement>(null);
   const editorView = useRef<EditorView | null>(null);
-  const languageSupport = useMemo(squiggle, []);
+  const languageSupport = useMemo(squiggle(project), [project]);
   const state = useMemo(
     () =>
       EditorState.create({

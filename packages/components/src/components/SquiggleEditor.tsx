@@ -3,7 +3,7 @@ import { CodeEditor } from "./CodeEditor";
 import { SquiggleContainer } from "./SquiggleContainer";
 import { useMaybeControlledValue } from "../lib/hooks";
 import { useSquiggle, SquiggleArgs } from "../lib/hooks/useSquiggle";
-import { SqLocation } from "@quri/squiggle-lang";
+import { SqLocation, SqProject } from "@quri/squiggle-lang";
 import { SquiggleViewer, SquiggleViewerProps } from "./SquiggleViewer";
 import { getErrorLocations, getValueToRender } from "../lib/utility";
 
@@ -19,6 +19,7 @@ const WrappedCodeEditor: React.FC<{
       oneLine={true}
       showGutter={false}
       errorLocations={errorLocations}
+      project={SqProject.create()}
     />
   </div>
 );
