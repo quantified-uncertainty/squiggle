@@ -1,4 +1,4 @@
-import { RV } from "@/values/RV";
+import { RVStorage } from "@/values/RVStorage";
 import * as d3 from "d3";
 import { FC, useEffect, useMemo, useRef } from "react";
 import { useInterfaceContext } from "../../Interface/InterfaceProvider";
@@ -13,7 +13,7 @@ type Datum = {
   clusterId: string | undefined;
 };
 
-const usePlotData = (rv: RV) => {
+const usePlotData = (rv: RVStorage) => {
   const {
     catalog: { items },
   } = useInterfaceContext();
@@ -41,7 +41,7 @@ const usePlotData = (rv: RV) => {
 };
 
 export const ValueAndUncertaintyPlot: FC<{
-  rv: RV;
+  rv: RVStorage;
 }> = ({ rv }) => {
   const {
     catalog: { items, clusters },

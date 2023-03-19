@@ -2,7 +2,7 @@ import { getModelCode, Model } from "@/model/utils";
 import { sq, SqProject } from "@quri/squiggle-lang";
 import { useMemo } from "react";
 
-import { RV } from "@/values/RV";
+import { RVStorage } from "@/values/RVStorage";
 
 const wrapper = sq`
 {|x, y|
@@ -56,7 +56,7 @@ export const useRelativeValues = (model: Model | undefined) => {
     }
     return {
       error: "",
-      rv: new RV(result.value.value),
+      rv: new RVStorage(result.value.value),
     };
   }, [project, code]);
 

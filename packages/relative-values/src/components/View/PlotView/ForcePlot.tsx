@@ -4,10 +4,10 @@ import { useInterfaceContext } from "@/components/Interface/InterfaceProvider";
 import * as d3 from "d3";
 import { useFilteredItems } from "../hooks";
 import { useViewContext } from "../ViewProvider";
-import { RV } from "@/values/RV";
+import { RVStorage } from "@/values/RVStorage";
 
 export const ForcePlot: FC<{
-  rv: RV;
+  rv: RVStorage;
 }> = ({ rv }) => {
   const ref = useRef<SVGGElement>(null);
 
@@ -73,7 +73,7 @@ export const ForcePlot: FC<{
           (d.target as Node).id
         );
         if (!relativeValueResult.ok) {
-          return 1e9; // ???
+          return 300; // 30 decibels; is this a good default?
         }
         return relativeValueResult.value.db * 10;
       });

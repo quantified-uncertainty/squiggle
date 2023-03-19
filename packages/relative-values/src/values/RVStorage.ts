@@ -74,7 +74,7 @@ const buildRelativeValue = ({
   };
 };
 
-export class RV {
+export class RVStorage {
   cache: Map<string, Map<string, RelativeValueResult>>;
 
   constructor(public fn: SqLambda) {

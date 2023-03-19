@@ -1,6 +1,6 @@
 import { useInterfaceContext } from "@/components/Interface/InterfaceProvider";
 import { DropdownButton } from "@/components/ui/DropdownButton";
-import { RV } from "@/values/RV";
+import { RVStorage } from "@/values/RVStorage";
 import { FC, Fragment, useEffect, useState } from "react";
 import { CellBox } from "../CellBox";
 import { AxisMenu } from "../GridView/AxisMenu";
@@ -11,7 +11,7 @@ import { useViewContext } from "../ViewProvider";
 import { ColumnHeader } from "./ColumnHeader";
 
 type Props = {
-  rv: RV;
+  rv: RVStorage;
 };
 
 export const ListView: FC<Props> = ({ rv }) => {
