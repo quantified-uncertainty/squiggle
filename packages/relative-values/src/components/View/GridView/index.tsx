@@ -74,7 +74,7 @@ export const GridView: FC<{
       <div
         className="grid relative"
         style={{
-          gridTemplateColumns: `repeat(${columnItems.length + 1}, 180px)`,
+          gridTemplateColumns: `repeat(${columnItems.length + 1}, 140px)`,
         }}
       >
         <div className="sticky bg-white top-0 left-0 z-20" />

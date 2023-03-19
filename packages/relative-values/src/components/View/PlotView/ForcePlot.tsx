@@ -128,7 +128,6 @@ export const ForcePlot: FC<{
       }
     }
     force.links(links);
-
     simulation.nodes(nodes);
     simulation.restart();
   }, [ref.current, d3ref.current, nodes]);

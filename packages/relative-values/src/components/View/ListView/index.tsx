@@ -46,7 +46,7 @@ export const ListView: FC<Props> = ({ rv }) => {
         className="grid grid-cols-3 border-r border-b border-gray-200 w-max"
         style={{
           gridTemplateColumns:
-            "minmax(100px, min-content) 180px minmax(100px, min-content)",
+            "minmax(100px, min-content) 140px minmax(100px, min-content)",
         }}
       >
         <div className="sticky bg-white top-0 left-0 z-20" />
