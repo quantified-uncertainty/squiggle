@@ -3,8 +3,8 @@ import { FC, useEffect, useMemo, useRef } from "react";
 import { useInterfaceContext } from "@/components/Interface/InterfaceProvider";
 import * as d3 from "d3";
 import { useFilteredItems } from "../hooks";
-import { RV } from "../hooks/useRelativeValues";
 import { useViewContext } from "../ViewProvider";
+import { RV } from "@/values/RV";
 
 export const ForcePlot: FC<{
   rv: RV;

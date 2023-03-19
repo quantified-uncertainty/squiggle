@@ -5,12 +5,13 @@ import * as d3 from "d3";
 
 import useSize from "@react-hook/size";
 import { numberShow } from "./numberShower";
+import { RelativeValue } from "@/values/RelativeValue";
 
 export type HistogramTheme = "dark" | "normal" | "light";
 
 type Props = {
+  relativeValue: RelativeValue;
   bins?: number;
-  data: number[]; // must be sorted
   domain: [number, number];
   hoveredXCoord?: number;
   allowHover?: boolean;
@@ -22,7 +23,7 @@ type Props = {
 export const Histogram: React.FC<Props> = ({
   bins = 30,
   cutOffRatio = 0, // By default cut off nothing
-  data,
+  relativeValue,
   domain,
   hoveredXCoord,
   allowHover,
@@ -39,20 +40,8 @@ export const Histogram: React.FC<Props> = ({
       number,
       number
     ];
+    const histogramData = relativeValue.histogramData(transformedDomain, bins);
     const xScale = d3.scaleLinear().domain(transformedDomain).range([0, width]);
-
-    const histogramDataFn = d3
-      .bin()
-      .value((d) => {
-        const value = Math.log(d);
-        return Math.max(
-          transformedDomain[0],
-          Math.min(transformedDomain[1], value)
-        );
-      })
-      .domain(transformedDomain)
-      .thresholds(bins);
-    const histogramData = histogramDataFn(data);
 
     const yScale = d3
       .scaleLinear()
@@ -60,7 +49,7 @@ export const Histogram: React.FC<Props> = ({
       .range([height, 0]);
 
     return { xScale, yScale, histogramData };
-  }, [bins, data, cutOffRatio, width, height]);
+  }, [bins, relativeValue, cutOffRatio, width, height]);
 
   const barWidth = width / histogramData.length;
   if (!_.isFinite(barWidth)) {

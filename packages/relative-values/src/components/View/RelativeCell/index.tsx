@@ -1,5 +1,5 @@
+import { RV } from "@/values/RV";
 import { FC, memo } from "react";
-import { RV } from "../hooks/useRelativeValues";
 import { DistCell } from "./DistCell";
 import { ErrorCell } from "./ErrorCell";
 

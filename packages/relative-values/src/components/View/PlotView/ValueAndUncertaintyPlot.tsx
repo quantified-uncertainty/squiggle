@@ -1,8 +1,8 @@
+import { RV } from "@/values/RV";
 import * as d3 from "d3";
 import { FC, useEffect, useMemo, useRef } from "react";
 import { useInterfaceContext } from "../../Interface/InterfaceProvider";
 import { useFilteredItems } from "../hooks";
-import { RV } from "../hooks/useRelativeValues";
 import { averageDb, averageMedian } from "../hooks/useSortedItems";
 import { useViewContext } from "../ViewProvider";
 

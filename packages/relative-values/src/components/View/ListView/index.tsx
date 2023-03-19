@@ -1,11 +1,11 @@
 import { useInterfaceContext } from "@/components/Interface/InterfaceProvider";
 import { DropdownButton } from "@/components/ui/DropdownButton";
+import { RV } from "@/values/RV";
 import { FC, Fragment, useEffect, useState } from "react";
 import { CellBox } from "../CellBox";
 import { AxisMenu } from "../GridView/AxisMenu";
 import { Header } from "../Header";
 import { useFilteredItems, useSortedItems } from "../hooks";
-import { RV } from "../hooks/useRelativeValues";
 import { RelativeCell } from "../RelativeCell";
 import { useViewContext } from "../ViewProvider";
 import { ColumnHeader } from "./ColumnHeader";

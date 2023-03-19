@@ -1,8 +1,8 @@
 import { StyledTab } from "@/components/ui/StyledTab";
+import { RV } from "@/values/RV";
 import { SqLambda } from "@quri/squiggle-lang";
 import { FC } from "react";
 import { ClusterFilter } from "../ClusterFilter";
-import { RV } from "../hooks/useRelativeValues";
 import { ForcePlot } from "./ForcePlot";
 import { ValueAndUncertaintyPlot } from "./ValueAndUncertaintyPlot";
 

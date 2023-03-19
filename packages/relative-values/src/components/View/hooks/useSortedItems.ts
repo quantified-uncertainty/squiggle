@@ -1,8 +1,9 @@
 import { Item } from "@/types";
+import { RelativeValue } from "@/values/RelativeValue";
+import { RV } from "@/values/RV";
 import _ from "lodash";
 import { useMemo } from "react";
 import { AxisConfig } from "../ViewProvider";
-import { RelativeValue, RV } from "./useRelativeValues";
 
 const averageMetric = ({
   item,
