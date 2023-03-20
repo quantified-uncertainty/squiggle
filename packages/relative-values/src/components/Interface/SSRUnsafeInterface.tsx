@@ -16,7 +16,7 @@ export const SSRUnsafeInterface: FC = () => {
   return (
     <StyledTab.Group>
       <div className="bg-blue-100 py-8 px-4">
-        <div className="flex justify-between items-start">
+        <div className="flex justify-between items-start max-w-6xl mx-auto">
           <div>
             <header className="text-2xl font-bold mb-4">{catalog.title}</header>
             <div className="text-sm text-gray-600 space-y-1">
@@ -45,7 +45,7 @@ export const SSRUnsafeInterface: FC = () => {
           <div className="flex flex-col items-end space-y-4">
             <StyledTab.List>
               <StyledTab name="Estimates" icon={() => <div />} />
-              <StyledTab name="About" icon={() => <div />} />
+              <StyledTab name="Items" icon={() => <div />} />
             </StyledTab.List>
             <Toolbar />
           </div>

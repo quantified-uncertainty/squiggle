@@ -7,7 +7,7 @@ export const ClusterIcon: FC<{ cluster: Cluster; selected?: boolean }> = ({
 }) => {
   return (
     <div
-      className="w-3 h-3 rounded-full"
+      className="w-2 h-2 rounded-sm"
       style={
         selected
           ? { backgroundColor: cluster.color }

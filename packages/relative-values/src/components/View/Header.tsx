@@ -15,13 +15,15 @@ export const Header: FC<{
   const cluster = item.clusterId ? clusters[item.clusterId] : undefined;
   return (
     <CellBox header clickable={clickable}>
-      <div className="text-xs font-bold p-1">
+      <div className="text-sm p-1 font-semibold text-slate-800 flex">
         {cluster ? (
-          <div className="float-right px-0.5">
+          <div className="float-left px-0.5 pr-2 pt-1.5">
             <ClusterIcon cluster={cluster} />
           </div>
         ) : null}
+        <div>
         {item.name}
+        </div>
       </div>
     </CellBox>
   );

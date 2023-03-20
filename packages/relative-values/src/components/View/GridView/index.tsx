@@ -62,10 +62,10 @@ export const GridView: FC<{
     <div>
       <div className="flex gap-8 mb-4 items-center">
         <div className="flex gap-2">
-          <DropdownButton text="Rows">
+          <DropdownButton text="Row Settings">
             {() => <AxisMenu axis="rows" />}
           </DropdownButton>
-          <DropdownButton text="Columns">
+          <DropdownButton text="Column Settings">
             {() => <AxisMenu axis="columns" />}
           </DropdownButton>
         </div>

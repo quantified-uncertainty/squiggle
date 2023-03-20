@@ -97,7 +97,7 @@ function getCatalog(): Catalog {
 
 function getTextModel(): Model {
   return {
-    author: "QURI",
+    author: "Nuno Sempere",
     mode: "text",
     code: `blog_post_to_software = SampleSet.fromDist(0.1 to 100)
 items = {
@@ -163,7 +163,7 @@ function getGraphModel(): Model {
       ["quri_ken", "(0.1 to 0.5)*blog_post_to_software"],
       ["quri_guesstimate", "(50 to 10000)*blog_post_to_software"],
     ],
-    metadata: { author: "QURI" },
+    metadata: { author: "Ozzie Gooen" },
     catalog: getCatalog(),
   });
 }
@@ -172,8 +172,8 @@ export function getQuriBuiltin(): InterfaceWithModels {
   return {
     catalog: getCatalog(),
     models: Map([
-      ["text", getTextModel()],
-      ["graph", getGraphModel()],
+      ["Nuno Sempere 2022 - Text", getTextModel()],
+      ["Ozzie Gooen 2023 - Graph", getGraphModel()],
     ]),
   };
 }

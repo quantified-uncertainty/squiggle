@@ -8,10 +8,12 @@ interface LayoutProps {
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen">
-      <div className="bg-gray-100">
+      <div className="bg-white border-b border-slate-300">
+        <div className="max-w-6xl mx-auto">
         <Link href="/">
-          <div className="text-lg font-medium p-4">Relative values</div>
+          <div className="text-lg font-bold py-2 text-slate-600">Relative Values App</div>
         </Link>
+</div>
       </div>
       {children}
     </div>

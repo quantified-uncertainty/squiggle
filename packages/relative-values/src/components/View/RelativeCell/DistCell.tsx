@@ -24,11 +24,11 @@ function numberToColor2(rating: number){
   } else if (rating < 3.0) {
     return ""
   } else if (rating < 6.0) {
-    return "bg-yellow-800 bg-opacity-5"
+    return "bg-yellow-500 bg-opacity-5"
   } else if (rating < 9.0) {
-    return "bg-yellow-600 bg-opacity-10"
+    return "bg-orange-700 bg-opacity-5"
   } else {
-    return "bg-red-600 bg-opacity-5" 
+    return "bg-red-400 bg-opacity-10" 
   }
 };
 
