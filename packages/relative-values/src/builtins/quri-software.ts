@@ -192,6 +192,7 @@ function getModel(): Model {
     catalog: getCatalog(),
     metadata: {
       author: "Nuño Sempere",
+      title: "By Nuño",
     },
   });
 }

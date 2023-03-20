@@ -8,7 +8,7 @@ type Node = {
 
 type ModelMetadata = {
   author: string;
-  name: string;
+  title: string;
 }
 
 export type TextModel = {
@@ -235,12 +235,13 @@ export function modelFromJSON(json: any) {
   };
 }
 
-export function createEmptyGraphModel({ author, catalog }: { author: string, catalog: Catalog }) {
+export function createEmptyGraphModel({ author, title, catalog }: { author: string, title: string, catalog: Catalog }) {
   return buildGraphModel({
     items: catalog.items.map(item => [item.id, 'pointMass(1)']),
     commonCode: '',
     metadata: {
       author,
+      title,
     },
     catalog,
   });

@@ -14,6 +14,7 @@ const defaultValue: InterfaceContextShape = {
         mode: "text",
         code: "",
         author: "unknown",
+        title: "default",
       },
     ],
   ]),
@@ -35,6 +36,7 @@ type Action =
       payload: {
         id: string;
         author: string;
+        title: string;
       };
     }
   | {
@@ -58,6 +60,7 @@ const reducer: Reducer<InterfaceContextShape, Action> = (state, action) => {
           action.payload.id,
           createEmptyGraphModel({
             author: action.payload.author,
+            title: action.payload.title,
             catalog: state.catalog,
           })
         ),

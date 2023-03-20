@@ -6,6 +6,7 @@ import { useInterfaceContext, useInterfaceDispatch } from "./InterfaceProvider";
 export const NewModelForm: FC = () => {
   const [id, setId] = useState("");
   const [author, setAuthor] = useState("");
+  const [title, setTitle] = useState("");
 
   const { catalog } = useInterfaceContext();
   const dispatch = useInterfaceDispatch();
@@ -18,6 +19,7 @@ export const NewModelForm: FC = () => {
       payload: {
         id,
         author,
+        title,
       },
     });
     window.history.replaceState(undefined, "", modelRoute(catalog.id, id));
@@ -39,6 +41,14 @@ export const NewModelForm: FC = () => {
           type="text"
           className="p-1 rounded border border-gray-200 w-full mb-4"
           onChange={(e) => setAuthor(e.currentTarget.value)}
+        />
+      </div>
+      <div>
+        <label className="font-bold">Title</label>
+        <input
+          type="text"
+          className="p-1 rounded border border-gray-200 w-full mb-4"
+          onChange={(e) => setTitle(e.currentTarget.value)}
         />
       </div>
       <div className="self-end">

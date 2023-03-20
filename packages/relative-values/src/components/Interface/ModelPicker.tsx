@@ -37,7 +37,7 @@ const ModelPickerMenu: FC<{ close(): void }> = ({ close }) => {
                 isSelected || "text-gray-500"
               )}
             >
-              {v.name}
+              {v.title}
             </span>{" "}
             <span className="font-bold">{v.author}</span>
           </div>
