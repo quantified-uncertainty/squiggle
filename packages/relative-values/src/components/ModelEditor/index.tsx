@@ -16,8 +16,8 @@ export const ModelEditor: FC<EstimateProps> = (props) => {
   return (
     <div>
       <div className="text-xs italic mb-2">
-        Changes aren't saved automatically. Use the "Save" button above to
-        export interface data as JSON.
+        Changes aren&apos;t saved automatically. Use the &quot;Save&quot; button
+        above to export interface data as JSON.
       </div>
       <InnerModelEditor {...props} />
     </div>

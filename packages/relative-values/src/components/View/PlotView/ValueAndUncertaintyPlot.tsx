@@ -36,7 +36,7 @@ const usePlotData = (rv: RVStorage) => {
       });
     }
     return data;
-  }, [filteredItems, rv]);
+  }, [filteredItems, items, rv]);
   return data;
 };
 

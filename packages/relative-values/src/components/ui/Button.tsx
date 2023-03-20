@@ -4,7 +4,7 @@ import { ButtonHTMLAttributes, FC, forwardRef, PropsWithChildren } from "react";
 export const Button = forwardRef<
   HTMLButtonElement,
   ButtonHTMLAttributes<HTMLButtonElement>
->(({ className, ...props }, ref) => {
+>(function Button({ className, ...props }, ref) {
   return (
     <button
       className={clsx(

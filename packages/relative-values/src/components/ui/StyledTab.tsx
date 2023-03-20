@@ -53,11 +53,13 @@ export const StyledTab: StyledTabType = ({ name, icon: Icon }) => {
   );
 };
 
-StyledTab.List = ({ children }) => (
-  <Tab.List className="flex w-fit p-0.5 rounded-md bg-slate-100 hover:bg-slate-200">
-    {children}
-  </Tab.List>
-);
+StyledTab.List = function StyledTabList({ children }) {
+  return (
+    <Tab.List className="flex w-fit p-0.5 rounded-md bg-slate-100 hover:bg-slate-200">
+      {children}
+    </Tab.List>
+  );
+};
 
 StyledTab.Group = Tab.Group;
 StyledTab.Panels = Tab.Panels;

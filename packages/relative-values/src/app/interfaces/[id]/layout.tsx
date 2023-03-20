@@ -16,11 +16,6 @@ export default function InterfaceLayout({
   const interfaceWithModels = allInterfaces.find(
     (i) => i.catalog.id === params.id
   );
-  if (!interfaceWithModels) {
-    return <div className="text-red-500">Not found</div>;
-  }
-
-  const { catalog, models } = interfaceWithModels;
 
   // FIXME - should be rendered on client
   const displayDate = (date?: Date) => {
@@ -30,6 +25,11 @@ export default function InterfaceLayout({
   const segment = useSelectedLayoutSegment();
 
   const router = useRouter();
+
+  if (!interfaceWithModels) {
+    return <div className="text-red-500">Not found</div>;
+  }
+  const { catalog, models } = interfaceWithModels;
 
   const selectedIndex = segment === "about" ? 1 : 0;
   const setSelectedIndex = (index: number) => {

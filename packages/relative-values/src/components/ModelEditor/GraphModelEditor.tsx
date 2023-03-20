@@ -82,6 +82,7 @@ export const GraphModelEditor: FC<EstimateProps<GraphModel>> = ({
                       Dependencies:{" "}
                       {node.dependencies.map((id, i) => (
                         <a
+                          key={id}
                           href={`#${getAnchor(id)}`}
                           className={clsx(
                             model.invalidIds.has(id) && "text-red-500"

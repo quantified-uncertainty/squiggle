@@ -39,7 +39,7 @@ export const Histogram: React.FC<Props> = ({
       .range([height, 0]);
 
     return { xScale, yScale, histogramData };
-  }, [bins, relativeValue, width, height]);
+  }, [bins, relativeValue, domain, width, height]);
 
   const barWidth = width / histogramData.length;
   if (!_.isFinite(barWidth)) {

@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+"use client";
 import Link from "next/link";
 import { PropsWithChildren } from "react";
 
@@ -6,10 +6,6 @@ import "@quri/squiggle-components/dist/main.css";
 import "../styles/main.css";
 
 import { Tailwind } from "@/components/Tailwind";
-
-export const metadata: Metadata = {
-  title: "Relative Values App",
-};
 
 export default function RootLayout({ children }: PropsWithChildren) {
   return (
