@@ -8,6 +8,7 @@ type Node = {
 
 type ModelMetadata = {
   author: string;
+  name: string;
 }
 
 export type TextModel = {

@@ -80,7 +80,7 @@ function getCatalog(): Catalog {
 
   return {
     id: "quri",
-    title: "QURI projects [TEST]",
+    title: "QURI projects",
     items,
     clusters: {
       papers: {
@@ -97,7 +97,8 @@ function getCatalog(): Catalog {
 
 function getTextModel(): Model {
   return {
-    author: "Nuno Sempere",
+    author: "Nuño Sempere",
+    name: "Nuño Sempere 2022 — Text",
     mode: "text",
     code: `blog_post_to_software = SampleSet.fromDist(0.1 to 100)
 items = {
@@ -163,7 +164,7 @@ function getGraphModel(): Model {
       ["quri_ken", "(0.1 to 0.5)*blog_post_to_software"],
       ["quri_guesstimate", "(50 to 10000)*blog_post_to_software"],
     ],
-    metadata: { author: "Ozzie Gooen" },
+    metadata: { author: "Ozzie Gooen", name: "Ozzie Gooen 2023 — Graph" },
     catalog: getCatalog(),
   });
 }
@@ -172,8 +173,8 @@ export function getQuriBuiltin(): InterfaceWithModels {
   return {
     catalog: getCatalog(),
     models: Map([
-      ["Nuno Sempere 2022 - Text", getTextModel()],
-      ["Ozzie Gooen 2023 - Graph", getGraphModel()],
+      ["nuno-2022", getTextModel()],
+      ["ozzie-2023", getGraphModel()],
     ]),
   };
 }
