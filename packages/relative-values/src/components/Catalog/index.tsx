@@ -36,17 +36,17 @@ const CatalogItems: FC = () => {
           "minmax(100px, max-content) minmax(max-content, 120px) 1fr",
       }}
     >
-      <div>Cluster</div>
       <div>ID</div>
-      <div>Description</div>
+      <div>Name</div>
+      <div>Cluster</div>
       <div className="col-span-3 border-b border-gray-200" />
       {items.map((item) => (
         <Fragment key={item.id}>
+          <code>{item.id}</code>
+          <div>{item.name}</div>
           <div>
             {item.clusterId ? <ClusterInfo clusterId={item.clusterId} /> : null}
           </div>
-          <code>{item.id}</code>
-          <div>{item.name}</div>
         </Fragment>
       ))}
     </div>

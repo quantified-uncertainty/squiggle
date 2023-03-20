@@ -9,6 +9,8 @@ import { useFilteredItems, useSortedItems } from "../hooks";
 import { RelativeCell } from "../RelativeCell";
 import { useViewContext } from "../ViewProvider";
 import { ColumnHeader } from "./ColumnHeader";
+import { averageDb, averageMedian } from "../hooks/useSortedItems";
+import { NumberShower } from "@quri/squiggle-components";
 
 type Props = {
   rv: RVStorage;
@@ -37,33 +39,67 @@ export const ListView: FC<Props> = ({ rv }) => {
 
   return (
     <div>
-      <div>
-        <DropdownButton text="Rows">
+      <div className="mb-2">
+        <DropdownButton text="Table Settings">
           {() => <AxisMenu axis="rows" />}
         </DropdownButton>
       </div>
       <div
-        className="grid grid-cols-3 border-r border-b border-gray-200 w-max"
+        className="grid grid-cols-6 border-r border-b border-gray-200 w-max"
         style={{
           gridTemplateColumns:
-            "minmax(100px, min-content) 180px minmax(100px, min-content)",
+            "minmax(220px, min-content)  minmax(140px, min-content) minmax(100px, min-content) minmax(160px, min-content) minmax(160px, min-content) minmax(160px, min-content)",
         }}
       >
-        <div className="sticky bg-white top-0 left-0 z-20" />
+        <CellBox header>
+          <div className="p-1 pt-2 text-sm font-semibold text-slate-600">Name</div>
+        </CellBox>
+        <CellBox header>
+          <div className="p-1 pt-2 text-sm font-semibold text-slate-600">ID</div>
+        </CellBox>
+        <CellBox header>
+          <div className="p-1 pt-2 text-sm font-semibold text-slate-600">Cluster</div>
+        </CellBox>
+        <CellBox header>
+          <div className="p-1 pt-2 text-sm font-semibold text-slate-600">Average Value</div>
+        </CellBox>
+        <CellBox header>
+          <div className="p-1 pt-2 text-sm font-semibold text-slate-600">Average Uncertainty (db)</div>
+        </CellBox>
         <ColumnHeader
           selectedItem={selectedItem}
           setSelectedItem={setSelectedItem}
         />
-        <CellBox header>
-          <div className="p-1">ID</div>
-        </CellBox>
         {sortedItems.map((item) => (
           <Fragment key={item.id}>
             <Header item={item} />
-            <RelativeCell id1={item.id} id2={selectedItem.id} rv={rv} />
             <CellBox>
-              <div className="p-1 font-mono text-xs">{item.id}</div>
+              <div className="p-2 font-mono text-xs text-slate-600">
+                {item.id}
+              </div>
             </CellBox>
+            <CellBox>
+              <div className="p-2 font-mono text-xs text-slate-600">
+                {item.clusterId}
+              </div>
+            </CellBox>
+            <CellBox>
+              <div className="p-2 text-slate-800">
+                <NumberShower
+                  number={averageMedian({ item, comparedTo: items, rv })}
+                  precision={2}
+                />
+              </div>
+            </CellBox>
+            <CellBox>
+              <div className="p-2 text-slate-800">
+                <NumberShower
+                  number={averageDb({ item, comparedTo: items, rv })}
+                  precision={3}
+                />
+              </div>
+            </CellBox>
+            <RelativeCell id1={item.id} id2={selectedItem.id} rv={rv} />
           </Fragment>
         ))}
       </div>

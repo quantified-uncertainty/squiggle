@@ -23,7 +23,6 @@ export const Histogram: React.FC<Props> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [width, height] = useSize(containerRef);
-
   const { xScale, yScale, histogramData } = useMemo(() => {
     // It would be better to use scaleLog(), but it's not truly logarithmic by default and that causes issues.
     // Could probably be fixed with some parameters.
@@ -81,7 +80,7 @@ const Bar: React.FC<{
 
   const themeToColor: { [t in HistogramTheme]: string } = {
     dark: "fill-[#92a9b8]",
-    normal: "fill-[#c5e0f3]",
+    normal: "fill-[#dee8ee]",
     light: "fill-grey-a1",
   };
 

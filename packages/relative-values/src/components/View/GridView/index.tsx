@@ -62,10 +62,10 @@ export const GridView: FC<{
     <div>
       <div className="flex gap-8 mb-4 items-center">
         <div className="flex gap-2">
-          <DropdownButton text="Rows">
+          <DropdownButton text="Row Settings">
             {() => <AxisMenu axis="rows" />}
           </DropdownButton>
-          <DropdownButton text="Columns">
+          <DropdownButton text="Column Settings">
             {() => <AxisMenu axis="columns" />}
           </DropdownButton>
         </div>
@@ -74,7 +74,7 @@ export const GridView: FC<{
       <div
         className="grid relative"
         style={{
-          gridTemplateColumns: `repeat(${columnItems.length + 1}, 180px)`,
+          gridTemplateColumns: `repeat(${columnItems.length + 1}, 140px)`,
         }}
       >
         <div className="sticky bg-white top-0 left-0 z-20" />

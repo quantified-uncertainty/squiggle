@@ -97,7 +97,7 @@ function getCatalog(): Catalog {
 
 function getTextModel(): Model {
   return {
-    author: "QURI",
+    author: "Nuno Sempere",
     mode: "text",
     code: `blog_post_to_software = SampleSet.fromDist(0.1 to 100)
 items = {
@@ -139,20 +139,20 @@ function getGraphModel(): Model {
     commonCode: "blog_post_to_software = SampleSet.fromDist(0.1 to 100)",
     items: [
       ["quri_papers_1", "pointMass(1)"],
-      ["quri_papers_2", "0.1 to 2"],
+      ["quri_papers_2", "1 to 2"],
       ["quri_papers_3", "0.5 to 10"],
       ["quri_papers_4", "0.2 to 20"],
-      ["quri_papers_5", "0.2 to 3"],
-      ["quri_papers_6", "0.3 to 2"],
-      ["quri_papers_7", "1 to 20"],
-      ["quri_papers_8", "0.5 to 8"],
-      ["quri_papers_9", "0.2 to 8"],
-      ["quri_papers_10", "2 to 15"],
-      ["quri_papers_11", "1 to 5"],
-      ["quri_papers_12", "0.05 to 0.2"],
-      ["quri_papers_13", "0.1 to 3"],
-      ["quri_papers_14", "0.2 to 3"],
-      ["quri_papers_15", "0.2 to 3"],
+      ["quri_papers_5", "SampleSet.fromDist(quri_papers_1 * (0.2 to 3))"],
+      ["quri_papers_6", "quri_papers_5 * (0.7 to 2.5)"],
+      ["quri_papers_7", "quri_papers_5 * (10 to 20)"],
+      ["quri_papers_8", "quri_papers_5 * (3 to 9)"],
+      ["quri_papers_9", "quri_papers_5 * (2 to 9)"],
+      ["quri_papers_10", "SampleSet.fromDist(quri_papers_1 * (2 to 15))"],
+      ["quri_papers_11", "quri_papers_10 * (3 to 6)"],
+      ["quri_papers_12", "quri_papers_10 * (4 to 7)"],
+      ["quri_papers_13", "quri_papers_12"],
+      ["quri_papers_14", "quri_papers_12 * (2 to 4)"],
+      ["quri_papers_15", "quri_papers_12 * (2 to 5)"],
       ["quri_metaforecast", "(1)*blog_post_to_software"],
       ["quri_metaforecast_twitter", "(0.01 to 0.1)*blog_post_to_software"],
       ["quri_squiggle", "(3 to 10)*blog_post_to_software"],
@@ -163,7 +163,7 @@ function getGraphModel(): Model {
       ["quri_ken", "(0.1 to 0.5)*blog_post_to_software"],
       ["quri_guesstimate", "(50 to 10000)*blog_post_to_software"],
     ],
-    metadata: { author: "QURI" },
+    metadata: { author: "Ozzie Gooen" },
     catalog: getCatalog(),
   });
 }
@@ -172,8 +172,8 @@ export function getQuriBuiltin(): InterfaceWithModels {
   return {
     catalog: getCatalog(),
     models: Map([
-      ["text", getTextModel()],
-      ["graph", getGraphModel()],
+      ["Nuno Sempere 2022 - Text", getTextModel()],
+      ["Ozzie Gooen 2023 - Graph", getGraphModel()],
     ]),
   };
 }

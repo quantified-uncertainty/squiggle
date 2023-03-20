@@ -29,11 +29,11 @@ const SaveButton: FC = () => {
 
   return (
     <div className="flex items-center gap-2">
-      <Button onClick={copy} className="w-40">
+      <Button onClick={copy} className="w-30">
         {isCopied ? (
           <span className="text-xs">Saved to clipboard!</span>
         ) : (
-          "Save"
+          "Export"
         )}
       </Button>
     </div>
