@@ -1,11 +1,11 @@
 import { useInterfaceContext } from "@/components/Interface/InterfaceProvider";
 import { DropdownButton } from "@/components/ui/DropdownButton";
+import { RVStorage } from "@/values/RVStorage";
 import { FC, Fragment, useEffect, useState } from "react";
 import { CellBox } from "../CellBox";
 import { AxisMenu } from "../GridView/AxisMenu";
 import { Header } from "../Header";
 import { useFilteredItems, useSortedItems } from "../hooks";
-import { RV } from "../hooks/useRelativeValues";
 import { RelativeCell } from "../RelativeCell";
 import { useViewContext } from "../ViewProvider";
 import { ColumnHeader } from "./ColumnHeader";
@@ -13,7 +13,7 @@ import { averageDb, averageMedian } from "../hooks/useSortedItems";
 import { NumberShower } from "@quri/squiggle-components";
 
 type Props = {
-  rv: RV;
+  rv: RVStorage;
 };
 
 export const ListView: FC<Props> = ({ rv }) => {

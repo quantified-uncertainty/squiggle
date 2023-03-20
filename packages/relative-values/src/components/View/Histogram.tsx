@@ -3,30 +3,22 @@ import React, { useMemo, useRef } from "react";
 
 import * as d3 from "d3";
 
+import { RelativeValue } from "@/values/RelativeValue";
 import useSize from "@react-hook/size";
-import { numberShow } from "./numberShower";
 
 export type HistogramTheme = "dark" | "normal" | "light";
 
 type Props = {
+  relativeValue: RelativeValue;
   bins?: number;
-  data: number[]; // must be sorted
   domain: [number, number];
-  hoveredXCoord?: number;
-  allowHover?: boolean;
-  cutOffRatio?: number;
-  showTicks?: boolean;
   theme?: HistogramTheme;
 };
 
 export const Histogram: React.FC<Props> = ({
   bins = 30,
-  cutOffRatio = 0, // By default cut off nothing
-  data,
+  relativeValue,
   domain,
-  hoveredXCoord,
-  allowHover,
-  showTicks,
   theme = "normal",
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -38,20 +30,8 @@ export const Histogram: React.FC<Props> = ({
       number,
       number
     ];
+    const histogramData = relativeValue.histogramData(transformedDomain, bins);
     const xScale = d3.scaleLinear().domain(transformedDomain).range([0, width]);
-
-    const histogramDataFn = d3
-      .bin()
-      .value((d) => {
-        const value = Math.log(d);
-        return Math.max(
-          transformedDomain[0],
-          Math.min(transformedDomain[1], value)
-        );
-      })
-      .domain(transformedDomain)
-      .thresholds(bins);
-    const histogramData = histogramDataFn(data);
 
     const yScale = d3
       .scaleLinear()
@@ -59,7 +39,7 @@ export const Histogram: React.FC<Props> = ({
       .range([height, 0]);
 
     return { xScale, yScale, histogramData };
-  }, [bins, data, cutOffRatio, width, height]);
+  }, [bins, relativeValue, width, height]);
 
   const barWidth = width / histogramData.length;
   if (!_.isFinite(barWidth)) {
@@ -82,85 +62,8 @@ export const Histogram: React.FC<Props> = ({
             />
           ))}
         </g>
-        {allowHover && <Hoverbar hoveredXCoord={hoveredXCoord} />}
-        {showTicks && (
-          <g>
-            <XAxis scale={xScale} height={height} />
-          </g>
-        )}
       </svg>
     </div>
-  );
-};
-
-const Hoverbar: React.FC<{
-  hoveredXCoord: number | undefined;
-}> = ({ hoveredXCoord }) => {
-  return (
-    <line
-      x1={hoveredXCoord}
-      x2={hoveredXCoord}
-      y1={0}
-      y2="100%"
-      className="stroke-[#0e2c40]/50"
-      style={{ strokeDasharray: "8, 5" }}
-    />
-  );
-};
-
-const Path: React.FC<{ scale: d3.ScaleLinear<number, number> }> = ({
-  scale,
-}) => {
-  const [start, end] = scale.range();
-  const d = `M0${start},6V0H${end}V6`;
-
-  return (
-    <path
-      className="fill-none"
-      style={{ shapeRendering: "crispEdges" }}
-      d={d}
-    />
-  );
-};
-
-const Tick: React.FC<{
-  value: number;
-  scale: d3.ScaleLinear<number, number>;
-}> = ({ value, scale }) => {
-  const valueText = numberShow(value);
-  let text = valueText.value;
-  text += valueText.symbol ? valueText.symbol : "";
-  text += valueText.power ? `e${valueText.power}` : "";
-  if (text === "0.0") {
-    text = "0";
-  }
-  return (
-    <g transform={`translate(${scale(value)},0)`}>
-      <text
-        dy=".71em"
-        y="-15"
-        x="-6"
-        className="fill-grey-666 text-[13px] font-semibold"
-      >
-        {text}
-      </text>
-    </g>
-  );
-};
-
-const XAxis: React.FC<{
-  scale: d3.ScaleLinear<number, number>;
-  height: number;
-}> = ({ scale, height }) => {
-  const ticks = scale.ticks
-    .apply(scale)
-    .map((tick, i) => <Tick value={tick} scale={scale} key={i} />);
-
-  return (
-    <g transform={`translate(0,${height})`}>
-      <Path scale={scale} />
-      <g>{ticks}</g>
-    </g>
   );
 };
 

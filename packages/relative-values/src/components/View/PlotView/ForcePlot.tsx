@@ -3,13 +3,13 @@ import { FC, useEffect, useMemo, useRef } from "react";
 import { useInterfaceContext } from "@/components/Interface/InterfaceProvider";
 import * as d3 from "d3";
 import { useFilteredItems } from "../hooks";
-import { RV } from "../hooks/useRelativeValues";
 import { useViewContext } from "../ViewProvider";
+import { RVStorage } from "@/values/RVStorage";
 
 export const ForcePlot: FC<{
-  rv: RV;
+  rv: RVStorage;
 }> = ({ rv }) => {
-  const ref = useRef<SVGGElement>(null);
+  const ref = useRef<HTMLCanvasElement>(null);
 
   const {
     catalog: { items, clusters },
@@ -26,6 +26,7 @@ export const ForcePlot: FC<{
     x: number;
     y: number;
     clusterId?: string;
+    name: string;
   };
 
   const nodes: Node[] = useMemo(
@@ -35,13 +36,13 @@ export const ForcePlot: FC<{
         x: 100,
         y: 100,
         clusterId: item.clusterId,
+        name: item.name,
       })),
     [filteredItems]
   );
 
-  const width = 400;
-  const height = 400;
-  const margin = { top: 10, bottom: 40, left: 60, right: 20 };
+  const width = 480;
+  const height = 450;
 
   const d3ref =
     useRef<{
@@ -49,21 +50,14 @@ export const ForcePlot: FC<{
       force: d3.ForceLink<Node, d3.SimulationLinkDatum<Node>>;
     }>();
 
+  const cursorRef = useRef<[number, number]>([0, 0]);
+
   useEffect(() => {
-    if (!ref.current) {
-      return;
-    }
-
-    const svg = d3.select(ref.current);
-    svg.selectAll("*").remove();
-
-    svg
-      .append("g")
-      .attr("id", "circles")
-      .attr("stroke", "#fff")
-      .attr("stroke-width", 1.5);
-
     const simulation = d3.forceSimulation(nodes);
+
+    simulation.alphaTarget(0.5);
+
+    simulation.force("center", d3.forceCenter());
 
     const force = d3
       .forceLink<Node, d3.SimulationLinkDatum<Node>>()
@@ -73,48 +67,108 @@ export const ForcePlot: FC<{
           (d.target as Node).id
         );
         if (!relativeValueResult.ok) {
-          return 1e9; // ???
+          return 450; // 30 decibels; is this a good default?
         }
-        return relativeValueResult.value.db * 10;
+        return relativeValueResult.value.db * 15;
       });
 
     simulation.force("link", force);
+
+    simulation.force("weak", d3.forceManyBody().strength(1));
 
     d3ref.current = { force, simulation };
 
     return () => {
       simulation.stop();
     };
+  }, []);
+
+  useEffect(() => {
+    if (!ref.current) {
+      return;
+    }
+    const canvas = ref.current;
+
+    const context = canvas.getContext("2d");
+    if (!context) {
+      return;
+    }
+
+    const devicePixelRatio = window.devicePixelRatio || 1;
+
+    canvas.style.width = `${canvas.clientWidth}px`;
+    canvas.style.height = `${canvas.clientHeight}px`;
+    canvas.width = canvas.clientWidth * devicePixelRatio;
+    canvas.height = canvas.clientHeight * devicePixelRatio;
+
+    context.scale(devicePixelRatio, devicePixelRatio);
+
+    d3.select(context.canvas)
+      .on("touchmove", (event) => event.preventDefault())
+      .on("pointermove", (e) => {
+        cursorRef.current = d3.pointer(e);
+      });
   }, [ref.current]);
 
   useEffect(() => {
-    if (!d3ref.current) {
+    if (!d3ref.current || !ref.current) {
       return;
     }
-    const svg = d3.select(ref.current);
+    const context = ref.current.getContext("2d");
+    if (!context) {
+      return;
+    }
 
     const { simulation, force } = d3ref.current;
 
-    const node = svg
-      .select("#circles")
-      .selectAll("circle")
-      .data(nodes)
-      .join(
-        (enter) =>
-          enter
-            .append("circle")
-            .attr("r", 5)
-            .attr("fill", (d) =>
-              d.clusterId ? clusters[d.clusterId].color : "black"
-            ),
-        (update) =>
-          update.attr("fill", (d) =>
-            d.clusterId ? clusters[d.clusterId].color : "black"
-          )
-      );
+    const distance = (
+      p1: { x: number; y: number },
+      p2: { x: number; y: number }
+    ) => {
+      return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
+    };
 
     const ticked = () => {
-      node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
+      context.clearRect(0, 0, width, height);
+      context.save();
+
+      context.translate(width / 2, height / 2);
+      const r = 5;
+      const hoveredNodes: Node[] = [];
+      for (const d of nodes) {
+        context.beginPath();
+        context.moveTo(d.x + r, d.y);
+        context.arc(d.x, d.y, r, 0, 2 * Math.PI);
+
+        const isHovered =
+          distance(d, {
+            x: cursorRef.current[0] - width / 2,
+            y: cursorRef.current[1] - height / 2,
+          }) <
+          r * 1.5;
+
+        if (isHovered) {
+          hoveredNodes.push(d);
+        }
+        context.fillStyle =
+          d.clusterId && !isHovered ? clusters[d.clusterId].color : "black";
+        context.fill();
+      }
+
+      // In theory, ref could be deallocated while tick function is still active.
+      // Also, this satisfies Typescript.
+      if (ref.current) {
+        ref.current.style.cursor = hoveredNodes.length ? "pointer" : "auto";
+      }
+      for (const d of hoveredNodes) {
+        context.beginPath();
+        context.font = "12px sans-serif";
+        context.fillStyle = "black";
+        context.fillText(d.name, d.x - r * 0.8, d.y - r * 1.5);
+        context.fill();
+      }
+
+      context.restore();
     };
     simulation.on("tick", ticked);
 
@@ -132,12 +186,5 @@ export const ForcePlot: FC<{
     simulation.restart();
   }, [ref.current, d3ref.current, nodes]);
 
-  return (
-    <svg
-      width={width + margin.left + margin.right}
-      height={height + margin.top + margin.bottom}
-    >
-      <g transform={`translate(${margin.left},${margin.top})`} ref={ref} />
-    </svg>
-  );
+  return <canvas width={width} height={height} ref={ref} />;
 };
