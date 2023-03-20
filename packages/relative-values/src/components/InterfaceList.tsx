@@ -1,10 +1,6 @@
 import { allInterfaces } from "@/builtins";
 import { InterfaceWithModels } from "@/types";
 import { FC } from "react";
-import { Button } from "./ui/Button";
-import { Dropdown } from "./ui/Dropdown";
-import { DropdownButton } from "./ui/DropdownButton";
-import { FormHeader } from "./ui/FormHeader";
 import { StyledLink } from "./ui/StyledLink";
 
 const Count: FC<{ number: number; text: string }> = ({ number, text }) => (

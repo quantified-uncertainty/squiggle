@@ -1,47 +1,27 @@
-import { interfaceRoute, modelRoute } from "@/routes";
+import { useSelectedModel } from "@/app/interfaces/[id]/models/[modelId]/ModelProvider";
+import { modelRoute, newModelRoute } from "@/routes";
 import clsx from "clsx";
-import { useRouter } from "next/router";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FC } from "react";
 import { Dropdown } from "../ui/Dropdown";
-import {
-  useInterfaceContext,
-  useInterfaceDispatch,
-  useSelectedModel,
-} from "./InterfaceProvider";
+import { useInterfaceContext } from "./InterfaceProvider";
 
 const ModelPickerMenu: FC<{ close(): void }> = ({ close }) => {
-  const { currentModel, models, catalog } = useInterfaceContext();
-  const dispatch = useInterfaceDispatch();
+  const { models, catalog } = useInterfaceContext();
+  const { selectedId, selectedModel } = useSelectedModel();
 
-  const { pathname } = useRouter();
+  const router = useRouter();
 
   const pick = (id: string) => {
-    dispatch({
-      type: "selectModel",
-      payload: id,
-    });
-
-    if (pathname.startsWith("/interfaces")) {
-      window.history.replaceState(undefined, "", modelRoute(catalog.id, id));
-    }
-    close();
-  };
-
-  const create = () => {
-    dispatch({
-      type: "openNewModelForm",
-    });
-    if (pathname.startsWith("/interfaces")) {
-      window.history.replaceState(undefined, "", interfaceRoute(catalog.id));
-    }
+    router.push(modelRoute(catalog.id, id));
     close();
   };
 
   return (
     <div className="px-6 py-4 w-64">
       {[...models.entries()].map(([k, v]) => {
-        const isSelected =
-          currentModel.mode === "selected" && k === currentModel.id;
+        const isSelected = k === selectedId;
         return (
           <div
             key={k}
@@ -63,27 +43,30 @@ const ModelPickerMenu: FC<{ close(): void }> = ({ close }) => {
           </div>
         );
       })}
-      <div
-        className={clsx(
-          "text-sm cursor-pointer p-2 hover:bg-gray-100",
-          "text-blue-500"
-        )}
-        onClick={create}
-      >
-        Create new model
-      </div>
+      <Link href={newModelRoute(catalog.id)} onClick={close}>
+        <div
+          className={clsx(
+            "text-sm cursor-pointer p-2 hover:bg-gray-100",
+            "text-blue-500"
+          )}
+        >
+          Create new model
+        </div>
+      </Link>
     </div>
   );
 };
 
 export const ModelPicker: FC = () => {
-  const model = useSelectedModel();
+  const { selectedModel } = useSelectedModel();
 
   return (
     <Dropdown render={({ close }) => <ModelPickerMenu close={close} />}>
       <div className="border border-gray-200 p-2 rounded cursor-pointer">
-        {model ? (
-          <div className="text-gray-700 text-sm">Model by {model.author}</div>
+        {selectedModel ? (
+          <div className="text-gray-700 text-sm">
+            Model by {selectedModel.author}
+          </div>
         ) : (
           <div className="italic text-gray-500 text-sm">Pick a model</div>
         )}

@@ -1,3 +1,4 @@
+import { useSelectedModel } from "@/app/interfaces/[id]/models/[modelId]/ModelProvider";
 import { FC } from "react";
 import { ModelEditor } from "../ModelEditor";
 import { StyledTab } from "../ui/StyledTab";
@@ -6,78 +7,59 @@ import { useRelativeValues } from "../View/hooks";
 import { ListView } from "../View/ListView";
 import { PlotView } from "../View/PlotView";
 import { ViewProvider } from "../View/ViewProvider";
-import {
-  useInterfaceContext,
-  useInterfaceDispatch,
-  useSelectedModel,
-} from "./InterfaceProvider";
+import { useInterfaceContext, useInterfaceDispatch } from "./InterfaceProvider";
 import { ModelPicker } from "./ModelPicker";
-import { NewModelForm } from "./NewModelForm";
+
+const NotFound: FC<{ error: string }> = ({ error }) => (
+  <div className="text-red-500 p-4">{error}</div>
+);
 
 export const ModelSection: FC = () => {
-  const model = useSelectedModel();
+  const { selectedId: id, selectedModel: model } = useSelectedModel();
   const { error, rv } = useRelativeValues(model);
   const {
     catalog: { clusters },
-    currentModel,
   } = useInterfaceContext();
   const dispatch = useInterfaceDispatch();
 
-  switch (currentModel.mode) {
-    case "unselected":
-      return (
-        <div className="flex">
-          <ModelPicker />
-        </div>
-      );
-    case "new":
-      return (
-        <div className="flex flex-col gap-4 items-start">
-          <ModelPicker />
-          <div className="self-stretch">
-            <NewModelForm />
-          </div>
-        </div>
-      );
-    default:
-      return (
-        <ViewProvider initialClusters={clusters}>
-          <StyledTab.Group>
-            <div className="mb-4 flex items-center justify-between">
-              <div>
-                <ModelPicker />
-                {error && <pre className="text-red-700">{error}</pre>}
-              </div>
-              <StyledTab.List>
-                <StyledTab name="List" icon={() => <div />} />
-                <StyledTab name="Grid" icon={() => <div />} />
-                <StyledTab name="Plot" icon={() => <div />} />
-                <StyledTab name="Editor" icon={() => <div />} />
-              </StyledTab.List>
-            </div>
-            <StyledTab.Panels>
-              <StyledTab.Panel>
-                {rv ? <ListView rv={rv} /> : null}
-              </StyledTab.Panel>
-              <StyledTab.Panel>
-                {rv ? <GridView rv={rv} /> : null}
-              </StyledTab.Panel>
-              <StyledTab.Panel>
-                {rv ? <PlotView rv={rv} /> : null}
-              </StyledTab.Panel>
-              <StyledTab.Panel>
-                {model ? (
-                  <ModelEditor
-                    model={model}
-                    setModel={(newModel) =>
-                      dispatch({ type: "updateModel", payload: newModel })
-                    }
-                  />
-                ) : null}
-              </StyledTab.Panel>
-            </StyledTab.Panels>
-          </StyledTab.Group>
-        </ViewProvider>
-      );
+  if (!model || id === undefined) {
+    return <NotFound error="Model not found" />;
   }
+
+  return (
+    <ViewProvider initialClusters={clusters}>
+      <StyledTab.Group>
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <ModelPicker />
+            {error && <pre className="text-red-700">{error}</pre>}
+          </div>
+          <StyledTab.List>
+            <StyledTab name="List" />
+            <StyledTab name="Grid" />
+            <StyledTab name="Plot" />
+            <StyledTab name="Editor" />
+          </StyledTab.List>
+        </div>
+        <StyledTab.Panels>
+          <StyledTab.Panel>{rv ? <ListView rv={rv} /> : null}</StyledTab.Panel>
+          <StyledTab.Panel>{rv ? <GridView rv={rv} /> : null}</StyledTab.Panel>
+          <StyledTab.Panel>{rv ? <PlotView rv={rv} /> : null}</StyledTab.Panel>
+          <StyledTab.Panel>
+            {model ? (
+              <ModelEditor
+                model={model}
+                setModel={(newModel) =>
+                  dispatch({
+                    type: "updateModel",
+                    payload: { id, model: newModel },
+                  })
+                }
+              />
+            ) : null}
+          </StyledTab.Panel>
+        </StyledTab.Panels>
+      </StyledTab.Group>
+    </ViewProvider>
+  );
 };

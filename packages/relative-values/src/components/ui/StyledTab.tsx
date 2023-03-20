@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, { Fragment, PropsWithChildren } from "react";
 import { Tab } from "@headlessui/react";
 import clsx from "clsx";
 
@@ -6,11 +6,11 @@ import clsx from "clsx";
 
 type StyledTabProps = {
   name: string;
-  icon: (props: React.ComponentProps<"svg">) => JSX.Element;
+  icon?: (props: React.ComponentProps<"svg">) => JSX.Element;
 };
 
 type StyledTabType = React.FC<StyledTabProps> & {
-  List: React.FC<{ children: React.ReactNode }>;
+  List: React.FC<PropsWithChildren>;
   Group: typeof Tab.Group;
   Panels: typeof Tab.Panels;
   Panel: typeof Tab.Panel;
@@ -27,14 +27,16 @@ export const StyledTab: StyledTabType = ({ name, icon: Icon }) => {
               selected && "bg-white shadow-sm ring-1 ring-black ring-opacity-5"
             )}
           >
-            <Icon
-              className={clsx(
-                "-ml-0.5 mr-2 h-4 w-4",
-                selected
-                  ? "text-slate-500"
-                  : "text-gray-400 group-hover:text-gray-900"
-              )}
-            />
+            {Icon && (
+              <Icon
+                className={clsx(
+                  "-ml-0.5 mr-2 h-4 w-4",
+                  selected
+                    ? "text-slate-500"
+                    : "text-gray-400 group-hover:text-gray-900"
+                )}
+              />
+            )}
             <span
               className={clsx(
                 selected

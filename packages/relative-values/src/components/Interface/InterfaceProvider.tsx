@@ -4,19 +4,7 @@ import { FC, PropsWithChildren, Reducer, useMemo } from "react";
 import { generateProvider } from "../generateProvider";
 import { Map } from "immutable";
 
-export type InterfaceContextShape = InterfaceWithModels & {
-  currentModel:
-    | {
-        mode: "selected";
-        id: string;
-      }
-    | {
-        mode: "unselected";
-      }
-    | {
-        mode: "new";
-      };
-};
+export type InterfaceContextShape = InterfaceWithModels;
 
 const defaultValue: InterfaceContextShape = {
   models: Map([
@@ -35,18 +23,12 @@ const defaultValue: InterfaceContextShape = {
     items: [],
     clusters: {},
   },
-  currentModel: {
-    mode: "unselected",
-  },
 };
 
 type Action =
   | {
       type: "selectModel";
       payload: string;
-    }
-  | {
-      type: "openNewModelForm";
     }
   | {
       type: "createModel";
@@ -57,7 +39,10 @@ type Action =
     }
   | {
       type: "updateModel";
-      payload: Model;
+      payload: {
+        id: string;
+        model: Model;
+      };
     }
   | {
       type: "load";
@@ -66,16 +51,6 @@ type Action =
 
 const reducer: Reducer<InterfaceContextShape, Action> = (state, action) => {
   switch (action.type) {
-    case "selectModel":
-      return {
-        ...state,
-        currentModel: { mode: "selected", id: action.payload },
-      };
-    case "openNewModelForm":
-      return {
-        ...state,
-        currentModel: { mode: "new" },
-      };
     case "createModel":
       return {
         ...state,
@@ -86,21 +61,11 @@ const reducer: Reducer<InterfaceContextShape, Action> = (state, action) => {
             catalog: state.catalog,
           })
         ),
-        currentModel: { mode: "selected", id: action.payload.id },
       };
     case "updateModel":
       return {
         ...state,
-        models: state.models.mapEntries(([k, v]) => {
-          if (
-            state.currentModel.mode === "selected" &&
-            k === state.currentModel.id
-          ) {
-            return [k, action.payload];
-          } else {
-            return [k, v];
-          }
-        }),
+        models: state.models.set(action.payload.id, action.payload.model),
       };
     case "load":
       return action.payload;
@@ -117,18 +82,6 @@ const { useContext, useDispatch, Provider } = generateProvider({
 
 export const useInterfaceContext = useContext;
 export const useInterfaceDispatch = useDispatch;
-
-export const useSelectedModel = () => {
-  const { currentModel, models } = useInterfaceContext();
-  const model = useMemo(() => {
-    if (currentModel.mode !== "selected") {
-      return;
-    }
-    return models.get(currentModel.id);
-  }, [models, currentModel]);
-
-  return model;
-};
 
 export const InterfaceProvider: FC<
   PropsWithChildren<{ initialValue: InterfaceContextShape }>

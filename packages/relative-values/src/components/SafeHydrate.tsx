@@ -1,14 +1,10 @@
-import { useRouter } from "next/router";
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 
 export const SafeHydrate: FC<{ children: () => React.ReactNode }> = ({
   children,
 }) => {
-  const { isReady } = useRouter();
+  const [render, setRender] = useState(false);
 
-  return (
-    <div suppressHydrationWarning>
-      {typeof window === "undefined" || !isReady ? null : children()}
-    </div>
-  );
+  useEffect(() => setRender(true), []);
+  return <div suppressHydrationWarning>{render ? children() : null}</div>;
 };

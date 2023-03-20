@@ -1,3 +1,4 @@
+"use client";
 import { FC, PropsWithChildren } from "react";
 
 export const Tailwind: FC<PropsWithChildren> = ({ children }) => (

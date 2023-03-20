@@ -1,9 +1,8 @@
-import { Interface } from "@/components/Interface";
+"use client";
 import {
   InterfaceContextShape,
   InterfaceProvider,
 } from "@/components/Interface/InterfaceProvider";
-import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/Button";
 import { modelFromJSON } from "@/model/utils";
 import { Map } from "immutable";
@@ -20,7 +19,6 @@ const LoadJSONForm: FC<{
       if (parsed.models && parsed.catalog) {
         // TODO - better validation
         return {
-          currentModel: { mode: "unselected" }, // default
           ...parsed,
           models: Map(
             parsed.models.map(([k, v]: any) => [k, modelFromJSON(v)])
@@ -59,19 +57,15 @@ export default function ScratchpadPage() {
 
   if (data) {
     return (
-      <Layout>
-        <InterfaceProvider initialValue={data}>
-          <Interface />
-        </InterfaceProvider>
-      </Layout>
+      <InterfaceProvider initialValue={data}>
+        <div>TODO</div>
+      </InterfaceProvider>
     );
   } else {
     return (
-      <Layout>
-        <div className="max-w-4xl p-8 mx-auto">
-          <LoadJSONForm setValue={setData} />
-        </div>
-      </Layout>
+      <div className="max-w-4xl p-8 mx-auto">
+        <LoadJSONForm setValue={setData} />
+      </div>
     );
   }
 }
