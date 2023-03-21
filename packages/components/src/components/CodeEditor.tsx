@@ -84,7 +84,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({
           // crosshairCursor(),
           highlightSelectionMatches({
             wholeWords: true,
-            highlightWordAroundCursor: true,
+            highlightWordAroundCursor: false, // Works weird on fractions! 5.3e10K
           }),
           keymap.of([
             ...closeBracketsKeymap,
