@@ -31,15 +31,15 @@ const ModelPickerMenu: FC<{ close(): void }> = ({ close }) => {
             )}
             onClick={() => pick(k)}
           >
-            <span
+            <div
               className={clsx(
                 "font-bold font-mono text-xs",
                 isSelected || "text-gray-500"
               )}
             >
               {v.title}
-            </span>{" "}
-            <span className="font-bold">{v.author}</span>
+            </div>
+            <div className="font-bold">{v.author}</div>
           </div>
         );
       })}
