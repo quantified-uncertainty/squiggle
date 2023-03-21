@@ -176,6 +176,7 @@ export class ContinuousShape implements PointSet<ContinuousShape> {
     return new ContinuousShape({
       xyShape: fn(this.xyShape),
       interpolation: this.interpolation,
+      // FIXME - this seems wrong
       integralSumCache: this.integralSumCache,
       integralCache: this.integralCache,
     });

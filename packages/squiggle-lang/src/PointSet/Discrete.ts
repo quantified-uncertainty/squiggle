@@ -48,6 +48,7 @@ export class DiscreteShape implements PointSet<DiscreteShape> {
   shapeMap(fn: (shape: XYShape.XYShape) => XYShape.XYShape): DiscreteShape {
     return new DiscreteShape({
       xyShape: fn(this.xyShape),
+      // FIXME - this seems wrong
       integralSumCache: this.integralSumCache,
       integralCache: this.integralCache,
     });
