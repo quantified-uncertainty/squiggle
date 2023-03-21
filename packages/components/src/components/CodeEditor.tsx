@@ -152,6 +152,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({
             ...(width !== null ? { width: `${width}px` } : {}),
             ...(height !== null ? { height: `${height}px` } : {}),
           },
+          ".cm-selectionMatch": { backgroundColor: "#33ae661a" },
         })
       ),
     });
