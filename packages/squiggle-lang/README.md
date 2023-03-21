@@ -51,7 +51,7 @@ yarn start  # listens to files and recompiles at every mutation
 yarn test
 
 # where o := open in osx and o := xdg-open in linux,
-yarn coverage:rescript; o _coverage/index.html  # produces coverage report and opens it in browser
+yarn coverage:local; o _coverage/lcov-report/index.html  # produces coverage report and opens it in browser
 ```
 
 # Distributing this package or using this package from other monorepo packages
