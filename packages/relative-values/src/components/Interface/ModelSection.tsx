@@ -9,6 +9,7 @@ import { PlotView } from "../View/PlotView";
 import { ViewProvider } from "../View/ViewProvider";
 import { useInterfaceContext, useInterfaceDispatch } from "./InterfaceProvider";
 import { ModelPicker } from "./ModelPicker";
+import { ChipIcon } from "@/components/ui/icons/ChipIcon";
 
 const NotFound: FC<{ error: string }> = ({ error }) => (
   <div className="text-red-500 p-4">{error}</div>
@@ -29,10 +30,24 @@ export const ModelSection: FC = () => {
   return (
     <ViewProvider initialClusters={clusters}>
       <StyledTab.Group>
-        <div className="mb-4 flex items-center justify-between">
-          <div>
-            <ModelPicker />
-            {error && <pre className="text-red-700">{error}</pre>}
+        <div className="mb-8 flex items-center justify-between max-w-6xl mx-auto">
+          <div className="flex">
+            <div>
+              {model ? (
+                <div className="px-3 py-1 bg-emerald-50 text-emerald-900 rounded-sm hover:bg-emerald-300 text-lg font-semibold flex">
+                  <span className="pt-1 pr-2">
+                    <ChipIcon className="fill-emerald-600" />
+                  </span>
+                  <span>{model.title}</span>
+                </div>
+              ) : (
+                ""
+              )}
+            </div>
+            <div>
+              <ModelPicker />
+              {error && <pre className="text-red-700">{error}</pre>}
+            </div>
           </div>
           <StyledTab.List>
             <StyledTab name="List" />

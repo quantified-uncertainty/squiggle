@@ -10,7 +10,7 @@ export const PlotView: FC<{
   rv: RVStorage;
 }> = ({ rv }) => {
   return (
-    <div className="flex gap-8">
+    <div className="flex gap-8 max-w-6xl mx-auto">
       <div>
         <StyledTab.Group>
           <StyledTab.List>

@@ -82,6 +82,9 @@ function getCatalog(): Catalog {
     id: "quri",
     title: "QURI projects",
     items,
+    description: "Key QURI Items. Only large ones are captured. Value is defined as what Ozzie thinks it should be.",
+    author: "Ozzie Gooen",
+    created: new Date("2022-03-12"),
     clusters: {
       papers: {
         name: "Papers",

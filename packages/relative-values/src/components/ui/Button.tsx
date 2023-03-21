@@ -8,8 +8,8 @@ export const Button = forwardRef<
   return (
     <button
       className={clsx(
-        "bg-gray-100 border border-gray-300 shadow rounded px-4 py-1 text-sm font-medium",
-        props.disabled ? "opacity-50" : "hover:bg-gray-200",
+        "bg-slate-100 border border-slate-300 rounded px-4 py-1 text-sm font-medium",
+        props.disabled ? "opacity-50" : "hover:bg-slate-200",
         className
       )}
       ref={ref}

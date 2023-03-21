@@ -55,11 +55,9 @@ const CatalogItems: FC = () => {
 
 export const Catalog: FC = () => {
   return (
-    <div>
-      <div className="mt-4">
-        <header className="text-xl font-bold mb-4">Items</header>
-        <CatalogItems />
-      </div>
+    <div className="mt-4 max-w-6xl mx-auto">
+      <header className="text-xl font-bold mb-4 ">Items</header>
+      <CatalogItems />
     </div>
   );
 };
