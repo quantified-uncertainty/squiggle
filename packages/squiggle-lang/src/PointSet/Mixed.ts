@@ -12,8 +12,10 @@ import { ConvolutionOperation, PointSet } from "./PointSet";
 export class MixedShape implements PointSet<MixedShape> {
   readonly continuous: ContinuousShape;
   readonly discrete: DiscreteShape;
-  readonly integralSumCache?: number;
-  readonly integralCache?: ContinuousShape;
+
+  // readonly for external functions through accessor fields
+  private _integralSumCache?: number;
+  private _integralCache?: ContinuousShape;
 
   constructor(args: {
     continuous: ContinuousShape;
@@ -23,8 +25,24 @@ export class MixedShape implements PointSet<MixedShape> {
   }) {
     this.continuous = args.continuous;
     this.discrete = args.discrete;
-    this.integralSumCache = args.integralSumCache;
-    this.integralCache = args.integralCache;
+    this._integralSumCache = args.integralSumCache;
+    this._integralCache = args.integralCache;
+  }
+
+  get integralCache() {
+    return this._integralCache;
+  }
+  get integralSumCache() {
+    return this._integralSumCache;
+  }
+
+  withIntegralSum(integralSumCache: number): MixedShape {
+    return new MixedShape({
+      continuous: this.continuous,
+      discrete: this.discrete,
+      integralSumCache,
+      integralCache: this.integralCache,
+    });
   }
 
   minX() {
@@ -44,15 +62,6 @@ export class MixedShape implements PointSet<MixedShape> {
     return this;
   }
 
-  updateIntegralCache(integralCache: ContinuousShape | undefined): MixedShape {
-    return new MixedShape({
-      continuous: this.continuous,
-      discrete: this.discrete,
-      integralSumCache: this.integralSumCache,
-      integralCache,
-    });
-  }
-
   truncate(leftCutoff: number | undefined, rightCutoff: number | undefined) {
     return new MixedShape({
       continuous: this.continuous.truncate(leftCutoff, rightCutoff),
@@ -61,24 +70,20 @@ export class MixedShape implements PointSet<MixedShape> {
   }
 
   normalize() {
-    const continuousIntegral = this.continuous.integral();
-    const discreteIntegral = this.discrete.integral();
-    const continuous = this.continuous.updateIntegralCache(continuousIntegral);
-    const discrete = this.discrete.updateIntegralCache(discreteIntegral);
-
-    const continuousIntegralSum = continuous.integralSum();
-    const discreteIntegralSum = discrete.integralSum();
+    const continuousIntegralSum = this.continuous.integralSum();
+    const discreteIntegralSum = this.discrete.integralSum();
 
     const totalIntegralSum = continuousIntegralSum + discreteIntegralSum;
     const newContinuousSum = continuousIntegralSum / totalIntegralSum;
     const newDiscreteSum = discreteIntegralSum / totalIntegralSum;
 
-    const normalizedContinuous = continuous
+    const normalizedContinuous = this.continuous
       .scaleBy(newContinuousSum / continuousIntegralSum)
-      .updateIntegralSumCache(newContinuousSum);
-    const normalizedDiscrete = discrete
+      .withIntegralSum(newContinuousSum);
+
+    const normalizedDiscrete = this.discrete
       .scaleBy(newDiscreteSum / discreteIntegralSum)
-      .updateIntegralSumCache(newDiscreteSum);
+      .withIntegralSum(newDiscreteSum);
 
     return new MixedShape({
       continuous: normalizedContinuous,
@@ -123,24 +128,24 @@ export class MixedShape implements PointSet<MixedShape> {
   }
 
   integral() {
-    if (this.integralCache) {
-      return this.integralCache;
+    if (!this._integralCache) {
+      // note: if the underlying shapes aren't normalized, then these integrals won't be either -- but that's the way it should be.
+      const continuousIntegral = this.continuous.integral();
+      const discreteIntegral = Continuous.stepwiseToLinear(
+        this.discrete.integral()
+      );
+      this._integralCache = new ContinuousShape({
+        xyShape: XYShape.PointwiseCombination.addCombine(
+          XYShape.XtoY.continuousInterpolator("Linear", "UseOutermostPoints"),
+          continuousIntegral.xyShape,
+          discreteIntegral.xyShape
+        ),
+      });
     }
-    // note: if the underlying shapes aren't normalized, then these integrals won't be either -- but that's the way it should be.
-    const continuousIntegral = this.continuous.integral();
-    const discreteIntegral = Continuous.stepwiseToLinear(
-      this.discrete.integral()
-    );
-    return new ContinuousShape({
-      xyShape: XYShape.PointwiseCombination.addCombine(
-        XYShape.XtoY.continuousInterpolator("Linear", "UseOutermostPoints"),
-        continuousIntegral.xyShape,
-        discreteIntegral.xyShape
-      ),
-    });
+    return this._integralCache;
   }
   integralSum() {
-    return this.integral().lastY();
+    return (this._integralSumCache ??= this.integral().lastY());
   }
   integralXtoY(f: number) {
     return XYShape.XtoY.linear(this.integral().xyShape, f);
@@ -148,6 +153,7 @@ export class MixedShape implements PointSet<MixedShape> {
   integralYtoX(f: number) {
     return XYShape.YtoX.linear(this.integral().xyShape, f);
   }
+
   // This pipes all ys (continuous and discrete) through fn.
   // If mapY is a linear operation, we might be able to update the integralSumCaches as well;
   // if not, they'll be set to None.

@@ -45,12 +45,9 @@ export class PointSetDist<
     return this.samplePointSet(this.pointSet);
   }
   sampleN(n: number) {
-    const integralCache = this.pointSet.integral();
-    const distWithUpdatedIntegralCache =
-      this.pointSet.updateIntegralCache(integralCache);
     const items: number[] = new Array(n).fill(0);
     for (let i = 0; i <= n - 1; i++) {
-      items[i] = this.samplePointSet(distWithUpdatedIntegralCache);
+      items[i] = this.samplePointSet(this.pointSet);
     }
     return items;
   }
