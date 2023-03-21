@@ -107,7 +107,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({
   );
 
   useEffect(() => {
-    if (editor.current != null && state != null) {
+    if (editor.current) {
       const view = new EditorView({ state, parent: editor.current });
       editorView.current = view;
 
