@@ -66,7 +66,8 @@ export const CodeEditor: FC<CodeEditorProps> = ({
 }) => {
   const editor = useRef<HTMLDivElement>(null);
   const editorView = useRef<EditorView | null>(null);
-  const languageSupport = useMemo(squiggle(project), [project]);
+  const languageSupport = squiggle();
+
   const state = useMemo(
     () =>
       EditorState.create({
@@ -86,7 +87,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({
           // crosshairCursor(),
           highlightSelectionMatches({
             wholeWords: true,
-            highlightWordAroundCursor: false, // Weird on numbers
+            highlightWordAroundCursor: false, // Works weird on fractions! 5.3e10K
           }),
           keymap.of([
             ...closeBracketsKeymap,
@@ -109,7 +110,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({
   );
 
   useEffect(() => {
-    if (editor.current != null && state != null) {
+    if (editor.current) {
       const view = new EditorView({ state, parent: editor.current });
       editorView.current = view;
 
@@ -154,6 +155,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({
             ...(width !== null ? { width: `${width}px` } : {}),
             ...(height !== null ? { height: `${height}px` } : {}),
           },
+          ".cm-selectionMatch": { backgroundColor: "#33ae661a" },
         })
       ),
     });

@@ -109,6 +109,18 @@ export const library = [
     ],
   }),
   maker.make({
+    name: "concat",
+    requiresNamespace: true,
+    examples: [`List.concat([1,2,3], [4, 5, 6])`],
+    definitions: [
+      makeDefinition<Value[], Value[]>(
+        "concat",
+        [frArray(frAny), frArray(frAny)],
+        ([array1, array2]) => Ok(vArray([...array1].concat(array2)))
+      ),
+    ],
+  }),
+  maker.make({
     name: "reduce",
     requiresNamespace: false,
     examples: [`List.reduce([1,4,5], 2, {|acc, el| acc+el})`],
