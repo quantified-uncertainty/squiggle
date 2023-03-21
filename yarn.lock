@@ -18356,7 +18356,6 @@ vega-embed@^6.21.3, vega-embed@^6.5.1:
     vega-schema-url-parser "^2.2.0"
     vega-themes "^2.12.1"
     vega-tooltip "^0.30.1"
-    yallist "*"
 
 vega-encode@~4.9.0:
   version "4.9.0"
