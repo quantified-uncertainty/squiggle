@@ -48,7 +48,7 @@ export abstract class SymbolicDist extends BaseDist {
   normalize() {
     return this;
   }
-  integralEndY() {
+  integralSum() {
     return 1;
   }
 
@@ -552,7 +552,12 @@ export class Lognormal extends SymbolicDist {
     return jstat.lognormal.mean(this.mu, this.sigma);
   }
   stdev(): Result.result<number, DistError> {
-    return Ok(Math.sqrt((Math.exp(this.sigma * this.sigma) - 1) * Math.exp(2 * this.mu + this.sigma * this.sigma)));
+    return Ok(
+      Math.sqrt(
+        (Math.exp(this.sigma * this.sigma) - 1) *
+          Math.exp(2 * this.mu + this.sigma * this.sigma)
+      )
+    );
   }
 
   static from90PercentCI(low: number, high: number) {

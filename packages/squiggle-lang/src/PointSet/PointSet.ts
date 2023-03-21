@@ -51,7 +51,7 @@ export interface PointSet<T> {
   updateIntegralCache(cache: ContinuousShape | undefined): T;
 
   integral(): ContinuousShape;
-  integralEndY(): number;
+  integralSum(): number;
   integralXtoY(x: number): number;
   integralYtoX(y: number): number;
 

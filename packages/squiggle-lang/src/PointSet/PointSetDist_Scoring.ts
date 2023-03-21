@@ -56,7 +56,7 @@ export const WithDistAnswer = {
     const combineAndIntegrate = (estimate: AnyPointSet, answer: AnyPointSet) =>
       Result.fmap(
         combinePointwise(estimate, answer, WithDistAnswer.integrand),
-        (t) => t.integralEndY()
+        (t) => t.integralSum()
       );
 
     const getMixedSums = (

@@ -183,7 +183,7 @@ export class ContinuousShape implements PointSet<ContinuousShape> {
     );
   }
 
-  integralEndY() {
+  integralSum() {
     return this.integralSumCache ?? this.integral().lastY();
   }
 
@@ -218,7 +218,7 @@ export class ContinuousShape implements PointSet<ContinuousShape> {
 
   normalize() {
     return this.updateIntegralCache(this.integral())
-      .scaleBy(1 / this.integralEndY())
+      .scaleBy(1 / this.integralSum())
       .updateIntegralSumCache(1);
   }
 

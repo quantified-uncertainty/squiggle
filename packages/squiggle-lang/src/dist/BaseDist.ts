@@ -15,7 +15,7 @@ export abstract class BaseDist {
 
   abstract normalize(): BaseDist;
   isNormalized(): boolean {
-    return Math.abs(this.integralEndY() - 1) < 1e-7;
+    return Math.abs(this.integralSum() - 1) < 1e-7;
   }
 
   abstract truncate(
@@ -24,7 +24,7 @@ export abstract class BaseDist {
     opts?: { env: Env } // needed for SymbolicDists
   ): result<BaseDist, DistError>;
 
-  abstract integralEndY(): number;
+  abstract integralSum(): number;
 
   abstract pdf(x: number, opts: { env: Env }): result<number, DistError>;
   abstract cdf(x: number): number;

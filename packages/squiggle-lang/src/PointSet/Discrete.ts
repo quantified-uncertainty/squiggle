@@ -62,7 +62,7 @@ export class DiscreteShape implements PointSet<DiscreteShape> {
     });
   }
 
-  integralEndY() {
+  integralSum() {
     return this.integralSumCache ?? this.integral().lastY();
   }
 
@@ -166,7 +166,7 @@ export class DiscreteShape implements PointSet<DiscreteShape> {
   }
 
   normalize() {
-    return this.scaleBy(1 / this.integralEndY()).updateIntegralSumCache(1);
+    return this.scaleBy(1 / this.integralSum()).updateIntegralSumCache(1);
   }
 
   downsample(i: number) {

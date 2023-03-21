@@ -72,8 +72,8 @@ export class PointSetDist<
     return new PointSetDist(this.pointSet.normalize());
   }
 
-  integralEndY() {
-    return this.pointSet.integralEndY();
+  integralSum() {
+    return this.pointSet.integralSum();
   }
 
   pdf(f: number): Result.result<number, DistError> {

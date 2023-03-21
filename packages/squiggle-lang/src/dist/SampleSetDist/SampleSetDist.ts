@@ -68,7 +68,7 @@ export class SampleSetDist extends BaseDist {
     return SampleSetDist.make(d.sampleN(env.sampleCount));
   }
 
-  integralEndY() {
+  integralSum() {
     // sampleset is always normalized
     return 1;
   }

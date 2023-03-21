@@ -66,8 +66,8 @@ export class MixedShape implements PointSet<MixedShape> {
     const continuous = this.continuous.updateIntegralCache(continuousIntegral);
     const discrete = this.discrete.updateIntegralCache(discreteIntegral);
 
-    const continuousIntegralSum = continuous.integralEndY();
-    const discreteIntegralSum = discrete.integralEndY();
+    const continuousIntegralSum = continuous.integralSum();
+    const discreteIntegralSum = discrete.integralSum();
 
     const totalIntegralSum = continuousIntegralSum + discreteIntegralSum;
     const newContinuousSum = continuousIntegralSum / totalIntegralSum;
@@ -96,16 +96,16 @@ export class MixedShape implements PointSet<MixedShape> {
     return MixedPoint.add(c, d); // "add" here just combines the two values into a single MixedPoint.
   }
   toDiscreteProbabilityMassFraction() {
-    const discreteIntegralSum = this.discrete.integralEndY();
-    const continuousIntegralSum = this.continuous.integralEndY();
+    const discreteIntegralSum = this.discrete.integralSum();
+    const continuousIntegralSum = this.continuous.integralSum();
     const totalIntegralSum = discreteIntegralSum + continuousIntegralSum;
     return discreteIntegralSum / totalIntegralSum;
   }
   downsample(count: number) {
     // We will need to distribute the new xs fairly between the discrete and continuous shapes.
     // The easiest way to do this is to simply go by the previous probability masses.
-    const discreteIntegralSum = this.discrete.integralEndY();
-    const continuousIntegralSum = this.continuous.integralEndY();
+    const discreteIntegralSum = this.discrete.integralSum();
+    const continuousIntegralSum = this.continuous.integralSum();
     const totalIntegralSum = discreteIntegralSum + continuousIntegralSum;
     // TODO: figure out what to do when the totalIntegralSum is zero.
     const downsampledDiscrete = this.discrete.downsample(
@@ -139,7 +139,7 @@ export class MixedShape implements PointSet<MixedShape> {
       ),
     });
   }
-  integralEndY() {
+  integralSum() {
     return this.integral().lastY();
   }
   integralXtoY(f: number) {
@@ -226,12 +226,12 @@ export class MixedShape implements PointSet<MixedShape> {
     const discreteMean = this.discrete.mean();
     const continuousMean = this.continuous.mean();
     // means are already weighted by subshape probabilities
-    return (discreteMean + continuousMean) / this.integralEndY();
+    return (discreteMean + continuousMean) / this.integralSum();
   }
   variance(): number {
     // the combined mean is the weighted sum of the two:
-    const discreteIntegralSum = this.discrete.integralEndY();
-    const continuousIntegralSum = this.continuous.integralEndY();
+    const discreteIntegralSum = this.discrete.integralSum();
+    const continuousIntegralSum = this.continuous.integralSum();
     const totalIntegralSum = discreteIntegralSum + continuousIntegralSum;
     const getMeanOfSquares = ({ discrete, continuous }: MixedShape) => {
       const discreteMean = discrete.shapeMap(XYShape.T.square).mean();
