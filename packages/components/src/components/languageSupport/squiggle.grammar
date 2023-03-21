@@ -1,0 +1,136 @@
+
+@precedence {
+    func @cut,
+    deref,
+    call,
+    unary @right,
+    exp @right,
+    times @left,
+    plus @left,
+    rel @left,
+    and @left,
+    or @left,
+    control @right,
+    else @right,
+    logop @right
+}
+
+@top Program {
+    (NonEmptyProgram)?
+}
+
+
+NonEmptyProgram {
+    (expression | (
+        (     Binding
+            | FunDeclaration
+            | semicolon)
+        )*
+        (expression)
+    ) 
+}
+
+// Statement {
+//     expression
+// }
+
+commaSep<content> {
+    () | content ("," content)*
+}
+
+Binding { VariableName { identifier } "=" expression }
+
+LambdaArgs {
+    () | LambdaParameter { identifier } ("," LambdaParameter { identifier })*
+}
+
+FunDeclaration { FunctionName[@dynamicPrecedence=0] { identifier }  ~fieldAmbig "(" LambdaArgs ")" "=" expression }
+
+AccessIdentifier {
+    Field { identifier } (!deref "." Field { identifier })*
+}
+
+expression[@isGroup="Expression"] {
+    String
+    | Boolean
+    | Number
+    | BlockExpr { "{" NonEmptyProgram "}" }
+    | RecordExpr { "{" commaSep<Entry { Field {identifier | String} ":" expression }> "}" }
+    | LambdaExpr { "{" "|" LambdaArgs "|" NonEmptyProgram "}" }
+    | IfExpr { if expression then expression !else else expression }
+    | ParenExpr { "(" expression ")" }
+    | AccessExpr[@dynamicPrecedence=1] { AccessIdentifier ~fieldAmbig }
+    | CallExpr { expression !call ("(" commaSep<Argument { expression }> ")"| "()") }
+    | TernaryExpr { expression !logop LogicOp<"?"> expression LogicOp<":"> expression }
+    | KVAccessExpr { expression !call ("[" Key { expression } "]") }
+    | ArrayExpr { "[" commaSep<expression> "]" }
+    | Void { !deref "()" }
+    | UnaryExpr { !unary (ArithOp<"-"> | ArithOp<"!"> | DotArithOp<".-">) expression }
+    | LogicExpr {
+          expression !or     LogicOp<"||">  expression
+        | expression !and    LogicOp<"&&">  expression
+        | expression !rel    LogicOp<">">   expression
+        | expression !rel    LogicOp<"<">   expression
+        | expression !rel    LogicOp<"<=">  expression
+        | expression !rel    LogicOp<">=">  expression
+        | expression !rel    LogicOp<"==">  expression
+    }
+    | ControlExpr {
+          expression !control  ControlOp<"|>">  expression
+    }
+    | ArithExpr {
+          expression !times  ( ArithOp<"*"> | DotArithOp<".*"> )                expression
+        | expression !times  ( ArithOp<"/"> | DotArithOp<"./"> )                expression
+        | expression !exp    ( ArithOp<"^"> | DotArithOp<".^"> )                expression
+        | expression !plus   ( ArithOp<"+"> | DotArithOp<".+"> )                expression
+        | expression !plus   ( ArithOp<"-"> | DotArithOp<".-"> )                expression
+        | expression !plus     @extend[@name="ArithOp"]<identifier, "to">       expression
+    }
+}
+
+
+
+Boolean { @specialize[@name="Boolean"]<identifier, "true" | "false"> }
+
+kw<term> { @specialize[@name={term}]<identifier, term> }
+if { kw<"if"> }
+then { kw<"then"> }
+else { kw<"else"> }
+@skip { spaces | newline | Comment | BlockComment }
+
+@local tokens {
+    blockCommentEnd { "*/" }
+    blockCommentNewline { "\n" }
+    @else blockCommentContent
+}
+@skip {} {
+    BlockComment[@name="Comment"] { '/*' (blockCommentContent | blockCommentNewline)* blockCommentEnd }
+}
+
+@tokens {
+
+    Comment { ( "#" | "//" ) ![\n]* }
+    spaces[@export] { $[ ]+ }
+    newline[@export] { $[\n] }
+    semicolon[@export] { $[;] }
+
+    String { '"' ![\"]* '"' | "'" ![\']* "'" }
+    "{" "}" "(" ")" "," "." "="[@name="Equals"]
+
+    ArithOp<expr> { expr }
+    DotArithOp[@name="ArithOp"]<expr> { expr }
+    ControlOp<expr> { expr }
+    LogicOp<expr> { expr }
+
+    identifierChar { @asciiLetter | $[_$\u{a1}-\u{10ffff}] }
+    word { identifierChar (identifierChar | @digit)* }
+    identifier { word }
+
+    Number {
+        (@digit (@digit)* ("." (@digit)*)? | "." (@digit)*) (("e" | "E") ("+" | "-")? (@digit)+)? (identifier)?
+    }
+    
+    @precedence { DotArithOp "." Number }
+    @precedence { Comment '/*' ArithOp  }
+
+}
