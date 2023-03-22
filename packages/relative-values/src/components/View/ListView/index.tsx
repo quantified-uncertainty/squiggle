@@ -38,7 +38,7 @@ export const ListView: FC<Props> = ({ rv }) => {
   });
 
   return (
-    <div>
+    <div className="max-w-6xl mx-auto">
       <div className="mb-2">
         <DropdownButton text="Table Settings">
           {() => <AxisMenu axis="rows" />}
@@ -61,7 +61,7 @@ export const ListView: FC<Props> = ({ rv }) => {
           <div className="p-1 pt-2 text-sm font-semibold text-slate-600">Cluster</div>
         </CellBox>
         <CellBox header>
-          <div className="p-1 pt-2 text-sm font-semibold text-slate-600">Average Value</div>
+          <div className="p-1 pt-2 text-sm font-semibold text-slate-600">Average Median Value</div>
         </CellBox>
         <CellBox header>
           <div className="p-1 pt-2 text-sm font-semibold text-slate-600">Average Uncertainty (db)</div>

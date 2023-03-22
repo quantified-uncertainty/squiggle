@@ -65,10 +65,10 @@ export const ModelPicker: FC = () => {
       <div className="border border-gray-200 p-2 rounded cursor-pointer">
         {selectedModel ? (
           <div className="text-gray-700 text-sm">
-            Model by {selectedModel.author}
+            Unselect
           </div>
         ) : (
-          <div className="italic text-gray-500 text-sm">Pick a model</div>
+          <div className="italic text-gray-500 text-sm">Pick an estimate</div>
         )}
       </div>
     </Dropdown>

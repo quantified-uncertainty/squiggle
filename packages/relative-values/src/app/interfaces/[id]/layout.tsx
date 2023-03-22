@@ -40,34 +40,37 @@ export default function InterfaceLayout({
     }
   };
 
+  const keyValue = (title: String, body: String) => {
+    return (
+      <div>
+        <span className="font-semibold">{title}: </span>
+        <span className="font-normal">{body}</span>
+      </div>
+    );
+  };
+
   return (
     <InterfaceProvider initialValue={interfaceWithModels}>
       <div className="bg-blue-100 py-8 px-4">
         <div className="flex justify-between items-start max-w-6xl mx-auto">
           <div>
-            <header className="text-2xl font-bold mb-4">{catalog.title}</header>
-            <div className="text-sm text-gray-600 space-y-1">
-              {catalog.author && (
-                <p className="font-semibold">
-                  Author: <span className="font-normal">{catalog.author}</span>
-                </p>
-              )}
-              {catalog.created && (
-                <p className="font-semibold">
-                  Date of Creation:{" "}
-                  <span className="font-normal">
-                    {displayDate(catalog.created)}
-                  </span>
-                </p>
-              )}
-              <p>
+            <header className="text-2xl font-bold mb-2">{catalog.title}</header>
+            <div className="text-sm text-gray-700 flex space-x-8">
+              {catalog.author && keyValue("Author", catalog.author)}
+              {catalog.created && keyValue("Created", displayDate(catalog.created))}
+              <div>
                 <span className="font-semibold">{catalog.items.length}</span>{" "}
                 items
-              </p>
-              <p>
-                <span className="font-semibold">{models.size}</span> models
-              </p>
+              </div>
+              <div>
+                <span className="font-semibold">{models.size}</span> estimates
+              </div>
             </div>
+            {catalog.description && (
+              <div className="text-sm text-gray-500 pt-1">
+                {catalog.description}
+              </div>
+            )}
           </div>
           <div className="flex flex-col items-end space-y-4">
             <StyledTab.Group
