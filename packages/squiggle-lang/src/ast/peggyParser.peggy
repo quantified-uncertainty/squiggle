@@ -59,7 +59,7 @@ array_parameters
   = head:dollarIdentifier tail:(_ ',' _nl @dollarIdentifier)*
     { return [head, ...tail]; }
   / ""
-    { return [h.nodeIdentifier("_", location())]; }
+    { return []; }
 
 expression = ifthenelse / ternary / logicalAdditive
 
@@ -152,9 +152,6 @@ chainFunctionCall
 
   callableBasicValue = staticCollectionElement / valueConstructor / variable
 
-// type: 'Call', fn: { type: 'Lambda', ... }, args:
-// type: 'Call', fn: { type: 'Identifier', value:  }, args:
-
 // end of binary operators
 
 unary
@@ -194,7 +191,7 @@ collectionElement
       = head:expression tail:(_ ',' _nl @expression)*
       { return [head, ...tail]; }
   / ""
-      {return [h.nodeVoid(location())];}
+      {return [];}
 
 atom
   = '(' _nl expression:expression _nl ')' {return expression}
