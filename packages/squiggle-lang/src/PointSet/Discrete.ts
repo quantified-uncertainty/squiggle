@@ -71,10 +71,13 @@ export class DiscreteShape implements PointSet<DiscreteShape> {
           (a, b) => a + b
         );
 
-        this._integralCache = new ContinuousShape({
-          xyShape: integralShape,
-          interpolation: "Stepwise",
-        });
+        // integralYtoX is broken because XYShape.YtoX.stepwise is not implemented, so we have to store integral as linear for now
+        this._integralCache = Continuous.stepwiseToLinear(
+          new ContinuousShape({
+            xyShape: integralShape,
+            interpolation: "Stepwise",
+          })
+        );
       }
     }
     return this._integralCache;
