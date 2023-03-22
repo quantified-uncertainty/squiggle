@@ -53,7 +53,7 @@ export interface PointSet<T> {
   integralXtoY(x: number): number;
   integralYtoX(y: number): number;
 
-  withIntegralSum(sum: number): T; // force a given sum (useful for normalization)
+  withAdjustedIntegralSum(sum: number): T; // force a given sum (useful for normalization)
 
   mean(): number;
   variance(): number;

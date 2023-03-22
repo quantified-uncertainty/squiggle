@@ -36,7 +36,7 @@ export class ContinuousShape implements PointSet<ContinuousShape> {
     return this._integralSumCache;
   }
 
-  withIntegralSum(integralSumCache: number): ContinuousShape {
+  withAdjustedIntegralSum(integralSumCache: number): ContinuousShape {
     return new ContinuousShape({
       xyShape: this.xyShape,
       interpolation: this.interpolation,
@@ -216,7 +216,7 @@ export class ContinuousShape implements PointSet<ContinuousShape> {
   }
 
   normalize() {
-    return this.scaleBy(1 / this.integralSum()).withIntegralSum(1);
+    return this.scaleBy(1 / this.integralSum()).withAdjustedIntegralSum(1);
   }
 
   mean() {

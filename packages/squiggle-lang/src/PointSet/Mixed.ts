@@ -36,7 +36,7 @@ export class MixedShape implements PointSet<MixedShape> {
     return this._integralSumCache;
   }
 
-  withIntegralSum(integralSumCache: number): MixedShape {
+  withAdjustedIntegralSum(integralSumCache: number): MixedShape {
     return new MixedShape({
       continuous: this.continuous,
       discrete: this.discrete,
@@ -79,11 +79,11 @@ export class MixedShape implements PointSet<MixedShape> {
 
     const normalizedContinuous = this.continuous
       .scaleBy(newContinuousSum / continuousIntegralSum)
-      .withIntegralSum(newContinuousSum);
+      .withAdjustedIntegralSum(newContinuousSum);
 
     const normalizedDiscrete = this.discrete
       .scaleBy(newDiscreteSum / discreteIntegralSum)
-      .withIntegralSum(newDiscreteSum);
+      .withAdjustedIntegralSum(newDiscreteSum);
 
     return new MixedShape({
       continuous: normalizedContinuous,

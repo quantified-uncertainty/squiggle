@@ -37,7 +37,7 @@ export class DiscreteShape implements PointSet<DiscreteShape> {
     return this._integralSumCache;
   }
 
-  withIntegralSum(integralSumCache: number): DiscreteShape {
+  withAdjustedIntegralSum(integralSumCache: number): DiscreteShape {
     return new DiscreteShape({
       xyShape: this.xyShape,
       integralSumCache,
@@ -176,7 +176,7 @@ export class DiscreteShape implements PointSet<DiscreteShape> {
   }
 
   normalize() {
-    return this.scaleBy(1 / this.integralSum()).withIntegralSum(1);
+    return this.scaleBy(1 / this.integralSum()).withAdjustedIntegralSum(1);
   }
 
   downsample(i: number) {
