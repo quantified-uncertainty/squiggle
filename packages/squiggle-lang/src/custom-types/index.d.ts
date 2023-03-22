@@ -21,6 +21,7 @@ declare module "jstat" {
     export function inv(x: number, rate: number): number;
     export function sample(rate: number): number;
     export function mean(rate: number): number;
+    export function variance(rate: number): number;
   }
 
   export namespace triangular {
@@ -44,6 +45,7 @@ declare module "jstat" {
     ): number;
     export function sample(low: number, high: number, medium: number): number;
     export function mean(low: number, high: number, medium: number): number;
+    export function variance(low: number, high: number, medium: number): number;
   }
 
   export namespace beta {
@@ -52,6 +54,7 @@ declare module "jstat" {
     export function inv(x: number, alpha: number, beta: number): number;
     export function sample(alpha: number, beta: number): number;
     export function mean(alpha: number, beta: number): number;
+    export function variance(alpha: number, beta: number): number;
   }
 
   export namespace uniform {

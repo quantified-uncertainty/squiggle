@@ -12,7 +12,7 @@ import { BaseDist } from "../../../src/dist/BaseDist";
 import {
   env,
   mkBeta,
-  mkDelta,
+  mkPointMass,
   mkExponential,
   mkLognormal,
   mkNormal,
@@ -37,7 +37,7 @@ const distributions = [
   // cauchyMake(1e0, 1e0),
   mkLognormal(2, 1),
   mkTriangular(1, 1e1, 5e1),
-  mkDelta(1e1),
+  mkPointMass(1e1),
 ];
 
 const combinations2 = <T>(arr: T[]): [T, T][] => {

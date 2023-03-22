@@ -202,6 +202,9 @@ export class Normal extends SymbolicDist {
   stdev(): Result.result<number, DistError> {
     return Ok(this._stdev);
   }
+  variance(): Result.result<number, DistError> {
+    return Ok(this._stdev ** 2);
+  }
 
   static from90PercentCI(low: number, high: number): result<Normal, string> {
     const mean = E_A_Floats.mean([low, high]);
@@ -318,6 +321,9 @@ export class Exponential extends SymbolicDist {
   mean() {
     return jstat.exponential.mean(this.rate);
   }
+  variance(): result<number, DistError> {
+    return Ok(jstat.exponential.variance(this.rate));
+  }
 }
 
 export class Cauchy extends SymbolicDist {
@@ -361,8 +367,14 @@ export class Cauchy extends SymbolicDist {
   sample() {
     return jstat.cauchy.sample(this.local, this.scale);
   }
-  mean(): never {
-    throw new Error("Cauchy distributions may have no mean value.");
+  mean() {
+    return NaN; // Cauchy distributions may have no mean value.
+  }
+  stdev(): result<number, DistError> {
+    return Ok(NaN);
+  }
+  variance(): result<number, DistError> {
+    return Ok(NaN);
   }
 }
 
@@ -420,6 +432,9 @@ export class Triangular extends SymbolicDist {
   mean() {
     return jstat.triangular.mean(this.low, this.high, this.medium);
   }
+  variance(): result<number, DistError> {
+    return Ok(jstat.triangular.variance(this.low, this.high, this.medium));
+  }
 
   min() {
     return this.low;
@@ -474,6 +489,9 @@ export class Beta extends SymbolicDist {
 
   mean() {
     return jstat.beta.mean(this.alpha, this.beta);
+  }
+  variance(): result<number, DistError> {
+    return Ok(jstat.beta.variance(this.alpha, this.beta));
   }
 
   static fromMeanAndSampleSize({
@@ -551,12 +569,10 @@ export class Lognormal extends SymbolicDist {
   mean() {
     return jstat.lognormal.mean(this.mu, this.sigma);
   }
-  stdev(): Result.result<number, DistError> {
+  variance(): Result.result<number, DistError> {
     return Ok(
-      Math.sqrt(
-        (Math.exp(this.sigma * this.sigma) - 1) *
-          Math.exp(2 * this.mu + this.sigma * this.sigma)
-      )
+      (Math.exp(this.sigma * this.sigma) - 1) *
+        Math.exp(2 * this.mu + this.sigma * this.sigma)
     );
   }
 
@@ -714,6 +730,9 @@ export class Uniform extends SymbolicDist {
   mean() {
     return jstat.uniform.mean(this.low, this.high);
   }
+  variance(): result<number, DistError> {
+    return Ok(Math.pow(this.high - this.low, 2) / 12);
+  }
 
   min() {
     return this.low;
@@ -791,10 +810,6 @@ export class Logistic extends SymbolicDist {
     return this.location;
   }
 
-  stdev(): Result.result<number, DistError> {
-    return Result.Ok(Math.sqrt((square(this.scale) * square(Math.PI)) / 3));
-  }
-
   variance(): Result.result<number, DistError> {
     return Result.Ok((square(this.scale) * square(Math.PI)) / 3);
   }
@@ -848,9 +863,6 @@ export class Bernoulli extends SymbolicDist {
     return this.p === 0 ? 0 : 1;
   }
 
-  stdev(): Result.result<number, DistError> {
-    return Ok(Math.sqrt(this.p * (1 - this.p)));
-  }
   variance(): Result.result<number, DistError> {
     return Ok(this.p * (1 - this.p));
   }
@@ -911,23 +923,23 @@ export class Gamma extends SymbolicDist {
   mean() {
     return jstat.gamma.mean(this.shape, this.scale);
   }
-  stdev(): Result.result<number, DistError> {
-    return Ok(Math.sqrt(this.shape) * this.scale);
+  variance(): Result.result<number, DistError> {
+    return Ok(this.shape * this.scale * this.scale);
   }
 }
 
-export class Float extends SymbolicDist {
+export class PointMass extends SymbolicDist {
   constructor(public t: number) {
     super();
   }
   toString() {
     return `PointMass(${this.t})`;
   }
-  static make(t: number): result<Float, string> {
+  static make(t: number): result<PointMass, string> {
     if (isFinite(t)) {
-      return Ok(new Float(t));
+      return Ok(new PointMass(t));
     } else {
-      return Result.Error("Float must be finite");
+      return Result.Error("PointMass must be finite");
     }
   }
 
@@ -938,10 +950,13 @@ export class Float extends SymbolicDist {
     return x >= this.t ? 1.0 : 0.0;
   }
   inv(p: number) {
-    return p < this.t ? 0.0 : 1.0;
+    return this.t;
   }
   mean() {
     return this.t;
+  }
+  variance(): result<number, DistError> {
+    return Ok(0);
   }
   sample() {
     return this.t;
@@ -995,27 +1010,27 @@ export const tryAnalyticalSimplification = (
   d2: SymbolicDist,
   op: Operation.AlgebraicOperation
 ): result<SymbolicDist, OperationError> | undefined => {
-  if (d1 instanceof Float && d2 instanceof Float) {
+  if (d1 instanceof PointMass && d2 instanceof PointMass) {
     return Result.fmap(
       Operation.Algebraic.toFn(op)(d1.t, d2.t),
-      (v) => new Float(v)
+      (v) => new PointMass(v)
     );
   } else if (d1 instanceof Normal && d2 instanceof Normal) {
     const out = Normal.operate(op, d1, d2);
     return out ? Ok(out) : undefined;
-  } else if (d1 instanceof Float && d2 instanceof Normal) {
+  } else if (d1 instanceof PointMass && d2 instanceof Normal) {
     const out = Normal.operateFloatFirst(op, d1.t, d2);
     return out ? Ok(out) : undefined;
-  } else if (d1 instanceof Normal && d2 instanceof Float) {
+  } else if (d1 instanceof Normal && d2 instanceof PointMass) {
     const out = Normal.operateFloatSecond(op, d1, d2.t);
     return out ? Ok(out) : undefined;
   } else if (d1 instanceof Lognormal && d2 instanceof Lognormal) {
     const out = Lognormal.operate(op, d1, d2);
     return out ? Ok(out) : undefined;
-  } else if (d1 instanceof Float && d2 instanceof Lognormal) {
+  } else if (d1 instanceof PointMass && d2 instanceof Lognormal) {
     const out = Lognormal.operateFloatFirst(op, d1.t, d2);
     return out ? Ok(out) : undefined;
-  } else if (d1 instanceof Lognormal && d2 instanceof Float) {
+  } else if (d1 instanceof Lognormal && d2 instanceof PointMass) {
     const out = Lognormal.operateFloatSecond(op, d1, d2.t);
     return out ? Ok(out) : undefined;
   } else {

@@ -6,6 +6,7 @@ import {
   mkLogistic,
   mkLognormal,
   mkNormal,
+  mkPointMass,
   mkTriangular,
   unpackResult,
 } from "../helpers/distHelpers";
@@ -51,9 +52,7 @@ describe("(Symbolic) mean", () => {
   );
 
   test("of a cauchy distribution", () => {
-    expect(() => {
-      mkCauchy(1, 1).mean();
-    }).toThrow();
+    expect(mkCauchy(1, 1).mean()).toBeNaN();
   });
 
   test.each([
@@ -134,7 +133,7 @@ describe("(Symbolic) mean", () => {
   });
 
   test("of a float", () => {
-    const meanValue = unpackResult(SymbolicDist.Float.make(7.7)).mean();
+    const meanValue = unpackResult(SymbolicDist.PointMass.make(7.7)).mean();
     expect(meanValue).toBeCloseTo(7.7);
   });
 });
@@ -250,5 +249,14 @@ describe("Bernoulli", () => {
       Math.sqrt(unpackResult(dist.variance())),
       5
     );
+  });
+});
+
+describe("PointMass", () => {
+  const dist = mkPointMass(5);
+  test("Inv", () => {
+    expect(dist.inv(0)).toEqual(5);
+    expect(dist.inv(1)).toEqual(5);
+    expect(dist.inv(0.3)).toEqual(5);
   });
 });

@@ -31,11 +31,10 @@ export abstract class BaseDist {
   abstract inv(x: number): number;
 
   stdev(): result<number, DistError> {
-    return Result.Error(notYetImplemented());
+    return Result.fmap(this.variance(), Math.sqrt);
   }
-  variance(): result<number, DistError> {
-    return Result.Error(notYetImplemented());
-  }
+  abstract variance(): result<number, DistError>;
+
   mode(): result<number, DistError> {
     return Result.Error(notYetImplemented());
   }

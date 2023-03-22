@@ -2,33 +2,43 @@
   "$schema": "https://turborepo.org/schema.json",
   "pipeline": {
     "build": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "build/**"]
     },
     "vscode-squiggle#build": {
-      "dependsOn": ["^build", "@quri/squiggle-components#bundle"]
+      "dependsOn": ["^build", "@quri/squiggle-components#bundle"],
+      "outputs": ["dist/**"]
     },
     "@quri/squiggle-components#build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", "storybook-static/**"]
+      "outputs": [
+        "dist/**",
+        "storybook-static/**",
+        "src/languageSupport/generated/**"
+      ]
     },
     "@quri/squiggle-lang#build": {
       "dependsOn": ["^build"],
       "outputs": ["src/**/*.js", "dist/**"]
     },
+    "@quri/relative-values#build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**"]
+    },
     "format": {},
     "lint": {
-      "dependsOn": ["^build"],
-      "outputs": []
+      "dependsOn": ["^build"]
     },
     "test": {
-      "dependsOn": ["build"],
-      "outputs": []
+      "dependsOn": ["build"]
     },
     "bundle": {
-      "dependsOn": ["build"]
+      "dependsOn": ["build"],
+      "outputs": ["dist/bundle*"]
     },
     "coverage": {
-      "dependsOn": ["build"]
+      "dependsOn": ["build"],
+      "outputs": ["coverage/**"]
     }
   }
 }
