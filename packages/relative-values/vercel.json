@@ -1,0 +1,4 @@
+{
+  "buildCommand": "cd ../.. && npx turbo run build --filter=@quri/relative-values",
+  "ignoreCommand": "npx turbo-ignore"
+}
