@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd ../.. && npx turbo run build --filter=squiggle-website",
+  "buildCommand": "npx turbo build",
   "framework": "docusaurus-2",
   "ignoreCommand": "npx turbo-ignore"
 }

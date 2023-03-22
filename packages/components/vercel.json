@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd ../.. && npx turbo run build --filter=@quri/squiggle-components",
+  "buildCommand": "npx turbo build",
   "outputDirectory": "storybook-static",
   "ignoreCommand": "npx turbo-ignore"
 }
