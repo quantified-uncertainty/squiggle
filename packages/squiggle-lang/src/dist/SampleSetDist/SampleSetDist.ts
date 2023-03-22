@@ -144,9 +144,6 @@ sample everything.
     return pointSetDistR.value.pdf(f);
   }
 
-  stdev(): Result.result<number, DistError> {
-    return Result.Ok(E_A_Floats.stdev(this.samples));
-  }
   variance(): Result.result<number, DistError> {
     return Result.Ok(E_A_Floats.variance(this.samples));
   }
