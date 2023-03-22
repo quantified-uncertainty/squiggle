@@ -6,6 +6,7 @@ import {
   mkLogistic,
   mkLognormal,
   mkNormal,
+  mkPointMass,
   mkTriangular,
   unpackResult,
 } from "../helpers/distHelpers";
@@ -253,4 +254,11 @@ describe("Bernoulli", () => {
   });
 });
 
-describe("PointMass", () => {});
+describe("PointMass", () => {
+  const dist = mkPointMass(5);
+  test("Inv", () => {
+    expect(dist.inv(0)).toEqual(5);
+    expect(dist.inv(1)).toEqual(5);
+    expect(dist.inv(0.3)).toEqual(5);
+  });
+});

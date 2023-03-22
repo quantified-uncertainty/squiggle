@@ -938,7 +938,7 @@ export class PointMass extends SymbolicDist {
     return x >= this.t ? 1.0 : 0.0;
   }
   inv(p: number) {
-    return p < this.t ? 0.0 : 1.0;
+    return this.t;
   }
   mean() {
     return this.t;
