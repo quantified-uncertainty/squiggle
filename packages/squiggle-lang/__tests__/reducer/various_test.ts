@@ -40,6 +40,16 @@ describe("eval", () => {
       "([0,1,2])[10]",
       "Error(Array index not found: 10)"
     );
+    test("trailing comma", () => {
+      expectEvalToBe(`[3,4,]`, "[3,4]");
+      expectEvalToBe(
+        `[
+        3,
+        4,
+      ]`,
+        "[3,4]"
+      );
+    });
   });
   describe("records", () => {
     test("empty", () => expectEvalToBe("{}", "{}"));
@@ -48,7 +58,7 @@ describe("eval", () => {
     test("index", () =>
       expectEvalToBe("r = {a: 1}; r.b", "Error(Record property not found: b)"));
     testEvalError("{a: 1}.b"); // invalid syntax
-    test("always the same property ending", () =>
+    test("trailing comma", () =>
       expectEvalToBe(
         `{
       a: 1, 

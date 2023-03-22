@@ -283,8 +283,12 @@ lambda
 arrayConstructor 'array'
   = '[' _nl ']'
     { return h.constructArray([], location()); }
-  / '[' _nl args:array_elements _nl ']'
+  / '[' _nl args:array_elements _nl end_of_array
     { return h.constructArray(args, location()); }
+
+  end_of_array
+    = ']'
+    / ',' _nl ']'
 
   array_elements
     = head:expression tail:(_ ',' _nl @expression)*
