@@ -202,6 +202,9 @@ export class Normal extends SymbolicDist {
   stdev(): Result.result<number, DistError> {
     return Ok(this._stdev);
   }
+  variance(): Result.result<number, DistError> {
+    return Ok(this._stdev ** 2);
+  }
 
   static from90PercentCI(low: number, high: number): result<Normal, string> {
     const mean = E_A_Floats.mean([low, high]);
@@ -318,6 +321,9 @@ export class Exponential extends SymbolicDist {
   mean() {
     return jstat.exponential.mean(this.rate);
   }
+  variance(): result<number, DistError> {
+    return Ok(jstat.exponential.variance(this.rate));
+  }
 }
 
 export class Cauchy extends SymbolicDist {
@@ -361,8 +367,14 @@ export class Cauchy extends SymbolicDist {
   sample() {
     return jstat.cauchy.sample(this.local, this.scale);
   }
-  mean(): never {
-    throw new Error("Cauchy distributions may have no mean value.");
+  mean() {
+    return NaN; // Cauchy distributions may have no mean value.
+  }
+  stdev(): result<number, DistError> {
+    return Ok(NaN);
+  }
+  variance(): result<number, DistError> {
+    return Ok(NaN);
   }
 }
 
@@ -420,6 +432,9 @@ export class Triangular extends SymbolicDist {
   mean() {
     return jstat.triangular.mean(this.low, this.high, this.medium);
   }
+  variance(): result<number, DistError> {
+    return Ok(jstat.triangular.variance(this.low, this.high, this.medium));
+  }
 
   min() {
     return this.low;
@@ -474,6 +489,9 @@ export class Beta extends SymbolicDist {
 
   mean() {
     return jstat.beta.mean(this.alpha, this.beta);
+  }
+  variance(): result<number, DistError> {
+    return Ok(jstat.beta.variance(this.alpha, this.beta));
   }
 
   static fromMeanAndSampleSize({
@@ -551,12 +569,10 @@ export class Lognormal extends SymbolicDist {
   mean() {
     return jstat.lognormal.mean(this.mu, this.sigma);
   }
-  stdev(): Result.result<number, DistError> {
+  variance(): Result.result<number, DistError> {
     return Ok(
-      Math.sqrt(
-        (Math.exp(this.sigma * this.sigma) - 1) *
-          Math.exp(2 * this.mu + this.sigma * this.sigma)
-      )
+      (Math.exp(this.sigma * this.sigma) - 1) *
+        Math.exp(2 * this.mu + this.sigma * this.sigma)
     );
   }
 
@@ -714,6 +730,9 @@ export class Uniform extends SymbolicDist {
   mean() {
     return jstat.uniform.mean(this.low, this.high);
   }
+  variance(): result<number, DistError> {
+    return Ok(Math.pow(this.high - this.low, 2) / 12);
+  }
 
   min() {
     return this.low;
@@ -791,10 +810,6 @@ export class Logistic extends SymbolicDist {
     return this.location;
   }
 
-  stdev(): Result.result<number, DistError> {
-    return Result.Ok(Math.sqrt((square(this.scale) * square(Math.PI)) / 3));
-  }
-
   variance(): Result.result<number, DistError> {
     return Result.Ok((square(this.scale) * square(Math.PI)) / 3);
   }
@@ -848,9 +863,6 @@ export class Bernoulli extends SymbolicDist {
     return this.p === 0 ? 0 : 1;
   }
 
-  stdev(): Result.result<number, DistError> {
-    return Ok(Math.sqrt(this.p * (1 - this.p)));
-  }
   variance(): Result.result<number, DistError> {
     return Ok(this.p * (1 - this.p));
   }
@@ -911,8 +923,8 @@ export class Gamma extends SymbolicDist {
   mean() {
     return jstat.gamma.mean(this.shape, this.scale);
   }
-  stdev(): Result.result<number, DistError> {
-    return Ok(Math.sqrt(this.shape) * this.scale);
+  variance(): Result.result<number, DistError> {
+    return Ok(this.shape * this.scale * this.scale);
   }
 }
 
@@ -942,6 +954,9 @@ export class PointMass extends SymbolicDist {
   }
   mean() {
     return this.t;
+  }
+  variance(): result<number, DistError> {
+    return Ok(0);
   }
   sample() {
     return this.t;

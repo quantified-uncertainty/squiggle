@@ -52,9 +52,7 @@ describe("(Symbolic) mean", () => {
   );
 
   test("of a cauchy distribution", () => {
-    expect(() => {
-      mkCauchy(1, 1).mean();
-    }).toThrow();
+    expect(mkCauchy(1, 1).mean()).toBeNaN();
   });
 
   test.each([
