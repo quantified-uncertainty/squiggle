@@ -2,13 +2,13 @@ import {
   logScoreScalarAnswer,
   mixture,
 } from "../../../src/dist/DistOperations";
-import { env, mkDelta, unpackResult } from "../../helpers/distHelpers";
+import { env, mkPointMass, unpackResult } from "../../helpers/distHelpers";
 
 describe("WithScalarAnswer: discrete -> scalar -> score", () => {
-  const pointA = mkDelta(3.0);
-  const pointB = mkDelta(2.0);
-  const pointC = mkDelta(1.0);
-  const pointD = mkDelta(0.0);
+  const pointA = mkPointMass(3.0);
+  const pointB = mkPointMass(2.0);
+  const pointC = mkPointMass(1.0);
+  const pointD = mkPointMass(0.0);
 
   test("score: agrees with analytical answer when finite", () => {
     const prediction = unpackResult(
