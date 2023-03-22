@@ -9,7 +9,11 @@
     },
     "@quri/squiggle-components#build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", "storybook-static/**"]
+      "outputs": [
+        "dist/**",
+        "storybook-static/**",
+        "src/languageSupport/generated/**"
+      ]
     },
     "@quri/squiggle-lang#build": {
       "dependsOn": ["^build"],
