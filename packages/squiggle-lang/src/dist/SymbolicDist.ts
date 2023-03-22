@@ -552,7 +552,12 @@ export class Lognormal extends SymbolicDist {
     return jstat.lognormal.mean(this.mu, this.sigma);
   }
   stdev(): Result.result<number, DistError> {
-    return Ok(Math.sqrt((Math.exp(this.sigma * this.sigma) - 1) * Math.exp(2 * this.mu + this.sigma * this.sigma)));
+    return Ok(
+      Math.sqrt(
+        (Math.exp(this.sigma * this.sigma) - 1) *
+          Math.exp(2 * this.mu + this.sigma * this.sigma)
+      )
+    );
   }
 
   static from90PercentCI(low: number, high: number) {
@@ -911,18 +916,18 @@ export class Gamma extends SymbolicDist {
   }
 }
 
-export class Float extends SymbolicDist {
+export class PointMass extends SymbolicDist {
   constructor(public t: number) {
     super();
   }
   toString() {
     return `PointMass(${this.t})`;
   }
-  static make(t: number): result<Float, string> {
+  static make(t: number): result<PointMass, string> {
     if (isFinite(t)) {
-      return Ok(new Float(t));
+      return Ok(new PointMass(t));
     } else {
-      return Result.Error("Float must be finite");
+      return Result.Error("PointMass must be finite");
     }
   }
 
@@ -990,27 +995,27 @@ export const tryAnalyticalSimplification = (
   d2: SymbolicDist,
   op: Operation.AlgebraicOperation
 ): result<SymbolicDist, OperationError> | undefined => {
-  if (d1 instanceof Float && d2 instanceof Float) {
+  if (d1 instanceof PointMass && d2 instanceof PointMass) {
     return Result.fmap(
       Operation.Algebraic.toFn(op)(d1.t, d2.t),
-      (v) => new Float(v)
+      (v) => new PointMass(v)
     );
   } else if (d1 instanceof Normal && d2 instanceof Normal) {
     const out = Normal.operate(op, d1, d2);
     return out ? Ok(out) : undefined;
-  } else if (d1 instanceof Float && d2 instanceof Normal) {
+  } else if (d1 instanceof PointMass && d2 instanceof Normal) {
     const out = Normal.operateFloatFirst(op, d1.t, d2);
     return out ? Ok(out) : undefined;
-  } else if (d1 instanceof Normal && d2 instanceof Float) {
+  } else if (d1 instanceof Normal && d2 instanceof PointMass) {
     const out = Normal.operateFloatSecond(op, d1, d2.t);
     return out ? Ok(out) : undefined;
   } else if (d1 instanceof Lognormal && d2 instanceof Lognormal) {
     const out = Lognormal.operate(op, d1, d2);
     return out ? Ok(out) : undefined;
-  } else if (d1 instanceof Float && d2 instanceof Lognormal) {
+  } else if (d1 instanceof PointMass && d2 instanceof Lognormal) {
     const out = Lognormal.operateFloatFirst(op, d1.t, d2);
     return out ? Ok(out) : undefined;
-  } else if (d1 instanceof Lognormal && d2 instanceof Float) {
+  } else if (d1 instanceof Lognormal && d2 instanceof PointMass) {
     const out = Lognormal.operateFloatSecond(op, d1, d2.t);
     return out ? Ok(out) : undefined;
   } else {

@@ -134,7 +134,7 @@ describe("(Symbolic) mean", () => {
   });
 
   test("of a float", () => {
-    const meanValue = unpackResult(SymbolicDist.Float.make(7.7)).mean();
+    const meanValue = unpackResult(SymbolicDist.PointMass.make(7.7)).mean();
     expect(meanValue).toBeCloseTo(7.7);
   });
 });
@@ -252,3 +252,5 @@ describe("Bernoulli", () => {
     );
   });
 });
+
+describe("PointMass", () => {});
