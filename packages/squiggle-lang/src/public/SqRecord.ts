@@ -1,5 +1,5 @@
 import { ValueMap, vRecord } from "../value";
-import { SqRecordValue, wrapValue } from "./SqValue";
+import { SqRecordValue, SqValue, wrapValue } from "./SqValue";
 import { SqValueLocation } from "./SqValueLocation";
 
 export class SqRecord {
@@ -9,6 +9,14 @@ export class SqRecord {
     return [...this._value.entries()].map(
       ([k, v]) => [k, wrapValue(v, this.location.extend(k))] as const
     );
+  }
+
+  get(key: string): SqValue | undefined {
+    const value = this._value.get(key);
+    if (value === undefined) {
+      return undefined;
+    }
+    return wrapValue(value, this.location.extend(key));
   }
 
   toString() {
