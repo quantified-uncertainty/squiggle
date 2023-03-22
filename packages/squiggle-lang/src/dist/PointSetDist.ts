@@ -36,6 +36,9 @@ export class PointSetDist<
   mean() {
     return this.pointSet.mean();
   }
+  variance(): Result.result<number, DistError> {
+    return Result.Ok(this.pointSet.variance());
+  }
 
   private samplePointSet(pointSet: AnyPointSet) {
     const randomItem = Math.random();

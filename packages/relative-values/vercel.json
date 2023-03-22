@@ -1,5 +1,5 @@
 {
   "buildCommand": "npx turbo build",
-  "outputDirectory": "storybook-static",
+  "framework": "nextjs",
   "ignoreCommand": "npx turbo-ignore"
 }
