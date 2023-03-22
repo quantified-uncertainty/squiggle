@@ -10,11 +10,8 @@
     "build:typescript": "tsc",
     "start": "tsc -w",
     "clean": "rm -rf dist && rm -f src/ast/peggyParser.js && rm -f src/public/SqProject/IncludeParser.js",
-    "benchmark": "ts-node benchmark/conversion_tests.ts",
-    "test:reducer": "jest __tests__/Reducer*/",
     "test": "jest",
     "test:watch": "jest --watchAll",
-    "test:fnRegistry": "jest __tests__/SquiggleLibrary*/",
     "coverage:local": "jest --coverage && echo && echo 'Open ./coverage/lcov-report/index.html to see the detailed report.'",
     "coverage": "jest --coverage && codecov",
     "lint:prettier": "prettier --check .",
@@ -46,9 +43,7 @@
     "ts-jest": "^29.0.5",
     "ts-loader": "^9.4.1",
     "ts-node": "^10.9.1",
-    "typescript": "^4.9.5",
-    "webpack": "^5.75.0",
-    "webpack-cli": "^5.0.1"
+    "typescript": "^4.9.5"
   },
   "source": "./src/index.ts",
   "main": "./dist/src/index.js",

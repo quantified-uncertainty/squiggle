@@ -2,6 +2,7 @@
 *.bs.js
 *.gen.tsx
 packages/components/storybook-static
+packages/components/grammar/generated
 node_modules
 packages/*/node_modules
 packages/website/.docusaurus

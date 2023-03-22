@@ -18,7 +18,6 @@ const WrappedCodeEditor: React.FC<{
       onChange={setCode}
       oneLine={true}
       showGutter={false}
-      height={20}
       errorLocations={errorLocations}
     />
   </div>

@@ -23,8 +23,10 @@ export const library = [
   maker.nn2n({ name: "pow", fn: (x, y) => Math.pow(x, y) }), // infix ^
   maker.nn2b({ name: "equal", fn: (x, y) => x === y }), // infix == on numbers
   maker.bb2b({ name: "equal", fn: (x, y) => x === y }), // infix == on booleans
+  maker.ss2b({ name: "equal", fn: (x, y) => x === y }), // infix == on strings
   maker.nn2b({ name: "unequal", fn: (x, y) => x !== y }), // infix != on numbers
   maker.bb2b({ name: "unequal", fn: (x, y) => x !== y }), // infix != on booleans
+  maker.ss2b({ name: "unequal", fn: (x, y) => x !== y }), // infix != on strings
   maker.nn2b({ name: "smaller", fn: (x, y) => x < y }), // infix <
   maker.nn2b({ name: "smallerEq", fn: (x, y) => x <= y }), // infix <=
   maker.nn2b({ name: "larger", fn: (x, y) => x > y }), // infix >

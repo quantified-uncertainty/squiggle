@@ -27,6 +27,11 @@ describe("List functions", () => {
     testEvalToBe("List.last([3,5,8])", "8");
     // TODO - test on empty arrays
   });
+  describe("concat", () => {
+    testEvalToBe("List.concat([1, 2, 3], [4, 5, 6])", "[1,2,3,4,5,6]");
+    testEvalToBe("List.concat([], [1, 2, 3])", "[1,2,3]");
+    testEvalToBe("List.concat(['cake'], [1, 2, 3])", "['cake',1,2,3]");
+  });
 
   describe("reverse", () => {
     testEvalToBe("List.reverse([3,5,8])", "[8,5,3]");
