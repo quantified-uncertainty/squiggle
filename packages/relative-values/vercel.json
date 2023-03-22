@@ -1,0 +1,5 @@
+{
+  "buildCommand": "cd ../.. && npx turbo run build --filter=@quri/relative-values",
+  "framework": "nextjs",
+  "ignoreCommand": "npx turbo-ignore"
+}
