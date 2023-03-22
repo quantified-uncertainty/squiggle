@@ -18656,6 +18656,11 @@ turbo-darwin-arm64@1.6.3:
   resolved "https://registry.yarnpkg.com/turbo-darwin-arm64/-/turbo-darwin-arm64-1.6.3.tgz#f0a32cae39e3fcd3da5e3129a94c18bb2e3ed6aa"
   integrity sha512-75DXhFpwE7CinBbtxTxH08EcWrxYSPFow3NaeFwsG8aymkWXF+U2aukYHJA6I12n9/dGqf7yRXzkF0S/9UtdyQ==
 
+turbo-ignore@^1.8.5:
+  version "1.8.5"
+  resolved "https://registry.yarnpkg.com/turbo-ignore/-/turbo-ignore-1.8.5.tgz#8306f5fee6001326babad98f1efe9fc6bfee93b3"
+  integrity sha512-YwjbabP1GPICS+S62dBqNLKRDgBo1ZzThWkeOONWKp+038uMTEiKDsb/lskseuI/DJrO6on9B4Dker/nSN5eqw==
+
 turbo-linux-64@1.6.3:
   version "1.6.3"
   resolved "https://registry.yarnpkg.com/turbo-linux-64/-/turbo-linux-64-1.6.3.tgz#8ddc6ac55ef84641182fe5ff50647f1b355826b0"
