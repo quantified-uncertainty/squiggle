@@ -1,6 +1,6 @@
-import { SqLambda } from "@quri/squiggle-lang";
+import { result, SqLambda } from "@quri/squiggle-lang";
+import { SqSampleSetDistribution } from "@quri/squiggle-lang/dist/src/public/SqDistribution";
 
-import { result } from "@quri/squiggle-lang";
 import { RelativeValue } from "./RelativeValue";
 
 export type RelativeValueResult = result<RelativeValue, string>;
@@ -20,47 +20,35 @@ const buildRelativeValue = ({
   if (!result.ok) {
     return { ok: false, value: result.value.toString() };
   }
-  const value = result.value;
-  if (value.tag !== "Record") {
-    return { ok: false, value: "Expected dist" };
-  }
-  const record = value.value;
-
-  const distValue = record.get("dist");
-  const medianValue = record.get("median");
-  const minValue = record.get("min");
-  const maxValue = record.get("max");
-  const dbValue = record.get("db");
-
-  if (!distValue || distValue.tag !== "Dist") {
-    return { ok: false, value: "Expected dist" };
+  const record = result.value.asJS();
+  if (!(record instanceof Map)) {
+    return { ok: false, value: "Expected record" };
   }
 
-  const dist = distValue.value;
-  if (dist.tag !== "SampleSet") {
+  // TODO - yup
+  const dist = record.get("dist");
+  const median = record.get("median");
+  const min = record.get("min");
+  const max = record.get("max");
+  const db = record.get("db");
+
+  if (!(dist instanceof SqSampleSetDistribution)) {
     // TODO - convert automatically?
     return { ok: false, value: "Expected sample set" };
   }
 
-  if (medianValue?.tag !== "Number") {
+  if (typeof median !== "number") {
     return { ok: false, value: "Expected median to be a number" };
   }
-  const median = medianValue.value;
-
-  if (minValue?.tag !== "Number") {
+  if (typeof min !== "number") {
     return { ok: false, value: "Expected min to be a number" };
   }
-  const min = minValue.value;
-
-  if (maxValue?.tag !== "Number") {
+  if (typeof max !== "number") {
     return { ok: false, value: "Expected max to be a number" };
   }
-  const max = maxValue.value;
-
-  if (dbValue?.tag !== "Number") {
+  if (typeof db !== "number") {
     return { ok: false, value: "Expected db to be a number" };
   }
-  const db = dbValue.value;
 
   return {
     ok: true,
