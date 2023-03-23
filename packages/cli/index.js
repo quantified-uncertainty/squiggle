@@ -61,10 +61,10 @@ const run = (fileName) => {
   console.log(chalk.cyan(`Updated ${fileName} -> ${newFilename}`));
 };
 
-const compile = () => {
-  glob("**/*.squiggleU", (_err, files) => {
-    files.forEach(run);
-  });
+const compile = async () => {
+  const files = await glob("**/*.squiggleU");
+
+  files.forEach(run);
 };
 
 const watch = () => {
