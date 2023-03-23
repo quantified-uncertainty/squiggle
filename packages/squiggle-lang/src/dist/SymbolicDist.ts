@@ -48,7 +48,7 @@ export abstract class SymbolicDist extends BaseDist {
   normalize() {
     return this;
   }
-  integralEndY() {
+  integralSum() {
     return 1;
   }
 

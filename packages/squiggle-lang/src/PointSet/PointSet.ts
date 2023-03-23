@@ -48,12 +48,12 @@ export interface PointSet<T> {
   downsample(length: number): T;
   truncate(left: number | undefined, right: number | undefined): T;
 
-  updateIntegralCache(cache: ContinuousShape | undefined): T;
-
   integral(): ContinuousShape;
-  integralEndY(): number;
+  integralSum(): number;
   integralXtoY(x: number): number;
   integralYtoX(y: number): number;
+
+  withAdjustedIntegralSum(sum: number): T; // force a given sum (useful for normalization)
 
   mean(): number;
   variance(): number;

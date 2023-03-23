@@ -1,5 +1,6 @@
 import { testRun, expectErrorToBeBounded } from "../helpers/helpers";
 import * as fc from "fast-check";
+import { testEvalToBe } from "../helpers/reducerHelpers";
 
 // via fast-check hint
 const toFloat32 = (v: number) => new Float32Array([v])[0];
@@ -50,5 +51,24 @@ describe("Mean of mixture is weighted average of means", () => {
         }
       )
     );
+  });
+});
+
+describe("Discrete", () => {
+  // doesn't extrapolate between discrete numbers
+  testEvalToBe("mx(3,5) -> inv(0.3)", "3");
+  testEvalToBe("mx(3,5) -> inv(0.7)", "5");
+  // works on mixed too
+  testEvalToBe("mx(3,5,normal(5,2), [1,1,0]) -> inv(0.3)", "3");
+  testEvalToBe("mx(3,5,normal(5,2), [1,1,0]) -> inv(0.7)", "5");
+
+  test("sample", () => {
+    for (let i = 0; i < 100; i++) {
+      const res = testRun("mx(3,5) -> sample");
+      if (res.tag !== "Number") {
+        throw new Error(`Expected number result, got: ${res.tag}`);
+      }
+      expect(res.value === 5 || res.value === 3).toBe(true);
+    }
   });
 });

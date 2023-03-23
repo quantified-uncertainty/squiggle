@@ -112,7 +112,7 @@ export const library: FRFunction[] = [
   maker.d2n({ name: "max", fn: (d) => d.max() }),
   maker.d2n({ name: "mode", fn: (d) => unpackDistResult(d.mode()) }),
   maker.d2n({ name: "sample", fn: (d) => d.sample() }),
-  maker.d2n({ name: "integralSum", fn: (d) => d.integralEndY() }),
+  maker.d2n({ name: "integralSum", fn: (d) => d.integralSum() }),
   maker.fromDefinition(
     makeDefinition(
       "triangular",

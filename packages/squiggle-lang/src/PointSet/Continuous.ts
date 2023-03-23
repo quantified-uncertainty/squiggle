@@ -12,8 +12,10 @@ import { DiscreteShape } from "./Discrete";
 export class ContinuousShape implements PointSet<ContinuousShape> {
   readonly xyShape: XYShape.XYShape;
   readonly interpolation: XYShape.InterpolationStrategy;
-  readonly integralSumCache?: number;
-  readonly integralCache?: ContinuousShape;
+
+  // readonly for external functions through accessor fields
+  private _integralSumCache?: number;
+  private _integralCache?: ContinuousShape;
 
   constructor(args: {
     xyShape: XYShape.XYShape;
@@ -23,8 +25,24 @@ export class ContinuousShape implements PointSet<ContinuousShape> {
   }) {
     this.xyShape = args.xyShape;
     this.interpolation = args.interpolation ?? "Linear";
-    this.integralSumCache = args.integralSumCache;
-    this.integralCache = args.integralCache;
+    this._integralSumCache = args.integralSumCache;
+    this._integralCache = args.integralCache;
+  }
+
+  get integralCache() {
+    return this._integralCache;
+  }
+  get integralSumCache() {
+    return this._integralSumCache;
+  }
+
+  withAdjustedIntegralSum(integralSumCache: number): ContinuousShape {
+    return new ContinuousShape({
+      xyShape: this.xyShape,
+      interpolation: this.interpolation,
+      integralSumCache,
+      integralCache: this.integralCache,
+    });
   }
 
   lastY() {
@@ -87,28 +105,6 @@ export class ContinuousShape implements PointSet<ContinuousShape> {
     );
   }
 
-  updateIntegralCache(
-    integralCache: ContinuousShape | undefined
-  ): ContinuousShape {
-    return new ContinuousShape({
-      xyShape: this.xyShape,
-      interpolation: this.interpolation,
-      integralSumCache: this.integralSumCache,
-      integralCache,
-    });
-  }
-
-  updateIntegralSumCache(
-    integralSumCache: number | undefined
-  ): ContinuousShape {
-    return new ContinuousShape({
-      xyShape: this.xyShape,
-      interpolation: this.interpolation,
-      integralSumCache,
-      integralCache: this.integralCache,
-    });
-  }
-
   toDiscreteProbabilityMassFraction() {
     return 0;
   }
@@ -151,15 +147,27 @@ export class ContinuousShape implements PointSet<ContinuousShape> {
 
   // TODO: This should work with stepwise plots.
   integral() {
-    if (XYShape.T.isEmpty(this.xyShape)) {
-      return emptyIntegral();
+    if (!this._integralCache) {
+      if (XYShape.T.isEmpty(this.xyShape)) {
+        this._integralCache = emptyIntegral();
+      } else {
+        this._integralCache = new ContinuousShape({
+          xyShape: XYShape.Range.integrateWithTriangles(this.xyShape),
+        });
+      }
     }
-    if (this.integralCache) {
-      return this.integralCache;
-    }
-    return new ContinuousShape({
-      xyShape: XYShape.Range.integrateWithTriangles(this.xyShape),
-    });
+    return this._integralCache;
+  }
+
+  integralSum() {
+    return (this._integralSumCache ??= this.integral().lastY());
+  }
+
+  integralXtoY(f: number) {
+    return XYShape.XtoY.linear(this.integral().xyShape, f);
+  }
+  integralYtoX(f: number) {
+    return XYShape.YtoX.linear(this.integral().xyShape, f);
   }
 
   private shapeMap(
@@ -168,6 +176,7 @@ export class ContinuousShape implements PointSet<ContinuousShape> {
     return new ContinuousShape({
       xyShape: fn(this.xyShape),
       interpolation: this.interpolation,
+      // FIXME - this seems wrong
       integralSumCache: this.integralSumCache,
       integralCache: this.integralCache,
     });
@@ -183,16 +192,6 @@ export class ContinuousShape implements PointSet<ContinuousShape> {
     );
   }
 
-  integralEndY() {
-    return this.integralSumCache ?? this.integral().lastY();
-  }
-
-  integralXtoY(f: number) {
-    return XYShape.XtoY.linear(this.integral().xyShape, f);
-  }
-  integralYtoX(f: number) {
-    return XYShape.YtoX.linear(this.integral().xyShape, f);
-  }
   toContinuous() {
     return this;
   }
@@ -217,9 +216,7 @@ export class ContinuousShape implements PointSet<ContinuousShape> {
   }
 
   normalize() {
-    return this.updateIntegralCache(this.integral())
-      .scaleBy(1 / this.integralEndY())
-      .updateIntegralSumCache(1);
+    return this.scaleBy(1 / this.integralSum()).withAdjustedIntegralSum(1);
   }
 
   mean() {
