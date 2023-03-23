@@ -8,6 +8,7 @@ import {
   mkLogistic,
   mkLognormal,
   mkNormal,
+  mkPointMass,
   mkTriangular,
   unpackResult,
   env,
@@ -19,6 +20,7 @@ import * as E_A from "../../src/utility/E_A";
 import { createSparkline } from "../../src/utility/sparklines";
 import { metalogBasisFunction } from "@quri/metalog";
 import { defaultEnv } from "../../src/dist/env";
+
 
 describe("(Symbolic) normalize", () => {
   test.each([-1e8, -1e-2, 0.0, 1e-4, 1e16])(
@@ -56,9 +58,7 @@ describe("(Symbolic) mean", () => {
   );
 
   test("of a cauchy distribution", () => {
-    expect(() => {
-      mkCauchy(1, 1).mean();
-    }).toThrow();
+    expect(mkCauchy(1, 1).mean()).toBeNaN();
   });
 
   test.each([
@@ -139,7 +139,7 @@ describe("(Symbolic) mean", () => {
   });
 
   test("of a float", () => {
-    const meanValue = unpackResult(SymbolicDist.Float.make(7.7)).mean();
+    const meanValue = unpackResult(SymbolicDist.PointMass.make(7.7)).mean();
     expect(meanValue).toBeCloseTo(7.7);
   });
 });
@@ -357,5 +357,14 @@ describe("Metalog", () => {
     const metalogDist = mkMetalogCdf(points);
     const pointSetDist = metalogDist.toPointSetDist(defaultEnv);
     expect(pointSetDist.ok).toBe(true);
+  });
+});
+
+describe("PointMass", () => {
+  const dist = mkPointMass(5);
+  test("Inv", () => {
+    expect(dist.inv(0)).toEqual(5);
+    expect(dist.inv(1)).toEqual(5);
+    expect(dist.inv(0.3)).toEqual(5);
   });
 });

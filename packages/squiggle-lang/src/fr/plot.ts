@@ -5,7 +5,7 @@ import {
   frRecord,
   frDistOrNumber,
 } from "../library/registry/frTypes";
-import { Float } from "../dist/SymbolicDist";
+import { PointMass } from "../dist/SymbolicDist";
 import { FnFactory } from "../library/registry/helpers";
 import * as Result from "../utility/result";
 import { vPlot, LabeledDistribution } from "../value";
@@ -34,7 +34,7 @@ export const library = [
           let distributions: LabeledDistribution[] = [];
           dists.forEach(({ name, value }) => {
             if (typeof value === "number") {
-              const deltaResult = Float.make(value);
+              const deltaResult = PointMass.make(value);
               if (deltaResult.ok === false) {
                 return Result.Error(REOther(deltaResult.value));
               } else {

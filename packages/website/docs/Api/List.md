@@ -59,6 +59,12 @@ first: (list<'a>) => 'a
 last: (list<'a>) => 'a
 ```
 
+### concat
+
+```
+concat: (list<'a>, list<'a>) => list<'a>
+```
+
 ### reverse
 
 ```

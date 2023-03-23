@@ -82,3 +82,15 @@ Math.tau:
 ```
 
 Tau is the ratio constant of a circle's circumference to radius, equal to 2 \* pi. 6.283185307179586
+
+### Math functions
+
+```
+Math.sqrt(x) // Square root
+Math.sin(x) // Sine
+Math.cos(x) // Cosine
+Math.tan(x) // Tangent
+Math.asin(x) // Arcsine (inverse sine)
+Math.acos(x) // Arccosine (invers cosine)
+Math.atan(x) // Acrtangent (inverse tangent)
+```

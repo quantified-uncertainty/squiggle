@@ -15,8 +15,10 @@ import { MixedShape } from "./Mixed";
 
 export class DiscreteShape implements PointSet<DiscreteShape> {
   readonly xyShape: XYShape.XYShape;
-  readonly integralSumCache?: number;
-  readonly integralCache?: Continuous.ContinuousShape;
+
+  // readonly for external functions through accessor fields
+  private _integralSumCache?: number;
+  private _integralCache?: Continuous.ContinuousShape;
 
   constructor(args: {
     xyShape: XYShape.XYShape;
@@ -24,46 +26,72 @@ export class DiscreteShape implements PointSet<DiscreteShape> {
     integralCache?: ContinuousShape;
   }) {
     this.xyShape = args.xyShape;
-    this.integralSumCache = args.integralSumCache;
-    this.integralCache = args.integralCache;
+    this._integralSumCache = args.integralSumCache;
+    this._integralCache = args.integralCache;
+  }
+
+  get integralCache() {
+    return this._integralCache;
+  }
+  get integralSumCache() {
+    return this._integralSumCache;
+  }
+
+  withAdjustedIntegralSum(integralSumCache: number): DiscreteShape {
+    return new DiscreteShape({
+      xyShape: this.xyShape,
+      integralSumCache,
+      integralCache: this.integralCache,
+    });
   }
 
   shapeMap(fn: (shape: XYShape.XYShape) => XYShape.XYShape): DiscreteShape {
     return new DiscreteShape({
       xyShape: fn(this.xyShape),
+      // FIXME - this seems wrong
       integralSumCache: this.integralSumCache,
       integralCache: this.integralCache,
     });
   }
 
   integral() {
-    if (XYShape.T.isEmpty(this.xyShape)) {
-      return emptyIntegral();
-    }
-    if (this.integralCache) {
-      return this.integralCache;
-    }
+    if (!this._integralCache) {
+      if (XYShape.T.isEmpty(this.xyShape)) {
+        this._integralCache = emptyIntegral();
+      } else {
+        const ts = this.xyShape;
+        // The first xy of this integral should always be the zero, to ensure nice plotting
+        const firstX = XYShape.T.minX(ts);
+        const prependedZeroPoint: XYShape.XYShape = {
+          xs: [firstX - epsilon_float],
+          ys: [0],
+        };
+        const integralShape = XYShape.T.accumulateYs(
+          XYShape.T.concat(prependedZeroPoint, ts),
+          (a, b) => a + b
+        );
 
-    const ts = this.xyShape;
-    // The first xy of this integral should always be the zero, to ensure nice plotting
-    const firstX = XYShape.T.minX(ts);
-    const prependedZeroPoint: XYShape.XYShape = {
-      xs: [firstX - epsilon_float],
-      ys: [0],
-    };
-    const integralShape = XYShape.T.accumulateYs(
-      XYShape.T.concat(prependedZeroPoint, ts),
-      (a, b) => a + b
-    );
-
-    return new ContinuousShape({
-      xyShape: integralShape,
-      interpolation: "Stepwise",
-    });
+        // integralYtoX is broken because XYShape.YtoX.stepwise is not implemented, so we have to store integral as linear for now
+        this._integralCache = Continuous.stepwiseToLinear(
+          new ContinuousShape({
+            xyShape: integralShape,
+            interpolation: "Stepwise",
+          })
+        );
+      }
+    }
+    return this._integralCache;
   }
 
-  integralEndY() {
-    return this.integralSumCache ?? this.integral().lastY();
+  integralSum() {
+    return (this._integralSumCache ??= this.integral().lastY());
+  }
+
+  integralXtoY(f: number) {
+    return XYShape.XtoY.linear(this.integral().xyShape, f);
+  }
+  integralYtoX(f: number) {
+    return XYShape.YtoX.linear(this.integral().xyShape, f);
   }
 
   minX() {
@@ -124,24 +152,6 @@ export class DiscreteShape implements PointSet<DiscreteShape> {
     );
   }
 
-  updateIntegralCache(
-    integralCache: Continuous.ContinuousShape | undefined
-  ): DiscreteShape {
-    return new DiscreteShape({
-      xyShape: this.xyShape,
-      integralSumCache: this.integralSumCache,
-      integralCache,
-    });
-  }
-
-  updateIntegralSumCache(integralSumCache: number | undefined): DiscreteShape {
-    return new DiscreteShape({
-      xyShape: this.xyShape,
-      integralSumCache,
-      integralCache: this.integralCache,
-    });
-  }
-
   toContinuous() {
     return undefined;
   }
@@ -166,7 +176,7 @@ export class DiscreteShape implements PointSet<DiscreteShape> {
   }
 
   normalize() {
-    return this.scaleBy(1 / this.integralEndY()).updateIntegralSumCache(1);
+    return this.scaleBy(1 / this.integralSum()).withAdjustedIntegralSum(1);
   }
 
   downsample(i: number) {
@@ -201,13 +211,6 @@ export class DiscreteShape implements PointSet<DiscreteShape> {
     return MixedPoint.makeDiscrete(
       XYShape.XtoY.stepwiseIfAtX(this.xyShape, f) ?? 0
     );
-  }
-
-  integralXtoY(f: number) {
-    return XYShape.XtoY.linear(this.integral().xyShape, f);
-  }
-  integralYtoX(f: number) {
-    return XYShape.YtoX.linear(this.integral().xyShape, f);
   }
 
   mean() {

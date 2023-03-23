@@ -40,7 +40,6 @@ export const ImportSettingsForm: React.FC<{
               value={importString}
               onChange={onChange}
               oneLine={false}
-              showGutter={true}
               height={150}
             />
           </div>

@@ -327,7 +327,7 @@ export const library: FRFunction[] = [
     name: "pointMass",
     examples: [`pointMass(0.5)`],
     definitions: [
-      makeOneArgDist("pointMass", (f) => SymbolicDist.Float.make(f)),
+      makeOneArgDist("pointMass", (f) => SymbolicDist.PointMass.make(f)),
     ],
   }),
 ];

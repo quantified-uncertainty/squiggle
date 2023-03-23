@@ -18,7 +18,6 @@ const WrappedCodeEditor: React.FC<{
       onChange={setCode}
       oneLine={true}
       showGutter={false}
-      height={20}
       errorLocations={errorLocations}
     />
   </div>
@@ -27,6 +26,7 @@ const WrappedCodeEditor: React.FC<{
 export type SquiggleEditorProps = SquiggleArgs & {
   defaultCode?: string;
   onCodeChange?: (code: string) => void;
+  hideViewer?: boolean;
 } & Omit<SquiggleViewerProps, "result">;
 
 export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
@@ -48,7 +48,9 @@ export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
         setCode={setCode}
         errorLocations={errorLocations}
       />
-      <SquiggleViewer result={valueToRender} {...props} />
+      {props.hideViewer ? null : (
+        <SquiggleViewer result={valueToRender} {...props} />
+      )}
     </SquiggleContainer>
   );
 };
