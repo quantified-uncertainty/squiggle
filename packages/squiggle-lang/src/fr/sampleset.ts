@@ -63,7 +63,7 @@ const baseLibrary = [
   }),
   maker.make({
     name: "fromFn",
-    examples: [`SampleSet.fromFn({|| sample(normal(5,2))})`],
+    examples: [`SampleSet.fromFn({|i| sample(normal(5,2))})`],
     output: "Dist",
     definitions: [
       makeDefinition("fromFn", [frLambda], ([lambda], context, reducer) =>

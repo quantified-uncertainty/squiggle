@@ -38,7 +38,6 @@ export class SampleSetDist extends BaseDist {
     fn: (i: number) => number,
     env: Env
   ): Result.result<SampleSetDist, DistError> {
-    const sampleCount = env.sampleCount;
     const samples: number[] = [];
     for (let i = 0; i < env.sampleCount; i++) {
       samples.push(fn(i));
