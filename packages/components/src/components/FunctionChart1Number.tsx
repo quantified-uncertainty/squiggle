@@ -34,14 +34,14 @@ function getFunctionImage({
     settings.count
   );
 
-  let functionImage: { x: number; value: number }[] = [];
+  let functionImage: { x: number; y: number }[] = [];
   let errors: { x: number; value: string }[] = [];
 
   for (const x of chartPointsToRender) {
     const result = fn.call([x]);
     if (result.ok) {
       if (result.value.tag === "Number") {
-        functionImage.push({ x, value: result.value.value });
+        functionImage.push({ x, y: result.value.value });
       } else {
         errors.push({ x, value: "This component expected number outputs" });
       }
@@ -69,23 +69,21 @@ export const FunctionChart1Number: FC<FunctionChart1NumberProps> = ({
     [settings, fn]
   );
 
-  const data = functionImage.map(({ x, value }) => ({
-    x,
-    y: value,
-  }));
-
   return (
     <>
       <SquiggleLineChart
-        data={{ facet: data }}
+        data={{ facet: functionImage }}
         height={height}
         actions={false}
       />
-      {errors.map(({ x, value }) => (
-        <ErrorAlert key={x} heading={value}>
-          Error at point {x}
-        </ErrorAlert>
-      ))}
+      <div className="space-y-1">
+        {errors.map(({ x, value }) => (
+          // TODO - group errors with identical value
+          <ErrorAlert key={x} heading={value}>
+            Error at point {x}
+          </ErrorAlert>
+        ))}
+      </div>
     </>
   );
 };
