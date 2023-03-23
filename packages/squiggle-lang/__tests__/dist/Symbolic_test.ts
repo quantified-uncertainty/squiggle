@@ -21,7 +21,6 @@ import { createSparkline } from "../../src/utility/sparklines";
 import { metalogBasisFunction } from "@quri/metalog";
 import { defaultEnv } from "../../src/dist/env";
 
-
 describe("(Symbolic) normalize", () => {
   test.each([-1e8, -1e-2, 0.0, 1e-4, 1e16])(
     "has no impact on normal distributions",
