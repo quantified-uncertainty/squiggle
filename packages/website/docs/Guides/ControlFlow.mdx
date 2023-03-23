@@ -38,7 +38,7 @@ x == 0 ? 1 : 2
 
 ### Tips and tricks
 
-#### Use brackets and parenthesis to simplify control flow
+#### Use brackets and parenthesis to organize control flow
 
 <SquiggleEditor
   defaultCode={`
@@ -70,6 +70,8 @@ if x == 1 then {
 }
 `}
 />
+
+This is overkill for simple examples becomes useful when the control conditions are more complex.
 
 #### Save the result to a variable
 
@@ -143,8 +145,8 @@ do:
 
 <SquiggleEditor
   defaultCode={`
-ls = List.upTo(0,10)
 f(x) = to(1, x)
-xs = List.map(l, {|x| f(x)})
+xs = List.upTo(0,10)
+ys = List.map(xs, {|x| f(x)})
 `}
 />
