@@ -984,6 +984,9 @@ export class Metalog extends SymbolicDist {
       return this.a[0];
     }
   }
+  variance(): Result.result<number, DistError> {
+    return Result.Ok(metalog.variance(this.a));
+  }
 
   // Metalog has a faster way of converting to point set dists
   // if you could use the quantile function.
