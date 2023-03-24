@@ -12,6 +12,7 @@ import { VariableBox } from "./VariableBox";
 import { ItemSettingsMenu } from "./ItemSettingsMenu";
 import { hasMassBelowZero } from "../../lib/distributionUtils";
 import { MergedItemSettings } from "./utils";
+import { PartialViewSettings } from "../ViewSettingsForm";
 
 const VariableList: React.FC<{
   value: SqValue;
@@ -70,8 +71,14 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
               <ItemSettingsMenu
                 value={value}
                 onChange={onChange}
-                disableLogX={
+                fixed={
                   shape.ok && hasMassBelowZero(shape.value.asShape())
+                    ? {
+                        distributionChartSettings: {
+                          logX: false,
+                        },
+                      }
+                    : undefined
                 }
                 withFunctionSettings={false}
               />
@@ -202,6 +209,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
           value={value}
           heading="Plot"
           renderSettingsMenu={({ onChange }) => {
+            const fixed: PartialViewSettings = {};
             const disableLogX =
               plot.tag === "distributions"
                 ? plot.distributions.some((x) => {
@@ -210,13 +218,24 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
                       pointSet.ok && hasMassBelowZero(pointSet.value.asShape())
                     );
                   })
-                : true;
+                : false;
+            if (disableLogX) {
+              fixed.distributionChartSettings = {
+                logX: false,
+              };
+            }
+            fixed.functionChartSettings = {};
+            if (plot.tag === "fn") {
+              fixed.functionChartSettings.start = plot.min;
+              fixed.functionChartSettings.stop = plot.max;
+            }
+
             return (
               <ItemSettingsMenu
                 value={value}
                 onChange={onChange}
-                disableLogX={disableLogX}
-                withFunctionSettings={false}
+                fixed={fixed}
+                withFunctionSettings={plot.tag === "fn"}
               />
             );
           }}

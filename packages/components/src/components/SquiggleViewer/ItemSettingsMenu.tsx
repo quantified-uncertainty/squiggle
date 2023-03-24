@@ -3,7 +3,11 @@ import React, { useContext, useRef, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Modal } from "../ui/Modal";
-import { ViewSettingsForm, viewSettingsSchema } from "../ViewSettingsForm";
+import {
+  PartialViewSettings,
+  ViewSettingsForm,
+  viewSettingsSchema,
+} from "../ViewSettingsForm";
 import { ViewerContext } from "./ViewerContext";
 import { PlaygroundContext } from "../SquigglePlayground";
 import { SqValue } from "@quri/squiggle-lang";
@@ -13,24 +17,17 @@ import _ from "lodash";
 type Props = {
   value: SqValue;
   onChange: () => void;
-  disableLogX?: boolean;
+  fixed?: PartialViewSettings;
   withFunctionSettings: boolean;
 };
 
 const ItemSettingsModal: React.FC<
   Props & { close: () => void; resetScroll: () => void }
-> = ({
-  value,
-  onChange,
-  disableLogX,
-  withFunctionSettings,
-  close,
-  resetScroll,
-}) => {
+> = ({ value, onChange, fixed, withFunctionSettings, close, resetScroll }) => {
   const { setSettings, getSettings, getMergedSettings } =
     useContext(ViewerContext);
 
-  const mergedSettings = getMergedSettings(value.location);
+  const mergedSettings = _.merge(getMergedSettings(value.location), fixed);
 
   const { register, watch } = useForm({
     resolver: yupResolver(viewSettingsSchema),
@@ -70,7 +67,7 @@ const ItemSettingsModal: React.FC<
         <ViewSettingsForm
           register={register}
           withFunctionSettings={withFunctionSettings}
-          disableLogXSetting={disableLogX}
+          fixed={fixed}
         />
       </Modal.Body>
     </Modal>
