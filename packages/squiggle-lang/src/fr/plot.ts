@@ -59,7 +59,7 @@ export const library = [
   maker.make({
     name: "fn",
     output: "Plot",
-    examples: [`Plot.fn({fn: fn, min: 3, max: 5})`],
+    examples: [`Plot.fn({fn: {|x|x*x}, min: 3, max: 5})`],
     definitions: [
       makeDefinition(
         "fn",
