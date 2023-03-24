@@ -3,6 +3,12 @@ import { Expression } from "../expression";
 import { Namespace } from "../reducer/bindings";
 import { ReducerContext } from "../reducer/Context";
 import { declarationToString, LambdaDeclaration } from "../reducer/declaration";
+import {
+  ErrorMessage,
+  REArrayIndexNotFound,
+  REOther,
+  RERecordPropertyNotFound,
+} from "../reducer/ErrorMessage";
 import { Lambda } from "../reducer/lambda";
 import * as DateTime from "../utility/DateTime";
 
@@ -31,6 +37,23 @@ class VArray {
   constructor(public value: Value[]) {}
   toString(): string {
     return "[" + this.value.map((v) => v.toString()).join(",") + "]";
+  }
+
+  get(key: Value) {
+    if (key.type === "Number") {
+      const index = key.value | 0; // TODO - fail on non-integer indices?
+      if (index >= 0 && index < this.value.length) {
+        return this.value[index];
+      } else {
+        return ErrorMessage.throw(
+          REArrayIndexNotFound("Array index not found", index)
+        );
+      }
+    }
+
+    return ErrorMessage.throw(
+      REOther("Can't access non-numerical key on an array")
+    );
   }
 }
 export const vArray = (v: Value[]) => new VArray(v);
@@ -110,6 +133,21 @@ class VRecord {
       "}"
     );
   }
+
+  get(key: Value) {
+    if (key.type === "String") {
+      return (
+        this.value.get(key.value) ??
+        ErrorMessage.throw(
+          RERecordPropertyNotFound("Record property not found", key.value)
+        )
+      );
+    } else {
+      return ErrorMessage.throw(
+        REOther("Can't access non-string key on a record")
+      );
+    }
+  }
 }
 export const vRecord = (v: ValueMap) => new VRecord(v);
 
@@ -135,17 +173,46 @@ export type LabeledDistribution = {
   distribution: BaseDist;
 };
 
-export type Plot = {
-  distributions: LabeledDistribution[];
-};
+export type Plot =
+  | {
+      type: "distributions";
+      distributions: LabeledDistribution[];
+    }
+  | {
+      type: "fn";
+      fn: Lambda;
+      min: number;
+      max: number;
+    };
 
 class VPlot {
   readonly type = "Plot" as const;
   constructor(public value: Plot) {}
+
   toString() {
-    return `Plot containing ${this.value.distributions
-      .map((x) => x.name)
-      .join(", ")}`;
+    switch (this.value.type) {
+      case "distributions":
+        return `Plot containing ${this.value.distributions
+          .map((x) => x.name)
+          .join(", ")}`;
+      case "fn":
+        return `Plot for function ${this.value.fn}`;
+      default:
+        // never happens
+        return "Unknown plot";
+    }
+  }
+
+  get(key: Value) {
+    if (
+      key.type === "String" &&
+      key.value === "fn" &&
+      this.value.type === "fn"
+    ) {
+      return vLambda(this.value.fn);
+    }
+
+    return ErrorMessage.throw(REOther("Trying to access key on wrong value"));
   }
 }
 

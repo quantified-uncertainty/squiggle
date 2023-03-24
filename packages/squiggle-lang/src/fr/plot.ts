@@ -4,11 +4,13 @@ import {
   frString,
   frRecord,
   frDistOrNumber,
+  frLambda,
+  frNumber,
 } from "../library/registry/frTypes";
 import { PointMass } from "../dist/SymbolicDist";
 import { FnFactory } from "../library/registry/helpers";
 import * as Result from "../utility/result";
-import { vPlot, LabeledDistribution } from "../value";
+import { vPlot, LabeledDistribution, vLambda } from "../value";
 import { REOther } from "../reducer/ErrorMessage";
 
 const maker = new FnFactory({
@@ -46,7 +48,29 @@ export const library = [
           });
           return Result.Ok(
             vPlot({
+              type: "distributions",
               distributions,
+            })
+          );
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "fn",
+    output: "Plot",
+    examples: [`Plot.fn({fn: fn, min: 3, max: 5})`],
+    definitions: [
+      makeDefinition(
+        "fn",
+        [frRecord(["fn", frLambda], ["min", frNumber], ["max", frNumber])],
+        ([{ fn, min, max }]) => {
+          return Result.Ok(
+            vPlot({
+              type: "fn",
+              fn,
+              min,
+              max,
             })
           );
         }

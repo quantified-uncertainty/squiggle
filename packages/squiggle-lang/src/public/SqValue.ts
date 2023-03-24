@@ -3,7 +3,7 @@ import { SqDistribution, wrapDistribution } from "./SqDistribution";
 import { SqLambda } from "./SqLambda";
 import { SqLambdaDeclaration } from "./SqLambdaDeclaration";
 import { SqRecord } from "./SqRecord";
-import { SqPlot } from "./SqPlot";
+import { SqPlot, wrapPlot } from "./SqPlot";
 import { SqArray } from "./SqArray";
 import { SqValueLocation } from "./SqValueLocation";
 import { SqError } from "./SqError";
@@ -194,7 +194,7 @@ export class SqPlotValue extends SqAbstractValue<"Plot", SqPlot> {
   tag = "Plot" as const;
 
   get value() {
-    return new SqPlot(this._value.value, this.location);
+    return wrapPlot(this._value.value, this.location);
   }
 
   asJS() {

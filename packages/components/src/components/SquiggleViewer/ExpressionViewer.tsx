@@ -202,10 +202,15 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
           value={value}
           heading="Plot"
           renderSettingsMenu={({ onChange }) => {
-            let disableLogX = plot.distributions.some((x) => {
-              let pointSet = x.distribution.pointSet(environment);
-              return pointSet.ok && hasMassBelowZero(pointSet.value.asShape());
-            });
+            const disableLogX =
+              plot.tag === "distributions"
+                ? plot.distributions.some((x) => {
+                    let pointSet = x.distribution.pointSet(environment);
+                    return (
+                      pointSet.ok && hasMassBelowZero(pointSet.value.asShape())
+                    );
+                  })
+                : true; // TODO - check min/max values for fn plots and support log scale in FunctionChart
             return (
               <ItemSettingsMenu
                 value={value}
@@ -217,14 +222,36 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
           }}
         >
           {(settings) => {
-            return (
-              <MultiDistributionChart
-                plot={sqPlotToPlot(plot)}
-                environment={environment}
-                chartHeight={settings.chartHeight}
-                settings={settings.distributionChartSettings}
-              />
-            );
+            switch (plot.tag) {
+              case "distributions":
+                return (
+                  <MultiDistributionChart
+                    plot={sqPlotToPlot(plot)}
+                    environment={environment}
+                    chartHeight={settings.chartHeight}
+                    settings={settings.distributionChartSettings}
+                  />
+                );
+              case "fn":
+                return (
+                  <FunctionChart
+                    fn={plot.fn}
+                    settings={{
+                      ...settings.functionChartSettings,
+                      start: plot.min,
+                      stop: plot.max,
+                    }}
+                    distributionChartSettings={
+                      settings.distributionChartSettings
+                    }
+                    height={settings.chartHeight}
+                    environment={{
+                      sampleCount: environment.sampleCount / 10,
+                      xyPointLength: environment.xyPointLength / 10,
+                    }}
+                  />
+                );
+            }
           }}
         </VariableBox>
       );
