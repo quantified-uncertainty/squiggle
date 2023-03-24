@@ -21,6 +21,7 @@ import { hasMassBelowZero } from "../lib/distributionUtils";
 import { NumberShower } from "./NumberShower";
 import { XIcon } from "@heroicons/react/solid";
 import { Tooltip } from "./ui/Tooltip";
+import { SqDistributionsPlot } from "@quri/squiggle-lang/src/public/SqPlot";
 
 export const distributionSettingsSchema = yup
   .object({})
@@ -46,7 +47,7 @@ interface Plot {
   colorScheme: string;
 }
 
-export function sqPlotToPlot(sqPlot: SqPlot): Plot {
+export function sqPlotToPlot(sqPlot: SqDistributionsPlot): Plot {
   return {
     distributions: sqPlot.distributions.map((x) => ({ ...x, opacity: 0.3 })),
     colorScheme: "category10",
