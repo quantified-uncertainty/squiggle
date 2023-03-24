@@ -1,95 +1,32 @@
-import { createEmptyGraphModel, Model } from "@/model/utils";
-import { InterfaceWithModels } from "@/types";
-import { FC, PropsWithChildren, Reducer, useMemo } from "react";
-import { generateProvider } from "../generateProvider";
-import { Map } from "immutable";
+import { useInterfaceById } from "@/storage/StorageProvider";
+import { createContext, FC, PropsWithChildren, useContext } from "react";
 
-export type InterfaceContextShape = InterfaceWithModels;
-
-const defaultValue: InterfaceContextShape = {
-  models: Map([
-    [
-      "default",
-      {
-        mode: "text",
-        code: "",
-        author: "unknown",
-        title: "default",
-      },
-    ],
-  ]),
-  catalog: {
-    id: "undefined",
-    title: "Undefined",
-    items: [],
-    clusters: {},
-  },
+export type InterfaceContextShape = {
+  interfaceId: string;
 };
 
-type Action =
-  | {
-      type: "selectModel";
-      payload: string;
-    }
-  | {
-      type: "createModel";
-      payload: {
-        id: string;
-        author: string;
-        title: string;
-      };
-    }
-  | {
-      type: "updateModel";
-      payload: {
-        id: string;
-        model: Model;
-      };
-    }
-  | {
-      type: "load";
-      payload: InterfaceContextShape;
-    };
-
-const reducer: Reducer<InterfaceContextShape, Action> = (state, action) => {
-  switch (action.type) {
-    case "createModel":
-      return {
-        ...state,
-        models: state.models.set(
-          action.payload.id,
-          createEmptyGraphModel({
-            author: action.payload.author,
-            title: action.payload.title,
-            catalog: state.catalog,
-          })
-        ),
-      };
-    case "updateModel":
-      return {
-        ...state,
-        models: state.models.set(action.payload.id, action.payload.model),
-      };
-    case "load":
-      return action.payload;
-    default:
-      return state;
-  }
-};
-
-const { useContext, useDispatch, Provider } = generateProvider({
-  name: "Interface",
-  reducer,
-  defaultValue,
+const InterfaceContext = createContext<InterfaceContextShape>({
+  interfaceId: "default",
 });
 
-export const useInterfaceContext = useContext;
-export const useInterfaceDispatch = useDispatch;
-
 export const InterfaceProvider: FC<
-  PropsWithChildren<{ initialValue: InterfaceContextShape }>
-> = ({ initialValue, children }) => {
+  PropsWithChildren<{ value: InterfaceContextShape }>
+> = ({ value, children }) => {
   return (
-    <Provider generateInitialValue={() => initialValue}>{children}</Provider>
+    <InterfaceContext.Provider value={value}>
+      {children}
+    </InterfaceContext.Provider>
   );
+};
+
+export const useInterfaceContext = () => useContext(InterfaceContext);
+
+export const useSelectedInterface = () => {
+  const { interfaceId } = useInterfaceContext();
+  const interfaceWithModel = useInterfaceById(interfaceId);
+  if (!interfaceWithModel) {
+    // should be checked when InterfaceProvider is created, so we don't have to deal with undefined types
+    throw new Error(`Interface ${interfaceId} not found`);
+  }
+  return interfaceWithModel;
 };

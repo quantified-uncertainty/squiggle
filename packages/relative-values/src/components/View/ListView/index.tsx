@@ -1,35 +1,34 @@
-import { useInterfaceContext } from "@/components/Interface/InterfaceProvider";
+import { useSelectedInterface } from "@/components/Interface/InterfaceProvider";
 import { DropdownButton } from "@/components/ui/DropdownButton";
+import { InterfaceWithModels } from "@/types";
 import { RVStorage } from "@/values/RVStorage";
-import { FC, Fragment, useEffect, useState } from "react";
+import { NumberShower } from "@quri/squiggle-components";
+import { FC, Fragment, useState } from "react";
 import { CellBox } from "../CellBox";
 import { AxisMenu } from "../GridView/AxisMenu";
 import { Header } from "../Header";
 import { useFilteredItems, useSortedItems } from "../hooks";
+import { averageDb, averageMedian } from "../hooks/useSortedItems";
 import { RelativeCell } from "../RelativeCell";
 import { useViewContext } from "../ViewProvider";
 import { ColumnHeader } from "./ColumnHeader";
-import { averageDb, averageMedian } from "../hooks/useSortedItems";
-import { NumberShower } from "@quri/squiggle-components";
 
 type Props = {
   rv: RVStorage;
 };
 
 export const ListView: FC<Props> = ({ rv }) => {
+  const { axisConfig } = useViewContext();
   const {
     catalog: { items },
-  } = useInterfaceContext();
-  const { axisConfig } = useViewContext();
+  } = useSelectedInterface();
 
   const [selectedItem, setSelectedItem] = useState(items[0]);
 
-  useEffect(() => {
-    // when catalog changes selectedItem can become invalid so we reset it
-    setSelectedItem(items[0]);
-  }, [items]);
-
-  const filteredItems = useFilteredItems({ items, config: axisConfig.rows });
+  const filteredItems = useFilteredItems({
+    items,
+    config: axisConfig.rows,
+  });
   const sortedItems = useSortedItems({
     items: filteredItems,
     config: axisConfig.rows,
@@ -52,19 +51,29 @@ export const ListView: FC<Props> = ({ rv }) => {
         }}
       >
         <CellBox header>
-          <div className="p-1 pt-2 text-sm font-semibold text-slate-600">Name</div>
+          <div className="p-1 pt-2 text-sm font-semibold text-slate-600">
+            Name
+          </div>
         </CellBox>
         <CellBox header>
-          <div className="p-1 pt-2 text-sm font-semibold text-slate-600">ID</div>
+          <div className="p-1 pt-2 text-sm font-semibold text-slate-600">
+            ID
+          </div>
         </CellBox>
         <CellBox header>
-          <div className="p-1 pt-2 text-sm font-semibold text-slate-600">Cluster</div>
+          <div className="p-1 pt-2 text-sm font-semibold text-slate-600">
+            Cluster
+          </div>
         </CellBox>
         <CellBox header>
-          <div className="p-1 pt-2 text-sm font-semibold text-slate-600">Average Median Value</div>
+          <div className="p-1 pt-2 text-sm font-semibold text-slate-600">
+            Average Median Value
+          </div>
         </CellBox>
         <CellBox header>
-          <div className="p-1 pt-2 text-sm font-semibold text-slate-600">Average Uncertainty (db)</div>
+          <div className="p-1 pt-2 text-sm font-semibold text-slate-600">
+            Average Uncertainty (db)
+          </div>
         </CellBox>
         <ColumnHeader
           selectedItem={selectedItem}

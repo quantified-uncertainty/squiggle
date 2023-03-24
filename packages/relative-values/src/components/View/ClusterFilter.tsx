@@ -1,9 +1,9 @@
 import { Cluster } from "@/types";
-import { FC } from "react";
-import { useInterfaceContext } from "../Interface/InterfaceProvider";
-import { ClusterIcon } from "../common/ClusterIcon";
-import { Axis, useViewContext, useViewDispatch } from "./ViewProvider";
 import clsx from "clsx";
+import { FC } from "react";
+import { ClusterIcon } from "../common/ClusterIcon";
+import { useSelectedInterface } from "../Interface/InterfaceProvider";
+import { Axis, useViewContext, useViewDispatch } from "./ViewProvider";
 
 export const ClusterItem: React.FC<{
   cluster: Cluster;
@@ -28,7 +28,7 @@ export const ClusterItem: React.FC<{
 export const ClusterFilter: FC<{ axis: Axis }> = ({ axis }) => {
   const {
     catalog: { clusters },
-  } = useInterfaceContext();
+  } = useSelectedInterface();
   const {
     axisConfig: {
       [axis]: { filter },

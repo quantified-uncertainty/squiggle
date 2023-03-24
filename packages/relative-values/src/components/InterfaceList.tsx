@@ -1,4 +1,4 @@
-import { allInterfaces } from "@/builtins";
+import { useAllInterfaces } from "@/storage/StorageProvider";
 import { InterfaceWithModels } from "@/types";
 import { FC } from "react";
 import { StyledLink } from "./ui/StyledLink";
@@ -25,6 +25,8 @@ const InterfaceCard: FC<{ data: InterfaceWithModels }> = ({ data }) => {
 };
 
 export const InterfaceList: FC = () => {
+  const allInterfaces = useAllInterfaces();
+
   return (
     <div className="max-w-6xl mx-auto">
       <header className="text-3xl mb-8">Interfaces</header>

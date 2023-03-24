@@ -1,4 +1,9 @@
 import { useSelectedModel } from "@/app/interfaces/[id]/models/[modelId]/ModelProvider";
+import { ChipIcon } from "@/components/ui/icons/ChipIcon";
+import {
+  useInterfaceById,
+  useStorageDispatch,
+} from "@/storage/StorageProvider";
 import { FC } from "react";
 import { ModelEditor } from "../ModelEditor";
 import { StyledTab } from "../ui/StyledTab";
@@ -7,9 +12,8 @@ import { useRelativeValues } from "../View/hooks";
 import { ListView } from "../View/ListView";
 import { PlotView } from "../View/PlotView";
 import { ViewProvider } from "../View/ViewProvider";
-import { useInterfaceContext, useInterfaceDispatch } from "./InterfaceProvider";
+import { useInterfaceContext } from "./InterfaceProvider";
 import { ModelPicker } from "./ModelPicker";
-import { ChipIcon } from "@/components/ui/icons/ChipIcon";
 
 const NotFound: FC<{ error: string }> = ({ error }) => (
   <div className="text-red-500 p-4">{error}</div>
@@ -18,17 +22,17 @@ const NotFound: FC<{ error: string }> = ({ error }) => (
 export const ModelSection: FC = () => {
   const { selectedId: id, selectedModel: model } = useSelectedModel();
   const { error, rv } = useRelativeValues(model);
-  const {
-    catalog: { clusters },
-  } = useInterfaceContext();
-  const dispatch = useInterfaceDispatch();
+  const { interfaceId } = useInterfaceContext();
+  const interfaceWithModels = useInterfaceById(interfaceId);
 
-  if (!model || id === undefined) {
+  const dispatch = useStorageDispatch();
+
+  if (!interfaceWithModels || !model || id === undefined) {
     return <NotFound error="Model not found" />;
   }
 
   return (
-    <ViewProvider initialClusters={clusters}>
+    <ViewProvider initialClusters={interfaceWithModels.catalog.clusters}>
       <StyledTab.Group>
         <div className="mb-8 flex items-center justify-between max-w-6xl mx-auto">
           <div className="flex">
@@ -67,7 +71,7 @@ export const ModelSection: FC = () => {
                 setModel={(newModel) =>
                   dispatch({
                     type: "updateModel",
-                    payload: { id, model: newModel },
+                    payload: { interfaceId, modelId: id, model: newModel },
                   })
                 }
               />

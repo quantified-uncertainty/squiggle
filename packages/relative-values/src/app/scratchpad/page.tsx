@@ -5,11 +5,15 @@ import {
 } from "@/components/Interface/InterfaceProvider";
 import { Button } from "@/components/ui/Button";
 import { modelFromJSON } from "@/model/utils";
+import { interfaceRoute } from "@/routes";
+import { useStorageDispatch } from "@/storage/StorageProvider";
+import { InterfaceWithModels } from "@/types";
 import { Map } from "immutable";
+import { useRouter } from "next/navigation";
 import { FC, useMemo, useState } from "react";
 
 const LoadJSONForm: FC<{
-  setValue(value: InterfaceContextShape): void;
+  setValue(value: InterfaceWithModels): void;
 }> = ({ setValue }) => {
   const [text, setText] = useState("{}");
 
@@ -52,20 +56,21 @@ const LoadJSONForm: FC<{
 };
 
 export default function ScratchpadPage() {
-  const [data, setData] =
-    useState<InterfaceContextShape | undefined>(undefined);
+  const dispatch = useStorageDispatch();
 
-  if (data) {
-    return (
-      <InterfaceProvider initialValue={data}>
-        <div>TODO</div>
-      </InterfaceProvider>
-    );
-  } else {
-    return (
-      <div className="max-w-4xl p-8 mx-auto">
-        <LoadJSONForm setValue={setData} />
-      </div>
-    );
-  }
+  const router = useRouter();
+
+  const setData = (data: InterfaceWithModels) => {
+    dispatch({
+      type: "createInterface",
+      payload: data,
+    });
+    router.push(interfaceRoute(data.catalog.id));
+  };
+
+  return (
+    <div className="max-w-4xl p-8 mx-auto">
+      <LoadJSONForm setValue={setData} />
+    </div>
+  );
 }

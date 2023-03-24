@@ -1,7 +1,7 @@
 import { Item } from "@/types";
 import { RVStorage } from "@/values/RVStorage";
 import { FC, Fragment, useCallback, useMemo } from "react";
-import { useInterfaceContext } from "../../Interface/InterfaceProvider";
+import { useSelectedInterface } from "../../Interface/InterfaceProvider";
 import { DropdownButton } from "../../ui/DropdownButton";
 import { Header } from "../Header";
 import { useFilteredItems, useSortedItems } from "../hooks";
@@ -16,7 +16,7 @@ export const GridView: FC<{
   const { axisConfig, gridMode } = useViewContext();
   const {
     catalog: { items },
-  } = useInterfaceContext();
+  } = useSelectedInterface();
 
   const filteredRowItems = useFilteredItems({
     items: items,

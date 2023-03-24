@@ -1,11 +1,14 @@
 import { FC, Fragment } from "react";
-import { useInterfaceContext } from "../Interface/InterfaceProvider";
+import {
+  useInterfaceContext,
+  useSelectedInterface,
+} from "../Interface/InterfaceProvider";
 import { ClusterIcon } from "../common/ClusterIcon";
 
 const ClusterInfo: FC<{ clusterId: string }> = ({ clusterId }) => {
   const {
     catalog: { clusters },
-  } = useInterfaceContext();
+  } = useSelectedInterface();
 
   const cluster = clusters[clusterId];
 
@@ -26,7 +29,7 @@ const ClusterInfo: FC<{ clusterId: string }> = ({ clusterId }) => {
 const CatalogItems: FC = () => {
   const {
     catalog: { items },
-  } = useInterfaceContext();
+  } = useSelectedInterface();
 
   return (
     <div
