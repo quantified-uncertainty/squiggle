@@ -1,15 +1,10 @@
+import { Namespace, NamespaceMap } from "../reducer/bindings";
+import { ErrorMessage, REOther } from "../reducer/ErrorMessage";
+import { BuiltinLambda } from "../reducer/lambda";
 import { Value, vLambda } from "../value";
 import { makeMathConstants } from "./math";
-import { makeVersionConstant } from "./version";
 import * as registry from "./registry";
-import { Namespace, NamespaceMap } from "../reducer/bindings";
-import { BuiltinLambda } from "../reducer/lambda";
-import {
-  ErrorMessage,
-  REArrayIndexNotFound,
-  REOther,
-  RERecordPropertyNotFound,
-} from "../reducer/ErrorMessage";
+import { makeVersionConstant } from "./version";
 
 const makeStdLib = (): Namespace => {
   let res = NamespaceMap<string, Value>();

@@ -1,17 +1,17 @@
+import { PointMass } from "../dist/SymbolicDist";
 import { makeDefinition } from "../library/registry/fnDefinition";
 import {
   frArray,
-  frString,
-  frRecord,
   frDistOrNumber,
   frLambda,
   frNumber,
+  frRecord,
+  frString,
 } from "../library/registry/frTypes";
-import { PointMass } from "../dist/SymbolicDist";
 import { FnFactory } from "../library/registry/helpers";
-import * as Result from "../utility/result";
-import { vPlot, LabeledDistribution, vLambda } from "../value";
 import { REOther } from "../reducer/ErrorMessage";
+import * as Result from "../utility/result";
+import { LabeledDistribution, vPlot } from "../value";
 
 const maker = new FnFactory({
   nameSpace: "Plot",
