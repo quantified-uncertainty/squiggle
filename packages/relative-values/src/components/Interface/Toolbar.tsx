@@ -1,17 +1,12 @@
-import { modelFromJSON, modelToJSON } from "@/model/utils";
-import { Map } from "immutable";
-import { FC, useMemo, useState } from "react";
+import { modelToJSON } from "@/model/utils";
+import { FC, useState } from "react";
 import { Button } from "../ui/Button";
-import {
-  InterfaceContextShape,
-  useInterfaceContext,
-  useInterfaceDispatch,
-} from "./InterfaceProvider";
+import { useSelectedInterface } from "./InterfaceProvider";
 
 const SaveButton: FC = () => {
   const [isCopied, setIsCopied] = useState(false);
 
-  const context = useInterfaceContext();
+  const context = useSelectedInterface();
 
   const copy = () => {
     const jsonContext = {

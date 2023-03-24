@@ -1,4 +1,4 @@
-import { useInterfaceContext } from "@/components/Interface/InterfaceProvider";
+import { useSelectedInterface } from "@/components/Interface/InterfaceProvider";
 import {
   createContext,
   FC,
@@ -13,9 +13,11 @@ type ModelContextShape = {
 
 const ModelContext = createContext<ModelContextShape>({});
 
+const useModelContext = () => useContext(ModelContext);
+
 export const useSelectedModel = () => {
-  const { selectedId } = useContext(ModelContext);
-  const { models } = useInterfaceContext();
+  const { selectedId } = useModelContext();
+  const { models } = useSelectedInterface();
 
   const selectedModel = useMemo(() => {
     if (selectedId === undefined) {

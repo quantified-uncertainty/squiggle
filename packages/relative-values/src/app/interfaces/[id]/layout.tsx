@@ -4,6 +4,7 @@ import { InterfaceProvider } from "@/components/Interface/InterfaceProvider";
 import { Toolbar } from "@/components/Interface/Toolbar";
 import { StyledTab } from "@/components/ui/StyledTab";
 import { aboutInterfaceRoute, interfaceRoute } from "@/routes";
+import { useInterfaceById } from "@/storage/StorageProvider";
 import { useRouter, useSelectedLayoutSegment } from "next/navigation";
 import { PropsWithChildren } from "react";
 
@@ -13,9 +14,7 @@ export default function InterfaceLayout({
 }: PropsWithChildren<{
   params: { id: string };
 }>) {
-  const interfaceWithModels = allInterfaces.find(
-    (i) => i.catalog.id === params.id
-  );
+  const interfaceWithModels = useInterfaceById(params.id);
 
   // FIXME - should be rendered on client
   const displayDate = (date?: Date) => {
@@ -50,14 +49,15 @@ export default function InterfaceLayout({
   };
 
   return (
-    <InterfaceProvider initialValue={interfaceWithModels}>
+    <InterfaceProvider value={{ interfaceId: params.id }}>
       <div className="bg-blue-100 py-8 px-4">
         <div className="flex justify-between items-start max-w-6xl mx-auto">
           <div>
             <header className="text-2xl font-bold mb-2">{catalog.title}</header>
             <div className="text-sm text-gray-700 flex space-x-8">
               {catalog.author && keyValue("Author", catalog.author)}
-              {catalog.created && keyValue("Created", displayDate(catalog.created))}
+              {catalog.created &&
+                keyValue("Created", displayDate(catalog.created))}
               <div>
                 <span className="font-semibold">{catalog.items.length}</span>{" "}
                 items

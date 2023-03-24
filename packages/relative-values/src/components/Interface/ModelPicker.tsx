@@ -5,11 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
 import { Dropdown } from "../ui/Dropdown";
-import { useInterfaceContext } from "./InterfaceProvider";
+import { useSelectedInterface } from "./InterfaceProvider";
 
 const ModelPickerMenu: FC<{ close(): void }> = ({ close }) => {
-  const { models, catalog } = useInterfaceContext();
-  const { selectedId, selectedModel } = useSelectedModel();
+  const { models, catalog } = useSelectedInterface();
+  const { selectedId } = useSelectedModel();
 
   const router = useRouter();
 
@@ -64,9 +64,7 @@ export const ModelPicker: FC = () => {
     <Dropdown render={({ close }) => <ModelPickerMenu close={close} />}>
       <div className="border border-gray-200 p-2 rounded cursor-pointer">
         {selectedModel ? (
-          <div className="text-gray-700 text-sm">
-            Unselect
-          </div>
+          <div className="text-gray-700 text-sm">Unselect</div>
         ) : (
           <div className="italic text-gray-500 text-sm">Pick an estimate</div>
         )}

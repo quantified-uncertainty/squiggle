@@ -1,10 +1,10 @@
 import { FC, useEffect, useMemo, useRef } from "react";
 
-import { useInterfaceContext } from "@/components/Interface/InterfaceProvider";
+import { useSelectedInterface } from "@/components/Interface/InterfaceProvider";
+import { RVStorage } from "@/values/RVStorage";
 import * as d3 from "d3";
 import { useFilteredItems } from "../hooks";
 import { useViewContext } from "../ViewProvider";
-import { RVStorage } from "@/values/RVStorage";
 
 export const ForcePlot: FC<{
   rv: RVStorage;
@@ -13,7 +13,7 @@ export const ForcePlot: FC<{
 
   const {
     catalog: { items, clusters },
-  } = useInterfaceContext();
+  } = useSelectedInterface();
 
   const {
     axisConfig: { rows },
@@ -44,11 +44,10 @@ export const ForcePlot: FC<{
   const width = 480;
   const height = 450;
 
-  const d3ref =
-    useRef<{
-      simulation: d3.Simulation<Node, undefined>;
-      force: d3.ForceLink<Node, d3.SimulationLinkDatum<Node>>;
-    }>();
+  const d3ref = useRef<{
+    simulation: d3.Simulation<Node, undefined>;
+    force: d3.ForceLink<Node, d3.SimulationLinkDatum<Node>>;
+  }>();
 
   const cursorRef = useRef<[number, number]>([0, 0]);
 
