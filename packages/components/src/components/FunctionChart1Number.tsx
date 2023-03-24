@@ -103,7 +103,10 @@ const InnerFunctionChart: FC<Props & { width: number }> = ({
     const tickCount = 5;
     const tickFormat = ".9~s";
     const lineColor = "#4c78a8";
+    const xLabelOffset = 6;
+    const yLabelOffset = 6;
 
+    // modified later according to label width
     const padding = { left: 20, right: 10, top: 10, bottom: 20 };
 
     const xScale = d3
@@ -119,12 +122,14 @@ const InnerFunctionChart: FC<Props & { width: number }> = ({
     const yTicks = yScale.ticks(tickCount);
     const yTickFormat = yScale.tickFormat(tickCount, tickFormat);
 
-    // measure ticks
+    // measure tick sizes for dynamic padding
     yTicks.forEach((d) => {
       const measured = context.measureText(yTickFormat(d));
       padding.left = Math.max(
         padding.left,
-        measured.actualBoundingBoxLeft + measured.actualBoundingBoxRight + 6
+        measured.actualBoundingBoxLeft +
+          measured.actualBoundingBoxRight +
+          yLabelOffset
       );
     });
     xTicks.forEach((d) => {
@@ -157,7 +162,7 @@ const InnerFunctionChart: FC<Props & { width: number }> = ({
       context.fillText(
         xTickFormat(d),
         padding.left + xScale(d),
-        padding.top + chartHeight + 6
+        padding.top + chartHeight + xLabelOffset
       );
     });
 
