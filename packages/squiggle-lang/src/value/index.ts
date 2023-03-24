@@ -194,7 +194,7 @@ class VPlot implements Indexable {
   readonly type = "Plot" as const;
   constructor(public value: Plot) {}
 
-  toString() {
+  toString(): string {
     switch (this.value.type) {
       case "distributions":
         return `Plot containing ${this.value.distributions
@@ -202,9 +202,6 @@ class VPlot implements Indexable {
           .join(", ")}`;
       case "fn":
         return `Plot for function ${this.value.fn}`;
-      default:
-        // never happens
-        return "Unknown plot";
     }
   }
 
