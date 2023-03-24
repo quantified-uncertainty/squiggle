@@ -210,7 +210,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
                       pointSet.ok && hasMassBelowZero(pointSet.value.asShape())
                     );
                   })
-                : true; // TODO - check min/max values for fn plots and support log scale in FunctionChart
+                : true;
             return (
               <ItemSettingsMenu
                 value={value}
