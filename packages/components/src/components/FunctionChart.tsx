@@ -27,8 +27,7 @@ type FunctionChartProps = {
 
 const FunctionCallErrorAlert = ({ error }: { error: SqError }) => {
   const [expanded, setExpanded] = React.useState(false);
-  if (expanded) {
-  }
+
   return (
     <MessageAlert heading="Function Display Failed">
       <div className="space-y-2">
