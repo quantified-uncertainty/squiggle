@@ -1,0 +1,53 @@
+---
+sidebar_position: 10
+title: Plot
+---
+
+The Plot module provides functions to create plots of distributions and functions. The two primary functions are `Plot.dists` and `Plot.fn`, which allow you to plot multiple labeled distributions and plot functions respectively.
+
+### Plot.dists
+
+Plots one or more labeled distributions on the same plot. Distributions can be either continuous, discrete, or a single number.
+
+```
+Plot.dists: ({dists: list<{name: string, value: distribution | number}>}) => plot
+```
+
+Examples:
+
+```
+Plot.dists({
+    dists: [{name: "dist", value: normal(0, 1)}]
+});
+```
+
+```
+plot = Plot.dists({
+    dists: [
+        { name: "Normal(0,1)", value: normal(0, 1) },
+        { name: "Normal(2,1)", value: normal(2, 1) },
+    ]
+})
+```
+
+### Plot.fn
+
+Plots a function within a specified range of x-values.
+
+```
+Plot.fn: ({fn: (number => number), min: number, max: number}) => plot
+```
+
+Examples:
+
+```
+Plot.fn({fn: {|x| x * x}, min: 3, max: 5})
+```
+
+```
+const plot = Plot.fn({
+    fn: {|x| Math.sin(x)},
+    min: 0,
+    max: 2 * Math.pi,
+})
+```
