@@ -4,11 +4,13 @@ import { getQuriSoftwareBuiltin } from "./quri-software";
 import { getQuriPosts } from "./quri-posts";
 import { getCrossCauses } from "./cross-cause";
 import { getHealthInterventions } from "./health-interventions";
+import { getThingsYouShouldBuy } from "./things-you-should-buy";
 
 export const allInterfaces: InterfaceWithModels[] = [
   getQuriBuiltin(),
   getQuriSoftwareBuiltin(),
   getQuriPosts(),
   getCrossCauses(),
-  getHealthInterventions()
+  getHealthInterventions(),
+	getThingsYouShouldBuy()
 ];

@@ -84,7 +84,7 @@ SQUIGGLE_CODE
   };
 }
 
-export function getCrossCauses(): InterfaceWithModels {
+export function getThingsYouShouldBuy(): InterfaceWithModels {
   return {
     catalog: getCatalog(),
     models: Map([["Cross-Cause-Estimate", getTextModel()]]),

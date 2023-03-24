@@ -79,9 +79,9 @@ function getTextModel(): Model {
     author: "Nuno Sempere",
     mode: "text",
     code: `
-SQUIGGLE_CODE
+
 // Utils
-ss(dist) = SampleSet.fromDist(dist)
+ss = {|dist| SampleSet.fromDist(dist) }
 // note: SampleSet ensures that the correlation 
 // is propagated, which allows for relative values.
 
@@ -367,7 +367,7 @@ item_nice_headphones`,
   };
 }
 
-export function getCrossCauses(): InterfaceWithModels {
+export function getThingsYouShouldBuy(): InterfaceWithModels {
   return {
     catalog: getCatalog(),
     models: Map([["Cross-Cause-Estimate", getTextModel()]]),
