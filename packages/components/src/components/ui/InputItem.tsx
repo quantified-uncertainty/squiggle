@@ -34,7 +34,10 @@ export function InputItem<T extends FieldValues>({
         disabled={disabled}
         defaultValue={fixed}
         {...register(name, { valueAsNumber: type === "number" })}
-        className="form-input max-w-lg block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md"
+        className={clsx(
+          "form-input max-w-lg block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md",
+          disabled && "text-gray-400"
+        )}
       />
     </label>
   );
