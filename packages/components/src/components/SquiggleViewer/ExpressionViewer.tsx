@@ -172,6 +172,15 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
         </VariableBox>
       );
     case "Declaration": {
+      const fixed: PartialViewSettings = {};
+      const { inputs } = value.value;
+      if (inputs.length === 1 && inputs[0].type === "Float") {
+        fixed.functionChartSettings = {
+          start: inputs[0].min,
+          stop: inputs[0].max,
+        };
+      }
+
       return (
         <VariableBox
           value={value}
@@ -181,55 +190,56 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
               <ItemSettingsMenu
                 onChange={onChange}
                 value={value}
+                fixed={fixed}
                 withFunctionSettings={true}
               />
             );
           }}
         >
-          {(_) => (
-            <div>NOT IMPLEMENTED YET</div>
-            // <FunctionChart
-            //   fn={expression.value.fn}
-            //   chartSettings={getChartSettings(expression.value)}
-            //   distributionChartSettings={settings.distributionChartSettings}
-            //   height={settings.height}
-            //   environment={{
-            //     sampleCount: environment.sampleCount / 10,
-            //     xyPointLength: environment.xyPointLength / 10,
-            //   }}
-            // />
+          {(settings) => (
+            <FunctionChart
+              fn={value.value.fn}
+              settings={{
+                ...settings.functionChartSettings,
+                ...fixed.functionChartSettings,
+              }}
+              distributionChartSettings={settings.distributionChartSettings}
+              height={settings.chartHeight}
+              environment={{
+                sampleCount: environment.sampleCount / 10,
+                xyPointLength: environment.xyPointLength / 10,
+              }}
+            />
           )}
         </VariableBox>
       );
     }
     case "Plot":
       const plot: SqPlot = value.value;
+      const fixed: PartialViewSettings = {};
+      const disableLogX =
+        plot.tag === "distributions"
+          ? plot.distributions.some((x) => {
+              let pointSet = x.distribution.pointSet(environment);
+              return pointSet.ok && hasMassBelowZero(pointSet.value.asShape());
+            })
+          : false;
+      if (disableLogX) {
+        fixed.distributionChartSettings = {
+          logX: false,
+        };
+      }
+      fixed.functionChartSettings = {};
+      if (plot.tag === "fn") {
+        fixed.functionChartSettings.start = plot.min;
+        fixed.functionChartSettings.stop = plot.max;
+      }
+
       return (
         <VariableBox
           value={value}
           heading="Plot"
           renderSettingsMenu={({ onChange }) => {
-            const fixed: PartialViewSettings = {};
-            const disableLogX =
-              plot.tag === "distributions"
-                ? plot.distributions.some((x) => {
-                    let pointSet = x.distribution.pointSet(environment);
-                    return (
-                      pointSet.ok && hasMassBelowZero(pointSet.value.asShape())
-                    );
-                  })
-                : false;
-            if (disableLogX) {
-              fixed.distributionChartSettings = {
-                logX: false,
-              };
-            }
-            fixed.functionChartSettings = {};
-            if (plot.tag === "fn") {
-              fixed.functionChartSettings.start = plot.min;
-              fixed.functionChartSettings.stop = plot.max;
-            }
-
             return (
               <ItemSettingsMenu
                 value={value}
@@ -257,8 +267,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
                     fn={plot.fn}
                     settings={{
                       ...settings.functionChartSettings,
-                      start: plot.min,
-                      stop: plot.max,
+                      ...fixed.functionChartSettings,
                     }}
                     distributionChartSettings={
                       settings.distributionChartSettings

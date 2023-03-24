@@ -101,7 +101,7 @@ export class SqDeclarationValue extends SqAbstractValue<
   tag = "Declaration" as const;
 
   get value() {
-    return new SqLambdaDeclaration(this._value.value);
+    return new SqLambdaDeclaration(this._value.value, this.location);
   }
 
   asJS() {

@@ -81,11 +81,18 @@ class VDate {
 }
 export const vDate = (v: Date) => new VDate(v);
 
-class VDeclaration {
+class VDeclaration implements Indexable {
   readonly type = "Declaration" as const;
   constructor(public value: LambdaDeclaration) {}
   toString() {
     return declarationToString(this.value, (f) => vLambda(f).toString());
+  }
+  get(key: Value) {
+    if (key.type === "String" && key.value === "fn") {
+      return vLambda(this.value.fn);
+    }
+
+    return ErrorMessage.throw(REOther("Trying to access key on wrong value"));
   }
 }
 export const vLambdaDeclaration = (v: LambdaDeclaration) => new VDeclaration(v);
