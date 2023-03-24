@@ -20,6 +20,11 @@ export type ReducerFn = (
 
 export type ValueMap = Namespace;
 
+// Mixin for values that allow field lookups; just for type safety.
+type Indexable = {
+  get(key: Value): Value;
+};
+
 /*
 Value classes are shaped in a similar way and can work as discriminated unions thank to the `type` property.
 
@@ -32,7 +37,7 @@ If you add a new value class, don't forget to add it to the "Value" union type b
 "vBlah" functions are just for the sake of brevity, so that we don't have to prefix any value creation with "new".
 */
 
-class VArray {
+class VArray implements Indexable {
   readonly type = "Array" as const;
   constructor(public value: Value[]) {}
   toString(): string {
@@ -121,7 +126,7 @@ class VString {
 }
 export const vString = (v: string) => new VString(v);
 
-class VRecord {
+class VRecord implements Indexable {
   readonly type = "Record" as const;
   constructor(public value: ValueMap) {}
   toString(): string {
@@ -185,7 +190,7 @@ export type Plot =
       max: number;
     };
 
-class VPlot {
+class VPlot implements Indexable {
   readonly type = "Plot" as const;
   constructor(public value: Plot) {}
 
