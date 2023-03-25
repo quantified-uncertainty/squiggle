@@ -7,24 +7,6 @@ This package contains the react components for squiggle. These can be used eithe
 
 The `@quri/squiggle-components` package offers several components and utilities for people who want to embed Squiggle components into websites.
 
-# Usage in a `react` project
-
-For example, in a fresh `create-react-app` project
-
-```sh
-yarn add @quri/squiggle-components
-```
-
-Add to `App.js`:
-
-```jsx
-import { SquiggleEditor } from "@quri/squiggle-components";
-<SquiggleEditor
-  defaultCode="x = beta($alpha, 10); x + $shift"
-  jsImports={{ alpha: 3, shift: 20 }}
-/>;
-```
-
 # Usage in a Nextjs project
 
 For now, `squiggle-components` requires the `window` property, so using the package in nextjs requires dynamic loading:
@@ -58,6 +40,27 @@ export function DynamicSquiggleChart({ squiggleString }) {
     );
   }
 }
+
+# Usage in a `react` project (future functionality).
+
+Right now, this functionality is [broken](https://github.com/quantified-uncertainty/squiggle/issues/1234), but we are aiming to fix it.
+
+For example, in a fresh `create-react-app` project
+
+```sh
+yarn add @quri/squiggle-components
+```
+
+Add to `App.js`:
+
+```jsx
+import { SquiggleEditor } from "@quri/squiggle-components";
+<SquiggleEditor
+  defaultCode="x = beta($alpha, 10); x + $shift"
+  jsImports={{ alpha: 3, shift: 20 }}
+/>;
+```
+
 
 ```
 
