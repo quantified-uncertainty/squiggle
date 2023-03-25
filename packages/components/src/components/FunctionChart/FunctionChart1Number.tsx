@@ -1,13 +1,14 @@
 import * as d3 from "d3";
 import * as React from "react";
-import { FC, useEffect, useMemo } from "react";
+import { FC, useEffect, useMemo, useRef } from "react";
 import { useMeasure } from "react-use";
 
 import { SqLambda } from "@quri/squiggle-lang";
 
 import { ErrorAlert } from "../Alert";
 import { FunctionChartSettings } from "./index";
-import { getFunctionImage } from "./utils";
+import { drawAxes, getFunctionImage } from "./utils";
+import { useCanvas } from "../../lib/hooks";
 
 type Props = {
   fn: SqLambda;
@@ -21,132 +22,29 @@ const InnerFunctionChart: FC<Props & { width: number }> = ({
   width,
   height,
 }) => {
-  const ref = React.useRef<HTMLCanvasElement>(null);
+  const { ref, context } = useCanvas();
 
   const { functionImage, errors } = useMemo(
     () => getFunctionImage({ settings, fn, valueType: "Number" }),
     [settings, fn]
   );
 
-  const devicePixelRatio = window.devicePixelRatio || 1;
-
   useEffect(() => {
-    if (!ref.current) {
-      return;
-    }
-    const canvas = ref.current;
-
-    const context = canvas.getContext("2d");
     if (!context) {
       return;
     }
-
-    canvas.style.width = `${canvas.clientWidth}px`;
-    canvas.style.height = `${canvas.clientHeight}px`;
-    canvas.width = canvas.clientWidth * devicePixelRatio;
-    canvas.height = canvas.clientHeight * devicePixelRatio;
-  }, [devicePixelRatio]);
-
-  useEffect(() => {
-    if (!ref.current) {
-      return;
-    }
-    const context = ref.current.getContext("2d");
-    if (!context) {
-      return;
-    }
-    context.resetTransform();
-    context.scale(devicePixelRatio, devicePixelRatio);
     context.clearRect(0, 0, width, height);
 
-    const axisColor = "rgba(114, 125, 147, 0.1)";
-    const labelColor = "rgb(114, 125, 147)";
-    const tickCount = 5;
-    const tickFormat = ".9~s";
+    const { xScale, yScale, padding, chartHeight } = drawAxes({
+      suggestedPadding: { left: 20, right: 10, top: 10, bottom: 20 },
+      xDomain: d3.extent(functionImage, (d) => d.x) as [number, number],
+      yDomain: d3.extent(functionImage, (d) => d.y) as [number, number],
+      width,
+      height,
+      context,
+    });
+
     const lineColor = "#4c78a8";
-    const xLabelOffset = 6;
-    const yLabelOffset = 6;
-
-    // modified later according to label width
-    const padding = { left: 20, right: 10, top: 10, bottom: 20 };
-
-    const xScale = d3
-      .scaleLinear()
-      .domain(d3.extent(functionImage, (d) => d.x) as [number, number]);
-    const yScale = d3
-      .scaleLinear()
-      .domain(d3.extent(functionImage, (d) => d.y) as [number, number]);
-
-    const xTicks = xScale.ticks(tickCount);
-    const xTickFormat = xScale.tickFormat(tickCount, tickFormat);
-
-    const yTicks = yScale.ticks(tickCount);
-    const yTickFormat = yScale.tickFormat(tickCount, tickFormat);
-
-    // measure tick sizes for dynamic padding
-    yTicks.forEach((d) => {
-      const measured = context.measureText(yTickFormat(d));
-      padding.left = Math.max(
-        padding.left,
-        measured.actualBoundingBoxLeft +
-          measured.actualBoundingBoxRight +
-          yLabelOffset
-      );
-    });
-    xTicks.forEach((d) => {
-      const measured = context.measureText(xTickFormat(d));
-      padding.right = Math.max(
-        padding.right,
-        (measured.actualBoundingBoxLeft + measured.actualBoundingBoxRight) / 2
-      );
-    });
-
-    const chartWidth = width - padding.left - padding.right;
-    const chartHeight = height - padding.top - padding.bottom;
-    xScale.range([0, chartWidth]);
-    yScale.range([0, chartHeight]);
-
-    // x axis
-    context.beginPath();
-    context.strokeStyle = axisColor;
-    context.lineWidth = 1;
-    context.moveTo(padding.left, padding.top + chartHeight);
-    context.lineTo(padding.left + chartWidth, padding.top + chartHeight);
-    context.stroke();
-
-    context.textAlign = "center";
-    context.textBaseline = "top";
-    context.fillStyle = labelColor;
-
-    xTicks.forEach((d) => {
-      context.beginPath();
-      context.fillText(
-        xTickFormat(d),
-        padding.left + xScale(d),
-        padding.top + chartHeight + xLabelOffset
-      );
-    });
-
-    // y axis
-    context.beginPath();
-    context.strokeStyle = axisColor;
-    context.lineWidth = 1;
-    context.moveTo(padding.left, padding.top);
-    context.lineTo(padding.left, padding.top + chartHeight);
-    context.stroke();
-
-    context.textAlign = "right";
-    context.textBaseline = "middle";
-    context.fillStyle = labelColor;
-
-    yTicks.forEach((d) => {
-      context.beginPath();
-      context.fillText(
-        yTickFormat(d),
-        padding.left - 6,
-        padding.top + chartHeight - yScale(d)
-      );
-    });
 
     // line
     context.translate(padding.left, chartHeight + padding.top);
@@ -163,7 +61,7 @@ const InnerFunctionChart: FC<Props & { width: number }> = ({
       .context(context)(functionImage);
 
     context.stroke();
-  }, [width, height, functionImage, settings, devicePixelRatio]);
+  }, [context, width, height, functionImage, settings]);
 
   return (
     <div>

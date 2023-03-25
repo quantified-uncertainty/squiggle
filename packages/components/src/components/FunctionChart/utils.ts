@@ -1,6 +1,16 @@
+import * as d3 from "d3";
 import range from "lodash/range";
+
 import { SqLambda, SqValue } from "@quri/squiggle-lang";
+
 import { FunctionChartSettings } from ".";
+
+const axisColor = "rgba(114, 125, 147, 0.1)";
+const labelColor = "rgb(114, 125, 147)";
+const tickCount = 5;
+const tickFormat = ".9~s";
+const xLabelOffset = 6;
+const yLabelOffset = 6;
 
 function rangeByCount(start: number, stop: number, count: number) {
   const step = (stop - start) / (count - 1);
@@ -56,4 +66,105 @@ export function getFunctionImage<T extends Exclude<SqValue["tag"], "Void">>({
   }
 
   return { errors, functionImage };
+}
+
+export type Padding = {
+  top: number;
+  left: number;
+  bottom: number;
+  right: number;
+};
+
+export function drawAxes({
+  context,
+  xDomain,
+  yDomain,
+  suggestedPadding,
+  width,
+  height,
+}: {
+  context: CanvasRenderingContext2D;
+  xDomain: [number, number];
+  yDomain: [number, number];
+  suggestedPadding: Padding; // expanded according to label width
+  width: number;
+  height: number;
+}) {
+  const xScale = d3.scaleLinear().domain(xDomain);
+  const yScale = d3.scaleLinear().domain(yDomain);
+
+  const xTicks = xScale.ticks(tickCount);
+  const xTickFormat = xScale.tickFormat(tickCount, tickFormat);
+
+  const yTicks = yScale.ticks(tickCount);
+  const yTickFormat = yScale.tickFormat(tickCount, tickFormat);
+
+  const padding: Padding = { ...suggestedPadding };
+
+  // measure tick sizes for dynamic padding
+  yTicks.forEach((d) => {
+    const measured = context.measureText(yTickFormat(d));
+    padding.left = Math.max(
+      padding.left,
+      measured.actualBoundingBoxLeft +
+        measured.actualBoundingBoxRight +
+        yLabelOffset
+    );
+  });
+  xTicks.forEach((d) => {
+    const measured = context.measureText(xTickFormat(d));
+    padding.right = Math.max(
+      padding.right,
+      (measured.actualBoundingBoxLeft + measured.actualBoundingBoxRight) / 2
+    );
+  });
+
+  const chartWidth = width - padding.left - padding.right;
+  const chartHeight = height - padding.top - padding.bottom;
+  xScale.range([0, chartWidth]);
+  yScale.range([0, chartHeight]);
+
+  // x axis
+  context.beginPath();
+  context.strokeStyle = axisColor;
+  context.lineWidth = 1;
+  context.moveTo(padding.left, padding.top + chartHeight);
+  context.lineTo(padding.left + chartWidth, padding.top + chartHeight);
+  context.stroke();
+
+  context.textAlign = "center";
+  context.textBaseline = "top";
+  context.fillStyle = labelColor;
+
+  xTicks.forEach((d) => {
+    context.beginPath();
+    context.fillText(
+      xTickFormat(d),
+      padding.left + xScale(d),
+      padding.top + chartHeight + xLabelOffset
+    );
+  });
+
+  // y axis
+  context.beginPath();
+  context.strokeStyle = axisColor;
+  context.lineWidth = 1;
+  context.moveTo(padding.left, padding.top);
+  context.lineTo(padding.left, padding.top + chartHeight);
+  context.stroke();
+
+  context.textAlign = "right";
+  context.textBaseline = "middle";
+  context.fillStyle = labelColor;
+
+  yTicks.forEach((d) => {
+    context.beginPath();
+    context.fillText(
+      yTickFormat(d),
+      padding.left - 6,
+      padding.top + chartHeight - yScale(d)
+    );
+  });
+
+  return { xScale, yScale, padding, chartWidth, chartHeight };
 }

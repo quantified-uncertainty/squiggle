@@ -18,10 +18,7 @@
     "declaration": true,
     "sourceMap": true
   },
-  "files": [
-    "src/vega-specs/spec-distributions.json",
-    "src/vega-specs/spec-percentiles.json"
-  ],
+  "files": ["src/vega-specs/spec-distributions.json"],
   "target": "ES6",
   "include": ["src/**/*", "src/*"],
   "exclude": ["node_modules", "**/*.spec.ts", "webpack.config.js"],
