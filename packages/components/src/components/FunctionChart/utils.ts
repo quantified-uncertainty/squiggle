@@ -6,7 +6,9 @@ import { SqLambda, SqValue } from "@quri/squiggle-lang";
 import { FunctionChartSettings } from ".";
 
 const axisColor = "rgba(114, 125, 147, 0.1)";
-const labelColor = "rgb(114, 125, 147)";
+export const labelColor = "rgb(114, 125, 147)";
+export const cursorLineColor = "#f87171"; // tailwind red-400
+export const primaryColor = "#4c78a8"; // for lines and areas
 const tickCount = 5;
 const tickFormat = ".9~s";
 const xLabelOffset = 6;
@@ -166,5 +168,5 @@ export function drawAxes({
     );
   });
 
-  return { xScale, yScale, padding, chartWidth, chartHeight };
+  return { xScale, yScale, xTickFormat, padding, chartWidth, chartHeight };
 }

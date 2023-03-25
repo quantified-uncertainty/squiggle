@@ -7,7 +7,7 @@ import { SqLambda } from "@quri/squiggle-lang";
 
 import { ErrorAlert } from "../Alert";
 import { FunctionChartSettings } from "./index";
-import { drawAxes, getFunctionImage } from "./utils";
+import { drawAxes, getFunctionImage, primaryColor } from "./utils";
 import { useCanvas } from "../../lib/hooks";
 
 type Props = {
@@ -44,13 +44,11 @@ const InnerFunctionChart: FC<Props & { width: number }> = ({
       context,
     });
 
-    const lineColor = "#4c78a8";
-
     // line
     context.translate(padding.left, chartHeight + padding.top);
     context.scale(1, -1);
     context.beginPath();
-    context.strokeStyle = lineColor;
+    context.strokeStyle = primaryColor;
     context.lineWidth = 2;
     context.imageSmoothingEnabled = true;
 

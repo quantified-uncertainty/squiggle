@@ -13,7 +13,14 @@ import {
 } from "../DistributionChart";
 import { NumberShower } from "../NumberShower";
 import { FunctionChartSettings } from "./index";
-import { drawAxes, getFunctionImage, Padding } from "./utils";
+import {
+  cursorLineColor,
+  drawAxes,
+  getFunctionImage,
+  labelColor,
+  Padding,
+  primaryColor,
+} from "./utils";
 
 function unwrap<a, b>(x: result<a, b>): a {
   if (x.ok) {
@@ -30,15 +37,21 @@ type FunctionChart1DistProps = {
   height: number;
 };
 
-type Percentiles = {
+const intervals = [
+  { width: 0.2, opacity: 0.2 },
+  { width: 0.4, opacity: 0.2 },
+  { width: 0.6, opacity: 0.2 },
+  { width: 0.8, opacity: 0.15 },
+  { width: 0.9, opacity: 0.1 },
+  { width: 0.98, opacity: 0.05 },
+] as const;
+
+type Width = (typeof intervals)[number]["width"];
+
+type Datum = {
   x: number;
   areas: {
-    1: [number, number];
-    5: [number, number];
-    10: [number, number];
-    20: [number, number];
-    30: [number, number];
-    40: [number, number];
+    [k in Width]: [number, number];
   };
   50: number;
 };
@@ -67,42 +80,29 @@ const getPercentiles = ({
 
   const groupedErrors: Errors = _.groupBy(errors, (x) => x.value);
 
-  const percentiles: Percentiles[] = functionImage.map(({ x, y: dist }) => {
+  const data: Datum[] = functionImage.map(({ x, y: dist }) => {
     const res = {
       x: x,
-      areas: {
-        1: [
-          unwrap(dist.inv(environment, 0.01)),
-          unwrap(dist.inv(environment, 0.99)),
-        ],
-        5: [
-          unwrap(dist.inv(environment, 0.05)),
-          unwrap(dist.inv(environment, 0.95)),
-        ],
-        10: [
-          unwrap(dist.inv(environment, 0.1)),
-          unwrap(dist.inv(environment, 0.9)),
-        ],
-        20: [
-          unwrap(dist.inv(environment, 0.2)),
-          unwrap(dist.inv(environment, 0.8)),
-        ],
-        30: [
-          unwrap(dist.inv(environment, 0.3)),
-          unwrap(dist.inv(environment, 0.7)),
-        ],
-        40: [
-          unwrap(dist.inv(environment, 0.4)),
-          unwrap(dist.inv(environment, 0.6)),
-        ],
-      },
+      areas: Object.fromEntries(
+        intervals.map(({ width }) => {
+          const left = (1 - width) / 2;
+          const right = left + width;
+          return [
+            width as Width,
+            [
+              unwrap(dist.inv(environment, left)),
+              unwrap(dist.inv(environment, right)),
+            ],
+          ];
+        })
+      ),
       50: unwrap(dist.inv(environment, 0.5)),
-    } satisfies Percentiles;
+    } as Datum;
 
     return res;
   });
 
-  return { percentiles, errors: groupedErrors };
+  return { data, errors: groupedErrors };
 };
 
 const InnerDistFunctionChart: FC<
@@ -143,6 +143,12 @@ const InnerDistFunctionChart: FC<
     if (!d3ref.current || !cursorRef.current) {
       return;
     }
+    if (
+      cursorRef.current[0] < d3ref.current.padding.left ||
+      cursorRef.current[0] > width - d3ref.current.padding.right
+    ) {
+      return;
+    }
     const x = d3ref.current.xScale.invert(
       cursorRef.current[0] - d3ref.current.padding.left
     );
@@ -166,7 +172,7 @@ const InnerDistFunctionChart: FC<
       />
     ) : null;
 
-  const { percentiles: data, errors } = useMemo(
+  const { data, errors } = useMemo(
     () => getPercentiles({ settings, fn, environment }),
     [environment, fn, settings]
   );
@@ -177,25 +183,26 @@ const InnerDistFunctionChart: FC<
     }
     context.clearRect(0, 0, width, height);
 
-    const { xScale, yScale, padding, chartHeight } = drawAxes({
-      suggestedPadding: { left: 20, right: 10, top: 10, bottom: 20 },
-      xDomain: d3.extent(data, (d) => d.x) as [number, number],
-      yDomain: [
-        Math.min(
-          ...data.map((d) =>
-            Math.min(...Object.values(d.areas).map((p) => p[0]), d[50])
-          )
-        ),
-        Math.max(
-          ...data.map((d) =>
-            Math.max(...Object.values(d.areas).map((p) => p[1]), d[50])
-          )
-        ),
-      ],
-      width,
-      height,
-      context,
-    });
+    const { xScale, yScale, xTickFormat, padding, chartWidth, chartHeight } =
+      drawAxes({
+        suggestedPadding: { left: 20, right: 10, top: 10, bottom: 20 },
+        xDomain: d3.extent(data, (d) => d.x) as [number, number],
+        yDomain: [
+          Math.min(
+            ...data.map((d) =>
+              Math.min(...Object.values(d.areas).map((p) => p[0]), d[50])
+            )
+          ),
+          Math.max(
+            ...data.map((d) =>
+              Math.max(...Object.values(d.areas).map((p) => p[1]), d[50])
+            )
+          ),
+        ],
+        width,
+        height,
+        context,
+      });
     d3ref.current = {
       padding,
       xScale,
@@ -205,41 +212,54 @@ const InnerDistFunctionChart: FC<
     context.translate(padding.left, chartHeight + padding.top);
     context.scale(1, -1);
 
-    const color = "#4C78A8";
-    context.fillStyle = color;
-
-    for (const [key, alpha] of [
-      [40, 0.2],
-      [30, 0.2],
-      [20, 0.2],
-      [10, 0.15],
-      [5, 0.1],
-      [1, 0.05],
-    ]) {
-      context.globalAlpha = alpha;
+    context.fillStyle = primaryColor;
+    for (const { width, opacity } of intervals) {
+      context.globalAlpha = opacity;
       d3
-        .area<Percentiles>()
+        .area<Datum>()
         .x((d) => xScale(d.x))
-        .y1((d) => yScale(d.areas[key][0]))
-        .y0((d) => yScale(d.areas[key][1]))
+        .y1((d) => yScale(d.areas[width][0]))
+        .y0((d) => yScale(d.areas[width][1]))
         .context(context)(data);
       context.fill();
     }
+    context.globalAlpha = 1;
 
     context.beginPath();
-    context.globalAlpha = 1;
-    context.strokeStyle = color;
+    context.strokeStyle = primaryColor;
     context.lineWidth = 2;
     context.imageSmoothingEnabled = true;
 
     d3
-      .line<Percentiles>()
+      .line<Datum>()
       .x((d) => xScale(d.x))
       .y((d) => yScale(d[50]))
       .context(context)(data);
 
     context.stroke();
-  }, [context, width, height, data]);
+
+    if (
+      cursorRef.current &&
+      cursorRef.current[0] >= padding.left &&
+      cursorRef.current[0] - padding.left <= chartWidth
+    ) {
+      const x = cursorRef.current[0] - padding.left;
+      context.beginPath();
+      context.strokeStyle = cursorLineColor;
+      context.lineWidth = 1;
+      context.moveTo(x, 0);
+      context.lineTo(x, chartHeight);
+      context.stroke();
+
+      context.textAlign = "left";
+      context.textBaseline = "bottom";
+      context.fillStyle = labelColor;
+      context.save();
+      context.scale(1, -1);
+      context.fillText(xTickFormat(xScale.invert(x)), x + 4, -2);
+      context.restore();
+    }
+  }, [context, width, height, data, cursorRef.current]);
 
   return (
     <div>
