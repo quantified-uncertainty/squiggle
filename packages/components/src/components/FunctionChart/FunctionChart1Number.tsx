@@ -1,52 +1,13 @@
-import _ from "lodash";
+import * as d3 from "d3";
 import * as React from "react";
 import { FC, useEffect, useMemo } from "react";
-import * as d3 from "d3";
+import { useMeasure } from "react-use";
 
 import { SqLambda } from "@quri/squiggle-lang";
 
-import { useMeasure } from "react-use";
-import { ErrorAlert } from "./Alert";
-import { FunctionChartSettings } from "./FunctionChart";
-
-function rangeByCount(start: number, stop: number, count: number) {
-  const step = (stop - start) / (count - 1);
-  const items = _.range(start, stop, step);
-  const result = items.concat([stop]);
-  return result;
-}
-
-function getFunctionImage({
-  settings,
-  fn,
-}: {
-  settings: FunctionChartSettings;
-  fn: SqLambda;
-}) {
-  const chartPointsToRender = rangeByCount(
-    settings.start,
-    settings.stop,
-    settings.count
-  );
-
-  let functionImage: { x: number; y: number }[] = [];
-  let errors: { x: number; value: string }[] = [];
-
-  for (const x of chartPointsToRender) {
-    const result = fn.call([x]);
-    if (result.ok) {
-      if (result.value.tag === "Number") {
-        functionImage.push({ x, y: result.value.value });
-      } else {
-        errors.push({ x, value: "This component expected number outputs" });
-      }
-    } else {
-      errors.push({ x, value: result.value.toString() });
-    }
-  }
-
-  return { errors, functionImage };
-}
+import { ErrorAlert } from "../Alert";
+import { FunctionChartSettings } from "./index";
+import { getFunctionImage } from "./utils";
 
 type Props = {
   fn: SqLambda;
@@ -63,7 +24,7 @@ const InnerFunctionChart: FC<Props & { width: number }> = ({
   const ref = React.useRef<HTMLCanvasElement>(null);
 
   const { functionImage, errors } = useMemo(
-    () => getFunctionImage({ settings, fn }),
+    () => getFunctionImage({ settings, fn, valueType: "Number" }),
     [settings, fn]
   );
 
