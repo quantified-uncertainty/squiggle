@@ -41,28 +41,9 @@ export function DynamicSquiggleChart({ squiggleString }) {
   }
 }
 
-# Usage in a `react` project (future functionality).
+# Usage with create react app
 
-Right now, this functionality is [broken](https://github.com/quantified-uncertainty/squiggle/issues/1234), but we are aiming to fix it.
-
-For example, in a fresh `create-react-app` project
-
-```sh
-yarn add @quri/squiggle-components
-```
-
-Add to `App.js`:
-
-```jsx
-import { SquiggleEditor } from "@quri/squiggle-components";
-<SquiggleEditor
-  defaultCode="x = beta($alpha, 10); x + $shift"
-  jsImports={{ alpha: 3, shift: 20 }}
-/>;
-```
-
-
-```
+Create react app seems to be [on the way out](https://github.com/reactjs/react.dev/pull/5487#issuecomment-1409720741) and it is currently not supported by Squiggle. We recommend looking into ["production-grade react frameworks"](https://react.dev/learn/start-a-new-react-project#production-grade-react-frameworks) instead.
 
 # Build storybook for development
 
