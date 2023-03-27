@@ -42,7 +42,7 @@ export const JsonEditor: FC<CodeEditorProps> = ({
           linter(jsonLint()),
         ],
       }),
-    [value]
+    []
   );
 
   useEffect(() => {

@@ -109,7 +109,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({
           languageSupport,
         ],
       }),
-    [languageSupport, value]
+    [languageSupport]
   );
 
   useEffect(() => {
