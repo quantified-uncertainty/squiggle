@@ -27,7 +27,7 @@ import {
 } from "@heroicons/react/solid";
 import clsx from "clsx";
 
-import { Env, SqProject } from "@quri/squiggle-lang";
+import { Env } from "@quri/squiggle-lang";
 
 import { CodeEditor } from "../CodeEditor";
 import { SquiggleContainer } from "../SquiggleContainer";

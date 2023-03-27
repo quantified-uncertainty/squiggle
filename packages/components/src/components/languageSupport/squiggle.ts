@@ -85,6 +85,7 @@ function squiggle(project: SqProject) {
             const defaultCompletion = {
               from: tag.from,
               options: [
+                /*eslint no-template-curly-in-string: "off"*/
                 snippetCompletion("{ |${args}| ${body} ", {
                   label: "{",
                   detail: "lambda function",

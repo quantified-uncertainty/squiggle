@@ -28,7 +28,6 @@ export const JsonEditor: FC<CodeEditorProps> = ({
   width,
   height,
 }) => {
-  const lineCount = value.split("\n").length;
   const editor = useRef<HTMLDivElement>(null);
   const editorView = useRef<EditorView | null>(null);
 
@@ -43,7 +42,7 @@ export const JsonEditor: FC<CodeEditorProps> = ({
           linter(jsonLint()),
         ],
       }),
-    []
+    [value]
   );
 
   useEffect(() => {

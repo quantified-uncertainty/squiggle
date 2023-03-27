@@ -69,7 +69,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({
 
   const editor = useRef<HTMLDivElement>(null);
   const editorView = useRef<EditorView | null>(null);
-  const languageSupport = squiggle(project)();
+  const languageSupport = useMemo(() => squiggle(project)(), [project]);
 
   const state = useMemo(
     () =>
@@ -109,7 +109,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({
           languageSupport,
         ],
       }),
-    []
+    [languageSupport, value]
   );
 
   useEffect(() => {
@@ -177,7 +177,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({
         })
       ),
     });
-  }, [width, height]);
+  }, [width, height, oneLine]);
 
   useEffect(() => {
     editorView.current?.dispatch({
