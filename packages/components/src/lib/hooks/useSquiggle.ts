@@ -34,6 +34,7 @@ export type SquiggleArgs = {
 export type ResultAndBindings = {
   result: result<SqValue, SqError>;
   bindings: SqRecord;
+  project: SqProject;
 };
 
 const importSourceName = (sourceName: string) => "imports-" + sourceName;
@@ -71,7 +72,7 @@ export const useSquiggle = (args: SquiggleArgs): ResultAndBindings => {
       project.run(sourceName);
       const result = project.getResult(sourceName);
       const bindings = project.getBindings(sourceName);
-      return { result, bindings };
+      return { result, bindings, project };
     },
     // This complains about executionId not being used inside the function body.
     // This is on purpose, as executionId simply allows you to run the squiggle

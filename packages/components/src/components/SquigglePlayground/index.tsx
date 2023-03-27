@@ -210,18 +210,10 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     renderedCode,
     executionId,
   } = useRunnerState(code);
-  const project = useMemo(() => {
-    const p = SqProject.create();
-    if (environment) {
-      p.setEnvironment(environment);
-    }
-    return p;
-  }, [environment]);
 
   const resultAndBindings = useSquiggle({
     ...props,
     code: renderedCode,
-    project,
     executionId,
     jsImports: imports,
     environment,
@@ -255,7 +247,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
         oneLine={false}
         showGutter={true}
         height={height}
-        project={project}
+        project={resultAndBindings.project}
       />
     </div>
   ) : (

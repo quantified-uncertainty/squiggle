@@ -64,9 +64,12 @@ export const CodeEditor: FC<CodeEditorProps> = ({
   errorLocations = [],
   project,
 }) => {
+  if (oneLine && height)
+    throw Error("Either `height` or `oneLine` may be set.");
+
   const editor = useRef<HTMLDivElement>(null);
   const editorView = useRef<EditorView | null>(null);
-  const languageSupport = squiggle();
+  const languageSupport = squiggle(project)();
 
   const state = useMemo(
     () =>
@@ -148,14 +151,29 @@ export const CodeEditor: FC<CodeEditorProps> = ({
   }, [onChange]);
 
   useEffect(() => {
+    const cHeight = oneLine
+      ? (() => {
+          if (editorView.current) {
+            const paddings = editorView.current.documentPadding;
+            return (
+              editorView.current.defaultLineHeight +
+              paddings.top +
+              paddings.bottom
+            );
+          } else {
+            return null;
+          }
+        })()
+      : height;
     editorView.current?.dispatch({
       effects: compTheme.reconfigure(
         EditorView.theme({
           "&": {
             ...(width !== null ? { width: `${width}px` } : {}),
-            ...(height !== null ? { height: `${height}px` } : {}),
+            ...(cHeight !== null ? { height: `${cHeight}px` } : {}),
           },
           ".cm-selectionMatch": { backgroundColor: "#33ae661a" },
+          ".cm-content": { padding: 0 },
         })
       ),
     });
