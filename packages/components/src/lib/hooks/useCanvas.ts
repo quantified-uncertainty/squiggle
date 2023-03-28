@@ -7,7 +7,7 @@ export function useCanvas() {
   const devicePixelRatio = window.devicePixelRatio || 1;
 
   const previous = usePrevious(ref.current);
-  const refChanged = previous !== ref.current && ref.current;
+  const refChanged = previous !== ref.current && !!ref.current;
 
   if (refChanged) {
     // the DOM node was either just initialized or has changed

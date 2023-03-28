@@ -1,11 +1,11 @@
 import { Env, result, SqError, SqLambda, SqValue } from "@quri/squiggle-lang";
 import _ from "lodash";
 import * as React from "react";
-import { FC, useEffect, useMemo, useRef, useState } from "react";
-import { useMeasure, useUpdate } from "react-use";
+import { FC, useEffect, useMemo, useRef } from "react";
+import { useMeasure } from "react-use";
 
 import * as d3 from "d3";
-import { useCanvas } from "../../lib/hooks";
+import { useCanvas, useCanvasCursor } from "../../lib/hooks";
 import { ErrorAlert } from "../Alert";
 import {
   DistributionChart,
@@ -117,21 +117,7 @@ const InnerDistFunctionChart: FC<
 }) => {
   const { ref, refChanged, context } = useCanvas();
 
-  const update = useUpdate();
-  const cursorRef = useRef<[number, number]>();
-
-  if (refChanged && context) {
-    d3.select(context.canvas)
-      .on("touchmove", (event) => event.preventDefault())
-      .on("pointermove", (e) => {
-        cursorRef.current = d3.pointer(e);
-        update(); // TODO - debounce?
-      })
-      .on("pointerout", (e) => {
-        cursorRef.current = undefined;
-        update();
-      });
-  }
+  const cursor = useCanvasCursor({ refChanged, context });
 
   const d3ref = useRef<{
     padding: Padding;
@@ -140,17 +126,17 @@ const InnerDistFunctionChart: FC<
 
   //TODO: This custom error handling is a bit hacky and should be improved.
   const mouseItem: result<SqValue, SqError> | undefined = useMemo(() => {
-    if (!d3ref.current || !cursorRef.current) {
+    if (!d3ref.current || !cursor) {
       return;
     }
     if (
-      cursorRef.current[0] < d3ref.current.padding.left ||
-      cursorRef.current[0] > width - d3ref.current.padding.right
+      cursor[0] < d3ref.current.padding.left ||
+      cursor[0] > width - d3ref.current.padding.right
     ) {
       return;
     }
     const x = d3ref.current.xScale.invert(
-      cursorRef.current[0] - d3ref.current.padding.left
+      cursor[0] - d3ref.current.padding.left
     );
     return x
       ? fn.call([x])
@@ -160,14 +146,14 @@ const InnerDistFunctionChart: FC<
             "Hover x-coordinate returned NaN. Expected a number."
           ),
         };
-  }, [fn, cursorRef.current]);
+  }, [fn, cursor]);
 
   const showChart =
     mouseItem && mouseItem.ok && mouseItem.value.tag === "Dist" ? (
       <DistributionChart
         distribution={mouseItem.value.value}
         environment={environment}
-        chartHeight={50}
+        height={50}
         settings={distributionChartSettings}
       />
     ) : null;
@@ -239,11 +225,11 @@ const InnerDistFunctionChart: FC<
     context.stroke();
 
     if (
-      cursorRef.current &&
-      cursorRef.current[0] >= padding.left &&
-      cursorRef.current[0] - padding.left <= chartWidth
+      cursor &&
+      cursor[0] >= padding.left &&
+      cursor[0] - padding.left <= chartWidth
     ) {
-      const x = cursorRef.current[0] - padding.left;
+      const x = cursor[0] - padding.left;
       context.beginPath();
       context.strokeStyle = cursorLineColor;
       context.lineWidth = 1;
@@ -259,7 +245,7 @@ const InnerDistFunctionChart: FC<
       context.fillText(xTickFormat(xScale.invert(x)), x + 4, -2);
       context.restore();
     }
-  }, [context, width, height, data, cursorRef.current]);
+  }, [context, width, height, data, cursor]);
 
   return (
     <div>
