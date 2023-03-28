@@ -4,6 +4,7 @@ import range from "lodash/range";
 import { SqLambda, SqValue } from "@quri/squiggle-lang";
 
 import { FunctionChartSettings } from ".";
+import { ScaleContinuousNumeric } from "d3";
 
 const axisColor = "rgba(114, 125, 147, 0.1)";
 export const labelColor = "rgb(114, 125, 147)";
@@ -199,4 +200,68 @@ export function drawAxes({
   }
 
   return { xScale, yScale, xTickFormat, padding, chartWidth, chartHeight };
+}
+
+export function drawVerticalCursorLine({
+  cursor,
+  padding,
+  chartWidth,
+  chartHeight,
+  xScale,
+  tickFormat,
+  context,
+}: {
+  cursor: [number, number]; // original canvas coordinates
+  padding: Padding;
+  chartWidth: number;
+  chartHeight: number;
+  xScale: ScaleContinuousNumeric<number, number, never>;
+  tickFormat: (d: d3.NumberValue) => string;
+  context: CanvasRenderingContext2D;
+}) {
+  context.save();
+
+  context.beginPath();
+  context.strokeStyle = cursorLineColor;
+  context.lineWidth = 1;
+  context.moveTo(cursor[0], padding.top);
+  context.lineTo(cursor[0], padding.top + chartHeight);
+  context.stroke();
+
+  context.textAlign = "left";
+  context.textBaseline = "bottom";
+  const text = tickFormat(xScale.invert(cursor[0] - padding.left));
+  const measured = context.measureText(text);
+
+  // TODO - could be simplified with cotext.translate
+  const px = 4,
+    py = 2,
+    mx = 4,
+    my = 4;
+
+  let boxWidth = measured.width + px * 2;
+  const boxHeight = measured.actualBoundingBoxAscent + py * 2;
+  const boxOrigin = {
+    x: cursor[0] + mx,
+    y: chartHeight + padding.top - boxHeight - my,
+  };
+  const flip =
+    boxOrigin.x + boxWidth > chartWidth + padding.left + padding.right;
+
+  if (flip) {
+    boxOrigin.x = cursor[0] - mx;
+    boxWidth = -boxWidth;
+    context.textAlign = "right";
+  }
+
+  context.fillStyle = "white";
+  context.fillRect(boxOrigin.x, boxOrigin.y, boxWidth, boxHeight);
+  context.fillStyle = labelColor;
+  context.fillText(
+    text,
+    boxOrigin.x + px * (flip ? -1 : 1),
+    chartHeight + padding.top - my - py + 1 // unsure why "+1" is needed, probably related to measureText result and could be fixed
+  );
+
+  context.restore();
 }

@@ -16,7 +16,11 @@ import { hasMassBelowZero } from "../../lib/distributionUtils";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks";
 import { flattenResult } from "../../lib/utility";
 import { ErrorAlert } from "../Alert";
-import { drawAxes, primaryColor } from "../FunctionChart/utils";
+import {
+  drawAxes,
+  drawVerticalCursorLine,
+  primaryColor,
+} from "../FunctionChart/utils";
 import { SummaryTable } from "./SummaryTable";
 import { Plot } from "./types";
 import {
@@ -115,13 +119,14 @@ const InnerMultiDistributionChart: FC<{
       plot.colorScheme === "blues" ? "#5ba3cf" : d3.schemeCategory10[i];
 
     const legendItemHeight = 16;
+    const sampleBarHeight = 5;
 
     const { padding, chartWidth, chartHeight, xScale, yScale } = drawAxes({
       suggestedPadding: {
         left: 10,
         right: 10,
         top: 10 + (plot.showLegend ? legendItemHeight * shapes.length : 0),
-        bottom: 30,
+        bottom: 20 + (samples.length ? 10 : 0),
       },
       xDomain: d3.extent(domain, (d) => d.x) as [number, number],
       yDomain: [
@@ -226,22 +231,19 @@ const InnerMultiDistributionChart: FC<{
     }
 
     // samples
-    {
-      const sampleHeight = 5;
-      context.save();
-      context.strokeStyle = primaryColor;
-      context.lineWidth = 0.1;
-      samples.forEach((sample) => {
-        context.beginPath();
-        const x = xScale(sample);
+    context.save();
+    context.strokeStyle = primaryColor;
+    context.lineWidth = 0.1;
+    samples.forEach((sample) => {
+      context.beginPath();
+      const x = xScale(sample);
 
-        context.beginPath();
-        context.moveTo(padding.left + x, height - sampleHeight);
-        context.lineTo(padding.left + x, height);
-        context.stroke();
-      });
-      context.restore();
-    }
+      context.beginPath();
+      context.moveTo(padding.left + x, height - sampleBarHeight);
+      context.lineTo(padding.left + x, height);
+      context.stroke();
+    });
+    context.restore();
 
     // hover vertical line & position preview
     if (
@@ -249,17 +251,15 @@ const InnerMultiDistributionChart: FC<{
       cursor[0] >= padding.left &&
       cursor[0] - padding.left <= chartWidth
     ) {
-      context.save();
-      context.textAlign = "left";
-      context.textBaseline = "top";
-      context.fillStyle = "black";
-      context.font = "12px sans-serif";
-      context.fillText(
-        d3.format(",.4r")(xScale.invert(cursor[0] - padding.left)),
-        padding.left,
-        padding.top
-      );
-      context.restore();
+      drawVerticalCursorLine({
+        cursor,
+        padding,
+        chartWidth,
+        chartHeight,
+        xScale,
+        tickFormat: d3.format(",.4r"),
+        context,
+      });
     }
   }, [
     context,
@@ -272,6 +272,8 @@ const InnerMultiDistributionChart: FC<{
     plot.showLegend,
     discreteTooltip,
     cursor,
+    settings.logX,
+    settings.expY,
   ]);
 
   return (
