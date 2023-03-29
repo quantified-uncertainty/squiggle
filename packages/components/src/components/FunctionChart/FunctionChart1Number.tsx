@@ -1,4 +1,6 @@
-import * as d3 from "d3";
+import { extent as d3Extent } from "d3-array";
+import { line as d3Line } from "d3-shape";
+
 import * as React from "react";
 import { FC, useEffect, useMemo } from "react";
 import { useMeasure } from "react-use";
@@ -39,8 +41,8 @@ const InnerFunctionChart: FC<Props & { width: number }> = ({
 
     const { xScale, yScale, padding, chartHeight } = drawAxes({
       suggestedPadding: { left: 20, right: 10, top: 10, bottom: 20 },
-      xDomain: d3.extent(functionImage, (d) => d.x) as [number, number],
-      yDomain: d3.extent(functionImage, (d) => d.y) as [number, number],
+      xDomain: d3Extent(functionImage, (d) => d.x) as [number, number],
+      yDomain: d3Extent(functionImage, (d) => d.y) as [number, number],
       width,
       height,
       context,
@@ -54,8 +56,7 @@ const InnerFunctionChart: FC<Props & { width: number }> = ({
     context.lineWidth = 2;
     context.imageSmoothingEnabled = true;
 
-    d3
-      .line<{ x: number; y: number }>()
+    d3Line<{ x: number; y: number }>()
       .x((d) => xScale(d.x))
       .y((d) => yScale(d.y))
       .context(context)(functionImage);

@@ -1,10 +1,14 @@
-import * as d3 from "d3";
+import {
+  scaleLinear as d3ScaleLinear,
+  scaleLog as d3ScaleLog,
+  scalePow as d3ScalePow,
+} from "d3-scale";
 import range from "lodash/range";
 
 import { SqLambda, SqValue } from "@quri/squiggle-lang";
 
 import { FunctionChartSettings } from "../components/FunctionChart";
-import { ScaleContinuousNumeric } from "d3";
+import { type ScaleContinuousNumeric } from "d3";
 
 const axisColor = "rgba(114, 125, 147, 0.1)";
 export const labelColor = "rgb(114, 125, 147)";
@@ -104,9 +108,9 @@ export function drawAxes({
   tickCount?: number;
   tickFormat?: string;
 }) {
-  const xScale = logX ? d3.scaleLog() : d3.scaleLinear();
+  const xScale = logX ? d3ScaleLog() : d3ScaleLinear();
   xScale.domain(xDomain);
-  const yScale = expY ? d3.scalePow().exponent(0.1) : d3.scaleLinear();
+  const yScale = expY ? d3ScalePow().exponent(0.1) : d3ScaleLinear();
   yScale.domain(yDomain);
 
   const xTicks = xScale.ticks(tickCount);

@@ -1,4 +1,4 @@
-import _ from "lodash";
+import isEqual from "lodash/isEqual";
 import { useRef } from "react";
 import { usePrevious } from "react-use";
 
@@ -19,7 +19,7 @@ export function useCanvas({
     height,
   };
   const previous = usePrevious(props);
-  const refChanged = !_.isEqual(previous, props) && !!ref.current;
+  const refChanged = !isEqual(previous, props) && !!ref.current;
 
   if (refChanged) {
     // the DOM node was either just initialized or has changed

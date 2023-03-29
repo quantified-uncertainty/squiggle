@@ -1,10 +1,19 @@
 import { Env, result, SqError, SqLambda, SqValue } from "@quri/squiggle-lang";
-import _ from "lodash";
+import groupBy from "lodash/groupBy";
 import * as React from "react";
 import { FC, useEffect, useMemo, useRef } from "react";
 import { useMeasure } from "react-use";
 
-import * as d3 from "d3";
+import { extent as d3Extent } from "d3-array";
+import { format as d3Format } from "d3-format";
+import { area as d3Area, line as d3Line } from "d3-shape";
+import {
+  drawAxes,
+  drawVerticalCursorLine,
+  getFunctionImage,
+  Padding,
+  primaryColor,
+} from "../../lib/drawUtils";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks";
 import { ErrorAlert } from "../Alert";
 import {
@@ -13,15 +22,6 @@ import {
 } from "../DistributionChart";
 import { NumberShower } from "../NumberShower";
 import { FunctionChartSettings } from "./index";
-import {
-  cursorLineColor,
-  drawAxes,
-  drawVerticalCursorLine,
-  getFunctionImage,
-  labelColor,
-  Padding,
-  primaryColor,
-} from "../../lib/drawUtils";
 
 function unwrap<a, b>(x: result<a, b>): a {
   if (x.ok) {
@@ -57,12 +57,12 @@ type Datum = {
   50: number;
 };
 
-type Errors = _.Dictionary<
-  {
+type Errors = {
+  [k: string]: {
     x: number;
     value: string;
-  }[]
->;
+  }[];
+};
 
 const getPercentiles = ({
   settings,
@@ -79,7 +79,7 @@ const getPercentiles = ({
     valueType: "Dist",
   });
 
-  const groupedErrors: Errors = _.groupBy(errors, (x) => x.value);
+  const groupedErrors: Errors = groupBy(errors, (x) => x.value);
 
   const data: Datum[] = functionImage.map(({ x, y: dist }) => {
     const res = {
@@ -174,7 +174,7 @@ const InnerDistFunctionChart: FC<
 
     const { xScale, yScale, padding, chartWidth, chartHeight } = drawAxes({
       suggestedPadding: { left: 20, right: 10, top: 10, bottom: 20 },
-      xDomain: d3.extent(data, (d) => d.x) as [number, number],
+      xDomain: d3Extent(data, (d) => d.x) as [number, number],
       yDomain: [
         Math.min(
           ...data.map((d) =>
@@ -204,8 +204,7 @@ const InnerDistFunctionChart: FC<
     context.fillStyle = primaryColor;
     for (const { width, opacity } of intervals) {
       context.globalAlpha = opacity;
-      d3
-        .area<Datum>()
+      d3Area<Datum>()
         .x((d) => xScale(d.x))
         .y1((d) => yScale(d.areas[width][0]))
         .y0((d) => yScale(d.areas[width][1]))
@@ -219,8 +218,7 @@ const InnerDistFunctionChart: FC<
     context.lineWidth = 2;
     context.imageSmoothingEnabled = true;
 
-    d3
-      .line<Datum>()
+    d3Line<Datum>()
       .x((d) => xScale(d.x))
       .y((d) => yScale(d[50]))
       .context(context)(data);
@@ -239,7 +237,7 @@ const InnerDistFunctionChart: FC<
         chartWidth,
         chartHeight,
         xScale,
-        tickFormat: d3.format(",.4r"),
+        tickFormat: d3Format(",.4r"),
         context,
       });
     }
@@ -249,7 +247,7 @@ const InnerDistFunctionChart: FC<
     <div>
       <canvas ref={ref}>Chart for {fn.toString()}</canvas>
       {showChart}
-      {_.entries(errors).map(([errorName, errorPoints]) => (
+      {Object.entries(errors).map(([errorName, errorPoints]) => (
         <ErrorAlert key={errorName} heading={errorName}>
           Values:{" "}
           {errorPoints
