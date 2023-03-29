@@ -3,8 +3,10 @@ import { Command } from "@commander-js/extra-typings";
 import open from "open";
 import { sq, SqProject } from "@quri/squiggle-lang";
 import { SqSampleSetDistribution } from "@quri/squiggle-lang/dist/src/public/SqDistribution";
+import { getHealthInterventions } from "./builtins/health-interventions";
 
 
+const interfaceWithModels =getHealthInterventions;
 const wrapper = sq`
 {|x, y|
   dist = fn(x, y) -> SampleSet.fromDist
@@ -342,8 +344,8 @@ export const makeProgram = () => {
     .action((filename, options) => {
       project.run("wrapper")
       const result = project.getResult("wrapper");
-      for (const start of items) {
-        for (const end of items){
+      for (const start of interfaceWithModels.catalog.items) {
+        for (const end of interfaceWithModels.catalog.items){
           console.log(buildRelativeValue({fn: result.value.value, id1: start.id, id2: end.id}))
         }
       }
