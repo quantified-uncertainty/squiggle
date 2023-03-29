@@ -12,7 +12,7 @@ const wrapper = sq`
     median: inv(dist, 0.5),
     min: inv(dist, 0.05),
     max: inv(dist, 0.95),
-    db: 10 * (dist -> log10 -> stdev)
+    db: 10 * (SampleSet.map(dist, abs) -> log10 -> stdev)
   }
 }
 `;
