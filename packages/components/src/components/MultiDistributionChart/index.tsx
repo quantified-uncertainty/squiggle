@@ -86,7 +86,7 @@ const InnerMultiDistributionChart: FC<{
   height: number;
   width: number;
   plot: Plot;
-}> = ({ shapes, samples, plot, height, settings, width }) => {
+}> = ({ shapes, samples, plot, height: innerHeight, settings, width }) => {
   const [discreteTooltip, setDiscreteTooltip] = useState<
     { value: number; probability: number } | undefined
   >();
@@ -105,6 +105,17 @@ const InnerMultiDistributionChart: FC<{
     shape.discrete.concat(shape.continuous)
   );
 
+  const legendItemHeight = 16;
+  const sampleBarHeight = 5;
+
+  const showTitle = !!settings.title;
+  const titleHeight = showTitle ? 20 : 4;
+  const legendHeight = plot.showLegend ? legendItemHeight * shapes.length : 0;
+  const samplesFooterHeight = samples.length ? 10 : 0;
+
+  const height =
+    innerHeight + legendHeight + titleHeight + samplesFooterHeight + 30;
+
   const { ref, refChanged, context } = useCanvas({ width, height });
 
   const cursor = useCanvasCursor({ refChanged, context });
@@ -113,22 +124,27 @@ const InnerMultiDistributionChart: FC<{
     if (!context) {
       return;
     }
+
     context.clearRect(0, 0, width, height);
 
     const getColor = (i: number) =>
       plot.colorScheme === "blues" ? "#5ba3cf" : d3.schemeCategory10[i];
 
-    const legendItemHeight = 16;
-    const sampleBarHeight = 5;
-
     const { padding, chartWidth, chartHeight, xScale, yScale } = drawAxes({
       suggestedPadding: {
         left: 10,
         right: 10,
-        top: 10 + (plot.showLegend ? legendItemHeight * shapes.length : 0),
-        bottom: 20 + (samples.length ? 10 : 0),
+        top: 10 + legendHeight + titleHeight,
+        bottom: 20 + samplesFooterHeight,
       },
-      xDomain: d3.extent(domain, (d) => d.x) as [number, number],
+      xDomain: [
+        _.isNumber(settings.minX) && !Number.isNaN(settings.minX)
+          ? settings.minX
+          : d3.min(domain, (d) => d.x) ?? 0,
+        _.isNumber(settings.maxX) && !Number.isNaN(settings.maxX)
+          ? settings.maxX
+          : d3.max(domain, (d) => d.x) ?? 0,
+      ],
       yDomain: [
         Math.min(...domain.map((p) => p.y), 0), // min value, but at least 0
         Math.max(...domain.map((p) => p.y)),
@@ -141,13 +157,24 @@ const InnerMultiDistributionChart: FC<{
       logX: settings.logX,
       expY: settings.expY,
       tickCount: 10,
+      tickFormat: settings.tickFormat,
     });
+
+    if (settings.title) {
+      context.save();
+      context.textAlign = "center";
+      context.textBaseline = "top";
+      context.fillStyle = "black";
+      context.font = "bold 12px sans-serif";
+      context.fillText(settings.title, width / 2, 4);
+      context.restore();
+    }
 
     if (plot.showLegend) {
       const radius = 5;
       for (let i = 0; i < shapes.length; i++) {
         context.save();
-        context.translate(padding.left, 5 + legendItemHeight * i);
+        context.translate(padding.left, titleHeight + legendItemHeight * i);
         context.fillStyle = getColor(i);
         drawCircle({
           context,
@@ -247,7 +274,6 @@ const InnerMultiDistributionChart: FC<{
     });
     context.restore();
 
-    // hover vertical line & position preview
     if (
       cursor &&
       cursor[0] >= padding.left &&
@@ -267,6 +293,9 @@ const InnerMultiDistributionChart: FC<{
     context,
     width,
     height,
+    legendHeight,
+    titleHeight,
+    samplesFooterHeight,
     shapes,
     samples,
     domain,
@@ -276,6 +305,9 @@ const InnerMultiDistributionChart: FC<{
     cursor,
     settings.logX,
     settings.expY,
+    settings.title,
+    settings.minX,
+    settings.maxX,
   ]);
 
   return (

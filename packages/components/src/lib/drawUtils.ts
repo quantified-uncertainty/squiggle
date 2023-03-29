@@ -172,7 +172,7 @@ export function drawAxes({
       if (i === 0) {
         startX = Math.max(x - textWidth / 2, 0);
       } else if (i === xTicks.length - 1) {
-        startX = width - textWidth;
+        startX = Math.min(x - textWidth / 2, width - textWidth);
       } else {
         startX = x - textWidth / 2;
       }
@@ -258,7 +258,9 @@ export function drawVerticalCursorLine({
     y: chartHeight + padding.top - boxHeight - my,
   };
   const flip =
-    boxOrigin.x + boxWidth > chartWidth + padding.left + padding.right;
+    boxOrigin.x + boxWidth > chartWidth + padding.left + padding.right &&
+    // in pathological cases, we can't fix the box on either side because the text is too long; in this case, we don't flip because first digits are more significant
+    boxWidth <= cursor[0];
 
   if (flip) {
     boxOrigin.x = cursor[0] - mx;

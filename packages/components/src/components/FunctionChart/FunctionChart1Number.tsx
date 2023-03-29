@@ -20,8 +20,10 @@ const InnerFunctionChart: FC<Props & { width: number }> = ({
   fn,
   settings,
   width,
-  height,
+  height: innerHeight,
 }) => {
+  const height = innerHeight + 30; // consider paddings, should match suggestedPadding below
+
   const { ref, context } = useCanvas({ width, height });
 
   const { functionImage, errors } = useMemo(

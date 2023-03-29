@@ -16,6 +16,7 @@ import { FunctionChartSettings } from "./index";
 import {
   cursorLineColor,
   drawAxes,
+  drawVerticalCursorLine,
   getFunctionImage,
   labelColor,
   Padding,
@@ -113,8 +114,10 @@ const InnerDistFunctionChart: FC<
   environment,
   distributionChartSettings,
   width,
-  height,
+  height: innerHeight,
 }) => {
+  const height = innerHeight + 30; // consider paddings, should match suggestedPadding below
+
   const { ref, refChanged, context } = useCanvas({ width, height });
 
   const cursor = useCanvasCursor({ refChanged, context });
@@ -126,7 +129,7 @@ const InnerDistFunctionChart: FC<
 
   //TODO: This custom error handling is a bit hacky and should be improved.
   const mouseItem: result<SqValue, SqError> | undefined = useMemo(() => {
-    if (!d3ref.current || !cursor || !width) {
+    if (!d3ref.current || !cursor) {
       return;
     }
     if (
@@ -169,32 +172,32 @@ const InnerDistFunctionChart: FC<
     }
     context.clearRect(0, 0, width, height);
 
-    const { xScale, yScale, xTickFormat, padding, chartWidth, chartHeight } =
-      drawAxes({
-        suggestedPadding: { left: 20, right: 10, top: 10, bottom: 20 },
-        xDomain: d3.extent(data, (d) => d.x) as [number, number],
-        yDomain: [
-          Math.min(
-            ...data.map((d) =>
-              Math.min(...Object.values(d.areas).map((p) => p[0]), d[50])
-            )
-          ),
-          Math.max(
-            ...data.map((d) =>
-              Math.max(...Object.values(d.areas).map((p) => p[1]), d[50])
-            )
-          ),
-        ],
-        width,
-        height,
-        context,
-      });
+    const { xScale, yScale, padding, chartWidth, chartHeight } = drawAxes({
+      suggestedPadding: { left: 20, right: 10, top: 10, bottom: 20 },
+      xDomain: d3.extent(data, (d) => d.x) as [number, number],
+      yDomain: [
+        Math.min(
+          ...data.map((d) =>
+            Math.min(...Object.values(d.areas).map((p) => p[0]), d[50])
+          )
+        ),
+        Math.max(
+          ...data.map((d) =>
+            Math.max(...Object.values(d.areas).map((p) => p[1]), d[50])
+          )
+        ),
+      ],
+      width,
+      height,
+      context,
+    });
     d3ref.current = {
       padding,
       xScale,
     };
 
     // areas
+    context.save();
     context.translate(padding.left, chartHeight + padding.top);
     context.scale(1, -1);
 
@@ -223,27 +226,22 @@ const InnerDistFunctionChart: FC<
       .context(context)(data);
 
     context.stroke();
+    context.restore();
 
     if (
       cursor &&
       cursor[0] >= padding.left &&
       cursor[0] - padding.left <= chartWidth
     ) {
-      const x = cursor[0] - padding.left;
-      context.beginPath();
-      context.strokeStyle = cursorLineColor;
-      context.lineWidth = 1;
-      context.moveTo(x, 0);
-      context.lineTo(x, chartHeight);
-      context.stroke();
-
-      context.textAlign = "left";
-      context.textBaseline = "bottom";
-      context.fillStyle = labelColor;
-      context.save();
-      context.scale(1, -1);
-      context.fillText(xTickFormat(xScale.invert(x)), x + 4, -2);
-      context.restore();
+      drawVerticalCursorLine({
+        cursor,
+        padding,
+        chartWidth,
+        chartHeight,
+        xScale,
+        tickFormat: d3.format(",.4r"),
+        context,
+      });
     }
   }, [context, width, height, data, cursor]);
 
