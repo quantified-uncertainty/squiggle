@@ -3,7 +3,8 @@ import React, { useContext } from "react";
 import * as ReactDOM from "react-dom";
 import { XIcon } from "@heroicons/react/solid";
 import clsx from "clsx";
-import { useWindowScroll, useWindowSize } from "react-use";
+import useWindowScroll from "react-use/lib/useWindowScroll";
+import useWindowSize from "react-use/lib/useWindowSize";
 
 type ModalContextShape = {
   close: () => void;

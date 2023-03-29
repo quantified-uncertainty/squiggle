@@ -1,6 +1,6 @@
 import * as React from "react";
 import { FC, useEffect, useState } from "react";
-import { useMeasure } from "react-use";
+import useMeasure from "react-use/lib/useMeasure";
 import * as yup from "yup";
 
 import { schemeCategory10 as d3SchemeCategory10 } from "d3-scale-chromatic";

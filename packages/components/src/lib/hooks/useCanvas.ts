@@ -1,6 +1,6 @@
 import isEqual from "lodash/isEqual";
 import { useRef } from "react";
-import { usePrevious } from "react-use";
+import usePrevious from "react-use/lib/usePrevious";
 
 export function useCanvas({
   width,

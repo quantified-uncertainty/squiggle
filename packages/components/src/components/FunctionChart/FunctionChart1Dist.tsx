@@ -2,7 +2,7 @@ import { Env, result, SqError, SqLambda, SqValue } from "@quri/squiggle-lang";
 import groupBy from "lodash/groupBy";
 import * as React from "react";
 import { FC, useEffect, useMemo, useRef } from "react";
-import { useMeasure } from "react-use";
+import useMeasure from "react-use/lib/useMeasure";
 
 import { extent as d3Extent } from "d3-array";
 import { format as d3Format } from "d3-format";

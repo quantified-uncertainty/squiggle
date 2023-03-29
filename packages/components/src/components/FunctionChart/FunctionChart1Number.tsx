@@ -3,7 +3,7 @@ import { line as d3Line } from "d3-shape";
 
 import * as React from "react";
 import { FC, useEffect, useMemo } from "react";
-import { useMeasure } from "react-use";
+import useMeasure from "react-use/lib/useMeasure";
 
 import { SqLambda } from "@quri/squiggle-lang";
 
