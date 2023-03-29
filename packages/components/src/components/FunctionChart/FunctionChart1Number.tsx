@@ -1,13 +1,13 @@
 import * as d3 from "d3";
 import * as React from "react";
-import { FC, useEffect, useMemo, useRef } from "react";
+import { FC, useEffect, useMemo } from "react";
 import { useMeasure } from "react-use";
 
 import { SqLambda } from "@quri/squiggle-lang";
 
 import { ErrorAlert } from "../Alert";
 import { FunctionChartSettings } from "./index";
-import { drawAxes, getFunctionImage, primaryColor } from "./utils";
+import { drawAxes, getFunctionImage, primaryColor } from "../../lib/drawUtils";
 import { useCanvas } from "../../lib/hooks";
 
 type Props = {
@@ -22,7 +22,7 @@ const InnerFunctionChart: FC<Props & { width: number }> = ({
   width,
   height,
 }) => {
-  const { ref, context } = useCanvas();
+  const { ref, context } = useCanvas({ width, height });
 
   const { functionImage, errors } = useMemo(
     () => getFunctionImage({ settings, fn, valueType: "Number" }),
@@ -63,9 +63,7 @@ const InnerFunctionChart: FC<Props & { width: number }> = ({
 
   return (
     <div>
-      <canvas width={width} height={height} ref={ref}>
-        Chart for {fn.toString()}
-      </canvas>
+      <canvas ref={ref}>Chart for {fn.toString()}</canvas>
       <div className="space-y-1">
         {errors.map(({ x, value }) => (
           // TODO - group errors with identical value

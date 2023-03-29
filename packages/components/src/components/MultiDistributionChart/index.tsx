@@ -18,9 +18,10 @@ import { flattenResult } from "../../lib/utility";
 import { ErrorAlert } from "../Alert";
 import {
   drawAxes,
+  drawCircle,
   drawVerticalCursorLine,
   primaryColor,
-} from "../FunctionChart/utils";
+} from "../../lib/drawUtils";
 import { SummaryTable } from "./SummaryTable";
 import { Plot } from "./types";
 import {
@@ -48,7 +49,6 @@ export const distributionSettingsSchema = yup.object({}).shape({
   /** Documented here: https://github.com/d3/d3-format */
   tickFormat: yup.string().required().default(".9~s"),
   showSummary: yup.boolean().required().default(false),
-  vegaActions: yup.boolean().required().default(false),
 });
 
 export type DistributionChartSettings = yup.InferType<
@@ -105,7 +105,7 @@ const InnerMultiDistributionChart: FC<{
     shape.discrete.concat(shape.continuous)
   );
 
-  const { ref, refChanged, context } = useCanvas();
+  const { ref, refChanged, context } = useCanvas({ width, height });
 
   const cursor = useCanvasCursor({ refChanged, context });
 
@@ -140,6 +140,7 @@ const InnerMultiDistributionChart: FC<{
       drawTicks: true,
       logX: settings.logX,
       expY: settings.expY,
+      tickCount: 10,
     });
 
     if (plot.showLegend) {
@@ -148,9 +149,12 @@ const InnerMultiDistributionChart: FC<{
         context.save();
         context.translate(padding.left, 5 + legendItemHeight * i);
         context.fillStyle = getColor(i);
-        context.beginPath();
-        context.arc(radius, radius, radius, 0, Math.PI * 2, true);
-        context.fill();
+        drawCircle({
+          context,
+          x: radius,
+          y: radius,
+          r: radius,
+        });
 
         context.textAlign = "left";
         context.textBaseline = "middle";
@@ -219,9 +223,7 @@ const InnerMultiDistributionChart: FC<{
           context.moveTo(x, 0);
           context.lineTo(x, y);
           context.stroke();
-          context.beginPath();
-          context.arc(x, y, discreteRadius, 0, Math.PI * 2, true);
-          context.fill();
+          drawCircle({ context, x, y, r: discreteRadius });
         }
       }
       context.restore();
@@ -281,9 +283,7 @@ const InnerMultiDistributionChart: FC<{
       ref={floating.refs.setReference}
       {...floatingInteractions.getReferenceProps()}
     >
-      <canvas width={width} height={height} ref={ref}>
-        Distribution plot
-      </canvas>
+      <canvas ref={ref}>Distribution plot</canvas>
       {isTooltipOpen && (
         <FloatingPortal>
           <div

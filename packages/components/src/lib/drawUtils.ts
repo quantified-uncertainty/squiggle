@@ -3,7 +3,7 @@ import range from "lodash/range";
 
 import { SqLambda, SqValue } from "@quri/squiggle-lang";
 
-import { FunctionChartSettings } from ".";
+import { FunctionChartSettings } from "../components/FunctionChart";
 import { ScaleContinuousNumeric } from "d3";
 
 const axisColor = "rgba(114, 125, 147, 0.1)";
@@ -11,8 +11,6 @@ export const labelColor = "rgb(114, 125, 147)";
 export const cursorLineColor = "#f87171"; // tailwind red-400
 export const primaryColor = "#4c78a8"; // for lines and areas
 const labelFont = "10px sans-serif";
-const tickCount = 5;
-const tickFormat = ".9~s";
 const xLabelOffset = 6;
 const yLabelOffset = 6;
 
@@ -90,6 +88,8 @@ export function drawAxes({
   drawTicks,
   logX,
   expY,
+  tickCount = 5,
+  tickFormat = ".9~s",
 }: {
   context: CanvasRenderingContext2D;
   xDomain: [number, number];
@@ -101,6 +101,8 @@ export function drawAxes({
   drawTicks?: boolean;
   logX?: boolean;
   expY?: boolean;
+  tickCount?: number;
+  tickFormat?: string;
 }) {
   const xScale = logX ? d3.scaleLog() : d3.scaleLinear();
   xScale.domain(xDomain);
@@ -130,47 +132,57 @@ export function drawAxes({
     });
   }
 
-  xTicks.forEach((d) => {
-    const measured = context.measureText(xTickFormat(d));
-    padding.right = Math.max(
-      padding.right,
-      (measured.actualBoundingBoxLeft + measured.actualBoundingBoxRight) / 2
-    );
-  });
-
   const chartWidth = width - padding.left - padding.right;
   const chartHeight = height - padding.top - padding.bottom;
   xScale.range([0, chartWidth]);
   yScale.range([0, chartHeight]);
 
   // x axis
-  context.save();
-  context.beginPath();
-  context.strokeStyle = axisColor;
-  context.lineWidth = 1;
-  context.moveTo(padding.left, padding.top + chartHeight);
-  context.lineTo(padding.left + chartWidth, padding.top + chartHeight);
-  context.stroke();
-
-  context.textAlign = "center";
-  context.textBaseline = "top";
-  context.fillStyle = labelColor;
-  context.font = labelFont;
-
-  xTicks.forEach((d) => {
+  {
+    context.save();
     context.beginPath();
-    const x = padding.left + xScale(d);
-    const y = padding.top + chartHeight;
-    context.fillText(xTickFormat(d), x, y + xLabelOffset);
-    if (drawTicks) {
-      context.beginPath();
-      context.strokeStyle = labelColor;
-      context.lineWidth = 1;
-      context.moveTo(x, y);
-      context.lineTo(x, y + tickSize);
-      context.stroke();
+    context.strokeStyle = axisColor;
+    context.lineWidth = 1;
+    context.moveTo(padding.left, padding.top + chartHeight);
+    context.lineTo(padding.left + chartWidth, padding.top + chartHeight);
+    context.stroke();
+
+    context.fillStyle = labelColor;
+    context.font = labelFont;
+
+    let prevBoundary = 0;
+    for (let i = 0; i < xTicks.length; i++) {
+      const xTick = xTicks[i];
+      const x = padding.left + xScale(xTick);
+      const y = padding.top + chartHeight;
+
+      if (drawTicks) {
+        context.beginPath();
+        context.strokeStyle = labelColor;
+        context.lineWidth = 1;
+        context.moveTo(x, y);
+        context.lineTo(x, y + tickSize);
+        context.stroke();
+      }
+      context.textAlign = "left";
+      context.textBaseline = "top";
+      const text = xTickFormat(xTick);
+      const { width: textWidth } = context.measureText(text);
+      let startX = 0;
+      if (i === 0) {
+        startX = Math.max(x - textWidth / 2, 0);
+      } else if (i === xTicks.length - 1) {
+        startX = width - textWidth;
+      } else {
+        startX = x - textWidth / 2;
+      }
+      if (startX < prevBoundary) {
+        continue; // doesn't fit, skip
+      }
+      context.fillText(text, startX, y + xLabelOffset);
+      prevBoundary = startX + textWidth;
     }
-  });
+  }
   context.restore();
 
   // y axis
@@ -254,8 +266,10 @@ export function drawVerticalCursorLine({
     context.textAlign = "right";
   }
 
+  context.globalAlpha = 0.7;
   context.fillStyle = "white";
   context.fillRect(boxOrigin.x, boxOrigin.y, boxWidth, boxHeight);
+  context.globalAlpha = 1;
   context.fillStyle = labelColor;
   context.fillText(
     text,
@@ -264,4 +278,20 @@ export function drawVerticalCursorLine({
   );
 
   context.restore();
+}
+
+export function drawCircle({
+  context,
+  x,
+  y,
+  r,
+}: {
+  context: CanvasRenderingContext2D;
+  x: number;
+  y: number;
+  r: number;
+}) {
+  context.beginPath();
+  context.arc(x, y, r, 0, Math.PI * 2, true);
+  context.fill();
 }

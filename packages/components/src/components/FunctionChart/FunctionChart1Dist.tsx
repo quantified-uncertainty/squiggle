@@ -20,7 +20,7 @@ import {
   labelColor,
   Padding,
   primaryColor,
-} from "./utils";
+} from "../../lib/drawUtils";
 
 function unwrap<a, b>(x: result<a, b>): a {
   if (x.ok) {
@@ -115,7 +115,7 @@ const InnerDistFunctionChart: FC<
   width,
   height,
 }) => {
-  const { ref, refChanged, context } = useCanvas();
+  const { ref, refChanged, context } = useCanvas({ width, height });
 
   const cursor = useCanvasCursor({ refChanged, context });
 
@@ -126,7 +126,7 @@ const InnerDistFunctionChart: FC<
 
   //TODO: This custom error handling is a bit hacky and should be improved.
   const mouseItem: result<SqValue, SqError> | undefined = useMemo(() => {
-    if (!d3ref.current || !cursor) {
+    if (!d3ref.current || !cursor || !width) {
       return;
     }
     if (
@@ -146,7 +146,7 @@ const InnerDistFunctionChart: FC<
             "Hover x-coordinate returned NaN. Expected a number."
           ),
         };
-  }, [fn, cursor]);
+  }, [fn, cursor, width]);
 
   const showChart =
     mouseItem && mouseItem.ok && mouseItem.value.tag === "Dist" ? (
@@ -164,7 +164,7 @@ const InnerDistFunctionChart: FC<
   );
 
   useEffect(() => {
-    if (!context) {
+    if (!context || !width || !height) {
       return;
     }
     context.clearRect(0, 0, width, height);
@@ -249,9 +249,7 @@ const InnerDistFunctionChart: FC<
 
   return (
     <div>
-      <canvas width={width} height={height} ref={ref}>
-        Chart for {fn.toString()}
-      </canvas>
+      <canvas ref={ref}>Chart for {fn.toString()}</canvas>
       {showChart}
       {_.entries(errors).map(([errorName, errorPoints]) => (
         <ErrorAlert key={errorName} heading={errorName}>
