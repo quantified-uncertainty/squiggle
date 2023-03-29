@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "cli": "tsx ./src/cli/index.js"
+    "cli": "tsx ./src/cli/index.ts"
   },
   "dependencies": {
     "@commander-js/extra-typings": "^10.0.3",
