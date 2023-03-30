@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { Command } from "@commander-js/extra-typings";
 import { sq, SqProject } from "@quri/squiggle-lang";
-import { allInterfaces } from "@/../models/src/index";
+import { allInterfaces } from "@models/src/index";
 import { getModelCode, Model } from "@/model/utils";
 import { modelFromJSON } from "@/model/utils";
 import { result, SqLambda } from "@quri/squiggle-lang";

@@ -1,4 +1,4 @@
-import data from "@/../models/cache/cache.json";
+import data from "@models/cache/cache.json";
 import { result } from "@quri/squiggle-lang";
 import { RelativeValue, RelativeValueResult } from "./RelativeValue";
 

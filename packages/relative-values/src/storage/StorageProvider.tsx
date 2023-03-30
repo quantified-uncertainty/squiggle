@@ -1,7 +1,7 @@
 import { generateProvider } from "@/components/generateProvider";
 import { InterfaceWithModels } from "@/types";
 import { FC, PropsWithChildren, Reducer } from "react";
-import { allInterfaces } from "@/../models/src"
+import { allInterfaces } from "@models/src";
 import { createEmptyGraphModel, Model } from "@/model/utils";
 
 type Storage = {
