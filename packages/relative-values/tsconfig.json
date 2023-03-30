@@ -29,7 +29,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "src/cli/index.js"
+    "src/cli/index.ts"
   ],
   "exclude": ["node_modules"]
 }
