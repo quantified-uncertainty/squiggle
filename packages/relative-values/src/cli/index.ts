@@ -109,6 +109,9 @@ const modelToJson = async ({
 };
 
 const catalogToJson = async (catalog: InterfaceWithModels) => {
+  // Make sure the directory exists
+  await fs.promises.mkdir("models/cache/interfaces", { recursive: true });
+
   let models: any[] = [];
   for (const [_, model] of catalog.models) {
     models.push({
@@ -187,7 +190,7 @@ export const makeProgram = () => {
         await readAndConcatJSONFiles();
       } else {
         await interfacesToJson();
-        await readAndConcatJSONFiles();
+        // await readAndConcatJSONFiles();
       }
     });
 
