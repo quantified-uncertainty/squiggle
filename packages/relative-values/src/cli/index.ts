@@ -2,11 +2,7 @@ import fs from "fs";
 import path from "path";
 import { Command } from "@commander-js/extra-typings";
 import { sq, SqProject } from "@quri/squiggle-lang";
-import {
-  SqSampleSetDistribution,
-  SqPointSetDistribution,
-} from "@quri/squiggle-lang/dist/src/public/SqDistribution";
-import { allInterfaces } from "@/builtins";
+import { allInterfaces } from "../../models/src/index";
 import { getModelCode, Model } from "@/model/utils";
 import { modelFromJSON } from "@/model/utils";
 import { result, SqLambda } from "@quri/squiggle-lang";
@@ -118,14 +114,14 @@ const catalogToJson = (catalog: InterfaceWithModels) => {
     models,
   };
   fs.writeFileSync(
-    `src/builtins_cache/${catalog.catalog.id}.json`,
+    `models/cache/interfaces/${catalog.catalog.id}.json`,
     JSON.stringify(json)
   );
 };
 
 async function readAndConcatJSONFiles() {
   try {
-    const filenames = await fs.promises.readdir("src/builtins_cache/");
+    const filenames = await fs.promises.readdir("models/cache/interfaces/");
     const jsonFiles = filenames.filter(
       (filename) => path.extname(filename) === ".json"
     );
@@ -135,7 +131,7 @@ async function readAndConcatJSONFiles() {
     for (const filename of jsonFiles) {
       try {
         const content = await fs.promises.readFile(
-          "src/builtins_cache/" + filename,
+          "models/cache/interfaces/" + filename,
           "utf-8"
         );
         console.log("Loaded", filename);
@@ -146,7 +142,7 @@ async function readAndConcatJSONFiles() {
     }
 
     await fs.promises.writeFile(
-      "src/relative_value_cache.json",
+      "models/cache/cache.json",
       JSON.stringify(items)
     );
   } catch (err) {
@@ -159,11 +155,6 @@ export const makeProgram = () => {
 
   program
     .command("run")
-    .arguments("[filename]")
-    .option(
-      "-e, --eval <code>",
-      "run a given squiggle code string instead of a file"
-    )
     .action(async (filename, options) => {
       for (const inter of allInterfaces) {
         catalogToJson(inter);

@@ -1,5 +1,5 @@
 "use client";
-import { allInterfaces } from "@/builtins";
+import { allInterfaces } from "../../../../models/src";
 import { InterfaceProvider } from "@/components/Interface/InterfaceProvider";
 import { Toolbar } from "@/components/Interface/Toolbar";
 import { StyledTab } from "@/components/ui/StyledTab";

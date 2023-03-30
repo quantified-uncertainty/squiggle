@@ -1,4 +1,4 @@
-import data from "../relative_value_cache.json";
+import data from "../../models/cache/cache.json";
 import { RelativeValue } from "./RelativeValue";
 
 type Distribution = {
