@@ -38,7 +38,6 @@ export class SampleSetDist extends BaseDist {
     fn: (i: number) => number,
     env: Env
   ): Result.result<SampleSetDist, DistError> {
-    const sampleCount = env.sampleCount;
     const samples: number[] = [];
     for (let i = 0; i < env.sampleCount; i++) {
       samples.push(fn(i));
@@ -68,7 +67,7 @@ export class SampleSetDist extends BaseDist {
     return SampleSetDist.make(d.sampleN(env.sampleCount));
   }
 
-  integralEndY() {
+  integralSum() {
     // sampleset is always normalized
     return 1;
   }
@@ -144,9 +143,6 @@ sample everything.
     return pointSetDistR.value.pdf(f);
   }
 
-  stdev(): Result.result<number, DistError> {
-    return Result.Ok(E_A_Floats.stdev(this.samples));
-  }
   variance(): Result.result<number, DistError> {
     return Result.Ok(E_A_Floats.variance(this.samples));
   }

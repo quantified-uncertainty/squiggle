@@ -27,7 +27,7 @@ const parseDist = (args: Value): BaseDist => {
   if (args.type === "Dist") {
     return args.value;
   } else if (args.type === "Number") {
-    return new SymbolicDist.Float(args.value);
+    return new SymbolicDist.PointMass(args.value);
   } else {
     return raiseArgumentError("Not a distribution");
   }

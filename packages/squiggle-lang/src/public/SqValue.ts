@@ -1,13 +1,14 @@
 import { result } from "../utility/result";
-import { wrapDistribution } from "./SqDistribution";
+import { SqDistribution, wrapDistribution } from "./SqDistribution";
 import { SqLambda } from "./SqLambda";
 import { SqLambdaDeclaration } from "./SqLambdaDeclaration";
 import { SqRecord } from "./SqRecord";
-import { SqPlot } from "./SqPlot";
+import { SqPlot, wrapPlot } from "./SqPlot";
 import { SqArray } from "./SqArray";
 import { SqValueLocation } from "./SqValueLocation";
 import { SqError } from "./SqError";
 import { Value } from "../value";
+import { BaseDist } from "../dist/BaseDist";
 
 export const wrapValue = (value: Value, location: SqValueLocation): SqValue => {
   const tag = value.type;
@@ -42,7 +43,7 @@ export const wrapValue = (value: Value, location: SqValueLocation): SqValue => {
   }
 };
 
-export abstract class SqAbstractValue<T> {
+export abstract class SqAbstractValue<T, J> {
   abstract tag: T;
 
   constructor(
@@ -53,100 +54,162 @@ export abstract class SqAbstractValue<T> {
   toString() {
     return this._value.toString();
   }
+
+  abstract asJS(): J;
 }
 
-export class SqArrayValue extends SqAbstractValue<"Array"> {
+export class SqArrayValue extends SqAbstractValue<"Array", unknown[]> {
   tag = "Array" as const;
 
   get value() {
     return new SqArray(this._value.value, this.location);
   }
+
+  asJS(): unknown[] {
+    return this.value.getValues().map((value) => value.asJS());
+  }
 }
 
-export class SqBoolValue extends SqAbstractValue<"Bool"> {
+export class SqBoolValue extends SqAbstractValue<"Bool", boolean> {
   tag = "Bool" as const;
 
   get value(): boolean {
     return this._value.value;
   }
+
+  asJS() {
+    return this.value;
+  }
 }
 
-export class SqDateValue extends SqAbstractValue<"Date"> {
+export class SqDateValue extends SqAbstractValue<"Date", Date> {
   tag = "Date" as const;
 
   get value(): Date {
     return this._value.value;
   }
-}
 
-export class SqDeclarationValue extends SqAbstractValue<"Declaration"> {
-  tag = "Declaration" as const;
-
-  get value() {
-    return new SqLambdaDeclaration(this._value.value);
+  asJS() {
+    return this.value;
   }
 }
 
-export class SqDistributionValue extends SqAbstractValue<"Dist"> {
+export class SqDeclarationValue extends SqAbstractValue<
+  "Declaration",
+  SqLambdaDeclaration
+> {
+  tag = "Declaration" as const;
+
+  get value() {
+    return new SqLambdaDeclaration(this._value.value, this.location);
+  }
+
+  asJS() {
+    return this.value;
+  }
+}
+
+export class SqDistributionValue extends SqAbstractValue<
+  "Dist",
+  SqDistribution
+> {
   tag = "Dist" as const;
 
   get value() {
     return wrapDistribution(this._value.value);
   }
+
+  asJS() {
+    return this.value; // should we return BaseDist instead?
+  }
 }
 
-export class SqLambdaValue extends SqAbstractValue<"Lambda"> {
+export class SqLambdaValue extends SqAbstractValue<"Lambda", SqLambda> {
   tag = "Lambda" as const;
 
   get value() {
     return new SqLambda(this._value.value, this.location);
   }
+
+  asJS() {
+    return this.value; // SqLambda is nicer than internal Lambda, so we use that
+  }
 }
 
-export class SqNumberValue extends SqAbstractValue<"Number"> {
+export class SqNumberValue extends SqAbstractValue<"Number", number> {
   tag = "Number" as const;
 
   get value(): number {
     return this._value.value;
   }
+
+  asJS() {
+    return this.value;
+  }
 }
 
-export class SqRecordValue extends SqAbstractValue<"Record"> {
+export class SqRecordValue extends SqAbstractValue<
+  "Record",
+  Map<string, unknown>
+> {
   tag = "Record" as const;
 
   get value() {
     return new SqRecord(this._value.value, this.location);
   }
+
+  asJS(): Map<string, unknown> {
+    return new Map(this.value.entries().map(([k, v]) => [k, v.asJS()])); // this is a native Map, not immutable Map
+  }
 }
 
-export class SqStringValue extends SqAbstractValue<"String"> {
+export class SqStringValue extends SqAbstractValue<"String", string> {
   tag = "String" as const;
 
   get value(): string {
     return this._value.value;
   }
+
+  asJS() {
+    return this.value;
+  }
 }
 
-export class SqTimeDurationValue extends SqAbstractValue<"TimeDuration"> {
+export class SqTimeDurationValue extends SqAbstractValue<
+  "TimeDuration",
+  number
+> {
   tag = "TimeDuration" as const;
 
   get value() {
     return this._value.value;
   }
-}
 
-export class SqPlotValue extends SqAbstractValue<"Plot"> {
-  tag = "Plot" as const;
-
-  get value() {
-    return new SqPlot(this._value.value, this.location);
+  asJS() {
+    return this._value.value;
   }
 }
 
-export class SqVoidValue extends SqAbstractValue<"Void"> {
+export class SqPlotValue extends SqAbstractValue<"Plot", SqPlot> {
+  tag = "Plot" as const;
+
+  get value() {
+    return wrapPlot(this._value.value, this.location);
+  }
+
+  asJS() {
+    return this.value;
+  }
+}
+
+export class SqVoidValue extends SqAbstractValue<"Void", null> {
   tag = "Void" as const;
 
   get value() {
+    return null;
+  }
+
+  asJS() {
     return null;
   }
 }

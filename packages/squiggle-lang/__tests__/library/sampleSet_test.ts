@@ -12,7 +12,7 @@ describe("Various SampleSet functions", () => {
     "Sample Set Distribution"
   );
   testEvalToBe(
-    "SampleSet.fromFn({|| sample(normal(5,2))})",
+    "SampleSet.fromFn({|i| sample(normal(5,2))})",
     "Sample Set Distribution"
   );
   testEvalToBe(

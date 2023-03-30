@@ -1,15 +1,17 @@
+import { PointMass } from "../dist/SymbolicDist";
 import { makeDefinition } from "../library/registry/fnDefinition";
 import {
   frArray,
-  frString,
-  frRecord,
   frDistOrNumber,
+  frLambda,
+  frNumber,
+  frRecord,
+  frString,
 } from "../library/registry/frTypes";
-import { Float } from "../dist/SymbolicDist";
 import { FnFactory } from "../library/registry/helpers";
-import * as Result from "../utility/result";
-import { vPlot, LabeledDistribution } from "../value";
 import { REOther } from "../reducer/ErrorMessage";
+import * as Result from "../utility/result";
+import { LabeledDistribution, vPlot } from "../value";
 
 const maker = new FnFactory({
   nameSpace: "Plot",
@@ -34,7 +36,7 @@ export const library = [
           let distributions: LabeledDistribution[] = [];
           dists.forEach(({ name, value }) => {
             if (typeof value === "number") {
-              const deltaResult = Float.make(value);
+              const deltaResult = PointMass.make(value);
               if (deltaResult.ok === false) {
                 return Result.Error(REOther(deltaResult.value));
               } else {
@@ -46,7 +48,29 @@ export const library = [
           });
           return Result.Ok(
             vPlot({
+              type: "distributions",
               distributions,
+            })
+          );
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "fn",
+    output: "Plot",
+    examples: [`Plot.fn({fn: {|x|x*x}, min: 3, max: 5})`],
+    definitions: [
+      makeDefinition(
+        "fn",
+        [frRecord(["fn", frLambda], ["min", frNumber], ["max", frNumber])],
+        ([{ fn, min, max }]) => {
+          return Result.Ok(
+            vPlot({
+              type: "fn",
+              fn,
+              min,
+              max,
             })
           );
         }

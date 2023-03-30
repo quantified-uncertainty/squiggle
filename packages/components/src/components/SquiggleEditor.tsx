@@ -9,6 +9,7 @@ import { getErrorLocations, getValueToRender } from "../lib/utility";
 export type SquiggleEditorProps = SquiggleArgs & {
   defaultCode?: string;
   onCodeChange?: (code: string) => void;
+  hideViewer?: boolean;
 } & Omit<SquiggleViewerProps, "result">;
 
 export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
@@ -37,7 +38,9 @@ export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
           project={resultAndBindings.project}
         />
       </div>
-      <SquiggleViewer result={valueToRender} {...props} />
+      {props.hideViewer ? null : (
+        <SquiggleViewer result={valueToRender} {...props} />
+      )}
     </SquiggleContainer>
   );
 };

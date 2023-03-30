@@ -31,8 +31,8 @@ export const uniformDist = unpackResult(
 export const uniformDist2 = unpackResult(
   SymbolicDist.Uniform.make({ low: 8, high: 11 })
 );
-export const floatDist = unpackResult(SymbolicDist.Float.make(10));
+export const floatDist = unpackResult(SymbolicDist.PointMass.make(10));
 
-export const point1 = unpackResult(SymbolicDist.Float.make(1));
-export const point2 = unpackResult(SymbolicDist.Float.make(2));
-export const point3 = unpackResult(SymbolicDist.Float.make(3));
+export const point1 = unpackResult(SymbolicDist.PointMass.make(1));
+export const point2 = unpackResult(SymbolicDist.PointMass.make(2));
+export const point3 = unpackResult(SymbolicDist.PointMass.make(3));

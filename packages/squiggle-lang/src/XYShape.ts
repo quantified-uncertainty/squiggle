@@ -6,8 +6,8 @@ import * as Result from "./utility/result";
 import { epsilon_float } from "./magicNumbers";
 
 export type XYShape = {
-  xs: number[];
-  ys: number[];
+  readonly xs: number[];
+  readonly ys: number[];
 };
 
 export type XYShapeError =
@@ -166,12 +166,18 @@ export const T = {
   equallyDividedXs(t: XYShape, newLength: number): number[] {
     return E_A_Floats.range(T.minX(t), T.maxX(t), newLength);
   },
+
+  // unused
   toJs(t: XYShape) {
     return t;
   },
+
+  // unused
   filterYValues(t: XYShape, fn: (y: number) => number): XYShape {
     return T.fromZippedArray(T.zip(t).filter(([, y]) => fn(y)));
   },
+
+  // unused
   filterOkYs<B>(xs: number[], ys: Result.t<number, B>[]): XYShape {
     const n = xs.length; // Assume length(xs) == length(ys)
     const newXs: number[] = [];
@@ -185,6 +191,7 @@ export const T = {
     }
     return { xs: newXs, ys: newYs };
   },
+
   Validator: {
     notSortedError(p: string): XYShapeError {
       return {
@@ -262,21 +269,6 @@ export const T = {
   makeFromZipped(values: readonly (readonly [number, number])[]) {
     const [xs, ys] = E_A.unzip(values);
     return T.make(xs, ys);
-  },
-};
-
-const Ts = {
-  minX(t: XYShape[]): number {
-    return Math.min(...t.map(T.minX));
-  },
-  maxX(t: XYShape[]): number {
-    return Math.max(...t.map(T.maxX));
-  },
-  equallyDividedXs(t: XYShape[], newLength: number) {
-    return E_A_Floats.range(Ts.minX(t), Ts.maxX(t), newLength);
-  },
-  allXs(t: XYShape[]): number[] {
-    return E_A_Floats.sort(t.map((s) => s.xs).flat());
   },
 };
 
@@ -544,109 +536,6 @@ export const PointwiseCombination = {
     return Result.Ok({ xs: outX, ys: outY });
   },
 
-  //   /*
-  //     This is from an approach to kl divergence that was ultimately rejected. Leaving it in for now because it may help us factor `combine` out of raw javascript soon.
-  //  */
-  //   let combineAlongSupportOfSecondArgument0: (
-  //     interpolator,
-  //     (float, float) => result<float, Operation.Error.t>,
-  //     T.t,
-  //     T.t,
-  //   ) => result<T.t, Operation.Error.t> = (interpolator, fn, t1, t2) => {
-  //     let newYs = []
-  //     let newXs = []
-  //     let (l1, l2) = (E.A.length(t1.xs), E.A.length(t2.xs))
-  //     let (i, j) = (ref(0), ref(0))
-  //     let minX = t2.xs[0]
-  //     let maxX = t2.xs[l2 - 1]
-  //     while j.contents < l2 - 1 && i.contents < l1 - 1 {
-  //       let someTuple = {
-  //         let x1 = t1.xs[i.contents + 1]
-  //         let x2 = t2.xs[j.contents + 1]
-  //         if (
-  //           /* if t1 has to catch up to t2 */
-  //           i.contents < l1 - 1 && j.contents < l2 && x1 < x2 && minX <= x1 && x2 <= maxX
-  //         ) {
-  //           i := i.contents + 1
-  //           let x = x1
-  //           let y1 = t1.ys[i.contents]
-  //           let y2 = interpolator(t2, j.contents, x)
-  //           Some((x, y1, y2))
-  //         } else if (
-  //           /* if t2 has to catch up to t1 */
-  //           i.contents < l1 && j.contents < l2 - 1 && x1 > x2 && x2 >= minX && maxX >= x1
-  //         ) {
-  //           j := j.contents + 1
-  //           let x = x2
-  //           let y1 = interpolator(t1, i.contents, x)
-  //           let y2 = t2.ys[j.contents]
-  //           Some((x, y1, y2))
-  //         } else if (
-  //           /* move both ahead if they are equal */
-  //           i.contents < l1 - 1 && j.contents < l2 - 1 && x1 == x2 && x1 >= minX && maxX >= x2
-  //         ) {
-  //           i := i.contents + 1
-  //           j := j.contents + 1
-  //           let x = x1
-  //           let y1 = t1.ys[i.contents]
-  //           let y2 = t2.ys[j.contents]
-  //           Some((x, y1, y2))
-  //         } else {
-  //           i := i.contents + 1
-  //           None
-  //         }
-  //       }
-  //       switch someTuple {
-  //       | Some((x, y1, y2)) => {
-  //           let _ = Js.Array.push(fn(y1, y2), newYs)
-  //           let _ = Js.Array.push(x, newXs)
-  //         }
-
-  //       | None => ()
-  //       }
-  //     }
-  //     T.filterOkYs(newXs, newYs)->Ok
-  //   }
-
-  //   /* *Dead code*: Nuño wrote this function to try to increase precision, but it didn't work.
-  //      If another traveler comes through with a similar idea, we hope this implementation will help them.
-  //      By "enrich" we mean to increase granularity.
-  //  */
-  //   let enrichXyShape = (t: T.t): T.t => {
-  //     let defaultEnrichmentFactor = 10
-  //     let length = E.A.length(t.xs)
-  //     let points =
-  //       length < MagicNumbers.Environment.defaultXYPointLength
-  //         ? defaultEnrichmentFactor * MagicNumbers.Environment.defaultXYPointLength / length
-  //         : defaultEnrichmentFactor
-
-  //     let getInBetween = (x1: float, x2: float): array<float> => {
-  //       if abs_float(x1 -. x2) < 2.0 *. MagicNumbers.Epsilon.seven {
-  //         [x1]
-  //       } else {
-  //         let newPointsArray = E.A.makeBy(points - 1, i => i)
-  //         // don't repeat the x2 point, it will be gotten in the next iteration.
-  //         let result = Js.Array.mapi((pos, i) =>
-  //           if i == 0 {
-  //             x1
-  //           } else {
-  //             let points' = Belt.Float.fromInt(points)
-  //             let pos' = Belt.Float.fromInt(pos)
-  //             x1 *. (points' -. pos') /. points' +. x2 *. pos' /. points'
-  //           }
-  //         , newPointsArray)
-  //         result
-  //       }
-  //     }
-  //     let newXsUnflattened = Js.Array.mapi(
-  //       (x, i) => i < length - 2 ? getInBetween(x, t.xs[i + 1]) : [x],
-  //       t.xs,
-  //     )
-  //     let newXs = E.A.concatMany(newXsUnflattened)
-  //     let newYs = E.A.fmap(newXs, x => XtoY.linear(t, x))
-  //     {xs: newXs, ys: newYs}
-  //   }
-
   addCombine(interpolator: Interpolator, t1: XYShape, t2: XYShape): XYShape {
     const result = PointwiseCombination.combine(
       interpolator,
@@ -661,42 +550,7 @@ export const PointwiseCombination = {
   },
 };
 
-// I'm really not sure this part is actually what we want at this point.
-// ((lastX, lastY), (nextX, nextY))
-type ZippedRange = [[number, number], [number, number]];
 export const Range = {
-  nextX([, [nextX]]: ZippedRange) {
-    return nextX;
-  },
-
-  rangePointAssumingSteps([[, lastY], [nextX]]: ZippedRange) {
-    return [nextX, lastY];
-  },
-
-  rangeAreaAssumingTriangles([[lastX, lastY], [nextX, nextY]]: ZippedRange) {
-    return ((nextX - lastX) * (lastY + nextY)) / 2;
-  },
-
-  //Todo: figure out how to without making new array.
-  rangeAreaAssumingTrapezoids([[lastX, lastY], [nextX, nextY]]: ZippedRange) {
-    return (nextX - lastX) * (Math.min(lastY, nextY) + (lastY + nextY) / 2);
-  },
-
-  delta_y_over_delta_x([[lastX, lastY], [nextX, nextY]]: ZippedRange) {
-    return (nextY - lastY) / (nextX - lastX);
-  },
-
-  mapYsBasedOnRanges(
-    t: XYShape,
-    fn: (r: ZippedRange) => number
-  ): [number, number][] | undefined {
-    const ranges = E_A.toRanges(E_A.zip(t.xs, t.ys));
-    if (!ranges.ok) {
-      return undefined; // probably length=1
-    }
-    return ranges.value.map((r) => [Range.nextX(r), fn(r)]);
-  },
-
   integrateWithTriangles({ xs, ys }: XYShape) {
     const length = xs.length;
     const cumulativeY: number[] = new Array(length).fill(0);
@@ -705,10 +559,6 @@ export const Range = {
         (xs[x + 1] - xs[x]) * ((ys[x] + ys[x + 1]) / 2) + cumulativeY[x]; // dx // (1/2) * (avgY)
     }
     return { xs, ys: cumulativeY };
-  },
-
-  derivative(t: XYShape) {
-    return Range.mapYsBasedOnRanges(t, Range.delta_y_over_delta_x);
   },
 
   stepwiseToLinear({ xs, ys }: XYShape): XYShape {
@@ -731,6 +581,47 @@ export const Range = {
 
     return { xs: newXs, ys: newYs };
   },
+
+  // Unused code:
+
+  // I'm really not sure this part is actually what we want at this point.
+  // ((lastX, lastY), (nextX, nextY))
+  // type ZippedRange = [[number, number], [number, number]];
+  // derivative(t: XYShape) {
+  //   return Range.mapYsBasedOnRanges(t, Range.delta_y_over_delta_x);
+  // },
+
+  // nextX([, [nextX]]: ZippedRange) {
+  //   return nextX;
+  // },
+
+  // rangePointAssumingSteps([[, lastY], [nextX]]: ZippedRange) {
+  //   return [nextX, lastY];
+  // },
+
+  // rangeAreaAssumingTriangles([[lastX, lastY], [nextX, nextY]]: ZippedRange) {
+  //   return ((nextX - lastX) * (lastY + nextY)) / 2;
+  // },
+
+  // //Todo: figure out how to without making new array.
+  // rangeAreaAssumingTrapezoids([[lastX, lastY], [nextX, nextY]]: ZippedRange) {
+  //   return (nextX - lastX) * (Math.min(lastY, nextY) + (lastY + nextY) / 2);
+  // },
+
+  // delta_y_over_delta_x([[lastX, lastY], [nextX, nextY]]: ZippedRange) {
+  //   return (nextY - lastY) / (nextX - lastX);
+  // },
+
+  // mapYsBasedOnRanges(
+  //   t: XYShape,
+  //   fn: (r: ZippedRange) => number
+  // ): [number, number][] | undefined {
+  //   const ranges = E_A.toRanges(E_A.zip(t.xs, t.ys));
+  //   if (!ranges.ok) {
+  //     return undefined; // probably length=1
+  //   }
+  //   return ranges.value.map((r) => [Range.nextX(r), fn(r)]);
+  // },
 };
 
 export const Analysis = {

@@ -5,7 +5,7 @@ import { Lambda } from "../../reducer/lambda";
 import { ReducerFn, Value, vBool, vDist, vNumber, vString } from "../../value";
 import { FRFunction } from "./core";
 import { FnDefinition, makeDefinition } from "./fnDefinition";
-import { frBool, frDist, frNumber } from "./frTypes";
+import { frBool, frDist, frNumber, frString } from "./frTypes";
 import * as Result from "../../utility/result";
 import { DistError } from "../../dist/DistError";
 import { ReducerContext } from "../../reducer/Context";
@@ -96,6 +96,23 @@ export class FnFactory {
       output: "Bool",
       definitions: [
         makeDefinition(args.name, [frBool, frBool], ([x, y]) =>
+          Ok(vBool(fn(x, y)))
+        ),
+      ],
+    });
+  }
+
+  ss2b({
+    fn,
+    ...args
+  }: ArgsWithoutDefinitions & {
+    fn: (x: string, y: string) => boolean;
+  }): FRFunction {
+    return this.make({
+      ...args,
+      output: "Bool",
+      definitions: [
+        makeDefinition(args.name, [frString, frString], ([x, y]) =>
           Ok(vBool(fn(x, y)))
         ),
       ],

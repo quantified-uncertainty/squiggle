@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useMemo, useRef } from "react";
 
-import squiggle from "./languageSupport/squiggle";
+import squiggle from "../languageSupport/squiggle";
 
 import { SqLocation, SqProject } from "@quri/squiggle-lang";
 
@@ -34,7 +34,7 @@ import {
   bracketMatching,
   foldKeymap,
 } from "@codemirror/language";
-import { lightThemeHighlightingStyle } from "./languageSupport/highlightingStyle";
+import { lightThemeHighlightingStyle } from "../languageSupport/highlightingStyle";
 
 interface CodeEditorProps {
   value: string;
