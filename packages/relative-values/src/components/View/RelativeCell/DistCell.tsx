@@ -2,7 +2,6 @@ import { RelativeValue } from "@/values/RelativeValue";
 import { NumberShower } from "@quri/squiggle-components";
 import { FC, memo } from "react";
 import { CellBox } from "../CellBox";
-import { Histogram } from "../Histogram";
 
 function numberToColor(rating: number){
   if (rating < 1.0) {
@@ -65,7 +64,6 @@ export const DistCell: FC<{ item: RelativeValue }> = memo(function DistCell({
 
         {item.db === 0 ? null : (
           <div className="h-2 absolute bottom-0 inset-x-0 -z-10">
-            <Histogram relativeValue={item} domain={[1e-3, 1e3]} />
           </div>
         )}
       </div>

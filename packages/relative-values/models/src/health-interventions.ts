@@ -242,6 +242,7 @@ function getCatalog(): Catalog {
 
 function getTextModel(): Model {
   return {
+    id: "health-interventions",
     title: "Health Interventions ",
     author: "GPT-4",
     mode: "text",
@@ -315,6 +316,6 @@ function getTextModel(): Model {
 export function getHealthInterventions(): InterfaceWithModels {
   return {
     catalog: getCatalog(),
-    models: Map([["health-interventions", getTextModel()]]),
+    models: Map([getTextModel()].map((m) => [m.id, m])),
   };
 }

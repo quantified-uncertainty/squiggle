@@ -145,7 +145,8 @@ function getCatalog(): Catalog {
   return {
     id: "quri-software",
     title: "QURI software projects",
-    description: "Key QURI Software projects. Only large ones are captured. Value is defined as what Nuno thinks it should be",
+    description:
+      "Key QURI Software projects. Only large ones are captured. Value is defined as what Nuno thinks it should be",
     author: "Nuno Sempere",
     created: new Date("2022-03-12"),
     items,
@@ -196,6 +197,7 @@ function getModel(): Model {
     metadata: {
       author: "Nuño Sempere",
       title: "By Nuño",
+      id: "nuno",
     },
   });
 }
@@ -203,6 +205,6 @@ function getModel(): Model {
 export function getQuriSoftwareBuiltin(): InterfaceWithModels {
   return {
     catalog: getCatalog(),
-    models: Map([["nuno", getModel()]]),
+    models: Map([getModel()].map((m) => [m.id, m])),
   };
 }

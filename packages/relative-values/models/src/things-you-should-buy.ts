@@ -75,6 +75,7 @@ function getCatalog(): Catalog {
 
 function getTextModel(): Model {
   return {
+	id: "Cross-Cause-Estimate",
     title: "Estimates for a few things you may want to buy",
     author: "Nuno Sempere",
     mode: "text",

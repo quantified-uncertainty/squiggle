@@ -4,9 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "cacheRV": "tsx ./src/cli/index.ts cacheRV",
+    "next-build": "next build",
+    "build": "yarn cacheRV && next build"
   },
   "dependencies": {
     "@floating-ui/react": "^0.20.1",
@@ -19,12 +21,15 @@
     "typescript": "^4.9.5"
   },
   "devDependencies": {
+    "@commander-js/extra-typings": "^10.0.3",
     "@types/react": "^18.0.28",
     "autoprefixer": "^10.4.14",
+    "commander": "^10.0.0",
     "eslint": "^8.36.0",
     "eslint-config-next": "^13.2.4",
     "postcss": "^8.4.21",
     "postcss-cli": "^10.1.0",
-    "tailwindcss": "^3.2.7"
+    "tailwindcss": "^3.2.7",
+    "tsx": "^3.12.6"
   }
 }

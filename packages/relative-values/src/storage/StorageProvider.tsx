@@ -1,7 +1,7 @@
 import { generateProvider } from "@/components/generateProvider";
 import { InterfaceWithModels } from "@/types";
 import { FC, PropsWithChildren, Reducer } from "react";
-import { allInterfaces } from "@/builtins";
+import { allInterfaces } from "@/../models/src"
 import { createEmptyGraphModel, Model } from "@/model/utils";
 
 type Storage = {
@@ -47,6 +47,7 @@ const reducer: Reducer<Storage, Action> = (state, action) => {
                 models: int.models.set(
                   action.payload.model.id,
                   createEmptyGraphModel({
+                    id: action.payload.model.id,
                     author: action.payload.model.author,
                     title: action.payload.model.title,
                     catalog: int.catalog,

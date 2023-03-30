@@ -39,6 +39,9 @@ export class PointSetDist<
   variance(): Result.result<number, DistError> {
     return Result.Ok(this.pointSet.variance());
   }
+  downsample(n:number): PointSetDist{
+    return new PointSetDist(this.pointSet.downsample(n))
+  }
 
   private samplePointSet(pointSet: AnyPointSet) {
     const randomItem = Math.random();
