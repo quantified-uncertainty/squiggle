@@ -1,11 +1,15 @@
 import * as React from "react";
+import { FC, useState } from "react";
 import * as yup from "yup";
+
 import { SqLambda, Env, SqError } from "@quri/squiggle-lang";
+
+import { MessageAlert } from "../Alert";
+import { SquiggleErrorAlert } from "../SquiggleErrorAlert";
+import { DistributionChartSettings } from "../DistributionChart";
+
 import { FunctionChart1Dist } from "./FunctionChart1Dist";
 import { FunctionChart1Number } from "./FunctionChart1Number";
-import { MessageAlert } from "./Alert";
-import { SquiggleErrorAlert } from "./SquiggleErrorAlert";
-import { DistributionChartSettings } from "./DistributionChart";
 
 export const functionSettingsSchema = yup.object({}).shape({
   start: yup.number().required().positive().integer().default(0).min(0),
@@ -25,10 +29,10 @@ type FunctionChartProps = {
   height: number;
 };
 
-const FunctionCallErrorAlert = ({ error }: { error: SqError }) => {
-  const [expanded, setExpanded] = React.useState(false);
-  if (expanded) {
-  }
+// TODO - move to SquiggleErrorAlert with `collapsible` flag or other HOC, there's nothing specific about functions here
+const FunctionCallErrorAlert: FC<{ error: SqError }> = ({ error }) => {
+  const [expanded, setExpanded] = useState(false);
+
   return (
     <MessageAlert heading="Function Display Failed">
       <div className="space-y-2">
@@ -44,7 +48,7 @@ const FunctionCallErrorAlert = ({ error }: { error: SqError }) => {
   );
 };
 
-export const FunctionChart: React.FC<FunctionChartProps> = ({
+export const FunctionChart: FC<FunctionChartProps> = ({
   fn,
   settings,
   environment,

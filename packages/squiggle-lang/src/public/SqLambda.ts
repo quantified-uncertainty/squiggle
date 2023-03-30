@@ -43,4 +43,8 @@ export class SqLambda {
     project.run(callId);
     return project.getResult(callId);
   }
+
+  toString() {
+    return this._value.toString();
+  }
 }

@@ -1,5 +1,5 @@
 const path = require("path");
-module.exports = {
+const config = {
   mode: "production",
   devtool: "source-map",
   profile: true,
@@ -50,3 +50,12 @@ module.exports = {
     },
   },
 };
+
+if (process.env.ANALYZE) {
+  const BundleAnalyzerPlugin =
+    require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
+
+  config.plugins = [...(config.plugins ?? []), new BundleAnalyzerPlugin()];
+}
+
+module.exports = config;

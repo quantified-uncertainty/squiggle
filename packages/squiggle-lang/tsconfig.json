@@ -3,6 +3,7 @@
     "module": "commonjs",
     "jsx": "react",
     "allowJs": true,
+    "skipLibCheck": true,
     "noImplicitAny": true,
     "removeComments": true,
     "preserveConstEnums": true,
