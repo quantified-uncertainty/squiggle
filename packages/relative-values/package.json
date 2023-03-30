@@ -7,7 +7,7 @@
     "start": "next start",
     "lint": "next lint",
     "cacheRV": "tsx ./src/cli/index.ts cacheRV",
-    "build": "yarn cache-values cacheRV && next build"
+    "build": "yarn cacheRV && next build"
   },
   "dependencies": {
     "@floating-ui/react": "^0.20.1",
