@@ -10,12 +10,15 @@ import { Catalog, InterfaceWithModels, Item } from "@/types";
 
 const wrapper = sq`
 {|x, y|
-  dist = fn(x, y) -> SampleSet.fromDist
+  dists = fn(x,y)
+  dist1 = dists[0] -> SampleSet.fromDist
+  dist2 = dists[1] -> SampleSet.fromDist
+  relativeDist = dists[0] / dists[1]
   {
-    median: inv(dist, 0.5),
-    min: inv(dist, 0.05),
-    max: inv(dist, 0.95),
-    db: 10 * (SampleSet.map(dist, abs) -> log10 -> stdev)
+    median: inv(relativeDist, 0.5),
+    min: inv(relativeDist, 0.05),
+    max: inv(relativeDist, 0.95),
+    db: 10 * (SampleSet.map(relativeDist, abs) -> log10 -> stdev)
   }
 }
 `;
