@@ -90,7 +90,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
               <DistributionChart
                 distribution={value.value}
                 environment={environment}
-                chartHeight={settings.chartHeight}
+                height={settings.chartHeight}
                 settings={settings.distributionChartSettings}
               />
             );
@@ -257,7 +257,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
                   <MultiDistributionChart
                     plot={sqPlotToPlot(plot)}
                     environment={environment}
-                    chartHeight={settings.chartHeight}
+                    height={settings.chartHeight}
                     settings={settings.distributionChartSettings}
                   />
                 );

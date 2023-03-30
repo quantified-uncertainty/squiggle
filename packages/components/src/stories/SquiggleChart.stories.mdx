@@ -118,18 +118,18 @@ could be continuous, discrete or mixed.
     name="Multiple plots"
     args={{
       code: `
-{
-  distributions: [
+Plot.dists({
+  dists: [
     {
       name: "one",
-      distribution: mx(0.5, normal(0,1))
+      value: mx(0.5, normal(0,1))
     },
     {
       name: "two",
-      distribution: mx(2, normal(5, 2)),
+      value: mx(2, normal(5, 2)),
     }
   ]
-}
+})
 `,
       width,
     }}
