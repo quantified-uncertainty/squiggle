@@ -6,7 +6,6 @@ export const useRelativeValues = (
   id: string | undefined,
   model: Model | undefined
 ) => {
-  console.log("Got Id and model", id, model)
   let cache = jsonData
     .flatMap((r) => r.models)
     .find((r) => model && r.name == model.title);

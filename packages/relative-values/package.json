@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "cli": "tsx ./src/cli/index.ts"
+    "stashRelativeValues": "tsx ./src/cli/index.ts run",
+    "build": "yarn run stashRelativeValues && next build"
   },
   "dependencies": {
     "@commander-js/extra-typings": "^10.0.3",

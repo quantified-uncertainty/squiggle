@@ -67,7 +67,11 @@ const buildRelativeValue = ({
   };
 };
 
-const modelToJson = ({
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+const modelToJson = async ({
   catalog,
   model,
 }: {
@@ -90,6 +94,12 @@ const modelToJson = ({
           id1: start.id,
           id2: end.id,
         });
+        if (!relativeValue.ok) {
+          console.error(
+            `Relative value returned a failure in model ${model.title}: ${relativeValue.value}. Comparing ${start.id} vs. ${end.id}`
+          );
+        }
+        await sleep(0); //Used to make sure that it's possible to interrupt if wanted by console user.
         row[end.id] = relativeValue;
       }
       obj[start.id] = row;
@@ -98,12 +108,12 @@ const modelToJson = ({
   }
 };
 
-const catalogToJson = (catalog: InterfaceWithModels) => {
+const catalogToJson = async (catalog: InterfaceWithModels) => {
   let models: any[] = [];
   for (const [_, model] of catalog.models) {
     models.push({
       name: model.title,
-      relativeValues: modelToJson({
+      relativeValues: await modelToJson({
         catalog: catalog.catalog,
         model: modelFromJSON(model),
       }),
@@ -115,8 +125,24 @@ const catalogToJson = (catalog: InterfaceWithModels) => {
   };
   fs.writeFileSync(
     `models/cache/interfaces/${catalog.catalog.id}.json`,
-    JSON.stringify(json)
+    JSON.stringify(json, null, 2)
   );
+  console.log(`Loaded ${catalog.catalog.title} to JSON`);
+};
+
+const interfacesToJson = async () => {
+  for (const inter of allInterfaces) {
+    await catalogToJson(inter);
+  }
+};
+
+const interfaceToJson = async (interfaceId: string) => {
+  const interface_ = allInterfaces.find((i) => i.catalog.id === interfaceId);
+  if (interface_) {
+    await catalogToJson(interface_);
+  } else {
+    console.error(`Could not find interface with ID ${interfaceId}`);
+  }
 };
 
 async function readAndConcatJSONFiles() {
@@ -134,7 +160,6 @@ async function readAndConcatJSONFiles() {
           "models/cache/interfaces/" + filename,
           "utf-8"
         );
-        console.log("Loaded", filename);
         items.push(JSON.parse(content));
       } catch (err) {
         console.error("Error reading file", filename, err);
@@ -143,7 +168,7 @@ async function readAndConcatJSONFiles() {
 
     await fs.promises.writeFile(
       "models/cache/cache.json",
-      JSON.stringify(items)
+      JSON.stringify(items, null, 2)
     );
   } catch (err) {
     console.error("Reading files didn't work", err);
@@ -155,12 +180,15 @@ export const makeProgram = () => {
 
   program
     .command("run")
-    .action(async (filename, options) => {
-      for (const inter of allInterfaces) {
-        catalogToJson(inter);
-        console.log(`Loaded ${inter.catalog.title} to JSON`);
+    .option("-i, --interface <interfaceName>", "Specify an interface id")
+    .action(async (options) => {
+      if (options.interface) {
+        await interfaceToJson(options.interface);
+        await readAndConcatJSONFiles();
+      } else {
+        await interfacesToJson();
+        await readAndConcatJSONFiles();
       }
-      await readAndConcatJSONFiles();
     });
 
   return program;
