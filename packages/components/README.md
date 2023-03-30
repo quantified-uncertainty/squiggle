@@ -42,6 +42,8 @@ export function DynamicSquiggleChart({ squiggleString }) {
 }
 ```
 
+You can example of this approach in [this repository](https://github.com/NunoSempere/squiggle-nexjs-example), which you could clone to begin using Squiggle in your project.
+
 ## Usage with create-react-app
 
 Create React App seems to be [on the way out](https://github.com/reactjs/react.dev/pull/5487#issuecomment-1409720741) and it is currently not supported by Squiggle. We recommend looking into ["production-grade React frameworks"](https://react.dev/learn/start-a-new-react-project#production-grade-react-frameworks) instead.
