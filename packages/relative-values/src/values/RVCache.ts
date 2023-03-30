@@ -12,7 +12,7 @@ type Distribution = {
 type DistributionResult = result<Distribution, string>;
 
 export type ModelData = {
-  name: string;
+  id: string;
   relativeValues: Record<string, Record<string, DistributionResult>>;
 };
 

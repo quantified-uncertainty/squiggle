@@ -75,6 +75,7 @@ function getCatalog(): Catalog {
 
 function getTextModel(): Model {
   return {
+    id: "Cross-Cause-Estimate",
     title: "Cross Cause Estimate",
     author: "Nuno Sempere",
     mode: "text",
@@ -666,6 +667,6 @@ function getTextModel(): Model {
 export function getCrossCauses(): InterfaceWithModels {
   return {
     catalog: getCatalog(),
-    models: Map([["Cross-Cause-Estimate", getTextModel()]]),
+    models: Map([getTextModel()].map((m) => [m.id, m])),
   };
 }

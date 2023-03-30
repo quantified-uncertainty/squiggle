@@ -47,6 +47,7 @@ const reducer: Reducer<Storage, Action> = (state, action) => {
                 models: int.models.set(
                   action.payload.model.id,
                   createEmptyGraphModel({
+                    id: action.payload.model.id,
                     author: action.payload.model.author,
                     title: action.payload.model.title,
                     catalog: int.catalog,

@@ -82,7 +82,8 @@ function getCatalog(): Catalog {
     id: "quri",
     title: "QURI projects",
     items,
-    description: "Key QURI Items. Only large ones are captured. Value is defined as what Ozzie thinks it should be.",
+    description:
+      "Key QURI Items. Only large ones are captured. Value is defined as what Ozzie thinks it should be.",
     author: "Ozzie Gooen",
     created: new Date("2022-03-12"),
     clusters: {
@@ -100,6 +101,7 @@ function getCatalog(): Catalog {
 
 function getTextModel(): Model {
   return {
+    id: "nuno-2022",
     author: "Nuño Sempere",
     title: "Nuño Sempere 2022 — Text",
     mode: "text",
@@ -167,7 +169,11 @@ function getGraphModel(): Model {
       ["quri_ken", "(0.1 to 0.5)*blog_post_to_software"],
       ["quri_guesstimate", "(50 to 10000)*blog_post_to_software"],
     ],
-    metadata: { author: "Ozzie Gooen", title: "Ozzie Gooen 2023 — Graph" },
+    metadata: {
+      id: "ozzie-2022",
+      author: "Ozzie Gooen",
+      title: "Ozzie Gooen 2023 — Graph",
+    },
     catalog: getCatalog(),
   });
 }
@@ -175,9 +181,6 @@ function getGraphModel(): Model {
 export function getQuriBuiltin(): InterfaceWithModels {
   return {
     catalog: getCatalog(),
-    models: Map([
-      ["nuno-2022", getTextModel()],
-      ["ozzie-2023", getGraphModel()],
-    ]),
+    models: Map([getTextModel(), getGraphModel()].map((m) => [m.id, m])),
   };
 }

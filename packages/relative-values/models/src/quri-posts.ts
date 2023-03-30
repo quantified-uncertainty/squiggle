@@ -478,6 +478,7 @@ function getCatalog(): Catalog {
 
 function getTextModel(): Model {
   return {
+    id: "quick-ozzie-estimate",
     title: "QURI Papers Estimate, Quick",
     author: "Ozzie Gooen",
     mode: "text",
@@ -502,6 +503,6 @@ fn(intervention1, intervention2) = scoreById(intervention1) / scoreById(interven
 export function getQuriPosts(): InterfaceWithModels {
   return {
     catalog: getCatalog(),
-    models: Map([["quick-ozzie-estimate", getTextModel()]]),
+    models: Map([getTextModel()].map((m) => [m.id, m])),
   };
 }

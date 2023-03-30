@@ -115,7 +115,7 @@ const catalogToJson = async (catalog: InterfaceWithModels) => {
   let models: any[] = [];
   for (const [_, model] of catalog.models) {
     models.push({
-      name: model.title,
+      id: model.id,
       relativeValues: await modelToJson({
         catalog: catalog.catalog,
         model: modelFromJSON(model),

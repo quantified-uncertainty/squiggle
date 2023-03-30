@@ -8,7 +8,7 @@ export const useRelativeValues = (
 ) => {
   let cache = jsonData
     .flatMap((r) => r.models)
-    .find((r) => model && r.name == model.title);
+    .find((r) => model && r.id == model.id);
   if (!cache) {
     return { error: "Data not in cache" };
   }
