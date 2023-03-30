@@ -21,7 +21,7 @@ const NotFound: FC<{ error: string }> = ({ error }) => (
 
 export const ModelSection: FC = () => {
   const { selectedId: id, selectedModel: model } = useSelectedModel();
-  const { error, rv } = useRelativeValues(model);
+  const { error, rv } = useRelativeValues(id, model);
   const { interfaceId } = useInterfaceContext();
   const interfaceWithModels = useInterfaceById(interfaceId);
 

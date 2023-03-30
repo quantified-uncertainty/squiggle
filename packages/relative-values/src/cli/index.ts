@@ -16,7 +16,6 @@ const wrapper = sq`
 {|x, y|
   dist = fn(x, y) -> SampleSet.fromDist
   {
-    dist: dist -> PointSet.fromDist -> PointSet.downsample(20),
     median: inv(dist, 0.5),
     min: inv(dist, 0.05),
     max: inv(dist, 0.95),
@@ -43,15 +42,10 @@ const buildRelativeValue = ({
     return { ok: false, value: "Expected record" };
   }
 
-  const dist = record.get("dist");
   const median = record.get("median");
   const min = record.get("min");
   const max = record.get("max");
   const db = record.get("db");
-
-  if (!(dist instanceof SqPointSetDistribution)) {
-    return { ok: false, value: "Expected point set" };
-  }
 
   if (typeof median !== "number") {
     return { ok: false, value: "Expected median to be a number" };
@@ -69,7 +63,6 @@ const buildRelativeValue = ({
   return {
     ok: true,
     value: {
-      dist,
       median,
       min,
       max,
@@ -110,16 +103,19 @@ const modelToJson = ({
 };
 
 const catalogToJson = (catalog: InterfaceWithModels) => {
-  let obj: { [k: string]: any } = {};
-  for (const [str, model] of catalog.models) {
-    obj[model.title] = modelToJson({
-      catalog: catalog.catalog,
-      model: modelFromJSON(model),
+  let models: any[] = [];
+  for (const [_, model] of catalog.models) {
+    models.push({
+      name: model.title,
+      relativeValues: modelToJson({
+        catalog: catalog.catalog,
+        model: modelFromJSON(model),
+      }),
     });
   }
   const json = {
     id: catalog.catalog.id,
-    caches: obj,
+    models,
   };
   fs.writeFileSync(
     `src/builtins_cache/${catalog.catalog.id}.json`,
@@ -171,7 +167,7 @@ export const makeProgram = () => {
     .action(async (filename, options) => {
       for (const inter of allInterfaces) {
         catalogToJson(inter);
-        console.log(`Loaded ${inter.catalog.title} to JSON`)
+        console.log(`Loaded ${inter.catalog.title} to JSON`);
       }
       await readAndConcatJSONFiles();
     });

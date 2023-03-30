@@ -3,6 +3,7 @@ import { sq, SqProject } from "@quri/squiggle-lang";
 import { useMemo } from "react";
 
 import { RVStorage } from "@/values/RVStorage";
+import { jsonData } from "../../../values/SCache";
 
 const wrapper = sq`
 {|x, y|
@@ -17,7 +18,10 @@ const wrapper = sq`
 }
 `;
 
-export const useRelativeValues = (model: Model | undefined) => {
+export const useRelativeValues = (
+  id: string | undefined,
+  model: Model | undefined
+) => {
   const project = useMemo(() => {
     const project = SqProject.create();
     project.setSource("wrapper", wrapper);
@@ -54,9 +58,21 @@ export const useRelativeValues = (model: Model | undefined) => {
         error: `Expected a function as result, got: ${result.value.tag}`,
       };
     }
+    console.log("HIHIHI", id);
+    let cache = jsonData
+      .flatMap((r) => r.models)
+      .find((r) => model && r.name == model.title);
+    if (!cache) {
+      console.log(
+        jsonData,
+        id,
+        jsonData.flatMap((r) => r.models)
+      );
+      return { error: "AAdddG" };
+    }
     return {
       error: "",
-      rv: new RVStorage(result.value.value),
+      rv: new RVStorage(result.value.value, cache),
     };
   }, [project, code]);
 
