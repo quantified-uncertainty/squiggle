@@ -43,7 +43,7 @@ export const wrapValue = (value: Value, location: SqValueLocation): SqValue => {
   }
 };
 
-export abstract class SqAbstractValue<T, J> {
+export abstract class SqAbstractValue<T extends string, J> {
   abstract tag: T;
 
   constructor(
