@@ -1,0 +1,152 @@
+---
+sidebar_position: 4
+title: Control Flow
+---
+
+import { SquiggleEditor } from "../../src/components/SquiggleEditor";
+import Admonition from "@theme/Admonition";
+
+This page documents control flow. Squiggle has if/else statements, but not for loops. But for for loops, you can use reduce/map constructs instead, which are also documented here.
+
+## Conditionals
+
+### If-else
+
+```js
+if condition then result else alternative
+```
+
+<SquiggleEditor
+  defaultCode={`
+x = 10
+if x == 1 then 1 else 2
+`}
+/>
+
+### If-else as a ternary operator
+
+```js
+test ? result : alternative;
+```
+
+<SquiggleEditor
+  defaultCode={`
+x = 10
+x == 0 ? 1 : 2
+`}
+/>
+
+### Tips and tricks
+
+#### Use brackets and parenthesis to organize control flow
+
+<SquiggleEditor
+  defaultCode={`
+x = 10
+if x == 1 then {
+  1
+} else {
+  2
+}
+`}
+/>
+
+or
+
+<SquiggleEditor
+  defaultCode={`
+x = 10
+x = 20
+if x == 1 then {
+  (
+    if y == 0 then {
+      1
+    } else {
+      2
+    }
+  )
+} else {
+  3
+}
+`}
+/>
+
+This is overkill for simple examples becomes useful when the control conditions are more complex.
+
+#### Save the result to a variable
+
+Assigning a value inside an if/else flow isn't possible:
+
+```js
+x = 10
+y = 20
+if x == 1 then {
+  y = 1
+} else {
+  y = 2 * x
+}
+```
+
+Instead, you can do this:
+
+<SquiggleEditor
+  defaultCode={`
+x = 10
+y = 20
+y = if x == 1 then {
+  1
+} else {
+  2 * x
+}
+`}
+/>
+
+Likewise, for assigning more than one value, you can't do this:
+
+```js
+y = 0
+z = 0
+if x == 1 then {
+  y = 2
+} else {
+  z = 4
+}
+```
+
+Instead, do:
+
+<SquiggleEditor
+  defaultCode={`
+x = 10
+result = if x == 1 then {
+  {y: 2, z: 0}
+} else {
+  {y: 0, z: 4}
+}
+y = result.y
+z = result.z
+`}
+/>
+
+## For loops
+
+For loops aren't supported in Squiggle. Instead, use a [map](/docs/Api/List#map) or a [reduce](/docs/Api/List#reduce) operator.
+
+Instead of:
+
+```js
+xs = [];
+for (i = 0; i < 10; i++) {
+  xs[i] = f(x);
+}
+```
+
+do:
+
+<SquiggleEditor
+  defaultCode={`
+f(x) = 2*x
+xs = List.upTo(0,10)
+ys = List.map(xs, {|x| f(x)})
+`}
+/>
