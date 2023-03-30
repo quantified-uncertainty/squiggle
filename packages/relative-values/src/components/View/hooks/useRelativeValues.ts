@@ -1,6 +1,6 @@
 import { getModelCode, Model } from "@/model/utils";
 import { RVStorage } from "@/values/RVStorage";
-import { jsonData } from "../../../values/SCache";
+import { jsonData } from "@/values/RVCache";
 
 export const useRelativeValues = (
   id: string | undefined,

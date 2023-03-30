@@ -6,29 +6,29 @@
     "dev": "next dev",
     "start": "next start",
     "lint": "next lint",
-    "stashRelativeValues": "tsx ./src/cli/index.ts run",
-    "build": "yarn run stashRelativeValues && next build"
+    "cacheRV": "tsx ./src/cli/index.ts cacheRV",
+    "build": "yarn cache-values cacheRV && next build"
   },
   "dependencies": {
-    "@commander-js/extra-typings": "^10.0.3",
     "@floating-ui/react": "^0.20.1",
     "@quri/squiggle-components": "^0.6.0",
     "@quri/squiggle-lang": "^0.6.0",
     "clsx": "^1.2.1",
-    "commander": "^10.0.0",
     "immutable": "^4.3.0",
     "next": "^13.2.4",
     "react": "^18.2.0",
-    "tsx": "^3.12.6",
     "typescript": "^4.9.5"
   },
   "devDependencies": {
+    "@commander-js/extra-typings": "^10.0.3",
     "@types/react": "^18.0.28",
     "autoprefixer": "^10.4.14",
+    "commander": "^10.0.0",
     "eslint": "^8.36.0",
     "eslint-config-next": "^13.2.4",
     "postcss": "^8.4.21",
     "postcss-cli": "^10.1.0",
-    "tailwindcss": "^3.2.7"
+    "tailwindcss": "^3.2.7",
+    "tsx": "^3.12.6"
   }
 }
