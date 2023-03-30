@@ -55,7 +55,7 @@ You need to _prepare_ by building and bundling `squiggle-lang`
 ```sh
 cd ../squiggle-lang
 yarn build
-````
+```
 
 If you've otherwise done this recently you can skip those.
 
