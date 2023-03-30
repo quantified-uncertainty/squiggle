@@ -190,7 +190,7 @@ export const makeProgram = () => {
         await readAndConcatJSONFiles();
       } else {
         await interfacesToJson();
-        // await readAndConcatJSONFiles();
+        await readAndConcatJSONFiles();
       }
     });
 
