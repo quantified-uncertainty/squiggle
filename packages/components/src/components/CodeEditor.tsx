@@ -186,7 +186,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({
           onSubmit
             ? [
                 {
-                  key: "Ctrl-Enter",
+                  key: "Mod-Enter",
                   run: () => {
                     onSubmit();
                     return true;
