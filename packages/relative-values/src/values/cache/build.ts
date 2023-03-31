@@ -8,7 +8,7 @@ import { getModelCode, Model, modelFromJSON } from "@/model/utils";
 import { Catalog, InterfaceWithModels } from "@/types";
 import { allInterfaces } from "@models/src/index";
 import { sq, SqLambda, SqProject } from "@quri/squiggle-lang";
-import { RelativeValueResult } from "../RelativeValue";
+import { RelativeValueResult } from "../types";
 import { CatalogCache, ModelCache } from "../cache";
 
 const cacheDir = path.join(path.dirname(__filename), "../../../models/cache");

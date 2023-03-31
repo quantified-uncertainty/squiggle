@@ -1,6 +1,6 @@
 import { Item } from "@/types";
-import { RelativeValue } from "@/values/RelativeValue";
-import { RVStorage } from "@/values/RVStorage";
+import { RelativeValue } from "@/values/types";
+import { ModelEvaluator } from "@/values/ModelEvaluator";
 import _ from "lodash";
 import { useMemo } from "react";
 import { AxisConfig } from "../ViewProvider";
@@ -14,7 +14,7 @@ const averageMetric = ({
   item: Item;
   comparedTo: Item[];
   getMetric: (item: RelativeValue) => number;
-  rv: RVStorage;
+  rv: ModelEvaluator;
 }) => {
   return (
     comparedTo.reduce((total, item2) => {
@@ -30,7 +30,7 @@ const averageMetric = ({
 type AverageProps = {
   item: Item;
   comparedTo: Item[];
-  rv: RVStorage;
+  rv: ModelEvaluator;
 };
 
 export function averageMedian({ item, comparedTo, rv }: AverageProps) {
@@ -59,7 +59,7 @@ export const useSortedItems = ({
 }: {
   items: Item[];
   config: AxisConfig;
-  rv: RVStorage;
+  rv: ModelEvaluator;
   otherDimensionItems: Item[]; // used for calculating average median and average uncertainty
 }) => {
   return useMemo(() => {

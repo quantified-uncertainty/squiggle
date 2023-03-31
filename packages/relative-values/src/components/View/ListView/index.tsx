@@ -1,7 +1,7 @@
 import { useSelectedInterface } from "@/components/Interface/InterfaceProvider";
 import { DropdownButton } from "@/components/ui/DropdownButton";
 import { InterfaceWithModels } from "@/types";
-import { RVStorage } from "@/values/RVStorage";
+import { ModelEvaluator } from "@/values/ModelEvaluator";
 import { NumberShower } from "@quri/squiggle-components";
 import { FC, Fragment, useState } from "react";
 import { CellBox } from "../CellBox";
@@ -14,7 +14,7 @@ import { useViewContext } from "../ViewProvider";
 import { ColumnHeader } from "./ColumnHeader";
 
 type Props = {
-  rv: RVStorage;
+  rv: ModelEvaluator;
 };
 
 export const ListView: FC<Props> = ({ rv }) => {

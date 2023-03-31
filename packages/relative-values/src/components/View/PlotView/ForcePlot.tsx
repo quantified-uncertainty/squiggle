@@ -1,13 +1,13 @@
 import { FC, useEffect, useMemo, useRef } from "react";
 
 import { useSelectedInterface } from "@/components/Interface/InterfaceProvider";
-import { RVStorage } from "@/values/RVStorage";
+import { ModelEvaluator } from "@/values/ModelEvaluator";
 import * as d3 from "d3";
 import { useFilteredItems } from "../hooks";
 import { useViewContext } from "../ViewProvider";
 
 export const ForcePlot: FC<{
-  rv: RVStorage;
+  rv: ModelEvaluator;
 }> = ({ rv }) => {
   const ref = useRef<HTMLCanvasElement>(null);
 

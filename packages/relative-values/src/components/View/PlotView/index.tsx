@@ -1,5 +1,5 @@
 import { StyledTab } from "@/components/ui/StyledTab";
-import { RVStorage } from "@/values/RVStorage";
+import { ModelEvaluator } from "@/values/ModelEvaluator";
 import { SqLambda } from "@quri/squiggle-lang";
 import { FC } from "react";
 import { ClusterFilter } from "../ClusterFilter";
@@ -7,7 +7,7 @@ import { ForcePlot } from "./ForcePlot";
 import { ValueAndUncertaintyPlot } from "./ValueAndUncertaintyPlot";
 
 export const PlotView: FC<{
-  rv: RVStorage;
+  rv: ModelEvaluator;
 }> = ({ rv }) => {
   return (
     <div className="flex gap-8 max-w-6xl mx-auto">

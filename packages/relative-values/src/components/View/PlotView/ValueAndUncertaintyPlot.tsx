@@ -1,4 +1,4 @@
-import { RVStorage } from "@/values/RVStorage";
+import { ModelEvaluator } from "@/values/ModelEvaluator";
 import * as d3 from "d3";
 import { FC, useEffect, useMemo, useRef } from "react";
 import { useSelectedInterface } from "../../Interface/InterfaceProvider";
@@ -13,7 +13,7 @@ type Datum = {
   clusterId: string | undefined;
 };
 
-const usePlotData = (rv: RVStorage) => {
+const usePlotData = (rv: ModelEvaluator) => {
   const {
     catalog: { items },
   } = useSelectedInterface();
@@ -41,7 +41,7 @@ const usePlotData = (rv: RVStorage) => {
 };
 
 export const ValueAndUncertaintyPlot: FC<{
-  rv: RVStorage;
+  rv: ModelEvaluator;
 }> = ({ rv }) => {
   const {
     catalog: { clusters },

@@ -1,5 +1,5 @@
 import { Item } from "@/types";
-import { RVStorage } from "@/values/RVStorage";
+import { ModelEvaluator } from "@/values/ModelEvaluator";
 import { FC, Fragment, useCallback, useMemo } from "react";
 import { useSelectedInterface } from "../../Interface/InterfaceProvider";
 import { DropdownButton } from "../../ui/DropdownButton";
@@ -11,7 +11,7 @@ import { AxisMenu } from "./AxisMenu";
 import { GridModeControls } from "./GridModeControls";
 
 export const GridView: FC<{
-  rv: RVStorage;
+  rv: ModelEvaluator;
 }> = ({ rv }) => {
   const { axisConfig, gridMode } = useViewContext();
   const {

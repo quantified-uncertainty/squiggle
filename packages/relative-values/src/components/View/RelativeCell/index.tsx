@@ -1,4 +1,4 @@
-import { RVStorage } from "@/values/RVStorage";
+import { ModelEvaluator } from "@/values/ModelEvaluator";
 import { FC, memo } from "react";
 import { DistCell } from "./DistCell";
 import { ErrorCell } from "./ErrorCell";
@@ -6,7 +6,7 @@ import { ErrorCell } from "./ErrorCell";
 export const RelativeCell: FC<{
   id1: string;
   id2: string;
-  rv: RVStorage;
+  rv: ModelEvaluator;
 }> = memo(function RelativeCell({ id1, id2, rv }) {
   const result = rv.compare(id1, id2);
 

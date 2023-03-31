@@ -1,5 +1,5 @@
 import data from "@models/cache/cache.json";
-import { RelativeValueResult } from "./RelativeValue";
+import { RelativeValueResult } from "./types";
 
 export type ModelCache = {
   id: string;
