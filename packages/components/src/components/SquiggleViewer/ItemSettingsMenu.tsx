@@ -12,7 +12,7 @@ import { ViewerContext } from "./ViewerContext";
 import { PlaygroundContext } from "../SquigglePlayground";
 import { SqValue } from "@quri/squiggle-lang";
 import { locationAsString } from "./utils";
-import _ from "lodash";
+import merge from "lodash/merge";
 
 type Props = {
   value: SqValue;
@@ -27,7 +27,7 @@ const ItemSettingsModal: React.FC<
   const { setSettings, getSettings, getMergedSettings } =
     useContext(ViewerContext);
 
-  const mergedSettings = _.merge(getMergedSettings(value.location), fixed);
+  const mergedSettings = merge(getMergedSettings(value.location), fixed);
 
   const { register, watch } = useForm({
     resolver: yupResolver(viewSettingsSchema),
@@ -36,7 +36,7 @@ const ItemSettingsModal: React.FC<
   useEffect(() => {
     const subscription = watch((vars) => {
       const settings = getSettings(value.location); // get the latest version
-      setSettings(value.location, _.merge({}, settings, vars));
+      setSettings(value.location, merge({}, settings, vars));
       onChange();
     });
     return () => subscription.unsubscribe();

@@ -77,11 +77,6 @@ export const DistributionViewSettingsForm: React.FC<{
           />
           <Checkbox
             register={register}
-            name="distributionChartSettings.vegaActions"
-            label="Show vega chart controls"
-          />
-          <Checkbox
-            register={register}
             name="distributionChartSettings.showSummary"
             label="Show summary statistics"
           />

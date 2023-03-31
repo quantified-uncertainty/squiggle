@@ -10,7 +10,7 @@ import {
 import { useSquiggle } from "../../lib/hooks";
 import { PartialViewSettings, viewSettingsSchema } from "../ViewSettingsForm";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert";
-import _ from "lodash";
+import merge from "lodash/merge";
 
 export type SquiggleViewerProps = {
   /** The output of squiggle's run */
@@ -33,7 +33,7 @@ export const SquiggleViewer: React.FC<SquiggleViewerProps> = ({
   const settingsStoreRef = useRef<SettingsStore>({});
 
   const globalSettings = useMemo(() => {
-    return _.merge({}, viewSettingsSchema.getDefault(), partialViewSettings);
+    return merge({}, viewSettingsSchema.getDefault(), partialViewSettings);
   }, [partialViewSettings]);
 
   const getSettings = useCallback(
@@ -55,7 +55,7 @@ export const SquiggleViewer: React.FC<SquiggleViewerProps> = ({
   const getMergedSettings = useCallback(
     (location: SqValueLocation) => {
       const localSettings = getSettings(location);
-      const result: MergedItemSettings = _.merge(
+      const result: MergedItemSettings = merge(
         {},
         globalSettings,
         localSettings
