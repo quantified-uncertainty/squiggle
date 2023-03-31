@@ -27,12 +27,12 @@ export const ModelSection: FC = () => {
 
   const dispatch = useStorageDispatch();
 
-  const rv = useMemo(
+  const modelEvaluatorResult = useMemo(
     () => (model ? ModelEvaluator.create(model) : undefined),
     [model]
   );
 
-  if (!interfaceWithModels || !model || !rv) {
+  if (!interfaceWithModels || !model || !modelEvaluatorResult) {
     return <NotFound error="Model not found" />;
   }
 
@@ -55,6 +55,9 @@ export const ModelSection: FC = () => {
             </div>
             <div>
               <ModelPicker />
+              {modelEvaluatorResult.ok ? null : (
+                <pre className="text-red-700">{modelEvaluatorResult.value}</pre>
+              )}
             </div>
           </div>
           <StyledTab.List>
@@ -66,13 +69,19 @@ export const ModelSection: FC = () => {
         </div>
         <StyledTab.Panels>
           <StyledTab.Panel>
-            <ListView rv={rv} />
+            {modelEvaluatorResult.ok ? (
+              <ListView rv={modelEvaluatorResult.value} />
+            ) : null}
           </StyledTab.Panel>
           <StyledTab.Panel>
-            <GridView rv={rv} />
+            {modelEvaluatorResult.ok ? (
+              <GridView rv={modelEvaluatorResult.value} />
+            ) : null}
           </StyledTab.Panel>
           <StyledTab.Panel>
-            <PlotView rv={rv} />
+            {modelEvaluatorResult.ok ? (
+              <PlotView rv={modelEvaluatorResult.value} />
+            ) : null}
           </StyledTab.Panel>
           <StyledTab.Panel>
             {model ? (
