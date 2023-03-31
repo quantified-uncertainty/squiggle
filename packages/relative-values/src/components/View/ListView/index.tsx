@@ -14,10 +14,10 @@ import { useViewContext } from "../ViewProvider";
 import { ColumnHeader } from "./ColumnHeader";
 
 type Props = {
-  rv: ModelEvaluator;
+  model: ModelEvaluator;
 };
 
-export const ListView: FC<Props> = ({ rv }) => {
+export const ListView: FC<Props> = ({ model }) => {
   const { axisConfig } = useViewContext();
   const {
     catalog: { items },
@@ -32,7 +32,7 @@ export const ListView: FC<Props> = ({ rv }) => {
   const sortedItems = useSortedItems({
     items: filteredItems,
     config: axisConfig.rows,
-    rv,
+    model: model,
     otherDimensionItems: [selectedItem],
   });
 
@@ -95,7 +95,11 @@ export const ListView: FC<Props> = ({ rv }) => {
             <CellBox>
               <div className="p-2 text-slate-800">
                 <NumberShower
-                  number={averageMedian({ item, comparedTo: items, rv })}
+                  number={averageMedian({
+                    item,
+                    comparedTo: items,
+                    model: model,
+                  })}
                   precision={2}
                 />
               </div>
@@ -103,12 +107,12 @@ export const ListView: FC<Props> = ({ rv }) => {
             <CellBox>
               <div className="p-2 text-slate-800">
                 <NumberShower
-                  number={averageDb({ item, comparedTo: items, rv })}
+                  number={averageDb({ item, comparedTo: items, model: model })}
                   precision={3}
                 />
               </div>
             </CellBox>
-            <RelativeCell id1={item.id} id2={selectedItem.id} rv={rv} />
+            <RelativeCell id1={item.id} id2={selectedItem.id} model={model} />
           </Fragment>
         ))}
       </div>

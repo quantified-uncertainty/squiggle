@@ -1,4 +1,4 @@
-import { buildCache } from "@/values/cache/build";
+import { buildCache } from "@/values/buildCache";
 import { Command } from "@commander-js/extra-typings";
 
 export const makeProgram = () => {

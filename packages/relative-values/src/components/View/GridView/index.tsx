@@ -11,8 +11,8 @@ import { AxisMenu } from "./AxisMenu";
 import { GridModeControls } from "./GridModeControls";
 
 export const GridView: FC<{
-  rv: ModelEvaluator;
-}> = ({ rv }) => {
+  model: ModelEvaluator;
+}> = ({ model }) => {
   const { axisConfig, gridMode } = useViewContext();
   const {
     catalog: { items },
@@ -30,13 +30,13 @@ export const GridView: FC<{
   const rowItems = useSortedItems({
     items: filteredRowItems,
     config: axisConfig.rows,
-    rv,
+    model: model,
     otherDimensionItems: filteredColumnItems,
   });
   const columnItems = useSortedItems({
     items: filteredColumnItems,
     config: axisConfig.columns,
-    rv,
+    model: model,
     otherDimensionItems: filteredRowItems,
   });
 
@@ -92,7 +92,7 @@ export const GridView: FC<{
                   key={columnItem.id}
                   id1={rowItem.id}
                   id2={columnItem.id}
-                  rv={rv}
+                  model={model}
                 />
               )
             )}

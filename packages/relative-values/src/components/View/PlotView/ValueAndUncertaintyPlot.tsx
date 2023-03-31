@@ -13,7 +13,7 @@ type Datum = {
   clusterId: string | undefined;
 };
 
-const usePlotData = (rv: ModelEvaluator) => {
+function usePlotData(model: ModelEvaluator) {
   const {
     catalog: { items },
   } = useSelectedInterface();
@@ -30,19 +30,19 @@ const usePlotData = (rv: ModelEvaluator) => {
     for (const item of filteredItems) {
       data.push({
         id: item.id,
-        median: averageMedian({ item, comparedTo: items, rv }),
-        db: averageDb({ item, comparedTo: items, rv }),
+        median: averageMedian({ item, comparedTo: items, model: model }),
+        db: averageDb({ item, comparedTo: items, model: model }),
         clusterId: item.clusterId,
       });
     }
     return data;
-  }, [filteredItems, items, rv]);
+  }, [filteredItems, items, model]);
   return data;
-};
+}
 
 export const ValueAndUncertaintyPlot: FC<{
-  rv: ModelEvaluator;
-}> = ({ rv }) => {
+  model: ModelEvaluator;
+}> = ({ model }) => {
   const {
     catalog: { clusters },
   } = useSelectedInterface();
@@ -53,7 +53,7 @@ export const ValueAndUncertaintyPlot: FC<{
   const height = 400;
   const margin = { top: 10, bottom: 40, left: 60, right: 20 };
 
-  const data = usePlotData(rv);
+  const data = usePlotData(model);
 
   type Obj = {
     xAxis: d3.Axis<d3.NumberValue>;

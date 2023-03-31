@@ -70,17 +70,17 @@ export const ModelSection: FC = () => {
         <StyledTab.Panels>
           <StyledTab.Panel>
             {modelEvaluatorResult.ok ? (
-              <ListView rv={modelEvaluatorResult.value} />
+              <ListView model={modelEvaluatorResult.value} />
             ) : null}
           </StyledTab.Panel>
           <StyledTab.Panel>
             {modelEvaluatorResult.ok ? (
-              <GridView rv={modelEvaluatorResult.value} />
+              <GridView model={modelEvaluatorResult.value} />
             ) : null}
           </StyledTab.Panel>
           <StyledTab.Panel>
             {modelEvaluatorResult.ok ? (
-              <PlotView rv={modelEvaluatorResult.value} />
+              <PlotView model={modelEvaluatorResult.value} />
             ) : null}
           </StyledTab.Panel>
           <StyledTab.Panel>

@@ -7,8 +7,8 @@ import { useFilteredItems } from "../hooks";
 import { useViewContext } from "../ViewProvider";
 
 export const ForcePlot: FC<{
-  rv: ModelEvaluator;
-}> = ({ rv }) => {
+  model: ModelEvaluator;
+}> = ({ model }) => {
   const ref = useRef<HTMLCanvasElement>(null);
 
   const {
@@ -61,7 +61,7 @@ export const ForcePlot: FC<{
     const force = d3
       .forceLink<Node, d3.SimulationLinkDatum<Node>>()
       .distance((d) => {
-        const relativeValueResult = rv.compare(
+        const relativeValueResult = model.compare(
           (d.source as Node).id,
           (d.target as Node).id
         );

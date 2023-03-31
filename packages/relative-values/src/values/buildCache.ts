@@ -1,4 +1,5 @@
-// doesn't work this CLI, unfortunately:
+// This module should never be imported on the frontend.
+// This Next.js feature would force that, but doesn't work this CLI, unfortunately:
 // import "server-only";
 
 import fs from "fs";
@@ -7,12 +8,11 @@ import path from "path";
 import { Model, modelFromJSON } from "@/model/utils";
 import { Catalog, InterfaceWithModels } from "@/types";
 import { allInterfaces } from "@models/src/index";
-import { sq } from "@quri/squiggle-lang";
-import { CatalogCache, ModelCache } from "../cache";
-import { ModelEvaluator } from "../ModelEvaluator";
-import { RelativeValueResult } from "../types";
+import { CatalogCache, ModelCache } from "./cache";
+import { ModelEvaluator } from "./ModelEvaluator";
+import { RelativeValueResult } from "./types";
 
-const cacheDir = path.join(path.dirname(__filename), "../../../models/cache");
+const cacheDir = path.join(path.dirname(__filename), "../../models/cache");
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
