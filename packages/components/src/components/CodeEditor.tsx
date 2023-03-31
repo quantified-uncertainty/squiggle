@@ -92,6 +92,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({
             wholeWords: true,
             highlightWordAroundCursor: false, // Works weird on fractions! 5.3e10K
           }),
+          compSubmitListener.of([]),
           keymap.of([
             ...closeBracketsKeymap,
             ...defaultKeymap,
@@ -104,7 +105,6 @@ export const CodeEditor: FC<CodeEditorProps> = ({
           ]),
           compGutter.of([]),
           compUpdateListener.of([]),
-          compSubmitListener.of([]),
           compTheme.of([]),
           languageSupport,
         ],
@@ -186,7 +186,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({
           onSubmit
             ? [
                 {
-                  key: "Ctrl-s",
+                  key: "Ctrl-Enter",
                   run: () => {
                     onSubmit();
                     return true;
