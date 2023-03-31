@@ -20,14 +20,14 @@ const NotFound: FC<{ error: string }> = ({ error }) => (
 );
 
 export const ModelSection: FC = () => {
-  const { selectedId: id, selectedModel: model } = useSelectedModel();
-  const { error, rv } = useRelativeValues(id, model);
+  const model = useSelectedModel();
+  const { error, rv } = useRelativeValues(model);
   const { interfaceId } = useInterfaceContext();
   const interfaceWithModels = useInterfaceById(interfaceId);
 
   const dispatch = useStorageDispatch();
 
-  if (!interfaceWithModels || !model || id === undefined) {
+  if (!interfaceWithModels || !model) {
     return <NotFound error="Model not found" />;
   }
 
@@ -71,7 +71,10 @@ export const ModelSection: FC = () => {
                 setModel={(newModel) =>
                   dispatch({
                     type: "updateModel",
-                    payload: { interfaceId, modelId: id, model: newModel },
+                    payload: {
+                      interfaceId,
+                      model: newModel,
+                    },
                   })
                 }
               />

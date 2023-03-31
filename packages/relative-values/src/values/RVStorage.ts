@@ -1,9 +1,17 @@
+import { Model } from "@/model/utils";
+import { ModelCache } from "./cache";
 import { RelativeValueResult } from "./RelativeValue";
-import { ModelData, searchRelativeValues } from "./RVCache";
+
 export class RVStorage {
-  constructor(public db: ModelData) {}
+  constructor(private model: Model, private cache: ModelCache) {}
 
   compare(id1: string, id2: string): RelativeValueResult {
-    return searchRelativeValues(this.db, id1, id2)
+    if (!this.cache.relativeValues[id1]?.[id2]) {
+      return {
+        ok: false,
+        value: `Combination ${id1} and ${id2} not cached`,
+      };
+    }
+    return this.cache.relativeValues[id1]?.[id2];
   }
 }
