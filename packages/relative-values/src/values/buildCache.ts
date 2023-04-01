@@ -5,12 +5,11 @@
 import fs from "fs";
 import path from "path";
 
-import { Model, modelFromJSON } from "@/model/utils";
+import { Model } from "@/model/utils";
 import { Catalog, InterfaceWithModels } from "@/types";
 import { allInterfaces } from "@models/src/index";
-import { CatalogCache, ModelCache } from "./cache";
 import { ModelEvaluator } from "./ModelEvaluator";
-import { RelativeValueResult } from "./types";
+import { RelativeValueResult, CatalogCache, ModelCache } from "./types";
 
 const cacheDir = path.join(path.dirname(__filename), "../../models/cache");
 

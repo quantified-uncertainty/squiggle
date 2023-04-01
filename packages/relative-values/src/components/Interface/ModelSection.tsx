@@ -6,7 +6,7 @@ import {
   useInterfaceById,
   useStorageDispatch,
 } from "@/storage/StorageProvider";
-import { ModelEvaluator } from "@/values/ModelEvaluator";
+import { createModelEvaluatorWithCache } from "@/values/loadCache";
 import { ModelEditor } from "../ModelEditor";
 import { StyledTab } from "../ui/StyledTab";
 import { GridView } from "../View/GridView";
@@ -28,7 +28,7 @@ export const ModelSection: FC = () => {
   const dispatch = useStorageDispatch();
 
   const modelEvaluatorResult = useMemo(
-    () => (model ? ModelEvaluator.create(model) : undefined),
+    () => (model ? createModelEvaluatorWithCache(model) : undefined),
     [model]
   );
 

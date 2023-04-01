@@ -1,8 +1,7 @@
 import { result, sq, SqLambda, SqProject } from "@quri/squiggle-lang";
 
 import { getModelCode, Model } from "@/model/utils";
-import { jsonData, ModelCache } from "./cache";
-import { RelativeValueResult } from "./types";
+import { ModelCache, RelativeValueResult } from "./types";
 
 const wrapper = sq`
 {|x, y|
@@ -67,17 +66,13 @@ export class ModelEvaluator {
   private constructor(
     private model: Model, // unused for now
     private fn: SqLambda,
-    private cache: ModelCache
+    private cache?: ModelCache
   ) {}
 
-  static create(model: Model): result<ModelEvaluator, string> {
-    const cache: ModelCache = jsonData
-      .flatMap((r) => r.models)
-      .find((r) => model && r.id == model.id) || {
-      id: model.id,
-      relativeValues: {},
-    };
-
+  static create(
+    model: Model,
+    cache?: ModelCache
+  ): result<ModelEvaluator, string> {
     const project = SqProject.create();
     project.setSource("wrapper", wrapper);
     project.setContinues("wrapper", ["model"]);
@@ -119,7 +114,7 @@ export class ModelEvaluator {
   }
 
   compare(id1: string, id2: string): RelativeValueResult {
-    const cachedValue = this.cache.relativeValues[id1]?.[id2];
+    const cachedValue = this.cache?.relativeValues[id1]?.[id2];
     if (!this.model.modified && cachedValue) {
       return cachedValue;
     }
