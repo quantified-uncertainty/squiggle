@@ -185,6 +185,8 @@ export const library: FRFunction[] = [
     examples: [
       "lognormal(0.5, 0.8)",
       "lognormal({p5: 4, p95: 10})",
+      "lognormal({p10: 4, p90: 10})",
+      "lognormal({p25: 4, p75: 10})",
       "lognormal({mean: 5, stdev: 2})",
     ],
     definitions: [
