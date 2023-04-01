@@ -13,9 +13,6 @@ import { OperationError } from "../operationError";
 import { DiscreteShape } from "../PointSet/Discrete";
 import { Env } from "./env";
 
-const normal95confidencePoint = 1.6448536269514722;
-// explained in website/docs/internal/ProcessingConfidenceIntervals
-
 const square = (n: number): number => {
   return n * n;
 };
@@ -206,12 +203,26 @@ export class Normal extends SymbolicDist {
     return Ok(this._stdev ** 2);
   }
 
-  static from90PercentCI(low: number, high: number): result<Normal, string> {
+  static fromCredibleInterval({
+    low,
+    high,
+    probability,
+  }: {
+    low: number;
+    high: number;
+    probability: number;
+  }): result<Normal, string> {
     if (low >= high) {
-      return Result.Error("Low value must be less than high value.");
+      return Result.Error("Low value must be less than high value");
     }
-    const mean = E_A_Floats.mean([low, high]);
-    const stdev = (high - low) / (2 * normal95confidencePoint);
+    if (probability <= 0 || probability >= 1) {
+      return Result.Error("Probability must be in (0, 1) interval");
+    }
+
+    // explained in website/docs/internal/ProcessingConfidenceIntervals
+    const normalizedSigmas = jstat.normal.inv(1 - (1 - probability) / 2, 0, 1);
+    const mean = (low + high) / 2;
+    const stdev = (high - low) / (2 * normalizedSigmas);
     return Normal.make({ mean, stdev });
   }
 
@@ -579,16 +590,34 @@ export class Lognormal extends SymbolicDist {
     );
   }
 
-  static from90PercentCI(low: number, high: number): result<Lognormal, string> {
+  static fromCredibleInterval({
+    low,
+    high,
+    probability,
+  }: {
+    low: number;
+    high: number;
+    probability: number;
+  }): result<Lognormal, string> {
     if (low >= high) {
-      return Result.Error("Low value must be less than high value.");
+      return Result.Error("Low value must be less than high value");
     }
+    if (low <= 0) {
+      return Result.Error("Low value must be above 0");
+    }
+    if (probability <= 0 || probability >= 1) {
+      return Result.Error("Probability must be in (0, 1) interval");
+    }
+
     const logLow = Math.log(low);
     const logHigh = Math.log(high);
-    const mu = E_A_Floats.mean([logLow, logHigh]);
-    const sigma = (logHigh - logLow) / (2 * normal95confidencePoint);
+
+    const normalizedSigmas = jstat.normal.inv(1 - (1 - probability) / 2, 0, 1);
+    const mu = (logLow + logHigh) / 2;
+    const sigma = (logHigh - logLow) / (2 * normalizedSigmas);
     return Lognormal.make({ mu, sigma });
   }
+
   static fromMeanAndStdev({
     mean,
     stdev,
@@ -994,15 +1023,21 @@ export class PointMass extends SymbolicDist {
   }
 }
 
-export const From90thPercentile = {
-  make(low: number, high: number): result<SymbolicDist, string> {
-    if (low <= 0) {
-      return Normal.from90PercentCI(low, high);
-    } else {
-      return Lognormal.from90PercentCI(low, high);
-    }
-  },
-};
+export function makeFromCredibleInterval({
+  low,
+  high,
+  probability,
+}: {
+  low: number;
+  high: number;
+  probability: number;
+}): result<SymbolicDist, string> {
+  if (low <= 0) {
+    return Normal.fromCredibleInterval({ low, high, probability });
+  } else {
+    return Lognormal.fromCredibleInterval({ low, high, probability });
+  }
+}
 
 /* Calling e.g. "Normal.operate" returns an optional that wraps a result.
        If the optional is None, there is no valid analytic solution. If it Some, it

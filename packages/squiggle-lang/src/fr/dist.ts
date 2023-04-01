@@ -21,6 +21,12 @@ import {
   REOther,
 } from "../reducer/ErrorMessage";
 
+const CI_CONFIG = [
+  { lowKey: "p5", highKey: "p95", probability: 0.9 },
+  { lowKey: "p10", highKey: "p90", probability: 0.8 },
+  { lowKey: "p25", highKey: "p75", probability: 0.5 },
+] as const;
+
 const maker = new FnFactory({
   nameSpace: "Dist",
   requiresNamespace: false,
@@ -89,17 +95,20 @@ const makeTwoArgsDist = (
   );
 };
 
-const makeP5P95Dist = (
+const makeCIDist = <K1 extends string, K2 extends string>(
   name: string,
+  lowKey: K1,
+  highKey: K2,
   fn: (
-    p5: number,
-    p95: number
+    low: number,
+    high: number
   ) => Result.result<SymbolicDist.SymbolicDist, string>
 ) => {
   return makeDefinition(
     name,
-    [frRecord(["p5", frNumber], ["p95", frNumber])],
-    ([{ p5, p95 }], { environment }) => twoVarSample(p5, p95, environment, fn)
+    [frRecord([lowKey, frNumber], [highKey, frNumber])],
+    ([record], { environment }) =>
+      twoVarSample(record[lowKey], record[highKey], environment, fn)
   );
 };
 
@@ -155,8 +164,14 @@ export const library: FRFunction[] = [
       makeTwoArgsDist("normal", (mean, stdev) =>
         SymbolicDist.Normal.make({ mean, stdev })
       ),
-      makeP5P95Dist("normal", (p5, p95) =>
-        SymbolicDist.Normal.from90PercentCI(p5, p95)
+      ...CI_CONFIG.map((entry) =>
+        makeCIDist("normal", entry.lowKey, entry.highKey, (low, high) =>
+          SymbolicDist.Normal.fromCredibleInterval({
+            low,
+            high,
+            probability: entry.probability,
+          })
+        )
       ),
       makeMeanStdevDist("normal", (mean, stdev) =>
         SymbolicDist.Normal.make({ mean, stdev })
@@ -174,8 +189,14 @@ export const library: FRFunction[] = [
       makeTwoArgsDist("lognormal", (mu, sigma) =>
         SymbolicDist.Lognormal.make({ mu, sigma })
       ),
-      makeP5P95Dist("lognormal", (p5, p95) =>
-        SymbolicDist.Lognormal.from90PercentCI(p5, p95)
+      ...CI_CONFIG.map((entry) =>
+        makeCIDist("lognormal", entry.lowKey, entry.highKey, (low, high) =>
+          SymbolicDist.Lognormal.fromCredibleInterval({
+            low,
+            high,
+            probability: entry.probability,
+          })
+        )
       ),
       makeMeanStdevDist("lognormal", (mean, stdev) =>
         SymbolicDist.Lognormal.fromMeanAndStdev({ mean, stdev })
@@ -232,15 +253,12 @@ export const library: FRFunction[] = [
   }),
   maker.make({
     name: "to (distribution)",
-    examples: [`5 to 10`, `to(5,10)`, `-5 to 5`],
-    definitions: [
-      makeTwoArgsDist("to", (low, high) =>
-        SymbolicDist.From90thPercentile.make(low, high)
-      ),
-      makeTwoArgsDist("credibleIntervalToDistribution", (low, high) =>
-        SymbolicDist.From90thPercentile.make(low, high)
-      ),
-    ],
+    examples: ["5 to 10", "to(5,10)", "-5 to 5"],
+    definitions: ["to", "credibleIntervalToDistribution"].map((functionName) =>
+      makeTwoArgsDist(functionName, (low, high) =>
+        SymbolicDist.makeFromCredibleInterval({ low, high, probability: 0.9 })
+      )
+    ),
   }),
   maker.make({
     name: "exponential",
