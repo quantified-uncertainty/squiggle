@@ -1476,11 +1476,6 @@
   resolved "https://registry.yarnpkg.com/@colors/colors/-/colors-1.5.0.tgz#bb504579c1cae923e6576a4f5da43d25f97bdbd9"
   integrity sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==
 
-"@commander-js/extra-typings@^10.0.2":
-  version "10.0.2"
-  resolved "https://registry.yarnpkg.com/@commander-js/extra-typings/-/extra-typings-10.0.2.tgz#eccf15c0b6fb58eadba163e7c6440d6a177401db"
-  integrity sha512-PSGG74fpbc2/WRInbKJbwKiUwdN9YqZSgHxDGMqInUe4G6DTLp90ww12uHMC1U/219qPWI0fLSSjwVDUTdnqIQ==
-
 "@commander-js/extra-typings@^10.0.3":
   version "10.0.3"
   resolved "https://registry.yarnpkg.com/@commander-js/extra-typings/-/extra-typings-10.0.3.tgz#8b6c64897231ed9c00461db82018b5131b653aae"
