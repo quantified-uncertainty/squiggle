@@ -8,7 +8,7 @@
     "@floating-ui/react": "^0.22.2",
     "@headlessui/react": "^1.7.13",
     "@heroicons/react": "^1.0.6",
-    "@hookform/resolvers": "^2.9.11",
+    "@hookform/resolvers": "^3.0.0",
     "@quri/squiggle-lang": "^0.6.0",
     "@react-hook/size": "^2.1.2",
     "@types/d3": "^7.4.0",
