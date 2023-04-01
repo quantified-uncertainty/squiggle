@@ -66,7 +66,7 @@ async function catalogToJson(catalog: InterfaceWithModels) {
       id: model.id,
       relativeValues: await modelToJson({
         catalog: catalog.catalog,
-        model: modelFromJSON(model),
+        model,
       }),
     });
   }
