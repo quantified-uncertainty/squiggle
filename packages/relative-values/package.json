@@ -11,7 +11,7 @@
     "build": "yarn cacheRV && next build"
   },
   "dependencies": {
-    "@floating-ui/react": "^0.20.1",
+    "@floating-ui/react": "^0.22.2",
     "@quri/squiggle-components": "^0.6.0",
     "@quri/squiggle-lang": "^0.6.0",
     "clsx": "^1.2.1",
