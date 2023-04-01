@@ -158,6 +158,8 @@ export const library: FRFunction[] = [
     examples: [
       "normal(5,1)",
       "normal({p5: 4, p95: 10})",
+      "normal({p10: 4, p90: 10})",
+      "normal({p25: 4, p75: 10})",
       "normal({mean: 5, stdev: 2})",
     ],
     definitions: [
