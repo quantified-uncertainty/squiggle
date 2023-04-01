@@ -23,7 +23,7 @@
     },
     "@quri/relative-values#build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**"]
+      "outputs": [".next/**", "./models/cache/**"]
     },
     "format": {},
     "lint": {
