@@ -207,6 +207,9 @@ export class Normal extends SymbolicDist {
   }
 
   static from90PercentCI(low: number, high: number): result<Normal, string> {
+    if (low >= high) {
+      return Result.Error("Low value must be less than high value.");
+    }
     const mean = E_A_Floats.mean([low, high]);
     const stdev = (high - low) / (2 * normal95confidencePoint);
     return Normal.make({ mean, stdev });
@@ -576,7 +579,10 @@ export class Lognormal extends SymbolicDist {
     );
   }
 
-  static from90PercentCI(low: number, high: number) {
+  static from90PercentCI(low: number, high: number): result<Lognormal, string> {
+    if (low >= high) {
+      return Result.Error("Low value must be less than high value.");
+    }
     const logLow = Math.log(low);
     const logHigh = Math.log(high);
     const mu = E_A_Floats.mean([logLow, logHigh]);
@@ -990,13 +996,11 @@ export class PointMass extends SymbolicDist {
 
 export const From90thPercentile = {
   make(low: number, high: number): result<SymbolicDist, string> {
-    if (low <= 0 && low < high) {
+    if (low <= 0) {
       return Normal.from90PercentCI(low, high);
-    }
-    if (low < high) {
+    } else {
       return Lognormal.from90PercentCI(low, high);
     }
-    return Result.Error("Low value must be less than high value.");
   },
 };
 
