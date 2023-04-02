@@ -1,5 +1,5 @@
-import { vNumber } from "../../src/value";
-import { Bindings } from "../../src/reducer/bindings";
+import { vNumber } from "../../src/value/index.js";
+import { Bindings } from "../../src/reducer/bindings.js";
 
 describe("Bindings", () => {
   const value = vNumber(1967);

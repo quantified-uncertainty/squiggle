@@ -1,10 +1,10 @@
-import { Namespace, NamespaceMap } from "../reducer/bindings";
-import { ErrorMessage, REOther } from "../reducer/ErrorMessage";
-import { BuiltinLambda } from "../reducer/lambda";
-import { Value, vLambda } from "../value";
-import { makeMathConstants } from "./math";
-import * as registry from "./registry";
-import { makeVersionConstant } from "./version";
+import { Namespace, NamespaceMap } from "../reducer/bindings.js";
+import { ErrorMessage, REOther } from "../reducer/ErrorMessage.js";
+import { BuiltinLambda } from "../reducer/lambda.js";
+import { Value, vLambda } from "../value/index.js";
+import { makeMathConstants } from "./math.js";
+import * as registry from "./registry/index.js";
+import { makeVersionConstant } from "./version.js";
 
 const makeStdLib = (): Namespace => {
   let res = NamespaceMap<string, Value>();

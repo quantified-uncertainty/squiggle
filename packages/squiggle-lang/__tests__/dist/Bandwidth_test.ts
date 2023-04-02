@@ -1,4 +1,4 @@
-import { nrd, nrd0 } from "../../src/dist/SampleSetDist/bandwidth";
+import { nrd, nrd0 } from "../../src/dist/SampleSetDist/bandwidth.js";
 
 describe("Bandwidth", () => {
   test("nrd0()", () => {

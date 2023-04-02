@@ -1,4 +1,4 @@
-import { testEvalToBe, testToExpression } from "../helpers/reducerHelpers";
+import { testEvalToBe, testToExpression } from "../helpers/reducerHelpers.js";
 
 describe("Parse ternary operator", () => {
   testToExpression("true ? 'YES' : 'NO'", "true ? ('YES') : ('NO')");

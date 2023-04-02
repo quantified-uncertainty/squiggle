@@ -1,4 +1,4 @@
-import { vNumber, vString } from "../../src/value";
+import { vNumber, vString } from "../../src/value/index.js";
 
 describe("Value", () => {
   test("toString", () => {

@@ -1,20 +1,27 @@
-import { BaseDist } from "../../dist/BaseDist";
-import { Env } from "../../dist/env";
-import { Ok } from "../../utility/result";
-import { Lambda } from "../../reducer/lambda";
-import { ReducerFn, Value, vBool, vDist, vNumber, vString } from "../../value";
-import { FRFunction } from "./core";
-import { FnDefinition, makeDefinition } from "./fnDefinition";
-import { frBool, frDist, frNumber, frString } from "./frTypes";
-import * as Result from "../../utility/result";
-import { DistError } from "../../dist/DistError";
-import { ReducerContext } from "../../reducer/Context";
-import { SampleMapNeedsNtoNFunction } from "../../operationError";
+import { BaseDist } from "../../dist/BaseDist.js";
+import { Env } from "../../dist/env.js";
+import { Ok } from "../../utility/result.js";
+import { Lambda } from "../../reducer/lambda.js";
+import {
+  ReducerFn,
+  Value,
+  vBool,
+  vDist,
+  vNumber,
+  vString,
+} from "../../value/index.js";
+import { FRFunction } from "./core.js";
+import { FnDefinition, makeDefinition } from "./fnDefinition.js";
+import { frBool, frDist, frNumber, frString } from "./frTypes.js";
+import * as Result from "../../utility/result.js";
+import { DistError } from "../../dist/DistError.js";
+import { ReducerContext } from "../../reducer/Context.js";
+import { SampleMapNeedsNtoNFunction } from "../../operationError.js";
 import {
   ErrorMessage,
   REDistributionError,
   REOperationError,
-} from "../../reducer/ErrorMessage";
+} from "../../reducer/ErrorMessage.js";
 
 type SimplifiedArgs = Omit<FRFunction, "nameSpace" | "requiresNamespace"> &
   Partial<Pick<FRFunction, "nameSpace" | "requiresNamespace">>;

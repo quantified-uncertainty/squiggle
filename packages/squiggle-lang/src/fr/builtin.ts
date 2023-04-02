@@ -1,14 +1,14 @@
-import { makeDefinition } from "../library/registry/fnDefinition";
+import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
   frArray,
   frBool,
   frNumber,
   frString,
-} from "../library/registry/frTypes";
-import { FnFactory } from "../library/registry/helpers";
-import { Ok } from "../utility/result";
-import { vArray, vBool, vString } from "../value";
+} from "../library/registry/frTypes.js";
+import { FnFactory } from "../library/registry/helpers.js";
+import { Ok } from "../utility/result.js";
+import { vArray, vBool, vString } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "", // no namespaced versions

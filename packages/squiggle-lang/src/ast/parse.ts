@@ -1,12 +1,12 @@
 import { LocationRange } from "peggy";
-import { result } from "../utility/result";
-import * as Result from "../utility/result";
-import { AnyPeggyNode } from "./peggyHelpers";
+import { result } from "../utility/result.js";
+import * as Result from "../utility/result.js";
+import { AnyPeggyNode } from "./peggyHelpers.js";
 
 import {
   parse as peggyParse,
   SyntaxError as PeggySyntaxError,
-} from "./peggyParser";
+} from "./peggyParser.js";
 
 export type ParseError = {
   type: "SyntaxError";

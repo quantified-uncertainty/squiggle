@@ -1,4 +1,4 @@
-import { ContinuousShape } from "./Continuous";
+import { ContinuousShape } from "./Continuous.js";
 
 // TODO - rewrite with generics
 

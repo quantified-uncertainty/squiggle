@@ -1,5 +1,5 @@
-import { FRFunction } from "../library/registry/core";
-import { FnFactory } from "../library/registry/helpers";
+import { FRFunction } from "../library/registry/core.js";
+import { FnFactory } from "../library/registry/helpers.js";
 
 const maker = new FnFactory({
   nameSpace: "Math",

@@ -1,8 +1,8 @@
-import { kde } from "./kde";
-import { XYShape } from "../../XYShape";
-import { nrd0 } from "./bandwidth";
-import { splitContinuousAndDiscrete } from "./splitContinuousAndDiscrete";
-import * as E_A_Floats from "../../utility/E_A_Floats";
+import { kde } from "./kde.js";
+import { XYShape } from "../../XYShape.js";
+import { nrd0 } from "./bandwidth.js";
+import { splitContinuousAndDiscrete } from "./splitContinuousAndDiscrete.js";
+import * as E_A_Floats from "../../utility/E_A_Floats.js";
 
 const minDiscreteToKeep = (samples: readonly number[]) =>
   Math.max(20, samples.length / 50);

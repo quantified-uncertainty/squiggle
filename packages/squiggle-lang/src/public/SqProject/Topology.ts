@@ -1,4 +1,4 @@
-import { SqProject } from "./index";
+import { SqProject } from "./index.js";
 
 // TODO - we should keep the persistent graph and reverse graph of dependencies for better performance.
 

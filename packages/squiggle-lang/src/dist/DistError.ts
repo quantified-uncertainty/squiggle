@@ -1,5 +1,5 @@
-import { OperationError } from "../operationError";
-import { XYShapeError } from "../XYShape";
+import { OperationError } from "../operationError.js";
+import { XYShapeError } from "../XYShape.js";
 
 type SimpleError<S extends String> = { type: S };
 type StringError<S extends String> = { type: S; message: string };

@@ -2,7 +2,7 @@ import {
   MySkip,
   testEvalToBe,
   testToExpression,
-} from "../helpers/reducerHelpers";
+} from "../helpers/reducerHelpers.js";
 
 describe("Symbolic constructors", () => {
   testEvalToBe("Dist.normal(5,2)", "Normal(5,2)");

@@ -1,10 +1,10 @@
-import { evaluateStringToResult } from "../../src/reducer";
+import { evaluateStringToResult } from "../../src/reducer/index.js";
 import {
   expectEvalToBe,
   testDescriptionEvalToBe,
   testEvalError,
   testEvalToBe,
-} from "../helpers/reducerHelpers";
+} from "../helpers/reducerHelpers.js";
 
 describe("eval", () => {
   describe("expressions", () => {

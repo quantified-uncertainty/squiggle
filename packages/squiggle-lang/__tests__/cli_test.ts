@@ -1,6 +1,6 @@
 import * as path from "path";
 import { CommanderError } from "@commander-js/extra-typings";
-import { makeProgram } from "../src/cli";
+import { makeProgram } from "../src/cli/index.js";
 
 afterEach(() => {
   jest.restoreAllMocks();

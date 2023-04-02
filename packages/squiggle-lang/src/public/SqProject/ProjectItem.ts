@@ -1,16 +1,16 @@
-import { parseIncludes as parseIncludes_ } from "./parseIncludes";
-import * as Result from "../../utility/result";
-import { result, Ok } from "../../utility/result";
-import { Resolver } from "./Resolver";
-import { AST, parse, ParseError } from "../../ast/parse";
-import { IError } from "../../reducer/IError";
-import { Expression } from "../../expression";
-import { Value } from "../../value";
-import { SqError } from "../SqError";
-import { expressionFromAst } from "../../ast/toExpression";
-import { ReducerContext } from "../../reducer/Context";
-import { evaluate } from "../../reducer";
-import { Namespace, NamespaceMap } from "../../reducer/bindings";
+import { parseIncludes as parseIncludes_ } from "./parseIncludes.js";
+import * as Result from "../../utility/result.js";
+import { result, Ok } from "../../utility/result.js";
+import { Resolver } from "./Resolver.js";
+import { AST, parse, ParseError } from "../../ast/parse.js";
+import { IError } from "../../reducer/IError.js";
+import { Expression } from "../../expression/index.js";
+import { Value } from "../../value/index.js";
+import { SqError } from "../SqError.js";
+import { expressionFromAst } from "../../ast/toExpression.js";
+import { ReducerContext } from "../../reducer/Context.js";
+import { evaluate } from "../../reducer/index.js";
+import { Namespace, NamespaceMap } from "../../reducer/bindings.js";
 
 // source -> rawParse -> includes -> expression -> bindings & result
 

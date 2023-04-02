@@ -1,7 +1,7 @@
-import { Env } from "../dist/env";
-import { Bindings, Namespace } from "./bindings";
-import { FrameStack, topFrameName } from "./frameStack";
-import { Lambda } from "./lambda";
+import { Env } from "../dist/env.js";
+import { Bindings, Namespace } from "./bindings.js";
+import { FrameStack, topFrameName } from "./frameStack.js";
+import { Lambda } from "./lambda.js";
 
 export type ReducerContext = Readonly<{
   bindings: Bindings;

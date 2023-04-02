@@ -2,7 +2,7 @@ import {
   testEvalToBe,
   testParse,
   testToExpression,
-} from "../helpers/reducerHelpers";
+} from "../helpers/reducerHelpers.js";
 
 describe("Parse function assignment", () => {
   testToExpression("f(x)=x", "f = {|x| {x}}");

@@ -1,4 +1,4 @@
-import filter from "lodash/filter";
+import filter from "lodash-es/filter.js";
 
 // Convert samples to x-y pairs for a PDF
 // Uses kernel density estimation (KDE) with a triangular kernel

@@ -1,22 +1,29 @@
-import { ReducerFn, vArray, vLambda, vRecord, vVoid, Value } from "../value";
-import { Expression } from "../expression";
-import * as Context from "./Context";
-import { IError } from "./IError";
-import { ImmutableMap } from "../utility/immutableMap";
-import { Ok, result } from "../utility/result";
-import * as Result from "../utility/result";
-import { stdLib } from "../library";
-import { defaultEnv } from "../dist/env";
-import { parse } from "../ast/parse";
-import { expressionFromAst } from "../ast/toExpression";
-import { SquiggleLambda } from "./lambda";
+import {
+  ReducerFn,
+  vArray,
+  vLambda,
+  vRecord,
+  vVoid,
+  Value,
+} from "../value/index.js";
+import { Expression } from "../expression/index.js";
+import * as Context from "./Context.js";
+import { IError } from "./IError.js";
+import { ImmutableMap } from "../utility/immutableMap.js";
+import { Ok, result } from "../utility/result.js";
+import * as Result from "../utility/result.js";
+import { stdLib } from "../library/index.js";
+import { defaultEnv } from "../dist/env.js";
+import { parse } from "../ast/parse.js";
+import { expressionFromAst } from "../ast/toExpression.js";
+import { SquiggleLambda } from "./lambda.js";
 import {
   ErrorMessage,
   REExpectedType,
   RENotAFunction,
   REOther,
   RESymbolNotFound,
-} from "./ErrorMessage";
+} from "./ErrorMessage.js";
 
 const throwFrom = (
   error: ErrorMessage,

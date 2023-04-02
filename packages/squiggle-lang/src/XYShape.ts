@@ -1,9 +1,9 @@
-import sortBy from "lodash/sortBy";
-import * as E_A from "./utility/E_A";
-import * as E_A_Floats from "./utility/E_A_Floats";
-import * as E_A_Sorted from "./utility/E_A_Sorted";
-import * as Result from "./utility/result";
-import { epsilon_float } from "./magicNumbers";
+import sortBy from "lodash-es/sortBy.js";
+import * as E_A from "./utility/E_A.js";
+import * as E_A_Floats from "./utility/E_A_Floats.js";
+import * as E_A_Sorted from "./utility/E_A_Sorted.js";
+import * as Result from "./utility/result.js";
+import { epsilon_float } from "./magicNumbers.js";
 
 export type XYShape = {
   readonly xs: number[];

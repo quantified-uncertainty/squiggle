@@ -1,6 +1,6 @@
-import * as XYShape from "../XYShape";
-import { ConvolutionOperation, convolutionOperationToFn } from "./PointSet";
-import * as E_A_Floats from "../utility/E_A_Floats";
+import * as XYShape from "../XYShape.js";
+import { ConvolutionOperation, convolutionOperationToFn } from "./PointSet.js";
+import * as E_A_Floats from "../utility/E_A_Floats.js";
 
 type PointMassesWithMoments = {
   n: number;

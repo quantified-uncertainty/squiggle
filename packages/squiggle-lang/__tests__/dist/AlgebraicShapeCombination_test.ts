@@ -1,4 +1,4 @@
-import * as AlgebraicShapeCombination from "../../src/PointSet/AlgebraicShapeCombination";
+import * as AlgebraicShapeCombination from "../../src/PointSet/AlgebraicShapeCombination.js";
 
 describe("Combining Continuous and Discrete Distributions", () => {
   test("keep order of xs when multiplying by negative number", () => {

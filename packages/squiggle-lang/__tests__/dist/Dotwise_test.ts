@@ -1,13 +1,13 @@
 import * as fc from "fast-check";
 
-import { BinaryOperations } from "../../src/dist/DistOperations";
-import { DivisionByZeroError } from "../../src/operationError";
+import { BinaryOperations } from "../../src/dist/DistOperations/index.js";
+import { DivisionByZeroError } from "../../src/operationError.js";
 import {
   env,
   mkExponential,
   mkNormal,
   unpackResult,
-} from "../helpers/distHelpers";
+} from "../helpers/distHelpers.js";
 
 describe("dotSubtract", () => {
   test("mean of normal minus exponential (unit)", () => {

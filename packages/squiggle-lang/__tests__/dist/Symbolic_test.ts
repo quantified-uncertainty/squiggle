@@ -9,12 +9,12 @@ import {
   mkPointMass,
   mkTriangular,
   unpackResult,
-} from "../helpers/distHelpers";
-import * as SymbolicDist from "../../src/dist/SymbolicDist";
-import * as Result from "../../src/utility/result";
-import * as E_A_Floats from "../../src/utility/E_A_Floats";
-import * as E_A from "../../src/utility/E_A";
-import { createSparkline } from "../../src/utility/sparklines";
+} from "../helpers/distHelpers.js";
+import * as SymbolicDist from "../../src/dist/SymbolicDist.js";
+import * as Result from "../../src/utility/result.js";
+import * as E_A_Floats from "../../src/utility/E_A_Floats.js";
+import * as E_A from "../../src/utility/E_A.js";
+import { createSparkline } from "../../src/utility/sparklines.js";
 
 describe("(Symbolic) normalize", () => {
   test.each([-1e8, -1e-2, 0.0, 1e-4, 1e16])(

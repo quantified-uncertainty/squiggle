@@ -1,10 +1,11 @@
 {
   "name": "@quri/squiggle-lang",
+  "type": "module",
   "version": "0.6.0",
   "homepage": "https://squiggle-language.com",
   "license": "MIT",
   "scripts": {
-    "peggy": "peggy --cache",
+    "peggy": "peggy --cache --format es",
     "build": "yarn build:peggy && yarn build:typescript",
     "build:peggy": "find . -type f -name *.peggy -exec yarn peggy {} \\;",
     "build:typescript": "tsc",
@@ -25,10 +26,11 @@
   "author": "Quantified Uncertainty Research Institute",
   "dependencies": {
     "@commander-js/extra-typings": "^10.0.2",
+    "@types/lodash-es": "^4.17.7",
     "commander": "^10.0.0",
     "immutable": "^4.3.0",
     "jstat": "^1.9.5",
-    "lodash": "^4.17.21",
+    "lodash-es": "^4.17.21",
     "open": "^8.4.2"
   },
   "devDependencies": {
@@ -46,6 +48,12 @@
     "typescript": "^4.9.5"
   },
   "source": "./src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/src/index.js",
+      "require": "./dist/cjs/src/index.js"
+    }
+  },
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
   "bin": {

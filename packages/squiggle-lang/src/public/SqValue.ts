@@ -1,14 +1,13 @@
-import { result } from "../utility/result";
-import { SqDistribution, wrapDistribution } from "./SqDistribution";
-import { SqLambda } from "./SqLambda";
-import { SqLambdaDeclaration } from "./SqLambdaDeclaration";
-import { SqRecord } from "./SqRecord";
-import { SqPlot, wrapPlot } from "./SqPlot";
-import { SqArray } from "./SqArray";
-import { SqValueLocation } from "./SqValueLocation";
-import { SqError } from "./SqError";
-import { Value } from "../value";
-import { BaseDist } from "../dist/BaseDist";
+import { result } from "../utility/result.js";
+import { Value } from "../value/index.js";
+import { SqArray } from "./SqArray.js";
+import { SqDistribution, wrapDistribution } from "./SqDistribution.js";
+import { SqError } from "./SqError.js";
+import { SqLambda } from "./SqLambda.js";
+import { SqLambdaDeclaration } from "./SqLambdaDeclaration.js";
+import { SqPlot, wrapPlot } from "./SqPlot.js";
+import { SqRecord } from "./SqRecord.js";
+import { SqValueLocation } from "./SqValueLocation.js";
 
 export const wrapValue = (value: Value, location: SqValueLocation): SqValue => {
   const tag = value.type;

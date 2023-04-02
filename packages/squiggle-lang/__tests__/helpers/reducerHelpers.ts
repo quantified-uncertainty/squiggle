@@ -1,13 +1,17 @@
-import { nodeResultToString, parse, toStringError } from "../../src/ast/parse";
-import { expressionFromAst } from "../../src/ast/toExpression";
-import { expressionToString } from "../../src/expression";
+import {
+  nodeResultToString,
+  parse,
+  toStringError,
+} from "../../src/ast/parse.js";
+import { expressionFromAst } from "../../src/ast/toExpression.js";
+import { expressionToString } from "../../src/expression/index.js";
 import {
   evaluateExpressionToResult,
   evaluateStringToResult,
-} from "../../src/reducer";
-import * as Result from "../../src/utility/result";
-import { IError } from "../../src/reducer/IError";
-import { Value } from "../../src/value";
+} from "../../src/reducer/index.js";
+import * as Result from "../../src/utility/result.js";
+import { IError } from "../../src/reducer/IError.js";
+import { Value } from "../../src/value/index.js";
 
 const expectParseToBe = (expr: string, answer: string) => {
   expect(nodeResultToString(parse(expr, "test"))).toBe(answer);

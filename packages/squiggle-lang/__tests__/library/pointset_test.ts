@@ -1,6 +1,6 @@
-import { testRun, expectErrorToBeBounded } from "../helpers/helpers";
+import { testRun, expectErrorToBeBounded } from "../helpers/helpers.js";
 import * as fc from "fast-check";
-import { testEvalToBe } from "../helpers/reducerHelpers";
+import { testEvalToBe } from "../helpers/reducerHelpers.js";
 
 // via fast-check hint
 const toFloat32 = (v: number) => new Float32Array([v])[0];

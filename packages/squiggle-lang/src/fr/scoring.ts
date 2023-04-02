@@ -1,16 +1,20 @@
-import { makeDefinition } from "../library/registry/fnDefinition";
-import { frDist, frDistOrNumber, frRecord } from "../library/registry/frTypes";
-import { FnFactory } from "../library/registry/helpers";
-import { vNumber } from "../value";
-import * as Result from "../utility/result";
-import * as DistOperations from "../dist/DistOperations";
-import { BaseDist } from "../dist/BaseDist";
-import { Env } from "../dist/env";
+import { makeDefinition } from "../library/registry/fnDefinition.js";
+import {
+  frDist,
+  frDistOrNumber,
+  frRecord,
+} from "../library/registry/frTypes.js";
+import { FnFactory } from "../library/registry/helpers.js";
+import { vNumber } from "../value/index.js";
+import * as Result from "../utility/result.js";
+import * as DistOperations from "../dist/DistOperations/index.js";
+import { BaseDist } from "../dist/BaseDist.js";
+import { Env } from "../dist/env.js";
 import {
   ErrorMessage,
   REDistributionError,
   REOther,
-} from "../reducer/ErrorMessage";
+} from "../reducer/ErrorMessage.js";
 
 const maker = new FnFactory({
   nameSpace: "Dist",

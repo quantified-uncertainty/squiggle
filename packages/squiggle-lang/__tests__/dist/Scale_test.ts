@@ -1,11 +1,11 @@
-import { operationDistError } from "../../src/dist/DistError";
-import * as DistOperations from "../../src/dist/DistOperations";
+import { operationDistError } from "../../src/dist/DistError.js";
+import * as DistOperations from "../../src/dist/DistOperations/index.js";
 import {
   DivisionByZeroError,
   NegativeInfinityError,
-} from "../../src/operationError";
-import * as Result from "../../src/utility/result";
-import { env, mkExponential, mkUniform } from "../helpers/distHelpers";
+} from "../../src/operationError.js";
+import * as Result from "../../src/utility/result.js";
+import { env, mkExponential, mkUniform } from "../helpers/distHelpers.js";
 
 describe("Scale logarithm", () => {
   /* These tests may not be important, because scalelog isn't normalized

@@ -1,16 +1,16 @@
-import { makeDefinition } from "../library/registry/fnDefinition";
+import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
   frArray,
   frLambda,
   frNumber,
-} from "../library/registry/frTypes";
-import { FnFactory } from "../library/registry/helpers";
-import { Ok } from "../utility/result";
-import * as Result from "../utility/result";
-import { Value, vArray, vNumber } from "../value";
-import * as E_A_Floats from "../utility/E_A_Floats";
-import { REOther } from "../reducer/ErrorMessage";
+} from "../library/registry/frTypes.js";
+import { FnFactory } from "../library/registry/helpers.js";
+import { Ok } from "../utility/result.js";
+import * as Result from "../utility/result.js";
+import { Value, vArray, vNumber } from "../value/index.js";
+import * as E_A_Floats from "../utility/E_A_Floats.js";
+import { REOther } from "../reducer/ErrorMessage.js";
 
 const maker = new FnFactory({
   nameSpace: "List",

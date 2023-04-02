@@ -1,17 +1,17 @@
-import { BaseDist } from "./BaseDist";
-import * as Result from "../utility/result";
+import { BaseDist } from "./BaseDist.js";
+import * as Result from "../utility/result.js";
 import jstat from "jstat";
-import * as E_A_Floats from "../utility/E_A_Floats";
-import * as XYShape from "../XYShape";
-import * as magicNumbers from "../magicNumbers";
-import * as Operation from "../operation";
-import { PointSetDist } from "./PointSetDist";
-import { Ok, result } from "../utility/result";
-import { ContinuousShape } from "../PointSet/Continuous";
-import { DistError, xyShapeDistError } from "./DistError";
-import { OperationError } from "../operationError";
-import { DiscreteShape } from "../PointSet/Discrete";
-import { Env } from "./env";
+import * as E_A_Floats from "../utility/E_A_Floats.js";
+import * as XYShape from "../XYShape.js";
+import * as magicNumbers from "../magicNumbers.js";
+import * as Operation from "../operation.js";
+import { PointSetDist } from "./PointSetDist.js";
+import { Ok, result } from "../utility/result.js";
+import { ContinuousShape } from "../PointSet/Continuous.js";
+import { DistError, xyShapeDistError } from "./DistError.js";
+import { OperationError } from "../operationError.js";
+import { DiscreteShape } from "../PointSet/Discrete.js";
+import { Env } from "./env.js";
 
 const normal95confidencePoint = 1.6448536269514722;
 // explained in website/docs/internal/ProcessingConfidenceIntervals

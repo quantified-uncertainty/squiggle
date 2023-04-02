@@ -1,11 +1,11 @@
-import { Ok, result } from "./utility/result";
-import * as Result from "./utility/result";
+import { Ok, result } from "./utility/result.js";
+import * as Result from "./utility/result.js";
 import {
   ComplexNumberError,
   DivisionByZeroError,
   NegativeInfinityError,
   OperationError,
-} from "./operationError";
+} from "./operationError.js";
 
 // matches algebraicOperation from Operation.res
 export type AlgebraicOperation =

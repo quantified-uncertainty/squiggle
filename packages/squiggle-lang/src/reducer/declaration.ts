@@ -1,5 +1,5 @@
-import { Lambda } from "./lambda";
-import * as DateTime from "../utility/DateTime";
+import { Lambda } from "./lambda.js";
+import * as DateTime from "../utility/DateTime.js";
 
 type LambdaDeclarationArg =
   | {

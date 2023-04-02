@@ -1,4 +1,4 @@
-import { testEvalToBe } from "../helpers/reducerHelpers";
+import { testEvalToBe } from "../helpers/reducerHelpers.js";
 
 describe("Scoring", () => {
   testEvalToBe(

@@ -1,25 +1,25 @@
-import { BaseDist } from "../dist/BaseDist";
-import { DistError } from "../dist/DistError";
-import { toSampleSetDist } from "../dist/DistOperations";
-import * as SampleSetDist from "../dist/SampleSetDist/SampleSetDist";
-import * as SymbolicDist from "../dist/SymbolicDist";
-import { Env } from "..";
-import { FRFunction } from "../library/registry/core";
-import { makeDefinition } from "../library/registry/fnDefinition";
+import { BaseDist } from "../dist/BaseDist.js";
+import { DistError } from "../dist/DistError.js";
+import { toSampleSetDist } from "../dist/DistOperations/index.js";
+import * as SampleSetDist from "../dist/SampleSetDist/SampleSetDist.js";
+import * as SymbolicDist from "../dist/SymbolicDist.js";
+import { Env } from "../index.js";
+import { FRFunction } from "../library/registry/core.js";
+import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frDistOrNumber,
   frNumber,
   frRecord,
-} from "../library/registry/frTypes";
-import { FnFactory } from "../library/registry/helpers";
-import { OtherOperationError } from "../operationError";
-import * as Result from "../utility/result";
-import { Value, vDist } from "../value";
+} from "../library/registry/frTypes.js";
+import { FnFactory } from "../library/registry/helpers.js";
+import { OtherOperationError } from "../operationError.js";
+import * as Result from "../utility/result.js";
+import { Value, vDist } from "../value/index.js";
 import {
   ErrorMessage,
   REDistributionError,
   REOther,
-} from "../reducer/ErrorMessage";
+} from "../reducer/ErrorMessage.js";
 
 const maker = new FnFactory({
   nameSpace: "Dist",

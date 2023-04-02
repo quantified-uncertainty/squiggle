@@ -1,5 +1,5 @@
-import * as expression from "../expression";
-import { AST } from "./parse";
+import * as expression from "../expression/index.js";
+import { AST } from "./parse.js";
 
 const contentFromNode = (ast: AST): expression.ExpressionContent => {
   switch (ast.type) {

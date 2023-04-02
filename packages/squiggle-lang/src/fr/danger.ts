@@ -1,17 +1,19 @@
 /* Notes: See commit 5ce0a6979d9f95d77e4ddbdffc40009de73821e3 for last commit which has more detailed helper functions. These might be useful when coming back to this code after a long time. */
 
-import { factorial } from "jstat";
+import jstat from "jstat";
 
-import { FRFunction } from "../library/registry/core";
-import { makeDefinition } from "../library/registry/fnDefinition";
-import { frArray, frLambda, frNumber } from "../library/registry/frTypes";
-import { FnFactory } from "../library/registry/helpers";
-import { ReducerContext } from "../reducer/Context";
-import { ErrorMessage, REOther } from "../reducer/ErrorMessage";
-import { Lambda } from "../reducer/lambda";
-import * as E_A from "../utility/E_A";
-import { Ok, result } from "../utility/result";
-import { ReducerFn, Value, vArray, vNumber } from "../value";
+import { FRFunction } from "../library/registry/core.js";
+import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { frArray, frLambda, frNumber } from "../library/registry/frTypes.js";
+import { FnFactory } from "../library/registry/helpers.js";
+import { ReducerContext } from "../reducer/Context.js";
+import { ErrorMessage, REOther } from "../reducer/ErrorMessage.js";
+import { Lambda } from "../reducer/lambda.js";
+import * as E_A from "../utility/E_A.js";
+import { Ok, result } from "../utility/result.js";
+import { ReducerFn, Value, vArray, vNumber } from "../value/index.js";
+
+const { factorial } = jstat;
 
 const maker = new FnFactory({
   nameSpace: "Danger",

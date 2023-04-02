@@ -1,5 +1,5 @@
-import { run, SqProject } from "../src";
-import { testRun } from "./helpers/helpers";
+import { run, SqProject } from "../src/index.js";
+import { testRun } from "./helpers/helpers.js";
 
 describe("Simple calculations and results", () => {
   test("mean(normal(5,2))", () => {

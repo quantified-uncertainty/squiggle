@@ -1,17 +1,17 @@
-import { ReducerContext } from "../../reducer/Context";
-import { result } from "../../utility/result";
-import * as Result from "../../utility/result";
-import { ReducerFn, Value } from "../../value";
+import { ReducerContext } from "../../reducer/Context.js";
+import { result } from "../../utility/result.js";
+import * as Result from "../../utility/result.js";
+import { ReducerFn, Value } from "../../value/index.js";
 import {
   FnDefinition,
   fnDefinitionToString,
   tryCallFnDefinition,
-} from "./fnDefinition";
+} from "./fnDefinition.js";
 import {
   ErrorMessage,
   REOther,
   RESymbolNotFound,
-} from "../../reducer/ErrorMessage";
+} from "../../reducer/ErrorMessage.js";
 
 export type FRFunction = {
   name: string;

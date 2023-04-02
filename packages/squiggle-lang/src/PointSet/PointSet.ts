@@ -1,13 +1,13 @@
-import * as Continuous from "../PointSet/Continuous";
-import * as Discrete from "../PointSet/Discrete";
-import * as Mixed from "../PointSet/Mixed";
+import * as Continuous from "../PointSet/Continuous.js";
+import * as Discrete from "../PointSet/Discrete.js";
+import * as Mixed from "../PointSet/Mixed.js";
 
-import * as Result from "../utility/result";
-import { result } from "../utility/result";
-import { ContinuousShape } from "./Continuous";
-import { DiscreteShape } from "./Discrete";
-import { MixedShape } from "./Mixed";
-import { MixedPoint } from "./MixedPoint";
+import * as Result from "../utility/result.js";
+import { result } from "../utility/result.js";
+import { ContinuousShape } from "./Continuous.js";
+import { DiscreteShape } from "./Discrete.js";
+import { MixedShape } from "./Mixed.js";
+import { MixedPoint } from "./MixedPoint.js";
 
 export type ConvolutionOperation = "Add" | "Multiply" | "Subtract";
 export type DistributionType = "PDF" | "CDF";

@@ -1,6 +1,6 @@
-import { SqSymbolicDistribution } from "../src/public/SqDistribution";
-import { SqDistributionValue } from "../src/public/SqValue";
-import { testRun } from "./helpers/helpers";
+import { SqSymbolicDistribution } from "../src/public/SqDistribution.js";
+import { SqDistributionValue } from "../src/public/SqValue.js";
+import { testRun } from "./helpers/helpers.js";
 
 describe("SqValue", () => {
   test("toJS", () => {

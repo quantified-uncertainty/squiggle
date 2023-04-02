@@ -1,4 +1,4 @@
-import { testRun } from "../helpers/helpers";
+import { testRun } from "../helpers/helpers.js";
 import * as fc from "fast-check";
 
 describe("Scalar manipulation is well-modeled by javascript math", () => {

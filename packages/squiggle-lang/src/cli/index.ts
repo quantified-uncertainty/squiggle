@@ -1,5 +1,5 @@
 import fs from "fs";
-import { OutputMode, run } from "./utils";
+import { OutputMode, run } from "./utils.js";
 
 import { Command } from "@commander-js/extra-typings";
 import open from "open";

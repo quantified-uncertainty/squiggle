@@ -1,11 +1,11 @@
 import { LocationRange } from "peggy";
-import { Expression } from "../expression";
-import { ReducerFn, Value } from "../value";
-import { Bindings } from "./bindings";
-import * as Context from "./Context";
-import { ReducerContext } from "./Context";
-import { ErrorMessage, REArityError } from "./ErrorMessage";
-import * as SqError from "./IError";
+import { Expression } from "../expression/index.js";
+import { ReducerFn, Value } from "../value/index.js";
+import { Bindings } from "./bindings.js";
+import * as Context from "./Context.js";
+import { ReducerContext } from "./Context.js";
+import { ErrorMessage, REArityError } from "./ErrorMessage.js";
+import * as SqError from "./IError.js";
 
 type LambdaBody = (
   args: Value[],

@@ -1,4 +1,4 @@
-import { testToExpression } from "../helpers/reducerHelpers";
+import { testToExpression } from "../helpers/reducerHelpers.js";
 
 describe("Peggy void", () => {
   //literal
