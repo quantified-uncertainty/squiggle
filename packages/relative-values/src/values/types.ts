@@ -7,6 +7,10 @@ export type RelativeValue = Readonly<{
   db: number;
 }>;
 
+export function hasInvalid(obj: RelativeValue): boolean {
+  return Object.values(obj).some((value) => !Number.isNaN(value) && !value);
+}
+
 export type RelativeValueResult = result<RelativeValue, string>;
 
 export type ModelCache = {

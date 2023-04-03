@@ -1,6 +1,6 @@
 import { Item } from "@/types";
-import { RelativeValue } from "@/values/types";
-import { ModelEvaluator } from "@/values/ModelEvaluator";
+import { RelativeValue, hasInvalid } from "@/values/types";
+import { ModelEvaluator, extractOkValues } from "@/values/ModelEvaluator";
 import _ from "lodash";
 import { useMemo } from "react";
 import { AxisConfig } from "../ViewProvider";
@@ -16,15 +16,17 @@ const averageMetric = ({
   getMetric: (item: RelativeValue) => number;
   model: ModelEvaluator;
 }) => {
-  return (
-    comparedTo.reduce((total, item2) => {
-      const value = model.compare(item.id, item2.id);
-      if (!value.ok) {
-        return total; // TODO: +Inf?
-      }
-      return total + getMetric(value.value);
-    }, 0) / comparedTo.length
-  );
+  const comparisons = extractOkValues(
+    comparedTo.map((item2) => model.compare(item.id, item2.id))
+  )
+    .filter((r) => !hasInvalid(r))
+    .map(getMetric);
+
+  if (comparisons.length === 0) {
+    return NaN;
+  } else {
+    return _.mean(comparisons);
+  }
 };
 
 type AverageProps = {

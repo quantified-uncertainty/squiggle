@@ -1,4 +1,4 @@
-import { RelativeValue } from "@/values/types";
+import { RelativeValue, hasInvalid } from "@/values/types";
 import { NumberShower } from "@quri/squiggle-components";
 import { FC, memo } from "react";
 import { CellBox } from "../CellBox";
@@ -52,18 +52,24 @@ export const DistCell: FC<{ item: RelativeValue; percentiles: number[] }> =
   memo(function DistCell({ item, percentiles }) {
     return (
       <CellBox>
-        <div
-          className={`h-full pt-[1px] min-h-[2em] relative ${numberToColor2(
-            item.db,
-            percentiles
-          )}`}
-        >
-          <div className="text-center z-0 py-1">
-            <div>
-              <span className="text-slate-700 text-lg font-semibold">
-                <NumberShower number={item.median} precision={1} />
-              </span>
-              {item.db === 0 ? null : (
+        {hasInvalid(item) ? (
+          <div
+            className={`h-full pt-[1px] min-h-[2em] relative bg-gray-300 bg-opacity-30`}
+          >
+            <div className="text-center z-0 p-4 text-gray-500">Error</div>
+          </div>
+        ) : (
+          <div
+            className={`h-full pt-[1px] min-h-[2em] relative ${numberToColor2(
+              item.db,
+              percentiles
+            )}`}
+          >
+            <div className="text-center z-0 py-1">
+              <div>
+                <span className="text-slate-700 text-lg font-semibold">
+                  <NumberShower number={item.median} precision={1} />
+                </span>
                 <span>
                   {" "}
                   <span
@@ -85,10 +91,8 @@ export const DistCell: FC<{ item: RelativeValue; percentiles: number[] }> =
                     om
                   </span>
                 </span>
-              )}
-            </div>
+              </div>
 
-            {item.db === 0 ? null : (
               <div
                 style={{ fontSize: "0.7em" }}
                 className="text-gray-400 font-light"
@@ -96,13 +100,11 @@ export const DistCell: FC<{ item: RelativeValue; percentiles: number[] }> =
                 <NumberShower number={item.min} precision={1} /> to{" "}
                 <NumberShower number={item.max} precision={1} />
               </div>
-            )}
-          </div>
+            </div>
 
-          {item.db === 0 ? null : (
             <div className="h-2 absolute bottom-0 inset-x-0 -z-10"></div>
-          )}
-        </div>
+          </div>
+        )}
       </CellBox>
     );
   });

@@ -19,7 +19,7 @@ const cartesianProduct = <A, B>(a: A[], b: B[]): [A, B][] => {
   return a.flatMap((aItem) => b.map<[A, B]>((bItem) => [aItem, bItem]));
 };
 
-const extractOkValues = <A, B>(items: result<A, B>[]): A[] => {
+export const extractOkValues = <A, B>(items: result<A, B>[]): A[] => {
   return items
     .filter((item): item is { ok: true; value: A } => item.ok)
     .map((item) => item.value);
