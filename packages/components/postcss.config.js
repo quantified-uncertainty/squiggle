@@ -1,4 +1,4 @@
-module.exports = {
+const config = {
   plugins: {
     "postcss-import": {},
     "tailwindcss/nesting": {},
@@ -7,3 +7,5 @@ module.exports = {
     cssnano: {},
   },
 };
+
+export default config;
