@@ -20,7 +20,7 @@
     "declaration": true,
     "sourceMap": true
   },
-  "include": ["src/**/*", "src/*"],
+  "include": ["src/**/*", "test/**/*"],
   "exclude": ["node_modules", "webpack.config.js"],
   "references": [
     {
