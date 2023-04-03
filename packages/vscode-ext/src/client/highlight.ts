@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 
-import { parse } from "@quri/squiggle-lang";
-import { AST } from "@quri/squiggle-lang/dist/src/ast/parse";
+import { parse, AST } from "@quri/squiggle-lang";
 
 const tokenTypes = ["enum", "function", "variable", "property"];
 const tokenModifiers = ["declaration", "documentation"];
