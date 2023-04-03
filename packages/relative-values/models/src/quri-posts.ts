@@ -495,7 +495,7 @@ scoreById(id) = {
     score(item.importance, item.karma, item.commentCount) * (1 to 100)
 }
 
-fn(intervention1, intervention2) = scoreById(intervention1) / scoreById(intervention2)
+fn(intervention1, intervention2) = [scoreById(intervention1), scoreById(intervention2)]
 `,
   };
 }
