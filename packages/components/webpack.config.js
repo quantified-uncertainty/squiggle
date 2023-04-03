@@ -1,5 +1,3 @@
-import ResolveTypeScriptPlugin from "resolve-typescript-plugin";
-
 import * as path from "path";
 
 import * as url from "url";
@@ -28,7 +26,6 @@ const config = {
     alias: {
       "@quri/squiggle-lang": path.resolve(__dirname, "../squiggle-lang/src"),
     },
-    plugins: [new ResolveTypeScriptPlugin()],
   },
   output: {
     filename: "bundle.js",
