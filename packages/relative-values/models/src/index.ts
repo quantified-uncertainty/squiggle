@@ -5,6 +5,7 @@ import { getQuriPosts } from "./quri-posts";
 import { getCrossCauses } from "./cross-cause";
 import { getHealthInterventions } from "./health-interventions";
 import { getThingsYouShouldBuy } from "./things-you-should-buy";
+import { getMacrovariables } from "./macrovariables";
 
 export const allInterfaces: InterfaceWithModels[] = [
   getQuriBuiltin(),
@@ -12,5 +13,6 @@ export const allInterfaces: InterfaceWithModels[] = [
   getQuriPosts(),
   getCrossCauses(),
   getHealthInterventions(),
-	getThingsYouShouldBuy()
+	getThingsYouShouldBuy(),
+  getMacrovariables(),
 ];
