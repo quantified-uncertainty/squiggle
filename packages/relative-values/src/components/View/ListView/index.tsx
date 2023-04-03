@@ -18,14 +18,20 @@ type Props = {
 
 export const ListView: FC<Props> = ({ model }) => {
   const { axisConfig } = useViewContext();
-  const {
-    catalog: { items },
-  } = useSelectedInterface();
+  const { catalog } = useSelectedInterface();
 
-  const [selectedItem, setSelectedItem] = useState(items[0]);
+  const [selectedItem, setSelectedItem] = useState(() => {
+    if (catalog.recommendedUnit !== undefined) {
+      return (
+        catalog.items.find((item) => item.id === catalog.recommendedUnit) ??
+        catalog.items[0]
+      );
+    }
+    return catalog.items[0];
+  });
 
   const filteredItems = useFilteredItems({
-    items,
+    items: catalog.items,
     config: axisConfig.rows,
   });
   const sortedItems = useSortedItems({
@@ -89,7 +95,11 @@ export const ListView: FC<Props> = ({ model }) => {
             <CellBox>
               <div className="p-2 text-slate-800">
                 <NumberShower
-                  number={averageDb({ item, comparedTo: items, model: model })}
+                  number={averageDb({
+                    item,
+                    comparedTo: catalog.items,
+                    model: model,
+                  })}
                   precision={3}
                 />
               </div>

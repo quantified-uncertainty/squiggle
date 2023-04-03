@@ -199,6 +199,7 @@ function getCatalog(): Catalog {
     id: "health-interventions",
     title: "Health Interventions",
     items,
+    recommendedUnit: "walking_in_nature_10min",
     clusters: {
       physicalAndMentalHealthActivities: {
         name: "Physical and Mental Health Activities",

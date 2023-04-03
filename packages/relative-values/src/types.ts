@@ -24,6 +24,7 @@ export type Catalog = {
   created?: Date;
   author?: string;
   items: Item[];
+  recommendedUnit?: string; // id of one of the items
   clusters: Clusters;
 };
 
