@@ -1,4 +1,4 @@
-import { pointer as d3Pointer, select as d3Select } from "d3-selection";
+import * as d3 from "d3";
 import { useRef } from "react";
 import { useUpdate } from "./react-use.js";
 
@@ -13,10 +13,10 @@ export function useCanvasCursor({
   const cursorRef = useRef<[number, number]>();
 
   if (refChanged && context) {
-    d3Select(context.canvas)
+    d3.select(context.canvas)
       .on("touchmove", (event) => event.preventDefault())
       .on("pointermove", (e) => {
-        cursorRef.current = d3Pointer(e);
+        cursorRef.current = d3.pointer(e);
         update(); // TODO - debounce?
       })
       .on("pointerout", (e) => {

@@ -2,10 +2,8 @@ import { Env, result, SqError, SqLambda, SqValue } from "@quri/squiggle-lang";
 import groupBy from "lodash/groupBy.js";
 import * as React from "react";
 import { FC, useEffect, useMemo, useRef } from "react";
+import * as d3 from "d3";
 
-import { extent as d3Extent } from "d3-array";
-import { format as d3Format } from "d3-format";
-import { area as d3Area, line as d3Line } from "d3-shape";
 import {
   drawAxes,
   drawVerticalCursorLine,
@@ -174,7 +172,7 @@ const InnerDistFunctionChart: FC<
 
     const { xScale, yScale, padding, chartWidth, chartHeight } = drawAxes({
       suggestedPadding: { left: 20, right: 10, top: 10, bottom: 20 },
-      xDomain: d3Extent(data, (d) => d.x) as [number, number],
+      xDomain: d3.extent(data, (d) => d.x) as [number, number],
       yDomain: [
         Math.min(
           ...data.map((d) =>
@@ -204,7 +202,8 @@ const InnerDistFunctionChart: FC<
     context.fillStyle = primaryColor;
     for (const { width, opacity } of intervals) {
       context.globalAlpha = opacity;
-      d3Area<Datum>()
+      d3
+        .area<Datum>()
         .x((d) => xScale(d.x))
         .y1((d) => yScale(d.areas[width][0]))
         .y0((d) => yScale(d.areas[width][1]))
@@ -218,7 +217,8 @@ const InnerDistFunctionChart: FC<
     context.lineWidth = 2;
     context.imageSmoothingEnabled = true;
 
-    d3Line<Datum>()
+    d3
+      .line<Datum>()
       .x((d) => xScale(d.x))
       .y((d) => yScale(d[50]))
       .context(context)(data);
@@ -237,7 +237,7 @@ const InnerDistFunctionChart: FC<
         chartWidth,
         chartHeight,
         xScale,
-        tickFormat: d3Format(",.4r"),
+        tickFormat: d3.format(",.4r"),
         context,
       });
     }

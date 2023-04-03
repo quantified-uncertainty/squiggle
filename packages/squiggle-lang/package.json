@@ -55,6 +55,7 @@
   },
   "module": "./dist/esm/src/index.js",
   "main": "./dist/cjs/src/index.js",
+  "types": "./dist/types/src/index.js",
   "bin": {
     "squiggle": "./dist/esm/src/cli/index.js"
   }

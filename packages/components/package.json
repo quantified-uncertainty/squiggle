@@ -75,7 +75,7 @@
   },
   "scripts": {
     "start": "cross-env REACT_APP_FAST_REFRESH=false && start-storybook -p 6006 -s public",
-    "build:typescript": "rm -rf dist/esm && rm -f dist/cjs && tsc -b tsconfig.json tsconfig.cjs.json && echo '{\"type\": \"commonjs\"}' >dist/cjs/package.json",
+    "build:typescript": "rm -rf dist/esm && rm -rf dist/cjs && tsc -b tsconfig.json tsconfig.cjs.json && echo '{\"type\": \"commonjs\"}' >dist/cjs/package.json",
     "build:css": "postcss ./src/styles/main.css -o ./dist/main.css",
     "build:lezer": "cd ./src/languageSupport; mkdir -p generated; lezer-generator ./squiggle.grammar --output generated/squiggle.ts",
     "build:storybook": "build-storybook -s public",
@@ -134,5 +134,6 @@
   },
   "module": "./dist/esm/src/index.js",
   "main": "./dist/cjs/src/index.js",
+  "types": "./dist/types/src/index.js",
   "source": "./src/index.ts"
 }

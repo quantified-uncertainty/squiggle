@@ -14,7 +14,7 @@ const jestConfig = {
       },
     ],
   },
-  testPathIgnorePatterns: ["<rootDir>/node_modules/"],
+  testPathIgnorePatterns: ["<rootDir>/node_modules/", "<rootDir>/dist"],
 };
 
 export default jestConfig;

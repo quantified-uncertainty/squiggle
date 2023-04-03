@@ -1,10 +1,5 @@
-import {
-  scaleLinear as d3ScaleLinear,
-  scaleLog as d3ScaleLog,
-  scalePow as d3ScalePow,
-} from "d3-scale";
+import * as d3 from "d3";
 import range from "lodash/range.js";
-import { type ScaleContinuousNumeric } from "d3";
 
 import { SqLambda, SqValue } from "@quri/squiggle-lang";
 
@@ -108,9 +103,9 @@ export function drawAxes({
   tickCount?: number;
   tickFormat?: string;
 }) {
-  const xScale = logX ? d3ScaleLog() : d3ScaleLinear();
+  const xScale = logX ? d3.scaleLog() : d3.scaleLinear();
   xScale.domain(xDomain);
-  const yScale = expY ? d3ScalePow().exponent(0.1) : d3ScaleLinear();
+  const yScale = expY ? d3.scalePow().exponent(0.1) : d3.scaleLinear();
   yScale.domain(yDomain);
 
   const xTicks = xScale.ticks(tickCount);
@@ -231,7 +226,7 @@ export function drawVerticalCursorLine({
   padding: Padding;
   chartWidth: number;
   chartHeight: number;
-  xScale: ScaleContinuousNumeric<number, number, never>;
+  xScale: d3.ScaleContinuousNumeric<number, number, never>;
   tickFormat: (d: d3.NumberValue) => string;
   context: CanvasRenderingContext2D;
 }) {

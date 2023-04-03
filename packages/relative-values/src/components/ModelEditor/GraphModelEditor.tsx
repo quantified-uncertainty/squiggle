@@ -44,7 +44,13 @@ export const GraphModelEditor: FC<EstimateProps<GraphModel>> = ({
   const getAnchor = (id: string) => `estimate-${id}`;
 
   const eject = () =>
-    setModel({ mode: "text", code, id: model.id, author: model.author, title: model.title });
+    setModel({
+      mode: "text",
+      code,
+      id: model.id,
+      author: model.author,
+      title: model.title,
+    });
 
   return (
     <div>
