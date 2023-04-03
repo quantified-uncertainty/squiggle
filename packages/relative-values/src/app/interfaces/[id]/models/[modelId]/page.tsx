@@ -1,8 +1,7 @@
 "use client";
-import { SafeHydrate } from "@/components/SafeHydrate";
 
+import { ModelSection } from "@/components/Interface/ModelSection";
 import { ModelProvider } from "./ModelProvider";
-import { SSRSafeModelSection } from "./SSRSafeModelSection";
 
 export default function ModelPage({
   params,
@@ -10,14 +9,8 @@ export default function ModelPage({
   params: { id: string; modelId: string };
 }) {
   return (
-    <SafeHydrate>
-      {() => {
-        return (
-          <ModelProvider value={{ selectedId: params.modelId }}>
-            <SSRSafeModelSection />
-          </ModelProvider>
-        );
-      }}
-    </SafeHydrate>
+    <ModelProvider value={{ selectedId: params.modelId }}>
+      <ModelSection />
+    </ModelProvider>
   );
 }
