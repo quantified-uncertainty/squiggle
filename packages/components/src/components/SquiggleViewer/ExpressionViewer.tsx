@@ -1,18 +1,20 @@
 import React from "react";
 import { SqDistributionTag, SqValue, SqPlot } from "@quri/squiggle-lang";
-import { NumberShower } from "../NumberShower";
-import { DistributionChart } from "../DistributionChart";
+import { clsx } from "clsx";
+
+import { NumberShower } from "../NumberShower.js";
+import { DistributionChart } from "../DistributionChart.js";
 import {
   sqPlotToPlot,
   MultiDistributionChart,
-} from "../MultiDistributionChart";
-import { FunctionChart } from "../FunctionChart";
-import clsx from "clsx";
-import { VariableBox } from "./VariableBox";
-import { ItemSettingsMenu } from "./ItemSettingsMenu";
-import { hasMassBelowZero } from "../../lib/distributionUtils";
-import { MergedItemSettings } from "./utils";
-import { PartialViewSettings } from "../ViewSettingsForm";
+} from "../MultiDistributionChart/index.js";
+import { FunctionChart } from "../FunctionChart/index.js";
+
+import { VariableBox } from "./VariableBox.js";
+import { ItemSettingsMenu } from "./ItemSettingsMenu.js";
+import { hasMassBelowZero } from "../../lib/distributionUtils.js";
+import { MergedItemSettings } from "./utils.js";
+import { PartialViewSettings } from "../ViewSettingsForm.js";
 
 const VariableList: React.FC<{
   value: SqValue;

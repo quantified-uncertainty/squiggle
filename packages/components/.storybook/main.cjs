@@ -1,16 +1,29 @@
-//const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
-const custom = require("../webpack.config.js");
+// import type { StorybookConfig } from "@storybook/core-common";
 
-module.exports = {
+const config = {
   webpackFinal: async (config) => {
+    const { default: custom } = await import("../webpack.config.js");
     config.resolve.alias = custom.resolve.alias;
+    config.resolve.extensionAlias = custom.resolve.extensionAlias;
     return {
       ...config,
       module: {
         ...config.module,
-        rules: config.module.rules.concat(
-          custom.module.rules.filter((x) => x.loader === "ts-loader")
-        ),
+        rules: [
+          ...config.module.rules,
+          custom.module.rules.find((x) => x.loader === "ts-loader"),
+          {
+            test: /\.(m?js)$/,
+            type: "javascript/auto",
+            resolve: {
+              fullySpecified: false,
+            },
+          },
+          // {
+          //   test: /src\/styles\/main\.css$/,
+          //   use: ["style-loader", "css-loader", "postcss-loader"],
+          // },
+        ],
       },
     };
   },
@@ -43,3 +56,5 @@ module.exports = {
     },
   },
 };
+
+module.exports = config;

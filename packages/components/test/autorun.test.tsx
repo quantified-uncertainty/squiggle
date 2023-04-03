@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import * as React from "react";
 import "@testing-library/jest-dom";
-import { SquigglePlayground } from "../src/index";
+import { SquigglePlayground } from "../src/index.js";
 
 test("Autorun is default", async () => {
   render(<SquigglePlayground code="70*30" />);
@@ -12,7 +12,7 @@ test("Autorun is default", async () => {
 });
 
 test("Autorun can be switched off", async () => {
-  const user = userEvent.setup();
+  const user = (userEvent as any).setup(); // typescript issue is due to ESM mess
   render(<SquigglePlayground code="70*30" />);
 
   expect(screen.getByTestId("autorun-controls")).toHaveTextContent("Autorun");

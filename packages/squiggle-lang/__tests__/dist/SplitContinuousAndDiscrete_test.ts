@@ -1,5 +1,5 @@
-import range from "lodash-es/range.js";
-import flatten from "lodash-es/flatten.js";
+import range from "lodash/range.js";
+import flatten from "lodash/flatten.js";
 import fc from "fast-check";
 
 import { splitContinuousAndDiscrete as split } from "../../src/dist/SampleSetDist/splitContinuousAndDiscrete.js";

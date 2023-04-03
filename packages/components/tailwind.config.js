@@ -1,4 +1,4 @@
-module.exports = {
+const config = {
   content: ["./src/**/*.{html,tsx,ts,js,jsx}"],
   corePlugins: {
     preflight: false,
@@ -29,3 +29,5 @@ module.exports = {
     },
   },
 };
+
+export default config;

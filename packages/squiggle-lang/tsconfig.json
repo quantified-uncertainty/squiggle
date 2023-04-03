@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "module": "es6",
+    "module": "es2020",
     "moduleResolution": "node16",
     "jsx": "react",
     "allowJs": true,
@@ -17,6 +17,5 @@
     "target": "ES6",
     "esModuleInterop": true
   },
-  "include": ["src/**/*", "scripts/**/*", "__tests__/**/*", "benchmark/**/*"],
-  "exclude": ["**/*.spec.ts"]
+  "include": ["src/**/*", "scripts/**/*", "__tests__/**/*", "benchmark/**/*"]
 }

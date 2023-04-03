@@ -1,8 +1,8 @@
 import * as React from "react";
-import { useSquiggle, SquiggleArgs } from "../lib/hooks/useSquiggle";
-import { SquiggleContainer } from "./SquiggleContainer";
-import { SquiggleViewer, SquiggleViewerProps } from "./SquiggleViewer";
-import { getValueToRender } from "../lib/utility";
+import { useSquiggle, SquiggleArgs } from "../lib/hooks/useSquiggle.js";
+import { SquiggleContainer } from "./SquiggleContainer.js";
+import { SquiggleViewer, SquiggleViewerProps } from "./SquiggleViewer/index.js";
+import { getValueToRender } from "../lib/utility.js";
 
 type Props = SquiggleArgs & Omit<SquiggleViewerProps, "result">;
 

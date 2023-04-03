@@ -1,4 +1,4 @@
-import isInteger from "lodash-es/isInteger.js";
+import isInteger from "lodash/isInteger.js";
 import * as E_A from "./E_A.js";
 
 class RangeError extends Error {}

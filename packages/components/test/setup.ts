@@ -1,3 +1,5 @@
+import { jest } from "@jest/globals";
+
 global.console = {
   ...console,
   /* eslint-disable no-console */
@@ -11,12 +13,15 @@ global.console = {
 
 // via https://github.com/jsdom/jsdom/issues/3002#issuecomment-1118039915
 Range.prototype.getBoundingClientRect = () => ({
-  bottom: 0,
   height: 0,
+  width: 0,
+  x: 0,
+  y: 0,
+  bottom: 0,
   left: 0,
   right: 0,
   top: 0,
-  width: 0,
+  toJSON() {},
 });
 Range.prototype.getClientRects = () => ({
   item: () => null,

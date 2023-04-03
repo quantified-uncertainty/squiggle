@@ -1,8 +1,8 @@
 import * as fc from "fast-check";
 import { kde } from "../../src/dist/SampleSetDist/kde.js";
-import range from "lodash-es/range.js";
-import sum from "lodash-es/sum.js";
-import sumBy from "lodash-es/sumBy.js";
+import range from "lodash/range.js";
+import sum from "lodash/sum.js";
+import sumBy from "lodash/sumBy.js";
 
 // KDE by definition, with triangular kernel max(0, |1-x|)
 // https://en.wikipedia.org/wiki/Kernel_density_estimation#Definition

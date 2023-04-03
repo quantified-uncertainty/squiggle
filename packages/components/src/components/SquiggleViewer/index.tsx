@@ -1,16 +1,19 @@
 import React, { useCallback, useMemo, useRef } from "react";
 import { SqValueLocation } from "@quri/squiggle-lang";
-import { ExpressionViewer } from "./ExpressionViewer";
-import { ViewerContext } from "./ViewerContext";
+import { ExpressionViewer } from "./ExpressionViewer.js";
+import { ViewerContext } from "./ViewerContext.js";
 import {
   LocalItemSettings,
   locationAsString,
   MergedItemSettings,
-} from "./utils";
-import { useSquiggle } from "../../lib/hooks";
-import { PartialViewSettings, viewSettingsSchema } from "../ViewSettingsForm";
-import { SquiggleErrorAlert } from "../SquiggleErrorAlert";
-import merge from "lodash/merge";
+} from "./utils.js";
+import { useSquiggle } from "../../lib/hooks/index.js";
+import {
+  PartialViewSettings,
+  viewSettingsSchema,
+} from "../ViewSettingsForm.js";
+import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
+import merge from "lodash/merge.js";
 
 export type SquiggleViewerProps = {
   /** The output of squiggle's run */

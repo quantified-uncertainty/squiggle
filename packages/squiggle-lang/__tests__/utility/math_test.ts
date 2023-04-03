@@ -1,4 +1,4 @@
-import uniq from "lodash-es/uniq.js";
+import uniq from "lodash/uniq.js";
 import { random_sample } from "../../src/utility/math.js";
 
 describe("random_sample", () => {

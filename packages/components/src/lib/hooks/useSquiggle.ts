@@ -7,8 +7,7 @@ import {
   Env,
 } from "@quri/squiggle-lang";
 import { useEffect, useMemo } from "react";
-import { JsImports, jsImportsToSquiggleCode } from "../jsImports";
-import * as uuid from "uuid";
+import { JsImports, jsImportsToSquiggleCode } from "../jsImports.js";
 
 // Props needed for a standalone execution
 type StandaloneExecutionProps = {
@@ -40,7 +39,9 @@ const importSourceName = (sourceName: string) => "imports-" + sourceName;
 const defaultContinues = [];
 
 export const useSquiggle = (args: SquiggleArgs): ResultAndBindings => {
-  const sourceName = useMemo(() => uuid.v4(), []);
+  // random; https://stackoverflow.com/a/12502559
+  const sourceName = useMemo(() => Math.random().toString(36).slice(2), []);
+
   const projectArg = "project" in args ? args.project : undefined;
   const environment = "environment" in args ? args.environment : undefined;
   const continues =

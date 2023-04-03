@@ -1,10 +1,20 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} */
-module.exports = {
-  preset: "ts-jest",
-  setupFilesAfterEnv: ["<rootDir>/test/setup.js"],
+const jestConfig = {
+  preset: "ts-jest/presets/default-esm-legacy",
   testEnvironment: "jsdom",
+  setupFilesAfterEnv: ["<rootDir>/test/setup.ts"],
   moduleNameMapper: {
-    "^d3$": "<rootDir>/../../node_modules/d3/dist/d3.min.js",
-    "^d3-(.*)$": `<rootDir>/../../node_modules/d3-$1/dist/d3-$1`,
+    "^(\\.{1,2}/.*)\\.js$": "$1",
   },
+  transform: {
+    "^.+\\.tsx?$": [
+      "ts-jest",
+      {
+        useESM: true,
+      },
+    ],
+  },
+  testPathIgnorePatterns: ["<rootDir>/node_modules/"],
 };
+
+export default jestConfig;

@@ -4,12 +4,12 @@ import * as yup from "yup";
 
 import { SqLambda, Env, SqError } from "@quri/squiggle-lang";
 
-import { MessageAlert } from "../Alert";
-import { SquiggleErrorAlert } from "../SquiggleErrorAlert";
-import { DistributionChartSettings } from "../DistributionChart";
+import { MessageAlert } from "../Alert.js";
+import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
+import { DistributionChartSettings } from "../DistributionChart.js";
 
-import { FunctionChart1Dist } from "./FunctionChart1Dist";
-import { FunctionChart1Number } from "./FunctionChart1Number";
+import { FunctionChart1Dist } from "./FunctionChart1Dist.js";
+import { FunctionChart1Number } from "./FunctionChart1Number.js";
 
 export const functionSettingsSchema = yup.object({}).shape({
   start: yup.number().required().positive().integer().default(0).min(0),

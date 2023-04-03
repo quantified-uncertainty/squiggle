@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import "@testing-library/jest-dom";
-import { SquiggleChart } from "../src/index";
+import { SquiggleChart } from "../src/index.js";
 
 test("Plot.dists render a figure", async () => {
   render(

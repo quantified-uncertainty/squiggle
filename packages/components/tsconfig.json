@@ -3,8 +3,10 @@
     "paths": {
       "@quri/squiggle-lang": ["../squiggle-lang/src"]
     },
-    "module": "commonjs",
+    "module": "es2020",
+    "moduleResolution": "node16",
     "jsx": "react",
+    "target": "ES6",
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "noImplicitAny": false,
@@ -13,12 +15,11 @@
     "strict": true,
     "preserveConstEnums": true,
     "composite": true,
-    "outDir": "./dist",
-    "declarationDir": "./dist",
+    "outDir": "./dist/esm",
+    "declarationDir": "./dist/types",
     "declaration": true,
     "sourceMap": true
   },
-  "target": "ES6",
   "include": ["src/**/*", "src/*"],
   "exclude": ["node_modules", "webpack.config.js"],
   "references": [

@@ -1,42 +1,42 @@
 import * as React from "react";
 import { FC, useEffect, useState } from "react";
-import useMeasure from "react-use/lib/useMeasure";
 import * as yup from "yup";
 
-import { schemeCategory10 as d3SchemeCategory10 } from "d3-scale-chromatic";
-import { min as d3Min, max as d3Max } from "d3-array";
-import { area as d3Area, line as d3Line } from "d3-shape";
+import { max as d3Max, min as d3Min } from "d3-array";
 import { format as d3Format } from "d3-format";
+import { schemeCategory10 as d3SchemeCategory10 } from "d3-scale-chromatic";
+import { area as d3Area, line as d3Line } from "d3-shape";
 
 import {
   Env,
   resultMap,
+  SqDistributionsPlot,
   SqDistributionTag,
   SqShape,
 } from "@quri/squiggle-lang";
-import { SqDistributionsPlot } from "@quri/squiggle-lang/src/public/SqPlot";
 
-import { hasMassBelowZero } from "../../lib/distributionUtils";
-import { useCanvas, useCanvasCursor } from "../../lib/hooks";
-import { flattenResult } from "../../lib/utility";
-import { ErrorAlert } from "../Alert";
+import {
+  FloatingPortal,
+  offset,
+  shift,
+  useClientPoint,
+  useFloating,
+  useInteractions,
+} from "@floating-ui/react";
+import isEqual from "lodash/isEqual.js";
+import { hasMassBelowZero } from "../../lib/distributionUtils.js";
 import {
   drawAxes,
   drawCircle,
   drawVerticalCursorLine,
   primaryColor,
-} from "../../lib/drawUtils";
-import { SummaryTable } from "./SummaryTable";
-import { Plot } from "./types";
-import {
-  useFloating,
-  useClientPoint,
-  useInteractions,
-  FloatingPortal,
-  offset,
-  shift,
-} from "@floating-ui/react";
-import isEqual from "lodash/isEqual";
+} from "../../lib/drawUtils.js";
+import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
+import { flattenResult } from "../../lib/utility.js";
+import { ErrorAlert } from "../Alert.js";
+import { SummaryTable } from "./SummaryTable.js";
+import { Plot } from "./types.js";
+import { useMeasure } from "../../lib/hooks/react-use.js";
 
 export const distributionSettingsSchema = yup.object({}).shape({
   /** Set the x scale to be logarithmic */

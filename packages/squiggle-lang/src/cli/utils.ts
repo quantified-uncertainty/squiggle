@@ -1,6 +1,6 @@
 import path from "path";
 import fs from "fs";
-import isFinite from "lodash-es/isFinite.js";
+import isFinite from "lodash/isFinite.js";
 
 import { Env } from "../dist/env.js";
 import { SqProject } from "../public/SqProject/index.js";

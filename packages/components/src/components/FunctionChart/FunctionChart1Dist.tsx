@@ -1,8 +1,7 @@
 import { Env, result, SqError, SqLambda, SqValue } from "@quri/squiggle-lang";
-import groupBy from "lodash/groupBy";
+import groupBy from "lodash/groupBy.js";
 import * as React from "react";
 import { FC, useEffect, useMemo, useRef } from "react";
-import useMeasure from "react-use/lib/useMeasure";
 
 import { extent as d3Extent } from "d3-array";
 import { format as d3Format } from "d3-format";
@@ -13,15 +12,16 @@ import {
   getFunctionImage,
   Padding,
   primaryColor,
-} from "../../lib/drawUtils";
-import { useCanvas, useCanvasCursor } from "../../lib/hooks";
-import { ErrorAlert } from "../Alert";
+} from "../../lib/drawUtils.js";
+import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
+import { ErrorAlert } from "../Alert.js";
 import {
   DistributionChart,
   DistributionChartSettings,
-} from "../DistributionChart";
-import { NumberShower } from "../NumberShower";
-import { FunctionChartSettings } from "./index";
+} from "../DistributionChart.js";
+import { NumberShower } from "../NumberShower.js";
+import { FunctionChartSettings } from "./index.js";
+import { useMeasure } from "../../lib/hooks/react-use.js";
 
 function unwrap<a, b>(x: result<a, b>): a {
   if (x.ok) {

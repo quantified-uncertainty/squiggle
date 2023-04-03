@@ -1,8 +1,9 @@
 import { SqValue } from "@quri/squiggle-lang";
 import React, { useContext, useReducer } from "react";
-import { Tooltip } from "../ui/Tooltip";
-import { LocalItemSettings, MergedItemSettings } from "./utils";
-import { ViewerContext } from "./ViewerContext";
+
+import { Tooltip } from "../ui/Tooltip.js";
+import { LocalItemSettings, MergedItemSettings } from "./utils.js";
+import { ViewerContext } from "./ViewerContext.js";
 
 type SettingsMenuParams = {
   onChange: () => void; // used to notify VariableBox that settings have changed, so that VariableBox could re-render itself

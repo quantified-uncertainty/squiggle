@@ -1,12 +1,12 @@
 import React from "react";
 import * as yup from "yup";
 import { UseFormRegister } from "react-hook-form";
-import { InputItem } from "./ui/InputItem";
-import { Checkbox } from "./ui/Checkbox";
-import { HeadedSection } from "./ui/HeadedSection";
-import { Text } from "./ui/Text";
-import { distributionSettingsSchema } from "./MultiDistributionChart";
-import { functionSettingsSchema } from "./FunctionChart";
+import { InputItem } from "./ui/InputItem.js";
+import { Checkbox } from "./ui/Checkbox.js";
+import { HeadedSection } from "./ui/HeadedSection.js";
+import { Text } from "./ui/Text.js";
+import { distributionSettingsSchema } from "./MultiDistributionChart/index.js";
+import { functionSettingsSchema } from "./FunctionChart/index.js";
 
 export const viewSettingsSchema = yup.object({}).shape({
   distributionChartSettings: distributionSettingsSchema,

@@ -1,4 +1,4 @@
-import sortBy from "lodash-es/sortBy.js";
+import sortBy from "lodash/sortBy.js";
 import * as E_A from "./utility/E_A.js";
 import * as E_A_Floats from "./utility/E_A_Floats.js";
 import * as E_A_Sorted from "./utility/E_A_Sorted.js";

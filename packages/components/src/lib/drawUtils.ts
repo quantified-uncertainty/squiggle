@@ -3,12 +3,12 @@ import {
   scaleLog as d3ScaleLog,
   scalePow as d3ScalePow,
 } from "d3-scale";
-import range from "lodash/range";
+import range from "lodash/range.js";
+import { type ScaleContinuousNumeric } from "d3";
 
 import { SqLambda, SqValue } from "@quri/squiggle-lang";
 
-import { FunctionChartSettings } from "../components/FunctionChart";
-import { type ScaleContinuousNumeric } from "d3";
+import { FunctionChartSettings } from "../components/FunctionChart/index.js";
 
 const axisColor = "rgba(114, 125, 147, 0.1)";
 export const labelColor = "rgb(114, 125, 147)";

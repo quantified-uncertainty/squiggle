@@ -1,6 +1,7 @@
-import { RefreshIcon } from "@heroicons/react/solid";
-import clsx from "clsx";
+import { clsx } from "clsx";
 import React from "react";
+
+import { RefreshIcon } from "@heroicons/react/solid/esm/index.js";
 
 type IconType = (props: React.ComponentProps<"svg">) => JSX.Element;
 
@@ -32,10 +33,7 @@ export const Toggle: React.FC<Props> = ({
     >
       <div className="relative w-6 h-6" key={String(spinIcon)}>
         <CurrentIcon
-          className={clsx(
-            "w-6 h-6 absolute opacity-100",
-            spinIcon && "animate-hide"
-          )}
+          className={clsx("w-6 h-6 opacity-100", spinIcon && "animate-hide")}
         />
         {spinIcon && (
           <RefreshIcon className="w-6 h-6 absolute opacity-0 animate-appear-and-spin" />

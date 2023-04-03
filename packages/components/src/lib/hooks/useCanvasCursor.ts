@@ -1,6 +1,6 @@
-import { select as d3Select, pointer as d3Pointer } from "d3-selection";
+import { pointer as d3Pointer, select as d3Select } from "d3-selection";
 import { useRef } from "react";
-import useUpdate from "react-use/lib/useUpdate";
+import { useUpdate } from "./react-use.js";
 
 export function useCanvasCursor({
   refChanged,

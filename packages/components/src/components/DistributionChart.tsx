@@ -1,11 +1,11 @@
-import * as React from "react";
 import { SqDistribution } from "@quri/squiggle-lang";
+import * as React from "react";
 import {
   MultiDistributionChart,
   MultiDistributionChartProps,
-} from "./MultiDistributionChart";
+} from "./MultiDistributionChart/index.js";
 
-export { DistributionChartSettings } from "./MultiDistributionChart";
+export { DistributionChartSettings } from "./MultiDistributionChart/index.js";
 
 export type DistributionChartProps = Omit<
   MultiDistributionChartProps,

@@ -1,9 +1,10 @@
-import { Text } from "../ui/Text";
 import React, { useState } from "react";
-import { HeadedSection } from "../ui/HeadedSection";
-import { JsImports } from "../../lib/jsImports";
-import { JsonEditor } from "../JsonEditor";
-import { ErrorAlert, SuccessAlert } from "../Alert";
+
+import { Text } from "../ui/Text.js";
+import { HeadedSection } from "../ui/HeadedSection.js";
+import { JsImports } from "../../lib/jsImports.js";
+import { JsonEditor } from "../JsonEditor.js";
+import { ErrorAlert, SuccessAlert } from "../Alert.js";
 
 export const ImportSettingsForm: React.FC<{
   initialImports: JsImports;

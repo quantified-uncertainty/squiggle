@@ -1,4 +1,4 @@
-import zipWith from "lodash-es/zipWith.js";
+import zipWith from "lodash/zipWith.js";
 import { SqPointSetDistribution } from "./SqDistribution.js";
 import { ContinuousShape } from "../PointSet/Continuous.js";
 import { DiscreteShape } from "../PointSet/Discrete.js";

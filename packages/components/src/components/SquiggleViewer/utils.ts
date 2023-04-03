@@ -1,5 +1,5 @@
 import { SqValueLocation } from "@quri/squiggle-lang";
-import { PartialViewSettings, ViewSettings } from "../ViewSettingsForm";
+import { PartialViewSettings, ViewSettings } from "../ViewSettingsForm.js";
 
 export type LocalItemSettings = {
   collapsed: boolean;

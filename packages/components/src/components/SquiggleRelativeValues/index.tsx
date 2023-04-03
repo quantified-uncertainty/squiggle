@@ -1,7 +1,10 @@
-import { SqLambda, SqProject } from "@quri/squiggle-lang";
-import { SqStringValue, SqValue } from "@quri/squiggle-lang/src/public/SqValue";
+import {
+  SqLambda,
+  SqProject,
+  SqStringValue,
+  SqValue,
+} from "@quri/squiggle-lang";
 import React, { useEffect, useMemo, useState } from "react";
-import { SquiggleViewer } from "../SquiggleViewer";
 
 const useRelativeValues = (code: string) => {
   const project = useMemo(() => SqProject.create(), []);
