@@ -1,7 +1,7 @@
 import { result, sq, SqLambda, SqProject } from "@quri/squiggle-lang";
 
 import { getModelCode, Model } from "@/model/utils";
-import { ModelCache, RelativeValueResult } from "./types";
+import { ModelCache, RelativeValue, RelativeValueResult } from "./types";
 
 const wrapper = sq`
 {|x, y|
@@ -10,10 +10,26 @@ const wrapper = sq`
     median: inv(dist, 0.5),
     min: inv(dist, 0.05),
     max: inv(dist, 0.95),
-    db: 10 * (SampleSet.map(dist, {|x| max([abs(x), 1e-9])}) -> log10 -> stdev)
+    db: log10(inv(dist, .95) / inv(dist, 0.05)) / 2
   }
 }
 `;
+
+const cartesianProduct = <A, B>(a: A[], b: B[]): [A, B][] => {
+  return a.flatMap((aItem) => b.map<[A, B]>((bItem) => [aItem, bItem]));
+};
+
+const extractOkValues = <A, B>(items: result<A, B>[]): A[] => {
+  return items
+    .filter((item): item is { ok: true; value: A } => item.ok)
+    .map((item) => item.value);
+};
+
+const getPercentile = (sortedList: number[], percentile: number): number => {
+  const index = (percentile / 100) * sortedList.length;
+  const result = sortedList[Math.floor(index)];
+  return result;
+};
 
 function buildRelativeValue({
   fn,
@@ -120,5 +136,22 @@ export class ModelEvaluator {
     }
 
     return this.compareWithoutCache(id1, id2);
+  }
+
+  compareAll(ids: string[]): RelativeValueResult[] {
+    return cartesianProduct(ids, ids).map(([row, column]) =>
+      this.compare(row, column)
+    );
+  }
+
+  getParamPercentiles(
+    ids: string[],
+    fn: (value: RelativeValue) => number,
+    percentiles: number[]
+  ): number[] {
+    let list = extractOkValues(this.compareAll(ids))
+      .map(fn)
+      .sort((a, b) => a - b);
+    return percentiles.map((p) => getPercentile(list, p));
   }
 }

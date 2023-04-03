@@ -36,6 +36,7 @@ export const ListView: FC<Props> = ({ model }) => {
     otherDimensionItems: [selectedItem],
   });
 
+  const percentiles =model.getParamPercentiles(items.map((i) => i.id), (r => r.db), [20, 40, 60, 80]) 
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-2">
@@ -112,7 +113,7 @@ export const ListView: FC<Props> = ({ model }) => {
                 />
               </div>
             </CellBox>
-            <RelativeCell id1={item.id} id2={selectedItem.id} model={model} />
+            <RelativeCell id1={item.id} id2={selectedItem.id} model={model} percentiles={percentiles} />
           </Fragment>
         ))}
       </div>

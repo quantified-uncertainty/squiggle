@@ -15,6 +15,7 @@ export type Item = {
   id: string;
   name: string;
   clusterId?: string;
+  description?: string;
 };
 
 export type Catalog = {

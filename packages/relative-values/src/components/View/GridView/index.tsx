@@ -1,5 +1,6 @@
 import { Item } from "@/types";
 import { ModelEvaluator } from "@/values/ModelEvaluator";
+import { FloatingFocusManager } from "@floating-ui/react";
 import { FC, Fragment, useCallback, useMemo } from "react";
 import { useSelectedInterface } from "../../Interface/InterfaceProvider";
 import { DropdownButton } from "../../ui/DropdownButton";
@@ -9,6 +10,7 @@ import { RelativeCell } from "../RelativeCell";
 import { useViewContext } from "../ViewProvider";
 import { AxisMenu } from "./AxisMenu";
 import { GridModeControls } from "./GridModeControls";
+import { result } from "@quri/squiggle-lang";
 
 export const GridView: FC<{
   model: ModelEvaluator;
@@ -58,6 +60,14 @@ export const GridView: FC<{
     [idToPosition, gridMode]
   );
 
+  const extractOkValues = <A, B>(items: result<A, B>[]): A[] => {
+    return items
+      .filter((item): item is { ok: true; value: A } => item.ok)
+      .map((item) => item.value);
+  };
+
+  const percentiles =model.getParamPercentiles(items.map((i) => i.id), (r => r.db), [20, 40, 60, 80]) 
+
   return (
     <div>
       <div className="flex gap-8 mb-4 items-center">
@@ -93,6 +103,7 @@ export const GridView: FC<{
                   id1={rowItem.id}
                   id2={columnItem.id}
                   model={model}
+                  percentiles={percentiles}
                 />
               )
             )}
