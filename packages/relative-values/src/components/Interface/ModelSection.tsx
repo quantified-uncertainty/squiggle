@@ -1,14 +1,15 @@
+import { FC, useMemo } from "react";
+
 import { useSelectedModel } from "@/app/interfaces/[id]/models/[modelId]/ModelProvider";
 import { ChipIcon } from "@/components/ui/icons/ChipIcon";
 import {
   useInterfaceById,
   useStorageDispatch,
 } from "@/storage/StorageProvider";
-import { FC } from "react";
+import { createModelEvaluatorWithCache } from "@/values/loadCache";
 import { ModelEditor } from "../ModelEditor";
 import { StyledTab } from "../ui/StyledTab";
 import { GridView } from "../View/GridView";
-import { useRelativeValues } from "../View/hooks";
 import { ListView } from "../View/ListView";
 import { PlotView } from "../View/PlotView";
 import { ViewProvider } from "../View/ViewProvider";
@@ -20,14 +21,18 @@ const NotFound: FC<{ error: string }> = ({ error }) => (
 );
 
 export const ModelSection: FC = () => {
-  const { selectedId: id, selectedModel: model } = useSelectedModel();
-  const { error, rv } = useRelativeValues(id, model);
+  const model = useSelectedModel();
   const { interfaceId } = useInterfaceContext();
   const interfaceWithModels = useInterfaceById(interfaceId);
 
   const dispatch = useStorageDispatch();
 
-  if (!interfaceWithModels || !model || id === undefined) {
+  const modelEvaluatorResult = useMemo(
+    () => (model ? createModelEvaluatorWithCache(model) : undefined),
+    [model]
+  );
+
+  if (!interfaceWithModels || !model || !modelEvaluatorResult) {
     return <NotFound error="Model not found" />;
   }
 
@@ -50,7 +55,9 @@ export const ModelSection: FC = () => {
             </div>
             <div>
               <ModelPicker />
-              {error && <pre className="text-red-700">{error}</pre>}
+              {modelEvaluatorResult.ok ? null : (
+                <pre className="text-red-700">{modelEvaluatorResult.value}</pre>
+              )}
             </div>
           </div>
           <StyledTab.List>
@@ -61,9 +68,21 @@ export const ModelSection: FC = () => {
           </StyledTab.List>
         </div>
         <StyledTab.Panels>
-          <StyledTab.Panel>{rv ? <ListView rv={rv} /> : null}</StyledTab.Panel>
-          <StyledTab.Panel>{rv ? <GridView rv={rv} /> : null}</StyledTab.Panel>
-          <StyledTab.Panel>{rv ? <PlotView rv={rv} /> : null}</StyledTab.Panel>
+          <StyledTab.Panel>
+            {modelEvaluatorResult.ok ? (
+              <ListView model={modelEvaluatorResult.value} />
+            ) : null}
+          </StyledTab.Panel>
+          <StyledTab.Panel>
+            {modelEvaluatorResult.ok ? (
+              <GridView model={modelEvaluatorResult.value} />
+            ) : null}
+          </StyledTab.Panel>
+          <StyledTab.Panel>
+            {modelEvaluatorResult.ok ? (
+              <PlotView model={modelEvaluatorResult.value} />
+            ) : null}
+          </StyledTab.Panel>
           <StyledTab.Panel>
             {model ? (
               <ModelEditor
@@ -71,7 +90,13 @@ export const ModelSection: FC = () => {
                 setModel={(newModel) =>
                   dispatch({
                     type: "updateModel",
-                    payload: { interfaceId, modelId: id, model: newModel },
+                    payload: {
+                      interfaceId,
+                      model: {
+                        ...newModel,
+                        modified: true, // skip cache
+                      },
+                    },
                   })
                 }
               />

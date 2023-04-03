@@ -10,6 +10,7 @@ type ModelMetadata = {
   id: string;
   author: string;
   title: string;
+  modified?: boolean;
 };
 
 export type TextModel = {
@@ -243,7 +244,7 @@ export function createEmptyGraphModel({
   id,
   catalog,
 }: {
-  id: string,
+  id: string;
   author: string;
   title: string;
   catalog: Catalog;

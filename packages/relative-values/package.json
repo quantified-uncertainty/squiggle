@@ -11,7 +11,7 @@
     "build": "yarn cacheRV && next build"
   },
   "dependencies": {
-    "@floating-ui/react": "^0.20.1",
+    "@floating-ui/react": "^0.22.2",
     "@quri/squiggle-components": "^0.6.0",
     "@quri/squiggle-lang": "^0.6.0",
     "clsx": "^1.2.1",
@@ -29,7 +29,7 @@
     "eslint-config-next": "^13.2.4",
     "postcss": "^8.4.21",
     "postcss-cli": "^10.1.0",
-    "tailwindcss": "^3.2.7",
+    "tailwindcss": "^3.3.1",
     "tsx": "^3.12.6"
   }
 }

@@ -1,14 +1,14 @@
 import { FC, useEffect, useMemo, useRef } from "react";
 
 import { useSelectedInterface } from "@/components/Interface/InterfaceProvider";
-import { RVStorage } from "@/values/RVStorage";
+import { ModelEvaluator } from "@/values/ModelEvaluator";
 import * as d3 from "d3";
 import { useFilteredItems } from "../hooks";
 import { useViewContext } from "../ViewProvider";
 
 export const ForcePlot: FC<{
-  rv: RVStorage;
-}> = ({ rv }) => {
+  model: ModelEvaluator;
+}> = ({ model }) => {
   const ref = useRef<HTMLCanvasElement>(null);
 
   const {
@@ -61,7 +61,7 @@ export const ForcePlot: FC<{
     const force = d3
       .forceLink<Node, d3.SimulationLinkDatum<Node>>()
       .distance((d) => {
-        const relativeValueResult = rv.compare(
+        const relativeValueResult = model.compare(
           (d.source as Node).id,
           (d.target as Node).id
         );

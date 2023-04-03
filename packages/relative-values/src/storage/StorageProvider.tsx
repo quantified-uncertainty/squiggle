@@ -1,7 +1,7 @@
 import { generateProvider } from "@/components/generateProvider";
 import { InterfaceWithModels } from "@/types";
 import { FC, PropsWithChildren, Reducer } from "react";
-import { allInterfaces } from "@/../models/src"
+import { allInterfaces } from "@models/src";
 import { createEmptyGraphModel, Model } from "@/model/utils";
 
 type Storage = {
@@ -30,7 +30,6 @@ type Action =
       type: "updateModel";
       payload: {
         interfaceId: string;
-        modelId: string;
         model: Model;
       };
     };
@@ -65,7 +64,7 @@ const reducer: Reducer<Storage, Action> = (state, action) => {
             ? {
                 ...int,
                 models: int.models.set(
-                  action.payload.modelId,
+                  action.payload.model.id,
                   action.payload.model
                 ),
               }
