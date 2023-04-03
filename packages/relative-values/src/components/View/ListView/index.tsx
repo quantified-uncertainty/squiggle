@@ -36,7 +36,7 @@ export const ListView: FC<Props> = ({ model }) => {
     otherDimensionItems: [selectedItem],
   });
 
-  const percentiles =model.getParamPercentiles(items.map((i) => i.id), (r => r.db), [20, 40, 60, 80]) 
+  const percentiles =model.getParamPercentiles(items.map((i) => i.id), (r => r.db), [20, 80]) 
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-2">

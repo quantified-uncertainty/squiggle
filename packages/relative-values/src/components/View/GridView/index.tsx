@@ -66,7 +66,12 @@ export const GridView: FC<{
       .map((item) => item.value);
   };
 
-  const percentiles =model.getParamPercentiles(items.map((i) => i.id), (r => r.db), [20, 40, 60, 80]) 
+  //It seems nicer, at this point, to just specify that its p25 and p75
+  const percentiles = model.getParamPercentiles(
+    items.map((i) => i.id),
+    (r) => r.db,
+    [5, 95]
+  );
 
   return (
     <div>
