@@ -10,16 +10,16 @@ function getCatalog(): Catalog {
     {
       id: "funder_openphil_2020",
       clusterId: "funder",
-      name: "Open Philanthropy - 2020",
+      name: "Open Philanthropy - 2020 (longtermism)",
       description:
-        "The marginal value of $1, from Open Philanthropy, in the year 2020",
+        "The marginal value of $1, from Open Philanthropy longtermism, in the year 2020",
     },
     {
       id: "funder_openphil_2023",
       clusterId: "funder",
-      name: "Open Philanthropy - 2023",
+      name: "Open Philanthropy - 2023 (longtermism)",
       description:
-        "The marginal value of $1, from Open Philanthropy, in the year 2023",
+        "The marginal value of $1, from Open Philanthropy longtermism, in the year 2023",
     },
     {
       id: "funder_eafund_ltff_2020",
@@ -68,12 +68,25 @@ function getCatalog(): Catalog {
       clusterId: "funder",
       name: "Global Health and Development (EA Funds) - 2020",
       description:
-        "The marginal value of $1, from Global Health and Development (EA Funds), in the year 2020",
+        "The marginal value of $1, from Global Health and Development (EA Funds), in the year 2020. Consider flow-though impacts, like longtermist benefits.",
+    },
+    {
+      id: "funder_eafund_globalhealth_2020_direct",
+      clusterId: "funder",
+      name: "Global Health and Development (EA Funds) (Direct Impacts) - 2020",
+      description:
+        "The marginal value of $1, from Global Health and Development (EA Funds), in the year 2020. Only consider direct impacts.",
     },
     {
       id: "qaly_human",
       clusterId: "sentient_welfare",
       name: "1 Human QALY",
+      description: "",
+    },
+    {
+      id: "life_human",
+      clusterId: "sentient_welfare",
+      name: "1 Average Human Life",
       description: "",
     },
     {
@@ -87,9 +100,19 @@ function getCatalog(): Catalog {
       name: "1 Chicken QALY",
     },
     {
+      id: "life_chicken",
+      clusterId: "sentient_welfare",
+      name: "1 Chicken Life",
+    },
+    {
       id: "qaly_cow",
       clusterId: "sentient_welfare",
       name: "1 Cow QALY",
+    },
+    {
+      id: "life_cow",
+      clusterId: "sentient_welfare",
+      name: "1 Cow Life",
     },
     {
       id: "macrovariable_microdoom",
@@ -97,16 +120,28 @@ function getCatalog(): Catalog {
       name: "1 Microdoom",
     },
     {
-      id: "macrovariable_universal_microtopia",
-      clusterId: "macrovariables",
-      name: "1 Universal Microdoom",
-    },
-    {
       id: "macrovariable_microtopia",
       clusterId: "macrovariables",
       name: "1 Microtopia",
       description: "",
-    }
+    },
+    {
+      id: "macrovariable_universal_microtopia",
+      clusterId: "macrovariables",
+      name: "1 Universal Microtopia",
+    },
+    {
+      id: "macrovariable_microhell",
+      clusterId: "macrovariables",
+      name: "1 Microhell",
+      description: "",
+    },
+    {
+      id: "macrovariable_universal_microhell",
+      clusterId: "macrovariables",
+      name: "1 Universal Microhell",
+      description: "",
+    },
   ];
 
   return {
@@ -120,11 +155,11 @@ function getCatalog(): Catalog {
       },
       funder: {
         name: "funder",
-        color: "#2B828C",
+        color: "#3B42aC",
       },
       sentient_welfare: {
         name: "Sentient Welfare",
-        color: "#2B828C",
+        color: "#5Bc28C",
       },
     },
   };
@@ -148,28 +183,51 @@ function getTextModel(): Model {
     human_to_cow = ss(0.1 to 0.6)
     human_to_salmon = ss(0.05 to 0.1)
 
+    average_qaly_per_years = ss(0.7 to 0.9)
     qaly_human = mx(1)
+    life_human = qaly_human * ss(67 to 75) * average_qaly_per_years
     qaly_chicken = qaly_human * human_to_chicken 
+    life_chicken = qaly_chicken * ss(3.5 to 4.5) * average_qaly_per_years
     qaly_cow = qaly_human * human_to_cow
+    life_cow = qaly_cow * ss(17 to 20) * average_qaly_per_years
     qaly_salmon = qaly_human * human_to_salmon 
 
-    qaly_to_utopia = ss((qaly_human * 100 to 1000) * (10E15 to 10E30))
+    qaly_to_utopia = ss(qaly_human * (10E18 to 10E50))
+    utopia_to_hell = ss(-(.01 to 10000))
+    universal_to_local_utopia_or_hell = 0.0000001 to 0.5
 
     macrovariable_microtopia = qaly_to_utopia * (1/1M)
-    macrovariable_universal_microtopia = macrovariable_microtopia * ss(1.4 to 100)
-    macrovariable_microdoom = macrovariable_microtopia * ss(0.1 to 0.6)
+    macrovariable_microhell = utopia_to_hell * macrovariable_microtopia
+
+    macrovariable_universal_microtopia = macrovariable_microtopia * (1/universal_to_local_utopia_or_hell)
+    macrovariable_microdoom = -1 * macrovariable_microtopia * ss(0.1 to 0.6)
+
+    macrovariable_universal_microhell = macrovariable_microhell * (1/universal_to_local_utopia_or_hell)
+
+    dollars_for_OP_longtermism_to_save_one_deca_utopia = ss(100B to 10000T)
+    dollars_for_OP_longtermism_to_save_one_microtopia = (dollars_for_OP_longtermism_to_save_one_deca_utopia / 100k) * (10 to 100) // convert to mTopia, then add factor for more efficient returns before one decaUtopia.
+    longterm_discount_rate = ss(0.00001 to 0.8)
 
     //Key variables
-    funder_openphil_2020 = macrovariable_microtopia * ss(1/(100k to 100M))
+    expected_positive_openphil_2020_impact = macrovariable_microtopia * longterm_discount_rate * 1/dollars_for_OP_longtermism_to_save_one_microtopia 
+    potential_impact_if_negative =  ss(-1*(0.01 to 0.4))
+    funder_openphil_2020 = mx(expected_positive_openphil_2020_impact, potential_impact_if_negative * expected_positive_openphil_2020_impact, [0.7, 0.3])
     funder_openphil_2023 = funder_openphil_2020 * longtermism_2020_to_2023
     
     funder_eafund_ltff_2020 = funder_openphil_2020 * ltff_to_openphil
     funder_eafund_ltff_2023 = funder_eafund_ltff_2020 * longtermism_2020_to_2023
 
     //Key variables
-    funder_eafund_animal_welfare_2020 = (1 / (ss(10 to 1000) * qaly_salmon)) + (1/ss(50 to 500) * funder_openphil_2020)
+    animal_or_human_to_1_dollar_OP_for_longtermism = ss(1000 to 1M) // How many dollars would longtermists trade for the longtermist benefits of giving to animals/humans, effectively? My guess is that $1M to the EA Animal charities will give some kind of longtermist benefit or another - worth at least $1 to OP longtermism.
+
+    saved_salmon_remaining_QALYS = 1 to 5
+    funder_eafund_animal_welfare_2020 = life_cow * (1 / (ss(10 to 1000))) + (1/animal_or_human_to_1_dollar_OP_for_longtermism) * funder_openphil_2020
     funder_eafund_animal_welfare_2023 = funder_eafund_animal_welfare_2020 * animals_2020_to_2023
-    funder_eafund_globalhealth_2020 = (1 / (ss(5000 to 150000) * qaly_human)) + (1/ss(50 to 500) * funder_openphil_2020)
+    saved_human_remaining_QALYS = 30 to 80
+
+
+    funder_eafund_globalhealth_2020_direct = life_human * (1 / (5000 to 20000))
+    funder_eafund_globalhealth_2020 = funder_eafund_globalhealth_2020_direct + (1/animal_or_human_to_1_dollar_OP_for_longtermism) * funder_openphil_2020
 
     funder_eafund_ea_infrastructure_2020 = (funder_eafund_ltff_2020 * ss(0.1 to 0.6)) + (funder_eafund_globalhealth_2020 * ss(0.01 to 0.5)) + (funder_eafund_animal_welfare_2020 * ss(0.01 to 0.5))
     funder_eafund_ea_infrastructure_2023 = funder_eafund_ea_infrastructure_2020 * ss(0.8 to 1.4)
@@ -184,13 +242,19 @@ function getTextModel(): Model {
         funder_eafund_ea_infrastructure_2020: funder_eafund_ea_infrastructure_2020,
         funder_eafund_ea_infrastructure_2023: funder_eafund_ea_infrastructure_2023,
         funder_eafund_globalhealth_2020: funder_eafund_globalhealth_2020,
+        funder_eafund_globalhealth_2020_direct: funder_eafund_globalhealth_2020_direct,
         qaly_human: qaly_human,
         qaly_chicken: qaly_chicken,
         qaly_cow: qaly_cow,
         qaly_salmon: qaly_salmon,
+        life_human: life_human,
+        life_chicken: life_chicken,
+        life_cow: life_cow,
         macrovariable_microdoom: macrovariable_microdoom,
         macrovariable_universal_microtopia: macrovariable_universal_microtopia,
-        macrovariable_microtopia: macrovariable_microtopia
+        macrovariable_microtopia: macrovariable_microtopia,
+        macrovariable_microhell: macrovariable_microhell,
+        macrovariable_universal_microhell: macrovariable_universal_microhell
     }
 
     fn(a,b) = vars[a] / vars[b]

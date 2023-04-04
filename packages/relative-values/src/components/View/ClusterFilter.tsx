@@ -15,7 +15,7 @@ export const ClusterItem: React.FC<{
       <ClusterIcon cluster={cluster} selected={selected} />
       <div
         className={clsx(
-          "text-xs hover:text-black font-medium",
+          "text-sm hover:text-black font-medium",
           selected ? "text-gray-600" : "text-gray-400"
         )}
       >

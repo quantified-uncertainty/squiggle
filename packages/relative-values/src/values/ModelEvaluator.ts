@@ -6,11 +6,17 @@ import { ModelCache, RelativeValue, RelativeValueResult } from "./types";
 const wrapper = sq`
 {|x, y|
   dist = fn(x, y) -> SampleSet.fromDist
+  findDb(dist) = {
+    p5 = abs(inv(dist, .95))
+    p95 = abs(inv(dist, 0.05))
+    diff = (p95 > p5) ? (p95 / p5) : (p5/p95)
+    abs(log10(diff))
+  } 
   {
     median: inv(dist, 0.5),
     min: inv(dist, 0.05),
     max: inv(dist, 0.95),
-    db: log10(inv(dist, .95) / inv(dist, 0.05)) / 2
+    db: findDb(dist)
   }
 }
 `;

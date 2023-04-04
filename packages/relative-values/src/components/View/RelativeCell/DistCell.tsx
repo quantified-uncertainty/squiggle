@@ -36,15 +36,15 @@ function numberToColor(rating: number, percentiles: number[]) {
 function numberToColor2(rating: number, percentiles: number[]) {
   switch (numberToTier(rating, percentiles)) {
     case 1:
-      return "";
+      return "hover:bg-gray-100";
     case 2:
-      return "bg-yellow-300 bg-opacity-5";
+      return "bg-yellow-300 bg-opacity-5 hover:bg-opacity-30";
     case 3:
-      return "bg-yellow-500 bg-opacity-10";
+      return "bg-yellow-500 bg-opacity-10  hover:bg-opacity-30";
     case 4:
-      return "bg-red-400 bg-opacity-10";
+      return "bg-red-400 bg-opacity-10 hover:bg-opacity-30";
     case 5:
-      return "bg-red-400 bg-opacity-20";
+      return "bg-red-400 bg-opacity-20 hover:bg-opacity-40";
   }
 }
 
@@ -97,8 +97,21 @@ export const DistCell: FC<{ item: RelativeValue; percentiles: number[] }> =
                 style={{ fontSize: "0.7em" }}
                 className="text-gray-400 font-light"
               >
-                <NumberShower number={item.min} precision={1} /> to{" "}
-                <NumberShower number={item.max} precision={1} />
+                {item.min < 0 && item.max < 0 ? (
+                  <span>
+                    {"-("}
+                    <NumberShower
+                      number={-1 * item.max}
+                      precision={1}
+                    /> to <NumberShower number={-1 * item.min} precision={1} />
+                    {")"}
+                  </span>
+                ) : (
+                  <span>
+                    <NumberShower number={item.min} precision={1} /> to{" "}
+                    <NumberShower number={item.max} precision={1} />
+                  </span>
+                )}
               </div>
             </div>
 
