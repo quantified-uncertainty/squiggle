@@ -10,8 +10,8 @@ const Section: FC<PropsWithChildren<{ title: string; border?: boolean }>> = ({
   border,
   children,
 }) => (
-  <div className="flex flex-col gap-2 items-center">
-    <header className="text-slate-800 font-bold">{title}</header>
+  <div className="flex flex-col gap-2">
+    <header className="text-slate-800 font-bold text-center">{title}</header>
     <div className={clsx(border && "border border-slate-100 p-1")}>
       {children}
     </div>
@@ -22,7 +22,12 @@ export const PlotView: FC<{
   model: ModelEvaluator;
 }> = ({ model }) => {
   return (
-    <div className="flex gap-2 max-w-6xl mx-auto">
+    <div
+      className="grid gap-2 max-w-6xl mx-auto"
+      style={{
+        gridTemplateColumns: "1fr 1fr minmax(120px, max-content)",
+      }}
+    >
       <Section title="Value and Uncertainty" border>
         <ValueAndUncertaintyPlot model={model} />
       </Section>

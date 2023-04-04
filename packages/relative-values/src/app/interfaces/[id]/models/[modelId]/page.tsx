@@ -1,16 +1,10 @@
 "use client";
 
-import { ModelSection } from "@/components/Interface/ModelSection";
-import { ModelProvider } from "./ModelProvider";
+import { ListView } from "@/components/View/ListView";
+import { useViewContext } from "@/components/View/ViewProvider";
 
-export default function ModelPage({
-  params,
-}: {
-  params: { id: string; modelId: string };
-}) {
-  return (
-    <ModelProvider value={{ selectedId: params.modelId }}>
-      <ModelSection />
-    </ModelProvider>
-  );
+export default function ModelPage() {
+  const { evaluator } = useViewContext();
+
+  return evaluator.ok ? <ListView model={evaluator.value} /> : null;
 }

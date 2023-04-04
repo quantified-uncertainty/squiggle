@@ -1,10 +1,11 @@
-import { ModelEvaluator } from "@/values/ModelEvaluator";
 import * as d3 from "d3";
 import { FC, useEffect, useMemo, useRef } from "react";
+
+import { ModelEvaluator } from "@/values/ModelEvaluator";
 import { useSelectedInterface } from "../../Interface/InterfaceProvider";
+import { useViewContext } from "../ViewProvider";
 import { useFilteredItems } from "../hooks";
 import { averageDb, averageMedian } from "../hooks/useSortedItems";
-import { useViewContext } from "../ViewProvider";
 
 type Datum = {
   id: string;

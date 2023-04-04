@@ -1,10 +1,9 @@
 "use client";
 import { InterfaceProvider } from "@/components/Interface/InterfaceProvider";
 import { Toolbar } from "@/components/Interface/Toolbar";
-import { StyledTab } from "@/components/ui/StyledTab";
+import { StyledTabLink } from "@/components/ui/StyledTabLink";
 import { aboutInterfaceRoute, interfaceRoute } from "@/routes";
 import { useInterfaceById } from "@/storage/StorageProvider";
-import { useRouter, useSelectedLayoutSegment } from "next/navigation";
 import { PropsWithChildren } from "react";
 
 export default function InterfaceLayout({
@@ -20,23 +19,10 @@ export default function InterfaceLayout({
     return date ? new Date(date).toLocaleDateString() : "";
   };
 
-  const segment = useSelectedLayoutSegment();
-
-  const router = useRouter();
-
   if (!interfaceWithModels) {
     return <div className="text-red-500">Not found</div>;
   }
   const { catalog, models } = interfaceWithModels;
-
-  const selectedIndex = segment === "about" ? 1 : 0;
-  const setSelectedIndex = (index: number) => {
-    if (index === 0) {
-      router.push(interfaceRoute(params.id));
-    } else {
-      router.push(aboutInterfaceRoute(params.id));
-    }
-  };
 
   const keyValue = (title: String, body: String) => {
     return (
@@ -72,15 +58,16 @@ export default function InterfaceLayout({
             )}
           </div>
           <div className="flex flex-col items-end space-y-4">
-            <StyledTab.Group
-              selectedIndex={selectedIndex}
-              onChange={setSelectedIndex}
-            >
-              <StyledTab.List>
-                <StyledTab name="Estimates" />
-                <StyledTab name="Items" />
-              </StyledTab.List>
-            </StyledTab.Group>
+            <StyledTabLink.List>
+              <StyledTabLink
+                name="Estimates"
+                href={interfaceRoute(params.id)}
+              />
+              <StyledTabLink
+                name="Items"
+                href={aboutInterfaceRoute(params.id)}
+              />
+            </StyledTabLink.List>
             <Toolbar />
           </div>
         </div>

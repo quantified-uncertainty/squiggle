@@ -3,6 +3,7 @@ import { Clusters } from "@/types";
 import { Set } from "immutable";
 import { FC, PropsWithChildren, Reducer } from "react";
 import { Filter } from "./types";
+import { ModelEvaluator } from "@/values/ModelEvaluator";
 
 export type Axis = "rows" | "columns";
 
@@ -21,12 +22,14 @@ export type AxisConfig = {
 };
 
 type ViewContextShape = {
+  evaluator: ReturnType<(typeof ModelEvaluator)["create"]>;
   gridMode: GridMode;
   axisConfig: { [k in Axis]: AxisConfig };
 };
 
 const defaultValue: ViewContextShape = {
   gridMode: "full",
+  evaluator: { ok: false, value: "uninitialized" },
   axisConfig: {
     rows: {
       filter: {
@@ -127,8 +130,11 @@ const {
 });
 
 export const ViewProvider: FC<
-  PropsWithChildren<{ initialClusters: Clusters }>
-> = ({ initialClusters, children }) => {
+  PropsWithChildren<{
+    initialClusters: Clusters;
+    evaluator: ReturnType<(typeof ModelEvaluator)["create"]>;
+  }>
+> = ({ initialClusters, evaluator, children }) => {
   return (
     <Provider
       generateInitialValue={() => {
@@ -139,6 +145,7 @@ export const ViewProvider: FC<
         };
 
         return {
+          evaluator,
           gridMode: "full",
           axisConfig: {
             rows: defaultAxisConfig,
