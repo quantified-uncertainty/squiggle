@@ -1,10 +1,17 @@
-import { FC, useEffect, useMemo, useRef } from "react";
+import { FC, useCallback, useEffect, useMemo, useRef } from "react";
 
 import { useSelectedInterface } from "@/components/Interface/InterfaceProvider";
 import { ModelEvaluator } from "@/values/ModelEvaluator";
 import * as d3 from "d3";
 import { useFilteredItems } from "../hooks";
 import { useViewContext } from "../ViewProvider";
+
+const distance = (
+  p1: { x: number; y: number },
+  p2: { x: number; y: number }
+) => {
+  return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
+};
 
 export const ForcePlot: FC<{
   model: ModelEvaluator;
@@ -109,25 +116,8 @@ export const ForcePlot: FC<{
       });
   }, [ref.current]);
 
-  useEffect(() => {
-    if (!d3ref.current || !ref.current) {
-      return;
-    }
-    const context = ref.current.getContext("2d");
-    if (!context) {
-      return;
-    }
-
-    const { simulation, force } = d3ref.current;
-
-    const distance = (
-      p1: { x: number; y: number },
-      p2: { x: number; y: number }
-    ) => {
-      return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
-    };
-
-    const ticked = () => {
+  const draw = useCallback(
+    (context: CanvasRenderingContext2D) => {
       context.clearRect(0, 0, width, height);
       context.save();
 
@@ -159,17 +149,44 @@ export const ForcePlot: FC<{
       if (ref.current) {
         ref.current.style.cursor = hoveredNodes.length ? "pointer" : "auto";
       }
+      context.textAlign = "left";
+      context.textBaseline = "bottom";
+      context.font = "12px sans-serif";
+      context.fillStyle = "black";
       for (const d of hoveredNodes) {
-        context.beginPath();
-        context.font = "12px sans-serif";
+        const x = d.x - r * 0.8,
+          y = d.y - r * 0.5;
+
+        const measured = context.measureText(d.name);
+        const boxWidth = measured.width + 8,
+          boxHeight = measured.actualBoundingBoxAscent + 4;
+
+        context.fillStyle = "white";
+        context.globalAlpha = 0.8;
+        context.fillRect(x, y - boxHeight, boxWidth, boxHeight);
+        context.globalAlpha = 1;
+
         context.fillStyle = "black";
-        context.fillText(d.name, d.x - r * 0.8, d.y - r * 1.5);
-        context.fill();
+        context.fillText(d.name, x + 4, y + 1);
       }
 
       context.restore();
-    };
-    simulation.on("tick", ticked);
+    },
+    [clusters, nodes]
+  );
+
+  useEffect(() => {
+    if (!d3ref.current || !ref.current) {
+      return;
+    }
+    const context = ref.current.getContext("2d");
+    if (!context) {
+      return;
+    }
+
+    const { simulation, force } = d3ref.current;
+
+    simulation.on("tick", () => draw(context));
 
     const links: { source: Node; target: Node }[] = [];
     for (let i = 0; i < filteredItems.length; i++) {
@@ -183,7 +200,7 @@ export const ForcePlot: FC<{
     force.links(links);
     simulation.nodes(nodes);
     simulation.restart();
-  }, [ref.current, d3ref.current, nodes]);
+  }, [ref.current, d3ref.current, nodes, draw]);
 
   return <canvas width={width} height={height} ref={ref} />;
 };
