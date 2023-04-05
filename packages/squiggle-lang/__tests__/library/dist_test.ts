@@ -1,4 +1,4 @@
-import { testRun } from "../helpers/helpers";
+import { testRun } from "../helpers/helpers.js";
 import {
   MySkip,
   testEvalToBe,
