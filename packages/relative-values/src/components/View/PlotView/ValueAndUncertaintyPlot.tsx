@@ -25,7 +25,7 @@ type Datum = {
 
 function usePlotData(model: ModelEvaluator) {
   const {
-    catalog: { items },
+    catalog: { items, recommendedUnit },
   } = useSelectedInterface();
 
   const {
@@ -34,19 +34,25 @@ function usePlotData(model: ModelEvaluator) {
 
   const filteredItems = useFilteredItems({ items, config: rows });
 
+  const comparedTo = useMemo(() => {
+    return recommendedUnit
+      ? [items.find((item) => item.id === recommendedUnit) ?? items[0]]
+      : items;
+  }, [recommendedUnit, items]);
+
   const data = useMemo(() => {
     const data: Datum[] = [];
 
     for (const item of filteredItems) {
       data.push({
         item,
-        median: averageMedian({ item, comparedTo: items, model: model }),
-        db: averageDb({ item, comparedTo: items, model: model }),
+        median: averageMedian({ item, comparedTo, model: model }),
+        db: averageDb({ item, comparedTo, model: model }),
       });
     }
     return data;
-  }, [filteredItems, items, model]);
-  return data;
+  }, [filteredItems, model, comparedTo]);
+  return { data, comparedToAverage: comparedTo.length > 1 };
 }
 
 export const ValueAndUncertaintyPlot: FC<{
@@ -60,7 +66,7 @@ export const ValueAndUncertaintyPlot: FC<{
   const [hoveredId, setHoveredId] = useState<number | undefined>(undefined);
 
   const height = 450;
-  const data = usePlotData(model);
+  const { data, comparedToAverage } = usePlotData(model);
 
   const draw = useCallback(
     ({ context, width }: DrawContext) => {
@@ -68,7 +74,7 @@ export const ValueAndUncertaintyPlot: FC<{
 
       const { xScale, yScale, padding, chartHeight } = drawAxes({
         context,
-        xDomain: d3.extent(data, (d) => d.median) as [number, number],
+        xDomain: d3.extent(data, (d) => Math.abs(d.median)) as [number, number],
         yDomain: d3.extent(data, (d) => d.db) as [number, number],
         suggestedPadding: { top: 10, bottom: 40, left: 60, right: 20 },
         width,
@@ -82,13 +88,23 @@ export const ValueAndUncertaintyPlot: FC<{
       context.textBaseline = "bottom";
       context.font = "bold 12px sans-serif";
       context.fillStyle = "rgb(114, 125, 147)"; // copy-paste from drawUtils
-      context.fillText("Mean relative value", width - padding.right, height);
+      context.fillText(
+        comparedToAverage ? "Mean relative value" : "Relative value",
+        width - padding.right,
+        height
+      );
 
       context.save();
       context.textAlign = "right";
       context.textBaseline = "top";
       context.rotate(-Math.PI / 2);
-      context.fillText("Uncertainty (decibels)", -padding.top, 0);
+      context.fillText(
+        comparedToAverage
+          ? "Mean uncertainty (decibels)"
+          : "Uncertainty (decibels)",
+        -padding.top,
+        0
+      );
       context.restore();
 
       context.save();
