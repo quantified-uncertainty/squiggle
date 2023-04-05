@@ -119,6 +119,23 @@ export class FnFactory {
     });
   }
 
+  ss2s({
+    fn,
+    ...args
+  }: ArgsWithoutDefinitions & {
+    fn: (x: string, y: string) => string;
+  }): FRFunction {
+    return this.make({
+      ...args,
+      output: "String",
+      definitions: [
+        makeDefinition(args.name, [frString, frString], ([x, y]) =>
+          Ok(vString(fn(x, y)))
+        ),
+      ],
+    });
+  }
+
   d2s({
     fn,
     ...args

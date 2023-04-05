@@ -72,4 +72,15 @@ describe("List functions", () => {
   describe("filter", () => {
     testEvalToBe("check(x)=(x==2);arr=[1,2,3]; List.filter(arr,check)", "[2]");
   });
+
+  describe("join", () => {
+    testEvalToBe("arr=['a', 'b', 'c']; List.join(arr, '-')", "'a-b-c'");
+    testEvalToBe("arr=['a', 'b', 'c']; List.join(arr, ' ')", "'a b c'");
+    testEvalToBe("arr=['a', 'b', 'c']; List.join(arr)", "'a,b,c'");
+  });
+
+  describe("flatten", () => {
+    testEvalToBe("List.flatten([[1,2], [3,4]])", "[1,2,3,4]");
+    testEvalToBe("List.flatten([[1,2], [3,[4,5]]])", "[1,2,3,[4,5]]");
+  });
 });

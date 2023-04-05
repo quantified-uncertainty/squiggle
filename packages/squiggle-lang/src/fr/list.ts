@@ -4,11 +4,12 @@ import {
   frArray,
   frLambda,
   frNumber,
+  frString,
 } from "../library/registry/frTypes";
 import { FnFactory } from "../library/registry/helpers";
 import { Ok } from "../utility/result";
 import * as Result from "../utility/result";
-import { Value, vArray, vNumber } from "../value";
+import { Value, vArray, vNumber, vString } from "../value";
 import * as E_A_Floats from "../utility/E_A_Floats";
 import { REOther } from "../reducer/ErrorMessage";
 
@@ -176,6 +177,29 @@ export const library = [
             )
           )
       ),
+    ],
+  }),
+  maker.make({
+    name: "join",
+    requiresNamespace: true,
+    examples: [`List.join(["a", "b", "c"], ",")`],
+    definitions: [
+      makeDefinition("join", [frArray(frAny), frString], ([array, joinStr]) =>
+        Ok(vString(array.map((r) => r.type == "String" ? r.value : r.toString()).join(joinStr)))
+      ),
+      makeDefinition("join", [frArray(frAny)], ([array]) =>
+        Ok(vString(array.map((r) => r.type == "String" ? r.value : r.toString()).join()))
+      ),
+    ],
+  }),
+  maker.make({
+    name: "flatten",
+    requiresNamespace: true,
+    examples: [`List.flatten([[1,2], [3,4]])`],
+    definitions: [
+      makeDefinition("flatten", [frArray(frAny)], ([arr]) => {
+        return Ok(vArray(arr).flatten());
+      }),
     ],
   }),
 ];

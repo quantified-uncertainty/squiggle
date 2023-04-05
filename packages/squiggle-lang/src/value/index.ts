@@ -60,6 +60,16 @@ class VArray implements Indexable {
       REOther("Can't access non-numerical key on an array")
     );
   }
+
+  flatten() {
+    return new VArray(
+      this.value.reduce(
+        (acc: Value[], v) =>
+          acc.concat(v.type === "Array" ? v.value : ([v] as Value[])),
+        []
+      )
+    );
+  }
 }
 export const vArray = (v: Value[]) => new VArray(v);
 
