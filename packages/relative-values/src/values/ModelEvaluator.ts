@@ -14,6 +14,7 @@ const wrapper = sq`
   } 
   {
     median: inv(dist, 0.5),
+    mean: mean(dist),
     min: inv(dist, 0.05),
     max: inv(dist, 0.95),
     db: findDb(dist)
@@ -56,12 +57,16 @@ function buildRelativeValue({
   }
 
   const median = record.get("median");
+  const mean = record.get("mean");
   const min = record.get("min");
   const max = record.get("max");
   const db = record.get("db");
 
   if (typeof median !== "number") {
     return { ok: false, value: "Expected median to be a number" };
+  }
+  if (typeof mean !== "number") {
+    return { ok: false, value: "Expected mean to be a number" };
   }
   if (typeof min !== "number") {
     return { ok: false, value: "Expected min to be a number" };
@@ -77,6 +82,7 @@ function buildRelativeValue({
     ok: true,
     value: {
       median,
+      mean,
       min,
       max,
       db,

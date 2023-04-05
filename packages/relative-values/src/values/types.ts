@@ -1,14 +1,16 @@
 import { result } from "@quri/squiggle-lang";
+import _ from "lodash";
 
 export type RelativeValue = Readonly<{
   median: number;
+  mean: number;
   min: number;
   max: number;
   db: number;
 }>;
 
 export function hasInvalid(obj: RelativeValue): boolean {
-  return Object.values(obj).some((value) => !Number.isNaN(value) && !value);
+  return Object.values(obj).some((value) => !isFinite(value));
 }
 
 export type RelativeValueResult = result<RelativeValue, string>;

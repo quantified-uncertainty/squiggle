@@ -146,7 +146,7 @@ function getGraphModel(): Model {
     items: [
       ["quri_papers_1", "pointMass(1)"], //external evalution of the EA Wiki
       ["quri_papers_2", "1 to 2"], //
-      ["quri_papers_3", "0.5 o 10"], 
+      ["quri_papers_3", "0.5 to 10"], 
       ["quri_papers_4", "0.2 to 20"],
       ["quri_papers_5", "SampleSet.fromDist(quri_papers_1 * (0.2 to 3))"],
       ["quri_papers_6", "quri_papers_5 * (0.7 to 2.5)"],
