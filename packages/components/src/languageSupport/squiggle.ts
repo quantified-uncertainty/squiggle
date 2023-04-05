@@ -77,7 +77,7 @@ function squiggle(project: SqProject) {
         }),
         languageData: {
           commentTokens: {
-            line: "#",
+            line: "//",
           },
           autocomplete: (cmpl: CompletionContext) => {
             const tree = syntaxTree(cmpl.state);
