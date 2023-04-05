@@ -81,22 +81,25 @@ function squiggle(project: SqProject) {
           },
           autocomplete: (cmpl: CompletionContext) => {
             const tree = syntaxTree(cmpl.state);
-            const tag = tree.cursorAt(cmpl.pos);
-            const defaultCompletion = {
-              from: tag.from,
-              options: [
-                /*eslint no-template-curly-in-string: "off"*/
-                snippetCompletion("{ |${args}| ${body} ", {
-                  label: "{",
-                  detail: "lambda function",
-                  type: "syntax",
-                }),
-              ],
-            };
-
+            {
+              const lambda = cmpl.tokenBefore(["LambdaStart"]);
+              if (lambda) {
+                return {
+                  from: lambda.from,
+                  options: [
+                    /*eslint no-template-curly-in-string: "off"*/
+                    snippetCompletion("|${args}| ${body}", {
+                      label: "|",
+                      detail: "lambda function",
+                      type: "syntax",
+                    }),
+                  ],
+                };
+              }
+            }
             const field = cmpl.tokenBefore(["AccessIdentifier"]);
             if (field === null) {
-              return defaultCompletion;
+              return undefined;
             }
             const from = field.from;
 
