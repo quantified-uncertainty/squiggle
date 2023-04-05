@@ -5,13 +5,16 @@ import { ModelCache, RelativeValue, RelativeValueResult } from "./types";
 
 const wrapper = sq`
 {|x, y|
-  dist = fn(x, y) -> SampleSet.fromDist
   findDb(dist) = {
-    p5 = abs(inv(dist, .95))
-    p95 = abs(inv(dist, 0.05))
-    diff = (p95 > p5) ? (p95 / p5) : (p5/p95)
-    abs(log10(diff))
+    absDist = SampleSet.map(dist, abs)
+    p5 = inv(absDist, 0.05)
+    p95 = inv(absDist, 0.95)
+    log10(p95 / p5)
   } 
+  dists = fn(x,y)
+  dist1 = dists[0] -> SampleSet.fromDist
+  dist2 = dists[1] -> SampleSet.fromDist
+  dist = dists[0] / dists[1]
   {
     median: inv(dist, 0.5),
     mean: mean(dist),

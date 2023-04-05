@@ -260,7 +260,7 @@ function getTextModel(): Model {
         macrovariable_universal_microhell: macrovariable_universal_microhell
     }
 
-    fn(a,b) = vars[a] / vars[b]
+    fn(a,b) = [vars[a], vars[b]]
 `,
   };
 }

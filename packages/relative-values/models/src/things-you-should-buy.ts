@@ -75,7 +75,7 @@ function getCatalog(): Catalog {
 
 function getTextModel(): Model {
   return {
-	id: "Cross-Cause-Estimate",
+	id: "things-to-buy",
     title: "Estimates for a few things you may want to buy",
     author: "Nuno Sempere",
     mode: "text",
@@ -359,7 +359,7 @@ items_object = {
 }
 
 getRelativeValues = {|item_1, item_2|
-  if item_1.id == item_2.id then mixture(1) else  item_1.value / item_2.value
+  if item_1.id == item_2.id then [item_1.value, item_1.value] else  [item_1.value, item_2.value]
 }
 
 fn(a,b) = getRelativeValues(items_object[a], items_object[b])
@@ -371,6 +371,6 @@ item_nice_headphones`,
 export function getThingsYouShouldBuy(): InterfaceWithModels {
   return {
     catalog: getCatalog(),
-    models: Map([["Cross-Cause-Estimate", getTextModel()]]),
+    models: Map([["things-to-buy", getTextModel()]]),
   };
 }
