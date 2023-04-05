@@ -5,7 +5,7 @@ import {
   MultiDistributionChartProps,
 } from "./MultiDistributionChart/index.js";
 
-export { DistributionChartSettings } from "./MultiDistributionChart/index.js";
+export { type DistributionChartSettings } from "./MultiDistributionChart/index.js";
 
 export type DistributionChartProps = Omit<
   MultiDistributionChartProps,

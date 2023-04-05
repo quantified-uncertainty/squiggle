@@ -1,0 +1,81 @@
+import { SquiggleChart } from "../components/SquiggleChart";
+import { Canvas, Meta, Story } from "@storybook/blocks";
+import * as SquiggleChartStories from "./SquiggleChart.stories";
+
+<Meta of={SquiggleChartStories} />
+
+# Squiggle Chart
+
+Squiggle chart evaluates squiggle expressions, and then returns a graph representing
+the result of a squiggle expression.
+
+A squiggle expression can have three different types of returns. A distribution,
+a constant, and a function.
+
+A distribution means that the result forms a probability distribution. This
+could be continuous, discrete or mixed.
+
+## Distributions
+
+### Continuous Distributions (Symbolic)
+
+<Canvas of={SquiggleChartStories.ContinuousSymbolic} />
+
+### Continuous Distributions (PointSet)
+
+<Canvas of={SquiggleChartStories.ContinuousPointset} />
+
+### Continuous Distributions (SampleSet)
+
+<Canvas of={SquiggleChartStories.ContinuousSampleSet} />
+
+### Discrete Distributions
+
+<Canvas of={SquiggleChartStories.Discrete} />
+
+### Date Distribution
+
+<Canvas of={SquiggleChartStories.DateDistribution} />
+
+## Mixed distributions
+
+<Canvas of={SquiggleChartStories.Mixed} />
+
+## Multiple plots
+
+<Canvas of={SquiggleChartStories.MultiplePlots} />
+
+## Constants
+
+A constant is a simple number as a result. This has special formatting rules
+to allow large and small numbers being printed cleanly.
+
+<Canvas of={SquiggleChartStories.Constant} />
+
+## Arrays
+
+<Canvas of={SquiggleChartStories.Array} />
+
+## Errors
+
+<Canvas of={SquiggleChartStories.Error} />
+
+## Booleans
+
+<Canvas of={SquiggleChartStories.Boolean} />
+
+## Functions (Distribution Output)
+
+<Canvas of={SquiggleChartStories.FunctionToDistribution} />
+
+## Functions (Number Output)
+
+<Canvas of={SquiggleChartStories.FunctionToNumber} />
+
+## Records
+
+<Canvas of={SquiggleChartStories.Record} />
+
+## Strings
+
+<Canvas of={SquiggleChartStories.String} />
