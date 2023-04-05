@@ -174,6 +174,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({
           },
           ".cm-selectionMatch": { backgroundColor: "#33ae661a" },
           ".cm-content": { padding: 0 },
+          ":-moz-focusring.cm-content": { outline: "none" },
         })
       ),
     });
