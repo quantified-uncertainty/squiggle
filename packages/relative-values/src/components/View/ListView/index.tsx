@@ -45,7 +45,7 @@ export const ListView: FC<Props> = ({ model }) => {
     <div className="max-w-6xl mx-auto">
       <div className="mb-2">
         <DropdownButton text="Table Settings">
-          {() => <AxisMenu axis="rows" />}
+          {() => <AxisMenu axis="rows" sortByAverage={false} />}
         </DropdownButton>
       </div>
       <div
