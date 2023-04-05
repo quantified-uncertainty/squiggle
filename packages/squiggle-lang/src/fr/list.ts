@@ -81,6 +81,16 @@ export const library = [
     ],
   }),
   maker.make({
+    name: "append",
+    examples: [`List.append([1,4],5)`],
+    definitions: [
+      makeDefinition("append", [frArray(frAny), frAny], ([array, el]) => {
+        let newArr = [...array, el];
+        return Ok(vArray(newArr));
+      }),
+    ],
+  }),
+  maker.make({
     name: "reverse",
     output: "Array",
     requiresNamespace: false,

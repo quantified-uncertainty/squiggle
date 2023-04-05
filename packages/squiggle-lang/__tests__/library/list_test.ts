@@ -35,7 +35,12 @@ describe("List functions", () => {
 
   describe("reverse", () => {
     testEvalToBe("List.reverse([3,5,8])", "[8,5,3]");
-    // TODO - test on empty arrays
+    testEvalToBe("List.reverse([])", "[]");
+  });
+
+  describe("append", () => {
+    testEvalToBe("List.append([3,5,8], 8)", "[3,5,8,8]");
+    testEvalToBe("List.append([], 8)", "[8]");
   });
 
   describe("map", () => {
