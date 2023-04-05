@@ -11,6 +11,8 @@ import * as Result from "../utility/result";
 import { Value, vArray, vNumber } from "../value";
 import * as E_A_Floats from "../utility/E_A_Floats";
 import { REOther } from "../reducer/ErrorMessage";
+import includes from "lodash/includes";
+import uniqBy from "lodash/uniqBY";
 
 const maker = new FnFactory({
   nameSpace: "List",
@@ -118,6 +120,28 @@ export const library = [
         [frArray(frAny), frArray(frAny)],
         ([array1, array2]) => Ok(vArray([...array1].concat(array2)))
       ),
+    ],
+  }),
+  maker.make({
+    name: "uniq",
+    requiresNamespace: true,
+    examples: [`List.uniq([1,2,3,"hi",false,"hi"])`],
+    definitions: [
+      makeDefinition<Value[]>("uniq", [frArray(frAny)], ([arr]) => {
+        const isUniqableType = (t: Value) =>
+          includes(["String", "Bool", "Number"], t.type);
+        //I'm not sure if the r.type concat is essential, but seems safe.
+        const uniqueValueKey = (t: Value) => t.toString() + t.type;
+
+        const allUniqable = arr.every(isUniqableType);
+        if (allUniqable) {
+          return Ok(vArray(uniqBy(arr, uniqueValueKey)));
+        } else {
+          return Result.Error(
+            REOther("Can only apply uniq() to Strings, Numbers, or Bools")
+          );
+        }
+      }),
     ],
   }),
   maker.make({

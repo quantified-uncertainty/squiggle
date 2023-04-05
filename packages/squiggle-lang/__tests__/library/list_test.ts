@@ -51,6 +51,19 @@ describe("List functions", () => {
     testEvalError("addone(x)=x+1; map(2, {x: addone})");
   });
 
+  describe("uniq", () => {
+    testEvalToBe("arr=[1,2,3,1,2,3]; List.uniq(arr)", "[1,2,3]");
+    testEvalToBe("arr=[1,'1']; List.uniq(arr)", "[1,'1']");
+    testEvalToBe(
+      "arr=[1,1, 'test', 'test', false, false, true]; List.uniq(arr)",
+      "[1,'test',false,true]"
+    );
+    testEvalToBe(
+      "arr=[1,2,normal(50,1)]; List.uniq(arr)",
+      "Error(Error: Can only apply uniq() to Strings, Numbers, or Bools)"
+    );
+  });
+
   describe("reduce", () => {
     testEvalToBe(
       "myadd(acc,x)=acc+x; arr=[1,2,3]; List.reduce(arr, 0, myadd)",
