@@ -1,4 +1,4 @@
-import { testEvalToBe } from "../helpers/reducerHelpers";
+import { testEvalToBe } from "../helpers/reducerHelpers.js";
 
 describe("Dict", () => {
   testEvalToBe("Dict.set({a: 1, b: 2}, 'c', 3)", "{a: 1,b: 2,c: 3}");

@@ -1,5 +1,5 @@
-import { SqProject } from "../../src";
-import { toStringResult } from "../../src/public/SqValue";
+import { SqProject } from "../../src/index.js";
+import { toStringResult } from "../../src/public/SqValue.js";
 
 describe("ReducerProject Tutorial", () => {
   /* Let's build a project that depends on values from the UI */

@@ -1,5 +1,5 @@
-export { useMaybeControlledValue } from "./useMaybeControlledValue";
-export { useSquiggle } from "./useSquiggle";
-export { useRunnerState } from "./useRunnerState";
-export { useCanvas } from "./useCanvas";
-export { useCanvasCursor } from "./useCanvasCursor";
+export { useMaybeControlledValue } from "./useMaybeControlledValue.js";
+export { useSquiggle } from "./useSquiggle.js";
+export { useRunnerState } from "./useRunnerState.js";
+export { useCanvas } from "./useCanvas.js";
+export { useCanvasCursor } from "./useCanvasCursor.js";

@@ -1,6 +1,6 @@
 import { SqError, SqFrame } from "@quri/squiggle-lang";
 import React from "react";
-import { ErrorAlert } from "./Alert";
+import { ErrorAlert } from "./Alert.js";
 
 type Props = {
   error: SqError;

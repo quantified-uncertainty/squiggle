@@ -1,7 +1,5 @@
 import React, { FC, useEffect, useMemo, useRef } from "react";
 
-import squiggle from "../languageSupport/squiggle";
-
 import { SqLocation } from "@quri/squiggle-lang";
 
 import { syntaxHighlighting } from "@codemirror/language";
@@ -9,6 +7,8 @@ import { EditorState, Compartment } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 import { defaultKeymap } from "@codemirror/commands";
 import { setDiagnostics } from "@codemirror/lint";
+
+import squiggle from "../languageSupport/squiggle.js";
 
 // From basic setup
 import {
@@ -34,7 +34,7 @@ import {
   bracketMatching,
   foldKeymap,
 } from "@codemirror/language";
-import { lightThemeHighlightingStyle } from "../languageSupport/highlightingStyle";
+import { lightThemeHighlightingStyle } from "../languageSupport/highlightingStyle.js";
 
 interface CodeEditorProps {
   value: string;

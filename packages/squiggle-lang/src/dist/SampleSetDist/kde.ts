@@ -1,5 +1,3 @@
-import filter from "lodash/filter";
-
 // Convert samples to x-y pairs for a PDF
 // Uses kernel density estimation (KDE) with a triangular kernel
 // samples:      Must be sorted!
@@ -12,7 +10,7 @@ export const kde = (
   xWidth: number,
   weight: number
 ) => {
-  samples = filter(samples, isFinite); // Not sure if this is needed?
+  samples = samples.filter((v) => Number.isFinite(v)); // Not sure if this is needed?
   const len = samples.length;
   if (len === 0) return { usedWidth: xWidth, xs: [], ys: [] };
 
