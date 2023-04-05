@@ -104,7 +104,7 @@ function squiggle(project: SqProject) {
             const from = field.from;
 
             const cursor = tree.cursor();
-            var names: String[] = [];
+            let names: String[] = [];
             while (cursor.next()) {
               if (cursor.type.is("VariableName")) {
                 names.push(cmpl.state.doc.sliceString(cursor.from, cursor.to));
