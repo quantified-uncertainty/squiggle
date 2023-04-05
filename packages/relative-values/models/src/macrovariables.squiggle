@@ -1,3 +1,5 @@
+//Trying having one file here, to see if that makes editing easier. Will later move this around with some script or similar.
+
 ss(t) = SampleSet.fromDist(t)
 
 //Sentient Welfare
