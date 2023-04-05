@@ -30,7 +30,7 @@ function usePlotData(model: ModelEvaluator) {
     for (const item of filteredItems) {
       data.push({
         id: item.id,
-        median: averageMedian({ item, comparedTo: items, model: model }),
+        median: Math.abs(averageMedian({ item, comparedTo: items, model: model })),
         db: averageDb({ item, comparedTo: items, model: model }),
         clusterId: item.clusterId,
       });
@@ -115,7 +115,7 @@ export const ValueAndUncertaintyPlot: FC<{
       .attr("x", width)
       .attr("y", height + 40)
       .attr("class", "font-bold text-xs fill-gray-500")
-      .text("Mean relative value");
+      .text("Abs mean relative value");
 
     g.append("text")
       .attr("text-anchor", "end")
