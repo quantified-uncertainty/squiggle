@@ -69,7 +69,7 @@ const SortBy: FC<{
   );
 };
 
-export const AxisMenu: FC<{ axis: Axis; sortByAverage: boolean }> = ({
+export const AxisMenu: FC<{ axis: Axis; sortByAverage?: boolean }> = ({
   axis,
   sortByAverage = true,
 }) => {
