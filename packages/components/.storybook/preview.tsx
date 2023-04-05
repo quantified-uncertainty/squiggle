@@ -1,6 +1,6 @@
 import * as React from "react";
-// import "../src/styles/main.css";
-import "!style-loader!css-loader!postcss-loader!../src/styles/main.css";
+
+import "../src/styles/main.css";
 import { SquiggleContainer } from "../src/components/SquiggleContainer";
 
 export const decorators = [

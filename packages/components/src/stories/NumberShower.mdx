@@ -1,0 +1,19 @@
+import { NumberShower } from "../components/NumberShower";
+import { Canvas, Meta, Story } from "@storybook/blocks";
+import * as NumberShowerStories from "./NumberShower.stories";
+
+<Meta of={NumberShowerStories} />
+
+# Number Shower
+
+The number shower is a simple component to display a number.
+
+It uses the symbols "K", "M", "B", and "T", to represent thousands, millions, billions, and trillions. Outside of that range, it uses scientific notation.
+
+<Canvas of={NumberShowerStories.TenThousand} />
+
+<Canvas of={NumberShowerStories.TenBillion} />
+
+<Canvas of={NumberShowerStories.Huge} />
+
+<Canvas of={NumberShowerStories.Tiny} />

@@ -1,0 +1,15 @@
+import { Meta, Canvas, Story } from "@storybook/blocks";
+import * as SquigglePlaygroundStories from "./SquigglePlayground.stories";
+
+<Meta of={SquigglePlaygroundStories} />
+
+# Squiggle Playground
+
+A Squiggle playground is an environment where you can play around with all settings,
+including sampling settings, in Squiggle.
+
+<Canvas of={SquigglePlaygroundStories.Normal} />
+
+<Canvas of={SquigglePlaygroundStories.WithShareButton} />
+
+<Canvas of={SquigglePlaygroundStories.WithoutEditor} />
