@@ -10,14 +10,6 @@ import {
   SqShape,
 } from "@quri/squiggle-lang";
 
-import {
-  FloatingPortal,
-  offset,
-  shift,
-  useClientPoint,
-  useFloating,
-  useInteractions,
-} from "@floating-ui/react";
 import isEqual from "lodash/isEqual.js";
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
 import {
@@ -27,13 +19,14 @@ import {
   primaryColor,
 } from "../../lib/drawUtils.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
+import { useMeasure } from "../../lib/hooks/react-use.js";
 import { flattenResult } from "../../lib/utility.js";
 import { ErrorAlert } from "../Alert.js";
 import { SummaryTable } from "./SummaryTable.js";
 import { Plot } from "./types.js";
-import { useMeasure } from "../../lib/hooks/react-use.js";
 
 import * as d3 from "d3";
+import { MouseTooltip } from "../ui/MouseTooltip.js";
 
 export const distributionSettingsSchema = yup.object({}).shape({
   /** Set the x scale to be logarithmic */
@@ -91,16 +84,6 @@ const InnerMultiDistributionChart: FC<{
   const [discreteTooltip, setDiscreteTooltip] = useState<
     { value: number; probability: number } | undefined
   >();
-
-  const isTooltipOpen = !!discreteTooltip;
-  const floating = useFloating({
-    open: isTooltipOpen,
-    middleware: [offset(4), shift()],
-  });
-
-  const floatingClientPoint = useClientPoint(floating.context);
-
-  const floatingInteractions = useInteractions([floatingClientPoint]);
 
   const domain = shapes.flatMap((shape) =>
     shape.discrete.concat(shape.continuous)
@@ -308,42 +291,29 @@ const InnerMultiDistributionChart: FC<{
     settings.title,
     settings.minX,
     settings.maxX,
+    settings.tickFormat,
   ]);
 
   return (
-    <div
-      ref={floating.refs.setReference}
-      {...floatingInteractions.getReferenceProps()}
+    <MouseTooltip
+      isOpen={!!discreteTooltip}
+      render={() => (
+        <div
+          className="bg-white border border-gray-300 rounded text-xs p-2 grid gap-x-2"
+          style={{
+            gridTemplateColumns: "min-content min-content",
+          }}
+        >
+          <div className="text-gray-500 text-right">Value:</div>
+          <div>{d3.format(",.6r")(discreteTooltip!.value)}</div>
+          <div className="text-gray-500 text-right">Probability:</div>
+          <div>{d3.format(",.6r")(discreteTooltip!.probability)}</div>
+          <br />
+        </div>
+      )}
     >
       <canvas ref={ref}>Distribution plot</canvas>
-      {isTooltipOpen && (
-        <FloatingPortal>
-          <div
-            ref={floating.refs.setFloating}
-            style={{
-              position: floating.strategy,
-              top: floating.y ?? 0,
-              left: floating.x ?? 0,
-            }}
-            className="squiggle"
-            {...floatingInteractions.getFloatingProps()}
-          >
-            <div
-              className="bg-white border border-gray-300 rounded text-xs p-2 grid gap-x-2"
-              style={{
-                gridTemplateColumns: "min-content min-content",
-              }}
-            >
-              <div className="text-gray-500 text-right">Value:</div>
-              <div>{d3.format(",.6r")(discreteTooltip.value)}</div>
-              <div className="text-gray-500 text-right">Probability:</div>
-              <div>{d3.format(",.6r")(discreteTooltip.probability)}</div>
-              <br />
-            </div>
-          </div>
-        </FloatingPortal>
-      )}
-    </div>
+    </MouseTooltip>
   );
 };
 
