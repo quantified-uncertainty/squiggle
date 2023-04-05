@@ -133,7 +133,9 @@ export const library = [
             if (mappedKey.type == "String") {
               mappedEntries.push([mappedKey.value, value]);
             } else {
-              return Result.Error(REOther("mapKeys: lambda must return a string"));
+              return Result.Error(
+                REOther("mapKeys: lambda must return a string")
+              );
             }
           }
           return Ok(vRecord(ImmutableMap(mappedEntries)));
