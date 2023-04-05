@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from "react";
 
 export type DrawContext = {
   context: CanvasRenderingContext2D;
@@ -13,7 +19,7 @@ export function useCanvas({
   draw,
 }: {
   height: number;
-  init?: DrawFunction; // e.g. for cursor initializations, see useCanvasCursor()
+  init?: DrawFunction; // useful for cursor initializations, see useCanvasCursor()
   draw: DrawFunction;
 }) {
   const [width, setWidth] = useState<number | undefined>();
@@ -23,29 +29,15 @@ export function useCanvas({
 
   const devicePixelRatio = window.devicePixelRatio || 1;
 
-  const updateSize = useCallback(
-    (canvas: HTMLCanvasElement, width: number) => {
-      // note: width shouldn't be set here, otherwise observer won't work
-      canvas.style.height = `${height}px`;
-      canvas.width = width * devicePixelRatio;
-      canvas.height = height * devicePixelRatio;
-      setWidth(width);
-    },
-    [devicePixelRatio, height]
-  );
-
   const observer = useMemo(
     () =>
       new window.ResizeObserver((entries) => {
         if (!entries[0]) {
           return;
         }
-        updateSize(
-          entries[0].target as HTMLCanvasElement,
-          entries[0].contentRect.width
-        );
+        setWidth(entries[0].contentRect.width);
       }),
-    [updateSize]
+    []
   );
 
   useEffect(() => {
@@ -60,7 +52,7 @@ export function useCanvas({
         return;
       }
       const usedWidth = canvas.getBoundingClientRect().width;
-      updateSize(canvas, usedWidth);
+      setWidth(usedWidth);
 
       const context = canvas.getContext("2d");
       if (!context) {
@@ -71,24 +63,33 @@ export function useCanvas({
 
       setContext(context);
       init?.({ context, width: usedWidth });
-      // TODO - call `draw` too? would be slightly faster
+      // TODO - call `draw` too? would be slightly faster; but we can't put `draw` in callback dependencies
 
       observer.disconnect();
       observer.observe(canvas);
     },
-    [init, observer, updateSize, devicePixelRatio]
+    [init, observer, devicePixelRatio]
   );
 
   const redraw = useCallback(() => {
     if (width === undefined || context === undefined) {
       return;
     }
+    // We have to do this here and not on observer's callback, because otherwise there's a delay between
+    // width change and drawing (setWidth is not synchronous), and that causes flickering and other issues.
+    const { canvas } = context;
+    canvas.style.height = `${height}px`;
+    canvas.width = width * devicePixelRatio;
+    canvas.height = height * devicePixelRatio;
+
+    // context.reset() would be better, but it's still experimental
     context.resetTransform();
     context.scale(devicePixelRatio, devicePixelRatio);
-    draw({ width, context });
-  }, [draw, width, context, devicePixelRatio]);
 
-  useEffect(() => {
+    draw({ width, context });
+  }, [draw, width, height, context, devicePixelRatio]);
+
+  useLayoutEffect(() => {
     redraw();
   }, [redraw]);
 

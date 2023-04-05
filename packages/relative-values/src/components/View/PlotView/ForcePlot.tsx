@@ -10,9 +10,10 @@ import {
 import * as d3 from "d3";
 import { useViewContext } from "../ViewProvider";
 import { useFilteredItems } from "../hooks";
-import { DrawContext } from "@quri/squiggle-components/dist/types/src/lib/hooks/useCanvas";
+import { DrawContext } from "@quri/squiggle-components";
+import { ItemTooltip } from "./ItemTooltip";
 
-const distance = (
+export const distance = (
   p1: { x: number; y: number },
   p2: { x: number; y: number }
 ) => {
@@ -60,7 +61,6 @@ export const ForcePlot: FC<{
 
   const draw = useCallback(
     ({ context, width }: DrawContext) => {
-      console.log(width);
       context.clearRect(0, 0, width, height);
       context.save();
 
@@ -92,15 +92,13 @@ export const ForcePlot: FC<{
       // TODO - force render only if id has changed
 
       context.canvas.style.cursor =
-        hoveredId === undefined ? "auto" : "pointer";
+        newHoveredId === undefined ? "auto" : "pointer";
 
-      if (hoveredId !== newHoveredId) {
-        setHoveredId(newHoveredId);
-      }
+      setHoveredId(newHoveredId);
 
       context.restore();
     },
-    [clusters, nodes, cursor, hoveredId]
+    [clusters, nodes, cursor]
   );
 
   const { ref, redraw } = useCanvas({
@@ -134,8 +132,8 @@ export const ForcePlot: FC<{
     simulation.force("weak", d3.forceManyBody().strength(1));
 
     const links: { source: Node; target: Node }[] = [];
-    for (let i = 0; i < filteredItems.length; i++) {
-      for (let j = i + 1; j < filteredItems.length; j++) {
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
         links.push({
           source: nodes[i],
           target: nodes[j],
@@ -146,7 +144,7 @@ export const ForcePlot: FC<{
     simulation.nodes(nodes);
 
     return simulation;
-  }, [model, nodes, filteredItems.length]);
+  }, [model, nodes]);
 
   useEffect(() => {
     return () => {
@@ -159,20 +157,20 @@ export const ForcePlot: FC<{
     simulation.restart();
   }, [simulation, redraw]);
 
+  const hoveredItem = useMemo(() => {
+    return hoveredId === undefined ? undefined : filteredItems[hoveredId];
+  }, [hoveredId, filteredItems]);
+
   const renderTooltip = useCallback(() => {
-    if (hoveredId === undefined) {
+    if (hoveredItem === undefined) {
       return;
     }
-    return (
-      <div className="px-1 py-0.5 text-xs bg-white border border-slate-200 rounded">
-        {nodes[hoveredId].name}
-      </div>
-    );
-  }, [nodes, hoveredId]);
+    return <ItemTooltip item={hoveredItem} />;
+  }, [hoveredItem]);
 
   return (
     <MouseTooltip isOpen={hoveredId !== undefined} render={renderTooltip}>
-      <canvas ref={ref} />
+      <canvas ref={ref} className="w-full" />
     </MouseTooltip>
   );
 };
