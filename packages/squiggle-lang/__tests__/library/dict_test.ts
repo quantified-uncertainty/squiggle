@@ -15,5 +15,6 @@ describe("Dict", () => {
   testEvalToBe("Dict.values({a: 1, b: 2})", "[1,2]");
   testEvalToBe("Dict.toList({a: 1, b: 2})", "[['a',1],['b',2]]");
   testEvalToBe("Dict.fromList([['a', 1], ['b', 2]])", "{a: 1,b: 2}");
-  testEvalToBe("Dict.map({a: 1, b: 2}, {|x| x * 2})", "{a: 2,b: 4}");
+  testEvalToBe("Dict.mapValues({a: 1, b: 2}, {|x| x * 2})", "{a: 2,b: 4}");
+  testEvalToBe("Dict.mapKeys({a: 1, b: 2}, {|x| concat(x, 'hi')})", "{ahi: 1,bhi: 2}");
 });

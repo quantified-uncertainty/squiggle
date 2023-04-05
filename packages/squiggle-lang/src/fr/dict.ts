@@ -10,7 +10,9 @@ import {
 import { FnFactory } from "../library/registry/helpers";
 import { Ok } from "../utility/result";
 import { ImmutableMap } from "../utility/immutableMap";
-import { vArray, vRecord, vString } from "../value";
+import { vArray, vRecord, vString, Value } from "../value";
+import * as Result from "../utility/result";
+import { REOther } from "../reducer/ErrorMessage";
 
 const maker = new FnFactory({
   nameSpace: "Dict",
@@ -93,12 +95,12 @@ export const library = [
     ],
   }),
   maker.make({
-    name: "map",
+    name: "mapValues",
     output: "Record",
-    examples: [`Dict.map({a: 1, b: 2}, {|x| x + 1})`],
+    examples: [`Dict.mapValues({a: 1, b: 2}, {|x| x + 1})`],
     definitions: [
       makeDefinition(
-        "map",
+        "mapValues",
         [frDict(frAny), frLambda],
         ([dict, lambda], context, reducer) => {
           return Ok(
@@ -111,6 +113,30 @@ export const library = [
               )
             )
           );
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "mapKeys",
+    output: "Record",
+    examples: [`Dict.mapKeys({a: 1, b: 2}, {|x| concat(x, "-1")})`],
+    definitions: [
+      makeDefinition(
+        "mapKeys",
+        [frDict(frAny), frLambda],
+        ([dict, lambda], context, reducer) => {
+          const mappedEntries: [string, Value][] = [];
+          for (const [key, value] of dict.entries()) {
+            const mappedKey = lambda.call([vString(key)], context, reducer);
+
+            if (mappedKey.type == "String") {
+              mappedEntries.push([mappedKey.value, value]);
+            } else {
+              return Result.Error(REOther("mapKeys: lambda must return a string"));
+            }
+          }
+          return Ok(vRecord(ImmutableMap(mappedEntries)));
         }
       ),
     ],
