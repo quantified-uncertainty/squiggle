@@ -2,6 +2,7 @@ import { BaseDist } from "../dist/BaseDist";
 import { Expression } from "../expression";
 import { Namespace } from "../reducer/bindings";
 import { ReducerContext } from "../reducer/Context";
+import isInteger from "lodash/isInteger";
 import { declarationToString, LambdaDeclaration } from "../reducer/declaration";
 import {
   ErrorMessage,
@@ -46,7 +47,12 @@ class VArray implements Indexable {
 
   get(key: Value) {
     if (key.type === "Number") {
-      const index = key.value | 0; // TODO - fail on non-integer indices?
+      if (!isInteger(key.value)) {
+        return ErrorMessage.throw(
+          REArrayIndexNotFound("Array index must be an integer", key.value)
+        );
+      }
+      const index = key.value | 0;
       if (index >= 0 && index < this.value.length) {
         return this.value[index];
       } else {

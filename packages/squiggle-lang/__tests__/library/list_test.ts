@@ -1,6 +1,12 @@
 import { testEvalError, testEvalToBe } from "../helpers/reducerHelpers";
 
 describe("List functions", () => {
+  describe("lookup", () => {
+    testEvalToBe("[3,5,8][1.8]", "Error(Array index must be an integer: 1.8)");
+    testEvalToBe("[3,5,8][0/0]", "Error(Array index must be an integer: NaN)");
+    testEvalToBe("[3,5,8][2]", "8");
+  });
+
   describe("length", () => {
     testEvalToBe("List.length([3,5,8])", "3");
     testEvalToBe("List.length([])", "0");
