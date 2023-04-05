@@ -5,7 +5,10 @@ import { ModelCache, RelativeValueResult } from "./types";
 
 const wrapper = sq`
 {|x, y|
-  dist = fn(x, y) -> SampleSet.fromDist
+  dists = fn(x,y)
+  dist1 = dists[0] -> SampleSet.fromDist
+  dist2 = dists[1] -> SampleSet.fromDist
+  dist = dists[0] / dists[1]
   {
     median: inv(dist, 0.5),
     min: inv(dist, 0.05),
