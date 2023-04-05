@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "prettier --check . && next lint",
     "cacheRV": "tsx ./src/cli/index.ts cacheRV",
     "next-build": "next build",
     "build": "yarn cacheRV && next build"
