@@ -220,5 +220,10 @@ export const CodeEditor: FC<CodeEditorProps> = ({
     );
   }, [errorLocations]);
 
-  return <div ref={editor}></div>;
+  return (
+    <div
+      style={{ minWidth: `${width}px`, minHeight: `${height}px` }}
+      ref={editor}
+    ></div>
+  );
 };
