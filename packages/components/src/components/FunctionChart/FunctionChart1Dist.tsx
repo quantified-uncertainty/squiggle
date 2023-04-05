@@ -1,8 +1,8 @@
 import { Env, result, SqError, SqLambda, SqValue } from "@quri/squiggle-lang";
+import * as d3 from "d3";
 import groupBy from "lodash/groupBy.js";
 import * as React from "react";
-import { FC, useEffect, useMemo, useRef } from "react";
-import * as d3 from "d3";
+import { FC, useCallback, useMemo, useRef } from "react";
 
 import {
   drawAxes,
@@ -12,6 +12,7 @@ import {
   primaryColor,
 } from "../../lib/drawUtils.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
+import { DrawContext } from "../../lib/hooks/useCanvas.js";
 import { ErrorAlert } from "../Alert.js";
 import {
   DistributionChart,
@@ -19,7 +20,6 @@ import {
 } from "../DistributionChart.js";
 import { NumberShower } from "../NumberShower.js";
 import { FunctionChartSettings } from "./index.js";
-import { useMeasure } from "../../lib/hooks/react-use.js";
 
 function unwrap<a, b>(x: result<a, b>): a {
   if (x.ok) {
@@ -104,21 +104,101 @@ const getPercentiles = ({
   return { data, errors: groupedErrors };
 };
 
-const InnerDistFunctionChart: FC<
-  FunctionChart1DistProps & { width: number }
-> = ({
+export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
   fn,
   settings,
   environment,
   distributionChartSettings,
-  width,
   height: innerHeight,
 }) => {
   const height = innerHeight + 30; // consider paddings, should match suggestedPadding below
+  const { cursor, initCursor } = useCanvasCursor();
 
-  const { ref, refChanged, context } = useCanvas({ width, height });
+  const { data, errors } = useMemo(
+    () => getPercentiles({ settings, fn, environment }),
+    [environment, fn, settings]
+  );
 
-  const cursor = useCanvasCursor({ refChanged, context });
+  const draw = useCallback(
+    ({ context, width }: DrawContext) => {
+      context.clearRect(0, 0, width, height);
+
+      const { xScale, yScale, padding, chartWidth, chartHeight } = drawAxes({
+        suggestedPadding: { left: 20, right: 10, top: 10, bottom: 20 },
+        xDomain: d3.extent(data, (d) => d.x) as [number, number],
+        yDomain: [
+          Math.min(
+            ...data.map((d) =>
+              Math.min(...Object.values(d.areas).map((p) => p[0]), d[50])
+            )
+          ),
+          Math.max(
+            ...data.map((d) =>
+              Math.max(...Object.values(d.areas).map((p) => p[1]), d[50])
+            )
+          ),
+        ],
+        width,
+        height,
+        context,
+      });
+      d3ref.current = {
+        padding,
+        xScale,
+      };
+
+      // areas
+      context.save();
+      context.translate(padding.left, chartHeight + padding.top);
+      context.scale(1, -1);
+
+      context.fillStyle = primaryColor;
+      for (const { width, opacity } of intervals) {
+        context.globalAlpha = opacity;
+        d3
+          .area<Datum>()
+          .x((d) => xScale(d.x))
+          .y1((d) => yScale(d.areas[width][0]))
+          .y0((d) => yScale(d.areas[width][1]))
+          .context(context)(data);
+        context.fill();
+      }
+      context.globalAlpha = 1;
+
+      context.beginPath();
+      context.strokeStyle = primaryColor;
+      context.lineWidth = 2;
+      context.imageSmoothingEnabled = true;
+
+      d3
+        .line<Datum>()
+        .x((d) => xScale(d.x))
+        .y((d) => yScale(d[50]))
+        .context(context)(data);
+
+      context.stroke();
+      context.restore();
+
+      if (
+        cursor &&
+        cursor[0] >= padding.left &&
+        cursor[0] - padding.left <= chartWidth
+      ) {
+        drawVerticalCursorLine({
+          cursor,
+          padding,
+          chartWidth,
+          chartHeight,
+          xScale,
+          tickFormat: d3.format(",.4r"),
+          context,
+        });
+      }
+    },
+    [cursor, height, data]
+  );
+
+  const { ref, width } = useCanvas({ height, init: initCursor, draw });
 
   const d3ref = useRef<{
     padding: Padding;
@@ -127,7 +207,7 @@ const InnerDistFunctionChart: FC<
 
   //TODO: This custom error handling is a bit hacky and should be improved.
   const mouseItem: result<SqValue, SqError> | undefined = useMemo(() => {
-    if (!d3ref.current || !cursor) {
+    if (!d3ref.current || !cursor || width === undefined) {
       return;
     }
     if (
@@ -159,92 +239,8 @@ const InnerDistFunctionChart: FC<
       />
     ) : null;
 
-  const { data, errors } = useMemo(
-    () => getPercentiles({ settings, fn, environment }),
-    [environment, fn, settings]
-  );
-
-  useEffect(() => {
-    if (!context || !width || !height) {
-      return;
-    }
-    context.clearRect(0, 0, width, height);
-
-    const { xScale, yScale, padding, chartWidth, chartHeight } = drawAxes({
-      suggestedPadding: { left: 20, right: 10, top: 10, bottom: 20 },
-      xDomain: d3.extent(data, (d) => d.x) as [number, number],
-      yDomain: [
-        Math.min(
-          ...data.map((d) =>
-            Math.min(...Object.values(d.areas).map((p) => p[0]), d[50])
-          )
-        ),
-        Math.max(
-          ...data.map((d) =>
-            Math.max(...Object.values(d.areas).map((p) => p[1]), d[50])
-          )
-        ),
-      ],
-      width,
-      height,
-      context,
-    });
-    d3ref.current = {
-      padding,
-      xScale,
-    };
-
-    // areas
-    context.save();
-    context.translate(padding.left, chartHeight + padding.top);
-    context.scale(1, -1);
-
-    context.fillStyle = primaryColor;
-    for (const { width, opacity } of intervals) {
-      context.globalAlpha = opacity;
-      d3
-        .area<Datum>()
-        .x((d) => xScale(d.x))
-        .y1((d) => yScale(d.areas[width][0]))
-        .y0((d) => yScale(d.areas[width][1]))
-        .context(context)(data);
-      context.fill();
-    }
-    context.globalAlpha = 1;
-
-    context.beginPath();
-    context.strokeStyle = primaryColor;
-    context.lineWidth = 2;
-    context.imageSmoothingEnabled = true;
-
-    d3
-      .line<Datum>()
-      .x((d) => xScale(d.x))
-      .y((d) => yScale(d[50]))
-      .context(context)(data);
-
-    context.stroke();
-    context.restore();
-
-    if (
-      cursor &&
-      cursor[0] >= padding.left &&
-      cursor[0] - padding.left <= chartWidth
-    ) {
-      drawVerticalCursorLine({
-        cursor,
-        padding,
-        chartWidth,
-        chartHeight,
-        xScale,
-        tickFormat: d3.format(",.4r"),
-        context,
-      });
-    }
-  }, [context, width, height, data, cursor]);
-
   return (
-    <div>
+    <div className="flex flex-col items-stretch">
       <canvas ref={ref}>Chart for {fn.toString()}</canvas>
       {showChart}
       {Object.entries(errors).map(([errorName, errorPoints]) => (
@@ -259,18 +255,6 @@ const InnerDistFunctionChart: FC<
             ))}
         </ErrorAlert>
       ))}
-    </div>
-  );
-};
-
-export const FunctionChart1Dist: FC<FunctionChart1DistProps> = (props) => {
-  const [containerRef, containerMeasure] = useMeasure<HTMLDivElement>();
-
-  return (
-    <div ref={containerRef}>
-      {containerMeasure.width ? (
-        <InnerDistFunctionChart {...props} width={containerMeasure.width} />
-      ) : null}
     </div>
   );
 };

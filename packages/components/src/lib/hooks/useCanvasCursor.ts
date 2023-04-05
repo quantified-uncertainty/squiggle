@@ -1,29 +1,23 @@
 import * as d3 from "d3";
-import { useRef } from "react";
-import { useUpdate } from "./react-use.js";
+import { useCallback, useState } from "react";
+import { DrawContext } from "./useCanvas.js";
 
-export function useCanvasCursor({
-  refChanged,
-  context,
-}: {
-  refChanged: boolean;
-  context: CanvasRenderingContext2D | null | undefined;
-}) {
-  const update = useUpdate();
-  const cursorRef = useRef<[number, number]>();
+export function useCanvasCursor() {
+  const [cursor, setCursor] = useState<[number, number] | undefined>();
 
-  if (refChanged && context) {
+  const init = useCallback(({ context }: DrawContext) => {
     d3.select(context.canvas)
       .on("touchmove", (event) => event.preventDefault())
       .on("pointermove", (e) => {
-        cursorRef.current = d3.pointer(e);
-        update(); // TODO - debounce?
+        setCursor(d3.pointer(e)); // TODO - debounce?
       })
       .on("pointerout", (e) => {
-        cursorRef.current = undefined;
-        update();
+        setCursor(undefined); // TODO - debounce?
       });
-  }
+  }, []);
 
-  return cursorRef.current;
+  return {
+    cursor,
+    initCursor: init,
+  };
 }

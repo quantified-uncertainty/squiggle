@@ -9,7 +9,7 @@ import {
 } from "@floating-ui/react";
 
 import { FloatingPortal } from "@floating-ui/react";
-import { FC, PropsWithChildren, ReactNode } from "react";
+import { FC, PropsWithChildren, ReactNode, memo } from "react";
 
 function useMouseTooltip({ isOpen }: { isOpen: boolean }) {
   const floating = useFloating({
@@ -39,7 +39,11 @@ type Props = PropsWithChildren<{
   render(): ReactNode;
 }>;
 
-export const MouseTooltip: FC<Props> = ({ render, isOpen, children }) => {
+export const MouseTooltip: FC<Props> = memo(function MouseTooltip({
+  render,
+  isOpen,
+  children,
+}) {
   const tooltip = useMouseTooltip({
     isOpen,
   });
@@ -61,4 +65,4 @@ export const MouseTooltip: FC<Props> = ({ render, isOpen, children }) => {
       )}
     </div>
   );
-};
+});

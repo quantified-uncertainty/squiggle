@@ -1,51 +1,100 @@
-import isEqual from "lodash/isEqual.js";
-import { useRef } from "react";
-import { usePrevious } from "./react-use.js";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+export type DrawContext = {
+  context: CanvasRenderingContext2D;
+  width: number;
+};
+
+type DrawFunction = (context: DrawContext) => void;
 
 export function useCanvas({
-  width,
   height,
+  init,
+  draw,
 }: {
-  width: number;
   height: number;
+  init?: DrawFunction; // e.g. for cursor initializations, see useCanvasCursor()
+  draw: DrawFunction;
 }) {
-  const ref = useRef<HTMLCanvasElement>(null);
+  const [width, setWidth] = useState<number | undefined>();
+  const [context, setContext] = useState<
+    CanvasRenderingContext2D | undefined
+  >();
 
   const devicePixelRatio = window.devicePixelRatio || 1;
 
-  const props = {
-    canvas: ref.current,
-    width,
-    height,
-  };
-  const previous = usePrevious(props);
-  const refChanged = !isEqual(previous, props) && !!ref.current;
+  const updateSize = useCallback(
+    (canvas: HTMLCanvasElement, width: number) => {
+      // note: width shouldn't be set here, otherwise observer won't work
+      canvas.style.height = `${height}px`;
+      canvas.width = width * devicePixelRatio;
+      canvas.height = height * devicePixelRatio;
+      setWidth(width);
+    },
+    [devicePixelRatio, height]
+  );
 
-  if (refChanged) {
-    // the DOM node was either just initialized or has changed
-    const canvas = ref.current;
+  const observer = useMemo(
+    () =>
+      new window.ResizeObserver((entries) => {
+        if (!entries[0]) {
+          return;
+        }
+        updateSize(
+          entries[0].target as HTMLCanvasElement,
+          entries[0].contentRect.width
+        );
+      }),
+    [updateSize]
+  );
 
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
-    canvas.width = width * devicePixelRatio;
-    canvas.height = height * devicePixelRatio;
-  }
-
-  if (!ref.current) {
-    return {
-      ref,
-      refChanged: false,
-      context: undefined,
+  useEffect(() => {
+    return () => {
+      observer.disconnect();
     };
-  }
+  }, [observer]);
 
-  const context = ref.current.getContext("2d") ?? undefined; // avoid "null" for simplicity
-  context?.resetTransform();
-  context?.scale(devicePixelRatio, devicePixelRatio);
+  const ref = useCallback(
+    (canvas: HTMLCanvasElement) => {
+      if (!canvas) {
+        return;
+      }
+      const usedWidth = canvas.getBoundingClientRect().width;
+      updateSize(canvas, usedWidth);
+
+      const context = canvas.getContext("2d");
+      if (!context) {
+        throw new Error("Failed to initialize 2d context"); // shouldn't happen, all browsers support 2d context
+      }
+      context.resetTransform();
+      context.scale(devicePixelRatio, devicePixelRatio);
+
+      setContext(context);
+      init?.({ context, width: usedWidth });
+      // TODO - call `draw` too? would be slightly faster
+
+      observer.disconnect();
+      observer.observe(canvas);
+    },
+    [init, observer, updateSize, devicePixelRatio]
+  );
+
+  const redraw = useCallback(() => {
+    if (width === undefined || context === undefined) {
+      return;
+    }
+    context.resetTransform();
+    context.scale(devicePixelRatio, devicePixelRatio);
+    draw({ width, context });
+  }, [draw, width, context, devicePixelRatio]);
+
+  useEffect(() => {
+    redraw();
+  }, [redraw]);
 
   return {
     ref,
-    refChanged,
-    context,
+    redraw,
+    width,
   };
 }
