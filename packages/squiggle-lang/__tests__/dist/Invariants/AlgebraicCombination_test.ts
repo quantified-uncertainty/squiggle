@@ -5,7 +5,7 @@ when things substantially change.
 Also, there are some open comments in https://github.com/quantified-uncertainty/squiggle/pull/232 that haven't been addressed.
 */
 
-import * as Result from "../../../src/utility/result";
+import * as Result from "../../../src/utility/result.js";
 import {
   normalDist5, // mean=5, stdev=2
   normalDist10, // mean=10, stdev=2
@@ -17,10 +17,10 @@ import {
   cauchyDist, // local=1; scale=1
   triangularDist, // low=1; medium=2; high=3;
   exponentialDist, // rate=2
-} from "../../fixtures/distFixtures";
+} from "../../fixtures/distFixtures.js";
 
-import { BinaryOperations } from "../../../src/dist/DistOperations";
-import { env, unpackResult } from "../../helpers/distHelpers";
+import { BinaryOperations } from "../../../src/dist/DistOperations/index.js";
+import { env, unpackResult } from "../../helpers/distHelpers.js";
 const {
   algebraicAdd,
   algebraicMultiply,

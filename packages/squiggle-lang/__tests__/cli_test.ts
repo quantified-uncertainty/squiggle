@@ -1,6 +1,11 @@
+import { jest } from "@jest/globals";
+
+import * as url from "url";
 import * as path from "path";
 import { CommanderError } from "@commander-js/extra-typings";
-import { makeProgram } from "../src/cli";
+import { makeProgram } from "../src/cli/makeProgram.js";
+
+const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 
 afterEach(() => {
   jest.restoreAllMocks();

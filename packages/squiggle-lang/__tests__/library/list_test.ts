@@ -1,4 +1,4 @@
-import { testEvalError, testEvalToBe } from "../helpers/reducerHelpers";
+import { testEvalError, testEvalToBe } from "../helpers/reducerHelpers.js";
 
 describe("List functions", () => {
   describe("length", () => {

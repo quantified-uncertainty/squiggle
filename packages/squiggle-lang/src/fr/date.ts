@@ -1,11 +1,15 @@
-import * as DateTime from "../utility/DateTime";
-import * as Result from "../utility/result";
-import { FnFactory } from "../library/registry/helpers";
-import { makeDefinition } from "../library/registry/fnDefinition";
-import { vDate, vTimeDuration, vNumber, vString } from "../value";
-import { Ok } from "../utility/result";
-import { frDate, frNumber, frTimeDuration } from "../library/registry/frTypes";
-import { REOther } from "../reducer/ErrorMessage";
+import * as DateTime from "../utility/DateTime.js";
+import * as Result from "../utility/result.js";
+import { FnFactory } from "../library/registry/helpers.js";
+import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { vDate, vTimeDuration, vNumber, vString } from "../value/index.js";
+import { Ok } from "../utility/result.js";
+import {
+  frDate,
+  frNumber,
+  frTimeDuration,
+} from "../library/registry/frTypes.js";
+import { REOther } from "../reducer/ErrorMessage.js";
 
 const maker = new FnFactory({
   nameSpace: "",

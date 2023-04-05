@@ -1,22 +1,22 @@
-import { toSampleSetDist } from "../dist/DistOperations";
-import * as SampleSetDist from "../dist/SampleSetDist/SampleSetDist";
-import { makeDefinition } from "../library/registry/fnDefinition";
+import { toSampleSetDist } from "../dist/DistOperations/index.js";
+import * as SampleSetDist from "../dist/SampleSetDist/SampleSetDist.js";
+import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
   frDist,
   frLambda,
   frNumber,
-} from "../library/registry/frTypes";
+} from "../library/registry/frTypes.js";
 import {
   doNumberLambdaCall,
   FnFactory,
   repackDistResult,
   unpackDistResult,
-} from "../library/registry/helpers";
-import { Ok } from "../utility/result";
-import { vArray, vNumber } from "../value";
-import { BaseDist } from "../dist/BaseDist";
-import { ErrorMessage, REExpectedType } from "../reducer/ErrorMessage";
+} from "../library/registry/helpers.js";
+import { Ok } from "../utility/result.js";
+import { vArray, vNumber } from "../value/index.js";
+import { BaseDist } from "../dist/BaseDist.js";
+import { ErrorMessage, REExpectedType } from "../reducer/ErrorMessage.js";
 
 const maker = new FnFactory({
   nameSpace: "SampleSet",

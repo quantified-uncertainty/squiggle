@@ -1,5 +1,5 @@
-import uniq from "lodash/uniq";
-import { random_sample } from "../../src/utility/math";
+import uniq from "lodash/uniq.js";
+import { random_sample } from "../../src/utility/math.js";
 
 describe("random_sample", () => {
   test("Length of random_sample", () => {

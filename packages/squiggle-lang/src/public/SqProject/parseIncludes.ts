@@ -1,9 +1,9 @@
 import { LocationRange } from "peggy";
-import { makeParseError } from "../../ast/parse";
-import { IError } from "../../reducer/IError";
-import { SqError } from "../SqError";
-import * as Result from "../../utility/result";
-import { parse } from "./IncludeParser";
+import { makeParseError } from "../../ast/parse.js";
+import { IError } from "../../reducer/IError.js";
+import { SqError } from "../SqError.js";
+import * as Result from "../../utility/result.js";
+import { parse } from "./IncludeParser.js";
 
 type PeggySyntaxError = {
   message: string;

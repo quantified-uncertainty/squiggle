@@ -1,25 +1,25 @@
-import { AlgebraicOperation } from "../../operation";
-import { result } from "../../utility/result";
-import * as Result from "../../utility/result";
-import * as Operation from "../../operation";
-import * as E_A_Floats from "../../utility/E_A_Floats";
-import * as PointSetDist from "../PointSetDist";
-import * as PointSetDist_Scoring from "../../PointSet/PointSetDist_Scoring";
-import { BaseDist } from "../BaseDist";
+import { AlgebraicOperation } from "../../operation.js";
+import { result } from "../../utility/result.js";
+import * as Result from "../../utility/result.js";
+import * as Operation from "../../operation.js";
+import * as E_A_Floats from "../../utility/E_A_Floats.js";
+import * as PointSetDist from "../PointSetDist.js";
+import * as PointSetDist_Scoring from "../../PointSet/PointSetDist_Scoring.js";
+import { BaseDist } from "../BaseDist.js";
 import {
   DistError,
   distributionVerticalShiftIsInvalid,
   operationDistError,
   otherError,
-} from "../DistError";
+} from "../DistError.js";
 import {
   algebraicCombination,
   AsAlgebraicCombinationStrategy,
-} from "./AlgebraicCombination";
-import { Env } from "../env";
-import * as SampleSetDist from "../SampleSetDist/SampleSetDist";
-import { OperationError } from "../../operationError";
-import { ContinuousShape } from "../../PointSet/Continuous";
+} from "./AlgebraicCombination.js";
+import { Env } from "../env.js";
+import * as SampleSetDist from "../SampleSetDist/SampleSetDist.js";
+import { OperationError } from "../../operationError.js";
+import { ContinuousShape } from "../../PointSet/Continuous.js";
 
 export const toSampleSetDist = (d: BaseDist, env: Env) => {
   return SampleSetDist.SampleSetDist.make(d.sampleN(env.sampleCount));

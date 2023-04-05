@@ -3,14 +3,18 @@ import { line as d3Line } from "d3-shape";
 
 import * as React from "react";
 import { FC, useEffect, useMemo } from "react";
-import useMeasure from "react-use/lib/useMeasure";
 
 import { SqLambda } from "@quri/squiggle-lang";
 
-import { ErrorAlert } from "../Alert";
-import { FunctionChartSettings } from "./index";
-import { drawAxes, getFunctionImage, primaryColor } from "../../lib/drawUtils";
-import { useCanvas } from "../../lib/hooks";
+import {
+  drawAxes,
+  getFunctionImage,
+  primaryColor,
+} from "../../lib/drawUtils.js";
+import { useCanvas } from "../../lib/hooks/index.js";
+import { ErrorAlert } from "../Alert.js";
+import { FunctionChartSettings } from "./index.js";
+import { useMeasure } from "../../lib/hooks/react-use.js";
 
 type Props = {
   fn: SqLambda;

@@ -1,4 +1,4 @@
-import { testEvalToBe } from "../helpers/reducerHelpers";
+import { testEvalToBe } from "../helpers/reducerHelpers.js";
 
 /*
     You can wrap around any expression with inspect(expr) to log the value of that expression.

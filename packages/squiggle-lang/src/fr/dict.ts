@@ -1,4 +1,4 @@
-import { makeDefinition } from "../library/registry/fnDefinition";
+import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
   frArray,
@@ -6,13 +6,13 @@ import {
   frLambda,
   frString,
   frTuple2,
-} from "../library/registry/frTypes";
-import { FnFactory } from "../library/registry/helpers";
-import { Ok } from "../utility/result";
-import { ImmutableMap } from "../utility/immutableMap";
-import { vArray, vRecord, vString, Value } from "../value";
-import * as Result from "../utility/result";
-import { REOther } from "../reducer/ErrorMessage";
+} from "../library/registry/frTypes.js";
+import { FnFactory } from "../library/registry/helpers.js";
+import { Ok } from "../utility/result.js";
+import { ImmutableMap } from "../utility/immutableMap.js";
+import { vArray, vRecord, vString } from "../value/index.js";
+import * as Result from "../utility/result.js";
+import { REOther } from "../reducer/ErrorMessage.js";
 
 const maker = new FnFactory({
   nameSpace: "Dict",

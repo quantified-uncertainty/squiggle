@@ -1,5 +1,5 @@
-import { Namespace, NamespaceMap } from "../reducer/bindings";
-import { vNumber } from "../value";
+import { Namespace, NamespaceMap } from "../reducer/bindings.js";
+import { vNumber } from "../value/index.js";
 
 const availableNumbers: [string, number][] = [
   ["Math.pi", Math.PI],

@@ -1,42 +1,39 @@
 import * as React from "react";
 import { FC, useEffect, useState } from "react";
-import useMeasure from "react-use/lib/useMeasure";
 import * as yup from "yup";
-
-import { schemeCategory10 as d3SchemeCategory10 } from "d3-scale-chromatic";
-import { min as d3Min, max as d3Max } from "d3-array";
-import { area as d3Area, line as d3Line } from "d3-shape";
-import { format as d3Format } from "d3-format";
 
 import {
   Env,
   resultMap,
+  SqDistributionsPlot,
   SqDistributionTag,
   SqShape,
 } from "@quri/squiggle-lang";
-import { SqDistributionsPlot } from "@quri/squiggle-lang/src/public/SqPlot";
 
-import { hasMassBelowZero } from "../../lib/distributionUtils";
-import { useCanvas, useCanvasCursor } from "../../lib/hooks";
-import { flattenResult } from "../../lib/utility";
-import { ErrorAlert } from "../Alert";
+import {
+  FloatingPortal,
+  offset,
+  shift,
+  useClientPoint,
+  useFloating,
+  useInteractions,
+} from "@floating-ui/react";
+import isEqual from "lodash/isEqual.js";
+import { hasMassBelowZero } from "../../lib/distributionUtils.js";
 import {
   drawAxes,
   drawCircle,
   drawVerticalCursorLine,
   primaryColor,
-} from "../../lib/drawUtils";
-import { SummaryTable } from "./SummaryTable";
-import { Plot } from "./types";
-import {
-  useFloating,
-  useClientPoint,
-  useInteractions,
-  FloatingPortal,
-  offset,
-  shift,
-} from "@floating-ui/react";
-import isEqual from "lodash/isEqual";
+} from "../../lib/drawUtils.js";
+import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
+import { flattenResult } from "../../lib/utility.js";
+import { ErrorAlert } from "../Alert.js";
+import { SummaryTable } from "./SummaryTable.js";
+import { Plot } from "./types.js";
+import { useMeasure } from "../../lib/hooks/react-use.js";
+
+import * as d3 from "d3";
 
 export const distributionSettingsSchema = yup.object({}).shape({
   /** Set the x scale to be logarithmic */
@@ -132,7 +129,7 @@ const InnerMultiDistributionChart: FC<{
     context.clearRect(0, 0, width, height);
 
     const getColor = (i: number) =>
-      plot.colorScheme === "blues" ? "#5ba3cf" : d3SchemeCategory10[i];
+      plot.colorScheme === "blues" ? "#5ba3cf" : d3.schemeCategory10[i];
 
     const { padding, chartWidth, chartHeight, xScale, yScale } = drawAxes({
       suggestedPadding: {
@@ -144,10 +141,10 @@ const InnerMultiDistributionChart: FC<{
       xDomain: [
         Number.isFinite(settings.minX)
           ? settings.minX!
-          : d3Min(domain, (d) => d.x) ?? 0,
+          : d3.min(domain, (d) => d.x) ?? 0,
         Number.isFinite(settings.maxX)
           ? settings.maxX!
-          : d3Max(domain, (d) => d.x) ?? 0,
+          : d3.max(domain, (d) => d.x) ?? 0,
       ],
       yDomain: [
         Math.min(...domain.map((p) => p.y), 0), // min value, but at least 0
@@ -219,7 +216,8 @@ const InnerMultiDistributionChart: FC<{
         context.globalAlpha = shape.opacity;
         context.fillStyle = getColor(i);
         context.beginPath();
-        d3Area<SqShape["continuous"][number]>()
+        d3
+          .area<SqShape["continuous"][number]>()
           .x((d) => xScale(d.x))
           .y0((d) => yScale(d.y))
           .y1(0)
@@ -228,7 +226,8 @@ const InnerMultiDistributionChart: FC<{
 
         context.globalAlpha = 1;
         context.strokeStyle = context.fillStyle;
-        d3Line<SqShape["continuous"][number]>()
+        d3
+          .line<SqShape["continuous"][number]>()
           .x((d) => xScale(d.x))
           .y((d) => yScale(d.y))
           .context(context)(shape.continuous);
@@ -286,7 +285,7 @@ const InnerMultiDistributionChart: FC<{
         chartWidth,
         chartHeight,
         xScale,
-        tickFormat: d3Format(",.4r"),
+        tickFormat: d3.format(",.4r"),
         context,
       });
     }
@@ -336,9 +335,9 @@ const InnerMultiDistributionChart: FC<{
               }}
             >
               <div className="text-gray-500 text-right">Value:</div>
-              <div>{d3Format(",.6r")(discreteTooltip.value)}</div>
+              <div>{d3.format(",.6r")(discreteTooltip.value)}</div>
               <div className="text-gray-500 text-right">Probability:</div>
-              <div>{d3Format(",.6r")(discreteTooltip.probability)}</div>
+              <div>{d3.format(",.6r")(discreteTooltip.probability)}</div>
               <br />
             </div>
           </div>

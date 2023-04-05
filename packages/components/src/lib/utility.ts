@@ -1,5 +1,5 @@
-import { result, resultMap } from "@quri/squiggle-lang";
-import { ResultAndBindings } from "./hooks/useSquiggle";
+import { SqError, SqValue, result, resultMap } from "@quri/squiggle-lang";
+import { ResultAndBindings } from "./hooks/useSquiggle.js";
 
 export function flattenResult<a, b>(x: result<a, b>[]): result<a[], b> {
   if (x.length === 0) {
@@ -35,7 +35,10 @@ export function some(arr: boolean[]): boolean {
   return arr.reduce((x, y) => x || y, false);
 }
 
-export function getValueToRender({ result, bindings }: ResultAndBindings) {
+export function getValueToRender({
+  result,
+  bindings,
+}: ResultAndBindings): result<SqValue, SqError> {
   return resultMap(result, (value) =>
     value.tag === "Void" ? bindings.asValue() : value
   );

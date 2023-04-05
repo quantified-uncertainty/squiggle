@@ -1,7 +1,7 @@
 import { LocationRange } from "peggy";
-import { ParseError, parse as astParse, AST } from "../ast/parse";
-import * as Result from "../utility/result";
-import { result } from "../utility/result";
+import { ParseError, parse as astParse, AST } from "../ast/parse.js";
+import * as Result from "../utility/result.js";
+import { result } from "../utility/result.js";
 
 export class SqParseError {
   constructor(private _value: ParseError) {}
