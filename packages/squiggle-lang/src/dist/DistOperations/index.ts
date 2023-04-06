@@ -103,18 +103,17 @@ export const logScoreScalarAnswer = ({
 };
 
 //TODO: Add faster pointwiseCombine fn
-const pointwiseCombination = (
-  t1: BaseDist,
-  {
-    env,
-    algebraicCombination,
-    t2,
-  }: {
-    env: Env;
-    algebraicCombination: AlgebraicOperation;
-    t2: BaseDist;
-  }
-): result<BaseDist, DistError> => {
+const pointwiseCombination = ({
+  t1,
+  t2,
+  env,
+  algebraicOperation,
+}: {
+  t1: BaseDist;
+  t2: BaseDist;
+  env: Env;
+  algebraicOperation: AlgebraicOperation;
+}): result<BaseDist, DistError> => {
   const p1r = t1.toPointSetDist(env);
   const p2r = t2.toPointSetDist(env);
   if (!p1r.ok) {
@@ -129,7 +128,7 @@ const pointwiseCombination = (
   const result = PointSetDist.combinePointwise(
     p1,
     p2,
-    Operation.Algebraic.toFn(algebraicCombination)
+    Operation.Algebraic.toFn(algebraicOperation)
   );
   if (result.ok) {
     return result;
@@ -142,11 +141,11 @@ export const pointwiseCombinationFloat = (
   t: BaseDist,
   {
     env,
-    algebraicCombination,
+    algebraicOperation,
     f,
   }: {
     env: Env;
-    algebraicCombination: AlgebraicOperation;
+    algebraicOperation: AlgebraicOperation;
     f: number;
   }
 ): result<BaseDist, DistError> => {
@@ -170,24 +169,24 @@ export const pointwiseCombinationFloat = (
       );
     });
 
-  if (algebraicCombination === "Add" || algebraicCombination === "Subtract") {
+  if (algebraicOperation === "Add" || algebraicOperation === "Subtract") {
     return Result.Error(distributionVerticalShiftIsInvalid());
   } else if (
-    algebraicCombination === "Multiply" ||
-    algebraicCombination === "Divide" ||
-    algebraicCombination === "Power" ||
-    algebraicCombination === "Logarithm"
+    algebraicOperation === "Multiply" ||
+    algebraicOperation === "Divide" ||
+    algebraicOperation === "Power" ||
+    algebraicOperation === "Logarithm"
   ) {
-    return executeCombination(algebraicCombination);
-  } else if (algebraicCombination.NAME === "LogarithmWithThreshold") {
-    return executeCombination(algebraicCombination);
+    return executeCombination(algebraicOperation);
+  } else if (algebraicOperation.NAME === "LogarithmWithThreshold") {
+    return executeCombination(algebraicOperation);
   } else {
-    throw new Error(`Unknown AlgebraicOperation ${algebraicCombination}`);
+    throw new Error(`Unknown AlgebraicOperation ${algebraicOperation}`);
   }
 };
 
 export const scaleLog = (t: BaseDist, f: number, { env }: { env: Env }) =>
-  pointwiseCombinationFloat(t, { env, algebraicCombination: "Logarithm", f });
+  pointwiseCombinationFloat(t, { env, algebraicOperation: "Logarithm", f });
 
 //TODO: The result should always cumulatively sum to 1. This would be good to test.
 //TODO: If the inputs are not normalized, this will return poor results. The weights probably refer to the post-normalized forms. It would be good to apply a catch to this.
@@ -198,15 +197,16 @@ export const mixture = (
   const scaleMultiplyFn = (dist: BaseDist, weight: number) =>
     pointwiseCombinationFloat(dist, {
       env,
-      algebraicCombination: "Multiply",
+      algebraicOperation: "Multiply",
       f: weight,
     });
 
   const pointwiseAddFn = (dist1: BaseDist, dist2: BaseDist) =>
-    pointwiseCombination(dist1, {
-      env,
-      algebraicCombination: "Add",
+    pointwiseCombination({
+      t1: dist1,
       t2: dist2,
+      env,
+      algebraicOperation: "Add",
     });
 
   const allValuesAreSampleSet = (v: [BaseDist, number][]) =>
@@ -265,15 +265,16 @@ const algebraic = (
 ) => algebraicCombination({ t1, t2, arithmeticOperation: operation, env });
 
 const pointwise = (
-  dist1: BaseDist,
-  dist2: BaseDist,
+  t1: BaseDist,
+  t2: BaseDist,
   env: Env,
-  operation: AlgebraicOperation
+  algebraicOperation: AlgebraicOperation
 ) =>
-  pointwiseCombination(dist1, {
+  pointwiseCombination({
+    t1,
+    t2,
     env,
-    algebraicCombination: operation,
-    t2: dist2,
+    algebraicOperation,
   });
 
 export const BinaryOperations: { [k: string]: BinaryOperation } = {
