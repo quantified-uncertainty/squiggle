@@ -17,6 +17,7 @@ const maker = new FnFactory({
 
 export const library = [
   maker.nn2n({ name: "add", fn: (x, y) => x + y }), // infix + (see Reducer/Reducer_Peggy/helpers.ts)
+  maker.ss2s({ name: "add", fn: (x, y) => x + y }), // infix + on strings
   maker.nn2n({ name: "subtract", fn: (x, y) => x - y }), // infix -
   maker.nn2n({ name: "multiply", fn: (x, y) => x * y }), // infix *
   maker.nn2n({ name: "divide", fn: (x, y) => x / y }), // infix /
@@ -48,6 +49,12 @@ export const library = [
     }),
     makeDefinition("concat", [frArray(frAny), frArray(frAny)], ([a, b]) => {
       return Ok(vArray([...a, ...b]));
+    }),
+    makeDefinition("concat", [frString, frAny], ([a, b]) => {
+      return Ok(vString(a + b.toString()));
+    }),
+    makeDefinition("add", [frString, frAny], ([a, b]) => {
+      return Ok(vString(a + b.toString()));
     }),
     makeDefinition("inspect", [frAny], ([value]) => {
       console.log(value.toString());

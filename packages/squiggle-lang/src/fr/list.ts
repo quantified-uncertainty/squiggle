@@ -4,11 +4,12 @@ import {
   frArray,
   frLambda,
   frNumber,
+  frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { Ok } from "../utility/result.js";
 import * as Result from "../utility/result.js";
-import { Value, vArray, vNumber } from "../value/index.js";
+import { Value, vArray, vNumber, vString } from "../value/index.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
 import { REOther } from "../reducer/ErrorMessage.js";
 import includes from "lodash/includes.js";
@@ -210,6 +211,31 @@ export const library = [
             )
           )
       ),
+    ],
+  }),
+  maker.make({
+    name: "join",
+    requiresNamespace: true,
+    examples: [`List.join(["a", "b", "c"], ",")`],
+    definitions: [
+      makeDefinition(
+        "join",
+        [frArray(frString), frString],
+        ([array, joinStr]) => Ok(vString(array.join(joinStr)))
+      ),
+      makeDefinition("join", [frArray(frString)], ([array]) =>
+        Ok(vString(array.join()))
+      ),
+    ],
+  }),
+  maker.make({
+    name: "flatten",
+    requiresNamespace: true,
+    examples: [`List.flatten([[1,2], [3,4]])`],
+    definitions: [
+      makeDefinition("flatten", [frArray(frAny)], ([arr]) => {
+        return Ok(vArray(arr).flatten());
+      }),
     ],
   }),
 ];

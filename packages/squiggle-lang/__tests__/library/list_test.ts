@@ -1,6 +1,12 @@
 import { testEvalError, testEvalToBe } from "../helpers/reducerHelpers.js";
 
 describe("List functions", () => {
+  describe("lookup", () => {
+    testEvalToBe("[3,5,8][1.8]", "Error(Array index must be an integer: 1.8)");
+    testEvalToBe("[3,5,8][0/0]", "Error(Array index must be an integer: NaN)");
+    testEvalToBe("[3,5,8][2]", "8");
+  });
+
   describe("length", () => {
     testEvalToBe("List.length([3,5,8])", "3");
     testEvalToBe("List.length([])", "0");
@@ -89,5 +95,16 @@ describe("List functions", () => {
 
   describe("filter", () => {
     testEvalToBe("check(x)=(x==2);arr=[1,2,3]; List.filter(arr,check)", "[2]");
+  });
+
+  describe("join", () => {
+    testEvalToBe("arr=['a', 'b', 'c']; List.join(arr, '-')", "'a-b-c'");
+    testEvalToBe("arr=['a', 'b', 'c']; List.join(arr, ' ')", "'a b c'");
+    testEvalToBe("arr=['a', 'b', 'c']; List.join(arr)", "'a,b,c'");
+  });
+
+  describe("flatten", () => {
+    testEvalToBe("List.flatten([[1,2], [3,4]])", "[1,2,3,4]");
+    testEvalToBe("List.flatten([[1,2], [3,[4,5]]])", "[1,2,3,[4,5]]");
   });
 });

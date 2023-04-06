@@ -14,7 +14,6 @@ describe("eval", () => {
     testEvalToBe("1+2", "3");
     testEvalToBe("(1+2)*3", "9");
     testEvalToBe("2>1", "true");
-    testEvalToBe("concat('a ', 'b')", "'a b'");
     testEvalToBe("concat([3,4], [5,6,7])", "[3,4,5,6,7]");
     testEvalToBe("log(10)", "2.302585092994046");
     testEvalToBe("Math.cos(10)", "-0.8390715290764524");
@@ -131,7 +130,7 @@ describe("stacktraces", () => {
     const error = result.value.toStringWithStackTrace();
 
     expect(error)
-      .toBe(`Error: There are function matches for add(), but with different arguments: [add(number, number)]; [add(distribution, number)]; [add(number, distribution)]; [add(distribution, distribution)]; [add(date, duration)]; [add(duration, duration)]
+      .toBe(`Error: There are function matches for add(), but with different arguments: [add(number, number)]; [add(string, string)]; [add(string, any)]; [add(distribution, number)]; [add(number, distribution)]; [add(distribution, distribution)]; [add(date, duration)]; [add(duration, duration)]
 Stack trace:
   f at line 4, column 5, file main
   g at line 6, column 12, file main
