@@ -1,51 +1,103 @@
-import isEqual from "lodash/isEqual.js";
-import { useRef } from "react";
-import { usePrevious } from "./react-use.js";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from "react";
+
+export type DrawContext = {
+  context: CanvasRenderingContext2D;
+  width: number;
+};
+
+type DrawFunction = (context: DrawContext) => void;
 
 export function useCanvas({
-  width,
   height,
+  init,
+  draw,
 }: {
-  width: number;
   height: number;
+  init?: DrawFunction; // useful for cursor initializations, see useCanvasCursor()
+  draw: DrawFunction;
 }) {
-  const ref = useRef<HTMLCanvasElement>(null);
+  const [width, setWidth] = useState<number | undefined>();
+  const [context, setContext] = useState<
+    CanvasRenderingContext2D | undefined
+  >();
 
-  const devicePixelRatio = window.devicePixelRatio || 1;
+  const devicePixelRatio =
+    typeof window === "undefined" ? 1 : window.devicePixelRatio;
 
-  const props = {
-    canvas: ref.current,
-    width,
-    height,
-  };
-  const previous = usePrevious(props);
-  const refChanged = !isEqual(previous, props) && !!ref.current;
+  const observer = useMemo(() => {
+    if (typeof window === "undefined") {
+      return undefined;
+    }
+    return new window.ResizeObserver((entries) => {
+      if (!entries[0]) {
+        return;
+      }
+      setWidth(entries[0].contentRect.width);
+    });
+  }, []);
 
-  if (refChanged) {
-    // the DOM node was either just initialized or has changed
-    const canvas = ref.current;
+  useEffect(() => {
+    return () => {
+      observer?.disconnect();
+    };
+  }, [observer]);
 
-    canvas.style.width = `${width}px`;
+  const ref = useCallback(
+    (canvas: HTMLCanvasElement) => {
+      if (!canvas) {
+        return;
+      }
+      const usedWidth = canvas.getBoundingClientRect().width;
+      setWidth(usedWidth);
+
+      const context = canvas.getContext("2d");
+      if (!context) {
+        throw new Error("Failed to initialize 2d context"); // shouldn't happen, all browsers support 2d context
+      }
+      context.resetTransform();
+      context.scale(devicePixelRatio, devicePixelRatio);
+
+      setContext(context);
+      init?.({ context, width: usedWidth });
+      // TODO - call `draw` too? would be slightly faster; but we can't put `draw` in callback dependencies
+
+      observer?.disconnect();
+      observer?.observe(canvas);
+    },
+    [init, observer, devicePixelRatio]
+  );
+
+  const redraw = useCallback(() => {
+    if (width === undefined || context === undefined) {
+      return;
+    }
+    // We have to do this here and not on observer's callback, because otherwise there's a delay between
+    // width change and drawing (setWidth is not synchronous), and that causes flickering and other issues.
+    const { canvas } = context;
     canvas.style.height = `${height}px`;
     canvas.width = width * devicePixelRatio;
     canvas.height = height * devicePixelRatio;
-  }
 
-  if (!ref.current) {
-    return {
-      ref,
-      refChanged: false,
-      context: undefined,
-    };
-  }
+    // context.reset() would be better, but it's still experimental
+    context.resetTransform();
+    context.scale(devicePixelRatio, devicePixelRatio);
 
-  const context = ref.current.getContext("2d") ?? undefined; // avoid "null" for simplicity
-  context?.resetTransform();
-  context?.scale(devicePixelRatio, devicePixelRatio);
+    draw({ width, context });
+  }, [draw, width, height, context, devicePixelRatio]);
+
+  useLayoutEffect(() => {
+    redraw();
+  }, [redraw]);
 
   return {
     ref,
-    refChanged,
-    context,
+    redraw,
+    width,
   };
 }

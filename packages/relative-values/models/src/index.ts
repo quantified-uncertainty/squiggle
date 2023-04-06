@@ -10,5 +10,5 @@ export const allInterfaces: InterfaceWithModels[] = [
   getQuriSoftwareBuiltin(),
   getQuriPosts(),
   getHealthInterventions(),
-	getThingsYouShouldBuy()
+  getThingsYouShouldBuy(),
 ];
