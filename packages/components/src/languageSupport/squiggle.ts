@@ -82,7 +82,7 @@ function squiggle(project: SqProject) {
           autocomplete: (cmpl: CompletionContext) => {
             const tree = syntaxTree(cmpl.state);
             {
-              const lambda = cmpl.tokenBefore(["LambdaStart"]);
+              const lambda = cmpl.tokenBefore(["ArgsOpen"]);
               if (lambda) {
                 return {
                   from: lambda.from,
