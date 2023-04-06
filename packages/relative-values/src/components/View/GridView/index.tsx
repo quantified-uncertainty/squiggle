@@ -1,6 +1,5 @@
 import { Item } from "@/types";
 import { ModelEvaluator } from "@/values/ModelEvaluator";
-import { FloatingFocusManager } from "@floating-ui/react";
 import { FC, Fragment, useCallback, useMemo } from "react";
 import { useSelectedInterface } from "../../Interface/InterfaceProvider";
 import { DropdownButton } from "../../ui/DropdownButton";
@@ -60,16 +59,10 @@ export const GridView: FC<{
     [idToPosition, gridMode]
   );
 
-  const extractOkValues = <A, B>(items: result<A, B>[]): A[] => {
-    return items
-      .filter((item): item is { ok: true; value: A } => item.ok)
-      .map((item) => item.value);
-  };
-
   //It seems nicer, at this point, to just specify that its p25 and p75
-  const percentiles = model.getParamPercentiles(
+  const uncertaintyPercentiles = model.getParamPercentiles(
     items.map((i) => i.id),
-    (r) => r.db,
+    (r) => r.uncertainty,
     [5, 95]
   );
 
@@ -108,7 +101,7 @@ export const GridView: FC<{
                   id1={rowItem.id}
                   id2={columnItem.id}
                   model={model}
-                  percentiles={percentiles}
+                  uncertaintyPercentiles={uncertaintyPercentiles}
                 />
               )
             )}

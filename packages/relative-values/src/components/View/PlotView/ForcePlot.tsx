@@ -68,7 +68,7 @@ export const ForcePlot: FC<{
         if (!relativeValueResult.ok) {
           return 450; // 30 decibels; is this a good default?
         }
-        return (relativeValueResult.value.db ^ 2) * 30;
+        return (relativeValueResult.value.uncertainty ^ 2) * 30;
       });
 
     simulation.force("link", force);

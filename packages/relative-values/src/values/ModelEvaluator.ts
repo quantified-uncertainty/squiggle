@@ -20,7 +20,7 @@ const wrapper = sq`
     mean: mean(dist),
     min: inv(dist, 0.05),
     max: inv(dist, 0.95),
-    db: findDb(dist)
+    uncertainty: findDb(dist)
   }
 }
 `;
@@ -35,8 +35,8 @@ export const extractOkValues = <A, B>(items: result<A, B>[]): A[] => {
     .map((item) => item.value);
 };
 
-const getPercentile = (sortedList: number[], percentile: number): number => {
-  const index = (percentile / 100) * sortedList.length;
+const getPercentile = (sortedList: number[], percentage: number): number => {
+  const index = (percentage / 100) * sortedList.length;
   const result = sortedList[Math.floor(index)];
   return result;
 };
@@ -63,7 +63,7 @@ function buildRelativeValue({
   const mean = record.get("mean");
   const min = record.get("min");
   const max = record.get("max");
-  const db = record.get("db");
+  const uncertainty = record.get("uncertainty");
 
   if (typeof median !== "number") {
     return { ok: false, value: "Expected median to be a number" };
@@ -77,8 +77,8 @@ function buildRelativeValue({
   if (typeof max !== "number") {
     return { ok: false, value: "Expected max to be a number" };
   }
-  if (typeof db !== "number") {
-    return { ok: false, value: "Expected db to be a number" };
+  if (typeof uncertainty !== "number") {
+    return { ok: false, value: "Expected uncertainty to be a number" };
   }
 
   return {
@@ -88,7 +88,7 @@ function buildRelativeValue({
       mean,
       min,
       max,
-      db,
+      uncertainty,
     },
   };
 }

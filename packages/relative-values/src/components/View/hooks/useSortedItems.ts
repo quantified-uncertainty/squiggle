@@ -1,5 +1,6 @@
 import { Item } from "@/types";
-import { RelativeValue, hasInvalid } from "@/values/types";
+import { RelativeValue } from "@/values/types";
+import { hasInvalid } from "@/values/value";
 import { ModelEvaluator, extractOkValues } from "@/values/ModelEvaluator";
 import _ from "lodash";
 import { useMemo } from "react";
@@ -47,7 +48,7 @@ export function averageMedian({ item, comparedTo, model }: AverageProps) {
 export function averageDb({ item, comparedTo, model }: AverageProps) {
   return averageMetric({
     item,
-    getMetric: (item) => item.db,
+    getMetric: (item) => item.uncertainty,
     comparedTo,
     model,
   });

@@ -9,7 +9,7 @@ import { useViewContext } from "../ViewProvider";
 type Datum = {
   id: string;
   median: number;
-  db: number;
+  uncertainty: number;
   clusterId: string | undefined;
 };
 
@@ -31,7 +31,7 @@ function usePlotData(model: ModelEvaluator) {
       data.push({
         id: item.id,
         median: Math.abs(averageMedian({ item, comparedTo: items, model: model })),
-        db: averageDb({ item, comparedTo: items, model: model }),
+        uncertainty: averageDb({ item, comparedTo: items, model: model }),
         clusterId: item.clusterId,
       });
     }
@@ -70,7 +70,7 @@ export const ValueAndUncertaintyPlot: FC<{
       .domain(d3.extent(data, (d) => d.median) as number[])
       .range([0, width]);
 
-    yScale.domain(d3.extent(data, (d) => d.db) as number[]).range([height, 0]);
+    yScale.domain(d3.extent(data, (d) => d.uncertainty) as number[]).range([height, 0]);
   };
 
   useEffect(() => {
@@ -166,13 +166,13 @@ export const ValueAndUncertaintyPlot: FC<{
               d.clusterId ? clusters[d.clusterId].color : "black"
             )
             .attr("cx", (d) => xScale(d.median))
-            .attr("cy", (d) => yScale(d.db)),
+            .attr("cy", (d) => yScale(d.uncertainty)),
         (update) =>
           update.call((update) =>
             update
               .transition(t)
               .attr("cx", (d) => xScale(d.median))
-              .attr("cy", (d) => yScale(d.db))
+              .attr("cy", (d) => yScale(d.uncertainty))
           )
       );
   }, [ref.current, obj.current, data]);

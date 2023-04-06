@@ -6,12 +6,8 @@ export type RelativeValue = Readonly<{
   mean: number;
   min: number;
   max: number;
-  db: number;
+  uncertainty: number;
 }>;
-
-export function hasInvalid(obj: RelativeValue): boolean {
-  return Object.values(obj).some((value) => !isFinite(value));
-}
 
 export type RelativeValueResult = result<RelativeValue, string>;
 

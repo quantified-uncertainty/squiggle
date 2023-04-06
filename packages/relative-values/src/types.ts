@@ -32,3 +32,8 @@ export type InterfaceWithModels = {
   catalog: Catalog;
   models: Map<string, Model>;
 };
+
+export type InterfaceWithModelsArrays = {
+  catalog: Catalog;
+  models: Model[];
+};

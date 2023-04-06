@@ -36,7 +36,7 @@ export const ListView: FC<Props> = ({ model }) => {
     otherDimensionItems: [selectedItem],
   });
 
-  const percentiles =model.getParamPercentiles(items.map((i) => i.id), (r => r.db), [20, 80]) 
+  const uncertaintyPercentiles =model.getParamPercentiles(items.map((i) => i.id), (r => r.uncertainty), [20, 80]) 
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-2">
@@ -78,7 +78,7 @@ export const ListView: FC<Props> = ({ model }) => {
         </CellBox>
         <CellBox header>
           <div className="p-1 pt-2 text-sm font-semibold text-slate-600">
-            Average Uncertainty (db)
+            Average Uncertainty (om)
           </div>
         </CellBox>
         <ColumnHeader
@@ -123,7 +123,7 @@ export const ListView: FC<Props> = ({ model }) => {
                 />
               </div>
             </CellBox>
-            <RelativeCell id1={item.id} id2={selectedItem.id} model={model} percentiles={percentiles} />
+            <RelativeCell id1={item.id} id2={selectedItem.id} model={model} uncertaintyPercentiles={uncertaintyPercentiles} />
           </Fragment>
         ))}
       </div>

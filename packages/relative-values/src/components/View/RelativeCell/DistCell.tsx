@@ -1,4 +1,5 @@
-import { RelativeValue, hasInvalid } from "@/values/types";
+import { RelativeValue } from "@/values/types";
+import { hasInvalid } from "@/values/value";
 import { NumberShower } from "@quri/squiggle-components";
 import { FC, memo } from "react";
 import { CellBox } from "../CellBox";
@@ -48,8 +49,8 @@ function numberToColor2(rating: number, percentiles: number[]) {
   }
 }
 
-export const DistCell: FC<{ item: RelativeValue; percentiles: number[] }> =
-  memo(function DistCell({ item, percentiles }) {
+export const DistCell: FC<{ item: RelativeValue; uncertaintyPercentiles: number[] }> =
+  memo(function DistCell({ item, uncertaintyPercentiles }) {
     return (
       <CellBox>
         {hasInvalid(item) ? (
@@ -61,8 +62,8 @@ export const DistCell: FC<{ item: RelativeValue; percentiles: number[] }> =
         ) : (
           <div
             className={`h-full pt-[1px] min-h-[2em] relative ${numberToColor2(
-              item.db,
-              percentiles
+              item.uncertainty,
+              uncertaintyPercentiles
             )}`}
           >
             <div className="text-center z-0 py-1">
@@ -78,14 +79,14 @@ export const DistCell: FC<{ item: RelativeValue; percentiles: number[] }> =
                   >
                     ±
                   </span>{" "}
-                  <span className={`${numberToColor(item.db, percentiles)}`}>
-                    <NumberShower number={item.db} precision={2} />
+                  <span className={`${numberToColor(item.uncertainty, uncertaintyPercentiles)}`}>
+                    <NumberShower number={item.uncertainty} precision={2} />
                   </span>
                   <span
                     style={{ fontSize: "0.6em" }}
                     className={`${numberToColor(
-                      item.db,
-                      percentiles
+                      item.uncertainty,
+                      uncertaintyPercentiles
                     )} font-light`}
                   >
                     om
