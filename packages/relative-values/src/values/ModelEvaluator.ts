@@ -5,7 +5,7 @@ import { ModelCache, RelativeValue, RelativeValueResult } from "./types";
 
 const wrapper = sq`
 {|x, y|
-  findDb(dist) = {
+  findUncertainty(dist) = {
     absDist = SampleSet.map(dist, abs)
     p5 = inv(absDist, 0.05)
     p95 = inv(absDist, 0.95)
@@ -20,7 +20,7 @@ const wrapper = sq`
     mean: mean(dist),
     min: inv(dist, 0.05),
     max: inv(dist, 0.95),
-    uncertainty: findDb(dist)
+    uncertainty: findUncertainty(dist)
   }
 }
 `;
@@ -162,11 +162,15 @@ export class ModelEvaluator {
   getParamPercentiles(
     ids: string[],
     fn: (value: RelativeValue) => number,
-    percentiles: number[]
+    percentiles: number[],
+    filter0 = false
   ): number[] {
     let list = extractOkValues(this.compareAll(ids))
       .map(fn)
       .sort((a, b) => a - b);
+    if (filter0) {
+      list = list.filter((v) => v !== 0);
+    }
     return percentiles.map((p) => getPercentile(list, p));
   }
 }

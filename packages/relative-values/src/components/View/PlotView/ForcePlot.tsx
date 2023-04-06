@@ -107,6 +107,31 @@ export const ForcePlot: FC<{
     init: initCursor,
   });
 
+  function getforceFn() {
+    //These params were eye-picked to look good
+    const expParamater = 0.7;
+    const multParameter = 250;
+
+    const diffPercentiles = model.getParamPercentiles(
+      filteredItems.map((item) => item.id),
+      (r) => r.uncertainty,
+      [10, 90],
+      true
+    );
+
+    const expDiff =
+      Math.log10(diffPercentiles[1]) - Math.log10(diffPercentiles[0]);
+
+    const forceExp = expParamater / expDiff;
+
+    // ForceMultiplier is inversetly proportional to the 90th percentile uncertainty, to ensure a decent spread
+    const forceMultiplier = multParameter / diffPercentiles[1] ** forceExp;
+
+    return (uncertainty: number) => uncertainty ** forceExp * forceMultiplier;
+  }
+
+  const forceFn = getforceFn();
+
   const simulation = useMemo(() => {
     const simulation = d3.forceSimulation(nodes);
 
@@ -122,9 +147,9 @@ export const ForcePlot: FC<{
           (d.target as Node).id
         );
         if (!relativeValueResult.ok) {
-          return 450; // 30 decibels; is this a good default?
+          return 200; // should eventually be just removed, this is a hack
         }
-        return (relativeValueResult.value.uncertainty ^ 2) * 30;
+        return forceFn(relativeValueResult.value.uncertainty);
       });
 
     simulation.force("link", force);

@@ -45,7 +45,7 @@ export function averageMedian({ item, comparedTo, model }: AverageProps) {
   });
 }
 
-export function averageDb({ item, comparedTo, model }: AverageProps) {
+export function averageUncertainty({ item, comparedTo, model }: AverageProps) {
   return averageMetric({
     item,
     getMetric: (item) => item.uncertainty,
@@ -79,7 +79,7 @@ export const useSortedItems = ({
         }
         case "uncertainty": {
           return _.sortBy(items, (item) =>
-            averageDb({ item, model, comparedTo: otherDimensionChoices })
+          averageUncertainty({ item, model, comparedTo: otherDimensionChoices })
           );
         }
         default:

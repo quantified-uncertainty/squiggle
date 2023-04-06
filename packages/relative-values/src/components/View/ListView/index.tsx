@@ -9,7 +9,7 @@ import { Header } from "../Header";
 import { RelativeCell } from "../RelativeCell";
 import { useViewContext } from "../ViewProvider";
 import { useFilteredItems, useSortedItems } from "../hooks";
-import { averageDb } from "../hooks/useSortedItems";
+import { averageUncertainty } from "../hooks/useSortedItems";
 import { ColumnHeader } from "./ColumnHeader";
 
 type Props = {
@@ -111,7 +111,7 @@ export const ListView: FC<Props> = ({ model }) => {
             <CellBox>
               <div className="p-2 text-slate-800">
                 <NumberShower
-                  number={averageDb({
+                  number={averageUncertainty({
                     item,
                     comparedTo: catalog.items,
                     model: model,

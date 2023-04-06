@@ -5,7 +5,7 @@ import { ModelEvaluator } from "@/values/ModelEvaluator";
 import { useSelectedInterface } from "../../Interface/InterfaceProvider";
 import { useViewContext } from "../ViewProvider";
 import { useFilteredItems } from "../hooks";
-import { averageDb, averageMedian } from "../hooks/useSortedItems";
+import { averageUncertainty, averageMedian } from "../hooks/useSortedItems";
 import {
   useCanvasCursor,
   DrawContext,
@@ -21,7 +21,6 @@ type Datum = {
   item: Item;
   median: number;
   uncertainty: number;
-  clusterId: string | undefined;
 };
 
 function usePlotData(model: ModelEvaluator) {
@@ -48,8 +47,7 @@ function usePlotData(model: ModelEvaluator) {
       data.push({
         item,
         median: averageMedian({ item, comparedTo, model: model }),
-        uncertainty: averageDb({ item, comparedTo: items, model: model }),
-        clusterId: item.clusterId,
+        uncertainty: averageUncertainty({ item, comparedTo, model: model }),
       });
     }
     return data;
@@ -77,7 +75,7 @@ export const ValueAndUncertaintyPlot: FC<{
       const { xScale, yScale, padding, chartHeight } = drawAxes({
         context,
         xDomain: d3.extent(data, (d) => Math.abs(d.median)) as [number, number],
-        yDomain: d3.extent(data, (d) => d.db) as [number, number],
+        yDomain: d3.extent(data, (d) => d.uncertainty) as [number, number],
         suggestedPadding: { top: 10, bottom: 40, left: 60, right: 20 },
         width,
         height,
@@ -85,7 +83,6 @@ export const ValueAndUncertaintyPlot: FC<{
         drawTicks: true,
         tickCount: 10,
       });
-
 
       context.textAlign = "right";
       context.textBaseline = "bottom";
@@ -121,7 +118,7 @@ export const ValueAndUncertaintyPlot: FC<{
 
         context.beginPath();
         const x = xScale(d.median),
-          y = yScale(d.db);
+          y = yScale(d.uncertainty);
         context.moveTo(x + r, y);
         context.arc(x, y, r, 0, 2 * Math.PI);
 
