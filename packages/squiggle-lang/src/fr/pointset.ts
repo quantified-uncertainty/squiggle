@@ -1,29 +1,29 @@
-import { makeDefinition } from "../library/registry/fnDefinition";
+import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
   frDist,
   frLambda,
   frNumber,
   frRecord,
-} from "../library/registry/frTypes";
-import * as Continuous from "../PointSet/Continuous";
-import * as Discrete from "../PointSet/Discrete";
+} from "../library/registry/frTypes.js";
+import * as Continuous from "../PointSet/Continuous.js";
+import * as Discrete from "../PointSet/Discrete.js";
 import {
   doNumberLambdaCall,
   FnFactory,
   repackDistResult,
-} from "../library/registry/helpers";
-import { PointSetDist } from "../dist/PointSetDist";
-import { vDist, vNumber } from "../value";
-import * as XYShape from "../XYShape";
-import { xyShapeDistError } from "../dist/DistError";
-import { BaseDist } from "../dist/BaseDist";
-import { Ok } from "../utility/result";
+} from "../library/registry/helpers.js";
+import { PointSetDist } from "../dist/PointSetDist.js";
+import { vDist, vNumber } from "../value/index.js";
+import * as XYShape from "../XYShape.js";
+import { xyShapeDistError } from "../dist/DistError.js";
+import { BaseDist } from "../dist/BaseDist.js";
+import { Ok } from "../utility/result.js";
 import {
   ErrorMessage,
   REDistributionError,
   REExpectedType,
-} from "../reducer/ErrorMessage";
+} from "../reducer/ErrorMessage.js";
 
 const maker = new FnFactory({
   nameSpace: "PointSet",

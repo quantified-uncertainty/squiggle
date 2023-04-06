@@ -1,10 +1,10 @@
-import { BaseDist } from "../../src/dist/BaseDist";
-import { DistError } from "../../src/dist/DistError";
-import { SampleSetDist } from "../../src/dist/SampleSetDist/SampleSetDist";
-import { Env } from "../../src";
-import * as Result from "../../src/utility/result";
-import { Ok } from "../../src/utility/result";
-import { unpackResult } from "../helpers/distHelpers";
+import { BaseDist } from "../../src/dist/BaseDist.js";
+import { DistError } from "../../src/dist/DistError.js";
+import { SampleSetDist } from "../../src/dist/SampleSetDist/SampleSetDist.js";
+import { Env } from "../../src/index.js";
+import * as Result from "../../src/utility/result.js";
+import { Ok } from "../../src/utility/result.js";
+import { unpackResult } from "../helpers/distHelpers.js";
 
 const env: Env = {
   sampleCount: 100,
@@ -20,7 +20,7 @@ import {
   cauchyDist,
   triangularDist,
   exponentialDist,
-} from "../fixtures/distFixtures";
+} from "../fixtures/distFixtures.js";
 
 describe("toPointSet", () => {
   test("on symbolic normal distribution", () => {

@@ -3,15 +3,15 @@ import {
   OperationError,
   OtherOperationError,
   PdfInvalidError,
-} from "../operationError";
-import * as Result from "../utility/result";
-import { MixedPoint } from "./MixedPoint";
+} from "../operationError.js";
+import * as Result from "../utility/result.js";
+import { MixedPoint } from "./MixedPoint.js";
 import {
   AnyPointSet,
   combinePointwise,
   isContinuous,
   isDiscrete,
-} from "./PointSet";
+} from "./PointSet.js";
 
 const logFn = Math.log; // base e
 const minusScaledLogOfQuotient = ({

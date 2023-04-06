@@ -1,12 +1,13 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import "@testing-library/jest-dom";
+import { SqProject } from "@quri/squiggle-lang";
+
 import {
   SquiggleChart,
   SquiggleEditor,
   SquigglePlayground,
-} from "../src/index";
-import { SqProject } from "@quri/squiggle-lang";
+} from "../src/index.js";
 
 test("Chart logs nothing on render", async () => {
   const { unmount } = render(<SquiggleChart code={"normal(0, 1)"} />);

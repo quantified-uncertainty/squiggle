@@ -1,7 +1,7 @@
 // Try in https://peggyjs.org/online
 
 {{
-  const h = require('./peggyHelpers');
+  import * as h from './peggyHelpers.js';
 }}
 
 start

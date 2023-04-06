@@ -2,8 +2,8 @@
   An expression is an intermediate representation of a Squiggle code.
   Expressions are evaluated by `Reducer_Expression.evaluate` function.
 */
-import { AST } from "../ast/parse";
-import { Value, vBool, vNumber, vString, vVoid } from "../value";
+import { AST } from "../ast/parse.js";
+import { Value, vBool, vNumber, vString, vVoid } from "../value/index.js";
 
 export type ExpressionContent =
   | {

@@ -1,6 +1,6 @@
-import isEqual from "lodash/isEqual";
+import isEqual from "lodash/isEqual.js";
 import { useRef } from "react";
-import usePrevious from "react-use/lib/usePrevious";
+import { usePrevious } from "./react-use.js";
 
 export function useCanvas({
   width,
@@ -11,7 +11,7 @@ export function useCanvas({
 }) {
   const ref = useRef<HTMLCanvasElement>(null);
 
-  const devicePixelRatio = window.devicePixelRatio || 1;
+  const devicePixelRatio = window?.devicePixelRatio ?? 1;
 
   const props = {
     canvas: ref.current,

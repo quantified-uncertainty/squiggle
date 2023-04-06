@@ -1,16 +1,16 @@
 import * as React from "react";
 import { FC, PropsWithChildren } from "react";
 
-import { XIcon } from "@heroicons/react/solid";
+import { XIcon } from "@heroicons/react/solid/esm/index.js";
 import {
   Env,
   result,
   SqDistribution,
   SqDistributionError,
 } from "@quri/squiggle-lang";
-import { NumberShower } from "../NumberShower";
-import { Tooltip } from "../ui/Tooltip";
-import { Plot } from "./types";
+import { NumberShower } from "../NumberShower.js";
+import { Tooltip } from "../ui/Tooltip.js";
+import { Plot } from "./types.js";
 
 const TableHeadCell: FC<PropsWithChildren> = ({ children }) => (
   <th className="border border-slate-200 bg-slate-50 py-1 px-2 text-slate-500 font-semibold">

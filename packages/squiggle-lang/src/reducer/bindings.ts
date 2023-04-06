@@ -6,7 +6,7 @@
 
 import { Map as ImmutableMap } from "immutable";
 
-import { Value } from "../value";
+import { Value } from "../value/index.js";
 
 // generics are hard, maybe there's an easier way to express this and specialize ImmutableMap on export, but I couldn't find it in 5 minutes
 type Namespace = ImmutableMap<string, Value>;

@@ -15,6 +15,7 @@
     "@docusaurus/core": "2.3.1",
     "@docusaurus/preset-classic": "2.3.1",
     "@heroicons/react": "^1.0.6",
+    "@mdx-js/react": "1.6.22",
     "@quri/squiggle-components": "^0.6.0",
     "base64-js": "^1.5.1",
     "clsx": "^1.2.1",

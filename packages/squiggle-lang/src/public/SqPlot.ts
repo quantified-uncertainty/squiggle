@@ -1,8 +1,8 @@
-import { Plot, vPlot } from "../value";
-import { wrapDistribution } from "./SqDistribution";
-import { SqLambda } from "./SqLambda";
-import { SqPlotValue } from "./SqValue";
-import { SqValueLocation } from "./SqValueLocation";
+import { Plot, vPlot } from "../value/index.js";
+import { wrapDistribution } from "./SqDistribution.js";
+import { SqLambda } from "./SqLambda.js";
+import { SqPlotValue } from "./SqValue.js";
+import { SqValueLocation } from "./SqValueLocation.js";
 
 export const wrapPlot = (value: Plot, location: SqValueLocation): SqPlot => {
   if (value.type === "distributions") {

@@ -1,4 +1,4 @@
-import * as magicNumbers from "../magicNumbers";
+import * as magicNumbers from "../magicNumbers.js";
 
 export type Env = {
   sampleCount: number; // int
