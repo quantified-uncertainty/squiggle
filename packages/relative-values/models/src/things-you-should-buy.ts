@@ -368,9 +368,5 @@ item_nice_headphones`,
   };
 }
 
-export function getThingsYouShouldBuy(): InterfaceWithModels {
-  return {
-    catalog: getCatalog(),
-    models: Map([["things-to-buy", getTextModel()]]),
-  };
-}
+export const catalog = getCatalog();
+export const models = [getTextModel()];

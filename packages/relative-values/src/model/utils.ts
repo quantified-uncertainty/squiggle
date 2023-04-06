@@ -1,5 +1,5 @@
 import { Map, Set } from "immutable";
-import { Catalog } from "@/types";
+import { Catalog, InterfaceWithModels } from "@/types";
 
 type Node = {
   code: string;

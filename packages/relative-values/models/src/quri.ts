@@ -144,8 +144,8 @@ function getGraphModel(): Model {
   return buildGraphModel({
     commonCode: "blog_post_to_software = SampleSet.fromDist(0.1 to 100)",
     items: [
-      ["quri_papers_1", "pointMass(1)"],
-      ["quri_papers_2", "1 to 2"],
+      ["quri_papers_1", "pointMass(1)"], //external evalution of the EA Wiki
+      ["quri_papers_2", "1 to 2"], //
       ["quri_papers_3", "0.5 to 10"],
       ["quri_papers_4", "0.2 to 20"],
       ["quri_papers_5", "SampleSet.fromDist(quri_papers_1 * (0.2 to 3))"],
@@ -178,9 +178,5 @@ function getGraphModel(): Model {
   });
 }
 
-export function getQuriBuiltin(): InterfaceWithModels {
-  return {
-    catalog: getCatalog(),
-    models: Map([getTextModel(), getGraphModel()].map((m) => [m.id, m])),
-  };
-}
+export const catalog = getCatalog();
+export const models = [getTextModel(), getGraphModel()];

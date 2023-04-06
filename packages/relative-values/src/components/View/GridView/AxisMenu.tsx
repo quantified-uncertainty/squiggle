@@ -59,7 +59,7 @@ const SortBy: FC<{
       />
       <div
         className={clsx(
-          "ml-2 text-xs font-medium",
+          "ml-2 text-sm font-medium",
           isCurrentMode ? "text-black" : "text-gray-400 group-hover:text-black"
         )}
       >

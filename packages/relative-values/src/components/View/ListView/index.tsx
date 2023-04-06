@@ -9,7 +9,7 @@ import { Header } from "../Header";
 import { RelativeCell } from "../RelativeCell";
 import { useViewContext } from "../ViewProvider";
 import { useFilteredItems, useSortedItems } from "../hooks";
-import { averageDb } from "../hooks/useSortedItems";
+import { averageUncertainty } from "../hooks/useSortedItems";
 import { ColumnHeader } from "./ColumnHeader";
 
 type Props = {
@@ -41,6 +41,12 @@ export const ListView: FC<Props> = ({ model }) => {
     otherDimensionItems: [selectedItem],
   });
 
+  const uncertaintyPercentiles = model.getParamPercentiles(
+    catalog.items.map((i) => i.id),
+    (r) => r.uncertainty,
+    [20, 80]
+  );
+
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-2">
@@ -52,12 +58,17 @@ export const ListView: FC<Props> = ({ model }) => {
         className="grid border-r border-b border-gray-200 w-max"
         style={{
           gridTemplateColumns:
-            "minmax(220px, min-content)  minmax(140px, min-content) minmax(100px, min-content) minmax(160px, min-content) minmax(160px, min-content)",
+            "minmax(200px, min-content) minmax(140px, min-content) minmax(100px, min-content) minmax(160px, min-content) minmax(160px, min-content) minmax(160px, min-content)",
         }}
       >
         <CellBox header>
           <div className="p-1 pt-2 text-sm font-semibold text-slate-600">
             Name
+          </div>
+        </CellBox>
+        <CellBox header>
+          <div className="p-1 pt-2 text-sm font-semibold text-slate-600">
+            Description
           </div>
         </CellBox>
         <CellBox header>
@@ -72,7 +83,7 @@ export const ListView: FC<Props> = ({ model }) => {
         </CellBox>
         <CellBox header>
           <div className="p-1 pt-2 text-sm font-semibold text-slate-600">
-            Average Uncertainty (db)
+            Average Uncertainty (om)
           </div>
         </CellBox>
         <ColumnHeader
@@ -82,6 +93,11 @@ export const ListView: FC<Props> = ({ model }) => {
         {sortedItems.map((item) => (
           <Fragment key={item.id}>
             <Header item={item} />
+            <CellBox>
+              <div className="p-2 text-xs text-slate-800">
+                {item.description}
+              </div>
+            </CellBox>
             <CellBox>
               <div className="p-2 font-mono text-xs text-slate-600">
                 {item.id}
@@ -95,7 +111,7 @@ export const ListView: FC<Props> = ({ model }) => {
             <CellBox>
               <div className="p-2 text-slate-800">
                 <NumberShower
-                  number={averageDb({
+                  number={averageUncertainty({
                     item,
                     comparedTo: catalog.items,
                     model: model,
@@ -104,7 +120,12 @@ export const ListView: FC<Props> = ({ model }) => {
                 />
               </div>
             </CellBox>
-            <RelativeCell id1={item.id} id2={selectedItem.id} model={model} />
+            <RelativeCell
+              id1={item.id}
+              id2={selectedItem.id}
+              model={model}
+              uncertaintyPercentiles={uncertaintyPercentiles}
+            />
           </Fragment>
         ))}
       </div>

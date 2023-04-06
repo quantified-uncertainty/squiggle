@@ -9,6 +9,7 @@ import { RelativeCell } from "../RelativeCell";
 import { useViewContext } from "../ViewProvider";
 import { AxisMenu } from "./AxisMenu";
 import { GridModeControls } from "./GridModeControls";
+import { result } from "@quri/squiggle-lang";
 
 export const GridView: FC<{
   model: ModelEvaluator;
@@ -58,6 +59,13 @@ export const GridView: FC<{
     [idToPosition, gridMode]
   );
 
+  //It seems nicer, at this point, to just specify that its p25 and p75
+  const uncertaintyPercentiles = model.getParamPercentiles(
+    items.map((i) => i.id),
+    (r) => r.uncertainty,
+    [5, 95]
+  );
+
   return (
     <div>
       <div className="flex gap-8 mb-4 items-center">
@@ -93,6 +101,7 @@ export const GridView: FC<{
                   id1={rowItem.id}
                   id2={columnItem.id}
                   model={model}
+                  uncertaintyPercentiles={uncertaintyPercentiles}
                 />
               )
             )}

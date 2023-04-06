@@ -1,10 +1,12 @@
 import { result } from "@quri/squiggle-lang";
+import _ from "lodash";
 
 export type RelativeValue = Readonly<{
   median: number;
+  mean: number;
   min: number;
   max: number;
-  db: number;
+  uncertainty: number;
 }>;
 
 export type RelativeValueResult = result<RelativeValue, string>;

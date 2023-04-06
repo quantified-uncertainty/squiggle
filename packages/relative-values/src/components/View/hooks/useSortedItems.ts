@@ -1,6 +1,7 @@
 import { Item } from "@/types";
 import { RelativeValue } from "@/values/types";
-import { ModelEvaluator } from "@/values/ModelEvaluator";
+import { hasInvalid } from "@/values/value";
+import { ModelEvaluator, extractOkValues } from "@/values/ModelEvaluator";
 import _ from "lodash";
 import { useMemo } from "react";
 import { AxisConfig } from "../ViewProvider";
@@ -16,15 +17,17 @@ const averageMetric = ({
   getMetric: (item: RelativeValue) => number;
   model: ModelEvaluator;
 }) => {
-  return (
-    comparedTo.reduce((total, item2) => {
-      const value = model.compare(item.id, item2.id);
-      if (!value.ok) {
-        return total; // TODO: +Inf?
-      }
-      return total + getMetric(value.value);
-    }, 0) / comparedTo.length
-  );
+  const comparisons = extractOkValues(
+    comparedTo.map((item2) => model.compare(item.id, item2.id))
+  )
+    .filter((r) => !hasInvalid(r))
+    .map(getMetric);
+
+  if (comparisons.length === 0) {
+    return NaN;
+  } else {
+    return _.mean(comparisons);
+  }
 };
 
 type AverageProps = {
@@ -42,10 +45,10 @@ export function averageMedian({ item, comparedTo, model }: AverageProps) {
   });
 }
 
-export function averageDb({ item, comparedTo, model }: AverageProps) {
+export function averageUncertainty({ item, comparedTo, model }: AverageProps) {
   return averageMetric({
     item,
-    getMetric: (item) => item.db,
+    getMetric: (item) => item.uncertainty,
     comparedTo,
     model,
   });
@@ -76,7 +79,11 @@ export const useSortedItems = ({
         }
         case "uncertainty": {
           return _.sortBy(items, (item) =>
-            averageDb({ item, model, comparedTo: otherDimensionChoices })
+            averageUncertainty({
+              item,
+              model,
+              comparedTo: otherDimensionChoices,
+            })
           );
         }
         default:
