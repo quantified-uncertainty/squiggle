@@ -6,6 +6,7 @@
     "dev": "next dev",
     "start": "next start",
     "lint": "prettier --check . && next lint",
+    "format": "prettier --write .",
     "cacheRV": "tsx ./src/cli/index.ts cacheRV",
     "next-build": "next build",
     "build": "yarn cacheRV && next build"

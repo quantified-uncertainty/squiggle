@@ -79,7 +79,11 @@ export const useSortedItems = ({
         }
         case "uncertainty": {
           return _.sortBy(items, (item) =>
-          averageUncertainty({ item, model, comparedTo: otherDimensionChoices })
+            averageUncertainty({
+              item,
+              model,
+              comparedTo: otherDimensionChoices,
+            })
           );
         }
         default:

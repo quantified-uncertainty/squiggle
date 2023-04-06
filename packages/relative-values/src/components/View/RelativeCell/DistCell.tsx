@@ -1,6 +1,7 @@
 import { RelativeValue } from "@/values/types";
 import { hasInvalid } from "@/values/value";
 import { NumberShower } from "@quri/squiggle-components";
+import clsx from "clsx";
 import { FC, memo } from "react";
 import { CellBox } from "../CellBox";
 
@@ -49,76 +50,80 @@ function numberToColor2(rating: number, percentiles: number[]) {
   }
 }
 
-export const DistCell: FC<{ item: RelativeValue; uncertaintyPercentiles: number[] }> =
-  memo(function DistCell({ item, uncertaintyPercentiles }) {
-    return (
-      <CellBox>
-        {hasInvalid(item) ? (
-          <div
-            className={`h-full pt-[1px] min-h-[2em] relative bg-gray-300 bg-opacity-30`}
-          >
-            <div className="text-center z-0 p-4 text-gray-500">Error</div>
-          </div>
-        ) : (
-          <div
-            className={`h-full pt-[1px] min-h-[2em] relative ${numberToColor2(
-              item.uncertainty,
-              uncertaintyPercentiles
-            )}`}
-          >
-            <div className="text-center z-0 py-1">
-              <div>
-                <span className="text-slate-700 text-lg font-semibold">
-                  <NumberShower number={item.median} precision={1} />
+export const DistCell: FC<{
+  item: RelativeValue;
+  uncertaintyPercentiles: number[];
+}> = memo(function DistCell({ item, uncertaintyPercentiles }) {
+  return (
+    <CellBox>
+      {hasInvalid(item) ? (
+        <div
+          className={`h-full pt-[1px] min-h-[2em] relative bg-gray-300 bg-opacity-30`}
+        >
+          <div className="text-center z-0 p-4 text-gray-500">Error</div>
+        </div>
+      ) : (
+        <div
+          className={`h-full pt-[1px] min-h-[2em] relative ${numberToColor2(
+            item.uncertainty,
+            uncertaintyPercentiles
+          )}`}
+        >
+          <div className="text-center z-0 py-1">
+            <div>
+              <span className="text-slate-700 text-lg font-semibold">
+                <NumberShower number={item.median} precision={1} />
+              </span>
+              <span>
+                {" "}
+                <span
+                  style={{ fontSize: "0.7em" }}
+                  className="text-gray-400 font-light"
+                >
+                  ±
+                </span>{" "}
+                <span
+                  className={numberToColor(
+                    item.uncertainty,
+                    uncertaintyPercentiles
+                  )}
+                >
+                  <NumberShower number={item.uncertainty} precision={2} />
                 </span>
-                <span>
-                  {" "}
-                  <span
-                    style={{ fontSize: "0.7em" }}
-                    className="text-gray-400 font-light"
-                  >
-                    ±
-                  </span>{" "}
-                  <span className={`${numberToColor(item.uncertainty, uncertaintyPercentiles)}`}>
-                    <NumberShower number={item.uncertainty} precision={2} />
-                  </span>
-                  <span
-                    style={{ fontSize: "0.6em" }}
-                    className={`${numberToColor(
-                      item.uncertainty,
-                      uncertaintyPercentiles
-                    )} font-light`}
-                  >
-                    om
-                  </span>
+                <span
+                  style={{ fontSize: "0.6em" }}
+                  className={clsx(
+                    numberToColor(item.uncertainty, uncertaintyPercentiles),
+                    "font-light"
+                  )}
+                >
+                  om
                 </span>
-              </div>
-
-              <div
-                style={{ fontSize: "0.7em" }}
-                className="text-gray-400 font-light"
-              >
-                {item.min < 0 && item.max < 0 ? (
-                  <span>
-                    {"-("}
-                    <NumberShower
-                      number={-1 * item.max}
-                      precision={1}
-                    /> to <NumberShower number={-1 * item.min} precision={1} />
-                    {")"}
-                  </span>
-                ) : (
-                  <span>
-                    <NumberShower number={item.min} precision={1} /> to{" "}
-                    <NumberShower number={item.max} precision={1} />
-                  </span>
-                )}
-              </div>
+              </span>
             </div>
 
-            <div className="h-2 absolute bottom-0 inset-x-0 -z-10"></div>
+            <div
+              style={{ fontSize: "0.7em" }}
+              className="text-gray-400 font-light"
+            >
+              {item.min < 0 && item.max < 0 ? (
+                <span>
+                  -(
+                  <NumberShower number={-1 * item.max} precision={1} /> to{" "}
+                  <NumberShower number={-1 * item.min} precision={1} />)
+                </span>
+              ) : (
+                <span>
+                  <NumberShower number={item.min} precision={1} /> to{" "}
+                  <NumberShower number={item.max} precision={1} />
+                </span>
+              )}
+            </div>
           </div>
-        )}
-      </CellBox>
-    );
-  });
+
+          <div className="h-2 absolute bottom-0 inset-x-0 -z-10"></div>
+        </div>
+      )}
+    </CellBox>
+  );
+});
