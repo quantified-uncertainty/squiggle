@@ -10,7 +10,9 @@ import {
 import { FnFactory } from "../library/registry/helpers.js";
 import { Ok } from "../utility/result.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
-import { vArray, vRecord, vString } from "../value/index.js";
+import { vArray, vRecord, vString, Value } from "../value/index.js";
+import * as Result from "../utility/result.js";
+import { REOther } from "../reducer/ErrorMessage.js";
 
 const maker = new FnFactory({
   nameSpace: "Dict",
@@ -111,6 +113,32 @@ export const library = [
               )
             )
           );
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "mapKeys",
+    output: "Record",
+    examples: [`Dict.mapKeys({a: 1, b: 2}, {|x| concat(x, "-1")})`],
+    definitions: [
+      makeDefinition(
+        "mapKeys",
+        [frDict(frAny), frLambda],
+        ([dict, lambda], context, reducer) => {
+          const mappedEntries: [string, Value][] = [];
+          for (const [key, value] of dict.entries()) {
+            const mappedKey = lambda.call([vString(key)], context, reducer);
+
+            if (mappedKey.type == "String") {
+              mappedEntries.push([mappedKey.value, value]);
+            } else {
+              return Result.Error(
+                REOther("mapKeys: lambda must return a string")
+              );
+            }
+          }
+          return Ok(vRecord(ImmutableMap(mappedEntries)));
         }
       ),
     ],

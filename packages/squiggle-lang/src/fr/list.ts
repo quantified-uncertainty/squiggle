@@ -11,6 +11,8 @@ import * as Result from "../utility/result.js";
 import { Value, vArray, vNumber } from "../value/index.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
 import { REOther } from "../reducer/ErrorMessage.js";
+import includes from "lodash/includes.js";
+import uniqBy from "lodash/uniqBy.js";
 
 const maker = new FnFactory({
   nameSpace: "List",
@@ -79,6 +81,16 @@ export const library = [
     ],
   }),
   maker.make({
+    name: "append",
+    examples: [`List.append([1,4],5)`],
+    definitions: [
+      makeDefinition("append", [frArray(frAny), frAny], ([array, el]) => {
+        let newArr = [...array, el];
+        return Ok(vArray(newArr));
+      }),
+    ],
+  }),
+  maker.make({
     name: "reverse",
     output: "Array",
     requiresNamespace: false,
@@ -118,6 +130,28 @@ export const library = [
         [frArray(frAny), frArray(frAny)],
         ([array1, array2]) => Ok(vArray([...array1].concat(array2)))
       ),
+    ],
+  }),
+  maker.make({
+    name: "uniq",
+    requiresNamespace: true,
+    examples: [`List.uniq([1,2,3,"hi",false,"hi"])`],
+    definitions: [
+      makeDefinition<Value[]>("uniq", [frArray(frAny)], ([arr]) => {
+        const isUniqableType = (t: Value) =>
+          includes(["String", "Bool", "Number"], t.type);
+        //I'm not sure if the r.type concat is essential, but seems safe.
+        const uniqueValueKey = (t: Value) => t.toString() + t.type;
+
+        const allUniqable = arr.every(isUniqableType);
+        if (allUniqable) {
+          return Ok(vArray(uniqBy(arr, uniqueValueKey)));
+        } else {
+          return Result.Error(
+            REOther("Can only apply uniq() to Strings, Numbers, or Bools")
+          );
+        }
+      }),
     ],
   }),
   maker.make({
