@@ -9,6 +9,6 @@ test("Plot.dists render a figure", async () => {
       code={`Plot.dists({dists: [{name: "dist1", value: 1 to 12}, {name: "dist2", value: normal(5, 2)}]})`}
     />
   );
-  let chart = await screen.findByRole("figure");
+  const chart = screen.getByTestId("multi-distribution-chart");
   expect(chart).toBeInTheDocument();
 });

@@ -7,57 +7,57 @@ import { Map } from "immutable";
 
 function getCatalog(): Catalog {
   const items: Item[] = [
-		{
-			id: "i0",
-			name: "Nice computer",
-			clusterId: "consumerism",
-		},
-		{
-			id: "i1",
-			name: "Nice headphones",
-			clusterId: "consumerism",
-		},
-		{
-			id: "i2",
-			name: "Great sleep mask",
-			clusterId: "consumerism",
-		},
-		{
-			id: "i3",
-			name: "Melatonin",
-			clusterId: "consumerism",
-		},
-		{
-			id: "i4",
-			name: "Spare laptop charger",
-			clusterId: "consumerism",
-		},
-		{
-			id: "i5",
-			name: "External battery",
-			clusterId: "consumerism",
-		},
-		{
-			id: "i6",
-			name: "Zinc Lozenges",
-			clusterId: "consumerism",
-		},
-		{
-			id: "i7",
-			name: "Vertical mouse",
-			clusterId: "consumerism",
-		},
-		{
-			id: "i8",
-			name: "External microphone",
-			clusterId: "consumerism",
-		},
+    {
+      id: "i0",
+      name: "Nice computer",
+      clusterId: "consumerism",
+    },
+    {
+      id: "i1",
+      name: "Nice headphones",
+      clusterId: "consumerism",
+    },
+    {
+      id: "i2",
+      name: "Great sleep mask",
+      clusterId: "consumerism",
+    },
+    {
+      id: "i3",
+      name: "Melatonin",
+      clusterId: "consumerism",
+    },
+    {
+      id: "i4",
+      name: "Spare laptop charger",
+      clusterId: "consumerism",
+    },
+    {
+      id: "i5",
+      name: "External battery",
+      clusterId: "consumerism",
+    },
+    {
+      id: "i6",
+      name: "Zinc Lozenges",
+      clusterId: "consumerism",
+    },
+    {
+      id: "i7",
+      name: "Vertical mouse",
+      clusterId: "consumerism",
+    },
+    {
+      id: "i8",
+      name: "External microphone",
+      clusterId: "consumerism",
+    },
 
-		{
-			id: "i9",
-			name: "Watch",
-			clusterId: "consumerism",
-		},
+    {
+      id: "i9",
+      name: "Watch",
+      clusterId: "consumerism",
+    },
   ];
 
   return {
@@ -75,7 +75,7 @@ function getCatalog(): Catalog {
 
 function getTextModel(): Model {
   return {
-	id: "things-to-buy",
+    id: "things-to-buy",
     title: "Estimates for a few things you may want to buy",
     author: "Nuno Sempere",
     mode: "text",

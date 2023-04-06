@@ -1,16 +1,15 @@
 import { useSelectedInterface } from "@/components/Interface/InterfaceProvider";
 import { DropdownButton } from "@/components/ui/DropdownButton";
-import { InterfaceWithModels } from "@/types";
 import { ModelEvaluator } from "@/values/ModelEvaluator";
 import { NumberShower } from "@quri/squiggle-components";
 import { FC, Fragment, useState } from "react";
 import { CellBox } from "../CellBox";
 import { AxisMenu } from "../GridView/AxisMenu";
 import { Header } from "../Header";
-import { useFilteredItems, useSortedItems } from "../hooks";
-import { averageDb, averageMedian } from "../hooks/useSortedItems";
 import { RelativeCell } from "../RelativeCell";
 import { useViewContext } from "../ViewProvider";
+import { useFilteredItems, useSortedItems } from "../hooks";
+import { averageDb } from "../hooks/useSortedItems";
 import { ColumnHeader } from "./ColumnHeader";
 
 type Props = {
@@ -19,14 +18,20 @@ type Props = {
 
 export const ListView: FC<Props> = ({ model }) => {
   const { axisConfig } = useViewContext();
-  const {
-    catalog: { items },
-  } = useSelectedInterface();
+  const { catalog } = useSelectedInterface();
 
-  const [selectedItem, setSelectedItem] = useState(items[0]);
+  const [selectedItem, setSelectedItem] = useState(() => {
+    if (catalog.recommendedUnit !== undefined) {
+      return (
+        catalog.items.find((item) => item.id === catalog.recommendedUnit) ??
+        catalog.items[0]
+      );
+    }
+    return catalog.items[0];
+  });
 
   const filteredItems = useFilteredItems({
-    items,
+    items: catalog.items,
     config: axisConfig.rows,
   });
   const sortedItems = useSortedItems({
@@ -36,19 +41,24 @@ export const ListView: FC<Props> = ({ model }) => {
     otherDimensionItems: [selectedItem],
   });
 
-  const uncertaintyPercentiles =model.getParamPercentiles(items.map((i) => i.id), (r => r.uncertainty), [20, 80]) 
+  const uncertaintyPercentiles = model.getParamPercentiles(
+    catalog.items.map((i) => i.id),
+    (r) => r.uncertainty,
+    [20, 80]
+  );
+
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-2">
         <DropdownButton text="Table Settings">
-          {() => <AxisMenu axis="rows" />}
+          {() => <AxisMenu axis="rows" sortByAverage={false} />}
         </DropdownButton>
       </div>
       <div
-        className="grid grid-cols-6 border-r border-b border-gray-200 w-max"
+        className="grid border-r border-b border-gray-200 w-max"
         style={{
           gridTemplateColumns:
-            "minmax(200px, min-content)  minmax(200px, min-content) minmax(120px, min-content) minmax(100px, min-content) minmax(160px, min-content) minmax(160px, min-content) minmax(160px, min-content)",
+            "minmax(200px, min-content) minmax(140px, min-content) minmax(100px, min-content) minmax(160px, min-content) minmax(160px, min-content) minmax(160px, min-content)",
         }}
       >
         <CellBox header>
@@ -69,11 +79,6 @@ export const ListView: FC<Props> = ({ model }) => {
         <CellBox header>
           <div className="p-1 pt-2 text-sm font-semibold text-slate-600">
             Cluster
-          </div>
-        </CellBox>
-        <CellBox header>
-          <div className="p-1 pt-2 text-sm font-semibold text-slate-600">
-            Average Median Value
           </div>
         </CellBox>
         <CellBox header>
@@ -106,24 +111,21 @@ export const ListView: FC<Props> = ({ model }) => {
             <CellBox>
               <div className="p-2 text-slate-800">
                 <NumberShower
-                  number={averageMedian({
+                  number={averageDb({
                     item,
-                    comparedTo: items,
+                    comparedTo: catalog.items,
                     model: model,
                   })}
-                  precision={2}
-                />
-              </div>
-            </CellBox>
-            <CellBox>
-              <div className="p-2 text-slate-800">
-                <NumberShower
-                  number={averageDb({ item, comparedTo: items, model: model })}
                   precision={3}
                 />
               </div>
             </CellBox>
-            <RelativeCell id1={item.id} id2={selectedItem.id} model={model} uncertaintyPercentiles={uncertaintyPercentiles} />
+            <RelativeCell
+              id1={item.id}
+              id2={selectedItem.id}
+              model={model}
+              uncertaintyPercentiles={uncertaintyPercentiles}
+            />
           </Fragment>
         ))}
       </div>

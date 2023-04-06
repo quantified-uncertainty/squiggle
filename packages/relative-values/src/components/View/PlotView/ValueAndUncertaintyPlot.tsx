@@ -1,13 +1,24 @@
-import { ModelEvaluator } from "@/values/ModelEvaluator";
 import * as d3 from "d3";
-import { FC, useEffect, useMemo, useRef } from "react";
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import { ModelEvaluator } from "@/values/ModelEvaluator";
 import { useSelectedInterface } from "../../Interface/InterfaceProvider";
+import { useViewContext } from "../ViewProvider";
 import { useFilteredItems } from "../hooks";
 import { averageDb, averageMedian } from "../hooks/useSortedItems";
-import { useViewContext } from "../ViewProvider";
+import {
+  useCanvasCursor,
+  DrawContext,
+  useCanvas,
+  drawAxes,
+  MouseTooltip,
+} from "@quri/squiggle-components";
+import { distance } from "./ForcePlot";
+import { ItemTooltip } from "./ItemTooltip";
+import { Item } from "@/types";
 
 type Datum = {
-  id: string;
+  item: Item;
   median: number;
   uncertainty: number;
   clusterId: string | undefined;
@@ -15,7 +26,7 @@ type Datum = {
 
 function usePlotData(model: ModelEvaluator) {
   const {
-    catalog: { items },
+    catalog: { items, recommendedUnit },
   } = useSelectedInterface();
 
   const {
@@ -24,20 +35,26 @@ function usePlotData(model: ModelEvaluator) {
 
   const filteredItems = useFilteredItems({ items, config: rows });
 
+  const comparedTo = useMemo(() => {
+    return recommendedUnit
+      ? [items.find((item) => item.id === recommendedUnit) ?? items[0]]
+      : items;
+  }, [recommendedUnit, items]);
+
   const data = useMemo(() => {
     const data: Datum[] = [];
 
     for (const item of filteredItems) {
       data.push({
-        id: item.id,
-        median: Math.abs(averageMedian({ item, comparedTo: items, model: model })),
+        item,
+        median: averageMedian({ item, comparedTo, model: model }),
         uncertainty: averageDb({ item, comparedTo: items, model: model }),
         clusterId: item.clusterId,
       });
     }
     return data;
-  }, [filteredItems, items, model]);
-  return data;
+  }, [filteredItems, model, comparedTo]);
+  return { data, comparedToAverage: comparedTo.length > 1 };
 }
 
 export const ValueAndUncertaintyPlot: FC<{
@@ -47,142 +64,112 @@ export const ValueAndUncertaintyPlot: FC<{
     catalog: { clusters },
   } = useSelectedInterface();
 
-  const ref = useRef<SVGGElement>(null);
+  const { cursor, initCursor } = useCanvasCursor();
+  const [hoveredId, setHoveredId] = useState<number | undefined>(undefined);
 
-  const width = 400;
-  const height = 400;
-  const margin = { top: 10, bottom: 40, left: 60, right: 20 };
+  const height = 450;
+  const { data, comparedToAverage } = usePlotData(model);
 
-  const data = usePlotData(model);
+  const draw = useCallback(
+    ({ context, width }: DrawContext) => {
+      context.clearRect(0, 0, width, height);
 
-  type Obj = {
-    xAxis: d3.Axis<d3.NumberValue>;
-    yAxis: d3.Axis<d3.NumberValue>;
-    xScale: d3.ScaleLogarithmic<number, number, never>;
-    yScale: d3.ScaleLinear<number, number, never>;
-  };
+      const { xScale, yScale, padding, chartHeight } = drawAxes({
+        context,
+        xDomain: d3.extent(data, (d) => Math.abs(d.median)) as [number, number],
+        yDomain: d3.extent(data, (d) => d.db) as [number, number],
+        suggestedPadding: { top: 10, bottom: 40, left: 60, right: 20 },
+        width,
+        height,
+        logX: true,
+        drawTicks: true,
+        tickCount: 10,
+      });
 
-  const obj = useRef<Obj>();
 
-  const updateScales = ({ xScale, yScale }: Pick<Obj, "xScale" | "yScale">) => {
-    // TODO - take data as parameter?
-    xScale
-      .domain(d3.extent(data, (d) => d.median) as number[])
-      .range([0, width]);
-
-    yScale.domain(d3.extent(data, (d) => d.uncertainty) as number[]).range([height, 0]);
-  };
-
-  useEffect(() => {
-    if (!ref.current) {
-      return;
-    }
-
-    const xScale = d3.scaleLog();
-    const yScale = d3.scaleLinear();
-
-    updateScales({ xScale, yScale });
-
-    const g = d3.select(ref.current);
-    g.selectAll("*").remove();
-
-    const xAxis = d3.axisBottom(xScale).ticks(6, ".9~s");
-
-    g.append("g")
-      .attr("transform", `translate(0,${height})`)
-      .attr("id", "xAxis")
-      .call(xAxis);
-
-    const yAxis = d3.axisLeft(yScale).ticks(6, ".9~s");
-
-    g.append("g").attr("id", "yAxis").call(yAxis);
-
-    const styleAxis = (
-      axis: d3.Selection<SVGGElement, unknown, null, undefined>
-    ) => {
-      axis
-        .selectAll(".domain")
-        .attr("class", "stroke-gray-300")
-        .attr("stroke-width", 2);
-      axis.selectAll(".tick line").attr("class", "stroke-gray-300");
-      axis.selectAll(".tick text").attr("class", "fill-gray-500");
-    };
-    styleAxis(g.select("#xAxis"));
-    styleAxis(g.select("#yAxis"));
-
-    g.append("text")
-      .attr("text-anchor", "end")
-      .attr("x", width)
-      .attr("y", height + 40)
-      .attr("class", "font-bold text-xs fill-gray-500")
-      .text("Abs mean relative value");
-
-    g.append("text")
-      .attr("text-anchor", "end")
-      .attr("transform", "rotate(-90)")
-      .attr("x", 0)
-      .attr("y", -30)
-      .attr("class", "font-bold text-xs fill-gray-500")
-      .text("Uncertainty (decibels)");
-
-    g.append("g").attr("id", "plot-data");
-
-    obj.current = { xAxis, yAxis, xScale, yScale };
-  }, [ref.current]); // intentionally doesn't depend on `x` and `y`, will transition axes later in the main loop
-
-  useEffect(() => {
-    if (!ref.current || !obj.current) {
-      return;
-    }
-
-    const { xScale, yScale } = obj.current;
-
-    const t = d3.transition<Datum>();
-
-    const box = d3.select(ref.current);
-
-    updateScales({ xScale, yScale });
-
-    box
-      .select("#xAxis")
-      .transition(t)
-      .call(obj.current.xAxis as any);
-    box
-      .select("#yAxis")
-      .transition(t)
-      .call(obj.current.yAxis as any);
-
-    const g = box.select("#plot-data");
-
-    g.selectAll("circle")
-      .data(data, (d: any) => d.id)
-      .join(
-        (enter) =>
-          enter
-            .append("circle")
-            .attr("r", 4.5)
-            .style("opacity", 0.7)
-            .style("fill", (d) =>
-              d.clusterId ? clusters[d.clusterId].color : "black"
-            )
-            .attr("cx", (d) => xScale(d.median))
-            .attr("cy", (d) => yScale(d.uncertainty)),
-        (update) =>
-          update.call((update) =>
-            update
-              .transition(t)
-              .attr("cx", (d) => xScale(d.median))
-              .attr("cy", (d) => yScale(d.uncertainty))
-          )
+      context.textAlign = "right";
+      context.textBaseline = "bottom";
+      context.font = "bold 12px sans-serif";
+      context.fillStyle = "rgb(114, 125, 147)"; // copy-paste from drawUtils
+      context.fillText(
+        comparedToAverage ? "Mean relative value" : "Relative value",
+        width - padding.right,
+        height
       );
-  }, [ref.current, obj.current, data]);
+
+      context.save();
+      context.textAlign = "right";
+      context.textBaseline = "top";
+      context.rotate(-Math.PI / 2);
+      context.fillText(
+        comparedToAverage
+          ? "Mean uncertainty (decibels)"
+          : "Uncertainty (decibels)",
+        -padding.top,
+        0
+      );
+      context.restore();
+
+      context.save();
+      context.translate(padding.left, height - padding.bottom);
+      context.scale(1, -1);
+
+      const r = 5;
+      let newHoveredId: typeof hoveredId;
+      for (let i = 0; i < data.length; i++) {
+        const d = data[i];
+
+        context.beginPath();
+        const x = xScale(d.median),
+          y = yScale(d.db);
+        context.moveTo(x + r, y);
+        context.arc(x, y, r, 0, 2 * Math.PI);
+
+        const isHovered =
+          cursor &&
+          distance(
+            { x: x + padding.left, y: padding.top + chartHeight - y },
+            {
+              x: cursor[0],
+              y: cursor[1],
+            }
+          ) <
+            r * 1.5;
+        if (isHovered) {
+          newHoveredId = i; // last one wins
+        }
+
+        context.fillStyle =
+          d.item.clusterId && !isHovered
+            ? clusters[d.item.clusterId].color
+            : "black";
+        context.fill();
+      }
+
+      context.canvas.style.cursor =
+        newHoveredId === undefined ? "auto" : "pointer";
+      setHoveredId(newHoveredId);
+      context.restore();
+    },
+    [data, clusters, cursor]
+  );
+
+  const { ref } = useCanvas({
+    height,
+    draw,
+    init: initCursor,
+  });
+
+  const renderTooltip = useCallback(() => {
+    if (hoveredId === undefined) {
+      return;
+    }
+    return <ItemTooltip item={data[hoveredId].item} />;
+  }, [data, hoveredId]);
 
   return (
-    <svg
-      width={width + margin.left + margin.right}
-      height={height + margin.top + margin.bottom}
-    >
-      <g transform={`translate(${margin.left},${margin.top})`} ref={ref} />
-    </svg>
+    <MouseTooltip isOpen={hoveredId !== undefined} render={renderTooltip}>
+      <canvas ref={ref} className="w-full" />
+    </MouseTooltip>
   );
 };
