@@ -1,7 +1,7 @@
-import { BaseDist } from "../../dist/BaseDist";
-import { Lambda } from "../../reducer/lambda";
-import { ImmutableMap } from "../../utility/immutableMap";
-import { Value } from "../../value";
+import { BaseDist } from "../../dist/BaseDist.js";
+import { Lambda } from "../../reducer/lambda.js";
+import { ImmutableMap } from "../../utility/immutableMap.js";
+import { Value } from "../../value/index.js";
 
 /*
 FRType is a function that unpacks a Value.

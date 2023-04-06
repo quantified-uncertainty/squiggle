@@ -1,9 +1,9 @@
-import { testRun } from "../helpers/helpers";
+import { testRun } from "../helpers/helpers.js";
 import {
   MySkip,
   testEvalToBe,
   testToExpression,
-} from "../helpers/reducerHelpers";
+} from "../helpers/reducerHelpers.js";
 
 describe("Symbolic constructors", () => {
   describe("normal constructor", () => {

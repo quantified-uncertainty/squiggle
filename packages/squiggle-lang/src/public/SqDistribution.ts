@@ -1,13 +1,13 @@
-import { SampleSetDist } from "../dist/SampleSetDist/SampleSetDist";
-import { Env } from "../dist/env";
-import { SqDistributionError } from "./SqDistributionError";
-import { wrapPointSet } from "./SqPointSet";
-import * as Result from "../utility/result";
-import { BaseDist } from "../dist/BaseDist";
-import { DistError } from "../dist/DistError";
-import { SymbolicDist } from "../dist/SymbolicDist";
-import { PointSetDist } from "../dist/PointSetDist";
-import { Ok, result } from "../utility/result";
+import { SampleSetDist } from "../dist/SampleSetDist/SampleSetDist.js";
+import { Env } from "../dist/env.js";
+import { SqDistributionError } from "./SqDistributionError.js";
+import { wrapPointSet } from "./SqPointSet.js";
+import * as Result from "../utility/result.js";
+import { BaseDist } from "../dist/BaseDist.js";
+import { DistError } from "../dist/DistError.js";
+import { SymbolicDist } from "../dist/SymbolicDist.js";
+import { PointSetDist } from "../dist/PointSetDist.js";
+import { Ok, result } from "../utility/result.js";
 
 export enum SqDistributionTag {
   PointSet = "PointSet",

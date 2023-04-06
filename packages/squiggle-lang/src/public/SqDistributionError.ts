@@ -1,4 +1,4 @@
-import { DistError, distErrorToString } from "../dist/DistError";
+import { DistError, distErrorToString } from "../dist/DistError.js";
 
 export class SqDistributionError {
   constructor(private _value: DistError) {}

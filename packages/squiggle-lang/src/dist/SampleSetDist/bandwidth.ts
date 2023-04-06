@@ -1,5 +1,5 @@
-import * as E_A_Sorted from "../../utility/E_A_Sorted";
-import * as E_A_Floats from "../../utility/E_A_Floats";
+import * as E_A_Sorted from "../../utility/E_A_Sorted.js";
+import * as E_A_Floats from "../../utility/E_A_Floats.js";
 
 // Silverman, B. W. (1986) Density Estimation. London: Chapman and Hall.
 // Scott, D. W. (1992) Multivariate Density Estimation: Theory, Practice, and Visualization. Wiley.

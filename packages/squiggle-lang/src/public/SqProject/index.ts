@@ -1,18 +1,18 @@
-import { SqError } from "../SqError";
-import { SqRecord } from "../SqRecord";
-import { SqValue, wrapValue } from "../SqValue";
-import * as Result from "../../utility/result";
-import { SqValueLocation } from "../SqValueLocation";
-import * as ProjectItem from "./ProjectItem";
-import * as Topology from "./Topology";
-import { Resolver } from "./Resolver";
-import { defaultEnv, Env } from "../../dist/env";
-import { IError } from "../../reducer/IError";
-import * as Library from "../../library";
-import { Value, vRecord } from "../../value";
-import { createContext } from "../../reducer/Context";
-import { Namespace, NamespaceMap } from "../../reducer/bindings";
-import { ErrorMessage } from "../../reducer/ErrorMessage";
+import { SqError } from "../SqError.js";
+import { SqRecord } from "../SqRecord.js";
+import { SqValue, wrapValue } from "../SqValue.js";
+import * as Result from "../../utility/result.js";
+import { SqValueLocation } from "../SqValueLocation.js";
+import * as ProjectItem from "./ProjectItem.js";
+import * as Topology from "./Topology.js";
+import { Resolver } from "./Resolver.js";
+import { defaultEnv, Env } from "../../dist/env.js";
+import { IError } from "../../reducer/IError.js";
+import * as Library from "../../library/index.js";
+import { Value, vRecord } from "../../value/index.js";
+import { createContext } from "../../reducer/Context.js";
+import { Namespace, NamespaceMap } from "../../reducer/bindings.js";
+import { ErrorMessage } from "../../reducer/ErrorMessage.js";
 
 type Options = {
   resolver?: Resolver;

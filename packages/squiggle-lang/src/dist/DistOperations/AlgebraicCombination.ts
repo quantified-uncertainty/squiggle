@@ -4,18 +4,18 @@ import {
   operationDistError,
   requestedStrategyInvalidError,
   unreachableError,
-} from "../DistError";
-import * as magicNumbers from "../../magicNumbers";
-import { result } from "../../utility/result";
-import * as Result from "../../utility/result";
-import * as Operation from "../../operation";
-import { BaseDist } from "../BaseDist";
-import { AlgebraicOperation } from "../../operation";
-import * as PointSetDist from "../PointSetDist";
-import * as SampleSetDist from "../SampleSetDist/SampleSetDist";
-import * as SymbolicDist from "../SymbolicDist";
-import { OperationError } from "../../operationError";
-import { Env } from "../env";
+} from "../DistError.js";
+import * as magicNumbers from "../../magicNumbers.js";
+import { result } from "../../utility/result.js";
+import * as Result from "../../utility/result.js";
+import * as Operation from "../../operation.js";
+import { BaseDist } from "../BaseDist.js";
+import { AlgebraicOperation } from "../../operation.js";
+import * as PointSetDist from "../PointSetDist.js";
+import * as SampleSetDist from "../SampleSetDist/SampleSetDist.js";
+import * as SymbolicDist from "../SymbolicDist.js";
+import { OperationError } from "../../operationError.js";
+import { Env } from "../env.js";
 
 export enum AsAlgebraicCombinationStrategy {
   AsDefault,

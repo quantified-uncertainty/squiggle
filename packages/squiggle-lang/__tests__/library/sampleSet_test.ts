@@ -1,6 +1,6 @@
-import { expectErrorToBeBounded, testRun } from "../helpers/helpers";
+import { expectErrorToBeBounded, testRun } from "../helpers/helpers.js";
 import * as fc from "fast-check";
-import { testEvalToBe } from "../helpers/reducerHelpers";
+import { testEvalToBe } from "../helpers/reducerHelpers.js";
 
 describe("Various SampleSet functions", () => {
   testEvalToBe(

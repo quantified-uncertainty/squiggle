@@ -1,17 +1,20 @@
-import { BaseDist } from "../dist/BaseDist";
-import { Expression } from "../expression";
-import { Namespace } from "../reducer/bindings";
-import { ReducerContext } from "../reducer/Context";
-import isInteger from "lodash/isInteger";
-import { declarationToString, LambdaDeclaration } from "../reducer/declaration";
+import { BaseDist } from "../dist/BaseDist.js";
+import { Expression } from "../expression/index.js";
+import { Namespace } from "../reducer/bindings.js";
+import { ReducerContext } from "../reducer/Context.js";
+import isInteger from "lodash/isInteger.js";
+import {
+  declarationToString,
+  LambdaDeclaration,
+} from "../reducer/declaration.js";
 import {
   ErrorMessage,
   REArrayIndexNotFound,
   REOther,
   RERecordPropertyNotFound,
-} from "../reducer/ErrorMessage";
-import { Lambda } from "../reducer/lambda";
-import * as DateTime from "../utility/DateTime";
+} from "../reducer/ErrorMessage.js";
+import { Lambda } from "../reducer/lambda.js";
+import * as DateTime from "../utility/DateTime.js";
 
 // TODO - move these types to reducer/
 export type ReducerFn = (

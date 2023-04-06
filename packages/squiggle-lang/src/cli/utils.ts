@@ -1,10 +1,10 @@
 import path from "path";
 import fs from "fs";
-import isFinite from "lodash/isFinite";
+import isFinite from "lodash/isFinite.js";
 
-import { Env } from "../dist/env";
-import { SqProject } from "../public/SqProject";
-import { bold, red } from "./colors";
+import { Env } from "../dist/env.js";
+import { SqProject } from "../public/SqProject/index.js";
+import { bold, red } from "./colors.js";
 
 export const measure = (callback: () => void) => {
   const t1 = new Date();
