@@ -184,23 +184,13 @@ export const library = [
     requiresNamespace: true,
     examples: [`List.join(["a", "b", "c"], ",")`],
     definitions: [
-      makeDefinition("join", [frArray(frAny), frString], ([array, joinStr]) =>
-        Ok(
-          vString(
-            array
-              .map((r) => (r.type == "String" ? r.value : r.toString()))
-              .join(joinStr)
-          )
-        )
+      makeDefinition(
+        "join",
+        [frArray(frString), frString],
+        ([array, joinStr]) => Ok(vString(array.join(joinStr)))
       ),
-      makeDefinition("join", [frArray(frAny)], ([array]) =>
-        Ok(
-          vString(
-            array
-              .map((r) => (r.type == "String" ? r.value : r.toString()))
-              .join()
-          )
-        )
+      makeDefinition("join", [frArray(frString)], ([array]) =>
+        Ok(vString(array.join()))
       ),
     ],
   }),
