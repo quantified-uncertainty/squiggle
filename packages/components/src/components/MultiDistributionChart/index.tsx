@@ -308,7 +308,11 @@ const InnerMultiDistributionChart: FC<{
         </div>
       )}
     >
-      <canvas className="w-full" ref={ref}>
+      <canvas
+        data-testid="multi-distribution-chart"
+        className="w-full"
+        ref={ref}
+      >
         Distribution plot
       </canvas>
     </MouseTooltip>
