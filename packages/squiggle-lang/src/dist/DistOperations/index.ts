@@ -12,10 +12,7 @@ import {
   operationDistError,
   otherError,
 } from "../DistError.js";
-import {
-  algebraicCombination,
-  AsAlgebraicCombinationStrategy,
-} from "./AlgebraicCombination.js";
+import { algebraicCombination } from "./AlgebraicCombination.js";
 import { Env } from "../env.js";
 import * as SampleSetDist from "../SampleSetDist/SampleSetDist.js";
 import { OperationError } from "../../operationError.js";
@@ -261,17 +258,11 @@ export type BinaryOperation = (
 
 // private helpers
 const algebraic = (
-  dist1: BaseDist,
-  dist2: BaseDist,
+  t1: BaseDist,
+  t2: BaseDist,
   env: Env,
   operation: AlgebraicOperation
-) =>
-  algebraicCombination(dist1, {
-    strategy: AsAlgebraicCombinationStrategy.AsDefault,
-    arithmeticOperation: operation,
-    env,
-    t2: dist2,
-  });
+) => algebraicCombination({ t1, t2, arithmeticOperation: operation, env });
 
 const pointwise = (
   dist1: BaseDist,

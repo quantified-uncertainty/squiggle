@@ -1,24 +1,22 @@
+import * as magicNumbers from "../../magicNumbers.js";
+import * as Operation from "../../operation.js";
+import { AlgebraicOperation } from "../../operation.js";
+import { OperationError } from "../../operationError.js";
+import * as Result from "../../utility/result.js";
+import { result } from "../../utility/result.js";
+import { BaseDist } from "../BaseDist.js";
 import {
   DistError,
   logarithmOfDistributionError,
   operationDistError,
-  requestedStrategyInvalidError,
   unreachableError,
 } from "../DistError.js";
-import * as magicNumbers from "../../magicNumbers.js";
-import { result } from "../../utility/result.js";
-import * as Result from "../../utility/result.js";
-import * as Operation from "../../operation.js";
-import { BaseDist } from "../BaseDist.js";
-import { AlgebraicOperation } from "../../operation.js";
 import * as PointSetDist from "../PointSetDist.js";
 import * as SampleSetDist from "../SampleSetDist/SampleSetDist.js";
 import * as SymbolicDist from "../SymbolicDist.js";
-import { OperationError } from "../../operationError.js";
 import { Env } from "../env.js";
 
-export enum AsAlgebraicCombinationStrategy {
-  AsDefault,
+export enum AlgebraicCombinationStrategy {
   AsSymbolic,
   AsMonteCarlo,
   AsConvolution,
@@ -129,53 +127,38 @@ const StrategyCallOnValidatedInputs = {
   },
 };
 
-type SpecificStrategy = "AsSymbolic" | "AsMonteCarlo" | "AsConvolution";
-
-const StrategyChooser = {
-  hasSampleSetDist: (t1: BaseDist, t2: BaseDist): boolean =>
+const chooseStrategy = ({
+  t1,
+  t2,
+  arithmeticOperation,
+}: {
+  t1: BaseDist;
+  t2: BaseDist;
+  arithmeticOperation: AlgebraicOperation;
+}): AlgebraicCombinationStrategy => {
+  const hasSampleSetDist = (): boolean =>
     t1 instanceof SampleSetDist.SampleSetDist ||
-    t2 instanceof SampleSetDist.SampleSetDist,
+    t2 instanceof SampleSetDist.SampleSetDist;
 
-  convolutionIsFasterThanMonteCarlo: (t1: BaseDist, t2: BaseDist): boolean =>
+  const convolutionIsFasterThanMonteCarlo = (): boolean =>
     t1.expectedConvolutionCost() * t2.expectedConvolutionCost() <
-    magicNumbers.OpCost.monteCarloCost,
+    magicNumbers.OpCost.monteCarloCost;
 
-  preferConvolutionToMonteCarlo: (
-    t1: BaseDist,
-    t2: BaseDist,
-    arithmeticOperation: AlgebraicOperation
-  ) => {
-    return (
-      !StrategyChooser.hasSampleSetDist(t1, t2) &&
-      Operation.Convolution.canDoAlgebraicOperation(arithmeticOperation) &&
-      StrategyChooser.convolutionIsFasterThanMonteCarlo(t1, t2)
-    );
-  },
+  const preferConvolutionToMonteCarlo = () =>
+    !hasSampleSetDist() &&
+    Operation.Convolution.canDoAlgebraicOperation(arithmeticOperation) &&
+    convolutionIsFasterThanMonteCarlo();
 
-  run({
-    t1,
-    t2,
-    arithmeticOperation,
-  }: {
-    t1: BaseDist;
-    t2: BaseDist;
-    arithmeticOperation: AlgebraicOperation;
-  }): SpecificStrategy {
-    if (
-      StrategyCallOnValidatedInputs.symbolic(arithmeticOperation, t1, t2) !==
-      undefined
-    ) {
-      return "AsSymbolic";
-    } else {
-      return StrategyChooser.preferConvolutionToMonteCarlo(
-        t1,
-        t2,
-        arithmeticOperation
-      )
-        ? "AsConvolution"
-        : "AsMonteCarlo";
-    }
-  },
+  if (
+    StrategyCallOnValidatedInputs.symbolic(arithmeticOperation, t1, t2) !==
+    undefined
+  ) {
+    return AlgebraicCombinationStrategy.AsSymbolic;
+  } else {
+    return preferConvolutionToMonteCarlo()
+      ? AlgebraicCombinationStrategy.AsConvolution
+      : AlgebraicCombinationStrategy.AsMonteCarlo;
+  }
 };
 
 const runStrategyOnValidatedInputs = ({
@@ -188,18 +171,18 @@ const runStrategyOnValidatedInputs = ({
   t1: BaseDist;
   t2: BaseDist;
   arithmeticOperation: AlgebraicOperation;
-  strategy: SpecificStrategy;
+  strategy: AlgebraicCombinationStrategy;
   env: Env;
 }): result<BaseDist, DistError> => {
   switch (strategy) {
-    case "AsMonteCarlo":
+    case AlgebraicCombinationStrategy.AsMonteCarlo:
       return StrategyCallOnValidatedInputs.monteCarlo(
         env,
         arithmeticOperation,
         t1,
         t2
       );
-    case "AsSymbolic":
+    case AlgebraicCombinationStrategy.AsSymbolic:
       const result = StrategyCallOnValidatedInputs.symbolic(
         arithmeticOperation,
         t1,
@@ -212,7 +195,7 @@ const runStrategyOnValidatedInputs = ({
         return Result.Error(operationDistError(result.value));
       }
       return result;
-    case "AsConvolution":
+    case AlgebraicCombinationStrategy.AsConvolution:
       const convOp =
         Operation.Convolution.fromAlgebraicOperation(arithmeticOperation);
       if (convOp === undefined) {
@@ -222,74 +205,33 @@ const runStrategyOnValidatedInputs = ({
   }
 };
 
-const run = (
-  t1: BaseDist,
-  {
-    strategy,
-    env,
-    arithmeticOperation,
-    t2,
-  }: {
-    strategy: AsAlgebraicCombinationStrategy;
-    env: Env;
-    arithmeticOperation: AlgebraicOperation;
-    t2: BaseDist;
-  }
-): result<BaseDist, DistError> => {
+export const algebraicCombination = ({
+  t1,
+  t2,
+  env,
+  arithmeticOperation,
+}: {
+  t1: BaseDist;
+  t2: BaseDist;
+  env: Env;
+  arithmeticOperation: AlgebraicOperation;
+}): result<BaseDist, DistError> => {
   const invalidOperationError = InputValidator.run(t1, t2, arithmeticOperation);
 
   if (invalidOperationError !== undefined) {
     return Result.Error(invalidOperationError);
   }
 
-  switch (strategy) {
-    case AsAlgebraicCombinationStrategy.AsDefault:
-      const chooseStrategy = StrategyChooser.run({
-        arithmeticOperation,
-        t1,
-        t2,
-      });
-      return runStrategyOnValidatedInputs({
-        t1,
-        t2,
-        strategy: chooseStrategy,
-        arithmeticOperation,
-        env,
-      });
-    case AsAlgebraicCombinationStrategy.AsMonteCarlo:
-      return StrategyCallOnValidatedInputs.monteCarlo(
-        env,
-        arithmeticOperation,
-        t1,
-        t2
-      );
-    case AsAlgebraicCombinationStrategy.AsSymbolic:
-      const result = StrategyCallOnValidatedInputs.symbolic(
-        arithmeticOperation,
-        t1,
-        t2
-      );
-      if (result === undefined) {
-        return Result.Error(
-          requestedStrategyInvalidError(`No analytic solution for inputs`)
-        );
-      }
-      if (!result.ok) {
-        return Result.Error(operationDistError(result.value));
-      }
-      return result;
-    case AsAlgebraicCombinationStrategy.AsConvolution:
-      const convOp =
-        Operation.Convolution.fromAlgebraicOperation(arithmeticOperation);
-      if (convOp === undefined) {
-        const errString = `Convolution not supported for ${Operation.Algebraic.toString(
-          arithmeticOperation
-        )}`;
-        return Result.Error(requestedStrategyInvalidError(errString));
-      } else {
-        return StrategyCallOnValidatedInputs.convolution(env, convOp, t1, t2);
-      }
-  }
+  const chosenStrategy = chooseStrategy({
+    arithmeticOperation,
+    t1,
+    t2,
+  });
+  return runStrategyOnValidatedInputs({
+    t1,
+    t2,
+    strategy: chosenStrategy,
+    arithmeticOperation,
+    env,
+  });
 };
-
-export const algebraicCombination = run;
