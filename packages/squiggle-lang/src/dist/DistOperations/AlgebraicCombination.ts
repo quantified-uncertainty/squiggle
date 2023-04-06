@@ -1,7 +1,6 @@
 import * as magicNumbers from "../../magicNumbers.js";
 import * as Operation from "../../operation.js";
 import { AlgebraicOperation } from "../../operation.js";
-import { OperationError } from "../../operationError.js";
 import * as Result from "../../utility/result.js";
 import { result } from "../../utility/result.js";
 import { BaseDist } from "../BaseDist.js";
@@ -15,12 +14,6 @@ import * as PointSetDist from "../PointSetDist.js";
 import * as SampleSetDist from "../SampleSetDist/SampleSetDist.js";
 import * as SymbolicDist from "../SymbolicDist.js";
 import { Env } from "../env.js";
-
-export enum AlgebraicCombinationStrategy {
-  AsSymbolic,
-  AsMonteCarlo,
-  AsConvolution,
-}
 
 // Checks if operation is possible, returns undefined if everything is ok.
 const validateInputs = (
@@ -58,145 +51,97 @@ const validateInputs = (
   }
 };
 
-const StrategyCallOnValidatedInputs = {
-  convolution: (
-    env: Env,
-    arithmeticOperation: Operation.ConvolutionOperation,
-    t1: BaseDist,
-    t2: BaseDist
-  ): result<PointSetDist.PointSetDist, DistError> => {
-    const p1r = t1.toPointSetDist(env);
-    const p2r = t2.toPointSetDist(env);
-    if (!p1r.ok) {
-      return p1r;
-    }
-    if (!p2r.ok) {
-      return p2r;
-    }
-    const p1 = p1r.value;
-    const p2 = p2r.value;
-
-    return Result.Ok(
-      PointSetDist.combineAlgebraically(arithmeticOperation, p1, p2)
-    );
-  },
-
-  monteCarlo(
-    env: Env,
-    arithmeticOperation: AlgebraicOperation,
-    t1: BaseDist,
-    t2: BaseDist
-  ): result<SampleSetDist.SampleSetDist, DistError> {
-    const fn = Operation.Algebraic.toFn(arithmeticOperation);
-    const s1r = SampleSetDist.SampleSetDist.fromDist(t1, env);
-    const s2r = SampleSetDist.SampleSetDist.fromDist(t2, env);
-    if (!s1r.ok) {
-      return s1r;
-    }
-    if (!s2r.ok) {
-      return s2r;
-    }
-    const s1 = s1r.value;
-    const s2 = s2r.value;
-    return SampleSetDist.map2({ fn, t1: s1, t2: s2 });
-  },
-
-  symbolic(
-    arithmeticOperation: AlgebraicOperation,
-    t1: BaseDist,
-    t2: BaseDist
-  ): result<SymbolicDist.SymbolicDist, OperationError> | undefined {
-    if (
-      t1 instanceof SymbolicDist.SymbolicDist &&
-      t2 instanceof SymbolicDist.SymbolicDist
-    ) {
-      return SymbolicDist.tryAnalyticalSimplification(
-        t1,
-        t2,
-        arithmeticOperation
-      );
-    } else {
-      return undefined;
-    }
-  },
+type CombinationArgs = {
+  t1: BaseDist;
+  t2: BaseDist;
+  env: Env;
+  arithmeticOperation: AlgebraicOperation;
 };
 
-const chooseStrategy = ({
+type StrategyImplementation = (
+  args: CombinationArgs
+) => result<BaseDist, DistError> | undefined;
+
+const symbolicStrategy: StrategyImplementation = ({
   t1,
   t2,
   arithmeticOperation,
-}: {
-  t1: BaseDist;
-  t2: BaseDist;
-  arithmeticOperation: AlgebraicOperation;
-}): AlgebraicCombinationStrategy => {
-  const hasSampleSetDist = (): boolean =>
-    t1 instanceof SampleSetDist.SampleSetDist ||
-    t2 instanceof SampleSetDist.SampleSetDist;
+}) => {
+  if (
+    t1 instanceof SymbolicDist.SymbolicDist &&
+    t2 instanceof SymbolicDist.SymbolicDist
+  ) {
+    const result = SymbolicDist.tryAnalyticalSimplification(
+      t1,
+      t2,
+      arithmeticOperation
+    );
+    return result ? Result.errMap(result, operationDistError) : undefined;
+  } else {
+    return undefined;
+  }
+};
 
-  const convolutionIsFasterThanMonteCarlo = (): boolean =>
-    t1.expectedConvolutionCost() * t2.expectedConvolutionCost() <
+const convolutionStrategy: StrategyImplementation = ({
+  env,
+  arithmeticOperation,
+  t1,
+  t2,
+}) => {
+  const convOp =
+    Operation.Convolution.fromAlgebraicOperation(arithmeticOperation);
+  if (convOp === undefined) {
+    return undefined;
+  }
+
+  const p1r = t1.toPointSetDist(env);
+  const p2r = t2.toPointSetDist(env);
+  if (!p1r.ok) {
+    return p1r;
+  }
+  if (!p2r.ok) {
+    return p2r;
+  }
+  const p1 = p1r.value;
+  const p2 = p2r.value;
+
+  return Result.Ok(PointSetDist.combineAlgebraically(convOp, p1, p2));
+};
+
+const monteCarloStrategy: StrategyImplementation = ({
+  env,
+  arithmeticOperation,
+  t1,
+  t2,
+}) => {
+  const fn = Operation.Algebraic.toFn(arithmeticOperation);
+  const s1r = SampleSetDist.SampleSetDist.fromDist(t1, env);
+  const s2r = SampleSetDist.SampleSetDist.fromDist(t2, env);
+  if (!s1r.ok) {
+    return s1r;
+  }
+  if (!s2r.ok) {
+    return s2r;
+  }
+  const s1 = s1r.value;
+  const s2 = s2r.value;
+  return SampleSetDist.map2({ fn, t1: s1, t2: s2 });
+};
+
+const preferConvolutionToMonteCarlo = (args: CombinationArgs): boolean => {
+  const hasSampleSetDist = () =>
+    args.t1 instanceof SampleSetDist.SampleSetDist ||
+    args.t2 instanceof SampleSetDist.SampleSetDist;
+
+  const convolutionIsFasterThanMonteCarlo = () =>
+    args.t1.expectedConvolutionCost() * args.t2.expectedConvolutionCost() <
     magicNumbers.OpCost.monteCarloCost;
 
-  const preferConvolutionToMonteCarlo = () =>
+  return (
     !hasSampleSetDist() &&
-    Operation.Convolution.canDoAlgebraicOperation(arithmeticOperation) &&
-    convolutionIsFasterThanMonteCarlo();
-
-  if (
-    StrategyCallOnValidatedInputs.symbolic(arithmeticOperation, t1, t2) !==
-    undefined
-  ) {
-    return AlgebraicCombinationStrategy.AsSymbolic;
-  } else {
-    return preferConvolutionToMonteCarlo()
-      ? AlgebraicCombinationStrategy.AsConvolution
-      : AlgebraicCombinationStrategy.AsMonteCarlo;
-  }
-};
-
-const runStrategyOnValidatedInputs = ({
-  t1,
-  t2,
-  arithmeticOperation,
-  strategy,
-  env,
-}: {
-  t1: BaseDist;
-  t2: BaseDist;
-  arithmeticOperation: AlgebraicOperation;
-  strategy: AlgebraicCombinationStrategy;
-  env: Env;
-}): result<BaseDist, DistError> => {
-  switch (strategy) {
-    case AlgebraicCombinationStrategy.AsMonteCarlo:
-      return StrategyCallOnValidatedInputs.monteCarlo(
-        env,
-        arithmeticOperation,
-        t1,
-        t2
-      );
-    case AlgebraicCombinationStrategy.AsSymbolic:
-      const result = StrategyCallOnValidatedInputs.symbolic(
-        arithmeticOperation,
-        t1,
-        t2
-      );
-      if (result === undefined) {
-        return Result.Error(unreachableError());
-      }
-      if (!result.ok) {
-        return Result.Error(operationDistError(result.value));
-      }
-      return result;
-    case AlgebraicCombinationStrategy.AsConvolution:
-      const convOp =
-        Operation.Convolution.fromAlgebraicOperation(arithmeticOperation);
-      if (convOp === undefined) {
-        return Result.Error(unreachableError());
-      }
-      return StrategyCallOnValidatedInputs.convolution(env, convOp, t1, t2);
-  }
+    Operation.Convolution.canDoAlgebraicOperation(args.arithmeticOperation) &&
+    convolutionIsFasterThanMonteCarlo()
+  );
 };
 
 /* Given two random variables A and B, this returns the distribution
@@ -204,33 +149,27 @@ const runStrategyOnValidatedInputs = ({
    For instance, normal(0, 1) + normal(1, 1) -> normal(1, 2).
    In general, this is implemented via convolution.
 */
-export const algebraicCombination = ({
-  t1,
-  t2,
-  env,
-  arithmeticOperation,
-}: {
-  t1: BaseDist;
-  t2: BaseDist;
-  env: Env;
-  arithmeticOperation: AlgebraicOperation;
-}): result<BaseDist, DistError> => {
-  const invalidOperationError = validateInputs(t1, t2, arithmeticOperation);
+export const algebraicCombination = (
+  args: CombinationArgs
+): result<BaseDist, DistError> => {
+  const invalidOperationError = validateInputs(
+    args.t1,
+    args.t2,
+    args.arithmeticOperation
+  );
 
   if (invalidOperationError !== undefined) {
     return Result.Error(invalidOperationError);
   }
 
-  const chosenStrategy = chooseStrategy({
-    arithmeticOperation,
-    t1,
-    t2,
-  });
-  return runStrategyOnValidatedInputs({
-    t1,
-    t2,
-    strategy: chosenStrategy,
-    arithmeticOperation,
-    env,
-  });
+  const maybeSymbolicResult = symbolicStrategy(args);
+  if (maybeSymbolicResult) {
+    return maybeSymbolicResult;
+  }
+
+  const strategy = preferConvolutionToMonteCarlo(args)
+    ? convolutionStrategy
+    : monteCarloStrategy;
+
+  return strategy(args) ?? Result.Error(unreachableError());
 };
