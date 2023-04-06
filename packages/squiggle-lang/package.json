@@ -28,7 +28,7 @@
     "commander": "^10.0.0",
     "immutable": "^4.3.0",
     "jstat": "^1.9.5",
-    "open": "^8.4.2"
+    "open": "^9.1.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",
