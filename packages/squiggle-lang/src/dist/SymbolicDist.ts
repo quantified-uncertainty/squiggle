@@ -262,12 +262,15 @@ export class Normal extends SymbolicDist {
     operation: Operation.AlgebraicOperation,
     n1: number,
     n2: Normal
-  ): Normal | undefined {
+  ): SymbolicDist | undefined {
     if (operation === "Add") {
       return new Normal({ mean: n1 + n2._mean, stdev: n2._stdev });
     } else if (operation === "Subtract") {
       return new Normal({ mean: n1 - n2._mean, stdev: n2._stdev });
     } else if (operation === "Multiply") {
+      if (n1 === 0) {
+        return new PointMass(0);
+      }
       return new Normal({
         mean: n1 * n2._mean,
         stdev: Math.abs(n1) * n2._stdev,
@@ -280,12 +283,15 @@ export class Normal extends SymbolicDist {
     operation: Operation.AlgebraicOperation,
     n1: Normal,
     n2: number
-  ): Normal | undefined {
+  ): SymbolicDist | undefined {
     if (operation === "Add") {
       return new Normal({ mean: n1._mean + n2, stdev: n1._stdev });
     } else if (operation === "Subtract") {
       return new Normal({ mean: n1._mean - n2, stdev: n1._stdev });
     } else if (operation === "Multiply") {
+      if (n2 === 0) {
+        return new PointMass(0);
+      }
       return new Normal({
         mean: n1._mean * n2,
         stdev: n1._stdev * Math.abs(n2),
@@ -1039,11 +1045,11 @@ export function makeFromCredibleInterval({
   }
 }
 
-/* Calling e.g. "Normal.operate" returns an optional that wraps a result.
-       If the optional is None, there is no valid analytic solution. If it Some, it
-       can still return an error if there is a serious problem,
-       like in the case of a divide by 0.
-   */
+/* Calling e.g. "Normal.operate" returns an optional Result.
+   If the result is undefined, there is no valid analytic solution.
+   If it's a Result object, it can still return an error if there is a serious problem,
+   like in the case of a divide by 0.
+*/
 export const tryAnalyticalSimplification = (
   d1: SymbolicDist,
   d2: SymbolicDist,

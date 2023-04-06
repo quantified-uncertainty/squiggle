@@ -137,6 +137,8 @@ describe("eval on distribution functions", () => {
   });
   describe("multiply", () => {
     testEvalToBe("normal(10, 2) * 2", "Normal(20,4)");
+    testEvalToBe("normal(10, 2) * 0", "PointMass(0)");
+    testEvalToBe("0 * normal(10, 2)", "PointMass(0)");
     testEvalToBe("2 * normal(10, 2)", "Normal(20,4)");
     testEvalToBe(
       "lognormal(5,2) * lognormal(10,2)",
