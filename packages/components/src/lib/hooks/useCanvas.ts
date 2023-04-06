@@ -27,22 +27,24 @@ export function useCanvas({
     CanvasRenderingContext2D | undefined
   >();
 
-  const devicePixelRatio = window?.devicePixelRatio ?? 1;
+  const devicePixelRatio =
+    typeof window === "undefined" ? 1 : window.devicePixelRatio;
 
-  const observer = useMemo(
-    () =>
-      new window.ResizeObserver((entries) => {
-        if (!entries[0]) {
-          return;
-        }
-        setWidth(entries[0].contentRect.width);
-      }),
-    []
-  );
+  const observer = useMemo(() => {
+    if (typeof window === "undefined") {
+      return undefined;
+    }
+    return new window.ResizeObserver((entries) => {
+      if (!entries[0]) {
+        return;
+      }
+      setWidth(entries[0].contentRect.width);
+    });
+  }, []);
 
   useEffect(() => {
     return () => {
-      observer.disconnect();
+      observer?.disconnect();
     };
   }, [observer]);
 
@@ -65,8 +67,8 @@ export function useCanvas({
       init?.({ context, width: usedWidth });
       // TODO - call `draw` too? would be slightly faster; but we can't put `draw` in callback dependencies
 
-      observer.disconnect();
-      observer.observe(canvas);
+      observer?.disconnect();
+      observer?.observe(canvas);
     },
     [init, observer, devicePixelRatio]
   );
