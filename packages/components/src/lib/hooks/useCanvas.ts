@@ -27,7 +27,7 @@ export function useCanvas({
     CanvasRenderingContext2D | undefined
   >();
 
-  const devicePixelRatio = window.devicePixelRatio || 1;
+  const devicePixelRatio = window?.devicePixelRatio ?? 1;
 
   const observer = useMemo(
     () =>
