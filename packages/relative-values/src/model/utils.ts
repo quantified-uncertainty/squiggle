@@ -260,13 +260,3 @@ export function createEmptyGraphModel({
     catalog,
   });
 }
-
-export function interfaceWithModelsBuilder(
-  catalog: Catalog,
-  models: Model[]
-): InterfaceWithModels {
-  return {
-    catalog: catalog,
-    models: Map(models.map((m) => [m.id, m])),
-  };
-}

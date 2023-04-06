@@ -202,9 +202,5 @@ function getModel(): Model {
   });
 }
 
-export function getQuriSoftwareBuiltin(): InterfaceWithModels {
-  return {
-    catalog: getCatalog(),
-    models: Map([getModel()].map((m) => [m.id, m])),
-  };
-}
+export const catalog = getCatalog();
+export const models = [getModel()];

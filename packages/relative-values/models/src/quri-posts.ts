@@ -502,9 +502,5 @@ fn(intervention1, intervention2) = [scoreById(intervention1), scoreById(interven
   };
 }
 
-export function getQuriPosts(): InterfaceWithModels {
-  return {
-    catalog: getCatalog(),
-    models: Map([getTextModel()].map((m) => [m.id, m])),
-  };
-}
+export const catalog = getCatalog();
+export const models = [getTextModel()];

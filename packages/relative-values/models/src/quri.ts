@@ -178,9 +178,5 @@ function getGraphModel(): Model {
   });
 }
 
-export function getQuriBuiltin(): InterfaceWithModels {
-  return {
-    catalog: getCatalog(),
-    models: Map([getTextModel(), getGraphModel()].map((m) => [m.id, m])),
-  };
-}
+export const catalog = getCatalog();
+export const models = [getTextModel(), getGraphModel()];

@@ -240,7 +240,7 @@ function getCatalog(): Catalog {
   };
 }
 
-function getTextModel(): Model {
+function getModel(): Model {
   return {
     id: "health-interventions",
     title: "Health Interventions ",
@@ -313,9 +313,5 @@ function getTextModel(): Model {
   };
 }
 
-export function getHealthInterventions(): InterfaceWithModels {
-  return {
-    catalog: getCatalog(),
-    models: Map([getTextModel()].map((m) => [m.id, m])),
-  };
-}
+export const catalog = getCatalog();
+export const models = [getModel()];

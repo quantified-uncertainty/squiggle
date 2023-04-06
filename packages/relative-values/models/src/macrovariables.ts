@@ -265,9 +265,5 @@ function getTextModel(): Model {
   };
 }
 
-export function getMacrovariables(): InterfaceWithModels {
-  return {
-    catalog: getCatalog(),
-    models: Map([getTextModel()].map((m) => [m.id, m])),
-  };
-}
+export const catalog = getCatalog();
+export const models = [getTextModel()];

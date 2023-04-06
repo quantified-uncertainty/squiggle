@@ -1,16 +1,23 @@
 import { InterfaceWithModels } from "@/types";
-import { getQuriBuiltin } from "./quri";
-import { getQuriSoftwareBuiltin } from "./quri-software";
-import { getQuriPosts } from "./quri-posts";
-import { getHealthInterventions } from "./health-interventions";
-import { getThingsYouShouldBuy } from "./things-you-should-buy";
-import { getMacrovariables } from "./macrovariables";
+import * as quri from "./quri";
+import * as software from "./quri-software";
+import * as posts from "./quri-posts";
+import * as health from "./health-interventions";
+import * as macrovariables from "./macrovariables";
+import { Map } from "immutable";
 
-export const allInterfaces: InterfaceWithModels[] = [
-  getQuriBuiltin(),
-  getQuriSoftwareBuiltin(),
-  getQuriPosts(),
-  getHealthInterventions(),
-	getThingsYouShouldBuy(),
-  getMacrovariables(),
+
+const items = [
+  { catalog: quri.catalog, models: quri.models },
+  { catalog: software.catalog, models: software.models },
+  { catalog: posts.catalog, models: posts.models },
+  { catalog: health.catalog, models: health.models },
+  { catalog: macrovariables.catalog, models: macrovariables.models },
 ];
+
+export const allInterfaces: InterfaceWithModels[] = items.map(
+  ({ catalog, models }) => ({
+    catalog,
+    models: Map(models.map((m) => [m.id, m])),
+  })
+);
