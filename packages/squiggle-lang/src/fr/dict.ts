@@ -95,12 +95,12 @@ export const library = [
     ],
   }),
   maker.make({
-    name: "mapValues",
+    name: "map",
     output: "Record",
-    examples: [`Dict.mapValues({a: 1, b: 2}, {|x| x + 1})`],
+    examples: [`Dict.map({a: 1, b: 2}, {|x| x + 1})`],
     definitions: [
       makeDefinition(
-        "mapValues",
+        "map",
         [frDict(frAny), frLambda],
         ([dict, lambda], context, reducer) => {
           return Ok(
