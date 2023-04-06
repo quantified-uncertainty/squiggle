@@ -18,7 +18,7 @@
     "immutable": "^4.3.0",
     "next": "^13.2.4",
     "react": "^18.2.0",
-    "typescript": "^4.9.5"
+    "typescript": "^5.0.3"
   },
   "devDependencies": {
     "@commander-js/extra-typings": "^10.0.3",
