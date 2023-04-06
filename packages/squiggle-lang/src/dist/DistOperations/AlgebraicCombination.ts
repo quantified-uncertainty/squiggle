@@ -22,19 +22,19 @@ export enum AlgebraicCombinationStrategy {
   AsConvolution,
 }
 
-/* Given two random variables A and B, this returns the distribution
-   of a new variable that is the result of the operation on A and B.
-   For instance, normal(0, 1) + normal(1, 1) -> normal(1, 2).
-   In general, this is implemented via convolution.
-*/
-const InputValidator = {
+// Checks if operation is possible, returns undefined if everything is ok.
+const validateInputs = (
+  t1: BaseDist,
+  t2: BaseDist,
+  arithmeticOperation: AlgebraicOperation
+): DistError | undefined => {
   /*
      It would be good to also do a check to make sure that probability mass for the second
      operand, at value 1.0, is 0 (or approximately 0). However, we'd ideally want to check
      that both the probability mass and the probability density are greater than zero.
      Right now we don't yet have a way of getting probability mass, so I'll leave this for later.
  */
-  getLogarithmInputError(t1: BaseDist, t2: BaseDist): DistError | undefined {
+  const getLogarithmInputError = (): DistError | undefined => {
     const isDistNotGreaterThanZero = (t: BaseDist) =>
       t.cdf(magicNumbers.Epsilon.ten) > 0;
 
@@ -49,19 +49,13 @@ const InputValidator = {
       );
     }
     return undefined;
-  },
+  };
 
-  run(
-    t1: BaseDist,
-    t2: BaseDist,
-    arithmeticOperation: AlgebraicOperation
-  ): DistError | undefined {
-    if (arithmeticOperation == "Logarithm") {
-      return InputValidator.getLogarithmInputError(t1, t2);
-    } else {
-      return undefined;
-    }
-  },
+  if (arithmeticOperation == "Logarithm") {
+    return getLogarithmInputError();
+  } else {
+    return undefined;
+  }
 };
 
 const StrategyCallOnValidatedInputs = {
@@ -205,6 +199,11 @@ const runStrategyOnValidatedInputs = ({
   }
 };
 
+/* Given two random variables A and B, this returns the distribution
+   of a new variable that is the result of the operation on A and B.
+   For instance, normal(0, 1) + normal(1, 1) -> normal(1, 2).
+   In general, this is implemented via convolution.
+*/
 export const algebraicCombination = ({
   t1,
   t2,
@@ -216,7 +215,7 @@ export const algebraicCombination = ({
   env: Env;
   arithmeticOperation: AlgebraicOperation;
 }): result<BaseDist, DistError> => {
-  const invalidOperationError = InputValidator.run(t1, t2, arithmeticOperation);
+  const invalidOperationError = validateInputs(t1, t2, arithmeticOperation);
 
   if (invalidOperationError !== undefined) {
     return Result.Error(invalidOperationError);
