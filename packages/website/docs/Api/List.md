@@ -1,5 +1,5 @@
 ---
-sidebar_position: 8
+sidebar_position: 7
 title: List
 ---
 
@@ -64,6 +64,11 @@ last: (list<'a>) => 'a
 ```
 List.concat: (list<'a>, list<'a>) => list<'a>
 ```
+### append
+
+```
+List.append: (list<'a>, <'a>) => list<'a>
+```
 
 ### reverse
 
@@ -80,7 +85,7 @@ List.uniq: (list<'a>) => list<'a>
 ```
 
 ```js
-List.uniq(["foobar", "foobar", 1, 1, 2]); // creates the list ["foobar", 1, 2]
+List.uniq(["foobar", "foobar", 1, 1, 2]); // ["foobar", 1, 2]
 ```
 
 ### map
@@ -131,8 +136,8 @@ See [Rescript implementation](https://rescript-lang.org/docs/manual/latest/api/b
 List.join: (list<string>, string) => string
 ```
 
-```
-List.join(["foo", "bar", "char"], "--") // creates the string "foo--bar--char"
+```js
+List.join(["foo", "bar", "char"], "--") // "foo--bar--char"
 ```
 
 ### flatten
@@ -141,7 +146,7 @@ List.join(["foo", "bar", "char"], "--") // creates the string "foo--bar--char"
 flatten: (list<list>) => list
 ```
 
-```
-List.flatten([[1,2], [3,4]]) // creates [1,2,3,4]
+```js
+List.flatten([[1,2], [3,4]]) // [1,2,3,4]
 
 ```

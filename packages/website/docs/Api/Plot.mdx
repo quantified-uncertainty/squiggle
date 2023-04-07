@@ -2,6 +2,7 @@
 sidebar_position: 10
 title: Plot
 ---
+import { SquiggleEditor } from "@quri/squiggle-components";
 
 The Plot module provides functions to create plots of distributions and functions. The two primary functions are `Plot.dists` and `Plot.fn`, which allow you to plot multiple labeled distributions and plot functions respectively.
 
@@ -15,20 +16,14 @@ Plot.dists: ({dists: list<{name: string, value: distribution | number}>}) => plo
 
 Examples:
 
-```
-Plot.dists({
-    dists: [{name: "dist", value: normal(0, 1)}]
-});
-```
-
-```
-plot = Plot.dists({
+<SquiggleEditor
+  defaultCode={`Plot.dists({
     dists: [
-        { name: "Normal(0,1)", value: normal(0, 1) },
-        { name: "Normal(2,1)", value: normal(2, 1) },
+        { name: "First Dist", value: normal(0, 1) },
+        { name: "Second Dist", value: uniform(2, 4) },
     ]
-})
-```
+})`}
+/>
 
 ### Plot.fn
 
@@ -40,14 +35,14 @@ Plot.fn: ({fn: (number => number), min: number, max: number}) => plot
 
 Examples:
 
-```
-Plot.fn({fn: {|x| x * x}, min: 3, max: 5})
-```
+<SquiggleEditor
+  defaultCode={`Plot.fn({fn: {|x| x^5}, min: 3, max: 40})`}
+/>
 
-```
-const plot = Plot.fn({
+<SquiggleEditor
+  defaultCode={`Plot.fn({
     fn: {|x| Math.sin(x)},
-    min: 0,
-    max: 2 * Math.pi,
-})
-```
+    min: 5,
+    max: 10
+})`}
+/>

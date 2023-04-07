@@ -1,5 +1,5 @@
 ---
-sidebar_position: 9
+sidebar_position: 3
 title: Dictionary
 ---
 
@@ -102,7 +102,7 @@ Dict.mergeMany([first, snd]); // {a: 1, b: 3, c: 5}
 ```
 Dict.set: (dict<'a>, string, 'a) => dict<'a>
 ```
-Returns a new dictionary with the new element. The passed-in dictionary is not changed.
+Creates a new dictionary that includes the added element, while leaving the original dictionary unaltered.
 
 ### map
 
