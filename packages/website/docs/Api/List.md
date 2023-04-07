@@ -64,6 +64,7 @@ last: (list<'a>) => 'a
 ```
 List.concat: (list<'a>, list<'a>) => list<'a>
 ```
+
 ### append
 
 ```
@@ -137,7 +138,7 @@ List.join: (list<string>, string) => string
 ```
 
 ```js
-List.join(["foo", "bar", "char"], "--") // "foo--bar--char"
+List.join(["foo", "bar", "char"], "--"); // "foo--bar--char"
 ```
 
 ### flatten
@@ -147,6 +148,8 @@ flatten: (list<list>) => list
 ```
 
 ```js
-List.flatten([[1,2], [3,4]]) // [1,2,3,4]
-
+List.flatten([
+  [1, 2],
+  [3, 4],
+]); // [1,2,3,4]
 ```

@@ -99,9 +99,11 @@ Dict.mergeMany([first, snd]); // {a: 1, b: 3, c: 5}
 ```
 
 ### set
+
 ```
 Dict.set: (dict<'a>, string, 'a) => dict<'a>
 ```
+
 Creates a new dictionary that includes the added element, while leaving the original dictionary unaltered.
 
 ### map
