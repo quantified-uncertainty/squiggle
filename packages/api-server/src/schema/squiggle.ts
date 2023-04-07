@@ -1,22 +1,18 @@
+import crypto from "crypto";
+
 import {
   SqAbstractDistribution,
-  SqError,
   SqProject,
-  SqRecord,
   SqValue,
-  result,
 } from "@quri/squiggle-lang";
 
+import { Prisma, SquiggleCache } from "@prisma/client";
 import { builder } from "../builder.js";
+import { prisma } from "../prisma.js";
 
-type T = result<{ result: SqValue; bindings: SqRecord }, SqError>;
-
-const SquiggleOkResult =
-  builder.objectRef<Extract<T, { ok: true }>>("SquiggleOkResult");
-
-const SquiggleErrorResult = builder.objectRef<Extract<T, { ok: false }>>(
-  "SquiggleErrorResult"
-);
+function getKey(code: string): string {
+  return crypto.createHash("md5").update(code).digest("base64");
+}
 
 const squiggleValueToJSON = (value: SqValue) => {
   return JSON.stringify(value.asJS(), (key, value) => {
@@ -30,65 +26,154 @@ const squiggleValueToJSON = (value: SqValue) => {
   });
 };
 
-const SquiggleOkResultObj = builder.objectType(SquiggleOkResult, {
-  fields: (t) => ({
-    resultJSON: t.string({
-      resolve(obj) {
-        return squiggleValueToJSON(obj.value.result);
-      },
-    }),
-    bindingsJSON: t.string({
-      resolve(obj) {
-        return squiggleValueToJSON(obj.value.bindings.asValue());
-      },
-    }),
-  }),
-});
+abstract class AbstractSquiggleOutput {
+  abstract isCached: boolean;
+  abstract isOk(): boolean;
+  abstract getErrorString(): string;
+  abstract getResultJSON(): Prisma.JsonValue;
+  abstract getBindingsJSON(): Prisma.JsonValue;
+}
 
-const SquiggleErrorResultObj = builder.objectType(SquiggleErrorResult, {
-  fields: (t) => ({
-    errorString: t.string({
-      resolve(result) {
-        return result.value.toString();
-      },
-    }),
-  }),
-});
+class SquiggleOutput implements AbstractSquiggleOutput {
+  private MAIN = "main";
+  readonly isCached = false;
 
-const SquiggleResultObj = builder.unionType("SquiggleResult", {
-  types: [SquiggleOkResultObj, SquiggleErrorResultObj],
+  project: SqProject;
+
+  constructor(private code: string) {
+    this.project = SqProject.create();
+
+    this.project.setSource(this.MAIN, code);
+    this.project.run(this.MAIN);
+  }
+
+  isOk() {
+    return this.project.getResult(this.MAIN).ok;
+  }
+
+  getErrorString() {
+    const result = this.project.getResult(this.MAIN);
+    if (result.ok) {
+      return "";
+    }
+    return result.value.toString();
+  }
+
+  getResultJSON(): string {
+    const result = this.project.getResult(this.MAIN);
+    if (!result.ok) {
+      return "0";
+    }
+    return squiggleValueToJSON(result.value);
+  }
+
+  getBindingsJSON(): string {
+    const bindings = this.project.getBindings(this.MAIN);
+    return squiggleValueToJSON(bindings.asValue());
+  }
+}
+
+class CachedSquiggleOutput implements AbstractSquiggleOutput {
+  readonly isCached = true;
+
+  constructor(private cache: SquiggleCache) {}
+
+  isOk() {
+    return this.cache.ok;
+  }
+
+  getErrorString(): string {
+    return this.cache.error || "";
+  }
+
+  getResultJSON() {
+    return this.cache.result;
+  }
+
+  getBindingsJSON() {
+    return this.cache.bindings;
+  }
+}
+
+const SquiggleOkOutputObj = builder.objectType(
+  builder.objectRef<AbstractSquiggleOutput>("SquiggleOkOutput"),
+  {
+    name: "SquiggleOkOutput",
+    fields: (t) => ({
+      isCached: t.boolean({
+        resolve: (obj) => obj.isCached,
+      }),
+      resultJSON: t.string({
+        resolve(obj) {
+          return JSON.stringify(obj.getResultJSON());
+        },
+      }),
+      bindingsJSON: t.string({
+        resolve(obj) {
+          return JSON.stringify(obj.getBindingsJSON());
+        },
+      }),
+    }),
+  }
+);
+
+const SquiggleErrorOutputObj = builder.objectType(
+  builder.objectRef<AbstractSquiggleOutput>("SquiggleErrorOutput"),
+  {
+    name: "SquiggleErrorOutput",
+    fields: (t) => ({
+      isCached: t.boolean({
+        resolve: (obj) => obj.isCached,
+      }),
+      errorString: t.string({
+        resolve(result) {
+          return result.getErrorString();
+        },
+      }),
+    }),
+  }
+);
+
+const SquiggleOutputObj = builder.unionType("SquiggleOutput", {
+  types: [SquiggleOkOutputObj, SquiggleErrorOutputObj],
   resolveType: (result) => {
-    return result.ok ? SquiggleOkResultObj : SquiggleErrorResultObj;
+    return result.isOk() ? SquiggleOkOutputObj : SquiggleErrorOutputObj;
   },
 });
 
 builder.queryField("runSquiggle", (t) =>
   t.field({
-    type: SquiggleResultObj,
+    type: SquiggleOutputObj,
     args: {
       code: t.arg.string({ required: true }),
     },
-    resolve(_, args) {
-      const project = SqProject.create();
+    async resolve(_, { code }) {
+      const key = getKey(code);
 
-      const MAIN = "main";
-      project.setSource(MAIN, args.code);
-      project.run(MAIN);
-      const result = project.getResult(MAIN);
-      if (result.ok) {
-        return {
-          ok: true,
-          value: {
-            result: result.value,
-            bindings: project.getBindings(MAIN),
-          },
-        } as const;
-      } else {
-        return {
-          ok: false,
-          value: result.value,
-        } as const;
+      const cached = await prisma.squiggleCache.findUnique({
+        where: { id: key },
+      });
+      if (cached) {
+        return new CachedSquiggleOutput(cached);
       }
+      const result = new SquiggleOutput(code);
+      await prisma.squiggleCache.upsert({
+        where: { id: key },
+        create: {
+          id: key,
+          ok: result.isOk(),
+          result: result.getResultJSON(),
+          bindings: result.getBindingsJSON(),
+          error: result.getErrorString(),
+        },
+        update: {
+          ok: result.isOk(),
+          result: result.getResultJSON(),
+          bindings: result.getBindingsJSON(),
+          error: result.getErrorString(),
+        },
+      });
+      return result;
     },
   })
 );

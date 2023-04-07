@@ -1,3 +1,6 @@
+import * as dotenv from "dotenv";
+dotenv.config();
+
 import { createYoga } from "graphql-yoga";
 import { createServer } from "node:http";
 import { schema } from "./schema/index.js";
