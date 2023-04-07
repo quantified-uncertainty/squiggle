@@ -4,8 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch ./src/server.ts",
-    "build": "tsc"
+    "dev": "next dev",
+    "start": "next start",
+    "build": "next build",
+    "lint": "prettier --check . && next lint"
   },
   "dependencies": {
     "@quri/squiggle-lang": "^0.6.0",
