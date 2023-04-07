@@ -1,13 +1,13 @@
-import { makeDefinition } from "../library/registry/fnDefinition";
+import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
   frLambda,
   frNumber,
   frRecord,
-} from "../library/registry/frTypes";
-import { FnFactory } from "../library/registry/helpers";
-import { Ok } from "../utility/result";
-import { vLambdaDeclaration } from "../value";
+} from "../library/registry/frTypes.js";
+import { FnFactory } from "../library/registry/helpers.js";
+import { Ok } from "../utility/result.js";
+import { vLambdaDeclaration } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Function",

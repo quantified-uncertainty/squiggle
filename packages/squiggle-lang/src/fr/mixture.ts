@@ -1,14 +1,14 @@
-import { BaseDist } from "../dist/BaseDist";
-import { Env } from "../dist/env";
-import * as SymbolicDist from "../dist/SymbolicDist";
-import * as Result from "../utility/result";
-import * as E_A from "../utility/E_A";
-import * as DistOperations from "../dist/DistOperations";
-import { Value, vDist } from "../value";
-import { argumentError, DistError } from "../dist/DistError";
-import { unpackDistResult } from "../library/registry/helpers";
-import { BuiltinLambda } from "../reducer/lambda";
-import { ErrorMessage, REDistributionError } from "../reducer/ErrorMessage";
+import { BaseDist } from "../dist/BaseDist.js";
+import { Env } from "../dist/env.js";
+import * as SymbolicDist from "../dist/SymbolicDist.js";
+import * as Result from "../utility/result.js";
+import * as E_A from "../utility/E_A.js";
+import * as DistOperations from "../dist/DistOperations/index.js";
+import { Value, vDist } from "../value/index.js";
+import { argumentError, DistError } from "../dist/DistError.js";
+import { unpackDistResult } from "../library/registry/helpers.js";
+import { BuiltinLambda } from "../reducer/lambda.js";
+import { ErrorMessage, REDistributionError } from "../reducer/ErrorMessage.js";
 
 const raiseArgumentError = (message: string) =>
   ErrorMessage.throw(REDistributionError(argumentError(message)));

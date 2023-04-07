@@ -1,6 +1,6 @@
-import { ParseError } from "../ast/parse";
-import { ErrorMessage, MessageException, REOther } from "./ErrorMessage";
-import { Frame, FrameStack } from "./frameStack";
+import { ParseError } from "../ast/parse.js";
+import { ErrorMessage, MessageException, REOther } from "./ErrorMessage.js";
+import { Frame, FrameStack } from "./frameStack.js";
 
 // "I" stands for "Internal", since we also have a more public SqError proxy
 export class IError extends Error {

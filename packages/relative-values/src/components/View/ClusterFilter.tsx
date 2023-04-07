@@ -12,10 +12,12 @@ export const ClusterItem: React.FC<{
 }> = ({ cluster, selected, toggle }) => {
   return (
     <div className="flex gap-1 items-center cursor-pointer" onClick={toggle}>
-      <ClusterIcon cluster={cluster} selected={selected} />
+      <div className="flex-none">
+        <ClusterIcon cluster={cluster} selected={selected} />
+      </div>
       <div
         className={clsx(
-          "text-xs hover:text-black font-medium",
+          "text-sm hover:text-black font-medium",
           selected ? "text-gray-600" : "text-gray-400"
         )}
       >

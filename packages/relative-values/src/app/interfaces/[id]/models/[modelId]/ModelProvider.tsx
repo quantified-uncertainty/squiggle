@@ -26,7 +26,7 @@ export const useSelectedModel = () => {
     return models.get(selectedId);
   }, [models, selectedId]);
 
-  return { selectedId, selectedModel };
+  return selectedModel;
 };
 
 export const ModelProvider: FC<

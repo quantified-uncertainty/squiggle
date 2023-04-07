@@ -1,26 +1,26 @@
-import { ReducerContext } from "../../reducer/Context";
-import { Lambda } from "../../reducer/lambda";
-import { ReducerFn, Value } from "../../value";
-import { result } from "../../utility/result";
-import * as core from "./core";
+import { ReducerContext } from "../../reducer/Context.js";
+import { Lambda } from "../../reducer/lambda.js";
+import { ReducerFn, Value } from "../../value/index.js";
+import { result } from "../../utility/result.js";
+import * as core from "./core.js";
 
-import { library as builtinLibrary } from "../../fr/builtin";
-import { library as dictLibrary } from "../../fr/dict";
-import { library as distLibrary } from "../../fr/dist";
-import { library as dangerLibrary } from "../../fr/danger";
-import { library as fnLibrary } from "../../fr/fn";
-import { library as samplesetLibrary } from "../../fr/sampleset";
-import { library as numberLibrary } from "../../fr/number";
-import { library as pointsetLibrary } from "../../fr/pointset";
-import { library as scoringLibrary } from "../../fr/scoring";
-import { library as genericDistLibrary } from "../../fr/genericDist";
-import { library as unitsLibrary } from "../../fr/units";
-import { library as dateLibrary } from "../../fr/date";
-import { library as mathLibrary } from "../../fr/math";
-import { library as listLibrary } from "../../fr/list";
-import { library as plotLibrary } from "../../fr/plot";
-import { mxLambda } from "../../fr/mixture";
-import { ErrorMessage } from "../../reducer/ErrorMessage";
+import { library as builtinLibrary } from "../../fr/builtin.js";
+import { library as dictLibrary } from "../../fr/dict.js";
+import { library as distLibrary } from "../../fr/dist.js";
+import { library as dangerLibrary } from "../../fr/danger.js";
+import { library as fnLibrary } from "../../fr/fn.js";
+import { library as samplesetLibrary } from "../../fr/sampleset.js";
+import { library as numberLibrary } from "../../fr/number.js";
+import { library as pointsetLibrary } from "../../fr/pointset.js";
+import { library as scoringLibrary } from "../../fr/scoring.js";
+import { library as genericDistLibrary } from "../../fr/genericDist.js";
+import { library as unitsLibrary } from "../../fr/units.js";
+import { library as dateLibrary } from "../../fr/date.js";
+import { library as mathLibrary } from "../../fr/math.js";
+import { library as listLibrary } from "../../fr/list.js";
+import { library as plotLibrary } from "../../fr/plot.js";
+import { mxLambda } from "../../fr/mixture.js";
+import { ErrorMessage } from "../../reducer/ErrorMessage.js";
 
 const fnList: core.FRFunction[] = [
   ...builtinLibrary,

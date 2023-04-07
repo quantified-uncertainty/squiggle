@@ -10,8 +10,10 @@ type Props = {
 
 export const DropdownButton: FC<Props> = ({ text, children }) => {
   return (
-    <Dropdown render={children}>
-      <Button>{text}</Button>
-    </Dropdown>
+    <div className="flex">
+      <Dropdown render={children}>
+        <Button>{text}</Button>
+      </Dropdown>
+    </div>
   );
 };

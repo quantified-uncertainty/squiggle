@@ -1,6 +1,6 @@
-import { testRun } from "../helpers/helpers";
+import { testRun } from "../helpers/helpers.js";
 import * as fc from "fast-check";
-import { testEvalToBe } from "../helpers/reducerHelpers";
+import { testEvalToBe } from "../helpers/reducerHelpers.js";
 
 describe("sampleN", () => {
   testEvalToBe("pointMass(5) -> sampleN(10) -> sum", "50");

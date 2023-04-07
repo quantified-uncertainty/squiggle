@@ -8,8 +8,8 @@ import {
 } from "@codemirror/language";
 import { styleTags, tags as t } from "@lezer/highlight";
 import { snippetCompletion, CompletionContext } from "@codemirror/autocomplete";
-import { parser } from "./generated/squiggle";
 import { SqProject } from "@quri/squiggle-lang";
+import { parser } from "./generated/squiggle.js";
 
 function squiggle(project: SqProject) {
   return () =>

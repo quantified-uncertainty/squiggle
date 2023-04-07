@@ -1,8 +1,8 @@
 import {
   logScoreScalarAnswer,
   mixture,
-} from "../../../src/dist/DistOperations";
-import { env, mkPointMass, unpackResult } from "../../helpers/distHelpers";
+} from "../../../src/dist/DistOperations/index.js";
+import { env, mkPointMass, unpackResult } from "../../helpers/distHelpers.js";
 
 describe("WithScalarAnswer: discrete -> scalar -> score", () => {
   const pointA = mkPointMass(3.0);

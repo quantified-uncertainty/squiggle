@@ -3,8 +3,10 @@
     "paths": {
       "@quri/squiggle-lang": ["../squiggle-lang/src"]
     },
-    "module": "commonjs",
+    "module": "es2020",
+    "moduleResolution": "node16",
     "jsx": "react",
+    "target": "ES6",
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "noImplicitAny": false,
@@ -13,19 +15,13 @@
     "strict": true,
     "preserveConstEnums": true,
     "composite": true,
-    "outDir": "./dist",
-    "declarationDir": "./dist",
+    "outDir": "./dist/esm",
+    "declarationDir": "./dist/types",
     "declaration": true,
     "sourceMap": true
   },
-  "files": [
-    "src/vega-specs/spec-distributions.json",
-    "src/vega-specs/spec-percentiles.json",
-    "src/vega-specs/spec-line-chart.json"
-  ],
-  "target": "ES6",
-  "include": ["src/**/*", "src/*"],
-  "exclude": ["node_modules", "**/*.spec.ts", "webpack.config.js"],
+  "include": ["src/**/*", "test/**/*"],
+  "exclude": ["node_modules", "webpack.config.js"],
   "references": [
     {
       "path": "../squiggle-lang"

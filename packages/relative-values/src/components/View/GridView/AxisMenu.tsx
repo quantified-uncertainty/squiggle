@@ -59,7 +59,7 @@ const SortBy: FC<{
       />
       <div
         className={clsx(
-          "ml-2 text-xs font-medium",
+          "ml-2 text-sm font-medium",
           isCurrentMode ? "text-black" : "text-gray-400 group-hover:text-black"
         )}
       >
@@ -69,7 +69,10 @@ const SortBy: FC<{
   );
 };
 
-export const AxisMenu: FC<{ axis: Axis }> = ({ axis }) => {
+export const AxisMenu: FC<{ axis: Axis; sortByAverage?: boolean }> = ({
+  axis,
+  sortByAverage = true,
+}) => {
   const {
     axisConfig: {
       [axis]: { sort },
@@ -89,13 +92,13 @@ export const AxisMenu: FC<{ axis: Axis }> = ({ axis }) => {
             axis={axis}
             config={sort}
             mode="median"
-            text="Average value"
+            text={sortByAverage ? "Average value" : "Value"}
           />
           <SortBy
             axis={axis}
             config={sort}
             mode="uncertainty"
-            text="Average uncertainty"
+            text={sortByAverage ? "Average uncertainty" : "Uncertainty"}
           />
         </div>
       </div>

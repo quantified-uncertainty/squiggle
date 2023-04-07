@@ -1,6 +1,6 @@
-import { registry } from "../../src/library/registry";
-import { allExamplesWithFns } from "../../src/library/registry/core";
-import { evaluateStringToResult } from "../../src/reducer";
+import { registry } from "../../src/library/registry/index.js";
+import { allExamplesWithFns } from "../../src/library/registry/core.js";
+import { evaluateStringToResult } from "../../src/reducer/index.js";
 
 test.each(allExamplesWithFns(registry))(
   "tests of example $example",

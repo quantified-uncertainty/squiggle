@@ -1,5 +1,5 @@
 import { Item } from "@/types";
-import { RVStorage } from "@/values/RVStorage";
+import { ModelEvaluator } from "@/values/ModelEvaluator";
 import { FC, Fragment, useCallback, useMemo } from "react";
 import { useSelectedInterface } from "../../Interface/InterfaceProvider";
 import { DropdownButton } from "../../ui/DropdownButton";
@@ -9,10 +9,11 @@ import { RelativeCell } from "../RelativeCell";
 import { useViewContext } from "../ViewProvider";
 import { AxisMenu } from "./AxisMenu";
 import { GridModeControls } from "./GridModeControls";
+import { result } from "@quri/squiggle-lang";
 
 export const GridView: FC<{
-  rv: RVStorage;
-}> = ({ rv }) => {
+  model: ModelEvaluator;
+}> = ({ model }) => {
   const { axisConfig, gridMode } = useViewContext();
   const {
     catalog: { items },
@@ -30,13 +31,13 @@ export const GridView: FC<{
   const rowItems = useSortedItems({
     items: filteredRowItems,
     config: axisConfig.rows,
-    rv,
+    model: model,
     otherDimensionItems: filteredColumnItems,
   });
   const columnItems = useSortedItems({
     items: filteredColumnItems,
     config: axisConfig.columns,
-    rv,
+    model: model,
     otherDimensionItems: filteredRowItems,
   });
 
@@ -56,6 +57,13 @@ export const GridView: FC<{
       return idToPosition[rowItem.id] <= idToPosition[columnItem.id];
     },
     [idToPosition, gridMode]
+  );
+
+  //It seems nicer, at this point, to just specify that its p25 and p75
+  const uncertaintyPercentiles = model.getParamPercentiles(
+    items.map((i) => i.id),
+    (r) => r.uncertainty,
+    [5, 95]
   );
 
   return (
@@ -92,7 +100,8 @@ export const GridView: FC<{
                   key={columnItem.id}
                   id1={rowItem.id}
                   id2={columnItem.id}
-                  rv={rv}
+                  model={model}
+                  uncertaintyPercentiles={uncertaintyPercentiles}
                 />
               )
             )}

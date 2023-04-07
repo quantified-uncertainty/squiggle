@@ -1,10 +1,10 @@
 import * as React from "react";
 import {
-  XCircleIcon,
-  InformationCircleIcon,
   CheckCircleIcon,
-} from "@heroicons/react/solid";
-import clsx from "clsx";
+  InformationCircleIcon,
+  XCircleIcon,
+} from "@heroicons/react/solid/esm/index.js";
+import { clsx } from "clsx";
 
 export const Alert: React.FC<{
   heading: string;

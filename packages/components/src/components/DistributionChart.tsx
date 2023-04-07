@@ -1,11 +1,11 @@
-import * as React from "react";
 import { SqDistribution } from "@quri/squiggle-lang";
+import * as React from "react";
 import {
   MultiDistributionChart,
   MultiDistributionChartProps,
-} from "./MultiDistributionChart";
+} from "./MultiDistributionChart/index.js";
 
-export { DistributionChartSettings } from "./MultiDistributionChart";
+export { type DistributionChartSettings } from "./MultiDistributionChart/index.js";
 
 export type DistributionChartProps = Omit<
   MultiDistributionChartProps,
@@ -17,7 +17,7 @@ export type DistributionChartProps = Omit<
 export const DistributionChart: React.FC<DistributionChartProps> = ({
   distribution,
   environment,
-  chartHeight,
+  height,
   settings,
 }) => {
   return (
@@ -30,7 +30,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
         colorScheme: "blues",
       }}
       environment={environment}
-      chartHeight={chartHeight}
+      height={height}
       settings={settings}
     />
   );

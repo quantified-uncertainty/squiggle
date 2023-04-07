@@ -1,28 +1,29 @@
-import { makeDefinition } from "../library/registry/fnDefinition";
+import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
   frDist,
   frLambda,
   frNumber,
   frRecord,
-} from "../library/registry/frTypes";
-import * as Continuous from "../PointSet/Continuous";
-import * as Discrete from "../PointSet/Discrete";
+} from "../library/registry/frTypes.js";
+import * as Continuous from "../PointSet/Continuous.js";
+import * as Discrete from "../PointSet/Discrete.js";
 import {
   doNumberLambdaCall,
   FnFactory,
   repackDistResult,
-} from "../library/registry/helpers";
-import { PointSetDist } from "../dist/PointSetDist";
-import { vDist, vNumber } from "../value";
-import * as XYShape from "../XYShape";
-import { xyShapeDistError } from "../dist/DistError";
-import { Ok } from "../utility/result";
+} from "../library/registry/helpers.js";
+import { PointSetDist } from "../dist/PointSetDist.js";
+import { vDist, vNumber } from "../value/index.js";
+import * as XYShape from "../XYShape.js";
+import { xyShapeDistError } from "../dist/DistError.js";
+import { BaseDist } from "../dist/BaseDist.js";
+import { Ok } from "../utility/result.js";
 import {
   ErrorMessage,
   REDistributionError,
   REExpectedType,
-} from "../reducer/ErrorMessage";
+} from "../reducer/ErrorMessage.js";
 
 const maker = new FnFactory({
   nameSpace: "PointSet",
@@ -41,6 +42,13 @@ const argsToXYShape = (inputs: { x: number; y: number }[]): XYShape.XYShape => {
   return result.value;
 };
 
+function pointSetAssert(dist: BaseDist): asserts dist is PointSetDist {
+  if (dist instanceof PointSetDist) {
+    return;
+  }
+  return ErrorMessage.throw(REExpectedType("PointSetDist", dist.toString()));
+}
+
 export const library = [
   maker.make({
     name: "fromDist",
@@ -53,6 +61,17 @@ export const library = [
     ],
   }),
   maker.make({
+    name: "downsample",
+    examples: [`PointSet.downsample(PointSet.fromDist(normal(5,2)), 50)`],
+    output: "Dist",
+    definitions: [
+      makeDefinition("downsample", [frDist, frNumber], ([dist, number]) => {
+        pointSetAssert(dist);
+        return Ok(vDist(dist.downsample(number)));
+      }),
+    ],
+  }),
+  maker.make({
     name: "mapY",
     examples: [`PointSet.mapY(mx(normal(5,2)), {|x| x + 1})`],
     output: "Dist",
@@ -61,11 +80,7 @@ export const library = [
         "mapY",
         [frDist, frLambda],
         ([dist, lambda], context, reducer) => {
-          if (!(dist instanceof PointSetDist)) {
-            return ErrorMessage.throw(
-              REExpectedType("PointSetDist", dist.toString())
-            );
-          }
+          pointSetAssert(dist);
           return repackDistResult(
             dist.mapYResult(
               (y) =>

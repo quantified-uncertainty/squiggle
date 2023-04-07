@@ -1,4 +1,4 @@
-import { SqProject } from "../../src";
+import { SqProject } from "../../src/index.js";
 
 describe("Parse includes", () => {
   const project = SqProject.create({ resolver: (name) => name });

@@ -4,27 +4,33 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "prettier --check . && next lint",
+    "format": "prettier --write .",
+    "cacheRV": "tsx ./src/cli/index.ts cacheRV",
+    "next-build": "next build",
+    "build": "yarn cacheRV && next build"
   },
   "dependencies": {
-    "@floating-ui/react": "^0.20.1",
+    "@floating-ui/react": "^0.22.2",
     "@quri/squiggle-components": "^0.6.0",
     "@quri/squiggle-lang": "^0.6.0",
     "clsx": "^1.2.1",
     "immutable": "^4.3.0",
     "next": "^13.2.4",
     "react": "^18.2.0",
-    "typescript": "^4.9.5"
+    "typescript": "^5.0.3"
   },
   "devDependencies": {
+    "@commander-js/extra-typings": "^10.0.3",
     "@types/react": "^18.0.28",
     "autoprefixer": "^10.4.14",
-    "eslint": "^8.36.0",
+    "commander": "^10.0.0",
+    "eslint": "^8.37.0",
     "eslint-config-next": "^13.2.4",
     "postcss": "^8.4.21",
     "postcss-cli": "^10.1.0",
-    "tailwindcss": "^3.2.7"
+    "tailwindcss": "^3.3.1",
+    "tsx": "^3.12.6"
   }
 }

@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react";
 import React from "react";
 import "@testing-library/jest-dom";
-import { SquiggleChart } from "../src/index";
+import { SquiggleChart } from "../src/index.js";
 import { SqProject } from "@quri/squiggle-lang";
 
 test("Creates and cleans up source", async () => {

@@ -1,4 +1,4 @@
-import * as Topology from "../../src/public/SqProject/Topology";
+import * as Topology from "../../src/public/SqProject/Topology.js";
 
 describe("Topology Diff", () => {
   test("when equal 1x", () => {

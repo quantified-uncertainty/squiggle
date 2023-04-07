@@ -1,10 +1,10 @@
-import zipWith from "lodash/zipWith";
-import { SqPointSetDistribution } from "./SqDistribution";
-import { ContinuousShape } from "../PointSet/Continuous";
-import { DiscreteShape } from "../PointSet/Discrete";
-import { MixedShape } from "../PointSet/Mixed";
-import { AnyPointSet } from "../PointSet/PointSet";
-import { PointSetDist } from "../dist/PointSetDist";
+import zipWith from "lodash/zipWith.js";
+import { SqPointSetDistribution } from "./SqDistribution.js";
+import { ContinuousShape } from "../PointSet/Continuous.js";
+import { DiscreteShape } from "../PointSet/Discrete.js";
+import { MixedShape } from "../PointSet/Mixed.js";
+import { AnyPointSet } from "../PointSet/PointSet.js";
+import { PointSetDist } from "../dist/PointSetDist.js";
 
 enum Tag {
   Mixed = "Mixed",

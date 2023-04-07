@@ -1,8 +1,8 @@
-import { ReducerContext } from "../../reducer/Context";
-import { ErrorMessage } from "../../reducer/ErrorMessage";
-import { result } from "../../utility/result";
-import { ReducerFn, Value } from "../../value";
-import { FRType } from "./frTypes";
+import { ReducerContext } from "../../reducer/Context.js";
+import { ErrorMessage } from "../../reducer/ErrorMessage.js";
+import { result } from "../../utility/result.js";
+import { ReducerFn, Value } from "../../value/index.js";
+import { FRType } from "./frTypes.js";
 
 type FnDefinition1<T1> = {
   name: string;

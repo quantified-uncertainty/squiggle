@@ -1,5 +1,5 @@
 import { useSelectedModel } from "@/app/interfaces/[id]/models/[modelId]/ModelProvider";
-import { modelRoute, newModelRoute } from "@/routes";
+import { modelRoute, newModelRoute, useSiblingRoute } from "@/routes";
 import clsx from "clsx";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -9,12 +9,19 @@ import { useSelectedInterface } from "./InterfaceProvider";
 
 const ModelPickerMenu: FC<{ close(): void }> = ({ close }) => {
   const { models, catalog } = useSelectedInterface();
-  const { selectedId } = useSelectedModel();
+  const selectedModel = useSelectedModel();
+  const selectedId = selectedModel?.id;
 
   const router = useRouter();
 
+  const siblingRoute = useSiblingRoute();
+
   const pick = (id: string) => {
-    router.push(modelRoute(catalog.id, id));
+    const newRoute = siblingRoute(id);
+    console.log(newRoute);
+    if (newRoute) {
+      router.push(newRoute);
+    }
     close();
   };
 
@@ -58,7 +65,7 @@ const ModelPickerMenu: FC<{ close(): void }> = ({ close }) => {
 };
 
 export const ModelPicker: FC = () => {
-  const { selectedModel } = useSelectedModel();
+  const selectedModel = useSelectedModel();
 
   return (
     <Dropdown render={({ close }) => <ModelPickerMenu close={close} />}>

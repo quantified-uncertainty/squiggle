@@ -1,10 +1,13 @@
 import React from "react";
-import { CodeEditor } from "./CodeEditor";
-import { SquiggleContainer } from "./SquiggleContainer";
-import { useMaybeControlledValue } from "../lib/hooks";
-import { useSquiggle, SquiggleArgs } from "../lib/hooks/useSquiggle";
-import { SquiggleViewer, SquiggleViewerProps } from "./SquiggleViewer";
-import { getErrorLocations, getValueToRender } from "../lib/utility";
+
+import { SqLocation } from "@quri/squiggle-lang";
+
+import { CodeEditor } from "./CodeEditor.js";
+import { SquiggleContainer } from "./SquiggleContainer.js";
+import { useMaybeControlledValue } from "../lib/hooks/index.js";
+import { useSquiggle, SquiggleArgs } from "../lib/hooks/useSquiggle.js";
+import { SquiggleViewer, SquiggleViewerProps } from "./SquiggleViewer/index.js";
+import { getErrorLocations, getValueToRender } from "../lib/utility.js";
 
 export type SquiggleEditorProps = SquiggleArgs & {
   defaultCode?: string;

@@ -1,5 +1,5 @@
-import { IError } from "../reducer/IError";
-import { Frame } from "../reducer/frameStack";
+import { IError } from "../reducer/IError.js";
+import { Frame } from "../reducer/frameStack.js";
 
 export class SqError {
   constructor(private _value: IError) {}
