@@ -176,7 +176,7 @@ export const library: FRFunction[] = [
         toValueResult(
           pointwiseCombinationFloat(dist, {
             env: environment,
-            algebraicCombination: {
+            algebraicOperation: {
               NAME: "LogarithmWithThreshold",
               VAL: eps,
             },
@@ -191,7 +191,7 @@ export const library: FRFunction[] = [
       unpackDistResult(
         pointwiseCombinationFloat(dist, {
           env,
-          algebraicCombination: "Multiply",
+          algebraicOperation: "Multiply",
           f,
         })
       ),
@@ -202,7 +202,7 @@ export const library: FRFunction[] = [
       unpackDistResult(
         pointwiseCombinationFloat(dist, {
           env,
-          algebraicCombination: "Power",
+          algebraicOperation: "Power",
           f,
         })
       ),
@@ -213,7 +213,7 @@ export const library: FRFunction[] = [
       unpackDistResult(
         pointwiseCombinationFloat(dist, {
           env,
-          algebraicCombination: "Power",
+          algebraicOperation: "Power",
           f: Math.E,
         })
       ),
