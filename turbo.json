@@ -27,7 +27,7 @@
     },
     "@quri/api-server#build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**"]
+      "outputs": [".next/**", "../../node_modules/.prisma"]
     },
     "format": {},
     "lint": {
