@@ -250,6 +250,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
         oneLine={false}
         showGutter={true}
         height={height}
+        project={resultAndBindings.project}
       />
     </div>
   ) : (

@@ -1,7 +1,6 @@
 import React, { FC, useEffect, useMemo, useRef } from "react";
 
-import { SqLocation } from "@quri/squiggle-lang";
-
+import { SqLocation, SqProject } from "@quri/squiggle-lang";
 import { syntaxHighlighting } from "@codemirror/language";
 import { EditorState, Compartment } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
@@ -45,6 +44,7 @@ interface CodeEditorProps {
   height?: number;
   showGutter?: boolean;
   errorLocations?: SqLocation[];
+  project: SqProject;
 }
 
 const compTheme = new Compartment();
@@ -61,10 +61,15 @@ export const CodeEditor: FC<CodeEditorProps> = ({
   oneLine = false,
   showGutter = false,
   errorLocations = [],
+  project,
 }) => {
+  if (oneLine && height)
+    throw Error("Either `height` or `oneLine` may be set.");
+
   const editor = useRef<HTMLDivElement>(null);
   const editorView = useRef<EditorView | null>(null);
-  const languageSupport = squiggle();
+  const languageSupport = useMemo(squiggle(project), [project]);
+
   const state = useMemo(
     () =>
       EditorState.create({
@@ -86,6 +91,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({
             wholeWords: true,
             highlightWordAroundCursor: false, // Works weird on fractions! 5.3e10K
           }),
+          compSubmitListener.of([]),
           keymap.of([
             ...closeBracketsKeymap,
             ...defaultKeymap,
@@ -98,12 +104,11 @@ export const CodeEditor: FC<CodeEditorProps> = ({
           ]),
           compGutter.of([]),
           compUpdateListener.of([]),
-          compSubmitListener.of([]),
           compTheme.of([]),
           languageSupport,
         ],
       }),
-    []
+    [languageSupport]
   );
 
   useEffect(() => {
@@ -145,18 +150,34 @@ export const CodeEditor: FC<CodeEditorProps> = ({
   }, [onChange]);
 
   useEffect(() => {
+    const cHeight = oneLine
+      ? (() => {
+          if (editorView.current) {
+            const paddings = editorView.current.documentPadding;
+            return (
+              editorView.current.defaultLineHeight +
+              paddings.top +
+              paddings.bottom
+            );
+          } else {
+            return null;
+          }
+        })()
+      : height;
     editorView.current?.dispatch({
       effects: compTheme.reconfigure(
         EditorView.theme({
           "&": {
             ...(width !== null ? { width: `${width}px` } : {}),
-            ...(height !== null ? { height: `${height}px` } : {}),
+            ...(cHeight !== null ? { height: `${cHeight}px` } : {}),
           },
           ".cm-selectionMatch": { backgroundColor: "#33ae661a" },
+          ".cm-content": { padding: 0 },
+          ":-moz-focusring.cm-content": { outline: "none" },
         })
       ),
     });
-  }, [width, height]);
+  }, [width, height, oneLine]);
 
   useEffect(() => {
     editorView.current?.dispatch({
@@ -165,7 +186,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({
           onSubmit
             ? [
                 {
-                  key: "Ctrl-s",
+                  key: "Mod-Enter",
                   run: () => {
                     onSubmit();
                     return true;
@@ -198,5 +219,10 @@ export const CodeEditor: FC<CodeEditorProps> = ({
     );
   }, [errorLocations]);
 
-  return <div ref={editor}></div>;
+  return (
+    <div
+      style={{ minWidth: `${width}px`, minHeight: `${height}px` }}
+      ref={editor}
+    ></div>
+  );
 };
