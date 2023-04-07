@@ -1,5 +1,5 @@
-import { builder } from "../builder.js";
+import { builder } from "../builder";
 
-import "./squiggle.js";
+import "./squiggle";
 
 export const schema = builder.toSchema();
