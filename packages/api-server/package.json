@@ -1,0 +1,12 @@
+{
+  "name": "@quri/api-server",
+  "version": "0.1.0",
+  "type": "module",
+  "dependencies": {
+    "@pothos/core": "^3.29.0",
+    "@pothos/plugin-simple-objects": "^3.6.7",
+    "graphql": "^16.6.0",
+    "graphql-yoga": "^3.8.0",
+    "typescript": "^5.0.3"
+  }
+}
