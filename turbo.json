@@ -25,6 +25,10 @@
       "dependsOn": ["^build"],
       "outputs": [".next/**", "./models/cache/**"]
     },
+    "@quri/api-server#build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**"]
+    },
     "format": {},
     "lint": {
       "dependsOn": ["^build"]
