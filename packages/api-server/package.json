@@ -8,6 +8,7 @@
     "build": "tsc"
   },
   "dependencies": {
+    "@quri/squiggle-lang": "^0.6.0",
     "@pothos/core": "^3.29.0",
     "@pothos/plugin-simple-objects": "^3.6.7",
     "@prisma/client": "^4.12.0",
