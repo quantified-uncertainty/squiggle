@@ -97,3 +97,29 @@ first = { a: 1, b: 2 };
 snd = { b: 3, c: 5 };
 Dict.mergeMany([first, snd]); // {a: 1, b: 3, c: 5}
 ```
+
+### set
+```
+Dict.set: (dict<'a>, string, 'a) => dict<'a>
+```
+Returns a new dictionary with the new element. The passed-in dictionary is not changed.
+
+### map
+
+```
+Dict.map: (dict<'a>, (`a => `a)) => dict<'a>
+```
+
+```js
+Dict.map({a: 1, b: 2}, {|x| x + 1}) // { a: 2, b:3 }
+```
+
+### mapKeys
+
+```
+Dict.map: (dict<'a>, (string => string)) => dict<'a>
+```
+
+```js
+Dict.mapKeys({a: 1, b: 2}, {|x| x + "hi" }) // {ahi: 1, bhi: 2}
+```
