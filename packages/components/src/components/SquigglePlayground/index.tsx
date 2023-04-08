@@ -247,7 +247,6 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
         value={code}
         onChange={setCode}
         onSubmit={run}
-        oneLine={false}
         showGutter={true}
         height={height}
         project={resultAndBindings.project}
