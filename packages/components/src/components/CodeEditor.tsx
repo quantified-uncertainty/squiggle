@@ -7,7 +7,7 @@ import { EditorView, keymap } from "@codemirror/view";
 import { defaultKeymap } from "@codemirror/commands";
 import { setDiagnostics } from "@codemirror/lint";
 
-import squiggle from "../languageSupport/squiggle.js";
+import { squiggleLanguageSupport } from "../languageSupport/squiggle.js";
 
 // From basic setup
 import {
@@ -39,7 +39,6 @@ interface CodeEditorProps {
   value: string;
   onChange: (value: string) => void;
   onSubmit?: () => void;
-  oneLine?: boolean;
   width?: number;
   height?: number;
   showGutter?: boolean;
@@ -58,17 +57,16 @@ export const CodeEditor: FC<CodeEditorProps> = ({
   onSubmit,
   width,
   height,
-  oneLine = false,
   showGutter = false,
   errorLocations = [],
   project,
 }) => {
-  if (oneLine && height)
-    throw Error("Either `height` or `oneLine` may be set.");
-
   const editor = useRef<HTMLDivElement>(null);
   const editorView = useRef<EditorView | null>(null);
-  const languageSupport = useMemo(squiggle(project), [project]);
+  const languageSupport = useMemo(
+    () => squiggleLanguageSupport(project),
+    [project]
+  );
 
   const state = useMemo(
     () =>
@@ -150,26 +148,12 @@ export const CodeEditor: FC<CodeEditorProps> = ({
   }, [onChange]);
 
   useEffect(() => {
-    const cHeight = oneLine
-      ? (() => {
-          if (editorView.current) {
-            const paddings = editorView.current.documentPadding;
-            return (
-              editorView.current.defaultLineHeight +
-              paddings.top +
-              paddings.bottom
-            );
-          } else {
-            return null;
-          }
-        })()
-      : height;
     editorView.current?.dispatch({
       effects: compTheme.reconfigure(
         EditorView.theme({
           "&": {
-            ...(width !== null ? { width: `${width}px` } : {}),
-            ...(cHeight !== null ? { height: `${cHeight}px` } : {}),
+            ...(width === undefined ? {} : { width: `${width}px` }),
+            ...(height === undefined ? {} : { height: `${height}px` }),
           },
           ".cm-selectionMatch": { backgroundColor: "#33ae661a" },
           ".cm-content": { padding: 0 },
@@ -177,7 +161,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({
         })
       ),
     });
-  }, [width, height, oneLine]);
+  }, [width, height]);
 
   useEffect(() => {
     editorView.current?.dispatch({
