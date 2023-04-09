@@ -59,7 +59,7 @@ export const ColumnHeader: FC<{
         fullHeight
       >
         <CellBox header clickable>
-          <Header item={selectedItem}/>
+          <Header item={selectedItem} />
         </CellBox>
       </Dropdown>
     </div>

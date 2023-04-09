@@ -61,7 +61,7 @@ export const ListView: FC<Props> = ({ model }) => {
       <div
         className="grid border-r border-b border-gray-200 w-full"
         style={{
-          gridTemplateColumns:"2fr 2fr 1fr"
+          gridTemplateColumns: "2fr 2fr 1fr",
         }}
       >
         <CellBox header>

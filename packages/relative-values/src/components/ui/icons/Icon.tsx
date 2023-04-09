@@ -9,7 +9,7 @@ export type IconProps = PropsWithChildren<{
 
 export const Icon: FC<IconProps> = ({
   size = 20,
-  viewBox="0 0 20 20",
+  viewBox = "0 0 20 20",
   className = "fill-black stroke-black",
   onClick,
   children,
