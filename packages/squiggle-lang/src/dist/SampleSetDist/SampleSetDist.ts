@@ -154,11 +154,12 @@ sample everything.
     );
   }
 
-  toPointSetDist(env: Env): Result.result<PointSetDist, DistError> {
+  toPointSetDist(env: Env, logTransform=true): Result.result<PointSetDist, DistError> {
     const dists = samplesToPointSetDist(
       this.samples,
       env.xyPointLength,
-      undefined
+      undefined,
+      logTransform
     );
 
     const result = buildMixedShape({

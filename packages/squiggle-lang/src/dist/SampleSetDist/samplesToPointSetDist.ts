@@ -15,14 +15,23 @@ type ConversionResult = {
 export const samplesToPointSetDist = (
   samples: readonly number[],
   outputXYPoints: number,
-  kernelWidth?: number
+  kernelWidth?: number,
+  logTransform: boolean = false,
 ): ConversionResult => {
   samples = E_A_Floats.sort(samples);
 
-  const { continuousPart, discretePart } = splitContinuousAndDiscrete(
+  let { continuousPart, discretePart } = splitContinuousAndDiscrete(
     samples,
     minDiscreteToKeep(samples)
   );
+
+  if (logTransform) {
+    continuousPart = continuousPart.map(r => {
+      if (r == 0) { return 0 }
+      else if (r < 0) { return -Math.log(-r) }
+      else { return Math.log(r) }
+    })
+  }
 
   const contLength = continuousPart.length;
   let pointWeight = 1 / samples.length;
@@ -39,7 +48,18 @@ export const samplesToPointSetDist = (
   } else {
     const width = kernelWidth ?? nrd0(continuousPart);
     const { xs, ys } = kde(continuousPart, outputXYPoints, width, pointWeight);
-    continuousDist = { xs, ys };
+    if (logTransform) {
+    continuousDist = ({
+      xs: xs.map(x => x > 0 ? Math.exp(x) : -Math.exp(-x)),
+      ys: ys.map((y, index) => {
+        let xValue = xs[index];
+        let xValueScaled = xValue > 0 ? Math.exp(xValue) : -Math.exp(-xValue);
+        return y / xValueScaled
+      })
+    });
+    } else {
+      continuousDist = { xs, ys };
+    }
   }
 
   discretePart.ys = discretePart.ys.map((count: number) => count * pointWeight);

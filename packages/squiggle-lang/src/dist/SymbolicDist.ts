@@ -80,7 +80,7 @@ export abstract class SymbolicDist extends BaseDist {
 
   toPointSetDist(
     env: Env,
-    xSelection: PointsetXSelection = "ByWeight"
+    xSelection: PointsetXSelection = "ByWeight",
   ): result<PointSetDist, DistError> {
     const xs = this.interpolateXs({
       xSelection,
