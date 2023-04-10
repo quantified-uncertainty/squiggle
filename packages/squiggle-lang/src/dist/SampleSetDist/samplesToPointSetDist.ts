@@ -53,7 +53,7 @@ export const samplesToPointSetDist = (
       xs: xs.map(x => x > 0 ? Math.exp(x) : -Math.exp(-x)),
       ys: ys.map((y, index) => {
         let xValue = xs[index];
-        let xValueScaled = xValue > 0 ? Math.exp(xValue) : -Math.exp(-xValue);
+        let xValueScaled = xValue > 0 ? Math.exp(xValue) : Math.exp(-xValue);
         return y / xValueScaled
       })
     });
