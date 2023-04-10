@@ -16,7 +16,7 @@ export const samplesToPointSetDist = (
   samples: readonly number[],
   outputXYPoints: number,
   kernelWidth?: number,
-  logTransform: boolean = false,
+  logTransform: boolean = true,
 ): ConversionResult => {
   samples = E_A_Floats.sort(samples);
 
@@ -25,11 +25,11 @@ export const samplesToPointSetDist = (
     minDiscreteToKeep(samples)
   );
 
+  //WARNING: Needs fix for negative numbers.
   if (logTransform) {
     continuousPart = continuousPart.map(r => {
       if (r == 0) { return 0 }
-      else if (r < 0) { return -Math.log(-r) }
-      else { return Math.log(r) }
+      return Math.log(r)
     })
   }
 
@@ -49,14 +49,13 @@ export const samplesToPointSetDist = (
     const width = kernelWidth ?? nrd0(continuousPart);
     const { xs, ys } = kde(continuousPart, outputXYPoints, width, pointWeight);
     if (logTransform) {
-    continuousDist = ({
-      xs: xs.map(x => x > 0 ? Math.exp(x) : -Math.exp(-x)),
-      ys: ys.map((y, index) => {
-        let xValue = xs[index];
-        let xValueScaled = xValue > 0 ? Math.exp(xValue) : Math.exp(-xValue);
-        return y / xValueScaled
-      })
-    });
+      continuousDist = ({
+        xs: xs.map(x => Math.exp(x)),
+        ys: ys.map((y, index) => {
+          let xValue = xs[index];
+          return y / Math.exp(xValue)
+        })
+      });
     } else {
       continuousDist = { xs, ys };
     }

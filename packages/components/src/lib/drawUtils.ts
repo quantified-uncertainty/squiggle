@@ -105,7 +105,7 @@ export function drawAxes({
 }) {
   const xScale = logX ? d3.scaleLog() : d3.scaleLinear();
   xScale.domain(xDomain);
-  const yScale = expY ? d3.scalePow().exponent(0.1) : d3.scaleLinear();
+  const yScale = expY ? d3.scalePow().exponent(0.02) : d3.scaleLinear();
   yScale.domain(yDomain);
 
   const xTicks = xScale.ticks(tickCount);
