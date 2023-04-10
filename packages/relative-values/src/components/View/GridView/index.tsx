@@ -61,7 +61,7 @@ export const GridView: FC<{
 
   //It seems nicer, at this point, to just specify that its p25 and p75
   const uncertaintyPercentiles = model.getParamPercentiles(
-    items.map((i) => i.id),
+    rowItems.map((i) => i.id),
     (r) => r.uncertainty,
     [5, 95]
   );

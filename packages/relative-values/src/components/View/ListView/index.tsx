@@ -46,7 +46,7 @@ export const ListView: FC<Props> = ({ model }) => {
   });
 
   const uncertaintyPercentiles = model.getParamPercentiles(
-    catalog.items.map((i) => i.id),
+    filteredItems.map((i) => i.id),
     (r) => r.uncertainty,
     [20, 80]
   );
