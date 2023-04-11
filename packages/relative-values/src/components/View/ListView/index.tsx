@@ -11,7 +11,7 @@ import { useViewContext } from "../ViewProvider";
 import { useFilteredItems, useSortedItems } from "../hooks";
 import { averageUncertainty } from "../hooks/useSortedItems";
 import { ColumnHeader } from "./ColumnHeader";
-import { Compass } from "@/components/ui/icons/Compass";
+import { CompassIcon } from "@/components/ui/icons/CompassIcon";
 import clsx from "clsx";
 import { ClusterItem } from "../ClusterFilter";
 import { ClusterIcon } from "../../common/ClusterIcon";
@@ -92,7 +92,7 @@ export const ListView: FC<Props> = ({ model }) => {
                   onClick={() => setSelectedItem(item)}
                   className={"pl-2 cursor-pointer"}
                 >
-                  <Compass
+                  <CompassIcon
                     className={clsx(
                       "hover:fill-slate-800",
                       item.id === selectedItem.id
