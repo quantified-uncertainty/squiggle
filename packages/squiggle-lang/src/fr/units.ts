@@ -1,4 +1,4 @@
-import { FnFactory } from "../library/registry/helpers";
+import { FnFactory } from "../library/registry/helpers.js";
 
 const maker = new FnFactory({
   nameSpace: "",

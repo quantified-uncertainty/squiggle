@@ -7,8 +7,7 @@ import {
   Env,
 } from "@quri/squiggle-lang";
 import { useEffect, useMemo } from "react";
-import { JsImports, jsImportsToSquiggleCode } from "../jsImports";
-import * as uuid from "uuid";
+import { JsImports, jsImportsToSquiggleCode } from "../jsImports.js";
 
 // Props needed for a standalone execution
 type StandaloneExecutionProps = {
@@ -34,13 +33,16 @@ export type SquiggleArgs = {
 export type ResultAndBindings = {
   result: result<SqValue, SqError>;
   bindings: SqRecord;
+  project: SqProject;
 };
 
 const importSourceName = (sourceName: string) => "imports-" + sourceName;
 const defaultContinues = [];
 
 export const useSquiggle = (args: SquiggleArgs): ResultAndBindings => {
-  const sourceName = useMemo(() => uuid.v4(), []);
+  // random; https://stackoverflow.com/a/12502559
+  const sourceName = useMemo(() => Math.random().toString(36).slice(2), []);
+
   const projectArg = "project" in args ? args.project : undefined;
   const environment = "environment" in args ? args.environment : undefined;
   const continues =
@@ -71,7 +73,7 @@ export const useSquiggle = (args: SquiggleArgs): ResultAndBindings => {
       project.run(sourceName);
       const result = project.getResult(sourceName);
       const bindings = project.getBindings(sourceName);
-      return { result, bindings };
+      return { result, bindings, project };
     },
     // This complains about executionId not being used inside the function body.
     // This is on purpose, as executionId simply allows you to run the squiggle

@@ -1,4 +1,4 @@
-import { useInterfaceContext } from "@/components/Interface/InterfaceProvider";
+import { useSelectedInterface } from "@/components/Interface/InterfaceProvider";
 import { Dropdown } from "@/components/ui/Dropdown";
 import { Item } from "@/types";
 import { FC, useState } from "react";
@@ -9,7 +9,7 @@ const ColumnHeaderContextMenu: FC<{
 }> = ({ setSelectedItem }) => {
   const {
     catalog: { items },
-  } = useInterfaceContext();
+  } = useSelectedInterface();
 
   const [search, setSearch] = useState("");
 

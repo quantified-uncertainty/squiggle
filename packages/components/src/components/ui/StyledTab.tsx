@@ -1,6 +1,6 @@
 import React, { Fragment } from "react";
 import { Tab } from "@headlessui/react";
-import clsx from "clsx";
+import { clsx } from "clsx";
 
 type StyledTabProps = {
   name: string;

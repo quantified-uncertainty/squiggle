@@ -1,14 +1,13 @@
-import { result } from "../utility/result";
-import { SqDistribution, wrapDistribution } from "./SqDistribution";
-import { SqLambda } from "./SqLambda";
-import { SqLambdaDeclaration } from "./SqLambdaDeclaration";
-import { SqRecord } from "./SqRecord";
-import { SqPlot } from "./SqPlot";
-import { SqArray } from "./SqArray";
-import { SqValueLocation } from "./SqValueLocation";
-import { SqError } from "./SqError";
-import { Value } from "../value";
-import { BaseDist } from "../dist/BaseDist";
+import { result } from "../utility/result.js";
+import { Value } from "../value/index.js";
+import { SqArray } from "./SqArray.js";
+import { SqDistribution, wrapDistribution } from "./SqDistribution.js";
+import { SqError } from "./SqError.js";
+import { SqLambda } from "./SqLambda.js";
+import { SqLambdaDeclaration } from "./SqLambdaDeclaration.js";
+import { SqPlot, wrapPlot } from "./SqPlot.js";
+import { SqRecord } from "./SqRecord.js";
+import { SqValueLocation } from "./SqValueLocation.js";
 
 export const wrapValue = (value: Value, location: SqValueLocation): SqValue => {
   const tag = value.type;
@@ -43,7 +42,7 @@ export const wrapValue = (value: Value, location: SqValueLocation): SqValue => {
   }
 };
 
-export abstract class SqAbstractValue<T, J> {
+export abstract class SqAbstractValue<T extends string, J> {
   abstract tag: T;
 
   constructor(
@@ -101,7 +100,7 @@ export class SqDeclarationValue extends SqAbstractValue<
   tag = "Declaration" as const;
 
   get value() {
-    return new SqLambdaDeclaration(this._value.value);
+    return new SqLambdaDeclaration(this._value.value, this.location);
   }
 
   asJS() {
@@ -194,7 +193,7 @@ export class SqPlotValue extends SqAbstractValue<"Plot", SqPlot> {
   tag = "Plot" as const;
 
   get value() {
-    return new SqPlot(this._value.value, this.location);
+    return wrapPlot(this._value.value, this.location);
   }
 
   asJS() {

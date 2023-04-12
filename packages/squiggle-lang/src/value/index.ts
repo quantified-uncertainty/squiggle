@@ -1,10 +1,20 @@
-import { BaseDist } from "../dist/BaseDist";
-import { Expression } from "../expression";
-import { Namespace } from "../reducer/bindings";
-import { ReducerContext } from "../reducer/Context";
-import { declarationToString, LambdaDeclaration } from "../reducer/declaration";
-import { Lambda } from "../reducer/lambda";
-import * as DateTime from "../utility/DateTime";
+import { BaseDist } from "../dist/BaseDist.js";
+import { Expression } from "../expression/index.js";
+import { Namespace } from "../reducer/bindings.js";
+import { ReducerContext } from "../reducer/Context.js";
+import isInteger from "lodash/isInteger.js";
+import {
+  declarationToString,
+  LambdaDeclaration,
+} from "../reducer/declaration.js";
+import {
+  ErrorMessage,
+  REArrayIndexNotFound,
+  REOther,
+  RERecordPropertyNotFound,
+} from "../reducer/ErrorMessage.js";
+import { Lambda } from "../reducer/lambda.js";
+import * as DateTime from "../utility/DateTime.js";
 
 // TODO - move these types to reducer/
 export type ReducerFn = (
@@ -13,6 +23,11 @@ export type ReducerFn = (
 ) => [Value, ReducerContext];
 
 export type ValueMap = Namespace;
+
+// Mixin for values that allow field lookups; just for type safety.
+type Indexable = {
+  get(key: Value): Value;
+};
 
 /*
 Value classes are shaped in a similar way and can work as discriminated unions thank to the `type` property.
@@ -26,11 +41,43 @@ If you add a new value class, don't forget to add it to the "Value" union type b
 "vBlah" functions are just for the sake of brevity, so that we don't have to prefix any value creation with "new".
 */
 
-class VArray {
+class VArray implements Indexable {
   readonly type = "Array" as const;
   constructor(public value: Value[]) {}
   toString(): string {
     return "[" + this.value.map((v) => v.toString()).join(",") + "]";
+  }
+
+  get(key: Value) {
+    if (key.type === "Number") {
+      if (!isInteger(key.value)) {
+        return ErrorMessage.throw(
+          REArrayIndexNotFound("Array index must be an integer", key.value)
+        );
+      }
+      const index = key.value | 0;
+      if (index >= 0 && index < this.value.length) {
+        return this.value[index];
+      } else {
+        return ErrorMessage.throw(
+          REArrayIndexNotFound("Array index not found", index)
+        );
+      }
+    }
+
+    return ErrorMessage.throw(
+      REOther("Can't access non-numerical key on an array")
+    );
+  }
+
+  flatten() {
+    return new VArray(
+      this.value.reduce(
+        (acc: Value[], v) =>
+          acc.concat(v.type === "Array" ? v.value : ([v] as Value[])),
+        []
+      )
+    );
   }
 }
 export const vArray = (v: Value[]) => new VArray(v);
@@ -53,11 +100,18 @@ class VDate {
 }
 export const vDate = (v: Date) => new VDate(v);
 
-class VDeclaration {
+class VDeclaration implements Indexable {
   readonly type = "Declaration" as const;
   constructor(public value: LambdaDeclaration) {}
   toString() {
     return declarationToString(this.value, (f) => vLambda(f).toString());
+  }
+  get(key: Value) {
+    if (key.type === "String" && key.value === "fn") {
+      return vLambda(this.value.fn);
+    }
+
+    return ErrorMessage.throw(REOther("Trying to access key on wrong value"));
   }
 }
 export const vLambdaDeclaration = (v: LambdaDeclaration) => new VDeclaration(v);
@@ -98,7 +152,7 @@ class VString {
 }
 export const vString = (v: string) => new VString(v);
 
-class VRecord {
+class VRecord implements Indexable {
   readonly type = "Record" as const;
   constructor(public value: ValueMap) {}
   toString(): string {
@@ -109,6 +163,21 @@ class VRecord {
         .join(",") +
       "}"
     );
+  }
+
+  get(key: Value) {
+    if (key.type === "String") {
+      return (
+        this.value.get(key.value) ??
+        ErrorMessage.throw(
+          RERecordPropertyNotFound("Record property not found", key.value)
+        )
+      );
+    } else {
+      return ErrorMessage.throw(
+        REOther("Can't access non-string key on a record")
+      );
+    }
   }
 }
 export const vRecord = (v: ValueMap) => new VRecord(v);
@@ -135,17 +204,43 @@ export type LabeledDistribution = {
   distribution: BaseDist;
 };
 
-export type Plot = {
-  distributions: LabeledDistribution[];
-};
+export type Plot =
+  | {
+      type: "distributions";
+      distributions: LabeledDistribution[];
+    }
+  | {
+      type: "fn";
+      fn: Lambda;
+      min: number;
+      max: number;
+    };
 
-class VPlot {
+class VPlot implements Indexable {
   readonly type = "Plot" as const;
   constructor(public value: Plot) {}
-  toString() {
-    return `Plot containing ${this.value.distributions
-      .map((x) => x.name)
-      .join(", ")}`;
+
+  toString(): string {
+    switch (this.value.type) {
+      case "distributions":
+        return `Plot containing ${this.value.distributions
+          .map((x) => x.name)
+          .join(", ")}`;
+      case "fn":
+        return `Plot for function ${this.value.fn}`;
+    }
+  }
+
+  get(key: Value) {
+    if (
+      key.type === "String" &&
+      key.value === "fn" &&
+      this.value.type === "fn"
+    ) {
+      return vLambda(this.value.fn);
+    }
+
+    return ErrorMessage.throw(REOther("Trying to access key on wrong value"));
   }
 }
 

@@ -1,12 +1,12 @@
 import React from "react";
 import * as yup from "yup";
 import { UseFormRegister } from "react-hook-form";
-import { InputItem } from "./ui/InputItem";
-import { Checkbox } from "./ui/Checkbox";
-import { HeadedSection } from "./ui/HeadedSection";
-import { Text } from "./ui/Text";
-import { distributionSettingsSchema } from "./MultiDistributionChart";
-import { functionSettingsSchema } from "./FunctionChart";
+import { InputItem } from "./ui/InputItem.js";
+import { Checkbox } from "./ui/Checkbox.js";
+import { HeadedSection } from "./ui/HeadedSection.js";
+import { Text } from "./ui/Text.js";
+import { distributionSettingsSchema } from "./MultiDistributionChart/index.js";
+import { functionSettingsSchema } from "./FunctionChart/index.js";
 
 export const viewSettingsSchema = yup.object({}).shape({
   distributionChartSettings: distributionSettingsSchema,
@@ -26,9 +26,9 @@ export type PartialViewSettings = DeepPartial<ViewSettings>;
 
 export const ViewSettingsForm: React.FC<{
   withFunctionSettings?: boolean;
-  disableLogXSetting?: boolean;
+  fixed?: PartialViewSettings;
   register: UseFormRegister<ViewSettings>;
-}> = ({ withFunctionSettings = true, disableLogXSetting, register }) => {
+}> = ({ withFunctionSettings = true, fixed, register }) => {
   return (
     <div className="space-y-6 p-3 divide-y divide-gray-200 max-w-xl">
       <HeadedSection title="General Display Settings">
@@ -42,22 +42,19 @@ export const ViewSettingsForm: React.FC<{
         </div>
       </HeadedSection>
 
-      <DistributionViewSettingsForm
-        disableLogXSetting={disableLogXSetting}
-        register={register}
-      />
+      <DistributionViewSettingsForm fixed={fixed} register={register} />
 
       {withFunctionSettings ? (
-        <FunctionViewSettingsForm register={register} />
+        <FunctionViewSettingsForm fixed={fixed} register={register} />
       ) : null}
     </div>
   );
 };
 
 export const DistributionViewSettingsForm: React.FC<{
-  disableLogXSetting?: boolean;
   register: UseFormRegister<ViewSettings>;
-}> = ({ disableLogXSetting, register }) => {
+  fixed?: PartialViewSettings;
+}> = ({ register, fixed }) => {
   return (
     <div className="pt-8">
       <HeadedSection title="Distribution Display Settings">
@@ -66,9 +63,9 @@ export const DistributionViewSettingsForm: React.FC<{
             register={register}
             name="distributionChartSettings.logX"
             label="Show x scale logarithmically"
-            disabled={disableLogXSetting}
+            fixed={fixed?.distributionChartSettings?.logX}
             tooltip={
-              disableLogXSetting
+              fixed?.distributionChartSettings?.logX !== undefined
                 ? "Your distribution has mass lower than or equal to 0. Log only works on strictly positive values."
                 : undefined
             }
@@ -77,11 +74,6 @@ export const DistributionViewSettingsForm: React.FC<{
             register={register}
             name="distributionChartSettings.expY"
             label="Show y scale exponentially"
-          />
-          <Checkbox
-            register={register}
-            name="distributionChartSettings.vegaActions"
-            label="Show vega chart controls"
           />
           <Checkbox
             register={register}
@@ -120,7 +112,8 @@ export const DistributionViewSettingsForm: React.FC<{
 
 export const FunctionViewSettingsForm: React.FC<{
   register: UseFormRegister<ViewSettings>;
-}> = ({ register }) => (
+  fixed?: PartialViewSettings;
+}> = ({ register, fixed }) => (
   <div className="pt-8">
     <HeadedSection title="Function Display Settings">
       <div className="space-y-6">
@@ -135,12 +128,14 @@ export const FunctionViewSettingsForm: React.FC<{
             type="number"
             name="functionChartSettings.start"
             register={register}
+            fixed={fixed?.functionChartSettings?.start}
             label="Min X Value"
           />
           <InputItem
             type="number"
             name="functionChartSettings.stop"
             register={register}
+            fixed={fixed?.functionChartSettings?.stop}
             label="Max X Value"
           />
           <InputItem

@@ -1,13 +1,13 @@
-import * as XYShape from "../XYShape";
-import * as Continuous from "./Continuous";
-import * as Discrete from "./Discrete";
-import * as MixedPoint from "./MixedPoint";
-import * as Result from "../utility/result";
-import * as Common from "./Common";
-import { AnyPointSet } from "./PointSet";
-import { ContinuousShape } from "./Continuous";
-import { DiscreteShape } from "./Discrete";
-import { ConvolutionOperation, PointSet } from "./PointSet";
+import * as XYShape from "../XYShape.js";
+import * as Continuous from "./Continuous.js";
+import * as Discrete from "./Discrete.js";
+import * as MixedPoint from "./MixedPoint.js";
+import * as Result from "../utility/result.js";
+import * as Common from "./Common.js";
+import { AnyPointSet } from "./PointSet.js";
+import { ContinuousShape } from "./Continuous.js";
+import { DiscreteShape } from "./Discrete.js";
+import { ConvolutionOperation, PointSet } from "./PointSet.js";
 
 export class MixedShape implements PointSet<MixedShape> {
   readonly continuous: ContinuousShape;

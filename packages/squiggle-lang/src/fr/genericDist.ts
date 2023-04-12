@@ -1,21 +1,21 @@
-import { FRFunction } from "../library/registry/core";
-import { FnFactory, unpackDistResult } from "../library/registry/helpers";
-import * as SymbolicDist from "../dist/SymbolicDist";
-import * as Result from "../utility/result";
-import * as magicNumbers from "../magicNumbers";
-import { DistError, otherError } from "../dist/DistError";
-import { makeDefinition } from "../library/registry/fnDefinition";
-import { Value, vArray, vDist, vNumber } from "../value";
-import { frDist, frNumber } from "../library/registry/frTypes";
-import { Ok } from "../utility/result";
+import { FRFunction } from "../library/registry/core.js";
+import { FnFactory, unpackDistResult } from "../library/registry/helpers.js";
+import * as SymbolicDist from "../dist/SymbolicDist.js";
+import * as Result from "../utility/result.js";
+import * as magicNumbers from "../magicNumbers.js";
+import { DistError, otherError } from "../dist/DistError.js";
+import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { Value, vArray, vDist, vNumber } from "../value/index.js";
+import { frDist, frNumber } from "../library/registry/frTypes.js";
+import { Ok } from "../utility/result.js";
 import {
   BinaryOperation,
   BinaryOperations,
   pointwiseCombinationFloat,
   scaleLog,
-} from "../dist/DistOperations";
-import { BaseDist } from "../dist/BaseDist";
-import { ErrorMessage, REDistributionError } from "../reducer/ErrorMessage";
+} from "../dist/DistOperations/index.js";
+import { BaseDist } from "../dist/BaseDist.js";
+import { ErrorMessage, REDistributionError } from "../reducer/ErrorMessage.js";
 
 const maker = new FnFactory({
   nameSpace: "",
@@ -176,7 +176,7 @@ export const library: FRFunction[] = [
         toValueResult(
           pointwiseCombinationFloat(dist, {
             env: environment,
-            algebraicCombination: {
+            algebraicOperation: {
               NAME: "LogarithmWithThreshold",
               VAL: eps,
             },
@@ -191,7 +191,7 @@ export const library: FRFunction[] = [
       unpackDistResult(
         pointwiseCombinationFloat(dist, {
           env,
-          algebraicCombination: "Multiply",
+          algebraicOperation: "Multiply",
           f,
         })
       ),
@@ -202,7 +202,7 @@ export const library: FRFunction[] = [
       unpackDistResult(
         pointwiseCombinationFloat(dist, {
           env,
-          algebraicCombination: "Power",
+          algebraicOperation: "Power",
           f,
         })
       ),
@@ -213,7 +213,7 @@ export const library: FRFunction[] = [
       unpackDistResult(
         pointwiseCombinationFloat(dist, {
           env,
-          algebraicCombination: "Power",
+          algebraicOperation: "Power",
           f: Math.E,
         })
       ),

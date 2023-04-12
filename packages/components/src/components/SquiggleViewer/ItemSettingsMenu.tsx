@@ -1,36 +1,34 @@
-import { CogIcon } from "@heroicons/react/solid";
+import { CogIcon } from "@heroicons/react/solid/esm/index.js";
 import React, { useContext, useRef, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Modal } from "../ui/Modal";
-import { ViewSettingsForm, viewSettingsSchema } from "../ViewSettingsForm";
-import { ViewerContext } from "./ViewerContext";
-import { PlaygroundContext } from "../SquigglePlayground";
 import { SqValue } from "@quri/squiggle-lang";
-import { locationAsString } from "./utils";
-import _ from "lodash";
+
+import { Modal } from "../ui/Modal.js";
+import {
+  PartialViewSettings,
+  ViewSettingsForm,
+  viewSettingsSchema,
+} from "../ViewSettingsForm.js";
+import { ViewerContext } from "./ViewerContext.js";
+import { PlaygroundContext } from "../SquigglePlayground/index.js";
+import { locationAsString } from "./utils.js";
+import merge from "lodash/merge.js";
 
 type Props = {
   value: SqValue;
   onChange: () => void;
-  disableLogX?: boolean;
+  fixed?: PartialViewSettings;
   withFunctionSettings: boolean;
 };
 
 const ItemSettingsModal: React.FC<
   Props & { close: () => void; resetScroll: () => void }
-> = ({
-  value,
-  onChange,
-  disableLogX,
-  withFunctionSettings,
-  close,
-  resetScroll,
-}) => {
+> = ({ value, onChange, fixed, withFunctionSettings, close, resetScroll }) => {
   const { setSettings, getSettings, getMergedSettings } =
     useContext(ViewerContext);
 
-  const mergedSettings = getMergedSettings(value.location);
+  const mergedSettings = merge(getMergedSettings(value.location), fixed);
 
   const { register, watch } = useForm({
     resolver: yupResolver(viewSettingsSchema),
@@ -39,7 +37,7 @@ const ItemSettingsModal: React.FC<
   useEffect(() => {
     const subscription = watch((vars) => {
       const settings = getSettings(value.location); // get the latest version
-      setSettings(value.location, _.merge({}, settings, vars));
+      setSettings(value.location, merge({}, settings, vars));
       onChange();
     });
     return () => subscription.unsubscribe();
@@ -70,7 +68,7 @@ const ItemSettingsModal: React.FC<
         <ViewSettingsForm
           register={register}
           withFunctionSettings={withFunctionSettings}
-          disableLogXSetting={disableLogX}
+          fixed={fixed}
         />
       </Modal.Body>
     </Modal>

@@ -1,8 +1,8 @@
-import { SqError } from "./SqError";
-import { SqValue } from "./SqValue";
-import { SqValueLocation } from "./SqValueLocation";
-import { result } from "../utility/result";
-import { Lambda } from "../reducer/lambda";
+import { SqError } from "./SqError.js";
+import { SqValue } from "./SqValue.js";
+import { SqValueLocation } from "./SqValueLocation.js";
+import { result } from "../utility/result.js";
+import { Lambda } from "../reducer/lambda.js";
 
 export class SqLambda {
   constructor(private _value: Lambda, public location: SqValueLocation) {}
@@ -42,5 +42,9 @@ export class SqLambda {
     project.setContinues(callId, [sourceId]);
     project.run(callId);
     return project.getResult(callId);
+  }
+
+  toString() {
+    return this._value.toString();
   }
 }

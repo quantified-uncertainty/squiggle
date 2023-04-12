@@ -7,12 +7,6 @@ import React, {
 } from "react";
 import { useForm, UseFormRegister, useWatch } from "react-hook-form";
 import * as yup from "yup";
-import {
-  useMaybeControlledValue,
-  useRunnerState,
-  useSquiggle,
-} from "../../lib/hooks";
-import { SquiggleArgs } from "../../lib/hooks/useSquiggle";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
   ChartSquareBarIcon,
@@ -24,23 +18,32 @@ import {
   PauseIcon,
   PlayIcon,
   RefreshIcon,
-} from "@heroicons/react/solid";
-import clsx from "clsx";
+} from "@heroicons/react/solid/esm/index.js";
+import { clsx } from "clsx";
 
+import {
+  useMaybeControlledValue,
+  useRunnerState,
+  useSquiggle,
+} from "../../lib/hooks/index.js";
+import { SquiggleArgs } from "../../lib/hooks/useSquiggle.js";
 import { Env } from "@quri/squiggle-lang";
 
-import { CodeEditor } from "../CodeEditor";
-import { SquiggleContainer } from "../SquiggleContainer";
-import { Toggle } from "../ui/Toggle";
-import { StyledTab } from "../ui/StyledTab";
-import { InputItem } from "../ui/InputItem";
-import { Text } from "../ui/Text";
-import { ViewSettingsForm, viewSettingsSchema } from "../ViewSettingsForm";
-import { getErrorLocations, getValueToRender } from "../../lib/utility";
-import { SquiggleViewer, SquiggleViewerProps } from "../SquiggleViewer";
-import { ShareButton } from "./ShareButton";
-import { JsImports } from "../../lib/jsImports";
-import { ImportSettingsForm } from "./ImportSettingsForm";
+import { CodeEditor } from "../CodeEditor.js";
+import { SquiggleContainer } from "../SquiggleContainer.js";
+import { Toggle } from "../ui/Toggle.js";
+import { StyledTab } from "../ui/StyledTab.js";
+import { InputItem } from "../ui/InputItem.js";
+import { Text } from "../ui/Text.js";
+import { ViewSettingsForm, viewSettingsSchema } from "../ViewSettingsForm.js";
+import { getErrorLocations, getValueToRender } from "../../lib/utility.js";
+import {
+  SquiggleViewer,
+  SquiggleViewerProps,
+} from "../SquiggleViewer/index.js";
+import { ShareButton } from "./ShareButton.js";
+import { JsImports } from "../../lib/jsImports.js";
+import { ImportSettingsForm } from "./ImportSettingsForm.js";
 
 type PlaygroundProps = SquiggleArgs &
   Omit<SquiggleViewerProps, "result"> & {
@@ -244,9 +247,9 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
         value={code}
         onChange={setCode}
         onSubmit={run}
-        oneLine={false}
         showGutter={true}
         height={height}
+        project={resultAndBindings.project}
       />
     </div>
   ) : (

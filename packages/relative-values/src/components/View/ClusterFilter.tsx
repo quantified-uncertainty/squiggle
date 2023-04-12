@@ -1,9 +1,9 @@
 import { Cluster } from "@/types";
-import { FC } from "react";
-import { useInterfaceContext } from "../Interface/InterfaceProvider";
-import { ClusterIcon } from "../common/ClusterIcon";
-import { Axis, useViewContext, useViewDispatch } from "./ViewProvider";
 import clsx from "clsx";
+import { FC } from "react";
+import { ClusterIcon } from "../common/ClusterIcon";
+import { useSelectedInterface } from "../Interface/InterfaceProvider";
+import { Axis, useViewContext, useViewDispatch } from "./ViewProvider";
 
 export const ClusterItem: React.FC<{
   cluster: Cluster;
@@ -12,10 +12,12 @@ export const ClusterItem: React.FC<{
 }> = ({ cluster, selected, toggle }) => {
   return (
     <div className="flex gap-1 items-center cursor-pointer" onClick={toggle}>
-      <ClusterIcon cluster={cluster} selected={selected} />
+      <div className="flex-none">
+        <ClusterIcon cluster={cluster} selected={selected} />
+      </div>
       <div
         className={clsx(
-          "text-xs hover:text-black font-medium",
+          "text-sm hover:text-black font-medium",
           selected ? "text-gray-600" : "text-gray-400"
         )}
       >
@@ -28,7 +30,7 @@ export const ClusterItem: React.FC<{
 export const ClusterFilter: FC<{ axis: Axis }> = ({ axis }) => {
   const {
     catalog: { clusters },
-  } = useInterfaceContext();
+  } = useSelectedInterface();
   const {
     axisConfig: {
       [axis]: { filter },

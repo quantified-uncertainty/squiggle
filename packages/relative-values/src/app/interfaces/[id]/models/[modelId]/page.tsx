@@ -1,23 +1,10 @@
 "use client";
-import { SafeHydrate } from "@/components/SafeHydrate";
 
-import { ModelProvider } from "./ModelProvider";
-import { SSRSafeModelSection } from "./SSRSafeModelSection";
+import { ListView } from "@/components/View/ListView";
+import { useViewContext } from "@/components/View/ViewProvider";
 
-export default function ModelPage({
-  params,
-}: {
-  params: { id: string; modelId: string };
-}) {
-  return (
-    <SafeHydrate>
-      {() => {
-        return (
-          <ModelProvider value={{ selectedId: params.modelId }}>
-            <SSRSafeModelSection />
-          </ModelProvider>
-        );
-      }}
-    </SafeHydrate>
-  );
+export default function ModelPage() {
+  const { evaluator } = useViewContext();
+
+  return evaluator.ok ? <ListView model={evaluator.value} /> : null;
 }

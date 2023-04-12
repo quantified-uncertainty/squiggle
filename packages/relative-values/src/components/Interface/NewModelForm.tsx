@@ -1,15 +1,17 @@
 import { modelRoute } from "@/routes";
+import { useStorageDispatch } from "@/storage/StorageProvider";
 import { FC, useState } from "react";
 import { Button } from "../ui/Button";
-import { useInterfaceContext, useInterfaceDispatch } from "./InterfaceProvider";
+import { useInterfaceContext, useSelectedInterface } from "./InterfaceProvider";
 
 export const NewModelForm: FC = () => {
   const [id, setId] = useState("");
   const [author, setAuthor] = useState("");
   const [title, setTitle] = useState("");
 
-  const { catalog } = useInterfaceContext();
-  const dispatch = useInterfaceDispatch();
+  const { catalog } = useSelectedInterface();
+  const { interfaceId } = useInterfaceContext();
+  const dispatch = useStorageDispatch();
 
   const disabled = !(id && author);
 
@@ -17,9 +19,12 @@ export const NewModelForm: FC = () => {
     dispatch({
       type: "createModel",
       payload: {
-        id,
-        author,
-        title,
+        interfaceId,
+        model: {
+          id,
+          author,
+          title,
+        },
       },
     });
     window.history.replaceState(undefined, "", modelRoute(catalog.id, id));

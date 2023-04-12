@@ -1,4 +1,4 @@
-import { SqProject } from "./SqProject";
+import { SqProject } from "./SqProject/index.js";
 
 type PathItem = string | number;
 

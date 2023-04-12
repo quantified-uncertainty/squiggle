@@ -1,4 +1,4 @@
-import { mixture } from "../../src/dist/DistOperations";
+import { mixture } from "../../src/dist/DistOperations/index.js";
 import {
   env,
   mkBeta,
@@ -7,7 +7,7 @@ import {
   mkNormal,
   mkUniform,
   unpackResult,
-} from "../helpers/distHelpers";
+} from "../helpers/distHelpers.js";
 
 describe("mixture", () => {
   test.each([

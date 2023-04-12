@@ -1,16 +1,19 @@
-import { makeDefinition } from "../library/registry/fnDefinition";
+import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
   frArray,
   frLambda,
   frNumber,
-} from "../library/registry/frTypes";
-import { FnFactory } from "../library/registry/helpers";
-import { Ok } from "../utility/result";
-import * as Result from "../utility/result";
-import { Value, vArray, vNumber } from "../value";
-import * as E_A_Floats from "../utility/E_A_Floats";
-import { REOther } from "../reducer/ErrorMessage";
+  frString,
+} from "../library/registry/frTypes.js";
+import { FnFactory } from "../library/registry/helpers.js";
+import { Ok } from "../utility/result.js";
+import * as Result from "../utility/result.js";
+import { Value, vArray, vNumber, vString } from "../value/index.js";
+import * as E_A_Floats from "../utility/E_A_Floats.js";
+import { REOther } from "../reducer/ErrorMessage.js";
+import includes from "lodash/includes.js";
+import uniqBy from "lodash/uniqBy.js";
 
 const maker = new FnFactory({
   nameSpace: "List",
@@ -121,6 +124,38 @@ export const library = [
     ],
   }),
   maker.make({
+    name: "append",
+    examples: [`List.append([1,4],5)`],
+    definitions: [
+      makeDefinition("append", [frArray(frAny), frAny], ([array, el]) => {
+        let newArr = [...array, el];
+        return Ok(vArray(newArr));
+      }),
+    ],
+  }),
+  maker.make({
+    name: "uniq",
+    requiresNamespace: true,
+    examples: [`List.uniq([1,2,3,"hi",false,"hi"])`],
+    definitions: [
+      makeDefinition<Value[]>("uniq", [frArray(frAny)], ([arr]) => {
+        const isUniqableType = (t: Value) =>
+          includes(["String", "Bool", "Number"], t.type);
+        //I'm not sure if the r.type concat is essential, but seems safe.
+        const uniqueValueKey = (t: Value) => t.toString() + t.type;
+
+        const allUniqable = arr.every(isUniqableType);
+        if (allUniqable) {
+          return Ok(vArray(uniqBy(arr, uniqueValueKey)));
+        } else {
+          return Result.Error(
+            REOther("Can only apply uniq() to Strings, Numbers, or Bools")
+          );
+        }
+      }),
+    ],
+  }),
+  maker.make({
     name: "reduce",
     requiresNamespace: false,
     examples: [`List.reduce([1,4,5], 2, {|acc, el| acc+el})`],
@@ -176,6 +211,31 @@ export const library = [
             )
           )
       ),
+    ],
+  }),
+  maker.make({
+    name: "join",
+    requiresNamespace: true,
+    examples: [`List.join(["a", "b", "c"], ",")`],
+    definitions: [
+      makeDefinition(
+        "join",
+        [frArray(frString), frString],
+        ([array, joinStr]) => Ok(vString(array.join(joinStr)))
+      ),
+      makeDefinition("join", [frArray(frString)], ([array]) =>
+        Ok(vString(array.join()))
+      ),
+    ],
+  }),
+  maker.make({
+    name: "flatten",
+    requiresNamespace: true,
+    examples: [`List.flatten([[1,2], [3,4]])`],
+    definitions: [
+      makeDefinition("flatten", [frArray(frAny)], ([arr]) => {
+        return Ok(vArray(arr).flatten());
+      }),
     ],
   }),
 ];

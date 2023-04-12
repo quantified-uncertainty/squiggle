@@ -1,5 +1,5 @@
 ---
-sidebar_position: 2
+sidebar_position: 3
 title: Dictionary
 ---
 
@@ -96,4 +96,32 @@ Dict.mergeMany: (list<dict<'a>>) => dict<'a>
 first = { a: 1, b: 2 };
 snd = { b: 3, c: 5 };
 Dict.mergeMany([first, snd]); // {a: 1, b: 3, c: 5}
+```
+
+### set
+
+```
+Dict.set: (dict<'a>, string, 'a) => dict<'a>
+```
+
+Creates a new dictionary that includes the added element, while leaving the original dictionary unaltered.
+
+### map
+
+```
+Dict.map: (dict<'a>, (`a => `a)) => dict<'a>
+```
+
+```js
+Dict.map({a: 1, b: 2}, {|x| x + 1}) // { a: 2, b:3 }
+```
+
+### mapKeys
+
+```
+Dict.map: (dict<'a>, (string => string)) => dict<'a>
+```
+
+```js
+Dict.mapKeys({a: 1, b: 2}, {|x| x + "hi" }) // {ahi: 1, bhi: 2}
 ```

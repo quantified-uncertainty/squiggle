@@ -1,4 +1,4 @@
-import * as XYShape from "../src/XYShape";
+import * as XYShape from "../src/XYShape.js";
 
 const makeAndGetErrorString = (
   xs: number[],

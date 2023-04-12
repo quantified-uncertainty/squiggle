@@ -1,6 +1,6 @@
-import { IError } from "../../src/reducer/IError";
-import { FrameStack } from "../../src/reducer/frameStack";
-import { ErrorMessage, REOther } from "../../src/reducer/ErrorMessage";
+import { IError } from "../../src/reducer/IError.js";
+import { FrameStack } from "../../src/reducer/frameStack.js";
+import { ErrorMessage, REOther } from "../../src/reducer/ErrorMessage.js";
 
 describe("ErrorMessage", () => {
   test("toString", () => {

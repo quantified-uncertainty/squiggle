@@ -62,13 +62,31 @@ last: (list<'a>) => 'a
 ### concat
 
 ```
-concat: (list<'a>, list<'a>) => list<'a>
+List.concat: (list<'a>, list<'a>) => list<'a>
+```
+
+### append
+
+```
+List.append: (list<'a>, <'a>) => list<'a>
 ```
 
 ### reverse
 
 ```
 reverse: (list<'a>) => list<'a>
+```
+
+### uniq
+
+Filters the list for unique elements. Now only works on Strings, Numbers, and Booleans.
+
+```
+List.uniq: (list<'a>) => list<'a>
+```
+
+```js
+List.uniq(["foobar", "foobar", 1, 1, 2]); // ["foobar", 1, 2]
 ```
 
 ### map
@@ -112,3 +130,26 @@ reduceReverse: (list<'b>, 'a, ('a, 'b) => 'a) => 'a
 Works like `reduce`, but the function is applied to each item from the last back to the first.
 
 See [Rescript implementation](https://rescript-lang.org/docs/manual/latest/api/belt/array#reducereverse).
+
+### join
+
+```
+List.join: (list<string>, string) => string
+```
+
+```js
+List.join(["foo", "bar", "char"], "--"); // "foo--bar--char"
+```
+
+### flatten
+
+```
+flatten: (list<list>) => list
+```
+
+```js
+List.flatten([
+  [1, 2],
+  [3, 4],
+]); // [1,2,3,4]
+```

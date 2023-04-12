@@ -15,6 +15,7 @@ export type Item = {
   id: string;
   name: string;
   clusterId?: string;
+  description?: string;
 };
 
 export type Catalog = {
@@ -24,10 +25,16 @@ export type Catalog = {
   created?: Date;
   author?: string;
   items: Item[];
+  recommendedUnit?: string; // id of one of the items
   clusters: Clusters;
 };
 
 export type InterfaceWithModels = {
   catalog: Catalog;
   models: Map<string, Model>;
+};
+
+export type InterfaceWithModelsArrays = {
+  catalog: Catalog;
+  models: Model[];
 };

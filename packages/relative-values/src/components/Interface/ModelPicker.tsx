@@ -1,20 +1,27 @@
 import { useSelectedModel } from "@/app/interfaces/[id]/models/[modelId]/ModelProvider";
-import { modelRoute, newModelRoute } from "@/routes";
+import { modelRoute, newModelRoute, useSiblingRoute } from "@/routes";
 import clsx from "clsx";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
 import { Dropdown } from "../ui/Dropdown";
-import { useInterfaceContext } from "./InterfaceProvider";
+import { useSelectedInterface } from "./InterfaceProvider";
 
 const ModelPickerMenu: FC<{ close(): void }> = ({ close }) => {
-  const { models, catalog } = useInterfaceContext();
-  const { selectedId, selectedModel } = useSelectedModel();
+  const { models, catalog } = useSelectedInterface();
+  const selectedModel = useSelectedModel();
+  const selectedId = selectedModel?.id;
 
   const router = useRouter();
 
+  const siblingRoute = useSiblingRoute();
+
   const pick = (id: string) => {
-    router.push(modelRoute(catalog.id, id));
+    const newRoute = siblingRoute(id);
+    console.log(newRoute);
+    if (newRoute) {
+      router.push(newRoute);
+    }
     close();
   };
 
@@ -58,15 +65,13 @@ const ModelPickerMenu: FC<{ close(): void }> = ({ close }) => {
 };
 
 export const ModelPicker: FC = () => {
-  const { selectedModel } = useSelectedModel();
+  const selectedModel = useSelectedModel();
 
   return (
     <Dropdown render={({ close }) => <ModelPickerMenu close={close} />}>
       <div className="border border-gray-200 p-2 rounded cursor-pointer">
         {selectedModel ? (
-          <div className="text-gray-700 text-sm">
-            Unselect
-          </div>
+          <div className="text-gray-700 text-sm">Unselect</div>
         ) : (
           <div className="italic text-gray-500 text-sm">Pick an estimate</div>
         )}

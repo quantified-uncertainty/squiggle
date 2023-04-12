@@ -1,5 +1,5 @@
 import { Map, Set } from "immutable";
-import { Catalog } from "@/types";
+import { Catalog, InterfaceWithModels } from "@/types";
 
 type Node = {
   code: string;
@@ -7,9 +7,11 @@ type Node = {
 };
 
 type ModelMetadata = {
+  id: string;
   author: string;
   title: string;
-}
+  modified?: boolean;
+};
 
 export type TextModel = {
   mode: "text";
@@ -56,7 +58,8 @@ function topologicalSort(model: GraphModel): GraphModelOrder {
       seen = seen.add(currentId);
 
       let ok = true;
-      for (const dependencyId of model.nodes.get(currentId)?.dependencies || []) {
+      for (const dependencyId of model.nodes.get(currentId)?.dependencies ||
+        []) {
         if (!dfs(dependencyId)) {
           ok = false;
         }
@@ -115,7 +118,7 @@ export function getGraphModelCode(model: GraphModel) {
 withSampleSetValue(item) = SampleSet.fromDist(item)
 items = Dict.map(items, withSampleSetValue)
 
-fn(intervention1, intervention2) = items[intervention1] / items[intervention2]
+fn(intervention1, intervention2) = [items[intervention1], items[intervention2]]
 `;
 
   return code;
@@ -235,13 +238,24 @@ export function modelFromJSON(json: any) {
   };
 }
 
-export function createEmptyGraphModel({ author, title, catalog }: { author: string, title: string, catalog: Catalog }) {
+export function createEmptyGraphModel({
+  author,
+  title,
+  id,
+  catalog,
+}: {
+  id: string;
+  author: string;
+  title: string;
+  catalog: Catalog;
+}) {
   return buildGraphModel({
-    items: catalog.items.map(item => [item.id, 'pointMass(1)']),
-    commonCode: '',
+    items: catalog.items.map((item) => [item.id, "pointMass(1)"]),
+    commonCode: "",
     metadata: {
       author,
       title,
+      id,
     },
     catalog,
   });

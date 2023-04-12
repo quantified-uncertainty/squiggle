@@ -7,7 +7,7 @@ import {
 import { SquiggleEditor } from "@quri/squiggle-components";
 import clsx from "clsx";
 import { FC, Fragment, PropsWithChildren, useMemo } from "react";
-import { useInterfaceContext } from "../Interface/InterfaceProvider";
+import { useSelectedInterface } from "../Interface/InterfaceProvider";
 import { Button } from "../ui/Button";
 import { EstimateProps } from "./types";
 
@@ -37,14 +37,20 @@ export const GraphModelEditor: FC<EstimateProps<GraphModel>> = ({
   model,
   setModel,
 }) => {
-  const { catalog } = useInterfaceContext();
+  const { catalog } = useSelectedInterface();
 
   const code = useMemo(() => getModelCode(model), [model]);
 
   const getAnchor = (id: string) => `estimate-${id}`;
 
   const eject = () =>
-    setModel({ mode: "text", code, author: model.author, title: model.title });
+    setModel({
+      mode: "text",
+      code,
+      id: model.id,
+      author: model.author,
+      title: model.title,
+    });
 
   return (
     <div>

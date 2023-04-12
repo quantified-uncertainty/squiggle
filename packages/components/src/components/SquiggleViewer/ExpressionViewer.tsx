@@ -1,17 +1,20 @@
 import React from "react";
 import { SqDistributionTag, SqValue, SqPlot } from "@quri/squiggle-lang";
-import { NumberShower } from "../NumberShower";
-import { DistributionChart } from "../DistributionChart";
+import { clsx } from "clsx";
+
+import { NumberShower } from "../NumberShower.js";
+import { DistributionChart } from "../DistributionChart.js";
 import {
   sqPlotToPlot,
   MultiDistributionChart,
-} from "../MultiDistributionChart";
-import { FunctionChart } from "../FunctionChart";
-import clsx from "clsx";
-import { VariableBox } from "./VariableBox";
-import { ItemSettingsMenu } from "./ItemSettingsMenu";
-import { hasMassBelowZero } from "../../lib/distributionUtils";
-import { MergedItemSettings } from "./utils";
+} from "../MultiDistributionChart/index.js";
+import { FunctionChart } from "../FunctionChart/index.js";
+
+import { VariableBox } from "./VariableBox.js";
+import { ItemSettingsMenu } from "./ItemSettingsMenu.js";
+import { hasMassBelowZero } from "../../lib/distributionUtils.js";
+import { MergedItemSettings } from "./utils.js";
+import { PartialViewSettings } from "../ViewSettingsForm.js";
 
 const VariableList: React.FC<{
   value: SqValue;
@@ -70,8 +73,14 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
               <ItemSettingsMenu
                 value={value}
                 onChange={onChange}
-                disableLogX={
+                fixed={
                   shape.ok && hasMassBelowZero(shape.value.asShape())
+                    ? {
+                        distributionChartSettings: {
+                          logX: false,
+                        },
+                      }
+                    : undefined
                 }
                 withFunctionSettings={false}
               />
@@ -83,7 +92,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
               <DistributionChart
                 distribution={value.value}
                 environment={environment}
-                chartHeight={settings.chartHeight}
+                height={settings.chartHeight}
                 settings={settings.distributionChartSettings}
               />
             );
@@ -165,6 +174,15 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
         </VariableBox>
       );
     case "Declaration": {
+      const fixed: PartialViewSettings = {};
+      const { inputs } = value.value;
+      if (inputs.length === 1 && inputs[0].type === "Float") {
+        fixed.functionChartSettings = {
+          start: inputs[0].min,
+          stop: inputs[0].max,
+        };
+      }
+
       return (
         <VariableBox
           value={value}
@@ -174,57 +192,96 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
               <ItemSettingsMenu
                 onChange={onChange}
                 value={value}
+                fixed={fixed}
                 withFunctionSettings={true}
               />
             );
           }}
         >
-          {(_) => (
-            <div>NOT IMPLEMENTED YET</div>
-            // <FunctionChart
-            //   fn={expression.value.fn}
-            //   chartSettings={getChartSettings(expression.value)}
-            //   distributionChartSettings={settings.distributionChartSettings}
-            //   height={settings.height}
-            //   environment={{
-            //     sampleCount: environment.sampleCount / 10,
-            //     xyPointLength: environment.xyPointLength / 10,
-            //   }}
-            // />
+          {(settings) => (
+            <FunctionChart
+              fn={value.value.fn}
+              settings={{
+                ...settings.functionChartSettings,
+                ...fixed.functionChartSettings,
+              }}
+              distributionChartSettings={settings.distributionChartSettings}
+              height={settings.chartHeight}
+              environment={{
+                sampleCount: environment.sampleCount / 10,
+                xyPointLength: environment.xyPointLength / 10,
+              }}
+            />
           )}
         </VariableBox>
       );
     }
     case "Plot":
       const plot: SqPlot = value.value;
+      const fixed: PartialViewSettings = {};
+      const disableLogX =
+        plot.tag === "distributions"
+          ? plot.distributions.some((x) => {
+              let pointSet = x.distribution.pointSet(environment);
+              return pointSet.ok && hasMassBelowZero(pointSet.value.asShape());
+            })
+          : false;
+      if (disableLogX) {
+        fixed.distributionChartSettings = {
+          logX: false,
+        };
+      }
+      fixed.functionChartSettings = {};
+      if (plot.tag === "fn") {
+        fixed.functionChartSettings.start = plot.min;
+        fixed.functionChartSettings.stop = plot.max;
+      }
+
       return (
         <VariableBox
           value={value}
           heading="Plot"
           renderSettingsMenu={({ onChange }) => {
-            let disableLogX = plot.distributions.some((x) => {
-              let pointSet = x.distribution.pointSet(environment);
-              return pointSet.ok && hasMassBelowZero(pointSet.value.asShape());
-            });
             return (
               <ItemSettingsMenu
                 value={value}
                 onChange={onChange}
-                disableLogX={disableLogX}
-                withFunctionSettings={false}
+                fixed={fixed}
+                withFunctionSettings={plot.tag === "fn"}
               />
             );
           }}
         >
           {(settings) => {
-            return (
-              <MultiDistributionChart
-                plot={sqPlotToPlot(plot)}
-                environment={environment}
-                chartHeight={settings.chartHeight}
-                settings={settings.distributionChartSettings}
-              />
-            );
+            switch (plot.tag) {
+              case "distributions":
+                return (
+                  <MultiDistributionChart
+                    plot={sqPlotToPlot(plot)}
+                    environment={environment}
+                    height={settings.chartHeight}
+                    settings={settings.distributionChartSettings}
+                  />
+                );
+              case "fn":
+                return (
+                  <FunctionChart
+                    fn={plot.fn}
+                    settings={{
+                      ...settings.functionChartSettings,
+                      ...fixed.functionChartSettings,
+                    }}
+                    distributionChartSettings={
+                      settings.distributionChartSettings
+                    }
+                    height={settings.chartHeight}
+                    environment={{
+                      sampleCount: environment.sampleCount / 10,
+                      xyPointLength: environment.xyPointLength / 10,
+                    }}
+                  />
+                );
+            }
           }}
         </VariableBox>
       );

@@ -1,6 +1,6 @@
-import { SqProject, evaluate } from "../../src/public/SqProject";
-import { toStringResult } from "../../src/public/SqValue";
-import { defaultEnvironment } from "../../src";
+import { SqProject, evaluate } from "../../src/public/SqProject/index.js";
+import { toStringResult } from "../../src/public/SqValue.js";
+import { defaultEnvironment } from "../../src/index.js";
 
 describe("ReducerProject Tutorial", () => {
   describe("Single source", () => {

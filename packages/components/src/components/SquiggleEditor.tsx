@@ -1,27 +1,11 @@
 import React from "react";
-import { CodeEditor } from "./CodeEditor";
-import { SquiggleContainer } from "./SquiggleContainer";
-import { useMaybeControlledValue } from "../lib/hooks";
-import { useSquiggle, SquiggleArgs } from "../lib/hooks/useSquiggle";
-import { SqLocation } from "@quri/squiggle-lang";
-import { SquiggleViewer, SquiggleViewerProps } from "./SquiggleViewer";
-import { getErrorLocations, getValueToRender } from "../lib/utility";
 
-const WrappedCodeEditor: React.FC<{
-  code: string;
-  setCode: (code: string) => void;
-  errorLocations?: SqLocation[];
-}> = ({ code, setCode, errorLocations }) => (
-  <div className="border border-grey-200 p-2 m-4" data-testid="squiggle-editor">
-    <CodeEditor
-      value={code}
-      onChange={setCode}
-      oneLine={true}
-      showGutter={false}
-      errorLocations={errorLocations}
-    />
-  </div>
-);
+import { useMaybeControlledValue } from "../lib/hooks/index.js";
+import { SquiggleArgs, useSquiggle } from "../lib/hooks/useSquiggle.js";
+import { getErrorLocations, getValueToRender } from "../lib/utility.js";
+import { CodeEditor } from "./CodeEditor.js";
+import { SquiggleContainer } from "./SquiggleContainer.js";
+import { SquiggleViewer, SquiggleViewerProps } from "./SquiggleViewer/index.js";
 
 export type SquiggleEditorProps = SquiggleArgs & {
   defaultCode?: string;
@@ -37,17 +21,23 @@ export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
   });
 
   const resultAndBindings = useSquiggle({ ...props, code });
-
   const valueToRender = getValueToRender(resultAndBindings);
   const errorLocations = getErrorLocations(resultAndBindings.result);
 
   return (
     <SquiggleContainer>
-      <WrappedCodeEditor
-        code={code}
-        setCode={setCode}
-        errorLocations={errorLocations}
-      />
+      <div
+        className="border border-grey-200 p-2 m-4"
+        data-testid="squiggle-editor"
+      >
+        <CodeEditor
+          value={code}
+          onChange={setCode}
+          showGutter={false}
+          errorLocations={errorLocations}
+          project={resultAndBindings.project}
+        />
+      </div>
       {props.hideViewer ? null : (
         <SquiggleViewer result={valueToRender} {...props} />
       )}

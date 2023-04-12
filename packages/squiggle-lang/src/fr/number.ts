@@ -1,11 +1,14 @@
-import { FnDefinition, makeDefinition } from "../library/registry/fnDefinition";
-import { frArray, frNumber } from "../library/registry/frTypes";
-import { FnFactory } from "../library/registry/helpers";
-import * as Result from "../utility/result";
-import * as E_A_Floats from "../utility/E_A_Floats";
-import { Ok } from "../utility/result";
-import { Value, vArray, vNumber } from "../value";
-import { ErrorMessage, REOther } from "../reducer/ErrorMessage";
+import {
+  FnDefinition,
+  makeDefinition,
+} from "../library/registry/fnDefinition.js";
+import { frArray, frNumber } from "../library/registry/frTypes.js";
+import { FnFactory } from "../library/registry/helpers.js";
+import * as Result from "../utility/result.js";
+import * as E_A_Floats from "../utility/E_A_Floats.js";
+import { Ok } from "../utility/result.js";
+import { Value, vArray, vNumber } from "../value/index.js";
+import { ErrorMessage, REOther } from "../reducer/ErrorMessage.js";
 
 const maker = new FnFactory({
   nameSpace: "Number",

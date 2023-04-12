@@ -7,27 +7,9 @@ This package contains the react components for squiggle. These can be used eithe
 
 The `@quri/squiggle-components` package offers several components and utilities for people who want to embed Squiggle components into websites.
 
-# Usage in a `react` project
+## Usage in a Next.js project
 
-For example, in a fresh `create-react-app` project
-
-```sh
-yarn add @quri/squiggle-components
-```
-
-Add to `App.js`:
-
-```jsx
-import { SquiggleEditor } from "@quri/squiggle-components";
-<SquiggleEditor
-  defaultCode="x = beta($alpha, 10); x + $shift"
-  jsImports={{ alpha: 3, shift: 20 }}
-/>;
-```
-
-# Usage in a Nextjs project
-
-For now, `squiggle-components` requires the `window` property, so using the package in nextjs requires dynamic loading:
+For now, `squiggle-components` requires the `window` property, so using the package in Next.js requires dynamic loading:
 
 ```
 
@@ -58,10 +40,15 @@ export function DynamicSquiggleChart({ squiggleString }) {
     );
   }
 }
-
 ```
 
-# Build storybook for development
+You can example of this approach in [this repository](https://github.com/NunoSempere/squiggle-nexjs-example), which you could clone to begin using Squiggle in your project.
+
+## Usage with create-react-app
+
+Create React App seems to be [on the way out](https://github.com/reactjs/react.dev/pull/5487#issuecomment-1409720741) and it is currently not supported by Squiggle. We recommend looking into ["production-grade React frameworks"](https://react.dev/learn/start-a-new-react-project#production-grade-react-frameworks) instead.
+
+## Build storybook for development
 
 We assume that you had run `yarn` at monorepo level, installing dependencies.
 

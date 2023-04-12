@@ -1,15 +1,10 @@
-import { Value, vLambda } from "../value";
-import { makeMathConstants } from "./math";
-import { makeVersionConstant } from "./version";
-import * as registry from "./registry";
-import { Namespace, NamespaceMap } from "../reducer/bindings";
-import { BuiltinLambda } from "../reducer/lambda";
-import {
-  ErrorMessage,
-  REArrayIndexNotFound,
-  REOther,
-  RERecordPropertyNotFound,
-} from "../reducer/ErrorMessage";
+import { Namespace, NamespaceMap } from "../reducer/bindings.js";
+import { ErrorMessage, REOther } from "../reducer/ErrorMessage.js";
+import { BuiltinLambda } from "../reducer/lambda.js";
+import { Value, vLambda } from "../value/index.js";
+import { makeMathConstants } from "./math.js";
+import * as registry from "./registry/index.js";
+import { makeVersionConstant } from "./version.js";
 
 const makeStdLib = (): Namespace => {
   let res = NamespaceMap<string, Value>();
@@ -18,38 +13,19 @@ const makeStdLib = (): Namespace => {
   res = res.merge(makeMathConstants());
   res = res.merge(makeVersionConstant());
 
-  // array and record lookups
+  // field lookups
   res = res.set(
     "$_atIndex_$",
     vLambda(
       new BuiltinLambda("$_atIndex_$", (inputs) => {
-        if (
-          inputs.length === 2 &&
-          inputs[0].type === "Array" &&
-          inputs[1].type === "Number"
-        ) {
-          const arr = inputs[0].value;
-          const index = inputs[1].value | 0; // TODO - fail on non-integer indices?
-          if (index >= 0 && index < arr.length) {
-            return arr[index];
-          } else {
-            return ErrorMessage.throw(
-              REArrayIndexNotFound("Array index not found", index)
-            );
-          }
-        } else if (
-          inputs.length === 2 &&
-          inputs[0].type === "Record" &&
-          inputs[1].type === "String"
-        ) {
-          const dict = inputs[0].value;
-          const index = inputs[1].value;
-          return (
-            dict.get(index) ??
-            ErrorMessage.throw(
-              RERecordPropertyNotFound("Record property not found", index)
-            )
-          );
+        if (inputs.length !== 2) {
+          // should never happen
+          return ErrorMessage.throw(REOther("$_atIndex_$ internal error"));
+        }
+
+        const [obj, key] = inputs;
+        if ("get" in obj) {
+          return obj.get(key);
         } else {
           return ErrorMessage.throw(
             REOther("Trying to access key on wrong value")

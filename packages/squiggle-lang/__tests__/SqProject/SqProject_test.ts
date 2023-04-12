@@ -1,5 +1,5 @@
-import { SqProject } from "../../src/public/SqProject";
-import { toStringResult } from "../../src/public/SqValue";
+import { SqProject } from "../../src/public/SqProject/index.js";
+import { toStringResult } from "../../src/public/SqValue.js";
 
 const runFetchResult = (project: SqProject, sourceId: string) => {
   project.run(sourceId);

@@ -1,12 +1,15 @@
-import { BaseDist } from "../../../src/dist/BaseDist";
-import { distErrorToString } from "../../../src/dist/DistError";
-import { logScoreDistAnswer, mixture } from "../../../src/dist/DistOperations";
+import { BaseDist } from "../../../src/dist/BaseDist.js";
+import { distErrorToString } from "../../../src/dist/DistError.js";
+import {
+  logScoreDistAnswer,
+  mixture,
+} from "../../../src/dist/DistOperations/index.js";
 import {
   env,
   mkNormal,
   mkUniform,
   unpackResult,
-} from "../../helpers/distHelpers";
+} from "../../helpers/distHelpers.js";
 import {
   floatDist,
   normalDist10,
@@ -15,7 +18,7 @@ import {
   point3,
   uniformDist,
   uniformDist2,
-} from "../../fixtures/distFixtures";
+} from "../../fixtures/distFixtures.js";
 
 const klDivergence = (prediction: BaseDist, answer: BaseDist): number => {
   const result = logScoreDistAnswer({

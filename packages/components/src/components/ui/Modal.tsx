@@ -1,9 +1,9 @@
 import { motion } from "framer-motion";
 import React, { useContext } from "react";
 import * as ReactDOM from "react-dom";
-import { XIcon } from "@heroicons/react/solid";
-import clsx from "clsx";
-import { useWindowScroll, useWindowSize } from "react-use";
+import { XIcon } from "@heroicons/react/solid/esm/index.js";
+import { clsx } from "clsx";
+import { useWindowScroll, useWindowSize } from "../../lib/hooks/react-use.js";
 
 type ModalContextShape = {
   close: () => void;

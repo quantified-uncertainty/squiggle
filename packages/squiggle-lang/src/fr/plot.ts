@@ -1,15 +1,17 @@
-import { makeDefinition } from "../library/registry/fnDefinition";
+import { PointMass } from "../dist/SymbolicDist.js";
+import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
-  frString,
-  frRecord,
   frDistOrNumber,
-} from "../library/registry/frTypes";
-import { PointMass } from "../dist/SymbolicDist";
-import { FnFactory } from "../library/registry/helpers";
-import * as Result from "../utility/result";
-import { vPlot, LabeledDistribution } from "../value";
-import { REOther } from "../reducer/ErrorMessage";
+  frLambda,
+  frNumber,
+  frRecord,
+  frString,
+} from "../library/registry/frTypes.js";
+import { FnFactory } from "../library/registry/helpers.js";
+import { REOther } from "../reducer/ErrorMessage.js";
+import * as Result from "../utility/result.js";
+import { LabeledDistribution, vPlot } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Plot",
@@ -46,7 +48,29 @@ export const library = [
           });
           return Result.Ok(
             vPlot({
+              type: "distributions",
               distributions,
+            })
+          );
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "fn",
+    output: "Plot",
+    examples: [`Plot.fn({fn: {|x|x*x}, min: 3, max: 5})`],
+    definitions: [
+      makeDefinition(
+        "fn",
+        [frRecord(["fn", frLambda], ["min", frNumber], ["max", frNumber])],
+        ([{ fn, min, max }]) => {
+          return Result.Ok(
+            vPlot({
+              type: "fn",
+              fn,
+              min,
+              max,
             })
           );
         }

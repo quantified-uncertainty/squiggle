@@ -1,4 +1,4 @@
-import { testEvalToBe } from "../helpers/reducerHelpers";
+import { testEvalToBe } from "../helpers/reducerHelpers.js";
 
 describe("Dict", () => {
   testEvalToBe("Dict.set({a: 1, b: 2}, 'c', 3)", "{a: 1,b: 2,c: 3}");
@@ -16,4 +16,8 @@ describe("Dict", () => {
   testEvalToBe("Dict.toList({a: 1, b: 2})", "[['a',1],['b',2]]");
   testEvalToBe("Dict.fromList([['a', 1], ['b', 2]])", "{a: 1,b: 2}");
   testEvalToBe("Dict.map({a: 1, b: 2}, {|x| x * 2})", "{a: 2,b: 4}");
+  testEvalToBe(
+    "Dict.mapKeys({a: 1, b: 2}, {|x| concat(x, 'hi')})",
+    "{ahi: 1,bhi: 2}"
+  );
 });
