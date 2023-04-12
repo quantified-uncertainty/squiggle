@@ -23,7 +23,7 @@ type Datum = {
   uncertainty: number;
 };
 
-function usePlotData(model: ModelEvaluator) {
+function usePlotData(model: ModelEvaluator, selectedId: string | undefined) {
   const {
     catalog: { items, recommendedUnit },
   } = useSelectedInterface();
@@ -35,29 +35,37 @@ function usePlotData(model: ModelEvaluator) {
   const filteredItems = useFilteredItems({ items, config: rows });
 
   const comparedTo = useMemo(() => {
-    return recommendedUnit
-      ? [items.find((item) => item.id === recommendedUnit) ?? items[0]]
-      : items;
-  }, [recommendedUnit, items]);
+    if (!!selectedId) {
+      return [items.find((item) => item.id === selectedId) ?? items[0]];
+    } else if (!!recommendedUnit) {
+      return [items.find((item) => item.id === recommendedUnit) ?? items[0]];
+    } else {
+      return items;
+    }
+  }, [selectedId, recommendedUnit, items]);
 
   const data = useMemo(() => {
     const data: Datum[] = [];
 
     for (const item of filteredItems) {
-      data.push({
-        item,
-        median: averageMedian({ item, comparedTo, model: model }),
-        uncertainty: averageUncertainty({ item, comparedTo, model: model }),
-      });
+      let uncertainty = averageUncertainty({ item, comparedTo, model: model });
+      if (uncertainty > 0) {
+        data.push({
+          item,
+          median: averageMedian({ item, comparedTo, model: model }),
+          uncertainty,
+        });
+      }
     }
-    return data;
+    return data.filter((r) => r.uncertainty > 0);
   }, [filteredItems, model, comparedTo]);
   return { data, comparedToAverage: comparedTo.length > 1 };
 }
 
 export const ValueAndUncertaintyPlot: FC<{
   model: ModelEvaluator;
-}> = ({ model }) => {
+  selectedId?: string | undefined;
+}> = ({ model, selectedId }) => {
   const {
     catalog: { clusters },
   } = useSelectedInterface();
@@ -66,7 +74,7 @@ export const ValueAndUncertaintyPlot: FC<{
   const [hoveredId, setHoveredId] = useState<number | undefined>(undefined);
 
   const height = 450;
-  const { data, comparedToAverage } = usePlotData(model);
+  const { data, comparedToAverage } = usePlotData(model, selectedId);
 
   const draw = useCallback(
     ({ context, width }: DrawContext) => {
@@ -74,12 +82,13 @@ export const ValueAndUncertaintyPlot: FC<{
 
       const { xScale, yScale, padding, chartHeight } = drawAxes({
         context,
-        xDomain: d3.extent(data, (d) => Math.abs(d.median)) as [number, number],
-        yDomain: d3.extent(data, (d) => d.uncertainty) as [number, number],
+        xDomain: d3.extent(data, (d) => d.uncertainty) as [number, number],
+        yDomain: d3.extent(data, (d) => Math.abs(d.median)) as [number, number],
         suggestedPadding: { top: 10, bottom: 40, left: 60, right: 20 },
         width,
         height,
         logX: true,
+        yScale: "log",
         drawTicks: true,
         tickCount: 10,
       });
@@ -89,7 +98,9 @@ export const ValueAndUncertaintyPlot: FC<{
       context.font = "bold 12px sans-serif";
       context.fillStyle = "rgb(114, 125, 147)"; // copy-paste from drawUtils
       context.fillText(
-        comparedToAverage ? "Mean relative value" : "Relative value",
+        comparedToAverage
+          ? "Mean uncertainty (decibels)"
+          : "Uncertainty (decibels)",
         width - padding.right,
         height
       );
@@ -99,9 +110,7 @@ export const ValueAndUncertaintyPlot: FC<{
       context.textBaseline = "top";
       context.rotate(-Math.PI / 2);
       context.fillText(
-        comparedToAverage
-          ? "Mean uncertainty (decibels)"
-          : "Uncertainty (decibels)",
+        comparedToAverage ? "Mean relative value" : "Relative value",
         -padding.top,
         0
       );
@@ -117,8 +126,8 @@ export const ValueAndUncertaintyPlot: FC<{
         const d = data[i];
 
         context.beginPath();
-        const x = xScale(d.median),
-          y = yScale(d.uncertainty);
+        const x = xScale(d.uncertainty),
+          y = yScale(d.median);
         context.moveTo(x + r, y);
         context.arc(x, y, r, 0, 2 * Math.PI);
 

@@ -11,12 +11,15 @@ import { useViewContext } from "../ViewProvider";
 import { useFilteredItems, useSortedItems } from "../hooks";
 import { averageUncertainty } from "../hooks/useSortedItems";
 import { ColumnHeader } from "./ColumnHeader";
+import Link from "next/link";
+import { itemRoute } from "@/routes";
 
 type Props = {
-  model: ModelEvaluator;
+  modelEvaluator: ModelEvaluator;
+  modelId: string,
 };
 
-export const ListView: FC<Props> = ({ model }) => {
+export const ListView: FC<Props> = ({ modelEvaluator, modelId }) => {
   const { axisConfig } = useViewContext();
   const { catalog } = useSelectedInterface();
 
@@ -37,11 +40,11 @@ export const ListView: FC<Props> = ({ model }) => {
   const sortedItems = useSortedItems({
     items: filteredItems,
     config: axisConfig.rows,
-    model: model,
+    model: modelEvaluator,
     otherDimensionItems: [selectedItem],
   });
 
-  const uncertaintyPercentiles = model.getParamPercentiles(
+  const uncertaintyPercentiles = modelEvaluator.getParamPercentiles(
     catalog.items.map((i) => i.id),
     (r) => r.uncertainty,
     [20, 80]
@@ -58,12 +61,17 @@ export const ListView: FC<Props> = ({ model }) => {
         className="grid border-r border-b border-gray-200 w-max"
         style={{
           gridTemplateColumns:
-            "minmax(200px, min-content) minmax(140px, min-content) minmax(100px, min-content) minmax(160px, min-content) minmax(160px, min-content) minmax(160px, min-content)",
+            "minmax(200px, min-content) minmax(60px, min-content) minmax(140px, min-content) minmax(100px, min-content) minmax(160px, min-content) minmax(160px, min-content) minmax(160px, min-content)",
         }}
       >
         <CellBox header>
           <div className="p-1 pt-2 text-sm font-semibold text-slate-600">
             Name
+          </div>
+        </CellBox>
+        <CellBox header>
+          <div className="p-1 pt-2 text-sm font-semibold text-slate-600">
+            Link
           </div>
         </CellBox>
         <CellBox header>
@@ -94,6 +102,9 @@ export const ListView: FC<Props> = ({ model }) => {
           <Fragment key={item.id}>
             <Header item={item} />
             <CellBox>
+              <Link href={itemRoute(catalog.id, modelId, item.id)}>Link</Link>
+            </CellBox>
+            <CellBox>
               <div className="p-2 text-xs text-slate-800">
                 {item.description}
               </div>
@@ -114,7 +125,7 @@ export const ListView: FC<Props> = ({ model }) => {
                   number={averageUncertainty({
                     item,
                     comparedTo: catalog.items,
-                    model: model,
+                    model: modelEvaluator,
                   })}
                   precision={3}
                 />
@@ -123,7 +134,7 @@ export const ListView: FC<Props> = ({ model }) => {
             <RelativeCell
               id1={item.id}
               id2={selectedItem.id}
-              model={model}
+              model={modelEvaluator}
               uncertaintyPercentiles={uncertaintyPercentiles}
             />
           </Fragment>
