@@ -60,43 +60,89 @@ export const ListView: FC<Props> = ({ model }) => {
     const compressed = deflate(text, { level: 9 });
     return HASH_PREFIX + encodeURIComponent(fromByteArray(compressed));
   }
+  interface TableRowProps {
+    label: string;
+    number: number;
+  }
+
+  const TableRow: React.FC<TableRowProps> = ({ label, number }) => (
+    <Fragment key={label}>
+      <div className="text-slate-400 py-1 mt-1 font-normal text-left text-xs col-span-1">
+        {label}
+      </div>
+      <div className="py-1 pl-2 text-left text-slate-600 text-md col-span-2">
+        <NumberShower number={number} precision={2} />
+      </div>
+    </Fragment>
+  );
 
   const sidebar = () => {
     let chosenItem = catalog.items.find(
       (item) => item.id === (highlightedItems && highlightedItems[0])
     );
-    if (chosenItem && selectedItem) {
-      let str = `// fn = ${model.model.id} 
+    if (!!chosenItem && selectedItem) {
+      const result = model.compare(chosenItem.id, selectedItem.id);
+      if (!result.ok) {
+        return "Result not found";
+      } else {
+        let item = result.value;
+        let str = `// fn = ${model.model.id} 
 dists = fn("${chosenItem.id}", "${selectedItem.id}")
 value_${chosenItem.id} = dists[0]
 value_${selectedItem.id} = dists[1]
 relativeValue = value_${chosenItem.id} / value_${selectedItem.id}`;
 
-      const fullStr = `${getModelCode(model.model)}
+        const fullStr = `${getModelCode(model.model)}
 ${str}
 relativeValue`;
-      const url = (setHashData({ initialSquiggleString: fullStr }))
-      return (
-        <div className="sticky top-4 bg-slate-50 px-2 py-4 ml-2 border-gray-200 border rounded-sm">
-          <div className="text-lg font-semibold text-slate-800 p-2">
-            {chosenItem.name}
+        const url = setHashData({ initialSquiggleString: fullStr });
+        return (
+          <div className="sticky top-4 bg-slate-50 px-2 py-4 ml-4 rounded-sm">
+            <div className="mt-2 mb-6 flex overflow-x-auto items-center p-1">
+              <span className="text-slate-500 text-md whitespace-nowrap mr-1">
+                value
+              </span>
+              <span className="text-slate-300 text-xl whitespace-nowrap">
+                (
+              </span>
+              <span className="text-sm bg-blue-100 rounded-sm text-slate-900 px-1 text-center whitespace-pre-wrap mr-2 ml-2">
+                {chosenItem.name}
+              </span>
+              <span className="text-slate-400 px-1 text-xl whitespace-nowrap">
+                /
+              </span>
+
+              <span className="text-sm bg-slate-200 bg-opacity-60 rounded-sm text-slate-800 px-1 text-center whitespace-pre-wrap mr-2 ml-2">
+                <span className="inline-block">{selectedItem.name}</span>
+              </span>
+              <span className="text-slate-300 text-xl whitespace-nowrap">
+                )
+              </span>
+            </div>
+
+            <div className="grid grid-cols-6 gap-1 w-full mt-10 mb-10">
+              <TableRow label="median" number={item.median} />
+              <TableRow label="mean" number={item.mean} />
+              <TableRow label="p5" number={item.min} />
+              <TableRow label="p95" number={item.max} />
+              <TableRow label="uncertainty" number={item.uncertainty} />
+            </div>
+
+            <div className="font-mono text-xs text-slate-500 p-2 border border-gray-200 bg-slate-100 rounded-sm whitespace-pre-wrap">
+              {str}
+            </div>
+
+            <a href={url}>Link</a>
           </div>
-          <div className="text-lg font-semibold text-slate-800 p-2 mt-4">
-            {selectedItem.name}
-          </div>
-          <div className="font-mono text-xs text-slate-500 p-2 border border-gray-300 bg-slate-200 rounded-sm whitespace-pre-wrap">
-            {str}
-          </div>
-          <a href={url}>Link</a>
-        </div>
-      );
+        );
+      }
     } else {
-      return "";
+      return "Need to select an item";
     }
   };
 
   return (
-    <div className="px-4">
+    <div>
       <div className="mb-2">
         <DropdownButton text="Table Settings">
           {() => <AxisMenu axis="rows" sortByAverage={false} />}
@@ -181,7 +227,7 @@ relativeValue`;
           </div>
         </div>
 
-        <div className="min-w-[500px] flex-1 relative">{sidebar()}</div>
+        <div className="min-w-[400px] flex-1 relative">{sidebar()}</div>
       </div>
     </div>
   );
