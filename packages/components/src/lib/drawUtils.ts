@@ -103,6 +103,7 @@ export function drawAxes({
   tickCount?: number;
   tickFormat?: string;
 }) {
+
   const xScale = logX ? d3.scaleLog() : d3.scaleLinear();
   xScale.domain(xDomain);
 

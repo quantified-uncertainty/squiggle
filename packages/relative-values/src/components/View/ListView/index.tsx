@@ -16,7 +16,7 @@ import { itemRoute } from "@/routes";
 
 type Props = {
   modelEvaluator: ModelEvaluator;
-  modelId: string,
+  modelId: string;
 };
 
 export const ListView: FC<Props> = ({ modelEvaluator, modelId }) => {

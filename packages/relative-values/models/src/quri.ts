@@ -86,6 +86,7 @@ function getCatalog(): Catalog {
       "Key QURI Items. Only large ones are captured. Value is defined as what Ozzie thinks it should be.",
     author: "Ozzie Gooen",
     created: new Date("2022-03-12"),
+    recommendedUnit: "quri_papers_5",
     clusters: {
       papers: {
         name: "Papers",

@@ -21,10 +21,10 @@ export const modelRoute = (
 export const itemRoute = (
   interfaceId: string,
   modelId: string,
-  itemId: string,
+  itemId: string
 ) => {
   return `${interfaceRoute(interfaceId)}/models/${modelId}/items/${itemId}`;
-}
+};
 
 export function useSiblingRoute() {
   const pathname = usePathname();

@@ -65,8 +65,9 @@ function usePlotData(model: ModelEvaluator, selectedId: string | undefined) {
 export const ValueAndUncertaintyPlot: FC<{
   model: ModelEvaluator;
   selectedId?: string | undefined;
+  height?: number;
   onClick?: (item: Item) => void;
-}> = ({ model, selectedId, onClick }) => {
+}> = ({ model, selectedId, height, onClick }) => {
   const {
     catalog: { clusters },
   } = useSelectedInterface();
@@ -75,12 +76,12 @@ export const ValueAndUncertaintyPlot: FC<{
   const [hoveredId, setHoveredId] = useState<number | undefined>(undefined);
   const [inSelectedId, setIn] = useState<string | undefined>(selectedId);
 
-  const height = 450;
+  const chosenHeight = height || 450;
   const { data, comparedToAverage } = usePlotData(model, inSelectedId);
 
   const draw = useCallback(
     ({ context, width }: DrawContext) => {
-      context.clearRect(0, 0, width, height);
+      context.clearRect(0, 0, width, chosenHeight);
 
       const { xScale, yScale, padding, chartHeight } = drawAxes({
         context,
@@ -88,7 +89,7 @@ export const ValueAndUncertaintyPlot: FC<{
         yDomain: d3.extent(data, (d) => Math.abs(d.median)) as [number, number],
         suggestedPadding: { top: 10, bottom: 40, left: 60, right: 20 },
         width,
-        height,
+        height: chosenHeight,
         logX: true,
         yScale: "log",
         drawTicks: true,
@@ -104,7 +105,7 @@ export const ValueAndUncertaintyPlot: FC<{
           ? "Mean uncertainty (decibels)"
           : "Uncertainty (decibels)",
         width - padding.right,
-        height
+        chosenHeight
       );
 
       context.save();
@@ -119,7 +120,7 @@ export const ValueAndUncertaintyPlot: FC<{
       context.restore();
 
       context.save();
-      context.translate(padding.left, height - padding.bottom);
+      context.translate(padding.left, chosenHeight - padding.bottom);
       context.scale(1, -1);
 
       const r = 5;
@@ -165,7 +166,7 @@ export const ValueAndUncertaintyPlot: FC<{
   );
 
   const { ref } = useCanvas({
-    height,
+    height: chosenHeight,
     draw,
     init: initCursor,
   });
