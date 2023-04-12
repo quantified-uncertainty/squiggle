@@ -85,8 +85,8 @@ export function drawAxes({
   height,
   hideYAxis,
   drawTicks,
-  logX,
-  expY,
+  logX = false,
+  yScale = "linear",
   tickCount = 5,
   tickFormat = ".9~s",
 }: {
@@ -99,20 +99,30 @@ export function drawAxes({
   hideYAxis?: boolean;
   drawTicks?: boolean;
   logX?: boolean;
-  expY?: boolean;
+  yScale?: "linear" | "log" | "exp";
   tickCount?: number;
   tickFormat?: string;
 }) {
   const xScale = logX ? d3.scaleLog() : d3.scaleLinear();
   xScale.domain(xDomain);
-  const yScale = expY ? d3.scalePow().exponent(0.1) : d3.scaleLinear();
-  yScale.domain(yDomain);
+
+  let yScaleObj
+
+  if (yScale === "exp") {
+    yScaleObj = d3.scalePow().exponent(0.1);
+  } else if (yScale === "log") {
+    yScaleObj = d3.scaleLog();
+  } else {
+    yScaleObj = d3.scaleLinear();
+  }
+
+  yScaleObj.domain(yDomain);
 
   const xTicks = xScale.ticks(tickCount);
   const xTickFormat = xScale.tickFormat(tickCount, tickFormat);
 
-  const yTicks = yScale.ticks(tickCount);
-  const yTickFormat = yScale.tickFormat(tickCount, tickFormat);
+  const yTicks = yScaleObj.ticks(tickCount);
+  const yTickFormat = yScaleObj.tickFormat(tickCount, tickFormat);
 
   const tickSize = 2;
 
@@ -134,7 +144,7 @@ export function drawAxes({
   const chartWidth = width - padding.left - padding.right;
   const chartHeight = height - padding.top - padding.bottom;
   xScale.range([0, chartWidth]);
-  yScale.range([0, chartHeight]);
+  yScaleObj.range([0, chartHeight]);
 
   // x axis
   {
@@ -204,13 +214,13 @@ export function drawAxes({
       context.fillText(
         yTickFormat(d),
         padding.left - 6,
-        padding.top + chartHeight - yScale(d)
+        padding.top + chartHeight - yScaleObj(d)
       );
     });
     context.restore();
   }
 
-  return { xScale, yScale, xTickFormat, padding, chartWidth, chartHeight };
+  return { xScale, yScale: yScaleObj, xTickFormat, padding, chartWidth, chartHeight };
 }
 
 export function drawVerticalCursorLine({

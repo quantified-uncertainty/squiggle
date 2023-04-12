@@ -72,11 +72,6 @@ export const DistributionViewSettingsForm: React.FC<{
           />
           <Checkbox
             register={register}
-            name="distributionChartSettings.expY"
-            label="Show y scale exponentially"
-          />
-          <Checkbox
-            register={register}
             name="distributionChartSettings.showSummary"
             label="Show summary statistics"
           />

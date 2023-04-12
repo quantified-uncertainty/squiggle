@@ -31,8 +31,8 @@ import { MouseTooltip } from "../ui/MouseTooltip.js";
 export const distributionSettingsSchema = yup.object({}).shape({
   /** Set the x scale to be logarithmic */
   logX: yup.boolean().required().default(false),
-  /** Set the y scale to be exponential */
-  expY: yup.boolean().required().default(false),
+  /** Set the y scale to be exponential or logarithmic */
+  yScale: yup.string().oneOf(["linear", "log", "exp"]).default("linear"),
   minX: yup.number(),
   maxX: yup.number(),
   title: yup.string(),
@@ -133,7 +133,7 @@ const InnerMultiDistributionChart: FC<{
         hideYAxis: true,
         drawTicks: true,
         logX: settings.logX,
-        expY: settings.expY,
+        yScale: settings.yScale,
         tickCount: 10,
         tickFormat: settings.tickFormat,
       });
@@ -280,7 +280,7 @@ const InnerMultiDistributionChart: FC<{
       discreteTooltip,
       cursor,
       settings.logX,
-      settings.expY,
+      settings.yScale,
       settings.title,
       settings.minX,
       settings.maxX,
