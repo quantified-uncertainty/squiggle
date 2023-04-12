@@ -65,16 +65,18 @@ function usePlotData(model: ModelEvaluator, selectedId: string | undefined) {
 export const ValueAndUncertaintyPlot: FC<{
   model: ModelEvaluator;
   selectedId?: string | undefined;
-}> = ({ model, selectedId }) => {
+  onClick?: (item: Item) => void;
+}> = ({ model, selectedId, onClick }) => {
   const {
     catalog: { clusters },
   } = useSelectedInterface();
 
   const { cursor, initCursor } = useCanvasCursor();
   const [hoveredId, setHoveredId] = useState<number | undefined>(undefined);
+  const [inSelectedId, setIn] = useState<string | undefined>(selectedId);
 
   const height = 450;
-  const { data, comparedToAverage } = usePlotData(model, selectedId);
+  const { data, comparedToAverage } = usePlotData(model, inSelectedId);
 
   const draw = useCallback(
     ({ context, width }: DrawContext) => {
@@ -155,6 +157,8 @@ export const ValueAndUncertaintyPlot: FC<{
       context.canvas.style.cursor =
         newHoveredId === undefined ? "auto" : "pointer";
       setHoveredId(newHoveredId);
+      let item = !!newHoveredId && data[newHoveredId];
+      item && !!onClick && onClick(item.item);
       context.restore();
     },
     [data, clusters, cursor]

@@ -5,6 +5,10 @@ import { ModelProvider, useSelectedModel } from "../../ModelProvider";
 import { useSelectedInterface } from "@/components/Interface/InterfaceProvider";
 import { ValueAndUncertaintyPlot } from "@/components/View/PlotView/ValueAndUncertaintyPlot";
 import { useViewContext } from "@/components/View/ViewProvider";
+import { useRouter } from "next/navigation";
+import { itemRoute } from "@/routes";
+import { Item } from "@/types";
+
 
 export default function ItemLayout({
   params,
@@ -15,8 +19,11 @@ export default function ItemLayout({
   const model = useSelectedModel();
   const { catalog } = useSelectedInterface();
   const { evaluator } = useViewContext();
-  console.log("H", catalog);
   let item = catalog.items.find((item) => item.id === params.itemId);
+  const router = useRouter()
+  const sendToItem = (item:Item) => {
+    router.push(itemRoute(catalog.id, params.modelId, item.id))
+  }
 
   if (!item) {
     return <div>Item not found</div>;
@@ -24,7 +31,13 @@ export default function ItemLayout({
     return (
       <div>
         {item.name} {item.id} {item.description}
-        {evaluator.ok && <ValueAndUncertaintyPlot model={evaluator.value} selectedId={item.id} />}
+        {evaluator.ok && (
+          <ValueAndUncertaintyPlot
+            model={evaluator.value}
+            selectedId={item.id}
+            onClick={(item) => sendToItem(item)}
+          />
+        )}
       </div>
     );
   }
