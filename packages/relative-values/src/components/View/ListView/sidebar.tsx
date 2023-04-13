@@ -1,14 +1,13 @@
-import clsx from "clsx";
-import { deflate, inflate } from "pako";
+import { deflate } from "pako";
 import { ModelEvaluator } from "@/values/ModelEvaluator";
-import { Catalog, InterfaceWithModels, Item } from "@/types";
+import { Item } from "@/types";
 import { fromByteArray } from "base64-js";
-import { getModelCode, Model } from "@/model/utils";
-import { FC, Fragment, useState } from "react";
+import { getModelCode } from "@/model/utils";
+import { FC, Fragment } from "react";
 import { NumberShower } from "@quri/squiggle-components";
 
-function setHashData(data) {
-  const text = JSON.stringify(data);
+function setHashData(initialSquiggleString: string) {
+  const text = JSON.stringify({ initialSquiggleString });
   const HASH_PREFIX = "https://www.squiggle-language.com/playground#code=";
   const compressed = deflate(text, { level: 9 });
   return HASH_PREFIX + encodeURIComponent(fromByteArray(compressed));
@@ -41,66 +40,57 @@ dists = fn("${chosenItem.id}", "${selectedItem.id}")
 value_${chosenItem.id} = dists[0]
 value_${selectedItem.id} = dists[1]
 relativeValue = value_${chosenItem.id} / value_${selectedItem.id}`;
-  const url = setHashData({ initialSquiggleString: str });
+  const url = setHashData(str);
   return url;
 };
 
 type Props = {
   model: ModelEvaluator;
-  catalog: Catalog;
-  highlightedItems: [string, string] | undefined;
-  selectedItem: Item | undefined;
+  numeratorItem: Item;
+  denominatorItem: Item;
 };
 
 export const ItemSideBar: FC<Props> = ({
   model,
-  catalog,
-  highlightedItems,
-  selectedItem,
+  numeratorItem,
+  denominatorItem,
 }) => {
-  let chosenItem = catalog.items.find(
-    (item) => item.id === (highlightedItems && highlightedItems[0])
-  );
-  if (!chosenItem || !selectedItem) {
-    return <div>Need to select an item</div>;
+  const result = model.compare(numeratorItem.id, denominatorItem.id);
+  if (!result.ok) {
+    return <div>Result not found</div>;
   } else {
-    const result = model.compare(chosenItem.id, selectedItem.id);
-    if (!result.ok) {
-      return <div>Result not found</div>;
-    } else {
-      let item = result.value;
-      const url = buildurl(model, chosenItem, selectedItem);
-      return (
-        <div>
-          <div className="mt-2 mb-6 flex overflow-x-auto items-center p-1">
-            <span className="text-slate-500 text-md whitespace-nowrap mr-1">
-              value
-            </span>
-            <span className="text-slate-300 text-xl whitespace-nowrap">(</span>
-            <span className="text-sm bg-blue-100 rounded-sm text-slate-900 px-1 text-center whitespace-pre-wrap mr-2 ml-2">
-              {chosenItem.name}
-            </span>
-            <span className="text-slate-300 px-1 text-xl whitespace-nowrap">
-              /
-            </span>
+    let item = result.value;
+    const url = buildurl(model, numeratorItem, denominatorItem);
+    return (
+      <div>
+        <div className="mt-2 mb-6 flex overflow-x-auto items-center p-1">
+          <span className="text-slate-500 text-md whitespace-nowrap mr-1">
+            value
+          </span>
+          <span className="text-slate-300 text-xl whitespace-nowrap">(</span>
+          <span className="text-sm bg-blue-100 rounded-sm text-slate-900 px-1 text-center whitespace-pre-wrap mr-2 ml-2">
+            {numeratorItem.name}
+          </span>
+          <span className="text-slate-300 px-1 text-xl whitespace-nowrap">
+            /
+          </span>
 
-            <span className="text-sm bg-slate-200 bg-opacity-60 rounded-sm text-slate-800 px-1 text-center whitespace-pre-wrap mr-2 ml-2">
-              <span className="inline-block">{selectedItem.name}</span>
-            </span>
-            <span className="text-slate-300 text-xl whitespace-nowrap">)</span>
-          </div>
-
-          <div className="grid grid-cols-6 gap-1 w-full mt-10 mb-10">
-            <TableRow label="median" number={item.median} />
-            <TableRow label="mean" number={item.mean} />
-            <TableRow label="p5" number={item.min} />
-            <TableRow label="p95" number={item.max} />
-            <TableRow label="uncertainty" number={item.uncertainty} />
-          </div>
-
-          <a href={url}>Open in Playground</a>
+          <span className="text-sm bg-slate-200 bg-opacity-60 rounded-sm text-slate-800 px-1 text-center whitespace-pre-wrap mr-2 ml-2">
+            <span className="inline-block">{denominatorItem.name}</span>
+          </span>
+          <span className="text-slate-300 text-xl whitespace-nowrap">)</span>
         </div>
-      );
-    }
+
+        <div className="grid grid-cols-6 gap-1 w-full mt-10 mb-10">
+          <TableRow label="median" number={item.median} />
+          <TableRow label="mean" number={item.mean} />
+          <TableRow label="p5" number={item.min} />
+          <TableRow label="p95" number={item.max} />
+          <TableRow label="uncertainty" number={item.uncertainty} />
+        </div>
+
+        <a href={url}>Open in Playground</a>
+      </div>
+    );
   }
 };

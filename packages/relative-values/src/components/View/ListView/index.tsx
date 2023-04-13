@@ -11,7 +11,7 @@ import { useViewContext } from "../ViewProvider";
 import { useFilteredItems, useSortedItems } from "../hooks";
 import { averageUncertainty } from "../hooks/useSortedItems";
 import { ColumnHeader } from "./ColumnHeader";
-import { getModelCode, Model } from "@/model/utils";
+import { Item } from "@/types";
 import clsx from "clsx";
 import { ItemSideBar } from "./sidebar";
 
@@ -23,7 +23,7 @@ export const ListView: FC<Props> = ({ model }) => {
   const { axisConfig } = useViewContext();
   const { catalog } = useSelectedInterface();
 
-  const [selectedItem, setSelectedItem] = useState(() => {
+  const [denominatorItem, setDenominatorItem] = useState(() => {
     if (catalog.recommendedUnit !== undefined) {
       return (
         catalog.items.find((item) => item.id === catalog.recommendedUnit) ??
@@ -33,9 +33,9 @@ export const ListView: FC<Props> = ({ model }) => {
     return catalog.items[0];
   });
 
-  const [highlightedItems, setHighlightedItems] = useState<
-    undefined | [string, string]
-  >(undefined);
+  const [numeratorItem, setNumeratorItem] = useState<undefined | Item>(
+    undefined
+  );
 
   const [search, setSearch] = useState("");
 
@@ -55,7 +55,7 @@ export const ListView: FC<Props> = ({ model }) => {
     items: filteredItems,
     config: axisConfig.rows,
     model: model,
-    otherDimensionItems: [selectedItem],
+    otherDimensionItems: [denominatorItem],
   });
 
   const uncertaintyPercentiles = model.getParamPercentiles(
@@ -88,7 +88,7 @@ export const ListView: FC<Props> = ({ model }) => {
           onChange={(e) => setSearch(e.currentTarget.value)}
         />
       </div>
-      <div className={clsx(!!highlightedItems ? "flex" : "auto")}>
+      <div className={clsx(!!numeratorItem ? "flex" : "auto")}>
         <div className="flex-2">
           <div className="grid border-r border-b border-gray-200 grid-cols-6">
             {headerRow("Name")}
@@ -97,8 +97,8 @@ export const ListView: FC<Props> = ({ model }) => {
             {headerRow("Cluster")}
             {headerRow("Average Uncertainty (om)")}
             <ColumnHeader
-              selectedItem={selectedItem}
-              setSelectedItem={setSelectedItem}
+              selectedItem={denominatorItem}
+              setSelectedItem={setDenominatorItem}
             />
             {sortedItems.map((item) => (
               <Fragment key={item.id}>
@@ -132,14 +132,16 @@ export const ListView: FC<Props> = ({ model }) => {
                 </CellBox>
                 <div
                   onClick={() =>
-                    highlightedItems && highlightedItems[0] === item.id
-                      ? setHighlightedItems(undefined)
-                      : setHighlightedItems([item.id, selectedItem.id])
+                    numeratorItem && numeratorItem.id === item.id
+                      ? setNumeratorItem(undefined)
+                      : setNumeratorItem(
+                          catalog.items.find((i) => i.id === item.id)
+                        )
                   }
                 >
                   <RelativeCell
                     id1={item.id}
-                    id2={selectedItem.id}
+                    id2={denominatorItem.id}
                     model={model}
                     uncertaintyPercentiles={uncertaintyPercentiles}
                   />
@@ -148,14 +150,13 @@ export const ListView: FC<Props> = ({ model }) => {
             ))}
           </div>
         </div>
-        {highlightedItems && (
+        {numeratorItem && numeratorItem && denominatorItem && (
           <div className="min-w-[400px] flex-1 relative">
             <div className="sticky top-4 bg-slate-50 px-2 py-4 ml-4 rounded-sm">
               <ItemSideBar
                 model={model}
-                catalog={catalog}
-                highlightedItems={highlightedItems}
-                selectedItem={selectedItem}
+                numeratorItem={numeratorItem}
+                denominatorItem={denominatorItem}
               />
             </div>
           </div>
