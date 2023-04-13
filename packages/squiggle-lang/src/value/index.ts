@@ -143,13 +143,11 @@ class VNumber {
 }
 export const vNumber = (v: number) => new VNumber(v);
 
-//Remove double quotes from string, because we wrap with double quotes
-const stringEscape = (str: string) => str.replace(/"/g, '\\"');
 class VString {
   readonly type = "String" as const;
   constructor(public value: string) {}
   toString() {
-    return `"${stringEscape(this.value)}"`;
+    return `'${(this.value)}'`;
   }
 }
 export const vString = (v: string) => new VString(v);
