@@ -11,6 +11,9 @@ import { useViewContext } from "../ViewProvider";
 import { useFilteredItems, useSortedItems } from "../hooks";
 import { averageUncertainty } from "../hooks/useSortedItems";
 import { ColumnHeader } from "./ColumnHeader";
+import { Item } from "@/types";
+import clsx from "clsx";
+import { ItemSideBar } from "./sidebar";
 
 type Props = {
   model: ModelEvaluator;
@@ -20,7 +23,7 @@ export const ListView: FC<Props> = ({ model }) => {
   const { axisConfig } = useViewContext();
   const { catalog } = useSelectedInterface();
 
-  const [selectedItem, setSelectedItem] = useState(() => {
+  const [denominatorItem, setDenominatorItem] = useState(() => {
     if (catalog.recommendedUnit !== undefined) {
       return (
         catalog.items.find((item) => item.id === catalog.recommendedUnit) ??
@@ -30,15 +33,29 @@ export const ListView: FC<Props> = ({ model }) => {
     return catalog.items[0];
   });
 
+  const [numeratorItem, setNumeratorItem] = useState<undefined | Item>(
+    undefined
+  );
+
+  const [search, setSearch] = useState("");
+
   const filteredItems = useFilteredItems({
-    items: catalog.items,
+    items: catalog.items.filter((item) => {
+      const regexp = new RegExp(search, "i");
+      return (
+        item.name.match(regexp) ||
+        item.id.match(regexp) ||
+        (item.clusterId || "").match(regexp)
+      );
+    }),
     config: axisConfig.rows,
   });
+
   const sortedItems = useSortedItems({
     items: filteredItems,
     config: axisConfig.rows,
     model: model,
-    otherDimensionItems: [selectedItem],
+    otherDimensionItems: [denominatorItem],
   });
 
   const uncertaintyPercentiles = model.getParamPercentiles(
@@ -47,87 +64,104 @@ export const ListView: FC<Props> = ({ model }) => {
     [20, 80]
   );
 
-  return (
-    <div className="max-w-6xl mx-auto">
-      <div className="mb-2">
-        <DropdownButton text="Table Settings">
-          {() => <AxisMenu axis="rows" sortByAverage={false} />}
-        </DropdownButton>
+  const headerRow = (name: string) => (
+    <CellBox header>
+      <div className="p-1 pt-2 text-sm font-semibold text-slate-600">
+        {name}
       </div>
-      <div
-        className="grid border-r border-b border-gray-200 w-max"
-        style={{
-          gridTemplateColumns:
-            "minmax(200px, min-content) minmax(140px, min-content) minmax(100px, min-content) minmax(160px, min-content) minmax(160px, min-content) minmax(160px, min-content)",
-        }}
-      >
-        <CellBox header>
-          <div className="p-1 pt-2 text-sm font-semibold text-slate-600">
-            Name
-          </div>
-        </CellBox>
-        <CellBox header>
-          <div className="p-1 pt-2 text-sm font-semibold text-slate-600">
-            Description
-          </div>
-        </CellBox>
-        <CellBox header>
-          <div className="p-1 pt-2 text-sm font-semibold text-slate-600">
-            ID
-          </div>
-        </CellBox>
-        <CellBox header>
-          <div className="p-1 pt-2 text-sm font-semibold text-slate-600">
-            Cluster
-          </div>
-        </CellBox>
-        <CellBox header>
-          <div className="p-1 pt-2 text-sm font-semibold text-slate-600">
-            Average Uncertainty (om)
-          </div>
-        </CellBox>
-        <ColumnHeader
-          selectedItem={selectedItem}
-          setSelectedItem={setSelectedItem}
+    </CellBox>
+  );
+
+  return (
+    <div>
+      <div className="mb-2 flex">
+        <div className="mr-2">
+          <DropdownButton text="Table Settings">
+            {() => <AxisMenu axis="rows" sortByAverage={false} />}
+          </DropdownButton>
+        </div>
+
+        <input
+          type="text"
+          className="p-1 rounded border border-gray-200 mb-4"
+          defaultValue={search}
+          onChange={(e) => setSearch(e.currentTarget.value)}
         />
-        {sortedItems.map((item) => (
-          <Fragment key={item.id}>
-            <Header item={item} />
-            <CellBox>
-              <div className="p-2 text-xs text-slate-800">
-                {item.description}
-              </div>
-            </CellBox>
-            <CellBox>
-              <div className="p-2 font-mono text-xs text-slate-600">
-                {item.id}
-              </div>
-            </CellBox>
-            <CellBox>
-              <div className="p-2 font-mono text-xs text-slate-600">
-                {item.clusterId}
-              </div>
-            </CellBox>
-            <CellBox>
-              <div className="p-2 text-slate-800">
-                <NumberShower
-                  number={averageUncertainty({
-                    item,
-                    comparedTo: catalog.items,
-                    model: model,
-                  })}
-                  precision={3}
-                />
-              </div>
-            </CellBox>
-            <RelativeCell
-              id1={item.id}
-              id2={selectedItem.id}
-              model={model}
-              uncertaintyPercentiles={uncertaintyPercentiles}
+      </div>
+      <div className={clsx(!!numeratorItem ? "flex" : "auto")}>
+        <div className="flex-2">
+          <div className="grid border-r border-b border-gray-200 grid-cols-6">
+            {headerRow("Name")}
+            {headerRow("Description")}
+            {headerRow("ID")}
+            {headerRow("Cluster")}
+            {headerRow("Average Uncertainty (om)")}
+            <ColumnHeader
+              selectedItem={denominatorItem}
+              setSelectedItem={setDenominatorItem}
             />
-          </Fragment>
-        ))}
+            {sortedItems.map((item) => (
+              <Fragment key={item.id}>
+                <Header item={item} />
+                <CellBox>
+                  <div className="p-2 text-xs text-slate-800">
+                    {item.description}
+                  </div>
+                </CellBox>
+                <CellBox>
+                  <div className="p-2 font-mono text-xs text-slate-600">
+                    {item.id}
+                  </div>
+                </CellBox>
+                <CellBox>
+                  <div className="p-2 font-mono text-xs text-slate-600">
+                    {item.clusterId}
+                  </div>
+                </CellBox>
+                <CellBox>
+                  <div className="p-2 text-slate-800">
+                    <NumberShower
+                      number={averageUncertainty({
+                        item,
+                        comparedTo: catalog.items,
+                        model: model,
+                      })}
+                      precision={3}
+                    />
+                  </div>
+                </CellBox>
+                <div
+                  className="cursor-pointer"
+                  onClick={() =>
+                    numeratorItem && numeratorItem.id === item.id
+                      ? setNumeratorItem(undefined)
+                      : setNumeratorItem(
+                          catalog.items.find((i) => i.id === item.id)
+                        )
+                  }
+                >
+                  <RelativeCell
+                    id1={item.id}
+                    id2={denominatorItem.id}
+                    model={model}
+                    uncertaintyPercentiles={uncertaintyPercentiles}
+                  />
+                </div>
+              </Fragment>
+            ))}
+          </div>
+        </div>
+        {numeratorItem && numeratorItem && denominatorItem && (
+          <div className="min-w-[500px] flex-1 relative">
+            <div className="sticky top-4 bg-slate-50 px-2 py-4 ml-4 rounded-sm border-gray-200 border">
+              <ItemSideBar
+                model={model}
+                numeratorItem={numeratorItem}
+                denominatorItem={denominatorItem}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
