@@ -152,7 +152,7 @@ export const ListView: FC<Props> = ({ model }) => {
           </div>
         </div>
         {numeratorItem && numeratorItem && denominatorItem && (
-          <div className="min-w-[400px] flex-1 relative">
+          <div className="min-w-[500px] flex-1 relative">
             <div className="sticky top-4 bg-slate-50 px-2 py-4 ml-4 rounded-sm border-gray-200 border">
               <ItemSideBar
                 model={model}
