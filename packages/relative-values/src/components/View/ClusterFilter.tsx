@@ -11,7 +11,10 @@ export const ClusterItem: React.FC<{
   toggle(): void;
 }> = ({ cluster, selected, toggle }) => {
   return (
-    <div className="flex gap-1 items-center cursor-pointer" onClick={toggle}>
+    <div
+      className="flex gap-1 items-center cursor-pointer select-none"
+      onClick={toggle}
+    >
       <div className="flex-none">
         <ClusterIcon cluster={cluster} selected={selected} />
       </div>

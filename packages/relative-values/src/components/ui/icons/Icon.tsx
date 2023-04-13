@@ -4,10 +4,12 @@ export type IconProps = PropsWithChildren<{
   size?: number;
   className?: string;
   onClick?: () => void;
+  viewBox?: string;
 }>;
 
 export const Icon: FC<IconProps> = ({
   size = 20,
+  viewBox = "0 0 20 20",
   className = "fill-black stroke-black",
   onClick,
   children,
@@ -15,7 +17,7 @@ export const Icon: FC<IconProps> = ({
   <svg
     width={size}
     height={size}
-    viewBox="0 0 20 20"
+    viewBox={viewBox}
     fill="none"
     onClick={onClick}
     className={className}
