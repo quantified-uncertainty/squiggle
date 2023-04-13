@@ -131,7 +131,7 @@ export const ListView: FC<Props> = ({ model }) => {
                   </div>
                 </CellBox>
                 <div
-                className="cursor-pointer"
+                  className="cursor-pointer"
                   onClick={() =>
                     numeratorItem && numeratorItem.id === item.id
                       ? setNumeratorItem(undefined)
