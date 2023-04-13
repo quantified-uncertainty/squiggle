@@ -37,10 +37,20 @@ export const ListView: FC<Props> = ({ model }) => {
     undefined | [string, string]
   >([catalog.items[0].id, catalog.items[1].id]);
 
+  const [search, setSearch] = useState("");
+
   const filteredItems = useFilteredItems({
-    items: catalog.items,
+    items: catalog.items.filter((item) => {
+      const regexp = new RegExp(search, "i");
+      return (
+        item.name.match(regexp) ||
+        item.id.match(regexp) ||
+        (item.clusterId || "").match(regexp)
+      );
+    }),
     config: axisConfig.rows,
   });
+
   const sortedItems = useSortedItems({
     items: filteredItems,
     config: axisConfig.rows,
@@ -108,7 +118,7 @@ relativeValue`;
               <span className="text-sm bg-blue-100 rounded-sm text-slate-900 px-1 text-center whitespace-pre-wrap mr-2 ml-2">
                 {chosenItem.name}
               </span>
-              <span className="text-slate-400 px-1 text-xl whitespace-nowrap">
+              <span className="text-slate-300 px-1 text-xl whitespace-nowrap">
                 /
               </span>
 
@@ -143,10 +153,19 @@ relativeValue`;
 
   return (
     <div>
-      <div className="mb-2">
-        <DropdownButton text="Table Settings">
-          {() => <AxisMenu axis="rows" sortByAverage={false} />}
-        </DropdownButton>
+      <div className="mb-2 flex">
+        <div className="mr-2">
+          <DropdownButton text="Table Settings">
+            {() => <AxisMenu axis="rows" sortByAverage={false} />}
+          </DropdownButton>
+        </div>
+
+        <input
+          type="text"
+          className="p-1 rounded border border-gray-200 mb-4"
+          defaultValue={search}
+          onChange={(e) => setSearch(e.currentTarget.value)}
+        />
       </div>
       <div className="flex">
         <div className="flex-2">
