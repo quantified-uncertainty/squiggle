@@ -147,7 +147,7 @@ class VString {
   readonly type = "String" as const;
   constructor(public value: string) {}
   toString() {
-    return `'${(this.value)}'`;
+    return `'${this.value}'`;
   }
 }
 export const vString = (v: string) => new VString(v);
