@@ -1,19 +1,18 @@
 import { useSelectedInterface } from "@/components/Interface/InterfaceProvider";
 import { DropdownButton } from "@/components/ui/DropdownButton";
 import { ModelEvaluator } from "@/values/ModelEvaluator";
-import { NumberShower } from "@quri/squiggle-components";
 import { FC, Fragment, useState } from "react";
 import { CellBox } from "../CellBox";
 import { AxisMenu } from "../GridView/AxisMenu";
-import { Header } from "../Header";
 import { RelativeCell } from "../RelativeCell";
 import { useViewContext } from "../ViewProvider";
 import { useFilteredItems, useSortedItems } from "../hooks";
-import { averageUncertainty } from "../hooks/useSortedItems";
 import { ColumnHeader } from "./ColumnHeader";
 import { Item } from "@/types";
-import clsx from "clsx";
 import { ItemSideBar } from "./sidebar";
+import { CompassIcon } from "@/components/ui/icons/CompassIcon";
+import clsx from "clsx";
+import { ClusterIcon } from "../../common/ClusterIcon";
 
 type Props = {
   model: ModelEvaluator;
@@ -59,7 +58,7 @@ export const ListView: FC<Props> = ({ model }) => {
   });
 
   const uncertaintyPercentiles = model.getParamPercentiles(
-    catalog.items.map((i) => i.id),
+    filteredItems.map((i) => i.id),
     (r) => r.uncertainty,
     [20, 80]
   );
@@ -90,7 +89,12 @@ export const ListView: FC<Props> = ({ model }) => {
       </div>
       <div className={clsx(!!numeratorItem ? "flex" : "auto")}>
         <div className="flex-2">
-          <div className="grid border-r border-b border-gray-200 grid-cols-6">
+          <div
+            className="grid border-r border-b border-gray-200 w-full"
+            style={{
+              gridTemplateColumns: "2fr 2fr 1fr",
+            }}
+          >
             {headerRow("Name")}
             {headerRow("Description")}
             {headerRow("ID")}
@@ -102,32 +106,55 @@ export const ListView: FC<Props> = ({ model }) => {
             />
             {sortedItems.map((item) => (
               <Fragment key={item.id}>
-                <Header item={item} />
                 <CellBox>
-                  <div className="p-2 text-xs text-slate-800">
+                  <div
+                    className="p-2 flex justify-end text-slate-700 cursor-pointer font-bold text-sm"
+                    onClick={() => setDenominatorItem(item)}
+                  >
+                    <div className="flex-grow text-sm hover:text-slate-900 hover:underline">
+                      {item.name}
+                    </div>
+                    <div
+                      onClick={() => setDenominatorItem(item)}
+                      className={"pl-2 cursor-pointer"}
+                    >
+                      <CompassIcon
+                        className={clsx(
+                          "hover:fill-slate-800",
+                          item.id === denominatorItem.id
+                            ? "fill-slate-500"
+                            : "fill-slate-200"
+                        )}
+                        size={23}
+                        viewBox={"0 0 25 25"}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex px-2 pb-3">
+                    {item.clusterId !== undefined ? (
+                      <div className="flex gap-1 items-center">
+                        <div className="flex-none opacity-50">
+                          <ClusterIcon
+                            cluster={catalog.clusters[item.clusterId]}
+                            selected={true}
+                          />
+                        </div>
+                        <div className="text-xs font-medium text-slate-400">
+                          {catalog.clusters[item.clusterId].name}
+                        </div>
+                      </div>
+                    ) : (
+                      ""
+                    )}
+                    <div className="px-3 font-mono text-xs text-slate-400">
+                      {item.id}
+                    </div>
+                  </div>
+                </CellBox>
+                <CellBox>
+                  <div className="p-3 text-sm text-slate-500">
                     {item.description}
-                  </div>
-                </CellBox>
-                <CellBox>
-                  <div className="p-2 font-mono text-xs text-slate-600">
-                    {item.id}
-                  </div>
-                </CellBox>
-                <CellBox>
-                  <div className="p-2 font-mono text-xs text-slate-600">
-                    {item.clusterId}
-                  </div>
-                </CellBox>
-                <CellBox>
-                  <div className="p-2 text-slate-800">
-                    <NumberShower
-                      number={averageUncertainty({
-                        item,
-                        comparedTo: catalog.items,
-                        model: model,
-                      })}
-                      precision={3}
-                    />
                   </div>
                 </CellBox>
                 <div
