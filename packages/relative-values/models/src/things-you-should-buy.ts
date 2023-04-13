@@ -364,7 +364,7 @@ getRelativeValues = {|item_1, item_2|
 
 fn(a,b) = getRelativeValues(items_object[a], items_object[b])
 // fn("i5", "i4")
-item_nice_headphones`,
+//item_nice_headphones`,
   };
 }
 
