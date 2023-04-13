@@ -6,8 +6,8 @@ Squiggle is currently in "Early Access" mode.
 
 # Quick links
 
-- [Squiggle documentation](https://www.squiggle-language.com/docs/Language)
-- The team presently communicates via the **EA Forecasting and Epistemics** slack (channels `#squiggle-dev` and `#squiggle-ops`), you can track down an invite by reaching out to Ozzie Gooen
+- [Squiggle documentation](https://www.squiggle-language.com/docs/Overview)
+- The team presently communicates via the **EA Forecasting and Epistemics** slack (channels `#squiggle-dev` and `#squiggle-ops`). You can track down an invite by reaching out to Ozzie Gooen
 - You can email `slava@quantifieduncertainty.org` if you need assistance in onboarding or if you have questions
 
 # Bug reports
