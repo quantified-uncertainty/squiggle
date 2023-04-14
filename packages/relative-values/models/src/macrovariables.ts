@@ -321,6 +321,7 @@ function getCatalog(): Catalog {
     id: "macrovariables",
     title: "Macrovariables",
     items,
+    recommendedUnit: "funder_openphil_2020",
     clusters: {
       macrovariables: {
         name: "macrovariables",

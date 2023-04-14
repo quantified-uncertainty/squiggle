@@ -22,6 +22,8 @@ export const ListView: FC<Props> = ({ model }) => {
   const { axisConfig } = useViewContext();
   const { catalog } = useSelectedInterface();
 
+  const showDescriptions = catalog.items.some((item) => !!item.description);
+
   const [denominatorItem, setDenominatorItem] = useState(() => {
     if (catalog.recommendedUnit !== undefined) {
       return (
@@ -73,7 +75,7 @@ export const ListView: FC<Props> = ({ model }) => {
 
   return (
     <div>
-      <div className="mb-2 flex">
+      <div className="mb-2 flex max-w-6xl mx-auto">
         <div className="mr-2">
           <DropdownButton text="Table Settings">
             {() => <AxisMenu axis="rows" sortByAverage={false} />}
@@ -88,16 +90,16 @@ export const ListView: FC<Props> = ({ model }) => {
           onChange={(e) => setSearch(e.currentTarget.value)}
         />
       </div>
-      <div className={clsx(!!numeratorItem ? "flex" : "auto")}>
+      <div className={"flex"}>
         <div className="flex-1">
           <div
             className="grid border-r border-b border-gray-200 w-full"
             style={{
-              gridTemplateColumns: "2fr 2fr 1fr",
+              gridTemplateColumns: showDescriptions ? "2fr 2fr 1fr" : "3fr 1fr",
             }}
           >
             {headerRow("Name")}
-            {headerRow("Description")}
+            {showDescriptions && headerRow("Description")}
             <ColumnHeader
               selectedItem={denominatorItem}
               setSelectedItem={setDenominatorItem}
@@ -150,11 +152,13 @@ export const ListView: FC<Props> = ({ model }) => {
                     </div>
                   </div>
                 </CellBox>
-                <CellBox>
-                  <div className="p-3 text-sm text-slate-500">
-                    {item.description}
-                  </div>
-                </CellBox>
+                {showDescriptions && (
+                  <CellBox>
+                    <div className="p-3 text-sm text-slate-500">
+                      {item.description}
+                    </div>
+                  </CellBox>
+                )}
                 <div
                   className="cursor-pointer"
                   onClick={() =>
