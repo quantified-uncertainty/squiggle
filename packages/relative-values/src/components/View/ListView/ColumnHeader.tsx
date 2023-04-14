@@ -59,7 +59,9 @@ export const ColumnHeader: FC<{
         fullHeight
       >
         <CellBox header clickable>
-          <div className="text-sm pl-1 pt-1 text-slate-600">Estimated value, in terms of</div>
+          <div className="text-sm pl-1 pt-1 text-slate-600">
+            Estimated value, in terms of
+          </div>
           <Header item={selectedItem} />
         </CellBox>
       </Dropdown>

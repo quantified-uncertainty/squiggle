@@ -107,7 +107,10 @@ export const ItemSideBar: FC<Props> = ({
           <TableRow label="uncertainty" number={item.uncertainty} />
         </div>
 
-        <a href={codeToPlaygroundUrl(squggleCode)} className="text-slate-400 underline">
+        <a
+          href={codeToPlaygroundUrl(squggleCode)}
+          className="text-slate-400 underline"
+        >
           Open in Playground
         </a>
       </div>
