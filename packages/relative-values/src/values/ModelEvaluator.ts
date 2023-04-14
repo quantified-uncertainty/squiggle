@@ -95,7 +95,7 @@ function buildRelativeValue({
 
 export class ModelEvaluator {
   private constructor(
-    public model: Model, // unused for now
+    public model: Model,
     private fn: SqLambda,
     private cache?: ModelCache
   ) {}
