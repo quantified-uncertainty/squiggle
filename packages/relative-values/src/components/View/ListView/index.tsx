@@ -84,11 +84,12 @@ export const ListView: FC<Props> = ({ model }) => {
           type="text"
           className="p-1 rounded border border-gray-200 mb-4"
           defaultValue={search}
+          placeholder="Filter..."
           onChange={(e) => setSearch(e.currentTarget.value)}
         />
       </div>
       <div className={clsx(!!numeratorItem ? "flex" : "auto")}>
-        <div className="flex-2">
+        <div className="flex-1">
           <div
             className="grid border-r border-b border-gray-200 w-full"
             style={{
@@ -97,9 +98,6 @@ export const ListView: FC<Props> = ({ model }) => {
           >
             {headerRow("Name")}
             {headerRow("Description")}
-            {headerRow("ID")}
-            {headerRow("Cluster")}
-            {headerRow("Average Uncertainty (om)")}
             <ColumnHeader
               selectedItem={denominatorItem}
               setSelectedItem={setDenominatorItem}
@@ -179,7 +177,7 @@ export const ListView: FC<Props> = ({ model }) => {
           </div>
         </div>
         {numeratorItem && numeratorItem && denominatorItem && (
-          <div className="min-w-[500px] flex-1 relative">
+          <div className="w-[500px] relative">
             <div className="sticky top-4 bg-slate-50 px-2 py-4 ml-4 rounded-sm border-gray-200 border">
               <ItemSideBar
                 model={model}

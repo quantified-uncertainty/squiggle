@@ -18,7 +18,6 @@ function getHashData() {
       decodeURIComponent(hash.slice(HASH_PREFIX.length))
     );
     const text = inflate(compressed, { to: "string" });
-    console.log(compressed, text, JSON.parse(text));
     return JSON.parse(text);
   } catch (err) {
     console.error(err);

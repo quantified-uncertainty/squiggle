@@ -10,70 +10,70 @@ function getCatalog(): Catalog {
     {
       id: "funder_openphil_2020",
       clusterId: "funder",
-      name: "Open Philanthropy - 2020 (longtermism)",
+      name: "$1 Open Philanthropy - 2020 (longtermism)",
       description:
         "The marginal value of $1, from Open Philanthropy longtermism, in the year 2020",
     },
     {
       id: "funder_openphil_2023",
       clusterId: "funder",
-      name: "Open Philanthropy - 2023 (longtermism)",
+      name: "$1 Open Philanthropy - 2023 (longtermism)",
       description:
         "The marginal value of $1, from Open Philanthropy longtermism, in the year 2023",
     },
     {
       id: "funder_eafund_ltff_2020",
       clusterId: "funder",
-      name: "Long-Term Future Fund (EA Funds) - 2020",
+      name: "$1 Long-Term Future Fund (EA Funds) - 2020",
       description:
         "The marginal value of $1, from Long-Term Future Fund (EA Funds), in the year 2020",
     },
     {
       id: "funder_eafund_ltff_2023",
       clusterId: "funder",
-      name: "Long-Term Future Fund (EA Funds) - 2023",
+      name: "$1 Long-Term Future Fund (EA Funds) - 2023",
       description:
         "The marginal value of $1, from Long-Term Future Fund (EA Funds), in the year 2023",
     },
     {
       id: "funder_eafund_animal_welfare_2020",
       clusterId: "funder",
-      name: "Animal Fund (EA Funds) - 2020",
+      name: "$1 Animal Fund (EA Funds) - 2020",
       description:
         "The marginal value of $1, from Long-Term Future Fund (EA Funds), in the year 2020",
     },
     {
       id: "funder_eafund_animal_welfare_2023",
       clusterId: "funder",
-      name: "Animal Fund (EA Funds) - 2023",
+      name: "$1 Animal Fund (EA Funds) - 2023",
       description:
         "The marginal value of $1, from Long-Term Future Fund (EA Funds), in the year 2023",
     },
     {
       id: "funder_eafund_ea_infrastructure_2020",
       clusterId: "funder",
-      name: "EA Infrastructure Fund (EA Funds) - 2020",
+      name: "$1 EA Infrastructure Fund (EA Funds) - 2020",
       description:
         "The marginal value of $1, from EA Infrastructure Fund (EA Funds), in the year 2020",
     },
     {
       id: "funder_eafund_ea_infrastructure_2023",
       clusterId: "funder",
-      name: "EA Infrastructure Fund (EA Funds) - 2023",
+      name: "$1 EA Infrastructure Fund (EA Funds) - 2023",
       description:
         "The marginal value of $1, from EA Infrastructure Fund (EA Funds), in the year 2023",
     },
     {
       id: "funder_eafund_globalhealth_2020",
       clusterId: "funder",
-      name: "Global Health and Development (EA Funds) - 2020",
+      name: "$1 Global Health and Development (EA Funds) - 2020",
       description:
         "The marginal value of $1, from Global Health and Development (EA Funds), in the year 2020. Consider flow-though impacts, like longtermist benefits.",
     },
     {
       id: "funder_eafund_globalhealth_2020_direct",
       clusterId: "funder",
-      name: "Global Health and Development (EA Funds) (Direct Impacts) - 2020",
+      name: "$1 Global Health and Development (EA Funds) (Direct Impacts) - 2020",
       description:
         "The marginal value of $1, from Global Health and Development (EA Funds), in the year 2020. Only consider direct impacts.",
     },
