@@ -70,11 +70,11 @@ export const GridView2: FC<{
         {clusterItems.map((rowItem) => (
           <Fragment key={rowItem.id}>
             <CellBox header>
-              <Header key={0} item={rowItem} />
+              <Header key={rowItem.id} item={rowItem} />
             </CellBox>
             {clusterItems.map((columnItem) => (
               <div
-                key={rowItem.id}
+                key={`${rowItem.id}-${columnItem.id}`}
                 onClick={() => {
                   dispatch({
                     type: "toggleClusterCombination",
