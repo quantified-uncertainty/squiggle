@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "db:generate": "prisma generate",
-    "dev": "next dev",
+    "dev": "next dev -p 3001",
     "start": "next start",
     "build": "next build",
     "lint": "prettier --check . && next lint",
