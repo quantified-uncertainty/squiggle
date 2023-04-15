@@ -9,7 +9,7 @@ export type Axis = "rows" | "columns";
 
 export type GridMode = "full" | "half";
 
-export type SortMode = "default" | "median" | "uncertainty";
+export type SortMode = "default" | "median" | "uncertainty" | "similarity";
 
 export type SortConfig = {
   mode: SortMode;
