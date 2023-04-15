@@ -60,23 +60,26 @@ function organizeBySimilarity({
 }: {
   items: Item[];
   model: ModelEvaluator;
-}) {
+}): Item[] {
   let remaining = [...items];
-  let sorted = [remaining.shift()];
+  let first = remaining.shift();
+  let sorted: Item[] = first ? [first] : [];
 
   while (remaining.length > 0) {
     // Keep iterating until all items are sorted
     let lastItem = _.last(sorted);
-    if (!!lastItem) {
-      let nextItem = _.minBy(remaining, (item) => {
-        let result = model.compare(lastItem.id, item.id);
-        return result.ok ? result.value.uncertainty : 10000;
-      });
-      if (!!nextItem) {
-        _.remove(remaining, (item) => item.id === nextItem?.id);
-        sorted.push(nextItem);
-      }
-    }
+
+    if (!lastItem) break;
+
+    let nextItem = _.minBy(remaining, (item) => {
+      let result = model.compare((lastItem as Item).id, item.id);
+      return result.ok ? result.value.uncertainty : 10000;
+    });
+
+    if (!nextItem) break;
+
+    _.remove(remaining, (item) => item.id === (nextItem as Item).id);
+    sorted.push(nextItem);
   }
 
   return sorted;
