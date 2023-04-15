@@ -3,6 +3,7 @@ import { Dropdown } from "@/components/ui/Dropdown";
 import { Item } from "@/types";
 import { FC, useState } from "react";
 import { Header } from "../Header";
+import { CellBox } from "../CellBox";
 
 const ColumnHeaderContextMenu: FC<{
   setSelectedItem(item: Item): void;
@@ -57,7 +58,12 @@ export const ColumnHeader: FC<{
         )}
         fullHeight
       >
-        <Header item={selectedItem} clickable />
+        <CellBox header clickable>
+          <div className="text-sm pl-1 pt-1 text-slate-600">
+            Estimated value, in terms of
+          </div>
+          <Header item={selectedItem} />
+        </CellBox>
       </Dropdown>
     </div>
   );

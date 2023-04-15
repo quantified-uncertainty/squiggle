@@ -1,14 +1,13 @@
 import React, { FC, useEffect, useMemo, useRef } from "react";
 
-import { SqLocation } from "@quri/squiggle-lang";
-
+import { SqLocation, SqProject } from "@quri/squiggle-lang";
 import { syntaxHighlighting } from "@codemirror/language";
 import { EditorState, Compartment } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 import { defaultKeymap } from "@codemirror/commands";
 import { setDiagnostics } from "@codemirror/lint";
 
-import squiggle from "../languageSupport/squiggle.js";
+import { squiggleLanguageSupport } from "../languageSupport/squiggle.js";
 
 // From basic setup
 import {
@@ -40,11 +39,11 @@ interface CodeEditorProps {
   value: string;
   onChange: (value: string) => void;
   onSubmit?: () => void;
-  oneLine?: boolean;
   width?: number;
   height?: number;
   showGutter?: boolean;
   errorLocations?: SqLocation[];
+  project: SqProject;
 }
 
 const compTheme = new Compartment();
@@ -58,13 +57,17 @@ export const CodeEditor: FC<CodeEditorProps> = ({
   onSubmit,
   width,
   height,
-  oneLine = false,
   showGutter = false,
   errorLocations = [],
+  project,
 }) => {
   const editor = useRef<HTMLDivElement>(null);
   const editorView = useRef<EditorView | null>(null);
-  const languageSupport = squiggle();
+  const languageSupport = useMemo(
+    () => squiggleLanguageSupport(project),
+    [project]
+  );
+
   const state = useMemo(
     () =>
       EditorState.create({
@@ -86,6 +89,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({
             wholeWords: true,
             highlightWordAroundCursor: false, // Works weird on fractions! 5.3e10K
           }),
+          compSubmitListener.of([]),
           keymap.of([
             ...closeBracketsKeymap,
             ...defaultKeymap,
@@ -98,12 +102,11 @@ export const CodeEditor: FC<CodeEditorProps> = ({
           ]),
           compGutter.of([]),
           compUpdateListener.of([]),
-          compSubmitListener.of([]),
           compTheme.of([]),
           languageSupport,
         ],
       }),
-    []
+    [languageSupport]
   );
 
   useEffect(() => {
@@ -149,10 +152,12 @@ export const CodeEditor: FC<CodeEditorProps> = ({
       effects: compTheme.reconfigure(
         EditorView.theme({
           "&": {
-            ...(width !== null ? { width: `${width}px` } : {}),
-            ...(height !== null ? { height: `${height}px` } : {}),
+            ...(width === undefined ? {} : { width: `${width}px` }),
+            ...(height === undefined ? {} : { height: `${height}px` }),
           },
           ".cm-selectionMatch": { backgroundColor: "#33ae661a" },
+          ".cm-content": { padding: 0 },
+          ":-moz-focusring.cm-content": { outline: "none" },
         })
       ),
     });
@@ -165,7 +170,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({
           onSubmit
             ? [
                 {
-                  key: "Ctrl-s",
+                  key: "Mod-Enter",
                   run: () => {
                     onSubmit();
                     return true;
@@ -198,5 +203,10 @@ export const CodeEditor: FC<CodeEditorProps> = ({
     );
   }, [errorLocations]);
 
-  return <div ref={editor}></div>;
+  return (
+    <div
+      style={{ minWidth: `${width}px`, minHeight: `${height}px` }}
+      ref={editor}
+    ></div>
+  );
 };

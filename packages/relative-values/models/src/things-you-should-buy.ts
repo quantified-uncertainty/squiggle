@@ -58,11 +58,16 @@ function getCatalog(): Catalog {
       name: "Watch",
       clusterId: "consumerism",
     },
+
+    { id: "i10", name: "$1", clusterId: "consumerism" },
+    { id: "i11", name: "1 Productive Hour", clusterId: "consumerism" },
+    { id: "i12", name: "1 Hour, 1 point wellbeing", clusterId: "consumerism" },
   ];
 
   return {
     id: "things-you-should-buy",
     title: "Things you should buy",
+    recommendedUnit: "i10",
     items,
     clusters: {
       consumerism: {
@@ -95,7 +100,7 @@ value_doubling_productivity = ss(30k to 75k)
 hours_worked_in_year = ss( (48 to 52) * (5 to 8 ))
 hours_day_in_front_of_computer = ss(8 to 14)
 hourly_salary = ss(salary / hours_worked_in_year)
-value_additional_free_hour = 30 to 150 // dollars
+value_additional_free_hour = ss(30 to 150) // dollars
 
 /* https://forum.effectivealtruism.org/posts/fwtoEN5pZpDfQQLKz/stuff-i-buy-and-use-a-listicle-to-boost-your-consumer */
 
@@ -339,8 +344,24 @@ item_casio_watch = {
 
  /* Put all items in a list */
 
+ item_dollar = {
+  id: "i10",
+  value: Dist.pointMass(1)
+ }
+
+ item_productive_hour = {
+  id: "i11",
+  value: value_additional_free_hour
+ }
+
+ items_hour_extra_1p_happiness = {
+  id: "i12",
+  value: value_hedonic_improvement_in_dollars 
+ }
+
+
 items = [
-  item_nice_computer, item_nice_headphones, item_hommini_sleep_mask, item_melatonin, item_spare_laptop_charger, item_external_portable_battery, item_zinc_lozenges, item_vertical_mouse, item_external_microphone, item_casio_watch
+  item_nice_computer, item_nice_headphones, item_hommini_sleep_mask, item_melatonin, item_spare_laptop_charger, item_external_portable_battery, item_zinc_lozenges, item_vertical_mouse, item_external_microphone, item_casio_watch, item_dollar, item_productive_hour, items_hour_extra_1p_happiness
 ]
 
  // Glue code for https://relative-values-git-relative-values-quantified-uncertainty.vercel.app/interfaces/cross-cause/models/Cross-Cause-Estimate
@@ -355,7 +376,10 @@ items_object = {
 	"i6": item_zinc_lozenges,
 	"i7": item_vertical_mouse,
 	"i8": item_external_microphone,
-	"i9": item_casio_watch
+	"i9": item_casio_watch,
+	"i10": item_dollar,
+	"i11": item_productive_hour,
+	"i12": items_hour_extra_1p_happiness
 }
 
 getRelativeValues = {|item_1, item_2|
@@ -364,7 +388,7 @@ getRelativeValues = {|item_1, item_2|
 
 fn(a,b) = getRelativeValues(items_object[a], items_object[b])
 // fn("i5", "i4")
-item_nice_headphones`,
+//item_nice_headphones`,
   };
 }
 

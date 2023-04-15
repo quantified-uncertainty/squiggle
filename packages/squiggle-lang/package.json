@@ -1,6 +1,6 @@
 {
   "name": "@quri/squiggle-lang",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "homepage": "https://squiggle-language.com",
   "license": "MIT",
   "scripts": {
@@ -20,7 +20,7 @@
     "format": "yarn format:prettier",
     "prepack": "yarn build && yarn test",
     "all": "yarn build && yarn test",
-    "cli": "node ./dist/src/cli/index.js"
+    "cli": "node --experimental-vm-modules ./dist/esm/src/cli/index.js"
   },
   "author": "Quantified Uncertainty Research Institute",
   "dependencies": {

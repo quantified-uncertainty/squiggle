@@ -1,9 +1,9 @@
 {
   "name": "@quri/relative-values",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 4000",
     "start": "next start",
     "lint": "prettier --check . && next lint",
     "format": "prettier --write .",
@@ -13,11 +13,15 @@
   },
   "dependencies": {
     "@floating-ui/react": "^0.22.2",
-    "@quri/squiggle-components": "^0.6.0",
-    "@quri/squiggle-lang": "^0.6.0",
+    "@quri/squiggle-components": "^0.7.0",
+    "@quri/squiggle-lang": "^0.7.0",
+    "@types/pako": "^2.0.0",
+    "@types/react": "^18.0.1",
+    "base64-js": "^1.5.1",
     "clsx": "^1.2.1",
     "immutable": "^4.3.0",
     "next": "^13.2.4",
+    "pako": "^2.1.0",
     "react": "^18.2.0",
     "typescript": "^5.0.3"
   },
