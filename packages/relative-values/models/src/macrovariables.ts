@@ -326,14 +326,17 @@ function getCatalog(): Catalog {
       macrovariables: {
         name: "macrovariables",
         color: "#DB828C",
+        recommendedUnit: "macrovariable_microtopia",
       },
       funder: {
         name: "funder",
         color: "#3B42aC",
+        recommendedUnit: "funder_openphil_2020",
       },
       sentientWelfare: {
         name: "Sentient Welfare",
         color: "#5Bc28C",
+        recommendedUnit: "sentientWelfare_cow_qaly",
       },
     },
   };

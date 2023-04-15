@@ -8,11 +8,139 @@ import { RelativeCell } from "../RelativeCell";
 import { useViewContext } from "../ViewProvider";
 import { useFilteredItems, useSortedItems } from "../hooks";
 import { ColumnHeader } from "./ColumnHeader";
-import { Item } from "@/types";
+import { Item, Catalog } from "@/types";
 import { ItemSideBar } from "./sidebar";
 import { CompassIcon } from "@/components/ui/icons/CompassIcon";
 import clsx from "clsx";
 import { ClusterIcon } from "../../common/ClusterIcon";
+
+type TableProps = {
+  model: ModelEvaluator;
+  items: Item[];
+  catalog: Catalog;
+  showDescriptions: boolean;
+  recommendedUnit: Item;
+  uncertaintyPercentiles: number[];
+  sidebarItems: Item[] | undefined;
+  setSidebarItems: (item: Item[] | undefined) => void;
+};
+
+export const ListViewTable: FC<TableProps> = ({
+  model,
+  catalog,
+  items,
+  showDescriptions,
+  recommendedUnit,
+  uncertaintyPercentiles,
+  sidebarItems,
+  setSidebarItems,
+}) => {
+  const headerRow = (name: string) => (
+    <CellBox header>
+      <div className="p-1 pt-2 text-sm font-semibold text-slate-600">
+        {name}
+      </div>
+    </CellBox>
+  );
+
+  const [denominatorItem, setDenominatorItem] = useState(() => {
+    return recommendedUnit || items[0];
+  });
+
+  return (
+    <div className="mb-10">
+      <div className="">
+        <div
+          className="grid border-r border-b border-gray-200 w-full"
+          style={{
+            gridTemplateColumns: showDescriptions ? "2fr 2fr 1fr" : "3fr 1fr",
+          }}
+        >
+          {headerRow("Name")}
+          {showDescriptions && headerRow("Description")}
+          <ColumnHeader
+            selectedItem={denominatorItem}
+            setSelectedItem={setDenominatorItem}
+          />
+          {items.map((item) => (
+            <Fragment key={item.id}>
+              <CellBox>
+                <div
+                  className="p-2 flex justify-end text-slate-700 cursor-pointer font-bold text-sm"
+                  onClick={() => setDenominatorItem(item)}
+                >
+                  <div className="flex-grow text-sm hover:text-slate-900 hover:underline">
+                    {item.name}
+                  </div>
+                  <div
+                    onClick={() => setDenominatorItem(item)}
+                    className={"pl-2 cursor-pointer"}
+                  >
+                    <CompassIcon
+                      className={clsx(
+                        "hover:fill-slate-800",
+                        item.id === denominatorItem.id
+                          ? "fill-slate-500"
+                          : "fill-slate-200"
+                      )}
+                      size={23}
+                      viewBox={"0 0 25 25"}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex px-2 pb-3">
+                  {item.clusterId !== undefined ? (
+                    <div className="flex gap-1 items-center">
+                      <div className="flex-none opacity-50">
+                        <ClusterIcon
+                          cluster={catalog.clusters[item.clusterId]}
+                          selected={true}
+                        />
+                      </div>
+                      <div className="text-xs font-medium text-slate-400">
+                        {catalog.clusters[item.clusterId].name}
+                      </div>
+                    </div>
+                  ) : (
+                    ""
+                  )}
+                  <div className="px-3 font-mono text-xs text-slate-400">
+                    {item.id}
+                  </div>
+                </div>
+              </CellBox>
+              {showDescriptions && (
+                <CellBox>
+                  <div className="p-3 text-sm text-slate-500">
+                    {item.description}
+                  </div>
+                </CellBox>
+              )}
+              <div
+                className="cursor-pointer"
+                onClick={() => {
+                  if (!!sidebarItems && sidebarItems[0].id === item.id) {
+                    setSidebarItems(undefined);
+                  } else {
+                    setSidebarItems([item, denominatorItem]);
+                  }
+                }}
+              >
+                <RelativeCell
+                  id1={item.id}
+                  id2={denominatorItem.id}
+                  model={model}
+                  uncertaintyPercentiles={uncertaintyPercentiles}
+                />
+              </div>
+            </Fragment>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 type Props = {
   model: ModelEvaluator;
@@ -24,17 +152,7 @@ export const ListView: FC<Props> = ({ model }) => {
 
   const showDescriptions = catalog.items.some((item) => !!item.description);
 
-  const [denominatorItem, setDenominatorItem] = useState(() => {
-    if (catalog.recommendedUnit !== undefined) {
-      return (
-        catalog.items.find((item) => item.id === catalog.recommendedUnit) ??
-        catalog.items[0]
-      );
-    }
-    return catalog.items[0];
-  });
-
-  const [numeratorItem, setNumeratorItem] = useState<undefined | Item>(
+  const [sidebarItems, setSidebarItems] = useState<undefined | Item[]>(
     undefined
   );
 
@@ -46,6 +164,7 @@ export const ListView: FC<Props> = ({ model }) => {
       return (
         item.name.match(regexp) ||
         item.id.match(regexp) ||
+        (item.description && item.description.match(regexp)) ||
         (item.clusterId || "").match(regexp)
       );
     }),
@@ -56,7 +175,7 @@ export const ListView: FC<Props> = ({ model }) => {
     items: filteredItems,
     config: axisConfig.rows,
     model: model,
-    otherDimensionItems: [denominatorItem],
+    otherDimensionItems: [],
   });
 
   const uncertaintyPercentiles = model.getParamPercentiles(
@@ -65,13 +184,27 @@ export const ListView: FC<Props> = ({ model }) => {
     [20, 80]
   );
 
-  const headerRow = (name: string) => (
-    <CellBox header>
-      <div className="p-1 pt-2 text-sm font-semibold text-slate-600">
-        {name}
-      </div>
-    </CellBox>
-  );
+  const clusterTable = (clusterId: string) => {
+    const clusterItems = sortedItems.filter((i) => i.clusterId === clusterId);
+    const recommendedUnit =
+      catalog.items.find(
+        (item) => item.id === catalog.clusters[clusterId].recommendedUnit
+      ) || catalog.items[0];
+    return (
+      clusterItems.length > 0 && (
+        <ListViewTable
+          model={model}
+          catalog={catalog}
+          items={clusterItems}
+          showDescriptions={showDescriptions}
+          recommendedUnit={recommendedUnit}
+          uncertaintyPercentiles={uncertaintyPercentiles}
+          sidebarItems={sidebarItems}
+          setSidebarItems={setSidebarItems}
+        />
+      )
+    );
+  };
 
   return (
     <div>
@@ -90,103 +223,22 @@ export const ListView: FC<Props> = ({ model }) => {
           onChange={(e) => setSearch(e.currentTarget.value)}
         />
       </div>
-      <div className={"flex"}>
-        <div className="flex-1">
-          <div
-            className="grid border-r border-b border-gray-200 w-full"
-            style={{
-              gridTemplateColumns: showDescriptions ? "2fr 2fr 1fr" : "3fr 1fr",
-            }}
-          >
-            {headerRow("Name")}
-            {showDescriptions && headerRow("Description")}
-            <ColumnHeader
-              selectedItem={denominatorItem}
-              setSelectedItem={setDenominatorItem}
-            />
-            {sortedItems.map((item) => (
-              <Fragment key={item.id}>
-                <CellBox>
-                  <div
-                    className="p-2 flex justify-end text-slate-700 cursor-pointer font-bold text-sm"
-                    onClick={() => setDenominatorItem(item)}
-                  >
-                    <div className="flex-grow text-sm hover:text-slate-900 hover:underline">
-                      {item.name}
-                    </div>
-                    <div
-                      onClick={() => setDenominatorItem(item)}
-                      className={"pl-2 cursor-pointer"}
-                    >
-                      <CompassIcon
-                        className={clsx(
-                          "hover:fill-slate-800",
-                          item.id === denominatorItem.id
-                            ? "fill-slate-500"
-                            : "fill-slate-200"
-                        )}
-                        size={23}
-                        viewBox={"0 0 25 25"}
-                      />
-                    </div>
-                  </div>
 
-                  <div className="flex px-2 pb-3">
-                    {item.clusterId !== undefined ? (
-                      <div className="flex gap-1 items-center">
-                        <div className="flex-none opacity-50">
-                          <ClusterIcon
-                            cluster={catalog.clusters[item.clusterId]}
-                            selected={true}
-                          />
-                        </div>
-                        <div className="text-xs font-medium text-slate-400">
-                          {catalog.clusters[item.clusterId].name}
-                        </div>
-                      </div>
-                    ) : (
-                      ""
-                    )}
-                    <div className="px-3 font-mono text-xs text-slate-400">
-                      {item.id}
-                    </div>
-                  </div>
-                </CellBox>
-                {showDescriptions && (
-                  <CellBox>
-                    <div className="p-3 text-sm text-slate-500">
-                      {item.description}
-                    </div>
-                  </CellBox>
-                )}
-                <div
-                  className="cursor-pointer"
-                  onClick={() =>
-                    numeratorItem && numeratorItem.id === item.id
-                      ? setNumeratorItem(undefined)
-                      : setNumeratorItem(
-                          catalog.items.find((i) => i.id === item.id)
-                        )
-                  }
-                >
-                  <RelativeCell
-                    id1={item.id}
-                    id2={denominatorItem.id}
-                    model={model}
-                    uncertaintyPercentiles={uncertaintyPercentiles}
-                  />
-                </div>
-              </Fragment>
+      <div className="flex">
+        <div className="flex-1">
+          {catalog.clusters &&
+            Object.keys(catalog.clusters).map((cluster) => (
+              <div key={cluster}>{clusterTable(cluster)}</div>
             ))}
-          </div>
         </div>
-        {numeratorItem && numeratorItem && denominatorItem && (
+
+        {sidebarItems && (
           <div className="w-[500px] relative">
             <div className="sticky top-4 bg-slate-50 px-2 py-4 ml-4 rounded-sm border-gray-200 border">
               <ItemSideBar
                 model={model}
-                numeratorItem={numeratorItem}
-                denominatorItem={denominatorItem}
+                numeratorItem={sidebarItems[0]}
+                denominatorItem={sidebarItems[1]}
               />
             </div>
           </div>
