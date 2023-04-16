@@ -14,7 +14,7 @@ import { RelativeValue } from "@/values/types";
 import _ from "lodash";
 import { DistCell } from "../RelativeCell/DistCell";
 
-export const GridView2: FC<{
+export const ClusterGridView: FC<{
   model: ModelEvaluator;
 }> = ({ model }) => {
   const {
@@ -166,7 +166,7 @@ export const GridView: FC<{
           </DropdownButton>
         </div>
         <GridModeControls />
-        <GridView2 model={model} />
+        <ClusterGridView model={model} />
       </div>
       <div
         className="grid relative"
