@@ -1758,11 +1758,6 @@
   resolved "https://registry.npmjs.org/@commander-js/extra-typings/-/extra-typings-10.0.3.tgz"
   integrity sha512-OIw28QV/GlP8k0B5CJTRsl8IyNvd0R8C8rfo54Yz9P388vCNDgdNrFlKxZTGqps+5j6lSw3Ss9JTQwcur1w1oA==
 
-"@commander-js/extra-typings@^9.4.1":
-  version "9.5.0"
-  resolved "https://registry.yarnpkg.com/@commander-js/extra-typings/-/extra-typings-9.5.0.tgz#52f9e02263a7a64f09a3b4b8149497c8239d6651"
-  integrity sha512-OdIzg8hLlFyiV3BOEd7yRMtrqZ+L+bjAjGILpeG0LKUlE+N68tjp65JqKhapqWMHS6nDGGt+KjDf1y+eOQjwfw==
-
 "@cspotcode/source-map-support@^0.8.0":
   version "0.8.1"
   resolved "https://registry.npmjs.org/@cspotcode/source-map-support/-/source-map-support-0.8.1.tgz"
@@ -3662,18 +3657,6 @@
   version "4.12.0"
   resolved "https://registry.npmjs.org/@prisma/engines/-/engines-4.12.0.tgz"
   integrity sha512-0alKtnxhNB5hYU+ymESBlGI4b9XrGGSdv7Ud+8TE/fBNOEhIud0XQsAR+TrvUZgS4na5czubiMsODw0TUrgkIA==
-
-"@quri/squiggle-lang@^0.6.0":
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/@quri/squiggle-lang/-/squiggle-lang-0.6.0.tgz#3559f2b5ded7cc2724099263f227c148e9641822"
-  integrity sha512-Lo96IgKHlorD1djb0fa0lgMve8w180kawXMy1JEaq8Z21QLhT6JLg2kuQHe+TFuxVzA4PUGjtA46xJ549xsONQ==
-  dependencies:
-    "@commander-js/extra-typings" "^9.4.1"
-    commander "^9.4.1"
-    immutable "^4.2.1"
-    jstat "^1.9.5"
-    lodash "^4.17.21"
-    open "^8.4.0"
 
 "@react-hook/latest@^1.0.2":
   version "1.0.3"
@@ -11064,7 +11047,7 @@ immer@^9.0.7:
   resolved "https://registry.npmjs.org/immer/-/immer-9.0.16.tgz"
   integrity sha512-qenGE7CstVm1NrHQbMh8YaSzTZTFNP3zPqr3YU0S0UY441j4bJTg4A2Hh5KAhwgaiU6ZZ1Ar6y/2f4TblnMReQ==
 
-immutable@^4.2.1, immutable@^4.3.0:
+immutable@^4.3.0:
   version "4.3.0"
   resolved "https://registry.npmjs.org/immutable/-/immutable-4.3.0.tgz"
   integrity sha512-0AOCmOip+xgJwEVTQj1EfiDDOkPmuyllDuTuEX+DDXUgapLAsBIfkg3sxCYyCEA8mQqZrrxPUGjcOQ2JS3WLkg==
