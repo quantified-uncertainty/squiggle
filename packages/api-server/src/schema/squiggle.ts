@@ -34,13 +34,14 @@ abstract class AbstractSquiggleOutput {
   abstract getBindingsJSON(): Prisma.JsonValue;
 }
 
-class SquiggleOutput implements AbstractSquiggleOutput {
+class SquiggleOutput extends AbstractSquiggleOutput {
   private MAIN = "main";
   readonly isCached = false;
 
   project: SqProject;
 
   constructor(private code: string) {
+    super();
     this.project = SqProject.create();
 
     this.project.setSource(this.MAIN, code);
@@ -73,10 +74,12 @@ class SquiggleOutput implements AbstractSquiggleOutput {
   }
 }
 
-class CachedSquiggleOutput implements AbstractSquiggleOutput {
+class CachedSquiggleOutput extends AbstractSquiggleOutput {
   readonly isCached = true;
 
-  constructor(private cache: SquiggleCache) {}
+  constructor(private cache: SquiggleCache) {
+    super();
+  }
 
   isOk() {
     return this.cache.ok;
@@ -95,14 +98,22 @@ class CachedSquiggleOutput implements AbstractSquiggleOutput {
   }
 }
 
-const SquiggleOkOutputObj = builder.objectType(
+const SquiggleOutputObj = builder
+  .interfaceRef<AbstractSquiggleOutput>("SquiggleOutput")
+  .implement({
+    fields: (t) => ({
+      isCached: t.exposeBoolean("isCached"),
+    }),
+  });
+
+builder.objectType(
   builder.objectRef<AbstractSquiggleOutput>("SquiggleOkOutput"),
   {
     name: "SquiggleOkOutput",
+    interfaces: [SquiggleOutputObj],
+    isTypeOf: (value) =>
+      value instanceof AbstractSquiggleOutput && value.isOk(),
     fields: (t) => ({
-      isCached: t.boolean({
-        resolve: (obj) => obj.isCached,
-      }),
       resultJSON: t.string({
         resolve(obj) {
           return JSON.stringify(obj.getResultJSON());
@@ -117,14 +128,14 @@ const SquiggleOkOutputObj = builder.objectType(
   }
 );
 
-const SquiggleErrorOutputObj = builder.objectType(
+builder.objectType(
   builder.objectRef<AbstractSquiggleOutput>("SquiggleErrorOutput"),
   {
     name: "SquiggleErrorOutput",
+    interfaces: [SquiggleOutputObj],
+    isTypeOf: (value) =>
+      value instanceof AbstractSquiggleOutput && !value.isOk(),
     fields: (t) => ({
-      isCached: t.boolean({
-        resolve: (obj) => obj.isCached,
-      }),
       errorString: t.string({
         resolve(result) {
           return result.getErrorString();
@@ -133,13 +144,6 @@ const SquiggleErrorOutputObj = builder.objectType(
     }),
   }
 );
-
-const SquiggleOutputObj = builder.unionType("SquiggleOutput", {
-  types: [SquiggleOkOutputObj, SquiggleErrorOutputObj],
-  resolveType: (result) => {
-    return result.isOk() ? SquiggleOkOutputObj : SquiggleErrorOutputObj;
-  },
-});
 
 builder.queryField("runSquiggle", (t) =>
   t.field({
