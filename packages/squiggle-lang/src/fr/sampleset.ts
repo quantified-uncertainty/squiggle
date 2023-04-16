@@ -1,4 +1,3 @@
-import { toSampleSetDist } from "../dist/DistOperations/index.js";
 import * as SampleSetDist from "../dist/SampleSetDist/index.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
@@ -38,7 +37,8 @@ const baseLibrary = [
   maker.d2d({
     name: "fromDist",
     examples: [`SampleSet.fromDist(normal(5,2))`],
-    fn: (dist, env) => unpackDistResult(toSampleSetDist(dist, env)),
+    fn: (dist, env) =>
+      unpackDistResult(SampleSetDist.SampleSetDist.fromDist(dist, env)),
   }),
   maker.make({
     name: "fromList",
