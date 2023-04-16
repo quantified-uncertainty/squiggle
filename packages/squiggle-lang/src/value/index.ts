@@ -210,6 +210,11 @@ export type Plot =
       distributions: LabeledDistribution[];
     }
   | {
+      type: "joint";
+      dist1: BaseDist;
+      dist2: BaseDist;
+    }
+  | {
       type: "fn";
       fn: Lambda;
       min: number;
@@ -228,6 +233,8 @@ class VPlot implements Indexable {
           .join(", ")}`;
       case "fn":
         return `Plot for function ${this.value.fn}`;
+      case "joint":
+        return `Joint plot for distributions ${this.value.dist1} and ${this.value.dist2}`;
     }
   }
 

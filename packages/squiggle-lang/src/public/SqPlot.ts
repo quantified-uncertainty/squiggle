@@ -5,12 +5,14 @@ import { SqPlotValue } from "./SqValue.js";
 import { SqValueLocation } from "./SqValueLocation.js";
 
 export const wrapPlot = (value: Plot, location: SqValueLocation): SqPlot => {
-  if (value.type === "distributions") {
-    return new SqDistributionsPlot(value, location);
-  } else if (value.type === "fn") {
-    return new SqFnPlot(value, location);
+  switch (value.type) {
+    case "distributions":
+      return new SqDistributionsPlot(value, location);
+    case "fn":
+      return new SqFnPlot(value, location);
+    case "joint":
+      return new SqJointPlot(value, location);
   }
-  throw new Error(`Unknown value ${value}`);
 };
 
 abstract class SqAbstractPlot<T extends Plot["type"]> {
@@ -61,4 +63,15 @@ export class SqFnPlot extends SqAbstractPlot<"fn"> {
   }
 }
 
-export type SqPlot = SqDistributionsPlot | SqFnPlot;
+export class SqJointPlot extends SqAbstractPlot<"joint"> {
+  tag = "joint" as const;
+
+  get dist1() {
+    return wrapDistribution(this._value.dist1);
+  }
+  get dist2() {
+    return wrapDistribution(this._value.dist2);
+  }
+}
+
+export type SqPlot = SqDistributionsPlot | SqFnPlot | SqJointPlot;
