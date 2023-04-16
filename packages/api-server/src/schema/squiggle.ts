@@ -15,91 +15,64 @@ function getKey(code: string): string {
 }
 
 const squiggleValueToJSON = (value: SqValue) => {
-  return JSON.stringify(value.asJS(), (key, value) => {
-    if (value instanceof Map) {
-      return Object.fromEntries(value.entries());
-    }
-    if (value instanceof SqAbstractDistribution) {
-      return value.toString();
-    }
-    return value;
-  });
+  // this is a lazy shortcut to traverse the value tree; should be reimplemented without parse/stringify
+  return JSON.parse(
+    JSON.stringify(value.asJS(), (key, value) => {
+      if (value instanceof Map) {
+        return Object.fromEntries(value.entries());
+      }
+      if (value instanceof SqAbstractDistribution) {
+        return value.toString();
+      }
+      return value;
+    })
+  );
 };
 
-abstract class AbstractSquiggleOutput {
-  abstract isCached: boolean;
-  abstract isOk(): boolean;
-  abstract getErrorString(): string;
-  abstract getResultJSON(): Prisma.JsonValue;
-  abstract getBindingsJSON(): Prisma.JsonValue;
-}
-
-class SquiggleOutput extends AbstractSquiggleOutput {
-  private MAIN = "main";
-  readonly isCached = false;
-
-  project: SqProject;
-
-  constructor(private code: string) {
-    super();
-    this.project = SqProject.create();
-
-    this.project.setSource(this.MAIN, code);
-    this.project.run(this.MAIN);
-  }
-
-  isOk() {
-    return this.project.getResult(this.MAIN).ok;
-  }
-
-  getErrorString() {
-    const result = this.project.getResult(this.MAIN);
-    if (result.ok) {
-      return "";
+type SquiggleOutput = {
+  isCached: boolean;
+} & (
+  | {
+      isOk: false;
+      errorString: string;
+      resultJSON?: undefined;
+      bindingsJSON?: undefined;
     }
-    return result.value.toString();
-  }
-
-  getResultJSON(): string {
-    const result = this.project.getResult(this.MAIN);
-    if (!result.ok) {
-      return "0";
+  | {
+      isOk: true;
+      errorString?: undefined;
+      resultJSON: Prisma.JsonValue;
+      bindingsJSON: Prisma.JsonValue;
     }
-    return squiggleValueToJSON(result.value);
-  }
+);
 
-  getBindingsJSON(): string {
-    const bindings = this.project.getBindings(this.MAIN);
-    return squiggleValueToJSON(bindings.asValue());
-  }
-}
+function runSquiggle(code: string): SquiggleOutput {
+  const MAIN = "main";
 
-class CachedSquiggleOutput extends AbstractSquiggleOutput {
-  readonly isCached = true;
+  const project = SqProject.create();
 
-  constructor(private cache: SquiggleCache) {
-    super();
-  }
+  project.setSource(MAIN, code);
+  project.run(MAIN);
 
-  isOk() {
-    return this.cache.ok;
-  }
+  const result = project.getResult(MAIN);
+  const bindings = project.getBindings(MAIN);
 
-  getErrorString(): string {
-    return this.cache.error || "";
-  }
-
-  getResultJSON() {
-    return this.cache.result;
-  }
-
-  getBindingsJSON() {
-    return this.cache.bindings;
-  }
+  return result.ok
+    ? {
+        isCached: false,
+        isOk: true,
+        resultJSON: squiggleValueToJSON(result.value),
+        bindingsJSON: squiggleValueToJSON(bindings.asValue()),
+      }
+    : {
+        isCached: false,
+        isOk: false,
+        errorString: result.value.toString(),
+      };
 }
 
 const SquiggleOutputObj = builder
-  .interfaceRef<AbstractSquiggleOutput>("SquiggleOutput")
+  .interfaceRef<SquiggleOutput>("SquiggleOutput")
   .implement({
     fields: (t) => ({
       isCached: t.exposeBoolean("isCached"),
@@ -107,21 +80,22 @@ const SquiggleOutputObj = builder
   });
 
 builder.objectType(
-  builder.objectRef<AbstractSquiggleOutput>("SquiggleOkOutput"),
+  builder.objectRef<Extract<SquiggleOutput, { isOk: true }>>(
+    "SquiggleOkOutput"
+  ),
   {
     name: "SquiggleOkOutput",
     interfaces: [SquiggleOutputObj],
-    isTypeOf: (value) =>
-      value instanceof AbstractSquiggleOutput && value.isOk(),
+    isTypeOf: (value) => (value as SquiggleOutput).isOk,
     fields: (t) => ({
       resultJSON: t.string({
         resolve(obj) {
-          return JSON.stringify(obj.getResultJSON());
+          return JSON.stringify(obj.resultJSON);
         },
       }),
       bindingsJSON: t.string({
         resolve(obj) {
-          return JSON.stringify(obj.getBindingsJSON());
+          return JSON.stringify(obj.bindingsJSON);
         },
       }),
     }),
@@ -129,18 +103,15 @@ builder.objectType(
 );
 
 builder.objectType(
-  builder.objectRef<AbstractSquiggleOutput>("SquiggleErrorOutput"),
+  builder.objectRef<Extract<SquiggleOutput, { isOk: false }>>(
+    "SquiggleErrorOutput"
+  ),
   {
     name: "SquiggleErrorOutput",
     interfaces: [SquiggleOutputObj],
-    isTypeOf: (value) =>
-      value instanceof AbstractSquiggleOutput && !value.isOk(),
+    isTypeOf: (value) => !(value as SquiggleOutput).isOk,
     fields: (t) => ({
-      errorString: t.string({
-        resolve(result) {
-          return result.getErrorString();
-        },
-      }),
+      errorString: t.exposeString("errorString"),
     }),
   }
 );
@@ -158,23 +129,29 @@ builder.queryField("runSquiggle", (t) =>
         where: { id: key },
       });
       if (cached) {
-        return new CachedSquiggleOutput(cached);
+        return {
+          isCached: true,
+          isOk: cached.ok,
+          errorString: cached.error,
+          resultJSON: cached.result,
+          bindingsJSON: cached.bindings,
+        } as unknown as SquiggleOutput; // cache is less strictly typed than SquiggleOutput, so we have to force-cast it
       }
-      const result = new SquiggleOutput(code);
+      const result = runSquiggle(code);
       await prisma.squiggleCache.upsert({
         where: { id: key },
         create: {
           id: key,
-          ok: result.isOk(),
-          result: result.getResultJSON(),
-          bindings: result.getBindingsJSON(),
-          error: result.getErrorString(),
+          ok: result.isOk,
+          result: result.resultJSON ?? undefined,
+          bindings: result.bindingsJSON ?? undefined,
+          error: result.errorString,
         },
         update: {
-          ok: result.isOk(),
-          result: result.getResultJSON(),
-          bindings: result.getBindingsJSON(),
-          error: result.getErrorString(),
+          ok: result.isOk,
+          result: result.resultJSON ?? undefined,
+          bindings: result.bindingsJSON ?? undefined,
+          error: result.errorString,
         },
       });
       return result;
