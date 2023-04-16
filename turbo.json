@@ -25,6 +25,10 @@
       "dependsOn": ["^build"],
       "outputs": [".next/**", "./models/cache/**"]
     },
+    "@quri/api-server#build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "../../node_modules/.prisma"]
+    },
     "format": {},
     "lint": {
       "dependsOn": ["^build"]
@@ -39,6 +43,10 @@
     "coverage": {
       "dependsOn": ["build"],
       "outputs": ["coverage/**"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
     }
   }
 }
