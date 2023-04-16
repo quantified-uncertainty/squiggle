@@ -1,7 +1,7 @@
 import { BaseDist } from "../dist/BaseDist.js";
 import { DistError } from "../dist/DistError.js";
 import { toSampleSetDist } from "../dist/DistOperations/index.js";
-import * as SampleSetDist from "../dist/SampleSetDist/SampleSetDist.js";
+import * as SampleSetDist from "../dist/SampleSetDist/index.js";
 import * as SymbolicDist from "../dist/SymbolicDist.js";
 import { Env } from "../index.js";
 import { FRFunction } from "../library/registry/core.js";

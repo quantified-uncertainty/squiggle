@@ -1,5 +1,5 @@
 import { toSampleSetDist } from "../dist/DistOperations/index.js";
-import * as SampleSetDist from "../dist/SampleSetDist/SampleSetDist.js";
+import * as SampleSetDist from "../dist/SampleSetDist/index.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,

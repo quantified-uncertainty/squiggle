@@ -1,4 +1,4 @@
-import { SampleSetDist } from "../dist/SampleSetDist/SampleSetDist.js";
+import { SampleSetDist } from "../dist/SampleSetDist/index.js";
 import { Env } from "../dist/env.js";
 import { SqDistributionError } from "./SqDistributionError.js";
 import { wrapPointSet } from "./SqPointSet.js";

@@ -14,7 +14,7 @@ import {
 } from "../DistError.js";
 import { algebraicCombination } from "./AlgebraicCombination.js";
 import { Env } from "../env.js";
-import * as SampleSetDist from "../SampleSetDist/SampleSetDist.js";
+import * as SampleSetDist from "../SampleSetDist/index.js";
 import { OperationError } from "../../operationError.js";
 import { ContinuousShape } from "../../PointSet/Continuous.js";
 
