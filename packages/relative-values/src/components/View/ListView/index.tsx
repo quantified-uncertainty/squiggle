@@ -20,7 +20,6 @@ type TableProps = {
   catalog: Catalog;
   showDescriptions: boolean;
   recommendedUnit: Item;
-  uncertaintyPercentiles: number[];
   sidebarItems: Item[] | undefined;
   setSidebarItems: (item: Item[] | undefined) => void;
 };
@@ -31,10 +30,28 @@ export const ListViewTable: FC<TableProps> = ({
   items,
   showDescriptions,
   recommendedUnit,
-  uncertaintyPercentiles,
   sidebarItems,
   setSidebarItems,
 }) => {
+  const { axisConfig } = useViewContext();
+
+  const uncertaintyPercentiles = model.getParamPercentiles(
+    items.map((i) => i.id),
+    (r) => r.uncertainty,
+    [20, 80]
+  );
+
+  const [denominatorItem, setDenominatorItem] = useState(() => {
+    return recommendedUnit || items[0];
+  });
+
+  const sortedItems = useSortedItems({
+    items: items,
+    config: axisConfig.rows,
+    model: model,
+    otherDimensionItems: [denominatorItem],
+  });
+
   const headerRow = (name: string) => (
     <CellBox header>
       <div className="p-1 pt-2 text-sm font-semibold text-slate-600">
@@ -42,10 +59,6 @@ export const ListViewTable: FC<TableProps> = ({
       </div>
     </CellBox>
   );
-
-  const [denominatorItem, setDenominatorItem] = useState(() => {
-    return recommendedUnit || items[0];
-  });
 
   return (
     <div className="mb-10">
@@ -62,7 +75,7 @@ export const ListViewTable: FC<TableProps> = ({
             selectedItem={denominatorItem}
             setSelectedItem={setDenominatorItem}
           />
-          {items.map((item) => (
+          {sortedItems.map((item) => (
             <Fragment key={item.id}>
               <CellBox>
                 <div
@@ -147,7 +160,6 @@ type Props = {
 };
 
 export const ListView: FC<Props> = ({ model }) => {
-  const { axisConfig } = useViewContext();
   const { catalog } = useSelectedInterface();
 
   const showDescriptions = catalog.items.some((item) => !!item.description);
@@ -158,34 +170,32 @@ export const ListView: FC<Props> = ({ model }) => {
 
   const [search, setSearch] = useState("");
 
-  const filteredItems = useFilteredItems({
-    items: catalog.items.filter((item) => {
-      const regexp = new RegExp(search, "i");
-      return (
-        item.name.match(regexp) ||
-        item.id.match(regexp) ||
-        (item.description && item.description.match(regexp)) ||
-        (item.clusterId || "").match(regexp)
-      );
-    }),
+  const { axisConfig } = useViewContext();
+
+  let itemMatchesString = (item: Item, str: string): boolean => {
+    const regexp = new RegExp(search, "i");
+    return !!(
+      item.name.match(regexp) ||
+      item.id.match(regexp) ||
+      (item.description && item.description.match(regexp)) ||
+      (item.clusterId || "").match(regexp)
+    );
+  };
+
+  let filteredItems = useFilteredItems({
+    items: catalog.items,
     config: axisConfig.rows,
   });
 
-  const sortedItems = useSortedItems({
-    items: filteredItems,
-    config: axisConfig.rows,
-    model: model,
-    otherDimensionItems: [],
-  });
-
-  const uncertaintyPercentiles = model.getParamPercentiles(
-    filteredItems.map((i) => i.id),
-    (r) => r.uncertainty,
-    [20, 80]
-  );
+  if (search !== "") {
+    filteredItems = filteredItems.filter((item) =>
+      itemMatchesString(item, search)
+    );
+  }
 
   const clusterTable = (clusterId: string) => {
-    const clusterItems = sortedItems.filter((i) => i.clusterId === clusterId);
+    const clusterItems = filteredItems.filter((i) => i.clusterId === clusterId);
+    //It's possible that the recommended unit isn't itself in clusterItems, so we need to make sure it's passed in separately
     const recommendedUnit =
       catalog.items.find(
         (item) => item.id === catalog.clusters[clusterId].recommendedUnit
@@ -198,7 +208,6 @@ export const ListView: FC<Props> = ({ model }) => {
           items={clusterItems}
           showDescriptions={showDescriptions}
           recommendedUnit={recommendedUnit}
-          uncertaintyPercentiles={uncertaintyPercentiles}
           sidebarItems={sidebarItems}
           setSidebarItems={setSidebarItems}
         />
