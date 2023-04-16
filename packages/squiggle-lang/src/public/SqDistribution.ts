@@ -26,7 +26,7 @@ export const wrapDistribution = (value: BaseDist): SqDistribution => {
   throw new Error(`Unknown value ${value}`);
 };
 
-abstract class SqAbstractDistribution<T extends BaseDist> {
+export abstract class SqAbstractDistribution<T extends BaseDist> {
   abstract tag: SqDistributionTag;
 
   constructor(protected _value: T) {}

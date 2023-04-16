@@ -4,7 +4,11 @@ import { SqValue, SqStringValue } from "./public/SqValue.js"; // TODO - reexport
 
 export { SqValueLocation } from "./public/SqValueLocation.js";
 export { result, fmap as resultMap } from "./utility/result.js";
-export { SqDistribution, SqDistributionTag } from "./public/SqDistribution.js";
+export {
+  SqAbstractDistribution,
+  SqDistribution,
+  SqDistributionTag,
+} from "./public/SqDistribution.js";
 export { SqDistributionError } from "./public/SqDistributionError.js";
 export { SqRecord } from "./public/SqRecord.js";
 export { SqLambda } from "./public/SqLambda.js";

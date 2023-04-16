@@ -1,0 +1,31 @@
+{
+  "name": "@quri/api-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "db:generate": "prisma generate",
+    "dev": "next dev -p 3001",
+    "start": "next start",
+    "build": "next build",
+    "lint": "prettier --check . && next lint",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "@quri/squiggle-lang": "^0.7.0",
+    "@pothos/core": "^3.29.0",
+    "@pothos/plugin-simple-objects": "^3.6.7",
+    "@prisma/client": "^4.12.0",
+    "eslint-config-next": "^13.3.0",
+    "graphql": "^16.6.0",
+    "graphql-yoga": "^3.8.0",
+    "next": "^13.3.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "typescript": "^5.0.3"
+  },
+  "devDependencies": {
+    "prisma": "^4.12.0",
+    "tsx": "^3.12.6"
+  }
+}
