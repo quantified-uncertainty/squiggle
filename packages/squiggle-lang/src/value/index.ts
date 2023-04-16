@@ -211,8 +211,8 @@ export type Plot =
     }
   | {
       type: "joint";
-      dist1: BaseDist;
-      dist2: BaseDist;
+      xDist: BaseDist;
+      yDist: BaseDist;
     }
   | {
       type: "fn";
@@ -234,7 +234,7 @@ class VPlot implements Indexable {
       case "fn":
         return `Plot for function ${this.value.fn}`;
       case "joint":
-        return `Joint plot for distributions ${this.value.dist1} and ${this.value.dist2}`;
+        return `Joint plot for distributions ${this.value.xDist} and ${this.value.yDist}`;
     }
   }
 

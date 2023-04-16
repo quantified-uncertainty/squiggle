@@ -1,5 +1,10 @@
+import { SampleSetDist } from "../dist/SampleSetDist/index.js";
+import { Env } from "../dist/env.js";
+import { zip } from "../utility/E_A.js";
+import * as Result from "../utility/result.js";
 import { Plot, vPlot } from "../value/index.js";
 import { wrapDistribution } from "./SqDistribution.js";
+import { SqError } from "./SqError.js";
 import { SqLambda } from "./SqLambda.js";
 import { SqPlotValue } from "./SqValue.js";
 import { SqValueLocation } from "./SqValueLocation.js";
@@ -66,11 +71,33 @@ export class SqFnPlot extends SqAbstractPlot<"fn"> {
 export class SqJointPlot extends SqAbstractPlot<"joint"> {
   tag = "joint" as const;
 
-  get dist1() {
-    return wrapDistribution(this._value.dist1);
+  get yDist() {
+    return wrapDistribution(this._value.xDist);
   }
-  get dist2() {
-    return wrapDistribution(this._value.dist2);
+  get xDist() {
+    return wrapDistribution(this._value.yDist);
+  }
+
+  points(env: Env): Result.result<{ x: number; y: number }[], SqError> {
+    const xSamplesValue = SampleSetDist.fromDist(this._value.xDist, env);
+    const ySamplesValue = SampleSetDist.fromDist(this._value.yDist, env);
+
+    if (!xSamplesValue.ok || !ySamplesValue.ok) {
+      return Result.Error(
+        SqError.createOtherError("Conversion to SampleSet failed")
+      );
+    }
+
+    const xSamples = xSamplesValue.value.samples;
+    const ySamples = ySamplesValue.value.samples;
+    if (xSamples.length !== ySamples.length) {
+      return Result.Error(SqError.createOtherError("Sample count mismatch"));
+    }
+    const points: { x: number; y: number }[] = [];
+    for (let i = 0; i < xSamples.length; i++) {
+      points.push({ x: xSamples[i], y: ySamples[i] });
+    }
+    return Result.Ok(points);
   }
 }
 

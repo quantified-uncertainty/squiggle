@@ -40,6 +40,15 @@ abstract class SqAbstractDistribution<T extends BaseDist> {
     );
   }
 
+  asSampleSetDist(env: Env) {
+    const innerResult = SampleSetDist.fromDist(this._value, env);
+    return Result.fmap2(
+      innerResult,
+      (dist) => new SqSampleSetDistribution(dist),
+      (e: DistError) => new SqDistributionError(e)
+    );
+  }
+
   toString() {
     return this._value.toString();
   }
@@ -79,17 +88,13 @@ abstract class SqAbstractDistribution<T extends BaseDist> {
 
 export class SqPointSetDistribution extends SqAbstractDistribution<PointSetDist> {
   tag = SqDistributionTag.PointSet as const;
-
-  value() {
-    return wrapPointSet(this._value.pointSet);
-  }
 }
 
 export class SqSampleSetDistribution extends SqAbstractDistribution<SampleSetDist> {
   tag = SqDistributionTag.SampleSet as const;
 
-  value(): SampleSetDist {
-    return this._value;
+  getSamples(): readonly number[] {
+    return this._value.samples;
   }
 }
 
