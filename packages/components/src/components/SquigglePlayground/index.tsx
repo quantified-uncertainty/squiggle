@@ -119,7 +119,10 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     environment,
   });
 
-  const valueToRender = getValueToRender(resultAndBindings);
+  const valueToRender = useMemo(
+    () => getValueToRender(resultAndBindings),
+    [resultAndBindings]
+  );
 
   const squiggleChart =
     runnerState.renderedCode === "" ? null : (
