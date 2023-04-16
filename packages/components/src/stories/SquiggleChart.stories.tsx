@@ -76,6 +76,17 @@ dists: [
   },
 };
 
+export const JointPlot: Story = {
+  name: "Joint plot",
+  args: {
+    code: `
+xDist = SampleSet.fromDist(2 to 5)
+yDist = (-3 to 3) * 5 - xDist ^ 2
+Plot.joint({ xDist: xDist, yDist: yDist })
+`,
+  },
+};
+
 export const Constant: Story = {
   name: "Constant",
   args: {
