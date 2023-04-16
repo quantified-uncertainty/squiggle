@@ -1,49 +1,45 @@
-import React, {
-  useState,
-  useEffect,
-  useMemo,
-  useRef,
-  useCallback,
-} from "react";
-import { useForm, UseFormRegister, useWatch } from "react-hook-form";
-import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
 import {
   ChartSquareBarIcon,
-  CheckCircleIcon,
   CodeIcon,
   CogIcon,
   CurrencyDollarIcon,
   EyeIcon,
-  PauseIcon,
-  PlayIcon,
-  RefreshIcon,
 } from "@heroicons/react/solid/esm/index.js";
-import { clsx } from "clsx";
+import { yupResolver } from "@hookform/resolvers/yup";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { UseFormRegister, useForm, useWatch } from "react-hook-form";
+import * as yup from "yup";
 
-import {
-  useMaybeControlledValue,
-  useRunnerState,
-  useSquiggle,
-} from "../../lib/hooks/index.js";
-import { SquiggleArgs } from "../../lib/hooks/useSquiggle.js";
 import { Env } from "@quri/squiggle-lang";
+import { useMaybeControlledValue, useSquiggle } from "../../lib/hooks/index.js";
+import { SquiggleArgs } from "../../lib/hooks/useSquiggle.js";
 
+import { JsImports } from "../../lib/jsImports.js";
+import { getErrorLocations, getValueToRender } from "../../lib/utility.js";
 import { CodeEditor } from "../CodeEditor.js";
 import { SquiggleContainer } from "../SquiggleContainer.js";
-import { Toggle } from "../ui/Toggle.js";
-import { StyledTab } from "../ui/StyledTab.js";
-import { InputItem } from "../ui/InputItem.js";
-import { Text } from "../ui/Text.js";
-import { ViewSettingsForm, viewSettingsSchema } from "../ViewSettingsForm.js";
-import { getErrorLocations, getValueToRender } from "../../lib/utility.js";
 import {
   SquiggleViewer,
   SquiggleViewerProps,
 } from "../SquiggleViewer/index.js";
-import { ShareButton } from "./ShareButton.js";
-import { JsImports } from "../../lib/jsImports.js";
+import { ViewSettingsForm, viewSettingsSchema } from "../ViewSettingsForm.js";
+import { StyledTab } from "../ui/StyledTab.js";
+
 import { ImportSettingsForm } from "./ImportSettingsForm.js";
+import { ShareButton } from "./ShareButton.js";
+import {
+  EnvironmentSettingsForm,
+  playgroundSettingsSchema,
+  type PlaygroundFormFields,
+} from "./playgroundSettings.js";
+import { RunControls } from "./RunControls/index.js";
+import { useRunnerState } from "./RunControls/useRunnerState.js";
 
 type PlaygroundProps = SquiggleArgs &
   Omit<SquiggleViewerProps, "result"> & {
@@ -59,98 +55,6 @@ type PlaygroundProps = SquiggleArgs &
     /** Height of the editor */
     height?: number;
   };
-
-const schema = yup
-  .object({})
-  .shape({
-    sampleCount: yup
-      .number()
-      .required()
-      .positive()
-      .integer()
-      .default(1000)
-      .min(10)
-      .max(1000000),
-    xyPointLength: yup
-      .number()
-      .required()
-      .positive()
-      .integer()
-      .default(1000)
-      .min(10)
-      .max(10000),
-  })
-  .concat(viewSettingsSchema);
-
-type FormFields = yup.InferType<typeof schema>;
-
-const EnvironmentSettingsForm: React.FC<{
-  register: UseFormRegister<FormFields>;
-}> = ({ register }) => (
-  <div className="space-y-6 p-3 max-w-xl">
-    <div>
-      <InputItem
-        name="sampleCount"
-        type="number"
-        label="Sample Count"
-        register={register}
-      />
-      <div className="mt-2">
-        <Text>
-          How many samples to use for Monte Carlo simulations. This can
-          occasionally be overridden by specific Squiggle programs.
-        </Text>
-      </div>
-    </div>
-    <div>
-      <InputItem
-        name="xyPointLength"
-        type="number"
-        register={register}
-        label="Coordinate Count (For PointSet Shapes)"
-      />
-      <div className="mt-2">
-        <Text>
-          When distributions are converted into PointSet shapes, we need to know
-          how many coordinates to use.
-        </Text>
-      </div>
-    </div>
-  </div>
-);
-
-const RunControls: React.FC<{
-  autorunMode: boolean;
-  isRunning: boolean;
-  isStale: boolean;
-  onAutorunModeChange: (value: boolean) => void;
-  run: () => void;
-}> = ({ autorunMode, isRunning, isStale, onAutorunModeChange, run }) => {
-  const CurrentPlayIcon = isRunning ? RefreshIcon : PlayIcon;
-
-  return (
-    <div className="flex space-x-1 items-center" data-testid="autorun-controls">
-      {autorunMode ? null : (
-        <button onClick={run}>
-          <CurrentPlayIcon
-            className={clsx(
-              "w-8 h-8",
-              isRunning && "animate-spin",
-              isStale ? "text-indigo-500" : "text-gray-400"
-            )}
-          />
-        </button>
-      )}
-      <Toggle
-        texts={["Autorun", "Paused"]}
-        icons={[CheckCircleIcon, PauseIcon]}
-        status={autorunMode}
-        onChange={onAutorunModeChange}
-        spinIcon={autorunMode && isRunning}
-      />
-    </div>
-  );
-};
 
 // Left panel ref is used for local settings modal positioning in ItemSettingsMenu.tsx
 type PlaygroundContextShape = {
@@ -178,20 +82,20 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
 
   const [imports, setImports] = useState<JsImports>({});
 
-  const defaultValues: FormFields = {
-    ...schema.getDefault(),
+  const defaultValues: PlaygroundFormFields = {
+    ...playgroundSettingsSchema.getDefault(),
     ...Object.fromEntries(
       Object.entries(props).filter(([k, v]) => v !== undefined)
     ),
   };
 
   const { register, control } = useForm({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(playgroundSettingsSchema),
     defaultValues,
   });
 
   // react-hook-form types the result as Partial, but the result doesn't seem to be a Partial, so this should be ok
-  const vars = useWatch({ control }) as FormFields;
+  const vars = useWatch({ control }) as PlaygroundFormFields;
 
   useEffect(() => {
     onSettingsChange?.(vars);
@@ -205,29 +109,25 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     [vars.sampleCount, vars.xyPointLength]
   );
 
-  const {
-    run,
-    autorunMode,
-    setAutorunMode,
-    isRunning,
-    renderedCode,
-    executionId,
-  } = useRunnerState(code);
+  const runnerState = useRunnerState(code);
 
   const resultAndBindings = useSquiggle({
     ...props,
-    code: renderedCode,
-    executionId,
+    code: runnerState.renderedCode,
+    executionId: runnerState.executionId,
     jsImports: imports,
     environment,
   });
 
-  const valueToRender = getValueToRender(resultAndBindings);
+  const valueToRender = useMemo(
+    () => getValueToRender(resultAndBindings),
+    [resultAndBindings]
+  );
 
   const squiggleChart =
-    renderedCode === "" ? null : (
+    runnerState.renderedCode === "" ? null : (
       <div className="relative">
-        {isRunning ? (
+        {runnerState.isRunning ? (
           <div className="absolute inset-0 bg-white opacity-0 animate-semi-appear" />
         ) : null}
         <SquiggleViewer
@@ -246,7 +146,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
         errorLocations={errorLocations}
         value={code}
         onChange={setCode}
-        onSubmit={run}
+        onSubmit={runnerState.run}
         showGutter={true}
         height={height}
         project={resultAndBindings.project}
@@ -323,13 +223,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
                 <StyledTab name="Input Variables" icon={CurrencyDollarIcon} />
               </StyledTab.List>
               <div className="flex space-x-2 items-center">
-                <RunControls
-                  autorunMode={autorunMode}
-                  isStale={renderedCode !== code}
-                  run={run}
-                  isRunning={isRunning}
-                  onAutorunModeChange={setAutorunMode}
-                />
+                <RunControls {...runnerState} />
                 {showShareButton && <ShareButton />}
               </div>
             </div>
