@@ -1,4 +1,4 @@
-import { SampleSetDist } from "../dist/SampleSetDist/SampleSetDist.js";
+import { SampleSetDist } from "../dist/SampleSetDist/index.js";
 import { Env } from "../dist/env.js";
 import { SqDistributionError } from "./SqDistributionError.js";
 import { wrapPointSet } from "./SqPointSet.js";
@@ -36,6 +36,15 @@ export abstract class SqAbstractDistribution<T extends BaseDist> {
     return Result.fmap2(
       innerResult,
       (dist) => wrapPointSet(dist.pointSet),
+      (e: DistError) => new SqDistributionError(e)
+    );
+  }
+
+  asSampleSetDist(env: Env) {
+    const innerResult = SampleSetDist.fromDist(this._value, env);
+    return Result.fmap2(
+      innerResult,
+      (dist) => new SqSampleSetDistribution(dist),
       (e: DistError) => new SqDistributionError(e)
     );
   }
@@ -79,17 +88,13 @@ export abstract class SqAbstractDistribution<T extends BaseDist> {
 
 export class SqPointSetDistribution extends SqAbstractDistribution<PointSetDist> {
   tag = SqDistributionTag.PointSet as const;
-
-  value() {
-    return wrapPointSet(this._value.pointSet);
-  }
 }
 
 export class SqSampleSetDistribution extends SqAbstractDistribution<SampleSetDist> {
   tag = SqDistributionTag.SampleSet as const;
 
-  value(): SampleSetDist {
-    return this._value;
+  getSamples(): readonly number[] {
+    return this._value.samples;
   }
 }
 
