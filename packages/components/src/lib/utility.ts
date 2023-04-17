@@ -44,10 +44,9 @@ export function getValueToRender({
   );
 }
 
-export function getErrorLocations(result: ResultAndBindings["result"]) {
+export function getErrors(result: ResultAndBindings["result"]) {
   if (!result.ok) {
-    const location = result.value.location();
-    return location ? [location] : [];
+    return [result.value];
   } else {
     return [];
   }

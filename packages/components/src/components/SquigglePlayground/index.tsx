@@ -21,7 +21,7 @@ import { useMaybeControlledValue, useSquiggle } from "../../lib/hooks/index.js";
 import { SquiggleArgs } from "../../lib/hooks/useSquiggle.js";
 
 import { JsImports } from "../../lib/jsImports.js";
-import { getErrorLocations, getValueToRender } from "../../lib/utility.js";
+import { getErrors, getValueToRender } from "../../lib/utility.js";
 import { CodeEditor } from "../CodeEditor.js";
 import { SquiggleContainer } from "../SquiggleContainer.js";
 import {
@@ -32,14 +32,14 @@ import { ViewSettingsForm, viewSettingsSchema } from "../ViewSettingsForm.js";
 import { StyledTab } from "../ui/StyledTab.js";
 
 import { ImportSettingsForm } from "./ImportSettingsForm.js";
+import { RunControls } from "./RunControls/index.js";
+import { useRunnerState } from "./RunControls/useRunnerState.js";
 import { ShareButton } from "./ShareButton.js";
 import {
   EnvironmentSettingsForm,
   playgroundSettingsSchema,
   type PlaygroundFormFields,
 } from "./playgroundSettings.js";
-import { RunControls } from "./RunControls/index.js";
-import { useRunnerState } from "./RunControls/useRunnerState.js";
 
 type PlaygroundProps = SquiggleArgs &
   Omit<SquiggleViewerProps, "result"> & {
@@ -138,12 +138,12 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
       </div>
     );
 
-  const errorLocations = getErrorLocations(resultAndBindings.result);
+  const errors = getErrors(resultAndBindings.result);
 
   const firstTab = showEditor ? (
     <div className="border border-slate-200" data-testid="squiggle-editor">
       <CodeEditor
-        errorLocations={errorLocations}
+        errors={errors}
         value={code}
         onChange={setCode}
         onSubmit={runnerState.run}
