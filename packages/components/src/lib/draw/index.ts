@@ -1,5 +1,6 @@
 import * as d3 from "d3";
 import { CartesianFrame } from "./CartesianFrame.js";
+import { Padding, Point } from "./types.js";
 
 const axisColor = "rgba(114, 125, 147, 0.1)";
 export const labelColor = "rgb(114, 125, 147)";
@@ -8,13 +9,6 @@ export const primaryColor = "#4c78a8"; // for lines and areas
 const labelFont = "10px sans-serif";
 const xLabelOffset = 6;
 const yLabelOffset = 6;
-
-export type Padding = {
-  top: number;
-  left: number;
-  bottom: number;
-  right: number;
-};
 
 export function drawAxes({
   context,
@@ -71,16 +65,15 @@ export function drawAxes({
     });
   }
 
-  const chartWidth = width - padding.left - padding.right;
-  const chartHeight = height - padding.top - padding.bottom;
-  xScale.range([0, chartWidth]);
-  yScale.range([0, chartHeight]);
-
   const frame = new CartesianFrame({
     context,
     x0: padding.left,
-    y0: padding.top + chartHeight,
+    y0: height - padding.bottom,
+    width: width - padding.left - padding.right,
+    height: height - padding.top - padding.bottom,
   });
+  xScale.range([0, frame.width]);
+  yScale.range([0, frame.height]);
 
   // x axis
   {
@@ -89,7 +82,7 @@ export function drawAxes({
     context.strokeStyle = axisColor;
     context.lineWidth = 1;
     context.moveTo(0, 0);
-    context.lineTo(chartWidth, 0);
+    context.lineTo(frame.width, 0);
     context.stroke();
 
     context.fillStyle = labelColor;
@@ -139,7 +132,7 @@ export function drawAxes({
     context.strokeStyle = axisColor;
     context.lineWidth = 1;
     context.moveTo(0, 0);
-    context.lineTo(0, chartHeight);
+    context.lineTo(0, frame.height);
     context.stroke();
 
     yTicks.forEach((d) => {
@@ -169,41 +162,38 @@ export function drawAxes({
     yScale,
     xTickFormat,
     padding,
-    chartWidth,
-    chartHeight,
     frame,
   };
 }
 
 export function drawVerticalCursorLine({
   cursor,
-  padding,
-  chartWidth,
-  chartHeight,
+  frame,
   xScale,
   tickFormat,
-  context,
 }: {
   cursor: [number, number]; // original canvas coordinates
-  padding: Padding;
-  chartWidth: number;
-  chartHeight: number;
+  frame: CartesianFrame;
   xScale: d3.ScaleContinuousNumeric<number, number, never>;
   tickFormat: (d: d3.NumberValue) => string;
-  context: CanvasRenderingContext2D;
 }) {
-  context.save();
+  const context = frame.context;
+  frame.enter();
+  const point = frame.translatedPoint({
+    x: cursor[0],
+    y: cursor[1],
+  });
 
   context.beginPath();
   context.strokeStyle = cursorLineColor;
   context.lineWidth = 1;
-  context.moveTo(cursor[0], padding.top);
-  context.lineTo(cursor[0], padding.top + chartHeight);
+  context.moveTo(point.x, 0);
+  context.lineTo(point.x, frame.height);
   context.stroke();
 
   context.textAlign = "left";
   context.textBaseline = "bottom";
-  const text = tickFormat(xScale.invert(cursor[0] - padding.left));
+  const text = tickFormat(xScale.invert(point.x));
   const measured = context.measureText(text);
 
   // TODO - could be simplified with cotext.translate
@@ -214,14 +204,15 @@ export function drawVerticalCursorLine({
 
   let boxWidth = measured.width + px * 2;
   const boxHeight = measured.actualBoundingBoxAscent + py * 2;
-  const boxOrigin = {
-    x: cursor[0] + mx,
-    y: chartHeight + padding.top - boxHeight - my,
+  const boxOrigin: Point = {
+    x: point.x + mx,
+    y: my,
   };
   const flip =
-    boxOrigin.x + boxWidth > chartWidth + padding.left + padding.right &&
-    // in pathological cases, we can't fix the box on either side because the text is too long; in this case, we don't flip because first digits are more significant
-    boxWidth <= cursor[0];
+    boxOrigin.x + boxWidth > frame.width &&
+    // In pathological cases, we can't fit the box on either side because the text is too long.
+    // In this case, we don't flip because first digits are more significant.
+    boxWidth <= point.x;
 
   if (flip) {
     boxOrigin.x = cursor[0] - mx;
@@ -234,13 +225,16 @@ export function drawVerticalCursorLine({
   context.fillRect(boxOrigin.x, boxOrigin.y, boxWidth, boxHeight);
   context.globalAlpha = 1;
   context.fillStyle = labelColor;
-  context.fillText(
+  frame.fillText(
     text,
     boxOrigin.x + px * (flip ? -1 : 1),
-    chartHeight + padding.top - my - py + 1 // unsure why "+1" is needed, probably related to measureText result and could be fixed
+    // unsure why "-1" is needed, probably related to measureText result and could be fixed
+    my + py - 1,
+    {
+      fillStyle: labelColor,
+    }
   );
-
-  context.restore();
+  frame.exit();
 }
 
 export function drawCircle({

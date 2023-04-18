@@ -1,3 +1,5 @@
+import { Point } from "./types.js";
+
 type TextOptions = {
   textAlign?: CanvasTextAlign;
   textBaseline?: CanvasTextBaseline;
@@ -23,15 +25,29 @@ export class CartesianFrame {
   public context: CanvasRenderingContext2D;
   public x0: number;
   public y0: number;
+  public width: number;
+  public height: number;
 
   constructor(props: {
     context: CanvasRenderingContext2D;
     x0: number;
     y0: number;
+    width: number;
+    height: number;
   }) {
     this.context = props.context;
     this.x0 = props.x0;
     this.y0 = props.y0;
+    this.width = props.width;
+    this.height = props.height;
+  }
+
+  // useful for converting cursor coordinates to frame
+  translatedPoint(point: Point): Point {
+    return {
+      x: point.x - this.x0,
+      y: this.y0 - point.y,
+    };
   }
 
   enter(): void {

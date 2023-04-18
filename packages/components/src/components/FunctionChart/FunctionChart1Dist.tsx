@@ -7,9 +7,9 @@ import { FC, useCallback, useMemo, useRef } from "react";
 import {
   drawAxes,
   drawVerticalCursorLine,
-  Padding,
   primaryColor,
 } from "../../lib/draw/index.js";
+import { Padding } from "../../lib/draw/types.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
 import { ErrorAlert } from "../Alert.js";
@@ -123,26 +123,25 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
     ({ context, width }: DrawContext) => {
       context.clearRect(0, 0, width, height);
 
-      const { xScale, yScale, padding, chartWidth, chartHeight, frame } =
-        drawAxes({
-          suggestedPadding: { left: 20, right: 10, top: 10, bottom: 20 },
-          xDomain: d3.extent(data, (d) => d.x) as [number, number],
-          yDomain: [
-            Math.min(
-              ...data.map((d) =>
-                Math.min(...Object.values(d.areas).map((p) => p[0]), d[50])
-              )
-            ),
-            Math.max(
-              ...data.map((d) =>
-                Math.max(...Object.values(d.areas).map((p) => p[1]), d[50])
-              )
-            ),
-          ],
-          width,
-          height,
-          context,
-        });
+      const { xScale, yScale, padding, frame } = drawAxes({
+        suggestedPadding: { left: 20, right: 10, top: 10, bottom: 20 },
+        xDomain: d3.extent(data, (d) => d.x) as [number, number],
+        yDomain: [
+          Math.min(
+            ...data.map((d) =>
+              Math.min(...Object.values(d.areas).map((p) => p[0]), d[50])
+            )
+          ),
+          Math.max(
+            ...data.map((d) =>
+              Math.max(...Object.values(d.areas).map((p) => p[1]), d[50])
+            )
+          ),
+        ],
+        width,
+        height,
+        context,
+      });
       d3ref.current = {
         padding,
         xScale,
@@ -181,16 +180,13 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
       if (
         cursor &&
         cursor[0] >= padding.left &&
-        cursor[0] - padding.left <= chartWidth
+        cursor[0] - padding.left <= frame.width
       ) {
         drawVerticalCursorLine({
+          frame,
           cursor,
-          padding,
-          chartWidth,
-          chartHeight,
           xScale,
           tickFormat: d3.format(",.4r"),
-          context,
         });
       }
     },

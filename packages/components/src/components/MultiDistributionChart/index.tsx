@@ -27,6 +27,7 @@ import { Plot } from "./types.js";
 import * as d3 from "d3";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
 import { MouseTooltip } from "../ui/MouseTooltip.js";
+import { Point } from "../../lib/draw/types.js";
 
 export const distributionSettingsSchema = yup.object({}).shape({
   /** Set the x scale to be logarithmic */
@@ -62,11 +63,6 @@ export type MultiDistributionChartProps = {
   environment: Env;
   height: number;
   settings: DistributionChartSettings;
-};
-
-type Point = {
-  x: number;
-  y: number;
 };
 
 function distance(point1: Point, point2: Point) {
@@ -108,36 +104,35 @@ const InnerMultiDistributionChart: FC<{
       const getColor = (i: number) =>
         plot.colorScheme === "blues" ? "#5ba3cf" : d3.schemeCategory10[i];
 
-      const { padding, chartWidth, chartHeight, xScale, yScale, frame } =
-        drawAxes({
-          suggestedPadding: {
-            left: 10,
-            right: 10,
-            top: 10 + legendHeight + titleHeight,
-            bottom: 20 + samplesFooterHeight,
-          },
-          xDomain: [
-            Number.isFinite(settings.minX)
-              ? settings.minX!
-              : d3.min(domain, (d) => d.x) ?? 0,
-            Number.isFinite(settings.maxX)
-              ? settings.maxX!
-              : d3.max(domain, (d) => d.x) ?? 0,
-          ],
-          yDomain: [
-            Math.min(...domain.map((p) => p.y), 0), // min value, but at least 0
-            Math.max(...domain.map((p) => p.y)),
-          ],
-          width,
-          height,
-          context,
-          hideYAxis: true,
-          drawTicks: true,
-          logX: settings.logX,
-          expY: settings.expY,
-          tickCount: 10,
-          tickFormat: settings.tickFormat,
-        });
+      const { padding, xScale, yScale, frame } = drawAxes({
+        suggestedPadding: {
+          left: 10,
+          right: 10,
+          top: 10 + legendHeight + titleHeight,
+          bottom: 20 + samplesFooterHeight,
+        },
+        xDomain: [
+          Number.isFinite(settings.minX)
+            ? settings.minX!
+            : d3.min(domain, (d) => d.x) ?? 0,
+          Number.isFinite(settings.maxX)
+            ? settings.maxX!
+            : d3.max(domain, (d) => d.x) ?? 0,
+        ],
+        yDomain: [
+          Math.min(...domain.map((p) => p.y), 0), // min value, but at least 0
+          Math.max(...domain.map((p) => p.y)),
+        ],
+        width,
+        height,
+        context,
+        hideYAxis: true,
+        drawTicks: true,
+        logX: settings.logX,
+        expY: settings.expY,
+        tickCount: 10,
+        tickFormat: settings.tickFormat,
+      });
 
       if (settings.title) {
         context.save();
@@ -175,10 +170,7 @@ const InnerMultiDistributionChart: FC<{
       {
         frame.enter();
         const translatedCursor: Point | undefined = cursor
-          ? {
-              x: cursor[0] - padding.left,
-              y: padding.top + chartHeight - cursor[1],
-            }
+          ? frame.translatedPoint({ x: cursor[0], y: cursor[1] })
           : undefined;
         const discreteRadius = 5;
 
@@ -253,16 +245,13 @@ const InnerMultiDistributionChart: FC<{
       if (
         cursor &&
         cursor[0] >= padding.left &&
-        cursor[0] - padding.left <= chartWidth
+        cursor[0] - padding.left <= frame.width
       ) {
         drawVerticalCursorLine({
+          frame,
           cursor,
-          padding,
-          chartWidth,
-          chartHeight,
           xScale,
           tickFormat: d3.format(",.4r"),
-          context,
         });
       }
     },
