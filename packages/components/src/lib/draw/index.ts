@@ -211,7 +211,7 @@ export function drawVerticalCursorLine({
     boxWidth <= point.x;
 
   if (flip) {
-    boxOrigin.x = cursor[0] - mx;
+    boxOrigin.x = cursor.x - mx;
     boxWidth = -boxWidth;
     context.textAlign = "right";
   }

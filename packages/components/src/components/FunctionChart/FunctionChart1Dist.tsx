@@ -206,13 +206,13 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
       return;
     }
     if (
-      cursor[0] < d3ref.current.padding.left ||
-      cursor[0] > width - d3ref.current.padding.right
+      cursor.x < d3ref.current.padding.left ||
+      cursor.x > width - d3ref.current.padding.right
     ) {
       return;
     }
     const x = d3ref.current.xScale.invert(
-      cursor[0] - d3ref.current.padding.left
+      cursor.x - d3ref.current.padding.left
     );
     return x
       ? fn.call([x])
