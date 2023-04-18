@@ -172,17 +172,14 @@ export function drawVerticalCursorLine({
   xScale,
   tickFormat,
 }: {
-  cursor: [number, number]; // original canvas coordinates
+  cursor: Point; // original canvas coordinates
   frame: CartesianFrame;
   xScale: d3.ScaleContinuousNumeric<number, number, never>;
   tickFormat: (d: d3.NumberValue) => string;
 }) {
   const context = frame.context;
   frame.enter();
-  const point = frame.translatedPoint({
-    x: cursor[0],
-    y: cursor[1],
-  });
+  const point = frame.translatedPoint(cursor);
 
   context.beginPath();
   context.strokeStyle = cursorLineColor;
@@ -196,7 +193,6 @@ export function drawVerticalCursorLine({
   const text = tickFormat(xScale.invert(point.x));
   const measured = context.measureText(text);
 
-  // TODO - could be simplified with cotext.translate
   const px = 4,
     py = 2,
     mx = 4,

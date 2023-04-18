@@ -170,7 +170,7 @@ const InnerMultiDistributionChart: FC<{
       {
         frame.enter();
         const translatedCursor: Point | undefined = cursor
-          ? frame.translatedPoint({ x: cursor[0], y: cursor[1] })
+          ? frame.translatedPoint(cursor)
           : undefined;
         const discreteRadius = 5;
 
@@ -244,8 +244,8 @@ const InnerMultiDistributionChart: FC<{
 
       if (
         cursor &&
-        cursor[0] >= padding.left &&
-        cursor[0] - padding.left <= frame.width
+        cursor.x >= padding.left &&
+        cursor.y - padding.left <= frame.width
       ) {
         drawVerticalCursorLine({
           frame,

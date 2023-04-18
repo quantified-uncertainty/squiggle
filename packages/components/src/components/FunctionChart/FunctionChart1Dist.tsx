@@ -179,8 +179,8 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
 
       if (
         cursor &&
-        cursor[0] >= padding.left &&
-        cursor[0] - padding.left <= frame.width
+        cursor.x >= padding.left &&
+        cursor.x - padding.left <= frame.width
       ) {
         drawVerticalCursorLine({
           frame,
