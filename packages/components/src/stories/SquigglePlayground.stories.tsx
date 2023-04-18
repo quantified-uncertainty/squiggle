@@ -2,6 +2,9 @@ import type { Meta, StoryObj } from "@storybook/react";
 
 import { SquigglePlayground as Component } from "../components/SquigglePlayground/index.js";
 
+/**
+ * A Squiggle playground is an environment where you can play around with all settings, including sampling settings, in Squiggle.
+ */
 const meta = {
   component: Component,
 } satisfies Meta<typeof Component>;

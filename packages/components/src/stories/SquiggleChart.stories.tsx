@@ -2,6 +2,16 @@ import type { Meta, StoryObj } from "@storybook/react";
 
 import { SquiggleChart } from "../components/SquiggleChart.js";
 
+/**
+ * Squiggle chart evaluates squiggle expressions, and then returns a graph representing
+ * the result of a squiggle expression.
+ *
+ * A squiggle expression can have three different types of returns. A distribution,
+ * a constant, and a function.
+ *
+ * A distribution means that the result forms a probability distribution. This
+ * could be continuous, discrete or mixed.
+ */
 const meta = {
   component: SquiggleChart,
 } satisfies Meta<typeof SquiggleChart>;
@@ -30,7 +40,6 @@ export const ContinuousSampleSet: Story = {
 };
 
 export const Discrete: Story = {
-  name: "Discrete",
   args: {
     code: "mx(0, 1, 3, 5, 8, 10, [0.1, 0.8, 0.5, 0.3, 0.2, 0.1])",
   },
@@ -97,21 +106,18 @@ export const Constant: Story = {
 };
 
 export const Array: Story = {
-  name: "Array",
   args: {
     code: "[normal(5,2), normal(10,1), normal(40,2), 400000]",
   },
 };
 
 export const Error: Story = {
-  name: "Error",
   args: {
     code: "f(x) = normal(",
   },
 };
 
 export const Boolean: Story = {
-  name: "Boolean",
   args: {
     code: "3 == 3",
   },
@@ -132,14 +138,12 @@ export const FunctionToNumber: Story = {
 };
 
 export const Record: Story = {
-  name: "Record",
   args: {
     code: "{foo: 35 to 50, bar: [1,2,3]}",
   },
 };
 
 export const String: Story = {
-  name: "String",
   args: {
     code: '"Lucky day!"',
   },
