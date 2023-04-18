@@ -17,6 +17,9 @@ export const Normal: Story = {
   },
 };
 
+/**
+ * It's possible to create a controlled version of the editor component.
+ */
 export const Controlled: Story = {
   name: "Controlled",
   args: {
@@ -24,6 +27,9 @@ export const Controlled: Story = {
   },
 };
 
+/**
+ * You can name variables like so:
+ */
 export const Variables: Story = {
   name: "Variables",
   args: {

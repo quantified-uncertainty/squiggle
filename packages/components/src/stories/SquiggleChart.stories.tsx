@@ -87,6 +87,9 @@ Plot.scatter({ xDist: xDist, yDist: yDist })
   },
 };
 
+/**
+ * A constant is a simple number as a result. This has special formatting rules to allow large and small numbers being printed cleanly.
+ */
 export const Constant: Story = {
   name: "Constant",
   args: {

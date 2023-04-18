@@ -1,4 +1,4 @@
-import { Canvas, Meta, Story } from "@storybook/blocks";
+import { Meta, Stories } from "@storybook/blocks";
 import * as SquiggleEditorStories from "./SquiggleEditor.stories";
 
 <Meta of={SquiggleEditorStories} />
@@ -8,12 +8,4 @@ import * as SquiggleEditorStories from "./SquiggleEditor.stories";
 Squiggle Editor is a Squiggle chart with a text editor included for changing
 the distribution.
 
-<Canvas of={SquiggleEditorStories.Normal} />
-
-It's also possible to create a controlled version of the same component
-
-<Canvas of={SquiggleEditorStories.Controlled} />
-
-You can also name variables like so:
-
-<Canvas of={SquiggleEditorStories.Variables} />
+<Stories />
