@@ -76,13 +76,13 @@ dists: [
   },
 };
 
-export const JointPlot: Story = {
-  name: "Joint plot",
+export const ScatterPlot: Story = {
+  name: "Scatter plot",
   args: {
     code: `
 xDist = SampleSet.fromDist(2 to 5)
 yDist = (-3 to 3) * 5 - xDist ^ 2
-Plot.joint({ xDist: xDist, yDist: yDist })
+Plot.scatter({ xDist: xDist, yDist: yDist })
 `,
   },
 };

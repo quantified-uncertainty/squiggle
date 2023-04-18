@@ -79,19 +79,19 @@ export const library = [
     ],
   }),
   maker.make({
-    name: "joint",
+    name: "scatter",
     output: "Plot",
     examples: [
-      `Plot.joint({ xDist: 2 to 5, yDist: SampleSet.fromDist(-3 to 3) })`,
+      `Plot.scatter({ xDist: 2 to 5, yDist: SampleSet.fromDist(-3 to 3) })`,
     ],
     definitions: [
       makeDefinition(
-        "joint",
+        "scatter",
         [frRecord(["xDist", frDist], ["yDist", frDist])],
         ([{ xDist, yDist }]) => {
           return Result.Ok(
             vPlot({
-              type: "joint",
+              type: "scatter",
               xDist,
               yDist,
             })

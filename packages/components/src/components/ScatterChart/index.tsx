@@ -1,18 +1,18 @@
 import React, { FC, useCallback, useMemo } from "react";
 
-import { Env, SqJointPlot } from "@quri/squiggle-lang";
+import { Env, SqScatterPlot } from "@quri/squiggle-lang";
 import * as d3 from "d3";
 import { DrawContext, useCanvas } from "../../lib/hooks/index.js";
 import { ErrorAlert } from "../Alert.js";
 import { drawAxes, primaryColor } from "../../lib/drawUtils.js";
 
 type Props = {
-  plot: SqJointPlot;
+  plot: SqScatterPlot;
   height: number;
   environment: Env;
 };
 
-export const JointChart: FC<Props> = ({ plot, height, environment }) => {
+export const ScatterChart: FC<Props> = ({ plot, height, environment }) => {
   const pointsResult = useMemo(
     () => plot.points(environment),
     [plot, environment]

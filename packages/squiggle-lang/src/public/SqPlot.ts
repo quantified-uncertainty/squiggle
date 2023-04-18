@@ -15,8 +15,8 @@ export const wrapPlot = (value: Plot, location: SqValueLocation): SqPlot => {
       return new SqDistributionsPlot(value, location);
     case "fn":
       return new SqFnPlot(value, location);
-    case "joint":
-      return new SqJointPlot(value, location);
+    case "scatter":
+      return new SqScatterPlot(value, location);
   }
 };
 
@@ -68,8 +68,8 @@ export class SqFnPlot extends SqAbstractPlot<"fn"> {
   }
 }
 
-export class SqJointPlot extends SqAbstractPlot<"joint"> {
-  tag = "joint" as const;
+export class SqScatterPlot extends SqAbstractPlot<"scatter"> {
+  tag = "scatter" as const;
 
   get yDist() {
     return wrapDistribution(this._value.xDist);
@@ -101,4 +101,4 @@ export class SqJointPlot extends SqAbstractPlot<"joint"> {
   }
 }
 
-export type SqPlot = SqDistributionsPlot | SqFnPlot | SqJointPlot;
+export type SqPlot = SqDistributionsPlot | SqFnPlot | SqScatterPlot;
