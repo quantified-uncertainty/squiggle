@@ -29,7 +29,7 @@ export const ScatterChart: FC<Props> = ({ plot, height, environment }) => {
       const xDomain = d3.extent(points, (d) => d.x) as [number, number];
       const yDomain = d3.extent(points, (d) => d.y) as [number, number];
 
-      const { xScale, yScale, translateToZero } = drawAxes({
+      const { xScale, yScale, frame } = drawAxes({
         context,
         xDomain,
         yDomain,
@@ -43,8 +43,8 @@ export const ScatterChart: FC<Props> = ({ plot, height, environment }) => {
         height,
         drawTicks: true,
       });
-      translateToZero();
 
+      frame.enter();
       const r = 2;
       context.fillStyle = primaryColor;
       context.globalAlpha = 0.15;
@@ -55,6 +55,7 @@ export const ScatterChart: FC<Props> = ({ plot, height, environment }) => {
         drawCircle({ context, x, y, r });
       }
       context.globalAlpha = 1;
+      frame.exit();
     },
     [pointsResult, height]
   );

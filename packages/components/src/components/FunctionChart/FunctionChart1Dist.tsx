@@ -123,40 +123,33 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
     ({ context, width }: DrawContext) => {
       context.clearRect(0, 0, width, height);
 
-      const {
-        xScale,
-        yScale,
-        padding,
-        chartWidth,
-        chartHeight,
-        translateToZero,
-      } = drawAxes({
-        suggestedPadding: { left: 20, right: 10, top: 10, bottom: 20 },
-        xDomain: d3.extent(data, (d) => d.x) as [number, number],
-        yDomain: [
-          Math.min(
-            ...data.map((d) =>
-              Math.min(...Object.values(d.areas).map((p) => p[0]), d[50])
-            )
-          ),
-          Math.max(
-            ...data.map((d) =>
-              Math.max(...Object.values(d.areas).map((p) => p[1]), d[50])
-            )
-          ),
-        ],
-        width,
-        height,
-        context,
-      });
+      const { xScale, yScale, padding, chartWidth, chartHeight, frame } =
+        drawAxes({
+          suggestedPadding: { left: 20, right: 10, top: 10, bottom: 20 },
+          xDomain: d3.extent(data, (d) => d.x) as [number, number],
+          yDomain: [
+            Math.min(
+              ...data.map((d) =>
+                Math.min(...Object.values(d.areas).map((p) => p[0]), d[50])
+              )
+            ),
+            Math.max(
+              ...data.map((d) =>
+                Math.max(...Object.values(d.areas).map((p) => p[1]), d[50])
+              )
+            ),
+          ],
+          width,
+          height,
+          context,
+        });
       d3ref.current = {
         padding,
         xScale,
       };
 
       // areas
-      context.save();
-      translateToZero();
+      frame.enter();
 
       context.fillStyle = primaryColor;
       for (const { width, opacity } of intervals) {
@@ -183,7 +176,7 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
         .context(context)(data);
 
       context.stroke();
-      context.restore();
+      frame.exit();
 
       if (
         cursor &&

@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+import { CartesianFrame } from "./CartesianFrame.js";
 
 const axisColor = "rgba(114, 125, 147, 0.1)";
 export const labelColor = "rgb(114, 125, 147)";
@@ -75,40 +76,45 @@ export function drawAxes({
   xScale.range([0, chartWidth]);
   yScale.range([0, chartHeight]);
 
+  const frame = new CartesianFrame({
+    context,
+    x0: padding.left,
+    y0: padding.top + chartHeight,
+  });
+
   // x axis
   {
-    context.save();
+    frame.enter();
     context.beginPath();
     context.strokeStyle = axisColor;
     context.lineWidth = 1;
-    context.moveTo(padding.left, padding.top + chartHeight);
-    context.lineTo(padding.left + chartWidth, padding.top + chartHeight);
+    context.moveTo(0, 0);
+    context.lineTo(chartWidth, 0);
     context.stroke();
 
     context.fillStyle = labelColor;
     context.font = labelFont;
 
-    let prevBoundary = 0;
+    let prevBoundary = -padding.left;
     for (let i = 0; i < xTicks.length; i++) {
       const xTick = xTicks[i];
-      const x = padding.left + xScale(xTick);
-      const y = padding.top + chartHeight;
+      const x = xScale(xTick);
+      const y = 0;
 
       if (drawTicks) {
         context.beginPath();
         context.strokeStyle = labelColor;
         context.lineWidth = 1;
         context.moveTo(x, y);
-        context.lineTo(x, y + tickSize);
+        context.lineTo(x, y - tickSize);
         context.stroke();
       }
-      context.textAlign = "left";
-      context.textBaseline = "top";
+
       const text = xTickFormat(xTick);
       const { width: textWidth } = context.measureText(text);
       let startX = 0;
       if (i === 0) {
-        startX = Math.max(x - textWidth / 2, 0);
+        startX = Math.max(x - textWidth / 2, -padding.left);
       } else if (i === xTicks.length - 1) {
         startX = Math.min(x - textWidth / 2, width - textWidth);
       } else {
@@ -117,31 +123,29 @@ export function drawAxes({
       if (startX < prevBoundary) {
         continue; // doesn't fit, skip
       }
-      context.fillText(text, startX, y + xLabelOffset);
+      frame.fillText(text, startX, y - xLabelOffset, {
+        textAlign: "left",
+        textBaseline: "top",
+      });
       prevBoundary = startX + textWidth;
     }
+    frame.exit();
   }
-  context.restore();
 
   // y axis
   if (!hideYAxis) {
-    context.save();
+    frame.enter();
     context.beginPath();
     context.strokeStyle = axisColor;
     context.lineWidth = 1;
-    context.moveTo(padding.left, padding.top);
-    context.lineTo(padding.left, padding.top + chartHeight);
+    context.moveTo(0, 0);
+    context.lineTo(0, chartHeight);
     context.stroke();
-
-    context.textAlign = "right";
-    context.textBaseline = "middle";
-    context.fillStyle = labelColor;
-    context.font = labelFont;
 
     yTicks.forEach((d) => {
       context.beginPath();
-      const x = padding.left;
-      const y = padding.top + chartHeight - yScale(d);
+      const x = 0;
+      const y = yScale(d);
       if (drawTicks) {
         context.beginPath();
         context.strokeStyle = labelColor;
@@ -150,9 +154,14 @@ export function drawAxes({
         context.lineTo(x - tickSize, y);
         context.stroke();
       }
-      context.fillText(yTickFormat(d), x - yLabelOffset, y);
+      frame.fillText(yTickFormat(d), x - yLabelOffset, y, {
+        textAlign: "right",
+        textBaseline: "middle",
+        fillStyle: labelColor,
+        font: labelFont,
+      });
     });
-    context.restore();
+    frame.exit();
   }
 
   return {
@@ -162,10 +171,7 @@ export function drawAxes({
     padding,
     chartWidth,
     chartHeight,
-    translateToZero: () => {
-      context.translate(padding.left, chartHeight + padding.top);
-      context.scale(1, -1);
-    },
+    frame,
   };
 }
 

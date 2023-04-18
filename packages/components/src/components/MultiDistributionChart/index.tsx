@@ -108,42 +108,36 @@ const InnerMultiDistributionChart: FC<{
       const getColor = (i: number) =>
         plot.colorScheme === "blues" ? "#5ba3cf" : d3.schemeCategory10[i];
 
-      const {
-        padding,
-        chartWidth,
-        chartHeight,
-        xScale,
-        yScale,
-        translateToZero,
-      } = drawAxes({
-        suggestedPadding: {
-          left: 10,
-          right: 10,
-          top: 10 + legendHeight + titleHeight,
-          bottom: 20 + samplesFooterHeight,
-        },
-        xDomain: [
-          Number.isFinite(settings.minX)
-            ? settings.minX!
-            : d3.min(domain, (d) => d.x) ?? 0,
-          Number.isFinite(settings.maxX)
-            ? settings.maxX!
-            : d3.max(domain, (d) => d.x) ?? 0,
-        ],
-        yDomain: [
-          Math.min(...domain.map((p) => p.y), 0), // min value, but at least 0
-          Math.max(...domain.map((p) => p.y)),
-        ],
-        width,
-        height,
-        context,
-        hideYAxis: true,
-        drawTicks: true,
-        logX: settings.logX,
-        expY: settings.expY,
-        tickCount: 10,
-        tickFormat: settings.tickFormat,
-      });
+      const { padding, chartWidth, chartHeight, xScale, yScale, frame } =
+        drawAxes({
+          suggestedPadding: {
+            left: 10,
+            right: 10,
+            top: 10 + legendHeight + titleHeight,
+            bottom: 20 + samplesFooterHeight,
+          },
+          xDomain: [
+            Number.isFinite(settings.minX)
+              ? settings.minX!
+              : d3.min(domain, (d) => d.x) ?? 0,
+            Number.isFinite(settings.maxX)
+              ? settings.maxX!
+              : d3.max(domain, (d) => d.x) ?? 0,
+          ],
+          yDomain: [
+            Math.min(...domain.map((p) => p.y), 0), // min value, but at least 0
+            Math.max(...domain.map((p) => p.y)),
+          ],
+          width,
+          height,
+          context,
+          hideYAxis: true,
+          drawTicks: true,
+          logX: settings.logX,
+          expY: settings.expY,
+          tickCount: 10,
+          tickFormat: settings.tickFormat,
+        });
 
       if (settings.title) {
         context.save();
@@ -179,8 +173,7 @@ const InnerMultiDistributionChart: FC<{
 
       // shapes
       {
-        context.save();
-        translateToZero();
+        frame.enter();
         const translatedCursor: Point | undefined = cursor
           ? {
               x: cursor[0] - padding.left,
@@ -236,10 +229,10 @@ const InnerMultiDistributionChart: FC<{
             drawCircle({ context, x, y, r: discreteRadius });
           }
         }
-        context.restore();
         if (!isEqual(discreteTooltip, newDiscreteTooltip)) {
           setDiscreteTooltip(newDiscreteTooltip);
         }
+        frame.exit();
       }
 
       // samples
