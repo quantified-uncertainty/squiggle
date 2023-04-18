@@ -201,11 +201,17 @@ export function drawAxes({
 
     yTicks.forEach((d) => {
       context.beginPath();
-      context.fillText(
-        yTickFormat(d),
-        padding.left - 6,
-        padding.top + chartHeight - yScale(d)
-      );
+      const x = padding.left;
+      const y = padding.top + chartHeight - yScale(d);
+      if (drawTicks) {
+        context.beginPath();
+        context.strokeStyle = labelColor;
+        context.lineWidth = 1;
+        context.moveTo(x, y);
+        context.lineTo(x - tickSize, y);
+        context.stroke();
+      }
+      context.fillText(yTickFormat(d), x - 6, y);
     });
     context.restore();
   }

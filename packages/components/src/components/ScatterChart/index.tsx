@@ -41,10 +41,11 @@ export const ScatterChart: FC<Props> = ({ plot, height, environment }) => {
         },
         width,
         height,
+        drawTicks: true,
       });
       translateToZero();
 
-      const r = 3;
+      const r = 2;
       context.fillStyle = primaryColor;
       context.globalAlpha = 0.15;
       for (const d of points) {

@@ -15,7 +15,7 @@ import { ItemSettingsMenu } from "./ItemSettingsMenu.js";
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
 import { MergedItemSettings } from "./utils.js";
 import { PartialViewSettings } from "../ViewSettingsForm.js";
-import { ScatterChart } from "../JointChart/index.js";
+import { ScatterChart } from "../ScatterChart/index.js";
 
 const VariableList: React.FC<{
   value: SqValue;
