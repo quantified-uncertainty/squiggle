@@ -3,7 +3,6 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { SquigglePlayground as Component } from "../components/SquigglePlayground/index.js";
 
 const meta = {
-  title: "Squiggle/SquigglePlayground",
   component: Component,
 } satisfies Meta<typeof Component>;
 export default meta;

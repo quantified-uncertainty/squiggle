@@ -3,7 +3,6 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { SquiggleEditor } from "../components/SquiggleEditor.js";
 
 const meta = {
-  title: "Squiggle/SquiggleEditor",
   component: SquiggleEditor,
 } satisfies Meta<typeof SquiggleEditor>;
 export default meta;

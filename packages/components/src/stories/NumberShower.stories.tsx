@@ -3,7 +3,6 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { NumberShower } from "../components/NumberShower.js";
 
 const meta = {
-  title: "Squiggle/NumberShower",
   component: NumberShower,
 } satisfies Meta<typeof NumberShower>;
 export default meta;
