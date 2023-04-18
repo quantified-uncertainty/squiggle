@@ -15,7 +15,7 @@ import { hasMassBelowZero } from "../../lib/distributionUtils.js";
 import {
   drawAxes,
   drawCircle,
-  drawVerticalCursorLine,
+  drawCursorLines,
   primaryColor,
 } from "../../lib/draw/index.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
@@ -247,11 +247,13 @@ const InnerMultiDistributionChart: FC<{
         cursor.x >= padding.left &&
         cursor.y - padding.left <= frame.width
       ) {
-        drawVerticalCursorLine({
+        drawCursorLines({
           frame,
           cursor,
-          xScale,
-          tickFormat: d3.format(",.4r"),
+          x: {
+            scale: xScale,
+            format: d3.format(",.4r"),
+          },
         });
       }
     },

@@ -6,7 +6,7 @@ import { FC, useCallback, useMemo, useRef } from "react";
 
 import {
   drawAxes,
-  drawVerticalCursorLine,
+  drawCursorLines,
   primaryColor,
 } from "../../lib/draw/index.js";
 import { Padding } from "../../lib/draw/types.js";
@@ -182,11 +182,13 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
         cursor.x >= padding.left &&
         cursor.x - padding.left <= frame.width
       ) {
-        drawVerticalCursorLine({
+        drawCursorLines({
           frame,
           cursor,
-          xScale,
-          tickFormat: d3.format(",.4r"),
+          x: {
+            scale: xScale,
+            format: d3.format(",.4r"),
+          },
         });
       }
     },

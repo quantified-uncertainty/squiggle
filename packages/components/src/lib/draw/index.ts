@@ -166,70 +166,116 @@ export function drawAxes({
   };
 }
 
-export function drawVerticalCursorLine({
+export function drawCursorLines({
   cursor,
   frame,
-  xScale,
-  tickFormat,
+  x: xLine,
+  y: yLine,
 }: {
   cursor: Point; // original canvas coordinates
   frame: CartesianFrame;
-  xScale: d3.ScaleContinuousNumeric<number, number, never>;
-  tickFormat: (d: d3.NumberValue) => string;
+  x?: {
+    scale: d3.ScaleContinuousNumeric<number, number, never>;
+    format: (d: d3.NumberValue) => string;
+  };
+  y?: {
+    scale: d3.ScaleContinuousNumeric<number, number, never>;
+    format: (d: d3.NumberValue) => string;
+  };
 }) {
   const context = frame.context;
   frame.enter();
   const point = frame.translatedPoint(cursor);
-
-  context.beginPath();
-  context.strokeStyle = cursorLineColor;
-  context.lineWidth = 1;
-  context.moveTo(point.x, 0);
-  context.lineTo(point.x, frame.height);
-  context.stroke();
-
-  context.textAlign = "left";
-  context.textBaseline = "bottom";
-  const text = tickFormat(xScale.invert(point.x));
-  const measured = context.measureText(text);
 
   const px = 4,
     py = 2,
     mx = 4,
     my = 4;
 
-  let boxWidth = measured.width + px * 2;
-  const boxHeight = measured.actualBoundingBoxAscent + py * 2;
-  const boxOrigin: Point = {
-    x: point.x + mx,
-    y: my,
-  };
-  const flip =
-    boxOrigin.x + boxWidth > frame.width &&
-    // In pathological cases, we can't fit the box on either side because the text is too long.
-    // In this case, we don't flip because first digits are more significant.
-    boxWidth <= point.x;
+  if (xLine) {
+    context.beginPath();
+    context.strokeStyle = cursorLineColor;
+    context.lineWidth = 1;
+    context.moveTo(point.x, 0);
+    context.lineTo(point.x, frame.height);
+    context.stroke();
 
-  if (flip) {
-    boxOrigin.x = cursor.x - mx;
-    boxWidth = -boxWidth;
-    context.textAlign = "right";
+    context.textAlign = "left";
+    context.textBaseline = "bottom";
+    const text = xLine.format(xLine.scale.invert(point.x));
+    const measured = context.measureText(text);
+
+    let boxWidth = measured.width + px * 2;
+    const boxHeight = measured.actualBoundingBoxAscent + py * 2;
+    const boxOrigin: Point = {
+      x: point.x + mx,
+      y: my,
+    };
+    const flip =
+      boxOrigin.x + boxWidth > frame.width &&
+      // In pathological cases, we can't fit the box on either side because the text is too long.
+      // In this case, we don't flip because first digits are more significant.
+      boxWidth <= point.x;
+
+    if (flip) {
+      boxOrigin.x = point.x - mx;
+      boxWidth = -boxWidth;
+      context.textAlign = "right";
+    }
+
+    context.globalAlpha = 0.7;
+    context.fillStyle = "white";
+    context.fillRect(boxOrigin.x, boxOrigin.y, boxWidth, boxHeight);
+    context.globalAlpha = 1;
+    context.fillStyle = labelColor;
+    frame.fillText(
+      text,
+      boxOrigin.x + px * (flip ? -1 : 1),
+      // unsure why "-1" is needed, probably related to measureText result and could be fixed
+      my + py - 1,
+      {
+        fillStyle: labelColor,
+      }
+    );
   }
 
-  context.globalAlpha = 0.7;
-  context.fillStyle = "white";
-  context.fillRect(boxOrigin.x, boxOrigin.y, boxWidth, boxHeight);
-  context.globalAlpha = 1;
-  context.fillStyle = labelColor;
-  frame.fillText(
-    text,
-    boxOrigin.x + px * (flip ? -1 : 1),
-    // unsure why "-1" is needed, probably related to measureText result and could be fixed
-    my + py - 1,
-    {
-      fillStyle: labelColor,
+  // TODO - simplify / remove copy-paste
+  if (yLine) {
+    context.beginPath();
+    context.strokeStyle = cursorLineColor;
+    context.lineWidth = 1;
+    context.moveTo(0, point.y);
+    context.lineTo(frame.width, point.y);
+    context.stroke();
+
+    context.textAlign = "left";
+    context.textBaseline = "bottom";
+    const text = yLine.format(yLine.scale.invert(point.y));
+    const measured = context.measureText(text);
+
+    const boxWidth = measured.width + px * 2;
+    let boxHeight = measured.actualBoundingBoxAscent + py * 2;
+    const boxOrigin: Point = {
+      x: mx,
+      y: my + point.y,
+    };
+    const flip = boxOrigin.y + boxHeight > frame.height;
+
+    if (flip) {
+      boxOrigin.y = point.y - mx;
+      boxHeight = -boxHeight;
+      context.textBaseline = "top";
     }
-  );
+
+    context.globalAlpha = 0.7;
+    context.fillStyle = "white";
+    context.fillRect(boxOrigin.x, boxOrigin.y, boxWidth, boxHeight);
+    context.globalAlpha = 1;
+    context.fillStyle = labelColor;
+    frame.fillText(text, mx + px, boxOrigin.y + py * (flip ? -1 : 1) - 1, {
+      fillStyle: labelColor,
+    });
+  }
   frame.exit();
 }
 
