@@ -17,7 +17,7 @@ import {
   drawCircle,
   drawVerticalCursorLine,
   primaryColor,
-} from "../../lib/drawUtils.js";
+} from "../../lib/draw/index.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
 import { flattenResult } from "../../lib/utility.js";
 import { ErrorAlert } from "../Alert.js";

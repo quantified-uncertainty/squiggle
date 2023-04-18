@@ -4,7 +4,7 @@ import { Env, SqScatterPlot } from "@quri/squiggle-lang";
 import * as d3 from "d3";
 import { DrawContext, useCanvas } from "../../lib/hooks/index.js";
 import { ErrorAlert } from "../Alert.js";
-import { drawAxes, primaryColor } from "../../lib/drawUtils.js";
+import { drawAxes, drawCircle, primaryColor } from "../../lib/draw/index.js";
 
 type Props = {
   plot: SqScatterPlot;
@@ -52,10 +52,7 @@ export const ScatterChart: FC<Props> = ({ plot, height, environment }) => {
         const x = xScale(d.x),
           y = yScale(d.y);
 
-        context.beginPath();
-        context.moveTo(x + r, y);
-        context.arc(x, y, r, 0, 2 * Math.PI);
-        context.fill();
+        drawCircle({ context, x, y, r });
       }
       context.globalAlpha = 1;
     },

@@ -7,10 +7,9 @@ import { FC, useCallback, useMemo, useRef } from "react";
 import {
   drawAxes,
   drawVerticalCursorLine,
-  getFunctionImage,
   Padding,
   primaryColor,
-} from "../../lib/drawUtils.js";
+} from "../../lib/draw/index.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
 import { ErrorAlert } from "../Alert.js";
@@ -20,6 +19,7 @@ import {
 } from "../DistributionChart.js";
 import { NumberShower } from "../NumberShower.js";
 import { FunctionChartSettings } from "./index.js";
+import { getFunctionImage } from "./utils.js";
 
 function unwrap<a, b>(x: result<a, b>): a {
   if (x.ok) {

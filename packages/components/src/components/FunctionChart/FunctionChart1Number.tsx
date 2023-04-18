@@ -6,14 +6,11 @@ import { FC, useCallback, useMemo } from "react";
 
 import { SqLambda } from "@quri/squiggle-lang";
 
-import {
-  drawAxes,
-  getFunctionImage,
-  primaryColor,
-} from "../../lib/drawUtils.js";
+import { drawAxes, primaryColor } from "../../lib/draw/index.js";
 import { useCanvas } from "../../lib/hooks/index.js";
 import { ErrorAlert } from "../Alert.js";
 import { FunctionChartSettings } from "./index.js";
+import { getFunctionImage } from "./utils.js";
 
 type Props = {
   fn: SqLambda;

@@ -12,4 +12,4 @@ export { MouseTooltip } from "./components/ui/MouseTooltip.js";
 export { useCanvas, useCanvasCursor, DrawContext } from "./lib/hooks/index.js";
 export { useUpdate } from "./lib/hooks/react-use.js";
 
-export { drawAxes } from "./lib/drawUtils.js";
+export { drawAxes } from "./lib/draw/index.js";
