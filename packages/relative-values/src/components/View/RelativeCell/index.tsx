@@ -8,7 +8,14 @@ export const RelativeCell: FC<{
   id2: string;
   model: ModelEvaluator;
   uncertaintyPercentiles: number[];
-}> = memo(function RelativeCell({ id1, id2, model, uncertaintyPercentiles }) {
+  showRange?: boolean;
+}> = memo(function RelativeCell({
+  id1,
+  id2,
+  model,
+  uncertaintyPercentiles,
+  showRange,
+}) {
   const result = model.compare(id1, id2);
 
   if (!result.ok) {
@@ -19,6 +26,8 @@ export const RelativeCell: FC<{
     <DistCell
       item={result.value}
       uncertaintyPercentiles={uncertaintyPercentiles}
+      showRange={showRange}
+      showMedian={true}
     />
   );
 });

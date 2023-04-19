@@ -25,7 +25,7 @@ const wrapper = sq`
 }
 `;
 
-const cartesianProduct = <A, B>(a: A[], b: B[]): [A, B][] => {
+export const cartesianProduct = <A, B>(a: A[], b: B[]): [A, B][] => {
   return a.flatMap((aItem) => b.map<[A, B]>((bItem) => [aItem, bItem]));
 };
 
@@ -40,6 +40,19 @@ const getPercentile = (sortedList: number[], percentage: number): number => {
   const result = sortedList[Math.floor(index)];
   return result;
 };
+
+export function getParamPercentiles(
+  values: RelativeValue[],
+  fn: (value: RelativeValue) => number,
+  percentiles: number[],
+  filter0 = false
+): number[] {
+  let list = values.map(fn).sort((a, b) => a - b);
+  if (filter0) {
+    list = list.filter((v) => v !== 0);
+  }
+  return percentiles.map((p) => getPercentile(list, p));
+}
 
 function buildRelativeValue({
   fn,

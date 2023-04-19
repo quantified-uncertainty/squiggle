@@ -1,5 +1,9 @@
 import { Item } from "@/types";
-import { ModelEvaluator } from "@/values/ModelEvaluator";
+import {
+  ModelEvaluator,
+  cartesianProduct,
+  getParamPercentiles,
+} from "@/values/ModelEvaluator";
 import { FC, Fragment, useCallback, useMemo, useState } from "react";
 import { useSelectedInterface } from "../../Interface/InterfaceProvider";
 import { DropdownButton } from "../../ui/DropdownButton";
@@ -40,7 +44,7 @@ export const ClusterGridView: FC<{
     );
     const combinations = rowItems
       .flatMap((row) =>
-        columnItems.flatMap((column) => model.compare(row.id, column.id))
+        columnItems.map((column) => model.compare(row.id, column.id))
       )
       .flatMap((x) => (x.ok ? [x.value] : []));
     return {
@@ -52,7 +56,36 @@ export const ClusterGridView: FC<{
     };
   };
 
-  //It seems nicer, at this point, to just specify that its p25 and p75
+  let allItems = cartesianProduct(clusterItems, clusterItems).map(
+    ([rowItem, columnItem]) => ({
+      row: rowItem,
+      column: columnItem,
+      value: combinationItems(rowItem, columnItem),
+    })
+  );
+
+  let percentiles = getParamPercentiles(
+    allItems.map((r) => r.value),
+    (r) => r.uncertainty,
+    [10, 90],
+    true
+  );
+
+  let distCell = (rowId: string, columnId: string) => {
+    const item = allItems.find(
+      (r) => r.row.id === rowId && r.column.id === columnId
+    )?.value;
+    return item ? (
+      <DistCell
+        key={`${rowId}-${columnId}`}
+        item={item}
+        uncertaintyPercentiles={percentiles}
+        showMedian={rowId != columnId}
+        showRange={false}
+      />
+    ) : null;
+  };
+
   return (
     <div>
       <div
@@ -86,10 +119,7 @@ export const ClusterGridView: FC<{
                 }}
                 className="cursor-pointer"
               >
-                <DistCell
-                  item={combinationItems(rowItem, columnItem)}
-                  uncertaintyPercentiles={[2, 30]}
-                />
+                {distCell(rowItem.id, columnItem.id)}
               </div>
             ))}
           </Fragment>
@@ -164,9 +194,15 @@ export const GridView: FC<{
           <DropdownButton text="Column Settings">
             {() => <AxisMenu axis="columns" />}
           </DropdownButton>
+          <DropdownButton text="Cluster Diagram">
+            {() => (
+              <div className="p-2">
+                <ClusterGridView model={model} />
+              </div>
+            )}
+          </DropdownButton>
         </div>
         <GridModeControls />
-        <ClusterGridView model={model} />
       </div>
       <div
         className="grid relative"
@@ -195,6 +231,7 @@ export const GridView: FC<{
                   id2={columnItem.id}
                   model={model}
                   uncertaintyPercentiles={uncertaintyPercentiles}
+                  showRange={false}
                 />
               )
             )}
