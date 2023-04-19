@@ -1,7 +1,7 @@
 import { Session } from "inspector";
 import * as fs from "fs";
-import { mkMetalog } from "../__tests__/helpers/distHelpers";
-import * as E_A_Floats from "../src/utility/E_A_Floats";
+import { mkMetalog } from "../../__tests__/helpers/distHelpers.js";
+import * as E_A_Floats from "../utility/E_A_Floats.js";
 const session = new Session();
 session.connect();
 
