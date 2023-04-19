@@ -2,7 +2,7 @@ import React from "react";
 
 import { useMaybeControlledValue } from "../lib/hooks/index.js";
 import { SquiggleArgs, useSquiggle } from "../lib/hooks/useSquiggle.js";
-import { getErrorLocations, getValueToRender } from "../lib/utility.js";
+import { getErrors, getValueToRender } from "../lib/utility.js";
 import { CodeEditor } from "./CodeEditor.js";
 import { SquiggleContainer } from "./SquiggleContainer.js";
 import { SquiggleViewer, SquiggleViewerProps } from "./SquiggleViewer/index.js";
@@ -22,7 +22,7 @@ export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
 
   const resultAndBindings = useSquiggle({ ...props, code });
   const valueToRender = getValueToRender(resultAndBindings);
-  const errorLocations = getErrorLocations(resultAndBindings.result);
+  const errors = getErrors(resultAndBindings.result);
 
   return (
     <SquiggleContainer>
@@ -34,7 +34,7 @@ export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
           value={code}
           onChange={setCode}
           showGutter={false}
-          errorLocations={errorLocations}
+          errors={errors}
           project={resultAndBindings.project}
         />
       </div>

@@ -15,6 +15,7 @@ import { ItemSettingsMenu } from "./ItemSettingsMenu.js";
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
 import { MergedItemSettings } from "./utils.js";
 import { PartialViewSettings } from "../ViewSettingsForm.js";
+import { JointChart } from "../JointChart/index.js";
 
 const VariableList: React.FC<{
   value: SqValue;
@@ -281,6 +282,17 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
                     }}
                   />
                 );
+              case "joint":
+                return (
+                  <JointChart
+                    plot={plot}
+                    height={settings.chartHeight}
+                    environment={environment}
+                  />
+                );
+              default:
+                // can happen if squiggle-lang version is too fresh and we messed up the components -> squiggle-lang dependency
+                return `Unsupported plot type ${(plot as any).tag}`;
             }
           }}
         </VariableBox>

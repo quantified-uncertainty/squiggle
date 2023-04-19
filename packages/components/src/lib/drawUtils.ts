@@ -210,7 +210,18 @@ export function drawAxes({
     context.restore();
   }
 
-  return { xScale, yScale, xTickFormat, padding, chartWidth, chartHeight };
+  return {
+    xScale,
+    yScale,
+    xTickFormat,
+    padding,
+    chartWidth,
+    chartHeight,
+    translateToZero: () => {
+      context.translate(padding.left, chartHeight + padding.top);
+      context.scale(1, -1);
+    },
+  };
 }
 
 export function drawVerticalCursorLine({

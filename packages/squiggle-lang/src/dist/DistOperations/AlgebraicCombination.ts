@@ -11,7 +11,7 @@ import {
   unreachableError,
 } from "../DistError.js";
 import * as PointSetDist from "../PointSetDist.js";
-import * as SampleSetDist from "../SampleSetDist/SampleSetDist.js";
+import * as SampleSetDist from "../SampleSetDist/index.js";
 import * as SymbolicDist from "../SymbolicDist.js";
 import { Env } from "../env.js";
 

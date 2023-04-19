@@ -43,7 +43,7 @@ export const FunctionChart1Number: FC<Props> = ({
     }) => {
       context.clearRect(0, 0, width, height);
 
-      const { xScale, yScale, padding, chartHeight } = drawAxes({
+      const { xScale, yScale, translateToZero } = drawAxes({
         suggestedPadding: { left: 20, right: 10, top: 10, bottom: 20 },
         xDomain: d3Extent(functionImage, (d) => d.x) as [number, number],
         yDomain: d3Extent(functionImage, (d) => d.y) as [number, number],
@@ -53,8 +53,7 @@ export const FunctionChart1Number: FC<Props> = ({
       });
 
       // line
-      context.translate(padding.left, chartHeight + padding.top);
-      context.scale(1, -1);
+      translateToZero();
       context.beginPath();
       context.strokeStyle = primaryColor;
       context.lineWidth = 2;

@@ -42,31 +42,33 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
 
   const isTopLevel = location.path.items.length === 0;
   const name = isTopLevel
-    ? { result: "Result", bindings: "Bindings" }[location.path.root]
+    ? { result: undefined, bindings: "Bindings" }[location.path.root]
     : location.path.items[location.path.items.length - 1];
 
   return (
     <div>
-      <header className="inline-flex space-x-1">
-        <Tooltip text={heading}>
-          <span
-            className="text-slate-500 font-mono text-sm cursor-pointer"
-            onClick={toggleCollapsed}
-          >
-            {name}:
-          </span>
-        </Tooltip>
-        {settings.collapsed ? (
-          <span
-            className="rounded p-0.5 bg-slate-200 text-slate-500 font-mono text-xs cursor-pointer"
-            onClick={toggleCollapsed}
-          >
-            ...
-          </span>
-        ) : renderSettingsMenu ? (
-          renderSettingsMenu({ onChange: forceUpdate })
-        ) : null}
-      </header>
+      {name === undefined ? null : (
+        <header className="inline-flex space-x-1">
+          <Tooltip text={heading}>
+            <span
+              className="text-slate-500 font-mono text-sm cursor-pointer"
+              onClick={toggleCollapsed}
+            >
+              {name}:
+            </span>
+          </Tooltip>
+          {settings.collapsed ? (
+            <span
+              className="rounded p-0.5 bg-slate-200 text-slate-500 font-mono text-xs cursor-pointer"
+              onClick={toggleCollapsed}
+            >
+              ...
+            </span>
+          ) : renderSettingsMenu ? (
+            renderSettingsMenu({ onChange: forceUpdate })
+          ) : null}
+        </header>
+      )}
       {settings.collapsed ? null : (
         <div className="flex w-full">
           {location.path.items.length ? (
