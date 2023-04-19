@@ -1,6 +1,8 @@
 import {
   mkBernoulli,
   mkBeta,
+  mkMetalog,
+  mkMetalogCdf,
   mkCauchy,
   mkExponential,
   mkLogistic,
@@ -15,6 +17,7 @@ import * as Result from "../../src/utility/result.js";
 import * as E_A_Floats from "../../src/utility/E_A_Floats.js";
 import * as E_A from "../../src/utility/E_A.js";
 import { createSparkline } from "../../src/utility/sparklines.js";
+import { defaultEnv } from "../../src/dist/env.js";
 
 describe("(Symbolic) normalize", () => {
   test.each([-1e8, -1e-2, 0.0, 1e-4, 1e16])(
@@ -249,6 +252,108 @@ describe("Bernoulli", () => {
       Math.sqrt(unpackResult(dist.variance())),
       5
     );
+  });
+});
+
+describe("Metalog", () => {
+  const dist = mkMetalog([5, 2]);
+  const testRange = 10;
+  const testSteps = 1000;
+  const step = (testRange * 2) / testSteps;
+  const iter = E_A_Floats.range(-testRange, testRange, testSteps);
+
+  test("CDF only grows", () => {
+    const cdfValues = iter.map((v) => dist.cdf(v));
+    expect(E_A.pairwise(cdfValues, (a, b) => a <= b).every((v) => v)).toBe(
+      true
+    );
+  });
+
+  test("CDF conforms to PDF", () => {
+    expect(
+      E_A.pairwise(
+        iter.map((a) => [dist.cdf(a), unpackResult(dist.pdf(a))]),
+        (a, b) => [a, b]
+      ).forEach(([[cdf, pdf], [cdf2]]) =>
+        expect(cdf2).toBeCloseTo(cdf + pdf * step)
+      )
+    );
+  });
+
+  test("Quantile is inverse of CDF", () => {
+    expect(
+      iter
+        .map((p) => [p, dist.inv(dist.cdf(p))])
+        .forEach(([p, pp]) => expect(p).toBeCloseTo(pp, 3))
+    );
+  });
+
+  test("Succeeds with OLS fails", () => {
+    const test = mkMetalogCdf([
+      { x: -1.2, q: 0.05 },
+      { x: 4, q: 0.2 },
+      { x: 10, q: 0.9 },
+      { x: 15, q: 0.95 },
+    ]);
+  });
+  test("Fails with too little terms", () => {
+    expect(() => mkMetalog([])).toThrowError();
+    expect(() => mkMetalog([2])).toThrowError();
+    expect(SymbolicDist.Metalog.fitFromCdf([{ x: 0, q: 0.1 }]).ok).toBe(false);
+    expect(
+      SymbolicDist.Metalog.fitFromCdf(
+        [
+          { x: 0, q: 0.1 },
+          { x: 1, q: 0.5 },
+          { x: 2, q: 0.7 },
+        ],
+        1
+      ).ok
+    ).toBe(false);
+    expect(
+      SymbolicDist.Metalog.fitFromCdf(
+        [
+          { x: 0, q: 0.1 },
+          { x: 1, q: 0.5 },
+          { x: 2, q: 0.7 },
+        ],
+        0
+      ).ok
+    ).toBe(false);
+    expect(
+      SymbolicDist.Metalog.fitFromCdf(
+        [
+          { x: 0, q: 0.1 },
+          { x: 1, q: 0.5 },
+          { x: 2, q: 0.7 },
+        ],
+        -1
+      ).ok
+    ).toBe(false);
+  });
+
+  test("CDF is close to fit", () => {
+    const metalogDist = mkMetalogCdf([
+      { x: 0, q: 0.2 },
+      { x: 2, q: 0.5 },
+      { x: 3, q: 0.9 },
+    ]);
+    expect(metalogDist.cdf(0)).toBeCloseTo(0.2);
+    expect(metalogDist.cdf(2)).toBeCloseTo(0.5);
+    expect(metalogDist.cdf(3)).toBeCloseTo(0.9);
+  });
+
+  test("Metalog Problem case, Xs out of order", () => {
+    const points = [
+      { x: 2, q: 0.2 },
+      { x: 4, q: 0.5 },
+      { x: 6, q: 0.7 },
+      { x: 8.8, q: 0.9 },
+    ];
+    debugger;
+    const metalogDist = mkMetalogCdf(points);
+    const pointSetDist = metalogDist.toPointSetDist(defaultEnv);
+    expect(pointSetDist.ok).toBe(true);
   });
 });
 

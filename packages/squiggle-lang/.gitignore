@@ -24,3 +24,4 @@ coverage
 .nyc_output/
 src/ast/peggyParser.js
 src/public/SqProject/IncludeParser.js
+.cpuprofile

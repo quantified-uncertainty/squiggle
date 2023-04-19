@@ -7,7 +7,10 @@ import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frDistOrNumber,
+  frBool,
+  frOptional,
   frNumber,
+  frArray,
   frRecord,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
@@ -17,6 +20,7 @@ import { Value, vDist } from "../value/index.js";
 import {
   ErrorMessage,
   REDistributionError,
+  REOperationError,
   REOther,
 } from "../reducer/ErrorMessage.js";
 
@@ -233,6 +237,67 @@ export const library: FRFunction[] = [
     definitions: [
       makeTwoArgsDist("cauchy", (local, scale) =>
         SymbolicDist.Cauchy.make({ local, scale })
+      ),
+    ],
+  }),
+  maker.make({
+    name: "metalog",
+    examples: [
+      `metalog([5, 2, 2])`,
+      `metalog([{x: -2, q: 0.1}, {x: -1, q: 0.3}, {x: 0, q: 0.9}])`,
+      `metalog([{x: -2, q: 0.1}, {x: -1, q: 0.3}, {x: 0, q: 0.9}], {terms: 2})`,
+      `metalog([{x: -2, q: 0.1}, {x: -1, q: 0.3}, {x: 0, q: 0.9}], {ols: true})`,
+    ],
+    definitions: [
+      makeDefinition("metalog", [frArray(frNumber)], ([a]) =>
+        Result.errMap(
+          Result.fmap(SymbolicDist.Metalog.make({ a }), vDist),
+          (x) => REOperationError(new OtherOperationError(x))
+        )
+      ),
+      makeDefinition(
+        "metalog",
+        [frArray(frRecord(["x", frNumber], ["q", frNumber]))],
+        ([points], { environment }) => {
+          return Result.errMap(
+            Result.fmap(
+              SymbolicDist.Metalog.fitFromCdf(
+                points,
+                undefined,
+                false,
+                environment.xyPointLength
+              ),
+              vDist
+            ),
+            (x) => REOperationError(new OtherOperationError(x))
+          );
+        }
+      ),
+      makeDefinition<
+        { x: number; q: number }[],
+        { terms?: number; ols?: boolean }
+      >(
+        "metalog",
+        [
+          frArray(frRecord(["x", frNumber], ["q", frNumber])),
+          frRecord(
+            ["terms", frOptional(frNumber)],
+            ["ols", frOptional(frBool)]
+          ),
+        ],
+        ([points, options], { environment }) =>
+          Result.errMap(
+            Result.fmap(
+              SymbolicDist.Metalog.fitFromCdf(
+                points,
+                options.terms,
+                options.ols,
+                environment.xyPointLength
+              ),
+              vDist
+            ),
+            (x) => REOperationError(new OtherOperationError(x))
+          )
       ),
     ],
   }),

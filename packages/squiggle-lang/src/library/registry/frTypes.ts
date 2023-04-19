@@ -12,6 +12,11 @@ export type FRType<T> = {
   getName: () => string;
 };
 
+// Only relevant during records. Can set a record field to optional
+export type FRField<T> = FRType<T> & {
+  optional?: boolean;
+};
+
 export const frNumber: FRType<number> = {
   unpack: (v: Value) => (v.type === "Number" ? v.value : undefined),
   getName: () => "number",
@@ -124,8 +129,8 @@ export function frRecord<K1 extends string, T1>(
   kv1: [K1, FRType<T1>]
 ): FRType<{ [k in K1]: T1 }>;
 export function frRecord<K1 extends string, T1, K2 extends string, T2>(
-  kv1: [K1, FRType<T1>],
-  kv2: [K2, FRType<T2>]
+  kv1: [K1, FRField<T1>],
+  kv2: [K2, FRField<T2>]
 ): FRType<{ [k in K1]: T1 } & { [k in K2]: T2 }>;
 export function frRecord<
   K1 extends string,
@@ -135,13 +140,13 @@ export function frRecord<
   K3 extends string,
   T3
 >(
-  kv1: [K1, FRType<T1>],
-  kv2: [K2, FRType<T2>],
-  kv3: [K3, FRType<T3>]
+  kv1: [K1, FRField<T1>],
+  kv2: [K2, FRField<T2>],
+  kv3: [K3, FRField<T3>]
 ): FRType<{ [k in K1]: T1 } & { [k in K2]: T2 } & { [k in K3]: T3 }>;
 
 export function frRecord(
-  ...allKvs: [string, FRType<unknown>][]
+  ...allKvs: [string, FRField<unknown>][]
 ): FRType<unknown> {
   return {
     unpack: (v: Value) => {
@@ -157,6 +162,9 @@ export function frRecord(
       for (const [key, valueShape] of allKvs) {
         const subvalue = r.get(key);
         if (subvalue === undefined) {
+          if (valueShape.optional) {
+            continue;
+          }
           return undefined;
         }
         const unpackedSubvalue = valueShape.unpack(subvalue);
@@ -170,8 +178,18 @@ export function frRecord(
     getName: () =>
       "{" +
       allKvs
-        .map(([name, frType]) => `${name}: ${frType.getName()}`)
+        .map(
+          ([name, frType]) =>
+            `${name}${frType.optional ? "?" : ""}: ${frType.getName()}`
+        )
         .join(", ") +
       "}",
+  };
+}
+
+export function frOptional<T>(t: FRType<T>): FRField<T> {
+  return {
+    ...t,
+    optional: true,
   };
 }

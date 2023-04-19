@@ -1,6 +1,7 @@
 import { BaseDist } from "./BaseDist.js";
 import * as Result from "../utility/result.js";
 import jstat from "jstat";
+import * as metalog from "@quri/metalog";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
 import * as XYShape from "../XYShape.js";
 import * as magicNumbers from "../magicNumbers.js";
@@ -12,6 +13,9 @@ import { DistError, xyShapeDistError } from "./DistError.js";
 import { OperationError } from "../operationError.js";
 import { DiscreteShape } from "../PointSet/Discrete.js";
 import { Env } from "./env.js";
+
+const normal95confidencePoint = 1.6448536269514722;
+// explained in website/docs/internal/ProcessingConfidenceIntervals
 
 const square = (n: number): number => {
   return n * n;
@@ -56,6 +60,14 @@ export abstract class SymbolicDist extends BaseDist {
     return Ok(this.simplePdf(f));
   }
 
+  static interpolateQuantiles(points: number): number[] {
+    return E_A_Floats.range(
+      SymbolicDist.minCdfValue,
+      SymbolicDist.maxCdfValue,
+      points
+    );
+  }
+
   protected interpolateXs(opts: {
     xSelection: PointsetXSelection;
     points: number;
@@ -67,11 +79,7 @@ export abstract class SymbolicDist extends BaseDist {
       case "Linear":
         return E_A_Floats.range(this.min(), this.max(), points);
       case "ByWeight":
-        const ys = E_A_Floats.range(
-          SymbolicDist.minCdfValue,
-          SymbolicDist.maxCdfValue,
-          points
-        );
+        const ys = SymbolicDist.interpolateQuantiles(points);
         return ys.map((y) => this.inv(y));
       default:
         throw new Error(`Unknown xSelection value ${xSelection}`);
@@ -917,6 +925,139 @@ export class Bernoulli extends SymbolicDist {
         })
       )
     );
+  }
+}
+export class Metalog extends SymbolicDist {
+  a: number[];
+  private constructor({ a }: { a: number[] }) {
+    super();
+    this.a = a;
+  }
+
+  static make({ a }: { a: number[] }): result<Metalog, string> {
+    const validationResult = metalog.validate(a);
+    if (validationResult === metalog.MetalogValidationStatus.Success) {
+      return Ok(new Metalog({ a }));
+    } else if (
+      validationResult === metalog.MetalogValidationStatus.NotEnoughParamaters
+    ) {
+      return Result.Error("Terms array must have more than one element");
+    } else if (
+      validationResult === metalog.MetalogValidationStatus.NegativeDerivative
+    ) {
+      return Result.Error(
+        "Invalid combination of a (pdf is negative in parts)"
+      );
+    } else {
+      return Result.Error("Unknown validation error");
+    }
+  }
+  static fitFromCdf(
+    points: { x: number; q: number }[],
+    terms?: number,
+    olsOnly?: boolean,
+    xyPointLength: number = 1000
+  ): result<Metalog, string> {
+    const result = Metalog.fitFromCdfMethod(
+      points,
+      xyPointLength,
+      terms ?? points.length,
+      "OLS"
+    );
+    if (result.ok || olsOnly) {
+      return result;
+    } else {
+      return Metalog.fitFromCdfMethod(
+        points,
+        xyPointLength,
+        terms ?? points.length,
+        "LP"
+      );
+    }
+  }
+
+  static fitFromCdfMethod(
+    points: { x: number; q: number }[],
+    xyPointLength: number,
+    terms: number,
+    method: "OLS" | "LP"
+  ): result<Metalog, string> {
+    let termCount = terms ?? points.length;
+    if (termCount > 1) {
+      const mappedPoints = points.map(({ x, q }) => ({ x, y: q }));
+      const validationPoints = undefined; //this.interpolateQuantiles(xyPointLength);
+      const a =
+        method === "OLS"
+          ? metalog.fitMetalog(mappedPoints, termCount, validationPoints)
+          : metalog.fitMetalogLP(
+              mappedPoints,
+              termCount,
+              0.01,
+              validationPoints
+            );
+      if (a !== undefined) {
+        return Ok(new Metalog({ a }));
+      } else {
+        return Result.Error("Could not fit metalog from CDF points");
+      }
+    } else {
+      return Result.Error("CDF must have more than 1 point");
+    }
+  }
+
+  toString() {
+    return `(${this.a})`;
+  }
+
+  simplePdf(x: number) {
+    return metalog.pdf(this.a, x);
+  }
+  cdf(x: number) {
+    return metalog.cdf(this.a, x);
+  }
+  inv(x: number) {
+    return metalog.quantile(this.a, x);
+  }
+  sample() {
+    return metalog.quantile(this.a, Math.random());
+  }
+  mean() {
+    if (this.a.length > 2) {
+      return this.a[0] + this.a[2] / 2;
+    } else {
+      return this.a[0];
+    }
+  }
+  variance(): Result.result<number, DistError> {
+    return Result.Ok(metalog.variance(this.a));
+  }
+
+  // Metalog has a faster way of converting to point set dists
+  // if you could use the quantile function.
+  toPointSetDist(
+    env: Env,
+    xSelection: PointsetXSelection = "ByWeight"
+  ): result<PointSetDist, DistError> {
+    if (xSelection === "ByWeight") {
+      const qs = Metalog.interpolateQuantiles(env.xyPointLength);
+      const xs = qs.map((q) => this.inv(q));
+      const ys = qs.map((q) => 1 / metalog.quantileDiff(this.a, q));
+      const xyShapeR = XYShape.T.make(xs, ys);
+      if (!xyShapeR.ok) {
+        return Result.Error(xyShapeDistError(xyShapeR.value));
+      }
+
+      return Ok(
+        new PointSetDist(
+          new ContinuousShape({
+            integralSumCache: 1.0,
+            xyShape: xyShapeR.value,
+          })
+        )
+      );
+    } else {
+      return super.toPointSetDist(env, xSelection);
+    }
   }
 }
 
