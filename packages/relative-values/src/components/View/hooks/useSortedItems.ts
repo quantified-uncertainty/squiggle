@@ -54,6 +54,7 @@ export function averageUncertainty({ item, comparedTo, model }: AverageProps) {
   });
 }
 
+//Takes the first item, then appends the next item that has the lowest uncertainty with the last item
 function organizeBySimilarity({
   items,
   model,

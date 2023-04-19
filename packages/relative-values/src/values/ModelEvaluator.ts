@@ -178,12 +178,11 @@ export class ModelEvaluator {
     percentiles: number[],
     filter0 = false
   ): number[] {
-    let list = extractOkValues(this.compareAll(ids))
-      .map(fn)
-      .sort((a, b) => a - b);
-    if (filter0) {
-      list = list.filter((v) => v !== 0);
-    }
-    return percentiles.map((p) => getPercentile(list, p));
+    return getParamPercentiles(
+      extractOkValues(this.compareAll(ids)),
+      fn,
+      percentiles,
+      filter0
+    );
   }
 }
