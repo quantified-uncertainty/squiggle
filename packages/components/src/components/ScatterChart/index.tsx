@@ -44,6 +44,7 @@ export const ScatterChart: FC<Props> = ({ plot, height, environment }) => {
         context,
         xDomain,
         yDomain,
+        logX: plot.logX,
         suggestedPadding: {
           top: 10,
           bottom: 16,
@@ -71,7 +72,9 @@ export const ScatterChart: FC<Props> = ({ plot, height, environment }) => {
       if (
         cursor &&
         cursor.x >= padding.left &&
-        cursor.x - padding.left <= frame.width
+        cursor.x - padding.left <= frame.width &&
+        cursor.y >= padding.top &&
+        cursor.y - padding.top <= frame.height
       ) {
         drawCursorLines({
           frame,
