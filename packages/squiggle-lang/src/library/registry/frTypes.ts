@@ -118,7 +118,7 @@ export const frAny: FRType<Value> = {
   getName: () => "any",
 };
 
-// We currently support records with up to 3 pairs.
+// We currently support records with up to 4 pairs.
 // The limit could be increased with the same pattern, but there might be a better solution for this.
 export function frRecord<K1 extends string, T1>(
   kv1: [K1, FRType<T1>]
@@ -139,6 +139,23 @@ export function frRecord<
   kv2: [K2, FRType<T2>],
   kv3: [K3, FRType<T3>]
 ): FRType<{ [k in K1]: T1 } & { [k in K2]: T2 } & { [k in K3]: T3 }>;
+export function frRecord<
+  K1 extends string,
+  T1,
+  K2 extends string,
+  T2,
+  K3 extends string,
+  T3,
+  K4 extends string,
+  T4
+>(
+  kv1: [K1, FRType<T1>],
+  kv2: [K2, FRType<T2>],
+  kv3: [K3, FRType<T3>],
+  kv4: [K4, FRType<T4>]
+): FRType<
+  { [k in K1]: T1 } & { [k in K2]: T2 } & { [k in K3]: T3 } & { [k in K4]: T4 }
+>;
 
 export function frRecord(
   ...allKvs: [string, FRType<unknown>][]
@@ -157,6 +174,10 @@ export function frRecord(
       for (const [key, valueShape] of allKvs) {
         const subvalue = r.get(key);
         if (subvalue === undefined) {
+          if ("isOptional" in valueShape) {
+            // that's ok!
+            continue;
+          }
           return undefined;
         }
         const unpackedSubvalue = valueShape.unpack(subvalue);
@@ -175,3 +196,17 @@ export function frRecord(
       "}",
   };
 }
+
+// Optionals are implemented for the sake of frRecords, which check for them explicitly.
+// Don't try to use them in other contexts.
+export const frOptional = <T>(
+  itemType: FRType<T>
+): FRType<T | null> & { isOptional: boolean } => {
+  return {
+    unpack: (v: Value) => {
+      return itemType.unpack(v);
+    },
+    getName: () => `optional(${itemType.getName()})`,
+    isOptional: true,
+  };
+};

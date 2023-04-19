@@ -77,6 +77,12 @@ export class SqScatterPlot extends SqAbstractPlot<"scatter"> {
   get xDist() {
     return wrapDistribution(this._value.yDist);
   }
+  get logX(): boolean {
+    return this._value.logX;
+  }
+  get logY(): boolean {
+    return this._value.logY;
+  }
 
   points(env: Env): Result.result<{ x: number; y: number }[], SqError> {
     const xSamplesValue = SampleSetDist.fromDist(this._value.xDist, env);
