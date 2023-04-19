@@ -77,8 +77,8 @@ export const ForcePlot: FC<{
         const isHovered =
           cursor &&
           distance(d, {
-            x: cursor[0] - width / 2,
-            y: cursor[1] - height / 2,
+            x: cursor.x - width / 2,
+            y: cursor.y - height / 2,
           }) <
             r * 1.5;
 
