@@ -72,14 +72,21 @@ export const ValueAndUncertaintyPlot: FC<{
     ({ context, width }: DrawContext) => {
       context.clearRect(0, 0, width, height);
 
-      const { xScale, yScale, padding, frame } = drawAxes({
+      const xScale = d3
+        .scaleLog()
+        .domain(d3.extent(data, (d) => Math.abs(d.median)) as [number, number]);
+
+      const yScale = d3
+        .scaleLinear()
+        .domain(d3.extent(data, (d) => d.uncertainty) as [number, number]);
+
+      const { padding, frame } = drawAxes({
         context,
-        xDomain: d3.extent(data, (d) => Math.abs(d.median)) as [number, number],
-        yDomain: d3.extent(data, (d) => d.uncertainty) as [number, number],
-        suggestedPadding: { top: 10, bottom: 40, left: 60, right: 20 },
         width,
         height,
-        logX: true,
+        suggestedPadding: { top: 10, bottom: 40, left: 60, right: 20 },
+        xScale,
+        yScale,
         drawTicks: true,
         tickCount: 10,
       });
