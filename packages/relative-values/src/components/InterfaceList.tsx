@@ -35,7 +35,6 @@ export const InterfaceList: FC = () => {
           <InterfaceCard key={i} data={interfaceWithModels} />
         ))}
       </div>
-      <StyledLink href="/scratchpad">From JSON</StyledLink>
     </div>
   );
 };

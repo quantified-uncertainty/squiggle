@@ -1,0 +1,4 @@
+/dist
+/.env
+/tsconfig.tsbuildinfo
+/.next

@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useMemo, useRef } from "react";
 
-import { SqLocation, SqProject } from "@quri/squiggle-lang";
+import { SqError, SqLocation, SqProject } from "@quri/squiggle-lang";
 import { syntaxHighlighting } from "@codemirror/language";
 import { EditorState, Compartment } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
@@ -42,7 +42,7 @@ interface CodeEditorProps {
   width?: number;
   height?: number;
   showGutter?: boolean;
-  errorLocations?: SqLocation[];
+  errors?: SqError[];
   project: SqProject;
 }
 
@@ -58,7 +58,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({
   width,
   height,
   showGutter = false,
-  errorLocations = [],
+  errors = [],
   project,
 }) => {
   const editor = useRef<HTMLDivElement>(null);
@@ -191,17 +191,31 @@ export const CodeEditor: FC<CodeEditorProps> = ({
     editorView.current?.dispatch(
       setDiagnostics(
         editorView.current.state,
-        errorLocations
-          .filter((f) => f.end.offset < docLength)
-          .map((loc) => ({
-            from: loc.start.offset,
-            to: loc.end.offset,
+        errors
+          .map((err) => {
+            const location = err.location();
+            if (!location) {
+              return undefined;
+            }
+            return {
+              location,
+              err,
+            };
+          })
+          .filter((err): err is NonNullable<typeof err> => {
+            return Boolean(
+              err && err.location && err.location.end.offset < docLength
+            );
+          })
+          .map((err) => ({
+            from: err.location.start.offset,
+            to: err.location.end.offset,
             severity: "error",
-            message: "Syntax error!",
+            message: err.err.toString(),
           }))
       )
     );
-  }, [errorLocations]);
+  }, [errors]);
 
   return (
     <div

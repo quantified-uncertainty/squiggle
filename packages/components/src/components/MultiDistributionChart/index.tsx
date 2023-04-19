@@ -108,7 +108,14 @@ const InnerMultiDistributionChart: FC<{
       const getColor = (i: number) =>
         plot.colorScheme === "blues" ? "#5ba3cf" : d3.schemeCategory10[i];
 
-      const { padding, chartWidth, chartHeight, xScale, yScale } = drawAxes({
+      const {
+        padding,
+        chartWidth,
+        chartHeight,
+        xScale,
+        yScale,
+        translateToZero,
+      } = drawAxes({
         suggestedPadding: {
           left: 10,
           right: 10,
@@ -173,8 +180,7 @@ const InnerMultiDistributionChart: FC<{
       // shapes
       {
         context.save();
-        context.translate(padding.left, chartHeight + padding.top);
-        context.scale(1, -1);
+        translateToZero();
         const translatedCursor: Point | undefined = cursor
           ? {
               x: cursor[0] - padding.left,
@@ -349,7 +355,7 @@ export const MultiDistributionChart: FC<MultiDistributionChartProps> = ({
   const samples: number[] = [];
   for (const { distribution } of distributions) {
     if (distribution.tag === SqDistributionTag.SampleSet) {
-      samples.push(...distribution.value().samples);
+      samples.push(...distribution.getSamples());
     }
   }
 

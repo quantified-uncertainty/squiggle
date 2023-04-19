@@ -9,7 +9,7 @@ import { RelativeCell } from "../RelativeCell";
 import { useViewContext } from "../ViewProvider";
 import { AxisMenu } from "./AxisMenu";
 import { GridModeControls } from "./GridModeControls";
-import { result } from "@quri/squiggle-lang";
+import { CellBox } from "../CellBox";
 
 export const GridView: FC<{
   model: ModelEvaluator;
@@ -61,7 +61,7 @@ export const GridView: FC<{
 
   //It seems nicer, at this point, to just specify that its p25 and p75
   const uncertaintyPercentiles = model.getParamPercentiles(
-    items.map((i) => i.id),
+    rowItems.map((i) => i.id),
     (r) => r.uncertainty,
     [5, 95]
   );
@@ -87,11 +87,15 @@ export const GridView: FC<{
       >
         <div className="sticky bg-white top-0 left-0 z-20" />
         {columnItems.map((item) => (
-          <Header key={item.id} item={item} />
+          <CellBox header key={item.id}>
+            <Header key={item.id} item={item} />
+          </CellBox>
         ))}
         {rowItems.map((rowItem) => (
           <Fragment key={rowItem.id}>
-            <Header key={0} item={rowItem} />
+            <CellBox header>
+              <Header key={0} item={rowItem} />
+            </CellBox>
             {columnItems.map((columnItem) =>
               isHiddenPair(rowItem, columnItem) ? (
                 <div key={columnItem.id} className="bg-gray-200" />

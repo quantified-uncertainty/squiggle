@@ -123,7 +123,14 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
     ({ context, width }: DrawContext) => {
       context.clearRect(0, 0, width, height);
 
-      const { xScale, yScale, padding, chartWidth, chartHeight } = drawAxes({
+      const {
+        xScale,
+        yScale,
+        padding,
+        chartWidth,
+        chartHeight,
+        translateToZero,
+      } = drawAxes({
         suggestedPadding: { left: 20, right: 10, top: 10, bottom: 20 },
         xDomain: d3.extent(data, (d) => d.x) as [number, number],
         yDomain: [
@@ -149,8 +156,7 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
 
       // areas
       context.save();
-      context.translate(padding.left, chartHeight + padding.top);
-      context.scale(1, -1);
+      translateToZero();
 
       context.fillStyle = primaryColor;
       for (const { width, opacity } of intervals) {

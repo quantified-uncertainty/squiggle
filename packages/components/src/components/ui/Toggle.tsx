@@ -36,7 +36,7 @@ export const Toggle: React.FC<Props> = ({
           className={clsx("w-6 h-6 opacity-100", spinIcon && "animate-hide")}
         />
         {spinIcon && (
-          <RefreshIcon className="w-6 h-6 absolute opacity-0 animate-appear-and-spin" />
+          <RefreshIcon className="w-6 h-6 absolute top-0 opacity-0 animate-appear-and-spin" />
         )}
       </div>
       <span>{status ? onText : offText}</span>

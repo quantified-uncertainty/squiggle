@@ -23,7 +23,7 @@ export const PlotView: FC<{
 }> = ({ model }) => {
   return (
     <div
-      className="grid gap-2 max-w-6xl mx-auto"
+      className="grid gap-2"
       style={{
         gridTemplateColumns: "1fr 1fr minmax(120px, max-content)",
       }}

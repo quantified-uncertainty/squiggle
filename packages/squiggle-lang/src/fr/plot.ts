@@ -2,6 +2,7 @@ import { PointMass } from "../dist/SymbolicDist.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
+  frDist,
   frDistOrNumber,
   frLambda,
   frNumber,
@@ -71,6 +72,28 @@ export const library = [
               fn,
               min,
               max,
+            })
+          );
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "joint",
+    output: "Plot",
+    examples: [
+      `Plot.joint({ xDist: 2 to 5, yDist: SampleSet.fromDist(-3 to 3) })`,
+    ],
+    definitions: [
+      makeDefinition(
+        "joint",
+        [frRecord(["xDist", frDist], ["yDist", frDist])],
+        ([{ xDist, yDist }]) => {
+          return Result.Ok(
+            vPlot({
+              type: "joint",
+              xDist,
+              yDist,
             })
           );
         }

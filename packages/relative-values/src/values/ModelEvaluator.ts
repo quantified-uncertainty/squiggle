@@ -6,7 +6,7 @@ import { ModelCache, RelativeValue, RelativeValueResult } from "./types";
 const wrapper = sq`
 {|x, y|
   findUncertainty(dist) = {
-    absDist = SampleSet.map(dist, abs)
+    absDist = dist -> SampleSet.fromDist -> SampleSet.map(abs)
     p5 = inv(absDist, 0.05)
     p95 = inv(absDist, 0.95)
     log10(p95 / p5)
@@ -95,7 +95,7 @@ function buildRelativeValue({
 
 export class ModelEvaluator {
   private constructor(
-    private model: Model, // unused for now
+    public model: Model,
     private fn: SqLambda,
     private cache?: ModelCache
   ) {}

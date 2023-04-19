@@ -1,6 +1,6 @@
 import { useLayoutEffect, useReducer } from "react";
 
-type State = {
+type InternalState = {
   autorunMode: boolean;
   renderedCode: string;
   // "prepared" is for rendering a spinner; "run" for executing squiggle code; then it gets back to "none" on the next render
@@ -8,7 +8,7 @@ type State = {
   executionId: number;
 };
 
-const buildInitialState = (code: string): State => ({
+const buildInitialState = (code: string): InternalState => ({
   autorunMode: true,
   renderedCode: "",
   runningState: "none",
@@ -32,7 +32,7 @@ type Action =
       type: "STOP_RUN";
     };
 
-const reducer = (state: State, action: Action): State => {
+const reducer = (state: InternalState, action: Action): InternalState => {
   switch (action.type) {
     case "SET_AUTORUN_MODE":
       return {
@@ -59,7 +59,20 @@ const reducer = (state: State, action: Action): State => {
   }
 };
 
-export const useRunnerState = (code: string) => {
+// For convenience, this type:
+// 1. Contains all necessary data for the playground;
+// 2. Matches the Props shape of RunControls comopnent.
+export type RunnerState = {
+  run: () => void;
+  autorunMode: boolean;
+  code: string;
+  renderedCode: string;
+  isRunning: boolean;
+  executionId: number;
+  setAutorunMode: (newValue: boolean) => void;
+};
+
+export function useRunnerState(code: string): RunnerState {
   const [state, dispatch] = useReducer(reducer, buildInitialState(code));
 
   useLayoutEffect(() => {
@@ -90,6 +103,7 @@ export const useRunnerState = (code: string) => {
   return {
     run,
     autorunMode: state.autorunMode,
+    code,
     renderedCode: state.renderedCode,
     isRunning: state.runningState !== "none",
     executionId: state.executionId,
@@ -97,4 +111,4 @@ export const useRunnerState = (code: string) => {
       dispatch({ type: "SET_AUTORUN_MODE", value: newValue, code });
     },
   };
-};
+}
