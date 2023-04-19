@@ -44,13 +44,21 @@ export const FunctionChart1Number: FC<Props> = ({
     }) => {
       context.clearRect(0, 0, width, height);
 
-      const { xScale, yScale, frame, padding } = drawAxes({
-        suggestedPadding: { left: 20, right: 10, top: 10, bottom: 20 },
-        xDomain: d3.extent(functionImage, (d) => d.x) as [number, number],
-        yDomain: d3.extent(functionImage, (d) => d.y) as [number, number],
+      const xScale = d3
+        .scaleLinear()
+        .domain(d3.extent(functionImage, (d) => d.x) as [number, number]);
+
+      const yScale = d3
+        .scaleLinear()
+        .domain(d3.extent(functionImage, (d) => d.y) as [number, number]);
+
+      const { frame, padding } = drawAxes({
+        context,
         width,
         height,
-        context,
+        suggestedPadding: { left: 20, right: 10, top: 10, bottom: 20 },
+        xScale,
+        yScale,
       });
 
       // line

@@ -37,24 +37,24 @@ export const ScatterChart: FC<Props> = ({ plot, height, environment }) => {
 
       const points = pointsResult.value;
 
-      const xDomain = d3.extent(points, (d) => d.x) as [number, number];
-      const yDomain = d3.extent(points, (d) => d.y) as [number, number];
+      const xScale = plot.logX ? d3.scaleSymlog() : d3.scaleLinear();
+      const yScale = plot.logY ? d3.scaleSymlog() : d3.scaleLinear();
+      xScale.domain(d3.extent(points, (d) => d.x) as [number, number]);
+      yScale.domain(d3.extent(points, (d) => d.y) as [number, number]);
 
-      const { xScale, yScale, frame, padding } = drawAxes({
+      const { frame, padding } = drawAxes({
         context,
-        xDomain,
-        yDomain,
-        xScaleMode: plot.logX ? "symlog" : "linear",
-        yScaleMode: plot.logY ? "symlog" : "linear",
+        width,
+        height,
         suggestedPadding: {
           top: 10,
           bottom: 16,
           left: 0,
           right: 0,
         },
-        tickCount: 40,
-        width,
-        height,
+        xScale,
+        yScale,
+        tickCount: 30,
         drawTicks: true,
       });
 
@@ -92,7 +92,7 @@ export const ScatterChart: FC<Props> = ({ plot, height, environment }) => {
         });
       }
     },
-    [pointsResult, height, cursor, plot.logX]
+    [pointsResult, height, cursor, plot.logX, plot.logY]
   );
 
   const { ref } = useCanvas({ height, init: initCursor, draw });

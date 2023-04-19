@@ -123,10 +123,13 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
     ({ context, width }: DrawContext) => {
       context.clearRect(0, 0, width, height);
 
-      const { xScale, yScale, padding, frame } = drawAxes({
-        suggestedPadding: { left: 20, right: 10, top: 10, bottom: 20 },
-        xDomain: d3.extent(data, (d) => d.x) as [number, number],
-        yDomain: [
+      const xScale = d3
+        .scaleLinear()
+        .domain(d3.extent(data, (d) => d.x) as [number, number]);
+
+      const yScale = d3
+        .scaleLinear()
+        .domain([
           Math.min(
             ...data.map((d) =>
               Math.min(...Object.values(d.areas).map((p) => p[0]), d[50])
@@ -137,7 +140,12 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
               Math.max(...Object.values(d.areas).map((p) => p[1]), d[50])
             )
           ),
-        ],
+        ]);
+
+      const { padding, frame } = drawAxes({
+        suggestedPadding: { left: 20, right: 10, top: 10, bottom: 20 },
+        xScale,
+        yScale,
         width,
         height,
         context,

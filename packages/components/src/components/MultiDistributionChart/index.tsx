@@ -101,32 +101,38 @@ const InnerMultiDistributionChart: FC<{
       const getColor = (i: number) =>
         plot.colorScheme === "blues" ? "#5ba3cf" : d3.schemeCategory10[i];
 
-      const { padding, xScale, yScale, frame } = drawAxes({
+      const xScale = settings.logX ? d3.scaleLog() : d3.scaleLinear();
+      xScale.domain([
+        Number.isFinite(settings.minX)
+          ? settings.minX!
+          : d3.min(domain, (d) => d.x) ?? 0,
+        Number.isFinite(settings.maxX)
+          ? settings.maxX!
+          : d3.max(domain, (d) => d.x) ?? 0,
+      ]);
+
+      const yScale = settings.expY
+        ? d3.scalePow().exponent(0.1)
+        : d3.scaleLinear();
+      yScale.domain([
+        Math.min(...domain.map((p) => p.y), 0), // min value, but at least 0
+        Math.max(...domain.map((p) => p.y)),
+      ]);
+
+      const { padding, frame } = drawAxes({
+        context,
+        width,
+        height,
         suggestedPadding: {
           left: 10,
           right: 10,
           top: 10 + legendHeight + titleHeight,
           bottom: 20 + samplesFooterHeight,
         },
-        xDomain: [
-          Number.isFinite(settings.minX)
-            ? settings.minX!
-            : d3.min(domain, (d) => d.x) ?? 0,
-          Number.isFinite(settings.maxX)
-            ? settings.maxX!
-            : d3.max(domain, (d) => d.x) ?? 0,
-        ],
-        yDomain: [
-          Math.min(...domain.map((p) => p.y), 0), // min value, but at least 0
-          Math.max(...domain.map((p) => p.y)),
-        ],
-        width,
-        height,
-        context,
+        xScale,
+        yScale,
         hideYAxis: true,
         drawTicks: true,
-        xScaleMode: settings.logX ? "log" : "linear",
-        yScaleMode: settings.expY ? "exp" : "linear",
         tickCount: 10,
         tickFormat: settings.tickFormat,
       });
