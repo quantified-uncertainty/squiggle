@@ -125,8 +125,8 @@ const InnerMultiDistributionChart: FC<{
         context,
         hideYAxis: true,
         drawTicks: true,
-        logX: settings.logX,
-        expY: settings.expY,
+        xScaleMode: settings.logX ? "log" : "linear",
+        yScaleMode: settings.expY ? "exp" : "linear",
         tickCount: 10,
         tickFormat: settings.tickFormat,
       });

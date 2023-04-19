@@ -44,13 +44,15 @@ export const ScatterChart: FC<Props> = ({ plot, height, environment }) => {
         context,
         xDomain,
         yDomain,
-        logX: plot.logX,
+        xScaleMode: plot.logX ? "symlog" : "linear",
+        yScaleMode: plot.logY ? "symlog" : "linear",
         suggestedPadding: {
           top: 10,
           bottom: 16,
           left: 0,
           right: 0,
         },
+        tickCount: 40,
         width,
         height,
         drawTicks: true,
@@ -90,7 +92,7 @@ export const ScatterChart: FC<Props> = ({ plot, height, environment }) => {
         });
       }
     },
-    [pointsResult, height, cursor]
+    [pointsResult, height, cursor, plot.logX]
   );
 
   const { ref } = useCanvas({ height, init: initCursor, draw });

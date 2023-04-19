@@ -199,7 +199,7 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
 
   const d3ref = useRef<{
     padding: Padding;
-    xScale: d3.ScaleLinear<number, number, never>;
+    xScale: d3.ScaleContinuousNumeric<number, number, never>;
   }>();
 
   //TODO: This custom error handling is a bit hacky and should be improved.

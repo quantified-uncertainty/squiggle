@@ -14,6 +14,21 @@ export function distance(point1: Point, point2: Point) {
   return Math.sqrt((point1.x - point2.x) ** 2 + (point1.y - point2.y) ** 2);
 }
 
+type ScaleMode = "linear" | "exp" | "log" | "symlog"; // TODO - symlog should include constant
+
+function scaleModeToScale(mode: ScaleMode) {
+  switch (mode) {
+    case "linear":
+      return d3.scaleLinear();
+    case "exp":
+      return d3.scalePow().exponent(0.1);
+    case "log":
+      return d3.scaleLog();
+    case "symlog":
+      return d3.scaleSymlog();
+  }
+}
+
 export function drawAxes({
   context,
   xDomain,
@@ -23,8 +38,8 @@ export function drawAxes({
   height,
   hideYAxis,
   drawTicks,
-  logX,
-  expY,
+  xScaleMode = "linear",
+  yScaleMode = "linear",
   tickCount = 5,
   tickFormat = ".9~s",
 }: {
@@ -36,14 +51,14 @@ export function drawAxes({
   height: number;
   hideYAxis?: boolean;
   drawTicks?: boolean;
-  logX?: boolean;
-  expY?: boolean;
+  xScaleMode?: ScaleMode;
+  yScaleMode?: ScaleMode;
   tickCount?: number;
   tickFormat?: string;
 }) {
-  const xScale = logX ? d3.scaleLog() : d3.scaleLinear();
+  const xScale = scaleModeToScale(xScaleMode);
   xScale.domain(xDomain);
-  const yScale = expY ? d3.scalePow().exponent(0.1) : d3.scaleLinear();
+  const yScale = scaleModeToScale(yScaleMode);
   yScale.domain(yDomain);
 
   const xTicks = xScale.ticks(tickCount);
