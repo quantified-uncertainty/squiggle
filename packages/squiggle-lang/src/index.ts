@@ -6,6 +6,9 @@ export { SqValueLocation } from "./public/SqValueLocation.js";
 export { result, fmap as resultMap } from "./utility/result.js";
 export {
   SqAbstractDistribution,
+  SqSampleSetDistribution,
+  SqPointSetDistribution,
+  SqSymbolicDistribution,
   SqDistribution,
   SqDistributionTag,
 } from "./public/SqDistribution.js";

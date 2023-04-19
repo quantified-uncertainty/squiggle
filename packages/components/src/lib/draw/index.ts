@@ -10,6 +10,8 @@ const labelFont = "10px sans-serif";
 const xLabelOffset = 6;
 const yLabelOffset = 6;
 
+export type AnyChartScale = d3.ScaleContinuousNumeric<number, number, never>;
+
 export function distance(point1: Point, point2: Point) {
   return Math.sqrt((point1.x - point2.x) ** 2 + (point1.y - point2.y) ** 2);
 }
@@ -27,8 +29,8 @@ export function drawAxes({
   tickFormat = ".9~s",
 }: {
   context: CanvasRenderingContext2D;
-  xScale: d3.ScaleContinuousNumeric<number, number, never>;
-  yScale: d3.ScaleContinuousNumeric<number, number, never>;
+  xScale: AnyChartScale;
+  yScale: AnyChartScale;
   suggestedPadding: Padding; // expanded according to label width
   width: number;
   height: number;
@@ -102,7 +104,7 @@ export function drawAxes({
       const { width: textWidth } = context.measureText(text);
       let startX = 0;
       if (i === 0) {
-        startX = Math.max(x - textWidth / 2, -padding.left);
+        startX = Math.max(x - textWidth / 2, prevBoundary);
       } else if (i === xTicks.length - 1) {
         startX = Math.min(x - textWidth / 2, width - textWidth);
       } else {
@@ -130,10 +132,17 @@ export function drawAxes({
     context.lineTo(0, frame.height);
     context.stroke();
 
-    yTicks.forEach((d) => {
+    let prevBoundary = -padding.bottom;
+    const x = 0;
+    for (let i = 0; i < yTicks.length; i++) {
+      const yTick = yTicks[i];
       context.beginPath();
-      const x = 0;
-      const y = yScale(d);
+      const y = yScale(yTick);
+
+      const text = yTickFormat(yTick);
+      context.textBaseline = "bottom";
+      const { actualBoundingBoxAscent: textHeight } = context.measureText(text);
+
       if (drawTicks) {
         context.beginPath();
         context.strokeStyle = labelColor;
@@ -142,13 +151,27 @@ export function drawAxes({
         context.lineTo(x - tickSize, y);
         context.stroke();
       }
-      frame.fillText(yTickFormat(d), x - yLabelOffset, y, {
+
+      let startY = 0;
+      if (i === 0) {
+        startY = Math.max(y - textHeight / 2, prevBoundary);
+      } else if (i === yTicks.length - 1) {
+        startY = Math.min(y - textHeight / 2, height - textHeight);
+      } else {
+        startY = y - textHeight / 2;
+      }
+
+      if (startY < prevBoundary) {
+        continue; // doesn't fit, skip
+      }
+      frame.fillText(text, x - yLabelOffset, startY - 1, {
         textAlign: "right",
-        textBaseline: "middle",
+        textBaseline: "bottom",
         fillStyle: labelColor,
         font: labelFont,
       });
-    });
+      prevBoundary = startY + textHeight;
+    }
     frame.exit();
   }
 

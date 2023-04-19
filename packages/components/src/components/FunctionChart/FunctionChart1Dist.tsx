@@ -5,6 +5,7 @@ import * as React from "react";
 import { FC, useCallback, useMemo, useRef } from "react";
 
 import {
+  AnyChartScale,
   drawAxes,
   drawCursorLines,
   primaryColor,
@@ -207,7 +208,7 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
 
   const d3ref = useRef<{
     padding: Padding;
-    xScale: d3.ScaleContinuousNumeric<number, number, never>;
+    xScale: AnyChartScale;
   }>();
 
   //TODO: This custom error handling is a bit hacky and should be improved.
