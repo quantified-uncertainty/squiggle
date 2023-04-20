@@ -24,6 +24,7 @@ export const ClusterGridView: FC<{
 
   const dispatch = useViewDispatch();
 
+  // Having clusters in Items is a bit of a hack, but it works for now. It allows us to reuse code meant for Items.
   const clusterItems: Item[] = Object.keys(clusters).map((id) => {
     const cluster = clusters[id];
     return {
