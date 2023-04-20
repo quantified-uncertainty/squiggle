@@ -1,7 +1,6 @@
 import { BaseDist } from "../dist/BaseDist.js";
 import { SampleSetDist } from "../dist/SampleSetDist/index.js";
 import { Env } from "../dist/env.js";
-import { zip } from "../utility/E_A.js";
 import * as Result from "../utility/result.js";
 import { Plot, vPlot } from "../value/index.js";
 import { SqSampleSetDistribution, wrapDistribution } from "./SqDistribution.js";

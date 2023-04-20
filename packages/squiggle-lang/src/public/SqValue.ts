@@ -7,6 +7,7 @@ import { SqLambda } from "./SqLambda.js";
 import { SqLambdaDeclaration } from "./SqLambdaDeclaration.js";
 import { SqPlot, wrapPlot } from "./SqPlot.js";
 import { SqRecord } from "./SqRecord.js";
+import { SqScale, wrapScale } from "./SqScale.js";
 import { SqValueLocation } from "./SqValueLocation.js";
 
 export const wrapValue = (value: Value, location: SqValueLocation): SqValue => {
@@ -33,6 +34,8 @@ export const wrapValue = (value: Value, location: SqValueLocation): SqValue => {
       return new SqStringValue(value, location);
     case "Plot":
       return new SqPlotValue(value, location);
+    case "Scale":
+      return new SqScaleValue(value, location);
     case "TimeDuration":
       return new SqTimeDurationValue(value, location);
     case "Void":
@@ -201,6 +204,18 @@ export class SqPlotValue extends SqAbstractValue<"Plot", SqPlot> {
   }
 }
 
+export class SqScaleValue extends SqAbstractValue<"Scale", SqScale> {
+  tag = "Scale" as const;
+
+  get value() {
+    return wrapScale(this._value.value, this.location);
+  }
+
+  asJS() {
+    return this.value;
+  }
+}
+
 export class SqVoidValue extends SqAbstractValue<"Void", null> {
   tag = "Void" as const;
 
@@ -227,6 +242,7 @@ export type SqValue =
   | SqStringValue
   | SqTimeDurationValue
   | SqPlotValue
+  | SqScaleValue
   | SqVoidValue;
 
 export const toStringResult = (result: result<SqValue, SqError>) => {

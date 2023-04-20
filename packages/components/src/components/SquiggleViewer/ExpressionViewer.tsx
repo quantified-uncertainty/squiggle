@@ -1,5 +1,10 @@
 import React from "react";
-import { SqDistributionTag, SqValue, SqPlot } from "@quri/squiggle-lang";
+import {
+  SqDistributionTag,
+  SqValue,
+  SqPlot,
+  SqScale,
+} from "@quri/squiggle-lang";
 import { clsx } from "clsx";
 
 import { NumberShower } from "../NumberShower.js";
@@ -217,7 +222,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
         </VariableBox>
       );
     }
-    case "Plot":
+    case "Plot": {
       const plot: SqPlot = value.value;
       const fixed: PartialViewSettings = {};
       const disableLogX =
@@ -297,6 +302,16 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
           }}
         </VariableBox>
       );
+    }
+    case "Scale": {
+      const scale: SqScale = value.value;
+
+      return (
+        <VariableBox value={value} heading="Scale">
+          {(settings) => <div>{scale.toString()}</div>}
+        </VariableBox>
+      );
+    }
     case "Record":
       return (
         <VariableList value={value} heading="Record">

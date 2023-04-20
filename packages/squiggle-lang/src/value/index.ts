@@ -255,6 +255,26 @@ class VPlot implements Indexable {
 
 export const vPlot = (plot: Plot) => new VPlot(plot);
 
+export type Scale = {
+  type: "linear";
+  min?: number;
+  max?: number;
+};
+
+class VScale {
+  readonly type = "Scale" as const;
+  constructor(public value: Scale) {}
+
+  toString(): string {
+    switch (this.value.type) {
+      case "linear":
+        return "Linear scale"; // TODO - mix in min/max if specified
+    }
+  }
+}
+
+export const vScale = (scale: Scale) => new VScale(scale);
+
 export type Value =
   | VArray
   | VBool
@@ -267,4 +287,5 @@ export type Value =
   | VRecord
   | VTimeDuration
   | VPlot
+  | VScale
   | VVoid;
