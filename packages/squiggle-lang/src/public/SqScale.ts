@@ -2,32 +2,31 @@ import { Scale, vScale } from "../value/index.js";
 import { SqScaleValue } from "./SqValue.js";
 import { SqValueLocation } from "./SqValueLocation.js";
 
-export const wrapScale = (value: Scale, location: SqValueLocation): SqScale => {
+export const wrapScale = (value: Scale): SqScale => {
   switch (value.type) {
     case "linear":
-      return new SqLinearScale(value, location);
+      return new SqLinearScale(value);
+    case "log":
+      return new SqLogScale(value);
   }
 };
 
 abstract class SqAbstractScale<T extends Scale["type"]> {
   abstract tag: T;
 
-  constructor(
-    protected _value: Extract<Scale, { type: T }>,
-    public location: SqValueLocation
-  ) {}
+  constructor(protected _value: Extract<Scale, { type: T }>) {}
 
   toString() {
     return vScale(this._value).toString();
-  }
-
-  asValue() {
-    return new SqScaleValue(vScale(this._value), this.location);
   }
 }
 
 export class SqLinearScale extends SqAbstractScale<"linear"> {
   tag = "linear" as const;
+
+  static create({ min, max }: { min: number; max: number }) {
+    return new SqLinearScale({ type: "linear", min, max });
+  }
 
   get min() {
     return this._value.min;
@@ -37,4 +36,19 @@ export class SqLinearScale extends SqAbstractScale<"linear"> {
   }
 }
 
-export type SqScale = SqLinearScale;
+export class SqLogScale extends SqAbstractScale<"log"> {
+  tag = "log" as const;
+
+  static create({ min, max }: { min: number; max: number }) {
+    return new SqLogScale({ type: "log", min, max });
+  }
+
+  get min() {
+    return this._value.min;
+  }
+  get max() {
+    return this._value.max;
+  }
+}
+
+export type SqScale = SqLinearScale | SqLogScale;

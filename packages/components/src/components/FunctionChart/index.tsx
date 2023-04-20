@@ -2,7 +2,7 @@ import * as React from "react";
 import { FC, useState } from "react";
 import * as yup from "yup";
 
-import { SqLambda, Env, SqError } from "@quri/squiggle-lang";
+import { SqLambda, Env, SqError, SqScale } from "@quri/squiggle-lang";
 
 import { MessageAlert } from "../Alert.js";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
@@ -23,6 +23,7 @@ export type FunctionChartSettings = yup.InferType<
 
 type FunctionChartProps = {
   fn: SqLambda;
+  xScale: SqScale;
   settings: FunctionChartSettings;
   distributionChartSettings: DistributionChartSettings;
   environment: Env;
@@ -50,6 +51,7 @@ const FunctionCallErrorAlert: FC<{ error: SqError }> = ({ error }) => {
 
 export const FunctionChart: FC<FunctionChartProps> = ({
   fn,
+  xScale,
   settings,
   environment,
   distributionChartSettings,
@@ -62,8 +64,8 @@ export const FunctionChart: FC<FunctionChartProps> = ({
       </MessageAlert>
     );
   }
-  const result1 = fn.call([settings.start]);
-  const result2 = fn.call([settings.stop]);
+  const result1 = fn.call([xScale.min ?? settings.start]);
+  const result2 = fn.call([xScale.max ?? settings.stop]);
   const getValidResult = () => {
     if (result1.ok) {
       return result1;
@@ -84,6 +86,7 @@ export const FunctionChart: FC<FunctionChartProps> = ({
       return (
         <FunctionChart1Dist
           fn={fn}
+          xScale={xScale}
           settings={settings}
           environment={environment}
           height={height}
@@ -92,7 +95,12 @@ export const FunctionChart: FC<FunctionChartProps> = ({
       );
     case "Number":
       return (
-        <FunctionChart1Number fn={fn} settings={settings} height={height} />
+        <FunctionChart1Number
+          fn={fn}
+          xScale={xScale}
+          settings={settings}
+          height={height}
+        />
       );
     default:
       return (

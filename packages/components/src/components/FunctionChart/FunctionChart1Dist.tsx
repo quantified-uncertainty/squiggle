@@ -1,4 +1,11 @@
-import { Env, result, SqError, SqLambda, SqValue } from "@quri/squiggle-lang";
+import {
+  Env,
+  result,
+  SqError,
+  SqLambda,
+  SqScale,
+  SqValue,
+} from "@quri/squiggle-lang";
 import * as d3 from "d3";
 import groupBy from "lodash/groupBy.js";
 import * as React from "react";
@@ -21,6 +28,7 @@ import {
 import { NumberShower } from "../NumberShower.js";
 import { FunctionChartSettings } from "./index.js";
 import { getFunctionImage } from "./utils.js";
+import { sqScaleToD3 } from "../../lib/utility.js";
 
 function unwrap<a, b>(x: result<a, b>): a {
   if (x.ok) {
@@ -32,6 +40,7 @@ function unwrap<a, b>(x: result<a, b>): a {
 type FunctionChart1DistProps = {
   fn: SqLambda;
   settings: FunctionChartSettings;
+  xScale: SqScale;
   distributionChartSettings: DistributionChartSettings;
   environment: Env;
   height: number;
@@ -107,6 +116,7 @@ const getPercentiles = ({
 
 export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
   fn,
+  xScale: xSqScale,
   settings,
   environment,
   distributionChartSettings,
@@ -124,9 +134,8 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
     ({ context, width }: DrawContext) => {
       context.clearRect(0, 0, width, height);
 
-      const xScale = d3
-        .scaleLinear()
-        .domain(d3.extent(data, (d) => d.x) as [number, number]);
+      const xScale = sqScaleToD3(xSqScale);
+      xScale.domain(d3.extent(data, (d) => d.x) as [number, number]);
 
       const yScale = d3
         .scaleLinear()

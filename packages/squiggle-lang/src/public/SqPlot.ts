@@ -63,7 +63,7 @@ export class SqFnPlot extends SqAbstractPlot<"fn"> {
   }
   get xScale() {
     const xScale = this._value.xScale;
-    return xScale ? wrapScale(xScale, this.location) : undefined;
+    return xScale ? wrapScale(xScale) : undefined;
   }
 }
 

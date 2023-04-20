@@ -18,7 +18,7 @@ export { SqLambda } from "./public/SqLambda.js";
 export { SqError, SqFrame } from "./public/SqError.js";
 export { SqShape } from "./public/SqPointSet.js";
 export { SqPlot, SqDistributionsPlot, SqScatterPlot } from "./public/SqPlot.js";
-export { SqScale } from "./public/SqScale.js";
+export { SqScale, SqLinearScale, SqLogScale } from "./public/SqScale.js";
 export { SqParseError, parse } from "./public/parse.js";
 
 export { defaultEnv as defaultEnvironment } from "./dist/env.js";

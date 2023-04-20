@@ -1,4 +1,12 @@
-import { SqError, SqValue, result, resultMap } from "@quri/squiggle-lang";
+import {
+  SqError,
+  SqScale,
+  SqValue,
+  result,
+  resultMap,
+} from "@quri/squiggle-lang";
+import * as d3 from "d3";
+
 import { ResultAndBindings } from "./hooks/useSquiggle.js";
 
 export function flattenResult<a, b>(x: result<a, b>[]): result<a[], b> {
@@ -49,5 +57,18 @@ export function getErrors(result: ResultAndBindings["result"]) {
     return [result.value];
   } else {
     return [];
+  }
+}
+
+export function sqScaleToD3(
+  scale: SqScale
+): d3.ScaleContinuousNumeric<number, number, never> {
+  switch (scale.tag) {
+    case "linear":
+      return d3.scaleLinear();
+    case "log":
+      return d3.scaleLog();
+    default:
+      throw new Error(`Unsupported scale type ${(scale as any).tag}`);
   }
 }

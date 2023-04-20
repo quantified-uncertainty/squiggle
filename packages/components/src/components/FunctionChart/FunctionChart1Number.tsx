@@ -3,7 +3,7 @@ import * as d3 from "d3";
 import * as React from "react";
 import { FC, useCallback, useMemo } from "react";
 
-import { SqLambda } from "@quri/squiggle-lang";
+import { SqLambda, SqScale } from "@quri/squiggle-lang";
 
 import {
   drawAxes,
@@ -14,9 +14,11 @@ import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
 import { ErrorAlert } from "../Alert.js";
 import { FunctionChartSettings } from "./index.js";
 import { getFunctionImage } from "./utils.js";
+import { sqScaleToD3 } from "../../lib/utility.js";
 
 type Props = {
   fn: SqLambda;
+  xScale: SqScale;
   settings: FunctionChartSettings;
   height: number;
 };
@@ -24,6 +26,7 @@ type Props = {
 export const FunctionChart1Number: FC<Props> = ({
   fn,
   settings,
+  xScale: xSqScale,
   height: innerHeight,
 }) => {
   const height = innerHeight + 30; // consider paddings, should match suggestedPadding below
@@ -44,9 +47,8 @@ export const FunctionChart1Number: FC<Props> = ({
     }) => {
       context.clearRect(0, 0, width, height);
 
-      const xScale = d3
-        .scaleLinear()
-        .domain(d3.extent(functionImage, (d) => d.x) as [number, number]);
+      const xScale = sqScaleToD3(xSqScale);
+      xScale.domain(d3.extent(functionImage, (d) => d.x) as [number, number]);
 
       const yScale = d3
         .scaleLinear()
@@ -96,7 +98,7 @@ export const FunctionChart1Number: FC<Props> = ({
         });
       }
     },
-    [functionImage, height, cursor]
+    [functionImage, height, cursor, xSqScale.tag]
   );
 
   const { ref } = useCanvas({ height, init: initCursor, draw });

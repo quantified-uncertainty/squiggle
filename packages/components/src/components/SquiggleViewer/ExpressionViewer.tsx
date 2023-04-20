@@ -4,6 +4,7 @@ import {
   SqValue,
   SqPlot,
   SqScale,
+  SqLinearScale,
 } from "@quri/squiggle-lang";
 import { clsx } from "clsx";
 
@@ -167,6 +168,10 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
                 .join(",")})`}</div>
               <FunctionChart
                 fn={value.value}
+                xScale={SqLinearScale.create({
+                  min: settings.functionChartSettings.start,
+                  max: settings.functionChartSettings.stop,
+                })}
                 settings={settings.functionChartSettings}
                 distributionChartSettings={settings.distributionChartSettings}
                 height={settings.chartHeight}
@@ -179,49 +184,6 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
           )}
         </VariableBox>
       );
-    case "Declaration": {
-      const fixed: PartialViewSettings = {};
-      const { inputs } = value.value;
-      if (inputs.length === 1 && inputs[0].type === "Float") {
-        fixed.functionChartSettings = {
-          start: inputs[0].min,
-          stop: inputs[0].max,
-        };
-      }
-
-      return (
-        <VariableBox
-          value={value}
-          heading="Function Declaration"
-          renderSettingsMenu={({ onChange }) => {
-            return (
-              <ItemSettingsMenu
-                onChange={onChange}
-                value={value}
-                fixed={fixed}
-                withFunctionSettings={true}
-              />
-            );
-          }}
-        >
-          {(settings) => (
-            <FunctionChart
-              fn={value.value.fn}
-              settings={{
-                ...settings.functionChartSettings,
-                ...fixed.functionChartSettings,
-              }}
-              distributionChartSettings={settings.distributionChartSettings}
-              height={settings.chartHeight}
-              environment={{
-                sampleCount: environment.sampleCount / 10,
-                xyPointLength: environment.xyPointLength / 10,
-              }}
-            />
-          )}
-        </VariableBox>
-      );
-    }
     case "Plot": {
       const plot: SqPlot = value.value;
       const fixed: PartialViewSettings = {};
@@ -282,6 +244,13 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
                       ...settings.functionChartSettings,
                       ...fixed.functionChartSettings,
                     }}
+                    xScale={
+                      plot.xScale ??
+                      SqLinearScale.create({
+                        min: settings.functionChartSettings.start,
+                        max: settings.functionChartSettings.stop,
+                      })
+                    }
                     distributionChartSettings={
                       settings.distributionChartSettings
                     }

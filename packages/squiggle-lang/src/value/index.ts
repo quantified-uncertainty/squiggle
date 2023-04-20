@@ -254,11 +254,17 @@ class VPlot implements Indexable {
 
 export const vPlot = (plot: Plot) => new VPlot(plot);
 
-export type Scale = {
-  type: "linear";
-  min?: number;
-  max?: number;
-};
+export type Scale =
+  | {
+      type: "linear";
+      min?: number;
+      max?: number;
+    }
+  | {
+      type: "log";
+      min?: number;
+      max?: number;
+    };
 
 class VScale {
   readonly type = "Scale" as const;
@@ -268,6 +274,8 @@ class VScale {
     switch (this.value.type) {
       case "linear":
         return "Linear scale"; // TODO - mix in min/max if specified
+      case "log":
+        return "Logarithmic scale";
     }
   }
 }

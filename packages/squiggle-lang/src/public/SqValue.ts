@@ -208,7 +208,7 @@ export class SqScaleValue extends SqAbstractValue<"Scale", SqScale> {
   tag = "Scale" as const;
 
   get value() {
-    return wrapScale(this._value.value, this.location);
+    return wrapScale(this._value.value);
   }
 
   asJS() {

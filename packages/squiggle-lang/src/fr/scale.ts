@@ -30,4 +30,24 @@ export const library = [
       ),
     ],
   }),
+  maker.make({
+    name: "log",
+    output: "Scale",
+    examples: [`Scale.log({ min: 3, max: 10 })`],
+    definitions: [
+      makeDefinition(
+        "log",
+        [frRecord(["min", frNumber], ["max", frNumber])],
+        ([{ min, max }]) => {
+          return Result.Ok(
+            vScale({
+              type: "log",
+              min,
+              max,
+            })
+          );
+        }
+      ),
+    ],
+  }),
 ];
