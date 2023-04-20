@@ -15,6 +15,7 @@ export const Default: Story = {
   args: {
     name: "fieldName",
     label: "Radio label",
+    initialId: "first",
     options: [
       {
         id: "first",
@@ -23,6 +24,12 @@ export const Default: Story = {
       {
         id: "second",
         name: "Second option",
+      },
+      {
+        id: "disabled",
+        name: "Disabled option",
+        disabled: true,
+        tooltip: "This text shows on hover",
       },
     ],
   },

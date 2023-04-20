@@ -78,7 +78,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
                   shape.ok && hasMassBelowZero(shape.value.asShape())
                     ? {
                         distributionChartSettings: {
-                          logX: false,
+                          disableLogX: true,
                         },
                       }
                     : undefined
@@ -229,7 +229,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
           : false;
       if (disableLogX) {
         fixed.distributionChartSettings = {
-          logX: false,
+          disableLogX: true,
         };
       }
       fixed.functionChartSettings = {};
