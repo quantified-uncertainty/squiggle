@@ -9,7 +9,7 @@ export type Axis = "rows" | "columns";
 
 export type GridMode = "full" | "half";
 
-export type SortMode = "default" | "median" | "uncertainty";
+export type SortMode = "default" | "median" | "uncertainty" | "similarity";
 
 export type SortConfig = {
   mode: SortMode;
@@ -61,6 +61,13 @@ type Action =
       };
     }
   | {
+      type: "toggleClusterCombination";
+      payload: {
+        row: string;
+        column: string;
+      };
+    }
+  | {
       type: "setSort";
       payload: {
         axis: "rows" | "columns";
@@ -91,6 +98,29 @@ const reducer: Reducer<ViewContextShape, Action> = (state, action) => {
                 axisConfig.filter.selectedClusters,
                 action.payload.id
               ),
+            },
+          },
+        },
+      };
+    }
+    case "toggleClusterCombination": {
+      const axisConfig = state.axisConfig;
+      return {
+        ...state,
+        axisConfig: {
+          ...state.axisConfig,
+          rows: {
+            ...axisConfig.rows,
+            filter: {
+              ...axisConfig.rows.filter,
+              selectedClusters: Set([action.payload.row]),
+            },
+          },
+          columns: {
+            ...axisConfig.columns,
+            filter: {
+              ...axisConfig.columns.filter,
+              selectedClusters: Set([action.payload.column]),
             },
           },
         },

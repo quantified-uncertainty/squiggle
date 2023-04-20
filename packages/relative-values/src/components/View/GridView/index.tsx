@@ -1,15 +1,143 @@
 import { Item } from "@/types";
-import { ModelEvaluator } from "@/values/ModelEvaluator";
-import { FC, Fragment, useCallback, useMemo } from "react";
+import { ModelEvaluator, getParamPercentiles } from "@/values/ModelEvaluator";
+import { cartesianProduct } from "@/lib/utils";
+import { FC, Fragment, useCallback, useMemo, useState } from "react";
 import { useSelectedInterface } from "../../Interface/InterfaceProvider";
 import { DropdownButton } from "../../ui/DropdownButton";
 import { Header } from "../Header";
 import { useFilteredItems, useSortedItems } from "../hooks";
 import { RelativeCell } from "../RelativeCell";
-import { useViewContext } from "../ViewProvider";
+import { useViewContext, AxisConfig, useViewDispatch } from "../ViewProvider";
 import { AxisMenu } from "./AxisMenu";
 import { GridModeControls } from "./GridModeControls";
 import { CellBox } from "../CellBox";
+import { RelativeValue } from "@/values/types";
+import _ from "lodash";
+import { DistCell } from "../RelativeCell/DistCell";
+
+export const ClusterGridView: FC<{
+  model: ModelEvaluator;
+}> = ({ model }) => {
+  const {
+    catalog: { items, clusters },
+  } = useSelectedInterface();
+
+  const dispatch = useViewDispatch();
+
+  // Having clusters in Items is a bit of a hack, but it works for now. It allows us to reuse code meant for Items.
+  const clusterItems: Item[] = Object.keys(clusters).map((id) => {
+    const cluster = clusters[id];
+    return {
+      id,
+      name: `${cluster.name} - ${
+        items.filter((item) => item.clusterId === id).length
+      }`,
+    };
+  });
+
+  const combinationItems = (rowItem: Item, columnItem: Item): RelativeValue => {
+    const rowItems = items.filter((item) => item.clusterId === rowItem.id);
+    const columnItems = items.filter(
+      (item) => item.clusterId === columnItem.id
+    );
+    const combinations = rowItems
+      .flatMap((row) =>
+        columnItems.map((column) => model.compare(row.id, column.id))
+      )
+      .flatMap((x) => (x.ok ? [x.value] : []));
+    return {
+      mean: _.mean(combinations.map((r) => r.mean)),
+      median: _.mean(combinations.map((r) => r.median)),
+      min: _.mean(combinations.map((r) => r.min)),
+      max: _.mean(combinations.map((r) => r.max)),
+      uncertainty: _.mean(combinations.map((r) => r.uncertainty)),
+    };
+  };
+
+  let allItems = cartesianProduct(clusterItems, clusterItems).map(
+    ([rowItem, columnItem]) => ({
+      row: rowItem,
+      column: columnItem,
+      value: combinationItems(rowItem, columnItem),
+    })
+  );
+
+  // Create a Map of Maps with rowId and columnId as keys. This helps the speed of lookup
+  const mapOfMapsOfValues: Map<string, Map<string, RelativeValue>> = new Map();
+
+  // Populate the Map of Maps
+  allItems.forEach(({ row, column, value }) => {
+    let columnMap = mapOfMapsOfValues.get(row.id);
+    if (!columnMap) {
+      columnMap = new Map();
+      mapOfMapsOfValues.set(row.id, columnMap);
+    }
+
+    columnMap.set(column.id, value);
+  });
+
+  let percentiles = getParamPercentiles(
+    allItems.map((r) => r.value),
+    (r) => r.uncertainty,
+    [10, 90],
+    true
+  );
+
+  let distCell = (rowId: string, columnId: string) => {
+    const item = mapOfMapsOfValues.get(rowId)?.get(columnId);
+    return item ? (
+      <DistCell
+        key={`${rowId}-${columnId}`}
+        item={item}
+        uncertaintyPercentiles={percentiles}
+        showMedian={rowId != columnId}
+        showRange={false}
+      />
+    ) : null;
+  };
+
+  return (
+    <div>
+      <div
+        className="grid relative"
+        style={{
+          gridTemplateColumns: `repeat(${clusterItems.length + 1}, 200px)`,
+        }}
+      >
+        <div className="top-0 left-0 z-20" />
+        {clusterItems.map((item) => (
+          <CellBox header key={item.id}>
+            <Header key={item.id} item={item} />
+          </CellBox>
+        ))}
+        {clusterItems.map((rowItem) => (
+          <Fragment key={rowItem.id}>
+            <CellBox header>
+              <Header key={rowItem.id} item={rowItem} />
+            </CellBox>
+            {clusterItems.map((columnItem) => (
+              <div
+                key={`${rowItem.id}-${columnItem.id}`}
+                onClick={() => {
+                  dispatch({
+                    type: "toggleClusterCombination",
+                    payload: {
+                      row: rowItem.id,
+                      column: columnItem.id,
+                    },
+                  });
+                }}
+                className="cursor-pointer"
+              >
+                {distCell(rowItem.id, columnItem.id)}
+              </div>
+            ))}
+          </Fragment>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 export const GridView: FC<{
   model: ModelEvaluator;
@@ -76,6 +204,13 @@ export const GridView: FC<{
           <DropdownButton text="Column Settings">
             {() => <AxisMenu axis="columns" />}
           </DropdownButton>
+          <DropdownButton text="Cluster Diagram">
+            {() => (
+              <div className="p-2">
+                <ClusterGridView model={model} />
+              </div>
+            )}
+          </DropdownButton>
         </div>
         <GridModeControls />
       </div>
@@ -106,6 +241,7 @@ export const GridView: FC<{
                   id2={columnItem.id}
                   model={model}
                   uncertaintyPercentiles={uncertaintyPercentiles}
+                  showRange={false}
                 />
               )
             )}

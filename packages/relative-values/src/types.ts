@@ -4,6 +4,7 @@ import { Map } from "immutable";
 export type Cluster = {
   name: string;
   color: string;
+  recommendedUnit?: string; // id of one of the items
 };
 
 // TODO - should be Map
