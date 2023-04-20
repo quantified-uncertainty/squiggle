@@ -238,9 +238,14 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
         };
       }
       fixed.functionChartSettings = {};
-      if (plot.tag === "fn") {
-        fixed.functionChartSettings.start = plot.min;
-        fixed.functionChartSettings.stop = plot.max;
+      if (plot.tag === "fn" && plot.xScale) {
+        const { min, max } = plot.xScale;
+        if (min !== undefined) {
+          fixed.functionChartSettings.start = min;
+        }
+        if (max !== undefined) {
+          fixed.functionChartSettings.stop = max;
+        }
       }
 
       return (
@@ -269,7 +274,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
                     settings={settings.distributionChartSettings}
                   />
                 );
-              case "fn":
+              case "fn": {
                 return (
                   <FunctionChart
                     fn={plot.fn}
@@ -287,6 +292,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
                     }}
                   />
                 );
+              }
               case "scatter":
                 return (
                   <ScatterChart

@@ -219,8 +219,7 @@ export type Plot =
   | {
       type: "fn";
       fn: Lambda;
-      min: number;
-      max: number;
+      xScale?: Scale;
     };
 
 class VPlot implements Indexable {

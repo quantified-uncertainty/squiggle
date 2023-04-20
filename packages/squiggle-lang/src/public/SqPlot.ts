@@ -6,6 +6,7 @@ import { Plot, vPlot } from "../value/index.js";
 import { SqSampleSetDistribution, wrapDistribution } from "./SqDistribution.js";
 import { SqError } from "./SqError.js";
 import { SqLambda } from "./SqLambda.js";
+import { wrapScale } from "./SqScale.js";
 import { SqPlotValue } from "./SqValue.js";
 import { SqValueLocation } from "./SqValueLocation.js";
 
@@ -60,11 +61,9 @@ export class SqFnPlot extends SqAbstractPlot<"fn"> {
       })
     );
   }
-  get min() {
-    return this._value.min;
-  }
-  get max() {
-    return this._value.max;
+  get xScale() {
+    const xScale = this._value.xScale;
+    return xScale ? wrapScale(xScale, this.location) : undefined;
   }
 }
 

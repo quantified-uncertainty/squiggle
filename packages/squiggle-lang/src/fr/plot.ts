@@ -9,6 +9,7 @@ import {
   frNumber,
   frOptional,
   frRecord,
+  frScale,
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
@@ -62,18 +63,19 @@ export const library = [
   maker.make({
     name: "fn",
     output: "Plot",
-    examples: [`Plot.fn({fn: {|x|x*x}, min: 3, max: 5})`],
+    examples: [
+      `Plot.fn({fn: {|x|x*x}, xScale: Scale.linear({ min: 3, max: 5}) })`,
+    ],
     definitions: [
       makeDefinition(
         "fn",
-        [frRecord(["fn", frLambda], ["min", frNumber], ["max", frNumber])],
-        ([{ fn, min, max }]) => {
+        [frRecord(["fn", frLambda], ["xScale", frOptional(frScale)])],
+        ([{ fn, xScale }]) => {
           return Result.Ok(
             vPlot({
               type: "fn",
               fn,
-              min,
-              max,
+              xScale: xScale ?? undefined,
             })
           );
         }

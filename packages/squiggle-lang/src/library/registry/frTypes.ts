@@ -1,7 +1,7 @@
 import { BaseDist } from "../../dist/BaseDist.js";
 import { Lambda } from "../../reducer/lambda.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
-import { Value } from "../../value/index.js";
+import { Scale, Value } from "../../value/index.js";
 
 /*
 FRType is a function that unpacks a Value.
@@ -44,6 +44,10 @@ export const frDist: FRType<BaseDist> = {
 export const frLambda: FRType<Lambda> = {
   unpack: (v) => (v.type === "Lambda" ? v.value : undefined),
   getName: () => "lambda",
+};
+export const frScale: FRType<Scale> = {
+  unpack: (v) => (v.type === "Scale" ? v.value : undefined),
+  getName: () => "scale",
 };
 
 export const frArray = <T>(itemType: FRType<T>): FRType<T[]> => {
