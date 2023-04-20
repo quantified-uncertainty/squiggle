@@ -54,6 +54,38 @@ export function averageUncertainty({ item, comparedTo, model }: AverageProps) {
   });
 }
 
+//Takes the first item, then appends the next item that has the lowest uncertainty with the last item
+function organizeBySimilarity({
+  items,
+  model,
+}: {
+  items: Item[];
+  model: ModelEvaluator;
+}): Item[] {
+  let remaining = [...items];
+  let first = remaining.shift();
+  let sorted: Item[] = first ? [first] : [];
+
+  while (remaining.length > 0) {
+    // Keep iterating until all items are sorted
+    let lastItem = _.last(sorted);
+
+    if (!lastItem) break;
+
+    let nextItem = _.minBy(remaining, (item) => {
+      let result = model.compare((lastItem as Item).id, item.id);
+      return result.ok ? result.value.uncertainty : 10000;
+    });
+
+    if (!nextItem) break;
+
+    _.remove(remaining, (item) => item.id === (nextItem as Item).id);
+    sorted.push(nextItem);
+  }
+
+  return sorted;
+}
+
 export const useSortedItems = ({
   items,
   config,
@@ -85,6 +117,9 @@ export const useSortedItems = ({
               comparedTo: otherDimensionChoices,
             })
           );
+        }
+        case "similarity": {
+          return organizeBySimilarity({ items, model });
         }
         default:
           return items;
