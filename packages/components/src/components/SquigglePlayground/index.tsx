@@ -44,6 +44,7 @@ import {
 import { ShareButton } from "./ShareButton.js";
 import { JsImports } from "../../lib/jsImports.js";
 import { ImportSettingsForm } from "./ImportSettingsForm.js";
+import SplitPanel from "./SplitPanel.js";
 
 type PlaygroundProps = SquiggleArgs &
   Omit<SquiggleViewerProps, "result"> & {
@@ -248,7 +249,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
         onChange={setCode}
         onSubmit={run}
         showGutter={true}
-        height={height}
+        // height={height}
         project={resultAndBindings.project}
       />
     </div>
@@ -282,17 +283,15 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const leftPanelRef = useRef<HTMLDivElement | null>(null);
 
   const withEditor = (
-    <div className="flex mt-2">
-      <div
-        className="w-1/2 relative"
-        style={{ minHeight: props.chartHeight }}
-        ref={leftPanelRef}
-      >
-        {tabs}
-      </div>
-      <div className="w-1/2 p-2 pl-4" data-testid="playground-result">
-        {squiggleChart}
-      </div>
+    <div className="mt-2">
+      <SplitPanel>
+        <div style={{ minHeight: props.chartHeight }} ref={leftPanelRef}>
+          {tabs}
+        </div>
+        <div className="p-2 pl-4 " data-testid="playground-result">
+          {squiggleChart}
+        </div>
+      </SplitPanel>
     </div>
   );
 

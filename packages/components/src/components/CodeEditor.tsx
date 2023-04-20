@@ -152,6 +152,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({
       effects: compTheme.reconfigure(
         EditorView.theme({
           "&": {
+            overflow: "scroll",
             ...(width === undefined ? {} : { width: `${width}px` }),
             ...(height === undefined ? {} : { height: `${height}px` }),
           },
@@ -205,7 +206,10 @@ export const CodeEditor: FC<CodeEditorProps> = ({
 
   return (
     <div
-      style={{ minWidth: `${width}px`, minHeight: `${height}px` }}
+      style={{
+        minWidth: `${width}px`,
+        minHeight: `${height}px`,
+      }}
       ref={editor}
     ></div>
   );
