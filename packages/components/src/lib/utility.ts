@@ -68,6 +68,8 @@ export function sqScaleToD3(
       return d3.scaleLinear();
     case "log":
       return d3.scaleLog();
+    case "symlog":
+      return d3.scaleSymlog().constant(1);
     default:
       throw new Error(`Unsupported scale type ${(scale as any).tag}`);
   }

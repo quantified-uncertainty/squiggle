@@ -210,7 +210,7 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
         });
       }
     },
-    [cursor, height, data]
+    [cursor, height, data, xSqScale]
   );
 
   const { ref, width } = useCanvas({ height, init: initCursor, draw });

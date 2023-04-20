@@ -8,6 +8,8 @@ export const wrapScale = (value: Scale): SqScale => {
       return new SqLinearScale(value);
     case "log":
       return new SqLogScale(value);
+    case "symlog":
+      return new SqSymlogScale(value);
   }
 };
 
@@ -51,4 +53,19 @@ export class SqLogScale extends SqAbstractScale<"log"> {
   }
 }
 
-export type SqScale = SqLinearScale | SqLogScale;
+export class SqSymlogScale extends SqAbstractScale<"symlog"> {
+  tag = "symlog" as const;
+
+  static create({ min, max }: { min: number; max: number }) {
+    return new SqSymlogScale({ type: "symlog", min, max });
+  }
+
+  get min() {
+    return this._value.min;
+  }
+  get max() {
+    return this._value.max;
+  }
+}
+
+export type SqScale = SqLinearScale | SqLogScale | SqSymlogScale;

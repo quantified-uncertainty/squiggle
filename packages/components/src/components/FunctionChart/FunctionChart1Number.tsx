@@ -98,7 +98,7 @@ export const FunctionChart1Number: FC<Props> = ({
         });
       }
     },
-    [functionImage, height, cursor, xSqScale.tag]
+    [functionImage, height, cursor, xSqScale]
   );
 
   const { ref } = useCanvas({ height, init: initCursor, draw });

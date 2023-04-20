@@ -264,6 +264,11 @@ export type Scale =
       type: "log";
       min?: number;
       max?: number;
+    }
+  | {
+      type: "symlog";
+      min?: number;
+      max?: number;
     };
 
 class VScale {
@@ -276,6 +281,8 @@ class VScale {
         return "Linear scale"; // TODO - mix in min/max if specified
       case "log":
         return "Logarithmic scale";
+      case "symlog":
+        return "Symlog scale";
     }
   }
 }
