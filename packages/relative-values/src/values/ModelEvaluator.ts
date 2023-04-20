@@ -2,6 +2,7 @@ import { result, sq, SqLambda, SqProject } from "@quri/squiggle-lang";
 
 import { getModelCode, Model } from "@/model/utils";
 import { ModelCache, RelativeValue, RelativeValueResult } from "./types";
+import { cartesianProduct } from "@/lib/utils";
 
 const wrapper = sq`
 {|x, y|
@@ -24,10 +25,6 @@ const wrapper = sq`
   }
 }
 `;
-
-export const cartesianProduct = <A, B>(a: A[], b: B[]): [A, B][] => {
-  return a.flatMap((aItem) => b.map<[A, B]>((bItem) => [aItem, bItem]));
-};
 
 export const extractOkValues = <A, B>(items: result<A, B>[]): A[] => {
   return items

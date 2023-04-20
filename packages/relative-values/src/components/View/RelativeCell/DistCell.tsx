@@ -101,7 +101,13 @@ export const DistCell: FC<{
                     uncertaintyPercentiles
                   )}
                 >
-                  <NumberShower number={item.uncertainty / 2} precision={2} />
+                  <NumberShower
+                    number={
+                      item.uncertainty /
+                      2 /* The uncertainty is the full range, we need to half for the +- to make sense. */
+                    }
+                    precision={2}
+                  />
                 </span>
                 <span
                   style={{ fontSize: "0.6em" }}

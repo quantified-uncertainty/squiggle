@@ -20,8 +20,8 @@ type TableProps = {
   catalog: Catalog;
   showDescriptions: boolean;
   recommendedUnit: Item;
-  sidebarItems: Item[] | undefined;
-  setSidebarItems: (item: Item[] | undefined) => void;
+  sidebarItems: [Item, Item] | undefined;
+  setSidebarItems: (items: [Item, Item] | undefined) => void;
 };
 
 export const ListViewTable: FC<TableProps> = ({
@@ -164,7 +164,7 @@ export const ListView: FC<Props> = ({ model }) => {
 
   const showDescriptions = catalog.items.some((item) => !!item.description);
 
-  const [sidebarItems, setSidebarItems] = useState<undefined | Item[]>(
+  const [sidebarItems, setSidebarItems] = useState<undefined | [Item, Item]>(
     undefined
   );
 

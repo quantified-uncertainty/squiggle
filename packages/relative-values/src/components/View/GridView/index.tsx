@@ -1,9 +1,6 @@
 import { Item } from "@/types";
-import {
-  ModelEvaluator,
-  cartesianProduct,
-  getParamPercentiles,
-} from "@/values/ModelEvaluator";
+import { ModelEvaluator, getParamPercentiles } from "@/values/ModelEvaluator";
+import { cartesianProduct } from "@/lib/utils";
 import { FC, Fragment, useCallback, useMemo, useState } from "react";
 import { useSelectedInterface } from "../../Interface/InterfaceProvider";
 import { DropdownButton } from "../../ui/DropdownButton";
@@ -64,6 +61,20 @@ export const ClusterGridView: FC<{
     })
   );
 
+  // Create a Map of Maps with rowId and columnId as keys. This helps the speed of lookup
+  const mapOfMapsOfValues: Map<string, Map<string, RelativeValue>> = new Map();
+
+  // Populate the Map of Maps
+  allItems.forEach(({ row, column, value }) => {
+    let columnMap = mapOfMapsOfValues.get(row.id);
+    if (!columnMap) {
+      columnMap = new Map();
+      mapOfMapsOfValues.set(row.id, columnMap);
+    }
+
+    columnMap.set(column.id, value);
+  });
+
   let percentiles = getParamPercentiles(
     allItems.map((r) => r.value),
     (r) => r.uncertainty,
@@ -72,9 +83,7 @@ export const ClusterGridView: FC<{
   );
 
   let distCell = (rowId: string, columnId: string) => {
-    const item = allItems.find(
-      (r) => r.row.id === rowId && r.column.id === columnId
-    )?.value;
+    const item = mapOfMapsOfValues.get(rowId)?.get(columnId);
     return item ? (
       <DistCell
         key={`${rowId}-${columnId}`}
@@ -94,7 +103,7 @@ export const ClusterGridView: FC<{
           gridTemplateColumns: `repeat(${clusterItems.length + 1}, 200px)`,
         }}
       >
-        <div className="sticky bg-white top-0 left-0 z-20" />
+        <div className="top-0 left-0 z-20" />
         {clusterItems.map((item) => (
           <CellBox header key={item.id}>
             <Header key={item.id} item={item} />
