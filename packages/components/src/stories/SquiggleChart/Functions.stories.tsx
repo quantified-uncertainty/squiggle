@@ -27,6 +27,20 @@ export const FunctionToNumber: Story = {
   },
 };
 
+export const LogScale: Story = {
+  name: "Log scale",
+  args: {
+    code: "foo(t) = t^2; Plot.fn({ fn: foo, xScale: Scale.log({ min: 1, max: 100 }) })",
+  },
+};
+
+export const LogScaleInvalid: Story = {
+  name: "Log scale with invalid range",
+  args: {
+    code: "foo(t) = t^2; Plot.fn({ fn: foo, xScale: Scale.log({ min: -1, max: 100 }) })",
+  },
+};
+
 export const Unrenderable: Story = {
   args: {
     code: "foo(x, y) = x + y; foo",

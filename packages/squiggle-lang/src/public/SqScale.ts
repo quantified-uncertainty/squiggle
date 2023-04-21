@@ -26,7 +26,7 @@ abstract class SqAbstractScale<T extends Scale["type"]> {
 export class SqLinearScale extends SqAbstractScale<"linear"> {
   tag = "linear" as const;
 
-  static create({ min, max }: { min: number; max: number }) {
+  static create({ min, max }: { min?: number; max?: number } = {}) {
     return new SqLinearScale({ type: "linear", min, max });
   }
 

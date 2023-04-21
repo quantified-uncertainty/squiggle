@@ -6,7 +6,7 @@ import { Plot, vPlot } from "../value/index.js";
 import { SqSampleSetDistribution, wrapDistribution } from "./SqDistribution.js";
 import { SqError } from "./SqError.js";
 import { SqLambda } from "./SqLambda.js";
-import { wrapScale } from "./SqScale.js";
+import { SqScale, wrapScale } from "./SqScale.js";
 import { SqPlotValue } from "./SqValue.js";
 import { SqValueLocation } from "./SqValueLocation.js";
 
@@ -90,11 +90,13 @@ export class SqScatterPlot extends SqAbstractPlot<"scatter"> {
     return this.buildSampleSetDist(this._value.yDist, env);
   }
 
-  get logX(): boolean {
-    return this._value.logX;
+  get xScale(): SqScale | undefined {
+    const scale = this._value.xScale;
+    return scale ? wrapScale(scale) : undefined;
   }
-  get logY(): boolean {
-    return this._value.logY;
+  get yScale(): SqScale | undefined {
+    const scale = this._value.yScale;
+    return scale ? wrapScale(scale) : undefined;
   }
 
   static zipToPoints(

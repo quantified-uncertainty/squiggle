@@ -95,18 +95,18 @@ export const library = [
           frRecord(
             ["xDist", frDist],
             ["yDist", frDist],
-            ["logX", frOptional(frBool)],
-            ["logY", frOptional(frBool)]
+            ["xScale", frOptional(frScale)],
+            ["yScale", frOptional(frScale)]
           ),
         ],
-        ([{ xDist, yDist, logX, logY }]) => {
+        ([{ xDist, yDist, xScale, yScale }]) => {
           return Result.Ok(
             vPlot({
               type: "scatter",
               xDist,
               yDist,
-              logX: logX ?? false,
-              logY: logY ?? false,
+              xScale: xScale ?? undefined,
+              yScale: yScale ?? undefined,
             })
           );
         }

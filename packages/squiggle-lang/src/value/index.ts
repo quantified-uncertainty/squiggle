@@ -213,8 +213,8 @@ export type Plot =
       type: "scatter";
       xDist: BaseDist;
       yDist: BaseDist;
-      logX: boolean;
-      logY: boolean;
+      xScale?: Scale;
+      yScale?: Scale;
     }
   | {
       type: "fn";

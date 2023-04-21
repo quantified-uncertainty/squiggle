@@ -63,6 +63,23 @@ export const FunctionChart1Number: FC<Props> = ({
         yScale,
       });
 
+      if (xSqScale.tag === "log" && functionImage[0].x <= 0) {
+        frame.enter();
+        frame.fillText(
+          "Invalid X Scale settings",
+          frame.width / 2,
+          frame.height / 2,
+          {
+            textAlign: "center",
+            textBaseline: "middle",
+            font: "12px Arial",
+            fillStyle: "red",
+          }
+        );
+        frame.exit();
+        return;
+      }
+
       // line
       frame.enter();
       context.beginPath();
