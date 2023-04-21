@@ -5,6 +5,7 @@ import * as posts from "./quri-posts";
 import * as health from "./health-interventions";
 import * as macrovariables from "./macrovariables";
 import * as purchases from "./things-you-should-buy";
+import * as animals from "./relative-values"
 import { Map } from "immutable";
 
 const items = [
@@ -13,6 +14,7 @@ const items = [
   { catalog: posts.catalog, models: posts.models },
   { catalog: health.catalog, models: health.models },
   { catalog: purchases.catalog, models: purchases.models },
+  { catalog: animals.catalog, models: animals.models },
   { catalog: macrovariables.catalog, models: macrovariables.models },
 ];
 
