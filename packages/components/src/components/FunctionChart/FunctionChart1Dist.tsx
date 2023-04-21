@@ -1,11 +1,4 @@
-import {
-  Env,
-  result,
-  SqError,
-  SqLambda,
-  SqScale,
-  SqValue,
-} from "@quri/squiggle-lang";
+import { Env, result, SqError, SqFnPlot, SqValue } from "@quri/squiggle-lang";
 import * as d3 from "d3";
 import groupBy from "lodash/groupBy.js";
 import * as React from "react";
@@ -20,15 +13,14 @@ import {
 import { Padding } from "../../lib/draw/types.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
+import { sqScaleToD3 } from "../../lib/utility.js";
 import { ErrorAlert } from "../Alert.js";
 import {
   DistributionChart,
   DistributionChartSettings,
 } from "../DistributionChart.js";
 import { NumberShower } from "../NumberShower.js";
-import { FunctionChartSettings } from "./index.js";
 import { getFunctionImage } from "./utils.js";
-import { sqScaleToD3 } from "../../lib/utility.js";
 
 function unwrap<a, b>(x: result<a, b>): a {
   if (x.ok) {
@@ -38,9 +30,7 @@ function unwrap<a, b>(x: result<a, b>): a {
   }
 }
 type FunctionChart1DistProps = {
-  fn: SqLambda;
-  settings: FunctionChartSettings;
-  xScale: SqScale;
+  plot: SqFnPlot;
   distributionChartSettings: DistributionChartSettings;
   environment: Env;
   height: number;
@@ -73,20 +63,14 @@ type Errors = {
 };
 
 const getPercentiles = ({
-  settings,
-  fn,
-  xScale,
+  plot,
   environment,
 }: {
-  settings: FunctionChartSettings;
-  fn: SqLambda;
-  xScale: SqScale;
+  plot: SqFnPlot;
   environment: Env;
 }) => {
   const { functionImage, errors } = getFunctionImage({
-    settings,
-    fn,
-    xScale,
+    plot,
     valueType: "Dist",
   });
 
@@ -118,9 +102,7 @@ const getPercentiles = ({
 };
 
 export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
-  fn,
-  xScale: xSqScale,
-  settings,
+  plot,
   environment,
   distributionChartSettings,
   height: innerHeight,
@@ -129,15 +111,15 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
   const { cursor, initCursor } = useCanvasCursor();
 
   const { data, errors } = useMemo(
-    () => getPercentiles({ settings, fn, xScale: xSqScale, environment }),
-    [environment, fn, settings, xSqScale]
+    () => getPercentiles({ plot, environment }),
+    [plot, environment]
   );
 
   const draw = useCallback(
     ({ context, width }: DrawContext) => {
       context.clearRect(0, 0, width, height);
 
-      const xScale = sqScaleToD3(xSqScale);
+      const xScale = sqScaleToD3(plot.xScale);
       xScale.domain(d3.extent(data, (d) => d.x) as [number, number]);
 
       const yScale = d3
@@ -213,7 +195,7 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
         });
       }
     },
-    [cursor, height, data, xSqScale]
+    [cursor, height, data, plot]
   );
 
   const { ref, width } = useCanvas({ height, init: initCursor, draw });
@@ -238,14 +220,14 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
       cursor.x - d3ref.current.padding.left
     );
     return x
-      ? fn.call([x])
+      ? plot.fn.call([x])
       : {
           ok: false,
           value: SqError.createOtherError(
             "Hover x-coordinate returned NaN. Expected a number."
           ),
         };
-  }, [fn, cursor, width]);
+  }, [plot.fn, cursor, width]);
 
   const showChart =
     mouseItem && mouseItem.ok && mouseItem.value.tag === "Dist" ? (
@@ -259,7 +241,7 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
 
   return (
     <div className="flex flex-col items-stretch">
-      <canvas ref={ref}>Chart for {fn.toString()}</canvas>
+      <canvas ref={ref}>Chart for {plot.toString()}</canvas>
       {showChart}
       {Object.entries(errors).map(([errorName, errorPoints]) => (
         <ErrorAlert key={errorName} heading={errorName}>

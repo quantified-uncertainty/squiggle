@@ -52,6 +52,17 @@ export class SqDistributionsPlot extends SqAbstractPlot<"distributions"> {
 export class SqFnPlot extends SqAbstractPlot<"fn"> {
   tag = "fn" as const;
 
+  static create({ fn, xScale }: { fn: SqLambda; xScale: SqScale }) {
+    return new SqFnPlot(
+      {
+        type: "fn",
+        fn: fn._value,
+        xScale: xScale._value,
+      },
+      fn.location
+    );
+  }
+
   get fn() {
     return new SqLambda(
       this._value.fn,
@@ -61,9 +72,17 @@ export class SqFnPlot extends SqAbstractPlot<"fn"> {
       })
     );
   }
+
   get xScale() {
-    const xScale = this._value.xScale;
-    return xScale ? wrapScale(xScale) : undefined;
+    return wrapScale(this._value.xScale);
+  }
+
+  get points(): number | undefined {
+    return this._value.points;
+  }
+
+  toString() {
+    return this.fn.toString(); // TODO - scale info?
   }
 }
 

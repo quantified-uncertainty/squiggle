@@ -101,13 +101,12 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
         className="h-5 w-5 cursor-pointer text-slate-400 hover:text-slate-500"
         onClick={() => setIsOpen(!isOpen)}
       />
-      {settings.distributionChartSettings || settings.functionChartSettings ? (
+      {settings.distributionChartSettings ? (
         <button
           onClick={() => {
             setSettings(props.value.location, {
               ...settings,
               distributionChartSettings: undefined,
-              functionChartSettings: undefined,
             });
             props.onChange();
           }}

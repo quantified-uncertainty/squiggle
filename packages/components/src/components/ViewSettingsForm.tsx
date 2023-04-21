@@ -1,17 +1,15 @@
 import React from "react";
-import * as yup from "yup";
 import { UseFormRegister } from "react-hook-form";
-import { InputItem } from "./ui/InputItem.js";
+import * as yup from "yup";
+import { distributionSettingsSchema } from "./MultiDistributionChart/index.js";
 import { Checkbox } from "./ui/Checkbox.js";
 import { HeadedSection } from "./ui/HeadedSection.js";
-import { Text } from "./ui/Text.js";
-import { distributionSettingsSchema } from "./MultiDistributionChart/index.js";
-import { functionSettingsSchema } from "./FunctionChart/index.js";
+import { InputItem } from "./ui/InputItem.js";
 import { Radio } from "./ui/Radio.js";
+import { Text } from "./ui/Text.js";
 
 export const viewSettingsSchema = yup.object({}).shape({
   distributionChartSettings: distributionSettingsSchema,
-  functionChartSettings: functionSettingsSchema,
   chartHeight: yup.number().required().positive().integer().default(200),
 });
 
@@ -153,14 +151,6 @@ export const FunctionViewSettingsForm: React.FC<{
           distributions, use [0..10] range by default. To customize the range,
           use <code>Plot.fn</code> function.
         </Text>
-        <div>
-          <InputItem
-            type="number"
-            name="functionChartSettings.count"
-            register={register}
-            label="Points between X min and X max to sample"
-          />
-        </div>
       </div>
     </HeadedSection>
   </div>

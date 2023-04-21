@@ -5,6 +5,7 @@ import {
   SqPlot,
   SqScale,
   SqLinearScale,
+  SqFnPlot,
 } from "@quri/squiggle-lang";
 import { clsx } from "clsx";
 
@@ -167,9 +168,10 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
                 .parameters()
                 .join(",")})`}</div>
               <FunctionChart
-                fn={value.value}
-                xScale={SqLinearScale.create()}
-                settings={settings.functionChartSettings}
+                plot={SqFnPlot.create({
+                  fn: value.value,
+                  xScale: SqLinearScale.create(),
+                })}
                 distributionChartSettings={settings.distributionChartSettings}
                 height={settings.chartHeight}
                 environment={{
@@ -226,12 +228,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
               case "fn": {
                 return (
                   <FunctionChart
-                    fn={plot.fn}
-                    settings={{
-                      ...settings.functionChartSettings,
-                      ...fixed.functionChartSettings,
-                    }}
-                    xScale={plot.xScale ?? SqLinearScale.create()}
+                    plot={plot}
                     distributionChartSettings={
                       settings.distributionChartSettings
                     }

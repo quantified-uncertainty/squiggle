@@ -5,7 +5,10 @@ import { result } from "../utility/result.js";
 import { Lambda } from "../reducer/lambda.js";
 
 export class SqLambda {
-  constructor(private _value: Lambda, public location: SqValueLocation) {}
+  constructor(
+    public _value: Lambda, // public because of SqFnPlot.create
+    public location: SqValueLocation
+  ) {}
 
   parameters() {
     return this._value.getParameters();

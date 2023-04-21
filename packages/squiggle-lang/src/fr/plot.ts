@@ -2,7 +2,6 @@ import { PointMass } from "../dist/SymbolicDist.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
-  frBool,
   frDist,
   frDistOrNumber,
   frLambda,
@@ -69,13 +68,20 @@ export const library = [
     definitions: [
       makeDefinition(
         "fn",
-        [frRecord(["fn", frLambda], ["xScale", frOptional(frScale)])],
-        ([{ fn, xScale }]) => {
+        [
+          frRecord(
+            ["fn", frLambda],
+            ["xScale", frOptional(frScale)],
+            ["points", frOptional(frNumber)]
+          ),
+        ],
+        ([{ fn, xScale, points }]) => {
           return Result.Ok(
             vPlot({
               type: "fn",
               fn,
-              xScale: xScale ?? undefined,
+              xScale: xScale ?? { type: "linear" },
+              points: points ?? undefined,
             })
           );
         }
@@ -105,8 +111,8 @@ export const library = [
               type: "scatter",
               xDist,
               yDist,
-              xScale: xScale ?? undefined,
-              yScale: yScale ?? undefined,
+              xScale: xScale ?? { type: "linear" },
+              yScale: yScale ?? { type: "linear" },
             })
           );
         }

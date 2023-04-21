@@ -1,12 +1,11 @@
 import range from "lodash/range.js";
 
-import { SqLambda, SqScale, SqValue } from "@quri/squiggle-lang";
-
-import { FunctionChartSettings } from "./index.js";
+import { SqFnPlot, SqValue } from "@quri/squiggle-lang";
 
 export const functionChartDefaults = {
   min: 0,
   max: 10,
+  points: 20,
 };
 
 function rangeByCount(start: number, stop: number, count: number) {
@@ -21,20 +20,16 @@ type Subvalue<T> = T extends SqValue["tag"]
   : never;
 
 export function getFunctionImage<T extends Exclude<SqValue["tag"], "Void">>({
-  settings,
-  fn,
-  xScale,
+  plot,
   valueType,
 }: {
-  settings: FunctionChartSettings;
-  fn: SqLambda;
-  xScale: SqScale;
+  plot: SqFnPlot;
   valueType: T;
 }) {
   const chartPointsToRender = rangeByCount(
-    xScale.min ?? functionChartDefaults.min,
-    xScale.max ?? functionChartDefaults.max,
-    settings.count
+    plot.xScale?.min ?? functionChartDefaults.min,
+    plot.xScale?.max ?? functionChartDefaults.max,
+    plot.points ?? functionChartDefaults.points
   );
 
   let functionImage: {
@@ -44,7 +39,7 @@ export function getFunctionImage<T extends Exclude<SqValue["tag"], "Void">>({
   let errors: { x: number; value: string }[] = [];
 
   for (const x of chartPointsToRender) {
-    const result = fn.call([x]);
+    const result = plot.fn.call([x]);
     if (result.ok) {
       if (result.value.tag === valueType) {
         functionImage.push({

@@ -16,7 +16,10 @@ export const wrapScale = (value: Scale): SqScale => {
 abstract class SqAbstractScale<T extends Scale["type"]> {
   abstract tag: T;
 
-  constructor(protected _value: Extract<Scale, { type: T }>) {}
+  constructor(
+    // public because of SqFnPlot.create
+    public _value: Extract<Scale, { type: T }>
+  ) {}
 
   toString() {
     return vScale(this._value).toString();

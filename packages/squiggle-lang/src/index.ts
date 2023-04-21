@@ -17,7 +17,12 @@ export { SqRecord } from "./public/SqRecord.js";
 export { SqLambda } from "./public/SqLambda.js";
 export { SqError, SqFrame } from "./public/SqError.js";
 export { SqShape } from "./public/SqPointSet.js";
-export { SqPlot, SqDistributionsPlot, SqScatterPlot } from "./public/SqPlot.js";
+export {
+  SqPlot,
+  SqDistributionsPlot,
+  SqFnPlot,
+  SqScatterPlot,
+} from "./public/SqPlot.js";
 export { SqScale, SqLinearScale, SqLogScale } from "./public/SqScale.js";
 export { SqParseError, parse } from "./public/parse.js";
 

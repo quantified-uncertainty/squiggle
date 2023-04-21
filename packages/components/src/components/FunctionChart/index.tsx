@@ -2,11 +2,11 @@ import * as React from "react";
 import { FC, useState } from "react";
 import * as yup from "yup";
 
-import { SqLambda, Env, SqError, SqScale } from "@quri/squiggle-lang";
+import { Env, SqError, SqFnPlot, SqLinearScale } from "@quri/squiggle-lang";
 
 import { MessageAlert } from "../Alert.js";
-import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 import { DistributionChartSettings } from "../DistributionChart.js";
+import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 
 import { FunctionChart1Dist } from "./FunctionChart1Dist.js";
 import { FunctionChart1Number } from "./FunctionChart1Number.js";
@@ -16,14 +16,8 @@ export const functionSettingsSchema = yup.object({}).shape({
   count: yup.number().required().positive().integer().default(20).min(2),
 });
 
-export type FunctionChartSettings = yup.InferType<
-  typeof functionSettingsSchema
->;
-
 type FunctionChartProps = {
-  fn: SqLambda;
-  xScale: SqScale;
-  settings: FunctionChartSettings;
+  plot: SqFnPlot;
   distributionChartSettings: DistributionChartSettings;
   environment: Env;
   height: number;
@@ -49,22 +43,21 @@ const FunctionCallErrorAlert: FC<{ error: SqError }> = ({ error }) => {
 };
 
 export const FunctionChart: FC<FunctionChartProps> = ({
-  fn,
-  xScale,
-  settings,
+  plot,
   environment,
   distributionChartSettings,
   height,
 }) => {
-  if (fn.parameters().length !== 1) {
+  if (plot.fn.parameters().length !== 1) {
     return (
       <MessageAlert heading="Function Display Not Supported">
         Only functions with one parameter are displayed.
       </MessageAlert>
     );
   }
-  const result1 = fn.call([xScale.min ?? functionChartDefaults.min]);
-  const result2 = fn.call([xScale.max ?? functionChartDefaults.max]);
+  const xSqScale = plot.xScale ?? SqLinearScale.create();
+  const result1 = plot.fn.call([xSqScale.min ?? functionChartDefaults.min]);
+  const result2 = plot.fn.call([xSqScale.max ?? functionChartDefaults.max]);
   const getValidResult = () => {
     if (result1.ok) {
       return result1;
@@ -84,23 +77,14 @@ export const FunctionChart: FC<FunctionChartProps> = ({
     case "Dist":
       return (
         <FunctionChart1Dist
-          fn={fn}
-          xScale={xScale}
-          settings={settings}
+          plot={plot}
           environment={environment}
           height={height}
           distributionChartSettings={distributionChartSettings}
         />
       );
     case "Number":
-      return (
-        <FunctionChart1Number
-          fn={fn}
-          xScale={xScale}
-          settings={settings}
-          height={height}
-        />
-      );
+      return <FunctionChart1Number plot={plot} height={height} />;
     default:
       return (
         <MessageAlert heading="Function Display Not Supported">

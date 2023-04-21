@@ -3,7 +3,7 @@ import * as d3 from "d3";
 import * as React from "react";
 import { FC, useCallback, useMemo } from "react";
 
-import { SqLambda, SqScale } from "@quri/squiggle-lang";
+import { SqFnPlot } from "@quri/squiggle-lang";
 
 import {
   drawAxes,
@@ -11,31 +11,25 @@ import {
   primaryColor,
 } from "../../lib/draw/index.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
-import { ErrorAlert } from "../Alert.js";
-import { FunctionChartSettings } from "./index.js";
-import { getFunctionImage } from "./utils.js";
 import { sqScaleToD3 } from "../../lib/utility.js";
+import { ErrorAlert } from "../Alert.js";
+import { getFunctionImage } from "./utils.js";
 
 type Props = {
-  fn: SqLambda;
-  xScale: SqScale;
-  settings: FunctionChartSettings;
+  plot: SqFnPlot;
   height: number;
 };
 
 export const FunctionChart1Number: FC<Props> = ({
-  fn,
-  settings,
-  xScale: xSqScale,
+  plot,
   height: innerHeight,
 }) => {
   const height = innerHeight + 30; // consider paddings, should match suggestedPadding below
   const { cursor, initCursor } = useCanvasCursor();
 
   const { functionImage, errors } = useMemo(
-    () =>
-      getFunctionImage({ settings, fn, xScale: xSqScale, valueType: "Number" }),
-    [settings, fn, xSqScale]
+    () => getFunctionImage({ plot, valueType: "Number" }),
+    [plot]
   );
 
   const draw = useCallback(
@@ -48,7 +42,7 @@ export const FunctionChart1Number: FC<Props> = ({
     }) => {
       context.clearRect(0, 0, width, height);
 
-      const xScale = sqScaleToD3(xSqScale);
+      const xScale = sqScaleToD3(plot.xScale);
       xScale.domain(d3.extent(functionImage, (d) => d.x) as [number, number]);
 
       const yScale = d3
@@ -64,7 +58,7 @@ export const FunctionChart1Number: FC<Props> = ({
         yScale,
       });
 
-      if (xSqScale.tag === "log" && functionImage[0].x <= 0) {
+      if (plot.xScale.tag === "log" && functionImage[0].x <= 0) {
         frame.enter();
         frame.fillText(
           "Invalid X Scale settings",
@@ -116,14 +110,14 @@ export const FunctionChart1Number: FC<Props> = ({
         });
       }
     },
-    [functionImage, height, cursor, xSqScale]
+    [functionImage, height, cursor, plot]
   );
 
   const { ref } = useCanvas({ height, init: initCursor, draw });
 
   return (
     <div className="flex flex-col items-stretch">
-      <canvas ref={ref}>Chart for {fn.toString()}</canvas>
+      <canvas ref={ref}>Chart for {plot.toString()}</canvas>
       <div className="space-y-1">
         {errors.map(({ x, value }) => (
           // TODO - group errors with identical value

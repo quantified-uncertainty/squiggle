@@ -213,13 +213,14 @@ export type Plot =
       type: "scatter";
       xDist: BaseDist;
       yDist: BaseDist;
-      xScale?: Scale;
-      yScale?: Scale;
+      xScale: Scale;
+      yScale: Scale;
     }
   | {
       type: "fn";
       fn: Lambda;
-      xScale?: Scale;
+      xScale: Scale;
+      points?: number;
     };
 
 class VPlot implements Indexable {

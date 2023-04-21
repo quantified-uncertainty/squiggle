@@ -160,6 +160,28 @@ export function frRecord<
 ): FRType<
   { [k in K1]: T1 } & { [k in K2]: T2 } & { [k in K3]: T3 } & { [k in K4]: T4 }
 >;
+export function frRecord<
+  K1 extends string,
+  T1,
+  K2 extends string,
+  T2,
+  K3 extends string,
+  T3,
+  K4 extends string,
+  T4,
+  K5 extends string,
+  T5
+>(
+  kv1: [K1, FRType<T1>],
+  kv2: [K2, FRType<T2>],
+  kv3: [K3, FRType<T3>],
+  kv4: [K4, FRType<T4>],
+  kv5: [K5, FRType<T5>]
+): FRType<
+  { [k in K1]: T1 } & { [k in K2]: T2 } & { [k in K3]: T3 } & {
+    [k in K4]: T4;
+  } & { [k in K5]: T5 }
+>;
 
 export function frRecord(
   ...allKvs: [string, FRType<unknown>][]
