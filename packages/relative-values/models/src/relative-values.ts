@@ -7,123 +7,123 @@ import {Map} from "immutable";
 
 function getCatalog(): Catalog {
   const items: Item[] = [
-      {
-        name: "Sinergia Animal (2022)",
-        id: "relative_value_animals_2023_04_n27"
-      },
-      {
-        name: "Faunalytics (2022)",
-        id: "relative_value_animals_2023_04_n15"
-      },
-      {
-        name: "salmon value per year of life",
-        id: "relative_value_animals_2023_04_n9"
-      },
-      {
-        name: "chicken value per lifetime",
-        id: "relative_value_animals_2023_04_n7"
-      },
-			{
-        name: "pig value per year of life",
-        id: "relative_value_animals_2023_04_n3"
-      },
-			{
-        name: "cow value per calorie",
-        id: "relative_value_animals_2023_04_n2"
-      },
-			{
-        name: "Beyond Meat (2022)",
-        id: "relative_value_animals_2023_04_n14"
-      },
-			{
-        name: "Wild Animal Inititative (2022)",
-        id: "relative_value_animals_2023_04_n18"
-      },
-			{
-        name: "pig value per calorie",
-        id: "relative_value_animals_2023_04_n5"
-      },
-			{
-        name: "salmon value per calorie",
-        id: "relative_value_animals_2023_04_n11"
-      },
-			{
-        name: "cow value per year of life",
-        id: "relative_value_animals_2023_04_n0"
-      },
-			{
-        name: "Compassion USA (2022)",
-        id: "relative_value_animals_2023_04_n20"
-      },
-			{
-        name: "Federation of Indian Animal Protection Organisations (2022)",
-        id: "relative_value_animals_2023_04_n23"
-      },
-			{
-        name: "Good Food Institute (2022)",
-        id: "relative_value_animals_2023_04_n17"
-      },
-			{
-        name: "salmon value per lifetime",
-        id: "relative_value_animals_2023_04_n10"
-      },
-			{
-        name: "pig value per lifetime",
-        id: "relative_value_animals_2023_04_n4"
-      },
-			{
-        name: "Open Wing Alliance (2022)",
-        id: "relative_value_animals_2023_04_n13"
-      },
-			{
-        name: "chicken value per calorie",
-        id: "relative_value_animals_2023_04_n8"
-      },
-			{
-        name: "cow value per lifetime",
-        id: "relative_value_animals_2023_04_n1"
-      },
-			{
-        name: "xiaobuVEGAN (2022)",
-        id: "relative_value_animals_2023_04_n28"
-      },
-			{
-        name: "Çiftlik Hayvanlarını Koruma Derneği (CHKD) (2022)",
-        id: "relative_value_animals_2023_04_n19"
-      },
-			{
-        name: "Mercy For Animals (2022)",
-        id: "relative_value_animals_2023_04_n25"
-      },
-			{
-        name: "Fish Welfare Inititative (2022)",
-        id: "relative_value_animals_2023_04_n12"
-      },
-			{
-        name: "Dharma Voices for Animals (202)",
-        id: "relative_value_animals_2023_04_n22"
-      },
-			{
-        name: "Material Innovation Initiative (2022)",
-        id: "relative_value_animals_2023_04_n24"
-      },
-			{
-        name: "Dansk Vegetarisk Forening (DVF) (2022)",
-        id: "relative_value_animals_2023_04_n21"
-      },
-			{
-        name: "New Harvest (2022)",
-        id: "relative_value_animals_2023_04_n26"
-      },
-			{
-        name: "The Humane League (2022)",
-        id: "relative_value_animals_2023_04_n16"
-      },
-			{
-        name: "chicken value per year of life",
-        id: "relative_value_animals_2023_04_n6"
-      }
-    ];
+    {
+      id: "cow_value_human_qalys_per_year_of_life",
+      name: "cow value per year of life"
+    },
+    {
+      id: "cow_value_human_qalys_per_lifetime",
+      name: "cow value per lifetime"
+    },
+    {
+      id: "cow_value_human_qalys_per_calorie",
+      name: "cow value per calorie"
+    },
+    {
+      id: "pig_value_human_qalys_per_year_of_life",
+      name: "pig value per year of life"
+    },
+		{
+      id: "pig_value_human_qalys_per_lifetime",
+      name: "pig value per lifetime"
+    },
+		{
+      id: "pig_value_human_qalys_per_calorie",
+      name: "pig value per calorie"
+    },
+		{
+      id: "chicken_value_human_qalys_per_year_of_life",
+      name: "chicken value per year of life"
+    },
+		{
+      id: "chicken_value_human_qalys_per_lifetime",
+      name: "chicken value per lifetime"
+    },
+		{
+      id: "chicken_value_human_qalys_per_calorie",
+      name: "chicken value per calorie"
+    },
+		{
+      id: "salmon_value_human_qalys_per_year_of_life",
+      name: "salmon value per year of life"
+    },
+		{
+      id: "salmon_value_human_qalys_per_lifetime",
+      name: "salmon value per lifetime"
+    },
+		{
+      id: "salmon_value_human_qalys_per_calorie",
+      name: "salmon value per calorie"
+    },
+		{
+      id: "fish_welfare_initiative_2022_value_estimate",
+      name: "Fish Welfare Initiative (2022)"
+    },
+		{
+      id: "open_wing_alliance_2022_value_estimate",
+      name: "Open Wing Alliance (2022)"
+    },
+		{
+      id: "beyond_meat_2022_value_estimate",
+      name: "Beyond Meat (2022)"
+    },
+		{
+      id: "faunalytics_2022_value_estimate",
+      name: "Faunalytics (2022)"
+    },
+		{
+      id: "the_humane_league_2022_value_estimate",
+      name: "The Humane League (2022)"
+    },
+		{
+      id: "good_food_institute_2022_value_estimate",
+      name: "Good Food Institute (2022)"
+    },
+		{
+      id: "wild_animal_inititative_2022_value_estimate",
+      name: "Wild Animal Inititative (2022)"
+    },
+		{
+      id: "chkd_2022_value_estimate",
+      name: "Çiftlik Hayvanlarını Koruma Derneği (CHKD) (2022)"
+    },
+		{
+      id: "compassion_usa_2022_value_estimate",
+      name: "Compassion USA (2022)"
+    },
+		{
+      id: "dansk_vegetarisk_forening_2022_value_estimate",
+      name: "Dansk Vegetarisk Forening (DVF) (2022)"
+    },
+		{
+      id: "dharma_voices_for_animals_2022_value_estimate",
+      name: "Dharma Voices for Animals (2022)"
+    },
+		{
+      id: "federation_of_indian_animal_protection_organisations_2022_value_estimate",
+      name: "Federation of Indian Animal Protection Organisations (2022)"
+    },
+		{
+      id: "material_innovation_initiative_2022_value_estimate",
+      name: "Material Innovation Initiative (2022)"
+    },
+		{
+      id: "mercy_for_animals_2022_value_estimate",
+      name: "Mercy For Animals (2022)"
+    },
+		{
+      id: "new_harvest_2022_value_estimate",
+      name: "New Harvest (2022)"
+    },
+		{
+      id: "sinergia_animal_2022_value_estimate",
+      name: "Sinergia Animal (2022)"
+    },
+		{
+      id: "xiaobuvegan_2022_value_estimate",
+      name: "xiaobuVEGAN (2022)"
+    }
+  ];
 
   return {
     id: "relative-values-animals-2023-04",
@@ -160,10 +160,10 @@ calories_cow = mixture(0.8M to 1.4M, (500k to 700k) * (weight_cow * non_wastage_
 
 cow_estimates = {
   name: "cow",
-	value_year_in_human_qalys: value_farmed_cow_year_in_human_qalys -> ss,
+  value_year_in_human_qalys: value_farmed_cow_year_in_human_qalys -> ss,
   weight: weight_cow,
-	calories: calories_cow,
-	lifetime: lifetime_cow -> ss
+  calories: calories_cow,
+  lifetime: lifetime_cow -> ss
 }
 
 // Pigs
@@ -183,10 +183,10 @@ calories_pig = weight_pig * meat_yield_pig * kilograms_in_pounds * calories_per_
 
 pig_estimates = {
   name: "pig",
-	value_year_in_human_qalys: value_farmed_pig_year_in_human_qalys -> ss,
+  value_year_in_human_qalys: value_farmed_pig_year_in_human_qalys -> ss,
   weight: weight_pig,
-	calories: calories_pig,
-	lifetime: lifetime_pig -> ss
+  calories: calories_pig,
+  lifetime: lifetime_pig -> ss
 }
 
 // Chickens (broilers)
@@ -205,10 +205,10 @@ calories_chicken = weight_chicken * kilograms_in_pounds * calories_per_pound_of_
 
 chicken_estimates = {
   name: "chicken",
-	value_year_in_human_qalys: value_farmed_chicken_year_in_human_qalys -> ss,
+  value_year_in_human_qalys: value_farmed_chicken_year_in_human_qalys -> ss,
   weight: weight_chicken,
-	calories: calories_chicken,
-	lifetime: lifetime_chicken -> ss
+  calories: calories_chicken,
+  lifetime: lifetime_chicken -> ss
 }
 
 // Fish (salmon)
@@ -226,10 +226,10 @@ calories_salmon = weight_salmon * calories_per_kilogram_of_salmon_meat
 
 salmon_estimates = {
   name: "salmon",
-	value_year_in_human_qalys: value_farmed_salmon_year_in_human_qalys -> ss,
+  value_year_in_human_qalys: value_farmed_salmon_year_in_human_qalys -> ss,
   weight: weight_salmon,
-	calories: calories_salmon,
-	lifetime: lifetime_salmon -> ss
+  calories: calories_salmon,
+  lifetime: lifetime_salmon -> ss
 }
 
 /* 
@@ -253,24 +253,26 @@ improvement_as_proportion_of_lifetime = (0.05 to 0.5) -> ss
 
 value_fwi_fish = 
   fish_potentially_helped * 
-	improvement_as_proportion_of_lifetime * 
-	(salmon_estimates.value_year_in_human_qalys / salmon_estimates.lifetime)
+  improvement_as_proportion_of_lifetime * 
+  (salmon_estimates.value_year_in_human_qalys / salmon_estimates.lifetime)
 
 value_of_shrimp_in_fish = (0.3 to 1)
 // ^ very uncertain, subjective
 
 value_fwi_shrimp = 
   shrimp_potentially_helped * 
-	improvement_as_proportion_of_lifetime * 
-	(salmon_estimates.value_year_in_human_qalys / salmon_estimates.lifetime) *
+  improvement_as_proportion_of_lifetime * 
+  (salmon_estimates.value_year_in_human_qalys / salmon_estimates.lifetime) *
   value_of_shrimp_in_fish
 
 value_fwi_so_far = value_fwi_fish + value_fwi_shrimp
 proportion_fwi_in_2022 = 1/4 to 1/2
 value_fwi  = value_fwi_so_far * proportion_fwi_in_2022
 fwi_item = {
-  name: "Fish Welfare Inititative (2022)",
-	value: value_fwi -> ss 
+  name: "Fish Welfare Initiative",
+  year: 2022, 
+  slug: "fish_welfare_initiative",
+  value: value_fwi -> ss 
 }
 
 /*
@@ -302,11 +304,13 @@ value_owa_2022 = num_corporate_commitments *
   average_duration_fulfilled_commitments *
   average_reduction_in_suffering_of_commitment_per_chicken *
   value_tortured_chicken_year_in_human_qalys *
-	chicken_estimates.lifetime
+  chicken_estimates.lifetime
 
 owa_item = {
-  name: "Open Wing Alliance (2022)",
-	value: value_owa_2022 -> ss
+  name: "Open Wing Alliance",
+  year: 2022, 
+  slug: "open_wing_alliance",
+  value: value_owa_2022 -> ss
 }
 
 /* Beyond Meat */
@@ -330,7 +334,9 @@ value_beyond_meat_year =  cows_saved_if_all_meat_was_counterfactual *
   cow_estimates.value_year_in_human_qalys
 
 beyond_meat_item = {
-  name: "Beyond Meat (2022)",
+  name: "Beyond Meat",
+  year: 2022, 
+  slug: "beyond_meat",
   value: value_beyond_meat_year -> ss
 }
 
@@ -364,7 +370,9 @@ add_uncertainty(dist) = mixture([dist, highly_uncertain_org], [95, 5])
 faunalytics_multiplier = truncateRight(0.01 to 20, 200)
 estimate_faunalytics_value = value_reference_top_animal_org * faunalytics_multiplier
 faunalytic_item = {
-  name: "Faunalytics (2022)",
+  name: "Faunalytics",
+  year: 2022, 
+  slug: "faunalytics",
   value: estimate_faunalytics_value -> add_uncertainty -> ss
 }
 
@@ -373,7 +381,9 @@ faunalytic_item = {
 owa_equivalents_humane_league = 0.5 to 5 // 
 humane_league_value = owa_item.value * owa_equivalents_humane_league
 humane_league_item = {
-  name: "The Humane League (2022)",
+  name: "The Humane League",
+  year: 2022, 
+  slug: "the_humane_league",
   value:  humane_league_value -> add_uncertainty -> ss
 }
 
@@ -387,7 +397,9 @@ value_gfi = mixture(
   [ 2/3, 1/3]
 )
 gfi_item = {
-  name: "Good Food Institute (2022)",
+  name: "Good Food Institute",
+  year: 2022, 
+  slug: "good_food_institute",
   value: value_gfi -> add_uncertainty -> ss
 }
 
@@ -398,7 +410,9 @@ impact_wai_in_fwi_units = mixture(
 ) // i.e., some of the time it produces something really valuable
 value_wai = impact_wai_in_fwi_units * fwi_item.value
 wai_item = {
-  name: "Wild Animal Inititative (2022)",
+  name: "Wild Animal Inititative",
+  year: 2022, 
+  slug: "wild_animal_inititative",
   value: value_wai -> add_uncertainty -> ss
 }
 
@@ -411,7 +425,9 @@ value_chkd = mixture(
   [1/2, 1/2]
 ) 
 chkd_item = {
-  name: "Çiftlik Hayvanlarını Koruma Derneği (CHKD) (2022)",
+  name: "Çiftlik Hayvanlarını Koruma Derneği (CHKD)",
+  year: 2022, 
+  slug: "chkd",
   value: value_chkd -> add_uncertainty -> ss
 }
 
@@ -422,7 +438,9 @@ value_compassion_usa = mixture(
   [1/2, 1/2]
 ) 
 compassion_usa_item = {
-  name: "Compassion USA (2022)",
+  name: "Compassion USA",
+  year: 2022, 
+  slug: "compassion_usa",
   value: value_compassion_usa -> add_uncertainty -> ss
 }
 
@@ -430,21 +448,27 @@ compassion_usa_item = {
 // Dansk Vegetarisk Forening (DVF) is a Denmark-based organization dedicated to increasing the availability of animal-free products, strengthening the animal advocacy movement, and reducing the consumption of animal products. DVF specifically engages in policy work on agricultural reform and the right to access plant-based food, as well as corporate and institutional outreach to food companies to make plant-based options more available. They also conduct research, run a product-labeling scheme, offer an educational program for children and youth, and lead a public outreach program promoting plant-based nutrition. DVF received Movement Grants from ACE in 2020 and 2022. Read Review.
 value_dvf = (value_reference_top_animal_org * tt(0.01 to 3)) // just a reference
 dvf_item = {
-  name: "Dansk Vegetarisk Forening (DVF) (2022)",
+  name: "Dansk Vegetarisk Forening (DVF)",
+  year: 2022, 
+  slug: "dansk_vegetarisk_forening",
   value: value_dvf -> add_uncertainty -> ss
 }
 
 // Dharma Voices for Animals (DVA) is the only international Buddhist animal rights organization in the world. The majority of their work takes place in Sri Lanka, Thailand, Vietnam, and the U.S., but they also work in Germany, Brazil, Finland, Myanmar, and Australia. DVA’s programs align with the specific contexts and priorities of the countries where they work. Many of their programs focus on diet change; however, they also lobby for animal welfare legislation, provide veterinary care, and work with restaurant owners to encourage them to transition their business to veganism. DVA has been an ACE Standout Charity since November 2021. Read Review.
 value_dva = (value_reference_top_animal_org * tt(0.001 to 100))
 dva_item = {
-  name: "Dharma Voices for Animals (202)",
+  name: "Dharma Voices for Animals",
+  year: 2022,
+  slug: "dharma_voices_for_animals",
   value: value_dva -> add_uncertainty -> ss
 }
 
 // Federation of Indian Animal Protection Organisations (FIAPO) is an India-based organization that is primarily dedicated to reducing farmed animal suffering. To a lesser extent, they also work to reduce the suffering of companion animals and animals used for entertainment. Their work focuses on improving animal welfare standards, strengthening the animal advocacy movement, increasing the availability of animal-free products, influencing legislation change, and providing direct help and veterinary care to animals. They also run a vegan pledge program to encourage individuals to decrease their consumption of animal products. FIAPO has been an ACE Standout Charities since December 2019. Read Review.
 value_fiapo = value_reference_top_animal_org * tt(0.01 to 2)
 fiapo_item = {
-  name: "Federation of Indian Animal Protection Organisations (2022)",
+  name: "Federation of Indian Animal Protection Organisations",
+  year: 2022, 
+  slug: "federation_of_indian_animal_protection_organisations",
   value: value_fiapo -> add_uncertainty -> ss
 }
 
@@ -454,36 +478,46 @@ fiapo_item = {
 //Material Innovation Initiative (MII) works to reduce farmed animal suffering by increasing the availability of animal-free products and strengthening the animal advocacy movement. They produce research on animal-free alternatives to existing materials used in the fashion, automotive, and homegoods industries, and they work with investors, corporations, and entrepreneurs to support the development of new products and production processes. They also host events, such as conferences, to create opportunities for the development of new networks in the next-gen materials industry. MII has been an ACE Standout Charity since November 2021. Read Review.
 value_mii = gfi_item.value * tt(0.005 to 0.5)
 mii_item = {
-  name: "Material Innovation Initiative (2022)",
+  name: "Material Innovation Initiative",
+  year: 2022, 
+  slug: "material_innovation_initiative",
   value: value_mii -> add_uncertainty -> ss
 }
 
 // Mercy For Animals (MFA) operates in the U.S., Brazil, Canada, Hong Kong, India, and Mexico. MFA’s work focuses on strengthening the animal advocacy movement and improving animal welfare standards, as well as decreasing the consumption of animal products and increasing the availability of animal-free products. They engage in a variety of farmed animal advocacy programs, often involving the distribution of footage from their undercover investigations of factory farms, which they primarily promote via media outreach and online campaigns. MFA also engage in corporate and institutional outreach, research, lobbying, and policy work. They recruit and train volunteers and support farmers in transitioning away from animal agriculture. MFA was selected as an ACE Top Charity several times between 2014 and 2017, and they have been a Standout Charity since November 2021. Read Review.
 value_mfa = value_reference_top_animal_org * tt(0.05 to 5)
 mfa_item = {
-  name: "Mercy For Animals (2022)",
+  name: "Mercy For Animals",
+  year: 2022, 
+  slug: "mercy_for_animals",
   value: value_mfa -> add_uncertainty -> ss
 }
 
 // New Harvest funds research in cellular agriculture, i.e., the development of animal products using cells instead of animals. Through grant programs, they fund graduate and postdoctoral research projects in the field of cellular agriculture, as well as undergraduate and master-level projects for researchers-in-training. They also carry out public engagement and community-building activities via their podcast, blog, research publications, and research summaries. New Harvest was selected as an ACE Standout Charity in both December 2015 and November 2021. Read Review.
 value_new_harvest = gfi_item.value * tt(0.01 to 0.5)
 new_harvest_item = {
-  name: "New Harvest (2022)",
+  name: "New Harvest",
+  year: 2022, 
+  slug: "new_harvest",
   value: value_new_harvest -> add_uncertainty -> ss
 }
 
 // Sinergia Animal operates in Indonesia, Thailand, Argentina, Brazil, Colombia, Uruguay, Chile, Ecuador, and Peru. They work to improve farmed animal welfare standards, increase the availability of animal-free products, decrease the consumption of animal products, and strengthen the animal advocacy movement. Sinergia Animal engages in corporate outreach to secure animal welfare commitments from major retailers. They also engage in investor and media outreach, policy work, investigations, individual and producer outreach, institutional outreach, and research. Sinergia Animal has been an ACE Standout Charity since November 2018. Read Review.
 value_sinergia_animal = value_reference_top_animal_org * tt(0.05 to 20)
 sinergia_animal_item = {
-  name: "Sinergia Animal (2022)",
+  name: "Sinergia Animal",
+  year: 2022, 
+  slug: "sinergia_animal",
   value: value_sinergia_animal -> add_uncertainty -> ss
 }
 
 //
-//xiaobuVEGAN is a China-based organization working to reduce farmed animal suffering. Their work aims to increase the availability of animal-free products, strengthen the animal advocacy movement, and decrease the consumption of animal products. xiaobuVEGAN engages in institutional outreach, runs an app that provides resources about vegan options in China, and supports dietary change via their vegan challenge program. xiaobuVEGAN has been an ACE Standout Charity since November 2021. Read Review.
+//xiaobuvegan is a china-based organization working to reduce farmed animal suffering. their work aims to increase the availability of animal-free products, strengthen the animal advocacy movement, and decrease the consumption of animal products. xiaobuvegan engages in institutional outreach, runs an app that provides resources about vegan options in china, and supports dietary change via their vegan challenge program. xiaobuvegan has been an ace standout charity since november 2021. read review.
 value_xiaobuVEGAN = value_reference_top_animal_org * truncateRight(mixture([0.1 to 10, 1 to 100], [7/10, 3/10]), 1000)
 xiaobuVEGAN_item = {
-  name: "xiaobuVEGAN (2022)",
+  name: "xiaobuVEGAN",
+  year: 2022, 
+  slug: "xiaobuvegan",
   value: value_xiaobuVEGAN -> add_uncertainty -> ss
 }
 
@@ -498,9 +532,21 @@ toAllAnimalEstimates = {|animal|
     animal.calories
 
   result = [
-    ({name: animal.name + " value per year of life", value: value_year_in_human_qalys}),
-    ({name: animal.name + " value per lifetime", value: value_in_lifetime_human_qalys}),
-    ({name: animal.name + " value per calorie", value: value_per_calorie_human_qalys}),    
+    ({
+      id: animal.name + "_value_human_qalys_per_year_of_life", 
+      name: animal.name + " value per year of life", 
+      value: value_year_in_human_qalys
+    }),
+    ({
+      id: animal.name + "_value_human_qalys_per_lifetime", 
+      name: animal.name + " value per lifetime", 
+      value: value_in_lifetime_human_qalys
+    }),
+    ({
+      id: animal.name + "_value_human_qalys_per_calorie", 
+      name: animal.name + " value per calorie", 
+      value: value_per_calorie_human_qalys
+    }),    
   ]
   result
 }
@@ -514,24 +560,18 @@ organization_items = [
   faunalytic_item, humane_league_item, gfi_item, wai_item, // top orgs
   chkd_item, compassion_usa_item, dvf_item, dva_item, fiapo_item, mii_item, mfa_item, new_harvest_item, sinergia_animal_item, xiaobuVEGAN_item, // standout orgs
 ]
+org_items_with_id = List.map(organization_items, {|i|
+  id_obj = ({id: i.slug + "_" + i.year + "_value_estimate", name: i.name + " (" + i.year + ")"})
+  result = Dict.merge(i, id_obj)
+  result
+})
 
 // All items
-addId = {|xs|
-  l = List.length(xs)
-  helper_list = List.upTo(0, l-1)
-  result = List.map(helper_list, {|i| 
-    obj = xs[i]
-    obj2 = ({id: "relative_value_animals_2023_04_n" + i})
-    result = Dict.merge(obj, obj2)
-    result
-  })
-  result
-} 
-items = [animal_estimates_disaggregated, organization_items] -> List.flatten -> addId -> List.map({|item| [item.name, item]})  -> Dict.fromList
+items = [animal_estimates_disaggregated, org_items_with_id] -> List.flatten // -> List.map({|item| [item.name, item]})  -> Dict.fromList
 
 // Result
 f(a, b) = [items[a].value, items[b].value]
-items
+items -> List.map({|i| ({id: i.id, name: i.name})})
 `};
 }
 
