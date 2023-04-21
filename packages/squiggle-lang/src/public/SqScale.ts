@@ -44,7 +44,7 @@ export class SqLinearScale extends SqAbstractScale<"linear"> {
 export class SqLogScale extends SqAbstractScale<"log"> {
   tag = "log" as const;
 
-  static create({ min, max }: { min: number; max: number }) {
+  static create({ min, max }: { min?: number; max?: number } = {}) {
     return new SqLogScale({ type: "log", min, max });
   }
 
@@ -74,7 +74,7 @@ export class SqSymlogScale extends SqAbstractScale<"symlog"> {
 export class SqPowerScale extends SqAbstractScale<"power"> {
   tag = "power" as const;
 
-  static create(args: { min: number; max: number; exponent: number }) {
+  static create(args: { min?: number; max?: number; exponent: number }) {
     return new SqPowerScale({ type: "power", ...args });
   }
 

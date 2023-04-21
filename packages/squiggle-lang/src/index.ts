@@ -23,7 +23,12 @@ export {
   SqFnPlot,
   SqScatterPlot,
 } from "./public/SqPlot.js";
-export { SqScale, SqLinearScale, SqLogScale } from "./public/SqScale.js";
+export {
+  SqScale,
+  SqLinearScale,
+  SqLogScale,
+  SqPowerScale,
+} from "./public/SqScale.js";
 export { SqParseError, parse } from "./public/parse.js";
 
 export { defaultEnv as defaultEnvironment } from "./dist/env.js";

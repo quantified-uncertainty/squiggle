@@ -2,7 +2,11 @@ import { SqValue } from "@quri/squiggle-lang";
 import React, { useContext, useReducer } from "react";
 
 import { Tooltip } from "../ui/Tooltip.js";
-import { LocalItemSettings, MergedItemSettings } from "./utils.js";
+import {
+  LocalItemSettings,
+  locationToShortName,
+  MergedItemSettings,
+} from "./utils.js";
 import { ViewerContext } from "./ViewerContext.js";
 
 type SettingsMenuParams = {
@@ -44,10 +48,7 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
     setSettingsAndUpdate({ ...settings, collapsed: !settings.collapsed });
   };
 
-  const isTopLevel = location.path.items.length === 0;
-  const name = isTopLevel
-    ? { result: undefined, bindings: "Bindings" }[location.path.root]
-    : location.path.items[location.path.items.length - 1];
+  const name = locationToShortName(location);
 
   return (
     <div>

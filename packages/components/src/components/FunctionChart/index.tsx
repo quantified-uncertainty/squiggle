@@ -1,6 +1,5 @@
 import * as React from "react";
 import { FC, useState } from "react";
-import * as yup from "yup";
 
 import { Env, SqError, SqFnPlot, SqLinearScale } from "@quri/squiggle-lang";
 
@@ -10,10 +9,6 @@ import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 import { FunctionChart1Dist } from "./FunctionChart1Dist.js";
 import { FunctionChart1Number } from "./FunctionChart1Number.js";
 import { functionChartDefaults } from "./utils.js";
-
-export const functionSettingsSchema = yup.object({}).shape({
-  count: yup.number().required().positive().integer().default(20).min(2),
-});
 
 type FunctionChartProps = {
   plot: SqFnPlot;

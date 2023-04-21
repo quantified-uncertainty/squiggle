@@ -54,17 +54,22 @@ export class SqDistributionsPlot extends SqAbstractPlot<"distributions"> {
     distribution,
     xScale,
     yScale,
+    showSummary,
+    title,
   }: {
     distribution: SqDistribution;
-    xScale?: SqScale;
-    yScale?: SqScale;
+    xScale: SqScale;
+    yScale: SqScale;
+    showSummary: boolean;
+    title?: string;
   }) {
     return new SqDistributionsPlot({
       type: "distributions",
       distributions: [{ distribution: distribution._value }],
-      xScale: xScale ? xScale._value : { type: "linear" },
-      yScale: yScale ? yScale._value : { type: "linear" },
-      showSummary: false,
+      xScale: xScale._value,
+      yScale: yScale._value,
+      showSummary,
+      title,
     });
   }
 
@@ -94,26 +99,42 @@ export class SqDistributionsPlot extends SqAbstractPlot<"distributions"> {
 
 export class SqFnPlot extends SqAbstractPlot<"fn"> {
   tag = "fn" as const;
+  // Necessary because wrapped fn location is different based on whether this is a real `Plot.fn` or a wrapper in the components.
+  // This can be removed when we get direct lambda evaluation back.
+  private createdProgrammatically: boolean = false;
 
-  static create({ fn, xScale }: { fn: SqLambda; xScale: SqScale }) {
-    return new SqFnPlot(
+  static create({
+    fn,
+    xScale,
+    points,
+  }: {
+    fn: SqLambda;
+    xScale: SqScale;
+    points?: number;
+  }) {
+    const result = new SqFnPlot(
       {
         type: "fn",
         fn: fn._value,
         xScale: xScale._value,
+        points,
       },
       fn.location
     );
+    result.createdProgrammatically = true;
+    return result;
   }
 
   get fn() {
     return new SqLambda(
       this._value.fn,
       this.location
-        ? new SqValueLocation(this.location.project, this.location.sourceId, {
-            ...this.location.path,
-            items: [...this.location.path.items, "fn"],
-          })
+        ? this.createdProgrammatically
+          ? this.location
+          : new SqValueLocation(this.location.project, this.location.sourceId, {
+              ...this.location.path,
+              items: [...this.location.path.items, "fn"],
+            })
         : undefined
     );
   }

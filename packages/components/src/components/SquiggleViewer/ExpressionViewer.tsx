@@ -2,7 +2,6 @@ import {
   SqDistributionTag,
   SqDistributionsPlot,
   SqFnPlot,
-  SqLinearScale,
   SqPlot,
   SqScale,
   SqValue,
@@ -10,14 +9,19 @@ import {
 import { clsx } from "clsx";
 import React from "react";
 
-import { FunctionChart } from "../FunctionChart/index.js";
 import { DistributionsChart } from "../DistributionsChart/index.js";
+import { FunctionChart } from "../FunctionChart/index.js";
 import { NumberShower } from "../NumberShower.js";
 
 import { ScatterChart } from "../ScatterChart/index.js";
+import {
+  generateDistributionPlotSettings,
+  generateFunctionPlotSettings,
+} from "../ViewSettingsForm.js";
 import { ItemSettingsMenu } from "./ItemSettingsMenu.js";
 import { VariableBox } from "./VariableBox.js";
 import { MergedItemSettings } from "./utils.js";
+import { hasMassBelowZero } from "../../lib/distributionUtils.js";
 
 const VariableList: React.FC<{
   value: SqValue;
@@ -60,6 +64,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
       );
     case "Dist": {
       const distType = value.value.tag;
+
       return (
         <VariableBox
           value={value}
@@ -69,21 +74,39 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
               : ""
           }`}
           renderSettingsMenu={({ onChange }) => {
+            const shape = value.location
+              ? value.value.pointSet(value.location.project.getEnvironment())
+              : undefined;
+
             return (
               <ItemSettingsMenu
                 value={value}
                 onChange={onChange}
+                fixed={
+                  shape?.ok && hasMassBelowZero(shape.value.asShape())
+                    ? {
+                        distributionChartSettings: {
+                          disableLogX: true,
+                        },
+                      }
+                    : undefined
+                }
                 withFunctionSettings={false}
               />
             );
           }}
         >
           {(settings) => {
+            const plot = SqDistributionsPlot.create({
+              distribution: value.value,
+              ...generateDistributionPlotSettings(
+                settings.distributionChartSettings
+              ),
+            });
+
             return (
               <DistributionsChart
-                plot={SqDistributionsPlot.create({
-                  distribution: value.value,
-                })}
+                plot={plot}
                 environment={environment}
                 height={settings.chartHeight}
               />
@@ -146,43 +169,35 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
             );
           }}
         >
-          {(settings) => (
-            <>
-              <div className="text-amber-700 bg-amber-100 rounded-md font-mono p-1 pl-2 mb-3 mt-1 text-sm">{`function(${value.value
-                .parameters()
-                .join(",")})`}</div>
-              <FunctionChart
-                plot={SqFnPlot.create({
-                  fn: value.value,
-                  xScale: SqLinearScale.create(),
-                })}
-                height={settings.chartHeight}
-                environment={{
-                  sampleCount: environment.sampleCount / 10,
-                  xyPointLength: environment.xyPointLength / 10,
-                }}
-              />
-            </>
-          )}
+          {(settings) => {
+            const plot = SqFnPlot.create({
+              fn: value.value,
+              ...generateFunctionPlotSettings(settings),
+            });
+
+            return (
+              <div>
+                <div className="text-amber-700 bg-amber-100 rounded-md font-mono p-1 pl-2 mb-3 mt-1 text-sm">{`function(${value.value
+                  .parameters()
+                  .join(",")})`}</div>
+                <FunctionChart
+                  plot={plot}
+                  height={settings.chartHeight}
+                  environment={{
+                    sampleCount: environment.sampleCount / 10,
+                    xyPointLength: environment.xyPointLength / 10,
+                  }}
+                />
+              </div>
+            );
+          }}
         </VariableBox>
       );
     case "Plot": {
       const plot: SqPlot = value.value;
 
       return (
-        <VariableBox
-          value={value}
-          heading="Plot"
-          renderSettingsMenu={({ onChange }) => {
-            return (
-              <ItemSettingsMenu
-                value={value}
-                onChange={onChange}
-                withFunctionSettings={plot.tag === "fn"}
-              />
-            );
-          }}
-        >
+        <VariableBox value={value} heading="Plot">
           {(settings) => {
             switch (plot.tag) {
               case "distributions":

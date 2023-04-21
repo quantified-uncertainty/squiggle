@@ -208,8 +208,7 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
     xScale: AnyChartScale;
   }>();
 
-  //TODO: This custom error handling is a bit hacky and should be improved.
-  const mouseItem: result<SqValue, SqError> | undefined = useMemo(() => {
+  const mouseX: number | undefined = useMemo(() => {
     if (!d3ref.current || !cursor || width === undefined) {
       return;
     }
@@ -219,18 +218,20 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
     ) {
       return;
     }
-    const x = d3ref.current.xScale.invert(
-      cursor.x - d3ref.current.padding.left
-    );
-    return x
-      ? plot.fn.call([x])
+    return d3ref.current.xScale.invert(cursor.x - d3ref.current.padding.left);
+  }, [cursor, width]);
+
+  //TODO: This custom error handling is a bit hacky and should be improved.
+  const mouseItem: result<SqValue, SqError> | undefined = useMemo(() => {
+    return mouseX
+      ? plot.fn.call([mouseX])
       : {
           ok: false,
           value: SqError.createOtherError(
             "Hover x-coordinate returned NaN. Expected a number."
           ),
         };
-  }, [plot.fn, cursor, width]);
+  }, [plot.fn, mouseX]);
 
   const showChart =
     mouseItem && mouseItem.ok && mouseItem.value.tag === "Dist" ? (
@@ -239,6 +240,11 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
           distribution: mouseItem.value.value,
           xScale: SqLinearScale.create(), // TODO - pass yScale from FnPlot?
           yScale: SqLinearScale.create(),
+          showSummary: false,
+          title:
+            mouseX === undefined
+              ? undefined
+              : `f(${d3.format(",.4r")(mouseX)})`, // TODO - use an original function name? it could be obtained with `locationToShortName`, but there's a corner case for arrays.
         })}
         environment={environment}
         height={50}
