@@ -145,6 +145,7 @@ export const ListViewTable: FC<TableProps> = ({
                   id2={denominatorItem.id}
                   model={model}
                   uncertaintyPercentiles={uncertaintyPercentiles}
+                  showRange={true}
                 />
               </div>
             </Fragment>
