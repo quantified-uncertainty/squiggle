@@ -1,6 +1,4 @@
 import { Scale, vScale } from "../value/index.js";
-import { SqScaleValue } from "./SqValue.js";
-import { SqValueLocation } from "./SqValueLocation.js";
 
 export const wrapScale = (value: Scale): SqScale => {
   switch (value.type) {
@@ -10,6 +8,8 @@ export const wrapScale = (value: Scale): SqScale => {
       return new SqLogScale(value);
     case "symlog":
       return new SqSymlogScale(value);
+    case "power":
+      return new SqPowerScale(value);
   }
 };
 
@@ -71,4 +71,22 @@ export class SqSymlogScale extends SqAbstractScale<"symlog"> {
   }
 }
 
-export type SqScale = SqLinearScale | SqLogScale | SqSymlogScale;
+export class SqPowerScale extends SqAbstractScale<"power"> {
+  tag = "power" as const;
+
+  static create(args: { min: number; max: number; exponent: number }) {
+    return new SqPowerScale({ type: "power", ...args });
+  }
+
+  get min() {
+    return this._value.min;
+  }
+  get max() {
+    return this._value.max;
+  }
+  get exponent() {
+    return this._value.exponent;
+  }
+}
+
+export type SqScale = SqLinearScale | SqLogScale | SqSymlogScale | SqPowerScale;

@@ -29,6 +29,10 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
   // So we use `forceUpdate` to force rerendering.
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
+  if (!location) {
+    throw new Error("Can't display a locationless value");
+  }
+
   const settings = getSettings(location);
 
   const setSettingsAndUpdate = (newSettings: LocalItemSettings) => {

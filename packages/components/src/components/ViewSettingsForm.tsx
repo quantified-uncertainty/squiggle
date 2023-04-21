@@ -1,11 +1,9 @@
 import React from "react";
 import { UseFormRegister } from "react-hook-form";
 import * as yup from "yup";
-import { distributionSettingsSchema } from "./MultiDistributionChart/index.js";
-import { Checkbox } from "./ui/Checkbox.js";
+import { distributionSettingsSchema } from "./DistributionsChart/index.js";
 import { HeadedSection } from "./ui/HeadedSection.js";
 import { InputItem } from "./ui/InputItem.js";
-import { Radio } from "./ui/Radio.js";
 import { Text } from "./ui/Text.js";
 
 export const viewSettingsSchema = yup.object({}).shape({
@@ -57,83 +55,11 @@ export const DistributionViewSettingsForm: React.FC<{
   return (
     <div className="pt-8">
       <HeadedSection title="Distribution Display Settings">
-        <div className="space-y-4">
-          <Checkbox
-            register={register}
-            name="distributionChartSettings.showSummary"
-            label="Show summary statistics"
-          />
-          <div className="space-y-2">
-            <Radio
-              register={register}
-              name="distributionChartSettings.xScale"
-              label="X Scale"
-              initialId={fixed?.distributionChartSettings?.xScale ?? "linear"}
-              options={[
-                {
-                  id: "linear",
-                  name: "Linear",
-                },
-                {
-                  id: "log",
-                  name: "Logarithmic",
-                  ...(fixed?.distributionChartSettings?.disableLogX
-                    ? {
-                        disabled: true,
-                        tooltip:
-                          "Your distribution has mass lower than or equal to 0. Log only works on strictly positive values.",
-                      }
-                    : null),
-                },
-                {
-                  id: "exp",
-                  name: "Exponential",
-                },
-              ]}
-            />
-            <Radio
-              register={register}
-              name="distributionChartSettings.yScale"
-              label="Y Scale"
-              initialId={fixed?.distributionChartSettings?.yScale ?? "linear"}
-              options={[
-                {
-                  id: "linear",
-                  name: "Linear",
-                },
-                // log Y is hidden because it almost always causes an empty chart
-                {
-                  id: "exp",
-                  name: "Exponential",
-                },
-              ]}
-            />
-          </div>
-          <InputItem
-            name="distributionChartSettings.minX"
-            type="number"
-            register={register}
-            label="Min X Value"
-          />
-          <InputItem
-            name="distributionChartSettings.maxX"
-            type="number"
-            register={register}
-            label="Max X Value"
-          />
-          <InputItem
-            name="distributionChartSettings.title"
-            type="text"
-            register={register}
-            label="Title"
-          />
-          <InputItem
-            name="distributionChartSettings.tickFormat"
-            type="text"
-            register={register}
-            label="Tick Format"
-          />
-        </div>
+        <Text>
+          Distribution plots can now be configured with arguments to{" "}
+          <code>Plot.dist</code>
+          and <code>Plot.dists</code> functions.
+        </Text>
       </HeadedSection>
     </div>
   );
@@ -145,13 +71,11 @@ export const FunctionViewSettingsForm: React.FC<{
 }> = ({ register, fixed }) => (
   <div className="pt-8">
     <HeadedSection title="Function Display Settings">
-      <div className="space-y-6">
-        <Text>
-          When displaying functions of single variables that return numbers or
-          distributions, use [0..10] range by default. To customize the range,
-          use <code>Plot.fn</code> function.
-        </Text>
-      </div>
+      <Text>
+        When displaying functions of single variables that return numbers or
+        distributions, we use <code>[0..10]</code> range by default. To
+        customize the range, use <code>Plot.fn</code> function.
+      </Text>
     </HeadedSection>
   </div>
 );

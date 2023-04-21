@@ -10,7 +10,10 @@ import { SqRecord } from "./SqRecord.js";
 import { SqScale, wrapScale } from "./SqScale.js";
 import { SqValueLocation } from "./SqValueLocation.js";
 
-export const wrapValue = (value: Value, location: SqValueLocation): SqValue => {
+export const wrapValue = (
+  value: Value,
+  location?: SqValueLocation
+): SqValue => {
   const tag = value.type;
 
   switch (value.type) {
@@ -50,7 +53,7 @@ export abstract class SqAbstractValue<T extends string, J> {
 
   constructor(
     protected _value: Extract<Value, { type: T }>,
-    public location: SqValueLocation
+    public location?: SqValueLocation
   ) {}
 
   toString() {

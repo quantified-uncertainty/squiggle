@@ -28,7 +28,7 @@ const ItemSettingsModal: React.FC<
   const { setSettings, getSettings, getMergedSettings } =
     useContext(ViewerContext);
 
-  const mergedSettings = merge(getMergedSettings(value.location), fixed);
+  const mergedSettings = merge(getMergedSettings(value.location!), fixed);
 
   const { register, watch } = useForm({
     resolver: yupResolver(viewSettingsSchema),
@@ -36,8 +36,8 @@ const ItemSettingsModal: React.FC<
   });
   useEffect(() => {
     const subscription = watch((vars) => {
-      const settings = getSettings(value.location); // get the latest version
-      setSettings(value.location, merge({}, settings, vars));
+      const settings = getSettings(value.location!); // get the latest version
+      setSettings(value.location!, merge({}, settings, vars));
       onChange();
     });
     return () => subscription.unsubscribe();
@@ -49,7 +49,7 @@ const ItemSettingsModal: React.FC<
     <Modal container={getLeftPanelElement()} close={close}>
       <Modal.Header>
         Chart settings
-        {value.location.path.items.length ? (
+        {value.location!.path.items.length ? (
           <>
             {" for "}
             <span
@@ -57,7 +57,7 @@ const ItemSettingsModal: React.FC<
               className="cursor-pointer"
               onClick={resetScroll}
             >
-              {locationAsString(value.location)}
+              {locationAsString(value.location!)}
             </span>{" "}
           </>
         ) : (
@@ -85,7 +85,7 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
   if (!enableLocalSettings) {
     return null;
   }
-  const settings = getSettings(props.value.location);
+  const settings = getSettings(props.value.location!);
 
   const resetScroll = () => {
     if (!ref.current) return;
@@ -104,7 +104,7 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
       {settings.distributionChartSettings ? (
         <button
           onClick={() => {
-            setSettings(props.value.location, {
+            setSettings(props.value.location!, {
               ...settings,
               distributionChartSettings: undefined,
             });

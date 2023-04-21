@@ -73,4 +73,31 @@ export const library = [
       }),
     ],
   }),
+  maker.make({
+    name: "power",
+    output: "Scale",
+    examples: [`Scale.power({ min: 1, max: 100, exponent: 0.1 })`],
+    definitions: [
+      makeDefinition(
+        "power",
+        [
+          frRecord(
+            ["min", frOptional(frNumber)],
+            ["max", frOptional(frNumber)],
+            ["exponent", frNumber]
+          ),
+        ],
+        ([{ min, max, exponent }]) => {
+          return Result.Ok(
+            vScale({
+              type: "power",
+              min: min ?? undefined,
+              max: max ?? undefined,
+              exponent,
+            })
+          );
+        }
+      ),
+    ],
+  }),
 ];

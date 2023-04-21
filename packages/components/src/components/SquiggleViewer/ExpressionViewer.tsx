@@ -1,28 +1,23 @@
-import React from "react";
 import {
   SqDistributionTag,
-  SqValue,
+  SqDistributionsPlot,
+  SqFnPlot,
+  SqLinearScale,
   SqPlot,
   SqScale,
-  SqLinearScale,
-  SqFnPlot,
+  SqValue,
 } from "@quri/squiggle-lang";
 import { clsx } from "clsx";
+import React from "react";
 
-import { NumberShower } from "../NumberShower.js";
-import { DistributionChart } from "../DistributionChart.js";
-import {
-  sqPlotToPlot,
-  MultiDistributionChart,
-} from "../MultiDistributionChart/index.js";
 import { FunctionChart } from "../FunctionChart/index.js";
+import { DistributionsChart } from "../DistributionsChart/index.js";
+import { NumberShower } from "../NumberShower.js";
 
-import { VariableBox } from "./VariableBox.js";
-import { ItemSettingsMenu } from "./ItemSettingsMenu.js";
-import { hasMassBelowZero } from "../../lib/distributionUtils.js";
-import { MergedItemSettings } from "./utils.js";
-import { PartialViewSettings } from "../ViewSettingsForm.js";
 import { ScatterChart } from "../ScatterChart/index.js";
+import { ItemSettingsMenu } from "./ItemSettingsMenu.js";
+import { VariableBox } from "./VariableBox.js";
+import { MergedItemSettings } from "./utils.js";
 
 const VariableList: React.FC<{
   value: SqValue;
@@ -34,7 +29,7 @@ const VariableList: React.FC<{
       <div
         className={clsx(
           "space-y-3",
-          value.location.path.items.length ? "pt-1 mt-1" : null
+          value.location!.path.items.length ? "pt-1 mt-1" : null
         )}
       >
         {children(settings)}
@@ -50,7 +45,7 @@ export interface Props {
 }
 
 export const ExpressionViewer: React.FC<Props> = ({ value }) => {
-  const environment = value.location.project.getEnvironment();
+  const environment = value.location!.project.getEnvironment();
 
   switch (value.tag) {
     case "Number":
@@ -74,22 +69,10 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
               : ""
           }`}
           renderSettingsMenu={({ onChange }) => {
-            const shape = value.value.pointSet(
-              value.location.project.getEnvironment()
-            );
             return (
               <ItemSettingsMenu
                 value={value}
                 onChange={onChange}
-                fixed={
-                  shape.ok && hasMassBelowZero(shape.value.asShape())
-                    ? {
-                        distributionChartSettings: {
-                          disableLogX: true,
-                        },
-                      }
-                    : undefined
-                }
                 withFunctionSettings={false}
               />
             );
@@ -97,11 +80,12 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
         >
           {(settings) => {
             return (
-              <DistributionChart
-                distribution={value.value}
+              <DistributionsChart
+                plot={SqDistributionsPlot.create({
+                  distribution: value.value,
+                })}
                 environment={environment}
                 height={settings.chartHeight}
-                settings={settings.distributionChartSettings}
               />
             );
           }}
@@ -172,7 +156,6 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
                   fn: value.value,
                   xScale: SqLinearScale.create(),
                 })}
-                distributionChartSettings={settings.distributionChartSettings}
                 height={settings.chartHeight}
                 environment={{
                   sampleCount: environment.sampleCount / 10,
@@ -185,19 +168,6 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
       );
     case "Plot": {
       const plot: SqPlot = value.value;
-      const fixed: PartialViewSettings = {};
-      const disableLogX =
-        plot.tag === "distributions"
-          ? plot.distributions.some((x) => {
-              let pointSet = x.distribution.pointSet(environment);
-              return pointSet.ok && hasMassBelowZero(pointSet.value.asShape());
-            })
-          : false;
-      if (disableLogX) {
-        fixed.distributionChartSettings = {
-          disableLogX: true,
-        };
-      }
 
       return (
         <VariableBox
@@ -208,7 +178,6 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
               <ItemSettingsMenu
                 value={value}
                 onChange={onChange}
-                fixed={fixed}
                 withFunctionSettings={plot.tag === "fn"}
               />
             );
@@ -218,20 +187,16 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
             switch (plot.tag) {
               case "distributions":
                 return (
-                  <MultiDistributionChart
-                    plot={sqPlotToPlot(plot)}
+                  <DistributionsChart
+                    plot={plot}
                     environment={environment}
                     height={settings.chartHeight}
-                    settings={settings.distributionChartSettings}
                   />
                 );
               case "fn": {
                 return (
                   <FunctionChart
                     plot={plot}
-                    distributionChartSettings={
-                      settings.distributionChartSettings
-                    }
                     height={settings.chartHeight}
                     environment={{
                       sampleCount: environment.sampleCount / 10,

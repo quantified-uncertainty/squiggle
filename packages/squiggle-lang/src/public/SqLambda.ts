@@ -7,7 +7,7 @@ import { Lambda } from "../reducer/lambda.js";
 export class SqLambda {
   constructor(
     public _value: Lambda, // public because of SqFnPlot.create
-    public location: SqValueLocation
+    public location?: SqValueLocation
   ) {}
 
   parameters() {
@@ -15,6 +15,9 @@ export class SqLambda {
   }
 
   call(args: (number | string)[]): result<SqValue, SqError> {
+    if (!this.location) {
+      throw new Error("Can't call a location-less Lambda");
+    }
     const { project, sourceId } = this.location;
     // Might be good to use uuid instead, but there's no way to remove sources from projects.
     // So this is not thread-safe.

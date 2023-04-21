@@ -39,6 +39,17 @@ export const Discrete: Story = {
   },
 };
 
+export const Scales: Story = {
+  name: "Continuous with scales",
+  args: {
+    code: `Plot.dist({
+  dist: -1 to 5,
+  xScale: Scale.symlog(),
+  yScale: Scale.power({ exponent: 0.1 }),
+})`,
+  },
+};
+
 /**
  * This feature is broken for now.
  */

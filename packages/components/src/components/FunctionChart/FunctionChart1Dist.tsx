@@ -1,4 +1,12 @@
-import { Env, result, SqError, SqFnPlot, SqValue } from "@quri/squiggle-lang";
+import {
+  Env,
+  result,
+  SqDistributionsPlot,
+  SqError,
+  SqFnPlot,
+  SqLinearScale,
+  SqValue,
+} from "@quri/squiggle-lang";
 import * as d3 from "d3";
 import groupBy from "lodash/groupBy.js";
 import * as React from "react";
@@ -15,10 +23,7 @@ import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
 import { sqScaleToD3 } from "../../lib/utility.js";
 import { ErrorAlert } from "../Alert.js";
-import {
-  DistributionChart,
-  DistributionChartSettings,
-} from "../DistributionChart.js";
+import { DistributionsChart } from "../DistributionsChart/index.js";
 import { NumberShower } from "../NumberShower.js";
 import { getFunctionImage } from "./utils.js";
 
@@ -31,7 +36,6 @@ function unwrap<a, b>(x: result<a, b>): a {
 }
 type FunctionChart1DistProps = {
   plot: SqFnPlot;
-  distributionChartSettings: DistributionChartSettings;
   environment: Env;
   height: number;
 };
@@ -104,7 +108,6 @@ const getPercentiles = ({
 export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
   plot,
   environment,
-  distributionChartSettings,
   height: innerHeight,
 }) => {
   const height = innerHeight + 30; // consider paddings, should match suggestedPadding below
@@ -231,11 +234,14 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
 
   const showChart =
     mouseItem && mouseItem.ok && mouseItem.value.tag === "Dist" ? (
-      <DistributionChart
-        distribution={mouseItem.value.value}
+      <DistributionsChart
+        plot={SqDistributionsPlot.create({
+          distribution: mouseItem.value.value,
+          xScale: SqLinearScale.create(), // TODO - pass yScale from FnPlot?
+          yScale: SqLinearScale.create(),
+        })}
         environment={environment}
         height={50}
-        settings={distributionChartSettings}
       />
     ) : null;
 

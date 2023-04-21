@@ -3,14 +3,23 @@ import { SampleSetDist } from "../dist/SampleSetDist/index.js";
 import { Env } from "../dist/env.js";
 import * as Result from "../utility/result.js";
 import { Plot, vPlot } from "../value/index.js";
-import { SqSampleSetDistribution, wrapDistribution } from "./SqDistribution.js";
+import {
+  SqDistribution,
+  SqSampleSetDistribution,
+  wrapDistribution,
+} from "./SqDistribution.js";
 import { SqError } from "./SqError.js";
 import { SqLambda } from "./SqLambda.js";
-import { SqScale, wrapScale } from "./SqScale.js";
+import { SqLinearScale, SqScale, wrapScale } from "./SqScale.js";
 import { SqPlotValue } from "./SqValue.js";
 import { SqValueLocation } from "./SqValueLocation.js";
 
-export const wrapPlot = (value: Plot, location: SqValueLocation): SqPlot => {
+type LabeledSqDistribution = {
+  name?: string;
+  distribution: SqDistribution;
+};
+
+export const wrapPlot = (value: Plot, location?: SqValueLocation): SqPlot => {
   switch (value.type) {
     case "distributions":
       return new SqDistributionsPlot(value, location);
@@ -26,7 +35,7 @@ abstract class SqAbstractPlot<T extends Plot["type"]> {
 
   constructor(
     protected _value: Extract<Plot, { type: T }>,
-    public location: SqValueLocation
+    public location?: SqValueLocation
   ) {}
 
   toString() {
@@ -41,11 +50,45 @@ abstract class SqAbstractPlot<T extends Plot["type"]> {
 export class SqDistributionsPlot extends SqAbstractPlot<"distributions"> {
   tag = "distributions" as const;
 
-  get distributions() {
+  static create({
+    distribution,
+    xScale,
+    yScale,
+  }: {
+    distribution: SqDistribution;
+    xScale?: SqScale;
+    yScale?: SqScale;
+  }) {
+    return new SqDistributionsPlot({
+      type: "distributions",
+      distributions: [{ distribution: distribution._value }],
+      xScale: xScale ? xScale._value : { type: "linear" },
+      yScale: yScale ? yScale._value : { type: "linear" },
+      showSummary: false,
+    });
+  }
+
+  get distributions(): LabeledSqDistribution[] {
     return this._value.distributions.map(({ name, distribution }) => ({
       name,
       distribution: wrapDistribution(distribution),
     }));
+  }
+
+  get title(): string | undefined {
+    return this._value.title;
+  }
+
+  get showSummary(): boolean {
+    return this._value.showSummary;
+  }
+
+  get xScale(): SqScale {
+    return wrapScale(this._value.xScale);
+  }
+
+  get yScale(): SqScale {
+    return wrapScale(this._value.yScale);
   }
 }
 
@@ -66,10 +109,12 @@ export class SqFnPlot extends SqAbstractPlot<"fn"> {
   get fn() {
     return new SqLambda(
       this._value.fn,
-      new SqValueLocation(this.location.project, this.location.sourceId, {
-        ...this.location.path,
-        items: [...this.location.path.items, "fn"],
-      })
+      this.location
+        ? new SqValueLocation(this.location.project, this.location.sourceId, {
+            ...this.location.path,
+            items: [...this.location.path.items, "fn"],
+          })
+        : undefined
     );
   }
 

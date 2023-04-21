@@ -200,7 +200,7 @@ class VVoid {
 export const vVoid = () => new VVoid();
 
 export type LabeledDistribution = {
-  name: string;
+  name?: string;
   distribution: BaseDist;
 };
 
@@ -208,6 +208,10 @@ export type Plot =
   | {
       type: "distributions";
       distributions: LabeledDistribution[];
+      xScale: Scale;
+      yScale: Scale;
+      title?: string;
+      showSummary: boolean;
     }
   | {
       type: "scatter";
@@ -270,6 +274,12 @@ export type Scale =
       type: "symlog";
       min?: number;
       max?: number;
+    }
+  | {
+      type: "power";
+      min?: number;
+      max?: number;
+      exponent: number;
     };
 
 class VScale {
@@ -284,6 +294,8 @@ class VScale {
         return "Logarithmic scale";
       case "symlog":
         return "Symlog scale";
+      case "power":
+        return `Power scale (${this.value.exponent})`;
     }
   }
 }

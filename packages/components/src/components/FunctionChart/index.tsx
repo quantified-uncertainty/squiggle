@@ -5,7 +5,6 @@ import * as yup from "yup";
 import { Env, SqError, SqFnPlot, SqLinearScale } from "@quri/squiggle-lang";
 
 import { MessageAlert } from "../Alert.js";
-import { DistributionChartSettings } from "../DistributionChart.js";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 
 import { FunctionChart1Dist } from "./FunctionChart1Dist.js";
@@ -18,7 +17,6 @@ export const functionSettingsSchema = yup.object({}).shape({
 
 type FunctionChartProps = {
   plot: SqFnPlot;
-  distributionChartSettings: DistributionChartSettings;
   environment: Env;
   height: number;
 };
@@ -45,7 +43,6 @@ const FunctionCallErrorAlert: FC<{ error: SqError }> = ({ error }) => {
 export const FunctionChart: FC<FunctionChartProps> = ({
   plot,
   environment,
-  distributionChartSettings,
   height,
 }) => {
   if (plot.fn.parameters().length !== 1) {
@@ -80,7 +77,6 @@ export const FunctionChart: FC<FunctionChartProps> = ({
           plot={plot}
           environment={environment}
           height={height}
-          distributionChartSettings={distributionChartSettings}
         />
       );
     case "Number":
