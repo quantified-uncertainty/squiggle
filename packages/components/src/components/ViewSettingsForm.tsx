@@ -150,25 +150,10 @@ export const FunctionViewSettingsForm: React.FC<{
       <div className="space-y-6">
         <Text>
           When displaying functions of single variables that return numbers or
-          distributions, we need to use defaults for the x-axis. We need to
-          select a minimum and maximum value of x to sample, and a number n of
-          the number of points to sample.
+          distributions, use [0..10] range by default. To customize the range,
+          use <code>Plot.fn</code> function.
         </Text>
-        <div className="space-y-4">
-          <InputItem
-            type="number"
-            name="functionChartSettings.start"
-            register={register}
-            fixed={fixed?.functionChartSettings?.start}
-            label="Min X Value"
-          />
-          <InputItem
-            type="number"
-            name="functionChartSettings.stop"
-            register={register}
-            fixed={fixed?.functionChartSettings?.stop}
-            label="Max X Value"
-          />
+        <div>
           <InputItem
             type="number"
             name="functionChartSettings.count"

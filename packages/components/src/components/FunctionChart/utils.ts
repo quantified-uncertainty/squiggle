@@ -1,8 +1,13 @@
 import range from "lodash/range.js";
 
-import { SqLambda, SqValue } from "@quri/squiggle-lang";
+import { SqLambda, SqScale, SqValue } from "@quri/squiggle-lang";
 
 import { FunctionChartSettings } from "./index.js";
+
+export const functionChartDefaults = {
+  min: 0,
+  max: 10,
+};
 
 function rangeByCount(start: number, stop: number, count: number) {
   const step = (stop - start) / (count - 1);
@@ -18,15 +23,17 @@ type Subvalue<T> = T extends SqValue["tag"]
 export function getFunctionImage<T extends Exclude<SqValue["tag"], "Void">>({
   settings,
   fn,
+  xScale,
   valueType,
 }: {
   settings: FunctionChartSettings;
   fn: SqLambda;
+  xScale: SqScale;
   valueType: T;
 }) {
   const chartPointsToRender = rangeByCount(
-    settings.start,
-    settings.stop,
+    xScale.min ?? functionChartDefaults.min,
+    xScale.max ?? functionChartDefaults.max,
     settings.count
   );
 

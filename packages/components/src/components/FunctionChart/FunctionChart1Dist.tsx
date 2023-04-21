@@ -75,15 +75,18 @@ type Errors = {
 const getPercentiles = ({
   settings,
   fn,
+  xScale,
   environment,
 }: {
   settings: FunctionChartSettings;
   fn: SqLambda;
+  xScale: SqScale;
   environment: Env;
 }) => {
   const { functionImage, errors } = getFunctionImage({
     settings,
     fn,
+    xScale,
     valueType: "Dist",
   });
 
@@ -126,8 +129,8 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
   const { cursor, initCursor } = useCanvasCursor();
 
   const { data, errors } = useMemo(
-    () => getPercentiles({ settings, fn, environment }),
-    [environment, fn, settings]
+    () => getPercentiles({ settings, fn, xScale: xSqScale, environment }),
+    [environment, fn, settings, xSqScale]
   );
 
   const draw = useCallback(

@@ -10,10 +10,9 @@ import { DistributionChartSettings } from "../DistributionChart.js";
 
 import { FunctionChart1Dist } from "./FunctionChart1Dist.js";
 import { FunctionChart1Number } from "./FunctionChart1Number.js";
+import { functionChartDefaults } from "./utils.js";
 
 export const functionSettingsSchema = yup.object({}).shape({
-  start: yup.number().required().positive().integer().default(0).min(0),
-  stop: yup.number().required().positive().integer().default(10).min(0),
   count: yup.number().required().positive().integer().default(20).min(2),
 });
 
@@ -64,8 +63,8 @@ export const FunctionChart: FC<FunctionChartProps> = ({
       </MessageAlert>
     );
   }
-  const result1 = fn.call([xScale.min ?? settings.start]);
-  const result2 = fn.call([xScale.max ?? settings.stop]);
+  const result1 = fn.call([xScale.min ?? functionChartDefaults.min]);
+  const result2 = fn.call([xScale.max ?? functionChartDefaults.max]);
   const getValidResult = () => {
     if (result1.ok) {
       return result1;

@@ -33,8 +33,9 @@ export const FunctionChart1Number: FC<Props> = ({
   const { cursor, initCursor } = useCanvasCursor();
 
   const { functionImage, errors } = useMemo(
-    () => getFunctionImage({ settings, fn, valueType: "Number" }),
-    [settings, fn]
+    () =>
+      getFunctionImage({ settings, fn, xScale: xSqScale, valueType: "Number" }),
+    [settings, fn, xSqScale]
   );
 
   const draw = useCallback(

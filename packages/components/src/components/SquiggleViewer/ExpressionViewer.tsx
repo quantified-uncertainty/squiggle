@@ -168,10 +168,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
                 .join(",")})`}</div>
               <FunctionChart
                 fn={value.value}
-                xScale={SqLinearScale.create({
-                  min: settings.functionChartSettings.start,
-                  max: settings.functionChartSettings.stop,
-                })}
+                xScale={SqLinearScale.create()}
                 settings={settings.functionChartSettings}
                 distributionChartSettings={settings.distributionChartSettings}
                 height={settings.chartHeight}
@@ -198,16 +195,6 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
         fixed.distributionChartSettings = {
           disableLogX: true,
         };
-      }
-      fixed.functionChartSettings = {};
-      if (plot.tag === "fn" && plot.xScale) {
-        const { min, max } = plot.xScale;
-        if (min !== undefined) {
-          fixed.functionChartSettings.start = min;
-        }
-        if (max !== undefined) {
-          fixed.functionChartSettings.stop = max;
-        }
       }
 
       return (
@@ -244,13 +231,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
                       ...settings.functionChartSettings,
                       ...fixed.functionChartSettings,
                     }}
-                    xScale={
-                      plot.xScale ??
-                      SqLinearScale.create({
-                        min: settings.functionChartSettings.start,
-                        max: settings.functionChartSettings.stop,
-                      })
-                    }
+                    xScale={plot.xScale ?? SqLinearScale.create()}
                     distributionChartSettings={
                       settings.distributionChartSettings
                     }
