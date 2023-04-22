@@ -575,7 +575,7 @@ org_items_with_id = List.map(organization_items, {|i|
 items = [animal_estimates_disaggregated, org_items_with_id] -> List.flatten -> List.map({|item| [item.id, item]})  -> Dict.fromList
 
 // Result
-f(a, b) = [items[a].value, items[b].value]
+fn(a, b) = [items[a].value, items[b].value]
 items 
 `,
   };
