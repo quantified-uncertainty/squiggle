@@ -8,6 +8,7 @@ yarn-error.log
 .direnv
 .log
 
+/.vscode/squiggle.code-workspace
 todo.txt
 result
 shell.nix
