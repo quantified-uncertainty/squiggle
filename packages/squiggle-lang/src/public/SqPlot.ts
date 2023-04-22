@@ -10,7 +10,7 @@ import {
 } from "./SqDistribution.js";
 import { SqError } from "./SqError.js";
 import { SqLambda } from "./SqLambda.js";
-import { SqLinearScale, SqScale, wrapScale } from "./SqScale.js";
+import { SqScale, wrapScale } from "./SqScale.js";
 import { SqPlotValue } from "./SqValue.js";
 import { SqValueLocation } from "./SqValueLocation.js";
 
@@ -23,8 +23,10 @@ export const wrapPlot = (value: Plot, location?: SqValueLocation): SqPlot => {
   switch (value.type) {
     case "distributions":
       return new SqDistributionsPlot(value, location);
-    case "fn":
-      return new SqFnPlot(value, location);
+    case "numericFn":
+      return new SqNumericFnPlot(value, location);
+    case "distFn":
+      return new SqDistFnPlot(value, location);
     case "scatter":
       return new SqScatterPlot(value, location);
   }
@@ -97,8 +99,8 @@ export class SqDistributionsPlot extends SqAbstractPlot<"distributions"> {
   }
 }
 
-export class SqFnPlot extends SqAbstractPlot<"fn"> {
-  tag = "fn" as const;
+export class SqNumericFnPlot extends SqAbstractPlot<"numericFn"> {
+  tag = "numericFn" as const;
   // Necessary because wrapped fn location is different based on whether this is a real `Plot.fn` or a wrapper in the components.
   // This can be removed when we get direct lambda evaluation back.
   private createdProgrammatically: boolean = false;
@@ -106,17 +108,20 @@ export class SqFnPlot extends SqAbstractPlot<"fn"> {
   static create({
     fn,
     xScale,
+    yScale,
     points,
   }: {
     fn: SqLambda;
     xScale: SqScale;
+    yScale: SqScale;
     points?: number;
   }) {
-    const result = new SqFnPlot(
+    const result = new SqNumericFnPlot(
       {
-        type: "fn",
+        type: "numericFn",
         fn: fn._value,
         xScale: xScale._value,
+        yScale: yScale._value,
         points,
       },
       fn.location
@@ -141,6 +146,71 @@ export class SqFnPlot extends SqAbstractPlot<"fn"> {
 
   get xScale() {
     return wrapScale(this._value.xScale);
+  }
+
+  get yScale() {
+    return wrapScale(this._value.yScale);
+  }
+
+  get points(): number | undefined {
+    return this._value.points;
+  }
+
+  toString() {
+    return this.fn.toString(); // TODO - scale info?
+  }
+}
+
+// TODO - mostly copy-pasted from SqNumericFnPlot, how can we avoid this?
+export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
+  tag = "distFn" as const;
+  private createdProgrammatically: boolean = false;
+
+  static create({
+    fn,
+    xScale,
+    distXScale,
+    points,
+  }: {
+    fn: SqLambda;
+    xScale: SqScale;
+    distXScale: SqScale;
+    points?: number;
+  }) {
+    const result = new SqDistFnPlot(
+      {
+        type: "distFn",
+        fn: fn._value,
+        xScale: xScale._value,
+        distXScale: distXScale._value,
+        points,
+      },
+      fn.location
+    );
+    result.createdProgrammatically = true;
+    return result;
+  }
+
+  get fn() {
+    return new SqLambda(
+      this._value.fn,
+      this.location
+        ? this.createdProgrammatically
+          ? this.location
+          : new SqValueLocation(this.location.project, this.location.sourceId, {
+              ...this.location.path,
+              items: [...this.location.path.items, "fn"],
+            })
+        : undefined
+    );
+  }
+
+  get xScale() {
+    return wrapScale(this._value.xScale);
+  }
+
+  get distXScale() {
+    return wrapScale(this._value.distXScale);
   }
 
   get points(): number | undefined {
@@ -201,4 +271,8 @@ export class SqScatterPlot extends SqAbstractPlot<"scatter"> {
   }
 }
 
-export type SqPlot = SqDistributionsPlot | SqFnPlot | SqScatterPlot;
+export type SqPlot =
+  | SqDistributionsPlot
+  | SqNumericFnPlot
+  | SqDistFnPlot
+  | SqScatterPlot;

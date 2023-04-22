@@ -50,6 +50,16 @@ export const Scales: Story = {
   },
 };
 
+export const CustomTickFormat: Story = {
+  name: "Custom tick format",
+  args: {
+    code: `Plot.dist({
+  dist: beta(3, 5),
+  xScale: Scale.linear({ tickFormat: ".0%" }),
+})`,
+  },
+};
+
 /**
  * This feature is broken for now.
  */

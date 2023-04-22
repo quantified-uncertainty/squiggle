@@ -68,7 +68,7 @@ export const library = [
               xScale: xScale ?? { type: "linear" },
               yScale: yScale ?? { type: "linear" },
               title: title ?? undefined,
-              showSummary: showSummary ?? false,
+              showSummary: showSummary ?? true,
             })
           );
         }
@@ -104,7 +104,7 @@ export const library = [
               xScale: xScale ?? { type: "linear" },
               yScale: yScale ?? { type: "linear" },
               title: title ?? undefined,
-              showSummary: showSummary ?? false,
+              showSummary: showSummary ?? true,
             })
           );
         }
@@ -112,27 +112,60 @@ export const library = [
     ],
   }),
   maker.make({
-    name: "fn",
+    name: "numericFn",
     output: "Plot",
     examples: [
-      `Plot.fn({fn: {|x|x*x}, xScale: Scale.linear({ min: 3, max: 5}) })`,
+      `Plot.numericFn({ fn: {|x|x*x}, xScale: Scale.linear({ min: 3, max: 5}), yScale: Scale.log({ tickFormat: ".2s" }) })`,
     ],
     definitions: [
       makeDefinition(
-        "fn",
+        "numericFn",
         [
           frRecord(
             ["fn", frLambda],
             ["xScale", frOptional(frScale)],
+            ["yScale", frOptional(frScale)],
             ["points", frOptional(frNumber)]
           ),
         ],
-        ([{ fn, xScale, points }]) => {
+        ([{ fn, xScale, yScale, points }]) => {
           return Result.Ok(
             vPlot({
-              type: "fn",
+              type: "numericFn",
               fn,
               xScale: xScale ?? { type: "linear" },
+              yScale: yScale ?? { type: "linear" },
+              points: points ?? undefined,
+            })
+          );
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "distFn",
+    output: "Plot",
+    examples: [
+      `Plot.distFn({ fn: {|x|uniform(x, x+1)}, xScale: Scale.linear({ min: 3, max: 5}), yScale: Scale.log({ tickFormat: ".2s" }) })`,
+    ],
+    definitions: [
+      makeDefinition(
+        "distFn",
+        [
+          frRecord(
+            ["fn", frLambda],
+            ["xScale", frOptional(frScale)],
+            ["distXScale", frOptional(frScale)],
+            ["points", frOptional(frNumber)]
+          ),
+        ],
+        ([{ fn, xScale, distXScale, points }]) => {
+          return Result.Ok(
+            vPlot({
+              type: "distFn",
+              fn,
+              xScale: xScale ?? { type: "linear" },
+              distXScale: distXScale ?? { type: "linear" },
               points: points ?? undefined,
             })
           );

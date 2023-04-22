@@ -221,9 +221,17 @@ export type Plot =
       yScale: Scale;
     }
   | {
-      type: "fn";
+      type: "numericFn";
       fn: Lambda;
       xScale: Scale;
+      yScale: Scale;
+      points?: number;
+    }
+  | {
+      type: "distFn";
+      fn: Lambda;
+      xScale: Scale;
+      distXScale: Scale;
       points?: number;
     };
 
@@ -237,8 +245,10 @@ class VPlot implements Indexable {
         return `Plot containing ${this.value.distributions
           .map((x) => x.name)
           .join(", ")}`;
-      case "fn":
-        return `Plot for function ${this.value.fn}`;
+      case "numericFn":
+        return `Plot for numeric function ${this.value.fn}`;
+      case "distFn":
+        return `Plot for dist function ${this.value.fn}`;
       case "scatter":
         return `Scatter plot for distributions ${this.value.xDist} and ${this.value.yDist}`;
     }
@@ -248,7 +258,7 @@ class VPlot implements Indexable {
     if (
       key.type === "String" &&
       key.value === "fn" &&
-      this.value.type === "fn"
+      (this.value.type === "numericFn" || this.value.type === "distFn")
     ) {
       return vLambda(this.value.fn);
     }
@@ -259,28 +269,28 @@ class VPlot implements Indexable {
 
 export const vPlot = (plot: Plot) => new VPlot(plot);
 
-export type Scale =
-  | {
-      type: "linear";
-      min?: number;
-      max?: number;
-    }
-  | {
-      type: "log";
-      min?: number;
-      max?: number;
-    }
-  | {
-      type: "symlog";
-      min?: number;
-      max?: number;
-    }
-  | {
-      type: "power";
-      min?: number;
-      max?: number;
-      exponent: number;
-    };
+export type CommonScaleArgs = {
+  min?: number;
+  max?: number;
+  tickFormat?: string;
+};
+
+export type Scale = CommonScaleArgs &
+  (
+    | {
+        type: "linear";
+      }
+    | {
+        type: "log";
+      }
+    | {
+        type: "symlog";
+      }
+    | {
+        type: "power";
+        exponent: number;
+      }
+  );
 
 class VScale {
   readonly type = "Scale" as const;

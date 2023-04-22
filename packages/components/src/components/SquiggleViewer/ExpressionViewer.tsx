@@ -1,7 +1,6 @@
 import {
   SqDistributionTag,
   SqDistributionsPlot,
-  SqFnPlot,
   SqPlot,
   SqScale,
   SqValue,
@@ -13,15 +12,14 @@ import { DistributionsChart } from "../DistributionsChart/index.js";
 import { FunctionChart } from "../FunctionChart/index.js";
 import { NumberShower } from "../NumberShower.js";
 
+import { hasMassBelowZero } from "../../lib/distributionUtils.js";
+import { DistFunctionChart } from "../FunctionChart/DistFunctionChart.js";
+import { NumericFunctionChart } from "../FunctionChart/NumericFunctionChart.js";
 import { ScatterChart } from "../ScatterChart/index.js";
-import {
-  generateDistributionPlotSettings,
-  generateFunctionPlotSettings,
-} from "../ViewSettingsForm.js";
+import { generateDistributionPlotSettings } from "../ViewSettingsForm.js";
 import { ItemSettingsMenu } from "./ItemSettingsMenu.js";
 import { VariableBox } from "./VariableBox.js";
 import { MergedItemSettings } from "./utils.js";
-import { hasMassBelowZero } from "../../lib/distributionUtils.js";
 
 const VariableList: React.FC<{
   value: SqValue;
@@ -170,25 +168,16 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
           }}
         >
           {(settings) => {
-            const plot = SqFnPlot.create({
-              fn: value.value,
-              ...generateFunctionPlotSettings(settings),
-            });
-
             return (
-              <div>
-                <div className="text-amber-700 bg-amber-100 rounded-md font-mono p-1 pl-2 mb-3 mt-1 text-sm">{`function(${value.value
-                  .parameters()
-                  .join(",")})`}</div>
-                <FunctionChart
-                  plot={plot}
-                  height={settings.chartHeight}
-                  environment={{
-                    sampleCount: environment.sampleCount / 10,
-                    xyPointLength: environment.xyPointLength / 10,
-                  }}
-                />
-              </div>
+              <FunctionChart
+                fn={value.value}
+                settings={settings}
+                height={settings.chartHeight}
+                environment={{
+                  sampleCount: environment.sampleCount / 10,
+                  xyPointLength: environment.xyPointLength / 10,
+                }}
+              />
             );
           }}
         </VariableBox>
@@ -208,9 +197,17 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
                     height={settings.chartHeight}
                   />
                 );
-              case "fn": {
+              case "numericFn": {
                 return (
-                  <FunctionChart
+                  <NumericFunctionChart
+                    plot={plot}
+                    height={settings.chartHeight}
+                  />
+                );
+              }
+              case "distFn": {
+                return (
+                  <DistFunctionChart
                     plot={plot}
                     height={settings.chartHeight}
                     environment={{

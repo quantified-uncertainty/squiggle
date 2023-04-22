@@ -8,6 +8,7 @@ import { InputItem } from "./ui/InputItem.js";
 import { Radio } from "./ui/Radio.js";
 import { Text } from "./ui/Text.js";
 import { functionChartDefaults } from "./FunctionChart/utils.js";
+import { defaultTickFormatSpecifier } from "../lib/draw/index.js";
 
 export const functionSettingsSchema = yup.object({}).shape({
   start: yup
@@ -38,15 +39,15 @@ type ScaleType = (typeof scaleTypes)[number];
 
 function scaleTypeToSqScale(
   scaleType: ScaleType,
-  minMax: { min?: number; max?: number } = {}
+  args: { min?: number; max?: number; tickFormat?: string } = {}
 ) {
   switch (scaleType) {
     case "linear":
-      return SqLinearScale.create(minMax);
+      return SqLinearScale.create(args);
     case "log":
-      return SqLogScale.create(minMax);
+      return SqLogScale.create(args);
     case "exp":
-      return SqPowerScale.create({ exponent: 0.1, ...minMax });
+      return SqPowerScale.create({ exponent: 0.1, ...args });
     default:
       // should never happen, just a precaution
       throw new Error("Internal error");
@@ -68,8 +69,8 @@ export const distributionSettingsSchema = yup.object({}).shape({
     .oneOf(["number", "dateTime"])
     .default("number"),
   /** Documented here: https://github.com/d3/d3-format */
-  tickFormat: yup.string().required().default(".9~s"),
-  showSummary: yup.boolean().required().default(false),
+  tickFormat: yup.string().required().default(defaultTickFormatSpecifier),
+  showSummary: yup.boolean().required().default(true),
 });
 
 export const viewSettingsSchema = yup.object({}).shape({
@@ -95,8 +96,11 @@ export function generateDistributionPlotSettings(
   const xScale = scaleTypeToSqScale(settings.xScale, {
     min: settings.minX,
     max: settings.maxX,
+    tickFormat: settings.tickFormat,
   });
-  const yScale = scaleTypeToSqScale(settings.yScale);
+  const yScale = scaleTypeToSqScale(settings.yScale, {
+    tickFormat: settings.tickFormat,
+  });
   return {
     xScale,
     yScale,

@@ -3,7 +3,7 @@ import {
   result,
   SqDistributionsPlot,
   SqError,
-  SqFnPlot,
+  SqDistFnPlot,
   SqLinearScale,
   SqValue,
 } from "@quri/squiggle-lang";
@@ -26,6 +26,7 @@ import { ErrorAlert } from "../Alert.js";
 import { DistributionsChart } from "../DistributionsChart/index.js";
 import { NumberShower } from "../NumberShower.js";
 import { getFunctionImage } from "./utils.js";
+import { FunctionChartContainer } from "./FunctionChartContainer.js";
 
 function unwrap<a, b>(x: result<a, b>): a {
   if (x.ok) {
@@ -35,7 +36,7 @@ function unwrap<a, b>(x: result<a, b>): a {
   }
 }
 type FunctionChart1DistProps = {
-  plot: SqFnPlot;
+  plot: SqDistFnPlot;
   environment: Env;
   height: number;
 };
@@ -70,13 +71,10 @@ const getPercentiles = ({
   plot,
   environment,
 }: {
-  plot: SqFnPlot;
+  plot: SqDistFnPlot;
   environment: Env;
 }) => {
-  const { functionImage, errors } = getFunctionImage({
-    plot,
-    valueType: "Dist",
-  });
+  const { functionImage, errors } = getFunctionImage(plot);
 
   const groupedErrors: Errors = groupBy(errors, (x) => x.value);
 
@@ -105,7 +103,7 @@ const getPercentiles = ({
   return { data, errors: groupedErrors };
 };
 
-export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
+export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
   plot,
   environment,
   height: innerHeight,
@@ -147,6 +145,7 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
         width,
         height,
         context,
+        xTickFormat: plot.xScale.tickFormat,
       });
       d3ref.current = {
         padding,
@@ -238,7 +237,7 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
       <DistributionsChart
         plot={SqDistributionsPlot.create({
           distribution: mouseItem.value.value,
-          xScale: SqLinearScale.create(), // TODO - pass yScale from FnPlot?
+          xScale: plot.distXScale,
           yScale: SqLinearScale.create(),
           showSummary: false,
           title:
@@ -252,21 +251,23 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
     ) : null;
 
   return (
-    <div className="flex flex-col items-stretch">
-      <canvas ref={ref}>Chart for {plot.toString()}</canvas>
-      {showChart}
-      {Object.entries(errors).map(([errorName, errorPoints]) => (
-        <ErrorAlert key={errorName} heading={errorName}>
-          Values:{" "}
-          {errorPoints
-            .map((r, i) => <NumberShower key={i} number={r.x} />)
-            .reduce((a, b) => (
-              <>
-                {a}, {b}
-              </>
-            ))}
-        </ErrorAlert>
-      ))}
-    </div>
+    <FunctionChartContainer fn={plot.fn}>
+      <div className="flex flex-col items-stretch">
+        <canvas ref={ref}>Chart for {plot.toString()}</canvas>
+        {showChart}
+        {Object.entries(errors).map(([errorName, errorPoints]) => (
+          <ErrorAlert key={errorName} heading={errorName}>
+            Values:{" "}
+            {errorPoints
+              .map((r, i) => <NumberShower key={i} number={r.x} />)
+              .reduce((a, b) => (
+                <>
+                  {a}, {b}
+                </>
+              ))}
+          </ErrorAlert>
+        ))}
+      </div>
+    </FunctionChartContainer>
   );
 };

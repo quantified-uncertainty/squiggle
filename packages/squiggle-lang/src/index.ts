@@ -20,7 +20,8 @@ export { SqShape } from "./public/SqPointSet.js";
 export {
   SqPlot,
   SqDistributionsPlot,
-  SqFnPlot,
+  SqNumericFnPlot,
+  SqDistFnPlot,
   SqScatterPlot,
 } from "./public/SqPlot.js";
 export {

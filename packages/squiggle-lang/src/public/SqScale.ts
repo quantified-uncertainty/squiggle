@@ -1,4 +1,4 @@
-import { Scale, vScale } from "../value/index.js";
+import { CommonScaleArgs, Scale, vScale } from "../value/index.js";
 
 export const wrapScale = (value: Scale): SqScale => {
   switch (value.type) {
@@ -24,66 +24,49 @@ abstract class SqAbstractScale<T extends Scale["type"]> {
   toString() {
     return vScale(this._value).toString();
   }
-}
-
-export class SqLinearScale extends SqAbstractScale<"linear"> {
-  tag = "linear" as const;
-
-  static create({ min, max }: { min?: number; max?: number } = {}) {
-    return new SqLinearScale({ type: "linear", min, max });
-  }
 
   get min() {
     return this._value.min;
   }
   get max() {
     return this._value.max;
+  }
+  get tickFormat() {
+    return this._value.tickFormat;
+  }
+}
+
+export class SqLinearScale extends SqAbstractScale<"linear"> {
+  tag = "linear" as const;
+
+  static create(args: CommonScaleArgs = {}) {
+    return new SqLinearScale({ type: "linear", ...args });
   }
 }
 
 export class SqLogScale extends SqAbstractScale<"log"> {
   tag = "log" as const;
 
-  static create({ min, max }: { min?: number; max?: number } = {}) {
-    return new SqLogScale({ type: "log", min, max });
-  }
-
-  get min() {
-    return this._value.min;
-  }
-  get max() {
-    return this._value.max;
+  static create(args: CommonScaleArgs = {}) {
+    return new SqLogScale({ type: "log", ...args });
   }
 }
 
 export class SqSymlogScale extends SqAbstractScale<"symlog"> {
   tag = "symlog" as const;
 
-  static create({ min, max }: { min: number; max: number }) {
-    return new SqSymlogScale({ type: "symlog", min, max });
-  }
-
-  get min() {
-    return this._value.min;
-  }
-  get max() {
-    return this._value.max;
+  static create(args: CommonScaleArgs = {}) {
+    return new SqSymlogScale({ type: "symlog", ...args });
   }
 }
 
 export class SqPowerScale extends SqAbstractScale<"power"> {
   tag = "power" as const;
 
-  static create(args: { min?: number; max?: number; exponent: number }) {
+  static create(args: CommonScaleArgs & { exponent: number }) {
     return new SqPowerScale({ type: "power", ...args });
   }
 
-  get min() {
-    return this._value.min;
-  }
-  get max() {
-    return this._value.max;
-  }
   get exponent() {
     return this._value.exponent;
   }

@@ -1,6 +1,5 @@
 import * as React from "react";
 import { FC, useCallback, useState } from "react";
-import * as yup from "yup";
 
 import {
   Env,
@@ -25,23 +24,9 @@ import { ErrorAlert } from "../Alert.js";
 import { SummaryTable } from "./SummaryTable.js";
 
 import * as d3 from "d3";
+import { Point } from "../../lib/draw/types.js";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
 import { MouseTooltip } from "../ui/MouseTooltip.js";
-import { Point } from "../../lib/draw/types.js";
-
-export const distributionSettingsSchema = yup.object({}).shape({
-  title: yup.string(),
-  xAxisType: yup
-    .mixed<"number" | "dateTime">()
-    .oneOf(["number", "dateTime"])
-    .default("number"),
-  /** Documented here: https://github.com/d3/d3-format */
-  tickFormat: yup.string().required().default(".9~s"),
-});
-
-export type DistributionChartSettings = yup.InferType<
-  typeof distributionSettingsSchema
->;
 
 export type DistributionsChartProps = {
   plot: SqDistributionsPlot;
@@ -116,6 +101,7 @@ const InnerDistributionsChart: FC<{
         hideYAxis: true,
         drawTicks: true,
         tickCount: 10,
+        xTickFormat: plot.xScale.tickFormat,
       });
 
       if (plot.title) {

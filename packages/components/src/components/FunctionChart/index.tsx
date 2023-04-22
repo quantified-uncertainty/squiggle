@@ -1,17 +1,32 @@
 import * as React from "react";
 import { FC, useState } from "react";
 
-import { Env, SqError, SqFnPlot, SqLinearScale } from "@quri/squiggle-lang";
+import {
+  Env,
+  SqError,
+  SqNumericFnPlot,
+  SqDistFnPlot,
+  SqLinearScale,
+  SqLambda,
+} from "@quri/squiggle-lang";
+
+import {
+  generateDistributionPlotSettings,
+  generateFunctionPlotSettings,
+} from "../ViewSettingsForm.js";
 
 import { MessageAlert } from "../Alert.js";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 
-import { FunctionChart1Dist } from "./FunctionChart1Dist.js";
-import { FunctionChart1Number } from "./FunctionChart1Number.js";
+import { DistFunctionChart } from "./DistFunctionChart.js";
+import { NumericFunctionChart } from "./NumericFunctionChart.js";
 import { functionChartDefaults } from "./utils.js";
+import { ViewSettings } from "../ViewSettingsForm.js";
+import { FunctionChartContainer } from "./FunctionChartContainer.js";
 
 type FunctionChartProps = {
-  plot: SqFnPlot;
+  fn: SqLambda;
+  settings: ViewSettings;
   environment: Env;
   height: number;
 };
@@ -36,20 +51,22 @@ const FunctionCallErrorAlert: FC<{ error: SqError }> = ({ error }) => {
 };
 
 export const FunctionChart: FC<FunctionChartProps> = ({
-  plot,
+  fn,
+  settings,
   environment,
   height,
 }) => {
-  if (plot.fn.parameters().length !== 1) {
+  if (fn.parameters().length !== 1) {
     return (
-      <MessageAlert heading="Function Display Not Supported">
-        Only functions with one parameter are displayed.
-      </MessageAlert>
+      <FunctionChartContainer fn={fn}>
+        <MessageAlert heading="Function Display Not Supported">
+          Only functions with one parameter are displayed.
+        </MessageAlert>
+      </FunctionChartContainer>
     );
   }
-  const xSqScale = plot.xScale ?? SqLinearScale.create();
-  const result1 = plot.fn.call([xSqScale.min ?? functionChartDefaults.min]);
-  const result2 = plot.fn.call([xSqScale.max ?? functionChartDefaults.max]);
+  const result1 = fn.call([functionChartDefaults.min]);
+  const result2 = fn.call([functionChartDefaults.max]);
   const getValidResult = () => {
     if (result1.ok) {
       return result1;
@@ -66,22 +83,40 @@ export const FunctionChart: FC<FunctionChartProps> = ({
   }
 
   switch (validResult.value.tag) {
-    case "Dist":
+    case "Dist": {
+      const plot = SqDistFnPlot.create({
+        fn,
+        ...generateFunctionPlotSettings(settings),
+        distXScale: generateDistributionPlotSettings(
+          settings.distributionChartSettings
+        ).xScale,
+      });
+
       return (
-        <FunctionChart1Dist
+        <DistFunctionChart
           plot={plot}
           environment={environment}
           height={height}
         />
       );
-    case "Number":
-      return <FunctionChart1Number plot={plot} height={height} />;
+    }
+    case "Number": {
+      const plot = SqNumericFnPlot.create({
+        fn,
+        ...generateFunctionPlotSettings(settings),
+        yScale: SqLinearScale.create(),
+      });
+
+      return <NumericFunctionChart plot={plot} height={height} />;
+    }
     default:
       return (
-        <MessageAlert heading="Function Display Not Supported">
-          There is no function visualization for this type of output:{" "}
-          <span className="font-bold">{validResult.value.tag}</span>
-        </MessageAlert>
+        <FunctionChartContainer fn={fn}>
+          <MessageAlert heading="Function Display Not Supported">
+            There is no function visualization for this type of output:{" "}
+            <span className="font-bold">{validResult.value.tag}</span>
+          </MessageAlert>
+        </FunctionChartContainer>
       );
   }
 };
