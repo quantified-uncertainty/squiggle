@@ -37,7 +37,7 @@ export type ResultAndBindings = {
 };
 
 const importSourceName = (sourceName: string) => "imports-" + sourceName;
-const defaultContinues = [];
+const defaultContinues: string[] = [];
 
 export const useSquiggle = (args: SquiggleArgs): ResultAndBindings => {
   // random; https://stackoverflow.com/a/12502559

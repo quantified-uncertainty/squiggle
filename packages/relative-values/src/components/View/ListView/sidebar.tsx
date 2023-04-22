@@ -45,7 +45,7 @@ value_${numeratorItemName} = dists[0]
 value_${denominatorItemName} = dists[1]
 relativeValue = value_${numeratorItemName} / value_${denominatorItemName}
 median = abs(inv(dists[1], 0.5))
-[Plot.joint({xDist:dists[1] / median, yDist: dists[0]/median}), relativeValue]`;
+[Plot.scatter({xDist:dists[1] / median, yDist: dists[0]/median}), relativeValue]`;
 };
 
 type Props = {

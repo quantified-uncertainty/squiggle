@@ -6,6 +6,9 @@ export { SqValueLocation } from "./public/SqValueLocation.js";
 export { result, fmap as resultMap } from "./utility/result.js";
 export {
   SqAbstractDistribution,
+  SqSampleSetDistribution,
+  SqPointSetDistribution,
+  SqSymbolicDistribution,
   SqDistribution,
   SqDistributionTag,
 } from "./public/SqDistribution.js";
@@ -14,7 +17,7 @@ export { SqRecord } from "./public/SqRecord.js";
 export { SqLambda } from "./public/SqLambda.js";
 export { SqError, SqFrame } from "./public/SqError.js";
 export { SqShape } from "./public/SqPointSet.js";
-export { SqPlot, SqDistributionsPlot, SqJointPlot } from "./public/SqPlot.js";
+export { SqPlot, SqDistributionsPlot, SqScatterPlot } from "./public/SqPlot.js";
 export { SqParseError, parse } from "./public/parse.js";
 
 export { defaultEnv as defaultEnvironment } from "./dist/env.js";

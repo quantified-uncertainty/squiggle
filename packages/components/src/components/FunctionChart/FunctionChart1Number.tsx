@@ -1,5 +1,4 @@
-import { extent as d3Extent } from "d3-array";
-import { line as d3Line } from "d3-shape";
+import * as d3 from "d3";
 
 import * as React from "react";
 import { FC, useCallback, useMemo } from "react";
@@ -8,12 +7,13 @@ import { SqLambda } from "@quri/squiggle-lang";
 
 import {
   drawAxes,
-  getFunctionImage,
+  drawCursorLines,
   primaryColor,
-} from "../../lib/drawUtils.js";
-import { useCanvas } from "../../lib/hooks/index.js";
+} from "../../lib/draw/index.js";
+import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
 import { ErrorAlert } from "../Alert.js";
 import { FunctionChartSettings } from "./index.js";
+import { getFunctionImage } from "./utils.js";
 
 type Props = {
   fn: SqLambda;
@@ -27,6 +27,7 @@ export const FunctionChart1Number: FC<Props> = ({
   height: innerHeight,
 }) => {
   const height = innerHeight + 30; // consider paddings, should match suggestedPadding below
+  const { cursor, initCursor } = useCanvasCursor();
 
   const { functionImage, errors } = useMemo(
     () => getFunctionImage({ settings, fn, valueType: "Number" }),
@@ -43,33 +44,62 @@ export const FunctionChart1Number: FC<Props> = ({
     }) => {
       context.clearRect(0, 0, width, height);
 
-      const { xScale, yScale, translateToZero } = drawAxes({
-        suggestedPadding: { left: 20, right: 10, top: 10, bottom: 20 },
-        xDomain: d3Extent(functionImage, (d) => d.x) as [number, number],
-        yDomain: d3Extent(functionImage, (d) => d.y) as [number, number],
+      const xScale = d3
+        .scaleLinear()
+        .domain(d3.extent(functionImage, (d) => d.x) as [number, number]);
+
+      const yScale = d3
+        .scaleLinear()
+        .domain(d3.extent(functionImage, (d) => d.y) as [number, number]);
+
+      const { frame, padding } = drawAxes({
+        context,
         width,
         height,
-        context,
+        suggestedPadding: { left: 20, right: 10, top: 10, bottom: 20 },
+        xScale,
+        yScale,
       });
 
       // line
-      translateToZero();
+      frame.enter();
       context.beginPath();
       context.strokeStyle = primaryColor;
       context.lineWidth = 2;
       context.imageSmoothingEnabled = true;
 
-      d3Line<{ x: number; y: number }>()
+      d3
+        .line<{ x: number; y: number }>()
         .x((d) => xScale(d.x))
         .y((d) => yScale(d.y))
         .context(context)(functionImage);
 
       context.stroke();
+      frame.exit();
+
+      if (
+        cursor &&
+        cursor.x >= padding.left &&
+        cursor.x - padding.left <= frame.width
+      ) {
+        drawCursorLines({
+          frame,
+          cursor,
+          x: {
+            scale: xScale,
+            format: d3.format(",.4r"),
+          },
+          y: {
+            scale: yScale,
+            format: d3.format(",.4r"),
+          },
+        });
+      }
     },
-    [functionImage, height]
+    [functionImage, height, cursor]
   );
 
-  const { ref } = useCanvas({ height, draw });
+  const { ref } = useCanvas({ height, init: initCursor, draw });
 
   return (
     <div className="flex flex-col items-stretch">

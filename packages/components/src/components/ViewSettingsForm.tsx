@@ -7,6 +7,7 @@ import { HeadedSection } from "./ui/HeadedSection.js";
 import { Text } from "./ui/Text.js";
 import { distributionSettingsSchema } from "./MultiDistributionChart/index.js";
 import { functionSettingsSchema } from "./FunctionChart/index.js";
+import { Radio } from "./ui/Radio.js";
 
 export const viewSettingsSchema = yup.object({}).shape({
   distributionChartSettings: distributionSettingsSchema,
@@ -58,28 +59,58 @@ export const DistributionViewSettingsForm: React.FC<{
   return (
     <div className="pt-8">
       <HeadedSection title="Distribution Display Settings">
-        <div className="space-y-2">
-          <Checkbox
-            register={register}
-            name="distributionChartSettings.logX"
-            label="Show x scale logarithmically"
-            fixed={fixed?.distributionChartSettings?.logX}
-            tooltip={
-              fixed?.distributionChartSettings?.logX !== undefined
-                ? "Your distribution has mass lower than or equal to 0. Log only works on strictly positive values."
-                : undefined
-            }
-          />
-          <Checkbox
-            register={register}
-            name="distributionChartSettings.expY"
-            label="Show y scale exponentially"
-          />
+        <div className="space-y-4">
           <Checkbox
             register={register}
             name="distributionChartSettings.showSummary"
             label="Show summary statistics"
           />
+          <div className="space-y-2">
+            <Radio
+              register={register}
+              name="distributionChartSettings.xScale"
+              label="X Scale"
+              initialId={fixed?.distributionChartSettings?.xScale ?? "linear"}
+              options={[
+                {
+                  id: "linear",
+                  name: "Linear",
+                },
+                {
+                  id: "log",
+                  name: "Logarithmic",
+                  ...(fixed?.distributionChartSettings?.disableLogX
+                    ? {
+                        disabled: true,
+                        tooltip:
+                          "Your distribution has mass lower than or equal to 0. Log only works on strictly positive values.",
+                      }
+                    : null),
+                },
+                {
+                  id: "exp",
+                  name: "Exponential",
+                },
+              ]}
+            />
+            <Radio
+              register={register}
+              name="distributionChartSettings.yScale"
+              label="Y Scale"
+              initialId={fixed?.distributionChartSettings?.yScale ?? "linear"}
+              options={[
+                {
+                  id: "linear",
+                  name: "Linear",
+                },
+                // log Y is hidden because it almost always causes an empty chart
+                {
+                  id: "exp",
+                  name: "Exponential",
+                },
+              ]}
+            />
+          </div>
           <InputItem
             name="distributionChartSettings.minX"
             type="number"

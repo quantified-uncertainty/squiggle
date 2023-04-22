@@ -2,10 +2,12 @@ import { PointMass } from "../dist/SymbolicDist.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
+  frBool,
   frDist,
   frDistOrNumber,
   frLambda,
   frNumber,
+  frOptional,
   frRecord,
   frString,
 } from "../library/registry/frTypes.js";
@@ -79,21 +81,30 @@ export const library = [
     ],
   }),
   maker.make({
-    name: "joint",
+    name: "scatter",
     output: "Plot",
     examples: [
-      `Plot.joint({ xDist: 2 to 5, yDist: SampleSet.fromDist(-3 to 3) })`,
+      `Plot.scatter({ xDist: 2 to 5, yDist: SampleSet.fromDist(-3 to 3) })`,
     ],
     definitions: [
       makeDefinition(
-        "joint",
-        [frRecord(["xDist", frDist], ["yDist", frDist])],
-        ([{ xDist, yDist }]) => {
+        "scatter",
+        [
+          frRecord(
+            ["xDist", frDist],
+            ["yDist", frDist],
+            ["logX", frOptional(frBool)],
+            ["logY", frOptional(frBool)]
+          ),
+        ],
+        ([{ xDist, yDist, logX, logY }]) => {
           return Result.Ok(
             vPlot({
-              type: "joint",
+              type: "scatter",
               xDist,
               yDist,
+              logX: logX ?? false,
+              logY: logY ?? false,
             })
           );
         }

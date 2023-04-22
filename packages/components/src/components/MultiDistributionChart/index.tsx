@@ -13,11 +13,12 @@ import {
 import isEqual from "lodash/isEqual.js";
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
 import {
+  distance,
   drawAxes,
   drawCircle,
-  drawVerticalCursorLine,
+  drawCursorLines,
   primaryColor,
-} from "../../lib/drawUtils.js";
+} from "../../lib/draw/index.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
 import { flattenResult } from "../../lib/utility.js";
 import { ErrorAlert } from "../Alert.js";
@@ -27,12 +28,15 @@ import { Plot } from "./types.js";
 import * as d3 from "d3";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
 import { MouseTooltip } from "../ui/MouseTooltip.js";
+import { Point } from "../../lib/draw/types.js";
+
+const scaleTypes = ["linear", "log", "exp"] as const;
+type ScaleType = (typeof scaleTypes)[number];
 
 export const distributionSettingsSchema = yup.object({}).shape({
-  /** Set the x scale to be logarithmic */
-  logX: yup.boolean().required().default(false),
-  /** Set the y scale to be exponential */
-  expY: yup.boolean().required().default(false),
+  xScale: yup.mixed<ScaleType>().oneOf(scaleTypes).default("linear"),
+  yScale: yup.mixed<ScaleType>().oneOf(scaleTypes).default("linear"),
+  disableLogX: yup.boolean(),
   minX: yup.number(),
   maxX: yup.number(),
   title: yup.string(),
@@ -44,6 +48,19 @@ export const distributionSettingsSchema = yup.object({}).shape({
   tickFormat: yup.string().required().default(".9~s"),
   showSummary: yup.boolean().required().default(false),
 });
+
+function scaleTypeToScale(
+  scaleType: ScaleType
+): d3.ScaleContinuousNumeric<number, number, never> {
+  switch (scaleType) {
+    case "linear":
+      return d3.scaleLinear();
+    case "log":
+      return d3.scaleLog();
+    case "exp":
+      return d3.scalePow().exponent(0.1);
+  }
+}
 
 export type DistributionChartSettings = yup.InferType<
   typeof distributionSettingsSchema
@@ -63,15 +80,6 @@ export type MultiDistributionChartProps = {
   height: number;
   settings: DistributionChartSettings;
 };
-
-type Point = {
-  x: number;
-  y: number;
-};
-
-function distance(point1: Point, point2: Point) {
-  return Math.sqrt((point1.x - point2.x) ** 2 + (point1.y - point2.y) ** 2);
-}
 
 const InnerMultiDistributionChart: FC<{
   shapes: (SqShape & { name: string; opacity: number })[];
@@ -108,39 +116,36 @@ const InnerMultiDistributionChart: FC<{
       const getColor = (i: number) =>
         plot.colorScheme === "blues" ? "#5ba3cf" : d3.schemeCategory10[i];
 
-      const {
-        padding,
-        chartWidth,
-        chartHeight,
-        xScale,
-        yScale,
-        translateToZero,
-      } = drawAxes({
+      const xScale = scaleTypeToScale(settings.xScale);
+      xScale.domain([
+        Number.isFinite(settings.minX)
+          ? settings.minX!
+          : d3.min(domain, (d) => d.x) ?? 0,
+        Number.isFinite(settings.maxX)
+          ? settings.maxX!
+          : d3.max(domain, (d) => d.x) ?? 0,
+      ]);
+
+      const yScale = scaleTypeToScale(settings.yScale);
+      yScale.domain([
+        Math.min(...domain.map((p) => p.y), 0), // min value, but at least 0
+        Math.max(...domain.map((p) => p.y)),
+      ]);
+
+      const { padding, frame } = drawAxes({
+        context,
+        width,
+        height,
         suggestedPadding: {
           left: 10,
           right: 10,
           top: 10 + legendHeight + titleHeight,
           bottom: 20 + samplesFooterHeight,
         },
-        xDomain: [
-          Number.isFinite(settings.minX)
-            ? settings.minX!
-            : d3.min(domain, (d) => d.x) ?? 0,
-          Number.isFinite(settings.maxX)
-            ? settings.maxX!
-            : d3.max(domain, (d) => d.x) ?? 0,
-        ],
-        yDomain: [
-          Math.min(...domain.map((p) => p.y), 0), // min value, but at least 0
-          Math.max(...domain.map((p) => p.y)),
-        ],
-        width,
-        height,
-        context,
+        xScale,
+        yScale,
         hideYAxis: true,
         drawTicks: true,
-        logX: settings.logX,
-        expY: settings.expY,
         tickCount: 10,
         tickFormat: settings.tickFormat,
       });
@@ -179,13 +184,9 @@ const InnerMultiDistributionChart: FC<{
 
       // shapes
       {
-        context.save();
-        translateToZero();
+        frame.enter();
         const translatedCursor: Point | undefined = cursor
-          ? {
-              x: cursor[0] - padding.left,
-              y: padding.top + chartHeight - cursor[1],
-            }
+          ? frame.translatedPoint(cursor)
           : undefined;
         const discreteRadius = 5;
 
@@ -236,10 +237,10 @@ const InnerMultiDistributionChart: FC<{
             drawCircle({ context, x, y, r: discreteRadius });
           }
         }
-        context.restore();
         if (!isEqual(discreteTooltip, newDiscreteTooltip)) {
           setDiscreteTooltip(newDiscreteTooltip);
         }
+        frame.exit();
       }
 
       // samples
@@ -259,17 +260,16 @@ const InnerMultiDistributionChart: FC<{
 
       if (
         cursor &&
-        cursor[0] >= padding.left &&
-        cursor[0] - padding.left <= chartWidth
+        cursor.x >= padding.left &&
+        cursor.y - padding.left <= frame.width
       ) {
-        drawVerticalCursorLine({
+        drawCursorLines({
+          frame,
           cursor,
-          padding,
-          chartWidth,
-          chartHeight,
-          xScale,
-          tickFormat: d3.format(",.4r"),
-          context,
+          x: {
+            scale: xScale,
+            format: d3.format(",.4r"),
+          },
         });
       }
     },
@@ -285,8 +285,8 @@ const InnerMultiDistributionChart: FC<{
       plot.showLegend,
       discreteTooltip,
       cursor,
-      settings.logX,
-      settings.expY,
+      settings.xScale,
+      settings.yScale,
       settings.title,
       settings.minX,
       settings.maxX,
@@ -361,7 +361,7 @@ export const MultiDistributionChart: FC<MultiDistributionChartProps> = ({
 
   return (
     <div className="flex flex-col items-stretch">
-      {settings.logX && shapes.value.some(hasMassBelowZero) ? (
+      {settings.xScale === "log" && shapes.value.some(hasMassBelowZero) ? (
         <ErrorAlert heading="Log Domain Error">
           Cannot graph distribution with negative values on logarithmic scale.
         </ErrorAlert>

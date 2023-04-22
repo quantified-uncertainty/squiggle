@@ -1,9 +1,10 @@
+import { BaseDist } from "../dist/BaseDist.js";
 import { SampleSetDist } from "../dist/SampleSetDist/index.js";
 import { Env } from "../dist/env.js";
 import { zip } from "../utility/E_A.js";
 import * as Result from "../utility/result.js";
 import { Plot, vPlot } from "../value/index.js";
-import { wrapDistribution } from "./SqDistribution.js";
+import { SqSampleSetDistribution, wrapDistribution } from "./SqDistribution.js";
 import { SqError } from "./SqError.js";
 import { SqLambda } from "./SqLambda.js";
 import { SqPlotValue } from "./SqValue.js";
@@ -15,8 +16,8 @@ export const wrapPlot = (value: Plot, location: SqValueLocation): SqPlot => {
       return new SqDistributionsPlot(value, location);
     case "fn":
       return new SqFnPlot(value, location);
-    case "joint":
-      return new SqJointPlot(value, location);
+    case "scatter":
+      return new SqScatterPlot(value, location);
   }
 };
 
@@ -68,37 +69,51 @@ export class SqFnPlot extends SqAbstractPlot<"fn"> {
   }
 }
 
-export class SqJointPlot extends SqAbstractPlot<"joint"> {
-  tag = "joint" as const;
+export class SqScatterPlot extends SqAbstractPlot<"scatter"> {
+  tag = "scatter" as const;
 
-  get yDist() {
-    return wrapDistribution(this._value.xDist);
-  }
-  get xDist() {
-    return wrapDistribution(this._value.yDist);
-  }
-
-  points(env: Env): Result.result<{ x: number; y: number }[], SqError> {
-    const xSamplesValue = SampleSetDist.fromDist(this._value.xDist, env);
-    const ySamplesValue = SampleSetDist.fromDist(this._value.yDist, env);
-
-    if (!xSamplesValue.ok || !ySamplesValue.ok) {
+  private buildSampleSetDist(
+    dist: BaseDist,
+    env: Env
+  ): Result.result<SqSampleSetDistribution, SqError> {
+    const sampleSetResult = SampleSetDist.fromDist(dist, env);
+    if (!sampleSetResult.ok) {
       return Result.Error(
         SqError.createOtherError("Conversion to SampleSet failed")
       );
     }
+    return Result.Ok(new SqSampleSetDistribution(sampleSetResult.value));
+  }
 
-    const xSamples = xSamplesValue.value.samples;
-    const ySamples = ySamplesValue.value.samples;
+  xDist(env: Env): Result.result<SqSampleSetDistribution, SqError> {
+    return this.buildSampleSetDist(this._value.xDist, env);
+  }
+  yDist(env: Env): Result.result<SqSampleSetDistribution, SqError> {
+    return this.buildSampleSetDist(this._value.yDist, env);
+  }
+
+  get logX(): boolean {
+    return this._value.logX;
+  }
+  get logY(): boolean {
+    return this._value.logY;
+  }
+
+  static zipToPoints(
+    xDist: SqSampleSetDistribution,
+    yDist: SqSampleSetDistribution
+  ): { x: number; y: number }[] {
+    const xSamples = xDist.getSamples();
+    const ySamples = yDist.getSamples();
     if (xSamples.length !== ySamples.length) {
-      return Result.Error(SqError.createOtherError("Sample count mismatch"));
+      throw new Error("Sample count mismatch");
     }
     const points: { x: number; y: number }[] = [];
     for (let i = 0; i < xSamples.length; i++) {
       points.push({ x: xSamples[i], y: ySamples[i] });
     }
-    return Result.Ok(points);
+    return points;
   }
 }
 
-export type SqPlot = SqDistributionsPlot | SqFnPlot | SqJointPlot;
+export type SqPlot = SqDistributionsPlot | SqFnPlot | SqScatterPlot;

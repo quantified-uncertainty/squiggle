@@ -5,12 +5,12 @@ import * as React from "react";
 import { FC, useCallback, useMemo, useRef } from "react";
 
 import {
+  AnyChartScale,
   drawAxes,
-  drawVerticalCursorLine,
-  getFunctionImage,
-  Padding,
+  drawCursorLines,
   primaryColor,
-} from "../../lib/drawUtils.js";
+} from "../../lib/draw/index.js";
+import { Padding } from "../../lib/draw/types.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
 import { ErrorAlert } from "../Alert.js";
@@ -20,6 +20,7 @@ import {
 } from "../DistributionChart.js";
 import { NumberShower } from "../NumberShower.js";
 import { FunctionChartSettings } from "./index.js";
+import { getFunctionImage } from "./utils.js";
 
 function unwrap<a, b>(x: result<a, b>): a {
   if (x.ok) {
@@ -123,17 +124,13 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
     ({ context, width }: DrawContext) => {
       context.clearRect(0, 0, width, height);
 
-      const {
-        xScale,
-        yScale,
-        padding,
-        chartWidth,
-        chartHeight,
-        translateToZero,
-      } = drawAxes({
-        suggestedPadding: { left: 20, right: 10, top: 10, bottom: 20 },
-        xDomain: d3.extent(data, (d) => d.x) as [number, number],
-        yDomain: [
+      const xScale = d3
+        .scaleLinear()
+        .domain(d3.extent(data, (d) => d.x) as [number, number]);
+
+      const yScale = d3
+        .scaleLinear()
+        .domain([
           Math.min(
             ...data.map((d) =>
               Math.min(...Object.values(d.areas).map((p) => p[0]), d[50])
@@ -144,7 +141,12 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
               Math.max(...Object.values(d.areas).map((p) => p[1]), d[50])
             )
           ),
-        ],
+        ]);
+
+      const { padding, frame } = drawAxes({
+        suggestedPadding: { left: 20, right: 10, top: 10, bottom: 20 },
+        xScale,
+        yScale,
         width,
         height,
         context,
@@ -155,8 +157,7 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
       };
 
       // areas
-      context.save();
-      translateToZero();
+      frame.enter();
 
       context.fillStyle = primaryColor;
       for (const { width, opacity } of intervals) {
@@ -183,21 +184,20 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
         .context(context)(data);
 
       context.stroke();
-      context.restore();
+      frame.exit();
 
       if (
         cursor &&
-        cursor[0] >= padding.left &&
-        cursor[0] - padding.left <= chartWidth
+        cursor.x >= padding.left &&
+        cursor.x - padding.left <= frame.width
       ) {
-        drawVerticalCursorLine({
+        drawCursorLines({
+          frame,
           cursor,
-          padding,
-          chartWidth,
-          chartHeight,
-          xScale,
-          tickFormat: d3.format(",.4r"),
-          context,
+          x: {
+            scale: xScale,
+            format: d3.format(",.4r"),
+          },
         });
       }
     },
@@ -208,7 +208,7 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
 
   const d3ref = useRef<{
     padding: Padding;
-    xScale: d3.ScaleLinear<number, number, never>;
+    xScale: AnyChartScale;
   }>();
 
   //TODO: This custom error handling is a bit hacky and should be improved.
@@ -217,13 +217,13 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
       return;
     }
     if (
-      cursor[0] < d3ref.current.padding.left ||
-      cursor[0] > width - d3ref.current.padding.right
+      cursor.x < d3ref.current.padding.left ||
+      cursor.x > width - d3ref.current.padding.right
     ) {
       return;
     }
     const x = d3ref.current.xScale.invert(
-      cursor[0] - d3ref.current.padding.left
+      cursor.x - d3ref.current.padding.left
     );
     return x
       ? fn.call([x])

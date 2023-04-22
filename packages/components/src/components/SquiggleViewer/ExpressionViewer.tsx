@@ -15,7 +15,7 @@ import { ItemSettingsMenu } from "./ItemSettingsMenu.js";
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
 import { MergedItemSettings } from "./utils.js";
 import { PartialViewSettings } from "../ViewSettingsForm.js";
-import { JointChart } from "../JointChart/index.js";
+import { ScatterChart } from "../ScatterChart/index.js";
 
 const VariableList: React.FC<{
   value: SqValue;
@@ -78,7 +78,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
                   shape.ok && hasMassBelowZero(shape.value.asShape())
                     ? {
                         distributionChartSettings: {
-                          logX: false,
+                          disableLogX: true,
                         },
                       }
                     : undefined
@@ -229,7 +229,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
           : false;
       if (disableLogX) {
         fixed.distributionChartSettings = {
-          logX: false,
+          disableLogX: true,
         };
       }
       fixed.functionChartSettings = {};
@@ -282,9 +282,9 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
                     }}
                   />
                 );
-              case "joint":
+              case "scatter":
                 return (
-                  <JointChart
+                  <ScatterChart
                     plot={plot}
                     height={settings.chartHeight}
                     environment={environment}
