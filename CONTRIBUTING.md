@@ -23,6 +23,10 @@ Squiggle is a **monorepo** with several **packages**.
 - **website** is the site [squiggle-language.com](https://www.squiggle-language.com)
 - **vscode-ext** is the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=qURI.vscode-squiggle)
 
+# VS Code
+
+If you want to use [VS Code Jest extension](https://github.com/jest-community/vscode-jest), or share other useful workspace settings, such as multi-root mode, move `.vscode/squiggle.code-workspace.default` file to `.vscode/squiggle.code-workspace`.
+
 # Deployment ops
 
 We use Vercel, and it should only concern Slava, Sam, and Ozzie.
