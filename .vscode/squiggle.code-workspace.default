@@ -1,0 +1,48 @@
+// Copy this file to squiggle.code-workspace if you want to use multi-root repo and to use Jest VS Code extension.
+{
+  "folders": [
+    {
+      "name": "squiggle",
+      "path": ".."
+    },
+    {
+      "name": "relative-values",
+      "path": "../packages/relative-values"
+    },
+    {
+      "name": "vscode-ext",
+      "path": "../packages/vscode-ext"
+    },
+    {
+      "name": "cli",
+      "path": "../packages/cli"
+    },
+    {
+      "name": "squiggle-lang",
+      "path": "../packages/squiggle-lang"
+    },
+    {
+      "name": "components",
+      "path": "../packages/components"
+    },
+    {
+      "name": "website",
+      "path": "../packages/website"
+    },
+    {
+      "name": "api-server",
+      "path": "../packages/api-server"
+    }
+  ],
+  "settings": {
+    "jest.disabledWorkspaceFolders": [
+      "squiggle",
+      "relative-values",
+      "vscode-ext",
+      "cli",
+      "website",
+      "api-server"
+    ],
+    "jest.jestCommandLine": "yarn test"
+  }
+}
