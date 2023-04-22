@@ -1,8 +1,16 @@
 import range from "lodash/range.js";
 
-import { SqLambda, SqValue } from "@quri/squiggle-lang";
+import {
+  SqNumericFnPlot,
+  SqDistFnPlot,
+  SqDistribution,
+} from "@quri/squiggle-lang";
 
-import { FunctionChartSettings } from "./index.js";
+export const functionChartDefaults = {
+  min: 0,
+  max: 10,
+  points: 20,
+};
 
 function rangeByCount(start: number, stop: number, count: number) {
   const step = (stop - start) / (count - 1);
@@ -11,45 +19,43 @@ function rangeByCount(start: number, stop: number, count: number) {
   return result;
 }
 
-type Subvalue<T> = T extends SqValue["tag"]
-  ? Extract<SqValue, { tag: T }>
-  : never;
+type ImageValue<T extends SqNumericFnPlot | SqDistFnPlot> =
+  T["tag"] extends "numericFn" ? number : SqDistribution;
 
-export function getFunctionImage<T extends Exclude<SqValue["tag"], "Void">>({
-  settings,
-  fn,
-  valueType,
-}: {
-  settings: FunctionChartSettings;
-  fn: SqLambda;
-  valueType: T;
-}) {
+export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot>(
+  plot: T
+) {
   const chartPointsToRender = rangeByCount(
-    settings.start,
-    settings.stop,
-    settings.count
+    plot.xScale?.min ?? functionChartDefaults.min,
+    plot.xScale?.max ?? functionChartDefaults.max,
+    plot.points ?? functionChartDefaults.points
   );
 
   let functionImage: {
     x: number;
-    y: Subvalue<T>["value"];
+    y: ImageValue<T>;
   }[] = [];
   let errors: { x: number; value: string }[] = [];
 
   for (const x of chartPointsToRender) {
-    const result = fn.call([x]);
+    const result = plot.fn.call([x]);
     if (result.ok) {
-      if (result.value.tag === valueType) {
+      if (result.value.tag === "Number" && plot.tag === "numericFn") {
         functionImage.push({
           x,
-          // This is sketchy, I'm not sure why the type check passes (it's not because of `if` guard above), might be a Typescript bug.
-          // The result should be correct, though.
-          y: result.value.value,
+          y: result.value.value as any, // typescript is hard to satisfy here
+        });
+      } else if (result.value.tag === "Dist" && plot.tag === "distFn") {
+        functionImage.push({
+          x,
+          y: result.value.value as any,
         });
       } else {
         errors.push({
           x,
-          value: `This component expected outputs of type ${valueType}`,
+          value: `This component expected outputs of type ${
+            plot.tag === "numericFn" ? "Number" : "Dist"
+          }, got: ${result.value.toString()}`,
         });
       }
     } else {

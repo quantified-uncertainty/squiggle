@@ -7,10 +7,10 @@ import {
   result,
   SqDistribution,
   SqDistributionError,
+  SqDistributionsPlot,
 } from "@quri/squiggle-lang";
 import { NumberShower } from "../NumberShower.js";
 import { Tooltip } from "../ui/Tooltip.js";
-import { Plot } from "./types.js";
 
 const TableHeadCell: FC<PropsWithChildren> = ({ children }) => (
   <th className="border border-slate-200 bg-slate-50 py-1 px-2 text-slate-500 font-semibold">
@@ -75,16 +75,17 @@ const SummaryTableRow: FC<SummaryTableRowProps> = ({
 };
 
 type SummaryTableProps = {
-  plot: Plot;
+  plot: SqDistributionsPlot;
   environment: Env;
 };
 
 export const SummaryTable: FC<SummaryTableProps> = ({ plot, environment }) => {
+  const showNames = plot.distributions.some((d) => d.name);
   return (
     <table className="border border-collapse border-slate-400">
       <thead className="bg-slate-50">
         <tr>
-          {plot.showLegend && <TableHeadCell>Name</TableHeadCell>}
+          {showNames && <TableHeadCell>Name</TableHeadCell>}
           <TableHeadCell>Mean</TableHeadCell>
           <TableHeadCell>Stdev</TableHeadCell>
           {percentiles.map((percentile) => (
@@ -93,12 +94,12 @@ export const SummaryTable: FC<SummaryTableProps> = ({ plot, environment }) => {
         </tr>
       </thead>
       <tbody>
-        {plot.distributions.map((dist) => (
+        {plot.distributions.map((dist, i) => (
           <SummaryTableRow
-            key={dist.name}
+            key={i} // dist.name doesn't have to be unique, so we can't use it as a key
             distribution={dist.distribution}
-            name={dist.name}
-            showName={plot.showLegend}
+            name={dist.name ?? dist.distribution.toString()}
+            showName={showNames}
             environment={environment}
           />
         ))}

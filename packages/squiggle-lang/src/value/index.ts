@@ -200,7 +200,7 @@ class VVoid {
 export const vVoid = () => new VVoid();
 
 export type LabeledDistribution = {
-  name: string;
+  name?: string;
   distribution: BaseDist;
 };
 
@@ -208,19 +208,31 @@ export type Plot =
   | {
       type: "distributions";
       distributions: LabeledDistribution[];
+      xScale: Scale;
+      yScale: Scale;
+      title?: string;
+      showSummary: boolean;
     }
   | {
       type: "scatter";
       xDist: BaseDist;
       yDist: BaseDist;
-      logX: boolean;
-      logY: boolean;
+      xScale: Scale;
+      yScale: Scale;
     }
   | {
-      type: "fn";
+      type: "numericFn";
       fn: Lambda;
-      min: number;
-      max: number;
+      xScale: Scale;
+      yScale: Scale;
+      points?: number;
+    }
+  | {
+      type: "distFn";
+      fn: Lambda;
+      xScale: Scale;
+      distXScale: Scale;
+      points?: number;
     };
 
 class VPlot implements Indexable {
@@ -233,8 +245,10 @@ class VPlot implements Indexable {
         return `Plot containing ${this.value.distributions
           .map((x) => x.name)
           .join(", ")}`;
-      case "fn":
-        return `Plot for function ${this.value.fn}`;
+      case "numericFn":
+        return `Plot for numeric function ${this.value.fn}`;
+      case "distFn":
+        return `Plot for dist function ${this.value.fn}`;
       case "scatter":
         return `Scatter plot for distributions ${this.value.xDist} and ${this.value.yDist}`;
     }
@@ -244,7 +258,7 @@ class VPlot implements Indexable {
     if (
       key.type === "String" &&
       key.value === "fn" &&
-      this.value.type === "fn"
+      (this.value.type === "numericFn" || this.value.type === "distFn")
     ) {
       return vLambda(this.value.fn);
     }
@@ -254,6 +268,49 @@ class VPlot implements Indexable {
 }
 
 export const vPlot = (plot: Plot) => new VPlot(plot);
+
+export type CommonScaleArgs = {
+  min?: number;
+  max?: number;
+  tickFormat?: string;
+};
+
+export type Scale = CommonScaleArgs &
+  (
+    | {
+        type: "linear";
+      }
+    | {
+        type: "log";
+      }
+    | {
+        type: "symlog";
+      }
+    | {
+        type: "power";
+        exponent: number;
+      }
+  );
+
+class VScale {
+  readonly type = "Scale" as const;
+  constructor(public value: Scale) {}
+
+  toString(): string {
+    switch (this.value.type) {
+      case "linear":
+        return "Linear scale"; // TODO - mix in min/max if specified
+      case "log":
+        return "Logarithmic scale";
+      case "symlog":
+        return "Symlog scale";
+      case "power":
+        return `Power scale (${this.value.exponent})`;
+    }
+  }
+}
+
+export const vScale = (scale: Scale) => new VScale(scale);
 
 export type Value =
   | VArray
@@ -267,4 +324,5 @@ export type Value =
   | VRecord
   | VTimeDuration
   | VPlot
+  | VScale
   | VVoid;

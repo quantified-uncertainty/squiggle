@@ -1,7 +1,7 @@
 import { BaseDist } from "../../dist/BaseDist.js";
 import { Lambda } from "../../reducer/lambda.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
-import { Value } from "../../value/index.js";
+import { Scale, Value } from "../../value/index.js";
 
 /*
 FRType is a function that unpacks a Value.
@@ -44,6 +44,10 @@ export const frDist: FRType<BaseDist> = {
 export const frLambda: FRType<Lambda> = {
   unpack: (v) => (v.type === "Lambda" ? v.value : undefined),
   getName: () => "lambda",
+};
+export const frScale: FRType<Scale> = {
+  unpack: (v) => (v.type === "Scale" ? v.value : undefined),
+  getName: () => "scale",
 };
 
 export const frArray = <T>(itemType: FRType<T>): FRType<T[]> => {
@@ -155,6 +159,28 @@ export function frRecord<
   kv4: [K4, FRType<T4>]
 ): FRType<
   { [k in K1]: T1 } & { [k in K2]: T2 } & { [k in K3]: T3 } & { [k in K4]: T4 }
+>;
+export function frRecord<
+  K1 extends string,
+  T1,
+  K2 extends string,
+  T2,
+  K3 extends string,
+  T3,
+  K4 extends string,
+  T4,
+  K5 extends string,
+  T5
+>(
+  kv1: [K1, FRType<T1>],
+  kv2: [K2, FRType<T2>],
+  kv3: [K3, FRType<T3>],
+  kv4: [K4, FRType<T4>],
+  kv5: [K5, FRType<T5>]
+): FRType<
+  { [k in K1]: T1 } & { [k in K2]: T2 } & { [k in K3]: T3 } & {
+    [k in K4]: T4;
+  } & { [k in K5]: T5 }
 >;
 
 export function frRecord(

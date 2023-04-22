@@ -1,28 +1,26 @@
-import { FRFunction } from "../library/registry/core.js";
-import { FnFactory, unpackDistResult } from "../library/registry/helpers.js";
-import * as SymbolicDist from "../dist/SymbolicDist.js";
-import * as Result from "../utility/result.js";
-import * as magicNumbers from "../magicNumbers.js";
+import { BaseDist } from "../dist/BaseDist.js";
 import { DistError, otherError } from "../dist/DistError.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { Value, vArray, vDist, vNumber } from "../value/index.js";
-import { frDist, frNumber } from "../library/registry/frTypes.js";
-import { Ok } from "../utility/result.js";
 import {
   BinaryOperation,
   BinaryOperations,
-  pointwiseCombinationFloat,
-  scaleLog,
 } from "../dist/DistOperations/index.js";
-import { BaseDist } from "../dist/BaseDist.js";
+import * as SymbolicDist from "../dist/SymbolicDist.js";
+import { FRFunction } from "../library/registry/core.js";
+import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { frDist, frNumber } from "../library/registry/frTypes.js";
+import { FnFactory, unpackDistResult } from "../library/registry/helpers.js";
+import * as magicNumbers from "../magicNumbers.js";
 import { ErrorMessage, REDistributionError } from "../reducer/ErrorMessage.js";
+import * as Result from "../utility/result.js";
+import { Ok } from "../utility/result.js";
+import { Value, vArray, vDist, vNumber } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "",
   requiresNamespace: false,
 });
 
-const toValueResult = (
+export const toValueResult = (
   result: Result.result<BaseDist, DistError>
 ): Result.result<Value, ErrorMessage> => {
   return Result.fmap2(result, vDist, (e) => REDistributionError(e));
@@ -155,68 +153,6 @@ export const library: FRFunction[] = [
   maker.d2d({
     name: "toPointSet",
     fn: (d, env) => unpackDistResult(d.toPointSetDist(env)),
-  }),
-  maker.d2d({
-    name: "scaleLog",
-    fn: (dist, env) => unpackDistResult(scaleLog(dist, Math.E, { env })),
-  }),
-  maker.d2d({
-    name: "scaleLog10",
-    fn: (dist, env) => unpackDistResult(scaleLog(dist, 10, { env })),
-  }),
-  maker.dn2d({
-    name: "scaleLog",
-    fn: (dist, x, env) => unpackDistResult(scaleLog(dist, x, { env })),
-  }),
-  maker.fromDefinition(
-    makeDefinition(
-      "scaleLogWithThreshold",
-      [frDist, frNumber, frNumber],
-      ([dist, base, eps], { environment }) =>
-        toValueResult(
-          pointwiseCombinationFloat(dist, {
-            env: environment,
-            algebraicOperation: {
-              NAME: "LogarithmWithThreshold",
-              VAL: eps,
-            },
-            f: base,
-          })
-        )
-    )
-  ),
-  maker.dn2d({
-    name: "scaleMultiply",
-    fn: (dist, f, env) =>
-      unpackDistResult(
-        pointwiseCombinationFloat(dist, {
-          env,
-          algebraicOperation: "Multiply",
-          f,
-        })
-      ),
-  }),
-  maker.dn2d({
-    name: "scalePow",
-    fn: (dist, f, env) =>
-      unpackDistResult(
-        pointwiseCombinationFloat(dist, {
-          env,
-          algebraicOperation: "Power",
-          f,
-        })
-      ),
-  }),
-  maker.d2d({
-    name: "scaleExp",
-    fn: (dist, env) =>
-      unpackDistResult(
-        pointwiseCombinationFloat(dist, {
-          env,
-          algebraicOperation: "Power",
-          f: Math.E,
-        })
-      ),
   }),
   maker.dn2n({
     name: "cdf",

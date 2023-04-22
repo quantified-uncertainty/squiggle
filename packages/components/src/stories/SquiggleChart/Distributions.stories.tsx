@@ -39,6 +39,27 @@ export const Discrete: Story = {
   },
 };
 
+export const Scales: Story = {
+  name: "Continuous with scales",
+  args: {
+    code: `Plot.dist({
+  dist: -1 to 5,
+  xScale: Scale.symlog(),
+  yScale: Scale.power({ exponent: 0.1 }),
+})`,
+  },
+};
+
+export const CustomTickFormat: Story = {
+  name: "Custom tick format",
+  args: {
+    code: `Plot.dist({
+  dist: beta(3, 5),
+  xScale: Scale.linear({ tickFormat: ".0%" }),
+})`,
+  },
+};
+
 /**
  * This feature is broken for now.
  */

@@ -32,7 +32,22 @@ yDist = (-3 to 3) * 5 - xDist ^ 2
 Plot.scatter({
   xDist: xDist,
   yDist: yDist,
-  logX: true
+  xScale: Scale.log(),
+})
+`,
+  },
+};
+
+export const DoubleSymlog: Story = {
+  args: {
+    code: `
+xDist = SampleSet.fromDist(-2 to 5)
+yDist = (-3 to 3) * 5 - xDist
+Plot.scatter({
+  xDist: xDist,
+  yDist: yDist,
+  xScale: Scale.symlog(),
+  yScale: Scale.symlog(),
 })
 `,
   },

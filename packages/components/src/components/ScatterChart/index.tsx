@@ -1,13 +1,8 @@
 import React, { FC, useCallback, useMemo } from "react";
 
-import {
-  Env,
-  SqSampleSetDistribution,
-  SqScatterPlot,
-} from "@quri/squiggle-lang";
+import { Env, SqLinearScale, SqScatterPlot } from "@quri/squiggle-lang";
 import * as d3 from "d3";
 import {
-  AnyChartScale,
   drawAxes,
   drawCircle,
   drawCursorLines,
@@ -18,6 +13,7 @@ import {
   useCanvas,
   useCanvasCursor,
 } from "../../lib/hooks/index.js";
+import { sqScaleToD3 } from "../../lib/utility.js";
 import { ErrorAlert } from "../Alert.js";
 
 type Props = {
@@ -25,25 +21,6 @@ type Props = {
   height: number;
   environment: Env;
 };
-
-function buildScaleFromSampleSet({
-  dist,
-  isLogarithmic,
-}: {
-  dist: SqSampleSetDistribution;
-  isLogarithmic: boolean;
-}) {
-  const samples = dist.getSamples();
-  let scale: AnyChartScale;
-  if (isLogarithmic) {
-    // TODO - calculate the optimal value of the constant
-    scale = d3.scaleSymlog().constant(1);
-  } else {
-    scale = d3.scaleLinear();
-  }
-  scale.domain(d3.extent(samples) as [number, number]);
-  return scale;
-}
 
 export const ScatterChart: FC<Props> = ({ plot, height, environment }) => {
   const { cursor, initCursor } = useCanvasCursor();
@@ -63,14 +40,19 @@ export const ScatterChart: FC<Props> = ({ plot, height, environment }) => {
 
       const points = SqScatterPlot.zipToPoints(xDist.value, yDist.value);
 
-      const xScale = buildScaleFromSampleSet({
-        dist: xDist.value,
-        isLogarithmic: plot.logX,
-      });
-      const yScale = buildScaleFromSampleSet({
-        dist: yDist.value,
-        isLogarithmic: plot.logY,
-      });
+      const xSqScale = plot.xScale ?? SqLinearScale.create();
+      const xScale = sqScaleToD3(xSqScale);
+      xScale.domain([
+        xSqScale.min ?? d3.min(xDist.value.getSamples())!,
+        xSqScale.max ?? d3.max(xDist.value.getSamples())!,
+      ]);
+
+      const ySqScale = plot.yScale ?? SqLinearScale.create();
+      const yScale = sqScaleToD3(ySqScale);
+      yScale.domain([
+        ySqScale.min ?? d3.min(yDist.value.getSamples())!,
+        ySqScale.max ?? d3.max(yDist.value.getSamples())!,
+      ]);
 
       const { frame, padding } = drawAxes({
         context,
@@ -84,6 +66,8 @@ export const ScatterChart: FC<Props> = ({ plot, height, environment }) => {
         },
         xScale,
         yScale,
+        xTickFormat: plot.xScale?.tickFormat,
+        yTickFormat: plot.yScale?.tickFormat,
         tickCount: 20,
         drawTicks: true,
       });
@@ -122,7 +106,7 @@ export const ScatterChart: FC<Props> = ({ plot, height, environment }) => {
         });
       }
     },
-    [xDist, yDist, height, cursor, plot.logX, plot.logY]
+    [xDist, yDist, height, cursor, plot.xScale, plot.yScale]
   );
 
   const { ref } = useCanvas({ height, init: initCursor, draw });

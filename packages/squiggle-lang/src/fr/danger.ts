@@ -4,14 +4,24 @@ import jstat from "jstat";
 
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frArray, frLambda, frNumber } from "../library/registry/frTypes.js";
-import { FnFactory } from "../library/registry/helpers.js";
+import {
+  frArray,
+  frDist,
+  frLambda,
+  frNumber,
+} from "../library/registry/frTypes.js";
+import { FnFactory, unpackDistResult } from "../library/registry/helpers.js";
 import { ReducerContext } from "../reducer/Context.js";
 import { ErrorMessage, REOther } from "../reducer/ErrorMessage.js";
 import { Lambda } from "../reducer/lambda.js";
 import * as E_A from "../utility/E_A.js";
 import { Ok, result } from "../utility/result.js";
 import { ReducerFn, Value, vArray, vNumber } from "../value/index.js";
+import {
+  pointwiseCombinationFloat,
+  scaleLog,
+} from "../dist/DistOperations/index.js";
+import { toValueResult } from "./genericDist.js";
 
 const { factorial } = jstat;
 
@@ -340,6 +350,71 @@ const diminishingReturnsLibrary = [
   }),
 ];
 
+const mapYLibrary: FRFunction[] = [
+  maker.d2d({
+    name: "mapYLog",
+    fn: (dist, env) => unpackDistResult(scaleLog(dist, Math.E, { env })),
+  }),
+  maker.d2d({
+    name: "mapYLog10",
+    fn: (dist, env) => unpackDistResult(scaleLog(dist, 10, { env })),
+  }),
+  maker.dn2d({
+    name: "mapYLog",
+    fn: (dist, x, env) => unpackDistResult(scaleLog(dist, x, { env })),
+  }),
+  maker.fromDefinition(
+    makeDefinition(
+      "mapYLogWithThreshold",
+      [frDist, frNumber, frNumber],
+      ([dist, base, eps], { environment }) =>
+        toValueResult(
+          pointwiseCombinationFloat(dist, {
+            env: environment,
+            algebraicOperation: {
+              NAME: "LogarithmWithThreshold",
+              VAL: eps,
+            },
+            f: base,
+          })
+        )
+    )
+  ),
+  maker.dn2d({
+    name: "mapYMultiply",
+    fn: (dist, f, env) =>
+      unpackDistResult(
+        pointwiseCombinationFloat(dist, {
+          env,
+          algebraicOperation: "Multiply",
+          f,
+        })
+      ),
+  }),
+  maker.dn2d({
+    name: "mapYPow",
+    fn: (dist, f, env) =>
+      unpackDistResult(
+        pointwiseCombinationFloat(dist, {
+          env,
+          algebraicOperation: "Power",
+          f,
+        })
+      ),
+  }),
+  maker.d2d({
+    name: "mapYExp",
+    fn: (dist, env) =>
+      unpackDistResult(
+        pointwiseCombinationFloat(dist, {
+          env,
+          algebraicOperation: "Power",
+          f: Math.E,
+        })
+      ),
+  }),
+];
+
 export const library = [
   // Combinatorics
   ...combinatoricsLibrary,
@@ -349,4 +424,7 @@ export const library = [
 
   // Diminishing marginal return functions
   ...diminishingReturnsLibrary,
+
+  // previously called `scaleLog`/`scaleExp`/...
+  ...mapYLibrary,
 ];

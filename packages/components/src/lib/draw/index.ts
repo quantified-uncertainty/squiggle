@@ -16,6 +16,8 @@ export function distance(point1: Point, point2: Point) {
   return Math.sqrt((point1.x - point2.x) ** 2 + (point1.y - point2.y) ** 2);
 }
 
+export const defaultTickFormatSpecifier = ".9~s";
+
 export function drawAxes({
   context,
   xScale,
@@ -26,7 +28,8 @@ export function drawAxes({
   hideYAxis,
   drawTicks,
   tickCount = 5,
-  tickFormat = ".9~s",
+  xTickFormat: xTickFormatSpecifier = defaultTickFormatSpecifier,
+  yTickFormat: yTickFormatSpecifier = defaultTickFormatSpecifier,
 }: {
   context: CanvasRenderingContext2D;
   xScale: AnyChartScale;
@@ -38,12 +41,14 @@ export function drawAxes({
   drawTicks?: boolean;
   tickCount?: number;
   tickFormat?: string;
+  xTickFormat?: string;
+  yTickFormat?: string;
 }) {
   const xTicks = xScale.ticks(tickCount);
-  const xTickFormat = xScale.tickFormat(tickCount, tickFormat);
+  const xTickFormat = xScale.tickFormat(tickCount, xTickFormatSpecifier);
 
   const yTicks = yScale.ticks(tickCount);
-  const yTickFormat = yScale.tickFormat(tickCount, tickFormat);
+  const yTickFormat = xScale.tickFormat(tickCount, yTickFormatSpecifier);
 
   const tickSize = 2;
 

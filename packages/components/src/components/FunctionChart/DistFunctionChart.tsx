@@ -1,4 +1,12 @@
-import { Env, result, SqError, SqLambda, SqValue } from "@quri/squiggle-lang";
+import {
+  Env,
+  result,
+  SqDistributionsPlot,
+  SqError,
+  SqDistFnPlot,
+  SqLinearScale,
+  SqValue,
+} from "@quri/squiggle-lang";
 import * as d3 from "d3";
 import groupBy from "lodash/groupBy.js";
 import * as React from "react";
@@ -13,14 +21,12 @@ import {
 import { Padding } from "../../lib/draw/types.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
+import { sqScaleToD3 } from "../../lib/utility.js";
 import { ErrorAlert } from "../Alert.js";
-import {
-  DistributionChart,
-  DistributionChartSettings,
-} from "../DistributionChart.js";
+import { DistributionsChart } from "../DistributionsChart/index.js";
 import { NumberShower } from "../NumberShower.js";
-import { FunctionChartSettings } from "./index.js";
 import { getFunctionImage } from "./utils.js";
+import { FunctionChartContainer } from "./FunctionChartContainer.js";
 
 function unwrap<a, b>(x: result<a, b>): a {
   if (x.ok) {
@@ -30,9 +36,7 @@ function unwrap<a, b>(x: result<a, b>): a {
   }
 }
 type FunctionChart1DistProps = {
-  fn: SqLambda;
-  settings: FunctionChartSettings;
-  distributionChartSettings: DistributionChartSettings;
+  plot: SqDistFnPlot;
   environment: Env;
   height: number;
 };
@@ -64,19 +68,13 @@ type Errors = {
 };
 
 const getPercentiles = ({
-  settings,
-  fn,
+  plot,
   environment,
 }: {
-  settings: FunctionChartSettings;
-  fn: SqLambda;
+  plot: SqDistFnPlot;
   environment: Env;
 }) => {
-  const { functionImage, errors } = getFunctionImage({
-    settings,
-    fn,
-    valueType: "Dist",
-  });
+  const { functionImage, errors } = getFunctionImage(plot);
 
   const groupedErrors: Errors = groupBy(errors, (x) => x.value);
 
@@ -105,28 +103,25 @@ const getPercentiles = ({
   return { data, errors: groupedErrors };
 };
 
-export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
-  fn,
-  settings,
+export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
+  plot,
   environment,
-  distributionChartSettings,
   height: innerHeight,
 }) => {
   const height = innerHeight + 30; // consider paddings, should match suggestedPadding below
   const { cursor, initCursor } = useCanvasCursor();
 
   const { data, errors } = useMemo(
-    () => getPercentiles({ settings, fn, environment }),
-    [environment, fn, settings]
+    () => getPercentiles({ plot, environment }),
+    [plot, environment]
   );
 
   const draw = useCallback(
     ({ context, width }: DrawContext) => {
       context.clearRect(0, 0, width, height);
 
-      const xScale = d3
-        .scaleLinear()
-        .domain(d3.extent(data, (d) => d.x) as [number, number]);
+      const xScale = sqScaleToD3(plot.xScale);
+      xScale.domain(d3.extent(data, (d) => d.x) as [number, number]);
 
       const yScale = d3
         .scaleLinear()
@@ -150,6 +145,7 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
         width,
         height,
         context,
+        xTickFormat: plot.xScale.tickFormat,
       });
       d3ref.current = {
         padding,
@@ -201,7 +197,7 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
         });
       }
     },
-    [cursor, height, data]
+    [cursor, height, data, plot]
   );
 
   const { ref, width } = useCanvas({ height, init: initCursor, draw });
@@ -211,8 +207,7 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
     xScale: AnyChartScale;
   }>();
 
-  //TODO: This custom error handling is a bit hacky and should be improved.
-  const mouseItem: result<SqValue, SqError> | undefined = useMemo(() => {
+  const mouseX: number | undefined = useMemo(() => {
     if (!d3ref.current || !cursor || width === undefined) {
       return;
     }
@@ -222,45 +217,57 @@ export const FunctionChart1Dist: FC<FunctionChart1DistProps> = ({
     ) {
       return;
     }
-    const x = d3ref.current.xScale.invert(
-      cursor.x - d3ref.current.padding.left
-    );
-    return x
-      ? fn.call([x])
+    return d3ref.current.xScale.invert(cursor.x - d3ref.current.padding.left);
+  }, [cursor, width]);
+
+  //TODO: This custom error handling is a bit hacky and should be improved.
+  const mouseItem: result<SqValue, SqError> | undefined = useMemo(() => {
+    return mouseX
+      ? plot.fn.call([mouseX])
       : {
           ok: false,
           value: SqError.createOtherError(
             "Hover x-coordinate returned NaN. Expected a number."
           ),
         };
-  }, [fn, cursor, width]);
+  }, [plot.fn, mouseX]);
 
   const showChart =
     mouseItem && mouseItem.ok && mouseItem.value.tag === "Dist" ? (
-      <DistributionChart
-        distribution={mouseItem.value.value}
+      <DistributionsChart
+        plot={SqDistributionsPlot.create({
+          distribution: mouseItem.value.value,
+          xScale: plot.distXScale,
+          yScale: SqLinearScale.create(),
+          showSummary: false,
+          title:
+            mouseX === undefined
+              ? undefined
+              : `f(${d3.format(",.4r")(mouseX)})`, // TODO - use an original function name? it could be obtained with `locationToShortName`, but there's a corner case for arrays.
+        })}
         environment={environment}
         height={50}
-        settings={distributionChartSettings}
       />
     ) : null;
 
   return (
-    <div className="flex flex-col items-stretch">
-      <canvas ref={ref}>Chart for {fn.toString()}</canvas>
-      {showChart}
-      {Object.entries(errors).map(([errorName, errorPoints]) => (
-        <ErrorAlert key={errorName} heading={errorName}>
-          Values:{" "}
-          {errorPoints
-            .map((r, i) => <NumberShower key={i} number={r.x} />)
-            .reduce((a, b) => (
-              <>
-                {a}, {b}
-              </>
-            ))}
-        </ErrorAlert>
-      ))}
-    </div>
+    <FunctionChartContainer fn={plot.fn}>
+      <div className="flex flex-col items-stretch">
+        <canvas ref={ref}>Chart for {plot.toString()}</canvas>
+        {showChart}
+        {Object.entries(errors).map(([errorName, errorPoints]) => (
+          <ErrorAlert key={errorName} heading={errorName}>
+            Values:{" "}
+            {errorPoints
+              .map((r, i) => <NumberShower key={i} number={r.x} />)
+              .reduce((a, b) => (
+                <>
+                  {a}, {b}
+                </>
+              ))}
+          </ErrorAlert>
+        ))}
+      </div>
+    </FunctionChartContainer>
   );
 };

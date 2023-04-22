@@ -3,7 +3,7 @@ import * as d3 from "d3";
 import * as React from "react";
 import { FC, useCallback, useMemo } from "react";
 
-import { SqLambda } from "@quri/squiggle-lang";
+import { SqNumericFnPlot } from "@quri/squiggle-lang";
 
 import {
   drawAxes,
@@ -11,27 +11,26 @@ import {
   primaryColor,
 } from "../../lib/draw/index.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
+import { sqScaleToD3 } from "../../lib/utility.js";
 import { ErrorAlert } from "../Alert.js";
-import { FunctionChartSettings } from "./index.js";
 import { getFunctionImage } from "./utils.js";
+import { FunctionChartContainer } from "./FunctionChartContainer.js";
 
 type Props = {
-  fn: SqLambda;
-  settings: FunctionChartSettings;
+  plot: SqNumericFnPlot;
   height: number;
 };
 
-export const FunctionChart1Number: FC<Props> = ({
-  fn,
-  settings,
+export const NumericFunctionChart: FC<Props> = ({
+  plot,
   height: innerHeight,
 }) => {
   const height = innerHeight + 30; // consider paddings, should match suggestedPadding below
   const { cursor, initCursor } = useCanvasCursor();
 
   const { functionImage, errors } = useMemo(
-    () => getFunctionImage({ settings, fn, valueType: "Number" }),
-    [settings, fn]
+    () => getFunctionImage(plot),
+    [plot]
   );
 
   const draw = useCallback(
@@ -44,13 +43,11 @@ export const FunctionChart1Number: FC<Props> = ({
     }) => {
       context.clearRect(0, 0, width, height);
 
-      const xScale = d3
-        .scaleLinear()
-        .domain(d3.extent(functionImage, (d) => d.x) as [number, number]);
+      const xScale = sqScaleToD3(plot.xScale);
+      xScale.domain(d3.extent(functionImage, (d) => d.x) as [number, number]);
 
-      const yScale = d3
-        .scaleLinear()
-        .domain(d3.extent(functionImage, (d) => d.y) as [number, number]);
+      const yScale = sqScaleToD3(plot.yScale);
+      yScale.domain(d3.extent(functionImage, (d) => d.y) as [number, number]);
 
       const { frame, padding } = drawAxes({
         context,
@@ -59,7 +56,26 @@ export const FunctionChart1Number: FC<Props> = ({
         suggestedPadding: { left: 20, right: 10, top: 10, bottom: 20 },
         xScale,
         yScale,
+        xTickFormat: plot.xScale.tickFormat,
+        yTickFormat: plot.yScale.tickFormat,
       });
+
+      if (plot.xScale.tag === "log" && functionImage[0].x <= 0) {
+        frame.enter();
+        frame.fillText(
+          "Invalid X Scale settings",
+          frame.width / 2,
+          frame.height / 2,
+          {
+            textAlign: "center",
+            textBaseline: "middle",
+            font: "12px Arial",
+            fillStyle: "red",
+          }
+        );
+        frame.exit();
+        return;
+      }
 
       // line
       frame.enter();
@@ -96,22 +112,24 @@ export const FunctionChart1Number: FC<Props> = ({
         });
       }
     },
-    [functionImage, height, cursor]
+    [functionImage, height, cursor, plot]
   );
 
   const { ref } = useCanvas({ height, init: initCursor, draw });
 
   return (
-    <div className="flex flex-col items-stretch">
-      <canvas ref={ref}>Chart for {fn.toString()}</canvas>
-      <div className="space-y-1">
-        {errors.map(({ x, value }) => (
-          // TODO - group errors with identical value
-          <ErrorAlert key={x} heading={value}>
-            Error at point {x}
-          </ErrorAlert>
-        ))}
+    <FunctionChartContainer fn={plot.fn}>
+      <div className="flex flex-col items-stretch">
+        <canvas ref={ref}>Chart for {plot.toString()}</canvas>
+        <div className="space-y-1">
+          {errors.map(({ x, value }) => (
+            // TODO - group errors with identical value
+            <ErrorAlert key={x} heading={value}>
+              Error at point {x}
+            </ErrorAlert>
+          ))}
+        </div>
       </div>
-    </div>
+    </FunctionChartContainer>
   );
 };

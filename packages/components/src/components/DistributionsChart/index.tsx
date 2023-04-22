@@ -1,6 +1,5 @@
 import * as React from "react";
 import { FC, useCallback, useState } from "react";
-import * as yup from "yup";
 
 import {
   Env,
@@ -20,74 +19,28 @@ import {
   primaryColor,
 } from "../../lib/draw/index.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
-import { flattenResult } from "../../lib/utility.js";
+import { flattenResult, sqScaleToD3 } from "../../lib/utility.js";
 import { ErrorAlert } from "../Alert.js";
 import { SummaryTable } from "./SummaryTable.js";
-import { Plot } from "./types.js";
 
 import * as d3 from "d3";
+import { Point } from "../../lib/draw/types.js";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
 import { MouseTooltip } from "../ui/MouseTooltip.js";
-import { Point } from "../../lib/draw/types.js";
 
-const scaleTypes = ["linear", "log", "exp"] as const;
-type ScaleType = (typeof scaleTypes)[number];
-
-export const distributionSettingsSchema = yup.object({}).shape({
-  xScale: yup.mixed<ScaleType>().oneOf(scaleTypes).default("linear"),
-  yScale: yup.mixed<ScaleType>().oneOf(scaleTypes).default("linear"),
-  disableLogX: yup.boolean(),
-  minX: yup.number(),
-  maxX: yup.number(),
-  title: yup.string(),
-  xAxisType: yup
-    .mixed<"number" | "dateTime">()
-    .oneOf(["number", "dateTime"])
-    .default("number"),
-  /** Documented here: https://github.com/d3/d3-format */
-  tickFormat: yup.string().required().default(".9~s"),
-  showSummary: yup.boolean().required().default(false),
-});
-
-function scaleTypeToScale(
-  scaleType: ScaleType
-): d3.ScaleContinuousNumeric<number, number, never> {
-  switch (scaleType) {
-    case "linear":
-      return d3.scaleLinear();
-    case "log":
-      return d3.scaleLog();
-    case "exp":
-      return d3.scalePow().exponent(0.1);
-  }
-}
-
-export type DistributionChartSettings = yup.InferType<
-  typeof distributionSettingsSchema
->;
-
-export function sqPlotToPlot(sqPlot: SqDistributionsPlot): Plot {
-  return {
-    distributions: sqPlot.distributions.map((x) => ({ ...x, opacity: 0.3 })),
-    colorScheme: "category10",
-    showLegend: true,
-  };
-}
-
-export type MultiDistributionChartProps = {
-  plot: Plot;
+export type DistributionsChartProps = {
+  plot: SqDistributionsPlot;
   environment: Env;
   height: number;
-  settings: DistributionChartSettings;
 };
 
-const InnerMultiDistributionChart: FC<{
-  shapes: (SqShape & { name: string; opacity: number })[];
+const InnerDistributionsChart: FC<{
+  isMulti: boolean; // enables legend and semi-transparent rendering
+  shapes: (SqShape & { name: string })[];
   samples: number[];
-  settings: DistributionChartSettings;
   height: number;
-  plot: Plot;
-}> = ({ shapes, samples, plot, height: innerHeight, settings }) => {
+  plot: SqDistributionsPlot;
+}> = ({ shapes, samples, plot, height: innerHeight, isMulti }) => {
   const [discreteTooltip, setDiscreteTooltip] = useState<
     { value: number; probability: number } | undefined
   >();
@@ -99,9 +52,9 @@ const InnerMultiDistributionChart: FC<{
   const legendItemHeight = 16;
   const sampleBarHeight = 5;
 
-  const showTitle = !!settings.title;
+  const showTitle = !!plot.title;
   const titleHeight = showTitle ? 20 : 4;
-  const legendHeight = plot.showLegend ? legendItemHeight * shapes.length : 0;
+  const legendHeight = isMulti ? legendItemHeight * shapes.length : 0;
   const samplesFooterHeight = samples.length ? 10 : 0;
 
   const height =
@@ -114,19 +67,20 @@ const InnerMultiDistributionChart: FC<{
       context.clearRect(0, 0, width, height);
 
       const getColor = (i: number) =>
-        plot.colorScheme === "blues" ? "#5ba3cf" : d3.schemeCategory10[i];
+        isMulti ? d3.schemeCategory10[i] : "#5ba3cf";
 
-      const xScale = scaleTypeToScale(settings.xScale);
+      const xScale = sqScaleToD3(plot.xScale);
       xScale.domain([
-        Number.isFinite(settings.minX)
-          ? settings.minX!
+        Number.isFinite(plot.xScale.min)
+          ? plot.xScale.min!
           : d3.min(domain, (d) => d.x) ?? 0,
-        Number.isFinite(settings.maxX)
-          ? settings.maxX!
+        Number.isFinite(plot.xScale.max)
+          ? plot.xScale.max!
           : d3.max(domain, (d) => d.x) ?? 0,
       ]);
 
-      const yScale = scaleTypeToScale(settings.yScale);
+      const yScale = sqScaleToD3(plot.yScale);
+      // TODO - use yScale.min/max?
       yScale.domain([
         Math.min(...domain.map((p) => p.y), 0), // min value, but at least 0
         Math.max(...domain.map((p) => p.y)),
@@ -147,20 +101,20 @@ const InnerMultiDistributionChart: FC<{
         hideYAxis: true,
         drawTicks: true,
         tickCount: 10,
-        tickFormat: settings.tickFormat,
+        xTickFormat: plot.xScale.tickFormat,
       });
 
-      if (settings.title) {
+      if (plot.title) {
         context.save();
         context.textAlign = "center";
         context.textBaseline = "top";
         context.fillStyle = "black";
         context.font = "bold 12px sans-serif";
-        context.fillText(settings.title, width / 2, 4);
+        context.fillText(plot.title, width / 2, 4);
         context.restore();
       }
 
-      if (plot.showLegend) {
+      if (isMulti) {
         const radius = 5;
         for (let i = 0; i < shapes.length; i++) {
           context.save();
@@ -197,7 +151,7 @@ const InnerMultiDistributionChart: FC<{
           const shape = shapes[i];
 
           // continuous
-          context.globalAlpha = shape.opacity;
+          context.globalAlpha = isMulti ? 0.3 : 1;
           context.fillStyle = getColor(i);
           context.beginPath();
           d3
@@ -281,16 +235,10 @@ const InnerMultiDistributionChart: FC<{
       shapes,
       samples,
       domain,
-      plot.colorScheme,
-      plot.showLegend,
+      plot,
       discreteTooltip,
       cursor,
-      settings.xScale,
-      settings.yScale,
-      settings.title,
-      settings.minX,
-      settings.maxX,
-      settings.tickFormat,
+      isMulti,
     ]
   );
 
@@ -325,19 +273,21 @@ const InnerMultiDistributionChart: FC<{
   );
 };
 
-export const MultiDistributionChart: FC<MultiDistributionChartProps> = ({
+export const DistributionsChart: FC<DistributionsChartProps> = ({
   plot,
   environment,
-  settings,
   height,
 }) => {
   const distributions = plot.distributions;
 
+  const isMulti =
+    distributions.length > 1 ||
+    !!(distributions.length === 1 && distributions[0].name);
+
   const shapes = flattenResult(
     distributions.map((x) =>
       resultMap(x.distribution.pointSet(environment), (pointSet) => ({
-        name: x.name,
-        opacity: x.opacity,
+        name: x.name ?? x.distribution.toString(),
         ...pointSet.asShape(),
       }))
     )
@@ -361,21 +311,21 @@ export const MultiDistributionChart: FC<MultiDistributionChartProps> = ({
 
   return (
     <div className="flex flex-col items-stretch">
-      {settings.xScale === "log" && shapes.value.some(hasMassBelowZero) ? (
+      {plot.xScale.tag === "log" && shapes.value.some(hasMassBelowZero) ? (
         <ErrorAlert heading="Log Domain Error">
           Cannot graph distribution with negative values on logarithmic scale.
         </ErrorAlert>
       ) : (
-        <InnerMultiDistributionChart
+        <InnerDistributionsChart
+          isMulti={isMulti}
           samples={samples}
           shapes={shapes.value}
           plot={plot}
-          settings={settings}
           height={height}
         />
       )}
       <div className="flex justify-center">
-        {settings.showSummary && (
+        {plot.showSummary && (
           <SummaryTable plot={plot} environment={environment} />
         )}
       </div>
