@@ -10,6 +10,10 @@ import { Map } from "immutable";
 
 const items = [
   { catalog: quri.catalog, models: quri.models },
+  { catalog: software.catalog, models: software.models },
+  { catalog: posts.catalog, models: posts.models },
+  { catalog: health.catalog, models: health.models },
+  { catalog: purchases.catalog, models: purchases.models },
   { catalog: animals.catalog, models: animals.models },
   { catalog: macrovariables.catalog, models: macrovariables.models },
 ];
