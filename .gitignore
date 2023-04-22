@@ -8,7 +8,6 @@ yarn-error.log
 .direnv
 .log
 
-.vscode
 todo.txt
 result
 shell.nix
