@@ -36,7 +36,7 @@ export type DistributionsChartProps = {
 
 const InnerDistributionsChart: FC<{
   isMulti: boolean; // enables legend and semi-transparent rendering
-  shapes: (SqShape & { name?: string })[];
+  shapes: (SqShape & { name: string })[];
   samples: number[];
   height: number;
   plot: SqDistributionsPlot;
@@ -131,7 +131,7 @@ const InnerDistributionsChart: FC<{
           context.textBaseline = "middle";
           context.fillStyle = "black";
           context.font = "12px sans-serif";
-          context.fillText(shapes[i].name ?? "TODO", 16, radius);
+          context.fillText(shapes[i].name, 16, radius);
           context.restore();
         }
       }
@@ -287,7 +287,7 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
   const shapes = flattenResult(
     distributions.map((x) =>
       resultMap(x.distribution.pointSet(environment), (pointSet) => ({
-        name: x.name,
+        name: x.name ?? x.distribution.toString(),
         ...pointSet.asShape(),
       }))
     )
