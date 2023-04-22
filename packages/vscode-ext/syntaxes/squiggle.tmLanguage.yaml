@@ -8,7 +8,6 @@ repository:
   statement:
     patterns:
       - include: "#let"
-      - include: "#defun"
   expression:
     patterns:
       - include: "#integer"
@@ -17,30 +16,12 @@ repository:
       - include: "#block"
       - include: "#function-call"
       - include: "#keywords"
+      - include: "#variable"
   let:
     match: ^\s*(\w+)\s*=
     captures:
       "1":
         name: variable.other.squiggle
-  defun:
-    begin: ^\s*(\w+)\s*(\()
-    end: (\))\s*=
-    beginCaptures:
-      "1":
-        name: entity.name.function.squiggle
-      "2":
-        name: punctuation.definition.arguments.begin.squiggle
-    endCaptures:
-      "1":
-        name: punctuation.definition.arguments.end.squiggle
-    patterns:
-      - include: "#array-parameters"
-  array-parameters:
-    begin: \b([\$_a-z]+[\$_a-zA-Z0-9]*)
-    end: \s*(?:(,)|(?=\)))
-    beginCaptures:
-      "1":
-        name: variable.parameter.function.squiggle
   function-call:
     begin: (\w+)\s*(\()
     end: (\))
@@ -48,12 +29,18 @@ repository:
       "1":
         name: entity.name.function.squiggle
       "2":
-        name: punctuation.definition.arguments.begin.squiggle
+        name: meta.brace.round.squiggle
     endCaptures:
       "1":
-        name: punctuation.definition.arguments.end.squiggle
+        name: meta.brace.round.squiggle
     patterns:
-      - include: "$self"
+      - include: "#expression"
+      - include: "#comma"
+  comma:
+    match: ","
+    captures:
+      "1":
+        name: punctuation.separator.comma.squiggle
   comment-block:
     begin: /\*
     end: \*/
@@ -92,6 +79,9 @@ repository:
     patterns:
       - include: "#single-quoted-string"
       - include: "#double-quoted-string"
+  variable:
+    match: \b([_a-zA-Z]+[_a-zA-Z0-9]*)
+    name: variable.other.squiggle
   single-quoted-string:
     match: "'.*?'"
     name: string.quoted.single.squiggle
