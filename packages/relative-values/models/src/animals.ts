@@ -576,7 +576,7 @@ items = [animal_estimates_disaggregated, org_items_with_id] -> List.flatten -> L
 
 // Result
 fn(a, b) = [items[a].value, items[b].value]
-items 
+// items 
 `,
   };
 }
