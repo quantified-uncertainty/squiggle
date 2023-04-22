@@ -89,5 +89,12 @@ repository:
     match: \b(\d+\.\d*|\.?\d+)([eE]-?\d+)?([_a-zA-Z]+[_a-zA-Z0-9]*)?
     name: constant.numeric.float.squiggle
   string:
+    patterns:
+      - include: "#single-quoted-string"
+      - include: "#double-quoted-string"
+  single-quoted-string:
+    match: "'.*?'"
+    name: string.quoted.single.squiggle
+  double-quoted-string:
     match: \".*?\"
     name: string.quoted.double.squiggle
