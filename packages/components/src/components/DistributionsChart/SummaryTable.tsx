@@ -94,9 +94,9 @@ export const SummaryTable: FC<SummaryTableProps> = ({ plot, environment }) => {
         </tr>
       </thead>
       <tbody>
-        {plot.distributions.map((dist) => (
+        {plot.distributions.map((dist, i) => (
           <SummaryTableRow
-            key={dist.name}
+            key={i} // dist.name doesn't have to be unique, so we can't use it as a key
             distribution={dist.distribution}
             name={dist.name ?? dist.distribution.toString()}
             showName={showNames}
