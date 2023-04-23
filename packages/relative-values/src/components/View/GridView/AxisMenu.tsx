@@ -100,6 +100,12 @@ export const AxisMenu: FC<{ axis: Axis; sortByAverage?: boolean }> = ({
             mode="uncertainty"
             text={sortByAverage ? "Average uncertainty" : "Uncertainty"}
           />
+          <SortBy
+            axis={axis}
+            config={sort}
+            mode="similarity"
+            text={"Uncertainty similarity"}
+          />
         </div>
       </div>
     </div>

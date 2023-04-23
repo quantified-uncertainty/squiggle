@@ -12,16 +12,11 @@
   },
   "icon": "media/vendor/icon.png",
   "engines": {
-    "vscode": "^1.70.0"
+    "vscode": "^1.75.0"
   },
   "categories": [
     "Programming Languages",
     "Visualization"
-  ],
-  "activationEvents": [
-    "onLanguage:squiggle",
-    "onCustomEditor:squiggle.wysiwyg",
-    "onCommand:squiggle.preview"
   ],
   "main": "./dist/client/extension.js",
   "contributes": {

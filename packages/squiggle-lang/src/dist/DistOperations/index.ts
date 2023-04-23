@@ -14,13 +14,9 @@ import {
 } from "../DistError.js";
 import { algebraicCombination } from "./AlgebraicCombination.js";
 import { Env } from "../env.js";
-import * as SampleSetDist from "../SampleSetDist/SampleSetDist.js";
+import * as SampleSetDist from "../SampleSetDist/index.js";
 import { OperationError } from "../../operationError.js";
 import { ContinuousShape } from "../../PointSet/Continuous.js";
-
-export const toSampleSetDist = (d: BaseDist, env: Env) => {
-  return SampleSetDist.SampleSetDist.make(d.sampleN(env.sampleCount));
-};
 
 export const logScoreDistAnswer = ({
   estimate,

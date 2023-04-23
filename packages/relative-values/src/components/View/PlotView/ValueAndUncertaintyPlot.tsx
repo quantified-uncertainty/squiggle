@@ -1,21 +1,21 @@
 import * as d3 from "d3";
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FC, useCallback, useMemo, useState } from "react";
 
+import { Item } from "@/types";
 import { ModelEvaluator } from "@/values/ModelEvaluator";
+import {
+  DrawContext,
+  MouseTooltip,
+  drawAxes,
+  useCanvas,
+  useCanvasCursor,
+} from "@quri/squiggle-components";
 import { useSelectedInterface } from "../../Interface/InterfaceProvider";
 import { useViewContext } from "../ViewProvider";
 import { useFilteredItems } from "../hooks";
-import { averageUncertainty, averageMedian } from "../hooks/useSortedItems";
-import {
-  useCanvasCursor,
-  DrawContext,
-  useCanvas,
-  drawAxes,
-  MouseTooltip,
-} from "@quri/squiggle-components";
+import { averageMedian, averageUncertainty } from "../hooks/useSortedItems";
 import { distance } from "./ForcePlot";
 import { ItemTooltip } from "./ItemTooltip";
-import { Item } from "@/types";
 
 type Datum = {
   item: Item;
@@ -72,14 +72,21 @@ export const ValueAndUncertaintyPlot: FC<{
     ({ context, width }: DrawContext) => {
       context.clearRect(0, 0, width, height);
 
-      const { xScale, yScale, padding, chartHeight } = drawAxes({
+      const xScale = d3
+        .scaleLog()
+        .domain(d3.extent(data, (d) => Math.abs(d.median)) as [number, number]);
+
+      const yScale = d3
+        .scaleLinear()
+        .domain(d3.extent(data, (d) => d.uncertainty) as [number, number]);
+
+      const { padding, frame } = drawAxes({
         context,
-        xDomain: d3.extent(data, (d) => Math.abs(d.median)) as [number, number],
-        yDomain: d3.extent(data, (d) => d.uncertainty) as [number, number],
-        suggestedPadding: { top: 10, bottom: 40, left: 60, right: 20 },
         width,
         height,
-        logX: true,
+        suggestedPadding: { top: 10, bottom: 40, left: 60, right: 20 },
+        xScale,
+        yScale,
         drawTicks: true,
         tickCount: 10,
       });
@@ -125,11 +132,8 @@ export const ValueAndUncertaintyPlot: FC<{
         const isHovered =
           cursor &&
           distance(
-            { x: x + padding.left, y: padding.top + chartHeight - y },
-            {
-              x: cursor[0],
-              y: cursor[1],
-            }
+            { x: x + padding.left, y: padding.top + frame.height - y },
+            cursor
           ) <
             r * 1.5;
         if (isHovered) {
@@ -148,7 +152,7 @@ export const ValueAndUncertaintyPlot: FC<{
       setHoveredId(newHoveredId);
       context.restore();
     },
-    [data, clusters, cursor]
+    [data, clusters, cursor, comparedToAverage]
   );
 
   const { ref } = useCanvas({

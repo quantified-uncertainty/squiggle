@@ -1,6 +1,5 @@
 "use client";
 import { InterfaceProvider } from "@/components/Interface/InterfaceProvider";
-import { Toolbar } from "@/components/Interface/Toolbar";
 import { StyledTabLink } from "@/components/ui/StyledTabLink";
 import { aboutInterfaceRoute, interfaceRoute } from "@/routes";
 import { useInterfaceById } from "@/storage/StorageProvider";
@@ -68,7 +67,6 @@ export default function InterfaceLayout({
                 href={aboutInterfaceRoute(params.id)}
               />
             </StyledTabLink.List>
-            <Toolbar />
           </div>
         </div>
       </div>

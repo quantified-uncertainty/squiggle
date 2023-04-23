@@ -4,6 +4,16 @@ import { result } from "../../utility/result.js";
 import { ReducerFn, Value } from "../../value/index.js";
 import { FRType } from "./frTypes.js";
 
+type FnDefinition0 = {
+  name: string;
+  inputs: [];
+  run: (
+    args: [],
+    context: ReducerContext,
+    reducerFn: ReducerFn
+  ) => result<Value, ErrorMessage>;
+};
+
 type FnDefinition1<T1> = {
   name: string;
   inputs: [FRType<T1>];
@@ -45,6 +55,15 @@ type FnDefinition4<T1, T2, T3, T4> = {
 };
 
 // https://www.typescriptlang.org/docs/handbook/2/functions.html#function-overloads
+export function makeDefinition(
+  name: string,
+  inputs: [],
+  run: (
+    args: [],
+    context: ReducerContext,
+    reducerFn: ReducerFn
+  ) => result<Value, ErrorMessage>
+): FnDefinition0;
 
 export function makeDefinition<T1>(
   name: string,
@@ -104,6 +123,7 @@ export function makeDefinition(
 }
 
 export type FnDefinition =
+  | FnDefinition0
   | FnDefinition1<any>
   | FnDefinition2<any, any>
   | FnDefinition3<any, any, any>

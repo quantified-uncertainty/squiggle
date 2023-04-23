@@ -19,6 +19,7 @@ import { library as dateLibrary } from "../../fr/date.js";
 import { library as mathLibrary } from "../../fr/math.js";
 import { library as listLibrary } from "../../fr/list.js";
 import { library as plotLibrary } from "../../fr/plot.js";
+import { library as scaleLibrary } from "../../fr/scale.js";
 import { mxLambda } from "../../fr/mixture.js";
 import { ErrorMessage } from "../../reducer/ErrorMessage.js";
 
@@ -38,6 +39,7 @@ const fnList: core.FRFunction[] = [
   ...mathLibrary,
   ...listLibrary,
   ...plotLibrary,
+  ...scaleLibrary,
 ];
 
 export const registry = core.make(fnList);

@@ -4,12 +4,7 @@ import "@testing-library/jest-dom";
 import { SquiggleChart } from "../src/index.js";
 
 test("showSummary prop shows table", async () => {
-  const { container } = render(
-    <SquiggleChart
-      code={"normal(5, 1)"}
-      distributionChartSettings={{ showSummary: true }}
-    />
-  );
+  const { container } = render(<SquiggleChart code={"normal(5, 1)"} />);
   expect(container).toHaveTextContent("Mean");
   expect(container).toHaveTextContent("5");
 });
