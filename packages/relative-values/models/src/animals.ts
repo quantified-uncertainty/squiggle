@@ -188,7 +188,7 @@ tt(dist) = truncateRight(dist, 100)
 one_human_qaly = ({
   id: "one_human_qaly", 
   name: "1 human QALY (quality-adjusted life-year)",
-  value: 1
+  value: normal(1, 0.01) // 
 })
 
 // Cows
@@ -628,7 +628,7 @@ items = [animal_estimates_disaggregated, org_items_with_id, [one_human_qaly]] ->
 
 // Result
 fn(a, b) = [items[a].value, items[b].value]
-// items 
+items 
 `,
   };
 }
