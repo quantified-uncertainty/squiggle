@@ -117,7 +117,7 @@ It's not worth fighting over, though, the difference is pretty small.
 Exceptions:
 
 - For React components, it's better to use `const my Component: FC<...> = ` since it type-checks both the arguments and the result type.
-- In some other cases where you have several functions with the similar signature, it's also convenient to deine a type for the entire function, and you have to use arrow functions to use it.
+- In some other cases where you have several functions with the similar signature, it's also convenient to define a type for the entire function, and you have to use arrow functions to use it.
 
 Also, don't use `function` keyword in non-top scopes (it's easier to avoid hoisting quirks this way).
 
