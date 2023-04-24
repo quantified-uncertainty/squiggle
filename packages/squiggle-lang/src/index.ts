@@ -37,7 +37,8 @@ export { SqProject, SqValue, SqStringValue };
 export { Env };
 export { LocationRange as SqLocation } from "peggy";
 
-export { AST } from "./ast/parse.js";
+export { AST, ASTNode } from "./ast/parse.js";
+export { ASTCommentNode } from "./ast/peggyHelpers.js";
 
 export const run = (
   code: string,

@@ -1,0 +1,14 @@
+{
+  "name": "@quri/prettier-plugin-squiggle",
+  "version": "0.0.1",
+  "dependencies": {
+    "@quri/squiggle-lang": "^0.7.0"
+  },
+  "peerDependencies": {
+    "prettier": "^2.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.4"
+  },
+  "main": "./dist/cjs/src/index.js"
+}

@@ -7,7 +7,7 @@
     "peggy": "peggy --cache --format es",
     "build": "yarn build:peggy && yarn build:typescript",
     "build:peggy": "find . -type f -name *.peggy -exec yarn peggy {} \\;",
-    "build:typescript": "tsc -b ./tsconfig.json ./tsconfig.cjs.json && echo '{\"type\": \"commonjs\"}' >dist/cjs/package.json",
+    "build:typescript": "tsc -b ./tsconfig.esm.json ./tsconfig.json && echo '{\"type\": \"commonjs\"}' >dist/cjs/package.json",
     "start": "tsc -w",
     "clean": "rm -rf dist && rm -f src/ast/peggyParser.js && rm -f src/public/SqProject/IncludeParser.js",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",

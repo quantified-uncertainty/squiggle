@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "node16",
+    "skipLibCheck": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "outDir": "./dist/cjs",
+    "declarationDir": "./dist/types",
+    "declaration": true,
+    "composite": true,
+    "target": "ES6",
+    "esModuleInterop": true
+  },
+  "include": ["src/**/*"],
+  "references": [
+    {
+      "path": "../squiggle-lang"
+    }
+  ]
+}

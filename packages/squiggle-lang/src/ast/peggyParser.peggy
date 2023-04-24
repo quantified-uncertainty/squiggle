@@ -329,12 +329,12 @@ statementSeparator 'statement separator'
   commentOrNewLine = finalComment? newLine
 
     finalComment "line comment"
-      = _ ('//'/'#') @([^\r\n]*)
+      = _ ('//'/'#') comment:($([^\r\n]*)) { options.comments.push(h.lineComment(comment, location())); }
 
   whiteSpaceCharactersOrComment = whiteSpaceCharacters / delimitedComment
 
     delimitedComment  "comment"
-      = '/*' @([^*]*) '*/'
+      = '/*' comment:($([^*]*)) '*/' { options.comments.push(h.blockComment(comment, location())); }
 
     whiteSpaceCharacters = [ \t]
 

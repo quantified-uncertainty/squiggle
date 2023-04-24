@@ -1,7 +1,7 @@
 import * as expression from "../expression/index.js";
-import { AST } from "./parse.js";
+import { ASTNode } from "./parse.js";
 
-const contentFromNode = (ast: AST): expression.ExpressionContent => {
+const contentFromNode = (ast: ASTNode): expression.ExpressionContent => {
   switch (ast.type) {
     case "Block":
       return expression.eBlock(ast.statements.map(fromNode));
@@ -55,7 +55,7 @@ const contentFromNode = (ast: AST): expression.ExpressionContent => {
   }
 };
 
-const fromNode = (ast: AST): expression.Expression => {
+const fromNode = (ast: ASTNode): expression.Expression => {
   return {
     ast,
     ...contentFromNode(ast),

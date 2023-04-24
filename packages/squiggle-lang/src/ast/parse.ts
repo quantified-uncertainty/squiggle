@@ -1,7 +1,7 @@
 import { LocationRange } from "peggy";
 import { result } from "../utility/result.js";
 import * as Result from "../utility/result.js";
-import { AnyPeggyNode } from "./peggyHelpers.js";
+import { AnyPeggyNode, ASTCommentNode } from "./peggyHelpers.js";
 
 import {
   parse as peggyParse,
@@ -23,11 +23,23 @@ export const makeParseError = (
   location,
 });
 
+export type AST = AnyPeggyNode & {
+  comments: ASTCommentNode[];
+};
+
+export type ASTNode = AnyPeggyNode;
+
 type ParseResult = result<AST, ParseError>;
 
 export const parse = (expr: string, source: string): ParseResult => {
   try {
-    return Result.Ok(peggyParse(expr, { grammarSource: source }));
+    const comments: ASTCommentNode[] = [];
+    const parsed: AST = peggyParse(expr, {
+      grammarSource: source,
+      comments,
+    });
+    parsed.comments = comments;
+    return Result.Ok(parsed);
   } catch (e) {
     if (e instanceof PeggySyntaxError) {
       return Result.Error({
@@ -40,8 +52,6 @@ export const parse = (expr: string, source: string): ParseResult => {
     }
   }
 };
-
-export type AST = AnyPeggyNode;
 
 const nodeToString = (node: AnyPeggyNode): string => {
   switch (node.type) {

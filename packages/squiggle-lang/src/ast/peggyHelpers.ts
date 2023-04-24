@@ -231,3 +231,31 @@ export function nodeTernary(
 export function nodeVoid(location: LocationRange): NodeVoid {
   return { type: "Void", location };
 }
+
+export type ASTCommentNode = {
+  type: "lineComment" | "blockComment";
+  value: string;
+  location: LocationRange;
+};
+
+export function lineComment(
+  text: string,
+  location: LocationRange
+): ASTCommentNode {
+  return {
+    type: "lineComment",
+    value: text,
+    location,
+  };
+}
+
+export function blockComment(
+  text: string,
+  location: LocationRange
+): ASTCommentNode {
+  return {
+    type: "blockComment",
+    value: text,
+    location,
+  };
+}
