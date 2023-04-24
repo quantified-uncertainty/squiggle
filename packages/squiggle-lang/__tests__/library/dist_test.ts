@@ -228,6 +228,10 @@ describe("eval on distribution functions", () => {
       "mixture(normal(5,2), normal(10,1), [0.2, 0.4])",
       "Point Set Distribution"
     );
+    testEvalToBe(
+      "mixture(normal(5,2) -> SampleSet.fromDist, normal(10,1), [0.2, 0.4])",
+      "Sample Set Distribution"
+    );
   });
 });
 
