@@ -8,6 +8,11 @@ import { sq } from "@quri/squiggle-lang";
 function getCatalog(): Catalog {
   const items: Item[] = [
     {
+      id: "one_human_qaly",
+      name: "1 human QALY (quality-adjusted life-year)",
+      clusterId: "sentient_welfare"
+    }
+    {
       id: "cow_value_human_qalys_per_year_of_life",
       name: "cow value per year of life",
       clusterId: "sentient_welfare",
@@ -611,8 +616,16 @@ org_items_with_id = List.map(organization_items, {|i|
   result
 })
 
+// Add human QALY as a reference point
+
+one_human_qaly = ({
+  id: "one_human_qaly", 
+  name: "1 human QALY (quality-adjusted life-year)"
+  value: 1
+})
+
 // All items
-items = [animal_estimates_disaggregated, org_items_with_id] -> List.flatten -> List.map({|item| [item.id, item]})  -> Dict.fromList
+items = [animal_estimates_disaggregated, org_items_with_id, [one_human_qaly]] -> List.flatten -> List.map({|item| [item.id, item]})  -> Dict.fromList
 
 // Result
 fn(a, b) = [items[a].value, items[b].value]
