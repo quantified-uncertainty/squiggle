@@ -9,6 +9,7 @@ import { Radio } from "./ui/Radio.js";
 import { Text } from "./ui/Text.js";
 import { functionChartDefaults } from "./FunctionChart/utils.js";
 import { defaultTickFormatSpecifier } from "../lib/draw/index.js";
+import { SqSymlogScale } from "@quri/squiggle-lang";
 
 export const functionSettingsSchema = yup.object({}).shape({
   start: yup
@@ -34,7 +35,7 @@ export const functionSettingsSchema = yup.object({}).shape({
     .min(2),
 });
 
-const scaleTypes = ["linear", "log", "exp"] as const;
+const scaleTypes = ["linear", "log", "symlog", "exp"] as const;
 type ScaleType = (typeof scaleTypes)[number];
 
 function scaleTypeToSqScale(
@@ -46,6 +47,8 @@ function scaleTypeToSqScale(
       return SqLinearScale.create(args);
     case "log":
       return SqLogScale.create(args);
+    case "symlog":
+      return SqSymlogScale.create(args);
     case "exp":
       return SqPowerScale.create({ exponent: 0.1, ...args });
     default:
@@ -179,6 +182,12 @@ export const DistributionViewSettingsForm: React.FC<{
                           "Your distribution has mass lower than or equal to 0. Log only works on strictly positive values.",
                       }
                     : null),
+                },
+                {
+                  id: "symlog",
+                  name: "Symlog",
+                  tooltip:
+                    "Almost logarithmic scale that supports negative values.",
                 },
                 {
                   id: "exp",

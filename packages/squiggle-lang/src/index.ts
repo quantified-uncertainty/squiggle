@@ -28,6 +28,7 @@ export {
   SqScale,
   SqLinearScale,
   SqLogScale,
+  SqSymlogScale,
   SqPowerScale,
 } from "./public/SqScale.js";
 export { SqParseError, parse } from "./public/parse.js";
