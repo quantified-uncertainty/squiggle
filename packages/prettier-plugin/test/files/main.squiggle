@@ -1,0 +1,15 @@
+// First comment
+foo = 5
+dist = normal(5,/* comment */ /* second comment */ 2)
+
+d2 = normal(5,2)
+d3 = normal(   5, 2   )
+
+r = {
+    foo: 5,
+    bar: 6, /* blah blah */ baz: 7
+}
+
+r2 = { foo: 5, bar: 6}
+
+value = 3 + 5 * 6 - (4 / (3 + 2))

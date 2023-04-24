@@ -1,7 +1,7 @@
 import { ASTCommentNode, ASTNode, parse } from "@quri/squiggle-lang";
 import { AstPath, Parser, Printer, SupportLanguage, doc } from "prettier";
 
-const { group, indent, softline, line, hardline, join } = doc.builders;
+const { group, indent, softline, line, hardline, join, ifBreak } = doc.builders;
 
 export const languages: SupportLanguage[] = [
   {
@@ -74,7 +74,8 @@ export const printers: Record<string, Printer<Node>> = {
           return group([
             path.call(print, "fn"),
             "(",
-            join(",", path.map(print, "args")),
+            indent([softline, join([",", line], path.map(print, "args"))]),
+            softline,
             ")",
           ]);
         case "Identifier":
@@ -85,6 +86,7 @@ export const printers: Record<string, Printer<Node>> = {
           return group([
             path.call(print, "key"),
             ":",
+            line,
             (path as AstPath<Extract<ASTNode, { type: "KeyValue" }>>).call(
               print,
               "value"
@@ -99,7 +101,13 @@ export const printers: Record<string, Printer<Node>> = {
             "}",
           ]);
         case "Record":
-          return group(["{", join(",", path.map(print, "elements")), "}"]);
+          return group([
+            "{",
+            indent([line, join([",", line], path.map(print, "elements"))]),
+            ifBreak(",", ""),
+            line,
+            "}",
+          ]);
         case "String":
           return ['"', node.value, '"'];
         case "Ternary":
@@ -118,9 +126,9 @@ export const printers: Record<string, Printer<Node>> = {
       const commentNode = path.getValue();
       switch (commentNode.type) {
         case "lineComment":
-          return `//${commentNode.value}`;
+          return ["//", commentNode.value, hardline];
         case "blockComment":
-          return `/*${commentNode.value}*/`;
+          return ["/*", commentNode.value, "*/"];
         default:
           throw new Error("Unknown comment type");
       }
@@ -141,6 +149,10 @@ export const printers: Record<string, Printer<Node>> = {
             return [node.variable, node.value];
           case "Call":
             return [...node.args, node.fn];
+          case "Record":
+            return node.elements;
+          case "KeyValue":
+            return [node.key, node.value];
           default:
             return [];
         }
