@@ -13,62 +13,62 @@ function getCatalog(): Catalog {
       clusterId: "sentient_welfare"
     }
     {
-      id: "cow_value_human_qalys_per_year_of_life",
+      id: "cow_value_per_year_of_life",
       name: "cow value per year of life",
       clusterId: "sentient_welfare",
     },
     {
-      id: "cow_value_human_qalys_per_lifetime",
+      id: "cow_value_per_lifetime",
       name: "cow value per lifetime",
       clusterId: "sentient_welfare",
     },
     {
-      id: "cow_value_human_qalys_per_calorie",
+      id: "cow_value_per_calorie",
       name: "cow value per calorie",
       clusterId: "sentient_welfare",
     },
     {
-      id: "pig_value_human_qalys_per_year_of_life",
+      id: "pig_value_per_year_of_life",
       name: "pig value per year of life",
       clusterId: "sentient_welfare",
     },
     {
-      id: "pig_value_human_qalys_per_lifetime",
+      id: "pig_value_per_lifetime",
       name: "pig value per lifetime",
       clusterId: "sentient_welfare",
     },
     {
-      id: "pig_value_human_qalys_per_calorie",
+      id: "pig_value_per_calorie",
       name: "pig value per calorie",
       clusterId: "sentient_welfare",
     },
     {
-      id: "chicken_value_human_qalys_per_year_of_life",
+      id: "chicken_value_per_year_of_life",
       name: "chicken value per year of life",
       clusterId: "sentient_welfare",
     },
     {
-      id: "chicken_value_human_qalys_per_lifetime",
+      id: "chicken_value_per_lifetime",
       name: "chicken value per lifetime",
       clusterId: "sentient_welfare",
     },
     {
-      id: "chicken_value_human_qalys_per_calorie",
+      id: "chicken_value_per_calorie",
       name: "chicken value per calorie",
       clusterId: "sentient_welfare",
     },
     {
-      id: "salmon_value_human_qalys_per_year_of_life",
+      id: "salmon_value_per_year_of_life",
       name: "salmon value per year of life",
       clusterId: "sentient_welfare",
     },
     {
-      id: "salmon_value_human_qalys_per_lifetime",
+      id: "salmon_value_per_lifetime",
       name: "salmon value per lifetime",
       clusterId: "sentient_welfare",
     },
     {
-      id: "salmon_value_human_qalys_per_calorie",
+      id: "salmon_value_per_calorie",
       name: "salmon value per calorie",
       clusterId: "sentient_welfare",
     },
@@ -185,9 +185,9 @@ ss = SampleSet.fromDist
 tt(dist) = truncateRight(dist, 100)
 
 // Cows
-value_happy_cow_year_in_human_qalys = 0.05 to 0.3
-value_tortured_cow_year_in_human_qalys = -(0.1 to 2)
-value_farmed_cow_year_in_human_qalys = normal({ p10: -0.2, p90: 0.1 })
+value_happy_cow_year = 0.05 to 0.3
+value_tortured_cow_year = -(0.1 to 2)
+value_farmed_cow_year = normal({ p10: -0.2, p90: 0.1 })
 // ^ purely subjective estimates
 // the thing is, it doesn't seem that unlikely to me
 // that cows do lead net positive lives
@@ -199,16 +199,16 @@ calories_cow = mixture(0.8M to 1.4M, (500k to 700k) * (weight_cow * non_wastage_
 
 cow_estimates = {
   name: "cow",
-  value_year_in_human_qalys: value_farmed_cow_year_in_human_qalys -> ss,
+  value_year: value_farmed_cow_year -> ss,
   weight: weight_cow,
   calories: calories_cow,
   lifetime: lifetime_cow -> ss
 }
 
 // Pigs
-value_happy_pig_year_in_human_qalys = 0.02 to 0.3
-value_tortured_pig_year_in_human_qalys = -(0.05 to 2)
-value_farmed_pig_year_in_human_qalys = normal({ p5: -0.5, p95: 0.05 })
+value_happy_pig_year = 0.02 to 0.3
+value_tortured_pig_year = -(0.05 to 2)
+value_farmed_pig_year = normal({ p5: -0.5, p95: 0.05 })
 // ^ purely subjective estimates
 lifetime_pig = (5 to 7) / 12
 weight_pig = 110 to 150 // kilograms 
@@ -222,16 +222,16 @@ calories_pig = weight_pig * meat_yield_pig * kilograms_in_pounds * calories_per_
 
 pig_estimates = {
   name: "pig",
-  value_year_in_human_qalys: value_farmed_pig_year_in_human_qalys -> ss,
+  value_year: value_farmed_pig_year -> ss,
   weight: weight_pig,
   calories: calories_pig,
   lifetime: lifetime_pig -> ss
 }
 
 // Chickens (broilers)
-value_happy_chicken_year_in_human_qalys = 0.001 to 0.05
-value_tortured_chicken_year_in_human_qalys = -(0.01 to 0.2) -> ss
-value_farmed_chicken_year_in_human_qalys = value_tortured_chicken_year_in_human_qalys/(1 to 3)
+value_happy_chicken_year = 0.001 to 0.05
+value_tortured_chicken_year = -(0.01 to 0.2) -> ss
+value_farmed_chicken_year = value_tortured_chicken_year/(1 to 3)
 // ^ purely subjective estimates
 lifetime_chicken = (4 to 7)/52
 weight_chicken = 2 to 3.5
@@ -244,16 +244,16 @@ calories_chicken = weight_chicken * kilograms_in_pounds * calories_per_pound_of_
 
 chicken_estimates = {
   name: "chicken",
-  value_year_in_human_qalys: value_farmed_chicken_year_in_human_qalys -> ss,
+  value_year: value_farmed_chicken_year -> ss,
   weight: weight_chicken,
   calories: calories_chicken,
   lifetime: lifetime_chicken -> ss
 }
 
 // Fish (salmon)
-value_happy_salmon_year_in_human_qalys = 0.001 to 0.01
-value_tortured_salmon_year_in_human_qalys = -(0.002 to 0.02)
-value_farmed_salmon_year_in_human_qalys = normal({ p5: -0.02, p95: 0.01 })
+value_happy_salmon_year = 0.001 to 0.01
+value_tortured_salmon_year = -(0.002 to 0.02)
+value_farmed_salmon_year = normal({ p5: -0.02, p95: 0.01 })
 // ^ purely subjective estimates
 lifetime_salmon = 2 to 3
 // https://thehumaneleague.org.uk/article/how-long-do-salmon-live
@@ -265,7 +265,7 @@ calories_salmon = weight_salmon * calories_per_kilogram_of_salmon_meat
 
 salmon_estimates = {
   name: "salmon",
-  value_year_in_human_qalys: value_farmed_salmon_year_in_human_qalys -> ss,
+  value_year: value_farmed_salmon_year -> ss,
   weight: weight_salmon,
   calories: calories_salmon,
   lifetime: lifetime_salmon -> ss
@@ -295,7 +295,7 @@ value_fwi_fish =
   (
     fish_potentially_helped * 
     improvement_as_proportion_of_lifetime * 
-    (salmon_estimates.value_year_in_human_qalys / salmon_estimates.lifetime)
+    (salmon_estimates.value_year / salmon_estimates.lifetime)
   ) -> sign_flip_to_denote_improvement
 
 value_of_shrimp_in_fish = (0.3 to 1)
@@ -306,7 +306,7 @@ value_fwi_shrimp =
   (
     shrimp_potentially_helped * 
     improvement_as_proportion_of_lifetime * 
-    (salmon_estimates.value_year_in_human_qalys / salmon_estimates.lifetime) *
+    (salmon_estimates.value_year / salmon_estimates.lifetime) *
     value_of_shrimp_in_fish
   ) -> sign_flip_to_denote_improvement
 
@@ -349,7 +349,7 @@ value_owa_2022 = (
     frequency_promises_are_fulfilled *
     average_duration_fulfilled_commitments *
     average_reduction_in_suffering_of_commitment_per_chicken *
-    value_tortured_chicken_year_in_human_qalys *
+    value_tortured_chicken_year *
     chicken_estimates.lifetime
   ) -> sign_flip_to_denote_improvement
 
@@ -379,7 +379,7 @@ value_beyond_meat_year =  (
     cows_saved_if_all_meat_was_counterfactual * 
     chance_purchase_was_counterfactual * 
     cow_estimates.lifetime *
-    cow_estimates.value_year_in_human_qalys
+    cow_estimates.value_year
   ) -> sign_flip_to_denote_improvement
 beyond_meat_item = {
   name: "Beyond Meat",
@@ -576,26 +576,26 @@ xiaobuVEGAN_item = {
 
 // animal estimates
 toAllAnimalEstimates = {|animal|
-  value_year_in_human_qalys = animal.value_year_in_human_qalys
-  value_in_lifetime_human_qalys = animal.lifetime * animal.value_year_in_human_qalys
-  value_per_calorie_human_qalys = animal.lifetime * animal.value_year_in_human_qalys / 
+  value_year = animal.value_year
+  value_in_lifetime = animal.lifetime * animal.value_year
+  value_per_calorie = animal.lifetime * animal.value_year / 
     animal.calories
 
   result = [
     ({
-      id: animal.name + "_value_human_qalys_per_year_of_life", 
+      id: animal.name + "_value_per_year_of_life", 
       name: animal.name + " value per year of life", 
-      value: value_year_in_human_qalys
+      value: value_year
     }),
     ({
-      id: animal.name + "_value_human_qalys_per_lifetime", 
+      id: animal.name + "_value_per_lifetime", 
       name: animal.name + " value per lifetime", 
-      value: value_in_lifetime_human_qalys
+      value: value_in_lifetime
     }),
     ({
-      id: animal.name + "_value_human_qalys_per_calorie", 
+      id: animal.name + "_value_per_calorie", 
       name: animal.name + " value per calorie", 
-      value: value_per_calorie_human_qalys
+      value: value_per_calorie
     }),    
   ]
   result
