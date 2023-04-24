@@ -461,6 +461,8 @@ wai_item = {
 
 /* Standout charities */
 // Modelled in way less detail
+// The text after the charity name is the short review from ACE,
+// taken from <https://animalcharityevaluators.org/donation-advice/recommended-charities/>
 
 // Çiftlik Hayvanlarını Koruma Derneği (CHKD)
 value_chkd = mixture(
