@@ -11,7 +11,7 @@ function getCatalog(): Catalog {
       id: "one_human_qaly",
       name: "1 human QALY (quality-adjusted life-year)",
       clusterId: "sentient_welfare"
-    }
+    },
     {
       id: "cow_value_per_year_of_life",
       name: "cow value per year of life",
