@@ -184,6 +184,13 @@ function getTextModel(): Model {
 ss = SampleSet.fromDist
 tt(dist) = truncateRight(dist, 100)
 
+// Add human QALY as a reference point
+one_human_qaly = ({
+  id: "one_human_qaly", 
+  name: "1 human QALY (quality-adjusted life-year)"
+  value: 1
+})
+
 // Cows
 value_happy_cow_year = 0.05 to 0.3
 value_tortured_cow_year = -(0.1 to 2)
@@ -614,14 +621,6 @@ org_items_with_id = List.map(organization_items, {|i|
   id_obj = ({id: i.slug + "_" + i.year + "_value_estimate", name: i.name + " (" + i.year + ")"})
   result = Dict.merge(i, id_obj)
   result
-})
-
-// Add human QALY as a reference point
-
-one_human_qaly = ({
-  id: "one_human_qaly", 
-  name: "1 human QALY (quality-adjusted life-year)"
-  value: 1
 })
 
 // All items
