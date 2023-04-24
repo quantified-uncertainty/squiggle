@@ -187,7 +187,7 @@ tt(dist) = truncateRight(dist, 100)
 // Add human QALY as a reference point
 one_human_qaly = ({
   id: "one_human_qaly", 
-  name: "1 human QALY (quality-adjusted life-year)"
+  name: "1 human QALY (quality-adjusted life-year)",
   value: 1
 })
 
