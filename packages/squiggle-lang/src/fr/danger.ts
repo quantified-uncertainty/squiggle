@@ -2,6 +2,14 @@
 
 import jstat from "jstat";
 
+import {
+  scaleLog,
+  scaleLogWithThreshold,
+} from "../dist/distOperations/index.js";
+import {
+  scaleMultiply,
+  scalePower,
+} from "../dist/distOperations/scaleOperations.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
@@ -17,10 +25,6 @@ import { Lambda } from "../reducer/lambda.js";
 import * as E_A from "../utility/E_A.js";
 import { Ok, result } from "../utility/result.js";
 import { ReducerFn, Value, vArray, vNumber } from "../value/index.js";
-import {
-  pointwiseCombinationFloat,
-  scaleLog,
-} from "../dist/DistOperations/index.js";
 import { toValueResult } from "./genericDist.js";
 
 const { factorial } = jstat;
@@ -369,49 +373,26 @@ const mapYLibrary: FRFunction[] = [
       [frDist, frNumber, frNumber],
       ([dist, base, eps], { environment }) =>
         toValueResult(
-          pointwiseCombinationFloat(dist, {
+          scaleLogWithThreshold(dist, {
             env: environment,
-            algebraicOperation: {
-              NAME: "LogarithmWithThreshold",
-              VAL: eps,
-            },
-            f: base,
+            eps,
+            base,
           })
         )
     )
   ),
   maker.dn2d({
     name: "mapYMultiply",
-    fn: (dist, f, env) =>
-      unpackDistResult(
-        pointwiseCombinationFloat(dist, {
-          env,
-          algebraicOperation: "Multiply",
-          f,
-        })
-      ),
+    fn: (dist, f, env) => unpackDistResult(scaleMultiply(dist, f, { env })),
   }),
   maker.dn2d({
     name: "mapYPow",
-    fn: (dist, f, env) =>
-      unpackDistResult(
-        pointwiseCombinationFloat(dist, {
-          env,
-          algebraicOperation: "Power",
-          f,
-        })
-      ),
+    fn: (dist, f, env) => unpackDistResult(scalePower(dist, f, { env })),
   }),
   maker.d2d({
     name: "mapYExp",
-    fn: (dist, env) =>
-      unpackDistResult(
-        pointwiseCombinationFloat(dist, {
-          env,
-          algebraicOperation: "Power",
-          f: Math.E,
-        })
-      ),
+    // TODO - shouldn't it be other way around, e^value?
+    fn: (dist, env) => unpackDistResult(scalePower(dist, Math.E, { env })),
   }),
 ];
 

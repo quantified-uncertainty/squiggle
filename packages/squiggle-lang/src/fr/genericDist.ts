@@ -2,8 +2,8 @@ import { BaseDist } from "../dist/BaseDist.js";
 import { DistError, otherError } from "../dist/DistError.js";
 import {
   BinaryOperation,
-  BinaryOperations,
-} from "../dist/DistOperations/index.js";
+  binaryOperations,
+} from "../dist/distOperations/index.js";
 import * as SymbolicDist from "../dist/SymbolicDist.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
@@ -28,19 +28,19 @@ export const toValueResult = (
 
 type OpPair = [string, BinaryOperation];
 const algebraicOps: OpPair[] = [
-  ["add", BinaryOperations.algebraicAdd],
-  ["multiply", BinaryOperations.algebraicMultiply],
-  ["subtract", BinaryOperations.algebraicSubtract],
-  ["divide", BinaryOperations.algebraicDivide],
-  ["pow", BinaryOperations.algebraicPower],
-  ["log", BinaryOperations.algebraicLogarithm],
+  ["add", binaryOperations.algebraicAdd],
+  ["multiply", binaryOperations.algebraicMultiply],
+  ["subtract", binaryOperations.algebraicSubtract],
+  ["divide", binaryOperations.algebraicDivide],
+  ["pow", binaryOperations.algebraicPower],
+  ["log", binaryOperations.algebraicLogarithm],
 ];
 const pointwiseOps: OpPair[] = [
-  ["dotAdd", BinaryOperations.pointwiseAdd],
-  ["dotMultiply", BinaryOperations.pointwiseMultiply],
-  ["dotSubtract", BinaryOperations.pointwiseSubtract],
-  ["dotDivide", BinaryOperations.pointwiseDivide],
-  ["dotPow", BinaryOperations.pointwisePower],
+  ["dotAdd", binaryOperations.pointwiseAdd],
+  ["dotMultiply", binaryOperations.pointwiseMultiply],
+  ["dotSubtract", binaryOperations.pointwiseSubtract],
+  ["dotDivide", binaryOperations.pointwiseDivide],
+  ["dotPow", binaryOperations.pointwisePower],
 ];
 
 const makeOperationFns = (): FRFunction[] => {
@@ -132,7 +132,7 @@ export const library: FRFunction[] = [
     name: "exp",
     fn: (dist, env) => {
       return unpackDistResult(
-        BinaryOperations.algebraicPower(
+        binaryOperations.algebraicPower(
           new SymbolicDist.PointMass(Math.E),
           dist,
           {
@@ -192,7 +192,7 @@ export const library: FRFunction[] = [
     name: "log",
     fn: (dist, env) =>
       unpackDistResult(
-        BinaryOperations.algebraicLogarithm(
+        binaryOperations.algebraicLogarithm(
           dist,
           new SymbolicDist.PointMass(Math.E),
           { env }
@@ -203,7 +203,7 @@ export const library: FRFunction[] = [
     name: "log10",
     fn: (dist, env) =>
       unpackDistResult(
-        BinaryOperations.algebraicLogarithm(
+        binaryOperations.algebraicLogarithm(
           dist,
           new SymbolicDist.PointMass(10),
           {
@@ -216,7 +216,7 @@ export const library: FRFunction[] = [
     name: "unaryMinus",
     fn: (dist, env) =>
       unpackDistResult(
-        BinaryOperations.algebraicMultiply(
+        binaryOperations.algebraicMultiply(
           dist,
           new SymbolicDist.PointMass(-1),
           {
@@ -229,7 +229,7 @@ export const library: FRFunction[] = [
     name: "dotExp",
     fn: (dist, env) =>
       unpackDistResult(
-        BinaryOperations.pointwisePower(
+        binaryOperations.pointwisePower(
           new SymbolicDist.PointMass(Math.E),
           dist,
           {

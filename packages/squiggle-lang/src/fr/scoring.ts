@@ -7,7 +7,7 @@ import {
 import { FnFactory } from "../library/registry/helpers.js";
 import { vNumber } from "../value/index.js";
 import * as Result from "../utility/result.js";
-import * as DistOperations from "../dist/DistOperations/index.js";
+import * as distOperations from "../dist/distOperations/index.js";
 import { BaseDist } from "../dist/BaseDist.js";
 import { Env } from "../dist/env.js";
 import {
@@ -28,7 +28,7 @@ const runScoringScalarAnswer = (
   env: Env
 ) => {
   return Result.fmap2(
-    DistOperations.logScoreScalarAnswer({ estimate, answer, prior, env }),
+    distOperations.logScoreScalarAnswer({ estimate, answer, prior, env }),
     vNumber,
     REDistributionError
   );
@@ -41,7 +41,7 @@ const runScoringDistAnswer = (
   env: Env
 ) => {
   return Result.fmap2(
-    DistOperations.logScoreDistAnswer({ estimate, answer, prior, env }),
+    distOperations.logScoreDistAnswer({ estimate, answer, prior, env }),
     vNumber,
     REDistributionError
   );

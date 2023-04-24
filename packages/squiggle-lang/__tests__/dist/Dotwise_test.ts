@@ -1,6 +1,6 @@
 import * as fc from "fast-check";
 
-import { BinaryOperations } from "../../src/dist/DistOperations/index.js";
+import { binaryOperations } from "../../src/dist/distOperations/index.js";
 import { DivisionByZeroError } from "../../src/operationError.js";
 import {
   env,
@@ -14,7 +14,7 @@ describe("dotSubtract", () => {
     const mean = 0;
     const rate = 10;
     const dotDifference = unpackResult(
-      BinaryOperations.pointwiseSubtract(
+      binaryOperations.pointwiseSubtract(
         mkNormal(mean, 1.0),
         mkExponential(rate),
         { env }
@@ -35,7 +35,7 @@ describe("dotSubtract", () => {
         fc.float({ min: new Float32Array([1e-5])[0], max: 1e5 }),
         (mean, rate) => {
           // We limit ourselves to stdev=1 so that the integral is trivial
-          const dotDifferenceR = BinaryOperations.pointwiseSubtract(
+          const dotDifferenceR = binaryOperations.pointwiseSubtract(
             mkNormal(mean, 1.0),
             mkExponential(rate),
             { env }

@@ -1,5 +1,5 @@
 import { operationDistError } from "../../src/dist/DistError.js";
-import * as DistOperations from "../../src/dist/DistOperations/index.js";
+import * as distOperations from "../../src/dist/distOperations/index.js";
 import {
   DivisionByZeroError,
   NegativeInfinityError,
@@ -13,7 +13,7 @@ describe("Scale logarithm", () => {
  */
   test.skip("mean of the base e scalar logarithm of an exponential(10)", () => {
     const rate = 10.0;
-    const scalelog = DistOperations.scaleLog(mkExponential(rate), Math.E, {
+    const scalelog = distOperations.scaleLog(mkExponential(rate), Math.E, {
       env,
     });
 
@@ -31,7 +31,7 @@ describe("Scale logarithm", () => {
   });
   const low = 10.0;
   const high = 100.0;
-  const scalelog = DistOperations.scaleLog(mkUniform(low, high), 2.0, { env });
+  const scalelog = distOperations.scaleLog(mkUniform(low, high), 2.0, { env });
 
   test("mean of the base 2 scalar logarithm of a uniform(10, 100)", () => {
     //For uniform pdf `_ => 1 / (b - a)`, the expected value of log of uniform is `integral from a to b of x * log(1 / (b -a)) dx`
