@@ -3,7 +3,7 @@ import { Env } from "../dist/env.js";
 import * as SymbolicDist from "../dist/SymbolicDist.js";
 import * as Result from "../utility/result.js";
 import * as E_A from "../utility/E_A.js";
-import * as DistOperations from "../dist/DistOperations/index.js";
+import * as distOperations from "../dist/distOperations/index.js";
 import { Value, vDist } from "../value/index.js";
 import { argumentError, DistError } from "../dist/DistError.js";
 import { unpackDistResult } from "../library/registry/helpers.js";
@@ -41,7 +41,7 @@ let mixtureWithGivenWeights = (
   env: Env
 ): Result.result<BaseDist, DistError> => {
   if (distributions.length === weights.length) {
-    return DistOperations.mixture(E_A.zip(distributions, weights), { env });
+    return distOperations.mixture(E_A.zip(distributions, weights), { env });
   } else {
     return raiseArgumentError(
       "Error, mixture call has different number of distributions and weights"

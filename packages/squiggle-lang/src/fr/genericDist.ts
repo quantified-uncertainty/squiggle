@@ -3,7 +3,7 @@ import { DistError, otherError } from "../dist/DistError.js";
 import {
   BinaryOperation,
   binaryOperations,
-} from "../dist/DistOperations/index.js";
+} from "../dist/distOperations/index.js";
 import * as SymbolicDist from "../dist/SymbolicDist.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";

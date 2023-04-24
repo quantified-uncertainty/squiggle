@@ -20,7 +20,7 @@ import { ReducerFn, Value, vArray, vNumber } from "../value/index.js";
 import {
   pointwiseCombinationFloat,
   scaleLog,
-} from "../dist/DistOperations/index.js";
+} from "../dist/distOperations/index.js";
 import { toValueResult } from "./genericDist.js";
 
 const { factorial } = jstat;

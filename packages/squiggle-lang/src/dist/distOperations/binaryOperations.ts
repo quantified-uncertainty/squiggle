@@ -3,7 +3,7 @@ import { result } from "../../utility/result.js";
 import { BaseDist } from "../BaseDist.js";
 import { DistError } from "../DistError.js";
 import { Env } from "../env.js";
-import { algebraicCombination } from "./AlgebraicCombination.js";
+import { algebraicCombination } from "./algebraicCombination.js";
 import { pointwiseCombination } from "./pointwiseCombination.js";
 
 export type BinaryOperation = (

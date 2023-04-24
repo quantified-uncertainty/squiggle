@@ -1,7 +1,7 @@
 import {
   logScoreScalarAnswer,
   mixture,
-} from "../../../src/dist/DistOperations/index.js";
+} from "../../../src/dist/distOperations/index.js";
 import { env, mkPointMass, unpackResult } from "../../helpers/distHelpers.js";
 
 describe("WithScalarAnswer: discrete -> scalar -> score", () => {
