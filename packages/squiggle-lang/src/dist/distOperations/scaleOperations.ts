@@ -10,6 +10,20 @@ export function scaleLog(dist: BaseDist, f: number, { env }: { env: Env }) {
   });
 }
 
+export function scaleLogWithThreshold(
+  dist: BaseDist,
+  { env, base, eps }: { env: Env; base: number; eps: number }
+) {
+  return pointwiseCombinationFloat(dist, {
+    env,
+    algebraicOperation: {
+      NAME: "LogarithmWithThreshold",
+      VAL: eps,
+    },
+    f: base,
+  });
+}
+
 export function scaleMultiply(
   dist: BaseDist,
   f: number,
@@ -18,6 +32,14 @@ export function scaleMultiply(
   return pointwiseCombinationFloat(dist, {
     env,
     algebraicOperation: "Multiply",
+    f,
+  });
+}
+
+export function scalePower(dist: BaseDist, f: number, { env }: { env: Env }) {
+  return pointwiseCombinationFloat(dist, {
+    env,
+    algebraicOperation: "Power",
     f,
   });
 }
