@@ -10,6 +10,10 @@ describe("Peggy parse", () => {
     testParse("1e-1", "{0.1}");
     testParse(".1e1", "{1}");
     testParse("0.1e1", "{1}");
+    testParse("0.1e+3", "{100}");
+    testParse("0.1e+2+5", "{(10 + 5)}");
+    testParse("0.1e+2-5", "{(10 - 5)}");
+    testParse("100e-2-5", "{(1 - 5)}");
   });
 
   describe("literals operators parenthesis", () => {

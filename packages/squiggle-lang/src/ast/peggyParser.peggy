@@ -285,7 +285,7 @@ float 'float'
   = $(((d+ "\." d*) / ("\." d+)) floatExponent? / d+ floatExponent)
   { return h.nodeFloat(parseFloat(text()), location()); }
 
-    floatExponent = [e]i '-'? d+
+    floatExponent = [e]i ('-'/'+')? d+
     d = [0-9]
 
 boolean 'boolean'
