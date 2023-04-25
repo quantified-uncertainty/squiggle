@@ -7,7 +7,9 @@ d3 = normal(   5, 2   )
 
 r = {
     foo: 5,
-    bar: 6, /* blah blah */ baz: 7
+    bar: 6, /* blah blah */ baz: 7,
+    "string key": 8,
+    ("foo" + "bar"): 9,
 }
 
 r2 = { foo: 5, bar: 6}
@@ -36,3 +38,5 @@ f3(x, y) = {
     t = x + y
     t
 }
+
+pipe = 5 -> f1 -> f2() -> f3(1) -> {f: f2}.f2 -> {foo: f3}.foo(1)

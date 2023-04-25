@@ -139,7 +139,7 @@ power
 chainFunctionCall
   = head:unary tail:(_ ('->'/'|>') _nl chained:chainedFunction {return chained})*
   { return tail.reduce(function(result, element) {
-      return h.nodeCall(element.callable, [result, ...element.args], location())
+      return h.nodePipe(result, element.callable, element.args, location())
     }, head)}
 
   chainedFunction

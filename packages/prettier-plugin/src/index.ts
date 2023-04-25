@@ -119,7 +119,7 @@ export const printers: Record<string, Printer<Node>> = {
           ]);
         case "Call":
           return group([
-            typedPath(node).call(print, "fn"),
+            typedPath(node).call(print, "fn"), // parenthesize?..
             "(",
             indent([softline, join([",", line], path.map(print, "args"))]),
             softline,
@@ -144,6 +144,29 @@ export const printers: Record<string, Printer<Node>> = {
               node.arg
             ),
           ]);
+        case "Pipe": {
+          const args = node.rightArgs.length
+            ? [
+                "(",
+                indent([
+                  softline,
+                  join([",", line], typedPath(node).map(print, "rightArgs")),
+                ]),
+                softline,
+                ")",
+              ]
+            : [];
+          return group([
+            parenthesizeIfNecessary(
+              typedPath(node).call(print, "leftArg"),
+              node.leftArg
+            ),
+            " ->",
+            line,
+            parenthesizeIfNecessary(typedPath(node).call(print, "fn"), node.fn),
+            args,
+          ]);
+        }
         case "DotLookup":
           return group([
             "(",
@@ -165,13 +188,15 @@ export const printers: Record<string, Printer<Node>> = {
           return node.value;
         case "ModuleIdentifier":
           return node.value;
-        case "KeyValue":
-          return group([
-            typedPath(node).call(print, "key"),
-            ":",
-            line,
-            typedPath(node).call(print, "value"),
-          ]);
+        case "KeyValue": {
+          const key =
+            node.key.type === "String" &&
+            node.key.value.match(/^[\$_a-z]+[\$_a-z0-9]*$/i)
+              ? node.key.value
+              : typedPath(node).call(print, "key");
+
+          return group([key, ":", line, typedPath(node).call(print, "value")]);
+        }
         case "Lambda":
           return group([
             "{|",

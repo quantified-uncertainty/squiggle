@@ -154,20 +154,20 @@ describe("Peggy parse", () => {
   });
 
   describe("pipe", () => {
-    testParse("1 -> add(2)", "{(:add 1 2)}");
-    testParse("-1 -> add(2)", "{(:add (-1) 2)}");
-    testParse("-a[1] -> add(2)", "{(:add (-:a[1]) 2)}");
-    testParse("-f(1) -> add(2)", "{(:add (-(:f 1)) 2)}");
-    testParse("1 + 2 -> add(3)", "{(1 + (:add 2 3))}");
-    testParse("1 -> add(2) * 3", "{((:add 1 2) * 3)}");
-    testParse("1 -> subtract(2)", "{(:subtract 1 2)}");
-    testParse("-1 -> subtract(2)", "{(:subtract (-1) 2)}");
-    testParse("1 -> subtract(2) * 3", "{((:subtract 1 2) * 3)}");
+    testParse("1 -> add(2)", "{(1 -> :add(2))}");
+    testParse("-1 -> add(2)", "{((-1) -> :add(2))}");
+    testParse("-a[1] -> add(2)", "{((-:a[1]) -> :add(2))}");
+    testParse("-f(1) -> add(2)", "{((-(:f 1)) -> :add(2))}");
+    testParse("1 + 2 -> add(3)", "{(1 + (2 -> :add(3)))}");
+    testParse("1 -> add(2) * 3", "{((1 -> :add(2)) * 3)}");
+    testParse("1 -> subtract(2)", "{(1 -> :subtract(2))}");
+    testParse("-1 -> subtract(2)", "{((-1) -> :subtract(2))}");
+    testParse("1 -> subtract(2) * 3", "{((1 -> :subtract(2)) * 3)}");
   });
 
   describe("elixir pipe", () => {
     //handled together with -> so there is no need for seperate tests
-    testParse("1 |> add(2)", "{(:add 1 2)}");
+    testParse("1 |> add(2)", "{(1 -> :add(2))}");
   });
 
   describe("to", () => {
@@ -178,7 +178,7 @@ describe("Peggy parse", () => {
     testParse("1 to 2 + 3", "{(1 to (2 + 3))}");
     testParse(
       "1->add(2) to 3->add(4) -> add(4)",
-      "{((:add 1 2) to (:add (:add 3 4) 4))}"
+      "{((1 -> :add(2)) to ((3 -> :add(4)) -> :add(4)))}"
     ); // lower than chain
   });
 
@@ -211,7 +211,10 @@ describe("Peggy parse", () => {
     testParse("f({|x| x+1})", "{(:f {|:x| (:x + 1)})}");
     testParse("map(arr, {|x| x+1})", "{(:map :arr {|:x| (:x + 1)})}");
     testParse("map([1,2,3], {|x| x+1})", "{(:map [1; 2; 3] {|:x| (:x + 1)})}");
-    testParse("[1,2,3]->map({|x| x+1})", "{(:map [1; 2; 3] {|:x| (:x + 1)})}");
+    testParse(
+      "[1,2,3]->map({|x| x+1})",
+      "{([1; 2; 3] -> :map({|:x| (:x + 1)}))}"
+    );
   });
   describe("unit", () => {
     testParse("1m", "{(:fromUnit_m 1)}");
@@ -320,7 +323,7 @@ describe("parsing new line", () => {
   p ->
   q 
  `,
-    "{:f = {:x = {1}; :y = {2}; :z = {3}; ((:x + :y) + :z)}; :g = {(:f + 4)}; (:q (:p (:h :g)))}"
+    "{:f = {:x = {1}; :y = {2}; :z = {3}; ((:x + :y) + :z)}; :g = {(:f + 4)}; (((:g -> :h()) -> :p()) -> :q())}"
   );
   testParse(
     `
@@ -329,7 +332,7 @@ describe("parsing new line", () => {
   c |>
   d 
  `,
-    "{(:d (:c (:b :a)))}"
+    "{(((:a -> :b()) -> :c()) -> :d())}"
   );
   testParse(
     `
@@ -339,6 +342,6 @@ describe("parsing new line", () => {
   d +
   e
  `,
-    "{((:d (:c (:b :a))) + :e)}"
+    "{((((:a -> :b()) -> :c()) -> :d()) + :e)}"
   );
 });

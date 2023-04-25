@@ -84,6 +84,16 @@ const nodeToString = (node: ASTNode): string => {
         nodeToString(node.args[1]) +
         ")"
       );
+    case "Pipe":
+      return (
+        "(" +
+        nodeToString(node.leftArg) +
+        " -> " +
+        nodeToString(node.fn) +
+        "(" +
+        node.rightArgs.map(nodeToString).join(",") +
+        "))"
+      );
     case "DotLookup":
       return nodeToString(node.arg) + "." + node.key;
     case "BracketLookup":

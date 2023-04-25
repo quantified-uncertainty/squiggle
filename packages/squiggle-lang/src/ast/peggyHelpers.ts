@@ -63,6 +63,15 @@ type NodeInfixCall = N<
 
 type NodeUnaryCall = N<"UnaryCall", { op: UnaryOperator; arg: AnyPeggyNode }>;
 
+type NodePipe = N<
+  "Pipe",
+  {
+    leftArg: AnyPeggyNode;
+    fn: AnyPeggyNode;
+    rightArgs: AnyPeggyNode[];
+  }
+>;
+
 type NodeDotLookup = N<"DotLookup", { arg: AnyPeggyNode; key: string }>;
 
 type NodeBracketLookup = N<
@@ -134,6 +143,7 @@ export type AnyPeggyNode =
   | NodeCall
   | NodeInfixCall
   | NodeUnaryCall
+  | NodePipe
   | NodeDotLookup
   | NodeBracketLookup
   | NodeFloat
@@ -148,6 +158,14 @@ export type AnyPeggyNode =
   | NodeString
   | NodeBoolean
   | NodeVoid;
+
+export function nodeCall(
+  fn: AnyPeggyNode,
+  args: AnyPeggyNode[],
+  location: LocationRange
+): NodeCall {
+  return { type: "Call", fn, args, location };
+}
 
 export function nodeInfixCall(
   op: InfixOperator,
@@ -169,6 +187,15 @@ export function nodeUnaryCall(
   location: LocationRange
 ): NodeUnaryCall {
   return { type: "UnaryCall", op, arg, location };
+}
+
+export function nodePipe(
+  leftArg: AnyPeggyNode,
+  fn: AnyPeggyNode,
+  rightArgs: AnyPeggyNode[],
+  location: LocationRange
+): NodePipe {
+  return { type: "Pipe", leftArg, fn, rightArgs, location };
 }
 
 export function nodeDotLookup(
@@ -217,13 +244,6 @@ export function nodeBoolean(
   location: LocationRange
 ): NodeBoolean {
   return { type: "Boolean", value, location };
-}
-export function nodeCall(
-  fn: AnyPeggyNode,
-  args: AnyPeggyNode[],
-  location: LocationRange
-): NodeCall {
-  return { type: "Call", fn, args, location };
 }
 export function nodeFloat(value: number, location: LocationRange): NodeFloat {
   return { type: "Float", value, location };

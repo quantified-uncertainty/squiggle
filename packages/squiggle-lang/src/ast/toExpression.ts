@@ -30,6 +30,11 @@ const contentFromNode = (ast: ASTNode): expression.ExpressionContent => {
         { ast, ...expression.eSymbol(unaryFunctions[ast.op]) },
         [fromNode(ast.arg)]
       );
+    case "Pipe":
+      return expression.eCall(fromNode(ast.fn), [
+        fromNode(ast.leftArg),
+        ...ast.rightArgs.map(fromNode),
+      ]);
     case "DotLookup":
       return expression.eCall(
         { ast, ...expression.eSymbol(INDEX_LOOKUP_FUNCTION) },
