@@ -1,5 +1,13 @@
 import { ASTCommentNode, ASTNode, parse } from "@quri/squiggle-lang";
-import { AstPath, Parser, Printer, SupportLanguage, doc } from "prettier";
+import {
+  AstPath,
+  Doc,
+  Parser,
+  Printer,
+  SupportLanguage,
+  doc,
+  util,
+} from "prettier";
 
 const { group, indent, softline, line, hardline, join, ifBreak } = doc.builders;
 
@@ -20,6 +28,7 @@ export const parsers: Record<string, Parser<Node>> = {
       if (!parseResult.ok) {
         throw new Error(`Parse failed. ${parseResult.value}`);
       }
+      // console.log(JSON.stringify(parseResult.value, null, 2));
       return parseResult.value;
     },
     astFormat: "squiggle-ast",
@@ -32,20 +41,33 @@ export const parsers: Record<string, Parser<Node>> = {
   },
 };
 
+function parenthesizeIfNecessary(doc: Doc, node: Node): Doc {
+  let needParens = false;
+  if (node.type === "InfixCall") {
+    needParens = true;
+  }
+  // TODO - ternary
+  // TODO - take parent's precedence into account
+
+  return needParens ? ["(", doc, ")"] : doc;
+}
+
 export const printers: Record<string, Printer<Node>> = {
   "squiggle-ast": {
     print: (path, options, print) => {
       const node = path.getValue();
+      const typedPath = <T extends ASTNode["type"]>(
+        _: Extract<ASTNode, { type: T }>
+      ) => {
+        return path as AstPath<Extract<ASTNode, { type: T }>>;
+      };
+
       switch (node.type) {
         case "Program":
-          return join(line, path.map(print, "statements"));
+          return path.map(print, "statements");
         case "Block":
           if (node.statements.length === 1) {
-            return (path as AstPath<Extract<ASTNode, { type: "Block" }>>).call(
-              print,
-              "statements",
-              0
-            );
+            return typedPath(node).call(print, "statements", 0);
           }
           return group([
             "{",
@@ -57,10 +79,14 @@ export const printers: Record<string, Printer<Node>> = {
           return group([
             node.variable.value,
             " = ",
-            (path as AstPath<Extract<ASTNode, { type: "LetStatement" }>>).call(
-              print,
-              "value"
-            ),
+            typedPath(node).call(print, "value"),
+            hardline,
+            util.isNextLineEmptyAfterIndex(
+              options.originalText,
+              node.location.end.offset
+            )
+              ? hardline
+              : "",
           ]);
         case "Boolean":
           return node.value ? "true" : "false";
@@ -69,14 +95,56 @@ export const printers: Record<string, Printer<Node>> = {
         case "Integer":
           return String(node.value);
         case "Array":
-          return join(",", path.map(print, "elements"));
+          return group([
+            "[",
+            indent([softline, join([",", line], path.map(print, "elements"))]),
+            ifBreak(",", ""),
+            softline,
+            "]",
+          ]);
         case "Call":
           return group([
-            path.call(print, "fn"),
+            typedPath(node).call(print, "fn"),
             "(",
             indent([softline, join([",", line], path.map(print, "args"))]),
             softline,
             ")",
+          ]);
+        case "InfixCall":
+          const args = ([0, 1] as const).map((i) =>
+            parenthesizeIfNecessary(
+              typedPath(node).call(print, "args", i),
+              node.args[i]
+            )
+          );
+
+          // TODO - make parens optional
+          return group([args[0], " ", node.op, line, args[1]]);
+        case "UnaryCall":
+          // TODO - make parens optional
+          return group([
+            node.op,
+            parenthesizeIfNecessary(
+              typedPath(node).call(print, "arg"),
+              node.arg
+            ),
+          ]);
+        case "DotLookup":
+          return group([
+            "(",
+            typedPath(node).call(print, "arg"),
+            ")",
+            ".",
+            node.key,
+          ]);
+        case "BracketLookup":
+          return group([
+            "(",
+            typedPath(node).call(print, "arg"),
+            ")",
+            "[",
+            typedPath(node).call(print, "key"),
+            "]",
           ]);
         case "Identifier":
           return node.value;
@@ -84,13 +152,10 @@ export const printers: Record<string, Printer<Node>> = {
           return node.value;
         case "KeyValue":
           return group([
-            path.call(print, "key"),
+            typedPath(node).call(print, "key"),
             ":",
             line,
-            (path as AstPath<Extract<ASTNode, { type: "KeyValue" }>>).call(
-              print,
-              "value"
-            ),
+            typedPath(node).call(print, "value"),
           ]);
         case "Lambda":
           return group([
@@ -120,6 +185,11 @@ export const printers: Record<string, Printer<Node>> = {
           ];
         case "Void":
           return "()";
+        case "lineComment":
+        case "blockComment":
+          throw new Error("Didn't expect comment node in print()");
+        default:
+          throw new Error(`Unsupported node type ${node satisfies never}`);
       }
     },
     printComment: (path: AstPath<ASTCommentNode>) => {

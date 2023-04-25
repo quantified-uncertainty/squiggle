@@ -1,16 +1,17 @@
 {
   "compilerOptions": {
     "module": "CommonJS",
-    "moduleResolution": "node16",
+    "moduleResolution": "node",
     "skipLibCheck": true,
     "strict": true,
     "noImplicitAny": true,
     "outDir": "./dist/cjs",
     "declarationDir": "./dist/types",
+    "target": "ES6",
+    "esModuleInterop": true,
     "declaration": true,
     "composite": true,
-    "target": "ES6",
-    "esModuleInterop": true
+    "incremental": true
   },
   "include": ["src/**/*"],
   "references": [

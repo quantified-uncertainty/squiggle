@@ -12,4 +12,16 @@ r = {
 
 r2 = { foo: 5, bar: 6}
 
-value = 3 + 5 * 6 - (4 / (3 + 2))
+simpleArithmetic = 2 + 2
+arithmetic1 = 2 + 2 * 3
+arithmetic2 = 2 + 2 / 3
+arithmetic3 = 2 / 3 + 1
+arithmetic4 = 2 / (3 + 1)
+arithmetic5 = -2 + 3
+arithmetic5 = -(2 + 3)
+value = 3 + 5 * 6 - 4 / (3 + 2)
+
+arr = [3,4,"foo"]
+arr2 = [3,4,"foo" /* hello */]
+
+l = arr[1]
