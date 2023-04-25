@@ -2,6 +2,7 @@
   "extends": "./tsconfig.esm.json",
   "compilerOptions": {
     "module": "CommonJS",
+    "moduleResolution": "node",
     "outDir": "./dist/cjs",
     "declarationDir": "./dist/types",
     "declaration": true

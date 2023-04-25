@@ -76,7 +76,7 @@ ternary
 logicalAdditive
   = head:logicalMultiplicative tail:(_ operator:logicalAdditiveOp _nl arg:logicalMultiplicative {return {operator: operator, right: arg}})*
   { return tail.reduce(function(result, element) {
-      return h.makeFunctionCall(h.toFunction[element.operator], [result, element.right], location())
+      return h.nodeInfixCall(element.operator, result, element.right, location())
     }, head)}
 
   logicalAdditiveOp "operator" = '||'
@@ -85,21 +85,21 @@ logicalAdditive
 logicalMultiplicative
   = head:equality tail:(_ operator:logicalMultiplicativeOp _nl arg:equality {return {operator: operator, right: arg}})*
   { return tail.reduce(function(result, element) {
-      return h.makeFunctionCall(h.toFunction[element.operator], [result, element.right], location())
+      return h.nodeInfixCall(element.operator, result, element.right, location())
     }, head)}
 
   logicalMultiplicativeOp "operator" = '&&'
 
 equality
   = left:relational _ operator:equalityOp _nl right:relational
-  { return h.makeFunctionCall(h.toFunction[operator], [left, right], location())}
+  { return h.nodeInfixCall(operator, left, right, location())}
   / relational
 
   equalityOp "operator" = '=='/'!='
 
 relational
   = left:credibleInterval _ operator:relationalOp _nl right:credibleInterval
-  { return h.makeFunctionCall(h.toFunction[operator], [left, right], location())}
+  { return h.nodeInfixCall(operator, left, right, location())}
   / credibleInterval
 
   relationalOp "operator" = '<='/'<'/'>='/'>'
@@ -107,7 +107,7 @@ relational
 credibleInterval
   = head:additive tail:(__ operator:credibleIntervalOp __nl arg:additive {return {operator: operator, right: arg}})*
   { return tail.reduce(function(result, element) {
-      return h.makeFunctionCall(h.toFunction[element.operator], [result, element.right], location())
+      return h.nodeInfixCall(element.operator, result, element.right, location())
     }, head)}
 
     credibleIntervalOp "operator" = 'to'
@@ -115,7 +115,7 @@ credibleInterval
 additive
   = head:multiplicative tail:(_ operator:additiveOp _nl arg:multiplicative {return {operator: operator, right: arg}})*
   { return tail.reduce(function(result, element) {
-      return h.makeFunctionCall(h.toFunction[element.operator], [result, element.right], location())
+      return h.nodeInfixCall(element.operator, result, element.right, location())
     }, head)}
 
   additiveOp "operator" = '+' / '-' / '.+' / '.-'
@@ -123,7 +123,7 @@ additive
 multiplicative
   = head:power tail:(_ operator:multiplicativeOp _nl arg:power {return {operator: operator, right: arg}})*
   { return tail.reduce(function(result, element) {
-      return h.makeFunctionCall(h.toFunction[element.operator], [result, element.right], location())
+      return h.nodeInfixCall(element.operator, result, element.right, location())
     }, head)}
 
   multiplicativeOp "operator" = '*' / '/' / '.*' / './'
@@ -131,7 +131,7 @@ multiplicative
 power
   = head:chainFunctionCall tail:(_ operator:powerOp _nl arg:chainFunctionCall {return {operator: operator, right: arg}})*
   { return tail.reduce(function(result, element) {
-      return h.makeFunctionCall(h.toFunction[element.operator], [result, element.right], location())
+      return h.nodeInfixCall(element.operator, result, element.right, location())
     }, head)}
 
   powerOp "operator" = '^' / '.^'
@@ -139,7 +139,7 @@ power
 chainFunctionCall
   = head:unary tail:(_ ('->'/'|>') _nl chained:chainedFunction {return chained})*
   { return tail.reduce(function(result, element) {
-      return h.makeFunctionCall(h.postOperatorToFunction['()'], [element.callable, result, ...element.args], location())
+      return h.nodeCall(element.callable, [result, ...element.args], location())
     }, head)}
 
   chainedFunction
@@ -156,7 +156,7 @@ chainFunctionCall
 
 unary
   = unaryOperator:unaryOperator _nl right:(unary/postOperator)
-  { return h.makeFunctionCall(h.unaryToFunction[unaryOperator], [right], location())}
+  { return h.nodeUnaryCall(unaryOperator, right, location())}
   / postOperator
 
   unaryOperator "unary operator"
@@ -169,22 +169,38 @@ postOperator
 staticCollectionElement
   = head:atom &('['/'.')
     tail:(
-      _ '[' _nl arg:expression  _nl ']' {return {fn: h.postOperatorToFunction['[]'], args: [arg]}}
-    / '.' arg:$dollarIdentifier {return {fn: h.postOperatorToFunction['[]'], args: [h.nodeString(arg, location())]}}
+      _ '[' _nl arg:expression  _nl ']' {return {mode: 'bracket', arg}}
+    / '.' arg:$dollarIdentifier {return {mode: 'dot', arg}}
     )*
   { return tail.reduce(function(result, element) {
-      return h.makeFunctionCall(element.fn, [result, ...element.args], location())
+      switch (element.mode) {
+        case 'dot':
+          return h.nodeDotLookup(result, element.arg, location());
+        case 'bracket':
+          return h.nodeBracketLookup(result, element.arg, location());
+        default:
+          throw new Error("Parser implementation error");
+      }
     }, head)}
 
 collectionElement
   = head:atom &('['/'('/'.')
     tail:(
-      _ '(' _nl args:array_functionArguments  _nl ')' {return {fn: h.postOperatorToFunction['()'], args: args}}
-    / _ '[' _nl arg:expression  _nl ']' {return {fn: h.postOperatorToFunction['[]'], args: [arg]}}
-    / '.' arg:$dollarIdentifier {return {fn: h.postOperatorToFunction['[]'], args: [h.nodeString(arg, location())]}}
+      _ '(' _nl args:array_functionArguments  _nl ')' {return {mode: 'call', args}}
+    / _ '[' _nl arg:expression  _nl ']' {return {mode: 'bracket', arg}}
+    / '.' arg:$dollarIdentifier {return {mode: 'dot', arg}}
     )*
   { return tail.reduce(function(result, element) {
-      return h.makeFunctionCall(element.fn, [result, ...element.args], location())
+      switch (element.mode) {
+        case 'call':
+          return h.nodeCall(result, element.args, location());
+        case 'dot':
+          return h.nodeDotLookup(result, element.arg, location());
+        case 'bracket':
+          return h.nodeBracketLookup(result, element.arg, location());
+        default:
+          throw new Error("Parser implementation error");
+      }
     }, head)}
 
     array_functionArguments
@@ -242,11 +258,12 @@ string 'string'
 
 number = number:(float / integer) unit:unitIdentifier?
   {
-    if (unit === null)
-      { return number }
-    else
-      { return h.makeFunctionCall('fromUnit_'+unit.value, [number], location())
-      }
+    if (unit === null) {
+      return number;
+    }
+    else {
+      return h.nodeCall(h.nodeIdentifier(`fromUnit_${unit.value}`, location()), [number], location());
+    }
   }
 
 integer 'integer'

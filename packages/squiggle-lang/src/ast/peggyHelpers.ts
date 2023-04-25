@@ -1,6 +1,6 @@
 import { LocationRange } from "peggy";
 
-export const toFunction = {
+export const infixFunctions = {
   "+": "add",
   "-": "subtract",
   "!=": "unequal",
@@ -21,18 +21,14 @@ export const toFunction = {
   "||": "or",
   to: "credibleIntervalToDistribution",
 };
+export type InfixOperator = keyof typeof infixFunctions;
 
-export const unaryToFunction = {
+export const unaryFunctions = {
   "-": "unaryMinus",
   "!": "not",
   ".-": "unaryDotMinus",
 };
-
-export const postOperatorToFunction = {
-  ".": "$_atIndex_$",
-  "()": "$$_applyAll_$$",
-  "[]": "$_atIndex_$",
-};
+export type UnaryOperator = keyof typeof unaryFunctions;
 
 type Node = {
   location: LocationRange;
@@ -49,6 +45,25 @@ type NodeArray = N<"Array", { elements: AnyPeggyNode[] }>;
 type NodeRecord = N<"Record", { elements: NodeKeyValue[] }>;
 
 type NodeCall = N<"Call", { fn: AnyPeggyNode; args: AnyPeggyNode[] }>;
+
+type NodeInfixCall = N<
+  "InfixCall",
+  { op: InfixOperator; args: [AnyPeggyNode, AnyPeggyNode] }
+>;
+
+type NodeUnaryCall = N<"UnaryCall", { op: UnaryOperator; arg: AnyPeggyNode }>;
+
+type NodeIndexLookup = N<
+  "IndexLookup",
+  { arg: AnyPeggyNode; index: AnyPeggyNode }
+>;
+
+type NodeDotLookup = N<"DotLookup", { arg: AnyPeggyNode; key: string }>;
+
+type NodeBracketLookup = N<
+  "BracketLookup",
+  { arg: AnyPeggyNode; key: AnyPeggyNode }
+>;
 
 type NodeFloat = N<"Float", { value: number }>;
 
@@ -97,6 +112,10 @@ export type AnyPeggyNode =
   | NodeBlock
   | NodeProgram
   | NodeCall
+  | NodeInfixCall
+  | NodeUnaryCall
+  | NodeDotLookup
+  | NodeBracketLookup
   | NodeFloat
   | NodeInteger
   | NodeIdentifier
@@ -109,16 +128,42 @@ export type AnyPeggyNode =
   | NodeBoolean
   | NodeVoid;
 
-export function makeFunctionCall(
-  fn: string,
-  args: AnyPeggyNode[],
+export function nodeInfixCall(
+  op: InfixOperator,
+  arg1: AnyPeggyNode,
+  arg2: AnyPeggyNode,
   location: LocationRange
-) {
-  if (fn === "$$_applyAll_$$") {
-    return nodeCall(args[0], args.splice(1), location);
-  } else {
-    return nodeCall(nodeIdentifier(fn, location), args, location);
-  }
+): NodeInfixCall {
+  return {
+    type: "InfixCall",
+    op,
+    args: [arg1, arg2],
+    location,
+  };
+}
+
+export function nodeUnaryCall(
+  op: UnaryOperator,
+  arg: AnyPeggyNode,
+  location: LocationRange
+): NodeUnaryCall {
+  return { type: "UnaryCall", op, arg, location };
+}
+
+export function nodeDotLookup(
+  arg: AnyPeggyNode,
+  key: string,
+  location: LocationRange
+): NodeDotLookup {
+  return { type: "DotLookup", arg, key, location };
+}
+
+export function nodeBracketLookup(
+  arg: AnyPeggyNode,
+  key: AnyPeggyNode,
+  location: LocationRange
+): NodeBracketLookup {
+  return { type: "BracketLookup", arg, key, location };
 }
 
 export function constructArray(

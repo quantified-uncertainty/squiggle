@@ -53,7 +53,9 @@ export const parse = (expr: string, source: string): ParseResult => {
   }
 };
 
-const nodeToString = (node: AnyPeggyNode): string => {
+// This function is just for the sake of tests.
+// For real generation of Squiggle code from AST try our prettier plugin.
+const nodeToString = (node: ASTNode): string => {
   switch (node.type) {
     case "Block":
     case "Program":
@@ -72,6 +74,22 @@ const nodeToString = (node: AnyPeggyNode): string => {
         node.args.map(nodeToString).join(" ") +
         ")"
       );
+    case "InfixCall":
+      return (
+        "(" +
+        nodeToString(node.args[0]) +
+        " " +
+        node.op +
+        " " +
+        nodeToString(node.args[1]) +
+        ")"
+      );
+    case "DotLookup":
+      return nodeToString(node.arg) + "." + node.key;
+    case "BracketLookup":
+      return nodeToString(node.arg) + "[" + nodeToString(node.key) + "]";
+    case "UnaryCall":
+      return "(" + node.op + nodeToString(node.arg) + ")";
     case "Float":
       return String(node.value);
     case "Identifier":
@@ -107,8 +125,7 @@ const nodeToString = (node: AnyPeggyNode): string => {
     case "Void":
       return "()";
     default:
-      // should never happen
-      throw new Error(`Unknown node ${node}`);
+      throw new Error(`Unknown node: ${node satisfies never}`);
   }
 };
 
