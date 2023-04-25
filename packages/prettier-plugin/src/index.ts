@@ -200,7 +200,7 @@ export const printers: Record<string, Printer<Node>> = {
         case "Lambda":
           return group([
             "{|",
-            join(",", path.map(print, "args")),
+            join(", ", path.map(print, "args")),
             "|",
             path.call(print, "body"),
             "}",
@@ -208,9 +208,16 @@ export const printers: Record<string, Printer<Node>> = {
         case "Record":
           return group([
             "{",
-            indent([line, join([",", line], path.map(print, "elements"))]),
-            ifBreak(",", ""),
-            line,
+            node.elements.length
+              ? [
+                  indent([
+                    line,
+                    join([",", line], path.map(print, "elements")),
+                  ]),
+                  ifBreak(",", ""),
+                  line,
+                ]
+              : [],
             "}",
           ]);
         case "String":
@@ -237,7 +244,8 @@ export const printers: Record<string, Printer<Node>> = {
       const commentNode = path.getValue();
       switch (commentNode.type) {
         case "lineComment":
-          return ["//", commentNode.value, hardline];
+          // I'm not sure why "hardline" at the end here is not necessary
+          return ["//", commentNode.value];
         case "blockComment":
           return ["/*", commentNode.value, "*/"];
         default:

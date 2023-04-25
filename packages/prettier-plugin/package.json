@@ -1,6 +1,11 @@
 {
   "name": "@quri/prettier-plugin-squiggle",
   "version": "0.0.1",
+  "homepage": "https://squiggle-language.com",
+  "license": "MIT",
+  "scripts": {
+    "test": "jest test"
+  },
   "dependencies": {
     "@quri/squiggle-lang": "^0.7.0"
   },
@@ -8,6 +13,8 @@
     "prettier": "^2.0.0"
   },
   "devDependencies": {
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
     "typescript": "^5.0.4"
   },
   "main": "./dist/cjs/src/index.js"
