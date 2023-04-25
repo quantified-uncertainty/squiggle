@@ -67,11 +67,11 @@ ifthenelse
   = 'if' __nl condition:logicalAdditive
       __nl 'then' __nl trueExpression:innerBlockOrExpression
     __nl 'else' __nl falseExpression:(ifthenelse/innerBlockOrExpression)
-    { return h.nodeTernary(condition, trueExpression, falseExpression, location()) }
+    { return h.nodeTernary(condition, trueExpression, falseExpression, 'IfThenElse', location()) }
 
 ternary
   = condition:logicalAdditive _ '?' _nl trueExpression:logicalAdditive _ ':' _nl falseExpression:(ternary/logicalAdditive)
-    { return h.nodeTernary(condition, trueExpression, falseExpression, location()) }
+    { return h.nodeTernary(condition, trueExpression, falseExpression, 'C', location()) }
 
 logicalAdditive
   = head:logicalMultiplicative tail:(_ operator:logicalAdditiveOp _nl arg:logicalMultiplicative {return {operator: operator, right: arg}})*

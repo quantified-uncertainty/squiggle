@@ -43,10 +43,9 @@ export const parsers: Record<string, Parser<Node>> = {
 
 function parenthesizeIfNecessary(doc: Doc, node: Node): Doc {
   let needParens = false;
-  if (node.type === "InfixCall") {
+  if (node.type === "InfixCall" || node.type === "Ternary") {
     needParens = true;
   }
-  // TODO - ternary
   // TODO - take parent's precedence into account
 
   return needParens ? ["(", doc, ")"] : doc;
@@ -177,10 +176,11 @@ export const printers: Record<string, Printer<Node>> = {
           return ['"', node.value, '"'];
         case "Ternary":
           return [
+            node.kind === "C" ? [] : "if ",
             path.call(print, "condition"),
-            " ? ",
+            node.kind === "C" ? " ? " : " then ",
             path.call(print, "trueExpression"),
-            " : ",
+            node.kind === "C" ? " : " : " else ",
             path.call(print, "falseExpression"),
           ];
         case "Void":

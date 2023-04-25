@@ -89,6 +89,7 @@ type NodeTernary = N<
     condition: AnyPeggyNode;
     trueExpression: AnyPeggyNode;
     falseExpression: AnyPeggyNode;
+    kind: "IfThenElse" | "C";
   }
 >;
 
@@ -262,6 +263,7 @@ export function nodeTernary(
   condition: AnyPeggyNode,
   trueExpression: AnyPeggyNode,
   falseExpression: AnyPeggyNode,
+  kind: NodeTernary["kind"],
   location: LocationRange
 ): NodeTernary {
   return {
@@ -269,6 +271,7 @@ export function nodeTernary(
     condition,
     trueExpression,
     falseExpression,
+    kind,
     location,
   };
 }
