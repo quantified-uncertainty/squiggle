@@ -70,7 +70,7 @@ export const printers: Record<string, Printer<Node>> = {
           }
           return group([
             "{",
-            indent([line, join(hardline, path.map(print, "statements"))]),
+            indent([line, path.map(print, "statements")]),
             line,
             "}",
           ]);
@@ -79,6 +79,22 @@ export const printers: Record<string, Printer<Node>> = {
             node.variable.value,
             " = ",
             typedPath(node).call(print, "value"),
+            hardline,
+            util.isNextLineEmptyAfterIndex(
+              options.originalText,
+              node.location.end.offset
+            )
+              ? hardline
+              : "",
+          ]);
+        case "DefunStatement":
+          return group([
+            node.variable.value,
+            "(",
+            join(", ", typedPath(node).map(print, "value", "args")),
+            ")",
+            " = ",
+            typedPath(node).call(print, "value", "body"),
             hardline,
             util.isNextLineEmptyAfterIndex(
               options.originalText,

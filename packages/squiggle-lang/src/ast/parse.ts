@@ -108,6 +108,8 @@ const nodeToString = (node: ASTNode): string => {
       );
     case "LetStatement":
       return nodeToString(node.variable) + " = " + nodeToString(node.value);
+    case "DefunStatement":
+      return nodeToString(node.variable) + " = " + nodeToString(node.value);
     case "ModuleIdentifier":
       return `@${node.value}`;
     case "String":

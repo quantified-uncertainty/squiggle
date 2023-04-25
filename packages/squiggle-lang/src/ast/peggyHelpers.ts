@@ -36,9 +36,19 @@ type Node = {
 
 type N<T extends string, V extends {}> = Node & { type: T } & V;
 
-type NodeBlock = N<"Block", { statements: AnyPeggyNode[] }>;
+type NodeBlock = N<
+  "Block",
+  {
+    statements: AnyPeggyNode[]; // should be NodeStatement[] ?
+  }
+>;
 
-type NodeProgram = N<"Program", { statements: AnyPeggyNode[] }>;
+type NodeProgram = N<
+  "Program",
+  {
+    statements: AnyPeggyNode[]; // should be NodeStatement[] ?
+  }
+>;
 
 type NodeArray = N<"Array", { elements: AnyPeggyNode[] }>;
 
@@ -52,11 +62,6 @@ type NodeInfixCall = N<
 >;
 
 type NodeUnaryCall = N<"UnaryCall", { op: UnaryOperator; arg: AnyPeggyNode }>;
-
-type NodeIndexLookup = N<
-  "IndexLookup",
-  { arg: AnyPeggyNode; index: AnyPeggyNode }
->;
 
 type NodeDotLookup = N<"DotLookup", { arg: AnyPeggyNode; key: string }>;
 
@@ -80,7 +85,21 @@ type NodeLetStatement = N<
 
 type NodeLambda = N<
   "Lambda",
-  { args: AnyPeggyNode[]; body: AnyPeggyNode; name?: string }
+  {
+    args: AnyPeggyNode[];
+    body: AnyPeggyNode; // should be a NodeBlock
+    name?: string;
+  }
+>;
+
+type NamedNodeLambda = NodeLambda & Required<Pick<NodeLambda, "name">>;
+
+type NodeDefunStatement = N<
+  "DefunStatement",
+  {
+    variable: NodeIdentifier;
+    value: NamedNodeLambda;
+  }
 >;
 
 type NodeTernary = N<
@@ -122,6 +141,7 @@ export type AnyPeggyNode =
   | NodeIdentifier
   | NodeModuleIdentifier
   | NodeLetStatement
+  | NodeDefunStatement
   | NodeLambda
   | NodeTernary
   | NodeKeyValue
@@ -249,6 +269,13 @@ export function nodeLetStatement(
   const patchedValue =
     value.type === "Lambda" ? { ...value, name: variable.value } : value;
   return { type: "LetStatement", variable, value: patchedValue, location };
+}
+export function nodeDefunStatement(
+  variable: NodeIdentifier,
+  value: NamedNodeLambda,
+  location: LocationRange
+): NodeDefunStatement {
+  return { type: "DefunStatement", variable, value, location };
 }
 export function nodeModuleIdentifier(
   value: string,

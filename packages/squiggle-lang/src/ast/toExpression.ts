@@ -61,6 +61,8 @@ const contentFromNode = (ast: ASTNode): expression.ExpressionContent => {
       );
     case "LetStatement":
       return expression.eLetStatement(ast.variable.value, fromNode(ast.value));
+    case "DefunStatement":
+      return expression.eLetStatement(ast.variable.value, fromNode(ast.value));
     case "ModuleIdentifier":
       return expression.eIdentifier(ast.value);
     case "String":

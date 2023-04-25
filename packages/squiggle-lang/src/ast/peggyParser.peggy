@@ -51,7 +51,7 @@ letStatement
 defunStatement
   = variable:variable '(' _nl args:array_parameters _nl ')' _ assignmentOp _nl body:innerBlockOrExpression
     { var value = h.nodeLambda(args, body, location(), variable)
-      return h.nodeLetStatement(variable, value, location()) }
+      return h.nodeDefunStatement(variable, value, location()) }
 
   assignmentOp "assignment" = '='
 
