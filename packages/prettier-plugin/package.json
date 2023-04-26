@@ -1,8 +1,9 @@
 {
   "name": "@quri/prettier-plugin-squiggle",
-  "version": "0.0.1",
+  "version": "0.7.0",
   "homepage": "https://squiggle-language.com",
   "license": "MIT",
+  "type": "commonjs",
   "scripts": {
     "build": "tsc",
     "test": "jest test"
@@ -18,5 +19,6 @@
     "ts-jest": "^29.1.0",
     "typescript": "^5.0.4"
   },
-  "main": "./dist/cjs/src/index.js"
+  "main": "./dist/cjs/src/index.js",
+  "types": "./dist/types/src/index.d.ts"
 }

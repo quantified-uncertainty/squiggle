@@ -1,5 +1,4 @@
 import { ASTCommentNode, ASTNode, parse } from "@quri/squiggle-lang";
-import { AnyPeggyNode } from "@quri/squiggle-lang/src/ast/peggyHelpers";
 import {
   AstPath,
   Doc,
