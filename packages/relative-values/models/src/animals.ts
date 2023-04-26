@@ -11,7 +11,7 @@ function getCatalog(): Catalog {
     {
       id: "one_human_qaly",
       name: "1 human QALY (quality-adjusted life-year)",
-      clusterId: "sentient_welfare"
+      clusterId: "sentient_welfare",
     },
     {
       id: "cow_value_per_year_of_life",
@@ -157,7 +157,7 @@ function getCatalog(): Catalog {
       id: "xiaobuvegan_2022_value_estimate",
       name: "xiaobuVEGAN (2022)",
       clusterId: "sentient_welfare_interventions",
-    }
+    },
   ];
 
   return {
@@ -175,7 +175,7 @@ function getCatalog(): Catalog {
         name: "sentient_welfare_interventions",
         color: "#3B42aC",
         recommendedUnit: "one_human_qaly",
-      }
+      },
     },
   };
 }
