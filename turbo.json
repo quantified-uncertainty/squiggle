@@ -35,7 +35,7 @@
     },
     "format": {},
     "lint": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build", "@quri/prettier-plugin-squiggle#build"]
     },
     "test": {
       "dependsOn": ["build"]
