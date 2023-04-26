@@ -71,7 +71,17 @@ defunStatement
 
 functionParameters = dollarIdentifier|.., commaSeparator|
 
+/*
+Rules for expressions start here.
+
+Peggy doesn't have built-in support for operator precedence, so we have to recurse into expressions,
+starting from the lowest precedence rules (ternary operators), up to highest precedence rules
+(function calls and field lookups), until we bottom down at atoms and start all over again.
+*/
+
 expression = ifthenelse / ternary / logicalOr
+
+// Ternaries
 
 ifthenelse
   = 'if' __nl condition:logicalOr
@@ -83,12 +93,13 @@ ternary
   = condition:logicalOr _ '?' _nl trueExpression:logicalOr _ ':' _nl falseExpression:(ternary / logicalOr)
     { return h.nodeTernary(condition, trueExpression, falseExpression, 'C', location()); }
 
+// Binary operators
+
 logicalOr
   = head:logicalAnd tail:(_ @logicalOrOp _nl @logicalAnd)*
   { return h.makeInfixChain(head, tail, location()); }
   logicalOrOp "operator" = '||'
 
-// start binary operators
 logicalAnd
   = head:equality tail:(_ @logicalAndOp _nl @equality)*
   { return h.makeInfixChain(head, tail, location()); }
@@ -137,14 +148,14 @@ chainFunctionCall
   }
 
   chainedFunction
-    = fn:callableBasicValue '(' _nl args:array_functionArguments _nl ')'
+    = fn:callableBasicValue '(' _nl args:functionArguments _nl ')'
       { return { callable: fn, args }; }
     / fn:callableBasicValue
       { return { callable: fn, args: [] }; }
 
   callableBasicValue = staticCollectionElement / valueConstructor / variable
 
-// end of binary operators
+// Unary operator
 
 unary
   = unaryOperator:unaryOperator _nl right:(unary/postOperator)
@@ -152,6 +163,8 @@ unary
   / postOperator
 
   unaryOperator "unary operator" = '-' / '.-' / '!'
+
+// Function calls and field lookups
 
 postOperator
   = collectionElement
@@ -179,7 +192,7 @@ staticCollectionElement
 collectionElement
   = head:atom &('['/'('/'.')
     tail:(
-      _ '(' _nl args:array_functionArguments _nl ')'
+      _ '(' _nl args:functionArguments _nl ')'
       { return {mode: 'call', args}; }
     / _ '[' _nl arg:expression _nl ']'
       { return {mode: 'bracket', arg}; }
@@ -201,13 +214,15 @@ collectionElement
     }, head);
   }
 
-array_functionArguments = expression|.., commaSeparator|
+functionArguments = expression|.., commaSeparator|
 
 atom
   = '(' _nl @expression _nl ')'
   / basicValue
 
 basicValue = valueConstructor / basicLiteral
+
+// Basic literals such as numbers, strings and booleans
 
 basicLiteral
   = string
@@ -274,6 +289,8 @@ float 'float'
 boolean 'boolean'
   = ('true' / 'false') ! [a-z]i ! [_$]
   { return h.nodeBoolean(text() === 'true', location()); }
+
+// Contructors - delimited blocks such as {} and []
 
 valueConstructor
   = recordConstructor
