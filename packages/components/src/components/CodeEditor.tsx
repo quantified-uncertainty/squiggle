@@ -1,42 +1,46 @@
-import React, { FC, useEffect, useMemo, useRef } from "react";
+import React, { FC, useCallback, useEffect, useMemo, useRef } from "react";
 
-import { SqError, SqLocation, SqProject } from "@quri/squiggle-lang";
-import { syntaxHighlighting } from "@codemirror/language";
-import { EditorState, Compartment } from "@codemirror/state";
-import { EditorView, keymap } from "@codemirror/view";
+import * as prettier from "prettier";
+import * as squigglePlugin from "@quri/prettier-plugin-squiggle";
+
 import { defaultKeymap } from "@codemirror/commands";
+import { syntaxHighlighting } from "@codemirror/language";
 import { setDiagnostics } from "@codemirror/lint";
+import { Compartment, EditorState } from "@codemirror/state";
+import { EditorView, keymap } from "@codemirror/view";
+
+import { SqError, SqProject } from "@quri/squiggle-lang";
 
 import { squiggleLanguageSupport } from "../languageSupport/squiggle.js";
 
 // From basic setup
 import {
-  lineNumbers,
-  highlightActiveLineGutter,
-  highlightSpecialChars,
-  drawSelection,
-  dropCursor,
-  highlightActiveLine,
-} from "@codemirror/view";
-import { history, historyKeymap, indentWithTab } from "@codemirror/commands";
-import { highlightSelectionMatches, searchKeymap } from "@codemirror/search";
-import {
-  closeBrackets,
   autocompletion,
+  closeBrackets,
   closeBracketsKeymap,
   completionKeymap,
 } from "@codemirror/autocomplete";
-import { lintKeymap } from "@codemirror/lint";
+import { history, historyKeymap, indentWithTab } from "@codemirror/commands";
 import {
-  foldGutter,
-  indentOnInput,
   bracketMatching,
+  foldGutter,
   foldKeymap,
+  indentOnInput,
 } from "@codemirror/language";
+import { lintKeymap } from "@codemirror/lint";
+import { highlightSelectionMatches, searchKeymap } from "@codemirror/search";
+import {
+  drawSelection,
+  dropCursor,
+  highlightActiveLine,
+  highlightActiveLineGutter,
+  highlightSpecialChars,
+  lineNumbers,
+} from "@codemirror/view";
 import { lightThemeHighlightingStyle } from "../languageSupport/highlightingStyle.js";
 
 interface CodeEditorProps {
-  value: string;
+  value: string; // TODO - should be `initialValue`, since we don't really support value updates
   onChange: (value: string) => void;
   onSubmit?: () => void;
   width?: number;
@@ -50,6 +54,7 @@ const compTheme = new Compartment();
 const compGutter = new Compartment();
 const compUpdateListener = new Compartment();
 const compSubmitListener = new Compartment();
+const compFormatListener = new Compartment();
 
 export const CodeEditor: FC<CodeEditorProps> = ({
   value,
@@ -68,6 +73,30 @@ export const CodeEditor: FC<CodeEditorProps> = ({
     [project]
   );
 
+  const format = useCallback(async () => {
+    if (!editorView.current) {
+      return;
+    }
+    const view = editorView.current;
+    const code = view.state.doc.toString();
+    const { formatted, cursorOffset } = await prettier.formatWithCursor(code, {
+      parser: "squiggle",
+      plugins: [squigglePlugin],
+      cursorOffset: editorView.current.state.selection.main.to,
+    });
+    onChange(formatted);
+    view.dispatch({
+      changes: {
+        from: 0,
+        to: editorView.current.state.doc.length,
+        insert: formatted,
+      },
+      selection: {
+        anchor: cursorOffset,
+      },
+    });
+  }, [onChange]);
+
   const state = useMemo(
     () =>
       EditorState.create({
@@ -83,13 +112,12 @@ export const CodeEditor: FC<CodeEditorProps> = ({
           bracketMatching(),
           closeBrackets(),
           autocompletion(),
-          // rectangularSelection(),
-          // crosshairCursor(),
           highlightSelectionMatches({
             wholeWords: true,
             highlightWordAroundCursor: false, // Works weird on fractions! 5.3e10K
           }),
           compSubmitListener.of([]),
+          compFormatListener.of([]),
           keymap.of([
             ...closeBracketsKeymap,
             ...defaultKeymap,
@@ -166,22 +194,34 @@ export const CodeEditor: FC<CodeEditorProps> = ({
   useEffect(() => {
     editorView.current?.dispatch({
       effects: compSubmitListener.reconfigure(
-        keymap.of(
-          onSubmit
-            ? [
-                {
-                  key: "Mod-Enter",
-                  run: () => {
-                    onSubmit();
-                    return true;
-                  },
-                },
-              ]
-            : []
-        )
+        keymap.of([
+          {
+            key: "Mod-Enter",
+            run: () => {
+              onSubmit?.();
+              return true;
+            },
+          },
+        ])
       ),
     });
   }, [onSubmit]);
+
+  useEffect(() => {
+    editorView.current?.dispatch({
+      effects: compFormatListener.reconfigure(
+        keymap.of([
+          {
+            key: "Alt-Shift-f",
+            run: () => {
+              format();
+              return true;
+            },
+          },
+        ])
+      ),
+    });
+  }, [format]);
 
   useEffect(() => {
     const docLength = editorView.current
@@ -218,9 +258,6 @@ export const CodeEditor: FC<CodeEditorProps> = ({
   }, [errors]);
 
   return (
-    <div
-      style={{ minWidth: `${width}px`, minHeight: `${height}px` }}
-      ref={editor}
-    ></div>
+    <div style={{ minWidth: width, minHeight: height }} ref={editor}></div>
   );
 };
