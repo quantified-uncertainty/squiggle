@@ -167,6 +167,16 @@ export function nodeCall(
   return { type: "Call", fn, args, location };
 }
 
+export function makeInfixChain(
+  head: AnyPeggyNode,
+  tail: [InfixOperator, AnyPeggyNode][],
+  location: LocationRange
+): AnyPeggyNode {
+  return tail.reduce((result, [operator, right]) => {
+    return nodeInfixCall(operator, result, right, location);
+  }, head);
+}
+
 export function nodeInfixCall(
   op: InfixOperator,
   arg1: AnyPeggyNode,

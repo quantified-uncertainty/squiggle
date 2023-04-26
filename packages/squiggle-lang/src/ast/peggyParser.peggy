@@ -10,35 +10,39 @@ start
 zeroOMoreArgumentsBlockOrExpression = lambda / innerBlockOrExpression
 
 outerBlock
-  = statements:array_statements
-    finalExpression: (statementSeparator @expression)?
+  = statements:statementsList
+    finalExpression:(statementSeparator @expression)?
     {
-      if (finalExpression) statements.push(finalExpression);
+      if (finalExpression) {
+        statements.push(finalExpression);
+      }
       return h.nodeProgram(statements, location());
     }
-  / finalExpression: expression
-    { return h.nodeProgram([finalExpression], location()) }
+  / finalExpression:expression
+    { return h.nodeProgram([finalExpression], location()); }
 
 innerBlockOrExpression
   = quotedInnerBlock
-  / finalExpression: expression
-    { return h.nodeBlock([finalExpression], location())}
+  / finalExpression:expression
+    { return h.nodeBlock([finalExpression], location()); }
 
 quotedInnerBlock
   = '{' _nl
-    statements:array_statements
-    finalExpression: (statementSeparator @expression) _nl
+    statements:statementsList
+    finalExpression:(statementSeparator @expression) _nl
     '}'
     {
-      if (finalExpression) statements.push(finalExpression);
+      if (finalExpression) {
+        statements.push(finalExpression);
+      }
       return h.nodeBlock(statements, location());
     }
   / '{' _nl
-    finalExpression: expression _nl
+    finalExpression:expression _nl
     '}'
-    { return h.nodeBlock([finalExpression], location()) }
+    { return h.nodeBlock([finalExpression], location()); }
 
-array_statements = statement|1.., statementSeparator|
+statementsList = statement|1.., statementSeparator|
 
 statement
   = letStatement
@@ -54,10 +58,10 @@ voidStatement
 
 letStatement
   = variable:variable _ assignmentOp _nl value:zeroOMoreArgumentsBlockOrExpression
-    { return h.nodeLetStatement(variable, value, location()) }
+    { return h.nodeLetStatement(variable, value, location()); }
 
 defunStatement
-  = variable:variable '(' _nl args:array_parameters _nl ')' _ assignmentOp _nl body:innerBlockOrExpression
+  = variable:variable '(' _nl args:functionParameters _nl ')' _ assignmentOp _nl body:innerBlockOrExpression
     {
       const value = h.nodeLambda(args, body, location(), variable);
       return h.nodeDefunStatement(variable, value, location());
@@ -65,94 +69,70 @@ defunStatement
 
   assignmentOp "assignment" = '='
 
-array_parameters = dollarIdentifier|.., commaSeparator|
+functionParameters = dollarIdentifier|.., commaSeparator|
 
-expression = ifthenelse / ternary / logicalAdditive
+expression = ifthenelse / ternary / logicalOr
 
 ifthenelse
-  = 'if' __nl condition:logicalAdditive
+  = 'if' __nl condition:logicalOr
     __nl 'then' __nl trueExpression:innerBlockOrExpression
     __nl 'else' __nl falseExpression:(ifthenelse/innerBlockOrExpression)
-    { return h.nodeTernary(condition, trueExpression, falseExpression, 'IfThenElse', location()) }
+    { return h.nodeTernary(condition, trueExpression, falseExpression, 'IfThenElse', location()); }
 
 ternary
-  = condition:logicalAdditive _ '?' _nl trueExpression:logicalAdditive _ ':' _nl falseExpression:(ternary/logicalAdditive)
-    { return h.nodeTernary(condition, trueExpression, falseExpression, 'C', location()) }
+  = condition:logicalOr _ '?' _nl trueExpression:logicalOr _ ':' _nl falseExpression:(ternary / logicalOr)
+    { return h.nodeTernary(condition, trueExpression, falseExpression, 'C', location()); }
 
-logicalAdditive
-  = head:logicalMultiplicative tail:(_ operator:logicalAdditiveOp _nl arg:logicalMultiplicative {return {operator: operator, right: arg}})*
-  {
-    return tail.reduce(function(result, element) {
-      return h.nodeInfixCall(element.operator, result, element.right, location())
-    }, head);
-  }
-  logicalAdditiveOp "operator" = '||'
+logicalOr
+  = head:logicalAnd tail:(_ @logicalOrOp _nl @logicalAnd)*
+  { return h.makeInfixChain(head, tail, location()); }
+  logicalOrOp "operator" = '||'
 
 // start binary operators
-logicalMultiplicative
-  = head:equality tail:(_ operator:logicalMultiplicativeOp _nl arg:equality {return {operator: operator, right: arg}})*
-  {
-    return tail.reduce(function(result, element) {
-      return h.nodeInfixCall(element.operator, result, element.right, location());
-    }, head);
-  }
-  logicalMultiplicativeOp "operator" = '&&'
+logicalAnd
+  = head:equality tail:(_ @logicalAndOp _nl @equality)*
+  { return h.makeInfixChain(head, tail, location()); }
+  logicalAndOp "operator" = '&&'
 
 equality
   = left:relational _ operator:equalityOp _nl right:relational
   { return h.nodeInfixCall(operator, left, right, location()); }
   / relational
 
-  equalityOp "operator" = '=='/'!='
+  equalityOp "operator" = '==' / '!='
 
 relational
   = left:credibleInterval _ operator:relationalOp _nl right:credibleInterval
   { return h.nodeInfixCall(operator, left, right, location()); }
   / credibleInterval
 
-  relationalOp "operator" = '<='/'<'/'>='/'>'
+  relationalOp "operator" = '<=' / '<' / '>=' / '>'
 
 credibleInterval
-  = head:additive tail:(__ operator:credibleIntervalOp __nl arg:additive { return {operator: operator, right: arg}; })*
-  {
-    return tail.reduce(function(result, element) {
-      return h.nodeInfixCall(element.operator, result, element.right, location())
-    }, head);
-  }
+  = head:additive tail:(__ @credibleIntervalOp __nl @additive)*
+  { return h.makeInfixChain(head, tail, location()); }
   credibleIntervalOp "operator" = 'to'
 
 additive
-  = head:multiplicative tail:(_ operator:additiveOp _nl arg:multiplicative {return {operator: operator, right: arg}})*
-  {
-    return tail.reduce(function(result, element) {
-      return h.nodeInfixCall(element.operator, result, element.right, location())
-    }, head);
-  }
+  = head:multiplicative tail:(_ @additiveOp _nl @multiplicative)*
+  { return h.makeInfixChain(head, tail, location()); }
   additiveOp "operator" = '+' / '-' / '.+' / '.-'
 
 multiplicative
-  = head:power tail:(_ operator:multiplicativeOp _nl arg:power {return {operator: operator, right: arg}})*
-  {
-    return tail.reduce(function(result, element) {
-      return h.nodeInfixCall(element.operator, result, element.right, location())
-    }, head);
-  }
+  = head:power tail:(_ @multiplicativeOp _nl @power)*
+  { return h.makeInfixChain(head, tail, location()); }
   multiplicativeOp "operator" = '*' / '/' / '.*' / './'
 
 power
-  = head:chainFunctionCall tail:(_ operator:powerOp _nl arg:chainFunctionCall { return { operator: operator, right: arg }; })*
-  {
-    return tail.reduce(function(result, element) {
-      return h.nodeInfixCall(element.operator, result, element.right, location())
-    }, head);
-  }
+  = head:chainFunctionCall tail:(_ @powerOp _nl @chainFunctionCall)*
+  { return h.makeInfixChain(head, tail, location()); }
   powerOp "operator" = '^' / '.^'
 
 chainFunctionCall
-  = head:unary tail:(_ ('->'/'|>') _nl @chainedFunction)*
+  = head:unary tail:(_ ('->' / '|>') _nl @chainedFunction)*
   {
     return tail.reduce(function(result, element) {
-      return h.nodePipe(result, element.callable, element.args, location())
+      return h.nodePipe(result, element.callable, element.args, location());
     }, head);
   }
 
@@ -199,9 +179,12 @@ staticCollectionElement
 collectionElement
   = head:atom &('['/'('/'.')
     tail:(
-      _ '(' _nl args:array_functionArguments  _nl ')' {return {mode: 'call', args}}
-    / _ '[' _nl arg:expression  _nl ']' {return {mode: 'bracket', arg}}
-    / '.' arg:$dollarIdentifier {return {mode: 'dot', arg}}
+      _ '(' _nl args:array_functionArguments _nl ')'
+      { return {mode: 'call', args}; }
+    / _ '[' _nl arg:expression _nl ']'
+      { return {mode: 'bracket', arg}; }
+    / '.' arg:$dollarIdentifier
+      { return {mode: 'dot', arg}; }
     )*
   {
     return tail.reduce(function(result, element) {
@@ -246,7 +229,7 @@ dollarIdentifierWithModule 'identifier'
     let modifiers = [...tail];
     modifiers.unshift(head);
     modifiers.push(final);
-    let modifiedIdentifier = modifiers.join('.');
+    const modifiedIdentifier = modifiers.join('.');
     return h.nodeIdentifier(modifiedIdentifier, location());
   }
 
@@ -289,7 +272,7 @@ float 'float'
     d = [0-9]
 
 boolean 'boolean'
-  = ('true'/'false')  ! [a-z]i ! [_$]
+  = ('true' / 'false') ! [a-z]i ! [_$]
   { return h.nodeBoolean(text() === 'true', location()); }
 
 valueConstructor
@@ -299,11 +282,13 @@ valueConstructor
   / quotedInnerBlock
 
 lambda
-  = '{' _nl '|' _nl args:array_parameters _nl '|' _nl statements:array_statements  finalExpression: (statementSeparator @expression)  _nl '}'
-      { statements.push(finalExpression)
-        return h.nodeLambda(args, h.nodeBlock(statements, location()), location(), undefined) }
-  / '{' _nl '|' _nl args:array_parameters _nl '|' _nl finalExpression: expression  _nl '}'
-      { return h.nodeLambda(args, finalExpression, location(), undefined) }
+  = '{' _nl '|' _nl args:functionParameters _nl '|' _nl statements:statementsList  finalExpression: (statementSeparator @expression)  _nl '}'
+  {
+    statements.push(finalExpression);
+    return h.nodeLambda(args, h.nodeBlock(statements, location()), location(), undefined);
+  }
+  / '{' _nl '|' _nl args:functionParameters _nl '|' _nl finalExpression: expression  _nl '}'
+  { return h.nodeLambda(args, finalExpression, location(), undefined); }
 
 arrayConstructor 'array'
   = '[' _nl ']'
@@ -313,7 +298,7 @@ arrayConstructor 'array'
 
   array_elements = @expression|1.., commaSeparator| commaSeparator?
 
-recordConstructor  'record'
+recordConstructor 'record'
   = '{' _nl '}'
     { return h.constructRecord([], location()); }
   / '{' _nl args:array_recordEntries _nl '}'
@@ -327,16 +312,16 @@ recordConstructor  'record'
 
 // Separators
 
-_ 'optional whitespace'
+_ 'whitespace'
   = whiteSpaceCharactersOrComment*
 
-_nl 'optional whitespace or newline'
+_nl 'whitespace or newline'
   = (whiteSpaceCharactersOrComment / commentOrNewLine)*
 
-__ 'required whitespace'
+__ 'whitespace'
   = whiteSpaceCharactersOrComment+
 
-__nl 'required whitespace or newline'
+__nl 'whitespace or newline'
   = (whiteSpaceCharactersOrComment / commentOrNewLine )+
 
 statementSeparator 'statement separator'
