@@ -3,3 +3,4 @@ dist
 coverage/
 src/ast/peggyParser.js
 src/public/SqProject/IncludeParser.js
+__tests__/fixtures
