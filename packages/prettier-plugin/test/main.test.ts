@@ -53,12 +53,21 @@ describe("expressions", () => {
     expect(format("2+2")).toBe("2 + 2");
   });
 
-  test("nested expressions add extra braces", () => {
-    expect(format("2+3*4")).toBe("2 + (3 * 4)");
-  });
-  // should be, not implemented:
-  test.failing("nested", () => {
+  test("nested", () => {
     expect(format("2+3*4")).toBe("2 + 3 * 4");
+    expect(format("(2+3)*4")).toBe("(2 + 3) * 4");
+    expect(format("2/3/4")).toBe("2 / 3 / 4");
+    expect(format("2/(3/4)")).toBe("2 / (3 / 4)");
+  });
+
+  test("complicated", () => {
+    expect(
+      format(`
+    4 > (3 > 2 ? 3 : 5) && 2 == -(-1 + -3 -> {|x|x / 3}) ? "ok" : "not ok"
+`)
+    ).toBe(
+      '4 > (3 > 2 ? 3 : 5) && 2 == -(-1 + -3 -> {|x|x / 3}) ? "ok" : "not ok"'
+    );
   });
 });
 
@@ -191,7 +200,7 @@ describe("pipes", () => {
         "pipe = 5 -> f1 -> f2() -> f3(1) -> {f: f2}.f2 -> {foo: f3}.foo(1)"
       )
     ).toBe(
-      "pipe = 5 -> f1 -> f2 -> f3(1) -> ({ f: f2 }).f2 -> ({ foo: f3 }).foo(1)\n"
+      "pipe = 5 -> f1 -> f2 -> f3(1) -> { f: f2 }.f2 -> { foo: f3 }.foo(1)\n"
     );
   });
 });

@@ -1,4 +1,5 @@
 import { ASTCommentNode, ASTNode, parse } from "@quri/squiggle-lang";
+import { AnyPeggyNode } from "@quri/squiggle-lang/src/ast/peggyHelpers";
 import {
   AstPath,
   Doc,
@@ -28,7 +29,6 @@ export const parsers: Record<string, Parser<Node>> = {
       if (!parseResult.ok) {
         throw new Error(`Parse failed. ${parseResult.value}`);
       }
-      // console.log(JSON.stringify(parseResult.value, null, 2));
       return parseResult.value;
     },
     astFormat: "squiggle-ast",
@@ -41,24 +41,80 @@ export const parsers: Record<string, Parser<Node>> = {
   },
 };
 
-function parenthesizeIfNecessary(doc: Doc, node: Node): Doc {
-  let needParens = false;
-  if (node.type === "InfixCall" || node.type === "Ternary") {
-    needParens = true;
+function getNodePrecedence(node: Node): number {
+  const infixPrecedence = {
+    "||": 2,
+    "&&": 3,
+    "==": 4,
+    "!=": 4,
+    "<=": 5,
+    "<": 5,
+    ">=": 5,
+    ">": 5,
+    to: 6,
+    "+": 7,
+    "-": 7,
+    ".+": 7,
+    ".-": 7,
+    "*": 8,
+    "/": 8,
+    ".*": 8,
+    "./": 8,
+    "^": 9,
+    ".^": 9,
+    "->": 10,
+    "|>": 10,
+  };
+  switch (node.type) {
+    case "Ternary":
+      return 1;
+    case "InfixCall": {
+      const precedence = infixPrecedence[node.op];
+      if (precedence === undefined) {
+        throw new Error(`Unknown operator ${node.op}`);
+      }
+      return precedence;
+    }
+    case "Pipe":
+      return 11;
+    case "UnaryCall":
+      return 12;
+    case "DotLookup":
+    case "BracketLookup":
+    case "Call":
+      return 13;
+    case "Block":
+      if (node.statements.length === 1) {
+        // will be unwrapped by printer
+        return getNodePrecedence(node.statements[0]);
+      }
+    default:
+      return 100;
   }
-  // TODO - take parent's precedence into account
-
-  return needParens ? ["(", doc, ")"] : doc;
 }
 
 export const printers: Record<string, Printer<Node>> = {
   "squiggle-ast": {
     print: (path, options, print) => {
       const node = path.getValue();
-      const typedPath = <T extends ASTNode["type"]>(
-        _: Extract<ASTNode, { type: T }>
+      const typedPath = <T extends Node>(_: T) => {
+        return path as AstPath<T>;
+      };
+
+      const printChild = (
+        doc: Doc,
+        parentNode: Node,
+        childNode: Node,
+        rightSide: boolean = false
       ) => {
-        return path as AstPath<Extract<ASTNode, { type: T }>>;
+        const parentPrecedence = getNodePrecedence(parentNode);
+        const childPrecedence = getNodePrecedence(childNode);
+        const needParens = rightSide
+          ? childPrecedence <= parentPrecedence // handles 4 / (5 / 6) case
+          : childPrecedence < parentPrecedence;
+
+        // TODO - indent
+        return needParens ? ["(", doc, ")"] : doc;
       };
 
       switch (node.type) {
@@ -127,22 +183,19 @@ export const printers: Record<string, Printer<Node>> = {
           ]);
         case "InfixCall":
           const args = ([0, 1] as const).map((i) =>
-            parenthesizeIfNecessary(
+            printChild(
               typedPath(node).call(print, "args", i),
-              node.args[i]
+              node,
+              node.args[i],
+              i === 1
             )
           );
 
-          // TODO - make parens optional
           return group([args[0], " ", node.op, line, args[1]]);
         case "UnaryCall":
-          // TODO - make parens optional
           return group([
             node.op,
-            parenthesizeIfNecessary(
-              typedPath(node).call(print, "arg"),
-              node.arg
-            ),
+            printChild(typedPath(node).call(print, "arg"), node, node.arg),
           ]);
         case "Pipe": {
           const args = node.rightArgs.length
@@ -157,29 +210,22 @@ export const printers: Record<string, Printer<Node>> = {
               ]
             : [];
           return group([
-            parenthesizeIfNecessary(
+            printChild(
               typedPath(node).call(print, "leftArg"),
+              node,
               node.leftArg
             ),
             " ->",
             line,
-            parenthesizeIfNecessary(typedPath(node).call(print, "fn"), node.fn),
+            printChild(typedPath(node).call(print, "fn"), node, node.fn),
             args,
           ]);
         }
         case "DotLookup":
-          return group([
-            "(",
-            typedPath(node).call(print, "arg"),
-            ")",
-            ".",
-            node.key,
-          ]);
+          return group([typedPath(node).call(print, "arg"), ".", node.key]);
         case "BracketLookup":
           return group([
-            "(",
             typedPath(node).call(print, "arg"),
-            ")",
             "[",
             typedPath(node).call(print, "key"),
             "]",
@@ -195,7 +241,12 @@ export const printers: Record<string, Printer<Node>> = {
               ? node.key.value
               : typedPath(node).call(print, "key");
 
-          return group([key, ":", line, typedPath(node).call(print, "value")]);
+          return group([
+            key,
+            // it would be better to allow a break here, but it's hard to format well */
+            ": ",
+            typedPath(node).call(print, "value"),
+          ]);
         }
         case "Lambda":
           return group([

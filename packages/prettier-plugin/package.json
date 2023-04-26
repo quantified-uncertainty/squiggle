@@ -4,6 +4,7 @@
   "homepage": "https://squiggle-language.com",
   "license": "MIT",
   "scripts": {
+    "build": "tsc",
     "test": "jest test"
   },
   "dependencies": {
