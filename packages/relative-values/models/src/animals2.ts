@@ -187,7 +187,455 @@ function getTextModel(): Model {
     author: "Nuño Sempere",
     mode: "text",
     code: sq`
-    fn(a,b) = [normal(0,1), normal(0,1 )]
+// Utils
+ss = SampleSet.fromDist
+tt(dist) = truncateRight(dist, 100)
+
+// Add human QALY as a reference point
+one_human_qaly = {
+  id: "one_human_qaly", 
+  name: "1 human QALY (quality-adjusted life-year)",
+  value: normal(1, 0.01)
+}
+
+// Cows
+value_happy_cow_year = 0.05 to 0.3
+value_tortured_cow_year = -(0.1 to 2)
+value_farmed_cow_year = normal({ p10: -0.2, p90: 0.1 })
+// ^ purely subjective estimates
+// the thing is, it doesn't seem that unlikely to me
+// that cows do lead net positive lives
+weight_cow = mixture([450 to 1800, 360 to 1100], [1/2,1/2])
+non_wastage_proportion_cow = (0.5 to 0.7) -> ss // should be a beta. 
+lifetime_cow = (30 to 42) / 12
+calories_cow = mixture(0.8M to 1.4M, (500k to 700k) * (weight_cow * non_wastage_proportion_cow)/1000) 
+// ^ kilocalories, averaging two estimates from <https://www.reddit.com/r/theydidthemonstermath/comments/a8ha9r/how_many_calories_are_in_a_whole_cow/>
+
+cow_estimates = {
+  name: "cow",
+  value_year: value_farmed_cow_year -> ss,
+  weight: weight_cow,
+  calories: calories_cow,
+  lifetime: lifetime_cow -> ss
+}
+
+// Pigs
+value_happy_pig_year = 0.02 to 0.3
+value_tortured_pig_year = -(0.05 to 2)
+value_farmed_pig_year = normal({ p5: -0.5, p95: 0.05 })
+// ^ purely subjective estimates
+lifetime_pig = (5 to 7) / 12
+weight_pig = 110 to 150 // kilograms 
+kilograms_in_pounds = 1/0.454
+// ^ "Most market hogs are raised for optimal meat quality and yield between 5-7 months of age, or between 250-325 pounds"
+// ^ https://s3.wp.wsu.edu/uploads/sites/2049/2021/02/02.21PorkFabVideoDataFactSheet02.16.2021.pdf
+meat_yield_pig = (55 to 58)/100
+calories_per_pound_of_pig_meat = 900 to 1.1k
+calories_pig = weight_pig * meat_yield_pig * kilograms_in_pounds * calories_per_pound_of_pig_meat
+// ^ see <https://www.quora.com/About-how-many-calories-are-in-an-entire-pig>
+
+pig_estimates = {
+  name: "pig",
+  value_year: value_farmed_pig_year -> ss,
+  weight: weight_pig,
+  calories: calories_pig,
+  lifetime: lifetime_pig -> ss
+}
+
+// Chickens (broilers)
+value_happy_chicken_year = 0.001 to 0.05
+value_tortured_chicken_year = -(0.01 to 0.2) -> ss
+value_farmed_chicken_year = value_tortured_chicken_year/(1 to 3)
+// ^ purely subjective estimates
+lifetime_chicken = (4 to 7)/52
+weight_chicken = 2 to 3.5
+// ^ kilograms. Not very sure, though
+kilograms_in_pounds = 1/0.454
+calories_per_pound_of_chicken_meat = 500 to 700
+// ^ also not sure
+calories_chicken = weight_chicken * kilograms_in_pounds * calories_per_pound_of_chicken_meat
+// ^ <https://teddit.nunosempere.com/r/1500isplenty/comments/m7uck1/how_to_figure_out_calories_of_a_whole_chicken/>
+
+chicken_estimates = {
+  name: "chicken",
+  value_year: value_farmed_chicken_year -> ss,
+  weight: weight_chicken,
+  calories: calories_chicken,
+  lifetime: lifetime_chicken -> ss
+}
+
+// Fish (salmon)
+value_happy_salmon_year = 0.001 to 0.01
+value_tortured_salmon_year = -(0.002 to 0.02)
+value_farmed_salmon_year = normal({ p5: -0.02, p95: 0.01 })
+// ^ purely subjective estimates
+lifetime_salmon = 2 to 3
+// https://thehumaneleague.org.uk/article/how-long-do-salmon-live
+weight_salmon = 3.5 to 5 // kilograms 
+// ^ https://www.wildcoastsalmon.com/salmonlifecycle
+calories_per_kilogram_of_salmon_meat = 1700 to 2100
+calories_salmon = weight_salmon * calories_per_kilogram_of_salmon_meat
+// ^ see <https://www.quora.com/How-many-calories-are-in-1kg-of-salmon>
+
+salmon_estimates = {
+  name: "salmon",
+  value_year: value_farmed_salmon_year -> ss,
+  weight: weight_salmon,
+  calories: calories_salmon,
+  lifetime: lifetime_salmon -> ss
+}
+
+/* 
+## Fish Welfare Initiative 
+
+Sources: 
+
+- https://www.fishwelfareinitiative.org/impact
+- https://forum.effectivealtruism.org/posts/T5fSphiK6sQ6hyptX/opinion-estimating-invertebrate-sentience#Peter_Hurford
+- https://forum.effectivealtruism.org/posts/Qk3hd6PrFManj8K6o/rethink-priorities-welfare-range-estimates
+- https://nunosempere.com/blog/2023/02/19/bayesian-adjustment-to-rethink-priorities-welfare-range-estimates/
+
+What am I estimating: Impact of FWI over the lifetime of the organization, until March 17, 2023, the date their impact page (<https://www.fishwelfareinitiative.org/impact>) was last updated. Here is a snapshot: <https://web.archive.org/web/20230322150326/https://www.fishwelfareinitiative.org/impact>.
+
+Key simplification: assume that all fish are salmon. This is inaccurate, because salmon is a very particular & expensive species of fish. But I think it's ok to start with. Later I could easily add different species.
+*/
+
+fish_potentially_helped = 1M to 2M
+shrimp_potentially_helped = 1M to 2M
+improvement_as_proportion_of_lifetime = (0.05 to 0.5) -> ss
+sign_flip_to_denote_improvement(x) = -x
+
+value_fwi_fish = 
+  (
+    fish_potentially_helped * 
+    improvement_as_proportion_of_lifetime * 
+    (salmon_estimates.value_year / salmon_estimates.lifetime)
+  ) -> sign_flip_to_denote_improvement
+
+value_of_shrimp_in_fish = (0.3 to 1)
+// ^ very uncertain, subjective
+
+
+value_fwi_shrimp = 
+  (
+    shrimp_potentially_helped * 
+    improvement_as_proportion_of_lifetime * 
+    (salmon_estimates.value_year / salmon_estimates.lifetime) *
+    value_of_shrimp_in_fish
+  ) -> sign_flip_to_denote_improvement
+
+value_fwi_so_far = value_fwi_fish + value_fwi_shrimp
+proportion_fwi_in_2022 = 1/4 to 1/2
+value_fwi  = value_fwi_so_far * proportion_fwi_in_2022 
+fwi_item = {
+  name: "Fish Welfare Initiative",
+  year: 2022, 
+  slug: "fish_welfare_initiative",
+  value: value_fwi -> ss 
+}
+
+/*
+## Open Wing Alliance
+
+Sources: 
+- <https://animalcharityevaluators.org/charity-review/the-humane-league/#comprehensive-review>
+- <https://thehumaneleague.org/article/owa-year-in-review-2022>
+
+What am I estimating: Impact of corporate commitments that OWA made happen in 2022.
+
+Notes on the estimation: The number of corporate campaigns is from OWA's own reporting. The number of chickens affected and the improvement per chicken is particularly speculative here.
+
+Key simplification: I am using the welfare numbers for meat chickens, rather than for egg-laying chicken. This will give inaccurate results, but hopefully not by many orders of magnitude.
+*/
+
+num_corporate_commitments = 150 to 200 
+// ^ "nearly 200 commitments", from https://thehumaneleague.org/article/owa-year-in-review-2022
+mean_num_chickens_per_year_per_commitment = 5k to 20k 
+// this: <https://thehumaneleague.org/article/victory-toridoll-releases-a-global-cage-free-commitment?ms=c_blog>
+// mentions 40k, but also seems to be the most impressive one for 2022 (?)
+frequency_promises_are_fulfilled = 0.4 to 0.9
+average_duration_fulfilled_commitments = 1 to 10 // years. Could be more?
+average_reduction_in_suffering_of_commitment_per_chicken = 0.05 to 0.3 // pulled out of thin air/very subjective estimate here.
+
+value_owa_2022 = (
+    num_corporate_commitments * 
+    mean_num_chickens_per_year_per_commitment *
+    frequency_promises_are_fulfilled *
+    average_duration_fulfilled_commitments *
+    average_reduction_in_suffering_of_commitment_per_chicken *
+    value_tortured_chicken_year *
+    chicken_estimates.lifetime
+  ) -> sign_flip_to_denote_improvement
+
+owa_item = {
+  name: "Open Wing Alliance",
+  year: 2022, 
+  slug: "open_wing_alliance",
+  value: value_owa_2022 -> ss
+}
+
+/* Beyond Meat */
+
+beyond_meat_price_per_pound = 5 to 12
+beyond_meat_revenues = 375M to 415M
+beyond_meat_pounds_sold = beyond_meat_revenues / beyond_meat_price_per_pound
+
+pounds_of_meat_per_cow = weight_cow * kilograms_in_pounds *  non_wastage_proportion_cow
+cows_saved_if_all_meat_was_counterfactual = beyond_meat_pounds_sold / pounds_of_meat_per_cow
+
+chance_purchase_was_counterfactual = 0.05 to 0.25 // should eventually be a beta
+// I imagine that most people would have chosen a vegetarian alternative
+// but also that having tasty meat replacements makes it easier to
+// keep being a vegetarian.
+// Very uncertain, though
+
+value_beyond_meat_year =  (
+    cows_saved_if_all_meat_was_counterfactual * 
+    chance_purchase_was_counterfactual * 
+    cow_estimates.lifetime *
+    cow_estimates.value_year
+  ) -> sign_flip_to_denote_improvement
+beyond_meat_item = {
+  name: "Beyond Meat",
+  year: 2022, 
+  slug: "beyond_meat",
+  value: value_beyond_meat_year -> ss
+}
+
+/* ACE Top Charities */ 
+
+/* From here on, estimates of ACE's top charities are constructed with reference to the above. 
+I consider them to be pretty fake (i.e., not-mechanistic), 
+though they could eventually become something more fleshed out.
+Maybe we could  */
+
+value_reference_fish_org = fwi_item.value 
+value_reference_chicken_org = owa_item.value
+value_reference_cow_org = beyond_meat_item.value / (10 to 1k) // beyond meat seems significantly more scaled up than the avg 
+value_reference_top_animal_org = mixture(
+  [value_reference_cow_org, value_reference_chicken_org, value_reference_chicken_org], 
+  [1/3, 1/3, 1/3]
+) -> ss
+
+// Add uncertainty
+values_reference_orgs = [value_reference_fish_org, value_reference_chicken_org, value_reference_cow_org]
+highly_uncertain_org = List.map(values_reference_orgs, {|dist| 
+ lower = inv(dist, 0.05)
+ upper = inv(dist, 0.95)
+ new_dist = normal({p5: lower*100, p95: upper*100}) 
+ // ^ only works because low < 0 and high>0
+ new_dist
+}) -> mixture
+add_uncertainty(dist) = mixture([dist, highly_uncertain_org], [95, 5])
+
+// Faunalytics
+faunalytics_multiplier = truncateRight(0.01 to 20, 200)
+estimate_faunalytics_value = value_reference_top_animal_org * faunalytics_multiplier
+faunalytic_item = {
+  name: "Faunalytics",
+  year: 2022, 
+  slug: "faunalytics",
+  value: estimate_faunalytics_value -> add_uncertainty -> ss
+}
+
+// The Humane League
+
+owa_equivalents_humane_league = 0.5 to 5 // 
+humane_league_value = owa_item.value * owa_equivalents_humane_league
+humane_league_item = {
+  name: "The Humane League",
+  year: 2022, 
+  slug: "the_humane_league",
+  value:  humane_league_value -> add_uncertainty -> ss
+}
+
+// The Good Food Institute
+beyond_meat_equivalents_gfi = 0.01 to 2
+value_gfi = mixture(
+  [ 
+    beyond_meat_equivalents_gfi * beyond_meat_item.value,
+    value_reference_top_animal_org
+  ],
+  [ 2/3, 1/3]
+)
+gfi_item = {
+  name: "Good Food Institute",
+  year: 2022, 
+  slug: "good_food_institute",
+  value: value_gfi -> add_uncertainty -> ss
+}
+
+// Wild Animal Initiative
+impact_wai_in_fwi_units = mixture(
+  [0, 0.1 to 2, 1 to 1k],
+  [3/10, 6/10, 1/10]
+) // i.e., some of the time it produces something really valuable
+value_wai = impact_wai_in_fwi_units * fwi_item.value
+wai_item = {
+  name: "Wild Animal Inititative",
+  year: 2022, 
+  slug: "wild_animal_inititative",
+  value: value_wai -> add_uncertainty -> ss
+}
+
+/* Standout charities */
+// Modelled in way less detail
+// The text after the charity name is the short review from ACE,
+// taken from <https://animalcharityevaluators.org/donation-advice/recommended-charities/>
+
+// Çiftlik Hayvanlarını Koruma Derneği (CHKD)
+value_chkd = mixture(
+  [value_reference_chicken_org * tt(0.1 to 5), value_reference_fish_org * tt(0.1 to 5)],
+  [1/2, 1/2]
+) 
+chkd_item = {
+  name: "Çiftlik Hayvanlarını Koruma Derneği (CHKD)",
+  year: 2022, 
+  slug: "chkd",
+  value: value_chkd -> add_uncertainty -> ss
+}
+
+// Compassion USA
+// Compassion USA is the U.S. branch of the international organization Compassion in World Farming (CIWF), which works to improve farmed animal welfare and end all factory farming practices. Compassion USA engages in corporate outreach to encourage food companies to implement improved animal welfare policies, especially for farmed chickens. They also run a public engagement program to encourage greater consumer awareness of animal welfare issues and offer resources to encourage individuals to reduce their consumption of animal products. Compassion USA has been an ACE Standout Charity since November 2017.  Read Review.
+value_compassion_usa = mixture(
+  [value_reference_chicken_org * tt(0.05 to 10), value_reference_top_animal_org * tt(0.05 to 10)],
+  [1/2, 1/2]
+) 
+compassion_usa_item = {
+  name: "Compassion USA",
+  year: 2022, 
+  slug: "compassion_usa",
+  value: value_compassion_usa -> add_uncertainty -> ss
+}
+
+// Dansk Vegetarisk Forening (DVF) 
+// Dansk Vegetarisk Forening (DVF) is a Denmark-based organization dedicated to increasing the availability of animal-free products, strengthening the animal advocacy movement, and reducing the consumption of animal products. DVF specifically engages in policy work on agricultural reform and the right to access plant-based food, as well as corporate and institutional outreach to food companies to make plant-based options more available. They also conduct research, run a product-labeling scheme, offer an educational program for children and youth, and lead a public outreach program promoting plant-based nutrition. DVF received Movement Grants from ACE in 2020 and 2022. Read Review.
+value_dvf = (value_reference_top_animal_org * tt(0.01 to 3)) // just a reference
+dvf_item = {
+  name: "Dansk Vegetarisk Forening (DVF)",
+  year: 2022, 
+  slug: "dansk_vegetarisk_forening",
+  value: value_dvf -> add_uncertainty -> ss
+}
+
+// Dharma Voices for Animals (DVA) is the only international Buddhist animal rights organization in the world. The majority of their work takes place in Sri Lanka, Thailand, Vietnam, and the U.S., but they also work in Germany, Brazil, Finland, Myanmar, and Australia. DVA’s programs align with the specific contexts and priorities of the countries where they work. Many of their programs focus on diet change; however, they also lobby for animal welfare legislation, provide veterinary care, and work with restaurant owners to encourage them to transition their business to veganism. DVA has been an ACE Standout Charity since November 2021. Read Review.
+value_dva = (value_reference_top_animal_org * tt(0.001 to 100))
+dva_item = {
+  name: "Dharma Voices for Animals",
+  year: 2022,
+  slug: "dharma_voices_for_animals",
+  value: value_dva -> add_uncertainty -> ss
+}
+
+// Federation of Indian Animal Protection Organisations (FIAPO) is an India-based organization that is primarily dedicated to reducing farmed animal suffering. To a lesser extent, they also work to reduce the suffering of companion animals and animals used for entertainment. Their work focuses on improving animal welfare standards, strengthening the animal advocacy movement, increasing the availability of animal-free products, influencing legislation change, and providing direct help and veterinary care to animals. They also run a vegan pledge program to encourage individuals to decrease their consumption of animal products. FIAPO has been an ACE Standout Charities since December 2019. Read Review.
+value_fiapo = value_reference_top_animal_org * tt(0.01 to 2)
+fiapo_item = {
+  name: "Federation of Indian Animal Protection Organisations",
+  year: 2022, 
+  slug: "federation_of_indian_animal_protection_organisations",
+  value: value_fiapo -> add_uncertainty -> ss
+}
+
+//Fish Welfare Initiative (FWI) is one of few organizations to work exclusively on improving the welfare standards of farmed fishes. The majority of their work takes place in India, but they also work in China and the Philippines. They run the Alliance for Responsible Aquaculture (ARA), which sets standards . FWI also engages in corporate outreach to improve fish welfare across the supply chain and conducts field research that informs standard setting for welfare improvements.  Read Review
+// Already modelled
+
+//Material Innovation Initiative (MII) works to reduce farmed animal suffering by increasing the availability of animal-free products and strengthening the animal advocacy movement. They produce research on animal-free alternatives to existing materials used in the fashion, automotive, and homegoods industries, and they work with investors, corporations, and entrepreneurs to support the development of new products and production processes. They also host events, such as conferences, to create opportunities for the development of new networks in the next-gen materials industry. MII has been an ACE Standout Charity since November 2021. Read Review.
+value_mii = gfi_item.value * tt(0.005 to 0.5)
+mii_item = {
+  name: "Material Innovation Initiative",
+  year: 2022, 
+  slug: "material_innovation_initiative",
+  value: value_mii -> add_uncertainty -> ss
+}
+
+// Mercy For Animals (MFA) operates in the U.S., Brazil, Canada, Hong Kong, India, and Mexico. MFA’s work focuses on strengthening the animal advocacy movement and improving animal welfare standards, as well as decreasing the consumption of animal products and increasing the availability of animal-free products. They engage in a variety of farmed animal advocacy programs, often involving the distribution of footage from their undercover investigations of factory farms, which they primarily promote via media outreach and online campaigns. MFA also engage in corporate and institutional outreach, research, lobbying, and policy work. They recruit and train volunteers and support farmers in transitioning away from animal agriculture. MFA was selected as an ACE Top Charity several times between 2014 and 2017, and they have been a Standout Charity since November 2021. Read Review.
+value_mfa = value_reference_top_animal_org * tt(0.05 to 5)
+mfa_item = {
+  name: "Mercy For Animals",
+  year: 2022, 
+  slug: "mercy_for_animals",
+  value: value_mfa -> add_uncertainty -> ss
+}
+
+// New Harvest funds research in cellular agriculture, i.e., the development of animal products using cells instead of animals. Through grant programs, they fund graduate and postdoctoral research projects in the field of cellular agriculture, as well as undergraduate and master-level projects for researchers-in-training. They also carry out public engagement and community-building activities via their podcast, blog, research publications, and research summaries. New Harvest was selected as an ACE Standout Charity in both December 2015 and November 2021. Read Review.
+value_new_harvest = gfi_item.value * tt(0.01 to 0.5)
+new_harvest_item = {
+  name: "New Harvest",
+  year: 2022, 
+  slug: "new_harvest",
+  value: value_new_harvest -> add_uncertainty -> ss
+}
+
+// Sinergia Animal operates in Indonesia, Thailand, Argentina, Brazil, Colombia, Uruguay, Chile, Ecuador, and Peru. They work to improve farmed animal welfare standards, increase the availability of animal-free products, decrease the consumption of animal products, and strengthen the animal advocacy movement. Sinergia Animal engages in corporate outreach to secure animal welfare commitments from major retailers. They also engage in investor and media outreach, policy work, investigations, individual and producer outreach, institutional outreach, and research. Sinergia Animal has been an ACE Standout Charity since November 2018. Read Review.
+value_sinergia_animal = value_reference_top_animal_org * tt(0.05 to 20)
+sinergia_animal_item = {
+  name: "Sinergia Animal",
+  year: 2022, 
+  slug: "sinergia_animal",
+  value: value_sinergia_animal -> add_uncertainty -> ss
+}
+
+//
+//xiaobuvegan is a china-based organization working to reduce farmed animal suffering. their work aims to increase the availability of animal-free products, strengthen the animal advocacy movement, and decrease the consumption of animal products. xiaobuvegan engages in institutional outreach, runs an app that provides resources about vegan options in china, and supports dietary change via their vegan challenge program. xiaobuvegan has been an ace standout charity since november 2021. read review.
+value_xiaobuVEGAN = value_reference_top_animal_org * truncateRight(mixture([0.1 to 10, 1 to 100], [7/10, 3/10]), 1000)
+xiaobuVEGAN_item = {
+  name: "xiaobuVEGAN",
+  year: 2022, 
+  slug: "xiaobuvegan",
+  value: value_xiaobuVEGAN -> add_uncertainty -> ss
+}
+
+
+// Construct relative values object
+
+// animal estimates
+toAllAnimalEstimates = {|animal|
+  value_year = animal.value_year
+  value_in_lifetime = animal.lifetime * animal.value_year
+  value_per_calorie = animal.lifetime * animal.value_year / 
+    animal.calories
+
+  result = [
+    ({
+      id: animal.name + "_value_per_year_of_life", 
+      name: animal.name + " value per year of life", 
+      value: value_year
+    }),
+    ({
+      id: animal.name + "_value_per_lifetime", 
+      name: animal.name + " value per lifetime", 
+      value: value_in_lifetime
+    }),
+    ({
+      id: animal.name + "_value_per_calorie", 
+      name: animal.name + " value per calorie", 
+      value: value_per_calorie
+    }),    
+  ]
+  result
+}
+
+animal_estimates = [cow_estimates, pig_estimates, chicken_estimates, salmon_estimates]
+animal_estimates_disaggregated = List.map(animal_estimates, toAllAnimalEstimates) -> List.flatten
+
+// Organizations
+organization_items = [
+  fwi_item, owa_item, beyond_meat_item, // reference, mechanisitcally estimated orgs
+  faunalytic_item, humane_league_item, gfi_item, wai_item, // top orgs
+  chkd_item, compassion_usa_item, dvf_item, dva_item, fiapo_item, mii_item, mfa_item, new_harvest_item, sinergia_animal_item, xiaobuVEGAN_item, // standout orgs
+]
+org_items_with_id = List.map(organization_items, {|i|
+  id_obj = ({id: i.slug + "_" + i.year + "_value_estimate", name: i.name + " (" + i.year + ")"})
+  result = Dict.merge(i, id_obj)
+  result
+})
+
+// All items
+items = [animal_estimates_disaggregated, org_items_with_id, [one_human_qaly]] -> List.flatten -> List.map({|item| [item.id, item]})  -> Dict.fromList
+
+// Result
+// fn(a,b) = [normal(0,1), normal(0,1 )]
+fn(a, b) = [items[a].value, items[b].value]
 `,
   };
 }
