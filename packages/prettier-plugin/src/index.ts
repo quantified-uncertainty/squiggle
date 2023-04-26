@@ -32,9 +32,17 @@ export const parsers: Record<string, Parser<Node>> = {
     },
     astFormat: "squiggle-ast",
     locStart: (node: Node) => {
+      if (!node.location) {
+        // can happen when formatWithCursor traverses the tree to find the cursor position
+        return -1;
+      }
       return node.location.start.offset;
     },
     locEnd: (node: Node) => {
+      if (!node.location) {
+        // can happen when formatWithCursor traverses the tree to find the cursor position
+        return -1;
+      }
       return node.location.end.offset;
     },
   },
@@ -135,7 +143,8 @@ export const printers: Record<string, Printer<Node>> = {
             " = ",
             typedPath(node).call(print, "value"),
             hardline,
-            util.isNextLineEmptyAfterIndex(
+            // isNextLineEmpty is missing from prettier types in v3 alpha
+            (util as any).isNextLineEmpty(
               options.originalText,
               node.location.end.offset
             )
@@ -151,7 +160,8 @@ export const printers: Record<string, Printer<Node>> = {
             " = ",
             typedPath(node).call(print, "value", "body"),
             hardline,
-            util.isNextLineEmptyAfterIndex(
+            // isNextLineEmpty is missing from prettier types in v3 alpha
+            (util as any).isNextLineEmpty(
               options.originalText,
               node.location.end.offset
             )
