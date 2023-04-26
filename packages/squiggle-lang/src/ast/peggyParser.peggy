@@ -254,7 +254,7 @@ identifier 'identifier'
 unitIdentifier 'identifier'
   = ([_a-zA-Z]+[_a-z0-9]i*) { return h.nodeIdentifier(text(), location()); }
 
-dollarIdentifier '$identifier'
+dollarIdentifier 'identifier'
   = ([\$_a-z]+[\$_a-z0-9]i*) { return h.nodeIdentifier(text(), location()); }
 
 moduleIdentifier 'identifier'
@@ -275,11 +275,11 @@ number = number:(float / integer) unit:unitIdentifier?
     }
   }
 
-integer 'integer'
+integer 'number'
   = d+ !"\." ![e]i
   { return h.nodeInteger(parseInt(text()), location()); }
 
-float 'float'
+float 'number'
   = $(((d+ "\." d*) / ("\." d+)) floatExponent? / d+ floatExponent)
   { return h.nodeFloat(parseFloat(text()), location()); }
 
@@ -332,19 +332,19 @@ recordConstructor 'record'
 _ 'whitespace'
   = whiteSpaceCharactersOrComment*
 
-_nl 'whitespace or newline'
+_nl 'whitespace'
   = (whiteSpaceCharactersOrComment / commentOrNewLine)*
 
 __ 'whitespace'
   = whiteSpaceCharactersOrComment+
 
-__nl 'whitespace or newline'
+__nl 'whitespace'
   = (whiteSpaceCharactersOrComment / commentOrNewLine )+
 
-statementSeparator 'statement separator'
+statementSeparator ';'
   = _ (';'/ commentOrNewLine)+ _nl
 
-commaSeparator = _ ',' _nl
+commaSeparator ',' = _ ',' _nl
 
 commentOrNewLine = finalComment? newLine
   newLine "newline"
