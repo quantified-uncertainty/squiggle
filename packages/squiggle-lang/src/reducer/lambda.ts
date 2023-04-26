@@ -111,7 +111,10 @@ export class SquiggleLambda extends Lambda {
 
 // stdlib functions (everything in FunctionRegistry) are instances of this class. Body is generated in library.ts makeStdlib() function.
 export class BuiltinLambda extends Lambda {
-  constructor(public name: string, body: LambdaBody) {
+  constructor(
+    public name: string,
+    body: LambdaBody
+  ) {
     super(body);
   }
 

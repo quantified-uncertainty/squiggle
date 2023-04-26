@@ -3,7 +3,10 @@ import { SqRecordValue, SqValue, wrapValue } from "./SqValue.js";
 import { SqValueLocation } from "./SqValueLocation.js";
 
 export class SqRecord {
-  constructor(private _value: ValueMap, public location?: SqValueLocation) {}
+  constructor(
+    private _value: ValueMap,
+    public location?: SqValueLocation
+  ) {}
 
   entries() {
     return [...this._value.entries()].map(
