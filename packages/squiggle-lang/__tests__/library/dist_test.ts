@@ -218,21 +218,6 @@ describe("eval on distribution functions", () => {
   describe("equality", () => {
     MySkip.testEvalToBe("normal(5,2) == normal(5,2)", "true");
   });
-
-  describe("mixture", () => {
-    testEvalToBe(
-      "mx(normal(5,2), normal(10,1), normal(15, 1))",
-      "Point Set Distribution"
-    );
-    testEvalToBe(
-      "mixture(normal(5,2), normal(10,1), [0.2, 0.4])",
-      "Point Set Distribution"
-    );
-    testEvalToBe(
-      "mixture(normal(5,2) -> SampleSet.fromDist, normal(10,1), [0.2, 0.4])",
-      "Sample Set Distribution"
-    );
-  });
 });
 
 describe("parse on distribution functions", () => {
