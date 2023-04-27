@@ -173,7 +173,7 @@ function getCatalog(): Catalog {
       },
       sentient_welfare_interventions: {
         name: "sentient_welfare_interventions",
-        color: "#3B42aC",
+        color: "#1fc600",
         recommendedUnit: "one_human_qaly",
       },
     },
