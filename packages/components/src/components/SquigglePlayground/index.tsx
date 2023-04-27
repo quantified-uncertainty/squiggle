@@ -45,6 +45,8 @@ import { ShareButton } from "./ShareButton.js";
 import { JsImports } from "../../lib/jsImports.js";
 import { ImportSettingsForm } from "./ImportSettingsForm.js";
 import SplitPanel from "./SplitPanel.js";
+import { ResizableBox } from "react-resizable";
+import "react-resizable/css/styles.css";
 
 type PlaygroundProps = SquiggleArgs &
   Omit<SquiggleViewerProps, "result"> & {
@@ -249,7 +251,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
         onChange={setCode}
         onSubmit={run}
         showGutter={true}
-        // height={height}
+        height={height}
         project={resultAndBindings.project}
       />
     </div>
@@ -258,8 +260,8 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   );
 
   const tabs = (
-    <StyledTab.Panels>
-      <StyledTab.Panel>{firstTab}</StyledTab.Panel>
+    <StyledTab.Panels className="h-full">
+      <StyledTab.Panel className="h-full">{firstTab}</StyledTab.Panel>
       <StyledTab.Panel>
         <EnvironmentSettingsForm register={register} />
       </StyledTab.Panel>
@@ -283,15 +285,15 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const leftPanelRef = useRef<HTMLDivElement | null>(null);
 
   const withEditor = (
-    <div className="mt-2">
-      <SplitPanel>
+    <div className="mt-2 flex-row flex">
+      <ResizableBox width={400} axis={"x"} resizeHandles={["e"]}>
         <div style={{ minHeight: props.chartHeight }} ref={leftPanelRef}>
           {tabs}
         </div>
-        <div className="p-2 pl-4 " data-testid="playground-result">
-          {squiggleChart}
-        </div>
-      </SplitPanel>
+      </ResizableBox>
+      <div className="p-2 pl-4 flex-grow" data-testid="playground-result">
+        {squiggleChart}
+      </div>
     </div>
   );
 

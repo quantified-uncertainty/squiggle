@@ -20,6 +20,7 @@
     "lodash-es": "^4.17.21",
     "react": "^18.1.0",
     "react-hook-form": "^7.43.9",
+    "react-resizable": "^3.0.5",
     "react-use": "^17.4.0",
     "vscode-uri": "^3.0.7",
     "yup": "^1.0.2"
