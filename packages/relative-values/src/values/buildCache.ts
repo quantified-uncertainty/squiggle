@@ -10,6 +10,7 @@ import { Catalog, InterfaceWithModels } from "@/types";
 import { allInterfaces } from "@models/src/index";
 import { ModelEvaluator } from "./ModelEvaluator";
 import { RelativeValueResult, CatalogCache, ModelCache } from "./types";
+import { performance } from "perf_hooks";
 
 const cacheDir = path.join(path.dirname(__filename), "../../models/cache");
 
@@ -54,6 +55,7 @@ async function modelToJson({
 }
 
 async function catalogToJson(catalog: InterfaceWithModels) {
+  const start = performance.now();
   // Make sure the directory exists
   await fs.promises.mkdir(path.join(cacheDir, "interfaces"), {
     recursive: true,
@@ -78,7 +80,15 @@ async function catalogToJson(catalog: InterfaceWithModels) {
     path.join(cacheDir, `interfaces/${catalog.catalog.id}.json`),
     JSON.stringify(json, null, 2)
   );
-  console.log(`Loaded ${catalog.catalog.title} to JSON`);
+
+  const end = performance.now();
+
+  console.log(
+    `Loaded ${catalog.catalog.title} to JSON. It took ${(
+      (end - start) /
+      1000
+    ).toFixed(1)}s`
+  );
 }
 
 async function interfacesToJson() {

@@ -1,12 +1,80 @@
+import { SqLinearScale, SqLogScale, SqPowerScale } from "@quri/squiggle-lang";
 import React from "react";
-import * as yup from "yup";
 import { UseFormRegister } from "react-hook-form";
-import { InputItem } from "./ui/InputItem.js";
+import * as yup from "yup";
 import { Checkbox } from "./ui/Checkbox.js";
 import { HeadedSection } from "./ui/HeadedSection.js";
+import { InputItem } from "./ui/InputItem.js";
+import { Radio } from "./ui/Radio.js";
 import { Text } from "./ui/Text.js";
-import { distributionSettingsSchema } from "./MultiDistributionChart/index.js";
-import { functionSettingsSchema } from "./FunctionChart/index.js";
+import { functionChartDefaults } from "./FunctionChart/utils.js";
+import { defaultTickFormatSpecifier } from "../lib/draw/index.js";
+import { SqSymlogScale } from "@quri/squiggle-lang";
+
+export const functionSettingsSchema = yup.object({}).shape({
+  start: yup
+    .number()
+    .required()
+    .positive()
+    .integer()
+    .default(functionChartDefaults.min)
+    .min(0),
+  stop: yup
+    .number()
+    .required()
+    .positive()
+    .integer()
+    .default(functionChartDefaults.max)
+    .min(0),
+  count: yup
+    .number()
+    .required()
+    .positive()
+    .integer()
+    .default(functionChartDefaults.points)
+    .min(2),
+});
+
+const scaleTypes = ["linear", "log", "symlog", "exp"] as const;
+type ScaleType = (typeof scaleTypes)[number];
+
+function scaleTypeToSqScale(
+  scaleType: ScaleType,
+  args: { min?: number; max?: number; tickFormat?: string } = {}
+) {
+  switch (scaleType) {
+    case "linear":
+      return SqLinearScale.create(args);
+    case "log":
+      return SqLogScale.create(args);
+    case "symlog":
+      return SqSymlogScale.create(args);
+    case "exp":
+      return SqPowerScale.create({ exponent: 0.1, ...args });
+    default:
+      // should never happen, just a precaution
+      throw new Error("Internal error");
+  }
+}
+
+export const distributionSettingsSchema = yup.object({}).shape({
+  /** Set the x scale to be logarithmic */
+  disableLogX: yup.boolean(),
+  xScale: yup.mixed<ScaleType>().oneOf(scaleTypes).default("linear"),
+  yScale: yup.mixed<ScaleType>().oneOf(scaleTypes).default("linear"),
+  /** Set the y scale to be exponential */
+  expY: yup.boolean().required().default(false),
+  minX: yup.number(),
+  maxX: yup.number(),
+  title: yup.string(),
+  xAxisType: yup
+    .mixed<"number" | "dateTime">()
+    .oneOf(["number", "dateTime"])
+    .default("number"),
+  /** Documented here: https://github.com/d3/d3-format */
+  tickFormat: yup.string().required().default(defaultTickFormatSpecifier),
+  showSummary: yup.boolean().required().default(true),
+});
 
 export const viewSettingsSchema = yup.object({}).shape({
   distributionChartSettings: distributionSettingsSchema,
@@ -23,6 +91,35 @@ type DeepPartial<T> = T extends object
   : T;
 
 export type PartialViewSettings = DeepPartial<ViewSettings>;
+
+// partial params for SqDistributionsPlot.create; TODO - infer explicit type?
+export function generateDistributionPlotSettings(
+  settings: yup.InferType<typeof distributionSettingsSchema>
+) {
+  const xScale = scaleTypeToSqScale(settings.xScale, {
+    min: settings.minX,
+    max: settings.maxX,
+    tickFormat: settings.tickFormat,
+  });
+  const yScale = scaleTypeToSqScale(settings.yScale, {
+    tickFormat: settings.tickFormat,
+  });
+  return {
+    xScale,
+    yScale,
+    showSummary: settings.showSummary,
+    title: settings.title,
+  };
+}
+
+// partial params for SqFnPlot.create; TODO - infer explicit type?
+export function generateFunctionPlotSettings(settings: ViewSettings) {
+  const xScale = SqLinearScale.create({
+    min: settings.functionChartSettings.start,
+    max: settings.functionChartSettings.stop,
+  });
+  return { xScale, points: settings.functionChartSettings.count };
+}
 
 export const ViewSettingsForm: React.FC<{
   withFunctionSettings?: boolean;
@@ -61,25 +158,61 @@ export const DistributionViewSettingsForm: React.FC<{
         <div className="space-y-2">
           <Checkbox
             register={register}
-            name="distributionChartSettings.logX"
-            label="Show x scale logarithmically"
-            fixed={fixed?.distributionChartSettings?.logX}
-            tooltip={
-              fixed?.distributionChartSettings?.logX !== undefined
-                ? "Your distribution has mass lower than or equal to 0. Log only works on strictly positive values."
-                : undefined
-            }
-          />
-          <Checkbox
-            register={register}
-            name="distributionChartSettings.expY"
-            label="Show y scale exponentially"
-          />
-          <Checkbox
-            register={register}
             name="distributionChartSettings.showSummary"
             label="Show summary statistics"
           />
+          <div className="space-y-2">
+            <Radio
+              register={register}
+              name="distributionChartSettings.xScale"
+              label="X Scale"
+              initialId={fixed?.distributionChartSettings?.xScale ?? "linear"}
+              options={[
+                {
+                  id: "linear",
+                  name: "Linear",
+                },
+                {
+                  id: "log",
+                  name: "Logarithmic",
+                  ...(fixed?.distributionChartSettings?.disableLogX
+                    ? {
+                        disabled: true,
+                        tooltip:
+                          "Your distribution has mass lower than or equal to 0. Log only works on strictly positive values.",
+                      }
+                    : null),
+                },
+                {
+                  id: "symlog",
+                  name: "Symlog",
+                  tooltip:
+                    "Almost logarithmic scale that supports negative values.",
+                },
+                {
+                  id: "exp",
+                  name: "Exponential",
+                },
+              ]}
+            />
+            <Radio
+              register={register}
+              name="distributionChartSettings.yScale"
+              label="Y Scale"
+              initialId={fixed?.distributionChartSettings?.yScale ?? "linear"}
+              options={[
+                {
+                  id: "linear",
+                  name: "Linear",
+                },
+                // log Y is hidden because it almost always causes an empty chart
+                {
+                  id: "exp",
+                  name: "Exponential",
+                },
+              ]}
+            />
+          </div>
           <InputItem
             name="distributionChartSettings.minX"
             type="number"

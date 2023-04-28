@@ -2,8 +2,10 @@ import type { Meta, StoryObj } from "@storybook/react";
 
 import { SquiggleEditor } from "../components/SquiggleEditor.js";
 
+/**
+ * Squiggle Editor is a Squiggle chart with a text editor included for changing the distribution.
+ */
 const meta = {
-  title: "Squiggle/SquiggleEditor",
   component: SquiggleEditor,
 } satisfies Meta<typeof SquiggleEditor>;
 export default meta;
@@ -17,6 +19,9 @@ export const Normal: Story = {
   },
 };
 
+/**
+ * It's possible to create a controlled version of the editor component.
+ */
 export const Controlled: Story = {
   name: "Controlled",
   args: {
@@ -24,6 +29,9 @@ export const Controlled: Story = {
   },
 };
 
+/**
+ * You can name variables like so:
+ */
 export const Variables: Story = {
   name: "Variables",
   args: {

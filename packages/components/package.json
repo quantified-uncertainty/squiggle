@@ -77,7 +77,8 @@
     "react-dom": "^16.8.0 || ^17 || ^18"
   },
   "scripts": {
-    "start": "storybook dev -p 6006",
+    "start": "yarn dev",
+    "dev": "storybook dev -p 6006",
     "build:typescript": "rm -rf dist/esm && tsc",
     "build:css": "postcss ./src/styles/main.css -o ./dist/main.css",
     "build:lezer": "cd ./src/languageSupport; mkdir -p generated; lezer-generator ./squiggle.grammar --output generated/squiggle.ts",

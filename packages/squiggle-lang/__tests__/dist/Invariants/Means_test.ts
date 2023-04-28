@@ -21,9 +21,9 @@ import {
   unpackResult,
 } from "../../helpers/distHelpers.js";
 import {
-  BinaryOperations,
+  binaryOperations,
   BinaryOperation,
-} from "../../../src/dist/DistOperations/index.js";
+} from "../../../src/dist/distOperations/index.js";
 import { Env } from "../../../src/dist/env.js";
 import { expectErrorToBeBounded } from "../../helpers/helpers.js";
 
@@ -72,7 +72,7 @@ const {
   algebraicSubtract,
   // algebraicLogarithm,
   // algebraicPower,
-} = BinaryOperations;
+} = binaryOperations;
 
 describe("Means are invariant", () => {
   describe.each([

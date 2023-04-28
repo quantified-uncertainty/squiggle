@@ -3,7 +3,7 @@ import { distErrorToString } from "../../../src/dist/DistError.js";
 import {
   logScoreDistAnswer,
   mixture,
-} from "../../../src/dist/DistOperations/index.js";
+} from "../../../src/dist/distOperations/index.js";
 import {
   env,
   mkNormal,

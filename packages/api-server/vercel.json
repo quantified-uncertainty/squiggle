@@ -1,0 +1,5 @@
+{
+  "buildCommand": "npx turbo build && yarn db:generate",
+  "framework": "nextjs",
+  "ignoreCommand": "npx turbo-ignore"
+}

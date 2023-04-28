@@ -2,16 +2,30 @@
 
 import jstat from "jstat";
 
+import {
+  scaleLog,
+  scaleLogWithThreshold,
+} from "../dist/distOperations/index.js";
+import {
+  scaleMultiply,
+  scalePower,
+} from "../dist/distOperations/scaleOperations.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frArray, frLambda, frNumber } from "../library/registry/frTypes.js";
-import { FnFactory } from "../library/registry/helpers.js";
+import {
+  frArray,
+  frDist,
+  frLambda,
+  frNumber,
+} from "../library/registry/frTypes.js";
+import { FnFactory, unpackDistResult } from "../library/registry/helpers.js";
 import { ReducerContext } from "../reducer/Context.js";
 import { ErrorMessage, REOther } from "../reducer/ErrorMessage.js";
 import { Lambda } from "../reducer/lambda.js";
 import * as E_A from "../utility/E_A.js";
 import { Ok, result } from "../utility/result.js";
 import { ReducerFn, Value, vArray, vNumber } from "../value/index.js";
+import { toValueResult } from "./genericDist.js";
 
 const { factorial } = jstat;
 
@@ -340,6 +354,48 @@ const diminishingReturnsLibrary = [
   }),
 ];
 
+const mapYLibrary: FRFunction[] = [
+  maker.d2d({
+    name: "mapYLog",
+    fn: (dist, env) => unpackDistResult(scaleLog(dist, Math.E, { env })),
+  }),
+  maker.d2d({
+    name: "mapYLog10",
+    fn: (dist, env) => unpackDistResult(scaleLog(dist, 10, { env })),
+  }),
+  maker.dn2d({
+    name: "mapYLog",
+    fn: (dist, x, env) => unpackDistResult(scaleLog(dist, x, { env })),
+  }),
+  maker.fromDefinition(
+    makeDefinition(
+      "mapYLogWithThreshold",
+      [frDist, frNumber, frNumber],
+      ([dist, base, eps], { environment }) =>
+        toValueResult(
+          scaleLogWithThreshold(dist, {
+            env: environment,
+            eps,
+            base,
+          })
+        )
+    )
+  ),
+  maker.dn2d({
+    name: "mapYMultiply",
+    fn: (dist, f, env) => unpackDistResult(scaleMultiply(dist, f, { env })),
+  }),
+  maker.dn2d({
+    name: "mapYPow",
+    fn: (dist, f, env) => unpackDistResult(scalePower(dist, f, { env })),
+  }),
+  maker.d2d({
+    name: "mapYExp",
+    // TODO - shouldn't it be other way around, e^value?
+    fn: (dist, env) => unpackDistResult(scalePower(dist, Math.E, { env })),
+  }),
+];
+
 export const library = [
   // Combinatorics
   ...combinatoricsLibrary,
@@ -349,4 +405,7 @@ export const library = [
 
   // Diminishing marginal return functions
   ...diminishingReturnsLibrary,
+
+  // previously called `scaleLog`/`scaleExp`/...
+  ...mapYLibrary,
 ];

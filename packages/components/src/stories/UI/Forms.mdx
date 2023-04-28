@@ -1,0 +1,9 @@
+import { Meta } from "@storybook/blocks";
+
+<Meta title="Squiggle/UI/Forms" />
+
+Forms are tightly coupled with [React Hook Form](https://react-hook-form.com/).
+
+This causes some difficulties with implementing them in Storybook, because we pass [register](https://react-hook-form.com/api/useform/register/) method explicitly, for better type safety, and it's impossible to pass `register` in Storybook's args.
+
+"Show code" button in Storybook won't give you the right JSX for these stories. Check out the source code for the stories to see how to use this components.

@@ -1,4 +1,4 @@
-dist
+/dist
 .nyc_output/
 coverage/
 src/ast/peggyParser.js

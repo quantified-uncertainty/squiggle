@@ -19,7 +19,7 @@ import {
   exponentialDist, // rate=2
 } from "../../fixtures/distFixtures.js";
 
-import { BinaryOperations } from "../../../src/dist/DistOperations/index.js";
+import { binaryOperations } from "../../../src/dist/distOperations/index.js";
 import { env, unpackResult } from "../../helpers/distHelpers.js";
 const {
   algebraicAdd,
@@ -28,7 +28,7 @@ const {
   algebraicSubtract,
   algebraicLogarithm,
   algebraicPower,
-} = BinaryOperations;
+} = binaryOperations;
 
 describe("(Algebraic) addition of distributions", () => {
   describe("mean", () => {

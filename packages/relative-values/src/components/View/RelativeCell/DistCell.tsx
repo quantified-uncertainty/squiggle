@@ -53,7 +53,14 @@ function numberToColor2(rating: number, percentiles: number[]) {
 export const DistCell: FC<{
   item: RelativeValue;
   uncertaintyPercentiles: number[];
-}> = memo(function DistCell({ item, uncertaintyPercentiles }) {
+  showRange?: boolean;
+  showMedian?: boolean;
+}> = memo(function DistCell({
+  item,
+  uncertaintyPercentiles,
+  showRange,
+  showMedian,
+}) {
   return (
     <CellBox>
       {hasInvalid(item) ? (
@@ -71,24 +78,36 @@ export const DistCell: FC<{
         >
           <div className="text-center z-0 py-1">
             <div>
-              <span className="text-slate-700 text-lg font-semibold">
-                <NumberShower number={item.median} precision={1} />
-              </span>
+              {showMedian && (
+                <span className="text-slate-700 text-lg font-semibold">
+                  <NumberShower number={item.median} precision={1} />
+                </span>
+              )}
               <span>
-                {" "}
-                <span
-                  style={{ fontSize: "0.7em" }}
-                  className="text-gray-400 font-light"
-                >
-                  ±
-                </span>{" "}
+                {showMedian && (
+                  <span>
+                    {" "}
+                    <span
+                      style={{ fontSize: "0.7em" }}
+                      className="text-gray-400 font-light"
+                    >
+                      ±
+                    </span>{" "}
+                  </span>
+                )}
                 <span
                   className={numberToColor(
                     item.uncertainty,
                     uncertaintyPercentiles
                   )}
                 >
-                  <NumberShower number={item.uncertainty} precision={2} />
+                  <NumberShower
+                    number={
+                      item.uncertainty /
+                      2 /* The uncertainty is the full range, we need to half for the +- to make sense. */
+                    }
+                    precision={2}
+                  />
                 </span>
                 <span
                   style={{ fontSize: "0.6em" }}
@@ -102,23 +121,27 @@ export const DistCell: FC<{
               </span>
             </div>
 
-            <div
-              style={{ fontSize: "0.7em" }}
-              className="text-gray-400 font-light"
-            >
-              {item.min < 0 && item.max < 0 ? (
-                <span>
-                  -(
-                  <NumberShower number={-1 * item.max} precision={1} /> to{" "}
-                  <NumberShower number={-1 * item.min} precision={1} />)
-                </span>
-              ) : (
-                <span>
-                  <NumberShower number={item.min} precision={1} /> to{" "}
-                  <NumberShower number={item.max} precision={1} />
-                </span>
-              )}
-            </div>
+            {showRange && (
+              <div
+                style={{ fontSize: "0.7em" }}
+                className="text-gray-400 font-light"
+              >
+                {item.min < 0 && item.max < 0 ? (
+                  <span>
+                    -(
+                    <NumberShower
+                      number={-1 * item.max}
+                      precision={1}
+                    /> to <NumberShower number={-1 * item.min} precision={1} />)
+                  </span>
+                ) : (
+                  <span>
+                    <NumberShower number={item.min} precision={1} /> to{" "}
+                    <NumberShower number={item.max} precision={1} />
+                  </span>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="h-2 absolute bottom-0 inset-x-0 -z-10"></div>

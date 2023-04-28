@@ -2,11 +2,12 @@ import { result, sq, SqLambda, SqProject } from "@quri/squiggle-lang";
 
 import { getModelCode, Model } from "@/model/utils";
 import { ModelCache, RelativeValue, RelativeValueResult } from "./types";
+import { cartesianProduct } from "@/lib/utils";
 
 const wrapper = sq`
 {|x, y|
   findUncertainty(dist) = {
-    absDist = SampleSet.map(dist, abs)
+    absDist = dist -> SampleSet.fromDist -> SampleSet.map(abs)
     p5 = inv(absDist, 0.05)
     p95 = inv(absDist, 0.95)
     log10(p95 / p5)
@@ -25,10 +26,6 @@ const wrapper = sq`
 }
 `;
 
-const cartesianProduct = <A, B>(a: A[], b: B[]): [A, B][] => {
-  return a.flatMap((aItem) => b.map<[A, B]>((bItem) => [aItem, bItem]));
-};
-
 export const extractOkValues = <A, B>(items: result<A, B>[]): A[] => {
   return items
     .filter((item): item is { ok: true; value: A } => item.ok)
@@ -40,6 +37,19 @@ const getPercentile = (sortedList: number[], percentage: number): number => {
   const result = sortedList[Math.floor(index)];
   return result;
 };
+
+export function getParamPercentiles(
+  values: RelativeValue[],
+  fn: (value: RelativeValue) => number,
+  percentiles: number[],
+  filter0 = false
+): number[] {
+  let list = values.map(fn).sort((a, b) => a - b);
+  if (filter0) {
+    list = list.filter((v) => v !== 0);
+  }
+  return percentiles.map((p) => getPercentile(list, p));
+}
 
 function buildRelativeValue({
   fn,
@@ -95,7 +105,7 @@ function buildRelativeValue({
 
 export class ModelEvaluator {
   private constructor(
-    private model: Model, // unused for now
+    public model: Model,
     private fn: SqLambda,
     private cache?: ModelCache
   ) {}
@@ -165,12 +175,11 @@ export class ModelEvaluator {
     percentiles: number[],
     filter0 = false
   ): number[] {
-    let list = extractOkValues(this.compareAll(ids))
-      .map(fn)
-      .sort((a, b) => a - b);
-    if (filter0) {
-      list = list.filter((v) => v !== 0);
-    }
-    return percentiles.map((p) => getPercentile(list, p));
+    return getParamPercentiles(
+      extractOkValues(this.compareAll(ids)),
+      fn,
+      percentiles,
+      filter0
+    );
   }
 }
