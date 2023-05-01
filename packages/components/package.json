@@ -4,7 +4,7 @@
   "license": "MIT",
   "dependencies": {
     "@codemirror/lang-json": "^6.0.1",
-    "@codemirror/theme-one-dark": "^6.1.0",
+    "@codemirror/theme-one-dark": "^6.1.2",
     "@floating-ui/react": "^0.22.2",
     "@headlessui/react": "^1.7.13",
     "@heroicons/react": "^1.0.6",
