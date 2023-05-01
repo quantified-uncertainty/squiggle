@@ -15,7 +15,7 @@
   "dependencies": {
     "chalk": "^5.2.0",
     "chokidar": "^3.5.3",
-    "commander": "^10.0.0",
+    "commander": "^10.0.1",
     "fs": "^0.0.1-security",
     "glob": "^9.3.2",
     "indent-string": "^5.0.0"
