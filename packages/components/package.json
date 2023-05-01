@@ -30,7 +30,7 @@
     "@storybook/addon-actions": "^7.0.2",
     "@storybook/addon-docs": "^7.0.2",
     "@storybook/addon-essentials": "^7.0.2",
-    "@storybook/addon-links": "^7.0.2",
+    "@storybook/addon-links": "^7.0.7",
     "@storybook/addon-styling": "^0.3.2",
     "@storybook/blocks": "^7.0.2",
     "@storybook/builder-vite": "^7.0.2",
