@@ -6,7 +6,7 @@ import indentString from "indent-string";
 import chokidar from "chokidar";
 import chalk from "chalk";
 import { Command } from "commander";
-import glob from "glob";
+import { glob } from "glob";
 
 const processFile = (fileName, seen = []) => {
   const normalizedFileName = path.resolve(fileName);
