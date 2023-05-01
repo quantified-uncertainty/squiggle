@@ -17938,10 +17938,10 @@ turbo-darwin-arm64@1.8.8:
   resolved "https://registry.npmjs.org/turbo-darwin-arm64/-/turbo-darwin-arm64-1.8.8.tgz"
   integrity sha512-ruGRI9nHxojIGLQv1TPgN7ud4HO4V8mFBwSgO6oDoZTNuk5ybWybItGR+yu6fni5vJoyMHXOYA2srnxvOc7hjQ==
 
-turbo-ignore@^1.8.8:
-  version "1.8.8"
-  resolved "https://registry.npmjs.org/turbo-ignore/-/turbo-ignore-1.8.8.tgz"
-  integrity sha512-IA8pRWtvhIxoyxH48UtxSEiKXdTvPt9CcBRarb/j1VyjtU4UPIFotgBKP5OcpTKkKOqRcJvOv/eLraL8dNl+EQ==
+turbo-ignore@^1.9.3:
+  version "1.9.3"
+  resolved "https://registry.yarnpkg.com/turbo-ignore/-/turbo-ignore-1.9.3.tgz#7cbf8bb1183a3312bba57761ac7ef51d4144ad56"
+  integrity sha512-r7dOWLV6y36mYLhysXD+kKOn8+WPWa5PYYX2H6QgHjfX3XiXUFe0cJhLF2IlmpAIESFp0xdnqa4ewrySnUtjzA==
 
 turbo-linux-64@1.8.8:
   version "1.8.8"
