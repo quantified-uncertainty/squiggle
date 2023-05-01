@@ -5431,10 +5431,10 @@
     "@types/history" "^4.7.11"
     "@types/react" "*"
 
-"@types/react@*", "@types/react@>=16", "@types/react@^18.0.21", "@types/react@^18.0.35":
-  version "18.0.35"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.35.tgz#192061cb1044fe01f2d3a94272cd35dd50502741"
-  integrity sha512-6Laome31HpetaIUGFWl1VQ3mdSImwxtFZ39rh059a1MNnKGqBpC88J6NJ8n/Is3Qx7CefDGLgf/KhN/sYCf7ag==
+"@types/react@*", "@types/react@>=16", "@types/react@^18.2.0":
+  version "18.2.0"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.2.0.tgz#15cda145354accfc09a18d2f2305f9fc099ada21"
+  integrity sha512-0FLj93y5USLHdnhIhABk83rm8XEGA7kH3cr+YUlvxoUGp1xNt/DINUMvqPxLyOQMzLmZe8i4RTHbvb8MC7NmrA==
   dependencies:
     "@types/prop-types" "*"
     "@types/scheduler" "*"
@@ -7991,15 +7991,10 @@ cssstyle@^3.0.0:
   dependencies:
     rrweb-cssom "^0.6.0"
 
-csstype@^3.0.2:
+csstype@^3.0.2, csstype@^3.0.6:
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.1.2.tgz#1d4bf9d572f11c14031f0436e1c10bc1f571f50b"
   integrity sha512-I7K1Uu0MBPzaFKg4nI5Q7Vs2t+3gWWW648spaF+Rg7pI9ds18Ugn+lvg4SHczUdKlHI5LWBXyqfS8+DufyBsgQ==
-
-csstype@^3.0.6:
-  version "3.1.1"
-  resolved "https://registry.npmjs.org/csstype/-/csstype-3.1.1.tgz"
-  integrity sha512-DJR/VvkAvSZW9bTouZue2sSxDwdTN92uHjqeKVm+0dAqdfNykRzQ95tay8aXMBAAPpUiq4Qcug2L7neoRh2Egw==
 
 csv-generate@^3.4.3:
   version "3.4.3"
