@@ -25,7 +25,6 @@ const config = {
     },
     alias: {
       "@quri/squiggle-lang": path.resolve(__dirname, "../squiggle-lang/src"),
-      prettier: "prettier/standalone",
     },
   },
   output: {

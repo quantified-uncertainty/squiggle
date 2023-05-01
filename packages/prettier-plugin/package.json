@@ -21,10 +21,16 @@
   "source": "./src/index.ts",
   "exports": {
     ".": {
+      "require": "./src/mock-cjs.cjs",
       "import": "./dist/esm/src/index.js",
+      "types": "./dist/types/src/index.d.ts"
+    },
+    "./standalone": {
+      "import": "./dist/esm/src/standalone.js",
       "types": "./dist/types/src/index.d.ts"
     }
   },
+  "main": "./src/mock-cjs.cjs",
   "module": "./dist/esm/src/index.js",
   "types": "./dist/types/src/index.d.ts"
 }

@@ -7,8 +7,8 @@ import React, {
   useRef,
 } from "react";
 
-import * as prettier from "prettier";
-import * as squigglePlugin from "@quri/prettier-plugin-squiggle";
+import * as prettier from "prettier/standalone";
+import * as squigglePlugin from "@quri/prettier-plugin-squiggle/standalone";
 
 import { defaultKeymap } from "@codemirror/commands";
 import { syntaxHighlighting } from "@codemirror/language";
