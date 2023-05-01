@@ -47,7 +47,7 @@
     "@types/node": "^18.15.11",
     "@types/react": "^18.2.0",
     "@types/webpack-bundle-analyzer": "^4.6.0",
-    "canvas": "^2.11.0",
+    "canvas": "^2.11.2",
     "eslint": "^8.37.0",
     "jest": "^29.5.0",
     "jest-environment-jsdom": "^29.5.0",
