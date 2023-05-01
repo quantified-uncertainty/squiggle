@@ -87,5 +87,8 @@ export function isMac() {
   // TODO - support https://developer.mozilla.org/en-US/docs/Web/API/NavigatorUAData/platform
   // when it will become available in Typescript types.
   // Note: MacIntel is valid even for ARM macs.
-  return typeof window !== 'undefined' && window.navigator.platform === "MacIntel" ? "Cmd+Enter" : "Ctrl+Enter";
+  return typeof window !== "undefined" &&
+    window.navigator.platform === "MacIntel"
+    ? "Cmd+Enter"
+    : "Ctrl+Enter";
 }
