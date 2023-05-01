@@ -4,10 +4,7 @@ import { Frame, FrameStack } from "./frameStack.js";
 
 // "I" stands for "Internal", since we also have a more public SqError proxy
 export class IError extends Error {
-  private constructor(
-    public m: ErrorMessage,
-    public frameStack: FrameStack
-  ) {
+  private constructor(public m: ErrorMessage, public frameStack: FrameStack) {
     super(); // pass `m.toString()`? a bit costly and we override `IError.toString() anyway`
   }
 
