@@ -15,3 +15,4 @@ packages/vscode-ext/media/vendor/
 packages/squiggle-lang/.nyc_output/
 packages/*/dist
 result
+packages/prettier-plugin/test/files/

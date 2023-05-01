@@ -6,7 +6,11 @@
       "outputs": ["dist/**", "build/**"]
     },
     "vscode-squiggle#build": {
-      "dependsOn": ["^build", "@quri/squiggle-components#bundle"],
+      "dependsOn": [
+        "^build",
+        "@quri/squiggle-components#bundle",
+        "@quri/prettier-plugin-squiggle#build"
+      ],
       "outputs": ["dist/**"]
     },
     "@quri/squiggle-components#build": {
@@ -31,7 +35,7 @@
     },
     "format": {},
     "lint": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build", "@quri/prettier-plugin-squiggle#build"]
     },
     "test": {
       "dependsOn": ["build"]

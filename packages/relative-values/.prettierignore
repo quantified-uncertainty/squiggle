@@ -1,3 +1,4 @@
 .vscode
 .next
 models/cache
+models/src/*.squiggle
