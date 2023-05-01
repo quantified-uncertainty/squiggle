@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@quri/squiggle-lang": "^0.7.0",
-    "@pothos/core": "^3.29.0",
+    "@pothos/core": "^3.30.0",
     "@pothos/plugin-simple-objects": "^3.6.7",
     "@prisma/client": "^4.13.0",
     "eslint-config-next": "^13.3.0",
