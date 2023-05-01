@@ -28,7 +28,7 @@
     "@commander-js/extra-typings": "^10.0.3",
     "@types/react": "^18.0.35",
     "autoprefixer": "^10.4.14",
-    "commander": "^10.0.0",
+    "commander": "^10.0.1",
     "eslint": "^8.37.0",
     "eslint-config-next": "^13.2.4",
     "postcss": "^8.4.21",
