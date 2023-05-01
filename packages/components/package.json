@@ -22,7 +22,7 @@
     "react-hook-form": "^7.43.9",
     "react-use": "^17.4.0",
     "vscode-uri": "^3.0.7",
-    "yup": "^1.0.2"
+    "yup": "^1.1.1"
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.0",
