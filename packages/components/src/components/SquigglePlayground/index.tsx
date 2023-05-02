@@ -202,7 +202,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
         </div>
       </ResizableBox>
       <div
-        className="p-2 pl-4 flex-1 overflow-scroll"
+        className="p-2 pl-4 flex-1 overflow-auto"
         data-testid="playground-result"
       >
         {squiggleChart}

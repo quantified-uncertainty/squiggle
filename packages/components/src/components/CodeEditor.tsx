@@ -152,7 +152,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({
       effects: compTheme.reconfigure(
         EditorView.theme({
           "&": {
-            overflow: "scroll",
+            overflow: "auto",
             ...(width === undefined ? {} : { width: `${width}px` }),
             ...(height === undefined ? {} : { height: `${height}px` }),
           },
