@@ -189,16 +189,13 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
         width={400}
         axis={"x"}
         resizeHandles={["e"]}
-        handle={(handle, ref) => {
-          console.log(handle, ref);
-          return (
-            <div
-              ref={ref}
-              className={`bg-slate-100 hover:bg-blue-200 transition w-1 h-full -mr-1 top-0 mt-0 rotate-0 react-resizable-handle react-resizable-handle-${handle}`}
-              style={{ backgroundImage: "none" }}
-            />
-          );
-        }}
+        handle={(handle, ref) => (
+          <div
+            ref={ref}
+            className={`bg-slate-100 hover:bg-blue-200 transition w-1 h-full -mr-1 top-0 mt-0 rotate-0 react-resizable-handle react-resizable-handle-${handle}`}
+            style={{ backgroundImage: "none" }}
+          />
+        )}
       >
         <div style={{ minHeight: props.chartHeight }} ref={leftPanelRef}>
           {tabs}
