@@ -1,5 +1,5 @@
 {
-  "name": "@quri/api-server",
+  "name": "@quri/hub",
   "version": "0.1.0",
   "private": true,
   "scripts": {
