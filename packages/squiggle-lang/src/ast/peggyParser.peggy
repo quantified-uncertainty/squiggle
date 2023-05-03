@@ -1,4 +1,4 @@
-// Try in https://peggyjs.org/online
+// Documentation: https://peggyjs.org/documentation.html
 
 {{
   import * as h from './peggyHelpers.js';
@@ -10,29 +10,39 @@ start
 zeroOMoreArgumentsBlockOrExpression = lambda / innerBlockOrExpression
 
 outerBlock
-  = statements:array_statements  finalExpression: (statementSeparator @expression)?
-    { if (finalExpression) statements.push(finalExpression)
-      return h.nodeProgram(statements, location()) }
-  / finalExpression: expression
-    { return h.nodeProgram([finalExpression], location()) }
+  = statements:statementsList
+    finalExpression:(statementSeparator @expression)?
+    {
+      if (finalExpression) {
+        statements.push(finalExpression);
+      }
+      return h.nodeProgram(statements, location());
+    }
+  / finalExpression:expression
+    { return h.nodeProgram([finalExpression], location()); }
 
 innerBlockOrExpression
   = quotedInnerBlock
-  / finalExpression: expression
-    { return h.nodeBlock([finalExpression], location())}
+  / finalExpression:expression
+    { return h.nodeBlock([finalExpression], location()); }
 
 quotedInnerBlock
-  = '{' _nl statements:array_statements  finalExpression: (statementSeparator @expression)  _nl '}'
-      { if (finalExpression) statements.push(finalExpression)
-        return h.nodeBlock(statements, location()) }
-  / '{' _nl finalExpression: expression  _nl '}'
-      { return h.nodeBlock([finalExpression], location()) }
+  = '{' _nl
+    statements:statementsList
+    finalExpression:(statementSeparator @expression) _nl
+    '}'
+    {
+      if (finalExpression) {
+        statements.push(finalExpression);
+      }
+      return h.nodeBlock(statements, location());
+    }
+  / '{' _nl
+    finalExpression:expression _nl
+    '}'
+    { return h.nodeBlock([finalExpression], location()); }
 
-array_statements
-  = head:statement tail:(statementSeparator @array_statements )
-    { return [head, ...tail] }
-  / head:statement
-      { return [head] }
+statementsList = statement|1.., statementSeparator|
 
 statement
   = letStatement
@@ -41,163 +51,178 @@ statement
 
 voidStatement
   = "call" _nl value:zeroOMoreArgumentsBlockOrExpression
-    { var variable = h.nodeIdentifier("_", location());
-      return h.nodeLetStatement(variable, value, location()); }
+    {
+      const variable = h.nodeIdentifier("_", location());
+      return h.nodeLetStatement(variable, value, location());
+    }
 
 letStatement
   = variable:variable _ assignmentOp _nl value:zeroOMoreArgumentsBlockOrExpression
-    { return h.nodeLetStatement(variable, value, location()) }
+    { return h.nodeLetStatement(variable, value, location()); }
 
 defunStatement
-  = variable:variable '(' _nl args:array_parameters _nl ')' _ assignmentOp _nl body:innerBlockOrExpression
-    { var value = h.nodeLambda(args, body, location(), variable)
-      return h.nodeLetStatement(variable, value, location()) }
+  = variable:variable '(' _nl args:functionParameters _nl ')' _ assignmentOp _nl body:innerBlockOrExpression
+    {
+      const value = h.nodeLambda(args, body, location(), variable);
+      return h.nodeDefunStatement(variable, value, location());
+    }
 
   assignmentOp "assignment" = '='
 
-array_parameters
-  = head:dollarIdentifier tail:(_ ',' _nl @dollarIdentifier)*
-    { return [head, ...tail]; }
-  / ""
-    { return []; }
+functionParameters = dollarIdentifier|.., commaSeparator|
 
-expression = ifthenelse / ternary / logicalAdditive
+/*
+Rules for expressions start here.
+
+Peggy doesn't have built-in support for operator precedence, so we have to recurse into expressions,
+starting from the lowest precedence rules (ternary operators), up to highest precedence rules
+(function calls and field lookups), until we bottom down at atoms and start all over again.
+*/
+
+expression = ifthenelse / ternary / logicalOr
+
+// Ternaries
 
 ifthenelse
-  = 'if' __nl condition:logicalAdditive
-      __nl 'then' __nl trueExpression:innerBlockOrExpression
+  = 'if' __nl condition:logicalOr
+    __nl 'then' __nl trueExpression:innerBlockOrExpression
     __nl 'else' __nl falseExpression:(ifthenelse/innerBlockOrExpression)
-    { return h.nodeTernary(condition, trueExpression, falseExpression, location()) }
+    { return h.nodeTernary(condition, trueExpression, falseExpression, 'IfThenElse', location()); }
 
 ternary
-  = condition:logicalAdditive _ '?' _nl trueExpression:logicalAdditive _ ':' _nl falseExpression:(ternary/logicalAdditive)
-    { return h.nodeTernary(condition, trueExpression, falseExpression, location()) }
+  = condition:logicalOr _ '?' _nl trueExpression:logicalOr _ ':' _nl falseExpression:(ternary / logicalOr)
+    { return h.nodeTernary(condition, trueExpression, falseExpression, 'C', location()); }
 
-logicalAdditive
-  = head:logicalMultiplicative tail:(_ operator:logicalAdditiveOp _nl arg:logicalMultiplicative {return {operator: operator, right: arg}})*
-  { return tail.reduce(function(result, element) {
-      return h.makeFunctionCall(h.toFunction[element.operator], [result, element.right], location())
-    }, head)}
+// Binary operators
 
-  logicalAdditiveOp "operator" = '||'
+logicalOr
+  = head:logicalAnd tail:(_ @logicalOrOp _nl @logicalAnd)*
+  { return h.makeInfixChain(head, tail, location()); }
+  logicalOrOp "operator" = '||'
 
-// start binary operators
-logicalMultiplicative
-  = head:equality tail:(_ operator:logicalMultiplicativeOp _nl arg:equality {return {operator: operator, right: arg}})*
-  { return tail.reduce(function(result, element) {
-      return h.makeFunctionCall(h.toFunction[element.operator], [result, element.right], location())
-    }, head)}
-
-  logicalMultiplicativeOp "operator" = '&&'
+logicalAnd
+  = head:equality tail:(_ @logicalAndOp _nl @equality)*
+  { return h.makeInfixChain(head, tail, location()); }
+  logicalAndOp "operator" = '&&'
 
 equality
   = left:relational _ operator:equalityOp _nl right:relational
-  { return h.makeFunctionCall(h.toFunction[operator], [left, right], location())}
+  { return h.nodeInfixCall(operator, left, right, location()); }
   / relational
 
-  equalityOp "operator" = '=='/'!='
+  equalityOp "operator" = '==' / '!='
 
 relational
   = left:credibleInterval _ operator:relationalOp _nl right:credibleInterval
-  { return h.makeFunctionCall(h.toFunction[operator], [left, right], location())}
+  { return h.nodeInfixCall(operator, left, right, location()); }
   / credibleInterval
 
-  relationalOp "operator" = '<='/'<'/'>='/'>'
+  relationalOp "operator" = '<=' / '<' / '>=' / '>'
 
 credibleInterval
-  = head:additive tail:(__ operator:credibleIntervalOp __nl arg:additive {return {operator: operator, right: arg}})*
-  { return tail.reduce(function(result, element) {
-      return h.makeFunctionCall(h.toFunction[element.operator], [result, element.right], location())
-    }, head)}
-
-    credibleIntervalOp "operator" = 'to'
+  = head:additive tail:(__ @credibleIntervalOp __nl @additive)*
+  { return h.makeInfixChain(head, tail, location()); }
+  credibleIntervalOp "operator" = 'to'
 
 additive
-  = head:multiplicative tail:(_ operator:additiveOp _nl arg:multiplicative {return {operator: operator, right: arg}})*
-  { return tail.reduce(function(result, element) {
-      return h.makeFunctionCall(h.toFunction[element.operator], [result, element.right], location())
-    }, head)}
-
+  = head:multiplicative tail:(_ @additiveOp _nl @multiplicative)*
+  { return h.makeInfixChain(head, tail, location()); }
   additiveOp "operator" = '+' / '-' / '.+' / '.-'
 
 multiplicative
-  = head:power tail:(_ operator:multiplicativeOp _nl arg:power {return {operator: operator, right: arg}})*
-  { return tail.reduce(function(result, element) {
-      return h.makeFunctionCall(h.toFunction[element.operator], [result, element.right], location())
-    }, head)}
-
+  = head:power tail:(_ @multiplicativeOp _nl @power)*
+  { return h.makeInfixChain(head, tail, location()); }
   multiplicativeOp "operator" = '*' / '/' / '.*' / './'
 
 power
-  = head:chainFunctionCall tail:(_ operator:powerOp _nl arg:chainFunctionCall {return {operator: operator, right: arg}})*
-  { return tail.reduce(function(result, element) {
-      return h.makeFunctionCall(h.toFunction[element.operator], [result, element.right], location())
-    }, head)}
-
+  = head:chainFunctionCall tail:(_ @powerOp _nl @chainFunctionCall)*
+  { return h.makeInfixChain(head, tail, location()); }
   powerOp "operator" = '^' / '.^'
 
 chainFunctionCall
-  = head:unary tail:(_ ('->'/'|>') _nl chained:chainedFunction {return chained})*
-  { return tail.reduce(function(result, element) {
-      return h.makeFunctionCall(h.postOperatorToFunction['()'], [element.callable, result, ...element.args], location())
-    }, head)}
+  = head:unary tail:(_ ('->' / '|>') _nl @chainedFunction)*
+  {
+    return tail.reduce(function(result, element) {
+      return h.nodePipe(result, element.callable, element.args, location());
+    }, head);
+  }
 
   chainedFunction
-    = fn:callableBasicValue '(' _nl args:array_functionArguments _nl ')'
-      { return {callable: fn, args: args}}
-    / fn:callableBasicValue '(' _nl ')'
-      { return {callable: fn, args: []}}
+    = fn:callableBasicValue '(' _nl args:functionArguments _nl ')'
+      { return { callable: fn, args }; }
     / fn:callableBasicValue
-      { return {callable: fn, args: []}}
+      { return { callable: fn, args: [] }; }
 
   callableBasicValue = staticCollectionElement / valueConstructor / variable
 
-// end of binary operators
+// Unary operator
 
 unary
   = unaryOperator:unaryOperator _nl right:(unary/postOperator)
-  { return h.makeFunctionCall(h.unaryToFunction[unaryOperator], [right], location())}
+  { return h.nodeUnaryCall(unaryOperator, right, location())}
   / postOperator
 
-  unaryOperator "unary operator"
-  = ('-' / '.-' / '!' )
+  unaryOperator "unary operator" = '-' / '.-' / '!'
+
+// Function calls and field lookups
 
 postOperator
   = collectionElement
   / atom
 
 staticCollectionElement
-  = head:atom &('['/'.')
+  = head:atom &('['/'.') // should we allow whitespace before the first []?
     tail:(
-      _ '[' _nl arg:expression  _nl ']' {return {fn: h.postOperatorToFunction['[]'], args: [arg]}}
-    / '.' arg:$dollarIdentifier {return {fn: h.postOperatorToFunction['[]'], args: [h.nodeString(arg, location())]}}
+      _ '[' _nl arg:expression  _nl ']' {return {mode: 'bracket', arg}}
+    / '.' arg:$dollarIdentifier {return {mode: 'dot', arg}} // TODO: should we allow whitespace before "."?
     )*
-  { return tail.reduce(function(result, element) {
-      return h.makeFunctionCall(element.fn, [result, ...element.args], location())
-    }, head)}
+  {
+    return tail.reduce(function(result, element) {
+      switch (element.mode) {
+        case 'dot':
+          return h.nodeDotLookup(result, element.arg, location());
+        case 'bracket':
+          return h.nodeBracketLookup(result, element.arg, location());
+        default:
+          throw new Error("Parser implementation error");
+      }
+    }, head);
+  }
 
 collectionElement
   = head:atom &('['/'('/'.')
     tail:(
-      _ '(' _nl args:array_functionArguments  _nl ')' {return {fn: h.postOperatorToFunction['()'], args: args}}
-    / _ '[' _nl arg:expression  _nl ']' {return {fn: h.postOperatorToFunction['[]'], args: [arg]}}
-    / '.' arg:$dollarIdentifier {return {fn: h.postOperatorToFunction['[]'], args: [h.nodeString(arg, location())]}}
+      _ '(' _nl args:functionArguments _nl ')'
+      { return {mode: 'call', args}; }
+    / _ '[' _nl arg:expression _nl ']'
+      { return {mode: 'bracket', arg}; }
+    / '.' arg:$dollarIdentifier
+      { return {mode: 'dot', arg}; }
     )*
-  { return tail.reduce(function(result, element) {
-      return h.makeFunctionCall(element.fn, [result, ...element.args], location())
-    }, head)}
+  {
+    return tail.reduce(function(result, element) {
+      switch (element.mode) {
+        case 'call':
+          return h.nodeCall(result, element.args, location());
+        case 'dot':
+          return h.nodeDotLookup(result, element.arg, location());
+        case 'bracket':
+          return h.nodeBracketLookup(result, element.arg, location());
+        default:
+          throw new Error("Parser implementation error");
+      }
+    }, head);
+  }
 
-    array_functionArguments
-      = head:expression tail:(_ ',' _nl @expression)*
-      { return [head, ...tail]; }
-  / ""
-      {return [];}
+functionArguments = expression|.., commaSeparator|
 
 atom
-  = '(' _nl expression:expression _nl ')' {return expression}
+  = '(' _nl @expression _nl ')'
   / basicValue
 
 basicValue = valueConstructor / basicLiteral
+
+// Basic literals such as numbers, strings and booleans
 
 basicLiteral
   = string
@@ -216,53 +241,56 @@ dollarIdentifierWithModule 'identifier'
     tail:('.' _nl @$moduleIdentifier)* '.' _nl
     final:$dollarIdentifier
   {
-    let modifiers = [...tail]
-    modifiers.unshift(head)
-    modifiers.push(final)
-    let modifiedIdentifier = modifiers.join('.')
-    return h.nodeIdentifier(modifiedIdentifier, location())
+    let modifiers = [...tail];
+    modifiers.unshift(head);
+    modifiers.push(final);
+    const modifiedIdentifier = modifiers.join('.');
+    return h.nodeIdentifier(modifiedIdentifier, location());
   }
 
 identifier 'identifier'
-  = ([_a-z]+[_a-z0-9]i*) {return h.nodeIdentifier(text(), location())}
+  = ([_a-z]+[_a-z0-9]i*) { return h.nodeIdentifier(text(), location()); }
 
 unitIdentifier 'identifier'
-  = ([_a-zA-Z]+[_a-z0-9]i*) {return h.nodeIdentifier(text(), location())}
+  = ([_a-zA-Z]+[_a-z0-9]i*) { return h.nodeIdentifier(text(), location()); }
 
-dollarIdentifier '$identifier'
-  = ([\$_a-z]+[\$_a-z0-9]i*) {return h.nodeIdentifier(text(), location())}
+dollarIdentifier 'identifier'
+  = ([\$_a-z]+[\$_a-z0-9]i*) { return h.nodeIdentifier(text(), location()); }
 
 moduleIdentifier 'identifier'
-  = ([A-Z]+[_a-z0-9]i*) {return h.nodeModuleIdentifier(text(), location())}
+  = ([A-Z]+[_a-z0-9]i*) { return h.nodeModuleIdentifier(text(), location()); }
 
 
 string 'string'
-  = characters:("'" @([^'])* "'") {return h.nodeString(characters.join(''), location())}
-  / characters:('"' @([^"])* '"') {return h.nodeString(characters.join(''), location())}
+  = characters:("'" @([^'])* "'") { return h.nodeString(characters.join(''), location()); }
+  / characters:('"' @([^"])* '"') { return h.nodeString(characters.join(''), location()); }
 
 number = number:(float / integer) unit:unitIdentifier?
   {
-    if (unit === null)
-      { return number }
-    else
-      { return h.makeFunctionCall('fromUnit_'+unit.value, [number], location())
-      }
+    if (unit === null) {
+      return number;
+    }
+    else {
+      return h.nodeCall(h.nodeIdentifier(`fromUnit_${unit.value}`, location()), [number], location());
+    }
   }
 
-integer 'integer'
+integer 'number'
   = d+ !"\." ![e]i
-  { return h.nodeInteger(parseInt(text()), location())}
+  { return h.nodeInteger(parseInt(text()), location()); }
 
-float 'float'
+float 'number'
   = $(((d+ "\." d*) / ("\." d+)) floatExponent? / d+ floatExponent)
-  { return h.nodeFloat(parseFloat(text()), location())}
+  { return h.nodeFloat(parseFloat(text()), location()); }
 
-    floatExponent = [e]i '-'? d+
+    floatExponent = [e]i ('-'/'+')? d+
     d = [0-9]
 
 boolean 'boolean'
-  = ('true'/'false')  ! [a-z]i ! [_$]
-  { return h.nodeBoolean(text() === 'true', location())}
+  = ('true' / 'false') ! [a-z]i ! [_$]
+  { return h.nodeBoolean(text() === 'true', location()); }
+
+// Contructors - delimited blocks such as {} and []
 
 valueConstructor
   = recordConstructor
@@ -271,72 +299,64 @@ valueConstructor
   / quotedInnerBlock
 
 lambda
-  = '{' _nl '|' _nl args:array_parameters _nl '|' _nl statements:array_statements  finalExpression: (statementSeparator @expression)  _nl '}'
-      { statements.push(finalExpression)
-        return h.nodeLambda(args, h.nodeBlock(statements, location()), location(), undefined) }
-  / '{' _nl '|' _nl args:array_parameters _nl '|' _nl finalExpression: expression  _nl '}'
-      { return h.nodeLambda(args, finalExpression, location(), undefined) }
+  = '{' _nl '|' _nl args:functionParameters _nl '|' _nl statements:statementsList  finalExpression: (statementSeparator @expression)  _nl '}'
+  {
+    statements.push(finalExpression);
+    return h.nodeLambda(args, h.nodeBlock(statements, location()), location(), undefined);
+  }
+  / '{' _nl '|' _nl args:functionParameters _nl '|' _nl finalExpression: expression  _nl '}'
+  { return h.nodeLambda(args, finalExpression, location(), undefined); }
 
 arrayConstructor 'array'
   = '[' _nl ']'
     { return h.constructArray([], location()); }
-  / '[' _nl args:array_elements _nl end_of_array
+  / '[' _nl args:array_elements _nl ']'
     { return h.constructArray(args, location()); }
 
-  end_of_array
-    = ']'
-    / ',' _nl ']'
+  array_elements = @expression|1.., commaSeparator| commaSeparator?
 
-  array_elements
-    = head:expression tail:(_ ',' _nl @expression)*
-    { return [head, ...tail]; }
-
-recordConstructor  'record'
+recordConstructor 'record'
   = '{' _nl '}'
     { return h.constructRecord([], location()); }
-  / '{' _nl args:array_recordArguments _nl end_of_record
+  / '{' _nl args:array_recordEntries _nl '}'
     { return h.constructRecord(args, location()); }
 
-  end_of_record
-    = '}'
-    / ',' _nl '}'
-
-  array_recordArguments
-    = head:keyValuePair tail:(_ ',' _nl @keyValuePair)*
-    { return [head, ...tail]; }
+  array_recordEntries = @keyValuePair|1.., commaSeparator| commaSeparator?
 
   keyValuePair
     = key:expression _ ':' _nl value:expression
-    { return h.nodeKeyValue(key, value, location())}
+    { return h.nodeKeyValue(key, value, location()); }
 
 // Separators
 
 _ 'whitespace'
   = whiteSpaceCharactersOrComment*
 
-_nl 'whitespace or newline'
+_nl 'whitespace'
   = (whiteSpaceCharactersOrComment / commentOrNewLine)*
 
 __ 'whitespace'
   = whiteSpaceCharactersOrComment+
 
-__nl 'whitespace or newline'
+__nl 'whitespace'
   = (whiteSpaceCharactersOrComment / commentOrNewLine )+
 
-statementSeparator 'statement separator'
-    = _ (';'/ commentOrNewLine)+ _nl
+statementSeparator ';'
+  = _ (';'/ commentOrNewLine)+ _nl
 
-  commentOrNewLine = finalComment? newLine
+commaSeparator ',' = _ ',' _nl
 
-    finalComment "line comment"
-      = _ ('//'/'#') @([^\r\n]*)
+commentOrNewLine = finalComment? newLine
+  newLine "newline"
+    = [\n\r]
 
-  whiteSpaceCharactersOrComment = whiteSpaceCharacters / delimitedComment
+finalComment "line comment"
+  = _ ('//'/'#') comment:($([^\r\n]*)) { options.comments.push(h.lineComment(comment, location())); }
 
-    delimitedComment  "comment"
-      = '/*' @([^*]*) '*/'
+whiteSpaceCharactersOrComment = whiteSpaceCharacters / delimitedComment
 
-    whiteSpaceCharacters = [ \t]
+  delimitedComment  "comment"
+    = '/*' comment:($([^*]*)) '*/' { options.comments.push(h.blockComment(comment, location())); }
 
-    newLine "newline"
-      = [\n\r]
+  whiteSpaceCharacters = [ \t]
+

@@ -8,7 +8,7 @@ import {
 
 type WrappedRender<
   Args extends Record<string, any>,
-  Values extends FieldValues
+  Values extends FieldValues,
 > = (args: Args, register: UseFormRegister<Values>) => React.ReactNode;
 
 function Form<Args extends Record<string, any>, Values extends FieldValues>({
@@ -28,7 +28,7 @@ function Form<Args extends Record<string, any>, Values extends FieldValues>({
 // Could be improved with better types and abstractions, but it's pretty complicated.
 export function withRHF<
   Args extends Record<string, any>,
-  Values extends FieldValues
+  Values extends FieldValues,
 >(
   render: WrappedRender<Args, Values>,
   // If you provide defaultValues, then Value generic will be inferred; that means that `register` function will be stricter typed.
