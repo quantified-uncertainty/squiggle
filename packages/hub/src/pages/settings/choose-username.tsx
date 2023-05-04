@@ -1,16 +1,13 @@
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { useSession } from "next-auth/react";
+
 import { Button } from "@/components/ui/Button";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { graphqlPlaygroundRoute } from "@/routes";
-import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
 
-export default async function ChooseUsernamePage() {
-  const session = await getServerSession(authOptions);
-
-  if (!session || session.user.username) {
-    redirect("/");
-  }
+export default function ChooseUsernamePage() {
+  useSession({
+    required: true,
+  });
 
   return (
     <div className="flex flex-col items-center gap-2 mt-20">
