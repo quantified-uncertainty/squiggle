@@ -1,11 +1,11 @@
+import { getServerSession } from "next-auth";
 import { FC, PropsWithChildren } from "react";
 
 import { UserControls } from "./UserControls";
-import { getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]/route";
 
 async function TopMenu() {
-  const session = await getServerSession(authOptions); // gets session from db or cookie
+  const session = await getServerSession(authOptions);
 
   return (
     <div className="border border-b h-16 flex items-center justify-end px-4">

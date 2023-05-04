@@ -1,4 +1,4 @@
-import NextAuth from "next-auth";
+import NextAuth, { AuthOptions } from "next-auth";
 
 import { Provider } from "next-auth/providers";
 import GithubProvider from "next-auth/providers/github";
@@ -28,10 +28,18 @@ function buildAuthOptions() {
     );
   }
 
-  return {
+  const authOptions: AuthOptions = {
     adapter: PrismaAdapter(prisma),
     providers,
+    callbacks: {
+      session({ session, user }) {
+        session.user.username = user.username;
+        return session;
+      },
+    },
   };
+
+  return authOptions;
 }
 
 export const authOptions = buildAuthOptions();

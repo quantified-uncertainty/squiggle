@@ -6,9 +6,9 @@ import {
   SqValue,
 } from "@quri/squiggle-lang";
 
-import { Prisma, SquiggleCache } from "@prisma/client";
-import { builder } from "../builder";
+import { Prisma } from "@prisma/client";
 import { prisma } from "../../prisma";
+import { builder } from "../builder";
 
 function getKey(code: string): string {
   return crypto.createHash("md5").update(code).digest("base64");

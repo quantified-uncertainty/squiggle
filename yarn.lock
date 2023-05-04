@@ -3646,6 +3646,11 @@
   resolved "https://registry.npmjs.org/@pothos/core/-/core-3.29.0.tgz"
   integrity sha512-6LcrnZ3QRQrbWvKLfdSvfrk1nyezLaDAT8yIhQXLOhhtm3iK+knIpdGbNfKiTgxbdSDkK69IcXNV4ifcq23bIQ==
 
+"@pothos/plugin-scope-auth@^3.19.1":
+  version "3.19.1"
+  resolved "https://registry.yarnpkg.com/@pothos/plugin-scope-auth/-/plugin-scope-auth-3.19.1.tgz#d81dcdfc421e46935d570c94fc1daee0906841cb"
+  integrity sha512-6PGM82PPpZCyBS2GQmH14VeiP+zwmX/VObWW0Kn6yom3WkRM6rZAAp6njLchMwEElX2nBfboAh5l2Sz9iteLvw==
+
 "@pothos/plugin-simple-objects@^3.6.7":
   version "3.6.7"
   resolved "https://registry.npmjs.org/@pothos/plugin-simple-objects/-/plugin-simple-objects-3.6.7.tgz"
