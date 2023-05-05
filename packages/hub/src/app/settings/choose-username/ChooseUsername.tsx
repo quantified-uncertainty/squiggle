@@ -32,7 +32,7 @@ export const ChooseUsername: FC = () => {
       variables: {
         username,
       },
-      onCompleted: console.log,
+      onCompleted: console.log, // TODO
       onError(error) {
         setError((error as any).source ?? error.toString());
       },

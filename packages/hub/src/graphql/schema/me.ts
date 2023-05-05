@@ -1,6 +1,5 @@
 import { prisma } from "@/prisma";
 import { builder } from "../builder";
-import { getSession } from "next-auth/react";
 
 const Me = builder.simpleObject("Me", {
   fields: (t) => ({
@@ -24,9 +23,38 @@ builder.queryField("me", (t) =>
   })
 );
 
+type GenericError = {
+  message: string;
+  genericError: true;
+};
+
+const GenericError = builder.objectRef<GenericError>("GenericError").implement({
+  fields: (t) => ({
+    message: t.exposeString("message"),
+  }),
+});
+
+function genericError(message: string): GenericError {
+  return {
+    genericError: true,
+    message,
+  };
+}
+
+const SetUsernameResult = builder.unionType("SetUsernameResult", {
+  types: [Me, GenericError],
+  resolveType: (fact) => {
+    if ("genericError" in fact) {
+      return GenericError;
+    } else {
+      return Me;
+    }
+  },
+});
+
 builder.mutationField("setUsername", (t) =>
   t.field({
-    type: Me,
+    type: SetUsernameResult,
     authScopes: {
       user: true,
     },
@@ -36,10 +64,10 @@ builder.mutationField("setUsername", (t) =>
     async resolve(_, args, { session }) {
       const email = session?.user.email;
       if (!email) {
-        throw new Error("Email is missing");
+        return genericError("Email is missing");
       }
       if (session.user.username) {
-        throw new Error("Username is already set");
+        return genericError("Username is already set");
       }
 
       await prisma.user.update({
