@@ -15,7 +15,7 @@ const TopMenu: FC = () => {
 
 export const Layout: FC<PropsWithChildren> = ({ children }) => {
   return (
-    <div className="squiggle-hub">
+    <div>
       <TopMenu />
       <div>{children}</div>
     </div>

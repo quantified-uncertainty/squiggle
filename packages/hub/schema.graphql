@@ -1,0 +1,28 @@
+type Me {
+  email: String
+  username: String
+}
+
+type Mutation {
+  setUsername(username: String!): Me!
+}
+
+type Query {
+  me: Me!
+  runSquiggle(code: String!): SquiggleOutput!
+}
+
+type SquiggleErrorOutput implements SquiggleOutput {
+  errorString: String!
+  isCached: Boolean!
+}
+
+type SquiggleOkOutput implements SquiggleOutput {
+  bindingsJSON: String!
+  isCached: Boolean!
+  resultJSON: String!
+}
+
+interface SquiggleOutput {
+  isCached: Boolean!
+}
