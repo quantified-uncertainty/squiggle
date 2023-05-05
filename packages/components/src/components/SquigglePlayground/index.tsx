@@ -33,7 +33,6 @@ import { StyledTab } from "../ui/StyledTab.js";
 
 import { ImportSettingsForm } from "./ImportSettingsForm.js";
 import { ResizableBox } from "react-resizable";
-import "react-resizable/css/styles.css";
 import { RunControls } from "./RunControls/index.js";
 import { useRunnerState } from "./RunControls/useRunnerState.js";
 import { ShareButton } from "./ShareButton.js";
