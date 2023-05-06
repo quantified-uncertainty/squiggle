@@ -79,15 +79,19 @@ enum ModelType {
 model Model {
   id String @id @default(cuid())
 
+  slug String
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  owner  User   @relation(fields: [userId], references: [id])
-  userId String
+  owner   User   @relation(fields: [ownerId], references: [id])
+  ownerId String
 
   squiggleSnippet SquiggleSnippet? @relation("SquiggleSnippetModel", fields: [modelId], references: [id], map: "squiggleSnippet_modelId")
   modelId         String
   modelType       ModelType
+
+  @@unique([slug, ownerId])
 }
 
 model SquiggleSnippet {

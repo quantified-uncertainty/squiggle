@@ -6,7 +6,7 @@
     "db:generate": "prisma generate",
     "dev": "next dev -p 3001",
     "start": "next start",
-    "build": "relay-compiler && next build",
+    "build": "yarn print-schema && yarn relay && next build",
     "lint": "prettier --check . && next lint",
     "format": "prettier --write .",
     "relay": "relay-compiler",
@@ -20,6 +20,7 @@
     "@pothos/plugin-relay": "^3.43.0",
     "@pothos/plugin-scope-auth": "^3.19.1",
     "@pothos/plugin-simple-objects": "^3.6.7",
+    "@pothos/plugin-validation": "^3.9.1",
     "@pothos/plugin-with-input": "^3.10.1",
     "@prisma/client": "^4.12.0",
     "@quri/squiggle-components": "^0.7.0",
@@ -31,7 +32,8 @@
     "next-auth": "^4.22.1",
     "nodemailer": "^6.9.1",
     "react-relay": "^15.0.0",
-    "typescript": "^5.0.3"
+    "typescript": "^5.0.3",
+    "zod": "^3.21.4"
   },
   "devDependencies": {
     "@types/react-relay": "^14.1.3",

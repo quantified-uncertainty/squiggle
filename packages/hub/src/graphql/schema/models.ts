@@ -1,5 +1,6 @@
 import { prisma } from "@/prisma";
 import { builder } from "../builder";
+import { User } from "./users";
 
 const SquiggleSnippet = builder.prismaNode("SquiggleSnippet", {
   id: { field: "id" },
@@ -16,7 +17,7 @@ const ModelContent = builder.unionType("ModelContent", {
 const Model = builder.prismaNode("Model", {
   id: { field: "id" },
   fields: (t) => ({
-    dbId: t.exposeString("id"),
+    slug: t.exposeString("slug"),
     // I'm not yet sure if we'll use custom scalars for datetime encoding, so `createdAtTimestamp` is a precaution; we'll probably switch to `createAt` in the future
     createdAtTimestamp: t.float({
       resolve: (model) => model.createdAt.getTime(),
@@ -37,6 +38,7 @@ const Model = builder.prismaNode("Model", {
         throw new Error(`Unknown model type ${model.modelType}`);
       },
     }),
+    owner: t.relation("owner"),
   }),
 });
 
@@ -49,20 +51,21 @@ builder.queryField("models", (t) =>
 );
 
 builder.queryField("model", (t) =>
-  t.field({
+  t.fieldWithInput({
     type: Model,
-    args: {
-      id: t.arg.string({ required: true }),
+    input: {
+      slug: t.input.string({ required: true }),
+      ownerUsername: t.input.string({ required: true }),
     },
     async resolve(root, args) {
-      const model = await prisma.model.findUnique({
+      const model = await prisma.model.findFirstOrThrow({
         where: {
-          id: args.id,
+          slug: args.input.slug,
+          owner: {
+            username: args.input.ownerUsername,
+          },
         },
       });
-      if (!model) {
-        throw new Error("Model not found");
-      }
       return model;
     },
   })
@@ -84,6 +87,12 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
     errors: {},
     input: {
       code: t.input.string({ required: true }),
+      slug: t.input.string({
+        required: true,
+        validate: {
+          regex: /^\w[\w\-]*$/,
+        },
+      }),
     },
     resolve: async (root, args, { session }) => {
       const email = session?.user.email;
@@ -94,6 +103,7 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
 
       const model = await prisma.model.create({
         data: {
+          slug: args.input.slug,
           squiggleSnippet: {
             create: {
               code: args.input.code,

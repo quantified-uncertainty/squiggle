@@ -18,8 +18,9 @@ type Me {
 type Model implements Node {
   content: ModelContent!
   createdAtTimestamp: Float!
-  dbId: String!
   id: ID!
+  owner: User!
+  slug: String!
   updatedAtTimestamp: Float!
 }
 
@@ -32,6 +33,7 @@ type Mutation {
 
 input MutationCreateSquiggleSnippetModelInput {
   code: String!
+  slug: String!
 }
 
 union MutationCreateSquiggleSnippetModelResult = BaseError | CreateSquiggleSnippetResult
@@ -51,11 +53,18 @@ type PageInfo {
 
 type Query {
   me: Me!
-  model(id: String!): Model!
+  model(input: QueryModelInput!): Model!
   models(after: String, before: String, first: Int, last: Int): QueryModelsConnection!
   node(id: ID!): Node
   nodes(ids: [ID!]!): [Node]!
   runSquiggle(code: String!): SquiggleOutput!
+  userByUsername(username: String!): User!
+  users(after: String, before: String, first: Int, last: Int): QueryUsersConnection!
+}
+
+input QueryModelInput {
+  ownerUsername: String!
+  slug: String!
 }
 
 type QueryModelsConnection {
@@ -66,6 +75,16 @@ type QueryModelsConnection {
 type QueryModelsConnectionEdge {
   cursor: String!
   node: Model!
+}
+
+type QueryUsersConnection {
+  edges: [QueryUsersConnectionEdge!]!
+  pageInfo: PageInfo!
+}
+
+type QueryUsersConnectionEdge {
+  cursor: String!
+  node: User!
 }
 
 type SquiggleErrorOutput implements SquiggleOutput {
@@ -86,4 +105,9 @@ interface SquiggleOutput {
 type SquiggleSnippet implements Node {
   code: String!
   id: ID!
+}
+
+type User implements Node {
+  id: ID!
+  username: String!
 }

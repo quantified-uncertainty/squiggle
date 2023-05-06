@@ -3673,6 +3673,11 @@
   resolved "https://registry.npmjs.org/@pothos/plugin-simple-objects/-/plugin-simple-objects-3.6.7.tgz"
   integrity sha512-2ME7NSJZMh7MFAsTScHRiZusrLd5qpMBT/zgfmlGSGZgTFOUj38fWkQGYTFbFxTP4uClEcf9GW3aAkwLmH2ATw==
 
+"@pothos/plugin-validation@^3.9.1":
+  version "3.9.1"
+  resolved "https://registry.yarnpkg.com/@pothos/plugin-validation/-/plugin-validation-3.9.1.tgz#7dac96d1e4ac8df708a70359c6b539ea0848a99d"
+  integrity sha512-CQrZ+fmNg1zVvn7PqGmaBgspLuQnIPtxx8Op87Z4Sh+95OWZO5zRB6c8PcfqI4SVbNYUsKUndEUziJ0i8lFS4w==
+
 "@pothos/plugin-with-input@^3.10.1":
   version "3.10.1"
   resolved "https://registry.yarnpkg.com/@pothos/plugin-with-input/-/plugin-with-input-3.10.1.tgz#5b22f991f6f3d23a4f85950fb4a4e4971ae41013"
@@ -19751,7 +19756,7 @@ yup@^1.0.2:
     toposort "^2.0.2"
     type-fest "^2.19.0"
 
-zod@3.21.4:
+zod@3.21.4, zod@^3.21.4:
   version "3.21.4"
   resolved "https://registry.yarnpkg.com/zod/-/zod-3.21.4.tgz#10882231d992519f0a10b5dd58a38c9dabbb64db"
   integrity sha512-m46AKbrzKVzOzs/DZgVnG5H55N1sv1M8qZU3A8RIKbs3mrACDNeIOeilDymVb2HdmP8uwshOCF4uJ8uM9rCqJw==

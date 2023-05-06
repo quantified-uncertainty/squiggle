@@ -6,6 +6,7 @@ import RelayPlugin from "@pothos/plugin-relay";
 import PrismaPlugin from "@pothos/plugin-prisma";
 import WithInputPlugin from "@pothos/plugin-with-input";
 import ErrorsPlugin from "@pothos/plugin-errors";
+import ValidationPlugin from "@pothos/plugin-validation";
 
 import type PrismaTypes from "@pothos/plugin-prisma/generated";
 
@@ -32,6 +33,7 @@ export const builder = new SchemaBuilder<{
     WithInputPlugin, // https://pothos-graphql.dev/docs/plugins/with-input
     PrismaPlugin, // https://pothos-graphql.dev/docs/plugins/prisma
     RelayPlugin, // https://pothos-graphql.dev/docs/plugins/relay
+    ValidationPlugin, // https://pothos-graphql.dev/docs/plugins/validation
   ],
   prisma: {
     client: prisma,

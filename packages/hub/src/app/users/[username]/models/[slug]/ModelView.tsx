@@ -6,8 +6,11 @@ import { ModelViewQuery } from "@gen/ModelViewQuery.graphql";
 import { SquigglePlayground } from "@quri/squiggle-components";
 
 const ModelViewQuery = graphql`
-  query ModelViewQuery($id: String!) {
-    model(id: $id) {
+  query ModelViewQuery($input: QueryModelInput!) {
+    model(input: $input) {
+      owner {
+        username
+      }
       content {
         __typename
         ... on SquiggleSnippet {
@@ -18,8 +21,13 @@ const ModelViewQuery = graphql`
   }
 `;
 
-export const ModelView: FC<{ id: string }> = ({ id }) => {
-  const data = useLazyLoadQuery<ModelViewQuery>(ModelViewQuery, { id });
+export const ModelView: FC<{ username: string; slug: string }> = ({
+  username,
+  slug,
+}) => {
+  const data = useLazyLoadQuery<ModelViewQuery>(ModelViewQuery, {
+    input: { ownerUsername: username, slug },
+  });
 
   const typename = data.model.content.__typename;
   if (typename !== "SquiggleSnippet") {

@@ -5,10 +5,14 @@ import { graphql } from "relay-runtime";
 
 import type { ModelCardFragment$key } from "@gen/ModelCardFragment.graphql";
 import { StyledLink } from "@/components/ui/StyledLink";
+import { modelRoute, userRoute } from "@/routes";
 
 const Fragment = graphql`
   fragment ModelCardFragment on Model {
-    dbId
+    slug
+    owner {
+      username
+    }
     content {
       __typename
       ... on SquiggleSnippet {
@@ -27,9 +31,20 @@ export const ModelCard: FC<{
     case "SquiggleSnippet":
       return (
         <div>
-          <StyledLink href={`/model-by-id/${data.dbId}`}>
-            {data.dbId}
-          </StyledLink>
+          <div>
+            <StyledLink
+              href={modelRoute({
+                username: data.owner.username,
+                slug: data.slug,
+              })}
+            >
+              {data.slug}
+            </StyledLink>{" "}
+            by{" "}
+            <StyledLink href={userRoute({ username: data.owner.username })}>
+              @{data.owner.username}
+            </StyledLink>
+          </div>
           <div className="font-mono">{data.content.code}</div>
         </div>
       );
