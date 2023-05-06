@@ -16,6 +16,10 @@ export function userRoute({ username }: { username: string }) {
   return `/users/${username}`;
 }
 
+export function newModelRoute() {
+  return "/new-model";
+}
+
 export function graphqlAPIRoute() {
   return graphqlPlaygroundRoute();
 }

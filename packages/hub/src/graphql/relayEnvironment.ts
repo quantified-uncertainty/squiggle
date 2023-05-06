@@ -11,11 +11,14 @@ import {
   CacheConfig,
 } from "relay-runtime";
 
-const HTTP_ENDPOINT = process.env.NEXT_PUBLIC_VERCEL_URL
-  ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/api/graphql`
-  : "http://localhost:3001/api/graphql";
-
 const IS_SERVER = typeof window === typeof undefined;
+
+const HTTP_ENDPOINT = IS_SERVER
+  ? process.env.NEXT_PUBLIC_VERCEL_URL
+    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/api/graphql`
+    : "http://localhost:3001/api/graphql"
+  : "/api/graphql";
+
 const CACHE_TTL = 5 * 1000; // 5 seconds, to resolve preloaded results
 
 export async function networkFetch(

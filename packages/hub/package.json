@@ -36,6 +36,7 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
+    "@types/react": "^18.2.6",
     "@types/react-relay": "^14.1.3",
     "@types/relay-runtime": "^14.1.10",
     "babel-plugin-relay": "^15.0.0",

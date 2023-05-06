@@ -15,6 +15,9 @@ const ModelListQuery = graphql`
           ...ModelCardFragment
         }
       }
+      pageInfo {
+        hasNextPage
+      }
     }
   }
 `;
@@ -27,6 +30,9 @@ export const ModelList: FC = () => {
       {data.models.edges.map((edge) => (
         <ModelCard key={edge.node.id} model={edge.node} />
       ))}
+      {data.models.pageInfo.hasNextPage && (
+        <div>{"There's more, but pagination is not implemented yet"}</div>
+      )}
     </div>
   );
 };
