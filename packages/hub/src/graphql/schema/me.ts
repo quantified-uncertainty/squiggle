@@ -23,51 +23,27 @@ builder.queryField("me", (t) =>
   })
 );
 
-type GenericError = {
-  message: string;
-  genericError: true;
-};
-
-const GenericError = builder.objectRef<GenericError>("GenericError").implement({
-  fields: (t) => ({
-    message: t.exposeString("message"),
-  }),
-});
-
-function genericError(message: string): GenericError {
-  return {
-    genericError: true,
-    message,
-  };
-}
-
-const SetUsernameResult = builder.unionType("SetUsernameResult", {
-  types: [Me, GenericError],
-  resolveType: (fact) => {
-    if ("genericError" in fact) {
-      return GenericError;
-    } else {
-      return Me;
-    }
-  },
-});
-
 builder.mutationField("setUsername", (t) =>
   t.field({
-    type: SetUsernameResult,
+    type: Me,
     authScopes: {
       user: true,
     },
     args: {
       username: t.arg.string({ required: true }),
     },
+    errors: {},
     async resolve(_, args, { session }) {
       const email = session?.user.email;
       if (!email) {
-        return genericError("Email is missing");
+        // shouldn't happen because we checked user auth scope previously, but helps with type checks
+        throw new Error("Email is missing");
       }
       if (session.user.username) {
-        return genericError("Username is already set");
+        throw new Error("Username is already set");
+      }
+      if (!args.username.match("^[a-zA-Z]\\w+$")) {
+        throw new Error("Expected alphanumerical username");
       }
 
       await prisma.user.update({

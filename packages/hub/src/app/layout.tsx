@@ -1,11 +1,11 @@
 import { getServerSession } from "next-auth";
 import { PropsWithChildren } from "react";
 
-import { authOptions } from "./api/auth/[...nextauth]/route";
 import { ClientApp } from "./ClientApp";
 
 import "@/styles/main.css";
 import "@quri/squiggle-components/dist/main.css";
+import { authOptions } from "./api/auth/[...nextauth]/authOptions";
 
 export default async function RootLayout({ children }: PropsWithChildren) {
   const session = await getServerSession(authOptions);

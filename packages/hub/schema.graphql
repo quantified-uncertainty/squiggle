@@ -1,15 +1,71 @@
+type BaseError implements Error {
+  message: String!
+}
+
+type CreateSquiggleSnippetResult {
+  model: Model!
+}
+
+interface Error {
+  message: String!
+}
+
 type Me {
   email: String
   username: String
 }
 
+type Model implements Node {
+  content: ModelContent!
+  createdAtTimestamp: Float!
+  dbId: String!
+  id: ID!
+  updatedAtTimestamp: Float!
+}
+
+union ModelContent = SquiggleSnippet
+
 type Mutation {
-  setUsername(username: String!): Me!
+  createSquiggleSnippetModel(input: MutationCreateSquiggleSnippetModelInput!): MutationCreateSquiggleSnippetModelResult!
+  setUsername(username: String!): MutationSetUsernameResult!
+}
+
+input MutationCreateSquiggleSnippetModelInput {
+  code: String!
+}
+
+union MutationCreateSquiggleSnippetModelResult = BaseError | CreateSquiggleSnippetResult
+
+union MutationSetUsernameResult = BaseError | Me
+
+interface Node {
+  id: ID!
+}
+
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
 }
 
 type Query {
   me: Me!
+  model(id: String!): Model!
+  models(after: String, before: String, first: Int, last: Int): QueryModelsConnection!
+  node(id: ID!): Node
+  nodes(ids: [ID!]!): [Node]!
   runSquiggle(code: String!): SquiggleOutput!
+}
+
+type QueryModelsConnection {
+  edges: [QueryModelsConnectionEdge!]!
+  pageInfo: PageInfo!
+}
+
+type QueryModelsConnectionEdge {
+  cursor: String!
+  node: Model!
 }
 
 type SquiggleErrorOutput implements SquiggleOutput {
@@ -25,4 +81,9 @@ type SquiggleOkOutput implements SquiggleOutput {
 
 interface SquiggleOutput {
   isCached: Boolean!
+}
+
+type SquiggleSnippet implements Node {
+  code: String!
+  id: ID!
 }

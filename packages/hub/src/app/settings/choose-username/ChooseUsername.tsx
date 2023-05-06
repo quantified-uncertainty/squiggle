@@ -1,17 +1,17 @@
 import { useSession } from "next-auth/react";
+import { FC, useState } from "react";
 import { useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
-import { FC, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
-import { StyledLink } from "@/components/ui/StyledLink";
-import { graphqlPlaygroundRoute } from "@/routes";
 import { ChooseUsernameMutation } from "@gen/ChooseUsernameMutation.graphql";
 
 const Mutation = graphql`
   mutation ChooseUsernameMutation($username: String!) {
     setUsername(username: $username) {
-      email
+      ... on Me {
+        email
+      }
     }
   }
 `;

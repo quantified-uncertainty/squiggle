@@ -5,6 +5,10 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator pothos {
+  provider = "prisma-pothos-types"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -55,6 +59,7 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  Model         Model[]
 }
 
 model VerificationToken {
@@ -63,4 +68,31 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+// models are polymorphic;
+// polymorphism schema inspired by https://stackoverflow.com/a/73140073
+enum ModelType {
+  SquiggleSnippet
+}
+
+model Model {
+  id String @id @default(cuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner  User   @relation(fields: [userId], references: [id])
+  userId String
+
+  squiggleSnippet SquiggleSnippet? @relation("SquiggleSnippetModel", fields: [modelId], references: [id], map: "squiggleSnippet_modelId")
+  modelId         String
+  modelType       ModelType
+}
+
+model SquiggleSnippet {
+  id    String  @id @default(cuid())
+  Model Model[] @relation("SquiggleSnippetModel")
+
+  code String
 }
