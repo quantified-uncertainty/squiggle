@@ -11,8 +11,8 @@ import {
   CacheConfig,
 } from "relay-runtime";
 
-const HTTP_ENDPOINT = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}/api/graphql`
+const HTTP_ENDPOINT = process.env.NEXT_PUBLIC_VERCEL_URL
+  ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/api/graphql`
   : "http://localhost:3001/api/graphql";
 
 const IS_SERVER = typeof window === typeof undefined;
