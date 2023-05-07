@@ -59,7 +59,7 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
-  Model         Model[]
+  models        Model[]
 }
 
 model VerificationToken {
@@ -87,16 +87,16 @@ model Model {
   owner   User   @relation(fields: [ownerId], references: [id])
   ownerId String
 
-  squiggleSnippet SquiggleSnippet? @relation("SquiggleSnippetModel", fields: [modelId], references: [id], map: "squiggleSnippet_modelId")
-  modelId         String
+  squiggleSnippet SquiggleSnippet? @relation(fields: [modelId], references: [id], map: "squiggleSnippet_modelId")
+  modelId         String           @unique
   modelType       ModelType
 
   @@unique([slug, ownerId])
 }
 
 model SquiggleSnippet {
-  id    String  @id @default(cuid())
-  Model Model[] @relation("SquiggleSnippetModel")
+  id    String @id @default(cuid())
+  Model Model?
 
   code String
 }

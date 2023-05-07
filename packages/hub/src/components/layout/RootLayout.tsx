@@ -11,11 +11,6 @@ const TopMenu: FC = () => {
     <div className="border border-b h-16 flex items-center justify-between px-4">
       <Link href="/">
         <div className="flex items-center text-lg font-bold py-2 text-slate-500 cursor-pointer">
-          {/* <ScaleIcon
-            className="fill-slate-500 mr-3 opacity-50"
-            size={24}
-            viewBox={"0 0 25 25"}
-          /> */}
           Squiggle Hub
         </div>
       </Link>
@@ -24,7 +19,7 @@ const TopMenu: FC = () => {
   );
 };
 
-export const Layout: FC<PropsWithChildren> = ({ children }) => {
+export const RootLayout: FC<PropsWithChildren> = ({ children }) => {
   return (
     <div>
       <TopMenu />

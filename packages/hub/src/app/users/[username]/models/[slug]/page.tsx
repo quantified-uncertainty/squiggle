@@ -7,5 +7,9 @@ export default function ModelPage({
 }: {
   params: { username: string; slug: string };
 }) {
-  return <ModelView {...params} />;
+  return (
+    <div className="p-4">
+      <ModelView {...params} />
+    </div>
+  );
 }

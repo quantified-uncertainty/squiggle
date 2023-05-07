@@ -3,9 +3,10 @@ import { useFragment } from "react-relay";
 
 import { graphql } from "relay-runtime";
 
-import type { ModelCardFragment$key } from "@gen/ModelCardFragment.graphql";
+import { UserLink } from "@/components/UserLink";
 import { StyledLink } from "@/components/ui/StyledLink";
-import { modelRoute, userRoute } from "@/routes";
+import { modelRoute } from "@/routes";
+import type { ModelCardFragment$key } from "@gen/ModelCardFragment.graphql";
 
 const Fragment = graphql`
   fragment ModelCardFragment on Model {
@@ -32,10 +33,7 @@ export const ModelCard: FC<{
         >
           {data.slug}
         </StyledLink>{" "}
-        by{" "}
-        <StyledLink href={userRoute({ username: data.owner.username })}>
-          @{data.owner.username}
-        </StyledLink>
+        by <UserLink user={data.owner} />
       </div>
     </div>
   );

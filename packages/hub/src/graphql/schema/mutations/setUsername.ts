@@ -1,27 +1,6 @@
 import { prisma } from "@/prisma";
-import { builder } from "../builder";
-
-const Me = builder.simpleObject("Me", {
-  fields: (t) => ({
-    email: t.string({ nullable: true }), // TODO - guarantee in NextAuth configuration? check and throw?
-    username: t.string({ nullable: true }),
-  }),
-});
-
-builder.queryField("me", (t) =>
-  t.field({
-    type: Me,
-    authScopes: {
-      user: true,
-    },
-    async resolve(_, __, { session }) {
-      if (!session) {
-        throw new Error("Impossible, should be guaranteed by authScopes");
-      }
-      return session.user;
-    },
-  })
-);
+import { builder } from "@/graphql/builder";
+import { Me } from "../types/me";
 
 builder.mutationField("setUsername", (t) =>
   t.field({

@@ -6,6 +6,10 @@ type CreateSquiggleSnippetResult {
   model: Model!
 }
 
+type DeleteModelResult {
+  ok: Boolean!
+}
+
 interface Error {
   message: String!
 }
@@ -24,11 +28,23 @@ type Model implements Node {
   updatedAtTimestamp: Float!
 }
 
+type ModelConnection {
+  edges: [ModelEdge!]!
+  pageInfo: PageInfo!
+}
+
 union ModelContent = SquiggleSnippet
+
+type ModelEdge {
+  cursor: String!
+  node: Model!
+}
 
 type Mutation {
   createSquiggleSnippetModel(input: MutationCreateSquiggleSnippetModelInput!): MutationCreateSquiggleSnippetModelResult!
+  deleteModel(input: MutationDeleteModelInput!): MutationDeleteModelResult!
   setUsername(username: String!): MutationSetUsernameResult!
+  updateSquiggleSnippetModel(input: MutationUpdateSquiggleSnippetModelInput!): MutationUpdateSquiggleSnippetModelResult!
 }
 
 input MutationCreateSquiggleSnippetModelInput {
@@ -38,7 +54,22 @@ input MutationCreateSquiggleSnippetModelInput {
 
 union MutationCreateSquiggleSnippetModelResult = BaseError | CreateSquiggleSnippetResult
 
+input MutationDeleteModelInput {
+  slug: String!
+  username: String!
+}
+
+union MutationDeleteModelResult = BaseError | DeleteModelResult
+
 union MutationSetUsernameResult = BaseError | Me
+
+input MutationUpdateSquiggleSnippetModelInput {
+  code: String!
+  slug: String!
+  username: String!
+}
+
+union MutationUpdateSquiggleSnippetModelResult = BaseError | UpdateSquiggleSnippetResult
 
 interface Node {
   id: ID!
@@ -54,7 +85,7 @@ type PageInfo {
 type Query {
   me: Me!
   model(input: QueryModelInput!): Model!
-  models(after: String, before: String, first: Int, last: Int): QueryModelsConnection!
+  models(after: String, before: String, first: Int, last: Int): ModelConnection!
   node(id: ID!): Node
   nodes(ids: [ID!]!): [Node]!
   runSquiggle(code: String!): SquiggleOutput!
@@ -65,16 +96,6 @@ type Query {
 input QueryModelInput {
   ownerUsername: String!
   slug: String!
-}
-
-type QueryModelsConnection {
-  edges: [QueryModelsConnectionEdge!]!
-  pageInfo: PageInfo!
-}
-
-type QueryModelsConnectionEdge {
-  cursor: String!
-  node: Model!
 }
 
 type QueryUsersConnection {
@@ -107,7 +128,12 @@ type SquiggleSnippet implements Node {
   id: ID!
 }
 
+type UpdateSquiggleSnippetResult {
+  model: Model!
+}
+
 type User implements Node {
   id: ID!
+  models(after: String, before: String, first: Int, last: Int): ModelConnection!
   username: String!
 }

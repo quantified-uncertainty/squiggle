@@ -1,36 +1,36 @@
 "use client";
 
-import { ModelListQuery } from "@gen/ModelListQuery.graphql";
 import { FC } from "react";
 
-import { graphql, useLazyLoadQuery } from "react-relay";
+import { ModelListFragment$key } from "@/__generated__/ModelListFragment.graphql";
+import { graphql, useFragment } from "react-relay";
 import { ModelCard } from "./ModelCard";
 
-const ModelListQuery = graphql`
-  query ModelListQuery {
-    models {
-      edges {
-        node {
-          id
-          ...ModelCardFragment
-        }
+const fragment = graphql`
+  fragment ModelListFragment on ModelConnection {
+    edges {
+      node {
+        id
+        ...ModelCardFragment
       }
-      pageInfo {
-        hasNextPage
-      }
+    }
+    pageInfo {
+      hasNextPage
     }
   }
 `;
 
-export const ModelList: FC = () => {
-  const data = useLazyLoadQuery<ModelListQuery>(ModelListQuery, {});
+export const ModelList: FC<{ connection: ModelListFragment$key }> = ({
+  connection,
+}) => {
+  const data = useFragment(fragment, connection);
 
   return (
     <div>
-      {data.models.edges.map((edge) => (
+      {data.edges.map((edge) => (
         <ModelCard key={edge.node.id} model={edge.node} />
       ))}
-      {data.models.pageInfo.hasNextPage && (
+      {data.pageInfo.hasNextPage && (
         <div>{"There's more, but pagination is not implemented yet"}</div>
       )}
     </div>

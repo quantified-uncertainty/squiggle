@@ -6,9 +6,10 @@ import {
   SqValue,
 } from "@quri/squiggle-lang";
 
+import { builder } from "@/graphql/builder";
+import { prisma } from "@/prisma";
+
 import { Prisma } from "@prisma/client";
-import { prisma } from "../../prisma";
-import { builder } from "../builder";
 
 function getKey(code: string): string {
   return crypto.createHash("md5").update(code).digest("base64");
@@ -45,31 +46,6 @@ type SquiggleOutput = {
       bindingsJSON: Prisma.JsonValue;
     }
 );
-
-function runSquiggle(code: string): SquiggleOutput {
-  const MAIN = "main";
-
-  const project = SqProject.create();
-
-  project.setSource(MAIN, code);
-  project.run(MAIN);
-
-  const result = project.getResult(MAIN);
-  const bindings = project.getBindings(MAIN);
-
-  return result.ok
-    ? {
-        isCached: false,
-        isOk: true,
-        resultJSON: squiggleValueToJSON(result.value),
-        bindingsJSON: squiggleValueToJSON(bindings.asValue()),
-      }
-    : {
-        isCached: false,
-        isOk: false,
-        errorString: result.value.toString(),
-      };
-}
 
 const SquiggleOutputObj = builder
   .interfaceRef<SquiggleOutput>("SquiggleOutput")
@@ -115,6 +91,31 @@ builder.objectType(
     }),
   }
 );
+
+function runSquiggle(code: string): SquiggleOutput {
+  const MAIN = "main";
+
+  const project = SqProject.create();
+
+  project.setSource(MAIN, code);
+  project.run(MAIN);
+
+  const result = project.getResult(MAIN);
+  const bindings = project.getBindings(MAIN);
+
+  return result.ok
+    ? {
+        isCached: false,
+        isOk: true,
+        resultJSON: squiggleValueToJSON(result.value),
+        bindingsJSON: squiggleValueToJSON(bindings.asValue()),
+      }
+    : {
+        isCached: false,
+        isOk: false,
+        errorString: result.value.toString(),
+      };
+}
 
 builder.queryField("runSquiggle", (t) =>
   t.field({

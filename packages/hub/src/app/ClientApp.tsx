@@ -5,7 +5,7 @@ import { SessionProvider } from "next-auth/react";
 import { FC, PropsWithChildren } from "react";
 import { RelayEnvironmentProvider } from "react-relay";
 
-import { Layout } from "@/components/layout/Layout";
+import { RootLayout } from "@/components/layout/RootLayout";
 import { getCurrentEnvironment } from "@/graphql/relayEnvironment";
 
 export const ClientApp: FC<PropsWithChildren<{ session: Session | null }>> = ({
@@ -17,7 +17,7 @@ export const ClientApp: FC<PropsWithChildren<{ session: Session | null }>> = ({
   return (
     <SessionProvider session={session}>
       <RelayEnvironmentProvider environment={environment}>
-        <Layout>{children}</Layout>
+        <RootLayout>{children}</RootLayout>
       </RelayEnvironmentProvider>
     </SessionProvider>
   );

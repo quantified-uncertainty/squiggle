@@ -1,3 +1,11 @@
 "use client";
 
-export { NewModel as default } from "./NewModel";
+import { NewModel } from "./NewModel";
+
+export default function NewModelPage() {
+  return (
+    <div className="p-4">
+      <NewModel />
+    </div>
+  );
+}

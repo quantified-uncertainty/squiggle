@@ -6,10 +6,16 @@ import { graphql } from "relay-runtime";
 import { SquigglePlayground } from "@quri/squiggle-components";
 import { Button } from "@/components/ui/Button";
 import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
+import { Controller, useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
 
-const SaveMutation = graphql`
+const Mutation = graphql`
   mutation NewModelMutation($input: MutationCreateSquiggleSnippetModelInput!) {
-    createSquiggleSnippetModel(input: $input) {
+    result: createSquiggleSnippetModel(input: $input) {
+      __typename
+      ... on BaseError {
+        message
+      }
       ... on CreateSquiggleSnippetResult {
         model {
           id
@@ -20,26 +26,66 @@ const SaveMutation = graphql`
 `;
 
 export const NewModel: FC = () => {
-  const [code, setCode] = useState("");
+  const { register, handleSubmit, control, formState } = useForm<{
+    code: string;
+    slug: string;
+  }>();
+
+  const router = useRouter();
+
+  const [error, setError] = useState("");
 
   const [saveMutation, isSaveInFlight] =
-    useMutation<NewModelMutation>(SaveMutation);
+    useMutation<NewModelMutation>(Mutation);
 
-  const save = useCallback(() => {
+  const save = handleSubmit((data) => {
     saveMutation({
       variables: {
         input: {
-          code,
-          slug: "TODO",
+          code: data.code,
+          slug: data.slug,
         },
       },
+      onCompleted(data) {
+        if (data.result.__typename === "BaseError") {
+          setError(data.result.message);
+        } else {
+          router.push("/");
+        }
+      },
+      onError(e) {
+        setError(e.toString());
+      },
     });
-  }, [saveMutation, code]);
+  });
 
   return (
-    <div>
-      <SquigglePlayground onCodeChange={setCode} code={code} />
-      <Button onClick={save}>Save</Button>
-    </div>
+    <form className="space-y-4" onSubmit={save}>
+      <div className="flex items-center gap-4">
+        <div className="font-bold text-xl">New model</div>
+        <div className="flex items-center gap-2">
+          <input
+            className="px-2 py-1 border rounded"
+            placeholder="Slug"
+            {...register("slug")}
+          />
+          <Button onClick={save} disabled={isSaveInFlight}>
+            Save
+          </Button>
+          {error && <div>{error}</div>}
+        </div>
+      </div>
+      <Controller
+        name="code"
+        control={control}
+        rules={{ required: true }}
+        render={({ field }) => (
+          <SquigglePlayground
+            onCodeChange={field.onChange}
+            code={field.value}
+          />
+        )}
+      />
+    </form>
   );
 };
