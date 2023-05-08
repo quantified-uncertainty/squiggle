@@ -21,5 +21,10 @@ export const FrontpageModelList: FC = () => {
     { fetchPolicy: "store-and-network" }
   );
 
-  return <ModelList connection={data.models} />;
+  return (
+    <div>
+      <header className="font-bold text-2xl mb-2">All models</header>
+      <ModelList connection={data.models} showOwner={true} />
+    </div>
+  );
 };

@@ -1,6 +1,6 @@
 import { DeleteModelButtonMutation } from "@/__generated__/DeleteModelButtonMutation.graphql";
 import { Button } from "@/components/ui/Button";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { FC, useCallback, useState } from "react";
 import { useMutation } from "react-relay";
 import { graphql } from "relay-runtime";

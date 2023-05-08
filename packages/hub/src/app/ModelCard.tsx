@@ -8,19 +8,23 @@ import { StyledLink } from "@/components/ui/StyledLink";
 import { modelRoute } from "@/routes";
 import type { ModelCardFragment$key } from "@gen/ModelCardFragment.graphql";
 
-const Fragment = graphql`
+const ModelFragment = graphql`
   fragment ModelCardFragment on Model {
     slug
     owner {
       username
+      ...UserLinkFragment
     }
   }
 `;
 
-export const ModelCard: FC<{
+type Props = {
   model: ModelCardFragment$key;
-}> = ({ model }) => {
-  const data = useFragment(Fragment, model);
+  showOwner?: boolean;
+};
+
+export const ModelCard: FC<Props> = ({ model, showOwner }) => {
+  const data = useFragment(ModelFragment, model);
 
   return (
     <div>
@@ -32,8 +36,13 @@ export const ModelCard: FC<{
           })}
         >
           {data.slug}
-        </StyledLink>{" "}
-        by <UserLink user={data.owner} />
+        </StyledLink>
+        {showOwner ? (
+          <span>
+            {" "}
+            by <UserLink user={data.owner} />
+          </span>
+        ) : null}
       </div>
     </div>
   );

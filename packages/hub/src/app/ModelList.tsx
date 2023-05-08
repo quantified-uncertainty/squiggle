@@ -20,15 +20,18 @@ const fragment = graphql`
   }
 `;
 
-export const ModelList: FC<{ connection: ModelListFragment$key }> = ({
-  connection,
-}) => {
+type Props = {
+  connection: ModelListFragment$key;
+  showOwner?: boolean;
+};
+
+export const ModelList: FC<Props> = ({ connection, showOwner }) => {
   const data = useFragment(fragment, connection);
 
   return (
     <div>
       {data.edges.map((edge) => (
-        <ModelCard key={edge.node.id} model={edge.node} />
+        <ModelCard key={edge.node.id} model={edge.node} showOwner={showOwner} />
       ))}
       {data.pageInfo.hasNextPage && (
         <div>{"There's more, but pagination is not implemented yet"}</div>

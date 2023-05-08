@@ -1,3 +1,4 @@
+"use client";
 import { FC } from "react";
 import { useLazyLoadQuery } from "react-relay";
 import { graphql } from "relay-runtime";
@@ -16,13 +17,22 @@ const UserViewQuery = graphql`
   }
 `;
 
-export const UserView: FC<{ username: string }> = ({ username }) => {
+type Props = {
+  username: string;
+};
+
+export const UserView: FC<Props> = ({ username }) => {
   const data = useLazyLoadQuery<UserViewQuery>(UserViewQuery, { username });
 
   return (
     <div>
-      <div className="text-xl font-bold">{data.userByUsername.username}</div>
-      <ModelList connection={data.userByUsername.models} />
+      <header className="text-2xl font-bold mb-2">
+        {data.userByUsername.username}
+      </header>
+      <section>
+        <header className="text-xl font-bold">Models</header>
+        <ModelList connection={data.userByUsername.models} />
+      </section>
     </div>
   );
 };

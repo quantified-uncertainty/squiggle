@@ -1,10 +1,11 @@
+import { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { PropsWithChildren } from "react";
 
-import { ClientApp } from "./ClientApp";
-
 import "@/styles/main.css";
 import "@quri/squiggle-components/dist/main.css";
+
+import { ClientApp } from "./ClientApp";
 import { authOptions } from "./api/auth/[...nextauth]/authOptions";
 
 export default async function RootLayout({ children }: PropsWithChildren) {
@@ -12,9 +13,6 @@ export default async function RootLayout({ children }: PropsWithChildren) {
 
   return (
     <html>
-      <head>
-        <title>Squiggle Hub</title>
-      </head>
       <body>
         <div className="squiggle-hub">
           <ClientApp session={session}>{children}</ClientApp>
@@ -23,3 +21,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
     </html>
   );
 }
+
+export const metadata: Metadata = {
+  title: "Squiggle Hub",
+};

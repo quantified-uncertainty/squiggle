@@ -3,12 +3,16 @@ import { useLazyLoadQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { ModelViewQuery } from "@gen/ModelViewQuery.graphql";
-import { ModelForm } from "./ModelForm";
+import { SquiggleSnippetForm } from "./SquiggleSnippetForm";
 
 const ModelViewQuery = graphql`
   query ModelViewQuery($input: QueryModelInput!) {
     model(input: $input) {
-      ...ModelFormFragment
+      id
+      content {
+        __typename
+        ...SquiggleSnippetFormFragment
+      }
     }
   }
 `;
@@ -23,5 +27,16 @@ export const ModelView: FC<Props> = ({ username, slug }) => {
     input: { ownerUsername: username, slug },
   });
 
-  return <ModelForm username={username} slug={slug} model={data.model} />;
+  const typename = data.model.content.__typename;
+  if (typename !== "SquiggleSnippet") {
+    return <div>Unknown model type {typename}</div>;
+  }
+
+  return (
+    <SquiggleSnippetForm
+      username={username}
+      slug={slug}
+      content={data.model.content}
+    />
+  );
 };
