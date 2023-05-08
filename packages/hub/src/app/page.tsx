@@ -10,7 +10,7 @@ export default function IndexPage() {
       <div className="space-y-4">
         <FrontpageModelList />
         <div>
-          <StyledLink href={newModelRoute()}>New model</StyledLink>
+          <StyledLink href={newModelRoute()}>Create new model</StyledLink>
         </div>
       </div>
     </div>

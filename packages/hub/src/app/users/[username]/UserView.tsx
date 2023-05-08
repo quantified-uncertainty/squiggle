@@ -30,7 +30,7 @@ export const UserView: FC<Props> = ({ username }) => {
         {data.userByUsername.username}
       </header>
       <section>
-        <header className="text-xl font-bold">Models</header>
+        <header className="text-lg font-bold mb-2">Models</header>
         <ModelList connection={data.userByUsername.models} />
       </section>
     </div>

@@ -7,7 +7,13 @@ builder.queryField("models", (t) =>
     {
       type: Model,
       cursor: "id",
-      resolve: (query) => prisma.model.findMany({ ...query }),
+      resolve: (query) =>
+        prisma.model.findMany({
+          ...query,
+          orderBy: {
+            createdAt: "desc",
+          },
+        }),
     },
     ModelConnection
   )

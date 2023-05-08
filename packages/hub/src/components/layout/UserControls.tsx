@@ -3,6 +3,7 @@ import { signIn, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/Button";
 import { chooseUsernameRoute } from "@/routes";
 import { Session } from "next-auth";
+import { UsernameLink } from "../UsernameLink";
 
 export function UserControls({ session }: { session: Session | null }) {
   if (
@@ -19,7 +20,11 @@ export function UserControls({ session }: { session: Session | null }) {
     <Button onClick={() => signIn()}>Sign In</Button>
   ) : (
     <div className="flex items-center gap-2">
-      <div>{session.user.username}</div>
+      {session.user.username === undefined ? null : (
+        <div>
+          <UsernameLink username={session.user.username} />
+        </div>
+      )}
       <Button onClick={() => signOut()}>Sign Out</Button>
     </div>
   );

@@ -30,9 +30,15 @@ export const ModelList: FC<Props> = ({ connection, showOwner }) => {
 
   return (
     <div>
-      {data.edges.map((edge) => (
-        <ModelCard key={edge.node.id} model={edge.node} showOwner={showOwner} />
-      ))}
+      <div className="space-y-4">
+        {data.edges.map((edge) => (
+          <ModelCard
+            key={edge.node.id}
+            model={edge.node}
+            showOwner={showOwner}
+          />
+        ))}
+      </div>
       {data.pageInfo.hasNextPage && (
         <div>{"There's more, but pagination is not implemented yet"}</div>
       )}
