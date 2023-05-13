@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
-import { Text } from "../ui/Text.js";
-import { HeadedSection } from "../ui/HeadedSection.js";
+import { FormComment } from "../ui/FormComment.js";
+import { FormSection } from "../ui/FormSection.js";
 import { JsImports } from "../../lib/jsImports.js";
 import { JsonEditor } from "../JsonEditor.js";
 import { ErrorAlert, SuccessAlert } from "../Alert.js";
@@ -29,13 +29,13 @@ export const ImportSettingsForm: React.FC<{
 
   return (
     <div className="p-3 max-w-3xl">
-      <HeadedSection title="Import Variables from JSON">
+      <FormSection title="Import Variables from JSON">
         <div className="space-y-6">
-          <Text>
+          <FormComment>
             You can import variables from JSON into your Squiggle code.
             Variables are accessed with dollar signs. For example, "timeNow"
             would be accessed as "$timeNow".
-          </Text>
+          </FormComment>
           <div className="border border-slate-200 mt-6 mb-2">
             <JsonEditor
               value={importString}
@@ -54,7 +54,7 @@ export const ImportSettingsForm: React.FC<{
             )}
           </div>
         </div>
-      </HeadedSection>
+      </FormSection>
     </div>
   );
 };

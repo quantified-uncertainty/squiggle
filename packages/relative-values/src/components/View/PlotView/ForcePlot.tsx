@@ -1,13 +1,12 @@
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 
+import * as d3 from "d3";
+
+import { useCanvas, useCanvasCursor } from "@quri/squiggle-components";
+import { MouseTooltip } from "@quri/ui";
+
 import { useSelectedInterface } from "@/components/Interface/InterfaceProvider";
 import { ModelEvaluator } from "@/values/ModelEvaluator";
-import {
-  MouseTooltip,
-  useCanvas,
-  useCanvasCursor,
-} from "@quri/squiggle-components";
-import * as d3 from "d3";
 import { useViewContext } from "../ViewProvider";
 import { useFilteredItems } from "../hooks";
 import { DrawContext } from "@quri/squiggle-components";

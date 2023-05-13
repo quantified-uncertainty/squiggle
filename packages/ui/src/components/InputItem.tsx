@@ -1,6 +1,14 @@
 import { clsx } from "clsx";
-import React from "react";
 import { Path, UseFormRegister, FieldValues } from "react-hook-form";
+
+export type Props<T extends FieldValues> = {
+  name: Path<T>;
+  label: string;
+  type: "number" | "text" | "color";
+  register: UseFormRegister<T>;
+  disabled?: boolean;
+  fixed?: string | number;
+};
 
 export function InputItem<T extends FieldValues>({
   name,
@@ -9,14 +17,7 @@ export function InputItem<T extends FieldValues>({
   register,
   disabled,
   fixed,
-}: {
-  name: Path<T>;
-  label: string;
-  type: "number" | "text" | "color";
-  register: UseFormRegister<T>;
-  disabled?: boolean;
-  fixed?: string | number;
-}) {
+}: Props<T>) {
   disabled ??= fixed !== undefined;
 
   return (

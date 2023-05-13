@@ -1,12 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { Checkbox } from "../../../components/ui/Checkbox.js";
+import { Checkbox } from "../../components/Checkbox.js";
 import { withRHF } from "./withRHF.js";
-import React from "react";
 
-const meta = {
-  component: Checkbox,
-} satisfies Meta<typeof Checkbox>;
+const meta = { component: Checkbox } satisfies Meta<typeof Checkbox>;
 export default meta;
 type Story = StoryObj<typeof Checkbox>;
 
@@ -31,17 +28,6 @@ export const Checked: Story = {
   },
 };
 
-export const Fixed: Story = {
-  render: withRHF((args, register) => (
-    <Checkbox {...args} register={register} />
-  )),
-  args: {
-    name: "fieldName",
-    label: "Checkbox text",
-    fixed: true,
-  },
-};
-
 export const WithTooltip: Story = {
   render: withRHF((args, register) => (
     <Checkbox {...args} register={register} />
@@ -49,7 +35,7 @@ export const WithTooltip: Story = {
   args: {
     name: "fieldName",
     label: "Checkbox text",
-    fixed: true,
+    disabled: true,
     tooltip: "This text shows on hover",
   },
 };

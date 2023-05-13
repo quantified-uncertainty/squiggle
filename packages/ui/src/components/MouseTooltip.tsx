@@ -1,6 +1,7 @@
-import * as React from "react";
+import { FC, PropsWithChildren, ReactNode, memo } from "react";
 
 import {
+  FloatingPortal,
   offset,
   shift,
   useClientPoint,
@@ -8,16 +9,15 @@ import {
   useInteractions,
 } from "@floating-ui/react";
 
-import { FloatingPortal } from "@floating-ui/react";
-import { FC, PropsWithChildren, ReactNode, memo } from "react";
-
 function useMouseTooltip({ isOpen }: { isOpen: boolean }) {
   const floating = useFloating({
     open: isOpen,
     middleware: [offset(4), shift()],
   });
 
-  const floatingClientPoint = useClientPoint(floating.context);
+  const floatingClientPoint = useClientPoint(floating.context, {
+    enabled: isOpen,
+  });
 
   const floatingInteractions = useInteractions([floatingClientPoint]);
 
@@ -44,21 +44,14 @@ export const MouseTooltip: FC<Props> = memo(function MouseTooltip({
   isOpen,
   children,
 }) {
-  const tooltip = useMouseTooltip({
-    isOpen,
-  });
+  const tooltip = useMouseTooltip({ isOpen });
 
   return (
     <div ref={tooltip.containerRef} {...tooltip.containerProps}>
       {children}
       {isOpen && (
         <FloatingPortal>
-          <div
-            ref={tooltip.ref}
-            style={tooltip.styles}
-            className="squiggle"
-            {...tooltip.props}
-          >
+          <div ref={tooltip.ref} style={tooltip.styles} {...tooltip.props}>
             {render()}
           </div>
         </FloatingPortal>

@@ -1,16 +1,14 @@
-import React, { Fragment, PropsWithChildren } from "react";
+import { ComponentProps, FC, Fragment, ReactNode } from "react";
 import { Tab } from "@headlessui/react";
-import clsx from "clsx";
-
-// copied from squiggle-components
+import { clsx } from "clsx";
 
 type StyledTabProps = {
   name: string;
-  icon?: (props: React.ComponentProps<"svg">) => JSX.Element;
+  icon: (props: ComponentProps<"svg">) => JSX.Element;
 };
 
-type StyledTabType = React.FC<StyledTabProps> & {
-  List: React.FC<PropsWithChildren>;
+type StyledTabType = FC<StyledTabProps> & {
+  List: FC<{ children: ReactNode }>;
   Group: typeof Tab.Group;
   Panels: typeof Tab.Panels;
   Panel: typeof Tab.Panel;
@@ -27,16 +25,14 @@ export const StyledTab: StyledTabType = ({ name, icon: Icon }) => {
               selected && "bg-white shadow-sm ring-1 ring-black ring-opacity-5"
             )}
           >
-            {Icon && (
-              <Icon
-                className={clsx(
-                  "-ml-0.5 mr-2 h-4 w-4",
-                  selected
-                    ? "text-slate-500"
-                    : "text-gray-400 group-hover:text-gray-900"
-                )}
-              />
-            )}
+            <Icon
+              className={clsx(
+                "-ml-0.5 mr-2 h-4 w-4",
+                selected
+                  ? "text-slate-500"
+                  : "text-gray-400 group-hover:text-gray-900"
+              )}
+            />
             <span
               className={clsx(
                 selected
@@ -53,13 +49,11 @@ export const StyledTab: StyledTabType = ({ name, icon: Icon }) => {
   );
 };
 
-StyledTab.List = function StyledTabList({ children }) {
-  return (
-    <Tab.List className="flex w-fit p-0.5 rounded-md bg-slate-100 hover:bg-slate-200">
-      {children}
-    </Tab.List>
-  );
-};
+StyledTab.List = ({ children }) => (
+  <Tab.List className="flex w-fit p-0.5 rounded-md bg-slate-100 hover:bg-slate-200">
+    {children}
+  </Tab.List>
+);
 
 StyledTab.Group = Tab.Group;
 StyledTab.Panels = Tab.Panels;

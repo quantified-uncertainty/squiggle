@@ -1,5 +1,4 @@
 import { clsx } from "clsx";
-import React from "react";
 import { FieldValues, Path, UseFormRegister } from "react-hook-form";
 
 export function Radio<T extends FieldValues>({
@@ -26,17 +25,15 @@ export function Radio<T extends FieldValues>({
       {options.map((option) => {
         const htmlId = `${name}@${option.id}`;
         return (
-          <div key={option.id} className="flex items-center gap-2 group">
+          <div key={option.id} className="flex items-center gap-1 group">
             <input
               id={htmlId}
               type="radio"
               {...register(name)}
               value={option.id}
               className={clsx(
-                "appearance-none ml-1 w-2 h-2 rounded-full ring-gray-300 ring-offset-2 ring-2",
-                option.disabled
-                  ? "cursor-not-allowed"
-                  : "cursor-pointer checked:bg-indigo-500 group-hover:ring-indigo-500 checked:ring-indigo-500"
+                "form-radio focus:ring-transparent text-indigo-500",
+                option.disabled ? "cursor-not-allowed" : "cursor-pointer"
               )}
               defaultChecked={option.id === initialId}
               disabled={option.disabled}

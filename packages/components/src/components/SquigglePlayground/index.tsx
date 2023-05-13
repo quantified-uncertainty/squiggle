@@ -17,6 +17,8 @@ import { UseFormRegister, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 
 import { Env } from "@quri/squiggle-lang";
+import { StyledTab } from "@quri/ui";
+
 import { useMaybeControlledValue, useSquiggle } from "../../lib/hooks/index.js";
 import { SquiggleArgs } from "../../lib/hooks/useSquiggle.js";
 
@@ -29,7 +31,6 @@ import {
   SquiggleViewerProps,
 } from "../SquiggleViewer/index.js";
 import { ViewSettingsForm, viewSettingsSchema } from "../ViewSettingsForm.js";
-import { StyledTab } from "../ui/StyledTab.js";
 
 import { ImportSettingsForm } from "./ImportSettingsForm.js";
 import { RunControls } from "./RunControls/index.js";

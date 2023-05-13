@@ -1,12 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { Radio } from "../../../components/ui/Radio.js";
+import { Radio } from "../../components/Radio.js";
 import { withRHF } from "./withRHF.js";
-import React from "react";
 
-const meta = {
-  component: Radio,
-} satisfies Meta<typeof Radio>;
+const meta = { component: Radio } satisfies Meta<typeof Radio>;
 export default meta;
 type Story = StoryObj<typeof Radio>;
 

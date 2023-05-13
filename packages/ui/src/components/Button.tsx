@@ -1,13 +1,12 @@
-import React from "react";
+import { FC, PropsWithChildren } from "react";
 import { clsx } from "clsx";
 
-type Props = {
+type Props = PropsWithChildren<{
   onClick: () => void;
-  children: React.ReactNode;
   wide?: boolean; // stretch the button horizontally
-};
+}>;
 
-export const Button: React.FC<Props> = ({ onClick, wide, children }) => {
+export const Button: FC<Props> = ({ onClick, wide, children }) => {
   return (
     <button
       className={clsx(

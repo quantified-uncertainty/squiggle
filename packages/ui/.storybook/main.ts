@@ -3,10 +3,9 @@ import type { StorybookConfig } from "@storybook/react-vite";
 const config: StorybookConfig = {
   stories: [
     "../src/stories/**/*.mdx",
-    // https://storybook.js.org/docs/react/configure/overview#with-a-configuration-object
     {
       directory: "../src/stories",
-      titlePrefix: "Squiggle",
+      titlePrefix: "UI",
       files: "**/*.stories.@(js|jsx|ts|tsx)",
     },
   ],
@@ -21,10 +20,7 @@ const config: StorybookConfig = {
       },
     },
   ],
-  framework: {
-    name: "@storybook/react-vite",
-    options: {},
-  },
+  framework: "@storybook/react-vite",
   typescript: {
     check: false,
     reactDocgen: "react-docgen-typescript",

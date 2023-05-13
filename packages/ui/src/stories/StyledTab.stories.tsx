@@ -1,9 +1,8 @@
-import React from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { StyledTab } from "../../components/ui/StyledTab.js";
-import { CogIcon } from "@heroicons/react/solid/esm/index.js";
-import { CodeIcon } from "@heroicons/react/solid/esm/index.js";
+import { StyledTab } from "../components/StyledTab.js";
+
+const Icon = () => <div />;
 
 /**
  * StyledTab component wraps the [\<Tab\>](https://headlessui.com/react/tabs) component from Headless UI.
@@ -19,8 +18,8 @@ export const Default: Story = {
   render: () => (
     <StyledTab.Group>
       <StyledTab.List>
-        <StyledTab name="Code" icon={CogIcon} />
-        <StyledTab name="Settings" icon={CodeIcon} />
+        <StyledTab name="Code" icon={Icon} />
+        <StyledTab name="Settings" icon={Icon} />
       </StyledTab.List>
       <div className="mt-2 border border-slate-200 p-2">
         <StyledTab.Panels>
@@ -31,3 +30,5 @@ export const Default: Story = {
     </StyledTab.Group>
   ),
 };
+
+// TODO - story for icon attribute

@@ -1,6 +1,6 @@
 import { ClipboardCopyIcon } from "@heroicons/react/solid/esm/index.js";
 import React, { useState } from "react";
-import { Button } from "../ui/Button.js";
+import { Button } from "@quri/ui";
 
 export const ShareButton: React.FC = () => {
   const [isCopied, setIsCopied] = useState(false);
