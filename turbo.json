@@ -29,7 +29,7 @@
       "dependsOn": ["^build"],
       "outputs": [".next/**", "./models/cache/**"]
     },
-    "@quri/api-server#build": {
+    "@quri/hub#build": {
       "dependsOn": ["^build"],
       "outputs": [".next/**", "../../node_modules/.prisma"]
     },
