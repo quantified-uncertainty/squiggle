@@ -1,2 +1,4 @@
 .vscode
 .next
+src/__generated__
+schema.graphql

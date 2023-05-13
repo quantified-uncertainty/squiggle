@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   flip,
   shift,
+  offset,
   useDismiss,
   useFloating,
   useHover,
@@ -22,11 +23,11 @@ export const TextTooltip: FC<Props> = ({ text, children }) => {
     placement: "top", // TODO - make configurable
     open: isOpen,
     onOpenChange: setIsOpen,
-    middleware: [shift(), flip()],
+    middleware: [shift(), offset(2), flip()],
   });
 
   const { getReferenceProps, getFloatingProps } = useInteractions([
-    useHover(context),
+    useHover(context, { delay: 300 }),
     useRole(context, { role: "tooltip" }),
     useDismiss(context),
   ]);

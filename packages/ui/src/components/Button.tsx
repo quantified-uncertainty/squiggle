@@ -2,7 +2,7 @@ import { FC, PropsWithChildren } from "react";
 import { clsx } from "clsx";
 
 type Props = PropsWithChildren<{
-  onClick: () => void;
+  onClick?: () => void;
   wide?: boolean; // stretch the button horizontally
 }>;
 
