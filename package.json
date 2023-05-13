@@ -6,13 +6,13 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.26.1",
-    "prettier": "^2.8.7",
-    "turbo": "^1.8.8",
-    "turbo-ignore": "^1.8.8"
+    "prettier": "^3.0.0-alpha.11",
+    "prettier2": "npm:prettier@^2",
+    "turbo": "^1.9.3",
+    "turbo-ignore": "^1.9.3"
   },
   "workspaces": [
     "packages/*"
   ],
-  "packageManager": "yarn@1.22.17",
-  "dependencies": {}
+  "packageManager": "yarn@1.22.17"
 }

@@ -1,13 +1,13 @@
 import * as vscode from "vscode";
 
-import { parse, AST } from "@quri/squiggle-lang";
+import { parse, ASTNode } from "@quri/squiggle-lang";
 
 const tokenTypes = ["enum", "function", "variable", "property"];
 const tokenModifiers = ["declaration", "documentation"];
 const legend = new vscode.SemanticTokensLegend(tokenTypes, tokenModifiers);
 
 const convertRange = (
-  range: Extract<AST, { type: "Identifier" }>["location"]
+  range: Extract<ASTNode, { type: "Identifier" }>["location"]
 ) =>
   new vscode.Range(
     new vscode.Position(range.start.line - 1, range.start.column - 1),
@@ -16,7 +16,7 @@ const convertRange = (
 
 const populateTokensBuilder = (
   tokensBuilder: vscode.SemanticTokensBuilder,
-  node: AST
+  node: ASTNode
   // bindings: { [key: string]: boolean }
 ) => {
   switch (node.type) {

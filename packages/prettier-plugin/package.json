@@ -1,0 +1,36 @@
+{
+  "name": "@quri/prettier-plugin-squiggle",
+  "version": "0.7.0",
+  "homepage": "https://squiggle-language.com",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest"
+  },
+  "dependencies": {
+    "@quri/squiggle-lang": "^0.7.0",
+    "prettier": "^3.0.0-alpha.11"
+  },
+  "peerDependencies": {},
+  "devDependencies": {
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.0.4"
+  },
+  "source": "./src/index.ts",
+  "exports": {
+    ".": {
+      "require": "./src/mock-cjs.cjs",
+      "import": "./dist/esm/src/index.js",
+      "types": "./dist/types/src/index.d.ts"
+    },
+    "./standalone": {
+      "import": "./dist/esm/src/standalone.js",
+      "types": "./dist/types/src/index.d.ts"
+    }
+  },
+  "main": "./src/mock-cjs.cjs",
+  "module": "./dist/esm/src/index.js",
+  "types": "./dist/types/src/index.d.ts"
+}

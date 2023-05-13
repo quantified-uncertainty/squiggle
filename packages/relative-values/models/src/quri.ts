@@ -1,6 +1,6 @@
 import { buildGraphModel, Model } from "@/model/utils";
 import { Catalog, InterfaceWithModels, Item } from "@/types";
-import { Map } from "immutable";
+import { sq } from "@quri/squiggle-lang";
 
 function getCatalog(): Catalog {
   const items: Item[] = [
@@ -105,7 +105,7 @@ function getTextModel(): Model {
     author: "Nuño Sempere",
     title: "Nuño Sempere 2022 — Text",
     mode: "text",
-    code: `blog_post_to_software = SampleSet.fromDist(0.1 to 100)
+    code: sq`blog_post_to_software = SampleSet.fromDist(0.1 to 100)
 items = {
   quri_papers_1: pointMass(1),
   quri_papers_2: 0.1 to 2,

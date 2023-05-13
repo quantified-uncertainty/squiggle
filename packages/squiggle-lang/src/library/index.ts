@@ -1,3 +1,4 @@
+import { INDEX_LOOKUP_FUNCTION } from "../ast/toExpression.js";
 import { Namespace, NamespaceMap } from "../reducer/bindings.js";
 import { ErrorMessage, REOther } from "../reducer/ErrorMessage.js";
 import { BuiltinLambda } from "../reducer/lambda.js";
@@ -15,12 +16,12 @@ const makeStdLib = (): Namespace => {
 
   // field lookups
   res = res.set(
-    "$_atIndex_$",
+    INDEX_LOOKUP_FUNCTION,
     vLambda(
-      new BuiltinLambda("$_atIndex_$", (inputs) => {
+      new BuiltinLambda(INDEX_LOOKUP_FUNCTION, (inputs) => {
         if (inputs.length !== 2) {
           // should never happen
-          return ErrorMessage.throw(REOther("$_atIndex_$ internal error"));
+          return ErrorMessage.throw(REOther("Index lookup internal error"));
         }
 
         const [obj, key] = inputs;
