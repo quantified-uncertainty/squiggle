@@ -1,0 +1,13 @@
+{
+  "extends": ["//"],
+  "pipeline": {
+    "build": {
+      "dependsOn": [
+        "^build",
+        "@quri/squiggle-components#bundle",
+        "@quri/prettier-plugin-squiggle#build" // TODO - why is this necessary?
+      ],
+      "outputs": ["dist/**"]
+    }
+  }
+}
