@@ -71,7 +71,6 @@
   "dependencies": {
     "@floating-ui/react": "^0.24.0",
     "@headlessui/react": "^1.7.14",
-    "@heroicons/react": "^2.0.18",
     "framer-motion": "^10.12.10",
     "react-hook-form": "^7.43.9",
     "react-use": "^17.4.0"

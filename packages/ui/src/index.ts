@@ -10,3 +10,5 @@ export { NumberInput } from "./components/NumberInput.js";
 export { TextInput } from "./components/TextInput.js";
 export { ColorInput } from "./components/ColorInput.js";
 export { Radio } from "./components/Radio.js";
+
+export { XIcon } from "./icons/XIcon.js";

@@ -1,4 +1,4 @@
-import { XIcon } from "@heroicons/react/solid/esm/index.js";
+import { XIcon } from "../icons/XIcon.js";
 import { clsx } from "clsx";
 import { motion } from "framer-motion";
 import {
@@ -35,14 +35,14 @@ const Overlay: React.FC = () => {
 const ModalHeader: React.FC<PropsWithChildren> = ({ children }) => {
   const { close } = useContext(ModalContext);
   return (
-    <header className="px-5 py-3 border-b border-gray-200 font-bold flex items-center justify-between">
+    <header className="pl-5 pr-4 py-3 border-b border-gray-200 font-bold flex items-center justify-between">
       <div>{children}</div>
       <button
-        className="px-1 bg-transparent cursor-pointer text-gray-700 hover:text-accent-500"
+        className="bg-transparent cursor-pointer fill-slate-300 stroke-slate-300 hover:stroke-slate-500 hover:fill-slate-500"
         type="button"
         onClick={close}
       >
-        <XIcon className="h-5 w-5 cursor-pointer text-slate-400 hover:text-slate-500" />
+        <XIcon size={16} className="m-1" />
       </button>
     </header>
   );
