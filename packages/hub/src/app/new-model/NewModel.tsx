@@ -65,7 +65,12 @@ export const NewModel: FC = () => {
       <div className="flex items-center gap-4">
         <div className="font-bold text-xl">New model</div>
         <div className="flex items-center gap-2">
-          <TextInput placeholder="Slug" register={register} name="slug" />
+          <TextInput
+            register={register}
+            name="slug"
+            placeholder="Slug"
+            size="small"
+          />
           <Button onClick={save} disabled={isSaveInFlight}>
             Save
           </Button>

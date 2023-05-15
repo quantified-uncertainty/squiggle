@@ -28,6 +28,21 @@ export const WithPlaceholder: Story = {
   },
 };
 
+/**
+ * Same height as 32px `<Button />`.
+ */
+export const Small: Story = {
+  render: withRHF((args, register) => (
+    <TextInput {...args} register={register} />
+  )),
+  args: {
+    name: "fieldName",
+    label: "Label",
+    size: "small",
+    placeholder: "Small",
+  },
+};
+
 export const WithoutLabel: Story = {
   render: withRHF((args, register) => (
     <TextInput {...args} register={register} />

@@ -1,5 +1,8 @@
 import { clsx } from "clsx";
 import { Path, UseFormRegister, FieldValues } from "react-hook-form";
+import { Labeled } from "./Labeled.js";
+
+type Size = "small" | "normal";
 
 export type Props<T extends FieldValues, Other extends {} = {}> = {
   name: Path<T>;
@@ -8,6 +11,7 @@ export type Props<T extends FieldValues, Other extends {} = {}> = {
   register: UseFormRegister<T>;
   disabled?: boolean;
   fixed?: string | number;
+  size?: Size;
 } & Other;
 
 export function InputItem<T extends FieldValues, Other extends {} = {}>({
@@ -17,6 +21,7 @@ export function InputItem<T extends FieldValues, Other extends {} = {}>({
   register,
   disabled,
   fixed,
+  size = "normal",
   ...other
 }: Props<T, Other>) {
   disabled ??= fixed !== undefined;
@@ -29,7 +34,8 @@ export function InputItem<T extends FieldValues, Other extends {} = {}>({
       {...register(name, { valueAsNumber: type === "number" })}
       {...other}
       className={clsx(
-        "form-input max-w-lg block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md",
+        "form-input block w-full max-w-lg sm:max-w-xs text-sm shadow-sm rounded-md border-gray-300 focus:ring-indigo-500 active:ring-indigo-500 focus:border-indigo-500 active:border-indigo-500",
+        size === "normal" ? "h-10" : "h-8",
         disabled && "text-gray-400"
       )}
     />
@@ -38,16 +44,8 @@ export function InputItem<T extends FieldValues, Other extends {} = {}>({
   return label === undefined ? (
     input
   ) : (
-    <label className="block">
-      <div
-        className={clsx(
-          "text-sm font-medium mb-1",
-          disabled ? "text-gray-400" : "text-gray-600"
-        )}
-      >
-        {label}
-      </div>
+    <Labeled label={label} disabled={disabled}>
       {input}
-    </label>
+    </Labeled>
   );
 }

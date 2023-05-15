@@ -16,3 +16,14 @@ export const Default: Story = {
     label: "Input label",
   },
 };
+
+export const Small: Story = {
+  render: withRHF((args, register) => (
+    <NumberInput {...args} register={register} />
+  )),
+  args: {
+    name: "fieldName",
+    label: "Small input label",
+    size: "small",
+  },
+};
