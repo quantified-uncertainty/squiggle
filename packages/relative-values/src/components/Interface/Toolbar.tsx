@@ -1,6 +1,7 @@
-import { modelToJSON } from "@/model/utils";
 import { FC, useState } from "react";
-import { Button } from "../ui/Button";
+import { Button } from "@quri/ui";
+
+import { modelToJSON } from "@/model/utils";
 import { useSelectedInterface } from "./InterfaceProvider";
 
 const SaveButton: FC = () => {
@@ -23,8 +24,8 @@ const SaveButton: FC = () => {
   };
 
   return (
-    <div className="flex items-center gap-2">
-      <Button onClick={copy} className="w-30">
+    <div className="w-30">
+      <Button onClick={copy} wide>
         {isCopied ? (
           <span className="text-xs">Saved to clipboard!</span>
         ) : (

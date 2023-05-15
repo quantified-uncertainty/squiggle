@@ -11,10 +11,10 @@ export const ShareButton: React.FC = () => {
   };
 
   return (
-    <div className="w-36">
+    <div className="w-40">
       <Button onClick={copy} wide>
         {isCopied ? (
-          "Copied to clipboard!"
+          "Copied!"
         ) : (
           <div className="flex items-center space-x-1">
             <ClipboardCopyIcon className="w-4 h-4" />
