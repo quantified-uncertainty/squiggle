@@ -14,7 +14,7 @@ describe("comments", () => {
 123`)
     ).toBe(`// line comment
 123`);
-  });
+  }, 20000); // first call to prettier is slow and occasionally causes timeouts in Github Actions
 
   test("comment indentation is ignored", async () => {
     expect(
