@@ -17,6 +17,26 @@ export const Default: Story = {
   },
 };
 
+export const WithPlaceholder: Story = {
+  render: withRHF((args, register) => (
+    <TextInput {...args} register={register} />
+  )),
+  args: {
+    name: "fieldName",
+    label: "Label",
+    placeholder: "Placeholder...",
+  },
+};
+
+export const WithoutLabel: Story = {
+  render: withRHF((args, register) => (
+    <TextInput {...args} register={register} />
+  )),
+  args: {
+    name: "fieldName",
+  },
+};
+
 export const Disabled: Story = {
   render: withRHF((args, register) => (
     <TextInput {...args} register={register} />

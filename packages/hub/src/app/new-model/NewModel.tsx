@@ -6,7 +6,7 @@ import { useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { SquigglePlayground } from "@quri/squiggle-components";
-import { Button } from "@quri/ui";
+import { Button, TextInput } from "@quri/ui";
 
 import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
 
@@ -27,7 +27,7 @@ const Mutation = graphql`
 `;
 
 export const NewModel: FC = () => {
-  const { register, handleSubmit, control, formState } = useForm<{
+  const { register, handleSubmit, control } = useForm<{
     code: string;
     slug: string;
   }>();
@@ -65,11 +65,7 @@ export const NewModel: FC = () => {
       <div className="flex items-center gap-4">
         <div className="font-bold text-xl">New model</div>
         <div className="flex items-center gap-2">
-          <input
-            className="px-2 py-1 border rounded"
-            placeholder="Slug"
-            {...register("slug")}
-          />
+          <TextInput placeholder="Slug" register={register} name="slug" />
           <Button onClick={save} disabled={isSaveInFlight}>
             Save
           </Button>
