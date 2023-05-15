@@ -1,6 +1,6 @@
 import { FC } from "react";
 
-import { Button } from "./Button";
+import { Button } from "@quri/ui";
 import { Dropdown } from "./Dropdown";
 
 type Props = {

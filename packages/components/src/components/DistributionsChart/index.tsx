@@ -1,3 +1,6 @@
+import { clsx } from "clsx";
+import * as d3 from "d3";
+import isEqual from "lodash/isEqual.js";
 import * as React from "react";
 import { FC, useCallback, useState } from "react";
 
@@ -8,8 +11,8 @@ import {
   SqDistributionTag,
   SqShape,
 } from "@quri/squiggle-lang";
+import { MouseTooltip } from "@quri/ui";
 
-import isEqual from "lodash/isEqual.js";
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
 import {
   distance,
@@ -23,10 +26,8 @@ import { flattenResult, sqScaleToD3 } from "../../lib/utility.js";
 import { ErrorAlert } from "../Alert.js";
 import { SummaryTable } from "./SummaryTable.js";
 
-import * as d3 from "d3";
 import { Point } from "../../lib/draw/types.js";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
-import { MouseTooltip } from "../ui/MouseTooltip.js";
 
 export type DistributionsChartProps = {
   plot: SqDistributionsPlot;
@@ -249,7 +250,10 @@ const InnerDistributionsChart: FC<{
       isOpen={!!discreteTooltip}
       render={() => (
         <div
-          className="bg-white border border-gray-300 rounded text-xs p-2 grid gap-x-2"
+          className={clsx(
+            "bg-white border border-gray-300 rounded text-xs p-2 grid gap-x-2",
+            "squiggle" // tooltip is rendered in a portal, so we need this because squiggle-components styles depend on it
+          )}
           style={{
             gridTemplateColumns: "min-content min-content",
           }}

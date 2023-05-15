@@ -1,6 +1,8 @@
 import React from "react";
 import { clsx } from "clsx";
 
+import { TextTooltip } from "@quri/ui";
+
 import {
   CheckCircleIcon,
   PauseIcon,
@@ -10,7 +12,6 @@ import {
 
 import { Toggle } from "../../ui/Toggle.js";
 import { RunnerState } from "./useRunnerState.js";
-import { Tooltip } from "../../ui/Tooltip.js";
 import { isMac } from "../../../lib/utility.js";
 
 export const RunControls: React.FC<RunnerState> = ({
@@ -27,7 +28,7 @@ export const RunControls: React.FC<RunnerState> = ({
   const text = isMac() ? "Cmd+Enter" : "Ctrl+Enter";
 
   const withTooltip = (jsx: JSX.Element) => (
-    <Tooltip text={text}>{jsx}</Tooltip>
+    <TextTooltip text={text}>{jsx}</TextTooltip>
   );
 
   const toggle = (

@@ -1,6 +1,6 @@
 import React from "react";
 
-export const HeadedSection: React.FC<{
+export const FormSection: React.FC<{
   title: string;
   children: React.ReactNode;
 }> = ({ title, children }) => (

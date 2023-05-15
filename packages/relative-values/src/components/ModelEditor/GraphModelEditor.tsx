@@ -1,14 +1,15 @@
+import { SquiggleEditor } from "@quri/squiggle-components";
+import { Button } from "@quri/ui";
+import clsx from "clsx";
+import { FC, Fragment, PropsWithChildren, useMemo } from "react";
+
 import {
   getModelCode,
   GraphModel,
   updateModelCommonCode,
   updateModelNode,
 } from "@/model/utils";
-import { SquiggleEditor } from "@quri/squiggle-components";
-import clsx from "clsx";
-import { FC, Fragment, PropsWithChildren, useMemo } from "react";
 import { useSelectedInterface } from "../Interface/InterfaceProvider";
-import { Button } from "../ui/Button";
 import { EstimateProps } from "./types";
 
 const Label: FC<PropsWithChildren<{ error?: boolean }>> = ({

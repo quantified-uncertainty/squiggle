@@ -1,0 +1,8 @@
+/*
+* These styles are used only by this package's storybook and by those consumers who don't want to use React.
+* Generally, you should generate styles for this package with Tailwind instead. See the README file for details.
+*/
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

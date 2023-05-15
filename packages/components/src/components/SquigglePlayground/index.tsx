@@ -17,6 +17,8 @@ import { UseFormRegister, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 
 import { Env } from "@quri/squiggle-lang";
+import { StyledTab, Button, TextTooltip } from "@quri/ui";
+
 import { useMaybeControlledValue, useSquiggle } from "../../lib/hooks/index.js";
 import { SquiggleArgs } from "../../lib/hooks/useSquiggle.js";
 
@@ -29,7 +31,6 @@ import {
   SquiggleViewerProps,
 } from "../SquiggleViewer/index.js";
 import { ViewSettingsForm, viewSettingsSchema } from "../ViewSettingsForm.js";
-import { StyledTab } from "../ui/StyledTab.js";
 
 import { ImportSettingsForm } from "./ImportSettingsForm.js";
 import { RunControls } from "./RunControls/index.js";
@@ -40,8 +41,6 @@ import {
   playgroundSettingsSchema,
   type PlaygroundFormFields,
 } from "./playgroundSettings.js";
-import { Button } from "../ui/Button.js";
-import { Tooltip } from "../ui/Tooltip.js";
 
 type PlaygroundProps = SquiggleArgs &
   Omit<SquiggleViewerProps, "result"> & {
@@ -231,11 +230,11 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
               </div>
               <div className="flex gap-2 items-center">
                 <RunControls {...runnerState} />
-                <Tooltip text={isMac() ? "Option+Shift+f" : "Alt+Shift+f"}>
+                <TextTooltip text={isMac() ? "Option+Shift+f" : "Alt+Shift+f"}>
                   <div>
                     <Button onClick={editorRef.current?.format}>Format</Button>
                   </div>
-                </Tooltip>
+                </TextTooltip>
                 {showShareButton && <ShareButton />}
               </div>
             </div>

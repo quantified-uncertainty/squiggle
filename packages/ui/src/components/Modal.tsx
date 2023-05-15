@@ -1,14 +1,22 @@
-import { motion } from "framer-motion";
-import React, { useContext } from "react";
-import * as ReactDOM from "react-dom";
-import { XIcon } from "@heroicons/react/solid/esm/index.js";
+import { XIcon } from "../icons/XIcon.js";
 import { clsx } from "clsx";
-import { useWindowScroll, useWindowSize } from "../../lib/hooks/react-use.js";
+import { motion } from "framer-motion";
+import {
+  PropsWithChildren,
+  createContext,
+  forwardRef,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import { createPortal } from "react-dom";
+
+import { useWindowScroll, useWindowSize } from "../hooks/react-use.js";
 
 type ModalContextShape = {
   close: () => void;
 };
-const ModalContext = React.createContext<ModalContextShape>({
+const ModalContext = createContext<ModalContextShape>({
   close: () => undefined,
 });
 
@@ -24,40 +32,38 @@ const Overlay: React.FC = () => {
   );
 };
 
-const ModalHeader: React.FC<{
-  children: React.ReactNode;
-}> = ({ children }) => {
+const ModalHeader: React.FC<PropsWithChildren> = ({ children }) => {
   const { close } = useContext(ModalContext);
   return (
-    <header className="px-5 py-3 border-b border-gray-200 font-bold flex items-center justify-between">
+    <header className="pl-5 pr-4 py-3 border-b border-gray-200 font-bold flex items-center justify-between">
       <div>{children}</div>
       <button
-        className="px-1 bg-transparent cursor-pointer text-gray-700 hover:text-accent-500"
+        className="bg-transparent cursor-pointer fill-slate-300 stroke-slate-300 hover:stroke-slate-500 hover:fill-slate-500"
         type="button"
         onClick={close}
       >
-        <XIcon className="h-5 w-5 cursor-pointer text-slate-400 hover:text-slate-500" />
+        <XIcon size={16} className="m-1" />
       </button>
     </header>
   );
 };
 
 // TODO - get rid of forwardRef, support `focus` and `{...hotkeys}` via smart props
-const ModalBody = React.forwardRef<
-  HTMLDivElement,
-  JSX.IntrinsicElements["div"]
->(function ModalBody(props, ref) {
-  return <div ref={ref} className="px-5 py-3 overflow-auto" {...props} />;
-});
+const ModalBody = forwardRef<HTMLDivElement, JSX.IntrinsicElements["div"]>(
+  function ModalBody(props, ref) {
+    return <div ref={ref} className="px-5 py-3 overflow-auto" {...props} />;
+  }
+);
 
-const ModalFooter: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+const ModalFooter: React.FC<PropsWithChildren> = ({ children }) => (
   <div className="px-5 py-3 border-t border-gray-200">{children}</div>
 );
 
-const ModalWindow: React.FC<{
-  children: React.ReactNode;
-  container?: HTMLElement;
-}> = ({ children, container }) => {
+const ModalWindow: React.FC<
+  PropsWithChildren<{
+    container?: HTMLElement;
+  }>
+> = ({ children, container }) => {
   // This component works in two possible modes:
   // 1. container mode - the modal is rendered inside a container element
   // 2. centered mode - the modal is rendered in the middle of the screen
@@ -112,11 +118,12 @@ const ModalWindow: React.FC<{
       position = undefined; // modal is hard to fit in the container, fallback to positioning it in the middle of the screen
     }
   }
+
   return (
     <div
       className={clsx(
         "bg-white rounded-md shadow-toast flex flex-col overflow-auto border",
-        position ? "fixed" : null
+        position && "fixed"
       )}
       style={{
         width: naturalWidth,
@@ -132,34 +139,44 @@ const ModalWindow: React.FC<{
   );
 };
 
-type ModalType = React.FC<{
-  children: React.ReactNode;
-  container?: HTMLElement; // if specified, modal will be positioned over the visible part of the container, if it's not too small
-  close: () => void;
-}> & {
+type ModalType = React.FC<
+  PropsWithChildren<{
+    // if specified, modal will be positioned over the visible part of the container, if it's not too small
+    container?: HTMLElement;
+    // When `important: '.container-classname'` is used, this should be set because we render Modal in a portal.
+    // `squiggle-components` set this to `squiggle`.
+    // See also: https://tailwindcss.com/docs/configuration#selector-strategy
+    tailwindSelector?: string;
+    close: () => void;
+  }>
+> & {
   Body: typeof ModalBody;
   Footer: typeof ModalFooter;
   Header: typeof ModalHeader;
 };
 
-export const Modal: ModalType = ({ children, container, close }) => {
-  const [el] = React.useState(() => document.createElement("div"));
+export const Modal: ModalType = ({
+  children,
+  container,
+  tailwindSelector,
+  close,
+}) => {
+  const [el] = useState(() => document.createElement("div"));
 
-  React.useEffect(() => {
+  useEffect(() => {
     document.body.appendChild(el);
     return () => {
       document.body.removeChild(el);
     };
   }, [el]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         close();
       }
     };
     document.addEventListener("keydown", handleEscape);
-
     return () => {
       document.removeEventListener("keydown", handleEscape);
     };
@@ -167,7 +184,7 @@ export const Modal: ModalType = ({ children, container, close }) => {
 
   const modal = (
     <ModalContext.Provider value={{ close }}>
-      <div className="squiggle">
+      <div className={tailwindSelector}>
         <div className="fixed inset-0 z-40 flex justify-center items-center">
           <Overlay />
           <ModalWindow container={container}>{children}</ModalWindow>
@@ -176,7 +193,7 @@ export const Modal: ModalType = ({ children, container, close }) => {
     </ModalContext.Provider>
   );
 
-  return ReactDOM.createPortal(modal, container || el);
+  return createPortal(modal, container || el);
 };
 
 Modal.Body = ModalBody;

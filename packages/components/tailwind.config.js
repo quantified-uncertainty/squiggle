@@ -1,5 +1,8 @@
 const config = {
-  content: ["./src/**/*.{html,tsx,ts,js,jsx}"],
+  content: [
+    "./src/**/*.{html,tsx,ts,js,jsx}",
+    "../../node_modules/@quri/ui/dist/**/*.js",
+  ],
   corePlugins: {
     preflight: false,
   },

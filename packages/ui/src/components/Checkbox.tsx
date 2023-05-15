@@ -1,30 +1,26 @@
 import { clsx } from "clsx";
-import React from "react";
 import { Path, UseFormRegister, FieldValues } from "react-hook-form";
+
+type Props<T extends FieldValues> = {
+  name: Path<T>;
+  label: string;
+  register: UseFormRegister<T>;
+  disabled?: boolean;
+  tooltip?: string;
+};
 
 export function Checkbox<T extends FieldValues>({
   name,
   label,
   register,
   disabled,
-  fixed,
   tooltip,
-}: {
-  name: Path<T>;
-  label: string;
-  register: UseFormRegister<T>;
-  disabled?: boolean;
-  fixed?: boolean;
-  tooltip?: string;
-}) {
-  disabled ??= fixed !== undefined;
-
+}: Props<T>) {
   return (
     <label className="flex items-center" title={tooltip}>
       <input
         type="checkbox"
         disabled={disabled}
-        defaultChecked={fixed}
         {...register(name)}
         className="form-checkbox focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
       />

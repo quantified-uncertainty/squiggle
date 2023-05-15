@@ -1,16 +1,13 @@
 "use client";
-import {
-  InterfaceContextShape,
-  InterfaceProvider,
-} from "@/components/Interface/InterfaceProvider";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@quri/ui";
+import { Map } from "immutable";
+import { useRouter } from "next/navigation";
+import { FC, useMemo, useState } from "react";
+
 import { modelFromJSON } from "@/model/utils";
 import { interfaceRoute } from "@/routes";
 import { useStorageDispatch } from "@/storage/StorageProvider";
 import { InterfaceWithModels } from "@/types";
-import { Map } from "immutable";
-import { useRouter } from "next/navigation";
-import { FC, useMemo, useState } from "react";
 
 const LoadJSONForm: FC<{
   setValue(value: InterfaceWithModels): void;

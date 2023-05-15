@@ -1,4 +1,4 @@
-import React, { cloneElement, useState } from "react";
+import { FC, cloneElement, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   flip,
@@ -11,16 +11,16 @@ import {
   useRole,
 } from "@floating-ui/react";
 
-interface Props {
+type Props = {
   text: string;
   children: JSX.Element;
-}
+};
 
-export const Tooltip: React.FC<Props> = ({ text, children }) => {
+export const TextTooltip: FC<Props> = ({ text, children }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const { x, y, reference, floating, strategy, context } = useFloating({
-    placement: "top",
+  const { x, y, refs, strategy, context } = useFloating({
+    placement: "top", // TODO - make configurable
     open: isOpen,
     onOpenChange: setIsOpen,
     middleware: [shift(), offset(2), flip()],
@@ -36,7 +36,7 @@ export const Tooltip: React.FC<Props> = ({ text, children }) => {
     <>
       {cloneElement(
         children,
-        getReferenceProps({ ref: reference, ...children.props })
+        getReferenceProps({ ref: refs.setReference, ...children.props })
       )}
       <AnimatePresence>
         {isOpen && (
@@ -46,7 +46,7 @@ export const Tooltip: React.FC<Props> = ({ text, children }) => {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
             {...getFloatingProps({
-              ref: floating,
+              ref: refs.setFloating,
               className:
                 "text-xs p-2 border border-gray-300 rounded bg-white z-10",
               style: {
