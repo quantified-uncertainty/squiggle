@@ -1,13 +1,14 @@
 "use client";
-import { useState, useCallback, FC } from "react";
+import { useRouter } from "next/navigation";
+import { FC, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { SquigglePlayground } from "@quri/squiggle-components";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@quri/ui";
+
 import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
-import { Controller, useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
 
 const Mutation = graphql`
   mutation NewModelMutation($input: MutationCreateSquiggleSnippetModelInput!) {

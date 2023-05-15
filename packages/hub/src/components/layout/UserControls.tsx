@@ -1,8 +1,9 @@
+import { Session } from "next-auth";
 import { signIn, signOut } from "next-auth/react";
 
-import { Button } from "@/components/ui/Button";
+import { Button } from "@quri/ui";
+
 import { chooseUsernameRoute } from "@/routes";
-import { Session } from "next-auth";
 import { UsernameLink } from "../UsernameLink";
 
 export function UserControls({ session }: { session: Session | null }) {

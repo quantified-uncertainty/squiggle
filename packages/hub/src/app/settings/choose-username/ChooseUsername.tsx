@@ -1,10 +1,10 @@
+import { Button } from "@quri/ui";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { FC, useState } from "react";
 import { useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
-import { useRouter } from "next/navigation";
 
-import { Button } from "@/components/ui/Button";
 import { ChooseUsernameMutation } from "@gen/ChooseUsernameMutation.graphql";
 
 const Mutation = graphql`

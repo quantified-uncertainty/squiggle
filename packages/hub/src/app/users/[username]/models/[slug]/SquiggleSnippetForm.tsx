@@ -1,14 +1,15 @@
 import { useSession } from "next-auth/react";
 import { FC, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { useFragment, useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
+
+import { SquigglePlayground } from "@quri/squiggle-components";
+import { Button } from "@quri/ui";
 
 import { SquiggleSnippetFormFragment$key } from "@/__generated__/SquiggleSnippetFormFragment.graphql";
 import { SquiggleSnippetFormMutation } from "@/__generated__/SquiggleSnippetFormMutation.graphql";
 import { UsernameLink } from "@/components/UsernameLink";
-import { Button } from "@/components/ui/Button";
-import { SquigglePlayground } from "@quri/squiggle-components";
-import { Controller, useForm } from "react-hook-form";
 import { DeleteModelButton } from "./DeleteModelButton";
 
 const Fragment = graphql`
@@ -89,10 +90,10 @@ export const SquiggleSnippetForm: FC<Props> = ({ username, slug, content }) => {
             <UsernameLink username={username} />
           </div>
           {session?.user.username === username ? (
-            <>
+            <div className="flex items-center gap-2">
               <DeleteModelButton username={username} slug={slug} />
               <Button onClick={save}>Save</Button>
-            </>
+            </div>
           ) : (
             <div className="text-xs">
               {"You don't own this model, edits won't be saved."}
