@@ -12,6 +12,28 @@ export function modelRoute({
   return `/users/${username}/models/${slug}`;
 }
 
+export function modelRevisionsRoute({
+  username,
+  slug,
+}: {
+  username: string;
+  slug: string;
+}) {
+  return `/users/${username}/models/${slug}/revisions`;
+}
+
+export function modelRevisionRoute({
+  username,
+  slug,
+  revisionId,
+}: {
+  username: string;
+  slug: string;
+  revisionId: string;
+}) {
+  return `/users/${username}/models/${slug}/revisions/${revisionId}`;
+}
+
 export function userRoute({ username }: { username: string }) {
   return `/users/${username}`;
 }

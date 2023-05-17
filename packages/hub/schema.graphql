@@ -24,7 +24,8 @@ type Model implements Node {
   createdAtTimestamp: Float!
   id: ID!
   owner: User!
-  revisions(after: String, before: String, first: Int, last: Int): SquiggleSnippet!
+  revision(id: ID!): ModelContent!
+  revisions(after: String, before: String, first: Int, last: Int): SquiggleSnippetConnection!
   slug: String!
   updatedAtTimestamp: Float!
 }
@@ -126,7 +127,19 @@ interface SquiggleOutput {
 
 type SquiggleSnippet implements Node {
   code: String!
+  createdAtTimestamp: Float!
+  dbId: ID!
   id: ID!
+}
+
+type SquiggleSnippetConnection {
+  edges: [SquiggleSnippetEdge!]!
+  pageInfo: PageInfo!
+}
+
+type SquiggleSnippetEdge {
+  cursor: String!
+  node: SquiggleSnippet!
 }
 
 type UpdateSquiggleSnippetResult {

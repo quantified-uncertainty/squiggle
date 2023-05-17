@@ -1,8 +1,10 @@
 import { builder } from "@/graphql/builder";
+import { prisma } from "@/prisma";
 
 export const SquiggleSnippet = builder.prismaNode("SquiggleSnippet", {
   id: { field: "id" },
   fields: (t) => ({
+    dbId: t.exposeID("id"),
     code: t.exposeString("code"),
     createdAtTimestamp: t.float({
       resolve: (snippet) => snippet.createdAt.getTime(),
@@ -49,10 +51,38 @@ export const Model = builder.prismaNode("Model", {
         }
       },
     }),
+    revision: t.field({
+      type: ModelContent,
+      args: {
+        id: t.arg.id({ required: true }),
+      },
+      select: (args, ctx, nestedSelection) => ({
+        squiggleSnippets: nestedSelection({
+          take: 1,
+          where: { id: args.id },
+        }),
+      }),
+      async resolve(model) {
+        switch (model.modelType) {
+          case "SquiggleSnippet": {
+            const snippet = model.squiggleSnippets[0];
+            if (!snippet) {
+              throw new Error("Not found");
+            }
+            return snippet;
+          }
+        }
+      },
+    }),
     revisions: t.relatedConnection(
       "squiggleSnippets",
       {
         cursor: "id",
+        query: () => ({
+          orderBy: {
+            createdAt: "desc",
+          },
+        }),
       },
       SquiggleSnippetConnection // should be ModelContentConnection, but it's harder to do with pothos-prisma
     ),

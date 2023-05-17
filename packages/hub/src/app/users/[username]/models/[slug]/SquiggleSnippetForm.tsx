@@ -9,9 +9,11 @@ import { Button } from "@quri/ui";
 
 import { SquiggleSnippetFormFragment$key } from "@/__generated__/SquiggleSnippetFormFragment.graphql";
 import { SquiggleSnippetFormMutation } from "@/__generated__/SquiggleSnippetFormMutation.graphql";
-import { UsernameLink } from "@/components/UsernameLink";
-import { DeleteModelButton } from "./DeleteModelButton";
+import { ModelInfo } from "@/components/ModelInfo";
 import { WithTopMenu } from "@/components/layout/WithTopMenu";
+import { StyledLink } from "@/components/ui/StyledLink";
+import { modelRevisionsRoute } from "@/routes";
+import { DeleteModelButton } from "./DeleteModelButton";
 
 const Fragment = graphql`
   fragment SquiggleSnippetFormFragment on SquiggleSnippet {
@@ -86,10 +88,7 @@ export const SquiggleSnippetForm: FC<Props> = ({ username, slug, content }) => {
     <form onSubmit={save}>
       <WithTopMenu>
         <div className="flex items-baseline gap-4">
-          <div>
-            <span className="text-xl font-bold">{slug}</span> by{" "}
-            <UsernameLink username={username} />
-          </div>
+          <ModelInfo slug={slug} username={username} />
           {session?.user.username === username ? (
             <div className="flex items-center gap-2">
               <DeleteModelButton username={username} slug={slug} />
@@ -100,6 +99,12 @@ export const SquiggleSnippetForm: FC<Props> = ({ username, slug, content }) => {
               {"You don't own this model, edits won't be saved."}
             </div>
           )}
+          <StyledLink
+            className="text-xs"
+            href={modelRevisionsRoute({ username, slug })}
+          >
+            Revisions
+          </StyledLink>
         </div>
         <Controller
           name="code"
