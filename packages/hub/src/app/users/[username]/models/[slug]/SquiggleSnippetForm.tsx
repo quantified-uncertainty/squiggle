@@ -11,6 +11,7 @@ import { SquiggleSnippetFormFragment$key } from "@/__generated__/SquiggleSnippet
 import { SquiggleSnippetFormMutation } from "@/__generated__/SquiggleSnippetFormMutation.graphql";
 import { UsernameLink } from "@/components/UsernameLink";
 import { DeleteModelButton } from "./DeleteModelButton";
+import { WithTopMenu } from "@/components/layout/WithTopMenu";
 
 const Fragment = graphql`
   fragment SquiggleSnippetFormFragment on SquiggleSnippet {
@@ -83,7 +84,7 @@ export const SquiggleSnippetForm: FC<Props> = ({ username, slug, content }) => {
 
   return (
     <form onSubmit={save}>
-      <div className="flex flex-col gap-2">
+      <WithTopMenu>
         <div className="flex items-baseline gap-4">
           <div>
             <span className="text-xl font-bold">{slug}</span> by{" "}
@@ -111,7 +112,7 @@ export const SquiggleSnippetForm: FC<Props> = ({ username, slug, content }) => {
             />
           )}
         />
-      </div>
+      </WithTopMenu>
     </form>
   );
 };
