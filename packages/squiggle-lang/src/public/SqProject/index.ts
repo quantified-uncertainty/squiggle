@@ -24,7 +24,7 @@ export class SqProject {
   private stdLib: Namespace;
   private environment: Env;
   private previousRunOrder: string[];
-  private resolver?: Resolver; // if not present, includes are forbidden
+  private resolver?: Resolver; // if not present, imports are forbidden
 
   constructor(options?: Options) {
     this.items = new Map();
@@ -143,21 +143,16 @@ export class SqProject {
     this.getSourceIds().forEach((id) => this.cleanResults(id));
   }
 
-  getIncludes(sourceId: string): Result.result<string[], SqError> {
-    return this.getItem(sourceId).includes;
+  getImportIds(sourceId: string): Result.result<string[], SqError> {
+    return Result.fmap(this.getItem(sourceId).imports, (imports) =>
+      imports.map((i) => i.sourceId)
+    );
   }
 
-  // returns all "direct" includes: explicit continues and direct "include as *"
-  getPastChain(sourceId: string): string[] {
-    return ProjectItem.getPastChain(this.getItem(sourceId));
-  }
-
-  getIncludesAsVariables(sourceId: string): [string, string][] {
-    return this.getItem(sourceId).includeAsVariables;
-  }
-
-  getDirectIncludes(sourceId: string): string[] {
-    return this.getItem(sourceId).directIncludes;
+  getImports(
+    sourceId: string
+  ): Result.result<ProjectItem.ImportBinding[], SqError> {
+    return this.getItem(sourceId).imports;
   }
 
   getContinues(sourceId: string): string[] {
@@ -202,11 +197,11 @@ export class SqProject {
     this.setItem(sourceId, newItem);
   }
 
-  parseIncludes(sourceId: string): void {
+  parseImports(sourceId: string): void {
     if (!this.resolver) {
-      throw new Error("Includes are not supported when resolver is unset");
+      throw new Error("Imports are not supported when resolver is unset");
     }
-    const newItem = ProjectItem.parseIncludes(
+    const newItem = ProjectItem.parseImports(
       this.getItem(sourceId),
       this.resolver
     );
@@ -233,12 +228,14 @@ export class SqProject {
     );
   }
 
-  private linkDependencies(sourceId: string): Namespace {
-    const pastChain = this.getPastChain(sourceId);
+  private buildInitialBindings(
+    sourceId: string
+  ): Result.result<Namespace, SqError> {
+    const continues = this.getContinues(sourceId);
     const namespace = NamespaceMap<string, Value>().merge(
       this.getStdLib(),
-      ...pastChain.map((id) => this.getRawBindings(id)),
-      ...pastChain.map((id) => {
+      ...continues.map((id) => this.getRawBindings(id)),
+      ...continues.map((id) => {
         const result = this.getInternalResult(id);
         if (!result.ok) {
           throw result.value;
@@ -247,27 +244,33 @@ export class SqProject {
       })
     );
 
-    const includesAsVariables = this.getIncludesAsVariables(sourceId);
-    return includesAsVariables.reduce(
-      (acc, [variable, includeFile]) =>
-        acc.set(variable, vRecord(this.getRawBindings(includeFile))),
-      namespace
+    const rImports = this.getImports(sourceId);
+    return Result.fmap(rImports, (imports) =>
+      imports.reduce(
+        (acc, importBinding) =>
+          acc.set(
+            importBinding.variable,
+            vRecord(this.getRawBindings(importBinding.sourceId))
+          ),
+        namespace
+      )
     );
   }
 
   private doLinkAndRun(sourceId: string): void {
-    const context = createContext(
-      this.linkDependencies(sourceId),
-      this.getEnvironment()
-    );
+    const rBindings = this.buildInitialBindings(sourceId);
+    if (!rBindings.ok) {
+      return; // imports failed, nothing to do here
+    }
+    const context = createContext(rBindings.value, this.getEnvironment());
+
     const newItem = ProjectItem.run(this.getItem(sourceId), context);
-    // console.log("after run " + newItem.bindings->Reducer_Bindings.toString)
     this.setItem(sourceId, newItem);
   }
 
-  private runFromRunOrder(runOrder: string[]) {
+  private runIds(sourceIds: string[]) {
     let error: SqError | undefined;
-    for (const sourceId of runOrder) {
+    for (const sourceId of sourceIds) {
       const cachedResult = this.getResultOption(sourceId);
       if (cachedResult) {
         // already ran
@@ -291,23 +294,23 @@ export class SqProject {
   }
 
   runAll() {
-    this.runFromRunOrder(this.getRunOrder());
+    this.runIds(this.getRunOrder());
   }
 
   run(sourceId: string) {
-    this.runFromRunOrder(Topology.getRunOrderFor(this, sourceId));
+    this.runIds(Topology.getRunOrderFor(this, sourceId));
   }
 }
 
 // ------------------------------------------------------------------------------------
 
 // Shortcut for running a single piece of code without creating a project
-export const evaluate = (
+export function evaluate(
   sourceCode: string
-): [Result.result<SqValue, SqError>, SqRecord] => {
-  let project = SqProject.create();
+): [Result.result<SqValue, SqError>, SqRecord] {
+  const project = SqProject.create();
   project.setSource("main", sourceCode);
   project.runAll();
 
   return [project.getResult("main"), project.getBindings("main")];
-};
+}

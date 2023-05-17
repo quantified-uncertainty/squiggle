@@ -9,7 +9,7 @@
     "build:peggy": "find . -type f -name *.peggy -exec yarn peggy {} \\;",
     "build:typescript": "tsc -b ./tsconfig.esm.json ./tsconfig.json && echo '{\"type\": \"commonjs\"}' >dist/cjs/package.json",
     "start": "tsc -w",
-    "clean": "rm -rf dist && rm -f src/ast/peggyParser.js && rm -f src/public/SqProject/IncludeParser.js",
+    "clean": "rm -rf dist && rm -f src/ast/peggyParser.js",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test:watch": "yarn test --watchAll",
     "coverage:local": "yarn test --coverage && echo && echo 'Open ./coverage/lcov-report/index.html to see the detailed report.'",

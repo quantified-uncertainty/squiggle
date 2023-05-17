@@ -1,7 +1,7 @@
 import { SqProject } from "../../src/index.js";
 import { toStringResult } from "../../src/public/SqValue.js";
 
-describe("ReducerProject Tutorial", () => {
+describe("SqProject Tutorial", () => {
   /* Let's build a project to provide a function. */
   /* But we will call that function on an array of user input. */
   const project = SqProject.create();

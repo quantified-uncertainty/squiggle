@@ -1,18 +1,22 @@
-import { parseIncludes as parseIncludes_ } from "./parseIncludes.js";
-import * as Result from "../../utility/result.js";
-import { result, Ok } from "../../utility/result.js";
-import { Resolver } from "./Resolver.js";
-import { AST, parse, ParseError } from "../../ast/parse.js";
-import { IError } from "../../reducer/IError.js";
+import { AST, ParseError, parse } from "../../ast/parse.js";
+import { expressionFromAst } from "../../ast/toExpression.js";
 import { Expression } from "../../expression/index.js";
+import { ReducerContext } from "../../reducer/Context.js";
+import { IError } from "../../reducer/IError.js";
+import { Namespace, NamespaceMap } from "../../reducer/bindings.js";
+import { evaluate } from "../../reducer/index.js";
+import * as Result from "../../utility/result.js";
+import { Ok, result } from "../../utility/result.js";
 import { Value } from "../../value/index.js";
 import { SqError } from "../SqError.js";
-import { expressionFromAst } from "../../ast/toExpression.js";
-import { ReducerContext } from "../../reducer/Context.js";
-import { evaluate } from "../../reducer/index.js";
-import { Namespace, NamespaceMap } from "../../reducer/bindings.js";
+import { Resolver } from "./Resolver.js";
 
-// source -> rawParse -> includes -> expression -> bindings & result
+// source -> rawParse -> imports -> expression -> bindings & result
+
+export type ImportBinding = {
+  sourceId: string;
+  variable: string;
+};
 
 export type ProjectItem = Readonly<{
   sourceId: string;
@@ -22,9 +26,7 @@ export type ProjectItem = Readonly<{
   bindings: Namespace;
   result?: result<Value, SqError>;
   continues: string[];
-  includes: result<string[], SqError>; // For loader
-  includeAsVariables: [string, string][]; // For linker
-  directIncludes: string[];
+  imports: result<ImportBinding[], SqError>;
 }>;
 
 type t = ProjectItem;
@@ -34,9 +36,7 @@ export const emptyItem = (sourceId: string): t => ({
   source: "",
   bindings: NamespaceMap(),
   continues: [],
-  includes: Ok([]),
-  directIncludes: [],
-  includeAsVariables: [],
+  imports: Ok([]),
 });
 
 export const touchSource = (t: t): t => {
@@ -46,9 +46,7 @@ export const touchSource = (t: t): t => {
     source: t.source,
     continues: t.continues,
     // why do we keep these?
-    includes: t.includes,
-    includeAsVariables: t.includeAsVariables,
-    directIncludes: t.directIncludes,
+    imports: t.imports,
   };
 };
 
@@ -58,9 +56,7 @@ const touchRawParse = (t: t): t => {
     ...r,
     source: t.source,
     continues: t.continues,
-    includes: t.includes,
-    includeAsVariables: t.includeAsVariables,
-    directIncludes: t.directIncludes,
+    imports: t.imports,
     rawParse: t.rawParse,
   };
 };
@@ -70,39 +66,35 @@ const touchExpression = (t: t): t => {
     ...t,
     source: t.source,
     continues: t.continues,
-    includes: t.includes,
-    includeAsVariables: t.includeAsVariables,
-    directIncludes: t.directIncludes,
+    imports: t.imports,
     rawParse: t.rawParse,
     expression: t.expression,
   };
 };
 
-const resetIncludes = (t: t): t => {
+const resetImports = (t: t): t => {
   return {
     ...t,
-    includes: Ok([]),
-    includeAsVariables: [],
-    directIncludes: [],
+    imports: Ok([]),
   };
 };
 
 export const setSource = (t: t, source: string): t => {
-  return touchSource(resetIncludes({ ...t, source }));
+  return touchSource(resetImports({ ...t, source }));
 };
 
 const setRawParse = (
   t: t,
   rawParse: NonNullable<ProjectItem["rawParse"]>
 ): t => {
-  return touchRawParse({ ...t, rawParse: rawParse });
+  return touchRawParse({ ...t, rawParse });
 };
 
 const setExpression = (
   t: t,
   expression: NonNullable<ProjectItem["expression"]>
 ): t => {
-  return touchExpression({ ...t, expression: expression });
+  return touchExpression({ ...t, expression });
 };
 
 const setBindings = (t: t, bindings: Namespace): t => {
@@ -135,50 +127,45 @@ export const clean = (t: t): t => {
 };
 
 export const getImmediateDependencies = (t: t): string[] => {
-  if (!t.includes.ok) {
+  if (!t.imports.ok) {
     return [];
   }
-  return [...t.includes.value, ...t.continues];
+  return [...t.imports.value.map((i) => i.sourceId), ...t.continues];
 };
-
-export const getPastChain = (t: t): string[] => [
-  ...t.directIncludes,
-  ...t.continues,
-];
 
 export const setContinues = (t: t, continues: string[]): t =>
   touchSource({ ...t, continues });
 
-const setIncludes = (t: t, includes: ProjectItem["includes"]): t => ({
+const setImports = (t: t, imports: ProjectItem["imports"]): t => ({
   ...t,
-  includes,
+  imports,
 });
 
-export const parseIncludes = (t: t, resolver: Resolver): t => {
-  const rRawImportAsVariables = parseIncludes_(t.source);
-  if (!rRawImportAsVariables.ok) {
-    return setIncludes(resetIncludes(t), rRawImportAsVariables);
-  } else {
-    // ok
-    const rawImportAsVariables = rRawImportAsVariables.value.map(
-      ([variable, file]) =>
-        [variable, resolver(file, t.sourceId)] as [string, string]
-    );
-
-    const includes = rawImportAsVariables.map(([_variable, file]) => file);
-    const includeAsVariables = rawImportAsVariables.filter(
-      ([variable, _file]) => variable !== ""
-    );
-    const directIncludes = rawImportAsVariables
-      .filter(([variable, _file]) => variable === "")
-      .map(([_variable, file]) => file);
-    return {
-      ...t,
-      includes: Ok(includes),
-      includeAsVariables,
-      directIncludes,
-    };
+export const parseImports = (t: t, resolver: Resolver): t => {
+  t = rawParse(t);
+  if (!t.rawParse) {
+    throw new Error("Internal logic error");
   }
+  if (!t.rawParse.ok) {
+    return setImports(resetImports(t), t.rawParse);
+  }
+
+  const program = t.rawParse.value;
+  if (program.type !== "Program") {
+    throw new Error("Expected Program as top-level AST type");
+  }
+
+  const resolvedImports: ImportBinding[] = program.imports.map(
+    ([variable, file]) => ({
+      variable: variable.value,
+      sourceId: resolver(file.value, t.sourceId),
+    })
+  );
+
+  return {
+    ...t,
+    imports: Ok(resolvedImports),
+  };
 };
 
 export const rawParse = (t: t): t => {

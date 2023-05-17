@@ -58,11 +58,11 @@ describe("project1", () => {
     expect(project.getDependencies("main")).toEqual(["first"]);
   });
 
-  test("past chain first", () => {
-    expect(project.getPastChain("first")).toEqual([]);
+  test("continues first", () => {
+    expect(project.getContinues("first")).toEqual([]);
   });
-  test("past chain main", () => {
-    expect(project.getPastChain("main")).toEqual(["first"]);
+  test("continues main", () => {
+    expect(project.getContinues("main")).toEqual(["first"]);
   });
 
   test("test result", () => {
@@ -127,7 +127,7 @@ describe("removing sources", () => {
   });
 });
 
-describe("project with include", () => {
+describe("project with import", () => {
   const project = SqProject.create({
     resolver: (name) => name,
   });
@@ -137,21 +137,20 @@ describe("project with include", () => {
   project.setSource(
     "first",
     `
-  #include 'common'
+  import 'common' as common
   x=1`
   );
-  project.parseIncludes("first");
-  project.parseIncludes("first"); //The only way of setting includes
-  //Don't forget to parse includes after changing the source
+  project.parseImports("first"); //The only way of setting imports
+  //Don't forget to parse imports after changing the source
 
   project.setSource("common", "common=0");
   project.setSource(
     "second",
     `
-  #include 'common'
+  import 'common' as common
   y=2`
   );
-  project.parseIncludes("second"); //The only way of setting includes
+  project.parseImports("second"); //The only way of setting imports
 
   project.setSource("main", "z=3; y");
 

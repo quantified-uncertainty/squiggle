@@ -28,7 +28,7 @@ const _run = (args: { src: string; filename?: string; environment?: Env }) => {
   const project = SqProject.create({
     resolver: (name, fromId) => {
       if (!name.startsWith("./") && !name.startsWith("../")) {
-        throw new Error("Only relative paths in includes are allowed");
+        throw new Error("Only relative paths in imports are allowed");
       }
       return path.resolve(path.dirname(fromId), name);
     },
@@ -38,21 +38,21 @@ const _run = (args: { src: string; filename?: string; environment?: Env }) => {
   }
   const filename = path.resolve(args.filename || "./__anonymous__");
 
-  const loadIncludesRecursively = (sourceId: string) => {
-    project.parseIncludes(sourceId);
-    const includes = project.getIncludes(sourceId);
-    if (!includes.ok) {
-      throw new Error(`Failed to parse includes from ${sourceId}`);
+  const loadImportsRecursively = (sourceId: string) => {
+    project.parseImports(sourceId);
+    const importIds = project.getImportIds(sourceId);
+    if (!importIds.ok) {
+      throw new Error(`Failed to parse imports from ${sourceId}`);
     }
-    includes.value.forEach((includeId) => {
-      const includeSrc = fs.readFileSync(includeId, "utf-8");
-      project.setSource(includeId, includeSrc);
-      loadIncludesRecursively(includeId);
+    importIds.value.forEach((importId) => {
+      const importSrc = fs.readFileSync(importId, "utf-8");
+      project.setSource(importId, importSrc);
+      loadImportsRecursively(importId);
     });
   };
 
   project.setSource(filename, args.src);
-  loadIncludesRecursively(filename);
+  loadImportsRecursively(filename);
 
   const time = measure(() => project.run(filename));
   const bindings = project.getBindings(filename);

@@ -113,9 +113,9 @@ export const eBlock = (exprs: Expression[]): ExpressionContent => ({
   value: exprs,
 });
 
-export const eProgram = (exprs: Expression[]): ExpressionContent => ({
+export const eProgram = (statements: Expression[]): ExpressionContent => ({
   type: "Program",
-  value: exprs,
+  value: statements,
 });
 
 export const eLetStatement = (

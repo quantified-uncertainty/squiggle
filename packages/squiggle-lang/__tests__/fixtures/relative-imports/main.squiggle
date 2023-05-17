@@ -1,6 +1,6 @@
-#include "./dir1/lib.squiggle" as lib1
-#include "./dir2/lib.squiggle" as lib2
-#include "./common.squiggle" as common
+import "./dir1/lib.squiggle" as lib1
+import "./dir2/lib.squiggle" as lib2
+import "./common.squiggle" as common
 
 /*
 common = 1

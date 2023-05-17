@@ -1,10 +1,12 @@
 import { SqProject } from "../../src/index.js";
 import { toStringResult } from "../../src/public/SqValue.js";
 
-describe("ReducerProject Tutorial", () => {
+describe("SqProject Tutorial", () => {
   describe("Multi source", () => {
-    /*
-     Case "Running multiple sources" */
+    /**
+     * Running multiple sources.
+     * This approach uses `setContinues`, which is useful in Observable and other notebook-like environments.
+     */
     test("Chaining", () => {
       const project = SqProject.create();
       /* This time let's add 3 sources and chain them together */
@@ -30,8 +32,8 @@ describe("ReducerProject Tutorial", () => {
     });
 
     test("Depending", () => {
-      /* Instead of chaining the sources, we could have a dependency tree */
-      /* The point here is that any source can depend on multiple sources */
+      /* Instead of chaining the sources, we could have a dependency tree. */
+      /* The point here is that any source can depend on multiple sources. */
       const project = SqProject.create();
 
       /* This time source1 and source2 are not depending on anything */
@@ -53,10 +55,11 @@ describe("ReducerProject Tutorial", () => {
       expect(bindings3.toString()).toBe("{z: 3}");
     });
 
-    test("Intro to including", () => {
-      /* Though it would not be practical for a storybook, 
-        let's write the same project above with includes.
-        You will see that parsing includes is setting the dependencies the same way as before. */
+    test("Intro to imports", () => {
+      /**
+       * Let's write the same project above with imports.
+       * You will see that parsing imports is setting the dependencies the same way as before.
+       */
       let project = SqProject.create({ resolver: (name) => name });
 
       /* This time source1 and source2 are not depending on anything */
@@ -66,33 +69,30 @@ describe("ReducerProject Tutorial", () => {
       project.setSource(
         "source3",
         `
-      #include "source1"
-      #include "source2"
-      z=x+y`
+      import "source1" as s1
+      import "source2" as s2
+      z=s1.x+s2.y`
       );
-      /* We need to parse the includes to set the dependencies */
-      project.parseIncludes("source3");
+      /* We need to parse the imports to set the dependencies */
+      project.parseImports("source3");
 
       /* Now we can run the project */
       project.runAll();
 
       /* And let's check the result and bindings of source3 
       This time you are getting all the variables because we are including the other sources 
-      Behind the scenes parseIncludes is setting the dependencies */
+      Behind the scenes parseImports is setting the dependencies */
       const result3 = project.getResult("source3");
       const bindings3 = project.getBindings("source3");
 
       expect(toStringResult(result3)).toBe("Ok(())");
       expect(bindings3.toString()).toBe("{z: 3}");
       /*
-      Doing it like this is too verbose for a storybook 
-      But I hope you have seen the relation of setContinues and parseIncludes */
-      /*
-         Dealing with includes needs more. 
+         Dealing with imports needs more. 
          - There are parse errors
-         - There are cyclic includes
+         - There are cyclic imports
          - And the depended source1 and source2 is not already there in the project
-         - If you knew the includes before hand there would not be point of the include directive.
+         - If you knew the imports before hand there would not be point of the imports directive.
          More on those on the next section. */
     });
   });
