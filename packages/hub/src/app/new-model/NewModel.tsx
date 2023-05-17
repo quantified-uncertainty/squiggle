@@ -9,6 +9,8 @@ import { SquigglePlayground } from "@quri/squiggle-components";
 import { Button, TextInput } from "@quri/ui";
 
 import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
+import { useSession } from "next-auth/react";
+import { WithTopMenu } from "@/components/layout/WithTopMenu";
 
 const Mutation = graphql`
   mutation NewModelMutation($input: MutationCreateSquiggleSnippetModelInput!) {
@@ -27,6 +29,8 @@ const Mutation = graphql`
 `;
 
 export const NewModel: FC = () => {
+  useSession({ required: true });
+
   const { register, handleSubmit, control } = useForm<{
     code: string;
     slug: string;
@@ -61,33 +65,35 @@ export const NewModel: FC = () => {
   });
 
   return (
-    <form className="space-y-4" onSubmit={save}>
-      <div className="flex items-center gap-4">
-        <div className="font-bold text-xl">New model</div>
-        <div className="flex items-center gap-2">
-          <TextInput
-            register={register}
-            name="slug"
-            placeholder="Slug"
-            size="small"
-          />
-          <Button onClick={save} disabled={isSaveInFlight}>
-            Save
-          </Button>
-          {error && <div>{error}</div>}
+    <form onSubmit={save}>
+      <WithTopMenu>
+        <div className="flex items-center gap-4">
+          <div className="font-bold text-xl">New model</div>
+          <div className="flex items-center gap-2">
+            <TextInput
+              register={register}
+              name="slug"
+              placeholder="Slug"
+              size="small"
+            />
+            <Button onClick={save} disabled={isSaveInFlight}>
+              Save
+            </Button>
+            {error && <div className="text-xs">{error}</div>}
+          </div>
         </div>
-      </div>
-      <Controller
-        name="code"
-        control={control}
-        rules={{ required: true }}
-        render={({ field }) => (
-          <SquigglePlayground
-            onCodeChange={field.onChange}
-            code={field.value}
-          />
-        )}
-      />
+        <Controller
+          name="code"
+          control={control}
+          rules={{ required: true }}
+          render={({ field }) => (
+            <SquigglePlayground
+              onCodeChange={field.onChange}
+              code={field.value}
+            />
+          )}
+        />
+      </WithTopMenu>
     </form>
   );
 };

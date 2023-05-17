@@ -1,5 +1,6 @@
 import { Metadata, ResolvingMetadata } from "next";
 import { UserView } from "./UserView";
+import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 
 type Props = {
   params: { username: string };
@@ -7,9 +8,9 @@ type Props = {
 
 export default function UserPage({ params }: Props) {
   return (
-    <div className="mt-16 max-w-2xl mx-auto">
+    <NarrowPageLayout>
       <UserView username={params.username} />
-    </div>
+    </NarrowPageLayout>
   );
 }
 

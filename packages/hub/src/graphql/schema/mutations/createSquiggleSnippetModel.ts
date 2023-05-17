@@ -34,22 +34,24 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
 
       const model = await prisma.model.create({
         data: {
-          slug: args.input.slug,
-          squiggleSnippet: {
-            create: {
-              code: args.input.code,
-            },
-          },
-          modelType: "SquiggleSnippet",
           owner: {
             connect: { email },
+          },
+          slug: args.input.slug,
+          revisions: {
+            create: {
+              squiggleSnippet: {
+                create: {
+                  code: args.input.code,
+                },
+              },
+              contentType: "SquiggleSnippet",
+            },
           },
         },
       });
 
-      return {
-        model,
-      };
+      return { model };
     },
   })
 );
