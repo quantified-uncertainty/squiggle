@@ -29,17 +29,19 @@ export type ProjectItem = Readonly<{
   imports: result<ImportBinding[], SqError>;
 }>;
 
-type t = ProjectItem;
+type T = ProjectItem;
 
-export const emptyItem = (sourceId: string): t => ({
-  sourceId,
-  source: "",
-  bindings: NamespaceMap(),
-  continues: [],
-  imports: Ok([]),
-});
+export function emptyItem(sourceId: string): T {
+  return {
+    sourceId,
+    source: "",
+    bindings: NamespaceMap(),
+    continues: [],
+    imports: Ok([]),
+  };
+}
 
-export const touchSource = (t: t): t => {
+export function touchSource(t: T): T {
   const r = emptyItem(t.sourceId);
   return {
     ...r,
@@ -48,9 +50,9 @@ export const touchSource = (t: t): t => {
     // why do we keep these?
     imports: t.imports,
   };
-};
+}
 
-const touchRawParse = (t: t): t => {
+function touchRawParse(t: T): T {
   const r = emptyItem(t.sourceId);
   return {
     ...r,
@@ -59,9 +61,9 @@ const touchRawParse = (t: t): t => {
     imports: t.imports,
     rawParse: t.rawParse,
   };
-};
+}
 
-const touchExpression = (t: t): t => {
+function touchExpression(t: T): T {
   return {
     ...t,
     source: t.source,
@@ -70,53 +72,47 @@ const touchExpression = (t: t): t => {
     rawParse: t.rawParse,
     expression: t.expression,
   };
-};
+}
 
-const resetImports = (t: t): t => {
+function resetImports(t: T): T {
   return {
     ...t,
     imports: Ok([]),
   };
-};
+}
 
-export const setSource = (t: t, source: string): t => {
+export function setSource(t: T, source: string): T {
   return touchSource(resetImports({ ...t, source }));
-};
+}
 
-const setRawParse = (
-  t: t,
-  rawParse: NonNullable<ProjectItem["rawParse"]>
-): t => {
+function setRawParse(t: T, rawParse: NonNullable<ProjectItem["rawParse"]>): T {
   return touchRawParse({ ...t, rawParse });
-};
+}
 
-const setExpression = (
-  t: t,
+function setExpression(
+  t: T,
   expression: NonNullable<ProjectItem["expression"]>
-): t => {
+): T {
   return touchExpression({ ...t, expression });
-};
+}
 
-const setBindings = (t: t, bindings: Namespace): t => {
+function setBindings(t: T, bindings: Namespace): T {
   return {
     ...t,
     bindings,
   };
-};
+}
 
-export const setResult = (
-  t: t,
-  result: NonNullable<ProjectItem["result"]>
-): t => {
+export function setResult(t: T, result: NonNullable<ProjectItem["result"]>): T {
   return {
     ...t,
     result,
   };
-};
+}
 
 export const cleanResults = touchExpression;
 
-export const clean = (t: t): t => {
+export function clean(t: T): T {
   // FIXME - this doesn't seem to be doing anything
   return {
     ...t,
@@ -124,24 +120,27 @@ export const clean = (t: t): t => {
     bindings: t.bindings,
     result: t.result,
   };
-};
+}
 
-export const getImmediateDependencies = (t: t): string[] => {
+export function getImmediateDependencies(t: T): string[] {
   if (!t.imports.ok) {
     return [];
   }
   return [...t.imports.value.map((i) => i.sourceId), ...t.continues];
-};
+}
 
-export const setContinues = (t: t, continues: string[]): t =>
-  touchSource({ ...t, continues });
+export function setContinues(t: T, continues: string[]): T {
+  return touchSource({ ...t, continues });
+}
 
-const setImports = (t: t, imports: ProjectItem["imports"]): t => ({
-  ...t,
-  imports,
-});
+function setImports(t: T, imports: ProjectItem["imports"]): T {
+  return {
+    ...t,
+    imports,
+  };
+}
 
-export const parseImports = (t: t, resolver: Resolver): t => {
+export function parseImports(t: T, resolver: Resolver): T {
   t = rawParse(t);
   if (!t.rawParse) {
     throw new Error("Internal logic error");
@@ -166,9 +165,9 @@ export const parseImports = (t: t, resolver: Resolver): t => {
     ...t,
     imports: Ok(resolvedImports),
   };
-};
+}
 
-export const rawParse = (t: t): t => {
+export function rawParse(t: T): T {
   if (t.rawParse) {
     return t;
   }
@@ -177,9 +176,9 @@ export const rawParse = (t: t): t => {
     (e: ParseError) => new SqError(IError.fromParseError(e))
   );
   return setRawParse(t, rawParse);
-};
+}
 
-const buildExpression = (t: t): t => {
+function buildExpression(t: T): T {
   t = rawParse(t);
   if (t.expression) {
     return t;
@@ -190,12 +189,17 @@ const buildExpression = (t: t): t => {
   }
   const expression = Result.fmap(t.rawParse, (node) => expressionFromAst(node));
   return setExpression(t, expression);
-};
+}
 
-const failRun = (t: t, e: SqError): t =>
-  setBindings(setResult(t, Result.Error(e)), NamespaceMap());
+function failRun(t: T, e: SqError): T {
+  return {
+    ...t,
+    result: Result.Error(e),
+    bindings: NamespaceMap(),
+  };
+}
 
-export const run = (t: t, context: ReducerContext): t => {
+export function run(t: T, context: ReducerContext): T {
   t = buildExpression(t);
   if (t.result) {
     return t;
@@ -215,11 +219,12 @@ export const run = (t: t, context: ReducerContext): t => {
       t.expression.value,
       context
     );
-    return setBindings(
-      setResult(t, Ok(result)),
-      contextAfterEvaluation.bindings.locals()
-    );
+    return {
+      ...t,
+      result: Ok(result),
+      bindings: contextAfterEvaluation.bindings.locals(),
+    };
   } catch (e: unknown) {
     return failRun(t, new SqError(IError.fromException(e)));
   }
-};
+}

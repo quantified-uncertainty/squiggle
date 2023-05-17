@@ -232,7 +232,7 @@ export class SqProject {
     sourceId: string
   ): Result.result<Namespace, SqError> {
     const continues = this.getContinues(sourceId);
-    const namespace = NamespaceMap<string, Value>().merge(
+    let namespace = NamespaceMap<string, Value>().merge(
       this.getStdLib(),
       ...continues.map((id) => this.getRawBindings(id)),
       ...continues.map((id) => {
@@ -245,16 +245,18 @@ export class SqProject {
     );
 
     const rImports = this.getImports(sourceId);
-    return Result.fmap(rImports, (imports) =>
-      imports.reduce(
-        (acc, importBinding) =>
-          acc.set(
-            importBinding.variable,
-            vRecord(this.getRawBindings(importBinding.sourceId))
-          ),
-        namespace
-      )
-    );
+    if (!rImports.ok) {
+      // shouldn't happen, getImports fail only if parse failed
+      return rImports;
+    }
+    for (const importBinding of rImports.value) {
+      // TODO - check for collisions?
+      namespace = namespace.set(
+        importBinding.variable,
+        vRecord(this.getRawBindings(importBinding.sourceId))
+      );
+    }
+    return Result.Ok(namespace);
   }
 
   private doLinkAndRun(sourceId: string): void {

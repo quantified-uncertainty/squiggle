@@ -19,7 +19,7 @@ x=1`
     expect(project.getDependents("main")).toEqual([]);
   });
 
-  test("getImports", () => {
+  test("getImportIds", () => {
     const mainImportIds = project.getImportIds("main");
     if (mainImportIds.ok) {
       expect(mainImportIds.value).toEqual(["./common", "./myModule"]);
@@ -28,11 +28,7 @@ x=1`
     }
   });
 
-  test("continues", () => {
-    expect(project.getContinues("main")).toEqual([]);
-  });
-
-  test("import as variables", () => {
+  test("getImports", () => {
     expect(project.getImports("main")).toEqual({
       ok: true,
       value: [
@@ -41,4 +37,22 @@ x=1`
       ],
     });
   });
+
+  test("continues", () => {
+    expect(project.getContinues("main")).toEqual([]);
+  });
+});
+
+describe("Unknown imports", () => {
+  const project = SqProject.create({ resolver: (name) => name });
+  project.setSource(
+    "main",
+    `
+import './lib' as lib
+123`
+  );
+
+  project.run("main");
+
+  console.log(project.getResult("main"));
 });
