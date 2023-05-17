@@ -33,8 +33,10 @@ const Mutation = graphql`
       }
       ... on UpdateSquiggleSnippetResult {
         model {
-          content {
-            ...SquiggleSnippetFormFragment
+          currentRevision {
+            content {
+              ...SquiggleSnippetFormFragment
+            }
           }
         }
       }

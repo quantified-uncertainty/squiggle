@@ -8,9 +8,7 @@ builder.mutationField("deleteModel", (t) =>
         ok: t.boolean(),
       }),
     }),
-    authScopes: {
-      user: true,
-    },
+    authScopes: { user: true },
     input: {
       username: t.input.string({ required: true }),
       slug: t.input.string({ required: true }),

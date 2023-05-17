@@ -1,14 +1,10 @@
 import { builder } from "@/graphql/builder";
-import { prisma } from "@/prisma";
 
 export const SquiggleSnippet = builder.prismaNode("SquiggleSnippet", {
   id: { field: "id" },
   fields: (t) => ({
     dbId: t.exposeID("id"),
     code: t.exposeString("code"),
-    createdAtTimestamp: t.float({
-      resolve: (snippet) => snippet.createdAt.getTime(),
-    }),
   }),
 });
 
@@ -18,9 +14,29 @@ export const ModelContent = builder.unionType("ModelContent", {
   resolveType: () => SquiggleSnippet,
 });
 
-export const SquiggleSnippetConnection = builder.connectionObject({
-  type: SquiggleSnippet,
-  name: "SquiggleSnippetConnection",
+export const ModelRevision = builder.prismaNode("ModelRevision", {
+  id: { field: "id" },
+  fields: (t) => ({
+    dbId: t.exposeID("id"),
+    createdAtTimestamp: t.float({
+      resolve: (revision) => revision.createdAt.getTime(),
+    }),
+    content: t.field({
+      type: ModelContent,
+      select: { squiggleSnippet: true },
+      async resolve(revision) {
+        switch (revision.contentType) {
+          case "SquiggleSnippet":
+            return revision.squiggleSnippet;
+        }
+      },
+    }),
+  }),
+});
+
+export const ModelRevisionConnection = builder.connectionObject({
+  type: ModelRevision,
+  name: "ModelRevisionConnection",
 });
 
 export const Model = builder.prismaNode("Model", {
@@ -34,10 +50,10 @@ export const Model = builder.prismaNode("Model", {
     updatedAtTimestamp: t.float({
       resolve: (model) => model.updatedAt.getTime(),
     }),
-    content: t.field({
-      type: ModelContent,
+    currentRevision: t.field({
+      type: ModelRevision,
       select: (args, ctx, nestedSelection) => ({
-        squiggleSnippets: nestedSelection({
+        revisions: nestedSelection({
           take: 1,
           orderBy: {
             createdAt: "desc",
@@ -45,37 +61,30 @@ export const Model = builder.prismaNode("Model", {
         }),
       }),
       async resolve(model) {
-        switch (model.modelType) {
-          case "SquiggleSnippet":
-            return model.squiggleSnippets[0];
-        }
+        return model.revisions[0];
       },
     }),
     revision: t.field({
-      type: ModelContent,
+      type: ModelRevision,
       args: {
         id: t.arg.id({ required: true }),
       },
       select: (args, ctx, nestedSelection) => ({
-        squiggleSnippets: nestedSelection({
+        revisions: nestedSelection({
           take: 1,
           where: { id: args.id },
         }),
       }),
       async resolve(model) {
-        switch (model.modelType) {
-          case "SquiggleSnippet": {
-            const snippet = model.squiggleSnippets[0];
-            if (!snippet) {
-              throw new Error("Not found");
-            }
-            return snippet;
-          }
+        const revision = model.revisions[0];
+        if (!revision) {
+          throw new Error("Not found");
         }
+        return revision;
       },
     }),
     revisions: t.relatedConnection(
-      "squiggleSnippets",
+      "revisions",
       {
         cursor: "id",
         query: () => ({
@@ -84,7 +93,7 @@ export const Model = builder.prismaNode("Model", {
           },
         }),
       },
-      SquiggleSnippetConnection // should be ModelContentConnection, but it's harder to do with pothos-prisma
+      ModelRevisionConnection
     ),
     owner: t.relation("owner"),
   }),

@@ -16,10 +16,12 @@ const ModelRevisionViewQuery = graphql`
     model(input: $input) {
       id
       revision(id: $revisionId) {
-        __typename
-        ... on SquiggleSnippet {
-          createdAtTimestamp
-          code
+        createdAtTimestamp
+        content {
+          __typename
+          ... on SquiggleSnippet {
+            code
+          }
         }
       }
     }
@@ -45,7 +47,7 @@ export const ModelRevisionView: FC<Props> = ({
     }
   );
 
-  const typename = data.model.revision.__typename;
+  const typename = data.model.revision.content.__typename;
   if (typename !== "SquiggleSnippet") {
     return <div>Unknown model type {typename}</div>;
   }
@@ -66,7 +68,7 @@ export const ModelRevisionView: FC<Props> = ({
       </div>
       <SquigglePlayground
         code={undefined as any} // code is optional in SquigglePlayground but marked as required due to Typescript bug
-        defaultCode={data.model.revision.code}
+        defaultCode={data.model.revision.content.code}
       />
     </WithTopMenu>
   );

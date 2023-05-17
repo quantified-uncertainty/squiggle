@@ -38,9 +38,14 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
         },
       });
 
-      const snippet = await prisma.squiggleSnippet.create({
+      const revision = await prisma.modelRevision.create({
         data: {
-          code: args.input.code,
+          squiggleSnippet: {
+            create: {
+              code: args.input.code,
+            },
+          },
+          contentType: "SquiggleSnippet",
           model: {
             connect: {
               slug_ownerId: {
@@ -55,7 +60,7 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
         },
       });
 
-      return { model: snippet.model };
+      return { model: revision.model };
     },
   })
 );

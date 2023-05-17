@@ -87,29 +87,30 @@ model Model {
   owner   User   @relation(fields: [ownerId], references: [id])
   ownerId String
 
-  // deprecated
-  squiggleSnippet SquiggleSnippet? @relation("legacy", fields: [modelId], references: [id], map: "squiggleSnippet_modelId")
-  modelId         String?          @unique // legacy
-
-  modelType ModelType
-
-  squiggleSnippets SquiggleSnippet[] @relation("model")
+  revisions ModelRevision[]
 
   @@unique([slug, ownerId])
   @@index([createdAt])
 }
 
-model SquiggleSnippet {
+model ModelRevision {
   id String @id @default(cuid())
 
   createdAt DateTime @default(now())
 
-  model   Model  @relation("model", fields: [modelId], references: [id], onDelete: Cascade)
+  model   Model  @relation(fields: [modelId], references: [id], onDelete: Cascade)
   modelId String
 
-  legacyModel Model? @relation("legacy")
+  contentType ModelType
+
+  squiggleSnippet SquiggleSnippet? @relation(fields: [contentId], references: [id], map: "squiggleSnippet_contentId")
+  contentId       String?          @unique
+}
+
+model SquiggleSnippet {
+  id String @id @default(cuid())
 
   code String
 
-  @@index([modelId, createdAt])
+  revision ModelRevision?
 }

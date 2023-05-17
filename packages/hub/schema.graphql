@@ -20,12 +20,12 @@ type Me {
 }
 
 type Model implements Node {
-  content: ModelContent!
   createdAtTimestamp: Float!
+  currentRevision: ModelRevision!
   id: ID!
   owner: User!
-  revision(id: ID!): ModelContent!
-  revisions(after: String, before: String, first: Int, last: Int): SquiggleSnippetConnection!
+  revision(id: ID!): ModelRevision!
+  revisions(after: String, before: String, first: Int, last: Int): ModelRevisionConnection!
   slug: String!
   updatedAtTimestamp: Float!
 }
@@ -40,6 +40,23 @@ union ModelContent = SquiggleSnippet
 type ModelEdge {
   cursor: String!
   node: Model!
+}
+
+type ModelRevision implements Node {
+  content: ModelContent!
+  createdAtTimestamp: Float!
+  dbId: ID!
+  id: ID!
+}
+
+type ModelRevisionConnection {
+  edges: [ModelRevisionEdge!]!
+  pageInfo: PageInfo!
+}
+
+type ModelRevisionEdge {
+  cursor: String!
+  node: ModelRevision!
 }
 
 type Mutation {
@@ -127,19 +144,8 @@ interface SquiggleOutput {
 
 type SquiggleSnippet implements Node {
   code: String!
-  createdAtTimestamp: Float!
   dbId: ID!
   id: ID!
-}
-
-type SquiggleSnippetConnection {
-  edges: [SquiggleSnippetEdge!]!
-  pageInfo: PageInfo!
-}
-
-type SquiggleSnippetEdge {
-  cursor: String!
-  node: SquiggleSnippet!
 }
 
 type UpdateSquiggleSnippetResult {

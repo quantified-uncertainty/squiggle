@@ -40,7 +40,8 @@ export const ModelRevisionsList: FC<Props> = ({ username, slug }) => {
     ModelRevisionsListQuery,
     {
       input: { ownerUsername: username, slug },
-    }
+    },
+    { fetchPolicy: "store-and-network" }
   );
 
   return (
