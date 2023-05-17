@@ -94,7 +94,9 @@ export const SquiggleSnippetForm: FC<Props> = ({ username, slug, content }) => {
           {session?.user.username === username ? (
             <div className="flex items-center gap-2">
               <DeleteModelButton username={username} slug={slug} />
-              <Button onClick={save}>Save</Button>
+              <Button theme="primary" onClick={save}>
+                Save
+              </Button>
             </div>
           ) : (
             <div className="text-xs">

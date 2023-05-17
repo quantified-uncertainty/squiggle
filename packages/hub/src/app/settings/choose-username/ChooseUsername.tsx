@@ -67,7 +67,7 @@ export const ChooseUsername: FC = () => {
             register={register}
             name="username"
           />
-          <Button onClick={save} disabled={disabled}>
+          <Button onClick={save} disabled={disabled} theme="primary">
             Save
           </Button>
         </div>

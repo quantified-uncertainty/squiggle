@@ -76,7 +76,7 @@ export const NewModel: FC = () => {
               placeholder="Slug"
               size="small"
             />
-            <Button onClick={save} disabled={isSaveInFlight}>
+            <Button onClick={save} disabled={isSaveInFlight} theme="primary">
               Save
             </Button>
             {error && <div className="text-xs">{error}</div>}
