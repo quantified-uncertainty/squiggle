@@ -1,31 +1,44 @@
 import { FC } from "react";
-import { useLazyLoadQuery } from "react-relay";
+import { useLazyLoadQuery, usePaginationFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
+import { ModelRevisionsList$key } from "@/__generated__/ModelRevisionsList.graphql";
 import { ModelInfo } from "@/components/ModelInfo";
 import { StyledLink } from "@/components/ui/StyledLink";
+import { commonDateFormat } from "@/lib/utils";
 import { modelRevisionRoute } from "@/routes";
 import { ModelRevisionsListQuery } from "@gen/ModelRevisionsListQuery.graphql";
-import { format, formatDistance } from "date-fns";
-import { commonDateFormat } from "@/lib/utils";
+import { Button } from "@quri/ui";
+import { format } from "date-fns";
+
+const RevisionsFragment = graphql`
+  fragment ModelRevisionsList on Model
+  @argumentDefinitions(
+    cursor: { type: "String" }
+    count: { type: "Int", defaultValue: 20 }
+  )
+  @refetchable(queryName: "ModelRevisionsListPaginationQuery") {
+    revisions(first: $count, after: $cursor)
+      @connection(key: "ModelRevisionsList_revisions") {
+      edges {
+        node {
+          id
+          dbId
+          createdAtTimestamp
+        }
+      }
+      pageInfo {
+        hasNextPage
+      }
+    }
+  }
+`;
 
 const ModelRevisionsListQuery = graphql`
   query ModelRevisionsListQuery($input: QueryModelInput!) {
     model(input: $input) {
       id
-      revisions {
-        edges {
-          node {
-            # TODO - fragment
-            id
-            dbId
-            createdAtTimestamp
-          }
-        }
-        pageInfo {
-          hasNextPage
-        }
-      }
+      ...ModelRevisionsList
     }
   }
 `;
@@ -36,7 +49,7 @@ type Props = {
 };
 
 export const ModelRevisionsList: FC<Props> = ({ username, slug }) => {
-  const data = useLazyLoadQuery<ModelRevisionsListQuery>(
+  const { model } = useLazyLoadQuery<ModelRevisionsListQuery>(
     ModelRevisionsListQuery,
     {
       input: { ownerUsername: username, slug },
@@ -44,12 +57,17 @@ export const ModelRevisionsList: FC<Props> = ({ username, slug }) => {
     { fetchPolicy: "store-and-network" }
   );
 
+  const { data, loadNext } = usePaginationFragment<
+    ModelRevisionsListQuery,
+    ModelRevisionsList$key
+  >(RevisionsFragment, model);
+
   return (
     <div>
       <ModelInfo slug={slug} username={username} />
       <div className="mt-4 mb-2 font-medium">Revision history</div>
       <div className="space-y-2">
-        {data.model.revisions.edges.map((edge, i) => (
+        {data.revisions.edges.map((edge) => (
           <div key={edge.node.dbId}>
             <StyledLink
               href={modelRevisionRoute({
@@ -62,8 +80,8 @@ export const ModelRevisionsList: FC<Props> = ({ username, slug }) => {
             </StyledLink>
           </div>
         ))}
-        {data.model.revisions.pageInfo.hasNextPage && (
-          <div>{"There's more, but pagination is not implemented yet"}</div>
+        {data.revisions.pageInfo.hasNextPage && (
+          <Button onClick={() => loadNext(20)}>Load more</Button>
         )}
       </div>
     </div>
