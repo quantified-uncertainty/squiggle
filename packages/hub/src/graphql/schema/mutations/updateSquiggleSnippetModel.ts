@@ -38,23 +38,24 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
         },
       });
 
-      const model = await prisma.model.update({
-        where: {
-          slug_ownerId: {
-            slug,
-            ownerId: owner.id,
-          },
-        },
+      const snippet = await prisma.squiggleSnippet.create({
         data: {
-          squiggleSnippet: {
-            update: {
-              code: args.input.code,
+          code: args.input.code,
+          model: {
+            connect: {
+              slug_ownerId: {
+                slug,
+                ownerId: owner.id,
+              },
             },
           },
         },
+        select: {
+          model: true,
+        },
       });
 
-      return { model };
+      return { model: snippet.model };
     },
   })
 );

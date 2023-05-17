@@ -32,23 +32,26 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
         throw new Error("Email is missing");
       }
 
-      const model = await prisma.model.create({
+      const snippet = await prisma.squiggleSnippet.create({
         data: {
-          slug: args.input.slug,
-          squiggleSnippet: {
+          code: args.input.code,
+          model: {
             create: {
-              code: args.input.code,
+              slug: args.input.slug,
+              modelType: "SquiggleSnippet",
+              owner: {
+                connect: { email },
+              },
             },
           },
-          modelType: "SquiggleSnippet",
-          owner: {
-            connect: { email },
-          },
+        },
+        include: {
+          model: true,
         },
       });
 
       return {
-        model,
+        model: snippet.model,
       };
     },
   })

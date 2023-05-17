@@ -24,6 +24,7 @@ type Model implements Node {
   createdAtTimestamp: Float!
   id: ID!
   owner: User!
+  revisions(after: String, before: String, first: Int, last: Int): SquiggleSnippet!
   slug: String!
   updatedAtTimestamp: Float!
 }

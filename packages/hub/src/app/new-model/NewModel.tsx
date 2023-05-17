@@ -9,6 +9,7 @@ import { SquigglePlayground } from "@quri/squiggle-components";
 import { Button, TextInput } from "@quri/ui";
 
 import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
+import { useSession } from "next-auth/react";
 
 const Mutation = graphql`
   mutation NewModelMutation($input: MutationCreateSquiggleSnippetModelInput!) {
@@ -27,6 +28,8 @@ const Mutation = graphql`
 `;
 
 export const NewModel: FC = () => {
+  useSession({ required: true });
+
   const { register, handleSubmit, control } = useForm<{
     code: string;
     slug: string;
@@ -74,7 +77,7 @@ export const NewModel: FC = () => {
           <Button onClick={save} disabled={isSaveInFlight}>
             Save
           </Button>
-          {error && <div>{error}</div>}
+          {error && <div className="text-xs">{error}</div>}
         </div>
       </div>
       <Controller
