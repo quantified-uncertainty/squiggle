@@ -5,15 +5,15 @@ import { useFragment, useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { SquigglePlayground } from "@quri/squiggle-components";
-import { Button } from "@quri/ui";
+import { Button, DotsHorizontalIcon, Dropdown, DropdownMenu } from "@quri/ui";
 
 import { SquiggleSnippetFormFragment$key } from "@/__generated__/SquiggleSnippetFormFragment.graphql";
 import { SquiggleSnippetFormMutation } from "@/__generated__/SquiggleSnippetFormMutation.graphql";
 import { ModelInfo } from "@/components/ModelInfo";
 import { WithTopMenu } from "@/components/layout/WithTopMenu";
-import { StyledLink } from "@/components/ui/StyledLink";
+import { DropdownMenuLinkItem } from "@/components/ui/DropdownMenuLinkItem";
 import { modelRevisionsRoute } from "@/routes";
-import { DeleteModelButton } from "./DeleteModelButton";
+import { DeleteModelAction } from "./DeleteModelAction";
 
 const Fragment = graphql`
   fragment SquiggleSnippetFormFragment on SquiggleSnippet {
@@ -93,22 +93,35 @@ export const SquiggleSnippetForm: FC<Props> = ({ username, slug, content }) => {
           <ModelInfo slug={slug} username={username} />
           {session?.user.username === username ? (
             <div className="flex items-center gap-2">
-              <DeleteModelButton username={username} slug={slug} />
               <Button theme="primary" onClick={save}>
                 Save
               </Button>
+              <Dropdown
+                render={({ close }) => (
+                  <DropdownMenu>
+                    <DropdownMenuLinkItem
+                      href={modelRevisionsRoute({ username, slug })}
+                      title="Revisions"
+                    />
+                    <DeleteModelAction
+                      username={username}
+                      slug={slug}
+                      close={close}
+                    />
+                  </DropdownMenu>
+                )}
+                tailwindSelector="squiggle-hub"
+              >
+                <Button>
+                  <DotsHorizontalIcon className="text-slate-500" />
+                </Button>
+              </Dropdown>
             </div>
           ) : (
             <div className="text-xs">
               {"You don't own this model, edits won't be saved."}
             </div>
           )}
-          <StyledLink
-            className="text-xs"
-            href={modelRevisionsRoute({ username, slug })}
-          >
-            Revisions
-          </StyledLink>
         </div>
         <Controller
           name="code"
