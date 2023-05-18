@@ -3,11 +3,11 @@ import { SqRecordValue, SqValue, wrapValue } from "./SqValue.js";
 import { SqValueLocation } from "./SqValueLocation.js";
 
 export class SqRecord {
-  constructor(private _value: ValueMap, public location: SqValueLocation) {}
+  constructor(private _value: ValueMap, public location?: SqValueLocation) {}
 
   entries() {
     return [...this._value.entries()].map(
-      ([k, v]) => [k, wrapValue(v, this.location.extend(k))] as const
+      ([k, v]) => [k, wrapValue(v, this.location?.extend(k))] as const
     );
   }
 
@@ -16,7 +16,7 @@ export class SqRecord {
     if (value === undefined) {
       return undefined;
     }
-    return wrapValue(value, this.location.extend(key));
+    return wrapValue(value, this.location?.extend(key));
   }
 
   toString() {

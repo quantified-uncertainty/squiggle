@@ -1,5 +1,0 @@
-{
-  "buildCommand": "npx turbo build",
-  "framework": "nextjs",
-  "ignoreCommand": "npx turbo-ignore"
-}

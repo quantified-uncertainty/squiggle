@@ -29,7 +29,7 @@ export const wrapDistribution = (value: BaseDist): SqDistribution => {
 export abstract class SqAbstractDistribution<T extends BaseDist> {
   abstract tag: SqDistributionTag;
 
-  constructor(protected _value: T) {}
+  constructor(public _value: T) {}
 
   pointSet(env: Env) {
     const innerResult = this._value.toPointSetDist(env);

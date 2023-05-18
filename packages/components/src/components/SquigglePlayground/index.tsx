@@ -17,19 +17,20 @@ import { UseFormRegister, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 
 import { Env } from "@quri/squiggle-lang";
+import { StyledTab, Button, TextTooltip } from "@quri/ui";
+
 import { useMaybeControlledValue, useSquiggle } from "../../lib/hooks/index.js";
 import { SquiggleArgs } from "../../lib/hooks/useSquiggle.js";
 
 import { JsImports } from "../../lib/jsImports.js";
-import { getErrors, getValueToRender } from "../../lib/utility.js";
-import { CodeEditor } from "../CodeEditor.js";
+import { getErrors, getValueToRender, isMac } from "../../lib/utility.js";
+import { CodeEditor, CodeEditorHandle } from "../CodeEditor.js";
 import { SquiggleContainer } from "../SquiggleContainer.js";
 import {
   SquiggleViewer,
   SquiggleViewerProps,
 } from "../SquiggleViewer/index.js";
 import { ViewSettingsForm, viewSettingsSchema } from "../ViewSettingsForm.js";
-import { StyledTab } from "../ui/StyledTab.js";
 
 import { ImportSettingsForm } from "./ImportSettingsForm.js";
 import { RunControls } from "./RunControls/index.js";
@@ -140,16 +141,19 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
 
   const errors = getErrors(resultAndBindings.result);
 
+  const editorRef = useRef<CodeEditorHandle>(null);
+
   const firstTab = showEditor ? (
     <div className="border border-slate-200" data-testid="squiggle-editor">
       <CodeEditor
-        errors={errors}
+        ref={editorRef}
         value={code}
-        onChange={setCode}
-        onSubmit={runnerState.run}
+        errors={errors}
+        project={resultAndBindings.project}
         showGutter={true}
         height={height}
-        project={resultAndBindings.project}
+        onChange={setCode}
+        onSubmit={runnerState.run}
       />
     </div>
   ) : (
@@ -213,17 +217,24 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
             }}
           >
             <div className="flex justify-between items-center">
-              <StyledTab.List>
-                <StyledTab
-                  name={showEditor ? "Code" : "Display"}
-                  icon={showEditor ? CodeIcon : EyeIcon}
-                />
-                <StyledTab name="Sampling Settings" icon={CogIcon} />
-                <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
-                <StyledTab name="Input Variables" icon={CurrencyDollarIcon} />
-              </StyledTab.List>
-              <div className="flex space-x-2 items-center">
+              <div className="flex gap-2 items-center">
+                <StyledTab.List>
+                  <StyledTab
+                    name={showEditor ? "Code" : "Display"}
+                    icon={showEditor ? CodeIcon : EyeIcon}
+                  />
+                  <StyledTab name="Sampling Settings" icon={CogIcon} />
+                  <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
+                  <StyledTab name="Input Variables" icon={CurrencyDollarIcon} />
+                </StyledTab.List>
+              </div>
+              <div className="flex gap-2 items-center">
                 <RunControls {...runnerState} />
+                <TextTooltip text={isMac() ? "Option+Shift+f" : "Alt+Shift+f"}>
+                  <div>
+                    <Button onClick={editorRef.current?.format}>Format</Button>
+                  </div>
+                </TextTooltip>
                 {showShareButton && <ShareButton />}
               </div>
             </div>

@@ -1,4 +1,4 @@
-import { mixture } from "../../src/dist/DistOperations/index.js";
+import { mixture } from "../../src/dist/distOperations/index.js";
 import {
   env,
   mkBeta,

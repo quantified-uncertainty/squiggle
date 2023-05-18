@@ -3,35 +3,11 @@
   "pipeline": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", "build/**"]
-    },
-    "vscode-squiggle#build": {
-      "dependsOn": ["^build", "@quri/squiggle-components#bundle"],
-      "outputs": ["dist/**"]
-    },
-    "@quri/squiggle-components#build": {
-      "dependsOn": ["^build"],
-      "outputs": [
-        "dist/**",
-        "storybook-static/**",
-        "src/languageSupport/generated/**"
-      ]
-    },
-    "@quri/squiggle-lang#build": {
-      "dependsOn": ["^build"],
-      "outputs": ["src/**/*.js", "dist/**"]
-    },
-    "@quri/relative-values#build": {
-      "dependsOn": ["^build"],
-      "outputs": [".next/**", "./models/cache/**"]
-    },
-    "@quri/api-server#build": {
-      "dependsOn": ["^build"],
-      "outputs": [".next/**", "../../node_modules/.prisma"]
+      "outputs": ["dist/**", "build/**", ".next/**", "!.next/cache/**"]
     },
     "format": {},
     "lint": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build", "@quri/prettier-plugin-squiggle#build"]
     },
     "test": {
       "dependsOn": ["build"]

@@ -1,7 +1,10 @@
 import * as expression from "../expression/index.js";
-import { AST } from "./parse.js";
+import { ASTNode } from "./parse.js";
+import { infixFunctions, unaryFunctions } from "./peggyHelpers.js";
 
-const contentFromNode = (ast: AST): expression.ExpressionContent => {
+export const INDEX_LOOKUP_FUNCTION = "$_atIndex_$";
+
+const contentFromNode = (ast: ASTNode): expression.ExpressionContent => {
   switch (ast.type) {
     case "Block":
       return expression.eBlock(ast.statements.map(fromNode));
@@ -17,6 +20,31 @@ const contentFromNode = (ast: AST): expression.ExpressionContent => {
       return expression.eBool(ast.value);
     case "Call":
       return expression.eCall(fromNode(ast.fn), ast.args.map(fromNode));
+    case "InfixCall":
+      return expression.eCall(
+        { ast, ...expression.eSymbol(infixFunctions[ast.op]) },
+        ast.args.map(fromNode)
+      );
+    case "UnaryCall":
+      return expression.eCall(
+        { ast, ...expression.eSymbol(unaryFunctions[ast.op]) },
+        [fromNode(ast.arg)]
+      );
+    case "Pipe":
+      return expression.eCall(fromNode(ast.fn), [
+        fromNode(ast.leftArg),
+        ...ast.rightArgs.map(fromNode),
+      ]);
+    case "DotLookup":
+      return expression.eCall(
+        { ast, ...expression.eSymbol(INDEX_LOOKUP_FUNCTION) },
+        [fromNode(ast.arg), { ast, ...expression.eString(ast.key) }]
+      );
+    case "BracketLookup":
+      return expression.eCall(
+        { ast, ...expression.eSymbol(INDEX_LOOKUP_FUNCTION) },
+        [fromNode(ast.arg), fromNode(ast.key)]
+      );
     case "Float":
       return expression.eNumber(ast.value);
     case "Identifier":
@@ -38,6 +66,8 @@ const contentFromNode = (ast: AST): expression.ExpressionContent => {
       );
     case "LetStatement":
       return expression.eLetStatement(ast.variable.value, fromNode(ast.value));
+    case "DefunStatement":
+      return expression.eLetStatement(ast.variable.value, fromNode(ast.value));
     case "ModuleIdentifier":
       return expression.eIdentifier(ast.value);
     case "String":
@@ -51,11 +81,11 @@ const contentFromNode = (ast: AST): expression.ExpressionContent => {
     case "Void":
       return expression.eVoid();
     default:
-      throw new Error(`Unsupported AST value ${ast}`);
+      throw new Error(`Unsupported AST value ${ast satisfies never}`);
   }
 };
 
-const fromNode = (ast: AST): expression.Expression => {
+const fromNode = (ast: ASTNode): expression.Expression => {
   return {
     ast,
     ...contentFromNode(ast),

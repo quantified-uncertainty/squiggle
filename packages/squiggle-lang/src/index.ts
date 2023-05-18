@@ -6,6 +6,9 @@ export { SqValueLocation } from "./public/SqValueLocation.js";
 export { result, fmap as resultMap } from "./utility/result.js";
 export {
   SqAbstractDistribution,
+  SqSampleSetDistribution,
+  SqPointSetDistribution,
+  SqSymbolicDistribution,
   SqDistribution,
   SqDistributionTag,
 } from "./public/SqDistribution.js";
@@ -14,7 +17,20 @@ export { SqRecord } from "./public/SqRecord.js";
 export { SqLambda } from "./public/SqLambda.js";
 export { SqError, SqFrame } from "./public/SqError.js";
 export { SqShape } from "./public/SqPointSet.js";
-export { SqPlot, SqDistributionsPlot, SqJointPlot } from "./public/SqPlot.js";
+export {
+  SqPlot,
+  SqDistributionsPlot,
+  SqNumericFnPlot,
+  SqDistFnPlot,
+  SqScatterPlot,
+} from "./public/SqPlot.js";
+export {
+  SqScale,
+  SqLinearScale,
+  SqLogScale,
+  SqSymlogScale,
+  SqPowerScale,
+} from "./public/SqScale.js";
 export { SqParseError, parse } from "./public/parse.js";
 
 export { defaultEnv as defaultEnvironment } from "./dist/env.js";
@@ -22,7 +38,8 @@ export { SqProject, SqValue, SqStringValue };
 export { Env };
 export { LocationRange as SqLocation } from "peggy";
 
-export { AST } from "./ast/parse.js";
+export { AST, ASTNode } from "./ast/parse.js";
+export { ASTCommentNode } from "./ast/peggyHelpers.js";
 
 export const run = (
   code: string,

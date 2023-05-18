@@ -23,6 +23,10 @@ Squiggle is a **monorepo** with several **packages**.
 - **website** is the site [squiggle-language.com](https://www.squiggle-language.com)
 - **vscode-ext** is the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=qURI.vscode-squiggle)
 
+# VS Code
+
+If you want to use [VS Code Jest extension](https://github.com/jest-community/vscode-jest), or share other useful workspace settings, such as multi-root mode, move `.vscode/squiggle.code-workspace.default` file to `.vscode/squiggle.code-workspace`.
+
 # Deployment ops
 
 We use Vercel, and it should only concern Slava, Sam, and Ozzie.
@@ -57,24 +61,31 @@ Autopings are set up: if you are not autopinged, you are welcome to comment, but
 # TypeScript style
 
 **Prefer `const` over `let`, never use `var`**
+
 `var` is deprecated in JS. `let` should only be used for mutable variables.
 
 **Use functional style, avoid classes**
+
 We use classes for outer-facing APIs, but most of the codebase should use plain immutable objects with functions act on those objects.
 
 **Use immutable types when it doesn't hurt the performance**
+
 Wrap object types in [Readonly](https://www.typescriptlang.org/docs/handbook/utility-types.html#readonlytype) or mark individual fields as `readonly`.
 
 **Don't use namespaces**
+
 Use native ES modules instead, as [recommended by TypeScript documentation](https://www.typescriptlang.org/docs/handbook/namespaces-and-modules.html#using-modules).
 
 **Avoid `any` as much as possible**
+
 It's almost always possible to type things properly with modern Typescript.
 
 **Always use `===` instead of `==`**
+
 Loose equality is [crazy](https://dorey.github.io/JavaScript-Equality-Table/unified/).
 
 **Don't use too many external libraries**
+
 This is especially important in `squiggle-lang` and less important in `website` or some other code that won't be used much as a library by many users.
 
 Heuristics for deciding whether pulling an external library is worth it:
@@ -86,22 +97,29 @@ Heuristics for deciding whether pulling an external library is worth it:
   - the closer to the "core" functionality of Squiggle the feature is (math, distributions-related code), the more it makes sense to keep control over the implementation details
 
 **Prefer named exports over default exports**
+
 It's easier to do refactorings with named exports.
 
 **Name files according to their main named exports; split code into many small files**
-This is expecially straightforward in the frontend code; try to put one component in a single file, `export const MyComponent: React.FC = ...` from `MyComponent.tsx`.
+
+This is expecially straightforward in the frontend code; try to put one component in a single file, `export const MyComponent: FC = ...` from `MyComponent.tsx`.
 
 In the squiggle-lang code, I'm not sure yet if this is viable.
 
 **Prefer `type` over `interface`**
+
 In the modern TypeScript there's no [big](https://stackoverflow.com/questions/37233735/interfaces-vs-types-in-typescript/52682220) [difference](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#differences-between-type-aliases-and-interfaces) between types and interfaces. Errors in interfaces can be slightly nicer, but interfaces are open by default and we mostly don't want that.
 
 It's not worth fighting over, though, the difference is pretty small.
 
-**Prefer arrow functions over `function` keyword whenever possible**
-Arrow functions have less hidden features (`this`, `arguments`, function hoisting) and are more concise when writing in functional style.
+**Prefer `function` keyword over arrow functions in top scope, use arrow functions otherwise**
 
-It's ok to use `function` when you need to define a complicated generic function, e.g. a generic functional React component.
+Exceptions:
+
+- For React components, it's better to use `const my Component: FC<...> = ` since it type-checks both the arguments and the result type.
+- In some other cases where you have several functions with the similar signature, it's also convenient to define a type for the entire function, and you have to use arrow functions to use it.
+
+Also, don't use `function` keyword in non-top scopes (it's easier to avoid hoisting quirks this way).
 
 **Prefer `undefined` over `null`**
 
@@ -110,4 +128,5 @@ It's ok to use `function` when you need to define a complicated generic function
 **Use exceptions instead of Ok/Error pairs, wrap in try/catch on top level if necessary**
 
 **https://github.com/airbnb/javascript is mostly good**
+
 When it doesn't contradict the list above.

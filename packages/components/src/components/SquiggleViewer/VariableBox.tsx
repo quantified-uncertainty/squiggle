@@ -1,8 +1,13 @@
-import { SqValue } from "@quri/squiggle-lang";
 import React, { useContext, useReducer } from "react";
 
-import { Tooltip } from "../ui/Tooltip.js";
-import { LocalItemSettings, MergedItemSettings } from "./utils.js";
+import { SqValue } from "@quri/squiggle-lang";
+import { TextTooltip } from "@quri/ui";
+
+import {
+  LocalItemSettings,
+  locationToShortName,
+  MergedItemSettings,
+} from "./utils.js";
 import { ViewerContext } from "./ViewerContext.js";
 
 type SettingsMenuParams = {
@@ -29,6 +34,10 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
   // So we use `forceUpdate` to force rerendering.
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
+  if (!location) {
+    throw new Error("Can't display a locationless value");
+  }
+
   const settings = getSettings(location);
 
   const setSettingsAndUpdate = (newSettings: LocalItemSettings) => {
@@ -40,23 +49,20 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
     setSettingsAndUpdate({ ...settings, collapsed: !settings.collapsed });
   };
 
-  const isTopLevel = location.path.items.length === 0;
-  const name = isTopLevel
-    ? { result: undefined, bindings: "Bindings" }[location.path.root]
-    : location.path.items[location.path.items.length - 1];
+  const name = locationToShortName(location);
 
   return (
     <div>
       {name === undefined ? null : (
         <header className="inline-flex space-x-1">
-          <Tooltip text={heading}>
+          <TextTooltip text={heading}>
             <span
               className="text-slate-500 font-mono text-sm cursor-pointer"
               onClick={toggleCollapsed}
             >
               {name}:
             </span>
-          </Tooltip>
+          </TextTooltip>
           {settings.collapsed ? (
             <span
               className="rounded p-0.5 bg-slate-200 text-slate-500 font-mono text-xs cursor-pointer"

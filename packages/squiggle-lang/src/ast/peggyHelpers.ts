@@ -1,6 +1,6 @@
 import { LocationRange } from "peggy";
 
-export const toFunction = {
+export const infixFunctions = {
   "+": "add",
   "-": "subtract",
   "!=": "unequal",
@@ -21,18 +21,14 @@ export const toFunction = {
   "||": "or",
   to: "credibleIntervalToDistribution",
 };
+export type InfixOperator = keyof typeof infixFunctions;
 
-export const unaryToFunction = {
+export const unaryFunctions = {
   "-": "unaryMinus",
   "!": "not",
   ".-": "unaryDotMinus",
 };
-
-export const postOperatorToFunction = {
-  ".": "$_atIndex_$",
-  "()": "$$_applyAll_$$",
-  "[]": "$_atIndex_$",
-};
+export type UnaryOperator = keyof typeof unaryFunctions;
 
 type Node = {
   location: LocationRange;
@@ -40,15 +36,48 @@ type Node = {
 
 type N<T extends string, V extends {}> = Node & { type: T } & V;
 
-type NodeBlock = N<"Block", { statements: AnyPeggyNode[] }>;
+type NodeBlock = N<
+  "Block",
+  {
+    statements: AnyPeggyNode[]; // should be NodeStatement[] ?
+  }
+>;
 
-type NodeProgram = N<"Program", { statements: AnyPeggyNode[] }>;
+type NodeProgram = N<
+  "Program",
+  {
+    statements: AnyPeggyNode[]; // should be NodeStatement[] ?
+  }
+>;
 
 type NodeArray = N<"Array", { elements: AnyPeggyNode[] }>;
 
 type NodeRecord = N<"Record", { elements: NodeKeyValue[] }>;
 
 type NodeCall = N<"Call", { fn: AnyPeggyNode; args: AnyPeggyNode[] }>;
+
+type NodeInfixCall = N<
+  "InfixCall",
+  { op: InfixOperator; args: [AnyPeggyNode, AnyPeggyNode] }
+>;
+
+type NodeUnaryCall = N<"UnaryCall", { op: UnaryOperator; arg: AnyPeggyNode }>;
+
+type NodePipe = N<
+  "Pipe",
+  {
+    leftArg: AnyPeggyNode;
+    fn: AnyPeggyNode;
+    rightArgs: AnyPeggyNode[];
+  }
+>;
+
+type NodeDotLookup = N<"DotLookup", { arg: AnyPeggyNode; key: string }>;
+
+type NodeBracketLookup = N<
+  "BracketLookup",
+  { arg: AnyPeggyNode; key: AnyPeggyNode }
+>;
 
 type NodeFloat = N<"Float", { value: number }>;
 
@@ -65,7 +94,21 @@ type NodeLetStatement = N<
 
 type NodeLambda = N<
   "Lambda",
-  { args: AnyPeggyNode[]; body: AnyPeggyNode; name?: string }
+  {
+    args: AnyPeggyNode[];
+    body: AnyPeggyNode; // should be a NodeBlock
+    name?: string;
+  }
+>;
+
+type NamedNodeLambda = NodeLambda & Required<Pick<NodeLambda, "name">>;
+
+type NodeDefunStatement = N<
+  "DefunStatement",
+  {
+    variable: NodeIdentifier;
+    value: NamedNodeLambda;
+  }
 >;
 
 type NodeTernary = N<
@@ -74,6 +117,7 @@ type NodeTernary = N<
     condition: AnyPeggyNode;
     trueExpression: AnyPeggyNode;
     falseExpression: AnyPeggyNode;
+    kind: "IfThenElse" | "C";
   }
 >;
 
@@ -97,11 +141,17 @@ export type AnyPeggyNode =
   | NodeBlock
   | NodeProgram
   | NodeCall
+  | NodeInfixCall
+  | NodeUnaryCall
+  | NodePipe
+  | NodeDotLookup
+  | NodeBracketLookup
   | NodeFloat
   | NodeInteger
   | NodeIdentifier
   | NodeModuleIdentifier
   | NodeLetStatement
+  | NodeDefunStatement
   | NodeLambda
   | NodeTernary
   | NodeKeyValue
@@ -109,16 +159,69 @@ export type AnyPeggyNode =
   | NodeBoolean
   | NodeVoid;
 
-export function makeFunctionCall(
-  fn: string,
+export function nodeCall(
+  fn: AnyPeggyNode,
   args: AnyPeggyNode[],
   location: LocationRange
-) {
-  if (fn === "$$_applyAll_$$") {
-    return nodeCall(args[0], args.splice(1), location);
-  } else {
-    return nodeCall(nodeIdentifier(fn, location), args, location);
-  }
+): NodeCall {
+  return { type: "Call", fn, args, location };
+}
+
+export function makeInfixChain(
+  head: AnyPeggyNode,
+  tail: [InfixOperator, AnyPeggyNode][],
+  location: LocationRange
+): AnyPeggyNode {
+  return tail.reduce((result, [operator, right]) => {
+    return nodeInfixCall(operator, result, right, location);
+  }, head);
+}
+
+export function nodeInfixCall(
+  op: InfixOperator,
+  arg1: AnyPeggyNode,
+  arg2: AnyPeggyNode,
+  location: LocationRange
+): NodeInfixCall {
+  return {
+    type: "InfixCall",
+    op,
+    args: [arg1, arg2],
+    location,
+  };
+}
+
+export function nodeUnaryCall(
+  op: UnaryOperator,
+  arg: AnyPeggyNode,
+  location: LocationRange
+): NodeUnaryCall {
+  return { type: "UnaryCall", op, arg, location };
+}
+
+export function nodePipe(
+  leftArg: AnyPeggyNode,
+  fn: AnyPeggyNode,
+  rightArgs: AnyPeggyNode[],
+  location: LocationRange
+): NodePipe {
+  return { type: "Pipe", leftArg, fn, rightArgs, location };
+}
+
+export function nodeDotLookup(
+  arg: AnyPeggyNode,
+  key: string,
+  location: LocationRange
+): NodeDotLookup {
+  return { type: "DotLookup", arg, key, location };
+}
+
+export function nodeBracketLookup(
+  arg: AnyPeggyNode,
+  key: AnyPeggyNode,
+  location: LocationRange
+): NodeBracketLookup {
+  return { type: "BracketLookup", arg, key, location };
 }
 
 export function constructArray(
@@ -151,13 +254,6 @@ export function nodeBoolean(
   location: LocationRange
 ): NodeBoolean {
   return { type: "Boolean", value, location };
-}
-export function nodeCall(
-  fn: AnyPeggyNode,
-  args: AnyPeggyNode[],
-  location: LocationRange
-): NodeCall {
-  return { type: "Call", fn, args, location };
 }
 export function nodeFloat(value: number, location: LocationRange): NodeFloat {
   return { type: "Float", value, location };
@@ -204,6 +300,13 @@ export function nodeLetStatement(
     value.type === "Lambda" ? { ...value, name: variable.value } : value;
   return { type: "LetStatement", variable, value: patchedValue, location };
 }
+export function nodeDefunStatement(
+  variable: NodeIdentifier,
+  value: NamedNodeLambda,
+  location: LocationRange
+): NodeDefunStatement {
+  return { type: "DefunStatement", variable, value, location };
+}
 export function nodeModuleIdentifier(
   value: string,
   location: LocationRange
@@ -217,6 +320,7 @@ export function nodeTernary(
   condition: AnyPeggyNode,
   trueExpression: AnyPeggyNode,
   falseExpression: AnyPeggyNode,
+  kind: NodeTernary["kind"],
   location: LocationRange
 ): NodeTernary {
   return {
@@ -224,10 +328,39 @@ export function nodeTernary(
     condition,
     trueExpression,
     falseExpression,
+    kind,
     location,
   };
 }
 
 export function nodeVoid(location: LocationRange): NodeVoid {
   return { type: "Void", location };
+}
+
+export type ASTCommentNode = {
+  type: "lineComment" | "blockComment";
+  value: string;
+  location: LocationRange;
+};
+
+export function lineComment(
+  text: string,
+  location: LocationRange
+): ASTCommentNode {
+  return {
+    type: "lineComment",
+    value: text,
+    location,
+  };
+}
+
+export function blockComment(
+  text: string,
+  location: LocationRange
+): ASTCommentNode {
+  return {
+    type: "blockComment",
+    value: text,
+    location,
+  };
 }

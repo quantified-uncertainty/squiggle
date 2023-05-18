@@ -1,0 +1,159 @@
+type BaseError implements Error {
+  message: String!
+}
+
+type CreateSquiggleSnippetResult {
+  model: Model!
+}
+
+type DeleteModelResult {
+  ok: Boolean!
+}
+
+interface Error {
+  message: String!
+}
+
+type Me {
+  email: String
+  username: String
+}
+
+type Model implements Node {
+  createdAtTimestamp: Float!
+  currentRevision: ModelRevision!
+  id: ID!
+  owner: User!
+  revision(id: ID!): ModelRevision!
+  revisions(after: String, before: String, first: Int, last: Int): ModelRevisionConnection!
+  slug: String!
+  updatedAtTimestamp: Float!
+}
+
+type ModelConnection {
+  edges: [ModelEdge!]!
+  pageInfo: PageInfo!
+}
+
+union ModelContent = SquiggleSnippet
+
+type ModelEdge {
+  cursor: String!
+  node: Model!
+}
+
+type ModelRevision implements Node {
+  content: ModelContent!
+  createdAtTimestamp: Float!
+  dbId: ID!
+  id: ID!
+}
+
+type ModelRevisionConnection {
+  edges: [ModelRevisionEdge!]!
+  pageInfo: PageInfo!
+}
+
+type ModelRevisionEdge {
+  cursor: String!
+  node: ModelRevision!
+}
+
+type Mutation {
+  createSquiggleSnippetModel(input: MutationCreateSquiggleSnippetModelInput!): MutationCreateSquiggleSnippetModelResult!
+  deleteModel(input: MutationDeleteModelInput!): MutationDeleteModelResult!
+  setUsername(username: String!): MutationSetUsernameResult!
+  updateSquiggleSnippetModel(input: MutationUpdateSquiggleSnippetModelInput!): MutationUpdateSquiggleSnippetModelResult!
+}
+
+input MutationCreateSquiggleSnippetModelInput {
+  code: String!
+  slug: String!
+}
+
+union MutationCreateSquiggleSnippetModelResult = BaseError | CreateSquiggleSnippetResult
+
+input MutationDeleteModelInput {
+  slug: String!
+  username: String!
+}
+
+union MutationDeleteModelResult = BaseError | DeleteModelResult
+
+union MutationSetUsernameResult = BaseError | Me
+
+input MutationUpdateSquiggleSnippetModelInput {
+  code: String!
+  slug: String!
+  username: String!
+}
+
+union MutationUpdateSquiggleSnippetModelResult = BaseError | UpdateSquiggleSnippetResult
+
+interface Node {
+  id: ID!
+}
+
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+type Query {
+  me: Me!
+  model(input: QueryModelInput!): Model!
+  models(after: String, before: String, first: Int, last: Int): ModelConnection!
+  node(id: ID!): Node
+  nodes(ids: [ID!]!): [Node]!
+  runSquiggle(code: String!): SquiggleOutput!
+  userByUsername(username: String!): User!
+  users(after: String, before: String, first: Int, last: Int): QueryUsersConnection!
+}
+
+input QueryModelInput {
+  ownerUsername: String!
+  slug: String!
+}
+
+type QueryUsersConnection {
+  edges: [QueryUsersConnectionEdge!]!
+  pageInfo: PageInfo!
+}
+
+type QueryUsersConnectionEdge {
+  cursor: String!
+  node: User!
+}
+
+type SquiggleErrorOutput implements SquiggleOutput {
+  errorString: String!
+  isCached: Boolean!
+}
+
+type SquiggleOkOutput implements SquiggleOutput {
+  bindingsJSON: String!
+  isCached: Boolean!
+  resultJSON: String!
+}
+
+interface SquiggleOutput {
+  isCached: Boolean!
+}
+
+type SquiggleSnippet implements Node {
+  code: String!
+  dbId: ID!
+  id: ID!
+}
+
+type UpdateSquiggleSnippetResult {
+  model: Model!
+}
+
+type User implements Node {
+  id: ID!
+  models(after: String, before: String, first: Int, last: Int): ModelConnection!
+  username: String!
+}

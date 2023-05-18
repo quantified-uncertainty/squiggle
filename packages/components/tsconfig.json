@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "paths": {
-      "@quri/squiggle-lang": ["../squiggle-lang/src"]
+      "@quri/squiggle-lang": ["../squiggle-lang/src"],
+      "@quri/prettier-plugin-squiggle": ["../prettier-plugin/src"]
     },
     "module": "es2020",
     "moduleResolution": "node16",
@@ -25,6 +26,9 @@
   "references": [
     {
       "path": "../squiggle-lang"
+    },
+    {
+      "path": "../prettier-plugin"
     }
   ]
 }

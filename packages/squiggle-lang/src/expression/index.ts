@@ -2,7 +2,7 @@
   An expression is an intermediate representation of a Squiggle code.
   Expressions are evaluated by `Reducer_Expression.evaluate` function.
 */
-import { AST } from "../ast/parse.js";
+import { ASTNode } from "../ast/parse.js";
 import { Value, vBool, vNumber, vString, vVoid } from "../value/index.js";
 
 export type ExpressionContent =
@@ -54,7 +54,7 @@ export type ExpressionContent =
       value: Value;
     };
 
-export type Expression = ExpressionContent & { ast: AST };
+export type Expression = ExpressionContent & { ast: ASTNode };
 
 export const eArray = (anArray: Expression[]): ExpressionContent => ({
   type: "Array",
