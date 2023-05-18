@@ -1,11 +1,14 @@
-import { useSelectedModel } from "@/app/interfaces/[id]/models/[modelId]/ModelProvider";
-import { modelRoute, newModelRoute, useSiblingRoute } from "@/routes";
 import clsx from "clsx";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
-import { Dropdown } from "../ui/Dropdown";
+
+import { Dropdown } from "@quri/ui";
+
+import { useSelectedModel } from "@/app/interfaces/[id]/models/[modelId]/ModelProvider";
+import { newModelRoute, useSiblingRoute } from "@/routes";
 import { useSelectedInterface } from "./InterfaceProvider";
+import { tailwindSelector } from "../Tailwind";
 
 const ModelPickerMenu: FC<{ close(): void }> = ({ close }) => {
   const { models, catalog } = useSelectedInterface();
@@ -68,7 +71,10 @@ export const ModelPicker: FC = () => {
   const selectedModel = useSelectedModel();
 
   return (
-    <Dropdown render={({ close }) => <ModelPickerMenu close={close} />}>
+    <Dropdown
+      tailwindSelector={tailwindSelector}
+      render={({ close }) => <ModelPickerMenu close={close} />}
+    >
       <div className="border border-gray-200 p-2 rounded cursor-pointer">
         {selectedModel ? (
           <div className="text-gray-700 text-sm">Unselect</div>
