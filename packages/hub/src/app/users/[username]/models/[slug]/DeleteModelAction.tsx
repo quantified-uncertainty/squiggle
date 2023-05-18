@@ -4,10 +4,10 @@ import { FC, useCallback, useState } from "react";
 import { useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { DeleteModelButtonMutation } from "@/__generated__/DeleteModelButtonMutation.graphql";
+import { DeleteModelActionMutation } from "@/__generated__/DeleteModelActionMutation.graphql";
 
 const Mutation = graphql`
-  mutation DeleteModelButtonMutation($input: MutationDeleteModelInput!) {
+  mutation DeleteModelActionMutation($input: MutationDeleteModelInput!) {
     deleteModel(input: $input) {
       __typename
       ... on BaseError {
@@ -27,7 +27,7 @@ export const DeleteModelAction: FC<Props> = ({ username, slug, close }) => {
   const router = useRouter();
 
   const [mutation, isMutationInFlight] =
-    useMutation<DeleteModelButtonMutation>(Mutation);
+    useMutation<DeleteModelActionMutation>(Mutation);
 
   const [error, setError] = useState("");
 
