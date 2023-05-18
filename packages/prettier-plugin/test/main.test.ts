@@ -46,6 +46,50 @@ x = 5
 // second line
 123`);
   });
+
+  test("comment in block definition", async () => {
+    expect(
+      await format(`
+foo = {
+  // inner comment
+  x = 5
+  x*x
+}
+`)
+    ).toBe(`foo = {
+  // inner comment
+  x = 5
+  x * x
+}
+`);
+  });
+
+  test("comment in simple function definition", async () => {
+    expect(
+      await format(`
+foo() = { /* inner comment */ 5 }
+`)
+    ).toBe(`foo() = {
+  /* inner comment */
+  5
+}
+`);
+  });
+
+  test("comment in function definition", async () => {
+    expect(
+      await format(`
+foo(x) = {
+  // inner comment
+  x*x
+}
+`)
+    ).toBe(`foo(x) = {
+  // inner comment
+  x * x
+}
+`);
+  });
 });
 
 describe("expressions", () => {
