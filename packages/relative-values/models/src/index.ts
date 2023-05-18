@@ -5,13 +5,16 @@ import * as posts from "./quri-posts";
 import * as health from "./health-interventions";
 import * as macrovariables from "./macrovariables";
 import * as purchases from "./things-you-should-buy";
+import * as aggregate from "./aggregate";
 import * as animals from "./animals";
 import { Map } from "immutable";
 
 const items = [
   { catalog: quri.catalog, models: quri.models },
+  { catalog: posts.catalog, models: posts.models },
   { catalog: animals.catalog, models: animals.models },
   { catalog: macrovariables.catalog, models: macrovariables.models },
+  { catalog: aggregate.catalog, models: aggregate.models },
 ];
 
 export const allInterfaces: InterfaceWithModels[] = items.map(

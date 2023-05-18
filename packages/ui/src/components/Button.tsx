@@ -8,6 +8,9 @@ type Props = PropsWithChildren<{
   wide?: boolean; // stretch the button horizontally
   theme?: ButtonTheme;
   disabled?: boolean;
+  // We default to type="button", to avoid form-related bugs.
+  // In HTML standard, there's also "reset", but it's rarely useful.
+  type?: "submit" | "button";
 }>;
 
 export const Button: FC<Props> = ({
@@ -15,6 +18,7 @@ export const Button: FC<Props> = ({
   wide,
   theme = "default",
   disabled,
+  type = "button",
   children,
 }) => {
   return (
@@ -33,6 +37,7 @@ export const Button: FC<Props> = ({
       )}
       onClick={onClick}
       disabled={disabled}
+      type={type}
     >
       {children}
     </button>

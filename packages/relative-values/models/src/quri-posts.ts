@@ -311,156 +311,156 @@ function getCatalog(): Catalog {
       name: "Forecasting Newsletter: Looking back at 2021.",
       clusterId: "papers",
     },
-    {
-      id: "paper-64",
-      name: "Splitting the timeline as an extinction risk intervention",
-      clusterId: "papers",
-    },
-    {
-      id: "paper-65",
-      name: "Five steps for quantifying speculative interventions",
-      clusterId: "papers",
-    },
-    {
-      id: "paper-66",
-      name: "Valuing research works by eliciting comparisons from EA researchers",
-      clusterId: "papers",
-    },
-    {
-      id: "paper-67",
-      name: "Big List of Cause Candidates: January 2021–March 2022 update",
-      clusterId: "papers",
-    },
-    {
-      id: "paper-68",
-      name: "Quantifying Uncertainty in GiveWell's GiveDirectly Cost-Effectiveness Analysis",
-      clusterId: "papers",
-    },
-    {
-      id: "paper-69",
-      name: "A Critical Review of Open Philanthropy’s Bet On Criminal Justice Reform",
-      clusterId: "papers",
-    },
-    {
-      id: "paper-70",
-      name: "Announcing Squiggle: Early Access",
-      clusterId: "papers",
-    },
-    {
-      id: "paper-71",
-      name: "$1,000 Squiggle Experimentation Challenge",
-      clusterId: "papers",
-    },
-    {
-      id: "paper-72",
-      name: "Introduction to Fermi estimates",
-      clusterId: "papers",
-    },
-    {
-      id: "paper-73",
-      name: "Value of Infomation, an example with GiveDirectly",
-      clusterId: "papers",
-    },
-    {
-      id: "paper-74",
-      name: "Simple estimation examples in Squiggle",
-      clusterId: "papers",
-    },
-    {
-      id: "paper-75",
-      name: "An experiment eliciting relative estimates for Open Philanthropy’s 2018 AI safety grants",
-      clusterId: "papers",
-    },
-    {
-      id: "paper-76",
-      name: "$5k challenge to quantify the impact of 80,000 hours' top career paths",
-      clusterId: "papers",
-    },
-    {
-      id: "paper-77",
-      name: "Five slightly more hardcore Squiggle models.",
-      clusterId: "papers",
-    },
-    {
-      id: "paper-78",
-      name: "Brief evaluations of top-10 billionnaires",
-      clusterId: "papers",
-    },
-    {
-      id: "paper-79",
-      name: "Quantifying Uncertainty in GiveWell CEAs",
-      clusterId: "papers",
-    },
-    {
-      id: "paper-80",
-      name: "Metaforecast late 2022 update: GraphQL API, Charts, better infrastructure behind the scenes.",
-      clusterId: "papers",
-    },
-    {
-      id: "paper-81",
-      name: "Tracking the money flows in forecasting",
-      clusterId: "papers",
-    },
-    {
-      id: "paper-82",
-      name: "List of past fraudsters similar to SBF",
-      clusterId: "papers",
-    },
-    {
-      id: "paper-83",
-      name: "Misha Yagudin and Ozzie Gooen Discuss LLMs and Effective Altruism",
-      clusterId: "papers",
-    },
-    {
-      id: "paper-84",
-      name: "Why does Academia+EA produce so few online videos?",
-      clusterId: "papers",
-    },
-    {
-      id: "paper-85",
-      name: "EA could use better internal communications infrastructure",
-      clusterId: "papers",
-    },
-    {
-      id: "paper-86",
-      name: "Can GPT-3 produce new ideas? Partially automating Robin Hanson and others",
-      clusterId: "papers",
-    },
-    {
-      id: "paper-87",
-      name: "My highly personal skepticism braindump on existential risk from artificial intelligence.",
-      clusterId: "papers",
-    },
-    {
-      id: "paper-88",
-      name: "An in-progress experiment to test how Laplace’s rule of succession performs in practice.",
-      clusterId: "papers",
-    },
-    {
-      id: "paper-89",
-      name: "Eli Lifland on Navigating the AI Alignment Landscape",
-      clusterId: "papers",
-    },
-    {
-      id: "paper-90",
-      name: "Straightforwardly eliciting probabilities from GPT-3",
-      clusterId: "papers",
-    },
-    {
-      id: "paper-91",
-      name: "Select Challenges with Criticism & Evaluation Around EA",
-      clusterId: "papers",
-    },
-    {
-      id: "paper-92",
-      name: "Who is Uncomfortable Critiquing Who, Around EA?",
-      clusterId: "papers",
-    },
-    {
-      id: "paper-93",
-      name: "Winners of the Squiggle Experimentation and 80,000 Hours Quantification Challenges",
-      clusterId: "papers",
-    },
+    // {
+    //   id: "paper-64",
+    //   name: "Splitting the timeline as an extinction risk intervention",
+    //   clusterId: "papers",
+    // },
+    // {
+    //   id: "paper-65",
+    //   name: "Five steps for quantifying speculative interventions",
+    //   clusterId: "papers",
+    // },
+    // {
+    //   id: "paper-66",
+    //   name: "Valuing research works by eliciting comparisons from EA researchers",
+    //   clusterId: "papers",
+    // },
+    // {
+    //   id: "paper-67",
+    //   name: "Big List of Cause Candidates: January 2021–March 2022 update",
+    //   clusterId: "papers",
+    // },
+    // {
+    //   id: "paper-68",
+    //   name: "Quantifying Uncertainty in GiveWell's GiveDirectly Cost-Effectiveness Analysis",
+    //   clusterId: "papers",
+    // },
+    // {
+    //   id: "paper-69",
+    //   name: "A Critical Review of Open Philanthropy’s Bet On Criminal Justice Reform",
+    //   clusterId: "papers",
+    // },
+    // {
+    //   id: "paper-70",
+    //   name: "Announcing Squiggle: Early Access",
+    //   clusterId: "papers",
+    // },
+    // {
+    //   id: "paper-71",
+    //   name: "$1,000 Squiggle Experimentation Challenge",
+    //   clusterId: "papers",
+    // },
+    // {
+    //   id: "paper-72",
+    //   name: "Introduction to Fermi estimates",
+    //   clusterId: "papers",
+    // },
+    // {
+    //   id: "paper-73",
+    //   name: "Value of Infomation, an example with GiveDirectly",
+    //   clusterId: "papers",
+    // },
+    // {
+    //   id: "paper-74",
+    //   name: "Simple estimation examples in Squiggle",
+    //   clusterId: "papers",
+    // },
+    // {
+    //   id: "paper-75",
+    //   name: "An experiment eliciting relative estimates for Open Philanthropy’s 2018 AI safety grants",
+    //   clusterId: "papers",
+    // },
+    // {
+    //   id: "paper-76",
+    //   name: "$5k challenge to quantify the impact of 80,000 hours' top career paths",
+    //   clusterId: "papers",
+    // },
+    // {
+    //   id: "paper-77",
+    //   name: "Five slightly more hardcore Squiggle models.",
+    //   clusterId: "papers",
+    // },
+    // {
+    //   id: "paper-78",
+    //   name: "Brief evaluations of top-10 billionnaires",
+    //   clusterId: "papers",
+    // },
+    // {
+    //   id: "paper-79",
+    //   name: "Quantifying Uncertainty in GiveWell CEAs",
+    //   clusterId: "papers",
+    // },
+    // {
+    //   id: "paper-80",
+    //   name: "Metaforecast late 2022 update: GraphQL API, Charts, better infrastructure behind the scenes.",
+    //   clusterId: "papers",
+    // },
+    // {
+    //   id: "paper-81",
+    //   name: "Tracking the money flows in forecasting",
+    //   clusterId: "papers",
+    // },
+    // {
+    //   id: "paper-82",
+    //   name: "List of past fraudsters similar to SBF",
+    //   clusterId: "papers",
+    // },
+    // {
+    //   id: "paper-83",
+    //   name: "Misha Yagudin and Ozzie Gooen Discuss LLMs and Effective Altruism",
+    //   clusterId: "papers",
+    // },
+    // {
+    //   id: "paper-84",
+    //   name: "Why does Academia+EA produce so few online videos?",
+    //   clusterId: "papers",
+    // },
+    // {
+    //   id: "paper-85",
+    //   name: "EA could use better internal communications infrastructure",
+    //   clusterId: "papers",
+    // },
+    // {
+    //   id: "paper-86",
+    //   name: "Can GPT-3 produce new ideas? Partially automating Robin Hanson and others",
+    //   clusterId: "papers",
+    // },
+    // {
+    //   id: "paper-87",
+    //   name: "My highly personal skepticism braindump on existential risk from artificial intelligence.",
+    //   clusterId: "papers",
+    // },
+    // {
+    //   id: "paper-88",
+    //   name: "An in-progress experiment to test how Laplace’s rule of succession performs in practice.",
+    //   clusterId: "papers",
+    // },
+    // {
+    //   id: "paper-89",
+    //   name: "Eli Lifland on Navigating the AI Alignment Landscape",
+    //   clusterId: "papers",
+    // },
+    // {
+    //   id: "paper-90",
+    //   name: "Straightforwardly eliciting probabilities from GPT-3",
+    //   clusterId: "papers",
+    // },
+    // {
+    //   id: "paper-91",
+    //   name: "Select Challenges with Criticism & Evaluation Around EA",
+    //   clusterId: "papers",
+    // },
+    // {
+    //   id: "paper-92",
+    //   name: "Who is Uncomfortable Critiquing Who, Around EA?",
+    //   clusterId: "papers",
+    // },
+    // {
+    //   id: "paper-93",
+    //   name: "Winners of the Squiggle Experimentation and 80,000 Hours Quantification Challenges",
+    //   clusterId: "papers",
+    // },
   ];
 
   return {
