@@ -1,0 +1,5 @@
+{
+  "buildCommand": "npx turbo build",
+  "outputDirectory": "storybook-static",
+  "ignoreCommand": "npx turbo-ignore"
+}
