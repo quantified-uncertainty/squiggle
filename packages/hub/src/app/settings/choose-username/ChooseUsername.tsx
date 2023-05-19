@@ -69,6 +69,7 @@ export const ChooseUsername: FC = () => {
             placeholder="Username"
             register={register}
             name="username"
+            size="small"
           />
           <Button onClick={save} disabled={disabled} theme="primary">
             Save

@@ -64,7 +64,6 @@ export const ModelRevisionsList: FC<Props> = ({ username, slug }) => {
 
   return (
     <div>
-      <ModelInfo slug={slug} username={username} />
       <div className="mt-4 mb-2 font-medium">Revision history</div>
       <div className="space-y-2">
         {data.revisions.edges.map((edge) => (

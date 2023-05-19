@@ -12,6 +12,16 @@ export function modelRoute({
   return `/users/${username}/models/${slug}`;
 }
 
+export function modelEditRoute({
+  username,
+  slug,
+}: {
+  username: string;
+  slug: string;
+}) {
+  return `/users/${username}/models/${slug}/edit`;
+}
+
 export function modelRevisionsRoute({
   username,
   slug,

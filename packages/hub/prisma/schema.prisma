@@ -98,6 +98,8 @@ model ModelRevision {
 
   createdAt DateTime @default(now())
 
+  description String @default("")
+
   model   Model  @relation(fields: [modelId], references: [id], onDelete: Cascade)
   modelId String
 
