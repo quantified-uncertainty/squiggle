@@ -35,7 +35,9 @@
     "next-auth": "^4.22.1",
     "nodemailer": "^6.9.1",
     "react-hook-form": "^7.43.9",
+    "react-markdown": "^8.0.7",
     "react-relay": "^15.0.0",
+    "remark-breaks": "^3.0.3",
     "typescript": "^5.0.3",
     "zod": "^3.21.4"
   },

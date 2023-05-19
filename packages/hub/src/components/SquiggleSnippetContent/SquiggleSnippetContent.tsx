@@ -1,8 +1,11 @@
 import { useSession } from "next-auth/react";
-import { FC, useMemo } from "react";
+import { FC, useEffect, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useFragment, useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
+
+import ReactMarkdown from "react-markdown";
+import remarkBreaks from "remark-breaks";
 
 import { SquiggleChart, SquigglePlayground } from "@quri/squiggle-components";
 import { Button, TextArea, useToast } from "@quri/ui";
@@ -149,7 +152,24 @@ const ViewSquiggleSnippetContent: FC<{
   return (
     <div>
       {data.currentRevision.description === "" ? null : (
-        <div className="mb-4">{data.currentRevision.description}</div>
+        <div className="mb-4">
+          <ReactMarkdown
+            remarkPlugins={[remarkBreaks]}
+            components={{
+              h1: ({ node, ...props }) => (
+                <h1 className="text-2xl font-medium" {...props} />
+              ),
+              h2: ({ node, ...props }) => (
+                <h1 className="text-xl font-bold" {...props} />
+              ),
+              h3: ({ node, ...props }) => (
+                <h1 className="font-bold" {...props} />
+              ),
+            }}
+          >
+            {data.currentRevision.description}
+          </ReactMarkdown>
+        </div>
       )}
       <SquiggleChart
         code={data.currentRevision.content.code}
