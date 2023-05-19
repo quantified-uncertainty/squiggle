@@ -151,7 +151,13 @@ const ViewSquiggleSnippetContent: FC<{
       {data.currentRevision.description === "" ? null : (
         <div className="mb-4">{data.currentRevision.description}</div>
       )}
-      <SquiggleChart code={data.currentRevision.content.code} />
+      <SquiggleChart
+        code={data.currentRevision.content.code}
+        environment={{
+          sampleCount: 1000,
+          xyPointLength: 1000,
+        }}
+      />
     </div>
   );
 };
