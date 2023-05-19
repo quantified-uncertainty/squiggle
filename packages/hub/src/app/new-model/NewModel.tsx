@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { FC, useState } from "react";
+import { FC } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
@@ -9,8 +9,8 @@ import { SquigglePlayground } from "@quri/squiggle-components";
 import { Button, TextInput, useToast } from "@quri/ui";
 
 import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
-import { useSession } from "next-auth/react";
 import { WithTopMenu } from "@/components/layout/WithTopMenu";
+import { useSession } from "next-auth/react";
 
 const Mutation = graphql`
   mutation NewModelMutation($input: MutationCreateSquiggleSnippetModelInput!) {

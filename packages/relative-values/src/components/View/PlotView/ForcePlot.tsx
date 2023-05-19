@@ -11,6 +11,7 @@ import { useViewContext } from "../ViewProvider";
 import { useFilteredItems } from "../hooks";
 import { DrawContext } from "@quri/squiggle-components";
 import { ItemTooltip } from "./ItemTooltip";
+import { tailwindSelector } from "@/components/Tailwind";
 
 export const distance = (
   p1: { x: number; y: number },
@@ -193,7 +194,11 @@ export const ForcePlot: FC<{
   }, [hoveredItem]);
 
   return (
-    <MouseTooltip isOpen={hoveredId !== undefined} render={renderTooltip}>
+    <MouseTooltip
+      isOpen={hoveredId !== undefined}
+      render={renderTooltip}
+      tailwindSelector={tailwindSelector}
+    >
       <canvas ref={ref} className="w-full" />
     </MouseTooltip>
   );

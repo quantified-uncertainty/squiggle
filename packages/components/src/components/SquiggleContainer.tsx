@@ -11,6 +11,8 @@ const SquiggleContext = React.createContext<SquiggleContextShape>({
   containerized: false,
 });
 
+export const tailwindSelector = "squiggle";
+
 export const SquiggleContainer: React.FC<Props> = ({ children }) => {
   const context = useContext(SquiggleContext);
 
@@ -19,7 +21,7 @@ export const SquiggleContainer: React.FC<Props> = ({ children }) => {
   } else {
     return (
       <SquiggleContext.Provider value={{ containerized: true }}>
-        <div className="squiggle">{children}</div>
+        <div className={tailwindSelector}>{children}</div>
       </SquiggleContext.Provider>
     );
   }
