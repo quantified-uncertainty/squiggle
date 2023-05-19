@@ -53,7 +53,13 @@ export const UserView: FC<Props> = ({ username }) => {
       </header>
       <section>
         <header className="text-lg font-bold mb-2">Models</header>
-        <ModelList connection={userByUsername.models} loadNext={loadNext} />
+        {userByUsername.models.edges.length ? (
+          <ModelList connection={userByUsername.models} loadNext={loadNext} />
+        ) : (
+          <div className="text-slate-500">
+            {"You don't have any models yet."}
+          </div>
+        )}
       </section>
     </div>
   );

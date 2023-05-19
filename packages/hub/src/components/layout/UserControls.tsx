@@ -3,8 +3,6 @@ import { signIn, signOut } from "next-auth/react";
 
 import {
   Button,
-  DotsHorizontalIcon,
-  Dropdown,
   DropdownMenu,
   DropdownMenuActionItem,
   SignOutIcon,
