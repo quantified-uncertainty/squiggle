@@ -31,7 +31,9 @@ export const ChooseUsername: FC = () => {
 
   const router = useRouter();
 
-  const { data: session } = useSession({ required: true });
+  const { data: session, update: updateSession } = useSession({
+    required: true,
+  });
   if (session?.user.username) {
     router.push("/");
   }
@@ -46,6 +48,7 @@ export const ChooseUsername: FC = () => {
         if (data.setUsername.__typename === "BaseError") {
           toast(data.setUsername.message, "error");
         } else {
+          updateSession();
           router.replace("/");
         }
       },
