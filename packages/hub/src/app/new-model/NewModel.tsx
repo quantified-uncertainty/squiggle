@@ -6,7 +6,7 @@ import { useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { SquigglePlayground } from "@quri/squiggle-components";
-import { Button, TextInput } from "@quri/ui";
+import { Button, TextInput, useToast } from "@quri/ui";
 
 import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
 import { useSession } from "next-auth/react";
@@ -31,14 +31,14 @@ const Mutation = graphql`
 export const NewModel: FC = () => {
   useSession({ required: true });
 
+  const toast = useToast();
+
   const { register, handleSubmit, control } = useForm<{
     code: string;
     slug: string;
   }>();
 
   const router = useRouter();
-
-  const [error, setError] = useState("");
 
   const [saveMutation, isSaveInFlight] =
     useMutation<NewModelMutation>(Mutation);
@@ -53,13 +53,13 @@ export const NewModel: FC = () => {
       },
       onCompleted(data) {
         if (data.result.__typename === "BaseError") {
-          setError(data.result.message);
+          toast(data.result.message, "error");
         } else {
           router.push("/");
         }
       },
       onError(e) {
-        setError(e.toString());
+        toast(e.toString(), "error");
       },
     });
   });
@@ -79,7 +79,6 @@ export const NewModel: FC = () => {
             <Button onClick={save} disabled={isSaveInFlight} theme="primary">
               Save
             </Button>
-            {error && <div className="text-xs">{error}</div>}
           </div>
         </div>
         <Controller

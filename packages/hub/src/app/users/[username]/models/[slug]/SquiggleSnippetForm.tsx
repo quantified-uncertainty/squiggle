@@ -5,7 +5,13 @@ import { useFragment, useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { SquigglePlayground } from "@quri/squiggle-components";
-import { Button, DotsHorizontalIcon, Dropdown, DropdownMenu } from "@quri/ui";
+import {
+  Button,
+  DotsHorizontalIcon,
+  Dropdown,
+  DropdownMenu,
+  useToast,
+} from "@quri/ui";
 
 import { SquiggleSnippetFormFragment$key } from "@/__generated__/SquiggleSnippetFormFragment.graphql";
 import { SquiggleSnippetFormMutation } from "@/__generated__/SquiggleSnippetFormMutation.graphql";
@@ -51,11 +57,10 @@ type Props = {
 };
 
 export const SquiggleSnippetForm: FC<Props> = ({ username, slug, content }) => {
+  const toast = useToast();
   const { data: session } = useSession();
 
   const data = useFragment(Fragment, content);
-
-  const [error, setError] = useState("");
 
   const { handleSubmit, control } = useForm<{ code: string }>({
     defaultValues: { code: data.code },
@@ -75,13 +80,13 @@ export const SquiggleSnippetForm: FC<Props> = ({ username, slug, content }) => {
       },
       onCompleted(data) {
         if (data.result.__typename === "BaseError") {
-          setError(data.result.message);
+          toast(data.result.message, "error");
         } else {
-          setError("");
+          toast("Saved", "confirmation");
         }
       },
       onError(e) {
-        setError(e.toString());
+        toast(e.toString(), "error");
       },
     });
   });

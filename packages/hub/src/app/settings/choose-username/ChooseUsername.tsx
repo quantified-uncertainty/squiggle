@@ -1,4 +1,4 @@
-import { Button, TextInput } from "@quri/ui";
+import { Button, TextInput, useToast } from "@quri/ui";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FC, useState } from "react";
@@ -23,7 +23,7 @@ const Mutation = graphql`
 `;
 
 export const ChooseUsername: FC = () => {
-  const [error, setError] = useState<string | undefined>();
+  const toast = useToast();
 
   const { register, handleSubmit, watch } = useForm<{
     username: string;
@@ -44,13 +44,13 @@ export const ChooseUsername: FC = () => {
       variables: { username: data.username },
       onCompleted(data) {
         if (data.setUsername.__typename === "BaseError") {
-          setError(data.setUsername.message);
+          toast(data.setUsername.message, "error");
         } else {
           router.replace("/");
         }
       },
       onError(error) {
-        setError((error as any).source ?? error.toString());
+        toast((error as any).source ?? error.toString(), "error");
       },
     });
   });
@@ -71,9 +71,6 @@ export const ChooseUsername: FC = () => {
             Save
           </Button>
         </div>
-        {error && (
-          <div className="text-xs text-red-700 max-w-lg font-mono">{error}</div>
-        )}
       </div>
     </div>
   );

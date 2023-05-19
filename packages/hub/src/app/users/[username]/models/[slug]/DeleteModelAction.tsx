@@ -1,4 +1,4 @@
-import { DropdownMenuAsyncActionItem, TrashIcon } from "@quri/ui";
+import { DropdownMenuAsyncActionItem, TrashIcon, useToast } from "@quri/ui";
 import { useRouter } from "next/navigation";
 import { FC, useCallback, useState } from "react";
 import { useMutation } from "react-relay";
@@ -29,7 +29,7 @@ export const DeleteModelAction: FC<Props> = ({ username, slug, close }) => {
   const [mutation, isMutationInFlight] =
     useMutation<DeleteModelActionMutation>(Mutation);
 
-  const [error, setError] = useState("");
+  const toast = useToast();
 
   const onClick = useCallback((): Promise<void> => {
     return new Promise((resolve) => {
@@ -37,19 +37,19 @@ export const DeleteModelAction: FC<Props> = ({ username, slug, close }) => {
         variables: { input: { username, slug } },
         onCompleted(response) {
           if (response.deleteModel.__typename === "BaseError") {
-            setError(response.deleteModel.message);
+            toast(response.deleteModel.message, "error");
             close();
           } else {
             router.push("/");
           }
         },
         onError(e) {
-          setError(e.toString());
+          toast(e.toString(), "error");
           close();
         },
       });
     });
-  }, [mutation, username, slug, close, router]);
+  }, [mutation, username, slug, close, router, toast]);
 
   return (
     <DropdownMenuAsyncActionItem
