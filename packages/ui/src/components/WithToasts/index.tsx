@@ -100,7 +100,7 @@ export const WithToasts: FC<PropsWithChildren> = ({ children }) => {
   return (
     <Context.Provider value={dispatch}>
       <div>{children}</div>
-      <div className="absolute right-4 bottom-4 space-y-2">
+      <div className="fixed right-4 bottom-4 space-y-2">
         {state.toasts.map((toast) => (
           <Toast key={toast.id} toast={toast} />
         ))}
