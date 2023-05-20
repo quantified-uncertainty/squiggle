@@ -6,16 +6,16 @@ describe("SqProject Tutorial", () => {
   /* But we will call that function on an array of user input. */
   const project = SqProject.create();
   project.setSource("library", "double(x) = x * 2");
-  /* userCode is not here yet but its dependency is fixed. So we can set it once and for all */
-  project.setContinues("userCode", ["library"]);
 
   const userValues = [1, 2, 3, 4, 5];
 
   const userResults = userValues.map((aUserValue) => {
     const userCode = `double(${aUserValue})`;
     /* Put the constructed source in the project */
-    /* We have already set that it depends on "library" */
     project.setSource("userCode", userCode);
+    /* Set that it depends on "library" */
+    project.setContinues("userCode", ["library"]);
+
     /* Run the project */
     project.runAll();
     /* Get the result */

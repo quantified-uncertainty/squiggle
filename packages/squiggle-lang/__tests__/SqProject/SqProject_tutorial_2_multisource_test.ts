@@ -60,7 +60,7 @@ describe("SqProject Tutorial", () => {
        * Let's write the same project above with imports.
        * You will see that parsing imports is setting the dependencies the same way as before.
        */
-      let project = SqProject.create({ resolver: (name) => name });
+      const project = SqProject.create({ resolver: (name) => name });
 
       /* This time source1 and source2 are not depending on anything */
       project.setSource("source1", "x=1");

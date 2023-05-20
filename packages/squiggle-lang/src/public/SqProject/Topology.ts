@@ -2,17 +2,18 @@ import { SqProject } from "./index.js";
 
 // TODO - we should keep the persistent graph and reverse graph of dependencies for better performance.
 
-const dfs = ({
+// Depth-first search.
+function dfs({
   getEdges,
   visited = new Set(),
   from,
-  result,
+  act,
 }: {
   getEdges: (id: string) => string[];
   visited?: Set<string>;
   from: string;
-  result: string[]; // will be modified
-}) => {
+  act: (id: string) => void;
+}) {
   const _dfs = (id: string) => {
     if (visited.has(id)) return;
     visited.add(id);
@@ -20,52 +21,51 @@ const dfs = ({
       if (visited.has(dependencyId)) continue;
       _dfs(dependencyId);
     }
-    result.push(id);
+    act(id);
   };
   _dfs(from);
-};
+}
 
-export const getRunOrder = (project: SqProject): string[] => {
+export function getRunOrder(project: SqProject): string[] {
   const visited = new Set<string>();
   const runOrder: string[] = [];
   for (const sourceId of project.getSourceIds()) {
     dfs({
-      getEdges: (id) => project.getImmediateDependencies(id),
+      getEdges: (id) => project.getDependencies(id),
       visited,
       from: sourceId,
-      result: runOrder,
+      act: (id) => runOrder.push(id),
     });
   }
   return runOrder;
-};
+}
 
-export const getRunOrderFor = (
-  project: SqProject,
-  sourceId: string
-): string[] => {
+export function getRunOrderFor(project: SqProject, sourceId: string): string[] {
   const result: string[] = [];
   dfs({
-    getEdges: (id) => project.getImmediateDependencies(id),
+    getEdges: (id) => project.getDependencies(id),
     from: sourceId,
-    result,
+    act: (id) => result.push(id),
   });
   return result;
-};
+}
 
-export const getDependencies = (
+// unused
+export function getDeepDependencies(
   project: SqProject,
   sourceId: string
-): string[] => {
+): string[] {
   const runOrder = getRunOrderFor(project, sourceId);
 
-  // sourceId is the last item of runOrder, but I didn't want to add an assertion
+  // `sourceId` should be the last item of runOrder, but I didn't want to add an assertion,
+  // to protect against weird bugs.
   return runOrder.filter((id) => id !== sourceId);
-};
+}
 
-const getInverseGraph = (project: SqProject) => {
+function getInverseGraph(project: SqProject) {
   const graph = new Map<string, string[]>();
   for (const id of project.getSourceIds()) {
-    const dependencies = project.getImmediateDependencies(id);
+    const dependencies = project.getDependencies(id);
     for (const dependencyId of dependencies) {
       const edges = graph.get(dependencyId) ?? [];
       edges.push(id);
@@ -73,37 +73,31 @@ const getInverseGraph = (project: SqProject) => {
     }
   }
   return graph;
-};
+}
 
-export const getDependents = (
+export function traverseDependents(
   project: SqProject,
-  sourceId: string
-): string[] => {
+  sourceId: string,
+  act: (id: string) => void
+): void {
   // We'll need the inverse graph for this.
   const graph = getInverseGraph(project);
 
-  const result: string[] = [];
   // TODO - it would be more appropriate to do bfs, but dfs+reverse allows to reuse the existing code
   dfs({
     getEdges: (id) => graph.get(id) ?? [],
     from: sourceId,
-    result,
+    act: (id) => {
+      if (id === sourceId) {
+        return;
+      }
+      act(id);
+    },
   });
+}
 
-  return result.filter((id) => id !== sourceId).reverse();
-};
+export function getDependents(project: SqProject, sourceId: string): string[] {
+  const graph = getInverseGraph(project);
 
-export const runOrderDiff = (
-  current: string[],
-  previous: string[]
-): string[] => {
-  const affected: string[] = [];
-  let eq = true;
-  for (let i = 0; i < current.length; i++) {
-    if (!eq || i >= previous.length || previous[i] !== current[i]) {
-      eq = false;
-      affected.push(current[i]);
-    }
-  }
-  return affected;
-};
+  return graph.get(sourceId) ?? [];
+}

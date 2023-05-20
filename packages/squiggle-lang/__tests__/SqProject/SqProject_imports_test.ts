@@ -15,10 +15,6 @@ x=1`
     expect(project.getDependencies("main")).toEqual(["./common", "./myModule"]);
   });
 
-  test("dependents", () => {
-    expect(project.getDependents("main")).toEqual([]);
-  });
-
   test("getImportIds", () => {
     const mainImportIds = project.getImportIds("main");
     if (mainImportIds.ok) {
@@ -54,5 +50,5 @@ import './lib' as lib
 
   project.run("main");
 
-  console.log(project.getResult("main"));
+  expect(project.getResult("main").ok).toEqual(false);
 });

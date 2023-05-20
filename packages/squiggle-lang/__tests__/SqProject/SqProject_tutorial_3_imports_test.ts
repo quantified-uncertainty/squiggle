@@ -60,15 +60,16 @@ describe("SqProject Tutorial", () => {
       /* Nothing is depending on or including main */
     });
 
-    describe("Real Like", () => {
-      /* Now let's look at recursive and possibly cyclic imports */
-      /* There is no function provided to load the import files.
-    Because we have no idea if will it be an ordinary function or will it use promises.
-    Therefore one has to write a function to load sources recursively and and setSources
-    while checking for dependencies */
+    test("recursive imports", async () => {
+      /*
+       * Now let's look at recursive and possibly cyclic imports.
+       * There is no function provided to load the import files.
+       * Because we have no idea if will it be an ordinary function or will it use promises.
+       * Therefore one has to provide a function to load sources.
+       * */
 
       /* Let's make a dummy loader */
-      let loadSource = (sourceName: string): string => {
+      const loadSource = async (sourceName: string): Promise<string> => {
         switch (sourceName) {
           case "source1":
             return "x=1";
@@ -85,43 +86,7 @@ describe("SqProject Tutorial", () => {
         }
       };
 
-      /* let's recursively load the sources */
-      const loadImportsRecursively = (
-        project: SqProject,
-        initialSourceName: string
-      ) => {
-        const visited = new Set<string>();
-        const inner = (sourceName: string) => {
-          if (visited.has(sourceName)) {
-            /* Oh we have already visited this source. There is an import cycle */
-            throw new Error(`Cyclic import ${sourceName}`);
-          }
-          visited.add(sourceName);
-          /* Let's parse the imports and dive into them */
-          project.parseImports(sourceName);
-          const rImportIds = project.getImportIds(sourceName);
-          if (!rImportIds.ok) {
-            /* Maybe there is an import syntax error */
-            throw new Error(rImportIds.value.toString());
-          }
-
-          for (const newImportId of rImportIds.value) {
-            /* We have got one of the new imports.
-                   Let's load it and add it to the project */
-            const newSource = loadSource(newImportId);
-            project.setSource(newImportId, newSource);
-            /* The new source is loaded and added to the project. */
-            /* Of course the new source might have imports too. */
-            /* Let's recursively load them */
-            loadImportsRecursively(project, newImportId);
-          }
-        };
-        inner(initialSourceName);
-      };
-      /* As we have a fake source loader and a recursive import handler,
-         We can not set up a real project */
-
-      /* * Here starts our real life project! * */
+      /* Here starts our real life project! * */
 
       const project = SqProject.create({ resolver: (name) => name });
 
@@ -137,7 +102,7 @@ describe("SqProject Tutorial", () => {
         `
       );
       /* Setting source requires parsing and loading the imports recursively */
-      loadImportsRecursively(project, "main"); // Not visited yet
+      await project.loadImportsRecursively("main", loadSource); // Not visited yet
 
       /* Let's salt it more. Let's have another source in the project which also has imports */
       /* doubleX imports source1 which is eventually imported by main as well */
@@ -148,7 +113,7 @@ describe("SqProject Tutorial", () => {
         doubleX = s1.x * 2
         `
       );
-      loadImportsRecursively(project, "doubleX");
+      await project.loadImportsRecursively("doubleX", loadSource);
       /* Remember, any time you set a source, you need to load imports recursively */
 
       /* As doubleX is not imported by main, it is not loaded recursively.
@@ -159,14 +124,13 @@ describe("SqProject Tutorial", () => {
       project.runAll();
       const result = project.getResult("main");
       const bindings = project.getBindings("main");
+
       /* And see the result and bindings.. */
-      test("recursive imports", () => {
-        expect([toStringResult(result), bindings.toString()]).toEqual([
-          "Ok(6)",
-          "{a: 6,b: 2}",
-        ]);
-        /* Everything as expected */
-      });
+      expect([toStringResult(result), bindings.toString()]).toEqual([
+        "Ok(6)",
+        "{a: 6,b: 2}",
+      ]);
+      /* Everything as expected */
     });
   });
 });

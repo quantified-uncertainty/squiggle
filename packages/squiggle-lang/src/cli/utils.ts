@@ -1,18 +1,18 @@
 import path from "path";
-import fs from "fs";
+import { promises as fs } from "fs";
 import isFinite from "lodash/isFinite.js";
 
 import { Env } from "../dist/env.js";
 import { SqProject } from "../public/SqProject/index.js";
 import { bold, red } from "./colors.js";
 
-export const measure = (callback: () => void) => {
+export async function measure(callback: () => Promise<void>) {
   const t1 = new Date();
-  callback();
+  await callback();
   const t2 = new Date();
 
   return (t2.getTime() - t1.getTime()) / 1000;
-};
+}
 
 export type OutputMode = "NONE" | "RESULT_OR_BINDINGS" | "RESULT_AND_BINDINGS";
 
@@ -24,7 +24,11 @@ export type RunArgs = {
   sampleCount?: string | number;
 };
 
-const _run = (args: { src: string; filename?: string; environment?: Env }) => {
+async function _run(args: {
+  src: string;
+  filename?: string;
+  environment?: Env;
+}) {
   const project = SqProject.create({
     resolver: (name, fromId) => {
       if (!name.startsWith("./") && !name.startsWith("../")) {
@@ -38,30 +42,22 @@ const _run = (args: { src: string; filename?: string; environment?: Env }) => {
   }
   const filename = path.resolve(args.filename || "./__anonymous__");
 
-  const loadImportsRecursively = (sourceId: string) => {
-    project.parseImports(sourceId);
-    const importIds = project.getImportIds(sourceId);
-    if (!importIds.ok) {
-      throw new Error(`Failed to parse imports from ${sourceId}`);
-    }
-    importIds.value.forEach((importId) => {
-      const importSrc = fs.readFileSync(importId, "utf-8");
-      project.setSource(importId, importSrc);
-      loadImportsRecursively(importId);
-    });
+  const loader = async (importId: string) => {
+    return await fs.readFile(importId, "utf-8");
   };
 
   project.setSource(filename, args.src);
-  loadImportsRecursively(filename);
 
-  const time = measure(() => project.run(filename));
+  const time = await measure(
+    async () => await project.runWithImports(filename, loader)
+  );
   const bindings = project.getBindings(filename);
   const result = project.getResult(filename);
 
   return { result, bindings, time };
-};
+}
 
-export const run = (args: RunArgs) => {
+export async function run(args: RunArgs) {
   let environment: Env | undefined;
   if (args.sampleCount && isFinite(Number(args.sampleCount))) {
     environment = {
@@ -70,7 +66,7 @@ export const run = (args: RunArgs) => {
     };
   }
 
-  const { result, bindings, time } = _run({
+  const { result, bindings, time } = await _run({
     src: args.src,
     filename: args.filename,
     environment,
@@ -109,4 +105,4 @@ export const run = (args: RunArgs) => {
   if (args.measure) {
     printLines(`${bold("Time:")} ${time}s`);
   }
-};
+}
