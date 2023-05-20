@@ -27,7 +27,7 @@ importStatementsList = (@importStatement __nl)*
 
 importStatement
   = _nl 'import' __ file:string variable:(__ 'as' __ @identifier)
-  { return [variable, file]; }
+  { return [file, variable]; }
 
 innerBlockOrExpression
   = quotedInnerBlock

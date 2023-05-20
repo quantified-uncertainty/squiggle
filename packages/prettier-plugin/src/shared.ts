@@ -132,7 +132,18 @@ export function createPlugin(util: PrettierUtil): Plugin<Node> {
 
         switch (node.type) {
           case "Program":
-            return path.map(print, "statements");
+            // TODO - preserve line breaks, break long lines
+            // TODO - comments will be moved to the end because imports is not a real AST, need to be fixed in squiggle-lang
+            return group([
+              node.imports.map((_, i) => [
+                "import ",
+                typedPath(node).call(print, "imports", i, 0),
+                " as ",
+                typedPath(node).call(print, "imports", i, 1),
+                hardline,
+              ]),
+              path.map(print, "statements"),
+            ]);
           case "Block":
             if (node.statements.length === 1) {
               return typedPath(node).call(print, "statements", 0);
