@@ -17,6 +17,7 @@ import { useFilteredItems } from "../hooks";
 import { averageMedian, averageUncertainty } from "../hooks/useSortedItems";
 import { distance } from "./ForcePlot";
 import { ItemTooltip } from "./ItemTooltip";
+import { tailwindSelector } from "@/components/Tailwind";
 
 type Datum = {
   item: Item;
@@ -170,7 +171,11 @@ export const ValueAndUncertaintyPlot: FC<{
   }, [data, hoveredId]);
 
   return (
-    <MouseTooltip isOpen={hoveredId !== undefined} render={renderTooltip}>
+    <MouseTooltip
+      isOpen={hoveredId !== undefined}
+      render={renderTooltip}
+      tailwindSelector={tailwindSelector}
+    >
       <canvas ref={ref} className="w-full" />
     </MouseTooltip>
   );

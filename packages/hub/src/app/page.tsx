@@ -1,10 +1,10 @@
 "use client";
 
-import { newModelRoute } from "@/routes";
-import { FrontpageModelList } from "./FrontpageModelList";
-import { StyledLink } from "@/components/ui/StyledLink";
-import { useSession } from "next-auth/react";
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
+import { StyledLink } from "@/components/ui/StyledLink";
+import { newModelRoute } from "@/routes";
+import { useSession } from "next-auth/react";
+import { FrontpageModelList } from "./FrontpageModelList";
 
 export default function IndexPage() {
   const { data: session } = useSession();

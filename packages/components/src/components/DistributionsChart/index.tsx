@@ -28,6 +28,7 @@ import { SummaryTable } from "./SummaryTable.js";
 
 import { Point } from "../../lib/draw/types.js";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
+import { tailwindSelector } from "../SquiggleContainer.js";
 
 export type DistributionsChartProps = {
   plot: SqDistributionsPlot;
@@ -265,6 +266,7 @@ const InnerDistributionsChart: FC<{
           <br />
         </div>
       )}
+      tailwindSelector={tailwindSelector}
     >
       <canvas
         data-testid="multi-distribution-chart"

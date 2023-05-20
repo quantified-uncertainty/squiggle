@@ -22,7 +22,7 @@ builder.mutationField("setUsername", (t) =>
         throw new Error("Username is already set");
       }
       if (!args.username.match("^[a-zA-Z]\\w+$")) {
-        throw new Error("Expected alphanumerical username");
+        throw new Error("Username must be alphanumerical");
       }
 
       await prisma.user.update({

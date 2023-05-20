@@ -38,7 +38,7 @@ const ModalHeader: React.FC<PropsWithChildren> = ({ children }) => {
     <header className="pl-5 pr-4 py-3 border-b border-gray-200 font-bold flex items-center justify-between">
       <div>{children}</div>
       <button
-        className="bg-transparent cursor-pointer fill-slate-300 stroke-slate-300 hover:stroke-slate-500 hover:fill-slate-500"
+        className="bg-transparent cursor-pointer text-slate-300 hover:text-slate-500"
         type="button"
         onClick={close}
       >

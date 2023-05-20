@@ -1,10 +1,16 @@
 import { Session } from "next-auth";
 import { signIn, signOut } from "next-auth/react";
 
-import { Button } from "@quri/ui";
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuActionItem,
+  SignOutIcon,
+} from "@quri/ui";
 
 import { chooseUsernameRoute } from "@/routes";
 import { UsernameLink } from "../UsernameLink";
+import { DotsDropdown } from "../ui/DotsDropdown";
 
 export function UserControls({ session }: { session: Session | null }) {
   if (
@@ -26,7 +32,18 @@ export function UserControls({ session }: { session: Session | null }) {
           <UsernameLink username={session.user.username} />
         </div>
       )}
-      <Button onClick={() => signOut()}>Sign Out</Button>
+
+      <DotsDropdown>
+        {() => (
+          <DropdownMenu>
+            <DropdownMenuActionItem
+              onClick={() => signOut()}
+              icon={SignOutIcon}
+              title="Sign Out"
+            />
+          </DropdownMenu>
+        )}
+      </DotsDropdown>
     </div>
   );
 }

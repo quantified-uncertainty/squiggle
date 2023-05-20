@@ -37,11 +37,16 @@ function useMouseTooltip({ isOpen }: { isOpen: boolean }) {
 type Props = PropsWithChildren<{
   isOpen: boolean;
   render(): ReactNode;
+  // When `important: '.container-classname'` is used, this should be set because we render tooltips in a portal.
+  // `squiggle-components` set this to `squiggle`.
+  // See also: https://tailwindcss.com/docs/configuration#selector-strategy
+  tailwindSelector?: string;
 }>;
 
 export const MouseTooltip: FC<Props> = memo(function MouseTooltip({
   render,
   isOpen,
+  tailwindSelector,
   children,
 }) {
   const tooltip = useMouseTooltip({ isOpen });
@@ -52,7 +57,7 @@ export const MouseTooltip: FC<Props> = memo(function MouseTooltip({
       {isOpen && (
         <FloatingPortal>
           <div ref={tooltip.ref} style={tooltip.styles} {...tooltip.props}>
-            {render()}
+            <div className={tailwindSelector}>{render()}</div>
           </div>
         </FloatingPortal>
       )}
