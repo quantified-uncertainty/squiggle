@@ -9,8 +9,9 @@ import {
   SqDistributionError,
   SqDistributionsPlot,
 } from "@quri/squiggle-lang";
+import { TextTooltip } from "@quri/ui";
+
 import { NumberShower } from "../NumberShower.js";
-import { Tooltip } from "../ui/Tooltip.js";
 
 const TableHeadCell: FC<PropsWithChildren> = ({ children }) => (
   <th className="border border-slate-200 bg-slate-50 py-1 px-2 text-slate-500 font-semibold">
@@ -53,9 +54,9 @@ const SummaryTableRow: FC<SummaryTableRowProps> = ({
       return <NumberShower number={x.value} />;
     } else {
       return (
-        <Tooltip text={x.value.toString()}>
+        <TextTooltip text={x.value.toString()}>
           <XIcon className="w-5 h-5 text-gray-500" />
-        </Tooltip>
+        </TextTooltip>
       );
     }
   };

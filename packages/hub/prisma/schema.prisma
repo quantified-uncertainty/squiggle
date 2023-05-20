@@ -87,16 +87,30 @@ model Model {
   owner   User   @relation(fields: [ownerId], references: [id])
   ownerId String
 
-  squiggleSnippet SquiggleSnippet? @relation(fields: [modelId], references: [id], map: "squiggleSnippet_modelId")
-  modelId         String           @unique
-  modelType       ModelType
+  revisions ModelRevision[]
 
   @@unique([slug, ownerId])
+  @@index([createdAt])
+}
+
+model ModelRevision {
+  id String @id @default(cuid())
+
+  createdAt DateTime @default(now())
+
+  model   Model  @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  modelId String
+
+  contentType ModelType
+
+  squiggleSnippet SquiggleSnippet? @relation(fields: [contentId], references: [id], map: "squiggleSnippet_contentId")
+  contentId       String?          @unique
 }
 
 model SquiggleSnippet {
-  id    String @id @default(cuid())
-  Model Model?
+  id String @id @default(cuid())
 
   code String
+
+  revision ModelRevision?
 }

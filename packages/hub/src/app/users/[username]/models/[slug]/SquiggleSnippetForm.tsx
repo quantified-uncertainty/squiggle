@@ -1,15 +1,25 @@
 import { useSession } from "next-auth/react";
 import { FC, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { useFragment, useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 
+import { SquigglePlayground } from "@quri/squiggle-components";
+import {
+  Button,
+  DotsHorizontalIcon,
+  Dropdown,
+  DropdownMenu,
+  useToast,
+} from "@quri/ui";
+
 import { SquiggleSnippetFormFragment$key } from "@/__generated__/SquiggleSnippetFormFragment.graphql";
 import { SquiggleSnippetFormMutation } from "@/__generated__/SquiggleSnippetFormMutation.graphql";
-import { UsernameLink } from "@/components/UsernameLink";
-import { Button } from "@/components/ui/Button";
-import { SquigglePlayground } from "@quri/squiggle-components";
-import { Controller, useForm } from "react-hook-form";
-import { DeleteModelButton } from "./DeleteModelButton";
+import { ModelInfo } from "@/components/ModelInfo";
+import { WithTopMenu } from "@/components/layout/WithTopMenu";
+import { DropdownMenuLinkItem } from "@/components/ui/DropdownMenuLinkItem";
+import { modelRevisionsRoute } from "@/routes";
+import { DeleteModelAction } from "./DeleteModelAction";
 
 const Fragment = graphql`
   fragment SquiggleSnippetFormFragment on SquiggleSnippet {
@@ -29,8 +39,10 @@ const Mutation = graphql`
       }
       ... on UpdateSquiggleSnippetResult {
         model {
-          content {
-            ...SquiggleSnippetFormFragment
+          currentRevision {
+            content {
+              ...SquiggleSnippetFormFragment
+            }
           }
         }
       }
@@ -45,11 +57,10 @@ type Props = {
 };
 
 export const SquiggleSnippetForm: FC<Props> = ({ username, slug, content }) => {
+  const toast = useToast();
   const { data: session } = useSession();
 
   const data = useFragment(Fragment, content);
-
-  const [error, setError] = useState("");
 
   const { handleSubmit, control } = useForm<{ code: string }>({
     defaultValues: { code: data.code },
@@ -69,30 +80,48 @@ export const SquiggleSnippetForm: FC<Props> = ({ username, slug, content }) => {
       },
       onCompleted(data) {
         if (data.result.__typename === "BaseError") {
-          setError(data.result.message);
+          toast(data.result.message, "error");
         } else {
-          setError("");
+          toast("Saved", "confirmation");
         }
       },
       onError(e) {
-        setError(e.toString());
+        toast(e.toString(), "error");
       },
     });
   });
 
   return (
     <form onSubmit={save}>
-      <div className="flex flex-col gap-2">
+      <WithTopMenu>
         <div className="flex items-baseline gap-4">
-          <div>
-            <span className="text-xl font-bold">{slug}</span> by{" "}
-            <UsernameLink username={username} />
-          </div>
+          <ModelInfo slug={slug} username={username} />
           {session?.user.username === username ? (
-            <>
-              <DeleteModelButton username={username} slug={slug} />
-              <Button onClick={save}>Save</Button>
-            </>
+            <div className="flex items-center gap-2">
+              <Button theme="primary" onClick={save}>
+                Save
+              </Button>
+              <Dropdown
+                render={({ close }) => (
+                  <DropdownMenu>
+                    <DropdownMenuLinkItem
+                      href={modelRevisionsRoute({ username, slug })}
+                      title="Revisions"
+                    />
+                    <DeleteModelAction
+                      username={username}
+                      slug={slug}
+                      close={close}
+                    />
+                  </DropdownMenu>
+                )}
+                tailwindSelector="squiggle-hub"
+              >
+                <Button>
+                  <DotsHorizontalIcon className="text-slate-500" />
+                </Button>
+              </Dropdown>
+            </div>
           ) : (
             <div className="text-xs">
               {"You don't own this model, edits won't be saved."}
@@ -110,7 +139,7 @@ export const SquiggleSnippetForm: FC<Props> = ({ username, slug, content }) => {
             />
           )}
         />
-      </div>
+      </WithTopMenu>
     </form>
   );
 };

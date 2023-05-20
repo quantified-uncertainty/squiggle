@@ -82,29 +82,36 @@ function getCatalog(): Catalog {
       id: "macrovariable_microdoom",
       clusterId: "macrovariables",
       name: "1 Microdoom",
+      description:
+        "+1/1 Mil chance of human extinction, via one risk event. For example, reducing the risk of a certain Nuclear catastrophe.",
     },
     {
       id: "macrovariable_microtopia",
       clusterId: "macrovariables",
       name: "1 Microtopia",
-      description: "",
+      description:
+        "+1/1 Mil chance of a positive (expected) AGI outcome. If it's assumed that this will decrease our future chance of many risks, then this might be expected to dramatically decreate human extinction. This might be expected to be very positive for humanity.",
     },
     {
       id: "macrovariable_universal_microtopia",
       clusterId: "macrovariables",
       name: "1 Universal Microtopia",
+      description:
+        "One microtopia, assuming that we will be able to have full control over the universe. For example, we assume that aliens will not be an issue.",
     },
     {
       id: "macrovariable_microhell",
       clusterId: "macrovariables",
       name: "1 Microhell",
-      description: "",
+      description:
+        "+1/1 Mil chance of a continuously negative-EV long-term outcome. This might look like many beings, on average, being tortured for 10^n years.",
     },
     {
       id: "macrovariable_universal_microhell",
       clusterId: "macrovariables",
       name: "1 Universal Microhell",
-      description: "",
+      description:
+        "One microhell, assuming that we will be able to have full control over the universe. For example, we assume that aliens will not be an issue.",
     },
     {
       id: "sentientWelfare_human_qaly",

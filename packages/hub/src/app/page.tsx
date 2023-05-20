@@ -1,18 +1,24 @@
 "use client";
 
-import { newModelRoute } from "@/routes";
-import { FrontpageModelList } from "./FrontpageModelList";
+import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 import { StyledLink } from "@/components/ui/StyledLink";
+import { newModelRoute } from "@/routes";
+import { useSession } from "next-auth/react";
+import { FrontpageModelList } from "./FrontpageModelList";
 
 export default function IndexPage() {
+  const { data: session } = useSession();
+
   return (
-    <div className="mt-16 max-w-2xl mx-auto">
+    <NarrowPageLayout>
       <div className="space-y-4">
         <FrontpageModelList />
-        <div>
-          <StyledLink href={newModelRoute()}>Create new model</StyledLink>
-        </div>
+        {session ? (
+          <div>
+            <StyledLink href={newModelRoute()}>Create new model</StyledLink>
+          </div>
+        ) : null}
       </div>
-    </div>
+    </NarrowPageLayout>
   );
 }

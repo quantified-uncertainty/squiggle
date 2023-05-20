@@ -1,11 +1,12 @@
+import { Button, TextInput, useToast } from "@quri/ui";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { FC, useState } from "react";
 import { useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
-import { useRouter } from "next/navigation";
 
-import { Button } from "@/components/ui/Button";
 import { ChooseUsernameMutation } from "@gen/ChooseUsernameMutation.graphql";
+import { useForm } from "react-hook-form";
 
 const Mutation = graphql`
   mutation ChooseUsernameMutation($username: String!) {
@@ -22,12 +23,17 @@ const Mutation = graphql`
 `;
 
 export const ChooseUsername: FC = () => {
-  const [username, setUsername] = useState("");
-  const [error, setError] = useState<string | undefined>();
+  const toast = useToast();
+
+  const { register, handleSubmit, watch } = useForm<{
+    username: string;
+  }>();
 
   const router = useRouter();
 
-  const { data: session } = useSession({ required: true });
+  const { data: session, update: updateSession } = useSession({
+    required: true,
+  });
   if (session?.user.username) {
     router.push("/");
   }
@@ -35,43 +41,39 @@ export const ChooseUsername: FC = () => {
   const [mutation, isMutationInFlight] =
     useMutation<ChooseUsernameMutation>(Mutation);
 
-  const onSave = () => {
+  const save = handleSubmit((data) => {
     mutation({
-      variables: {
-        username,
-      },
+      variables: { username: data.username },
       onCompleted(data) {
         if (data.setUsername.__typename === "BaseError") {
-          setError(data.setUsername.message);
+          toast(data.setUsername.message, "error");
         } else {
+          updateSession();
           router.replace("/");
         }
       },
       onError(error) {
-        setError((error as any).source ?? error.toString());
+        toast((error as any).source ?? error.toString(), "error");
       },
     });
-  };
+  });
+
+  const disabled = isMutationInFlight || !watch("username");
 
   return (
     <div className="flex flex-col items-center mt-20">
       <div className="space-y-2">
         <div>Pick a username:</div>
-        <div className="flex gap-1">
-          <input
-            type="text"
-            placeholder="username"
-            className="px-2 py-1 border rounded"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+        <div className="flex items-center gap-1">
+          <TextInput
+            placeholder="Username"
+            register={register}
+            name="username"
           />
-          <Button onClick={onSave} disabled={isMutationInFlight || !username}>
+          <Button onClick={save} disabled={disabled} theme="primary">
             Save
           </Button>
         </div>
-        {error && (
-          <div className="text-xs text-red-700 max-w-lg font-mono">{error}</div>
-        )}
       </div>
     </div>
   );

@@ -9,9 +9,11 @@ const ModelViewQuery = graphql`
   query ModelViewQuery($input: QueryModelInput!) {
     model(input: $input) {
       id
-      content {
-        __typename
-        ...SquiggleSnippetFormFragment
+      currentRevision {
+        content {
+          __typename
+          ...SquiggleSnippetFormFragment
+        }
       }
     }
   }
@@ -27,7 +29,7 @@ export const ModelView: FC<Props> = ({ username, slug }) => {
     input: { ownerUsername: username, slug },
   });
 
-  const typename = data.model.content.__typename;
+  const typename = data.model.currentRevision.content.__typename;
   if (typename !== "SquiggleSnippet") {
     return <div>Unknown model type {typename}</div>;
   }
@@ -36,7 +38,7 @@ export const ModelView: FC<Props> = ({ username, slug }) => {
     <SquiggleSnippetForm
       username={username}
       slug={slug}
-      content={data.model.content}
+      content={data.model.currentRevision.content}
     />
   );
 };

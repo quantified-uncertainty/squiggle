@@ -1,7 +1,8 @@
+import { Button } from "@quri/ui";
+import { FC, useState } from "react";
+
 import { modelRoute } from "@/routes";
 import { useStorageDispatch } from "@/storage/StorageProvider";
-import { FC, useState } from "react";
-import { Button } from "../ui/Button";
 import { useInterfaceContext, useSelectedInterface } from "./InterfaceProvider";
 
 export const NewModelForm: FC = () => {

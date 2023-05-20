@@ -145,7 +145,11 @@ export function createPlugin(util: PrettierUtil): Plugin<Node> {
               path.map(print, "statements"),
             ]);
           case "Block":
-            if (node.statements.length === 1) {
+            if (
+              node.statements.length === 1 &&
+              !("comments" in node) &&
+              !("comments" in node.statements[0])
+            ) {
               return typedPath(node).call(print, "statements", 0);
             }
             return group([
@@ -346,10 +350,14 @@ export function createPlugin(util: PrettierUtil): Plugin<Node> {
               return node.elements;
             case "LetStatement":
               return [node.variable, node.value];
+            case "DefunStatement":
+              return [node.value];
             case "Call":
               return [...node.args, node.fn];
             case "Record":
               return node.elements;
+            case "Lambda":
+              return [node.body];
             case "KeyValue":
               return [node.key, node.value];
             default:

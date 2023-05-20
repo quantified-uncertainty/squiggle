@@ -1,13 +1,16 @@
 "use client";
-import { useState, useCallback, FC } from "react";
+import { useRouter } from "next/navigation";
+import { FC } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { SquigglePlayground } from "@quri/squiggle-components";
-import { Button } from "@/components/ui/Button";
+import { Button, TextInput, useToast } from "@quri/ui";
+
 import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
-import { Controller, useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
+import { WithTopMenu } from "@/components/layout/WithTopMenu";
+import { useSession } from "next-auth/react";
 
 const Mutation = graphql`
   mutation NewModelMutation($input: MutationCreateSquiggleSnippetModelInput!) {
@@ -26,14 +29,16 @@ const Mutation = graphql`
 `;
 
 export const NewModel: FC = () => {
-  const { register, handleSubmit, control, formState } = useForm<{
+  useSession({ required: true });
+
+  const toast = useToast();
+
+  const { register, handleSubmit, control } = useForm<{
     code: string;
     slug: string;
   }>();
 
   const router = useRouter();
-
-  const [error, setError] = useState("");
 
   const [saveMutation, isSaveInFlight] =
     useMutation<NewModelMutation>(Mutation);
@@ -48,44 +53,46 @@ export const NewModel: FC = () => {
       },
       onCompleted(data) {
         if (data.result.__typename === "BaseError") {
-          setError(data.result.message);
+          toast(data.result.message, "error");
         } else {
           router.push("/");
         }
       },
       onError(e) {
-        setError(e.toString());
+        toast(e.toString(), "error");
       },
     });
   });
 
   return (
-    <form className="space-y-4" onSubmit={save}>
-      <div className="flex items-center gap-4">
-        <div className="font-bold text-xl">New model</div>
-        <div className="flex items-center gap-2">
-          <input
-            className="px-2 py-1 border rounded"
-            placeholder="Slug"
-            {...register("slug")}
-          />
-          <Button onClick={save} disabled={isSaveInFlight}>
-            Save
-          </Button>
-          {error && <div>{error}</div>}
+    <form onSubmit={save}>
+      <WithTopMenu>
+        <div className="flex items-center gap-4">
+          <div className="font-bold text-xl">New model</div>
+          <div className="flex items-center gap-2">
+            <TextInput
+              register={register}
+              name="slug"
+              placeholder="Slug"
+              size="small"
+            />
+            <Button onClick={save} disabled={isSaveInFlight} theme="primary">
+              Save
+            </Button>
+          </div>
         </div>
-      </div>
-      <Controller
-        name="code"
-        control={control}
-        rules={{ required: true }}
-        render={({ field }) => (
-          <SquigglePlayground
-            onCodeChange={field.onChange}
-            code={field.value}
-          />
-        )}
-      />
+        <Controller
+          name="code"
+          control={control}
+          rules={{ required: true }}
+          render={({ field }) => (
+            <SquigglePlayground
+              onCodeChange={field.onChange}
+              code={field.value}
+            />
+          )}
+        />
+      </WithTopMenu>
     </form>
   );
 };
