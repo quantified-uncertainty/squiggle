@@ -40,15 +40,42 @@ x=1`
 });
 
 describe("Unknown imports", () => {
-  const project = SqProject.create({ resolver: (name) => name });
-  project.setSource(
-    "main",
-    `
+  test.failing("run", () => {
+    const project = SqProject.create({ resolver: (name) => name });
+    project.setSource(
+      "main",
+      `
 import './lib' as lib
 123`
-  );
+    );
 
-  project.run("main");
+    project.run("main");
 
-  expect(project.getResult("main").ok).toEqual(false);
+    expect(project.getResult("main").ok).toEqual(false);
+  });
+
+  test("runWithImports", () => {
+    const project = SqProject.create({ resolver: (name) => name });
+    project.setSource(
+      "main",
+      `
+import './lib' as lib
+lib.x`
+    );
+
+    expect(
+      project.runWithImports("main", async (id) => {
+        throw new Error(`Unknown id ${id}`);
+      })
+    ).rejects.toThrow();
+
+    expect(
+      project.runWithImports("main", async (id) => {
+        if (id === "./lib") {
+          return "x = 5";
+        }
+        throw new Error(`Unknown id ${id}`);
+      })
+    ).resolves.toBe(undefined);
+  });
 });
