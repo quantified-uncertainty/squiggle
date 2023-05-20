@@ -28,7 +28,6 @@ type Options = {
   resolver?: Resolver;
 };
 
-// TODO: Auto clean project based on topology
 export class SqProject {
   private readonly items: Map<string, ProjectItem>;
   private stdLib: Namespace;
@@ -74,10 +73,6 @@ export class SqProject {
     return item;
   }
 
-  private touchSource_(sourceId: string): void {
-    this.getItem(sourceId).touchSource();
-  }
-
   private touchDependents(sourceId: string) {
     Topology.traverseDependents(this, sourceId, (id) => this.clean(id));
   }
@@ -99,17 +94,17 @@ export class SqProject {
   }
 
   touchSource(sourceId: string) {
-    this.touchSource_(sourceId);
+    this.getItem(sourceId).touchSource();
     this.touchDependents(sourceId);
   }
 
   setSource(sourceId: string, value: string) {
     if (this.items.has(sourceId)) {
       this.getItem(sourceId).setSource(value);
-      this.touchDependents(sourceId);
     } else {
       this.items.set(sourceId, new ProjectItem({ sourceId, source: value }));
     }
+    this.touchDependents(sourceId);
   }
 
   removeSource(sourceId: string) {
@@ -156,12 +151,12 @@ export class SqProject {
     return this.getItem(sourceId).result;
   }
 
-  private getInternalResult(sourceId: string) {
+  private getInternalResult(sourceId: string): Result.result<Value, SqError> {
     const result = this.getResultOption(sourceId);
     return result ?? Result.Error(getNeedToRunError());
   }
 
-  getResult(sourceId: string) {
+  getResult(sourceId: string): Result.result<SqValue, SqError> {
     return Result.fmap(this.getInternalResult(sourceId), (v) =>
       wrapValue(
         v,
@@ -261,7 +256,6 @@ export class SqProject {
 
       this.getItem(sourceId).run(context);
     } else {
-      // imports failed? or some other rare error
       this.getItem(sourceId).failRun(rBindings.value);
     }
   }

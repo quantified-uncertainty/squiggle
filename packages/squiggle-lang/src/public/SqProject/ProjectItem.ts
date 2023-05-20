@@ -11,7 +11,7 @@ import { Value } from "../../value/index.js";
 import { SqError } from "../SqError.js";
 import { Resolver } from "./Resolver.js";
 
-// source -> rawParse -> imports -> expression -> bindings & result
+// source -> ast -> imports -> expression -> bindings & result
 
 export type ImportBinding = {
   sourceId: string;
@@ -22,7 +22,7 @@ export class ProjectItem {
   private readonly sourceId: string;
   source: string;
   continues: string[];
-  rawParse?: result<AST, SqError>;
+  ast?: result<AST, SqError>;
   imports?: result<ImportBinding[], SqError>;
   expression?: result<Expression, SqError>;
   bindings?: Namespace;
@@ -35,7 +35,7 @@ export class ProjectItem {
   }
 
   touchSource() {
-    this.rawParse = undefined;
+    this.ast = undefined;
     this.imports = undefined;
     this.expression = undefined;
     this.bindings = undefined;
@@ -44,11 +44,11 @@ export class ProjectItem {
 
   setSource(source: string) {
     this.source = source;
-    return this.touchSource();
+    this.touchSource();
   }
 
-  private setRawParse(rawParse: NonNullable<ProjectItem["rawParse"]>): void {
-    this.rawParse = rawParse;
+  private setAST(ast: NonNullable<ProjectItem["ast"]>): void {
+    this.ast = ast;
 
     this.imports = undefined;
     this.expression = undefined;
@@ -90,23 +90,23 @@ export class ProjectItem {
 
   setContinues(continues: string[]) {
     this.continues = continues;
-    return this.clean();
+    this.clean();
   }
 
   parseImports(resolver: Resolver | undefined): void {
     if (this.imports) {
       return;
     }
-    this.buildRawParse();
-    if (!this.rawParse) {
+    this.buildAST();
+    if (!this.ast) {
       throw new Error("Internal logic error");
     }
-    if (!this.rawParse.ok) {
-      this.setImports(this.rawParse);
+    if (!this.ast.ok) {
+      this.setImports(this.ast);
       return;
     }
 
-    const program = this.rawParse.value;
+    const program = this.ast.value;
     if (program.type !== "Program") {
       throw new Error("Expected Program as top-level AST type");
     }
@@ -137,29 +137,27 @@ export class ProjectItem {
     this.setImports(Ok(resolvedImports));
   }
 
-  private buildRawParse(): void {
-    if (this.rawParse) {
+  private buildAST(): void {
+    if (this.ast) {
       return;
     }
-    const rawParse = Result.errMap(
+    const ast = Result.errMap(
       parse(this.source, this.sourceId),
       (e: ParseError) => new SqError(IError.fromParseError(e))
     );
-    this.setRawParse(rawParse);
+    this.setAST(ast);
   }
 
   private buildExpression(): void {
-    this.buildRawParse();
+    this.buildAST();
     if (this.expression) {
       return;
     }
-    if (!this.rawParse) {
-      // rawParse() guarantees that the rawParse is set
+    if (!this.ast) {
+      // buildAST() guarantees that the ast is set
       throw new Error("Internal logic error");
     }
-    const expression = Result.fmap(this.rawParse, (node) =>
-      expressionFromAst(node)
-    );
+    const expression = Result.fmap(this.ast, (node) => expressionFromAst(node));
     this.setExpression(expression);
   }
 
@@ -180,7 +178,8 @@ export class ProjectItem {
     }
 
     if (!this.expression.ok) {
-      return this.failRun(this.expression.value);
+      this.failRun(this.expression.value);
+      return;
     }
 
     try {
