@@ -73,6 +73,7 @@
     "@headlessui/react": "^1.7.14",
     "framer-motion": "^10.12.10",
     "react-hook-form": "^7.43.9",
+    "react-textarea-autosize": "^8.4.1",
     "react-use": "^17.4.0"
   }
 }

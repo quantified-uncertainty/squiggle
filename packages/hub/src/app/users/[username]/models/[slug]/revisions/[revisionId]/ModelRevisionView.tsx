@@ -53,23 +53,20 @@ export const ModelRevisionView: FC<Props> = ({
   }
 
   return (
-    <WithTopMenu>
-      <div className="flex gap-4 items-baseline">
-        <ModelInfo username={username} slug={slug} />
-        <div className="flex gap-2">
-          <div className="text-xs">
-            Version from{" "}
-            {format(data.model.revision.createdAtTimestamp, commonDateFormat)}
-          </div>
-          <StyledLink className="text-xs" href={modelRoute({ username, slug })}>
-            Go to latest version
-          </StyledLink>
+    <div>
+      <div className="mx-auto max-w-2xl mb-6">
+        <div>
+          <span className="text-slate-500">Version from</span>{" "}
+          {format(data.model.revision.createdAtTimestamp, commonDateFormat)}
         </div>
+        <StyledLink href={modelRoute({ username, slug })}>
+          Go to latest version
+        </StyledLink>
       </div>
       <SquigglePlayground
         code={undefined as any} // code is optional in SquigglePlayground but marked as required due to Typescript bug
         defaultCode={data.model.revision.content.code}
       />
-    </WithTopMenu>
+    </div>
   );
 };

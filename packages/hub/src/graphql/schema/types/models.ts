@@ -21,6 +21,7 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
     createdAtTimestamp: t.float({
       resolve: (revision) => revision.createdAt.getTime(),
     }),
+    description: t.exposeString("description"),
     content: t.field({
       type: ModelContent,
       select: { squiggleSnippet: true },

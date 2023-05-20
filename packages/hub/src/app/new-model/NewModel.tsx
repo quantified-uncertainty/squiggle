@@ -6,11 +6,12 @@ import { useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { SquigglePlayground } from "@quri/squiggle-components";
-import { Button, TextInput, useToast } from "@quri/ui";
+import { Button, TextArea, TextInput, useToast } from "@quri/ui";
 
 import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
 import { WithTopMenu } from "@/components/layout/WithTopMenu";
 import { useSession } from "next-auth/react";
+import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 
 const Mutation = graphql`
   mutation NewModelMutation($input: MutationCreateSquiggleSnippetModelInput!) {
@@ -36,6 +37,7 @@ export const NewModel: FC = () => {
   const { register, handleSubmit, control } = useForm<{
     code: string;
     slug: string;
+    description: string;
   }>();
 
   const router = useRouter();
@@ -49,6 +51,7 @@ export const NewModel: FC = () => {
         input: {
           code: data.code,
           slug: data.slug,
+          description: data.description,
         },
       },
       onCompleted(data) {
@@ -67,14 +70,14 @@ export const NewModel: FC = () => {
   return (
     <form onSubmit={save}>
       <WithTopMenu>
-        <div className="flex items-center gap-4">
-          <div className="font-bold text-xl">New model</div>
-          <div className="flex items-center gap-2">
-            <TextInput
+        <div className="max-w-2xl mx-auto">
+          <div className="font-bold text-xl mb-4">New model</div>
+          <div className="space-y-2">
+            <TextInput register={register} name="slug" label="Slug" />
+            <TextArea
               register={register}
-              name="slug"
-              placeholder="Slug"
-              size="small"
+              name="description"
+              label="Description"
             />
             <Button onClick={save} disabled={isSaveInFlight} theme="primary">
               Save

@@ -18,6 +18,7 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
     errors: {},
     input: {
       code: t.input.string({ required: true }),
+      description: t.input.string(),
       slug: t.input.string({
         required: true,
         validate: {
@@ -25,7 +26,7 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
         },
       }),
     },
-    resolve: async (_, args, { session }) => {
+    resolve: async (_, { input }, { session }) => {
       const email = session?.user.email;
       if (!email) {
         // shouldn't happen because we checked user auth scope previously, but helps with type checks
@@ -37,15 +38,16 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
           owner: {
             connect: { email },
           },
-          slug: args.input.slug,
+          slug: input.slug,
           revisions: {
             create: {
               squiggleSnippet: {
                 create: {
-                  code: args.input.code,
+                  code: input.code,
                 },
               },
               contentType: "SquiggleSnippet",
+              description: input.description ?? "",
             },
           },
         },

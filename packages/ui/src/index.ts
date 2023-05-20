@@ -15,6 +15,7 @@ export { NumberInput } from "./components/NumberInput.js";
 export { TextInput } from "./components/TextInput.js";
 export { ColorInput } from "./components/ColorInput.js";
 export { Radio } from "./components/Radio.js";
+export { TextArea } from "./components/TextArea.js";
 
 export { XIcon } from "./icons/XIcon.js";
 export { RefreshIcon } from "./icons/RefreshIcon.js";

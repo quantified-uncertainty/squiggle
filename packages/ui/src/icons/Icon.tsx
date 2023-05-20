@@ -17,7 +17,6 @@ export const Icon: FC<IconProps> = ({
     height={size}
     viewBox="0 0 20 20"
     fill="currentColor"
-    stroke="currentColor"
     onClick={onClick}
     className={className}
   >

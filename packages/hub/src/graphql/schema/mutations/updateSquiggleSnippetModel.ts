@@ -20,21 +20,21 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
       code: t.input.string({ required: true }),
       username: t.input.string({ required: true }),
       slug: t.input.string({ required: true }),
+      description: t.input.string(),
     },
-    resolve: async (_, args, { session }) => {
+    resolve: async (_, { input }, { session }) => {
       const email = session?.user.email;
       if (!email) {
         // shouldn't happen because we checked user auth scope previously, but helps with type checks
         throw new Error("Email is missing");
       }
-      const { username, slug } = args.input;
-      if (session?.user.username !== username) {
+      if (session?.user.username !== input.username) {
         throw new Error("Can't edit another user's model");
       }
 
       const owner = await prisma.user.findUniqueOrThrow({
         where: {
-          username,
+          username: input.username,
         },
       });
 
@@ -42,14 +42,15 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
         data: {
           squiggleSnippet: {
             create: {
-              code: args.input.code,
+              code: input.code,
             },
           },
           contentType: "SquiggleSnippet",
+          description: input.description ?? "",
           model: {
             connect: {
               slug_ownerId: {
-                slug,
+                slug: input.slug,
                 ownerId: owner.id,
               },
             },

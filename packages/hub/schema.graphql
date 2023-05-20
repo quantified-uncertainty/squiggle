@@ -46,6 +46,7 @@ type ModelRevision implements Node {
   content: ModelContent!
   createdAtTimestamp: Float!
   dbId: ID!
+  description: String!
   id: ID!
 }
 
@@ -68,6 +69,7 @@ type Mutation {
 
 input MutationCreateSquiggleSnippetModelInput {
   code: String!
+  description: String
   slug: String!
 }
 
@@ -84,6 +86,7 @@ union MutationSetUsernameResult = BaseError | Me
 
 input MutationUpdateSquiggleSnippetModelInput {
   code: String!
+  description: String
   slug: String!
   username: String!
 }
