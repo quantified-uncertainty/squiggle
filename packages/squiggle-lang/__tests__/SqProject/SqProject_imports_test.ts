@@ -40,7 +40,7 @@ x=1`
 });
 
 describe("Unknown imports", () => {
-  test.failing("run", () => {
+  test("run", () => {
     const project = SqProject.create({ resolver: (name) => name });
     project.setSource(
       "main",

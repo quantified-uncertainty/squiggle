@@ -80,7 +80,9 @@ export class ProjectItem {
 
   getDependencies(): string[] {
     if (!this.imports?.ok) {
-      // FIXME
+      // Evaluation will fail later in buildInitialBindings, so it's ok.
+      // It would be better if we parsed imports recursively directly during the run,
+      // but it's complicated because of asyncs and separation of concerns between this module, SqProject and Topology.
       return this.continues;
     }
     return [...this.imports.value.map((i) => i.sourceId), ...this.continues];
@@ -91,7 +93,7 @@ export class ProjectItem {
     return this.clean();
   }
 
-  parseImports(resolver: Resolver): void {
+  parseImports(resolver: Resolver | undefined): void {
     if (this.imports) {
       return;
     }
@@ -107,6 +109,22 @@ export class ProjectItem {
     const program = this.rawParse.value;
     if (program.type !== "Program") {
       throw new Error("Expected Program as top-level AST type");
+    }
+
+    if (!program.imports.length) {
+      this.setImports(Ok([]));
+      return;
+    }
+
+    if (!resolver) {
+      this.setImports(
+        Result.Error(
+          new SqError(
+            IError.other("Can't use imports when resolver is not configured")
+          )
+        )
+      );
+      return;
     }
 
     const resolvedImports: ImportBinding[] = program.imports.map(

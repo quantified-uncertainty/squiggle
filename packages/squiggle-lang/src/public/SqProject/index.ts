@@ -19,6 +19,11 @@ function getNeedToRunError() {
   return new SqError(IError.fromMessage(ErrorMessage.needToRun()));
 }
 
+// TODO - pass the the id from which the dependency was imported/continued too
+function getMissingDependencyError(id: string) {
+  return new SqError(IError.other(`Dependency ${id} is missing`));
+}
+
 type Options = {
   resolver?: Resolver;
 };
@@ -169,9 +174,7 @@ export class SqProject {
   }
 
   parseImports(sourceId: string): void {
-    if (!this.resolver) {
-      throw new Error("Imports are not supported when resolver is unset");
-    }
+    // resolver can be undefined; in this case parseImports will fail if there are any imports
     this.getItem(sourceId).parseImports(this.resolver);
   }
 
@@ -194,28 +197,57 @@ export class SqProject {
     sourceId: string
   ): Result.result<Namespace, SqError> {
     const continues = this.getContinues(sourceId);
-    let namespace = NamespaceMap<string, Value>().merge(
-      this.getStdLib(),
-      ...continues.map((id) => this.getRawBindings(id)),
-      ...continues.map((id) => {
-        const result = this.getInternalResult(id);
-        if (!result.ok) {
-          throw result.value;
-        }
-        return NamespaceMap([["__result__", result.value]]);
-      })
-    );
 
-    const rImports = this.getImports(sourceId) ?? Result.Ok([]); // FIXME - should just fail if imports are not parsed
+    // We start from stdLib and add more bindings on top of it.
+    const namespacesToMerge = [this.getStdLib()];
+
+    // First, merge continues.
+    for (const continueId of continues) {
+      if (!this.items.has(continueId)) {
+        return Result.Error(getMissingDependencyError(continueId));
+      }
+      const continueBindings = this.getItem(continueId).bindings;
+      if (!continueBindings) {
+        return Result.Error(getNeedToRunError());
+      }
+      namespacesToMerge.push(continueBindings);
+
+      const result = this.getInternalResult(continueId);
+      if (!result.ok) {
+        return result;
+      }
+
+      // this is excessive, we could push it just once for the last continue
+      // (but we'll probably remove the support for `__result__` eventually, anyway)
+      namespacesToMerge.push(NamespaceMap([["__result__", result.value]]));
+    }
+    let namespace = NamespaceMap<string, Value>().merge(...namespacesToMerge);
+
+    // Second, merge imports.
+    this.parseImports(sourceId);
+    const rImports = this.getImports(sourceId);
+    if (!rImports) {
+      // Shouldn't happen, we just called parseImports.
+      return Result.Error(new SqError(IError.other("Internal logic error")));
+    }
+
     if (!rImports.ok) {
-      // shouldn't happen, getImports fail only if parse failed
+      // Shouldn't happen, getImports fail only if parse failed.
       return rImports;
     }
     for (const importBinding of rImports.value) {
+      if (!this.items.has(importBinding.sourceId)) {
+        return Result.Error(getMissingDependencyError(importBinding.sourceId));
+      }
+      const importBindings = this.getItem(importBinding.sourceId).bindings;
+      if (!importBindings) {
+        return Result.Error(getNeedToRunError());
+      }
+
       // TODO - check for collisions?
       namespace = namespace.set(
         importBinding.variable,
-        vRecord(this.getRawBindings(importBinding.sourceId))
+        vRecord(importBindings)
       );
     }
     return Result.Ok(namespace);
@@ -263,7 +295,7 @@ export class SqProject {
     this.runIds(this.getRunOrder());
   }
 
-  // Deprecated; this method will ignore invalid imports.
+  // Deprecated; this method won't handle imports correctly.
   // Use `runWithImports` instead.
   run(sourceId: string) {
     this.runIds(Topology.getRunOrderFor(this, sourceId));
