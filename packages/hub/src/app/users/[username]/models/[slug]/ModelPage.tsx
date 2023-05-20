@@ -5,7 +5,6 @@ import { Button, DotsHorizontalIcon, Dropdown, DropdownMenu } from "@quri/ui";
 
 import { ModelInfo } from "@/components/ModelInfo";
 import { WithTopMenu } from "@/components/layout/WithTopMenu";
-import { DropdownMenuLinkItem } from "@/components/ui/DropdownMenuLinkItem";
 import { StyledTabLink } from "@/components/ui/StyledTabLink";
 import { modelEditRoute, modelRevisionsRoute, modelRoute } from "@/routes";
 import { DeleteModelAction } from "./DeleteModelAction";
@@ -39,6 +38,17 @@ export const ModelPage: FC<Props> = ({ username, slug, children }) => {
     <WithTopMenu>
       <div className="flex items-center gap-4 max-w-2xl mx-auto">
         <ModelInfo slug={slug} username={username} />
+        <StyledTabLink.List>
+          <StyledTabLink name="View" href={modelRoute({ username, slug })} />
+          <StyledTabLink
+            name="Edit"
+            href={modelEditRoute({ username, slug })}
+          />
+          <StyledTabLink
+            name="Revisions"
+            href={modelRevisionsRoute({ username, slug })}
+          />
+        </StyledTabLink.List>
         <Dropdown
           render={({ close }) => (
             <DropdownMenu>
@@ -55,17 +65,6 @@ export const ModelPage: FC<Props> = ({ username, slug, children }) => {
             <DotsHorizontalIcon className="text-slate-500" />
           </Button>
         </Dropdown>
-        <StyledTabLink.List>
-          <StyledTabLink name="View" href={modelRoute({ username, slug })} />
-          <StyledTabLink
-            name="Edit"
-            href={modelEditRoute({ username, slug })}
-          />
-          <StyledTabLink
-            name="Revisions"
-            href={modelRevisionsRoute({ username, slug })}
-          />
-        </StyledTabLink.List>
       </div>
       {children}
     </WithTopMenu>

@@ -115,13 +115,15 @@ const EditSquiggleSnippetContent: FC<{
               {"You don't own this model, edits won't be saved."}
             </div>
           )}
-          <div className="mt-2">
-            <TextArea
-              register={register}
-              name="description"
-              label="Description"
-            />
-          </div>
+          {session?.user.username === data.owner.username ? (
+            <div className="mt-2">
+              <TextArea
+                register={register}
+                name="description"
+                label="Description"
+              />
+            </div>
+          ) : null}
         </div>
         <Controller
           name="code"
