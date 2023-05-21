@@ -27,58 +27,55 @@ const relativeValuesShape = frRecord(
 
 export const library = [
   maker.make({
-    name: "calculate",
+    name: "wrap",
     output: "Record",
-    examples: ["RelativeValues.calculate(fn, 'id1', 'id2')"],
+    examples: [
+      "RelativeValues.wrap({|id1, id2| [2 to 5, 3 to 6]})('foo', 'bar')",
+    ],
     definitions: [
       // TODO - this is proof-of-concept and needs to be rewritten as `makeSquiggleDefinition` or as an implicitly imported Prelude.squiggle file
-      makeDefinition(
-        "calculate",
-        [frLambda, frString, frString],
-        ([fn, id1, id2], context, reducer) => {
-          const astResult = parse(
-            `
-findUncertainty(dist) = {
-  absDist = dist -> SampleSet.fromDist -> SampleSet.map(abs)
-  p5 = inv(absDist, 0.05)
-  p95 = inv(absDist, 0.95)
-  log10(p95 / p5)
-} 
-dists = fn(x,y)
-dist1 = dists[0] -> SampleSet.fromDist
-dist2 = dists[1] -> SampleSet.fromDist
-dist = dists[0] / dists[1]
+      makeDefinition("wrap", [frLambda], ([fn], context, reducer) => {
+        const astResult = parse(
+          `
 {
-  median: inv(dist, 0.5),
-  mean: mean(dist),
-  min: inv(dist, 0.05),
-  max: inv(dist, 0.95),
-  uncertainty: findUncertainty(dist)
+  |x,y|
+  findUncertainty(dist) = {
+    absDist = dist -> SampleSet.fromDist -> SampleSet.map(abs)
+    p5 = inv(absDist, 0.05)
+    p95 = inv(absDist, 0.95)
+    log10(p95 / p5)
+  } 
+  dists = fn(x,y)
+  dist1 = dists[0] -> SampleSet.fromDist
+  dist2 = dists[1] -> SampleSet.fromDist
+  dist = dists[0] / dists[1]
+  {
+    median: inv(dist, 0.5),
+    mean: mean(dist),
+    min: inv(dist, 0.05),
+    max: inv(dist, 0.95),
+    uncertainty: findUncertainty(dist)
+  }
 }
 `,
-            "@stdlib"
-          );
-          if (!astResult.ok) {
-            return Result.Error({
-              type: "RESyntaxError",
-              desc: astResult.value.message,
-            });
-          }
-          const lambda = new SquiggleLambda(
-            "RelativeValues.calculate",
-            ["fn", "x", "y"],
-            context.bindings,
-            expressionFromAst(astResult.value),
-            astResult.value.location
-          );
-          const result = lambda.call(
-            [vLambda(fn), vString(id1), vString(id2)],
-            context,
-            reducer
-          );
-          return Result.Ok(result);
+          "@stdlib"
+        );
+        if (!astResult.ok) {
+          return Result.Error({
+            type: "RESyntaxError",
+            desc: astResult.value.message,
+          });
         }
-      ),
+        const lambda = new SquiggleLambda(
+          "RelativeValues.wrap",
+          ["fn"],
+          context.bindings,
+          expressionFromAst(astResult.value),
+          astResult.value.location
+        );
+        const result = lambda.call([vLambda(fn)], context, reducer);
+        return Result.Ok(result);
+      }),
     ],
   }),
   maker.make({

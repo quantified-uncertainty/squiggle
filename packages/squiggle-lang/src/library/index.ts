@@ -1,13 +1,30 @@
 import { INDEX_LOOKUP_FUNCTION } from "../ast/toExpression.js";
 import { Namespace, NamespaceMap } from "../reducer/bindings.js";
 import { ErrorMessage, REOther } from "../reducer/ErrorMessage.js";
-import { BuiltinLambda } from "../reducer/lambda.js";
+import { BuiltinLambda, Lambda } from "../reducer/lambda.js";
 import { Value, vLambda } from "../value/index.js";
+
 import { makeMathConstants } from "./math.js";
-import * as registry from "./registry/index.js";
+import { nonRegistryLambdas, registry } from "./registry/index.js";
 import { makeVersionConstant } from "./version.js";
 
-const makeStdLib = (): Namespace => {
+function makeLookupLambda(): Lambda {
+  return new BuiltinLambda(INDEX_LOOKUP_FUNCTION, (inputs) => {
+    if (inputs.length !== 2) {
+      // should never happen
+      return ErrorMessage.throw(REOther("Index lookup internal error"));
+    }
+
+    const [obj, key] = inputs;
+    if ("get" in obj) {
+      return obj.get(key);
+    } else {
+      return ErrorMessage.throw(REOther("Trying to access key on wrong value"));
+    }
+  });
+}
+
+function makeStdLib(): Namespace {
   let res = NamespaceMap<string, Value>();
 
   // constants
@@ -15,52 +32,19 @@ const makeStdLib = (): Namespace => {
   res = res.merge(makeVersionConstant());
 
   // field lookups
-  res = res.set(
-    INDEX_LOOKUP_FUNCTION,
-    vLambda(
-      new BuiltinLambda(INDEX_LOOKUP_FUNCTION, (inputs) => {
-        if (inputs.length !== 2) {
-          // should never happen
-          return ErrorMessage.throw(REOther("Index lookup internal error"));
-        }
-
-        const [obj, key] = inputs;
-        if ("get" in obj) {
-          return obj.get(key);
-        } else {
-          return ErrorMessage.throw(
-            REOther("Trying to access key on wrong value")
-          );
-        }
-      })
-    )
-  );
+  res = res.set(INDEX_LOOKUP_FUNCTION, vLambda(makeLookupLambda()));
 
   // some lambdas can't be expressed in function registry (e.g. `mx` with its variadic number of parameters)
-  for (const [name, lambda] of registry.nonRegistryLambdas) {
+  for (const [name, lambda] of nonRegistryLambdas) {
     res = res.set(name, vLambda(lambda));
   }
 
   // bind the entire FunctionRegistry
-
   for (const name of registry.allNames()) {
-    res = res.set(
-      name,
-      vLambda(
-        new BuiltinLambda(name, (args, context, reducer) => {
-          // Note: current bindings could be accidentally exposed here through context (compare with native lambda implementation above, where we override them with local bindings).
-          // But FunctionRegistry API is too limited for that to matter. Please take care not to violate that in the future by accident.
-          const result = registry.call(name, args, context, reducer);
-          if (!result.ok) {
-            return ErrorMessage.throw(result.value);
-          }
-          return result.value;
-        })
-      )
-    );
+    res = res.set(name, vLambda(registry.makeLambda(name)));
   }
 
   return res;
-};
+}
 
 export const stdLib = makeStdLib();

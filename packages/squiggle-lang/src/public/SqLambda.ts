@@ -1,5 +1,6 @@
 import { defaultEnv } from "../dist/env.js";
 import { stdLib } from "../library/index.js";
+import { registry } from "../library/registry/index.js";
 import { createContext } from "../reducer/Context.js";
 import { IError } from "../reducer/IError.js";
 import { evaluate } from "../reducer/index.js";
@@ -15,6 +16,10 @@ export class SqLambda {
     public _value: Lambda, // public because of SqFnPlot.create
     public location?: SqValueLocation
   ) {}
+
+  static createFromStdlibName(name: string) {
+    return new SqLambda(registry.makeLambda(name));
+  }
 
   parameters() {
     return this._value.getParameters();
