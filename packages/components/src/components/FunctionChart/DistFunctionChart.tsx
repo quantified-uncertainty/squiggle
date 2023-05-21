@@ -75,7 +75,7 @@ const getPercentiles = ({
   plot: SqDistFnPlot;
   environment: Env;
 }) => {
-  const { functionImage, errors } = getFunctionImage(plot);
+  const { functionImage, errors } = getFunctionImage(plot, environment);
 
   const groupedErrors: Errors = groupBy(errors, (x) => x.value);
 
@@ -224,14 +224,14 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
   //TODO: This custom error handling is a bit hacky and should be improved.
   const mouseItem: result<SqValue, SqError> | undefined = useMemo(() => {
     return mouseX
-      ? plot.fn.directCall([SqNumberValue.create(mouseX)])
+      ? plot.fn.directCall([SqNumberValue.create(mouseX)], environment)
       : {
           ok: false,
           value: SqError.createOtherError(
             "Hover x-coordinate returned NaN. Expected a number."
           ),
         };
-  }, [plot.fn, mouseX]);
+  }, [plot.fn, environment, mouseX]);
 
   const showChart =
     mouseItem && mouseItem.ok && mouseItem.value.tag === "Dist" ? (

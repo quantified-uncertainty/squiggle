@@ -5,6 +5,7 @@ import {
   SqDistFnPlot,
   SqDistribution,
   SqNumberValue,
+  Env,
 } from "@quri/squiggle-lang";
 
 export const functionChartDefaults = {
@@ -24,7 +25,8 @@ type ImageValue<T extends SqNumericFnPlot | SqDistFnPlot> =
   T["tag"] extends "numericFn" ? number : SqDistribution;
 
 export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot>(
-  plot: T
+  plot: T,
+  environment: Env
 ) {
   const chartPointsToRender = rangeByCount(
     plot.xScale?.min ?? functionChartDefaults.min,
@@ -39,7 +41,7 @@ export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot>(
   let errors: { x: number; value: string }[] = [];
 
   for (const x of chartPointsToRender) {
-    const result = plot.fn.directCall([SqNumberValue.create(x)]);
+    const result = plot.fn.directCall([SqNumberValue.create(x)], environment);
     if (result.ok) {
       if (result.value.tag === "Number" && plot.tag === "numericFn") {
         functionImage.push({

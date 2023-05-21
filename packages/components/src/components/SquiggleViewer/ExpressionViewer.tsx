@@ -202,6 +202,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
                 return (
                   <NumericFunctionChart
                     plot={plot}
+                    environment={environment}
                     height={settings.chartHeight}
                   />
                 );
