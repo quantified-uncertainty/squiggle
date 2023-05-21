@@ -1,5 +1,3 @@
-import { parse } from "../ast/parse.js";
-import { expressionFromAst } from "../ast/toExpression.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
@@ -8,9 +6,9 @@ import {
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { SquiggleLambda } from "../reducer/lambda.js";
+import { makeSquiggleDefinition } from "../library/registry/squiggleDefinition.js";
 import * as Result from "../utility/result.js";
-import { vLambda, vPlot } from "../value/index.js";
+import { vPlot } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "RelativeValues",
@@ -30,18 +28,20 @@ export const library = [
       "RelativeValues.wrap({|id1, id2| [2 to 5, 3 to 6]})('foo', 'bar')",
     ],
     definitions: [
-      // TODO - this is proof-of-concept and needs to be rewritten as `makeSquiggleDefinition` or as an implicitly imported Prelude.squiggle file
-      makeDefinition([frLambda], ([fn], context, reducer) => {
-        const astResult = parse(
-          `
-{
+      makeSquiggleDefinition({
+        name: "RelativeValues.wrap",
+        inputs: [frLambda],
+        parameters: ["fn"],
+        code: `{
   |x,y|
   findUncertainty(dist) = {
     absDist = dist -> SampleSet.fromDist -> SampleSet.map(abs)
     p5 = inv(absDist, 0.05)
     p95 = inv(absDist, 0.95)
     log10(p95 / p5)
-  } 
+  }
+
+  zzz = inspect("hello", hello)
   dists = fn(x,y)
   dist1 = dists[0] -> SampleSet.fromDist
   dist2 = dists[1] -> SampleSet.fromDist
@@ -53,25 +53,7 @@ export const library = [
     max: inv(dist, 0.95),
     uncertainty: findUncertainty(dist)
   }
-}
-`,
-          "@stdlib"
-        );
-        if (!astResult.ok) {
-          return Result.Error({
-            type: "RESyntaxError",
-            desc: astResult.value.message,
-          });
-        }
-        const lambda = new SquiggleLambda(
-          "RelativeValues.wrap",
-          ["fn"],
-          context.bindings,
-          expressionFromAst(astResult.value),
-          astResult.value.location
-        );
-        const result = lambda.call([vLambda(fn)], context, reducer);
-        return Result.Ok(result);
+}`,
       }),
     ],
   }),

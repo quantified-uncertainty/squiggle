@@ -258,29 +258,29 @@ export class FnFactory {
   }
 }
 
-export const unpackDistResult = <T>(result: Result.result<T, DistError>): T => {
+export function unpackDistResult<T>(result: Result.result<T, DistError>): T {
   if (!result.ok) {
     return ErrorMessage.throw(REDistributionError(result.value));
   }
   return result.value;
-};
+}
 
-export const repackDistResult = (
+export function repackDistResult(
   result: Result.result<BaseDist, DistError>
-): Result.result<Value, ErrorMessage> => {
+): Result.result<Value, ErrorMessage> {
   const dist = unpackDistResult(result);
   return Ok(vDist(dist));
-};
+}
 
-export const doNumberLambdaCall = (
+export function doNumberLambdaCall(
   lambda: Lambda,
   args: Value[],
   context: ReducerContext,
   reducer: ReducerFn
-) => {
+) {
   const value = lambda.call(args, context, reducer);
   if (value.type === "Number") {
     return value.value;
   }
   return ErrorMessage.throw(REOperationError(SampleMapNeedsNtoNFunction));
-};
+}

@@ -4,7 +4,7 @@ import { result } from "../../utility/result.js";
 import { ReducerFn, Value } from "../../value/index.js";
 import { FRType } from "./frTypes.js";
 
-type FnDefinition0 = {
+export type FnDefinition0 = {
   inputs: [];
   run: (
     args: [],
@@ -13,7 +13,7 @@ type FnDefinition0 = {
   ) => result<Value, ErrorMessage>;
 };
 
-type FnDefinition1<T1> = {
+export type FnDefinition1<T1> = {
   inputs: [FRType<T1>];
   run: (
     args: [T1],
@@ -22,7 +22,7 @@ type FnDefinition1<T1> = {
   ) => result<Value, ErrorMessage>;
 };
 
-type FnDefinition2<T1, T2> = {
+export type FnDefinition2<T1, T2> = {
   inputs: [FRType<T1>, FRType<T2>];
   run: (
     args: [T1, T2],
@@ -31,7 +31,7 @@ type FnDefinition2<T1, T2> = {
   ) => result<Value, ErrorMessage>;
 };
 
-type FnDefinition3<T1, T2, T3> = {
+export type FnDefinition3<T1, T2, T3> = {
   inputs: [FRType<T1>, FRType<T2>, FRType<T3>];
   run: (
     args: [T1, T2, T3],
@@ -40,7 +40,7 @@ type FnDefinition3<T1, T2, T3> = {
   ) => result<Value, ErrorMessage>;
 };
 
-type FnDefinition4<T1, T2, T3, T4> = {
+export type FnDefinition4<T1, T2, T3, T4> = {
   inputs: [FRType<T1>, FRType<T2>, FRType<T3>, FRType<T4>];
   run: (
     args: [T1, T2, T3, T4],
@@ -114,12 +114,12 @@ export type FnDefinition =
   | FnDefinition3<any, any, any>
   | FnDefinition4<any, any, any, any>;
 
-export const tryCallFnDefinition = (
+export function tryCallFnDefinition(
   fn: FnDefinition,
   args: Value[],
   context: ReducerContext,
   reducerFn: ReducerFn
-): result<Value, ErrorMessage> | undefined => {
+): result<Value, ErrorMessage> | undefined {
   if (args.length !== fn.inputs.length) {
     return; // args length mismatch
   }
@@ -133,9 +133,9 @@ export const tryCallFnDefinition = (
     unpackedArgs.push(unpackedArg);
   }
   return fn.run(unpackedArgs as any, context, reducerFn);
-};
+}
 
-export const fnDefinitionToString = (fn: FnDefinition): string => {
+export function fnDefinitionToString(fn: FnDefinition): string {
   const inputs = fn.inputs.map((t) => t.getName()).join(", ");
   return `(${inputs})`;
-};
+}
