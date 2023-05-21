@@ -1,5 +1,5 @@
 import { result } from "../utility/result.js";
-import { Value } from "../value/index.js";
+import { Value, vNumber } from "../value/index.js";
 import { SqArray } from "./SqArray.js";
 import { SqDistribution, wrapDistribution } from "./SqDistribution.js";
 import { SqError } from "./SqError.js";
@@ -52,7 +52,7 @@ export abstract class SqAbstractValue<T extends string, J> {
   abstract tag: T;
 
   constructor(
-    protected _value: Extract<Value, { type: T }>,
+    public _value: Extract<Value, { type: T }>,
     public location?: SqValueLocation
   ) {}
 
@@ -143,6 +143,10 @@ export class SqLambdaValue extends SqAbstractValue<"Lambda", SqLambda> {
 
 export class SqNumberValue extends SqAbstractValue<"Number", number> {
   tag = "Number" as const;
+
+  static create(value: number) {
+    return new SqNumberValue(vNumber(value));
+  }
 
   get value(): number {
     return this._value.value;

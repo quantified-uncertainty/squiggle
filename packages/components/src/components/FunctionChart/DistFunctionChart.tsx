@@ -6,6 +6,7 @@ import {
   SqDistFnPlot,
   SqLinearScale,
   SqValue,
+  SqNumberValue,
 } from "@quri/squiggle-lang";
 import * as d3 from "d3";
 import groupBy from "lodash/groupBy.js";
@@ -223,7 +224,7 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
   //TODO: This custom error handling is a bit hacky and should be improved.
   const mouseItem: result<SqValue, SqError> | undefined = useMemo(() => {
     return mouseX
-      ? plot.fn.call([mouseX])
+      ? plot.fn.directCall([SqNumberValue.create(mouseX)])
       : {
           ok: false,
           value: SqError.createOtherError(

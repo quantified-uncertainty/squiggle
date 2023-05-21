@@ -8,6 +8,7 @@ import {
   SqDistFnPlot,
   SqLinearScale,
   SqLambda,
+  SqNumberValue,
 } from "@quri/squiggle-lang";
 
 import {
@@ -65,8 +66,12 @@ export const FunctionChart: FC<FunctionChartProps> = ({
       </FunctionChartContainer>
     );
   }
-  const result1 = fn.call([functionChartDefaults.min]);
-  const result2 = fn.call([functionChartDefaults.max]);
+  const result1 = fn.directCall([
+    SqNumberValue.create(functionChartDefaults.min),
+  ]);
+  const result2 = fn.directCall([
+    SqNumberValue.create(functionChartDefaults.max),
+  ]);
   const getValidResult = () => {
     if (result1.ok) {
       return result1;

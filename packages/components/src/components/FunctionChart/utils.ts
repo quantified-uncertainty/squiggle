@@ -4,6 +4,7 @@ import {
   SqNumericFnPlot,
   SqDistFnPlot,
   SqDistribution,
+  SqNumberValue,
 } from "@quri/squiggle-lang";
 
 export const functionChartDefaults = {
@@ -38,7 +39,7 @@ export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot>(
   let errors: { x: number; value: string }[] = [];
 
   for (const x of chartPointsToRender) {
-    const result = plot.fn.call([x]);
+    const result = plot.fn.directCall([SqNumberValue.create(x)]);
     if (result.ok) {
       if (result.value.tag === "Number" && plot.tag === "numericFn") {
         functionImage.push({

@@ -1,8 +1,14 @@
-import { SqError } from "./SqError.js";
-import { SqValue } from "./SqValue.js";
-import { SqValueLocation } from "./SqValueLocation.js";
-import { result } from "../utility/result.js";
+import { defaultEnv } from "../dist/env.js";
+import { stdLib } from "../library/index.js";
+import { createContext } from "../reducer/Context.js";
+import { IError } from "../reducer/IError.js";
+import { evaluate } from "../reducer/index.js";
 import { Lambda } from "../reducer/lambda.js";
+import * as Result from "../utility/result.js";
+import { result } from "../utility/result.js";
+import { SqError } from "./SqError.js";
+import { SqValue, wrapValue } from "./SqValue.js";
+import { SqValueLocation } from "./SqValueLocation.js";
 
 export class SqLambda {
   constructor(
@@ -14,6 +20,21 @@ export class SqLambda {
     return this._value.getParameters();
   }
 
+  directCall(args: SqValue[]): result<SqValue, SqError> {
+    const rawArgs = args.map((arg) => arg._value);
+    try {
+      const value = this._value.call(
+        rawArgs,
+        createContext(stdLib, defaultEnv),
+        evaluate
+      );
+      return Result.Ok(wrapValue(value));
+    } catch (e) {
+      return Result.Error(new SqError(IError.fromException(e)));
+    }
+  }
+
+  // deprecated, prefer `directCall`, it's much faster
   call(args: (number | string)[]): result<SqValue, SqError> {
     if (!this.location) {
       throw new Error("Can't call a location-less Lambda");
