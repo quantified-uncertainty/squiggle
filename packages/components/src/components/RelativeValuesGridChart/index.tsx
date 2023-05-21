@@ -3,7 +3,7 @@ import { clsx } from "clsx";
 import { FC, Fragment, PropsWithChildren, useMemo } from "react";
 
 import { SqRelativeValuesPlot } from "@quri/squiggle-lang";
-import { DistCell } from "./DistCell.js";
+import { RelativeValueCell } from "./RelativeValueCell.js";
 import { SqLambda } from "@quri/squiggle-lang";
 import { SqLambdaValue } from "@quri/squiggle-lang";
 import { SqStringValue } from "@quri/squiggle-lang";
@@ -58,7 +58,7 @@ const Cell: FC<{
 
   return (
     <CellBox>
-      <DistCell item={item} showMedian={true} />
+      <RelativeValueCell item={item} showMedian={true} />
     </CellBox>
   );
 };

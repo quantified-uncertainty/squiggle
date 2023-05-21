@@ -65,7 +65,7 @@ function numberToColor2(
   }
 }
 
-export const DistCell: FC<{
+export const RelativeValueCell: FC<{
   item: RelativeValue;
   uncertaintyPercentiles?: [number, number];
   showRange?: boolean;
