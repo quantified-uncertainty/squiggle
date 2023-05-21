@@ -130,7 +130,7 @@ describe("stacktraces", () => {
     const error = result.value.toStringWithStackTrace();
 
     expect(error)
-      .toBe(`Error: There are function matches for add(), but with different arguments: [add(number, number)]; [add(string, string)]; [add(string, any)]; [add(distribution, number)]; [add(number, distribution)]; [add(distribution, distribution)]; [add(date, duration)]; [add(duration, duration)]
+      .toBe(`Error: There are function matches for add(), but with different arguments: [(number, number)]; [(string, string)]; [(string, any)]; [(distribution, number)]; [(number, distribution)]; [(distribution, distribution)]; [(date, duration)]; [(duration, duration)]
 Stack trace:
   f at line 4, column 5, file main
   g at line 6, column 12, file main

@@ -1,4 +1,4 @@
-import { LocationRange } from "peggy";
+import { parse } from "../ast/parse.js";
 import { expressionFromAst } from "../ast/toExpression.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
@@ -8,12 +8,9 @@ import {
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { Bindings, NamespaceMap } from "../reducer/bindings.js";
 import { SquiggleLambda } from "../reducer/lambda.js";
 import * as Result from "../utility/result.js";
-import { vLambda, vNumber, vPlot, vString } from "../value/index.js";
-import { IError } from "../reducer/IError.js";
-import { parse } from "../ast/parse.js";
+import { vLambda, vPlot } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "RelativeValues",
@@ -34,7 +31,7 @@ export const library = [
     ],
     definitions: [
       // TODO - this is proof-of-concept and needs to be rewritten as `makeSquiggleDefinition` or as an implicitly imported Prelude.squiggle file
-      makeDefinition("wrap", [frLambda], ([fn], context, reducer) => {
+      makeDefinition([frLambda], ([fn], context, reducer) => {
         const astResult = parse(
           `
 {
@@ -88,7 +85,7 @@ export const library = [
   })`,
     ],
     definitions: [
-      makeDefinition("gridPlot", [relativeValuesShape], ([{ ids, fn }]) => {
+      makeDefinition([relativeValuesShape], ([{ ids, fn }]) => {
         return Result.Ok(
           vPlot({
             type: "relativeValues",

@@ -34,7 +34,7 @@ export class Registry {
   ) {}
 
   static make(fns: FRFunction[]) {
-    const dict: FnNameDict = new Map<string, FnDefinition[]>();
+    const dict: FnNameDict = new Map();
     // Three layers of reduce:
     // 1. functions
     // 2. definitions of each function
@@ -42,8 +42,8 @@ export class Registry {
     for (const fn of fns) {
       for (const def of fn.definitions) {
         const names = [
-          ...(fn.nameSpace == "" ? [] : [`${fn.nameSpace}.${def.name}`]),
-          ...(fn.requiresNamespace ? [] : [def.name]),
+          ...(fn.nameSpace == "" ? [] : [`${fn.nameSpace}.${fn.name}`]),
+          ...(fn.requiresNamespace ? [] : [fn.name]),
         ];
 
         for (const name of names) {

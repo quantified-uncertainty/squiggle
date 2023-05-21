@@ -55,32 +55,24 @@ const makeOperationFns = (): FRFunction[] => {
 
   for (const [name, op] of [...algebraicOps, ...pointwiseOps]) {
     fns.push(
-      maker.fromDefinition(
-        makeDefinition(name, [frDist, frNumber], ([dist, n], { environment }) =>
-          toValueResult(
-            op(dist, new SymbolicDist.PointMass(n), { env: environment })
-          )
-        )
-      )
-    );
-    fns.push(
-      maker.fromDefinition(
-        makeDefinition(name, [frNumber, frDist], ([n, dist], { environment }) =>
-          toValueResult(
-            op(new SymbolicDist.PointMass(n), dist, { env: environment })
-          )
-        )
-      )
-    );
-    fns.push(
-      maker.fromDefinition(
-        makeDefinition(
-          name,
-          [frDist, frDist],
-          ([dist1, dist2], { environment }) =>
+      maker.make({
+        name,
+        definitions: [
+          makeDefinition([frDist, frNumber], ([dist, n], { environment }) =>
+            toValueResult(
+              op(dist, new SymbolicDist.PointMass(n), { env: environment })
+            )
+          ),
+          makeDefinition([frNumber, frDist], ([n, dist], { environment }) =>
+            toValueResult(
+              op(new SymbolicDist.PointMass(n), dist, { env: environment })
+            )
+          ),
+          makeDefinition([frDist, frDist], ([dist1, dist2], { environment }) =>
             toValueResult(op(dist1, dist2, { env: environment }))
-        )
-      )
+          ),
+        ],
+      })
     );
   }
 
@@ -112,19 +104,18 @@ export const library: FRFunction[] = [
   maker.d2n({ name: "sample", fn: (d) => d.sample() }),
   maker.d2n({ name: "integralSum", fn: (d) => d.integralSum() }),
   maker.fromDefinition(
-    makeDefinition(
-      "triangular",
-      [frNumber, frNumber, frNumber],
-      ([low, medium, high]) =>
-        Result.fmap2(
-          SymbolicDist.Triangular.make({ low, medium, high }),
-          vDist,
-          (e) => REDistributionError(otherError(e))
-        )
+    "triangular",
+    makeDefinition([frNumber, frNumber, frNumber], ([low, medium, high]) =>
+      Result.fmap2(
+        SymbolicDist.Triangular.make({ low, medium, high }),
+        vDist,
+        (e) => REDistributionError(otherError(e))
+      )
     )
   ),
   maker.fromDefinition(
-    makeDefinition("sampleN", [frDist, frNumber], ([dist, n]) => {
+    "sampleN",
+    makeDefinition([frDist, frNumber], ([dist, n]) => {
       return Ok(vArray(dist.sampleN(n | 0).map(vNumber)));
     })
   ),
@@ -181,8 +172,8 @@ export const library: FRFunction[] = [
       unpackDistResult(dist.truncate(undefined, x, { env })),
   }),
   maker.fromDefinition(
+    "truncate",
     makeDefinition(
-      "truncate",
       [frDist, frNumber, frNumber],
       ([dist, left, right], { environment }) =>
         toValueResult(dist.truncate(left, right, { env: environment }))

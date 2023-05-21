@@ -5,7 +5,6 @@ import { ReducerFn, Value } from "../../value/index.js";
 import { FRType } from "./frTypes.js";
 
 type FnDefinition0 = {
-  name: string;
   inputs: [];
   run: (
     args: [],
@@ -15,7 +14,6 @@ type FnDefinition0 = {
 };
 
 type FnDefinition1<T1> = {
-  name: string;
   inputs: [FRType<T1>];
   run: (
     args: [T1],
@@ -25,7 +23,6 @@ type FnDefinition1<T1> = {
 };
 
 type FnDefinition2<T1, T2> = {
-  name: string;
   inputs: [FRType<T1>, FRType<T2>];
   run: (
     args: [T1, T2],
@@ -35,7 +32,6 @@ type FnDefinition2<T1, T2> = {
 };
 
 type FnDefinition3<T1, T2, T3> = {
-  name: string;
   inputs: [FRType<T1>, FRType<T2>, FRType<T3>];
   run: (
     args: [T1, T2, T3],
@@ -45,7 +41,6 @@ type FnDefinition3<T1, T2, T3> = {
 };
 
 type FnDefinition4<T1, T2, T3, T4> = {
-  name: string;
   inputs: [FRType<T1>, FRType<T2>, FRType<T3>, FRType<T4>];
   run: (
     args: [T1, T2, T3, T4],
@@ -56,7 +51,6 @@ type FnDefinition4<T1, T2, T3, T4> = {
 
 // https://www.typescriptlang.org/docs/handbook/2/functions.html#function-overloads
 export function makeDefinition(
-  name: string,
   inputs: [],
   run: (
     args: [],
@@ -66,7 +60,6 @@ export function makeDefinition(
 ): FnDefinition0;
 
 export function makeDefinition<T1>(
-  name: string,
   inputs: [FRType<T1>],
   run: (
     args: [T1],
@@ -76,7 +69,6 @@ export function makeDefinition<T1>(
 ): FnDefinition1<T1>;
 
 export function makeDefinition<T1, T2>(
-  name: string,
   inputs: [FRType<T1>, FRType<T2>],
   run: (
     args: [T1, T2],
@@ -86,7 +78,6 @@ export function makeDefinition<T1, T2>(
 ): FnDefinition2<T1, T2>;
 
 export function makeDefinition<T1, T2, T3>(
-  name: string,
   inputs: [FRType<T1>, FRType<T2>, FRType<T3>],
   run: (
     args: [T1, T2, T3],
@@ -96,7 +87,6 @@ export function makeDefinition<T1, T2, T3>(
 ): FnDefinition3<T1, T2, T3>;
 
 export function makeDefinition<T1, T2, T3, T4>(
-  name: string,
   inputs: [FRType<T1>, FRType<T2>, FRType<T3>, FRType<T4>],
   run: (
     args: [T1, T2, T3, T4],
@@ -107,7 +97,6 @@ export function makeDefinition<T1, T2, T3, T4>(
 
 // `any` here is fine, this signature won't be visible due to function overloads above
 export function makeDefinition(
-  name: string,
   inputs: any,
   run: (
     args: any,
@@ -115,11 +104,7 @@ export function makeDefinition(
     reducerFn: ReducerFn
   ) => result<Value, ErrorMessage>
 ): FnDefinition {
-  return {
-    name,
-    inputs,
-    run,
-  };
+  return { inputs, run };
 }
 
 export type FnDefinition =
@@ -152,5 +137,5 @@ export const tryCallFnDefinition = (
 
 export const fnDefinitionToString = (fn: FnDefinition): string => {
   const inputs = fn.inputs.map((t) => t.getName()).join(", ");
-  return `${fn.name}(${inputs})`;
+  return `(${inputs})`;
 };
