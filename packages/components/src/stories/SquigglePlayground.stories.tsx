@@ -25,9 +25,14 @@ export const RelativeValues: Story = {
   args: {
     code: undefined as any,
     defaultCode: `ids = ["foo", "bar"]
-fn = {
-  |id1, id2|
-  [SampleSet.fromDist(2 to 5), SampleSet.fromDist(3 to 6)]
+foo = SampleSet.fromDist(2 to 5)
+bar = foo + SampleSet.fromDist(3 to 6) * 0.5
+items = {
+  foo: foo,
+  bar: bar
+}
+fn = { |id1, id2|
+  [items[id1], items[id2]]
 }
 
 RelativeValues.gridPlot({

@@ -8,7 +8,13 @@ function hasInvalid(obj: RelativeValue): boolean {
   return Object.values(obj).some((value) => !Number.isFinite(value));
 }
 
-function numberToTier(rating: number, percentiles: [number, number]) {
+function numberToTier(
+  rating: number,
+  percentiles: [number, number] | undefined
+) {
+  if (!percentiles) {
+    return 1;
+  }
   const increment = (percentiles[1] - percentiles[0]) / 5;
   if (rating < percentiles[0] + increment) {
     return 1;
@@ -23,7 +29,10 @@ function numberToTier(rating: number, percentiles: [number, number]) {
   }
 }
 
-function numberToColor(rating: number, percentiles: [number, number]) {
+function numberToColor(
+  rating: number,
+  percentiles: [number, number] | undefined
+) {
   switch (numberToTier(rating, percentiles)) {
     case 1:
       return "text-gray-900";
@@ -38,7 +47,10 @@ function numberToColor(rating: number, percentiles: [number, number]) {
   }
 }
 
-function numberToColor2(rating: number, percentiles: [number, number]) {
+function numberToColor2(
+  rating: number,
+  percentiles: [number, number] | undefined
+) {
   switch (numberToTier(rating, percentiles)) {
     case 1:
       return "hover:bg-gray-100";
@@ -55,7 +67,7 @@ function numberToColor2(rating: number, percentiles: [number, number]) {
 
 export const DistCell: FC<{
   item: RelativeValue;
-  uncertaintyPercentiles: [number, number];
+  uncertaintyPercentiles?: [number, number];
   showRange?: boolean;
   showMedian?: boolean;
 }> = memo(function DistCell({
@@ -65,17 +77,15 @@ export const DistCell: FC<{
   showMedian,
 }) {
   return hasInvalid(item) ? (
-    <div
-      className={`h-full pt-[1px] min-h-[2em] relative bg-gray-300 bg-opacity-30`}
-    >
+    <div className="h-full pt-[1px] min-h-[2em] relative bg-gray-300 bg-opacity-30">
       <div className="text-center z-0 p-4 text-gray-500">Error</div>
     </div>
   ) : (
     <div
-      className={`h-full pt-[1px] min-h-[2em] relative ${numberToColor2(
-        item.uncertainty,
-        uncertaintyPercentiles
-      )}`}
+      className={clsx(
+        "h-full pt-[1px] min-h-[2em] relative",
+        numberToColor2(item.uncertainty, uncertaintyPercentiles)
+      )}
     >
       <div className="text-center z-0 py-1">
         <div>
