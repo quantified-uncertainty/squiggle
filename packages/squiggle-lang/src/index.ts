@@ -23,6 +23,7 @@ export {
   SqNumericFnPlot,
   SqDistFnPlot,
   SqScatterPlot,
+  SqRelativeValuesPlot,
 } from "./public/SqPlot.js";
 export {
   SqScale,
