@@ -5,12 +5,12 @@ import { cartesianProduct } from "@/lib/utils";
 import { Item } from "@/types";
 import { ModelEvaluator, getParamPercentiles } from "@/values/ModelEvaluator";
 import { RelativeValue } from "@/values/types";
+import { RelativeValueCell } from "@quri/squiggle-components";
 import { useSelectedInterface } from "../../Interface/InterfaceProvider";
 import { DropdownButton } from "../../ui/DropdownButton";
 import { CellBox } from "../CellBox";
 import { Header } from "../Header";
 import { RelativeCell } from "../RelativeCell";
-import { DistCell } from "../RelativeCell/DistCell";
 import { useViewContext, useViewDispatch } from "../ViewProvider";
 import { useFilteredItems, useSortedItems } from "../hooks";
 import { AxisMenu } from "./AxisMenu";
@@ -87,7 +87,7 @@ export const ClusterGridView: FC<{
   const distCell = (rowId: string, columnId: string) => {
     const item = mapOfMapsOfValues.get(rowId)?.get(columnId);
     return item ? (
-      <DistCell
+      <RelativeValueCell
         item={item}
         uncertaintyPercentiles={percentiles}
         showMedian={rowId !== columnId}
@@ -129,7 +129,7 @@ export const ClusterGridView: FC<{
                 }}
                 className="cursor-pointer"
               >
-                {distCell(rowItem.id, columnItem.id)}
+                <CellBox>{distCell(rowItem.id, columnItem.id)}</CellBox>
               </div>
             ))}
           </Fragment>

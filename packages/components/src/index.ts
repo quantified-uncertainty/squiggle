@@ -7,6 +7,8 @@ export { SquigglePlayground } from "./components/SquigglePlayground/index.js";
 export { SquiggleContainer } from "./components/SquiggleContainer.js";
 export { NumberShower } from "./components/NumberShower.js";
 
+export { RelativeValueCell } from "./components/RelativeValuesGridChart/RelativeValueCell.js";
+
 // for use in relative values
 export {
   useCanvas,

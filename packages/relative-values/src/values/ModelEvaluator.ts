@@ -41,14 +41,17 @@ const getPercentile = (sortedList: number[], percentage: number): number => {
 export function getParamPercentiles(
   values: RelativeValue[],
   fn: (value: RelativeValue) => number,
-  percentiles: number[],
+  percentiles: [number, number],
   filter0 = false
-): number[] {
+): [number, number] {
   let list = values.map(fn).sort((a, b) => a - b);
   if (filter0) {
     list = list.filter((v) => v !== 0);
   }
-  return percentiles.map((p) => getPercentile(list, p));
+  return [
+    getPercentile(list, percentiles[0]),
+    getPercentile(list, percentiles[1]),
+  ];
 }
 
 function buildRelativeValue({
@@ -172,9 +175,9 @@ export class ModelEvaluator {
   getParamPercentiles(
     ids: string[],
     fn: (value: RelativeValue) => number,
-    percentiles: number[],
+    percentiles: [number, number],
     filter0 = false
-  ): number[] {
+  ): [number, number] {
     return getParamPercentiles(
       extractOkValues(this.compareAll(ids)),
       fn,

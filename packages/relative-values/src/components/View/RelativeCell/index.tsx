@@ -1,13 +1,14 @@
 import { ModelEvaluator } from "@/values/ModelEvaluator";
+import { RelativeValueCell } from "@quri/squiggle-components";
 import { FC, memo } from "react";
-import { DistCell } from "./DistCell";
 import { ErrorCell } from "./ErrorCell";
+import { CellBox } from "../CellBox";
 
 export const RelativeCell: FC<{
   id1: string;
   id2: string;
   model: ModelEvaluator;
-  uncertaintyPercentiles: number[];
+  uncertaintyPercentiles: [number, number];
   showRange?: boolean;
 }> = memo(function RelativeCell({
   id1,
@@ -23,11 +24,13 @@ export const RelativeCell: FC<{
   }
 
   return (
-    <DistCell
-      item={result.value}
-      uncertaintyPercentiles={uncertaintyPercentiles}
-      showRange={showRange}
-      showMedian={true}
-    />
+    <CellBox>
+      <RelativeValueCell
+        item={result.value}
+        uncertaintyPercentiles={uncertaintyPercentiles}
+        showRange={showRange}
+        showMedian={true}
+      />
+    </CellBox>
   );
 });
