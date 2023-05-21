@@ -1,4 +1,9 @@
-import { SqLambda, SqNumberValue, SqValue } from "../src/index.js";
+import {
+  SqLambda,
+  SqNumberValue,
+  SqValue,
+  defaultEnvironment,
+} from "../src/index.js";
 import { SqSymbolicDistribution } from "../src/public/SqDistribution.js";
 import { testRun } from "./helpers/helpers.js";
 
@@ -19,10 +24,10 @@ describe("SqValue", () => {
 describe("SqLambda", () => {
   test("createFromStdlibName", () => {
     const lambda = SqLambda.createFromStdlibName("List.upTo");
-    const result = lambda.directCall([
-      SqNumberValue.create(1),
-      SqNumberValue.create(5),
-    ]);
+    const result = lambda.directCall(
+      [SqNumberValue.create(1), SqNumberValue.create(5)],
+      defaultEnvironment
+    );
 
     expect(result.ok).toBe(true);
     expect(result.value.toString()).toBe("[1,2,3,4,5]");

@@ -1,6 +1,11 @@
 import { Env } from "./dist/env.js";
 import { SqProject } from "./public/SqProject/index.js";
-import { SqValue, SqStringValue, SqNumberValue } from "./public/SqValue.js"; // TODO - reexport other values too
+import {
+  SqValue,
+  SqStringValue,
+  SqNumberValue,
+  SqLambdaValue,
+} from "./public/SqValue.js"; // TODO - reexport other values too
 
 export { SqValueLocation } from "./public/SqValueLocation.js";
 export { result, fmap as resultMap } from "./utility/result.js";
@@ -35,7 +40,7 @@ export {
 export { SqParseError, parse } from "./public/parse.js";
 
 export { defaultEnv as defaultEnvironment } from "./dist/env.js";
-export { SqProject, SqValue, SqStringValue, SqNumberValue };
+export { SqProject, SqValue, SqStringValue, SqNumberValue, SqLambdaValue };
 export { Env };
 export { LocationRange as SqLocation } from "peggy";
 

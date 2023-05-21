@@ -1,4 +1,4 @@
-import { defaultEnv } from "../dist/env.js";
+import { Env, defaultEnv } from "../dist/env.js";
 import { stdLib } from "../library/index.js";
 import { registry } from "../library/registry/index.js";
 import { createContext } from "../reducer/Context.js";
@@ -25,12 +25,12 @@ export class SqLambda {
     return this._value.getParameters();
   }
 
-  directCall(args: SqValue[]): result<SqValue, SqError> {
+  directCall(args: SqValue[], env: Env): result<SqValue, SqError> {
     const rawArgs = args.map((arg) => arg._value);
     try {
       const value = this._value.call(
         rawArgs,
-        createContext(stdLib, defaultEnv),
+        createContext(stdLib, env),
         evaluate
       );
       return Result.Ok(wrapValue(value));
