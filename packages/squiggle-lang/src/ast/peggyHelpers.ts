@@ -46,6 +46,7 @@ type NodeBlock = N<
 type NodeProgram = N<
   "Program",
   {
+    imports: [NodeString, NodeIdentifier][];
     statements: AnyPeggyNode[]; // should be NodeStatement[] ?
   }
 >;
@@ -244,10 +245,11 @@ export function nodeBlock(
   return { type: "Block", statements, location };
 }
 export function nodeProgram(
+  imports: [NodeString, NodeIdentifier][],
   statements: AnyPeggyNode[],
   location: LocationRange
 ): NodeProgram {
-  return { type: "Program", statements, location };
+  return { type: "Program", imports, statements, location };
 }
 export function nodeBoolean(
   value: boolean,

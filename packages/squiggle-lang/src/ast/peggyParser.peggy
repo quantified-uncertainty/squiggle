@@ -10,16 +10,24 @@ start
 zeroOMoreArgumentsBlockOrExpression = lambda / innerBlockOrExpression
 
 outerBlock
-  = statements:statementsList
+  = imports:importStatementsList
+    statements:statementsList
     finalExpression:(statementSeparator @expression)?
     {
       if (finalExpression) {
         statements.push(finalExpression);
       }
-      return h.nodeProgram(statements, location());
+      return h.nodeProgram(imports, statements, location());
     }
-  / finalExpression:expression
-    { return h.nodeProgram([finalExpression], location()); }
+  / imports:importStatementsList
+    finalExpression:expression
+    { return h.nodeProgram(imports, [finalExpression], location()); }
+
+importStatementsList = (@importStatement __nl)*
+
+importStatement
+  = _nl 'import' __ file:string variable:(__ 'as' __ @identifier)
+  { return [file, variable]; }
 
 innerBlockOrExpression
   = quotedInnerBlock
@@ -339,16 +347,15 @@ __ 'whitespace'
   = whiteSpaceCharactersOrComment+
 
 __nl 'whitespace'
-  = (whiteSpaceCharactersOrComment / commentOrNewLine )+
+  = (whiteSpaceCharactersOrComment / commentOrNewLine)+
 
 statementSeparator ';'
-  = _ (';'/ commentOrNewLine)+ _nl
+  = _ (';' / commentOrNewLine)+ _nl
 
 commaSeparator ',' = _ ',' _nl
 
 commentOrNewLine = finalComment? newLine
-  newLine "newline"
-    = [\n\r]
+  newLine "newline" = [\n\r]
 
 finalComment "line comment"
   = _ ('//'/'#') comment:($([^\r\n]*)) { options.comments.push(h.lineComment(comment, location())); }

@@ -21,6 +21,8 @@ export function squiggleLanguageSupport(project: SqProject) {
             if: t.keyword,
             then: t.keyword,
             else: t.keyword,
+            import: t.keyword,
+            as: t.keyword,
 
             Equals: t.definitionOperator,
 

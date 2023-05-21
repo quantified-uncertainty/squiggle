@@ -43,7 +43,7 @@ export function makeProgram() {
       "-b, --show-bindings",
       "show bindings even if the result is present"
     ) // incompatible with --quiet
-    .action((filename, options) => {
+    .action(async (filename, options) => {
       let output: OutputMode = "RESULT_OR_BINDINGS";
       if (options.quiet && options.showBindings) {
         program.error(
@@ -59,7 +59,7 @@ export function makeProgram() {
 
       const sampleCount = process.env.SAMPLE_COUNT;
 
-      run({ src, filename, output, measure: options.time, sampleCount });
+      await run({ src, filename, output, measure: options.time, sampleCount });
     });
 
   program
