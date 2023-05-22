@@ -29,10 +29,10 @@ export const ViewSquiggleSnippetContent: FC<{
                 <h1 className="text-2xl font-medium" {...props} />
               ),
               h2: ({ node, ...props }) => (
-                <h1 className="text-xl font-bold" {...props} />
+                <h2 className="text-xl font-bold" {...props} />
               ),
               h3: ({ node, ...props }) => (
-                <h1 className="font-bold" {...props} />
+                <h3 className="font-bold" {...props} />
               ),
             }}
           >
