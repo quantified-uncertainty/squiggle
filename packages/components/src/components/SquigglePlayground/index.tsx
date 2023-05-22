@@ -7,6 +7,7 @@ import {
 } from "@heroicons/react/solid/esm/index.js";
 import { yupResolver } from "@hookform/resolvers/yup";
 import React, {
+  ReactNode,
   useCallback,
   useEffect,
   useMemo,
@@ -35,7 +36,6 @@ import { SqProject } from "@quri/squiggle-lang";
 import { ImportSettingsForm } from "./ImportSettingsForm.js";
 import { RunControls } from "./RunControls/index.js";
 import { useRunnerState } from "./RunControls/useRunnerState.js";
-import { ShareButton } from "./ShareButton.js";
 import {
   EnvironmentSettingsForm,
   playgroundSettingsSchema,
@@ -60,7 +60,8 @@ type PlaygroundProps = // Playground can be either controlled (`code`) or uncont
       onSettingsChange?(settings: any): void;
       /** Should we show the editor? */
       showEditor?: boolean;
-      /** Useful for playground on squiggle website, where we update the anchor link based on current code and settings */
+      /** Allows to inject extra buttons, e.g. share button on the website, or save button in Squiggle Hub */
+      renderExtraControls?: () => ReactNode;
       showShareButton?: boolean;
       /** Height of the editor */
       height?: number;
@@ -80,7 +81,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     code: controlledCode,
     onCodeChange,
     onSettingsChange,
-    showShareButton = false,
+    renderExtraControls,
     height = 500,
     showEditor = true,
   } = props;
@@ -244,7 +245,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
                     <Button onClick={editorRef.current?.format}>Format</Button>
                   </div>
                 </TextTooltip>
-                {showShareButton && <ShareButton />}
+                {renderExtraControls?.()}
               </div>
             </div>
             {showEditor ? withEditor : withoutEditor}
