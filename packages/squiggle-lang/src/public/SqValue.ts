@@ -1,5 +1,5 @@
 import { result } from "../utility/result.js";
-import { Value } from "../value/index.js";
+import { Value, vLambda, vNumber, vString } from "../value/index.js";
 import { SqArray } from "./SqArray.js";
 import { SqDistribution, wrapDistribution } from "./SqDistribution.js";
 import { SqError } from "./SqError.js";
@@ -52,7 +52,7 @@ export abstract class SqAbstractValue<T extends string, J> {
   abstract tag: T;
 
   constructor(
-    protected _value: Extract<Value, { type: T }>,
+    public _value: Extract<Value, { type: T }>,
     public location?: SqValueLocation
   ) {}
 
@@ -132,6 +132,10 @@ export class SqDistributionValue extends SqAbstractValue<
 export class SqLambdaValue extends SqAbstractValue<"Lambda", SqLambda> {
   tag = "Lambda" as const;
 
+  static create(value: SqLambda) {
+    return new SqLambdaValue(vLambda(value._value));
+  }
+
   get value() {
     return new SqLambda(this._value.value, this.location);
   }
@@ -143,6 +147,10 @@ export class SqLambdaValue extends SqAbstractValue<"Lambda", SqLambda> {
 
 export class SqNumberValue extends SqAbstractValue<"Number", number> {
   tag = "Number" as const;
+
+  static create(value: number) {
+    return new SqNumberValue(vNumber(value));
+  }
 
   get value(): number {
     return this._value.value;
@@ -170,6 +178,10 @@ export class SqRecordValue extends SqAbstractValue<
 
 export class SqStringValue extends SqAbstractValue<"String", string> {
   tag = "String" as const;
+
+  static create(value: string) {
+    return new SqStringValue(vString(value));
+  }
 
   get value(): string {
     return this._value.value;

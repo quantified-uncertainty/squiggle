@@ -1,8 +1,7 @@
-import { ClusterIcon } from "@/components/common/ClusterIcon";
 import { useSelectedInterface } from "@/components/Interface/InterfaceProvider";
+import { ClusterIcon } from "@/components/common/ClusterIcon";
 import { Item } from "@/types";
 import { FC } from "react";
-import { CellBox } from "./CellBox";
 
 export const Header: FC<{
   item: Item;

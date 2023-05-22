@@ -214,13 +214,6 @@ export type Plot =
       showSummary: boolean;
     }
   | {
-      type: "scatter";
-      xDist: BaseDist;
-      yDist: BaseDist;
-      xScale: Scale;
-      yScale: Scale;
-    }
-  | {
       type: "numericFn";
       fn: Lambda;
       xScale: Scale;
@@ -233,6 +226,18 @@ export type Plot =
       xScale: Scale;
       distXScale: Scale;
       points?: number;
+    }
+  | {
+      type: "scatter";
+      xDist: BaseDist;
+      yDist: BaseDist;
+      xScale: Scale;
+      yScale: Scale;
+    }
+  | {
+      type: "relativeValues";
+      fn: Lambda;
+      ids: string[];
     };
 
 class VPlot implements Indexable {
@@ -251,6 +256,8 @@ class VPlot implements Indexable {
         return `Plot for dist function ${this.value.fn}`;
       case "scatter":
         return `Scatter plot for distributions ${this.value.xDist} and ${this.value.yDist}`;
+      case "relativeValues":
+        return `Plot for relative values ${this.value.ids.join(", ")}`;
     }
   }
 
@@ -258,7 +265,9 @@ class VPlot implements Indexable {
     if (
       key.type === "String" &&
       key.value === "fn" &&
-      (this.value.type === "numericFn" || this.value.type === "distFn")
+      (this.value.type === "numericFn" ||
+        this.value.type === "distFn" ||
+        this.value.type === "relativeValues")
     ) {
       return vLambda(this.value.fn);
     }

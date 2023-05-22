@@ -4,8 +4,7 @@ import { result } from "../../utility/result.js";
 import { ReducerFn, Value } from "../../value/index.js";
 import { FRType } from "./frTypes.js";
 
-type FnDefinition0 = {
-  name: string;
+export type FnDefinition0 = {
   inputs: [];
   run: (
     args: [],
@@ -14,8 +13,7 @@ type FnDefinition0 = {
   ) => result<Value, ErrorMessage>;
 };
 
-type FnDefinition1<T1> = {
-  name: string;
+export type FnDefinition1<T1> = {
   inputs: [FRType<T1>];
   run: (
     args: [T1],
@@ -24,8 +22,7 @@ type FnDefinition1<T1> = {
   ) => result<Value, ErrorMessage>;
 };
 
-type FnDefinition2<T1, T2> = {
-  name: string;
+export type FnDefinition2<T1, T2> = {
   inputs: [FRType<T1>, FRType<T2>];
   run: (
     args: [T1, T2],
@@ -34,8 +31,7 @@ type FnDefinition2<T1, T2> = {
   ) => result<Value, ErrorMessage>;
 };
 
-type FnDefinition3<T1, T2, T3> = {
-  name: string;
+export type FnDefinition3<T1, T2, T3> = {
   inputs: [FRType<T1>, FRType<T2>, FRType<T3>];
   run: (
     args: [T1, T2, T3],
@@ -44,8 +40,7 @@ type FnDefinition3<T1, T2, T3> = {
   ) => result<Value, ErrorMessage>;
 };
 
-type FnDefinition4<T1, T2, T3, T4> = {
-  name: string;
+export type FnDefinition4<T1, T2, T3, T4> = {
   inputs: [FRType<T1>, FRType<T2>, FRType<T3>, FRType<T4>];
   run: (
     args: [T1, T2, T3, T4],
@@ -56,7 +51,6 @@ type FnDefinition4<T1, T2, T3, T4> = {
 
 // https://www.typescriptlang.org/docs/handbook/2/functions.html#function-overloads
 export function makeDefinition(
-  name: string,
   inputs: [],
   run: (
     args: [],
@@ -66,7 +60,6 @@ export function makeDefinition(
 ): FnDefinition0;
 
 export function makeDefinition<T1>(
-  name: string,
   inputs: [FRType<T1>],
   run: (
     args: [T1],
@@ -76,7 +69,6 @@ export function makeDefinition<T1>(
 ): FnDefinition1<T1>;
 
 export function makeDefinition<T1, T2>(
-  name: string,
   inputs: [FRType<T1>, FRType<T2>],
   run: (
     args: [T1, T2],
@@ -86,7 +78,6 @@ export function makeDefinition<T1, T2>(
 ): FnDefinition2<T1, T2>;
 
 export function makeDefinition<T1, T2, T3>(
-  name: string,
   inputs: [FRType<T1>, FRType<T2>, FRType<T3>],
   run: (
     args: [T1, T2, T3],
@@ -96,7 +87,6 @@ export function makeDefinition<T1, T2, T3>(
 ): FnDefinition3<T1, T2, T3>;
 
 export function makeDefinition<T1, T2, T3, T4>(
-  name: string,
   inputs: [FRType<T1>, FRType<T2>, FRType<T3>, FRType<T4>],
   run: (
     args: [T1, T2, T3, T4],
@@ -107,7 +97,6 @@ export function makeDefinition<T1, T2, T3, T4>(
 
 // `any` here is fine, this signature won't be visible due to function overloads above
 export function makeDefinition(
-  name: string,
   inputs: any,
   run: (
     args: any,
@@ -115,11 +104,7 @@ export function makeDefinition(
     reducerFn: ReducerFn
   ) => result<Value, ErrorMessage>
 ): FnDefinition {
-  return {
-    name,
-    inputs,
-    run,
-  };
+  return { inputs, run };
 }
 
 export type FnDefinition =
@@ -129,12 +114,12 @@ export type FnDefinition =
   | FnDefinition3<any, any, any>
   | FnDefinition4<any, any, any, any>;
 
-export const tryCallFnDefinition = (
+export function tryCallFnDefinition(
   fn: FnDefinition,
   args: Value[],
   context: ReducerContext,
   reducerFn: ReducerFn
-): result<Value, ErrorMessage> | undefined => {
+): result<Value, ErrorMessage> | undefined {
   if (args.length !== fn.inputs.length) {
     return; // args length mismatch
   }
@@ -148,9 +133,9 @@ export const tryCallFnDefinition = (
     unpackedArgs.push(unpackedArg);
   }
   return fn.run(unpackedArgs as any, context, reducerFn);
-};
+}
 
-export const fnDefinitionToString = (fn: FnDefinition): string => {
+export function fnDefinitionToString(fn: FnDefinition): string {
   const inputs = fn.inputs.map((t) => t.getName()).join(", ");
-  return `${fn.name}(${inputs})`;
-};
+  return `(${inputs})`;
+}

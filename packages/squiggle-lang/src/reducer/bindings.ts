@@ -61,4 +61,13 @@ export class Bindings {
   locals(): Namespace {
     return this.namespace;
   }
+
+  root(): Bindings {
+    // Looks for uppermost bindings, which will contain stdlib.
+    // This is useful for makeSquiggleDefinition() impelemntation.
+    if (this.parent) {
+      return this.parent.root();
+    }
+    return this;
+  }
 }

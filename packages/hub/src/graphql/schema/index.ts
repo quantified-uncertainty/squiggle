@@ -14,6 +14,7 @@ import "./mutations/createSquiggleSnippetModel";
 import "./mutations/deleteDefinition";
 import "./mutations/deleteModel";
 import "./mutations/setUsername";
+import "./mutations/updateModelSlug";
 import "./mutations/updateSquiggleSnippetModel";
 
 export const schema = builder.toSchema();

@@ -55,7 +55,7 @@ export const library = [
     examples: [`PointSet.fromDist(normal(5,2))`],
     output: "Dist",
     definitions: [
-      makeDefinition("fromDist", [frDist], ([dist], context) =>
+      makeDefinition([frDist], ([dist], context) =>
         repackDistResult(dist.toPointSetDist(context.environment))
       ),
     ],
@@ -65,7 +65,7 @@ export const library = [
     examples: [`PointSet.downsample(PointSet.fromDist(normal(5,2)), 50)`],
     output: "Dist",
     definitions: [
-      makeDefinition("downsample", [frDist, frNumber], ([dist, number]) => {
+      makeDefinition([frDist, frNumber], ([dist, number]) => {
         pointSetAssert(dist);
         return Ok(vDist(dist.downsample(number)));
       }),
@@ -76,21 +76,17 @@ export const library = [
     examples: [`PointSet.mapY(mx(normal(5,2)), {|x| x + 1})`],
     output: "Dist",
     definitions: [
-      makeDefinition(
-        "mapY",
-        [frDist, frLambda],
-        ([dist, lambda], context, reducer) => {
-          pointSetAssert(dist);
-          return repackDistResult(
-            dist.mapYResult(
-              (y) =>
-                Ok(doNumberLambdaCall(lambda, [vNumber(y)], context, reducer)),
-              undefined,
-              undefined
-            )
-          );
-        }
-      ),
+      makeDefinition([frDist, frLambda], ([dist, lambda], context, reducer) => {
+        pointSetAssert(dist);
+        return repackDistResult(
+          dist.mapYResult(
+            (y) =>
+              Ok(doNumberLambdaCall(lambda, [vNumber(y)], context, reducer)),
+            undefined,
+            undefined
+          )
+        );
+      }),
     ],
   }),
   maker.make({
@@ -106,7 +102,6 @@ export const library = [
     output: "Dist",
     definitions: [
       makeDefinition(
-        "makeContinuous",
         [frArray(frRecord(["x", frNumber], ["y", frNumber]))],
         ([arr]) => {
           return Ok(
@@ -133,7 +128,6 @@ export const library = [
     output: "Dist",
     definitions: [
       makeDefinition(
-        "makeDiscrete",
         [frArray(frRecord(["x", frNumber], ["y", frNumber]))],
         ([arr]) => {
           return Ok(

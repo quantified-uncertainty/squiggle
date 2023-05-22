@@ -99,6 +99,7 @@ type Mutation {
   deleteDefinition(input: MutationDeleteDefinitionInput!): MutationDeleteDefinitionResult!
   deleteModel(input: MutationDeleteModelInput!): MutationDeleteModelResult!
   setUsername(username: String!): MutationSetUsernameResult!
+  updateModelSlug(input: MutationUpdateModelSlugInput!): MutationUpdateModelSlugResult!
   updateSquiggleSnippetModel(input: MutationUpdateSquiggleSnippetModelInput!): MutationUpdateSquiggleSnippetModelResult!
 }
 
@@ -133,6 +134,14 @@ input MutationDeleteModelInput {
 union MutationDeleteModelResult = BaseError | DeleteModelResult
 
 union MutationSetUsernameResult = BaseError | Me
+
+input MutationUpdateModelSlugInput {
+  newSlug: String!
+  oldSlug: String!
+  username: String!
+}
+
+union MutationUpdateModelSlugResult = BaseError | UpdateModelSlugResult
 
 input MutationUpdateSquiggleSnippetModelInput {
   code: String!
@@ -221,6 +230,10 @@ type SquiggleSnippet implements Node {
   code: String!
   dbId: ID!
   id: ID!
+}
+
+type UpdateModelSlugResult {
+  model: Model!
 }
 
 type UpdateSquiggleSnippetResult {
