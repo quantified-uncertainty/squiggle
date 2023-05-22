@@ -5,6 +5,9 @@ import { EntityInfo } from "@/components/EntityInfo";
 import { WithTopMenu } from "@/components/layout/WithTopMenu";
 import { StyledTabLink } from "@/components/ui/StyledTabLink";
 import { definitionRoute } from "@/routes";
+import { Dropdown, DropdownMenu } from "@quri/ui";
+import { DropdownButton } from "@/components/ui/DropdownButton";
+import { DeleteDefinitionAction } from "./DeleteDefinitionAction";
 
 export const DefinitionPageFragment = graphql`
   fragment DefinitionPage on Definition {
@@ -49,6 +52,17 @@ export const DefinitionPage: FC<Props> = ({ username, slug, children }) => {
             href={modelRevisionsRoute({ username, slug })}
           /> */}
         </StyledTabLink.List>
+        <DropdownButton>
+          {({ close }) => (
+            <DropdownMenu>
+              <DeleteDefinitionAction
+                username={username}
+                slug={slug}
+                close={close}
+              />
+            </DropdownMenu>
+          )}
+        </DropdownButton>
       </div>
       <div>{children}</div>
     </WithTopMenu>

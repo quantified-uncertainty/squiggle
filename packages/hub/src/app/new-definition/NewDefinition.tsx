@@ -3,7 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 
@@ -37,7 +37,17 @@ export const NewDefinition: FC = () => {
   const { register, handleSubmit, control } = useForm<{
     slug: string;
     title: string;
+    items: { id: string }[];
   }>();
+
+  const {
+    fields: itemFields,
+    append: appendItem,
+    remove: removeItem,
+  } = useFieldArray({
+    name: "items",
+    control,
+  });
 
   const router = useRouter();
 
@@ -50,6 +60,7 @@ export const NewDefinition: FC = () => {
         input: {
           slug: data.slug,
           title: data.title,
+          items: data.items,
         },
       },
       onCompleted(data) {
@@ -68,10 +79,23 @@ export const NewDefinition: FC = () => {
   return (
     <form onSubmit={save}>
       <div className="max-w-2xl mx-auto">
-        <div className="font-bold text-xl mb-4">New definition</div>
+        <div className="font-bold text-xl mb-4">
+          New Relative Values definition
+        </div>
         <div className="space-y-2">
           <TextInput register={register} name="slug" label="Slug" />
           <TextInput register={register} name="title" label="Title" />
+          <header>Items</header>
+          <div className="space-y-2">
+            <div className="space-y-2">
+              {itemFields.map((item, i) => (
+                <div key={i}>
+                  <TextInput register={register} name={`items.${i}.id`} />
+                </div>
+              ))}
+            </div>
+            <Button onClick={() => appendItem({ id: "" })}>Add item</Button>
+          </div>
           <Button onClick={save} disabled={isSaveInFlight} theme="primary">
             Save
           </Button>

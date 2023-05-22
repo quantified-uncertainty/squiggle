@@ -8,6 +8,7 @@ import { WithTopMenu } from "@/components/layout/WithTopMenu";
 import { StyledTabLink } from "@/components/ui/StyledTabLink";
 import { modelEditRoute, modelRevisionsRoute, modelRoute } from "@/routes";
 import { DeleteModelAction } from "./DeleteModelAction";
+import { DropdownButton } from "@/components/ui/DropdownButton";
 
 export const ModelPageFragment = graphql`
   fragment ModelPage on Model {
@@ -49,8 +50,8 @@ export const ModelPage: FC<Props> = ({ username, slug, children }) => {
             href={modelRevisionsRoute({ username, slug })}
           />
         </StyledTabLink.List>
-        <Dropdown
-          render={({ close }) => (
+        <DropdownButton>
+          {({ close }) => (
             <DropdownMenu>
               <DeleteModelAction
                 username={username}
@@ -59,12 +60,7 @@ export const ModelPage: FC<Props> = ({ username, slug, children }) => {
               />
             </DropdownMenu>
           )}
-          tailwindSelector="squiggle-hub"
-        >
-          <Button>
-            <DotsHorizontalIcon className="text-slate-500" />
-          </Button>
-        </Dropdown>
+        </DropdownButton>
       </div>
       {children}
     </WithTopMenu>

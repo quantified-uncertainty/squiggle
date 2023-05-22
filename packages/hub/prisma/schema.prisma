@@ -148,7 +148,7 @@ model DefinitionRevision {
 
   createdAt DateTime @default(now())
 
-  definition   Definition @relation(fields: [definitionId], references: [id])
+  definition   Definition @relation(fields: [definitionId], references: [id], onDelete: Cascade)
   definitionId String
 
   contentType DefinitionType

@@ -35,6 +35,10 @@ type DefinitionRevision implements Node {
   id: ID!
 }
 
+type DeleteDefinitionResult {
+  ok: Boolean!
+}
+
 type DeleteModelResult {
   ok: Boolean!
 }
@@ -92,12 +96,14 @@ type ModelRevisionEdge {
 type Mutation {
   createRelativeValuesDefinition(input: MutationCreateRelativeValuesDefinitionInput!): MutationCreateRelativeValuesDefinitionResult!
   createSquiggleSnippetModel(input: MutationCreateSquiggleSnippetModelInput!): MutationCreateSquiggleSnippetModelResult!
+  deleteDefinition(input: MutationDeleteDefinitionInput!): MutationDeleteDefinitionResult!
   deleteModel(input: MutationDeleteModelInput!): MutationDeleteModelResult!
   setUsername(username: String!): MutationSetUsernameResult!
   updateSquiggleSnippetModel(input: MutationUpdateSquiggleSnippetModelInput!): MutationUpdateSquiggleSnippetModelResult!
 }
 
 input MutationCreateRelativeValuesDefinitionInput {
+  items: [RelativeValuesItemInput!]!
   slug: String!
   title: String!
 }
@@ -111,6 +117,13 @@ input MutationCreateSquiggleSnippetModelInput {
 }
 
 union MutationCreateSquiggleSnippetModelResult = BaseError | CreateSquiggleSnippetResult
+
+input MutationDeleteDefinitionInput {
+  slug: String!
+  username: String!
+}
+
+union MutationDeleteDefinitionResult = BaseError | DeleteDefinitionResult
 
 input MutationDeleteModelInput {
   slug: String!
@@ -182,6 +195,10 @@ type RelativeValuesDefinition implements Node {
 }
 
 type RelativeValuesItem {
+  id: String!
+}
+
+input RelativeValuesItemInput {
   id: String!
 }
 

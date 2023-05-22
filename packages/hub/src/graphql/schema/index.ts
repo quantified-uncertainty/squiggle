@@ -9,10 +9,11 @@ import "./queries/runSquiggle";
 import "./queries/userByUsername";
 import "./queries/users";
 
+import "./mutations/createRelativeValuesDefinition";
 import "./mutations/createSquiggleSnippetModel";
+import "./mutations/deleteDefinition";
 import "./mutations/deleteModel";
 import "./mutations/setUsername";
 import "./mutations/updateSquiggleSnippetModel";
-import "./mutations/createRelativeValuesDefinition";
 
 export const schema = builder.toSchema();
