@@ -8,6 +8,7 @@ import { WithTopMenu } from "@/components/layout/WithTopMenu";
 import { StyledTabLink } from "@/components/ui/StyledTabLink";
 import { modelEditRoute, modelRevisionsRoute, modelRoute } from "@/routes";
 import { DeleteModelAction } from "./DeleteModelAction";
+import { UpdateModelSlugAction } from "./UpdateModelSlugAction";
 
 export const ModelPageFragment = graphql`
   fragment ModelPage on Model {
@@ -52,6 +53,11 @@ export const ModelPage: FC<Props> = ({ username, slug, children }) => {
         <Dropdown
           render={({ close }) => (
             <DropdownMenu>
+              <UpdateModelSlugAction
+                username={username}
+                slug={slug}
+                close={close}
+              />
               <DeleteModelAction
                 username={username}
                 slug={slug}

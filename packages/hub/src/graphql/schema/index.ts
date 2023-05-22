@@ -9,6 +9,7 @@ import "./queries/users";
 
 import "./mutations/createSquiggleSnippetModel";
 import "./mutations/updateSquiggleSnippetModel";
+import "./mutations/updateModelSlug";
 import "./mutations/setUsername";
 import "./mutations/deleteModel";
 
