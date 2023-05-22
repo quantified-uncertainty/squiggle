@@ -87,9 +87,9 @@ export class Registry {
     const showNameMatchDefinitions = () => {
       const defsString = definitions
         .map(fnDefinitionToString)
-        .map((r) => `[${r}]`)
-        .join("; ");
-      return `There are function matches for ${fnName}(), but with different arguments: ${defsString}`;
+        .map((def) => `  ${fnName}${def}\n`)
+        .join("");
+      return `There are function matches for ${fnName}(), but with different arguments:\n${defsString}`;
     };
 
     for (const definition of definitions) {
