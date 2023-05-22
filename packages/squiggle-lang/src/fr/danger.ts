@@ -58,7 +58,7 @@ const combinatoricsLibrary: FRFunction[] = [
     output: "Number",
     examples: [`Danger.binomial(1, 20, 0.5)`],
     definitions: [
-      makeDefinition("binomial", [frNumber, frNumber, frNumber], ([n, k, p]) =>
+      makeDefinition([frNumber, frNumber, frNumber], ([n, k, p]) =>
         Ok(vNumber(choose(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k)))
       ),
     ],
@@ -153,7 +153,6 @@ const integrationLibrary: FRFunction[] = [
     // https://www.wolframalpha.com/input?i=integrate+x%2B1+from+1+to+10
     definitions: [
       makeDefinition(
-        "integrateFunctionBetweenWithNumIntegrationPoints",
         [frLambda, frNumber, frNumber, frNumber],
         ([lambda, min, max, numIntegrationPoints], context, reducer) => {
           if (numIntegrationPoints === 0) {
@@ -188,7 +187,6 @@ const integrationLibrary: FRFunction[] = [
     ],
     definitions: [
       makeDefinition(
-        "integrateFunctionBetweenWithEpsilon",
         [frLambda, frNumber, frNumber, frNumber],
         ([lambda, min, max, epsilon], context, reducer) => {
           if (epsilon === 0) {
@@ -231,7 +229,6 @@ const diminishingReturnsLibrary = [
     ],
     definitions: [
       makeDefinition(
-        "optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions",
         [frArray(frLambda), frNumber, frNumber],
         ([lambdas, funds, approximateIncrement], context, reducer) => {
           // TODO: This is so complicated, it probably should be its own file. It might also make sense to have it work in Rescript directly, taking in a function rather than a reducer; then something else can wrap that function in the reducer/lambdas/context.
@@ -367,20 +364,22 @@ const mapYLibrary: FRFunction[] = [
     name: "mapYLog",
     fn: (dist, x, env) => unpackDistResult(scaleLog(dist, x, { env })),
   }),
-  maker.fromDefinition(
-    makeDefinition(
-      "mapYLogWithThreshold",
-      [frDist, frNumber, frNumber],
-      ([dist, base, eps], { environment }) =>
-        toValueResult(
-          scaleLogWithThreshold(dist, {
-            env: environment,
-            eps,
-            base,
-          })
-        )
-    )
-  ),
+  maker.make({
+    name: "mapYLogWithThreshold",
+    definitions: [
+      makeDefinition(
+        [frDist, frNumber, frNumber],
+        ([dist, base, eps], { environment }) =>
+          toValueResult(
+            scaleLogWithThreshold(dist, {
+              env: environment,
+              eps,
+              base,
+            })
+          )
+      ),
+    ],
+  }),
   maker.dn2d({
     name: "mapYMultiply",
     fn: (dist, f, env) => unpackDistResult(scaleMultiply(dist, f, { env })),
