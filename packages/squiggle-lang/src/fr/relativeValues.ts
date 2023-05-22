@@ -41,7 +41,6 @@ export const library = [
     log10(p95 / p5)
   }
 
-  zzz = inspect("hello", hello)
   dists = fn(x,y)
   dist1 = dists[0] -> SampleSet.fromDist
   dist2 = dists[1] -> SampleSet.fromDist

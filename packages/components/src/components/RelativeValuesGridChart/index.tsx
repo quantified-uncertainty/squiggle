@@ -18,7 +18,7 @@ const rvSchema = z.object({
   uncertainty: z.number(),
 });
 
-export const CellBox: FC<PropsWithChildren<{ header?: boolean }>> = ({
+const CellBox: FC<PropsWithChildren<{ header?: boolean }>> = ({
   children,
   header,
 }) => (
@@ -31,6 +31,14 @@ export const CellBox: FC<PropsWithChildren<{ header?: boolean }>> = ({
     {children}
   </div>
 );
+
+const ErrorCell: FC = () => {
+  return (
+    <CellBox>
+      <div className="p-2">Error</div>
+    </CellBox>
+  );
+};
 
 const Header: FC<{ text: string }> = ({ text }) => (
   <div className="p-2 text-xs break-all">{text}</div>
@@ -47,12 +55,14 @@ const Cell: FC<{
     environment
   );
 
+  console.log(itemResult);
+
   if (!itemResult.ok) {
-    return <CellBox>Error</CellBox>;
+    return <ErrorCell />;
   }
   const jsItem = itemResult.value.asJS();
   if (!(jsItem instanceof Map)) {
-    return <CellBox>Error</CellBox>;
+    return <ErrorCell />;
   }
   const item = rvSchema.parse(Object.fromEntries(jsItem.entries()));
 
