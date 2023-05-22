@@ -8,6 +8,8 @@ import { WithTopMenu } from "@/components/layout/WithTopMenu";
 import { StyledTabLink } from "@/components/ui/StyledTabLink";
 import { modelEditRoute, modelRevisionsRoute, modelRoute } from "@/routes";
 import { DeleteModelAction } from "./DeleteModelAction";
+import { UpdateModelSlugAction } from "./UpdateModelSlugAction";
+import { useSession } from "next-auth/react";
 
 export const ModelPageFragment = graphql`
   fragment ModelPage on Model {
@@ -28,12 +30,38 @@ export const ModelPageQuery = graphql`
   }
 `;
 
-type Props = PropsWithChildren<{
+type CommonProps = {
   username: string;
   slug: string;
-}>;
+};
+
+const MenuButton: FC<CommonProps> = ({ username, slug }) => {
+  return (
+    <Dropdown
+      render={({ close }) => (
+        <DropdownMenu>
+          <UpdateModelSlugAction
+            username={username}
+            slug={slug}
+            close={close}
+          />
+          <DeleteModelAction username={username} slug={slug} close={close} />
+        </DropdownMenu>
+      )}
+      tailwindSelector="squiggle-hub"
+    >
+      <Button>
+        <DotsHorizontalIcon className="text-slate-500" />
+      </Button>
+    </Dropdown>
+  );
+};
+
+type Props = PropsWithChildren<CommonProps>;
 
 export const ModelPage: FC<Props> = ({ username, slug, children }) => {
+  const { data: session } = useSession();
+
   return (
     <WithTopMenu>
       <div className="flex items-center gap-4 max-w-2xl mx-auto">
@@ -49,22 +77,9 @@ export const ModelPage: FC<Props> = ({ username, slug, children }) => {
             href={modelRevisionsRoute({ username, slug })}
           />
         </StyledTabLink.List>
-        <Dropdown
-          render={({ close }) => (
-            <DropdownMenu>
-              <DeleteModelAction
-                username={username}
-                slug={slug}
-                close={close}
-              />
-            </DropdownMenu>
-          )}
-          tailwindSelector="squiggle-hub"
-        >
-          <Button>
-            <DotsHorizontalIcon className="text-slate-500" />
-          </Button>
-        </Dropdown>
+        {session?.user.username === username ? (
+          <MenuButton username={username} slug={slug} />
+        ) : null}
       </div>
       {children}
     </WithTopMenu>
