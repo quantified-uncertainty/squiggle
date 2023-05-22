@@ -1,5 +1,5 @@
 import { useSession } from "next-auth/react";
-import { FC, useEffect, useMemo } from "react";
+import { FC, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useFragment, useMutation } from "react-relay";
 import { graphql } from "relay-runtime";

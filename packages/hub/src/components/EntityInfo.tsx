@@ -2,7 +2,8 @@ import { FC } from "react";
 
 import { UsernameLink } from "./UsernameLink";
 
-export const ModelInfo: FC<{ username: string; slug: string }> = ({
+// works both for models and for definitions
+export const EntityInfo: FC<{ username: string; slug: string }> = ({
   username,
   slug,
 }) => {

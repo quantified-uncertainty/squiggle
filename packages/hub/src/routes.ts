@@ -44,12 +44,26 @@ export function modelRevisionRoute({
   return `/users/${username}/models/${slug}/revisions/${revisionId}`;
 }
 
+export function definitionRoute({
+  username,
+  slug,
+}: {
+  username: string;
+  slug: string;
+}) {
+  return `/users/${username}/definitions/${slug}`;
+}
+
 export function userRoute({ username }: { username: string }) {
   return `/users/${username}`;
 }
 
 export function newModelRoute() {
   return "/new-model";
+}
+
+export function newDefinitionRoute() {
+  return "/new-definition";
 }
 
 export function graphqlAPIRoute() {

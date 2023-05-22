@@ -51,16 +51,16 @@ model Session {
 }
 
 model User {
-  id            String              @id @default(cuid())
+  id            String       @id @default(cuid())
   name          String?
-  email         String?             @unique
-  username      String?             @unique
+  email         String?      @unique
+  username      String?      @unique
   emailVerified DateTime?
   image         String?
   accounts      Account[]
   sessions      Session[]
   models        Model[]
-  definitions   GenericDefinition[]
+  definitions   Definition[]
 }
 
 model VerificationToken {
@@ -121,7 +121,11 @@ model SquiggleSnippet {
 }
 
 // Definitions are polymorphic too.
-model GenericDefinition {
+enum DefinitionType {
+  RelativeValues
+}
+
+model Definition {
   id String @id @default(cuid())
 
   slug String
@@ -144,8 +148,10 @@ model DefinitionRevision {
 
   createdAt DateTime @default(now())
 
-  definition   GenericDefinition @relation(fields: [definitionId], references: [id])
+  definition   Definition @relation(fields: [definitionId], references: [id])
   definitionId String
+
+  contentType DefinitionType
 
   relativeValues RelativeValuesDefinition? @relation(fields: [contentId], references: [id], map: "relativeValues_contentId")
   contentId      String?                   @unique
@@ -165,9 +171,9 @@ model RelativeValuesDefinition {
 // Note that model _revisions_ are associated with definitions (and not definition revisions).
 // Associating model revisions with definition revisions would be better, but it's more complicated.
 model VariableWithDefinition {
-  modelRevision   ModelRevision     @relation(fields: [modelRevisionId], references: [id])
+  modelRevision   ModelRevision @relation(fields: [modelRevisionId], references: [id])
   modelRevisionId String
-  definition      GenericDefinition @relation(fields: [definitionId], references: [id])
+  definition      Definition    @relation(fields: [definitionId], references: [id])
   definitionId    String
 
   variable String

@@ -2,8 +2,37 @@ type BaseError implements Error {
   message: String!
 }
 
+type CreateRelativeValuesDefinitionResult {
+  definition: Definition!
+}
+
 type CreateSquiggleSnippetResult {
   model: Model!
+}
+
+type Definition implements Node {
+  createdAtTimestamp: Float!
+  currentRevision: DefinitionRevision!
+  id: ID!
+  owner: User!
+  slug: String!
+}
+
+type DefinitionConnection {
+  edges: [DefinitionEdge!]!
+  pageInfo: PageInfo!
+}
+
+union DefinitionContent = RelativeValuesDefinition
+
+type DefinitionEdge {
+  cursor: String!
+  node: Definition!
+}
+
+type DefinitionRevision implements Node {
+  content: DefinitionContent!
+  id: ID!
 }
 
 type DeleteModelResult {
@@ -61,11 +90,19 @@ type ModelRevisionEdge {
 }
 
 type Mutation {
+  createRelativeValuesDefinition(input: MutationCreateRelativeValuesDefinitionInput!): MutationCreateRelativeValuesDefinitionResult!
   createSquiggleSnippetModel(input: MutationCreateSquiggleSnippetModelInput!): MutationCreateSquiggleSnippetModelResult!
   deleteModel(input: MutationDeleteModelInput!): MutationDeleteModelResult!
   setUsername(username: String!): MutationSetUsernameResult!
   updateSquiggleSnippetModel(input: MutationUpdateSquiggleSnippetModelInput!): MutationUpdateSquiggleSnippetModelResult!
 }
+
+input MutationCreateRelativeValuesDefinitionInput {
+  slug: String!
+  title: String!
+}
+
+union MutationCreateRelativeValuesDefinitionResult = BaseError | CreateRelativeValuesDefinitionResult
 
 input MutationCreateSquiggleSnippetModelInput {
   code: String!
@@ -105,6 +142,8 @@ type PageInfo {
 }
 
 type Query {
+  definition(input: QueryDefinitionInput!): Definition!
+  definitions(after: String, before: String, first: Int, last: Int): DefinitionConnection!
   me: Me!
   model(input: QueryModelInput!): Model!
   models(after: String, before: String, first: Int, last: Int): ModelConnection!
@@ -113,6 +152,11 @@ type Query {
   runSquiggle(code: String!): SquiggleOutput!
   userByUsername(username: String!): User!
   users(after: String, before: String, first: Int, last: Int): QueryUsersConnection!
+}
+
+input QueryDefinitionInput {
+  ownerUsername: String!
+  slug: String!
 }
 
 input QueryModelInput {
@@ -128,6 +172,17 @@ type QueryUsersConnection {
 type QueryUsersConnectionEdge {
   cursor: String!
   node: User!
+}
+
+type RelativeValuesDefinition implements Node {
+  dbId: ID!
+  id: ID!
+  items: [RelativeValuesItem!]!
+  title: String!
+}
+
+type RelativeValuesItem {
+  id: String!
 }
 
 type SquiggleErrorOutput implements SquiggleOutput {

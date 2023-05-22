@@ -11,7 +11,6 @@ import { Button, TextArea, TextInput, useToast } from "@quri/ui";
 import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
 import { WithTopMenu } from "@/components/layout/WithTopMenu";
 import { useSession } from "next-auth/react";
-import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 
 const Mutation = graphql`
   mutation NewModelMutation($input: MutationCreateSquiggleSnippetModelInput!) {

@@ -5,7 +5,7 @@ import { graphql } from "relay-runtime";
 import { ModelRevisionViewQuery } from "@gen/ModelRevisionViewQuery.graphql";
 import { SquigglePlayground } from "@quri/squiggle-components";
 import { WithTopMenu } from "@/components/layout/WithTopMenu";
-import { ModelInfo } from "@/components/ModelInfo";
+import { EntityInfo } from "@/components/EntityInfo";
 import { commonDateFormat } from "@/lib/utils";
 import { format } from "date-fns";
 import { modelRoute } from "@/routes";

@@ -53,7 +53,7 @@ export const Model = builder.prismaNode("Model", {
     }),
     currentRevision: t.field({
       type: ModelRevision,
-      select: (args, ctx, nestedSelection) => ({
+      select: (_, __, nestedSelection) => ({
         revisions: nestedSelection({
           take: 1,
           orderBy: {
@@ -70,7 +70,7 @@ export const Model = builder.prismaNode("Model", {
       args: {
         id: t.arg.id({ required: true }),
       },
-      select: (args, ctx, nestedSelection) => ({
+      select: (args, _, nestedSelection) => ({
         revisions: nestedSelection({
           take: 1,
           where: { id: args.id },

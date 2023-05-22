@@ -3,7 +3,7 @@ import { useLazyLoadQuery, usePaginationFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { ModelRevisionsList$key } from "@/__generated__/ModelRevisionsList.graphql";
-import { ModelInfo } from "@/components/ModelInfo";
+import { EntityInfo } from "@/components/EntityInfo";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { commonDateFormat } from "@/lib/utils";
 import { modelRevisionRoute } from "@/routes";

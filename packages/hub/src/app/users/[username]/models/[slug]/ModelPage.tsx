@@ -3,7 +3,7 @@ import { graphql } from "relay-runtime";
 
 import { Button, DotsHorizontalIcon, Dropdown, DropdownMenu } from "@quri/ui";
 
-import { ModelInfo } from "@/components/ModelInfo";
+import { EntityInfo } from "@/components/EntityInfo";
 import { WithTopMenu } from "@/components/layout/WithTopMenu";
 import { StyledTabLink } from "@/components/ui/StyledTabLink";
 import { modelEditRoute, modelRevisionsRoute, modelRoute } from "@/routes";
@@ -37,7 +37,7 @@ export const ModelPage: FC<Props> = ({ username, slug, children }) => {
   return (
     <WithTopMenu>
       <div className="flex items-center gap-4 max-w-2xl mx-auto">
-        <ModelInfo slug={slug} username={username} />
+        <EntityInfo slug={slug} username={username} />
         <StyledTabLink.List>
           <StyledTabLink name="View" href={modelRoute({ username, slug })} />
           <StyledTabLink
