@@ -1,6 +1,6 @@
 import { DropdownMenuAsyncActionItem, TrashIcon, useToast } from "@quri/ui";
 import { useRouter } from "next/navigation";
-import { FC, useCallback, useState } from "react";
+import { FC, useCallback } from "react";
 import { useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 
@@ -26,8 +26,7 @@ type Props = {
 export const DeleteModelAction: FC<Props> = ({ username, slug, close }) => {
   const router = useRouter();
 
-  const [mutation, isMutationInFlight] =
-    useMutation<DeleteModelActionMutation>(Mutation);
+  const [mutation] = useMutation<DeleteModelActionMutation>(Mutation);
 
   const toast = useToast();
 
@@ -38,18 +37,19 @@ export const DeleteModelAction: FC<Props> = ({ username, slug, close }) => {
         onCompleted(response) {
           if (response.deleteModel.__typename === "BaseError") {
             toast(response.deleteModel.message, "error");
-            close();
+            resolve();
           } else {
+            // TODO - this is risky, what if we add more error types to GraphQL schema?
             router.push("/");
           }
         },
         onError(e) {
           toast(e.toString(), "error");
-          close();
+          resolve();
         },
       });
     });
-  }, [mutation, username, slug, close, router, toast]);
+  }, [mutation, username, slug, router, toast]);
 
   return (
     <DropdownMenuAsyncActionItem

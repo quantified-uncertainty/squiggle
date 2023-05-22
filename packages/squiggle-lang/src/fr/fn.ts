@@ -32,7 +32,6 @@ export const library = [
     isExperimental: true,
     definitions: [
       makeDefinition(
-        "declare",
         [
           frRecord(
             ["fn", frLambda],

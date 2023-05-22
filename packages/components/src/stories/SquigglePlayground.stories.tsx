@@ -19,6 +19,29 @@ export const Normal: Story = {
   },
 };
 
+export const RelativeValues: Story = {
+  name: "RelativeValues plot",
+  args: {
+    code: undefined as any,
+    defaultCode: `ids = ["foo", "bar"]
+foo = SampleSet.fromDist(2 to 5)
+bar = foo + SampleSet.fromDist(3 to 6) * 0.5
+items = {
+  foo: foo,
+  bar: bar
+}
+fn = { |id1, id2|
+  [items[id1], items[id2]]
+}
+
+RelativeValues.gridPlot({
+  ids: ids,
+  fn: fn
+})
+`,
+  },
+};
+
 export const WithShareButton: Story = {
   name: "With share button",
   args: {

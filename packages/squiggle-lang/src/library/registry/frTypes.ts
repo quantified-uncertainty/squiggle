@@ -1,7 +1,20 @@
 import { BaseDist } from "../../dist/BaseDist.js";
 import { Lambda } from "../../reducer/lambda.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
-import { Scale, Value } from "../../value/index.js";
+import {
+  Scale,
+  Value,
+  vArray,
+  vBool,
+  vDate,
+  vDist,
+  vLambda,
+  vNumber,
+  vRecord,
+  vScale,
+  vString,
+  vTimeDuration,
+} from "../../value/index.js";
 
 /*
 FRType is a function that unpacks a Value.
@@ -9,44 +22,54 @@ Each function identifies the specific type and can be used in a function definit
 */
 export type FRType<T> = {
   unpack: (v: Value) => T | undefined;
+  pack: (v: T) => Value; // used in makeSquiggleDefinition
   getName: () => string;
 };
 
 export const frNumber: FRType<number> = {
   unpack: (v: Value) => (v.type === "Number" ? v.value : undefined),
+  pack: vNumber,
   getName: () => "number",
 };
 export const frString: FRType<string> = {
   unpack: (v: Value) => (v.type === "String" ? v.value : undefined),
+  pack: vString,
   getName: () => "string",
 };
 export const frBool: FRType<boolean> = {
   unpack: (v: Value) => (v.type === "Bool" ? v.value : undefined),
+  pack: vBool,
   getName: () => "bool",
 };
 export const frDate: FRType<Date> = {
   unpack: (v) => (v.type === "Date" ? v.value : undefined),
+  pack: vDate,
   getName: () => "date",
 };
 export const frTimeDuration: FRType<number> = {
   unpack: (v) => (v.type === "TimeDuration" ? v.value : undefined),
+  pack: vTimeDuration,
   getName: () => "duration",
 };
 export const frDistOrNumber: FRType<BaseDist | number> = {
   unpack: (v) =>
     v.type === "Dist" ? v.value : v.type === "Number" ? v.value : undefined,
+  pack: (v) => (typeof v === "number" ? vNumber(v) : vDist(v)),
   getName: () => "distribution|number",
 };
 export const frDist: FRType<BaseDist> = {
   unpack: (v) => (v.type === "Dist" ? v.value : undefined),
+  pack: vDist,
   getName: () => "distribution",
 };
 export const frLambda: FRType<Lambda> = {
   unpack: (v) => (v.type === "Lambda" ? v.value : undefined),
+  pack: vLambda,
   getName: () => "lambda",
 };
 export const frScale: FRType<Scale> = {
   unpack: (v) => (v.type === "Scale" ? v.value : undefined),
+  pack: vScale,
   getName: () => "scale",
 };
 
@@ -67,6 +90,7 @@ export const frArray = <T>(itemType: FRType<T>): FRType<T[]> => {
       }
       return unpackedArray;
     },
+    pack: (v) => vArray(v.map(itemType.pack)),
     getName: () => `list(${itemType.getName()})`,
   };
 };
@@ -90,6 +114,7 @@ export const frTuple2 = <T1, T2>(
       }
       return [item1, item2];
     },
+    pack: ([v1, v2]) => vArray([type1.pack(v1), type2.pack(v2)]),
     getName: () => `tuple(${type1.getName()}, ${type2.getName()})`,
   };
 };
@@ -113,16 +138,21 @@ export const frDict = <T>(
       }
       return unpackedMap;
     },
+    pack: (v) =>
+      vRecord(
+        ImmutableMap([...v.entries()].map(([k, v]) => [k, itemType.pack(v)]))
+      ),
     getName: () => `dict(${itemType.getName()})`,
   };
 };
 
 export const frAny: FRType<Value> = {
   unpack: (v) => v,
+  pack: (v) => v,
   getName: () => "any",
 };
 
-// We currently support records with up to 4 pairs.
+// We currently support records with up to 5 pairs.
 // The limit could be increased with the same pattern, but there might be a better solution for this.
 export function frRecord<K1 extends string, T1>(
   kv1: [K1, FRType<T1>]
@@ -183,9 +213,9 @@ export function frRecord<
   } & { [k in K5]: T5 }
 >;
 
-export function frRecord(
+export function frRecord<T extends {}>(
   ...allKvs: [string, FRType<unknown>][]
-): FRType<unknown> {
+): FRType<T> {
   return {
     unpack: (v: Value) => {
       // extra keys are allowed
@@ -212,8 +242,19 @@ export function frRecord(
         }
         result[key] = unpackedSubvalue;
       }
-      return result;
+      return result as any; // that's ok, overload signatures guarantee type safety
     },
+    pack: (v) =>
+      vRecord(
+        ImmutableMap(
+          allKvs
+            .filter(
+              ([key, valueShape]) =>
+                !("isOptional" in valueShape) || (v as any)[key] !== null
+            )
+            .map(([key, valueShape]) => [key, valueShape.pack((v as any)[key])])
+        )
+      ),
     getName: () =>
       "{" +
       allKvs
@@ -231,6 +272,13 @@ export const frOptional = <T>(
   return {
     unpack: (v: Value) => {
       return itemType.unpack(v);
+    },
+    pack: (v) => {
+      if (v === null) {
+        // shouldn't happen if frRecord implementation is correct and frOptional is used correctly.
+        throw new Error("Unable to pack null value");
+      }
+      return itemType.pack(v);
     },
     getName: () => `optional(${itemType.getName()})`,
     isOptional: true,
