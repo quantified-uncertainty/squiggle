@@ -17,10 +17,9 @@ import { UseFormRegister, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 
 import { Env } from "@quri/squiggle-lang";
-import { StyledTab, Button, TextTooltip } from "@quri/ui";
+import { Button, StyledTab, TextTooltip } from "@quri/ui";
 
 import { useMaybeControlledValue, useSquiggle } from "../../lib/hooks/index.js";
-import { SquiggleArgs } from "../../lib/hooks/useSquiggle.js";
 
 import { JsImports } from "../../lib/jsImports.js";
 import { getErrors, getValueToRender, isMac } from "../../lib/utility.js";
@@ -32,6 +31,7 @@ import {
 } from "../SquiggleViewer/index.js";
 import { ViewSettingsForm, viewSettingsSchema } from "../ViewSettingsForm.js";
 
+import { SqProject } from "@quri/squiggle-lang";
 import { ImportSettingsForm } from "./ImportSettingsForm.js";
 import { RunControls } from "./RunControls/index.js";
 import { useRunnerState } from "./RunControls/useRunnerState.js";
@@ -42,20 +42,29 @@ import {
   type PlaygroundFormFields,
 } from "./playgroundSettings.js";
 
-type PlaygroundProps = SquiggleArgs &
-  Omit<SquiggleViewerProps, "result"> & {
-    /** The initial squiggle string to put in the playground */
-    defaultCode?: string;
-    onCodeChange?(expr: string): void;
-    /* When settings change */
-    onSettingsChange?(settings: any): void;
-    /** Should we show the editor? */
-    showEditor?: boolean;
-    /** Useful for playground on squiggle website, where we update the anchor link based on current code and settings */
-    showShareButton?: boolean;
-    /** Height of the editor */
-    height?: number;
-  };
+type PlaygroundProps = // Playground can be either controlled (`code`) or uncontrolled (`defaultCode` + `onCodeChange`)
+  (
+    | { code: string; defaultCode?: undefined }
+    | { defaultCode?: string; code?: undefined }
+  ) &
+    (
+      | {
+          project: SqProject;
+          continues?: string[];
+        }
+      | {}
+    ) &
+    Omit<SquiggleViewerProps, "result"> & {
+      onCodeChange?(expr: string): void;
+      /* When settings change */
+      onSettingsChange?(settings: any): void;
+      /** Should we show the editor? */
+      showEditor?: boolean;
+      /** Useful for playground on squiggle website, where we update the anchor link based on current code and settings */
+      showShareButton?: boolean;
+      /** Height of the editor */
+      height?: number;
+    };
 
 // Left panel ref is used for local settings modal positioning in ItemSettingsMenu.tsx
 type PlaygroundContextShape = {

@@ -14,7 +14,6 @@ type Story = StoryObj<typeof meta>;
 export const Normal: Story = {
   name: "Normal",
   args: {
-    code: undefined as any,
     defaultCode: "normal(5,2)",
     height: 800,
   },
@@ -23,7 +22,6 @@ export const Normal: Story = {
 export const WithShareButton: Story = {
   name: "With share button",
   args: {
-    code: undefined as any,
     defaultCode: "normal(5,2)",
     height: undefined,
     showShareButton: true,
