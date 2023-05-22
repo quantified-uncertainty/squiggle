@@ -51,15 +51,16 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String              @id @default(cuid())
   name          String?
-  email         String?   @unique
-  username      String?   @unique
+  email         String?             @unique
+  username      String?             @unique
   emailVerified DateTime?
   image         String?
   accounts      Account[]
   sessions      Session[]
   models        Model[]
+  definitions   GenericDefinition[]
 }
 
 model VerificationToken {
@@ -70,8 +71,8 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// models are polymorphic;
-// polymorphism schema inspired by https://stackoverflow.com/a/73140073
+// Models are polymorphic.
+// Polymorphism schema inspired by https://stackoverflow.com/a/73140073
 enum ModelType {
   SquiggleSnippet
 }
@@ -107,6 +108,8 @@ model ModelRevision {
 
   squiggleSnippet SquiggleSnippet? @relation(fields: [contentId], references: [id], map: "squiggleSnippet_contentId")
   contentId       String?          @unique
+
+  variablesWithDefinitions VariableWithDefinition[]
 }
 
 model SquiggleSnippet {
@@ -115,4 +118,59 @@ model SquiggleSnippet {
   code String
 
   revision ModelRevision?
+}
+
+// Definitions are polymorphic too.
+model GenericDefinition {
+  id String @id @default(cuid())
+
+  slug String
+
+  createdAt DateTime @default(now())
+
+  owner   User   @relation(fields: [ownerId], references: [id])
+  ownerId String
+
+  revisions DefinitionRevision[]
+
+  modelVariables VariableWithDefinition[]
+
+  @@unique([slug, ownerId])
+  @@index([createdAt])
+}
+
+model DefinitionRevision {
+  id String @id @default(cuid())
+
+  createdAt DateTime @default(now())
+
+  definition   GenericDefinition @relation(fields: [definitionId], references: [id])
+  definitionId String
+
+  relativeValues RelativeValuesDefinition? @relation(fields: [contentId], references: [id], map: "relativeValues_contentId")
+  contentId      String?                   @unique
+}
+
+model RelativeValuesDefinition {
+  id String @id @default(cuid())
+
+  title String
+
+  revision DefinitionRevision?
+
+  items    Json
+  clusters Json
+}
+
+// Note that model _revisions_ are associated with definitions (and not definition revisions).
+// Associating model revisions with definition revisions would be better, but it's more complicated.
+model VariableWithDefinition {
+  modelRevision   ModelRevision     @relation(fields: [modelRevisionId], references: [id])
+  modelRevisionId String
+  definition      GenericDefinition @relation(fields: [definitionId], references: [id])
+  definitionId    String
+
+  variable String
+
+  @@id([modelRevisionId, definitionId])
 }
