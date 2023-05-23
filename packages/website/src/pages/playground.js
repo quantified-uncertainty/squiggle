@@ -2,7 +2,9 @@ import { deflate, inflate } from "pako";
 import { toByteArray, fromByteArray } from "base64-js";
 import React from "react";
 import Layout from "@theme/Layout";
+
 import { SquigglePlayground } from "@quri/squiggle-components";
+import { ShareButton } from "../components/ShareButton";
 
 const HASH_PREFIX = "#code=";
 function getHashData() {
@@ -47,8 +49,7 @@ export default function PlaygroundPage() {
       showSummary: hashData.showSummary ?? true,
     },
     height: 700,
-    showShareButton: true,
-    showEditor: hashData.showEditor ?? true,
+    renderExtraControls: () => <ShareButton />,
     onCodeChange: (code) => setHashData({ defaultCode: code }),
     onSettingsChange: (settings) => {
       const { showEditor } = settings;
