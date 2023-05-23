@@ -2,7 +2,7 @@ import { ClipboardCopyIcon } from "@heroicons/react/solid/esm/index.js";
 import React, { useState } from "react";
 import { Button } from "@quri/ui";
 
-export const ShareButton: React.FC = () => {
+export const ShareButton = () => {
   const [isCopied, setIsCopied] = useState(false);
   const copy = () => {
     navigator.clipboard.writeText((window.top || window).location.href);

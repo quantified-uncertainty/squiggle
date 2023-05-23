@@ -17,6 +17,7 @@
     "@heroicons/react": "^1.0.6",
     "@mdx-js/react": "1.6.22",
     "@quri/squiggle-components": "^0.7.0",
+    "@quri/ui": "^0.1.0",
     "base64-js": "^1.5.1",
     "clsx": "^1.2.1",
     "hast-util-is-element": "2.1.3",

@@ -37,7 +37,11 @@ export const NewModel: FC = () => {
     code: string;
     slug: string;
     description: string;
-  }>();
+  }>({
+    defaultValues: {
+      code: "normal(2, 5)",
+    },
+  });
 
   const router = useRouter();
 
@@ -78,9 +82,6 @@ export const NewModel: FC = () => {
               name="description"
               label="Description"
             />
-            <Button onClick={save} disabled={isSaveInFlight} theme="primary">
-              Save
-            </Button>
           </div>
         </div>
         <Controller
@@ -91,6 +92,15 @@ export const NewModel: FC = () => {
             <SquigglePlayground
               onCodeChange={field.onChange}
               code={field.value}
+              renderExtraControls={() => (
+                <Button
+                  onClick={save}
+                  disabled={isSaveInFlight}
+                  theme="primary"
+                >
+                  Save
+                </Button>
+              )}
             />
           )}
         />

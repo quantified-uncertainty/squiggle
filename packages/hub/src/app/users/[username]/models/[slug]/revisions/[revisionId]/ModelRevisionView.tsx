@@ -63,10 +63,7 @@ export const ModelRevisionView: FC<Props> = ({
           Go to latest version
         </StyledLink>
       </div>
-      <SquigglePlayground
-        code={undefined as any} // code is optional in SquigglePlayground but marked as required due to Typescript bug
-        defaultCode={data.model.revision.content.code}
-      />
+      <SquigglePlayground defaultCode={data.model.revision.content.code} />
     </div>
   );
 };
