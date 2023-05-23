@@ -1,4 +1,4 @@
-import { builder } from "../../builder";
+import { builder } from "../builder";
 import { ModelConnection } from "./models";
 
 export const User = builder.prismaNode("User", {
