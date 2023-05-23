@@ -32,7 +32,7 @@ const Query = graphql`
 `;
 
 export const FrontpageModelList: FC = () => {
-  const fragment = useLazyLoadQuery<FrontpageModelListQuery>(
+  const modelsRef = useLazyLoadQuery<FrontpageModelListQuery>(
     Query,
     {},
     { fetchPolicy: "store-and-network" }
@@ -43,13 +43,13 @@ export const FrontpageModelList: FC = () => {
     loadNext,
   } = usePaginationFragment<FrontpageModelListQuery, FrontpageModelList$key>(
     Fragment,
-    fragment
+    modelsRef
   );
 
   return (
     <div>
       <header className="font-bold text-2xl mb-2">All models</header>
-      <ModelList connection={models} showOwner={true} loadNext={loadNext} />
+      <ModelList connectionRef={models} showOwner={true} loadNext={loadNext} />
     </div>
   );
 };

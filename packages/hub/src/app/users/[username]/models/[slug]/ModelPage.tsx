@@ -19,7 +19,7 @@ export const ModelPageFragment = graphql`
     owner {
       username
     }
-    ...ModelContent
+    ...ModelPageBody
   }
 `;
 

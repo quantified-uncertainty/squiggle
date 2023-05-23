@@ -20,12 +20,12 @@ const Fragment = graphql`
 `;
 
 type Props = {
-  definition: DefinitionCardFragment$key;
+  definitionRef: DefinitionCardFragment$key;
   showOwner?: boolean;
 };
 
-export const DefinitionCard: FC<Props> = ({ definition, showOwner }) => {
-  const data = useFragment(Fragment, definition);
+export const DefinitionCard: FC<Props> = ({ definitionRef, showOwner }) => {
+  const definition = useFragment(Fragment, definitionRef);
 
   return (
     <div className="border p-2 rounded">
@@ -33,24 +33,30 @@ export const DefinitionCard: FC<Props> = ({ definition, showOwner }) => {
         <div>
           <StyledDefinitionLink
             href={definitionRoute({
-              username: data.owner.username,
-              slug: data.slug,
+              username: definition.owner.username,
+              slug: definition.slug,
             })}
           >
-            {data.slug}
+            {definition.slug}
           </StyledDefinitionLink>
         </div>
         <div className="text-xs text-slate-500">
           Created{" "}
-          <time dateTime={new Date(data.createdAtTimestamp).toISOString()}>
-            {formatDistance(new Date(data.createdAtTimestamp), new Date(), {
-              addSuffix: true,
-            })}
+          <time
+            dateTime={new Date(definition.createdAtTimestamp).toISOString()}
+          >
+            {formatDistance(
+              new Date(definition.createdAtTimestamp),
+              new Date(),
+              {
+                addSuffix: true,
+              }
+            )}
           </time>
           {showOwner ? (
             <span>
               {" "}
-              by <UserLink user={data.owner} />
+              by <UserLink userRef={definition.owner} />
             </span>
           ) : null}
         </div>

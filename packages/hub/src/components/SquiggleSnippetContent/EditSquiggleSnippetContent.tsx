@@ -6,10 +6,12 @@ import { graphql, useFragment, useMutation } from "react-relay";
 import { SquigglePlayground } from "@quri/squiggle-components";
 import { Button, TextArea, useToast } from "@quri/ui";
 
-import { SquiggleSnippetContentFragment$key } from "@/__generated__/SquiggleSnippetContentFragment.graphql";
-import { WithTopMenu } from "@/components/layout/WithTopMenu";
-import { Fragment } from "./SquiggleSnippetContent";
 import { EditSquiggleSnippetContentMutation } from "@/__generated__/EditSquiggleSnippetContentMutation.graphql";
+import { ModelPageBody$key } from "@/__generated__/ModelPageBody.graphql";
+import { WithTopMenu } from "@/components/layout/WithTopMenu";
+import { SquiggleSnippetContentFragment } from "./SquiggleSnippetContent";
+import { SquiggleSnippetContent$key } from "@/__generated__/SquiggleSnippetContent.graphql";
+import { ModelPageBodyFragment } from "@/app/users/[username]/models/[slug]/ModelPageBody";
 
 export const Mutation = graphql`
   mutation EditSquiggleSnippetContentMutation(
@@ -22,31 +24,35 @@ export const Mutation = graphql`
       }
       ... on UpdateSquiggleSnippetResult {
         model {
-          ...SquiggleSnippetContentFragment
+          ...ModelPage
         }
       }
     }
   }
 `;
 
-export const EditSquiggleSnippetContent: FC<{
-  model: SquiggleSnippetContentFragment$key;
-}> = ({ model }) => {
+type Props = {
+  // We have to pass the entire model here and not just content;
+  // it's too hard to split the editing form into "content-type-specific" part and "generic model fields" part.
+  modelRef: ModelPageBody$key;
+};
+
+export const EditSquiggleSnippetContent: FC<Props> = ({ modelRef }) => {
   const toast = useToast();
   const { data: session } = useSession();
 
-  const data = useFragment(Fragment, model);
+  const model = useFragment(ModelPageBodyFragment, modelRef);
+  const content = useFragment<SquiggleSnippetContent$key>(
+    SquiggleSnippetContentFragment,
+    model.currentRevision.content
+  );
 
   const initialFormValues = useMemo(() => {
-    if (data.currentRevision.content.__typename !== "SquiggleSnippet") {
-      // shouldn't happen, typename is validated by ModelView
-      throw new Error("Internal error");
-    }
     return {
-      code: data.currentRevision.content.code,
-      description: data.currentRevision.description,
+      code: content.code,
+      description: model.currentRevision.description,
     };
-  }, [data]);
+  }, [model, content]);
 
   const { handleSubmit, control, register } = useForm<{
     code: string;
@@ -63,8 +69,8 @@ export const EditSquiggleSnippetContent: FC<{
       variables: {
         input: {
           code: formData.code,
-          slug: data.slug,
-          username: data.owner.username,
+          slug: model.slug,
+          username: model.owner.username,
           description: formData.description,
         },
       },
@@ -81,7 +87,7 @@ export const EditSquiggleSnippetContent: FC<{
     });
   });
 
-  const canSave = session?.user.username === data.owner.username;
+  const canSave = session?.user.username === model.owner.username;
 
   return (
     <form onSubmit={save}>
@@ -92,7 +98,7 @@ export const EditSquiggleSnippetContent: FC<{
               {"You don't own this model, edits won't be saved."}
             </div>
           )}
-          {session?.user.username === data.owner.username ? (
+          {session?.user.username === model.owner.username ? (
             <div className="mt-2">
               <TextArea
                 register={register}

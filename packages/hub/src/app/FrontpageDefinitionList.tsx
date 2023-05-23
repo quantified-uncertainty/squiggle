@@ -32,7 +32,7 @@ const Query = graphql`
 `;
 
 export const FrontpageDefinitionList: FC = () => {
-  const fragment = useLazyLoadQuery<FrontpageDefinitionListQuery>(
+  const definitionsRef = useLazyLoadQuery<FrontpageDefinitionListQuery>(
     Query,
     {},
     { fetchPolicy: "store-and-network" }
@@ -44,13 +44,13 @@ export const FrontpageDefinitionList: FC = () => {
   } = usePaginationFragment<
     FrontpageDefinitionListQuery,
     FrontpageDefinitionList$key
-  >(Fragment, fragment);
+  >(Fragment, definitionsRef);
 
   return (
     <div>
       <header className="font-bold text-2xl mb-2">All definitions</header>
       <DefinitionList
-        connection={definitions}
+        connectionRef={definitions}
         showOwner={true}
         loadNext={loadNext}
       />

@@ -49,7 +49,7 @@ type Props = {
 };
 
 export const ModelRevisionsList: FC<Props> = ({ username, slug }) => {
-  const { model } = useLazyLoadQuery<ModelRevisionsListQuery>(
+  const { model: modelRef } = useLazyLoadQuery<ModelRevisionsListQuery>(
     ModelRevisionsListQuery,
     {
       input: { ownerUsername: username, slug },
@@ -57,16 +57,16 @@ export const ModelRevisionsList: FC<Props> = ({ username, slug }) => {
     { fetchPolicy: "store-and-network" }
   );
 
-  const { data, loadNext } = usePaginationFragment<
+  const { data: model, loadNext } = usePaginationFragment<
     ModelRevisionsListQuery,
     ModelRevisionsList$key
-  >(RevisionsFragment, model);
+  >(RevisionsFragment, modelRef);
 
   return (
     <div>
       <div className="mt-4 mb-2 font-medium">Revision history</div>
       <div className="space-y-2">
-        {data.revisions.edges.map((edge) => (
+        {model.revisions.edges.map((edge) => (
           <div key={edge.node.dbId}>
             <StyledLink
               href={modelRevisionRoute({
@@ -79,7 +79,7 @@ export const ModelRevisionsList: FC<Props> = ({ username, slug }) => {
             </StyledLink>
           </div>
         ))}
-        {data.revisions.pageInfo.hasNextPage && (
+        {model.revisions.pageInfo.hasNextPage && (
           <Button onClick={() => loadNext(20)}>Load more</Button>
         )}
       </div>

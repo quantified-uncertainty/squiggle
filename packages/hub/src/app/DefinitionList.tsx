@@ -23,30 +23,30 @@ const fragment = graphql`
 `;
 
 type Props = {
-  connection: DefinitionListFragment$key;
+  connectionRef: DefinitionListFragment$key;
   loadNext(count: number): unknown;
   showOwner?: boolean;
 };
 
 export const DefinitionList: FC<Props> = ({
-  connection,
+  connectionRef,
   loadNext,
   showOwner,
 }) => {
-  const data = useFragment(fragment, connection);
+  const connection = useFragment(fragment, connectionRef);
 
   return (
     <div>
       <div className="space-y-4">
-        {data.edges.map((edge) => (
+        {connection.edges.map((edge) => (
           <DefinitionCard
             key={edge.node.id}
-            definition={edge.node}
+            definitionRef={edge.node}
             showOwner={showOwner}
           />
         ))}
       </div>
-      {data.pageInfo.hasNextPage && (
+      {connection.pageInfo.hasNextPage && (
         <div className="mt-4">
           <Button onClick={() => loadNext(20)}>Load more</Button>
         </div>

@@ -21,12 +21,12 @@ const ModelFragment = graphql`
 `;
 
 type Props = {
-  model: ModelCardFragment$key;
+  modelRef: ModelCardFragment$key;
   showOwner?: boolean;
 };
 
-export const ModelCard: FC<Props> = ({ model, showOwner }) => {
-  const data = useFragment(ModelFragment, model);
+export const ModelCard: FC<Props> = ({ modelRef, showOwner }) => {
+  const model = useFragment(ModelFragment, modelRef);
 
   return (
     <div className="border p-2 rounded">
@@ -34,24 +34,24 @@ export const ModelCard: FC<Props> = ({ model, showOwner }) => {
         <div>
           <StyledLink
             href={modelRoute({
-              username: data.owner.username,
-              slug: data.slug,
+              username: model.owner.username,
+              slug: model.slug,
             })}
           >
-            {data.slug}
+            {model.slug}
           </StyledLink>
         </div>
         <div className="text-xs text-slate-500">
           Created{" "}
-          <time dateTime={new Date(data.createdAtTimestamp).toISOString()}>
-            {formatDistance(new Date(data.createdAtTimestamp), new Date(), {
+          <time dateTime={new Date(model.createdAtTimestamp).toISOString()}>
+            {formatDistance(new Date(model.createdAtTimestamp), new Date(), {
               addSuffix: true,
             })}
           </time>
           {showOwner ? (
             <span>
               {" "}
-              by <UserLink user={data.owner} />
+              by <UserLink userRef={model.owner} />
             </span>
           ) : null}
         </div>

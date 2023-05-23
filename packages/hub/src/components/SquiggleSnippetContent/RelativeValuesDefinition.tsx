@@ -3,7 +3,6 @@ import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { RelativeValuesDefinitionFragment$key } from "@/__generated__/RelativeValuesDefinitionFragment.graphql";
-import { NarrowPageLayout } from "../layout/NarrowPageLayout";
 
 const Fragment = graphql`
   fragment RelativeValuesDefinitionFragment on Definition {
@@ -27,19 +26,24 @@ const Fragment = graphql`
 `;
 
 type Props = {
-  definition: RelativeValuesDefinitionFragment$key;
+  definitionRef: RelativeValuesDefinitionFragment$key;
   mode: "view" | "edit";
 };
 
-export const RelativeValuesDefinition: FC<Props> = ({ definition, mode }) => {
-  const data = useFragment(Fragment, definition);
+export const RelativeValuesDefinition: FC<Props> = ({
+  definitionRef,
+  mode,
+}) => {
+  const definition = useFragment(Fragment, definitionRef);
 
-  if (data.currentRevision.content.__typename !== "RelativeValuesDefinition") {
+  if (
+    definition.currentRevision.content.__typename !== "RelativeValuesDefinition"
+  ) {
     // shouldn't happen, typename is validated by DefinitionContent
     throw new Error("Internal error");
   }
 
-  const { content } = data.currentRevision;
+  const { content } = definition.currentRevision;
 
   return (
     <div className="max-w-2xl mx-auto">

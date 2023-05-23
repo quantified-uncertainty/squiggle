@@ -42,19 +42,17 @@ export const UserView: FC<Props> = ({ username }) => {
   const fragment = useLazyLoadQuery<UserViewQuery>(Query, { username });
 
   const {
-    data: { userByUsername },
+    data: { userByUsername: user },
     loadNext,
   } = usePaginationFragment<UserViewQuery, UserView$key>(Fragment, fragment);
 
   return (
     <div>
-      <header className="text-2xl font-bold mb-2">
-        {userByUsername.username}
-      </header>
+      <header className="text-2xl font-bold mb-2">{user.username}</header>
       <section>
         <header className="text-lg font-bold mb-2">Models</header>
-        {userByUsername.models.edges.length ? (
-          <ModelList connection={userByUsername.models} loadNext={loadNext} />
+        {user.models.edges.length ? (
+          <ModelList connectionRef={user.models} loadNext={loadNext} />
         ) : (
           <div className="text-slate-500">
             {"You don't have any models yet."}

@@ -5,7 +5,7 @@ import { useFragment, useLazyLoadQuery } from "react-relay";
 import { ModelPageQuery as ModelPageQueryType } from "@gen/ModelPageQuery.graphql";
 import { ModelPageFragment, ModelPageQuery } from "../ModelPage";
 import { ModelPage$key } from "@/__generated__/ModelPage.graphql";
-import { ModelContent } from "../ModelContent";
+import { EditModelPageBody } from "./EditModelPageBody";
 
 export default function Page({
   params,
@@ -19,5 +19,5 @@ export default function Page({
 
   const model = useFragment<ModelPage$key>(ModelPageFragment, data.model);
 
-  return <ModelContent model={model} mode="edit" />;
+  return <EditModelPageBody modelRef={model} />;
 }
