@@ -196,8 +196,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
         handle={(handle, ref) => (
           <div
             ref={ref}
-            className={`bg-slate-100 hover:bg-blue-200 transition w-1 h-full -mr-1 top-0 mt-0 rotate-0 react-resizable-handle react-resizable-handle-${handle}`}
-            style={{ backgroundImage: "none" }}
+            className={`bg-none bg-slate-100 hover:bg-blue-200 transition w-1 h-full -mr-1 top-0 mt-0 rotate-0 react-resizable-handle react-resizable-handle-${handle}`}
           />
         )}
       >
