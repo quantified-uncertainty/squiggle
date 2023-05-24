@@ -2,10 +2,40 @@ import { builder } from "@/graphql/builder";
 import { Definition } from "../types/definition";
 import { prisma } from "@/prisma";
 
+const RelativeValuesClusterInput = builder.inputType(
+  "RelativeValuesClusterInput",
+  {
+    fields: (t) => ({
+      id: t.string({
+        required: true,
+        validate: {
+          regex: /^\w[\w\-]*$/,
+        },
+      }),
+      color: t.string({
+        required: true,
+        validate: {
+          regex: /^#[0-9a-f]{6}$/,
+        },
+      }),
+    }),
+  }
+);
+
 const RelativeValuesItemInput = builder.inputType("RelativeValuesItemInput", {
   fields: (t) => ({
     id: t.string({
       required: true,
+      validate: {
+        regex: /^\w[\w\-]*$/,
+      },
+    }),
+    name: t.string({
+      required: true,
+    }),
+    description: t.string(),
+    clusterId: t.string(),
+    recommendedUnit: t.string({
       validate: {
         regex: /^\w[\w\-]*$/,
       },
@@ -42,6 +72,10 @@ builder.mutationField("createRelativeValuesDefinition", (t) =>
         type: [RelativeValuesItemInput],
         required: true,
       }),
+      clusters: t.input.field({
+        type: [RelativeValuesClusterInput],
+        required: true,
+      }),
     },
     resolve: async (_, { input }, { session }) => {
       const email = session?.user.email;
@@ -65,6 +99,8 @@ builder.mutationField("createRelativeValuesDefinition", (t) =>
         itemIds.add(item.id);
       }
 
+      // TODO - check that `recommendedUnit` matches some item id, and that `clusterId` matches some cluster id
+
       const definition = await prisma.definition.create({
         data: {
           owner: {
@@ -77,7 +113,7 @@ builder.mutationField("createRelativeValuesDefinition", (t) =>
                 create: {
                   title: input.title,
                   items: input.items,
-                  clusters: [],
+                  clusters: input.clusters,
                 },
               },
               contentType: "RelativeValues",

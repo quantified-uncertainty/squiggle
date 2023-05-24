@@ -17,18 +17,15 @@ const fragment = graphql`
 
 type Props = {
   definitionRef: DefinitionContent$key;
-  mode: "view" | "edit";
 };
 
-export const DefinitionContent: FC<Props> = ({ definitionRef, mode }) => {
+export const DefinitionContent: FC<Props> = ({ definitionRef }) => {
   const definition = useFragment(fragment, definitionRef);
   const typename = definition.currentRevision.content.__typename;
 
   switch (typename) {
     case "RelativeValuesDefinition":
-      return (
-        <RelativeValuesDefinition definitionRef={definition} mode={mode} />
-      );
+      return <RelativeValuesDefinition definitionRef={definition} />;
     default:
       return <div>Unknown definition type {typename}</div>;
   }

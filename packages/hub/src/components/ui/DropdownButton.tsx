@@ -1,18 +1,18 @@
-import { FC, ReactNode } from "react";
+import { FC } from "react";
 
-import { Button, DotsHorizontalIcon, Dropdown, DropdownMenu } from "@quri/ui";
+import { Button, Dropdown } from "@quri/ui";
 
 type Props = {
-  children: (options: { close(): void }) => ReactNode;
+  text: string;
+  children(): React.ReactNode;
 };
 
-// TODO - move to @quri/ui
-export const DropdownButton: FC<Props> = ({ children }) => {
+export const DropdownButton: FC<Props> = ({ text, children }) => {
   return (
-    <Dropdown render={children} tailwindSelector="squiggle-hub">
-      <Button>
-        <DotsHorizontalIcon className="text-slate-500" />
-      </Button>
-    </Dropdown>
+    <div className="flex">
+      <Dropdown render={children}>
+        <Button>{text}</Button>
+      </Dropdown>
+    </div>
   );
 };

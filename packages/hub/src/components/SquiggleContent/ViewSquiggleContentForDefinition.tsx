@@ -4,6 +4,8 @@ import { useFragment } from "react-relay";
 
 import { SquiggleContent$key } from "@/__generated__/SquiggleContent.graphql";
 import { ViewSquiggleContentForDefinition$key } from "@/__generated__/ViewSquiggleContentForDefinition.graphql";
+import { SquiggleContentFragment } from "./SquiggleContent";
+import { ViewSquiggleContentForRelativeValuesDefinition } from "@/relative-values/ViewSquiggleContentForRelativeValuesDefinition";
 
 type Props = {
   contentRef: SquiggleContent$key;
@@ -17,11 +19,7 @@ const fragment = graphql`
       currentRevision {
         content {
           __typename
-          ... on RelativeValuesDefinition {
-            items {
-              id
-            }
-          }
+          ...ViewSquiggleContentForRelativeValuesDefinition
         }
       }
     }
@@ -35,9 +33,16 @@ export const ViewSquiggleContentForDefinition: FC<Props> = ({
 }) => {
   const forDefinition = useFragment(fragment, definitionRef);
 
+  const content = useFragment(SquiggleContentFragment, contentRef);
+
   switch (forDefinition.definition.currentRevision.content.__typename) {
     case "RelativeValuesDefinition":
-      return <div>TODO - RV UI</div>;
+      return (
+        <ViewSquiggleContentForRelativeValuesDefinition
+          definitionRef={forDefinition.definition.currentRevision.content}
+          code={content.code}
+        />
+      );
     default:
       return <div>ERROR - unknown definition type</div>;
   }

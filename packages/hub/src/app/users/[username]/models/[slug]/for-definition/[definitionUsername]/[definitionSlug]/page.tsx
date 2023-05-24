@@ -33,5 +33,11 @@ export default function OuterModelPage({
 
   const model = useFragment<ModelPage$key>(ModelPageFragment, modelRef);
 
-  return <ViewModelRevision revisionRef={model.currentRevision} />;
+  return (
+    <ViewModelRevision
+      revisionRef={model.currentRevision}
+      modelUsername={params.username}
+      modelSlug={params.slug}
+    />
+  );
 }

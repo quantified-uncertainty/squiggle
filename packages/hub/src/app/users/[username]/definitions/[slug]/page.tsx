@@ -21,5 +21,5 @@ export default function OuterDefinitionPage({
     data.definition
   );
 
-  return <DefinitionContent definitionRef={definition} mode="view" />;
+  return <DefinitionContent definitionRef={definition} />;
 }

@@ -61,7 +61,7 @@ const CreateVariableWithDefinitionModal: FC<{
   });
 
   return (
-    <Modal close={close} tailwindSelector="squiggle-hub">
+    <Modal close={close}>
       <Modal.Header>...</Modal.Header>
       <Modal.Body>
         <TextInput register={register} label="Variable" name="variable" />

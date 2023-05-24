@@ -126,6 +126,7 @@ type Mutation {
 }
 
 input MutationCreateRelativeValuesDefinitionInput {
+  clusters: [RelativeValuesClusterInput!]!
   items: [RelativeValuesItemInput!]!
   slug: String!
   title: String!
@@ -220,19 +221,39 @@ type QueryUsersConnectionEdge {
   node: User!
 }
 
+type RelativeValuesCluster {
+  color: String!
+  id: String!
+  recommendedUnit: String
+}
+
+input RelativeValuesClusterInput {
+  color: String!
+  id: String!
+}
+
 type RelativeValuesDefinition implements Node {
+  clusters: [RelativeValuesCluster!]!
   dbId: ID!
   id: ID!
   items: [RelativeValuesItem!]!
+  recommendedUnit: String
   title: String!
 }
 
 type RelativeValuesItem {
+  clusterId: String
+  description: String!
   id: String!
+  name: String!
 }
 
 input RelativeValuesItemInput {
+  clusterId: String
+  description: String
   id: String!
+  name: String!
+  recommendedUnit: String
 }
 
 type SquiggleErrorOutput implements SquiggleOutput {

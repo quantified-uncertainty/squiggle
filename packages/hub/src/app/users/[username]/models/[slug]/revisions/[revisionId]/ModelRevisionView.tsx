@@ -3,7 +3,7 @@ import { useLazyLoadQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { StyledLink } from "@/components/ui/StyledLink";
-import { commonDateFormat } from "@/lib/utils";
+import { commonDateFormat } from "@/lib/common";
 import { modelRoute } from "@/routes";
 import { ModelRevisionViewQuery } from "@gen/ModelRevisionViewQuery.graphql";
 import { SquigglePlayground } from "@quri/squiggle-components";

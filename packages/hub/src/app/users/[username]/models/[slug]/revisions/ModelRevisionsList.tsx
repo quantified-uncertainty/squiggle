@@ -5,7 +5,7 @@ import { graphql } from "relay-runtime";
 import { ModelRevisionsList$key } from "@/__generated__/ModelRevisionsList.graphql";
 import { EntityInfo } from "@/components/EntityInfo";
 import { StyledLink } from "@/components/ui/StyledLink";
-import { commonDateFormat } from "@/lib/utils";
+import { commonDateFormat } from "@/lib/common";
 import { modelRevisionRoute } from "@/routes";
 import { ModelRevisionsListQuery } from "@gen/ModelRevisionsListQuery.graphql";
 import { Button } from "@quri/ui";

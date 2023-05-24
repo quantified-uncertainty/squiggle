@@ -6,7 +6,7 @@ import { DropdownMenu } from "@quri/ui";
 
 import { EntityInfo } from "@/components/EntityInfo";
 import { WithTopMenu } from "@/components/layout/WithTopMenu";
-import { DropdownButton } from "@/components/ui/DropdownButton";
+import { DotsDropdownButton } from "@/components/ui/DotsDropdownButton";
 import { StyledTabLink } from "@/components/ui/StyledTabLink";
 import { modelEditRoute, modelRevisionsRoute, modelRoute } from "@/routes";
 import { DeleteModelAction } from "./DeleteModelAction";
@@ -49,7 +49,7 @@ type CommonProps = {
 
 const MenuButton: FC<CommonProps> = ({ username, slug }) => {
   return (
-    <DropdownButton>
+    <DotsDropdownButton>
       {({ close }) => (
         <DropdownMenu>
           <UpdateModelSlugAction
@@ -60,7 +60,7 @@ const MenuButton: FC<CommonProps> = ({ username, slug }) => {
           <DeleteModelAction username={username} slug={slug} close={close} />
         </DropdownMenu>
       )}
-    </DropdownButton>
+    </DotsDropdownButton>
   );
 };
 

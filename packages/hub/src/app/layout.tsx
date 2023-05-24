@@ -14,9 +14,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
   return (
     <html>
       <body>
-        <div className="squiggle-hub">
-          <ClientApp session={session}>{children}</ClientApp>
-        </div>
+        <ClientApp session={session}>{children}</ClientApp>
       </body>
     </html>
   );

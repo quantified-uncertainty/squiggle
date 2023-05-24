@@ -12,6 +12,21 @@ export function modelRoute({
   return `/users/${username}/models/${slug}`;
 }
 
+export function modelForDefinitionRoute({
+  username,
+  slug,
+  definition,
+}: {
+  username: string;
+  slug: string;
+  definition: {
+    username: string;
+    slug: string;
+  };
+}) {
+  return `/users/${username}/models/${slug}/for-definition/${definition.username}/${definition.slug}`;
+}
+
 export function modelEditRoute({
   username,
   slug,
@@ -52,6 +67,16 @@ export function definitionRoute({
   slug: string;
 }) {
   return `/users/${username}/definitions/${slug}`;
+}
+
+export function definitionEditRoute({
+  username,
+  slug,
+}: {
+  username: string;
+  slug: string;
+}) {
+  return `/users/${username}/definitions/${slug}/edit`;
 }
 
 export function userRoute({ username }: { username: string }) {

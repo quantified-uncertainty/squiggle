@@ -1,7 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["./src/**/*.{tsx,ts}", "../../node_modules/@quri/ui/dist/**/*.js"],
-  important: ".squiggle-hub",
   theme: {
     extend: {
       boxShadow: {

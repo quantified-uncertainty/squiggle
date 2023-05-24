@@ -9,10 +9,12 @@ import { VariablesWithDefinitionsList } from "@/components/variablesWithDefiniti
 import { ModelRevisionFragment } from "./ModelRevision";
 
 type Props = {
+  modelUsername: string;
+  modelSlug: string;
   revisionRef: ModelRevision$key;
 };
 
-const Content: FC<Props> = ({ revisionRef }) => {
+const Content: FC<{ revisionRef: ModelRevision$key }> = ({ revisionRef }) => {
   const revision = useFragment(ModelRevisionFragment, revisionRef);
   const typename = revision.content.__typename;
 
@@ -29,7 +31,11 @@ const Content: FC<Props> = ({ revisionRef }) => {
   }
 };
 
-export const ViewModelRevision: FC<Props> = ({ revisionRef }) => {
+export const ViewModelRevision: FC<Props> = ({
+  revisionRef,
+  modelUsername,
+  modelSlug,
+}) => {
   const revision = useFragment(ModelRevisionFragment, revisionRef);
 
   return (
@@ -55,8 +61,12 @@ export const ViewModelRevision: FC<Props> = ({ revisionRef }) => {
         </div>
       )}
       {revision.variablesWithDefinitions.length ? (
-        <div className="mb-4">
-          <VariablesWithDefinitionsList dataRef={revision} />
+        <div className="pb-4 mb-4 border-b border-slate-200">
+          <VariablesWithDefinitionsList
+            dataRef={revision}
+            modelUsername={modelUsername}
+            modelSlug={modelSlug}
+          />
         </div>
       ) : null}
       <Content revisionRef={revisionRef} />

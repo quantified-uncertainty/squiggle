@@ -1,15 +1,36 @@
 import { z } from "zod";
 import { builder } from "@/graphql/builder";
 
-const itemsSchema = z.array(
+const clustersSchema = z.array(
   z.object({
     id: z.string(),
+    color: z.string(),
   })
 );
 
+const itemsSchema = z.array(
+  z.object({
+    id: z.string(),
+    name: z.string().default(""),
+    clusterId: z.string().optional(),
+    description: z.string().default(""),
+  })
+);
+
+const RelativeValuesCluster = builder.simpleObject("RelativeValuesCluster", {
+  fields: (t) => ({
+    id: t.string(),
+    color: t.string(),
+    recommendedUnit: t.string({ nullable: true }),
+  }),
+});
+
 const RelativeValuesItem = builder.simpleObject("RelativeValuesItem", {
   fields: (t) => ({
-    id: t.string({ nullable: false }),
+    id: t.string(),
+    name: t.string(),
+    description: t.string(),
+    clusterId: t.string({ nullable: true }),
   }),
 });
 
@@ -25,6 +46,16 @@ export const RelativeValuesDefinition = builder.prismaNode(
         resolve(obj) {
           return itemsSchema.parse(obj.items);
         },
+      }),
+      clusters: t.field({
+        type: [RelativeValuesCluster],
+        resolve(obj) {
+          return clustersSchema.parse(obj.clusters);
+        },
+      }),
+      recommendedUnit: t.string({
+        nullable: true,
+        resolve: () => null, // TODO
       }),
     }),
   }
