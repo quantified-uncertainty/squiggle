@@ -3,9 +3,10 @@ import ReactMarkdown from "react-markdown";
 import { useFragment } from "react-relay";
 import remarkBreaks from "remark-breaks";
 
-import { ViewSquiggleSnippetContent } from "@/components/SquiggleSnippetContent/ViewSquiggleSnippetContent";
-import { ModelPageBodyFragment } from "./ModelPageBody";
 import { ModelPageBody$key } from "@/__generated__/ModelPageBody.graphql";
+import { ViewSquiggleSnippetContent } from "@/components/SquiggleSnippetContent/ViewSquiggleSnippetContent";
+import { VariablesWithDefinitionsList } from "@/components/variablesWithDefinitions/VariablesWithDefinitionsList";
+import { ModelPageBodyFragment } from "./ModelPageBody";
 
 type Props = {
   modelRef: ModelPageBody$key;
@@ -51,6 +52,11 @@ export const ViewModelPageBody: FC<Props> = ({ modelRef }) => {
           </ReactMarkdown>
         </div>
       )}
+      {model.currentRevision.variablesWithDefinitions.length ? (
+        <div className="mb-4">
+          <VariablesWithDefinitionsList dataRef={model.currentRevision} />
+        </div>
+      ) : null}
       <Content modelRef={modelRef} />
     </div>
   );

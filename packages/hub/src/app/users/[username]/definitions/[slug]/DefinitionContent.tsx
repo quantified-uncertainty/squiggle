@@ -1,5 +1,5 @@
 import { DefinitionContent$key } from "@/__generated__/DefinitionContent.graphql";
-import { RelativeValuesDefinition } from "@/components/SquiggleSnippetContent/RelativeValuesDefinition";
+import { RelativeValuesDefinition } from "@/components/RelativeValuesDefinition";
 import { FC } from "react";
 import { graphql, useFragment } from "react-relay";
 

@@ -11,6 +11,11 @@ export const ModelPageBodyFragment = graphql`
     currentRevision {
       id
       description
+      ...VariablesWithDefinitions
+      # to measure length in ViewModelPageBody
+      variablesWithDefinitions {
+        id
+      }
       content {
         __typename
         ...SquiggleSnippetContent

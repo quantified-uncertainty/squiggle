@@ -171,6 +171,8 @@ model RelativeValuesDefinition {
 // Note that model _revisions_ are associated with definitions (and not definition revisions).
 // Associating model revisions with definition revisions would be better, but it's more complicated.
 model VariableWithDefinition {
+  id String @id @default(cuid())
+
   modelRevision   ModelRevision @relation(fields: [modelRevisionId], references: [id])
   modelRevisionId String
   definition      Definition    @relation(fields: [definitionId], references: [id])
@@ -178,5 +180,5 @@ model VariableWithDefinition {
 
   variable String
 
-  @@id([modelRevisionId, definitionId])
+  @@unique([modelRevisionId, definitionId])
 }

@@ -2,6 +2,17 @@ import { builder } from "@/graphql/builder";
 import { Definition } from "../types/definitions";
 import { prisma } from "@/prisma";
 
+const RelativeValuesItemInput = builder.inputType("RelativeValuesItemInput", {
+  fields: (t) => ({
+    id: t.string({
+      required: true,
+      validate: {
+        regex: /^\w[\w\-]*$/,
+      },
+    }),
+  }),
+});
+
 builder.mutationField("createRelativeValuesDefinition", (t) =>
   t.fieldWithInput({
     type: builder.simpleObject("CreateRelativeValuesDefinitionResult", {
@@ -28,18 +39,7 @@ builder.mutationField("createRelativeValuesDefinition", (t) =>
         required: true,
       }),
       items: t.input.field({
-        type: [
-          builder.inputType("RelativeValuesItemInput", {
-            fields: (t) => ({
-              id: t.string({
-                required: true,
-                validate: {
-                  regex: /^\w[\w\-]*$/,
-                },
-              }),
-            }),
-          }),
-        ],
+        type: [RelativeValuesItemInput],
         required: true,
       }),
     },

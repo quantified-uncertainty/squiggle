@@ -1,6 +1,36 @@
 import { prisma } from "@/prisma";
 import { builder } from "@/graphql/builder";
 import { Model } from "../types/models";
+import { Definition } from "@prisma/client";
+
+const DefinitionRefInput = builder.inputType("DefinitionRefInput", {
+  fields: (t) => ({
+    username: t.string({ required: true }),
+    slug: t.string({ required: true }),
+  }),
+});
+
+const ModelVariableWithDefinitionInput = builder.inputType(
+  "ModelVariableWithDefinitionInput",
+  {
+    fields: (t) => ({
+      variable: t.string({ required: true }),
+      definition: t.field({
+        type: DefinitionRefInput,
+        required: true,
+      }),
+    }),
+  }
+);
+
+const SquiggleSnippetContentInput = builder.inputType(
+  "SquiggleSnippetContentInput",
+  {
+    fields: (t) => ({
+      code: t.string({ required: true }),
+    }),
+  }
+);
 
 builder.mutationField("updateSquiggleSnippetModel", (t) =>
   t.fieldWithInput({
@@ -17,10 +47,17 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
     },
     errors: {},
     input: {
-      code: t.input.string({ required: true }),
       username: t.input.string({ required: true }),
       slug: t.input.string({ required: true }),
       description: t.input.string(),
+      variablesWithDefinitions: t.input.field({
+        type: [ModelVariableWithDefinitionInput],
+      }),
+      code: t.input.string({ deprecationReason: "Use content arg instead" }),
+      content: t.input.field({
+        type: SquiggleSnippetContentInput,
+        // TODO - should be required after `code` input is removed
+      }),
     },
     resolve: async (_, { input }, { session }) => {
       const email = session?.user.email;
@@ -38,12 +75,65 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
         },
       });
 
+      const code = input.code ?? input.content?.code;
+      if (code === undefined) {
+        // remove this after `code` support is removed
+        throw new Error("One of `code` and `content.code` must be set");
+      }
+
+      const variablesWithDefinitions = input.variablesWithDefinitions ?? [];
+      const variablesWithDefinitionsToInsert: {
+        definitionId: string;
+        variable: string;
+      }[] = [];
+
+      if (variablesWithDefinitions.length) {
+        const selectedDefiintions = await prisma.definition.findMany({
+          where: {
+            OR: variablesWithDefinitions.map((pair) => ({
+              slug: pair.definition.slug,
+              owner: {
+                username: pair.definition.username,
+              },
+            })),
+          },
+          include: { owner: true },
+        });
+
+        // username -> slug -> Definition
+        let linkedDefinitions: Map<string, Map<string, Definition>> = new Map();
+        // now we need to match variablesWithDefinitions with definitions to get ids; I wonder if this could be simplified without sacrificing safety
+        for (let definition of selectedDefiintions) {
+          const { username } = definition.owner;
+          if (username === null) {
+            continue; // should never happen
+          }
+          if (!linkedDefinitions.has(username)) {
+            linkedDefinitions.set(username, new Map());
+          }
+          linkedDefinitions.get(username)?.set(definition.slug, definition);
+        }
+        for (const pair of variablesWithDefinitions) {
+          const definition = linkedDefinitions
+            .get(pair.definition.username)
+            ?.get(pair.definition.slug);
+
+          if (!definition) {
+            throw new Error(
+              `Definition with username=${pair.definition.username}, slug ${pair.definition.slug} not found`
+            );
+          }
+          variablesWithDefinitionsToInsert.push({
+            variable: pair.variable,
+            definitionId: definition.id,
+          });
+        }
+      }
+
       const revision = await prisma.modelRevision.create({
         data: {
           squiggleSnippet: {
-            create: {
-              code: input.code,
-            },
+            create: { code },
           },
           contentType: "SquiggleSnippet",
           description: input.description ?? "",
@@ -53,6 +143,11 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
                 slug: input.slug,
                 ownerId: owner.id,
               },
+            },
+          },
+          variablesWithDefinitions: {
+            createMany: {
+              data: variablesWithDefinitionsToInsert,
             },
           },
         },

@@ -1,7 +1,7 @@
 import { FC } from "react";
 import { useFragment } from "react-relay";
 
-import { EditSquiggleSnippetContent } from "@/components/SquiggleSnippetContent/EditSquiggleSnippetContent";
+import { EditSquiggleSnippetModel } from "@/components/SquiggleSnippetContent/EditSquiggleSnippetModel";
 import { ModelPageBodyFragment } from "../ModelPageBody";
 import { ModelPageBody$key } from "@/__generated__/ModelPageBody.graphql";
 
@@ -15,7 +15,7 @@ export const EditModelPageBody: FC<Props> = ({ modelRef }) => {
 
   switch (typename) {
     case "SquiggleSnippet":
-      return <EditSquiggleSnippetContent modelRef={modelRef} />;
+      return <EditSquiggleSnippetModel modelRef={modelRef} />;
     default:
       return <div>Unknown model type {typename}</div>;
   }

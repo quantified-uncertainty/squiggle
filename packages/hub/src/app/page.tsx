@@ -2,7 +2,7 @@
 
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 import { StyledLink } from "@/components/ui/StyledLink";
-import { newModelRoute } from "@/routes";
+import { newDefinitionRoute, newModelRoute } from "@/routes";
 import { useSession } from "next-auth/react";
 import { FrontpageModelList } from "./FrontpageModelList";
 import { FrontpageDefinitionList } from "./FrontpageDefinitionList";
@@ -21,7 +21,16 @@ export default function IndexPage() {
             </div>
           ) : null}
         </div>
-        <FrontpageDefinitionList />
+        <div className="space-y-4">
+          <FrontpageDefinitionList />
+          {session ? (
+            <div>
+              <StyledLink href={newDefinitionRoute()}>
+                Create new definition
+              </StyledLink>
+            </div>
+          ) : null}
+        </div>
       </div>
     </NarrowPageLayout>
   );

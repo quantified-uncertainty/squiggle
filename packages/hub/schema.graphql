@@ -30,6 +30,11 @@ type DefinitionEdge {
   node: Definition!
 }
 
+input DefinitionRefInput {
+  slug: String!
+  username: String!
+}
+
 type DefinitionRevision implements Node {
   content: DefinitionContent!
   id: ID!
@@ -81,6 +86,7 @@ type ModelRevision implements Node {
   dbId: ID!
   description: String!
   id: ID!
+  variablesWithDefinitions: [VariableWithDefinition!]!
 }
 
 type ModelRevisionConnection {
@@ -91,6 +97,11 @@ type ModelRevisionConnection {
 type ModelRevisionEdge {
   cursor: String!
   node: ModelRevision!
+}
+
+input ModelVariableWithDefinitionInput {
+  definition: DefinitionRefInput!
+  variable: String!
 }
 
 type Mutation {
@@ -144,10 +155,12 @@ input MutationUpdateModelSlugInput {
 union MutationUpdateModelSlugResult = BaseError | UpdateModelSlugResult
 
 input MutationUpdateSquiggleSnippetModelInput {
-  code: String!
+  code: String @deprecated(reason: "Use content arg instead")
+  content: SquiggleSnippetContentInput
   description: String
   slug: String!
   username: String!
+  variablesWithDefinitions: [ModelVariableWithDefinitionInput!]
 }
 
 union MutationUpdateSquiggleSnippetModelResult = BaseError | UpdateSquiggleSnippetResult
@@ -232,6 +245,10 @@ type SquiggleSnippet implements Node {
   id: ID!
 }
 
+input SquiggleSnippetContentInput {
+  code: String!
+}
+
 type UpdateModelSlugResult {
   model: Model!
 }
@@ -244,4 +261,10 @@ type User implements Node {
   id: ID!
   models(after: String, before: String, first: Int, last: Int): ModelConnection!
   username: String!
+}
+
+type VariableWithDefinition implements Node {
+  definition: Definition!
+  id: ID!
+  variable: String!
 }

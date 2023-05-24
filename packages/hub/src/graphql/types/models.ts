@@ -1,4 +1,5 @@
 import { builder } from "@/graphql/builder";
+import { Definition } from "./definitions";
 
 export const SquiggleSnippet = builder.prismaNode("SquiggleSnippet", {
   id: { field: "id" },
@@ -14,6 +15,17 @@ export const ModelContent = builder.unionType("ModelContent", {
   resolveType: () => SquiggleSnippet,
 });
 
+export const VariableWithDefinition = builder.prismaNode(
+  "VariableWithDefinition",
+  {
+    id: { field: "id" },
+    fields: (t) => ({
+      variable: t.exposeString("variable"),
+      definition: t.relation("definition"),
+    }),
+  }
+);
+
 export const ModelRevision = builder.prismaNode("ModelRevision", {
   id: { field: "id" },
   fields: (t) => ({
@@ -22,6 +34,9 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
       resolve: (revision) => revision.createdAt.getTime(),
     }),
     description: t.exposeString("description"),
+    // `relatedConnection` would be more principled, and in theory the number of variables with definitions could be high.
+    // But connection is harder to deal with on the UI side, since and we send all variables back on updates, so it doesn't make much sense there.
+    variablesWithDefinitions: t.relation("variablesWithDefinitions"),
     content: t.field({
       type: ModelContent,
       select: { squiggleSnippet: true },
