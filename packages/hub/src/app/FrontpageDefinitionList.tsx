@@ -7,7 +7,7 @@ import { DefinitionList } from "./DefinitionList";
 import { FrontpageDefinitionListQuery } from "@/__generated__/FrontpageDefinitionListQuery.graphql";
 import { FrontpageDefinitionList$key } from "@/__generated__/FrontpageDefinitionList.graphql";
 
-const Fragment = graphql`
+const fragment = graphql`
   fragment FrontpageDefinitionList on Query
   @argumentDefinitions(
     cursor: { type: "String" }
@@ -44,7 +44,7 @@ export const FrontpageDefinitionList: FC = () => {
   } = usePaginationFragment<
     FrontpageDefinitionListQuery,
     FrontpageDefinitionList$key
-  >(Fragment, definitionsRef);
+  >(fragment, definitionsRef);
 
   return (
     <div>

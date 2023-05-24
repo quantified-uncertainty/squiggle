@@ -1,6 +1,6 @@
 import { prisma } from "@/prisma";
 import { builder } from "@/graphql/builder";
-import { Model } from "../types/models";
+import { Model } from "../types/model";
 import { Definition } from "@prisma/client";
 
 const DefinitionRefInput = builder.inputType("DefinitionRefInput", {

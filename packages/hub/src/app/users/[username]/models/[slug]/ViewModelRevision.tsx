@@ -3,36 +3,38 @@ import ReactMarkdown from "react-markdown";
 import { useFragment } from "react-relay";
 import remarkBreaks from "remark-breaks";
 
-import { ModelPageBody$key } from "@/__generated__/ModelPageBody.graphql";
-import { ViewSquiggleSnippetContent } from "@/components/SquiggleSnippetContent/ViewSquiggleSnippetContent";
+import { ModelRevision$key } from "@/__generated__/ModelRevision.graphql";
+import { ViewSquiggleContent } from "@/components/SquiggleContent/ViewSquiggleContent";
 import { VariablesWithDefinitionsList } from "@/components/variablesWithDefinitions/VariablesWithDefinitionsList";
-import { ModelPageBodyFragment } from "./ModelPageBody";
+import { ModelRevisionFragment } from "./ModelRevision";
 
 type Props = {
-  modelRef: ModelPageBody$key;
+  revisionRef: ModelRevision$key;
 };
 
-const Content: FC<Props> = ({ modelRef: model }) => {
-  const data = useFragment(ModelPageBodyFragment, model);
-  const typename = data.currentRevision.content.__typename;
+const Content: FC<Props> = ({ revisionRef }) => {
+  const revision = useFragment(ModelRevisionFragment, revisionRef);
+  const typename = revision.content.__typename;
 
   switch (typename) {
     case "SquiggleSnippet":
       return (
-        <ViewSquiggleSnippetContent contentRef={data.currentRevision.content} />
+        <ViewSquiggleContent
+          contentRef={revision.content}
+          definitionRef={revision.forDefinition}
+        />
       );
     default:
       return <div>Unknown model type {typename}</div>;
   }
 };
 
-export const ViewModelPageBody: FC<Props> = ({ modelRef }) => {
-  const model = useFragment(ModelPageBodyFragment, modelRef);
-  const typename = model.currentRevision.content.__typename;
+export const ViewModelRevision: FC<Props> = ({ revisionRef }) => {
+  const revision = useFragment(ModelRevisionFragment, revisionRef);
 
   return (
     <div>
-      {model.currentRevision.description === "" ? null : (
+      {revision.description === "" ? null : (
         <div className="mb-4">
           <ReactMarkdown
             remarkPlugins={[remarkBreaks]}
@@ -48,16 +50,16 @@ export const ViewModelPageBody: FC<Props> = ({ modelRef }) => {
               ),
             }}
           >
-            {model.currentRevision.description}
+            {revision.description}
           </ReactMarkdown>
         </div>
       )}
-      {model.currentRevision.variablesWithDefinitions.length ? (
+      {revision.variablesWithDefinitions.length ? (
         <div className="mb-4">
-          <VariablesWithDefinitionsList dataRef={model.currentRevision} />
+          <VariablesWithDefinitionsList dataRef={revision} />
         </div>
       ) : null}
-      <Content modelRef={modelRef} />
+      <Content revisionRef={revisionRef} />
     </div>
   );
 };

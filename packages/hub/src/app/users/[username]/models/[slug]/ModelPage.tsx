@@ -13,20 +13,31 @@ import { DeleteModelAction } from "./DeleteModelAction";
 import { UpdateModelSlugAction } from "./UpdateModelSlugAction";
 
 export const ModelPageFragment = graphql`
-  fragment ModelPage on Model {
+  fragment ModelPage on Model
+  @argumentDefinitions(
+    forDefinitionInput: { type: "ModelRevisionForDefinitionInput" }
+  ) {
     id
     slug
     owner {
       username
     }
-    ...ModelPageBody
+    currentRevision {
+      content {
+        __typename
+      }
+      ...ModelRevision @arguments(forDefinitionInput: $forDefinitionInput)
+    }
   }
 `;
 
 export const ModelPageQuery = graphql`
-  query ModelPageQuery($input: QueryModelInput!) {
+  query ModelPageQuery(
+    $input: QueryModelInput!
+    $forDefinitionInput: ModelRevisionForDefinitionInput
+  ) {
     model(input: $input) {
-      ...ModelPage
+      ...ModelPage @arguments(forDefinitionInput: $forDefinitionInput)
     }
   }
 `;

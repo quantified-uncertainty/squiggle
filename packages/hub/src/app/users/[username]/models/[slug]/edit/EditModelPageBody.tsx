@@ -1,16 +1,16 @@
 import { FC } from "react";
 import { useFragment } from "react-relay";
 
-import { EditSquiggleSnippetModel } from "@/components/SquiggleSnippetContent/EditSquiggleSnippetModel";
-import { ModelPageBodyFragment } from "../ModelPageBody";
-import { ModelPageBody$key } from "@/__generated__/ModelPageBody.graphql";
+import { ModelPage$key } from "@/__generated__/ModelPage.graphql";
+import { EditSquiggleSnippetModel } from "@/components/SquiggleContent/EditSquiggleSnippetModel";
+import { ModelPageFragment } from "../ModelPage";
 
 type Props = {
-  modelRef: ModelPageBody$key;
+  modelRef: ModelPage$key;
 };
 
 export const EditModelPageBody: FC<Props> = ({ modelRef }) => {
-  const model = useFragment(ModelPageBodyFragment, modelRef);
+  const model = useFragment(ModelPageFragment, modelRef);
   const typename = model.currentRevision.content.__typename;
 
   switch (typename) {

@@ -8,7 +8,7 @@ import { UserLink } from "@/components/UserLink";
 import { StyledDefinitionLink } from "@/components/ui/StyledDefinitionLink";
 import { definitionRoute } from "@/routes";
 
-const Fragment = graphql`
+const fragment = graphql`
   fragment DefinitionCardFragment on Definition {
     slug
     createdAtTimestamp
@@ -25,7 +25,7 @@ type Props = {
 };
 
 export const DefinitionCard: FC<Props> = ({ definitionRef, showOwner }) => {
-  const definition = useFragment(Fragment, definitionRef);
+  const definition = useFragment(fragment, definitionRef);
 
   return (
     <div className="border p-2 rounded">

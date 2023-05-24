@@ -1,9 +1,10 @@
-import { DefinitionContent$key } from "@/__generated__/DefinitionContent.graphql";
-import { RelativeValuesDefinition } from "@/components/RelativeValuesDefinition";
 import { FC } from "react";
 import { graphql, useFragment } from "react-relay";
 
-const Fragment = graphql`
+import { DefinitionContent$key } from "@/__generated__/DefinitionContent.graphql";
+import { RelativeValuesDefinition } from "@/components/RelativeValuesDefinition";
+
+const fragment = graphql`
   fragment DefinitionContent on Definition {
     currentRevision {
       content {
@@ -20,7 +21,7 @@ type Props = {
 };
 
 export const DefinitionContent: FC<Props> = ({ definitionRef, mode }) => {
-  const definition = useFragment(Fragment, definitionRef);
+  const definition = useFragment(fragment, definitionRef);
   const typename = definition.currentRevision.content.__typename;
 
   switch (typename) {

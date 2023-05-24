@@ -4,7 +4,7 @@ import { graphql } from "relay-runtime";
 
 import { RelativeValuesDefinitionFragment$key } from "@/__generated__/RelativeValuesDefinitionFragment.graphql";
 
-const Fragment = graphql`
+const fragment = graphql`
   fragment RelativeValuesDefinitionFragment on Definition {
     id
     slug
@@ -34,7 +34,7 @@ export const RelativeValuesDefinition: FC<Props> = ({
   definitionRef,
   mode,
 }) => {
-  const definition = useFragment(Fragment, definitionRef);
+  const definition = useFragment(fragment, definitionRef);
 
   if (
     definition.currentRevision.content.__typename !== "RelativeValuesDefinition"

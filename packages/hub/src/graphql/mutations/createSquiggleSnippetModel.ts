@@ -1,6 +1,6 @@
 import { prisma } from "@/prisma";
 import { builder } from "@/graphql/builder";
-import { Model } from "../types/models";
+import { Model } from "../types/model";
 
 builder.mutationField("createSquiggleSnippetModel", (t) =>
   t.fieldWithInput({

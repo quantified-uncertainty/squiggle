@@ -1,6 +1,6 @@
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
-import { Definition, DefinitionConnection } from "../types/definitions";
+import { Definition, DefinitionConnection } from "../types/definition";
 
 builder.queryField("definitions", (t) =>
   t.prismaConnection(

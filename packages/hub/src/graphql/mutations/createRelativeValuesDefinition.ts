@@ -1,5 +1,5 @@
 import { builder } from "@/graphql/builder";
-import { Definition } from "../types/definitions";
+import { Definition } from "../types/definition";
 import { prisma } from "@/prisma";
 
 const RelativeValuesItemInput = builder.inputType("RelativeValuesItemInput", {

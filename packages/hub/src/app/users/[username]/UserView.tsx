@@ -7,7 +7,7 @@ import type { UserViewQuery } from "@gen/UserViewQuery.graphql";
 import { ModelList } from "@/app/ModelList";
 import { UserView$key } from "@/__generated__/UserView.graphql";
 
-const Fragment = graphql`
+const fragment = graphql`
   fragment UserView on Query
   @argumentDefinitions(
     cursor: { type: "String" }
@@ -39,12 +39,12 @@ type Props = {
 };
 
 export const UserView: FC<Props> = ({ username }) => {
-  const fragment = useLazyLoadQuery<UserViewQuery>(Query, { username });
+  const fragmentRef = useLazyLoadQuery<UserViewQuery>(Query, { username });
 
   const {
     data: { userByUsername: user },
     loadNext,
-  } = usePaginationFragment<UserViewQuery, UserView$key>(Fragment, fragment);
+  } = usePaginationFragment<UserViewQuery, UserView$key>(fragment, fragmentRef);
 
   return (
     <div>

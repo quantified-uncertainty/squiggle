@@ -85,6 +85,7 @@ type ModelRevision implements Node {
   createdAtTimestamp: Float!
   dbId: ID!
   description: String!
+  forDefinition(input: ModelRevisionForDefinitionInput): ModelRevisionForDefinition
   id: ID!
   variablesWithDefinitions: [VariableWithDefinition!]!
 }
@@ -97,6 +98,16 @@ type ModelRevisionConnection {
 type ModelRevisionEdge {
   cursor: String!
   node: ModelRevision!
+}
+
+type ModelRevisionForDefinition {
+  definition: Definition!
+  variable: String!
+}
+
+input ModelRevisionForDefinitionInput {
+  slug: String!
+  username: String!
 }
 
 input ModelVariableWithDefinitionInput {

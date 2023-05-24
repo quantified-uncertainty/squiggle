@@ -7,13 +7,15 @@ import { SquigglePlayground } from "@quri/squiggle-components";
 import { Button, Modal, TextArea, TextInput, useToast } from "@quri/ui";
 
 import { EditSquiggleSnippetModelMutation } from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
-import { ModelPageBody$key } from "@/__generated__/ModelPageBody.graphql";
-import { SquiggleSnippetContent$key } from "@/__generated__/SquiggleSnippetContent.graphql";
+import { SquiggleContent$key } from "@/__generated__/SquiggleContent.graphql";
 import { VariablesWithDefinitions$key } from "@/__generated__/VariablesWithDefinitions.graphql";
-import { ModelPageBodyFragment } from "@/app/users/[username]/models/[slug]/ModelPageBody";
+import { ModelRevisionFragment } from "@/app/users/[username]/models/[slug]/ModelRevision";
 import { WithTopMenu } from "@/components/layout/WithTopMenu";
 import { VariablesWithDefinitionsFragment } from "../variablesWithDefinitions/VariablesWithDefinitions";
-import { SquiggleSnippetContentFragment } from "./SquiggleSnippetContent";
+import { SquiggleContentFragment } from "./SquiggleContent";
+import { ModelPage$key } from "@/__generated__/ModelPage.graphql";
+import { ModelPageFragment } from "@/app/users/[username]/models/[slug]/ModelPage";
+import { ModelRevision$key } from "@/__generated__/ModelRevision.graphql";
 
 export const Mutation = graphql`
   mutation EditSquiggleSnippetModelMutation(
@@ -112,17 +114,22 @@ const VariablesWithDefinitionsControls: FC<{
 type Props = {
   // We have to pass the entire model here and not just content;
   // it's too hard to split the editing form into "content-type-specific" part and "generic model fields" part.
-  modelRef: ModelPageBody$key;
+  modelRef: ModelPage$key;
 };
 
 export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
   const toast = useToast();
   const { data: session } = useSession();
 
-  const model = useFragment(ModelPageBodyFragment, modelRef);
-  const content = useFragment<SquiggleSnippetContent$key>(
-    SquiggleSnippetContentFragment,
-    model.currentRevision.content
+  const model = useFragment(ModelPageFragment, modelRef);
+  const revision = useFragment<ModelRevision$key>(
+    ModelRevisionFragment,
+    model.currentRevision
+  );
+
+  const content = useFragment<SquiggleContent$key>(
+    SquiggleContentFragment,
+    revision.content
   );
 
   // borrowing fragment to populate form
@@ -130,13 +137,13 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
   const { variablesWithDefinitions } =
     useFragment<VariablesWithDefinitions$key>(
       VariablesWithDefinitionsFragment,
-      model.currentRevision
+      revision
     );
 
   const initialFormValues: FormShape = useMemo(() => {
     return {
       code: content.code,
-      description: model.currentRevision.description,
+      description: revision.description,
       variablesWithDefinitions: variablesWithDefinitions.map((item) => ({
         variable: item.variable,
         definition: {
@@ -145,7 +152,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
         },
       })),
     };
-  }, [model, content, variablesWithDefinitions]);
+  }, [content, revision.description, variablesWithDefinitions]);
 
   const { handleSubmit, control, register } = useForm<FormShape>({
     defaultValues: initialFormValues,

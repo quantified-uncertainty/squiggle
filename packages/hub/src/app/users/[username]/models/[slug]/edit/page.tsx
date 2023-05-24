@@ -1,10 +1,9 @@
 "use client";
 
-import { useFragment, useLazyLoadQuery } from "react-relay";
+import { useLazyLoadQuery } from "react-relay";
 
 import { ModelPageQuery as ModelPageQueryType } from "@gen/ModelPageQuery.graphql";
-import { ModelPageFragment, ModelPageQuery } from "../ModelPage";
-import { ModelPage$key } from "@/__generated__/ModelPage.graphql";
+import { ModelPageQuery } from "../ModelPage";
 import { EditModelPageBody } from "./EditModelPageBody";
 
 export default function Page({
@@ -17,7 +16,5 @@ export default function Page({
     input: { ownerUsername: params.username, slug: params.slug },
   });
 
-  const model = useFragment<ModelPage$key>(ModelPageFragment, data.model);
-
-  return <EditModelPageBody modelRef={model} />;
+  return <EditModelPageBody modelRef={data.model} />;
 }

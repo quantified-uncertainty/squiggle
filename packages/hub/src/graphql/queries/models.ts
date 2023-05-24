@@ -1,5 +1,5 @@
 import { builder } from "@/graphql/builder";
-import { Model, ModelConnection } from "../types/models";
+import { Model, ModelConnection } from "../types/model";
 import { prisma } from "@/prisma";
 
 builder.queryField("models", (t) =>
