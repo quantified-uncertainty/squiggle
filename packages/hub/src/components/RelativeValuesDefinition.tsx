@@ -2,33 +2,21 @@ import { FC, Fragment } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { RelativeValuesDefinitionFragment$key } from "@/__generated__/RelativeValuesDefinitionFragment.graphql";
 import { ClusterIcon } from "@/relative-values/components/common/ClusterIcon";
+import { RelativeValuesDefinition$key } from "@/__generated__/RelativeValuesDefinition.graphql";
 
-const fragment = graphql`
-  fragment RelativeValuesDefinitionFragment on Definition {
-    id
-    slug
-    owner {
-      username
+export const RelativeValuesDefinitionFragment = graphql`
+  fragment RelativeValuesDefinition on RelativeValuesDefinition {
+    title
+    clusters {
+      id
+      color
     }
-    currentRevision {
-      content {
-        __typename
-        ... on RelativeValuesDefinition {
-          title
-          clusters {
-            id
-            color
-          }
-          items {
-            id
-            name
-            description
-            clusterId
-          }
-        }
-      }
+    items {
+      id
+      name
+      description
+      clusterId
     }
   }
 `;
@@ -56,20 +44,11 @@ const ClusterInfo: FC<{
 };
 
 type Props = {
-  definitionRef: RelativeValuesDefinitionFragment$key;
+  definitionRef: RelativeValuesDefinition$key;
 };
 
 export const RelativeValuesDefinition: FC<Props> = ({ definitionRef }) => {
-  const definition = useFragment(fragment, definitionRef);
-
-  if (
-    definition.currentRevision.content.__typename !== "RelativeValuesDefinition"
-  ) {
-    // shouldn't happen, typename is validated by DefinitionContent
-    throw new Error("Internal error");
-  }
-
-  const { content } = definition.currentRevision;
+  const content = useFragment(RelativeValuesDefinitionFragment, definitionRef);
 
   const clusters = Object.fromEntries(
     content.clusters.map((cluster) => [cluster.id, cluster])

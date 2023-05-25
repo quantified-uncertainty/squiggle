@@ -3,10 +3,10 @@ import { graphql } from "relay-runtime";
 
 import { EntityInfo } from "@/components/EntityInfo";
 import { WithTopMenu } from "@/components/layout/WithTopMenu";
+import { DotsDropdownButton } from "@/components/ui/DotsDropdownButton";
 import { StyledTabLink } from "@/components/ui/StyledTabLink";
 import { definitionEditRoute, definitionRoute } from "@/routes";
-import { Dropdown, DropdownMenu } from "@quri/ui";
-import { DotsDropdownButton } from "@/components/ui/DotsDropdownButton";
+import { DropdownMenu } from "@quri/ui";
 import { DeleteDefinitionAction } from "./DeleteDefinitionAction";
 
 export const DefinitionPageFragment = graphql`
@@ -16,7 +16,12 @@ export const DefinitionPageFragment = graphql`
     owner {
       username
     }
-    ...DefinitionContent
+    currentRevision {
+      content {
+        __typename
+      }
+      ...DefinitionRevision
+    }
   }
 `;
 

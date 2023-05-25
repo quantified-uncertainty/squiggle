@@ -122,6 +122,7 @@ type Mutation {
   deleteModel(input: MutationDeleteModelInput!): MutationDeleteModelResult!
   setUsername(username: String!): MutationSetUsernameResult!
   updateModelSlug(input: MutationUpdateModelSlugInput!): MutationUpdateModelSlugResult!
+  updateRelativeValuesDefinition(input: MutationUpdateRelativeValuesDefinitionInput!): MutationUpdateRelativeValuesDefinitionResult!
   updateSquiggleSnippetModel(input: MutationUpdateSquiggleSnippetModelInput!): MutationUpdateSquiggleSnippetModelResult!
 }
 
@@ -165,6 +166,16 @@ input MutationUpdateModelSlugInput {
 }
 
 union MutationUpdateModelSlugResult = BaseError | UpdateModelSlugResult
+
+input MutationUpdateRelativeValuesDefinitionInput {
+  clusters: [RelativeValuesClusterInput!]!
+  items: [RelativeValuesItemInput!]!
+  slug: String!
+  title: String!
+  username: String!
+}
+
+union MutationUpdateRelativeValuesDefinitionResult = BaseError | UpdateRelativeValuesDefinitionResult
 
 input MutationUpdateSquiggleSnippetModelInput {
   code: String @deprecated(reason: "Use content arg instead")
@@ -283,6 +294,10 @@ input SquiggleSnippetContentInput {
 
 type UpdateModelSlugResult {
   model: Model!
+}
+
+type UpdateRelativeValuesDefinitionResult {
+  definition: Definition!
 }
 
 type UpdateSquiggleSnippetResult {

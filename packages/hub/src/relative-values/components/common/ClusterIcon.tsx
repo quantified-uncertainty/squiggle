@@ -1,5 +1,4 @@
 import { FC } from "react";
-import { Cluster } from "@/relative-values/types";
 
 export const ClusterIcon: FC<{
   cluster: { color: string };

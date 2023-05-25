@@ -15,6 +15,7 @@ import "./mutations/deleteDefinition";
 import "./mutations/deleteModel";
 import "./mutations/setUsername";
 import "./mutations/updateModelSlug";
+import "./mutations/updateRelativeValuesDefinition";
 import "./mutations/updateSquiggleSnippetModel";
 
 export const schema = builder.toSchema();
