@@ -4,6 +4,7 @@ import { PropsWithChildren } from "react";
 
 import "@/styles/main.css";
 import "@quri/squiggle-components/dist/main.css";
+import "react-loading-skeleton/dist/skeleton.css";
 
 import { ClientApp } from "./ClientApp";
 import { authOptions } from "./api/auth/[...nextauth]/authOptions";
