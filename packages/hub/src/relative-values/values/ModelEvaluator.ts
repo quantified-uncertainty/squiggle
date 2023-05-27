@@ -2,7 +2,6 @@ import { result, SqLambda, SqProject } from "@quri/squiggle-lang";
 import { z } from "zod";
 
 import { cartesianProduct } from "@/relative-values/lib/utils";
-import { getModelCode, Model } from "@/relative-values/model/utils";
 import { ModelCache, RelativeValue, RelativeValueResult } from "./types";
 
 export const extractOkValues = <A, B>(items: result<A, B>[]): A[] => {

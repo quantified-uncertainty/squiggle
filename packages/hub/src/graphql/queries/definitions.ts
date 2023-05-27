@@ -1,20 +1,23 @@
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
-import { Definition, DefinitionConnection } from "../types/definition";
+import {
+  RelativeValuesDefinition,
+  RelativeValuesDefinitionConnection,
+} from "../types/definition";
 
-builder.queryField("definitions", (t) =>
+builder.queryField("relativeValuesDefinitions", (t) =>
   t.prismaConnection(
     {
-      type: Definition,
+      type: RelativeValuesDefinition,
       cursor: "id",
       resolve: (query) =>
-        prisma.definition.findMany({
+        prisma.relativeValuesDefinition.findMany({
           ...query,
           orderBy: {
             createdAt: "desc",
           },
         }),
     },
-    DefinitionConnection
+    RelativeValuesDefinitionConnection
   )
 );

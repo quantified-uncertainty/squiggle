@@ -51,16 +51,16 @@ model Session {
 }
 
 model User {
-  id            String       @id @default(cuid())
-  name          String?
-  email         String?      @unique
-  username      String?      @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  models        Model[]
-  definitions   Definition[]
+  id                        String                     @id @default(cuid())
+  name                      String?
+  email                     String?                    @unique
+  username                  String?                    @unique
+  emailVerified             DateTime?
+  image                     String?
+  accounts                  Account[]
+  sessions                  Session[]
+  models                    Model[]
+  relativeValuesDefinitions RelativeValuesDefinition[]
 }
 
 model VerificationToken {
@@ -109,7 +109,7 @@ model ModelRevision {
   squiggleSnippet SquiggleSnippet? @relation(fields: [contentId], references: [id], map: "squiggleSnippet_contentId")
   contentId       String?          @unique
 
-  variablesWithDefinitions VariableWithDefinition[]
+  relativeValuesExports RelativeValuesExport[]
 }
 
 model SquiggleSnippet {
@@ -120,12 +120,9 @@ model SquiggleSnippet {
   revision ModelRevision?
 }
 
-// Definitions are polymorphic too.
-enum DefinitionType {
-  RelativeValues
-}
-
-model Definition {
+// Definitions are polymorphic, but organized differently from Models, without content types.
+// Reasoning: https://github.com/quantified-uncertainty/squiggle/issues/1828#issuecomment-1563596166
+model RelativeValuesDefinition {
   id String @id @default(cuid())
 
   slug String
@@ -135,50 +132,39 @@ model Definition {
   owner   User   @relation(fields: [ownerId], references: [id])
   ownerId String
 
-  revisions DefinitionRevision[]
+  revisions RelativeValuesDefinitionRevision[]
 
-  modelVariables VariableWithDefinition[]
+  modelVariables RelativeValuesExport[]
 
   @@unique([slug, ownerId])
   @@index([createdAt])
 }
 
-model DefinitionRevision {
+model RelativeValuesDefinitionRevision {
   id String @id @default(cuid())
 
   createdAt DateTime @default(now())
 
-  definition   Definition @relation(fields: [definitionId], references: [id], onDelete: Cascade)
+  definition   RelativeValuesDefinition @relation(fields: [definitionId], references: [id], onDelete: Cascade)
   definitionId String
 
-  contentType DefinitionType
-
-  relativeValues RelativeValuesDefinition? @relation(fields: [contentId], references: [id], map: "relativeValues_contentId")
-  contentId      String?                   @unique
-}
-
-model RelativeValuesDefinition {
-  id String @id @default(cuid())
-
-  title String
-
-  revision DefinitionRevision?
-
+  title    String
   items    Json
   clusters Json
 }
 
-// Note that model _revisions_ are associated with definitions (and not definition revisions).
+// Note that model revisions are associated with definitions (and not definition revisions).
 // Associating model revisions with definition revisions would be better, but it's more complicated.
-model VariableWithDefinition {
+model RelativeValuesExport {
   id String @id @default(cuid())
 
-  modelRevision   ModelRevision @relation(fields: [modelRevisionId], references: [id])
+  modelRevision   ModelRevision            @relation(fields: [modelRevisionId], references: [id])
   modelRevisionId String
-  definition      Definition    @relation(fields: [definitionId], references: [id])
+  definition      RelativeValuesDefinition @relation(fields: [definitionId], references: [id])
   definitionId    String
 
-  variable String
+  variableName String
 
+  // TODO - should this include `variableName`? It might be useful to export multiple variables for the same definition.
   @@unique([modelRevisionId, definitionId])
 }

@@ -3,22 +3,26 @@ import { graphql } from "react-relay";
 export const ModelRevisionFragment = graphql`
   fragment ModelRevision on ModelRevision
   @argumentDefinitions(
-    forDefinitionInput: { type: "ModelRevisionForDefinitionInput" }
+    forRelativeValues: { type: "ModelRevisionForRelativeValuesInput" }
   ) {
     id
     description
     ...VariablesWithDefinitions
     # to measure length in ViewModelPageBody
-    variablesWithDefinitions {
+    relativeValuesExports {
       id
     }
     content {
       __typename
       ...SquiggleContent
     }
-    forDefinition(input: $forDefinitionInput) {
-      ...ViewSquiggleContentForDefinition
-      variable
+    forRelativeValues(input: $forRelativeValues) {
+      definition {
+        currentRevision {
+          ...ViewSquiggleContentForRelativeValuesDefinition
+        }
+      }
+      variableName
     }
   }
 `;

@@ -1,6 +1,6 @@
 import { useFragment } from "react-relay";
 import { StyledDefinitionLink } from "../ui/StyledDefinitionLink";
-import { definitionRoute, modelForDefinitionRoute } from "@/routes";
+import { relativeValuesRoute, modelForDefinitionRoute } from "@/routes";
 import { FC } from "react";
 import { VariablesWithDefinitionsFragment } from "./VariablesWithDefinitions";
 import { VariablesWithDefinitions$key } from "@/__generated__/VariablesWithDefinitions.graphql";
@@ -17,7 +17,7 @@ export const VariablesWithDefinitionsList: FC<Props> = ({
   modelUsername,
   modelSlug,
 }) => {
-  const { variablesWithDefinitions: list } = useFragment(
+  const { relativeValuesExports } = useFragment(
     VariablesWithDefinitionsFragment,
     dataRef
   );
@@ -25,7 +25,7 @@ export const VariablesWithDefinitionsList: FC<Props> = ({
   return (
     <div>
       <header className="text-lg font-bold">Variables with definitions</header>
-      {list.map((pair) => (
+      {relativeValuesExports.map((pair) => (
         <div key={pair.id}>
           <StyledLink
             href={modelForDefinitionRoute({
@@ -37,11 +37,11 @@ export const VariablesWithDefinitionsList: FC<Props> = ({
               },
             })}
           >
-            {pair.variable}
+            {pair.variableName}
           </StyledLink>{" "}
           &rarr;{" "}
           <StyledDefinitionLink
-            href={definitionRoute({
+            href={relativeValuesRoute({
               username: pair.definition.owner.username,
               slug: pair.definition.slug,
             })}

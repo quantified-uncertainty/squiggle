@@ -1,6 +1,4 @@
 import { ViewSquiggleContentForRelativeValuesDefinition$data } from "@/__generated__/ViewSquiggleContentForRelativeValuesDefinition.graphql";
-import { Model } from "./model/utils";
-import { Map } from "immutable";
 
 export type Cluster =
   ViewSquiggleContentForRelativeValuesDefinition$data["clusters"][0];
@@ -12,15 +10,3 @@ export type Clusters = {
 
 export type Item =
   ViewSquiggleContentForRelativeValuesDefinition$data["items"][0];
-
-export type Catalog = ViewSquiggleContentForRelativeValuesDefinition$data;
-
-export type InterfaceWithModels = {
-  catalog: Catalog;
-  models: Map<string, Model>;
-};
-
-export type InterfaceWithModelsArrays = {
-  catalog: Catalog;
-  models: Model[];
-};

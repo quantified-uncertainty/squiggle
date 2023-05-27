@@ -11,7 +11,7 @@ import "./queries/users";
 
 import "./mutations/createRelativeValuesDefinition";
 import "./mutations/createSquiggleSnippetModel";
-import "./mutations/deleteDefinition";
+import "./mutations/deleteRelativeValuesDefinition";
 import "./mutations/deleteModel";
 import "./mutations/setUsername";
 import "./mutations/updateModelSlug";

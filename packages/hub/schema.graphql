@@ -3,31 +3,11 @@ type BaseError implements Error {
 }
 
 type CreateRelativeValuesDefinitionResult {
-  definition: Definition!
+  definition: RelativeValuesDefinition!
 }
 
 type CreateSquiggleSnippetResult {
   model: Model!
-}
-
-type Definition implements Node {
-  createdAtTimestamp: Float!
-  currentRevision: DefinitionRevision!
-  id: ID!
-  owner: User!
-  slug: String!
-}
-
-type DefinitionConnection {
-  edges: [DefinitionEdge!]!
-  pageInfo: PageInfo!
-}
-
-union DefinitionContent = RelativeValuesDefinition
-
-type DefinitionEdge {
-  cursor: String!
-  node: Definition!
 }
 
 input DefinitionRefInput {
@@ -35,16 +15,11 @@ input DefinitionRefInput {
   username: String!
 }
 
-type DefinitionRevision implements Node {
-  content: DefinitionContent!
-  id: ID!
-}
-
-type DeleteDefinitionResult {
+type DeleteModelResult {
   ok: Boolean!
 }
 
-type DeleteModelResult {
+type DeleteRelativeValuesDefinitionResult {
   ok: Boolean!
 }
 
@@ -85,9 +60,9 @@ type ModelRevision implements Node {
   createdAtTimestamp: Float!
   dbId: ID!
   description: String!
-  forDefinition(input: ModelRevisionForDefinitionInput): ModelRevisionForDefinition
+  forRelativeValues(input: ModelRevisionForRelativeValuesInput): RelativeValuesExport
   id: ID!
-  variablesWithDefinitions: [VariableWithDefinition!]!
+  relativeValuesExports: [RelativeValuesExport!]!
 }
 
 type ModelRevisionConnection {
@@ -100,26 +75,16 @@ type ModelRevisionEdge {
   node: ModelRevision!
 }
 
-type ModelRevisionForDefinition {
-  definition: Definition!
-  variable: String!
-}
-
-input ModelRevisionForDefinitionInput {
+input ModelRevisionForRelativeValuesInput {
   slug: String!
   username: String!
-}
-
-input ModelVariableWithDefinitionInput {
-  definition: DefinitionRefInput!
-  variable: String!
 }
 
 type Mutation {
   createRelativeValuesDefinition(input: MutationCreateRelativeValuesDefinitionInput!): MutationCreateRelativeValuesDefinitionResult!
   createSquiggleSnippetModel(input: MutationCreateSquiggleSnippetModelInput!): MutationCreateSquiggleSnippetModelResult!
-  deleteDefinition(input: MutationDeleteDefinitionInput!): MutationDeleteDefinitionResult!
   deleteModel(input: MutationDeleteModelInput!): MutationDeleteModelResult!
+  deleteRelativeValuesDefinition(input: MutationDeleteRelativeValuesDefinitionInput!): MutationDeleteRelativeValuesDefinitionResult!
   setUsername(username: String!): MutationSetUsernameResult!
   updateModelSlug(input: MutationUpdateModelSlugInput!): MutationUpdateModelSlugResult!
   updateRelativeValuesDefinition(input: MutationUpdateRelativeValuesDefinitionInput!): MutationUpdateRelativeValuesDefinitionResult!
@@ -143,19 +108,19 @@ input MutationCreateSquiggleSnippetModelInput {
 
 union MutationCreateSquiggleSnippetModelResult = BaseError | CreateSquiggleSnippetResult
 
-input MutationDeleteDefinitionInput {
-  slug: String!
-  username: String!
-}
-
-union MutationDeleteDefinitionResult = BaseError | DeleteDefinitionResult
-
 input MutationDeleteModelInput {
   slug: String!
   username: String!
 }
 
 union MutationDeleteModelResult = BaseError | DeleteModelResult
+
+input MutationDeleteRelativeValuesDefinitionInput {
+  slug: String!
+  username: String!
+}
+
+union MutationDeleteRelativeValuesDefinitionResult = BaseError | DeleteRelativeValuesDefinitionResult
 
 union MutationSetUsernameResult = BaseError | Me
 
@@ -181,9 +146,9 @@ input MutationUpdateSquiggleSnippetModelInput {
   code: String @deprecated(reason: "Use content arg instead")
   content: SquiggleSnippetContentInput
   description: String
+  relativeValuesExports: [RelativeValuesExportInput!]
   slug: String!
   username: String!
-  variablesWithDefinitions: [ModelVariableWithDefinitionInput!]
 }
 
 union MutationUpdateSquiggleSnippetModelResult = BaseError | UpdateSquiggleSnippetResult
@@ -200,24 +165,24 @@ type PageInfo {
 }
 
 type Query {
-  definition(input: QueryDefinitionInput!): Definition!
-  definitions(after: String, before: String, first: Int, last: Int): DefinitionConnection!
   me: Me!
   model(input: QueryModelInput!): Model!
   models(after: String, before: String, first: Int, last: Int): ModelConnection!
   node(id: ID!): Node
   nodes(ids: [ID!]!): [Node]!
+  relativeValuesDefinition(input: QueryRelativeValuesDefinitionInput!): RelativeValuesDefinition!
+  relativeValuesDefinitions(after: String, before: String, first: Int, last: Int): RelativeValuesDefinitionConnection!
   runSquiggle(code: String!): SquiggleOutput!
   userByUsername(username: String!): User!
   users(after: String, before: String, first: Int, last: Int): QueryUsersConnection!
 }
 
-input QueryDefinitionInput {
+input QueryModelInput {
   ownerUsername: String!
   slug: String!
 }
 
-input QueryModelInput {
+input QueryRelativeValuesDefinitionInput {
   ownerUsername: String!
   slug: String!
 }
@@ -244,12 +209,41 @@ input RelativeValuesClusterInput {
 }
 
 type RelativeValuesDefinition implements Node {
-  clusters: [RelativeValuesCluster!]!
+  createdAtTimestamp: Float!
+  currentRevision: RelativeValuesDefinitionRevision!
   dbId: ID!
+  id: ID!
+  owner: User!
+  slug: String!
+}
+
+type RelativeValuesDefinitionConnection {
+  edges: [RelativeValuesDefinitionEdge!]!
+  pageInfo: PageInfo!
+}
+
+type RelativeValuesDefinitionEdge {
+  cursor: String!
+  node: RelativeValuesDefinition!
+}
+
+type RelativeValuesDefinitionRevision implements Node {
+  clusters: [RelativeValuesCluster!]!
   id: ID!
   items: [RelativeValuesItem!]!
   recommendedUnit: String
   title: String!
+}
+
+type RelativeValuesExport implements Node {
+  definition: RelativeValuesDefinition!
+  id: ID!
+  variableName: String!
+}
+
+input RelativeValuesExportInput {
+  definition: DefinitionRefInput!
+  variableName: String!
 }
 
 type RelativeValuesItem {
@@ -297,7 +291,7 @@ type UpdateModelSlugResult {
 }
 
 type UpdateRelativeValuesDefinitionResult {
-  definition: Definition!
+  definition: RelativeValuesDefinition!
 }
 
 type UpdateSquiggleSnippetResult {
@@ -308,10 +302,4 @@ type User implements Node {
   id: ID!
   models(after: String, before: String, first: Int, last: Int): ModelConnection!
   username: String!
-}
-
-type VariableWithDefinition implements Node {
-  definition: Definition!
-  id: ID!
-  variable: String!
 }

@@ -1,5 +1,5 @@
 import { builder } from "@/graphql/builder";
-import { Definition } from "../types/definition";
+import { RelativeValuesDefinition } from "../types/definition";
 import { prisma } from "@/prisma";
 
 export const RelativeValuesClusterInput = builder.inputType(
@@ -51,7 +51,7 @@ builder.mutationField("createRelativeValuesDefinition", (t) =>
     type: builder.simpleObject("CreateRelativeValuesDefinitionResult", {
       fields: (t) => ({
         definition: t.field({
-          type: Definition,
+          type: RelativeValuesDefinition,
           nullable: false,
         }),
       }),
@@ -88,7 +88,9 @@ builder.mutationField("createRelativeValuesDefinition", (t) =>
       }
 
       if (!input.items.length) {
-        throw new Error("Definition must include at least one item");
+        throw new Error(
+          "RelativeValuesDefinition must include at least one item"
+        );
       }
 
       const itemIds = new Set<string>();
@@ -104,7 +106,7 @@ builder.mutationField("createRelativeValuesDefinition", (t) =>
 
       // TODO - check that `recommendedUnit` matches some item id, and that `clusterId` matches some cluster id
 
-      const definition = await prisma.definition.create({
+      const definition = await prisma.relativeValuesDefinition.create({
         data: {
           owner: {
             connect: { email },
@@ -112,14 +114,9 @@ builder.mutationField("createRelativeValuesDefinition", (t) =>
           slug: input.slug,
           revisions: {
             create: {
-              relativeValues: {
-                create: {
-                  title: input.title,
-                  items: input.items,
-                  clusters: input.clusters,
-                },
-              },
-              contentType: "RelativeValues",
+              title: input.title,
+              items: input.items,
+              clusters: input.clusters,
             },
           },
         },

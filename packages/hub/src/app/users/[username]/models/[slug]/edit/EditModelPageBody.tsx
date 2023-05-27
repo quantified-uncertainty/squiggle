@@ -2,7 +2,7 @@ import { FC } from "react";
 import { useFragment } from "react-relay";
 
 import { ModelPage$key } from "@/__generated__/ModelPage.graphql";
-import { EditSquiggleSnippetModel } from "@/components/SquiggleContent/EditSquiggleSnippetModel";
+import { EditSquiggleSnippetModel } from "@/squiggle/components/EditSquiggleSnippetModel";
 import { ModelPageFragment } from "../ModelPage";
 
 type Props = {

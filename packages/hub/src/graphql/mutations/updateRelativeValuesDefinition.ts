@@ -1,5 +1,5 @@
 import { builder } from "@/graphql/builder";
-import { Definition } from "../types/definition";
+import { RelativeValuesDefinition } from "../types/definition";
 import { prisma } from "@/prisma";
 import {
   RelativeValuesClusterInput,
@@ -11,7 +11,7 @@ builder.mutationField("updateRelativeValuesDefinition", (t) =>
     type: builder.simpleObject("UpdateRelativeValuesDefinitionResult", {
       fields: (t) => ({
         definition: t.field({
-          type: Definition,
+          type: RelativeValuesDefinition,
           nullable: false,
         }),
       }),
@@ -68,16 +68,11 @@ builder.mutationField("updateRelativeValuesDefinition", (t) =>
 
       // TODO - check that `recommendedUnit` matches some item id, and that `clusterId` matches some cluster id
 
-      const revision = await prisma.definitionRevision.create({
+      const revision = await prisma.relativeValuesDefinitionRevision.create({
         data: {
-          relativeValues: {
-            create: {
-              title: input.title,
-              items: input.items,
-              clusters: input.clusters,
-            },
-          },
-          contentType: "RelativeValues",
+          title: input.title,
+          items: input.items,
+          clusters: input.clusters,
           definition: {
             connect: {
               slug_ownerId: {

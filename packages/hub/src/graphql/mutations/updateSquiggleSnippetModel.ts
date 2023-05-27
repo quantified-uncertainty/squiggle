@@ -1,7 +1,7 @@
 import { prisma } from "@/prisma";
 import { builder } from "@/graphql/builder";
 import { Model } from "../types/model";
-import { Definition } from "@prisma/client";
+import { RelativeValuesDefinition } from "@prisma/client";
 
 const DefinitionRefInput = builder.inputType("DefinitionRefInput", {
   fields: (t) => ({
@@ -10,11 +10,11 @@ const DefinitionRefInput = builder.inputType("DefinitionRefInput", {
   }),
 });
 
-const ModelVariableWithDefinitionInput = builder.inputType(
-  "ModelVariableWithDefinitionInput",
+const RelativeValuesExportInput = builder.inputType(
+  "RelativeValuesExportInput",
   {
     fields: (t) => ({
-      variable: t.string({ required: true }),
+      variableName: t.string({ required: true }),
       definition: t.field({
         type: DefinitionRefInput,
         required: true,
@@ -50,8 +50,8 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
       username: t.input.string({ required: true }),
       slug: t.input.string({ required: true }),
       description: t.input.string(),
-      variablesWithDefinitions: t.input.field({
-        type: [ModelVariableWithDefinitionInput],
+      relativeValuesExports: t.input.field({
+        type: [RelativeValuesExportInput],
       }),
       code: t.input.string({ deprecationReason: "Use content arg instead" }),
       content: t.input.field({
@@ -81,28 +81,32 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
         throw new Error("One of `code` and `content.code` must be set");
       }
 
-      const variablesWithDefinitions = input.variablesWithDefinitions ?? [];
-      const variablesWithDefinitionsToInsert: {
+      const relativeValuesExports = input.relativeValuesExports ?? [];
+      const relativeValuesExportsToInsert: {
         definitionId: string;
-        variable: string;
+        variableName: string;
       }[] = [];
 
-      if (variablesWithDefinitions.length) {
-        const selectedDefiintions = await prisma.definition.findMany({
-          where: {
-            OR: variablesWithDefinitions.map((pair) => ({
-              slug: pair.definition.slug,
-              owner: {
-                username: pair.definition.username,
-              },
-            })),
-          },
-          include: { owner: true },
-        });
+      if (relativeValuesExports.length) {
+        const selectedDefiintions =
+          await prisma.relativeValuesDefinition.findMany({
+            where: {
+              OR: relativeValuesExports.map((pair) => ({
+                slug: pair.definition.slug,
+                owner: {
+                  username: pair.definition.username,
+                },
+              })),
+            },
+            include: { owner: true },
+          });
 
         // username -> slug -> Definition
-        let linkedDefinitions: Map<string, Map<string, Definition>> = new Map();
-        // now we need to match variablesWithDefinitions with definitions to get ids; I wonder if this could be simplified without sacrificing safety
+        let linkedDefinitions: Map<
+          string,
+          Map<string, RelativeValuesDefinition>
+        > = new Map();
+        // now we need to match relativeValuesExports with definitions to get ids; I wonder if this could be simplified without sacrificing safety
         for (let definition of selectedDefiintions) {
           const { username } = definition.owner;
           if (username === null) {
@@ -113,7 +117,7 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
           }
           linkedDefinitions.get(username)?.set(definition.slug, definition);
         }
-        for (const pair of variablesWithDefinitions) {
+        for (const pair of relativeValuesExports) {
           const definition = linkedDefinitions
             .get(pair.definition.username)
             ?.get(pair.definition.slug);
@@ -123,8 +127,8 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
               `Definition with username=${pair.definition.username}, slug ${pair.definition.slug} not found`
             );
           }
-          variablesWithDefinitionsToInsert.push({
-            variable: pair.variable,
+          relativeValuesExportsToInsert.push({
+            variableName: pair.variableName,
             definitionId: definition.id,
           });
         }
@@ -145,9 +149,9 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
               },
             },
           },
-          variablesWithDefinitions: {
+          relativeValuesExports: {
             createMany: {
-              data: variablesWithDefinitionsToInsert,
+              data: relativeValuesExportsToInsert,
             },
           },
         },

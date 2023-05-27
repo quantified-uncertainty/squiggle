@@ -24,7 +24,7 @@ export function modelForDefinitionRoute({
     slug: string;
   };
 }) {
-  return `/users/${username}/models/${slug}/for-definition/${definition.username}/${definition.slug}`;
+  return `/users/${username}/models/${slug}/for-relative-values/${definition.username}/${definition.slug}`;
 }
 
 export function modelEditRoute({
@@ -59,24 +59,24 @@ export function modelRevisionRoute({
   return `/users/${username}/models/${slug}/revisions/${revisionId}`;
 }
 
-export function definitionRoute({
+export function relativeValuesRoute({
   username,
   slug,
 }: {
   username: string;
   slug: string;
 }) {
-  return `/users/${username}/definitions/${slug}`;
+  return `/users/${username}/relative-values/${slug}`;
 }
 
-export function definitionEditRoute({
+export function relativeValuesEditRoute({
   username,
   slug,
 }: {
   username: string;
   slug: string;
 }) {
-  return `/users/${username}/definitions/${slug}/edit`;
+  return `/users/${username}/relative-values/${slug}/edit`;
 }
 
 export function userRoute({ username }: { username: string }) {
@@ -84,11 +84,11 @@ export function userRoute({ username }: { username: string }) {
 }
 
 export function newModelRoute() {
-  return "/new-model";
+  return "/new/model";
 }
 
 export function newDefinitionRoute() {
-  return "/new-definition";
+  return "/new/definition";
 }
 
 export function graphqlAPIRoute() {

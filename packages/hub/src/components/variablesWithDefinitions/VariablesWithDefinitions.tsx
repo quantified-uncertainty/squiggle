@@ -2,9 +2,9 @@ import { graphql } from "relay-runtime";
 
 export const VariablesWithDefinitionsFragment = graphql`
   fragment VariablesWithDefinitions on ModelRevision {
-    variablesWithDefinitions {
+    relativeValuesExports {
       id
-      variable
+      variableName
       definition {
         id
         owner {

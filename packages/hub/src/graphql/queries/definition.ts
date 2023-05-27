@@ -1,16 +1,16 @@
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
-import { Definition } from "../types/definition";
+import { RelativeValuesDefinition } from "../types/definition";
 
-builder.queryField("definition", (t) =>
+builder.queryField("relativeValuesDefinition", (t) =>
   t.fieldWithInput({
-    type: Definition,
+    type: RelativeValuesDefinition,
     input: {
       slug: t.input.string({ required: true }),
       ownerUsername: t.input.string({ required: true }),
     },
     async resolve(root, args) {
-      return await prisma.definition.findFirstOrThrow({
+      return await prisma.relativeValuesDefinition.findFirstOrThrow({
         where: {
           slug: args.input.slug,
           owner: {

@@ -4,8 +4,9 @@ import { useFragment } from "react-relay";
 import remarkBreaks from "remark-breaks";
 
 import { ModelRevision$key } from "@/__generated__/ModelRevision.graphql";
-import { ViewSquiggleContent } from "@/components/SquiggleContent/ViewSquiggleContent";
+import { SquiggleContent } from "@/squiggle/components/SquiggleContent";
 import { VariablesWithDefinitionsList } from "@/components/variablesWithDefinitions/VariablesWithDefinitionsList";
+import { ViewSquiggleContentForRelativeValuesDefinition } from "@/relative-values/components/ViewSquiggleContentForRelativeValuesDefinition";
 import { ModelRevisionFragment } from "./ModelRevision";
 
 type Props = {
@@ -19,13 +20,20 @@ const Content: FC<{ revisionRef: ModelRevision$key }> = ({ revisionRef }) => {
   const typename = revision.content.__typename;
 
   switch (typename) {
-    case "SquiggleSnippet":
-      return (
-        <ViewSquiggleContent
-          contentRef={revision.content}
-          definitionRef={revision.forDefinition}
-        />
-      );
+    case "SquiggleSnippet": {
+      const definitionRef =
+        revision.forRelativeValues?.definition.currentRevision;
+      if (definitionRef) {
+        return (
+          <ViewSquiggleContentForRelativeValuesDefinition
+            contentRef={revision.content}
+            definitionRef={definitionRef}
+          />
+        );
+      }
+
+      return <SquiggleContent dataRef={revision.content} />;
+    }
     default:
       return <div>Unknown model type {typename}</div>;
   }
@@ -54,13 +62,20 @@ export const ViewModelRevision: FC<Props> = ({
               h3: ({ node, ...props }) => (
                 <h3 className="font-bold" {...props} />
               ),
+              a: ({ node, href, children }) => (
+                // TODO - nofollow?
+                // TODO - StyledLink for internal URLs
+                <a href={href} className="text-blue-500 hover:underline">
+                  {children}
+                </a>
+              ),
             }}
           >
             {revision.description}
           </ReactMarkdown>
         </div>
       )}
-      {revision.variablesWithDefinitions.length ? (
+      {revision.relativeValuesExports.length ? (
         <div className="pb-4 mb-4 border-b border-slate-200">
           <VariablesWithDefinitionsList
             dataRef={revision}

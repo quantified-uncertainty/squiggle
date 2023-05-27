@@ -15,7 +15,7 @@ import { UpdateModelSlugAction } from "./UpdateModelSlugAction";
 export const ModelPageFragment = graphql`
   fragment ModelPage on Model
   @argumentDefinitions(
-    forDefinitionInput: { type: "ModelRevisionForDefinitionInput" }
+    forRelativeValues: { type: "ModelRevisionForRelativeValuesInput" }
   ) {
     id
     slug
@@ -26,7 +26,7 @@ export const ModelPageFragment = graphql`
       content {
         __typename
       }
-      ...ModelRevision @arguments(forDefinitionInput: $forDefinitionInput)
+      ...ModelRevision @arguments(forRelativeValues: $forRelativeValues)
     }
   }
 `;
@@ -34,10 +34,10 @@ export const ModelPageFragment = graphql`
 export const ModelPageQuery = graphql`
   query ModelPageQuery(
     $input: QueryModelInput!
-    $forDefinitionInput: ModelRevisionForDefinitionInput
+    $forRelativeValues: ModelRevisionForRelativeValuesInput
   ) {
     model(input: $input) {
-      ...ModelPage @arguments(forDefinitionInput: $forDefinitionInput)
+      ...ModelPage @arguments(forRelativeValues: $forRelativeValues)
     }
   }
 `;

@@ -4,8 +4,8 @@ import { useLazyLoadQuery, usePaginationFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import type { UserViewQuery } from "@gen/UserViewQuery.graphql";
-import { ModelList } from "@/app/ModelList";
 import { UserView$key } from "@/__generated__/UserView.graphql";
+import { ModelList } from "@/models/components/ModelList";
 
 const fragment = graphql`
   fragment UserView on Query
@@ -22,7 +22,7 @@ const fragment = graphql`
         edges {
           __typename
         }
-        ...ModelListFragment
+        ...ModelList
       }
     }
   }
