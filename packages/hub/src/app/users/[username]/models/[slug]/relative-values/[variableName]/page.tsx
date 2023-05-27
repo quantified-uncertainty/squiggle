@@ -3,20 +3,21 @@
 import { useFragment, useLazyLoadQuery } from "react-relay";
 
 import { ModelPageQuery as ModelPageQueryType } from "@gen/ModelPageQuery.graphql";
-import { ModelPageFragment, ModelPageQuery } from "../../../ModelPage";
-import { ViewModelRevision } from "../../../ViewModelRevision";
+import { ModelPageFragment, ModelPageQuery } from "../../ModelPage";
+import { ViewModelRevision } from "../../ViewModelRevision";
 import { ModelPage$key } from "@/__generated__/ModelPage.graphql";
+import { ViewModelRevisionContentForRelativeValues } from "./ViewModelRevisionContentForRelativeValues";
 
-export default function OuterModelPage({
+export default function ModelRelativeValuesPage({
   params,
 }: {
   params: {
     username: string;
     slug: string;
-    definitionUsername: string;
-    definitionSlug: string;
+    variableName: string;
   };
 }) {
+  // TODO: this might error if variableName is ambiguous; we should render all matching definitions in that case.
   const { model: modelRef } = useLazyLoadQuery<ModelPageQueryType>(
     ModelPageQuery,
     {
@@ -25,8 +26,7 @@ export default function OuterModelPage({
         slug: params.slug,
       },
       forRelativeValues: {
-        username: params.definitionUsername,
-        slug: params.definitionSlug,
+        variableName: params.variableName,
       },
     }
   );
@@ -38,6 +38,10 @@ export default function OuterModelPage({
       revisionRef={model.currentRevision}
       modelUsername={params.username}
       modelSlug={params.slug}
-    />
+    >
+      <ViewModelRevisionContentForRelativeValues
+        revisionRef={model.currentRevision}
+      />
+    </ViewModelRevision>
   );
 }

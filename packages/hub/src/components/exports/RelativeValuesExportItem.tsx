@@ -1,0 +1,57 @@
+import { RelativeValuesExportItem$key } from "@/__generated__/RelativeValuesExportItem.graphql";
+import { FC, PropsWithChildren } from "react";
+import { useFragment } from "react-relay";
+import { graphql } from "relay-runtime";
+import { StyledDefinitionLink } from "../ui/StyledDefinitionLink";
+import { relativeValuesRoute } from "@/routes";
+
+export const RelativeValuesExportItemFragment = graphql`
+  fragment RelativeValuesExportItem on RelativeValuesExport {
+    id
+    variableName
+    definition {
+      id
+      owner {
+        id
+        username
+      }
+      slug
+    }
+  }
+`;
+
+const Container: FC<PropsWithChildren> = ({ children }) => (
+  <div className="px-4 py-2 hover:bg-slate-100">
+    <div className="text-slate-600 group-hover:text-slate-900 text-sm font-medium">
+      {children}
+    </div>
+  </div>
+);
+
+const RawItem: FC = () => <Container>Raw view</Container>;
+
+type Props = {
+  itemRef?: RelativeValuesExportItem$key;
+};
+
+const NonEmptyItem: FC<Required<Props>> = ({ itemRef }) => {
+  const item = useFragment(RelativeValuesExportItemFragment, itemRef);
+
+  return (
+    <Container>
+      {item.variableName} for{" "}
+      <StyledDefinitionLink
+        href={relativeValuesRoute({
+          username: item.definition.owner.username,
+          slug: item.definition.slug,
+        })}
+      >
+        {item.definition.owner.username}/{item.definition.slug}
+      </StyledDefinitionLink>
+    </Container>
+  );
+};
+
+export const RelativeValuesExportItem: FC<Props> = ({ itemRef }) => {
+  return itemRef ? <NonEmptyItem itemRef={itemRef} /> : <RawItem />;
+};

@@ -48,8 +48,20 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
       type: RelativeValuesExport,
       nullable: true,
       input: {
-        slug: t.input.string({ required: true }),
-        username: t.input.string({ required: true }),
+        variableName: t.input.string({ required: true }),
+        // optional, necessary if the variable is associated with multiple definitions
+        for: t.input.field({
+          required: false,
+          type: builder.inputType(
+            "ModelRevisionForRelativeValuesSlugUsernameInput",
+            {
+              fields: (t) => ({
+                slug: t.string({ required: true }),
+                username: t.string({ required: true }),
+              }),
+            }
+          ),
+        }),
       },
       argOptions: {
         required: false,
@@ -59,20 +71,35 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
           return null;
         }
 
-        return await prisma.relativeValuesExport.findFirstOrThrow({
+        const exports = await prisma.relativeValuesExport.findMany({
           where: {
             modelRevisionId: revision.id,
-            definition: {
-              owner: {
-                username: input.username,
-              },
-              slug: input.slug,
-            },
+            variableName: input.variableName,
+            ...(input.for
+              ? {
+                  definition: {
+                    owner: {
+                      username: input.for.username,
+                    },
+                    slug: input.for.slug,
+                  },
+                }
+              : {}),
           },
           include: {
             definition: true,
           },
         });
+
+        if (exports.length > 1) {
+          throw new Error("Ambiguous input, multiple variables match it");
+        }
+
+        if (exports.length === 0) {
+          throw new Error("Not found");
+        }
+
+        return exports[0];
       },
     }),
   }),

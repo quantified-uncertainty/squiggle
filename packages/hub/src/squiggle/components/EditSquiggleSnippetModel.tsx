@@ -8,14 +8,14 @@ import { Button, Modal, TextArea, TextInput, useToast } from "@quri/ui";
 
 import { EditSquiggleSnippetModelMutation } from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
 import { SquiggleContent$key } from "@/__generated__/SquiggleContent.graphql";
-import { VariablesWithDefinitions$key } from "@/__generated__/VariablesWithDefinitions.graphql";
 import { ModelRevisionFragment } from "@/app/users/[username]/models/[slug]/ModelRevision";
 import { WithTopMenu } from "@/components/layout/WithTopMenu";
-import { VariablesWithDefinitionsFragment } from "../../components/variablesWithDefinitions/VariablesWithDefinitions";
 import { SquiggleContentFragment } from "./SquiggleContent";
 import { ModelPage$key } from "@/__generated__/ModelPage.graphql";
 import { ModelPageFragment } from "@/app/users/[username]/models/[slug]/ModelPage";
 import { ModelRevision$key } from "@/__generated__/ModelRevision.graphql";
+import { ModelExportsFragment } from "@/components/exports/ModelExports";
+import { ModelExports$key } from "@/__generated__/ModelExports.graphql";
 
 export const Mutation = graphql`
   mutation EditSquiggleSnippetModelMutation(
@@ -134,8 +134,8 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
 
   // borrowing fragment to populate form
   // TODO - should be encapsulated in VariablesWithDefinitions/useVariablesWithDefinitionsData.ts
-  const { relativeValuesExports } = useFragment<VariablesWithDefinitions$key>(
-    VariablesWithDefinitionsFragment,
+  const { relativeValuesExports } = useFragment<ModelExports$key>(
+    ModelExportsFragment,
     revision
   );
 
@@ -143,7 +143,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
     return {
       code: content.code,
       description: revision.description,
-      relativeValuesExports: relativeValuesExports.map((item) => ({
+      relativeValuesExports: revision.relativeValuesExports.map((item) => ({
         variableName: item.variableName,
         definition: {
           username: item.definition.owner.username,

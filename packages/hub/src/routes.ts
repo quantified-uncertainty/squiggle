@@ -12,19 +12,16 @@ export function modelRoute({
   return `/users/${username}/models/${slug}`;
 }
 
-export function modelForDefinitionRoute({
+export function modelForRelativeValuesExportRoute({
   username,
   slug,
-  definition,
+  variableName,
 }: {
   username: string;
   slug: string;
-  definition: {
-    username: string;
-    slug: string;
-  };
+  variableName: string;
 }) {
-  return `/users/${username}/models/${slug}/for-relative-values/${definition.username}/${definition.slug}`;
+  return `/users/${username}/models/${slug}/relative-values/${variableName}`;
 }
 
 export function modelEditRoute({

@@ -165,6 +165,5 @@ model RelativeValuesExport {
 
   variableName String
 
-  // TODO - should this include `variableName`? It might be useful to export multiple variables for the same definition.
-  @@unique([modelRevisionId, definitionId])
+  @@unique([modelRevisionId, definitionId, variableName], name: "uniqueKey")
 }

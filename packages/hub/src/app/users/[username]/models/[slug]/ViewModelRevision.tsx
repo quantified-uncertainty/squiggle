@@ -1,48 +1,24 @@
-import { FC } from "react";
+import { FC, PropsWithChildren } from "react";
 import ReactMarkdown from "react-markdown";
 import { useFragment } from "react-relay";
 import remarkBreaks from "remark-breaks";
 
 import { ModelRevision$key } from "@/__generated__/ModelRevision.graphql";
-import { SquiggleContent } from "@/squiggle/components/SquiggleContent";
-import { VariablesWithDefinitionsList } from "@/components/variablesWithDefinitions/VariablesWithDefinitionsList";
-import { ViewSquiggleContentForRelativeValuesDefinition } from "@/relative-values/components/ViewSquiggleContentForRelativeValuesDefinition";
+import { ModelExportsPicker } from "@/components/exports/ModelExportsPicker";
 import { ModelRevisionFragment } from "./ModelRevision";
 
-type Props = {
+// this is layout-like pattern, but we already use layout in this route for other purposes
+type Props = PropsWithChildren<{
   modelUsername: string;
   modelSlug: string;
   revisionRef: ModelRevision$key;
-};
-
-const Content: FC<{ revisionRef: ModelRevision$key }> = ({ revisionRef }) => {
-  const revision = useFragment(ModelRevisionFragment, revisionRef);
-  const typename = revision.content.__typename;
-
-  switch (typename) {
-    case "SquiggleSnippet": {
-      const definitionRef =
-        revision.forRelativeValues?.definition.currentRevision;
-      if (definitionRef) {
-        return (
-          <ViewSquiggleContentForRelativeValuesDefinition
-            contentRef={revision.content}
-            definitionRef={definitionRef}
-          />
-        );
-      }
-
-      return <SquiggleContent dataRef={revision.content} />;
-    }
-    default:
-      return <div>Unknown model type {typename}</div>;
-  }
-};
+}>;
 
 export const ViewModelRevision: FC<Props> = ({
   revisionRef,
   modelUsername,
   modelSlug,
+  children,
 }) => {
   const revision = useFragment(ModelRevisionFragment, revisionRef);
 
@@ -77,14 +53,18 @@ export const ViewModelRevision: FC<Props> = ({
       )}
       {revision.relativeValuesExports.length ? (
         <div className="pb-4 mb-4 border-b border-slate-200">
-          <VariablesWithDefinitionsList
-            dataRef={revision}
-            modelUsername={modelUsername}
-            modelSlug={modelSlug}
-          />
+          <div className="flex items-center gap-2 font-medium text-sm">
+            <header>View export:</header>
+            <ModelExportsPicker
+              dataRef={revision}
+              modelUsername={modelUsername}
+              modelSlug={modelSlug}
+              selected={revision.forRelativeValues ?? undefined}
+            />
+          </div>
         </div>
       ) : null}
-      <Content revisionRef={revisionRef} />
+      <div>{children}</div>
     </div>
   );
 };

@@ -76,6 +76,11 @@ type ModelRevisionEdge {
 }
 
 input ModelRevisionForRelativeValuesInput {
+  for: ModelRevisionForRelativeValuesSlugUsernameInput
+  variableName: String!
+}
+
+input ModelRevisionForRelativeValuesSlugUsernameInput {
   slug: String!
   username: String!
 }
