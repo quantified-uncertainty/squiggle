@@ -4,7 +4,7 @@ import { Padding, Point } from "./types.js";
 
 const axisColor = "rgba(114, 125, 147, 0.1)";
 export const labelColor = "rgb(114, 125, 147)";
-export const cursorLineColor = "#f87171"; // tailwind red-400
+export const cursorLineColor = "#aaa"; // tailwind red-400
 export const primaryColor = "#4c78a8"; // for lines and areas
 const labelFont = "10px sans-serif";
 const xLabelOffset = 6;
@@ -219,9 +219,11 @@ export function drawCursorLines({
     context.beginPath();
     context.strokeStyle = cursorLineColor;
     context.lineWidth = 1;
+    context.setLineDash([5, 5]); // setting the dashed line pattern
     context.moveTo(point.x, 0);
     context.lineTo(point.x, frame.height);
     context.stroke();
+    context.setLineDash([]); // resetting the dashed line pattern so it doesn't affect other lines
 
     context.textAlign = "left";
     context.textBaseline = "bottom";
@@ -267,9 +269,11 @@ export function drawCursorLines({
     context.beginPath();
     context.strokeStyle = cursorLineColor;
     context.lineWidth = 1;
+    context.setLineDash([5, 5]); // setting the dashed line pattern
     context.moveTo(0, point.y);
     context.lineTo(frame.width, point.y);
     context.stroke();
+    context.setLineDash([]); // resetting the dashed line pattern so it doesn't affect other lines
 
     context.textAlign = "left";
     context.textBaseline = "bottom";

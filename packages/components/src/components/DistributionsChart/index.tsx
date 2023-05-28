@@ -164,8 +164,10 @@ const InnerDistributionsChart: FC<{
             .context(context)(shape.continuous);
           context.fill();
 
+          // The top line
           context.globalAlpha = 1;
           context.strokeStyle = context.fillStyle;
+          context.beginPath();
           d3
             .line<SqShape["continuous"][number]>()
             .x((d) => xScale(d.x))
