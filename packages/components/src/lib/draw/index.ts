@@ -4,7 +4,7 @@ import { Padding, Point } from "./types.js";
 
 const axisColor = "rgba(114, 125, 147, 0.1)";
 export const labelColor = "rgb(114, 125, 147)";
-export const cursorLineColor = "#aaa"; // tailwind red-400
+export const cursorLineColor = "#aaa";
 export const primaryColor = "#4c78a8"; // for lines and areas
 const labelFont = "10px sans-serif";
 const xLabelOffset = 6;
@@ -48,7 +48,7 @@ export function drawAxes({
   const xTickFormat = xScale.tickFormat(tickCount, xTickFormatSpecifier);
 
   const yTicks = yScale.ticks(tickCount);
-  const yTickFormat = xScale.tickFormat(tickCount, yTickFormatSpecifier);
+  const yTickFormat = yScale.tickFormat(tickCount, yTickFormatSpecifier);
 
   const tickSize = 2;
 

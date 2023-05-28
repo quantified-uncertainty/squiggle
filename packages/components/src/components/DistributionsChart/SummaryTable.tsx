@@ -83,7 +83,7 @@ type SummaryTableProps = {
 export const SummaryTable: FC<SummaryTableProps> = ({ plot, environment }) => {
   const showNames = plot.distributions.some((d) => d.name);
   return (
-    <table className="border border-collapse border-slate-400">
+    <table className="border border-collapse border-slate-200 overflow-hidden rounded-lg">
       <thead className="bg-slate-50">
         <tr>
           {showNames && <TableHeadCell>Name</TableHeadCell>}

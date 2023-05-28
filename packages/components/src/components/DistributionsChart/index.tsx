@@ -332,7 +332,7 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
           height={height}
         />
       )}
-      <div className="flex justify-center">
+      <div className="flex justify-center pt-2">
         {plot.showSummary && (
           <SummaryTable plot={plot} environment={environment} />
         )}
