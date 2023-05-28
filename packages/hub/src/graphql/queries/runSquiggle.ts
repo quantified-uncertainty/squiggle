@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { Prisma } from "@prisma/client";
 
 import {
   SqAbstractDistribution,
@@ -9,13 +10,11 @@ import {
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
-import { Prisma } from "@prisma/client";
-
 function getKey(code: string): string {
   return crypto.createHash("md5").update(code).digest("base64");
 }
 
-const squiggleValueToJSON = (value: SqValue) => {
+export const squiggleValueToJSON = (value: SqValue) => {
   // this is a lazy shortcut to traverse the value tree; should be reimplemented without parse/stringify
   return JSON.parse(
     JSON.stringify(value.asJS(), (key, value) => {

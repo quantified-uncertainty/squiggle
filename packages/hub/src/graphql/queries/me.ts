@@ -1,5 +1,6 @@
 import { builder } from "@/graphql/builder";
-import { Me } from "../types/me";
+
+import { Me } from "../types/Me";
 
 builder.queryField("me", (t) =>
   t.field({

@@ -35,6 +35,12 @@ export const ModelRevisionFragment = graphql`
           ...RelativeValuesDefinitionRevision
         }
       }
+      cache {
+        firstItem
+        secondItem
+        resultJSON
+        errorString
+      }
     }
   }
 `;

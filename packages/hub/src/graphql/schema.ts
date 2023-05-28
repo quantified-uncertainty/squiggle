@@ -17,5 +17,6 @@ import "./mutations/setUsername";
 import "./mutations/updateModelSlug";
 import "./mutations/updateRelativeValuesDefinition";
 import "./mutations/updateSquiggleSnippetModel";
+import "./mutations/buildRelativeValuesCache";
 
 export const schema = builder.toSchema();

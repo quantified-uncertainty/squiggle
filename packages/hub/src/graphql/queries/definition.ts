@@ -1,6 +1,7 @@
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
-import { RelativeValuesDefinition } from "../types/definition";
+
+import { RelativeValuesDefinition } from "../types/RelativeValuesDefinition";
 
 builder.queryField("relativeValuesDefinition", (t) =>
   t.fieldWithInput({

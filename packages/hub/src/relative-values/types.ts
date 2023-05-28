@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 import { RelativeValuesDefinitionRevision$data } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
 
 export type Cluster = RelativeValuesDefinitionRevision$data["clusters"][0];
@@ -8,3 +10,20 @@ export type Clusters = {
 };
 
 export type Item = RelativeValuesDefinitionRevision$data["items"][0];
+
+// used in GraphQL schema
+export const relativeValuesClustersSchema = z.array(
+  z.object({
+    id: z.string(),
+    color: z.string(),
+  })
+);
+
+export const relativeValuesItemsSchema = z.array(
+  z.object({
+    id: z.string(),
+    name: z.string().default(""),
+    clusterId: z.string().optional(),
+    description: z.string().default(""),
+  })
+);

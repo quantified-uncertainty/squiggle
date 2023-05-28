@@ -1,8 +1,14 @@
 import { result, SqLambda, SqProject } from "@quri/squiggle-lang";
 import { z } from "zod";
 
-import { cartesianProduct } from "@/relative-values/lib/utils";
-import { ModelCache, RelativeValue, RelativeValueResult } from "./types";
+import { ModelRevision$data } from "@/__generated__/ModelRevision.graphql";
+import { cartesianProduct } from "../lib/utils";
+import {
+  RelativeValue,
+  RelativeValueResult,
+  RelativeValuesCacheRecord,
+  relativeValueSchema,
+} from "./types";
 
 export const extractOkValues = <A, B>(items: result<A, B>[]): A[] => {
   return items
@@ -76,12 +82,12 @@ export class ModelEvaluator {
   private constructor(
     public modelCode: string,
     private fn: SqLambda,
-    private cache?: ModelCache
+    private cache?: RelativeValuesCacheRecord
   ) {}
 
   static create(
     modelCode: string,
-    cache?: ModelCache
+    cache?: NonNullable<ModelRevision$data["forRelativeValues"]>["cache"]
   ): result<ModelEvaluator, string> {
     const project = SqProject.create();
     project.setSource("wrapper", "RelativeValues.wrap(fn)");
@@ -107,9 +113,29 @@ export class ModelEvaluator {
       }
     }
 
+    let cacheRecord: RelativeValuesCacheRecord | undefined = {};
+    if (cache) {
+      cacheRecord = {};
+      for (const item of cache) {
+        cacheRecord[item.firstItem] ??= {};
+
+        const result: RelativeValueResult =
+          item.errorString === null
+            ? {
+                ok: true,
+                value: relativeValueSchema.parse(JSON.parse(item.resultJSON)),
+              }
+            : {
+                ok: false,
+                value: item.errorString,
+              };
+        cacheRecord[item.firstItem][item.secondItem] = result;
+      }
+    }
+
     return {
       ok: true,
-      value: new ModelEvaluator(modelCode, result.value.value, cache),
+      value: new ModelEvaluator(modelCode, result.value.value, cacheRecord),
     };
   }
 
@@ -124,7 +150,7 @@ export class ModelEvaluator {
   }
 
   compare(id1: string, id2: string): RelativeValueResult {
-    const cachedValue = this.cache?.relativeValues[id1]?.[id2];
+    const cachedValue = this.cache?.[id1]?.[id2];
     if (cachedValue) {
       return cachedValue;
     }

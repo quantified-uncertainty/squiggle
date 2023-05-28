@@ -1,17 +1,21 @@
-import { result } from "@quri/squiggle-lang";
 import _ from "lodash";
+import { z } from "zod";
 
-export type RelativeValue = Readonly<{
-  median: number;
-  mean: number;
-  min: number;
-  max: number;
-  uncertainty: number;
-}>;
+import { result } from "@quri/squiggle-lang";
+
+export const relativeValueSchema = z.object({
+  median: z.number(),
+  mean: z.number(),
+  min: z.number(),
+  max: z.number(),
+  uncertainty: z.number(),
+});
+
+export type RelativeValue = Readonly<z.infer<typeof relativeValueSchema>>;
 
 export type RelativeValueResult = result<RelativeValue, string>;
 
-export type ModelCache = {
-  id: string;
-  relativeValues: Record<string, Record<string, RelativeValueResult>>;
-};
+export type RelativeValuesCacheRecord = Record<
+  string,
+  Record<string, RelativeValueResult>
+>;

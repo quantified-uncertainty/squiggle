@@ -1,6 +1,7 @@
 import { prisma } from "@/prisma";
 import { builder } from "@/graphql/builder";
-import { Me } from "../types/me";
+
+import { Me } from "../types/Me";
 
 builder.mutationField("setUsername", (t) =>
   t.field({

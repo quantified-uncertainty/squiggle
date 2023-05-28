@@ -1,7 +1,9 @@
+import { RelativeValuesDefinition } from "@prisma/client";
+
 import { prisma } from "@/prisma";
 import { builder } from "@/graphql/builder";
-import { Model } from "../types/model";
-import { RelativeValuesDefinition } from "@prisma/client";
+
+import { Model } from "../types/Model";
 
 const DefinitionRefInput = builder.inputType("DefinitionRefInput", {
   fields: (t) => ({

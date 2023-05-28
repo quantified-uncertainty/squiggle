@@ -1,10 +1,10 @@
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
+import { RelativeValuesExport } from "./RelativeValuesExport";
 
 export const SquiggleSnippet = builder.prismaNode("SquiggleSnippet", {
   id: { field: "id" },
   fields: (t) => ({
-    dbId: t.exposeID("id"),
     code: t.exposeString("code"),
   }),
 });
@@ -15,18 +15,9 @@ export const ModelContent = builder.unionType("ModelContent", {
   resolveType: () => SquiggleSnippet,
 });
 
-const RelativeValuesExport = builder.prismaNode("RelativeValuesExport", {
-  id: { field: "id" },
-  fields: (t) => ({
-    definition: t.relation("definition"),
-    variableName: t.exposeString("variableName"),
-  }),
-});
-
 export const ModelRevision = builder.prismaNode("ModelRevision", {
   id: { field: "id" },
   fields: (t) => ({
-    dbId: t.exposeID("id"),
     createdAtTimestamp: t.float({
       resolve: (revision) => revision.createdAt.getTime(),
     }),

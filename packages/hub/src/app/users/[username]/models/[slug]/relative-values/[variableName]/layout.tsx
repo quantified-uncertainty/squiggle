@@ -5,22 +5,17 @@ import { useFragment } from "react-relay";
 
 import { ModelPage$key } from "@/__generated__/ModelPage.graphql";
 import { ModelRevision$key } from "@/__generated__/ModelRevision.graphql";
+import { RelativeValuesDefinitionRevision$key } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
 import { SquiggleContent$key } from "@/__generated__/SquiggleContent.graphql";
 import { StyledTabLink } from "@/components/ui/StyledTabLink";
+import { RelativeValuesDefinitionRevisionFragment } from "@/relative-values/components/RelativeValuesDefinitionRevision";
 import { RelativeValuesProvider } from "@/relative-values/components/views/RelativeValuesProvider";
 import { ModelEvaluator } from "@/relative-values/values/ModelEvaluator";
+import { modelForRelativeValuesExportRoute } from "@/routes";
 import { SquiggleContentFragment } from "@/squiggle/components/SquiggleContent";
 import { ModelPageFragment, useModelPageQuery } from "../../ModelPage";
 import { ModelRevisionFragment } from "../../ModelRevision";
-import { RelativeValuesDefinitionRevision$key } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
 import { ViewModelRevision } from "../../ViewModelRevision";
-import { RelativeValuesDefinitionRevisionFragment } from "@/relative-values/components/RelativeValuesDefinitionRevision";
-import {
-  modelForRelativeValuesExportRoute,
-  relativeValuesGridRoute,
-  relativeValuesPlotRoute,
-  relativeValuesRoute,
-} from "@/routes";
 
 export default function RelativeValuesModelLayout({
   params,
@@ -50,19 +45,21 @@ export default function RelativeValuesModelLayout({
     revision.content
   );
 
-  const definitionRef = revision.forRelativeValues?.definition.currentRevision;
-
-  if (!definitionRef) {
+  if (!revision.forRelativeValues) {
     throw new Error("Not found");
   }
+
+  const definitionRef = revision.forRelativeValues.definition.currentRevision;
+
   const definition = useFragment<RelativeValuesDefinitionRevision$key>(
     RelativeValuesDefinitionRevisionFragment,
     definitionRef
   );
 
   const evaluatorResult = useMemo(
-    () => ModelEvaluator.create(content.code),
-    [content.code]
+    () =>
+      ModelEvaluator.create(content.code, revision.forRelativeValues?.cache),
+    [content.code, revision.forRelativeValues]
   );
 
   if (!evaluatorResult.ok) {

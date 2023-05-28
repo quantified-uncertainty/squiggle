@@ -158,12 +158,30 @@ model RelativeValuesDefinitionRevision {
 model RelativeValuesExport {
   id String @id @default(cuid())
 
-  modelRevision   ModelRevision            @relation(fields: [modelRevisionId], references: [id])
+  modelRevision   ModelRevision            @relation(fields: [modelRevisionId], references: [id], onDelete: Cascade)
   modelRevisionId String
-  definition      RelativeValuesDefinition @relation(fields: [definitionId], references: [id])
+  definition      RelativeValuesDefinition @relation(fields: [definitionId], references: [id], onDelete: Cascade)
   definitionId    String
 
   variableName String
 
+  cache RelativeValuesPairCache[]
+
   @@unique([modelRevisionId, definitionId, variableName], name: "uniqueKey")
+}
+
+model RelativeValuesPairCache {
+  id String @id @default(cuid())
+
+  export   RelativeValuesExport @relation(fields: [exportId], references: [id], onDelete: Cascade)
+  exportId String
+
+  firstItem  String
+  secondItem String
+
+  error String?
+
+  // { median, mean, min, max, uncertainty } object.
+  // Maybe this should be split into postgres columns later.
+  result Json?
 }

@@ -1,5 +1,5 @@
 import { builder } from "../builder";
-import { ModelConnection } from "./model";
+import { ModelConnection } from "./Model";
 
 export const User = builder.prismaNode("User", {
   id: { field: "id" },

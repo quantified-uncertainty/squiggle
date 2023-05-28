@@ -1,6 +1,7 @@
 import { builder } from "@/graphql/builder";
-import { RelativeValuesDefinition } from "../types/definition";
 import { prisma } from "@/prisma";
+
+import { RelativeValuesDefinition } from "../types/RelativeValuesDefinition";
 
 export const RelativeValuesClusterInput = builder.inputType(
   "RelativeValuesClusterInput",

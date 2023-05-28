@@ -1,6 +1,7 @@
 import { prisma } from "@/prisma";
 import { builder } from "@/graphql/builder";
-import { Model } from "../types/model";
+
+import { Model } from "../types/Model";
 
 builder.queryField("model", (t) =>
   t.fieldWithInput({

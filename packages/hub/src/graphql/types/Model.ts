@@ -1,5 +1,6 @@
 import { builder } from "@/graphql/builder";
-import { ModelRevision, ModelRevisionConnection } from "./model-revision";
+import { ModelRevision, ModelRevisionConnection } from "./ModelRevision";
+import { decodeGlobalID } from "@pothos/plugin-relay";
 
 export const Model = builder.prismaNode("Model", {
   id: { field: "id" },
@@ -31,12 +32,19 @@ export const Model = builder.prismaNode("Model", {
       args: {
         id: t.arg.id({ required: true }),
       },
-      select: (args, _, nestedSelection) => ({
-        revisions: nestedSelection({
-          take: 1,
-          where: { id: args.id },
-        }),
-      }),
+      select: (args, _, nestedSelection) => {
+        const { typename, id } = decodeGlobalID(String(args.id));
+        if (typename !== "ModelRevision") {
+          throw new Error("Expected ModelRevision id");
+        }
+
+        return {
+          revisions: nestedSelection({
+            take: 1,
+            where: { id },
+          }),
+        };
+      },
       async resolve(model) {
         const revision = model.revisions[0];
         if (!revision) {
