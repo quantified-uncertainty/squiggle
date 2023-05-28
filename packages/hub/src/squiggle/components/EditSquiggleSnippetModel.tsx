@@ -142,7 +142,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
           ) : null}
           <div className="mt-4">
             <header className="text-sm font-medium text-gray-600 mb-2">
-              Exports
+              Views
             </header>
             <EditModelExports
               append={appendVariableWithDefinition}

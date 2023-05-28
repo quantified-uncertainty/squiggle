@@ -4,6 +4,7 @@ import { graphql } from "relay-runtime";
 
 import { RelativeValuesDefinitionRevision$key } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
 import { ClusterIcon } from "@/relative-values/components/common/ClusterIcon";
+import { Header } from "@/components/ui/Header";
 
 export const RelativeValuesDefinitionRevisionFragment = graphql`
   fragment RelativeValuesDefinitionRevision on RelativeValuesDefinitionRevision {
@@ -62,8 +63,10 @@ export const RelativeValuesDefinitionRevision: FC<Props> = ({
   );
 
   return (
-    <div className="mx-auto max-w-6xl mt-4">
-      <header className="text-xl font-bold mb-4">{content.title}</header>
+    <div>
+      <div className="mb-4">
+        <Header>{content.title}</Header>
+      </div>
       <div
         className="grid gap-x-8 gap-y-2"
         style={{

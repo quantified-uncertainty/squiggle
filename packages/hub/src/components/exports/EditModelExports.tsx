@@ -5,6 +5,8 @@ import { FC, useState } from "react";
 import { Button, Modal, TextInput } from "@quri/ui";
 import { RelativeValuesExportInput } from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
 import { useForm } from "react-hook-form";
+import { StyledDefinitionLink } from "../ui/StyledDefinitionLink";
+import { relativeValuesRoute } from "@/routes";
 
 const CreateVariableWithDefinitionModal: FC<{
   close: () => void;
@@ -53,15 +55,24 @@ export const EditModelExports: FC<Props> = ({ append, remove, items }) => {
       <div>
         {items.map((item, i) => (
           <div key={i} className="flex items-center gap-2">
-            <div>
-              {item.variableName} &rarr; {item.definition.username}/
-              {item.definition.slug}
+            <div className="text-sm">
+              {item.variableName} &rarr;{" "}
+              <StyledDefinitionLink
+                href={relativeValuesRoute({
+                  username: item.definition.username,
+                  slug: item.definition.slug,
+                })}
+              >
+                {item.definition.username}/{item.definition.slug}
+              </StyledDefinitionLink>
             </div>
             <Button onClick={() => remove(i)}>Remove</Button>
           </div>
         ))}
       </div>
-      <Button onClick={() => setIsOpen(true)}>Add export</Button>
+      <div className="mt-2">
+        <Button onClick={() => setIsOpen(true)}>Add view</Button>
+      </div>
       {isOpen && (
         <CreateVariableWithDefinitionModal
           close={() => setIsOpen(false)}

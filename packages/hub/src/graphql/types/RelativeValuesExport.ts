@@ -21,6 +21,7 @@ export const RelativeValuesExport = builder.prismaNode("RelativeValuesExport", {
   id: { field: "id" },
   fields: (t) => ({
     definition: t.relation("definition"),
+    modelRevision: t.relation("modelRevision"),
     variableName: t.exposeString("variableName"),
     cache: t.relation("cache"),
   }),

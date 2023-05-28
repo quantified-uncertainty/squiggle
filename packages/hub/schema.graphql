@@ -69,6 +69,7 @@ type ModelRevision implements Node {
   description: String!
   forRelativeValues(input: ModelRevisionForRelativeValuesInput): RelativeValuesExport
   id: ID!
+  model: Model!
   relativeValuesExports: [RelativeValuesExport!]!
 }
 
@@ -238,6 +239,7 @@ type RelativeValuesDefinition implements Node {
   createdAtTimestamp: Float!
   currentRevision: RelativeValuesDefinitionRevision!
   id: ID!
+  modelExports: [RelativeValuesExport!]!
   owner: User!
   slug: String!
 }
@@ -264,6 +266,7 @@ type RelativeValuesExport implements Node {
   cache: [RelativeValuesPairCache!]!
   definition: RelativeValuesDefinition!
   id: ID!
+  modelRevision: ModelRevision!
   variableName: String!
 }
 
@@ -334,5 +337,6 @@ type UpdateSquiggleSnippetResult {
 type User implements Node {
   id: ID!
   models(after: String, before: String, first: Int, last: Int): ModelConnection!
+  relativeValuesDefinitions(after: String, before: String, first: Int, last: Int): RelativeValuesDefinitionConnection!
   username: String!
 }

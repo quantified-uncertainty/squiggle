@@ -1,5 +1,6 @@
 import { builder } from "../builder";
 import { ModelConnection } from "./Model";
+import { RelativeValuesDefinitionConnection } from "./RelativeValuesDefinition";
 
 export const User = builder.prismaNode("User", {
   id: { field: "id" },
@@ -13,5 +14,10 @@ export const User = builder.prismaNode("User", {
       },
     }),
     models: t.relatedConnection("models", { cursor: "id" }, ModelConnection),
+    relativeValuesDefinitions: t.relatedConnection(
+      "relativeValuesDefinitions",
+      { cursor: "id" },
+      RelativeValuesDefinitionConnection
+    ),
   }),
 });

@@ -19,6 +19,18 @@ export const RelativeValuesDefinitionPageFragment = graphql`
     currentRevision {
       ...RelativeValuesDefinitionRevision
     }
+    modelExports {
+      id
+      variableName
+      modelRevision {
+        model {
+          owner {
+            username
+          }
+          slug
+        }
+      }
+    }
   }
 `;
 

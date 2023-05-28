@@ -134,7 +134,7 @@ model RelativeValuesDefinition {
 
   revisions RelativeValuesDefinitionRevision[]
 
-  modelVariables RelativeValuesExport[]
+  modelExports RelativeValuesExport[]
 
   @@unique([slug, ownerId])
   @@index([createdAt])

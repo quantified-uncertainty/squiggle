@@ -27,9 +27,11 @@ export const RelativeValuesDefinition = builder.prismaNode(
     id: { field: "id" },
     fields: (t) => ({
       slug: t.exposeString("slug"),
+      owner: t.relation("owner"),
       createdAtTimestamp: t.float({
         resolve: (obj) => obj.createdAt.getTime(),
       }),
+      modelExports: t.relation("modelExports"),
       currentRevision: t.field({
         type: RelativeValuesDefinitionRevision,
         select: (_, __, nestedSelection) => ({
@@ -44,7 +46,6 @@ export const RelativeValuesDefinition = builder.prismaNode(
           return obj.revisions[0];
         },
       }),
-      owner: t.relation("owner"),
     }),
   }
 );
