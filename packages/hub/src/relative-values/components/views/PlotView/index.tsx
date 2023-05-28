@@ -5,6 +5,7 @@ import { ModelEvaluator } from "@/relative-values/values/ModelEvaluator";
 import { ClusterFilter } from "../ClusterFilter";
 import { ForcePlot } from "./ForcePlot";
 import { ValueAndUncertaintyPlot } from "./ValueAndUncertaintyPlot";
+import { useRelativeValuesContext } from "../RelativeValuesProvider";
 
 const Section: FC<PropsWithChildren<{ title: string; border?: boolean }>> = ({
   title,
@@ -19,9 +20,9 @@ const Section: FC<PropsWithChildren<{ title: string; border?: boolean }>> = ({
   </div>
 );
 
-export const PlotView: FC<{
-  model: ModelEvaluator;
-}> = ({ model }) => {
+export const PlotView: FC = () => {
+  const { evaluator: model } = useRelativeValuesContext();
+
   return (
     <div
       className="grid gap-2"

@@ -1,7 +1,7 @@
 import { Set } from "immutable";
 import { FC, PropsWithChildren, Reducer } from "react";
 
-import { ViewSquiggleContentForRelativeValuesDefinition$data } from "@/__generated__/ViewSquiggleContentForRelativeValuesDefinition.graphql";
+import { RelativeValuesDefinitionRevision$data } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
 import { generateProvider } from "@/relative-values/components/generateProvider";
 import { ModelEvaluator } from "@/relative-values/values/ModelEvaluator";
 import { Filter } from "./types";
@@ -24,7 +24,7 @@ export type AxisConfig = {
 
 type ViewContextShape = {
   evaluator: ModelEvaluator;
-  definition: ViewSquiggleContentForRelativeValuesDefinition$data;
+  definition: RelativeValuesDefinitionRevision$data;
   gridMode: GridMode;
   axisConfig: { [k in Axis]: AxisConfig };
 };
@@ -164,7 +164,7 @@ const {
 
 export const RelativeValuesProvider: FC<
   PropsWithChildren<{
-    definition: ViewSquiggleContentForRelativeValuesDefinition$data;
+    definition: RelativeValuesDefinitionRevision$data;
     evaluator: ModelEvaluator;
   }>
 > = ({ evaluator, definition, children }) => {

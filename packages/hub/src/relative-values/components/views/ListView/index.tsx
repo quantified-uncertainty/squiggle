@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { FC, Fragment, useState } from "react";
 
-import { ViewSquiggleContentForRelativeValuesDefinition$data } from "@/__generated__/ViewSquiggleContentForRelativeValuesDefinition.graphql";
+import { RelativeValuesDefinitionRevision$data } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
 import { DropdownButton } from "@/components/ui/DropdownButton";
 import { CompassIcon } from "@/relative-values/components/ui/icons/CompassIcon";
 import { Item } from "@/relative-values/types";
@@ -21,7 +21,7 @@ import { ItemSideBar } from "./sidebar";
 
 type TableProps = {
   model: ModelEvaluator;
-  items: ViewSquiggleContentForRelativeValuesDefinition$data["items"];
+  items: RelativeValuesDefinitionRevision$data["items"];
   showDescriptions: boolean;
   recommendedUnit: Item;
   sidebarItems: [Item, Item] | undefined;
@@ -37,7 +37,6 @@ export const ListViewTable: FC<TableProps> = ({
   setSidebarItems,
 }) => {
   const { axisConfig } = useRelativeValuesContext();
-  const catalog = useDefinition();
   const clusters = useDefinitionClusters();
 
   const uncertaintyPercentiles = model.getParamPercentiles(
@@ -161,11 +160,8 @@ export const ListViewTable: FC<TableProps> = ({
   );
 };
 
-type Props = {
-  model: ModelEvaluator;
-};
-
-export const ListView: FC<Props> = ({ model }) => {
+export const ListView: FC = () => {
+  const { evaluator: model } = useRelativeValuesContext();
   const definition = useDefinition();
   const clusters = useDefinitionClusters();
 
@@ -223,7 +219,7 @@ export const ListView: FC<Props> = ({ model }) => {
 
   return (
     <div>
-      <div className="mb-2 flex max-w-6xl mx-auto">
+      <div className="mb-2 flex">
         <div className="mr-2">
           <DropdownButton text="Table Settings">
             {() => <AxisMenu axis="rows" sortByAverage={false} />}

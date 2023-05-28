@@ -1,12 +1,10 @@
-import { ViewSquiggleContentForRelativeValuesDefinition$data } from "@/__generated__/ViewSquiggleContentForRelativeValuesDefinition.graphql";
+import { RelativeValuesDefinitionRevision$data } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
 
-export type Cluster =
-  ViewSquiggleContentForRelativeValuesDefinition$data["clusters"][0];
+export type Cluster = RelativeValuesDefinitionRevision$data["clusters"][0];
 
 // TODO - should be Map
 export type Clusters = {
   [k: string]: Cluster;
 };
 
-export type Item =
-  ViewSquiggleContentForRelativeValuesDefinition$data["items"][0];
+export type Item = RelativeValuesDefinitionRevision$data["items"][0];

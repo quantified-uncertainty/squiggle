@@ -11,6 +11,7 @@ export const RelativeValuesDefinitionRevisionFragment = graphql`
     clusters {
       id
       color
+      recommendedUnit
     }
     items {
       id
@@ -18,6 +19,7 @@ export const RelativeValuesDefinitionRevisionFragment = graphql`
       description
       clusterId
     }
+    recommendedUnit
   }
 `;
 

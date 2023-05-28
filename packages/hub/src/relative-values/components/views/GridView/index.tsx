@@ -148,9 +148,8 @@ export const ClusterGridView: FC<{
   );
 };
 
-export const GridView: FC<{
-  model: ModelEvaluator;
-}> = ({ model }) => {
+export const GridView: FC = () => {
+  const { evaluator: model } = useRelativeValuesContext();
   const { axisConfig, gridMode } = useRelativeValuesContext();
   const { items } = useDefinition();
 

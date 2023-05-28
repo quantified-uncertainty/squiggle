@@ -1,14 +1,13 @@
 import { useMemo } from "react";
 
-import { Item } from "@/relative-values/types";
+import { RelativeValuesDefinitionRevision$data } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
 import { AxisConfig } from "../RelativeValuesProvider";
-import { ViewSquiggleContentForRelativeValuesDefinition$data } from "@/__generated__/ViewSquiggleContentForRelativeValuesDefinition.graphql";
 
 export const useFilteredItems = ({
   items,
   config,
 }: {
-  items: ViewSquiggleContentForRelativeValuesDefinition$data["items"];
+  items: RelativeValuesDefinitionRevision$data["items"];
   config: AxisConfig;
 }) => {
   return useMemo(() => {

@@ -1,9 +1,6 @@
 "use client";
 
-import { useLazyLoadQuery } from "react-relay";
-
-import { ModelPageQuery as ModelPageQueryType } from "@gen/ModelPageQuery.graphql";
-import { ModelPageQuery } from "../ModelPage";
+import { useModelPageQuery } from "../ModelPage";
 import { EditModelPageBody } from "./EditModelPageBody";
 
 export default function Page({
@@ -11,10 +8,10 @@ export default function Page({
 }: {
   params: { username: string; slug: string };
 }) {
-  // should be de-duped by Next.js caches, so it's not a problem that we do this query twice
-  const data = useLazyLoadQuery<ModelPageQueryType>(ModelPageQuery, {
-    input: { ownerUsername: params.username, slug: params.slug },
+  const modelRef = useModelPageQuery({
+    ownerUsername: params.username,
+    slug: params.slug,
   });
 
-  return <EditModelPageBody modelRef={data.model} />;
+  return <EditModelPageBody modelRef={modelRef} />;
 }

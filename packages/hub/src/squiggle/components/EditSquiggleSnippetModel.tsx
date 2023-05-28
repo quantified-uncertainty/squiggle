@@ -6,16 +6,18 @@ import { graphql, useFragment, useMutation } from "react-relay";
 import { SquigglePlayground } from "@quri/squiggle-components";
 import { Button, Modal, TextArea, TextInput, useToast } from "@quri/ui";
 
-import { EditSquiggleSnippetModelMutation } from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
+import {
+  EditSquiggleSnippetModelMutation,
+  RelativeValuesExportInput,
+} from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
+import { ModelPage$key } from "@/__generated__/ModelPage.graphql";
+import { ModelRevision$key } from "@/__generated__/ModelRevision.graphql";
 import { SquiggleContent$key } from "@/__generated__/SquiggleContent.graphql";
+import { ModelPageFragment } from "@/app/users/[username]/models/[slug]/ModelPage";
 import { ModelRevisionFragment } from "@/app/users/[username]/models/[slug]/ModelRevision";
 import { WithTopMenu } from "@/components/layout/WithTopMenu";
 import { SquiggleContentFragment } from "./SquiggleContent";
-import { ModelPage$key } from "@/__generated__/ModelPage.graphql";
-import { ModelPageFragment } from "@/app/users/[username]/models/[slug]/ModelPage";
-import { ModelRevision$key } from "@/__generated__/ModelRevision.graphql";
-import { ModelExportsFragment } from "@/components/exports/ModelExports";
-import { ModelExports$key } from "@/__generated__/ModelExports.graphql";
+import { EditModelExports } from "@/components/exports/EditModelExports";
 
 export const Mutation = graphql`
   mutation EditSquiggleSnippetModelMutation(
@@ -35,80 +37,10 @@ export const Mutation = graphql`
   }
 `;
 
-type VariableWithDefinition = {
-  variableName: string;
-  definition: {
-    username: string;
-    slug: string;
-  };
-};
-
 type FormShape = {
   code: string;
   description: string;
-  relativeValuesExports: VariableWithDefinition[];
-};
-
-const CreateVariableWithDefinitionModal: FC<{
-  close: () => void;
-  append: (item: VariableWithDefinition) => void;
-}> = ({ close, append }) => {
-  const { register, handleSubmit } = useForm<VariableWithDefinition>();
-
-  const create = handleSubmit((data) => {
-    append(data);
-    close();
-  });
-
-  return (
-    <Modal close={close}>
-      <Modal.Header>...</Modal.Header>
-      <Modal.Body>
-        <TextInput register={register} label="Variable" name="variableName" />
-        <TextInput
-          register={register}
-          label="Username"
-          name="definition.username"
-        />
-        <TextInput register={register} label="Slug" name="definition.slug" />
-      </Modal.Body>
-      <Modal.Footer>
-        <Button onClick={create} theme="primary">
-          Create
-        </Button>
-      </Modal.Footer>
-    </Modal>
-  );
-};
-
-const VariablesWithDefinitionsControls: FC<{
-  append: (item: VariableWithDefinition) => void;
-  remove: (id: number) => void;
-  items: VariableWithDefinition[];
-}> = ({ append, remove, items }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  return (
-    <div>
-      <div>
-        {items.map((item, i) => (
-          <div key={i} className="flex items-center gap-2">
-            <div>
-              {item.variableName} &rarr; {item.definition.username}/
-              {item.definition.slug}
-            </div>
-            <Button onClick={() => remove(i)}>Remove</Button>
-          </div>
-        ))}
-      </div>
-      <Button onClick={() => setIsOpen(true)}>Add export</Button>
-      {isOpen && (
-        <CreateVariableWithDefinitionModal
-          close={() => setIsOpen(false)}
-          append={append}
-        />
-      )}
-    </div>
-  );
+  relativeValuesExports: RelativeValuesExportInput[];
 };
 
 type Props = {
@@ -132,13 +64,6 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
     revision.content
   );
 
-  // borrowing fragment to populate form
-  // TODO - should be encapsulated in VariablesWithDefinitions/useVariablesWithDefinitionsData.ts
-  const { relativeValuesExports } = useFragment<ModelExports$key>(
-    ModelExportsFragment,
-    revision
-  );
-
   const initialFormValues: FormShape = useMemo(() => {
     return {
       code: content.code,
@@ -151,7 +76,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
         },
       })),
     };
-  }, [content, revision.description, relativeValuesExports]);
+  }, [content, revision.description, revision.relativeValuesExports]);
 
   const { handleSubmit, control, register } = useForm<FormShape>({
     defaultValues: initialFormValues,
@@ -215,8 +140,11 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
               />
             </div>
           ) : null}
-          <div className="mt-2">
-            <VariablesWithDefinitionsControls
+          <div className="mt-4">
+            <header className="text-sm font-medium text-gray-600 mb-2">
+              Exports
+            </header>
+            <EditModelExports
               append={appendVariableWithDefinition}
               remove={removeVariableWithDefinition}
               items={variablesWithDefinitionsFields}

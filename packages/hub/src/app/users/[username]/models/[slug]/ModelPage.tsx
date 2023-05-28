@@ -1,6 +1,7 @@
 import { FC, PropsWithChildren } from "react";
 import { graphql } from "relay-runtime";
 import { useSession } from "next-auth/react";
+import { useLazyLoadQuery } from "react-relay";
 
 import { DropdownMenu } from "@quri/ui";
 
@@ -11,6 +12,11 @@ import { StyledTabLink } from "@/components/ui/StyledTabLink";
 import { modelEditRoute, modelRevisionsRoute, modelRoute } from "@/routes";
 import { DeleteModelAction } from "./DeleteModelAction";
 import { UpdateModelSlugAction } from "./UpdateModelSlugAction";
+import {
+  ModelRevisionForRelativeValuesInput,
+  QueryModelInput,
+} from "@/__generated__/ModelPageQuery.graphql";
+import { ModelPageQuery as ModelPageQueryType } from "@gen/ModelPageQuery.graphql";
 
 export const ModelPageFragment = graphql`
   fragment ModelPage on Model
@@ -31,7 +37,7 @@ export const ModelPageFragment = graphql`
   }
 `;
 
-export const ModelPageQuery = graphql`
+const ModelPageQuery = graphql`
   query ModelPageQuery(
     $input: QueryModelInput!
     $forRelativeValues: ModelRevisionForRelativeValuesInput
@@ -41,6 +47,19 @@ export const ModelPageQuery = graphql`
     }
   }
 `;
+
+// This is a common query used in multiple nested pages, but it should be de-duped by Next.js caching mechanisms.
+export function useModelPageQuery(
+  input: QueryModelInput,
+  forRelativeValues?: ModelRevisionForRelativeValuesInput
+) {
+  const { model: modelRef } = useLazyLoadQuery<ModelPageQueryType>(
+    ModelPageQuery,
+    { input, forRelativeValues }
+  );
+
+  return modelRef;
+}
 
 type CommonProps = {
   username: string;

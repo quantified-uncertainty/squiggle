@@ -16,12 +16,20 @@ export function modelForRelativeValuesExportRoute({
   username,
   slug,
   variableName,
+  mode = "list",
 }: {
   username: string;
   slug: string;
   variableName: string;
+  mode?: "list" | "grid" | "plot";
 }) {
-  return `/users/${username}/models/${slug}/relative-values/${variableName}`;
+  const baseRoute = `/users/${username}/models/${slug}/relative-values/${variableName}`;
+  switch (mode) {
+    case "list":
+      return baseRoute;
+    default:
+      return `${baseRoute}/${mode}`;
+  }
 }
 
 export function modelEditRoute({
@@ -66,14 +74,11 @@ export function relativeValuesRoute({
   return `/users/${username}/relative-values/${slug}`;
 }
 
-export function relativeValuesEditRoute({
-  username,
-  slug,
-}: {
+export function relativeValuesEditRoute(props: {
   username: string;
   slug: string;
 }) {
-  return `/users/${username}/relative-values/${slug}/edit`;
+  return relativeValuesRoute(props) + "/edit";
 }
 
 export function userRoute({ username }: { username: string }) {

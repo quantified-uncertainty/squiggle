@@ -32,7 +32,7 @@ export const ModelRevisionFragment = graphql`
       ...RelativeValuesExportItem
       definition {
         currentRevision {
-          ...ViewSquiggleContentForRelativeValuesDefinition
+          ...RelativeValuesDefinitionRevision
         }
       }
     }

@@ -39,7 +39,7 @@ const NonEmptyItem: FC<Required<Props>> = ({ itemRef }) => {
 
   return (
     <Container>
-      {item.variableName} for{" "}
+      {item.variableName} &rarr;{" "}
       <StyledDefinitionLink
         href={relativeValuesRoute({
           username: item.definition.owner.username,

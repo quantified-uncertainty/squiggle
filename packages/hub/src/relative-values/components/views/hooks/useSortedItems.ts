@@ -2,14 +2,13 @@ import _ from "lodash";
 import { useMemo } from "react";
 
 import { Item } from "@/relative-values/types";
-import { RelativeValue } from "@/relative-values/values/types";
-import { hasInvalid } from "@/relative-values/values/value";
 import {
   ModelEvaluator,
   extractOkValues,
 } from "@/relative-values/values/ModelEvaluator";
+import { RelativeValue } from "@/relative-values/values/types";
+import { hasInvalid } from "@/relative-values/values/value";
 import { AxisConfig } from "../RelativeValuesProvider";
-import { ViewSquiggleContentForRelativeValuesDefinition$data } from "@/__generated__/ViewSquiggleContentForRelativeValuesDefinition.graphql";
 
 const averageMetric = ({
   item,
@@ -97,10 +96,10 @@ export const useSortedItems = ({
   model,
   otherDimensionItems: otherDimensionChoices,
 }: {
-  items: ViewSquiggleContentForRelativeValuesDefinition$data["items"];
+  items: readonly Item[];
   config: AxisConfig;
   model: ModelEvaluator;
-  otherDimensionItems: ViewSquiggleContentForRelativeValuesDefinition$data["items"]; // used for calculating average median and average uncertainty
+  otherDimensionItems: readonly Item[]; // used for calculating average median and average uncertainty
 }) => {
   return useMemo(() => {
     const sorted = (() => {
