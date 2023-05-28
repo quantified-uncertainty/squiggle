@@ -18,5 +18,6 @@ import "./mutations/updateModelSlug";
 import "./mutations/updateRelativeValuesDefinition";
 import "./mutations/updateSquiggleSnippetModel";
 import "./mutations/buildRelativeValuesCache";
+import "./mutations/clearRelativeValuesCache";
 
 export const schema = builder.toSchema();

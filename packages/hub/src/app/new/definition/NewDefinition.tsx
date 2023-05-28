@@ -13,6 +13,7 @@ import {
   RelativeValuesDefinitionForm,
   RelativeValuesDefinitionFormShape,
 } from "@/relative-values/components/RelativeValuesDefinitionForm";
+import { useAsyncMutation } from "@/hooks/useAsyncMutation";
 
 const Mutation = graphql`
   mutation NewDefinitionMutation(
@@ -35,15 +36,16 @@ const Mutation = graphql`
 export const NewDefinition: FC = () => {
   useSession({ required: true });
 
-  const toast = useToast();
-
   const router = useRouter();
 
-  const [saveMutation, isSaveInFlight] =
-    useMutation<NewDefinitionMutation>(Mutation);
+  const [runMutation] = useAsyncMutation<NewDefinitionMutation>({
+    mutation: Mutation,
+    expectedTypename: "CreateRelativeValuesDefinitionResult",
+    confirmation: "Definition created",
+  });
 
   const save = (data: RelativeValuesDefinitionFormShape) => {
-    saveMutation({
+    runMutation({
       variables: {
         input: {
           slug: data.slug,
@@ -52,16 +54,9 @@ export const NewDefinition: FC = () => {
           clusters: data.clusters,
         },
       },
-      onCompleted(data) {
-        if (data.result.__typename === "BaseError") {
-          toast(data.result.message, "error");
-        } else {
-          // TODO - go to definition page instead?
-          router.push("/");
-        }
-      },
-      onError(e) {
-        toast(e.toString(), "error");
+      onCompleted: () => {
+        // TODO - go to definition page instead?
+        router.push("/");
       },
     });
   };

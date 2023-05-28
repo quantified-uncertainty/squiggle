@@ -16,6 +16,7 @@ import { SquiggleContentFragment } from "@/squiggle/components/SquiggleContent";
 import { ModelPageFragment, useModelPageQuery } from "../../ModelPage";
 import { ModelRevisionFragment } from "../../ModelRevision";
 import { ViewModelRevision } from "../../ViewModelRevision";
+import { CacheMenu } from "./CacheMenu";
 
 export default function RelativeValuesModelLayout({
   params,
@@ -49,11 +50,9 @@ export default function RelativeValuesModelLayout({
     throw new Error("Not found");
   }
 
-  const definitionRef = revision.forRelativeValues.definition.currentRevision;
-
   const definition = useFragment<RelativeValuesDefinitionRevision$key>(
     RelativeValuesDefinitionRevisionFragment,
-    definitionRef
+    revision.forRelativeValues.definition.currentRevision
   );
 
   const evaluatorResult = useMemo(
@@ -74,7 +73,7 @@ export default function RelativeValuesModelLayout({
       modelUsername={params.username}
       modelSlug={params.slug}
     >
-      <div className="mb-8">
+      <div className="mb-8 flex items-center gap-4">
         <StyledTabLink.List>
           <StyledTabLink
             name="List"
@@ -103,6 +102,7 @@ export default function RelativeValuesModelLayout({
             })}
           />
         </StyledTabLink.List>
+        <CacheMenu revision={revision} />
       </div>
       <RelativeValuesProvider definition={definition} evaluator={evaluator}>
         {children}

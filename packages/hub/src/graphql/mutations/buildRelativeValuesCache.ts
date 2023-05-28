@@ -4,12 +4,16 @@ import { cartesianProduct } from "@/relative-values/lib/utils";
 import { relativeValuesItemsSchema } from "@/relative-values/types";
 import { ModelEvaluator } from "@/relative-values/values/ModelEvaluator";
 import { decodeGlobalID } from "@pothos/plugin-relay";
+import { RelativeValuesExport } from "../types/RelativeValuesExport";
 
 builder.mutationField("buildRelativeValuesCache", (t) =>
   t.fieldWithInput({
     type: builder.simpleObject("BuildRelativeValuesCacheResult", {
       fields: (t) => ({
-        ok: t.boolean(),
+        relativeValuesExport: t.field({
+          type: RelativeValuesExport,
+          nullable: false,
+        }),
       }),
     }),
     authScopes: {
@@ -20,7 +24,7 @@ builder.mutationField("buildRelativeValuesCache", (t) =>
       exportId: t.input.string({ required: true }),
     },
     resolve: async (_, { input }, { session }) => {
-      const { typename, id } = decodeGlobalID(input.exportId);
+      const { typename, id: exportId } = decodeGlobalID(input.exportId);
       if (typename !== "RelativeValuesExport") {
         throw new Error("Expected RelativeValuesExport id");
       }
@@ -33,7 +37,7 @@ builder.mutationField("buildRelativeValuesCache", (t) =>
 
       const relativeValuesExport =
         await prisma.relativeValuesExport.findUniqueOrThrow({
-          where: { id },
+          where: { id: exportId },
           include: {
             definition: {
               select: {
@@ -93,14 +97,33 @@ builder.mutationField("buildRelativeValuesCache", (t) =>
       const items = relativeValuesItemsSchema.parse(definitionRevision.items);
       const itemIds = items.map((item) => item.id);
 
+      const existingCacheItems = await prisma.relativeValuesPairCache.findMany({
+        where: {
+          exportId,
+        },
+        select: {
+          firstItem: true,
+          secondItem: true,
+        },
+      });
+
+      const seen: Record<string, Record<string, boolean>> = {};
+      for (const row of existingCacheItems) {
+        seen[row.firstItem] ??= {};
+        seen[row.firstItem][row.secondItem] = true;
+      }
+
       for (const [firstItem, secondItem] of cartesianProduct(
         itemIds,
         itemIds
       )) {
+        if (seen[firstItem]?.[secondItem]) {
+          continue; // already cached
+        }
         const result = evaluator.compareWithoutCache(firstItem, secondItem);
         await prisma.relativeValuesPairCache.create({
           data: {
-            exportId: relativeValuesExport.id,
+            exportId,
             firstItem,
             secondItem,
             ...(result.ok
@@ -110,7 +133,11 @@ builder.mutationField("buildRelativeValuesCache", (t) =>
         });
       }
 
-      return { ok: true };
+      const updatedRelativeValuesExport =
+        await prisma.relativeValuesExport.findUniqueOrThrow({
+          where: { id: exportId },
+        });
+      return { relativeValuesExport: updatedRelativeValuesExport };
     },
   })
 );

@@ -29,6 +29,7 @@ export const ModelRevisionFragment = graphql`
     }
 
     forRelativeValues(input: $forRelativeValues) {
+      id
       ...RelativeValuesExportItem
       definition {
         currentRevision {

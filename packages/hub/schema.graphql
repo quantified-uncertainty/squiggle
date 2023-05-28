@@ -3,7 +3,11 @@ type BaseError implements Error {
 }
 
 type BuildRelativeValuesCacheResult {
-  ok: Boolean!
+  relativeValuesExport: RelativeValuesExport!
+}
+
+type ClearRelativeValuesCacheResult {
+  relativeValuesExport: RelativeValuesExport!
 }
 
 type CreateRelativeValuesDefinitionResult {
@@ -90,6 +94,7 @@ input ModelRevisionForRelativeValuesSlugUsernameInput {
 
 type Mutation {
   buildRelativeValuesCache(input: MutationBuildRelativeValuesCacheInput!): MutationBuildRelativeValuesCacheResult!
+  clearRelativeValuesCache(input: MutationClearRelativeValuesCacheInput!): MutationClearRelativeValuesCacheResult!
   createRelativeValuesDefinition(input: MutationCreateRelativeValuesDefinitionInput!): MutationCreateRelativeValuesDefinitionResult!
   createSquiggleSnippetModel(input: MutationCreateSquiggleSnippetModelInput!): MutationCreateSquiggleSnippetModelResult!
   deleteModel(input: MutationDeleteModelInput!): MutationDeleteModelResult!
@@ -105,6 +110,12 @@ input MutationBuildRelativeValuesCacheInput {
 }
 
 union MutationBuildRelativeValuesCacheResult = BaseError | BuildRelativeValuesCacheResult
+
+input MutationClearRelativeValuesCacheInput {
+  exportId: String!
+}
+
+union MutationClearRelativeValuesCacheResult = BaseError | ClearRelativeValuesCacheResult
 
 input MutationCreateRelativeValuesDefinitionInput {
   clusters: [RelativeValuesClusterInput!]!
