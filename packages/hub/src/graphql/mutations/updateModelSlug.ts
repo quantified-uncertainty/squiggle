@@ -4,7 +4,7 @@ import { builder } from "@/graphql/builder";
 import { Model } from "../types/Model";
 
 builder.mutationField("updateModelSlug", (t) =>
-  t.fieldWithInput({
+  t.withAuth({ user: true }).fieldWithInput({
     type: builder.simpleObject("UpdateModelSlugResult", {
       fields: (t) => ({
         model: t.field({
@@ -13,9 +13,6 @@ builder.mutationField("updateModelSlug", (t) =>
         }),
       }),
     }),
-    authScopes: {
-      user: true,
-    },
     errors: {},
     input: {
       username: t.input.string({ required: true }),
@@ -28,12 +25,7 @@ builder.mutationField("updateModelSlug", (t) =>
       }),
     },
     resolve: async (_, { input }, { session }) => {
-      const email = session?.user.email;
-      if (!email) {
-        // shouldn't happen because we checked user auth scope previously, but helps with type checks
-        throw new Error("Email is missing");
-      }
-      if (session?.user.username !== input.username) {
+      if (session.user.username !== input.username) {
         throw new Error("Can't edit another user's model");
       }
 

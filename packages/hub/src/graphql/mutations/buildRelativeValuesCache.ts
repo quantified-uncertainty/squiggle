@@ -7,7 +7,7 @@ import { decodeGlobalID } from "@pothos/plugin-relay";
 import { RelativeValuesExport } from "../types/RelativeValuesExport";
 
 builder.mutationField("buildRelativeValuesCache", (t) =>
-  t.fieldWithInput({
+  t.withAuth({ user: true }).fieldWithInput({
     type: builder.simpleObject("BuildRelativeValuesCacheResult", {
       fields: (t) => ({
         relativeValuesExport: t.field({
@@ -16,9 +16,6 @@ builder.mutationField("buildRelativeValuesCache", (t) =>
         }),
       }),
     }),
-    authScopes: {
-      user: true,
-    },
     errors: {},
     input: {
       exportId: t.input.string({ required: true }),
@@ -27,12 +24,6 @@ builder.mutationField("buildRelativeValuesCache", (t) =>
       const { typename, id: exportId } = decodeGlobalID(input.exportId);
       if (typename !== "RelativeValuesExport") {
         throw new Error("Expected RelativeValuesExport id");
-      }
-
-      const email = session?.user.email;
-      if (!email) {
-        // shouldn't happen because we checked user auth scope previously, but helps with type checks
-        throw new Error("Email is missing");
       }
 
       const relativeValuesExport =
@@ -68,7 +59,7 @@ builder.mutationField("buildRelativeValuesCache", (t) =>
 
       const { modelRevision } = relativeValuesExport;
 
-      if (modelRevision.model.owner.email !== email) {
+      if (modelRevision.model.owner.email !== session.user.email) {
         throw new Error("You don't own this model");
       }
 

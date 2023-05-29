@@ -4,31 +4,24 @@ import { builder } from "@/graphql/builder";
 import { Me } from "../types/Me";
 
 builder.mutationField("setUsername", (t) =>
-  t.field({
+  t.withAuth({ user: true }).field({
     type: Me,
-    authScopes: {
-      user: true,
-    },
     args: {
       username: t.arg.string({ required: true }),
     },
     errors: {},
     async resolve(_, args, { session }) {
-      const email = session?.user.email;
-      if (!email) {
-        // shouldn't happen because we checked user auth scope previously, but helps with type checks
-        throw new Error("Email is missing");
-      }
       if (session.user.username) {
         throw new Error("Username is already set");
       }
+
       if (!args.username.match("^[a-zA-Z]\\w+$")) {
         throw new Error("Username must be alphanumerical");
       }
 
       await prisma.user.update({
         where: {
-          email,
+          email: session.user.email,
         },
         data: {
           username: args.username,

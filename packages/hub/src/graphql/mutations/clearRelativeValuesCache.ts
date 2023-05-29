@@ -4,7 +4,7 @@ import { decodeGlobalID } from "@pothos/plugin-relay";
 import { RelativeValuesExport } from "../types/RelativeValuesExport";
 
 builder.mutationField("clearRelativeValuesCache", (t) =>
-  t.fieldWithInput({
+  t.withAuth({ user: true }).fieldWithInput({
     type: builder.simpleObject("ClearRelativeValuesCacheResult", {
       fields: (t) => ({
         relativeValuesExport: t.field({
@@ -13,9 +13,6 @@ builder.mutationField("clearRelativeValuesCache", (t) =>
         }),
       }),
     }),
-    authScopes: {
-      user: true,
-    },
     errors: {},
     input: {
       exportId: t.input.string({ required: true }),
@@ -26,10 +23,27 @@ builder.mutationField("clearRelativeValuesCache", (t) =>
         throw new Error("Expected RelativeValuesExport id");
       }
 
-      const email = session?.user.email;
-      if (!email) {
-        // shouldn't happen because we checked user auth scope previously, but helps with type checks
-        throw new Error("Email is missing");
+      const relativeValuesExport =
+        await prisma.relativeValuesExport.findUniqueOrThrow({
+          where: { id: input.exportId },
+          include: {
+            modelRevision: {
+              select: {
+                model: {
+                  select: {
+                    owner: true,
+                  },
+                },
+              },
+            },
+          },
+        });
+
+      if (
+        relativeValuesExport.modelRevision.model.owner.email !==
+        session.user.email
+      ) {
+        throw new Error("You don't own this model");
       }
 
       await prisma.relativeValuesPairCache.deleteMany({

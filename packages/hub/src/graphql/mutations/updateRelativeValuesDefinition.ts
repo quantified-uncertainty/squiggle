@@ -6,10 +6,12 @@ import { RelativeValuesDefinition } from "../types/RelativeValuesDefinition";
 import {
   RelativeValuesClusterInput,
   RelativeValuesItemInput,
+  validateItemId,
+  validateRelativeValuesDefinition,
 } from "./createRelativeValuesDefinition";
 
 builder.mutationField("updateRelativeValuesDefinition", (t) =>
-  t.fieldWithInput({
+  t.withAuth({ user: true }).fieldWithInput({
     type: builder.simpleObject("UpdateRelativeValuesDefinitionResult", {
       fields: (t) => ({
         definition: t.field({
@@ -18,9 +20,6 @@ builder.mutationField("updateRelativeValuesDefinition", (t) =>
         }),
       }),
     }),
-    authScopes: {
-      user: true,
-    },
     errors: {},
     input: {
       username: t.input.string({ required: true }),
@@ -34,14 +33,12 @@ builder.mutationField("updateRelativeValuesDefinition", (t) =>
         type: [RelativeValuesClusterInput],
         required: true,
       }),
+      recommendedUnit: t.input.string({
+        validate: validateItemId,
+      }),
     },
     resolve: async (_, { input }, { session }) => {
-      const email = session?.user.email;
-      if (!email) {
-        // shouldn't happen because we checked user auth scope previously, but helps with type checks
-        throw new Error("Email is missing");
-      }
-      if (session?.user.username !== input.username) {
+      if (session.user.username !== input.username) {
         throw new Error("Can't edit another user's model");
       }
 
@@ -51,24 +48,11 @@ builder.mutationField("updateRelativeValuesDefinition", (t) =>
         },
       });
 
-      if (!input.items.length) {
-        throw new Error("Definition must include at least one item");
-      }
-
-      // TODO - there's some copy-paste here from createRelativeValuesDefinition
-
-      const itemIds = new Set<string>();
-      for (const item of input.items) {
-        if (itemIds.has(item.id)) {
-          throw new Error(`Duplicate item id ${item.id}`);
-        }
-        if (!item.id.match(/^\w[\w\-]*$/)) {
-          throw new Error(`Invalid item id ${item.id}`);
-        }
-        itemIds.add(item.id);
-      }
-
-      // TODO - check that `recommendedUnit` matches some item id, and that `clusterId` matches some cluster id
+      validateRelativeValuesDefinition({
+        items: input.items,
+        clusters: input.clusters,
+        recommendedUnit: input.recommendedUnit,
+      });
 
       const revision = await prisma.relativeValuesDefinitionRevision.create({
         data: {
