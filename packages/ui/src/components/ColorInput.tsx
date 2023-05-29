@@ -36,7 +36,7 @@ export function ColorInput<T extends FieldValues>({
             </DropdownMenu>
           )}
         >
-          <div className="w-8 h-8 rounded p-1 border border-slate-200">
+          <div className="w-10 h-10 rounded p-1 border border-slate-200">
             <div
               style={{ backgroundColor: field.value }}
               className="w-full h-full rounded"
