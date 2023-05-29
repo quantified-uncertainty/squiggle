@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import {
+  Control,
   DeepPartial,
   FieldValues,
   UseFormRegister,
@@ -9,7 +10,10 @@ import {
 type WrappedRender<
   Args extends Record<string, any>,
   Values extends FieldValues
-> = (args: Args, register: UseFormRegister<Values>) => ReactNode;
+> = (
+  args: Args,
+  props: { register: UseFormRegister<Values>; control: Control<Values> }
+) => ReactNode;
 
 function Form<Args extends Record<string, any>, Values extends FieldValues>({
   render,
@@ -20,8 +24,8 @@ function Form<Args extends Record<string, any>, Values extends FieldValues>({
   args: Args;
   defaultValues?: DeepPartial<Values>;
 }) {
-  const { register } = useForm<Values>({ defaultValues });
-  return <form>{render(args, register)}</form>;
+  const { register, control } = useForm<Values>({ defaultValues });
+  return <form>{render(args, { register, control })}</form>;
 }
 
 // This is kinda hacky (in practice, Typescript doesn't infer T well the way we use it now).

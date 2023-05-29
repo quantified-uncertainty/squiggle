@@ -8,7 +8,7 @@ export default meta;
 type Story = StoryObj<typeof Checkbox>;
 
 export const Unchecked: Story = {
-  render: withRHF((args, register) => (
+  render: withRHF((args, { register }) => (
     <Checkbox {...args} register={register} />
   )),
   args: {
@@ -19,7 +19,7 @@ export const Unchecked: Story = {
 
 export const Checked: Story = {
   render: withRHF(
-    (args, register) => <Checkbox {...(args as any)} register={register} />,
+    (args, { register }) => <Checkbox {...(args as any)} register={register} />,
     { fieldName: true }
   ),
   args: {
@@ -29,7 +29,7 @@ export const Checked: Story = {
 };
 
 export const WithTooltip: Story = {
-  render: withRHF((args, register) => (
+  render: withRHF((args, { register }) => (
     <Checkbox {...args} register={register} />
   )),
   args: {

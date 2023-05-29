@@ -8,7 +8,7 @@ export default meta;
 type Story = StoryObj<typeof TextInput>;
 
 export const Default: Story = {
-  render: withRHF((args, register) => (
+  render: withRHF((args, { register }) => (
     <TextInput {...args} register={register} />
   )),
   args: {
@@ -18,7 +18,7 @@ export const Default: Story = {
 };
 
 export const WithPlaceholder: Story = {
-  render: withRHF((args, register) => (
+  render: withRHF((args, { register }) => (
     <TextInput {...args} register={register} />
   )),
   args: {
@@ -32,7 +32,7 @@ export const WithPlaceholder: Story = {
  * Same height as 32px `<Button />`.
  */
 export const Small: Story = {
-  render: withRHF((args, register) => (
+  render: withRHF((args, { register }) => (
     <TextInput {...args} register={register} />
   )),
   args: {
@@ -44,7 +44,7 @@ export const Small: Story = {
 };
 
 export const WithoutLabel: Story = {
-  render: withRHF((args, register) => (
+  render: withRHF((args, { register }) => (
     <TextInput {...args} register={register} />
   )),
   args: {
@@ -53,7 +53,7 @@ export const WithoutLabel: Story = {
 };
 
 export const Disabled: Story = {
-  render: withRHF((args, register) => (
+  render: withRHF((args, { register }) => (
     <TextInput {...args} register={register} />
   )),
   args: {

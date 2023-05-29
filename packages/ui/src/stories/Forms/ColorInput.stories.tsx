@@ -8,8 +8,8 @@ export default meta;
 type Story = StoryObj<typeof ColorInput>;
 
 export const Default: Story = {
-  render: withRHF((args, register) => (
-    <ColorInput {...args} register={register} />
+  render: withRHF((args, { control }) => (
+    <ColorInput {...args} control={control} />
   )),
   args: {
     name: "fieldName",
