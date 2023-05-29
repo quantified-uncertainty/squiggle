@@ -25,8 +25,12 @@ const TopMenu: FC = () => {
         <Link className="text-lg font-bold py-2 text-slate-500" href="/">
           Squiggle Hub
         </Link>
-        <MenuLink href={newModelRoute()}>New model</MenuLink>
-        <MenuLink href={newDefinitionRoute()}>New definition</MenuLink>
+        {session ? (
+          <>
+            <MenuLink href={newModelRoute()}>New model</MenuLink>
+            <MenuLink href={newDefinitionRoute()}>New definition</MenuLink>
+          </>
+        ) : null}
       </div>
       <UserControls session={session} />
     </div>
