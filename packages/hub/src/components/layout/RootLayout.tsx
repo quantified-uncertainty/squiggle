@@ -42,6 +42,17 @@ export const RootLayout: FC<PropsWithChildren> = ({ children }) => {
     <div>
       <TopMenu />
       <div>{children}</div>
+      <div className="mt-16 p-8 border-t border-t-slate-200 bg-slate-100">
+        <div className="text-sm text-slate-500">
+          By{" "}
+          <a
+            href="https://quantifieduncertainty.org"
+            className="text-blue-500 hover:underline"
+          >
+            QURI
+          </a>
+        </div>
+      </div>
     </div>
   );
 };

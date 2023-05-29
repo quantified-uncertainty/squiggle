@@ -8,5 +8,9 @@ module.exports = {
       },
     },
   },
-  plugins: [require("@tailwindcss/forms")],
+  plugins: [
+    require("@tailwindcss/forms")({
+      strategy: "class", // strategy: 'base' interferes with react-select styles
+    }),
+  ],
 };

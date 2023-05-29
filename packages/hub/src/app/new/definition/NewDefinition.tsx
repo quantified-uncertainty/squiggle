@@ -3,17 +3,15 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
-import { useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { useToast } from "@quri/ui";
-
 import { NewDefinitionMutation } from "@/__generated__/NewDefinitionMutation.graphql";
+import { Header } from "@/components/ui/Header";
+import { useAsyncMutation } from "@/hooks/useAsyncMutation";
 import {
   RelativeValuesDefinitionForm,
   RelativeValuesDefinitionFormShape,
 } from "@/relative-values/components/RelativeValuesDefinitionForm";
-import { useAsyncMutation } from "@/hooks/useAsyncMutation";
 
 const Mutation = graphql`
   mutation NewDefinitionMutation(
@@ -63,9 +61,7 @@ export const NewDefinition: FC = () => {
 
   return (
     <div>
-      <div className="font-bold text-xl mb-4">
-        New Relative Values definition
-      </div>
+      <Header size="large">New Relative Values definition</Header>
       <RelativeValuesDefinitionForm save={save} />
     </div>
   );
