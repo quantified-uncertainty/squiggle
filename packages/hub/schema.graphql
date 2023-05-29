@@ -121,6 +121,7 @@ union MutationClearRelativeValuesCacheResult = BaseError | ClearRelativeValuesCa
 input MutationCreateRelativeValuesDefinitionInput {
   clusters: [RelativeValuesClusterInput!]!
   items: [RelativeValuesItemInput!]!
+  recommendedUnit: String
   slug: String!
   title: String!
 }
@@ -162,6 +163,7 @@ union MutationUpdateModelSlugResult = BaseError | UpdateModelSlugResult
 input MutationUpdateRelativeValuesDefinitionInput {
   clusters: [RelativeValuesClusterInput!]!
   items: [RelativeValuesItemInput!]!
+  recommendedUnit: String
   slug: String!
   title: String!
   username: String!
@@ -233,6 +235,7 @@ type RelativeValuesCluster {
 input RelativeValuesClusterInput {
   color: String!
   id: String!
+  recommendedUnit: String
 }
 
 type RelativeValuesDefinition implements Node {
@@ -287,7 +290,6 @@ input RelativeValuesItemInput {
   description: String
   id: String!
   name: String!
-  recommendedUnit: String
 }
 
 type RelativeValuesPairCache implements Node {

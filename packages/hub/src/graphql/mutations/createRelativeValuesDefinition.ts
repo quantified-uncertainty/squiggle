@@ -39,9 +39,6 @@ export const RelativeValuesItemInput = builder.inputType(
       }),
       description: t.string(),
       clusterId: t.string(),
-      recommendedUnit: t.string({
-        validate: validateItemId,
-      }),
     }),
   }
 );

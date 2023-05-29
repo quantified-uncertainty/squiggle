@@ -39,9 +39,11 @@ const TopMenu: FC = () => {
 
 export const RootLayout: FC<PropsWithChildren> = ({ children }) => {
   return (
-    <div>
-      <TopMenu />
-      <div>{children}</div>
+    <div className="min-h-screen flex flex-col">
+      <div className="flex-1">
+        <TopMenu />
+        <div>{children}</div>
+      </div>
       <div className="mt-16 p-8 border-t border-t-slate-200 bg-slate-100">
         <div className="text-sm text-slate-500">
           By{" "}

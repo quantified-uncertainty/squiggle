@@ -1,7 +1,8 @@
 "use client";
 
 import { FC } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
+import Select from "react-select";
 
 import {
   Button,
@@ -23,7 +24,11 @@ export type RelativeValuesDefinitionFormShape = {
     description: string;
     clusterId: string | null;
   }[];
-  clusters: readonly { id: string; color: string }[];
+  clusters: readonly {
+    id: string;
+    color: string;
+    recommendedUnit: string | null;
+  }[];
 };
 
 type Props = {
@@ -64,8 +69,9 @@ export const RelativeValuesDefinitionForm: FC<Props> = ({
     save(data);
   });
 
-  // for cluster selects
+  // for select dropdowns (this affect the form's performance, though)
   const clusters = watch("clusters");
+  const items = watch("items");
 
   return (
     <form onSubmit={onSubmit}>
@@ -106,6 +112,32 @@ export const RelativeValuesDefinitionForm: FC<Props> = ({
                       name={`clusters.${i}.color`}
                     />
                   </div>
+                  <Labeled label="Recommended unit">
+                    <Controller
+                      name={`clusters.${i}.recommendedUnit`}
+                      control={control}
+                      render={({ field }) => {
+                        const value = items.find(
+                          (item) => item.id === field.value
+                        );
+                        return (
+                          <Select
+                            value={
+                              value
+                                ? { label: value.id, value: value.id }
+                                : null
+                            }
+                            options={items.map((item) => ({
+                              label: item.id,
+                              value: item.id,
+                            }))}
+                            onChange={(item) => field.onChange(item?.value)}
+                            isClearable={true}
+                          />
+                        );
+                      }}
+                    />
+                  </Labeled>
                   <Button onClick={() => removeCluster(i)}>
                     <div className="flex gap-1">
                       <TrashIcon />
@@ -115,7 +147,11 @@ export const RelativeValuesDefinitionForm: FC<Props> = ({
                 </div>
               ))}
             </div>
-            <Button onClick={() => appendCluster({ id: "", color: "" })}>
+            <Button
+              onClick={() =>
+                appendCluster({ id: "", color: "", recommendedUnit: null })
+              }
+            >
               Add cluster
             </Button>
           </div>
@@ -151,8 +187,8 @@ export const RelativeValuesDefinitionForm: FC<Props> = ({
                   <Labeled label="Cluster ID">
                     <SelectCluster
                       name={`items.${i}.clusterId`}
-                      control={control}
                       clusters={clusters}
+                      control={control}
                     />
                   </Labeled>
                   <Button onClick={() => removeItem(i)}>
