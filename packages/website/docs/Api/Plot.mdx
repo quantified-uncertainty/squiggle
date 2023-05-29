@@ -28,7 +28,8 @@ Examples:
 />
 
 ### Plot.dist
-Like ``Plot.dists``, but plots a single distribution.
+
+Like `Plot.dists`, but plots a single distribution.
 
 ```js
 Plot.dist: ({dist: dist, xScale: scale, yScale: scale, title: string, showSummary: bool}) => plot
@@ -45,10 +46,9 @@ Examples:
 })`}
 />
 
-
 ### Plot.numericFn
 
-Plots a function that outputs numeric values. This works by sampling the function at a fixed number of points. The number of points is adjustable with the ``points`` parameter.
+Plots a function that outputs numeric values. This works by sampling the function at a fixed number of points. The number of points is adjustable with the `points` parameter.
 
 ```js
 Plot.numericFn: ({fn: (number => number), xScale: scale, yScale: scale, points: number}) => plot
@@ -78,7 +78,8 @@ Plot.distFn: ({fn: (number => dist), xScale: scale, distXScale: scale, points: n
   fn: {|t| normal(t,2)*normal(5,3)},
   xScale: Scale.log({ min: 3, max: 100 }),
   distXScale: Scale.linear({ tickFormat: '#x' }),
-})`}/>
+})`}
+/>
 
 ### Plot.scatter
 
@@ -92,7 +93,8 @@ Plot.scatter({
   xDist: xDist,
   yDist: yDist,
   xScale: Scale.log({min: 1.5}),
-})`}/>
+})`}
+/>
 
 <SquiggleEditor
   defaultCode={`xDist = SampleSet.fromDist(-2 to 5)
@@ -102,9 +104,11 @@ Plot.scatter({
   yDist: yDist,
   xScale: Scale.symlog(),
   yScale: Scale.symlog(),
-})`}/>
+})`}
+/>
 
-### Scales  
+### Scales
+
 Chart axes can be scaled using the following functions. Each scale function accepts optional min and max value. Power scale accepts an extra exponent parameter.
 
 We use D3 for the tick formats. You can read about custom tick formats [here](https://github.com/d3/d3-format).
@@ -116,12 +120,12 @@ Scale.symlog: ({min: number, max: number, tickFormat: string}) => scale
 Scale.power: ({min: number, max: number, tickFormat: string, exponent: number}) => scale
 ```
 
-** Scale.log **  
+** Scale.log **
 
-** Scale.linear **  
+** Scale.linear **
 
 ** Scale.symlog **  
 Symmetric log scale. Useful for plotting data that includes negative values.
 
 ** Scale.power **  
-Power scale. Accepts an extra ``exponent`` parameter, like, ``Scale.power({exponent: 2, min: 0, max: 100})``.
+Power scale. Accepts an extra `exponent` parameter, like, `Scale.power({exponent: 2, min: 0, max: 100})`.
