@@ -164,8 +164,10 @@ const InnerDistributionsChart: FC<{
             .context(context)(shape.continuous);
           context.fill();
 
+          // The top line
           context.globalAlpha = 1;
           context.strokeStyle = context.fillStyle;
+          context.beginPath();
           d3
             .line<SqShape["continuous"][number]>()
             .x((d) => xScale(d.x))
@@ -330,7 +332,7 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
           height={height}
         />
       )}
-      <div className="flex justify-center">
+      <div className="flex justify-center pt-2">
         {plot.showSummary && (
           <SummaryTable plot={plot} environment={environment} />
         )}
