@@ -84,7 +84,10 @@ Plot.distFn: ({fn: (number => dist), xScale: scale, distXScale: scale, points: n
 ### Plot.scatter
 
 Plots a scatterplot. Requires two sample set distributions.
+
+```js
 Plot.numericFn: ({yDist: sampleSetDist, xDist: sampleSetDist, xScale: Scale, yScale: Scale}) => plot
+```
 
 <SquiggleEditor
   defaultCode={`xDist = SampleSet.fromDist(2 to 5)
