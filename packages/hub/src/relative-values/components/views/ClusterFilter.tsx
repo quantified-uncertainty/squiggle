@@ -10,8 +10,8 @@ import {
   useRelativeValuesDispatch,
 } from "./RelativeValuesProvider";
 
-export const ClusterItem: React.FC<{
-  cluster: Cluster;
+const ClusterItem: React.FC<{
+  cluster: Omit<Cluster, "recommendedUnit">; // this component is also used in a form where data doesn't come from GraphQL backend
   selected: boolean;
   toggle(): void;
 }> = ({ cluster, selected, toggle }) => {

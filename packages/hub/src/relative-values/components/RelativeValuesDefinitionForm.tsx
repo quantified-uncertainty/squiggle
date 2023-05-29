@@ -1,14 +1,7 @@
 "use client";
 
 import { FC } from "react";
-import {
-  Control,
-  Controller,
-  Path,
-  useFieldArray,
-  useForm,
-} from "react-hook-form";
-import Select from "react-select";
+import { useFieldArray, useForm } from "react-hook-form";
 
 import {
   Button,
@@ -19,27 +12,7 @@ import {
   TrashIcon,
 } from "@quri/ui";
 
-const SelectCluster: FC<{
-  clusters: RelativeValuesDefinitionFormShape["clusters"];
-  name: Path<RelativeValuesDefinitionFormShape>;
-  control: Control<RelativeValuesDefinitionFormShape>;
-}> = ({ clusters, name, control }) => {
-  return (
-    <Controller
-      name={name}
-      control={control}
-      render={({ field }) => (
-        <Select
-          value={clusters.find((cluster) => cluster.id === field.value)}
-          options={clusters}
-          getOptionLabel={(cluster) => cluster.id}
-          getOptionValue={(cluster) => cluster.id}
-          onChange={(cluster) => field.onChange(cluster?.id)}
-        />
-      )}
-    />
-  );
-};
+import { SelectCluster } from "./SelectCluster";
 
 export type RelativeValuesDefinitionFormShape = {
   slug: string;

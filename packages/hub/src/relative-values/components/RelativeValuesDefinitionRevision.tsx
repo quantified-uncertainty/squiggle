@@ -3,8 +3,8 @@ import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { RelativeValuesDefinitionRevision$key } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
-import { ClusterIcon } from "@/relative-values/components/common/ClusterIcon";
 import { Header } from "@/components/ui/Header";
+import { ClusterInfo } from "./ClusterInfo";
 
 export const RelativeValuesDefinitionRevisionFragment = graphql`
   fragment RelativeValuesDefinitionRevision on RelativeValuesDefinitionRevision {
@@ -23,28 +23,6 @@ export const RelativeValuesDefinitionRevisionFragment = graphql`
     recommendedUnit
   }
 `;
-
-const ClusterInfo: FC<{
-  clusterId: string;
-  clusters: {
-    [k in string]: { id: string; color: string };
-  };
-}> = ({ clusterId, clusters }) => {
-  const cluster = clusters[clusterId];
-
-  if (!cluster) {
-    return <div>UNKNOWN CLUSTER</div>;
-  }
-
-  return (
-    <div className="flex gap-1 items-center">
-      <div className="flex-0">
-        <ClusterIcon cluster={cluster} />
-      </div>
-      <div className="text-sm font-bold">{cluster.id}</div>
-    </div>
-  );
-};
 
 type Props = {
   dataRef: RelativeValuesDefinitionRevision$key;
@@ -84,7 +62,11 @@ export const RelativeValuesDefinitionRevision: FC<Props> = ({
             <div>{item.name}</div>
             <div>
               {item.clusterId ? (
-                <ClusterInfo clusterId={item.clusterId} clusters={clusters} />
+                clusters[item.clusterId] ? (
+                  <ClusterInfo cluster={clusters[item.clusterId]} />
+                ) : (
+                  <div>UNKNOWN CLUSTER</div>
+                )
               ) : null}
             </div>
             <div>{item.description}</div>
