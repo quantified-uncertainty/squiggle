@@ -1,17 +1,16 @@
-import { prisma } from "@/prisma";
 import { builder } from "@/graphql/builder";
-
-import { Model } from "../types/Model";
+import { prisma } from "@/prisma";
 
 builder.queryField("model", (t) =>
-  t.fieldWithInput({
-    type: Model,
+  t.prismaFieldWithInput({
+    type: "Model",
     input: {
       slug: t.input.string({ required: true }),
       ownerUsername: t.input.string({ required: true }),
     },
-    async resolve(root, args) {
+    async resolve(query, _, args) {
       const model = await prisma.model.findFirstOrThrow({
+        ...query,
         where: {
           slug: args.input.slug,
           owner: {

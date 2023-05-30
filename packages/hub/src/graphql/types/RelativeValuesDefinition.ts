@@ -3,6 +3,7 @@ import {
   relativeValuesClustersSchema,
   relativeValuesItemsSchema,
 } from "@/relative-values/types";
+import { RelativeValuesExport } from "./RelativeValuesExport";
 
 const RelativeValuesCluster = builder.simpleObject("RelativeValuesCluster", {
   fields: (t) => ({
@@ -31,7 +32,13 @@ export const RelativeValuesDefinition = builder.prismaNode(
       createdAtTimestamp: t.float({
         resolve: (obj) => obj.createdAt.getTime(),
       }),
-      modelExports: t.relation("modelExports"),
+      modelExports: t.field({
+        select: (args, ctx, nestedSelection) => ({
+          modelExports: nestedSelection({}),
+        }),
+        type: [RelativeValuesExport],
+        resolve: (definition) => definition.modelExports,
+      }),
       currentRevision: t.field({
         type: RelativeValuesDefinitionRevision,
         select: (_, __, nestedSelection) => ({
