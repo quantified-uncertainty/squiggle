@@ -159,6 +159,7 @@ type SquiggleSnippet implements Node {
   code: String!
   dbId: ID!
   id: ID!
+  lineCount: Int!
 }
 
 type UpdateModelSlugResult {

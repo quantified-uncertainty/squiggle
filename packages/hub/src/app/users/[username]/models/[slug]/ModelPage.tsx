@@ -51,7 +51,7 @@ const MenuButton: FC<CommonProps> = ({ username, slug }) => {
       tailwindSelector="squiggle-hub"
     >
       <Button>
-        <DotsHorizontalIcon className="text-slate-500" />
+        Settings
       </Button>
     </Dropdown>
   );

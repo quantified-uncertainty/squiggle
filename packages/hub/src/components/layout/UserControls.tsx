@@ -1,16 +1,18 @@
 import { Session } from "next-auth";
 import { signIn, signOut } from "next-auth/react";
+import { useRouter } from 'next/navigation';
 
 import {
   Button,
   DropdownMenu,
+  Dropdown,
   DropdownMenuActionItem,
   SignOutIcon,
 } from "@quri/ui";
 
 import { chooseUsernameRoute } from "@/routes";
-import { UsernameLink } from "../UsernameLink";
-import { DotsDropdown } from "../ui/DotsDropdown";
+import { StyledLink } from "@/components/ui/StyledLink";
+import { userRoute } from "@/routes";
 
 export function UserControls({ session }: { session: Session | null }) {
   if (
@@ -23,27 +25,36 @@ export function UserControls({ session }: { session: Session | null }) {
     window.location.href = chooseUsernameRoute();
   }
 
+  const router = useRouter();
+
   return !session?.user ? (
     <Button onClick={() => signIn()}>Sign In</Button>
   ) : (
     <div className="flex items-center gap-2">
-      {session.user.username === undefined ? null : (
+      {session.user?.username && (
         <div>
-          <UsernameLink username={session.user.username} />
+          <Dropdown
+            render={() => (
+              <DropdownMenu>
+                <DropdownMenuActionItem
+                  onClick={() => router.push(userRoute({ username: session.user.username || ""}))}
+                  title="Profile"
+                />
+                <DropdownMenuActionItem
+                  onClick={() => signOut()}
+                  title="Sign Out"
+                />
+              </DropdownMenu>
+            )}
+            tailwindSelector="squiggle-hub"
+          >
+
+            <div className="text-slate-500 p2 cursor-pointer">
+              {session.user.username}
+            </div>
+          </Dropdown>
         </div>
       )}
-
-      <DotsDropdown>
-        {() => (
-          <DropdownMenu>
-            <DropdownMenuActionItem
-              onClick={() => signOut()}
-              icon={SignOutIcon}
-              title="Sign Out"
-            />
-          </DropdownMenu>
-        )}
-      </DotsDropdown>
     </div>
   );
 }
