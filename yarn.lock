@@ -3327,10 +3327,10 @@
   resolved "https://registry.yarnpkg.com/@pothos/plugin-simple-objects/-/plugin-simple-objects-3.6.8.tgz#fe33d741a2955f7242347534a495e745385ad0d7"
   integrity sha512-qsoBZHfwLAdozJEdT7r7jfineL9vDfdWf7HZkw5zkiUtY6KrZJPNuq0MMCPZGuGxHFBm60jC73nk/ENZrVKpsg==
 
-"@pothos/plugin-validation@^3.9.1":
-  version "3.9.1"
-  resolved "https://registry.yarnpkg.com/@pothos/plugin-validation/-/plugin-validation-3.9.1.tgz#7dac96d1e4ac8df708a70359c6b539ea0848a99d"
-  integrity sha512-CQrZ+fmNg1zVvn7PqGmaBgspLuQnIPtxx8Op87Z4Sh+95OWZO5zRB6c8PcfqI4SVbNYUsKUndEUziJ0i8lFS4w==
+"@pothos/plugin-validation@^3.9.2":
+  version "3.9.2"
+  resolved "https://registry.yarnpkg.com/@pothos/plugin-validation/-/plugin-validation-3.9.2.tgz#1b1c4ee52370e627003b08f4fbae920d65816e60"
+  integrity sha512-BOWcjFqCqbzsnMtcywmG39ojlvc9/1nsubNxuhC4pb+Lka9Yw8ET7OF8EmMRY9WfXD+LVyQkhSlBV6b2j9GDJA==
 
 "@pothos/plugin-with-input@^3.10.1":
   version "3.10.1"
