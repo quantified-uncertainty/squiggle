@@ -5,6 +5,9 @@ export const SquiggleSnippet = builder.prismaNode("SquiggleSnippet", {
   fields: (t) => ({
     dbId: t.exposeID("id"),
     code: t.exposeString("code"),
+    lineCount: t.int({
+      resolve: (snippet) => snippet.code.split("\n").length,
+    }),
   }),
 });
 
@@ -29,6 +32,15 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
         switch (revision.contentType) {
           case "SquiggleSnippet":
             return revision.squiggleSnippet;
+        }
+      },
+    }),
+    lineCount: t.int({
+      select: { squiggleSnippet: true },
+      async resolve(revision) {
+        switch (revision.contentType) {
+          case "SquiggleSnippet":
+            return revision.squiggleSnippet.code.split("\n").length;
         }
       },
     }),

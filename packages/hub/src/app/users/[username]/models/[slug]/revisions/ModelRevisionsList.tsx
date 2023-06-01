@@ -25,6 +25,7 @@ const RevisionsFragment = graphql`
           id
           dbId
           createdAtTimestamp
+          lineCount
         }
       }
       pageInfo {
@@ -76,6 +77,7 @@ export const ModelRevisionsList: FC<Props> = ({ username, slug }) => {
               })}
             >
               {format(new Date(edge.node.createdAtTimestamp), commonDateFormat)}
+              {` - ${edge.node.lineCount} lines`}
             </StyledLink>
           </div>
         ))}

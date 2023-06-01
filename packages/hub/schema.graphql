@@ -48,6 +48,7 @@ type ModelRevision implements Node {
   dbId: ID!
   description: String!
   id: ID!
+  lineCount: Int!
 }
 
 type ModelRevisionConnection {

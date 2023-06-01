@@ -48,7 +48,7 @@ export const FrontpageModelList: FC = () => {
 
   return (
     <div>
-      <header className="font-bold text-2xl mb-2">All models</header>
+      <header className="font-bold mb-2 text-slate-600">Models</header>
       <ModelList connection={models} showOwner={true} loadNext={loadNext} />
     </div>
   );
