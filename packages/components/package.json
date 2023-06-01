@@ -19,7 +19,7 @@
     "lodash": "^4.17.21",
     "prettier": "^3.0.0-alpha.11",
     "react": "^18.1.0",
-    "react-hook-form": "^7.43.9",
+    "react-hook-form": "^7.44.2",
     "vscode-uri": "^3.0.7",
     "yup": "^1.1.1",
     "zod": "^3.21.4"
