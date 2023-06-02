@@ -70,7 +70,7 @@
   },
   "dependencies": {
     "@floating-ui/react": "^0.24.0",
-    "@headlessui/react": "^1.7.14",
+    "@headlessui/react": "^1.7.15",
     "framer-motion": "^10.12.10",
     "react-hook-form": "^7.44.2",
     "react-textarea-autosize": "^8.4.1",
