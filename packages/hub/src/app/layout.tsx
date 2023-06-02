@@ -8,6 +8,7 @@ import "react-loading-skeleton/dist/skeleton.css";
 
 import { ClientApp } from "./ClientApp";
 import { authOptions } from "./api/auth/[...nextauth]/authOptions";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 export default async function RootLayout({ children }: PropsWithChildren) {
   const session = await getServerSession(authOptions);
@@ -15,7 +16,9 @@ export default async function RootLayout({ children }: PropsWithChildren) {
   return (
     <html>
       <body>
-        <ClientApp session={session}>{children}</ClientApp>
+        <ClientApp session={session}>
+          <ErrorBoundary>{children}</ErrorBoundary>
+        </ClientApp>
       </body>
     </html>
   );
