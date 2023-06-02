@@ -36,20 +36,21 @@ export default function OuterDefinitionPage({
       <div>
         {definition.modelExports.length ? (
           <section className="mb-4">
-            <Header>Models that implement this definition</Header>
-            <div>
+            <Header>Implemented by:</Header>
+            <div className="flex flex-col">
               {definition.modelExports.map((row) => (
-                <StyledLink
-                  key={row.id}
-                  href={modelForRelativeValuesExportRoute({
-                    username: row.modelRevision.model.owner.username,
-                    slug: row.modelRevision.model.slug,
-                    variableName: row.variableName,
-                  })}
-                >
-                  {row.modelRevision.model.owner.username}/
-                  {row.modelRevision.model.slug}
-                </StyledLink>
+                <div key={row.id}>
+                  <StyledLink
+                    href={modelForRelativeValuesExportRoute({
+                      username: row.modelRevision.model.owner.username,
+                      slug: row.modelRevision.model.slug,
+                      variableName: row.variableName,
+                    })}
+                  >
+                    {row.modelRevision.model.owner.username}/
+                    {row.modelRevision.model.slug}
+                  </StyledLink>
+                </div>
               ))}
             </div>
           </section>

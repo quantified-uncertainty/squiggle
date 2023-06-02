@@ -28,27 +28,25 @@ export const FrontPage: FC = () => {
   );
 
   return (
-    <NarrowPageLayout>
-      <div className="space-y-8">
-        <div className="space-y-4">
-          <FrontPageModelList dataRef={data} />
-          {session ? (
-            <div>
-              <StyledLink href={newModelRoute()}>Create new model</StyledLink>
-            </div>
-          ) : null}
-        </div>
-        <div className="space-y-4">
-          <FrontPageDefinitionList dataRef={data} />
-          {session ? (
-            <div>
-              <StyledLink href={newDefinitionRoute()}>
-                Create new relative values definition
-              </StyledLink>
-            </div>
-          ) : null}
-        </div>
+    <div className="space-y-8">
+      <div className="space-y-4">
+        <FrontPageModelList dataRef={data} />
+        {session ? (
+          <div>
+            <StyledLink href={newModelRoute()}>Create new model</StyledLink>
+          </div>
+        ) : null}
       </div>
-    </NarrowPageLayout>
+      <div className="space-y-4">
+        <FrontPageDefinitionList dataRef={data} />
+        {session ? (
+          <div>
+            <StyledLink href={newDefinitionRoute()}>
+              Create new relative values definition
+            </StyledLink>
+          </div>
+        ) : null}
+      </div>
+    </div>
   );
 };

@@ -1,8 +1,7 @@
 "use client";
 
-import { FullLayoutWithPadding } from "@/components/layout/FullLayoutWithPadding";
-import { NewDefinition } from "./NewDefinition";
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
+import { NewDefinition } from "./NewDefinition";
 
 export default function NewModelPage() {
   return (

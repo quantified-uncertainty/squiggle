@@ -5,13 +5,14 @@ import { graphql, useFragment, useMutation } from "react-relay";
 
 import { useToast } from "@quri/ui";
 
-import { EditRelativeValuesDefinitionMutation } from "@/__generated__/EditRelativeValuesDefinitionMutation.graphql";
-import { RelativeValuesDefinitionRevisionFragment } from "@/relative-values/components/RelativeValuesDefinitionRevision";
 import {
   RelativeValuesDefinitionForm,
   RelativeValuesDefinitionFormShape,
 } from "@/relative-values/components/RelativeValuesDefinitionForm";
+import { RelativeValuesDefinitionRevisionFragment } from "@/relative-values/components/RelativeValuesDefinitionRevision";
 import { RelativeValuesDefinitionPageFragment } from "../RelativeValuesDefinitionPage";
+
+import { EditRelativeValuesDefinitionMutation } from "@/__generated__/EditRelativeValuesDefinitionMutation.graphql";
 import { RelativeValuesDefinitionPage$key } from "@/__generated__/RelativeValuesDefinitionPage.graphql";
 import { RelativeValuesDefinitionRevision$key } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
 
