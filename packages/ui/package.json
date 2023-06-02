@@ -33,7 +33,7 @@
     "@storybook/addon-docs": "^7.0.11",
     "@storybook/addon-essentials": "^7.0.11",
     "@storybook/addon-interactions": "^7.0.11",
-    "@storybook/addon-links": "^7.0.11",
+    "@storybook/addon-links": "^7.0.18",
     "@storybook/blocks": "^7.0.11",
     "@storybook/react": "^7.0.18",
     "@storybook/react-vite": "^7.0.11",
