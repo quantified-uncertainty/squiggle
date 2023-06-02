@@ -3682,7 +3682,7 @@
     p-map "^4.0.0"
     webpack-sources "^3.2.2"
 
-"@storybook/addon-actions@7.0.11", "@storybook/addon-actions@^7.0.11":
+"@storybook/addon-actions@7.0.11":
   version "7.0.11"
   resolved "https://registry.yarnpkg.com/@storybook/addon-actions/-/addon-actions-7.0.11.tgz#359f964036d50bc498b5dcd58e0a592dffb5e1bb"
   integrity sha512-kh5z6L5r5BOWVt0+xZgdMZjDJQkJIVcAOxahRS9MwWkw0NDpXjcPS7HsVXZ1DlnnzhfjLFr0BXadVdcc2FLj7A==
@@ -3695,6 +3695,28 @@
     "@storybook/preview-api" "7.0.11"
     "@storybook/theming" "7.0.11"
     "@storybook/types" "7.0.11"
+    dequal "^2.0.2"
+    lodash "^4.17.21"
+    polished "^4.2.2"
+    prop-types "^15.7.2"
+    react-inspector "^6.0.0"
+    telejson "^7.0.3"
+    ts-dedent "^2.0.0"
+    uuid "^9.0.0"
+
+"@storybook/addon-actions@^7.0.18":
+  version "7.0.18"
+  resolved "https://registry.yarnpkg.com/@storybook/addon-actions/-/addon-actions-7.0.18.tgz#003cb5fc7810b5ba9fd2c8249ba82bc4b95a02dc"
+  integrity sha512-3M5AU/ZD79YP88vKlFezIJbIoG/II7wCixUBTmwiC3BeQZDuVsqPNl8eiP6MGT70xwyx7a993lSM5f5N5W93vg==
+  dependencies:
+    "@storybook/client-logger" "7.0.18"
+    "@storybook/components" "7.0.18"
+    "@storybook/core-events" "7.0.18"
+    "@storybook/global" "^5.0.0"
+    "@storybook/manager-api" "7.0.18"
+    "@storybook/preview-api" "7.0.18"
+    "@storybook/theming" "7.0.18"
+    "@storybook/types" "7.0.18"
     dequal "^2.0.2"
     lodash "^4.17.21"
     polished "^4.2.2"
@@ -4157,16 +4179,16 @@
     use-resize-observer "^9.1.0"
     util-deprecate "^1.0.2"
 
-"@storybook/components@^7.0.2":
-  version "7.0.7"
-  resolved "https://registry.yarnpkg.com/@storybook/components/-/components-7.0.7.tgz#3b4829e8287e81a6850417c40f6f28e6ea5580bc"
-  integrity sha512-6PLs9LMkBuhH/w4bSJ72tYgICMbOOIHuoB/fQdVlzhsdnXL2fM/v4RVW2N7v+Oz3lYXp/JtV8V9Ub8h6eDQKXg==
+"@storybook/components@7.0.18", "@storybook/components@^7.0.2":
+  version "7.0.18"
+  resolved "https://registry.yarnpkg.com/@storybook/components/-/components-7.0.18.tgz#74ab115342e576b7644c83667a9daef5758fc3c8"
+  integrity sha512-Jn1CbF9UAKt8BVaZtuhmthpcZ02VMaCFXR0ISfDXCpiMKnylmpP0+WfXcoKLzz6yS+EW8EW5S9+Qq8xgQY8H7A==
   dependencies:
-    "@storybook/client-logger" "7.0.7"
+    "@storybook/client-logger" "7.0.18"
     "@storybook/csf" "^0.1.0"
     "@storybook/global" "^5.0.0"
-    "@storybook/theming" "7.0.7"
-    "@storybook/types" "7.0.7"
+    "@storybook/theming" "7.0.18"
+    "@storybook/types" "7.0.18"
     memoizerific "^1.11.3"
     use-resize-observer "^9.1.0"
     util-deprecate "^1.0.2"
@@ -4725,7 +4747,7 @@
     "@storybook/global" "^5.0.0"
     memoizerific "^1.11.3"
 
-"@storybook/theming@7.0.18":
+"@storybook/theming@7.0.18", "@storybook/theming@^7.0.2":
   version "7.0.18"
   resolved "https://registry.yarnpkg.com/@storybook/theming/-/theming-7.0.18.tgz#566f5f42c9324b734f8aa9be4d16221278054734"
   integrity sha512-P1gMKa/mKQHIMq0sxBIwTzAcF6v/6hrc62YmkuV62vXu+8zNV2YWbRwywqm3Q6faZEadmb/bL9+z8whaKhCL/g==
@@ -4735,7 +4757,7 @@
     "@storybook/global" "^5.0.0"
     memoizerific "^1.11.3"
 
-"@storybook/theming@7.0.7", "@storybook/theming@^7.0.2":
+"@storybook/theming@7.0.7":
   version "7.0.7"
   resolved "https://registry.yarnpkg.com/@storybook/theming/-/theming-7.0.7.tgz#263c162825e3c0ff4eb53e204e586077e596037e"
   integrity sha512-InTZe+Sgco1NsxgiG+cyUKWQe3GsjlIyU/o5qDdtOTXcZ64HzyBuAZlAequSddqfDeMDqxRFPc2w1J28MAUHxA==
