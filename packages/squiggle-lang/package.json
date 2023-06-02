@@ -4,9 +4,8 @@
   "homepage": "https://squiggle-language.com",
   "license": "MIT",
   "scripts": {
-    "peggy": "peggy --cache --format es",
     "build": "yarn build:peggy && yarn build:typescript",
-    "build:peggy": "find . -type f -name *.peggy -exec yarn peggy {} \\;",
+    "build:peggy": "peggy --cache --format es ./src/ast/peggyParser.peggy",
     "build:typescript": "tsc -b ./tsconfig.esm.json ./tsconfig.json && echo '{\"type\": \"commonjs\"}' >dist/cjs/package.json",
     "start": "tsc -w",
     "clean": "rm -rf dist && rm -f src/ast/peggyParser.js",
@@ -32,6 +31,7 @@
   },
   "devDependencies": {
     "@types/jest": "^29.5.2",
+    "@types/node": "^20.2.5",
     "chalk": "^5.2.0",
     "codecov": "^3.8.3",
     "fast-check": "^3.10.0",
@@ -39,7 +39,6 @@
     "moduleserve": "^0.9.1",
     "peggy": "^3.0.2",
     "ts-jest": "^29.1.0",
-    "ts-loader": "^9.4.3",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.4"
   },

@@ -26,8 +26,9 @@ Range.prototype.getBoundingClientRect = () => ({
   top: 0,
   toJSON() {},
 });
+
 Range.prototype.getClientRects = () => ({
   item: () => null,
   length: 0,
-  [Symbol.iterator]: jest.fn(),
+  [Symbol.iterator]: jest.fn<() => IterableIterator<DOMRect>>(),
 });

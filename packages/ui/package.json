@@ -46,7 +46,8 @@
     "react-dom": "^18.2.0",
     "storybook": "^7.0.18",
     "tailwindcss": "^3.3.2",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "vite": "^4.3.9"
   },
   "eslintConfig": {
     "extends": [
