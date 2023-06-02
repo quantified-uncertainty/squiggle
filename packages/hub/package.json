@@ -34,7 +34,7 @@
     "next": "^13.4.4",
     "next-auth": "^4.22.1",
     "nodemailer": "^6.9.3",
-    "react-hook-form": "^7.43.9",
+    "react-hook-form": "^7.44.3",
     "react-loading-skeleton": "^3.3.1",
     "react-markdown": "^8.0.7",
     "react-relay": "^15.0.0",
