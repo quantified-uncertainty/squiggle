@@ -2540,10 +2540,10 @@
   dependencies:
     "@floating-ui/dom" "^1.2.7"
 
-"@floating-ui/react@^0.24.0":
-  version "0.24.0"
-  resolved "https://registry.yarnpkg.com/@floating-ui/react/-/react-0.24.0.tgz#d835f7041b9b4ed1b7daa83f33af412ae0c6c946"
-  integrity sha512-/UxcKFV5WtD+CbInbosDmUwVpcKlTTo6sVllSWMYXiX/HHXWeMxbcUNIkilsj5EDlbKiw7nHQtHYHYQLQMsVdQ==
+"@floating-ui/react@^0.24.2":
+  version "0.24.2"
+  resolved "https://registry.yarnpkg.com/@floating-ui/react/-/react-0.24.2.tgz#1f2e596da122341a3fa65667a6f26ed126d32cc0"
+  integrity sha512-8sdLmcC85J6M2H0AL8yOQuiWD4T0gNMSLpuJjmXyEA6ndfmxXR0hwKFkczB4xRNFhKbwoQeuh8z561HE2vOdZw==
   dependencies:
     "@floating-ui/react-dom" "^2.0.0"
     aria-hidden "^1.1.3"
