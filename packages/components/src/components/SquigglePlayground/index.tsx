@@ -33,7 +33,6 @@ import {
 import { ViewSettingsForm, viewSettingsSchema } from "../ViewSettingsForm.js";
 
 import { SqProject } from "@quri/squiggle-lang";
-import { ImportSettingsForm } from "./ImportSettingsForm.js";
 import { RunControls } from "./RunControls/index.js";
 import { useRunnerState } from "./RunControls/useRunnerState.js";
 import {
@@ -47,25 +46,25 @@ type PlaygroundProps = // Playground can be either controlled (`code`) or uncont
     | { code: string; defaultCode?: undefined }
     | { defaultCode?: string; code?: undefined }
   ) &
-    (
-      | {
-          project: SqProject;
-          continues?: string[];
-        }
-      | {}
-    ) &
-    Omit<SquiggleViewerProps, "result"> & {
-      onCodeChange?(expr: string): void;
-      /* When settings change */
-      onSettingsChange?(settings: any): void;
-      /** Should we show the editor? */
-      showEditor?: boolean;
-      /** Allows to inject extra buttons, e.g. share button on the website, or save button in Squiggle Hub */
-      renderExtraControls?: () => ReactNode;
-      showShareButton?: boolean;
-      /** Height of the editor */
-      height?: number;
-    };
+  (
+    | {
+      project: SqProject;
+      continues?: string[];
+    }
+    | {}
+  ) &
+  Omit<SquiggleViewerProps, "result"> & {
+    onCodeChange?(expr: string): void;
+    /* When settings change */
+    onSettingsChange?(settings: any): void;
+    /** Should we show the editor? */
+    showEditor?: boolean;
+    /** Allows to inject extra buttons, e.g. share button on the website, or save button in Squiggle Hub */
+    renderExtraControls?: () => ReactNode;
+    showShareButton?: boolean;
+    /** Height of the editor */
+    height?: number;
+  };
 
 // Left panel ref is used for local settings modal positioning in ItemSettingsMenu.tsx
 type PlaygroundContextShape = {
@@ -154,17 +153,27 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const editorRef = useRef<CodeEditorHandle>(null);
 
   const firstTab = showEditor ? (
-    <div className="border border-slate-200" data-testid="squiggle-editor">
-      <CodeEditor
-        ref={editorRef}
-        value={code}
-        errors={errors}
-        project={resultAndBindings.project}
-        showGutter={true}
-        height={height}
-        onChange={setCode}
-        onSubmit={runnerState.run}
-      />
+
+    <div className="">
+      <div className="flex pb-2">
+        <TextTooltip text={isMac() ? "Option+Shift+f" : "Alt+Shift+f"}>
+          <div>
+            <Button onClick={editorRef.current?.format}>Format Code</Button>
+          </div>
+        </TextTooltip>
+      </div>
+      <div data-testid="squiggle-editor">
+        <CodeEditor
+          ref={editorRef}
+          value={code}
+          errors={errors}
+          project={resultAndBindings.project}
+          showGutter={true}
+          height={height}
+          onChange={setCode}
+          onSubmit={runnerState.run}
+        />
+      </div>
     </div>
   ) : (
     squiggleChart
@@ -186,9 +195,6 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
             >
           }
         />
-      </StyledTab.Panel>
-      <StyledTab.Panel>
-        <ImportSettingsForm initialImports={imports} setImports={setImports} />
       </StyledTab.Panel>
     </StyledTab.Panels>
   );
@@ -235,16 +241,10 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
                   />
                   <StyledTab name="Sampling Settings" icon={CogIcon} />
                   <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
-                  <StyledTab name="Input Variables" icon={CurrencyDollarIcon} />
                 </StyledTab.List>
               </div>
               <div className="flex gap-2 items-center">
                 <RunControls {...runnerState} />
-                <TextTooltip text={isMac() ? "Option+Shift+f" : "Alt+Shift+f"}>
-                  <div>
-                    <Button onClick={editorRef.current?.format}>Format</Button>
-                  </div>
-                </TextTooltip>
                 {renderExtraControls?.()}
               </div>
             </div>

@@ -27,3 +27,36 @@ but this line is still necessary for proper initialization of `--tw-*` variables
   position: absolute;
   border-bottom: 1px solid red;
 }
+
+/* Override CodeMirrors default outline. */
+.cm-editor.cm-focused {
+  outline: none;
+}
+
+.cm-gutters {
+  color: #aaa !important;
+}
+
+.ͼ2 .cm-gutters{
+  background: white;
+}
+
+.ͼ2 .cm-gutters{
+  border: none;
+}
+
+.ͼ2 .cm-activeLine {
+  border-radius: 0 3px 3px 0;
+}
+
+.cm-lineNumbers .cm-gutterElement.cm-activeLineGutter {
+  border-radius: 3px 0 0 3px;
+}
+
+.cm-gutterElement.cm-activeLineGutter {
+  background-color: #cceeff44
+}
+
+.cm-gutter.cm-lineNumbers{
+  color: #bbb
+}
