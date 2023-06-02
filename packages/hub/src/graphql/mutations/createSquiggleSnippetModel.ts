@@ -34,24 +34,46 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
         throw new Error("Email is missing");
       }
 
-      const model = await prisma.model.create({
-        data: {
-          owner: {
-            connect: { email },
+      const model = await prisma.$transaction(async (tx) => {
+        // nested create is not possible here;
+        // similar problem is described here: https://github.com/prisma/prisma/discussions/14937,
+        // seems to be caused by multiple Model -> ModelRevision relations
+        const model = await tx.model.create({
+          data: {
+            owner: {
+              connect: { email },
+            },
+            slug: input.slug,
           },
-          slug: input.slug,
-          revisions: {
-            create: {
-              squiggleSnippet: {
-                create: {
-                  code: input.code,
-                },
+        });
+
+        const revision = await tx.modelRevision.create({
+          data: {
+            squiggleSnippet: {
+              create: {
+                code: input.code,
               },
-              contentType: "SquiggleSnippet",
-              description: input.description ?? "",
+            },
+            contentType: "SquiggleSnippet",
+            description: input.description ?? "",
+            model: {
+              connect: {
+                id: model.id,
+              },
             },
           },
-        },
+        });
+
+        await tx.model.update({
+          where: {
+            id: model.id,
+          },
+          data: {
+            currentRevisionId: revision.id,
+          },
+        });
+
+        return model;
       });
 
       return { model };

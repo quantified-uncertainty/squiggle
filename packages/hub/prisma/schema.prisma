@@ -88,7 +88,11 @@ model Model {
   owner   User   @relation(fields: [ownerId], references: [id])
   ownerId String
 
-  revisions ModelRevision[]
+  revisions ModelRevision[] @relation("Revisions")
+
+  // technically nullable, but won't ever be null in practice
+  currentRevision   ModelRevision? @relation("CurrentRevision", fields: [currentRevisionId], references: [id])
+  currentRevisionId String?        @unique
 
   @@unique([slug, ownerId])
   @@index([createdAt])
@@ -101,7 +105,7 @@ model ModelRevision {
 
   description String @default("")
 
-  model   Model  @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  model   Model  @relation("Revisions", fields: [modelId], references: [id], onDelete: Cascade)
   modelId String
 
   contentType ModelType
@@ -110,6 +114,9 @@ model ModelRevision {
   contentId       String?          @unique
 
   relativeValuesExports RelativeValuesExport[]
+
+  // required by Prisma, but unused since `model` field should point at the same entity
+  currentRevisionModel Model? @relation("CurrentRevision")
 }
 
 model SquiggleSnippet {

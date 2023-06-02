@@ -13,7 +13,7 @@ import {
   TrashIcon,
 } from "@quri/ui";
 
-import { SelectCluster } from "./SelectCluster";
+import { SelectCluster } from "../SelectCluster";
 
 export type RelativeValuesDefinitionFormShape = {
   slug: string;
@@ -43,9 +43,7 @@ export const RelativeValuesDefinitionForm: FC<Props> = ({
   save,
 }) => {
   const { register, handleSubmit, control, watch } =
-    useForm<RelativeValuesDefinitionFormShape>({
-      defaultValues,
-    });
+    useForm<RelativeValuesDefinitionFormShape>({ defaultValues });
 
   const {
     fields: clusterFields,

@@ -82,17 +82,15 @@ export const EditRelativeValuesDefinition: FC<Props> = ({ definitionRef }) => {
   };
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <RelativeValuesDefinitionForm
-        defaultValues={{
-          slug: "", // unused but necessary for types
-          title: revision.title,
-          items: revision.items,
-          clusters: revision.clusters,
-        }}
-        withoutSlug
-        save={save}
-      />
-    </div>
+    <RelativeValuesDefinitionForm
+      defaultValues={{
+        slug: "", // unused but necessary for types
+        title: revision.title,
+        items: revision.items,
+        clusters: revision.clusters,
+      }}
+      withoutSlug
+      save={save}
+    />
   );
 };

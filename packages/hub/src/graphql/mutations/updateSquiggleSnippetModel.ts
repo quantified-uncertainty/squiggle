@@ -90,7 +90,7 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
       }[] = [];
 
       if (relativeValuesExports.length) {
-        const selectedDefiintions =
+        const selectedDefinitions =
           await prisma.relativeValuesDefinition.findMany({
             where: {
               OR: relativeValuesExports.map((pair) => ({
@@ -109,7 +109,7 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
           Map<string, RelativeValuesDefinition>
         > = new Map();
         // now we need to match relativeValuesExports with definitions to get ids; I wonder if this could be simplified without sacrificing safety
-        for (let definition of selectedDefiintions) {
+        for (let definition of selectedDefinitions) {
           const { username } = definition.owner;
           if (username === null) {
             continue; // should never happen
@@ -136,33 +136,50 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
         }
       }
 
-      const revision = await prisma.modelRevision.create({
-        data: {
-          squiggleSnippet: {
-            create: { code },
-          },
-          contentType: "SquiggleSnippet",
-          description: input.description ?? "",
-          model: {
-            connect: {
-              slug_ownerId: {
-                slug: input.slug,
-                ownerId: owner.id,
+      const model = await prisma.$transaction(async (tx) => {
+        const revision = await tx.modelRevision.create({
+          data: {
+            squiggleSnippet: {
+              create: { code },
+            },
+            contentType: "SquiggleSnippet",
+            description: input.description ?? "",
+            model: {
+              connect: {
+                slug_ownerId: {
+                  slug: input.slug,
+                  ownerId: owner.id,
+                },
+              },
+            },
+            relativeValuesExports: {
+              createMany: {
+                data: relativeValuesExportsToInsert,
               },
             },
           },
-          relativeValuesExports: {
-            createMany: {
-              data: relativeValuesExportsToInsert,
+          include: {
+            model: {
+              select: {
+                id: true,
+              },
             },
           },
-        },
-        select: {
-          model: true,
-        },
+        });
+
+        const model = await tx.model.update({
+          where: {
+            id: revision.model.id,
+          },
+          data: {
+            currentRevisionId: revision.id,
+          },
+        });
+
+        return model;
       });
 
-      return { model: revision.model };
+      return { model };
     },
   })
 );

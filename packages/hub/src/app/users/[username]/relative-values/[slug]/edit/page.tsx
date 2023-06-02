@@ -19,8 +19,10 @@ export default function Page({
   );
 
   return (
-    <EditRelativeValuesDefinition
-      definitionRef={data.relativeValuesDefinition}
-    />
+    <div className="mx-auto max-w-6xl">
+      <EditRelativeValuesDefinition
+        definitionRef={data.relativeValuesDefinition}
+      />
+    </div>
   );
 }

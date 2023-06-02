@@ -13,19 +13,8 @@ export const Model = builder.prismaNode("Model", {
     updatedAtTimestamp: t.float({
       resolve: (model) => model.updatedAt.getTime(),
     }),
-    currentRevision: t.field({
-      type: ModelRevision,
-      select: (_, __, nestedSelection) => ({
-        revisions: nestedSelection({
-          take: 1,
-          orderBy: {
-            createdAt: "desc",
-          },
-        }),
-      }),
-      async resolve(model) {
-        return model.revisions[0];
-      },
+    currentRevision: t.relation("currentRevision", {
+      nullable: false,
     }),
     revision: t.field({
       type: ModelRevision,
