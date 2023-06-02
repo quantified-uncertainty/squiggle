@@ -155,9 +155,11 @@ model RelativeValuesDefinitionRevision {
   definition   RelativeValuesDefinition @relation(fields: [definitionId], references: [id], onDelete: Cascade)
   definitionId String
 
-  title    String
-  items    Json
-  clusters Json
+  title String
+
+  items           Json
+  clusters        Json
+  recommendedUnit String?
 }
 
 // Note that model revisions are associated with definitions (and not definition revisions).

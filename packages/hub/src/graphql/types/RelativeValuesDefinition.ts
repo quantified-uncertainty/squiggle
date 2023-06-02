@@ -96,10 +96,7 @@ export const RelativeValuesDefinitionRevision = builder.prismaNode(
           return relativeValuesClustersSchema.parse(obj.clusters);
         },
       }),
-      recommendedUnit: t.string({
-        nullable: true,
-        resolve: () => null, // TODO
-      }),
+      recommendedUnit: t.exposeString("recommendedUnit", { nullable: true }),
     }),
   }
 );

@@ -59,6 +59,7 @@ builder.mutationField("updateRelativeValuesDefinition", (t) =>
           title: input.title,
           items: input.items,
           clusters: input.clusters,
+          recommendedUnit: input.recommendedUnit,
           definition: {
             connect: {
               slug_ownerId: {

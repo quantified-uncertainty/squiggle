@@ -129,6 +129,7 @@ builder.mutationField("createRelativeValuesDefinition", (t) =>
               title: input.title,
               items: input.items,
               clusters: input.clusters,
+              recommendedUnit: input.recommendedUnit,
             },
           },
         },

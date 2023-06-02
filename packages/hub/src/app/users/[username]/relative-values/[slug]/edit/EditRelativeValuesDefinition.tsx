@@ -66,6 +66,7 @@ export const EditRelativeValuesDefinition: FC<Props> = ({ definitionRef }) => {
           title: data.title,
           items: data.items,
           clusters: data.clusters,
+          recommendedUnit: data.recommendedUnit,
         },
       },
       onCompleted(data) {
@@ -89,6 +90,7 @@ export const EditRelativeValuesDefinition: FC<Props> = ({ definitionRef }) => {
         title: revision.title,
         items: revision.items,
         clusters: revision.clusters,
+        recommendedUnit: revision.recommendedUnit,
       }}
       withoutSlug
       save={save}

@@ -50,6 +50,7 @@ export const NewDefinition: FC = () => {
           title: data.title,
           items: data.items,
           clusters: data.clusters,
+          recommendedUnit: data.recommendedUnit,
         },
       },
       onCompleted: () => {

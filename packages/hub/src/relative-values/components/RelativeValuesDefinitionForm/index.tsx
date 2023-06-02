@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect } from "react";
 import {
   Control,
   Controller,
@@ -23,6 +23,7 @@ import {
   TrashIcon,
 } from "@quri/ui";
 
+import { Header } from "@/components/ui/Header";
 import { SelectCluster } from "../SelectCluster";
 
 export type RelativeValuesDefinitionFormShape = {
@@ -39,6 +40,7 @@ export type RelativeValuesDefinitionFormShape = {
     color: string;
     recommendedUnit: string | null;
   }[];
+  recommendedUnit: string | null;
 };
 
 const JSONForm: FC<{
@@ -54,6 +56,7 @@ const JSONForm: FC<{
         {
           clusters: getValues("clusters"),
           items: getValues("items"),
+          recommendedUnit: getValues("recommendedUnit"),
         },
         null,
         2
@@ -67,6 +70,7 @@ const JSONForm: FC<{
       // FIXME - must be validated first
       setValue("items", decoded.items);
       setValue("clusters", decoded.clusters);
+      setValue("recommendedUnit", decoded.recommendedUnit);
     });
     return () => subscription.unsubscribe();
   }, [jsonWatch, setValue]);
@@ -98,8 +102,8 @@ const HTMLForm: FC<{
   });
 
   // for select dropdowns (this affect the form's performance, though)
-  const clusters = watch("clusters");
-  const items = watch("items");
+  const clusters = watch("clusters") ?? [];
+  const items = watch("items") ?? [];
 
   return (
     <div>
@@ -218,7 +222,30 @@ const HTMLForm: FC<{
             Add item
           </Button>
         </div>
-      </div>{" "}
+      </div>
+      <div>
+        <header className="font-bold text-lg mt-8 mb-2">
+          Recommended unit
+        </header>
+        <Controller
+          name="recommendedUnit"
+          control={control}
+          render={({ field }) => {
+            const value = items.find((item) => item.id === field.value);
+            return (
+              <Select
+                value={value ? { label: value.id, value: value.id } : null}
+                options={items.map((item) => ({
+                  label: item.id,
+                  value: item.id,
+                }))}
+                onChange={(item) => field.onChange(item?.value)}
+                isClearable={true}
+              />
+            );
+          }}
+        />
+      </div>
     </div>
   );
 };
@@ -260,6 +287,7 @@ export const RelativeValuesDefinitionForm: FC<Props> = ({
         />
       </div>
       <div className="mt-8">
+        <Header>Edit as:</Header>
         <StyledTab.Group>
           <StyledTab.List>
             <StyledTab name="Form" icon={() => <div />} />

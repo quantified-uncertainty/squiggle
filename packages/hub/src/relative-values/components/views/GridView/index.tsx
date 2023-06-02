@@ -1,6 +1,8 @@
 import _ from "lodash";
 import { FC, Fragment, useCallback, useMemo } from "react";
 
+import { RelativeValueCell } from "@quri/squiggle-components";
+
 import { cartesianProduct } from "@/relative-values/lib/utils";
 import { Item } from "@/relative-values/types";
 import {
@@ -21,8 +23,6 @@ import {
 import { useFilteredItems, useSortedItems } from "../hooks";
 import { AxisMenu } from "./AxisMenu";
 import { GridModeControls } from "./GridModeControls";
-
-import { RelativeValueCell } from "@quri/squiggle-components";
 
 export const ClusterGridView: FC<{
   model: ModelEvaluator;
