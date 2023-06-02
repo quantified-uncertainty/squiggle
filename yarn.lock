@@ -3475,10 +3475,10 @@
   resolved "https://registry.yarnpkg.com/@pothos/plugin-relay/-/plugin-relay-3.43.0.tgz#13929f9ff77386662b7b17364a4be9cb9a17801d"
   integrity sha512-435jODSgj29IRgHlQjfLUoaTcg1FodqkOaNA0T0IZmjgmS8+2GxqYscRrZWQU7Ufr1MLRvGXOQ+14ri2jw5geQ==
 
-"@pothos/plugin-scope-auth@^3.19.1":
-  version "3.19.1"
-  resolved "https://registry.yarnpkg.com/@pothos/plugin-scope-auth/-/plugin-scope-auth-3.19.1.tgz#d81dcdfc421e46935d570c94fc1daee0906841cb"
-  integrity sha512-6PGM82PPpZCyBS2GQmH14VeiP+zwmX/VObWW0Kn6yom3WkRM6rZAAp6njLchMwEElX2nBfboAh5l2Sz9iteLvw==
+"@pothos/plugin-scope-auth@^3.19.2":
+  version "3.19.2"
+  resolved "https://registry.yarnpkg.com/@pothos/plugin-scope-auth/-/plugin-scope-auth-3.19.2.tgz#3fd30aed0da03e70d6a72d90f77d5f9b5d52ce55"
+  integrity sha512-S+jz6sRt4LkRf3wYhq9/H4bu5OiMFoFub1HJRNgkdx9zzIQia20D+SXFlMcQluuOytVmaFXiz2gUYmY3hCQKQw==
 
 "@pothos/plugin-simple-objects@^3.6.8":
   version "3.6.8"
