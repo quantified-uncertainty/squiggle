@@ -21,7 +21,7 @@
     "react": "^18.1.0",
     "react-hook-form": "^7.44.2",
     "vscode-uri": "^3.0.7",
-    "yup": "^1.1.1",
+    "yup": "^1.2.0",
     "zod": "^3.21.4"
   },
   "devDependencies": {
