@@ -5,6 +5,8 @@ import {
   CurrencyDollarIcon,
   EyeIcon,
 } from "@heroicons/react/solid/esm/index.js";
+import { useMeasure } from "../../lib/hooks/react-use.js";
+
 import { yupResolver } from "@hookform/resolvers/yup";
 import React, {
   useCallback,
@@ -82,6 +84,17 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     defaultValue: defaultCode,
     onChange: onCodeChange,
   });
+
+  // Once the component is mounted, we want the editor to be 1/2 the width of the container.
+  // After that, it will be manually controlled.
+  const [ref, bounds] = useMeasure() as [(instance: HTMLDivElement | null) => void, any];
+  const [initialEditorWidth, setInitialEditorWidth] = useState(0);
+
+  useEffect(() => {
+    if (initialEditorWidth === 0) {
+      setInitialEditorWidth(bounds.width / 2);
+    }
+  }, [initialEditorWidth, bounds])
 
   const [imports, setImports] = useState<JsImports>({});
 
@@ -190,7 +203,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const withEditor = (
     <div className="mt-2 flex-row flex">
       <ResizableBox
-        width={400}
+        width={initialEditorWidth}
         axis={"x"}
         resizeHandles={["e"]}
         handle={(handle, ref) => (
@@ -220,41 +233,43 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   }, []);
 
   return (
-    <SquiggleContainer>
-      <PlaygroundContext.Provider value={{ getLeftPanelElement }}>
-        <StyledTab.Group>
-          <div
-            className="pb-4"
-            style={{
-              minHeight: 200 /* important if editor is hidden */,
-            }}
-          >
-            <div className="flex justify-between items-center">
-              <div className="flex gap-2 items-center">
-                <StyledTab.List>
-                  <StyledTab
-                    name={showEditor ? "Code" : "Display"}
-                    icon={showEditor ? CodeIcon : EyeIcon}
-                  />
-                  <StyledTab name="Sampling Settings" icon={CogIcon} />
-                  <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
-                  <StyledTab name="Input Variables" icon={CurrencyDollarIcon} />
-                </StyledTab.List>
+    <div ref={ref}>
+      <SquiggleContainer>
+        <PlaygroundContext.Provider value={{ getLeftPanelElement }}>
+          <StyledTab.Group>
+            <div
+              className="pb-4"
+              style={{
+                minHeight: 200 /* important if editor is hidden */,
+              }}
+            >
+              <div className="flex justify-between items-center">
+                <div className="flex gap-2 items-center">
+                  <StyledTab.List>
+                    <StyledTab
+                      name={showEditor ? "Code" : "Display"}
+                      icon={showEditor ? CodeIcon : EyeIcon}
+                    />
+                    <StyledTab name="Sampling Settings" icon={CogIcon} />
+                    <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
+                    <StyledTab name="Input Variables" icon={CurrencyDollarIcon} />
+                  </StyledTab.List>
+                </div>
+                <div className="flex gap-2 items-center">
+                  <RunControls {...runnerState} />
+                  <Tooltip text={isMac() ? "Option+Shift+f" : "Alt+Shift+f"}>
+                    <div>
+                      <Button onClick={editorRef.current?.format}>Format</Button>
+                    </div>
+                  </Tooltip>
+                  {showShareButton && <ShareButton />}
+                </div>
               </div>
-              <div className="flex gap-2 items-center">
-                <RunControls {...runnerState} />
-                <Tooltip text={isMac() ? "Option+Shift+f" : "Alt+Shift+f"}>
-                  <div>
-                    <Button onClick={editorRef.current?.format}>Format</Button>
-                  </div>
-                </Tooltip>
-                {showShareButton && <ShareButton />}
-              </div>
+              {showEditor ? withEditor : withoutEditor}
             </div>
-            {showEditor ? withEditor : withoutEditor}
-          </div>
-        </StyledTab.Group>
-      </PlaygroundContext.Provider>
-    </SquiggleContainer>
+          </StyledTab.Group>
+        </PlaygroundContext.Provider>
+      </SquiggleContainer>
+    </div>
   );
 };
