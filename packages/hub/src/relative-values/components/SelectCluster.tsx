@@ -6,7 +6,7 @@ import Select, {
   SingleValueProps,
   components,
 } from "react-select";
-import { ClusterInfo } from "./ClusterInfo";
+import { ClusterInfo } from "./common/ClusterInfo";
 
 type Option = Readonly<{
   id: string;
@@ -37,7 +37,7 @@ export function SelectCluster<T extends FieldValues>({
   name,
   control,
 }: {
-  clusters: Option[];
+  clusters: readonly Option[];
   name: Path<T>;
   control: Control<T>;
 }) {

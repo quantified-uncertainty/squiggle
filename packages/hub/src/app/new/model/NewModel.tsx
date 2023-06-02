@@ -76,11 +76,17 @@ export const NewModel: FC = () => {
         <div className="max-w-2xl mx-auto">
           <div className="font-bold text-xl mb-4">New model</div>
           <div className="space-y-2">
-            <TextInput register={register} name="slug" label="Slug" />
+            <TextInput
+              register={register}
+              name="slug"
+              label="Slug"
+              placeholder="my-model"
+            />
             <TextArea
               register={register}
               name="description"
               label="Description"
+              placeholder="Any comments"
             />
           </div>
         </div>

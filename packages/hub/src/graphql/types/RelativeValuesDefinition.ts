@@ -3,6 +3,8 @@ import {
   relativeValuesClustersSchema,
   relativeValuesItemsSchema,
 } from "@/relative-values/types";
+import { RelativeValuesExport } from "./RelativeValuesExport";
+import { prisma } from "@/prisma";
 
 const RelativeValuesCluster = builder.simpleObject("RelativeValuesCluster", {
   fields: (t) => ({
@@ -31,7 +33,33 @@ export const RelativeValuesDefinition = builder.prismaNode(
       createdAtTimestamp: t.float({
         resolve: (obj) => obj.createdAt.getTime(),
       }),
-      modelExports: t.relation("modelExports"),
+      modelExports: t.field({
+        type: [RelativeValuesExport],
+        resolve: async (definition) => {
+          const models = await prisma.model.findMany({
+            where: {
+              currentRevision: {
+                relativeValuesExports: {
+                  some: {
+                    definitionId: definition.id,
+                  },
+                },
+              },
+            },
+          });
+
+          return await prisma.relativeValuesExport.findMany({
+            where: {
+              modelRevisionId: {
+                in: models
+                  .map((model) => model.currentRevisionId)
+                  .filter((id): id is NonNullable<typeof id> => id !== null),
+              },
+              definitionId: definition.id,
+            },
+          });
+        },
+      }),
       currentRevision: t.field({
         type: RelativeValuesDefinitionRevision,
         select: (_, __, nestedSelection) => ({

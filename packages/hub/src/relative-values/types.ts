@@ -16,6 +16,7 @@ export const relativeValuesClustersSchema = z.array(
   z.object({
     id: z.string(),
     color: z.string(),
+    recommendedUnit: z.nullable(z.string()).optional(),
   })
 );
 

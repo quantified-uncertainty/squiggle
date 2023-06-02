@@ -1,5 +1,6 @@
 import { FC } from "react";
-import { ClusterIcon } from "@/relative-values/components/common/ClusterIcon";
+
+import { ClusterIcon } from "./ClusterIcon";
 
 export const ClusterInfo: FC<{
   cluster: { id: string; color: string };
