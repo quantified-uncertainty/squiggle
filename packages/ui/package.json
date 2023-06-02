@@ -71,7 +71,7 @@
   "dependencies": {
     "@floating-ui/react": "^0.24.2",
     "@headlessui/react": "^1.7.15",
-    "framer-motion": "^10.12.10",
+    "framer-motion": "^10.12.16",
     "react-hook-form": "^7.44.2",
     "react-textarea-autosize": "^8.4.1",
     "react-use": "^17.4.0"
