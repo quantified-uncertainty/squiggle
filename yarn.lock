@@ -3759,7 +3759,7 @@
     lodash "^4.17.21"
     ts-dedent "^2.0.0"
 
-"@storybook/addon-docs@7.0.11", "@storybook/addon-docs@^7.0.11":
+"@storybook/addon-docs@7.0.11":
   version "7.0.11"
   resolved "https://registry.yarnpkg.com/@storybook/addon-docs/-/addon-docs-7.0.11.tgz#5b05f9d25e819443fab58c565ff2f31cfa37886e"
   integrity sha512-WmNEQSiFJrjf47VtQg8uOb5q8M5V4MaolhV9zsN6GSTViduY2P7ti+Fk7ZE6QyO1Yy9Vm4WJLPz/vLcfW73IHw==
@@ -3781,6 +3781,33 @@
     "@storybook/react-dom-shim" "7.0.11"
     "@storybook/theming" "7.0.11"
     "@storybook/types" "7.0.11"
+    fs-extra "^11.1.0"
+    remark-external-links "^8.0.0"
+    remark-slug "^6.0.0"
+    ts-dedent "^2.0.0"
+
+"@storybook/addon-docs@^7.0.18":
+  version "7.0.18"
+  resolved "https://registry.yarnpkg.com/@storybook/addon-docs/-/addon-docs-7.0.18.tgz#a39b0a1443158e0046a1b0746bab20344400f1da"
+  integrity sha512-oq+ZN5809gIRdTZQIpeK1F8BJtL1/VWo9rWvl6ymVOL/Xzdgd7AOfKf9Y99X35RcxAGysRIHLGJjF4bgLoY1Aw==
+  dependencies:
+    "@babel/core" "^7.20.2"
+    "@babel/plugin-transform-react-jsx" "^7.19.0"
+    "@jest/transform" "^29.3.1"
+    "@mdx-js/react" "^2.1.5"
+    "@storybook/blocks" "7.0.18"
+    "@storybook/client-logger" "7.0.18"
+    "@storybook/components" "7.0.18"
+    "@storybook/csf-plugin" "7.0.18"
+    "@storybook/csf-tools" "7.0.18"
+    "@storybook/global" "^5.0.0"
+    "@storybook/mdx2-csf" "^1.0.0"
+    "@storybook/node-logger" "7.0.18"
+    "@storybook/postinstall" "7.0.18"
+    "@storybook/preview-api" "7.0.18"
+    "@storybook/react-dom-shim" "7.0.18"
+    "@storybook/theming" "7.0.18"
+    "@storybook/types" "7.0.18"
     fs-extra "^11.1.0"
     remark-external-links "^8.0.0"
     remark-slug "^6.0.0"
@@ -3931,7 +3958,7 @@
     "@storybook/client-logger" "7.0.7"
     "@storybook/manager-api" "7.0.7"
 
-"@storybook/blocks@7.0.11", "@storybook/blocks@^7.0.11":
+"@storybook/blocks@7.0.11":
   version "7.0.11"
   resolved "https://registry.yarnpkg.com/@storybook/blocks/-/blocks-7.0.11.tgz#6329dda62b972e17322a3368fce2e25b42810a08"
   integrity sha512-WfqRnKLk3Ke9Pr9G7BrtGJZKuOj32WxbQUbPlCi9oVysYQm69hgcO3+MTft96ur62p8e7gcoIFKrhFi0x4rXiw==
@@ -3947,6 +3974,34 @@
     "@storybook/preview-api" "7.0.11"
     "@storybook/theming" "7.0.11"
     "@storybook/types" "7.0.11"
+    "@types/lodash" "^4.14.167"
+    color-convert "^2.0.1"
+    dequal "^2.0.2"
+    lodash "^4.17.21"
+    markdown-to-jsx "^7.1.8"
+    memoizerific "^1.11.3"
+    polished "^4.2.2"
+    react-colorful "^5.1.2"
+    telejson "^7.0.3"
+    ts-dedent "^2.0.0"
+    util-deprecate "^1.0.2"
+
+"@storybook/blocks@7.0.18", "@storybook/blocks@^7.0.11":
+  version "7.0.18"
+  resolved "https://registry.yarnpkg.com/@storybook/blocks/-/blocks-7.0.18.tgz#996651ac813de2a810ba442ab77266961721d324"
+  integrity sha512-HLsuzmUdVIeFXEP5v5vyjnEePRNYjzltwTjCKQhHAlt8/aQZmREiIMOfoMoAa1Rd+On8Ib2DUd2cN10VS18H8A==
+  dependencies:
+    "@storybook/channels" "7.0.18"
+    "@storybook/client-logger" "7.0.18"
+    "@storybook/components" "7.0.18"
+    "@storybook/core-events" "7.0.18"
+    "@storybook/csf" "^0.1.0"
+    "@storybook/docs-tools" "7.0.18"
+    "@storybook/global" "^5.0.0"
+    "@storybook/manager-api" "7.0.18"
+    "@storybook/preview-api" "7.0.18"
+    "@storybook/theming" "7.0.18"
+    "@storybook/types" "7.0.18"
     "@types/lodash" "^4.14.167"
     color-convert "^2.0.1"
     dequal "^2.0.2"
@@ -4527,6 +4582,11 @@
   version "7.0.11"
   resolved "https://registry.yarnpkg.com/@storybook/postinstall/-/postinstall-7.0.11.tgz#447d0090e0b301ae42fdbb5f2f9dab2e20d4ef6c"
   integrity sha512-bUKMQyu0LowxcxX7eO7TJYcs9WPeMfM6Ls2DTfExy7nU/z9EBfPlbXb7lXrMo4mdrHU1Cb+nGi8ZNiMwhggbqA==
+
+"@storybook/postinstall@7.0.18":
+  version "7.0.18"
+  resolved "https://registry.yarnpkg.com/@storybook/postinstall/-/postinstall-7.0.18.tgz#348711fea8ccf66255904811fa33316d0f54445e"
+  integrity sha512-ObIwAK2UiYhXN/7UifISQgBoH5jnyxh6T8kvCw83YhC78SDOPNgIGjToJECizJ7iubtqAWtCfCT5TrGEpyLGbg==
 
 "@storybook/preview-api@7.0.11":
   version "7.0.11"
