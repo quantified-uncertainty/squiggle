@@ -15767,10 +15767,10 @@ prettier@^2.7.1, prettier@^2.8.0:
   resolved "https://registry.npmjs.org/prettier/-/prettier-2.8.7.tgz"
   integrity sha512-yPngTo3aXUUmyuTjeTUT75txrf+aMh9FiD7q9ZE/i6r0bPb22g4FsE6Y338PQX1bmfy08i9QQCB7/rcUAVntfw==
 
-prettier@^3.0.0-alpha.11:
-  version "3.0.0-alpha.11"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.0.0-alpha.11.tgz#fb6f9c7b4495fcc8c70b6633de885bf38b8585af"
-  integrity sha512-/x61/kcsjjU8kUEDKnn8PtqRzMXROg68KbUOtRC09oOQ3Vs6Bjwz7tabF98xu/K/RP/jZzWIvxphWr881DaokQ==
+prettier@^3.0.0-alpha.12:
+  version "3.0.0-alpha.12"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.0.0-alpha.12.tgz#c38228f277e870298b6d95e579e54ea500487505"
+  integrity sha512-QCCLoJ+ttw/DV6zLiHJDZdC7sZ23fk3gCulQmjU6AuA/Uk8o6qbzM4afyEDIM94xhj7MEGDtKYo+ZFpxwjmSEg==
 
 pretty-bytes@^5.3.0, pretty-bytes@^5.4.1:
   version "5.6.0"
