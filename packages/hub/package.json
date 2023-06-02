@@ -23,7 +23,7 @@
     "@pothos/plugin-simple-objects": "^3.6.8",
     "@pothos/plugin-validation": "^3.9.1",
     "@pothos/plugin-with-input": "^3.10.1",
-    "@prisma/client": "4.14.0",
+    "@prisma/client": "4.15.0",
     "@quri/squiggle-components": "^0.7.0",
     "@quri/squiggle-lang": "^0.7.0",
     "@quri/ui": "^0.1.0",
