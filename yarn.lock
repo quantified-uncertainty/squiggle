@@ -3480,10 +3480,10 @@
   resolved "https://registry.yarnpkg.com/@pothos/plugin-scope-auth/-/plugin-scope-auth-3.19.2.tgz#3fd30aed0da03e70d6a72d90f77d5f9b5d52ce55"
   integrity sha512-S+jz6sRt4LkRf3wYhq9/H4bu5OiMFoFub1HJRNgkdx9zzIQia20D+SXFlMcQluuOytVmaFXiz2gUYmY3hCQKQw==
 
-"@pothos/plugin-simple-objects@^3.6.8":
-  version "3.6.8"
-  resolved "https://registry.yarnpkg.com/@pothos/plugin-simple-objects/-/plugin-simple-objects-3.6.8.tgz#fe33d741a2955f7242347534a495e745385ad0d7"
-  integrity sha512-qsoBZHfwLAdozJEdT7r7jfineL9vDfdWf7HZkw5zkiUtY6KrZJPNuq0MMCPZGuGxHFBm60jC73nk/ENZrVKpsg==
+"@pothos/plugin-simple-objects@^3.7.0":
+  version "3.7.0"
+  resolved "https://registry.yarnpkg.com/@pothos/plugin-simple-objects/-/plugin-simple-objects-3.7.0.tgz#89d95a5ff44613d14775d8a2f26d96858757ebbe"
+  integrity sha512-CgZJLaHLt1Q30j+XCiWV6qVJcae1ksiUFdi8kz4sEsOhCNfdVwz64s8rx7SSqsdmPbjb68dJIDKpq2Qg9VZb8g==
 
 "@pothos/plugin-validation@^3.9.2":
   version "3.9.2"
