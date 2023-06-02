@@ -175,13 +175,15 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     squiggleChart
   );
 
+  const standardHeightStyle = { height: `${height}px`, overflow: "auto" }
+
   const tabs = (
-    <StyledTab.Panels className="h-full">
-      <StyledTab.Panel className="h-full">{firstTab}</StyledTab.Panel>
-      <StyledTab.Panel>
+    <StyledTab.Panels>
+      <StyledTab.Panel>{firstTab}</StyledTab.Panel>
+      <StyledTab.Panel style={standardHeightStyle}>
         <EnvironmentSettingsForm register={register} />
       </StyledTab.Panel>
-      <StyledTab.Panel>
+      <StyledTab.Panel style={standardHeightStyle}>
         <ViewSettingsForm
           register={
             // This is dangerous, but doesn't cause any problems.
@@ -192,7 +194,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
           }
         />
       </StyledTab.Panel>
-      <StyledTab.Panel>
+      <StyledTab.Panel style={standardHeightStyle}>
         <ImportSettingsForm initialImports={imports} setImports={setImports} />
       </StyledTab.Panel>
     </StyledTab.Panels>
@@ -203,6 +205,8 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const withEditor = (
     <div className="mt-2 flex-row flex">
       <ResizableBox
+        style={{ height: "100%" }}
+        className="border border-slate-200 h-full"
         width={initialEditorWidth}
         axis={"x"}
         resizeHandles={["e"]}
@@ -213,13 +217,14 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
           />
         )}
       >
-        <div style={{ minHeight: props.chartHeight }} ref={leftPanelRef}>
+        <div ref={leftPanelRef}>
           {tabs}
         </div>
       </ResizableBox>
       <div
-        className="p-2 pl-4 flex-1 overflow-auto"
+        className="p-2 pl-4 flex-1"
         data-testid="playground-result"
+        style={standardHeightStyle}
       >
         {squiggleChart}
       </div>

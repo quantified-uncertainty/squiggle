@@ -127,7 +127,7 @@ export const ViewSettingsForm: React.FC<{
   register: UseFormRegister<ViewSettings>;
 }> = ({ withFunctionSettings = true, fixed, register }) => {
   return (
-    <div className="space-y-6 p-3 divide-y divide-gray-200 max-w-xl">
+    <div className="space-y-6 p-3 divide-y divide-gray-200">
       <HeadedSection title="General Display Settings">
         <div className="space-y-4">
           <InputItem
