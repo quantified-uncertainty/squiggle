@@ -95,17 +95,6 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   });
   const { ref, width: initialWidth } = useInitialWidth();
 
-  // Once the component is mounted, we want the editor to be 1/2 the width of the container.
-  // After that, it will be manually controlled.
-  // const [ref, bounds] = useMeasure() as [(instance: HTMLDivElement | null) => void, any];
-  // const [initialEditorWidth, setInitialEditorWidth] = useState(0);
-
-  // useEffect(() => {
-  //   if (initialEditorWidth === 0) {
-  //     setInitialEditorWidth(bounds.width / 2);
-  //   }
-  // }, [initialEditorWidth, bounds])
-
   const [imports, setImports] = useState<JsImports>({});
 
   const defaultValues: PlaygroundFormFields = {
