@@ -19,13 +19,13 @@ export const ClientApp: FC<PropsWithChildren<{ session: Session | null }>> = ({
   return (
     <SessionProvider session={session}>
       <RelayEnvironmentProvider environment={environment}>
-        <WithToasts>
-          <RootLayout>
-            <div className="squiggle-hub">
+        <div className="squiggle-hub">
+          <WithToasts>
+            <RootLayout>
               <SquiggleContainer>{children}</SquiggleContainer>
-            </div>
-          </RootLayout>
-        </WithToasts>
+            </RootLayout>
+          </WithToasts>
+        </div>
       </RelayEnvironmentProvider>
     </SessionProvider>
   );
