@@ -203,14 +203,14 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const withEditor = (
     <div className="mt-2 flex flex-row border-slate-100 border rounded-md py-2 px-1">
       <ResizableBox
-        className="h-full"
+        className="h-full pr-2"
         width={initialWidth / 2}
         axis={"x"}
         resizeHandles={["e"]}
         handle={(handle, ref) => (
           <div
             ref={ref}
-            className={`rounded bg-none bg-slate-200 hover:bg-slate-500 transition w-1 h-full -mr-1 top-0 mt-0 rotate-0 react-resizable-handle react-resizable-handle-${handle}`}
+            className={`rounded bg-none bg-slate-200 hover:bg-slate-500 transition w-2 h-full -mr-1 top-0 mt-0 rotate-0 react-resizable-handle react-resizable-handle-${handle}`}
           />
         )}
       >
