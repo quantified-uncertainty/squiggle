@@ -50,25 +50,25 @@ type PlaygroundProps = // Playground can be either controlled (`code`) or uncont
     | { code: string; defaultCode?: undefined }
     | { defaultCode?: string; code?: undefined }
   ) &
-  (
-    | {
-      project: SqProject;
-      continues?: string[];
-    }
-    | {}
-  ) &
-  Omit<SquiggleViewerProps, "result"> & {
-    onCodeChange?(expr: string): void;
-    /* When settings change */
-    onSettingsChange?(settings: any): void;
-    /** Should we show the editor? */
-    showEditor?: boolean;
-    /** Allows to inject extra buttons, e.g. share button on the website, or save button in Squiggle Hub */
-    renderExtraControls?: () => ReactNode;
-    showShareButton?: boolean;
-    /** Height of the editor */
-    height?: number;
-  };
+    (
+      | {
+          project: SqProject;
+          continues?: string[];
+        }
+      | {}
+    ) &
+    Omit<SquiggleViewerProps, "result"> & {
+      onCodeChange?(expr: string): void;
+      /* When settings change */
+      onSettingsChange?(settings: any): void;
+      /** Should we show the editor? */
+      showEditor?: boolean;
+      /** Allows to inject extra buttons, e.g. share button on the website, or save button in Squiggle Hub */
+      renderExtraControls?: () => ReactNode;
+      showShareButton?: boolean;
+      /** Height of the editor */
+      height?: number;
+    };
 
 // Left panel ref is used for local settings modal positioning in ItemSettingsMenu.tsx
 type PlaygroundContextShape = {
@@ -174,7 +174,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     squiggleChart
   );
 
-  const standardHeightStyle = { height: `${height}px`, overflow: "auto" }
+  const standardHeightStyle = { height: `${height}px`, overflow: "auto" };
 
   const tabs = (
     <StyledTab.Panels>
@@ -216,9 +216,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
           />
         )}
       >
-        <div ref={leftPanelRef}>
-          {tabs}
-        </div>
+        <div ref={leftPanelRef}>{tabs}</div>
       </ResizableBox>
       <div
         className="p-2 pl-4 flex-1"
@@ -256,14 +254,21 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
                     />
                     <StyledTab name="Sampling Settings" icon={CogIcon} />
                     <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
-                    <StyledTab name="Input Variables" icon={CurrencyDollarIcon} />
+                    <StyledTab
+                      name="Input Variables"
+                      icon={CurrencyDollarIcon}
+                    />
                   </StyledTab.List>
                 </div>
                 <div className="flex gap-2 items-center">
                   <RunControls {...runnerState} />
-                  <TextTooltip text={isMac() ? "Option+Shift+f" : "Alt+Shift+f"}>
+                  <TextTooltip
+                    text={isMac() ? "Option+Shift+f" : "Alt+Shift+f"}
+                  >
                     <div>
-                      <Button onClick={editorRef.current?.format}>Format</Button>
+                      <Button onClick={editorRef.current?.format}>
+                        Format
+                      </Button>
                     </div>
                   </TextTooltip>
                   {renderExtraControls?.()}

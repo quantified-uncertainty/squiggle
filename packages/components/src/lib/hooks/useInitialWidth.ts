@@ -1,8 +1,4 @@
-import {
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useEffect, useRef, useState } from "react";
 
 export const useInitialWidth = () => {
   const ref = useRef<HTMLDivElement>(null);
