@@ -157,7 +157,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const editorRef = useRef<CodeEditorHandle>(null);
 
   const firstTab = showEditor ? (
-    <div className="border border-slate-200" data-testid="squiggle-editor">
+    <div data-testid="squiggle-editor">
       <CodeEditor
         ref={editorRef}
         value={code}
@@ -201,16 +201,16 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const leftPanelRef = useRef<HTMLDivElement | null>(null);
 
   const withEditor = (
-    <div className="mt-2 flex flex-row">
+    <div className="mt-2 flex flex-row border-slate-100 border rounded-md py-2 px-1">
       <ResizableBox
-        className="border border-slate-200 h-full"
+        className="h-full"
         width={initialWidth / 2}
         axis={"x"}
         resizeHandles={["e"]}
         handle={(handle, ref) => (
           <div
             ref={ref}
-            className={`bg-none bg-slate-100 hover:bg-blue-200 transition w-1 h-full -mr-1 top-0 mt-0 rotate-0 react-resizable-handle react-resizable-handle-${handle}`}
+            className={`rounded bg-none bg-slate-200 hover:bg-slate-500 transition w-1 h-full -mr-1 top-0 mt-0 rotate-0 react-resizable-handle react-resizable-handle-${handle}`}
           />
         )}
       >
