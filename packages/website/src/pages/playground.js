@@ -61,7 +61,6 @@ export default function PlaygroundPage() {
     <Layout title="Playground" description="Squiggle Playground">
       <div
         style={{
-          maxWidth: 2000,
           padding: 8,
         }}
       >

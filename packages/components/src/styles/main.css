@@ -10,6 +10,12 @@ so unscoped forms css with scoped preflight css, and there's no setting for scop
 @import "./forms.css";
 
 /*
+Used for resizable panes in the playground.
+Webpack doesn't tolerate well importing it from tsx for some reason, and it's relatively small in any case.
+*/
+@import "react-resizable/css/styles.css";
+
+/*
 This doesn't include tailwind's original preflight (it's disabled in tailwind.config.js),
 but this line is still necessary for proper initialization of `--tw-*` variables.
 */
@@ -17,13 +23,3 @@ but this line is still necessary for proper initialization of `--tw-*` variables
 
 @tailwind components;
 @tailwind utilities;
-
-/* Necessary hack because scoped preflight in ./base.css has higher specificity. */
-.ace_cursor {
-  border-left: 2px solid !important;
-}
-
-.ace-error-marker {
-  position: absolute;
-  border-bottom: 1px solid red;
-}
