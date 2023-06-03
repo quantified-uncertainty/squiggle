@@ -50,9 +50,6 @@
     "jsdom": "^22.1.0",
     "postcss": "^8.4.24",
     "postcss-cli": "^10.0.0",
-    "postcss-import": "^15.1.0",
-    "postcss-loader": "^7.3.2",
-    "postcss-nesting": "^11.2.2",
     "react": "^18.1.0",
     "react-dom": "^18.2.0",
     "resize-observer-polyfill": "^1.5.1",
@@ -134,8 +131,8 @@
     "./main.css": {
       "default": "./dist/main.css"
     },
-    "./plugin": {
-      "default": "./dist/tailwind-plugin.cjs"
+    "./tailwind-plugin": {
+      "default": "./dist/src/tailwind-plugin.cjs"
     }
   },
   "module": "./dist/src/index.js",

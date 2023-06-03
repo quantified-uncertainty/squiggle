@@ -6,6 +6,10 @@
 
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Lato:wght@100;400;700;900&family=Lora:wght@400;500;600&display=swap");
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* You can override the default Infima variables here. */
 :root {
   --ifm-color-primary: #e74c0f;
