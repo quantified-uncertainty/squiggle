@@ -16,7 +16,7 @@ import React, {
 } from "react";
 import { UseFormRegister, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
-import { useInitialWidth } from "../../lib/hooks/useInitialWidth.ts";
+import { useInitialWidth } from "../../lib/hooks/useInitialWidth.js";
 
 import { Env } from "@quri/squiggle-lang";
 import { Button, StyledTab, TextTooltip } from "@quri/ui";
