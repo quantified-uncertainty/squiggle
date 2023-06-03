@@ -21,7 +21,9 @@ export const ClientApp: FC<PropsWithChildren<{ session: Session | null }>> = ({
       <RelayEnvironmentProvider environment={environment}>
         <WithToasts>
           <RootLayout>
-            <SquiggleContainer>{children}</SquiggleContainer>
+            <div className="squiggle-hub">
+              <SquiggleContainer>{children}</SquiggleContainer>
+            </div>
           </RootLayout>
         </WithToasts>
       </RelayEnvironmentProvider>
