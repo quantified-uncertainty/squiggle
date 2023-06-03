@@ -200,7 +200,6 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
         effects: compTheme.reconfigure(
           EditorView.theme({
             "&": {
-              overflow: "auto",
               ...(width === undefined ? {} : { width: `${width}px` }),
               ...(height === undefined ? {} : { height: `${height}px` }),
             },

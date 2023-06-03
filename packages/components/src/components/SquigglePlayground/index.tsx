@@ -5,7 +5,6 @@ import {
   CurrencyDollarIcon,
   EyeIcon,
 } from "@heroicons/react/solid/esm/index.js";
-
 import { yupResolver } from "@hookform/resolvers/yup";
 import React, {
   ReactNode,
@@ -174,7 +173,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     squiggleChart
   );
 
-  const standardHeightStyle = { height: `${height}px`, overflow: "auto" };
+  const standardHeightStyle = { height, overflow: "auto" };
 
   const tabs = (
     <StyledTab.Panels>
@@ -204,7 +203,6 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const withEditor = (
     <div className="mt-2 flex flex-row">
       <ResizableBox
-        style={{ height: "100%" }}
         className="border border-slate-200 h-full"
         width={initialWidth / 2}
         axis={"x"}
