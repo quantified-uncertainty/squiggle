@@ -1,8 +1,9 @@
 import React from "react";
 import * as yup from "yup";
 
-import { InputItem } from "../ui/InputItem.js";
-import { Text } from "../ui/Text.js";
+import { NumberInput } from "@quri/ui";
+
+import { FormComment } from "../ui/FormComment.js";
 import { viewSettingsSchema } from "../ViewSettingsForm.js";
 import { UseFormRegister } from "react-hook-form";
 
@@ -37,31 +38,29 @@ export const EnvironmentSettingsForm: React.FC<{
 }> = ({ register }) => (
   <div className="space-y-6 p-3 max-w-xl">
     <div>
-      <InputItem
+      <NumberInput
         name="sampleCount"
-        type="number"
         label="Sample Count"
         register={register}
       />
       <div className="mt-2">
-        <Text>
+        <FormComment>
           How many samples to use for Monte Carlo simulations. This can
           occasionally be overridden by specific Squiggle programs.
-        </Text>
+        </FormComment>
       </div>
     </div>
     <div>
-      <InputItem
+      <NumberInput
         name="xyPointLength"
-        type="number"
         register={register}
         label="Coordinate Count (For PointSet Shapes)"
       />
       <div className="mt-2">
-        <Text>
+        <FormComment>
           When distributions are converted into PointSet shapes, we need to know
           how many coordinates to use.
-        </Text>
+        </FormComment>
       </div>
     </div>
   </div>

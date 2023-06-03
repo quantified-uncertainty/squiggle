@@ -5,10 +5,10 @@ import {
   CurrencyDollarIcon,
   EyeIcon,
 } from "@heroicons/react/solid/esm/index.js";
-import { useMeasure } from "../../lib/hooks/react-use.js";
 
 import { yupResolver } from "@hookform/resolvers/yup";
 import React, {
+  ReactNode,
   useCallback,
   useEffect,
   useMemo,
@@ -19,8 +19,9 @@ import { UseFormRegister, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 
 import { Env } from "@quri/squiggle-lang";
+import { Button, StyledTab, TextTooltip } from "@quri/ui";
+
 import { useMaybeControlledValue, useSquiggle } from "../../lib/hooks/index.js";
-import { SquiggleArgs } from "../../lib/hooks/useSquiggle.js";
 
 import { JsImports } from "../../lib/jsImports.js";
 import { getErrors, getValueToRender, isMac } from "../../lib/utility.js";
@@ -31,31 +32,38 @@ import {
   SquiggleViewerProps,
 } from "../SquiggleViewer/index.js";
 import { ViewSettingsForm, viewSettingsSchema } from "../ViewSettingsForm.js";
-import { StyledTab } from "../ui/StyledTab.js";
 
+import { SqProject } from "@quri/squiggle-lang";
 import { ImportSettingsForm } from "./ImportSettingsForm.js";
 import { ResizableBox } from "react-resizable";
 import { RunControls } from "./RunControls/index.js";
 import { useRunnerState } from "./RunControls/useRunnerState.js";
-import { ShareButton } from "./ShareButton.js";
 import {
   EnvironmentSettingsForm,
   playgroundSettingsSchema,
   type PlaygroundFormFields,
 } from "./playgroundSettings.js";
-import { Button } from "../ui/Button.js";
-import { Tooltip } from "../ui/Tooltip.js";
 
-type PlaygroundProps = SquiggleArgs &
+type PlaygroundProps = // Playground can be either controlled (`code`) or uncontrolled (`defaultCode` + `onCodeChange`)
+  (
+    | { code: string; defaultCode?: undefined }
+    | { defaultCode?: string; code?: undefined }
+  ) &
+  (
+    | {
+      project: SqProject;
+      continues?: string[];
+    }
+    | {}
+  ) &
   Omit<SquiggleViewerProps, "result"> & {
-    /** The initial squiggle string to put in the playground */
-    defaultCode?: string;
     onCodeChange?(expr: string): void;
     /* When settings change */
     onSettingsChange?(settings: any): void;
     /** Should we show the editor? */
     showEditor?: boolean;
-    /** Useful for playground on squiggle website, where we update the anchor link based on current code and settings */
+    /** Allows to inject extra buttons, e.g. share button on the website, or save button in Squiggle Hub */
+    renderExtraControls?: () => ReactNode;
     showShareButton?: boolean;
     /** Height of the editor */
     height?: number;
@@ -75,7 +83,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     code: controlledCode,
     onCodeChange,
     onSettingsChange,
-    showShareButton = false,
+    renderExtraControls,
     height = 500,
     showEditor = true,
   } = props;
@@ -87,14 +95,14 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
 
   // Once the component is mounted, we want the editor to be 1/2 the width of the container.
   // After that, it will be manually controlled.
-  const [ref, bounds] = useMeasure() as [(instance: HTMLDivElement | null) => void, any];
-  const [initialEditorWidth, setInitialEditorWidth] = useState(0);
+  // const [ref, bounds] = useMeasure() as [(instance: HTMLDivElement | null) => void, any];
+  // const [initialEditorWidth, setInitialEditorWidth] = useState(0);
 
-  useEffect(() => {
-    if (initialEditorWidth === 0) {
-      setInitialEditorWidth(bounds.width / 2);
-    }
-  }, [initialEditorWidth, bounds])
+  // useEffect(() => {
+  //   if (initialEditorWidth === 0) {
+  //     setInitialEditorWidth(bounds.width / 2);
+  //   }
+  // }, [initialEditorWidth, bounds])
 
   const [imports, setImports] = useState<JsImports>({});
 
@@ -207,7 +215,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
       <ResizableBox
         style={{ height: "100%" }}
         className="border border-slate-200 h-full"
-        width={initialEditorWidth}
+        width={500}
         axis={"x"}
         resizeHandles={["e"]}
         handle={(handle, ref) => (
@@ -238,7 +246,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   }, []);
 
   return (
-    <div ref={ref}>
+    <div>
       <SquiggleContainer>
         <PlaygroundContext.Provider value={{ getLeftPanelElement }}>
           <StyledTab.Group>
@@ -262,15 +270,15 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
                 </div>
                 <div className="flex gap-2 items-center">
                   <RunControls {...runnerState} />
-                  <Tooltip text={isMac() ? "Option+Shift+f" : "Alt+Shift+f"}>
+                  <TextTooltip text={isMac() ? "Option+Shift+f" : "Alt+Shift+f"}>
                     <div>
                       <Button onClick={editorRef.current?.format}>Format</Button>
                     </div>
-                  </Tooltip>
-                  {showShareButton && <ShareButton />}
+                  </TextTooltip>
+                  {renderExtraControls?.()}
                 </div>
+                {showEditor ? withEditor : withoutEditor}
               </div>
-              {showEditor ? withEditor : withoutEditor}
             </div>
           </StyledTab.Group>
         </PlaygroundContext.Provider>

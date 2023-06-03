@@ -14,7 +14,7 @@ describe("comments", () => {
 123`)
     ).toBe(`// line comment
 123`);
-  });
+  }, 20000); // first call to prettier is slow and occasionally causes timeouts in Github Actions
 
   test("comment indentation is ignored", async () => {
     expect(
@@ -45,6 +45,50 @@ x = 5
 x = 5
 // second line
 123`);
+  });
+
+  test("comment in block definition", async () => {
+    expect(
+      await format(`
+foo = {
+  // inner comment
+  x = 5
+  x*x
+}
+`)
+    ).toBe(`foo = {
+  // inner comment
+  x = 5
+  x * x
+}
+`);
+  });
+
+  test("comment in simple function definition", async () => {
+    expect(
+      await format(`
+foo() = { /* inner comment */ 5 }
+`)
+    ).toBe(`foo() = {
+  /* inner comment */
+  5
+}
+`);
+  });
+
+  test("comment in function definition", async () => {
+    expect(
+      await format(`
+foo(x) = {
+  // inner comment
+  x*x
+}
+`)
+    ).toBe(`foo(x) = {
+  // inner comment
+  x * x
+}
+`);
   });
 });
 
@@ -202,5 +246,32 @@ describe("pipes", () => {
     ).toBe(
       "pipe = 5 -> f1 -> f2 -> f3(1) -> { f: f2 }.f2 -> { foo: f3 }.foo(1)\n"
     );
+  });
+});
+
+describe("imports", () => {
+  test("single import", async () => {
+    expect(
+      await format(`import     "./foo.squiggle" as foo
+    123`)
+    ).toBe(`import "./foo.squiggle" as foo
+123`);
+  });
+
+  test("multiple imports", async () => {
+    expect(
+      await format(`import     "./foo.squiggle" as foo
+import     "./foo2.squiggle" as foo2 // hello
+
+
+import     "./foo3.squiggle" as foo3
+
+    123`)
+    ).toBe(`import "./foo.squiggle" as foo
+import "./foo2.squiggle" as foo2
+import "./foo3.squiggle" as foo3
+// hello
+
+123`);
   });
 });

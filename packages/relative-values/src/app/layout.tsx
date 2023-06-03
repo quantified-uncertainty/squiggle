@@ -8,7 +8,6 @@ import "../styles/main.css";
 import { Tailwind } from "@/components/Tailwind";
 import { StorageProvider } from "@/storage/StorageProvider";
 import { ScaleIcon } from "../components/ui/icons/ScaleIcon";
-import { Scale } from "@quri/squiggle-lang/dist/types/src/operation";
 
 export default function RootLayout({ children }: PropsWithChildren) {
   return (

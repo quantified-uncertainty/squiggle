@@ -1,21 +1,23 @@
 import * as d3 from "d3";
 import { FC, useCallback, useMemo, useState } from "react";
 
-import { Item } from "@/types";
-import { ModelEvaluator } from "@/values/ModelEvaluator";
 import {
   DrawContext,
-  MouseTooltip,
   drawAxes,
   useCanvas,
   useCanvasCursor,
 } from "@quri/squiggle-components";
+import { MouseTooltip } from "@quri/ui";
+
+import { Item } from "@/types";
+import { ModelEvaluator } from "@/values/ModelEvaluator";
 import { useSelectedInterface } from "../../Interface/InterfaceProvider";
 import { useViewContext } from "../ViewProvider";
 import { useFilteredItems } from "../hooks";
 import { averageMedian, averageUncertainty } from "../hooks/useSortedItems";
 import { distance } from "./ForcePlot";
 import { ItemTooltip } from "./ItemTooltip";
+import { tailwindSelector } from "@/components/Tailwind";
 
 type Datum = {
   item: Item;
@@ -169,7 +171,11 @@ export const ValueAndUncertaintyPlot: FC<{
   }, [data, hoveredId]);
 
   return (
-    <MouseTooltip isOpen={hoveredId !== undefined} render={renderTooltip}>
+    <MouseTooltip
+      isOpen={hoveredId !== undefined}
+      render={renderTooltip}
+      tailwindSelector={tailwindSelector}
+    >
       <canvas ref={ref} className="w-full" />
     </MouseTooltip>
   );

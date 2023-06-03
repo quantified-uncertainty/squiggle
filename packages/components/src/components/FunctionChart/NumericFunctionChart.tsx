@@ -15,22 +15,25 @@ import { sqScaleToD3 } from "../../lib/utility.js";
 import { ErrorAlert } from "../Alert.js";
 import { getFunctionImage } from "./utils.js";
 import { FunctionChartContainer } from "./FunctionChartContainer.js";
+import { Env } from "@quri/squiggle-lang";
 
 type Props = {
   plot: SqNumericFnPlot;
+  environment: Env;
   height: number;
 };
 
 export const NumericFunctionChart: FC<Props> = ({
   plot,
+  environment,
   height: innerHeight,
 }) => {
   const height = innerHeight + 30; // consider paddings, should match suggestedPadding below
   const { cursor, initCursor } = useCanvasCursor();
 
   const { functionImage, errors } = useMemo(
-    () => getFunctionImage(plot),
-    [plot]
+    () => getFunctionImage(plot, environment),
+    [plot, environment]
   );
 
   const draw = useCallback(

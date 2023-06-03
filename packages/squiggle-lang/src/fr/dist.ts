@@ -81,21 +81,18 @@ const twoVarSample = (
 };
 
 const makeTwoArgsDist = (
-  name: string,
   fn: (
     v1: number,
     v2: number
   ) => Result.result<SymbolicDist.SymbolicDist, string>
 ) => {
   return makeDefinition(
-    name,
     [frDistOrNumber, frDistOrNumber],
     ([v1, v2], { environment }) => twoVarSample(v1, v2, environment, fn)
   );
 };
 
 const makeCIDist = <K1 extends string, K2 extends string>(
-  name: string,
   lowKey: K1,
   highKey: K2,
   fn: (
@@ -104,7 +101,6 @@ const makeCIDist = <K1 extends string, K2 extends string>(
   ) => Result.result<SymbolicDist.SymbolicDist, string>
 ) => {
   return makeDefinition(
-    name,
     [frRecord([lowKey, frNumber], [highKey, frNumber])],
     ([record], { environment }) =>
       twoVarSample(record[lowKey], record[highKey], environment, fn)
@@ -112,14 +108,12 @@ const makeCIDist = <K1 extends string, K2 extends string>(
 };
 
 const makeMeanStdevDist = (
-  name: string,
   fn: (
     mean: number,
     stdev: number
   ) => Result.result<SymbolicDist.SymbolicDist, string>
 ) => {
   return makeDefinition(
-    name,
     [frRecord(["mean", frNumber], ["stdev", frNumber])],
     ([{ mean, stdev }], { environment }) =>
       twoVarSample(mean, stdev, environment, fn)
@@ -127,10 +121,9 @@ const makeMeanStdevDist = (
 };
 
 const makeOneArgDist = (
-  name: string,
   fn: (v: number) => Result.result<SymbolicDist.SymbolicDist, string>
 ) => {
-  return makeDefinition(name, [frDistOrNumber], ([v], { environment }) => {
+  return makeDefinition([frDistOrNumber], ([v], { environment }) => {
     const repack = (r: Result.result<SampleSetDist.SampleSetDist, DistError>) =>
       Result.fmap(Result.errMap(r, REDistributionError), vDist);
 
@@ -162,11 +155,11 @@ export const library: FRFunction[] = [
       "normal({mean: 5, stdev: 2})",
     ],
     definitions: [
-      makeTwoArgsDist("normal", (mean, stdev) =>
+      makeTwoArgsDist((mean, stdev) =>
         SymbolicDist.Normal.make({ mean, stdev })
       ),
       ...CI_CONFIG.map((entry) =>
-        makeCIDist("normal", entry.lowKey, entry.highKey, (low, high) =>
+        makeCIDist(entry.lowKey, entry.highKey, (low, high) =>
           SymbolicDist.Normal.fromCredibleInterval({
             low,
             high,
@@ -174,7 +167,7 @@ export const library: FRFunction[] = [
           })
         )
       ),
-      makeMeanStdevDist("normal", (mean, stdev) =>
+      makeMeanStdevDist((mean, stdev) =>
         SymbolicDist.Normal.make({ mean, stdev })
       ),
     ],
@@ -189,11 +182,11 @@ export const library: FRFunction[] = [
       "lognormal({mean: 5, stdev: 2})",
     ],
     definitions: [
-      makeTwoArgsDist("lognormal", (mu, sigma) =>
+      makeTwoArgsDist((mu, sigma) =>
         SymbolicDist.Lognormal.make({ mu, sigma })
       ),
       ...CI_CONFIG.map((entry) =>
-        makeCIDist("lognormal", entry.lowKey, entry.highKey, (low, high) =>
+        makeCIDist(entry.lowKey, entry.highKey, (low, high) =>
           SymbolicDist.Lognormal.fromCredibleInterval({
             low,
             high,
@@ -201,7 +194,7 @@ export const library: FRFunction[] = [
           })
         )
       ),
-      makeMeanStdevDist("lognormal", (mean, stdev) =>
+      makeMeanStdevDist((mean, stdev) =>
         SymbolicDist.Lognormal.fromMeanAndStdev({ mean, stdev })
       ),
     ],
@@ -210,19 +203,15 @@ export const library: FRFunction[] = [
     name: "uniform",
     examples: [`uniform(10, 12)`],
     definitions: [
-      makeTwoArgsDist("uniform", (low, high) =>
-        SymbolicDist.Uniform.make({ low, high })
-      ),
+      makeTwoArgsDist((low, high) => SymbolicDist.Uniform.make({ low, high })),
     ],
   }),
   maker.make({
     name: "beta",
     examples: [`beta(20, 25)`, `beta({mean: 0.39, stdev: 0.1})`],
     definitions: [
-      makeTwoArgsDist("beta", (alpha, beta) =>
-        SymbolicDist.Beta.make({ alpha, beta })
-      ),
-      makeMeanStdevDist("beta", (mean, stdev) =>
+      makeTwoArgsDist((alpha, beta) => SymbolicDist.Beta.make({ alpha, beta })),
+      makeMeanStdevDist((mean, stdev) =>
         SymbolicDist.Beta.fromMeanAndStdev({ mean, stdev })
       ),
     ],
@@ -231,7 +220,7 @@ export const library: FRFunction[] = [
     name: "cauchy",
     examples: [`cauchy(5, 1)`],
     definitions: [
-      makeTwoArgsDist("cauchy", (local, scale) =>
+      makeTwoArgsDist((local, scale) =>
         SymbolicDist.Cauchy.make({ local, scale })
       ),
     ],
@@ -240,7 +229,7 @@ export const library: FRFunction[] = [
     name: "gamma",
     examples: [`gamma(5, 1)`],
     definitions: [
-      makeTwoArgsDist("gamma", (shape, scale) =>
+      makeTwoArgsDist((shape, scale) =>
         SymbolicDist.Gamma.make({ shape, scale })
       ),
     ],
@@ -249,41 +238,41 @@ export const library: FRFunction[] = [
     name: "logistic",
     examples: [`logistic(5, 1)`],
     definitions: [
-      makeTwoArgsDist("logistic", (location, scale) =>
+      makeTwoArgsDist((location, scale) =>
         SymbolicDist.Logistic.make({ location, scale })
       ),
     ],
   }),
-  maker.make({
-    name: "to (distribution)",
-    examples: ["5 to 10", "to(5,10)", "-5 to 5"],
-    definitions: ["to", "credibleIntervalToDistribution"].map((functionName) =>
-      makeTwoArgsDist(functionName, (low, high) =>
-        SymbolicDist.makeFromCredibleInterval({ low, high, probability: 0.9 })
-      )
-    ),
-  }),
+  ...["to", "credibleIntervalToDistribution"].map((name) =>
+    maker.make({
+      name,
+      examples: name === "to" ? ["5 to 10", "to(5,10)", "-5 to 5"] : [],
+      definitions: [
+        makeTwoArgsDist((low, high) =>
+          SymbolicDist.makeFromCredibleInterval({
+            low,
+            high,
+            probability: 0.9,
+          })
+        ),
+      ],
+    })
+  ),
   maker.make({
     name: "exponential",
     examples: [`exponential(2)`],
     definitions: [
-      makeOneArgDist("exponential", (rate) =>
-        SymbolicDist.Exponential.make(rate)
-      ),
+      makeOneArgDist((rate) => SymbolicDist.Exponential.make(rate)),
     ],
   }),
   maker.make({
     name: "bernoulli",
     examples: [`bernoulli(0.5)`],
-    definitions: [
-      makeOneArgDist("bernoulli", (p) => SymbolicDist.Bernoulli.make(p)),
-    ],
+    definitions: [makeOneArgDist((p) => SymbolicDist.Bernoulli.make(p))],
   }),
   maker.make({
     name: "pointMass",
     examples: [`pointMass(0.5)`],
-    definitions: [
-      makeOneArgDist("pointMass", (f) => SymbolicDist.PointMass.make(f)),
-    ],
+    definitions: [makeOneArgDist((f) => SymbolicDist.PointMass.make(f))],
   }),
 ];

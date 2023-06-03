@@ -1,18 +1,19 @@
+import clsx from "clsx";
+import { FC, Fragment, useState } from "react";
+
 import { useSelectedInterface } from "@/components/Interface/InterfaceProvider";
 import { DropdownButton } from "@/components/ui/DropdownButton";
+import { CompassIcon } from "@/components/ui/icons/CompassIcon";
+import { Catalog, Item } from "@/types";
 import { ModelEvaluator } from "@/values/ModelEvaluator";
-import { FC, Fragment, useState } from "react";
+import { ClusterIcon } from "../../common/ClusterIcon";
 import { CellBox } from "../CellBox";
 import { AxisMenu } from "../GridView/AxisMenu";
 import { RelativeCell } from "../RelativeCell";
 import { useViewContext } from "../ViewProvider";
 import { useFilteredItems, useSortedItems } from "../hooks";
 import { ColumnHeader } from "./ColumnHeader";
-import { Item, Catalog } from "@/types";
 import { ItemSideBar } from "./sidebar";
-import { CompassIcon } from "@/components/ui/icons/CompassIcon";
-import clsx from "clsx";
-import { ClusterIcon } from "../../common/ClusterIcon";
 
 type TableProps = {
   model: ModelEvaluator;
@@ -145,6 +146,7 @@ export const ListViewTable: FC<TableProps> = ({
                   id2={denominatorItem.id}
                   model={model}
                   uncertaintyPercentiles={uncertaintyPercentiles}
+                  showRange={true}
                 />
               </div>
             </Fragment>

@@ -29,6 +29,8 @@ export const wrapPlot = (value: Plot, location?: SqValueLocation): SqPlot => {
       return new SqDistFnPlot(value, location);
     case "scatter":
       return new SqScatterPlot(value, location);
+    case "relativeValues":
+      return new SqRelativeValuesPlot(value, location);
   }
 };
 
@@ -271,8 +273,29 @@ export class SqScatterPlot extends SqAbstractPlot<"scatter"> {
   }
 }
 
+export class SqRelativeValuesPlot extends SqAbstractPlot<"relativeValues"> {
+  tag = "relativeValues" as const;
+
+  get ids(): string[] {
+    return this._value.ids;
+  }
+
+  get fn(): SqLambda {
+    return new SqLambda(
+      this._value.fn,
+      this.location
+        ? new SqValueLocation(this.location.project, this.location.sourceId, {
+            ...this.location.path,
+            items: [...this.location.path.items, "fn"],
+          })
+        : undefined
+    );
+  }
+}
+
 export type SqPlot =
   | SqDistributionsPlot
   | SqNumericFnPlot
   | SqDistFnPlot
-  | SqScatterPlot;
+  | SqScatterPlot
+  | SqRelativeValuesPlot;

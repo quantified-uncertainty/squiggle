@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@quri/squiggle-lang": "^0.7.0",
-    "prettier": "^3.0.0-alpha.11"
+    "prettier": "^3.0.0-alpha.12"
   },
   "peerDependencies": {},
   "devDependencies": {

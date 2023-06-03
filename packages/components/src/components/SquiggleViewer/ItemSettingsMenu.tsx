@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { SqValue } from "@quri/squiggle-lang";
 
-import { Modal } from "../ui/Modal.js";
+import { Modal } from "@quri/ui";
 import {
   PartialViewSettings,
   ViewSettingsForm,
@@ -46,7 +46,11 @@ const ItemSettingsModal: React.FC<
   const { getLeftPanelElement } = useContext(PlaygroundContext);
 
   return (
-    <Modal container={getLeftPanelElement()} close={close}>
+    <Modal
+      container={getLeftPanelElement()}
+      tailwindSelector="squiggle" // technically, `container` prop is enough, but this is a bit safer
+      close={close}
+    >
       <Modal.Header>
         Chart settings
         {value.location!.path.items.length ? (

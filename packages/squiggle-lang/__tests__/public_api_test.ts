@@ -1,5 +1,10 @@
+import {
+  SqLambda,
+  SqNumberValue,
+  SqValue,
+  defaultEnvironment,
+} from "../src/index.js";
 import { SqSymbolicDistribution } from "../src/public/SqDistribution.js";
-import { SqDistributionValue } from "../src/public/SqValue.js";
 import { testRun } from "./helpers/helpers.js";
 
 describe("SqValue", () => {
@@ -13,5 +18,18 @@ describe("SqValue", () => {
     expect((value as any).get("y")[2].get("dist")).toBeInstanceOf(
       SqSymbolicDistribution
     );
+  });
+});
+
+describe("SqLambda", () => {
+  test("createFromStdlibName", () => {
+    const lambda = SqLambda.createFromStdlibName("List.upTo");
+    const result = lambda.directCall(
+      [SqNumberValue.create(1), SqNumberValue.create(5)],
+      defaultEnvironment
+    );
+
+    expect(result.ok).toBe(true);
+    expect(result.value.toString()).toBe("[1,2,3,4,5]");
   });
 });

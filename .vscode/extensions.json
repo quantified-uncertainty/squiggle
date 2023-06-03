@@ -6,6 +6,7 @@
     "bradlc.vscode-tailwindcss",
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
-    "Prisma.prisma"
+    "Prisma.prisma",
+    "tamuratak.vscode-lezer"
   ]
 }

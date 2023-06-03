@@ -1,15 +1,19 @@
-import { SqLinearScale, SqLogScale, SqPowerScale } from "@quri/squiggle-lang";
 import React from "react";
 import { UseFormRegister } from "react-hook-form";
 import * as yup from "yup";
-import { Checkbox } from "./ui/Checkbox.js";
-import { HeadedSection } from "./ui/HeadedSection.js";
-import { InputItem } from "./ui/InputItem.js";
-import { Radio } from "./ui/Radio.js";
-import { Text } from "./ui/Text.js";
+
+import {
+  SqLinearScale,
+  SqLogScale,
+  SqPowerScale,
+  SqSymlogScale,
+} from "@quri/squiggle-lang";
+import { Checkbox, NumberInput, TextInput, Radio } from "@quri/ui";
+
+import { FormSection } from "./ui/FormSection.js";
+import { FormComment } from "./ui/FormComment.js";
 import { functionChartDefaults } from "./FunctionChart/utils.js";
 import { defaultTickFormatSpecifier } from "../lib/draw/index.js";
-import { SqSymlogScale } from "@quri/squiggle-lang";
 
 export const functionSettingsSchema = yup.object({}).shape({
   start: yup
@@ -128,16 +132,15 @@ export const ViewSettingsForm: React.FC<{
 }> = ({ withFunctionSettings = true, fixed, register }) => {
   return (
     <div className="space-y-6 p-3 divide-y divide-gray-200">
-      <HeadedSection title="General Display Settings">
+      <FormSection title="General Display Settings">
         <div className="space-y-4">
-          <InputItem
+          <NumberInput
             name="chartHeight"
-            type="number"
             register={register}
             label="Chart Height (in pixels)"
           />
         </div>
-      </HeadedSection>
+      </FormSection>
 
       <DistributionViewSettingsForm fixed={fixed} register={register} />
 
@@ -154,7 +157,7 @@ export const DistributionViewSettingsForm: React.FC<{
 }> = ({ register, fixed }) => {
   return (
     <div className="pt-8">
-      <HeadedSection title="Distribution Display Settings">
+      <FormSection title="Distribution Display Settings">
         <div className="space-y-2">
           <Checkbox
             register={register}
@@ -213,32 +216,28 @@ export const DistributionViewSettingsForm: React.FC<{
               ]}
             />
           </div>
-          <InputItem
+          <NumberInput
             name="distributionChartSettings.minX"
-            type="number"
             register={register}
             label="Min X Value"
           />
-          <InputItem
+          <NumberInput
             name="distributionChartSettings.maxX"
-            type="number"
             register={register}
             label="Max X Value"
           />
-          <InputItem
+          <TextInput
             name="distributionChartSettings.title"
-            type="text"
             register={register}
             label="Title"
           />
-          <InputItem
+          <TextInput
             name="distributionChartSettings.tickFormat"
-            type="text"
             register={register}
             label="Tick Format"
           />
         </div>
-      </HeadedSection>
+      </FormSection>
     </div>
   );
 };
@@ -248,37 +247,34 @@ export const FunctionViewSettingsForm: React.FC<{
   fixed?: PartialViewSettings;
 }> = ({ register, fixed }) => (
   <div className="pt-8">
-    <HeadedSection title="Function Display Settings">
+    <FormSection title="Function Display Settings">
       <div className="space-y-6">
-        <Text>
+        <FormComment>
           When displaying functions of single variables that return numbers or
           distributions, we need to use defaults for the x-axis. We need to
           select a minimum and maximum value of x to sample, and a number n of
           the number of points to sample.
-        </Text>
+        </FormComment>
         <div className="space-y-4">
-          <InputItem
-            type="number"
+          <NumberInput
             name="functionChartSettings.start"
             register={register}
             fixed={fixed?.functionChartSettings?.start}
             label="Min X Value"
           />
-          <InputItem
-            type="number"
+          <NumberInput
             name="functionChartSettings.stop"
             register={register}
             fixed={fixed?.functionChartSettings?.stop}
             label="Max X Value"
           />
-          <InputItem
-            type="number"
+          <NumberInput
             name="functionChartSettings.count"
             register={register}
             label="Points between X min and X max to sample"
           />
         </div>
       </div>
-    </HeadedSection>
+    </FormSection>
   </div>
 );

@@ -1,238 +1,196 @@
-import { parseIncludes as parseIncludes_ } from "./parseIncludes.js";
-import * as Result from "../../utility/result.js";
-import { result, Ok } from "../../utility/result.js";
-import { Resolver } from "./Resolver.js";
-import { AST, parse, ParseError } from "../../ast/parse.js";
-import { IError } from "../../reducer/IError.js";
+import { AST, ParseError, parse } from "../../ast/parse.js";
+import { expressionFromAst } from "../../ast/toExpression.js";
 import { Expression } from "../../expression/index.js";
+import { ReducerContext } from "../../reducer/Context.js";
+import { IError } from "../../reducer/IError.js";
+import { Namespace, NamespaceMap } from "../../reducer/bindings.js";
+import { evaluate } from "../../reducer/index.js";
+import * as Result from "../../utility/result.js";
+import { Ok, result } from "../../utility/result.js";
 import { Value } from "../../value/index.js";
 import { SqError } from "../SqError.js";
-import { expressionFromAst } from "../../ast/toExpression.js";
-import { ReducerContext } from "../../reducer/Context.js";
-import { evaluate } from "../../reducer/index.js";
-import { Namespace, NamespaceMap } from "../../reducer/bindings.js";
+import { Resolver } from "./Resolver.js";
 
-// source -> rawParse -> includes -> expression -> bindings & result
+// source -> ast -> imports -> expression -> bindings & result
 
-export type ProjectItem = Readonly<{
+export type ImportBinding = {
   sourceId: string;
+  variable: string;
+};
+
+export class ProjectItem {
+  private readonly sourceId: string;
   source: string;
-  rawParse?: result<AST, SqError>;
-  expression?: result<Expression, SqError>;
-  bindings: Namespace;
-  result?: result<Value, SqError>;
   continues: string[];
-  includes: result<string[], SqError>; // For loader
-  includeAsVariables: [string, string][]; // For linker
-  directIncludes: string[];
-}>;
+  ast?: result<AST, SqError>;
+  imports?: result<ImportBinding[], SqError>;
+  expression?: result<Expression, SqError>;
+  bindings?: Namespace;
+  result?: result<Value, SqError>;
 
-type t = ProjectItem;
-
-export const emptyItem = (sourceId: string): t => ({
-  sourceId,
-  source: "",
-  bindings: NamespaceMap(),
-  continues: [],
-  includes: Ok([]),
-  directIncludes: [],
-  includeAsVariables: [],
-});
-
-export const touchSource = (t: t): t => {
-  const r = emptyItem(t.sourceId);
-  return {
-    ...r,
-    source: t.source,
-    continues: t.continues,
-    // why do we keep these?
-    includes: t.includes,
-    includeAsVariables: t.includeAsVariables,
-    directIncludes: t.directIncludes,
-  };
-};
-
-const touchRawParse = (t: t): t => {
-  const r = emptyItem(t.sourceId);
-  return {
-    ...r,
-    source: t.source,
-    continues: t.continues,
-    includes: t.includes,
-    includeAsVariables: t.includeAsVariables,
-    directIncludes: t.directIncludes,
-    rawParse: t.rawParse,
-  };
-};
-
-const touchExpression = (t: t): t => {
-  return {
-    ...t,
-    source: t.source,
-    continues: t.continues,
-    includes: t.includes,
-    includeAsVariables: t.includeAsVariables,
-    directIncludes: t.directIncludes,
-    rawParse: t.rawParse,
-    expression: t.expression,
-  };
-};
-
-const resetIncludes = (t: t): t => {
-  return {
-    ...t,
-    includes: Ok([]),
-    includeAsVariables: [],
-    directIncludes: [],
-  };
-};
-
-export const setSource = (t: t, source: string): t => {
-  return touchSource(resetIncludes({ ...t, source }));
-};
-
-const setRawParse = (
-  t: t,
-  rawParse: NonNullable<ProjectItem["rawParse"]>
-): t => {
-  return touchRawParse({ ...t, rawParse: rawParse });
-};
-
-const setExpression = (
-  t: t,
-  expression: NonNullable<ProjectItem["expression"]>
-): t => {
-  return touchExpression({ ...t, expression: expression });
-};
-
-const setBindings = (t: t, bindings: Namespace): t => {
-  return {
-    ...t,
-    bindings,
-  };
-};
-
-export const setResult = (
-  t: t,
-  result: NonNullable<ProjectItem["result"]>
-): t => {
-  return {
-    ...t,
-    result,
-  };
-};
-
-export const cleanResults = touchExpression;
-
-export const clean = (t: t): t => {
-  // FIXME - this doesn't seem to be doing anything
-  return {
-    ...t,
-    source: t.source,
-    bindings: t.bindings,
-    result: t.result,
-  };
-};
-
-export const getImmediateDependencies = (t: t): string[] => {
-  if (!t.includes.ok) {
-    return [];
+  constructor(props: { sourceId: string; source: string }) {
+    this.sourceId = props.sourceId;
+    this.source = props.source;
+    this.continues = [];
   }
-  return [...t.includes.value, ...t.continues];
-};
 
-export const getPastChain = (t: t): string[] => [
-  ...t.directIncludes,
-  ...t.continues,
-];
+  touchSource() {
+    this.ast = undefined;
+    this.imports = undefined;
+    this.expression = undefined;
+    this.bindings = undefined;
+    this.result = undefined;
+  }
 
-export const setContinues = (t: t, continues: string[]): t =>
-  touchSource({ ...t, continues });
+  setSource(source: string) {
+    this.source = source;
+    this.touchSource();
+  }
 
-const setIncludes = (t: t, includes: ProjectItem["includes"]): t => ({
-  ...t,
-  includes,
-});
+  private setAST(ast: NonNullable<ProjectItem["ast"]>): void {
+    this.ast = ast;
 
-export const parseIncludes = (t: t, resolver: Resolver): t => {
-  const rRawImportAsVariables = parseIncludes_(t.source);
-  if (!rRawImportAsVariables.ok) {
-    return setIncludes(resetIncludes(t), rRawImportAsVariables);
-  } else {
-    // ok
-    const rawImportAsVariables = rRawImportAsVariables.value.map(
-      ([variable, file]) =>
-        [variable, resolver(file, t.sourceId)] as [string, string]
+    this.imports = undefined;
+    this.expression = undefined;
+    this.result = undefined;
+    this.bindings = undefined;
+  }
+
+  private setExpression(
+    expression: NonNullable<ProjectItem["expression"]>
+  ): void {
+    this.expression = expression;
+
+    this.result = undefined;
+    this.bindings = undefined;
+  }
+
+  private setImports(imports: result<ImportBinding[], SqError>): void {
+    this.imports = imports;
+
+    this.expression = undefined;
+    this.result = undefined;
+    this.bindings = undefined;
+  }
+
+  clean() {
+    this.result = undefined;
+    this.bindings = undefined;
+  }
+
+  getDependencies(): string[] {
+    if (!this.imports?.ok) {
+      // Evaluation will fail later in buildInitialBindings, so it's ok.
+      // It would be better if we parsed imports recursively directly during the run,
+      // but it's complicated because of asyncs and separation of concerns between this module, SqProject and Topology.
+      return this.continues;
+    }
+    return [...this.imports.value.map((i) => i.sourceId), ...this.continues];
+  }
+
+  setContinues(continues: string[]) {
+    this.continues = continues;
+    this.clean();
+  }
+
+  parseImports(resolver: Resolver | undefined): void {
+    if (this.imports) {
+      return;
+    }
+    this.buildAST();
+    if (!this.ast) {
+      throw new Error("Internal logic error");
+    }
+    if (!this.ast.ok) {
+      this.setImports(this.ast);
+      return;
+    }
+
+    const program = this.ast.value;
+    if (program.type !== "Program") {
+      throw new Error("Expected Program as top-level AST type");
+    }
+
+    if (!program.imports.length) {
+      this.setImports(Ok([]));
+      return;
+    }
+
+    if (!resolver) {
+      this.setImports(
+        Result.Error(
+          new SqError(
+            IError.other("Can't use imports when resolver is not configured")
+          )
+        )
+      );
+      return;
+    }
+
+    const resolvedImports: ImportBinding[] = program.imports.map(
+      ([file, variable]) => ({
+        variable: variable.value,
+        sourceId: resolver(file.value, this.sourceId),
+      })
     );
 
-    const includes = rawImportAsVariables.map(([_variable, file]) => file);
-    const includeAsVariables = rawImportAsVariables.filter(
-      ([variable, _file]) => variable !== ""
+    this.setImports(Ok(resolvedImports));
+  }
+
+  private buildAST(): void {
+    if (this.ast) {
+      return;
+    }
+    const ast = Result.errMap(
+      parse(this.source, this.sourceId),
+      (e: ParseError) => new SqError(IError.fromParseError(e))
     );
-    const directIncludes = rawImportAsVariables
-      .filter(([variable, _file]) => variable === "")
-      .map(([_variable, file]) => file);
-    return {
-      ...t,
-      includes: Ok(includes),
-      includeAsVariables,
-      directIncludes,
-    };
-  }
-};
-
-export const rawParse = (t: t): t => {
-  if (t.rawParse) {
-    return t;
-  }
-  const rawParse = Result.errMap(
-    parse(t.source, t.sourceId),
-    (e: ParseError) => new SqError(IError.fromParseError(e))
-  );
-  return setRawParse(t, rawParse);
-};
-
-const buildExpression = (t: t): t => {
-  t = rawParse(t);
-  if (t.expression) {
-    return t;
-  }
-  if (!t.rawParse) {
-    // rawParse() guarantees that the rawParse is set
-    throw new Error("Internal logic error");
-  }
-  const expression = Result.fmap(t.rawParse, (node) => expressionFromAst(node));
-  return setExpression(t, expression);
-};
-
-const failRun = (t: t, e: SqError): t =>
-  setBindings(setResult(t, Result.Error(e)), NamespaceMap());
-
-export const run = (t: t, context: ReducerContext): t => {
-  t = buildExpression(t);
-  if (t.result) {
-    return t;
+    this.setAST(ast);
   }
 
-  if (!t.expression) {
-    // buildExpression() guarantees that the expression is set
-    throw new Error("Internal logic error");
+  private buildExpression(): void {
+    this.buildAST();
+    if (this.expression) {
+      return;
+    }
+    if (!this.ast) {
+      // buildAST() guarantees that the ast is set
+      throw new Error("Internal logic error");
+    }
+    const expression = Result.fmap(this.ast, (node) => expressionFromAst(node));
+    this.setExpression(expression);
   }
 
-  if (!t.expression.ok) {
-    return failRun(t, t.expression.value);
+  failRun(e: SqError): void {
+    this.result = Result.Error(e);
+    this.bindings = NamespaceMap();
   }
 
-  try {
-    const [result, contextAfterEvaluation] = evaluate(
-      t.expression.value,
-      context
-    );
-    return setBindings(
-      setResult(t, Ok(result)),
-      contextAfterEvaluation.bindings.locals()
-    );
-  } catch (e: unknown) {
-    return failRun(t, new SqError(IError.fromException(e)));
+  run(context: ReducerContext) {
+    this.buildExpression();
+    if (this.result) {
+      return;
+    }
+
+    if (!this.expression) {
+      // buildExpression() guarantees that the expression is set
+      throw new Error("Internal logic error");
+    }
+
+    if (!this.expression.ok) {
+      this.failRun(this.expression.value);
+      return;
+    }
+
+    try {
+      const [result, contextAfterEvaluation] = evaluate(
+        this.expression.value,
+        context
+      );
+      this.result = Ok(result);
+      this.bindings = contextAfterEvaluation.bindings.locals();
+    } catch (e: unknown) {
+      this.failRun(new SqError(IError.fromException(e)));
+    }
   }
-};
+}

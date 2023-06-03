@@ -34,7 +34,6 @@ export const library = [
     ],
     definitions: [
       makeDefinition(
-        "dists",
         [
           frRecord(
             [
@@ -86,7 +85,6 @@ export const library = [
     ],
     definitions: [
       makeDefinition(
-        "dist",
         [
           frRecord(
             ["dist", frDist],
@@ -119,7 +117,6 @@ export const library = [
     ],
     definitions: [
       makeDefinition(
-        "numericFn",
         [
           frRecord(
             ["fn", frLambda],
@@ -150,7 +147,6 @@ export const library = [
     ],
     definitions: [
       makeDefinition(
-        "distFn",
         [
           frRecord(
             ["fn", frLambda],
@@ -182,7 +178,6 @@ export const library = [
     ],
     definitions: [
       makeDefinition(
-        "scatter",
         [
           frRecord(
             ["xDist", frDist],

@@ -1,0 +1,4 @@
+import "./lib.squiggle" as lib
+import "./lib2.squiggle" as lib2
+
+normal(lib.x, lib2.y)

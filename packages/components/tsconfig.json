@@ -6,7 +6,7 @@
     },
     "module": "es2020",
     "moduleResolution": "node16",
-    "jsx": "react",
+    "jsx": "react-jsx",
     "target": "ES6",
     "skipLibCheck": true,
     "resolveJsonModule": true,

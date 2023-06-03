@@ -20,6 +20,7 @@ import { generateDistributionPlotSettings } from "../ViewSettingsForm.js";
 import { ItemSettingsMenu } from "./ItemSettingsMenu.js";
 import { VariableBox } from "./VariableBox.js";
 import { MergedItemSettings } from "./utils.js";
+import { RelativeValuesGridChart } from "../RelativeValuesGridChart/index.js";
 
 const VariableList: React.FC<{
   value: SqValue;
@@ -201,6 +202,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
                 return (
                   <NumericFunctionChart
                     plot={plot}
+                    environment={environment}
                     height={settings.chartHeight}
                   />
                 );
@@ -222,6 +224,13 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
                   <ScatterChart
                     plot={plot}
                     height={settings.chartHeight}
+                    environment={environment}
+                  />
+                );
+              case "relativeValues":
+                return (
+                  <RelativeValuesGridChart
+                    plot={plot}
                     environment={environment}
                   />
                 );

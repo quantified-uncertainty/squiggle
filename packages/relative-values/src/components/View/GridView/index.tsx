@@ -1,19 +1,20 @@
+import _ from "lodash";
+import { FC, Fragment, useCallback, useMemo } from "react";
+
+import { cartesianProduct } from "@/lib/utils";
 import { Item } from "@/types";
 import { ModelEvaluator, getParamPercentiles } from "@/values/ModelEvaluator";
-import { cartesianProduct } from "@/lib/utils";
-import { FC, Fragment, useCallback, useMemo, useState } from "react";
+import { RelativeValue } from "@/values/types";
+import { RelativeValueCell } from "@quri/squiggle-components";
 import { useSelectedInterface } from "../../Interface/InterfaceProvider";
 import { DropdownButton } from "../../ui/DropdownButton";
+import { CellBox } from "../CellBox";
 import { Header } from "../Header";
-import { useFilteredItems, useSortedItems } from "../hooks";
 import { RelativeCell } from "../RelativeCell";
-import { useViewContext, AxisConfig, useViewDispatch } from "../ViewProvider";
+import { useViewContext, useViewDispatch } from "../ViewProvider";
+import { useFilteredItems, useSortedItems } from "../hooks";
 import { AxisMenu } from "./AxisMenu";
 import { GridModeControls } from "./GridModeControls";
-import { CellBox } from "../CellBox";
-import { RelativeValue } from "@/values/types";
-import _ from "lodash";
-import { DistCell } from "../RelativeCell/DistCell";
 
 export const ClusterGridView: FC<{
   model: ModelEvaluator;
@@ -76,21 +77,20 @@ export const ClusterGridView: FC<{
     columnMap.set(column.id, value);
   });
 
-  let percentiles = getParamPercentiles(
+  const percentiles = getParamPercentiles(
     allItems.map((r) => r.value),
     (r) => r.uncertainty,
     [10, 90],
     true
   );
 
-  let distCell = (rowId: string, columnId: string) => {
+  const distCell = (rowId: string, columnId: string) => {
     const item = mapOfMapsOfValues.get(rowId)?.get(columnId);
     return item ? (
-      <DistCell
-        key={`${rowId}-${columnId}`}
+      <RelativeValueCell
         item={item}
         uncertaintyPercentiles={percentiles}
-        showMedian={rowId != columnId}
+        showMedian={rowId !== columnId}
         showRange={false}
       />
     ) : null;
@@ -107,17 +107,17 @@ export const ClusterGridView: FC<{
         <div className="top-0 left-0 z-20" />
         {clusterItems.map((item) => (
           <CellBox header key={item.id}>
-            <Header key={item.id} item={item} />
+            <Header item={item} />
           </CellBox>
         ))}
         {clusterItems.map((rowItem) => (
           <Fragment key={rowItem.id}>
             <CellBox header>
-              <Header key={rowItem.id} item={rowItem} />
+              <Header item={rowItem} />
             </CellBox>
             {clusterItems.map((columnItem) => (
               <div
-                key={`${rowItem.id}-${columnItem.id}`}
+                key={columnItem.id}
                 onClick={() => {
                   dispatch({
                     type: "toggleClusterCombination",
@@ -129,7 +129,7 @@ export const ClusterGridView: FC<{
                 }}
                 className="cursor-pointer"
               >
-                {distCell(rowItem.id, columnItem.id)}
+                <CellBox>{distCell(rowItem.id, columnItem.id)}</CellBox>
               </div>
             ))}
           </Fragment>
@@ -223,7 +223,7 @@ export const GridView: FC<{
         <div className="sticky bg-white top-0 left-0 z-20" />
         {columnItems.map((item) => (
           <CellBox header key={item.id}>
-            <Header key={item.id} item={item} />
+            <Header item={item} />
           </CellBox>
         ))}
         {rowItems.map((rowItem) => (

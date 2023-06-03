@@ -1,30 +1,9 @@
-import { result, sq, SqLambda, SqProject } from "@quri/squiggle-lang";
+import { result, SqLambda, SqProject } from "@quri/squiggle-lang";
+import { z } from "zod";
 
+import { cartesianProduct } from "@/lib/utils";
 import { getModelCode, Model } from "@/model/utils";
 import { ModelCache, RelativeValue, RelativeValueResult } from "./types";
-import { cartesianProduct } from "@/lib/utils";
-
-const wrapper = sq`
-{|x, y|
-  findUncertainty(dist) = {
-    absDist = dist -> SampleSet.fromDist -> SampleSet.map(abs)
-    p5 = inv(absDist, 0.05)
-    p95 = inv(absDist, 0.95)
-    log10(p95 / p5)
-  } 
-  dists = fn(x,y)
-  dist1 = dists[0] -> SampleSet.fromDist
-  dist2 = dists[1] -> SampleSet.fromDist
-  dist = dists[0] / dists[1]
-  {
-    median: inv(dist, 0.5),
-    mean: mean(dist),
-    min: inv(dist, 0.05),
-    max: inv(dist, 0.95),
-    uncertainty: findUncertainty(dist)
-  }
-}
-`;
 
 export const extractOkValues = <A, B>(items: result<A, B>[]): A[] => {
   return items
@@ -41,14 +20,17 @@ const getPercentile = (sortedList: number[], percentage: number): number => {
 export function getParamPercentiles(
   values: RelativeValue[],
   fn: (value: RelativeValue) => number,
-  percentiles: number[],
+  percentiles: [number, number],
   filter0 = false
-): number[] {
+): [number, number] {
   let list = values.map(fn).sort((a, b) => a - b);
   if (filter0) {
     list = list.filter((v) => v !== 0);
   }
-  return percentiles.map((p) => getPercentile(list, p));
+  return [
+    getPercentile(list, percentiles[0]),
+    getPercentile(list, percentiles[1]),
+  ];
 }
 
 function buildRelativeValue({
@@ -69,37 +51,25 @@ function buildRelativeValue({
     return { ok: false, value: "Expected record" };
   }
 
-  const median = record.get("median");
-  const mean = record.get("mean");
-  const min = record.get("min");
-  const max = record.get("max");
-  const uncertainty = record.get("uncertainty");
+  const rvSchema = z.object({
+    median: z.number(),
+    mean: z.number(),
+    min: z.number(),
+    max: z.number(),
+    uncertainty: z.number(),
+  });
 
-  if (typeof median !== "number") {
-    return { ok: false, value: "Expected median to be a number" };
-  }
-  if (typeof mean !== "number") {
-    return { ok: false, value: "Expected mean to be a number" };
-  }
-  if (typeof min !== "number") {
-    return { ok: false, value: "Expected min to be a number" };
-  }
-  if (typeof max !== "number") {
-    return { ok: false, value: "Expected max to be a number" };
-  }
-  if (typeof uncertainty !== "number") {
-    return { ok: false, value: "Expected uncertainty to be a number" };
+  const itemResult = rvSchema.safeParse(Object.fromEntries(record.entries()));
+  if (!itemResult.success) {
+    return {
+      ok: false,
+      value: itemResult.error.message,
+    };
   }
 
   return {
     ok: true,
-    value: {
-      median,
-      mean,
-      min,
-      max,
-      uncertainty,
-    },
+    value: itemResult.data,
   };
 }
 
@@ -115,7 +85,7 @@ export class ModelEvaluator {
     cache?: ModelCache
   ): result<ModelEvaluator, string> {
     const project = SqProject.create();
-    project.setSource("wrapper", wrapper);
+    project.setSource("wrapper", "RelativeValues.wrap(fn)");
     project.setContinues("wrapper", ["model"]);
     project.setSource("model", getModelCode(model));
 
@@ -172,9 +142,9 @@ export class ModelEvaluator {
   getParamPercentiles(
     ids: string[],
     fn: (value: RelativeValue) => number,
-    percentiles: number[],
+    percentiles: [number, number],
     filter0 = false
-  ): number[] {
+  ): [number, number] {
     return getParamPercentiles(
       extractOkValues(this.compareAll(ids)),
       fn,

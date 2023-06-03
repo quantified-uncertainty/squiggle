@@ -137,9 +137,9 @@
     "package": "vsce package --yarn"
   },
   "devDependencies": {
-    "@types/node": "18.x",
+    "@types/node": "20.x",
     "@types/vscode": "^1.70.0",
-    "esbuild": "^0.17.18",
+    "esbuild": "^0.17.19",
     "js-yaml": "^4.1.0",
     "typescript": "^5.0.4",
     "vsce": "^2.14.0"

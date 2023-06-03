@@ -1,11 +1,34 @@
 import fs from "fs";
+import util from "util";
 import { OutputMode, run } from "./utils.js";
 
 import { Command } from "@commander-js/extra-typings";
 import open from "open";
+import { parse } from "../public/parse.js";
+import { red } from "./colors.js";
 
-export const makeProgram = () => {
+export function makeProgram() {
   const program = new Command();
+
+  const loadSrc = ({
+    filename,
+    inline,
+  }: {
+    filename: string | undefined;
+    inline: string | undefined;
+  }) => {
+    let src = "";
+    if (filename !== undefined && inline !== undefined) {
+      program.error("Only one of filename and eval string should be set.");
+    } else if (filename !== undefined) {
+      src = fs.readFileSync(filename, "utf-8");
+    } else if (inline !== undefined) {
+      src = inline;
+    } else {
+      program.error("One of filename and eval string should be set.");
+    }
+    return src;
+  };
 
   program
     .command("run")
@@ -20,9 +43,7 @@ export const makeProgram = () => {
       "-b, --show-bindings",
       "show bindings even if the result is present"
     ) // incompatible with --quiet
-    .action((filename, options) => {
-      let src = "";
-
+    .action(async (filename, options) => {
       let output: OutputMode = "RESULT_OR_BINDINGS";
       if (options.quiet && options.showBindings) {
         program.error(
@@ -34,19 +55,31 @@ export const makeProgram = () => {
         output = "RESULT_AND_BINDINGS";
       }
 
-      if (filename && options.eval) {
-        program.error("Only one of filename and eval string should be set.");
-      } else if (filename) {
-        src = fs.readFileSync(filename, "utf-8");
-      } else if (options.eval) {
-        src = options.eval;
-      } else {
-        program.error("One of filename and eval string should be set.");
-      }
+      const src = loadSrc({ filename, inline: options.eval });
 
       const sampleCount = process.env.SAMPLE_COUNT;
 
-      run({ src, filename, output, measure: options.time, sampleCount });
+      await run({ src, filename, output, measure: options.time, sampleCount });
+    });
+
+  program
+    .command("parse")
+    .arguments("[filename]")
+    .option(
+      "-e, --eval <code>",
+      "parse a given squiggle code string instead of a file"
+    )
+    .action((filename, options) => {
+      const src = loadSrc({ filename, inline: options.eval });
+
+      const parseResult = parse(src);
+      if (parseResult.ok) {
+        console.log(
+          util.inspect(parseResult.value, { depth: Infinity, colors: true })
+        );
+      } else {
+        console.log(red(parseResult.value.toString()));
+      }
     });
 
   program.command("playground").action(() => {
@@ -54,4 +87,4 @@ export const makeProgram = () => {
   });
 
   return program;
-};
+}
