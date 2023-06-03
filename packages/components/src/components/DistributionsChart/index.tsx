@@ -1,7 +1,6 @@
 import { clsx } from "clsx";
 import * as d3 from "d3";
 import isEqual from "lodash/isEqual.js";
-import * as React from "react";
 import { FC, useCallback, useState } from "react";
 
 import {
@@ -28,7 +27,6 @@ import { SummaryTable } from "./SummaryTable.js";
 
 import { Point } from "../../lib/draw/types.js";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
-import { tailwindSelector } from "../SquiggleContainer.js";
 
 export type DistributionsChartProps = {
   plot: SqDistributionsPlot;
@@ -254,8 +252,7 @@ const InnerDistributionsChart: FC<{
       render={() => (
         <div
           className={clsx(
-            "bg-white border border-gray-300 rounded text-xs p-2 grid gap-x-2",
-            "squiggle" // tooltip is rendered in a portal, so we need this because squiggle-components styles depend on it
+            "bg-white border border-gray-300 rounded text-xs p-2 grid gap-x-2"
           )}
           style={{
             gridTemplateColumns: "min-content min-content",
@@ -268,7 +265,6 @@ const InnerDistributionsChart: FC<{
           <br />
         </div>
       )}
-      tailwindSelector={tailwindSelector}
     >
       <canvas
         data-testid="multi-distribution-chart"

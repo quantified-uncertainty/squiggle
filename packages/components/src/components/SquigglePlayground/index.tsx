@@ -25,7 +25,6 @@ import { useMaybeControlledValue, useSquiggle } from "../../lib/hooks/index.js";
 import { JsImports } from "../../lib/jsImports.js";
 import { getErrors, getValueToRender, isMac } from "../../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "../CodeEditor.js";
-import { SquiggleContainer } from "../SquiggleContainer.js";
 import {
   SquiggleViewer,
   SquiggleViewerProps,
@@ -217,41 +216,39 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   }, []);
 
   return (
-    <SquiggleContainer>
-      <PlaygroundContext.Provider value={{ getLeftPanelElement }}>
-        <StyledTab.Group>
-          <div
-            className="pb-4"
-            style={{
-              minHeight: 200 /* important if editor is hidden */,
-            }}
-          >
-            <div className="flex justify-between items-center">
-              <div className="flex gap-2 items-center">
-                <StyledTab.List>
-                  <StyledTab
-                    name={showEditor ? "Code" : "Display"}
-                    icon={showEditor ? CodeIcon : EyeIcon}
-                  />
-                  <StyledTab name="Sampling Settings" icon={CogIcon} />
-                  <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
-                  <StyledTab name="Input Variables" icon={CurrencyDollarIcon} />
-                </StyledTab.List>
-              </div>
-              <div className="flex gap-2 items-center">
-                <RunControls {...runnerState} />
-                <TextTooltip text={isMac() ? "Option+Shift+f" : "Alt+Shift+f"}>
-                  <div>
-                    <Button onClick={editorRef.current?.format}>Format</Button>
-                  </div>
-                </TextTooltip>
-                {renderExtraControls?.()}
-              </div>
+    <PlaygroundContext.Provider value={{ getLeftPanelElement }}>
+      <StyledTab.Group>
+        <div
+          className="pb-4"
+          style={{
+            minHeight: 200 /* important if editor is hidden */,
+          }}
+        >
+          <div className="flex justify-between items-center">
+            <div className="flex gap-2 items-center">
+              <StyledTab.List>
+                <StyledTab
+                  name={showEditor ? "Code" : "Display"}
+                  icon={showEditor ? CodeIcon : EyeIcon}
+                />
+                <StyledTab name="Sampling Settings" icon={CogIcon} />
+                <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
+                <StyledTab name="Input Variables" icon={CurrencyDollarIcon} />
+              </StyledTab.List>
             </div>
-            {showEditor ? withEditor : withoutEditor}
+            <div className="flex gap-2 items-center">
+              <RunControls {...runnerState} />
+              <TextTooltip text={isMac() ? "Option+Shift+f" : "Alt+Shift+f"}>
+                <div>
+                  <Button onClick={editorRef.current?.format}>Format</Button>
+                </div>
+              </TextTooltip>
+              {renderExtraControls?.()}
+            </div>
           </div>
-        </StyledTab.Group>
-      </PlaygroundContext.Provider>
-    </SquiggleContainer>
+          {showEditor ? withEditor : withoutEditor}
+        </div>
+      </StyledTab.Group>
+    </PlaygroundContext.Provider>
   );
 };
