@@ -9,7 +9,7 @@
     "test": "NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "dependencies": {
-    "@quri/squiggle-lang": "^0.7.0",
+    "@quri/squiggle-lang": "workspace:*",
     "prettier": "^3.0.0-alpha.12"
   },
   "devDependencies": {

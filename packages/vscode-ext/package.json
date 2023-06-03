@@ -151,8 +151,8 @@
     "vsce": "^2.14.0"
   },
   "dependencies": {
-    "@quri/squiggle-components": "^0.7.0",
-    "@quri/squiggle-lang": "^0.7.0",
+    "@quri/squiggle-components": "workspace:*",
+    "@quri/squiggle-lang": "workspace:*",
     "vscode-languageclient": "^8.1.0",
     "vscode-languageserver": "^8.1.0",
     "vscode-languageserver-textdocument": "^1.0.8"
