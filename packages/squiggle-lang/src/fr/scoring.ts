@@ -58,7 +58,6 @@ export const library = [
     ],
     definitions: [
       makeDefinition(
-        "logScore",
         [
           frRecord(
             ["estimate", frDist],
@@ -87,7 +86,6 @@ export const library = [
         }
       ),
       makeDefinition(
-        "logScore",
         [frRecord(["estimate", frDist], ["answer", frDistOrNumber])],
         ([{ estimate, answer }], context) => {
           if (answer instanceof BaseDist) {
@@ -116,11 +114,8 @@ export const library = [
     output: "Number",
     examples: ["Dist.klDivergence(normal(5,2), normal(5,1.5))"],
     definitions: [
-      makeDefinition(
-        "klDivergence",
-        [frDist, frDist],
-        ([estimate, d], context) =>
-          runScoringDistAnswer(estimate, d, undefined, context.environment)
+      makeDefinition([frDist, frDist], ([estimate, d], context) =>
+        runScoringDistAnswer(estimate, d, undefined, context.environment)
       ),
     ],
   }),

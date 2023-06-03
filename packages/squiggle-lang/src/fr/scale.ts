@@ -26,7 +26,7 @@ export const library = [
     output: "Scale",
     examples: [`Scale.linear({ min: 3, max: 10 })`],
     definitions: [
-      makeDefinition("linear", [commonRecord], ([{ min, max, tickFormat }]) => {
+      makeDefinition([commonRecord], ([{ min, max, tickFormat }]) => {
         return Result.Ok(
           vScale({
             type: "linear",
@@ -36,7 +36,7 @@ export const library = [
           })
         );
       }),
-      makeDefinition("linear", [], () => {
+      makeDefinition([], () => {
         return Result.Ok(vScale({ type: "linear" }));
       }),
     ],
@@ -46,7 +46,7 @@ export const library = [
     output: "Scale",
     examples: [`Scale.log({ min: 1, max: 100 })`],
     definitions: [
-      makeDefinition("log", [commonRecord], ([{ min, max, tickFormat }]) => {
+      makeDefinition([commonRecord], ([{ min, max, tickFormat }]) => {
         // TODO - check that min > 0?
         return Result.Ok(
           vScale({
@@ -57,7 +57,7 @@ export const library = [
           })
         );
       }),
-      makeDefinition("log", [], () => {
+      makeDefinition([], () => {
         return Result.Ok(vScale({ type: "log" }));
       }),
     ],
@@ -67,7 +67,7 @@ export const library = [
     output: "Scale",
     examples: [`Scale.symlog({ min: -10, max: 10 })`],
     definitions: [
-      makeDefinition("symlog", [commonRecord], ([{ min, max, tickFormat }]) => {
+      makeDefinition([commonRecord], ([{ min, max, tickFormat }]) => {
         return Result.Ok(
           vScale({
             type: "symlog",
@@ -77,7 +77,7 @@ export const library = [
           })
         );
       }),
-      makeDefinition("symlog", [], () => {
+      makeDefinition([], () => {
         return Result.Ok(vScale({ type: "symlog" }));
       }),
     ],
@@ -88,7 +88,6 @@ export const library = [
     examples: [`Scale.power({ min: 1, max: 100, exponent: 0.1 })`],
     definitions: [
       makeDefinition(
-        "power",
         [
           frRecord(
             ["min", frOptional(frNumber)],

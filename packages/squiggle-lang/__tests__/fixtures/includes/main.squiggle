@@ -1,4 +1,0 @@
-#include "./lib.squiggle" as lib
-#include "./lib2.squiggle"
-
-normal(lib.x, y)

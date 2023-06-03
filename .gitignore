@@ -1,15 +1,22 @@
 node_modules
 yarn-error.log
 .cache
-.merlin
-.parcel-cache
 .DS_Store
 **/.sync.ffs_db
 .direnv
 .log
 
 /.vscode/squiggle.code-workspace
+/.vscode/settings.json
 todo.txt
 result
 shell.nix
 .turbo
+
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions

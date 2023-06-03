@@ -26,7 +26,7 @@ export const library = [
     output: "Number",
     examples: [`List.length([1,4,5])`],
     definitions: [
-      makeDefinition("length", [frArray(frAny)], ([values]) =>
+      makeDefinition([frArray(frAny)], ([values]) =>
         Ok(vNumber(values.length))
       ),
     ],
@@ -38,7 +38,7 @@ export const library = [
     definitions: [
       // TODO: If the second item is a function with no args, it could be nice to run this function and return the result.
       // TODO: check if number is int, and fail instead of silently rounding?
-      makeDefinition("make", [frNumber, frAny], ([number, value]) =>
+      makeDefinition([frNumber, frAny], ([number, value]) =>
         Ok(vArray(new Array(number | 0).fill(value)))
       ),
     ],
@@ -48,7 +48,7 @@ export const library = [
     output: "Array",
     examples: [`List.upTo(1,4)`],
     definitions: [
-      makeDefinition("upTo", [frNumber, frNumber], ([low, high]) =>
+      makeDefinition([frNumber, frNumber], ([low, high]) =>
         Ok(
           vArray(E_A_Floats.range(low, high, (high - low + 1) | 0).map(vNumber))
         )
@@ -59,7 +59,7 @@ export const library = [
     name: "first",
     examples: [`List.first([1,4,5])`],
     definitions: [
-      makeDefinition("first", [frArray(frAny)], ([array]) => {
+      makeDefinition([frArray(frAny)], ([array]) => {
         if (!array.length) {
           return Result.Error(REOther("No first element"));
         } else {
@@ -72,7 +72,7 @@ export const library = [
     name: "last",
     examples: [`List.last([1,4,5])`],
     definitions: [
-      makeDefinition("last", [frArray(frAny)], ([array]) => {
+      makeDefinition([frArray(frAny)], ([array]) => {
         if (!array.length) {
           return Result.Error(REOther("No last element"));
         } else {
@@ -87,7 +87,7 @@ export const library = [
     requiresNamespace: false,
     examples: [`List.reverse([1,4,5])`],
     definitions: [
-      makeDefinition("reverse", [frArray(frAny)], ([array]) =>
+      makeDefinition([frArray(frAny)], ([array]) =>
         Ok(vArray([...array].reverse()))
       ),
     ],
@@ -99,7 +99,6 @@ export const library = [
     examples: [`List.map([1,4,5], {|x| x+1})`],
     definitions: [
       makeDefinition(
-        "map",
         [frArray(frAny), frLambda],
         ([array, lambda], context, reducer) => {
           const mapped: Value[] = new Array(array.length);
@@ -117,7 +116,6 @@ export const library = [
     examples: [`List.concat([1,2,3], [4, 5, 6])`],
     definitions: [
       makeDefinition<Value[], Value[]>(
-        "concat",
         [frArray(frAny), frArray(frAny)],
         ([array1, array2]) => Ok(vArray([...array1].concat(array2)))
       ),
@@ -127,7 +125,7 @@ export const library = [
     name: "append",
     examples: [`List.append([1,4],5)`],
     definitions: [
-      makeDefinition("append", [frArray(frAny), frAny], ([array, el]) => {
+      makeDefinition([frArray(frAny), frAny], ([array, el]) => {
         let newArr = [...array, el];
         return Ok(vArray(newArr));
       }),
@@ -138,7 +136,7 @@ export const library = [
     requiresNamespace: true,
     examples: [`List.uniq([1,2,3,"hi",false,"hi"])`],
     definitions: [
-      makeDefinition<Value[]>("uniq", [frArray(frAny)], ([arr]) => {
+      makeDefinition<Value[]>([frArray(frAny)], ([arr]) => {
         const isUniqableType = (t: Value) =>
           includes(["String", "Bool", "Number"], t.type);
         //I'm not sure if the r.type concat is essential, but seems safe.
@@ -161,7 +159,6 @@ export const library = [
     examples: [`List.reduce([1,4,5], 2, {|acc, el| acc+el})`],
     definitions: [
       makeDefinition(
-        "reduce",
         [frArray(frAny), frAny, frLambda],
         ([array, initialValue, lambda], context, reducer) =>
           Ok(
@@ -179,7 +176,6 @@ export const library = [
     examples: [`List.reduceReverse([1,4,5], 2, {|acc, el| acc-el})`],
     definitions: [
       makeDefinition(
-        "reduceReverse",
         [frArray(frAny), frAny, frLambda],
         ([array, initialValue, lambda], context, reducer) =>
           Ok(
@@ -199,7 +195,6 @@ export const library = [
     examples: [`List.filter([1,4,5], {|x| x>3})`],
     definitions: [
       makeDefinition(
-        "filter",
         [frArray(frAny), frLambda],
         ([array, lambda], context, reducer) =>
           Ok(
@@ -218,12 +213,10 @@ export const library = [
     requiresNamespace: true,
     examples: [`List.join(["a", "b", "c"], ",")`],
     definitions: [
-      makeDefinition(
-        "join",
-        [frArray(frString), frString],
-        ([array, joinStr]) => Ok(vString(array.join(joinStr)))
+      makeDefinition([frArray(frString), frString], ([array, joinStr]) =>
+        Ok(vString(array.join(joinStr)))
       ),
-      makeDefinition("join", [frArray(frString)], ([array]) =>
+      makeDefinition([frArray(frString)], ([array]) =>
         Ok(vString(array.join()))
       ),
     ],
@@ -233,7 +226,7 @@ export const library = [
     requiresNamespace: true,
     examples: [`List.flatten([[1,2], [3,4]])`],
     definitions: [
-      makeDefinition("flatten", [frArray(frAny)], ([arr]) => {
+      makeDefinition([frArray(frAny)], ([arr]) => {
         return Ok(vArray(arr).flatten());
       }),
     ],

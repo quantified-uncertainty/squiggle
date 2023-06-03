@@ -1,17 +1,17 @@
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 
+import * as d3 from "d3";
+
+import { useCanvas, useCanvasCursor } from "@quri/squiggle-components";
+import { MouseTooltip } from "@quri/ui";
+
 import { useSelectedInterface } from "@/components/Interface/InterfaceProvider";
 import { ModelEvaluator } from "@/values/ModelEvaluator";
-import {
-  MouseTooltip,
-  useCanvas,
-  useCanvasCursor,
-} from "@quri/squiggle-components";
-import * as d3 from "d3";
 import { useViewContext } from "../ViewProvider";
 import { useFilteredItems } from "../hooks";
 import { DrawContext } from "@quri/squiggle-components";
 import { ItemTooltip } from "./ItemTooltip";
+import { tailwindSelector } from "@/components/Tailwind";
 
 export const distance = (
   p1: { x: number; y: number },
@@ -194,7 +194,11 @@ export const ForcePlot: FC<{
   }, [hoveredItem]);
 
   return (
-    <MouseTooltip isOpen={hoveredId !== undefined} render={renderTooltip}>
+    <MouseTooltip
+      isOpen={hoveredId !== undefined}
+      render={renderTooltip}
+      tailwindSelector={tailwindSelector}
+    >
       <canvas ref={ref} className="w-full" />
     </MouseTooltip>
   );

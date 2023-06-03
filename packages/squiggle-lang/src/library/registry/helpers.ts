@@ -1,7 +1,16 @@
 import { BaseDist } from "../../dist/BaseDist.js";
+import { DistError } from "../../dist/DistError.js";
 import { Env } from "../../dist/env.js";
-import { Ok } from "../../utility/result.js";
+import { SampleMapNeedsNtoNFunction } from "../../operationError.js";
+import { ReducerContext } from "../../reducer/Context.js";
+import {
+  ErrorMessage,
+  REDistributionError,
+  REOperationError,
+} from "../../reducer/ErrorMessage.js";
 import { Lambda } from "../../reducer/lambda.js";
+import * as Result from "../../utility/result.js";
+import { Ok } from "../../utility/result.js";
 import {
   ReducerFn,
   Value,
@@ -13,15 +22,6 @@ import {
 import { FRFunction } from "./core.js";
 import { FnDefinition, makeDefinition } from "./fnDefinition.js";
 import { frBool, frDist, frNumber, frString } from "./frTypes.js";
-import * as Result from "../../utility/result.js";
-import { DistError } from "../../dist/DistError.js";
-import { ReducerContext } from "../../reducer/Context.js";
-import { SampleMapNeedsNtoNFunction } from "../../operationError.js";
-import {
-  ErrorMessage,
-  REDistributionError,
-  REOperationError,
-} from "../../reducer/ErrorMessage.js";
 
 type SimplifiedArgs = Omit<FRFunction, "nameSpace" | "requiresNamespace"> &
   Partial<Pick<FRFunction, "nameSpace" | "requiresNamespace">>;
@@ -52,9 +52,7 @@ export class FnFactory {
     return this.make({
       ...args,
       output: "Number",
-      definitions: [
-        makeDefinition(args.name, [frNumber], ([x]) => Ok(vNumber(fn(x)))),
-      ],
+      definitions: [makeDefinition([frNumber], ([x]) => Ok(vNumber(fn(x))))],
     });
   }
 
@@ -68,9 +66,7 @@ export class FnFactory {
       ...args,
       output: "Number",
       definitions: [
-        makeDefinition(args.name, [frNumber, frNumber], ([x, y]) =>
-          Ok(vNumber(fn(x, y)))
-        ),
+        makeDefinition([frNumber, frNumber], ([x, y]) => Ok(vNumber(fn(x, y)))),
       ],
     });
   }
@@ -85,9 +81,7 @@ export class FnFactory {
       ...args,
       output: "Bool",
       definitions: [
-        makeDefinition(args.name, [frNumber, frNumber], ([x, y]) =>
-          Ok(vBool(fn(x, y)))
-        ),
+        makeDefinition([frNumber, frNumber], ([x, y]) => Ok(vBool(fn(x, y)))),
       ],
     });
   }
@@ -102,9 +96,7 @@ export class FnFactory {
       ...args,
       output: "Bool",
       definitions: [
-        makeDefinition(args.name, [frBool, frBool], ([x, y]) =>
-          Ok(vBool(fn(x, y)))
-        ),
+        makeDefinition([frBool, frBool], ([x, y]) => Ok(vBool(fn(x, y)))),
       ],
     });
   }
@@ -119,9 +111,7 @@ export class FnFactory {
       ...args,
       output: "Bool",
       definitions: [
-        makeDefinition(args.name, [frString, frString], ([x, y]) =>
-          Ok(vBool(fn(x, y)))
-        ),
+        makeDefinition([frString, frString], ([x, y]) => Ok(vBool(fn(x, y)))),
       ],
     });
   }
@@ -136,9 +126,7 @@ export class FnFactory {
       ...args,
       output: "String",
       definitions: [
-        makeDefinition(args.name, [frString, frString], ([x, y]) =>
-          Ok(vString(fn(x, y)))
-        ),
+        makeDefinition([frString, frString], ([x, y]) => Ok(vString(fn(x, y)))),
       ],
     });
   }
@@ -153,7 +141,7 @@ export class FnFactory {
       ...args,
       output: "String",
       definitions: [
-        makeDefinition(args.name, [frDist], ([dist], { environment }) =>
+        makeDefinition([frDist], ([dist], { environment }) =>
           Ok(vString(fn(dist, environment)))
         ),
       ],
@@ -170,10 +158,8 @@ export class FnFactory {
       ...args,
       output: "String",
       definitions: [
-        makeDefinition(
-          args.name,
-          [frDist, frNumber],
-          ([dist, n], { environment }) => Ok(vString(fn(dist, n, environment)))
+        makeDefinition([frDist, frNumber], ([dist, n], { environment }) =>
+          Ok(vString(fn(dist, n, environment)))
         ),
       ],
     });
@@ -189,7 +175,7 @@ export class FnFactory {
       ...args,
       output: "Number",
       definitions: [
-        makeDefinition(args.name, [frDist], ([x], { environment }) =>
+        makeDefinition([frDist], ([x], { environment }) =>
           Ok(vNumber(fn(x, environment)))
         ),
       ],
@@ -206,7 +192,7 @@ export class FnFactory {
       ...args,
       output: "Bool",
       definitions: [
-        makeDefinition(args.name, [frDist], ([x], { environment }) =>
+        makeDefinition([frDist], ([x], { environment }) =>
           Ok(vBool(fn(x, environment)))
         ),
       ],
@@ -223,7 +209,7 @@ export class FnFactory {
       ...args,
       output: "Dist",
       definitions: [
-        makeDefinition(args.name, [frDist], ([dist], { environment }) =>
+        makeDefinition([frDist], ([dist], { environment }) =>
           Ok(vDist(fn(dist, environment)))
         ),
       ],
@@ -240,10 +226,8 @@ export class FnFactory {
       ...args,
       output: "Dist",
       definitions: [
-        makeDefinition(
-          args.name,
-          [frDist, frNumber],
-          ([dist, n], { environment }) => Ok(vDist(fn(dist, n, environment)))
+        makeDefinition([frDist, frNumber], ([dist, n], { environment }) =>
+          Ok(vDist(fn(dist, n, environment)))
         ),
       ],
     });
@@ -259,46 +243,44 @@ export class FnFactory {
       ...args,
       output: "Number",
       definitions: [
-        makeDefinition(
-          args.name,
-          [frDist, frNumber],
-          ([dist, n], { environment }) => Ok(vNumber(fn(dist, n, environment)))
+        makeDefinition([frDist, frNumber], ([dist, n], { environment }) =>
+          Ok(vNumber(fn(dist, n, environment)))
         ),
       ],
     });
   }
 
-  fromDefinition(def: FnDefinition) {
+  fromDefinition(name: string, def: FnDefinition) {
     return this.make({
-      name: def.name,
+      name,
       definitions: [def],
     });
   }
 }
 
-export const unpackDistResult = <T>(result: Result.result<T, DistError>): T => {
+export function unpackDistResult<T>(result: Result.result<T, DistError>): T {
   if (!result.ok) {
     return ErrorMessage.throw(REDistributionError(result.value));
   }
   return result.value;
-};
+}
 
-export const repackDistResult = (
+export function repackDistResult(
   result: Result.result<BaseDist, DistError>
-): Result.result<Value, ErrorMessage> => {
+): Result.result<Value, ErrorMessage> {
   const dist = unpackDistResult(result);
   return Ok(vDist(dist));
-};
+}
 
-export const doNumberLambdaCall = (
+export function doNumberLambdaCall(
   lambda: Lambda,
   args: Value[],
   context: ReducerContext,
   reducer: ReducerFn
-) => {
+) {
   const value = lambda.call(args, context, reducer);
   if (value.type === "Number") {
     return value.value;
   }
   return ErrorMessage.throw(REOperationError(SampleMapNeedsNtoNFunction));
-};
+}

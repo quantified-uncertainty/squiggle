@@ -18,6 +18,11 @@
     "Programming Languages",
     "Visualization"
   ],
+  "activationEvents": [
+    "onLanguage:squiggle",
+    "onCustomEditor:squiggle.wysiwyg",
+    "onCommand:squiggle.preview"
+  ],
   "main": "./dist/client/extension.js",
   "contributes": {
     "languages": [
@@ -134,13 +139,14 @@
     "pretest": "yarn run build && yarn run lint",
     "lint": "tsc -noEmit && prettier --check .",
     "format": "prettier --write .",
-    "package": "vsce package --yarn"
+    "package": "vsce package --no-dependencies"
   },
   "devDependencies": {
-    "@types/node": "18.x",
+    "@types/node": "20.x",
     "@types/vscode": "^1.70.0",
-    "esbuild": "^0.17.18",
+    "esbuild": "^0.17.19",
     "js-yaml": "^4.1.0",
+    "prettier": "^2.8.8",
     "typescript": "^5.0.4",
     "vsce": "^2.14.0"
   },

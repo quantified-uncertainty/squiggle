@@ -99,24 +99,19 @@ it("Bindings", async () => {
   expect(stripAnsi(result.stdout)).toBe("Result:\n6\n\nBindings:\n{x: 5}\n");
 });
 
-it("Code with includes", async () => {
-  const filename = path.join(
-    __dirname,
-    "fixtures",
-    "includes",
-    "main.squiggle"
-  );
+it("Code with imports", async () => {
+  const filename = path.join(__dirname, "fixtures", "imports", "main.squiggle");
   const result = await runCLI(["run", filename]);
   expect(result.exitCode).toBe(0);
   expect(result.stderr).toBe("");
   expect(result.stdout).toBe("Normal(5,2)\n");
 });
 
-it("Relative includes", async () => {
+it("Relative imports", async () => {
   const filename = path.join(
     __dirname,
     "fixtures",
-    "relative-includes",
+    "relative-imports",
     "main.squiggle"
   );
   const result = await runCLI(["run", filename]);

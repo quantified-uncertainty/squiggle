@@ -58,11 +58,11 @@ describe("project1", () => {
     expect(project.getDependencies("main")).toEqual(["first"]);
   });
 
-  test("past chain first", () => {
-    expect(project.getPastChain("first")).toEqual([]);
+  test("continues first", () => {
+    expect(project.getContinues("first")).toEqual([]);
   });
-  test("past chain main", () => {
-    expect(project.getPastChain("main")).toEqual(["first"]);
+  test("continues main", () => {
+    expect(project.getContinues("main")).toEqual(["first"]);
   });
 
   test("test result", () => {
@@ -75,11 +75,11 @@ describe("project1", () => {
 
 describe("project2", () => {
   const project = SqProject.create();
-  project.setContinues("main", ["second"]);
-  project.setContinues("second", ["first"]);
   project.setSource("first", "x=1");
   project.setSource("second", "y=2");
   project.setSource("main", "z=3;y");
+  project.setContinues("main", ["second"]);
+  project.setContinues("second", ["first"]);
 
   test("runOrder", () => {
     expect(project.getRunOrder()).toEqual(["first", "second", "main"]);
@@ -87,17 +87,23 @@ describe("project2", () => {
   test("runOrderFor", () => {
     expect(project.getRunOrderFor("first")).toEqual(["first"]);
   });
+  test("runOrderFor", () => {
+    expect(project.getRunOrderFor("main")).toEqual(["first", "second", "main"]);
+  });
   test("dependencies first", () => {
     expect(project.getDependencies("first")).toEqual([]);
   });
   test("dependents first", () => {
-    expect(project.getDependents("first")).toEqual(["second", "main"]);
+    expect(project.getDependents("first")).toEqual(["second"]);
+  });
+  test("dependents second", () => {
+    expect(project.getDependents("second")).toEqual(["main"]);
   });
   test("dependents main", () => {
     expect(project.getDependents("main")).toEqual([]);
   });
   test("dependencies main", () => {
-    expect(project.getDependencies("main")).toEqual(["first", "second"]);
+    expect(project.getDependencies("main")).toEqual(["second"]);
   });
   test("test result", () => {
     expect(runFetchResult(project, "main")).toBe("Ok(2)");
@@ -110,11 +116,13 @@ describe("project2", () => {
 
 describe("removing sources", () => {
   const project = SqProject.create();
-  project.setContinues("main", ["second"]);
-  project.setContinues("second", ["first"]);
   project.setSource("first", "x=1");
+
   project.setSource("second", "y=2");
+  project.setContinues("second", ["first"]);
+
   project.setSource("main", "y");
+  project.setContinues("main", ["second"]);
 
   project.removeSource("main");
 
@@ -127,33 +135,32 @@ describe("removing sources", () => {
   });
 });
 
-describe("project with include", () => {
+describe("project with import", () => {
   const project = SqProject.create({
     resolver: (name) => name,
   });
-  project.setContinues("main", ["second"]);
-  project.setContinues("second", ["first"]);
 
   project.setSource(
     "first",
     `
-  #include 'common'
+  import 'common' as common
   x=1`
   );
-  project.parseIncludes("first");
-  project.parseIncludes("first"); //The only way of setting includes
-  //Don't forget to parse includes after changing the source
+  project.parseImports("first"); //The only way of setting imports
+  //Don't forget to parse imports after changing the source
 
   project.setSource("common", "common=0");
   project.setSource(
     "second",
     `
-  #include 'common'
+  import 'common' as common
   y=2`
   );
-  project.parseIncludes("second"); //The only way of setting includes
+  project.setContinues("second", ["first"]);
+  project.parseImports("second"); //The only way of setting imports
 
   project.setSource("main", "z=3; y");
+  project.setContinues("main", ["second"]);
 
   test("runOrder", () => {
     expect(project.getRunOrder()).toEqual([
@@ -172,17 +179,16 @@ describe("project with include", () => {
     expect(project.getDependencies("first")).toEqual(["common"]);
   });
   test("dependents first", () => {
-    expect(project.getDependents("first")).toEqual(["second", "main"]);
+    expect(project.getDependents("first")).toEqual(["second"]);
+  });
+  test("dependents common", () => {
+    expect(project.getDependents("common")).toEqual(["first", "second"]);
   });
   test("dependents main", () => {
     expect(project.getDependents("main")).toEqual([]);
   });
   test("dependencies main", () => {
-    expect(project.getDependencies("main")).toEqual([
-      "common",
-      "first",
-      "second",
-    ]);
+    expect(project.getDependencies("main")).toEqual(["second"]);
   });
   test("test result", () => {
     expect(runFetchResult(project, "main")).toBe("Ok(2)");

@@ -1,6 +1,8 @@
 "use client";
 import { FC, PropsWithChildren } from "react";
 
+export const tailwindSelector = "squiggle-relative-values squiggle";
+
 export const Tailwind: FC<PropsWithChildren> = ({ children }) => (
-  <div className="squiggle-relative-values">{children}</div>
+  <div className={tailwindSelector}>{children}</div>
 );

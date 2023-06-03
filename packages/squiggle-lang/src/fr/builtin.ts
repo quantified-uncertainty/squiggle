@@ -35,37 +35,60 @@ export const library = [
   maker.bb2b({ name: "or", fn: (x, y) => x || y }), // infix ||
   maker.bb2b({ name: "and", fn: (x, y) => x && y }), // infix &&
   maker.n2n({ name: "unaryMinus", fn: (x) => -x }), // unary prefix -
-  ...[
-    makeDefinition("not", [frNumber], ([x]) => {
-      // unary prefix !
-      return Ok(vBool(x !== 0));
-    }),
-    makeDefinition("not", [frBool], ([x]) => {
-      // unary prefix !
-      return Ok(vBool(!x));
-    }),
-    makeDefinition("concat", [frString, frString], ([a, b]) => {
-      return Ok(vString(a + b));
-    }),
-    makeDefinition("concat", [frArray(frAny), frArray(frAny)], ([a, b]) => {
-      return Ok(vArray([...a, ...b]));
-    }),
-    makeDefinition("concat", [frString, frAny], ([a, b]) => {
-      return Ok(vString(a + b.toString()));
-    }),
-    makeDefinition("add", [frString, frAny], ([a, b]) => {
-      return Ok(vString(a + b.toString()));
-    }),
-    makeDefinition("inspect", [frAny], ([value]) => {
-      console.log(value.toString());
-      return Ok(value);
-    }),
-    makeDefinition("inspect", [frAny, frString], ([value, label]) => {
-      console.log(`${label}: ${value.toString()}`);
-      return Ok(value);
-    }),
-    makeDefinition("javascriptraise", [frAny], ([msg]) => {
-      throw new Error(msg.toString());
-    }),
-  ].map((d) => maker.fromDefinition(d)),
+  maker.make({
+    name: "not",
+    definitions: [
+      makeDefinition([frNumber], ([x]) => {
+        // unary prefix !
+        return Ok(vBool(x !== 0));
+      }),
+      makeDefinition([frBool], ([x]) => {
+        // unary prefix !
+        return Ok(vBool(!x));
+      }),
+    ],
+  }),
+  maker.make({
+    name: "concat",
+    definitions: [
+      makeDefinition([frString, frString], ([a, b]) => {
+        return Ok(vString(a + b));
+      }),
+      makeDefinition([frArray(frAny), frArray(frAny)], ([a, b]) => {
+        return Ok(vArray([...a, ...b]));
+      }),
+      makeDefinition([frString, frAny], ([a, b]) => {
+        return Ok(vString(a + b.toString()));
+      }),
+    ],
+  }),
+  maker.make({
+    name: "add",
+    definitions: [
+      makeDefinition([frString, frAny], ([a, b]) => {
+        return Ok(vString(a + b.toString()));
+      }),
+    ],
+  }),
+  maker.make({
+    name: "inspect",
+    definitions: [
+      makeDefinition([frAny], ([value]) => {
+        console.log(value.toString());
+        return Ok(value);
+      }),
+      makeDefinition([frAny, frString], ([value, label]) => {
+        console.log(`${label}: ${value.toString()}`);
+        return Ok(value);
+      }),
+    ],
+  }),
+  maker.make({
+    name: "javascriptraise",
+    definitions: [
+      makeDefinition([frAny], ([msg]) => {
+        throw new Error(msg.toString());
+      }),
+    ],
+  }),
 ];

@@ -1,8 +1,7 @@
 import { registry } from "../../src/library/registry/index.js";
-import { allExamplesWithFns } from "../../src/library/registry/core.js";
 import { evaluateStringToResult } from "../../src/reducer/index.js";
 
-test.each(allExamplesWithFns(registry))(
+test.each(registry.allExamplesWithFns())(
   "tests of example $example",
   ({ fn, example }) => {
     const result = evaluateStringToResult(example);

@@ -1,0 +1,14 @@
+import "./dir1/lib.squiggle" as lib1
+import "./dir2/lib.squiggle" as lib2
+import "./common.squiggle" as common
+
+/*
+common = 1
+dir1.common = 10
+dir2.common = 100
+dir1/lib = dir1/common + common = 11
+dir2/lib = dir2/common + common = 101
+main = common + dir1/lib + dir2/lib + common = 11 + 101 + 1 = 113
+*/
+
+lib1.x + lib2.x + common.x

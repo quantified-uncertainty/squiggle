@@ -36,7 +36,7 @@ export const SquiggleErrorAlert: React.FC<Props> = ({ error }) => {
   return (
     <ErrorAlert heading="Error">
       <div className="space-y-4">
-        <div>{error.toString()}</div>
+        <div className="whitespace-pre-wrap">{error.toString()}</div>
         <StackTrace error={error} />
       </div>
     </ErrorAlert>

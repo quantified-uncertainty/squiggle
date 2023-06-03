@@ -45,7 +45,7 @@ const baseLibrary = [
     examples: [`SampleSet.fromList([3,5,2,3,5,2,3,5,2,3,3,5,3,2,3,1,1,3])`],
     output: "Dist",
     definitions: [
-      makeDefinition("fromList", [frArray(frNumber)], ([numbers]) =>
+      makeDefinition([frArray(frNumber)], ([numbers]) =>
         repackDistResult(SampleSetDist.SampleSetDist.make(numbers))
       ),
     ],
@@ -55,7 +55,7 @@ const baseLibrary = [
     examples: [`SampleSet.toList(SampleSet.fromDist(normal(5,2)))`],
     output: "Array",
     definitions: [
-      makeDefinition("toList", [frDist], ([dist]) => {
+      makeDefinition([frDist], ([dist]) => {
         sampleSetAssert(dist);
         return Ok(vArray(dist.samples.map(vNumber)));
       }),
@@ -66,7 +66,7 @@ const baseLibrary = [
     examples: [`SampleSet.fromFn({|i| sample(normal(5,2))})`],
     output: "Dist",
     definitions: [
-      makeDefinition("fromFn", [frLambda], ([lambda], context, reducer) =>
+      makeDefinition([frLambda], ([lambda], context, reducer) =>
         repackDistResult(
           SampleSetDist.SampleSetDist.fromFn((i: number) => {
             return doNumberLambdaCall(lambda, [vNumber(i)], context, reducer);
@@ -80,18 +80,14 @@ const baseLibrary = [
     examples: [`SampleSet.map(SampleSet.fromDist(normal(5,2)), {|x| x + 1})`],
     output: "Dist",
     definitions: [
-      makeDefinition(
-        "map",
-        [frDist, frLambda],
-        ([dist, lambda], context, reducer) => {
-          sampleSetAssert(dist);
-          return repackDistResult(
-            dist.samplesMap((r) =>
-              Ok(doNumberLambdaCall(lambda, [vNumber(r)], context, reducer))
-            )
-          );
-        }
-      ),
+      makeDefinition([frDist, frLambda], ([dist, lambda], context, reducer) => {
+        sampleSetAssert(dist);
+        return repackDistResult(
+          dist.samplesMap((r) =>
+            Ok(doNumberLambdaCall(lambda, [vNumber(r)], context, reducer))
+          )
+        );
+      }),
     ],
   }),
   maker.make({
@@ -102,7 +98,6 @@ const baseLibrary = [
     output: "Dist",
     definitions: [
       makeDefinition(
-        "map2",
         [frDist, frDist, frLambda],
         ([dist1, dist2, lambda], context, reducer) => {
           sampleSetAssert(dist1);
@@ -134,7 +129,6 @@ const baseLibrary = [
     output: "Dist",
     definitions: [
       makeDefinition(
-        "map3",
         [frDist, frDist, frDist, frLambda],
         ([dist1, dist2, dist3, lambda], context, reducer) => {
           sampleSetAssert(dist1);
@@ -168,7 +162,6 @@ const baseLibrary = [
     output: "Dist",
     definitions: [
       makeDefinition(
-        "mapN",
         [frArray(frDist), frLambda],
         ([dists, lambda], context, reducer) => {
           const sampleSetDists = dists.map((d) => {
@@ -210,16 +203,16 @@ const mkComparison = (
     ],
     output: "Dist",
     definitions: [
-      makeDefinition(name, [frDist, frDist], ([dist1, dist2]) => {
+      makeDefinition([frDist, frDist], ([dist1, dist2]) => {
         sampleSetAssert(dist1);
         sampleSetAssert(dist2);
         return repackDistResult(withDist(dist1, dist2));
       }),
-      makeDefinition(name, [frDist, frNumber], ([dist, f]) => {
+      makeDefinition([frDist, frNumber], ([dist, f]) => {
         sampleSetAssert(dist);
         return repackDistResult(withFloat(dist, f));
       }),
-      makeDefinition(name, [frNumber, frDist], ([f, dist]) => {
+      makeDefinition([frNumber, frDist], ([f, dist]) => {
         sampleSetAssert(dist);
         return repackDistResult(withFloat(dist, f));
       }),

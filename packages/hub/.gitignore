@@ -1,0 +1,5 @@
+/dist
+/.env
+/tsconfig.tsbuildinfo
+/.next
+__generated__

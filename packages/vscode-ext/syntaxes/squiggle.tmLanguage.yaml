@@ -1,5 +1,6 @@
 scopeName: source.squiggle
 patterns:
+  - include: "#import"
   - include: "#statement"
   - include: "#expression"
   - include: "#comment-block"
@@ -17,6 +18,17 @@ repository:
       - include: "#function-call"
       - include: "#keywords"
       - include: "#variable"
+  import:
+    match: ^\s*(import)\s+('.*?'|".*?")\s+(as)\s+(\w+)
+    captures:
+      "1":
+        name: keyword.control.squiggle
+      "2":
+        name: string.quoted.squiggle
+      "3":
+        name: keyword.control.squiggle
+      "4":
+        name: variable.other.squiggle
   let:
     match: ^\s*(\w+)\s*=
     captures:
