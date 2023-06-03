@@ -10,7 +10,8 @@
     "build:storybook": "storybook build",
     "clean:ts": "rm -rf ./dist && rm -f ./tsconfig.tsbuildinfo",
     "build": "yarn clean:ts && yarn build:ts && yarn build:css && yarn build:storybook",
-    "lint": "prettier --check . && eslint --ignore-path .gitignore ./src",
+    "lint": "prettier --check .",
+    "lint:eslint": "eslint --ignore-path .gitignore ./src",
     "format": "prettier --write ."
   },
   "exports": {
@@ -39,8 +40,13 @@
     "@storybook/react-vite": "^7.0.18",
     "@storybook/testing-library": "^0.1.0",
     "@tailwindcss/forms": "^0.5.3",
+    "@typescript-eslint/eslint-plugin": "^5.59.8",
+    "@typescript-eslint/parser": "^5.59.8",
+    "eslint": "^8.42.0",
+    "eslint-plugin-react": "^7.32.2",
     "postcss": "^8.4.24",
     "postcss-cli": "^10.1.0",
+    "prettier": "^2.8.8",
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -50,24 +56,23 @@
     "vite": "^4.3.9"
   },
   "eslintConfig": {
+    "env": {
+      "browser": true,
+      "es2021": true
+    },
     "extends": [
-      "react-app",
-      "react-app/jest"
+      "eslint:recommended",
+      "plugin:react/recommended",
+      "plugin:@typescript-eslint/recommended"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+      "@typescript-eslint"
     ],
     "rules": {
-      "no-console": "error"
-    },
-    "overrides": [
-      {
-        "files": [
-          "**/*.stories.*",
-          "src/index.ts"
-        ],
-        "rules": {
-          "import/no-anonymous-default-export": "off"
-        }
-      }
-    ]
+      "no-console": "error",
+      "react/react-in-jsx-scope": "off"
+    }
   },
   "dependencies": {
     "@floating-ui/react": "^0.24.2",
