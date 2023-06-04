@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "storybook dev -p 6007",
     "build:ts": "tsc",
-    "build:css": "postcss ./src/styles/main.css -o ./dist/main.css",
+    "build:css": "postcss ./src/styles/full.css -o ./dist/full.css",
     "build:storybook": "storybook build",
     "clean:ts": "rm -rf ./dist && rm -f ./tsconfig.tsbuildinfo",
     "build": "yarn clean:ts && yarn build:ts && yarn build:css && yarn build:storybook",
@@ -19,8 +19,8 @@
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
-    "./dist/main.css": {
-      "default": "./dist/main.css"
+    "./full.css": {
+      "default": "./dist/full.css"
     }
   },
   "module": "./dist/index.js",
@@ -29,6 +29,15 @@
   "peerDependencies": {
     "react": "^17 || ^18",
     "react-dom": "^17 || ^18"
+  },
+  "dependencies": {
+    "@floating-ui/react": "^0.24.2",
+    "@headlessui/react": "^1.7.15",
+    "framer-motion": "^10.12.16",
+    "react-colorful": "^5.6.1",
+    "react-hook-form": "^7.44.3",
+    "react-textarea-autosize": "^8.4.1",
+    "react-use": "^17.4.0"
   },
   "devDependencies": {
     "@storybook/addon-docs": "^7.0.18",
@@ -73,14 +82,5 @@
       "no-console": "error",
       "react/react-in-jsx-scope": "off"
     }
-  },
-  "dependencies": {
-    "@floating-ui/react": "^0.24.2",
-    "@headlessui/react": "^1.7.15",
-    "framer-motion": "^10.12.16",
-    "react-colorful": "^5.6.1",
-    "react-hook-form": "^7.44.3",
-    "react-textarea-autosize": "^8.4.1",
-    "react-use": "^17.4.0"
   }
 }

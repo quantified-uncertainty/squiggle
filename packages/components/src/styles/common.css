@@ -1,0 +1,8 @@
+/*
+* These styles should always be imported when you use squiggle-components.
+*/
+
+/*
+* Used for resizable panes in the playground.
+*/
+@import "react-resizable/css/styles.css";

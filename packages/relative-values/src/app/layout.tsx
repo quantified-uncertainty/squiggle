@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { PropsWithChildren } from "react";
 
-import "@quri/squiggle-components/dist/main.css";
+import "@quri/squiggle-components/common.css";
 import "../styles/main.css";
 
 import { StorageProvider } from "@/storage/StorageProvider";

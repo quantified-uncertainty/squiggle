@@ -74,13 +74,13 @@
     "start": "yarn dev",
     "dev": "storybook dev -p 6006",
     "build:typescript": "rm -rf dist/src dist/tsconfig.tsbuildinfo && tsc",
-    "build:css": "postcss ./src/styles/main.css -o ./dist/main.css",
+    "build:css": "postcss ./src/styles/full.css -o ./dist/full.css && postcss ./src/styles/common.css -o ./dist/common.css",
     "build:lezer": "cd ./src/languageSupport; mkdir -p generated; lezer-generator ./squiggle.grammar --output generated/squiggle.ts",
     "build:storybook": "storybook build",
     "build": "yarn run build:lezer && yarn run build:typescript && yarn run build:css && yarn run build:storybook",
     "bundle": "webpack",
     "all": "yarn bundle && yarn build",
-    "lint": "prettier --check",
+    "lint": "prettier --check .",
     "lint:eslint": "eslint --ignore-path .gitignore .",
     "format": "prettier --write .",
     "prepack": "yarn run build:typescript && yarn run bundle",
@@ -126,11 +126,11 @@
       "import": "./dist/src/index.js",
       "types": "./dist/src/index.d.ts"
     },
-    "./dist/main.css": {
-      "default": "./dist/main.css"
+    "./full.css": {
+      "default": "./dist/full.css"
     },
-    "./main.css": {
-      "default": "./dist/main.css"
+    "./common.css": {
+      "default": "./dist/common.css"
     },
     "./tailwind-plugin": {
       "default": "./dist/src/tailwind-plugin.cjs"

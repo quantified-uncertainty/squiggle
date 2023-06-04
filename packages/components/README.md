@@ -44,12 +44,18 @@ module.exports = {
 
 It's possible that in the future you might need to change the `content` or `plugins` lists. Please check this README and consult with squiggle-components changelog when you update this library to a new version.
 
+In addition, you should import common styles (these include styles from the JS libraries that we use in squiggle-components):
+
+```js
+import "@quri/squiggle-components/dist/common.css";
+```
+
 ### 2. Usage without Tailwind
 
 You can import the CSS file that we bundle with this library:
 
 ```js
-import "@quri/squiggle-components/dist/main.css";
+import "@quri/squiggle-components/dist/full.css";
 ```
 
 Note that you have to import this CSS file **only if you don't use Tailwind**.
@@ -106,6 +112,12 @@ Then, add `<TailwindProvider>...</TailwindProvider>` on top of your app (it can 
 
 1. Add an additional `<div class="squiggle">...</div>` for scoped Tailwind styles.
 2. Set up React context that will allow to wrap modals and tooltips with that div too. (This is necessary because our modals and tooltips rely on React portals and jump out of the main DOM tree.)
+
+In addition, you should import common styles (these include styles from the JS libraries that we use in squiggle-components):
+
+```js
+import "@quri/squiggle-components/dist/common.css";
+```
 
 ## Components
 
