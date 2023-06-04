@@ -1,4 +1,4 @@
-import { FC, PropsWithChildren, ReactNode, memo } from "react";
+import { FC, PropsWithChildren, ReactNode, memo, useContext } from "react";
 
 import {
   FloatingPortal,
@@ -8,6 +8,7 @@ import {
   useFloating,
   useInteractions,
 } from "@floating-ui/react";
+import { TailwindContext } from "./TailwindProvider.js";
 
 function useMouseTooltip({ isOpen }: { isOpen: boolean }) {
   const floating = useFloating({
@@ -37,19 +38,16 @@ function useMouseTooltip({ isOpen }: { isOpen: boolean }) {
 type Props = PropsWithChildren<{
   isOpen: boolean;
   render(): ReactNode;
-  // When `important: '.container-classname'` is used, this should be set because we render tooltips in a portal.
-  // `squiggle-components` set this to `squiggle`.
-  // See also: https://tailwindcss.com/docs/configuration#selector-strategy
-  tailwindSelector?: string;
 }>;
 
 export const MouseTooltip: FC<Props> = memo(function MouseTooltip({
   render,
   isOpen,
-  tailwindSelector,
   children,
-}) {
+}: Props) {
   const tooltip = useMouseTooltip({ isOpen });
+
+  const { selector: tailwindSelector } = useContext(TailwindContext);
 
   return (
     <div ref={tooltip.containerRef} {...tooltip.containerProps}>

@@ -27,3 +27,5 @@ export { SignOutIcon } from "./icons/SignOutIcon.js";
 export { EditIcon } from "./icons/EditIcon.js";
 
 export { useToast, WithToasts } from "./components/WithToasts/index.js";
+
+export { TailwindProvider } from "./components/TailwindProvider.js";
