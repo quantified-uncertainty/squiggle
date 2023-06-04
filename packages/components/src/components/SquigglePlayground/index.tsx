@@ -200,16 +200,17 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const leftPanelRef = useRef<HTMLDivElement | null>(null);
 
   const withEditor = (
-    <div className="mt-2 flex flex-row">
+    <div className="mt-2 flex">
       <ResizableBox
         className="border border-slate-200 h-full"
         width={initialWidth / 2}
         axis={"x"}
         resizeHandles={["e"]}
-        handle={(handle, ref) => (
+        handle={(_, ref) => (
           <div
             ref={ref}
-            className={`bg-none bg-slate-100 hover:bg-blue-200 transition w-1 h-full -mr-1 top-0 mt-0 rotate-0 react-resizable-handle react-resizable-handle-${handle}`}
+            // we don't use react-resizable original styles, it's easier to style this manually
+            className="absolute top-0 -right-1 w-1 h-full bg-slate-100 hover:bg-blue-200 transition cursor-ew-resize"
           />
         )}
       >
