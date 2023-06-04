@@ -16,6 +16,7 @@ import React, {
 } from "react";
 import { UseFormRegister, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
+import { useInitialWidth } from "../../lib/hooks/useInitialWidth.js";
 
 import { Env } from "@quri/squiggle-lang";
 import { Button, StyledTab, TextTooltip } from "@quri/ui";
@@ -32,6 +33,7 @@ import {
 import { ViewSettingsForm, viewSettingsSchema } from "../ViewSettingsForm.js";
 
 import { SqProject } from "@quri/squiggle-lang";
+import { ResizableBox } from "react-resizable";
 import { ImportSettingsForm } from "./ImportSettingsForm.js";
 import { RunControls } from "./RunControls/index.js";
 import { useRunnerState } from "./RunControls/useRunnerState.js";
@@ -89,6 +91,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     defaultValue: defaultCode,
     onChange: onCodeChange,
   });
+  const { ref, width: initialWidth } = useInitialWidth();
 
   const [imports, setImports] = useState<JsImports>({});
 
@@ -169,13 +172,15 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     squiggleChart
   );
 
+  const standardHeightStyle = { height, overflow: "auto" };
+
   const tabs = (
     <StyledTab.Panels>
       <StyledTab.Panel>{firstTab}</StyledTab.Panel>
-      <StyledTab.Panel>
+      <StyledTab.Panel style={standardHeightStyle}>
         <EnvironmentSettingsForm register={register} />
       </StyledTab.Panel>
-      <StyledTab.Panel>
+      <StyledTab.Panel style={standardHeightStyle}>
         <ViewSettingsForm
           register={
             // This is dangerous, but doesn't cause any problems.
@@ -186,7 +191,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
           }
         />
       </StyledTab.Panel>
-      <StyledTab.Panel>
+      <StyledTab.Panel style={standardHeightStyle}>
         <ImportSettingsForm initialImports={imports} setImports={setImports} />
       </StyledTab.Panel>
     </StyledTab.Panels>
@@ -195,15 +200,26 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const leftPanelRef = useRef<HTMLDivElement | null>(null);
 
   const withEditor = (
-    <div className="flex mt-2">
-      <div
-        className="w-1/2 relative"
-        style={{ minHeight: props.chartHeight }}
-        ref={leftPanelRef}
+    <div className="mt-2 flex flex-row">
+      <ResizableBox
+        className="border border-slate-200 h-full"
+        width={initialWidth / 2}
+        axis={"x"}
+        resizeHandles={["e"]}
+        handle={(handle, ref) => (
+          <div
+            ref={ref}
+            className={`bg-none bg-slate-100 hover:bg-blue-200 transition w-1 h-full -mr-1 top-0 mt-0 rotate-0 react-resizable-handle react-resizable-handle-${handle}`}
+          />
+        )}
       >
-        {tabs}
-      </div>
-      <div className="w-1/2 p-2 pl-4" data-testid="playground-result">
+        <div ref={leftPanelRef}>{tabs}</div>
+      </ResizableBox>
+      <div
+        className="p-2 pl-4 flex-1"
+        data-testid="playground-result"
+        style={standardHeightStyle}
+      >
         {squiggleChart}
       </div>
     </div>
@@ -216,39 +232,41 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   }, []);
 
   return (
-    <PlaygroundContext.Provider value={{ getLeftPanelElement }}>
-      <StyledTab.Group>
-        <div
-          className="pb-4"
-          style={{
-            minHeight: 200 /* important if editor is hidden */,
-          }}
-        >
-          <div className="flex justify-between items-center">
-            <div className="flex gap-2 items-center">
-              <StyledTab.List>
-                <StyledTab
-                  name={showEditor ? "Code" : "Display"}
-                  icon={showEditor ? CodeIcon : EyeIcon}
-                />
-                <StyledTab name="Sampling Settings" icon={CogIcon} />
-                <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
-                <StyledTab name="Input Variables" icon={CurrencyDollarIcon} />
-              </StyledTab.List>
+    <div ref={ref}>
+      <PlaygroundContext.Provider value={{ getLeftPanelElement }}>
+        <StyledTab.Group>
+          <div
+            className="pb-4"
+            style={{
+              minHeight: 200 /* important if editor is hidden */,
+            }}
+          >
+            <div className="flex justify-between items-center">
+              <div className="flex gap-2 items-center">
+                <StyledTab.List>
+                  <StyledTab
+                    name={showEditor ? "Code" : "Display"}
+                    icon={showEditor ? CodeIcon : EyeIcon}
+                  />
+                  <StyledTab name="Sampling Settings" icon={CogIcon} />
+                  <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
+                  <StyledTab name="Input Variables" icon={CurrencyDollarIcon} />
+                </StyledTab.List>
+              </div>
+              <div className="flex gap-2 items-center">
+                <RunControls {...runnerState} />
+                <TextTooltip text={isMac() ? "Option+Shift+f" : "Alt+Shift+f"}>
+                  <div>
+                    <Button onClick={editorRef.current?.format}>Format</Button>
+                  </div>
+                </TextTooltip>
+                {renderExtraControls?.()}
+              </div>
             </div>
-            <div className="flex gap-2 items-center">
-              <RunControls {...runnerState} />
-              <TextTooltip text={isMac() ? "Option+Shift+f" : "Alt+Shift+f"}>
-                <div>
-                  <Button onClick={editorRef.current?.format}>Format</Button>
-                </div>
-              </TextTooltip>
-              {renderExtraControls?.()}
-            </div>
+            {showEditor ? withEditor : withoutEditor}
           </div>
-          {showEditor ? withEditor : withoutEditor}
-        </div>
-      </StyledTab.Group>
-    </PlaygroundContext.Provider>
+        </StyledTab.Group>
+      </PlaygroundContext.Provider>
+    </div>
   );
 };

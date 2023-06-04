@@ -6,3 +6,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+* Used for resizable panes in the playground.
+*/
+@import "react-resizable/css/styles.css";
