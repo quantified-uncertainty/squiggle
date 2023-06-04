@@ -6,25 +6,12 @@ const katex = require("rehype-katex");
 const lightCodeTheme = require("prism-react-renderer/themes/github");
 const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 
-// via https://github.com/facebook/docusaurus/issues/2961#issuecomment-1531243979
-async function pluginTailwindCSS(context, options) {
+async function pluginTailwindCSS() {
   return {
     name: "docusaurus-tailwindcss",
-    injectHtmlTags() {
-      return {
-        headTags: [
-          {
-            tagName: "link",
-            attributes: {
-              rel: "stylesheet",
-              href: "https://cdn.jsdelivr.net/npm/tailwindcss/dist/preflight.min.css",
-            },
-          },
-        ],
-      };
-    },
     configurePostCss(postcssOptions) {
-      // Appends TailwindCSS and AutoPrefixer.
+      // Appends TailwindCSS and AutoPrefixer; also postcss-nested for scoped-preflight.css
+      postcssOptions.plugins.push(require("postcss-nested"));
       postcssOptions.plugins.push(require("tailwindcss"));
       postcssOptions.plugins.push(require("autoprefixer"));
       return postcssOptions;

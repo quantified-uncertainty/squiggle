@@ -1,10 +1,12 @@
-import { deflate, inflate } from "pako";
-import { toByteArray, fromByteArray } from "base64-js";
-import React from "react";
 import Layout from "@theme/Layout";
+import { fromByteArray, toByteArray } from "base64-js";
+import { deflate, inflate } from "pako";
+import React from "react";
 
 import { SquigglePlayground } from "@quri/squiggle-components";
+
 import { ShareButton } from "../components/ShareButton";
+import { TailwindProvider } from "@quri/ui";
 
 const HASH_PREFIX = "#code=";
 function getHashData() {
@@ -64,7 +66,9 @@ export default function PlaygroundPage() {
           padding: 8,
         }}
       >
-        <SquigglePlayground {...playgroundProps} />
+        <TailwindProvider>
+          <SquigglePlayground {...playgroundProps} />
+        </TailwindProvider>
       </div>
     </Layout>
   );
