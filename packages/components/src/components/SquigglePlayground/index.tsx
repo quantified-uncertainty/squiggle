@@ -127,7 +127,6 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     ...props,
     code: runnerState.renderedCode,
     executionId: runnerState.executionId,
-    jsImports: imports,
     environment,
   });
 
