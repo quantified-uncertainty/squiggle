@@ -50,9 +50,6 @@
     "jsdom": "^22.1.0",
     "postcss": "^8.4.24",
     "postcss-cli": "^10.0.0",
-    "postcss-import": "^15.1.0",
-    "postcss-loader": "^7.3.2",
-    "postcss-nesting": "^11.2.2",
     "react": "^18.1.0",
     "react-dom": "^18.2.0",
     "resize-observer-polyfill": "^1.5.1",
@@ -75,7 +72,7 @@
   "scripts": {
     "start": "yarn dev",
     "dev": "storybook dev -p 6006",
-    "build:typescript": "rm -rf dist/esm && tsc",
+    "build:typescript": "rm -rf dist/src dist/tsconfig.tsbuildinfo && tsc",
     "build:css": "postcss ./src/styles/main.css -o ./dist/main.css",
     "build:lezer": "cd ./src/languageSupport; mkdir -p generated; lezer-generator ./squiggle.grammar --output generated/squiggle.ts",
     "build:storybook": "storybook build",
@@ -125,14 +122,20 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/esm/src/index.js",
-      "types": "./dist/types/src/index.d.ts"
+      "import": "./dist/src/index.js",
+      "types": "./dist/src/index.d.ts"
     },
     "./dist/main.css": {
       "default": "./dist/main.css"
+    },
+    "./main.css": {
+      "default": "./dist/main.css"
+    },
+    "./tailwind-plugin": {
+      "default": "./dist/src/tailwind-plugin.cjs"
     }
   },
-  "module": "./dist/esm/src/index.js",
-  "types": "./dist/types/src/index.js",
+  "module": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
   "source": "./src/index.ts"
 }

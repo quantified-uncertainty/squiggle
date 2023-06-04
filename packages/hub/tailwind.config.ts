@@ -1,7 +1,11 @@
-/** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: ["./src/**/*.{tsx,ts}", "../../node_modules/@quri/ui/dist/**/*.js"],
-  important: ".squiggle-hub",
+import type { Config } from "tailwindcss";
+
+export default {
+  content: [
+    "./src/**/*.{ts,tsx}",
+    "../ui/src/**/*.{ts,tsx}",
+    "../components/src/**/*.{ts,tsx}",
+  ],
   theme: {
     extend: {
       boxShadow: {
@@ -10,8 +14,9 @@ module.exports = {
     },
   },
   plugins: [
+    require("@quri/squiggle-components/tailwind-plugin"),
     require("@tailwindcss/forms")({
       strategy: "class", // strategy: 'base' interferes with react-select styles
     }),
   ],
-};
+} satisfies Config;

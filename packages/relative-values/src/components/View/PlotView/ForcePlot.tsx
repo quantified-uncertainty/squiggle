@@ -7,11 +7,10 @@ import { MouseTooltip } from "@quri/ui";
 
 import { useSelectedInterface } from "@/components/Interface/InterfaceProvider";
 import { ModelEvaluator } from "@/values/ModelEvaluator";
+import { DrawContext } from "@quri/squiggle-components";
 import { useViewContext } from "../ViewProvider";
 import { useFilteredItems } from "../hooks";
-import { DrawContext } from "@quri/squiggle-components";
 import { ItemTooltip } from "./ItemTooltip";
-import { tailwindSelector } from "@/components/Tailwind";
 
 export const distance = (
   p1: { x: number; y: number },
@@ -194,11 +193,7 @@ export const ForcePlot: FC<{
   }, [hoveredItem]);
 
   return (
-    <MouseTooltip
-      isOpen={hoveredId !== undefined}
-      render={renderTooltip}
-      tailwindSelector={tailwindSelector}
-    >
+    <MouseTooltip isOpen={hoveredId !== undefined} render={renderTooltip}>
       <canvas ref={ref} className="w-full" />
     </MouseTooltip>
   );

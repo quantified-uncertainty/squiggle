@@ -1,12 +1,6 @@
-const config = {
-  content: [
-    "./src/**/*.{html,tsx,ts,js,jsx}",
-    "../../node_modules/@quri/ui/dist/**/*.js",
-  ],
-  corePlugins: {
-    preflight: false,
-  },
-  important: ".squiggle",
+import plugin from "tailwindcss/plugin";
+
+export default plugin(() => {}, {
   theme: {
     extend: {
       animation: {
@@ -17,20 +11,18 @@ const config = {
       },
       keyframes: {
         "squiggle-appear": {
-          from: { opacity: 0 },
-          to: { opacity: 1 },
+          from: { opacity: "0" },
+          to: { opacity: "1" },
         },
         "squiggle-semi-appear": {
-          from: { opacity: 0 },
-          to: { opacity: 0.5 },
+          from: { opacity: "0" },
+          to: { opacity: "0.5" },
         },
         "squiggle-hide": {
-          from: { opacity: 1 },
-          to: { opacity: 0 },
+          from: { opacity: "1" },
+          to: { opacity: "0" },
         },
       },
     },
   },
-};
-
-export default config;
+});

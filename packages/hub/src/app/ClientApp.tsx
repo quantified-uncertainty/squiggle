@@ -8,7 +8,6 @@ import { RelayEnvironmentProvider } from "react-relay";
 import { RootLayout } from "@/components/layout/RootLayout";
 import { getCurrentEnvironment } from "@/graphql/relayEnvironment";
 import { WithToasts } from "@quri/ui";
-import { SquiggleContainer } from "@quri/squiggle-components";
 
 export const ClientApp: FC<PropsWithChildren<{ session: Session | null }>> = ({
   session,
@@ -19,13 +18,9 @@ export const ClientApp: FC<PropsWithChildren<{ session: Session | null }>> = ({
   return (
     <SessionProvider session={session}>
       <RelayEnvironmentProvider environment={environment}>
-        <div className="squiggle-hub">
-          <WithToasts>
-            <RootLayout>
-              <SquiggleContainer>{children}</SquiggleContainer>
-            </RootLayout>
-          </WithToasts>
-        </div>
+        <WithToasts>
+          <RootLayout>{children}</RootLayout>
+        </WithToasts>
       </RelayEnvironmentProvider>
     </SessionProvider>
   );
