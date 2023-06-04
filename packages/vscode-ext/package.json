@@ -132,7 +132,7 @@
   "scripts": {
     "vscode:prepublish": "yarn run lint && yarn run build",
     "build:grammar": "js-yaml syntaxes/squiggle.tmLanguage.yaml >syntaxes/squiggle.tmLanguage.json && js-yaml syntaxes/squiggle.js.yaml >syntaxes/squiggle.js.json && prettier -w syntaxes/squiggle.js.json",
-    "build:vendor": "mkdir -p media/vendor && cp ../components/dist/bundle.js media/vendor/components.js && cp ../components/dist/main.css media/vendor/components.css && cp ../../node_modules/react/umd/react.production.min.js media/vendor/react.js && cp ../../node_modules/react-dom/umd/react-dom.production.min.js media/vendor/react-dom.js && cp ../website/static/img/squiggle-logo.png media/vendor/icon.png",
+    "build:vendor": "mkdir -p media/vendor && cp ../components/dist/bundle.js media/vendor/components.js && cp ../components/dist/full.css media/vendor/components.css && cp ../../node_modules/react/umd/react.production.min.js media/vendor/react.js && cp ../../node_modules/react-dom/umd/react-dom.production.min.js media/vendor/react-dom.js && cp ../website/static/img/squiggle-logo.png media/vendor/icon.png",
     "build:bundle": "esbuild ./src/client/extension.ts ./src/server/server.ts --format=cjs --platform=node --sourcemap --minify --bundle --external:vscode --outdir=./dist",
     "build": "yarn run build:vendor && yarn run build:grammar && yarn run build:bundle",
     "watch": "yarn run compile:bundle --watch",

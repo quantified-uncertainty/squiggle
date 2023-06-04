@@ -8,7 +8,7 @@ type Props = {
 
 export const DotsDropdown: FC<Props> = ({ children }) => {
   return (
-    <Dropdown render={children} tailwindSelector="squiggle-hub">
+    <Dropdown render={children}>
       <Button>
         <DotsHorizontalIcon className="text-slate-500" />
       </Button>

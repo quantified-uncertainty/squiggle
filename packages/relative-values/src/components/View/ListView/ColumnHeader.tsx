@@ -6,7 +6,6 @@ import { useSelectedInterface } from "@/components/Interface/InterfaceProvider";
 import { Item } from "@/types";
 import { CellBox } from "../CellBox";
 import { Header } from "../Header";
-import { tailwindSelector } from "@/components/Tailwind";
 
 const ColumnHeaderContextMenu: FC<{
   setSelectedItem(item: Item): void;
@@ -51,7 +50,6 @@ export const ColumnHeader: FC<{
   return (
     <div className="sticky top-0 left-0 z-10 grid place-items-stretch h-full">
       <Dropdown
-        tailwindSelector={tailwindSelector}
         render={({ close }) => (
           <ColumnHeaderContextMenu
             setSelectedItem={(item) => {

@@ -36,9 +36,11 @@
     "nodemailer": "^6.9.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-hook-form": "^7.44.2",
+    "react-hook-form": "^7.44.3",
+    "react-loading-skeleton": "^3.3.1",
     "react-markdown": "^8.0.7",
     "react-relay": "^15.0.0",
+    "react-select": "^5.7.3",
     "remark-breaks": "^3.0.3",
     "typescript": "^5.0.3",
     "zod": "^3.21.4"

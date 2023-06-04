@@ -26,7 +26,6 @@ import { useMaybeControlledValue, useSquiggle } from "../../lib/hooks/index.js";
 import { JsImports } from "../../lib/jsImports.js";
 import { getErrors, getValueToRender, isMac } from "../../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "../CodeEditor.js";
-import { SquiggleContainer } from "../SquiggleContainer.js";
 import {
   SquiggleViewer,
   SquiggleViewerProps,
@@ -34,8 +33,8 @@ import {
 import { ViewSettingsForm, viewSettingsSchema } from "../ViewSettingsForm.js";
 
 import { SqProject } from "@quri/squiggle-lang";
-import { ImportSettingsForm } from "./ImportSettingsForm.js";
 import { ResizableBox } from "react-resizable";
+import { ImportSettingsForm } from "./ImportSettingsForm.js";
 import { RunControls } from "./RunControls/index.js";
 import { useRunnerState } from "./RunControls/useRunnerState.js";
 import {
@@ -201,16 +200,17 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const leftPanelRef = useRef<HTMLDivElement | null>(null);
 
   const withEditor = (
-    <div className="mt-2 flex flex-row">
+    <div className="mt-2 flex">
       <ResizableBox
-        className="border border-slate-200 h-full"
+        className="border border-slate-200 h-full relative"
         width={initialWidth / 2}
-        axis={"x"}
+        axis="x"
         resizeHandles={["e"]}
-        handle={(handle, ref) => (
+        handle={(_, ref) => (
           <div
             ref={ref}
-            className={`bg-none bg-slate-100 hover:bg-blue-200 transition w-1 h-full -mr-1 top-0 mt-0 rotate-0 react-resizable-handle react-resizable-handle-${handle}`}
+            // we don't use react-resizable original styles, it's easier to style this manually
+            className="absolute top-0 -right-1 w-1 h-full bg-slate-100 hover:bg-blue-200 transition cursor-ew-resize"
           />
         )}
       >
@@ -234,49 +234,40 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
 
   return (
     <div ref={ref}>
-      <SquiggleContainer>
-        <PlaygroundContext.Provider value={{ getLeftPanelElement }}>
-          <StyledTab.Group>
-            <div
-              className="pb-4"
-              style={{
-                minHeight: 200 /* important if editor is hidden */,
-              }}
-            >
-              <div className="flex justify-between items-center">
-                <div className="flex gap-2 items-center">
-                  <StyledTab.List>
-                    <StyledTab
-                      name={showEditor ? "Code" : "Display"}
-                      icon={showEditor ? CodeIcon : EyeIcon}
-                    />
-                    <StyledTab name="Sampling Settings" icon={CogIcon} />
-                    <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
-                    <StyledTab
-                      name="Input Variables"
-                      icon={CurrencyDollarIcon}
-                    />
-                  </StyledTab.List>
-                </div>
-                <div className="flex gap-2 items-center">
-                  <RunControls {...runnerState} />
-                  <TextTooltip
-                    text={isMac() ? "Option+Shift+f" : "Alt+Shift+f"}
-                  >
-                    <div>
-                      <Button onClick={editorRef.current?.format}>
-                        Format
-                      </Button>
-                    </div>
-                  </TextTooltip>
-                  {renderExtraControls?.()}
-                </div>
+      <PlaygroundContext.Provider value={{ getLeftPanelElement }}>
+        <StyledTab.Group>
+          <div
+            className="pb-4"
+            style={{
+              minHeight: 200 /* important if editor is hidden */,
+            }}
+          >
+            <div className="flex justify-between items-center">
+              <div className="flex gap-2 items-center">
+                <StyledTab.List>
+                  <StyledTab
+                    name={showEditor ? "Code" : "Display"}
+                    icon={showEditor ? CodeIcon : EyeIcon}
+                  />
+                  <StyledTab name="Sampling Settings" icon={CogIcon} />
+                  <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
+                  <StyledTab name="Input Variables" icon={CurrencyDollarIcon} />
+                </StyledTab.List>
               </div>
-              {showEditor ? withEditor : withoutEditor}
+              <div className="flex gap-2 items-center">
+                <RunControls {...runnerState} />
+                <TextTooltip text={isMac() ? "Option+Shift+f" : "Alt+Shift+f"}>
+                  <div>
+                    <Button onClick={editorRef.current?.format}>Format</Button>
+                  </div>
+                </TextTooltip>
+                {renderExtraControls?.()}
+              </div>
             </div>
-          </StyledTab.Group>
-        </PlaygroundContext.Provider>
-      </SquiggleContainer>
+            {showEditor ? withEditor : withoutEditor}
+          </div>
+        </StyledTab.Group>
+      </PlaygroundContext.Provider>
     </div>
   );
 };

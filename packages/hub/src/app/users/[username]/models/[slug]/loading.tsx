@@ -1,3 +1,11 @@
+import Skeleton from "react-loading-skeleton";
+
+import { FullLayoutWithPadding } from "@/components/layout/FullLayoutWithPadding";
+
 export default function Loading() {
-  return <div className="p-4">loading...</div>;
+  return (
+    <FullLayoutWithPadding>
+      <Skeleton count={10} height={24} />
+    </FullLayoutWithPadding>
+  );
 }

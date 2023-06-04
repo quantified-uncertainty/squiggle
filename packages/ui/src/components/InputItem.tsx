@@ -34,9 +34,9 @@ export function InputItem<T extends FieldValues, Other extends {} = {}>({
       {...register(name, { valueAsNumber: type === "number" })}
       {...other}
       className={clsx(
-        "form-input block w-full max-w-lg sm:max-w-xs text-sm shadow-sm rounded-md border-gray-300 focus:ring-indigo-500 active:ring-indigo-500 focus:border-indigo-500 active:border-indigo-500",
+        "form-input block w-full max-w-lg sm:max-w-xs text-sm shadow-sm rounded-md border-slate-300 focus:ring-indigo-500 active:ring-indigo-500 focus:border-indigo-500 active:border-indigo-500 placeholder:text-slate-300",
         size === "normal" ? "h-10" : "h-8",
-        disabled && "text-gray-400"
+        disabled && "text-slate-400"
       )}
     />
   );

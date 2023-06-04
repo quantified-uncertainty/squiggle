@@ -2,4 +2,5 @@
 /.env
 /tsconfig.tsbuildinfo
 /.next
+/.vscode
 __generated__

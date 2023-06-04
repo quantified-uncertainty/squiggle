@@ -12,6 +12,7 @@ import {
 import { createPortal } from "react-dom";
 
 import { useWindowScroll, useWindowSize } from "../hooks/react-use.js";
+import { TailwindContext } from "./TailwindProvider.js";
 
 type ModalContextShape = {
   close: () => void;
@@ -143,10 +144,6 @@ type ModalType = React.FC<
   PropsWithChildren<{
     // if specified, modal will be positioned over the visible part of the container, if it's not too small
     container?: HTMLElement;
-    // When `important: '.container-classname'` is used, this should be set because we render Modal in a portal.
-    // `squiggle-components` set this to `squiggle`.
-    // See also: https://tailwindcss.com/docs/configuration#selector-strategy
-    tailwindSelector?: string;
     close: () => void;
   }>
 > & {
@@ -155,13 +152,10 @@ type ModalType = React.FC<
   Header: typeof ModalHeader;
 };
 
-export const Modal: ModalType = ({
-  children,
-  container,
-  tailwindSelector,
-  close,
-}) => {
+export const Modal: ModalType = ({ children, container, close }) => {
   const [el] = useState(() => document.createElement("div"));
+
+  const { selector: tailwindSelector } = useContext(TailwindContext);
 
   useEffect(() => {
     document.body.appendChild(el);

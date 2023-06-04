@@ -19,7 +19,7 @@
     "lodash": "^4.17.21",
     "prettier": "^3.0.0-alpha.12",
     "react": "^18.1.0",
-    "react-hook-form": "^7.44.2",
+    "react-hook-form": "^7.44.3",
     "react-resizable": "^3.0.5",
     "vscode-uri": "^3.0.7",
     "yup": "^1.2.0",
@@ -43,6 +43,7 @@
     "@types/lodash": "^4.14.195",
     "@types/node": "^20.2.5",
     "@types/react": "^18.2.8",
+    "@types/react-resizable": "^3.0.4",
     "@types/webpack-bundle-analyzer": "^4.6.0",
     "canvas": "^2.11.2",
     "eslint": "^8.41.0",
@@ -51,9 +52,6 @@
     "jsdom": "^22.1.0",
     "postcss": "^8.4.24",
     "postcss-cli": "^10.0.0",
-    "postcss-import": "^15.1.0",
-    "postcss-loader": "^7.3.2",
-    "postcss-nesting": "^11.2.2",
     "react": "^18.1.0",
     "react-dom": "^18.2.0",
     "resize-observer-polyfill": "^1.5.1",
@@ -76,14 +74,14 @@
   "scripts": {
     "start": "yarn dev",
     "dev": "storybook dev -p 6006",
-    "build:typescript": "rm -rf dist/esm && tsc",
-    "build:css": "postcss ./src/styles/main.css -o ./dist/main.css",
+    "build:typescript": "rm -rf dist/src dist/tsconfig.tsbuildinfo && tsc",
+    "build:css": "postcss ./src/styles/full.css -o ./dist/full.css && postcss ./src/styles/common.css -o ./dist/common.css",
     "build:lezer": "cd ./src/languageSupport; mkdir -p generated; lezer-generator ./squiggle.grammar --output generated/squiggle.ts",
     "build:storybook": "storybook build",
     "build": "yarn run build:lezer && yarn run build:typescript && yarn run build:css && yarn run build:storybook",
     "bundle": "webpack",
     "all": "yarn bundle && yarn build",
-    "lint": "prettier --check",
+    "lint": "prettier --check .",
     "lint:eslint": "eslint --ignore-path .gitignore .",
     "format": "prettier --write .",
     "prepack": "yarn run build:typescript && yarn run bundle",
@@ -126,14 +124,20 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/esm/src/index.js",
-      "types": "./dist/types/src/index.d.ts"
+      "import": "./dist/src/index.js",
+      "types": "./dist/src/index.d.ts"
     },
-    "./dist/main.css": {
-      "default": "./dist/main.css"
+    "./full.css": {
+      "default": "./dist/full.css"
+    },
+    "./common.css": {
+      "default": "./dist/common.css"
+    },
+    "./tailwind-plugin": {
+      "default": "./dist/src/tailwind-plugin.cjs"
     }
   },
-  "module": "./dist/esm/src/index.js",
-  "types": "./dist/types/src/index.js",
+  "module": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
   "source": "./src/index.ts"
 }

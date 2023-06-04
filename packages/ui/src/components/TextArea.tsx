@@ -29,8 +29,8 @@ export function TextArea<T extends FieldValues>({
       placeholder={placeholder}
       {...register(name)}
       className={clsx(
-        "form-input block w-full text-sm shadow-sm rounded-md border-gray-300 focus:ring-indigo-500 active:ring-indigo-500 focus:border-indigo-500 active:border-indigo-500",
-        disabled && "text-gray-400"
+        "form-input block w-full text-sm shadow-sm rounded-md border-slate-300 focus:ring-indigo-500 active:ring-indigo-500 focus:border-indigo-500 active:border-indigo-500 placeholder:text-slate-300",
+        disabled && "text-slate-400"
       )}
     />
   );
