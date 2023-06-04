@@ -7,7 +7,6 @@ import {
   Env,
 } from "@quri/squiggle-lang";
 import { useEffect, useMemo } from "react";
-import { JsImports, jsImportsToSquiggleCode } from "../jsImports.js";
 
 // Props needed for a standalone execution
 type StandaloneExecutionProps = {
@@ -26,7 +25,6 @@ type ProjectExecutionProps = {
 export type SquiggleArgs = {
   code: string;
   executionId?: number;
-  jsImports?: JsImports;
   onChange?: (expr: SqValue | undefined, sourceName: string) => void;
 } & (StandaloneExecutionProps | ProjectExecutionProps);
 
@@ -64,11 +62,6 @@ export const useSquiggle = (args: SquiggleArgs): ResultAndBindings => {
     () => {
       project.setSource(sourceName, args.code);
       let fullContinues = continues;
-      if (args.jsImports && Object.keys(args.jsImports).length) {
-        const importsSource = jsImportsToSquiggleCode(args.jsImports);
-        project.setSource(importSourceName(sourceName), importsSource);
-        fullContinues = continues.concat(importSourceName(sourceName));
-      }
       project.setContinues(sourceName, fullContinues);
       project.run(sourceName);
       const result = project.getResult(sourceName);
@@ -81,7 +74,7 @@ export const useSquiggle = (args: SquiggleArgs): ResultAndBindings => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       args.code,
-      args.jsImports,
+      [],
       args.executionId,
       sourceName,
       continues,
