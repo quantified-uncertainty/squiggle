@@ -108,7 +108,7 @@ export const viewSettingsSchema = yup.object({}).shape({
   chartHeight: yup.number().required().positive().integer().default(200),
 });
 
-export type ViewSettings = yup.InferType<typeof viewSettingsSchema>;
+export type PlaygroundSettings = yup.InferType<typeof viewSettingsSchema>;
 
 type DeepPartial<T> = T extends object
   ? {
@@ -116,7 +116,7 @@ type DeepPartial<T> = T extends object
   }
   : T;
 
-export type PartialViewSettings = DeepPartial<ViewSettings>;
+export type PartialPlaygroundSettings = DeepPartial<PlaygroundSettings>;
 
 // partial params for SqDistributionsPlot.create; TODO - infer explicit type?
 export function generateDistributionPlotSettings(
@@ -139,7 +139,7 @@ export function generateDistributionPlotSettings(
 }
 
 // partial params for SqFnPlot.create; TODO - infer explicit type?
-export function generateFunctionPlotSettings(settings: ViewSettings) {
+export function generateFunctionPlotSettings(settings: PlaygroundSettings) {
   const xScale = SqLinearScale.create({
     min: settings.functionChartSettings.start,
     max: settings.functionChartSettings.stop,
@@ -147,9 +147,9 @@ export function generateFunctionPlotSettings(settings: ViewSettings) {
   return { xScale, points: settings.functionChartSettings.count };
 }
 
-export const EnvironmentSettingsForm: React.FC<{
-  register: UseFormRegister<ViewSettings>;
-  fixed?: PartialViewSettings;
+export const RenderingSettingsForm: React.FC<{
+  register: UseFormRegister<PlaygroundSettings>;
+  fixed?: PartialPlaygroundSettings;
 }> = ({ register }) => (
   <div className="space-y-4">
     <div className="space-y-2">
@@ -181,9 +181,9 @@ export const EnvironmentSettingsForm: React.FC<{
   </div>
 );
 
-export const DistributionViewSettingsForm: React.FC<{
-  register: UseFormRegister<ViewSettings>;
-  fixed?: PartialViewSettings;
+export const DistributionSettingsForm: React.FC<{
+  register: UseFormRegister<PlaygroundSettings>;
+  fixed?: PartialPlaygroundSettings;
 }> = ({ register, fixed }) => {
   return (
     <>
@@ -272,9 +272,9 @@ export const DistributionViewSettingsForm: React.FC<{
   );
 };
 
-export const FunctionViewSettingsForm: React.FC<{
-  register: UseFormRegister<ViewSettings>;
-  fixed?: PartialViewSettings;
+export const FunctionSettingsForm: React.FC<{
+  register: UseFormRegister<PlaygroundSettings>;
+  fixed?: PartialPlaygroundSettings;
 }> = ({ register, fixed }) => (
   <>
     <FormSection title="Function Display Settings">
@@ -309,16 +309,16 @@ export const FunctionViewSettingsForm: React.FC<{
   </>
 );
 
-export const ViewSettingsForm: React.FC<{
+export const PlaygroundSettingsForm: React.FC<{
   withFunctionSettings?: boolean;
-  fixed?: PartialViewSettings;
-  register: UseFormRegister<ViewSettings>;
+  fixed?: PartialPlaygroundSettings;
+  register: UseFormRegister<PlaygroundSettings>;
 }> = ({ withFunctionSettings = true, fixed, register }) => {
   return (
     <div className="divide-y divide-gray-200 max-w-2xl">
       <div className="mb-6">
         <FormSection title="Rendering Settings">
-          <EnvironmentSettingsForm fixed={fixed} register={register} />
+          <RenderingSettingsForm fixed={fixed} register={register} />
         </FormSection>
       </div>
 
@@ -333,12 +333,12 @@ export const ViewSettingsForm: React.FC<{
       </div>
 
       <div className="pt-6 mb-6">
-        <DistributionViewSettingsForm fixed={fixed} register={register} />
+        <DistributionSettingsForm fixed={fixed} register={register} />
 
       </div>
       {withFunctionSettings ? (
         <div className="pt-4">
-          <FunctionViewSettingsForm fixed={fixed} register={register} />
+          <FunctionSettingsForm fixed={fixed} register={register} />
         </div>
       ) : null}
     </div>

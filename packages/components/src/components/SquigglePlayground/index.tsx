@@ -29,7 +29,7 @@ import {
   SquiggleViewer,
   SquiggleViewerProps,
 } from "../SquiggleViewer/index.js";
-import { ViewSettingsForm, viewSettingsSchema, type ViewSettings } from "../ViewSettingsForm.js";
+import { PlaygroundSettingsForm, viewSettingsSchema, type PlaygroundSettings } from "../PlaygroundSettings.js";
 
 import { SqProject } from "@quri/squiggle-lang";
 import { ResizableBox } from "react-resizable";
@@ -86,7 +86,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   });
   const { ref, width: initialWidth } = useInitialWidth();
 
-  const defaultValues: ViewSettings = {
+  const defaultValues: PlaygroundSettings = {
     ...viewSettingsSchema.getDefault(),
     ...Object.fromEntries(
       Object.entries(props).filter(([k, v]) => v !== undefined)
@@ -103,7 +103,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   });
 
   // react-hook-form types the result as Partial, but the result doesn't seem to be a Partial, so this should be ok
-  const vars = useWatch({ control }) as ViewSettings;
+  const vars = useWatch({ control }) as PlaygroundSettings;
 
   useEffect(() => {
     onSettingsChange?.(vars);
@@ -179,10 +179,10 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
             <div className="pb-4">
               <Button onClick={() => setSelectedTab("CODE")}> Back </Button>
             </div>
-            <ViewSettingsForm
+            <PlaygroundSettingsForm
               register={
                 // This is dangerous, but doesn't cause any problems.
-                // I tried to make `ViewSettings` generic (to allow it to accept any extension of a settings schema), but it didn't work.
+                // I tried to make `PlaygroundSettings` generic (to allow it to accept any extension of a settings schema), but it didn't work.
                 register as unknown as UseFormRegister<
                   yup.InferType<typeof viewSettingsSchema>
                 >

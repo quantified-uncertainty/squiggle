@@ -9,17 +9,17 @@ import { Modal } from "@quri/ui";
 
 import { PlaygroundContext } from "../SquigglePlayground/index.js";
 import {
-  PartialViewSettings,
-  ViewSettingsForm,
+  PartialPlaygroundSettings,
+  PlaygroundSettingsForm,
   viewSettingsSchema,
-} from "../ViewSettingsForm.js";
+} from "../PlaygroundSettings.js";
 import { ViewerContext } from "./ViewerContext.js";
 import { locationAsString } from "./utils.js";
 
 type Props = {
   value: SqValue;
   onChange: () => void;
-  fixed?: PartialViewSettings;
+  fixed?: PartialPlaygroundSettings;
   withFunctionSettings: boolean;
 };
 
@@ -66,7 +66,7 @@ const ItemSettingsModal: React.FC<
         )}
       </Modal.Header>
       <Modal.Body>
-        <ViewSettingsForm
+        <PlaygroundSettingsForm
           register={register}
           withFunctionSettings={withFunctionSettings}
           fixed={fixed}

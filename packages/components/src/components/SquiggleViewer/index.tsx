@@ -9,9 +9,9 @@ import {
 } from "./utils.js";
 import { useSquiggle } from "../../lib/hooks/index.js";
 import {
-  PartialViewSettings,
+  PartialPlaygroundSettings,
   viewSettingsSchema,
-} from "../ViewSettingsForm.js";
+} from "../PlaygroundSettings.js";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 import merge from "lodash/merge.js";
 
@@ -19,7 +19,7 @@ export type SquiggleViewerProps = {
   /** The output of squiggle's run */
   result: ReturnType<typeof useSquiggle>["result"];
   enableLocalSettings?: boolean;
-} & PartialViewSettings;
+} & PartialPlaygroundSettings;
 
 type SettingsStore = {
   [k: string]: LocalItemSettings;
@@ -31,14 +31,14 @@ export const SquiggleViewer = memo<SquiggleViewerProps>(
   function SquiggleViewer({
     result,
     enableLocalSettings = false,
-    ...partialViewSettings
+    ...partialPlaygroundSettings
   }) {
     // can't store settings in the state because we don't want to rerender the entire tree on every change
     const settingsStoreRef = useRef<SettingsStore>({});
 
     const globalSettings = useMemo(() => {
-      return merge({}, viewSettingsSchema.getDefault(), partialViewSettings);
-    }, [partialViewSettings]);
+      return merge({}, viewSettingsSchema.getDefault(), partialPlaygroundSettings);
+    }, [partialPlaygroundSettings]);
 
     const getSettings = useCallback(
       (location: SqValueLocation) => {
