@@ -29,18 +29,12 @@ import {
   SquiggleViewer,
   SquiggleViewerProps,
 } from "../SquiggleViewer/index.js";
-import { ViewSettingsForm, viewSettingsSchema } from "../ViewSettingsForm.js";
+import { ViewSettingsForm, viewSettingsSchema, type ViewSettings } from "../ViewSettingsForm.js";
 
 import { SqProject } from "@quri/squiggle-lang";
 import { ResizableBox } from "react-resizable";
-import { ImportSettingsForm } from "./ImportSettingsForm.js";
 import { RunControls } from "./RunControls/index.js";
 import { useRunnerState } from "./RunControls/useRunnerState.js";
-import {
-  EnvironmentSettingsForm,
-  playgroundSettingsSchema,
-  type PlaygroundFormFields,
-} from "./playgroundSettings.js";
 
 type PlaygroundProps = // Playground can be either controlled (`code`) or uncontrolled (`defaultCode` + `onCodeChange`)
   (
@@ -92,8 +86,8 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   });
   const { ref, width: initialWidth } = useInitialWidth();
 
-  const defaultValues: PlaygroundFormFields = {
-    ...playgroundSettingsSchema.getDefault(),
+  const defaultValues: ViewSettings = {
+    ...viewSettingsSchema.getDefault(),
     ...Object.fromEntries(
       Object.entries(props).filter(([k, v]) => v !== undefined)
     ),
@@ -104,12 +98,12 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const [selectedTab, setSelectedTab] = useState("CODE" as Tab)
 
   const { register, control } = useForm({
-    resolver: yupResolver(playgroundSettingsSchema),
+    resolver: yupResolver(viewSettingsSchema),
     defaultValues,
   });
 
   // react-hook-form types the result as Partial, but the result doesn't seem to be a Partial, so this should be ok
-  const vars = useWatch({ control }) as PlaygroundFormFields;
+  const vars = useWatch({ control }) as ViewSettings;
 
   useEffect(() => {
     onSettingsChange?.(vars);
@@ -117,10 +111,10 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
 
   const environment: Env = useMemo(
     () => ({
-      sampleCount: Number(vars.sampleCount),
-      xyPointLength: Number(vars.xyPointLength),
+      sampleCount: Number(vars.renderingSettings.sampleCount),
+      xyPointLength: Number(vars.renderingSettings.xyPointLength),
     }),
-    [vars.sampleCount, vars.xyPointLength]
+    [vars.renderingSettings.sampleCount, vars.renderingSettings.xyPointLength]
   );
 
   const runnerState = useRunnerState(code);

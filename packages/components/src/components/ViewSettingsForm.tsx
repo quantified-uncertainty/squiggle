@@ -149,12 +149,12 @@ export function generateFunctionPlotSettings(settings: ViewSettings) {
 
 export const EnvironmentSettingsForm: React.FC<{
   register: UseFormRegister<ViewSettings>;
-  fixed?: Partial<ViewSettings>;
+  fixed?: PartialViewSettings;
 }> = ({ register }) => (
   <div className="space-y-4">
     <div className="space-y-2">
       <NumberInput
-        name="sampleCount"
+        name="renderingSettings.sampleCount"
         label="Sample Count"
         register={register}
       />
@@ -167,7 +167,7 @@ export const EnvironmentSettingsForm: React.FC<{
     </div>
     <div className="space-y-2">
       <NumberInput
-        name="xyPointLength"
+        name="renderingSettings.xyPointLength"
         register={register}
         label="Coordinate Count (For PointSet Shapes)"
       />
