@@ -1,5 +1,8 @@
 import { SqValueLocation } from "@quri/squiggle-lang";
-import { PartialPlaygroundSettings, PlaygroundSettings } from "../PlaygroundSettings.js";
+import {
+  PartialPlaygroundSettings,
+  PlaygroundSettings,
+} from "../PlaygroundSettings.js";
 
 export type LocalItemSettings = {
   collapsed: boolean;

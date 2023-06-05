@@ -25,10 +25,7 @@ test("Creates and cleans up source and imports", async () => {
   const project = SqProject.create();
 
   const { unmount } = render(
-    <SquiggleChart
-      code={"normal($x, 1)"}
-      project={project}
-    />
+    <SquiggleChart code={"normal($x, 1)"} project={project} />
   );
 
   expect(project.getSourceIds().length).toBe(2);

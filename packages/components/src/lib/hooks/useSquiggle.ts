@@ -72,14 +72,7 @@ export const useSquiggle = (args: SquiggleArgs): ResultAndBindings => {
     // This is on purpose, as executionId simply allows you to run the squiggle
     // code again
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      args.code,
-      [],
-      args.executionId,
-      sourceName,
-      continues,
-      project,
-    ]
+    [args.code, [], args.executionId, sourceName, continues, project]
   );
 
   const { onChange } = args;

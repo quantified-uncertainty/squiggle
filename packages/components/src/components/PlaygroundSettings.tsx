@@ -15,26 +15,24 @@ import { FormComment } from "./ui/FormComment.js";
 import { functionChartDefaults } from "./FunctionChart/utils.js";
 import { defaultTickFormatSpecifier } from "../lib/draw/index.js";
 
-export const renderingSettingsSchema = yup
-  .object({})
-  .shape({
-    sampleCount: yup
-      .number()
-      .required()
-      .positive()
-      .integer()
-      .default(1000)
-      .min(10)
-      .max(1000000),
-    xyPointLength: yup
-      .number()
-      .required()
-      .positive()
-      .integer()
-      .default(1000)
-      .min(10)
-      .max(10000),
-  })
+export const renderingSettingsSchema = yup.object({}).shape({
+  sampleCount: yup
+    .number()
+    .required()
+    .positive()
+    .integer()
+    .default(1000)
+    .min(10)
+    .max(1000000),
+  xyPointLength: yup
+    .number()
+    .required()
+    .positive()
+    .integer()
+    .default(1000)
+    .min(10)
+    .max(10000),
+});
 
 export const functionSettingsSchema = yup.object({}).shape({
   start: yup
@@ -112,8 +110,8 @@ export type PlaygroundSettings = yup.InferType<typeof viewSettingsSchema>;
 
 type DeepPartial<T> = T extends object
   ? {
-    [P in keyof T]?: DeepPartial<T[P]>;
-  }
+      [P in keyof T]?: DeepPartial<T[P]>;
+    }
   : T;
 
 export type PartialPlaygroundSettings = DeepPartial<PlaygroundSettings>;
@@ -210,10 +208,10 @@ export const DistributionSettingsForm: React.FC<{
                   name: "Logarithmic",
                   ...(fixed?.distributionChartSettings?.disableLogX
                     ? {
-                      disabled: true,
-                      tooltip:
-                        "Your distribution has mass lower than or equal to 0. Log only works on strictly positive values.",
-                    }
+                        disabled: true,
+                        tooltip:
+                          "Your distribution has mass lower than or equal to 0. Log only works on strictly positive values.",
+                      }
                     : null),
                 },
                 {
@@ -334,7 +332,6 @@ export const PlaygroundSettingsForm: React.FC<{
 
       <div className="pt-6 mb-6">
         <DistributionSettingsForm fixed={fixed} register={register} />
-
       </div>
       {withFunctionSettings ? (
         <div className="pt-4">

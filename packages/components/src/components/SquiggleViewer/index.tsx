@@ -37,7 +37,11 @@ export const SquiggleViewer = memo<SquiggleViewerProps>(
     const settingsStoreRef = useRef<SettingsStore>({});
 
     const globalSettings = useMemo(() => {
-      return merge({}, viewSettingsSchema.getDefault(), partialPlaygroundSettings);
+      return merge(
+        {},
+        viewSettingsSchema.getDefault(),
+        partialPlaygroundSettings
+      );
     }, [partialPlaygroundSettings]);
 
     const getSettings = useCallback(

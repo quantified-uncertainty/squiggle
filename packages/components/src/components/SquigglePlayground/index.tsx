@@ -29,7 +29,11 @@ import {
   SquiggleViewer,
   SquiggleViewerProps,
 } from "../SquiggleViewer/index.js";
-import { PlaygroundSettingsForm, viewSettingsSchema, type PlaygroundSettings } from "../PlaygroundSettings.js";
+import {
+  PlaygroundSettingsForm,
+  viewSettingsSchema,
+  type PlaygroundSettings,
+} from "../PlaygroundSettings.js";
 
 import { SqProject } from "@quri/squiggle-lang";
 import { ResizableBox } from "react-resizable";
@@ -41,25 +45,25 @@ type PlaygroundProps = // Playground can be either controlled (`code`) or uncont
     | { code: string; defaultCode?: undefined }
     | { defaultCode?: string; code?: undefined }
   ) &
-  (
-    | {
-      project: SqProject;
-      continues?: string[];
-    }
-    | {}
-  ) &
-  Omit<SquiggleViewerProps, "result"> & {
-    onCodeChange?(expr: string): void;
-    /* When settings change */
-    onSettingsChange?(settings: any): void;
-    /** Should we show the editor? */
-    showEditor?: boolean;
-    /** Allows to inject extra buttons, e.g. share button on the website, or save button in Squiggle Hub */
-    renderExtraControls?: () => ReactNode;
-    showShareButton?: boolean;
-    /** Height of the editor */
-    height?: number;
-  };
+    (
+      | {
+          project: SqProject;
+          continues?: string[];
+        }
+      | {}
+    ) &
+    Omit<SquiggleViewerProps, "result"> & {
+      onCodeChange?(expr: string): void;
+      /* When settings change */
+      onSettingsChange?(settings: any): void;
+      /** Should we show the editor? */
+      showEditor?: boolean;
+      /** Allows to inject extra buttons, e.g. share button on the website, or save button in Squiggle Hub */
+      renderExtraControls?: () => ReactNode;
+      showShareButton?: boolean;
+      /** Height of the editor */
+      height?: number;
+    };
 
 // Left panel ref is used for local settings modal positioning in ItemSettingsMenu.tsx
 type PlaygroundContextShape = {
@@ -95,7 +99,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
 
   type Tab = "CODE" | "SETTINGS" | "view";
 
-  const [selectedTab, setSelectedTab] = useState("CODE" as Tab)
+  const [selectedTab, setSelectedTab] = useState("CODE" as Tab);
 
   const { register, control } = useForm({
     resolver: yupResolver(viewSettingsSchema),
@@ -171,10 +175,8 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const tabs = (
     <div>
       {selectedTab === "CODE" && firstTab}
-      {selectedTab === "SETTINGS" &&
-        <div className="px-2 space-y-6"
-        style={standardHeightStyle}
-        >
+      {selectedTab === "SETTINGS" && (
+        <div className="px-2 space-y-6" style={standardHeightStyle}>
           <div className="px-2 py-2">
             <div className="pb-4">
               <Button onClick={() => setSelectedTab("CODE")}> Back </Button>
@@ -190,13 +192,14 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
             />
           </div>
         </div>
-      }
+      )}
     </div>
   );
 
   const leftPanelRef = useRef<HTMLDivElement | null>(null);
 
-  const textClasses = "text-slate-800 text-sm px-2 py-2 cursor-pointer rounded-sm hover:bg-slate-200 select-none"
+  const textClasses =
+    "text-slate-800 text-sm px-2 py-2 cursor-pointer rounded-sm hover:bg-slate-200 select-none";
 
   const withEditor = (
     <div className="mt-2 flex flex-row">
@@ -218,13 +221,21 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
           <div>
             <div className="flex justify-end mb-2 p-1 bg-slate-50 border-b border-slate-200 overflow-x-auto">
               <div className="mr-2 flex gap-1 items-center">
-                <div className={textClasses} onClick={() => selectedTab !== "SETTINGS" ? setSelectedTab("SETTINGS") : setSelectedTab("CODE")}>
+                <div
+                  className={textClasses}
+                  onClick={() =>
+                    selectedTab !== "SETTINGS"
+                      ? setSelectedTab("SETTINGS")
+                      : setSelectedTab("CODE")
+                  }
+                >
                   Settings
                 </div>
-                <TextTooltip
-                  text={isMac() ? "Option+Shift+f" : "Alt+Shift+f"}
-                >
-                  <div className={textClasses} onClick={editorRef.current?.format}>
+                <TextTooltip text={isMac() ? "Option+Shift+f" : "Alt+Shift+f"}>
+                  <div
+                    className={textClasses}
+                    onClick={editorRef.current?.format}
+                  >
                     Format Code
                   </div>
                 </TextTooltip>
@@ -241,9 +252,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
         data-testid="playground-result"
         style={standardHeightStyle}
       >
-        <div className="flex gap-2 items-center justify-end">
-
-        </div>
+        <div className="flex gap-2 items-center justify-end"></div>
         {squiggleChart}
       </div>
     </div>
@@ -257,16 +266,16 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
 
   return (
     <div ref={ref}>
-        <PlaygroundContext.Provider value={{ getLeftPanelElement }}>
-          <div
-            className="pb-4"
-            style={{
-              minHeight: 200 /* important if editor is hidden */,
-            }}
-          >
-            {showEditor ? withEditor : withoutEditor}
-          </div>
-        </PlaygroundContext.Provider>
+      <PlaygroundContext.Provider value={{ getLeftPanelElement }}>
+        <div
+          className="pb-4"
+          style={{
+            minHeight: 200 /* important if editor is hidden */,
+          }}
+        >
+          {showEditor ? withEditor : withoutEditor}
+        </div>
+      </PlaygroundContext.Provider>
     </div>
   );
 };
