@@ -7,6 +7,7 @@ import { FrontpageModelListQuery } from "@/__generated__/FrontpageModelListQuery
 import { graphql, useLazyLoadQuery, usePaginationFragment } from "react-relay";
 import { ModelList } from "./ModelList";
 
+
 const Fragment = graphql`
   fragment FrontpageModelList on Query
   @argumentDefinitions(
