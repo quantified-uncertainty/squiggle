@@ -19,7 +19,7 @@ import * as yup from "yup";
 import { useInitialWidth } from "../../lib/hooks/useInitialWidth.js";
 
 import { Env } from "@quri/squiggle-lang";
-import { Button, StyledTab, TextTooltip } from "@quri/ui";
+import { Button, TextTooltip } from "@quri/ui";
 
 import { useMaybeControlledValue, useSquiggle } from "../../lib/hooks/index.js";
 
@@ -92,8 +92,6 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   });
   const { ref, width: initialWidth } = useInitialWidth();
 
-  const [imports, setImports] = useState<JsImports>({});
-
   const defaultValues: PlaygroundFormFields = {
     ...playgroundSettingsSchema.getDefault(),
     ...Object.fromEntries(
@@ -101,7 +99,9 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     ),
   };
 
-  const [selectedIndex, setSelectedIndex] = useState(0)
+  type Tab = "CODE" | "SETTINGS" | "view";
+
+  const [selectedTab, setSelectedTab] = useState("SETTINGS" as Tab)
 
   const { register, control } = useForm({
     resolver: yupResolver(playgroundSettingsSchema),
@@ -156,18 +156,18 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const editorRef = useRef<CodeEditorHandle>(null);
 
   const firstTab = showEditor ? (
-      <div data-testid="squiggle-editor" className="p-1">
-        <CodeEditor
-          ref={editorRef}
-          value={code}
-          errors={errors}
-          project={resultAndBindings.project}
-          showGutter={true}
-          height={height}
-          onChange={setCode}
-          onSubmit={runnerState.run}
-        />
-      </div>
+    <div data-testid="squiggle-editor" className="p-1">
+      <CodeEditor
+        ref={editorRef}
+        value={code}
+        errors={errors}
+        project={resultAndBindings.project}
+        showGutter={true}
+        height={height}
+        onChange={setCode}
+        onSubmit={runnerState.run}
+      />
+    </div>
   ) : (
     squiggleChart
   );
@@ -175,26 +175,34 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const standardHeightStyle = { height, overflow: "auto" };
 
   const tabs = (
-    <StyledTab.Panels>
-      <StyledTab.Panel>{firstTab}</StyledTab.Panel>
-      <StyledTab.Panel style={standardHeightStyle}>
-        <EnvironmentSettingsForm register={register} />
-      </StyledTab.Panel>
-      <StyledTab.Panel style={standardHeightStyle}>
-        <ViewSettingsForm
-          register={
-            // This is dangerous, but doesn't cause any problems.
-            // I tried to make `ViewSettings` generic (to allow it to accept any extension of a settings schema), but it didn't work.
-            register as unknown as UseFormRegister<
-              yup.InferType<typeof viewSettingsSchema>
-            >
-          }
-        />
-      </StyledTab.Panel>
-    </StyledTab.Panels>
+    <div>
+      {selectedTab === "CODE" && firstTab}
+      {selectedTab === "SETTINGS" &&
+        <div className="px-2 space-y-6"
+        style={standardHeightStyle}
+        >
+          <div className="px-2 py-2">
+            <div className="pb-4">
+              <Button onClick={() => setSelectedTab("CODE")}> Back </Button>
+            </div>
+            <ViewSettingsForm
+              register={
+                // This is dangerous, but doesn't cause any problems.
+                // I tried to make `ViewSettings` generic (to allow it to accept any extension of a settings schema), but it didn't work.
+                register as unknown as UseFormRegister<
+                  yup.InferType<typeof viewSettingsSchema>
+                >
+              }
+            />
+          </div>
+        </div>
+      }
+    </div>
   );
 
   const leftPanelRef = useRef<HTMLDivElement | null>(null);
+
+  const textClasses = "text-slate-800 text-sm px-2 py-2 cursor-pointer rounded-sm hover:bg-slate-200 select-none"
 
   const withEditor = (
     <div className="mt-2 flex flex-row border border-slate-200">
@@ -214,20 +222,15 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
         <div ref={leftPanelRef}>
           <div>
             <div className="flex justify-end mb-2 p-1 bg-slate-50 border-b border-slate-200 overflow-x-auto">
-              <div className="mr-2 flex gap-2 items-center">
-                <Button onClick={() => setSelectedIndex(1)}>
-                  Rendering Settings
-                </Button>
-                <Button onClick={() => setSelectedIndex(2)}>
-                  View Settings
-                </Button>
+              <div className="mr-2 flex gap-1 items-center">
+                <div className={textClasses} onClick={() => selectedTab !== "SETTINGS" ? setSelectedTab("SETTINGS") : setSelectedTab("CODE")}>
+                  Settings
+                </div>
                 <TextTooltip
                   text={isMac() ? "Option+Shift+f" : "Alt+Shift+f"}
                 >
-                  <div>
-                    <Button onClick={editorRef.current?.format}>
-                      Format Code
-                    </Button>
+                  <div className={textClasses} onClick={editorRef.current?.format}>
+                    Format Code
                   </div>
                 </TextTooltip>
                 <RunControls {...runnerState} />
@@ -261,24 +264,14 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     <div ref={ref}>
       <SquiggleContainer>
         <PlaygroundContext.Provider value={{ getLeftPanelElement }}>
-          <StyledTab.Group selectedIndex={selectedIndex} onChange={setSelectedIndex}>
-            <div
-              className="pb-4"
-              style={{
-                minHeight: 200 /* important if editor is hidden */,
-              }}
-            >
-                  <StyledTab.List>
-                    <StyledTab
-                      name={showEditor ? "Code" : "Display"}
-                      icon={showEditor ? CodeIcon : EyeIcon}
-                    />
-                    <StyledTab name="Sampling Settings" icon={CogIcon} />
-                    <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
-                  </StyledTab.List>
-              {showEditor ? withEditor : withoutEditor}
-            </div>
-          </StyledTab.Group>
+          <div
+            className="pb-4"
+            style={{
+              minHeight: 200 /* important if editor is hidden */,
+            }}
+          >
+            {showEditor ? withEditor : withoutEditor}
+          </div>
         </PlaygroundContext.Provider>
       </SquiggleContainer>
     </div>
