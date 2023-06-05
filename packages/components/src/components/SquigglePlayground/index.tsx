@@ -101,6 +101,8 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     ),
   };
 
+  const [selectedIndex, setSelectedIndex] = useState(0)
+
   const { register, control } = useForm({
     resolver: yupResolver(playgroundSettingsSchema),
     defaultValues,
@@ -154,23 +156,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const editorRef = useRef<CodeEditorHandle>(null);
 
   const firstTab = showEditor ? (
-    <div>
-      <div className="flex justify-end mb-2 p-1 bg-slate-50">
-        <div className="mr-2 flex gap-2 items-center overflow-y-auto">
-          <TextTooltip
-            text={isMac() ? "Option+Shift+f" : "Alt+Shift+f"}
-          >
-            <div>
-              <Button onClick={editorRef.current?.format}>
-                Format Code
-              </Button>
-            </div>
-          </TextTooltip>
-          <RunControls {...runnerState} />
-          {renderExtraControls?.()}
-        </div>
-      </div>
-      <div data-testid="squiggle-editor">
+      <div data-testid="squiggle-editor" className="p-1">
         <CodeEditor
           ref={editorRef}
           value={code}
@@ -182,7 +168,6 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
           onSubmit={runnerState.run}
         />
       </div>
-    </div>
   ) : (
     squiggleChart
   );
@@ -212,7 +197,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const leftPanelRef = useRef<HTMLDivElement | null>(null);
 
   const withEditor = (
-    <div className="mt-2 flex flex-row py-2 px-1">
+    <div className="mt-2 flex flex-row border border-slate-200">
       <ResizableBox
         className="h-full"
         width={initialWidth / 2}
@@ -221,11 +206,37 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
         handle={(handle, ref) => (
           <div
             ref={ref}
-            className={`bg-none bg-slate-200 hover:bg-slate-500 transition w-px h-full m-0 top-0 mt-0 rotate-0 react-resizable-handle react-resizable-handle-${handle}`}
+            style={{ paddingRight: "2px" }}
+            className={`bg-none bg-slate-200 hover:bg-slate-400 transition w-px pr-1 h-full m-0 top-0 mt-0 rotate-0 react-resizable-handle react-resizable-handle-${handle}`}
           />
         )}
       >
-        <div ref={leftPanelRef}>{tabs}</div>
+        <div ref={leftPanelRef}>
+          <div>
+            <div className="flex justify-end mb-2 p-1 bg-slate-50 border-b border-slate-200 overflow-x-auto">
+              <div className="mr-2 flex gap-2 items-center">
+                <Button onClick={() => setSelectedIndex(1)}>
+                  Rendering Settings
+                </Button>
+                <Button onClick={() => setSelectedIndex(2)}>
+                  View Settings
+                </Button>
+                <TextTooltip
+                  text={isMac() ? "Option+Shift+f" : "Alt+Shift+f"}
+                >
+                  <div>
+                    <Button onClick={editorRef.current?.format}>
+                      Format Code
+                    </Button>
+                  </div>
+                </TextTooltip>
+                <RunControls {...runnerState} />
+                {renderExtraControls?.()}
+              </div>
+            </div>
+            {tabs}
+          </div>
+        </div>
       </ResizableBox>
       <div
         className="p-2 pl-4 flex-1"
@@ -250,15 +261,13 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     <div ref={ref}>
       <SquiggleContainer>
         <PlaygroundContext.Provider value={{ getLeftPanelElement }}>
-          <StyledTab.Group>
+          <StyledTab.Group selectedIndex={selectedIndex} onChange={setSelectedIndex}>
             <div
               className="pb-4"
               style={{
                 minHeight: 200 /* important if editor is hidden */,
               }}
             >
-              <div className="flex justify-between items-center">
-                <div className="flex gap-2 items-center">
                   <StyledTab.List>
                     <StyledTab
                       name={showEditor ? "Code" : "Display"}
@@ -267,8 +276,6 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
                     <StyledTab name="Sampling Settings" icon={CogIcon} />
                     <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
                   </StyledTab.List>
-                </div>
-              </div>
               {showEditor ? withEditor : withoutEditor}
             </div>
           </StyledTab.Group>
