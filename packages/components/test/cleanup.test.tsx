@@ -28,7 +28,6 @@ test("Creates and cleans up source and imports", async () => {
     <SquiggleChart
       code={"normal($x, 1)"}
       project={project}
-      jsImports={{ x: 3 }}
     />
   );
 
