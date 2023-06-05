@@ -8,7 +8,9 @@ export default meta;
 type Story = StoryObj<typeof Radio>;
 
 export const Default: Story = {
-  render: withRHF((args, register) => <Radio {...args} register={register} />),
+  render: withRHF((args, { register }) => (
+    <Radio {...args} register={register} />
+  )),
   args: {
     name: "fieldName",
     label: "Radio label",

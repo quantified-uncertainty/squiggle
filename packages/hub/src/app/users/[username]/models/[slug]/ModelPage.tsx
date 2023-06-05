@@ -1,34 +1,65 @@
 import { FC, PropsWithChildren } from "react";
 import { graphql } from "relay-runtime";
+import { useSession } from "next-auth/react";
+import { useLazyLoadQuery } from "react-relay";
 
-import { Button, DotsHorizontalIcon, Dropdown, DropdownMenu } from "@quri/ui";
+import { DropdownMenu } from "@quri/ui";
 
-import { ModelInfo } from "@/components/ModelInfo";
+import { EntityInfo } from "@/components/EntityInfo";
 import { WithTopMenu } from "@/components/layout/WithTopMenu";
+import { DotsDropdownButton } from "@/components/ui/DotsDropdownButton";
 import { StyledTabLink } from "@/components/ui/StyledTabLink";
 import { modelEditRoute, modelRevisionsRoute, modelRoute } from "@/routes";
 import { DeleteModelAction } from "./DeleteModelAction";
 import { UpdateModelSlugAction } from "./UpdateModelSlugAction";
-import { useSession } from "next-auth/react";
+import {
+  ModelRevisionForRelativeValuesInput,
+  QueryModelInput,
+} from "@/__generated__/ModelPageQuery.graphql";
+import { ModelPageQuery as ModelPageQueryType } from "@gen/ModelPageQuery.graphql";
 
 export const ModelPageFragment = graphql`
-  fragment ModelPage on Model {
+  fragment ModelPage on Model
+  @argumentDefinitions(
+    forRelativeValues: { type: "ModelRevisionForRelativeValuesInput" }
+  ) {
     id
     slug
     owner {
       username
     }
-    ...ModelContent
-  }
-`;
-
-export const ModelPageQuery = graphql`
-  query ModelPageQuery($input: QueryModelInput!) {
-    model(input: $input) {
-      ...ModelPage
+    currentRevision {
+      content {
+        __typename
+      }
+      ...ModelRevision @arguments(forRelativeValues: $forRelativeValues)
     }
   }
 `;
+
+const ModelPageQuery = graphql`
+  query ModelPageQuery(
+    $input: QueryModelInput!
+    $forRelativeValues: ModelRevisionForRelativeValuesInput
+  ) {
+    model(input: $input) {
+      ...ModelPage @arguments(forRelativeValues: $forRelativeValues)
+    }
+  }
+`;
+
+// This is a common query used in multiple nested pages, but it should be de-duped by Next.js caching mechanisms.
+export function useModelPageQuery(
+  input: QueryModelInput,
+  forRelativeValues?: ModelRevisionForRelativeValuesInput
+) {
+  const { model: modelRef } = useLazyLoadQuery<ModelPageQueryType>(
+    ModelPageQuery,
+    { input, forRelativeValues }
+  );
+
+  return modelRef;
+}
 
 type CommonProps = {
   username: string;
@@ -37,8 +68,8 @@ type CommonProps = {
 
 const MenuButton: FC<CommonProps> = ({ username, slug }) => {
   return (
-    <Dropdown
-      render={({ close }) => (
+    <DotsDropdownButton>
+      {({ close }) => (
         <DropdownMenu>
           <UpdateModelSlugAction
             username={username}
@@ -48,12 +79,7 @@ const MenuButton: FC<CommonProps> = ({ username, slug }) => {
           <DeleteModelAction username={username} slug={slug} close={close} />
         </DropdownMenu>
       )}
-      tailwindSelector="squiggle-hub"
-    >
-      <Button>
-        <DotsHorizontalIcon className="text-slate-500" />
-      </Button>
-    </Dropdown>
+    </DotsDropdownButton>
   );
 };
 
@@ -65,7 +91,7 @@ export const ModelPage: FC<Props> = ({ username, slug, children }) => {
   return (
     <WithTopMenu>
       <div className="flex items-center gap-4 max-w-2xl mx-auto">
-        <ModelInfo slug={slug} username={username} />
+        <EntityInfo slug={slug} username={username} />
         <StyledTabLink.List>
           <StyledTabLink name="View" href={modelRoute({ username, slug })} />
           <StyledTabLink

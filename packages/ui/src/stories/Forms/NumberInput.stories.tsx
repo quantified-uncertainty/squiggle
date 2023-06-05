@@ -8,7 +8,7 @@ export default meta;
 type Story = StoryObj<typeof NumberInput>;
 
 export const Default: Story = {
-  render: withRHF((args, register) => (
+  render: withRHF((args, { register }) => (
     <NumberInput {...args} register={register} />
   )),
   args: {
@@ -18,7 +18,7 @@ export const Default: Story = {
 };
 
 export const Small: Story = {
-  render: withRHF((args, register) => (
+  render: withRHF((args, { register }) => (
     <NumberInput {...args} register={register} />
   )),
   args: {

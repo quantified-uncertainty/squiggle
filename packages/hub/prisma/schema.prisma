@@ -51,15 +51,16 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  username      String?   @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  models        Model[]
+  id                        String                     @id @default(cuid())
+  name                      String?
+  email                     String?                    @unique
+  username                  String?                    @unique
+  emailVerified             DateTime?
+  image                     String?
+  accounts                  Account[]
+  sessions                  Session[]
+  models                    Model[]
+  relativeValuesDefinitions RelativeValuesDefinition[]
 }
 
 model VerificationToken {
@@ -70,8 +71,8 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// models are polymorphic;
-// polymorphism schema inspired by https://stackoverflow.com/a/73140073
+// Models are polymorphic.
+// Polymorphism schema inspired by https://stackoverflow.com/a/73140073
 enum ModelType {
   SquiggleSnippet
 }
@@ -87,7 +88,11 @@ model Model {
   owner   User   @relation(fields: [ownerId], references: [id])
   ownerId String
 
-  revisions ModelRevision[]
+  revisions ModelRevision[] @relation("Revisions")
+
+  // technically nullable, but won't ever be null in practice
+  currentRevision   ModelRevision? @relation("CurrentRevision", fields: [currentRevisionId], references: [id])
+  currentRevisionId String?        @unique
 
   @@unique([slug, ownerId])
   @@index([createdAt])
@@ -100,13 +105,18 @@ model ModelRevision {
 
   description String @default("")
 
-  model   Model  @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  model   Model  @relation("Revisions", fields: [modelId], references: [id], onDelete: Cascade)
   modelId String
 
   contentType ModelType
 
   squiggleSnippet SquiggleSnippet? @relation(fields: [contentId], references: [id], map: "squiggleSnippet_contentId")
   contentId       String?          @unique
+
+  relativeValuesExports RelativeValuesExport[]
+
+  // required by Prisma, but unused since `model` field should point at the same entity
+  currentRevisionModel Model? @relation("CurrentRevision")
 }
 
 model SquiggleSnippet {
@@ -115,4 +125,72 @@ model SquiggleSnippet {
   code String
 
   revision ModelRevision?
+}
+
+// Definitions are polymorphic, but organized differently from Models, without content types.
+// Reasoning: https://github.com/quantified-uncertainty/squiggle/issues/1828#issuecomment-1563596166
+model RelativeValuesDefinition {
+  id String @id @default(cuid())
+
+  slug String
+
+  createdAt DateTime @default(now())
+
+  owner   User   @relation(fields: [ownerId], references: [id])
+  ownerId String
+
+  revisions RelativeValuesDefinitionRevision[]
+
+  modelExports RelativeValuesExport[]
+
+  @@unique([slug, ownerId])
+  @@index([createdAt])
+}
+
+model RelativeValuesDefinitionRevision {
+  id String @id @default(cuid())
+
+  createdAt DateTime @default(now())
+
+  definition   RelativeValuesDefinition @relation(fields: [definitionId], references: [id], onDelete: Cascade)
+  definitionId String
+
+  title String
+
+  items           Json
+  clusters        Json
+  recommendedUnit String?
+}
+
+// Note that model revisions are associated with definitions (and not definition revisions).
+// Associating model revisions with definition revisions would be better, but it's more complicated.
+model RelativeValuesExport {
+  id String @id @default(cuid())
+
+  modelRevision   ModelRevision            @relation(fields: [modelRevisionId], references: [id], onDelete: Cascade)
+  modelRevisionId String
+  definition      RelativeValuesDefinition @relation(fields: [definitionId], references: [id], onDelete: Cascade)
+  definitionId    String
+
+  variableName String
+
+  cache RelativeValuesPairCache[]
+
+  @@unique([modelRevisionId, definitionId, variableName], name: "uniqueKey")
+}
+
+model RelativeValuesPairCache {
+  id String @id @default(cuid())
+
+  export   RelativeValuesExport @relation(fields: [exportId], references: [id], onDelete: Cascade)
+  exportId String
+
+  firstItem  String
+  secondItem String
+
+  error String?
+
+  // { median, mean, min, max, uncertainty } object.
+  // Maybe this should be split into postgres columns later.
+  result Json?
 }

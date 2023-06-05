@@ -16,8 +16,7 @@
     "strict": true,
     "preserveConstEnums": true,
     "composite": true,
-    "outDir": "./dist/esm",
-    "declarationDir": "./dist/types",
+    "outDir": "./dist",
     "declaration": true,
     "sourceMap": true
   },

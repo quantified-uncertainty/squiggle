@@ -1,29 +1,3 @@
-/*
-Fork of tailwind's preflight with `.squiggle` scoping.
-*/
-@import "./base.css";
-/*
-Fork of https://github.com/tailwindlabs/tailwindcss-forms styles (with strategy: "class"), but with `.squiggle` scoping.
-This is necessary because tailwindcss-forms's css specificity is lower than preflight's specificity (`padding: 0` and so on),
-so unscoped forms css with scoped preflight css, and there's no setting for scoping.
-*/
-@import "./forms.css";
-
-/*
-Used for resizable panes in the playground.
-Webpack doesn't tolerate well importing it from tsx for some reason, and it's relatively small in any case.
-*/
-@import "react-resizable/css/styles.css";
-
-/*
-This doesn't include tailwind's original preflight (it's disabled in tailwind.config.js),
-but this line is still necessary for proper initialization of `--tw-*` variables.
-*/
-@tailwind base;
-
-@tailwind components;
-@tailwind utilities;
-
 /* Override CodeMirrors default outline. */
 .cm-editor.cm-focused {
     outline: none;

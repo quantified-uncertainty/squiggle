@@ -2,14 +2,12 @@ import { FC } from "react";
 import { useLazyLoadQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
+import { StyledLink } from "@/components/ui/StyledLink";
+import { commonDateFormat } from "@/lib/common";
+import { modelRoute } from "@/routes";
 import { ModelRevisionViewQuery } from "@gen/ModelRevisionViewQuery.graphql";
 import { SquigglePlayground } from "@quri/squiggle-components";
-import { WithTopMenu } from "@/components/layout/WithTopMenu";
-import { ModelInfo } from "@/components/ModelInfo";
-import { commonDateFormat } from "@/lib/utils";
 import { format } from "date-fns";
-import { modelRoute } from "@/routes";
-import { StyledLink } from "@/components/ui/StyledLink";
 
 const ModelRevisionViewQuery = graphql`
   query ModelRevisionViewQuery($input: QueryModelInput!, $revisionId: ID!) {

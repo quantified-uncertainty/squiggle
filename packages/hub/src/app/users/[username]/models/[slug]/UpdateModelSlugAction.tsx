@@ -60,7 +60,7 @@ const UpdateModelSlugModal: FC<Props> = ({ username, slug, close }) => {
   });
 
   return (
-    <Modal close={close} tailwindSelector="squiggle-hub">
+    <Modal close={close}>
       <Modal.Header>
         Rename {username}/{slug}
       </Modal.Header>

@@ -1,24 +1,12 @@
 "use client";
 
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
-import { StyledLink } from "@/components/ui/StyledLink";
-import { newModelRoute } from "@/routes";
-import { useSession } from "next-auth/react";
-import { FrontpageModelList } from "./FrontpageModelList";
+import { FrontPage } from "./FrontPage";
 
-export default function IndexPage() {
-  const { data: session } = useSession();
-
+export default function OuterFrontPage() {
   return (
     <NarrowPageLayout>
-      <div className="space-y-4">
-        <FrontpageModelList />
-        {session ? (
-          <div>
-            <StyledLink href={newModelRoute()}>Create new model</StyledLink>
-          </div>
-        ) : null}
-      </div>
+      <FrontPage />
     </NarrowPageLayout>
   );
 }

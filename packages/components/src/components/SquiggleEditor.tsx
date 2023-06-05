@@ -4,7 +4,6 @@ import { useMaybeControlledValue } from "../lib/hooks/index.js";
 import { SquiggleArgs, useSquiggle } from "../lib/hooks/useSquiggle.js";
 import { getErrors, getValueToRender } from "../lib/utility.js";
 import { CodeEditor } from "./CodeEditor.js";
-import { SquiggleContainer } from "./SquiggleContainer.js";
 import { SquiggleViewer, SquiggleViewerProps } from "./SquiggleViewer/index.js";
 
 export type SquiggleEditorProps = SquiggleArgs & {
@@ -25,7 +24,7 @@ export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
   const errors = getErrors(resultAndBindings.result);
 
   return (
-    <SquiggleContainer>
+    <div>
       <div
         className="border border-grey-200 p-2 m-4"
         data-testid="squiggle-editor"
@@ -41,6 +40,6 @@ export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
       {props.hideViewer ? null : (
         <SquiggleViewer result={valueToRender} {...props} />
       )}
-    </SquiggleContainer>
+    </div>
   );
 };

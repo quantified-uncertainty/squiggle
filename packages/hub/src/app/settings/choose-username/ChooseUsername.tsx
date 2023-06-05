@@ -35,7 +35,7 @@ export const ChooseUsername: FC = () => {
     required: true,
   });
   if (session?.user.username) {
-    router.push("/");
+    router.replace("/");
   }
 
   const [mutation, isMutationInFlight] =

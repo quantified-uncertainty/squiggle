@@ -12,7 +12,9 @@ export const UserLinkFragment = graphql`
   }
 `;
 
-export const UserLink: FC<{ user: UserLinkFragment$key }> = ({ user }) => {
-  const data = useFragment(UserLinkFragment, user);
-  return <UsernameLink username={data.username} />;
+export const UserLink: FC<{ userRef: UserLinkFragment$key }> = ({
+  userRef,
+}) => {
+  const user = useFragment(UserLinkFragment, userRef);
+  return <UsernameLink username={user.username} />;
 };

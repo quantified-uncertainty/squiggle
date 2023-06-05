@@ -8,7 +8,7 @@ export default meta;
 type Story = StoryObj<typeof TextArea>;
 
 export const Default: Story = {
-  render: withRHF((args, register) => (
+  render: withRHF((args, { register }) => (
     <TextArea {...args} register={register} />
   )),
   args: {

@@ -3,9 +3,8 @@ import { useLazyLoadQuery, usePaginationFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { ModelRevisionsList$key } from "@/__generated__/ModelRevisionsList.graphql";
-import { ModelInfo } from "@/components/ModelInfo";
 import { StyledLink } from "@/components/ui/StyledLink";
-import { commonDateFormat } from "@/lib/utils";
+import { commonDateFormat } from "@/lib/common";
 import { modelRevisionRoute } from "@/routes";
 import { ModelRevisionsListQuery } from "@gen/ModelRevisionsListQuery.graphql";
 import { Button } from "@quri/ui";
@@ -23,7 +22,6 @@ const RevisionsFragment = graphql`
       edges {
         node {
           id
-          dbId
           createdAtTimestamp
         }
       }
@@ -49,7 +47,7 @@ type Props = {
 };
 
 export const ModelRevisionsList: FC<Props> = ({ username, slug }) => {
-  const { model } = useLazyLoadQuery<ModelRevisionsListQuery>(
+  const { model: modelRef } = useLazyLoadQuery<ModelRevisionsListQuery>(
     ModelRevisionsListQuery,
     {
       input: { ownerUsername: username, slug },
@@ -57,29 +55,29 @@ export const ModelRevisionsList: FC<Props> = ({ username, slug }) => {
     { fetchPolicy: "store-and-network" }
   );
 
-  const { data, loadNext } = usePaginationFragment<
+  const { data: model, loadNext } = usePaginationFragment<
     ModelRevisionsListQuery,
     ModelRevisionsList$key
-  >(RevisionsFragment, model);
+  >(RevisionsFragment, modelRef);
 
   return (
     <div>
       <div className="mt-4 mb-2 font-medium">Revision history</div>
       <div className="space-y-2">
-        {data.revisions.edges.map((edge) => (
-          <div key={edge.node.dbId}>
+        {model.revisions.edges.map((edge) => (
+          <div key={edge.node.id}>
             <StyledLink
               href={modelRevisionRoute({
                 username,
                 slug,
-                revisionId: edge.node.dbId,
+                revisionId: edge.node.id,
               })}
             >
               {format(new Date(edge.node.createdAtTimestamp), commonDateFormat)}
             </StyledLink>
           </div>
         ))}
-        {data.revisions.pageInfo.hasNextPage && (
+        {model.revisions.pageInfo.hasNextPage && (
           <Button onClick={() => loadNext(20)}>Load more</Button>
         )}
       </div>

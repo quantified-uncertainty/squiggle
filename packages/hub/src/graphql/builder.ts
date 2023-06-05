@@ -14,15 +14,24 @@ import { Session } from "next-auth";
 import { NextRequest } from "next/server";
 import { prisma } from "@/prisma";
 
+type Context = {
+  session: Session | null;
+  request: NextRequest;
+};
+
 export const builder = new SchemaBuilder<{
   PrismaTypes: PrismaTypes;
   DefaultEdgesNullability: false;
-  Context: {
-    session: Session | null;
-    request: NextRequest;
-  };
+  Context: Context;
   AuthScopes: {
     user: boolean;
+  };
+  AuthContexts: {
+    user: Context & {
+      session: Session & {
+        user: NonNullable<Session["user"]> & { email: string };
+      };
+    };
   };
 }>({
   plugins: [

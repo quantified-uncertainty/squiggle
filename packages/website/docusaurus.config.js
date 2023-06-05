@@ -5,7 +5,19 @@ const katex = require("rehype-katex");
 
 const lightCodeTheme = require("prism-react-renderer/themes/github");
 const darkCodeTheme = require("prism-react-renderer/themes/dracula");
-const path = require("path");
+
+async function pluginTailwindCSS() {
+  return {
+    name: "docusaurus-tailwindcss",
+    configurePostCss(postcssOptions) {
+      // Appends TailwindCSS and AutoPrefixer; also postcss-nested for scoped-preflight.css
+      postcssOptions.plugins.push(require("postcss-nested"));
+      postcssOptions.plugins.push(require("tailwindcss"));
+      postcssOptions.plugins.push(require("autoprefixer"));
+      return postcssOptions;
+    },
+  };
+}
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -19,7 +31,7 @@ const config = {
   favicon: "img/favicon.ico",
   organizationName: "quantified-uncertainty", // Usually your GitHub org/user name.
   projectName: "squiggle", // Usually your repo name.
-  plugins: [],
+  plugins: [pluginTailwindCSS],
   presets: [
     [
       "classic",
@@ -40,10 +52,7 @@ const config = {
             "https://github.com/quantified-uncertainty/squiggle/tree/develop/packages/website/",
         },
         theme: {
-          customCss: [
-            require.resolve("./src/css/custom.css"),
-            require.resolve("@quri/squiggle-components/dist/main.css"),
-          ],
+          customCss: [require.resolve("./src/css/custom.css")],
         },
       }),
     ],

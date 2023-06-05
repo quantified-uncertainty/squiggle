@@ -25,7 +25,6 @@ import { useMaybeControlledValue, useSquiggle } from "../../lib/hooks/index.js";
 
 import { getErrors, getValueToRender, isMac } from "../../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "../CodeEditor.js";
-import { SquiggleContainer } from "../SquiggleContainer.js";
 import {
   SquiggleViewer,
   SquiggleViewerProps,
@@ -34,6 +33,7 @@ import { ViewSettingsForm, viewSettingsSchema } from "../ViewSettingsForm.js";
 
 import { SqProject } from "@quri/squiggle-lang";
 import { ResizableBox } from "react-resizable";
+import { ImportSettingsForm } from "./ImportSettingsForm.js";
 import { RunControls } from "./RunControls/index.js";
 import { useRunnerState } from "./RunControls/useRunnerState.js";
 import {
@@ -209,13 +209,13 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
       <ResizableBox
         className="h-full"
         width={initialWidth / 2}
-        axis={"x"}
+        axis="x"
         resizeHandles={["e"]}
-        handle={(handle, ref) => (
+        handle={(_, ref) => (
           <div
             ref={ref}
             style={{ paddingRight: "2px" }}
-            className={`bg-none bg-slate-200 hover:bg-slate-400 transition w-px pr-1 h-full m-0 top-0 mt-0 rotate-0 react-resizable-handle react-resizable-handle-${handle}`}
+            className={`bg-none bg-slate-200 hover:bg-slate-400 transition w-px pr-1 h-full m-0 top-0 mt-0 rotate-0 react-resizable-handle`}
           />
         )}
       >
@@ -262,7 +262,6 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
 
   return (
     <div ref={ref}>
-      <SquiggleContainer>
         <PlaygroundContext.Provider value={{ getLeftPanelElement }}>
           <div
             className="pb-4"
@@ -273,7 +272,6 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
             {showEditor ? withEditor : withoutEditor}
           </div>
         </PlaygroundContext.Provider>
-      </SquiggleContainer>
     </div>
   );
 };

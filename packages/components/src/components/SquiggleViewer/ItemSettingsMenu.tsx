@@ -1,19 +1,20 @@
 import { CogIcon } from "@heroicons/react/solid/esm/index.js";
-import React, { useContext, useRef, useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { SqValue } from "@quri/squiggle-lang";
+import merge from "lodash/merge.js";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 
+import { SqValue } from "@quri/squiggle-lang";
 import { Modal } from "@quri/ui";
+
+import { PlaygroundContext } from "../SquigglePlayground/index.js";
 import {
   PartialViewSettings,
   ViewSettingsForm,
   viewSettingsSchema,
 } from "../ViewSettingsForm.js";
 import { ViewerContext } from "./ViewerContext.js";
-import { PlaygroundContext } from "../SquigglePlayground/index.js";
 import { locationAsString } from "./utils.js";
-import merge from "lodash/merge.js";
 
 type Props = {
   value: SqValue;
@@ -46,11 +47,7 @@ const ItemSettingsModal: React.FC<
   const { getLeftPanelElement } = useContext(PlaygroundContext);
 
   return (
-    <Modal
-      container={getLeftPanelElement()}
-      tailwindSelector="squiggle" // technically, `container` prop is enough, but this is a bit safer
-      close={close}
-    >
+    <Modal container={getLeftPanelElement()} close={close}>
       <Modal.Header>
         Chart settings
         {value.location!.path.items.length ? (
