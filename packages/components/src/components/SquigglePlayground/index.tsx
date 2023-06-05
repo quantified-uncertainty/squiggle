@@ -101,7 +101,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
 
   type Tab = "CODE" | "SETTINGS" | "view";
 
-  const [selectedTab, setSelectedTab] = useState("SETTINGS" as Tab)
+  const [selectedTab, setSelectedTab] = useState("CODE" as Tab)
 
   const { register, control } = useForm({
     resolver: yupResolver(playgroundSettingsSchema),
