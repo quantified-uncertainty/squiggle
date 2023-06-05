@@ -3,3 +3,37 @@
 */
 
 /* This file is empty for now, but can be useful in the future, e.g. if we depend on some external library that provides its own stylesheet. */
+
+/* Override CodeMirrors default outline. */
+.cm-editor.cm-focused {
+    outline: none;
+}
+
+.cm-gutters {
+    color: #aaa !important;
+}
+
+.ͼ2 .cm-gutters {
+    background: white;
+}
+
+.ͼ2 .cm-gutters {
+    border: none
+}
+
+.ͼ2 .cm-activeLine {
+    border-radius: 0 3px 3px 0;
+    margin-right: 0.25em;
+}
+
+.cm-lineNumbers .cm-gutterElement.cm-activeLineGutter {
+    border-radius: 3px 0 0 3px;
+}
+
+.cm-gutterElement.cm-activeLineGutter {
+    background-color: #cceeff44
+}
+
+.cm-gutter.cm-lineNumbers {
+    color: #bbb
+}
