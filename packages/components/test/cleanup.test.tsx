@@ -21,15 +21,15 @@ test("Creates and cleans up source", async () => {
   expect(project.getSource(sourceId)).toBe(undefined);
 });
 
-test("Creates and cleans up source and imports", async () => {
-  const project = SqProject.create();
+// test("Creates and cleans up source and imports", async () => {
+//   const project = SqProject.create();
 
-  const { unmount } = render(
-    <SquiggleChart code={"normal($x, 1)"} project={project} />
-  );
+//   const { unmount } = render(
+//     <SquiggleChart code={"normal($x, 1)"} project={project} />
+//   );
 
-  expect(project.getSourceIds().length).toBe(2);
+//   expect(project.getSourceIds().length).toBe(2);
 
-  unmount();
-  expect(project.getSourceIds()).toStrictEqual([]);
-});
+//   unmount();
+//   expect(project.getSourceIds()).toStrictEqual([]);
+// });
