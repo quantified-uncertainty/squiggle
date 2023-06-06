@@ -197,7 +197,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const leftPanelRef = useRef<HTMLDivElement | null>(null);
 
   const textClasses =
-    "text-slate-800 text-sm px-2 py-2 cursor-pointer rounded-sm hover:bg-slate-200 select-none";
+    "text-slate-800 text-sm px-2 py-2 cursor-pointer rounded-sm hover:bg-slate-200 select-none whitespace-nowrap";
 
   const leftPanelHeader = (
     <div className="flex justify-end mb-1 p-1 bg-slate-50 border-b border-slate-200 overflow-x-auto" ref={leftSideHeader}>
@@ -250,10 +250,10 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
         </div>
       </ResizableBox>
       <div
-        className="flex-1"
+        className="flex-1 overflow-y-auto" //The overflow seems needed, it can't just be in the sub divs.
         data-testid="playground-result"
       >
-        <div className="flex mb-1 p-2 overflow-x-auto justify-end text-slate-400 text-sm" ref={rightSideHeader}>
+        <div className="flex mb-1 p-2 overflow-y-auto justify-end text-slate-400 text-sm whitespace-nowrap" ref={rightSideHeader}>
           {runnerState.isRunning ? "rendering..." : `render #${runnerState.executionId} in ${showTime(runnerState.executionTime)}`}
         </div>
         <div

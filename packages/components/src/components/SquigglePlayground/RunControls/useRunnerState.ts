@@ -14,7 +14,7 @@ const buildInitialState = (code: string): InternalState => ({
   autorunMode: true,
   renderedCode: "",
   runningState: "none",
-  executionId: 1,
+  executionId: 0,
   startTime: undefined,
   totalTime: undefined,
 });
