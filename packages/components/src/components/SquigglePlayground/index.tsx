@@ -17,6 +17,7 @@ import React, {
 import { UseFormRegister, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import { useInitialWidth } from "../../lib/hooks/useInitialWidth.js";
+import { useHeight } from "../../lib/hooks/useHeight.js";
 
 import { Env } from "@quri/squiggle-lang";
 import { Button, TextTooltip } from "@quri/ui";
@@ -153,9 +154,12 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
 
   const editorRef = useRef<CodeEditorHandle>(null);
 
-  const standardHeightStyle = { height, overflow: "auto" };
+  const standardHeightStyle = (height) => ({ height, overflow: "auto" });
+  const { ref: leftSideHeader, height: leftSideHeaderHeight } = useHeight();
+  const { ref: rightSideHeader, height: rightSideHeaderHeight } = useHeight();
+  const TOOLTIP_HEIGHT = 20;
 
-  const leftPanelBody = (
+  const leftPanelBody = (leftSideHeaderHeight &&
     <>
       {selectedTab === "CODE" && (<div data-testid="squiggle-editor">
         <CodeEditor
@@ -164,13 +168,13 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
           errors={errors}
           project={resultAndBindings.project}
           showGutter={true}
-          height={height}
+          height={height - leftSideHeaderHeight + TOOLTIP_HEIGHT}
           onChange={setCode}
           onSubmit={runnerState.run}
         />
       </div>)}
       {selectedTab === "SETTINGS" && (
-        <div className="px-2 space-y-6" style={standardHeightStyle}>
+        <div className="px-2 space-y-6" style={standardHeightStyle(height - leftSideHeaderHeight + TOOLTIP_HEIGHT)}>
           <div className="px-2 py-2">
             <div className="pb-4">
               <Button onClick={() => setSelectedTab("CODE")}> Back </Button>
@@ -196,7 +200,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     "text-slate-800 text-sm px-2 py-2 cursor-pointer rounded-sm hover:bg-slate-200 select-none";
 
   const leftPanelHeader = (
-    <div className="flex justify-end mb-1 p-1 bg-slate-50 border-b border-slate-200 overflow-x-auto">
+    <div className="flex justify-end mb-1 p-1 bg-slate-50 border-b border-slate-200 overflow-x-auto" ref={leftSideHeader}>
       <div className="mr-2 flex gap-1 items-center">
         <div
           className={textClasses}
@@ -225,7 +229,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const showTime = executionTime => executionTime > 1000 ? `${(executionTime / 1000).toFixed(2)}s` : `${executionTime}ms`;
 
   const playgroundWithEditor = (
-    <div className="mt-2 flex flex-row">
+    <div className="flex flex-row">
       <ResizableBox
         className="h-full relative"
         width={initialWidth / 2}
@@ -246,14 +250,15 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
         </div>
       </ResizableBox>
       <div
-        className="p-2 pl-4 flex-1"
+        className="flex-1"
         data-testid="playground-result"
       >
-        <div className="flex mb-1 p-1 overflow-x-auto justify-end text-slate-400 text-sm">
+        <div className="flex mb-1 p-2 overflow-x-auto justify-end text-slate-400 text-sm" ref={rightSideHeader}>
           {runnerState.isRunning ? "rendering..." : `render #${runnerState.executionId} in ${showTime(runnerState.executionTime)}`}
         </div>
         <div
-          style={standardHeightStyle}
+          style={standardHeightStyle(height - rightSideHeaderHeight)}
+          className="p-2"
         >
           {squiggleChart}
         </div>
@@ -269,13 +274,12 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     <PlaygroundContext.Provider value={{ getLeftPanelElement }}>
       <div
         ref={fullContainerRef}
-        className="pb-4"
         style={{
           minHeight: 200 /* important if editor is hidden */,
         }}
       >
         {showEditor && playgroundWithEditor}
-        {!showEditor && <div style={standardHeightStyle}> {squiggleChart}</div>}
+        {!showEditor && <div style={standardHeightStyle(rightSideHeaderHeight)}> {squiggleChart}</div>}
       </div>
     </PlaygroundContext.Provider>
   );

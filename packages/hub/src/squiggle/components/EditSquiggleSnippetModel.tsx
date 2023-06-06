@@ -18,6 +18,7 @@ import { ModelRevisionFragment } from "@/app/users/[username]/models/[slug]/Mode
 import { WithTopMenu } from "@/components/layout/WithTopMenu";
 import { SquiggleContentFragment } from "./SquiggleContent";
 import { EditModelExports } from "@/components/exports/EditModelExports";
+import { useHeight } from "@/hooks/useHeight";
 
 export const Mutation = graphql`
   mutation EditSquiggleSnippetModelMutation(
@@ -124,52 +125,51 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
 
   return (
     <form onSubmit={save}>
-      <WithTopMenu>
-        <div className="max-w-2xl mx-auto">
-          {canSave ? null : (
-            <div className="text-xs">
-              {"You don't own this model, edits won't be saved."}
-            </div>
-          )}
-          {session?.user.username === model.owner.username ? (
-            <div className="mt-2">
-              <TextArea
-                register={register}
-                name="description"
-                label="Description"
-              />
-            </div>
-          ) : null}
-          <div className="mt-4">
-            <header className="text-sm font-medium text-gray-600 mb-2">
-              Views
-            </header>
-            <EditModelExports
-              append={appendVariableWithDefinition}
-              remove={removeVariableWithDefinition}
-              items={variablesWithDefinitionsFields}
+      <div className="max-w-2xl mx-auto">
+        {canSave ? null : (
+          <div className="text-xs">
+            {"You don't own this model, edits won't be saved."}
+          </div>
+        )}
+        {session?.user.username === model.owner.username ? (
+          <div className="mt-2">
+            <TextArea
+              register={register}
+              name="description"
+              label="Description"
             />
           </div>
+        ) : null}
+        <div className="mt-4">
+          <header className="text-sm font-medium text-gray-600 mb-2">
+            Views
+          </header>
+          <EditModelExports
+            append={appendVariableWithDefinition}
+            remove={removeVariableWithDefinition}
+            items={variablesWithDefinitionsFields}
+          />
         </div>
-        <Controller
-          name="code"
-          control={control}
-          rules={{ required: true }}
-          render={({ field }) => (
-            <SquigglePlayground
-              onCodeChange={field.onChange}
-              code={field.value}
-              renderExtraControls={() =>
-                canSave ? (
-                  <Button theme="primary" onClick={save} wide>
-                    Save
-                  </Button>
-                ) : null
-              }
-            />
-          )}
-        />
-      </WithTopMenu>
+      </div>
+      <Controller
+        name="code"
+        control={control}
+        rules={{ required: true }}
+        render={({ field }) => (
+          <SquigglePlayground
+            height={1000}
+            onCodeChange={field.onChange}
+            code={field.value}
+            renderExtraControls={() =>
+              canSave ? (
+                <Button theme="primary" onClick={save} wide>
+                  Save
+                </Button>
+              ) : null
+            }
+          />
+        )}
+      />
     </form>
   );
 };
