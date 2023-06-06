@@ -46,25 +46,25 @@ type PlaygroundProps = // Playground can be either controlled (`code`) or uncont
     | { code: string; defaultCode?: undefined }
     | { defaultCode?: string; code?: undefined }
   ) &
-  (
-    | {
-      project: SqProject;
-      continues?: string[];
-    }
-    | {}
-  ) &
-  Omit<SquiggleViewerProps, "result"> & {
-    onCodeChange?(expr: string): void;
-    /* When settings change */
-    onSettingsChange?(settings: any): void;
-    /** Should we show the editor? */
-    showEditor?: boolean;
-    /** Allows to inject extra buttons, e.g. share button on the website, or save button in Squiggle Hub */
-    renderExtraControls?: () => ReactNode;
-    showShareButton?: boolean;
-    /** Height of the editor */
-    height?: number;
-  };
+    (
+      | {
+          project: SqProject;
+          continues?: string[];
+        }
+      | {}
+    ) &
+    Omit<SquiggleViewerProps, "result"> & {
+      onCodeChange?(expr: string): void;
+      /* When settings change */
+      onSettingsChange?(settings: any): void;
+      /** Should we show the editor? */
+      showEditor?: boolean;
+      /** Allows to inject extra buttons, e.g. share button on the website, or save button in Squiggle Hub */
+      renderExtraControls?: () => ReactNode;
+      showShareButton?: boolean;
+      /** Height of the editor */
+      height?: number;
+    };
 
 // Left panel ref is used for local settings modal positioning in ItemSettingsMenu.tsx
 type PlaygroundContextShape = {
@@ -157,24 +157,31 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const standardHeightStyle = (height) => ({ height, overflow: "auto" });
   const { ref: leftSideHeader, height: leftSideHeaderHeight } = useHeight();
   const { ref: rightSideHeader, height: rightSideHeaderHeight } = useHeight();
-  const TOOLTIP_HEIGHT = 20;
+  const TOOLTIP_HEIGHT = 0; //sometimes 20. Not sure why this seems to change, it's frustrating.
 
-  const leftPanelBody = (leftSideHeaderHeight &&
+  const leftPanelBody = leftSideHeaderHeight && (
     <>
-      {selectedTab === "CODE" && (<div data-testid="squiggle-editor">
-        <CodeEditor
-          ref={editorRef}
-          value={code}
-          errors={errors}
-          project={resultAndBindings.project}
-          showGutter={true}
-          height={height - leftSideHeaderHeight + TOOLTIP_HEIGHT}
-          onChange={setCode}
-          onSubmit={runnerState.run}
-        />
-      </div>)}
+      {selectedTab === "CODE" && (
+        <div data-testid="squiggle-editor">
+          <CodeEditor
+            ref={editorRef}
+            value={code}
+            errors={errors}
+            project={resultAndBindings.project}
+            showGutter={true}
+            height={height - leftSideHeaderHeight + TOOLTIP_HEIGHT}
+            onChange={setCode}
+            onSubmit={runnerState.run}
+          />
+        </div>
+      )}
       {selectedTab === "SETTINGS" && (
-        <div className="px-2 space-y-6" style={standardHeightStyle(height - leftSideHeaderHeight + TOOLTIP_HEIGHT)}>
+        <div
+          className="px-2 space-y-6"
+          style={standardHeightStyle(
+            height - leftSideHeaderHeight + TOOLTIP_HEIGHT
+          )}
+        >
           <div className="px-2 py-2">
             <div className="pb-4">
               <Button onClick={() => setSelectedTab("CODE")}> Back </Button>
@@ -200,7 +207,10 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     "text-slate-800 text-sm px-2 py-2 cursor-pointer rounded-sm hover:bg-slate-200 select-none whitespace-nowrap";
 
   const leftPanelHeader = (
-    <div className="flex justify-end mb-1 p-1 bg-slate-50 border-b border-slate-200 overflow-x-auto" ref={leftSideHeader}>
+    <div
+      className="flex justify-end mb-1 p-1 bg-slate-50 border-b border-slate-200 overflow-x-auto"
+      ref={leftSideHeader}
+    >
       <div className="mr-2 flex gap-1 items-center">
         <div
           className={textClasses}
@@ -213,10 +223,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
           Settings
         </div>
         <TextTooltip text={isMac() ? "Option+Shift+f" : "Alt+Shift+f"}>
-          <div
-            className={textClasses}
-            onClick={editorRef.current?.format}
-          >
+          <div className={textClasses} onClick={editorRef.current?.format}>
             Format Code
           </div>
         </TextTooltip>
@@ -224,9 +231,12 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
         {renderExtraControls?.()}
       </div>
     </div>
-  )
+  );
 
-  const showTime = executionTime => executionTime > 1000 ? `${(executionTime / 1000).toFixed(2)}s` : `${executionTime}ms`;
+  const showTime = (executionTime) =>
+    executionTime > 1000
+      ? `${(executionTime / 1000).toFixed(2)}s`
+      : `${executionTime}ms`;
 
   const playgroundWithEditor = (
     <div className="flex flex-row">
@@ -253,8 +263,15 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
         className="flex-1 overflow-y-auto" //The overflow seems needed, it can't just be in the sub divs.
         data-testid="playground-result"
       >
-        <div className="flex mb-1 p-2 overflow-y-auto justify-end text-slate-400 text-sm whitespace-nowrap" ref={rightSideHeader}>
-          {runnerState.isRunning ? "rendering..." : `render #${runnerState.executionId} in ${showTime(runnerState.executionTime)}`}
+        <div
+          className="flex mb-1 p-2 overflow-y-auto justify-end text-slate-400 text-sm whitespace-nowrap"
+          ref={rightSideHeader}
+        >
+          {runnerState.isRunning
+            ? "rendering..."
+            : `render #${runnerState.executionId} in ${showTime(
+                runnerState.executionTime
+              )}`}
         </div>
         <div
           style={standardHeightStyle(height - rightSideHeaderHeight)}
@@ -279,7 +296,12 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
         }}
       >
         {showEditor && playgroundWithEditor}
-        {!showEditor && <div style={standardHeightStyle(rightSideHeaderHeight)}> {squiggleChart}</div>}
+        {!showEditor && (
+          <div style={standardHeightStyle(rightSideHeaderHeight)}>
+            {" "}
+            {squiggleChart}
+          </div>
+        )}
       </div>
     </PlaygroundContext.Provider>
   );
