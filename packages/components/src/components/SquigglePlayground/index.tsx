@@ -272,6 +272,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
         <div
           style={standardHeightStyle(height - rightSideHeaderHeight)}
           className="p-2"
+          data-testid="playground-result"
         >
           {squiggleChart}
         </div>
