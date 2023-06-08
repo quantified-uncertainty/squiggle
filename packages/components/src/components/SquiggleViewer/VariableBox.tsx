@@ -57,7 +57,7 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
         <header className="flex justify-between hover:bg-stone-100 rounded-md">
           <div className="inline-flex items-center">
             <span
-              className="cursor-pointer p-1 mr-1 text-stone-400 hover:text-slate-700"
+              className="cursor-pointer p-1 mr-1 text-stone-300 hover:text-slate-700"
               onClick={toggleCollapsed}
             >
               <TriangleIcon
@@ -82,7 +82,13 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
       {settings.collapsed ? null : (
         <div className="flex w-full">
           {location.path.items.length ? (
-            <div className="shrink-0 border-l border-stone-200 w-2 ml-2"></div>
+            <div
+              className="flex group cursor-pointer"
+              onClick={toggleCollapsed}
+            >
+              <div className="p-1" />
+              <div className="border-l border-stone-200 group-hover:border-stone-500 w-2" />
+            </div>
           ) : null}
           <div className="grow">{children(getMergedSettings(location))}</div>
         </div>
