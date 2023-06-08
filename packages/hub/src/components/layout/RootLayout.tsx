@@ -44,7 +44,7 @@ export const RootLayout: FC<PropsWithChildren> = ({ children }) => {
         <TopMenu />
         <div>{children}</div>
       </div>
-      <div className="mt-16 p-8 border-t border-t-slate-200 bg-slate-100">
+      <div className="p-8 border-t border-t-slate-200 bg-slate-100">
         <div className="text-sm text-slate-500">
           By{" "}
           <a

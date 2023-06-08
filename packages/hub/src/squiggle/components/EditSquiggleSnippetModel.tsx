@@ -18,7 +18,7 @@ import { ModelRevisionFragment } from "@/app/users/[username]/models/[slug]/Mode
 import { WithTopMenu } from "@/components/layout/WithTopMenu";
 import { SquiggleContentFragment } from "./SquiggleContent";
 import { EditModelExports } from "@/components/exports/EditModelExports";
-import { useHeight } from "@/hooks/useHeight";
+import { useAvailableHeight } from "@/hooks/useAvailableHeight";
 
 export const Mutation = graphql`
   mutation EditSquiggleSnippetModelMutation(
@@ -64,6 +64,8 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
     SquiggleContentFragment,
     revision.content
   );
+
+  const {height, ref} = useAvailableHeight();
 
   const initialFormValues: FormShape = useMemo(() => {
     return {
@@ -151,13 +153,14 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
           />
         </div>
       </div>
+      <div ref={ref}>
       <Controller
         name="code"
         control={control}
         rules={{ required: true }}
         render={({ field }) => (
           <SquigglePlayground
-            height={1000}
+            height={height}
             onCodeChange={field.onChange}
             code={field.value}
             renderExtraControls={() =>
@@ -170,6 +173,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
           />
         )}
       />
+      </div>
     </form>
   );
 };

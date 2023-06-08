@@ -6,7 +6,6 @@ export const useHeight = () => {
 
   useEffect(() => {
     if (ref.current) {
-      console.log(ref.current, ref.current.offsetHeight);
       setHeight(ref.current.offsetHeight);
     }
   }, []); // Empty array means this effect runs once when the component mounts

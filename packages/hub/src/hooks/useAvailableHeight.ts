@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 
-export const useHeight = () => {
+//This gets all of the available height on the page, starting from the top of the element.
+//This is useful for having a div fill up the rest of the page.
+export const useAvailableHeight = () => {
   const ref = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(0);
 
   useEffect(() => {
     const updateHeight = () => {
       if (ref.current) {
-        setHeight(ref.current.offsetHeight);
+        setHeight(window.innerHeight - ref.current.offsetTop);
       }
     }
 
@@ -22,3 +24,6 @@ export const useHeight = () => {
       window.removeEventListener('resize', updateHeight);
     }
   }, []); // Empty array means this effect runs once when the component mounts
+
+  return { ref, height }
+}
