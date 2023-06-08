@@ -21,6 +21,7 @@ export { Labeled } from "./components/Labeled.js";
 export { XIcon } from "./icons/XIcon.js";
 export { RefreshIcon } from "./icons/RefreshIcon.js";
 export { TrashIcon } from "./icons/TrashIcon.js";
+export { TriangleIcon } from "./icons/TriangleIcon.js";
 export { DotsHorizontalIcon } from "./icons/DotsHorizontalIcon.js";
 export { ExternalLinkIcon } from "./icons/ExternalLinkIcon.js";
 export { SignOutIcon } from "./icons/SignOutIcon.js";
