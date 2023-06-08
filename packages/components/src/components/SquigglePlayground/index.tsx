@@ -260,7 +260,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
         className="flex-1 overflow-y-auto" //The overflow seems needed, it can't just be in the sub divs.
       >
         <div
-          className="flex mb-1 p-2 overflow-y-auto justify-end text-slate-400 text-sm whitespace-nowrap"
+          className="flex mb-1 p-2 overflow-y-auto justify-end text-zinc-400 text-sm whitespace-nowrap"
           ref={rightSideHeader}
         >
           {runnerState.isRunning

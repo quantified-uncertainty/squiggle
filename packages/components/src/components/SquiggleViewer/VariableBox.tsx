@@ -56,38 +56,35 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
       {name === undefined ? null : (
         <header className="flex justify-between hover:bg-stone-100 rounded-md">
           <div className="inline-flex items-center">
-              <span className="cursor-pointer p-1 mr-1 text-stone-400 hover:text-slate-700" onClick={toggleCollapsed}>
-                <TriangleIcon size={10} className={settings.collapsed ? "rotate-90" : "rotate-180"} />
-              </span>
-              <span
-                className="text-stone-700 font-mono text-sm"
-              >
-                {name}
-              </span>
+            <span
+              className="cursor-pointer p-1 mr-1 text-stone-400 hover:text-slate-700"
+              onClick={toggleCollapsed}
+            >
+              <TriangleIcon
+                size={10}
+                className={settings.collapsed ? "rotate-90" : "rotate-180"}
+              />
+            </span>
+            <span className="text-stone-800 font-mono text-sm">{name}</span>
           </div>
           <div className="inline-flex space-x-1">
-            {!settings.collapsed &&
+            {!settings.collapsed && (
               <div className="text-stone-400 hover:text-stone-600 text-sm">
                 {heading}
               </div>
-            }
-            {!settings.collapsed &&
-              renderSettingsMenu ? (
-              renderSettingsMenu({ onChange: forceUpdate })
-            ) : null}
+            )}
+            {!settings.collapsed && renderSettingsMenu
+              ? renderSettingsMenu({ onChange: forceUpdate })
+              : null}
           </div>
         </header>
       )}
       {settings.collapsed ? null : (
         <div className="flex w-full">
           {location.path.items.length ? (
-            <div
-              className="shrink-0 border-l border-stone-200 hover:border-stone-200 w-4 cursor-pointer hover:bg-stone-200"
-              onClick={toggleCollapsed}
-            ></div>
+            <div className="shrink-0 border-l border-stone-200 w-2 ml-2"></div>
           ) : null}
-          <div className="grow">
-            {children(getMergedSettings(location))}</div>
+          <div className="grow">{children(getMergedSettings(location))}</div>
         </div>
       )}
     </div>

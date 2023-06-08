@@ -4,8 +4,4 @@ import { FC, PropsWithChildren } from "react";
 
 export const FunctionChartContainer: FC<
   PropsWithChildren<{ fn: SqLambda }>
-> = ({ children, fn }) => (
-  <div>
-    {children}
-  </div>
-);
+> = ({ children, fn }) => <div>{children}</div>;
