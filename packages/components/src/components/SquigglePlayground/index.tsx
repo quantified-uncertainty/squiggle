@@ -219,7 +219,11 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
         >
           Settings
         </div>
-        <TextTooltip text={isMac() ? "Option+Shift+f" : "Alt+Shift+f"}>
+        <TextTooltip
+          text={isMac() ? "Option+Shift+f" : "Alt+Shift+f"}
+          placement="bottom"
+          offset={5}
+        >
           <div className={textClasses} onClick={editorRef.current?.format}>
             Format Code
           </div>

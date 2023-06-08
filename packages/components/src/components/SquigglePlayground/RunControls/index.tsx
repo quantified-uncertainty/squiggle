@@ -28,7 +28,9 @@ export const RunControls: React.FC<RunnerState> = ({
   const text = isMac() ? "Cmd+Enter" : "Ctrl+Enter";
 
   const withTooltip = (jsx: JSX.Element) => (
-    <TextTooltip text={text}>{jsx}</TextTooltip>
+    <TextTooltip text={text} placement="bottom" offset={5}>
+      {jsx}
+    </TextTooltip>
   );
 
   const toggle = (
