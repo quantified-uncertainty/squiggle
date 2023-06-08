@@ -157,7 +157,6 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const standardHeightStyle = (height) => ({ height, overflow: "auto" });
   const { ref: leftSideHeader, height: leftSideHeaderHeight } = useHeight();
   const { ref: rightSideHeader, height: rightSideHeaderHeight } = useHeight();
-  const TOOLTIP_HEIGHT = 0; //sometimes 20. Not sure why this seems to change, it's frustrating.
 
   const leftPanelBody = leftSideHeaderHeight && (
     <>
@@ -169,7 +168,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
             errors={errors}
             project={resultAndBindings.project}
             showGutter={true}
-            height={height - leftSideHeaderHeight + TOOLTIP_HEIGHT}
+            height={height - leftSideHeaderHeight}
             onChange={setCode}
             onSubmit={runnerState.run}
           />
@@ -178,9 +177,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
       {selectedTab === "SETTINGS" && (
         <div
           className="px-2 space-y-6"
-          style={standardHeightStyle(
-            height - leftSideHeaderHeight + TOOLTIP_HEIGHT
-          )}
+          style={standardHeightStyle(height - leftSideHeaderHeight)}
         >
           <div className="px-2 py-2">
             <div className="pb-4">
@@ -261,7 +258,6 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
       </ResizableBox>
       <div
         className="flex-1 overflow-y-auto" //The overflow seems needed, it can't just be in the sub divs.
-        data-testid="playground-result"
       >
         <div
           className="flex mb-1 p-2 overflow-y-auto justify-end text-slate-400 text-sm whitespace-nowrap"
@@ -298,7 +294,6 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
         {showEditor && playgroundWithEditor}
         {!showEditor && (
           <div style={standardHeightStyle(rightSideHeaderHeight)}>
-            {" "}
             {squiggleChart}
           </div>
         )}
