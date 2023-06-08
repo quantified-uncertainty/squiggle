@@ -65,7 +65,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
     revision.content
   );
 
-  const {height, ref} = useAvailableHeight();
+  const { height, ref } = useAvailableHeight();
 
   const initialFormValues: FormShape = useMemo(() => {
     return {
@@ -154,25 +154,25 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
         </div>
       </div>
       <div ref={ref}>
-      <Controller
-        name="code"
-        control={control}
-        rules={{ required: true }}
-        render={({ field }) => (
-          <SquigglePlayground
-            height={height}
-            onCodeChange={field.onChange}
-            code={field.value}
-            renderExtraControls={() =>
-              canSave ? (
-                <Button theme="primary" onClick={save} wide>
-                  Save
-                </Button>
-              ) : null
-            }
-          />
-        )}
-      />
+        <Controller
+          name="code"
+          control={control}
+          rules={{ required: true }}
+          render={({ field }) => (
+            <SquigglePlayground
+              height={height}
+              onCodeChange={field.onChange}
+              code={field.value}
+              renderExtraControls={() =>
+                canSave ? (
+                  <Button theme="primary" onClick={save} wide>
+                    Save
+                  </Button>
+                ) : null
+              }
+            />
+          )}
+        />
       </div>
     </form>
   );

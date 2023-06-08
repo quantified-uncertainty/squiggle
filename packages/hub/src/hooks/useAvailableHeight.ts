@@ -11,19 +11,19 @@ export const useAvailableHeight = () => {
       if (ref.current) {
         setHeight(window.innerHeight - ref.current.offsetTop);
       }
-    }
+    };
 
     // Call it right away
     updateHeight();
 
     // Call it when window resizes
-    window.addEventListener('resize', updateHeight);
+    window.addEventListener("resize", updateHeight);
 
     // Cleanup function
     return () => {
-      window.removeEventListener('resize', updateHeight);
-    }
+      window.removeEventListener("resize", updateHeight);
+    };
   }, []); // Empty array means this effect runs once when the component mounts
 
-  return { ref, height }
-}
+  return { ref, height };
+};
