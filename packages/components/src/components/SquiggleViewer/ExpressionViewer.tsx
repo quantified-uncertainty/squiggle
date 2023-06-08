@@ -31,7 +31,7 @@ const VariableList: React.FC<{
     {(settings) => (
       <div
         className={clsx(
-          "space-y-3",
+          "space-y-2",
           value.location!.path.items.length ? "pt-1 mt-1" : null
         )}
       >

@@ -99,7 +99,7 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
   return (
     <div className="flex gap-2" ref={ref}>
       <CogIcon
-        className="h-5 w-5 cursor-pointer text-slate-400 hover:text-slate-500"
+        className="h-5 w-5 cursor-pointer text-stone-200 hover:text-stone-500"
         onClick={() => setIsOpen(!isOpen)}
       />
       {settings.distributionChartSettings ? (
@@ -111,7 +111,7 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
             });
             props.onChange();
           }}
-          className="text-xs px-1 py-0.5 rounded bg-slate-300"
+          className="text-xs px-1 py-0.5 rounded bg-stone-200 hover:bg-stone-400"
         >
           Reset settings
         </button>
