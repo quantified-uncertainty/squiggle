@@ -21,7 +21,7 @@ import {
   primaryColor,
 } from "../../lib/draw/index.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
-import { flattenResult, sqScaleToD3 } from "../../lib/utility.js";
+import { canvasClasses, flattenResult, sqScaleToD3 } from "../../lib/utility.js";
 import { ErrorAlert } from "../Alert.js";
 import { SummaryTable } from "./SummaryTable.js";
 
@@ -268,7 +268,7 @@ const InnerDistributionsChart: FC<{
     >
       <canvas
         data-testid="multi-distribution-chart"
-        className="w-full"
+        className={canvasClasses}
         ref={ref}
       >
         Distribution plot

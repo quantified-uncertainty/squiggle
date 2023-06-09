@@ -92,3 +92,6 @@ export function isMac() {
     ? "Cmd+Enter"
     : "Ctrl+Enter";
 }
+
+//This is important to make sure that canvas elements properly stretch
+export const canvasClasses = "w-full"
