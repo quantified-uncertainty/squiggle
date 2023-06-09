@@ -7,6 +7,7 @@ import {
   parse as peggyParse,
   SyntaxError as PeggySyntaxError,
 } from "./peggyParser.js";
+import { stringEscape } from "../value/index.js";
 
 export type ParseError = {
   type: "SyntaxError";
@@ -123,7 +124,7 @@ const nodeToString = (node: ASTNode): string => {
     case "ModuleIdentifier":
       return `@${node.value}`;
     case "String":
-      return `'${node.value}'`; // TODO - quote?
+      return stringEscape(node.value);
     case "Ternary":
       return (
         "(::$$_ternary_$$ " +
