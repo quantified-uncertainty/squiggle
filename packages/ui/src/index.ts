@@ -26,7 +26,7 @@ export { DotsHorizontalIcon } from "./icons/DotsHorizontalIcon.js";
 export { ExternalLinkIcon } from "./icons/ExternalLinkIcon.js";
 export { SignOutIcon } from "./icons/SignOutIcon.js";
 export { EditIcon } from "./icons/EditIcon.js";
-export { BarChartIcon, PauseIcon, PlayIcon, CodeBracketIcon, ScaleIcon } from "./icons/HeroIcons.js";
+export { BarChartIcon, PauseIcon, PlayIcon, CodeBracketIcon, ScaleIcon, CheckIcon, FireIcon, BoltIcon, Bars3CenterLeftIcon } from "./icons/HeroIcons.js";
 
 export { useToast, WithToasts } from "./components/WithToasts/index.js";
 
