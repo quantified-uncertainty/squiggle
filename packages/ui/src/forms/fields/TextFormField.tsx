@@ -1,18 +1,18 @@
-import { FieldValues } from "react-hook-form";
+import { FieldPath, FieldValues } from "react-hook-form";
 
-import { FormField, FormFieldProps } from "../common/FormField.js";
+import { FormField } from "../common/FormField.js";
+import { CommonStringFieldProps } from "../common/types.js";
 import { StyledInput, type StyledInputProps } from "../styled/StyledInput.js";
 
-type Props<T extends FieldValues> = Omit<
-  FormFieldProps<T>,
-  "children" | "inlineLabel"
-> &
-  Pick<StyledInputProps, "size" | "placeholder">;
-
-export function TextFormField<T extends FieldValues>({
+export function TextFormField<
+  TValues extends FieldValues,
+  TName extends FieldPath<TValues> = FieldPath<TValues>
+>({
   placeholder,
+  size,
   ...fieldProps
-}: Props<T>) {
+}: CommonStringFieldProps<TValues, TName> &
+  Pick<StyledInputProps, "size" | "placeholder">) {
   return (
     <FormField {...fieldProps}>
       {(inputProps) => (
@@ -20,6 +20,7 @@ export function TextFormField<T extends FieldValues>({
           type="text"
           {...inputProps}
           placeholder={placeholder}
+          size={size}
           autoComplete="off" // TODO - make customizable?
         />
       )}

@@ -10,15 +10,18 @@ import {
 
 import { ErrorIcon } from "../../icons/ErrorIcon.js";
 
-type WithRHFErrorProps<T extends FieldValues> = {
-  name: FieldPath<T>;
+type WithRHFErrorProps<
+  TValues extends FieldValues,
+  TName extends FieldPath<TValues> = FieldPath<TValues>
+> = {
+  name: TName;
 };
 
-export function WithRHFError<T extends FieldValues>({
-  name,
-  children,
-}: PropsWithChildren<WithRHFErrorProps<T>>) {
-  const { getFieldState, formState, clearErrors } = useFormContext<T>();
+export function WithRHFError<
+  TValues extends FieldValues,
+  TName extends FieldPath<TValues> = FieldPath<TValues>
+>({ name, children }: PropsWithChildren<WithRHFErrorProps<TValues, TName>>) {
+  const { getFieldState, formState, clearErrors } = useFormContext<TValues>();
 
   const { error } = getFieldState(name, formState);
   const isErrorOpen = Boolean(error);
@@ -30,7 +33,7 @@ export function WithRHFError<T extends FieldValues>({
   });
 
   return (
-    <div>
+    <div className="relative">
       <div ref={refs.setReference}>{children}</div>
       {isErrorOpen && (
         <div
@@ -50,22 +53,26 @@ export function WithRHFError<T extends FieldValues>({
   );
 }
 
-type Props<T extends FieldValues> = {
-  name: FieldPath<T>;
-  rules?: RegisterOptions<T>;
-  children: (props: UseFormRegisterReturn<FieldPath<T>>) => ReactNode;
+type Props<
+  TValues extends FieldValues,
+  TFieldName extends FieldPath<TValues> = FieldPath<TValues>
+> = {
+  name: TFieldName;
+  rules?: RegisterOptions<TValues, TFieldName>;
+  children: (props: UseFormRegisterReturn<TFieldName>) => ReactNode;
 };
 
 // Helper component for various react-hook-form connected components.
-export function FormInput<T extends FieldValues>({
-  name,
-  rules,
-  children,
-}: Props<T>) {
-  const { register } = useFormContext<T>();
+export function FormInput<
+  TValues extends FieldValues,
+  TFieldName extends FieldPath<TValues> = FieldPath<TValues>
+>({ name, rules, children }: Props<TValues, TFieldName>) {
+  const { register } = useFormContext<TValues>();
 
   return (
-    <WithRHFError name={name}>{children(register(name, rules))}</WithRHFError>
+    <WithRHFError<TValues, TFieldName> name={name}>
+      {children(register(name, rules))}
+    </WithRHFError>
   );
 }
 

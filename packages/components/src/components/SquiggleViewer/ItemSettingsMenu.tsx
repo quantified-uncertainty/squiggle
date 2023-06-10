@@ -2,7 +2,7 @@ import { CogIcon } from "@heroicons/react/solid/esm/index.js";
 import { yupResolver } from "@hookform/resolvers/yup";
 import merge from "lodash/merge.js";
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 
 import { SqValue } from "@quri/squiggle-lang";
 import { Modal } from "@quri/ui";
@@ -31,18 +31,19 @@ const ItemSettingsModal: React.FC<
 
   const mergedSettings = merge(getMergedSettings(value.location!), fixed);
 
-  const { register, watch } = useForm({
+  const form = useForm({
     resolver: yupResolver(viewSettingsSchema),
     defaultValues: mergedSettings,
+    mode: "onChange",
   });
   useEffect(() => {
-    const subscription = watch((vars) => {
+    const subscription = form.watch((vars) => {
       const settings = getSettings(value.location!); // get the latest version
       setSettings(value.location!, merge({}, settings, vars));
       onChange();
     });
     return () => subscription.unsubscribe();
-  }, [getSettings, setSettings, onChange, value.location, watch]);
+  }, [getSettings, setSettings, onChange, value.location, form.watch]);
 
   const { getLeftPanelElement } = useContext(PlaygroundContext);
 
@@ -66,11 +67,13 @@ const ItemSettingsModal: React.FC<
         )}
       </Modal.Header>
       <Modal.Body>
-        <PlaygroundSettingsForm
-          register={register}
-          withFunctionSettings={withFunctionSettings}
-          fixed={fixed}
-        />
+        <FormProvider {...form}>
+          <PlaygroundSettingsForm
+            withGlobalSettings={false}
+            withFunctionSettings={withFunctionSettings}
+            fixed={fixed}
+          />
+        </FormProvider>
       </Modal.Body>
     </Modal>
   );

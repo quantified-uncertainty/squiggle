@@ -4,28 +4,27 @@ import {
   ControllerRenderProps,
   FieldPath,
   FieldValues,
-  RegisterOptions,
+  UseControllerProps,
   useFormContext,
 } from "react-hook-form";
 
 import { WithRHFError } from "./FormInput.js";
 
-export type Props<T extends FieldValues> = {
-  name: FieldPath<T>;
-  rules?: Omit<
-    RegisterOptions<T>,
-    "valueAsNumber" | "valueAsDate" | "setValueAs" | "disabled"
-  >;
-  children: (props: ControllerRenderProps<T>) => ReactNode;
+type Props<
+  TValues extends FieldValues,
+  TName extends FieldPath<TValues> = FieldPath<TValues>
+> = {
+  name: TName;
+  rules?: UseControllerProps<TValues, TName>["rules"];
+  children: (props: ControllerRenderProps<TValues, TName>) => ReactNode;
 };
 
 // Helper component for custom controlled react-hook-form connected components.
-export function ControlledFormInput<T extends FieldValues>({
-  name,
-  rules,
-  children,
-}: Props<T>) {
-  const { control } = useFormContext<T>();
+export function ControlledFormInput<
+  TValues extends FieldValues,
+  TName extends FieldPath<TValues> = FieldPath<TValues>
+>({ name, rules, children }: Props<TValues, TName>) {
+  const { control } = useFormContext<TValues>();
 
   return (
     <WithRHFError name={name}>

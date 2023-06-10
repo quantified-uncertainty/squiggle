@@ -1,5 +1,4 @@
 import React from "react";
-import { UseFormRegister } from "react-hook-form";
 import * as yup from "yup";
 
 import {
@@ -8,12 +7,17 @@ import {
   SqPowerScale,
   SqSymlogScale,
 } from "@quri/squiggle-lang";
-import { Checkbox, NumberInput, TextInput, Radio } from "@quri/ui";
+import {
+  CheckboxFormField,
+  NumberFormField,
+  RadioFormField,
+  TextFormField,
+} from "@quri/ui";
 
-import { FormSection } from "./ui/FormSection.js";
-import { FormComment } from "./ui/FormComment.js";
-import { functionChartDefaults } from "./FunctionChart/utils.js";
 import { defaultTickFormatSpecifier } from "../lib/draw/index.js";
+import { functionChartDefaults } from "./FunctionChart/utils.js";
+import { FormComment } from "./ui/FormComment.js";
+import { FormSection } from "./ui/FormSection.js";
 
 export const renderingSettingsSchema = yup.object({}).shape({
   sampleCount: yup
@@ -145,136 +149,100 @@ export function generateFunctionPlotSettings(settings: PlaygroundSettings) {
   return { xScale, points: settings.functionChartSettings.count };
 }
 
-export const RenderingSettingsForm: React.FC<{
-  register: UseFormRegister<PlaygroundSettings>;
-  fixed?: PartialPlaygroundSettings;
-}> = ({ register }) => (
+export const RenderingSettingsForm: React.FC = () => (
   <div className="space-y-4">
-    <div className="space-y-2">
-      <NumberInput
-        name="renderingSettings.sampleCount"
-        label="Sample Count"
-        register={register}
-      />
-      <div className="mt-3">
-        <FormComment>
-          How many samples to use for Monte Carlo simulations. This can
-          occasionally be overridden by specific Squiggle programs.
-        </FormComment>
-      </div>
-    </div>
-    <div className="space-y-2">
-      <NumberInput
-        name="renderingSettings.xyPointLength"
-        register={register}
-        label="Coordinate Count (For PointSet Shapes)"
-      />
-      <div className="mt-2">
-        <FormComment>
-          When distributions are converted into PointSet shapes, we need to know
-          how many coordinates to use.
-        </FormComment>
-      </div>
-    </div>
+    <NumberFormField<PlaygroundSettings>
+      name="renderingSettings.sampleCount"
+      label="Sample Count"
+      description="How many samples to use for Monte Carlo simulations. This can occasionally be overridden by specific Squiggle programs."
+    />
+    <NumberFormField<PlaygroundSettings>
+      name="renderingSettings.xyPointLength"
+      label="Coordinate Count (For PointSet Shapes)"
+      description="When distributions are converted into PointSet shapes, we need to know how many coordinates to use."
+    />
   </div>
 );
 
 export const DistributionSettingsForm: React.FC<{
-  register: UseFormRegister<PlaygroundSettings>;
   fixed?: PartialPlaygroundSettings;
-}> = ({ register, fixed }) => {
+}> = ({ fixed }) => {
   return (
-    <>
-      <FormSection title="Distribution Display Settings">
-        <div className="space-y-2">
-          <Checkbox
-            register={register}
-            name="distributionChartSettings.showSummary"
-            label="Show summary statistics"
-          />
-          <div className="space-y-2">
-            <Radio
-              register={register}
-              name="distributionChartSettings.xScale"
-              label="X Scale"
-              initialId={fixed?.distributionChartSettings?.xScale ?? "linear"}
-              options={[
-                {
-                  id: "linear",
-                  name: "Linear",
-                },
-                {
-                  id: "log",
-                  name: "Logarithmic",
-                  ...(fixed?.distributionChartSettings?.disableLogX
-                    ? {
-                        disabled: true,
-                        tooltip:
-                          "Your distribution has mass lower than or equal to 0. Log only works on strictly positive values.",
-                      }
-                    : null),
-                },
-                {
-                  id: "symlog",
-                  name: "Symlog",
-                  tooltip:
-                    "Almost logarithmic scale that supports negative values.",
-                },
-                {
-                  id: "exp",
-                  name: "Exponential",
-                },
-              ]}
-            />
-            <Radio
-              register={register}
-              name="distributionChartSettings.yScale"
-              label="Y Scale"
-              initialId={fixed?.distributionChartSettings?.yScale ?? "linear"}
-              options={[
-                {
-                  id: "linear",
-                  name: "Linear",
-                },
-                // log Y is hidden because it almost always causes an empty chart
-                {
-                  id: "exp",
-                  name: "Exponential",
-                },
-              ]}
-            />
-          </div>
-          <NumberInput
-            name="distributionChartSettings.minX"
-            register={register}
-            label="Min X Value"
-          />
-          <NumberInput
-            name="distributionChartSettings.maxX"
-            register={register}
-            label="Max X Value"
-          />
-          <TextInput
-            name="distributionChartSettings.title"
-            register={register}
-            label="Title"
-          />
-          <TextInput
-            name="distributionChartSettings.tickFormat"
-            register={register}
-            label="Tick Format"
-          />
-        </div>
-      </FormSection>
-    </>
+    <FormSection title="Distribution Display Settings">
+      <div className="space-y-4">
+        <CheckboxFormField<PlaygroundSettings>
+          name="distributionChartSettings.showSummary"
+          label="Show summary statistics"
+        />
+        <RadioFormField<PlaygroundSettings>
+          name="distributionChartSettings.xScale"
+          label="X Scale"
+          options={[
+            {
+              id: "linear",
+              name: "Linear",
+            },
+            {
+              id: "log",
+              name: "Logarithmic",
+              ...(fixed?.distributionChartSettings?.disableLogX
+                ? {
+                    disabled: true,
+                    tooltip:
+                      "Your distribution has mass lower than or equal to 0. Log only works on strictly positive values.",
+                  }
+                : null),
+            },
+            {
+              id: "symlog",
+              name: "Symlog",
+              tooltip:
+                "Almost logarithmic scale that supports negative values.",
+            },
+            {
+              id: "exp",
+              name: "Exponential",
+            },
+          ]}
+        />
+        <RadioFormField<PlaygroundSettings>
+          name="distributionChartSettings.yScale"
+          label="Y Scale"
+          options={[
+            {
+              id: "linear",
+              name: "Linear",
+            },
+            // log Y is hidden because it almost always causes an empty chart
+            {
+              id: "exp",
+              name: "Exponential",
+            },
+          ]}
+        />
+        <NumberFormField<PlaygroundSettings>
+          name="distributionChartSettings.minX"
+          label="Min X Value"
+        />
+        <NumberFormField<PlaygroundSettings>
+          name="distributionChartSettings.maxX"
+          label="Max X Value"
+        />
+        <TextFormField<PlaygroundSettings>
+          name="distributionChartSettings.title"
+          label="Title"
+        />
+        <TextFormField<PlaygroundSettings>
+          name="distributionChartSettings.tickFormat"
+          label="Tick Format"
+        />
+      </div>
+    </FormSection>
   );
 };
 
-export const FunctionSettingsForm: React.FC<{
-  register: UseFormRegister<PlaygroundSettings>;
-  fixed?: PartialPlaygroundSettings;
-}> = ({ register, fixed }) => (
-  <>
+export const FunctionSettingsForm: React.FC = () => {
+  return (
     <FormSection title="Function Display Settings">
       <div className="space-y-6">
         <FormComment>
@@ -284,58 +252,57 @@ export const FunctionSettingsForm: React.FC<{
           the number of points to sample.
         </FormComment>
         <div className="space-y-4">
-          <NumberInput
+          <NumberFormField<PlaygroundSettings>
             name="functionChartSettings.start"
-            register={register}
-            fixed={fixed?.functionChartSettings?.start}
             label="Min X Value"
           />
-          <NumberInput
+          <NumberFormField<PlaygroundSettings>
             name="functionChartSettings.stop"
-            register={register}
-            fixed={fixed?.functionChartSettings?.stop}
             label="Max X Value"
           />
-          <NumberInput
+          <NumberFormField<PlaygroundSettings>
             name="functionChartSettings.count"
-            register={register}
             label="Points between X min and X max to sample"
           />
         </div>
       </div>
     </FormSection>
-  </>
-);
+  );
+};
 
 export const PlaygroundSettingsForm: React.FC<{
   withFunctionSettings?: boolean;
+  withGlobalSettings?: boolean;
   fixed?: PartialPlaygroundSettings;
-  register: UseFormRegister<PlaygroundSettings>;
-}> = ({ withFunctionSettings = true, fixed, register }) => {
+}> = ({ withGlobalSettings = true, withFunctionSettings = true, fixed }) => {
   return (
     <div className="divide-y divide-gray-200 max-w-2xl">
-      <div className="mb-6">
-        <FormSection title="Rendering Settings">
-          <RenderingSettingsForm fixed={fixed} register={register} />
-        </FormSection>
-      </div>
+      {withGlobalSettings && (
+        <>
+          <div className="mb-6">
+            <FormSection title="Rendering Settings">
+              <RenderingSettingsForm />
+            </FormSection>
+          </div>
+
+          <div className="pt-6 mb-6">
+            <FormSection title="General Display Settings">
+              <NumberFormField<PlaygroundSettings>
+                name="chartHeight"
+                label="Chart Height (in pixels)"
+              />
+            </FormSection>
+          </div>
+        </>
+      )}
 
       <div className="pt-6 mb-6">
-        <FormSection title="General Display Settings">
-          <NumberInput
-            name="chartHeight"
-            register={register}
-            label="Chart Height (in pixels)"
-          />
-        </FormSection>
+        <DistributionSettingsForm fixed={fixed} />
       </div>
 
-      <div className="pt-6 mb-6">
-        <DistributionSettingsForm fixed={fixed} register={register} />
-      </div>
       {withFunctionSettings ? (
-        <div className="pt-4">
-          <FunctionSettingsForm fixed={fixed} register={register} />
+        <div className="pt-6 mb-6">
+          <FunctionSettingsForm />
         </div>
       ) : null}
     </div>

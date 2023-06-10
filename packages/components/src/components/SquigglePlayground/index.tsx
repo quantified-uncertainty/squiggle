@@ -1,10 +1,4 @@
-import {
-  ChartSquareBarIcon,
-  CodeIcon,
-  CogIcon,
-  CurrencyDollarIcon,
-  EyeIcon,
-} from "@heroicons/react/solid/esm/index.js";
+import { CogIcon } from "@heroicons/react/solid/esm/index.js";
 import { yupResolver } from "@hookform/resolvers/yup";
 import React, {
   ReactNode,
@@ -14,59 +8,58 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { UseFormRegister, useForm, useWatch } from "react-hook-form";
-import * as yup from "yup";
-import { useInitialWidth } from "../../lib/hooks/useInitialWidth.js";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { useHeight } from "../../lib/hooks/useHeight.js";
+import { useInitialWidth } from "../../lib/hooks/useInitialWidth.js";
 
 import { Env } from "@quri/squiggle-lang";
-import { Button, Bars3CenterLeftIcon } from "@quri/ui";
+import { Bars3CenterLeftIcon, Button } from "@quri/ui";
 
 import { useMaybeControlledValue, useSquiggle } from "../../lib/hooks/index.js";
 
 import { getErrors, getValueToRender, isMac } from "../../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "../CodeEditor.js";
 import {
-  SquiggleViewer,
-  SquiggleViewerProps,
-} from "../SquiggleViewer/index.js";
-import {
   PlaygroundSettingsForm,
   viewSettingsSchema,
   type PlaygroundSettings,
 } from "../PlaygroundSettings.js";
+import {
+  SquiggleViewer,
+  SquiggleViewerProps,
+} from "../SquiggleViewer/index.js";
 
 import { SqProject } from "@quri/squiggle-lang";
 import { ResizableBox } from "react-resizable";
+import { MenuItem } from "./MenuItem.js";
+import { AutorunnerMenuItem } from "./RunControls/AutorunnerMenuItem.js";
 import { RunMenuItem } from "./RunControls/RunMenuItem.js";
 import { useRunnerState } from "./RunControls/useRunnerState.js";
-import { AutorunnerMenuItem } from "./RunControls/AutorunnerMenuItem.js";
-import { MenuItem } from "./MenuItem.js"
 
 type PlaygroundProps = // Playground can be either controlled (`code`) or uncontrolled (`defaultCode` + `onCodeChange`)
   (
     | { code: string; defaultCode?: undefined }
     | { defaultCode?: string; code?: undefined }
   ) &
-  (
-    | {
-      project: SqProject;
-      continues?: string[];
-    }
-    | {}
-  ) &
-  Omit<SquiggleViewerProps, "result"> & {
-    onCodeChange?(expr: string): void;
-    /* When settings change */
-    onSettingsChange?(settings: any): void;
-    /** Should we show the editor? */
-    showEditor?: boolean;
-    /** Allows to inject extra buttons, e.g. share button on the website, or save button in Squiggle Hub */
-    renderExtraControls?: () => ReactNode;
-    showShareButton?: boolean;
-    /** Height of the editor */
-    height?: number;
-  };
+    (
+      | {
+          project: SqProject;
+          continues?: string[];
+        }
+      | {}
+    ) &
+    Omit<SquiggleViewerProps, "result"> & {
+      onCodeChange?(expr: string): void;
+      /* When settings change */
+      onSettingsChange?(settings: any): void;
+      /** Should we show the editor? */
+      showEditor?: boolean;
+      /** Allows to inject extra buttons, e.g. share button on the website, or save button in Squiggle Hub */
+      renderExtraControls?: () => ReactNode;
+      showShareButton?: boolean;
+      /** Height of the editor */
+      height?: number;
+    };
 
 // Left panel ref is used for local settings modal positioning in ItemSettingsMenu.tsx
 type PlaygroundContextShape = {
@@ -104,13 +97,14 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
 
   const [selectedTab, setSelectedTab] = useState("CODE" as Tab);
 
-  const { register, control } = useForm({
+  const form = useForm({
     resolver: yupResolver(viewSettingsSchema),
     defaultValues,
+    mode: "onChange",
   });
 
   // react-hook-form types the result as Partial, but the result doesn't seem to be a Partial, so this should be ok
-  const vars = useWatch({ control }) as PlaygroundSettings;
+  const vars = useWatch({ control: form.control }) as PlaygroundSettings;
 
   useEffect(() => {
     onSettingsChange?.(vars);
@@ -185,15 +179,9 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
             <div className="pb-4">
               <Button onClick={() => setSelectedTab("CODE")}> Back </Button>
             </div>
-            <PlaygroundSettingsForm
-              register={
-                // This is dangerous, but doesn't cause any problems.
-                // I tried to make `PlaygroundSettings` generic (to allow it to accept any extension of a settings schema), but it didn't work.
-                register as unknown as UseFormRegister<
-                  yup.InferType<typeof viewSettingsSchema>
-                >
-              }
-            />
+            <FormProvider {...form}>
+              <PlaygroundSettingsForm />
+            </FormProvider>
           </div>
         </div>
       )}
@@ -213,11 +201,24 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
       <div className="mr-2 flex gap-1 items-center">
         <RunMenuItem {...runnerState} />
         <AutorunnerMenuItem {...runnerState} />
-        <MenuItem onClick={() =>
-          selectedTab !== "SETTINGS"
-            ? setSelectedTab("SETTINGS")
-            : setSelectedTab("CODE")} icon={CogIcon} tooltipText="Settings"/>
-        <MenuItem tooltipText={isMac() ? "Format Code (Option+Shift+f)" : "Format Code (Alt+Shift+f)"} icon={Bars3CenterLeftIcon} onClick={editorRef.current?.format}/>
+        <MenuItem
+          onClick={() =>
+            selectedTab !== "SETTINGS"
+              ? setSelectedTab("SETTINGS")
+              : setSelectedTab("CODE")
+          }
+          icon={CogIcon}
+          tooltipText="Settings"
+        />
+        <MenuItem
+          tooltipText={
+            isMac()
+              ? "Format Code (Option+Shift+f)"
+              : "Format Code (Alt+Shift+f)"
+          }
+          icon={Bars3CenterLeftIcon}
+          onClick={editorRef.current?.format}
+        />
         {renderExtraControls?.()}
       </div>
     </div>
@@ -259,8 +260,8 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
           {runnerState.isRunning
             ? "rendering..."
             : `render #${runnerState.executionId} in ${showTime(
-              runnerState.executionTime
-            )}`}
+                runnerState.executionTime
+              )}`}
         </div>
         <div
           style={standardHeightStyle(height - rightSideHeaderHeight)}

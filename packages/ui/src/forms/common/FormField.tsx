@@ -6,30 +6,36 @@ import {
   UseFormRegisterReturn,
 } from "react-hook-form";
 
-import { FormInput } from "./FormInput.js";
 import { FieldLayout, type FormFieldLayoutProps } from "./FormFieldLayout.js";
+import { FormInput } from "./FormInput.js";
 
-export type FormFieldProps<T extends FieldValues> = FormFieldLayoutProps & {
-  name: FieldPath<T>;
-  registerOptions?: RegisterOptions<T>;
-  children: (props: UseFormRegisterReturn<FieldPath<T>>) => ReactNode;
+export type FormFieldProps<
+  TValues extends FieldValues,
+  TName extends FieldPath<TValues> = FieldPath<TValues>
+> = FormFieldLayoutProps & {
+  name: TName;
+  rules?: RegisterOptions<TValues, TName>; // more related than CommonFieldProps
+  children: (props: UseFormRegisterReturn<TName>) => ReactNode;
 };
 
-export function FormField<T extends FieldValues>({
+export function FormField<
+  TValues extends FieldValues,
+  TName extends FieldPath<TValues> = FieldPath<TValues>
+>({
   name,
-  registerOptions,
+  rules,
   label,
   description,
   inlineLabel,
   children,
-}: FormFieldProps<T>) {
+}: FormFieldProps<TValues, TName>) {
   return (
     <FieldLayout
       label={label}
       description={description}
       inlineLabel={inlineLabel}
     >
-      <FormInput name={name} rules={registerOptions}>
+      <FormInput name={name} rules={rules}>
         {children}
       </FormInput>
     </FieldLayout>

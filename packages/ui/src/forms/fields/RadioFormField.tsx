@@ -1,21 +1,17 @@
-import { FieldValues } from "react-hook-form";
+import { FieldPath, FieldValues } from "react-hook-form";
 
-import {
-  ControlledFormField,
-  ControlledFormFieldProps,
-} from "../common/ControlledFormField.js";
+import { ControlledFormField } from "../common/ControlledFormField.js";
+import { CommonUnknownFieldProps } from "../common/types.js";
 import { StyledRadio, type StyledRadioProps } from "../styled/StyledRadio.js";
 
-type Props<T extends FieldValues> = Omit<
-  ControlledFormFieldProps<T>,
-  "children" | "inlineLabel"
-> &
-  Pick<StyledRadioProps, "options">;
-
-export function RadioFormField<T extends FieldValues>({
+export function RadioFormField<
+  TValues extends FieldValues,
+  TName extends FieldPath<TValues> = FieldPath<TValues>
+>({
   options,
   ...fieldProps
-}: Props<T>) {
+}: CommonUnknownFieldProps<TValues, TName> &
+  Pick<StyledRadioProps, "options">) {
   return (
     <ControlledFormField {...fieldProps}>
       {({ onChange, value }) => (

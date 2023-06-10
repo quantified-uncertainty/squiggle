@@ -24,7 +24,7 @@ export const WithValidation: Story = {
     ...Default.args,
     description: "Negative number.",
     placeholder: "-5",
-    registerOptions: {
+    rules: {
       max: 0,
       required: true,
     },

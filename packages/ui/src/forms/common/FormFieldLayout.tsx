@@ -15,7 +15,7 @@ export const FieldLayout: FC<PropsWithChildren<FormFieldLayoutProps>> = ({
 }) => {
   // TODO - use <label forHtml=...> (but this would require a `useId`)
   return (
-    <label>
+    <label className="block">
       <div
         className={clsx(
           inlineLabel && "flex flex-row-reverse items-end justify-end gap-2"

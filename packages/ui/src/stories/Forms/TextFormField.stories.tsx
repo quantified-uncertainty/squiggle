@@ -22,7 +22,7 @@ export const Default: Story = {
 export const WithValidation: Story = {
   args: {
     ...Default.args,
-    registerOptions: {
+    rules: {
       pattern: {
         value: /^[\w-]+$/,
         message: "Must be alphanumerical",

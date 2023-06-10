@@ -1,23 +1,17 @@
-import { FieldValues } from "react-hook-form";
+import { FieldPath, FieldValues } from "react-hook-form";
 
-import {
-  ControlledFormField,
-  ControlledFormFieldProps,
-} from "../common/ControlledFormField.js";
+import { ControlledFormField } from "../common/ControlledFormField.js";
+import { CommonUnknownFieldProps } from "../common/types.js";
 import { StyledCheckbox } from "../styled/StyledCheckbox.js";
 
-type Props<T extends FieldValues> = Omit<
-  ControlledFormFieldProps<T>,
-  "children" | "inlineLabel"
->;
-
-export function CheckboxFormField<T extends FieldValues>({
-  ...fieldProps
-}: Props<T>) {
+export function CheckboxFormField<
+  TValues extends FieldValues,
+  TName extends FieldPath<TValues> = FieldPath<TValues>
+>({ ...fieldProps }: CommonUnknownFieldProps<TValues, TName>) {
   return (
     <ControlledFormField {...fieldProps} inlineLabel>
       {({ value, onChange }) => (
-        <StyledCheckbox value={value} onChange={onChange} />
+        <StyledCheckbox checked={value} onChange={onChange} />
       )}
     </ControlledFormField>
   );
