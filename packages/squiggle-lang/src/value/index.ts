@@ -146,7 +146,33 @@ export const vNumber = (v: number) => new VNumber(v);
 export function stringEscape(str: string): string {
   if (!str.includes("'")) return `'${str}'`;
   if (!str.includes('"')) return `"${str}"`;
-  return `"${str.replace('"', `" + '"' + "`)}"`;
+
+  let quoteRanges: [number, number][] = [];
+  let start = -1;
+  for (let i = 0; i < str.length; i++) {
+    if (start == -1) {
+      if (str.at(i) == `'`) {
+        start = i;
+      }
+    } else {
+      if (str.at(i) != `'`) {
+        quoteRanges.push([start, i]);
+        start = -1;
+      }
+    }
+  }
+  if (start != -1) {
+    quoteRanges.push([start, str.length]);
+  }
+
+  let result: string = quoteRanges
+    .reverse()
+    .reduce<string>(
+      (p, [s, e]) =>
+        p.slice(0, s) + `' + "` + "'".repeat(e - s) + `" + '` + p.slice(e),
+      str
+    );
+  return "'" + result + "'";
 }
 
 class VString {
