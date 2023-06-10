@@ -123,7 +123,9 @@ export const NumericFunctionChart: FC<Props> = ({
   return (
     <FunctionChartContainer fn={plot.fn}>
       <div className="flex flex-col items-stretch">
-        <canvas ref={ref} className={canvasClasses}>Chart for {plot.toString()}</canvas>
+        <canvas ref={ref} className={canvasClasses}>
+          Chart for {plot.toString()}
+        </canvas>
         <div className="space-y-1">
           {errors.map(({ x, value }) => (
             // TODO - group errors with identical value

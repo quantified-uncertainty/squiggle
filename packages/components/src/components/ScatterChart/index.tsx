@@ -113,7 +113,9 @@ export const ScatterChart: FC<Props> = ({ plot, height, environment }) => {
 
   return (
     <div className="flex flex-col items-stretch">
-      <canvas ref={ref} className={canvasClasses}>Chart for {plot.toString()}</canvas>
+      <canvas ref={ref} className={canvasClasses}>
+        Chart for {plot.toString()}
+      </canvas>
       {[xDist, yDist].map((dist) =>
         dist.ok ? null : (
           <ErrorAlert heading="Conversion error">
