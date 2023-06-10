@@ -1,41 +1,36 @@
 import { clsx } from "clsx";
-import { FieldValues, Path, UseFormRegister } from "react-hook-form";
+import { useId } from "react";
 
-export function Radio<T extends FieldValues>({
-  name,
-  label,
-  register,
-  initialId,
-  options,
-}: {
-  name: Path<T>;
-  label: string;
-  register: UseFormRegister<T>;
-  initialId: string;
+export type StyledRadioProps = {
+  value?: string;
   options: {
     id: string;
     name: string;
     disabled?: boolean;
     tooltip?: string;
   }[];
-}) {
+  // do we need other fields, e.g. onBlur?
+  onChange(newValue: string): void;
+};
+
+export function StyledRadio({ value, options, onChange }: StyledRadioProps) {
+  const id = useId();
+
   return (
     <div className="flex items-center gap-3">
-      <div className="text-sm font-medium text-gray-600">{label}:</div>
       {options.map((option) => {
-        const htmlId = `${name}@${option.id}`;
+        const htmlId = `${id}@${option.id}`;
         return (
           <div key={option.id} className="flex items-center gap-1 group">
             <input
               id={htmlId}
               type="radio"
-              {...register(name)}
-              value={option.id}
+              onChange={() => onChange(option.id)}
+              checked={option.id === value}
               className={clsx(
                 "form-radio focus:ring-transparent text-indigo-500",
                 option.disabled ? "cursor-not-allowed" : "cursor-pointer"
               )}
-              defaultChecked={option.id === initialId}
               disabled={option.disabled}
             />
             <label

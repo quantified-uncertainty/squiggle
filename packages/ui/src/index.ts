@@ -10,13 +10,18 @@ export { DropdownMenuAsyncActionItem } from "./components/Dropdown/DropdownMenuA
 export { TextTooltip } from "./components/TextTooltip.js";
 export { MouseTooltip } from "./components/MouseTooltip.js";
 
-export { Checkbox } from "./components/Checkbox.js";
-export { NumberInput } from "./components/NumberInput.js";
-export { TextInput } from "./components/TextInput.js";
-export { ColorInput } from "./components/ColorInput.js";
-export { Radio } from "./components/Radio.js";
-export { TextArea } from "./components/TextArea.js";
-export { Labeled } from "./components/Labeled.js";
+// react-hook-form inputs, with label and description; you should usually use these to build forms
+export { TextFormField } from "./forms/fields/TextFormField.js";
+export { NumberFormField } from "./forms/fields/NumberFormField.js";
+export { TextAreaFormField } from "./forms/fields/TextAreaFormField.js";
+export { ColorFormField } from "./forms/fields/ColorFormField.js";
+export { CheckboxFormField } from "./forms/fields/CheckboxFormField.js";
+export { RadioFormField } from "./forms/fields/RadioFormField.js";
+
+// styled form inputs, if you want to avoid react-hook-form for some reason
+export { StyledInput } from "./forms/styled/StyledInput.js";
+export { StyledCheckbox } from "./forms/styled/StyledCheckbox.js";
+export { StyledColorInput } from "./forms/styled/StyledColorInput.js";
 
 export { XIcon } from "./icons/XIcon.js";
 export { RefreshIcon } from "./icons/RefreshIcon.js";
