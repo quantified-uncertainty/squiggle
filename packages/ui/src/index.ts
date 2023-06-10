@@ -18,10 +18,17 @@ export { ColorFormField } from "./forms/fields/ColorFormField.js";
 export { CheckboxFormField } from "./forms/fields/CheckboxFormField.js";
 export { RadioFormField } from "./forms/fields/RadioFormField.js";
 
+// generic react-hook-form inputs
+export { ControlledFormField } from "./forms/common/ControlledFormField.js";
+export { FormField } from "./forms/common/FormField.js";
+export { ControlledFormInput } from "./forms/common/ControlledFormInput.js";
+export { FormInput } from "./forms/common/FormInput.js";
+
 // styled form inputs, if you want to avoid react-hook-form for some reason
 export { StyledInput } from "./forms/styled/StyledInput.js";
 export { StyledCheckbox } from "./forms/styled/StyledCheckbox.js";
 export { StyledColorInput } from "./forms/styled/StyledColorInput.js";
+export { StyledTextArea } from "./forms/styled/StyledTextArea.js";
 
 export { XIcon } from "./icons/XIcon.js";
 export { RefreshIcon } from "./icons/RefreshIcon.js";
@@ -31,7 +38,17 @@ export { DotsHorizontalIcon } from "./icons/DotsHorizontalIcon.js";
 export { ExternalLinkIcon } from "./icons/ExternalLinkIcon.js";
 export { SignOutIcon } from "./icons/SignOutIcon.js";
 export { EditIcon } from "./icons/EditIcon.js";
-export { BarChartIcon, PauseIcon, PlayIcon, CodeBracketIcon, ScaleIcon, CheckIcon, FireIcon, BoltIcon, Bars3CenterLeftIcon } from "./icons/HeroIcons.js";
+export {
+  BarChartIcon,
+  PauseIcon,
+  PlayIcon,
+  CodeBracketIcon,
+  ScaleIcon,
+  CheckIcon,
+  FireIcon,
+  BoltIcon,
+  Bars3CenterLeftIcon,
+} from "./icons/HeroIcons.js";
 
 export { useToast, WithToasts } from "./components/WithToasts/index.js";
 

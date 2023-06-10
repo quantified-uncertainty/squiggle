@@ -1,12 +1,13 @@
-import { Button, TextInput, useToast } from "@quri/ui";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { FC, useState } from "react";
+import { FC } from "react";
+import { FormProvider, useForm } from "react-hook-form";
 import { useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 
+import { Button, TextFormField, useToast } from "@quri/ui";
+
 import { ChooseUsernameMutation } from "@gen/ChooseUsernameMutation.graphql";
-import { useForm } from "react-hook-form";
 
 const Mutation = graphql`
   mutation ChooseUsernameMutation($username: String!) {
@@ -25,9 +26,11 @@ const Mutation = graphql`
 export const ChooseUsername: FC = () => {
   const toast = useToast();
 
-  const { register, handleSubmit, watch } = useForm<{
+  const form = useForm<{
     username: string;
-  }>();
+  }>({
+    mode: "onChange",
+  });
 
   const router = useRouter();
 
@@ -41,7 +44,7 @@ export const ChooseUsername: FC = () => {
   const [mutation, isMutationInFlight] =
     useMutation<ChooseUsernameMutation>(Mutation);
 
-  const save = handleSubmit((data) => {
+  const save = form.handleSubmit((data) => {
     mutation({
       variables: { username: data.username },
       onCompleted(data) {
@@ -58,24 +61,32 @@ export const ChooseUsername: FC = () => {
     });
   });
 
-  const disabled = isMutationInFlight || !watch("username");
+  const disabled = isMutationInFlight || !form.formState.isValid;
 
   return (
-    <div className="flex flex-col items-center mt-20">
-      <div className="space-y-2">
-        <div>Pick a username:</div>
-        <div className="flex items-center gap-1">
-          <TextInput
-            placeholder="Username"
-            register={register}
-            name="username"
-            size="small"
-          />
-          <Button onClick={save} disabled={disabled} theme="primary">
-            Save
-          </Button>
+    <FormProvider {...form}>
+      <div className="flex flex-col items-center mt-20">
+        <div className="space-y-2">
+          <div>Pick a username:</div>
+          <div className="flex items-center gap-1">
+            <TextFormField
+              placeholder="Username"
+              name="username"
+              size="small"
+              rules={{
+                required: true,
+                pattern: {
+                  value: /^[\w-]+$/,
+                  message: "Must be alphanumerical",
+                },
+              }}
+            />
+            <Button onClick={save} disabled={disabled} theme="primary">
+              Save
+            </Button>
+          </div>
         </div>
       </div>
-    </div>
+    </FormProvider>
   );
 };

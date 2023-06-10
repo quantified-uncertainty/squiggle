@@ -1,20 +1,20 @@
-import { UpdateModelSlugActionMutation } from "@/__generated__/UpdateModelSlugActionMutation.graphql";
-import { modelRoute } from "@/routes";
+import { useRouter } from "next/navigation";
+import { FC, useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { useMutation } from "react-relay";
+import { graphql } from "relay-runtime";
+
 import {
   Button,
   DropdownMenuActionItem,
-  DropdownMenuAsyncActionItem,
   EditIcon,
   Modal,
-  TextInput,
-  TrashIcon,
+  TextFormField,
   useToast,
 } from "@quri/ui";
-import { useRouter } from "next/navigation";
-import { FC, useCallback, useState } from "react";
-import { useForm } from "react-hook-form";
-import { useMutation } from "react-relay";
-import { graphql } from "relay-runtime";
+
+import { UpdateModelSlugActionMutation } from "@/__generated__/UpdateModelSlugActionMutation.graphql";
+import { modelRoute } from "@/routes";
 
 const Mutation = graphql`
   mutation UpdateModelSlugActionMutation(
@@ -39,10 +39,16 @@ const UpdateModelSlugModal: FC<Props> = ({ username, slug, close }) => {
   const router = useRouter();
   const toast = useToast();
 
-  const { register, handleSubmit } = useForm<{ slug: string }>();
-  const [mutation] = useMutation<UpdateModelSlugActionMutation>(Mutation);
+  const form = useForm<{ slug: string }>({
+    mode: "onChange",
+    defaultValues: {
+      slug,
+    },
+  });
+  const [mutation, mutationInFlight] =
+    useMutation<UpdateModelSlugActionMutation>(Mutation);
 
-  const save = handleSubmit((data) => {
+  const save = form.handleSubmit((data) => {
     mutation({
       variables: { input: { username, oldSlug: slug, newSlug: data.slug } },
       onCompleted(response) {
@@ -60,22 +66,38 @@ const UpdateModelSlugModal: FC<Props> = ({ username, slug, close }) => {
   });
 
   return (
-    <Modal close={close}>
-      <Modal.Header>
-        Rename {username}/{slug}
-      </Modal.Header>
-      <Modal.Body>
-        <div className="mb-4">
-          Are you sure? All existing links to the model will break.
-        </div>
-        <TextInput register={register} name="slug" label="New slug" />
-      </Modal.Body>
-      <Modal.Footer>
-        <Button onClick={save} theme="primary">
-          Save
-        </Button>
-      </Modal.Footer>
-    </Modal>
+    <FormProvider {...form}>
+      <Modal close={close}>
+        <Modal.Header>
+          Rename {username}/{slug}
+        </Modal.Header>
+        <Modal.Body>
+          <div className="mb-4">
+            Are you sure? All existing links to the model will break.
+          </div>
+          <TextFormField
+            name="slug"
+            label="New slug"
+            rules={{
+              pattern: {
+                value: /^[\w-]+$/,
+                message: "Must be alphanumerical",
+              },
+              required: true,
+            }}
+          />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            onClick={save}
+            theme="primary"
+            disabled={!form.formState.isValid || mutationInFlight}
+          >
+            Save
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </FormProvider>
   );
 };
 
