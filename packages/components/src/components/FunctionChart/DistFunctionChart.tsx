@@ -10,7 +10,6 @@ import {
 } from "@quri/squiggle-lang";
 import * as d3 from "d3";
 import groupBy from "lodash/groupBy.js";
-import * as React from "react";
 import { FC, useCallback, useMemo, useRef } from "react";
 
 import {
@@ -22,7 +21,7 @@ import {
 import { Padding } from "../../lib/draw/types.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
-import { sqScaleToD3 } from "../../lib/utility.js";
+import { sqScaleToD3, canvasClasses } from "../../lib/utility.js";
 import { ErrorAlert } from "../Alert.js";
 import { DistributionsChart } from "../DistributionsChart/index.js";
 import { NumberShower } from "../NumberShower.js";
@@ -254,7 +253,7 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
   return (
     <FunctionChartContainer fn={plot.fn}>
       <div className="flex flex-col items-stretch">
-        <canvas ref={ref}>Chart for {plot.toString()}</canvas>
+        <canvas ref={ref} className={canvasClasses}>Chart for {plot.toString()}</canvas>
         {showChart}
         {Object.entries(errors).map(([errorName, errorPoints]) => (
           <ErrorAlert key={errorName} heading={errorName}>

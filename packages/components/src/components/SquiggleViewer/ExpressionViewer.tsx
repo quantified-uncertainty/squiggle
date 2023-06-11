@@ -31,7 +31,7 @@ const VariableList: React.FC<{
     {(settings) => (
       <div
         className={clsx(
-          "space-y-3",
+          "space-y-2",
           value.location!.path.items.length ? "pt-1 mt-1" : null
         )}
       >
@@ -55,7 +55,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
       return (
         <VariableBox value={value} heading="Number">
           {() => (
-            <div className="font-semibold text-slate-600">
+            <div className="font-semibold text-neutral-600">
               <NumberShower precision={3} number={value.value} />
             </div>
           )}
@@ -119,11 +119,9 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
         <VariableBox value={value} heading="String">
           {() => (
             <>
-              <span className="text-slate-400">"</span>
-              <span className="text-slate-600 font-semibold font-mono">
-                {value.value}
-              </span>
-              <span className="text-slate-400">"</span>
+              <span className="text-neutral-300">"</span>
+              <span className="text-neutral-600 text-sm">{value.value}</span>
+              <span className="text-neutral-300">"</span>
             </>
           )}
         </VariableBox>
@@ -131,7 +129,11 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
     case "Bool":
       return (
         <VariableBox value={value} heading="Boolean">
-          {() => value.value.toString()}
+          {() => (
+            <span className="text-neutral-600 text-sm font-mono">
+              {value.value.toString()}
+            </span>
+          )}
         </VariableBox>
       );
     case "Date":
@@ -157,7 +159,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
       return (
         <VariableBox
           value={value}
-          heading="Function"
+          heading={`Function(${value.value.parameters().join(", ")})`}
           renderSettingsMenu={({ onChange }) => {
             return (
               <ItemSettingsMenu
@@ -257,7 +259,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
           {() => {
             const entries = value.value.entries();
             if (!entries.length) {
-              return <div className="text-slate-400">Empty record</div>;
+              return <div className="text-neutral-400">Empty record</div>;
             }
             return entries.map(([key, r]) => (
               <ExpressionViewer key={key} value={r} />
@@ -281,7 +283,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
           {() => (
             <div>
               <span>No display for type: </span>{" "}
-              <span className="font-semibold text-slate-600">
+              <span className="font-semibold text-neutral-600">
                 {(value as { tag: string }).tag}
               </span>
             </div>

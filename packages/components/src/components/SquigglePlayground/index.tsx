@@ -20,7 +20,7 @@ import { useInitialWidth } from "../../lib/hooks/useInitialWidth.js";
 import { useHeight } from "../../lib/hooks/useHeight.js";
 
 import { Env } from "@quri/squiggle-lang";
-import { Button, TextTooltip } from "@quri/ui";
+import { Button, Bars3CenterLeftIcon } from "@quri/ui";
 
 import { useMaybeControlledValue, useSquiggle } from "../../lib/hooks/index.js";
 
@@ -38,33 +38,35 @@ import {
 
 import { SqProject } from "@quri/squiggle-lang";
 import { ResizableBox } from "react-resizable";
-import { RunControls } from "./RunControls/index.js";
+import { RunMenuItem } from "./RunControls/RunMenuItem.js";
 import { useRunnerState } from "./RunControls/useRunnerState.js";
+import { AutorunnerMenuItem } from "./RunControls/AutorunnerMenuItem.js";
+import { MenuItem } from "./MenuItem.js"
 
 type PlaygroundProps = // Playground can be either controlled (`code`) or uncontrolled (`defaultCode` + `onCodeChange`)
   (
     | { code: string; defaultCode?: undefined }
     | { defaultCode?: string; code?: undefined }
   ) &
-    (
-      | {
-          project: SqProject;
-          continues?: string[];
-        }
-      | {}
-    ) &
-    Omit<SquiggleViewerProps, "result"> & {
-      onCodeChange?(expr: string): void;
-      /* When settings change */
-      onSettingsChange?(settings: any): void;
-      /** Should we show the editor? */
-      showEditor?: boolean;
-      /** Allows to inject extra buttons, e.g. share button on the website, or save button in Squiggle Hub */
-      renderExtraControls?: () => ReactNode;
-      showShareButton?: boolean;
-      /** Height of the editor */
-      height?: number;
-    };
+  (
+    | {
+      project: SqProject;
+      continues?: string[];
+    }
+    | {}
+  ) &
+  Omit<SquiggleViewerProps, "result"> & {
+    onCodeChange?(expr: string): void;
+    /* When settings change */
+    onSettingsChange?(settings: any): void;
+    /** Should we show the editor? */
+    showEditor?: boolean;
+    /** Allows to inject extra buttons, e.g. share button on the website, or save button in Squiggle Hub */
+    renderExtraControls?: () => ReactNode;
+    showShareButton?: boolean;
+    /** Height of the editor */
+    height?: number;
+  };
 
 // Left panel ref is used for local settings modal positioning in ItemSettingsMenu.tsx
 type PlaygroundContextShape = {
@@ -209,22 +211,13 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
       ref={leftSideHeader}
     >
       <div className="mr-2 flex gap-1 items-center">
-        <div
-          className={textClasses}
-          onClick={() =>
-            selectedTab !== "SETTINGS"
-              ? setSelectedTab("SETTINGS")
-              : setSelectedTab("CODE")
-          }
-        >
-          Settings
-        </div>
-        <TextTooltip text={isMac() ? "Option+Shift+f" : "Alt+Shift+f"}>
-          <div className={textClasses} onClick={editorRef.current?.format}>
-            Format Code
-          </div>
-        </TextTooltip>
-        <RunControls {...runnerState} />
+        <RunMenuItem {...runnerState} />
+        <AutorunnerMenuItem {...runnerState} />
+        <MenuItem onClick={() =>
+          selectedTab !== "SETTINGS"
+            ? setSelectedTab("SETTINGS")
+            : setSelectedTab("CODE")} icon={CogIcon} tooltipText="Settings"/>
+        <MenuItem tooltipText={isMac() ? "Format Code (Option+Shift+f)" : "Format Code (Alt+Shift+f)"} icon={Bars3CenterLeftIcon} onClick={editorRef.current?.format}/>
         {renderExtraControls?.()}
       </div>
     </div>
@@ -260,14 +253,14 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
         className="flex-1 overflow-y-auto" //The overflow seems needed, it can't just be in the sub divs.
       >
         <div
-          className="flex mb-1 p-2 overflow-y-auto justify-end text-slate-400 text-sm whitespace-nowrap"
+          className="flex mb-1 p-2 overflow-y-auto justify-end text-zinc-400 text-sm whitespace-nowrap"
           ref={rightSideHeader}
         >
           {runnerState.isRunning
             ? "rendering..."
             : `render #${runnerState.executionId} in ${showTime(
-                runnerState.executionTime
-              )}`}
+              runnerState.executionTime
+            )}`}
         </div>
         <div
           style={standardHeightStyle(height - rightSideHeaderHeight)}

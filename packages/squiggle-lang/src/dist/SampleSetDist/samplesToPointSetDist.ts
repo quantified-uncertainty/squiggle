@@ -5,7 +5,7 @@ import { splitContinuousAndDiscrete } from "./splitContinuousAndDiscrete.js";
 import * as E_A_Floats from "../../utility/E_A_Floats.js";
 
 const minDiscreteToKeep = (samples: readonly number[]) =>
-  Math.max(20, samples.length / 50);
+  Math.max(20, Math.round(samples.length / 50));
 
 type ConversionResult = {
   continuousDist: XYShape | undefined;
