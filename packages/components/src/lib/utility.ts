@@ -94,4 +94,4 @@ export function isMac() {
 }
 
 //This is important to make sure that canvas elements properly stretch
-export const canvasClasses = "w-full"
+export const canvasClasses = "w-full";

@@ -253,7 +253,9 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
   return (
     <FunctionChartContainer fn={plot.fn}>
       <div className="flex flex-col items-stretch">
-        <canvas ref={ref} className={canvasClasses}>Chart for {plot.toString()}</canvas>
+        <canvas ref={ref} className={canvasClasses}>
+          Chart for {plot.toString()}
+        </canvas>
         {showChart}
         {Object.entries(errors).map(([errorName, errorPoints]) => (
           <ErrorAlert key={errorName} heading={errorName}>

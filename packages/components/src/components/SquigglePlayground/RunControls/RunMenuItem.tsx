@@ -1,14 +1,11 @@
-import React from "react";
-import { clsx } from "clsx";
 import { PlayIcon } from "@quri/ui";
+import React from "react";
 
-import {
-  RefreshIcon,
-} from "@heroicons/react/solid/esm/index.js";
+import { RefreshIcon } from "@heroicons/react/solid/esm/index.js";
 
-import { RunnerState } from "./useRunnerState.js";
 import { isMac } from "../../../lib/utility.js";
-import { MenuItem } from "../MenuItem.js"
+import { MenuItem } from "../MenuItem.js";
+import { RunnerState } from "./useRunnerState.js";
 
 export const RunMenuItem: React.FC<RunnerState> = ({
   run,
@@ -22,6 +19,14 @@ export const RunMenuItem: React.FC<RunnerState> = ({
   const text = `Run (${isMac() ? "Cmd+Enter" : "Ctrl+Enter"})`;
 
   return (
-    <MenuItem tooltipText={text} icon={CurrentPlayIcon} iconSpin={isRunning} iconColorClasses={isStale ? "text-amber-500" : ""} onClick={run}>Run</MenuItem>
-  )
+    <MenuItem
+      tooltipText={text}
+      icon={CurrentPlayIcon}
+      iconSpin={isRunning}
+      iconColorClasses={isStale ? "text-amber-500" : ""}
+      onClick={run}
+    >
+      Run
+    </MenuItem>
+  );
 };

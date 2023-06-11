@@ -1,20 +1,19 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { Radio } from "../../components/Radio.js";
-import { withRHF } from "./withRHF.js";
+import { RadioFormField } from "../../index.js";
+import { formDecorator } from "./withRHF.js";
 
-const meta = { component: Radio } satisfies Meta<typeof Radio>;
+const meta = {
+  component: RadioFormField,
+  decorators: [formDecorator],
+} satisfies Meta<typeof RadioFormField>;
 export default meta;
-type Story = StoryObj<typeof Radio>;
+type Story = StoryObj<typeof RadioFormField>;
 
 export const Default: Story = {
-  render: withRHF((args, { register }) => (
-    <Radio {...args} register={register} />
-  )),
   args: {
     name: "fieldName",
     label: "Radio label",
-    initialId: "first",
     options: [
       {
         id: "first",
