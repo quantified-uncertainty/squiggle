@@ -13,7 +13,7 @@ export const AutorunnerMenuItem: React.FC<RunnerState> = ({
     tooltipText={"Triggers runs on code changes"}
     icon={autorunMode ? BoltIcon : PauseIcon}
     onClick={() => setAutorunMode(!autorunMode)}
-    iconColorClasses={autorunMode ? "text-amber-500" : ""}
+    className={!autorunMode ? "opacity-60" : ""}
   >
     Autorun
   </MenuItem>

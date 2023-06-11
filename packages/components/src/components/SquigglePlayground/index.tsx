@@ -190,15 +190,11 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
 
   const leftPanelRef = useRef<HTMLDivElement | null>(null);
 
-  const textClasses =
-    "text-slate-800 text-sm px-2 py-2 cursor-pointer rounded-sm hover:bg-slate-200 select-none whitespace-nowrap";
-
   const leftPanelHeader = (
     <div
-      className="flex justify-end mb-1 p-1 bg-slate-50 border-b border-slate-200 overflow-x-auto"
+      className="flex items-center h-8 bg-slate-50 border-b border-slate-200 overflow-hidden mb-1"
       ref={leftSideHeader}
     >
-      <div className="mr-2 flex gap-1 items-center">
         <RunMenuItem {...runnerState} />
         <AutorunnerMenuItem {...runnerState} />
         <MenuItem
@@ -220,7 +216,6 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
           onClick={editorRef.current?.format}
         />
         {renderExtraControls?.()}
-      </div>
     </div>
   );
 

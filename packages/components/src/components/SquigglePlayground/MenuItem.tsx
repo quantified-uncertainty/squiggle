@@ -10,10 +10,12 @@ export const MenuItem: React.FC<{
   iconSpin?: boolean;
   onClick?: () => void;
   tooltipText?: string;
+  className?: string;
 }> = ({
   icon: Icon,
   iconColorClasses,
   iconSpin,
+  className,
   onClick,
   tooltipText,
   children,
@@ -23,17 +25,19 @@ export const MenuItem: React.FC<{
       {jsx}
     </TextTooltip>
   );
+  const iconSize = children ? "h-3 w-3" : "h-5 w-5";
   const main = (
     <div
       className={
-        "flex items-center text-slate-800 space-x-1 text-sm px-3 py-2 cursor-pointer rounded-sm hover:bg-slate-200 select-none whitespace-nowrap"
+        "flex items-center text-slate-800 space-x-1 text-sm px-4 h-full cursor-pointer hover:bg-slate-200 select-none whitespace-nowrap transition " + className
       }
       onClick={onClick}
     >
       {Icon && (
         <Icon
           className={clsx(
-            "h-4 w-4 flex-shrink-0",
+            iconSize,
+            "flex-shrink-0",
             iconColorClasses || "text-slate-400",
             iconSpin && "animate-spin"
           )}

@@ -12,18 +12,16 @@ export const RunMenuItem: React.FC<RunnerState> = ({
   code,
   renderedCode,
   isRunning,
+  autorunMode
 }) => {
-  const isStale = renderedCode !== code;
-  const CurrentPlayIcon = isRunning ? RefreshIcon : PlayIcon;
-
+  const showAsRunning = !autorunMode && isRunning
   const text = `Run (${isMac() ? "Cmd+Enter" : "Ctrl+Enter"})`;
 
   return (
     <MenuItem
       tooltipText={text}
-      icon={CurrentPlayIcon}
-      iconSpin={isRunning}
-      iconColorClasses={isStale ? "text-amber-500" : ""}
+      icon={showAsRunning ? RefreshIcon : PlayIcon}
+      iconSpin={showAsRunning}
       onClick={run}
     >
       Run
