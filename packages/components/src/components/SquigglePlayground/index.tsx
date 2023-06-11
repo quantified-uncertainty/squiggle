@@ -1,5 +1,6 @@
 import { CogIcon } from "@heroicons/react/solid/esm/index.js";
 import { zodResolver } from "@hookform/resolvers/zod";
+import merge from "lodash/merge.js";
 import React, {
   ReactNode,
   useCallback,
@@ -8,12 +9,15 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { FormProvider, useForm, useWatch } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
+import { ResizableBox } from "react-resizable";
+import { z } from "zod";
+
+import { Env, SqProject } from "@quri/squiggle-lang";
+import { Bars3CenterLeftIcon, Button } from "@quri/ui";
+
 import { useHeight } from "../../lib/hooks/useHeight.js";
 import { useInitialWidth } from "../../lib/hooks/useInitialWidth.js";
-
-import { Env } from "@quri/squiggle-lang";
-import { Bars3CenterLeftIcon, Button } from "@quri/ui";
 
 import { useMaybeControlledValue, useSquiggle } from "../../lib/hooks/index.js";
 
@@ -21,22 +25,19 @@ import { getErrors, getValueToRender, isMac } from "../../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "../CodeEditor.js";
 import {
   PlaygroundSettingsForm,
+  defaultPlaygroundSettings,
   viewSettingsSchema,
   type PlaygroundSettings,
-  defaultPlaygroundSettings,
 } from "../PlaygroundSettings.js";
 import {
   SquiggleViewer,
   SquiggleViewerProps,
 } from "../SquiggleViewer/index.js";
 
-import { SqProject } from "@quri/squiggle-lang";
-import { ResizableBox } from "react-resizable";
 import { MenuItem } from "./MenuItem.js";
 import { AutorunnerMenuItem } from "./RunControls/AutorunnerMenuItem.js";
 import { RunMenuItem } from "./RunControls/RunMenuItem.js";
 import { useRunnerState } from "./RunControls/useRunnerState.js";
-import { z } from "zod";
 
 type PlaygroundProps = // Playground can be either controlled (`code`) or uncontrolled (`defaultCode` + `onCodeChange`)
   (
@@ -88,13 +89,13 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   });
   const { ref: fullContainerRef, width: initialWidth } = useInitialWidth();
 
-  const defaultValues: PlaygroundSettings = {
-    // TODO - this doesn't deep merge and injects extra unrelated props
-    ...defaultPlaygroundSettings,
-    ...Object.fromEntries(
+  const defaultValues: PlaygroundSettings = merge(
+    {},
+    defaultPlaygroundSettings,
+    Object.fromEntries(
       Object.entries(props).filter(([k, v]) => v !== undefined)
-    ),
-  };
+    )
+  );
 
   type Tab = "CODE" | "SETTINGS";
 

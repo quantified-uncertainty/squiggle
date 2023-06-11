@@ -79,6 +79,7 @@ export const viewSettingsSchema = z.object({
 
 export type PlaygroundSettings = z.infer<typeof viewSettingsSchema>;
 
+// passing this to zod through `.default()` is problematic, especially for number fields:
 export const defaultPlaygroundSettings: PlaygroundSettings = {
   chartHeight: 200,
   renderingSettings: {
