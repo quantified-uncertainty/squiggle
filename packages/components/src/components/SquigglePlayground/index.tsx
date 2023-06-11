@@ -109,16 +109,10 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   );
 
   useEffect(() => {
-    const submit = form.handleSubmit(
-      (data) => {
-        console.log({ data });
-        setSettings(data);
-        onSettingsChange?.(data);
-      },
-      (e) => {
-        console.log({ e });
-      }
-    );
+    const submit = form.handleSubmit((data) => {
+      setSettings(data);
+      onSettingsChange?.(data);
+    });
     const subscription = form.watch(() => submit());
     return () => subscription.unsubscribe();
   }, [form.handleSubmit, form.watch, onSettingsChange]);
