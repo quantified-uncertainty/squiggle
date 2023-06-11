@@ -12,9 +12,9 @@ export const RunMenuItem: React.FC<RunnerState> = ({
   code,
   renderedCode,
   isRunning,
-  autorunMode
+  autorunMode,
 }) => {
-  const showAsRunning = !autorunMode && isRunning
+  const showAsRunning = !autorunMode && isRunning;
   const text = `Run (${isMac() ? "Cmd+Enter" : "Ctrl+Enter"})`;
 
   return (

@@ -9,7 +9,6 @@ import React, {
   useState,
 } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
-import { useHeight } from "../../lib/hooks/useHeight.js";
 import { useInitialWidth } from "../../lib/hooks/useInitialWidth.js";
 
 import { Env } from "@quri/squiggle-lang";
@@ -151,10 +150,10 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const editorRef = useRef<CodeEditorHandle>(null);
 
   const standardHeightStyle = (height) => ({ height, overflow: "auto" });
-  const { ref: leftSideHeader, height: leftSideHeaderHeight } = useHeight();
-  const { ref: rightSideHeader, height: rightSideHeaderHeight } = useHeight();
+  const leftSideHeaderHeight = 32; //calculated from the leftPanelHeader fixed height.
+  const rightSideHeaderHeight = 32;
 
-  const leftPanelBody = leftSideHeaderHeight && (
+  const leftPanelBody = (
     <>
       {selectedTab === "CODE" && (
         <div data-testid="squiggle-editor">
@@ -191,31 +190,26 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const leftPanelRef = useRef<HTMLDivElement | null>(null);
 
   const leftPanelHeader = (
-    <div
-      className="flex items-center h-8 bg-slate-50 border-b border-slate-200 overflow-hidden mb-1"
-      ref={leftSideHeader}
-    >
-        <RunMenuItem {...runnerState} />
-        <AutorunnerMenuItem {...runnerState} />
-        <MenuItem
-          onClick={() =>
-            selectedTab !== "SETTINGS"
-              ? setSelectedTab("SETTINGS")
-              : setSelectedTab("CODE")
-          }
-          icon={CogIcon}
-          tooltipText="Settings"
-        />
-        <MenuItem
-          tooltipText={
-            isMac()
-              ? "Format Code (Option+Shift+f)"
-              : "Format Code (Alt+Shift+f)"
-          }
-          icon={Bars3CenterLeftIcon}
-          onClick={editorRef.current?.format}
-        />
-        {renderExtraControls?.()}
+    <div className="flex items-center h-8 bg-slate-50 border-b border-slate-200 overflow-hidden mb-1">
+      <RunMenuItem {...runnerState} />
+      <AutorunnerMenuItem {...runnerState} />
+      <MenuItem
+        onClick={() =>
+          selectedTab !== "SETTINGS"
+            ? setSelectedTab("SETTINGS")
+            : setSelectedTab("CODE")
+        }
+        icon={CogIcon}
+        tooltipText="Settings"
+      />
+      <MenuItem
+        tooltipText={
+          isMac() ? "Format Code (Option+Shift+f)" : "Format Code (Alt+Shift+f)"
+        }
+        icon={Bars3CenterLeftIcon}
+        onClick={editorRef.current?.format}
+      />
+      {renderExtraControls?.()}
     </div>
   );
 
@@ -248,10 +242,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
       <div
         className="flex-1 overflow-y-auto" //The overflow seems needed, it can't just be in the sub divs.
       >
-        <div
-          className="flex mb-1 p-2 overflow-y-auto justify-end text-zinc-400 text-sm whitespace-nowrap"
-          ref={rightSideHeader}
-        >
+        <div className="flex mb-1 h-8 p-2 overflow-y-auto justify-end text-zinc-400 text-sm whitespace-nowrap">
           {runnerState.isRunning
             ? "rendering..."
             : `render #${runnerState.executionId} in ${showTime(
