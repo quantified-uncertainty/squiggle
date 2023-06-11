@@ -1,5 +1,4 @@
-import { flip, offset, shift, useFloating } from "@floating-ui/react";
-import { PropsWithChildren, ReactNode } from "react";
+import { ReactNode } from "react";
 import {
   FieldPath,
   FieldValues,
@@ -8,50 +7,7 @@ import {
   useFormContext,
 } from "react-hook-form";
 
-import { ErrorIcon } from "../../icons/ErrorIcon.js";
-
-type WithRHFErrorProps<
-  TValues extends FieldValues,
-  TName extends FieldPath<TValues> = FieldPath<TValues>
-> = {
-  name: TName;
-};
-
-export function WithRHFError<
-  TValues extends FieldValues,
-  TName extends FieldPath<TValues> = FieldPath<TValues>
->({ name, children }: PropsWithChildren<WithRHFErrorProps<TValues, TName>>) {
-  const { getFieldState, formState, clearErrors } = useFormContext<TValues>();
-
-  const { error } = getFieldState(name, formState);
-  const isErrorOpen = Boolean(error);
-
-  const { refs, floatingStyles } = useFloating({
-    placement: "bottom-start", // TODO - make configurable
-    open: isErrorOpen,
-    middleware: [shift(), offset(2), flip()],
-  });
-
-  return (
-    <div className="relative">
-      <div ref={refs.setReference}>{children}</div>
-      {isErrorOpen && (
-        <div
-          ref={refs.setFloating}
-          style={floatingStyles}
-          onClick={() => clearErrors(name)}
-        >
-          <div className="bg-red-100 px-2 py-1 rounded flex gap-1 items-center">
-            <ErrorIcon size={16} className="text-red-500" />
-            <div className="text-sm text-red-800 font-medium">
-              {error?.message || error?.type || String(error)}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+import { WithRHFError } from "./WithRHFError.js";
 
 type Props<
   TValues extends FieldValues,

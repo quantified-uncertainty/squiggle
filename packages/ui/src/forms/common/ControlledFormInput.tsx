@@ -8,7 +8,7 @@ import {
   useFormContext,
 } from "react-hook-form";
 
-import { WithRHFError } from "./FormInput.js";
+import { WithRHFError } from "./WithRHFError.js";
 
 type Props<
   TValues extends FieldValues,
