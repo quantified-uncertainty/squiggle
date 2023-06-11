@@ -16,7 +16,7 @@ type ViewerContextShape = {
 
 export const ViewerContext = React.createContext<ViewerContextShape>({
   getSettings: () => ({ collapsed: false }),
-  getMergedSettings: () => viewSettingsSchema.getDefault(),
+  getMergedSettings: () => viewSettingsSchema.parse({}),
   setSettings() {},
   enableLocalSettings: false,
 });

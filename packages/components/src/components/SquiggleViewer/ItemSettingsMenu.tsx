@@ -1,5 +1,5 @@
 import { CogIcon } from "@heroicons/react/solid/esm/index.js";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { zodResolver } from "@hookform/resolvers/zod";
 import merge from "lodash/merge.js";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -32,7 +32,7 @@ const ItemSettingsModal: React.FC<
   const mergedSettings = merge(getMergedSettings(value.location!), fixed);
 
   const form = useForm({
-    resolver: yupResolver(viewSettingsSchema),
+    resolver: zodResolver(viewSettingsSchema),
     defaultValues: mergedSettings,
     mode: "onChange",
   });

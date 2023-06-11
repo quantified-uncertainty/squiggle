@@ -1,5 +1,5 @@
 import React from "react";
-import * as yup from "yup";
+import { z } from "zod";
 
 import {
   SqLinearScale,
@@ -19,51 +19,27 @@ import { functionChartDefaults } from "./FunctionChart/utils.js";
 import { FormComment } from "./ui/FormComment.js";
 import { FormSection } from "./ui/FormSection.js";
 
-export const renderingSettingsSchema = yup.object({}).shape({
-  sampleCount: yup
-    .number()
-    .required()
-    .positive()
-    .integer()
-    .default(1000)
-    .min(10)
-    .max(1000000),
-  xyPointLength: yup
-    .number()
-    .required()
-    .positive()
-    .integer()
-    .default(1000)
-    .min(10)
-    .max(10000),
+export const renderingSettingsSchema = z.object({
+  sampleCount: z.number().int().gte(10).lte(1000000).default(1000),
+  xyPointLength: z.number().int().gte(10).lte(10000).default(1000),
 });
 
-export const functionSettingsSchema = yup.object({}).shape({
-  start: yup
-    .number()
-    .required()
-    .positive()
-    .integer()
-    .default(functionChartDefaults.min)
-    .min(0),
-  stop: yup
-    .number()
-    .required()
-    .positive()
-    .integer()
-    .default(functionChartDefaults.max)
-    .min(0),
-  count: yup
-    .number()
-    .required()
-    .positive()
-    .integer()
-    .default(functionChartDefaults.points)
-    .min(2),
+export const functionSettingsSchema = z.object({
+  start: z.number().finite().default(functionChartDefaults.min),
+  stop: z.number().finite().default(functionChartDefaults.max),
+  count: z.number().int().finite().gte(2).default(functionChartDefaults.points),
 });
 
-const scaleTypes = ["linear", "log", "symlog", "exp"] as const;
-type ScaleType = (typeof scaleTypes)[number];
+const scaleSchema = z
+  .union([
+    z.literal("linear"),
+    z.literal("log"),
+    z.literal("symlog"),
+    z.literal("exp"),
+  ])
+  .default("linear");
+
+type ScaleType = z.infer<typeof scaleSchema>;
 
 function scaleTypeToSqScale(
   scaleType: ScaleType,
@@ -84,33 +60,36 @@ function scaleTypeToSqScale(
   }
 }
 
-export const distributionSettingsSchema = yup.object({}).shape({
+export const distributionSettingsSchema = z.object({
   /** Set the x scale to be logarithmic */
-  disableLogX: yup.boolean(),
-  xScale: yup.mixed<ScaleType>().oneOf(scaleTypes).default("linear"),
-  yScale: yup.mixed<ScaleType>().oneOf(scaleTypes).default("linear"),
-  /** Set the y scale to be exponential */
-  expY: yup.boolean().required().default(false),
-  minX: yup.number(),
-  maxX: yup.number(),
-  title: yup.string(),
-  xAxisType: yup
-    .mixed<"number" | "dateTime">()
-    .oneOf(["number", "dateTime"])
+  disableLogX: z.boolean().optional(),
+  xScale: scaleSchema,
+  yScale: scaleSchema,
+  minX: z.number().optional(),
+  maxX: z.number().optional(),
+  title: z.string().optional(),
+  xAxisType: z
+    .union([z.literal("number"), z.literal("dateTime")])
     .default("number"),
   /** Documented here: https://github.com/d3/d3-format */
-  tickFormat: yup.string().required().default(defaultTickFormatSpecifier),
-  showSummary: yup.boolean().required().default(true),
+  tickFormat: z.string().default(defaultTickFormatSpecifier),
+  showSummary: z.boolean().default(true),
 });
 
-export const viewSettingsSchema = yup.object({}).shape({
-  renderingSettings: renderingSettingsSchema,
-  distributionChartSettings: distributionSettingsSchema,
-  functionChartSettings: functionSettingsSchema,
-  chartHeight: yup.number().required().positive().integer().default(200),
+export const viewSettingsSchema = z.object({
+  renderingSettings: renderingSettingsSchema.default(
+    renderingSettingsSchema.parse({})
+  ),
+  distributionChartSettings: distributionSettingsSchema.default(
+    distributionSettingsSchema.parse({})
+  ),
+  functionChartSettings: functionSettingsSchema.default(
+    functionSettingsSchema.parse({})
+  ),
+  chartHeight: z.number().int().finite().gte(10).lte(5000).default(200),
 });
 
-export type PlaygroundSettings = yup.InferType<typeof viewSettingsSchema>;
+export type PlaygroundSettings = z.infer<typeof viewSettingsSchema>;
 
 type DeepPartial<T> = T extends object
   ? {
@@ -122,7 +101,7 @@ export type PartialPlaygroundSettings = DeepPartial<PlaygroundSettings>;
 
 // partial params for SqDistributionsPlot.create; TODO - infer explicit type?
 export function generateDistributionPlotSettings(
-  settings: yup.InferType<typeof distributionSettingsSchema>
+  settings: z.infer<typeof distributionSettingsSchema>
 ) {
   const xScale = scaleTypeToSqScale(settings.xScale, {
     min: settings.minX,
