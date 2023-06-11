@@ -17,31 +17,29 @@ import React, {
 import { UseFormRegister, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import { useInitialWidth } from "../../lib/hooks/useInitialWidth.js";
+import { useHeight } from "../../lib/hooks/useHeight.js";
 
 import { Env } from "@quri/squiggle-lang";
-import { Button, StyledTab, TextTooltip } from "@quri/ui";
+import { Button, TextTooltip } from "@quri/ui";
 
 import { useMaybeControlledValue, useSquiggle } from "../../lib/hooks/index.js";
 
-import { JsImports } from "../../lib/jsImports.js";
 import { getErrors, getValueToRender, isMac } from "../../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "../CodeEditor.js";
 import {
   SquiggleViewer,
   SquiggleViewerProps,
 } from "../SquiggleViewer/index.js";
-import { ViewSettingsForm, viewSettingsSchema } from "../ViewSettingsForm.js";
+import {
+  PlaygroundSettingsForm,
+  viewSettingsSchema,
+  type PlaygroundSettings,
+} from "../PlaygroundSettings.js";
 
 import { SqProject } from "@quri/squiggle-lang";
 import { ResizableBox } from "react-resizable";
-import { ImportSettingsForm } from "./ImportSettingsForm.js";
 import { RunControls } from "./RunControls/index.js";
 import { useRunnerState } from "./RunControls/useRunnerState.js";
-import {
-  EnvironmentSettingsForm,
-  playgroundSettingsSchema,
-  type PlaygroundFormFields,
-} from "./playgroundSettings.js";
 
 type PlaygroundProps = // Playground can be either controlled (`code`) or uncontrolled (`defaultCode` + `onCodeChange`)
   (
@@ -91,24 +89,26 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     defaultValue: defaultCode,
     onChange: onCodeChange,
   });
-  const { ref, width: initialWidth } = useInitialWidth();
+  const { ref: fullContainerRef, width: initialWidth } = useInitialWidth();
 
-  const [imports, setImports] = useState<JsImports>({});
-
-  const defaultValues: PlaygroundFormFields = {
-    ...playgroundSettingsSchema.getDefault(),
+  const defaultValues: PlaygroundSettings = {
+    ...viewSettingsSchema.getDefault(),
     ...Object.fromEntries(
       Object.entries(props).filter(([k, v]) => v !== undefined)
     ),
   };
 
+  type Tab = "CODE" | "SETTINGS" | "view";
+
+  const [selectedTab, setSelectedTab] = useState("CODE" as Tab);
+
   const { register, control } = useForm({
-    resolver: yupResolver(playgroundSettingsSchema),
+    resolver: yupResolver(viewSettingsSchema),
     defaultValues,
   });
 
   // react-hook-form types the result as Partial, but the result doesn't seem to be a Partial, so this should be ok
-  const vars = useWatch({ control }) as PlaygroundFormFields;
+  const vars = useWatch({ control }) as PlaygroundSettings;
 
   useEffect(() => {
     onSettingsChange?.(vars);
@@ -116,10 +116,10 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
 
   const environment: Env = useMemo(
     () => ({
-      sampleCount: Number(vars.sampleCount),
-      xyPointLength: Number(vars.xyPointLength),
+      sampleCount: Number(vars.renderingSettings.sampleCount),
+      xyPointLength: Number(vars.renderingSettings.xyPointLength),
     }),
-    [vars.sampleCount, vars.xyPointLength]
+    [vars.renderingSettings.sampleCount, vars.renderingSettings.xyPointLength]
   );
 
   const runnerState = useRunnerState(code);
@@ -128,7 +128,6 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     ...props,
     code: runnerState.renderedCode,
     executionId: runnerState.executionId,
-    jsImports: imports,
     environment,
   });
 
@@ -155,54 +154,91 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
 
   const editorRef = useRef<CodeEditorHandle>(null);
 
-  const firstTab = showEditor ? (
-    <div className="border border-slate-200" data-testid="squiggle-editor">
-      <CodeEditor
-        ref={editorRef}
-        value={code}
-        errors={errors}
-        project={resultAndBindings.project}
-        showGutter={true}
-        height={height}
-        onChange={setCode}
-        onSubmit={runnerState.run}
-      />
-    </div>
-  ) : (
-    squiggleChart
-  );
+  const standardHeightStyle = (height) => ({ height, overflow: "auto" });
+  const { ref: leftSideHeader, height: leftSideHeaderHeight } = useHeight();
+  const { ref: rightSideHeader, height: rightSideHeaderHeight } = useHeight();
 
-  const standardHeightStyle = { height, overflow: "auto" };
-
-  const tabs = (
-    <StyledTab.Panels>
-      <StyledTab.Panel>{firstTab}</StyledTab.Panel>
-      <StyledTab.Panel style={standardHeightStyle}>
-        <EnvironmentSettingsForm register={register} />
-      </StyledTab.Panel>
-      <StyledTab.Panel style={standardHeightStyle}>
-        <ViewSettingsForm
-          register={
-            // This is dangerous, but doesn't cause any problems.
-            // I tried to make `ViewSettings` generic (to allow it to accept any extension of a settings schema), but it didn't work.
-            register as unknown as UseFormRegister<
-              yup.InferType<typeof viewSettingsSchema>
-            >
-          }
-        />
-      </StyledTab.Panel>
-      <StyledTab.Panel style={standardHeightStyle}>
-        <ImportSettingsForm initialImports={imports} setImports={setImports} />
-      </StyledTab.Panel>
-    </StyledTab.Panels>
+  const leftPanelBody = leftSideHeaderHeight && (
+    <>
+      {selectedTab === "CODE" && (
+        <div data-testid="squiggle-editor">
+          <CodeEditor
+            ref={editorRef}
+            value={code}
+            errors={errors}
+            project={resultAndBindings.project}
+            showGutter={true}
+            height={height - leftSideHeaderHeight}
+            onChange={setCode}
+            onSubmit={runnerState.run}
+          />
+        </div>
+      )}
+      {selectedTab === "SETTINGS" && (
+        <div
+          className="px-2 space-y-6"
+          style={standardHeightStyle(height - leftSideHeaderHeight)}
+        >
+          <div className="px-2 py-2">
+            <div className="pb-4">
+              <Button onClick={() => setSelectedTab("CODE")}> Back </Button>
+            </div>
+            <PlaygroundSettingsForm
+              register={
+                // This is dangerous, but doesn't cause any problems.
+                // I tried to make `PlaygroundSettings` generic (to allow it to accept any extension of a settings schema), but it didn't work.
+                register as unknown as UseFormRegister<
+                  yup.InferType<typeof viewSettingsSchema>
+                >
+              }
+            />
+          </div>
+        </div>
+      )}
+    </>
   );
 
   const leftPanelRef = useRef<HTMLDivElement | null>(null);
 
-  const withEditor = (
-    <div className="mt-2 flex">
+  const textClasses =
+    "text-slate-800 text-sm px-2 py-2 cursor-pointer rounded-sm hover:bg-slate-200 select-none whitespace-nowrap";
+
+  const leftPanelHeader = (
+    <div
+      className="flex justify-end mb-1 p-1 bg-slate-50 border-b border-slate-200 overflow-x-auto"
+      ref={leftSideHeader}
+    >
+      <div className="mr-2 flex gap-1 items-center">
+        <div
+          className={textClasses}
+          onClick={() =>
+            selectedTab !== "SETTINGS"
+              ? setSelectedTab("SETTINGS")
+              : setSelectedTab("CODE")
+          }
+        >
+          Settings
+        </div>
+        <TextTooltip text={isMac() ? "Option+Shift+f" : "Alt+Shift+f"}>
+          <div className={textClasses} onClick={editorRef.current?.format}>
+            Format Code
+          </div>
+        </TextTooltip>
+        <RunControls {...runnerState} />
+        {renderExtraControls?.()}
+      </div>
+    </div>
+  );
+
+  const showTime = (executionTime) =>
+    executionTime > 1000
+      ? `${(executionTime / 1000).toFixed(2)}s`
+      : `${executionTime}ms`;
+
+  const playgroundWithEditor = (
+    <div className="flex flex-row">
       <ResizableBox
-        className="border border-slate-200 h-full relative"
+        className="h-full relative"
         width={initialWidth / 2}
         axis="x"
         resizeHandles={["e"]}
@@ -210,64 +246,59 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
           <div
             ref={ref}
             // we don't use react-resizable original styles, it's easier to style this manually
-            className="absolute top-0 -right-1 w-1 h-full bg-slate-100 hover:bg-blue-200 transition cursor-ew-resize"
+            className="absolute top-0 h-full bg-slate-200 hover:bg-blue-200 transition cursor-ew-resize"
+            style={{ width: 3, right: -1 }}
           />
         )}
       >
-        <div ref={leftPanelRef}>{tabs}</div>
+        <div ref={leftPanelRef}>
+          {leftPanelHeader}
+          {leftPanelBody}
+        </div>
       </ResizableBox>
       <div
-        className="p-2 pl-4 flex-1"
-        data-testid="playground-result"
-        style={standardHeightStyle}
+        className="flex-1 overflow-y-auto" //The overflow seems needed, it can't just be in the sub divs.
       >
-        {squiggleChart}
+        <div
+          className="flex mb-1 p-2 overflow-y-auto justify-end text-slate-400 text-sm whitespace-nowrap"
+          ref={rightSideHeader}
+        >
+          {runnerState.isRunning
+            ? "rendering..."
+            : `render #${runnerState.executionId} in ${showTime(
+                runnerState.executionTime
+              )}`}
+        </div>
+        <div
+          style={standardHeightStyle(height - rightSideHeaderHeight)}
+          className="p-2"
+          data-testid="playground-result"
+        >
+          {squiggleChart}
+        </div>
       </div>
     </div>
   );
-
-  const withoutEditor = <div className="mt-3">{tabs}</div>;
 
   const getLeftPanelElement = useCallback(() => {
     return leftPanelRef.current ?? undefined;
   }, []);
 
   return (
-    <div ref={ref}>
-      <PlaygroundContext.Provider value={{ getLeftPanelElement }}>
-        <StyledTab.Group>
-          <div
-            className="pb-4"
-            style={{
-              minHeight: 200 /* important if editor is hidden */,
-            }}
-          >
-            <div className="flex justify-between items-center">
-              <div className="flex gap-2 items-center">
-                <StyledTab.List>
-                  <StyledTab
-                    name={showEditor ? "Code" : "Display"}
-                    icon={showEditor ? CodeIcon : EyeIcon}
-                  />
-                  <StyledTab name="Sampling Settings" icon={CogIcon} />
-                  <StyledTab name="View Settings" icon={ChartSquareBarIcon} />
-                  <StyledTab name="Input Variables" icon={CurrencyDollarIcon} />
-                </StyledTab.List>
-              </div>
-              <div className="flex gap-2 items-center">
-                <RunControls {...runnerState} />
-                <TextTooltip text={isMac() ? "Option+Shift+f" : "Alt+Shift+f"}>
-                  <div>
-                    <Button onClick={editorRef.current?.format}>Format</Button>
-                  </div>
-                </TextTooltip>
-                {renderExtraControls?.()}
-              </div>
-            </div>
-            {showEditor ? withEditor : withoutEditor}
+    <PlaygroundContext.Provider value={{ getLeftPanelElement }}>
+      <div
+        ref={fullContainerRef}
+        style={{
+          minHeight: 200 /* important if editor is hidden */,
+        }}
+      >
+        {showEditor && playgroundWithEditor}
+        {!showEditor && (
+          <div style={standardHeightStyle(rightSideHeaderHeight)}>
+            {squiggleChart}
           </div>
-        </StyledTab.Group>
-      </PlaygroundContext.Provider>
-    </div>
+        )}
+      </div>
+    </PlaygroundContext.Provider>
   );
 };

@@ -16,7 +16,7 @@ import { hasMassBelowZero } from "../../lib/distributionUtils.js";
 import { DistFunctionChart } from "../FunctionChart/DistFunctionChart.js";
 import { NumericFunctionChart } from "../FunctionChart/NumericFunctionChart.js";
 import { ScatterChart } from "../ScatterChart/index.js";
-import { generateDistributionPlotSettings } from "../ViewSettingsForm.js";
+import { generateDistributionPlotSettings } from "../PlaygroundSettings.js";
 import { ItemSettingsMenu } from "./ItemSettingsMenu.js";
 import { VariableBox } from "./VariableBox.js";
 import { MergedItemSettings } from "./utils.js";

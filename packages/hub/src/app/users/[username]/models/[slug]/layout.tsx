@@ -2,7 +2,6 @@
 
 import { ReactNode } from "react";
 import { ModelPage } from "./ModelPage";
-import { FullLayoutWithPadding } from "@/components/layout/FullLayoutWithPadding";
 
 export default function ModelLayout({
   params,
@@ -12,8 +11,8 @@ export default function ModelLayout({
   children: ReactNode;
 }) {
   return (
-    <FullLayoutWithPadding>
+    <div className="pt-4">
       <ModelPage {...params}>{children}</ModelPage>
-    </FullLayoutWithPadding>
+    </div>
   );
 }

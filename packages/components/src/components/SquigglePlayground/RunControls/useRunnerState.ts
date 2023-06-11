@@ -6,13 +6,17 @@ type InternalState = {
   // "prepared" is for rendering a spinner; "run" for executing squiggle code; then it gets back to "none" on the next render
   runningState: "none" | "prepared" | "run";
   executionId: number;
+  startTime?: number;
+  totalTime?: number;
 };
 
 const buildInitialState = (code: string): InternalState => ({
   autorunMode: true,
   renderedCode: "",
   runningState: "none",
-  executionId: 1,
+  executionId: 0,
+  startTime: undefined,
+  totalTime: undefined,
 });
 
 type Action =
@@ -50,11 +54,13 @@ const reducer = (state: InternalState, action: Action): InternalState => {
         runningState: "run",
         renderedCode: action.code,
         executionId: state.executionId + 1,
+        startTime: Date.now(),
       };
     case "STOP_RUN":
       return {
         ...state,
         runningState: "none",
+        totalTime: state.startTime && Date.now() - state.startTime,
       };
   }
 };
@@ -69,6 +75,7 @@ export type RunnerState = {
   renderedCode: string;
   isRunning: boolean;
   executionId: number;
+  executionTime: number | undefined;
   setAutorunMode: (newValue: boolean) => void;
 };
 
@@ -107,6 +114,7 @@ export function useRunnerState(code: string): RunnerState {
     renderedCode: state.renderedCode,
     isRunning: state.runningState !== "none",
     executionId: state.executionId,
+    executionTime: state.totalTime,
     setAutorunMode: (newValue: boolean) => {
       dispatch({ type: "SET_AUTORUN_MODE", value: newValue, code });
     },

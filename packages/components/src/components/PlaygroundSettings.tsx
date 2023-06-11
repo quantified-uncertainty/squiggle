@@ -15,6 +15,25 @@ import { FormComment } from "./ui/FormComment.js";
 import { functionChartDefaults } from "./FunctionChart/utils.js";
 import { defaultTickFormatSpecifier } from "../lib/draw/index.js";
 
+export const renderingSettingsSchema = yup.object({}).shape({
+  sampleCount: yup
+    .number()
+    .required()
+    .positive()
+    .integer()
+    .default(1000)
+    .min(10)
+    .max(1000000),
+  xyPointLength: yup
+    .number()
+    .required()
+    .positive()
+    .integer()
+    .default(1000)
+    .min(10)
+    .max(10000),
+});
+
 export const functionSettingsSchema = yup.object({}).shape({
   start: yup
     .number()
@@ -81,12 +100,13 @@ export const distributionSettingsSchema = yup.object({}).shape({
 });
 
 export const viewSettingsSchema = yup.object({}).shape({
+  renderingSettings: renderingSettingsSchema,
   distributionChartSettings: distributionSettingsSchema,
   functionChartSettings: functionSettingsSchema,
   chartHeight: yup.number().required().positive().integer().default(200),
 });
 
-export type ViewSettings = yup.InferType<typeof viewSettingsSchema>;
+export type PlaygroundSettings = yup.InferType<typeof viewSettingsSchema>;
 
 type DeepPartial<T> = T extends object
   ? {
@@ -94,7 +114,7 @@ type DeepPartial<T> = T extends object
     }
   : T;
 
-export type PartialViewSettings = DeepPartial<ViewSettings>;
+export type PartialPlaygroundSettings = DeepPartial<PlaygroundSettings>;
 
 // partial params for SqDistributionsPlot.create; TODO - infer explicit type?
 export function generateDistributionPlotSettings(
@@ -117,7 +137,7 @@ export function generateDistributionPlotSettings(
 }
 
 // partial params for SqFnPlot.create; TODO - infer explicit type?
-export function generateFunctionPlotSettings(settings: ViewSettings) {
+export function generateFunctionPlotSettings(settings: PlaygroundSettings) {
   const xScale = SqLinearScale.create({
     min: settings.functionChartSettings.start,
     max: settings.functionChartSettings.stop,
@@ -125,38 +145,46 @@ export function generateFunctionPlotSettings(settings: ViewSettings) {
   return { xScale, points: settings.functionChartSettings.count };
 }
 
-export const ViewSettingsForm: React.FC<{
-  withFunctionSettings?: boolean;
-  fixed?: PartialViewSettings;
-  register: UseFormRegister<ViewSettings>;
-}> = ({ withFunctionSettings = true, fixed, register }) => {
-  return (
-    <div className="space-y-6 p-3 divide-y divide-gray-200">
-      <FormSection title="General Display Settings">
-        <div className="space-y-4">
-          <NumberInput
-            name="chartHeight"
-            register={register}
-            label="Chart Height (in pixels)"
-          />
-        </div>
-      </FormSection>
-
-      <DistributionViewSettingsForm fixed={fixed} register={register} />
-
-      {withFunctionSettings ? (
-        <FunctionViewSettingsForm fixed={fixed} register={register} />
-      ) : null}
+export const RenderingSettingsForm: React.FC<{
+  register: UseFormRegister<PlaygroundSettings>;
+  fixed?: PartialPlaygroundSettings;
+}> = ({ register }) => (
+  <div className="space-y-4">
+    <div className="space-y-2">
+      <NumberInput
+        name="renderingSettings.sampleCount"
+        label="Sample Count"
+        register={register}
+      />
+      <div className="mt-3">
+        <FormComment>
+          How many samples to use for Monte Carlo simulations. This can
+          occasionally be overridden by specific Squiggle programs.
+        </FormComment>
+      </div>
     </div>
-  );
-};
+    <div className="space-y-2">
+      <NumberInput
+        name="renderingSettings.xyPointLength"
+        register={register}
+        label="Coordinate Count (For PointSet Shapes)"
+      />
+      <div className="mt-2">
+        <FormComment>
+          When distributions are converted into PointSet shapes, we need to know
+          how many coordinates to use.
+        </FormComment>
+      </div>
+    </div>
+  </div>
+);
 
-export const DistributionViewSettingsForm: React.FC<{
-  register: UseFormRegister<ViewSettings>;
-  fixed?: PartialViewSettings;
+export const DistributionSettingsForm: React.FC<{
+  register: UseFormRegister<PlaygroundSettings>;
+  fixed?: PartialPlaygroundSettings;
 }> = ({ register, fixed }) => {
   return (
-    <div className="pt-8">
+    <>
       <FormSection title="Distribution Display Settings">
         <div className="space-y-2">
           <Checkbox
@@ -238,15 +266,15 @@ export const DistributionViewSettingsForm: React.FC<{
           />
         </div>
       </FormSection>
-    </div>
+    </>
   );
 };
 
-export const FunctionViewSettingsForm: React.FC<{
-  register: UseFormRegister<ViewSettings>;
-  fixed?: PartialViewSettings;
+export const FunctionSettingsForm: React.FC<{
+  register: UseFormRegister<PlaygroundSettings>;
+  fixed?: PartialPlaygroundSettings;
 }> = ({ register, fixed }) => (
-  <div className="pt-8">
+  <>
     <FormSection title="Function Display Settings">
       <div className="space-y-6">
         <FormComment>
@@ -276,5 +304,40 @@ export const FunctionViewSettingsForm: React.FC<{
         </div>
       </div>
     </FormSection>
-  </div>
+  </>
 );
+
+export const PlaygroundSettingsForm: React.FC<{
+  withFunctionSettings?: boolean;
+  fixed?: PartialPlaygroundSettings;
+  register: UseFormRegister<PlaygroundSettings>;
+}> = ({ withFunctionSettings = true, fixed, register }) => {
+  return (
+    <div className="divide-y divide-gray-200 max-w-2xl">
+      <div className="mb-6">
+        <FormSection title="Rendering Settings">
+          <RenderingSettingsForm fixed={fixed} register={register} />
+        </FormSection>
+      </div>
+
+      <div className="pt-6 mb-6">
+        <FormSection title="General Display Settings">
+          <NumberInput
+            name="chartHeight"
+            register={register}
+            label="Chart Height (in pixels)"
+          />
+        </FormSection>
+      </div>
+
+      <div className="pt-6 mb-6">
+        <DistributionSettingsForm fixed={fixed} register={register} />
+      </div>
+      {withFunctionSettings ? (
+        <div className="pt-4">
+          <FunctionSettingsForm fixed={fixed} register={register} />
+        </div>
+      ) : null}
+    </div>
+  );
+};
