@@ -20,24 +20,22 @@ import { FormComment } from "./ui/FormComment.js";
 import { FormSection } from "./ui/FormSection.js";
 
 export const renderingSettingsSchema = z.object({
-  sampleCount: z.number().int().gte(10).lte(1000000).default(1000),
-  xyPointLength: z.number().int().gte(10).lte(10000).default(1000),
+  sampleCount: z.number().int().gte(10).lte(1000000),
+  xyPointLength: z.number().int().gte(10).lte(10000),
 });
 
 export const functionSettingsSchema = z.object({
-  start: z.number().finite().default(functionChartDefaults.min),
-  stop: z.number().finite().default(functionChartDefaults.max),
-  count: z.number().int().finite().gte(2).default(functionChartDefaults.points),
+  start: z.number().finite(),
+  stop: z.number().finite(),
+  count: z.number().int().finite(),
 });
 
-const scaleSchema = z
-  .union([
-    z.literal("linear"),
-    z.literal("log"),
-    z.literal("symlog"),
-    z.literal("exp"),
-  ])
-  .default("linear");
+const scaleSchema = z.union([
+  z.literal("linear"),
+  z.literal("log"),
+  z.literal("symlog"),
+  z.literal("exp"),
+]);
 
 type ScaleType = z.infer<typeof scaleSchema>;
 
@@ -61,35 +59,45 @@ function scaleTypeToSqScale(
 }
 
 export const distributionSettingsSchema = z.object({
-  /** Set the x scale to be logarithmic */
-  disableLogX: z.boolean().optional(),
   xScale: scaleSchema,
   yScale: scaleSchema,
   minX: z.number().optional(),
   maxX: z.number().optional(),
   title: z.string().optional(),
-  xAxisType: z
-    .union([z.literal("number"), z.literal("dateTime")])
-    .default("number"),
+  xAxisType: z.union([z.literal("number"), z.literal("dateTime")]),
   /** Documented here: https://github.com/d3/d3-format */
-  tickFormat: z.string().default(defaultTickFormatSpecifier),
-  showSummary: z.boolean().default(true),
+  tickFormat: z.string(),
+  showSummary: z.boolean(),
 });
 
 export const viewSettingsSchema = z.object({
-  renderingSettings: renderingSettingsSchema.default(
-    renderingSettingsSchema.parse({})
-  ),
-  distributionChartSettings: distributionSettingsSchema.default(
-    distributionSettingsSchema.parse({})
-  ),
-  functionChartSettings: functionSettingsSchema.default(
-    functionSettingsSchema.parse({})
-  ),
-  chartHeight: z.number().int().finite().gte(10).lte(5000).default(200),
+  renderingSettings: renderingSettingsSchema,
+  distributionChartSettings: distributionSettingsSchema,
+  functionChartSettings: functionSettingsSchema,
+  chartHeight: z.number().int().finite().gte(10).lte(5000),
 });
 
 export type PlaygroundSettings = z.infer<typeof viewSettingsSchema>;
+
+export const defaultPlaygroundSettings: PlaygroundSettings = {
+  chartHeight: 200,
+  renderingSettings: {
+    sampleCount: 1000,
+    xyPointLength: 1000,
+  },
+  functionChartSettings: {
+    start: functionChartDefaults.min,
+    stop: functionChartDefaults.max,
+    count: functionChartDefaults.points,
+  },
+  distributionChartSettings: {
+    xScale: "linear",
+    yScale: "linear",
+    xAxisType: "number",
+    tickFormat: defaultTickFormatSpecifier,
+    showSummary: true,
+  },
+};
 
 type DeepPartial<T> = T extends object
   ? {
@@ -128,6 +136,11 @@ export function generateFunctionPlotSettings(settings: PlaygroundSettings) {
   return { xScale, points: settings.functionChartSettings.count };
 }
 
+// settings for the settings form
+export type MetaSettings = {
+  disableLogX?: boolean;
+};
+
 export const RenderingSettingsForm: React.FC = () => (
   <div className="space-y-4">
     <NumberFormField<PlaygroundSettings>
@@ -144,8 +157,8 @@ export const RenderingSettingsForm: React.FC = () => (
 );
 
 export const DistributionSettingsForm: React.FC<{
-  fixed?: PartialPlaygroundSettings;
-}> = ({ fixed }) => {
+  metaSettings?: MetaSettings;
+}> = ({ metaSettings }) => {
   return (
     <FormSection title="Distribution Display Settings">
       <div className="space-y-4">
@@ -164,7 +177,7 @@ export const DistributionSettingsForm: React.FC<{
             {
               id: "log",
               name: "Logarithmic",
-              ...(fixed?.distributionChartSettings?.disableLogX
+              ...(metaSettings?.disableLogX
                 ? {
                     disabled: true,
                     tooltip:
@@ -252,8 +265,12 @@ export const FunctionSettingsForm: React.FC = () => {
 export const PlaygroundSettingsForm: React.FC<{
   withFunctionSettings?: boolean;
   withGlobalSettings?: boolean;
-  fixed?: PartialPlaygroundSettings;
-}> = ({ withGlobalSettings = true, withFunctionSettings = true, fixed }) => {
+  metaSettings?: MetaSettings;
+}> = ({
+  withGlobalSettings = true,
+  withFunctionSettings = true,
+  metaSettings,
+}) => {
   return (
     <div className="divide-y divide-gray-200 max-w-2xl">
       {withGlobalSettings && (
@@ -276,7 +293,7 @@ export const PlaygroundSettingsForm: React.FC<{
       )}
 
       <div className="pt-6 mb-6">
-        <DistributionSettingsForm fixed={fixed} />
+        <DistributionSettingsForm metaSettings={metaSettings} />
       </div>
 
       {withFunctionSettings ? (

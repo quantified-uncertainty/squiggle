@@ -1,8 +1,8 @@
 import { SqValueLocation } from "@quri/squiggle-lang";
 import React from "react";
 
+import { defaultPlaygroundSettings } from "../PlaygroundSettings.js";
 import { LocalItemSettings, MergedItemSettings } from "./utils.js";
-import { viewSettingsSchema } from "../PlaygroundSettings.js";
 
 type ViewerContextShape = {
   // Note that we don't store settings themselves in the context (that would cause rerenders of the entire tree on each settings update).
@@ -16,7 +16,7 @@ type ViewerContextShape = {
 
 export const ViewerContext = React.createContext<ViewerContextShape>({
   getSettings: () => ({ collapsed: false }),
-  getMergedSettings: () => viewSettingsSchema.parse({}),
+  getMergedSettings: () => defaultPlaygroundSettings,
   setSettings() {},
   enableLocalSettings: false,
 });

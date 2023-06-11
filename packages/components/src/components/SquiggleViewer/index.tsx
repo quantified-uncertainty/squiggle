@@ -4,6 +4,7 @@ import { memo, useCallback, useMemo, useRef } from "react";
 
 import { useSquiggle } from "../../lib/hooks/index.js";
 import {
+  defaultPlaygroundSettings,
   PartialPlaygroundSettings,
   viewSettingsSchema,
 } from "../PlaygroundSettings.js";
@@ -38,7 +39,7 @@ export const SquiggleViewer = memo<SquiggleViewerProps>(
     const settingsStoreRef = useRef<SettingsStore>({});
 
     const globalSettings = useMemo(() => {
-      return merge({}, viewSettingsSchema.parse({}), partialPlaygroundSettings);
+      return merge({}, defaultPlaygroundSettings, partialPlaygroundSettings);
     }, [partialPlaygroundSettings]);
 
     const getSettings = useCallback(

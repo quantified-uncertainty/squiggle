@@ -23,6 +23,7 @@ import {
   PlaygroundSettingsForm,
   viewSettingsSchema,
   type PlaygroundSettings,
+  defaultPlaygroundSettings,
 } from "../PlaygroundSettings.js";
 import {
   SquiggleViewer,
@@ -88,7 +89,8 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const { ref: fullContainerRef, width: initialWidth } = useInitialWidth();
 
   const defaultValues: PlaygroundSettings = {
-    ...viewSettingsSchema.parse({}),
+    // TODO - this doesn't deep merge and injects extra unrelated props
+    ...defaultPlaygroundSettings,
     ...Object.fromEntries(
       Object.entries(props).filter(([k, v]) => v !== undefined)
     ),

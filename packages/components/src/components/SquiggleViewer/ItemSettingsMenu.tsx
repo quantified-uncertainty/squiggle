@@ -1,47 +1,58 @@
 import { CogIcon } from "@heroicons/react/solid/esm/index.js";
 import { zodResolver } from "@hookform/resolvers/zod";
-import merge from "lodash/merge.js";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
 import { SqValue } from "@quri/squiggle-lang";
 import { Modal } from "@quri/ui";
 
-import { PlaygroundContext } from "../SquigglePlayground/index.js";
 import {
-  PartialPlaygroundSettings,
+  MetaSettings,
   PlaygroundSettingsForm,
   viewSettingsSchema,
 } from "../PlaygroundSettings.js";
+import { PlaygroundContext } from "../SquigglePlayground/index.js";
 import { ViewerContext } from "./ViewerContext.js";
 import { locationAsString } from "./utils.js";
 
 type Props = {
   value: SqValue;
   onChange: () => void;
-  fixed?: PartialPlaygroundSettings;
+  metaSettings?: MetaSettings;
   withFunctionSettings: boolean;
 };
 
 const ItemSettingsModal: React.FC<
   Props & { close: () => void; resetScroll: () => void }
-> = ({ value, onChange, fixed, withFunctionSettings, close, resetScroll }) => {
+> = ({
+  value,
+  onChange,
+  metaSettings,
+  withFunctionSettings,
+  close,
+  resetScroll,
+}) => {
   const { setSettings, getSettings, getMergedSettings } =
     useContext(ViewerContext);
 
-  const mergedSettings = merge(getMergedSettings(value.location!), fixed);
+  const mergedSettings = getMergedSettings(value.location!);
 
   const form = useForm({
     resolver: zodResolver(viewSettingsSchema),
     defaultValues: mergedSettings,
     mode: "onChange",
   });
+
   useEffect(() => {
-    const subscription = form.watch((vars) => {
-      const settings = getSettings(value.location!); // get the latest version
-      setSettings(value.location!, merge({}, settings, vars));
+    const submit = form.handleSubmit((data) => {
+      setSettings(value.location!, {
+        collapsed: false,
+        ...data,
+      });
       onChange();
     });
+
+    const subscription = form.watch(() => submit());
     return () => subscription.unsubscribe();
   }, [getSettings, setSettings, onChange, value.location, form.watch]);
 
@@ -60,7 +71,7 @@ const ItemSettingsModal: React.FC<
               onClick={resetScroll}
             >
               {locationAsString(value.location!)}
-            </span>{" "}
+            </span>
           </>
         ) : (
           ""
@@ -71,7 +82,7 @@ const ItemSettingsModal: React.FC<
           <PlaygroundSettingsForm
             withGlobalSettings={false}
             withFunctionSettings={withFunctionSettings}
-            fixed={fixed}
+            metaSettings={metaSettings}
           />
         </FormProvider>
       </Modal.Body>
@@ -93,10 +104,7 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
 
   const resetScroll = () => {
     if (!ref.current) return;
-    window.scroll({
-      top: ref.current.getBoundingClientRect().y + window.scrollY,
-      behavior: "smooth",
-    });
+    ref.current.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
@@ -109,8 +117,7 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
         <button
           onClick={() => {
             setSettings(props.value.location!, {
-              ...settings,
-              distributionChartSettings: undefined,
+              collapsed: settings.collapsed,
             });
             props.onChange();
           }}
