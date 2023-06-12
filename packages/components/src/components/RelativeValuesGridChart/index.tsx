@@ -55,8 +55,6 @@ const Cell: FC<{
     environment
   );
 
-  console.log(itemResult);
-
   if (!itemResult.ok) {
     return <ErrorCell />;
   }
