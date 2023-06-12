@@ -9,7 +9,7 @@ import { EntityInfo } from "@/components/EntityInfo";
 import { WithTopMenu } from "@/components/layout/WithTopMenu";
 import { DotsDropdownButton } from "@/components/ui/DotsDropdownButton";
 import { StyledTabLink } from "@/components/ui/StyledTabLink";
-import { modelEditRoute, modelRevisionsRoute, modelRoute } from "@/routes";
+import { modelViewRoute, modelRevisionsRoute, modelRoute } from "@/routes";
 import { DeleteModelAction } from "./DeleteModelAction";
 import { UpdateModelSlugAction } from "./UpdateModelSlugAction";
 import {
@@ -93,11 +93,7 @@ export const ModelPage: FC<Props> = ({ username, slug, children }) => {
       <div className="flex items-center gap-4 px-4 bg-gray-200 pt-5 pb-4 border-b border-gray-300">
         <EntityInfo slug={slug} username={username} />
         <StyledTabLink.List>
-          <StyledTabLink name="View" href={modelRoute({ username, slug })} />
-          <StyledTabLink
-            name="Editor"
-            href={modelEditRoute({ username, slug })}
-          />
+          <StyledTabLink name="Editor" href={modelRoute({ username, slug })} />
           <StyledTabLink
             name="Revisions"
             href={modelRevisionsRoute({ username, slug })}
