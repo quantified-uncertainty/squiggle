@@ -1,19 +1,39 @@
 import { FC, PropsWithChildren } from "react";
+import { DropdownMenu, Dropdown, DropdownMenuActionItem } from "@quri/ui";
+import { TriangleIcon } from "@quri/ui";
+import { useRouter } from "next/navigation";
 
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 
 import { newDefinitionRoute, newModelRoute } from "@/routes";
 import { UserControls } from "./UserControls";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context";
 
-const MenuLink: FC<PropsWithChildren<{ href: string }>> = ({
-  href,
-  children,
-}) => (
-  <Link className="text-sm text-gray-300 hover:text-white" href={href}>
-    {children}
-  </Link>
-);
+const NewDropdown: FC = () => {
+  const router = useRouter();
+  return (
+    <Dropdown
+      render={() => (
+        <DropdownMenu>
+          <DropdownMenuActionItem
+            onClick={() => router.push(newModelRoute())}
+            title={"New Model"}
+          />
+          <DropdownMenuActionItem
+            onClick={() => router.push(newDefinitionRoute())}
+            title={"New Definition"}
+          />
+        </DropdownMenu>
+      )}
+    >
+      <div className="flex items-center text-white cursor-pointer hover:bg-slate-700 px-2 py-1 rounded-md select-none">
+        New
+        <TriangleIcon size={6} className={"rotate-180 ml-2 text-slate-300"} />
+      </div>
+    </Dropdown>
+  );
+};
 
 const TopMenu: FC = () => {
   const { data: session } = useSession();
@@ -21,18 +41,23 @@ const TopMenu: FC = () => {
   return (
     <div className="border-slate-200 h-12 flex items-center justify-between px-4 bg-gray-800">
       <div className="flex gap-6 items-baseline">
-        {" "}
-        <Link className="text-md py-2 text-white" href="/">
+        <Link
+          className="text-white hover:text-slate-300 font-semibold"
+          href="/"
+        >
           Squiggle Hub
         </Link>
-        {session ? (
-          <>
-            <MenuLink href={newModelRoute()}>New model</MenuLink>
-            <MenuLink href={newDefinitionRoute()}>New definition</MenuLink>
-          </>
-        ) : null}
       </div>
-      <UserControls session={session} />
+      <div className="flex gap-6 items-baseline">
+        <Link
+          className="text-white hover:text-slate-300"
+          href="https://www.squiggle-language.com/docs/Api/Dist"
+        >
+          Squiggle Docs
+        </Link>
+        {session && <NewDropdown />}
+        <UserControls session={session} />
+      </div>
     </div>
   );
 };

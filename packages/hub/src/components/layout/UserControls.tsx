@@ -1,6 +1,7 @@
 import { Session } from "next-auth";
 import { signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { TriangleIcon } from "@quri/ui";
 
 import {
   Button,
@@ -48,7 +49,10 @@ export function UserControls({ session }: { session: Session | null }) {
           </DropdownMenu>
         )}
       >
-        {session.user.username}
+        <div className="flex items-center text-white cursor-pointer hover:bg-slate-700 px-2 py-1 rounded-md select-none">
+          {session.user.username}
+          <TriangleIcon size={6} className={"rotate-180 ml-2 text-slate-300"} />
+        </div>
       </Dropdown>
     </div>
   );
