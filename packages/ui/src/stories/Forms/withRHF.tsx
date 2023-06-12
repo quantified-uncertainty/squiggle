@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { ComponentType, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
 import { Button } from "../../index.js";
 
 // correct type signature here causes TS2742 "Not portable" error.
-export const formDecorator: /* NonNullable<Meta<unknown>["decorators"]>[number] */ any =
-  (Story: any) => {
+export const formDecorator /* NonNullable<Meta<unknown>["decorators"]>[number] */ =
+  (Story: ComponentType) => {
     const form = useForm({
       mode: "onChange",
     });

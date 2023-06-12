@@ -4,6 +4,7 @@ export { Modal } from "./components/Modal.js";
 
 export { Dropdown } from "./components/Dropdown/index.js";
 export { DropdownMenu } from "./components/Dropdown/DropdownMenu.js";
+export { DropdownMenuHeader } from "./components/Dropdown/DropdownMenuHeader.js";
 export { DropdownMenuActionItem } from "./components/Dropdown/DropdownMenuActionItem.js";
 export { DropdownMenuAsyncActionItem } from "./components/Dropdown/DropdownMenuAsyncActionItem.js";
 

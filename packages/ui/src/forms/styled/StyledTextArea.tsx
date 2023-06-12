@@ -4,7 +4,7 @@ import { clsx } from "clsx";
 
 // ESM hack
 const TextareaAutosize =
-  ImportedTextareaAutosize as any as typeof ImportedTextareaAutosize.default;
+  ImportedTextareaAutosize as unknown as typeof ImportedTextareaAutosize.default;
 
 export type StyledTextAreaProps = Omit<
   TextareaHTMLAttributes<HTMLTextAreaElement>,
