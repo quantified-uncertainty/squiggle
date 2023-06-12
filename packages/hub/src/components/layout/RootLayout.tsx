@@ -1,5 +1,10 @@
 import { FC, PropsWithChildren } from "react";
-import { DropdownMenu, Dropdown, DropdownMenuActionItem } from "@quri/ui";
+import {
+  DropdownMenu,
+  Dropdown,
+  DropdownMenuActionItem,
+  DropdownMenuHeader,
+} from "@quri/ui";
 import {
   TriangleIcon,
   CodeBracketIcon,
@@ -29,7 +34,7 @@ const NewDropdown: FC = () => {
           <DropdownMenuActionItem
             onClick={() => router.push(newDefinitionRoute())}
             icon={ScaleIcon}
-            title={"New Definition"}
+            title={"New Relative Value Definition"}
           />
         </DropdownMenu>
       )}
