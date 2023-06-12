@@ -1,19 +1,21 @@
-import React, { memo, useCallback, useMemo, useRef } from "react";
 import { SqValueLocation } from "@quri/squiggle-lang";
+import merge from "lodash/merge.js";
+import { memo, useCallback, useMemo, useRef } from "react";
+
+import { useSquiggle } from "../../lib/hooks/index.js";
+import {
+  defaultPlaygroundSettings,
+  PartialPlaygroundSettings,
+  viewSettingsSchema,
+} from "../PlaygroundSettings.js";
+import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 import { ExpressionViewer } from "./ExpressionViewer.js";
-import { ViewerContext } from "./ViewerContext.js";
 import {
   LocalItemSettings,
   locationAsString,
   MergedItemSettings,
 } from "./utils.js";
-import { useSquiggle } from "../../lib/hooks/index.js";
-import {
-  PartialPlaygroundSettings,
-  viewSettingsSchema,
-} from "../PlaygroundSettings.js";
-import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
-import merge from "lodash/merge.js";
+import { ViewerContext } from "./ViewerContext.js";
 
 export type SquiggleViewerProps = {
   /** The output of squiggle's run */
@@ -37,11 +39,7 @@ export const SquiggleViewer = memo<SquiggleViewerProps>(
     const settingsStoreRef = useRef<SettingsStore>({});
 
     const globalSettings = useMemo(() => {
-      return merge(
-        {},
-        viewSettingsSchema.getDefault(),
-        partialPlaygroundSettings
-      );
+      return merge({}, defaultPlaygroundSettings, partialPlaygroundSettings);
     }, [partialPlaygroundSettings]);
 
     const getSettings = useCallback(

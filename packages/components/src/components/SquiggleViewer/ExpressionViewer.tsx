@@ -81,15 +81,10 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
               <ItemSettingsMenu
                 value={value}
                 onChange={onChange}
-                fixed={
-                  shape?.ok && hasMassBelowZero(shape.value.asShape())
-                    ? {
-                        distributionChartSettings: {
-                          disableLogX: true,
-                        },
-                      }
-                    : undefined
-                }
+                metaSettings={{
+                  disableLogX:
+                    shape?.ok && hasMassBelowZero(shape.value.asShape()),
+                }}
                 withFunctionSettings={false}
               />
             );

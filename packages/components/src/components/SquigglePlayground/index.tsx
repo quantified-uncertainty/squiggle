@@ -1,5 +1,6 @@
 import { CogIcon } from "@heroicons/react/solid/esm/index.js";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { zodResolver } from "@hookform/resolvers/zod";
+import merge from "lodash/merge.js";
 import React, {
   ReactNode,
   useCallback,
@@ -8,13 +9,14 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { FormProvider, useForm, useWatch } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { useInitialWidth } from "../../lib/hooks/useInitialWidth.js";
+import { ResizableBox } from "react-resizable";
+import { z } from "zod";
 
-import { Env } from "@quri/squiggle-lang";
+import { Env, SqProject } from "@quri/squiggle-lang";
 import {
   Bars3CenterLeftIcon,
-  AdjustmentsHorizontalIcon,
   AdjustmentsVerticalIcon,
   Button,
 } from "@quri/ui";
@@ -25,6 +27,7 @@ import { getErrors, getValueToRender, isMac } from "../../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "../CodeEditor.js";
 import {
   PlaygroundSettingsForm,
+  defaultPlaygroundSettings,
   viewSettingsSchema,
   type PlaygroundSettings,
 } from "../PlaygroundSettings.js";
@@ -33,8 +36,6 @@ import {
   SquiggleViewerProps,
 } from "../SquiggleViewer/index.js";
 
-import { SqProject } from "@quri/squiggle-lang";
-import { ResizableBox } from "react-resizable";
 import { MenuItem } from "./MenuItem.js";
 import { AutorunnerMenuItem } from "./RunControls/AutorunnerMenuItem.js";
 import { RunMenuItem } from "./RunControls/RunMenuItem.js";
@@ -90,36 +91,46 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   });
   const { ref: fullContainerRef, width: initialWidth } = useInitialWidth();
 
-  const defaultValues: PlaygroundSettings = {
-    ...viewSettingsSchema.getDefault(),
-    ...Object.fromEntries(
+  const defaultValues: PlaygroundSettings = merge(
+    {},
+    defaultPlaygroundSettings,
+    Object.fromEntries(
       Object.entries(props).filter(([k, v]) => v !== undefined)
-    ),
-  };
+    )
+  );
 
   type Tab = "CODE" | "SETTINGS";
 
-  const [selectedTab, setSelectedTab] = useState("CODE" as Tab);
+  const [selectedTab, setSelectedTab] = useState<Tab>("CODE");
 
   const form = useForm({
-    resolver: yupResolver(viewSettingsSchema),
+    resolver: zodResolver(viewSettingsSchema),
     defaultValues,
     mode: "onChange",
   });
 
-  // react-hook-form types the result as Partial, but the result doesn't seem to be a Partial, so this should be ok
-  const vars = useWatch({ control: form.control }) as PlaygroundSettings;
+  const [settings, setSettings] = useState<z.infer<typeof viewSettingsSchema>>(
+    () => form.getValues()
+  );
 
   useEffect(() => {
-    onSettingsChange?.(vars);
-  }, [vars, onSettingsChange]);
+    const submit = form.handleSubmit((data) => {
+      setSettings(data);
+      onSettingsChange?.(data);
+    });
+    const subscription = form.watch(() => submit());
+    return () => subscription.unsubscribe();
+  }, [form.handleSubmit, form.watch, onSettingsChange]);
 
   const environment: Env = useMemo(
     () => ({
-      sampleCount: Number(vars.renderingSettings.sampleCount),
-      xyPointLength: Number(vars.renderingSettings.xyPointLength),
+      sampleCount: settings.renderingSettings.sampleCount,
+      xyPointLength: settings.renderingSettings.xyPointLength,
     }),
-    [vars.renderingSettings.sampleCount, vars.renderingSettings.xyPointLength]
+    [
+      settings.renderingSettings.sampleCount,
+      settings.renderingSettings.xyPointLength,
+    ]
   );
 
   const runnerState = useRunnerState(code);
@@ -143,7 +154,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
           <div className="absolute inset-0 bg-white opacity-0 animate-semi-appear" />
         ) : null}
         <SquiggleViewer
-          {...vars}
+          {...settings}
           enableLocalSettings={true}
           result={valueToRender}
         />
@@ -154,7 +165,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
 
   const editorRef = useRef<CodeEditorHandle>(null);
 
-  const standardHeightStyle = (height) => ({ height, overflow: "auto" });
+  const standardHeightStyle = (height:number) => ({ height, overflow: "auto" });
   const leftSideHeaderHeight = 32; //calculated from the leftPanelHeader fixed height.
   const rightSideHeaderHeight = 32;
 
