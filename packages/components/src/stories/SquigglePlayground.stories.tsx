@@ -19,6 +19,18 @@ export const Normal: Story = {
   },
 };
 
+export const Slow: Story = {
+  name: "Slow Code",
+  args: {
+    defaultCode: "normal(5,2) + uniform(10, 120) + uniform(30,2000)+ uniform(30,2000)+ uniform(30,2000)+ uniform(30,2000)+ uniform(30,2000)+ uniform(30,2000)+ uniform(30,2000)+ uniform(30,2000)+ uniform(30,2000)+ uniform(30,2000)+ uniform(30,2000)+ uniform(30,2000)",
+    height: 800,
+    renderingSettings: {
+      sampleCount: 500000,
+      xyPointLength: 1000
+    }
+  },
+};
+
 export const RelativeValues: Story = {
   name: "RelativeValues plot",
   args: {
