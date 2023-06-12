@@ -1,16 +1,16 @@
 import { Session } from "next-auth";
 import { signIn, signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 import {
   Button,
   DropdownMenu,
+  Dropdown,
   DropdownMenuActionItem,
-  SignOutIcon,
 } from "@quri/ui";
 
 import { chooseUsernameRoute } from "@/routes";
-import { UsernameLink } from "../UsernameLink";
-import { DotsDropdown } from "../ui/DotsDropdown";
+import { userRoute } from "@/routes";
 
 export function UserControls({ session }: { session: Session | null }) {
   if (
@@ -22,28 +22,34 @@ export function UserControls({ session }: { session: Session | null }) {
     // https://github.com/vercel/next.js/issues/42556 (it's closed but not really solved)
     window.location.href = chooseUsernameRoute();
   }
+  const router = useRouter();
 
   return !session?.user ? (
     <Button onClick={() => signIn()}>Sign In</Button>
   ) : (
     <div className="flex items-center gap-2">
-      {session.user.username === undefined ? null : (
-        <div>
-          <UsernameLink username={session.user.username} />
-        </div>
-      )}
-
-      <DotsDropdown>
-        {() => (
+      <Dropdown
+        render={() => (
           <DropdownMenu>
+            {!!session.user.username && (
+              <DropdownMenuActionItem
+                onClick={() =>
+                  router.push(
+                    userRoute({ username: session.user.username || "" })
+                  )
+                }
+                title="Profile"
+              />
+            )}
             <DropdownMenuActionItem
               onClick={() => signOut()}
-              icon={SignOutIcon}
               title="Sign Out"
             />
           </DropdownMenu>
         )}
-      </DotsDropdown>
+      >
+        {session.user.username}
+      </Dropdown>
     </div>
   );
 }

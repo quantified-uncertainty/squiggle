@@ -10,9 +10,5 @@ export default function ModelLayout({
   params: { username: string; slug: string };
   children: ReactNode;
 }) {
-  return (
-    <div className="pt-4">
-      <ModelPage {...params}>{children}</ModelPage>
-    </div>
-  );
+  return <ModelPage {...params}>{children}</ModelPage>;
 }

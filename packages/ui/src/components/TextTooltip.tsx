@@ -18,7 +18,12 @@ type Props = {
   offset?: number;
 };
 
-export const TextTooltip: FC<Props> = ({ text, placement, offset: offsetAmount, children }) => {
+export const TextTooltip: FC<Props> = ({
+  text,
+  placement,
+  offset: offsetAmount,
+  children,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const { x, y, refs, strategy, context } = useFloating({

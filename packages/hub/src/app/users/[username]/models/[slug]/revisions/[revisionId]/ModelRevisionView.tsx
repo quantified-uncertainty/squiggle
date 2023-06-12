@@ -52,14 +52,16 @@ export const ModelRevisionView: FC<Props> = ({
 
   return (
     <div>
-      <div className="mx-auto max-w-2xl mb-6">
-        <div>
-          <span className="text-slate-500">Version from</span>{" "}
-          {format(data.model.revision.createdAtTimestamp, commonDateFormat)}
+      <div className="border-b border-gray-300">
+        <div className="mx-auto max-w-2xl p-4 pb-8">
+          <div>
+            <span className="text-slate-500">Version from</span>{" "}
+            {format(data.model.revision.createdAtTimestamp, commonDateFormat)}
+          </div>
+          <StyledLink href={modelRoute({ username, slug })}>
+            Go to latest version
+          </StyledLink>
         </div>
-        <StyledLink href={modelRoute({ username, slug })}>
-          Go to latest version
-        </StyledLink>
       </div>
       <SquigglePlayground defaultCode={data.model.revision.content.code} />
     </div>

@@ -89,13 +89,13 @@ export const ModelPage: FC<Props> = ({ username, slug, children }) => {
   const { data: session } = useSession();
 
   return (
-    <WithTopMenu>
-      <div className="flex items-center gap-4 max-w-2xl mx-auto">
+    <WithTopMenu addMarginToMainSection={false}>
+      <div className="flex items-center gap-4 px-4 bg-gray-200 pt-5 pb-4 border-b border-gray-300">
         <EntityInfo slug={slug} username={username} />
         <StyledTabLink.List>
           <StyledTabLink name="View" href={modelRoute({ username, slug })} />
           <StyledTabLink
-            name="Edit"
+            name="Editor"
             href={modelEditRoute({ username, slug })}
           />
           <StyledTabLink

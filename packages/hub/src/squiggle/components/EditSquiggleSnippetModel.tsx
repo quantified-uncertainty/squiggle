@@ -132,28 +132,6 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
   return (
     <FormProvider {...form}>
       <form onSubmit={save}>
-        <div className="max-w-2xl mx-auto">
-          {canSave ? null : (
-            <div className="text-xs">
-              {"You don't own this model, edits won't be saved."}
-            </div>
-          )}
-          {session?.user.username === model.owner.username ? (
-            <div className="mt-2">
-              <TextAreaFormField name="description" label="Description" />
-            </div>
-          ) : null}
-          <div className="mt-4">
-            <header className="text-sm font-medium text-gray-600 mb-2">
-              Views
-            </header>
-            <EditModelExports
-              append={appendVariableWithDefinition}
-              remove={removeVariableWithDefinition}
-              items={variablesWithDefinitionsFields}
-            />
-          </div>
-        </div>
         <div ref={ref}>
           <Controller
             name="code"
@@ -165,9 +143,11 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
                 code={field.value}
                 renderExtraControls={() =>
                   canSave ? (
-                    <Button theme="primary" onClick={save} wide>
-                      Save
-                    </Button>
+                    <div>
+                      <Button theme="primary" onClick={save} wide>
+                        Save
+                      </Button>
+                    </div>
                   ) : null
                 }
               />

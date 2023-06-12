@@ -10,7 +10,7 @@ const MenuLink: FC<PropsWithChildren<{ href: string }>> = ({
   href,
   children,
 }) => (
-  <Link className="font-medium text-slate-500" href={href}>
+  <Link className="text-sm text-gray-300 hover:text-white" href={href}>
     {children}
   </Link>
 );
@@ -19,10 +19,10 @@ const TopMenu: FC = () => {
   const { data: session } = useSession();
 
   return (
-    <div className="border-slate-200 border-b h-16 flex items-center justify-between px-4">
+    <div className="border-slate-200 h-12 flex items-center justify-between px-4 bg-gray-800">
       <div className="flex gap-6 items-baseline">
         {" "}
-        <Link className="text-lg font-bold py-2 text-slate-500" href="/">
+        <Link className="text-md py-2 text-white" href="/">
           Squiggle Hub
         </Link>
         {session ? (

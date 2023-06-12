@@ -58,7 +58,7 @@ export const RelativeValuesDefinitionPage: FC<Props> = ({
   const { data: session } = useSession();
 
   return (
-    <WithTopMenu>
+    <WithTopMenu addMarginToMainSection={false}>
       <div className="flex items-center gap-4 max-w-6xl mx-auto">
         <EntityInfo slug={slug} username={username} />
         {session?.user.username === username ? (

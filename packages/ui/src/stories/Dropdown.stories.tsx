@@ -31,11 +31,7 @@ export const Default: Story = {
             icon={XIcon}
             onClick={() => {}}
           />
-          <DropdownMenuActionItem
-            title="Second item"
-            icon={XIcon}
-            onClick={() => {}}
-          />
+          <DropdownMenuActionItem title="Second item" onClick={() => {}} />
           <DropdownMenuAsyncActionItem
             title="Async item"
             icon={XIcon}

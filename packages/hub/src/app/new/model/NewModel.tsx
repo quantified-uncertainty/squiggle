@@ -73,7 +73,7 @@ export const NewModel: FC = () => {
   return (
     <form onSubmit={save}>
       <FormProvider {...form}>
-        <WithTopMenu>
+        <WithTopMenu addMarginToMainSection={false}>
           <div className="max-w-2xl mx-auto">
             <div className="font-bold text-xl mb-4">New model</div>
             <div className="space-y-2">
