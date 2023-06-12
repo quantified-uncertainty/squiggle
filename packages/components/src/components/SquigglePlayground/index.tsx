@@ -234,8 +234,8 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
           <div
             ref={ref}
             // we don't use react-resizable original styles, it's easier to style this manually
-            className="absolute top-0 h-full bg-slate-200 hover:bg-blue-200 transition cursor-ew-resize"
-            style={{ width: 3, right: -1 }}
+            className="absolute top-0 h-full border-l border-slate-300 hover:border-blue-500 transition cursor-ew-resize"
+            style={{ width: 5, right: -5 }}
           />
         )}
       >
