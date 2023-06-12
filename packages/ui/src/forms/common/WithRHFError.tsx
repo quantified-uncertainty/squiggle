@@ -27,8 +27,6 @@ export function WithRHFError<
     middleware: [shift(), offset(2), flip()],
   });
 
-  console.log({ placement });
-
   return (
     <div className="relative">
       <div ref={refs.setReference}>{children}</div>
