@@ -2,10 +2,13 @@ export { Button } from "./components/Button.js";
 export { StyledTab } from "./components/StyledTab.js";
 export { Modal } from "./components/Modal.js";
 
-export { Dropdown } from "./components/Dropdown/index.js";
-export { DropdownMenu } from "./components/Dropdown/DropdownMenu.js";
-export { DropdownMenuActionItem } from "./components/Dropdown/DropdownMenuActionItem.js";
-export { DropdownMenuAsyncActionItem } from "./components/Dropdown/DropdownMenuAsyncActionItem.js";
+export { DropdownMenu,
+DropdownMenuContent,
+DropdownMenuItem,
+DropdownMenuLabel,
+DropdownMenuSeparator,
+DropdownMenuTrigger,
+} from "./components/Dropdown/index.js";
 
 export { TextTooltip } from "./components/TextTooltip.js";
 export { MouseTooltip } from "./components/MouseTooltip.js";

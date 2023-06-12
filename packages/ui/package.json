@@ -33,7 +33,9 @@
   "dependencies": {
     "@floating-ui/react": "^0.24.2",
     "@headlessui/react": "^1.7.15",
+    "@radix-ui/react-dropdown-menu": "^2.0.5",
     "framer-motion": "^10.12.16",
+    "lucide-react": "^0.242.0",
     "react-colorful": "^5.6.1",
     "react-hook-form": "^7.44.3",
     "react-textarea-autosize": "^8.4.1",

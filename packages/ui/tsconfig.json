@@ -14,7 +14,11 @@
     "composite": true,
     "rootDir": "./src",
     "outDir": "./dist",
-    "sourceMap": true
+    "sourceMap": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
