@@ -90,7 +90,10 @@ export const ModelPage: FC<Props> = ({ username, slug, children }) => {
 
   return (
     <WithTopMenu addMarginToMainSection={false}>
-      <div className="flex items-center gap-4 px-4 bg-gray-200 pt-5 pb-4 border-b border-gray-300">
+      <div
+        className="flex items-center gap-4 px-4 pt-5 pb-4 border-b border-gray-300"
+        style={{ backgroundColor: "#eceef0" }}
+      >
         <EntityInfo slug={slug} username={username} />
         <StyledTabLink.List>
           <StyledTabLink name="Editor" href={modelRoute({ username, slug })} />

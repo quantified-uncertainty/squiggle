@@ -12,7 +12,12 @@ import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { useInitialWidth } from "../../lib/hooks/useInitialWidth.js";
 
 import { Env } from "@quri/squiggle-lang";
-import { Bars3CenterLeftIcon, Button } from "@quri/ui";
+import {
+  Bars3CenterLeftIcon,
+  AdjustmentsHorizontalIcon,
+  AdjustmentsVerticalIcon,
+  Button,
+} from "@quri/ui";
 
 import { useMaybeControlledValue, useSquiggle } from "../../lib/hooks/index.js";
 
@@ -92,7 +97,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     ),
   };
 
-  type Tab = "CODE" | "SETTINGS" | "view";
+  type Tab = "CODE" | "SETTINGS";
 
   const [selectedTab, setSelectedTab] = useState("CODE" as Tab);
 
@@ -199,8 +204,8 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
             ? setSelectedTab("SETTINGS")
             : setSelectedTab("CODE")
         }
-        icon={CogIcon}
-        tooltipText="Settings"
+        icon={AdjustmentsVerticalIcon}
+        tooltipText="Configuration"
       />
       <MenuItem
         tooltipText={

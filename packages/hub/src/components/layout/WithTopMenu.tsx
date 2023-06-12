@@ -11,7 +11,7 @@ export const WithTopMenu: FC<Props> = ({
 }) => {
   return (
     <div>
-      <div className="border-b border-slate-200">{top}</div>
+      <div>{top}</div>
       <div className={addMarginToMainSection ? "mt-4" : ""}>{main}</div>
     </div>
   );

@@ -1,6 +1,11 @@
 import { FC, PropsWithChildren } from "react";
 import { DropdownMenu, Dropdown, DropdownMenuActionItem } from "@quri/ui";
-import { TriangleIcon, CodeBracketIcon, ScaleIcon } from "@quri/ui";
+import {
+  TriangleIcon,
+  CodeBracketIcon,
+  ScaleIcon,
+  BookOpenIcon,
+} from "@quri/ui";
 import { useRouter } from "next/navigation";
 
 import { useSession } from "next-auth/react";
@@ -29,7 +34,7 @@ const NewDropdown: FC = () => {
         </DropdownMenu>
       )}
     >
-      <div className="flex items-center text-white cursor-pointer hover:bg-slate-700 px-2 py-1 rounded-md select-none">
+      <div className="flex items-center text-white cursor-pointer hover:bg-slate-700 px-2 py-1 rounded-md select-none text-sm">
         New
         <TriangleIcon size={6} className={"rotate-180 ml-2 text-slate-300"} />
       </div>
@@ -41,7 +46,7 @@ const TopMenu: FC = () => {
   const { data: session } = useSession();
 
   return (
-    <div className="border-slate-200 h-12 flex items-center justify-between px-4 bg-gray-800">
+    <div className="border-slate-200 h-10 flex items-center justify-between px-4 bg-gray-800">
       <div className="flex gap-6 items-baseline">
         <Link
           className="text-white hover:text-slate-300 font-semibold"
@@ -52,10 +57,14 @@ const TopMenu: FC = () => {
       </div>
       <div className="flex gap-6 items-baseline">
         <Link
-          className="text-white hover:text-slate-300"
+          className="text-white text-sm hover:bg-slate-700 px-2 py-1 rounded-md select-none"
           href="https://www.squiggle-language.com/docs/Api/Dist"
         >
-          Squiggle Docs
+          <BookOpenIcon
+            className="inline-block mr-1 text-slate-400"
+            size={14}
+          />
+          Docs
         </Link>
         {session && <NewDropdown />}
         <UserControls session={session} />

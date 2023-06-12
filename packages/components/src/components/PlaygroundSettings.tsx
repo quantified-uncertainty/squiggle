@@ -107,7 +107,7 @@ export const viewSettingsSchema = yup.object({}).shape({
   renderingSettings: renderingSettingsSchema,
   distributionChartSettings: distributionSettingsSchema,
   functionChartSettings: functionSettingsSchema,
-  chartHeight: yup.number().required().positive().integer().default(200),
+  chartHeight: yup.number().required().positive().integer().default(100),
 });
 
 export type PlaygroundSettings = yup.InferType<typeof viewSettingsSchema>;
