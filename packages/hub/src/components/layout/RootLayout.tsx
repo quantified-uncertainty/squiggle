@@ -1,6 +1,6 @@
 import { FC, PropsWithChildren } from "react";
 import { DropdownMenu, Dropdown, DropdownMenuActionItem } from "@quri/ui";
-import { TriangleIcon } from "@quri/ui";
+import { TriangleIcon, CodeBracketIcon, ScaleIcon } from "@quri/ui";
 import { useRouter } from "next/navigation";
 
 import { useSession } from "next-auth/react";
@@ -18,10 +18,12 @@ const NewDropdown: FC = () => {
         <DropdownMenu>
           <DropdownMenuActionItem
             onClick={() => router.push(newModelRoute())}
+            icon={CodeBracketIcon}
             title={"New Model"}
           />
           <DropdownMenuActionItem
             onClick={() => router.push(newDefinitionRoute())}
+            icon={ScaleIcon}
             title={"New Definition"}
           />
         </DropdownMenu>

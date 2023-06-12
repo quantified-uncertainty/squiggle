@@ -48,6 +48,13 @@ export {
   FireIcon,
   BoltIcon,
   Bars3CenterLeftIcon,
+  BookOpenIcon,
+  UserIcon,
+  UserCircleIcon,
+  AdjustmentsHorizontalIcon,
+  AdjustmentsVerticalIcon,
+  DocumentTextIcon,
+  LinkIcon,
 } from "./icons/HeroIcons.js";
 
 export { useToast, WithToasts } from "./components/WithToasts/index.js";

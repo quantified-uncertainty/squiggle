@@ -1,7 +1,7 @@
 import { Session } from "next-auth";
 import { signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { TriangleIcon } from "@quri/ui";
+import { TriangleIcon, UserCircleIcon, SignOutIcon } from "@quri/ui";
 
 import {
   Button,
@@ -39,11 +39,13 @@ export function UserControls({ session }: { session: Session | null }) {
                     userRoute({ username: session.user.username || "" })
                   )
                 }
+                icon={UserCircleIcon}
                 title="Profile"
               />
             )}
             <DropdownMenuActionItem
               onClick={() => signOut()}
+              icon={SignOutIcon}
               title="Sign Out"
             />
           </DropdownMenu>
