@@ -74,11 +74,11 @@ export function relativeValuesRoute({
   return `/users/${username}/relative-values/${slug}`;
 }
 
-export function relativeValuesViewRoute(props: {
+export function relativeValuesEditRoute(props: {
   username: string;
   slug: string;
 }) {
-  return relativeValuesRoute(props) + "/view";
+  return relativeValuesRoute(props) + "/edit";
 }
 
 export function userRoute({ username }: { username: string }) {
