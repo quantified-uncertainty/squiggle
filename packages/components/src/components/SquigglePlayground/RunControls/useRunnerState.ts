@@ -1,4 +1,4 @@
-import { useLayoutEffect, useReducer } from "react";
+import { useLayoutEffect, useReducer, useRef } from "react";
 
 type InternalState = {
   autorunMode: boolean;
@@ -81,19 +81,18 @@ export type RunnerState = {
 
 export function useRunnerState(code: string): RunnerState {
   const [state, dispatch] = useReducer(reducer, buildInitialState(code));
+  const timeoutSetRef = useRef(false); // Ref to track if timeout is already set.
 
   useLayoutEffect(() => {
     const onFirstExecution = () => state.executionId === 0;
-    if (state.runningState === "prepared") {
+    if (state.runningState === "prepared" && !timeoutSetRef.current) {
+      timeoutSetRef.current = true;
       // this is necessary for async playground loading - otherwise it executes the code synchronously on the initial load
       // (it's surprising that this is necessary, but empirically it _is_ necessary, both with `useEffect` and `useLayoutEffect`)
-      setTimeout(
-        () => {
-          dispatch({ type: "RUN", code });
-        },
-        // We want to wait a bit longer the first render, to make sure that the editor loads first.
-        onFirstExecution() ? 50 : 0
-      );
+      setTimeout(() => {
+        dispatch({ type: "RUN", code });
+        timeoutSetRef.current = false; // Reset after dispatch.
+      }, onFirstExecution() ? 50 : 0);
     } else if (state.runningState === "run") {
       dispatch({ type: "STOP_RUN" });
     }
