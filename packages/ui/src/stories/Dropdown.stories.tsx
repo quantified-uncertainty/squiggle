@@ -1,16 +1,23 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
+import { ComponentType } from "react";
 import {
+  Button,
+  Dropdown,
   DropdownMenu,
   DropdownMenuActionItem,
   DropdownMenuAsyncActionItem,
+  DropdownMenuHeader,
+  EditIcon,
+  RefreshIcon,
+  TrashIcon,
 } from "../index.js";
-import { Button, Dropdown, XIcon } from "../index.js";
+import { DropdownMenuSeparator } from "../components/Dropdown/DropdownMenuSeparator.js";
 
 const meta = {
   component: Dropdown,
   decorators: [
-    (Story: any) => (
+    (Story: ComponentType) => (
       <div className="flex">
         <Story />
       </div>
@@ -26,19 +33,21 @@ export const Default: Story = {
     render({ close }) {
       return (
         <DropdownMenu>
+          <DropdownMenuHeader>Header</DropdownMenuHeader>
+          <DropdownMenuSeparator />
           <DropdownMenuActionItem
-            title="First item"
-            icon={XIcon}
-            onClick={() => {}}
+            title="Refresh"
+            icon={RefreshIcon}
+            onClick={() => undefined}
           />
           <DropdownMenuActionItem
-            title="Second item"
-            icon={XIcon}
-            onClick={() => {}}
+            title="Edit"
+            icon={EditIcon}
+            onClick={() => undefined}
           />
           <DropdownMenuAsyncActionItem
-            title="Async item"
-            icon={XIcon}
+            title="Delete (async)"
+            icon={TrashIcon}
             onClick={async () => {
               return new Promise((resolve) => setTimeout(resolve, 1000));
             }}

@@ -6,11 +6,11 @@ import { default as useWindowSizeImport } from "react-use/lib/useWindowSize.js";
 
 function cjsHack<T>(v: { default: T }) {
   // this can happen in jest environment, TODO - investigate
-  if ((v as any).default) {
-    return (v as any).default as T;
+  if (v.default) {
+    return v.default as T;
   }
 
-  return v as any as T;
+  return v as T;
 }
 
 export const useWindowScroll = cjsHack(useWindowScrollImport);
