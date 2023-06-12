@@ -46,10 +46,10 @@ const TopMenu: FC = () => {
   const { data: session } = useSession();
 
   return (
-    <div className="border-slate-200 h-10 flex items-center justify-between px-4 bg-gray-800">
+    <div className="border-slate-200 h-10 flex items-center justify-between px-8 bg-gray-800">
       <div className="flex gap-6 items-baseline">
         <Link
-          className="text-white hover:text-slate-300 font-semibold"
+          className="text-slate-300 hover:text-slate-300 font-semibold"
           href="/"
         >
           Squiggle Hub

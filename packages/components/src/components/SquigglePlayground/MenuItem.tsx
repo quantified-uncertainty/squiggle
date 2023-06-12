@@ -29,7 +29,7 @@ export const MenuItem: React.FC<{
   const main = (
     <div
       className={
-        "flex items-center text-slate-800 space-x-1 text-sm px-4 h-full cursor-pointer hover:bg-slate-200 select-none whitespace-nowrap transition " +
+        "flex items-center text-slate-600 space-x-1 text-sm px-4 h-full cursor-pointer hover:bg-slate-200 select-none whitespace-nowrap transition " +
         className
       }
       onClick={onClick}

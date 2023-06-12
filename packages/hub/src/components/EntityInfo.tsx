@@ -9,13 +9,9 @@ export const EntityInfo: FC<{ username: string; slug: string }> = ({
   slug,
 }) => {
   return (
-    <div className="flex">
+    <div className="flex justify-between w-full">
       <div className="flex items-center mr-3 group cursor-pointer">
-        <CodeBracketIcon
-          className="inline-block mr-2 text-slate-400 group-hover:text-slate-600 transition"
-          size={22}
-        />
-        <span className="text-xl font-medium text-slate-700 group-hover:text-slate-900 group-hover:underline">
+        <span className="text-xl font-medium text-blue-600 group-hover:underline">
           {slug}
         </span>
       </div>

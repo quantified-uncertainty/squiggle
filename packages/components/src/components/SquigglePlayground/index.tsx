@@ -206,7 +206,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const leftPanelRef = useRef<HTMLDivElement | null>(null);
 
   const leftPanelHeader = (
-    <div className="flex items-center h-8 bg-slate-50 border-b border-slate-200 overflow-hidden mb-1">
+    <div className="flex items-center h-8 bg-slate-50 border-b border-slate-200 overflow-hidden mb-1 px-5">
       <RunMenuItem {...runnerState} />
       <AutorunnerMenuItem {...runnerState} />
       <MenuItem

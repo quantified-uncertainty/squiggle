@@ -91,7 +91,7 @@ export const ModelPage: FC<Props> = ({ username, slug, children }) => {
   return (
     <WithTopMenu addMarginToMainSection={false}>
       <div
-        className="flex items-center gap-4 px-4 pt-5 pb-4 border-b border-gray-300"
+        className="flex items-center gap-4 px-8 pt-5 pb-4 border-b border-gray-300"
         style={{ backgroundColor: "#eceef0" }}
       >
         <EntityInfo slug={slug} username={username} />
