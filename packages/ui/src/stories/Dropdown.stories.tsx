@@ -6,11 +6,12 @@ import {
   DropdownMenuAsyncActionItem,
 } from "../index.js";
 import { Button, Dropdown, XIcon } from "../index.js";
+import { ComponentType } from "react";
 
 const meta = {
   component: Dropdown,
   decorators: [
-    (Story: any) => (
+    (Story: ComponentType) => (
       <div className="flex">
         <Story />
       </div>
@@ -29,12 +30,12 @@ export const Default: Story = {
           <DropdownMenuActionItem
             title="First item"
             icon={XIcon}
-            onClick={() => {}}
+            onClick={() => undefined}
           />
           <DropdownMenuActionItem
             title="Second item"
             icon={XIcon}
-            onClick={() => {}}
+            onClick={() => undefined}
           />
           <DropdownMenuAsyncActionItem
             title="Async item"

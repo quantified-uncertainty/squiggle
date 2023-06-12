@@ -3,6 +3,7 @@ import {
   flip,
   FloatingPortal,
   offset,
+  Side,
   useClick,
   useDismiss,
   useFloating,
@@ -45,7 +46,7 @@ export const Dropdown: FC<Props> = ({ render, fullHeight, children }) => {
     right: "left",
     bottom: "top",
     left: "right",
-  }[placement.split("-")[0]];
+  }[placement.split("-")[0] as Side];
 
   const renderTooltip = () => (
     <FloatingPortal>
@@ -69,7 +70,7 @@ export const Dropdown: FC<Props> = ({ render, fullHeight, children }) => {
                 style={{
                   left: middlewareData.arrow?.x ?? "",
                   top: middlewareData.arrow?.y ?? "",
-                  [staticSide!]: "-0.25rem",
+                  [staticSide]: "-0.25rem",
                 }}
                 className="absolute h-2 w-2 rotate-45 bg-white"
               />
