@@ -22,7 +22,9 @@ export const splitContinuousAndDiscrete = (
   const discreteValue: number[] = [];
 
   if (!Number.isInteger(minDiscreteWeight)) {
-    throw new Error(`Minimum discrete weight must be an integer. Got ${minDiscreteWeight}`);
+    throw new Error(
+      `Minimum discrete weight must be an integer. Got ${minDiscreteWeight}`
+    );
   }
   if (minDiscreteWeight <= 1) {
     // Weight of 1 is pointless because it indicates only discrete values,
