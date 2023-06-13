@@ -39,7 +39,11 @@ export const NewModel: FC = () => {
     description: string;
   }>({
     defaultValues: {
-      code: "normal(2, 5)",
+      code: `/*
+Describe your code here
+*/
+
+a = normal(2, 5)`,
     },
   });
 
@@ -73,50 +77,28 @@ export const NewModel: FC = () => {
   return (
     <form onSubmit={save}>
       <FormProvider {...form}>
-        <WithTopMenu addMarginToMainSection={false}>
-          <div className="max-w-2xl mx-auto">
-            <div className="font-bold text-xl mb-4">New model</div>
-            <div className="space-y-2">
-              <TextFormField
-                name="slug"
-                label="Slug"
-                placeholder="my-model"
-                rules={{
-                  pattern: {
-                    value: /^[\w-]+$/,
-                    message: "Must be alphanumerical",
-                  },
-                  required: true,
-                }}
-              />
-              <TextAreaFormField
-                name="description"
-                label="Description"
-                placeholder="Any comments"
-              />
-            </div>
+        <div className="max-w-2xl mx-auto">
+          <div className="font-bold text-xl mb-4">New model</div>
+          <div className="space-y-2 mb-4">
+            <TextFormField
+              name="slug"
+              description="Must be alphanumerical, with no spaces. Example: my-long-model"
+              label="Model Name"
+              placeholder="my-model"
+              rules={{
+                pattern: {
+                  value: /^[\w-]+$/,
+                  message:
+                    "Must be alphanumerical, with no spaces. Example: my-long-model",
+                },
+                required: true,
+              }}
+            />
           </div>
-          <Controller
-            name="code"
-            control={form.control}
-            rules={{ required: true }}
-            render={({ field }) => (
-              <SquigglePlayground
-                onCodeChange={field.onChange}
-                code={field.value}
-                renderExtraControls={() => (
-                  <Button
-                    onClick={save}
-                    disabled={isSaveInFlight}
-                    theme="primary"
-                  >
-                    Save
-                  </Button>
-                )}
-              />
-            )}
-          />
-        </WithTopMenu>
+          <Button onClick={save} disabled={isSaveInFlight} theme="primary">
+            Save
+          </Button>
+        </div>
       </FormProvider>
     </form>
   );
