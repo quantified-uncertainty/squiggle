@@ -5,6 +5,7 @@ import { FC } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
+import { modelRoute } from "@/routes";
 
 import { SquigglePlayground } from "@quri/squiggle-components";
 import { Button, TextAreaFormField, TextFormField, useToast } from "@quri/ui";
@@ -29,7 +30,7 @@ const Mutation = graphql`
 `;
 
 export const NewModel: FC = () => {
-  useSession({ required: true });
+  const { data: session } = useSession({ required: true });
 
   const toast = useToast();
 
@@ -61,11 +62,17 @@ a = normal(2, 5)`,
           description: data.description,
         },
       },
-      onCompleted(data) {
-        if (data.result.__typename === "BaseError") {
-          toast(data.result.message, "error");
+      onCompleted(completion) {
+        if (completion.result.__typename === "BaseError") {
+          toast(completion.result.message, "error");
         } else {
-          router.push("/");
+          //My guess is that there are more elegant ways of returning the slug, but I wasn't sure what was the best way to do it
+          const username = session?.user?.username;
+          if (username) {
+            router.push(modelRoute({ username, slug: data.slug }));
+          } else {
+            router.push("/");
+          }
         }
       },
       onError(e) {
