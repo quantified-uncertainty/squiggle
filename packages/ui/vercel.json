@@ -1,4 +1,5 @@
 {
+  "installCommand": "YARN_CACHE_FOLDER=../../node_modules/.yarn-cache yarn install",
   "buildCommand": "npx turbo build",
   "outputDirectory": "storybook-static",
   "ignoreCommand": "npx turbo-ignore || ../../skip-dependabot.sh"
