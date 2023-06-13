@@ -3,7 +3,7 @@ import { clsx } from "clsx";
 import { TextTooltip } from "@quri/ui";
 
 export const MenuItem: React.FC<{
-  icon?: (props: { className?: string }) => React.ReactElement | null;
+  icon?: React.ComponentType<{ className?: string }>;
   children?: React.ReactNode;
   iconClasses?: string;
   iconColorClasses?: string;

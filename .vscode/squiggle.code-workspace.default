@@ -43,6 +43,9 @@
       "website",
       "api-server"
     ],
-    "jest.jestCommandLine": "yarn test"
+    "jest.jestCommandLine": "yarn test",
+    "files.associations": {
+      "turbo.json": "jsonc"
+    }
   }
 }

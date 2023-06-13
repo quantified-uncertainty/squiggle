@@ -1,6 +1,11 @@
 {
   "$schema": "https://turborepo.org/schema.json",
   "pipeline": {
+    // dev target for pre-push checks
+    "build:ts": {
+      "dependsOn": ["^build:ts", "@quri/squiggle-lang#build"],
+      "outputs": ["dist/**"]
+    },
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**", "build/**", ".next/**", "!.next/cache/**"]
