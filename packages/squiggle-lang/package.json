@@ -4,9 +4,9 @@
   "homepage": "https://squiggle-language.com",
   "license": "MIT",
   "scripts": {
-    "build": "yarn build:peggy && yarn build:typescript",
+    "build": "yarn build:peggy && yarn build:ts",
     "build:peggy": "peggy --cache --format es ./src/ast/peggyParser.peggy",
-    "build:typescript": "tsc -b ./tsconfig.esm.json ./tsconfig.json && echo '{\"type\": \"commonjs\"}' >dist/cjs/package.json",
+    "build:ts": "tsc -b ./tsconfig.esm.json ./tsconfig.json && echo '{\"type\": \"commonjs\"}' >dist/cjs/package.json",
     "start": "tsc -w",
     "clean": "rm -rf dist && rm -f src/ast/peggyParser.js",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",

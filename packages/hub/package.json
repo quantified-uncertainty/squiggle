@@ -7,6 +7,7 @@
     "dev": "next dev -p 3001",
     "start": "__NEXT_PRIVATE_PREBUNDLED_REACT=next next start",
     "generate": "yarn db:generate && yarn print-schema && yarn relay",
+    "build:ts": "yarn generate && tsc",
     "build": "yarn generate && __NEXT_PRIVATE_PREBUNDLED_REACT=next next build",
     "lint": "prettier --check . && next lint",
     "format": "prettier --write .",
