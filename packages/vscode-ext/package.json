@@ -137,7 +137,7 @@
     "build": "yarn run build:vendor && yarn run build:grammar && yarn run build:bundle",
     "watch": "yarn run compile:bundle --watch",
     "pretest": "yarn run build && yarn run lint",
-    "lint": "tsc -noEmit && prettier --check .",
+    "lint": "tsc && prettier --check .",
     "format": "prettier --write .",
     "package": "vsce package --no-dependencies"
   },
