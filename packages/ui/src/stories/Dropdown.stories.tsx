@@ -8,7 +8,6 @@ import {
   DropdownMenuActionItem,
   DropdownMenuAsyncActionItem,
   DropdownMenuHeader,
-  EditIcon,
   RefreshIcon,
   TrashIcon,
 } from "../index.js";
