@@ -4378,6 +4378,7 @@ __metadata:
     next: ^13.4.5
     next-auth: ^4.22.1
     nodemailer: ^6.9.3
+    pako: ^2.1.0
     postcss: ^8.4.24
     prettier: ^2.8.8
     prisma: ^4.15.0
