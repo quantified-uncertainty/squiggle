@@ -89,10 +89,13 @@ export function useRunnerState(code: string): RunnerState {
       timeoutSetRef.current = true;
       // this is necessary for async playground loading - otherwise it executes the code synchronously on the initial load
       // (it's surprising that this is necessary, but empirically it _is_ necessary, both with `useEffect` and `useLayoutEffect`)
-      setTimeout(() => {
-        dispatch({ type: "RUN", code });
-        timeoutSetRef.current = false; // Reset after dispatch.
-      }, onFirstExecution() ? 50 : 0);
+      setTimeout(
+        () => {
+          dispatch({ type: "RUN", code });
+          timeoutSetRef.current = false; // Reset after dispatch.
+        },
+        onFirstExecution() ? 50 : 0
+      );
     } else if (state.runningState === "run") {
       dispatch({ type: "STOP_RUN" });
     }

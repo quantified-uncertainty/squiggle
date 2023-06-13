@@ -15,11 +15,7 @@ import { ResizableBox } from "react-resizable";
 import { z } from "zod";
 
 import { Env, SqProject } from "@quri/squiggle-lang";
-import {
-  Bars3CenterLeftIcon,
-  AdjustmentsVerticalIcon,
-  Button,
-} from "@quri/ui";
+import { Bars3CenterLeftIcon, AdjustmentsVerticalIcon, Button } from "@quri/ui";
 
 import { useMaybeControlledValue, useSquiggle } from "../../lib/hooks/index.js";
 
@@ -165,7 +161,10 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
 
   const editorRef = useRef<CodeEditorHandle>(null);
 
-  const standardHeightStyle = (height:number) => ({ height, overflow: "auto" });
+  const standardHeightStyle = (height: number) => ({
+    height,
+    overflow: "auto",
+  });
   const leftSideHeaderHeight = 32; //calculated from the leftPanelHeader fixed height.
   const rightSideHeaderHeight = 32;
 
