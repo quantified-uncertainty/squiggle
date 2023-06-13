@@ -27,10 +27,12 @@
     "commander": "^10.0.1",
     "immutable": "^4.3.0",
     "jstat": "^1.9.6",
+    "lodash": "^4.17.21",
     "open": "^9.1.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.2",
+    "@types/lodash": "^4.14.195",
     "@types/node": "^20.3.0",
     "chalk": "^5.2.0",
     "codecov": "^3.8.3",
