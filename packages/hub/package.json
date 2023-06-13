@@ -49,6 +49,7 @@
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.3",
+    "@types/pako": "^2.0.0",
     "@types/react": "^18.2.12",
     "@types/react-relay": "^14.1.4",
     "@types/relay-runtime": "^14.1.10",
