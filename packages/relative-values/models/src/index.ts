@@ -11,10 +11,10 @@ import { Map } from "immutable";
 
 const items = [
   { catalog: quri.catalog, models: quri.models },
-  { catalog: posts.catalog, models: posts.models },
-  { catalog: animals.catalog, models: animals.models },
-  { catalog: macrovariables.catalog, models: macrovariables.models },
-  { catalog: aggregate.catalog, models: aggregate.models },
+  // { catalog: posts.catalog, models: posts.models },
+  // { catalog: animals.catalog, models: animals.models },
+  // { catalog: macrovariables.catalog, models: macrovariables.models },
+  // { catalog: aggregate.catalog, models: aggregate.models },
 ];
 
 export const allInterfaces: InterfaceWithModels[] = items.map(
