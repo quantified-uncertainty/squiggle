@@ -3,8 +3,7 @@
 const math = require("remark-math");
 const katex = require("rehype-katex");
 
-const lightCodeTheme = require("prism-react-renderer/themes/github");
-const darkCodeTheme = require("prism-react-renderer/themes/dracula");
+const prismThemes = require("prism-react-renderer").themes;
 
 async function pluginTailwindCSS() {
   return {
@@ -148,8 +147,8 @@ const config = {
         copyright: `CC0. Built with Docusaurus.`,
       },
       prism: {
-        theme: lightCodeTheme,
-        darkTheme: darkCodeTheme,
+        theme: prismThemes.github,
+        darkTheme: prismThemes.dracula,
       },
     }),
   stylesheets: [

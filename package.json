@@ -8,8 +8,8 @@
     "@changesets/cli": "^2.26.1",
     "prettier": "^3.0.0-alpha.12",
     "prettier2": "npm:prettier@^2",
-    "turbo": "latest",
-    "turbo-ignore": "^1.10.1"
+    "turbo": "^1.10.3",
+    "turbo-ignore": "^1.10.3"
   },
   "workspaces": [
     "packages/*"
