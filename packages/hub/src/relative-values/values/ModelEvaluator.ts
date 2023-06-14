@@ -1,4 +1,9 @@
-import { result, SqLambda, SqProject } from "@quri/squiggle-lang";
+import {
+  result,
+  SqLambda,
+  SqProject,
+  SqStringValue,
+} from "@quri/squiggle-lang";
 import { z } from "zod";
 
 import { ModelRevision$data } from "@/__generated__/ModelRevision.graphql";
@@ -47,7 +52,10 @@ function buildRelativeValue({
   id1: string;
   id2: string;
 }): RelativeValueResult {
-  const result = fn.call([id1, id2]);
+  const result = fn.call([
+    SqStringValue.create(id1),
+    SqStringValue.create(id2),
+  ]);
   if (!result.ok) {
     return { ok: false, value: result.value.toString() };
   }

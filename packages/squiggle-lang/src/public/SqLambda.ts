@@ -1,8 +1,8 @@
-import { Env, defaultEnv } from "../dist/env.js";
+import { Env } from "../dist/env.js";
 import { stdLib } from "../library/index.js";
 import { registry } from "../library/registry/index.js";
-import { createContext } from "../reducer/context.js";
 import { IError } from "../reducer/IError.js";
+import { createContext } from "../reducer/context.js";
 import { evaluate } from "../reducer/index.js";
 import { Lambda } from "../reducer/lambda.js";
 import * as Result from "../utility/result.js";
@@ -25,7 +25,18 @@ export class SqLambda {
     return this._value.getParameters();
   }
 
-  call(args: SqValue[], env: Env): result<SqValue, SqError> {
+  call(args: SqValue[], env?: Env): result<SqValue, SqError> {
+    if (!env) {
+      if (!this.location) {
+        return Result.Err(
+          SqError.createOtherError(
+            "Programmatically constructed lambda call requires env argument"
+          )
+        );
+      }
+      // default to project environment that created this lambda
+      env = this.location.project.getEnvironment();
+    }
     const rawArgs = args.map((arg) => arg._value);
     try {
       const value = this._value.call(
