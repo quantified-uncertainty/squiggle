@@ -125,8 +125,8 @@ export const T = {
   },
   mapYResult<E>(
     t: XYShape,
-    fn: (y: number) => Result.t<number, E>
-  ): Result.t<XYShape, E> {
+    fn: (y: number) => Result.result<number, E>
+  ): Result.result<XYShape, E> {
     const mappedYs: number[] = [];
     for (const y of t.ys) {
       const mappedY = fn(y);
@@ -178,7 +178,7 @@ export const T = {
   },
 
   // unused
-  filterOkYs<B>(xs: number[], ys: Result.t<number, B>[]): XYShape {
+  filterOkYs<B>(xs: number[], ys: Result.result<number, B>[]): XYShape {
     const n = xs.length; // Assume length(xs) == length(ys)
     const newXs: number[] = [];
     const newYs: number[] = [];
@@ -256,7 +256,7 @@ export const T = {
     },
   },
 
-  make(xs: number[], ys: number[]): Result.t<XYShape, XYShapeError> {
+  make(xs: number[], ys: number[]): Result.result<XYShape, XYShapeError> {
     const attempt: XYShape = { xs, ys };
     const maybeError = T.Validator.validate(attempt);
     if (maybeError) {
@@ -470,10 +470,10 @@ export const PointwiseCombination = {
   // t1 and t2 are interpolator functions from XYShape.XtoY.
   combine<E>(
     interpolator: Interpolator,
-    fn: (a: number, b: number) => Result.t<number, E>,
+    fn: (a: number, b: number) => Result.result<number, E>,
     t1: XYShape,
     t2: XYShape
-  ): Result.t<XYShape, E> {
+  ): Result.result<XYShape, E> {
     // This function combines two xyShapes by looping through both of them simultaneously.
     // It always moves on to the next smallest x, whether that's in the first or second input's xs,
     // and interpolates the value on the other side, thus accumulating xs and ys.

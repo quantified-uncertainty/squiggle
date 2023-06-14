@@ -5,9 +5,6 @@ export type result<V, E> =
     }
   | { ok: false; value: E };
 
-// shortcut
-export type t<V, E> = result<V, E>;
-
 export function Ok<T, E>(value: T): result<T, E> {
   return { ok: true, value: value };
 }
