@@ -108,7 +108,7 @@ export class Registry {
   }
 
   makeLambda(fnName: string): Lambda {
-    if (!this.fnNameDict.get(fnName)) {
+    if (!this.fnNameDict.has(fnName)) {
       throw new Error(`Function ${fnName} doesn't exist in registry`);
     }
     return new BuiltinLambda(fnName, (args, context, reducer) => {

@@ -115,9 +115,8 @@ export const library = [
     requiresNamespace: true,
     examples: [`List.concat([1,2,3], [4, 5, 6])`],
     definitions: [
-      makeDefinition<Value[], Value[]>(
-        [frArray(frAny), frArray(frAny)],
-        ([array1, array2]) => Ok(vArray([...array1].concat(array2)))
+      makeDefinition([frArray(frAny), frArray(frAny)], ([array1, array2]) =>
+        Ok(vArray([...array1].concat(array2)))
       ),
     ],
   }),
@@ -136,7 +135,7 @@ export const library = [
     requiresNamespace: true,
     examples: [`List.uniq([1,2,3,"hi",false,"hi"])`],
     definitions: [
-      makeDefinition<Value[]>([frArray(frAny)], ([arr]) => {
+      makeDefinition([frArray(frAny)], ([arr]) => {
         const isUniqableType = (t: Value) =>
           includes(["String", "Bool", "Number"], t.type);
         //I'm not sure if the r.type concat is essential, but seems safe.

@@ -18,27 +18,25 @@ const maker = new FnFactory({
 const emptyList = (): Result.result<Value, ErrorMessage> =>
   Result.Err(REOther("List is empty"));
 
-const makeNumberArrayToNumberDefinition = (
-  fn: (arr: number[]) => number
-): FnDefinition => {
+function makeNumberArrayToNumberDefinition(fn: (arr: number[]) => number) {
   return makeDefinition([frArray(frNumber)], ([arr]) => {
     if (arr.length === 0) {
       return emptyList();
     }
     return Ok(vNumber(fn(arr)));
   });
-};
+}
 
-const makeNumberArrayToNumberArrayDefinition = (
+function makeNumberArrayToNumberArrayDefinition(
   fn: (arr: number[]) => number[]
-): FnDefinition => {
+) {
   return makeDefinition([frArray(frNumber)], ([arr]) => {
     if (arr.length === 0) {
       return emptyList();
     }
     return Ok(vArray(fn(arr).map(vNumber)));
   });
-};
+}
 
 export const library = [
   maker.n2n({

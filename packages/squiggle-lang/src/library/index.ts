@@ -47,4 +47,6 @@ function makeStdLib(): Namespace {
   return res;
 }
 
+// We do this on import, because stdLib is expensive and we want to do it only once.
+// Might be better to build it lazily on demand and cache.
 export const stdLib = makeStdLib();

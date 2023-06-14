@@ -5,115 +5,34 @@ import { result } from "../../utility/result.js";
 import { Value } from "../../value/index.js";
 import { FRType } from "./frTypes.js";
 
-export type FnDefinition0 = {
-  inputs: [];
+// Type safety of `FnDefinition is guaranteed by `makeDefinition` signature below and by `FRType` unpack logic.
+// It won't be possible to make `FnDefinition` generic without sacrificing type safety in other parts of the codebase,
+// because of contravariance (we need to store all FnDefinitions in a generic array later on).
+export type FnDefinition = {
+  inputs: FRType<any>[];
   run: (
-    args: [],
+    args: any[],
     context: ReducerContext,
     reducerFn: ReducerFn
   ) => result<Value, ErrorMessage>;
 };
 
-export type FnDefinition1<T1> = {
-  inputs: [FRType<T1>];
+export function makeDefinition<const T extends any[]>(
+  // [...] wrapper is important, see also: https://stackoverflow.com/a/63891197
+  inputs: [...{ [K in keyof T]: FRType<T[K]> }],
   run: (
-    args: [T1],
-    context: ReducerContext,
-    reducerFn: ReducerFn
-  ) => result<Value, ErrorMessage>;
-};
-
-export type FnDefinition2<T1, T2> = {
-  inputs: [FRType<T1>, FRType<T2>];
-  run: (
-    args: [T1, T2],
-    context: ReducerContext,
-    reducerFn: ReducerFn
-  ) => result<Value, ErrorMessage>;
-};
-
-export type FnDefinition3<T1, T2, T3> = {
-  inputs: [FRType<T1>, FRType<T2>, FRType<T3>];
-  run: (
-    args: [T1, T2, T3],
-    context: ReducerContext,
-    reducerFn: ReducerFn
-  ) => result<Value, ErrorMessage>;
-};
-
-export type FnDefinition4<T1, T2, T3, T4> = {
-  inputs: [FRType<T1>, FRType<T2>, FRType<T3>, FRType<T4>];
-  run: (
-    args: [T1, T2, T3, T4],
-    context: ReducerContext,
-    reducerFn: ReducerFn
-  ) => result<Value, ErrorMessage>;
-};
-
-// https://www.typescriptlang.org/docs/handbook/2/functions.html#function-overloads
-export function makeDefinition(
-  inputs: [],
-  run: (
-    args: [],
-    context: ReducerContext,
-    reducerFn: ReducerFn
-  ) => result<Value, ErrorMessage>
-): FnDefinition0;
-
-export function makeDefinition<T1>(
-  inputs: [FRType<T1>],
-  run: (
-    args: [T1],
-    context: ReducerContext,
-    reducerFn: ReducerFn
-  ) => result<Value, ErrorMessage>
-): FnDefinition1<T1>;
-
-export function makeDefinition<T1, T2>(
-  inputs: [FRType<T1>, FRType<T2>],
-  run: (
-    args: [T1, T2],
-    context: ReducerContext,
-    reducerFn: ReducerFn
-  ) => result<Value, ErrorMessage>
-): FnDefinition2<T1, T2>;
-
-export function makeDefinition<T1, T2, T3>(
-  inputs: [FRType<T1>, FRType<T2>, FRType<T3>],
-  run: (
-    args: [T1, T2, T3],
-    context: ReducerContext,
-    reducerFn: ReducerFn
-  ) => result<Value, ErrorMessage>
-): FnDefinition3<T1, T2, T3>;
-
-export function makeDefinition<T1, T2, T3, T4>(
-  inputs: [FRType<T1>, FRType<T2>, FRType<T3>, FRType<T4>],
-  run: (
-    args: [T1, T2, T3, T4],
-    context: ReducerContext,
-    reducerFn: ReducerFn
-  ) => result<Value, ErrorMessage>
-): FnDefinition4<T1, T2, T3, T4>;
-
-// `any` here is fine, this signature won't be visible due to function overloads above
-export function makeDefinition(
-  inputs: any,
-  run: (
-    args: any,
+    args: T,
     context: ReducerContext,
     reducerFn: ReducerFn
   ) => result<Value, ErrorMessage>
 ): FnDefinition {
-  return { inputs, run };
+  return {
+    inputs,
+    // Type of `run` argument must match `FnDefinition['run']`. This
+    // This unsafe type casting is necessary because function type parameters are contravariant.
+    run: run as FnDefinition["run"],
+  };
 }
-
-export type FnDefinition =
-  | FnDefinition0
-  | FnDefinition1<any>
-  | FnDefinition2<any, any>
-  | FnDefinition3<any, any, any>
-  | FnDefinition4<any, any, any, any>;
 
 export function tryCallFnDefinition(
   fn: FnDefinition,
@@ -124,7 +43,7 @@ export function tryCallFnDefinition(
   if (args.length !== fn.inputs.length) {
     return; // args length mismatch
   }
-  const unpackedArgs: any[] = []; // any, but that's ok, type safety is guaranteed by FnDefinition type
+  const unpackedArgs: any = []; // any, but that's ok, type safety is guaranteed by FnDefinition type
   for (let i = 0; i < args.length; i++) {
     const unpackedArg = fn.inputs[i].unpack(args[i]);
     if (unpackedArg === undefined) {
@@ -133,7 +52,7 @@ export function tryCallFnDefinition(
     }
     unpackedArgs.push(unpackedArg);
   }
-  return fn.run(unpackedArgs as any, context, reducerFn);
+  return fn.run(unpackedArgs, context, reducerFn);
 }
 
 export function fnDefinitionToString(fn: FnDefinition): string {
