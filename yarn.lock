@@ -2041,16 +2041,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@codemirror/lang-json@npm:^6.0.1":
-  version: 6.0.1
-  resolution: "@codemirror/lang-json@npm:6.0.1"
-  dependencies:
-    "@codemirror/language": ^6.0.0
-    "@lezer/json": ^1.0.0
-  checksum: e9e87d50ff7b81bd56a6ab50740b1dd54e9a93f1be585e1d59d0642e2148842ea1528ac7b7221eb4ddc7fe84bbc28065144cc3ab86f6e06c6aeb2d4b4e62acf1
-  languageName: node
-  linkType: hard
-
 "@codemirror/language@npm:^6.0.0":
   version: 6.6.0
   resolution: "@codemirror/language@npm:6.6.0"
@@ -3859,16 +3849,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lezer/json@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "@lezer/json@npm:1.0.0"
-  dependencies:
-    "@lezer/highlight": ^1.0.0
-    "@lezer/lr": ^1.0.0
-  checksum: c1ca0cdf681415b58a383a669944bed66da3aa830870d32d1e471d545cff0fe43d9ac8a0d2a318a96daa99cd5a645b1d58ba8fbdd2e8d7ca4d33a62c7582cbab
-  languageName: node
-  linkType: hard
-
 "@lezer/lr@npm:^1.0.0, @lezer/lr@npm:^1.3.0":
   version: 1.3.3
   resolution: "@lezer/lr@npm:1.3.3"
@@ -4396,7 +4376,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@quri/squiggle-components@workspace:packages/components"
   dependencies:
-    "@codemirror/lang-json": ^6.0.1
     "@codemirror/theme-one-dark": ^6.1.2
     "@heroicons/react": ^1.0.6
     "@hookform/resolvers": ^3.1.1
