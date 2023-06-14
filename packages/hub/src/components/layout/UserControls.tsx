@@ -9,6 +9,7 @@ import {
   Dropdown,
   DropdownMenuActionItem,
   DropdownMenuHeader,
+  DropdownMenuSeparator,
 } from "@quri/ui";
 
 import { chooseUsernameRoute } from "@/routes";
@@ -34,6 +35,7 @@ export function UserControls({ session }: { session: Session | null }) {
         render={() => (
           <DropdownMenu>
             <DropdownMenuHeader>User Actions</DropdownMenuHeader>
+            <DropdownMenuSeparator />
             {!!session.user.username && (
               <DropdownMenuActionItem
                 onClick={() =>

@@ -8,10 +8,10 @@ import {
   DropdownMenuActionItem,
   DropdownMenuAsyncActionItem,
   DropdownMenuHeader,
+  DropdownMenuSeparator,
   RefreshIcon,
   TrashIcon,
 } from "../index.js";
-import { DropdownMenuSeparator } from "../components/Dropdown/DropdownMenuSeparator.js";
 
 const meta = {
   component: Dropdown,

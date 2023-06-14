@@ -53,7 +53,7 @@ export const ModelRevisionView: FC<Props> = ({
   return (
     <div>
       <div className="border-b border-gray-300">
-        <div className="mx-auto max-w-2xl p-4 pb-8">
+        <div className="pt-4 pb-8 px-8">
           <div>
             <span className="text-slate-500">Version from</span>{" "}
             {format(data.model.revision.createdAtTimestamp, commonDateFormat)}

@@ -94,6 +94,8 @@ export function useRunnerState(code: string): RunnerState {
           dispatch({ type: "RUN", code });
           timeoutSetRef.current = false; // Reset after dispatch.
         },
+        // We want to delay this until after the editor renders, so that the editor shows first.
+        // 50md is often enough to do this. Later, when this is run in a web worker, we can remove.
         onFirstExecution() ? 50 : 0
       );
     } else if (state.runningState === "run") {

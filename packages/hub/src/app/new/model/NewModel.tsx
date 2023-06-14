@@ -7,7 +7,6 @@ import { useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 import { modelRoute } from "@/routes";
 
-import { SquigglePlayground } from "@quri/squiggle-components";
 import { Button, TextAreaFormField, TextFormField, useToast } from "@quri/ui";
 
 import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";

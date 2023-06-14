@@ -7,6 +7,7 @@ export { DropdownMenu } from "./components/Dropdown/DropdownMenu.js";
 export { DropdownMenuHeader } from "./components/Dropdown/DropdownMenuHeader.js";
 export { DropdownMenuActionItem } from "./components/Dropdown/DropdownMenuActionItem.js";
 export { DropdownMenuAsyncActionItem } from "./components/Dropdown/DropdownMenuAsyncActionItem.js";
+export { DropdownMenuSeparator } from "./components/Dropdown/DropdownMenuSeparator.js";
 
 export { TextTooltip } from "./components/TextTooltip.js";
 export { MouseTooltip } from "./components/MouseTooltip.js";
