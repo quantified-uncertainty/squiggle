@@ -1,7 +1,7 @@
 import { AST, ParseError, parse } from "../../ast/parse.js";
 import { expressionFromAst } from "../../ast/toExpression.js";
 import { Expression } from "../../expression/index.js";
-import { ReducerContext } from "../../reducer/Context.js";
+import { ReducerContext } from "../../reducer/context.js";
 import { IError } from "../../reducer/IError.js";
 import { Namespace, NamespaceMap } from "../../reducer/bindings.js";
 import { evaluate } from "../../reducer/index.js";

@@ -1,6 +1,6 @@
 import { vArray, vLambda, vRecord, vVoid, Value } from "../value/index.js";
 import { Expression } from "../expression/index.js";
-import * as Context from "./Context.js";
+import * as Context from "./context.js";
 import { IError } from "./IError.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { Ok, result } from "../utility/result.js";

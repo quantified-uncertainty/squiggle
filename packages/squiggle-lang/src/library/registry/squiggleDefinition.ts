@@ -1,6 +1,6 @@
 import { parse } from "../../ast/parse.js";
 import { expressionFromAst } from "../../ast/toExpression.js";
-import { ReducerContext } from "../../reducer/Context.js";
+import { ReducerContext } from "../../reducer/context.js";
 import { ReducerFn } from "../../reducer/index.js";
 import { SquiggleLambda } from "../../reducer/lambda.js";
 import * as Result from "../../utility/result.js";

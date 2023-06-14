@@ -2,7 +2,7 @@ import { BaseDist } from "../../dist/BaseDist.js";
 import { DistError } from "../../dist/DistError.js";
 import { Env } from "../../dist/env.js";
 import { SampleMapNeedsNtoNFunction } from "../../operationError.js";
-import { ReducerContext } from "../../reducer/Context.js";
+import { ReducerContext } from "../../reducer/context.js";
 import {
   ErrorMessage,
   REDistributionError,

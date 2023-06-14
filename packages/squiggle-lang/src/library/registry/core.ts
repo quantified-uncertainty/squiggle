@@ -1,4 +1,4 @@
-import { ReducerContext } from "../../reducer/Context.js";
+import { ReducerContext } from "../../reducer/context.js";
 import { result } from "../../utility/result.js";
 import * as Result from "../../utility/result.js";
 import { Value } from "../../value/index.js";

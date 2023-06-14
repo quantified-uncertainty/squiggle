@@ -1,7 +1,7 @@
 import { Env, defaultEnv } from "../dist/env.js";
 import { stdLib } from "../library/index.js";
 import { registry } from "../library/registry/index.js";
-import { createContext } from "../reducer/Context.js";
+import { createContext } from "../reducer/context.js";
 import { IError } from "../reducer/IError.js";
 import { evaluate } from "../reducer/index.js";
 import { Lambda } from "../reducer/lambda.js";

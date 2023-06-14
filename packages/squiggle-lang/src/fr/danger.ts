@@ -19,7 +19,7 @@ import {
   frNumber,
 } from "../library/registry/frTypes.js";
 import { FnFactory, unpackDistResult } from "../library/registry/helpers.js";
-import { ReducerContext } from "../reducer/Context.js";
+import { ReducerContext } from "../reducer/context.js";
 import { ErrorMessage, REOther } from "../reducer/ErrorMessage.js";
 import { Lambda } from "../reducer/lambda.js";
 import * as E_A from "../utility/E_A.js";

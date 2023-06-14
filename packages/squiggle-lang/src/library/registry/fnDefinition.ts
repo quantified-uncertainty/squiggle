@@ -1,4 +1,4 @@
-import { ReducerContext } from "../../reducer/Context.js";
+import { ReducerContext } from "../../reducer/context.js";
 import { ErrorMessage } from "../../reducer/ErrorMessage.js";
 import { ReducerFn } from "../../reducer/index.js";
 import { result } from "../../utility/result.js";

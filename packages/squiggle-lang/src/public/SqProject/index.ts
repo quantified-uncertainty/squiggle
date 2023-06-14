@@ -7,7 +7,7 @@ import { defaultEnv, Env } from "../../dist/env.js";
 import { IError } from "../../reducer/IError.js";
 import * as Library from "../../library/index.js";
 import { Value, vRecord } from "../../value/index.js";
-import { createContext } from "../../reducer/Context.js";
+import { createContext } from "../../reducer/context.js";
 import { Namespace, NamespaceMap } from "../../reducer/bindings.js";
 import { ErrorMessage } from "../../reducer/ErrorMessage.js";
 
