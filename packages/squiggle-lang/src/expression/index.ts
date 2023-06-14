@@ -29,25 +29,33 @@ export type ExpressionContent =
     }
   | {
       type: "Ternary";
-      condition: Expression;
-      ifTrue: Expression;
-      ifFalse: Expression;
+      value: {
+        condition: Expression;
+        ifTrue: Expression;
+        ifFalse: Expression;
+      };
     }
   | {
       type: "Assign";
-      left: string;
-      right: Expression;
+      value: {
+        left: string;
+        right: Expression;
+      };
     }
   | {
       type: "Call";
-      fn: Expression;
-      args: Expression[];
+      value: {
+        fn: Expression;
+        args: Expression[];
+      };
     }
   | {
       type: "Lambda";
-      parameters: string[];
-      body: Expression;
-      name?: string;
+      value: {
+        parameters: string[];
+        body: Expression;
+        name?: string;
+      };
     }
   | {
       type: "Value";
@@ -71,8 +79,10 @@ export const eCall = (
   args: Expression[]
 ): ExpressionContent => ({
   type: "Call",
-  fn,
-  args,
+  value: {
+    fn,
+    args,
+  },
 });
 
 export const eLambda = (
@@ -81,9 +91,11 @@ export const eLambda = (
   name: string | undefined
 ): ExpressionContent => ({
   type: "Lambda",
-  parameters,
-  body,
-  name,
+  value: {
+    parameters,
+    body,
+    name,
+  },
 });
 
 export const eNumber = (x: number): ExpressionContent => ({
@@ -123,8 +135,10 @@ export const eLetStatement = (
   right: Expression
 ): ExpressionContent => ({
   type: "Assign",
-  left,
-  right,
+  value: {
+    left,
+    right,
+  },
 });
 
 export const eTernary = (
@@ -133,9 +147,11 @@ export const eTernary = (
   ifFalse: Expression
 ): ExpressionContent => ({
   type: "Ternary",
-  condition,
-  ifTrue,
-  ifFalse,
+  value: {
+    condition,
+    ifTrue,
+    ifFalse,
+  },
 });
 
 export const eIdentifier = (name: string): ExpressionContent => ({
@@ -166,18 +182,18 @@ const toString = (expression: Expression): string => {
     case "Symbol":
       return expression.value;
     case "Ternary":
-      return `${toString(expression.condition)} ? (${toString(
-        expression.ifTrue
-      )}) : (${toString(expression.ifFalse)})`;
+      return `${toString(expression.value.condition)} ? (${toString(
+        expression.value.ifTrue
+      )}) : (${toString(expression.value.ifFalse)})`;
     case "Assign":
-      return `${expression.left} = ${toString(expression.right)}`;
+      return `${expression.value.left} = ${toString(expression.value.right)}`;
     case "Call":
-      return `(${toString(expression.fn)})(${expression.args
+      return `(${toString(expression.value.fn)})(${expression.value.args
         .map(toString)
         .join(", ")})`;
     case "Lambda":
-      return `{|${expression.parameters.join(", ")}| ${toString(
-        expression.body
+      return `{|${expression.value.parameters.join(", ")}| ${toString(
+        expression.value.body
       )}}`;
     case "Value":
       return expression.value.toString();

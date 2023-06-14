@@ -46,7 +46,7 @@ export abstract class Lambda {
   }
 }
 
-// user-defined functions, i.e. `add2 = {|x, y| x + y}`, are instances of this class
+// User-defined functions, e.g. `add2 = {|x, y| x + y}`, are instances of this class.
 export class SquiggleLambda extends Lambda {
   parameters: string[];
   location: LocationRange;
@@ -59,8 +59,7 @@ export class SquiggleLambda extends Lambda {
     body: Expression,
     location: LocationRange
   ) {
-    // creating inline functions is bad for performance; this should be refactored as a method
-    const lambda = (
+    const lambda: LambdaBody = (
       args: Value[],
       context: ReducerContext,
       reducer: ReducerFn
@@ -110,7 +109,7 @@ export class SquiggleLambda extends Lambda {
   }
 }
 
-// stdlib functions (everything in FunctionRegistry) are instances of this class. Body is generated in library.ts makeStdlib() function.
+// Stdlib functions (everything in FunctionRegistry) are instances of this class.
 export class BuiltinLambda extends Lambda {
   constructor(public name: string, body: LambdaBody) {
     super(body);
