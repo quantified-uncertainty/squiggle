@@ -1,3 +1,3 @@
-import { Map } from "immutable";
+import { OrderedMap } from "immutable";
 
-export { Map as ImmutableMap };
+export { OrderedMap as ImmutableMap };
