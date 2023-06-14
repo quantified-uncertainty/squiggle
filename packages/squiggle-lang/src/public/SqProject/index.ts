@@ -211,10 +211,6 @@ export class SqProject {
       if (!result.ok) {
         return result;
       }
-
-      // this is excessive, we could push it just once for the last continue
-      // (but we'll probably remove the support for `__result__` eventually, anyway)
-      namespacesToMerge.push(NamespaceMap([["__result__", result.value]]));
     }
     let namespace = NamespaceMap<string, Value>().merge(...namespacesToMerge);
 

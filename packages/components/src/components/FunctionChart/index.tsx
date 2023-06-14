@@ -66,11 +66,11 @@ export const FunctionChart: FC<FunctionChartProps> = ({
       </FunctionChartContainer>
     );
   }
-  const result1 = fn.directCall(
+  const result1 = fn.call(
     [SqNumberValue.create(functionChartDefaults.min)],
     environment
   );
-  const result2 = fn.directCall(
+  const result2 = fn.call(
     [SqNumberValue.create(functionChartDefaults.max)],
     environment
   );

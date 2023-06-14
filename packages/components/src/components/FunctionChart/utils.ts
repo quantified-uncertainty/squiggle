@@ -41,7 +41,7 @@ export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot>(
   let errors: { x: number; value: string }[] = [];
 
   for (const x of chartPointsToRender) {
-    const result = plot.fn.directCall([SqNumberValue.create(x)], environment);
+    const result = plot.fn.call([SqNumberValue.create(x)], environment);
     if (result.ok) {
       if (result.value.tag === "Number" && plot.tag === "numericFn") {
         functionImage.push({

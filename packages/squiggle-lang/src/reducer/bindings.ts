@@ -54,10 +54,6 @@ export class Bindings {
     return new Bindings(ns, this);
   }
 
-  removeResult(): Bindings {
-    return new Bindings(this.namespace.delete("__result__"), this.parent);
-  }
-
   locals(): Namespace {
     return this.namespace;
   }

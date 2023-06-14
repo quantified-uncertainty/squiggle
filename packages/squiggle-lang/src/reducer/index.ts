@@ -41,7 +41,6 @@ const throwFrom = (
   Recursively evaluate the expression
 */
 export const evaluate: ReducerFn = (expression, context) => {
-  // console.log(`reduce: ${expression->Reducer_Expression_T.toString}`)
   switch (expression.type) {
     case "Block": {
       let currentContext: Context.ReducerContext = {
