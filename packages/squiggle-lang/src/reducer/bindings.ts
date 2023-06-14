@@ -4,7 +4,7 @@
   { localX: ..., localY: ... } <- { globalZ: ..., ... } <- { importedT: ..., ... } <- { stdlibFunction: ..., ... }
 */
 
-import { Map as ImmutableMap } from "immutable";
+import { ImmutableMap } from "../utility/immutableMap.js";
 
 import { Value } from "../value/index.js";
 
