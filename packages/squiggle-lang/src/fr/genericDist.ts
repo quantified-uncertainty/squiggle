@@ -10,7 +10,7 @@ import { makeDefinition } from "../library/registry/fnDefinition.js";
 import { frDist, frNumber } from "../library/registry/frTypes.js";
 import { FnFactory, unpackDistResult } from "../library/registry/helpers.js";
 import * as magicNumbers from "../magicNumbers.js";
-import { ErrorMessage, REDistributionError } from "../reducer/ErrorMessage.js";
+import { ErrorMessage, REDistributionError } from "../errors.js";
 import * as Result from "../utility/result.js";
 import { Ok } from "../utility/result.js";
 import { Value, vArray, vDist, vNumber } from "../value/index.js";

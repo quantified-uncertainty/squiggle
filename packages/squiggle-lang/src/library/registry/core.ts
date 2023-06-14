@@ -7,11 +7,7 @@ import {
   fnDefinitionToString,
   tryCallFnDefinition,
 } from "./fnDefinition.js";
-import {
-  ErrorMessage,
-  REOther,
-  RESymbolNotFound,
-} from "../../reducer/ErrorMessage.js";
+import { ErrorMessage, REOther, RESymbolNotFound } from "../../errors.js";
 import { BuiltinLambda, Lambda } from "../../reducer/lambda.js";
 import { ReducerFn } from "../../reducer/index.js";
 

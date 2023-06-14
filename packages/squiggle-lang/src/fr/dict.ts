@@ -12,7 +12,7 @@ import { Ok } from "../utility/result.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { vArray, vRecord, vString, Value } from "../value/index.js";
 import * as Result from "../utility/result.js";
-import { REOther } from "../reducer/ErrorMessage.js";
+import { REOther } from "../errors.js";
 
 const maker = new FnFactory({
   nameSpace: "Dict",

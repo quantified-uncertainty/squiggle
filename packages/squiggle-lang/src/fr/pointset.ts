@@ -17,10 +17,7 @@ import {
   doNumberLambdaCall,
   repackDistResult,
 } from "../library/registry/helpers.js";
-import {
-  REDistributionError,
-  REExpectedType,
-} from "../reducer/ErrorMessage.js";
+import { REDistributionError, REExpectedType } from "../errors.js";
 import { Ok } from "../utility/result.js";
 import { vDist, vNumber } from "../value/index.js";
 

@@ -9,7 +9,7 @@ import {
   frNumber,
   frTimeDuration,
 } from "../library/registry/frTypes.js";
-import { REOther } from "../reducer/ErrorMessage.js";
+import { REOther } from "../errors.js";
 
 const maker = new FnFactory({
   nameSpace: "",

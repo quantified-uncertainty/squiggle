@@ -2,7 +2,7 @@ import { LocationRange } from "peggy";
 
 import { Expression } from "../expression/index.js";
 import { Value } from "../value/index.js";
-import { REArityError } from "./ErrorMessage.js";
+import { REArityError } from "../errors.js";
 import * as IError from "./IError.js";
 import { Bindings } from "./bindings.js";
 import * as Context from "./context.js";

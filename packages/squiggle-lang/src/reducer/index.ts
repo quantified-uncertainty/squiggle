@@ -13,7 +13,7 @@ import {
   RENotAFunction,
   REOther,
   RESymbolNotFound,
-} from "./ErrorMessage.js";
+} from "../errors.js";
 import { IError } from "./IError.js";
 import * as Context from "./context.js";
 import { SquiggleLambda } from "./lambda.js";

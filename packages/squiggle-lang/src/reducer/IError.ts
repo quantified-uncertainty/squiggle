@@ -4,7 +4,7 @@ import {
   REJavaScriptExn,
   REOther,
   RESyntaxError,
-} from "./ErrorMessage.js";
+} from "../errors.js";
 import { Frame, FrameStack } from "./frameStack.js";
 
 // "I" stands for "Internal", since we also have a more public SqError proxy

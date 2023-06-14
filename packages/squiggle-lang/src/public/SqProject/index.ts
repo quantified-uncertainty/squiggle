@@ -9,7 +9,7 @@ import * as Library from "../../library/index.js";
 import { Value, vRecord } from "../../value/index.js";
 import { createContext } from "../../reducer/context.js";
 import { Namespace, NamespaceMap } from "../../reducer/bindings.js";
-import { ErrorMessage, RENeedToRun } from "../../reducer/ErrorMessage.js";
+import { ErrorMessage, RENeedToRun } from "../../errors.js";
 
 import { ImportBinding, ProjectItem } from "./ProjectItem.js";
 import * as Topology from "./Topology.js";

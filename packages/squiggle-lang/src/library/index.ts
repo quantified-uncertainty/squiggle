@@ -1,6 +1,6 @@
 import { INDEX_LOOKUP_FUNCTION } from "../expression/constants.js";
 import { Namespace, NamespaceMap } from "../reducer/bindings.js";
-import { REOther } from "../reducer/ErrorMessage.js";
+import { REOther } from "../errors.js";
 import { BuiltinLambda, Lambda } from "../reducer/lambda.js";
 import { Value, vLambda } from "../value/index.js";
 

@@ -11,7 +11,7 @@ import { Ok } from "../utility/result.js";
 import * as Result from "../utility/result.js";
 import { Value, vArray, vNumber, vString } from "../value/index.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
-import { REOther } from "../reducer/ErrorMessage.js";
+import { REOther } from "../errors.js";
 import includes from "lodash/includes.js";
 import uniqBy from "lodash/uniqBy.js";
 

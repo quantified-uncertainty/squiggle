@@ -7,7 +7,7 @@ import {
   ErrorMessage,
   REDistributionError,
   REOperationError,
-} from "../../reducer/ErrorMessage.js";
+} from "../../errors.js";
 import { ReducerFn } from "../../reducer/index.js";
 import { Lambda } from "../../reducer/lambda.js";
 import * as Result from "../../utility/result.js";

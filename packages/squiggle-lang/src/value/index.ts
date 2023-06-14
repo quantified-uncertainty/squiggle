@@ -11,7 +11,7 @@ import {
   REArrayIndexNotFound,
   REOther,
   RERecordPropertyNotFound,
-} from "../reducer/ErrorMessage.js";
+} from "../errors.js";
 import { Lambda } from "../reducer/lambda.js";
 import * as DateTime from "../utility/DateTime.js";
 

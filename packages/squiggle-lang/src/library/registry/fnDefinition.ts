@@ -1,5 +1,5 @@
 import { ReducerContext } from "../../reducer/context.js";
-import { ErrorMessage } from "../../reducer/ErrorMessage.js";
+import { ErrorMessage } from "../../errors.js";
 import { ReducerFn } from "../../reducer/index.js";
 import { result } from "../../utility/result.js";
 import { Value } from "../../value/index.js";

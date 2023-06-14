@@ -1,5 +1,7 @@
-import { DistError, distErrorToString } from "../dist/DistError.js";
-import { OperationError } from "../operationError.js";
+import { DistError, distErrorToString } from "./dist/DistError.js";
+import { OperationError } from "./operationError.js";
+
+// Common error types.
 
 // Messages don't contain any stack trace information.
 // Stdlib functions are allowed to throw messages, because they will be caught later
