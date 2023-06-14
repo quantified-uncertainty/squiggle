@@ -15,7 +15,7 @@ export function mixture(
   { env }: { env: Env }
 ): result<BaseDist, DistError> {
   if (values.length < 1) {
-    return Result.Error(
+    return Result.Err(
       otherError("Mixture error: mixture must have at least 1 element")
     );
   }

@@ -260,7 +260,7 @@ export const T = {
     const attempt: XYShape = { xs, ys };
     const maybeError = T.Validator.validate(attempt);
     if (maybeError) {
-      return Result.Error(maybeError);
+      return Result.Err(maybeError);
     } else {
       return Result.Ok(attempt);
     }

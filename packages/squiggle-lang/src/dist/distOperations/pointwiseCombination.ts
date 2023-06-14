@@ -44,7 +44,7 @@ export function pointwiseCombination({
   if (result.ok) {
     return result;
   } else {
-    return Result.Error(operationDistError(result.value));
+    return Result.Err(operationDistError(result.value));
   }
 }
 
@@ -81,7 +81,7 @@ export function pointwiseCombinationFloat(
     });
 
   if (algebraicOperation === "Add" || algebraicOperation === "Subtract") {
-    return Result.Error(distributionVerticalShiftIsInvalid());
+    return Result.Err(distributionVerticalShiftIsInvalid());
   } else if (
     algebraicOperation === "Multiply" ||
     algebraicOperation === "Divide" ||

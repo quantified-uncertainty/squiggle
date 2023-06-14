@@ -52,7 +52,7 @@ export const library = [
             if (typeof value === "number") {
               const deltaResult = PointMass.make(value);
               if (deltaResult.ok === false) {
-                return Result.Error(REOther(deltaResult.value));
+                return Result.Err(REOther(deltaResult.value));
               } else {
                 distributions.push({ name, distribution: deltaResult.value });
               }

@@ -62,13 +62,11 @@ export const evaluate: ReducerFn = (expression, context) => {
     }
 
     case "Program": {
-      // Js.log(`bindings: ${context.bindings->Bindings.locals->Reducer_Namespace.toString}`)
       let currentContext = context;
       let currentValue: Value = vVoid();
       for (const statement of expression.value) {
         [currentValue, currentContext] = evaluate(statement, currentContext);
       }
-      // Js.log(`bindings after: ${finalContext.bindings->Bindings.locals->Reducer_Namespace.toString}`)
       return [currentValue, currentContext];
     }
 
@@ -196,7 +194,7 @@ export function evaluateExpressionToResult(
     const [value] = evaluate(expression, context);
     return Ok(value);
   } catch (e) {
-    return Result.Error(IError.fromException(e));
+    return Result.Err(IError.fromException(e));
   }
 }
 

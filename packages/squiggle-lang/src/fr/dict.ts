@@ -125,7 +125,7 @@ export const library = [
             if (mappedKey.type == "String") {
               mappedEntries.push([mappedKey.value, value]);
             } else {
-              return Result.Error(
+              return Result.Err(
                 REOther("mapKeys: lambda must return a string")
               );
             }

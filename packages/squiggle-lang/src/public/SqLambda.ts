@@ -35,7 +35,7 @@ export class SqLambda {
       );
       return Result.Ok(wrapValue(value));
     } catch (e) {
-      return Result.Error(new SqError(IError.fromException(e)));
+      return Result.Err(new SqError(IError.fromException(e)));
     }
   }
 

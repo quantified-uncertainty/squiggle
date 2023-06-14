@@ -16,7 +16,7 @@ const maker = new FnFactory({
 });
 
 const emptyList = (): Result.result<Value, ErrorMessage> =>
-  Result.Error(REOther("List is empty"));
+  Result.Err(REOther("List is empty"));
 
 const makeNumberArrayToNumberDefinition = (
   fn: (arr: number[]) => number

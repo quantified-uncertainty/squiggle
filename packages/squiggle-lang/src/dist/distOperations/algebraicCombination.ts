@@ -159,7 +159,7 @@ export const algebraicCombination = (
   );
 
   if (invalidOperationError !== undefined) {
-    return Result.Error(invalidOperationError);
+    return Result.Err(invalidOperationError);
   }
 
   const maybeSymbolicResult = symbolicStrategy(args);
@@ -171,5 +171,5 @@ export const algebraicCombination = (
     ? convolutionStrategy
     : monteCarloStrategy;
 
-  return strategy(args) ?? Result.Error(unreachableError());
+  return strategy(args) ?? Result.Err(unreachableError());
 };

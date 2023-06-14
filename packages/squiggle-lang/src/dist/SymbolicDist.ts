@@ -90,7 +90,7 @@ export abstract class SymbolicDist extends BaseDist {
     const ys = xs.map((x) => this.simplePdf(x));
     const xyShapeR = XYShape.T.make(xs, ys);
     if (!xyShapeR.ok) {
-      return Result.Error(xyShapeDistError(xyShapeR.value));
+      return Result.Err(xyShapeDistError(xyShapeR.value));
     }
 
     return Ok(
@@ -165,7 +165,7 @@ export class Normal extends SymbolicDist {
     stdev: number;
   }): result<Normal, string> {
     if (stdev <= 0) {
-      return Result.Error(
+      return Result.Err(
         "Standard deviation of normal distribution must be larger than 0"
       );
     }
@@ -213,10 +213,10 @@ export class Normal extends SymbolicDist {
     probability: number;
   }): result<Normal, string> {
     if (low >= high) {
-      return Result.Error("Low value must be less than high value");
+      return Result.Err("Low value must be less than high value");
     }
     if (probability <= 0 || probability >= 1) {
-      return Result.Error("Probability must be in (0, 1) interval");
+      return Result.Err("Probability must be in (0, 1) interval");
     }
 
     // explained in website/docs/internal/ProcessingConfidenceIntervals
@@ -315,7 +315,7 @@ export class Exponential extends SymbolicDist {
 
   static make(rate: number): result<Exponential, string> {
     if (rate <= 0) {
-      return Result.Error(
+      return Result.Err(
         "Exponential distributions rate must be larger than 0."
       );
     }
@@ -365,7 +365,7 @@ export class Cauchy extends SymbolicDist {
     if (scale > 0) {
       return Ok(new Cauchy({ local, scale }));
     } else {
-      return Result.Error(
+      return Result.Err(
         "Cauchy distribution scale parameter must larger than 0."
       );
     }
@@ -430,7 +430,7 @@ export class Triangular extends SymbolicDist {
     if (low < medium && medium < high) {
       return Ok(new Triangular({ low, medium, high }));
     }
-    return Result.Error("Triangular values must be increasing order.");
+    return Result.Err("Triangular values must be increasing order.");
   }
 
   toString() {
@@ -483,7 +483,7 @@ export class Beta extends SymbolicDist {
     if (alpha > 0 && beta > 0) {
       return Ok(new Beta({ alpha, beta }));
     } else {
-      return Result.Error("Beta distribution parameters must be positive");
+      return Result.Err("Beta distribution parameters must be positive");
     }
   }
 
@@ -536,9 +536,9 @@ export class Beta extends SymbolicDist {
   }): result<Beta, string> {
     // https://en.wikipedia.org/wiki/Beta_distribution#Mean_and_variance
     if (!(0 < stdev && stdev <= 0.5)) {
-      return Result.Error("Stdev must be in in between 0 and 0.5.");
+      return Result.Err("Stdev must be in in between 0 and 0.5.");
     } else if (!(0 <= mean && mean <= 1)) {
-      return Result.Error("Mean must be in between 0 and 1.0.");
+      return Result.Err("Mean must be in between 0 and 1.0.");
     } else {
       const variance = stdev * stdev;
       const sampleSize = (mean * (1 - mean)) / variance - 1;
@@ -565,7 +565,7 @@ export class Lognormal extends SymbolicDist {
     sigma: number;
   }): result<Lognormal, string> {
     if (sigma <= 0) {
-      return Result.Error("Lognormal standard deviation must be larger than 0");
+      return Result.Err("Lognormal standard deviation must be larger than 0");
     }
     return Ok(new Lognormal({ mu, sigma }));
   }
@@ -606,13 +606,13 @@ export class Lognormal extends SymbolicDist {
     probability: number;
   }): result<Lognormal, string> {
     if (low >= high) {
-      return Result.Error("Low value must be less than high value");
+      return Result.Err("Low value must be less than high value");
     }
     if (low <= 0) {
-      return Result.Error("Low value must be above 0");
+      return Result.Err("Low value must be above 0");
     }
     if (probability <= 0 || probability >= 1) {
-      return Result.Error("Probability must be in (0, 1) interval");
+      return Result.Err("Probability must be in (0, 1) interval");
     }
 
     const logLow = Math.log(low);
@@ -634,9 +634,9 @@ export class Lognormal extends SymbolicDist {
     // https://math.stackexchange.com/questions/2501783/parameters-of-a-lognormal-distribution
     // https://wikiless.org/wiki/Log-normal_distribution?lang=en#Generation_and_parameters
     if (mean <= 0) {
-      return Result.Error("Lognormal mean must be larger than 0");
+      return Result.Err("Lognormal mean must be larger than 0");
     } else if (stdev <= 0) {
-      return Result.Error("Lognormal standard deviation must be larger than 0");
+      return Result.Err("Lognormal standard deviation must be larger than 0");
     } else {
       const variance = stdev ** 2;
       const meanSquared = mean ** 2;
@@ -727,7 +727,7 @@ export class Uniform extends SymbolicDist {
     if (high > low) {
       return Ok(new Uniform({ low, high }));
     } else {
-      return Result.Error("High must be larger than low");
+      return Result.Err("High must be larger than low");
     }
   }
 
@@ -818,7 +818,7 @@ export class Logistic extends SymbolicDist {
     if (scale > 0) {
       return Ok(new Logistic({ location, scale }));
     } else {
-      return Result.Error("Scale must be positive");
+      return Result.Err("Scale must be positive");
     }
   }
 
@@ -867,7 +867,7 @@ export class Bernoulli extends SymbolicDist {
     if (p >= 0.0 && p <= 1.0) {
       return Ok(new Bernoulli(p));
     } else {
-      return Result.Error("Bernoulli parameter must be between 0 and 1");
+      return Result.Err("Bernoulli parameter must be between 0 and 1");
     }
   }
 
@@ -937,10 +937,10 @@ export class Gamma extends SymbolicDist {
     scale: number;
   }): result<Gamma, string> {
     if (shape <= 0) {
-      return Result.Error("shape must be larger than 0");
+      return Result.Err("shape must be larger than 0");
     }
     if (scale <= 0) {
-      return Result.Error("scale must be larger than 0");
+      return Result.Err("scale must be larger than 0");
     }
     return Ok(new Gamma({ shape, scale }));
   }
@@ -980,7 +980,7 @@ export class PointMass extends SymbolicDist {
     if (isFinite(t)) {
       return Ok(new PointMass(t));
     } else {
-      return Result.Error("PointMass must be finite");
+      return Result.Err("PointMass must be finite");
     }
   }
 

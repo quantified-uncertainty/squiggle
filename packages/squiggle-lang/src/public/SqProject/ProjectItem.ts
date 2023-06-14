@@ -118,7 +118,7 @@ export class ProjectItem {
 
     if (!resolver) {
       this.setImports(
-        Result.Error(
+        Result.Err(
           new SqError(
             IError.other("Can't use imports when resolver is not configured")
           )
@@ -162,7 +162,7 @@ export class ProjectItem {
   }
 
   failRun(e: SqError): void {
-    this.result = Result.Error(e);
+    this.result = Result.Err(e);
     this.bindings = NamespaceMap();
   }
 

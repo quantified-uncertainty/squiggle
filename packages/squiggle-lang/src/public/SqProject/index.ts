@@ -127,7 +127,7 @@ export class SqProject {
   getImportIds(sourceId: string): Result.result<string[], SqError> {
     const imports = this.getImports(sourceId);
     if (!imports) {
-      return Result.Error(getNeedToRunError());
+      return Result.Err(getNeedToRunError());
     }
     return Result.fmap(imports, (imports) => imports.map((i) => i.sourceId));
   }
@@ -153,7 +153,7 @@ export class SqProject {
 
   private getInternalResult(sourceId: string): Result.result<Value, SqError> {
     const result = this.getResultOption(sourceId);
-    return result ?? Result.Error(getNeedToRunError());
+    return result ?? Result.Err(getNeedToRunError());
   }
 
   getResult(sourceId: string): Result.result<SqValue, SqError> {
@@ -199,11 +199,11 @@ export class SqProject {
     // First, merge continues.
     for (const continueId of continues) {
       if (!this.items.has(continueId)) {
-        return Result.Error(getMissingDependencyError(continueId));
+        return Result.Err(getMissingDependencyError(continueId));
       }
       const continueBindings = this.getItem(continueId).bindings;
       if (!continueBindings) {
-        return Result.Error(getNeedToRunError());
+        return Result.Err(getNeedToRunError());
       }
       namespacesToMerge.push(continueBindings);
 
@@ -223,7 +223,7 @@ export class SqProject {
     const rImports = this.getImports(sourceId);
     if (!rImports) {
       // Shouldn't happen, we just called parseImports.
-      return Result.Error(new SqError(IError.other("Internal logic error")));
+      return Result.Err(new SqError(IError.other("Internal logic error")));
     }
 
     if (!rImports.ok) {
@@ -232,11 +232,11 @@ export class SqProject {
     }
     for (const importBinding of rImports.value) {
       if (!this.items.has(importBinding.sourceId)) {
-        return Result.Error(getMissingDependencyError(importBinding.sourceId));
+        return Result.Err(getMissingDependencyError(importBinding.sourceId));
       }
       const importBindings = this.getItem(importBinding.sourceId).bindings;
       if (!importBindings) {
-        return Result.Error(getNeedToRunError());
+        return Result.Err(getNeedToRunError());
       }
 
       // TODO - check for collisions?

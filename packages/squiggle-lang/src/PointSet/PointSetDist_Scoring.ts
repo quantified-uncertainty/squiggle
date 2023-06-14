@@ -23,7 +23,7 @@ const minusScaledLogOfQuotient = ({
 }): Result.result<number, OperationError> => {
   const quot = esti / answ;
   return quot < 0.0
-    ? Result.Error(ComplexNumberError)
+    ? Result.Err(ComplexNumberError)
     : Result.Ok(-answ * logFn(quot));
 };
 
@@ -80,7 +80,7 @@ export const WithDistAnswer = {
           combineAndIntegrate(estiContinuousPart, answContinuousPart)
         );
       } else {
-        return Result.Error(new OtherOperationError("unreachable state"));
+        return Result.Err(new OtherOperationError("unreachable state"));
       }
     };
 
@@ -135,10 +135,10 @@ export const WithScalarAnswer = {
     ): Result.result<number, OperationError> => {
       const density = estimatePdf(answer);
       if (density === undefined) {
-        return Result.Error(PdfInvalidError);
+        return Result.Err(PdfInvalidError);
       } else {
         if (density < 0) {
-          return Result.Error(PdfInvalidError);
+          return Result.Err(PdfInvalidError);
         } else if (density === 0) {
           return Result.Ok(Infinity);
         } else {

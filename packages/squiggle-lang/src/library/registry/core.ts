@@ -83,7 +83,7 @@ export class Registry {
   ): result<Value, ErrorMessage> {
     const definitions = this.fnNameDict.get(fnName);
     if (definitions === undefined) {
-      return Result.Error(RESymbolNotFound(fnName));
+      return Result.Err(RESymbolNotFound(fnName));
     }
     const showNameMatchDefinitions = () => {
       const defsString = definitions
@@ -104,7 +104,7 @@ export class Registry {
         return callResult;
       }
     }
-    return Result.Error(REOther(showNameMatchDefinitions()));
+    return Result.Err(REOther(showNameMatchDefinitions()));
   }
 
   makeLambda(fnName: string): Lambda {

@@ -12,7 +12,7 @@ export function Ok<T, E>(value: T): result<T, E> {
   return { ok: true, value: value };
 }
 
-export function Error<T, E>(value: E): result<T, E> {
+export function Err<T, E>(value: E): result<T, E> {
   return { ok: false, value: value };
 }
 
@@ -35,7 +35,7 @@ export function fmap2<T, T2, E, E2>(
   if (r.ok) {
     return Ok(fn1(r.value));
   } else {
-    return Error(fn2(r.value));
+    return Err(fn2(r.value));
   }
 }
 
@@ -46,7 +46,7 @@ export function errMap<T, E, E2>(
   if (r.ok) {
     return r;
   } else {
-    return Error(fn(r.value));
+    return Err(fn(r.value));
   }
 }
 

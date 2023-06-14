@@ -61,7 +61,7 @@ export const library = [
     definitions: [
       makeDefinition([frArray(frAny)], ([array]) => {
         if (!array.length) {
-          return Result.Error(REOther("No first element"));
+          return Result.Err(REOther("No first element"));
         } else {
           return Ok(array[0]);
         }
@@ -74,7 +74,7 @@ export const library = [
     definitions: [
       makeDefinition([frArray(frAny)], ([array]) => {
         if (!array.length) {
-          return Result.Error(REOther("No last element"));
+          return Result.Err(REOther("No last element"));
         } else {
           return Ok(array[array.length - 1]);
         }
@@ -146,7 +146,7 @@ export const library = [
         if (allUniqable) {
           return Ok(vArray(uniqBy(arr, uniqueValueKey)));
         } else {
-          return Result.Error(
+          return Result.Err(
             REOther("Can only apply uniq() to Strings, Numbers, or Bools")
           );
         }
