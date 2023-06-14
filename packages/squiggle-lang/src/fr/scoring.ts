@@ -1,3 +1,6 @@
+import { BaseDist } from "../dist/BaseDist.js";
+import * as distOperations from "../dist/distOperations/index.js";
+import { Env } from "../dist/env.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frDist,
@@ -5,16 +8,9 @@ import {
   frRecord,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { vNumber } from "../value/index.js";
+import { REDistributionError, REOther } from "../reducer/ErrorMessage.js";
 import * as Result from "../utility/result.js";
-import * as distOperations from "../dist/distOperations/index.js";
-import { BaseDist } from "../dist/BaseDist.js";
-import { Env } from "../dist/env.js";
-import {
-  ErrorMessage,
-  REDistributionError,
-  REOther,
-} from "../reducer/ErrorMessage.js";
+import { vNumber } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Dist",
@@ -30,7 +26,7 @@ const runScoringScalarAnswer = (
   return Result.fmap2(
     distOperations.logScoreScalarAnswer({ estimate, answer, prior, env }),
     vNumber,
-    REDistributionError
+    (e) => new REDistributionError(e)
   );
 };
 
@@ -43,7 +39,7 @@ const runScoringDistAnswer = (
   return Result.fmap2(
     distOperations.logScoreDistAnswer({ estimate, answer, prior, env }),
     vNumber,
-    REDistributionError
+    (e) => new REDistributionError(e)
   );
 };
 
@@ -81,7 +77,7 @@ export const library = [
               context.environment
             );
           } else {
-            return ErrorMessage.throw(REOther("Impossible type"));
+            throw new REOther("Impossible type");
           }
         }
       ),
@@ -103,7 +99,7 @@ export const library = [
               context.environment
             );
           } else {
-            return ErrorMessage.throw(REOther("Impossible type"));
+            throw new REOther("Impossible type");
           }
         }
       ),

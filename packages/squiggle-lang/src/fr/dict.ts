@@ -126,7 +126,7 @@ export const library = [
               mappedEntries.push([mappedKey.value, value]);
             } else {
               return Result.Err(
-                REOther("mapKeys: lambda must return a string")
+                new REOther("mapKeys: lambda must return a string")
               );
             }
           }

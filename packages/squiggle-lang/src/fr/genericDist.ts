@@ -23,7 +23,7 @@ const maker = new FnFactory({
 export const toValueResult = (
   result: Result.result<BaseDist, DistError>
 ): Result.result<Value, ErrorMessage> => {
-  return Result.fmap2(result, vDist, (e) => REDistributionError(e));
+  return Result.fmap2(result, vDist, (e) => new REDistributionError(e));
 };
 
 type OpPair = [string, BinaryOperation];
@@ -109,7 +109,7 @@ export const library: FRFunction[] = [
       Result.fmap2(
         SymbolicDist.Triangular.make({ low, medium, high }),
         vDist,
-        (e) => REDistributionError(otherError(e))
+        (e) => new REDistributionError(otherError(e))
       )
     )
   ),

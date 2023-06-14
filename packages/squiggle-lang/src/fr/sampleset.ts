@@ -1,3 +1,4 @@
+import { BaseDist } from "../dist/BaseDist.js";
 import * as SampleSetDist from "../dist/SampleSetDist/index.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
@@ -7,15 +8,14 @@ import {
   frNumber,
 } from "../library/registry/frTypes.js";
 import {
-  doNumberLambdaCall,
   FnFactory,
+  doNumberLambdaCall,
   repackDistResult,
   unpackDistResult,
 } from "../library/registry/helpers.js";
+import { REExpectedType } from "../reducer/ErrorMessage.js";
 import { Ok } from "../utility/result.js";
 import { vArray, vNumber } from "../value/index.js";
-import { BaseDist } from "../dist/BaseDist.js";
-import { ErrorMessage, REExpectedType } from "../reducer/ErrorMessage.js";
 
 const maker = new FnFactory({
   nameSpace: "SampleSet",
@@ -30,7 +30,7 @@ function sampleSetAssert(
   if (dist instanceof SampleSetDist.SampleSetDist) {
     return;
   }
-  return ErrorMessage.throw(REExpectedType("SampleSetDist", dist.toString()));
+  throw new REExpectedType("SampleSetDist", dist.toString());
 }
 
 const baseLibrary = [

@@ -83,7 +83,7 @@ export class Registry {
   ): result<Value, ErrorMessage> {
     const definitions = this.fnNameDict.get(fnName);
     if (definitions === undefined) {
-      return Result.Err(RESymbolNotFound(fnName));
+      return Result.Err(new RESymbolNotFound(fnName));
     }
     const showNameMatchDefinitions = () => {
       const defsString = definitions
@@ -104,7 +104,7 @@ export class Registry {
         return callResult;
       }
     }
-    return Result.Err(REOther(showNameMatchDefinitions()));
+    return Result.Err(new REOther(showNameMatchDefinitions()));
   }
 
   makeLambda(fnName: string): Lambda {
@@ -116,7 +116,7 @@ export class Registry {
       // But FunctionRegistry API is too limited for that to matter. Please take care not to violate that in the future by accident.
       const result = this.call(fnName, args, context, reducer);
       if (!result.ok) {
-        return ErrorMessage.throw(result.value);
+        throw result.value;
       }
       return result.value;
     });

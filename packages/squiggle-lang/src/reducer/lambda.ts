@@ -1,11 +1,12 @@
 import { LocationRange } from "peggy";
+
 import { Expression } from "../expression/index.js";
 import { Value } from "../value/index.js";
+import { REArityError } from "./ErrorMessage.js";
+import * as IError from "./IError.js";
 import { Bindings } from "./bindings.js";
 import * as Context from "./context.js";
 import { ReducerContext } from "./context.js";
-import { ErrorMessage, REArityError } from "./ErrorMessage.js";
-import * as SqError from "./IError.js";
 import { ReducerFn } from "./index.js";
 
 type LambdaBody = (
@@ -36,9 +37,10 @@ export abstract class Lambda {
       inFunction: this,
     };
 
-    return SqError.rethrowWithFrameStack(() => {
-      return this.body(args, newContext, reducer);
-    }, newContext.frameStack);
+    return IError.rethrowWithFrameStack(
+      () => this.body(args, newContext, reducer),
+      newContext.frameStack
+    );
   }
 
   call(args: Value[], context: ReducerContext, reducer: ReducerFn): Value {
@@ -67,9 +69,7 @@ export class SquiggleLambda extends Lambda {
       const argsLength = args.length;
       const parametersLength = parameters.length;
       if (argsLength !== parametersLength) {
-        ErrorMessage.throw(
-          REArityError(undefined, parametersLength, argsLength)
-        );
+        throw new REArityError(undefined, parametersLength, argsLength);
       }
 
       // We could call bindings.extend() here to create a new local scope, but we don't,

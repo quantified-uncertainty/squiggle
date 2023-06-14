@@ -82,8 +82,8 @@ const evaluateBlock: SubReducerFn<"Block"> = (statements, context) => {
    * See also: similar note in `SquiggleLambda` constructor.
    */
   let currentContext = context;
-
   let currentValue: Value = vVoid();
+
   for (const statement of statements) {
     [currentValue, currentContext] = evaluate(statement, currentContext);
   }
@@ -91,8 +91,10 @@ const evaluateBlock: SubReducerFn<"Block"> = (statements, context) => {
 };
 
 const evaluateProgram: SubReducerFn<"Program"> = (statements, context) => {
+  // Same as Block, but doesn't drop the context, so that we could return bindings from it.
   let currentContext = context;
   let currentValue: Value = vVoid();
+
   for (const statement of statements) {
     [currentValue, currentContext] = evaluate(statement, currentContext);
   }
@@ -118,7 +120,7 @@ const evaluateRecord: SubReducerFn<"Record"> = (
         const [key] = evaluate(eKey, context);
         if (key.type !== "String") {
           return throwFrom(
-            REOther("Record keys must be strings"),
+            new REOther("Record keys must be strings"),
             context,
             ast
           );
@@ -146,7 +148,7 @@ const evaluateAssign: SubReducerFn<"Assign"> = (expressionValue, context) => {
 const evaluateSymbol: SubReducerFn<"Symbol"> = (name, context, ast) => {
   const value = context.bindings.get(name);
   if (value === undefined) {
-    return throwFrom(RESymbolNotFound(name), context, ast);
+    return throwFrom(new RESymbolNotFound(name), context, ast);
   } else {
     return [value, context];
   }
@@ -172,7 +174,7 @@ const evaluateTernary: SubReducerFn<"Ternary"> = (
       context
     );
   } else {
-    return throwFrom(REExpectedType("Boolean", ""), context, ast);
+    return throwFrom(new REExpectedType("Boolean", ""), context, ast);
   }
 };
 
@@ -211,7 +213,7 @@ const evaluateCall: SubReducerFn<"Call"> = (expressionValue, context, ast) => {
       );
       return [result, context];
     default:
-      return throwFrom(RENotAFunction(lambda.toString()), context, ast);
+      return throwFrom(new RENotAFunction(lambda.toString()), context, ast);
   }
 };
 

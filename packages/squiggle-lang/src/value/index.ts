@@ -44,23 +44,20 @@ class VArray implements Indexable {
   get(key: Value) {
     if (key.type === "Number") {
       if (!isInteger(key.value)) {
-        return ErrorMessage.throw(
-          REArrayIndexNotFound("Array index must be an integer", key.value)
+        throw new REArrayIndexNotFound(
+          "Array index must be an integer",
+          key.value
         );
       }
       const index = key.value | 0;
       if (index >= 0 && index < this.value.length) {
         return this.value[index];
       } else {
-        return ErrorMessage.throw(
-          REArrayIndexNotFound("Array index not found", index)
-        );
+        throw new REArrayIndexNotFound("Array index not found", index);
       }
     }
 
-    return ErrorMessage.throw(
-      REOther("Can't access non-numerical key on an array")
-    );
+    throw new REOther("Can't access non-numerical key on an array");
   }
 
   flatten() {
@@ -104,7 +101,7 @@ class VDeclaration implements Indexable {
       return vLambda(this.value.fn);
     }
 
-    return ErrorMessage.throw(REOther("Trying to access key on wrong value"));
+    throw new REOther("Trying to access key on wrong value");
   }
 }
 export const vLambdaDeclaration = (v: LambdaDeclaration) => new VDeclaration(v);
@@ -160,16 +157,16 @@ class VRecord implements Indexable {
 
   get(key: Value) {
     if (key.type === "String") {
-      return (
-        this.value.get(key.value) ??
-        ErrorMessage.throw(
-          RERecordPropertyNotFound("Record property not found", key.value)
-        )
-      );
+      const result = this.value.get(key.value);
+      if (!result) {
+        throw new RERecordPropertyNotFound(
+          "Record property not found",
+          key.value
+        );
+      }
+      return result;
     } else {
-      return ErrorMessage.throw(
-        REOther("Can't access non-string key on a record")
-      );
+      throw new REOther("Can't access non-string key on a record");
     }
   }
 }
@@ -265,7 +262,7 @@ class VPlot implements Indexable {
       return vLambda(this.value.fn);
     }
 
-    return ErrorMessage.throw(REOther("Trying to access key on wrong value"));
+    throw new REOther("Trying to access key on wrong value");
   }
 }
 

@@ -9,14 +9,14 @@ import * as Library from "../../library/index.js";
 import { Value, vRecord } from "../../value/index.js";
 import { createContext } from "../../reducer/context.js";
 import { Namespace, NamespaceMap } from "../../reducer/bindings.js";
-import { ErrorMessage } from "../../reducer/ErrorMessage.js";
+import { ErrorMessage, RENeedToRun } from "../../reducer/ErrorMessage.js";
 
 import { ImportBinding, ProjectItem } from "./ProjectItem.js";
 import * as Topology from "./Topology.js";
 import { Resolver } from "./Resolver.js";
 
 function getNeedToRunError() {
-  return new SqError(IError.fromMessage(ErrorMessage.needToRun()));
+  return new SqError(IError.fromMessage(new RENeedToRun()));
 }
 
 // TODO - pass the the id from which the dependency was imported/continued too

@@ -254,7 +254,7 @@ export class FnFactory {
 
 export function unpackDistResult<T>(result: Result.result<T, DistError>): T {
   if (!result.ok) {
-    return ErrorMessage.throw(REDistributionError(result.value));
+    throw new REDistributionError(result.value);
   }
   return result.value;
 }
@@ -276,5 +276,5 @@ export function doNumberLambdaCall(
   if (value.type === "Number") {
     return value.value;
   }
-  return ErrorMessage.throw(REOperationError(SampleMapNeedsNtoNFunction));
+  throw new REOperationError(SampleMapNeedsNtoNFunction);
 }

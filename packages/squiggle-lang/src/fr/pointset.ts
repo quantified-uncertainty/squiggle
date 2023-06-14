@@ -1,3 +1,9 @@
+import * as Continuous from "../PointSet/Continuous.js";
+import * as Discrete from "../PointSet/Discrete.js";
+import * as XYShape from "../XYShape.js";
+import { BaseDist } from "../dist/BaseDist.js";
+import { xyShapeDistError } from "../dist/DistError.js";
+import { PointSetDist } from "../dist/PointSetDist.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
@@ -6,24 +12,17 @@ import {
   frNumber,
   frRecord,
 } from "../library/registry/frTypes.js";
-import * as Continuous from "../PointSet/Continuous.js";
-import * as Discrete from "../PointSet/Discrete.js";
 import {
-  doNumberLambdaCall,
   FnFactory,
+  doNumberLambdaCall,
   repackDistResult,
 } from "../library/registry/helpers.js";
-import { PointSetDist } from "../dist/PointSetDist.js";
-import { vDist, vNumber } from "../value/index.js";
-import * as XYShape from "../XYShape.js";
-import { xyShapeDistError } from "../dist/DistError.js";
-import { BaseDist } from "../dist/BaseDist.js";
-import { Ok } from "../utility/result.js";
 import {
-  ErrorMessage,
   REDistributionError,
   REExpectedType,
 } from "../reducer/ErrorMessage.js";
+import { Ok } from "../utility/result.js";
+import { vDist, vNumber } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "PointSet",
@@ -35,9 +34,7 @@ const argsToXYShape = (inputs: { x: number; y: number }[]): XYShape.XYShape => {
     inputs.map(({ x, y }) => [x, y] as const)
   );
   if (!result.ok) {
-    return ErrorMessage.throw(
-      REDistributionError(xyShapeDistError(result.value))
-    );
+    throw new REDistributionError(xyShapeDistError(result.value));
   }
   return result.value;
 };
@@ -46,7 +43,7 @@ function pointSetAssert(dist: BaseDist): asserts dist is PointSetDist {
   if (dist instanceof PointSetDist) {
     return;
   }
-  return ErrorMessage.throw(REExpectedType("PointSetDist", dist.toString()));
+  throw new REExpectedType("PointSetDist", dist.toString());
 }
 
 export const library = [
