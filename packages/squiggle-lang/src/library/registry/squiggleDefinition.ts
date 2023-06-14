@@ -1,5 +1,5 @@
 import { parse } from "../../ast/parse.js";
-import { expressionFromAst } from "../../ast/toExpression.js";
+import { expressionFromAst } from "../../expression/fromAst.js";
 import { ReducerContext } from "../../reducer/context.js";
 import { ReducerFn } from "../../reducer/index.js";
 import { SquiggleLambda } from "../../reducer/lambda.js";

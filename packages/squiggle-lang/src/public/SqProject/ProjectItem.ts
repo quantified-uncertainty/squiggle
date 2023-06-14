@@ -1,5 +1,5 @@
 import { AST, ParseError, parse } from "../../ast/parse.js";
-import { expressionFromAst } from "../../ast/toExpression.js";
+import { expressionFromAst } from "../../expression/fromAst.js";
 import { Expression } from "../../expression/index.js";
 import { ReducerContext } from "../../reducer/context.js";
 import { IError } from "../../reducer/IError.js";
@@ -97,7 +97,7 @@ export class ProjectItem {
     if (this.imports) {
       return;
     }
-    this.buildAST();
+    this.buildAst();
     if (!this.ast) {
       throw new Error("Internal logic error");
     }
@@ -137,7 +137,7 @@ export class ProjectItem {
     this.setImports(Ok(resolvedImports));
   }
 
-  private buildAST(): void {
+  private buildAst(): void {
     if (this.ast) {
       return;
     }
@@ -149,7 +149,7 @@ export class ProjectItem {
   }
 
   private buildExpression(): void {
-    this.buildAST();
+    this.buildAst();
     if (this.expression) {
       return;
     }

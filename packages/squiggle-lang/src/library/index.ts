@@ -1,4 +1,4 @@
-import { INDEX_LOOKUP_FUNCTION } from "../ast/toExpression.js";
+import { INDEX_LOOKUP_FUNCTION } from "../expression/constants.js";
 import { Namespace, NamespaceMap } from "../reducer/bindings.js";
 import { ErrorMessage, REOther } from "../reducer/ErrorMessage.js";
 import { BuiltinLambda, Lambda } from "../reducer/lambda.js";

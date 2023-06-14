@@ -1,5 +1,5 @@
 import { ASTNode, parse } from "../ast/parse.js";
-import { expressionFromAst } from "../ast/toExpression.js";
+import { expressionFromAst } from "../expression/fromAst.js";
 import { defaultEnv } from "../dist/env.js";
 import { Expression } from "../expression/index.js";
 import { stdLib } from "../library/index.js";
@@ -81,7 +81,7 @@ const evaluateBlock: SubReducerFn<"Block"> = (statements, context) => {
    * Note: We'll have to remove this optimization if we add any kind of `locals()` (like in Python) function or debugging utilities.
    * See also: similar note in `SquiggleLambda` constructor.
    */
-  let currentContext: Context.ReducerContext = context;
+  let currentContext = context;
 
   let currentValue: Value = vVoid();
   for (const statement of statements) {
