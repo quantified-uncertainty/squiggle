@@ -1,7 +1,7 @@
 import { ReducerContext } from "../../reducer/Context.js";
 import { result } from "../../utility/result.js";
 import * as Result from "../../utility/result.js";
-import { ReducerFn, Value } from "../../value/index.js";
+import { Value } from "../../value/index.js";
 import {
   FnDefinition,
   fnDefinitionToString,
@@ -13,6 +13,7 @@ import {
   RESymbolNotFound,
 } from "../../reducer/ErrorMessage.js";
 import { BuiltinLambda, Lambda } from "../../reducer/lambda.js";
+import { ReducerFn } from "../../reducer/index.js";
 
 export type FRFunction = {
   name: string;

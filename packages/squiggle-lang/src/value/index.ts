@@ -1,8 +1,7 @@
-import { BaseDist } from "../dist/BaseDist.js";
-import { Expression } from "../expression/index.js";
-import { Namespace } from "../reducer/bindings.js";
-import { ReducerContext } from "../reducer/Context.js";
 import isInteger from "lodash/isInteger.js";
+
+import { BaseDist } from "../dist/BaseDist.js";
+import { Namespace } from "../reducer/bindings.js";
 import {
   declarationToString,
   LambdaDeclaration,
@@ -15,12 +14,6 @@ import {
 } from "../reducer/ErrorMessage.js";
 import { Lambda } from "../reducer/lambda.js";
 import * as DateTime from "../utility/DateTime.js";
-
-// TODO - move these types to reducer/
-export type ReducerFn = (
-  expression: Expression,
-  context: ReducerContext
-) => [Value, ReducerContext];
 
 export type ValueMap = Namespace;
 

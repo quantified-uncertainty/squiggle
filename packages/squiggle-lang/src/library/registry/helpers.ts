@@ -8,17 +8,11 @@ import {
   REDistributionError,
   REOperationError,
 } from "../../reducer/ErrorMessage.js";
+import { ReducerFn } from "../../reducer/index.js";
 import { Lambda } from "../../reducer/lambda.js";
 import * as Result from "../../utility/result.js";
 import { Ok } from "../../utility/result.js";
-import {
-  ReducerFn,
-  Value,
-  vBool,
-  vDist,
-  vNumber,
-  vString,
-} from "../../value/index.js";
+import { Value, vBool, vDist, vNumber, vString } from "../../value/index.js";
 import { FRFunction } from "./core.js";
 import { FnDefinition, makeDefinition } from "./fnDefinition.js";
 import { frBool, frDist, frNumber, frString } from "./frTypes.js";

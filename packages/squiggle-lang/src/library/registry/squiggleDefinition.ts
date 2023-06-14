@@ -1,9 +1,9 @@
 import { parse } from "../../ast/parse.js";
 import { expressionFromAst } from "../../ast/toExpression.js";
 import { ReducerContext } from "../../reducer/Context.js";
+import { ReducerFn } from "../../reducer/index.js";
 import { SquiggleLambda } from "../../reducer/lambda.js";
 import * as Result from "../../utility/result.js";
-import { ReducerFn } from "../../value/index.js";
 import { FnDefinition, FnDefinition0, FnDefinition1 } from "./fnDefinition.js";
 import { FRType } from "./frTypes.js";
 

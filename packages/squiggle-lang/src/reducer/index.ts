@@ -1,11 +1,4 @@
-import {
-  ReducerFn,
-  vArray,
-  vLambda,
-  vRecord,
-  vVoid,
-  Value,
-} from "../value/index.js";
+import { vArray, vLambda, vRecord, vVoid, Value } from "../value/index.js";
 import { Expression } from "../expression/index.js";
 import * as Context from "./Context.js";
 import { IError } from "./IError.js";
@@ -24,6 +17,11 @@ import {
   REOther,
   RESymbolNotFound,
 } from "./ErrorMessage.js";
+
+export type ReducerFn = (
+  expression: Expression,
+  context: Context.ReducerContext
+) => [Value, Context.ReducerContext];
 
 const throwFrom = (
   error: ErrorMessage,
@@ -186,11 +184,13 @@ export const evaluate: ReducerFn = (expression, context) => {
   }
 };
 
-const createDefaultContext = () => Context.createContext(stdLib, defaultEnv);
+function createDefaultContext() {
+  return Context.createContext(stdLib, defaultEnv);
+}
 
-export const evaluateExpressionToResult = (
+export function evaluateExpressionToResult(
   expression: Expression
-): result<Value, IError> => {
+): result<Value, IError> {
   const context = createDefaultContext();
   try {
     const [value] = evaluate(expression, context);
@@ -198,13 +198,13 @@ export const evaluateExpressionToResult = (
   } catch (e) {
     return Result.Error(IError.fromException(e));
   }
-};
+}
 
-export const evaluateStringToResult = (code: string): result<Value, IError> => {
+export function evaluateStringToResult(code: string): result<Value, IError> {
   const exprR = Result.fmap(parse(code, "main"), expressionFromAst);
 
   return Result.bind(
     Result.errMap(exprR, IError.fromParseError),
     evaluateExpressionToResult
   );
-};
+}

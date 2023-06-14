@@ -24,8 +24,9 @@ import { ErrorMessage, REOther } from "../reducer/ErrorMessage.js";
 import { Lambda } from "../reducer/lambda.js";
 import * as E_A from "../utility/E_A.js";
 import { Ok, result } from "../utility/result.js";
-import { ReducerFn, Value, vArray, vNumber } from "../value/index.js";
+import { Value, vArray, vNumber } from "../value/index.js";
 import { toValueResult } from "./genericDist.js";
+import { ReducerFn } from "../reducer/index.js";
 
 const { factorial } = jstat;
 
