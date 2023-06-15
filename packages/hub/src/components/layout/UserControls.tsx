@@ -1,7 +1,7 @@
 import { Session } from "next-auth";
 import { signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { TriangleIcon, UserCircleIcon, SignOutIcon } from "@quri/ui";
+import { UserCircleIcon, SignOutIcon } from "@quri/ui";
 
 import {
   Button,
@@ -14,6 +14,7 @@ import {
 
 import { chooseUsernameRoute } from "@/routes";
 import { userRoute } from "@/routes";
+import { DropdownWithArrow } from "./TopMenuComponents";
 
 export function UserControls({ session }: { session: Session | null }) {
   if (
@@ -26,8 +27,9 @@ export function UserControls({ session }: { session: Session | null }) {
     window.location.href = chooseUsernameRoute();
   }
   const router = useRouter();
+  const { username } = session?.user || { username: undefined };
 
-  return !session?.user ? (
+  return !!username ? (
     <Button onClick={() => signIn()}>Sign In</Button>
   ) : (
     <div className="flex items-center gap-2">
@@ -36,17 +38,11 @@ export function UserControls({ session }: { session: Session | null }) {
           <DropdownMenu>
             <DropdownMenuHeader>User Actions</DropdownMenuHeader>
             <DropdownMenuSeparator />
-            {!!session.user.username && (
-              <DropdownMenuActionItem
-                onClick={() =>
-                  router.push(
-                    userRoute({ username: session.user.username || "" })
-                  )
-                }
-                icon={UserCircleIcon}
-                title="Profile"
-              />
-            )}
+            <DropdownMenuActionItem
+              onClick={() => router.push(userRoute({ username: username! }))}
+              icon={UserCircleIcon}
+              title="Profile"
+            />
             <DropdownMenuActionItem
               onClick={() => signOut()}
               icon={SignOutIcon}
@@ -55,10 +51,7 @@ export function UserControls({ session }: { session: Session | null }) {
           </DropdownMenu>
         )}
       >
-        <div className="flex items-center text-white cursor-pointer hover:bg-slate-700 px-2 py-1 rounded-md select-none text-sm">
-          {session.user.username}
-          <TriangleIcon size={6} className={"rotate-180 ml-2 text-slate-300"} />
-        </div>
+        <DropdownWithArrow text={username!} />
       </Dropdown>
     </div>
   );

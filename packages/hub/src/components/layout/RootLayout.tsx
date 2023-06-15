@@ -3,10 +3,6 @@ import {
   DropdownMenu,
   Dropdown,
   DropdownMenuActionItem,
-  DropdownMenuHeader,
-} from "@quri/ui";
-import {
-  TriangleIcon,
   CodeBracketIcon,
   ScaleIcon,
   BookOpenIcon,
@@ -18,7 +14,7 @@ import Link from "next/link";
 
 import { newDefinitionRoute, newModelRoute } from "@/routes";
 import { UserControls } from "./UserControls";
-import { AppRouterInstance } from "next/dist/shared/lib/app-router-context";
+import { DropdownWithArrow, StyledLink } from "./TopMenuComponents";
 
 const NewDropdown: FC = () => {
   const router = useRouter();
@@ -39,10 +35,7 @@ const NewDropdown: FC = () => {
         </DropdownMenu>
       )}
     >
-      <div className="flex items-center text-white cursor-pointer hover:bg-slate-700 px-2 py-1 rounded-md select-none text-sm">
-        New
-        <TriangleIcon size={6} className={"rotate-180 ml-2 text-slate-300"} />
-      </div>
+      <DropdownWithArrow text={"New"} />
     </Dropdown>
   );
 };
@@ -61,16 +54,11 @@ const TopMenu: FC = () => {
         </Link>
       </div>
       <div className="flex gap-6 items-baseline">
-        <Link
-          className="text-white text-sm hover:bg-slate-700 px-2 py-1 rounded-md select-none"
+        <StyledLink
           href="https://www.squiggle-language.com/docs/Api/Dist"
-        >
-          <BookOpenIcon
-            className="inline-block mr-1 text-slate-400"
-            size={14}
-          />
-          Docs
-        </Link>
+          icon={BookOpenIcon}
+          title="Docs"
+        />
         {session && <NewDropdown />}
         <UserControls session={session} />
       </div>
