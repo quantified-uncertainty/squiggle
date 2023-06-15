@@ -82,7 +82,7 @@ const InnerDistributionsChart: FC<{
       context.clearRect(0, 0, width, height);
 
       const getColor = (i: number) =>
-        isMulti ? d3.schemeCategory10[i] : "#6cabd2";
+        isMulti ? d3.schemeCategory10[i] : "#6d9bce";
 
       const xScale = sqScaleToD3(plot.xScale);
       xScale.domain([
