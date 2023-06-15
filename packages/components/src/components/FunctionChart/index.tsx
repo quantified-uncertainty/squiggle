@@ -14,7 +14,7 @@ import {
 import {
   generateDistributionPlotSettings,
   generateFunctionPlotSettings,
-} from "../ViewSettingsForm.js";
+} from "../PlaygroundSettings.js";
 
 import { MessageAlert } from "../Alert.js";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
@@ -22,12 +22,12 @@ import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 import { DistFunctionChart } from "./DistFunctionChart.js";
 import { NumericFunctionChart } from "./NumericFunctionChart.js";
 import { functionChartDefaults } from "./utils.js";
-import { ViewSettings } from "../ViewSettingsForm.js";
+import { PlaygroundSettings } from "../PlaygroundSettings.js";
 import { FunctionChartContainer } from "./FunctionChartContainer.js";
 
 type FunctionChartProps = {
   fn: SqLambda;
-  settings: ViewSettings;
+  settings: PlaygroundSettings;
   environment: Env;
   height: number;
 };
@@ -66,11 +66,11 @@ export const FunctionChart: FC<FunctionChartProps> = ({
       </FunctionChartContainer>
     );
   }
-  const result1 = fn.directCall(
+  const result1 = fn.call(
     [SqNumberValue.create(functionChartDefaults.min)],
     environment
   );
-  const result2 = fn.directCall(
+  const result2 = fn.call(
     [SqNumberValue.create(functionChartDefaults.max)],
     environment
   );

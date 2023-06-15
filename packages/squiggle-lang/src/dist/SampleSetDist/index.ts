@@ -30,7 +30,7 @@ export class SampleSetDist extends BaseDist {
     if (a.length > 5) {
       return Result.Ok(new SampleSetDist(a));
     } else {
-      return Result.Error({ type: "TooFewSamples" });
+      return Result.Err({ type: "TooFewSamples" });
     }
   }
 
@@ -147,7 +147,7 @@ sample everything.
     return Result.Ok(E_A_Floats.variance(this.samples));
   }
   mode(): Result.result<number, DistError> {
-    return Result.Error(
+    return Result.Err(
       otherError(
         "Not implemented, https://github.com/quantified-uncertainty/squiggle/issues/1392"
       )
@@ -168,7 +168,7 @@ sample everything.
       discrete: new DiscreteShape({ xyShape: dists.discreteDist }),
     });
     if (!result) {
-      return Result.Error(tooFewSamplesForConversionToPointSet());
+      return Result.Err(tooFewSamplesForConversionToPointSet());
     }
     return Result.Ok(new PointSetDist(result));
   }
@@ -230,7 +230,7 @@ const buildSampleSetFromFn = (
   for (let i = 0; i < n; i++) {
     const result = fn(i);
     if (!result.ok) {
-      return Result.Error(distOperationError(result.value));
+      return Result.Err(distOperationError(result.value));
     }
     samples.push(result.value);
   }

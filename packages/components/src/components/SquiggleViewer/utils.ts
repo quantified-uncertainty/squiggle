@@ -1,11 +1,14 @@
 import { SqValueLocation } from "@quri/squiggle-lang";
-import { PartialViewSettings, ViewSettings } from "../ViewSettingsForm.js";
+import {
+  PartialPlaygroundSettings,
+  PlaygroundSettings,
+} from "../PlaygroundSettings.js";
 
 export type LocalItemSettings = {
   collapsed: boolean;
-} & PartialViewSettings;
+} & PartialPlaygroundSettings;
 
-export type MergedItemSettings = ViewSettings;
+export type MergedItemSettings = PlaygroundSettings;
 
 export const locationAsString = (location: SqValueLocation) =>
   location.path.items.join(".");

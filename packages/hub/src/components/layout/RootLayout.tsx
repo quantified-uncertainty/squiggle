@@ -1,38 +1,67 @@
 import { FC, PropsWithChildren } from "react";
+import {
+  DropdownMenu,
+  Dropdown,
+  DropdownMenuActionItem,
+  CodeBracketIcon,
+  ScaleIcon,
+  BookOpenIcon,
+} from "@quri/ui";
+import { useRouter } from "next/navigation";
 
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 
 import { newDefinitionRoute, newModelRoute } from "@/routes";
 import { UserControls } from "./UserControls";
+import { DropdownWithArrow, StyledLink } from "./TopMenuComponents";
 
-const MenuLink: FC<PropsWithChildren<{ href: string }>> = ({
-  href,
-  children,
-}) => (
-  <Link className="font-medium text-slate-500" href={href}>
-    {children}
-  </Link>
-);
+const NewDropdown: FC = () => {
+  const router = useRouter();
+  return (
+    <Dropdown
+      render={() => (
+        <DropdownMenu>
+          <DropdownMenuActionItem
+            onClick={() => router.push(newModelRoute())}
+            icon={CodeBracketIcon}
+            title={"New Model"}
+          />
+          <DropdownMenuActionItem
+            onClick={() => router.push(newDefinitionRoute())}
+            icon={ScaleIcon}
+            title={"New Relative Value Definition"}
+          />
+        </DropdownMenu>
+      )}
+    >
+      <DropdownWithArrow text={"New"} />
+    </Dropdown>
+  );
+};
 
 const TopMenu: FC = () => {
   const { data: session } = useSession();
 
   return (
-    <div className="border-slate-200 border-b h-16 flex items-center justify-between px-4">
+    <div className="border-slate-200 h-10 flex items-center justify-between px-8 bg-gray-800">
       <div className="flex gap-6 items-baseline">
-        {" "}
-        <Link className="text-lg font-bold py-2 text-slate-500" href="/">
+        <Link
+          className="text-slate-300 hover:text-slate-300 font-semibold"
+          href="/"
+        >
           Squiggle Hub
         </Link>
-        {session ? (
-          <>
-            <MenuLink href={newModelRoute()}>New model</MenuLink>
-            <MenuLink href={newDefinitionRoute()}>New definition</MenuLink>
-          </>
-        ) : null}
       </div>
-      <UserControls session={session} />
+      <div className="flex gap-6 items-baseline">
+        <StyledLink
+          href="https://www.squiggle-language.com/docs/Api/Dist"
+          icon={BookOpenIcon}
+          title="Docs"
+        />
+        {session && <NewDropdown />}
+        <UserControls session={session} />
+      </div>
     </div>
   );
 };
@@ -44,7 +73,7 @@ export const RootLayout: FC<PropsWithChildren> = ({ children }) => {
         <TopMenu />
         <div>{children}</div>
       </div>
-      <div className="mt-16 p-8 border-t border-t-slate-200 bg-slate-100">
+      <div className="p-8 border-t border-t-slate-200 bg-slate-100">
         <div className="text-sm text-slate-500">
           By{" "}
           <a

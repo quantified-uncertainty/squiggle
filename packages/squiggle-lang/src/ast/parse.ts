@@ -42,7 +42,7 @@ export const parse = (expr: string, source: string): ParseResult => {
     return Result.Ok(parsed);
   } catch (e) {
     if (e instanceof PeggySyntaxError) {
-      return Result.Error({
+      return Result.Err({
         type: "SyntaxError",
         location: (e as any).location,
         message: (e as any).message,

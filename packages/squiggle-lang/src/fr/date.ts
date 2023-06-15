@@ -9,7 +9,7 @@ import {
   frNumber,
   frTimeDuration,
 } from "../library/registry/frTypes.js";
-import { REOther } from "../reducer/ErrorMessage.js";
+import { REOther } from "../errors.js";
 
 const maker = new FnFactory({
   nameSpace: "",
@@ -51,7 +51,11 @@ export const library = [
   maker.fromDefinition(
     "makeDateFromYear",
     makeDefinition([frNumber], ([year]) => {
-      return Result.fmap2(DateTime.Date.makeFromYear(year), vDate, REOther);
+      return Result.fmap2(
+        DateTime.Date.makeFromYear(year),
+        vDate,
+        (e) => new REOther(e)
+      );
     })
   ),
   maker.fromDefinition(
@@ -69,7 +73,11 @@ export const library = [
         Ok(vDate(DateTime.Date.subtractDuration(d1, d2)))
       ),
       makeDefinition([frDate, frDate], ([d1, d2]) =>
-        Result.fmap2(DateTime.Date.subtract(d1, d2), vTimeDuration, REOther)
+        Result.fmap2(
+          DateTime.Date.subtract(d1, d2),
+          vTimeDuration,
+          (e) => new REOther(e)
+        )
       ),
       makeDefinition([frTimeDuration, frTimeDuration], ([d1, d2]) =>
         Ok(vTimeDuration(DateTime.Duration.subtract(d1, d2)))

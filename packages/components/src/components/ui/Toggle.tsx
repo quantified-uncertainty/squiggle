@@ -23,8 +23,12 @@ export const Toggle: React.FC<Props> = ({
 }) => {
   const CurrentIcon = status ? OnIcon : OffIcon;
   return (
-    <Button onClick={() => onChange(!status)}>
-      <div className={clsx("flex items-center gap-1")}>
+    <div onClick={() => onChange(!status)}>
+      <div
+        className={clsx(
+          "flex items-center gap-1 text-slate-800 text-sm px-2 py-2 cursor-pointer rounded-sm hover:bg-slate-200 select-none whitespace-nowrap"
+        )}
+      >
         <div className="relative" key={String(spinIcon)}>
           <CurrentIcon
             className={clsx(
@@ -38,6 +42,6 @@ export const Toggle: React.FC<Props> = ({
         </div>
         <span>{status ? onText : offText}</span>
       </div>
-    </Button>
+    </div>
   );
 };

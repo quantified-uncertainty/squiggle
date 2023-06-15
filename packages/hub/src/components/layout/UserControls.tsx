@@ -1,16 +1,20 @@
 import { Session } from "next-auth";
 import { signIn, signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { UserCircleIcon, SignOutIcon } from "@quri/ui";
 
 import {
   Button,
   DropdownMenu,
+  Dropdown,
   DropdownMenuActionItem,
-  SignOutIcon,
+  DropdownMenuHeader,
+  DropdownMenuSeparator,
 } from "@quri/ui";
 
 import { chooseUsernameRoute } from "@/routes";
-import { UsernameLink } from "../UsernameLink";
-import { DotsDropdown } from "../ui/DotsDropdown";
+import { userRoute } from "@/routes";
+import { DropdownWithArrow } from "./TopMenuComponents";
 
 export function UserControls({ session }: { session: Session | null }) {
   if (
@@ -22,20 +26,23 @@ export function UserControls({ session }: { session: Session | null }) {
     // https://github.com/vercel/next.js/issues/42556 (it's closed but not really solved)
     window.location.href = chooseUsernameRoute();
   }
+  const router = useRouter();
+  const { username } = session?.user || { username: undefined };
 
-  return !session?.user ? (
+  return !!username ? (
     <Button onClick={() => signIn()}>Sign In</Button>
   ) : (
     <div className="flex items-center gap-2">
-      {session.user.username === undefined ? null : (
-        <div>
-          <UsernameLink username={session.user.username} />
-        </div>
-      )}
-
-      <DotsDropdown>
-        {() => (
+      <Dropdown
+        render={() => (
           <DropdownMenu>
+            <DropdownMenuHeader>User Actions</DropdownMenuHeader>
+            <DropdownMenuSeparator />
+            <DropdownMenuActionItem
+              onClick={() => router.push(userRoute({ username: username! }))}
+              icon={UserCircleIcon}
+              title="Profile"
+            />
             <DropdownMenuActionItem
               onClick={() => signOut()}
               icon={SignOutIcon}
@@ -43,7 +50,9 @@ export function UserControls({ session }: { session: Session | null }) {
             />
           </DropdownMenu>
         )}
-      </DotsDropdown>
+      >
+        <DropdownWithArrow text={username!} />
+      </Dropdown>
     </div>
   );
 }

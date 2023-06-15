@@ -24,7 +24,10 @@ export const Alert: React.FC<{
   children,
 }) => {
   return (
-    <div className={clsx("rounded-md p-4", backgroundColor)} role="status">
+    <div
+      className={clsx("rounded-sm px-3 py-2", backgroundColor)}
+      role="status"
+    >
       <div className="flex">
         <Icon
           className={clsx("h-5 w-5 flex-shrink-0", iconColor)}
@@ -64,7 +67,7 @@ export const MessageAlert: React.FC<{
   <Alert
     {...props}
     backgroundColor="bg-slate-100"
-    headingColor="text-slate-700"
+    headingColor="text-slate-800"
     bodyColor="text-slate-700"
     icon={InformationCircleIcon}
     iconColor="text-slate-400"

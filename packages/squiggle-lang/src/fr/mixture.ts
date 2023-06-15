@@ -1,17 +1,18 @@
 import { BaseDist } from "../dist/BaseDist.js";
-import { Env } from "../dist/env.js";
+import { DistError, argumentError } from "../dist/DistError.js";
 import * as SymbolicDist from "../dist/SymbolicDist.js";
-import * as Result from "../utility/result.js";
-import * as E_A from "../utility/E_A.js";
 import * as distOperations from "../dist/distOperations/index.js";
-import { Value, vDist } from "../value/index.js";
-import { argumentError, DistError } from "../dist/DistError.js";
+import { Env } from "../dist/env.js";
 import { unpackDistResult } from "../library/registry/helpers.js";
+import { REDistributionError } from "../errors.js";
 import { BuiltinLambda } from "../reducer/lambda.js";
-import { ErrorMessage, REDistributionError } from "../reducer/ErrorMessage.js";
+import * as E_A from "../utility/E_A.js";
+import * as Result from "../utility/result.js";
+import { Value, vDist } from "../value/index.js";
 
-const raiseArgumentError = (message: string) =>
-  ErrorMessage.throw(REDistributionError(argumentError(message)));
+const raiseArgumentError = (message: string) => {
+  throw new REDistributionError(argumentError(message));
+};
 
 let parseNumber = (arg: Value): number => {
   if (arg.type === "Number") {

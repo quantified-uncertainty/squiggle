@@ -1,4 +1,4 @@
-import { useLayoutEffect, useReducer } from "react";
+import { useLayoutEffect, useReducer, useRef } from "react";
 
 type InternalState = {
   autorunMode: boolean;
@@ -6,13 +6,17 @@ type InternalState = {
   // "prepared" is for rendering a spinner; "run" for executing squiggle code; then it gets back to "none" on the next render
   runningState: "none" | "prepared" | "run";
   executionId: number;
+  startTime?: number;
+  totalTime?: number;
 };
 
 const buildInitialState = (code: string): InternalState => ({
   autorunMode: true,
   renderedCode: "",
   runningState: "none",
-  executionId: 1,
+  executionId: 0,
+  startTime: undefined,
+  totalTime: undefined,
 });
 
 type Action =
@@ -50,11 +54,13 @@ const reducer = (state: InternalState, action: Action): InternalState => {
         runningState: "run",
         renderedCode: action.code,
         executionId: state.executionId + 1,
+        startTime: Date.now(),
       };
     case "STOP_RUN":
       return {
         ...state,
         runningState: "none",
+        totalTime: state.startTime && Date.now() - state.startTime,
       };
   }
 };
@@ -69,19 +75,29 @@ export type RunnerState = {
   renderedCode: string;
   isRunning: boolean;
   executionId: number;
+  executionTime: number | undefined;
   setAutorunMode: (newValue: boolean) => void;
 };
 
 export function useRunnerState(code: string): RunnerState {
   const [state, dispatch] = useReducer(reducer, buildInitialState(code));
+  const timeoutSetRef = useRef(false); // Ref to track if timeout is already set.
 
   useLayoutEffect(() => {
-    if (state.runningState === "prepared") {
+    const onFirstExecution = () => state.executionId === 0;
+    if (state.runningState === "prepared" && !timeoutSetRef.current) {
+      timeoutSetRef.current = true;
       // this is necessary for async playground loading - otherwise it executes the code synchronously on the initial load
       // (it's surprising that this is necessary, but empirically it _is_ necessary, both with `useEffect` and `useLayoutEffect`)
-      setTimeout(() => {
-        dispatch({ type: "RUN", code });
-      }, 0);
+      setTimeout(
+        () => {
+          dispatch({ type: "RUN", code });
+          timeoutSetRef.current = false; // Reset after dispatch.
+        },
+        // We want to delay this until after the editor renders, so that the editor shows first.
+        // 50md is often enough to do this. Later, when this is run in a web worker, we can remove.
+        onFirstExecution() ? 50 : 0
+      );
     } else if (state.runningState === "run") {
       dispatch({ type: "STOP_RUN" });
     }
@@ -107,6 +123,7 @@ export function useRunnerState(code: string): RunnerState {
     renderedCode: state.renderedCode,
     isRunning: state.runningState !== "none",
     executionId: state.executionId,
+    executionTime: state.totalTime,
     setAutorunMode: (newValue: boolean) => {
       dispatch({ type: "SET_AUTORUN_MODE", value: newValue, code });
     },

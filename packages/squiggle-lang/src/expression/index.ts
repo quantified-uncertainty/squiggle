@@ -1,10 +1,11 @@
 /*
-  An expression is an intermediate representation of a Squiggle code.
-  Expressions are evaluated by `Reducer_Expression.evaluate` function.
-*/
+ * An expression is an intermediate representation of a Squiggle code.
+ * Expressions are evaluated by reducer's `evaluate` function.
+ */
 import { ASTNode } from "../ast/parse.js";
 import { Value, vBool, vNumber, vString, vVoid } from "../value/index.js";
 
+// All shapes are type+value, to help with V8 monomorphism.
 export type ExpressionContent =
   | {
       type: "Block";
@@ -29,25 +30,33 @@ export type ExpressionContent =
     }
   | {
       type: "Ternary";
-      condition: Expression;
-      ifTrue: Expression;
-      ifFalse: Expression;
+      value: {
+        condition: Expression;
+        ifTrue: Expression;
+        ifFalse: Expression;
+      };
     }
   | {
       type: "Assign";
-      left: string;
-      right: Expression;
+      value: {
+        left: string;
+        right: Expression;
+      };
     }
   | {
       type: "Call";
-      fn: Expression;
-      args: Expression[];
+      value: {
+        fn: Expression;
+        args: Expression[];
+      };
     }
   | {
       type: "Lambda";
-      parameters: string[];
-      body: Expression;
-      name?: string;
+      value: {
+        parameters: string[];
+        body: Expression;
+        name?: string;
+      };
     }
   | {
       type: "Value";
@@ -71,8 +80,10 @@ export const eCall = (
   args: Expression[]
 ): ExpressionContent => ({
   type: "Call",
-  fn,
-  args,
+  value: {
+    fn,
+    args,
+  },
 });
 
 export const eLambda = (
@@ -81,9 +92,11 @@ export const eLambda = (
   name: string | undefined
 ): ExpressionContent => ({
   type: "Lambda",
-  parameters,
-  body,
-  name,
+  value: {
+    parameters,
+    body,
+    name,
+  },
 });
 
 export const eNumber = (x: number): ExpressionContent => ({
@@ -123,8 +136,10 @@ export const eLetStatement = (
   right: Expression
 ): ExpressionContent => ({
   type: "Assign",
-  left,
-  right,
+  value: {
+    left,
+    right,
+  },
 });
 
 export const eTernary = (
@@ -133,9 +148,11 @@ export const eTernary = (
   ifFalse: Expression
 ): ExpressionContent => ({
   type: "Ternary",
-  condition,
-  ifTrue,
-  ifFalse,
+  value: {
+    condition,
+    ifTrue,
+    ifFalse,
+  },
 });
 
 export const eIdentifier = (name: string): ExpressionContent => ({
@@ -148,42 +165,45 @@ export const eVoid = (): ExpressionContent => ({
   value: vVoid(),
 });
 
-/*
-  Converts the expression to String
-*/
-const toString = (expression: Expression): string => {
+// Converts the expression to String. Useful for tests.
+export function expressionToString(expression: Expression): string {
   switch (expression.type) {
     case "Block":
-      return `{${expression.value.map(toString).join("; ")}}`;
+      return `{${expression.value.map(expressionToString).join("; ")}}`;
     case "Program":
-      return expression.value.map(toString).join("; ");
+      return expression.value.map(expressionToString).join("; ");
     case "Array":
-      return `[${expression.value.map(toString).join(", ")}]`;
+      return `[${expression.value.map(expressionToString).join(", ")}]`;
     case "Record":
       return `{${expression.value
-        .map(([key, value]) => `${toString(key)}: ${toString(value)}`)
+        .map(
+          ([key, value]) =>
+            `${expressionToString(key)}: ${expressionToString(value)}`
+        )
         .join(", ")}}`;
     case "Symbol":
       return expression.value;
     case "Ternary":
-      return `${toString(expression.condition)} ? (${toString(
-        expression.ifTrue
-      )}) : (${toString(expression.ifFalse)})`;
+      return `${expressionToString(
+        expression.value.condition
+      )} ? (${expressionToString(
+        expression.value.ifTrue
+      )}) : (${expressionToString(expression.value.ifFalse)})`;
     case "Assign":
-      return `${expression.left} = ${toString(expression.right)}`;
+      return `${expression.value.left} = ${expressionToString(
+        expression.value.right
+      )}`;
     case "Call":
-      return `(${toString(expression.fn)})(${expression.args
-        .map(toString)
-        .join(", ")})`;
+      return `(${expressionToString(
+        expression.value.fn
+      )})(${expression.value.args.map(expressionToString).join(", ")})`;
     case "Lambda":
-      return `{|${expression.parameters.join(", ")}| ${toString(
-        expression.body
+      return `{|${expression.value.parameters.join(", ")}| ${expressionToString(
+        expression.value.body
       )}}`;
     case "Value":
       return expression.value.toString();
     default:
       return `Unknown expression ${expression}`;
   }
-};
-
-export { toString as expressionToString };
+}

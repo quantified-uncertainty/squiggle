@@ -19,13 +19,14 @@ import {
   frNumber,
 } from "../library/registry/frTypes.js";
 import { FnFactory, unpackDistResult } from "../library/registry/helpers.js";
-import { ReducerContext } from "../reducer/Context.js";
-import { ErrorMessage, REOther } from "../reducer/ErrorMessage.js";
+import { ReducerContext } from "../reducer/context.js";
+import { ErrorMessage, REOther } from "../errors.js";
 import { Lambda } from "../reducer/lambda.js";
 import * as E_A from "../utility/E_A.js";
 import { Ok, result } from "../utility/result.js";
-import { ReducerFn, Value, vArray, vNumber } from "../value/index.js";
+import { Value, vArray, vNumber } from "../value/index.js";
 import { toValueResult } from "./genericDist.js";
+import { ReducerFn } from "../reducer/index.js";
 
 const { factorial } = jstat;
 
@@ -79,10 +80,8 @@ const integrateFunctionBetweenWithNumIntegrationPoints = (
     if (result.type === "Number") {
       return result.value;
     }
-    return ErrorMessage.throw(
-      REOther(
-        "Error 1 in Danger.integrate. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead"
-      )
+    throw new REOther(
+      "Error 1 in Danger.integrate. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead"
     );
   };
 
@@ -156,10 +155,8 @@ const integrationLibrary: FRFunction[] = [
         [frLambda, frNumber, frNumber, frNumber],
         ([lambda, min, max, numIntegrationPoints], context, reducer) => {
           if (numIntegrationPoints === 0) {
-            return ErrorMessage.throw(
-              REOther(
-                "Integration error 4 in Danger.integrate: Increment can't be 0."
-              )
+            throw new REOther(
+              "Integration error 4 in Danger.integrate: Increment can't be 0."
             );
           }
           return integrateFunctionBetweenWithNumIntegrationPoints(
@@ -190,10 +187,8 @@ const integrationLibrary: FRFunction[] = [
         [frLambda, frNumber, frNumber, frNumber],
         ([lambda, min, max, epsilon], context, reducer) => {
           if (epsilon === 0) {
-            return ErrorMessage.throw(
-              REOther(
-                "Integration error in Danger.integrate: Increment can't be 0."
-              )
+            throw new REOther(
+              "Integration error in Danger.integrate: Increment can't be 0."
             );
           }
           return integrateFunctionBetweenWithNumIntegrationPoints(
@@ -251,31 +246,23 @@ const diminishingReturnsLibrary = [
       2. O(n*(m-1)): Iterate through all possible spending combinations. The advantage of this option is that it wouldn't assume that the returns of marginal spending are diminishing.
  */
           if (lambdas.length <= 1) {
-            return ErrorMessage.throw(
-              REOther(
-                "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, number of functions should be greater than 1."
-              )
+            throw new REOther(
+              "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, number of functions should be greater than 1."
             );
           }
           if (funds <= 0) {
-            return ErrorMessage.throw(
-              REOther(
-                "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, funds should be greater than 0."
-              )
+            throw new REOther(
+              "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, funds should be greater than 0."
             );
           }
           if (approximateIncrement <= 0) {
-            return ErrorMessage.throw(
-              REOther(
-                "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, approximateIncrement should be greater than 0."
-              )
+            throw new REOther(
+              "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, approximateIncrement should be greater than 0."
             );
           }
           if (approximateIncrement >= funds) {
-            return ErrorMessage.throw(
-              REOther(
-                "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, approximateIncrement should be smaller than funds amount."
-              )
+            throw new REOther(
+              "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, approximateIncrement should be smaller than funds amount."
             );
           }
           const applyFunctionAtPoint = (lambda: Lambda, point: number) => {
@@ -288,10 +275,8 @@ const diminishingReturnsLibrary = [
             if (lambdaResult.type === "Number") {
               return lambdaResult.value;
             }
-            return ErrorMessage.throw(
-              REOther(
-                "Error 1 in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead"
-              )
+            throw new REOther(
+              "Error 1 in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead"
             );
           };
 

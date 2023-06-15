@@ -1,5 +1,11 @@
 "use client";
-import { Control, Controller, FieldValues, Path } from "react-hook-form";
+import {
+  Control,
+  Controller,
+  FieldPath,
+  FieldValues,
+  Path,
+} from "react-hook-form";
 
 import Select, {
   OptionProps,
@@ -7,6 +13,7 @@ import Select, {
   components,
 } from "react-select";
 import { ClusterInfo } from "./common/ClusterInfo";
+import { ControlledFormField } from "@quri/ui";
 
 type Option = Readonly<{
   id: string;
@@ -32,29 +39,30 @@ const SingleValue = ({
   );
 };
 
-export function SelectCluster<T extends FieldValues>({
-  clusters,
+export function SelectCluster<
+  TValues extends FieldValues,
+  TName extends FieldPath<TValues> = FieldPath<TValues>
+>({
   name,
-  control,
+  clusters,
+  label,
 }: {
+  name: TName;
   clusters: readonly Option[];
-  name: Path<T>;
-  control: Control<T>;
+  label?: string;
 }) {
   return (
-    <Controller
-      name={name}
-      control={control}
-      render={({ field }) => (
+    <ControlledFormField name={name} label={label}>
+      {({ value, onChange }) => (
         <Select
           components={{ SingleValue, Option }}
-          value={clusters.find((cluster) => cluster.id === field.value)}
+          value={clusters.find((cluster) => cluster.id === value)}
           options={clusters}
           getOptionLabel={(cluster) => cluster.id}
           getOptionValue={(cluster) => cluster.id}
-          onChange={(cluster) => field.onChange(cluster?.id)}
+          onChange={(cluster) => onChange(cluster?.id)}
         />
       )}
-    />
+    </ControlledFormField>
   );
 }

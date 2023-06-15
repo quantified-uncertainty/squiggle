@@ -11,7 +11,7 @@ import {
   primaryColor,
 } from "../../lib/draw/index.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
-import { sqScaleToD3 } from "../../lib/utility.js";
+import { sqScaleToD3, canvasClasses } from "../../lib/utility.js";
 import { ErrorAlert } from "../Alert.js";
 import { getFunctionImage } from "./utils.js";
 import { FunctionChartContainer } from "./FunctionChartContainer.js";
@@ -123,7 +123,9 @@ export const NumericFunctionChart: FC<Props> = ({
   return (
     <FunctionChartContainer fn={plot.fn}>
       <div className="flex flex-col items-stretch">
-        <canvas ref={ref}>Chart for {plot.toString()}</canvas>
+        <canvas ref={ref} className={canvasClasses}>
+          Chart for {plot.toString()}
+        </canvas>
         <div className="space-y-1">
           {errors.map(({ x, value }) => (
             // TODO - group errors with identical value

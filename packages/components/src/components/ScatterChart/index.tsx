@@ -13,7 +13,7 @@ import {
   useCanvas,
   useCanvasCursor,
 } from "../../lib/hooks/index.js";
-import { sqScaleToD3 } from "../../lib/utility.js";
+import { sqScaleToD3, canvasClasses } from "../../lib/utility.js";
 import { ErrorAlert } from "../Alert.js";
 
 type Props = {
@@ -113,7 +113,9 @@ export const ScatterChart: FC<Props> = ({ plot, height, environment }) => {
 
   return (
     <div className="flex flex-col items-stretch">
-      <canvas ref={ref}>Chart for {plot.toString()}</canvas>
+      <canvas ref={ref} className={canvasClasses}>
+        Chart for {plot.toString()}
+      </canvas>
       {[xDist, yDist].map((dist) =>
         dist.ok ? null : (
           <ErrorAlert heading="Conversion error">

@@ -3,7 +3,7 @@ import {
   parse,
   toStringError,
 } from "../../src/ast/parse.js";
-import { expressionFromAst } from "../../src/ast/toExpression.js";
+import { expressionFromAst } from "../../src/expression/fromAst.js";
 import { expressionToString } from "../../src/expression/index.js";
 import {
   evaluateExpressionToResult,

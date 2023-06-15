@@ -75,7 +75,7 @@ const Toast: FC<{ toast: ToastShape }> = ({ toast }) => {
   );
 };
 
-const Context = createContext<(action: Action) => void>(() => {});
+const Context = createContext<(action: Action) => void>(() => undefined);
 
 export const useToast = () => {
   const dispatch = useContext(Context);

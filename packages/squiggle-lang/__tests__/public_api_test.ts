@@ -24,7 +24,7 @@ describe("SqValue", () => {
 describe("SqLambda", () => {
   test("createFromStdlibName", () => {
     const lambda = SqLambda.createFromStdlibName("List.upTo");
-    const result = lambda.directCall(
+    const result = lambda.call(
       [SqNumberValue.create(1), SqNumberValue.create(5)],
       defaultEnvironment
     );

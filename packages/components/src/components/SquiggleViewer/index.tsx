@@ -1,25 +1,27 @@
-import React, { memo, useCallback, useMemo, useRef } from "react";
 import { SqValueLocation } from "@quri/squiggle-lang";
+import merge from "lodash/merge.js";
+import { memo, useCallback, useMemo, useRef } from "react";
+
+import { useSquiggle } from "../../lib/hooks/index.js";
+import {
+  defaultPlaygroundSettings,
+  PartialPlaygroundSettings,
+  viewSettingsSchema,
+} from "../PlaygroundSettings.js";
+import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 import { ExpressionViewer } from "./ExpressionViewer.js";
-import { ViewerContext } from "./ViewerContext.js";
 import {
   LocalItemSettings,
   locationAsString,
   MergedItemSettings,
 } from "./utils.js";
-import { useSquiggle } from "../../lib/hooks/index.js";
-import {
-  PartialViewSettings,
-  viewSettingsSchema,
-} from "../ViewSettingsForm.js";
-import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
-import merge from "lodash/merge.js";
+import { ViewerContext } from "./ViewerContext.js";
 
 export type SquiggleViewerProps = {
   /** The output of squiggle's run */
   result: ReturnType<typeof useSquiggle>["result"];
   enableLocalSettings?: boolean;
-} & PartialViewSettings;
+} & PartialPlaygroundSettings;
 
 type SettingsStore = {
   [k: string]: LocalItemSettings;
@@ -31,14 +33,14 @@ export const SquiggleViewer = memo<SquiggleViewerProps>(
   function SquiggleViewer({
     result,
     enableLocalSettings = false,
-    ...partialViewSettings
+    ...partialPlaygroundSettings
   }) {
     // can't store settings in the state because we don't want to rerender the entire tree on every change
     const settingsStoreRef = useRef<SettingsStore>({});
 
     const globalSettings = useMemo(() => {
-      return merge({}, viewSettingsSchema.getDefault(), partialViewSettings);
-    }, [partialViewSettings]);
+      return merge({}, defaultPlaygroundSettings, partialPlaygroundSettings);
+    }, [partialPlaygroundSettings]);
 
     const getSettings = useCallback(
       (location: SqValueLocation) => {

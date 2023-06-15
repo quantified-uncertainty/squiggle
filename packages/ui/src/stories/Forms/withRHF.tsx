@@ -1,47 +1,25 @@
-import { ReactNode } from "react";
-import {
-  Control,
-  DeepPartial,
-  FieldValues,
-  UseFormRegister,
-  useForm,
-} from "react-hook-form";
+import { ComponentType, useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
 
-type WrappedRender<
-  Args extends Record<string, any>,
-  Values extends FieldValues
-> = (
-  args: Args,
-  props: { register: UseFormRegister<Values>; control: Control<Values> }
-) => ReactNode;
+import { Button } from "../../index.js";
 
-function Form<Args extends Record<string, any>, Values extends FieldValues>({
-  render,
-  args,
-  defaultValues,
-}: {
-  render: WrappedRender<Args, Values>;
-  args: Args;
-  defaultValues?: DeepPartial<Values>;
-}) {
-  const { register, control } = useForm<Values>({ defaultValues });
-  return <form>{render(args, { register, control })}</form>;
-}
+// correct type signature here causes TS2742 "Not portable" error.
+export const formDecorator /* NonNullable<Meta<unknown>["decorators"]>[number] */ =
+  (Story: ComponentType) => {
+    const form = useForm({
+      mode: "onChange",
+    });
+    const [result, setResult] = useState<unknown>();
 
-// This is kinda hacky (in practice, Typescript doesn't infer T well the way we use it now).
-// Could be improved with better types and abstractions, but it's pretty complicated.
-export function withRHF<
-  Args extends Record<string, any>,
-  Values extends FieldValues
->(
-  render: WrappedRender<Args, Values>,
-  // If you provide defaultValues, then Value generic will be inferred; that means that `register` function will be stricter typed.
-  // As a consequence, since `name` field in `args` is represented as string, type check might fail.
-  // Casting with `{...args as any}` seems fine, for now, since this is just for storybook purposes.
-  defaultValues?: DeepPartial<Values>
-) {
-  // returns storybook's render function
-  return (args: Args) => {
-    return <Form render={render} args={args} defaultValues={defaultValues} />;
+    return (
+      <form onSubmit={form.handleSubmit(setResult)}>
+        <FormProvider {...form}>
+          <Story />
+          <div className="mt-4">
+            <Button type="submit">Submit</Button>
+          </div>
+          {result ? <pre>{JSON.stringify(result, null, 2)}</pre> : undefined}
+        </FormProvider>
+      </form>
+    );
   };
-}

@@ -1,6 +1,6 @@
-import { INDEX_LOOKUP_FUNCTION } from "../ast/toExpression.js";
+import { INDEX_LOOKUP_FUNCTION } from "../expression/constants.js";
 import { Namespace, NamespaceMap } from "../reducer/bindings.js";
-import { ErrorMessage, REOther } from "../reducer/ErrorMessage.js";
+import { REOther } from "../errors.js";
 import { BuiltinLambda, Lambda } from "../reducer/lambda.js";
 import { Value, vLambda } from "../value/index.js";
 
@@ -12,14 +12,14 @@ function makeLookupLambda(): Lambda {
   return new BuiltinLambda(INDEX_LOOKUP_FUNCTION, (inputs) => {
     if (inputs.length !== 2) {
       // should never happen
-      return ErrorMessage.throw(REOther("Index lookup internal error"));
+      throw new REOther("Index lookup internal error");
     }
 
     const [obj, key] = inputs;
     if ("get" in obj) {
       return obj.get(key);
     } else {
-      return ErrorMessage.throw(REOther("Trying to access key on wrong value"));
+      throw new REOther("Trying to access key on wrong value");
     }
   });
 }
@@ -47,4 +47,6 @@ function makeStdLib(): Namespace {
   return res;
 }
 
+// We do this on import, because stdLib is expensive and we want to do it only once.
+// Might be better to build it lazily on demand and cache.
 export const stdLib = makeStdLib();

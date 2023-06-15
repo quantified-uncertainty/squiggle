@@ -10,5 +10,6 @@ export const Primary: Story = {
   args: {
     children: <div className="flex border p-1 w-24">Hover me</div>,
     text: "Tooltip text",
+    placement: "top",
   },
 };

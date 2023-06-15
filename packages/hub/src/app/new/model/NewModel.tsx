@@ -2,12 +2,12 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, FormProvider, useForm } from "react-hook-form";
 import { useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
+import { modelRoute } from "@/routes";
 
-import { SquigglePlayground } from "@quri/squiggle-components";
-import { Button, TextArea, TextInput, useToast } from "@quri/ui";
+import { Button, TextAreaFormField, TextFormField, useToast } from "@quri/ui";
 
 import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
 import { WithTopMenu } from "@/components/layout/WithTopMenu";
@@ -29,17 +29,21 @@ const Mutation = graphql`
 `;
 
 export const NewModel: FC = () => {
-  useSession({ required: true });
+  const { data: session } = useSession({ required: true });
 
   const toast = useToast();
 
-  const { register, handleSubmit, control } = useForm<{
+  const form = useForm<{
     code: string;
     slug: string;
     description: string;
   }>({
     defaultValues: {
-      code: "normal(2, 5)",
+      code: `/*
+Describe your code here
+*/
+
+a = normal(2, 5)`,
     },
   });
 
@@ -48,7 +52,7 @@ export const NewModel: FC = () => {
   const [saveMutation, isSaveInFlight] =
     useMutation<NewModelMutation>(Mutation);
 
-  const save = handleSubmit((data) => {
+  const save = form.handleSubmit((data) => {
     saveMutation({
       variables: {
         input: {
@@ -57,11 +61,17 @@ export const NewModel: FC = () => {
           description: data.description,
         },
       },
-      onCompleted(data) {
-        if (data.result.__typename === "BaseError") {
-          toast(data.result.message, "error");
+      onCompleted(completion) {
+        if (completion.result.__typename === "BaseError") {
+          toast(completion.result.message, "error");
         } else {
-          router.push("/");
+          //My guess is that there are more elegant ways of returning the slug, but I wasn't sure what was the best way to do it
+          const username = session?.user?.username;
+          if (username) {
+            router.push(modelRoute({ username, slug: data.slug }));
+          } else {
+            router.push("/");
+          }
         }
       },
       onError(e) {
@@ -72,45 +82,30 @@ export const NewModel: FC = () => {
 
   return (
     <form onSubmit={save}>
-      <WithTopMenu>
+      <FormProvider {...form}>
         <div className="max-w-2xl mx-auto">
           <div className="font-bold text-xl mb-4">New model</div>
-          <div className="space-y-2">
-            <TextInput
-              register={register}
+          <div className="space-y-2 mb-4">
+            <TextFormField
               name="slug"
-              label="Slug"
+              description="Must be alphanumerical, with no spaces. Example: my-long-model"
+              label="Model Name"
               placeholder="my-model"
-            />
-            <TextArea
-              register={register}
-              name="description"
-              label="Description"
-              placeholder="Any comments"
+              rules={{
+                pattern: {
+                  value: /^[\w-]+$/,
+                  message:
+                    "Must be alphanumerical, with no spaces. Example: my-long-model",
+                },
+                required: true,
+              }}
             />
           </div>
+          <Button onClick={save} disabled={isSaveInFlight} theme="primary">
+            Save
+          </Button>
         </div>
-        <Controller
-          name="code"
-          control={control}
-          rules={{ required: true }}
-          render={({ field }) => (
-            <SquigglePlayground
-              onCodeChange={field.onChange}
-              code={field.value}
-              renderExtraControls={() => (
-                <Button
-                  onClick={save}
-                  disabled={isSaveInFlight}
-                  theme="primary"
-                >
-                  Save
-                </Button>
-              )}
-            />
-          )}
-        />
-      </WithTopMenu>
+      </FormProvider>
     </form>
   );
 };

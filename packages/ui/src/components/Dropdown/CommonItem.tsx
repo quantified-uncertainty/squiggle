@@ -5,23 +5,30 @@ import { RefreshIcon } from "../../icons/RefreshIcon.js";
 import { IconProps } from "../../icons/Icon.js";
 
 export type CommonProps = {
-  icon: FC<IconProps>;
+  icon?: FC<IconProps>;
   title: string;
   acting?: boolean;
 };
 
-export const CommonItem: FC<CommonProps> = ({ title, icon, acting }) => {
+const iconDisplay = (icon?: FC<IconProps>, acting?: boolean) => {
+  if (!icon) return null;
   const Icon = acting ? RefreshIcon : icon;
   return (
-    <div className="px-4 py-2 flex items-center gap-2 group hover:bg-slate-100 cursor-pointer">
-      <Icon
-        size={14}
-        className={clsx(
-          "text-slate-400 group-hover:text-slate-900",
-          acting && "animate-spin"
-        )}
-      />
-      <div className="text-slate-600 group-hover:text-slate-900 text-sm font-medium">
+    <Icon
+      size={14}
+      className={clsx(
+        "text-slate-400 group-hover:text-slate-900",
+        acting && "animate-spin"
+      )}
+    />
+  );
+};
+
+export const CommonItem: FC<CommonProps> = ({ title, icon, acting }) => {
+  return (
+    <div className="rounded px-2 py-1.5 flex items-center gap-2 group hover:bg-slate-100 transition-colors duration-75 cursor-pointer">
+      {iconDisplay(icon, acting)}
+      <div className="text-slate-700 group-hover:text-slate-900 text-sm font-medium">
         {title}
       </div>
     </div>

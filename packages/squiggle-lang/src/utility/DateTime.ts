@@ -57,9 +57,7 @@ export const DateModule = {
     const [f1, f2] = [t1.getTime(), t2.getTime()];
     const diff = f1 - f2;
     if (diff < 0) {
-      return Result.Error(
-        "Cannot subtract a date by one that is in its future"
-      );
+      return Result.Err("Cannot subtract a date by one that is in its future");
     } else {
       return Ok(Duration.fromFloat(diff));
     }
@@ -73,9 +71,9 @@ export const DateModule = {
 
   makeWithYearInt(y: number): result<Date, string> {
     if (y < 100) {
-      return Result.Error("Year must be over 100");
+      return Result.Err("Year must be over 100");
     } else if (y > 200000) {
-      return Result.Error("Year must be less than 200000");
+      return Result.Err("Year must be less than 200000");
     } else {
       return Ok(new Date(y, 0));
     }

@@ -233,7 +233,7 @@ export class SqScatterPlot extends SqAbstractPlot<"scatter"> {
   ): Result.result<SqSampleSetDistribution, SqError> {
     const sampleSetResult = SampleSetDist.fromDist(dist, env);
     if (!sampleSetResult.ok) {
-      return Result.Error(
+      return Result.Err(
         SqError.createOtherError("Conversion to SampleSet failed")
       );
     }

@@ -38,6 +38,9 @@ commaSep<content> {
     () | content ("," content)*
 }
 
+// when trailing comma is allowed
+commaSep1<content> { () | content ("," content?)* }
+
 Binding { VariableName { identifier } "=" expression }
 
 LambdaArgs {
@@ -55,7 +58,7 @@ expression[@isGroup="Expression"] {
     | Boolean
     | Number
     | BlockExpr { "{" NonEmptyProgram "}" }
-    | RecordExpr { "{" commaSep<Entry { Field {identifier | String} ":" expression }> "}" }
+    | RecordExpr { "{" commaSep1<Entry { Field {identifier | String} ":" expression }> "}" }
     | LambdaExpr { "{" ArgsOpen { "|" } LambdaArgs "|" NonEmptyProgram "}" }
     | IfExpr { if expression then expression !else else expression }
     | ParenExpr { "(" expression ")" }
@@ -63,7 +66,7 @@ expression[@isGroup="Expression"] {
     | CallExpr { expression !call ("(" commaSep<Argument { expression }> ")"| "()") }
     | TernaryExpr { expression !logop LogicOp<"?"> expression LogicOp<":"> expression }
     | KVAccessExpr { expression !call ("[" Key { expression } "]") }
-    | ArrayExpr { "[" commaSep<expression> "]" }
+    | ArrayExpr { "[" commaSep1<expression> "]" }
     | Void { !deref "()" }
     | UnaryExpr { !unary (ArithOp<"-"> | ArithOp<"!"> | DotArithOp<".-">) expression }
     | LogicExpr {
@@ -117,7 +120,7 @@ as { kw<"as"> }
     semicolon[@export] { $[;] }
 
     String { '"' ![\"]* '"' | "'" ![\']* "'" }
-    "{" "}" "(" ")" "," "." "="[@name="Equals"]
+    "{" "}" "[" "]" "(" ")" "," "." "="[@name="Equals"]
 
     ArithOp<expr> { expr }
     DotArithOp[@name="ArithOp"]<expr> { expr }

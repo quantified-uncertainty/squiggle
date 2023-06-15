@@ -50,12 +50,10 @@ const Cell: FC<{
   id2: string;
   environment: Env;
 }> = ({ wrapFn, id1, id2, environment }) => {
-  const itemResult = wrapFn.directCall(
+  const itemResult = wrapFn.call(
     [SqStringValue.create(id1), SqStringValue.create(id2)],
     environment
   );
-
-  console.log(itemResult);
 
   if (!itemResult.ok) {
     return <ErrorCell />;
@@ -82,7 +80,7 @@ export const RelativeValuesGridChart: FC<Props> = ({ plot, environment }) => {
   const ids = plot.ids;
 
   const wrapFnResult = useMemo(() => {
-    return SqLambda.createFromStdlibName("RelativeValues.wrap").directCall(
+    return SqLambda.createFromStdlibName("RelativeValues.wrap").call(
       [SqLambdaValue.create(plot.fn)],
       environment
     );

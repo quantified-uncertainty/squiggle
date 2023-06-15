@@ -2,8 +2,83 @@ import { Meta } from "@storybook/blocks";
 
 <Meta title="UI/Forms" />
 
-Forms are tightly coupled with [React Hook Form](https://react-hook-form.com/).
+We provide form components for several layers of abstraction.
 
-This causes some difficulties with implementing them in Storybook, because we pass [register](https://react-hook-form.com/api/useform/register/) method explicitly, for better type safety, and it's impossible to pass `register` in Storybook's args.
+We'll explain them here, starting from the most convenient (and least flexible) to the underlying generic components.
 
-"Show code" button in Storybook won't give you the right JSX for these stories. Check out the source code for the stories to see how to use this components.
+Most form components we have are tightly coupled with [React Hook Form](https://react-hook-form.com/).
+
+# Specific form field components
+
+First, there are input-specific `*FormField` component: `<TextFormField>`, `<ColorFormField>` and so on. These components are type-safe wrappers around `<FormField>` and `<ControlledFormInput>` (explained in the next section). You should use these components unless you need to do something nonstandard.
+
+Example:
+
+```typescript
+<TextFormField
+  name="foo"
+  label="Foo"
+  description="Foo described"
+  rules={{ required: true }}
+/>
+```
+
+Note that here and for all following components (except for `<Styled*>` versions) your form must be wrapped in `<FormProvider>`.
+
+So the full example looks like this:
+
+```typescript
+const MyForm = () => {
+  const form = useForm();
+
+  return (
+    <form onSubmit={form.handleSubmit(...)}>
+      <FormProvider {...form}>
+        <TextFormField
+          name="foo"
+          label="Foo"
+          description="Foo described"
+          rules={{ required: true, pattern: /^\w+$/ }}
+        />
+        <TextAreaFormField name="bar" label="bar" description="Bar described" />
+      </FormProvider>
+    </form>
+  );
+};
+```
+
+# Generic field components
+
+Second, there are more generic `<FormField>` and `<ControlledFormField>` components. These components allow you to combine any custom input component with standard labels and descriptions.
+
+Example (this is a simplified version of `<TextFormField>`):
+
+```typescript
+<FormField name="slug" label="Slug" description="Model slug">
+  {(props) => <StyledInput type="text" {...props} />}
+</FormField>
+```
+
+# Generic input components
+
+Third, there are `<FormInput>` and `<ControlledFormInput>`. These allow you to render an input with its React Hook Form error message, while doing a custom layout.
+
+These are more generic, and the only style decision that they impose on you is that the errors are always displayed as a tooltip.
+
+Example:
+
+```typescript
+<FormInput name="foo">
+  {(props) => <StyledInput type="text" {...props} />}
+</FormInput>
+```
+
+# Styled
+
+Lastly, there are `Styled*` components: `<StyledCheckbox>`, `<StyledTextArea>` and so on. These mostly map on native HTML elements, and take similar props, but are styled with Tailwind. They don't require React Hook Form and can be used anywhere.
+
+Example:
+
+```typescript
+<StyledTextArea value="initial text" placeholder="write text here" />
+```

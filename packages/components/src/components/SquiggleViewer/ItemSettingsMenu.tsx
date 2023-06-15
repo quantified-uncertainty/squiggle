@@ -1,48 +1,60 @@
 import { CogIcon } from "@heroicons/react/solid/esm/index.js";
-import { yupResolver } from "@hookform/resolvers/yup";
-import merge from "lodash/merge.js";
+import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 
 import { SqValue } from "@quri/squiggle-lang";
 import { Modal } from "@quri/ui";
 
-import { PlaygroundContext } from "../SquigglePlayground/index.js";
 import {
-  PartialViewSettings,
-  ViewSettingsForm,
+  MetaSettings,
+  PlaygroundSettingsForm,
   viewSettingsSchema,
-} from "../ViewSettingsForm.js";
+} from "../PlaygroundSettings.js";
+import { PlaygroundContext } from "../SquigglePlayground/index.js";
 import { ViewerContext } from "./ViewerContext.js";
 import { locationAsString } from "./utils.js";
 
 type Props = {
   value: SqValue;
   onChange: () => void;
-  fixed?: PartialViewSettings;
+  metaSettings?: MetaSettings;
   withFunctionSettings: boolean;
 };
 
 const ItemSettingsModal: React.FC<
   Props & { close: () => void; resetScroll: () => void }
-> = ({ value, onChange, fixed, withFunctionSettings, close, resetScroll }) => {
+> = ({
+  value,
+  onChange,
+  metaSettings,
+  withFunctionSettings,
+  close,
+  resetScroll,
+}) => {
   const { setSettings, getSettings, getMergedSettings } =
     useContext(ViewerContext);
 
-  const mergedSettings = merge(getMergedSettings(value.location!), fixed);
+  const mergedSettings = getMergedSettings(value.location!);
 
-  const { register, watch } = useForm({
-    resolver: yupResolver(viewSettingsSchema),
+  const form = useForm({
+    resolver: zodResolver(viewSettingsSchema),
     defaultValues: mergedSettings,
+    mode: "onChange",
   });
+
   useEffect(() => {
-    const subscription = watch((vars) => {
-      const settings = getSettings(value.location!); // get the latest version
-      setSettings(value.location!, merge({}, settings, vars));
+    const submit = form.handleSubmit((data) => {
+      setSettings(value.location!, {
+        collapsed: false,
+        ...data,
+      });
       onChange();
     });
+
+    const subscription = form.watch(() => submit());
     return () => subscription.unsubscribe();
-  }, [getSettings, setSettings, onChange, value.location, watch]);
+  }, [getSettings, setSettings, onChange, value.location, form.watch]);
 
   const { getLeftPanelElement } = useContext(PlaygroundContext);
 
@@ -59,18 +71,20 @@ const ItemSettingsModal: React.FC<
               onClick={resetScroll}
             >
               {locationAsString(value.location!)}
-            </span>{" "}
+            </span>
           </>
         ) : (
           ""
         )}
       </Modal.Header>
       <Modal.Body>
-        <ViewSettingsForm
-          register={register}
-          withFunctionSettings={withFunctionSettings}
-          fixed={fixed}
-        />
+        <FormProvider {...form}>
+          <PlaygroundSettingsForm
+            withGlobalSettings={false}
+            withFunctionSettings={withFunctionSettings}
+            metaSettings={metaSettings}
+          />
+        </FormProvider>
       </Modal.Body>
     </Modal>
   );
@@ -90,28 +104,24 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
 
   const resetScroll = () => {
     if (!ref.current) return;
-    window.scroll({
-      top: ref.current.getBoundingClientRect().y + window.scrollY,
-      behavior: "smooth",
-    });
+    ref.current.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
     <div className="flex gap-2" ref={ref}>
       <CogIcon
-        className="h-5 w-5 cursor-pointer text-slate-400 hover:text-slate-500"
+        className="h-5 w-5 cursor-pointer text-stone-200 hover:text-stone-500"
         onClick={() => setIsOpen(!isOpen)}
       />
       {settings.distributionChartSettings ? (
         <button
           onClick={() => {
             setSettings(props.value.location!, {
-              ...settings,
-              distributionChartSettings: undefined,
+              collapsed: settings.collapsed,
             });
             props.onChange();
           }}
-          className="text-xs px-1 py-0.5 rounded bg-slate-300"
+          className="text-xs px-1 py-0.5 rounded bg-stone-200 hover:bg-stone-400"
         >
           Reset settings
         </button>

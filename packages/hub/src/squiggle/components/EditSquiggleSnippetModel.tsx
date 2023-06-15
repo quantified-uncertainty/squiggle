@@ -1,10 +1,15 @@
 import { useSession } from "next-auth/react";
-import { FC, useMemo, useState } from "react";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { FC, useMemo } from "react";
+import {
+  Controller,
+  FormProvider,
+  useFieldArray,
+  useForm,
+} from "react-hook-form";
 import { graphql, useFragment, useMutation } from "react-relay";
 
 import { SquigglePlayground } from "@quri/squiggle-components";
-import { Button, Modal, TextArea, TextInput, useToast } from "@quri/ui";
+import { Button, TextAreaFormField, useToast } from "@quri/ui";
 
 import {
   EditSquiggleSnippetModelMutation,
@@ -15,9 +20,9 @@ import { ModelRevision$key } from "@/__generated__/ModelRevision.graphql";
 import { SquiggleContent$key } from "@/__generated__/SquiggleContent.graphql";
 import { ModelPageFragment } from "@/app/users/[username]/models/[slug]/ModelPage";
 import { ModelRevisionFragment } from "@/app/users/[username]/models/[slug]/ModelRevision";
-import { WithTopMenu } from "@/components/layout/WithTopMenu";
-import { SquiggleContentFragment } from "./SquiggleContent";
 import { EditModelExports } from "@/components/exports/EditModelExports";
+import { useAvailableHeight } from "@/hooks/useAvailableHeight";
+import { SquiggleContentFragment } from "./SquiggleContent";
 
 export const Mutation = graphql`
   mutation EditSquiggleSnippetModelMutation(
@@ -64,6 +69,8 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
     revision.content
   );
 
+  const { height, ref } = useAvailableHeight();
+
   const initialFormValues: FormShape = useMemo(() => {
     return {
       code: content.code,
@@ -78,7 +85,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
     };
   }, [content, revision.description, revision.relativeValuesExports]);
 
-  const { handleSubmit, control, register } = useForm<FormShape>({
+  const form = useForm<FormShape>({
     defaultValues: initialFormValues,
   });
 
@@ -88,13 +95,13 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
     remove: removeVariableWithDefinition,
   } = useFieldArray({
     name: "relativeValuesExports",
-    control,
+    control: form.control,
   });
 
   const [saveMutation] =
     useMutation<EditSquiggleSnippetModelMutation>(Mutation);
 
-  const save = handleSubmit((formData) => {
+  const save = form.handleSubmit((formData) => {
     saveMutation({
       variables: {
         input: {
@@ -123,53 +130,31 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
   const canSave = session?.user.username === model.owner.username;
 
   return (
-    <form onSubmit={save}>
-      <WithTopMenu>
-        <div className="max-w-2xl mx-auto">
-          {canSave ? null : (
-            <div className="text-xs">
-              {"You don't own this model, edits won't be saved."}
-            </div>
-          )}
-          {session?.user.username === model.owner.username ? (
-            <div className="mt-2">
-              <TextArea
-                register={register}
-                name="description"
-                label="Description"
+    <FormProvider {...form}>
+      <form onSubmit={save}>
+        <div ref={ref}>
+          <Controller
+            name="code"
+            rules={{ required: true }}
+            render={({ field }) => (
+              <SquigglePlayground
+                height={height}
+                onCodeChange={field.onChange}
+                code={field.value}
+                renderExtraControls={() =>
+                  canSave ? (
+                    <div>
+                      <Button theme="primary" onClick={save} wide>
+                        Save
+                      </Button>
+                    </div>
+                  ) : null
+                }
               />
-            </div>
-          ) : null}
-          <div className="mt-4">
-            <header className="text-sm font-medium text-gray-600 mb-2">
-              Views
-            </header>
-            <EditModelExports
-              append={appendVariableWithDefinition}
-              remove={removeVariableWithDefinition}
-              items={variablesWithDefinitionsFields}
-            />
-          </div>
+            )}
+          />
         </div>
-        <Controller
-          name="code"
-          control={control}
-          rules={{ required: true }}
-          render={({ field }) => (
-            <SquigglePlayground
-              onCodeChange={field.onChange}
-              code={field.value}
-              renderExtraControls={() =>
-                canSave ? (
-                  <Button theme="primary" onClick={save} wide>
-                    Save
-                  </Button>
-                ) : null
-              }
-            />
-          )}
-        />
-      </WithTopMenu>
-    </form>
+      </form>
+    </FormProvider>
   );
 };
