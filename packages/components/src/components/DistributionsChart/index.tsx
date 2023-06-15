@@ -22,6 +22,7 @@ import {
 } from "../../lib/draw/index.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
 import {
+  adjustColorBrightness,
   canvasClasses,
   flattenResult,
   sqScaleToD3,
@@ -80,7 +81,7 @@ const InnerDistributionsChart: FC<{
       context.clearRect(0, 0, width, height);
 
       const getColor = (i: number) =>
-        isMulti ? d3.schemeCategory10[i] : "#5ba3cf";
+        isMulti ? d3.schemeCategory10[i] : "#6cabd2";
 
       const xScale = sqScaleToD3(plot.xScale);
       xScale.domain([
@@ -99,7 +100,6 @@ const InnerDistributionsChart: FC<{
         Math.max(...domain.map((p) => p.y)),
       ]);
 
-      const tickCount = Math.min(width / 100, 12);
       const { padding, frame } = drawAxes({
         context,
         width,
@@ -187,6 +187,9 @@ const InnerDistributionsChart: FC<{
           context.stroke();
 
           // discrete
+          const darkerColor = adjustColorBrightness(getColor(i), -40);
+          context.fillStyle = darkerColor;
+          context.strokeStyle = darkerColor;
           for (const point of shape.discrete) {
             context.beginPath();
             context.lineWidth = 1;
