@@ -1,20 +1,15 @@
 import { LocationRange } from "peggy";
 
+import { ASTNode } from "../ast/parse.js";
+import { REArityError } from "../errors.js";
 import { Expression } from "../expression/index.js";
 import { Value } from "../value/index.js";
-import { REArityError } from "../errors.js";
 import * as IError from "./IError.js";
 import { Bindings } from "./bindings.js";
 import * as Context from "./context.js";
 import { ReducerContext } from "./context.js";
-import { ReducerFn } from "./index.js";
-import { ASTNode } from "../ast/parse.js";
 
-type LambdaBody = (
-  args: Value[],
-  context: ReducerContext,
-  reducer: ReducerFn
-) => Value;
+type LambdaBody = (args: Value[], context: ReducerContext) => Value;
 
 export abstract class Lambda {
   constructor(public body: LambdaBody) {}
@@ -26,7 +21,6 @@ export abstract class Lambda {
   callFrom(
     args: Value[],
     context: ReducerContext,
-    reducer: ReducerFn,
     ast: ASTNode | undefined
   ): Value {
     const newContext: ReducerContext = {
@@ -39,7 +33,7 @@ export abstract class Lambda {
     };
 
     const value = IError.rethrowWithFrameStack(
-      () => this.body(args, newContext, reducer),
+      () => this.body(args, newContext),
       newContext.frameStack
     );
     if (ast) {
@@ -48,8 +42,8 @@ export abstract class Lambda {
     return value;
   }
 
-  call(args: Value[], context: ReducerContext, reducer: ReducerFn): Value {
-    return this.callFrom(args, context, reducer, undefined);
+  call(args: Value[], context: ReducerContext): Value {
+    return this.callFrom(args, context, undefined);
   }
 }
 
@@ -66,11 +60,7 @@ export class SquiggleLambda extends Lambda {
     body: Expression,
     location: LocationRange
   ) {
-    const lambda: LambdaBody = (
-      args: Value[],
-      context: ReducerContext,
-      reducer: ReducerFn
-    ) => {
+    const lambda: LambdaBody = (args: Value[], context: ReducerContext) => {
       const argsLength = args.length;
       const parametersLength = parameters.length;
       if (argsLength !== parametersLength) {
@@ -85,13 +75,11 @@ export class SquiggleLambda extends Lambda {
       }
 
       const lambdaContext: ReducerContext = {
+        ...context,
         bindings: localBindings, // based on bindings at the moment of lambda creation
-        environment: context.environment, // environment at the moment when lambda is called
-        frameStack: context.frameStack, // already extended in `.call()`
-        inFunction: context.inFunction, // already updated in `.call()`
       };
 
-      const [value] = reducer(body, lambdaContext);
+      const [value] = context.evaluate(body, lambdaContext);
       return value;
     };
 

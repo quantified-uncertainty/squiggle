@@ -93,21 +93,18 @@ export const library = [
     output: "Record",
     examples: [`Dict.map({a: 1, b: 2}, {|x| x + 1})`],
     definitions: [
-      makeDefinition(
-        [frDict(frAny), frLambda],
-        ([dict, lambda], context, reducer) => {
-          return Ok(
-            vRecord(
-              ImmutableMap(
-                [...dict.entries()].map(([key, value]) => {
-                  const mappedValue = lambda.call([value], context, reducer);
-                  return [key, mappedValue];
-                })
-              )
+      makeDefinition([frDict(frAny), frLambda], ([dict, lambda], context) => {
+        return Ok(
+          vRecord(
+            ImmutableMap(
+              [...dict.entries()].map(([key, value]) => {
+                const mappedValue = lambda.call([value], context);
+                return [key, mappedValue];
+              })
             )
-          );
-        }
-      ),
+          )
+        );
+      }),
     ],
   }),
   maker.make({
@@ -115,24 +112,21 @@ export const library = [
     output: "Record",
     examples: [`Dict.mapKeys({a: 1, b: 2}, {|x| concat(x, "-1")})`],
     definitions: [
-      makeDefinition(
-        [frDict(frAny), frLambda],
-        ([dict, lambda], context, reducer) => {
-          const mappedEntries: [string, Value][] = [];
-          for (const [key, value] of dict.entries()) {
-            const mappedKey = lambda.call([vString(key)], context, reducer);
+      makeDefinition([frDict(frAny), frLambda], ([dict, lambda], context) => {
+        const mappedEntries: [string, Value][] = [];
+        for (const [key, value] of dict.entries()) {
+          const mappedKey = lambda.call([vString(key)], context);
 
-            if (mappedKey.type == "String") {
-              mappedEntries.push([mappedKey.value, value]);
-            } else {
-              return Result.Err(
-                new REOther("mapKeys: lambda must return a string")
-              );
-            }
+          if (mappedKey.type == "String") {
+            mappedEntries.push([mappedKey.value, value]);
+          } else {
+            return Result.Err(
+              new REOther("mapKeys: lambda must return a string")
+            );
           }
-          return Ok(vRecord(ImmutableMap(mappedEntries)));
         }
-      ),
+        return Ok(vRecord(ImmutableMap(mappedEntries)));
+      }),
     ],
   }),
 ];

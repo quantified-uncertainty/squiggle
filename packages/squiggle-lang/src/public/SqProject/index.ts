@@ -36,7 +36,7 @@ export class SqProject {
 
   constructor(options?: Options) {
     this.items = new Map();
-    this.stdLib = Library.stdLib;
+    this.stdLib = Library.getStdLib();
     this.environment = defaultEnv;
     this.resolver = options?.resolver;
   }
@@ -244,19 +244,19 @@ export class SqProject {
     return Result.Ok(namespace);
   }
 
-  private doLinkAndRun(sourceId: string): void {
+  private async doLinkAndRun(sourceId: string): Promise<void> {
     const rBindings = this.buildInitialBindings(sourceId);
 
     if (rBindings.ok) {
       const context = createContext(rBindings.value, this.getEnvironment());
 
-      this.getItem(sourceId).run(context);
+      await this.getItem(sourceId).run(context);
     } else {
       this.getItem(sourceId).failRun(rBindings.value);
     }
   }
 
-  private runIds(sourceIds: string[]) {
+  private async runIds(sourceIds: string[]) {
     let error: SqError | undefined;
     for (const sourceId of sourceIds) {
       const cachedResult = this.getResultOption(sourceId);
@@ -273,7 +273,7 @@ export class SqProject {
         continue;
       }
 
-      this.doLinkAndRun(sourceId);
+      await this.doLinkAndRun(sourceId);
       const result = this.getResultOption(sourceId);
       if (result && !result.ok) {
         error = result.value;
@@ -281,14 +281,14 @@ export class SqProject {
     }
   }
 
-  runAll() {
-    this.runIds(this.getRunOrder());
+  async runAll() {
+    await this.runIds(this.getRunOrder());
   }
 
   // Deprecated; this method won't handle imports correctly.
   // Use `runWithImports` instead.
-  run(sourceId: string) {
-    this.runIds(Topology.getRunOrderFor(this, sourceId));
+  async run(sourceId: string) {
+    await this.runIds(Topology.getRunOrderFor(this, sourceId));
   }
 
   async loadImportsRecursively(
@@ -330,7 +330,7 @@ export class SqProject {
   ) {
     await this.loadImportsRecursively(sourceId, loadSource);
 
-    this.run(sourceId);
+    await this.run(sourceId);
   }
 }
 

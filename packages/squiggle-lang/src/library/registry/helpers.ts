@@ -1,14 +1,13 @@
 import { BaseDist } from "../../dist/BaseDist.js";
 import { DistError } from "../../dist/DistError.js";
 import { Env } from "../../dist/env.js";
-import { SampleMapNeedsNtoNFunction } from "../../operationError.js";
-import { ReducerContext } from "../../reducer/context.js";
 import {
   ErrorMessage,
   REDistributionError,
   REOperationError,
 } from "../../errors.js";
-import { ReducerFn } from "../../reducer/index.js";
+import { SampleMapNeedsNtoNFunction } from "../../operationError.js";
+import { ReducerContext } from "../../reducer/context.js";
 import { Lambda } from "../../reducer/lambda.js";
 import * as Result from "../../utility/result.js";
 import { Ok } from "../../utility/result.js";
@@ -269,10 +268,9 @@ export function repackDistResult(
 export function doNumberLambdaCall(
   lambda: Lambda,
   args: Value[],
-  context: ReducerContext,
-  reducer: ReducerFn
+  context: ReducerContext
 ) {
-  const value = lambda.call(args, context, reducer);
+  const value = lambda.call(args, context);
   if (value.type === "Number") {
     return value.value;
   }

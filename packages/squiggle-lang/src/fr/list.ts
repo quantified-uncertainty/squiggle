@@ -98,16 +98,13 @@ export const library = [
     requiresNamespace: false,
     examples: [`List.map([1,4,5], {|x| x+1})`],
     definitions: [
-      makeDefinition(
-        [frArray(frAny), frLambda],
-        ([array, lambda], context, reducer) => {
-          const mapped: Value[] = new Array(array.length);
-          for (let i = 0; i < array.length; i++) {
-            mapped[i] = lambda.call([array[i]], context, reducer);
-          }
-          return Ok(vArray(mapped));
+      makeDefinition([frArray(frAny), frLambda], ([array, lambda], context) => {
+        const mapped: Value[] = new Array(array.length);
+        for (let i = 0; i < array.length; i++) {
+          mapped[i] = lambda.call([array[i]], context);
         }
-      ),
+        return Ok(vArray(mapped));
+      }),
     ],
   }),
   maker.make({
@@ -159,10 +156,10 @@ export const library = [
     definitions: [
       makeDefinition(
         [frArray(frAny), frAny, frLambda],
-        ([array, initialValue, lambda], context, reducer) =>
+        ([array, initialValue, lambda], context) =>
           Ok(
             array.reduce(
-              (acc, elem) => lambda.call([acc, elem], context, reducer),
+              (acc, elem) => lambda.call([acc, elem], context),
               initialValue
             )
           )
@@ -176,12 +173,12 @@ export const library = [
     definitions: [
       makeDefinition(
         [frArray(frAny), frAny, frLambda],
-        ([array, initialValue, lambda], context, reducer) =>
+        ([array, initialValue, lambda], context) =>
           Ok(
             [...array]
               .reverse()
               .reduce(
-                (acc, elem) => lambda.call([acc, elem], context, reducer),
+                (acc, elem) => lambda.call([acc, elem], context),
                 initialValue
               )
           )
@@ -193,17 +190,15 @@ export const library = [
     requiresNamespace: false,
     examples: [`List.filter([1,4,5], {|x| x>3})`],
     definitions: [
-      makeDefinition(
-        [frArray(frAny), frLambda],
-        ([array, lambda], context, reducer) =>
-          Ok(
-            vArray(
-              array.filter((elem) => {
-                const result = lambda.call([elem], context, reducer);
-                return result.type === "Bool" && result.value;
-              })
-            )
+      makeDefinition([frArray(frAny), frLambda], ([array, lambda], context) =>
+        Ok(
+          vArray(
+            array.filter((elem) => {
+              const result = lambda.call([elem], context);
+              return result.type === "Bool" && result.value;
+            })
           )
+        )
       ),
     ],
   }),

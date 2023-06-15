@@ -1,39 +1,41 @@
 import { SqProject } from "../../src/public/SqProject/index.js";
 import { toStringResult } from "../../src/public/SqValue.js";
 
-const runFetchResult = (project: SqProject, sourceId: string) => {
-  project.run(sourceId);
+const runFetchResult = async (project: SqProject, sourceId: string) => {
+  await project.run(sourceId);
   const result = project.getResult(sourceId);
   return toStringResult(result);
 };
 
-const runFetchFlatBindings = (project: SqProject, sourceId: string) => {
-  project.run(sourceId);
+const runFetchFlatBindings = async (project: SqProject, sourceId: string) => {
+  await project.run(sourceId);
   return project.getBindings(sourceId).toString();
 };
 
-test("test result true", () => {
+test("test result true", async () => {
   const project = SqProject.create();
   project.setSource("main", "true");
-  expect(runFetchResult(project, "main")).toBe("Ok(true)");
+  expect(await runFetchResult(project, "main")).toBe("Ok(true)");
 });
 
-test("test result false", () => {
+test("test result false", async () => {
   const project = SqProject.create();
   project.setSource("main", "false");
-  expect(runFetchResult(project, "main")).toBe("Ok(false)");
+  expect(await runFetchResult(project, "main")).toBe("Ok(false)");
 });
 
-test("test library", () => {
+test("test library", async () => {
   const project = SqProject.create();
   project.setSource("main", "x=Math.pi; x");
-  expect(runFetchResult(project, "main")).toBe("Ok(3.141592653589793)");
+  expect(await runFetchResult(project, "main")).toBe("Ok(3.141592653589793)");
 });
 
-test("test bindings", () => {
+test("test bindings", async () => {
   const project = SqProject.create();
   project.setSource("variables", "myVariable=666");
-  expect(runFetchFlatBindings(project, "variables")).toBe("{myVariable: 666}");
+  expect(await runFetchFlatBindings(project, "variables")).toBe(
+    "{myVariable: 666}"
+  );
 });
 
 describe("project1", () => {
@@ -65,11 +67,11 @@ describe("project1", () => {
     expect(project.getContinues("main")).toEqual(["first"]);
   });
 
-  test("test result", () => {
-    expect(runFetchResult(project, "main")).toBe("Ok(1)");
+  test("test result", async () => {
+    expect(await runFetchResult(project, "main")).toBe("Ok(1)");
   });
-  test("test bindings", () => {
-    expect(runFetchFlatBindings(project, "first")).toBe("{x: 1}");
+  test("test bindings", async () => {
+    expect(await runFetchFlatBindings(project, "first")).toBe("{x: 1}");
   });
 });
 
@@ -105,12 +107,12 @@ describe("project2", () => {
   test("dependencies main", () => {
     expect(project.getDependencies("main")).toEqual(["second"]);
   });
-  test("test result", () => {
-    expect(runFetchResult(project, "main")).toBe("Ok(2)");
+  test("test result", async () => {
+    expect(await runFetchResult(project, "main")).toBe("Ok(2)");
   });
-  test("test bindings", () => {
+  test("test bindings", async () => {
     // bindings from continues are not exposed!
-    expect(runFetchFlatBindings(project, "main")).toBe("{z: 3}");
+    expect(await runFetchFlatBindings(project, "main")).toBe("{z: 3}");
   });
 });
 
@@ -190,12 +192,12 @@ describe("project with import", () => {
   test("dependencies main", () => {
     expect(project.getDependencies("main")).toEqual(["second"]);
   });
-  test("test result", () => {
-    expect(runFetchResult(project, "main")).toBe("Ok(2)");
+  test("test result", async () => {
+    expect(await runFetchResult(project, "main")).toBe("Ok(2)");
   });
-  test("test bindings", () => {
+  test("test bindings", async () => {
     // bindings from continues are not exposed!
-    expect(runFetchFlatBindings(project, "main")).toBe("{z: 3}");
+    expect(await runFetchFlatBindings(project, "main")).toBe("{z: 3}");
   });
 });
 

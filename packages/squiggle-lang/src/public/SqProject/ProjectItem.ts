@@ -4,7 +4,7 @@ import { Expression } from "../../expression/index.js";
 import { ReducerContext } from "../../reducer/context.js";
 import { IError } from "../../reducer/IError.js";
 import { Namespace, NamespaceMap } from "../../reducer/bindings.js";
-import { evaluate } from "../../reducer/index.js";
+import { ReducerFn, evaluate } from "../../reducer/index.js";
 import * as Result from "../../utility/result.js";
 import { Ok, result } from "../../utility/result.js";
 import { Value } from "../../value/index.js";
@@ -166,7 +166,7 @@ export class ProjectItem {
     this.bindings = NamespaceMap();
   }
 
-  run(context: ReducerContext) {
+  async run(context: ReducerContext) {
     this.buildExpression();
     if (this.result) {
       return;
@@ -182,11 +182,16 @@ export class ProjectItem {
       return;
     }
 
+    const wrappedEvaluate = context.evaluate;
+    const asyncEvaluate: ReducerFn = (expression, context) => {
+      return wrappedEvaluate(expression, context);
+    };
+
     try {
-      const [result, contextAfterEvaluation] = evaluate(
-        this.expression.value,
-        context
-      );
+      const [result, contextAfterEvaluation] = evaluate(this.expression.value, {
+        ...context,
+        evaluate: asyncEvaluate,
+      });
       this.result = Ok(result);
       this.bindings = contextAfterEvaluation.bindings.locals();
     } catch (e: unknown) {

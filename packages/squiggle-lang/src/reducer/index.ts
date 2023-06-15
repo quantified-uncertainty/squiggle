@@ -1,12 +1,5 @@
 import { ASTNode, parse } from "../ast/parse.js";
-import { expressionFromAst } from "../expression/fromAst.js";
 import { defaultEnv } from "../dist/env.js";
-import { Expression } from "../expression/index.js";
-import { stdLib } from "../library/index.js";
-import { ImmutableMap } from "../utility/immutableMap.js";
-import * as Result from "../utility/result.js";
-import { Ok, result } from "../utility/result.js";
-import { Value, vArray, vLambda, vRecord, vVoid } from "../value/index.js";
 import {
   ErrorMessage,
   REExpectedType,
@@ -14,12 +7,19 @@ import {
   REOther,
   RESymbolNotFound,
 } from "../errors.js";
+import { expressionFromAst } from "../expression/fromAst.js";
+import { Expression } from "../expression/index.js";
+import { getStdLib } from "../library/index.js";
+import { ImmutableMap } from "../utility/immutableMap.js";
+import * as Result from "../utility/result.js";
+import { Ok, result } from "../utility/result.js";
+import { Value, vArray, vLambda, vRecord, vVoid } from "../value/index.js";
 import { IError } from "./IError.js";
 import * as Context from "./context.js";
 import { SquiggleLambda } from "./lambda.js";
 
-export type ReducerFn<T extends Expression["type"] = Expression["type"]> = (
-  expression: Extract<Expression, { type: T }>,
+export type ReducerFn = (
+  expression: Expression,
   context: Context.ReducerContext
 ) => [Value, Context.ReducerContext];
 
@@ -44,8 +44,10 @@ function throwFrom(
 }
 
 /*
-  Recursively evaluate the expression
-*/
+ * Recursively evaluate the expression.
+ * Don't call this function recursively! Call `context.evaluate` instead.
+ * `context.evaluate` can inject additional behaviors, e.g. delay for pseudo-async evaluation.
+ */
 export const evaluate: ReducerFn = (expression, context) => {
   const ast = expression.ast;
   switch (expression.type) {
@@ -85,7 +87,10 @@ const evaluateBlock: SubReducerFn<"Block"> = (statements, context) => {
   let currentValue: Value = vVoid();
 
   for (const statement of statements) {
-    [currentValue, currentContext] = evaluate(statement, currentContext);
+    [currentValue, currentContext] = context.evaluate(
+      statement,
+      currentContext
+    );
   }
   return [currentValue, context]; // throw away block's context
 };
@@ -96,7 +101,10 @@ const evaluateProgram: SubReducerFn<"Program"> = (statements, context) => {
   let currentValue: Value = vVoid();
 
   for (const statement of statements) {
-    [currentValue, currentContext] = evaluate(statement, currentContext);
+    [currentValue, currentContext] = context.evaluate(
+      statement,
+      currentContext
+    );
   }
   return [currentValue, currentContext];
 };
@@ -107,7 +115,7 @@ const evaluateArray: SubReducerFn<"Array"> = (
   ast
 ) => {
   const values = expressionValue.map((element) => {
-    const [value] = evaluate(element, context);
+    const [value] = context.evaluate(element, context);
     return value;
   });
   const value = vArray(values);
@@ -123,7 +131,7 @@ const evaluateRecord: SubReducerFn<"Record"> = (
   const value = vRecord(
     ImmutableMap(
       expressionValue.map(([eKey, eValue]) => {
-        const [key] = evaluate(eKey, context);
+        const [key] = context.evaluate(eKey, context);
         if (key.type !== "String") {
           return throwFrom(
             new REOther("Record keys must be strings"),
@@ -132,7 +140,7 @@ const evaluateRecord: SubReducerFn<"Record"> = (
           );
         }
         const keyString: string = key.value;
-        const [value] = evaluate(eValue, context);
+        const [value] = context.evaluate(eValue, context);
         return [keyString, value];
       })
     )
@@ -142,7 +150,7 @@ const evaluateRecord: SubReducerFn<"Record"> = (
 };
 
 const evaluateAssign: SubReducerFn<"Assign"> = (expressionValue, context) => {
-  const [result] = evaluate(expressionValue.right, context);
+  const [result] = context.evaluate(expressionValue.right, context);
   return [
     vVoid(),
     {
@@ -170,12 +178,15 @@ const evaluateTernary: SubReducerFn<"Ternary"> = (
   context,
   ast
 ) => {
-  const [predicateResult] = evaluate(expressionValue.condition, context);
+  const [predicateResult] = context.evaluate(
+    expressionValue.condition,
+    context
+  );
   if (predicateResult.type !== "Bool") {
     return throwFrom(new REExpectedType("Boolean", ""), context, ast);
   }
 
-  const [value] = evaluate(
+  const [value] = context.evaluate(
     predicateResult.value ? expressionValue.ifTrue : expressionValue.ifFalse,
     context
   );
@@ -201,9 +212,9 @@ const evaluateLambda: SubReducerFn<"Lambda"> = (
 };
 
 const evaluateCall: SubReducerFn<"Call"> = (expressionValue, context, ast) => {
-  const [lambda] = evaluate(expressionValue.fn, context);
+  const [lambda] = context.evaluate(expressionValue.fn, context);
   const argValues = expressionValue.args.map((arg) => {
-    const [argValue] = evaluate(arg, context);
+    const [argValue] = context.evaluate(arg, context);
     return argValue;
   });
   switch (lambda.type) {
@@ -211,7 +222,6 @@ const evaluateCall: SubReducerFn<"Call"> = (expressionValue, context, ast) => {
       const result = lambda.value.callFrom(
         argValues,
         context,
-        evaluate,
         ast // we pass the ast of a current expression here, to put it on frameStack and in the resulting value
       );
       return [result, context];
@@ -221,7 +231,7 @@ const evaluateCall: SubReducerFn<"Call"> = (expressionValue, context, ast) => {
 };
 
 function createDefaultContext() {
-  return Context.createContext(stdLib, defaultEnv);
+  return Context.createContext(getStdLib(), defaultEnv);
 }
 
 export async function evaluateExpressionToResult(
@@ -229,7 +239,7 @@ export async function evaluateExpressionToResult(
 ): Promise<result<Value, IError>> {
   const context = createDefaultContext();
   try {
-    const [value] = evaluate(expression, context);
+    const [value] = context.evaluate(expression, context);
     return Ok(value);
   } catch (e) {
     return Result.Err(IError.fromException(e));

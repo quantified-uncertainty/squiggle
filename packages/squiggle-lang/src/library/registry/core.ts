@@ -9,7 +9,6 @@ import {
 } from "./fnDefinition.js";
 import { ErrorMessage, REOther, RESymbolNotFound } from "../../errors.js";
 import { BuiltinLambda, Lambda } from "../../reducer/lambda.js";
-import { ReducerFn } from "../../reducer/index.js";
 
 export type FRFunction = {
   name: string;
@@ -74,8 +73,7 @@ export class Registry {
   call(
     fnName: string,
     args: Value[],
-    context: ReducerContext,
-    reducer: ReducerFn
+    context: ReducerContext
   ): result<Value, ErrorMessage> {
     const definitions = this.fnNameDict.get(fnName);
     if (definitions === undefined) {
@@ -90,12 +88,7 @@ export class Registry {
     };
 
     for (const definition of definitions) {
-      const callResult = tryCallFnDefinition(
-        definition,
-        args,
-        context,
-        reducer
-      );
+      const callResult = tryCallFnDefinition(definition, args, context);
       if (callResult !== undefined) {
         return callResult;
       }
@@ -107,10 +100,10 @@ export class Registry {
     if (!this.fnNameDict.has(fnName)) {
       throw new Error(`Function ${fnName} doesn't exist in registry`);
     }
-    return new BuiltinLambda(fnName, (args, context, reducer) => {
+    return new BuiltinLambda(fnName, (args, context) => {
       // Note: current bindings could be accidentally exposed here through context (compare with native lambda implementation above, where we override them with local bindings).
       // But FunctionRegistry API is too limited for that to matter. Please take care not to violate that in the future by accident.
-      const result = this.call(fnName, args, context, reducer);
+      const result = this.call(fnName, args, context);
       if (!result.ok) {
         throw result.value;
       }

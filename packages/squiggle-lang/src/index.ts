@@ -58,7 +58,7 @@ export async function run(
   if (options?.environment) {
     project.setEnvironment(options.environment);
   }
-  project.run("main");
+  await project.run("main");
   const result = project.getResult("main");
   const bindings = project.getBindings("main");
   return { result, bindings };

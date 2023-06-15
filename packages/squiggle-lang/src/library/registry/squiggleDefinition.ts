@@ -1,7 +1,6 @@
 import { parse } from "../../ast/parse.js";
 import { expressionFromAst } from "../../expression/fromAst.js";
 import { ReducerContext } from "../../reducer/context.js";
-import { ReducerFn } from "../../reducer/index.js";
 import { SquiggleLambda } from "../../reducer/lambda.js";
 import * as Result from "../../utility/result.js";
 import { FnDefinition } from "./fnDefinition.js";
@@ -27,11 +26,7 @@ export function makeSquiggleDefinition<const T extends string[]>({
 
   const expression = expressionFromAst(astResult.value);
 
-  const run = (
-    args: unknown[],
-    context: ReducerContext,
-    reducer: ReducerFn
-  ) => {
+  const run = (args: unknown[], context: ReducerContext) => {
     // It would be better to create this lambda outside of `run` instead of creating it on every call.
     // But we don't have access to `context.bindings` outside of `run`, and it's not clear how the code
     // could reference stdlib functions in that case.
@@ -50,8 +45,7 @@ export function makeSquiggleDefinition<const T extends string[]>({
       // It's unfortunate that we have to unpack values and repack them again.
       // But it's the only way to support polymorphic functions and make use of error reporting mechanism in our registry.
       inputs.map((input, i) => input.pack(args[i])),
-      context,
-      reducer
+      context
     );
     return Result.Ok(result);
   };

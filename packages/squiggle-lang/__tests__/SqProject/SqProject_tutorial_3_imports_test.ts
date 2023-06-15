@@ -120,7 +120,7 @@ describe("Recursive imports", () => {
     project.setContinues("main", ["doubleX"]);
 
     /* Let's run the project */
-    project.runAll();
+    await project.runAll();
     const result = project.getResult("main");
     const bindings = project.getBindings("main");
 

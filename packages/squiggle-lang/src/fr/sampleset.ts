@@ -66,10 +66,10 @@ const baseLibrary = [
     examples: [`SampleSet.fromFn({|i| sample(normal(5,2))})`],
     output: "Dist",
     definitions: [
-      makeDefinition([frLambda], ([lambda], context, reducer) =>
+      makeDefinition([frLambda], ([lambda], context) =>
         repackDistResult(
           SampleSetDist.SampleSetDist.fromFn((i: number) => {
-            return doNumberLambdaCall(lambda, [vNumber(i)], context, reducer);
+            return doNumberLambdaCall(lambda, [vNumber(i)], context);
           }, context.environment)
         )
       ),
@@ -80,11 +80,11 @@ const baseLibrary = [
     examples: [`SampleSet.map(SampleSet.fromDist(normal(5,2)), {|x| x + 1})`],
     output: "Dist",
     definitions: [
-      makeDefinition([frDist, frLambda], ([dist, lambda], context, reducer) => {
+      makeDefinition([frDist, frLambda], ([dist, lambda], context) => {
         sampleSetAssert(dist);
         return repackDistResult(
           dist.samplesMap((r) =>
-            Ok(doNumberLambdaCall(lambda, [vNumber(r)], context, reducer))
+            Ok(doNumberLambdaCall(lambda, [vNumber(r)], context))
           )
         );
       }),
@@ -99,19 +99,14 @@ const baseLibrary = [
     definitions: [
       makeDefinition(
         [frDist, frDist, frLambda],
-        ([dist1, dist2, lambda], context, reducer) => {
+        ([dist1, dist2, lambda], context) => {
           sampleSetAssert(dist1);
           sampleSetAssert(dist2);
           return repackDistResult(
             SampleSetDist.map2({
               fn: (a, b) =>
                 Ok(
-                  doNumberLambdaCall(
-                    lambda,
-                    [vNumber(a), vNumber(b)],
-                    context,
-                    reducer
-                  )
+                  doNumberLambdaCall(lambda, [vNumber(a), vNumber(b)], context)
                 ),
               t1: dist1,
               t2: dist2,
@@ -130,7 +125,7 @@ const baseLibrary = [
     definitions: [
       makeDefinition(
         [frDist, frDist, frDist, frLambda],
-        ([dist1, dist2, dist3, lambda], context, reducer) => {
+        ([dist1, dist2, dist3, lambda], context) => {
           sampleSetAssert(dist1);
           sampleSetAssert(dist2);
           sampleSetAssert(dist3);
@@ -141,8 +136,7 @@ const baseLibrary = [
                   doNumberLambdaCall(
                     lambda,
                     [vNumber(a), vNumber(b), vNumber(c)],
-                    context,
-                    reducer
+                    context
                   )
                 ),
               t1: dist1,
@@ -163,7 +157,7 @@ const baseLibrary = [
     definitions: [
       makeDefinition(
         [frArray(frDist), frLambda],
-        ([dists, lambda], context, reducer) => {
+        ([dists, lambda], context) => {
           const sampleSetDists = dists.map((d) => {
             sampleSetAssert(d);
             return d;
@@ -172,12 +166,7 @@ const baseLibrary = [
             SampleSetDist.mapN({
               fn: (a) =>
                 Ok(
-                  doNumberLambdaCall(
-                    lambda,
-                    [vArray(a.map(vNumber))],
-                    context,
-                    reducer
-                  )
+                  doNumberLambdaCall(lambda, [vArray(a.map(vNumber))], context)
                 ),
               t1: sampleSetDists,
             })

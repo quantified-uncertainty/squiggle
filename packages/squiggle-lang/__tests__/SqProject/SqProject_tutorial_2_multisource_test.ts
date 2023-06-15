@@ -7,7 +7,7 @@ describe("SqProject Tutorial", () => {
      * Running multiple sources.
      * This approach uses `setContinues`, which is useful in Observable and other notebook-like environments.
      */
-    test("Chaining", () => {
+    test("Chaining", async () => {
       const project = SqProject.create();
       /* This time let's add 3 sources and chain them together */
       project.setSource("source1", "x=1");
@@ -21,7 +21,7 @@ describe("SqProject Tutorial", () => {
       project.setContinues("source3", ["source2"]);
 
       /* Now we can run the project */
-      project.runAll();
+      await project.runAll();
 
       /* And let's check the result and bindings of source3 */
       const result3 = project.getResult("source3");
@@ -31,7 +31,7 @@ describe("SqProject Tutorial", () => {
       expect(bindings3.toString()).toBe("{z: 3}");
     });
 
-    test("Depending", () => {
+    test("Depending", async () => {
       /* Instead of chaining the sources, we could have a dependency tree. */
       /* The point here is that any source can depend on multiple sources. */
       const project = SqProject.create();
@@ -45,7 +45,7 @@ describe("SqProject Tutorial", () => {
       project.setContinues("source3", ["source1", "source2"]);
 
       /* Now we can run the project */
-      project.runAll();
+      await project.runAll();
 
       /* And let's check the result and bindings of source3 */
       const result3 = project.getResult("source3");
@@ -55,7 +55,7 @@ describe("SqProject Tutorial", () => {
       expect(bindings3.toString()).toBe("{z: 3}");
     });
 
-    test("Intro to imports", () => {
+    test("Intro to imports", async () => {
       /**
        * Let's write the same project above with imports.
        * You will see that parsing imports is setting the dependencies the same way as before.
@@ -77,7 +77,7 @@ describe("SqProject Tutorial", () => {
       project.parseImports("source3");
 
       /* Now we can run the project */
-      project.runAll();
+      await project.runAll();
 
       /* And let's check the result and bindings of source3 
       This time you are getting all the variables because we are including the other sources 

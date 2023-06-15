@@ -70,12 +70,11 @@ export const library = [
     examples: [`PointSet.mapY(mx(normal(5,2)), {|x| x + 1})`],
     output: "Dist",
     definitions: [
-      makeDefinition([frDist, frLambda], ([dist, lambda], context, reducer) => {
+      makeDefinition([frDist, frLambda], ([dist, lambda], context) => {
         pointSetAssert(dist);
         return repackDistResult(
           dist.mapYResult(
-            (y) =>
-              Ok(doNumberLambdaCall(lambda, [vNumber(y)], context, reducer)),
+            (y) => Ok(doNumberLambdaCall(lambda, [vNumber(y)], context)),
             undefined,
             undefined
           )
