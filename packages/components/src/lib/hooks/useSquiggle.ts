@@ -6,7 +6,7 @@ import {
   SqValue,
   Env,
 } from "@quri/squiggle-lang";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 // Props needed for a standalone execution
 type StandaloneExecutionProps = {
@@ -31,20 +31,31 @@ export type SquiggleArgs = {
 export type ResultAndBindings = {
   result: result<SqValue, SqError>;
   bindings: SqRecord;
-  project: SqProject;
+  code: string;
+  executionId: number;
+  executionTime: number;
 };
 
-const importSourceName = (sourceName: string) => "imports-" + sourceName;
-const defaultContinues: string[] = [];
+export type UseSquiggleOutput = [
+  ResultAndBindings | undefined,
+  {
+    project: SqProject;
+    isRunning: boolean;
+  }
+];
 
-export const useSquiggle = (args: SquiggleArgs): ResultAndBindings => {
+// this array's identity must be constant because it's used in useEffect below
+const defaultContinues = [];
+
+export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
   // random; https://stackoverflow.com/a/12502559
+  // TODO - React.useId?
   const sourceName = useMemo(() => Math.random().toString(36).slice(2), []);
 
   const projectArg = "project" in args ? args.project : undefined;
   const environment = "environment" in args ? args.environment : undefined;
   const continues =
-    "continues" in args ? args.continues ?? [] : defaultContinues;
+    "continues" in args ? args.continues ?? defaultContinues : defaultContinues;
 
   const project = useMemo(() => {
     if (projectArg) {
@@ -58,36 +69,71 @@ export const useSquiggle = (args: SquiggleArgs): ResultAndBindings => {
     }
   }, [projectArg, environment]);
 
-  const result = useMemo(
+  const [isRunning, setIsRunning] = useState(false);
+
+  const [resultAndBindings, setResultAndBindings] = useState<
+    ResultAndBindings | undefined
+  >(undefined);
+
+  const { executionId = 1, onChange } = args;
+
+  useEffect(
     () => {
-      project.setSource(sourceName, args.code);
-      let fullContinues = continues;
-      project.setContinues(sourceName, fullContinues);
-      project.run(sourceName);
-      const result = project.getResult(sourceName);
-      const bindings = project.getBindings(sourceName);
-      return { result, bindings, project };
+      // TODO - cancel previous run if already running
+      setIsRunning(true);
+
+      const channel = new MessageChannel();
+
+      // trick from https://stackoverflow.com/a/56727837
+      channel.port1.onmessage = async () => {
+        const startTime = Date.now();
+        project.setSource(sourceName, args.code);
+        project.setContinues(sourceName, continues);
+        await project.run(sourceName);
+        const result = project.getResult(sourceName);
+        const bindings = project.getBindings(sourceName);
+        setResultAndBindings({
+          result,
+          bindings,
+          code: args.code,
+          executionId,
+          executionTime: Date.now() - startTime,
+        });
+        setIsRunning(false);
+      };
+
+      requestAnimationFrame(function () {
+        channel.port2.postMessage(undefined);
+      });
     },
     // This complains about executionId not being used inside the function body.
     // This is on purpose, as executionId simply allows you to run the squiggle
     // code again
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [args.code, args.executionId, sourceName, continues, project]
+    [args.code, executionId, sourceName, continues, project]
   );
 
-  const { onChange } = args;
-
   useEffect(() => {
-    onChange?.(result.result.ok ? result.result.value : undefined, sourceName);
-  }, [result, onChange, sourceName]);
+    if (!resultAndBindings || isRunning) {
+      return;
+    }
+    onChange?.(
+      resultAndBindings.result.ok ? resultAndBindings.result.value : undefined,
+      sourceName
+    );
+  }, [resultAndBindings, isRunning, onChange, sourceName]);
 
   useEffect(() => {
     return () => {
       project.removeSource(sourceName);
-      if (project.getSource(importSourceName(sourceName)))
-        project.removeSource(importSourceName(sourceName));
     };
   }, [project, sourceName]);
 
-  return result;
-};
+  return [
+    resultAndBindings,
+    {
+      project,
+      isRunning: executionId !== resultAndBindings?.executionId,
+    },
+  ];
+}

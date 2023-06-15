@@ -132,32 +132,32 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
 
   const runnerState = useRunnerState(code);
 
-  const resultAndBindings = useSquiggle({
+  const [resultAndBindings, { project, isRunning }] = useSquiggle({
     ...props,
     code: runnerState.renderedCode,
     executionId: runnerState.executionId,
     environment,
   });
 
-  const valueToRender = useMemo(
-    () => getValueToRender(resultAndBindings),
-    [resultAndBindings]
-  );
-
-  const errors = getErrors(resultAndBindings.result);
+  const errors = useMemo(() => {
+    if (!resultAndBindings) {
+      return [];
+    }
+    return getErrors(resultAndBindings.result);
+  }, [resultAndBindings]);
 
   const editorRef = useRef<CodeEditorHandle>(null);
 
   const squiggleChart =
-    runnerState.renderedCode === "" ? null : (
+    runnerState.renderedCode === "" || !resultAndBindings ? null : (
       <div className="relative">
-        {runnerState.isRunning ? (
+        {isRunning ? (
           <div className="absolute inset-0 bg-white opacity-0 animate-semi-appear" />
         ) : null}
         <SquiggleViewer
           {...settings}
           localSettingsEnabled={true}
-          result={valueToRender}
+          result={getValueToRender(resultAndBindings)}
           editor={editorRef.current ?? undefined}
         />
       </div>
@@ -171,7 +171,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
             ref={editorRef}
             value={code}
             errors={errors}
-            project={resultAndBindings.project}
+            project={project}
             showGutter={true}
             onChange={setCode}
             onSubmit={runnerState.run}
@@ -197,7 +197,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
 
   const leftPanelHeader = (
     <div className="flex items-center h-8 bg-slate-50 border-b border-slate-200 overflow-hidden mb-1 px-5">
-      <RunMenuItem {...runnerState} />
+      <RunMenuItem {...runnerState} isRunning={isRunning} />
       <AutorunnerMenuItem {...runnerState} />
       <MenuItem
         onClick={() =>
@@ -253,11 +253,13 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
       </ResizableBox>
       <div className="flex-1 flex flex-col overflow-y-auto">
         <div className="mb-1 h-8 p-2 flex justify-end text-zinc-400 text-sm whitespace-nowrap">
-          {runnerState.isRunning
+          {isRunning
             ? "rendering..."
-            : `render #${runnerState.executionId} in ${showTime(
-                runnerState.executionTime
-              )}`}
+            : resultAndBindings
+            ? `render #${resultAndBindings.executionId} in ${showTime(
+                resultAndBindings.executionTime
+              )}`
+            : null}
         </div>
         <div
           className="flex-1 overflow-auto p-2"

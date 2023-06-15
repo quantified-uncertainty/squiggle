@@ -1,8 +1,10 @@
 import { FC, memo } from "react";
 
 import { SqValue } from "@quri/squiggle-lang";
-import { Button, FocusIcon } from "@quri/ui";
+import { FocusIcon } from "@quri/ui";
 import { useSquiggle } from "../../lib/hooks/index.js";
+import { MessageAlert } from "../Alert.js";
+import { CodeEditorHandle } from "../CodeEditor.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 import { ExpressionViewer } from "./ExpressionViewer.js";
@@ -12,10 +14,8 @@ import {
   useViewerContext,
 } from "./ViewerProvider.js";
 import { extractSubvalueByLocation, locationAsString } from "./utils.js";
-import { MessageAlert } from "../Alert.js";
-import { CodeEditorHandle } from "../CodeEditor.js";
 
-type Result = ReturnType<typeof useSquiggle>["result"];
+type Result = NonNullable<ReturnType<typeof useSquiggle>[0]>["result"];
 
 export type SquiggleViewerProps = {
   /** The output of squiggle's run */

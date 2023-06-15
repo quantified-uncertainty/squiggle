@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 
 import { useMaybeControlledValue } from "../lib/hooks/index.js";
 import { SquiggleArgs, useSquiggle } from "../lib/hooks/useSquiggle.js";
@@ -19,9 +19,14 @@ export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
     onChange: props.onCodeChange,
   });
 
-  const resultAndBindings = useSquiggle({ ...props, code });
-  const valueToRender = getValueToRender(resultAndBindings);
-  const errors = getErrors(resultAndBindings.result);
+  const [resultAndBindings, { project }] = useSquiggle({ ...props, code });
+
+  const errors = useMemo(() => {
+    if (!resultAndBindings) {
+      return [];
+    }
+    return getErrors(resultAndBindings.result);
+  }, [resultAndBindings]);
 
   return (
     <div>
@@ -34,11 +39,14 @@ export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
           onChange={setCode}
           showGutter={false}
           errors={errors}
-          project={resultAndBindings.project}
+          project={project}
         />
       </div>
-      {props.hideViewer ? null : (
-        <SquiggleViewer result={valueToRender} {...props} />
+      {props.hideViewer || !resultAndBindings ? null : (
+        <SquiggleViewer
+          result={getValueToRender(resultAndBindings)}
+          {...props}
+        />
       )}
     </div>
   );
