@@ -15,6 +15,7 @@ import { MouseTooltip, TextTooltip } from "@quri/ui";
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
 import {
   distance,
+  distributionColor,
   drawAxes,
   drawCircle,
   drawCursorLines,
@@ -82,7 +83,7 @@ const InnerDistributionsChart: FC<{
       context.clearRect(0, 0, width, height);
 
       const getColor = (i: number) =>
-        isMulti ? d3.schemeCategory10[i] : "#6d9bce";
+        isMulti ? d3.schemeCategory10[i] : distributionColor;
 
       const xScale = sqScaleToD3(plot.xScale);
       xScale.domain([

@@ -6,6 +6,7 @@ const axisColor = "rgba(114, 125, 147, 0.1)";
 export const labelColor = "rgb(114, 125, 147)";
 export const cursorLineColor = "#888";
 export const primaryColor = "#4c78a8"; // for lines and areas
+export const distributionColor = "#6d9bce"; // for distributions. Slightly lighter than primaryColor
 const labelFont = "10px sans-serif";
 const xLabelOffset = 6;
 const yLabelOffset = 6;
