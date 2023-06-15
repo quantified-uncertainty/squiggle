@@ -99,6 +99,7 @@ const InnerDistributionsChart: FC<{
         Math.max(...domain.map((p) => p.y)),
       ]);
 
+      const tickCount = Math.min(width / 100, 12);
       const { padding, frame } = drawAxes({
         context,
         width,
@@ -113,7 +114,6 @@ const InnerDistributionsChart: FC<{
         yScale,
         hideYAxis: true,
         drawTicks: true,
-        tickCount: 10,
         xTickFormat: plot.xScale.tickFormat,
       });
 
