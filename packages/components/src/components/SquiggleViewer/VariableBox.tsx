@@ -22,7 +22,7 @@ type VariableBoxProps = {
   children: (settings: MergedItemSettings) => React.ReactNode;
 };
 
-export const SQTypeWithCount = ({
+export const SqTypeWithCount = ({
   type,
   count,
 }: {

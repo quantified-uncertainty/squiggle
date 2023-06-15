@@ -24,10 +24,6 @@ export const Slow: Story = {
   args: {
     defaultCode: "List.upTo(1,5000000) -> reduce(0,add)",
     height: 800,
-    renderingSettings: {
-      sampleCount: 100000,
-      xyPointLength: 1000,
-    },
   },
 };
 

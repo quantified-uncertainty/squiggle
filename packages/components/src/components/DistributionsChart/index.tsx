@@ -69,7 +69,8 @@ const InnerDistributionsChart: FC<{
   const showTitle = !!plot.title;
   const titleHeight = showTitle ? 20 : 4;
   const legendHeight = isMulti ? legendItemHeight * shapes.length : 0;
-  const samplesFooterHeight = samples.length ? 10 : 0;
+  const _showSamplesBar = showSamplesBar && samples.length;
+  const samplesFooterHeight = _showSamplesBar ? 10 : 0;
 
   const height =
     innerHeight + legendHeight + titleHeight + samplesFooterHeight + 30;
@@ -227,7 +228,7 @@ const InnerDistributionsChart: FC<{
       }
 
       // samples
-      if (showSamplesBar) {
+      if (_showSamplesBar) {
         context.save();
         context.strokeStyle = primaryColor;
         context.lineWidth = 0.1;
@@ -343,9 +344,7 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
   for (const { distribution } of distributions) {
     if (distribution.tag === SqDistributionTag.SampleSet) {
       const distSamples = distribution.getSamples();
-      for (let i = 0; i < distSamples.length; i++) {
-        samples.push(distSamples[i]);
-      }
+      samples.concat(distSamples);
     }
   }
 
@@ -373,12 +372,9 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
             .join(
               ", "
             )}] are not valid probability distributions, because their integrals do not add up to 1.`;
-    console.log(
-      distributions.map(({ name, distribution }) => distribution.integralSum())
-    );
     return (
       <div>
-        <TextTooltip text={message} placement="right">
+        <TextTooltip text={message} placement="top">
           <div className="font-semibold text-xs text-orange-900 bg-orange-100 rounded-md px-1.5 py-0.5 w-fit ml-2">
             Not Normalized
           </div>

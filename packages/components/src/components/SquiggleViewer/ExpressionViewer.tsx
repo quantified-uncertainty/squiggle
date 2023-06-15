@@ -18,7 +18,7 @@ import { NumericFunctionChart } from "../FunctionChart/NumericFunctionChart.js";
 import { ScatterChart } from "../ScatterChart/index.js";
 import { generateDistributionPlotSettings } from "../PlaygroundSettings.js";
 import { ItemSettingsMenu } from "./ItemSettingsMenu.js";
-import { SQTypeWithCount, VariableBox } from "./VariableBox.js";
+import { SqTypeWithCount, VariableBox } from "./VariableBox.js";
 import { MergedItemSettings } from "./utils.js";
 import { RelativeValuesGridChart } from "../RelativeValuesGridChart/index.js";
 
@@ -255,7 +255,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
         <VariableList
           value={value}
           heading={`Record(${entries.length})`}
-          preview={<SQTypeWithCount type="{}" count={entries.length} />}
+          preview={<SqTypeWithCount type="{}" count={entries.length} />}
         >
           {() => {
             if (!entries.length) {
@@ -273,7 +273,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
         <VariableList
           value={value}
           heading={`List(${values.length})`}
-          preview={<SQTypeWithCount type="[]" count={values.length} />}
+          preview={<SqTypeWithCount type="[]" count={values.length} />}
         >
           {(_) => values.map((r, i) => <ExpressionViewer key={i} value={r} />)}
         </VariableList>
