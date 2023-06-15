@@ -28,14 +28,19 @@ describe("mixture", () => {
     );
   });
 
-  describe("Sample Set mode keeps correlations", () => {
+  test("Sample Set mode keeps correlations", async () => {
     expect(
-      testRun("a = normal(0,1); m = mx(a, 3, [.999999,.00001]); stdev(a - m)")
-        .value
+      (
+        await testRun(
+          "a = normal(0,1); m = mx(a, 3, [.999999,.00001]); stdev(a - m)"
+        )
+      ).value
     ).toBeGreaterThan(1);
     expect(
-      testRun(
-        "a = normal(0,1) -> SampleSet.fromDist; m = mx(a, 3, [.999999,.00001]); stdev(a - m)"
+      (
+        await testRun(
+          "a = normal(0,1) -> SampleSet.fromDist; m = mx(a, 3, [.999999,.00001]); stdev(a - m)"
+        )
       ).value
     ).toBeCloseTo(0);
   });

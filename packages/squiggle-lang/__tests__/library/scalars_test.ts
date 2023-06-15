@@ -4,9 +4,9 @@ import * as fc from "fast-check";
 describe("Scalar manipulation is well-modeled by javascript math", () => {
   test("in the case of natural logarithms", () => {
     fc.assert(
-      fc.property(fc.nat(), (x) => {
+      fc.asyncProperty(fc.nat(), async (x) => {
         const squiggleString = `log(${x})`;
-        const squiggleResult = testRun(squiggleString);
+        const squiggleResult = await testRun(squiggleString);
         if (x === 0) {
           expect(squiggleResult.value).toEqual(-Infinity);
         } else {
@@ -18,11 +18,16 @@ describe("Scalar manipulation is well-modeled by javascript math", () => {
 
   test("in the case of addition (with assignment)", () => {
     fc.assert(
-      fc.property(fc.integer(), fc.integer(), fc.integer(), (x, y, z) => {
-        let squiggleString = `x = ${x}; y = ${y}; z = ${z}; x + y + z`;
-        let squiggleResult = testRun(squiggleString);
-        expect(squiggleResult.value).toBeCloseTo(x + y + z);
-      })
+      fc.asyncProperty(
+        fc.integer(),
+        fc.integer(),
+        fc.integer(),
+        async (x, y, z) => {
+          const squiggleString = `x = ${x}; y = ${y}; z = ${z}; x + y + z`;
+          const squiggleResult = await testRun(squiggleString);
+          expect(squiggleResult.value).toBeCloseTo(x + y + z);
+        }
+      )
     );
   });
 });

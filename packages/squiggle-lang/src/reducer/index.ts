@@ -224,9 +224,9 @@ function createDefaultContext() {
   return Context.createContext(stdLib, defaultEnv);
 }
 
-export function evaluateExpressionToResult(
+export async function evaluateExpressionToResult(
   expression: Expression
-): result<Value, IError> {
+): Promise<result<Value, IError>> {
   const context = createDefaultContext();
   try {
     const [value] = evaluate(expression, context);
@@ -236,11 +236,14 @@ export function evaluateExpressionToResult(
   }
 }
 
-export function evaluateStringToResult(code: string): result<Value, IError> {
+export async function evaluateStringToResult(
+  code: string
+): Promise<result<Value, IError>> {
   const exprR = Result.fmap(parse(code, "main"), expressionFromAst);
 
-  return Result.bind(
-    Result.errMap(exprR, IError.fromParseError),
-    evaluateExpressionToResult
-  );
+  if (exprR.ok) {
+    return await evaluateExpressionToResult(exprR.value);
+  } else {
+    return Result.Err(IError.fromParseError(exprR.value));
+  }
 }

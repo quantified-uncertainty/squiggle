@@ -18,8 +18,8 @@ expect.extend({
   },
 });
 
-export function testRun(x: string) {
-  const { result } = run(x, {
+export async function testRun(x: string) {
+  const { result } = await run(x, {
     environment: {
       sampleCount: 1000,
       xyPointLength: 100,

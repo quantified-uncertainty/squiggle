@@ -20,28 +20,35 @@ describe("Symbolic constructors", () => {
     );
 
     testEvalToBe("normal({p5: -2, p95: 4})", "Normal(1,1.8238704957353071)");
-    expect(testRun("normal({p5: -2, p95: 4}) -> inv(0.05)").value).toBeCloseTo(
-      -2
-    );
-    expect(testRun("normal({p5: -2, p95: 4}) -> inv(0.95)").value).toBeCloseTo(
-      4
-    );
+
+    test("5% inv", async () => {
+      expect(
+        (await testRun("normal({p5: -2, p95: 4}) -> inv(0.05)")).value
+      ).toBeCloseTo(-2);
+      expect(
+        (await testRun("normal({p5: -2, p95: 4}) -> inv(0.95)")).value
+      ).toBeCloseTo(4);
+    });
 
     testEvalToBe("normal({p10: -2, p90: 4})", "Normal(1,2.3409124382171367)");
-    expect(testRun("normal({p10: -2, p90: 4}) -> inv(0.1)").value).toBeCloseTo(
-      -2
-    );
-    expect(testRun("normal({p10: -2, p90: 4}) -> inv(0.9)").value).toBeCloseTo(
-      4
-    );
+    test("10% inv", async () => {
+      expect(
+        (await testRun("normal({p10: -2, p90: 4}) -> inv(0.1)")).value
+      ).toBeCloseTo(-2);
+      expect(
+        (await testRun("normal({p10: -2, p90: 4}) -> inv(0.9)")).value
+      ).toBeCloseTo(4);
+    });
 
     testEvalToBe("normal({p25: -2, p75: 4})", "Normal(1,4.447806655516805)");
-    expect(testRun("normal({p25: -2, p75: 4}) -> inv(0.25)").value).toBeCloseTo(
-      -2
-    );
-    expect(testRun("normal({p25: -2, p75: 4}) -> inv(0.75)").value).toBeCloseTo(
-      4
-    );
+    test("25% inv", async () => {
+      expect(
+        (await testRun("normal({p25: -2, p75: 4}) -> inv(0.25)")).value
+      ).toBeCloseTo(-2);
+      expect(
+        (await testRun("normal({p25: -2, p75: 4}) -> inv(0.75)")).value
+      ).toBeCloseTo(4);
+    });
   });
 
   describe("lognormal constructor", () => {
@@ -56,34 +63,40 @@ describe("Symbolic constructors", () => {
       "lognormal({p5: 2, p95: 5})",
       "Lognormal(1.1512925464970227,0.27853260523016377)"
     );
-    expect(
-      testRun("lognormal({p5: 2, p95: 5}) -> inv(0.05)").value
-    ).toBeCloseTo(2);
-    expect(
-      testRun("lognormal({p5: 2, p95: 5}) -> inv(0.95)").value
-    ).toBeCloseTo(5);
+    test("5% inv", async () => {
+      expect(
+        (await testRun("lognormal({p5: 2, p95: 5}) -> inv(0.05)")).value
+      ).toBeCloseTo(2);
+      expect(
+        (await testRun("lognormal({p5: 2, p95: 5}) -> inv(0.95)")).value
+      ).toBeCloseTo(5);
+    });
 
     testEvalToBe(
       "lognormal({p10: 2, p90: 5})",
       "Lognormal(1.1512925464970227,0.3574927285445488)"
     );
-    expect(
-      testRun("lognormal({p10: 2, p90: 5}) -> inv(0.1)").value
-    ).toBeCloseTo(2);
-    expect(
-      testRun("lognormal({p10: 2, p90: 5}) -> inv(0.9)").value
-    ).toBeCloseTo(5);
+    test("10% inv", async () => {
+      expect(
+        (await testRun("lognormal({p10: 2, p90: 5}) -> inv(0.1)")).value
+      ).toBeCloseTo(2);
+      expect(
+        (await testRun("lognormal({p10: 2, p90: 5}) -> inv(0.9)")).value
+      ).toBeCloseTo(5);
+    });
 
     testEvalToBe(
       "lognormal({p25: 2, p75: 5})",
       "Lognormal(1.1512925464970227,0.6792473359363719)"
     );
-    expect(
-      testRun("lognormal({p25: 2, p75: 5}) -> inv(0.25)").value
-    ).toBeCloseTo(2);
-    expect(
-      testRun("lognormal({p25: 2, p75: 5}) -> inv(0.75)").value
-    ).toBeCloseTo(5);
+    test("25% inv", async () => {
+      expect(
+        (await testRun("lognormal({p25: 2, p75: 5}) -> inv(0.25)")).value
+      ).toBeCloseTo(2);
+      expect(
+        (await testRun("lognormal({p25: 2, p75: 5}) -> inv(0.75)")).value
+      ).toBeCloseTo(5);
+    });
   });
 
   testEvalToBe("pointMass(5)", "PointMass(5)");

@@ -47,12 +47,12 @@ export { LocationRange as SqLocation } from "peggy";
 export { AST, ASTNode } from "./ast/parse.js";
 export { ASTCommentNode } from "./ast/peggyHelpers.js";
 
-export const run = (
+export async function run(
   code: string,
   options?: {
     environment?: Env;
   }
-) => {
+) {
   const project = SqProject.create();
   project.setSource("main", code);
   if (options?.environment) {
@@ -62,7 +62,7 @@ export const run = (
   const result = project.getResult("main");
   const bindings = project.getBindings("main");
   return { result, bindings };
-};
+}
 
 // can be used for syntax highlighting in JS/TS files if you have Squiggle VS Code extension installed.
 export function sq(strings: TemplateStringsArray, ...rest: unknown[]) {

@@ -59,15 +59,15 @@ const arrayGen = () =>
       (xs_) => Math.min(...Array.from(xs_)) != Math.max(...Array.from(xs_))
     );
 
-const makeSampleSet = (samples: number[]) => {
+async function makeSampleSet(samples: number[]) {
   const sampleList = samples.map((x) => x.toFixed(20)).join(",");
-  const result = testRun(`SampleSet.fromList([${sampleList}])`);
+  const result = await testRun(`SampleSet.fromList([${sampleList}])`);
   if (result.tag === "Dist") {
     return result.value;
   } else {
     fail("Expected to be distribution");
   }
-};
+}
 
 const env = { sampleCount: 10000, xyPointLength: 100 };
 
@@ -75,10 +75,10 @@ describe("cumulative density function", () => {
   // We should fix this.
   test.skip("'s codomain is bounded above", () => {
     fc.assert(
-      fc.property(arrayGen(), fc.float(), (xs_, x) => {
+      fc.asyncProperty(arrayGen(), fc.float(), async (xs_, x) => {
         const xs = Array.from(xs_);
         // Should compute with squiggle strings once interpreter has `sample`
-        const result = makeSampleSet(xs);
+        const result = await makeSampleSet(xs);
         const cdfValue = result.cdf(env, x).value;
         const epsilon = 5e-7;
         expect(cdfValue).toBeLessThanOrEqual(1 + epsilon);
@@ -88,10 +88,10 @@ describe("cumulative density function", () => {
 
   test.skip("'s codomain is bounded below", () => {
     fc.assert(
-      fc.property(arrayGen(), fc.float(), (xs_, x) => {
+      fc.asyncProperty(arrayGen(), fc.float(), async (xs_, x) => {
         const xs = Array.from(xs_);
         // Should compute with squiggle strings once interpreter has `sample`
-        const result = makeSampleSet(xs);
+        const result = await makeSampleSet(xs);
         const cdfValue = result.cdf(env, x).value;
         expect(cdfValue).toBeGreaterThanOrEqual(0);
       })
@@ -102,11 +102,11 @@ describe("cumulative density function", () => {
   // highest value. These tests fail
   test.skip("at the highest number in the sample is close to 1", () => {
     fc.assert(
-      fc.property(arrayGen(), (xs_) => {
+      fc.asyncProperty(arrayGen(), async (xs_) => {
         const xs = Array.from(xs_);
         const max = Math.max(...xs);
         // Should compute with squiggle strings once interpreter has `sample`
-        const result = makeSampleSet(xs);
+        const result = await makeSampleSet(xs);
         const cdfValue = result.cdf(env, max).value;
         expect(cdfValue).toBeCloseTo(1.0, 2);
       })
@@ -116,11 +116,11 @@ describe("cumulative density function", () => {
   // I may simply be mistaken about the math here.
   test.skip("at the lowest number in the distribution is within epsilon of 0", () => {
     fc.assert(
-      fc.property(arrayGen(), (xs_) => {
+      fc.asyncProperty(arrayGen(), async (xs_) => {
         const xs = Array.from(xs_);
         const min = Math.min(...xs);
         // Should compute with squiggle strings once interpreter has `sample`
-        const result = makeSampleSet(xs);
+        const result = await makeSampleSet(xs);
         const cdfValue = result.cdf(env, min).value;
         const max = Math.max(...xs);
         const epsilon = 5e-3;
@@ -136,9 +136,9 @@ describe("cumulative density function", () => {
   // I believe this is true, but due to bugs can't get the test to pass.
   test.skip("is <= 1 everywhere with equality when x is higher than the max", () => {
     fc.assert(
-      fc.property(arrayGen(), fc.float(), (xs_, x) => {
+      fc.asyncProperty(arrayGen(), fc.float(), async (xs_, x) => {
         const xs = Array.from(xs_);
-        const dist = makeSampleSet(xs);
+        const dist = await makeSampleSet(xs);
         const cdfValue = dist.cdf(env, x).value;
         const max = Math.max(...xs);
         if (x > max) {
@@ -155,9 +155,9 @@ describe("cumulative density function", () => {
 
   test.skip("is non-negative everywhere with zero when x is lower than the min", () => {
     fc.assert(
-      fc.property(arrayGen(), fc.float(), (xs_, x) => {
+      fc.asyncProperty(arrayGen(), fc.float(), async (xs_, x) => {
         const xs = Array.from(xs_);
-        const dist = makeSampleSet(xs);
+        const dist = await makeSampleSet(xs);
         const cdfValue = dist.cdf(env, x).value;
         expect(cdfValue).toBeGreaterThanOrEqual(0);
       })
@@ -171,12 +171,12 @@ describe("probability density function", () => {
 
   test.skip("assigns to the max at most the weight of the mean", () => {
     fc.assert(
-      fc.property(arrayGen(), (xs_) => {
+      fc.asyncProperty(arrayGen(), async (xs_) => {
         const xs = Array.from(xs_);
         const max = Math.max(...xs);
         const mean = xs.reduce((a, b) => a + b, 0.0) / xs.length;
         // Should be from squiggleString once interpreter exposes sampleset
-        const dist = makeSampleSet(xs);
+        const dist = await makeSampleSet(xs);
         const pdfValueMean = dist.pdf(env, mean).value;
         const pdfValueMax = dist.pdf(env, max).value;
         if (typeof pdfValueMean == "number" && typeof pdfValueMax == "number") {
@@ -193,12 +193,12 @@ describe("probability density function", () => {
 describe("mean is mean", () => {
   test.skip("when sampling twice as widely as the input", () => {
     fc.assert(
-      fc.property(
+      fc.asyncProperty(
         fc.float64Array({ minLength: 10, maxLength: 100000 }),
-        (xs_) => {
+        async (xs_) => {
           const xs = Array.from(xs_);
           const n = xs.length;
-          const dist = makeSampleSet(xs);
+          const dist = await makeSampleSet(xs);
           const myEnv = { sampleCount: 2 * n, xyPointLength: 4 * n };
           const mean = dist.mean(myEnv);
           if (typeof mean === "number") {
@@ -215,12 +215,12 @@ describe("mean is mean", () => {
 
   test.skip("when sampling half as widely as the input", () => {
     fc.assert(
-      fc.property(
+      fc.asyncProperty(
         fc.float64Array({ minLength: 10, maxLength: 100000 }),
-        (xs_) => {
+        async (xs_) => {
           const xs = Array.from(xs_);
           const n = xs.length;
-          const dist = makeSampleSet(xs);
+          const dist = await makeSampleSet(xs);
           const myEnv = {
             sampleCount: Math.floor(n / 2),
             xyPointLength: 4 * n,
@@ -242,11 +242,11 @@ describe("mean is mean", () => {
 describe("fromSamples function", () => {
   test.skip("gives a mean near the mean of the input", () => {
     fc.assert(
-      fc.property(arrayGen(), (xs_) => {
+      fc.asyncProperty(arrayGen(), async (xs_) => {
         const xs = Array.from(xs_);
         const xsString = xs.toString();
         const squiggleString = `x = fromSamples([${xsString}]); mean(x)`;
-        const squiggleResult = testRun(squiggleString);
+        const squiggleResult = await testRun(squiggleString);
         const mean = xs.reduce((a, b) => a + b, 0.0) / xs.length;
         expect(squiggleResult.value).toBeCloseTo(mean, 4);
       })

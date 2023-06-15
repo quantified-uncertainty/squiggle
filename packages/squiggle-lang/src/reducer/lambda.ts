@@ -13,7 +13,7 @@ import { ASTNode } from "../ast/parse.js";
 type LambdaBody = (
   args: Value[],
   context: ReducerContext,
-  reducerFn: ReducerFn
+  reducer: ReducerFn
 ) => Value;
 
 export abstract class Lambda {
