@@ -33,6 +33,17 @@ export const ContinuousSampleSet: Story = {
   },
 };
 
+export const ContinuousSampleSet1MSamples: Story = {
+  name: "Continuous SampleSet, 1M Sample",
+  args: {
+    code: "SampleSet.fromDist(uniform(5,10))",
+    environment: {
+      sampleCount: 1000000,
+      xyPointLength: 1000,
+    },
+  },
+};
+
 export const Discrete: Story = {
   args: {
     code: "mx(0, 1, 3, 5, 8, 10, [0.1, 0.8, 0.5, 0.3, 0.2, 0.1])",
