@@ -18,6 +18,6 @@ export function locationToShortName(
 ): string | undefined {
   const isTopLevel = location.path.items.length === 0;
   return isTopLevel
-    ? { result: undefined, bindings: "Bindings" }[location.path.root]
+    ? { result: undefined, bindings: "Outputs" }[location.path.root]
     : String(location.path.items[location.path.items.length - 1]);
 }
