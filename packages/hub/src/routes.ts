@@ -32,14 +32,14 @@ export function modelForRelativeValuesExportRoute({
   }
 }
 
-export function modelEditRoute({
+export function modelViewRoute({
   username,
   slug,
 }: {
   username: string;
   slug: string;
 }) {
-  return `/users/${username}/models/${slug}/edit`;
+  return `/users/${username}/models/${slug}/view`;
 }
 
 export function modelRevisionsRoute({

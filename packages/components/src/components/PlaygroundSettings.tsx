@@ -81,7 +81,7 @@ export type PlaygroundSettings = z.infer<typeof viewSettingsSchema>;
 
 // passing this to zod through `.default()` is problematic, especially for number fields:
 export const defaultPlaygroundSettings: PlaygroundSettings = {
-  chartHeight: 200,
+  chartHeight: 100,
   renderingSettings: {
     sampleCount: 1000,
     xyPointLength: 1000,

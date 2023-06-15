@@ -3,7 +3,7 @@ import { useFragment } from "react-relay";
 
 import { ModelPage$key } from "@/__generated__/ModelPage.graphql";
 import { EditSquiggleSnippetModel } from "@/squiggle/components/EditSquiggleSnippetModel";
-import { ModelPageFragment } from "../ModelPage";
+import { ModelPageFragment } from "./ModelPage";
 
 type Props = {
   modelRef: ModelPage$key;

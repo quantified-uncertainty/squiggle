@@ -10,14 +10,12 @@ import React, {
   useState,
 } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { useInitialWidth } from "../../lib/hooks/useInitialWidth.js";
 import { ResizableBox } from "react-resizable";
 import { z } from "zod";
 
 import { Env, SqProject } from "@quri/squiggle-lang";
-import { Bars3CenterLeftIcon, Button } from "@quri/ui";
-
-import { useHeight } from "../../lib/hooks/useHeight.js";
-import { useInitialWidth } from "../../lib/hooks/useInitialWidth.js";
+import { Bars3CenterLeftIcon, AdjustmentsVerticalIcon, Button } from "@quri/ui";
 
 import { useMaybeControlledValue, useSquiggle } from "../../lib/hooks/index.js";
 
@@ -167,10 +165,10 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     height,
     overflow: "auto",
   });
-  const { ref: leftSideHeader, height: leftSideHeaderHeight } = useHeight();
-  const { ref: rightSideHeader, height: rightSideHeaderHeight } = useHeight();
+  const leftSideHeaderHeight = 32; //calculated from the leftPanelHeader fixed height.
+  const rightSideHeaderHeight = 32;
 
-  const leftPanelBody = leftSideHeaderHeight && (
+  const leftPanelBody = (
     <>
       {selectedTab === "CODE" && (
         <div data-testid="squiggle-editor">
@@ -206,37 +204,27 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
 
   const leftPanelRef = useRef<HTMLDivElement | null>(null);
 
-  const textClasses =
-    "text-slate-800 text-sm px-2 py-2 cursor-pointer rounded-sm hover:bg-slate-200 select-none whitespace-nowrap";
-
   const leftPanelHeader = (
-    <div
-      className="flex justify-end mb-1 p-1 bg-slate-50 border-b border-slate-200 overflow-x-auto"
-      ref={leftSideHeader}
-    >
-      <div className="mr-2 flex gap-1 items-center">
-        <RunMenuItem {...runnerState} />
-        <AutorunnerMenuItem {...runnerState} />
-        <MenuItem
-          onClick={() =>
-            selectedTab !== "SETTINGS"
-              ? setSelectedTab("SETTINGS")
-              : setSelectedTab("CODE")
-          }
-          icon={CogIcon}
-          tooltipText="Settings"
-        />
-        <MenuItem
-          tooltipText={
-            isMac()
-              ? "Format Code (Option+Shift+f)"
-              : "Format Code (Alt+Shift+f)"
-          }
-          icon={Bars3CenterLeftIcon}
-          onClick={editorRef.current?.format}
-        />
-        {renderExtraControls?.()}
-      </div>
+    <div className="flex items-center h-8 bg-slate-50 border-b border-slate-200 overflow-hidden mb-1 px-5">
+      <RunMenuItem {...runnerState} />
+      <AutorunnerMenuItem {...runnerState} />
+      <MenuItem
+        onClick={() =>
+          selectedTab !== "SETTINGS"
+            ? setSelectedTab("SETTINGS")
+            : setSelectedTab("CODE")
+        }
+        icon={AdjustmentsVerticalIcon}
+        tooltipText="Configuration"
+      />
+      <MenuItem
+        tooltipText={
+          isMac() ? "Format Code (Option+Shift+f)" : "Format Code (Alt+Shift+f)"
+        }
+        icon={Bars3CenterLeftIcon}
+        onClick={editorRef.current?.format}
+      />
+      {renderExtraControls?.()}
     </div>
   );
 
@@ -256,8 +244,8 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
           <div
             ref={ref}
             // we don't use react-resizable original styles, it's easier to style this manually
-            className="absolute top-0 h-full bg-slate-200 hover:bg-blue-200 transition cursor-ew-resize"
-            style={{ width: 3, right: -1 }}
+            className="absolute top-0 h-full border-l border-slate-300 hover:border-blue-500 transition cursor-ew-resize"
+            style={{ width: 5, right: -5 }}
           />
         )}
       >
@@ -269,10 +257,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
       <div
         className="flex-1 overflow-y-auto" //The overflow seems needed, it can't just be in the sub divs.
       >
-        <div
-          className="flex mb-1 p-2 overflow-y-auto justify-end text-zinc-400 text-sm whitespace-nowrap"
-          ref={rightSideHeader}
-        >
+        <div className="flex mb-1 h-8 p-2 overflow-y-auto justify-end text-zinc-400 text-sm whitespace-nowrap">
           {runnerState.isRunning
             ? "rendering..."
             : `render #${runnerState.executionId} in ${showTime(

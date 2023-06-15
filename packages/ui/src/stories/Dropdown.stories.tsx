@@ -8,11 +8,10 @@ import {
   DropdownMenuActionItem,
   DropdownMenuAsyncActionItem,
   DropdownMenuHeader,
-  EditIcon,
+  DropdownMenuSeparator,
   RefreshIcon,
   TrashIcon,
 } from "../index.js";
-import { DropdownMenuSeparator } from "../components/Dropdown/DropdownMenuSeparator.js";
 
 const meta = {
   component: Dropdown,
@@ -40,11 +39,7 @@ export const Default: Story = {
             icon={RefreshIcon}
             onClick={() => undefined}
           />
-          <DropdownMenuActionItem
-            title="Edit"
-            icon={EditIcon}
-            onClick={() => undefined}
-          />
+          <DropdownMenuActionItem title="Edit" onClick={() => undefined} />
           <DropdownMenuAsyncActionItem
             title="Delete (async)"
             icon={TrashIcon}

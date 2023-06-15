@@ -37,15 +37,15 @@ export function WithRHFError<
           style={floatingStyles}
           onClick={() => clearErrors(name)}
         >
-          <div className="bg-red-100 fill-red-100 pr-4 pl-3 py-2 rounded flex gap-1 items-center shadow-md">
+          <div className="bg-red-700 fill-red-700 pr-4 pl-3 py-2 rounded flex gap-1 items-center shadow-md">
             <div
               className={clsx(
-                "rotate-45 w-2 h-2 absolute left-3 bg-red-100",
+                "rotate-45 w-2 h-2 absolute left-3 bg-red-700",
                 placement === "top-start" ? "-bottom-1" : "-top-1"
               )}
             />
-            <ErrorIcon size={16} className="text-red-500 shrink-0" />
-            <div className="text-sm text-red-800 font-medium leading-none">
+            <ErrorIcon size={16} className="text-white shrink-0" />
+            <div className="text-sm text-white font-medium leading-none">
               {error?.message || error?.type || String(error)}
             </div>
           </div>

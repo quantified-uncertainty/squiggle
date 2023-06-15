@@ -7,9 +7,5 @@ export default function ModelPage({
 }: {
   params: { username: string; slug: string; revisionId: string };
 }) {
-  return (
-    <div className="p-4">
-      <ModelRevisionView {...params} />
-    </div>
-  );
+  return <ModelRevisionView {...params} />;
 }

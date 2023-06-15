@@ -26,7 +26,7 @@ export const FieldLayout: FC<PropsWithChildren<FormFieldLayoutProps>> = ({
             className={clsx(
               "text-sm font-medium mb-1",
               // TODO - add `disabled` prop?
-              "text-gray-600",
+              "text-gray-900",
               inlineLabel && "leading-none"
             )}
           >

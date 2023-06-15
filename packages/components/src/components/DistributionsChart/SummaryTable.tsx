@@ -14,13 +14,13 @@ import { TextTooltip } from "@quri/ui";
 import { NumberShower } from "../NumberShower.js";
 
 const TableHeadCell: FC<PropsWithChildren> = ({ children }) => (
-  <th className="border border-slate-200 bg-slate-50 py-1 px-2 text-slate-500 font-semibold">
+  <th className="border border-slate-200 py-1 px-2 text-slate-700 text-xs font-light">
     {children}
   </th>
 );
 
 const Cell: FC<PropsWithChildren> = ({ children }) => (
-  <td className="border border-slate-200 py-1 px-2 text-slate-900">
+  <td className="border border-slate-200 py-1 px-2 text-slate-700 text-sm font-light">
     {children}
   </td>
 );
@@ -83,7 +83,7 @@ type SummaryTableProps = {
 export const SummaryTable: FC<SummaryTableProps> = ({ plot, environment }) => {
   const showNames = plot.distributions.some((d) => d.name);
   return (
-    <table className="border border-collapse border-slate-400">
+    <table className="table border border-collapse border-slate-400">
       <thead className="bg-slate-50">
         <tr>
           {showNames && <TableHeadCell>Name</TableHeadCell>}
