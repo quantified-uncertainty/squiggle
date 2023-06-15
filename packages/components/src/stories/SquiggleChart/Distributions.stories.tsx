@@ -26,6 +26,13 @@ export const ContinuousPointset: Story = {
   },
 };
 
+export const NonnormalizedContinousPointSet: Story = {
+  name: "Non-normalized Continuous Pointset",
+  args: {
+    code: "normal(5,2) .- uniform(3,8)",
+  },
+};
+
 export const ContinuousSampleSet: Story = {
   name: "Continuous SampleSet",
   args: {

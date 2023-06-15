@@ -10,7 +10,7 @@ import {
   SqDistributionTag,
   SqShape,
 } from "@quri/squiggle-lang";
-import { MouseTooltip } from "@quri/ui";
+import { MouseTooltip, TextTooltip } from "@quri/ui";
 
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
 import {
@@ -335,10 +335,43 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
     }
   }
 
+  const normalizedStatus = distributions.map(({ name, distribution }) => ({
+    name,
+    isNormalized: distribution.isNormalized(),
+  }));
+
+  const anyAreNonnormalized = normalizedStatus.some(
+    ({ isNormalized }) => !isNormalized
+  );
+
   const _showSamplesBar =
     showSamplesBar === undefined
       ? samples.length < CUTOFF_TO_SHOW_SAMPLES_BAR
       : showSamplesBar;
+
+  const nonNormalizedError = () => {
+    const message =
+      distributions.length === 1
+        ? `Not a valid probability distribution. Its integral is ${distributions[0].distribution.integralSum()}, it should be 1. Squiggle currently poorly supports these types.`
+        : `Distributions: [${normalizedStatus
+            .filter(({ isNormalized }) => !isNormalized)
+            .map(({ name }) => name)
+            .join(
+              ", "
+            )}] are not valid probability distributions, because their integrals do not add up to 1.`;
+    console.log(
+      distributions.map(({ name, distribution }) => distribution.integralSum())
+    );
+    return (
+      <div>
+        <TextTooltip text={message} placement="right">
+          <div className="font-semibold text-xs text-orange-900 bg-orange-100 rounded-md px-1.5 py-0.5 w-fit ml-2">
+            Not Normalized
+          </div>
+        </TextTooltip>
+      </div>
+    );
+  };
 
   return (
     <div className="flex flex-col items-stretch">
@@ -356,11 +389,14 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
           showSamplesBar={_showSamplesBar}
         />
       )}
-      <div className="flex justify-center pt-2">
-        {plot.showSummary && (
-          <SummaryTable plot={plot} environment={environment} />
-        )}
-      </div>
+      {!anyAreNonnormalized && (
+        <div className="flex justify-center pt-2">
+          {plot.showSummary && (
+            <SummaryTable plot={plot} environment={environment} />
+          )}
+        </div>
+      )}
+      {anyAreNonnormalized && nonNormalizedError()}
     </div>
   );
 };
