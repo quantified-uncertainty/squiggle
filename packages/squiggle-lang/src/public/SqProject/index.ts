@@ -7,16 +7,16 @@ import { defaultEnv, Env } from "../../dist/env.js";
 import { IError } from "../../reducer/IError.js";
 import * as Library from "../../library/index.js";
 import { Value, vRecord } from "../../value/index.js";
-import { createContext } from "../../reducer/Context.js";
+import { createContext } from "../../reducer/context.js";
 import { Namespace, NamespaceMap } from "../../reducer/bindings.js";
-import { ErrorMessage } from "../../reducer/ErrorMessage.js";
+import { ErrorMessage, RENeedToRun } from "../../errors.js";
 
 import { ImportBinding, ProjectItem } from "./ProjectItem.js";
 import * as Topology from "./Topology.js";
 import { Resolver } from "./Resolver.js";
 
 function getNeedToRunError() {
-  return new SqError(IError.fromMessage(ErrorMessage.needToRun()));
+  return new SqError(IError.fromMessage(new RENeedToRun()));
 }
 
 // TODO - pass the the id from which the dependency was imported/continued too
@@ -127,7 +127,7 @@ export class SqProject {
   getImportIds(sourceId: string): Result.result<string[], SqError> {
     const imports = this.getImports(sourceId);
     if (!imports) {
-      return Result.Error(getNeedToRunError());
+      return Result.Err(getNeedToRunError());
     }
     return Result.fmap(imports, (imports) => imports.map((i) => i.sourceId));
   }
@@ -153,7 +153,7 @@ export class SqProject {
 
   private getInternalResult(sourceId: string): Result.result<Value, SqError> {
     const result = this.getResultOption(sourceId);
-    return result ?? Result.Error(getNeedToRunError());
+    return result ?? Result.Err(getNeedToRunError());
   }
 
   getResult(sourceId: string): Result.result<SqValue, SqError> {
@@ -199,11 +199,11 @@ export class SqProject {
     // First, merge continues.
     for (const continueId of continues) {
       if (!this.items.has(continueId)) {
-        return Result.Error(getMissingDependencyError(continueId));
+        return Result.Err(getMissingDependencyError(continueId));
       }
       const continueBindings = this.getItem(continueId).bindings;
       if (!continueBindings) {
-        return Result.Error(getNeedToRunError());
+        return Result.Err(getNeedToRunError());
       }
       namespacesToMerge.push(continueBindings);
 
@@ -211,10 +211,6 @@ export class SqProject {
       if (!result.ok) {
         return result;
       }
-
-      // this is excessive, we could push it just once for the last continue
-      // (but we'll probably remove the support for `__result__` eventually, anyway)
-      namespacesToMerge.push(NamespaceMap([["__result__", result.value]]));
     }
     let namespace = NamespaceMap<string, Value>().merge(...namespacesToMerge);
 
@@ -223,7 +219,7 @@ export class SqProject {
     const rImports = this.getImports(sourceId);
     if (!rImports) {
       // Shouldn't happen, we just called parseImports.
-      return Result.Error(new SqError(IError.other("Internal logic error")));
+      return Result.Err(new SqError(IError.other("Internal logic error")));
     }
 
     if (!rImports.ok) {
@@ -232,11 +228,11 @@ export class SqProject {
     }
     for (const importBinding of rImports.value) {
       if (!this.items.has(importBinding.sourceId)) {
-        return Result.Error(getMissingDependencyError(importBinding.sourceId));
+        return Result.Err(getMissingDependencyError(importBinding.sourceId));
       }
       const importBindings = this.getItem(importBinding.sourceId).bindings;
       if (!importBindings) {
-        return Result.Error(getNeedToRunError());
+        return Result.Err(getNeedToRunError());
       }
 
       // TODO - check for collisions?

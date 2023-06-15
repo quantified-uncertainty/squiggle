@@ -1,7 +1,7 @@
 import { AST, ParseError, parse } from "../../ast/parse.js";
-import { expressionFromAst } from "../../ast/toExpression.js";
+import { expressionFromAst } from "../../expression/fromAst.js";
 import { Expression } from "../../expression/index.js";
-import { ReducerContext } from "../../reducer/Context.js";
+import { ReducerContext } from "../../reducer/context.js";
 import { IError } from "../../reducer/IError.js";
 import { Namespace, NamespaceMap } from "../../reducer/bindings.js";
 import { evaluate } from "../../reducer/index.js";
@@ -97,7 +97,7 @@ export class ProjectItem {
     if (this.imports) {
       return;
     }
-    this.buildAST();
+    this.buildAst();
     if (!this.ast) {
       throw new Error("Internal logic error");
     }
@@ -118,7 +118,7 @@ export class ProjectItem {
 
     if (!resolver) {
       this.setImports(
-        Result.Error(
+        Result.Err(
           new SqError(
             IError.other("Can't use imports when resolver is not configured")
           )
@@ -137,7 +137,7 @@ export class ProjectItem {
     this.setImports(Ok(resolvedImports));
   }
 
-  private buildAST(): void {
+  private buildAst(): void {
     if (this.ast) {
       return;
     }
@@ -149,7 +149,7 @@ export class ProjectItem {
   }
 
   private buildExpression(): void {
-    this.buildAST();
+    this.buildAst();
     if (this.expression) {
       return;
     }
@@ -162,7 +162,7 @@ export class ProjectItem {
   }
 
   failRun(e: SqError): void {
-    this.result = Result.Error(e);
+    this.result = Result.Err(e);
     this.bindings = NamespaceMap();
   }
 

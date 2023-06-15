@@ -11,7 +11,7 @@ import { Ok } from "../utility/result.js";
 import * as Result from "../utility/result.js";
 import { Value, vArray, vNumber, vString } from "../value/index.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
-import { REOther } from "../reducer/ErrorMessage.js";
+import { REOther } from "../errors.js";
 import includes from "lodash/includes.js";
 import uniqBy from "lodash/uniqBy.js";
 
@@ -61,7 +61,7 @@ export const library = [
     definitions: [
       makeDefinition([frArray(frAny)], ([array]) => {
         if (!array.length) {
-          return Result.Error(REOther("No first element"));
+          return Result.Err(new REOther("No first element"));
         } else {
           return Ok(array[0]);
         }
@@ -74,7 +74,7 @@ export const library = [
     definitions: [
       makeDefinition([frArray(frAny)], ([array]) => {
         if (!array.length) {
-          return Result.Error(REOther("No last element"));
+          return Result.Err(new REOther("No last element"));
         } else {
           return Ok(array[array.length - 1]);
         }
@@ -115,9 +115,8 @@ export const library = [
     requiresNamespace: true,
     examples: [`List.concat([1,2,3], [4, 5, 6])`],
     definitions: [
-      makeDefinition<Value[], Value[]>(
-        [frArray(frAny), frArray(frAny)],
-        ([array1, array2]) => Ok(vArray([...array1].concat(array2)))
+      makeDefinition([frArray(frAny), frArray(frAny)], ([array1, array2]) =>
+        Ok(vArray([...array1].concat(array2)))
       ),
     ],
   }),
@@ -136,7 +135,7 @@ export const library = [
     requiresNamespace: true,
     examples: [`List.uniq([1,2,3,"hi",false,"hi"])`],
     definitions: [
-      makeDefinition<Value[]>([frArray(frAny)], ([arr]) => {
+      makeDefinition([frArray(frAny)], ([arr]) => {
         const isUniqableType = (t: Value) =>
           includes(["String", "Bool", "Number"], t.type);
         //I'm not sure if the r.type concat is essential, but seems safe.
@@ -146,8 +145,8 @@ export const library = [
         if (allUniqable) {
           return Ok(vArray(uniqBy(arr, uniqueValueKey)));
         } else {
-          return Result.Error(
-            REOther("Can only apply uniq() to Strings, Numbers, or Bools")
+          return Result.Err(
+            new REOther("Can only apply uniq() to Strings, Numbers, or Bools")
           );
         }
       }),

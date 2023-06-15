@@ -223,7 +223,7 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
   //TODO: This custom error handling is a bit hacky and should be improved.
   const mouseItem: result<SqValue, SqError> | undefined = useMemo(() => {
     return mouseX
-      ? plot.fn.directCall([SqNumberValue.create(mouseX)], environment)
+      ? plot.fn.call([SqNumberValue.create(mouseX)], environment)
       : {
           ok: false,
           value: SqError.createOtherError(

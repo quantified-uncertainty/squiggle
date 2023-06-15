@@ -13,7 +13,7 @@ import {
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { REOther } from "../reducer/ErrorMessage.js";
+import { REOther } from "../errors.js";
 import * as Result from "../utility/result.js";
 import { LabeledDistribution, vPlot } from "../value/index.js";
 
@@ -52,7 +52,7 @@ export const library = [
             if (typeof value === "number") {
               const deltaResult = PointMass.make(value);
               if (deltaResult.ok === false) {
-                return Result.Error(REOther(deltaResult.value));
+                return Result.Err(new REOther(deltaResult.value));
               } else {
                 distributions.push({ name, distribution: deltaResult.value });
               }

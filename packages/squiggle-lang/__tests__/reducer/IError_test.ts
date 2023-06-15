@@ -1,12 +1,10 @@
 import { IError } from "../../src/reducer/IError.js";
 import { FrameStack } from "../../src/reducer/frameStack.js";
-import { ErrorMessage, REOther } from "../../src/reducer/ErrorMessage.js";
+import { ErrorMessage, REOther } from "../../src/errors.js";
 
 describe("ErrorMessage", () => {
   test("toString", () => {
-    expect(ErrorMessage.toString(REOther("test error"))).toBe(
-      "Error: test error"
-    );
+    expect(new REOther("test error").toString()).toBe("Error: test error");
   });
 });
 
@@ -26,7 +24,7 @@ describe("IError", () => {
 
     expect(
       IError.fromMessageWithFrameStack(
-        REOther("test error"),
+        new REOther("test error"),
         frameStack
       ).toStringWithStackTrace()
     ).toBe(`Error: test error

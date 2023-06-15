@@ -1,37 +1,22 @@
 import { parse } from "../../ast/parse.js";
-import { expressionFromAst } from "../../ast/toExpression.js";
-import { ReducerContext } from "../../reducer/Context.js";
+import { expressionFromAst } from "../../expression/fromAst.js";
+import { ReducerContext } from "../../reducer/context.js";
+import { ReducerFn } from "../../reducer/index.js";
 import { SquiggleLambda } from "../../reducer/lambda.js";
 import * as Result from "../../utility/result.js";
-import { ReducerFn } from "../../value/index.js";
-import { FnDefinition, FnDefinition0, FnDefinition1 } from "./fnDefinition.js";
+import { FnDefinition } from "./fnDefinition.js";
 import { FRType } from "./frTypes.js";
 
-export function makeSquiggleDefinition(args: {
-  name: string;
-  inputs: [];
-  parameters: [];
-  code: string;
-}): FnDefinition0;
-
-export function makeSquiggleDefinition<T1>(args: {
-  name: string;
-  inputs: [FRType<T1>];
-  parameters: [string];
-  code: string;
-}): FnDefinition1<T1>;
-
-// TODO - add support for more inputs, in the same fashion as we do in ./fnDefinition.js
-
-export function makeSquiggleDefinition({
+export function makeSquiggleDefinition<const T extends string[]>({
   name,
   inputs,
   parameters,
   code,
 }: {
   name: string; // unfortunately necessary, so that lambda isn't anonymous
-  inputs: FRType<unknown>[];
-  parameters: string[];
+  // guarantees that both arrays have the same length
+  inputs: [...{ [K in keyof T]: FRType<any> }];
+  parameters: [...T];
   code: string;
 }): FnDefinition {
   const astResult = parse(code, "@stdlib");

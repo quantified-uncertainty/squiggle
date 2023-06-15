@@ -1,15 +1,23 @@
 import { ParseError } from "../ast/parse.js";
-import { ErrorMessage, MessageException, REOther } from "./ErrorMessage.js";
+import {
+  ErrorMessage,
+  REJavaScriptExn,
+  REOther,
+  RESyntaxError,
+} from "../errors.js";
 import { Frame, FrameStack } from "./frameStack.js";
 
 // "I" stands for "Internal", since we also have a more public SqError proxy
 export class IError extends Error {
+  // TODO - it would be better to store `m` in `cause`, to like native Error objects do.
   private constructor(public m: ErrorMessage, public frameStack: FrameStack) {
-    super(); // pass `m.toString()`? a bit costly and we override `IError.toString() anyway`
+    // Should we pass `m.toString()`?
+    // It'd be a bit costly and we override `IError.toString()` anyway.
+    super();
   }
 
-  // this shouldn't be used much, since frame stack will be empty
-  // but it's useful for global errors, e.g. in ReducerProject or somethere in the frontend
+  // This shouldn't be used much, since frame stack will be empty.
+  // But it's useful for global errors, e.g. in SqProject or somethere in the frontend.
   static fromMessage(message: ErrorMessage) {
     return new IError(message, FrameStack.make());
   }
@@ -23,34 +31,30 @@ export class IError extends Error {
 
   static fromParseError({ message, location }: ParseError) {
     return IError.fromMessageWithFrameStack(
-      { type: "RESyntaxError", desc: message },
+      new RESyntaxError(message),
       FrameStack.makeSingleFrameStack(location)
     );
   }
 
-  // this shouldn't be used for most runtime errors - the resulting error would have an empty framestack
+  // This shouldn't be used for most runtime errors - the resulting error would have an empty framestack.
   static fromException(exn: unknown) {
     if (exn instanceof IError) {
       return exn;
-    } else if (exn instanceof MessageException) {
-      return IError.fromMessage(exn.e);
+    } else if (exn instanceof ErrorMessage) {
+      return IError.fromMessage(exn);
     } else if (exn instanceof Error) {
-      return IError.fromMessage({
-        type: "REJavaScriptExn",
-        msg: exn.message,
-        name: exn.name,
-      });
+      return IError.fromMessage(new REJavaScriptExn(exn.message, exn.name));
     } else {
       return IError.other("Unknown exception");
     }
   }
 
   static other(v: string) {
-    return IError.fromMessage(REOther(v));
+    return IError.fromMessage(new REOther(v));
   }
 
   toString() {
-    return ErrorMessage.toString(this.m);
+    return this.m.toString();
   }
 
   toStringWithStackTrace() {
@@ -73,31 +77,27 @@ export class IError extends Error {
 
 // converts raw exceptions into exceptions with framestack attached
 // already converted exceptions won't be affected
-export const rethrowWithFrameStack = <T>(
+export function rethrowWithFrameStack<T>(
   fn: () => T,
   frameStack: FrameStack
-): T => {
+): T {
   try {
     return fn();
   } catch (e) {
     if (e instanceof IError) {
       throw e; // exception already has a framestack
-    } else if (e instanceof MessageException) {
-      throw IError.fromMessageWithFrameStack(e.e, frameStack); // probably comes from FunctionRegistry, adding framestack
+    } else if (e instanceof ErrorMessage) {
+      throw IError.fromMessageWithFrameStack(e, frameStack); // probably comes from FunctionRegistry, adding framestack
     } else if (e instanceof Error) {
       throw IError.fromMessageWithFrameStack(
-        {
-          type: "REJavaScriptExn",
-          msg: e.message,
-          name: e.name,
-        },
+        new REJavaScriptExn(e.message, e.name),
         frameStack
       );
     } else {
       throw IError.fromMessageWithFrameStack(
-        REOther("Unknown exception"),
+        new REOther("Unknown exception"),
         frameStack
       );
     }
   }
-};
+}

@@ -1,11 +1,13 @@
 import { LocationRange } from "peggy";
+
 import { Expression } from "../expression/index.js";
-import { ReducerFn, Value } from "../value/index.js";
+import { Value } from "../value/index.js";
+import { REArityError } from "../errors.js";
+import * as IError from "./IError.js";
 import { Bindings } from "./bindings.js";
-import * as Context from "./Context.js";
-import { ReducerContext } from "./Context.js";
-import { ErrorMessage, REArityError } from "./ErrorMessage.js";
-import * as SqError from "./IError.js";
+import * as Context from "./context.js";
+import { ReducerContext } from "./context.js";
+import { ReducerFn } from "./index.js";
 
 type LambdaBody = (
   args: Value[],
@@ -35,9 +37,10 @@ export abstract class Lambda {
       inFunction: this,
     };
 
-    return SqError.rethrowWithFrameStack(() => {
-      return this.body(args, newContext, reducer);
-    }, newContext.frameStack);
+    return IError.rethrowWithFrameStack(
+      () => this.body(args, newContext, reducer),
+      newContext.frameStack
+    );
   }
 
   call(args: Value[], context: ReducerContext, reducer: ReducerFn): Value {
@@ -45,7 +48,7 @@ export abstract class Lambda {
   }
 }
 
-// user-defined functions, i.e. `add2 = {|x, y| x + y}`, are instances of this class
+// User-defined functions, e.g. `add2 = {|x, y| x + y}`, are instances of this class.
 export class SquiggleLambda extends Lambda {
   parameters: string[];
   location: LocationRange;
@@ -58,8 +61,7 @@ export class SquiggleLambda extends Lambda {
     body: Expression,
     location: LocationRange
   ) {
-    // creating inline functions is bad for performance; this should be refactored as a method
-    const lambda = (
+    const lambda: LambdaBody = (
       args: Value[],
       context: ReducerContext,
       reducer: ReducerFn
@@ -67,9 +69,7 @@ export class SquiggleLambda extends Lambda {
       const argsLength = args.length;
       const parametersLength = parameters.length;
       if (argsLength !== parametersLength) {
-        ErrorMessage.throw(
-          REArityError(undefined, parametersLength, argsLength)
-        );
+        throw new REArityError(undefined, parametersLength, argsLength);
       }
 
       // We could call bindings.extend() here to create a new local scope, but we don't,
@@ -109,7 +109,7 @@ export class SquiggleLambda extends Lambda {
   }
 }
 
-// stdlib functions (everything in FunctionRegistry) are instances of this class. Body is generated in library.ts makeStdlib() function.
+// Stdlib functions (everything in FunctionRegistry) are instances of this class.
 export class BuiltinLambda extends Lambda {
   constructor(public name: string, body: LambdaBody) {
     super(body);

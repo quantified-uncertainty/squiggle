@@ -14,11 +14,7 @@ import { FnFactory } from "../library/registry/helpers.js";
 import { OtherOperationError } from "../operationError.js";
 import * as Result from "../utility/result.js";
 import { Value, vDist } from "../value/index.js";
-import {
-  ErrorMessage,
-  REDistributionError,
-  REOther,
-} from "../reducer/ErrorMessage.js";
+import { ErrorMessage, REDistributionError, REOther } from "../errors.js";
 
 const CI_CONFIG = [
   { lowKey: "p5", highKey: "p95", probability: 0.9 },
@@ -34,7 +30,7 @@ const maker = new FnFactory({
 const makeSampleSet = (d: BaseDist, env: Env) => {
   const result = SampleSetDist.SampleSetDist.fromDist(d, env);
   if (!result.ok) {
-    return ErrorMessage.throw(REDistributionError(result.value));
+    throw new REDistributionError(result.value);
   }
   return result.value;
 };
@@ -49,7 +45,10 @@ const twoVarSample = (
   ) => Result.result<SymbolicDist.SymbolicDist, string>
 ): Result.result<Value, ErrorMessage> => {
   const repack = (r: Result.result<SampleSetDist.SampleSetDist, DistError>) =>
-    Result.fmap(Result.errMap(r, REDistributionError), vDist);
+    Result.fmap(
+      Result.errMap(r, (e) => new REDistributionError(e)),
+      vDist
+    );
 
   const sampleFn = (a: number, b: number) =>
     Result.fmap2(
@@ -75,9 +74,9 @@ const twoVarSample = (
     const s2 = makeSampleSet(v2, env);
     return repack(s2.samplesMap((a) => sampleFn(v1, a)));
   } else if (typeof v1 === "number" && typeof v2 === "number") {
-    return Result.fmap2(fn(v1, v2), vDist, REOther);
+    return Result.fmap2(fn(v1, v2), vDist, (e) => new REOther(e));
   }
-  return ErrorMessage.throw(REOther("Impossible branch"));
+  throw new REOther("Impossible branch");
 };
 
 const makeTwoArgsDist = (
@@ -125,7 +124,10 @@ const makeOneArgDist = (
 ) => {
   return makeDefinition([frDistOrNumber], ([v], { environment }) => {
     const repack = (r: Result.result<SampleSetDist.SampleSetDist, DistError>) =>
-      Result.fmap(Result.errMap(r, REDistributionError), vDist);
+      Result.fmap(
+        Result.errMap(r, (e) => new REDistributionError(e)),
+        vDist
+      );
 
     const sampleFn = (a: number) =>
       Result.fmap2(
@@ -138,9 +140,9 @@ const makeOneArgDist = (
       const s = makeSampleSet(v, environment);
       return repack(s.samplesMap(sampleFn));
     } else if (typeof v === "number") {
-      return Result.fmap2(fn(v), vDist, REOther);
+      return Result.fmap2(fn(v), vDist, (e) => new REOther(e));
     }
-    return ErrorMessage.throw(REOther("Impossible branch"));
+    throw new REOther("Impossible branch");
   });
 };
 

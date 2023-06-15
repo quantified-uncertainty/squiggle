@@ -98,7 +98,7 @@ export class PointSetDist<
   toSparkline(bucketCount: number): Result.result<string, DistError> {
     const continuous = this.pointSet.toContinuous();
     if (!continuous) {
-      return Result.Error(
+      return Result.Err(
         sparklineError("Cannot find the sparkline of a discrete distribution")
       );
     }

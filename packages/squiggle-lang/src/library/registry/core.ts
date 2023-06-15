@@ -1,18 +1,15 @@
-import { ReducerContext } from "../../reducer/Context.js";
+import { ReducerContext } from "../../reducer/context.js";
 import { result } from "../../utility/result.js";
 import * as Result from "../../utility/result.js";
-import { ReducerFn, Value } from "../../value/index.js";
+import { Value } from "../../value/index.js";
 import {
   FnDefinition,
   fnDefinitionToString,
   tryCallFnDefinition,
 } from "./fnDefinition.js";
-import {
-  ErrorMessage,
-  REOther,
-  RESymbolNotFound,
-} from "../../reducer/ErrorMessage.js";
+import { ErrorMessage, REOther, RESymbolNotFound } from "../../errors.js";
 import { BuiltinLambda, Lambda } from "../../reducer/lambda.js";
+import { ReducerFn } from "../../reducer/index.js";
 
 export type FRFunction = {
   name: string;
@@ -82,7 +79,7 @@ export class Registry {
   ): result<Value, ErrorMessage> {
     const definitions = this.fnNameDict.get(fnName);
     if (definitions === undefined) {
-      return Result.Error(RESymbolNotFound(fnName));
+      return Result.Err(new RESymbolNotFound(fnName));
     }
     const showNameMatchDefinitions = () => {
       const defsString = definitions
@@ -103,11 +100,11 @@ export class Registry {
         return callResult;
       }
     }
-    return Result.Error(REOther(showNameMatchDefinitions()));
+    return Result.Err(new REOther(showNameMatchDefinitions()));
   }
 
   makeLambda(fnName: string): Lambda {
-    if (!this.fnNameDict.get(fnName)) {
+    if (!this.fnNameDict.has(fnName)) {
       throw new Error(`Function ${fnName} doesn't exist in registry`);
     }
     return new BuiltinLambda(fnName, (args, context, reducer) => {
@@ -115,7 +112,7 @@ export class Registry {
       // But FunctionRegistry API is too limited for that to matter. Please take care not to violate that in the future by accident.
       const result = this.call(fnName, args, context, reducer);
       if (!result.ok) {
-        return ErrorMessage.throw(result.value);
+        throw result.value;
       }
       return result.value;
     });

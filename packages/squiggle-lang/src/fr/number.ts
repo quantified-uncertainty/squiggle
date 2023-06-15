@@ -8,7 +8,7 @@ import * as Result from "../utility/result.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
 import { Ok } from "../utility/result.js";
 import { Value, vArray, vNumber } from "../value/index.js";
-import { ErrorMessage, REOther } from "../reducer/ErrorMessage.js";
+import { ErrorMessage, REOther } from "../errors.js";
 
 const maker = new FnFactory({
   nameSpace: "Number",
@@ -16,29 +16,27 @@ const maker = new FnFactory({
 });
 
 const emptyList = (): Result.result<Value, ErrorMessage> =>
-  Result.Error(REOther("List is empty"));
+  Result.Err(new REOther("List is empty"));
 
-const makeNumberArrayToNumberDefinition = (
-  fn: (arr: number[]) => number
-): FnDefinition => {
+function makeNumberArrayToNumberDefinition(fn: (arr: number[]) => number) {
   return makeDefinition([frArray(frNumber)], ([arr]) => {
     if (arr.length === 0) {
       return emptyList();
     }
     return Ok(vNumber(fn(arr)));
   });
-};
+}
 
-const makeNumberArrayToNumberArrayDefinition = (
+function makeNumberArrayToNumberArrayDefinition(
   fn: (arr: number[]) => number[]
-): FnDefinition => {
+) {
   return makeDefinition([frArray(frNumber)], ([arr]) => {
     if (arr.length === 0) {
       return emptyList();
     }
     return Ok(vArray(fn(arr).map(vNumber)));
   });
-};
+}
 
 export const library = [
   maker.n2n({

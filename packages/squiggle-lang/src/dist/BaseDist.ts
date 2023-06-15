@@ -36,7 +36,7 @@ export abstract class BaseDist {
   abstract variance(): result<number, DistError>;
 
   mode(): result<number, DistError> {
-    return Result.Error(notYetImplemented());
+    return Result.Err(notYetImplemented());
   }
 
   abstract toPointSetDist(env: Env): result<PointSetDist, DistError>;

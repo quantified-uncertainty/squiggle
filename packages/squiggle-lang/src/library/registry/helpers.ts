@@ -2,23 +2,17 @@ import { BaseDist } from "../../dist/BaseDist.js";
 import { DistError } from "../../dist/DistError.js";
 import { Env } from "../../dist/env.js";
 import { SampleMapNeedsNtoNFunction } from "../../operationError.js";
-import { ReducerContext } from "../../reducer/Context.js";
+import { ReducerContext } from "../../reducer/context.js";
 import {
   ErrorMessage,
   REDistributionError,
   REOperationError,
-} from "../../reducer/ErrorMessage.js";
+} from "../../errors.js";
+import { ReducerFn } from "../../reducer/index.js";
 import { Lambda } from "../../reducer/lambda.js";
 import * as Result from "../../utility/result.js";
 import { Ok } from "../../utility/result.js";
-import {
-  ReducerFn,
-  Value,
-  vBool,
-  vDist,
-  vNumber,
-  vString,
-} from "../../value/index.js";
+import { Value, vBool, vDist, vNumber, vString } from "../../value/index.js";
 import { FRFunction } from "./core.js";
 import { FnDefinition, makeDefinition } from "./fnDefinition.js";
 import { frBool, frDist, frNumber, frString } from "./frTypes.js";
@@ -260,7 +254,7 @@ export class FnFactory {
 
 export function unpackDistResult<T>(result: Result.result<T, DistError>): T {
   if (!result.ok) {
-    return ErrorMessage.throw(REDistributionError(result.value));
+    throw new REDistributionError(result.value);
   }
   return result.value;
 }
@@ -282,5 +276,5 @@ export function doNumberLambdaCall(
   if (value.type === "Number") {
     return value.value;
   }
-  return ErrorMessage.throw(REOperationError(SampleMapNeedsNtoNFunction));
+  throw new REOperationError(SampleMapNeedsNtoNFunction);
 }
