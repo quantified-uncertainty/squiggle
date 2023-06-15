@@ -132,7 +132,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
 
   const runnerState = useRunnerState(code);
 
-  const [resultAndBindings, { project, isRunning }] = useSquiggle({
+  const [squiggleOutput, { project, isRunning }] = useSquiggle({
     ...props,
     code: runnerState.renderedCode,
     executionId: runnerState.executionId,
@@ -140,16 +140,16 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   });
 
   const errors = useMemo(() => {
-    if (!resultAndBindings) {
+    if (!squiggleOutput) {
       return [];
     }
-    return getErrors(resultAndBindings.result);
-  }, [resultAndBindings]);
+    return getErrors(squiggleOutput.result);
+  }, [squiggleOutput]);
 
   const editorRef = useRef<CodeEditorHandle>(null);
 
   const squiggleChart =
-    runnerState.renderedCode === "" || !resultAndBindings ? null : (
+    runnerState.renderedCode === "" || !squiggleOutput ? null : (
       <div className="relative">
         {isRunning ? (
           <div className="absolute inset-0 bg-white opacity-0 animate-semi-appear" />
@@ -157,7 +157,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
         <SquiggleViewer
           {...settings}
           localSettingsEnabled={true}
-          result={getValueToRender(resultAndBindings)}
+          result={getValueToRender(squiggleOutput)}
           editor={editorRef.current ?? undefined}
         />
       </div>
@@ -255,9 +255,9 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
         <div className="mb-1 h-8 p-2 flex justify-end text-zinc-400 text-sm whitespace-nowrap">
           {isRunning
             ? "rendering..."
-            : resultAndBindings
-            ? `render #${resultAndBindings.executionId} in ${showTime(
-                resultAndBindings.executionTime
+            : squiggleOutput
+            ? `render #${squiggleOutput.executionId} in ${showTime(
+                squiggleOutput.executionTime
               )}`
             : null}
         </div>

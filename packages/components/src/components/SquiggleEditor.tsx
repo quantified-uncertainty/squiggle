@@ -19,14 +19,14 @@ export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
     onChange: props.onCodeChange,
   });
 
-  const [resultAndBindings, { project }] = useSquiggle({ ...props, code });
+  const [squiggleOutput, { project }] = useSquiggle({ ...props, code });
 
   const errors = useMemo(() => {
-    if (!resultAndBindings) {
+    if (!squiggleOutput) {
       return [];
     }
-    return getErrors(resultAndBindings.result);
-  }, [resultAndBindings]);
+    return getErrors(squiggleOutput.result);
+  }, [squiggleOutput]);
 
   return (
     <div>
@@ -42,11 +42,8 @@ export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
           project={project}
         />
       </div>
-      {props.hideViewer || !resultAndBindings ? null : (
-        <SquiggleViewer
-          result={getValueToRender(resultAndBindings)}
-          {...props}
-        />
+      {props.hideViewer || !squiggleOutput ? null : (
+        <SquiggleViewer result={getValueToRender(squiggleOutput)} {...props} />
       )}
     </div>
   );

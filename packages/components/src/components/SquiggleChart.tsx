@@ -11,13 +11,13 @@ type Props = SquiggleArgs & Omit<SquiggleViewerProps, "result">;
 export const SquiggleChart: React.FC<Props> = React.memo((props) => {
   // TODO - split props into useSquiggle args and SquiggleViewer args would be cleaner
   // (but `useSquiggle` props are union-typed and are hard to extract for that reason)
-  const [resultAndBindings] = useSquiggle(props);
+  const [squiggleOutput] = useSquiggle(props);
 
-  if (!resultAndBindings) {
+  if (!squiggleOutput) {
     return <RefreshIcon className="animate-spin" />;
   }
 
-  const valueToRender = getValueToRender(resultAndBindings);
+  const valueToRender = getValueToRender(squiggleOutput);
 
   return <SquiggleViewer {...props} result={valueToRender} />;
 });

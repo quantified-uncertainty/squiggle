@@ -1,3 +1,5 @@
+import { useEffect, useMemo, useState } from "react";
+
 import {
   result,
   SqError,
@@ -6,7 +8,6 @@ import {
   SqValue,
   Env,
 } from "@quri/squiggle-lang";
-import { useEffect, useMemo, useState } from "react";
 
 // Props needed for a standalone execution
 type StandaloneExecutionProps = {
@@ -28,7 +29,7 @@ export type SquiggleArgs = {
   onChange?: (expr: SqValue | undefined, sourceName: string) => void;
 } & (StandaloneExecutionProps | ProjectExecutionProps);
 
-export type ResultAndBindings = {
+export type SquiggleOutput = {
   result: result<SqValue, SqError>;
   bindings: SqRecord;
   code: string;
@@ -37,7 +38,7 @@ export type ResultAndBindings = {
 };
 
 export type UseSquiggleOutput = [
-  ResultAndBindings | undefined,
+  SquiggleOutput | undefined,
   {
     project: SqProject;
     isRunning: boolean;
@@ -71,8 +72,8 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
 
   const [isRunning, setIsRunning] = useState(false);
 
-  const [resultAndBindings, setResultAndBindings] = useState<
-    ResultAndBindings | undefined
+  const [squiggleOutput, setSquiggleOutput] = useState<
+    SquiggleOutput | undefined
   >(undefined);
 
   const { executionId = 1, onChange } = args;
@@ -92,7 +93,7 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
         await project.run(sourceName);
         const result = project.getResult(sourceName);
         const bindings = project.getBindings(sourceName);
-        setResultAndBindings({
+        setSquiggleOutput({
           result,
           bindings,
           code: args.code,
@@ -114,14 +115,14 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
   );
 
   useEffect(() => {
-    if (!resultAndBindings || isRunning) {
+    if (!squiggleOutput || isRunning) {
       return;
     }
     onChange?.(
-      resultAndBindings.result.ok ? resultAndBindings.result.value : undefined,
+      squiggleOutput.result.ok ? squiggleOutput.result.value : undefined,
       sourceName
     );
-  }, [resultAndBindings, isRunning, onChange, sourceName]);
+  }, [squiggleOutput, isRunning, onChange, sourceName]);
 
   useEffect(() => {
     return () => {
@@ -130,10 +131,10 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
   }, [project, sourceName]);
 
   return [
-    resultAndBindings,
+    squiggleOutput,
     {
       project,
-      isRunning: executionId !== resultAndBindings?.executionId,
+      isRunning: executionId !== squiggleOutput?.executionId,
     },
   ];
 }
