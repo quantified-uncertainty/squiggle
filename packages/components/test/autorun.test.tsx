@@ -15,23 +15,27 @@ test("Autorun can be switched off", async () => {
   const user = (userEvent as any).setup(); // typescript issue is due to ESM mess
   act(() => render(<SquigglePlayground code="70*30" />));
 
-  expect(screen.getByTestId("autorun-controls")).toHaveTextContent("Autorun");
+  expect(screen.getByTestId("autorun-controls")).toHaveAttribute(
+    "aria-checked",
+    "true"
+  );
 
   await waitFor(() =>
     expect(screen.getByTestId("playground-result")).toHaveTextContent("2100")
   );
 
   await act(
-    async () => await user.click(await screen.getByText("Autorun")) // disable
+    async () =>
+      await user.click(screen.getByTestId("autorun-controls").firstChild) // disable
   );
 
-  expect(screen.getByTestId("autorun-controls")).toHaveTextContent("Paused");
-  expect(screen.getByTestId("autorun-controls")).not.toHaveTextContent(
-    "Autorun"
+  expect(screen.getByTestId("autorun-controls")).toHaveAttribute(
+    "aria-checked",
+    "false"
   );
 
   await act(
-    async () => await user.click(await screen.getByText("Paused")) // enable autorun again
+    async () => await user.click(screen.getByTestId("autorun-controls")) // enable autorun again
   );
 
   expect(screen.getByTestId("autorun-controls")).toHaveTextContent("Autorun");
