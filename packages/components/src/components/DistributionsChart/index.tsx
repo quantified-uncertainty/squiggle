@@ -187,9 +187,20 @@ const InnerDistributionsChart: FC<{
           context.stroke();
 
           // discrete
-          const darkerColor = adjustColorBrightness(getColor(i), -40);
-          context.fillStyle = darkerColor;
-          context.strokeStyle = darkerColor;
+          const darkenAmountCircle = isMulti ? 10 : 50;
+          const darkenAmountLine = Math.floor(darkenAmountCircle / 2);
+
+          const discreteLineColor = adjustColorBrightness(
+            getColor(i),
+            -darkenAmountLine
+          );
+          const discreteCircleColor = adjustColorBrightness(
+            getColor(i),
+            -darkenAmountCircle
+          );
+
+          context.strokeStyle = discreteLineColor;
+          context.fillStyle = discreteCircleColor;
           for (const point of shape.discrete) {
             context.beginPath();
             context.lineWidth = 1;
