@@ -151,7 +151,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
         ) : null}
         <SquiggleViewer
           {...settings}
-          enableLocalSettings={true}
+          localSettingsEnabled={true}
           result={valueToRender}
         />
       </div>

@@ -8,10 +8,15 @@ import {
   locationToShortName,
   MergedItemSettings,
 } from "./utils.js";
-import { ViewerContext } from "./ViewerContext.js";
+import {
+  useSetSettings,
+  useViewerContext,
+  ViewerContext,
+} from "./ViewerProvider.js";
 
 type SettingsMenuParams = {
-  onChange: () => void; // used to notify VariableBox that settings have changed, so that VariableBox could re-render itself
+  // Used to notify VariableBox that settings have changed, so that VariableBox could re-render itself.
+  onChange: () => void;
 };
 
 type VariableBoxProps = {
@@ -27,10 +32,10 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
   renderSettingsMenu,
   children,
 }) => {
-  const { setSettings, getSettings, getMergedSettings } =
-    useContext(ViewerContext);
+  const setSettings = useSetSettings();
+  const { getSettings, getMergedSettings } = useViewerContext();
 
-  // Since ViewerContext doesn't keep the actual settings, VariableBox won't rerender when setSettings is called.
+  // Since `ViewerContext` doesn't store settings, `VariableBox` won't rerender when `setSettings` is called.
   // So we use `forceUpdate` to force rerendering.
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
