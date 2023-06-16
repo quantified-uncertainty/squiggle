@@ -29,7 +29,7 @@ export function UserControls({ session }: { session: Session | null }) {
   const router = useRouter();
   const { username } = session?.user || { username: undefined };
 
-  return !!username ? (
+  return !username ? (
     <Button onClick={() => signIn()}>Sign In</Button>
   ) : (
     <div className="flex items-center gap-2">

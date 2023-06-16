@@ -32,7 +32,7 @@ export default function OuterDefinitionPage({
   );
 
   return (
-    <div className="mx-auto max-w-6xl mt-4">
+    <div className="mt-4">
       <div>
         {definition.modelExports.length ? (
           <section className="mb-4">
