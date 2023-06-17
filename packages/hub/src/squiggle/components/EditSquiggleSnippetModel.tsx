@@ -134,7 +134,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
             rules={{ required: true }}
             render={({ field }) => (
               <SquigglePlayground
-                height={height}
+                height={height ?? "100vh"}
                 onCodeChange={field.onChange}
                 code={field.value}
                 renderExtraControls={() =>
