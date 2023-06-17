@@ -89,7 +89,6 @@ export const ValueAndUncertaintyPlot: FC<{
         xScale,
         yScale,
         drawTicks: true,
-        tickCount: 10,
       });
 
       context.textAlign = "right";

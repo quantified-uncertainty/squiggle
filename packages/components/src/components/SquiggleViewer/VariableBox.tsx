@@ -17,13 +17,28 @@ type SettingsMenuParams = {
 type VariableBoxProps = {
   value: SqValue;
   heading: string;
+  preview?: React.ReactNode;
   renderSettingsMenu?: (params: SettingsMenuParams) => React.ReactNode;
   children: (settings: MergedItemSettings) => React.ReactNode;
 };
 
+export const SqTypeWithCount = ({
+  type,
+  count,
+}: {
+  type: string;
+  count: number;
+}) => (
+  <div className="text-sm text-stone-400 font-mono">
+    {type}
+    <span className="ml-0.5">{count}</span>
+  </div>
+);
+
 export const VariableBox: React.FC<VariableBoxProps> = ({
   value: { location },
   heading = "Error",
+  preview,
   renderSettingsMenu,
   children,
 }) => {
@@ -66,6 +81,7 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
               />
             </span>
             <span className="text-stone-800 font-mono text-sm">{name}</span>
+            {preview && <div className="ml-2">{preview}</div>}
           </div>
           <div className="inline-flex space-x-1">
             {!settings.collapsed && (

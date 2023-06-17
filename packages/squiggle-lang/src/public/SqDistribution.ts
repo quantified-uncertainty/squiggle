@@ -61,6 +61,14 @@ export abstract class SqAbstractDistribution<T extends BaseDist> {
     return this._value.mean();
   }
 
+  integralSum(): number {
+    return this._value.integralSum();
+  }
+
+  isNormalized(): boolean {
+    return this._value.isNormalized();
+  }
+
   pdf(env: Env, n: number) {
     return Result.fmap2(
       this._value.pdf(n, { env }),
