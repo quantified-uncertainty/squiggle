@@ -267,7 +267,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
           }}
         </VariableList>
       );
-    case "Array":
+    case "Array": {
       const values = value.value.getValues();
       return (
         <VariableList
@@ -275,12 +275,10 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
           heading={`List(${values.length})`}
           preview={<SqTypeWithCount type="[]" count={values.length} />}
         >
-          {() =>
-            value.value
-              .getValues()
-              .map((r, i) => <ExpressionViewer key={i} value={r} />)
+          {() => values.map((r, i) => <ExpressionViewer key={i} value={r} />)}
         </VariableList>
       );
+    }
     default: {
       return (
         <VariableList value={value} heading="Error">
