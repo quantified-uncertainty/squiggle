@@ -12,6 +12,7 @@ import {
   useViewerContext,
 } from "./ViewerProvider.js";
 import { extractSubvalueByLocation, locationAsString } from "./utils.js";
+import { MessageAlert } from "../Alert.js";
 
 type Result = ReturnType<typeof useSquiggle>["result"];
 
@@ -31,7 +32,7 @@ const SquiggleViewerBody: FC<{ value: SqValue }> = ({ value }) => {
     : value;
 
   if (!valueToRender) {
-    return <div>NOT FOUND</div>;
+    return <MessageAlert heading="Focused variable is not defined" />;
   }
 
   return <ExpressionViewer value={valueToRender} />;
