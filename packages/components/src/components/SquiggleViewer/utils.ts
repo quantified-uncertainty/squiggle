@@ -34,9 +34,6 @@ export function extractSubvalueByLocation(
   if (!value.location) {
     return;
   }
-  if (value.location.path.root !== location.path.root) {
-    return;
-  }
 
   for (const key of location.path.items) {
     let nextValue: SqValue | undefined;
