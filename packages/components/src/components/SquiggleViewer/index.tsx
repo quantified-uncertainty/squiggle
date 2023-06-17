@@ -1,13 +1,14 @@
 import { FC, memo } from "react";
 
 import { SqValue } from "@quri/squiggle-lang";
-import { Button, FocusIcon } from "@quri/ui";
+import { FocusIcon, ChevronRightIcon } from "@quri/ui";
 import { useSquiggle } from "../../lib/hooks/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 import { ExpressionViewer } from "./ExpressionViewer.js";
 import {
   ViewerProvider,
+  useFocus,
   useUnfocus,
   useViewerContext,
 } from "./ViewerProvider.js";
@@ -41,23 +42,33 @@ const SquiggleViewerBody: FC<{ value: SqValue }> = ({ value }) => {
 const SquiggleViewerOuter: FC<BodyProps> = ({ result }) => {
   const { focused } = useViewerContext();
   const unfocus = useUnfocus();
+  const focus = useFocus();
+
+  const navLinkStyle =
+    "text-sm text-slate-500 hover:text-slate-900 hover:underline font-mono cursor-pointer";
+
+  const focusedNavigation = focused && (
+    <div className="flex items-center mb-3 pl-1">
+      <span onClick={unfocus} className={navLinkStyle}>
+        {focused.path.root === "bindings" ? "Variables" : focused.path.root}
+      </span>
+      {focused
+        .pathItemsAsValueLocations()
+        .slice(0, -1)
+        .map((location, i) => (
+          <div key={i} className="flex items-center">
+            <ChevronRightIcon className="text-slate-300" size={24} />
+            <div onClick={() => focus(location)} className={navLinkStyle}>
+              {location.path.items[i]}
+            </div>
+          </div>
+        ))}
+    </div>
+  );
 
   return (
     <div>
-      {focused && (
-        <div className="flex items-center gap-2 mb-1">
-          <FocusIcon />
-          <div className="text-stone-800 font-mono text-sm">
-            {locationAsString(focused)}
-          </div>
-          <button
-            className="text-xs px-1 py-0.5 rounded bg-stone-200 hover:bg-stone-400"
-            onClick={unfocus}
-          >
-            Show all
-          </button>
-        </div>
-      )}
+      {focusedNavigation}
       {result.ok ? (
         <SquiggleViewerBody value={result.value} />
       ) : (

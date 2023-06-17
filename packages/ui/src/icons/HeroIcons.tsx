@@ -146,3 +146,23 @@ export const LinkIcon: FC<IconProps> = (props) => (
     <path d="M11.603 7.963a.75.75 0 00-.977 1.138 2.5 2.5 0 01.142 3.667l-3 3a2.5 2.5 0 01-3.536-3.536l1.225-1.224a.75.75 0 00-1.061-1.06l-1.224 1.224a4 4 0 105.656 5.656l3-3a4 4 0 00-.225-5.865z" />
   </Icon>
 );
+
+export const ChevronRightIcon: FC<IconProps> = (props) => (
+  <Icon {...props}>
+    <path
+      fillRule="evenodd"
+      d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+      clipRule="evenodd"
+    />
+  </Icon>
+);
+
+export const ChevronLeftIcon: FC<IconProps> = (props) => (
+  <Icon {...props}>
+    <path
+      fillRule="evenodd"
+      d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z"
+      clipRule="evenodd"
+    />
+  </Icon>
+);

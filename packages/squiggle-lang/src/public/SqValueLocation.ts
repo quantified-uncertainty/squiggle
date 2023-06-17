@@ -20,4 +20,14 @@ export class SqValueLocation {
       items: [...this.path.items, item],
     });
   }
+
+  pathItemsAsValueLocations() {
+    return this.path.items.map(
+      (_, index) =>
+        new SqValueLocation(this.project, this.sourceId, {
+          root: this.path.root,
+          items: this.path.items.slice(0, index + 1),
+        })
+    );
+  }
 }
