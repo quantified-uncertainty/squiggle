@@ -1,92 +1,85 @@
-import { SqValueLocation } from "@quri/squiggle-lang";
-import merge from "lodash/merge.js";
-import { memo, useCallback, useMemo, useRef } from "react";
+import { FC, memo } from "react";
 
+import { SqValue } from "@quri/squiggle-lang";
+import { Button, FocusIcon } from "@quri/ui";
 import { useSquiggle } from "../../lib/hooks/index.js";
-import {
-  defaultPlaygroundSettings,
-  PartialPlaygroundSettings,
-  viewSettingsSchema,
-} from "../PlaygroundSettings.js";
+import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 import { ExpressionViewer } from "./ExpressionViewer.js";
 import {
-  LocalItemSettings,
-  locationAsString,
-  MergedItemSettings,
-} from "./utils.js";
-import { ViewerContext } from "./ViewerContext.js";
+  ViewerProvider,
+  useUnfocus,
+  useViewerContext,
+} from "./ViewerProvider.js";
+import { extractSubvalueByLocation, locationAsString } from "./utils.js";
+import { MessageAlert } from "../Alert.js";
+
+type Result = ReturnType<typeof useSquiggle>["result"];
 
 export type SquiggleViewerProps = {
   /** The output of squiggle's run */
-  result: ReturnType<typeof useSquiggle>["result"];
-  enableLocalSettings?: boolean;
+  result: Result;
+  localSettingsEnabled?: boolean;
 } & PartialPlaygroundSettings;
 
-type SettingsStore = {
-  [k: string]: LocalItemSettings;
+type BodyProps = Pick<SquiggleViewerProps, "result">;
+
+const SquiggleViewerBody: FC<{ value: SqValue }> = ({ value }) => {
+  const { focused } = useViewerContext();
+
+  const valueToRender = focused
+    ? extractSubvalueByLocation(value, focused)
+    : value;
+
+  if (!valueToRender) {
+    return <MessageAlert heading="Focused variable is not defined" />;
+  }
+
+  return <ExpressionViewer value={valueToRender} />;
 };
 
-const defaultSettings: LocalItemSettings = { collapsed: false };
+const SquiggleViewerOuter: FC<BodyProps> = ({ result }) => {
+  const { focused } = useViewerContext();
+  const unfocus = useUnfocus();
+
+  return (
+    <div>
+      {focused && (
+        <div className="flex items-center gap-2 mb-1">
+          <FocusIcon />
+          <div className="text-stone-800 font-mono text-sm">
+            {locationAsString(focused)}
+          </div>
+          <button
+            className="text-xs px-1 py-0.5 rounded bg-stone-200 hover:bg-stone-400"
+            onClick={unfocus}
+          >
+            Show all
+          </button>
+        </div>
+      )}
+      {result.ok ? (
+        <SquiggleViewerBody value={result.value} />
+      ) : (
+        <SquiggleErrorAlert error={result.value} />
+      )}
+    </div>
+  );
+};
 
 export const SquiggleViewer = memo<SquiggleViewerProps>(
   function SquiggleViewer({
     result,
-    enableLocalSettings = false,
+    localSettingsEnabled = false,
     ...partialPlaygroundSettings
   }) {
-    // can't store settings in the state because we don't want to rerender the entire tree on every change
-    const settingsStoreRef = useRef<SettingsStore>({});
-
-    const globalSettings = useMemo(() => {
-      return merge({}, defaultPlaygroundSettings, partialPlaygroundSettings);
-    }, [partialPlaygroundSettings]);
-
-    const getSettings = useCallback(
-      (location: SqValueLocation) => {
-        return (
-          settingsStoreRef.current[locationAsString(location)] ||
-          defaultSettings
-        );
-      },
-      [settingsStoreRef]
-    );
-
-    const setSettings = useCallback(
-      (location: SqValueLocation, value: LocalItemSettings) => {
-        settingsStoreRef.current[locationAsString(location)] = value;
-      },
-      [settingsStoreRef]
-    );
-
-    const getMergedSettings = useCallback(
-      (location: SqValueLocation) => {
-        const localSettings = getSettings(location);
-        const result: MergedItemSettings = merge(
-          {},
-          globalSettings,
-          localSettings
-        );
-        return result;
-      },
-      [globalSettings, getSettings]
-    );
-
     return (
-      <ViewerContext.Provider
-        value={{
-          getSettings,
-          setSettings,
-          getMergedSettings,
-          enableLocalSettings,
-        }}
+      <ViewerProvider
+        partialPlaygroundSettings={partialPlaygroundSettings}
+        localSettingsEnabled={localSettingsEnabled}
       >
-        {result.ok ? (
-          <ExpressionViewer value={result.value} />
-        ) : (
-          <SquiggleErrorAlert error={result.value} />
-        )}
-      </ViewerContext.Provider>
+        <SquiggleViewerOuter result={result} />
+      </ViewerProvider>
     );
   }
 );

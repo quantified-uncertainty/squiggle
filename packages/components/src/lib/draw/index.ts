@@ -6,6 +6,7 @@ const axisColor = "rgba(114, 125, 147, 0.1)";
 export const labelColor = "rgb(114, 125, 147)";
 export const cursorLineColor = "#888";
 export const primaryColor = "#4c78a8"; // for lines and areas
+export const distributionColor = "#6d9bce"; // for distributions. Slightly lighter than primaryColor
 const labelFont = "10px sans-serif";
 const xLabelOffset = 6;
 const yLabelOffset = 6;
@@ -17,6 +18,21 @@ export function distance(point1: Point, point2: Point) {
 }
 
 export const defaultTickFormatSpecifier = ".9~s";
+interface DrawAxesParams {
+  context: CanvasRenderingContext2D;
+  xScale: AnyChartScale;
+  yScale: AnyChartScale;
+  suggestedPadding: Padding;
+  width: number;
+  height: number;
+  hideYAxis?: boolean;
+  drawTicks?: boolean;
+  xTickCount?: number;
+  yTickCount?: number;
+  tickFormat?: string;
+  xTickFormat?: string;
+  yTickFormat?: string;
+}
 
 export function drawAxes({
   context,
@@ -25,30 +41,18 @@ export function drawAxes({
   suggestedPadding,
   width,
   height,
-  hideYAxis,
-  drawTicks,
-  tickCount = 5,
+  hideYAxis = false,
+  drawTicks = true,
+  xTickCount = Math.max(Math.min(Math.floor(width / 100), 12), 3),
+  yTickCount = Math.max(Math.min(Math.floor(height / 100), 12), 3),
   xTickFormat: xTickFormatSpecifier = defaultTickFormatSpecifier,
   yTickFormat: yTickFormatSpecifier = defaultTickFormatSpecifier,
-}: {
-  context: CanvasRenderingContext2D;
-  xScale: AnyChartScale;
-  yScale: AnyChartScale;
-  suggestedPadding: Padding; // expanded according to label width
-  width: number;
-  height: number;
-  hideYAxis?: boolean;
-  drawTicks?: boolean;
-  tickCount?: number;
-  tickFormat?: string;
-  xTickFormat?: string;
-  yTickFormat?: string;
-}) {
-  const xTicks = xScale.ticks(tickCount);
-  const xTickFormat = xScale.tickFormat(tickCount, xTickFormatSpecifier);
+}: DrawAxesParams) {
+  const xTicks = xScale.ticks(xTickCount);
+  const xTickFormat = xScale.tickFormat(xTickCount, xTickFormatSpecifier);
 
-  const yTicks = yScale.ticks(tickCount);
-  const yTickFormat = yScale.tickFormat(tickCount, yTickFormatSpecifier);
+  const yTicks = yScale.ticks(yTickCount);
+  const yTickFormat = yScale.tickFormat(yTickCount, yTickFormatSpecifier);
 
   const tickSize = 2;
 

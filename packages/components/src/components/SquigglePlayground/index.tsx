@@ -151,7 +151,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
         ) : null}
         <SquiggleViewer
           {...settings}
-          enableLocalSettings={true}
+          localSettingsEnabled={true}
           result={valueToRender}
         />
       </div>
@@ -289,7 +289,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
       >
         {showEditor && playgroundWithEditor}
         {!showEditor && (
-          <div style={standardHeightStyle(rightSideHeaderHeight)}>
+          <div style={standardHeightStyle(height - rightSideHeaderHeight)}>
             {squiggleChart}
           </div>
         )}

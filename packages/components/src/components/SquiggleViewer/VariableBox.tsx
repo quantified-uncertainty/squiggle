@@ -1,36 +1,57 @@
-import React, { useContext, useReducer } from "react";
+import React, { useReducer } from "react";
 
 import { SqValue } from "@quri/squiggle-lang";
-import { TriangleIcon } from "@quri/ui";
+import { FocusIcon, TriangleIcon } from "@quri/ui";
 
 import {
   LocalItemSettings,
   locationToShortName,
   MergedItemSettings,
 } from "./utils.js";
-import { ViewerContext } from "./ViewerContext.js";
+import {
+  useFocus,
+  useSetSettings,
+  useViewerContext,
+} from "./ViewerProvider.js";
 
 type SettingsMenuParams = {
-  onChange: () => void; // used to notify VariableBox that settings have changed, so that VariableBox could re-render itself
+  // Used to notify VariableBox that settings have changed, so that VariableBox could re-render itself.
+  onChange: () => void;
 };
 
 type VariableBoxProps = {
   value: SqValue;
   heading: string;
+  preview?: React.ReactNode;
   renderSettingsMenu?: (params: SettingsMenuParams) => React.ReactNode;
   children: (settings: MergedItemSettings) => React.ReactNode;
 };
 
+export const SqTypeWithCount = ({
+  type,
+  count,
+}: {
+  type: string;
+  count: number;
+}) => (
+  <div className="text-sm text-stone-400 font-mono">
+    {type}
+    <span className="ml-0.5">{count}</span>
+  </div>
+);
+
 export const VariableBox: React.FC<VariableBoxProps> = ({
   value: { location },
   heading = "Error",
+  preview,
   renderSettingsMenu,
   children,
 }) => {
-  const { setSettings, getSettings, getMergedSettings } =
-    useContext(ViewerContext);
+  const setSettings = useSetSettings();
+  const focus = useFocus();
+  const { getSettings, getMergedSettings } = useViewerContext();
 
-  // Since ViewerContext doesn't keep the actual settings, VariableBox won't rerender when setSettings is called.
+  // Since `ViewerContext` doesn't store settings, `VariableBox` won't rerender when `setSettings` is called.
   // So we use `forceUpdate` to force rerendering.
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
@@ -66,16 +87,22 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
               />
             </span>
             <span className="text-stone-800 font-mono text-sm">{name}</span>
+            {preview && <div className="ml-2">{preview}</div>}
           </div>
           <div className="inline-flex space-x-1">
-            {!settings.collapsed && (
+            {Boolean(!settings.collapsed && location.path.items.length) && (
               <div className="text-stone-400 hover:text-stone-600 text-sm">
                 {heading}
               </div>
             )}
-            {!settings.collapsed && renderSettingsMenu
-              ? renderSettingsMenu({ onChange: forceUpdate })
-              : null}
+            {location.path.items.length ? (
+              <FocusIcon
+                className="h-5 w-5 cursor-pointer text-stone-200 hover:text-stone-500"
+                onClick={() => focus(location)}
+              />
+            ) : null}
+            {!settings.collapsed &&
+              renderSettingsMenu?.({ onChange: forceUpdate })}
           </div>
         </header>
       )}

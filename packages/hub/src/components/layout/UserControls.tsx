@@ -29,9 +29,7 @@ export function UserControls({ session }: { session: Session | null }) {
   const router = useRouter();
   const { username } = session?.user || { username: undefined };
 
-  return !username ? (
-    <Button onClick={() => signIn()}>Sign In</Button>
-  ) : (
+  return !!username ? (
     <div className="flex items-center gap-2">
       <Dropdown
         render={() => (
@@ -54,5 +52,7 @@ export function UserControls({ session }: { session: Session | null }) {
         <DropdownWithArrow text={username!} />
       </Dropdown>
     </div>
+  ) : (
+    <Button onClick={() => signIn()}>Sign In</Button>
   );
 }

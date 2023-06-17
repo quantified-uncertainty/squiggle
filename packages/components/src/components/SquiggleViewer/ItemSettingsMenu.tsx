@@ -12,7 +12,11 @@ import {
   viewSettingsSchema,
 } from "../PlaygroundSettings.js";
 import { PlaygroundContext } from "../SquigglePlayground/index.js";
-import { ViewerContext } from "./ViewerContext.js";
+import {
+  ViewerContext,
+  useSetSettings,
+  useViewerContext,
+} from "./ViewerProvider.js";
 import { locationAsString } from "./utils.js";
 
 type Props = {
@@ -32,8 +36,8 @@ const ItemSettingsModal: React.FC<
   close,
   resetScroll,
 }) => {
-  const { setSettings, getSettings, getMergedSettings } =
-    useContext(ViewerContext);
+  const setSettings = useSetSettings();
+  const { getSettings, getMergedSettings } = useViewerContext();
 
   const mergedSettings = getMergedSettings(value.location!);
 
@@ -92,12 +96,12 @@ const ItemSettingsModal: React.FC<
 
 export const ItemSettingsMenu: React.FC<Props> = (props) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { enableLocalSettings, setSettings, getSettings } =
-    useContext(ViewerContext);
+  const setSettings = useSetSettings();
+  const { localSettingsEnabled, getSettings } = useContext(ViewerContext);
 
   const ref = useRef<HTMLDivElement | null>(null);
 
-  if (!enableLocalSettings) {
+  if (!localSettingsEnabled) {
     return null;
   }
   const settings = getSettings(props.value.location!);
@@ -110,7 +114,7 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
   return (
     <div className="flex gap-2" ref={ref}>
       <CogIcon
-        className="h-5 w-5 cursor-pointer text-stone-200 hover:text-stone-500"
+        className="h-5 w-5 cursor-pointer text-stone-300 hover:text-stone-500"
         onClick={() => setIsOpen(!isOpen)}
       />
       {settings.distributionChartSettings ? (

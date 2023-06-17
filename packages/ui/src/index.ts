@@ -40,6 +40,7 @@ export { DotsHorizontalIcon } from "./icons/DotsHorizontalIcon.js";
 export { ExternalLinkIcon } from "./icons/ExternalLinkIcon.js";
 export { SignOutIcon } from "./icons/SignOutIcon.js";
 export { EditIcon } from "./icons/EditIcon.js";
+export { FocusIcon } from "./icons/FocusIcon.js";
 export {
   BarChartIcon,
   PauseIcon,
