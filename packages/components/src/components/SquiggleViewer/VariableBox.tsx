@@ -1,7 +1,7 @@
-import React, { useContext, useReducer } from "react";
+import React, { useReducer } from "react";
 
 import { SqValue } from "@quri/squiggle-lang";
-import { TriangleIcon } from "@quri/ui";
+import { FocusIcon, TriangleIcon } from "@quri/ui";
 
 import {
   LocalItemSettings,
@@ -9,9 +9,9 @@ import {
   MergedItemSettings,
 } from "./utils.js";
 import {
+  useFocus,
   useSetSettings,
   useViewerContext,
-  ViewerContext,
 } from "./ViewerProvider.js";
 
 type SettingsMenuParams = {
@@ -33,6 +33,7 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
   children,
 }) => {
   const setSettings = useSetSettings();
+  const focus = useFocus();
   const { getSettings, getMergedSettings } = useViewerContext();
 
   // Since `ViewerContext` doesn't store settings, `VariableBox` won't rerender when `setSettings` is called.
@@ -73,14 +74,19 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
             <span className="text-stone-800 font-mono text-sm">{name}</span>
           </div>
           <div className="inline-flex space-x-1">
-            {!settings.collapsed && (
+            {Boolean(!settings.collapsed && location.path.items.length) && (
               <div className="text-stone-400 hover:text-stone-600 text-sm">
                 {heading}
               </div>
             )}
-            {!settings.collapsed && renderSettingsMenu
-              ? renderSettingsMenu({ onChange: forceUpdate })
-              : null}
+            {location.path.items.length ? (
+              <FocusIcon
+                className="h-5 w-5 cursor-pointer text-stone-200 hover:text-stone-500"
+                onClick={() => focus(location)}
+              />
+            ) : null}
+            {!settings.collapsed &&
+              renderSettingsMenu?.({ onChange: forceUpdate })}
           </div>
         </header>
       )}

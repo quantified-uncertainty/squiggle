@@ -27,10 +27,28 @@ export function locationToShortName(
     : String(location.path.items[location.path.items.length - 1]);
 }
 
-export function extractLocationFromValue(
+export function extractSubvalueByLocation(
   value: SqValue,
   location: SqValueLocation
-) {
-  // TODO
+): SqValue | undefined {
+  if (!value.location) {
+    return;
+  }
+  if (value.location.path.root !== location.path.root) {
+    return;
+  }
+
+  for (const key of location.path.items) {
+    let nextValue: SqValue | undefined;
+    if (typeof key === "number" && value.tag === "Array") {
+      nextValue = value.value.getValues()[key];
+    } else if (typeof key === "string" && value.tag === "Record") {
+      nextValue = value.value.get(key);
+    }
+    if (!nextValue) {
+      return;
+    }
+    value = nextValue;
+  }
   return value;
 }

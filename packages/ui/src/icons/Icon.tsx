@@ -6,16 +6,17 @@ export type IconProps = PropsWithChildren<{
   onClick?: () => void;
 }>;
 
-export const Icon: FC<IconProps> = ({
+export const Icon: FC<IconProps & { viewBox?: string }> = ({
   size = 20,
   className,
   onClick,
+  viewBox = "0 0 20 20",
   children,
 }) => (
   <svg
     width={size}
     height={size}
-    viewBox="0 0 20 20"
+    viewBox={viewBox}
     fill="currentColor"
     onClick={onClick}
     className={className}

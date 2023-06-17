@@ -244,7 +244,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
 
       return (
         <VariableBox value={value} heading="Scale">
-          {(settings) => <div>{scale.toString()}</div>}
+          {() => <div>{scale.toString()}</div>}
         </VariableBox>
       );
     }
@@ -265,7 +265,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
     case "Array":
       return (
         <VariableList value={value} heading="Array">
-          {(_) =>
+          {() =>
             value.value
               .getValues()
               .map((r, i) => <ExpressionViewer key={i} value={r} />)
