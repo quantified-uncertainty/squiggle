@@ -36,7 +36,7 @@ const SquiggleViewerBody: FC<{ value: SqValue }> = ({ value }) => {
     return <MessageAlert heading="Focused variable is not defined" />;
   }
 
-  return <ExpressionViewer value={valueToRender} />;
+  return <ExpressionViewer value={valueToRender} isFocused={!!focused} />;
 };
 
 const SquiggleViewerOuter: FC<BodyProps> = ({ result }) => {
