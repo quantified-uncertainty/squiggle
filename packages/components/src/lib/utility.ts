@@ -95,3 +95,20 @@ export function isMac() {
 
 //This is important to make sure that canvas elements properly stretch
 export const canvasClasses = "w-full";
+
+// Function by supersan on Stack Overflow.
+// https://stackoverflow.com/questions/5560248/programmatically-lighten-or-darken-a-hex-color-or-rgb-and-blend-colors
+// Takes in a string like "#333999"
+export function adjustColorBrightness(color: string, amount: number) {
+  return (
+    "#" +
+    color
+      .replace(/^#/, "")
+      .replace(/../g, (color) =>
+        (
+          "0" +
+          Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)
+        ).substr(-2)
+      )
+  );
+}

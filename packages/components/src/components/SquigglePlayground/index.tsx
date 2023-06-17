@@ -289,7 +289,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
       >
         {showEditor && playgroundWithEditor}
         {!showEditor && (
-          <div style={standardHeightStyle(rightSideHeaderHeight)}>
+          <div style={standardHeightStyle(height - rightSideHeaderHeight)}>
             {squiggleChart}
           </div>
         )}

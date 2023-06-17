@@ -22,13 +22,8 @@ export const Normal: Story = {
 export const Slow: Story = {
   name: "Slow Code",
   args: {
-    defaultCode:
-      "normal(5,2) + uniform(10, 120) + uniform(30,2000)+ uniform(30,2000)+ uniform(30,2000)+ uniform(30,2000)+ uniform(30,2000)+ uniform(30,2000)+ uniform(30,2000)+ uniform(30,2000)+ uniform(30,2000)+ uniform(30,2000)+ uniform(30,2000)+ uniform(30,2000)",
+    defaultCode: "List.upTo(1,5000000) -> reduce(0,add)",
     height: 800,
-    renderingSettings: {
-      sampleCount: 500000,
-      xyPointLength: 1000,
-    },
   },
 };
 

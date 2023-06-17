@@ -18,16 +18,17 @@ import { NumericFunctionChart } from "../FunctionChart/NumericFunctionChart.js";
 import { ScatterChart } from "../ScatterChart/index.js";
 import { generateDistributionPlotSettings } from "../PlaygroundSettings.js";
 import { ItemSettingsMenu } from "./ItemSettingsMenu.js";
-import { VariableBox } from "./VariableBox.js";
+import { SqTypeWithCount, VariableBox } from "./VariableBox.js";
 import { MergedItemSettings } from "./utils.js";
 import { RelativeValuesGridChart } from "../RelativeValuesGridChart/index.js";
 
 const VariableList: React.FC<{
   value: SqValue;
   heading: string;
+  preview?: React.ReactNode;
   children: (settings: MergedItemSettings) => React.ReactNode;
-}> = ({ value, heading, children }) => (
-  <VariableBox value={value} heading={heading}>
+}> = ({ value, heading, children, preview }) => (
+  <VariableBox value={value} preview={preview} heading={heading}>
     {(settings) => (
       <div
         className={clsx(
@@ -249,10 +250,14 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
       );
     }
     case "Record":
+      const entries = value.value.entries();
       return (
-        <VariableList value={value} heading="Record">
+        <VariableList
+          value={value}
+          heading={`Record(${entries.length})`}
+          preview={<SqTypeWithCount type="{}" count={entries.length} />}
+        >
           {() => {
-            const entries = value.value.entries();
             if (!entries.length) {
               return <div className="text-neutral-400">Empty record</div>;
             }
@@ -263,13 +268,17 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
         </VariableList>
       );
     case "Array":
+      const values = value.value.getValues();
       return (
-        <VariableList value={value} heading="Array">
+        <VariableList
+          value={value}
+          heading={`List(${values.length})`}
+          preview={<SqTypeWithCount type="[]" count={values.length} />}
+        >
           {() =>
             value.value
               .getValues()
               .map((r, i) => <ExpressionViewer key={i} value={r} />)
-          }
         </VariableList>
       );
     default: {

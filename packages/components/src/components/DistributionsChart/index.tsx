@@ -10,11 +10,12 @@ import {
   SqDistributionTag,
   SqShape,
 } from "@quri/squiggle-lang";
-import { MouseTooltip } from "@quri/ui";
+import { MouseTooltip, TextTooltip } from "@quri/ui";
 
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
 import {
   distance,
+  distributionColor,
   drawAxes,
   drawCircle,
   drawCursorLines,
@@ -22,6 +23,7 @@ import {
 } from "../../lib/draw/index.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
 import {
+  adjustColorBrightness,
   canvasClasses,
   flattenResult,
   sqScaleToD3,
@@ -36,6 +38,7 @@ export type DistributionsChartProps = {
   plot: SqDistributionsPlot;
   environment: Env;
   height: number;
+  showSamplesBar?: boolean;
 };
 
 const InnerDistributionsChart: FC<{
@@ -44,7 +47,15 @@ const InnerDistributionsChart: FC<{
   samples: number[];
   height: number;
   plot: SqDistributionsPlot;
-}> = ({ shapes, samples, plot, height: innerHeight, isMulti }) => {
+  showSamplesBar: boolean;
+}> = ({
+  shapes,
+  samples,
+  plot,
+  height: innerHeight,
+  isMulti,
+  showSamplesBar,
+}) => {
   const [discreteTooltip, setDiscreteTooltip] = useState<
     { value: number; probability: number } | undefined
   >();
@@ -59,7 +70,8 @@ const InnerDistributionsChart: FC<{
   const showTitle = !!plot.title;
   const titleHeight = showTitle ? 20 : 4;
   const legendHeight = isMulti ? legendItemHeight * shapes.length : 0;
-  const samplesFooterHeight = samples.length ? 10 : 0;
+  const _showSamplesBar = showSamplesBar && samples.length;
+  const samplesFooterHeight = _showSamplesBar ? 10 : 0;
 
   const height =
     innerHeight + legendHeight + titleHeight + samplesFooterHeight + 30;
@@ -71,7 +83,7 @@ const InnerDistributionsChart: FC<{
       context.clearRect(0, 0, width, height);
 
       const getColor = (i: number) =>
-        isMulti ? d3.schemeCategory10[i] : "#5ba3cf";
+        isMulti ? d3.schemeCategory10[i] : distributionColor;
 
       const xScale = sqScaleToD3(plot.xScale);
       xScale.domain([
@@ -104,7 +116,6 @@ const InnerDistributionsChart: FC<{
         yScale,
         hideYAxis: true,
         drawTicks: true,
-        tickCount: 10,
         xTickFormat: plot.xScale.tickFormat,
       });
 
@@ -178,6 +189,20 @@ const InnerDistributionsChart: FC<{
           context.stroke();
 
           // discrete
+          const darkenAmountCircle = isMulti ? 10 : 50;
+          const darkenAmountLine = Math.floor(darkenAmountCircle / 2);
+
+          const discreteLineColor = adjustColorBrightness(
+            getColor(i),
+            -darkenAmountLine
+          );
+          const discreteCircleColor = adjustColorBrightness(
+            getColor(i),
+            -darkenAmountCircle
+          );
+
+          context.strokeStyle = discreteLineColor;
+          context.fillStyle = discreteCircleColor;
           for (const point of shape.discrete) {
             context.beginPath();
             context.lineWidth = 1;
@@ -204,19 +229,22 @@ const InnerDistributionsChart: FC<{
       }
 
       // samples
-      context.save();
-      context.strokeStyle = primaryColor;
-      context.lineWidth = 0.1;
-      samples.forEach((sample) => {
-        context.beginPath();
-        const x = xScale(sample);
+      if (_showSamplesBar) {
+        context.save();
+        context.strokeStyle = primaryColor;
+        context.lineWidth = 0.1;
 
-        context.beginPath();
-        context.moveTo(padding.left + x, height - sampleBarHeight);
-        context.lineTo(padding.left + x, height);
-        context.stroke();
-      });
-      context.restore();
+        samples.forEach((sample) => {
+          context.beginPath();
+          const x = xScale(sample);
+
+          context.beginPath();
+          context.moveTo(padding.left + x, height - sampleBarHeight);
+          context.lineTo(padding.left + x, height);
+          context.stroke();
+        });
+        context.restore();
+      }
 
       if (
         cursor &&
@@ -285,7 +313,9 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
   plot,
   environment,
   height,
+  showSamplesBar,
 }) => {
+  const CUTOFF_TO_SHOW_SAMPLES_BAR = 100000; // Default to stop showing bottom samples bar if there are more than 100k samples
   const distributions = plot.distributions;
 
   const isMulti =
@@ -310,12 +340,49 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
   }
 
   // if this is a sample set, include the samples
+  // It's important not to use the ...spread operator, so that it works with >1M samples.
   const samples: number[] = [];
   for (const { distribution } of distributions) {
     if (distribution.tag === SqDistributionTag.SampleSet) {
-      samples.push(...distribution.getSamples());
+      const distSamples = distribution.getSamples();
+      samples.concat(distSamples);
     }
   }
+
+  const normalizedStatus = distributions.map(({ name, distribution }) => ({
+    name,
+    isNormalized: distribution.isNormalized(),
+  }));
+
+  const anyAreNonnormalized = normalizedStatus.some(
+    ({ isNormalized }) => !isNormalized
+  );
+
+  const _showSamplesBar =
+    showSamplesBar === undefined
+      ? samples.length < CUTOFF_TO_SHOW_SAMPLES_BAR
+      : showSamplesBar;
+
+  const nonNormalizedError = () => {
+    const message =
+      distributions.length === 1
+        ? `Not a valid probability distribution. Its integral is ${distributions[0].distribution.integralSum()}, it should be 1. Squiggle currently poorly supports these types.`
+        : `Distributions: [${normalizedStatus
+            .filter(({ isNormalized }) => !isNormalized)
+            .map(({ name }) => name)
+            .join(
+              ", "
+            )}] are not valid probability distributions, because their integrals do not add up to 1.`;
+    return (
+      <div>
+        <TextTooltip text={message} placement="top">
+          <div className="font-semibold text-xs text-orange-900 bg-orange-100 rounded-md px-1.5 py-0.5 w-fit ml-2">
+            Not Normalized
+          </div>
+        </TextTooltip>
+      </div>
+    );
+  };
 
   return (
     <div className="flex flex-col items-stretch">
@@ -330,13 +397,17 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
           shapes={shapes.value}
           plot={plot}
           height={height}
+          showSamplesBar={_showSamplesBar}
         />
       )}
-      <div className="flex justify-center pt-2">
-        {plot.showSummary && (
-          <SummaryTable plot={plot} environment={environment} />
-        )}
-      </div>
+      {!anyAreNonnormalized && (
+        <div className="flex justify-center pt-2">
+          {plot.showSummary && (
+            <SummaryTable plot={plot} environment={environment} />
+          )}
+        </div>
+      )}
+      {anyAreNonnormalized && nonNormalizedError()}
     </div>
   );
 };

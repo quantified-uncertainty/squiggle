@@ -26,10 +26,28 @@ export const ContinuousPointset: Story = {
   },
 };
 
+export const NonnormalizedContinousPointSet: Story = {
+  name: "Non-normalized Continuous Pointset",
+  args: {
+    code: "normal(5,2) .- uniform(3,8)",
+  },
+};
+
 export const ContinuousSampleSet: Story = {
   name: "Continuous SampleSet",
   args: {
     code: "SampleSet.fromDist(normal(5,2))",
+  },
+};
+
+export const ContinuousSampleSet1MSamples: Story = {
+  name: "Continuous SampleSet, 1M Sample",
+  args: {
+    code: "SampleSet.fromDist(uniform(5,10))",
+    environment: {
+      sampleCount: 1000000,
+      xyPointLength: 1000,
+    },
   },
 };
 

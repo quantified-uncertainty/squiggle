@@ -62,7 +62,7 @@ export const TextTooltip: FC<Props> = ({
               },
             })}
           >
-            <div className="whitespace-pre text-white">{text}</div>
+            <div className="text-white max-w-sm">{text}</div>
           </motion.div>
         )}
       </AnimatePresence>
