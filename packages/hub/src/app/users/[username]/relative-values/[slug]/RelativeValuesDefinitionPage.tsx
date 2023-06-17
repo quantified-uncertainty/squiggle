@@ -7,7 +7,7 @@ import { relativeValuesEditRoute, relativeValuesRoute } from "@/routes";
 import { DropdownMenu } from "@quri/ui";
 import { DeleteDefinitionAction } from "./DeleteRelativeValuesDefinitionAction";
 import { useSession } from "next-auth/react";
-import { EntityLayout } from "@/components/Entity";
+import { EntityLayout } from "@/components/EntityLayout";
 
 export const RelativeValuesDefinitionPageFragment = graphql`
   fragment RelativeValuesDefinitionPage on RelativeValuesDefinition {

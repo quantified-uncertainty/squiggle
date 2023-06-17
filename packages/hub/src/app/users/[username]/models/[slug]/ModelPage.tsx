@@ -15,7 +15,7 @@ import {
   QueryModelInput,
 } from "@/__generated__/ModelPageQuery.graphql";
 import { ModelPageQuery as ModelPageQueryType } from "@gen/ModelPageQuery.graphql";
-import { EntityLayout } from "@/components/Entity";
+import { EntityLayout } from "@/components/EntityLayout";
 
 export const ModelPageFragment = graphql`
   fragment ModelPage on Model
