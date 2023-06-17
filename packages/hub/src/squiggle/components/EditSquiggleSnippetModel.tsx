@@ -9,7 +9,7 @@ import {
 import { graphql, useFragment, useMutation } from "react-relay";
 
 import { SquigglePlayground } from "@quri/squiggle-components";
-import { Button, TextAreaFormField, useToast } from "@quri/ui";
+import { Button, useToast } from "@quri/ui";
 
 import {
   EditSquiggleSnippetModelMutation,
@@ -20,7 +20,6 @@ import { ModelRevision$key } from "@/__generated__/ModelRevision.graphql";
 import { SquiggleContent$key } from "@/__generated__/SquiggleContent.graphql";
 import { ModelPageFragment } from "@/app/users/[username]/models/[slug]/ModelPage";
 import { ModelRevisionFragment } from "@/app/users/[username]/models/[slug]/ModelRevision";
-import { EditModelExports } from "@/components/exports/EditModelExports";
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
 import { SquiggleContentFragment } from "./SquiggleContent";
 
@@ -44,7 +43,6 @@ export const Mutation = graphql`
 
 type FormShape = {
   code: string;
-  description: string;
   relativeValuesExports: RelativeValuesExportInput[];
 };
 
@@ -74,7 +72,6 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
   const initialFormValues: FormShape = useMemo(() => {
     return {
       code: content.code,
-      description: revision.description,
       relativeValuesExports: revision.relativeValuesExports.map((item) => ({
         variableName: item.variableName,
         definition: {
@@ -83,7 +80,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
         },
       })),
     };
-  }, [content, revision.description, revision.relativeValuesExports]);
+  }, [content, revision.relativeValuesExports]);
 
   const form = useForm<FormShape>({
     defaultValues: initialFormValues,
@@ -111,7 +108,6 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
           relativeValuesExports: formData.relativeValuesExports,
           slug: model.slug,
           username: model.owner.username,
-          description: formData.description,
         },
       },
       onCompleted(data) {

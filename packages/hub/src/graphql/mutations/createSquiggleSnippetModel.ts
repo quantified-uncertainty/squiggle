@@ -19,7 +19,6 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
     errors: {},
     input: {
       code: t.input.string({ required: true }),
-      description: t.input.string(),
       slug: t.input.string({
         required: true,
         validate: {
@@ -55,7 +54,6 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
               },
             },
             contentType: "SquiggleSnippet",
-            description: input.description ?? "",
             model: {
               connect: {
                 id: model.id,

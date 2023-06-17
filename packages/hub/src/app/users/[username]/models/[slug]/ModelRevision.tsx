@@ -7,7 +7,6 @@ export const ModelRevisionFragment = graphql`
     forRelativeValues: { type: "ModelRevisionForRelativeValuesInput" }
   ) {
     id
-    description
 
     # unfortunately we have to repeat ModelExports fragment here,
     # because of EditSquiggleSnippetModel component

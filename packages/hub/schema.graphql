@@ -66,7 +66,6 @@ type ModelEdge {
 type ModelRevision implements Node {
   content: ModelContent!
   createdAtTimestamp: Float!
-  description: String!
   forRelativeValues(input: ModelRevisionForRelativeValuesInput): RelativeValuesExport
   id: ID!
   model: Model!
@@ -130,7 +129,6 @@ union MutationCreateRelativeValuesDefinitionResult = BaseError | CreateRelativeV
 
 input MutationCreateSquiggleSnippetModelInput {
   code: String!
-  description: String
   slug: String!
 }
 
@@ -174,7 +172,6 @@ union MutationUpdateRelativeValuesDefinitionResult = BaseError | UpdateRelativeV
 input MutationUpdateSquiggleSnippetModelInput {
   code: String @deprecated(reason: "Use content arg instead")
   content: SquiggleSnippetContentInput
-  description: String
   relativeValuesExports: [RelativeValuesExportInput!]
   slug: String!
   username: String!
