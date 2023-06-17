@@ -1,14 +1,9 @@
 "use client";
 
-import { ChangeEventHandler, FC, useEffect, useState } from "react";
+import { ChangeEventHandler, FC, useState } from "react";
 import {
-  Control,
   Controller,
   FormProvider,
-  UseFormGetValues,
-  UseFormRegister,
-  UseFormSetValue,
-  UseFormWatch,
   useFieldArray,
   useForm,
   useFormContext,
@@ -26,8 +21,28 @@ import {
   TrashIcon,
 } from "@quri/ui";
 
-import { Header } from "@/components/ui/Header";
 import { SelectCluster } from "../SelectCluster";
+
+const formSectionHeader = (text: string) => (
+  <div className="text-base font-semibold leading-7 text-gray-900">{text}</div>
+);
+
+const formDivider = <div className="border-b border-slate-400 pt-8 mb-6" />;
+
+function FormSection({
+  headerName,
+  children,
+}: {
+  headerName: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      {formSectionHeader(headerName)}
+      {children}
+    </div>
+  );
+}
 
 export type RelativeValuesDefinitionFormShape = {
   slug: string;
@@ -107,12 +122,11 @@ const HTMLForm: FC = () => {
 
   return (
     <div>
-      <div>
-        <header className="font-bold text-lg">Clusters</header>
-        <div className="space-y-4">
-          <div className="space-y-8">
+      <FormSection headerName="Clusters">
+        <div className="space-y-3">
+          <div className="space-y-2">
             {clusterFields.map((_, i) => (
-              <div key={i} className="border-t pt-8 border-slate-200 space-y-2">
+              <div key={i} className="border-t pb-4 border-slate-200 space-y-2">
                 <div className="flex items-end gap-4">
                   <TextFormField
                     label="ID"
@@ -159,13 +173,16 @@ const HTMLForm: FC = () => {
             Add cluster
           </Button>
         </div>
-      </div>
-      <div>
-        <header className="font-bold text-lg mt-8">Items</header>
+      </FormSection>
+      {formDivider}
+      <FormSection headerName="Items">
         <div className="space-y-4">
-          <div className="space-y-8">
+          <div>
             {itemFields.map((_, i) => (
-              <div key={i} className="border-t pt-8 border-slate-200 space-y-2">
+              <div
+                key={i}
+                className="border-b pt-4 pb-6 border-slate-200 space-y-2"
+              >
                 <TextFormField
                   label="ID"
                   placeholder="my_item_id"
@@ -209,11 +226,9 @@ const HTMLForm: FC = () => {
             Add item
           </Button>
         </div>
-      </div>
-      <div>
-        <header className="font-bold text-lg mt-8 mb-2">
-          Recommended unit
-        </header>
+      </FormSection>
+      {formDivider}
+      <FormSection headerName="Recommended Unit">
         <Controller
           name="recommendedUnit"
           control={control}
@@ -232,7 +247,7 @@ const HTMLForm: FC = () => {
             );
           }}
         />
-      </div>
+      </FormSection>
     </div>
   );
 };
@@ -271,14 +286,14 @@ export const RelativeValuesDefinitionForm: FC<Props> = ({
             placeholder="My definition"
           />
         </div>
-        <div className="mt-8">
-          <Header>Edit as:</Header>
+        <div className="pt-8">
+          {formSectionHeader("Editing Format")}
           <StyledTab.Group>
             <StyledTab.List>
               <StyledTab name="Form" icon={() => <div />} />
               <StyledTab name="JSON" icon={() => <div />} />
             </StyledTab.List>
-            <div className="mt-8">
+            <div className="mt-4">
               <StyledTab.Panels>
                 <StyledTab.Panel>
                   <HTMLForm />
@@ -290,8 +305,8 @@ export const RelativeValuesDefinitionForm: FC<Props> = ({
             </div>
           </StyledTab.Group>
         </div>
-        <div className="mt-8">
-          <Button onClick={onSubmit} theme="primary" wide>
+        <div className="mt-4">
+          <Button onClick={onSubmit} theme="primary">
             Save
           </Button>
         </div>
