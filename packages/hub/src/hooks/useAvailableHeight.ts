@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 
-//This gets all of the available height on the page, starting from the top of the element.
-//This is useful for having a div fill up the rest of the page.
+// This gets all of the available height on the page, starting from the top of the element.
+// This is useful for having a div fill up the rest of the page.
 export const useAvailableHeight = () => {
   const ref = useRef<HTMLDivElement>(null);
-  const [height, setHeight] = useState(0);
+  const [height, setHeight] = useState<number | undefined>();
 
   useEffect(() => {
     const updateHeight = () => {
