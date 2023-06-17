@@ -1,7 +1,7 @@
 "use client";
 
-import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 import { NewDefinition } from "./NewDefinition";
+import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 
 export default function NewModelPage() {
   return (

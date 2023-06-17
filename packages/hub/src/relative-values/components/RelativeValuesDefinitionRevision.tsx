@@ -3,7 +3,7 @@ import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { RelativeValuesDefinitionRevision$key } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
-import { Header } from "@/components/ui/Header";
+import { Header2 } from "@/components/ui/Header2";
 import { ClusterInfo } from "./common/ClusterInfo";
 
 export const RelativeValuesDefinitionRevisionFragment = graphql`
@@ -43,10 +43,10 @@ export const RelativeValuesDefinitionRevision: FC<Props> = ({
   return (
     <section>
       <div className="mb-4">
-        <Header size="large">{content.title}</Header>
+        <Header2 size="large">{content.title}</Header2>
       </div>
       <section>
-        <Header>Clusters</Header>
+        <Header2>Clusters</Header2>
         <div
           className="grid gap-x-8 gap-y-2"
           style={{
@@ -65,7 +65,7 @@ export const RelativeValuesDefinitionRevision: FC<Props> = ({
         </div>
       </section>
       <section className="mt-8">
-        <Header>Items</Header>
+        <Header2>Items</Header2>
         <div
           className="grid gap-x-8 gap-y-2"
           style={{

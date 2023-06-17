@@ -5,6 +5,7 @@ import { useLazyLoadQuery } from "react-relay";
 import { RelativeValuesDefinitionPageQuery as RelativeValuesDefinitionPageQueryType } from "@gen/RelativeValuesDefinitionPageQuery.graphql";
 import { RelativeValuesDefinitionPageQuery } from "../RelativeValuesDefinitionPage";
 import { EditRelativeValuesDefinition } from "./EditRelativeValuesDefinition";
+import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 
 export default function Page({
   params,
@@ -19,10 +20,10 @@ export default function Page({
   );
 
   return (
-    <div className="mx-auto max-w-6xl">
+    <NarrowPageLayout>
       <EditRelativeValuesDefinition
         definitionRef={data.relativeValuesDefinition}
       />
-    </div>
+    </NarrowPageLayout>
   );
 }

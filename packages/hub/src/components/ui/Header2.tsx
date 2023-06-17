@@ -5,15 +5,15 @@ type Props = PropsWithChildren<{
   size?: "normal" | "large";
 }>;
 
-export const Header: FC<Props> = ({ children, size = "normal" }) => {
+export const Header2: FC<Props> = ({ children, size = "normal" }) => {
   return (
-    <header
+    <h2
       className={clsx(
         size === "normal" && "text-xl font-bold mb-2",
         size === "large" && "text-2xl font-bold mb-4"
       )}
     >
       {children}
-    </header>
+    </h2>
   );
 };
