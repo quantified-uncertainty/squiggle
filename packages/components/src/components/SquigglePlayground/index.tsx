@@ -1,7 +1,8 @@
-import { CogIcon } from "@heroicons/react/solid/esm/index.js";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { clsx } from "clsx";
 import merge from "lodash/merge.js";
 import React, {
+  CSSProperties,
   ReactNode,
   useCallback,
   useEffect,
@@ -10,12 +11,12 @@ import React, {
   useState,
 } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { useInitialWidth } from "../../lib/hooks/useInitialWidth.js";
 import { ResizableBox } from "react-resizable";
 import { z } from "zod";
+import { useInitialWidth } from "../../lib/hooks/useInitialWidth.js";
 
 import { Env, SqProject } from "@quri/squiggle-lang";
-import { Bars3CenterLeftIcon, AdjustmentsVerticalIcon, Button } from "@quri/ui";
+import { AdjustmentsVerticalIcon, Bars3CenterLeftIcon, Button } from "@quri/ui";
 
 import { useMaybeControlledValue, useSquiggle } from "../../lib/hooks/index.js";
 
@@ -59,7 +60,7 @@ type PlaygroundProps = // Playground can be either controlled (`code`) or uncont
       renderExtraControls?: () => ReactNode;
       showShareButton?: boolean;
       /** Height of the editor */
-      height?: number;
+      height?: CSSProperties["height"];
     };
 
 // Left panel ref is used for local settings modal positioning in ItemSettingsMenu.tsx
@@ -161,13 +162,6 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
 
   const editorRef = useRef<CodeEditorHandle>(null);
 
-  const standardHeightStyle = (height: number) => ({
-    height,
-    overflow: "auto",
-  });
-  const leftSideHeaderHeight = 32; //calculated from the leftPanelHeader fixed height.
-  const rightSideHeaderHeight = 32;
-
   const leftPanelBody = (
     <>
       {selectedTab === "CODE" && (
@@ -178,20 +172,16 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
             errors={errors}
             project={resultAndBindings.project}
             showGutter={true}
-            height={height - leftSideHeaderHeight}
             onChange={setCode}
             onSubmit={runnerState.run}
           />
         </div>
       )}
       {selectedTab === "SETTINGS" && (
-        <div
-          className="px-2 space-y-6"
-          style={standardHeightStyle(height - leftSideHeaderHeight)}
-        >
+        <div className="px-2 space-y-6">
           <div className="px-2 py-2">
             <div className="pb-4">
-              <Button onClick={() => setSelectedTab("CODE")}> Back </Button>
+              <Button onClick={() => setSelectedTab("CODE")}>Back</Button>
             </div>
             <FormProvider {...form}>
               <PlaygroundSettingsForm />
@@ -234,10 +224,14 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
       : `${executionTime}ms`;
 
   const playgroundWithEditor = (
-    <div className="flex flex-row">
+    <div className="flex h-full items-stretch">
       <ResizableBox
-        className="h-full relative"
-        width={initialWidth / 2}
+        className={clsx("relative", !initialWidth && "w-1/2")}
+        width={
+          initialWidth === undefined
+            ? (null as any) // we intentionally pass the invalid value to ResizableBox when initialWidth is not set yet
+            : initialWidth / 2
+        }
         axis="x"
         resizeHandles={["e"]}
         handle={(_, ref) => (
@@ -249,15 +243,15 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
           />
         )}
       >
-        <div ref={leftPanelRef}>
+        <div className="h-full flex flex-col" ref={leftPanelRef}>
           {leftPanelHeader}
-          {leftPanelBody}
+          <div className="flex-1 grid place-content-stretch overflow-auto">
+            {leftPanelBody}
+          </div>
         </div>
       </ResizableBox>
-      <div
-        className="flex-1 overflow-y-auto" //The overflow seems needed, it can't just be in the sub divs.
-      >
-        <div className="flex mb-1 h-8 p-2 overflow-y-auto justify-end text-zinc-400 text-sm whitespace-nowrap">
+      <div className="flex-1 flex flex-col overflow-y-auto">
+        <div className="mb-1 h-8 p-2 flex justify-end text-zinc-400 text-sm whitespace-nowrap">
           {runnerState.isRunning
             ? "rendering..."
             : `render #${runnerState.executionId} in ${showTime(
@@ -265,8 +259,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
               )}`}
         </div>
         <div
-          style={standardHeightStyle(height - rightSideHeaderHeight)}
-          className="px-2"
+          className="flex-1 overflow-auto p2-2"
           data-testid="playground-result"
         >
           {squiggleChart}
@@ -281,18 +274,8 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
 
   return (
     <PlaygroundContext.Provider value={{ getLeftPanelElement }}>
-      <div
-        ref={fullContainerRef}
-        style={{
-          minHeight: 200 /* important if editor is hidden */,
-        }}
-      >
-        {showEditor && playgroundWithEditor}
-        {!showEditor && (
-          <div style={standardHeightStyle(height - rightSideHeaderHeight)}>
-            {squiggleChart}
-          </div>
-        )}
+      <div ref={fullContainerRef} style={{ height }}>
+        {showEditor ? playgroundWithEditor : squiggleChart}
       </div>
     </PlaygroundContext.Provider>
   );
