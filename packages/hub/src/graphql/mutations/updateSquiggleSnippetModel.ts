@@ -51,7 +51,6 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
     input: {
       username: t.input.string({ required: true }),
       slug: t.input.string({ required: true }),
-      description: t.input.string(),
       relativeValuesExports: t.input.field({
         type: [RelativeValuesExportInput],
       }),
@@ -143,7 +142,6 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
               create: { code },
             },
             contentType: "SquiggleSnippet",
-            description: input.description ?? "",
             model: {
               connect: {
                 slug_ownerId: {
