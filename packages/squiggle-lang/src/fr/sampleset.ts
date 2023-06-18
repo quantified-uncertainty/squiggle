@@ -57,7 +57,7 @@ const baseLibrary = [
     definitions: [
       makeDefinition([frDist], ([dist]) => {
         sampleSetAssert(dist);
-        return Ok(vArray(dist.samples.map(vNumber)));
+        return vArray(dist.samples.map(vNumber));
       }),
     ],
   }),

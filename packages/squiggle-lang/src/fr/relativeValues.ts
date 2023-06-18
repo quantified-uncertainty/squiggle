@@ -67,13 +67,11 @@ export const library = [
     ],
     definitions: [
       makeDefinition([relativeValuesShape], ([{ ids, fn }]) => {
-        return Result.Ok(
-          vPlot({
-            type: "relativeValues",
-            fn,
-            ids,
-          })
-        );
+        return vPlot({
+          type: "relativeValues",
+          fn,
+          ids,
+        });
       }),
     ],
   }),

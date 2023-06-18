@@ -70,14 +70,10 @@ export class Registry {
     return [...this.fnNameDict.keys()];
   }
 
-  call(
-    fnName: string,
-    args: Value[],
-    context: ReducerContext
-  ): result<Value, ErrorMessage> {
+  call(fnName: string, args: Value[], context: ReducerContext): Value {
     const definitions = this.fnNameDict.get(fnName);
     if (definitions === undefined) {
-      return Result.Err(new RESymbolNotFound(fnName));
+      throw new RESymbolNotFound(fnName);
     }
     const showNameMatchDefinitions = () => {
       const defsString = definitions
@@ -93,7 +89,7 @@ export class Registry {
         return callResult;
       }
     }
-    return Result.Err(new REOther(showNameMatchDefinitions()));
+    throw new REOther(showNameMatchDefinitions());
   }
 
   makeLambda(fnName: string): Lambda {
@@ -103,11 +99,7 @@ export class Registry {
     return new BuiltinLambda(fnName, (args, context) => {
       // Note: current bindings could be accidentally exposed here through context (compare with native lambda implementation above, where we override them with local bindings).
       // But FunctionRegistry API is too limited for that to matter. Please take care not to violate that in the future by accident.
-      const result = this.call(fnName, args, context);
-      if (!result.ok) {
-        throw result.value;
-      }
-      return result.value;
+      return this.call(fnName, args, context);
     });
   }
 }

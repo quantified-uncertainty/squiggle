@@ -9,13 +9,13 @@ import { FRType } from "./frTypes.js";
 // because of contravariance (we need to store all FnDefinitions in a generic array later on).
 export type FnDefinition = {
   inputs: FRType<any>[];
-  run: (args: any[], context: ReducerContext) => result<Value, ErrorMessage>;
+  run: (args: any[], context: ReducerContext) => Value;
 };
 
 export function makeDefinition<const T extends any[]>(
   // [...] wrapper is important, see also: https://stackoverflow.com/a/63891197
   inputs: [...{ [K in keyof T]: FRType<T[K]> }],
-  run: (args: T, context: ReducerContext) => result<Value, ErrorMessage>
+  run: (args: T, context: ReducerContext) => Value
 ): FnDefinition {
   return {
     inputs,
@@ -29,7 +29,7 @@ export function tryCallFnDefinition(
   fn: FnDefinition,
   args: Value[],
   context: ReducerContext
-): result<Value, ErrorMessage> | undefined {
+): Value | undefined {
   if (args.length !== fn.inputs.length) {
     return; // args length mismatch
   }

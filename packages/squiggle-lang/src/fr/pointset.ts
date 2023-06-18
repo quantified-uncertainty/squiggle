@@ -61,7 +61,7 @@ export const library = [
     definitions: [
       makeDefinition([frDist, frNumber], ([dist, number]) => {
         pointSetAssert(dist);
-        return Ok(vDist(dist.downsample(number)));
+        return vDist(dist.downsample(number));
       }),
     ],
   }),
@@ -97,11 +97,9 @@ export const library = [
       makeDefinition(
         [frArray(frRecord(["x", frNumber], ["y", frNumber]))],
         ([arr]) => {
-          return Ok(
-            vDist(
-              new PointSetDist(
-                new Continuous.ContinuousShape({ xyShape: argsToXYShape(arr) })
-              )
+          return vDist(
+            new PointSetDist(
+              new Continuous.ContinuousShape({ xyShape: argsToXYShape(arr) })
             )
           );
         }
@@ -123,11 +121,9 @@ export const library = [
       makeDefinition(
         [frArray(frRecord(["x", frNumber], ["y", frNumber]))],
         ([arr]) => {
-          return Ok(
-            vDist(
-              new PointSetDist(
-                new Discrete.DiscreteShape({ xyShape: argsToXYShape(arr) })
-              )
+          return vDist(
+            new PointSetDist(
+              new Discrete.DiscreteShape({ xyShape: argsToXYShape(arr) })
             )
           );
         }

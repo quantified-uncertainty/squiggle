@@ -22,9 +22,7 @@ const makeNumberToDurationFn = (
 ) =>
   maker.make({
     name,
-    definitions: [
-      makeDefinition([frNumber], ([t]) => Ok(vTimeDuration(fn(t)))),
-    ],
+    definitions: [makeDefinition([frNumber], ([t]) => vTimeDuration(fn(t)))],
   });
 
 const makeDurationToNumberFn = (
@@ -33,54 +31,52 @@ const makeDurationToNumberFn = (
 ) =>
   maker.make({
     name,
-    definitions: [
-      makeDefinition([frTimeDuration], ([t]) => Ok(vNumber(fn(t)))),
-    ],
+    definitions: [makeDefinition([frTimeDuration], ([t]) => vNumber(fn(t)))],
   });
 
 export const library = [
   maker.make({
     name: "toString",
     definitions: [
-      makeDefinition([frDate], ([t]) => Ok(vString(DateTime.Date.toString(t)))),
+      makeDefinition([frDate], ([t]) => vString(DateTime.Date.toString(t))),
       makeDefinition([frTimeDuration], ([t]) =>
-        Ok(vString(DateTime.Duration.toString(t)))
+        vString(DateTime.Duration.toString(t))
       ),
     ],
   }),
   maker.fromDefinition(
     "makeDateFromYear",
     makeDefinition([frNumber], ([year]) => {
-      return Result.fmap2(
-        DateTime.Date.makeFromYear(year),
-        vDate,
-        (e) => new REOther(e)
-      );
+      const result = DateTime.Date.makeFromYear(year);
+      if (!result.ok) {
+        throw new REOther(result.value);
+      }
+      return vDate(result.value);
     })
   ),
   maker.fromDefinition(
     "dateFromNumber",
-    makeDefinition([frNumber], ([f]) => Ok(vDate(new Date(f))))
+    makeDefinition([frNumber], ([f]) => vDate(new Date(f)))
   ),
   maker.fromDefinition(
     "toNumber",
-    makeDefinition([frDate], ([f]) => Ok(vNumber(f.getTime())))
+    makeDefinition([frDate], ([f]) => vNumber(f.getTime()))
   ),
   maker.make({
     name: "subtract",
     definitions: [
       makeDefinition([frDate, frTimeDuration], ([d1, d2]) =>
-        Ok(vDate(DateTime.Date.subtractDuration(d1, d2)))
+        vDate(DateTime.Date.subtractDuration(d1, d2))
       ),
-      makeDefinition([frDate, frDate], ([d1, d2]) =>
-        Result.fmap2(
-          DateTime.Date.subtract(d1, d2),
-          vTimeDuration,
-          (e) => new REOther(e)
-        )
-      ),
+      makeDefinition([frDate, frDate], ([d1, d2]) => {
+        const result = DateTime.Date.subtract(d1, d2);
+        if (!result.ok) {
+          throw new REOther(result.value);
+        }
+        return vTimeDuration(result.value);
+      }),
       makeDefinition([frTimeDuration, frTimeDuration], ([d1, d2]) =>
-        Ok(vTimeDuration(DateTime.Duration.subtract(d1, d2)))
+        vTimeDuration(DateTime.Duration.subtract(d1, d2))
       ),
     ],
   }),
@@ -88,10 +84,10 @@ export const library = [
     name: "add",
     definitions: [
       makeDefinition([frDate, frTimeDuration], ([d1, d2]) =>
-        Ok(vDate(DateTime.Date.addDuration(d1, d2)))
+        vDate(DateTime.Date.addDuration(d1, d2))
       ),
       makeDefinition([frTimeDuration, frTimeDuration], ([d1, d2]) =>
-        Ok(vTimeDuration(DateTime.Duration.add(d1, d2)))
+        vTimeDuration(DateTime.Duration.add(d1, d2))
       ),
     ],
   }),
@@ -99,7 +95,7 @@ export const library = [
     name: "multiply",
     definitions: [
       makeDefinition([frTimeDuration, frNumber], ([d1, d2]) =>
-        Ok(vTimeDuration(DateTime.Duration.multiply(d1, d2)))
+        vTimeDuration(DateTime.Duration.multiply(d1, d2))
       ),
     ],
   }),
@@ -107,10 +103,10 @@ export const library = [
     name: "divide",
     definitions: [
       makeDefinition([frTimeDuration, frNumber], ([d1, d2]) =>
-        Ok(vTimeDuration(DateTime.Duration.divide(d1, d2)))
+        vTimeDuration(DateTime.Duration.divide(d1, d2))
       ),
       makeDefinition([frTimeDuration, frTimeDuration], ([d1, d2]) =>
-        Ok(vNumber(d1 / d2))
+        vNumber(d1 / d2)
       ),
     ],
   }),

@@ -15,15 +15,16 @@ const maker = new FnFactory({
   requiresNamespace: false,
 });
 
-const emptyList = (): Result.result<Value, ErrorMessage> =>
-  Result.Err(new REOther("List is empty"));
+const throwEmptyList = (): never => {
+  throw new REOther("List is empty");
+};
 
 function makeNumberArrayToNumberDefinition(fn: (arr: number[]) => number) {
   return makeDefinition([frArray(frNumber)], ([arr]) => {
     if (arr.length === 0) {
-      return emptyList();
+      return throwEmptyList();
     }
-    return Ok(vNumber(fn(arr)));
+    return vNumber(fn(arr));
   });
 }
 
@@ -32,9 +33,9 @@ function makeNumberArrayToNumberArrayDefinition(
 ) {
   return makeDefinition([frArray(frNumber)], ([arr]) => {
     if (arr.length === 0) {
-      return emptyList();
+      return throwEmptyList();
     }
-    return Ok(vArray(fn(arr).map(vNumber)));
+    return vArray(fn(arr).map(vNumber));
   });
 }
 

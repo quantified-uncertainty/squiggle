@@ -1,18 +1,17 @@
 import { BaseDist } from "../dist/BaseDist.js";
 import { DistError, otherError } from "../dist/DistError.js";
+import * as SymbolicDist from "../dist/SymbolicDist.js";
 import {
   BinaryOperation,
   binaryOperations,
 } from "../dist/distOperations/index.js";
-import * as SymbolicDist from "../dist/SymbolicDist.js";
+import { REDistributionError } from "../errors.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import { frDist, frNumber } from "../library/registry/frTypes.js";
 import { FnFactory, unpackDistResult } from "../library/registry/helpers.js";
 import * as magicNumbers from "../magicNumbers.js";
-import { ErrorMessage, REDistributionError } from "../errors.js";
 import * as Result from "../utility/result.js";
-import { Ok } from "../utility/result.js";
 import { Value, vArray, vDist, vNumber } from "../value/index.js";
 
 const maker = new FnFactory({
@@ -20,11 +19,14 @@ const maker = new FnFactory({
   requiresNamespace: false,
 });
 
-export const toValueResult = (
+export function distResultToValue(
   result: Result.result<BaseDist, DistError>
-): Result.result<Value, ErrorMessage> => {
-  return Result.fmap2(result, vDist, (e) => new REDistributionError(e));
-};
+): Value {
+  if (!result.ok) {
+    throw new REDistributionError(result.value);
+  }
+  return vDist(result.value);
+}
 
 type OpPair = [string, BinaryOperation];
 const algebraicOps: OpPair[] = [
@@ -59,17 +61,17 @@ const makeOperationFns = (): FRFunction[] => {
         name,
         definitions: [
           makeDefinition([frDist, frNumber], ([dist, n], { environment }) =>
-            toValueResult(
+            distResultToValue(
               op(dist, new SymbolicDist.PointMass(n), { env: environment })
             )
           ),
           makeDefinition([frNumber, frDist], ([n, dist], { environment }) =>
-            toValueResult(
+            distResultToValue(
               op(new SymbolicDist.PointMass(n), dist, { env: environment })
             )
           ),
           makeDefinition([frDist, frDist], ([dist1, dist2], { environment }) =>
-            toValueResult(op(dist1, dist2, { env: environment }))
+            distResultToValue(op(dist1, dist2, { env: environment }))
           ),
         ],
       })
@@ -105,18 +107,18 @@ export const library: FRFunction[] = [
   maker.d2n({ name: "integralSum", fn: (d) => d.integralSum() }),
   maker.fromDefinition(
     "triangular",
-    makeDefinition([frNumber, frNumber, frNumber], ([low, medium, high]) =>
-      Result.fmap2(
-        SymbolicDist.Triangular.make({ low, medium, high }),
-        vDist,
-        (e) => new REDistributionError(otherError(e))
-      )
-    )
+    makeDefinition([frNumber, frNumber, frNumber], ([low, medium, high]) => {
+      const result = SymbolicDist.Triangular.make({ low, medium, high });
+      if (!result.ok) {
+        throw new REDistributionError(otherError(result.value));
+      }
+      return vDist(result.value);
+    })
   ),
   maker.fromDefinition(
     "sampleN",
     makeDefinition([frDist, frNumber], ([dist, n]) => {
-      return Ok(vArray(dist.sampleN(n | 0).map(vNumber)));
+      return vArray(dist.sampleN(n | 0).map(vNumber));
     })
   ),
   maker.d2d({
@@ -176,7 +178,7 @@ export const library: FRFunction[] = [
     makeDefinition(
       [frDist, frNumber, frNumber],
       ([dist, left, right], { environment }) =>
-        toValueResult(dist.truncate(left, right, { env: environment }))
+        distResultToValue(dist.truncate(left, right, { env: environment }))
     )
   ),
   maker.d2d({

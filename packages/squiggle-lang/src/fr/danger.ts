@@ -25,7 +25,7 @@ import { Lambda } from "../reducer/lambda.js";
 import * as E_A from "../utility/E_A.js";
 import { Ok, result } from "../utility/result.js";
 import { Value, vArray, vNumber } from "../value/index.js";
-import { toValueResult } from "./genericDist.js";
+import { distResultToValue } from "./genericDist.js";
 
 const { factorial } = jstat;
 
@@ -59,7 +59,7 @@ const combinatoricsLibrary: FRFunction[] = [
     examples: [`Danger.binomial(1, 20, 0.5)`],
     definitions: [
       makeDefinition([frNumber, frNumber, frNumber], ([n, k, p]) =>
-        Ok(vNumber(choose(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k)))
+        vNumber(choose(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k))
       ),
     ],
   }),
@@ -71,7 +71,7 @@ const integrateFunctionBetweenWithNumIntegrationPoints = (
   max: number,
   numIntegrationPoints: number,
   context: ReducerContext
-): result<Value, ErrorMessage> => {
+): Value => {
   const applyFunctionAtFloatToFloatOption = (point: number) => {
     // Defined here so that it has access to context, reducer
     const result = lambda.call([vNumber(point)], context);
@@ -131,7 +131,7 @@ const integrateFunctionBetweenWithNumIntegrationPoints = (
   const result =
     (yMin + yMax) * weightForAnOuterPoint +
     innerPointsSum * weightForAnInnerPoint;
-  return Ok(vNumber(result));
+  return vNumber(result);
 };
 const integrationLibrary: FRFunction[] = [
   // Integral in terms of function, min, max, num points
@@ -317,10 +317,8 @@ const diminishingReturnsLibrary = [
             initAccumulator
           );
 
-          return Ok(
-            vArray(
-              optimalAllocationEndAccumulator.optimalAllocations.map(vNumber)
-            )
+          return vArray(
+            optimalAllocationEndAccumulator.optimalAllocations.map(vNumber)
           );
         }
       ),
@@ -347,7 +345,7 @@ const mapYLibrary: FRFunction[] = [
       makeDefinition(
         [frDist, frNumber, frNumber],
         ([dist, base, eps], { environment }) =>
-          toValueResult(
+          distResultToValue(
             scaleLogWithThreshold(dist, {
               env: environment,
               eps,
