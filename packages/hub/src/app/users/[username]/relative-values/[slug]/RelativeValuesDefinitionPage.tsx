@@ -1,14 +1,13 @@
 import { FC, PropsWithChildren } from "react";
 import { graphql } from "relay-runtime";
 
-import { EntityInfo } from "@/components/EntityInfo";
-import { WithTopMenu } from "@/components/layout/WithTopMenu";
 import { DotsDropdownButton } from "@/components/ui/DotsDropdownButton";
 import { StyledTabLink } from "@/components/ui/StyledTabLink";
 import { relativeValuesEditRoute, relativeValuesRoute } from "@/routes";
 import { DropdownMenu } from "@quri/ui";
 import { DeleteDefinitionAction } from "./DeleteRelativeValuesDefinitionAction";
 import { useSession } from "next-auth/react";
+import { EntityLayout } from "@/components/EntityLayout";
 
 export const RelativeValuesDefinitionPageFragment = graphql`
   fragment RelativeValuesDefinitionPage on RelativeValuesDefinition {
@@ -58,10 +57,12 @@ export const RelativeValuesDefinitionPage: FC<Props> = ({
   const { data: session } = useSession();
 
   return (
-    <WithTopMenu addMarginToMainSection={false}>
-      <div className="flex items-center gap-4 max-w-6xl mx-auto">
-        <EntityInfo slug={slug} username={username} />
-        {session?.user.username === username ? (
+    <EntityLayout
+      slug={slug}
+      username={username}
+      homepageUrl={relativeValuesRoute({ username, slug })}
+      headerChildren={
+        session?.user.username === username ? (
           <>
             <StyledTabLink.List>
               <StyledTabLink
@@ -85,9 +86,10 @@ export const RelativeValuesDefinitionPage: FC<Props> = ({
               )}
             </DotsDropdownButton>
           </>
-        ) : null}
-      </div>
-      <div>{children}</div>
-    </WithTopMenu>
+        ) : null
+      }
+    >
+      {children}
+    </EntityLayout>
   );
 };

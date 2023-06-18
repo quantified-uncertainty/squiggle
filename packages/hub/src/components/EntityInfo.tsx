@@ -1,20 +1,20 @@
 import { FC } from "react";
 
 import { UsernameLink } from "./UsernameLink";
-import { modelRoute } from "@/routes";
 import Link from "next/link";
 
 // works both for models and for definitions
-export const EntityInfo: FC<{ username: string; slug: string }> = ({
-  username,
-  slug,
-}) => {
+export const EntityInfo: FC<{
+  username: string;
+  slug: string;
+  href: string;
+}> = ({ username, slug, href }) => {
   return (
     <div className="flex justify-between w-full">
       <div className="flex items-center mr-3 group cursor-pointer">
         <Link
           className="text-xl font-medium text-blue-600 group-hover:underline"
-          href={modelRoute({ slug, username })}
+          href={href}
         >
           {slug}
         </Link>

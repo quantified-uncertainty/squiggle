@@ -6,7 +6,7 @@ import { FC } from "react";
 import { graphql } from "relay-runtime";
 
 import { NewDefinitionMutation } from "@/__generated__/NewDefinitionMutation.graphql";
-import { Header } from "@/components/ui/Header";
+import { H1 } from "@/components/ui/Headers";
 import { useAsyncMutation } from "@/hooks/useAsyncMutation";
 import {
   RelativeValuesDefinitionForm,
@@ -62,7 +62,7 @@ export const NewDefinition: FC = () => {
 
   return (
     <div>
-      <Header size="large">New Relative Values definition</Header>
+      <H1 size="normal">New Relative Values definition</H1>
       <RelativeValuesDefinitionForm save={save} />
     </div>
   );

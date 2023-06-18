@@ -6,7 +6,7 @@ import { graphql, usePaginationFragment } from "react-relay";
 import { FrontPageModelList$key } from "@/__generated__/FrontPageModelList.graphql";
 import { FrontPageModelListPaginationQuery } from "@/__generated__/FrontPageModelListPaginationQuery.graphql";
 import { ModelList } from "@/models/components/ModelList";
-import { Header } from "@/components/ui/Header";
+import { H2 } from "@/components/ui/Headers";
 
 const Fragment = graphql`
   fragment FrontPageModelList on Query
@@ -41,7 +41,7 @@ export const FrontPageModelList: FC<Props> = ({ dataRef }) => {
 
   return (
     <div>
-      <Header size="large">All models</Header>
+      <H2 size="normal">All models</H2>
       <ModelList connectionRef={models} showOwner={true} loadNext={loadNext} />
     </div>
   );

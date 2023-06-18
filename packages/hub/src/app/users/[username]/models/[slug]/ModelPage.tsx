@@ -5,11 +5,9 @@ import { useLazyLoadQuery } from "react-relay";
 
 import { DropdownMenu } from "@quri/ui";
 
-import { EntityInfo } from "@/components/EntityInfo";
-import { WithTopMenu } from "@/components/layout/WithTopMenu";
 import { DotsDropdownButton } from "@/components/ui/DotsDropdownButton";
 import { StyledTabLink } from "@/components/ui/StyledTabLink";
-import { modelViewRoute, modelRevisionsRoute, modelRoute } from "@/routes";
+import { modelRevisionsRoute, modelRoute } from "@/routes";
 import { DeleteModelAction } from "./DeleteModelAction";
 import { UpdateModelSlugAction } from "./UpdateModelSlugAction";
 import {
@@ -17,6 +15,7 @@ import {
   QueryModelInput,
 } from "@/__generated__/ModelPageQuery.graphql";
 import { ModelPageQuery as ModelPageQueryType } from "@gen/ModelPageQuery.graphql";
+import { EntityLayout } from "@/components/EntityLayout";
 
 export const ModelPageFragment = graphql`
   fragment ModelPage on Model
@@ -89,24 +88,30 @@ export const ModelPage: FC<Props> = ({ username, slug, children }) => {
   const { data: session } = useSession();
 
   return (
-    <WithTopMenu addMarginToMainSection={false}>
-      <div
-        className="flex items-center gap-4 px-8 pt-5 pb-4 border-b border-gray-300"
-        style={{ backgroundColor: "#eceef0" }}
-      >
-        <EntityInfo slug={slug} username={username} />
-        <StyledTabLink.List>
-          <StyledTabLink name="Editor" href={modelRoute({ username, slug })} />
-          <StyledTabLink
-            name="Revisions"
-            href={modelRevisionsRoute({ username, slug })}
-          />
-        </StyledTabLink.List>
-        {session?.user.username === username ? (
-          <MenuButton username={username} slug={slug} />
-        ) : null}
-      </div>
+    <EntityLayout
+      slug={slug}
+      username={username}
+      homepageUrl={modelRoute({ username, slug })}
+      isFluid={true}
+      headerChildren={
+        <>
+          <StyledTabLink.List>
+            <StyledTabLink
+              name="Editor"
+              href={modelRoute({ username, slug })}
+            />
+            <StyledTabLink
+              name="Revisions"
+              href={modelRevisionsRoute({ username, slug })}
+            />
+          </StyledTabLink.List>
+          {session?.user.username === username ? (
+            <MenuButton username={username} slug={slug} />
+          ) : null}
+        </>
+      }
+    >
       {children}
-    </WithTopMenu>
+    </EntityLayout>
   );
 };

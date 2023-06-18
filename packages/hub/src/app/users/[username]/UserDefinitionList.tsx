@@ -1,6 +1,6 @@
 import { UserDefinitionList$key } from "@/__generated__/UserDefinitionList.graphql";
 import { UserModelList$key } from "@/__generated__/UserModelList.graphql";
-import { Header } from "@/components/ui/Header";
+import { H1 } from "@/components/ui/Headers";
 import { ModelList } from "@/models/components/ModelList";
 import { RelativeValuesDefinitionList } from "@/relative-values/components/RelativeValuesDefinitionList";
 import { FC } from "react";
@@ -37,7 +37,7 @@ export const UserDefinitionList: FC<Props> = ({ dataRef }) => {
   return (
     <section>
       <div className="mb-2">
-        <Header>Relative values definitions</Header>
+        <H1>Relative values definitions</H1>
       </div>
       <RelativeValuesDefinitionList
         connectionRef={relativeValuesDefinitions}
