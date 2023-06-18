@@ -2,16 +2,16 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
-import { Controller, FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 import { modelRoute } from "@/routes";
 import { H1 } from "@/components/ui/Headers";
 
-import { Button, TextAreaFormField, TextFormField, useToast } from "@quri/ui";
+import { Button, TextFormField, useToast } from "@quri/ui";
 
+import { modelRoute } from "@/routes";
 import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
-import { WithTopMenu } from "@/components/layout/WithTopMenu";
 
 const Mutation = graphql`
   mutation NewModelMutation($input: MutationCreateSquiggleSnippetModelInput!) {
@@ -37,7 +37,6 @@ export const NewModel: FC = () => {
   const form = useForm<{
     code: string;
     slug: string;
-    description: string;
   }>({
     defaultValues: {
       code: `/*
@@ -59,7 +58,6 @@ a = normal(2, 5)`,
         input: {
           code: data.code,
           slug: data.slug,
-          description: data.description,
         },
       },
       onCompleted(completion) {
