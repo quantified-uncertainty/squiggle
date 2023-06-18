@@ -157,15 +157,11 @@ const evaluateSymbol: SubReducerFn<"Symbol"> = (name, context, ast) => {
   if (value === undefined) {
     return throwFrom(new RESymbolNotFound(name), context, ast);
   } else {
-    return [value, context];
+    return [value.cloneWithAst(ast), context];
   }
 };
 
-const evaluateValue: SubReducerFn<"Value"> = (
-  expressionValue,
-  context,
-  ast
-) => {
+const evaluateValue: SubReducerFn<"Value"> = (expressionValue, context) => {
   return [expressionValue, context];
 };
 
@@ -175,14 +171,15 @@ const evaluateTernary: SubReducerFn<"Ternary"> = (
   ast
 ) => {
   const [predicateResult] = evaluate(expressionValue.condition, context);
-  if (predicateResult.type === "Bool") {
-    return evaluate(
-      predicateResult.value ? expressionValue.ifTrue : expressionValue.ifFalse,
-      context
-    );
-  } else {
+  if (predicateResult.type !== "Bool") {
     return throwFrom(new REExpectedType("Boolean", ""), context, ast);
   }
+
+  const [value] = evaluate(
+    predicateResult.value ? expressionValue.ifTrue : expressionValue.ifFalse,
+    context
+  );
+  return [value.cloneWithAst(ast), context];
 };
 
 const evaluateLambda: SubReducerFn<"Lambda"> = (
@@ -190,18 +187,17 @@ const evaluateLambda: SubReducerFn<"Lambda"> = (
   context,
   ast
 ) => {
-  return [
-    vLambda(
-      new SquiggleLambda(
-        expressionValue.name,
-        expressionValue.parameters,
-        context.bindings,
-        expressionValue.body,
-        ast.location
-      )
-    ),
-    context,
-  ];
+  const value = vLambda(
+    new SquiggleLambda(
+      expressionValue.name,
+      expressionValue.parameters,
+      context.bindings,
+      expressionValue.body,
+      ast.location
+    )
+  );
+  value.ast = ast;
+  return [value, context];
 };
 
 const evaluateCall: SubReducerFn<"Call"> = (expressionValue, context, ast) => {
