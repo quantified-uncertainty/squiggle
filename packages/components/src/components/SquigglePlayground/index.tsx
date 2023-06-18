@@ -259,7 +259,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
               )}`}
         </div>
         <div
-          className="flex-1 overflow-auto p2-2"
+          className="flex-1 overflow-auto px-2"
           data-testid="playground-result"
         >
           {squiggleChart}
