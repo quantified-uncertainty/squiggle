@@ -1,25 +1,30 @@
 import isInteger from "lodash/isInteger.js";
 
 import { BaseDist } from "../dist/BaseDist.js";
+import {
+  REArrayIndexNotFound,
+  REOther,
+  RERecordPropertyNotFound,
+} from "../errors.js";
 import { Namespace } from "../reducer/bindings.js";
 import {
   declarationToString,
   LambdaDeclaration,
 } from "../reducer/declaration.js";
-import {
-  ErrorMessage,
-  REArrayIndexNotFound,
-  REOther,
-  RERecordPropertyNotFound,
-} from "../errors.js";
 import { Lambda } from "../reducer/lambda.js";
 import * as DateTime from "../utility/DateTime.js";
+import { ASTNode } from "../ast/parse.js";
 
 export type ValueMap = Namespace;
 
 // Mixin for values that allow field lookups; just for type safety.
 type Indexable = {
   get(key: Value): Value;
+};
+
+type BaseValue = {
+  ast?: ASTNode;
+  toString(): string;
 };
 
 /*
@@ -34,8 +39,10 @@ If you add a new value class, don't forget to add it to the "Value" union type b
 "vBlah" functions are just for the sake of brevity, so that we don't have to prefix any value creation with "new".
 */
 
-class VArray implements Indexable {
+class VArray implements BaseValue, Indexable {
   readonly type = "Array" as const;
+  ast?: ASTNode;
+
   constructor(public value: Value[]) {}
   toString(): string {
     return "[" + this.value.map((v) => v.toString()).join(",") + "]";
@@ -72,8 +79,10 @@ class VArray implements Indexable {
 }
 export const vArray = (v: Value[]) => new VArray(v);
 
-class VBool {
+class VBool implements BaseValue {
   readonly type = "Bool" as const;
+  ast?: ASTNode;
+
   constructor(public value: boolean) {}
   toString() {
     return String(this.value);
@@ -81,8 +90,10 @@ class VBool {
 }
 export const vBool = (v: boolean) => new VBool(v);
 
-class VDate {
+class VDate implements BaseValue {
   readonly type = "Date" as const;
+  ast?: ASTNode;
+
   constructor(public value: Date) {}
   toString() {
     return DateTime.Date.toString(this.value);
@@ -90,8 +101,10 @@ class VDate {
 }
 export const vDate = (v: Date) => new VDate(v);
 
-class VDeclaration implements Indexable {
+class VDeclaration implements BaseValue, Indexable {
   readonly type = "Declaration" as const;
+  ast?: ASTNode;
+
   constructor(public value: LambdaDeclaration) {}
   toString() {
     return declarationToString(this.value, (f) => vLambda(f).toString());
@@ -106,8 +119,10 @@ class VDeclaration implements Indexable {
 }
 export const vLambdaDeclaration = (v: LambdaDeclaration) => new VDeclaration(v);
 
-class VDist {
+class VDist implements BaseValue {
   readonly type = "Dist" as const;
+  ast?: ASTNode;
+
   constructor(public value: BaseDist) {}
   toString() {
     return this.value.toString();
@@ -115,8 +130,10 @@ class VDist {
 }
 export const vDist = (v: BaseDist) => new VDist(v);
 
-class VLambda {
+class VLambda implements BaseValue {
   type = "Lambda" as const;
+  ast?: ASTNode;
+
   constructor(public value: Lambda) {}
   toString() {
     return this.value.toString();
@@ -124,8 +141,10 @@ class VLambda {
 }
 export const vLambda = (v: Lambda) => new VLambda(v);
 
-class VNumber {
+class VNumber implements BaseValue {
   readonly type = "Number" as const;
+  ast?: ASTNode;
+
   constructor(public value: number) {}
   toString() {
     return String(this.value);
@@ -133,8 +152,10 @@ class VNumber {
 }
 export const vNumber = (v: number) => new VNumber(v);
 
-class VString {
+class VString implements BaseValue {
   readonly type = "String" as const;
+  ast?: ASTNode;
+
   constructor(public value: string) {}
   toString() {
     return `'${this.value}'`;
@@ -142,8 +163,10 @@ class VString {
 }
 export const vString = (v: string) => new VString(v);
 
-class VRecord implements Indexable {
+class VRecord implements BaseValue, Indexable {
   readonly type = "Record" as const;
+  ast?: ASTNode;
+
   constructor(public value: ValueMap) {}
   toString(): string {
     return (
@@ -172,8 +195,10 @@ class VRecord implements Indexable {
 }
 export const vRecord = (v: ValueMap) => new VRecord(v);
 
-class VTimeDuration {
+class VTimeDuration implements BaseValue {
   readonly type = "TimeDuration" as const;
+  ast?: ASTNode;
+
   constructor(public value: number) {}
   toString() {
     return DateTime.Duration.toString(this.value);
@@ -181,8 +206,10 @@ class VTimeDuration {
 }
 export const vTimeDuration = (v: number) => new VTimeDuration(v);
 
-class VVoid {
+class VVoid implements BaseValue {
   readonly type = "Void" as const;
+  ast?: ASTNode;
+
   toString() {
     return "()";
   }
@@ -230,8 +257,10 @@ export type Plot =
       ids: string[];
     };
 
-class VPlot implements Indexable {
+class VPlot implements BaseValue, Indexable {
   readonly type = "Plot" as const;
+  ast?: ASTNode;
+
   constructor(public value: Plot) {}
 
   toString(): string {
@@ -291,8 +320,10 @@ export type Scale = CommonScaleArgs &
       }
   );
 
-class VScale {
+class VScale implements BaseValue {
   readonly type = "Scale" as const;
+  ast?: ASTNode;
+
   constructor(public value: Scale) {}
 
   toString(): string {

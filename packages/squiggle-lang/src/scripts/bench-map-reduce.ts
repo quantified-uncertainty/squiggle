@@ -2,7 +2,7 @@
 import { SqProject } from "../index.js";
 import { measure } from "../cli/utils.js";
 
-const maxP = 6;
+const maxP = 5;
 
 async function main() {
   for (let p = 0; p <= maxP; p++) {

@@ -8,6 +8,7 @@ import { Bindings } from "./bindings.js";
 import * as Context from "./context.js";
 import { ReducerContext } from "./context.js";
 import { ReducerFn } from "./index.js";
+import { ASTNode } from "../ast/parse.js";
 
 type LambdaBody = (
   args: Value[],
@@ -26,21 +27,23 @@ export abstract class Lambda {
     args: Value[],
     context: ReducerContext,
     reducer: ReducerFn,
-    location: LocationRange | undefined
+    ast: ASTNode | undefined
   ): Value {
     const newContext: ReducerContext = {
       ...context,
       frameStack: context.frameStack.extend(
         Context.currentFunctionName(context),
-        location
+        ast?.location
       ),
       inFunction: this,
     };
 
-    return IError.rethrowWithFrameStack(
+    const value = IError.rethrowWithFrameStack(
       () => this.body(args, newContext, reducer),
       newContext.frameStack
     );
+    value.ast = ast;
+    return value;
   }
 
   call(args: Value[], context: ReducerContext, reducer: ReducerFn): Value {

@@ -209,7 +209,7 @@ const evaluateCall: SubReducerFn<"Call"> = (expressionValue, context, ast) => {
         argValues,
         context,
         evaluate,
-        ast.location // we have to pass the location of a current expression here, to put it on frameStack
+        ast // we pass the ast of a current expression here, to put it on frameStack and in the resulting value
       );
       return [result, context];
     default:
