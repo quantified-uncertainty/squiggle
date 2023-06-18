@@ -10,6 +10,7 @@ import {
 } from "./utils.js";
 import {
   useFocus,
+  useIsFocused,
   useSetSettings,
   useViewerContext,
 } from "./ViewerProvider.js";
@@ -23,7 +24,6 @@ type SettingsMenuParams = {
 type VariableBoxProps = {
   value: SqValue;
   heading: string;
-  isFocused?: boolean;
   preview?: React.ReactNode;
   renderSettingsMenu?: (params: SettingsMenuParams) => React.ReactNode;
   children: (settings: MergedItemSettings) => React.ReactNode;
@@ -45,13 +45,13 @@ export const SqTypeWithCount = ({
 export const VariableBox: React.FC<VariableBoxProps> = ({
   value: { location },
   heading = "Error",
-  isFocused = false,
   preview,
   renderSettingsMenu,
   children,
 }) => {
   const setSettings = useSetSettings();
   const focus = useFocus();
+  const isFocused = location && useIsFocused(location);
   const { getSettings, getMergedSettings } = useViewerContext();
 
   // Since `ViewerContext` doesn't store settings, `VariableBox` won't rerender when `setSettings` is called.
@@ -107,8 +107,11 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
                 "font-mono",
                 isFocused
                   ? "text-md text-stone-900 ml-1"
-                  : "text-sm text-stone-800"
+                  : "text-sm text-stone-800 cursor-pointer hover:underline"
               )}
+              onClick={() =>
+                !isFocused && location.path.items.length && focus(location)
+              }
             >
               {name}
             </span>
@@ -120,12 +123,6 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
                 {heading}
               </div>
             )}
-            {location.path.items.length && !isFocused ? (
-              <FocusIcon
-                className="h-5 w-5 cursor-pointer text-stone-200 hover:text-stone-500"
-                onClick={() => focus(location)}
-              />
-            ) : null}
             {!isCollapsed && renderSettingsMenu?.({ onChange: forceUpdate })}
           </div>
         </header>

@@ -89,6 +89,11 @@ export function useUnfocus() {
   return () => dispatch({ type: "UNFOCUS" });
 }
 
+export function useIsFocused(location: SqValueLocation) {
+  const { focused } = useViewerContext();
+  return !!focused && locationAsString(focused) === locationAsString(location);
+}
+
 type SettingsStore = {
   [k: string]: LocalItemSettings;
 };

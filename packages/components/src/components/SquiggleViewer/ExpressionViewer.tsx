@@ -25,16 +25,10 @@ import { RelativeValuesGridChart } from "../RelativeValuesGridChart/index.js";
 const VariableList: React.FC<{
   value: SqValue;
   heading: string;
-  isFocused?: boolean;
   preview?: React.ReactNode;
   children: (settings: MergedItemSettings) => React.ReactNode;
-}> = ({ value, heading, children, preview, isFocused }) => (
-  <VariableBox
-    value={value}
-    preview={preview}
-    heading={heading}
-    isFocused={isFocused}
-  >
+}> = ({ value, heading, children, preview }) => (
+  <VariableBox value={value} preview={preview} heading={heading}>
     {(settings) => (
       <div
         className={clsx(
@@ -52,16 +46,15 @@ export interface Props {
   /** The output of squiggle's run */
   value: SqValue;
   width?: number;
-  isFocused?: boolean;
 }
 
-export const ExpressionViewer: React.FC<Props> = ({ value, isFocused }) => {
+export const ExpressionViewer: React.FC<Props> = ({ value }) => {
   const environment = value.location!.project.getEnvironment();
 
   switch (value.tag) {
     case "Number":
       return (
-        <VariableBox value={value} isFocused={isFocused} heading="Number">
+        <VariableBox value={value} heading="Number">
           {() => (
             <div className="font-semibold text-neutral-600">
               <NumberShower precision={3} number={value.value} />
@@ -75,7 +68,6 @@ export const ExpressionViewer: React.FC<Props> = ({ value, isFocused }) => {
       return (
         <VariableBox
           value={value}
-          isFocused={isFocused}
           heading={`Distribution (${distType})\n${
             distType === SqDistributionTag.Symbolic
               ? value.value.toString()
@@ -120,7 +112,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value, isFocused }) => {
     }
     case "String":
       return (
-        <VariableBox value={value} isFocused={isFocused} heading="String">
+        <VariableBox value={value} heading="String">
           {() => (
             <>
               <span className="text-neutral-300">"</span>
@@ -132,7 +124,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value, isFocused }) => {
       );
     case "Bool":
       return (
-        <VariableBox value={value} isFocused={isFocused} heading="Boolean">
+        <VariableBox value={value} heading="Boolean">
           {() => (
             <span className="text-neutral-600 text-sm font-mono">
               {value.value.toString()}
@@ -142,7 +134,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value, isFocused }) => {
       );
     case "Date":
       return (
-        <VariableBox value={value} isFocused={isFocused} heading="Date">
+        <VariableBox value={value} heading="Date">
           {() => value.value.toDateString()}
         </VariableBox>
       );
@@ -154,11 +146,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value, isFocused }) => {
       );
     case "TimeDuration": {
       return (
-        <VariableBox
-          value={value}
-          isFocused={isFocused}
-          heading="Time Duration"
-        >
+        <VariableBox value={value} heading="Time Duration">
           {() => <NumberShower precision={3} number={value.value} />}
         </VariableBox>
       );
@@ -167,7 +155,6 @@ export const ExpressionViewer: React.FC<Props> = ({ value, isFocused }) => {
       return (
         <VariableBox
           value={value}
-          isFocused={isFocused}
           heading={`Function(${value.value.parameters().join(", ")})`}
           renderSettingsMenu={({ onChange }) => {
             return (
@@ -198,7 +185,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value, isFocused }) => {
       const plot: SqPlot = value.value;
 
       return (
-        <VariableBox value={value} isFocused={isFocused} heading="Plot">
+        <VariableBox value={value} heading="Plot">
           {(settings) => {
             switch (plot.tag) {
               case "distributions":
@@ -257,7 +244,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value, isFocused }) => {
       const scale: SqScale = value.value;
 
       return (
-        <VariableBox value={value} isFocused={isFocused} heading="Scale">
+        <VariableBox value={value} heading="Scale">
           {() => <div>{scale.toString()}</div>}
         </VariableBox>
       );
@@ -267,7 +254,6 @@ export const ExpressionViewer: React.FC<Props> = ({ value, isFocused }) => {
       return (
         <VariableList
           value={value}
-          isFocused={isFocused}
           heading={`Record(${entries.length})`}
           preview={<SqTypeWithCount type="{}" count={entries.length} />}
         >
@@ -286,7 +272,6 @@ export const ExpressionViewer: React.FC<Props> = ({ value, isFocused }) => {
       return (
         <VariableList
           value={value}
-          isFocused={isFocused}
           heading={`List(${values.length})`}
           preview={<SqTypeWithCount type="[]" count={values.length} />}
         >
@@ -296,7 +281,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value, isFocused }) => {
     }
     default: {
       return (
-        <VariableList value={value} isFocused={isFocused} heading="Error">
+        <VariableList value={value} heading="Error">
           {() => (
             <div>
               <span>No display for type: </span>{" "}
