@@ -100,8 +100,12 @@ function contentFromNode(ast: ASTNode): expression.ExpressionContent {
 }
 
 export function expressionFromAst(ast: ASTNode): expression.Expression {
+  const content = contentFromNode(ast);
+  if (content.type === "Value") {
+    content.value.ast = ast;
+  }
   return {
     ast,
-    ...contentFromNode(ast),
+    ...content,
   };
 }

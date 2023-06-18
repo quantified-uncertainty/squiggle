@@ -101,12 +101,18 @@ const evaluateProgram: SubReducerFn<"Program"> = (statements, context) => {
   return [currentValue, currentContext];
 };
 
-const evaluateArray: SubReducerFn<"Array"> = (expressionValue, context) => {
+const evaluateArray: SubReducerFn<"Array"> = (
+  expressionValue,
+  context,
+  ast
+) => {
   const values = expressionValue.map((element) => {
     const [value] = evaluate(element, context);
     return value;
   });
-  return [vArray(values), context];
+  const value = vArray(values);
+  value.ast = ast;
+  return [value, context];
 };
 
 const evaluateRecord: SubReducerFn<"Record"> = (
@@ -131,6 +137,7 @@ const evaluateRecord: SubReducerFn<"Record"> = (
       })
     )
   );
+  value.ast = ast;
   return [value, context];
 };
 

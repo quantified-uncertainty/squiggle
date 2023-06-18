@@ -1,7 +1,9 @@
 import { LocationRange } from "peggy";
 import { result } from "../utility/result.js";
 import * as Result from "../utility/result.js";
-import { AnyPeggyNode, ASTCommentNode } from "./peggyHelpers.js";
+import { type ASTNode, ASTCommentNode } from "./peggyHelpers.js";
+
+export { type ASTNode } from "./peggyHelpers.js";
 
 import {
   parse as peggyParse,
@@ -23,11 +25,9 @@ export const makeParseError = (
   location,
 });
 
-export type AST = AnyPeggyNode & {
+export type AST = ASTNode & {
   comments: ASTCommentNode[];
 };
-
-export type ASTNode = AnyPeggyNode;
 
 type ParseResult = result<AST, ParseError>;
 

@@ -39,7 +39,7 @@ type N<T extends string, V extends {}> = Node & { type: T } & V;
 type NodeBlock = N<
   "Block",
   {
-    statements: AnyPeggyNode[]; // should be NodeStatement[] ?
+    statements: ASTNode[]; // should be NodeStatement[] ?
   }
 >;
 
@@ -47,38 +47,35 @@ type NodeProgram = N<
   "Program",
   {
     imports: [NodeString, NodeIdentifier][];
-    statements: AnyPeggyNode[]; // should be NodeStatement[] ?
+    statements: ASTNode[]; // should be NodeStatement[] ?
   }
 >;
 
-type NodeArray = N<"Array", { elements: AnyPeggyNode[] }>;
+type NodeArray = N<"Array", { elements: ASTNode[] }>;
 
 type NodeRecord = N<"Record", { elements: NodeKeyValue[] }>;
 
-type NodeCall = N<"Call", { fn: AnyPeggyNode; args: AnyPeggyNode[] }>;
+type NodeCall = N<"Call", { fn: ASTNode; args: ASTNode[] }>;
 
 type NodeInfixCall = N<
   "InfixCall",
-  { op: InfixOperator; args: [AnyPeggyNode, AnyPeggyNode] }
+  { op: InfixOperator; args: [ASTNode, ASTNode] }
 >;
 
-type NodeUnaryCall = N<"UnaryCall", { op: UnaryOperator; arg: AnyPeggyNode }>;
+type NodeUnaryCall = N<"UnaryCall", { op: UnaryOperator; arg: ASTNode }>;
 
 type NodePipe = N<
   "Pipe",
   {
-    leftArg: AnyPeggyNode;
-    fn: AnyPeggyNode;
-    rightArgs: AnyPeggyNode[];
+    leftArg: ASTNode;
+    fn: ASTNode;
+    rightArgs: ASTNode[];
   }
 >;
 
-type NodeDotLookup = N<"DotLookup", { arg: AnyPeggyNode; key: string }>;
+type NodeDotLookup = N<"DotLookup", { arg: ASTNode; key: string }>;
 
-type NodeBracketLookup = N<
-  "BracketLookup",
-  { arg: AnyPeggyNode; key: AnyPeggyNode }
->;
+type NodeBracketLookup = N<"BracketLookup", { arg: ASTNode; key: ASTNode }>;
 
 type NodeFloat = N<"Float", { value: number }>;
 
@@ -90,14 +87,14 @@ type NodeModuleIdentifier = N<"ModuleIdentifier", { value: string }>;
 
 type NodeLetStatement = N<
   "LetStatement",
-  { variable: NodeIdentifier; value: AnyPeggyNode }
+  { variable: NodeIdentifier; value: ASTNode }
 >;
 
 type NodeLambda = N<
   "Lambda",
   {
-    args: AnyPeggyNode[];
-    body: AnyPeggyNode; // should be a NodeBlock
+    args: ASTNode[];
+    body: ASTNode; // should be a NodeBlock
     name?: string;
   }
 >;
@@ -115,9 +112,9 @@ type NodeDefunStatement = N<
 type NodeTernary = N<
   "Ternary",
   {
-    condition: AnyPeggyNode;
-    trueExpression: AnyPeggyNode;
-    falseExpression: AnyPeggyNode;
+    condition: ASTNode;
+    trueExpression: ASTNode;
+    falseExpression: ASTNode;
     kind: "IfThenElse" | "C";
   }
 >;
@@ -125,8 +122,8 @@ type NodeTernary = N<
 type NodeKeyValue = N<
   "KeyValue",
   {
-    key: AnyPeggyNode;
-    value: AnyPeggyNode;
+    key: ASTNode;
+    value: ASTNode;
   }
 >;
 
@@ -136,7 +133,7 @@ type NodeBoolean = N<"Boolean", { value: boolean }>;
 
 type NodeVoid = N<"Void", {}>;
 
-export type AnyPeggyNode =
+export type ASTNode =
   | NodeArray
   | NodeRecord
   | NodeBlock
@@ -161,18 +158,18 @@ export type AnyPeggyNode =
   | NodeVoid;
 
 export function nodeCall(
-  fn: AnyPeggyNode,
-  args: AnyPeggyNode[],
+  fn: ASTNode,
+  args: ASTNode[],
   location: LocationRange
 ): NodeCall {
   return { type: "Call", fn, args, location };
 }
 
 export function makeInfixChain(
-  head: AnyPeggyNode,
-  tail: [InfixOperator, AnyPeggyNode][],
+  head: ASTNode,
+  tail: [InfixOperator, ASTNode][],
   location: LocationRange
-): AnyPeggyNode {
+): ASTNode {
   return tail.reduce((result, [operator, right]) => {
     return nodeInfixCall(operator, result, right, location);
   }, head);
@@ -180,8 +177,8 @@ export function makeInfixChain(
 
 export function nodeInfixCall(
   op: InfixOperator,
-  arg1: AnyPeggyNode,
-  arg2: AnyPeggyNode,
+  arg1: ASTNode,
+  arg2: ASTNode,
   location: LocationRange
 ): NodeInfixCall {
   return {
@@ -194,23 +191,23 @@ export function nodeInfixCall(
 
 export function nodeUnaryCall(
   op: UnaryOperator,
-  arg: AnyPeggyNode,
+  arg: ASTNode,
   location: LocationRange
 ): NodeUnaryCall {
   return { type: "UnaryCall", op, arg, location };
 }
 
 export function nodePipe(
-  leftArg: AnyPeggyNode,
-  fn: AnyPeggyNode,
-  rightArgs: AnyPeggyNode[],
+  leftArg: ASTNode,
+  fn: ASTNode,
+  rightArgs: ASTNode[],
   location: LocationRange
 ): NodePipe {
   return { type: "Pipe", leftArg, fn, rightArgs, location };
 }
 
 export function nodeDotLookup(
-  arg: AnyPeggyNode,
+  arg: ASTNode,
   key: string,
   location: LocationRange
 ): NodeDotLookup {
@@ -218,15 +215,15 @@ export function nodeDotLookup(
 }
 
 export function nodeBracketLookup(
-  arg: AnyPeggyNode,
-  key: AnyPeggyNode,
+  arg: ASTNode,
+  key: ASTNode,
   location: LocationRange
 ): NodeBracketLookup {
   return { type: "BracketLookup", arg, key, location };
 }
 
 export function constructArray(
-  elements: AnyPeggyNode[],
+  elements: ASTNode[],
   location: LocationRange
 ): NodeArray {
   return { type: "Array", elements, location };
@@ -239,14 +236,14 @@ export function constructRecord(
 }
 
 export function nodeBlock(
-  statements: AnyPeggyNode[],
+  statements: ASTNode[],
   location: LocationRange
 ): NodeBlock {
   return { type: "Block", statements, location };
 }
 export function nodeProgram(
   imports: [NodeString, NodeIdentifier][],
-  statements: AnyPeggyNode[],
+  statements: ASTNode[],
   location: LocationRange
 ): NodeProgram {
   return { type: "Program", imports, statements, location };
@@ -273,8 +270,8 @@ export function nodeInteger(
   return { type: "Integer", value, location };
 }
 export function nodeKeyValue(
-  key: AnyPeggyNode,
-  value: AnyPeggyNode,
+  key: ASTNode,
+  value: ASTNode,
   location: LocationRange
 ): NodeKeyValue {
   if (key.type === "Identifier") {
@@ -286,8 +283,8 @@ export function nodeKeyValue(
   return { type: "KeyValue", key, value, location };
 }
 export function nodeLambda(
-  args: AnyPeggyNode[],
-  body: AnyPeggyNode,
+  args: ASTNode[],
+  body: ASTNode,
   location: LocationRange,
   name?: NodeIdentifier
 ): NodeLambda {
@@ -295,7 +292,7 @@ export function nodeLambda(
 }
 export function nodeLetStatement(
   variable: NodeIdentifier,
-  value: AnyPeggyNode,
+  value: ASTNode,
   location: LocationRange
 ): NodeLetStatement {
   const patchedValue =
@@ -319,9 +316,9 @@ export function nodeString(value: string, location: LocationRange): NodeString {
   return { type: "String", value, location };
 }
 export function nodeTernary(
-  condition: AnyPeggyNode,
-  trueExpression: AnyPeggyNode,
-  falseExpression: AnyPeggyNode,
+  condition: ASTNode,
+  trueExpression: ASTNode,
+  falseExpression: ASTNode,
   kind: NodeTernary["kind"],
   location: LocationRange
 ): NodeTernary {

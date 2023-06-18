@@ -1,7 +1,7 @@
 import React, { useReducer } from "react";
 
 import { SqValue } from "@quri/squiggle-lang";
-import { FocusIcon, TriangleIcon } from "@quri/ui";
+import { Button, FocusIcon, TriangleIcon } from "@quri/ui";
 
 import {
   LocalItemSettings,
@@ -41,7 +41,7 @@ export const SqTypeWithCount = ({
 );
 
 export const VariableBox: React.FC<VariableBoxProps> = ({
-  value: { location },
+  value,
   heading = "Error",
   preview,
   renderSettingsMenu,
@@ -49,11 +49,21 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
 }) => {
   const setSettings = useSetSettings();
   const focus = useFocus();
-  const { getSettings, getMergedSettings } = useViewerContext();
+  const { editor, getSettings, getMergedSettings } = useViewerContext();
+
+  const scrollTo = () => {
+    const offset = value.ast()?.location.start.offset;
+    if (offset === undefined) {
+      return;
+    }
+    editor?.scrollTo(offset);
+  };
 
   // Since `ViewerContext` doesn't store settings, `VariableBox` won't rerender when `setSettings` is called.
   // So we use `forceUpdate` to force rerendering.
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
+
+  const { location } = value;
 
   if (!location) {
     throw new Error("Can't display a locationless value");
@@ -86,7 +96,12 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
                 className={settings.collapsed ? "rotate-90" : "rotate-180"}
               />
             </span>
-            <span className="text-stone-800 font-mono text-sm">{name}</span>
+            <span
+              className="text-stone-800 font-mono text-sm cursor-pointer"
+              onClick={scrollTo}
+            >
+              {name}
+            </span>
             {preview && <div className="ml-2">{preview}</div>}
           </div>
           <div className="inline-flex space-x-1">

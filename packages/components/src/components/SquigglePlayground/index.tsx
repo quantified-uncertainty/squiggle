@@ -144,6 +144,10 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     [resultAndBindings]
   );
 
+  const errors = getErrors(resultAndBindings.result);
+
+  const editorRef = useRef<CodeEditorHandle>(null);
+
   const squiggleChart =
     runnerState.renderedCode === "" ? null : (
       <div className="relative">
@@ -154,13 +158,10 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
           {...settings}
           localSettingsEnabled={true}
           result={valueToRender}
+          editor={editorRef.current ?? undefined}
         />
       </div>
     );
-
-  const errors = getErrors(resultAndBindings.result);
-
-  const editorRef = useRef<CodeEditorHandle>(null);
 
   const leftPanelBody = (
     <>

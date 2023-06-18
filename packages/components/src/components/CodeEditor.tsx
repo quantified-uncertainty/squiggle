@@ -59,6 +59,7 @@ interface CodeEditorProps {
 
 export type CodeEditorHandle = {
   format(): void;
+  scrollTo(position: number): void;
 };
 
 const compTheme = new Compartment();
@@ -115,7 +116,16 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
       });
     }, [onChange]);
 
-    useImperativeHandle(ref, () => ({ format }));
+    const scrollTo = (position: number) => {
+      editorView.current?.dispatch({
+        selection: {
+          anchor: position,
+        },
+        scrollIntoView: true,
+      });
+    };
+
+    useImperativeHandle(ref, () => ({ format, scrollTo }));
 
     const state = useMemo(
       () =>

@@ -41,7 +41,7 @@ If you add a new value class, don't forget to add it to the "Value" union type b
 
 class VArray implements BaseValue, Indexable {
   readonly type = "Array" as const;
-  ast?: ASTNode;
+  ast?: ASTNode = undefined; // explicit initialzation is intentional - it prevents polymorphism when we feel ast later
 
   constructor(public value: Value[]) {}
   toString(): string {
@@ -81,7 +81,7 @@ export const vArray = (v: Value[]) => new VArray(v);
 
 class VBool implements BaseValue {
   readonly type = "Bool" as const;
-  ast?: ASTNode;
+  ast?: ASTNode = undefined;
 
   constructor(public value: boolean) {}
   toString() {
@@ -92,7 +92,7 @@ export const vBool = (v: boolean) => new VBool(v);
 
 class VDate implements BaseValue {
   readonly type = "Date" as const;
-  ast?: ASTNode;
+  ast?: ASTNode = undefined;
 
   constructor(public value: Date) {}
   toString() {
@@ -103,7 +103,7 @@ export const vDate = (v: Date) => new VDate(v);
 
 class VDeclaration implements BaseValue, Indexable {
   readonly type = "Declaration" as const;
-  ast?: ASTNode;
+  ast?: ASTNode = undefined;
 
   constructor(public value: LambdaDeclaration) {}
   toString() {
@@ -121,7 +121,7 @@ export const vLambdaDeclaration = (v: LambdaDeclaration) => new VDeclaration(v);
 
 class VDist implements BaseValue {
   readonly type = "Dist" as const;
-  ast?: ASTNode;
+  ast?: ASTNode = undefined;
 
   constructor(public value: BaseDist) {}
   toString() {
@@ -132,7 +132,7 @@ export const vDist = (v: BaseDist) => new VDist(v);
 
 class VLambda implements BaseValue {
   type = "Lambda" as const;
-  ast?: ASTNode;
+  ast?: ASTNode = undefined;
 
   constructor(public value: Lambda) {}
   toString() {
@@ -143,7 +143,7 @@ export const vLambda = (v: Lambda) => new VLambda(v);
 
 class VNumber implements BaseValue {
   readonly type = "Number" as const;
-  ast?: ASTNode;
+  ast?: ASTNode = undefined;
 
   constructor(public value: number) {}
   toString() {
@@ -154,7 +154,7 @@ export const vNumber = (v: number) => new VNumber(v);
 
 class VString implements BaseValue {
   readonly type = "String" as const;
-  ast?: ASTNode;
+  ast?: ASTNode = undefined;
 
   constructor(public value: string) {}
   toString() {
@@ -165,7 +165,7 @@ export const vString = (v: string) => new VString(v);
 
 class VRecord implements BaseValue, Indexable {
   readonly type = "Record" as const;
-  ast?: ASTNode;
+  ast?: ASTNode = undefined;
 
   constructor(public value: ValueMap) {}
   toString(): string {
@@ -197,7 +197,7 @@ export const vRecord = (v: ValueMap) => new VRecord(v);
 
 class VTimeDuration implements BaseValue {
   readonly type = "TimeDuration" as const;
-  ast?: ASTNode;
+  ast?: ASTNode = undefined;
 
   constructor(public value: number) {}
   toString() {
@@ -208,7 +208,7 @@ export const vTimeDuration = (v: number) => new VTimeDuration(v);
 
 class VVoid implements BaseValue {
   readonly type = "Void" as const;
-  ast?: ASTNode;
+  ast?: ASTNode = undefined;
 
   toString() {
     return "()";
@@ -259,7 +259,7 @@ export type Plot =
 
 class VPlot implements BaseValue, Indexable {
   readonly type = "Plot" as const;
-  ast?: ASTNode;
+  ast?: ASTNode = undefined;
 
   constructor(public value: Plot) {}
 
@@ -322,7 +322,7 @@ export type Scale = CommonScaleArgs &
 
 class VScale implements BaseValue {
   readonly type = "Scale" as const;
-  ast?: ASTNode;
+  ast?: ASTNode = undefined;
 
   constructor(public value: Scale) {}
 

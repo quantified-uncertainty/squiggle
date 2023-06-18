@@ -13,6 +13,7 @@ import {
 } from "./ViewerProvider.js";
 import { extractSubvalueByLocation, locationAsString } from "./utils.js";
 import { MessageAlert } from "../Alert.js";
+import { CodeEditorHandle } from "../CodeEditor.js";
 
 type Result = ReturnType<typeof useSquiggle>["result"];
 
@@ -20,6 +21,7 @@ export type SquiggleViewerProps = {
   /** The output of squiggle's run */
   result: Result;
   localSettingsEnabled?: boolean;
+  editor?: CodeEditorHandle;
 } & PartialPlaygroundSettings;
 
 type BodyProps = Pick<SquiggleViewerProps, "result">;
@@ -71,12 +73,14 @@ export const SquiggleViewer = memo<SquiggleViewerProps>(
   function SquiggleViewer({
     result,
     localSettingsEnabled = false,
+    editor,
     ...partialPlaygroundSettings
   }) {
     return (
       <ViewerProvider
         partialPlaygroundSettings={partialPlaygroundSettings}
         localSettingsEnabled={localSettingsEnabled}
+        editor={editor}
       >
         <SquiggleViewerOuter result={result} />
       </ViewerProvider>

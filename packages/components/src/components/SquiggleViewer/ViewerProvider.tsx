@@ -21,6 +21,7 @@ import {
   MergedItemSettings,
   locationAsString,
 } from "./utils.js";
+import { CodeEditorHandle } from "../CodeEditor.js";
 
 type Action =
   | {
@@ -46,6 +47,7 @@ type ViewerContextShape = {
   getMergedSettings(location: SqValueLocation): MergedItemSettings;
   localSettingsEnabled: boolean; // show local settings icon in the UI
   focused?: SqValueLocation;
+  editor?: CodeEditorHandle;
   dispatch(action: Action): void;
 };
 
@@ -54,6 +56,7 @@ export const ViewerContext = createContext<ViewerContextShape>({
   getMergedSettings: () => defaultPlaygroundSettings,
   localSettingsEnabled: false,
   focused: undefined,
+  editor: undefined,
   dispatch() {},
 });
 
@@ -99,8 +102,9 @@ export const ViewerProvider: FC<
   PropsWithChildren<{
     partialPlaygroundSettings: PartialPlaygroundSettings;
     localSettingsEnabled: boolean;
+    editor?: CodeEditorHandle;
   }>
-> = ({ partialPlaygroundSettings, localSettingsEnabled, children }) => {
+> = ({ partialPlaygroundSettings, localSettingsEnabled, editor, children }) => {
   // can't store settings in the state because we don't want to rerender the entire tree on every change
   const settingsStoreRef = useRef<SettingsStore>({});
 
@@ -157,6 +161,7 @@ export const ViewerProvider: FC<
         getSettings,
         getMergedSettings,
         localSettingsEnabled,
+        editor,
         focused,
         dispatch,
       }}
