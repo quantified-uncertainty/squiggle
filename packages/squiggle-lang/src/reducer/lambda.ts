@@ -42,7 +42,9 @@ export abstract class Lambda {
       () => this.body(args, newContext, reducer),
       newContext.frameStack
     );
-    value.ast = ast;
+    if (ast) {
+      value.ast = ast;
+    }
     return value;
   }
 
