@@ -10,7 +10,6 @@ import { H1 } from "@/components/ui/Headers";
 
 import { Button, TextFormField, useToast } from "@quri/ui";
 
-import { modelRoute } from "@/routes";
 import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
 
 const Mutation = graphql`
