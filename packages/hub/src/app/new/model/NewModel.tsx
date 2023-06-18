@@ -6,7 +6,7 @@ import { Controller, FormProvider, useForm } from "react-hook-form";
 import { useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 import { modelRoute } from "@/routes";
-import { Header2 } from "@/components/ui/Header2";
+import { H1 } from "@/components/ui/Headers";
 
 import { Button, TextAreaFormField, TextFormField, useToast } from "@quri/ui";
 
@@ -84,8 +84,8 @@ a = normal(2, 5)`,
   return (
     <form onSubmit={save}>
       <FormProvider {...form}>
-        <Header2 size="large">New Model</Header2>
-        <div className="space-y-2 mb-4">
+        <H1>New Model</H1>
+        <div className="mb-4">
           <TextFormField
             name="slug"
             description="Must be alphanumerical, with no spaces. Example: my-long-model"

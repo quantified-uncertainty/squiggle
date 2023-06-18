@@ -2,7 +2,7 @@
 import { useFragment, useLazyLoadQuery } from "react-relay";
 
 import { RelativeValuesDefinitionPage$key } from "@/__generated__/RelativeValuesDefinitionPage.graphql";
-import { Header2 } from "@/components/ui/Header2";
+import { H2 } from "@/components/ui/Headers";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { RelativeValuesDefinitionRevision } from "@/relative-values/components/RelativeValuesDefinitionRevision";
 import { modelForRelativeValuesExportRoute } from "@/routes";
@@ -36,7 +36,7 @@ export default function OuterDefinitionPage({
       <div>
         {definition.modelExports.length ? (
           <section className="mb-4">
-            <Header2>Implemented by:</Header2>
+            <H2>Implemented by:</H2>
             <div className="flex flex-col">
               {definition.modelExports.map((row) => (
                 <div key={row.id}>

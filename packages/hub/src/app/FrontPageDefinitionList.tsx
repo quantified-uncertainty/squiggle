@@ -6,7 +6,7 @@ import { graphql, usePaginationFragment } from "react-relay";
 import { FrontPageDefinitionList$key } from "@/__generated__/FrontPageDefinitionList.graphql";
 import { FrontPageDefinitionListPaginationQuery } from "@/__generated__/FrontPageDefinitionListPaginationQuery.graphql";
 import { RelativeValuesDefinitionList } from "@/relative-values/components/RelativeValuesDefinitionList";
-import { Header2 } from "@/components/ui/Header2";
+import { H2 } from "@/components/ui/Headers";
 
 const Fragment = graphql`
   fragment FrontPageDefinitionList on Query
@@ -41,7 +41,7 @@ export const FrontPageDefinitionList: FC<Props> = ({ dataRef }) => {
 
   return (
     <section>
-      <Header2 size="large">All relative values definitions</Header2>
+      <H2>All relative values definitions</H2>
       <RelativeValuesDefinitionList
         connectionRef={relativeValuesDefinitions}
         showOwner={true}

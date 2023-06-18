@@ -1,5 +1,5 @@
 import { UserModelList$key } from "@/__generated__/UserModelList.graphql";
-import { Header2 } from "@/components/ui/Header2";
+import { H1 } from "@/components/ui/Headers";
 import { ModelList } from "@/models/components/ModelList";
 import { FC } from "react";
 import { usePaginationFragment } from "react-relay";
@@ -35,7 +35,7 @@ export const UserModelList: FC<Props> = ({ dataRef }) => {
   return (
     <section>
       <div className="mb-2">
-        <Header2>Models</Header2>
+        <H1>Models</H1>
       </div>
       {models.edges.length ? (
         <ModelList connectionRef={models} loadNext={loadNext} />
