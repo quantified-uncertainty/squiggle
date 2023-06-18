@@ -23,9 +23,13 @@ type Indexable = {
 };
 
 abstract class BaseValue {
-  ast?: ASTNode = undefined; // explicit initialzation is intentional - it prevents polymorphism when we feel ast later
-  abstract toString(): string;
+  abstract type: string;
+
+  // Explicit initialzation is intentional - it prevents polymorphism when we fill `ast` later.
+  ast?: ASTNode = undefined;
+
   cloneWithAst(newAst: ASTNode) {
+    // This generic version is somewhat slow; speciailized implementation in each subclass would be faster.
     const newValue = Object.assign(
       Object.create(Object.getPrototypeOf(this)),
       this
@@ -33,6 +37,8 @@ abstract class BaseValue {
     newValue.ast = newAst;
     return newValue;
   }
+
+  abstract toString(): string;
 }
 
 /*
@@ -40,7 +46,7 @@ Value classes are shaped in a similar way and can work as discriminated unions t
 
 `type` property is currently stored on instances; that creates some memory overhead, but it's hard to store it in prototype in a type-safe way.
 
-Also, it's important that `type` is declared "as const"; otherwise unions won't work properly.
+Also, it's important that `type` is declared as readonly (or `as const`, but readonly is enough); otherwise unions won't work properly.
 
 If you add a new value class, don't forget to add it to the "Value" union type below.
 
@@ -48,7 +54,7 @@ If you add a new value class, don't forget to add it to the "Value" union type b
 */
 
 class VArray extends BaseValue implements Indexable {
-  readonly type = "Array" as const;
+  readonly type = "Array";
 
   constructor(public value: Value[]) {
     super();
@@ -89,7 +95,7 @@ class VArray extends BaseValue implements Indexable {
 export const vArray = (v: Value[]) => new VArray(v);
 
 class VBool extends BaseValue {
-  readonly type = "Bool" as const;
+  readonly type = "Bool";
   ast?: ASTNode = undefined;
 
   constructor(public value: boolean) {
@@ -102,7 +108,7 @@ class VBool extends BaseValue {
 export const vBool = (v: boolean) => new VBool(v);
 
 class VDate extends BaseValue {
-  readonly type = "Date" as const;
+  readonly type = "Date";
 
   constructor(public value: Date) {
     super();
@@ -114,7 +120,7 @@ class VDate extends BaseValue {
 export const vDate = (v: Date) => new VDate(v);
 
 class VDeclaration extends BaseValue implements Indexable {
-  readonly type = "Declaration" as const;
+  readonly type = "Declaration";
 
   constructor(public value: LambdaDeclaration) {
     super();
@@ -133,7 +139,7 @@ class VDeclaration extends BaseValue implements Indexable {
 export const vLambdaDeclaration = (v: LambdaDeclaration) => new VDeclaration(v);
 
 class VDist extends BaseValue {
-  readonly type = "Dist" as const;
+  readonly type = "Dist";
 
   constructor(public value: BaseDist) {
     super();
@@ -145,7 +151,7 @@ class VDist extends BaseValue {
 export const vDist = (v: BaseDist) => new VDist(v);
 
 class VLambda extends BaseValue {
-  type = "Lambda" as const;
+  readonly type = "Lambda";
 
   constructor(public value: Lambda) {
     super();
@@ -157,7 +163,7 @@ class VLambda extends BaseValue {
 export const vLambda = (v: Lambda) => new VLambda(v);
 
 class VNumber extends BaseValue {
-  readonly type = "Number" as const;
+  readonly type = "Number";
 
   constructor(public value: number) {
     super();
@@ -169,7 +175,7 @@ class VNumber extends BaseValue {
 export const vNumber = (v: number) => new VNumber(v);
 
 class VString extends BaseValue {
-  readonly type = "String" as const;
+  readonly type = "String";
 
   constructor(public value: string) {
     super();
@@ -181,7 +187,7 @@ class VString extends BaseValue {
 export const vString = (v: string) => new VString(v);
 
 class VRecord extends BaseValue implements Indexable {
-  readonly type = "Record" as const;
+  readonly type = "Record";
 
   constructor(public value: ValueMap) {
     super();
@@ -214,7 +220,7 @@ class VRecord extends BaseValue implements Indexable {
 export const vRecord = (v: ValueMap) => new VRecord(v);
 
 class VTimeDuration extends BaseValue {
-  readonly type = "TimeDuration" as const;
+  readonly type = "TimeDuration";
 
   constructor(public value: number) {
     super();
@@ -226,7 +232,7 @@ class VTimeDuration extends BaseValue {
 export const vTimeDuration = (v: number) => new VTimeDuration(v);
 
 class VVoid extends BaseValue {
-  readonly type = "Void" as const;
+  readonly type = "Void";
 
   constructor() {
     super();
@@ -279,7 +285,7 @@ export type Plot =
     };
 
 class VPlot extends BaseValue implements Indexable {
-  readonly type = "Plot" as const;
+  readonly type = "Plot";
 
   constructor(public value: Plot) {
     super();
@@ -343,7 +349,7 @@ export type Scale = CommonScaleArgs &
   );
 
 class VScale extends BaseValue {
-  readonly type = "Scale" as const;
+  readonly type = "Scale";
 
   constructor(public value: Scale) {
     super();
