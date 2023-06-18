@@ -9,17 +9,18 @@ export type ReducerContext = Readonly<{
   environment: Env;
   frameStack: FrameStack;
   evaluate: ReducerFn;
-  inFunction?: Lambda;
+  inFunction: Lambda | undefined;
 }>;
 
 export const createContext = (
   stdLib: Namespace,
   environment: Env
 ): ReducerContext => ({
-  frameStack: FrameStack.make(),
   bindings: Bindings.fromNamespace(stdLib).extend(),
-  evaluate,
   environment,
+  frameStack: FrameStack.make(),
+  evaluate,
+  inFunction: undefined,
 });
 
 export const currentFunctionName = (t: ReducerContext): string => {

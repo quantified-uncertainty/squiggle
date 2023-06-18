@@ -24,11 +24,15 @@ export abstract class Lambda {
     ast: ASTNode | undefined
   ): Value {
     const newContext: ReducerContext = {
-      ...context,
+      // Be careful! the order here must match the order of props in ReducerContext.
+      // Also, we intentionally don't use object spread syntax because of monomorphism.
+      bindings: context.bindings,
+      environment: context.environment,
       frameStack: context.frameStack.extend(
         Context.currentFunctionName(context),
         ast?.location
       ),
+      evaluate: context.evaluate,
       inFunction: this,
     };
 
@@ -75,8 +79,12 @@ export class SquiggleLambda extends Lambda {
       }
 
       const lambdaContext: ReducerContext = {
-        ...context,
         bindings: localBindings, // based on bindings at the moment of lambda creation
+        // no spread is intentional - helps with monomorphism
+        environment: context.environment,
+        frameStack: context.frameStack,
+        evaluate: context.evaluate,
+        inFunction: context.inFunction,
       };
 
       const [value] = context.evaluate(body, lambdaContext);

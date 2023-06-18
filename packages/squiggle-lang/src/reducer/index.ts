@@ -154,8 +154,12 @@ const evaluateAssign: SubReducerFn<"Assign"> = (expressionValue, context) => {
   return [
     vVoid(),
     {
-      ...context,
+      // no spread is intentional - helps with monomorphism
       bindings: context.bindings.set(expressionValue.left, result),
+      environment: context.environment,
+      frameStack: context.frameStack,
+      evaluate: context.evaluate,
+      inFunction: context.inFunction,
     },
   ];
 };
@@ -165,6 +169,7 @@ const evaluateSymbol: SubReducerFn<"Symbol"> = (name, context, ast) => {
   if (value === undefined) {
     return throwFrom(new RESymbolNotFound(name), context, ast);
   } else {
+    // cloneWithAst here is costly, but necessary.
     return [value.cloneWithAst(ast), context];
   }
 };
