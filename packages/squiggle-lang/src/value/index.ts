@@ -28,12 +28,13 @@ abstract class BaseValue {
   // Explicit initialzation is intentional - it prevents polymorphism when we fill `ast` later.
   ast?: ASTNode = undefined;
 
+  clone() {
+    return Object.assign(Object.create(Object.getPrototypeOf(this)), this);
+  }
+
   cloneWithAst(newAst: ASTNode) {
     // This generic version is somewhat slow; speciailized implementation in each subclass would be faster.
-    const newValue = Object.assign(
-      Object.create(Object.getPrototypeOf(this)),
-      this
-    );
+    const newValue = this.clone();
     newValue.ast = newAst;
     return newValue;
   }

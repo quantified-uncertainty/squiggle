@@ -17,7 +17,7 @@ function makeLookupLambda(): Lambda {
 
     const [obj, key] = inputs;
     if ("get" in obj) {
-      return obj.get(key);
+      return obj.get(key).clone();
     } else {
       throw new REOther("Trying to access key on wrong value");
     }
