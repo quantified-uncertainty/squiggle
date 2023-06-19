@@ -1,4 +1,4 @@
-import React, {
+import {
   forwardRef,
   useCallback,
   useEffect,
@@ -8,18 +8,12 @@ import React, {
 } from "react";
 
 import * as prettier from "prettier/standalone";
-import * as squigglePlugin from "@quri/prettier-plugin-squiggle/standalone";
 
 import { defaultKeymap } from "@codemirror/commands";
 import { syntaxHighlighting } from "@codemirror/language";
 import { setDiagnostics } from "@codemirror/lint";
 import { Compartment, EditorState } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
-
-import { SqError, SqProject } from "@quri/squiggle-lang";
-
-import { squiggleLanguageSupport } from "../languageSupport/squiggle.js";
-
 // From basic setup
 import {
   autocompletion,
@@ -44,16 +38,24 @@ import {
   highlightSpecialChars,
   lineNumbers,
 } from "@codemirror/view";
+
+import * as squigglePlugin from "@quri/prettier-plugin-squiggle/standalone";
+import { SqError, SqProject } from "@quri/squiggle-lang";
+
+import { SqValueLocation } from "@quri/squiggle-lang";
 import { lightThemeHighlightingStyle } from "../languageSupport/highlightingStyle.js";
+import { squiggleLanguageSupport } from "../languageSupport/squiggle.js";
 
 interface CodeEditorProps {
   value: string; // TODO - should be `initialValue`, since we don't really support value updates
   onChange: (value: string) => void;
   onSubmit?: () => void;
+  onViewValueLocation?: (ast: SqValueLocation) => void;
   width?: number;
   height?: number;
   showGutter?: boolean;
   errors?: SqError[];
+  sourceId?: string;
   project: SqProject;
 }
 
@@ -67,6 +69,7 @@ const compGutter = new Compartment();
 const compUpdateListener = new Compartment();
 const compSubmitListener = new Compartment();
 const compFormatListener = new Compartment();
+const compViewNodeListener = new Compartment();
 
 export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
   function CodeEditor(
@@ -74,10 +77,12 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
       value,
       onChange,
       onSubmit,
+      onViewValueLocation,
       width,
       height,
       showGutter = false,
       errors = [],
+      sourceId,
       project,
     },
     ref
@@ -148,6 +153,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
             }),
             compSubmitListener.of([]),
             compFormatListener.of([]),
+            compViewNodeListener.of([]),
             keymap.of([
               ...closeBracketsKeymap,
               ...defaultKeymap,
@@ -252,6 +258,38 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
         ),
       });
     }, [format]);
+
+    useEffect(() => {
+      editorView.current?.dispatch({
+        effects: compViewNodeListener.reconfigure(
+          keymap.of([
+            {
+              key: "Alt-Shift-v",
+              run: () => {
+                if (!onViewValueLocation) {
+                  return true;
+                }
+                const offset = editorView.current?.state.selection.main.to;
+                if (offset === undefined) {
+                  return true;
+                }
+                if (sourceId === undefined) {
+                  return true;
+                }
+                const valueLocationResult = project.findValueLocationByOffset(
+                  sourceId,
+                  offset
+                );
+                if (valueLocationResult.ok) {
+                  onViewValueLocation(valueLocationResult.value);
+                }
+                return true;
+              },
+            },
+          ])
+        ),
+      });
+    }, [onViewValueLocation]);
 
     useEffect(() => {
       if (!editorView.current) {

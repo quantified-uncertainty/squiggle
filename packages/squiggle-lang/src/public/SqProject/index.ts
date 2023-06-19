@@ -1,19 +1,19 @@
+import { Env, defaultEnv } from "../../dist/env.js";
+import { RENeedToRun } from "../../errors.js";
+import * as Library from "../../library/index.js";
+import { IError } from "../../reducer/IError.js";
+import { Namespace, NamespaceMap } from "../../reducer/bindings.js";
+import { createContext } from "../../reducer/context.js";
+import * as Result from "../../utility/result.js";
+import { Value, vRecord } from "../../value/index.js";
 import { SqError } from "../SqError.js";
 import { SqRecord } from "../SqRecord.js";
 import { SqValue, wrapValue } from "../SqValue.js";
-import * as Result from "../../utility/result.js";
 import { SqValueLocation } from "../SqValueLocation.js";
-import { defaultEnv, Env } from "../../dist/env.js";
-import { IError } from "../../reducer/IError.js";
-import * as Library from "../../library/index.js";
-import { Value, vRecord } from "../../value/index.js";
-import { createContext } from "../../reducer/context.js";
-import { Namespace, NamespaceMap } from "../../reducer/bindings.js";
-import { ErrorMessage, RENeedToRun } from "../../errors.js";
 
 import { ImportBinding, ProjectItem } from "./ProjectItem.js";
-import * as Topology from "./Topology.js";
 import { Resolver } from "./Resolver.js";
+import * as Topology from "./Topology.js";
 
 function getNeedToRunError() {
   return new SqError(IError.fromMessage(new RENeedToRun()));
@@ -331,6 +331,29 @@ export class SqProject {
     await this.loadImportsRecursively(sourceId, loadSource);
 
     await this.run(sourceId);
+  }
+
+  findValueLocationByOffset(
+    sourceId: string,
+    offset: number
+  ): Result.result<SqValueLocation, SqError> {
+    const { ast } = this.getItem(sourceId);
+    if (!ast) {
+      return Result.Err(SqError.createOtherError("Not parsed"));
+    }
+    if (!ast.ok) {
+      return ast;
+    }
+    const found = SqValueLocation.findByOffset({
+      project: this,
+      sourceId,
+      ast: ast.value,
+      offset,
+    });
+    if (!found) {
+      return Result.Err(SqError.createOtherError("Not found"));
+    }
+    return Result.Ok(found);
   }
 }
 

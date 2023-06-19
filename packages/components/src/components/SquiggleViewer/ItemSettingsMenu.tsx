@@ -97,7 +97,8 @@ const ItemSettingsModal: React.FC<
 export const ItemSettingsMenu: React.FC<Props> = (props) => {
   const [isOpen, setIsOpen] = useState(false);
   const setSettings = useSetSettings();
-  const { localSettingsEnabled, getSettings } = useContext(ViewerContext);
+  const { localSettingsEnabled, getSettings, dispatch } =
+    useContext(ViewerContext);
 
   const ref = useRef<HTMLDivElement | null>(null);
 
@@ -107,8 +108,15 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
   const settings = getSettings(props.value.location!);
 
   const resetScroll = () => {
-    if (!ref.current) return;
-    ref.current.scrollIntoView({ behavior: "smooth" });
+    if (!props.value.location) {
+      return;
+    }
+    dispatch({
+      type: "SCROLL_TO_LOCATION",
+      payload: {
+        location: props.value.location,
+      },
+    });
   };
 
   return (

@@ -37,6 +37,25 @@ type Action =
     }
   | {
       type: "UNFOCUS";
+    }
+  | {
+      type: "SCROLL_TO_LOCATION";
+      payload: {
+        location: SqValueLocation;
+      };
+    }
+  | {
+      type: "REGISTER_ITEM_HANDLE";
+      payload: {
+        location: SqValueLocation;
+        element: HTMLDivElement;
+      };
+    }
+  | {
+      type: "UNREGISTER_ITEM_HANDLE";
+      payload: {
+        location: SqValueLocation;
+      };
     };
 
 type ViewerContextShape = {
@@ -108,6 +127,8 @@ export const ViewerProvider: FC<
   // can't store settings in the state because we don't want to rerender the entire tree on every change
   const settingsStoreRef = useRef<SettingsStore>({});
 
+  const itemHandlesStoreRef = useRef<{ [k: string]: HTMLDivElement }>({});
+
   const [focused, setFocused] = useState<SqValueLocation | undefined>();
 
   const globalSettings = useMemo(() => {
@@ -149,6 +170,22 @@ export const ViewerProvider: FC<
           return;
         case "UNFOCUS":
           setFocused(undefined);
+          return;
+        case "SCROLL_TO_LOCATION":
+          itemHandlesStoreRef.current[
+            locationAsString(action.payload.location)
+          ]?.scrollIntoView({ behavior: "smooth" });
+          return;
+        case "REGISTER_ITEM_HANDLE":
+          itemHandlesStoreRef.current[
+            locationAsString(action.payload.location)
+          ] = action.payload.element;
+          setFocused(undefined);
+          return;
+        case "UNREGISTER_ITEM_HANDLE":
+          delete itemHandlesStoreRef.current[
+            locationAsString(action.payload.location)
+          ];
           return;
       }
     },

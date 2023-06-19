@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 
 import {
-  result,
+  Env,
   SqError,
   SqProject,
   SqRecord,
   SqValue,
-  Env,
+  result,
 } from "@quri/squiggle-lang";
 
 // Props needed for a standalone execution
@@ -26,7 +26,7 @@ type ProjectExecutionProps = {
 export type SquiggleArgs = {
   code: string;
   executionId?: number;
-  onChange?: (expr: SqValue | undefined, sourceName: string) => void;
+  onChange?: (expr: SqValue | undefined, sourceId: string) => void;
 } & (StandaloneExecutionProps | ProjectExecutionProps);
 
 export type SquiggleOutput = {
@@ -42,7 +42,8 @@ export type UseSquiggleOutput = [
   {
     project: SqProject;
     isRunning: boolean;
-  }
+    sourceId: string;
+  },
 ];
 
 // this array's identity must be constant because it's used in useEffect below
@@ -51,7 +52,7 @@ const defaultContinues = [];
 export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
   // random; https://stackoverflow.com/a/12502559
   // TODO - React.useId?
-  const sourceName = useMemo(() => Math.random().toString(36).slice(2), []);
+  const sourceId = useMemo(() => Math.random().toString(36).slice(2), []);
 
   const projectArg = "project" in args ? args.project : undefined;
   const environment = "environment" in args ? args.environment : undefined;
@@ -88,11 +89,11 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
       // trick from https://stackoverflow.com/a/56727837
       channel.port1.onmessage = async () => {
         const startTime = Date.now();
-        project.setSource(sourceName, args.code);
-        project.setContinues(sourceName, continues);
-        await project.run(sourceName);
-        const result = project.getResult(sourceName);
-        const bindings = project.getBindings(sourceName);
+        project.setSource(sourceId, args.code);
+        project.setContinues(sourceId, continues);
+        await project.run(sourceId);
+        const result = project.getResult(sourceId);
+        const bindings = project.getBindings(sourceId);
         setSquiggleOutput({
           result,
           bindings,
@@ -111,7 +112,7 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
     // This is on purpose, as executionId simply allows you to run the squiggle
     // code again
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [args.code, executionId, sourceName, continues, project]
+    [args.code, executionId, sourceId, continues, project]
   );
 
   useEffect(() => {
@@ -120,21 +121,22 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
     }
     onChange?.(
       squiggleOutput.result.ok ? squiggleOutput.result.value : undefined,
-      sourceName
+      sourceId
     );
-  }, [squiggleOutput, isRunning, onChange, sourceName]);
+  }, [squiggleOutput, isRunning, onChange, sourceId]);
 
   useEffect(() => {
     return () => {
-      project.removeSource(sourceName);
+      project.removeSource(sourceId);
     };
-  }, [project, sourceName]);
+  }, [project, sourceId]);
 
   return [
     squiggleOutput,
     {
       project,
       isRunning: executionId !== squiggleOutput?.executionId,
+      sourceId,
     },
   ];
 }

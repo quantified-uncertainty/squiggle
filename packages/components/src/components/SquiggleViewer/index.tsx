@@ -1,4 +1,4 @@
-import { FC, memo } from "react";
+import { FC, forwardRef, memo } from "react";
 
 import { SqValue } from "@quri/squiggle-lang";
 import { FocusIcon } from "@quri/ui";
@@ -14,8 +14,14 @@ import {
   useViewerContext,
 } from "./ViewerProvider.js";
 import { extractSubvalueByLocation, locationAsString } from "./utils.js";
+import { SqValueLocation } from "@quri/squiggle-lang";
+import { useImperativeHandle } from "react";
 
 type Result = NonNullable<ReturnType<typeof useSquiggle>[0]>["result"];
+
+export type SquiggleViewerHandle = {
+  viewValueLocation(location: SqValueLocation): void;
+};
 
 export type SquiggleViewerProps = {
   /** The output of squiggle's run */
@@ -40,9 +46,21 @@ const SquiggleViewerBody: FC<{ value: SqValue }> = ({ value }) => {
   return <ExpressionViewer value={valueToRender} />;
 };
 
-const SquiggleViewerOuter: FC<BodyProps> = ({ result }) => {
-  const { focused } = useViewerContext();
+const SquiggleViewerOuter = forwardRef<
+  SquiggleViewerHandle,
+  SquiggleViewerProps
+>(function SquiggleViewerOuter({ result }, ref) {
+  const { focused, dispatch } = useViewerContext();
   const unfocus = useUnfocus();
+
+  useImperativeHandle(ref, () => ({
+    viewValueLocation(location: SqValueLocation) {
+      dispatch({
+        type: "SCROLL_TO_LOCATION",
+        payload: { location },
+      });
+    },
+  }));
 
   return (
     <div>
@@ -67,23 +85,30 @@ const SquiggleViewerOuter: FC<BodyProps> = ({ result }) => {
       )}
     </div>
   );
-};
+});
 
-export const SquiggleViewer = memo<SquiggleViewerProps>(
-  function SquiggleViewer({
-    result,
-    localSettingsEnabled = false,
-    editor,
-    ...partialPlaygroundSettings
-  }) {
+const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
+  function SquiggleViewer(
+    {
+      result,
+      localSettingsEnabled = false,
+      editor,
+      ...partialPlaygroundSettings
+    },
+    ref
+  ) {
     return (
       <ViewerProvider
         partialPlaygroundSettings={partialPlaygroundSettings}
         localSettingsEnabled={localSettingsEnabled}
         editor={editor}
       >
-        <SquiggleViewerOuter result={result} />
+        <SquiggleViewerOuter result={result} ref={ref} />
       </ViewerProvider>
     );
   }
 );
+
+// React.memo and React.forwardRef are hard to combine in TypeScript;
+// https://github.com/DefinitelyTyped/DefinitelyTyped/issues/37087#issuecomment-656596623
+export const SquiggleViewer = memo(innerComponent) as typeof innerComponent;

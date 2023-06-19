@@ -1,7 +1,7 @@
-import React, { useReducer } from "react";
+import React, { FC, ReactNode, useEffect, useReducer } from "react";
 
 import { SqValue } from "@quri/squiggle-lang";
-import { Button, FocusIcon, TriangleIcon } from "@quri/ui";
+import { FocusIcon, TriangleIcon } from "@quri/ui";
 
 import {
   LocalItemSettings,
@@ -22,25 +22,22 @@ type SettingsMenuParams = {
 type VariableBoxProps = {
   value: SqValue;
   heading: string;
-  preview?: React.ReactNode;
-  renderSettingsMenu?: (params: SettingsMenuParams) => React.ReactNode;
-  children: (settings: MergedItemSettings) => React.ReactNode;
+  preview?: ReactNode;
+  renderSettingsMenu?: (params: SettingsMenuParams) => ReactNode;
+  children: (settings: MergedItemSettings) => ReactNode;
 };
 
-export const SqTypeWithCount = ({
-  type,
-  count,
-}: {
+export const SqTypeWithCount: FC<{
   type: string;
   count: number;
-}) => (
+}> = ({ type, count }) => (
   <div className="text-sm text-stone-400 font-mono">
     {type}
     <span className="ml-0.5">{count}</span>
   </div>
 );
 
-export const VariableBox: React.FC<VariableBoxProps> = ({
+export const VariableBox: FC<VariableBoxProps> = ({
   value,
   heading = "Error",
   preview,
@@ -49,9 +46,10 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
 }) => {
   const setSettings = useSetSettings();
   const focus = useFocus();
-  const { editor, getSettings, getMergedSettings } = useViewerContext();
+  const { editor, getSettings, getMergedSettings, dispatch } =
+    useViewerContext();
 
-  const scrollTo = () => {
+  const findInEditor = () => {
     const offset = value.ast()?.location.start.offset;
     if (offset === undefined) {
       return;
@@ -82,8 +80,29 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
 
   const name = locationToShortName(location);
 
+  const saveRef = (element: HTMLDivElement) => {
+    dispatch({
+      type: "REGISTER_ITEM_HANDLE",
+      payload: {
+        location,
+        element,
+      },
+    });
+  };
+
+  useEffect(() => {
+    return () => {
+      dispatch({
+        type: "UNREGISTER_ITEM_HANDLE",
+        payload: {
+          location,
+        },
+      });
+    };
+  }, []);
+
   return (
-    <div>
+    <div ref={saveRef}>
       {name === undefined ? null : (
         <header className="flex justify-between hover:bg-stone-100 rounded-md">
           <div className="inline-flex items-center">
@@ -98,7 +117,7 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
             </span>
             <span
               className="text-stone-800 font-mono text-sm cursor-pointer"
-              onClick={scrollTo}
+              onClick={findInEditor}
             >
               {name}
             </span>

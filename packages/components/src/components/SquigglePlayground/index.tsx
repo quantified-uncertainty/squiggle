@@ -30,6 +30,7 @@ import {
 } from "../PlaygroundSettings.js";
 import {
   SquiggleViewer,
+  SquiggleViewerHandle,
   SquiggleViewerProps,
 } from "../SquiggleViewer/index.js";
 
@@ -132,7 +133,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
 
   const runnerState = useRunnerState(code);
 
-  const [squiggleOutput, { project, isRunning }] = useSquiggle({
+  const [squiggleOutput, { project, isRunning, sourceId }] = useSquiggle({
     ...props,
     code: runnerState.renderedCode,
     executionId: runnerState.executionId,
@@ -147,6 +148,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   }, [squiggleOutput]);
 
   const editorRef = useRef<CodeEditorHandle>(null);
+  const viewerRef = useRef<SquiggleViewerHandle>(null);
 
   const squiggleChart =
     runnerState.renderedCode === "" || !squiggleOutput ? null : (
@@ -156,6 +158,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
         ) : null}
         <SquiggleViewer
           {...settings}
+          ref={viewerRef}
           localSettingsEnabled={true}
           result={getValueToRender(squiggleOutput)}
           editor={editorRef.current ?? undefined}
@@ -172,8 +175,12 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
             value={code}
             errors={errors}
             project={project}
+            sourceId={sourceId}
             showGutter={true}
             onChange={setCode}
+            onViewValueLocation={(ast) =>
+              viewerRef.current?.viewValueLocation(ast)
+            }
             onSubmit={runnerState.run}
           />
         </div>
