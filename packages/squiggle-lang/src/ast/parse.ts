@@ -120,8 +120,6 @@ const nodeToString = (node: ASTNode): string => {
       return nodeToString(node.variable) + " = " + nodeToString(node.value);
     case "DefunStatement":
       return nodeToString(node.variable) + " = " + nodeToString(node.value);
-    case "ModuleIdentifier":
-      return `@${node.value}`;
     case "String":
       return `'${node.value}'`; // TODO - quote?
     case "Ternary":

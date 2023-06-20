@@ -82,8 +82,6 @@ function contentFromNode(ast: ASTNode): expression.ExpressionContent {
         ast.variable.value,
         expressionFromAst(ast.value)
       );
-    case "ModuleIdentifier":
-      return expression.eIdentifier(ast.value);
     case "String":
       return expression.eString(ast.value);
     case "Ternary":

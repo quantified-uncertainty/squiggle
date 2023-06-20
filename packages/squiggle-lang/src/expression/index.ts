@@ -155,11 +155,6 @@ export const eTernary = (
   },
 });
 
-export const eIdentifier = (name: string): ExpressionContent => ({
-  type: "Symbol",
-  value: name,
-});
-
 export const eVoid = (): ExpressionContent => ({
   type: "Value",
   value: vVoid(),

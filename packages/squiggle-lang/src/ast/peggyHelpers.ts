@@ -83,8 +83,6 @@ type NodeInteger = N<"Integer", { value: number }>;
 
 type NodeIdentifier = N<"Identifier", { value: string }>;
 
-type NodeModuleIdentifier = N<"ModuleIdentifier", { value: string }>;
-
 type NodeLetStatement = N<
   "LetStatement",
   { variable: NodeIdentifier; value: ASTNode }
@@ -147,7 +145,6 @@ export type ASTNode =
   | NodeFloat
   | NodeInteger
   | NodeIdentifier
-  | NodeModuleIdentifier
   | NodeLetStatement
   | NodeDefunStatement
   | NodeLambda
@@ -305,12 +302,6 @@ export function nodeDefunStatement(
   location: LocationRange
 ): NodeDefunStatement {
   return { type: "DefunStatement", variable, value, location };
-}
-export function nodeModuleIdentifier(
-  value: string,
-  location: LocationRange
-): NodeModuleIdentifier {
-  return { type: "ModuleIdentifier", value, location };
 }
 export function nodeString(value: string, location: LocationRange): NodeString {
   return { type: "String", value, location };
