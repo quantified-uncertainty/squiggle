@@ -36,11 +36,11 @@ export abstract class Lambda {
       inFunction: this,
     };
 
-    const value = IError.rethrowWithFrameStack(
-      () => this.body(args, newContext),
-      newContext.frameStack
-    );
-    return value;
+    try {
+      return this.body(args, newContext);
+    } catch (e) {
+      IError.rethrowWithFrameStack(e, newContext.frameStack);
+    }
   }
 
   call(args: Value[], context: ReducerContext): Value {

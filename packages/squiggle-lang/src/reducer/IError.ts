@@ -77,27 +77,23 @@ export class IError extends Error {
 
 // converts raw exceptions into exceptions with framestack attached
 // already converted exceptions won't be affected
-export function rethrowWithFrameStack<T>(
-  fn: () => T,
+export function rethrowWithFrameStack(
+  err: unknown,
   frameStack: FrameStack
-): T {
-  try {
-    return fn();
-  } catch (e) {
-    if (e instanceof IError) {
-      throw e; // exception already has a framestack
-    } else if (e instanceof ErrorMessage) {
-      throw IError.fromMessageWithFrameStack(e, frameStack); // probably comes from FunctionRegistry, adding framestack
-    } else if (e instanceof Error) {
-      throw IError.fromMessageWithFrameStack(
-        new REJavaScriptExn(e.message, e.name),
-        frameStack
-      );
-    } else {
-      throw IError.fromMessageWithFrameStack(
-        new REOther("Unknown exception"),
-        frameStack
-      );
-    }
+): never {
+  if (err instanceof IError) {
+    throw err; // exception already has a framestack
+  } else if (err instanceof ErrorMessage) {
+    throw IError.fromMessageWithFrameStack(err, frameStack); // probably comes from FunctionRegistry, adding framestack
+  } else if (err instanceof Error) {
+    throw IError.fromMessageWithFrameStack(
+      new REJavaScriptExn(err.message, err.name),
+      frameStack
+    );
+  } else {
+    throw IError.fromMessageWithFrameStack(
+      new REOther("Unknown exception"),
+      frameStack
+    );
   }
 }
