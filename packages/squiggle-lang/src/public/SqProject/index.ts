@@ -2,8 +2,8 @@ import { Env, defaultEnv } from "../../dist/env.js";
 import { RENeedToRun } from "../../errors.js";
 import * as Library from "../../library/index.js";
 import { IError } from "../../reducer/IError.js";
-import { Namespace, NamespaceMap } from "../../reducer/bindings.js";
 import { createContext } from "../../reducer/context.js";
+import { Bindings } from "../../reducer/stack.js";
 import * as Result from "../../utility/result.js";
 import { Value, vRecord } from "../../value/index.js";
 import { SqError } from "../SqError.js";
@@ -11,6 +11,7 @@ import { SqRecord } from "../SqRecord.js";
 import { SqValue, wrapValue } from "../SqValue.js";
 import { SqValueLocation } from "../SqValueLocation.js";
 
+import { ImmutableMap } from "../../utility/immutableMap.js";
 import { ImportBinding, ProjectItem } from "./ProjectItem.js";
 import { Resolver } from "./Resolver.js";
 import * as Topology from "./Topology.js";
@@ -30,7 +31,7 @@ type Options = {
 
 export class SqProject {
   private readonly items: Map<string, ProjectItem>;
-  private stdLib: Namespace;
+  private stdLib: Bindings;
   private environment: Env;
   private resolver?: Resolver; // if not present, imports are forbidden
 
@@ -53,11 +54,11 @@ export class SqProject {
     return this.environment;
   }
 
-  getStdLib(): Namespace {
+  getStdLib(): Bindings {
     return this.stdLib;
   }
 
-  setStdLib(value: Namespace) {
+  setStdLib(value: Bindings) {
     this.stdLib = value;
   }
 
@@ -173,9 +174,9 @@ export class SqProject {
     this.getItem(sourceId).parseImports(this.resolver);
   }
 
-  private getRawBindings(sourceId: string): Namespace {
+  private getRawBindings(sourceId: string): Bindings {
     // FIXME - should fail if bindings are not set
-    return this.getItem(sourceId).bindings ?? NamespaceMap();
+    return this.getItem(sourceId).bindings ?? ImmutableMap();
   }
 
   getBindings(sourceId: string): SqRecord {
@@ -188,9 +189,7 @@ export class SqProject {
     );
   }
 
-  private buildInitialBindings(
-    sourceId: string
-  ): Result.result<Namespace, SqError> {
+  private buildExternals(sourceId: string): Result.result<Bindings, SqError> {
     const continues = this.getContinues(sourceId);
 
     // We start from stdLib and add more bindings on top of it.
@@ -212,7 +211,9 @@ export class SqProject {
         return result;
       }
     }
-    let namespace = NamespaceMap<string, Value>().merge(...namespacesToMerge);
+    let externals: Bindings = ImmutableMap<string, Value>().merge(
+      ...namespacesToMerge
+    );
 
     // Second, merge imports.
     this.parseImports(sourceId);
@@ -236,23 +237,23 @@ export class SqProject {
       }
 
       // TODO - check for collisions?
-      namespace = namespace.set(
+      externals = externals.set(
         importBinding.variable,
         vRecord(importBindings)
       );
     }
-    return Result.Ok(namespace);
+    return Result.Ok(externals);
   }
 
   private async doLinkAndRun(sourceId: string): Promise<void> {
-    const rBindings = this.buildInitialBindings(sourceId);
+    const rExternals = this.buildExternals(sourceId);
 
-    if (rBindings.ok) {
-      const context = createContext(rBindings.value, this.getEnvironment());
+    if (rExternals.ok) {
+      const context = createContext(this.getEnvironment());
 
-      await this.getItem(sourceId).run(context);
+      await this.getItem(sourceId).run(context, rExternals.value);
     } else {
-      this.getItem(sourceId).failRun(rBindings.value);
+      this.getItem(sourceId).failRun(rExternals.value);
     }
   }
 

@@ -5,7 +5,6 @@ import {
   REExpectedType,
   RENotAFunction,
   REOther,
-  RESymbolNotFound,
 } from "../errors.js";
 import { expressionFromAst } from "../expression/fromAst.js";
 import { Expression } from "../expression/index.js";
@@ -61,8 +60,8 @@ export const evaluate: ReducerFn = (expression, context) => {
       return evaluateRecord(expression.value, context, ast);
     case "Assign":
       return evaluateAssign(expression.value, context, ast);
-    case "Symbol":
-      return evaluateSymbol(expression.value, context, ast);
+    case "ResolvedSymbol":
+      return evaluateResolvedSymbol(expression.value, context, ast);
     case "Value":
       return evaluateValue(expression.value, context, ast);
     case "Ternary":
@@ -155,7 +154,7 @@ const evaluateAssign: SubReducerFn<"Assign"> = (expressionValue, context) => {
     vVoid(),
     {
       // no spread is intentional - helps with monomorphism
-      bindings: context.bindings.set(expressionValue.left, result),
+      stack: context.stack.push(expressionValue.left, result),
       environment: context.environment,
       frameStack: context.frameStack,
       evaluate: context.evaluate,
@@ -164,14 +163,14 @@ const evaluateAssign: SubReducerFn<"Assign"> = (expressionValue, context) => {
   ];
 };
 
-const evaluateSymbol: SubReducerFn<"Symbol"> = (name, context, ast) => {
-  const value = context.bindings.get(name);
-  if (value === undefined) {
-    return throwFrom(new RESymbolNotFound(name), context, ast);
-  } else {
-    // cloneWithAst here is costly, but necessary.
-    return [value.cloneWithAst(ast), context];
-  }
+const evaluateResolvedSymbol: SubReducerFn<"ResolvedSymbol"> = (
+  expressionValue,
+  context,
+  ast
+) => {
+  const value = context.stack.get(expressionValue.offset);
+  // cloneWithAst here is costly, but necessary.
+  return [value.cloneWithAst(ast), context];
 };
 
 const evaluateValue: SubReducerFn<"Value"> = (expressionValue, context) => {
@@ -207,7 +206,7 @@ const evaluateLambda: SubReducerFn<"Lambda"> = (
     new SquiggleLambda(
       expressionValue.name,
       expressionValue.parameters,
-      context.bindings,
+      context.stack,
       expressionValue.body,
       ast.location
     )
@@ -236,7 +235,7 @@ const evaluateCall: SubReducerFn<"Call"> = (expressionValue, context, ast) => {
 };
 
 function createDefaultContext() {
-  return Context.createContext(getStdLib(), defaultEnv);
+  return Context.createContext(defaultEnv);
 }
 
 export async function evaluateExpressionToResult(
@@ -254,7 +253,9 @@ export async function evaluateExpressionToResult(
 export async function evaluateStringToResult(
   code: string
 ): Promise<result<Value, IError>> {
-  const exprR = Result.fmap(parse(code, "main"), expressionFromAst);
+  const exprR = Result.fmap(parse(code, "main"), (ast) =>
+    expressionFromAst(ast, getStdLib())
+  );
 
   if (exprR.ok) {
     return await evaluateExpressionToResult(exprR.value);

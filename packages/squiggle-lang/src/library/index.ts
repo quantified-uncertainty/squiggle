@@ -1,11 +1,16 @@
-import { INDEX_LOOKUP_FUNCTION } from "../expression/constants.js";
-import { Namespace, NamespaceMap } from "../reducer/bindings.js";
 import { REOther } from "../errors.js";
+import { INDEX_LOOKUP_FUNCTION } from "../expression/constants.js";
 import { BuiltinLambda, Lambda } from "../reducer/lambda.js";
-import { Value, vLambda } from "../value/index.js";
+import { vLambda } from "../value/index.js";
 
+import { Bindings } from "../reducer/stack.js";
+import { ImmutableMap } from "../utility/immutableMap.js";
 import { makeMathConstants } from "./math.js";
-import { nonRegistryLambdas, registry } from "./registry/index.js";
+import {
+  makeSquiggleBindings,
+  nonRegistryLambdas,
+  registry,
+} from "./registry/index.js";
 import { makeVersionConstant } from "./version.js";
 
 function makeLookupLambda(): Lambda {
@@ -24,8 +29,8 @@ function makeLookupLambda(): Lambda {
   });
 }
 
-function makeStdLib(): Namespace {
-  let res = NamespaceMap<string, Value>();
+function makeStdLib(): Bindings {
+  let res: Bindings = ImmutableMap();
 
   // constants
   res = res.merge(makeMathConstants());
@@ -44,11 +49,13 @@ function makeStdLib(): Namespace {
     res = res.set(name, vLambda(registry.makeLambda(name)));
   }
 
+  res = res.merge(makeSquiggleBindings(res));
+
   return res;
 }
 
 // lazy cache
-let cachedStdLib: ReturnType<typeof makeStdLib> | undefined;
+let cachedStdLib: Bindings | undefined;
 export function getStdLib() {
   cachedStdLib ??= makeStdLib();
   return cachedStdLib;

@@ -25,8 +25,14 @@ export type ExpressionContent =
       value: [Expression, Expression][];
     }
   | {
-      type: "Symbol";
-      value: string;
+      type: "ResolvedSymbol";
+      value: {
+        name: string;
+        // Position on stack, counting backwards (so last variable on stack has offset=0).
+        // It's important to count backwards, because we want to store imports and continues on top of the stack.
+        // (And maybe stdLib too, in the future.)
+        offset: number;
+      };
     }
   | {
       type: "Ternary";
@@ -53,9 +59,9 @@ export type ExpressionContent =
   | {
       type: "Lambda";
       value: {
+        name?: string;
         parameters: string[];
         body: Expression;
-        name?: string;
       };
     }
   | {
@@ -70,9 +76,9 @@ export const eArray = (anArray: Expression[]): ExpressionContent => ({
   value: anArray,
 });
 
-export const eBool = (b: boolean): ExpressionContent => ({
+export const eValue = (value: Value): ExpressionContent => ({
   type: "Value",
-  value: vBool(b),
+  value,
 });
 
 export const eCall = (
@@ -87,21 +93,16 @@ export const eCall = (
 });
 
 export const eLambda = (
+  name: string | undefined,
   parameters: string[],
-  body: Expression,
-  name: string | undefined
+  body: Expression
 ): ExpressionContent => ({
   type: "Lambda",
   value: {
+    name,
     parameters,
     body,
-    name,
   },
-});
-
-export const eNumber = (x: number): ExpressionContent => ({
-  type: "Value",
-  value: vNumber(x),
 });
 
 export const eRecord = (
@@ -111,14 +112,12 @@ export const eRecord = (
   value: aMap,
 });
 
-export const eString = (s: string): ExpressionContent => ({
-  type: "Value",
-  value: vString(s),
-});
-
-export const eSymbol = (name: string): ExpressionContent => ({
-  type: "Symbol",
-  value: name,
+export const eResolvedSymbol = (
+  name: string,
+  offset: number
+): ExpressionContent => ({
+  type: "ResolvedSymbol",
+  value: { name, offset },
 });
 
 export const eBlock = (exprs: Expression[]): ExpressionContent => ({
@@ -176,8 +175,8 @@ export function expressionToString(expression: Expression): string {
             `${expressionToString(key)}: ${expressionToString(value)}`
         )
         .join(", ")}}`;
-    case "Symbol":
-      return expression.value;
+    case "ResolvedSymbol":
+      return `${expression.value.name}{${expression.value.offset}}`;
     case "Ternary":
       return `${expressionToString(
         expression.value.condition

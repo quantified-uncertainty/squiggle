@@ -39,7 +39,7 @@ export class SqLambda {
     const rawArgs = args.map((arg) => arg._value);
     try {
       // TODO - obtain correct context from project
-      const value = this._value.call(rawArgs, createContext(getStdLib(), env));
+      const value = this._value.call(rawArgs, createContext(env));
       return Result.Ok(wrapValue(value));
     } catch (e) {
       return Result.Err(new SqError(IError.fromException(e)));

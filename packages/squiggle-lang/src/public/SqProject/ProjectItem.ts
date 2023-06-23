@@ -1,17 +1,17 @@
 import { AST, ParseError, parse } from "../../ast/parse.js";
 import { expressionFromAst } from "../../expression/fromAst.js";
-import { Expression } from "../../expression/index.js";
-import { ReducerContext } from "../../reducer/context.js";
 import { IError } from "../../reducer/IError.js";
-import { Namespace, NamespaceMap } from "../../reducer/bindings.js";
+import { ReducerContext } from "../../reducer/context.js";
 import { ReducerFn, evaluate } from "../../reducer/index.js";
+import { Bindings } from "../../reducer/stack.js";
+import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
 import { Ok, result } from "../../utility/result.js";
 import { Value } from "../../value/index.js";
 import { SqError } from "../SqError.js";
 import { Resolver } from "./Resolver.js";
 
-// source -> ast -> imports -> expression -> bindings & result
+// source -> ast -> imports -> bindings & result
 
 export type ImportBinding = {
   sourceId: string;
@@ -24,8 +24,7 @@ export class ProjectItem {
   continues: string[];
   ast?: result<AST, SqError>;
   imports?: result<ImportBinding[], SqError>;
-  expression?: result<Expression, SqError>;
-  bindings?: Namespace;
+  bindings?: Bindings;
   result?: result<Value, SqError>;
 
   constructor(props: { sourceId: string; source: string }) {
@@ -37,7 +36,6 @@ export class ProjectItem {
   touchSource() {
     this.ast = undefined;
     this.imports = undefined;
-    this.expression = undefined;
     this.bindings = undefined;
     this.result = undefined;
   }
@@ -47,20 +45,10 @@ export class ProjectItem {
     this.touchSource();
   }
 
-  private setAST(ast: NonNullable<ProjectItem["ast"]>): void {
+  private setAst(ast: NonNullable<ProjectItem["ast"]>): void {
     this.ast = ast;
 
     this.imports = undefined;
-    this.expression = undefined;
-    this.result = undefined;
-    this.bindings = undefined;
-  }
-
-  private setExpression(
-    expression: NonNullable<ProjectItem["expression"]>
-  ): void {
-    this.expression = expression;
-
     this.result = undefined;
     this.bindings = undefined;
   }
@@ -68,7 +56,6 @@ export class ProjectItem {
   private setImports(imports: result<ImportBinding[], SqError>): void {
     this.imports = imports;
 
-    this.expression = undefined;
     this.result = undefined;
     this.bindings = undefined;
   }
@@ -145,55 +132,44 @@ export class ProjectItem {
       parse(this.source, this.sourceId),
       (e: ParseError) => new SqError(IError.fromParseError(e))
     );
-    this.setAST(ast);
-  }
-
-  private buildExpression(): void {
-    this.buildAst();
-    if (this.expression) {
-      return;
-    }
-    if (!this.ast) {
-      // buildAST() guarantees that the ast is set
-      throw new Error("Internal logic error");
-    }
-    const expression = Result.fmap(this.ast, (node) => expressionFromAst(node));
-    this.setExpression(expression);
+    this.setAst(ast);
   }
 
   failRun(e: SqError): void {
     this.result = Result.Err(e);
-    this.bindings = NamespaceMap();
+    this.bindings = ImmutableMap();
   }
 
-  async run(context: ReducerContext) {
-    this.buildExpression();
+  async run(context: ReducerContext, externals: ImmutableMap<string, Value>) {
     if (this.result) {
       return;
     }
 
-    if (!this.expression) {
-      // buildExpression() guarantees that the expression is set
+    this.buildAst();
+    if (!this.ast) {
+      // buildAst() guarantees that the ast is set
       throw new Error("Internal logic error");
     }
 
-    if (!this.expression.ok) {
-      this.failRun(this.expression.value);
+    if (!this.ast.ok) {
+      this.failRun(this.ast.value);
       return;
     }
 
-    const wrappedEvaluate = context.evaluate;
-    const asyncEvaluate: ReducerFn = (expression, context) => {
-      return wrappedEvaluate(expression, context);
-    };
-
     try {
-      const [result, contextAfterEvaluation] = evaluate(this.expression.value, {
+      const expression = expressionFromAst(this.ast.value, externals);
+
+      const wrappedEvaluate = context.evaluate;
+      const asyncEvaluate: ReducerFn = (expression, context) => {
+        return wrappedEvaluate(expression, context);
+      };
+
+      const [result, contextAfterEvaluation] = evaluate(expression, {
         ...context,
         evaluate: asyncEvaluate,
       });
       this.result = Ok(result);
-      this.bindings = contextAfterEvaluation.bindings.locals();
+      this.bindings = contextAfterEvaluation.stack.asBindings();
     } catch (e: unknown) {
       this.failRun(new SqError(IError.fromException(e)));
     }

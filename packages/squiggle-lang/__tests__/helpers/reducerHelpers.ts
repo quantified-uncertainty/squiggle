@@ -12,6 +12,7 @@ import {
 import * as Result from "../../src/utility/result.js";
 import { IError } from "../../src/reducer/IError.js";
 import { Value } from "../../src/value/index.js";
+import { getStdLib } from "../../src/library/index.js";
 
 const expectParseToBe = (expr: string, answer: string) => {
   expect(nodeResultToString(parse(expr, "test"))).toBe(answer);
@@ -24,7 +25,9 @@ export const testParse = (expr: string, answer: string) =>
   test(expr, () => expectParseToBe(expr, answer));
 
 async function expectExpressionToBe(expr: string, answer: string, v?: string) {
-  const rExpr = Result.fmap(parse(expr, "test"), expressionFromAst);
+  const rExpr = Result.fmap(parse(expr, "test"), (ast) =>
+    expressionFromAst(ast, getStdLib())
+  );
   const a1 = rExpr.ok
     ? expressionToString(rExpr.value)
     : `Error(${toStringError(rExpr.value)})`;

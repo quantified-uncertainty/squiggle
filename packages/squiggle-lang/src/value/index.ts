@@ -1,21 +1,21 @@
 import isInteger from "lodash/isInteger.js";
 
+import { ASTNode } from "../ast/parse.js";
 import { BaseDist } from "../dist/BaseDist.js";
 import {
   REArrayIndexNotFound,
   REOther,
   RERecordPropertyNotFound,
 } from "../errors.js";
-import { Namespace } from "../reducer/bindings.js";
 import {
-  declarationToString,
   LambdaDeclaration,
+  declarationToString,
 } from "../reducer/declaration.js";
 import { Lambda } from "../reducer/lambda.js";
 import * as DateTime from "../utility/DateTime.js";
-import { ASTNode } from "../ast/parse.js";
+import { ImmutableMap } from "../utility/immutableMap.js";
 
-export type ValueMap = Namespace;
+export type ValueMap = ImmutableMap<string, Value>;
 
 // Mixin for values that allow field lookups; just for type safety.
 type Indexable = {

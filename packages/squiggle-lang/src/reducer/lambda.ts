@@ -5,9 +5,9 @@ import { REArityError } from "../errors.js";
 import { Expression } from "../expression/index.js";
 import { Value } from "../value/index.js";
 import * as IError from "./IError.js";
-import { Bindings } from "./bindings.js";
 import * as Context from "./context.js";
 import { ReducerContext } from "./context.js";
+import { Stack } from "./stack.js";
 
 type LambdaBody = (args: Value[], context: ReducerContext) => Value;
 
@@ -26,7 +26,7 @@ export abstract class Lambda {
     const newContext: ReducerContext = {
       // Be careful! the order here must match the order of props in ReducerContext.
       // Also, we intentionally don't use object spread syntax because of monomorphism.
-      bindings: context.bindings,
+      stack: context.stack,
       environment: context.environment,
       frameStack: context.frameStack.extend(
         Context.currentFunctionName(context),
@@ -60,7 +60,7 @@ export class SquiggleLambda extends Lambda {
   constructor(
     name: string | undefined,
     parameters: string[],
-    bindings: Bindings,
+    stack: Stack,
     body: Expression,
     location: LocationRange
   ) {
@@ -71,15 +71,13 @@ export class SquiggleLambda extends Lambda {
         throw new REArityError(undefined, parametersLength, argsLength);
       }
 
-      // We could call bindings.extend() here to create a new local scope, but we don't,
-      // since bindings are immutable anyway, and scopes are costly (lookups to upper scopes are O(depth)).
-      let localBindings = bindings;
+      let localStack = stack;
       for (let i = 0; i < parametersLength; i++) {
-        localBindings = localBindings.set(parameters[i], args[i]);
+        localStack = localStack.push(parameters[i], args[i]);
       }
 
       const lambdaContext: ReducerContext = {
-        bindings: localBindings, // based on bindings at the moment of lambda creation
+        stack: localStack,
         // no spread is intentional - helps with monomorphism
         environment: context.environment,
         frameStack: context.frameStack,

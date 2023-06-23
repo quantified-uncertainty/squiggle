@@ -91,7 +91,7 @@ type NodeLetStatement = N<
 type NodeLambda = N<
   "Lambda",
   {
-    args: ASTNode[];
+    args: string[];
     body: ASTNode; // should be a NodeBlock
     name?: string;
   }
@@ -280,7 +280,7 @@ export function nodeKeyValue(
   return { type: "KeyValue", key, value, location };
 }
 export function nodeLambda(
-  args: ASTNode[],
+  args: string[],
   body: ASTNode,
   location: LocationRange,
   name?: NodeIdentifier
