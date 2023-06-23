@@ -60,10 +60,6 @@ export abstract class SqAbstractValue<T extends string, J> {
     return this._value.toString();
   }
 
-  ast() {
-    return this._value.ast;
-  }
-
   abstract asJS(): J;
 }
 

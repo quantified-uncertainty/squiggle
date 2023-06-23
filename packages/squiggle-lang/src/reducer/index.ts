@@ -118,7 +118,6 @@ const evaluateArray: SubReducerFn<"Array"> = (
     return value;
   });
   const value = vArray(values);
-  value.ast = ast;
   return [value, context];
 };
 
@@ -144,7 +143,6 @@ const evaluateRecord: SubReducerFn<"Record"> = (
       })
     )
   );
-  value.ast = ast;
   return [value, context];
 };
 
@@ -170,7 +168,7 @@ const evaluateResolvedSymbol: SubReducerFn<"ResolvedSymbol"> = (
 ) => {
   const value = context.stack.get(expressionValue.offset);
   // cloneWithAst here is costly, but necessary.
-  return [value.cloneWithAst(ast), context];
+  return [value, context];
 };
 
 const evaluateValue: SubReducerFn<"Value"> = (expressionValue, context) => {
@@ -194,7 +192,7 @@ const evaluateTernary: SubReducerFn<"Ternary"> = (
     predicateResult.value ? expressionValue.ifTrue : expressionValue.ifFalse,
     context
   );
-  return [value.cloneWithAst(ast), context];
+  return [value, context];
 };
 
 const evaluateLambda: SubReducerFn<"Lambda"> = (
@@ -211,7 +209,6 @@ const evaluateLambda: SubReducerFn<"Lambda"> = (
       ast.location
     )
   );
-  value.ast = ast;
   return [value, context];
 };
 

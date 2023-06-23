@@ -1,6 +1,5 @@
 import isInteger from "lodash/isInteger.js";
 
-import { ASTNode } from "../ast/parse.js";
 import { BaseDist } from "../dist/BaseDist.js";
 import {
   REArrayIndexNotFound,
@@ -25,18 +24,8 @@ type Indexable = {
 abstract class BaseValue {
   abstract type: string;
 
-  // Explicit initialzation is intentional - it prevents polymorphism when we fill `ast` later.
-  ast?: ASTNode = undefined;
-
   clone() {
     return Object.assign(Object.create(Object.getPrototypeOf(this)), this);
-  }
-
-  cloneWithAst(newAst: ASTNode) {
-    // This generic version is somewhat slow; speciailized implementation in each subclass would be faster.
-    const newValue = this.clone();
-    newValue.ast = newAst;
-    return newValue;
   }
 
   abstract toString(): string;
@@ -97,7 +86,6 @@ export const vArray = (v: Value[]) => new VArray(v);
 
 class VBool extends BaseValue {
   readonly type = "Bool";
-  ast?: ASTNode = undefined;
 
   constructor(public value: boolean) {
     super();

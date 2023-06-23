@@ -242,9 +242,6 @@ function innerExpressionFromAst(
   context: CompileContext
 ): [expression.Expression, CompileContext] {
   const [content, newContext] = contentFromNode(ast, context);
-  if (content.type === "Value") {
-    content.value.ast = ast;
-  }
   return [
     {
       ast,
