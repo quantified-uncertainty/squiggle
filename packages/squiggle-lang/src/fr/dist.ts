@@ -14,7 +14,11 @@ import { FnFactory } from "../library/registry/helpers.js";
 import { OtherOperationError } from "../operationError.js";
 import * as Result from "../utility/result.js";
 import { Value, vDist } from "../value/index.js";
-import { ErrorMessage, REDistributionError, REOther } from "../errors.js";
+import {
+  ErrorMessage,
+  REDistributionError,
+  REOther,
+} from "../errors/messages.js";
 import { distResultToValue } from "./genericDist.js";
 
 const CI_CONFIG = [

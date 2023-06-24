@@ -2,9 +2,10 @@ import { List as ImmutableList } from "immutable";
 
 import { ASTNode } from "../ast/parse.js";
 import { infixFunctions, unaryFunctions } from "../ast/peggyHelpers.js";
-import { RESymbolNotFound } from "../errors.js";
+import { ICompileError } from "../errors/IError.js";
 import { Bindings } from "../reducer/stack.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
+import * as Result from "../utility/result.js";
 import { vBool, vNumber, vString } from "../value/index.js";
 import { INDEX_LOOKUP_FUNCTION } from "./constants.js";
 import * as expression from "./index.js";
@@ -32,15 +33,15 @@ function createInitialCompileContext(externals: Bindings): CompileContext {
   };
 }
 
-function getValueOrThrow(context: CompileContext, name: string) {
+function getValueOrThrow(context: CompileContext, ast: ASTNode, name: string) {
   const value = context.externals.get(name);
   if (value === undefined) {
-    throw new RESymbolNotFound(name);
+    throw new ICompileError(`${name} is not defined`, ast.location);
   }
   return expression.eValue(value);
 }
 
-function contentFromNode(
+function compileToContent(
   ast: ASTNode,
   context: CompileContext
 ): [expression.ExpressionContent, CompileContext] {
@@ -54,7 +55,7 @@ function contentFromNode(
       };
       const statements: expression.Expression[] = [];
       for (const astStatement of ast.statements) {
-        const [statement, newContext] = innerExpressionFromAst(
+        const [statement, newContext] = innerCompileAst(
           astStatement,
           currentContext
         );
@@ -72,7 +73,7 @@ function contentFromNode(
       };
       const statements: expression.Expression[] = [];
       for (const astStatement of ast.statements) {
-        const [statement, newContext] = innerExpressionFromAst(
+        const [statement, newContext] = innerCompileAst(
           astStatement,
           currentContext
         );
@@ -92,7 +93,7 @@ function contentFromNode(
       return [
         expression.eLetStatement(
           ast.variable.value,
-          innerExpressionFromAst(ast.value, context)[0]
+          innerCompileAst(ast.value, context)[0]
         ),
         newContext,
       ];
@@ -100,8 +101,8 @@ function contentFromNode(
     case "Call": {
       return [
         expression.eCall(
-          innerExpressionFromAst(ast.fn, context)[0],
-          ast.args.map((arg) => innerExpressionFromAst(arg, context)[0])
+          innerCompileAst(ast.fn, context)[0],
+          ast.args.map((arg) => innerCompileAst(arg, context)[0])
         ),
         context,
       ];
@@ -109,8 +110,8 @@ function contentFromNode(
     case "InfixCall": {
       return [
         expression.eCall(
-          { ast, ...getValueOrThrow(context, infixFunctions[ast.op]) },
-          ast.args.map((arg) => innerExpressionFromAst(arg, context)[0])
+          { ast, ...getValueOrThrow(context, ast, infixFunctions[ast.op]) },
+          ast.args.map((arg) => innerCompileAst(arg, context)[0])
         ),
         context,
       ];
@@ -118,27 +119,25 @@ function contentFromNode(
     case "UnaryCall":
       return [
         expression.eCall(
-          { ast, ...getValueOrThrow(context, unaryFunctions[ast.op]) },
-          [innerExpressionFromAst(ast.arg, context)[0]]
+          { ast, ...getValueOrThrow(context, ast, unaryFunctions[ast.op]) },
+          [innerCompileAst(ast.arg, context)[0]]
         ),
         context,
       ];
     case "Pipe":
       return [
-        expression.eCall(innerExpressionFromAst(ast.fn, context)[0], [
-          innerExpressionFromAst(ast.leftArg, context)[0],
-          ...ast.rightArgs.map(
-            (arg) => innerExpressionFromAst(arg, context)[0]
-          ),
+        expression.eCall(innerCompileAst(ast.fn, context)[0], [
+          innerCompileAst(ast.leftArg, context)[0],
+          ...ast.rightArgs.map((arg) => innerCompileAst(arg, context)[0]),
         ]),
         context,
       ];
     case "DotLookup":
       return [
         expression.eCall(
-          { ast, ...getValueOrThrow(context, INDEX_LOOKUP_FUNCTION) },
+          { ast, ...getValueOrThrow(context, ast, INDEX_LOOKUP_FUNCTION) },
           [
-            innerExpressionFromAst(ast.arg, context)[0],
+            innerCompileAst(ast.arg, context)[0],
             { ast, ...expression.eValue(vString(ast.key)) },
           ]
         ),
@@ -147,10 +146,10 @@ function contentFromNode(
     case "BracketLookup":
       return [
         expression.eCall(
-          { ast, ...getValueOrThrow(context, INDEX_LOOKUP_FUNCTION) },
+          { ast, ...getValueOrThrow(context, ast, INDEX_LOOKUP_FUNCTION) },
           [
-            innerExpressionFromAst(ast.arg, context)[0],
-            innerExpressionFromAst(ast.key, context)[0],
+            innerCompileAst(ast.arg, context)[0],
+            innerCompileAst(ast.key, context)[0],
           ]
         ),
         context,
@@ -169,7 +168,7 @@ function contentFromNode(
         expression.eLambda(
           ast.name,
           ast.args,
-          innerExpressionFromAst(ast.body, innerContext)[0]
+          innerCompileAst(ast.body, innerContext)[0]
         ),
         context,
       ];
@@ -177,17 +176,17 @@ function contentFromNode(
     case "KeyValue":
       return [
         expression.eArray([
-          innerExpressionFromAst(ast.key, context)[0],
-          innerExpressionFromAst(ast.value, context)[0],
+          innerCompileAst(ast.key, context)[0],
+          innerCompileAst(ast.value, context)[0],
         ]),
         context,
       ];
     case "Ternary":
       return [
         expression.eTernary(
-          innerExpressionFromAst(ast.condition, context)[0],
-          innerExpressionFromAst(ast.trueExpression, context)[0],
-          innerExpressionFromAst(ast.falseExpression, context)[0]
+          innerCompileAst(ast.condition, context)[0],
+          innerCompileAst(ast.trueExpression, context)[0],
+          innerCompileAst(ast.falseExpression, context)[0]
         ),
         context,
       ];
@@ -195,7 +194,7 @@ function contentFromNode(
       return [
         expression.eArray(
           ast.elements.map(
-            (statement) => innerExpressionFromAst(statement, context)[0]
+            (statement) => innerCompileAst(statement, context)[0]
           )
         ),
         context,
@@ -204,8 +203,8 @@ function contentFromNode(
       return [
         expression.eRecord(
           ast.elements.map((kv) => [
-            innerExpressionFromAst(kv.key, context)[0],
-            innerExpressionFromAst(kv.value, context)[0],
+            innerCompileAst(kv.key, context)[0],
+            innerCompileAst(kv.value, context)[0],
           ])
         ),
         context,
@@ -223,7 +222,7 @@ function contentFromNode(
     case "Identifier": {
       const offset = context.nameToPos.get(ast.value);
       if (offset === undefined) {
-        return [getValueOrThrow(context, ast.value), context];
+        return [getValueOrThrow(context, ast, ast.value), context];
       } else {
         const result = expression.eResolvedSymbol(
           ast.value,
@@ -237,11 +236,11 @@ function contentFromNode(
   }
 }
 
-function innerExpressionFromAst(
+function innerCompileAst(
   ast: ASTNode,
   context: CompileContext
 ): [expression.Expression, CompileContext] {
-  const [content, newContext] = contentFromNode(ast, context);
+  const [content, newContext] = compileToContent(ast, context);
   return [
     {
       ast,
@@ -251,13 +250,20 @@ function innerExpressionFromAst(
   ];
 }
 
-export function expressionFromAst(
+export function compileAst(
   ast: ASTNode,
   externals: Bindings
-): expression.Expression {
-  const [expression] = innerExpressionFromAst(
-    ast,
-    createInitialCompileContext(externals)
-  );
-  return expression;
+): Result.result<expression.Expression, ICompileError> {
+  try {
+    const [expression] = innerCompileAst(
+      ast,
+      createInitialCompileContext(externals)
+    );
+    return Result.Ok(expression);
+  } catch (err) {
+    if (err instanceof ICompileError) {
+      return Result.Err(err);
+    }
+    throw err; // internal error, better to detect early (but maybe we should wrap this in IOtherError instead)
+  }
 }

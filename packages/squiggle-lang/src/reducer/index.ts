@@ -5,15 +5,15 @@ import {
   REExpectedType,
   RENotAFunction,
   REOther,
-} from "../errors.js";
-import { expressionFromAst } from "../expression/fromAst.js";
+} from "../errors/messages.js";
+import { compileAst } from "../expression/compile.js";
 import { Expression } from "../expression/index.js";
 import { getStdLib } from "../library/index.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import * as Result from "../utility/result.js";
 import { Ok, result } from "../utility/result.js";
 import { Value, vArray, vLambda, vRecord, vVoid } from "../value/index.js";
-import { IError } from "./IError.js";
+import { ICompileError, IRuntimeError } from "../errors/IError.js";
 import * as Context from "./context.js";
 import { SquiggleLambda } from "./lambda.js";
 
@@ -33,7 +33,7 @@ function throwFrom(
   context: Context.ReducerContext,
   ast: ASTNode
 ): never {
-  throw IError.fromMessageWithFrameStack(
+  throw IRuntimeError.fromMessageWithFrameStack(
     error,
     context.frameStack.extend(
       Context.currentFunctionName(context),
@@ -237,26 +237,26 @@ function createDefaultContext() {
 
 export async function evaluateExpressionToResult(
   expression: Expression
-): Promise<result<Value, IError>> {
+): Promise<result<Value, IRuntimeError>> {
   const context = createDefaultContext();
   try {
     const [value] = context.evaluate(expression, context);
     return Ok(value);
   } catch (e) {
-    return Result.Err(IError.fromException(e));
+    return Result.Err(IRuntimeError.fromException(e));
   }
 }
 
 export async function evaluateStringToResult(
   code: string
-): Promise<result<Value, IError>> {
-  const exprR = Result.fmap(parse(code, "main"), (ast) =>
-    expressionFromAst(ast, getStdLib())
+): Promise<result<Value, ICompileError | IRuntimeError>> {
+  const exprR = Result.bind(parse(code, "main"), (ast) =>
+    compileAst(ast, getStdLib())
   );
 
   if (exprR.ok) {
     return await evaluateExpressionToResult(exprR.value);
   } else {
-    return Result.Err(IError.fromParseError(exprR.value));
+    return Result.Err(exprR.value);
   }
 }

@@ -8,7 +8,7 @@ import {
   SqSampleSetDistribution,
   wrapDistribution,
 } from "./SqDistribution.js";
-import { SqError } from "./SqError.js";
+import { SqError, SqOtherError } from "./SqError.js";
 import { SqLambda } from "./SqLambda.js";
 import { SqScale, wrapScale } from "./SqScale.js";
 import { SqPlotValue } from "./SqValue.js";
@@ -227,9 +227,7 @@ export class SqScatterPlot extends SqAbstractPlot<"scatter"> {
   ): Result.result<SqSampleSetDistribution, SqError> {
     const sampleSetResult = SampleSetDist.fromDist(dist, env);
     if (!sampleSetResult.ok) {
-      return Result.Err(
-        SqError.createOtherError("Conversion to SampleSet failed")
-      );
+      return Result.Err(new SqOtherError("Conversion to SampleSet failed"));
     }
     return Result.Ok(new SqSampleSetDistribution(sampleSetResult.value));
   }

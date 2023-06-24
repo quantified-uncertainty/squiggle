@@ -176,7 +176,8 @@ export function expressionToString(expression: Expression): string {
         )
         .join(", ")}}`;
     case "ResolvedSymbol":
-      return `${expression.value.name}{${expression.value.offset}}`;
+      // it would be useful to output the offset here, but we need to update tests accordingly
+      return expression.value.name;
     case "Ternary":
       return `${expressionToString(
         expression.value.condition

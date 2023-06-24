@@ -1,6 +1,6 @@
 import { AST, ParseError, parse } from "../../ast/parse.js";
-import { expressionFromAst } from "../../expression/fromAst.js";
-import { IError } from "../../reducer/IError.js";
+import { compileAst } from "../../expression/compile.js";
+import { IRuntimeError } from "../../errors/IError.js";
 import { ReducerContext } from "../../reducer/context.js";
 import { ReducerFn, evaluate } from "../../reducer/index.js";
 import { Bindings } from "../../reducer/stack.js";
@@ -8,7 +8,12 @@ import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
 import { Ok, result } from "../../utility/result.js";
 import { Value } from "../../value/index.js";
-import { SqError } from "../SqError.js";
+import {
+  SqCompileError,
+  SqError,
+  SqOtherError,
+  SqRuntimeError,
+} from "../SqError.js";
 import { Resolver } from "./Resolver.js";
 
 // source -> ast -> imports -> bindings & result
@@ -106,9 +111,7 @@ export class ProjectItem {
     if (!resolver) {
       this.setImports(
         Result.Err(
-          new SqError(
-            IError.other("Can't use imports when resolver is not configured")
-          )
+          new SqOtherError("Can't use imports when resolver is not configured")
         )
       );
       return;
@@ -130,7 +133,7 @@ export class ProjectItem {
     }
     const ast = Result.errMap(
       parse(this.source, this.sourceId),
-      (e: ParseError) => new SqError(IError.fromParseError(e))
+      (e) => new SqCompileError(e)
     );
     this.setAst(ast);
   }
@@ -156,22 +159,30 @@ export class ProjectItem {
       return;
     }
 
-    try {
-      const expression = expressionFromAst(this.ast.value, externals);
+    const expression = Result.errMap(
+      compileAst(this.ast.value, externals),
+      (e) => new SqCompileError(e)
+    );
 
+    if (!expression.ok) {
+      this.failRun(expression.value);
+      return;
+    }
+
+    try {
       const wrappedEvaluate = context.evaluate;
       const asyncEvaluate: ReducerFn = (expression, context) => {
         return wrappedEvaluate(expression, context);
       };
 
-      const [result, contextAfterEvaluation] = evaluate(expression, {
+      const [result, contextAfterEvaluation] = evaluate(expression.value, {
         ...context,
         evaluate: asyncEvaluate,
       });
       this.result = Ok(result);
       this.bindings = contextAfterEvaluation.stack.asBindings();
     } catch (e: unknown) {
-      this.failRun(new SqError(IError.fromException(e)));
+      this.failRun(new SqRuntimeError(IRuntimeError.fromException(e)));
     }
   }
 }

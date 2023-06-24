@@ -5,7 +5,7 @@ import {
   BinaryOperation,
   binaryOperations,
 } from "../dist/distOperations/index.js";
-import { REDistributionError } from "../errors.js";
+import { REDistributionError } from "../errors/messages.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import { frDist, frNumber } from "../library/registry/frTypes.js";

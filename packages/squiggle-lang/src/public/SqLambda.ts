@@ -1,12 +1,11 @@
 import { Env } from "../dist/env.js";
-import { getStdLib } from "../library/index.js";
+import { IRuntimeError } from "../errors/IError.js";
 import { registry } from "../library/registry/index.js";
-import { IError } from "../reducer/IError.js";
 import { createContext } from "../reducer/context.js";
 import { Lambda } from "../reducer/lambda.js";
 import * as Result from "../utility/result.js";
 import { result } from "../utility/result.js";
-import { SqError } from "./SqError.js";
+import { SqError, SqOtherError, SqRuntimeError } from "./SqError.js";
 import { SqValue, wrapValue } from "./SqValue.js";
 import { SqValuePath } from "./SqValuePath.js";
 
@@ -28,7 +27,7 @@ export class SqLambda {
     if (!env) {
       if (!this.path) {
         return Result.Err(
-          SqError.createOtherError(
+          new SqOtherError(
             "Programmatically constructed lambda call requires env argument"
           )
         );
@@ -42,7 +41,7 @@ export class SqLambda {
       const value = this._value.call(rawArgs, createContext(env));
       return Result.Ok(wrapValue(value));
     } catch (e) {
-      return Result.Err(new SqError(IError.fromException(e)));
+      return Result.Err(new SqRuntimeError(IRuntimeError.fromException(e)));
     }
   }
 

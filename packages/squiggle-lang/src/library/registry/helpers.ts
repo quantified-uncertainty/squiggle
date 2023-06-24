@@ -5,7 +5,7 @@ import {
   ErrorMessage,
   REDistributionError,
   REOperationError,
-} from "../../errors.js";
+} from "../../errors/messages.js";
 import { SampleMapNeedsNtoNFunction } from "../../operationError.js";
 import { ReducerContext } from "../../reducer/context.js";
 import { Lambda } from "../../reducer/lambda.js";

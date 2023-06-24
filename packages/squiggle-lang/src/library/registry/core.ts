@@ -7,7 +7,11 @@ import {
   fnDefinitionToString,
   tryCallFnDefinition,
 } from "./fnDefinition.js";
-import { ErrorMessage, REOther, RESymbolNotFound } from "../../errors.js";
+import {
+  ErrorMessage,
+  REOther,
+  RESymbolNotFound,
+} from "../../errors/messages.js";
 import { BuiltinLambda, Lambda } from "../../reducer/lambda.js";
 
 export type FRFunction = {

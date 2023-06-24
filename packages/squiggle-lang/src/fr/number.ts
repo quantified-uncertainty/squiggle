@@ -8,7 +8,7 @@ import * as Result from "../utility/result.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
 import { Ok } from "../utility/result.js";
 import { Value, vArray, vNumber } from "../value/index.js";
-import { ErrorMessage, REOther } from "../errors.js";
+import { ErrorMessage, REOther } from "../errors/messages.js";
 
 const maker = new FnFactory({
   nameSpace: "Number",

@@ -1,6 +1,6 @@
-import { IError } from "../../src/reducer/IError.js";
+import { IRuntimeError } from "../../src/errors/IError.js";
 import { FrameStack } from "../../src/reducer/frameStack.js";
-import { ErrorMessage, REOther } from "../../src/errors.js";
+import { ErrorMessage, REOther } from "../../src/errors/messages.js";
 
 describe("ErrorMessage", () => {
   test("toString", () => {
@@ -10,12 +10,14 @@ describe("ErrorMessage", () => {
 
 describe("IError", () => {
   test("toString", () =>
-    expect(IError.other("test error").toString()).toBe("Error: test error"));
+    expect(
+      IRuntimeError.fromMessage(new REOther("test error")).toString()
+    ).toBe("Error: test error"));
 
   test("toStringWithStacktrace with empty stacktrace", () =>
-    expect(IError.other("test error").toStringWithStackTrace()).toBe(
-      "Error: test error"
-    ));
+    expect(
+      IRuntimeError.fromMessage(new REOther("test error")).toStringWithDetails()
+    ).toBe("Error: test error"));
 
   test("toStringWithStackTrace", () => {
     const frameStack = FrameStack.make()
@@ -23,10 +25,10 @@ describe("IError", () => {
       .extend("frame2", undefined);
 
     expect(
-      IError.fromMessageWithFrameStack(
+      IRuntimeError.fromMessageWithFrameStack(
         new REOther("test error"),
         frameStack
-      ).toStringWithStackTrace()
+      ).toStringWithDetails()
     ).toBe(`Error: test error
 Stack trace:
   frame2

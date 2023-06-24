@@ -1,6 +1,6 @@
 import { List } from "immutable";
 
-import { REOther } from "../errors.js";
+import { REOther } from "../errors/messages.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { Value } from "../value/index.js";
 

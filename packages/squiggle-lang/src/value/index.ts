@@ -5,7 +5,7 @@ import {
   REArrayIndexNotFound,
   REOther,
   RERecordPropertyNotFound,
-} from "../errors.js";
+} from "../errors/messages.js";
 import {
   LambdaDeclaration,
   declarationToString,

@@ -13,7 +13,7 @@ import {
   repackDistResult,
   unpackDistResult,
 } from "../library/registry/helpers.js";
-import { REExpectedType } from "../errors.js";
+import { REExpectedType } from "../errors/messages.js";
 import { Ok } from "../utility/result.js";
 import { vArray, vNumber } from "../value/index.js";
 

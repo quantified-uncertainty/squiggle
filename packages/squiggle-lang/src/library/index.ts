@@ -1,4 +1,4 @@
-import { REOther } from "../errors.js";
+import { REOther } from "../errors/messages.js";
 import { INDEX_LOOKUP_FUNCTION } from "../expression/constants.js";
 import { BuiltinLambda, Lambda } from "../reducer/lambda.js";
 import { vLambda } from "../value/index.js";

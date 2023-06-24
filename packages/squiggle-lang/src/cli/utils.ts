@@ -83,7 +83,7 @@ export async function run(args: RunArgs) {
   };
 
   if (!result.ok) {
-    printLines(red("Error:"), result.value.toStringWithStackTrace());
+    printLines(red("Error:"), result.value.toStringWithDetails());
   } else {
     switch (args.output) {
       case "RESULT_OR_BINDINGS":

@@ -68,7 +68,7 @@ describe("Peggy parse", () => {
   });
 
   describe("functions", () => {
-    testParse("identity(x) = x", "{:identity = {|:x| {:x}}}"); // Function definitions become lambda assignments
+    testParse("identity(x) = x", "{:identity = {|x| {:x}}}"); // Function definitions become lambda assignments
     testParse("identity(x)", "{(:identity :x)}");
   });
 
@@ -193,31 +193,31 @@ describe("Peggy parse", () => {
   });
 
   describe("lambda", () => {
-    testParse("{|x| x}", "{{|:x| :x}}");
-    testParse("f={|x| x}", "{:f = {|:x| :x}}");
-    testParse("f(x)=x", "{:f = {|:x| {:x}}}"); // Function definitions are lambda assignments
-    testParse("f(x)=x ? 1 : 0", "{:f = {|:x| {(::$$_ternary_$$ :x 1 0)}}}"); // Function definitions are lambda assignments
+    testParse("{|x| x}", "{{|x| :x}}");
+    testParse("f={|x| x}", "{:f = {|x| :x}}");
+    testParse("f(x)=x", "{:f = {|x| {:x}}}"); // Function definitions are lambda assignments
+    testParse("f(x)=x ? 1 : 0", "{:f = {|x| {(::$$_ternary_$$ :x 1 0)}}}"); // Function definitions are lambda assignments
   });
 
   describe("Using lambda as value", () => {
     testParse(
       "myadd(x,y)=x+y; z=myadd; z",
-      "{:myadd = {|:x,:y| {(:x + :y)}}; :z = {:myadd}; :z}"
+      "{:myadd = {|x,y| {(:x + :y)}}; :z = {:myadd}; :z}"
     );
     testParse(
       "myadd(x,y)=x+y; z=[myadd]; z",
-      "{:myadd = {|:x,:y| {(:x + :y)}}; :z = {[:myadd]}; :z}"
+      "{:myadd = {|x,y| {(:x + :y)}}; :z = {[:myadd]}; :z}"
     );
     testParse(
       "myaddd(x,y)=x+y; z={x: myaddd}; z",
-      "{:myaddd = {|:x,:y| {(:x + :y)}}; :z = {{'x': :myaddd}}; :z}"
+      "{:myaddd = {|x,y| {(:x + :y)}}; :z = {{'x': :myaddd}}; :z}"
     );
-    testParse("f({|x| x+1})", "{(:f {|:x| (:x + 1)})}");
-    testParse("map(arr, {|x| x+1})", "{(:map :arr {|:x| (:x + 1)})}");
-    testParse("map([1,2,3], {|x| x+1})", "{(:map [1; 2; 3] {|:x| (:x + 1)})}");
+    testParse("f({|x| x+1})", "{(:f {|x| (:x + 1)})}");
+    testParse("map(arr, {|x| x+1})", "{(:map :arr {|x| (:x + 1)})}");
+    testParse("map([1,2,3], {|x| x+1})", "{(:map [1; 2; 3] {|x| (:x + 1)})}");
     testParse(
       "[1,2,3]->map({|x| x+1})",
-      "{([1; 2; 3] -> :map({|:x| (:x + 1)}))}"
+      "{([1; 2; 3] -> :map({|x| (:x + 1)}))}"
     );
   });
   describe("unit", () => {

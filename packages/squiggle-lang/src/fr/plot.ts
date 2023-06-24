@@ -13,7 +13,7 @@ import {
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { REOther } from "../errors.js";
+import { REOther } from "../errors/messages.js";
 import * as Result from "../utility/result.js";
 import { LabeledDistribution, vPlot } from "../value/index.js";
 

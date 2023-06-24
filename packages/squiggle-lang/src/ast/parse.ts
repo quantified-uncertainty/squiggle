@@ -1,13 +1,14 @@
 import { LocationRange } from "peggy";
-import { result } from "../utility/result.js";
 import * as Result from "../utility/result.js";
-import { type ASTNode, ASTCommentNode } from "./peggyHelpers.js";
+import { result } from "../utility/result.js";
+import { ASTCommentNode, type ASTNode } from "./peggyHelpers.js";
 
 export { type ASTNode } from "./peggyHelpers.js";
 
+import { ICompileError } from "../errors/IError.js";
 import {
-  parse as peggyParse,
   SyntaxError as PeggySyntaxError,
+  parse as peggyParse,
 } from "./peggyParser.js";
 
 export type ParseError = {
@@ -16,22 +17,13 @@ export type ParseError = {
   message: string;
 };
 
-export const makeParseError = (
-  message: string,
-  location: LocationRange
-): ParseError => ({
-  type: "SyntaxError",
-  message,
-  location,
-});
-
 export type AST = ASTNode & {
   comments: ASTCommentNode[];
 };
 
-type ParseResult = result<AST, ParseError>;
+type ParseResult = result<AST, ICompileError>;
 
-export const parse = (expr: string, source: string): ParseResult => {
+export function parse(expr: string, source: string): ParseResult {
   try {
     const comments: ASTCommentNode[] = [];
     const parsed: AST = peggyParse(expr, {
@@ -42,20 +34,18 @@ export const parse = (expr: string, source: string): ParseResult => {
     return Result.Ok(parsed);
   } catch (e) {
     if (e instanceof PeggySyntaxError) {
-      return Result.Err({
-        type: "SyntaxError",
-        location: (e as any).location,
-        message: (e as any).message,
-      });
+      return Result.Err(
+        new ICompileError((e as any).message, (e as any).location)
+      );
     } else {
       throw e;
     }
   }
-};
+}
 
 // This function is just for the sake of tests.
 // For real generation of Squiggle code from AST try our prettier plugin.
-const nodeToString = (node: ASTNode): string => {
+function nodeToString(node: ASTNode): string {
   switch (node.type) {
     case "Block":
     case "Program":
@@ -131,15 +121,11 @@ const nodeToString = (node: ASTNode): string => {
     default:
       throw new Error(`Unknown node: ${node satisfies never}`);
   }
-};
+}
 
-export const toStringError = (error: ParseError): string => {
-  return `Syntax Error: ${error.message}}`;
-};
-
-export const nodeResultToString = (r: ParseResult): string => {
+export function nodeResultToString(r: ParseResult): string {
   if (!r.ok) {
-    return toStringError(r.value);
+    return r.value.toString();
   }
   return nodeToString(r.value);
-};
+}

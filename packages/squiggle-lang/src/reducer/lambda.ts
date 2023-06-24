@@ -1,10 +1,10 @@
 import { LocationRange } from "peggy";
 
 import { ASTNode } from "../ast/parse.js";
-import { REArityError } from "../errors.js";
+import { REArityError } from "../errors/messages.js";
 import { Expression } from "../expression/index.js";
 import { Value } from "../value/index.js";
-import * as IError from "./IError.js";
+import * as IError from "../errors/IError.js";
 import * as Context from "./context.js";
 import { ReducerContext } from "./context.js";
 import { Stack } from "./stack.js";
@@ -121,6 +121,6 @@ export class BuiltinLambda extends Lambda {
   }
 
   toString() {
-    return "Builtin function"; // TODO - return name instead?
+    return this.name;
   }
 }

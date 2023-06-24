@@ -37,7 +37,8 @@ describe("Arity check", () => {
 describe("symbol not defined", () => {
   testEvalToBe("f(x)=x(y); f(f)", "Error(y is not defined)");
   testEvalToBe("f(x)=x; f(f)", "lambda(x=>internal code)");
-  testEvalToBe("f(x)=x(y); f(z)", "Error(z is not defined)");
+  testEvalToBe("f(x)=x(y); f(z)", "Error(y is not defined)");
+  testEvalToBe("f(x)=x(3); f(z)", "Error(z is not defined)");
   testEvalToBe("f(x)=x(y); f(2)", "Error(y is not defined)");
   testEvalToBe("f(x)=x(1); f(2)", "Error(2 is not a function)");
 });

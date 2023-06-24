@@ -1,16 +1,12 @@
-import {
-  nodeResultToString,
-  parse,
-  toStringError,
-} from "../../src/ast/parse.js";
-import { expressionFromAst } from "../../src/expression/fromAst.js";
+import { nodeResultToString, parse } from "../../src/ast/parse.js";
+import { compileAst } from "../../src/expression/compile.js";
 import { expressionToString } from "../../src/expression/index.js";
 import {
   evaluateExpressionToResult,
   evaluateStringToResult,
 } from "../../src/reducer/index.js";
 import * as Result from "../../src/utility/result.js";
-import { IError } from "../../src/reducer/IError.js";
+import { ICompileError, IRuntimeError } from "../../src/errors/IError.js";
 import { Value } from "../../src/value/index.js";
 import { getStdLib } from "../../src/library/index.js";
 
@@ -18,19 +14,20 @@ const expectParseToBe = (expr: string, answer: string) => {
   expect(nodeResultToString(parse(expr, "test"))).toBe(answer);
 };
 
-const resultToString = (r: Result.result<Value, IError>) =>
-  r.ok ? r.value.toString() : `Error(${r.value.toString()})`;
+const resultToString = (
+  r: Result.result<Value, ICompileError | IRuntimeError>
+) => (r.ok ? r.value.toString() : `Error(${r.value.toString()})`);
 
 export const testParse = (expr: string, answer: string) =>
   test(expr, () => expectParseToBe(expr, answer));
 
 async function expectExpressionToBe(expr: string, answer: string, v?: string) {
-  const rExpr = Result.fmap(parse(expr, "test"), (ast) =>
-    expressionFromAst(ast, getStdLib())
+  const rExpr = Result.bind(parse(expr, "test"), (ast) =>
+    compileAst(ast, getStdLib())
   );
   const a1 = rExpr.ok
     ? expressionToString(rExpr.value)
-    : `Error(${toStringError(rExpr.value)})`;
+    : `Error(${rExpr.value.toString()})`;
 
   expect(a1).toBe(answer);
 
@@ -38,9 +35,9 @@ async function expectExpressionToBe(expr: string, answer: string, v?: string) {
     return;
   }
 
-  const a2r: Result.result<Value, IError> = rExpr.ok
+  const a2r: Result.result<Value, ICompileError | IRuntimeError> = rExpr.ok
     ? await evaluateExpressionToResult(rExpr.value)
-    : Result.Err(IError.fromParseError(rExpr.value));
+    : Result.Err(rExpr.value);
 
   const a2 = resultToString(a2r);
   expect(a2).toBe(v);

@@ -8,7 +8,7 @@ import {
   frRecord,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { REDistributionError, REOther } from "../errors.js";
+import { REDistributionError, REOther } from "../errors/messages.js";
 import * as Result from "../utility/result.js";
 import { vNumber } from "../value/index.js";
 

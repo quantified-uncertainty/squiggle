@@ -1,30 +1,28 @@
 import { Env, defaultEnv } from "../../dist/env.js";
-import { RENeedToRun } from "../../errors.js";
 import * as Library from "../../library/index.js";
-import { IError } from "../../reducer/IError.js";
 import { createContext } from "../../reducer/context.js";
 import { Bindings } from "../../reducer/stack.js";
 import * as Result from "../../utility/result.js";
 import { Value, vRecord } from "../../value/index.js";
-import { SqError } from "../SqError.js";
+import { SqError, SqOtherError } from "../SqError.js";
 import { SqRecord } from "../SqRecord.js";
 import { SqValue, wrapValue } from "../SqValue.js";
 import { SqValuePath } from "../SqValuePath.js";
 
+import { LocationRange } from "peggy";
+import { findLocationByPath } from "../../ast/utils.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import { ImportBinding, ProjectItem } from "./ProjectItem.js";
 import { Resolver } from "./Resolver.js";
 import * as Topology from "./Topology.js";
-import { findLocationByPath } from "../../ast/utils.js";
-import { LocationRange } from "peggy";
 
 function getNeedToRunError() {
-  return new SqError(IError.fromMessage(new RENeedToRun()));
+  return new SqOtherError("Need to run");
 }
 
 // TODO - pass the the id from which the dependency was imported/continued too
 function getMissingDependencyError(id: string) {
-  return new SqError(IError.other(`Dependency ${id} is missing`));
+  return new SqOtherError(`Dependency ${id} is missing`);
 }
 
 type Options = {
@@ -226,7 +224,7 @@ export class SqProject {
     const rImports = this.getImports(sourceId);
     if (!rImports) {
       // Shouldn't happen, we just called parseImports.
-      return Result.Err(new SqError(IError.other("Internal logic error")));
+      return Result.Err(new SqOtherError("Internal logic error"));
     }
 
     if (!rImports.ok) {
@@ -346,7 +344,7 @@ export class SqProject {
   ): Result.result<SqValuePath, SqError> {
     const { ast } = this.getItem(sourceId);
     if (!ast) {
-      return Result.Err(SqError.createOtherError("Not parsed"));
+      return Result.Err(new SqOtherError("Not parsed"));
     }
     if (!ast.ok) {
       return ast;
@@ -358,7 +356,7 @@ export class SqProject {
       offset,
     });
     if (!found) {
-      return Result.Err(SqError.createOtherError("Not found"));
+      return Result.Err(new SqOtherError("Not found"));
     }
     return Result.Ok(found);
   }
@@ -369,7 +367,7 @@ export class SqProject {
   ): Result.result<LocationRange, SqError> {
     const { ast: astR } = this.getItem(sourceId);
     if (!astR) {
-      return Result.Err(SqError.createOtherError("Not parsed"));
+      return Result.Err(new SqOtherError("Not parsed"));
     }
     if (!astR.ok) {
       return astR;
