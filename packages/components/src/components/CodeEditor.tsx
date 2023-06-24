@@ -45,6 +45,8 @@ import { SqError, SqProject } from "@quri/squiggle-lang";
 import { SqValuePath } from "@quri/squiggle-lang";
 import { lightThemeHighlightingStyle } from "../languageSupport/highlightingStyle.js";
 import { squiggleLanguageSupport } from "../languageSupport/squiggle.js";
+import { SqCompileError } from "@quri/squiggle-lang";
+import { SqRuntimeError } from "@quri/squiggle-lang";
 
 interface CodeEditorProps {
   value: string; // TODO - should be `initialValue`, since we don't really support value updates
@@ -302,6 +304,13 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
           editorView.current.state,
           errors
             .map((err) => {
+              if (
+                !(
+                  err instanceof SqCompileError || err instanceof SqRuntimeError
+                )
+              ) {
+                return undefined;
+              }
               const location = err.location();
               if (!location) {
                 return undefined;
