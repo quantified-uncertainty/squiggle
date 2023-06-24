@@ -175,7 +175,6 @@ export const ViewerProvider: FC<
         case "REGISTER_ITEM_HANDLE":
           itemHandlesStoreRef.current[pathAsString(action.payload.path)] =
             action.payload.element;
-          setFocused(undefined);
           return;
         case "UNREGISTER_ITEM_HANDLE":
           delete itemHandlesStoreRef.current[pathAsString(action.payload.path)];
