@@ -176,7 +176,7 @@ export function createPlugin(util: PrettierUtil): Plugin<Node> {
             return group([
               node.variable.value,
               "(",
-              join(", ", typedPath(node).map(print, "value", "args")),
+              join(", ", node.value.args),
               ")",
               " = ",
               typedPath(node).call(print, "value", "body"),
@@ -210,7 +210,10 @@ export function createPlugin(util: PrettierUtil): Plugin<Node> {
             return group([
               typedPath(node).call(print, "fn"), // parenthesize?..
               "(",
-              indent([softline, join([",", line], path.map(print, "args"))]),
+              indent([
+                softline,
+                join([",", line], typedPath(node).map(print, "args")),
+              ]),
               softline,
               ")",
             ]);
@@ -265,8 +268,6 @@ export function createPlugin(util: PrettierUtil): Plugin<Node> {
             ]);
           case "Identifier":
             return node.value;
-          case "ModuleIdentifier":
-            return node.value;
           case "KeyValue": {
             const key =
               node.key.type === "String" &&
@@ -284,7 +285,7 @@ export function createPlugin(util: PrettierUtil): Plugin<Node> {
           case "Lambda":
             return group([
               "{|",
-              join(", ", path.map(print, "args")),
+              join(", ", node.args),
               "|",
               path.call(print, "body"),
               "}",

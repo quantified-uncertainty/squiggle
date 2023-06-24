@@ -67,12 +67,12 @@ export function findLocationByPath(
       }
       break;
     case "Block":
-      if (ast.statements.length === 1) {
-        return findLocationByPath(ast.statements[0], path);
-      }
-      break;
+      return findLocationByPath(
+        ast.statements[ast.statements.length - 1],
+        path
+      );
     case "Lambda":
-      // TODO - if lambda's end expression is a record or an array, we could return it
+      // TODO - if symbol matching this lambda and look in its end expression
       break;
   }
   return ast.location;
