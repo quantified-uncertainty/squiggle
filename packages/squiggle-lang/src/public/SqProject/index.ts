@@ -15,6 +15,8 @@ import { ImmutableMap } from "../../utility/immutableMap.js";
 import { ImportBinding, ProjectItem } from "./ProjectItem.js";
 import { Resolver } from "./Resolver.js";
 import * as Topology from "./Topology.js";
+import { findLocationByPath } from "../../ast/utils.js";
+import { LocationRange } from "peggy";
 
 function getNeedToRunError() {
   return new SqError(IError.fromMessage(new RENeedToRun()));
@@ -359,6 +361,21 @@ export class SqProject {
       return Result.Err(SqError.createOtherError("Not found"));
     }
     return Result.Ok(found);
+  }
+
+  findLocationByValuePath(
+    sourceId: string,
+    path: SqValuePath
+  ): Result.result<LocationRange, SqError> {
+    const { ast: astR } = this.getItem(sourceId);
+    if (!astR) {
+      return Result.Err(SqError.createOtherError("Not parsed"));
+    }
+    if (!astR.ok) {
+      return astR;
+    }
+    const ast = astR.value;
+    return Result.Ok(findLocationByPath(ast, path.items));
   }
 }
 

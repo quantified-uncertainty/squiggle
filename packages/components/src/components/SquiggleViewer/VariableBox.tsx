@@ -50,12 +50,11 @@ export const VariableBox: FC<VariableBoxProps> = ({
     useViewerContext();
 
   const findInEditor = () => {
-    // const offset = value.ast()?.location.start.offset;
-    const offset = undefined;
-    if (offset === undefined) {
+    const locationR = value.path?.findLocation();
+    if (!locationR?.ok) {
       return;
     }
-    editor?.scrollTo(offset);
+    editor?.scrollTo(locationR.value.start.offset);
   };
 
   // Since `ViewerContext` doesn't store settings, `VariableBox` won't rerender when `setSettings` is called.

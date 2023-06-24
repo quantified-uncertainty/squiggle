@@ -1,6 +1,9 @@
+import { LocationRange } from "peggy";
 import { ASTNode } from "../ast/parse.js";
 import { locationContains } from "../ast/utils.js";
 import { SqProject } from "./SqProject/index.js";
+import * as Result from "../utility/result.js";
+import { SqError } from "./SqError.js";
 
 type PathItem = string | number;
 
@@ -103,5 +106,9 @@ export class SqValuePath {
       root: "bindings", // not important, will probably be removed soon
       items: findLoop(ast),
     });
+  }
+
+  findLocation(): Result.result<LocationRange, SqError> {
+    return this.project.findLocationByValuePath(this.sourceId, this);
   }
 }
