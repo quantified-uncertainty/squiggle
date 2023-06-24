@@ -1,5 +1,6 @@
 import { Env } from "../dist/env.js";
 import { IRuntimeError } from "../errors/IError.js";
+import { getStdLib } from "../library/index.js";
 import { registry } from "../library/registry/index.js";
 import { createContext } from "../reducer/context.js";
 import { Lambda } from "../reducer/lambda.js";
@@ -16,7 +17,14 @@ export class SqLambda {
   ) {}
 
   static createFromStdlibName(name: string) {
-    return new SqLambda(registry.makeLambda(name));
+    const value = getStdLib().get(name);
+    if (!value) {
+      throw new Error(`Name ${name} not found in stdlib`);
+    }
+    if (value.type !== "Lambda") {
+      throw new Error(`Stdlib value ${name} is not a function`);
+    }
+    return new SqLambda(value.value);
   }
 
   parameters() {

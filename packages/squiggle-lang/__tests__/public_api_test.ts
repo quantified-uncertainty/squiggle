@@ -32,4 +32,13 @@ describe("SqLambda", () => {
     expect(result.ok).toBe(true);
     expect(result.value.toString()).toBe("[1,2,3,4,5]");
   });
+
+  test("createFromStdlibName for squiggle definition", () => {
+    const lambda = SqLambda.createFromStdlibName("RelativeValues.wrap");
+    expect(lambda).toBeInstanceOf(SqLambda);
+  });
+
+  test("createFromStdlibName for unknown name", () => {
+    expect(() => SqLambda.createFromStdlibName("Foo.bar")).toThrow();
+  });
 });
