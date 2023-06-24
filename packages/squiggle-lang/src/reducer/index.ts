@@ -167,7 +167,6 @@ const evaluateResolvedSymbol: SubReducerFn<"ResolvedSymbol"> = (
   ast
 ) => {
   const value = context.stack.get(expressionValue.offset);
-  // cloneWithAst here is costly, but necessary.
   return [value, context];
 };
 
