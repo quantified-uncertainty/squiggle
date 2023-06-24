@@ -42,7 +42,7 @@ import {
 import * as squigglePlugin from "@quri/prettier-plugin-squiggle/standalone";
 import { SqError, SqProject } from "@quri/squiggle-lang";
 
-import { SqValueLocation } from "@quri/squiggle-lang";
+import { SqValuePath } from "@quri/squiggle-lang";
 import { lightThemeHighlightingStyle } from "../languageSupport/highlightingStyle.js";
 import { squiggleLanguageSupport } from "../languageSupport/squiggle.js";
 
@@ -50,7 +50,7 @@ interface CodeEditorProps {
   value: string; // TODO - should be `initialValue`, since we don't really support value updates
   onChange: (value: string) => void;
   onSubmit?: () => void;
-  onViewValueLocation?: (ast: SqValueLocation) => void;
+  onViewValuePath?: (path: SqValuePath) => void;
   width?: number;
   height?: number;
   showGutter?: boolean;
@@ -77,7 +77,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
       value,
       onChange,
       onSubmit,
-      onViewValueLocation,
+      onViewValuePath,
       width,
       height,
       showGutter = false,
@@ -266,7 +266,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
             {
               key: "Alt-Shift-v",
               run: () => {
-                if (!onViewValueLocation) {
+                if (!onViewValuePath) {
                   return true;
                 }
                 const offset = editorView.current?.state.selection.main.to;
@@ -276,12 +276,12 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
                 if (sourceId === undefined) {
                   return true;
                 }
-                const valueLocationResult = project.findValueLocationByOffset(
+                const valuePathResult = project.findValuePathByOffset(
                   sourceId,
                   offset
                 );
-                if (valueLocationResult.ok) {
-                  onViewValueLocation(valueLocationResult.value);
+                if (valuePathResult.ok) {
+                  onViewValuePath(valuePathResult.value);
                 }
                 return true;
               },
@@ -289,7 +289,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
           ])
         ),
       });
-    }, [onViewValueLocation]);
+    }, [onViewValuePath]);
 
     useEffect(() => {
       if (!editorView.current) {

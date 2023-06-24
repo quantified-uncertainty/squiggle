@@ -17,7 +17,7 @@ import {
   useSetSettings,
   useViewerContext,
 } from "./ViewerProvider.js";
-import { locationAsString } from "./utils.js";
+import { pathAsString } from "./utils.js";
 
 type Props = {
   value: SqValue;
@@ -39,7 +39,7 @@ const ItemSettingsModal: React.FC<
   const setSettings = useSetSettings();
   const { getSettings, getMergedSettings } = useViewerContext();
 
-  const mergedSettings = getMergedSettings(value.location!);
+  const mergedSettings = getMergedSettings(value.path!);
 
   const form = useForm({
     resolver: zodResolver(viewSettingsSchema),
@@ -49,7 +49,7 @@ const ItemSettingsModal: React.FC<
 
   useEffect(() => {
     const submit = form.handleSubmit((data) => {
-      setSettings(value.location!, {
+      setSettings(value.path!, {
         collapsed: false,
         ...data,
       });
@@ -58,7 +58,7 @@ const ItemSettingsModal: React.FC<
 
     const subscription = form.watch(() => submit());
     return () => subscription.unsubscribe();
-  }, [getSettings, setSettings, onChange, value.location, form.watch]);
+  }, [getSettings, setSettings, onChange, value.path, form.watch]);
 
   const { getLeftPanelElement } = useContext(PlaygroundContext);
 
@@ -66,7 +66,7 @@ const ItemSettingsModal: React.FC<
     <Modal container={getLeftPanelElement()} close={close}>
       <Modal.Header>
         Chart settings
-        {value.location!.path.items.length ? (
+        {value.path!.items.length ? (
           <>
             {" for "}
             <span
@@ -74,7 +74,7 @@ const ItemSettingsModal: React.FC<
               className="cursor-pointer"
               onClick={resetScroll}
             >
-              {locationAsString(value.location!)}
+              {pathAsString(value.path!)}
             </span>
           </>
         ) : (
@@ -105,16 +105,16 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
   if (!localSettingsEnabled) {
     return null;
   }
-  const settings = getSettings(props.value.location!);
+  const settings = getSettings(props.value.path!);
 
   const resetScroll = () => {
-    if (!props.value.location) {
+    if (!props.value.path) {
       return;
     }
     dispatch({
-      type: "SCROLL_TO_LOCATION",
+      type: "SCROLL_TO_PATH",
       payload: {
-        location: props.value.location,
+        path: props.value.path,
       },
     });
   };
@@ -128,7 +128,7 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
       {settings.distributionChartSettings ? (
         <button
           onClick={() => {
-            setSettings(props.value.location!, {
+            setSettings(props.value.path!, {
               collapsed: settings.collapsed,
             });
             props.onChange();

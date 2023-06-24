@@ -4,22 +4,30 @@ import { SqProject } from "./SqProject/index.js";
 
 type PathItem = string | number;
 
-type SqValuePath = {
-  root: "result" | "bindings";
-  items: PathItem[];
-};
+export class SqValuePath {
+  public project: SqProject;
+  public sourceId: string;
+  public root: "result" | "bindings";
+  public items: PathItem[];
 
-export class SqValueLocation {
-  constructor(
-    public project: SqProject,
-    public sourceId: string,
-    public path: SqValuePath
-  ) {}
+  constructor(props: {
+    project: SqProject;
+    sourceId: string;
+    root: "result" | "bindings";
+    items: PathItem[];
+  }) {
+    this.project = props.project;
+    this.sourceId = props.sourceId;
+    this.root = props.root;
+    this.items = props.items;
+  }
 
   extend(item: PathItem) {
-    return new SqValueLocation(this.project, this.sourceId, {
-      root: this.path.root,
-      items: [...this.path.items, item],
+    return new SqValuePath({
+      project: this.project,
+      sourceId: this.sourceId,
+      root: this.root,
+      items: [...this.items, item],
     });
   }
 
@@ -33,9 +41,8 @@ export class SqValueLocation {
     sourceId: string;
     ast: ASTNode;
     offset: number;
-  }): SqValueLocation | undefined {
+  }): SqValuePath | undefined {
     const findLoop = (ast: ASTNode): PathItem[] => {
-      console.log("findLoop", ast);
       switch (ast.type) {
         case "Program": {
           for (const statement of ast.statements) {
@@ -90,11 +97,11 @@ export class SqValueLocation {
       return [];
     };
 
-    const path = {
+    return new SqValuePath({
+      project,
+      sourceId,
       root: "bindings", // not important, will probably be removed soon
       items: findLoop(ast),
-    } satisfies SqValuePath;
-
-    return new SqValueLocation(project, sourceId, path);
+    });
   }
 }

@@ -13,14 +13,14 @@ import {
   useUnfocus,
   useViewerContext,
 } from "./ViewerProvider.js";
-import { extractSubvalueByLocation, locationAsString } from "./utils.js";
-import { SqValueLocation } from "@quri/squiggle-lang";
+import { extractSubvalueByPath, pathAsString } from "./utils.js";
+import { SqValuePath } from "@quri/squiggle-lang";
 import { useImperativeHandle } from "react";
 
 type Result = NonNullable<ReturnType<typeof useSquiggle>[0]>["result"];
 
 export type SquiggleViewerHandle = {
-  viewValueLocation(location: SqValueLocation): void;
+  viewValuePath(path: SqValuePath): void;
 };
 
 export type SquiggleViewerProps = {
@@ -30,14 +30,10 @@ export type SquiggleViewerProps = {
   editor?: CodeEditorHandle;
 } & PartialPlaygroundSettings;
 
-type BodyProps = Pick<SquiggleViewerProps, "result">;
-
 const SquiggleViewerBody: FC<{ value: SqValue }> = ({ value }) => {
   const { focused } = useViewerContext();
 
-  const valueToRender = focused
-    ? extractSubvalueByLocation(value, focused)
-    : value;
+  const valueToRender = focused ? extractSubvalueByPath(value, focused) : value;
 
   if (!valueToRender) {
     return <MessageAlert heading="Focused variable is not defined" />;
@@ -54,10 +50,10 @@ const SquiggleViewerOuter = forwardRef<
   const unfocus = useUnfocus();
 
   useImperativeHandle(ref, () => ({
-    viewValueLocation(location: SqValueLocation) {
+    viewValuePath(path: SqValuePath) {
       dispatch({
-        type: "SCROLL_TO_LOCATION",
-        payload: { location },
+        type: "SCROLL_TO_PATH",
+        payload: { path },
       });
     },
   }));
@@ -68,7 +64,7 @@ const SquiggleViewerOuter = forwardRef<
         <div className="flex items-center gap-2 mb-1">
           <FocusIcon />
           <div className="text-stone-800 font-mono text-sm">
-            {locationAsString(focused)}
+            {pathAsString(focused)}
           </div>
           <button
             className="text-xs px-1 py-0.5 rounded bg-stone-200 hover:bg-stone-400"

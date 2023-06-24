@@ -178,9 +178,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
             sourceId={sourceId}
             showGutter={true}
             onChange={setCode}
-            onViewValueLocation={(ast) =>
-              viewerRef.current?.viewValueLocation(ast)
-            }
+            onViewValuePath={(ast) => viewerRef.current?.viewValuePath(ast)}
             onSubmit={runnerState.run}
           />
         </div>

@@ -9,7 +9,7 @@ import { Value, vRecord } from "../../value/index.js";
 import { SqError } from "../SqError.js";
 import { SqRecord } from "../SqRecord.js";
 import { SqValue, wrapValue } from "../SqValue.js";
-import { SqValueLocation } from "../SqValueLocation.js";
+import { SqValuePath } from "../SqValuePath.js";
 
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import { ImportBinding, ProjectItem } from "./ProjectItem.js";
@@ -161,7 +161,9 @@ export class SqProject {
     return Result.fmap(this.getInternalResult(sourceId), (v) =>
       wrapValue(
         v,
-        new SqValueLocation(this, sourceId, {
+        new SqValuePath({
+          project: this,
+          sourceId,
           root: "result",
           items: [],
         })
@@ -182,7 +184,9 @@ export class SqProject {
   getBindings(sourceId: string): SqRecord {
     return new SqRecord(
       this.getRawBindings(sourceId),
-      new SqValueLocation(this, sourceId, {
+      new SqValuePath({
+        project: this,
+        sourceId,
         root: "bindings",
         items: [],
       })
@@ -334,10 +338,10 @@ export class SqProject {
     await this.run(sourceId);
   }
 
-  findValueLocationByOffset(
+  findValuePathByOffset(
     sourceId: string,
     offset: number
-  ): Result.result<SqValueLocation, SqError> {
+  ): Result.result<SqValuePath, SqError> {
     const { ast } = this.getItem(sourceId);
     if (!ast) {
       return Result.Err(SqError.createOtherError("Not parsed"));
@@ -345,7 +349,7 @@ export class SqProject {
     if (!ast.ok) {
       return ast;
     }
-    const found = SqValueLocation.findByOffset({
+    const found = SqValuePath.findByOffset({
       project: this,
       sourceId,
       ast: ast.value,

@@ -3,7 +3,7 @@
  * Expressions are evaluated by reducer's `evaluate` function.
  */
 import { ASTNode } from "../ast/parse.js";
-import { Value, vBool, vNumber, vString, vVoid } from "../value/index.js";
+import { Value, vVoid } from "../value/index.js";
 
 // All shapes are type+value, to help with V8 monomorphism.
 export type ExpressionContent =

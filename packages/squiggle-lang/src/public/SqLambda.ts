@@ -8,12 +8,12 @@ import * as Result from "../utility/result.js";
 import { result } from "../utility/result.js";
 import { SqError } from "./SqError.js";
 import { SqValue, wrapValue } from "./SqValue.js";
-import { SqValueLocation } from "./SqValueLocation.js";
+import { SqValuePath } from "./SqValuePath.js";
 
 export class SqLambda {
   constructor(
     public _value: Lambda, // public because of SqFnPlot.create
-    public location?: SqValueLocation
+    public path?: SqValuePath
   ) {}
 
   static createFromStdlibName(name: string) {
@@ -26,7 +26,7 @@ export class SqLambda {
 
   call(args: SqValue[], env?: Env): result<SqValue, SqError> {
     if (!env) {
-      if (!this.location) {
+      if (!this.path) {
         return Result.Err(
           SqError.createOtherError(
             "Programmatically constructed lambda call requires env argument"
@@ -34,7 +34,7 @@ export class SqLambda {
         );
       }
       // default to project environment that created this lambda
-      env = this.location.project.getEnvironment();
+      env = this.path.project.getEnvironment();
     }
     const rawArgs = args.map((arg) => arg._value);
     try {

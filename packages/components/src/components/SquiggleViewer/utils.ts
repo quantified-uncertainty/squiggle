@@ -1,4 +1,4 @@
-import { SqValueLocation } from "@quri/squiggle-lang";
+import { SqValuePath } from "@quri/squiggle-lang";
 import {
   PartialPlaygroundSettings,
   PlaygroundSettings,
@@ -14,28 +14,26 @@ export type LocalItemSettings = {
 
 export type MergedItemSettings = PlaygroundSettings;
 
-export function locationAsString(location: SqValueLocation) {
-  return location.path.items.join(".");
+export function pathAsString(path: SqValuePath) {
+  return path.items.join(".");
 }
 
-export function locationToShortName(
-  location: SqValueLocation
-): string | undefined {
-  const isTopLevel = location.path.items.length === 0;
+export function pathToShortName(path: SqValuePath): string | undefined {
+  const isTopLevel = path.items.length === 0;
   return isTopLevel
-    ? { result: undefined, bindings: "Variables" }[location.path.root]
-    : String(location.path.items[location.path.items.length - 1]);
+    ? { result: undefined, bindings: "Variables" }[path.root]
+    : String(path.items[path.items.length - 1]);
 }
 
-export function extractSubvalueByLocation(
+export function extractSubvalueByPath(
   value: SqValue,
-  location: SqValueLocation
+  path: SqValuePath
 ): SqValue | undefined {
-  if (!value.location) {
+  if (!value.path) {
     return;
   }
 
-  for (const key of location.path.items) {
+  for (const key of path.items) {
     let nextValue: SqValue | undefined;
     if (typeof key === "number" && value.tag === "Array") {
       nextValue = value.value.getValues()[key];

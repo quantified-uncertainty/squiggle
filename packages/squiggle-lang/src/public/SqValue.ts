@@ -8,41 +8,38 @@ import { SqLambdaDeclaration } from "./SqLambdaDeclaration.js";
 import { SqPlot, wrapPlot } from "./SqPlot.js";
 import { SqRecord } from "./SqRecord.js";
 import { SqScale, wrapScale } from "./SqScale.js";
-import { SqValueLocation } from "./SqValueLocation.js";
+import { SqValuePath } from "./SqValuePath.js";
 
-export const wrapValue = (
-  value: Value,
-  location?: SqValueLocation
-): SqValue => {
+export const wrapValue = (value: Value, path?: SqValuePath): SqValue => {
   const tag = value.type;
 
   switch (value.type) {
     case "Array":
-      return new SqArrayValue(value, location);
+      return new SqArrayValue(value, path);
     case "Bool":
-      return new SqBoolValue(value, location);
+      return new SqBoolValue(value, path);
     case "Date":
-      return new SqDateValue(value, location);
+      return new SqDateValue(value, path);
     case "Declaration":
-      return new SqDeclarationValue(value, location);
+      return new SqDeclarationValue(value, path);
     case "Dist":
-      return new SqDistributionValue(value, location);
+      return new SqDistributionValue(value, path);
     case "Lambda":
-      return new SqLambdaValue(value, location);
+      return new SqLambdaValue(value, path);
     case "Number":
-      return new SqNumberValue(value, location);
+      return new SqNumberValue(value, path);
     case "Record":
-      return new SqRecordValue(value, location);
+      return new SqRecordValue(value, path);
     case "String":
-      return new SqStringValue(value, location);
+      return new SqStringValue(value, path);
     case "Plot":
-      return new SqPlotValue(value, location);
+      return new SqPlotValue(value, path);
     case "Scale":
-      return new SqScaleValue(value, location);
+      return new SqScaleValue(value, path);
     case "TimeDuration":
-      return new SqTimeDurationValue(value, location);
+      return new SqTimeDurationValue(value, path);
     case "Void":
-      return new SqVoidValue(value, location);
+      return new SqVoidValue(value, path);
     default:
       throw new Error(`Unknown value ${JSON.stringify(value)}`);
   }
@@ -53,7 +50,7 @@ export abstract class SqAbstractValue<T extends string, J> {
 
   constructor(
     public _value: Extract<Value, { type: T }>,
-    public location?: SqValueLocation
+    public path?: SqValuePath
   ) {}
 
   toString() {
@@ -67,7 +64,7 @@ export class SqArrayValue extends SqAbstractValue<"Array", unknown[]> {
   tag = "Array" as const;
 
   get value() {
-    return new SqArray(this._value.value, this.location);
+    return new SqArray(this._value.value, this.path);
   }
 
   asJS(): unknown[] {
@@ -106,7 +103,7 @@ export class SqDeclarationValue extends SqAbstractValue<
   tag = "Declaration" as const;
 
   get value() {
-    return new SqLambdaDeclaration(this._value.value, this.location);
+    return new SqLambdaDeclaration(this._value.value, this.path);
   }
 
   asJS() {
@@ -137,7 +134,7 @@ export class SqLambdaValue extends SqAbstractValue<"Lambda", SqLambda> {
   }
 
   get value() {
-    return new SqLambda(this._value.value, this.location);
+    return new SqLambda(this._value.value, this.path);
   }
 
   asJS() {
@@ -168,7 +165,7 @@ export class SqRecordValue extends SqAbstractValue<
   tag = "Record" as const;
 
   get value() {
-    return new SqRecord(this._value.value, this.location);
+    return new SqRecord(this._value.value, this.path);
   }
 
   asJS(): Map<string, unknown> {
@@ -211,7 +208,7 @@ export class SqPlotValue extends SqAbstractValue<"Plot", SqPlot> {
   tag = "Plot" as const;
 
   get value() {
-    return wrapPlot(this._value.value, this.location);
+    return wrapPlot(this._value.value, this.path);
   }
 
   asJS() {

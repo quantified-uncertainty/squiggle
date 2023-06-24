@@ -5,7 +5,7 @@ import { FocusIcon, TriangleIcon } from "@quri/ui";
 
 import {
   LocalItemSettings,
-  locationToShortName,
+  pathToShortName,
   MergedItemSettings,
 } from "./utils.js";
 import {
@@ -50,7 +50,8 @@ export const VariableBox: FC<VariableBoxProps> = ({
     useViewerContext();
 
   const findInEditor = () => {
-    const offset = value.ast()?.location.start.offset;
+    // const offset = value.ast()?.location.start.offset;
+    const offset = undefined;
     if (offset === undefined) {
       return;
     }
@@ -61,16 +62,16 @@ export const VariableBox: FC<VariableBoxProps> = ({
   // So we use `forceUpdate` to force rerendering.
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
-  const { location } = value;
+  const { path } = value;
 
-  if (!location) {
-    throw new Error("Can't display a locationless value");
+  if (!path) {
+    throw new Error("Can't display a pathless value");
   }
 
-  const settings = getSettings(location);
+  const settings = getSettings(path);
 
   const setSettingsAndUpdate = (newSettings: LocalItemSettings) => {
-    setSettings(location, newSettings);
+    setSettings(path, newSettings);
     forceUpdate();
   };
 
@@ -78,13 +79,13 @@ export const VariableBox: FC<VariableBoxProps> = ({
     setSettingsAndUpdate({ ...settings, collapsed: !settings.collapsed });
   };
 
-  const name = locationToShortName(location);
+  const name = pathToShortName(path);
 
   const saveRef = (element: HTMLDivElement) => {
     dispatch({
       type: "REGISTER_ITEM_HANDLE",
       payload: {
-        location,
+        path: path,
         element,
       },
     });
@@ -95,7 +96,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
       dispatch({
         type: "UNREGISTER_ITEM_HANDLE",
         payload: {
-          location,
+          path: path,
         },
       });
     };
@@ -124,15 +125,15 @@ export const VariableBox: FC<VariableBoxProps> = ({
             {preview && <div className="ml-2">{preview}</div>}
           </div>
           <div className="inline-flex space-x-1">
-            {Boolean(!settings.collapsed && location.path.items.length) && (
+            {Boolean(!settings.collapsed && path.items.length) && (
               <div className="text-stone-400 hover:text-stone-600 text-sm">
                 {heading}
               </div>
             )}
-            {location.path.items.length ? (
+            {path.items.length ? (
               <FocusIcon
                 className="h-5 w-5 cursor-pointer text-stone-200 hover:text-stone-500"
-                onClick={() => focus(location)}
+                onClick={() => focus(path)}
               />
             ) : null}
             {!settings.collapsed &&
@@ -142,7 +143,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
       )}
       {settings.collapsed ? null : (
         <div className="flex w-full">
-          {location.path.items.length ? (
+          {path.items.length ? (
             <div
               className="flex group cursor-pointer"
               onClick={toggleCollapsed}
@@ -151,7 +152,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
               <div className="border-l border-stone-200 group-hover:border-stone-500 w-2" />
             </div>
           ) : null}
-          <div className="grow">{children(getMergedSettings(location))}</div>
+          <div className="grow">{children(getMergedSettings(path))}</div>
         </div>
       )}
     </div>

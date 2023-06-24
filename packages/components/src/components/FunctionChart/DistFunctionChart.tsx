@@ -243,7 +243,7 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
           title:
             mouseX === undefined
               ? undefined
-              : `f(${d3.format(",.4r")(mouseX)})`, // TODO - use an original function name? it could be obtained with `locationToShortName`, but there's a corner case for arrays.
+              : `f(${d3.format(",.4r")(mouseX)})`, // TODO - use an original function name? it could be obtained with `pathToShortName`, but there's a corner case for arrays.
         })}
         environment={environment}
         height={50}

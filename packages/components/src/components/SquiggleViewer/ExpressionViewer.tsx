@@ -33,7 +33,7 @@ const VariableList: React.FC<{
       <div
         className={clsx(
           "space-y-2",
-          value.location!.path.items.length ? "pt-1 mt-1" : null
+          value.path!.items.length ? "pt-1 mt-1" : null
         )}
       >
         {children(settings)}
@@ -49,7 +49,7 @@ export interface Props {
 }
 
 export const ExpressionViewer: React.FC<Props> = ({ value }) => {
-  const environment = value.location!.project.getEnvironment();
+  const environment = value.path!.project.getEnvironment();
 
   switch (value.tag) {
     case "Number":
@@ -74,8 +74,8 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
               : ""
           }`}
           renderSettingsMenu={({ onChange }) => {
-            const shape = value.location
-              ? value.value.pointSet(value.location.project.getEnvironment())
+            const shape = value.path
+              ? value.value.pointSet(value.path.project.getEnvironment())
               : undefined;
 
             return (
@@ -249,7 +249,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
         </VariableBox>
       );
     }
-    case "Record":
+    case "Record": {
       const entries = value.value.entries();
       return (
         <VariableList
@@ -267,6 +267,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
           }}
         </VariableList>
       );
+    }
     case "Array": {
       const values = value.value.getValues();
       return (

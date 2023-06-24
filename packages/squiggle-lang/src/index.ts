@@ -7,7 +7,7 @@ import {
   SqLambdaValue,
 } from "./public/SqValue.js"; // TODO - reexport other values too
 
-export { SqValueLocation } from "./public/SqValueLocation.js";
+export { SqValuePath } from "./public/SqValuePath.js";
 export { result, fmap as resultMap } from "./utility/result.js";
 export {
   SqAbstractDistribution,

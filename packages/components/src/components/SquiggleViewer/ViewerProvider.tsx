@@ -10,7 +10,7 @@ import {
   useState,
 } from "react";
 
-import { SqValueLocation } from "@quri/squiggle-lang";
+import { SqValuePath } from "@quri/squiggle-lang";
 
 import {
   PartialPlaygroundSettings,
@@ -19,7 +19,7 @@ import {
 import {
   LocalItemSettings,
   MergedItemSettings,
-  locationAsString,
+  pathAsString,
 } from "./utils.js";
 import { CodeEditorHandle } from "../CodeEditor.js";
 
@@ -27,34 +27,34 @@ type Action =
   | {
       type: "SET_SETTINGS";
       payload: {
-        location: SqValueLocation;
+        path: SqValuePath;
         value: LocalItemSettings;
       };
     }
   | {
       type: "FOCUS";
-      payload: SqValueLocation;
+      payload: SqValuePath;
     }
   | {
       type: "UNFOCUS";
     }
   | {
-      type: "SCROLL_TO_LOCATION";
+      type: "SCROLL_TO_PATH";
       payload: {
-        location: SqValueLocation;
+        path: SqValuePath;
       };
     }
   | {
       type: "REGISTER_ITEM_HANDLE";
       payload: {
-        location: SqValueLocation;
+        path: SqValuePath;
         element: HTMLDivElement;
       };
     }
   | {
       type: "UNREGISTER_ITEM_HANDLE";
       payload: {
-        location: SqValueLocation;
+        path: SqValuePath;
       };
     };
 
@@ -62,10 +62,10 @@ type ViewerContextShape = {
   // Note that we don't store settings themselves in the context (that would cause rerenders of the entire tree on each settings update).
   // Instead, we keep settings in local state and notify the global context via setSettings to pass them down the component tree again if it got rebuilt from scratch.
   // See ./SquiggleViewer.tsx and ./VariableBox.tsx for other implementation details on this.
-  getSettings(location: SqValueLocation): LocalItemSettings;
-  getMergedSettings(location: SqValueLocation): MergedItemSettings;
+  getSettings(path: SqValuePath): LocalItemSettings;
+  getMergedSettings(path: SqValuePath): MergedItemSettings;
   localSettingsEnabled: boolean; // show local settings icon in the UI
-  focused?: SqValueLocation;
+  focused?: SqValuePath;
   editor?: CodeEditorHandle;
   dispatch(action: Action): void;
 };
@@ -85,20 +85,17 @@ export function useViewerContext() {
 
 export function useSetSettings() {
   const { dispatch } = useViewerContext();
-  return (location: SqValueLocation, value: LocalItemSettings) => {
+  return (path: SqValuePath, value: LocalItemSettings) => {
     dispatch({
       type: "SET_SETTINGS",
-      payload: {
-        location,
-        value,
-      },
+      payload: { path, value },
     });
   };
 }
 
 export function useFocus() {
   const { dispatch } = useViewerContext();
-  return (location: SqValueLocation) => {
+  return (location: SqValuePath) => {
     dispatch({
       type: "FOCUS",
       payload: location,
@@ -129,24 +126,23 @@ export const ViewerProvider: FC<
 
   const itemHandlesStoreRef = useRef<{ [k: string]: HTMLDivElement }>({});
 
-  const [focused, setFocused] = useState<SqValueLocation | undefined>();
+  const [focused, setFocused] = useState<SqValuePath | undefined>();
 
   const globalSettings = useMemo(() => {
     return merge({}, defaultPlaygroundSettings, partialPlaygroundSettings);
   }, [partialPlaygroundSettings]);
 
   const getSettings = useCallback(
-    (location: SqValueLocation) => {
+    (location: SqValuePath) => {
       return (
-        settingsStoreRef.current[locationAsString(location)] ||
-        defaultLocalSettings
+        settingsStoreRef.current[pathAsString(location)] || defaultLocalSettings
       );
     },
     [settingsStoreRef]
   );
 
   const getMergedSettings = useCallback(
-    (location: SqValueLocation) => {
+    (location: SqValuePath) => {
       const localSettings = getSettings(location);
       const result: MergedItemSettings = merge(
         {},
@@ -162,7 +158,7 @@ export const ViewerProvider: FC<
     (action: Action) => {
       switch (action.type) {
         case "SET_SETTINGS":
-          settingsStoreRef.current[locationAsString(action.payload.location)] =
+          settingsStoreRef.current[pathAsString(action.payload.path)] =
             action.payload.value;
           return;
         case "FOCUS":
@@ -171,21 +167,18 @@ export const ViewerProvider: FC<
         case "UNFOCUS":
           setFocused(undefined);
           return;
-        case "SCROLL_TO_LOCATION":
+        case "SCROLL_TO_PATH":
           itemHandlesStoreRef.current[
-            locationAsString(action.payload.location)
+            pathAsString(action.payload.path)
           ]?.scrollIntoView({ behavior: "smooth" });
           return;
         case "REGISTER_ITEM_HANDLE":
-          itemHandlesStoreRef.current[
-            locationAsString(action.payload.location)
-          ] = action.payload.element;
+          itemHandlesStoreRef.current[pathAsString(action.payload.path)] =
+            action.payload.element;
           setFocused(undefined);
           return;
         case "UNREGISTER_ITEM_HANDLE":
-          delete itemHandlesStoreRef.current[
-            locationAsString(action.payload.location)
-          ];
+          delete itemHandlesStoreRef.current[pathAsString(action.payload.path)];
           return;
       }
     },
