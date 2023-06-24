@@ -64,6 +64,10 @@ export class SqCompileError extends SqAbstractError<"compile"> {
   toStringWithDetails() {
     return this._value.toStringWithDetails();
   }
+
+  location() {
+    return this._value.location;
+  }
 }
 
 export class SqOtherError extends SqAbstractError<"other"> {

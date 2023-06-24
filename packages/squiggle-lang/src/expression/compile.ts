@@ -155,19 +155,29 @@ function compileToContent(
         context,
       ];
     case "Lambda": {
+      let newNameToPos = context.nameToPos;
+      const args: string[] = [];
+      for (let i = 0; i < ast.args.length; i++) {
+        const arg = ast.args[i];
+        if (arg.type !== "Identifier") {
+          throw new ICompileError(
+            "Argument is not an identifier",
+            ast.location
+          );
+        }
+        args.push(arg.value);
+        newNameToPos = newNameToPos.set(arg.value, context.size + i);
+      }
       const innerContext: CompileContext = {
         externals: context.externals,
-        nameToPos: ast.args.reduce(
-          (map, arg, i) => map.set(arg, context.size + i),
-          context.nameToPos
-        ),
+        nameToPos: newNameToPos,
         locals: ImmutableList(),
         size: context.size + ast.args.length,
       };
       return [
         expression.eLambda(
           ast.name,
-          ast.args,
+          args,
           innerCompileAst(ast.body, innerContext)[0]
         ),
         context,

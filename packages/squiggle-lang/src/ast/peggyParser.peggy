@@ -77,7 +77,7 @@ defunStatement
 
   assignmentOp "assignment" = '='
 
-functionParameters = ($dollarIdentifier)|.., commaSeparator|
+functionParameters = dollarIdentifier|.., commaSeparator|
 
 /*
 Rules for expressions start here.

@@ -99,7 +99,13 @@ function nodeToString(node: ASTNode): string {
     case "KeyValue":
       return nodeToString(node.key) + ": " + nodeToString(node.value);
     case "Lambda":
-      return "{|" + node.args.join(",") + "| " + nodeToString(node.body) + "}";
+      return (
+        "{|" +
+        node.args.map(nodeToString).join(",") +
+        "| " +
+        nodeToString(node.body) +
+        "}"
+      );
     case "LetStatement":
       return nodeToString(node.variable) + " = " + nodeToString(node.value);
     case "DefunStatement":

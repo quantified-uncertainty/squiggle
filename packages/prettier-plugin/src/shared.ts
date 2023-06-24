@@ -176,7 +176,7 @@ export function createPlugin(util: PrettierUtil): Plugin<Node> {
             return group([
               node.variable.value,
               "(",
-              join(", ", node.value.args),
+              join(", ", typedPath(node).map(print, "value", "args")),
               ")",
               " = ",
               typedPath(node).call(print, "value", "body"),
@@ -285,7 +285,7 @@ export function createPlugin(util: PrettierUtil): Plugin<Node> {
           case "Lambda":
             return group([
               "{|",
-              join(", ", node.args),
+              join(", ", path.map(print, "args")),
               "|",
               path.call(print, "body"),
               "}",
