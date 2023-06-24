@@ -43,7 +43,12 @@ export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
         />
       </div>
       {props.hideViewer || !squiggleOutput ? null : (
-        <SquiggleViewer result={getValueToRender(squiggleOutput)} {...props} />
+        <div data-testid="editor-result">
+          <SquiggleViewer
+            result={getValueToRender(squiggleOutput)}
+            {...props}
+          />
+        </div>
       )}
     </div>
   );

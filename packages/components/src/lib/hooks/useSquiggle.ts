@@ -84,10 +84,7 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
       // TODO - cancel previous run if already running
       setIsRunning(true);
 
-      const channel = new MessageChannel();
-
-      // trick from https://stackoverflow.com/a/56727837
-      channel.port1.onmessage = async () => {
+      const act = async () => {
         const startTime = Date.now();
         project.setSource(sourceId, args.code);
         project.setContinues(sourceId, continues);
@@ -104,9 +101,16 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
         setIsRunning(false);
       };
 
-      requestAnimationFrame(function () {
-        channel.port2.postMessage(undefined);
-      });
+      if (typeof MessageChannel === "undefined") {
+        setTimeout(act, 10);
+      } else {
+        // trick from https://stackoverflow.com/a/56727837
+        const channel = new MessageChannel();
+        channel.port1.onmessage = act;
+        requestAnimationFrame(function () {
+          channel.port2.postMessage(undefined);
+        });
+      }
     },
     // This complains about executionId not being used inside the function body.
     // This is on purpose, as executionId simply allows you to run the squiggle
