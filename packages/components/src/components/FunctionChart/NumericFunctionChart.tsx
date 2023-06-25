@@ -1,9 +1,7 @@
 import * as d3 from "d3";
-
-import * as React from "react";
 import { FC, useCallback, useMemo } from "react";
 
-import { SqNumericFnPlot } from "@quri/squiggle-lang";
+import { Env, SqNumericFnPlot } from "@quri/squiggle-lang";
 
 import {
   drawAxes,
@@ -11,11 +9,9 @@ import {
   primaryColor,
 } from "../../lib/draw/index.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
-import { sqScaleToD3, canvasClasses } from "../../lib/utility.js";
+import { canvasClasses, sqScaleToD3 } from "../../lib/utility.js";
 import { ErrorAlert } from "../Alert.js";
 import { getFunctionImage } from "./utils.js";
-import { FunctionChartContainer } from "./FunctionChartContainer.js";
-import { Env } from "@quri/squiggle-lang";
 
 type Props = {
   plot: SqNumericFnPlot;
@@ -121,20 +117,18 @@ export const NumericFunctionChart: FC<Props> = ({
   const { ref } = useCanvas({ height, init: initCursor, draw });
 
   return (
-    <FunctionChartContainer fn={plot.fn}>
-      <div className="flex flex-col items-stretch">
-        <canvas ref={ref} className={canvasClasses}>
-          Chart for {plot.toString()}
-        </canvas>
-        <div className="space-y-1">
-          {errors.map(({ x, value }) => (
-            // TODO - group errors with identical value
-            <ErrorAlert key={x} heading={value}>
-              Error at point {x}
-            </ErrorAlert>
-          ))}
-        </div>
+    <div className="flex flex-col items-stretch">
+      <canvas ref={ref} className={canvasClasses}>
+        Chart for {plot.toString()}
+      </canvas>
+      <div className="space-y-1">
+        {errors.map(({ x, value }) => (
+          // TODO - group errors with identical value
+          <ErrorAlert key={x} heading={value}>
+            Error at point {x}
+          </ErrorAlert>
+        ))}
       </div>
-    </FunctionChartContainer>
+    </div>
   );
 };

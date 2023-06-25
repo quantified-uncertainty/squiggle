@@ -1,23 +1,18 @@
-import React, { useMemo } from "react";
+import { FC, useMemo } from "react";
 
-import { useMaybeControlledValue } from "../lib/hooks/index.js";
-import { SquiggleArgs, useSquiggle } from "../lib/hooks/useSquiggle.js";
+import { useMaybeControlledCode } from "../lib/hooks/index.js";
+import { useSquiggle } from "../lib/hooks/useSquiggle.js";
 import { getErrors, getValueToRender } from "../lib/utility.js";
 import { CodeEditor } from "./CodeEditor.js";
 import { SquiggleViewer, SquiggleViewerProps } from "./SquiggleViewer/index.js";
+import { SquiggleCodeProps } from "./types.js";
 
-export type SquiggleEditorProps = SquiggleArgs & {
-  defaultCode?: string;
-  onCodeChange?: (code: string) => void;
+export type SquiggleEditorProps = SquiggleCodeProps & {
   hideViewer?: boolean;
 } & Omit<SquiggleViewerProps, "result">;
 
-export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
-  const [code, setCode] = useMaybeControlledValue({
-    value: props.code,
-    defaultValue: props.defaultCode ?? "",
-    onChange: props.onCodeChange,
-  });
+export const SquiggleEditor: FC<SquiggleEditorProps> = (props) => {
+  const [code, setCode] = useMaybeControlledCode(props);
 
   const [squiggleOutput, { project }] = useSquiggle({ ...props, code });
 

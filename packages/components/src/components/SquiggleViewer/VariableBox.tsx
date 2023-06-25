@@ -64,7 +64,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
   const { path } = value;
 
   if (!path) {
-    throw new Error("Can't display a pathless value");
+    throw new Error("Can't display pathless value");
   }
 
   const settings = getSettings(path);

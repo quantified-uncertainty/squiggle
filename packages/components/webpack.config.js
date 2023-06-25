@@ -1,6 +1,9 @@
 import * as path from "path";
 
 import * as url from "url";
+
+import { BundleAnalyzerPlugin } from "webpack-bundle-analyzer";
+
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 
 const config = {
@@ -59,9 +62,6 @@ const config = {
 };
 
 if (process.env.ANALYZE) {
-  const BundleAnalyzerPlugin =
-    require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
-
   config.plugins = [...(config.plugins ?? []), new BundleAnalyzerPlugin()];
 }
 

@@ -13,16 +13,19 @@ import React, {
 import { FormProvider, useForm } from "react-hook-form";
 import { ResizableBox } from "react-resizable";
 import { z } from "zod";
-import { useInitialWidth } from "../../lib/hooks/useInitialWidth.js";
 
-import { Env, SqProject } from "@quri/squiggle-lang";
+import { Env } from "@quri/squiggle-lang";
 import { AdjustmentsVerticalIcon, Bars3CenterLeftIcon, Button } from "@quri/ui";
 
-import { useMaybeControlledValue, useSquiggle } from "../../lib/hooks/index.js";
-
+import {
+  useInitialWidth,
+  useMaybeControlledCode,
+  useSquiggle,
+} from "../../lib/hooks/index.js";
 import { getErrors, getValueToRender, isMac } from "../../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "../CodeEditor.js";
 import {
+  PartialPlaygroundSettings,
   PlaygroundSettingsForm,
   defaultPlaygroundSettings,
   viewSettingsSchema,
@@ -31,35 +34,22 @@ import {
 import {
   SquiggleViewer,
   SquiggleViewerHandle,
-  SquiggleViewerProps,
 } from "../SquiggleViewer/index.js";
-
+import { SquiggleCodeProps } from "../types.js";
 import { MenuItem } from "./MenuItem.js";
 import { AutorunnerMenuItem } from "./RunControls/AutorunnerMenuItem.js";
 import { RunMenuItem } from "./RunControls/RunMenuItem.js";
 import { useRunnerState } from "./RunControls/useRunnerState.js";
 
 type PlaygroundProps = // Playground can be either controlled (`code`) or uncontrolled (`defaultCode` + `onCodeChange`)
-  (
-    | { code: string; defaultCode?: undefined }
-    | { defaultCode?: string; code?: undefined }
-  ) &
-    (
-      | {
-          project: SqProject;
-          continues?: string[];
-        }
-      | {}
-    ) &
-    Omit<SquiggleViewerProps, "result"> & {
-      onCodeChange?(expr: string): void;
+  SquiggleCodeProps &
+    PartialPlaygroundSettings & {
       /* When settings change */
-      onSettingsChange?(settings: any): void;
+      onSettingsChange?(settings: PlaygroundSettings): void;
       /** Should we show the editor? */
       showEditor?: boolean;
       /** Allows to inject extra buttons, e.g. share button on the website, or save button in Squiggle Hub */
       renderExtraControls?: () => ReactNode;
-      showShareButton?: boolean;
       /** Height of the editor */
       height?: CSSProperties["height"];
     };
@@ -74,27 +64,18 @@ export const PlaygroundContext = React.createContext<PlaygroundContextShape>({
 
 export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const {
-    defaultCode = "",
-    code: controlledCode,
-    onCodeChange,
     onSettingsChange,
     renderExtraControls,
     height = 500,
     showEditor = true,
   } = props;
-  const [code, setCode] = useMaybeControlledValue({
-    value: controlledCode,
-    defaultValue: defaultCode,
-    onChange: onCodeChange,
-  });
+  const [code, setCode] = useMaybeControlledCode(props);
   const { ref: fullContainerRef, width: initialWidth } = useInitialWidth();
 
   const defaultValues: PlaygroundSettings = merge(
     {},
     defaultPlaygroundSettings,
-    Object.fromEntries(
-      Object.entries(props).filter(([k, v]) => v !== undefined)
-    )
+    Object.fromEntries(Object.entries(props).filter(([, v]) => v !== undefined))
   );
 
   type Tab = "CODE" | "SETTINGS";
@@ -118,7 +99,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     });
     const subscription = form.watch(() => submit());
     return () => subscription.unsubscribe();
-  }, [form.handleSubmit, form.watch, onSettingsChange]);
+  }, [form, onSettingsChange]);
 
   const environment: Env = useMemo(
     () => ({
@@ -166,37 +147,33 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
       </div>
     );
 
-  const leftPanelBody = (
-    <>
-      {selectedTab === "CODE" && (
-        <div data-testid="squiggle-editor">
-          <CodeEditor
-            ref={editorRef}
-            value={code}
-            errors={errors}
-            project={project}
-            sourceId={sourceId}
-            showGutter={true}
-            onChange={setCode}
-            onViewValuePath={(ast) => viewerRef.current?.viewValuePath(ast)}
-            onSubmit={runnerState.run}
-          />
-        </div>
-      )}
-      {selectedTab === "SETTINGS" && (
-        <div className="px-2 space-y-6">
-          <div className="px-2 py-2">
-            <div className="pb-4">
-              <Button onClick={() => setSelectedTab("CODE")}>Back</Button>
-            </div>
-            <FormProvider {...form}>
-              <PlaygroundSettingsForm />
-            </FormProvider>
+  const leftPanelBody =
+    selectedTab === "CODE" ? (
+      <div data-testid="squiggle-editor">
+        <CodeEditor
+          ref={editorRef}
+          value={code}
+          errors={errors}
+          project={project}
+          sourceId={sourceId}
+          showGutter={true}
+          onChange={setCode}
+          onViewValuePath={(ast) => viewerRef.current?.viewValuePath(ast)}
+          onSubmit={runnerState.run}
+        />
+      </div>
+    ) : selectedTab === "SETTINGS" ? (
+      <div className="px-2 space-y-6">
+        <div className="px-2 py-2">
+          <div className="pb-4">
+            <Button onClick={() => setSelectedTab("CODE")}>Back</Button>
           </div>
+          <FormProvider {...form}>
+            <PlaygroundSettingsForm />
+          </FormProvider>
         </div>
-      )}
-    </>
-  );
+      </div>
+    ) : null;
 
   const leftPanelRef = useRef<HTMLDivElement | null>(null);
 

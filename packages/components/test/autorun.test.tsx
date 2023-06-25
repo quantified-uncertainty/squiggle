@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom";
 import { act, render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { userEvent } from "./user-event.js";
 
 import { SquigglePlayground } from "../src/index.js";
 
@@ -12,7 +12,7 @@ test("Autorun is default", async () => {
 });
 
 test("Autorun can be switched off", async () => {
-  const user = (userEvent as any).setup(); // typescript issue is due to ESM mess
+  const user = userEvent.setup(); // typescript issue is due to ESM mess
   act(() => render(<SquigglePlayground code="70*30" />));
 
   expect(screen.getByTestId("autorun-controls")).toHaveAttribute(

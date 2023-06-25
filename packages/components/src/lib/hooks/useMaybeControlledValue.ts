@@ -9,9 +9,9 @@ type ControlledValueArgs<T> = {
 export function useMaybeControlledValue<T>(
   args: ControlledValueArgs<T>
 ): [T, (x: T) => void] {
-  let [uncontrolledValue, setUncontrolledValue] = useState(args.defaultValue);
-  let value = args.value ?? uncontrolledValue;
-  let onChange = (newValue: T) => {
+  const [uncontrolledValue, setUncontrolledValue] = useState(args.defaultValue);
+  const value = args.value ?? uncontrolledValue;
+  const onChange = (newValue: T) => {
     if (args.value === undefined) {
       // uncontrolled mode
       setUncontrolledValue(newValue);

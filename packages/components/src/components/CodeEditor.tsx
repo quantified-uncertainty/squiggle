@@ -291,7 +291,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
           ])
         ),
       });
-    }, [onViewValuePath]);
+    }, [onViewValuePath, project, sourceId]);
 
     useEffect(() => {
       if (!editorView.current) {

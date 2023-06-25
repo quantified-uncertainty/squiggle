@@ -30,7 +30,6 @@ export const Slow: Story = {
 export const RelativeValues: Story = {
   name: "RelativeValues plot",
   args: {
-    code: undefined as any,
     defaultCode: `ids = ["foo", "bar"]
 foo = SampleSet.fromDist(2 to 5)
 bar = foo + SampleSet.fromDist(3 to 6) * 0.5
@@ -50,12 +49,14 @@ RelativeValues.gridPlot({
   },
 };
 
-export const WithShareButton: Story = {
-  name: "With share button",
+export const WithExtraControls: Story = {
+  name: "With extra controls",
   args: {
     defaultCode: "normal(5,2)",
     height: undefined,
-    showShareButton: true,
+    renderExtraControls: () => (
+      <button className="bg-green-500 px-2">Extra button</button>
+    ),
   },
 };
 

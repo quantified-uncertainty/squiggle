@@ -27,7 +27,6 @@ import { ErrorAlert } from "../Alert.js";
 import { DistributionsChart } from "../DistributionsChart/index.js";
 import { NumberShower } from "../NumberShower.js";
 import { getFunctionImage } from "./utils.js";
-import { FunctionChartContainer } from "./FunctionChartContainer.js";
 
 function unwrap<a, b>(x: result<a, b>): a {
   if (x.ok) {
@@ -252,25 +251,23 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
     ) : null;
 
   return (
-    <FunctionChartContainer fn={plot.fn}>
-      <div className="flex flex-col items-stretch">
-        <canvas ref={ref} className={canvasClasses}>
-          Chart for {plot.toString()}
-        </canvas>
-        {showChart}
-        {Object.entries(errors).map(([errorName, errorPoints]) => (
-          <ErrorAlert key={errorName} heading={errorName}>
-            Values:{" "}
-            {errorPoints
-              .map((r, i) => <NumberShower key={i} number={r.x} />)
-              .reduce((a, b) => (
-                <>
-                  {a}, {b}
-                </>
-              ))}
-          </ErrorAlert>
-        ))}
-      </div>
-    </FunctionChartContainer>
+    <div className="flex flex-col items-stretch">
+      <canvas ref={ref} className={canvasClasses}>
+        Chart for {plot.toString()}
+      </canvas>
+      {showChart}
+      {Object.entries(errors).map(([errorName, errorPoints]) => (
+        <ErrorAlert key={errorName} heading={errorName}>
+          Values:{" "}
+          {errorPoints
+            .map((r, i) => <NumberShower key={i} number={r.x} />)
+            .reduce((a, b) => (
+              <>
+                {a}, {b}
+              </>
+            ))}
+        </ErrorAlert>
+      ))}
+    </div>
   );
 };

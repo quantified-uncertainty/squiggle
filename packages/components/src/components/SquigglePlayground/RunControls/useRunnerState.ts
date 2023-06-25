@@ -1,4 +1,4 @@
-import { useLayoutEffect, useReducer } from "react";
+import { useReducer } from "react";
 
 type InternalState = {
   autorunMode: boolean;
@@ -6,7 +6,7 @@ type InternalState = {
   executionId: number;
 };
 
-const buildInitialState = (code: string): InternalState => ({
+const buildInitialState = (): InternalState => ({
   autorunMode: true,
   renderedCode: "",
   executionId: 0,
@@ -52,7 +52,7 @@ export type RunnerState = {
 };
 
 export function useRunnerState(code: string): RunnerState {
-  const [state, dispatch] = useReducer(reducer, buildInitialState(code));
+  const [state, dispatch] = useReducer(reducer, undefined, buildInitialState);
 
   const run = () => {
     dispatch({ type: "RUN", code });

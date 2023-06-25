@@ -1,3 +1,6 @@
+import { clsx } from "clsx";
+import React from "react";
+
 import {
   SqDistributionTag,
   SqDistributionsPlot,
@@ -5,42 +8,46 @@ import {
   SqScale,
   SqValue,
 } from "@quri/squiggle-lang";
-import { clsx } from "clsx";
-import React from "react";
-
-import { DistributionsChart } from "../DistributionsChart/index.js";
-import { FunctionChart } from "../FunctionChart/index.js";
-import { NumberShower } from "../NumberShower.js";
 
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
+import { DistributionsChart } from "../DistributionsChart/index.js";
 import { DistFunctionChart } from "../FunctionChart/DistFunctionChart.js";
 import { NumericFunctionChart } from "../FunctionChart/NumericFunctionChart.js";
-import { ScatterChart } from "../ScatterChart/index.js";
+import { FunctionChart } from "../FunctionChart/index.js";
+import { NumberShower } from "../NumberShower.js";
 import { generateDistributionPlotSettings } from "../PlaygroundSettings.js";
+import { RelativeValuesGridChart } from "../RelativeValuesGridChart/index.js";
+import { ScatterChart } from "../ScatterChart/index.js";
 import { ItemSettingsMenu } from "./ItemSettingsMenu.js";
 import { SqTypeWithCount, VariableBox } from "./VariableBox.js";
 import { MergedItemSettings } from "./utils.js";
-import { RelativeValuesGridChart } from "../RelativeValuesGridChart/index.js";
 
 const VariableList: React.FC<{
   value: SqValue;
   heading: string;
   preview?: React.ReactNode;
   children: (settings: MergedItemSettings) => React.ReactNode;
-}> = ({ value, heading, children, preview }) => (
-  <VariableBox value={value} preview={preview} heading={heading}>
-    {(settings) => (
-      <div
-        className={clsx(
-          "space-y-2",
-          value.path!.items.length ? "pt-1 mt-1" : null
-        )}
-      >
-        {children(settings)}
-      </div>
-    )}
-  </VariableBox>
-);
+}> = ({ value, heading, children, preview }) => {
+  return (
+    <VariableBox value={value} preview={preview} heading={heading}>
+      {(settings) => {
+        if (!value.path) {
+          throw new Error("Can't display pathless value");
+        }
+        return (
+          <div
+            className={clsx(
+              "space-y-2",
+              value.path.items.length ? "pt-1 mt-1" : null
+            )}
+          >
+            {children(settings)}
+          </div>
+        );
+      }}
+    </VariableBox>
+  );
+};
 
 export interface Props {
   /** The output of squiggle's run */
@@ -49,7 +56,10 @@ export interface Props {
 }
 
 export const ExpressionViewer: React.FC<Props> = ({ value }) => {
-  const environment = value.path!.project.getEnvironment();
+  if (!value.path) {
+    throw new Error("Can't display pathless value");
+  }
+  const environment = value.path.project.getEnvironment();
 
   switch (value.tag) {
     case "Number":
@@ -115,9 +125,9 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
         <VariableBox value={value} heading="String">
           {() => (
             <>
-              <span className="text-neutral-300">"</span>
+              <span className="text-neutral-300">{'"'}</span>
               <span className="text-neutral-600 text-sm">{value.value}</span>
-              <span className="text-neutral-300">"</span>
+              <span className="text-neutral-300">{'"'}</span>
             </>
           )}
         </VariableBox>
@@ -234,7 +244,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
                 );
               default:
                 // can happen if squiggle-lang version is too fresh and we messed up the components -> squiggle-lang dependency
-                return `Unsupported plot type ${(plot as any).tag}`;
+                return `Unsupported plot ${plot satisfies never}`;
             }
           }}
         </VariableBox>
