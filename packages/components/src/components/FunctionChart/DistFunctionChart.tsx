@@ -7,6 +7,7 @@ import {
   SqLinearScale,
   SqValue,
   SqNumberValue,
+  SqOtherError,
 } from "@quri/squiggle-lang";
 import * as d3 from "d3";
 import groupBy from "lodash/groupBy.js";
@@ -226,7 +227,7 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
       ? plot.fn.call([SqNumberValue.create(mouseX)], environment)
       : {
           ok: false,
-          value: SqError.createOtherError(
+          value: new SqOtherError(
             "Hover x-coordinate returned NaN. Expected a number."
           ),
         };
@@ -243,7 +244,7 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
           title:
             mouseX === undefined
               ? undefined
-              : `f(${d3.format(",.4r")(mouseX)})`, // TODO - use an original function name? it could be obtained with `locationToShortName`, but there's a corner case for arrays.
+              : `f(${d3.format(",.4r")(mouseX)})`, // TODO - use an original function name? it could be obtained with `pathToShortName`, but there's a corner case for arrays.
         })}
         environment={environment}
         height={50}

@@ -1,60 +1,40 @@
 import { parse } from "../../ast/parse.js";
-import { expressionFromAst } from "../../expression/fromAst.js";
-import { ReducerContext } from "../../reducer/context.js";
-import { ReducerFn } from "../../reducer/index.js";
-import { SquiggleLambda } from "../../reducer/lambda.js";
-import * as Result from "../../utility/result.js";
-import { FnDefinition } from "./fnDefinition.js";
-import { FRType } from "./frTypes.js";
+import { defaultEnv } from "../../dist/env.js";
+import { compileAst } from "../../expression/compile.js";
+import { createContext } from "../../reducer/context.js";
+import { Bindings } from "../../reducer/stack.js";
+import { Value } from "../../value/index.js";
 
-export function makeSquiggleDefinition<const T extends string[]>({
+export type SquiggleDefinition = {
+  name: string;
+  value: Value;
+};
+
+export function makeSquiggleDefinition({
+  builtins,
   name,
-  inputs,
-  parameters,
   code,
 }: {
-  name: string; // unfortunately necessary, so that lambda isn't anonymous
-  // guarantees that both arrays have the same length
-  inputs: [...{ [K in keyof T]: FRType<any> }];
-  parameters: [...T];
+  builtins: Bindings;
+  name: string;
   code: string;
-}): FnDefinition {
+}): SquiggleDefinition {
   const astResult = parse(code, "@stdlib");
   if (!astResult.ok) {
     // will be detected during tests, should never happen in runtime
     throw new Error(`Stdlib code ${code} is invalid`);
   }
 
-  const expression = expressionFromAst(astResult.value);
+  const expressionResult = compileAst(astResult.value, builtins);
 
-  const run = (
-    args: unknown[],
-    context: ReducerContext,
-    reducer: ReducerFn
-  ) => {
-    // It would be better to create this lambda outside of `run` instead of creating it on every call.
-    // But we don't have access to `context.bindings` outside of `run`, and it's not clear how the code
-    // could reference stdlib functions in that case.
-    const lambda = new SquiggleLambda(
-      name,
-      parameters,
-      // Look for uppermost bindings scope, which will contain stdlib.
-      // This way we guarantee that function implementation can't touch local variables,
-      // and that local variables won't override stdlib references in function's body.
-      context.bindings.root(),
-      expression,
-      astResult.value.location
-    );
+  if (!expressionResult.ok) {
+    // fail fast
+    throw expressionResult.value;
+  }
 
-    const result = lambda.call(
-      // It's unfortunate that we have to unpack values and repack them again.
-      // But it's the only way to support polymorphic functions and make use of error reporting mechanism in our registry.
-      inputs.map((input, i) => input.pack(args[i])),
-      context,
-      reducer
-    );
-    return Result.Ok(result);
-  };
+  // TODO - do we need runtime env? That would mean that we'd have to build stdlib for each env separately.
+  const context = createContext(defaultEnv);
+  const [value] = context.evaluate(expressionResult.value, context);
 
-  return { inputs: inputs as any, run: run as any };
+  return { name, value };
 }

@@ -1,6 +1,6 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import React from "react";
 import "@testing-library/jest-dom";
+import { render, waitFor } from "@testing-library/react";
+
 import { SqProject } from "@quri/squiggle-lang";
 
 import {
@@ -21,7 +21,7 @@ test("Chart logs nothing on render", async () => {
 });
 
 test("Editor logs nothing on render", async () => {
-  const { unmount } = render(<SquiggleEditor code={"normal(0, 1)"} />);
+  const { unmount } = render(<SquiggleEditor code="normal(0, 1)" />);
   unmount();
 
   /* eslint-disable no-console */
@@ -34,27 +34,32 @@ test("Editor logs nothing on render", async () => {
 test("Project dependencies work in editors", async () => {
   const project = SqProject.create();
 
-  render(<SquiggleEditor code={"x = 1"} project={project} />);
-  const source = project.getSourceIds()[0];
-  const { container } = render(
-    <SquiggleEditor code={"x + 1"} project={project} continues={[source]} />
+  project.setSource("depend", "x = 123");
+
+  const rendered = render(
+    <SquiggleEditor code="x + 456" project={project} continues={["depend"]} />
   );
-  expect(container).toHaveTextContent("2");
+
+  await waitFor(() => expect(project.getSourceIds().length).toBe(2));
+
+  await waitFor(() =>
+    expect(rendered.getByTestId("editor-result")).toHaveTextContent("579")
+  );
 });
 
 test("Project dependencies work in playgrounds", async () => {
   const project = SqProject.create();
-  project.setSource("depend", "x = 1");
+  project.setSource("depend", "x = 123");
 
-  render(
+  const rendered = render(
     <SquigglePlayground
-      code={"x + 1"}
+      code="x + 456"
       project={project}
       continues={["depend"]}
     />
   );
   // We must await here because SquigglePlayground loads results asynchronously
   await waitFor(() =>
-    expect(screen.getByTestId("playground-result")).toHaveTextContent("2")
+    expect(rendered.getByTestId("playground-result")).toHaveTextContent("579")
   );
 });

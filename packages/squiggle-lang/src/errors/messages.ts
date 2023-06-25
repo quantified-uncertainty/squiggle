@@ -1,5 +1,5 @@
-import { DistError, distErrorToString } from "./dist/DistError.js";
-import { OperationError } from "./operationError.js";
+import { DistError, distErrorToString } from "../dist/DistError.js";
+import { OperationError } from "../operationError.js";
 
 // Common error types.
 
@@ -111,16 +111,6 @@ export class RETodo extends ErrorMessage {
 
   toString() {
     return `TODO: ${this.msg}`;
-  }
-}
-
-export class RENeedToRun extends ErrorMessage {
-  constructor() {
-    super();
-  }
-
-  toString() {
-    return "Need to run";
   }
 }
 

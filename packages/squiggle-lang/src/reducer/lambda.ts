@@ -1,19 +1,15 @@
 import { LocationRange } from "peggy";
 
+import { ASTNode } from "../ast/parse.js";
+import { REArityError } from "../errors/messages.js";
 import { Expression } from "../expression/index.js";
 import { Value } from "../value/index.js";
-import { REArityError } from "../errors.js";
-import * as IError from "./IError.js";
-import { Bindings } from "./bindings.js";
+import * as IError from "../errors/IError.js";
 import * as Context from "./context.js";
 import { ReducerContext } from "./context.js";
-import { ReducerFn } from "./index.js";
+import { Stack } from "./stack.js";
 
-type LambdaBody = (
-  args: Value[],
-  context: ReducerContext,
-  reducerFn: ReducerFn
-) => Value;
+type LambdaBody = (args: Value[], context: ReducerContext) => Value;
 
 export abstract class Lambda {
   constructor(public body: LambdaBody) {}
@@ -25,26 +21,30 @@ export abstract class Lambda {
   callFrom(
     args: Value[],
     context: ReducerContext,
-    reducer: ReducerFn,
-    location: LocationRange | undefined
+    ast: ASTNode | undefined
   ): Value {
     const newContext: ReducerContext = {
-      ...context,
+      // Be careful! the order here must match the order of props in ReducerContext.
+      // Also, we intentionally don't use object spread syntax because of monomorphism.
+      stack: context.stack,
+      environment: context.environment,
       frameStack: context.frameStack.extend(
         Context.currentFunctionName(context),
-        location
+        ast?.location
       ),
+      evaluate: context.evaluate,
       inFunction: this,
     };
 
-    return IError.rethrowWithFrameStack(
-      () => this.body(args, newContext, reducer),
-      newContext.frameStack
-    );
+    try {
+      return this.body(args, newContext);
+    } catch (e) {
+      IError.rethrowWithFrameStack(e, newContext.frameStack);
+    }
   }
 
-  call(args: Value[], context: ReducerContext, reducer: ReducerFn): Value {
-    return this.callFrom(args, context, reducer, undefined);
+  call(args: Value[], context: ReducerContext): Value {
+    return this.callFrom(args, context, undefined);
   }
 }
 
@@ -57,36 +57,32 @@ export class SquiggleLambda extends Lambda {
   constructor(
     name: string | undefined,
     parameters: string[],
-    bindings: Bindings,
+    stack: Stack,
     body: Expression,
     location: LocationRange
   ) {
-    const lambda: LambdaBody = (
-      args: Value[],
-      context: ReducerContext,
-      reducer: ReducerFn
-    ) => {
+    const lambda: LambdaBody = (args: Value[], context: ReducerContext) => {
       const argsLength = args.length;
       const parametersLength = parameters.length;
       if (argsLength !== parametersLength) {
         throw new REArityError(undefined, parametersLength, argsLength);
       }
 
-      // We could call bindings.extend() here to create a new local scope, but we don't,
-      // since bindings are immutable anyway, and scopes are costly (lookups to upper scopes are O(depth)).
-      let localBindings = bindings;
+      let localStack = stack;
       for (let i = 0; i < parametersLength; i++) {
-        localBindings = localBindings.set(parameters[i], args[i]);
+        localStack = localStack.push(parameters[i], args[i]);
       }
 
       const lambdaContext: ReducerContext = {
-        bindings: localBindings, // based on bindings at the moment of lambda creation
-        environment: context.environment, // environment at the moment when lambda is called
-        frameStack: context.frameStack, // already extended in `.call()`
-        inFunction: context.inFunction, // already updated in `.call()`
+        stack: localStack,
+        // no spread is intentional - helps with monomorphism
+        environment: context.environment,
+        frameStack: context.frameStack,
+        evaluate: context.evaluate,
+        inFunction: context.inFunction,
       };
 
-      const [value] = reducer(body, lambdaContext);
+      const [value] = context.evaluate(body, lambdaContext);
       return value;
     };
 
@@ -125,6 +121,6 @@ export class BuiltinLambda extends Lambda {
   }
 
   toString() {
-    return "Builtin function"; // TODO - return name instead?
+    return this.name;
   }
 }

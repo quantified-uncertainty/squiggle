@@ -13,7 +13,7 @@ import {
   frRecord,
   frOptional,
 } from "../../src/library/registry/frTypes.js";
-import { NamespaceMap } from "../../src/reducer/bindings.js";
+import { ImmutableMap } from "../../src/utility/immutableMap.js";
 
 import {
   Value,
@@ -108,12 +108,12 @@ test("frTuple2", () => {
 });
 
 test("frDict", () => {
-  const dict = NamespaceMap([
+  const dict = ImmutableMap([
     ["foo", 5],
     ["bar", 6],
   ]);
   const value = vRecord(
-    NamespaceMap([
+    ImmutableMap([
       ["foo", vNumber(dict.get("foo")!)],
       ["bar", vNumber(dict.get("bar")!)],
     ])
@@ -129,7 +129,7 @@ describe("frRecord", () => {
       bar: "hello",
     };
     const v = vRecord(
-      NamespaceMap<string, Value>([
+      ImmutableMap<string, Value>([
         ["foo", vNumber(record.foo)],
         ["bar", vString(record.bar)],
       ])
@@ -146,7 +146,7 @@ describe("frRecord", () => {
       bar: "hello",
     };
     const v = vRecord(
-      NamespaceMap<string, Value>([
+      ImmutableMap<string, Value>([
         ["foo", vNumber(record.foo)],
         ["bar", vString(record.bar)],
       ])

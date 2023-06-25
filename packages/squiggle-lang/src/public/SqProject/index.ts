@@ -1,27 +1,28 @@
-import { SqError } from "../SqError.js";
+import { Env, defaultEnv } from "../../dist/env.js";
+import * as Library from "../../library/index.js";
+import { createContext } from "../../reducer/context.js";
+import { Bindings } from "../../reducer/stack.js";
+import * as Result from "../../utility/result.js";
+import { Value, vRecord } from "../../value/index.js";
+import { SqError, SqOtherError } from "../SqError.js";
 import { SqRecord } from "../SqRecord.js";
 import { SqValue, wrapValue } from "../SqValue.js";
-import * as Result from "../../utility/result.js";
-import { SqValueLocation } from "../SqValueLocation.js";
-import { defaultEnv, Env } from "../../dist/env.js";
-import { IError } from "../../reducer/IError.js";
-import * as Library from "../../library/index.js";
-import { Value, vRecord } from "../../value/index.js";
-import { createContext } from "../../reducer/context.js";
-import { Namespace, NamespaceMap } from "../../reducer/bindings.js";
-import { ErrorMessage, RENeedToRun } from "../../errors.js";
+import { SqValuePath } from "../SqValuePath.js";
 
+import { LocationRange } from "peggy";
+import { findLocationByPath } from "../../ast/utils.js";
+import { ImmutableMap } from "../../utility/immutableMap.js";
 import { ImportBinding, ProjectItem } from "./ProjectItem.js";
-import * as Topology from "./Topology.js";
 import { Resolver } from "./Resolver.js";
+import * as Topology from "./Topology.js";
 
 function getNeedToRunError() {
-  return new SqError(IError.fromMessage(new RENeedToRun()));
+  return new SqOtherError("Need to run");
 }
 
 // TODO - pass the the id from which the dependency was imported/continued too
 function getMissingDependencyError(id: string) {
-  return new SqError(IError.other(`Dependency ${id} is missing`));
+  return new SqOtherError(`Dependency ${id} is missing`);
 }
 
 type Options = {
@@ -30,13 +31,13 @@ type Options = {
 
 export class SqProject {
   private readonly items: Map<string, ProjectItem>;
-  private stdLib: Namespace;
+  private stdLib: Bindings;
   private environment: Env;
   private resolver?: Resolver; // if not present, imports are forbidden
 
   constructor(options?: Options) {
     this.items = new Map();
-    this.stdLib = Library.stdLib;
+    this.stdLib = Library.getStdLib();
     this.environment = defaultEnv;
     this.resolver = options?.resolver;
   }
@@ -53,11 +54,11 @@ export class SqProject {
     return this.environment;
   }
 
-  getStdLib(): Namespace {
+  getStdLib(): Bindings {
     return this.stdLib;
   }
 
-  setStdLib(value: Namespace) {
+  setStdLib(value: Bindings) {
     this.stdLib = value;
   }
 
@@ -160,7 +161,9 @@ export class SqProject {
     return Result.fmap(this.getInternalResult(sourceId), (v) =>
       wrapValue(
         v,
-        new SqValueLocation(this, sourceId, {
+        new SqValuePath({
+          project: this,
+          sourceId,
           root: "result",
           items: [],
         })
@@ -173,24 +176,24 @@ export class SqProject {
     this.getItem(sourceId).parseImports(this.resolver);
   }
 
-  private getRawBindings(sourceId: string): Namespace {
+  private getRawBindings(sourceId: string): Bindings {
     // FIXME - should fail if bindings are not set
-    return this.getItem(sourceId).bindings ?? NamespaceMap();
+    return this.getItem(sourceId).bindings ?? ImmutableMap();
   }
 
   getBindings(sourceId: string): SqRecord {
     return new SqRecord(
       this.getRawBindings(sourceId),
-      new SqValueLocation(this, sourceId, {
+      new SqValuePath({
+        project: this,
+        sourceId,
         root: "bindings",
         items: [],
       })
     );
   }
 
-  private buildInitialBindings(
-    sourceId: string
-  ): Result.result<Namespace, SqError> {
+  private buildExternals(sourceId: string): Result.result<Bindings, SqError> {
     const continues = this.getContinues(sourceId);
 
     // We start from stdLib and add more bindings on top of it.
@@ -212,14 +215,16 @@ export class SqProject {
         return result;
       }
     }
-    let namespace = NamespaceMap<string, Value>().merge(...namespacesToMerge);
+    let externals: Bindings = ImmutableMap<string, Value>().merge(
+      ...namespacesToMerge
+    );
 
     // Second, merge imports.
     this.parseImports(sourceId);
     const rImports = this.getImports(sourceId);
     if (!rImports) {
       // Shouldn't happen, we just called parseImports.
-      return Result.Err(new SqError(IError.other("Internal logic error")));
+      return Result.Err(new SqOtherError("Internal logic error"));
     }
 
     if (!rImports.ok) {
@@ -236,27 +241,27 @@ export class SqProject {
       }
 
       // TODO - check for collisions?
-      namespace = namespace.set(
+      externals = externals.set(
         importBinding.variable,
         vRecord(importBindings)
       );
     }
-    return Result.Ok(namespace);
+    return Result.Ok(externals);
   }
 
-  private doLinkAndRun(sourceId: string): void {
-    const rBindings = this.buildInitialBindings(sourceId);
+  private async doLinkAndRun(sourceId: string): Promise<void> {
+    const rExternals = this.buildExternals(sourceId);
 
-    if (rBindings.ok) {
-      const context = createContext(rBindings.value, this.getEnvironment());
+    if (rExternals.ok) {
+      const context = createContext(this.getEnvironment());
 
-      this.getItem(sourceId).run(context);
+      await this.getItem(sourceId).run(context, rExternals.value);
     } else {
-      this.getItem(sourceId).failRun(rBindings.value);
+      this.getItem(sourceId).failRun(rExternals.value);
     }
   }
 
-  private runIds(sourceIds: string[]) {
+  private async runIds(sourceIds: string[]) {
     let error: SqError | undefined;
     for (const sourceId of sourceIds) {
       const cachedResult = this.getResultOption(sourceId);
@@ -273,7 +278,7 @@ export class SqProject {
         continue;
       }
 
-      this.doLinkAndRun(sourceId);
+      await this.doLinkAndRun(sourceId);
       const result = this.getResultOption(sourceId);
       if (result && !result.ok) {
         error = result.value;
@@ -281,14 +286,14 @@ export class SqProject {
     }
   }
 
-  runAll() {
-    this.runIds(this.getRunOrder());
+  async runAll() {
+    await this.runIds(this.getRunOrder());
   }
 
   // Deprecated; this method won't handle imports correctly.
   // Use `runWithImports` instead.
-  run(sourceId: string) {
-    this.runIds(Topology.getRunOrderFor(this, sourceId));
+  async run(sourceId: string) {
+    await this.runIds(Topology.getRunOrderFor(this, sourceId));
   }
 
   async loadImportsRecursively(
@@ -330,7 +335,45 @@ export class SqProject {
   ) {
     await this.loadImportsRecursively(sourceId, loadSource);
 
-    this.run(sourceId);
+    await this.run(sourceId);
+  }
+
+  findValuePathByOffset(
+    sourceId: string,
+    offset: number
+  ): Result.result<SqValuePath, SqError> {
+    const { ast } = this.getItem(sourceId);
+    if (!ast) {
+      return Result.Err(new SqOtherError("Not parsed"));
+    }
+    if (!ast.ok) {
+      return ast;
+    }
+    const found = SqValuePath.findByOffset({
+      project: this,
+      sourceId,
+      ast: ast.value,
+      offset,
+    });
+    if (!found) {
+      return Result.Err(new SqOtherError("Not found"));
+    }
+    return Result.Ok(found);
+  }
+
+  findLocationByValuePath(
+    sourceId: string,
+    path: SqValuePath
+  ): Result.result<LocationRange, SqError> {
+    const { ast: astR } = this.getItem(sourceId);
+    if (!astR) {
+      return Result.Err(new SqOtherError("Not parsed"));
+    }
+    if (!astR.ok) {
+      return astR;
+    }
+    const ast = astR.value;
+    return Result.Ok(findLocationByPath(ast, path.items));
   }
 }
 

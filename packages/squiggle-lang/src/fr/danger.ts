@@ -10,6 +10,7 @@ import {
   scaleMultiply,
   scalePower,
 } from "../dist/distOperations/scaleOperations.js";
+import { ErrorMessage, REOther } from "../errors/messages.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
@@ -20,13 +21,11 @@ import {
 } from "../library/registry/frTypes.js";
 import { FnFactory, unpackDistResult } from "../library/registry/helpers.js";
 import { ReducerContext } from "../reducer/context.js";
-import { ErrorMessage, REOther } from "../errors.js";
 import { Lambda } from "../reducer/lambda.js";
 import * as E_A from "../utility/E_A.js";
 import { Ok, result } from "../utility/result.js";
 import { Value, vArray, vNumber } from "../value/index.js";
-import { toValueResult } from "./genericDist.js";
-import { ReducerFn } from "../reducer/index.js";
+import { distResultToValue } from "./genericDist.js";
 
 const { factorial } = jstat;
 
@@ -60,7 +59,7 @@ const combinatoricsLibrary: FRFunction[] = [
     examples: [`Danger.binomial(1, 20, 0.5)`],
     definitions: [
       makeDefinition([frNumber, frNumber, frNumber], ([n, k, p]) =>
-        Ok(vNumber(choose(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k)))
+        vNumber(choose(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k))
       ),
     ],
   }),
@@ -71,12 +70,11 @@ const integrateFunctionBetweenWithNumIntegrationPoints = (
   min: number,
   max: number,
   numIntegrationPoints: number,
-  context: ReducerContext,
-  reducer: ReducerFn
-): result<Value, ErrorMessage> => {
+  context: ReducerContext
+): Value => {
   const applyFunctionAtFloatToFloatOption = (point: number) => {
     // Defined here so that it has access to context, reducer
-    const result = lambda.call([vNumber(point)], context, reducer);
+    const result = lambda.call([vNumber(point)], context);
     if (result.type === "Number") {
       return result.value;
     }
@@ -133,7 +131,7 @@ const integrateFunctionBetweenWithNumIntegrationPoints = (
   const result =
     (yMin + yMax) * weightForAnOuterPoint +
     innerPointsSum * weightForAnInnerPoint;
-  return Ok(vNumber(result));
+  return vNumber(result);
 };
 const integrationLibrary: FRFunction[] = [
   // Integral in terms of function, min, max, num points
@@ -153,7 +151,7 @@ const integrationLibrary: FRFunction[] = [
     definitions: [
       makeDefinition(
         [frLambda, frNumber, frNumber, frNumber],
-        ([lambda, min, max, numIntegrationPoints], context, reducer) => {
+        ([lambda, min, max, numIntegrationPoints], context) => {
           if (numIntegrationPoints === 0) {
             throw new REOther(
               "Integration error 4 in Danger.integrate: Increment can't be 0."
@@ -164,8 +162,7 @@ const integrationLibrary: FRFunction[] = [
             min,
             max,
             numIntegrationPoints,
-            context,
-            reducer
+            context
           );
         }
       ),
@@ -185,7 +182,7 @@ const integrationLibrary: FRFunction[] = [
     definitions: [
       makeDefinition(
         [frLambda, frNumber, frNumber, frNumber],
-        ([lambda, min, max, epsilon], context, reducer) => {
+        ([lambda, min, max, epsilon], context) => {
           if (epsilon === 0) {
             throw new REOther(
               "Integration error in Danger.integrate: Increment can't be 0."
@@ -196,8 +193,7 @@ const integrationLibrary: FRFunction[] = [
             min,
             max,
             (max - min) / epsilon,
-            context,
-            reducer
+            context
           );
         }
       ),
@@ -225,7 +221,7 @@ const diminishingReturnsLibrary = [
     definitions: [
       makeDefinition(
         [frArray(frLambda), frNumber, frNumber],
-        ([lambdas, funds, approximateIncrement], context, reducer) => {
+        ([lambdas, funds, approximateIncrement], context) => {
           // TODO: This is so complicated, it probably should be its own file. It might also make sense to have it work in Rescript directly, taking in a function rather than a reducer; then something else can wrap that function in the reducer/lambdas/context.
           /*
     The key idea for this function is that
@@ -267,11 +263,7 @@ const diminishingReturnsLibrary = [
           }
           const applyFunctionAtPoint = (lambda: Lambda, point: number) => {
             // Defined here so that it has access to context, reducer
-            const lambdaResult = lambda.call(
-              [vNumber(point)],
-              context,
-              reducer
-            );
+            const lambdaResult = lambda.call([vNumber(point)], context);
             if (lambdaResult.type === "Number") {
               return lambdaResult.value;
             }
@@ -325,10 +317,8 @@ const diminishingReturnsLibrary = [
             initAccumulator
           );
 
-          return Ok(
-            vArray(
-              optimalAllocationEndAccumulator.optimalAllocations.map(vNumber)
-            )
+          return vArray(
+            optimalAllocationEndAccumulator.optimalAllocations.map(vNumber)
           );
         }
       ),
@@ -355,7 +345,7 @@ const mapYLibrary: FRFunction[] = [
       makeDefinition(
         [frDist, frNumber, frNumber],
         ([dist, base, eps], { environment }) =>
-          toValueResult(
+          distResultToValue(
             scaleLogWithThreshold(dist, {
               env: environment,
               eps,

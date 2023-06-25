@@ -16,7 +16,10 @@ describe("Peggy to Expression", () => {
     testToExpression("-1", "(unaryMinus)(1)", "-1");
     testToExpression("!true", "(not)(true)", "false");
     testToExpression("1 + -1", "(add)(1, (unaryMinus)(1))", "0");
-    testToExpression("-a[0]", "(unaryMinus)(($_atIndex_$)(a, 0))");
+    testToExpression(
+      "a = [3,4]; -a[0]",
+      "a = {[3, 4]}; (unaryMinus)(($_atIndex_$)(a, 0))"
+    );
   });
 
   describe("multi-line", () => {
@@ -26,13 +29,13 @@ describe("Peggy to Expression", () => {
 
   describe("variables", () => {
     testToExpression("x = 1", "x = {1}");
-    testToExpression("x", "x", "Error(x is not defined)"); //TODO: value should return error
+    testToExpression("x", "Error(x is not defined)");
     testToExpression("x = 1; x", "x = {1}; x", "1");
   });
 
   describe("functions", () => {
     testToExpression("identity(x) = x", "identity = {|x| {x}}"); // Function definitions become lambda assignments
-    testToExpression("identity(x)", "(identity)(x)"); // Note value returns error properly
+    testToExpression("identity(x)", "Error(identity is not defined)"); // Note value returns error properly
     testToExpression(
       "f(x) = x> 2 ? 0 : 1; f(3)",
       "f = {|x| {(larger)(x, 2) ? (0) : (1)}}; (f)(3)",
@@ -54,7 +57,7 @@ describe("Peggy to Expression", () => {
   describe("records", () => {
     testToExpression("{a: 1, b: 2}", "{'a': 1, 'b': 2}", "{a: 1,b: 2}");
     testToExpression("{1+0: 1, 2+0: 2}", "{(add)(1, 0): 1, (add)(2, 0): 2}"); // key can be any expression
-    testToExpression("record.property", "($_atIndex_$)(record, 'property')");
+    testToExpression("record.property", "Error(record is not defined)");
     testToExpression(
       "record={property: 1}; record.property",
       "record = {{'property': 1}}; ($_atIndex_$)(record, 'property')",
@@ -143,14 +146,10 @@ describe("Peggy to Expression", () => {
   });
 
   describe("module", () => {
-    // testToExpression("Math.pi", "{:Math.pi}", "3.141592653589793")
-    // Only.test("stdlibrary", () => {
-    //  SquiggleLibrary_StdLib.stdLib
-    //  ->IEvBindings
-    //  ->Reducer_Value.toString
-    //  ->expect
-    //  ->toBe("")
-    // })
-    testToExpression("Math.pi", "Math.pi", "3.141592653589793");
+    testToExpression(
+      "Math.pi",
+      "3.141592653589793", // inlined
+      "3.141592653589793"
+    );
   });
 });

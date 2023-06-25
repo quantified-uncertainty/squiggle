@@ -1,5 +1,5 @@
-import { Namespace, NamespaceMap } from "../reducer/bindings.js";
-import { vNumber } from "../value/index.js";
+import { ImmutableMap } from "../utility/immutableMap.js";
+import { Value, vNumber } from "../value/index.js";
 
 const availableNumbers: [string, number][] = [
   ["Math.pi", Math.PI],
@@ -14,6 +14,6 @@ const availableNumbers: [string, number][] = [
   ["Math.tau", 6.283185307179586],
 ];
 
-export const makeMathConstants = (): Namespace => {
-  return NamespaceMap(availableNumbers.map(([name, v]) => [name, vNumber(v)]));
-};
+export function makeMathConstants(): ImmutableMap<string, Value> {
+  return ImmutableMap(availableNumbers.map(([name, v]) => [name, vNumber(v)]));
+}

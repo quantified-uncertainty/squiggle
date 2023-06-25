@@ -210,7 +210,10 @@ export function createPlugin(util: PrettierUtil): Plugin<Node> {
             return group([
               typedPath(node).call(print, "fn"), // parenthesize?..
               "(",
-              indent([softline, join([",", line], path.map(print, "args"))]),
+              indent([
+                softline,
+                join([",", line], typedPath(node).map(print, "args")),
+              ]),
               softline,
               ")",
             ]);
@@ -264,8 +267,6 @@ export function createPlugin(util: PrettierUtil): Plugin<Node> {
               "]",
             ]);
           case "Identifier":
-            return node.value;
-          case "ModuleIdentifier":
             return node.value;
           case "KeyValue": {
             const key =

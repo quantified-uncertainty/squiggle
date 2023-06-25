@@ -13,7 +13,7 @@ import {
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { REOther } from "../errors.js";
+import { REOther } from "../errors/messages.js";
 import * as Result from "../utility/result.js";
 import { LabeledDistribution, vPlot } from "../value/index.js";
 
@@ -52,7 +52,7 @@ export const library = [
             if (typeof value === "number") {
               const deltaResult = PointMass.make(value);
               if (deltaResult.ok === false) {
-                return Result.Err(new REOther(deltaResult.value));
+                throw new REOther(deltaResult.value);
               } else {
                 distributions.push({ name, distribution: deltaResult.value });
               }
@@ -60,16 +60,14 @@ export const library = [
               distributions.push({ name, distribution: value });
             }
           });
-          return Result.Ok(
-            vPlot({
-              type: "distributions",
-              distributions,
-              xScale: xScale ?? { type: "linear" },
-              yScale: yScale ?? { type: "linear" },
-              title: title ?? undefined,
-              showSummary: showSummary ?? true,
-            })
-          );
+          return vPlot({
+            type: "distributions",
+            distributions,
+            xScale: xScale ?? { type: "linear" },
+            yScale: yScale ?? { type: "linear" },
+            title: title ?? undefined,
+            showSummary: showSummary ?? true,
+          });
         }
       ),
     ],
@@ -95,16 +93,14 @@ export const library = [
           ),
         ],
         ([{ dist, xScale, yScale, title, showSummary }]) => {
-          return Result.Ok(
-            vPlot({
-              type: "distributions",
-              distributions: [{ distribution: dist }],
-              xScale: xScale ?? { type: "linear" },
-              yScale: yScale ?? { type: "linear" },
-              title: title ?? undefined,
-              showSummary: showSummary ?? true,
-            })
-          );
+          return vPlot({
+            type: "distributions",
+            distributions: [{ distribution: dist }],
+            xScale: xScale ?? { type: "linear" },
+            yScale: yScale ?? { type: "linear" },
+            title: title ?? undefined,
+            showSummary: showSummary ?? true,
+          });
         }
       ),
     ],
@@ -126,15 +122,13 @@ export const library = [
           ),
         ],
         ([{ fn, xScale, yScale, points }]) => {
-          return Result.Ok(
-            vPlot({
-              type: "numericFn",
-              fn,
-              xScale: xScale ?? { type: "linear" },
-              yScale: yScale ?? { type: "linear" },
-              points: points ?? undefined,
-            })
-          );
+          return vPlot({
+            type: "numericFn",
+            fn,
+            xScale: xScale ?? { type: "linear" },
+            yScale: yScale ?? { type: "linear" },
+            points: points ?? undefined,
+          });
         }
       ),
     ],
@@ -156,15 +150,13 @@ export const library = [
           ),
         ],
         ([{ fn, xScale, distXScale, points }]) => {
-          return Result.Ok(
-            vPlot({
-              type: "distFn",
-              fn,
-              xScale: xScale ?? { type: "linear" },
-              distXScale: distXScale ?? { type: "linear" },
-              points: points ?? undefined,
-            })
-          );
+          return vPlot({
+            type: "distFn",
+            fn,
+            xScale: xScale ?? { type: "linear" },
+            distXScale: distXScale ?? { type: "linear" },
+            points: points ?? undefined,
+          });
         }
       ),
     ],
@@ -187,15 +179,13 @@ export const library = [
           ),
         ],
         ([{ xDist, yDist, xScale, yScale }]) => {
-          return Result.Ok(
-            vPlot({
-              type: "scatter",
-              xDist,
-              yDist,
-              xScale: xScale ?? { type: "linear" },
-              yScale: yScale ?? { type: "linear" },
-            })
-          );
+          return vPlot({
+            type: "scatter",
+            xDist,
+            yDist,
+            xScale: xScale ?? { type: "linear" },
+            yScale: yScale ?? { type: "linear" },
+          });
         }
       ),
     ],

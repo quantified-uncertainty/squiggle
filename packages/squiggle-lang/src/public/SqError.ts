@@ -1,22 +1,41 @@
-import { IError } from "../reducer/IError.js";
+import { ICompileError, IRuntimeError } from "../errors/IError.js";
 import { Frame } from "../reducer/frameStack.js";
 
-export class SqError {
-  constructor(private _value: IError) {}
+abstract class SqAbstractError<T extends string> {
+  abstract tag: T;
+
+  abstract toString(): string;
+  abstract toStringWithDetails(): string;
+}
+
+export class SqFrame {
+  constructor(private _value: Frame) {}
+
+  name(): string {
+    return this._value.name;
+  }
+
+  location() {
+    return this._value.location;
+  }
+}
+
+export class SqRuntimeError extends SqAbstractError<"runtime"> {
+  tag = "runtime" as const;
+
+  constructor(private _value: IRuntimeError) {
+    super();
+  }
 
   toString() {
     return this._value.toString();
   }
 
-  toStringWithStackTrace() {
-    return this._value.toStringWithStackTrace();
+  toStringWithDetails() {
+    return this._value.toStringWithDetails();
   }
 
-  static createOtherError(v: string) {
-    return new SqError(IError.other(v));
-  }
-
-  getTopFrame(): SqFrame | undefined {
+  private getTopFrame(): SqFrame | undefined {
     const frame = this._value.getTopFrame();
     return frame ? new SqFrame(frame) : undefined;
   }
@@ -31,14 +50,41 @@ export class SqError {
   }
 }
 
-export class SqFrame {
-  constructor(private _value: Frame) {}
+export class SqCompileError extends SqAbstractError<"compile"> {
+  tag = "compile" as const;
 
-  name(): string {
-    return this._value.name;
+  constructor(private _value: ICompileError) {
+    super();
+  }
+
+  toString() {
+    return this._value.toString();
+  }
+
+  toStringWithDetails() {
+    return this._value.toStringWithDetails();
   }
 
   location() {
     return this._value.location;
   }
 }
+
+export class SqOtherError extends SqAbstractError<"other"> {
+  tag = "other" as const;
+
+  constructor(private _value: string) {
+    super();
+  }
+
+  toString() {
+    return this._value;
+  }
+
+  toStringWithDetails() {
+    // no details on other errors
+    return this._value;
+  }
+}
+
+export type SqError = SqRuntimeError | SqCompileError | SqOtherError;

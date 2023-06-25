@@ -1,7 +1,7 @@
-import { Namespace, NamespaceMap } from "../reducer/bindings.js";
-import { vString } from "../value/index.js";
+import { ImmutableMap } from "../utility/immutableMap.js";
+import { Value, vString } from "../value/index.js";
 
-export const makeVersionConstant = (): Namespace => {
+export function makeVersionConstant(): ImmutableMap<string, Value> {
   // TODO - generate during build based on package.json
-  return NamespaceMap([["System.version", vString("0.6.0")]]);
-};
+  return ImmutableMap([["System.version", vString("0.6.0")]]);
+}

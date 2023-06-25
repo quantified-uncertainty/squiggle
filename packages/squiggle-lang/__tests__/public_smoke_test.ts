@@ -2,55 +2,55 @@ import { run, SqProject } from "../src/index.js";
 import { testRun } from "./helpers/helpers.js";
 
 describe("Simple calculations and results", () => {
-  test("mean(normal(5,2))", () => {
-    const result = testRun("mean(normal(5,2))"); // FIXME
+  test("mean(normal(5,2))", async () => {
+    const result = await testRun("mean(normal(5,2))"); // FIXME
     expect(result.toString()).toEqual("5");
   });
-  test("10+10", () => {
-    const result = testRun("10 + 10");
+  test("10+10", async () => {
+    const result = await testRun("10 + 10");
     expect(result.toString()).toEqual("20");
   });
 });
 describe("Log function", () => {
-  test("log(1) = 0", () => {
-    const foo = testRun("log(1)");
+  test("log(1) = 0", async () => {
+    const foo = await testRun("log(1)");
     expect(foo.toString()).toEqual("0");
   });
 });
 
 describe("Array", () => {
-  test("nested Array", () => {
-    expect(testRun("[[ 1 ]]").toString()).toEqual("[[1]]");
+  test("nested Array", async () => {
+    expect((await testRun("[[ 1 ]]")).toString()).toEqual("[[1]]");
   });
 });
 
 describe("Record", () => {
-  test("Return record", () => {
-    expect(testRun("{a:1}").toString()).toEqual("{a: 1}");
+  test("Return record", async () => {
+    expect((await testRun("{a:1}")).toString()).toEqual("{a: 1}");
   });
 });
 
 describe("Continues", () => {
-  test("Bindings from continues are accessible", () => {
+  test("Bindings from continues are accessible", async () => {
     const project = SqProject.create();
     project.setSource("p1", "x = 5");
     project.setSource("p2", "y = x + 2");
     project.setSource("main", "y + 3");
     project.setContinues("main", ["p2"]);
     project.setContinues("p2", ["p1"]);
-    project.run("main");
+    await project.run("main");
     const result = project.getResult("main");
     expect(result.ok).toEqual(true);
     expect(result.value.toString()).toEqual("10");
   });
-  test("Can merge bindings from three partials", () => {
+  test("Can merge bindings from three partials", async () => {
     const project = SqProject.create();
     project.setSource("p1", "x = 1");
     project.setSource("p2", "y = 2");
     project.setSource("p3", "z = 3");
     project.setSource("main", "x + y + z");
     project.setContinues("main", ["p1", "p2", "p3"]);
-    project.run("main");
+    await project.run("main");
     const result = project.getResult("main");
     expect(result.ok).toEqual(true);
     expect(result.value.toString()).toEqual("6");
@@ -64,9 +64,9 @@ describe("Distribution", () => {
   let dist1Samples = [3, 4, 5, 6, 6, 7, 10, 15, 30];
   let dist1SampleCount = dist1Samples.length;
 
-  const buildDist = (samples: number[]) => {
+  const buildDist = async (samples: number[]) => {
     const src = `SampleSet.fromList([${samples.join(",")}])`;
-    const { result } = run(src, {
+    const { result } = await run(src, {
       environment: env,
     });
     if (!result.ok) {
@@ -81,22 +81,25 @@ describe("Distribution", () => {
     return dist.value;
   };
 
-  const dist = buildDist(dist1Samples);
-  const dist2 = buildDist([20, 22, 24, 29, 30, 35, 38, 44, 52]);
+  // const dist2 = buildDist([20, 22, 24, 29, 30, 35, 38, 44, 52]);
 
-  test("mean", () => {
+  test("mean", async () => {
+    const dist = await buildDist(dist1Samples);
     expect(dist.mean(env)).toBeCloseTo(9.5555555);
   });
-  test("pdf", () => {
+  test("pdf", async () => {
+    const dist = await buildDist(dist1Samples);
     expect(dist.pdf(env, 5.0).value).toBeCloseTo(0.10499097598222966, 1);
   });
-  test("cdf", () => {
+  test("cdf", async () => {
+    const dist = await buildDist(dist1Samples);
     expect(dist.cdf(env, 5.0).value).toBeCloseTo(
       dist1Samples.filter((x) => x <= 5).length / dist1SampleCount,
       1
     );
   });
-  test("inv", () => {
+  test("inv", async () => {
+    const dist = await buildDist(dist1Samples);
     expect(dist.inv(env, 0.5).value).toBeCloseTo(6);
   });
   // test("toPointSet", () => {

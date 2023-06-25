@@ -1,11 +1,11 @@
-import React, { useReducer } from "react";
+import React, { FC, ReactNode, useEffect, useReducer } from "react";
 
 import { SqValue } from "@quri/squiggle-lang";
 import { FocusIcon, TriangleIcon } from "@quri/ui";
 
 import {
   LocalItemSettings,
-  locationToShortName,
+  pathToShortName,
   MergedItemSettings,
 } from "./utils.js";
 import {
@@ -22,26 +22,23 @@ type SettingsMenuParams = {
 type VariableBoxProps = {
   value: SqValue;
   heading: string;
-  preview?: React.ReactNode;
-  renderSettingsMenu?: (params: SettingsMenuParams) => React.ReactNode;
-  children: (settings: MergedItemSettings) => React.ReactNode;
+  preview?: ReactNode;
+  renderSettingsMenu?: (params: SettingsMenuParams) => ReactNode;
+  children: (settings: MergedItemSettings) => ReactNode;
 };
 
-export const SqTypeWithCount = ({
-  type,
-  count,
-}: {
+export const SqTypeWithCount: FC<{
   type: string;
   count: number;
-}) => (
+}> = ({ type, count }) => (
   <div className="text-sm text-stone-400 font-mono">
     {type}
     <span className="ml-0.5">{count}</span>
   </div>
 );
 
-export const VariableBox: React.FC<VariableBoxProps> = ({
-  value: { location },
+export const VariableBox: FC<VariableBoxProps> = ({
+  value,
   heading = "Error",
   preview,
   renderSettingsMenu,
@@ -49,20 +46,31 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
 }) => {
   const setSettings = useSetSettings();
   const focus = useFocus();
-  const { getSettings, getMergedSettings } = useViewerContext();
+  const { editor, getSettings, getMergedSettings, dispatch } =
+    useViewerContext();
+
+  const findInEditor = () => {
+    const locationR = value.path?.findLocation();
+    if (!locationR?.ok) {
+      return;
+    }
+    editor?.scrollTo(locationR.value.start.offset);
+  };
 
   // Since `ViewerContext` doesn't store settings, `VariableBox` won't rerender when `setSettings` is called.
   // So we use `forceUpdate` to force rerendering.
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
-  if (!location) {
-    throw new Error("Can't display a locationless value");
+  const { path } = value;
+
+  if (!path) {
+    throw new Error("Can't display a pathless value");
   }
 
-  const settings = getSettings(location);
+  const settings = getSettings(path);
 
   const setSettingsAndUpdate = (newSettings: LocalItemSettings) => {
-    setSettings(location, newSettings);
+    setSettings(path, newSettings);
     forceUpdate();
   };
 
@@ -70,10 +78,31 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
     setSettingsAndUpdate({ ...settings, collapsed: !settings.collapsed });
   };
 
-  const name = locationToShortName(location);
+  const name = pathToShortName(path);
+
+  const saveRef = (element: HTMLDivElement) => {
+    dispatch({
+      type: "REGISTER_ITEM_HANDLE",
+      payload: {
+        path: path,
+        element,
+      },
+    });
+  };
+
+  useEffect(() => {
+    return () => {
+      dispatch({
+        type: "UNREGISTER_ITEM_HANDLE",
+        payload: {
+          path: path,
+        },
+      });
+    };
+  }, []);
 
   return (
-    <div>
+    <div ref={saveRef}>
       {name === undefined ? null : (
         <header className="flex justify-between hover:bg-stone-100 rounded-md">
           <div className="inline-flex items-center">
@@ -86,19 +115,24 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
                 className={settings.collapsed ? "rotate-90" : "rotate-180"}
               />
             </span>
-            <span className="text-stone-800 font-mono text-sm">{name}</span>
+            <span
+              className="text-stone-800 font-mono text-sm cursor-pointer"
+              onClick={findInEditor}
+            >
+              {name}
+            </span>
             {preview && <div className="ml-2">{preview}</div>}
           </div>
           <div className="inline-flex space-x-1">
-            {Boolean(!settings.collapsed && location.path.items.length) && (
+            {Boolean(!settings.collapsed && path.items.length) && (
               <div className="text-stone-400 hover:text-stone-600 text-sm">
                 {heading}
               </div>
             )}
-            {location.path.items.length ? (
+            {path.items.length ? (
               <FocusIcon
                 className="h-5 w-5 cursor-pointer text-stone-200 hover:text-stone-500"
-                onClick={() => focus(location)}
+                onClick={() => focus(path)}
               />
             ) : null}
             {!settings.collapsed &&
@@ -108,7 +142,7 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
       )}
       {settings.collapsed ? null : (
         <div className="flex w-full">
-          {location.path.items.length ? (
+          {path.items.length ? (
             <div
               className="flex group cursor-pointer"
               onClick={toggleCollapsed}
@@ -117,7 +151,7 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
               <div className="border-l border-stone-200 group-hover:border-stone-500 w-2" />
             </div>
           ) : null}
-          <div className="grow">{children(getMergedSettings(location))}</div>
+          <div className="grow">{children(getMergedSettings(path))}</div>
         </div>
       )}
     </div>

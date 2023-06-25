@@ -8,7 +8,7 @@ const toFloat32 = (v: number) => new Float32Array([v])[0];
 describe("Mean of mixture is weighted average of means", () => {
   test("mx(normal(a,b), beta(m,s), [x,y])", () => {
     fc.assert(
-      fc.property(
+      fc.asyncProperty(
         // normal mean
         fc.float({ min: toFloat32(0.1), max: 10, noNaN: true }),
         // normal stdev
@@ -31,10 +31,10 @@ describe("Mean of mixture is weighted average of means", () => {
         }),
         fc.float({ min: toFloat32(1e-7), max: 100, noNaN: true }),
         fc.float({ min: toFloat32(1e-7), max: 100, noNaN: true }),
-        (normalMean, normalStdev, betaA, betaB, x, y) => {
+        async (normalMean, normalStdev, betaA, betaB, x, y) => {
           // normaalize is due to https://github.com/quantified-uncertainty/squiggle/issues/1400 bug
           const squiggleString = `mean(mixture(normal(${normalMean},${normalStdev}), beta(${betaA},${betaB}), [${x}, ${y}])->normalize)`;
-          const res = testRun(squiggleString);
+          const res = await testRun(squiggleString);
           const weightDenom = x + y;
           const normalWeight = x / weightDenom;
           const betaWeight = y / weightDenom;
@@ -62,9 +62,9 @@ describe("Discrete", () => {
   testEvalToBe("mx(3,5,normal(5,2), [1,1,0]) -> inv(0.3)", "3");
   testEvalToBe("mx(3,5,normal(5,2), [1,1,0]) -> inv(0.7)", "5");
 
-  test("sample", () => {
+  test("sample", async () => {
     for (let i = 0; i < 100; i++) {
-      const res = testRun("mx(3,5) -> sample");
+      const res = await testRun("mx(3,5) -> sample");
       if (res.tag !== "Number") {
         throw new Error(`Expected number result, got: ${res.tag}`);
       }

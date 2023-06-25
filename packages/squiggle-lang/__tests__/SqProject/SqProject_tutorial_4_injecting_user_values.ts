@@ -6,7 +6,7 @@ describe("SqProject Tutorial", () => {
   const project = SqProject.create();
   project.setSource("main", "x+y+z");
   /* x, y and z is not defined in the project but they has to come from the user */
-  test("Injecting user values", () => {
+  test("Injecting user values", async () => {
     /* User has input the values */
     const x = 1;
     const y = 2;
@@ -22,7 +22,7 @@ describe("SqProject Tutorial", () => {
     /* "main" is depending on the user code */
     project.setContinues("main", ["userCode"]);
     /* We can now run the project */
-    project.runAll();
+    await project.runAll();
     let result = project.getResult("main");
     expect(toStringResult(result)).toBe("Ok(6)");
   });

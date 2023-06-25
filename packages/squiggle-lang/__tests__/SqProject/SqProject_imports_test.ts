@@ -40,7 +40,7 @@ x=1`
 });
 
 describe("Unknown imports", () => {
-  test("run", () => {
+  test("run", async () => {
     const project = SqProject.create({ resolver: (name) => name });
     project.setSource(
       "main",
@@ -49,7 +49,7 @@ import './lib' as lib
 123`
     );
 
-    project.run("main");
+    await project.run("main");
 
     expect(project.getResult("main").ok).toEqual(false);
   });

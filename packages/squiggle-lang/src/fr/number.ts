@@ -8,22 +8,23 @@ import * as Result from "../utility/result.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
 import { Ok } from "../utility/result.js";
 import { Value, vArray, vNumber } from "../value/index.js";
-import { ErrorMessage, REOther } from "../errors.js";
+import { ErrorMessage, REOther } from "../errors/messages.js";
 
 const maker = new FnFactory({
   nameSpace: "Number",
   requiresNamespace: false,
 });
 
-const emptyList = (): Result.result<Value, ErrorMessage> =>
-  Result.Err(new REOther("List is empty"));
+const throwEmptyList = (): never => {
+  throw new REOther("List is empty");
+};
 
 function makeNumberArrayToNumberDefinition(fn: (arr: number[]) => number) {
   return makeDefinition([frArray(frNumber)], ([arr]) => {
     if (arr.length === 0) {
-      return emptyList();
+      return throwEmptyList();
     }
-    return Ok(vNumber(fn(arr)));
+    return vNumber(fn(arr));
   });
 }
 
@@ -32,9 +33,9 @@ function makeNumberArrayToNumberArrayDefinition(
 ) {
   return makeDefinition([frArray(frNumber)], ([arr]) => {
     if (arr.length === 0) {
-      return emptyList();
+      return throwEmptyList();
     }
-    return Ok(vArray(fn(arr).map(vNumber)));
+    return vArray(fn(arr).map(vNumber));
   });
 }
 

@@ -7,7 +7,7 @@ import {
   SqLambdaValue,
 } from "./public/SqValue.js"; // TODO - reexport other values too
 
-export { SqValueLocation } from "./public/SqValueLocation.js";
+export { SqValuePath } from "./public/SqValuePath.js";
 export { result, fmap as resultMap } from "./utility/result.js";
 export {
   SqAbstractDistribution,
@@ -20,7 +20,13 @@ export {
 export { SqDistributionError } from "./public/SqDistributionError.js";
 export { SqRecord } from "./public/SqRecord.js";
 export { SqLambda } from "./public/SqLambda.js";
-export { SqError, SqFrame } from "./public/SqError.js";
+export {
+  SqError,
+  SqRuntimeError,
+  SqCompileError,
+  SqOtherError,
+  SqFrame,
+} from "./public/SqError.js";
 export { SqShape } from "./public/SqPointSet.js";
 export {
   SqPlot,
@@ -37,7 +43,7 @@ export {
   SqSymlogScale,
   SqPowerScale,
 } from "./public/SqScale.js";
-export { SqParseError, parse } from "./public/parse.js";
+export { parse } from "./public/parse.js";
 
 export { defaultEnv as defaultEnvironment } from "./dist/env.js";
 export { SqProject, SqValue, SqStringValue, SqNumberValue, SqLambdaValue };
@@ -47,22 +53,22 @@ export { LocationRange as SqLocation } from "peggy";
 export { AST, ASTNode } from "./ast/parse.js";
 export { ASTCommentNode } from "./ast/peggyHelpers.js";
 
-export const run = (
+export async function run(
   code: string,
   options?: {
     environment?: Env;
   }
-) => {
+) {
   const project = SqProject.create();
   project.setSource("main", code);
   if (options?.environment) {
     project.setEnvironment(options.environment);
   }
-  project.run("main");
+  await project.run("main");
   const result = project.getResult("main");
   const bindings = project.getBindings("main");
   return { result, bindings };
-};
+}
 
 // can be used for syntax highlighting in JS/TS files if you have Squiggle VS Code extension installed.
 export function sq(strings: TemplateStringsArray, ...rest: unknown[]) {

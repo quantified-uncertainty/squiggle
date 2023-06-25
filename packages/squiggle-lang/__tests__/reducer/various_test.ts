@@ -30,7 +30,9 @@ describe("eval", () => {
   });
 
   describe("arrays", () => {
-    test("empty array", () => expectEvalToBe("[]", "[]"));
+    test("empty array", async () => {
+      await expectEvalToBe("[]", "[]");
+    });
     testEvalToBe("[1, 2, 3]", "[1,2,3]");
     testEvalToBe("['hello', 'world']", "['hello','world']");
     testEvalToBe("([0,1,2])[1]", "1");
@@ -39,9 +41,9 @@ describe("eval", () => {
       "([0,1,2])[10]",
       "Error(Array index not found: 10)"
     );
-    test("trailing comma", () => {
-      expectEvalToBe(`[3,4,]`, "[3,4]");
-      expectEvalToBe(
+    test("trailing comma", async () => {
+      await expectEvalToBe(`[3,4,]`, "[3,4]");
+      await expectEvalToBe(
         `[
         3,
         4,
@@ -51,14 +53,18 @@ describe("eval", () => {
     });
   });
   describe("records", () => {
-    test("empty", () => expectEvalToBe("{}", "{}"));
-    test("define", () => expectEvalToBe("{a: 1, b: 2}", "{a: 1,b: 2}"));
-    test("index", () => expectEvalToBe("r = {a: 1}; r.a", "1"));
-    test("index", () =>
-      expectEvalToBe("r = {a: 1}; r.b", "Error(Record property not found: b)"));
+    test("empty", async () => await expectEvalToBe("{}", "{}"));
+    test("define", async () =>
+      await expectEvalToBe("{a: 1, b: 2}", "{a: 1,b: 2}"));
+    test("index", async () => await expectEvalToBe("r = {a: 1}; r.a", "1"));
+    test("index", async () =>
+      await expectEvalToBe(
+        "r = {a: 1}; r.b",
+        "Error(Record property not found: b)"
+      ));
     testEvalError("{a: 1}.b"); // invalid syntax
-    test("trailing comma", () =>
-      expectEvalToBe(
+    test("trailing comma", async () =>
+      await expectEvalToBe(
         `{
       a: 1, 
       b: 2,
@@ -114,8 +120,8 @@ describe("test exceptions", () => {
 });
 
 describe("stacktraces", () => {
-  test("nested calls", () => {
-    const result = evaluateStringToResult(`
+  test("nested calls", async () => {
+    const result = await evaluateStringToResult(`
   f(x) = {
     y = "a"
     x + y
@@ -127,7 +133,7 @@ describe("stacktraces", () => {
     if (result.ok) {
       throw new Error("Expected code to fail");
     }
-    const error = result.value.toStringWithStackTrace();
+    const error = result.value.toStringWithDetails();
 
     expect(error).toBe(
       `Error: There are function matches for add(), but with different arguments:

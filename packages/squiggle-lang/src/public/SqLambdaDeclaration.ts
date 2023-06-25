@@ -1,22 +1,14 @@
 import { LambdaDeclaration } from "../reducer/declaration.js";
 import { SqLambda } from "./SqLambda.js";
-import { SqValueLocation } from "./SqValueLocation.js";
+import { SqValuePath } from "./SqValuePath.js";
 
 export class SqLambdaDeclaration {
-  constructor(
-    private _value: LambdaDeclaration,
-    public location?: SqValueLocation
-  ) {}
+  constructor(private _value: LambdaDeclaration, public path?: SqValuePath) {}
 
   get fn() {
     return new SqLambda(
       this._value.fn,
-      this.location
-        ? new SqValueLocation(this.location.project, this.location.sourceId, {
-            ...this.location.path,
-            items: [...this.location.path.items, "fn"],
-          })
-        : undefined
+      this.path ? this.path.extend("fn") : undefined
     );
   }
 

@@ -40,11 +40,11 @@ export const library = [
     definitions: [
       makeDefinition([frNumber], ([x]) => {
         // unary prefix !
-        return Ok(vBool(x !== 0));
+        return vBool(x !== 0);
       }),
       makeDefinition([frBool], ([x]) => {
         // unary prefix !
-        return Ok(vBool(!x));
+        return vBool(!x);
       }),
     ],
   }),
@@ -52,13 +52,13 @@ export const library = [
     name: "concat",
     definitions: [
       makeDefinition([frString, frString], ([a, b]) => {
-        return Ok(vString(a + b));
+        return vString(a + b);
       }),
       makeDefinition([frArray(frAny), frArray(frAny)], ([a, b]) => {
-        return Ok(vArray([...a, ...b]));
+        return vArray([...a, ...b]);
       }),
       makeDefinition([frString, frAny], ([a, b]) => {
-        return Ok(vString(a + b.toString()));
+        return vString(a + b.toString());
       }),
     ],
   }),
@@ -66,7 +66,7 @@ export const library = [
     name: "add",
     definitions: [
       makeDefinition([frString, frAny], ([a, b]) => {
-        return Ok(vString(a + b.toString()));
+        return vString(a + b.toString());
       }),
     ],
   }),
@@ -75,11 +75,11 @@ export const library = [
     definitions: [
       makeDefinition([frAny], ([value]) => {
         console.log(value.toString());
-        return Ok(value);
+        return value;
       }),
       makeDefinition([frAny, frString], ([value, label]) => {
         console.log(`${label}: ${value.toString()}`);
-        return Ok(value);
+        return value;
       }),
     ],
   }),
