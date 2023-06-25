@@ -19,8 +19,8 @@ import { AdjustmentsVerticalIcon, Bars3CenterLeftIcon, Button } from "@quri/ui";
 
 import {
   useInitialWidth,
-  useMaybeControlledCode,
   useSquiggle,
+  useUncontrolledCode,
 } from "../../lib/hooks/index.js";
 import { getErrors, getValueToRender, isMac } from "../../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "../CodeEditor.js";
@@ -69,7 +69,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     height = 500,
     showEditor = true,
   } = props;
-  const [code, setCode] = useMaybeControlledCode(props);
+  const [code, setCode] = useUncontrolledCode(props);
   const { ref: fullContainerRef, width: initialWidth } = useInitialWidth();
 
   const defaultValues: PlaygroundSettings = merge(

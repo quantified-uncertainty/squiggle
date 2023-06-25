@@ -21,7 +21,7 @@ test("Chart logs nothing on render", async () => {
 });
 
 test("Editor logs nothing on render", async () => {
-  const { unmount } = render(<SquiggleEditor code="normal(0, 1)" />);
+  const { unmount } = render(<SquiggleEditor defaultCode="normal(0, 1)" />);
   unmount();
 
   /* eslint-disable no-console */
@@ -37,7 +37,11 @@ test("Project dependencies work in editors", async () => {
   project.setSource("depend", "x = 123");
 
   const rendered = render(
-    <SquiggleEditor code="x + 456" project={project} continues={["depend"]} />
+    <SquiggleEditor
+      defaultCode="x + 456"
+      project={project}
+      continues={["depend"]}
+    />
   );
 
   await waitFor(() => expect(project.getSourceIds().length).toBe(2));
@@ -53,7 +57,7 @@ test("Project dependencies work in playgrounds", async () => {
 
   const rendered = render(
     <SquigglePlayground
-      code="x + 456"
+      defaultCode="x + 456"
       project={project}
       continues={["depend"]}
     />

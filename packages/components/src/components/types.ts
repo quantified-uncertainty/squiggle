@@ -1,21 +1,12 @@
 import { SqProject } from "@quri/squiggle-lang";
 
-export type SquiggleCodeProps = (
+export type SquiggleCodeProps = {
+  defaultCode?: string;
+  onCodeChange?(code: string): void;
+} & (
   | {
-      code: string;
-      defaultCode?: undefined;
-      onCodeChange?: undefined; // not compatible with `code`
+      project: SqProject;
+      continues?: string[];
     }
-  | {
-      defaultCode?: string;
-      code?: undefined;
-      onCodeChange?(expr: string): void;
-    }
-) &
-  (
-    | {
-        project: SqProject;
-        continues?: string[];
-      }
-    | object
-  );
+  | object
+);

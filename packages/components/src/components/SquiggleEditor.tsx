@@ -1,18 +1,18 @@
 import { FC, useMemo } from "react";
 
-import { useMaybeControlledCode } from "../lib/hooks/index.js";
 import { useSquiggle } from "../lib/hooks/useSquiggle.js";
 import { getErrors, getValueToRender } from "../lib/utility.js";
 import { CodeEditor } from "./CodeEditor.js";
 import { SquiggleViewer, SquiggleViewerProps } from "./SquiggleViewer/index.js";
 import { SquiggleCodeProps } from "./types.js";
+import { useUncontrolledCode } from "../lib/hooks/index.js";
 
 export type SquiggleEditorProps = SquiggleCodeProps & {
   hideViewer?: boolean;
 } & Omit<SquiggleViewerProps, "result">;
 
 export const SquiggleEditor: FC<SquiggleEditorProps> = (props) => {
-  const [code, setCode] = useMaybeControlledCode(props);
+  const [code, setCode] = useUncontrolledCode(props);
 
   const [squiggleOutput, { project }] = useSquiggle({ ...props, code });
 
