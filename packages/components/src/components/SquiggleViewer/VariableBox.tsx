@@ -24,7 +24,7 @@ type SettingsMenuParams = {
   onChange: () => void;
 };
 
-type VariableBoxProps = {
+export type VariableBoxProps = {
   value: SqValue;
   heading: string;
   preview?: ReactNode;
@@ -36,7 +36,7 @@ export const SqTypeWithCount: FC<{
   type: string;
   count: number;
 }> = ({ type, count }) => (
-  <div className="text-sm text-stone-400 font-mono">
+  <div>
     {type}
     <span className="ml-0.5">{count}</span>
   </div>
@@ -178,7 +178,9 @@ export const VariableBox: FC<VariableBoxProps> = ({
               {name}
             </span>
             {shouldShowLeftHeaderPreview && (
-              <div className="ml-2">{preview}</div>
+              <div className="ml-2 text-sm text-stone-400 font-mono">
+                {preview}
+              </div>
             )}
             {shouldShowRightHeaderFindInEditor && (
               <div className="ml-3">

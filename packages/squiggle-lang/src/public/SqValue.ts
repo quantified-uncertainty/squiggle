@@ -57,6 +57,14 @@ export abstract class SqAbstractValue<T extends string, J> {
     return this._value.toString();
   }
 
+  //Creates a new element, to be immutable
+  withPath(path: SqValuePath) {
+    const newInstance = Object.create(Object.getPrototypeOf(this));
+    Object.assign(newInstance, this);
+    newInstance.path = path;
+    return newInstance;
+  }
+
   abstract asJS(): J;
 }
 
