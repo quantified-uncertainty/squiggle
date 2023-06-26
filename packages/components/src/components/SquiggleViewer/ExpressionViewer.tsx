@@ -26,9 +26,15 @@ const VariableList: React.FC<{
   value: SqValue;
   heading: string;
   preview?: React.ReactNode;
+  childrenLength: number;
   children: (settings: MergedItemSettings) => React.ReactNode;
-}> = ({ value, heading, children, preview }) => (
-  <VariableBox value={value} preview={preview} heading={heading}>
+}> = ({ value, heading, childrenLength, children, preview }) => (
+  <VariableBox
+    value={value}
+    preview={preview}
+    heading={heading}
+    childrenLength={childrenLength}
+  >
     {(settings) => (
       <div
         className={clsx(
@@ -252,6 +258,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
           value={value}
           heading={`Record(${entries.length})`}
           preview={<SqTypeWithCount type="{}" count={entries.length} />}
+          childrenLength={entries.length}
         >
           {() => {
             if (!entries.length) {
@@ -266,11 +273,13 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
     }
     case "Array": {
       const values = value.value.getValues();
+      const length = values.length;
       return (
         <VariableList
           value={value}
-          heading={`List(${values.length})`}
-          preview={<SqTypeWithCount type="[]" count={values.length} />}
+          childrenLength={length}
+          heading={`List(${length})`}
+          preview={<SqTypeWithCount type="[]" count={length} />}
         >
           {() => values.map((r, i) => <ExpressionViewer key={i} value={r} />)}
         </VariableList>
@@ -278,7 +287,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
     }
     default: {
       return (
-        <VariableList value={value} heading="Error">
+        <VariableList value={value} heading="Error" childrenLength={0}>
           {() => (
             <div>
               <span>No display for type: </span>{" "}

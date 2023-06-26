@@ -62,8 +62,20 @@ type ViewerContextShape = {
   // Note that we don't store settings themselves in the context (that would cause rerenders of the entire tree on each settings update).
   // Instead, we keep settings in local state and notify the global context via setSettings to pass them down the component tree again if it got rebuilt from scratch.
   // See ./SquiggleViewer.tsx and ./VariableBox.tsx for other implementation details on this.
-  getSettings(path: SqValuePath): LocalItemSettings;
-  getMergedSettings(path: SqValuePath): MergedItemSettings;
+  getSettings({
+    path,
+    defaults,
+  }: {
+    path: SqValuePath;
+    defaults?: LocalItemSettings;
+  }): LocalItemSettings;
+  getMergedSettings({
+    path,
+    defaults,
+  }: {
+    path: SqValuePath;
+    defaults?: LocalItemSettings;
+  }): MergedItemSettings;
   localSettingsEnabled: boolean; // show local settings icon in the UI
   focused?: SqValuePath;
   editor?: CodeEditorHandle;
@@ -138,17 +150,27 @@ export const ViewerProvider: FC<
   }, [partialPlaygroundSettings]);
 
   const getSettings = useCallback(
-    (location: SqValuePath) => {
-      return (
-        settingsStoreRef.current[pathAsString(location)] || defaultLocalSettings
-      );
+    ({
+      path,
+      defaults = defaultLocalSettings,
+    }: {
+      path: SqValuePath;
+      defaults?: LocalItemSettings;
+    }) => {
+      return settingsStoreRef.current[pathAsString(path)] || defaults;
     },
     [settingsStoreRef]
   );
 
   const getMergedSettings = useCallback(
-    (location: SqValuePath) => {
-      const localSettings = getSettings(location);
+    ({
+      path,
+      defaults = defaultLocalSettings,
+    }: {
+      path: SqValuePath;
+      defaults?: LocalItemSettings;
+    }) => {
+      const localSettings = getSettings({ path, defaults });
       const result: MergedItemSettings = merge(
         {},
         globalSettings,

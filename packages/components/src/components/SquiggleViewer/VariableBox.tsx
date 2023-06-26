@@ -26,6 +26,7 @@ type VariableBoxProps = {
   value: SqValue;
   heading: string;
   preview?: ReactNode;
+  childrenLength?: number;
   renderSettingsMenu?: (params: SettingsMenuParams) => ReactNode;
   children: (settings: MergedItemSettings) => ReactNode;
 };
@@ -45,6 +46,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
   heading = "Error",
   preview,
   renderSettingsMenu,
+  childrenLength = 0,
   children,
 }) => {
   const setSettings = useSetSettings();
@@ -73,10 +75,11 @@ export const VariableBox: FC<VariableBoxProps> = ({
 
   const isFocused = path && useIsFocused(path);
 
-  const settings = getSettings(path);
+  const defaults: LocalItemSettings = { collapsed: childrenLength > 9 };
+  const settings = getSettings({ path, defaults });
 
   const getAdjustedMergedSettings = (path: SqValuePath) => {
-    const mergedSettings = getMergedSettings(path);
+    const mergedSettings = getMergedSettings({ path });
     const { chartHeight } = mergedSettings;
     return {
       ...mergedSettings,

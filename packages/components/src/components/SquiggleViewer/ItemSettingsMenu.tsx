@@ -39,7 +39,7 @@ const ItemSettingsModal: React.FC<
   const setSettings = useSetSettings();
   const { getSettings, getMergedSettings } = useViewerContext();
 
-  const mergedSettings = getMergedSettings(value.path!);
+  const mergedSettings = getMergedSettings({ path: value.path! });
 
   const form = useForm({
     resolver: zodResolver(viewSettingsSchema),
@@ -105,7 +105,7 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
   if (!localSettingsEnabled) {
     return null;
   }
-  const settings = getSettings(props.value.path!);
+  const settings = getSettings({ path: props.value.path! });
 
   const resetScroll = () => {
     if (!props.value.path) {
