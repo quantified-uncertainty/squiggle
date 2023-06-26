@@ -27,6 +27,18 @@ export const Slow: Story = {
   },
 };
 
+export const WithNestedResult: Story = {
+  name: "Nested  Code",
+  args: {
+    defaultCode: `a = normal(5,2)
+b = a + 4
+c = a + 2
+d = {e: {f: {g1: a, g2: b, g3: {h: {i: a}}}}}
+    `,
+    height: 800,
+  },
+};
+
 export const RelativeValues: Story = {
   name: "RelativeValues plot",
   args: {

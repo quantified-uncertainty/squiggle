@@ -1,7 +1,7 @@
 import React, { FC, ReactNode, useEffect, useReducer } from "react";
 
 import { SqValue } from "@quri/squiggle-lang";
-import { FocusIcon, TriangleIcon } from "@quri/ui";
+import { TriangleIcon, CodeBracketIcon, TextTooltip } from "@quri/ui";
 
 import {
   LocalItemSettings,
@@ -65,6 +65,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
   const { path } = value;
+  const isRoot = Boolean(path?.isRoot());
 
   if (!path) {
     throw new Error("Can't display a pathless value");
@@ -116,17 +117,28 @@ export const VariableBox: FC<VariableBoxProps> = ({
   }, []);
 
   const isCollapsed = isFocused ? false : settings.collapsed;
+  const shouldShowTriangleToggle = !isFocused;
+  const shouldShowLeftHeaderPreview = !isFocused && !!preview;
+  const shouldShowRightHeaderString = Boolean(
+    !settings.collapsed && path.items.length
+  );
+  const shouldShowRightHeaderFindInEditor = !isRoot;
+  const showOpenedLeftSidebar = Boolean(
+    !isCollapsed && path.items.length && !isFocused
+  );
+  const _focus = () => !isFocused && path.items.length && focus(path);
+
   return (
     <div ref={saveRef}>
       {name === undefined ? null : (
         <header
           className={clsx(
-            "flex justify-between",
+            "flex justify-between group",
             isFocused ? "mb-2" : "hover:bg-stone-100 rounded-md"
           )}
         >
           <div className="inline-flex items-center">
-            {!isFocused && (
+            {shouldShowTriangleToggle && (
               <span
                 className="cursor-pointer p-1 mr-1 text-stone-300 hover:text-slate-700"
                 onClick={toggleCollapsed}
@@ -144,38 +156,40 @@ export const VariableBox: FC<VariableBoxProps> = ({
                   ? "text-md text-stone-900 ml-1"
                   : "text-sm text-stone-800 cursor-pointer hover:underline"
               )}
-              onClick={() => !isFocused && path.items.length && focus(path)}
+              onClick={_focus}
             >
               {name}
             </span>
-            {/* <span
-              className="text-stone-800 font-mono text-sm cursor-pointer"
-              onClick={findInEditor}
-            >
-              {name}
-            </span> */}
-            {!isFocused && !!preview && <div className="ml-2">{preview}</div>}
+            {shouldShowLeftHeaderPreview && (
+              <div className="ml-2">{preview}</div>
+            )}
+            {shouldShowRightHeaderFindInEditor && (
+              <div className="ml-2">
+                <TextTooltip text="Show in Editor" placement="bottom">
+                  <span>
+                    <CodeBracketIcon
+                      className="hidden items-center h-4 w-4 cursor-pointer text-stone-300 hover:text-stone-800 group-hover:flex"
+                      onClick={findInEditor}
+                    />
+                  </span>
+                </TextTooltip>
+              </div>
+            )}
           </div>
           <div className="inline-flex space-x-1">
-            {Boolean(!settings.collapsed && path.items.length) && (
+            {shouldShowRightHeaderString && (
               <div className="text-stone-400 hover:text-stone-600 text-sm">
                 {heading}
               </div>
             )}
-            {path.items.length ? (
-              <FocusIcon
-                className="h-5 w-5 cursor-pointer text-stone-200 hover:text-stone-500"
-                onClick={() => focus(path)}
-              />
-            ) : null}
             {!settings.collapsed &&
               renderSettingsMenu?.({ onChange: forceUpdate })}
           </div>
         </header>
       )}
-      {isCollapsed ? null : (
+      {!isCollapsed && (
         <div className="flex w-full">
-          {path.items.length && !isFocused ? (
+          {showOpenedLeftSidebar && (
             <div
               className="flex group cursor-pointer"
               onClick={toggleCollapsed}
@@ -183,7 +197,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
               <div className="p-1" />
               <div className="border-l border-stone-200 group-hover:border-stone-500 w-2" />
             </div>
-          ) : null}
+          )}
           {isFocused && <div className="w-2" />}
           <div className="grow">
             {children(getAdjustedMergedSettings(path))}

@@ -123,4 +123,8 @@ export class SqValuePath {
         })
     );
   }
+
+  isRoot() {
+    return this.items.length === 0;
+  }
 }

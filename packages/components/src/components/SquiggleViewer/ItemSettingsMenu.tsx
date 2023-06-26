@@ -4,7 +4,7 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
 import { SqValue } from "@quri/squiggle-lang";
-import { Modal } from "@quri/ui";
+import { Modal, TextTooltip } from "@quri/ui";
 
 import {
   MetaSettings,
@@ -121,10 +121,12 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
 
   return (
     <div className="flex gap-2" ref={ref}>
-      <CogIcon
-        className="h-5 w-5 cursor-pointer text-stone-300 hover:text-stone-500"
-        onClick={() => setIsOpen(!isOpen)}
-      />
+      <TextTooltip text="Settings" placement="bottom">
+        <CogIcon
+          className="h-5 w-5 cursor-pointer text-stone-300 hover:text-stone-500"
+          onClick={() => setIsOpen(!isOpen)}
+        />
+      </TextTooltip>
       {settings.distributionChartSettings ? (
         <button
           onClick={() => {
