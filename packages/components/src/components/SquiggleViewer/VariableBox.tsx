@@ -164,12 +164,12 @@ export const VariableBox: FC<VariableBoxProps> = ({
               <div className="ml-2">{preview}</div>
             )}
             {shouldShowRightHeaderFindInEditor && (
-              <div className="ml-2">
+              <div className="ml-3">
                 <TextTooltip text="Show in Editor" placement="bottom">
                   <span>
                     <CodeBracketIcon
-                      className="hidden items-center h-4 w-4 cursor-pointer text-stone-300 hover:text-stone-800 group-hover:flex"
-                      onClick={findInEditor}
+                      className={`items-center h-4 w-4 cursor-pointer text-stone-200  group-hover:text-stone-400 hover:!text-stone-800 transition`}
+                      onClick={() => findInEditor()}
                     />
                   </span>
                 </TextTooltip>
@@ -178,7 +178,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
           </div>
           <div className="inline-flex space-x-1">
             {shouldShowRightHeaderString && (
-              <div className="text-stone-400 hover:text-stone-600 text-sm">
+              <div className="text-stone-400 group-hover:text-stone-600 text-sm">
                 {heading}
               </div>
             )}

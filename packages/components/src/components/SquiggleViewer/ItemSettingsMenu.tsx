@@ -123,7 +123,7 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
     <div className="flex gap-2" ref={ref}>
       <TextTooltip text="Settings" placement="bottom">
         <CogIcon
-          className="h-5 w-5 cursor-pointer text-stone-300 hover:text-stone-500"
+          className="h-5 w-5 cursor-pointer text-stone-100 hover:!text-stone-500 group-hover:text-stone-400 transition"
           onClick={() => setIsOpen(!isOpen)}
         />
       </TextTooltip>
