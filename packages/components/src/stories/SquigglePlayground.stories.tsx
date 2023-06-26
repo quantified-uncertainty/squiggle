@@ -68,12 +68,3 @@ export const WithExtraControls: Story = {
     ),
   },
 };
-
-export const WithoutEditor: Story = {
-  name: "Without an editor (e.g. for VS Code environment)",
-  args: {
-    defaultCode: "normal(5,2)",
-    height: 800,
-    showEditor: false,
-  },
-};
