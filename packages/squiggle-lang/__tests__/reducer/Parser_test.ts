@@ -2,7 +2,7 @@ import { testRun } from "../helpers/helpers.js";
 import * as fc from "fast-check";
 
 describe("Squiggle's parser is whitespace insensitive", () => {
-  test("when assigning a distribution to a name and calling that name", () => {
+  test("when assigning a distribution to a name and calling that name", async () => {
     // intersperse varying amounts of whitespace in a squiggle string
     let squiggleString = (
       a: string,
@@ -16,7 +16,7 @@ describe("Squiggle's parser is whitespace insensitive", () => {
     ): string => {
       return `theDist${a}=${b}beta(${c}4${d},${e}5e1)${f};${g}theDist${h}`;
     };
-    let squiggleOutput = testRun(
+    let squiggleOutput = await testRun(
       squiggleString("", "", "", "", "", "", "", "")
     );
 
@@ -26,7 +26,7 @@ describe("Squiggle's parser is whitespace insensitive", () => {
     };
 
     fc.assert(
-      fc.property(
+      fc.asyncProperty(
         whitespaceGen(),
         whitespaceGen(),
         whitespaceGen(),
@@ -35,9 +35,9 @@ describe("Squiggle's parser is whitespace insensitive", () => {
         whitespaceGen(),
         whitespaceGen(),
         whitespaceGen(),
-        (a, b, c, d, e, f, g, h) => {
+        async (a, b, c, d, e, f, g, h) => {
           expect(
-            testRun(squiggleString(a, b, c, d, e, f, g, h))
+            await testRun(squiggleString(a, b, c, d, e, f, g, h))
           ).toEqualSqValue(squiggleOutput);
         }
       )

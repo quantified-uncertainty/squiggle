@@ -12,7 +12,7 @@ import { Ok } from "../utility/result.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { vArray, vRecord, vString, Value } from "../value/index.js";
 import * as Result from "../utility/result.js";
-import { REOther } from "../errors.js";
+import { REOther } from "../errors/messages.js";
 
 const maker = new FnFactory({
   nameSpace: "Dict",
@@ -26,7 +26,7 @@ export const library = [
     examples: [`Dict.set({a: 1, b: 2}, "c", 3)`],
     definitions: [
       makeDefinition([frDict(frAny), frString, frAny], ([dict, key, value]) =>
-        Ok(vRecord(dict.set(key, value)))
+        vRecord(dict.set(key, value))
       ),
     ],
   }),
@@ -36,7 +36,7 @@ export const library = [
     examples: [`Dict.merge({a: 1, b: 2}, {c: 3, d: 4})`],
     definitions: [
       makeDefinition([frDict(frAny), frDict(frAny)], ([d1, d2]) =>
-        Ok(vRecord(ImmutableMap([...d1.entries(), ...d2.entries()])))
+        vRecord(ImmutableMap([...d1.entries(), ...d2.entries()]))
       ),
     ],
   }),
@@ -46,7 +46,7 @@ export const library = [
     examples: [`Dict.mergeMany([{a: 1, b: 2}, {c: 3, d: 4}])`],
     definitions: [
       makeDefinition([frArray(frDict(frAny))], ([dicts]) =>
-        Ok(vRecord(ImmutableMap(dicts.map((d) => [...d.entries()]).flat())))
+        vRecord(ImmutableMap(dicts.map((d) => [...d.entries()]).flat()))
       ),
     ],
   }),
@@ -56,7 +56,7 @@ export const library = [
     examples: [`Dict.keys({a: 1, b: 2})`],
     definitions: [
       makeDefinition([frDict(frAny)], ([d1]) =>
-        Ok(vArray([...d1.keys()].map((k) => vString(k))))
+        vArray([...d1.keys()].map((k) => vString(k)))
       ),
     ],
   }),
@@ -65,7 +65,7 @@ export const library = [
     output: "Array",
     examples: [`Dict.values({a: 1, b: 2})`],
     definitions: [
-      makeDefinition([frDict(frAny)], ([d1]) => Ok(vArray([...d1.values()]))),
+      makeDefinition([frDict(frAny)], ([d1]) => vArray([...d1.values()])),
     ],
   }),
   maker.make({
@@ -74,7 +74,7 @@ export const library = [
     examples: [`Dict.toList({a: 1, b: 2})`],
     definitions: [
       makeDefinition([frDict(frAny)], ([dict]) =>
-        Ok(vArray([...dict.entries()].map(([k, v]) => vArray([vString(k), v]))))
+        vArray([...dict.entries()].map(([k, v]) => vArray([vString(k), v])))
       ),
     ],
   }),
@@ -84,7 +84,7 @@ export const library = [
     examples: [`Dict.fromList([["a", 1], ["b", 2]])`],
     definitions: [
       makeDefinition([frArray(frTuple2(frString, frAny))], ([items]) =>
-        Ok(vRecord(ImmutableMap(items)))
+        vRecord(ImmutableMap(items))
       ),
     ],
   }),
@@ -93,21 +93,16 @@ export const library = [
     output: "Record",
     examples: [`Dict.map({a: 1, b: 2}, {|x| x + 1})`],
     definitions: [
-      makeDefinition(
-        [frDict(frAny), frLambda],
-        ([dict, lambda], context, reducer) => {
-          return Ok(
-            vRecord(
-              ImmutableMap(
-                [...dict.entries()].map(([key, value]) => {
-                  const mappedValue = lambda.call([value], context, reducer);
-                  return [key, mappedValue];
-                })
-              )
-            )
-          );
-        }
-      ),
+      makeDefinition([frDict(frAny), frLambda], ([dict, lambda], context) => {
+        return vRecord(
+          ImmutableMap(
+            [...dict.entries()].map(([key, value]) => {
+              const mappedValue = lambda.call([value], context);
+              return [key, mappedValue];
+            })
+          )
+        );
+      }),
     ],
   }),
   maker.make({
@@ -115,24 +110,19 @@ export const library = [
     output: "Record",
     examples: [`Dict.mapKeys({a: 1, b: 2}, {|x| concat(x, "-1")})`],
     definitions: [
-      makeDefinition(
-        [frDict(frAny), frLambda],
-        ([dict, lambda], context, reducer) => {
-          const mappedEntries: [string, Value][] = [];
-          for (const [key, value] of dict.entries()) {
-            const mappedKey = lambda.call([vString(key)], context, reducer);
+      makeDefinition([frDict(frAny), frLambda], ([dict, lambda], context) => {
+        const mappedEntries: [string, Value][] = [];
+        for (const [key, value] of dict.entries()) {
+          const mappedKey = lambda.call([vString(key)], context);
 
-            if (mappedKey.type == "String") {
-              mappedEntries.push([mappedKey.value, value]);
-            } else {
-              return Result.Err(
-                new REOther("mapKeys: lambda must return a string")
-              );
-            }
+          if (mappedKey.type == "String") {
+            mappedEntries.push([mappedKey.value, value]);
+          } else {
+            throw new REOther("mapKeys: lambda must return a string");
           }
-          return Ok(vRecord(ImmutableMap(mappedEntries)));
         }
-      ),
+        return vRecord(ImmutableMap(mappedEntries));
+      }),
     ],
   }),
 ];

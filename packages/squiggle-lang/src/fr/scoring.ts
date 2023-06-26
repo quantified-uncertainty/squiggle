@@ -8,7 +8,7 @@ import {
   frRecord,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { REDistributionError, REOther } from "../errors.js";
+import { REDistributionError, REOther } from "../errors/messages.js";
 import * as Result from "../utility/result.js";
 import { vNumber } from "../value/index.js";
 
@@ -23,11 +23,16 @@ const runScoringScalarAnswer = (
   prior: BaseDist | undefined,
   env: Env
 ) => {
-  return Result.fmap2(
-    distOperations.logScoreScalarAnswer({ estimate, answer, prior, env }),
-    vNumber,
-    (e) => new REDistributionError(e)
-  );
+  const result = distOperations.logScoreScalarAnswer({
+    estimate,
+    answer,
+    prior,
+    env,
+  });
+  if (!result.ok) {
+    throw new REDistributionError(result.value);
+  }
+  return vNumber(result.value);
 };
 
 const runScoringDistAnswer = (
@@ -36,11 +41,16 @@ const runScoringDistAnswer = (
   prior: BaseDist | undefined,
   env: Env
 ) => {
-  return Result.fmap2(
-    distOperations.logScoreDistAnswer({ estimate, answer, prior, env }),
-    vNumber,
-    (e) => new REDistributionError(e)
-  );
+  const result = distOperations.logScoreDistAnswer({
+    estimate,
+    answer,
+    prior,
+    env,
+  });
+  if (!result.ok) {
+    throw new REDistributionError(result.value);
+  }
+  return vNumber(result.value);
 };
 
 export const library = [

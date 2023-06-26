@@ -25,7 +25,7 @@ async function main() {
     `
     );
     const time = await measure(async () => {
-      project.run("main");
+      await project.run("main");
     });
     const result = project.getResult("main");
     if (!result.ok) {

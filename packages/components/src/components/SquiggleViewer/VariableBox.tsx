@@ -1,11 +1,11 @@
-import React, { useReducer } from "react";
+import React, { FC, ReactNode, useEffect, useReducer } from "react";
 
 import { SqValue } from "@quri/squiggle-lang";
 import { FocusIcon, TriangleIcon } from "@quri/ui";
 
 import {
   LocalItemSettings,
-  locationToShortName,
+  pathToShortName,
   MergedItemSettings,
 } from "./utils.js";
 import {
@@ -15,6 +15,7 @@ import {
   useViewerContext,
 } from "./ViewerProvider.js";
 import { clsx } from "clsx";
+import { SqValuePath } from "@quri/squiggle-lang";
 
 type SettingsMenuParams = {
   // Used to notify VariableBox that settings have changed, so that VariableBox could re-render itself.
@@ -24,26 +25,23 @@ type SettingsMenuParams = {
 type VariableBoxProps = {
   value: SqValue;
   heading: string;
-  preview?: React.ReactNode;
-  renderSettingsMenu?: (params: SettingsMenuParams) => React.ReactNode;
-  children: (settings: MergedItemSettings) => React.ReactNode;
+  preview?: ReactNode;
+  renderSettingsMenu?: (params: SettingsMenuParams) => ReactNode;
+  children: (settings: MergedItemSettings) => ReactNode;
 };
 
-export const SqTypeWithCount = ({
-  type,
-  count,
-}: {
+export const SqTypeWithCount: FC<{
   type: string;
   count: number;
-}) => (
+}> = ({ type, count }) => (
   <div className="text-sm text-stone-400 font-mono">
     {type}
     <span className="ml-0.5">{count}</span>
   </div>
 );
 
-export const VariableBox: React.FC<VariableBoxProps> = ({
-  value: { location },
+export const VariableBox: FC<VariableBoxProps> = ({
+  value,
   heading = "Error",
   preview,
   renderSettingsMenu,
@@ -51,22 +49,42 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
 }) => {
   const setSettings = useSetSettings();
   const focus = useFocus();
-  const isFocused = location && useIsFocused(location);
-  const { getSettings, getMergedSettings } = useViewerContext();
+  const { editor, getSettings, getMergedSettings, dispatch } =
+    useViewerContext();
+
+  const findInEditor = () => {
+    const locationR = value.path?.findLocation();
+    if (!locationR?.ok) {
+      return;
+    }
+    editor?.scrollTo(locationR.value.start.offset);
+  };
 
   // Since `ViewerContext` doesn't store settings, `VariableBox` won't rerender when `setSettings` is called.
   // So we use `forceUpdate` to force rerendering.
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
-  if (!location) {
-    throw new Error("Can't display a locationless value");
+  const { path } = value;
+
+  if (!path) {
+    throw new Error("Can't display a pathless value");
   }
 
-  const settings = getSettings(location);
-  // const fooSettings = {...settings, chartHeight: settings.chartHeight + 100}
+  const isFocused = path && useIsFocused(path);
+
+  const settings = getSettings(path);
+
+  const getAdjustedMergedSettings = (path: SqValuePath) => {
+    const mergedSettings = getMergedSettings(path);
+    const { chartHeight } = mergedSettings;
+    return {
+      ...mergedSettings,
+      chartHeight: isFocused ? chartHeight * 3 : chartHeight,
+    };
+  };
 
   const setSettingsAndUpdate = (newSettings: LocalItemSettings) => {
-    setSettings(location, newSettings);
+    setSettings(path, newSettings);
     forceUpdate();
   };
 
@@ -74,15 +92,32 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
     setSettingsAndUpdate({ ...settings, collapsed: !settings.collapsed });
   };
 
-  const name = locationToShortName(location);
-  const adjustSettings = (settings) => ({
-    ...settings,
-    chartHeight: isFocused ? settings.chartHeight * 3 : settings.chartHeight,
-  });
+  const name = pathToShortName(path);
+
+  const saveRef = (element: HTMLDivElement) => {
+    dispatch({
+      type: "REGISTER_ITEM_HANDLE",
+      payload: {
+        path: path,
+        element,
+      },
+    });
+  };
+
+  useEffect(() => {
+    return () => {
+      dispatch({
+        type: "UNREGISTER_ITEM_HANDLE",
+        payload: {
+          path: path,
+        },
+      });
+    };
+  }, []);
 
   const isCollapsed = isFocused ? false : settings.collapsed;
   return (
-    <div>
+    <div ref={saveRef}>
       {name === undefined ? null : (
         <header
           className={clsx(
@@ -109,27 +144,38 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
                   ? "text-md text-stone-900 ml-1"
                   : "text-sm text-stone-800 cursor-pointer hover:underline"
               )}
-              onClick={() =>
-                !isFocused && location.path.items.length && focus(location)
-              }
+              onClick={() => !isFocused && path.items.length && focus(path)}
             >
               {name}
             </span>
+            {/* <span
+              className="text-stone-800 font-mono text-sm cursor-pointer"
+              onClick={findInEditor}
+            >
+              {name}
+            </span> */}
             {!isFocused && !!preview && <div className="ml-2">{preview}</div>}
           </div>
           <div className="inline-flex space-x-1">
-            {Boolean(!isCollapsed && location.path.items.length) && (
+            {Boolean(!settings.collapsed && path.items.length) && (
               <div className="text-stone-400 hover:text-stone-600 text-sm">
                 {heading}
               </div>
             )}
-            {!isCollapsed && renderSettingsMenu?.({ onChange: forceUpdate })}
+            {path.items.length ? (
+              <FocusIcon
+                className="h-5 w-5 cursor-pointer text-stone-200 hover:text-stone-500"
+                onClick={() => focus(path)}
+              />
+            ) : null}
+            {!settings.collapsed &&
+              renderSettingsMenu?.({ onChange: forceUpdate })}
           </div>
         </header>
       )}
       {isCollapsed ? null : (
         <div className="flex w-full">
-          {location.path.items.length && !isFocused ? (
+          {path.items.length && !isFocused ? (
             <div
               className="flex group cursor-pointer"
               onClick={toggleCollapsed}
@@ -140,7 +186,7 @@ export const VariableBox: React.FC<VariableBoxProps> = ({
           ) : null}
           {isFocused && <div className="w-2" />}
           <div className="grow">
-            {children(adjustSettings(getMergedSettings(location)))}
+            {children(getAdjustedMergedSettings(path))}
           </div>
         </div>
       )}

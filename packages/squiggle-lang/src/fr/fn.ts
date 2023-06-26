@@ -39,15 +39,13 @@ export const library = [
           ),
         ],
         ([{ fn, inputs }]) => {
-          return Ok(
-            vLambdaDeclaration({
-              fn,
-              args: inputs.map((input) => ({
-                ...input,
-                type: "Float" as const,
-              })),
-            })
-          );
+          return vLambdaDeclaration({
+            fn,
+            args: inputs.map((input) => ({
+              ...input,
+              type: "Float" as const,
+            })),
+          });
         }
       ),
     ],

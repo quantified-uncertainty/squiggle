@@ -17,7 +17,7 @@ import {
   doNumberLambdaCall,
   repackDistResult,
 } from "../library/registry/helpers.js";
-import { REDistributionError, REExpectedType } from "../errors.js";
+import { REDistributionError, REExpectedType } from "../errors/messages.js";
 import { Ok } from "../utility/result.js";
 import { vDist, vNumber } from "../value/index.js";
 
@@ -61,7 +61,7 @@ export const library = [
     definitions: [
       makeDefinition([frDist, frNumber], ([dist, number]) => {
         pointSetAssert(dist);
-        return Ok(vDist(dist.downsample(number)));
+        return vDist(dist.downsample(number));
       }),
     ],
   }),
@@ -70,12 +70,11 @@ export const library = [
     examples: [`PointSet.mapY(mx(normal(5,2)), {|x| x + 1})`],
     output: "Dist",
     definitions: [
-      makeDefinition([frDist, frLambda], ([dist, lambda], context, reducer) => {
+      makeDefinition([frDist, frLambda], ([dist, lambda], context) => {
         pointSetAssert(dist);
         return repackDistResult(
           dist.mapYResult(
-            (y) =>
-              Ok(doNumberLambdaCall(lambda, [vNumber(y)], context, reducer)),
+            (y) => Ok(doNumberLambdaCall(lambda, [vNumber(y)], context)),
             undefined,
             undefined
           )
@@ -98,11 +97,9 @@ export const library = [
       makeDefinition(
         [frArray(frRecord(["x", frNumber], ["y", frNumber]))],
         ([arr]) => {
-          return Ok(
-            vDist(
-              new PointSetDist(
-                new Continuous.ContinuousShape({ xyShape: argsToXYShape(arr) })
-              )
+          return vDist(
+            new PointSetDist(
+              new Continuous.ContinuousShape({ xyShape: argsToXYShape(arr) })
             )
           );
         }
@@ -124,11 +121,9 @@ export const library = [
       makeDefinition(
         [frArray(frRecord(["x", frNumber], ["y", frNumber]))],
         ([arr]) => {
-          return Ok(
-            vDist(
-              new PointSetDist(
-                new Discrete.DiscreteShape({ xyShape: argsToXYShape(arr) })
-              )
+          return vDist(
+            new PointSetDist(
+              new Discrete.DiscreteShape({ xyShape: argsToXYShape(arr) })
             )
           );
         }

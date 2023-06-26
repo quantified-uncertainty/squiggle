@@ -3,7 +3,6 @@
 import { ReactNode } from "react";
 
 import { RelativeValuesDefinitionPage } from "./RelativeValuesDefinitionPage";
-import { FullLayoutWithPadding } from "@/components/layout/FullLayoutWithPadding";
 
 export default function ModelLayout({
   params,
@@ -13,10 +12,8 @@ export default function ModelLayout({
   children: ReactNode;
 }) {
   return (
-    <FullLayoutWithPadding>
-      <RelativeValuesDefinitionPage {...params}>
-        {children}
-      </RelativeValuesDefinitionPage>
-    </FullLayoutWithPadding>
+    <RelativeValuesDefinitionPage {...params}>
+      {children}
+    </RelativeValuesDefinitionPage>
   );
 }

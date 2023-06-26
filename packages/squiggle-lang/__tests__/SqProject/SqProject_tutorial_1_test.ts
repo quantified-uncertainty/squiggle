@@ -4,7 +4,7 @@ import { defaultEnvironment } from "../../src/index.js";
 
 describe("SqProject Tutorial", () => {
   describe("Single source", () => {
-    test("run", () => {
+    test("run", async () => {
       /*
       Let's start with running a single source and getting Result as well as the Bindings
       First you need to create a project. A project is a collection of sources.
@@ -17,7 +17,7 @@ describe("SqProject Tutorial", () => {
       /* Every source has a name. This is used for debugging, dependencies and error messages. */
       project.setSource("main", "1 + 2");
       /* Let's run "main" source. */
-      project.run("main");
+      await project.run("main");
       /*
       Now you have a result for "main" source.
       Running one by one is necessary for UI to navigate among the sources and to see the results by source.
@@ -30,7 +30,7 @@ describe("SqProject Tutorial", () => {
       If you have all the sources, you can always run the whole project.
       Dependencies and recompiling on demand will be taken care of by the project.
       */
-      project.runAll();
+      await project.runAll();
 
       /*
       Either with run or runAll you executed the project.
@@ -52,10 +52,10 @@ describe("SqProject Tutorial", () => {
       /* You've got 3 with empty bindings. */
     });
 
-    test("run summary", () => {
+    test("run summary", async () => {
       const project = SqProject.create();
       project.setSource("main", "1 + 2");
-      project.runAll();
+      await project.runAll();
       const result = project.getResult("main");
       const bindings = project.getBindings("main");
       /* Now you have external bindings and external result. */
@@ -65,7 +65,7 @@ describe("SqProject Tutorial", () => {
       ]);
     });
 
-    test("run with an environment", () => {
+    test("run with an environment", async () => {
       /* Running the source code like above allows you to set a custom environment */
       const project = SqProject.create();
 
@@ -73,7 +73,7 @@ describe("SqProject Tutorial", () => {
       project.setEnvironment(defaultEnvironment);
 
       project.setSource("main", "1 + 2");
-      project.runAll();
+      await project.runAll();
       const result = project.getResult("main");
       const _bindings = project.getBindings("main");
       expect(toStringResult(result)).toBe("Ok(3)");

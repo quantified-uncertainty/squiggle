@@ -13,7 +13,7 @@ async function main() {
     project.setSource("map", "l |> map({|x| x})");
     project.setContinues("map", ["list"]);
     const time = await measure(async () => {
-      project.run("map");
+      await project.run("map");
     });
     console.log(`1e${p}`, "\t", time);
   }

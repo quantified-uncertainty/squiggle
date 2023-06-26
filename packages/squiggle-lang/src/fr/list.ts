@@ -11,7 +11,7 @@ import { Ok } from "../utility/result.js";
 import * as Result from "../utility/result.js";
 import { Value, vArray, vNumber, vString } from "../value/index.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
-import { REOther } from "../errors.js";
+import { REOther } from "../errors/messages.js";
 import includes from "lodash/includes.js";
 import uniqBy from "lodash/uniqBy.js";
 
@@ -26,9 +26,7 @@ export const library = [
     output: "Number",
     examples: [`List.length([1,4,5])`],
     definitions: [
-      makeDefinition([frArray(frAny)], ([values]) =>
-        Ok(vNumber(values.length))
-      ),
+      makeDefinition([frArray(frAny)], ([values]) => vNumber(values.length)),
     ],
   }),
   maker.make({
@@ -39,7 +37,7 @@ export const library = [
       // TODO: If the second item is a function with no args, it could be nice to run this function and return the result.
       // TODO: check if number is int, and fail instead of silently rounding?
       makeDefinition([frNumber, frAny], ([number, value]) =>
-        Ok(vArray(new Array(number | 0).fill(value)))
+        vArray(new Array(number | 0).fill(value))
       ),
     ],
   }),
@@ -49,9 +47,7 @@ export const library = [
     examples: [`List.upTo(1,4)`],
     definitions: [
       makeDefinition([frNumber, frNumber], ([low, high]) =>
-        Ok(
-          vArray(E_A_Floats.range(low, high, (high - low + 1) | 0).map(vNumber))
-        )
+        vArray(E_A_Floats.range(low, high, (high - low + 1) | 0).map(vNumber))
       ),
     ],
   }),
@@ -61,9 +57,9 @@ export const library = [
     definitions: [
       makeDefinition([frArray(frAny)], ([array]) => {
         if (!array.length) {
-          return Result.Err(new REOther("No first element"));
+          throw new REOther("No first element");
         } else {
-          return Ok(array[0]);
+          return array[0];
         }
       }),
     ],
@@ -74,9 +70,9 @@ export const library = [
     definitions: [
       makeDefinition([frArray(frAny)], ([array]) => {
         if (!array.length) {
-          return Result.Err(new REOther("No last element"));
+          throw new REOther("No last element");
         } else {
-          return Ok(array[array.length - 1]);
+          return array[array.length - 1];
         }
       }),
     ],
@@ -88,7 +84,7 @@ export const library = [
     examples: [`List.reverse([1,4,5])`],
     definitions: [
       makeDefinition([frArray(frAny)], ([array]) =>
-        Ok(vArray([...array].reverse()))
+        vArray([...array].reverse())
       ),
     ],
   }),
@@ -98,16 +94,13 @@ export const library = [
     requiresNamespace: false,
     examples: [`List.map([1,4,5], {|x| x+1})`],
     definitions: [
-      makeDefinition(
-        [frArray(frAny), frLambda],
-        ([array, lambda], context, reducer) => {
-          const mapped: Value[] = new Array(array.length);
-          for (let i = 0; i < array.length; i++) {
-            mapped[i] = lambda.call([array[i]], context, reducer);
-          }
-          return Ok(vArray(mapped));
+      makeDefinition([frArray(frAny), frLambda], ([array, lambda], context) => {
+        const mapped: Value[] = new Array(array.length);
+        for (let i = 0; i < array.length; i++) {
+          mapped[i] = lambda.call([array[i]], context);
         }
-      ),
+        return vArray(mapped);
+      }),
     ],
   }),
   maker.make({
@@ -116,7 +109,7 @@ export const library = [
     examples: [`List.concat([1,2,3], [4, 5, 6])`],
     definitions: [
       makeDefinition([frArray(frAny), frArray(frAny)], ([array1, array2]) =>
-        Ok(vArray([...array1].concat(array2)))
+        vArray([...array1].concat(array2))
       ),
     ],
   }),
@@ -126,7 +119,7 @@ export const library = [
     definitions: [
       makeDefinition([frArray(frAny), frAny], ([array, el]) => {
         let newArr = [...array, el];
-        return Ok(vArray(newArr));
+        return vArray(newArr);
       }),
     ],
   }),
@@ -143,10 +136,10 @@ export const library = [
 
         const allUniqable = arr.every(isUniqableType);
         if (allUniqable) {
-          return Ok(vArray(uniqBy(arr, uniqueValueKey)));
+          return vArray(uniqBy(arr, uniqueValueKey));
         } else {
-          return Result.Err(
-            new REOther("Can only apply uniq() to Strings, Numbers, or Bools")
+          throw new REOther(
+            "Can only apply uniq() to Strings, Numbers, or Bools"
           );
         }
       }),
@@ -159,12 +152,10 @@ export const library = [
     definitions: [
       makeDefinition(
         [frArray(frAny), frAny, frLambda],
-        ([array, initialValue, lambda], context, reducer) =>
-          Ok(
-            array.reduce(
-              (acc, elem) => lambda.call([acc, elem], context, reducer),
-              initialValue
-            )
+        ([array, initialValue, lambda], context) =>
+          array.reduce(
+            (acc, elem) => lambda.call([acc, elem], context),
+            initialValue
           )
       ),
     ],
@@ -176,15 +167,13 @@ export const library = [
     definitions: [
       makeDefinition(
         [frArray(frAny), frAny, frLambda],
-        ([array, initialValue, lambda], context, reducer) =>
-          Ok(
-            [...array]
-              .reverse()
-              .reduce(
-                (acc, elem) => lambda.call([acc, elem], context, reducer),
-                initialValue
-              )
-          )
+        ([array, initialValue, lambda], context) =>
+          [...array]
+            .reverse()
+            .reduce(
+              (acc, elem) => lambda.call([acc, elem], context),
+              initialValue
+            )
       ),
     ],
   }),
@@ -193,17 +182,13 @@ export const library = [
     requiresNamespace: false,
     examples: [`List.filter([1,4,5], {|x| x>3})`],
     definitions: [
-      makeDefinition(
-        [frArray(frAny), frLambda],
-        ([array, lambda], context, reducer) =>
-          Ok(
-            vArray(
-              array.filter((elem) => {
-                const result = lambda.call([elem], context, reducer);
-                return result.type === "Bool" && result.value;
-              })
-            )
-          )
+      makeDefinition([frArray(frAny), frLambda], ([array, lambda], context) =>
+        vArray(
+          array.filter((elem) => {
+            const result = lambda.call([elem], context);
+            return result.type === "Bool" && result.value;
+          })
+        )
       ),
     ],
   }),
@@ -213,11 +198,9 @@ export const library = [
     examples: [`List.join(["a", "b", "c"], ",")`],
     definitions: [
       makeDefinition([frArray(frString), frString], ([array, joinStr]) =>
-        Ok(vString(array.join(joinStr)))
+        vString(array.join(joinStr))
       ),
-      makeDefinition([frArray(frString)], ([array]) =>
-        Ok(vString(array.join()))
-      ),
+      makeDefinition([frArray(frString)], ([array]) => vString(array.join())),
     ],
   }),
   maker.make({
@@ -226,7 +209,7 @@ export const library = [
     examples: [`List.flatten([[1,2], [3,4]])`],
     definitions: [
       makeDefinition([frArray(frAny)], ([arr]) => {
-        return Ok(vArray(arr).flatten());
+        return vArray(arr).flatten();
       }),
     ],
   }),

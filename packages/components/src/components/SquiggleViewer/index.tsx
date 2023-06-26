@@ -1,8 +1,10 @@
-import { FC, memo } from "react";
+import { FC, forwardRef, memo } from "react";
 
 import { SqValue } from "@quri/squiggle-lang";
 import { FocusIcon, ChevronRightIcon } from "@quri/ui";
 import { useSquiggle } from "../../lib/hooks/index.js";
+import { MessageAlert } from "../Alert.js";
+import { CodeEditorHandle } from "../CodeEditor.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 import { ExpressionViewer } from "./ExpressionViewer.js";
@@ -12,25 +14,27 @@ import {
   useUnfocus,
   useViewerContext,
 } from "./ViewerProvider.js";
-import { extractSubvalueByLocation, locationAsString } from "./utils.js";
-import { MessageAlert } from "../Alert.js";
+import { extractSubvalueByPath } from "./utils.js";
+import { SqValuePath } from "@quri/squiggle-lang";
+import { useImperativeHandle } from "react";
 
-type Result = ReturnType<typeof useSquiggle>["result"];
+type Result = NonNullable<ReturnType<typeof useSquiggle>[0]>["result"];
+
+export type SquiggleViewerHandle = {
+  viewValuePath(path: SqValuePath): void;
+};
 
 export type SquiggleViewerProps = {
   /** The output of squiggle's run */
   result: Result;
   localSettingsEnabled?: boolean;
+  editor?: CodeEditorHandle;
 } & PartialPlaygroundSettings;
-
-type BodyProps = Pick<SquiggleViewerProps, "result">;
 
 const SquiggleViewerBody: FC<{ value: SqValue }> = ({ value }) => {
   const { focused } = useViewerContext();
 
-  const valueToRender = focused
-    ? extractSubvalueByLocation(value, focused)
-    : value;
+  const valueToRender = focused ? extractSubvalueByPath(value, focused) : value;
 
   if (!valueToRender) {
     return <MessageAlert heading="Focused variable is not defined" />;
@@ -39,8 +43,11 @@ const SquiggleViewerBody: FC<{ value: SqValue }> = ({ value }) => {
   return <ExpressionViewer value={valueToRender} />;
 };
 
-const SquiggleViewerOuter: FC<BodyProps> = ({ result }) => {
-  const { focused } = useViewerContext();
+const SquiggleViewerOuter = forwardRef<
+  SquiggleViewerHandle,
+  SquiggleViewerProps
+>(function SquiggleViewerOuter({ result }, ref) {
+  const { focused, dispatch } = useViewerContext();
   const unfocus = useUnfocus();
   const focus = useFocus();
 
@@ -50,21 +57,30 @@ const SquiggleViewerOuter: FC<BodyProps> = ({ result }) => {
   const focusedNavigation = focused && (
     <div className="flex items-center mb-3 pl-1">
       <span onClick={unfocus} className={navLinkStyle}>
-        {focused.path.root === "bindings" ? "Variables" : focused.path.root}
+        {focused.root === "bindings" ? "Variables" : focused.root}
       </span>
       {focused
-        .pathItemsAsValueLocations()
+        .itemsAsValuePaths()
         .slice(0, -1)
-        .map((location, i) => (
+        .map((path, i) => (
           <div key={i} className="flex items-center">
             <ChevronRightIcon className="text-slate-300" size={24} />
-            <div onClick={() => focus(location)} className={navLinkStyle}>
-              {location.path.items[i]}
+            <div onClick={() => focus(path)} className={navLinkStyle}>
+              {path.items[i]}
             </div>
           </div>
         ))}
     </div>
   );
+
+  useImperativeHandle(ref, () => ({
+    viewValuePath(path: SqValuePath) {
+      dispatch({
+        type: "SCROLL_TO_PATH",
+        payload: { path },
+      });
+    },
+  }));
 
   return (
     <div>
@@ -76,21 +92,30 @@ const SquiggleViewerOuter: FC<BodyProps> = ({ result }) => {
       )}
     </div>
   );
-};
+});
 
-export const SquiggleViewer = memo<SquiggleViewerProps>(
-  function SquiggleViewer({
-    result,
-    localSettingsEnabled = false,
-    ...partialPlaygroundSettings
-  }) {
+const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
+  function SquiggleViewer(
+    {
+      result,
+      localSettingsEnabled = false,
+      editor,
+      ...partialPlaygroundSettings
+    },
+    ref
+  ) {
     return (
       <ViewerProvider
         partialPlaygroundSettings={partialPlaygroundSettings}
         localSettingsEnabled={localSettingsEnabled}
+        editor={editor}
       >
-        <SquiggleViewerOuter result={result} />
+        <SquiggleViewerOuter result={result} ref={ref} />
       </ViewerProvider>
     );
   }
 );
+
+// React.memo and React.forwardRef are hard to combine in TypeScript;
+// https://github.com/DefinitelyTyped/DefinitelyTyped/issues/37087#issuecomment-656596623
+export const SquiggleViewer = memo(innerComponent) as typeof innerComponent;

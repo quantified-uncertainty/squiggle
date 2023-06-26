@@ -249,12 +249,11 @@ dollarIdentifierWithModule 'identifier'
     tail:('.' _nl @$moduleIdentifier)* '.' _nl
     final:$dollarIdentifier
   {
-    let modifiers = [...tail];
-    modifiers.unshift(head);
-    modifiers.push(final);
+    const modifiers = [head, ...tail, final];
     const modifiedIdentifier = modifiers.join('.');
     return h.nodeIdentifier(modifiedIdentifier, location());
   }
+  moduleIdentifier 'identifier' = ([A-Z]+[_a-z0-9]i*)
 
 identifier 'identifier'
   = ([_a-z]+[_a-z0-9]i*) { return h.nodeIdentifier(text(), location()); }
@@ -264,9 +263,6 @@ unitIdentifier 'identifier'
 
 dollarIdentifier 'identifier'
   = ([\$_a-z]+[\$_a-z0-9]i*) { return h.nodeIdentifier(text(), location()); }
-
-moduleIdentifier 'identifier'
-  = ([A-Z]+[_a-z0-9]i*) { return h.nodeModuleIdentifier(text(), location()); }
 
 
 string 'string'

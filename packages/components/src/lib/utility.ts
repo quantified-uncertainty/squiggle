@@ -7,7 +7,7 @@ import {
 } from "@quri/squiggle-lang";
 import * as d3 from "d3";
 
-import { ResultAndBindings } from "./hooks/useSquiggle.js";
+import { SquiggleOutput } from "./hooks/useSquiggle.js";
 
 export function flattenResult<a, b>(x: result<a, b>[]): result<a[], b> {
   if (x.length === 0) {
@@ -46,13 +46,13 @@ export function some(arr: boolean[]): boolean {
 export function getValueToRender({
   result,
   bindings,
-}: ResultAndBindings): result<SqValue, SqError> {
+}: SquiggleOutput): result<SqValue, SqError> {
   return resultMap(result, (value) =>
     value.tag === "Void" ? bindings.asValue() : value
   );
 }
 
-export function getErrors(result: ResultAndBindings["result"]) {
+export function getErrors(result: SquiggleOutput["result"]) {
   if (!result.ok) {
     return [result.value];
   } else {

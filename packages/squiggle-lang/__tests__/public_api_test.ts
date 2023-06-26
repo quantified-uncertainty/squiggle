@@ -8,9 +8,9 @@ import { SqSymbolicDistribution } from "../src/public/SqDistribution.js";
 import { testRun } from "./helpers/helpers.js";
 
 describe("SqValue", () => {
-  test("toJS", () => {
-    const value = testRun(
-      '{ x: 5, y: [3, "foo", { dist: normal(5,2) } ] }'
+  test("toJS", async () => {
+    const value = (
+      await testRun('{ x: 5, y: [3, "foo", { dist: normal(5,2) } ] }')
     ).asJS();
 
     expect(value).toBeInstanceOf(Map);
@@ -31,5 +31,14 @@ describe("SqLambda", () => {
 
     expect(result.ok).toBe(true);
     expect(result.value.toString()).toBe("[1,2,3,4,5]");
+  });
+
+  test("createFromStdlibName for squiggle definition", () => {
+    const lambda = SqLambda.createFromStdlibName("RelativeValues.wrap");
+    expect(lambda).toBeInstanceOf(SqLambda);
+  });
+
+  test("createFromStdlibName for unknown name", () => {
+    expect(() => SqLambda.createFromStdlibName("Foo.bar")).toThrow();
   });
 });

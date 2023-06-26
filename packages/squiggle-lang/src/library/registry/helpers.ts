@@ -1,14 +1,13 @@
 import { BaseDist } from "../../dist/BaseDist.js";
 import { DistError } from "../../dist/DistError.js";
 import { Env } from "../../dist/env.js";
-import { SampleMapNeedsNtoNFunction } from "../../operationError.js";
-import { ReducerContext } from "../../reducer/context.js";
 import {
   ErrorMessage,
   REDistributionError,
   REOperationError,
-} from "../../errors.js";
-import { ReducerFn } from "../../reducer/index.js";
+} from "../../errors/messages.js";
+import { SampleMapNeedsNtoNFunction } from "../../operationError.js";
+import { ReducerContext } from "../../reducer/context.js";
 import { Lambda } from "../../reducer/lambda.js";
 import * as Result from "../../utility/result.js";
 import { Ok } from "../../utility/result.js";
@@ -46,7 +45,7 @@ export class FnFactory {
     return this.make({
       ...args,
       output: "Number",
-      definitions: [makeDefinition([frNumber], ([x]) => Ok(vNumber(fn(x))))],
+      definitions: [makeDefinition([frNumber], ([x]) => vNumber(fn(x)))],
     });
   }
 
@@ -60,7 +59,7 @@ export class FnFactory {
       ...args,
       output: "Number",
       definitions: [
-        makeDefinition([frNumber, frNumber], ([x, y]) => Ok(vNumber(fn(x, y)))),
+        makeDefinition([frNumber, frNumber], ([x, y]) => vNumber(fn(x, y))),
       ],
     });
   }
@@ -75,7 +74,7 @@ export class FnFactory {
       ...args,
       output: "Bool",
       definitions: [
-        makeDefinition([frNumber, frNumber], ([x, y]) => Ok(vBool(fn(x, y)))),
+        makeDefinition([frNumber, frNumber], ([x, y]) => vBool(fn(x, y))),
       ],
     });
   }
@@ -90,7 +89,7 @@ export class FnFactory {
       ...args,
       output: "Bool",
       definitions: [
-        makeDefinition([frBool, frBool], ([x, y]) => Ok(vBool(fn(x, y)))),
+        makeDefinition([frBool, frBool], ([x, y]) => vBool(fn(x, y))),
       ],
     });
   }
@@ -105,7 +104,7 @@ export class FnFactory {
       ...args,
       output: "Bool",
       definitions: [
-        makeDefinition([frString, frString], ([x, y]) => Ok(vBool(fn(x, y)))),
+        makeDefinition([frString, frString], ([x, y]) => vBool(fn(x, y))),
       ],
     });
   }
@@ -120,7 +119,7 @@ export class FnFactory {
       ...args,
       output: "String",
       definitions: [
-        makeDefinition([frString, frString], ([x, y]) => Ok(vString(fn(x, y)))),
+        makeDefinition([frString, frString], ([x, y]) => vString(fn(x, y))),
       ],
     });
   }
@@ -136,7 +135,7 @@ export class FnFactory {
       output: "String",
       definitions: [
         makeDefinition([frDist], ([dist], { environment }) =>
-          Ok(vString(fn(dist, environment)))
+          vString(fn(dist, environment))
         ),
       ],
     });
@@ -153,7 +152,7 @@ export class FnFactory {
       output: "String",
       definitions: [
         makeDefinition([frDist, frNumber], ([dist, n], { environment }) =>
-          Ok(vString(fn(dist, n, environment)))
+          vString(fn(dist, n, environment))
         ),
       ],
     });
@@ -170,7 +169,7 @@ export class FnFactory {
       output: "Number",
       definitions: [
         makeDefinition([frDist], ([x], { environment }) =>
-          Ok(vNumber(fn(x, environment)))
+          vNumber(fn(x, environment))
         ),
       ],
     });
@@ -187,7 +186,7 @@ export class FnFactory {
       output: "Bool",
       definitions: [
         makeDefinition([frDist], ([x], { environment }) =>
-          Ok(vBool(fn(x, environment)))
+          vBool(fn(x, environment))
         ),
       ],
     });
@@ -204,7 +203,7 @@ export class FnFactory {
       output: "Dist",
       definitions: [
         makeDefinition([frDist], ([dist], { environment }) =>
-          Ok(vDist(fn(dist, environment)))
+          vDist(fn(dist, environment))
         ),
       ],
     });
@@ -221,7 +220,7 @@ export class FnFactory {
       output: "Dist",
       definitions: [
         makeDefinition([frDist, frNumber], ([dist, n], { environment }) =>
-          Ok(vDist(fn(dist, n, environment)))
+          vDist(fn(dist, n, environment))
         ),
       ],
     });
@@ -238,7 +237,7 @@ export class FnFactory {
       output: "Number",
       definitions: [
         makeDefinition([frDist, frNumber], ([dist, n], { environment }) =>
-          Ok(vNumber(fn(dist, n, environment)))
+          vNumber(fn(dist, n, environment))
         ),
       ],
     });
@@ -261,18 +260,17 @@ export function unpackDistResult<T>(result: Result.result<T, DistError>): T {
 
 export function repackDistResult(
   result: Result.result<BaseDist, DistError>
-): Result.result<Value, ErrorMessage> {
+): Value {
   const dist = unpackDistResult(result);
-  return Ok(vDist(dist));
+  return vDist(dist);
 }
 
 export function doNumberLambdaCall(
   lambda: Lambda,
   args: Value[],
-  context: ReducerContext,
-  reducer: ReducerFn
+  context: ReducerContext
 ) {
-  const value = lambda.call(args, context, reducer);
+  const value = lambda.call(args, context);
   if (value.type === "Number") {
     return value.value;
   }

@@ -39,11 +39,6 @@ export class FrameStack {
     return new FrameStack(new Frame(name, location), this);
   }
 
-  // this is useful for SyntaxErrors
-  static makeSingleFrameStack(location: LocationRange): FrameStack {
-    return FrameStack.make().extend(topFrameName, location);
-  }
-
   // this includes the left offset because it's mostly used in SqError.toStringWithStackTrace
   toString(): string {
     return this.toFrameArray()

@@ -7,9 +7,12 @@ import {
   fnDefinitionToString,
   tryCallFnDefinition,
 } from "./fnDefinition.js";
-import { ErrorMessage, REOther, RESymbolNotFound } from "../../errors.js";
+import {
+  ErrorMessage,
+  REOther,
+  RESymbolNotFound,
+} from "../../errors/messages.js";
 import { BuiltinLambda, Lambda } from "../../reducer/lambda.js";
-import { ReducerFn } from "../../reducer/index.js";
 
 export type FRFunction = {
   name: string;
@@ -71,15 +74,10 @@ export class Registry {
     return [...this.fnNameDict.keys()];
   }
 
-  call(
-    fnName: string,
-    args: Value[],
-    context: ReducerContext,
-    reducer: ReducerFn
-  ): result<Value, ErrorMessage> {
+  call(fnName: string, args: Value[], context: ReducerContext): Value {
     const definitions = this.fnNameDict.get(fnName);
     if (definitions === undefined) {
-      return Result.Err(new RESymbolNotFound(fnName));
+      throw new RESymbolNotFound(fnName);
     }
     const showNameMatchDefinitions = () => {
       const defsString = definitions
@@ -90,31 +88,22 @@ export class Registry {
     };
 
     for (const definition of definitions) {
-      const callResult = tryCallFnDefinition(
-        definition,
-        args,
-        context,
-        reducer
-      );
+      const callResult = tryCallFnDefinition(definition, args, context);
       if (callResult !== undefined) {
         return callResult;
       }
     }
-    return Result.Err(new REOther(showNameMatchDefinitions()));
+    throw new REOther(showNameMatchDefinitions());
   }
 
   makeLambda(fnName: string): Lambda {
     if (!this.fnNameDict.has(fnName)) {
       throw new Error(`Function ${fnName} doesn't exist in registry`);
     }
-    return new BuiltinLambda(fnName, (args, context, reducer) => {
+    return new BuiltinLambda(fnName, (args, context) => {
       // Note: current bindings could be accidentally exposed here through context (compare with native lambda implementation above, where we override them with local bindings).
       // But FunctionRegistry API is too limited for that to matter. Please take care not to violate that in the future by accident.
-      const result = this.call(fnName, args, context, reducer);
-      if (!result.ok) {
-        throw result.value;
-      }
-      return result.value;
+      return this.call(fnName, args, context);
     });
   }
 }

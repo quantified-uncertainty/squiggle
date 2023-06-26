@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom";
-import { render } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 
 import { SqProject } from "@quri/squiggle-lang";
 
@@ -12,7 +12,9 @@ test("Creates and cleans up source", async () => {
     <SquiggleChart code={"normal(0, 1)"} project={project} />
   );
 
-  expect(project.getSourceIds().length).toBe(1);
+  await waitFor(() => {
+    expect(project.getSourceIds().length).toBe(1);
+  });
 
   const sourceId = project.getSourceIds()[0];
   expect(project.getSource(sourceId)).toBe("normal(0, 1)");

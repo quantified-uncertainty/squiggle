@@ -4,7 +4,7 @@ import * as SymbolicDist from "../dist/SymbolicDist.js";
 import * as distOperations from "../dist/distOperations/index.js";
 import { Env } from "../dist/env.js";
 import { unpackDistResult } from "../library/registry/helpers.js";
-import { REDistributionError } from "../errors.js";
+import { REDistributionError } from "../errors/messages.js";
 import { BuiltinLambda } from "../reducer/lambda.js";
 import * as E_A from "../utility/E_A.js";
 import * as Result from "../utility/result.js";

@@ -27,17 +27,15 @@ export const library = [
     examples: [`Scale.linear({ min: 3, max: 10 })`],
     definitions: [
       makeDefinition([commonRecord], ([{ min, max, tickFormat }]) => {
-        return Result.Ok(
-          vScale({
-            type: "linear",
-            min: min ?? undefined,
-            max: max ?? undefined,
-            tickFormat: tickFormat ?? undefined,
-          })
-        );
+        return vScale({
+          type: "linear",
+          min: min ?? undefined,
+          max: max ?? undefined,
+          tickFormat: tickFormat ?? undefined,
+        });
       }),
       makeDefinition([], () => {
-        return Result.Ok(vScale({ type: "linear" }));
+        return vScale({ type: "linear" });
       }),
     ],
   }),
@@ -48,17 +46,15 @@ export const library = [
     definitions: [
       makeDefinition([commonRecord], ([{ min, max, tickFormat }]) => {
         // TODO - check that min > 0?
-        return Result.Ok(
-          vScale({
-            type: "log",
-            min: min ?? undefined,
-            max: max ?? undefined,
-            tickFormat: tickFormat ?? undefined,
-          })
-        );
+        return vScale({
+          type: "log",
+          min: min ?? undefined,
+          max: max ?? undefined,
+          tickFormat: tickFormat ?? undefined,
+        });
       }),
       makeDefinition([], () => {
-        return Result.Ok(vScale({ type: "log" }));
+        return vScale({ type: "log" });
       }),
     ],
   }),
@@ -68,17 +64,15 @@ export const library = [
     examples: [`Scale.symlog({ min: -10, max: 10 })`],
     definitions: [
       makeDefinition([commonRecord], ([{ min, max, tickFormat }]) => {
-        return Result.Ok(
-          vScale({
-            type: "symlog",
-            min: min ?? undefined,
-            max: max ?? undefined,
-            tickFormat: tickFormat ?? undefined,
-          })
-        );
+        return vScale({
+          type: "symlog",
+          min: min ?? undefined,
+          max: max ?? undefined,
+          tickFormat: tickFormat ?? undefined,
+        });
       }),
       makeDefinition([], () => {
-        return Result.Ok(vScale({ type: "symlog" }));
+        return vScale({ type: "symlog" });
       }),
     ],
   }),
@@ -97,15 +91,13 @@ export const library = [
           ),
         ],
         ([{ min, max, tickFormat, exponent }]) => {
-          return Result.Ok(
-            vScale({
-              type: "power",
-              min: min ?? undefined,
-              max: max ?? undefined,
-              tickFormat: tickFormat ?? undefined,
-              exponent,
-            })
-          );
+          return vScale({
+            type: "power",
+            min: min ?? undefined,
+            max: max ?? undefined,
+            tickFormat: tickFormat ?? undefined,
+            exponent,
+          });
         }
       ),
     ],

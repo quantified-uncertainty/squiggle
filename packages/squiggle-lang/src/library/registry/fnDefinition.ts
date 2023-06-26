@@ -1,6 +1,5 @@
+import { ErrorMessage } from "../../errors/messages.js";
 import { ReducerContext } from "../../reducer/context.js";
-import { ErrorMessage } from "../../errors.js";
-import { ReducerFn } from "../../reducer/index.js";
 import { result } from "../../utility/result.js";
 import { Value } from "../../value/index.js";
 import { FRType } from "./frTypes.js";
@@ -10,21 +9,13 @@ import { FRType } from "./frTypes.js";
 // because of contravariance (we need to store all FnDefinitions in a generic array later on).
 export type FnDefinition = {
   inputs: FRType<any>[];
-  run: (
-    args: any[],
-    context: ReducerContext,
-    reducerFn: ReducerFn
-  ) => result<Value, ErrorMessage>;
+  run: (args: any[], context: ReducerContext) => Value;
 };
 
 export function makeDefinition<const T extends any[]>(
   // [...] wrapper is important, see also: https://stackoverflow.com/a/63891197
   inputs: [...{ [K in keyof T]: FRType<T[K]> }],
-  run: (
-    args: T,
-    context: ReducerContext,
-    reducerFn: ReducerFn
-  ) => result<Value, ErrorMessage>
+  run: (args: T, context: ReducerContext) => Value
 ): FnDefinition {
   return {
     inputs,
@@ -37,9 +28,8 @@ export function makeDefinition<const T extends any[]>(
 export function tryCallFnDefinition(
   fn: FnDefinition,
   args: Value[],
-  context: ReducerContext,
-  reducerFn: ReducerFn
-): result<Value, ErrorMessage> | undefined {
+  context: ReducerContext
+): Value | undefined {
   if (args.length !== fn.inputs.length) {
     return; // args length mismatch
   }
@@ -52,7 +42,7 @@ export function tryCallFnDefinition(
     }
     unpackedArgs.push(unpackedArg);
   }
-  return fn.run(unpackedArgs, context, reducerFn);
+  return fn.run(unpackedArgs, context);
 }
 
 export function fnDefinitionToString(fn: FnDefinition): string {

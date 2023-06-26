@@ -1,42 +1,54 @@
 import isInteger from "lodash/isInteger.js";
 
 import { BaseDist } from "../dist/BaseDist.js";
-import { Namespace } from "../reducer/bindings.js";
 import {
-  declarationToString,
-  LambdaDeclaration,
-} from "../reducer/declaration.js";
-import {
-  ErrorMessage,
   REArrayIndexNotFound,
   REOther,
   RERecordPropertyNotFound,
-} from "../errors.js";
+} from "../errors/messages.js";
+import {
+  LambdaDeclaration,
+  declarationToString,
+} from "../reducer/declaration.js";
 import { Lambda } from "../reducer/lambda.js";
 import * as DateTime from "../utility/DateTime.js";
+import { ImmutableMap } from "../utility/immutableMap.js";
 
-export type ValueMap = Namespace;
+export type ValueMap = ImmutableMap<string, Value>;
 
 // Mixin for values that allow field lookups; just for type safety.
 type Indexable = {
   get(key: Value): Value;
 };
 
+abstract class BaseValue {
+  abstract type: string;
+
+  clone() {
+    return Object.assign(Object.create(Object.getPrototypeOf(this)), this);
+  }
+
+  abstract toString(): string;
+}
+
 /*
 Value classes are shaped in a similar way and can work as discriminated unions thank to the `type` property.
 
 `type` property is currently stored on instances; that creates some memory overhead, but it's hard to store it in prototype in a type-safe way.
 
-Also, it's important that `type` is declared "as const"; otherwise unions won't work properly.
+Also, it's important that `type` is declared as readonly (or `as const`, but readonly is enough); otherwise unions won't work properly.
 
 If you add a new value class, don't forget to add it to the "Value" union type below.
 
 "vBlah" functions are just for the sake of brevity, so that we don't have to prefix any value creation with "new".
 */
 
-class VArray implements Indexable {
-  readonly type = "Array" as const;
-  constructor(public value: Value[]) {}
+class VArray extends BaseValue implements Indexable {
+  readonly type = "Array";
+
+  constructor(public value: Value[]) {
+    super();
+  }
   toString(): string {
     return "[" + this.value.map((v) => v.toString()).join(",") + "]";
   }
@@ -72,27 +84,36 @@ class VArray implements Indexable {
 }
 export const vArray = (v: Value[]) => new VArray(v);
 
-class VBool {
-  readonly type = "Bool" as const;
-  constructor(public value: boolean) {}
+class VBool extends BaseValue {
+  readonly type = "Bool";
+
+  constructor(public value: boolean) {
+    super();
+  }
   toString() {
     return String(this.value);
   }
 }
 export const vBool = (v: boolean) => new VBool(v);
 
-class VDate {
-  readonly type = "Date" as const;
-  constructor(public value: Date) {}
+class VDate extends BaseValue {
+  readonly type = "Date";
+
+  constructor(public value: Date) {
+    super();
+  }
   toString() {
     return DateTime.Date.toString(this.value);
   }
 }
 export const vDate = (v: Date) => new VDate(v);
 
-class VDeclaration implements Indexable {
-  readonly type = "Declaration" as const;
-  constructor(public value: LambdaDeclaration) {}
+class VDeclaration extends BaseValue implements Indexable {
+  readonly type = "Declaration";
+
+  constructor(public value: LambdaDeclaration) {
+    super();
+  }
   toString() {
     return declarationToString(this.value, (f) => vLambda(f).toString());
   }
@@ -106,45 +127,60 @@ class VDeclaration implements Indexable {
 }
 export const vLambdaDeclaration = (v: LambdaDeclaration) => new VDeclaration(v);
 
-class VDist {
-  readonly type = "Dist" as const;
-  constructor(public value: BaseDist) {}
+class VDist extends BaseValue {
+  readonly type = "Dist";
+
+  constructor(public value: BaseDist) {
+    super();
+  }
   toString() {
     return this.value.toString();
   }
 }
 export const vDist = (v: BaseDist) => new VDist(v);
 
-class VLambda {
-  type = "Lambda" as const;
-  constructor(public value: Lambda) {}
+class VLambda extends BaseValue {
+  readonly type = "Lambda";
+
+  constructor(public value: Lambda) {
+    super();
+  }
   toString() {
     return this.value.toString();
   }
 }
 export const vLambda = (v: Lambda) => new VLambda(v);
 
-class VNumber {
-  readonly type = "Number" as const;
-  constructor(public value: number) {}
+class VNumber extends BaseValue {
+  readonly type = "Number";
+
+  constructor(public value: number) {
+    super();
+  }
   toString() {
     return String(this.value);
   }
 }
 export const vNumber = (v: number) => new VNumber(v);
 
-class VString {
-  readonly type = "String" as const;
-  constructor(public value: string) {}
+class VString extends BaseValue {
+  readonly type = "String";
+
+  constructor(public value: string) {
+    super();
+  }
   toString() {
     return `'${this.value}'`;
   }
 }
 export const vString = (v: string) => new VString(v);
 
-class VRecord implements Indexable {
-  readonly type = "Record" as const;
-  constructor(public value: ValueMap) {}
+class VRecord extends BaseValue implements Indexable {
+  readonly type = "Record";
+
+  constructor(public value: ValueMap) {
+    super();
+  }
   toString(): string {
     return (
       "{" +
@@ -172,17 +208,24 @@ class VRecord implements Indexable {
 }
 export const vRecord = (v: ValueMap) => new VRecord(v);
 
-class VTimeDuration {
-  readonly type = "TimeDuration" as const;
-  constructor(public value: number) {}
+class VTimeDuration extends BaseValue {
+  readonly type = "TimeDuration";
+
+  constructor(public value: number) {
+    super();
+  }
   toString() {
     return DateTime.Duration.toString(this.value);
   }
 }
 export const vTimeDuration = (v: number) => new VTimeDuration(v);
 
-class VVoid {
-  readonly type = "Void" as const;
+class VVoid extends BaseValue {
+  readonly type = "Void";
+
+  constructor() {
+    super();
+  }
   toString() {
     return "()";
   }
@@ -230,9 +273,12 @@ export type Plot =
       ids: string[];
     };
 
-class VPlot implements Indexable {
-  readonly type = "Plot" as const;
-  constructor(public value: Plot) {}
+class VPlot extends BaseValue implements Indexable {
+  readonly type = "Plot";
+
+  constructor(public value: Plot) {
+    super();
+  }
 
   toString(): string {
     switch (this.value.type) {
@@ -291,9 +337,12 @@ export type Scale = CommonScaleArgs &
       }
   );
 
-class VScale {
-  readonly type = "Scale" as const;
-  constructor(public value: Scale) {}
+class VScale extends BaseValue {
+  readonly type = "Scale";
+
+  constructor(public value: Scale) {
+    super();
+  }
 
   toString(): string {
     switch (this.value.type) {

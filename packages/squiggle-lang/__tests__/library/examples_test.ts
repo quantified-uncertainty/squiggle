@@ -3,8 +3,8 @@ import { evaluateStringToResult } from "../../src/reducer/index.js";
 
 test.each(registry.allExamplesWithFns())(
   "tests of example $example",
-  ({ fn, example }) => {
-    const result = evaluateStringToResult(example);
+  async ({ fn, example }) => {
+    const result = await evaluateStringToResult(example);
     expect(result.ok).toBe(true);
 
     if (!result.ok) {

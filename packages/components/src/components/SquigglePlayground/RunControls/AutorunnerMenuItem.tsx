@@ -1,15 +1,19 @@
 import React from "react";
+
+import { BoltIcon, PauseIcon } from "@quri/ui";
+
 import { MenuItem } from "../MenuItem.js";
-
-import { PauseIcon, BoltIcon } from "@quri/ui";
-
 import { RunnerState } from "./useRunnerState.js";
 
 export const AutorunnerMenuItem: React.FC<RunnerState> = ({
   setAutorunMode,
   autorunMode,
 }) => (
-  <div data-testid="autorun-controls" aria-checked={autorunMode}>
+  <div
+    data-testid="autorun-controls"
+    className="h-full"
+    aria-checked={autorunMode}
+  >
     <MenuItem
       tooltipText={"Triggers runs on code changes"}
       icon={autorunMode ? BoltIcon : PauseIcon}

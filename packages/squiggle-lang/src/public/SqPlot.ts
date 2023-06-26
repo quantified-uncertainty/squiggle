@@ -8,29 +8,29 @@ import {
   SqSampleSetDistribution,
   wrapDistribution,
 } from "./SqDistribution.js";
-import { SqError } from "./SqError.js";
+import { SqError, SqOtherError } from "./SqError.js";
 import { SqLambda } from "./SqLambda.js";
 import { SqScale, wrapScale } from "./SqScale.js";
 import { SqPlotValue } from "./SqValue.js";
-import { SqValueLocation } from "./SqValueLocation.js";
+import { SqValuePath } from "./SqValuePath.js";
 
 type LabeledSqDistribution = {
   name?: string;
   distribution: SqDistribution;
 };
 
-export const wrapPlot = (value: Plot, location?: SqValueLocation): SqPlot => {
+export const wrapPlot = (value: Plot, path?: SqValuePath): SqPlot => {
   switch (value.type) {
     case "distributions":
-      return new SqDistributionsPlot(value, location);
+      return new SqDistributionsPlot(value, path);
     case "numericFn":
-      return new SqNumericFnPlot(value, location);
+      return new SqNumericFnPlot(value, path);
     case "distFn":
-      return new SqDistFnPlot(value, location);
+      return new SqDistFnPlot(value, path);
     case "scatter":
-      return new SqScatterPlot(value, location);
+      return new SqScatterPlot(value, path);
     case "relativeValues":
-      return new SqRelativeValuesPlot(value, location);
+      return new SqRelativeValuesPlot(value, path);
   }
 };
 
@@ -39,7 +39,7 @@ abstract class SqAbstractPlot<T extends Plot["type"]> {
 
   constructor(
     protected _value: Extract<Plot, { type: T }>,
-    public location?: SqValueLocation
+    public path?: SqValuePath
   ) {}
 
   toString() {
@@ -47,7 +47,7 @@ abstract class SqAbstractPlot<T extends Plot["type"]> {
   }
 
   asValue() {
-    return new SqPlotValue(vPlot(this._value), this.location);
+    return new SqPlotValue(vPlot(this._value), this.path);
   }
 }
 
@@ -103,7 +103,7 @@ export class SqDistributionsPlot extends SqAbstractPlot<"distributions"> {
 
 export class SqNumericFnPlot extends SqAbstractPlot<"numericFn"> {
   tag = "numericFn" as const;
-  // Necessary because wrapped fn location is different based on whether this is a real `Plot.fn` or a wrapper in the components.
+  // Necessary because wrapped fn path is different based on whether this is a real `Plot.fn` or a wrapper in the components.
   // This can be removed when we get direct lambda evaluation back.
   private createdProgrammatically: boolean = false;
 
@@ -126,7 +126,7 @@ export class SqNumericFnPlot extends SqAbstractPlot<"numericFn"> {
         yScale: yScale._value,
         points,
       },
-      fn.location
+      fn.path
     );
     result.createdProgrammatically = true;
     return result;
@@ -135,13 +135,10 @@ export class SqNumericFnPlot extends SqAbstractPlot<"numericFn"> {
   get fn() {
     return new SqLambda(
       this._value.fn,
-      this.location
+      this.path
         ? this.createdProgrammatically
-          ? this.location
-          : new SqValueLocation(this.location.project, this.location.sourceId, {
-              ...this.location.path,
-              items: [...this.location.path.items, "fn"],
-            })
+          ? this.path
+          : this.path.extend("fn")
         : undefined
     );
   }
@@ -187,7 +184,7 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
         distXScale: distXScale._value,
         points,
       },
-      fn.location
+      fn.path
     );
     result.createdProgrammatically = true;
     return result;
@@ -196,13 +193,10 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
   get fn() {
     return new SqLambda(
       this._value.fn,
-      this.location
+      this.path
         ? this.createdProgrammatically
-          ? this.location
-          : new SqValueLocation(this.location.project, this.location.sourceId, {
-              ...this.location.path,
-              items: [...this.location.path.items, "fn"],
-            })
+          ? this.path
+          : this.path.extend("fn")
         : undefined
     );
   }
@@ -233,9 +227,7 @@ export class SqScatterPlot extends SqAbstractPlot<"scatter"> {
   ): Result.result<SqSampleSetDistribution, SqError> {
     const sampleSetResult = SampleSetDist.fromDist(dist, env);
     if (!sampleSetResult.ok) {
-      return Result.Err(
-        SqError.createOtherError("Conversion to SampleSet failed")
-      );
+      return Result.Err(new SqOtherError("Conversion to SampleSet failed"));
     }
     return Result.Ok(new SqSampleSetDistribution(sampleSetResult.value));
   }
@@ -283,12 +275,7 @@ export class SqRelativeValuesPlot extends SqAbstractPlot<"relativeValues"> {
   get fn(): SqLambda {
     return new SqLambda(
       this._value.fn,
-      this.location
-        ? new SqValueLocation(this.location.project, this.location.sourceId, {
-            ...this.location.path,
-            items: [...this.location.path.items, "fn"],
-          })
-        : undefined
+      this.path ? this.path.extend("fn") : undefined
     );
   }
 }
