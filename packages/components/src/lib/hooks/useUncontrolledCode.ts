@@ -17,5 +17,5 @@ export function useUncontrolledCode({
     [onCodeChange]
   );
 
-  return [code, onChange] as const;
+  return { code, setCode: onChange, defaultCode };
 }

@@ -69,7 +69,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     height = 500,
     showEditor = true,
   } = props;
-  const [code, setCode] = useUncontrolledCode(props);
+  const { code, setCode, defaultCode } = useUncontrolledCode(props);
   const { ref: fullContainerRef, width: initialWidth } = useInitialWidth();
 
   const defaultValues: PlaygroundSettings = merge(
@@ -152,7 +152,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
       <div data-testid="squiggle-editor">
         <CodeEditor
           ref={editorRef}
-          value={code}
+          defaultValue={defaultCode}
           errors={errors}
           project={project}
           sourceId={sourceId}
@@ -211,9 +211,12 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
       <ResizableBox
         className={clsx("relative", !initialWidth && "w-1/2")}
         width={
-          initialWidth === undefined
-            ? (null as any) // we intentionally pass the invalid value to ResizableBox when initialWidth is not set yet
-            : initialWidth / 2
+          /* We intentionally pass the invalid value to ResizableBox when initialWidth is not set yet.
+           * This causes warnings in development.
+           * See also: https://github.com/quantified-uncertainty/squiggle/issues/1934
+           */
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          initialWidth === undefined ? (null as any) : initialWidth / 2
         }
         axis="x"
         resizeHandles={["e"]}

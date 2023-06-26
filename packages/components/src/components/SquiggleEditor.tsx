@@ -12,7 +12,7 @@ export type SquiggleEditorProps = SquiggleCodeProps & {
 } & Omit<SquiggleViewerProps, "result">;
 
 export const SquiggleEditor: FC<SquiggleEditorProps> = (props) => {
-  const [code, setCode] = useUncontrolledCode(props);
+  const { code, setCode, defaultCode } = useUncontrolledCode(props);
 
   const [squiggleOutput, { project }] = useSquiggle({ ...props, code });
 
@@ -30,7 +30,7 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = (props) => {
         data-testid="squiggle-editor"
       >
         <CodeEditor
-          value={code}
+          defaultValue={defaultCode}
           onChange={setCode}
           showGutter={false}
           errors={errors}

@@ -8,7 +8,9 @@ import {
 } from "@codemirror/language";
 import { styleTags, tags as t } from "@lezer/highlight";
 import { snippetCompletion, CompletionContext } from "@codemirror/autocomplete";
+
 import { SqProject } from "@quri/squiggle-lang";
+
 import { parser } from "./generated/squiggle.js";
 
 export function squiggleLanguageSupport(project: SqProject) {
@@ -88,7 +90,6 @@ export function squiggleLanguageSupport(project: SqProject) {
               return {
                 from: lambda.from,
                 options: [
-                  /*eslint no-template-curly-in-string: "off"*/
                   snippetCompletion("|${args}| ${body}", {
                     label: "|",
                     detail: "lambda function",
