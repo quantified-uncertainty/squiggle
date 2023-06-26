@@ -221,14 +221,6 @@ export const DistributionSettingsForm: React.FC<{
           name="distributionChartSettings.maxX"
           label="Max X Value"
         />
-        <TextFormField<PlaygroundSettings>
-          name="distributionChartSettings.title"
-          label="Title"
-        />
-        <TextFormField<PlaygroundSettings>
-          name="distributionChartSettings.tickFormat"
-          label="Tick Format"
-        />
       </div>
     </FormSection>
   );
