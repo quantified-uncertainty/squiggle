@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { clsx } from "clsx";
 import merge from "lodash/merge.js";
 import React, {
   CSSProperties,
@@ -11,17 +10,12 @@ import React, {
   useState,
 } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { ResizableBox } from "react-resizable";
 import { z } from "zod";
 
 import { Env } from "@quri/squiggle-lang";
 import { AdjustmentsVerticalIcon, Bars3CenterLeftIcon, Button } from "@quri/ui";
 
-import {
-  useInitialWidth,
-  useSquiggle,
-  useUncontrolledCode,
-} from "../../lib/hooks/index.js";
+import { useSquiggle, useUncontrolledCode } from "../../lib/hooks/index.js";
 import { getErrors, getValueToRender, isMac } from "../../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "../CodeEditor.js";
 import {
@@ -37,6 +31,7 @@ import {
 } from "../SquiggleViewer/index.js";
 import { SquiggleCodeProps } from "../types.js";
 import { MenuItem } from "./MenuItem.js";
+import { ResizableTwoPanelLayout } from "./ResizableTwoPanelLayout.js";
 import { AutorunnerMenuItem } from "./RunControls/AutorunnerMenuItem.js";
 import { RunMenuItem } from "./RunControls/RunMenuItem.js";
 import { useRunnerState } from "./RunControls/useRunnerState.js";
@@ -46,8 +41,6 @@ type PlaygroundProps = // Playground can be either controlled (`code`) or uncont
     PartialPlaygroundSettings & {
       /* When settings change */
       onSettingsChange?(settings: PlaygroundSettings): void;
-      /** Should we show the editor? */
-      showEditor?: boolean;
       /** Allows to inject extra buttons, e.g. share button on the website, or save button in Squiggle Hub */
       renderExtraControls?: () => ReactNode;
       /** Height of the editor */
@@ -62,23 +55,17 @@ export const PlaygroundContext = React.createContext<PlaygroundContextShape>({
   getLeftPanelElement: () => undefined,
 });
 
+type Tab = "CODE" | "SETTINGS";
+
 export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
-  const {
-    onSettingsChange,
-    renderExtraControls,
-    height = 500,
-    showEditor = true,
-  } = props;
+  const { onSettingsChange, renderExtraControls, height = 500 } = props;
   const { code, setCode, defaultCode } = useUncontrolledCode(props);
-  const { ref: fullContainerRef, width: initialWidth } = useInitialWidth();
 
   const defaultValues: PlaygroundSettings = merge(
     {},
     defaultPlaygroundSettings,
     Object.fromEntries(Object.entries(props).filter(([, v]) => v !== undefined))
   );
-
-  type Tab = "CODE" | "SETTINGS";
 
   const [selectedTab, setSelectedTab] = useState<Tab>("CODE");
 
@@ -101,24 +88,13 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     return () => subscription.unsubscribe();
   }, [form, onSettingsChange]);
 
-  const environment: Env = useMemo(
-    () => ({
-      sampleCount: settings.renderingSettings.sampleCount,
-      xyPointLength: settings.renderingSettings.xyPointLength,
-    }),
-    [
-      settings.renderingSettings.sampleCount,
-      settings.renderingSettings.xyPointLength,
-    ]
-  );
-
   const runnerState = useRunnerState(code);
 
   const [squiggleOutput, { project, isRunning, sourceId }] = useSquiggle({
     ...props,
     code: runnerState.renderedCode,
     executionId: runnerState.executionId,
-    environment,
+    environment: settings.renderingSettings,
   });
 
   const errors = useMemo(() => {
@@ -130,22 +106,6 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
 
   const editorRef = useRef<CodeEditorHandle>(null);
   const viewerRef = useRef<SquiggleViewerHandle>(null);
-
-  const squiggleChart =
-    runnerState.renderedCode === "" || !squiggleOutput ? null : (
-      <div className="relative">
-        {isRunning ? (
-          <div className="absolute inset-0 bg-white opacity-0 animate-semi-appear" />
-        ) : null}
-        <SquiggleViewer
-          {...settings}
-          ref={viewerRef}
-          localSettingsEnabled={true}
-          result={getValueToRender(squiggleOutput)}
-          editor={editorRef.current ?? undefined}
-        />
-      </div>
-    );
 
   const leftPanelBody =
     selectedTab === "CODE" ? (
@@ -183,9 +143,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
       <AutorunnerMenuItem {...runnerState} />
       <MenuItem
         onClick={() =>
-          selectedTab !== "SETTINGS"
-            ? setSelectedTab("SETTINGS")
-            : setSelectedTab("CODE")
+          setSelectedTab(selectedTab === "SETTINGS" ? "CODE" : "SETTINGS")
         }
         icon={AdjustmentsVerticalIcon}
         tooltipText="Configuration"
@@ -201,70 +159,64 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     </div>
   );
 
-  const showTime = (executionTime) =>
-    executionTime > 1000
-      ? `${(executionTime / 1000).toFixed(2)}s`
-      : `${executionTime}ms`;
+  const getLeftPanelElement = useCallback(
+    () => leftPanelRef.current ?? undefined,
+    []
+  );
 
-  const playgroundWithEditor = (
-    <div className="flex h-full items-stretch">
-      <ResizableBox
-        className={clsx("relative", !initialWidth && "w-1/2")}
-        width={
-          /* We intentionally pass the invalid value to ResizableBox when initialWidth is not set yet.
-           * This causes warnings in development.
-           * See also: https://github.com/quantified-uncertainty/squiggle/issues/1934
-           */
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          initialWidth === undefined ? (null as any) : initialWidth / 2
-        }
-        axis="x"
-        resizeHandles={["e"]}
-        handle={(_, ref) => (
-          <div
-            ref={ref}
-            // we don't use react-resizable original styles, it's easier to style this manually
-            className="absolute top-0 h-full border-l border-slate-300 hover:border-blue-500 transition cursor-ew-resize"
-            style={{ width: 5, right: -5 }}
-          />
-        )}
-      >
-        <div className="h-full flex flex-col" ref={leftPanelRef}>
-          {leftPanelHeader}
-          <div className="flex-1 grid place-content-stretch overflow-auto">
-            {leftPanelBody}
-          </div>
-        </div>
-      </ResizableBox>
-      <div className="flex-1 flex flex-col overflow-y-auto">
-        <div className="mb-1 h-8 p-2 flex justify-end text-zinc-400 text-sm whitespace-nowrap">
-          {isRunning
-            ? "rendering..."
-            : squiggleOutput
-            ? `render #${squiggleOutput.executionId} in ${showTime(
-                squiggleOutput.executionTime
-              )}`
-            : null}
-        </div>
-        <div
-          className="flex-1 overflow-auto p-2"
-          data-testid="playground-result"
-        >
-          {squiggleChart}
-        </div>
+  const renderLeft = () => (
+    <div className="h-full flex flex-col" ref={leftPanelRef}>
+      {leftPanelHeader}
+      <div className="flex-1 grid place-content-stretch overflow-auto">
+        {leftPanelBody}
       </div>
     </div>
   );
 
-  const getLeftPanelElement = useCallback(() => {
-    return leftPanelRef.current ?? undefined;
-  }, []);
+  const squiggleViewer = squiggleOutput?.code ? (
+    <div className="relative">
+      {isRunning ? (
+        <div className="absolute inset-0 bg-white opacity-0 animate-semi-appear" />
+      ) : null}
+      <SquiggleViewer
+        {...settings}
+        ref={viewerRef}
+        localSettingsEnabled={true}
+        result={getValueToRender(squiggleOutput)}
+        editor={editorRef.current ?? undefined}
+      />
+    </div>
+  ) : null;
+
+  const showTime = (executionTime: number) =>
+    executionTime > 1000
+      ? `${(executionTime / 1000).toFixed(2)}s`
+      : `${executionTime}ms`;
+
+  const renderRight = () => (
+    <div className="flex flex-col overflow-y-auto">
+      <div className="mb-1 h-8 p-2 flex justify-end text-zinc-400 text-sm whitespace-nowrap">
+        {isRunning
+          ? "rendering..."
+          : squiggleOutput
+          ? `render #${squiggleOutput.executionId} in ${showTime(
+              squiggleOutput.executionTime
+            )}`
+          : null}
+      </div>
+      <div className="flex-1 overflow-auto p-2" data-testid="playground-result">
+        {squiggleViewer}
+      </div>
+    </div>
+  );
 
   return (
     <PlaygroundContext.Provider value={{ getLeftPanelElement }}>
-      <div ref={fullContainerRef} style={{ height }}>
-        {showEditor ? playgroundWithEditor : squiggleChart}
-      </div>
+      <ResizableTwoPanelLayout
+        height={height}
+        renderLeft={renderLeft}
+        renderRight={renderRight}
+      />
     </PlaygroundContext.Provider>
   );
 };
