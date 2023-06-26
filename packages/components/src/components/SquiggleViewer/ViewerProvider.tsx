@@ -10,7 +10,7 @@ import {
   useState,
 } from "react";
 
-import { SqValuePath } from "@quri/squiggle-lang";
+import { SqValue, SqValuePath } from "@quri/squiggle-lang";
 
 import {
   PartialPlaygroundSettings,
@@ -19,6 +19,7 @@ import {
 import {
   LocalItemSettings,
   MergedItemSettings,
+  getChildrenValues,
   pathAsString,
 } from "./utils.js";
 import { CodeEditorHandle } from "../CodeEditor.js";
@@ -37,6 +38,10 @@ type Action =
     }
   | {
       type: "UNFOCUS";
+    }
+  | {
+      type: "COLLAPSE_CHILDREN";
+      payload: SqValue;
     }
   | {
       type: "SCROLL_TO_PATH";
@@ -120,6 +125,16 @@ export function useUnfocus() {
   return () => dispatch({ type: "UNFOCUS" });
 }
 
+export function useCollapseChildren() {
+  const { dispatch } = useViewerContext();
+  return (value: SqValue) => {
+    dispatch({
+      type: "COLLAPSE_CHILDREN",
+      payload: value,
+    });
+  };
+}
+
 export function useIsFocused(location: SqValuePath) {
   const { focused } = useViewerContext();
   return !!focused && pathAsString(focused) === pathAsString(location);
@@ -181,6 +196,14 @@ export const ViewerProvider: FC<
     [globalSettings, getSettings]
   );
 
+  const setCollapsed = (path: SqValuePath, isCollapsed: boolean) => {
+    const ref = settingsStoreRef.current[pathAsString(path)];
+    settingsStoreRef.current[pathAsString(path)] = {
+      ...ref,
+      collapsed: isCollapsed,
+    };
+  };
+
   const dispatch = useCallback(
     (action: Action) => {
       switch (action.type) {
@@ -194,6 +217,13 @@ export const ViewerProvider: FC<
         case "UNFOCUS":
           setFocused(undefined);
           return;
+        case "COLLAPSE_CHILDREN": {
+          const children = getChildrenValues(action.payload);
+          for (const child of children) {
+            child.path && setCollapsed(child.path, true);
+          }
+          return;
+        }
         case "SCROLL_TO_PATH":
           itemHandlesStoreRef.current[
             pathAsString(action.payload.path)

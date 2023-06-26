@@ -6,12 +6,14 @@ import { TriangleIcon, CodeBracketIcon, TextTooltip } from "@quri/ui";
 import {
   LocalItemSettings,
   pathToShortName,
+  getChildrenValues,
   MergedItemSettings,
 } from "./utils.js";
 import {
   useFocus,
   useIsFocused,
   useSetSettings,
+  useCollapseChildren,
   useViewerContext,
 } from "./ViewerProvider.js";
 import { clsx } from "clsx";
@@ -26,7 +28,6 @@ type VariableBoxProps = {
   value: SqValue;
   heading: string;
   preview?: ReactNode;
-  childrenLength?: number;
   renderSettingsMenu?: (params: SettingsMenuParams) => ReactNode;
   children: (settings: MergedItemSettings) => ReactNode;
 };
@@ -41,15 +42,21 @@ export const SqTypeWithCount: FC<{
   </div>
 );
 
+//I'm unsure what good defaults will be here. These are heuristics.
+const makeInitialSettings = (childrenLength: number, isRoot: boolean) => ({
+  beCollapsed: !isRoot && childrenLength > 5,
+  collapseChildren: childrenLength > 10,
+});
+
 export const VariableBox: FC<VariableBoxProps> = ({
   value,
   heading = "Error",
   preview,
   renderSettingsMenu,
-  childrenLength = 0,
   children,
 }) => {
   const setSettings = useSetSettings();
+  const collapseChildren = useCollapseChildren();
   const focus = useFocus();
   const { editor, getSettings, getMergedSettings, dispatch } =
     useViewerContext();
@@ -68,14 +75,20 @@ export const VariableBox: FC<VariableBoxProps> = ({
 
   const { path } = value;
   const isRoot = Boolean(path?.isRoot());
+  const childrenElements = getChildrenValues(value);
+  const initialSettings = makeInitialSettings(childrenElements.length, isRoot);
 
   if (!path) {
     throw new Error("Can't display a pathless value");
   }
 
+  initialSettings.collapseChildren && collapseChildren(value);
+
   const isFocused = path && useIsFocused(path);
 
-  const defaults: LocalItemSettings = { collapsed: childrenLength > 9 };
+  const defaults: LocalItemSettings = {
+    collapsed: initialSettings.beCollapsed,
+  };
   const settings = getSettings({ path, defaults });
 
   const getAdjustedMergedSettings = (path: SqValuePath) => {
@@ -122,8 +135,9 @@ export const VariableBox: FC<VariableBoxProps> = ({
   const isCollapsed = isFocused ? false : settings.collapsed;
   const shouldShowTriangleToggle = !isFocused;
   const shouldShowLeftHeaderPreview = !isFocused && !!preview;
+  const shouldShowRightHeaderItems = !settings.collapsed || isFocused;
   const shouldShowRightHeaderString = Boolean(
-    !settings.collapsed && path.items.length
+    shouldShowRightHeaderItems && path.items.length
   );
   const shouldShowRightHeaderFindInEditor = !isRoot;
   const showOpenedLeftSidebar = Boolean(
@@ -185,7 +199,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
                 {heading}
               </div>
             )}
-            {!settings.collapsed &&
+            {shouldShowRightHeaderItems &&
               renderSettingsMenu?.({ onChange: forceUpdate })}
           </div>
         </header>

@@ -19,22 +19,16 @@ import { ScatterChart } from "../ScatterChart/index.js";
 import { generateDistributionPlotSettings } from "../PlaygroundSettings.js";
 import { ItemSettingsMenu } from "./ItemSettingsMenu.js";
 import { SqTypeWithCount, VariableBox } from "./VariableBox.js";
-import { MergedItemSettings } from "./utils.js";
+import { MergedItemSettings, getChildrenValues } from "./utils.js";
 import { RelativeValuesGridChart } from "../RelativeValuesGridChart/index.js";
 
 const VariableList: React.FC<{
   value: SqValue;
   heading: string;
   preview?: React.ReactNode;
-  childrenLength: number;
   children: (settings: MergedItemSettings) => React.ReactNode;
-}> = ({ value, heading, childrenLength, children, preview }) => (
-  <VariableBox
-    value={value}
-    preview={preview}
-    heading={heading}
-    childrenLength={childrenLength}
-  >
+}> = ({ value, heading, children, preview }) => (
+  <VariableBox value={value} preview={preview} heading={heading}>
     {(settings) => (
       <div
         className={clsx(
@@ -252,42 +246,33 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
       );
     }
     case "Record": {
-      const entries = value.value.entries();
+      const entries = getChildrenValues(value);
       return (
         <VariableList
           value={value}
           heading={`Record(${entries.length})`}
           preview={<SqTypeWithCount type="{}" count={entries.length} />}
-          childrenLength={entries.length}
         >
-          {() => {
-            if (!entries.length) {
-              return <div className="text-neutral-400">Empty record</div>;
-            }
-            return entries.map(([key, r]) => (
-              <ExpressionViewer key={key} value={r} />
-            ));
-          }}
+          {() => entries.map((r, i) => <ExpressionViewer key={i} value={r} />)}
         </VariableList>
       );
     }
     case "Array": {
-      const values = value.value.getValues();
-      const length = values.length;
+      const entries = getChildrenValues(value);
+      const length = entries.length;
       return (
         <VariableList
           value={value}
-          childrenLength={length}
           heading={`List(${length})`}
           preview={<SqTypeWithCount type="[]" count={length} />}
         >
-          {() => values.map((r, i) => <ExpressionViewer key={i} value={r} />)}
+          {() => entries.map((r, i) => <ExpressionViewer key={i} value={r} />)}
         </VariableList>
       );
     }
     default: {
       return (
-        <VariableList value={value} heading="Error" childrenLength={0}>
+        <VariableList value={value} heading="Error">
           {() => (
             <div>
               <span>No display for type: </span>{" "}
