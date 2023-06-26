@@ -178,7 +178,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
           </div>
           <div className="inline-flex space-x-1">
             {shouldShowRightHeaderString && (
-              <div className="text-stone-400 group-hover:text-stone-600 text-sm">
+              <div className="text-stone-400 group-hover:text-stone-600 text-sm transition">
                 {heading}
               </div>
             )}

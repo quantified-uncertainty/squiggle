@@ -68,11 +68,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
       return (
         <VariableBox
           value={value}
-          heading={`Distribution (${distType})\n${
-            distType === SqDistributionTag.Symbolic
-              ? value.value.toString()
-              : ""
-          }`}
+          heading={`${distType} Distribution`}
           renderSettingsMenu={({ onChange }) => {
             const shape = value.path
               ? value.value.pointSet(value.path.project.getEnvironment())
