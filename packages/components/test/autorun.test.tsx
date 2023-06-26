@@ -7,7 +7,9 @@ import { SquigglePlayground } from "../src/index.js";
 test("Autorun is default", async () => {
   act(() => render(<SquigglePlayground defaultCode="70*30" />));
   await waitFor(() =>
-    expect(screen.getByTestId("playground-result")).toHaveTextContent("2100")
+    expect(screen.getByTestId("dynamic-viewer-result")).toHaveTextContent(
+      "2100"
+    )
   );
 });
 
@@ -21,7 +23,9 @@ test("Autorun can be switched off", async () => {
   );
 
   await waitFor(() =>
-    expect(screen.getByTestId("playground-result")).toHaveTextContent("2100")
+    expect(screen.getByTestId("dynamic-viewer-result")).toHaveTextContent(
+      "2100"
+    )
   );
 
   await act(

@@ -47,7 +47,9 @@ test("Project dependencies work in editors", async () => {
   await waitFor(() => expect(project.getSourceIds().length).toBe(2));
 
   await waitFor(() =>
-    expect(rendered.getByTestId("editor-result")).toHaveTextContent("579")
+    expect(rendered.getByTestId("dynamic-viewer-result")).toHaveTextContent(
+      "579"
+    )
   );
 });
 
@@ -64,6 +66,8 @@ test("Project dependencies work in playgrounds", async () => {
   );
   // We must await here because SquigglePlayground loads results asynchronously
   await waitFor(() =>
-    expect(rendered.getByTestId("playground-result")).toHaveTextContent("579")
+    expect(rendered.getByTestId("dynamic-viewer-result")).toHaveTextContent(
+      "579"
+    )
   );
 });

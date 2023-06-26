@@ -45,7 +45,7 @@ export const ResizableTwoPanelLayout: FC<Props> = ({
       >
         {renderLeft()}
       </ResizableBox>
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-y-auto">
         {renderRight()}
       </div>
     </div>

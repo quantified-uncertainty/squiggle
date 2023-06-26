@@ -1,20 +1,41 @@
-import { FC, useMemo } from "react";
+import { FC, useMemo, useRef } from "react";
 
-import { useSquiggle } from "../lib/hooks/useSquiggle.js";
-import { getErrors, getValueToRender } from "../lib/utility.js";
-import { CodeEditor } from "./CodeEditor.js";
-import { SquiggleViewer, SquiggleViewerProps } from "./SquiggleViewer/index.js";
-import { SquiggleCodeProps } from "./types.js";
 import { useUncontrolledCode } from "../lib/hooks/index.js";
+import { useSquiggle } from "../lib/hooks/useSquiggle.js";
+import { getErrors } from "../lib/utility.js";
+import { CodeEditor, CodeEditorHandle } from "./CodeEditor.js";
+import { DynamicSquiggleViewer } from "./DynamicSquiggleViewer.js";
+import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
+import { SquiggleCodeProps } from "./types.js";
+import { useRunnerState } from "./SquigglePlayground/RunControls/useRunnerState.js";
 
 export type SquiggleEditorProps = SquiggleCodeProps & {
   hideViewer?: boolean;
-} & Omit<SquiggleViewerProps, "result">;
+  localSettingsEnabled?: boolean;
+} & PartialPlaygroundSettings;
 
-export const SquiggleEditor: FC<SquiggleEditorProps> = (props) => {
-  const { code, setCode, defaultCode } = useUncontrolledCode(props);
+export const SquiggleEditor: FC<SquiggleEditorProps> = ({
+  defaultCode: propsDefaultCode,
+  onCodeChange,
+  project: propsProject,
+  continues,
+  hideViewer,
+  localSettingsEnabled,
+  ...settings
+}) => {
+  const { code, setCode, defaultCode } = useUncontrolledCode({
+    defaultCode: propsDefaultCode,
+    onCodeChange,
+  });
 
-  const [squiggleOutput, { project }] = useSquiggle({ ...props, code });
+  const runnerState = useRunnerState(code);
+
+  const [squiggleOutput, { project, isRunning }] = useSquiggle({
+    code: runnerState.renderedCode,
+    executionId: runnerState.executionId,
+    project: propsProject,
+    continues,
+  });
 
   const errors = useMemo(() => {
     if (!squiggleOutput) {
@@ -23,6 +44,8 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = (props) => {
     return getErrors(squiggleOutput.result);
   }, [squiggleOutput]);
 
+  const editorRef = useRef<CodeEditorHandle>(null);
+
   return (
     <div>
       <div
@@ -30,20 +53,21 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = (props) => {
         data-testid="squiggle-editor"
       >
         <CodeEditor
-          defaultValue={defaultCode}
+          defaultValue={defaultCode ?? ""}
           onChange={setCode}
           showGutter={false}
           errors={errors}
           project={project}
+          ref={editorRef}
         />
       </div>
-      {props.hideViewer || !squiggleOutput ? null : (
-        <div data-testid="editor-result">
-          <SquiggleViewer
-            result={getValueToRender(squiggleOutput)}
-            {...props}
-          />
-        </div>
+      {hideViewer || !squiggleOutput?.code ? null : (
+        <DynamicSquiggleViewer
+          squiggleOutput={squiggleOutput}
+          localSettingsEnabled={localSettingsEnabled}
+          isRunning={isRunning}
+          {...settings}
+        />
       )}
     </div>
   );

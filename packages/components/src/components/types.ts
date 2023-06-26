@@ -8,5 +8,8 @@ export type SquiggleCodeProps = {
       project: SqProject;
       continues?: string[];
     }
-  | object
+  | {
+      project?: undefined;
+      continues?: undefined;
+    }
 );

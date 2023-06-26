@@ -12,12 +12,12 @@ import React, {
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { Env } from "@quri/squiggle-lang";
 import { AdjustmentsVerticalIcon, Bars3CenterLeftIcon, Button } from "@quri/ui";
 
 import { useSquiggle, useUncontrolledCode } from "../../lib/hooks/index.js";
-import { getErrors, getValueToRender, isMac } from "../../lib/utility.js";
+import { getErrors, isMac } from "../../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "../CodeEditor.js";
+import { DynamicSquiggleViewer } from "../DynamicSquiggleViewer.js";
 import {
   PartialPlaygroundSettings,
   PlaygroundSettingsForm,
@@ -25,10 +25,7 @@ import {
   viewSettingsSchema,
   type PlaygroundSettings,
 } from "../PlaygroundSettings.js";
-import {
-  SquiggleViewer,
-  SquiggleViewerHandle,
-} from "../SquiggleViewer/index.js";
+import { SquiggleViewerHandle } from "../SquiggleViewer/index.js";
 import { SquiggleCodeProps } from "../types.js";
 import { MenuItem } from "./MenuItem.js";
 import { ResizableTwoPanelLayout } from "./ResizableTwoPanelLayout.js";
@@ -173,41 +170,14 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     </div>
   );
 
-  const squiggleViewer = squiggleOutput?.code ? (
-    <div className="relative">
-      {isRunning ? (
-        <div className="absolute inset-0 bg-white opacity-0 animate-semi-appear" />
-      ) : null}
-      <SquiggleViewer
-        {...settings}
-        ref={viewerRef}
-        localSettingsEnabled={true}
-        result={getValueToRender(squiggleOutput)}
-        editor={editorRef.current ?? undefined}
-      />
-    </div>
-  ) : null;
-
-  const showTime = (executionTime: number) =>
-    executionTime > 1000
-      ? `${(executionTime / 1000).toFixed(2)}s`
-      : `${executionTime}ms`;
-
   const renderRight = () => (
-    <div className="flex flex-col overflow-y-auto">
-      <div className="mb-1 h-8 p-2 flex justify-end text-zinc-400 text-sm whitespace-nowrap">
-        {isRunning
-          ? "rendering..."
-          : squiggleOutput
-          ? `render #${squiggleOutput.executionId} in ${showTime(
-              squiggleOutput.executionTime
-            )}`
-          : null}
-      </div>
-      <div className="flex-1 overflow-auto p-2" data-testid="playground-result">
-        {squiggleViewer}
-      </div>
-    </div>
+    <DynamicSquiggleViewer
+      squiggleOutput={squiggleOutput}
+      isRunning={isRunning}
+      editor={editorRef.current ?? undefined}
+      ref={viewerRef}
+      {...settings}
+    />
   );
 
   return (
