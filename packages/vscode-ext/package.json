@@ -108,10 +108,15 @@
     "configuration": {
       "title": "Squiggle",
       "properties": {
-        "squiggle.playground.showSummary": {
-          "type": "boolean",
-          "default": false,
-          "description": "Whether to show the summary table in the playground"
+        "squiggle.preview.sampleCount": {
+          "type": "number",
+          "default": 1000,
+          "description": "How many samples to use for Monte Carlo simulations"
+        },
+        "squiggle.preview.xyPointLength": {
+          "type": "number",
+          "default": 1000,
+          "description": "Coordinate Count (For PointSet Shapes)"
         }
       }
     }
