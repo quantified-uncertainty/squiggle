@@ -8,6 +8,7 @@ type Props = PropsWithChildren<{
   wide?: boolean; // stretch the button horizontally
   theme?: ButtonTheme;
   disabled?: boolean;
+  height?: string;
   // We default to type="button", to avoid form-related bugs.
   // In HTML standard, there's also "reset", but it's rarely useful.
   type?: "submit" | "button";
@@ -19,12 +20,13 @@ export const Button: FC<Props> = ({
   theme = "default",
   disabled,
   type = "button",
+  height = "8",
   children,
 }) => {
   return (
     <button
       className={clsx(
-        "rounded-md h-8 px-4 border text-sm font-medium flex items-center justify-center space-x-1",
+        "rounded-md px-4 border text-sm font-medium flex items-center justify-center space-x-1",
         theme === "primary"
           ? "bg-green-700 border-green-900 text-white"
           : "bg-slate-100 border-slate-300 text-gray-600",
@@ -33,7 +35,8 @@ export const Button: FC<Props> = ({
           : theme === "primary"
           ? "hover:bg-green-800 hover:border-green-900 hover:text-white"
           : "hover:bg-slate-200 hover:text-gray-900",
-        wide && "w-full"
+        wide && "w-full",
+        `h-${height}`
       )}
       onClick={onClick}
       disabled={disabled}

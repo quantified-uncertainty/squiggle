@@ -140,24 +140,28 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const leftPanelRef = useRef<HTMLDivElement | null>(null);
 
   const leftPanelHeader = (
-    <div className="flex items-center h-8 bg-slate-50 border-b border-slate-200 overflow-hidden mb-1 px-5">
-      <RunMenuItem {...runnerState} isRunning={isRunning} />
-      <AutorunnerMenuItem {...runnerState} />
-      <MenuItem
-        onClick={() =>
-          setSelectedTab(selectedTab === "SETTINGS" ? "CODE" : "SETTINGS")
-        }
-        icon={AdjustmentsVerticalIcon}
-        tooltipText="Configuration"
-      />
-      <MenuItem
-        tooltipText={
-          isMac() ? "Format Code (Option+Shift+f)" : "Format Code (Alt+Shift+f)"
-        }
-        icon={Bars3CenterLeftIcon}
-        onClick={editorRef.current?.format}
-      />
-      {renderExtraControls?.()}
+    <div className="flex justify-between items-center h-8 bg-slate-50 border-b border-slate-200 overflow-hidden mb-1 px-4">
+      <div className="flex items-center h-full">
+        <RunMenuItem {...runnerState} isRunning={isRunning} />
+        <AutorunnerMenuItem {...runnerState} />
+        <MenuItem
+          onClick={() =>
+            setSelectedTab(selectedTab === "SETTINGS" ? "CODE" : "SETTINGS")
+          }
+          icon={AdjustmentsVerticalIcon}
+          tooltipText="Configuration"
+        />
+        <MenuItem
+          tooltipText={
+            isMac()
+              ? "Format Code (Option+Shift+f)"
+              : "Format Code (Alt+Shift+f)"
+          }
+          icon={Bars3CenterLeftIcon}
+          onClick={editorRef.current?.format}
+        />
+      </div>
+      <div>{renderExtraControls?.()}</div>
     </div>
   );
 
