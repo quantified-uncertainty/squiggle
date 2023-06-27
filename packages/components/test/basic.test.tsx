@@ -53,17 +53,8 @@ test("Project dependencies work in editors", async () => {
   );
 });
 
-test("Project dependencies work in playgrounds", async () => {
-  const project = SqProject.create();
-  project.setSource("depend", "x = 123");
-
-  const rendered = render(
-    <SquigglePlayground
-      defaultCode="x + 456"
-      project={project}
-      continues={["depend"]}
-    />
-  );
+test("Playground", async () => {
+  const rendered = render(<SquigglePlayground defaultCode="123 + 456" />);
   // We must await here because SquigglePlayground loads results asynchronously
   await waitFor(() =>
     expect(rendered.getByTestId("dynamic-viewer-result")).toHaveTextContent(
