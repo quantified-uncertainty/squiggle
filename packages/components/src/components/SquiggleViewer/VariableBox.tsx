@@ -8,7 +8,6 @@ import {
   getChildrenValues,
   MergedItemSettings,
   pathToShortName,
-  pathAsString,
 } from "./utils.js";
 import {
   useFocus,
@@ -84,9 +83,11 @@ export const VariableBox: FC<VariableBoxProps> = ({
     throw new Error("Can't display pathless value");
   }
 
-  if (initialSettings.collapseChildren) {
-    collapseChildren(value);
-  }
+  useEffect(() => {
+    if (initialSettings.collapseChildren) {
+      collapseChildren(value);
+    }
+  }, []);
 
   const defaults: LocalItemSettings = {
     collapsed: initialSettings.beCollapsed,
