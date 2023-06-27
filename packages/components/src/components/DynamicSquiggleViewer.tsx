@@ -10,14 +10,22 @@ import { SquiggleViewerHandle } from "./SquiggleViewer/index.js";
 type Props = {
   squiggleOutput: SquiggleOutput | undefined;
   isRunning: boolean;
-  editor?: CodeEditorHandle;
+  showHeader?: boolean;
   localSettingsEnabled?: boolean;
+  editor?: CodeEditorHandle;
 } & PartialPlaygroundSettings;
 
 /* Wrapper for SquiggleViewer that shows the rendering stats and isRunning state. */
 export const DynamicSquiggleViewer = forwardRef<SquiggleViewerHandle, Props>(
   function DynamicSquiggleViewer(
-    { isRunning, squiggleOutput, editor, localSettingsEnabled, ...settings },
+    {
+      squiggleOutput,
+      isRunning,
+      showHeader = true,
+      localSettingsEnabled,
+      editor,
+      ...settings
+    },
     viewerRef
   ) {
     const squiggleViewer = squiggleOutput?.code ? (
@@ -44,15 +52,17 @@ export const DynamicSquiggleViewer = forwardRef<SquiggleViewerHandle, Props>(
     return (
       // `flex flex-col` helps to fit this in playground right panel and doesn't hurt otherwise
       <div className="flex flex-col overflow-y-auto">
-        <div className="mb-1 h-8 p-2 flex justify-end text-zinc-400 text-sm whitespace-nowrap">
-          {isRunning
-            ? "rendering..."
-            : squiggleOutput
-            ? `render #${squiggleOutput.executionId} in ${showTime(
-                squiggleOutput.executionTime
-              )}`
-            : null}
-        </div>
+        {showHeader && (
+          <div className="mb-1 h-8 p-2 flex justify-end text-zinc-400 text-sm whitespace-nowrap">
+            {isRunning
+              ? "rendering..."
+              : squiggleOutput
+              ? `render #${squiggleOutput.executionId} in ${showTime(
+                  squiggleOutput.executionTime
+                )}`
+              : null}
+          </div>
+        )}
         <div
           className="flex-1 overflow-auto p-2"
           data-testid="dynamic-viewer-result"

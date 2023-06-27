@@ -19,7 +19,7 @@ import { functionChartDefaults } from "./FunctionChart/utils.js";
 import { FormComment } from "./ui/FormComment.js";
 import { FormSection } from "./ui/FormSection.js";
 
-export const renderingSettingsSchema = z.object({
+export const environmentSchema = z.object({
   sampleCount: z.number().int().gte(10).lte(1000000),
   xyPointLength: z.number().int().gte(10).lte(10000),
 });
@@ -71,7 +71,7 @@ export const distributionSettingsSchema = z.object({
 });
 
 export const viewSettingsSchema = z.object({
-  renderingSettings: renderingSettingsSchema,
+  environment: environmentSchema,
   distributionChartSettings: distributionSettingsSchema,
   functionChartSettings: functionSettingsSchema,
   chartHeight: z.number().int().finite().gte(10).lte(5000),
@@ -82,7 +82,7 @@ export type PlaygroundSettings = z.infer<typeof viewSettingsSchema>;
 // passing this to zod through `.default()` is problematic, especially for number fields:
 export const defaultPlaygroundSettings: PlaygroundSettings = {
   chartHeight: 100,
-  renderingSettings: {
+  environment: {
     sampleCount: 1000,
     xyPointLength: 1000,
   },
@@ -142,15 +142,15 @@ export type MetaSettings = {
   disableLogX?: boolean;
 };
 
-export const RenderingSettingsForm: React.FC = () => (
+export const EnvironmentForm: React.FC = () => (
   <div className="space-y-4">
     <NumberFormField<PlaygroundSettings>
-      name="renderingSettings.sampleCount"
+      name="environment.sampleCount"
       label="Sample Count"
       description="How many samples to use for Monte Carlo simulations. This can occasionally be overridden by specific Squiggle programs."
     />
     <NumberFormField<PlaygroundSettings>
-      name="renderingSettings.xyPointLength"
+      name="environment.xyPointLength"
       label="Coordinate Count (For PointSet Shapes)"
       description="When distributions are converted into PointSet shapes, we need to know how many coordinates to use."
     />
@@ -278,7 +278,7 @@ export const PlaygroundSettingsForm: React.FC<{
         <>
           <div className="mb-6">
             <FormSection title="Rendering Settings">
-              <RenderingSettingsForm />
+              <EnvironmentForm />
             </FormSection>
           </div>
 

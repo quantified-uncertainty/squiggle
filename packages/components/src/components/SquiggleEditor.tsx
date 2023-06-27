@@ -6,19 +6,21 @@ import { getErrors } from "../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "./CodeEditor.js";
 import { DynamicSquiggleViewer } from "./DynamicSquiggleViewer.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
-import { SquiggleCodeProps } from "./types.js";
 import { useRunnerState } from "./SquigglePlayground/RunControls/useRunnerState.js";
+import { SquiggleCodeProps } from "./types.js";
 
 export type SquiggleEditorProps = SquiggleCodeProps & {
   hideViewer?: boolean;
   localSettingsEnabled?: boolean;
-} & PartialPlaygroundSettings;
+  // environment comes from SquiggleCodeProps
+} & Omit<PartialPlaygroundSettings, "environment">;
 
 export const SquiggleEditor: FC<SquiggleEditorProps> = ({
   defaultCode: propsDefaultCode,
   onCodeChange,
   project: propsProject,
   continues,
+  environment,
   hideViewer,
   localSettingsEnabled,
   ...settings
@@ -33,8 +35,7 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
   const [squiggleOutput, { project, isRunning }] = useSquiggle({
     code: runnerState.renderedCode,
     executionId: runnerState.executionId,
-    project: propsProject,
-    continues,
+    ...(propsProject ? { project: propsProject, continues } : { environment }),
   });
 
   const errors = useMemo(() => {
@@ -59,13 +60,16 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
           errors={errors}
           project={project}
           ref={editorRef}
+          onSubmit={() => runnerState.run()}
         />
       </div>
       {hideViewer || !squiggleOutput?.code ? null : (
         <DynamicSquiggleViewer
           squiggleOutput={squiggleOutput}
-          localSettingsEnabled={localSettingsEnabled}
           isRunning={isRunning}
+          localSettingsEnabled={localSettingsEnabled}
+          editor={editorRef.current ?? undefined}
+          environment={environment}
           {...settings}
         />
       )}

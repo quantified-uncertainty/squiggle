@@ -133,6 +133,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
         },
         scrollIntoView: true,
       });
+      editorView.current?.focus();
     };
 
     useImperativeHandle(ref, () => ({ format, scrollTo }));

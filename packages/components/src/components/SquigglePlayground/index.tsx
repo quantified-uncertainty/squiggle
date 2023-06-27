@@ -26,23 +26,26 @@ import {
   type PlaygroundSettings,
 } from "../PlaygroundSettings.js";
 import { SquiggleViewerHandle } from "../SquiggleViewer/index.js";
-import { SquiggleCodeProps } from "../types.js";
 import { MenuItem } from "./MenuItem.js";
 import { ResizableTwoPanelLayout } from "./ResizableTwoPanelLayout.js";
 import { AutorunnerMenuItem } from "./RunControls/AutorunnerMenuItem.js";
 import { RunMenuItem } from "./RunControls/RunMenuItem.js";
 import { useRunnerState } from "./RunControls/useRunnerState.js";
 
-type PlaygroundProps = // Playground can be either controlled (`code`) or uncontrolled (`defaultCode` + `onCodeChange`)
-  SquiggleCodeProps &
-    PartialPlaygroundSettings & {
-      /* When settings change */
-      onSettingsChange?(settings: PlaygroundSettings): void;
-      /** Allows to inject extra buttons, e.g. share button on the website, or save button in Squiggle Hub */
-      renderExtraControls?: () => ReactNode;
-      /** Height of the editor */
-      height?: CSSProperties["height"];
-    };
+type PlaygroundProps = {
+  /* We don't support `project` or `continues` in the playground.
+   * First, because playground will support multi-file mode by itself.
+   * Second, because environment is configurable through playground settings and it won't be possible with an external project.
+   */
+  defaultCode?: string;
+  onCodeChange?(code: string): void;
+  /* When settings change */
+  onSettingsChange?(settings: PlaygroundSettings): void;
+  /* Allows to inject extra buttons, e.g. share button on the website, or save button in Squiggle Hub */
+  renderExtraControls?: () => ReactNode;
+  /* Height of the playground */
+  height?: CSSProperties["height"];
+} & PartialPlaygroundSettings;
 
 // Left panel ref is used for local settings modal positioning in ItemSettingsMenu.tsx
 type PlaygroundContextShape = {
@@ -56,7 +59,10 @@ type Tab = "CODE" | "SETTINGS";
 
 export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const { onSettingsChange, renderExtraControls, height = 500 } = props;
-  const { code, setCode, defaultCode } = useUncontrolledCode(props);
+  const { code, setCode, defaultCode } = useUncontrolledCode({
+    defaultCode: props.defaultCode,
+    onCodeChange: props.onCodeChange,
+  });
 
   const defaultValues: PlaygroundSettings = merge(
     {},
@@ -88,10 +94,9 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const runnerState = useRunnerState(code);
 
   const [squiggleOutput, { project, isRunning, sourceId }] = useSquiggle({
-    ...props,
     code: runnerState.renderedCode,
     executionId: runnerState.executionId,
-    environment: settings.renderingSettings,
+    environment: settings.environment,
   });
 
   const errors = useMemo(() => {

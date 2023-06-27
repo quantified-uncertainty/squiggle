@@ -1,15 +1,10 @@
-import { SqProject } from "@quri/squiggle-lang";
+import {
+  ProjectExecutionProps,
+  StandaloneExecutionProps,
+} from "../lib/hooks/useSquiggle.js";
 
+// common props for SquigglePlayground and SquiggleEditor
 export type SquiggleCodeProps = {
   defaultCode?: string;
   onCodeChange?(code: string): void;
-} & (
-  | {
-      project: SqProject;
-      continues?: string[];
-    }
-  | {
-      project?: undefined;
-      continues?: undefined;
-    }
-);
+} & (StandaloneExecutionProps | ProjectExecutionProps);
