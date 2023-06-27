@@ -6,7 +6,7 @@ import {
   SqValue,
 } from "@quri/squiggle-lang";
 import { clsx } from "clsx";
-import React, { Children } from "react";
+import React, { ReactNode, Children } from "react";
 
 import { DistributionsChart } from "../DistributionsChart/index.js";
 import { FunctionChart } from "../FunctionChart/index.js";
@@ -131,27 +131,17 @@ export const getBoxProps = (
             />
           );
         },
-        children: (settings) => {
-          if (value.value.parameters().length === 0) {
-            const fnResult = value.value.call([], environment);
-            if (fnResult.ok && value.path) {
-              const fnValue: SqValue = fnResult.value.withPath(value.path);
-              return getBoxProps(fnValue).children(settings);
-            }
-          } else {
-            return (
-              <FunctionChart
-                fn={value.value}
-                settings={settings}
-                height={settings.chartHeight}
-                environment={{
-                  sampleCount: environment.sampleCount / 10,
-                  xyPointLength: environment.xyPointLength / 10,
-                }}
-              />
-            );
-          }
-        },
+        children: (settings) => (
+          <FunctionChart
+            fn={value.value}
+            settings={settings}
+            height={settings.chartHeight}
+            environment={{
+              sampleCount: environment.sampleCount / 10,
+              xyPointLength: environment.xyPointLength / 10,
+            }}
+          />
+        ),
       };
     case "Plot": {
       const plot: SqPlot = value.value;
@@ -260,13 +250,18 @@ export interface Props {
 export const ExpressionViewer: React.FC<Props> = ({ value }) => {
   const boxProps = getBoxProps(value);
   const heading = boxProps.heading || value.tag;
-  const varbox = <VariableBox {...boxProps} value={value} heading={heading} />;
   const hasChildren = () => !!getChildrenValues(value);
-  return value.tag === "Record" || value.tag === "Array" ? (
-    <div className={clsx("space-y-2", hasChildren() && "pt-1 mt-1")}>
-      {varbox}
-    </div>
-  ) : (
-    varbox
+  const children: (settings: MergedItemSettings) => ReactNode =
+    (value.tag === "Record" || value.tag === "Array") && hasChildren()
+      ? (settings) => (
+          <div className={"space-y-2 pt-1 mt-1"}>
+            {boxProps.children(settings)}
+          </div>
+        )
+      : boxProps.children;
+  return (
+    <VariableBox {...boxProps} value={value} heading={heading}>
+      {children}
+    </VariableBox>
   );
 };

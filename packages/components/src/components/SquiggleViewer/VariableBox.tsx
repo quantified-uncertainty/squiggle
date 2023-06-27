@@ -139,15 +139,15 @@ export const VariableBox: FC<VariableBoxProps> = ({
   const _focus = () => !isFocused && hasBodyContent && focus(path);
 
   const triangleToggle = () => (
-    <span
+    <div
       className="cursor-pointer p-1 mr-1 text-stone-300 hover:text-slate-700"
       onClick={toggleCollapsed}
     >
       <TriangleIcon size={10} className={isOpen ? "rotate-180" : "rotate-90"} />
-    </span>
+    </div>
   );
   const headerName = (
-    <span
+    <div
       className={clsx(
         "font-mono",
         isFocused
@@ -157,7 +157,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
       onClick={_focus}
     >
       {name}
-    </span>
+    </div>
   );
   const headerPreview = () =>
     !!preview && (
