@@ -86,13 +86,12 @@ const InnerDistributionsChart: FC<{
         isMulti ? d3.schemeCategory10[i] : distributionColor;
 
       const xScale = sqScaleToD3(plot.xScale);
+
+      const ifGood = (x: number | undefined) =>
+        Number.isFinite(x) ? x : undefined;
       xScale.domain([
-        Number.isFinite(plot.xScale.min)
-          ? plot.xScale.min!
-          : d3.min(domain, (d) => d.x) ?? 0,
-        Number.isFinite(plot.xScale.max)
-          ? plot.xScale.max!
-          : d3.max(domain, (d) => d.x) ?? 0,
+        ifGood(plot.xScale.min) ?? d3.min(domain, (d) => d.x) ?? 0,
+        ifGood(plot.xScale.max) ?? d3.max(domain, (d) => d.x) ?? 0,
       ]);
 
       const yScale = sqScaleToD3(plot.yScale);
@@ -273,6 +272,7 @@ const InnerDistributionsChart: FC<{
       discreteTooltip,
       cursor,
       isMulti,
+      _showSamplesBar,
     ]
   );
 
@@ -281,22 +281,24 @@ const InnerDistributionsChart: FC<{
   return (
     <MouseTooltip
       isOpen={!!discreteTooltip}
-      render={() => (
-        <div
-          className={clsx(
-            "bg-white border border-gray-300 rounded text-xs p-2 grid gap-x-2"
-          )}
-          style={{
-            gridTemplateColumns: "min-content min-content",
-          }}
-        >
-          <div className="text-gray-500 text-right">Value:</div>
-          <div>{d3.format(",.6r")(discreteTooltip!.value)}</div>
-          <div className="text-gray-500 text-right">Probability:</div>
-          <div>{d3.format(",.6r")(discreteTooltip!.probability)}</div>
-          <br />
-        </div>
-      )}
+      render={() =>
+        discreteTooltip ? (
+          <div
+            className={clsx(
+              "bg-white border border-gray-300 rounded text-xs p-2 grid gap-x-2"
+            )}
+            style={{
+              gridTemplateColumns: "min-content min-content",
+            }}
+          >
+            <div className="text-gray-500 text-right">Value:</div>
+            <div>{d3.format(",.6r")(discreteTooltip.value)}</div>
+            <div className="text-gray-500 text-right">Probability:</div>
+            <div>{d3.format(",.6r")(discreteTooltip.probability)}</div>
+            <br />
+          </div>
+        ) : null
+      }
     >
       <canvas
         data-testid="multi-distribution-chart"

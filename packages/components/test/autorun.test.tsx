@@ -1,19 +1,21 @@
 import "@testing-library/jest-dom";
 import { act, render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { userEvent } from "./user-event.js";
 
 import { SquigglePlayground } from "../src/index.js";
 
 test("Autorun is default", async () => {
-  act(() => render(<SquigglePlayground code="70*30" />));
+  act(() => render(<SquigglePlayground defaultCode="70*30" />));
   await waitFor(() =>
-    expect(screen.getByTestId("playground-result")).toHaveTextContent("2100")
+    expect(screen.getByTestId("dynamic-viewer-result")).toHaveTextContent(
+      "2100"
+    )
   );
 });
 
 test("Autorun can be switched off", async () => {
-  const user = (userEvent as any).setup(); // typescript issue is due to ESM mess
-  act(() => render(<SquigglePlayground code="70*30" />));
+  const user = userEvent.setup(); // typescript issue is due to ESM mess
+  act(() => render(<SquigglePlayground defaultCode="70*30" />));
 
   expect(screen.getByTestId("autorun-controls")).toHaveAttribute(
     "aria-checked",
@@ -21,7 +23,9 @@ test("Autorun can be switched off", async () => {
   );
 
   await waitFor(() =>
-    expect(screen.getByTestId("playground-result")).toHaveTextContent("2100")
+    expect(screen.getByTestId("dynamic-viewer-result")).toHaveTextContent(
+      "2100"
+    )
   );
 
   await act(

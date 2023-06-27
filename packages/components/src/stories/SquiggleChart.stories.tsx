@@ -25,6 +25,13 @@ export const Nested: Story = {
   },
 };
 
+export const WithHeader: Story = {
+  args: {
+    ...Nested.args,
+    showHeader: true,
+  },
+};
+
 export const Array: Story = {
   args: {
     code: "[normal(5,2), normal(10,1), normal(40,2), 400000]",

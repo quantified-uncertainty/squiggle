@@ -1,7 +1,7 @@
 import { jest } from "@jest/globals";
-import ResizeObserver from "resize-observer-polyfill";
+import { ResizeObserver } from "@juggle/resize-observer";
 
-window.ResizeObserver = ResizeObserver as any;
+window.ResizeObserver = ResizeObserver;
 
 global.console = {
   ...console,

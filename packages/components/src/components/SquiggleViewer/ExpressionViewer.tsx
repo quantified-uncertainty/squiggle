@@ -1,30 +1,28 @@
+import React, { ReactNode } from "react";
+
 import {
-  SqDistributionTag,
   SqDistributionsPlot,
   SqPlot,
   SqScale,
   SqValue,
 } from "@quri/squiggle-lang";
-import { clsx } from "clsx";
-import React, { ReactNode, Children } from "react";
-
-import { DistributionsChart } from "../DistributionsChart/index.js";
-import { FunctionChart } from "../FunctionChart/index.js";
-import { NumberShower } from "../NumberShower.js";
-
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
+import { DistributionsChart } from "../DistributionsChart/index.js";
 import { DistFunctionChart } from "../FunctionChart/DistFunctionChart.js";
 import { NumericFunctionChart } from "../FunctionChart/NumericFunctionChart.js";
-import { ScatterChart } from "../ScatterChart/index.js";
+import { FunctionChart } from "../FunctionChart/index.js";
+import { NumberShower } from "../NumberShower.js";
 import { generateDistributionPlotSettings } from "../PlaygroundSettings.js";
+import { RelativeValuesGridChart } from "../RelativeValuesGridChart/index.js";
+import { ScatterChart } from "../ScatterChart/index.js";
 import { ItemSettingsMenu } from "./ItemSettingsMenu.js";
+
 import {
   SqTypeWithCount,
   VariableBox,
   VariableBoxProps,
 } from "./VariableBox.js";
 import { MergedItemSettings, getChildrenValues } from "./utils.js";
-import { RelativeValuesGridChart } from "../RelativeValuesGridChart/index.js";
 
 export const getBoxProps = (
   value: SqValue
@@ -194,7 +192,7 @@ export const getBoxProps = (
               );
             default:
               // can happen if squiggle-lang version is too fresh and we messed up the components -> squiggle-lang dependency
-              return `Unsupported plot type ${(plot as any).tag}`;
+              return `Unsupported plot ${plot satisfies never}`;
           }
         },
       };
@@ -248,6 +246,9 @@ export interface Props {
 }
 
 export const ExpressionViewer: React.FC<Props> = ({ value }) => {
+  if (!value.path) {
+    throw new Error("Can't display pathless value");
+  }
   const boxProps = getBoxProps(value);
   const heading = boxProps.heading || value.tag;
   const hasChildren = () => !!getChildrenValues(value);

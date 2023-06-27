@@ -19,6 +19,15 @@ export const Normal: Story = {
   },
 };
 
+export const HeightAndScroll: Story = {
+  name: "Custom heigth and scrollbars",
+  args: {
+    defaultCode:
+      "List.upTo(1,10) -> map({|i| i to i + 1})" + new Array(100).join("\n"),
+    height: 400,
+  },
+};
+
 export const Slow: Story = {
   name: "Slow Code",
   args: {
@@ -43,7 +52,6 @@ d = {e: {f: {g1: a, g2: b, g3: {h: {i: a}}}}}
 export const RelativeValues: Story = {
   name: "RelativeValues plot",
   args: {
-    code: undefined as any,
     defaultCode: `ids = ["foo", "bar"]
 foo = SampleSet.fromDist(2 to 5)
 bar = foo + SampleSet.fromDist(3 to 6) * 0.5
@@ -63,20 +71,13 @@ RelativeValues.gridPlot({
   },
 };
 
-export const WithShareButton: Story = {
-  name: "With share button",
+export const WithExtraControls: Story = {
+  name: "With extra controls",
   args: {
     defaultCode: "normal(5,2)",
     height: undefined,
-    showShareButton: true,
-  },
-};
-
-export const WithoutEditor: Story = {
-  name: "Without an editor (e.g. for VS Code environment)",
-  args: {
-    code: "normal(5,2)",
-    height: 800,
-    showEditor: false,
+    renderExtraControls: () => (
+      <button className="bg-green-500 px-2">Extra button</button>
+    ),
   },
 };

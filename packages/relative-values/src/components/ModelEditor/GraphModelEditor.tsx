@@ -65,12 +65,11 @@ export const GraphModelEditor: FC<EstimateProps<GraphModel>> = ({
           <Label>Common code</Label>
         </div>
         <SquiggleEditor
-          code={model.commonCode}
+          defaultCode={model.commonCode}
           onCodeChange={(code) =>
             setModel(updateModelCommonCode({ model, code }))
           }
           hideViewer
-          // className="w-full border border-gray-200 rounded p-1"
         />
         <Description>
           Variables that can be used in other definitions
@@ -106,7 +105,7 @@ export const GraphModelEditor: FC<EstimateProps<GraphModel>> = ({
               </a>
               {node ? (
                 <SquiggleEditor
-                  code={node.code}
+                  defaultCode={node.code}
                   onCodeChange={(code) =>
                     setModel(
                       updateModelNode({

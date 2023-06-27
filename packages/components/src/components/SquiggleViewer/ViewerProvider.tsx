@@ -135,9 +135,13 @@ export function useCollapseChildren() {
   };
 }
 
-export function useIsFocused(location: SqValuePath) {
+export function useIsFocused(location: SqValuePath | undefined) {
   const { focused } = useViewerContext();
-  return !!focused && pathAsString(focused) === pathAsString(location);
+  if (location === undefined) {
+    return false;
+  } else {
+    return !!focused && pathAsString(focused) === pathAsString(location);
+  }
 }
 
 type SettingsStore = {

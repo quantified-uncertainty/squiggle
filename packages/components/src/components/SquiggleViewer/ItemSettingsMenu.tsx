@@ -39,7 +39,11 @@ const ItemSettingsModal: React.FC<
   const setSettings = useSetSettings();
   const { getSettings, getMergedSettings } = useViewerContext();
 
-  const mergedSettings = getMergedSettings({ path: value.path! });
+  if (!value.path) {
+    throw new Error("Can't render settings modal for pathless value");
+  }
+
+  const mergedSettings = getMergedSettings({ path: value.path });
 
   const form = useForm({
     resolver: zodResolver(viewSettingsSchema),
@@ -49,7 +53,10 @@ const ItemSettingsModal: React.FC<
 
   useEffect(() => {
     const submit = form.handleSubmit((data) => {
-      setSettings(value.path!, {
+      if (!value.path) {
+        return; // satisfies TypeScript
+      }
+      setSettings(value.path, {
         collapsed: false,
         ...data,
       });
@@ -58,7 +65,7 @@ const ItemSettingsModal: React.FC<
 
     const subscription = form.watch(() => submit());
     return () => subscription.unsubscribe();
-  }, [getSettings, setSettings, onChange, value.path, form.watch]);
+  }, [getSettings, setSettings, onChange, value.path, form]);
 
   const { getLeftPanelElement } = useContext(PlaygroundContext);
 
@@ -66,7 +73,7 @@ const ItemSettingsModal: React.FC<
     <Modal container={getLeftPanelElement()} close={close}>
       <Modal.Header>
         Chart settings
-        {value.path!.items.length ? (
+        {value.path.items.length ? (
           <>
             {" for "}
             <span
@@ -74,7 +81,7 @@ const ItemSettingsModal: React.FC<
               className="cursor-pointer"
               onClick={resetScroll}
             >
-              {pathAsString(value.path!)}
+              {pathAsString(value.path)}
             </span>
           </>
         ) : (
@@ -105,7 +112,11 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
   if (!localSettingsEnabled) {
     return null;
   }
-  const settings = getSettings({ path: props.value.path! });
+  if (!props.value.path) {
+    throw new Error("Can't render settings menu for pathless value");
+  }
+
+  const settings = getSettings({ path: props.value.path });
 
   const resetScroll = () => {
     if (!props.value.path) {
@@ -130,7 +141,11 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
       {settings.distributionChartSettings ? (
         <button
           onClick={() => {
-            setSettings(props.value.path!, {
+            if (!props.value.path) {
+              // shouldn't happen, satisfies TypeScript
+              return;
+            }
+            setSettings(props.value.path, {
               collapsed: settings.collapsed,
             });
             props.onChange();

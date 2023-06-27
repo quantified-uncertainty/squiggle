@@ -1,13 +1,14 @@
-import React, { FC, ReactNode, useEffect, useReducer } from "react";
+import { FC, ReactNode, useCallback, useEffect, useReducer } from "react";
 
 import { SqValue } from "@quri/squiggle-lang";
 import { TriangleIcon, CodeBracketIcon, TextTooltip } from "@quri/ui";
 
 import {
   LocalItemSettings,
-  pathToShortName,
   getChildrenValues,
   MergedItemSettings,
+  pathToShortName,
+  pathAsString,
 } from "./utils.js";
 import {
   useFocus,
@@ -60,6 +61,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
   const focus = useFocus();
   const { editor, getSettings, getMergedSettings, dispatch } =
     useViewerContext();
+  const isFocused = useIsFocused(value.path);
 
   const findInEditor = () => {
     const locationR = value.path?.findLocation();
@@ -79,14 +81,12 @@ export const VariableBox: FC<VariableBoxProps> = ({
   const initialSettings = makeInitialSettings(childrenElements.length, isRoot);
 
   if (!path) {
-    throw new Error("Can't display a pathless value");
+    throw new Error("Can't display pathless value");
   }
 
   if (initialSettings.collapseChildren) {
     collapseChildren(value);
   }
-
-  const isFocused = path && useIsFocused(path);
 
   const defaults: LocalItemSettings = {
     collapsed: initialSettings.beCollapsed,
@@ -113,26 +113,28 @@ export const VariableBox: FC<VariableBoxProps> = ({
 
   const name = pathToShortName(path);
 
-  const saveRef = (element: HTMLDivElement) => {
-    dispatch({
-      type: "REGISTER_ITEM_HANDLE",
-      payload: {
-        path: path,
-        element,
-      },
-    });
-  };
+  // should be callback to not fire on each render
+  const saveRef = useCallback(
+    (element: HTMLDivElement) => {
+      dispatch({
+        type: "REGISTER_ITEM_HANDLE",
+        payload: { path, element },
+      });
+    },
+    [dispatch, path]
+  );
 
   useEffect(() => {
+    // This code is a bit risky, because I'm not sure about the order in which ref callbacks and effect cleanups fire.
+    // But it works in practice.
+    // We should switch to ref cleanups after https://github.com/facebook/react/pull/25686 is released.
     return () => {
       dispatch({
         type: "UNREGISTER_ITEM_HANDLE",
-        payload: {
-          path: path,
-        },
+        payload: { path },
       });
     };
-  }, []);
+  }, [dispatch, path]);
 
   const hasBodyContent = Boolean(path.items.length);
   const isOpen = isFocused || !settings.collapsed;
