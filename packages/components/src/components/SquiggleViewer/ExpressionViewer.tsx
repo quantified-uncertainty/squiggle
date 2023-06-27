@@ -83,14 +83,16 @@ export const getBoxProps = (
     }
     case "String":
       return {
-        preview:
-          value.value.substring(0, 30) + (value.value.length > 30 ? "..." : ""),
+        preview: (
+          <div className="overflow-ellipsis overflow-hidden">
+            {value.value.substring(0, 20) +
+              (value.value.length > 20 ? "..." : "")}
+          </div>
+        ),
         children: () => (
-          <>
-            <span className="text-neutral-300">"</span>
-            <span className="text-neutral-600 text-sm">{value.value}</span>
-            <span className="text-neutral-300">"</span>
-          </>
+          <div className="text-neutral-800 text-sm px-2 py-1 my-1 bg-stone-100">
+            {value.value}
+          </div>
         ),
       };
     case "Bool":

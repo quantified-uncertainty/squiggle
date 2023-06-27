@@ -82,7 +82,9 @@ export const VariableBox: FC<VariableBoxProps> = ({
     throw new Error("Can't display a pathless value");
   }
 
-  initialSettings.collapseChildren && collapseChildren(value);
+  if (initialSettings.collapseChildren) {
+    collapseChildren(value);
+  }
 
   const isFocused = path && useIsFocused(path);
 
@@ -132,18 +134,61 @@ export const VariableBox: FC<VariableBoxProps> = ({
     };
   }, []);
 
-  const isCollapsed = isFocused ? false : settings.collapsed;
-  const shouldShowTriangleToggle = !isFocused;
-  const shouldShowLeftHeaderPreview = !isFocused && !!preview;
-  const shouldShowRightHeaderItems = !settings.collapsed || isFocused;
-  const shouldShowRightHeaderString = Boolean(
-    shouldShowRightHeaderItems && path.items.length
+  const hasBodyContent = Boolean(path.items.length);
+  const isOpen = isFocused || !settings.collapsed;
+  const _focus = () => !isFocused && hasBodyContent && focus(path);
+
+  const triangleToggle = () => (
+    <span
+      className="cursor-pointer p-1 mr-1 text-stone-300 hover:text-slate-700"
+      onClick={toggleCollapsed}
+    >
+      <TriangleIcon size={10} className={isOpen ? "rotate-180" : "rotate-90"} />
+    </span>
   );
-  const shouldShowRightHeaderFindInEditor = !isRoot;
-  const showOpenedLeftSidebar = Boolean(
-    !isCollapsed && path.items.length && !isFocused
+  const headerName = (
+    <span
+      className={clsx(
+        "font-mono",
+        isFocused
+          ? "text-md text-stone-900 ml-1"
+          : "text-sm text-stone-800 cursor-pointer hover:underline"
+      )}
+      onClick={_focus}
+    >
+      {name}
+    </span>
   );
-  const _focus = () => !isFocused && path.items.length && focus(path);
+  const headerPreview = () =>
+    !!preview && (
+      <div className="ml-2 text-sm text-stone-400 font-mono">{preview}</div>
+    );
+  const headerFindInEditorButton = () => (
+    <div className="ml-3">
+      <TextTooltip text="Show in Editor" placement="bottom">
+        <span>
+          <CodeBracketIcon
+            className={`items-center h-4 w-4 cursor-pointer text-stone-200  group-hover:text-stone-400 hover:!text-stone-800 transition`}
+            onClick={() => findInEditor()}
+          />
+        </span>
+      </TextTooltip>
+    </div>
+  );
+  const headerString = () => (
+    <div className="text-stone-400 group-hover:text-stone-600 text-sm transition">
+      {heading}
+    </div>
+  );
+  const headerSettingsButton = () =>
+    renderSettingsMenu?.({ onChange: forceUpdate });
+  const leftCollapseBorder = () =>
+    hasBodyContent && (
+      <div className="flex group cursor-pointer" onClick={toggleCollapsed}>
+        <div className="p-1" />
+        <div className="border-l border-stone-200 group-hover:border-stone-500 w-2" />
+      </div>
+    );
 
   return (
     <div ref={saveRef}>
@@ -155,68 +200,20 @@ export const VariableBox: FC<VariableBoxProps> = ({
           )}
         >
           <div className="inline-flex items-center">
-            {shouldShowTriangleToggle && (
-              <span
-                className="cursor-pointer p-1 mr-1 text-stone-300 hover:text-slate-700"
-                onClick={toggleCollapsed}
-              >
-                <TriangleIcon
-                  size={10}
-                  className={isCollapsed ? "rotate-90" : "rotate-180"}
-                />
-              </span>
-            )}
-            <span
-              className={clsx(
-                "font-mono",
-                isFocused
-                  ? "text-md text-stone-900 ml-1"
-                  : "text-sm text-stone-800 cursor-pointer hover:underline"
-              )}
-              onClick={_focus}
-            >
-              {name}
-            </span>
-            {shouldShowLeftHeaderPreview && (
-              <div className="ml-2 text-sm text-stone-400 font-mono">
-                {preview}
-              </div>
-            )}
-            {shouldShowRightHeaderFindInEditor && (
-              <div className="ml-3">
-                <TextTooltip text="Show in Editor" placement="bottom">
-                  <span>
-                    <CodeBracketIcon
-                      className={`items-center h-4 w-4 cursor-pointer text-stone-200  group-hover:text-stone-400 hover:!text-stone-800 transition`}
-                      onClick={() => findInEditor()}
-                    />
-                  </span>
-                </TextTooltip>
-              </div>
-            )}
+            {!isFocused && triangleToggle()}
+            {headerName}
+            {!isFocused && headerPreview()}
+            {!isRoot && headerFindInEditorButton()}
           </div>
           <div className="inline-flex space-x-1">
-            {shouldShowRightHeaderString && (
-              <div className="text-stone-400 group-hover:text-stone-600 text-sm transition">
-                {heading}
-              </div>
-            )}
-            {shouldShowRightHeaderItems &&
-              renderSettingsMenu?.({ onChange: forceUpdate })}
+            {isOpen && headerString()}
+            {isOpen && headerSettingsButton()}
           </div>
         </header>
       )}
-      {!isCollapsed && (
+      {isOpen && (
         <div className="flex w-full">
-          {showOpenedLeftSidebar && (
-            <div
-              className="flex group cursor-pointer"
-              onClick={toggleCollapsed}
-            >
-              <div className="p-1" />
-              <div className="border-l border-stone-200 group-hover:border-stone-500 w-2" />
-            </div>
-          )}
+          {!isFocused && leftCollapseBorder()}
           {isFocused && <div className="w-2" />}
           <div className="grow">
             {children(getAdjustedMergedSettings(path))}
