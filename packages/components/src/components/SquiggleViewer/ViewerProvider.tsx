@@ -137,10 +137,10 @@ export function useCollapseChildren() {
 
 export function useIsFocused(location: SqValuePath | undefined) {
   const { focused } = useViewerContext();
-  if (location === undefined) {
+  if (!focused || location === undefined) {
     return false;
   } else {
-    return !!focused && pathAsString(focused) === pathAsString(location);
+    return pathAsString(focused) === pathAsString(location);
   }
 }
 
