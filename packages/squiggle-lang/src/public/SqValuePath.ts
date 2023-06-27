@@ -111,4 +111,20 @@ export class SqValuePath {
   findLocation(): Result.result<LocationRange, SqError> {
     return this.project.findLocationByValuePath(this.sourceId, this);
   }
+
+  itemsAsValuePaths() {
+    return this.items.map(
+      (_, index) =>
+        new SqValuePath({
+          project: this.project,
+          sourceId: this.sourceId,
+          root: this.root,
+          items: this.items.slice(0, index + 1),
+        })
+    );
+  }
+
+  isRoot() {
+    return this.items.length === 0;
+  }
 }

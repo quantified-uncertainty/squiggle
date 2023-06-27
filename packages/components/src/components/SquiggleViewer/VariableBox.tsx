@@ -1,27 +1,33 @@
 import { FC, ReactNode, useCallback, useEffect, useReducer } from "react";
 
 import { SqValue } from "@quri/squiggle-lang";
-import { FocusIcon, TriangleIcon } from "@quri/ui";
+import { TriangleIcon, CodeBracketIcon, TextTooltip } from "@quri/ui";
 
 import {
   LocalItemSettings,
+  getChildrenValues,
   MergedItemSettings,
   pathToShortName,
+  pathAsString,
 } from "./utils.js";
 import {
   useFocus,
+  useIsFocused,
   useSetSettings,
+  useCollapseChildren,
   useViewerContext,
 } from "./ViewerProvider.js";
+import { clsx } from "clsx";
+import { SqValuePath } from "@quri/squiggle-lang";
 
 type SettingsMenuParams = {
   // Used to notify VariableBox that settings have changed, so that VariableBox could re-render itself.
   onChange: () => void;
 };
 
-type VariableBoxProps = {
+export type VariableBoxProps = {
   value: SqValue;
-  heading: string;
+  heading?: string;
   preview?: ReactNode;
   renderSettingsMenu?: (params: SettingsMenuParams) => ReactNode;
   children: (settings: MergedItemSettings) => ReactNode;
@@ -31,11 +37,17 @@ export const SqTypeWithCount: FC<{
   type: string;
   count: number;
 }> = ({ type, count }) => (
-  <div className="text-sm text-stone-400 font-mono">
+  <div>
     {type}
     <span className="ml-0.5">{count}</span>
   </div>
 );
+
+//I'm unsure what good defaults will be here. These are heuristics.
+const makeInitialSettings = (childrenLength: number, isRoot: boolean) => ({
+  beCollapsed: !isRoot && childrenLength > 5,
+  collapseChildren: childrenLength > 10,
+});
 
 export const VariableBox: FC<VariableBoxProps> = ({
   value,
@@ -45,9 +57,11 @@ export const VariableBox: FC<VariableBoxProps> = ({
   children,
 }) => {
   const setSettings = useSetSettings();
+  const collapseChildren = useCollapseChildren();
   const focus = useFocus();
   const { editor, getSettings, getMergedSettings, dispatch } =
     useViewerContext();
+  const isFocused = useIsFocused(value.path);
 
   const findInEditor = () => {
     const locationR = value.path?.findLocation();
@@ -62,12 +76,31 @@ export const VariableBox: FC<VariableBoxProps> = ({
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
   const { path } = value;
+  const isRoot = Boolean(path?.isRoot());
+  const childrenElements = getChildrenValues(value);
+  const initialSettings = makeInitialSettings(childrenElements.length, isRoot);
 
   if (!path) {
     throw new Error("Can't display pathless value");
   }
 
-  const settings = getSettings(path);
+  if (initialSettings.collapseChildren) {
+    collapseChildren(value);
+  }
+
+  const defaults: LocalItemSettings = {
+    collapsed: initialSettings.beCollapsed,
+  };
+  const settings = getSettings({ path, defaults });
+
+  const getAdjustedMergedSettings = (path: SqValuePath) => {
+    const mergedSettings = getMergedSettings({ path });
+    const { chartHeight } = mergedSettings;
+    return {
+      ...mergedSettings,
+      chartHeight: isFocused ? chartHeight * 3 : chartHeight,
+    };
+  };
 
   const setSettingsAndUpdate = (newSettings: LocalItemSettings) => {
     setSettings(path, newSettings);
@@ -103,57 +136,90 @@ export const VariableBox: FC<VariableBoxProps> = ({
     };
   }, [dispatch, path]);
 
+  const hasBodyContent = Boolean(path.items.length);
+  const isOpen = isFocused || !settings.collapsed;
+  const _focus = () => !isFocused && hasBodyContent && focus(path);
+
+  const triangleToggle = () => (
+    <div
+      className="cursor-pointer p-1 mr-1 text-stone-300 hover:text-slate-700"
+      onClick={toggleCollapsed}
+    >
+      <TriangleIcon size={10} className={isOpen ? "rotate-180" : "rotate-90"} />
+    </div>
+  );
+  const headerName = (
+    <div
+      className={clsx(
+        "font-mono",
+        isFocused
+          ? "text-md text-stone-900 ml-1"
+          : "text-sm text-stone-800 cursor-pointer hover:underline"
+      )}
+      onClick={_focus}
+    >
+      {name}
+    </div>
+  );
+  const headerPreview = () =>
+    !!preview && (
+      <div className="ml-2 text-sm text-stone-400 font-mono">{preview}</div>
+    );
+  const headerFindInEditorButton = () => (
+    <div className="ml-3">
+      <TextTooltip text="Show in Editor" placement="bottom">
+        <span>
+          <CodeBracketIcon
+            className={`items-center h-4 w-4 cursor-pointer text-stone-200  group-hover:text-stone-400 hover:!text-stone-800 transition`}
+            onClick={() => findInEditor()}
+          />
+        </span>
+      </TextTooltip>
+    </div>
+  );
+  const headerString = () => (
+    <div className="text-stone-400 group-hover:text-stone-600 text-sm transition">
+      {heading}
+    </div>
+  );
+  const headerSettingsButton = () =>
+    renderSettingsMenu?.({ onChange: forceUpdate });
+  const leftCollapseBorder = () =>
+    hasBodyContent && (
+      <div className="flex group cursor-pointer" onClick={toggleCollapsed}>
+        <div className="p-1" />
+        <div className="border-l border-stone-200 group-hover:border-stone-500 w-2" />
+      </div>
+    );
+
   return (
     <div ref={saveRef}>
       {name === undefined ? null : (
-        <header className="flex justify-between hover:bg-stone-100 rounded-md">
+        <header
+          className={clsx(
+            "flex justify-between group",
+            isFocused ? "mb-2" : "hover:bg-stone-100 rounded-md"
+          )}
+        >
           <div className="inline-flex items-center">
-            <span
-              className="cursor-pointer p-1 mr-1 text-stone-300 hover:text-slate-700"
-              onClick={toggleCollapsed}
-            >
-              <TriangleIcon
-                size={10}
-                className={settings.collapsed ? "rotate-90" : "rotate-180"}
-              />
-            </span>
-            <span
-              className="text-stone-800 font-mono text-sm cursor-pointer"
-              onClick={findInEditor}
-            >
-              {name}
-            </span>
-            {preview && <div className="ml-2">{preview}</div>}
+            {!isFocused && triangleToggle()}
+            {headerName}
+            {!isFocused && headerPreview()}
+            {!isRoot && headerFindInEditorButton()}
           </div>
           <div className="inline-flex space-x-1">
-            {Boolean(!settings.collapsed && path.items.length) && (
-              <div className="text-stone-400 hover:text-stone-600 text-sm">
-                {heading}
-              </div>
-            )}
-            {path.items.length ? (
-              <FocusIcon
-                className="h-5 w-5 cursor-pointer text-stone-200 hover:text-stone-500"
-                onClick={() => focus(path)}
-              />
-            ) : null}
-            {!settings.collapsed &&
-              renderSettingsMenu?.({ onChange: forceUpdate })}
+            {isOpen && headerString()}
+            {isOpen && headerSettingsButton()}
           </div>
         </header>
       )}
-      {settings.collapsed ? null : (
+      {isOpen && (
         <div className="flex w-full">
-          {path.items.length ? (
-            <div
-              className="flex group cursor-pointer"
-              onClick={toggleCollapsed}
-            >
-              <div className="p-1" />
-              <div className="border-l border-stone-200 group-hover:border-stone-500 w-2" />
-            </div>
-          ) : null}
-          <div className="grow">{children(getMergedSettings(path))}</div>
+          {!isFocused && leftCollapseBorder()}
+          {isFocused && <div className="w-2" />}
+          <div className="grow">
+            {children(getAdjustedMergedSettings(path))}
+          </div>
         </div>
       )}
     </div>

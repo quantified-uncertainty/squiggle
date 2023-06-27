@@ -1,9 +1,8 @@
-import { SqValuePath } from "@quri/squiggle-lang";
 import {
   PartialPlaygroundSettings,
   PlaygroundSettings,
 } from "../PlaygroundSettings.js";
-import { SqValue } from "@quri/squiggle-lang";
+import { SqValue, SqValuePath } from "@quri/squiggle-lang";
 
 export type LocalItemSettings = {
   collapsed: boolean;
@@ -23,6 +22,18 @@ export function pathToShortName(path: SqValuePath): string | undefined {
   return isTopLevel
     ? { result: undefined, bindings: "Variables" }[path.root]
     : String(path.items[path.items.length - 1]);
+}
+
+export function getChildrenValues(value: SqValue) {
+  switch (value.tag) {
+    case "Array":
+      return value.value.getValues();
+    case "Record":
+      return value.value.entries().map((a) => a[1]);
+    default: {
+      return [];
+    }
+  }
 }
 
 export function extractSubvalueByPath(

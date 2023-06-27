@@ -1,7 +1,7 @@
 import { FC, forwardRef, memo } from "react";
 
 import { SqValue, SqValuePath } from "@quri/squiggle-lang";
-import { FocusIcon } from "@quri/ui";
+import { ChevronRightIcon } from "@quri/ui";
 import { useImperativeHandle } from "react";
 import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
 import { MessageAlert } from "../Alert.js";
@@ -11,10 +11,11 @@ import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 import { ExpressionViewer } from "./ExpressionViewer.js";
 import {
   ViewerProvider,
+  useFocus,
   useUnfocus,
   useViewerContext,
 } from "./ViewerProvider.js";
-import { extractSubvalueByPath, pathAsString } from "./utils.js";
+import { extractSubvalueByPath } from "./utils.js";
 
 export type SquiggleViewerHandle = {
   viewValuePath(path: SqValuePath): void;
@@ -45,6 +46,29 @@ const SquiggleViewerOuter = forwardRef<
 >(function SquiggleViewerOuter({ result }, ref) {
   const { focused, dispatch } = useViewerContext();
   const unfocus = useUnfocus();
+  const focus = useFocus();
+
+  const navLinkStyle =
+    "text-sm text-slate-500 hover:text-slate-900 hover:underline font-mono cursor-pointer";
+
+  const focusedNavigation = focused && (
+    <div className="flex items-center mb-3 pl-1">
+      <span onClick={unfocus} className={navLinkStyle}>
+        {focused.root === "bindings" ? "Variables" : focused.root}
+      </span>
+      {focused
+        .itemsAsValuePaths()
+        .slice(0, -1)
+        .map((path, i) => (
+          <div key={i} className="flex items-center">
+            <ChevronRightIcon className="text-slate-300" size={24} />
+            <div onClick={() => focus(path)} className={navLinkStyle}>
+              {path.items[i]}
+            </div>
+          </div>
+        ))}
+    </div>
+  );
 
   useImperativeHandle(ref, () => ({
     viewValuePath(path: SqValuePath) {
@@ -57,20 +81,7 @@ const SquiggleViewerOuter = forwardRef<
 
   return (
     <div>
-      {focused && (
-        <div className="flex items-center gap-2 mb-1">
-          <FocusIcon />
-          <div className="text-stone-800 font-mono text-sm">
-            {pathAsString(focused)}
-          </div>
-          <button
-            className="text-xs px-1 py-0.5 rounded bg-stone-200 hover:bg-stone-400"
-            onClick={unfocus}
-          >
-            Show all
-          </button>
-        </div>
-      )}
+      {focusedNavigation}
       {result.ok ? (
         <SquiggleViewerBody value={result.value} />
       ) : (

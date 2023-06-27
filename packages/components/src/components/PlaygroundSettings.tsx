@@ -7,12 +7,7 @@ import {
   SqPowerScale,
   SqSymlogScale,
 } from "@quri/squiggle-lang";
-import {
-  CheckboxFormField,
-  NumberFormField,
-  RadioFormField,
-  TextFormField,
-} from "@quri/ui";
+import { CheckboxFormField, NumberFormField, RadioFormField } from "@quri/ui";
 
 import { defaultTickFormatSpecifier } from "../lib/draw/index.js";
 import { functionChartDefaults } from "./FunctionChart/utils.js";
@@ -220,14 +215,6 @@ export const DistributionSettingsForm: React.FC<{
         <NumberFormField<PlaygroundSettings>
           name="distributionChartSettings.maxX"
           label="Max X Value"
-        />
-        <TextFormField<PlaygroundSettings>
-          name="distributionChartSettings.title"
-          label="Title"
-        />
-        <TextFormField<PlaygroundSettings>
-          name="distributionChartSettings.tickFormat"
-          label="Tick Format"
         />
       </div>
     </FormSection>

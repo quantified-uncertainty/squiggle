@@ -58,6 +58,8 @@ export {
   AdjustmentsVerticalIcon,
   DocumentTextIcon,
   LinkIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from "./icons/HeroIcons.js";
 
 export { useToast, WithToasts } from "./components/WithToasts/index.js";

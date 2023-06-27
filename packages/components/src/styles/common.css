@@ -36,7 +36,11 @@
 }
 
 .cm-gutterElement.cm-activeLineGutter {
-  background-color: #cceeff44;
+  background-color: #abd3e857;
+}
+
+.ͼ2 .cm-activeLine {
+  background-color: #abd3e857;
 }
 
 .cm-gutter.cm-lineNumbers {

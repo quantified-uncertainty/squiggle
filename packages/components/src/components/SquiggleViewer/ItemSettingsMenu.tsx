@@ -4,7 +4,7 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
 import { SqValue } from "@quri/squiggle-lang";
-import { Modal } from "@quri/ui";
+import { Modal, TextTooltip } from "@quri/ui";
 
 import {
   MetaSettings,
@@ -43,7 +43,7 @@ const ItemSettingsModal: React.FC<
     throw new Error("Can't render settings modal for pathless value");
   }
 
-  const mergedSettings = getMergedSettings(value.path);
+  const mergedSettings = getMergedSettings({ path: value.path });
 
   const form = useForm({
     resolver: zodResolver(viewSettingsSchema),
@@ -116,7 +116,7 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
     throw new Error("Can't render settings menu for pathless value");
   }
 
-  const settings = getSettings(props.value.path);
+  const settings = getSettings({ path: props.value.path });
 
   const resetScroll = () => {
     if (!props.value.path) {
@@ -132,10 +132,12 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
 
   return (
     <div className="flex gap-2" ref={ref}>
-      <CogIcon
-        className="h-5 w-5 cursor-pointer text-stone-300 hover:text-stone-500"
-        onClick={() => setIsOpen(!isOpen)}
-      />
+      <TextTooltip text="Settings" placement="bottom">
+        <CogIcon
+          className="h-5 w-5 cursor-pointer text-stone-100 hover:!text-stone-500 group-hover:text-stone-400 transition"
+          onClick={() => setIsOpen(!isOpen)}
+        />
+      </TextTooltip>
       {settings.distributionChartSettings ? (
         <button
           onClick={() => {
