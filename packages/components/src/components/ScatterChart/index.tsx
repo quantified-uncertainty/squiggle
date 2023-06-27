@@ -1,7 +1,8 @@
-import React, { FC, useCallback, useMemo } from "react";
+import * as d3 from "d3";
+import { FC, useCallback, useMemo } from "react";
 
 import { Env, SqLinearScale, SqScatterPlot } from "@quri/squiggle-lang";
-import * as d3 from "d3";
+
 import {
   drawAxes,
   drawCircle,
@@ -13,7 +14,7 @@ import {
   useCanvas,
   useCanvasCursor,
 } from "../../lib/hooks/index.js";
-import { sqScaleToD3, canvasClasses } from "../../lib/utility.js";
+import { canvasClasses, sqScaleToD3 } from "../../lib/utility.js";
 import { ErrorAlert } from "../Alert.js";
 
 type Props = {
@@ -43,15 +44,15 @@ export const ScatterChart: FC<Props> = ({ plot, height, environment }) => {
       const xSqScale = plot.xScale ?? SqLinearScale.create();
       const xScale = sqScaleToD3(xSqScale);
       xScale.domain([
-        xSqScale.min ?? d3.min(xDist.value.getSamples())!,
-        xSqScale.max ?? d3.max(xDist.value.getSamples())!,
+        xSqScale.min ?? d3.min(xDist.value.getSamples()) ?? 0,
+        xSqScale.max ?? d3.max(xDist.value.getSamples()) ?? 0,
       ]);
 
       const ySqScale = plot.yScale ?? SqLinearScale.create();
       const yScale = sqScaleToD3(ySqScale);
       yScale.domain([
-        ySqScale.min ?? d3.min(yDist.value.getSamples())!,
-        ySqScale.max ?? d3.max(yDist.value.getSamples())!,
+        ySqScale.min ?? d3.min(yDist.value.getSamples()) ?? 0,
+        ySqScale.max ?? d3.max(yDist.value.getSamples()) ?? 0,
       ]);
 
       const { frame, padding } = drawAxes({
@@ -115,9 +116,9 @@ export const ScatterChart: FC<Props> = ({ plot, height, environment }) => {
       <canvas ref={ref} className={canvasClasses}>
         Chart for {plot.toString()}
       </canvas>
-      {[xDist, yDist].map((dist) =>
+      {[xDist, yDist].map((dist, i) =>
         dist.ok ? null : (
-          <ErrorAlert heading="Conversion error">
+          <ErrorAlert key={i} heading="Conversion error">
             {dist.value.toString()}
           </ErrorAlert>
         )

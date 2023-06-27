@@ -1,8 +1,9 @@
 import { FC, forwardRef, memo } from "react";
 
-import { SqValue } from "@quri/squiggle-lang";
+import { SqValue, SqValuePath } from "@quri/squiggle-lang";
 import { FocusIcon } from "@quri/ui";
-import { useSquiggle } from "../../lib/hooks/index.js";
+import { useImperativeHandle } from "react";
+import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
 import { MessageAlert } from "../Alert.js";
 import { CodeEditorHandle } from "../CodeEditor.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
@@ -14,10 +15,6 @@ import {
   useViewerContext,
 } from "./ViewerProvider.js";
 import { extractSubvalueByPath, pathAsString } from "./utils.js";
-import { SqValuePath } from "@quri/squiggle-lang";
-import { useImperativeHandle } from "react";
-
-type Result = NonNullable<ReturnType<typeof useSquiggle>[0]>["result"];
 
 export type SquiggleViewerHandle = {
   viewValuePath(path: SqValuePath): void;
@@ -25,7 +22,7 @@ export type SquiggleViewerHandle = {
 
 export type SquiggleViewerProps = {
   /** The output of squiggle's run */
-  result: Result;
+  result: SquiggleOutput["result"];
   localSettingsEnabled?: boolean;
   editor?: CodeEditorHandle;
 } & PartialPlaygroundSettings;

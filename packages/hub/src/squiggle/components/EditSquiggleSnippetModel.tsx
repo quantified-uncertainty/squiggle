@@ -136,7 +136,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
               <SquigglePlayground
                 height={height ?? "100vh"}
                 onCodeChange={field.onChange}
-                code={field.value}
+                defaultCode={field.value}
                 renderExtraControls={() =>
                   canSave ? (
                     <div>

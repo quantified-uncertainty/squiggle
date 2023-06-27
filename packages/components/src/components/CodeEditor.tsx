@@ -40,16 +40,19 @@ import {
 } from "@codemirror/view";
 
 import * as squigglePlugin from "@quri/prettier-plugin-squiggle/standalone";
-import { SqError, SqProject } from "@quri/squiggle-lang";
+import {
+  SqCompileError,
+  SqError,
+  SqProject,
+  SqRuntimeError,
+  SqValuePath,
+} from "@quri/squiggle-lang";
 
-import { SqValuePath } from "@quri/squiggle-lang";
 import { lightThemeHighlightingStyle } from "../languageSupport/highlightingStyle.js";
 import { squiggleLanguageSupport } from "../languageSupport/squiggle.js";
-import { SqCompileError } from "@quri/squiggle-lang";
-import { SqRuntimeError } from "@quri/squiggle-lang";
 
 interface CodeEditorProps {
-  value: string; // TODO - should be `initialValue`, since we don't really support value updates
+  defaultValue: string;
   onChange: (value: string) => void;
   onSubmit?: () => void;
   onViewValuePath?: (path: SqValuePath) => void;
@@ -76,7 +79,7 @@ const compViewNodeListener = new Compartment();
 export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
   function CodeEditor(
     {
-      value,
+      defaultValue,
       onChange,
       onSubmit,
       onViewValuePath,
@@ -130,6 +133,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
         },
         scrollIntoView: true,
       });
+      editorView.current?.focus();
     };
 
     useImperativeHandle(ref, () => ({ format, scrollTo }));
@@ -137,7 +141,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     const state = useMemo(
       () =>
         EditorState.create({
-          doc: value,
+          doc: defaultValue,
           extensions: [
             highlightSpecialChars(),
             history(),
@@ -172,7 +176,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
             languageSupport,
           ],
         }),
-      [languageSupport]
+      [languageSupport, defaultValue]
     );
 
     useEffect(() => {
@@ -291,7 +295,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
           ])
         ),
       });
-    }, [onViewValuePath]);
+    }, [onViewValuePath, project, sourceId]);
 
     useEffect(() => {
       if (!editorView.current) {

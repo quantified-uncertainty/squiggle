@@ -13,7 +13,7 @@ export function useCanvasCursor() {
         const pointer = d3.pointer(e);
         setCursor({ x: pointer[0], y: pointer[1] }); // TODO - debounce?
       })
-      .on("pointerout", (e) => {
+      .on("pointerout", () => {
         setCursor(undefined); // TODO - debounce?
       });
   }, []);

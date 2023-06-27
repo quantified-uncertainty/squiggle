@@ -77,7 +77,7 @@ export function sqScaleToD3(
     case "power":
       return d3.scalePow().exponent(scale.exponent);
     default:
-      throw new Error(`Unsupported scale type ${(scale as any).tag}`);
+      throw new Error(`Unknown scale: ${scale satisfies never}`);
   }
 }
 

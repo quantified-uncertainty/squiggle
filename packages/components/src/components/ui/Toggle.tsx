@@ -1,8 +1,6 @@
+import { RefreshIcon } from "@heroicons/react/solid/esm/index.js";
 import { clsx } from "clsx";
 import React from "react";
-
-import { RefreshIcon } from "@heroicons/react/solid/esm/index.js";
-import { Button } from "@quri/ui";
 
 type IconType = (props: React.ComponentProps<"svg">) => JSX.Element;
 

@@ -1,25 +1,42 @@
-import React, { useMemo } from "react";
+import { FC, useMemo, useRef } from "react";
 
-import { useMaybeControlledValue } from "../lib/hooks/index.js";
-import { SquiggleArgs, useSquiggle } from "../lib/hooks/useSquiggle.js";
-import { getErrors, getValueToRender } from "../lib/utility.js";
-import { CodeEditor } from "./CodeEditor.js";
-import { SquiggleViewer, SquiggleViewerProps } from "./SquiggleViewer/index.js";
+import { useUncontrolledCode } from "../lib/hooks/index.js";
+import { useSquiggle } from "../lib/hooks/useSquiggle.js";
+import { getErrors } from "../lib/utility.js";
+import { CodeEditor, CodeEditorHandle } from "./CodeEditor.js";
+import { DynamicSquiggleViewer } from "./DynamicSquiggleViewer.js";
+import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
+import { useRunnerState } from "./SquigglePlayground/RunControls/useRunnerState.js";
+import { SquiggleCodeProps } from "./types.js";
 
-export type SquiggleEditorProps = SquiggleArgs & {
-  defaultCode?: string;
-  onCodeChange?: (code: string) => void;
+export type SquiggleEditorProps = SquiggleCodeProps & {
   hideViewer?: boolean;
-} & Omit<SquiggleViewerProps, "result">;
+  localSettingsEnabled?: boolean;
+  // environment comes from SquiggleCodeProps
+} & Omit<PartialPlaygroundSettings, "environment">;
 
-export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
-  const [code, setCode] = useMaybeControlledValue({
-    value: props.code,
-    defaultValue: props.defaultCode ?? "",
-    onChange: props.onCodeChange,
+export const SquiggleEditor: FC<SquiggleEditorProps> = ({
+  defaultCode: propsDefaultCode,
+  onCodeChange,
+  project: propsProject,
+  continues,
+  environment,
+  hideViewer,
+  localSettingsEnabled,
+  ...settings
+}) => {
+  const { code, setCode, defaultCode } = useUncontrolledCode({
+    defaultCode: propsDefaultCode,
+    onCodeChange,
   });
 
-  const [squiggleOutput, { project }] = useSquiggle({ ...props, code });
+  const runnerState = useRunnerState(code);
+
+  const [squiggleOutput, { project, isRunning }] = useSquiggle({
+    code: runnerState.renderedCode,
+    executionId: runnerState.executionId,
+    ...(propsProject ? { project: propsProject, continues } : { environment }),
+  });
 
   const errors = useMemo(() => {
     if (!squiggleOutput) {
@@ -28,6 +45,8 @@ export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
     return getErrors(squiggleOutput.result);
   }, [squiggleOutput]);
 
+  const editorRef = useRef<CodeEditorHandle>(null);
+
   return (
     <div>
       <div
@@ -35,20 +54,24 @@ export const SquiggleEditor: React.FC<SquiggleEditorProps> = (props) => {
         data-testid="squiggle-editor"
       >
         <CodeEditor
-          value={code}
+          defaultValue={defaultCode ?? ""}
           onChange={setCode}
           showGutter={false}
           errors={errors}
           project={project}
+          ref={editorRef}
+          onSubmit={() => runnerState.run()}
         />
       </div>
-      {props.hideViewer || !squiggleOutput ? null : (
-        <div data-testid="editor-result">
-          <SquiggleViewer
-            result={getValueToRender(squiggleOutput)}
-            {...props}
-          />
-        </div>
+      {hideViewer || !squiggleOutput?.code ? null : (
+        <DynamicSquiggleViewer
+          squiggleOutput={squiggleOutput}
+          isRunning={isRunning}
+          localSettingsEnabled={localSettingsEnabled}
+          editor={editorRef.current ?? undefined}
+          environment={environment}
+          {...settings}
+        />
       )}
     </div>
   );

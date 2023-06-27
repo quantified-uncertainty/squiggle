@@ -1,29 +1,25 @@
-import * as React from "react";
 import { FC, useState } from "react";
 
 import {
   Env,
-  SqError,
-  SqNumericFnPlot,
   SqDistFnPlot,
-  SqLinearScale,
+  SqError,
   SqLambda,
+  SqLinearScale,
   SqNumberValue,
+  SqNumericFnPlot,
 } from "@quri/squiggle-lang";
 
+import { MessageAlert } from "../Alert.js";
 import {
+  PlaygroundSettings,
   generateDistributionPlotSettings,
   generateFunctionPlotSettings,
 } from "../PlaygroundSettings.js";
-
-import { MessageAlert } from "../Alert.js";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
-
 import { DistFunctionChart } from "./DistFunctionChart.js";
 import { NumericFunctionChart } from "./NumericFunctionChart.js";
 import { functionChartDefaults } from "./utils.js";
-import { PlaygroundSettings } from "../PlaygroundSettings.js";
-import { FunctionChartContainer } from "./FunctionChartContainer.js";
 
 type FunctionChartProps = {
   fn: SqLambda;
@@ -59,11 +55,9 @@ export const FunctionChart: FC<FunctionChartProps> = ({
 }) => {
   if (fn.parameters().length !== 1) {
     return (
-      <FunctionChartContainer fn={fn}>
-        <MessageAlert heading="Function Display Not Supported">
-          Only functions with one parameter are displayed.
-        </MessageAlert>
-      </FunctionChartContainer>
+      <MessageAlert heading="Function Display Not Supported">
+        Only functions with one parameter are displayed.
+      </MessageAlert>
     );
   }
   const result1 = fn.call(
@@ -124,12 +118,10 @@ export const FunctionChart: FC<FunctionChartProps> = ({
     }
     default:
       return (
-        <FunctionChartContainer fn={fn}>
-          <MessageAlert heading="Function Display Not Supported">
-            There is no function visualization for this type of output:{" "}
-            <span className="font-bold">{validResult.value.tag}</span>
-          </MessageAlert>
-        </FunctionChartContainer>
+        <MessageAlert heading="Function Display Not Supported">
+          There is no function visualization for this type of output:{" "}
+          <span className="font-bold">{validResult.value.tag}</span>
+        </MessageAlert>
       );
   }
 };

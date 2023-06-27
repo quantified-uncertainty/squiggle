@@ -9,16 +9,18 @@ import {
   result,
 } from "@quri/squiggle-lang";
 
-// Props needed for a standalone execution
-type StandaloneExecutionProps = {
-  /** The amount of points returned to draw the distribution, not needed if using a project */
+// Props needed for a standalone execution.
+export type StandaloneExecutionProps = {
+  project?: undefined;
   environment?: Env;
+  continues?: undefined;
 };
 
 // Props needed when executing inside a project.
-type ProjectExecutionProps = {
+export type ProjectExecutionProps = {
   /** The project that this execution is part of */
   project: SqProject;
+  environment?: undefined;
   /** What other squiggle sources from the project to continue. Default [] */
   continues?: string[];
 };

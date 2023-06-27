@@ -24,6 +24,7 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
+    "@juggle/resize-observer": "^3.4.0",
     "@lezer/generator": "^1.2.4",
     "@storybook/addon-actions": "^7.0.20",
     "@storybook/addon-docs": "^7.0.20",
@@ -42,11 +43,12 @@
     "@types/react": "^18.2.12",
     "@types/react-resizable": "^3.0.4",
     "@types/webpack-bundle-analyzer": "^4.6.0",
-    "@typescript-eslint/eslint-plugin": "^5.59.11",
-    "@typescript-eslint/parser": "^5.59.11",
+    "@typescript-eslint/eslint-plugin": "^5.60.0",
+    "@typescript-eslint/parser": "^5.60.0",
     "canvas": "^2.11.2",
     "eslint": "^8.42.0",
     "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
     "jest": "^29.5.0",
     "jest-environment-jsdom": "^29.5.0",
     "jsdom": "^22.1.0",
@@ -81,8 +83,9 @@
     "build": "yarn run build:lezer && yarn run build:ts && yarn run build:css && yarn run build:storybook",
     "bundle": "webpack",
     "all": "yarn bundle && yarn build",
-    "lint": "prettier --check .",
-    "lint:eslint": "eslint --ignore-path .gitignore .",
+    "lint": "yarn lint:prettier && yarn eslint",
+    "lint:prettier": "prettier --check .",
+    "eslint": "eslint --ignore-path .gitignore .",
     "format": "prettier --write .",
     "prepack": "yarn run build:ts && yarn run bundle",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
@@ -91,12 +94,14 @@
   },
   "eslintConfig": {
     "env": {
+      "node": true,
       "browser": true,
       "es2021": true
     },
     "extends": [
       "eslint:recommended",
       "plugin:react/recommended",
+      "plugin:react-hooks/recommended",
       "plugin:@typescript-eslint/recommended"
     ],
     "parser": "@typescript-eslint/parser",

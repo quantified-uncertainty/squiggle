@@ -1,12 +1,12 @@
-import React, { FC, ReactNode, useEffect, useReducer } from "react";
+import { FC, ReactNode, useCallback, useEffect, useReducer } from "react";
 
 import { SqValue } from "@quri/squiggle-lang";
 import { FocusIcon, TriangleIcon } from "@quri/ui";
 
 import {
   LocalItemSettings,
-  pathToShortName,
   MergedItemSettings,
+  pathToShortName,
 } from "./utils.js";
 import {
   useFocus,
@@ -64,7 +64,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
   const { path } = value;
 
   if (!path) {
-    throw new Error("Can't display a pathless value");
+    throw new Error("Can't display pathless value");
   }
 
   const settings = getSettings(path);
@@ -80,26 +80,28 @@ export const VariableBox: FC<VariableBoxProps> = ({
 
   const name = pathToShortName(path);
 
-  const saveRef = (element: HTMLDivElement) => {
-    dispatch({
-      type: "REGISTER_ITEM_HANDLE",
-      payload: {
-        path: path,
-        element,
-      },
-    });
-  };
+  // should be callback to not fire on each render
+  const saveRef = useCallback(
+    (element: HTMLDivElement) => {
+      dispatch({
+        type: "REGISTER_ITEM_HANDLE",
+        payload: { path, element },
+      });
+    },
+    [dispatch, path]
+  );
 
   useEffect(() => {
+    // This code is a bit risky, because I'm not sure about the order in which ref callbacks and effect cleanups fire.
+    // But it works in practice.
+    // We should switch to ref cleanups after https://github.com/facebook/react/pull/25686 is released.
     return () => {
       dispatch({
         type: "UNREGISTER_ITEM_HANDLE",
-        payload: {
-          path: path,
-        },
+        payload: { path },
       });
     };
-  }, []);
+  }, [dispatch, path]);
 
   return (
     <div ref={saveRef}>
