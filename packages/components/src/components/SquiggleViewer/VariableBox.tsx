@@ -26,7 +26,7 @@ type SettingsMenuParams = {
 
 export type VariableBoxProps = {
   value: SqValue;
-  heading: string;
+  heading?: string;
   preview?: ReactNode;
   renderSettingsMenu?: (params: SettingsMenuParams) => ReactNode;
   children: (settings: MergedItemSettings) => ReactNode;

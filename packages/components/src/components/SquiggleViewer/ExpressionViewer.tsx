@@ -26,35 +26,14 @@ import {
 import { MergedItemSettings, getChildrenValues } from "./utils.js";
 import { RelativeValuesGridChart } from "../RelativeValuesGridChart/index.js";
 
-const VariableList: React.FC<{
-  value: SqValue;
-  heading: string;
-  preview?: React.ReactNode;
-  children: (settings: MergedItemSettings) => React.ReactNode;
-}> = ({ value, heading, children, preview }) => (
-  <VariableBox value={value} preview={preview} heading={heading}>
-    {(settings) => (
-      <div
-        className={clsx(
-          "space-y-2",
-          value.path!.items.length ? "pt-1 mt-1" : null
-        )}
-      >
-        {children(settings)}
-      </div>
-    )}
-  </VariableBox>
-);
-
-//Note: This doesn't really need to return "value", but it was nice to use VariableBoxProps
-export const getBoxProps = (value: SqValue): VariableBoxProps => {
+export const getBoxProps = (
+  value: SqValue
+): Omit<VariableBoxProps, "value"> => {
   const environment = value.path!.project.getEnvironment();
 
   switch (value.tag) {
     case "Number":
       return {
-        value: value,
-        heading: "Number",
         preview: <NumberShower precision={3} number={value.value} />,
         children: () => (
           <div className="font-semibold text-neutral-600">
@@ -66,7 +45,6 @@ export const getBoxProps = (value: SqValue): VariableBoxProps => {
       const distType = value.value.tag;
 
       return {
-        value: value,
         heading: `${distType} Distribution`,
         renderSettingsMenu: ({ onChange }) => {
           const shape = value.path
@@ -105,8 +83,6 @@ export const getBoxProps = (value: SqValue): VariableBoxProps => {
     }
     case "String":
       return {
-        value: value,
-        heading: "String",
         preview:
           value.value.substring(0, 30) + (value.value.length > 30 ? "..." : ""),
         children: () => (
@@ -119,9 +95,6 @@ export const getBoxProps = (value: SqValue): VariableBoxProps => {
       };
     case "Bool":
       return {
-        value: value,
-        heading: "Boolean",
-
         preview: value.value.toString(),
         children: () => (
           <span className="text-neutral-600 text-sm font-mono">
@@ -131,30 +104,21 @@ export const getBoxProps = (value: SqValue): VariableBoxProps => {
       };
     case "Date":
       return {
-        value: value,
-        heading: "Date",
-
         children: () => value.value.toDateString(),
       };
 
     case "Void":
       return {
-        value: value,
-        heading: "Void",
         children: () => "Void",
       };
     case "TimeDuration": {
       return {
-        value: value,
-        heading: "Time Duration",
-
         children: () => <NumberShower precision={3} number={value.value} />,
       };
     }
     case "Lambda":
       return {
-        value: value,
-        heading: ``,
+        heading: "",
         preview: `fn(${value.value.parameters().join(", ")})`,
         renderSettingsMenu: ({ onChange }) => {
           return (
@@ -190,8 +154,6 @@ export const getBoxProps = (value: SqValue): VariableBoxProps => {
     case "Plot": {
       const plot: SqPlot = value.value;
       return {
-        value: value,
-        heading: "Plot",
         children: (settings) => {
           switch (plot.tag) {
             case "distributions":
@@ -248,15 +210,12 @@ export const getBoxProps = (value: SqValue): VariableBoxProps => {
     case "Scale": {
       const scale: SqScale = value.value;
       return {
-        value: value,
-        heading: "Scale",
         children: () => <div>{scale.toString()}</div>,
       };
     }
     case "Record": {
       const entries = getChildrenValues(value);
       return {
-        value: value,
         heading: `Record(${entries.length})`,
         preview: <SqTypeWithCount type="{}" count={entries.length} />,
         children: () =>
@@ -267,7 +226,6 @@ export const getBoxProps = (value: SqValue): VariableBoxProps => {
       const entries = getChildrenValues(value);
       const length = entries.length;
       return {
-        value: value,
         heading: `List(${length})`,
         preview: <SqTypeWithCount type="[]" count={length} />,
         children: () =>
@@ -277,7 +235,6 @@ export const getBoxProps = (value: SqValue): VariableBoxProps => {
 
     default: {
       return {
-        value: value,
         heading: "Error",
         children: () => (
           <div>
@@ -300,27 +257,14 @@ export interface Props {
 
 export const ExpressionViewer: React.FC<Props> = ({ value }) => {
   const boxProps = getBoxProps(value);
-  switch (value.tag) {
-    case "Record":
-    case "Array":
-      return (
-        <VariableList
-          value={value}
-          heading={boxProps.heading}
-          preview={boxProps.preview}
-        >
-          {boxProps.children}
-        </VariableList>
-      );
-    default:
-      return (
-        <VariableBox
-          value={value}
-          heading={boxProps.heading}
-          preview={boxProps.preview}
-        >
-          {boxProps.children}
-        </VariableBox>
-      );
-  }
+  const heading = boxProps.heading || value.tag;
+  const varbox = <VariableBox {...boxProps} value={value} heading={heading} />;
+  const hasChildren = () => !!getChildrenValues(value);
+  return value.tag === "Record" || value.tag === "Array" ? (
+    <div className={clsx("space-y-2", hasChildren() && "pt-1 mt-1")}>
+      {varbox}
+    </div>
+  ) : (
+    varbox
+  );
 };
