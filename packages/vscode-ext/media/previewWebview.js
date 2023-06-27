@@ -6,9 +6,9 @@
   const root = ReactDOM.createRoot(container);
   function updateContent(text, showSettings) {
     root.render(
-      React.createElement(squiggle_components.SquigglePlayground, {
+      React.createElement(squiggle_components.SquiggleChart, {
         code: text,
-        showEditor: false,
+        showHeader: true,
         showSummary: Boolean(showSettings.showSummary),
       })
     );

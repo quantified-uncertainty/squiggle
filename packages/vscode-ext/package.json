@@ -20,7 +20,6 @@
   ],
   "activationEvents": [
     "onLanguage:squiggle",
-    "onCustomEditor:squiggle.wysiwyg",
     "onCommand:squiggle.preview"
   ],
   "main": "./dist/client/extension.js",
@@ -72,18 +71,6 @@
         "embeddedLanguages": {
           "meta.embedded.block.squiggle": "squiggle"
         }
-      }
-    ],
-    "customEditors": [
-      {
-        "viewType": "squiggle.wysiwyg",
-        "displayName": "Squiggle WYSIWYG",
-        "selector": [
-          {
-            "filenamePattern": "*.squiggle"
-          }
-        ],
-        "priority": "option"
       }
     ],
     "commands": [
