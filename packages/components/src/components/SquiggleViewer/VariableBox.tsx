@@ -1,24 +1,30 @@
-import { FC, ReactNode, useCallback, useEffect, useReducer } from "react";
+import {
+  FC,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+} from "react";
 
 import { SqValue } from "@quri/squiggle-lang";
-import { TriangleIcon, CodeBracketIcon, TextTooltip } from "@quri/ui";
+import { CodeBracketIcon, TextTooltip, TriangleIcon } from "@quri/ui";
 
+import { SqValuePath } from "@quri/squiggle-lang";
+import { clsx } from "clsx";
 import {
-  LocalItemSettings,
-  getChildrenValues,
-  MergedItemSettings,
-  pathToShortName,
-  pathAsString,
-} from "./utils.js";
-import {
+  useCollapseChildren,
   useFocus,
   useIsFocused,
   useSetSettings,
-  useCollapseChildren,
   useViewerContext,
 } from "./ViewerProvider.js";
-import { clsx } from "clsx";
-import { SqValuePath } from "@quri/squiggle-lang";
+import {
+  LocalItemSettings,
+  MergedItemSettings,
+  getChildrenValues,
+  pathToShortName,
+} from "./utils.js";
 
 type SettingsMenuParams = {
   // Used to notify VariableBox that settings have changed, so that VariableBox could re-render itself.
@@ -42,12 +48,6 @@ export const SqTypeWithCount: FC<{
     <span className="ml-0.5">{count}</span>
   </div>
 );
-
-//I'm unsure what good defaults will be here. These are heuristics.
-const makeInitialSettings = (childrenLength: number, isRoot: boolean) => ({
-  beCollapsed: !isRoot && childrenLength > 5,
-  collapseChildren: childrenLength > 10,
-});
 
 export const VariableBox: FC<VariableBoxProps> = ({
   value,
@@ -76,21 +76,27 @@ export const VariableBox: FC<VariableBoxProps> = ({
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
   const { path } = value;
-  const isRoot = Boolean(path?.isRoot());
-  const childrenElements = getChildrenValues(value);
-  const initialSettings = makeInitialSettings(childrenElements.length, isRoot);
-
   if (!path) {
     throw new Error("Can't display pathless value");
   }
 
-  if (initialSettings.collapseChildren) {
-    collapseChildren(value);
-  }
+  const isRoot = Boolean(path.isRoot());
 
-  const defaults: LocalItemSettings = {
-    collapsed: initialSettings.beCollapsed,
-  };
+  // This doesn't just memoizes the detaults, but also affects children, in some cases.
+  const defaults: LocalItemSettings = useMemo(() => {
+    // TODO - value.size() would be faster.
+    const childrenElements = getChildrenValues(value);
+
+    // I'm unsure what good defaults will be here. These are heuristics.
+    // Firing this in `useEffect` would be too late in some cases; see https://github.com/quantified-uncertainty/squiggle/pull/1943#issuecomment-1610583706
+    if (childrenElements.length > 10) {
+      collapseChildren(value);
+    }
+    return {
+      collapsed: !isRoot && childrenElements.length > 5,
+    };
+  }, [value, collapseChildren, isRoot]);
+
   const settings = getSettings({ path, defaults });
 
   const getAdjustedMergedSettings = (path: SqValuePath) => {
