@@ -26,6 +26,7 @@ export const PageMenu: FC = () => {
           href="https://www.squiggle-language.com/docs/Api/Dist"
           icon={BookOpenIcon}
           title="Docs"
+          external
         />
         {session && <NewDropdown />}
         <UserControls session={session} />
