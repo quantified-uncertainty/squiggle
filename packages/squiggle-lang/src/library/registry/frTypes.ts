@@ -79,9 +79,13 @@ export const frArray = <T>(itemType: FRType<T>): FRType<T[]> => {
       if (v.type !== "Array") {
         return undefined;
       }
+      if (itemType.getName() === "any") {
+        // special case, performance optimization
+        return v.value as T[];
+      }
+
       const unpackedArray: T[] = [];
       for (const item of v.value) {
-        // TODO - skip checks if itemType is `any`
         const unpackedItem = itemType.unpack(item);
         if (unpackedItem === undefined) {
           return undefined;

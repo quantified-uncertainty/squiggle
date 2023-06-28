@@ -12,6 +12,7 @@ import {
   frDict,
   frRecord,
   frOptional,
+  frAny,
 } from "../../src/library/registry/frTypes.js";
 import { ImmutableMap } from "../../src/utility/immutableMap.js";
 
@@ -93,11 +94,25 @@ describe("frDist", () => {
 test.todo("frLambda");
 test.todo("frScale");
 
-test("frArray", () => {
+describe("frArray", () => {
   const arr = [3, 5, 6];
   const value = vArray(arr.map((i) => vNumber(i)));
-  expect(frArray(frNumber).unpack(value)).toEqual(arr);
-  expect(frArray(frNumber).pack(arr)).toEqual(value);
+
+  test("unpack number[]", () => {
+    expect(frArray(frNumber).unpack(value)).toEqual(arr);
+  });
+
+  test("pack number[]", () => {
+    expect(frArray(frNumber).pack(arr)).toEqual(value);
+  });
+
+  test("unpack any[]", () => {
+    expect(frArray(frAny).unpack(value)).toEqual([
+      vNumber(3),
+      vNumber(5),
+      vNumber(6),
+    ]);
+  });
 });
 
 test("frTuple2", () => {
