@@ -1,22 +1,23 @@
 import { Session } from "next-auth";
 import { signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { UserCircleIcon, SignOutIcon } from "@quri/ui";
+import { FC } from "react";
 
 import {
   Button,
-  DropdownMenu,
   Dropdown,
+  DropdownMenu,
   DropdownMenuActionItem,
   DropdownMenuHeader,
   DropdownMenuSeparator,
+  SignOutIcon,
+  UserCircleIcon,
 } from "@quri/ui";
 
-import { chooseUsernameRoute } from "@/routes";
-import { userRoute } from "@/routes";
-import { DropdownWithArrow } from "./TopMenuComponents";
+import { chooseUsernameRoute, userRoute } from "@/routes";
+import { DropdownWithArrow } from "./DropdownWithArrow";
 
-export function UserControls({ session }: { session: Session | null }) {
+export const UserControls: FC<{ session: Session | null }> = ({ session }) => {
   if (
     session?.user &&
     !session?.user.username &&
@@ -55,4 +56,4 @@ export function UserControls({ session }: { session: Session | null }) {
   ) : (
     <Button onClick={() => signIn()}>Sign In</Button>
   );
-}
+};
