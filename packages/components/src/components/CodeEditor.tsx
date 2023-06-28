@@ -5,6 +5,7 @@ import {
   useImperativeHandle,
   useMemo,
   useRef,
+  useState,
 } from "react";
 
 import * as prettier from "prettier/standalone";
@@ -94,10 +95,17 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
   ) {
     const editor = useRef<HTMLDivElement>(null);
     const editorView = useRef<EditorView | null>(null);
+
+    const projectRef = useRef<SqProject | null>(null);
     const languageSupport = useMemo(
-      () => squiggleLanguageSupport(project),
-      [project]
+      // We don't pass `project` because its value can be updated (in theory...),
+      // and I couldn't find quickly how to update EditorState extensions.
+      () => squiggleLanguageSupport(projectRef),
+      []
     );
+    useEffect(() => {
+      projectRef.current = project;
+    }, [project]);
 
     const format = useCallback(async () => {
       if (!editorView.current) {
@@ -138,45 +146,46 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
 
     useImperativeHandle(ref, () => ({ format, scrollTo }));
 
-    const state = useMemo(
-      () =>
-        EditorState.create({
-          doc: defaultValue,
-          extensions: [
-            highlightSpecialChars(),
-            history(),
-            drawSelection(),
-            dropCursor(),
-            EditorState.allowMultipleSelections.of(true),
-            indentOnInput(),
-            syntaxHighlighting(lightThemeHighlightingStyle, { fallback: true }),
-            bracketMatching(),
-            closeBrackets(),
-            autocompletion(),
-            highlightSelectionMatches({
-              wholeWords: true,
-              highlightWordAroundCursor: false, // Works weird on fractions! 5.3e10K
-            }),
-            compSubmitListener.of([]),
-            compFormatListener.of([]),
-            compViewNodeListener.of([]),
-            keymap.of([
-              ...closeBracketsKeymap,
-              ...defaultKeymap,
-              ...searchKeymap,
-              ...historyKeymap,
-              ...foldKeymap,
-              ...completionKeymap,
-              ...lintKeymap,
-              indentWithTab,
-            ]),
-            compGutter.of([]),
-            compUpdateListener.of([]),
-            compTheme.of([]),
-            languageSupport,
-          ],
-        }),
-      [languageSupport, defaultValue]
+    // Note the `useState` instead of `useMemo`; we never want to recreate EditorState, it would cause bugs.
+    // `defaultValue` changes are ignored;
+    // `languageSupport` changes (which depends on `project` prop) are handled with `projectRef`.
+    const [state] = useState(() =>
+      EditorState.create({
+        doc: defaultValue,
+        extensions: [
+          highlightSpecialChars(),
+          history(),
+          drawSelection(),
+          dropCursor(),
+          EditorState.allowMultipleSelections.of(true),
+          indentOnInput(),
+          syntaxHighlighting(lightThemeHighlightingStyle, { fallback: true }),
+          bracketMatching(),
+          closeBrackets(),
+          autocompletion(),
+          highlightSelectionMatches({
+            wholeWords: true,
+            highlightWordAroundCursor: false, // Works weird on fractions! 5.3e10K
+          }),
+          compSubmitListener.of([]),
+          compFormatListener.of([]),
+          compViewNodeListener.of([]),
+          keymap.of([
+            ...closeBracketsKeymap,
+            ...defaultKeymap,
+            ...searchKeymap,
+            ...historyKeymap,
+            ...foldKeymap,
+            ...completionKeymap,
+            ...lintKeymap,
+            indentWithTab,
+          ]),
+          compGutter.of([]),
+          compUpdateListener.of([]),
+          compTheme.of([]),
+          languageSupport,
+        ],
+      })
     );
 
     useEffect(() => {

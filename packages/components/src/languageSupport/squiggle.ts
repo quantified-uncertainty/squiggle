@@ -1,19 +1,20 @@
+import { CompletionContext, snippetCompletion } from "@codemirror/autocomplete";
 import {
   LRLanguage,
   LanguageSupport,
-  indentNodeProp,
-  foldNodeProp,
   foldInside,
+  foldNodeProp,
+  indentNodeProp,
   syntaxTree,
 } from "@codemirror/language";
 import { styleTags, tags as t } from "@lezer/highlight";
-import { snippetCompletion, CompletionContext } from "@codemirror/autocomplete";
+import { RefObject } from "react";
 
 import { SqProject } from "@quri/squiggle-lang";
 
 import { parser } from "./generated/squiggle.js";
 
-export function squiggleLanguageSupport(project: SqProject) {
+export function squiggleLanguageSupport(projectRef: RefObject<SqProject>) {
   return new LanguageSupport(
     LRLanguage.define({
       name: "squiggle",
@@ -119,14 +120,14 @@ export function squiggleLanguageSupport(project: SqProject) {
                 label: name,
                 type: "constant",
               })),
-              ...project
-                .getStdLib()
+              ...(projectRef.current
+                ?.getStdLib()
                 .keySeq()
                 .toArray()
                 .map((name) => ({
                   label: name,
                   type: "function",
-                })),
+                })) ?? []),
             ],
           };
         },
