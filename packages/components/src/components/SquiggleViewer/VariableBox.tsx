@@ -1,4 +1,11 @@
-import { FC, ReactNode, useCallback, useEffect, useReducer } from "react";
+import {
+  FC,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useReducer,
+  useState,
+} from "react";
 
 import { SqValue } from "@quri/squiggle-lang";
 import { TriangleIcon, CodeBracketIcon, TextTooltip } from "@quri/ui";
@@ -8,7 +15,6 @@ import {
   getChildrenValues,
   MergedItemSettings,
   pathToShortName,
-  pathAsString,
 } from "./utils.js";
 import {
   useFocus,
@@ -62,6 +68,8 @@ export const VariableBox: FC<VariableBoxProps> = ({
   const { editor, getSettings, getMergedSettings, dispatch } =
     useViewerContext();
   const isFocused = useIsFocused(value.path);
+  const [hasCollapsedChildren, setHasCollapsedChildren] =
+    useState<boolean>(false);
 
   const findInEditor = () => {
     const locationR = value.path?.findLocation();
@@ -84,8 +92,9 @@ export const VariableBox: FC<VariableBoxProps> = ({
     throw new Error("Can't display pathless value");
   }
 
-  if (initialSettings.collapseChildren) {
+  if (!hasCollapsedChildren && initialSettings.collapseChildren) {
     collapseChildren(value);
+    setHasCollapsedChildren(true);
   }
 
   const defaults: LocalItemSettings = {
