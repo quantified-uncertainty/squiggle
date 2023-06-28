@@ -6,6 +6,7 @@ import {
   SqScale,
   SqValue,
 } from "@quri/squiggle-lang";
+
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
 import { DistributionsChart } from "../DistributionsChart/index.js";
 import { DistFunctionChart } from "../FunctionChart/DistFunctionChart.js";
@@ -16,7 +17,6 @@ import { generateDistributionPlotSettings } from "../PlaygroundSettings.js";
 import { RelativeValuesGridChart } from "../RelativeValuesGridChart/index.js";
 import { ScatterChart } from "../ScatterChart/index.js";
 import { ItemSettingsMenu } from "./ItemSettingsMenu.js";
-
 import {
   SqTypeWithCount,
   VariableBox,
