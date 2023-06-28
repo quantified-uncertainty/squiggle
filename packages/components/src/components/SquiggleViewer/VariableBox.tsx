@@ -76,30 +76,27 @@ export const VariableBox: FC<VariableBoxProps> = ({
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
   const { path } = value;
-  const isRoot = Boolean(path?.isRoot());
-  const initialSettings = useMemo(() => {
-    // TODO - value.size() would be faster.
-    const childrenElements = getChildrenValues(value);
-    // I'm unsure what good defaults will be here. These are heuristics.
-    return {
-      beCollapsed: !isRoot && childrenElements.length > 5,
-      collapseChildren: childrenElements.length > 10,
-    };
-  }, [value, isRoot]);
-
   if (!path) {
     throw new Error("Can't display pathless value");
   }
 
-  useEffect(() => {
-    if (initialSettings.collapseChildren) {
+  const isRoot = Boolean(path.isRoot());
+
+  // This doesn't just memoizes the detaults, but also affects children, in some cases.
+  const defaults: LocalItemSettings = useMemo(() => {
+    // TODO - value.size() would be faster.
+    const childrenElements = getChildrenValues(value);
+
+    // I'm unsure what good defaults will be here. These are heuristics.
+    // Firing this in `useEffect` would be too late in some cases; see https://github.com/quantified-uncertainty/squiggle/pull/1943#issuecomment-1610583706
+    if (childrenElements.length > 10) {
       collapseChildren(value);
     }
-  }, [value, collapseChildren, initialSettings]);
+    return {
+      collapsed: !isRoot && childrenElements.length > 5,
+    };
+  }, [value, collapseChildren, isRoot]);
 
-  const defaults: LocalItemSettings = {
-    collapsed: initialSettings.beCollapsed,
-  };
   const settings = getSettings({ path, defaults });
 
   const getAdjustedMergedSettings = (path: SqValuePath) => {
