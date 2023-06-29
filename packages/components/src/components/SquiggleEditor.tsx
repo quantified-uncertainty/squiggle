@@ -6,7 +6,7 @@ import { getErrors } from "../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "./CodeEditor.js";
 import { DynamicSquiggleViewer } from "./DynamicSquiggleViewer.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
-import { useRunnerState } from "./SquigglePlayground/RunControls/useRunnerState.js";
+import { useRunnerState } from "../lib/hooks/useRunnerState.js";
 import { SquiggleCodeProps } from "./types.js";
 
 export type SquiggleEditorProps = SquiggleCodeProps & {

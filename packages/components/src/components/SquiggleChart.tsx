@@ -9,7 +9,7 @@ import {
 } from "../lib/hooks/useSquiggle.js";
 import { DynamicSquiggleViewer } from "./DynamicSquiggleViewer.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
-import { useRunnerState } from "./SquigglePlayground/RunControls/useRunnerState.js";
+import { useRunnerState } from "../lib/hooks/useRunnerState.js";
 
 type Props = {
   code: string;

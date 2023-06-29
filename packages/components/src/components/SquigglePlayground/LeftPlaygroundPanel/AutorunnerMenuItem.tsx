@@ -2,8 +2,8 @@ import React from "react";
 
 import { BoltIcon, PauseIcon } from "@quri/ui";
 
-import { MenuItem } from "../MenuItem.js";
-import { RunnerState } from "./useRunnerState.js";
+import { MenuItem } from "./MenuItem.js";
+import { RunnerState } from "../../../lib/hooks/useRunnerState.js";
 
 export const AutorunnerMenuItem: React.FC<RunnerState> = ({
   setAutorunMode,

@@ -7,6 +7,7 @@ import React, {
   useState,
 } from "react";
 
+import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
 import { DynamicSquiggleViewer } from "../DynamicSquiggleViewer.js";
 import {
   PartialPlaygroundSettings,
@@ -17,9 +18,9 @@ import { SquiggleViewerHandle } from "../SquiggleViewer/index.js";
 import {
   LeftPlaygroundPanel,
   LeftPlaygroundPanelHandle,
-} from "./LeftPlaygroundPanel.js";
+  RenderExtraControls,
+} from "./LeftPlaygroundPanel/index.js";
 import { ResizableTwoPanelLayout } from "./ResizableTwoPanelLayout.js";
-import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
 
 type PlaygroundProps = {
   /* We don't support `project` or `continues` in the playground.
@@ -30,8 +31,8 @@ type PlaygroundProps = {
   onCodeChange?(code: string): void;
   /* When settings change */
   onSettingsChange?(settings: PlaygroundSettings): void;
-  /* Allows to inject extra buttons, e.g. share button on the website, or save button in Squiggle Hub */
-  renderExtraControls?: () => ReactNode;
+  /* Allows to inject extra buttons to the left panel's menu, e.g. share button on the website, or save button in Squiggle Hub. */
+  renderExtraControls?: RenderExtraControls;
   /* Height of the playground */
   height?: CSSProperties["height"];
 } & PartialPlaygroundSettings;
@@ -54,8 +55,10 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     ...defaultSettings
   } = props;
 
-  // never changes - LeftPanel component must be uncontrolled to avoid performance issues
-  const [fullDefaultSettings] = useState(
+  // `settings` are owned by SquigglePlayground.
+  // This can cause some unnecessary renders (e.g. settings form), but most heavy playground subcomponents
+  // should rerender on settings changes (e.g. right panel), so that's fine.
+  const [settings, setSettings] = useState(
     () =>
       merge(
         {},
@@ -65,8 +68,6 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
         )
       ) as PlaygroundSettings
   );
-
-  const [settings, setSettings] = useState(fullDefaultSettings);
   const handleSettingsChange = useCallback(
     (newSettings: PlaygroundSettings) => {
       setSettings(newSettings);
@@ -93,7 +94,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     <LeftPlaygroundPanel
       defaultCode={defaultCode}
       onCodeChange={onCodeChange}
-      defaultSettings={fullDefaultSettings}
+      settings={settings}
       onSettingsChange={handleSettingsChange}
       onOutputChange={setOutput}
       renderExtraControls={renderExtraControls}
