@@ -15,7 +15,7 @@ import { z } from "zod";
 import { AdjustmentsVerticalIcon, Bars3CenterLeftIcon, Button } from "@quri/ui";
 
 import { useSquiggle, useUncontrolledCode } from "../../lib/hooks/index.js";
-import { getErrors, isMac } from "../../lib/utility.js";
+import { altKey, getErrors } from "../../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "../CodeEditor.js";
 import { DynamicSquiggleViewer } from "../DynamicSquiggleViewer.js";
 import {
@@ -152,11 +152,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
           tooltipText="Configuration"
         />
         <MenuItem
-          tooltipText={
-            isMac()
-              ? "Format Code (Option+Shift+f)"
-              : "Format Code (Alt+Shift+f)"
-          }
+          tooltipText={`Format Code (${altKey()}+Shift+f)`}
           icon={Bars3CenterLeftIcon}
           onClick={editorRef.current?.format}
         />
