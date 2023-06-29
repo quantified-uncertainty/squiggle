@@ -1,36 +1,25 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import merge from "lodash/merge.js";
 import React, {
   CSSProperties,
   ReactNode,
   useCallback,
-  useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
-import { FormProvider, useForm } from "react-hook-form";
-import { z } from "zod";
 
-import { AdjustmentsVerticalIcon, Bars3CenterLeftIcon, Button } from "@quri/ui";
-
-import { useSquiggle, useUncontrolledCode } from "../../lib/hooks/index.js";
-import { altKey, getErrors } from "../../lib/utility.js";
-import { CodeEditor, CodeEditorHandle } from "../CodeEditor.js";
 import { DynamicSquiggleViewer } from "../DynamicSquiggleViewer.js";
 import {
   PartialPlaygroundSettings,
-  PlaygroundSettingsForm,
   defaultPlaygroundSettings,
-  viewSettingsSchema,
   type PlaygroundSettings,
 } from "../PlaygroundSettings.js";
 import { SquiggleViewerHandle } from "../SquiggleViewer/index.js";
-import { MenuItem } from "./MenuItem.js";
+import {
+  LeftPlaygroundPanel,
+  LeftPlaygroundPanelHandle,
+} from "./LeftPlaygroundPanel.js";
 import { ResizableTwoPanelLayout } from "./ResizableTwoPanelLayout.js";
-import { AutorunnerMenuItem } from "./RunControls/AutorunnerMenuItem.js";
-import { RunMenuItem } from "./RunControls/RunMenuItem.js";
-import { useRunnerState } from "./RunControls/useRunnerState.js";
+import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
 
 type PlaygroundProps = {
   /* We don't support `project` or `continues` in the playground.
@@ -55,129 +44,70 @@ export const PlaygroundContext = React.createContext<PlaygroundContextShape>({
   getLeftPanelElement: () => undefined,
 });
 
-type Tab = "CODE" | "SETTINGS";
-
 export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
-  const { onSettingsChange, renderExtraControls, height = 500 } = props;
-  const { code, setCode, defaultCode } = useUncontrolledCode({
-    defaultCode: props.defaultCode,
-    onCodeChange: props.onCodeChange,
-  });
+  const {
+    defaultCode,
+    onCodeChange,
+    onSettingsChange,
+    renderExtraControls,
+    height = 500,
+    ...defaultSettings
+  } = props;
 
-  const defaultValues: PlaygroundSettings = merge(
-    {},
-    defaultPlaygroundSettings,
-    Object.fromEntries(Object.entries(props).filter(([, v]) => v !== undefined))
+  // never changes - LeftPanel component must be uncontrolled to avoid performance issues
+  const [fullDefaultSettings] = useState(
+    () =>
+      merge(
+        {},
+        defaultPlaygroundSettings,
+        Object.fromEntries(
+          Object.entries(defaultSettings).filter(([, v]) => v !== undefined)
+        )
+      ) as PlaygroundSettings
   );
 
-  const [selectedTab, setSelectedTab] = useState<Tab>("CODE");
-
-  const form = useForm({
-    resolver: zodResolver(viewSettingsSchema),
-    defaultValues,
-    mode: "onChange",
-  });
-
-  const [settings, setSettings] = useState<z.infer<typeof viewSettingsSchema>>(
-    () => form.getValues()
+  const [settings, setSettings] = useState(fullDefaultSettings);
+  const handleSettingsChange = useCallback(
+    (newSettings: PlaygroundSettings) => {
+      setSettings(newSettings);
+      onSettingsChange?.(newSettings);
+    },
+    [onSettingsChange]
   );
 
-  useEffect(() => {
-    const submit = form.handleSubmit((data) => {
-      setSettings(data);
-      onSettingsChange?.(data);
-    });
-    const subscription = form.watch(() => submit());
-    return () => subscription.unsubscribe();
-  }, [form, onSettingsChange]);
+  const [output, setOutput] = useState<{
+    output: SquiggleOutput | undefined;
+    isRunning: boolean;
+  }>({ output: undefined, isRunning: false });
 
-  const runnerState = useRunnerState(code);
-
-  const [squiggleOutput, { project, isRunning, sourceId }] = useSquiggle({
-    code: runnerState.renderedCode,
-    executionId: runnerState.executionId,
-    environment: settings.environment,
-  });
-
-  const errors = useMemo(() => {
-    if (!squiggleOutput) {
-      return [];
-    }
-    return getErrors(squiggleOutput.result);
-  }, [squiggleOutput]);
-
-  const editorRef = useRef<CodeEditorHandle>(null);
   const viewerRef = useRef<SquiggleViewerHandle>(null);
 
-  const leftPanelBody =
-    selectedTab === "CODE" ? (
-      <div data-testid="squiggle-editor">
-        <CodeEditor
-          ref={editorRef}
-          defaultValue={defaultCode}
-          errors={errors}
-          project={project}
-          sourceId={sourceId}
-          showGutter={true}
-          onChange={setCode}
-          onViewValuePath={(path) => viewerRef.current?.viewValuePath(path)}
-          onSubmit={runnerState.run}
-        />
-      </div>
-    ) : selectedTab === "SETTINGS" ? (
-      <div className="px-4 py-2">
-        <div className="pb-4">
-          <Button onClick={() => setSelectedTab("CODE")}>Back</Button>
-        </div>
-        <FormProvider {...form}>
-          <PlaygroundSettingsForm />
-        </FormProvider>
-      </div>
-    ) : null;
-
-  const leftPanelRef = useRef<HTMLDivElement | null>(null);
-
-  const leftPanelHeader = (
-    <div className="flex justify-between h-8 bg-slate-50 border-b border-slate-200 overflow-hidden mb-1 px-4">
-      <div className="flex">
-        <RunMenuItem {...runnerState} isRunning={isRunning} />
-        <AutorunnerMenuItem {...runnerState} />
-        <MenuItem
-          onClick={() =>
-            setSelectedTab(selectedTab === "SETTINGS" ? "CODE" : "SETTINGS")
-          }
-          icon={AdjustmentsVerticalIcon}
-          tooltipText="Configuration"
-        />
-        <MenuItem
-          tooltipText={`Format Code (${altKey()}+Shift+f)`}
-          icon={Bars3CenterLeftIcon}
-          onClick={editorRef.current?.format}
-        />
-      </div>
-      <div className="flex items-center">{renderExtraControls?.()}</div>
-    </div>
-  );
+  const leftPanelRef = useRef<LeftPlaygroundPanelHandle>(null);
 
   const getLeftPanelElement = useCallback(
-    () => leftPanelRef.current ?? undefined,
+    () => leftPanelRef.current?.getLeftPanelElement() ?? undefined,
     []
   );
 
   const renderLeft = () => (
-    <div className="h-full flex flex-col" ref={leftPanelRef}>
-      {leftPanelHeader}
-      <div className="flex-1 grid place-content-stretch overflow-auto">
-        {leftPanelBody}
-      </div>
-    </div>
+    <LeftPlaygroundPanel
+      defaultCode={defaultCode}
+      onCodeChange={onCodeChange}
+      defaultSettings={fullDefaultSettings}
+      onSettingsChange={handleSettingsChange}
+      onOutputChange={setOutput}
+      renderExtraControls={renderExtraControls}
+      onViewValuePath={(path) => viewerRef.current?.viewValuePath(path)}
+      ref={leftPanelRef}
+    />
   );
 
   const renderRight = () => (
     <DynamicSquiggleViewer
-      squiggleOutput={squiggleOutput}
-      isRunning={isRunning}
-      editor={editorRef.current ?? undefined}
+      squiggleOutput={output.output}
+      isRunning={output.isRunning}
+      // FIXME - this will cause viewer to be rendered twice on initial render
+      editor={leftPanelRef.current?.getEditor() ?? undefined}
       ref={viewerRef}
       {...settings}
     />
