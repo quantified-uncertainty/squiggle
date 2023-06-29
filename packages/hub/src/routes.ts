@@ -12,6 +12,10 @@ export function modelRoute({
   return `/users/${username}/models/${slug}`;
 }
 
+export function isModelRoute(url: string) {
+  return url.match("^/users/[^/]+/models/[^/]+$");
+}
+
 export function modelForRelativeValuesExportRoute({
   username,
   slug,

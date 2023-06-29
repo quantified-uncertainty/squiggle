@@ -127,12 +127,16 @@ export function useUnfocus() {
 
 export function useCollapseChildren() {
   const { dispatch } = useViewerContext();
-  return (value: SqValue) => {
-    dispatch({
-      type: "COLLAPSE_CHILDREN",
-      payload: value,
-    });
-  };
+  // stable callback identity here is important, see VariableBox code
+  return useCallback(
+    (value: SqValue) => {
+      dispatch({
+        type: "COLLAPSE_CHILDREN",
+        payload: value,
+      });
+    },
+    [dispatch]
+  );
 }
 
 export function useIsFocused(location: SqValuePath | undefined) {
@@ -204,7 +208,7 @@ export const ViewerProvider: FC<
     const ref = settingsStoreRef.current[pathAsString(path)];
     settingsStoreRef.current[pathAsString(path)] = {
       ...ref,
-      collapsed: isCollapsed,
+      collapsed: ref?.collapsed ?? isCollapsed,
     };
   };
 
