@@ -16,6 +16,24 @@ export function isModelRoute(url: string) {
   return url.match("^/users/[^/]+/models/[^/]+$");
 }
 
+// used by useFixModelUrlCasing hook
+export function patchModelRoute({
+  pathname,
+  username,
+  slug,
+}: {
+  pathname: string;
+  username: string;
+  slug: string;
+}) {
+  const match = pathname.match("^/users/[^/]+/models/[^/]+($|/.*)");
+  if (!match) {
+    // not a model route; should we throw an error instead?
+    return pathname;
+  }
+  return `/users/${username}/models/${slug}${match[1]}`;
+}
+
 export function modelForRelativeValuesExportRoute({
   username,
   slug,

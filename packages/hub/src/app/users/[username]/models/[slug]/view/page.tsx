@@ -6,6 +6,7 @@ import { ModelPage$key } from "@/__generated__/ModelPage.graphql";
 import { ModelPageFragment, useModelPageQuery } from "../ModelPage";
 import { ViewModelRevision } from "../ViewModelRevision";
 import { ViewModelRevisionContent } from "../ViewModelRevisionContent";
+import { useFixModelUrlCasing } from "../FixModelUrlCasing";
 
 export default function OuterModelPage({
   params,
@@ -16,6 +17,7 @@ export default function OuterModelPage({
     ownerUsername: params.username,
     slug: params.slug,
   });
+  useFixModelUrlCasing(modelRef);
 
   const model = useFragment<ModelPage$key>(ModelPageFragment, modelRef);
 
