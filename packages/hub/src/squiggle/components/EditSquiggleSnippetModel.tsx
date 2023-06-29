@@ -140,7 +140,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
                 renderExtraControls={() =>
                   canSave ? (
                     <div className="ml-2">
-                      <Button theme="primary" onClick={save} height={"7"}>
+                      <Button theme="primary" onClick={save} size={"small"}>
                         Save
                       </Button>
                     </div>

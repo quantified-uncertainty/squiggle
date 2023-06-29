@@ -9,6 +9,7 @@ type Props = PropsWithChildren<{
   theme?: ButtonTheme;
   disabled?: boolean;
   height?: string;
+  size?: "small" | "medium";
   // We default to type="button", to avoid form-related bugs.
   // In HTML standard, there's also "reset", but it's rarely useful.
   type?: "submit" | "button";
@@ -20,23 +21,24 @@ export const Button: FC<Props> = ({
   theme = "default",
   disabled,
   type = "button",
-  height = "8",
+  size = "medium",
   children,
 }) => {
   return (
     <button
       className={clsx(
-        "rounded-md px-4 border text-sm font-medium flex items-center justify-center space-x-1",
+        "border text-xs font-medium flex items-center justify-center space-x-1",
         theme === "primary"
           ? "bg-green-700 border-green-900 text-white"
           : "bg-slate-100 border-slate-300 text-gray-600",
         disabled
           ? "opacity-60"
           : theme === "primary"
-          ? "hover:bg-green-800 hover:border-green-900 hover:text-white"
+          ? "hover:bg-green-800 hover:border-green-800 hover:text-white"
           : "hover:bg-slate-200 hover:text-gray-900",
         wide && "w-full",
-        `h-${height}`
+        size === "medium" && "px-4 h-8 rounded-md",
+        size === "small" && "px-3 h-6 rounded-sm"
       )}
       onClick={onClick}
       disabled={disabled}
