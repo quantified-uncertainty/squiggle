@@ -140,8 +140,8 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
   const leftPanelRef = useRef<HTMLDivElement | null>(null);
 
   const leftPanelHeader = (
-    <div className="flex justify-between items-center h-8 bg-slate-50 border-b border-slate-200 overflow-hidden mb-1 px-4">
-      <div className="flex items-center h-full">
+    <div className="flex justify-between h-8 bg-slate-50 border-b border-slate-200 overflow-hidden mb-1 px-4">
+      <div className="flex">
         <RunMenuItem {...runnerState} isRunning={isRunning} />
         <AutorunnerMenuItem {...runnerState} />
         <MenuItem
@@ -161,7 +161,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
           onClick={editorRef.current?.format}
         />
       </div>
-      <div>{renderExtraControls?.()}</div>
+      <div className="flex items-center">{renderExtraControls?.()}</div>
     </div>
   );
 

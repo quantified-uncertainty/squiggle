@@ -27,7 +27,7 @@ export const Button: FC<Props> = ({
   return (
     <button
       className={clsx(
-        "border text-xs font-medium flex items-center justify-center space-x-1",
+        "border text-sm font-medium flex items-center justify-center space-x-1",
         theme === "primary"
           ? "bg-green-700 border-green-900 text-white"
           : "bg-slate-100 border-slate-300 text-gray-600",
