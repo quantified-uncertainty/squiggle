@@ -9,6 +9,7 @@ import { modelRevisionRoute } from "@/routes";
 import { ModelRevisionsListQuery } from "@gen/ModelRevisionsListQuery.graphql";
 import { Button } from "@quri/ui";
 import { format } from "date-fns";
+import { useFixModelUrlCasing } from "../FixModelUrlCasing";
 
 const RevisionsFragment = graphql`
   fragment ModelRevisionsList on Model
@@ -36,6 +37,7 @@ const ModelRevisionsListQuery = graphql`
   query ModelRevisionsListQuery($input: QueryModelInput!) {
     model(input: $input) {
       id
+      ...FixModelUrlCasing
       ...ModelRevisionsList
     }
   }
@@ -54,6 +56,8 @@ export const ModelRevisionsList: FC<Props> = ({ username, slug }) => {
     },
     { fetchPolicy: "store-and-network" }
   );
+
+  useFixModelUrlCasing(modelRef);
 
   const { data: model, loadNext } = usePaginationFragment<
     ModelRevisionsListQuery,

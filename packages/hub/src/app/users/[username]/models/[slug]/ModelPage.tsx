@@ -1,21 +1,21 @@
-import { FC, PropsWithChildren } from "react";
-import { graphql } from "relay-runtime";
 import { useSession } from "next-auth/react";
+import { FC, PropsWithChildren } from "react";
 import { useLazyLoadQuery } from "react-relay";
+import { graphql } from "relay-runtime";
 
 import { DropdownMenu } from "@quri/ui";
 
-import { DotsDropdownButton } from "@/components/ui/DotsDropdownButton";
-import { StyledTabLink } from "@/components/ui/StyledTabLink";
-import { modelRevisionsRoute, modelRoute } from "@/routes";
-import { DeleteModelAction } from "./DeleteModelAction";
-import { UpdateModelSlugAction } from "./UpdateModelSlugAction";
 import {
   ModelRevisionForRelativeValuesInput,
   QueryModelInput,
 } from "@/__generated__/ModelPageQuery.graphql";
-import { ModelPageQuery as ModelPageQueryType } from "@gen/ModelPageQuery.graphql";
 import { EntityLayout } from "@/components/EntityLayout";
+import { DotsDropdownButton } from "@/components/ui/DotsDropdownButton";
+import { StyledTabLink } from "@/components/ui/StyledTabLink";
+import { modelRevisionsRoute, modelRoute } from "@/routes";
+import { ModelPageQuery as ModelPageQueryType } from "@gen/ModelPageQuery.graphql";
+import { DeleteModelAction } from "./DeleteModelAction";
+import { UpdateModelSlugAction } from "./UpdateModelSlugAction";
 
 export const ModelPageFragment = graphql`
   fragment ModelPage on Model
@@ -43,6 +43,7 @@ const ModelPageQuery = graphql`
   ) {
     model(input: $input) {
       ...ModelPage @arguments(forRelativeValues: $forRelativeValues)
+      ...FixModelUrlCasing
     }
   }
 `;

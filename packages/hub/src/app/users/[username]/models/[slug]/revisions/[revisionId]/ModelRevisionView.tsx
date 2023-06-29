@@ -8,11 +8,13 @@ import { modelRoute } from "@/routes";
 import { ModelRevisionViewQuery } from "@gen/ModelRevisionViewQuery.graphql";
 import { SquigglePlayground } from "@quri/squiggle-components";
 import { format } from "date-fns";
+import { useFixModelUrlCasing } from "../../FixModelUrlCasing";
 
 const ModelRevisionViewQuery = graphql`
   query ModelRevisionViewQuery($input: QueryModelInput!, $revisionId: ID!) {
     model(input: $input) {
       id
+      ...FixModelUrlCasing
       revision(id: $revisionId) {
         createdAtTimestamp
         content {
@@ -44,6 +46,8 @@ export const ModelRevisionView: FC<Props> = ({
       revisionId,
     }
   );
+
+  useFixModelUrlCasing(data.model);
 
   const typename = data.model.revision.content.__typename;
   if (typename !== "SquiggleSnippet") {
