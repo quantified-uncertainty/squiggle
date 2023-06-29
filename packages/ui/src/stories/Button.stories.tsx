@@ -25,3 +25,10 @@ export const Disabled: Story = {
     disabled: true,
   },
 };
+
+export const Small: Story = {
+  args: {
+    children: "Button",
+    size: "small",
+  },
+};
