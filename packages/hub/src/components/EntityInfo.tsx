@@ -13,7 +13,7 @@ export const EntityInfo: FC<{
     <div className="flex justify-between w-full">
       <div className="flex items-center mr-3 group cursor-pointer">
         <Link
-          className="text-xl font-medium text-blue-600 group-hover:underline"
+          className="text-lg font-medium text-blue-600 group-hover:underline"
           href={href}
         >
           {slug}
