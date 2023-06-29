@@ -85,12 +85,20 @@ export function isMac() {
   // Browser-only. Defaults to `false` when `window` is not available.
 
   // TODO - support https://developer.mozilla.org/en-US/docs/Web/API/NavigatorUAData/platform
-  // when it will become available in Typescript types.
+  // when it will become available in modern browsers.
   // Note: MacIntel is valid even for ARM macs.
-  return typeof window !== "undefined" &&
-    window.navigator.platform === "MacIntel"
-    ? "Cmd+Enter"
-    : "Ctrl+Enter";
+  return (
+    typeof window !== "undefined" && window.navigator.platform === "MacIntel"
+  );
+}
+
+export function modKey() {
+  // Matches Codemirror; https://codemirror.net/docs/ref/#view.KeyBinding
+  return isMac() ? "Cmd" : "Ctrl";
+}
+
+export function altKey() {
+  return isMac() ? "Option" : "Alt";
 }
 
 //This is important to make sure that canvas elements properly stretch
