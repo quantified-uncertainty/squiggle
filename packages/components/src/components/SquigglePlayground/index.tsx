@@ -120,20 +120,18 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
           sourceId={sourceId}
           showGutter={true}
           onChange={setCode}
-          onViewValuePath={(ast) => viewerRef.current?.viewValuePath(ast)}
+          onViewValuePath={(path) => viewerRef.current?.viewValuePath(path)}
           onSubmit={runnerState.run}
         />
       </div>
     ) : selectedTab === "SETTINGS" ? (
-      <div className="px-2 space-y-6">
-        <div className="px-2 py-2">
-          <div className="pb-4">
-            <Button onClick={() => setSelectedTab("CODE")}>Back</Button>
-          </div>
-          <FormProvider {...form}>
-            <PlaygroundSettingsForm />
-          </FormProvider>
+      <div className="px-4 py-2">
+        <div className="pb-4">
+          <Button onClick={() => setSelectedTab("CODE")}>Back</Button>
         </div>
+        <FormProvider {...form}>
+          <PlaygroundSettingsForm />
+        </FormProvider>
       </div>
     ) : null;
 
