@@ -28,8 +28,7 @@ export function patchModelRoute({
 }) {
   const match = pathname.match("^/users/[^/]+/models/[^/]+($|/.*)");
   if (!match) {
-    // not a model route; should we throw an error instead?
-    return pathname;
+    throw new Error("Not a model route");
   }
   return `/users/${username}/models/${slug}${match[1]}`;
 }
