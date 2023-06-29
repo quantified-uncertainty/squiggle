@@ -61,21 +61,31 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
       mode: "onChange",
     });
 
+    const [environment, setEnvironment] = useState(
+      props.defaultSettings.environment
+    );
+
+    const { onSettingsChange, onOutputChange } = props;
+
     useEffect(() => {
-      const submit = form.handleSubmit(props.onSettingsChange);
+      const submit = form.handleSubmit((settings) => {
+        onSettingsChange(settings);
+        // Force new object, so that useSquiggle would rerun.
+        // TODO - maybe this is excessive; also it should only happen when autorun is enabled
+        setEnvironment({ ...settings.environment });
+      });
       const subscription = form.watch(() => submit());
       return () => subscription.unsubscribe();
-    }, [form, props.onSettingsChange]);
+    }, [form, onSettingsChange]);
 
     const runnerState = useRunnerState(code);
 
     const [squiggleOutput, { project, isRunning, sourceId }] = useSquiggle({
       code: runnerState.renderedCode,
       executionId: runnerState.executionId,
-      environment: form.getValues().environment,
+      environment,
     });
 
-    const { onOutputChange } = props;
     useEffect(() => {
       onOutputChange({
         output: squiggleOutput,
