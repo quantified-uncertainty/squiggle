@@ -122,9 +122,6 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
 
     const leftPanelBody = overrideState ? (
       <div className="px-4 py-2">
-        <div className="pb-4">
-          <Button onClick={() => overrideHandle.back()}>Back</Button>
-        </div>
         {overrideState.render({
           settings: props.settings,
           setSettings: props.onSettingsChange,
@@ -147,18 +144,33 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
     );
 
     const leftPanelHeader = (
-      <div className="flex justify-between h-8 bg-slate-50 border-b border-slate-200 overflow-hidden mb-1 px-4">
-        <div className="flex">
-          <RunMenuItem {...runnerState} isRunning={isRunning} />
-          <AutorunnerMenuItem {...runnerState} />
-          <SetttingsMenuItem overrideHandle={overrideHandle} />
-          <MenuItem
-            tooltipText={`Format Code (${altKey()}+Shift+f)`}
-            icon={Bars3CenterLeftIcon}
-            onClick={editorRef.current?.format}
-          />
-        </div>
-        <div className="flex items-center">{props.renderExtraControls?.()}</div>
+      <div className="h-8 bg-slate-50 border-b border-slate-200 overflow-hidden mb-1 px-4">
+        {overrideState ? (
+          <div className="h-full flex gap-2">
+            <MenuItem onClick={() => overrideHandle.back()}>
+              &larr; Back
+            </MenuItem>
+            <div className="self-center text-sm font-medium text-slate-600">
+              {overrideState.title}
+            </div>
+          </div>
+        ) : (
+          <div className="flex justify-between h-full">
+            <div className="flex">
+              <RunMenuItem {...runnerState} isRunning={isRunning} />
+              <AutorunnerMenuItem {...runnerState} />
+              <SetttingsMenuItem overrideHandle={overrideHandle} />
+              <MenuItem
+                tooltipText={`Format Code (${altKey()}+Shift+f)`}
+                icon={Bars3CenterLeftIcon}
+                onClick={editorRef.current?.format}
+              />
+            </div>
+            <div className="flex items-center">
+              {props.renderExtraControls?.()}
+            </div>
+          </div>
+        )}
       </div>
     );
 
