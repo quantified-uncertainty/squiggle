@@ -22,6 +22,7 @@ import { ModelPageFragment } from "@/app/users/[username]/models/[slug]/ModelPag
 import { ModelRevisionFragment } from "@/app/users/[username]/models/[slug]/ModelRevision";
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
 import { SquiggleContentFragment } from "./SquiggleContent";
+import { EditModelExports } from "@/components/exports/EditModelExports";
 
 export const Mutation = graphql`
   mutation EditSquiggleSnippetModelMutation(
@@ -137,8 +138,11 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
                 height={height ?? "100vh"}
                 onCodeChange={field.onChange}
                 defaultCode={field.value}
-                renderExtraControls={() => (
+                renderExtraControls={({ openModal }) => (
                   <div className="h-full flex items-center justify-end gap-2">
+                    <Button size="small" onClick={() => openModal("exports")}>
+                      Exports
+                    </Button>
                     {canSave && (
                       <Button theme="primary" onClick={save} size="small">
                         Save
@@ -146,6 +150,22 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
                     )}
                   </div>
                 )}
+                renderExtraModal={(name) => {
+                  if (name === "exports") {
+                    return {
+                      body: (
+                        <div className="px-4 py-2">
+                          <EditModelExports
+                            append={appendVariableWithDefinition}
+                            remove={removeVariableWithDefinition}
+                            items={variablesWithDefinitionsFields}
+                          />
+                        </div>
+                      ),
+                      title: "Exports",
+                    };
+                  }
+                }}
               />
             )}
           />

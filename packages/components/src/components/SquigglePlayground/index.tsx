@@ -1,11 +1,5 @@
 import merge from "lodash/merge.js";
-import React, {
-  CSSProperties,
-  ReactNode,
-  useCallback,
-  useRef,
-  useState,
-} from "react";
+import React, { CSSProperties, useCallback, useRef, useState } from "react";
 
 import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
 import { DynamicSquiggleViewer } from "../DynamicSquiggleViewer.js";
@@ -18,7 +12,6 @@ import { SquiggleViewerHandle } from "../SquiggleViewer/index.js";
 import {
   LeftPlaygroundPanel,
   LeftPlaygroundPanelHandle,
-  RenderExtraControls,
 } from "./LeftPlaygroundPanel/index.js";
 import { ResizableTwoPanelLayout } from "./ResizableTwoPanelLayout.js";
 
@@ -31,11 +24,13 @@ type PlaygroundProps = {
   onCodeChange?(code: string): void;
   /* When settings change */
   onSettingsChange?(settings: PlaygroundSettings): void;
-  /* Allows to inject extra buttons to the left panel's menu, e.g. share button on the website, or save button in Squiggle Hub. */
-  renderExtraControls?: RenderExtraControls;
   /* Height of the playground */
   height?: CSSProperties["height"];
-} & PartialPlaygroundSettings;
+} & Pick<
+  Parameters<typeof LeftPlaygroundPanel>[0],
+  "renderExtraControls" | "renderExtraModal"
+> &
+  PartialPlaygroundSettings;
 
 // Left panel ref is used for local settings modal positioning in ItemSettingsMenu.tsx
 type PlaygroundContextShape = {
@@ -51,6 +46,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     onCodeChange,
     onSettingsChange,
     renderExtraControls,
+    renderExtraModal,
     height = 500,
     ...defaultSettings
   } = props;
@@ -98,6 +94,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
       onSettingsChange={handleSettingsChange}
       onOutputChange={setOutput}
       renderExtraControls={renderExtraControls}
+      renderExtraModal={renderExtraModal}
       onViewValuePath={(path) => viewerRef.current?.viewValuePath(path)}
       ref={leftPanelRef}
     />

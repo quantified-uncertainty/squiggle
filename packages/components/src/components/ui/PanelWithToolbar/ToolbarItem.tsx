@@ -1,17 +1,20 @@
-import * as React from "react";
 import { clsx } from "clsx";
+import { ComponentType, FC, ReactNode } from "react";
+
 import { TextTooltip } from "@quri/ui";
 
-export const MenuItem: React.FC<{
-  icon?: React.ComponentType<{ className?: string }>;
-  children?: React.ReactNode;
+type Props = {
+  icon?: ComponentType<{ className?: string }>;
+  children?: ReactNode;
   iconClasses?: string;
   iconColorClasses?: string;
   iconSpin?: boolean;
   onClick?: () => void;
   tooltipText?: string;
   className?: string;
-}> = ({
+};
+
+export const ToolbarItem: FC<Props> = ({
   icon: Icon,
   iconColorClasses,
   iconSpin,
@@ -28,10 +31,10 @@ export const MenuItem: React.FC<{
   const iconSize = children ? "h-3 w-3" : "h-5 w-5";
   const main = (
     <div
-      className={
-        "flex items-center text-slate-600 space-x-1 text-sm px-4 h-full cursor-pointer hover:bg-slate-200 select-none whitespace-nowrap transition " +
+      className={clsx(
+        "flex items-center text-slate-600 space-x-1 text-sm px-4 h-full cursor-pointer hover:bg-slate-200 select-none whitespace-nowrap transition ",
         className
-      }
+      )}
       onClick={onClick}
     >
       {Icon && (

@@ -5,11 +5,10 @@ import {
   useImperativeHandle,
   useMemo,
   useRef,
-  useState,
 } from "react";
 
 import { SqValuePath } from "@quri/squiggle-lang";
-import { Bars3CenterLeftIcon, Button } from "@quri/ui";
+import { Bars3CenterLeftIcon } from "@quri/ui";
 
 import {
   SquiggleOutput,
@@ -20,47 +19,15 @@ import {
 import { altKey, getErrors } from "../../../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "../../CodeEditor.js";
 import { PlaygroundSettings } from "../../PlaygroundSettings.js";
+import { ToolbarItem } from "../../ui/PanelWithToolbar/ToolbarItem.js";
+import { PanelWithToolbar } from "../../ui/PanelWithToolbar/index.js";
 import { AutorunnerMenuItem } from "./AutorunnerMenuItem.js";
-import { MenuItem } from "./MenuItem.js";
+import { GlobalSettingsModal } from "./GlobalSettingsModal.js";
 import { RunMenuItem } from "./RunMenuItem.js";
 import { SetttingsMenuItem } from "./SettingsMenuItem.js";
 
-type Override = {
-  render(props: {
-    // Passing these through SettingsMenuItem props won't work correctly, because it would snapshot
-    // its props at the moment when settings form was opened.
-    settings: PlaygroundSettings;
-    setSettings: (newSettings: PlaygroundSettings) => void;
-  }): ReactNode;
-  title: string;
-};
-
-function useOverrideContent() {
-  const [overrideState, setOverrideState] = useState<Override | undefined>(
-    undefined
-  );
-
-  const overrideHandle = useMemo(() => {
-    return {
-      override: (value: Override) => {
-        setOverrideState(value);
-      },
-      back: () => setOverrideState(undefined),
-    };
-  }, [setOverrideState]);
-
-  return {
-    overrideState,
-    overrideHandle,
-  };
-}
-
-export type OverrideHandle = ReturnType<
-  typeof useOverrideContent
->["overrideHandle"];
-
 export type RenderExtraControls = (props: {
-  overrideHandle: OverrideHandle;
+  openModal: (name: string) => void;
 }) => ReactNode;
 
 type Props = {
@@ -72,7 +39,9 @@ type Props = {
     output: SquiggleOutput | undefined;
     isRunning: boolean;
   }): void;
+  /* Allows to inject extra buttons to the left panel's menu, e.g. share button on the website, or save button in Squiggle Hub. */
   renderExtraControls?: RenderExtraControls;
+  renderExtraModal?: Parameters<typeof PanelWithToolbar>[0]["renderModal"];
   onViewValuePath?: (path: SqValuePath) => void;
 };
 
@@ -83,7 +52,7 @@ export type LeftPlaygroundPanelHandle = {
 };
 
 export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
-  function LeftPanel(props, ref) {
+  function LeftPlaygroundPanel(props, ref) {
     const { code, setCode } = useUncontrolledCode({
       defaultCode: props.defaultCode,
       onCodeChange: props.onCodeChange,
@@ -120,16 +89,27 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
       getLeftPanelElement: () => containerRef.current,
     }));
 
-    const { overrideState, overrideHandle } = useOverrideContent();
-
-    const leftPanelBody = overrideState ? (
-      <div className="px-4 py-2">
-        {overrideState.render({
-          settings: props.settings,
-          setSettings: props.onSettingsChange,
-        })}
+    const renderToolbar = ({
+      openModal,
+    }: {
+      openModal: (name: string) => void;
+    }) => (
+      <div className="flex">
+        <RunMenuItem {...runnerState} isRunning={isRunning} />
+        <AutorunnerMenuItem {...runnerState} />
+        <ToolbarItem
+          tooltipText={`Format Code (${altKey()}+Shift+f)`}
+          icon={Bars3CenterLeftIcon}
+          onClick={editorRef.current?.format}
+        />
+        <SetttingsMenuItem onClick={() => openModal("settings")} />
+        <div className="flex-1">
+          {props.renderExtraControls?.({ openModal })}
+        </div>
       </div>
-    ) : (
+    );
+
+    const renderBody = () => (
       <div data-testid="squiggle-editor">
         <CodeEditor
           ref={editorRef}
@@ -147,41 +127,30 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
       </div>
     );
 
-    const leftPanelHeader = (
-      <div className="h-8 bg-slate-50 border-b border-slate-200 overflow-hidden mb-1 px-4">
-        {overrideState ? (
-          <div className="h-full flex gap-2">
-            <MenuItem onClick={() => overrideHandle.back()}>
-              &larr; Back
-            </MenuItem>
-            <div className="self-center text-sm font-medium text-slate-600">
-              {overrideState.title}
+    const renderModal = (modalName: string) => {
+      if (modalName === "settings") {
+        return {
+          title: "Settings",
+          body: (
+            <div className="px-4 py-2">
+              <GlobalSettingsModal
+                settings={props.settings}
+                onSettingsChange={props.onSettingsChange}
+              />
             </div>
-          </div>
-        ) : (
-          <div className="flex h-full">
-            <RunMenuItem {...runnerState} isRunning={isRunning} />
-            <AutorunnerMenuItem {...runnerState} />
-            <MenuItem
-              tooltipText={`Format Code (${altKey()}+Shift+f)`}
-              icon={Bars3CenterLeftIcon}
-              onClick={editorRef.current?.format}
-            />
-            <SetttingsMenuItem overrideHandle={overrideHandle} />
-            <div className="flex-1">
-              {props.renderExtraControls?.({ overrideHandle })}
-            </div>
-          </div>
-        )}
-      </div>
-    );
+          ),
+        };
+      }
+      return props.renderExtraModal?.(modalName);
+    };
 
     return (
-      <div className="h-full flex flex-col" ref={containerRef}>
-        {leftPanelHeader}
-        <div className="flex-1 grid place-content-stretch overflow-auto">
-          {leftPanelBody}
-        </div>
+      <div ref={containerRef} className="h-full">
+        <PanelWithToolbar
+          renderBody={renderBody}
+          renderToolbar={renderToolbar}
+          renderModal={renderModal}
+        />
       </div>
     );
   }
