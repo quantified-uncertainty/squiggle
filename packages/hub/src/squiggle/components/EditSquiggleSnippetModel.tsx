@@ -1,11 +1,6 @@
 import { useSession } from "next-auth/react";
 import { FC, useMemo } from "react";
-import {
-  Controller,
-  FormProvider,
-  useFieldArray,
-  useForm,
-} from "react-hook-form";
+import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { graphql, useFragment, useMutation } from "react-relay";
 
 import { SquigglePlayground } from "@quri/squiggle-components";
@@ -126,48 +121,46 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
 
   const canSave = session?.user.username === model.owner.username;
 
+  const onCodeChange = (code: string) => {
+    form.setValue("code", code);
+  };
+
   return (
     <FormProvider {...form}>
       <form onSubmit={save}>
         <div ref={ref}>
-          <Controller
-            name="code"
-            rules={{ required: true }}
-            render={({ field }) => (
-              <SquigglePlayground
-                height={height ?? "100vh"}
-                onCodeChange={field.onChange}
-                defaultCode={field.value}
-                renderExtraControls={({ openModal }) => (
-                  <div className="h-full flex items-center justify-end gap-2">
-                    <Button size="small" onClick={() => openModal("exports")}>
-                      Exports
-                    </Button>
-                    {canSave && (
-                      <Button theme="primary" onClick={save} size="small">
-                        Save
-                      </Button>
-                    )}
-                  </div>
+          <SquigglePlayground
+            height={height ?? "100vh"}
+            onCodeChange={onCodeChange}
+            defaultCode={content.code}
+            renderExtraControls={({ openModal }) => (
+              <div className="h-full flex items-center justify-end gap-2">
+                <Button size="small" onClick={() => openModal("exports")}>
+                  Exports
+                </Button>
+                {canSave && (
+                  <Button theme="primary" onClick={save} size="small">
+                    Save
+                  </Button>
                 )}
-                renderExtraModal={(name) => {
-                  if (name === "exports") {
-                    return {
-                      body: (
-                        <div className="px-4 py-2">
-                          <EditModelExports
-                            append={appendVariableWithDefinition}
-                            remove={removeVariableWithDefinition}
-                            items={variablesWithDefinitionsFields}
-                          />
-                        </div>
-                      ),
-                      title: "Exports",
-                    };
-                  }
-                }}
-              />
+              </div>
             )}
+            renderExtraModal={(name) => {
+              if (name === "exports") {
+                return {
+                  body: (
+                    <div className="px-6 py-2">
+                      <EditModelExports
+                        append={appendVariableWithDefinition}
+                        remove={removeVariableWithDefinition}
+                        items={variablesWithDefinitionsFields}
+                      />
+                    </div>
+                  ),
+                  title: "Exports",
+                };
+              }
+            }}
           />
         </div>
       </form>
