@@ -2,7 +2,11 @@ import { FC } from "react";
 import { useFragment } from "react-relay";
 
 import { ModelExports$key } from "@/__generated__/ModelExports.graphql";
-import { modelForRelativeValuesExportRoute, modelRoute } from "@/routes";
+import {
+  modelForRelativeValuesExportRoute,
+  modelRoute,
+  modelViewRoute,
+} from "@/routes";
 import { Dropdown, DropdownMenu } from "@quri/ui";
 import { DropdownMenuLinkItem } from "../ui/DropdownMenuLinkItem";
 import { ModelExportsFragment } from "./ModelExports";
@@ -46,7 +50,7 @@ const Menu: FC<Props> = ({ dataRef, modelUsername, modelSlug }) => {
   return (
     <DropdownMenu>
       <Link
-        href={modelRoute({
+        href={modelViewRoute({
           username: modelUsername,
           slug: modelSlug,
         })}

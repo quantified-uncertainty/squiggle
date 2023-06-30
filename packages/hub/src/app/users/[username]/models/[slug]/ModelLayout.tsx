@@ -13,11 +13,17 @@ import {
 import { EntityLayout } from "@/components/EntityLayout";
 import { DotsDropdownButton } from "@/components/ui/DotsDropdownButton";
 import { StyledTabLink } from "@/components/ui/StyledTabLink";
-import { modelRevisionsRoute, modelRoute, patchModelRoute } from "@/routes";
+import {
+  modelRevisionsRoute,
+  modelRoute,
+  modelViewRoute,
+  patchModelRoute,
+} from "@/routes";
 import { DeleteModelAction } from "./DeleteModelAction";
 import { UpdateModelSlugAction } from "./UpdateModelSlugAction";
 
-// doing this with a fragment would be too hard, because of how layouts work in Next.js
+// Doing this with a fragment would be too hard, because of how layouts work in Next.js.
+// So we have to do two GraphQL queries on most model pages.
 const Query = graphql`
   query ModelLayoutQuery($input: QueryModelInput!) {
     model(input: $input) {
@@ -25,6 +31,12 @@ const Query = graphql`
       slug
       owner {
         username
+      }
+      currentRevision {
+        # for length; TODO - "hasExports" field?
+        relativeValuesExports {
+          id
+        }
       }
     }
   }
@@ -90,6 +102,12 @@ export const ModelLayout: FC<Props> = ({ username, slug, children }) => {
               name="Editor"
               href={modelRoute({ username, slug })}
             />
+            {model.currentRevision.relativeValuesExports.length ? (
+              <StyledTabLink
+                name="Viewer"
+                href={modelViewRoute({ username, slug })}
+              />
+            ) : null}
             <StyledTabLink
               name="Revisions"
               href={modelRevisionsRoute({ username, slug })}

@@ -21,7 +21,7 @@ export const ViewModelRevision: FC<Props> = ({
   const revision = useFragment(ModelRevisionFragment, revisionRef);
 
   return (
-    <div>
+    <div className="p-4">
       {revision.relativeValuesExports.length ? (
         <div className="pb-4 mb-4 border-b border-slate-200">
           <div className="flex items-center gap-2 font-medium text-sm">
