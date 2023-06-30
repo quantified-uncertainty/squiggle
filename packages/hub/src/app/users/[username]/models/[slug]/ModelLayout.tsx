@@ -106,6 +106,12 @@ export const ModelLayout: FC<Props> = ({ username, slug, children }) => {
               <StyledTabLink
                 name="Viewer"
                 href={modelViewRoute({ username, slug })}
+                selected={(pathname, href) =>
+                  pathname === href ||
+                  pathname.startsWith(
+                    modelRoute({ username, slug }) + "/relative-values"
+                  )
+                }
               />
             ) : null}
             <StyledTabLink
