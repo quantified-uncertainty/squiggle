@@ -46,12 +46,16 @@ export default function PlaygroundPage() {
     delete hashData.initialSquiggleString;
   }
   const playgroundProps = {
-    defaultCode: hashData.defaultCode ?? "normal(0,1)",
+    defaultCode: hashData.defaultCode ?? "normal(0, 1)",
     distributionChartSettings: {
       showSummary: hashData.showSummary ?? true,
     },
     height: 700,
-    renderExtraControls: () => <ShareButton />,
+    renderExtraControls: () => (
+      <div className="h-full flex justify-end items-center">
+        <ShareButton />
+      </div>
+    ),
     onCodeChange: (code) => setHashData({ defaultCode: code }),
     onSettingsChange: (settings) => {
       const { showEditor } = settings;
