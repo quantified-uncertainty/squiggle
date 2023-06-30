@@ -47,8 +47,6 @@ export const ModelRevisionView: FC<Props> = ({
     }
   );
 
-  useFixModelUrlCasing(data.model);
-
   const typename = data.model.revision.content.__typename;
   if (typename !== "SquiggleSnippet") {
     return <div>Unknown model type {typename}</div>;

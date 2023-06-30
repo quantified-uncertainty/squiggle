@@ -20,9 +20,9 @@ import { ModelRevision$key } from "@/__generated__/ModelRevision.graphql";
 import { SquiggleContent$key } from "@/__generated__/SquiggleContent.graphql";
 import { ModelPageFragment } from "@/app/users/[username]/models/[slug]/ModelPage";
 import { ModelRevisionFragment } from "@/app/users/[username]/models/[slug]/ModelRevision";
+import { EditModelExports } from "@/components/exports/EditModelExports";
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
 import { SquiggleContentFragment } from "./SquiggleContent";
-import { EditModelExports } from "@/components/exports/EditModelExports";
 
 export const Mutation = graphql`
   mutation EditSquiggleSnippetModelMutation(

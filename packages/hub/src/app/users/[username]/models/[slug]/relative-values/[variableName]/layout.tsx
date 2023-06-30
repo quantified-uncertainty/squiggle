@@ -17,7 +17,6 @@ import { ModelPageFragment, useModelPageQuery } from "../../ModelPage";
 import { ModelRevisionFragment } from "../../ModelRevision";
 import { ViewModelRevision } from "../../ViewModelRevision";
 import { CacheMenu } from "./CacheMenu";
-import { useFixModelUrlCasing } from "../../FixModelUrlCasing";
 
 export default function RelativeValuesModelLayout({
   params,
@@ -35,7 +34,6 @@ export default function RelativeValuesModelLayout({
       variableName: params.variableName,
     }
   );
-  useFixModelUrlCasing(modelRef);
 
   const model = useFragment<ModelPage$key>(ModelPageFragment, modelRef);
   const revision = useFragment<ModelRevision$key>(
