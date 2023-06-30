@@ -137,15 +137,15 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
                 height={height ?? "100vh"}
                 onCodeChange={field.onChange}
                 defaultCode={field.value}
-                renderExtraControls={() =>
-                  canSave ? (
-                    <div className="ml-2">
-                      <Button theme="primary" onClick={save} size={"small"}>
+                renderExtraControls={() => (
+                  <div className="h-full flex items-center justify-end gap-2">
+                    {canSave && (
+                      <Button theme="primary" onClick={save} size="small">
                         Save
                       </Button>
-                    </div>
-                  ) : null
-                }
+                    )}
+                  </div>
+                )}
               />
             )}
           />

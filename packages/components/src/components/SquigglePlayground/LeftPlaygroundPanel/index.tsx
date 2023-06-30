@@ -59,7 +59,9 @@ export type OverrideHandle = ReturnType<
   typeof useOverrideContent
 >["overrideHandle"];
 
-export type RenderExtraControls = () => ReactNode;
+export type RenderExtraControls = (props: {
+  overrideHandle: OverrideHandle;
+}) => ReactNode;
 
 type Props = {
   defaultCode?: string;
@@ -82,7 +84,7 @@ export type LeftPlaygroundPanelHandle = {
 
 export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
   function LeftPanel(props, ref) {
-    const { code, setCode, defaultCode } = useUncontrolledCode({
+    const { code, setCode } = useUncontrolledCode({
       defaultCode: props.defaultCode,
       onCodeChange: props.onCodeChange,
     });
@@ -131,7 +133,9 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
       <div data-testid="squiggle-editor">
         <CodeEditor
           ref={editorRef}
-          defaultValue={defaultCode}
+          // it's important to pass `code` and not `defaultCode` here;
+          // see https://github.com/quantified-uncertainty/squiggle/issues/1952
+          defaultValue={code}
           errors={errors}
           project={project}
           sourceId={sourceId}
@@ -155,19 +159,17 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
             </div>
           </div>
         ) : (
-          <div className="flex justify-between h-full">
-            <div className="flex">
-              <RunMenuItem {...runnerState} isRunning={isRunning} />
-              <AutorunnerMenuItem {...runnerState} />
-              <SetttingsMenuItem overrideHandle={overrideHandle} />
-              <MenuItem
-                tooltipText={`Format Code (${altKey()}+Shift+f)`}
-                icon={Bars3CenterLeftIcon}
-                onClick={editorRef.current?.format}
-              />
-            </div>
-            <div className="flex items-center">
-              {props.renderExtraControls?.()}
+          <div className="flex h-full">
+            <RunMenuItem {...runnerState} isRunning={isRunning} />
+            <AutorunnerMenuItem {...runnerState} />
+            <MenuItem
+              tooltipText={`Format Code (${altKey()}+Shift+f)`}
+              icon={Bars3CenterLeftIcon}
+              onClick={editorRef.current?.format}
+            />
+            <SetttingsMenuItem overrideHandle={overrideHandle} />
+            <div className="flex-1">
+              {props.renderExtraControls?.({ overrideHandle })}
             </div>
           </div>
         )}
