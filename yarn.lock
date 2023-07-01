@@ -4419,7 +4419,7 @@ __metadata:
     eslint: ^8.44.0
     eslint-plugin-react: ^7.32.2
     eslint-plugin-react-hooks: ^4.6.0
-    framer-motion: ^10.12.16
+    framer-motion: ^10.12.18
     jest: ^29.5.0
     jest-environment-jsdom: ^29.5.0
     jsdom: ^22.1.0
@@ -4500,7 +4500,7 @@ __metadata:
     clsx: ^1.2.1
     eslint: ^8.44.0
     eslint-plugin-react: ^7.32.2
-    framer-motion: ^10.12.16
+    framer-motion: ^10.12.18
     postcss: ^8.4.24
     postcss-cli: ^10.1.0
     prettier: ^2.8.8
@@ -12592,9 +12592,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"framer-motion@npm:^10.12.16":
-  version: 10.12.16
-  resolution: "framer-motion@npm:10.12.16"
+"framer-motion@npm:^10.12.18":
+  version: 10.12.18
+  resolution: "framer-motion@npm:10.12.18"
   dependencies:
     "@emotion/is-prop-valid": ^0.8.2
     tslib: ^2.4.0
@@ -12609,7 +12609,7 @@ __metadata:
       optional: true
     react-dom:
       optional: true
-  checksum: 0ba346fd6e64688ea5e64f9e353af6202b42d59e309ac32daca7fc07dc1dad9136dd2c18017a85ac76d01becb7f4683fc92dedbfce3e44831ea0c47bdc73e812
+  checksum: 71539be1175de80d2266702069bb3c4f0150eb3e28f0e32307e10c217410d5ee350b025d48a86c3144caf2d0e0e1dd95e33ed886a14466bc1e763e52d4cd6157
   languageName: node
   linkType: hard
 
