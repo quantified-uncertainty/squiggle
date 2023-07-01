@@ -15,11 +15,11 @@ if [ -d "$VERCEL_CACHE" ]; then
     # Note that we use `yarn workspaces focus` instead of full `yarn install`.
     # That way we install only the subset of all monorepo dependencies,
     # and also check that the project lists its dependencies correctly.
-    YARN_CACHE_FOLDER=$VERCEL_CACHE yarn workspaces focus
+    YARN_CACHE_FOLDER=$VERCEL_CACHE yarn install --immutable
 else
     # Yarn fails when cache folder is in node_modules but it doesn't exist.
     echo "Initial install with $DEFAULT_CACHE"
-    yarn workspaces focus
+    yarn install --immutable
     echo mv $DEFAULT_CACHE $VERCEL_CACHE
     mv $DEFAULT_CACHE $VERCEL_CACHE
 fi
