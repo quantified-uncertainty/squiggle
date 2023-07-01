@@ -4397,7 +4397,7 @@ __metadata:
     "@storybook/addon-essentials": ^7.0.20
     "@storybook/addon-links": ^7.0.24
     "@storybook/blocks": ^7.0.20
-    "@storybook/node-logger": ^7.0.20
+    "@storybook/node-logger": ^7.0.24
     "@storybook/react": ^7.0.20
     "@storybook/react-vite": ^7.0.24
     "@testing-library/jest-dom": ^5.16.5
@@ -5541,7 +5541,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/node-logger@npm:7.0.20, @storybook/node-logger@npm:^7.0.20":
+"@storybook/node-logger@npm:7.0.20":
   version: 7.0.20
   resolution: "@storybook/node-logger@npm:7.0.20"
   dependencies:
@@ -5553,7 +5553,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/node-logger@npm:7.0.24":
+"@storybook/node-logger@npm:7.0.24, @storybook/node-logger@npm:^7.0.24":
   version: 7.0.24
   resolution: "@storybook/node-logger@npm:7.0.24"
   dependencies:
