@@ -31,7 +31,7 @@
     "@types/react": "^18.2.12",
     "autoprefixer": "^10.4.14",
     "commander": "^10.0.1",
-    "eslint": "^8.42.0",
+    "eslint": "^8.44.0",
     "eslint-config-next": "^13.4.5",
     "postcss": "^8.4.24",
     "postcss-cli": "^10.1.0",

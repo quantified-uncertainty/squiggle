@@ -54,7 +54,7 @@
     "@types/react-relay": "^14.1.4",
     "@types/relay-runtime": "^14.1.10",
     "babel-plugin-relay": "^15.0.0",
-    "eslint": "^8.42.0",
+    "eslint": "^8.44.0",
     "eslint-config-next": "^13.4.5",
     "graphql": "^16.6.0",
     "postcss": "^8.4.24",
