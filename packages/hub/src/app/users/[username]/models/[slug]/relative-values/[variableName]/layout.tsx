@@ -1,7 +1,10 @@
 "use client";
 
-import { ReactNode, useMemo } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useFragment } from "react-relay";
+import Skeleton from "react-loading-skeleton";
+
+import { result } from "@quri/squiggle-lang";
 
 import { ModelPage$key } from "@/__generated__/ModelPage.graphql";
 import { ModelRevision$key } from "@/__generated__/ModelRevision.graphql";
@@ -17,7 +20,6 @@ import { ModelPageFragment, useModelPageQuery } from "../../ModelPage";
 import { ModelRevisionFragment } from "../../ModelRevision";
 import { ViewModelRevision } from "../../ViewModelRevision";
 import { CacheMenu } from "./CacheMenu";
-import { useFixModelUrlCasing } from "../../FixModelUrlCasing";
 
 export default function RelativeValuesModelLayout({
   params,
@@ -35,7 +37,6 @@ export default function RelativeValuesModelLayout({
       variableName: params.variableName,
     }
   );
-  useFixModelUrlCasing(modelRef);
 
   const model = useFragment<ModelPage$key>(ModelPageFragment, modelRef);
   const revision = useFragment<ModelRevision$key>(
@@ -57,17 +58,31 @@ export default function RelativeValuesModelLayout({
     revision.forRelativeValues.definition.currentRevision
   );
 
-  const evaluatorResult = useMemo(
-    () =>
-      ModelEvaluator.create(content.code, revision.forRelativeValues?.cache),
-    [content.code, revision.forRelativeValues]
+  const [evaluatorResult, setEvaluatorResult] = useState<
+    result<ModelEvaluator, string> | undefined
+  >();
+
+  useEffect(() => {
+    // ModelEvaluator.create is async because SqProject.run is async
+    ModelEvaluator.create(content.code, revision.forRelativeValues?.cache).then(
+      setEvaluatorResult
+    );
+  }, [content.code, revision.forRelativeValues]);
+
+  const body = evaluatorResult ? (
+    evaluatorResult.ok ? (
+      <RelativeValuesProvider
+        definition={definition}
+        evaluator={evaluatorResult.value}
+      >
+        {children}
+      </RelativeValuesProvider>
+    ) : (
+      <div>Error: {evaluatorResult.value}</div>
+    )
+  ) : (
+    <Skeleton height={256} />
   );
-
-  if (!evaluatorResult.ok) {
-    return <div>Error: {evaluatorResult.value}</div>;
-  }
-
-  const evaluator = evaluatorResult.value;
 
   return (
     <ViewModelRevision
@@ -106,9 +121,7 @@ export default function RelativeValuesModelLayout({
         </StyledTabLink.List>
         <CacheMenu revision={revision} />
       </div>
-      <RelativeValuesProvider definition={definition} evaluator={evaluator}>
-        {children}
-      </RelativeValuesProvider>
+      {body}
     </ViewModelRevision>
   );
 }

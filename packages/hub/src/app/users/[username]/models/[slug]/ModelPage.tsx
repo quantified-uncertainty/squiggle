@@ -1,21 +1,11 @@
-import { useSession } from "next-auth/react";
-import { FC, PropsWithChildren } from "react";
 import { useLazyLoadQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { DropdownMenu } from "@quri/ui";
-
 import {
+  ModelPageQuery,
   ModelRevisionForRelativeValuesInput,
   QueryModelInput,
 } from "@/__generated__/ModelPageQuery.graphql";
-import { EntityLayout } from "@/components/EntityLayout";
-import { DotsDropdownButton } from "@/components/ui/DotsDropdownButton";
-import { StyledTabLink } from "@/components/ui/StyledTabLink";
-import { modelRevisionsRoute, modelRoute } from "@/routes";
-import { ModelPageQuery as ModelPageQueryType } from "@gen/ModelPageQuery.graphql";
-import { DeleteModelAction } from "./DeleteModelAction";
-import { UpdateModelSlugAction } from "./UpdateModelSlugAction";
 
 export const ModelPageFragment = graphql`
   fragment ModelPage on Model
@@ -36,7 +26,7 @@ export const ModelPageFragment = graphql`
   }
 `;
 
-const ModelPageQuery = graphql`
+const Query = graphql`
   query ModelPageQuery(
     $input: QueryModelInput!
     $forRelativeValues: ModelRevisionForRelativeValuesInput
@@ -53,66 +43,10 @@ export function useModelPageQuery(
   input: QueryModelInput,
   forRelativeValues?: ModelRevisionForRelativeValuesInput
 ) {
-  const { model: modelRef } = useLazyLoadQuery<ModelPageQueryType>(
-    ModelPageQuery,
-    { input, forRelativeValues }
-  );
+  const { model: modelRef } = useLazyLoadQuery<ModelPageQuery>(Query, {
+    input,
+    forRelativeValues,
+  });
 
   return modelRef;
 }
-
-type CommonProps = {
-  username: string;
-  slug: string;
-};
-
-const MenuButton: FC<CommonProps> = ({ username, slug }) => {
-  return (
-    <DotsDropdownButton>
-      {({ close }) => (
-        <DropdownMenu>
-          <UpdateModelSlugAction
-            username={username}
-            slug={slug}
-            close={close}
-          />
-          <DeleteModelAction username={username} slug={slug} close={close} />
-        </DropdownMenu>
-      )}
-    </DotsDropdownButton>
-  );
-};
-
-type Props = PropsWithChildren<CommonProps>;
-
-export const ModelPage: FC<Props> = ({ username, slug, children }) => {
-  const { data: session } = useSession();
-
-  return (
-    <EntityLayout
-      slug={slug}
-      username={username}
-      homepageUrl={modelRoute({ username, slug })}
-      isFluid={true}
-      headerChildren={
-        <>
-          <StyledTabLink.List>
-            <StyledTabLink
-              name="Editor"
-              href={modelRoute({ username, slug })}
-            />
-            <StyledTabLink
-              name="Revisions"
-              href={modelRevisionsRoute({ username, slug })}
-            />
-          </StyledTabLink.List>
-          {session?.user.username === username ? (
-            <MenuButton username={username} slug={slug} />
-          ) : null}
-        </>
-      }
-    >
-      {children}
-    </EntityLayout>
-  );
-};

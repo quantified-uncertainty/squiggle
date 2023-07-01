@@ -1,8 +1,10 @@
-import { SquiggleContent$key } from "@/__generated__/SquiggleContent.graphql";
-import { SquiggleChart } from "@quri/squiggle-components";
 import { FC } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
+
+import { SquiggleChart } from "@quri/squiggle-components";
+
+import { SquiggleContent$key } from "@/__generated__/SquiggleContent.graphql";
 
 // common for edit and view tabs
 export const SquiggleContentFragment = graphql`

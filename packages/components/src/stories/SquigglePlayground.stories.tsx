@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
 import { SquigglePlayground as Component } from "../components/SquigglePlayground/index.js";
+import { Button } from "@quri/ui";
 
 /**
  * A Squiggle playground is an environment where you can play around with all settings, including sampling settings, in Squiggle.
@@ -76,8 +77,19 @@ export const WithExtraControls: Story = {
   args: {
     defaultCode: "normal(5,2)",
     height: undefined,
-    renderExtraControls: () => (
-      <button className="bg-green-500 px-2">Extra button</button>
+    renderExtraControls: ({ openModal }) => (
+      <div className="ml-2 h-full flex items-center">
+        <Button size="small" onClick={() => openModal("extra")}>
+          Extra modal
+        </Button>
+      </div>
     ),
+    renderExtraModal: (name) =>
+      name === "extra"
+        ? {
+            title: "Extra",
+            body: <div>Extra content</div>,
+          }
+        : undefined,
   },
 };

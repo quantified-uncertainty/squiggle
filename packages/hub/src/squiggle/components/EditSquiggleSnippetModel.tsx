@@ -1,11 +1,6 @@
 import { useSession } from "next-auth/react";
 import { FC, useMemo } from "react";
-import {
-  Controller,
-  FormProvider,
-  useFieldArray,
-  useForm,
-} from "react-hook-form";
+import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { graphql, useFragment, useMutation } from "react-relay";
 
 import { SquigglePlayground } from "@quri/squiggle-components";
@@ -20,6 +15,7 @@ import { ModelRevision$key } from "@/__generated__/ModelRevision.graphql";
 import { SquiggleContent$key } from "@/__generated__/SquiggleContent.graphql";
 import { ModelPageFragment } from "@/app/users/[username]/models/[slug]/ModelPage";
 import { ModelRevisionFragment } from "@/app/users/[username]/models/[slug]/ModelRevision";
+import { EditModelExports } from "@/components/exports/EditModelExports";
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
 import { SquiggleContentFragment } from "./SquiggleContent";
 
@@ -125,29 +121,46 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
 
   const canSave = session?.user.username === model.owner.username;
 
+  const onCodeChange = (code: string) => {
+    form.setValue("code", code);
+  };
+
   return (
     <FormProvider {...form}>
       <form onSubmit={save}>
         <div ref={ref}>
-          <Controller
-            name="code"
-            rules={{ required: true }}
-            render={({ field }) => (
-              <SquigglePlayground
-                height={height ?? "100vh"}
-                onCodeChange={field.onChange}
-                defaultCode={field.value}
-                renderExtraControls={() =>
-                  canSave ? (
-                    <div className="ml-2">
-                      <Button theme="primary" onClick={save} size={"small"}>
-                        Save
-                      </Button>
-                    </div>
-                  ) : null
-                }
-              />
+          <SquigglePlayground
+            height={height ?? "100vh"}
+            onCodeChange={onCodeChange}
+            defaultCode={content.code}
+            renderExtraControls={({ openModal }) => (
+              <div className="h-full flex items-center justify-end gap-2">
+                <Button size="small" onClick={() => openModal("exports")}>
+                  Exports
+                </Button>
+                {canSave && (
+                  <Button theme="primary" onClick={save} size="small">
+                    Save
+                  </Button>
+                )}
+              </div>
             )}
+            renderExtraModal={(name) => {
+              if (name === "exports") {
+                return {
+                  body: (
+                    <div className="px-6 py-2">
+                      <EditModelExports
+                        append={appendVariableWithDefinition}
+                        remove={removeVariableWithDefinition}
+                        items={variablesWithDefinitionsFields}
+                      />
+                    </div>
+                  ),
+                  title: "Exports",
+                };
+              }
+            }}
           />
         </div>
       </form>

@@ -3,9 +3,9 @@ import React from "react";
 
 import { PlayIcon } from "@quri/ui";
 
+import { RunnerState } from "../../../lib/hooks/useRunnerState.js";
 import { modKey } from "../../../lib/utility.js";
-import { MenuItem } from "../MenuItem.js";
-import { RunnerState } from "./useRunnerState.js";
+import { ToolbarItem } from "../../ui/PanelWithToolbar/ToolbarItem.js";
 
 export const RunMenuItem: React.FC<RunnerState & { isRunning: boolean }> = ({
   run,
@@ -16,13 +16,13 @@ export const RunMenuItem: React.FC<RunnerState & { isRunning: boolean }> = ({
   const text = `Run (${modKey()}+Enter)`;
 
   return (
-    <MenuItem
+    <ToolbarItem
       tooltipText={text}
       icon={showAsRunning ? RefreshIcon : PlayIcon}
       iconSpin={showAsRunning}
       onClick={run}
     >
       Run
-    </MenuItem>
+    </ToolbarItem>
   );
 };

@@ -1,14 +1,14 @@
 "use client";
 
 import { ReactNode } from "react";
-import { ModelPage } from "./ModelPage";
+import { ModelLayout } from "./ModelLayout";
 
-export default function ModelLayout({
+export default function Layout({
   params,
   children,
 }: {
   params: { username: string; slug: string };
   children: ReactNode;
 }) {
-  return <ModelPage {...params}>{children}</ModelPage>;
+  return <ModelLayout {...params}>{children}</ModelLayout>;
 }

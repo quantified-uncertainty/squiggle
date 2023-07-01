@@ -12,7 +12,7 @@ export const ShareButton = () => {
 
   return (
     <div className="w-40">
-      <Button onClick={copy} wide>
+      <Button onClick={copy} wide size="small">
         {isCopied ? (
           "Copied!"
         ) : (

@@ -2,8 +2,8 @@ import React from "react";
 
 import { BoltIcon, PauseIcon } from "@quri/ui";
 
-import { MenuItem } from "../MenuItem.js";
-import { RunnerState } from "./useRunnerState.js";
+import { RunnerState } from "../../../lib/hooks/useRunnerState.js";
+import { ToolbarItem } from "../../ui/PanelWithToolbar/ToolbarItem.js";
 
 export const AutorunnerMenuItem: React.FC<RunnerState> = ({
   setAutorunMode,
@@ -14,13 +14,13 @@ export const AutorunnerMenuItem: React.FC<RunnerState> = ({
     className="h-full"
     aria-checked={autorunMode}
   >
-    <MenuItem
+    <ToolbarItem
       tooltipText={"Triggers runs on code changes"}
       icon={autorunMode ? BoltIcon : PauseIcon}
       onClick={() => setAutorunMode(!autorunMode)}
       className={!autorunMode ? "opacity-60" : ""}
     >
       Autorun
-    </MenuItem>
+    </ToolbarItem>
   </div>
 );

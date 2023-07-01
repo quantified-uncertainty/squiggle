@@ -93,16 +93,16 @@ export class ModelEvaluator {
     private cache?: RelativeValuesCacheRecord
   ) {}
 
-  static create(
+  static async create(
     modelCode: string,
     cache?: NonNullable<ModelRevision$data["forRelativeValues"]>["cache"]
-  ): result<ModelEvaluator, string> {
+  ): Promise<result<ModelEvaluator, string>> {
     const project = SqProject.create();
     project.setSource("wrapper", "RelativeValues.wrap(fn)");
     project.setContinues("wrapper", ["model"]);
     project.setSource("model", modelCode);
 
-    project.run("wrapper");
+    await project.run("wrapper");
     const result = project.getResult("wrapper");
 
     if (!result.ok || result.value.tag !== "Lambda") {
