@@ -4398,7 +4398,7 @@ __metadata:
     "@storybook/addon-links": ^7.0.24
     "@storybook/blocks": ^7.0.20
     "@storybook/node-logger": ^7.0.24
-    "@storybook/react": ^7.0.20
+    "@storybook/react": ^7.0.24
     "@storybook/react-vite": ^7.0.24
     "@testing-library/jest-dom": ^5.16.5
     "@testing-library/react": ^14.0.0
@@ -4490,7 +4490,7 @@ __metadata:
     "@storybook/addon-interactions": ^7.0.20
     "@storybook/addon-links": ^7.0.24
     "@storybook/blocks": ^7.0.20
-    "@storybook/react": ^7.0.20
+    "@storybook/react": ^7.0.24
     "@storybook/react-vite": ^7.0.24
     "@storybook/testing-library": ^0.2.0
     "@tailwindcss/forms": ^0.5.3
@@ -5265,16 +5265,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/core-client@npm:7.0.20":
-  version: 7.0.20
-  resolution: "@storybook/core-client@npm:7.0.20"
-  dependencies:
-    "@storybook/client-logger": 7.0.20
-    "@storybook/preview-api": 7.0.20
-  checksum: e1c52999d563b437ca5729bb5d3878992a40bbe6f793943e57b94c494e01ab2600ebfbefcce13246123711541c1bff23ca9bbf326389486668b9dd704934b679
-  languageName: node
-  linkType: hard
-
 "@storybook/core-client@npm:7.0.24":
   version: 7.0.24
   resolution: "@storybook/core-client@npm:7.0.24"
@@ -5714,7 +5704,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/react@npm:7.0.24":
+"@storybook/react@npm:7.0.24, @storybook/react@npm:^7.0.24":
   version: 7.0.24
   resolution: "@storybook/react@npm:7.0.24"
   dependencies:
@@ -5746,41 +5736,6 @@ __metadata:
     typescript:
       optional: true
   checksum: b1820c8daa69496390735f23c43499dae189f72c3c45b876b8a1587af0ae8cf6d4bcb09bb1ddfb3523de2da1e5cb5530318c33a955ecd73346189e14ead60a1f
-  languageName: node
-  linkType: hard
-
-"@storybook/react@npm:^7.0.20":
-  version: 7.0.20
-  resolution: "@storybook/react@npm:7.0.20"
-  dependencies:
-    "@storybook/client-logger": 7.0.20
-    "@storybook/core-client": 7.0.20
-    "@storybook/docs-tools": 7.0.20
-    "@storybook/global": ^5.0.0
-    "@storybook/preview-api": 7.0.20
-    "@storybook/react-dom-shim": 7.0.20
-    "@storybook/types": 7.0.20
-    "@types/escodegen": ^0.0.6
-    "@types/estree": ^0.0.51
-    "@types/node": ^16.0.0
-    acorn: ^7.4.1
-    acorn-jsx: ^5.3.1
-    acorn-walk: ^7.2.0
-    escodegen: ^2.0.0
-    html-tags: ^3.1.0
-    lodash: ^4.17.21
-    prop-types: ^15.7.2
-    react-element-to-jsx-string: ^15.0.0
-    ts-dedent: ^2.0.0
-    type-fest: ^2.19.0
-    util-deprecate: ^1.0.2
-  peerDependencies:
-    react: ^16.8.0 || ^17.0.0 || ^18.0.0
-    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
-  peerDependenciesMeta:
-    typescript:
-      optional: true
-  checksum: 2fb9a0fa800066f48ea1bc3d92bb23bcf35029258af68933e70d2253abc60be59fbce998bdf04782f1660ed64b7e359f1218597a66e3b66cc1235a6595a7646c
   languageName: node
   linkType: hard
 
