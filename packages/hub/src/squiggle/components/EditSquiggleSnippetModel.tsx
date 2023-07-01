@@ -133,18 +133,18 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
             height={height ?? "100vh"}
             onCodeChange={onCodeChange}
             defaultCode={content.code}
-            renderExtraControls={({ openModal }) => (
-              <div className="h-full flex items-center justify-end gap-2">
-                <Button size="small" onClick={() => openModal("exports")}>
-                  Exports
-                </Button>
-                {canSave && (
+            renderExtraControls={({ openModal }) =>
+              canSave && (
+                <div className="h-full flex items-center justify-end gap-2">
+                  <Button size="small" onClick={() => openModal("exports")}>
+                    Exports
+                  </Button>
                   <Button theme="primary" onClick={save} size="small">
                     Save
                   </Button>
-                )}
-              </div>
-            )}
+                </div>
+              )
+            }
             renderExtraModal={(name) => {
               if (name === "exports") {
                 return {
