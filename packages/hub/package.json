@@ -52,7 +52,7 @@
     "@types/pako": "^2.0.0",
     "@types/react": "^18.2.12",
     "@types/react-relay": "^14.1.4",
-    "@types/relay-runtime": "^14.1.10",
+    "@types/relay-runtime": "^14.1.11",
     "babel-plugin-relay": "^15.0.0",
     "eslint": "^8.42.0",
     "eslint-config-next": "^13.4.5",
