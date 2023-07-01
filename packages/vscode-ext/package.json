@@ -134,7 +134,7 @@
     "package": "vsce package --no-dependencies"
   },
   "devDependencies": {
-    "@types/node": "^20.3.0",
+    "@types/node": "^20.3.3",
     "@types/vscode": "^1.79.0",
     "esbuild": "^0.18.1",
     "js-yaml": "^4.1.0",
