@@ -100,6 +100,8 @@ export function SelectRelativeValuesDefinition<
           loadOptions={loadOptions}
           onChange={(user) => onChange(user?.slug)}
           isDisabled={!username}
+          styles={{ menuPortal: (base) => ({ ...base, zIndex: 100 }) }}
+          menuPortalTarget={document.body}
         />
       )}
     </ControlledFormField>

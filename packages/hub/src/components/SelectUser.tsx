@@ -82,6 +82,8 @@ export function SelectUser<
           components={{ SingleValue, Option }}
           loadOptions={loadOptions}
           onChange={(user) => onChange(user?.username)}
+          styles={{ menuPortal: (base) => ({ ...base, zIndex: 100 }) }}
+          menuPortalTarget={document.body}
         />
       )}
     </ControlledFormField>
