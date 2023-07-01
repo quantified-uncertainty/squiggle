@@ -1,4 +1,4 @@
-import { FieldPath, FieldValues } from "react-hook-form";
+import { FieldPathByValue, FieldValues } from "react-hook-form";
 
 import { FormField } from "../common/FormField.js";
 import { CommonStringFieldProps } from "../common/types.js";
@@ -9,7 +9,10 @@ import {
 
 export function TextAreaFormField<
   TValues extends FieldValues,
-  TName extends FieldPath<TValues> = FieldPath<TValues>
+  TName extends FieldPathByValue<TValues, string> = FieldPathByValue<
+    TValues,
+    string
+  >
 >({
   placeholder,
   ...fieldProps

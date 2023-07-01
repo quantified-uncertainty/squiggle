@@ -1,26 +1,36 @@
 import { ReactNode } from "react";
 import {
-  ControllerRenderProps,
-  FieldPath,
+  FieldPathByValue,
   FieldValues,
   RegisterOptions,
 } from "react-hook-form";
 
 import { ControlledFormInput } from "./ControlledFormInput.js";
 import { FieldLayout, FormFieldLayoutProps } from "./FormFieldLayout.js";
+import { PatchedControllerRenderProps } from "./types.js";
 
 export type ControlledFormFieldProps<
   TValues extends FieldValues,
-  TName extends FieldPath<TValues> = FieldPath<TValues>
+  TValueType = unknown,
+  TName extends FieldPathByValue<TValues, TValueType> = FieldPathByValue<
+    TValues,
+    TValueType
+  >
 > = FormFieldLayoutProps & {
   name: TName;
   rules?: RegisterOptions<TValues, TName>;
-  children: (props: ControllerRenderProps<TValues, TName>) => ReactNode;
+  children: (
+    props: PatchedControllerRenderProps<TValues, TValueType, TName>
+  ) => ReactNode;
 };
 
 export function ControlledFormField<
   TValues extends FieldValues,
-  TName extends FieldPath<TValues> = FieldPath<TValues>
+  TValueType,
+  TName extends FieldPathByValue<TValues, TValueType> = FieldPathByValue<
+    TValues,
+    TValueType
+  >
 >({
   name,
   rules,
@@ -28,7 +38,7 @@ export function ControlledFormField<
   description,
   inlineLabel,
   children,
-}: ControlledFormFieldProps<TValues, TName>) {
+}: ControlledFormFieldProps<TValues, TValueType, TName>) {
   return (
     <FieldLayout
       label={label}

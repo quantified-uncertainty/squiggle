@@ -241,7 +241,7 @@ const HTMLForm: FC = () => {
                   label: item.id,
                   value: item.id,
                 }))}
-                onChange={(item) => field.onChange(item?.value)}
+                onChange={(item) => field.onChange(item?.value ?? null)}
                 isClearable={true}
               />
             );
