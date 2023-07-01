@@ -4,7 +4,7 @@ import { FC, useState } from "react";
 
 import { RelativeValuesExportInput } from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
 import { relativeValuesRoute } from "@/routes";
-import { Button, Modal, TextFormField } from "@quri/ui";
+import { Button, Modal, TextFormField, TrashIcon } from "@quri/ui";
 import { FormProvider, useForm } from "react-hook-form";
 import { StyledDefinitionLink } from "../ui/StyledDefinitionLink";
 
@@ -77,7 +77,10 @@ export const EditModelExports: FC<Props> = ({ append, remove, items }) => {
                 {item.definition.username}/{item.definition.slug}
               </StyledDefinitionLink>
             </div>
-            <Button onClick={() => remove(i)}>Remove</Button>
+            <TrashIcon
+              className="text-slate-400 hover:text-slate-700 cursor-pointer"
+              onClick={() => remove(i)}
+            />
           </div>
         ))}
       </div>
