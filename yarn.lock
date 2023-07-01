@@ -4305,7 +4305,7 @@ __metadata:
     "@types/pako": ^2.0.0
     "@types/react": ^18.2.12
     "@types/react-relay": ^14.1.4
-    "@types/relay-runtime": ^14.1.10
+    "@types/relay-runtime": ^14.1.11
     babel-plugin-relay: ^15.0.0
     clsx: ^1.2.1
     date-fns: ^2.30.0
@@ -6780,10 +6780,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/relay-runtime@npm:*, @types/relay-runtime@npm:^14.1.10":
+"@types/relay-runtime@npm:*":
   version: 14.1.10
   resolution: "@types/relay-runtime@npm:14.1.10"
   checksum: 498af0a8b6521edcf3c2945bbd126167ffe29d18505085527641ba5d617533e37f356af17ec8d1ea7192fa1d398da116b9457d5a5c054d9b2f9ea2542adec61d
+  languageName: node
+  linkType: hard
+
+"@types/relay-runtime@npm:^14.1.11":
+  version: 14.1.11
+  resolution: "@types/relay-runtime@npm:14.1.11"
+  checksum: c05424162fc8dab8bd23f7420da9732d856e27420e8b8c9623c4b2371342c28f40cf8d66cf11850d38f41425477b6f62784754c45d48d8ce7eea3961b740c019
   languageName: node
   linkType: hard
 
