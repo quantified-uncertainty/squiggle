@@ -1,15 +1,18 @@
-import { FieldPath, FieldValues } from "react-hook-form";
+import { FieldPathByValue, FieldValues } from "react-hook-form";
 
 import { ControlledFormField } from "../common/ControlledFormField.js";
-import { StyledColorInput } from "../styled/StyledColorInput.js";
 import { CommonStringFieldProps } from "../common/types.js";
+import { StyledColorInput } from "../styled/StyledColorInput.js";
 
 export function ColorFormField<
   TValues extends FieldValues,
-  TName extends FieldPath<TValues> = FieldPath<TValues>
+  TName extends FieldPathByValue<TValues, string> = FieldPathByValue<
+    TValues,
+    string
+  >
 >({ ...fieldProps }: CommonStringFieldProps<TValues, TName>) {
   return (
-    <ControlledFormField {...fieldProps} inlineLabel>
+    <ControlledFormField<TValues, string, TName> {...fieldProps} inlineLabel>
       {({ value, onChange }) => (
         <StyledColorInput value={value} onChange={onChange} />
       )}

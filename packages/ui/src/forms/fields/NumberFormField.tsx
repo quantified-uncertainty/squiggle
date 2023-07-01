@@ -1,4 +1,4 @@
-import { FieldPath, FieldValues } from "react-hook-form";
+import { FieldPathByValue, FieldValues } from "react-hook-form";
 
 import { ControlledFormField } from "../common/ControlledFormField.js";
 import { CommonNumberFieldProps } from "../common/types.js";
@@ -6,7 +6,10 @@ import { StyledInput, type StyledInputProps } from "../styled/StyledInput.js";
 
 export function NumberFormField<
   TValues extends FieldValues,
-  TName extends FieldPath<TValues> = FieldPath<TValues>
+  TName extends FieldPathByValue<
+    TValues,
+    number | undefined
+  > = FieldPathByValue<TValues, number | undefined>
 >({
   placeholder,
   rules = {},
