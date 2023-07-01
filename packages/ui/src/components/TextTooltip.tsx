@@ -9,12 +9,13 @@ import {
   useHover,
   useInteractions,
   useRole,
+  Placement,
 } from "@floating-ui/react";
 
 type Props = {
   text: string;
   children: JSX.Element;
-  placement?: "top" | "bottom" | "left" | "right";
+  placement?: Placement;
   offset?: number;
 };
 

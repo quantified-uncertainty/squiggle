@@ -197,10 +197,10 @@ type Query {
   node(id: ID!): Node
   nodes(ids: [ID!]!): [Node]!
   relativeValuesDefinition(input: QueryRelativeValuesDefinitionInput!): RelativeValuesDefinition!
-  relativeValuesDefinitions(after: String, before: String, first: Int, last: Int): RelativeValuesDefinitionConnection!
+  relativeValuesDefinitions(after: String, before: String, first: Int, input: RelativeValuesDefinitionsQueryInput, last: Int): RelativeValuesDefinitionConnection!
   runSquiggle(code: String!): SquiggleOutput!
   userByUsername(username: String!): User!
-  users(after: String, before: String, first: Int, last: Int): QueryUsersConnection!
+  users(after: String, before: String, first: Int, input: UsersQueryInput, last: Int): QueryUsersConnection!
 }
 
 input QueryModelInput {
@@ -260,6 +260,11 @@ type RelativeValuesDefinitionRevision implements Node {
   items: [RelativeValuesItem!]!
   recommendedUnit: String
   title: String!
+}
+
+input RelativeValuesDefinitionsQueryInput {
+  ownerUsername: String
+  slugContains: String
 }
 
 type RelativeValuesExport implements Node {
@@ -338,4 +343,8 @@ type User implements Node {
   models(after: String, before: String, first: Int, last: Int): ModelConnection!
   relativeValuesDefinitions(after: String, before: String, first: Int, last: Int): RelativeValuesDefinitionConnection!
   username: String!
+}
+
+input UsersQueryInput {
+  usernameContains: String
 }

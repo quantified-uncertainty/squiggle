@@ -1,19 +1,14 @@
 "use client";
-import {
-  Control,
-  Controller,
-  FieldPath,
-  FieldValues,
-  Path,
-} from "react-hook-form";
-
+import { FieldPath, FieldValues } from "react-hook-form";
 import Select, {
   OptionProps,
   SingleValueProps,
   components,
 } from "react-select";
-import { ClusterInfo } from "./common/ClusterInfo";
+
 import { ControlledFormField } from "@quri/ui";
+
+import { ClusterInfo } from "./common/ClusterInfo";
 
 type Option = Readonly<{
   id: string;
