@@ -1,12 +1,14 @@
 "use client";
-
 import { FC, useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
+
+import { Button, Modal, TextFormField, TrashIcon } from "@quri/ui";
 
 import { RelativeValuesExportInput } from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
 import { relativeValuesRoute } from "@/routes";
-import { Button, Modal, TextFormField, TrashIcon } from "@quri/ui";
-import { FormProvider, useForm } from "react-hook-form";
 import { StyledDefinitionLink } from "../ui/StyledDefinitionLink";
+import { SelectUser } from "../SelectUser";
+import { SelectRelativeValuesDefinition } from "./SelectRelativeValuesDefinition";
 
 const CreateVariableWithDefinitionModal: FC<{
   close: () => void;
@@ -30,15 +32,11 @@ const CreateVariableWithDefinitionModal: FC<{
               name="variableName"
               rules={{ required: true }}
             />
-            <TextFormField
-              label="Username"
-              name="definition.username"
-              rules={{ required: true }}
-            />
-            <TextFormField
+            <SelectUser label="Username" name="definition.username" />
+            <SelectRelativeValuesDefinition
               label="Slug"
               name="definition.slug"
-              rules={{ required: true }}
+              userFieldName="definition.username"
             />
           </div>
         </Modal.Body>

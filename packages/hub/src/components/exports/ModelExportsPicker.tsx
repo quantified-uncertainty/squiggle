@@ -1,17 +1,13 @@
+import Link from "next/link";
 import { FC } from "react";
 import { useFragment } from "react-relay";
 
-import { ModelExports$key } from "@/__generated__/ModelExports.graphql";
-import {
-  modelForRelativeValuesExportRoute,
-  modelRoute,
-  modelViewRoute,
-} from "@/routes";
 import { Dropdown, DropdownMenu } from "@quri/ui";
-import { DropdownMenuLinkItem } from "../ui/DropdownMenuLinkItem";
-import { ModelExportsFragment } from "./ModelExports";
-import Link from "next/link";
+
+import { ModelExports$key } from "@/__generated__/ModelExports.graphql";
 import { RelativeValuesExportItem$key } from "@/__generated__/RelativeValuesExportItem.graphql";
+import { modelForRelativeValuesExportRoute, modelViewRoute } from "@/routes";
+import { ModelExportsFragment } from "./ModelExports";
 import {
   RelativeValuesExportItem,
   RelativeValuesExportItemFragment,

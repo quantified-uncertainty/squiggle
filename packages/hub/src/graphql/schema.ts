@@ -1,7 +1,7 @@
 import { builder } from "./builder";
 
-import "./queries/definition";
-import "./queries/definitions";
+import "./queries/relativeValuesDefinition";
+import "./queries/relativeValuesDefinitions";
 import "./queries/me";
 import "./queries/model";
 import "./queries/models";
