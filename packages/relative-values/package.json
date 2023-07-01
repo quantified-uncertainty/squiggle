@@ -30,7 +30,7 @@
     "@commander-js/extra-typings": "^11.0.0",
     "@types/react": "^18.2.14",
     "autoprefixer": "^10.4.14",
-    "commander": "^10.0.1",
+    "commander": "^11.0.0",
     "eslint": "^8.44.0",
     "eslint-config-next": "^13.4.7",
     "postcss": "^8.4.24",
