@@ -21265,7 +21265,7 @@ __metadata:
     prettier: ^3.0.0-alpha.12
     prettier2: "npm:prettier@^2"
     turbo: ^1.10.3
-    turbo-ignore: ^1.10.3
+    turbo-ignore: ^1.10.7
   languageName: unknown
   linkType: soft
 
@@ -22408,12 +22408,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"turbo-ignore@npm:^1.10.3":
-  version: 1.10.3
-  resolution: "turbo-ignore@npm:1.10.3"
+"turbo-ignore@npm:^1.10.7":
+  version: 1.10.7
+  resolution: "turbo-ignore@npm:1.10.7"
   bin:
     turbo-ignore: dist/index.js
-  checksum: 5ae08e5ec45d0813b08848d650c7b25bf8ba74daede396bcc6f7ea4980e6d20e8670790aa5c6c632902ce87aade00023f3b9afc97b212c9931a84a1e9490e64c
+  checksum: a264b2cc2df2ff37ef8b130f8c2f21e06dcc6ac9146242107a94c57a73a92b57bc0821288d30af7d9cb8f30928e4e53e8caeecdb1815a04d8a7c11b494190d08
   languageName: node
   linkType: hard
 

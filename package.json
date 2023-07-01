@@ -10,7 +10,7 @@
     "prettier": "^3.0.0-alpha.12",
     "prettier2": "npm:prettier@^2",
     "turbo": "^1.10.3",
-    "turbo-ignore": "^1.10.3"
+    "turbo-ignore": "^1.10.7"
   },
   "workspaces": [
     "packages/*"
