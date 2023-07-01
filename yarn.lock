@@ -4322,7 +4322,7 @@ __metadata:
     prisma: ^4.16.2
     react: ^18.2.0
     react-dom: ^18.2.0
-    react-hook-form: ^7.44.3
+    react-hook-form: ^7.45.1
     react-loading-skeleton: ^3.3.1
     react-markdown: ^8.0.7
     react-relay: ^15.0.0
@@ -4429,7 +4429,7 @@ __metadata:
     prettier: ^3.0.0-alpha.12
     react: ^18.2.0
     react-dom: ^18.2.0
-    react-hook-form: ^7.44.3
+    react-hook-form: ^7.45.1
     react-resizable: ^3.0.5
     resize-observer-polyfill: ^1.5.1
     rollup-plugin-node-builtins: ^2.1.2
@@ -4508,7 +4508,7 @@ __metadata:
     react: ^18.2.0
     react-colorful: ^5.6.1
     react-dom: ^18.2.0
-    react-hook-form: ^7.44.3
+    react-hook-form: ^7.45.1
     react-textarea-autosize: ^8.4.1
     react-use: ^17.4.0
     rollup-plugin-node-builtins: ^2.1.2
@@ -19718,12 +19718,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-hook-form@npm:^7.44.3":
-  version: 7.44.3
-  resolution: "react-hook-form@npm:7.44.3"
+"react-hook-form@npm:^7.45.1":
+  version: 7.45.1
+  resolution: "react-hook-form@npm:7.45.1"
   peerDependencies:
     react: ^16.8.0 || ^17 || ^18
-  checksum: 8dc97e705d28d842c60fd79b0f07b8b045c458c234e3bf422baab87a844d0ebecbdf3e349538eaaa5c12366cd85169f60a52ed84dd31cdd99729899e424548bf
+  checksum: 3abe1dcf449a3d438b4e5403d93d1502f6dab05afd5c5215f0fc88a32f3d06e7f4b77bee75479359c22a418af6ea0f52711478c73773cb5fd0f43da50669aa17
   languageName: node
   linkType: hard
 
