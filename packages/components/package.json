@@ -44,7 +44,7 @@
     "@types/react-resizable": "^3.0.4",
     "@types/webpack-bundle-analyzer": "^4.6.0",
     "@typescript-eslint/eslint-plugin": "^5.60.1",
-    "@typescript-eslint/parser": "^5.60.0",
+    "@typescript-eslint/parser": "^5.60.1",
     "canvas": "^2.11.2",
     "eslint": "^8.44.0",
     "eslint-plugin-react": "^7.32.2",
