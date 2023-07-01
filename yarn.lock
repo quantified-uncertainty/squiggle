@@ -19226,15 +19226,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prism-react-renderer@npm:2.0.5":
-  version: 2.0.5
-  resolution: "prism-react-renderer@npm:2.0.5"
+"prism-react-renderer@npm:2.0.6":
+  version: 2.0.6
+  resolution: "prism-react-renderer@npm:2.0.6"
   dependencies:
     "@types/prismjs": ^1.26.0
     clsx: ^1.2.1
   peerDependencies:
     react: ">=16.0.0"
-  checksum: 9cd7e1fcf1e758e230f46af2f069a47bbfe55d0209312b329aba40e7e9b18f6763352bf08fc9d89ab7622f1d7a4663e01d2ff964f721ea734e8f901e4f0cd87e
+  checksum: d2202b79ddf01d308da3ba2f7f31a852fb0fb2e0290575d44e719af4c1d91fa913d04eb480fa3ba03e2d35d745ae806904270ffad00770511ec8bd80db67cb24
   languageName: node
   linkType: hard
 
@@ -21672,7 +21672,7 @@ __metadata:
     pako: ^2.1.0
     postcss-nested: ^6.0.1
     prettier: ^2.8.8
-    prism-react-renderer: 2.0.5
+    prism-react-renderer: 2.0.6
     react: ^18.2.0
     react-dom: ^18.2.0
     rehype-katex: ^5.0.0
