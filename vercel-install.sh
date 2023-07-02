@@ -12,9 +12,8 @@ DEFAULT_CACHE=../../.yarn/cache
 
 if [ -d "$VERCEL_CACHE" ]; then
     echo "$VERCEL_CACHE exists"
-    # Note that we use `yarn workspaces focus` instead of full `yarn install`.
-    # That way we install only the subset of all monorepo dependencies,
-    # and also check that the project lists its dependencies correctly.
+    # `yarn workspaces focus` would be better, but it causes issues because of Vercel/Github mismatch.
+    # See https://github.com/quantified-uncertainty/squiggle/issues/1797#issuecomment-1616186996 for details.
     YARN_CACHE_FOLDER=$VERCEL_CACHE yarn install --immutable
 else
     # Yarn fails when cache folder is in node_modules but it doesn't exist.
