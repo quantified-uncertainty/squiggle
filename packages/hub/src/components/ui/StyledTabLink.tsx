@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, ReactNode } from "react";
 import { IconProps, StyledTab } from "@quri/ui";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -12,7 +12,7 @@ type StyledTabLinkProps = {
 };
 
 type StyledTabLinkType = React.FC<StyledTabLinkProps> & {
-  List: React.FC<PropsWithChildren<{ selected?: string }>>;
+  List: FC<{ children: ReactNode }>;
 };
 
 export const StyledTabLink: StyledTabLinkType = ({
@@ -31,6 +31,4 @@ export const StyledTabLink: StyledTabLinkType = ({
   );
 };
 
-StyledTabLink.List = function StyledTabLinkList({ children }) {
-  return <StyledTab.ListDiv>{children}</StyledTab.ListDiv>;
-};
+StyledTabLink.List = StyledTab.ListDiv;
