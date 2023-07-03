@@ -20,6 +20,11 @@ import { ModelPageFragment, useModelPageQuery } from "../../ModelPage";
 import { ModelRevisionFragment } from "../../ModelRevision";
 import { ViewModelRevision } from "../../ViewModelRevision";
 import { CacheMenu } from "./CacheMenu";
+import { BarChartIcon } from "@quri/ui";
+import { Bars4Icon } from "@quri/ui";
+import { ListBulletIcon } from "@quri/ui";
+import { TableCellsIcon } from "@quri/ui";
+import { ScatterPlotIcon } from "@quri/ui";
 
 export default function RelativeValuesModelLayout({
   params,
@@ -91,9 +96,11 @@ export default function RelativeValuesModelLayout({
       modelSlug={params.slug}
     >
       <div className="mb-8 flex items-center gap-4">
+        <div className="">{params.variableName}</div>
         <StyledTabLink.List>
           <StyledTabLink
             name="List"
+            icon={Bars4Icon}
             href={modelForRelativeValuesExportRoute({
               username: params.username,
               slug: params.slug,
@@ -102,6 +109,7 @@ export default function RelativeValuesModelLayout({
           />
           <StyledTabLink
             name="Grid"
+            icon={TableCellsIcon}
             href={modelForRelativeValuesExportRoute({
               username: params.username,
               slug: params.slug,
@@ -111,6 +119,7 @@ export default function RelativeValuesModelLayout({
           />
           <StyledTabLink
             name="Plot"
+            icon={ScatterPlotIcon}
             href={modelForRelativeValuesExportRoute({
               username: params.username,
               slug: params.slug,

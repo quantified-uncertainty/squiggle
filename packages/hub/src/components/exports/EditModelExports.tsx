@@ -5,10 +5,16 @@ import { FormProvider, useForm } from "react-hook-form";
 import { Button, Modal, TextFormField, TrashIcon } from "@quri/ui";
 
 import { RelativeValuesExportInput } from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
-import { relativeValuesRoute } from "@/routes";
+import {
+  relativeValuesRoute,
+  modelForRelativeValuesExportRoute,
+  modelViewRoute,
+} from "@/routes";
 import { StyledDefinitionLink } from "../ui/StyledDefinitionLink";
 import { SelectUser } from "../SelectUser";
 import { SelectRelativeValuesDefinition } from "./SelectRelativeValuesDefinition";
+import { StyledLink } from "../ui/StyledLink";
+import { H2 } from "../ui/Headers";
 
 const CreateVariableWithDefinitionModal: FC<{
   close: () => void;
@@ -54,13 +60,20 @@ type Props = {
   append: (item: RelativeValuesExportInput) => void;
   remove: (id: number) => void;
   items: RelativeValuesExportInput[];
+  modelSlug: string;
 };
 
-export const EditModelExports: FC<Props> = ({ append, remove, items }) => {
+export const EditModelExports: FC<Props> = ({
+  append,
+  remove,
+  items,
+  modelSlug,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div>
+      <H2>Relative Values Exports</H2>
       <div>
         {items.map((item, i) => (
           <div key={i} className="flex items-center gap-2">
@@ -75,15 +88,25 @@ export const EditModelExports: FC<Props> = ({ append, remove, items }) => {
                 {item.definition.username}/{item.definition.slug}
               </StyledDefinitionLink>
             </div>
-            <TrashIcon
-              className="text-slate-400 hover:text-slate-700 cursor-pointer"
-              onClick={() => remove(i)}
-            />
+            <StyledLink
+              href={modelForRelativeValuesExportRoute({
+                username: item.definition.username,
+                slug: modelSlug,
+                variableName: item.variableName,
+              })}
+            >
+              View
+            </StyledLink>
+            <Button onClick={() => remove(i)} size="small">
+              Delete
+            </Button>
           </div>
         ))}
       </div>
       <div className="mt-2">
-        <Button onClick={() => setIsOpen(true)}>Add view</Button>
+        <Button onClick={() => setIsOpen(true)} theme="primary">
+          Export New Variable
+        </Button>
       </div>
       {isOpen && (
         <CreateVariableWithDefinitionModal

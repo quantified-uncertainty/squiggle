@@ -1,14 +1,13 @@
-import clsx from "clsx";
+import { FC } from "react";
+import { IconProps, StyledTab } from "@quri/ui";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { PropsWithChildren, createContext, useContext } from "react";
 
-// based on StyledTab
-
 type StyledTabLinkProps = {
   name: string;
   href: string;
-  icon?: (props: React.ComponentProps<"svg">) => JSX.Element;
+  icon?: FC<IconProps>;
   selected?: (pathname: string, href: string) => boolean;
 };
 
@@ -23,47 +22,15 @@ export const StyledTabLink: StyledTabLinkType = ({
   selected,
 }) => {
   const pathname = usePathname();
-
   const isSelected = selected ? selected(pathname, href) : pathname === href;
 
   return (
     <Link href={href}>
-      <button className="group flex rounded-md focus:outline-none focus-visible:ring-offset-gray-100">
-        <span
-          className={clsx(
-            "p-1 pl-2.5 pr-3.5 rounded-md flex items-center text-sm font-medium",
-            isSelected && "bg-white shadow-sm ring-1 ring-black ring-opacity-5"
-          )}
-        >
-          {Icon && (
-            <Icon
-              className={clsx(
-                "-ml-0.5 mr-2 h-4 w-4",
-                isSelected
-                  ? "text-slate-500"
-                  : "text-gray-400 group-hover:text-gray-900"
-              )}
-            />
-          )}
-          <span
-            className={clsx(
-              isSelected
-                ? "text-gray-900"
-                : "text-gray-600 group-hover:text-gray-900"
-            )}
-          >
-            {name}
-          </span>
-        </span>
-      </button>
+      <StyledTab.Button isSelected={isSelected} name={name} icon={Icon} />
     </Link>
   );
 };
 
 StyledTabLink.List = function StyledTabLinkList({ children }) {
-  return (
-    <div className="flex w-fit p-0.5 rounded-md bg-slate-100 hover:bg-slate-200">
-      {children}
-    </div>
-  );
+  return <StyledTab.ListDiv>{children}</StyledTab.ListDiv>;
 };

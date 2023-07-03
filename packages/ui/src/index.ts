@@ -32,6 +32,7 @@ export { StyledCheckbox } from "./forms/styled/StyledCheckbox.js";
 export { StyledColorInput } from "./forms/styled/StyledColorInput.js";
 export { StyledTextArea } from "./forms/styled/StyledTextArea.js";
 
+export type { IconProps } from "./icons/Icon.js";
 export { XIcon } from "./icons/XIcon.js";
 export { RefreshIcon } from "./icons/RefreshIcon.js";
 export { TrashIcon } from "./icons/TrashIcon.js";
@@ -60,6 +61,10 @@ export {
   LinkIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  Bars4Icon,
+  ListBulletIcon,
+  TableCellsIcon,
+  ScatterPlotIcon,
 } from "./icons/HeroIcons.js";
 
 export { useToast, WithToasts } from "./components/WithToasts/index.js";
