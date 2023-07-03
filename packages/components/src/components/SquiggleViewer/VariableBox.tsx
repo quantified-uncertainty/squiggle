@@ -171,19 +171,18 @@ export const VariableBox: FC<VariableBoxProps> = ({
     !!preview && (
       <div className="ml-2 text-sm text-stone-400 font-mono">{preview}</div>
     );
-  const headerFindInEditorButton = () =>
-    editor && (
-      <div className="ml-3">
-        <TextTooltip text="Show in Editor" placement="bottom">
-          <span>
-            <CodeBracketIcon
-              className={`items-center h-4 w-4 cursor-pointer text-stone-200  group-hover:text-stone-400 hover:!text-stone-800 transition`}
-              onClick={() => findInEditor()}
-            />
-          </span>
-        </TextTooltip>
-      </div>
-    );
+  const headerFindInEditorButton = () => (
+    <div className="ml-3">
+      <TextTooltip text="Show in Editor" placement="bottom">
+        <span>
+          <CodeBracketIcon
+            className={`items-center h-4 w-4 cursor-pointer text-stone-200  group-hover:text-stone-400 hover:!text-stone-800 transition`}
+            onClick={() => findInEditor()}
+          />
+        </span>
+      </TextTooltip>
+    </div>
+  );
   const headerString = () => (
     <div className="text-stone-400 group-hover:text-stone-600 text-sm transition">
       {heading}
@@ -212,7 +211,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
             {!isFocused && triangleToggle()}
             {headerName}
             {!isFocused && headerPreview()}
-            {!isRoot && headerFindInEditorButton()}
+            {!isRoot && editor && headerFindInEditorButton()}
           </div>
           <div className="inline-flex space-x-1">
             {isOpen && headerString()}
