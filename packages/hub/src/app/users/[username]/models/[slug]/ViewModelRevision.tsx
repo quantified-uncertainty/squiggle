@@ -21,11 +21,10 @@ export const ViewModelRevision: FC<Props> = ({
   const revision = useFragment(ModelRevisionFragment, revisionRef);
 
   return (
-    <div className="p-4">
+    <div className="py-4 px-8">
       {revision.relativeValuesExports.length ? (
         <div className="pb-4 mb-4 border-b border-slate-200">
           <div className="flex items-center gap-2 font-medium text-sm">
-            <header>View export:</header>
             <ModelExportsPicker
               dataRef={revision}
               modelUsername={modelUsername}
@@ -35,7 +34,8 @@ export const ViewModelRevision: FC<Props> = ({
           </div>
         </div>
       ) : null}
-      <div>{children}</div>
+
+      {children}
     </div>
   );
 };

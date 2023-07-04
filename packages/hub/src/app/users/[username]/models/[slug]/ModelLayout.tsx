@@ -1,7 +1,7 @@
 import { useSession } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
 import { FC, PropsWithChildren } from "react";
-import { useLazyLoadQuery } from "react-relay";
+import { useFragment, useLazyLoadQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { DropdownMenu } from "@quri/ui";
@@ -21,6 +21,7 @@ import {
 } from "@/routes";
 import { DeleteModelAction } from "./DeleteModelAction";
 import { UpdateModelSlugAction } from "./UpdateModelSlugAction";
+import { ModelExportsPicker } from "@/components/exports/ModelExportsPicker";
 
 // Doing this with a fragment would be too hard, because of how layouts work in Next.js.
 // So we have to do two GraphQL queries on most model pages.
@@ -33,6 +34,7 @@ const Query = graphql`
         username
       }
       currentRevision {
+        id
         # for length; TODO - "hasExports" field?
         relativeValuesExports {
           id
