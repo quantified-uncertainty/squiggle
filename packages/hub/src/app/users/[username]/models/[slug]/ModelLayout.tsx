@@ -4,7 +4,14 @@ import { FC, PropsWithChildren } from "react";
 import { useFragment, useLazyLoadQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { DropdownMenu } from "@quri/ui";
+import Link from "next/link";
+import {
+  DropdownMenu,
+  DropdownMenuHeader,
+  DropdownMenuSeparator,
+  DropdownMenuActionItem,
+  TriangleIcon,
+} from "@quri/ui";
 
 import {
   ModelLayoutQuery,
@@ -14,6 +21,7 @@ import { EntityLayout } from "@/components/EntityLayout";
 import { DotsDropdownButton } from "@/components/ui/DotsDropdownButton";
 import { StyledTabLink } from "@/components/ui/StyledTabLink";
 import {
+  modelForRelativeValuesExportRoute,
   modelRevisionsRoute,
   modelRoute,
   modelViewRoute,
@@ -22,6 +30,8 @@ import {
 import { DeleteModelAction } from "./DeleteModelAction";
 import { UpdateModelSlugAction } from "./UpdateModelSlugAction";
 import { ModelExportsPicker } from "@/components/exports/ModelExportsPicker";
+import { ScaleIcon } from "@quri/ui";
+import { Dropdown } from "@quri/ui";
 
 // Doing this with a fragment would be too hard, because of how layouts work in Next.js.
 // So we have to do two GraphQL queries on most model pages.
@@ -38,6 +48,13 @@ const Query = graphql`
         # for length; TODO - "hasExports" field?
         relativeValuesExports {
           id
+          variableName
+          definition {
+            slug
+            owner {
+              username
+            }
+          }
         }
       }
     }
@@ -88,8 +105,32 @@ export const ModelLayout: FC<Props> = ({ username, slug, children }) => {
   const { model } = useLazyLoadQuery<ModelLayoutQuery>(Query, {
     input: { ownerUsername: username, slug },
   });
+  const router = useRouter();
 
   useFixModelUrlCasing(model);
+
+  const dropDown = (
+    <DropdownMenu>
+      <DropdownMenuHeader> Relative Value Functions </DropdownMenuHeader>
+      <DropdownMenuSeparator />
+      {model.currentRevision.relativeValuesExports.map((exportItem) => (
+        <DropdownMenuActionItem
+          key={exportItem.variableName}
+          icon={ScaleIcon}
+          onClick={() =>
+            router.push(
+              modelForRelativeValuesExportRoute({
+                username: model.owner.username,
+                slug: model.slug,
+                variableName: exportItem.variableName,
+              })
+            )
+          }
+          title={exportItem.definition.slug}
+        />
+      ))}
+    </DropdownMenu>
+  );
 
   return (
     <EntityLayout
@@ -99,6 +140,17 @@ export const ModelLayout: FC<Props> = ({ username, slug, children }) => {
       isFluid={true}
       headerChildren={
         <>
+          {Boolean(model.currentRevision.relativeValuesExports.length) && (
+            <Dropdown render={() => dropDown}>
+              <div className="flex items-center rounded cursor-pointer hover:bg-white px-2 py-1 select-none text-sm">
+                <ScaleIcon size={16} className="text-gray-500" />
+                <TriangleIcon
+                  size={7}
+                  className="rotate-180 ml-2 text-slate-400"
+                />
+              </div>
+            </Dropdown>
+          )}
           <StyledTabLink.List>
             <StyledTabLink
               name="Editor"
