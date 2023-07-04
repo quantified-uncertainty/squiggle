@@ -13,6 +13,8 @@ on:
 env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: quantified-uncertainty
+  # used by turbo cache hashes, see turbo.json
+  PLATFORM: github
 
 jobs:
   build-test-lint:
@@ -23,7 +25,7 @@ jobs:
       - name: Setup Node.js environment
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
           cache: 'yarn'
       - name: Install dependencies
         run: yarn install --immutable
@@ -40,9 +42,9 @@ jobs:
       - name: Setup Node.js environment
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
           cache: 'yarn'
       - name: Install dependencies
-        run: yarn
+        run: yarn install --immutable
       - name: Coverage
         run: npx turbo run coverage

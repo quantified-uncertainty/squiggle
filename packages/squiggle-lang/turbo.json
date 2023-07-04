@@ -3,6 +3,12 @@
   "pipeline": {
     "build": {
       "outputs": ["src/**/*.js", "dist/**"]
+    },
+    "build:ts": {
+      "dependsOn": ["build:peggy"]
+    },
+    "build:peggy": {
+      "outputs": ["src/ast/peggyParser.js"]
     }
   }
 }
