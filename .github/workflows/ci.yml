@@ -13,7 +13,7 @@ on:
 env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: quantified-uncertainty
-  # used by turbo cache hashes, see packages/hub/turbo.json
+  # used by turbo cache hashes, see turbo.json
   PLATFORM: github
 
 jobs:

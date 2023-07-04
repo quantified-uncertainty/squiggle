@@ -1,5 +1,8 @@
 {
   "$schema": "https://turborepo.org/schema.json",
+  // Next.js manifests contain full path names which are platform-dependent,
+  // so we can't share builds between Vercel deployments and Github Actions
+  "globalEnv": ["PLATFORM"],
   "pipeline": {
     // dev target for pre-push checks
     "build:ts": {
