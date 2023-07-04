@@ -211,7 +211,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
             {!isFocused && triangleToggle()}
             {headerName}
             {!isFocused && headerPreview()}
-            {!isRoot && headerFindInEditorButton()}
+            {!isRoot && editor && headerFindInEditorButton()}
           </div>
           <div className="inline-flex space-x-1">
             {isOpen && headerString()}
