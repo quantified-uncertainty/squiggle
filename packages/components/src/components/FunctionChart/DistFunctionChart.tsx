@@ -22,11 +22,12 @@ import {
 import { Padding } from "../../lib/draw/types.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
-import { sqScaleToD3, canvasClasses } from "../../lib/utility.js";
+import { canvasClasses } from "../../lib/utility.js";
 import { ErrorAlert } from "../Alert.js";
 import { DistributionsChart } from "../DistributionsChart/index.js";
 import { NumberShower } from "../NumberShower.js";
 import { getFunctionImage } from "./utils.js";
+import { sqScaleToD3 } from "../../lib/d3/index.js";
 
 function unwrap<a, b>(x: result<a, b>): a {
   if (x.ok) {

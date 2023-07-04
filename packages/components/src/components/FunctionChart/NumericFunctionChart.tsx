@@ -9,9 +9,10 @@ import {
   primaryColor,
 } from "../../lib/draw/index.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
-import { canvasClasses, sqScaleToD3 } from "../../lib/utility.js";
+import { canvasClasses } from "../../lib/utility.js";
 import { ErrorAlert } from "../Alert.js";
 import { getFunctionImage } from "./utils.js";
+import { sqScaleToD3 } from "../../lib/d3/index.js";
 
 type Props = {
   plot: SqNumericFnPlot;

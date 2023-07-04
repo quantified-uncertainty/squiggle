@@ -26,13 +26,13 @@ import {
   adjustColorBrightness,
   canvasClasses,
   flattenResult,
-  sqScaleToD3,
 } from "../../lib/utility.js";
 import { ErrorAlert } from "../Alert.js";
 import { SummaryTable } from "./SummaryTable.js";
 
 import { Point } from "../../lib/draw/types.js";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
+import { sqScaleToD3 } from "../../lib/d3/index.js";
 
 export type DistributionsChartProps = {
   plot: SqDistributionsPlot;
