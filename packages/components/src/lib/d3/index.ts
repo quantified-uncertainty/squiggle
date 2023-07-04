@@ -7,18 +7,27 @@ type CustomFormat = "squiggle-default";
 function isCustomFormat(
   specifier: string | undefined
 ): specifier is CustomFormat {
-  return specifier === "squiggle-default";
+  return specifier === undefined || specifier === "squiggle-default";
 }
 
 function squiggleDefaultFormat() {
-  const siFormat = d3.format(".9~s");
-  const expFormat = d3.format(".9~e");
-  const fixedFormat = d3.format(".9~f");
+  const locale = d3.formatLocale({
+    decimal: ".",
+    thousands: ",",
+    grouping: [3],
+    currency: ["$", ""],
+    minus: "-",
+  });
+  const siFormat = locale.format(".9~s");
+  const expFormat = locale.format(".9~e");
+  const fixedFormat = locale.format(".9~f");
 
   return (d: d3.NumberValue) => {
     const abs = Math.abs(Number(d));
     if (abs === 0 || (abs >= 0.0001 && abs < 1e6)) {
       return fixedFormat(d);
+    } else if (abs >= 1e9 && abs < 1e12) {
+      return fixedFormat(Number(d) / 1e9) + "B";
     } else if (abs >= 1e6 && abs < 1e15) {
       return siFormat(d);
     } else {
