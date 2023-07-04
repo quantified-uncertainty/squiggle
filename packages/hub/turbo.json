@@ -1,0 +1,10 @@
+{
+  "extends": ["//"],
+  "pipeline": {
+    "build": {
+      // Next.js manifests contain full path names which are platform-dependent,
+      // so we can't share builds between Vercel deployments and Github Actions
+      "env": ["PLATFORM"]
+    }
+  }
+}
