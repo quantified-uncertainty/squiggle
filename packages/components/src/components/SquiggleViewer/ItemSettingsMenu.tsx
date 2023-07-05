@@ -3,9 +3,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
-import { SqValue } from "@quri/squiggle-lang";
 import { Modal, TextTooltip } from "@quri/ui";
 
+import { SqValueWithPath } from "../../lib/utility.js";
 import {
   MetaSettings,
   PlaygroundSettingsForm,
@@ -20,7 +20,7 @@ import {
 import { pathAsString } from "./utils.js";
 
 type Props = {
-  value: SqValue;
+  value: SqValueWithPath;
   onChange: () => void;
   metaSettings?: MetaSettings;
   withFunctionSettings: boolean;
@@ -39,10 +39,6 @@ const ItemSettingsModal: React.FC<
   const setSettings = useSetSettings();
   const { getSettings, getMergedSettings } = useViewerContext();
 
-  if (!value.path) {
-    throw new Error("Can't render settings modal for pathless value");
-  }
-
   const mergedSettings = getMergedSettings({ path: value.path });
 
   const form = useForm({
@@ -53,9 +49,6 @@ const ItemSettingsModal: React.FC<
 
   useEffect(() => {
     const submit = form.handleSubmit((data) => {
-      if (!value.path) {
-        return; // satisfies TypeScript
-      }
       setSettings(value.path, {
         collapsed: false,
         ...data,
@@ -112,16 +105,10 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
   if (!localSettingsEnabled) {
     return null;
   }
-  if (!props.value.path) {
-    throw new Error("Can't render settings menu for pathless value");
-  }
 
   const settings = getSettings({ path: props.value.path });
 
   const resetScroll = () => {
-    if (!props.value.path) {
-      return;
-    }
     dispatch({
       type: "SCROLL_TO_PATH",
       payload: {
@@ -141,10 +128,6 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
       {settings.distributionChartSettings ? (
         <button
           onClick={() => {
-            if (!props.value.path) {
-              // shouldn't happen, satisfies TypeScript
-              return;
-            }
             setSettings(props.value.path, {
               collapsed: settings.collapsed,
             });

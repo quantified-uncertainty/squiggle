@@ -24,7 +24,7 @@ export function pathToShortName(path: SqValuePath): string | undefined {
     : String(path.items[path.items.length - 1]);
 }
 
-export function getChildrenValues(value: SqValue) {
+export function getChildrenValues(value: SqValue): SqValue[] {
   switch (value.tag) {
     case "Array":
       return value.value.getValues();

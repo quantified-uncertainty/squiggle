@@ -6,12 +6,12 @@ import {
   useMemo,
   useReducer,
 } from "react";
-
-import { SqValue } from "@quri/squiggle-lang";
-import { CodeBracketIcon, TextTooltip, TriangleIcon } from "@quri/ui";
-
-import { SqValuePath } from "@quri/squiggle-lang";
 import { clsx } from "clsx";
+
+import { CodeBracketIcon, TextTooltip, TriangleIcon } from "@quri/ui";
+import { SqValuePath } from "@quri/squiggle-lang";
+
+import { SqValueWithPath } from "../../lib/utility.js";
 import {
   useCollapseChildren,
   useFocus,
@@ -32,7 +32,7 @@ type SettingsMenuParams = {
 };
 
 export type VariableBoxProps = {
-  value: SqValue;
+  value: SqValueWithPath;
   heading?: string;
   preview?: ReactNode;
   renderSettingsMenu?: (params: SettingsMenuParams) => ReactNode;
@@ -64,8 +64,8 @@ export const VariableBox: FC<VariableBoxProps> = ({
   const isFocused = useIsFocused(value.path);
 
   const findInEditor = () => {
-    const locationR = value.path?.findLocation();
-    if (!locationR?.ok) {
+    const locationR = value.path.findLocation();
+    if (!locationR.ok) {
       return;
     }
     editor?.scrollTo(locationR.value.start.offset);
