@@ -1,18 +1,21 @@
-import {
-  Env,
-  result,
-  SqDistributionsPlot,
-  SqError,
-  SqDistFnPlot,
-  SqLinearScale,
-  SqValue,
-  SqNumberValue,
-  SqOtherError,
-} from "@quri/squiggle-lang";
 import * as d3 from "d3";
 import groupBy from "lodash/groupBy.js";
 import { FC, useCallback, useMemo, useRef } from "react";
 
+import {
+  Env,
+  SqDistFnPlot,
+  SqDistributionsPlot,
+  SqError,
+  SqLinearScale,
+  SqNumberValue,
+  SqOtherError,
+  SqValue,
+  result,
+} from "@quri/squiggle-lang";
+
+import { sqScaleToD3 } from "../../lib/d3/index.js";
+import { scaleLinear } from "../../lib/d3/patchedScales.js";
 import {
   AnyChartScale,
   drawAxes,
@@ -27,7 +30,6 @@ import { ErrorAlert } from "../Alert.js";
 import { DistributionsChart } from "../DistributionsChart/index.js";
 import { NumberShower } from "../NumberShower.js";
 import { getFunctionImage } from "./utils.js";
-import { sqScaleToD3 } from "../../lib/d3/index.js";
 
 function unwrap<a, b>(x: result<a, b>): a {
   if (x.ok) {
@@ -117,27 +119,29 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
     [plot, environment]
   );
 
+  const { xScale, yScale } = useMemo(() => {
+    const xScale = sqScaleToD3(plot.xScale);
+    xScale.domain(d3.extent(data, (d) => d.x) as [number, number]);
+
+    const yScale = scaleLinear().domain([
+      Math.min(
+        ...data.map((d) =>
+          Math.min(...Object.values(d.areas).map((p) => p[0]), d[50])
+        )
+      ),
+      Math.max(
+        ...data.map((d) =>
+          Math.max(...Object.values(d.areas).map((p) => p[1]), d[50])
+        )
+      ),
+    ]);
+
+    return { xScale, yScale };
+  }, [data, plot.xScale]);
+
   const draw = useCallback(
     ({ context, width }: DrawContext) => {
       context.clearRect(0, 0, width, height);
-
-      const xScale = sqScaleToD3(plot.xScale);
-      xScale.domain(d3.extent(data, (d) => d.x) as [number, number]);
-
-      const yScale = d3
-        .scaleLinear()
-        .domain([
-          Math.min(
-            ...data.map((d) =>
-              Math.min(...Object.values(d.areas).map((p) => p[0]), d[50])
-            )
-          ),
-          Math.max(
-            ...data.map((d) =>
-              Math.max(...Object.values(d.areas).map((p) => p[1]), d[50])
-            )
-          ),
-        ]);
 
       const { padding, frame } = drawAxes({
         suggestedPadding: { left: 20, right: 10, top: 10, bottom: 20 },
@@ -193,12 +197,12 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
           cursor,
           x: {
             scale: xScale,
-            format: d3.format(",.4r"),
+            format: plot.xScale.tickFormat,
           },
         });
       }
     },
-    [cursor, height, data, plot]
+    [cursor, height, data, plot, xScale, yScale]
   );
 
   const { ref, width } = useCanvas({ height, init: initCursor, draw });
@@ -234,22 +238,27 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
   }, [plot.fn, environment, mouseX]);
 
   const showChart =
-    mouseItem && mouseItem.ok && mouseItem.value.tag === "Dist" ? (
+    mouseItem &&
+    mouseItem.ok &&
+    mouseItem.value.tag === "Dist" &&
+    d3ref.current &&
+    mouseX !== undefined ? (
       <DistributionsChart
         plot={SqDistributionsPlot.create({
           distribution: mouseItem.value.value,
           xScale: plot.distXScale,
           yScale: SqLinearScale.create(),
           showSummary: false,
-          title:
-            mouseX === undefined
-              ? undefined
-              : `f(${d3.format(",.4r")(mouseX)})`, // TODO - use an original function name? it could be obtained with `pathToShortName`, but there's a corner case for arrays.
+          // TODO - use an original function name? it could be obtained with `pathToShortName`, but there's a corner case for arrays.
+          title: `f(${d3ref.current.xScale.tickFormat(
+            undefined,
+            plot.xScale.tickFormat
+          )(mouseX)})`,
         })}
         environment={environment}
         height={50}
       />
-    ) : null;
+    ) : null; // TODO - show error
 
   return (
     <div className="flex flex-col items-stretch">

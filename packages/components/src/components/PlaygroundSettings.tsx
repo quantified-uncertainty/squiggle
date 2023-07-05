@@ -9,7 +9,6 @@ import {
 } from "@quri/squiggle-lang";
 import { CheckboxFormField, NumberFormField, RadioFormField } from "@quri/ui";
 
-import { defaultTickFormatSpecifier } from "../lib/draw/index.js";
 import { functionChartDefaults } from "./FunctionChart/utils.js";
 import { FormComment } from "./ui/FormComment.js";
 import { FormSection } from "./ui/FormSection.js";
@@ -36,7 +35,7 @@ type ScaleType = z.infer<typeof scaleSchema>;
 
 function scaleTypeToSqScale(
   scaleType: ScaleType,
-  args: { min?: number; max?: number; tickFormat?: string } = {}
+  args: { min?: number; max?: number } = {}
 ) {
   switch (scaleType) {
     case "linear":
@@ -59,9 +58,6 @@ export const distributionSettingsSchema = z.object({
   minX: z.number().optional(),
   maxX: z.number().optional(),
   title: z.string().optional(),
-  xAxisType: z.union([z.literal("number"), z.literal("dateTime")]),
-  /** Documented here: https://github.com/d3/d3-format */
-  tickFormat: z.string(),
   showSummary: z.boolean(),
 });
 
@@ -89,8 +85,6 @@ export const defaultPlaygroundSettings: PlaygroundSettings = {
   distributionChartSettings: {
     xScale: "linear",
     yScale: "linear",
-    xAxisType: "number",
-    tickFormat: defaultTickFormatSpecifier,
     showSummary: true,
   },
 };
@@ -110,11 +104,8 @@ export function generateDistributionPlotSettings(
   const xScale = scaleTypeToSqScale(settings.xScale, {
     min: settings.minX,
     max: settings.maxX,
-    tickFormat: settings.tickFormat,
   });
-  const yScale = scaleTypeToSqScale(settings.yScale, {
-    tickFormat: settings.tickFormat,
-  });
+  const yScale = scaleTypeToSqScale(settings.yScale);
   return {
     xScale,
     yScale,

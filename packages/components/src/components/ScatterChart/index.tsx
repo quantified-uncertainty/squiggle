@@ -98,11 +98,11 @@ export const ScatterChart: FC<Props> = ({ plot, height, environment }) => {
           cursor,
           x: {
             scale: xScale,
-            format: d3.format(",.4r"),
+            format: xSqScale.tickFormat,
           },
           y: {
             scale: yScale,
-            format: d3.format(",.4r"),
+            format: ySqScale.tickFormat,
           },
         });
       }

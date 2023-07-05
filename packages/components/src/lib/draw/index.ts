@@ -17,7 +17,9 @@ export function distance(point1: Point, point2: Point) {
   return Math.sqrt((point1.x - point2.x) ** 2 + (point1.y - point2.y) ** 2);
 }
 
-export const defaultTickFormatSpecifier = ".9~s";
+// see lib/d3/index.ts
+export const defaultTickFormatSpecifier = "squiggle-default";
+
 interface DrawAxesParams {
   context: CanvasRenderingContext2D;
   xScale: AnyChartScale;
@@ -29,7 +31,6 @@ interface DrawAxesParams {
   drawTicks?: boolean;
   xTickCount?: number;
   yTickCount?: number;
-  tickFormat?: string;
   xTickFormat?: string;
   yTickFormat?: string;
 }
@@ -203,11 +204,11 @@ export function drawCursorLines({
   frame: CartesianFrame;
   x?: {
     scale: d3.ScaleContinuousNumeric<number, number, never>;
-    format: (d: d3.NumberValue) => string;
+    format?: string | undefined;
   };
   y?: {
     scale: d3.ScaleContinuousNumeric<number, number, never>;
-    format: (d: d3.NumberValue) => string;
+    format?: string | undefined;
   };
 }) {
   const context = frame.context;
@@ -231,7 +232,10 @@ export function drawCursorLines({
 
     context.textAlign = "left";
     context.textBaseline = "bottom";
-    const text = xLine.format(xLine.scale.invert(point.x));
+    const text = xLine.scale.tickFormat(
+      undefined,
+      xLine.format
+    )(xLine.scale.invert(point.x));
     const measured = context.measureText(text);
 
     let boxWidth = measured.width + px * 2;
@@ -281,7 +285,10 @@ export function drawCursorLines({
 
     context.textAlign = "left";
     context.textBaseline = "bottom";
-    const text = yLine.format(yLine.scale.invert(point.y));
+    const text = yLine.scale.tickFormat(
+      undefined,
+      yLine.format
+    )(yLine.scale.invert(point.y));
     const measured = context.measureText(text);
 
     const boxWidth = measured.width + px * 2;

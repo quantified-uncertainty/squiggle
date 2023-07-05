@@ -103,11 +103,11 @@ export const NumericFunctionChart: FC<Props> = ({
           cursor,
           x: {
             scale: xScale,
-            format: d3.format(",.4r"),
+            format: plot.xScale.tickFormat,
           },
           y: {
             scale: yScale,
-            format: d3.format(",.4r"),
+            format: plot.yScale.tickFormat,
           },
         });
       }
