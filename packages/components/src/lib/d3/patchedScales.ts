@@ -2,6 +2,9 @@ import * as d3 from "d3";
 
 type CustomFormat = "squiggle-default" | undefined;
 
+// see lib/d3/index.ts
+export const defaultTickFormatSpecifier: CustomFormat = "squiggle-default";
+
 function isCustomFormat(
   specifier: string | undefined
 ): specifier is CustomFormat {

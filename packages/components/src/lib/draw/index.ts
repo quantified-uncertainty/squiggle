@@ -1,6 +1,7 @@
 import * as d3 from "d3";
 import { CartesianFrame } from "./CartesianFrame.js";
 import { Padding, Point } from "./types.js";
+import { defaultTickFormatSpecifier } from "../d3/patchedScales.js";
 
 const axisColor = "rgba(114, 125, 147, 0.1)";
 export const labelColor = "rgb(114, 125, 147)";
@@ -16,9 +17,6 @@ export type AnyChartScale = d3.ScaleContinuousNumeric<number, number, never>;
 export function distance(point1: Point, point2: Point) {
   return Math.sqrt((point1.x - point2.x) ** 2 + (point1.y - point2.y) ** 2);
 }
-
-// see lib/d3/index.ts
-export const defaultTickFormatSpecifier = "squiggle-default";
 
 interface DrawAxesParams {
   context: CanvasRenderingContext2D;
