@@ -114,7 +114,7 @@ export function drawAxes({
       if (i === 0) {
         startX = Math.max(x - textWidth / 2, prevBoundary);
       } else if (i === xTicks.length - 1) {
-        startX = Math.min(x - textWidth / 2, width - textWidth);
+        startX = Math.min(x - textWidth / 2, frame.width - textWidth);
       } else {
         startX = x - textWidth / 2;
       }
@@ -164,7 +164,7 @@ export function drawAxes({
       if (i === 0) {
         startY = Math.max(y - textHeight / 2, prevBoundary);
       } else if (i === yTicks.length - 1) {
-        startY = Math.min(y - textHeight / 2, height - textHeight);
+        startY = Math.min(y - textHeight / 2, frame.height - textHeight);
       } else {
         startY = y - textHeight / 2;
       }
