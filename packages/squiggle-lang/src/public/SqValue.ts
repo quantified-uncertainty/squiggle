@@ -10,9 +10,7 @@ import { SqRecord } from "./SqRecord.js";
 import { SqScale, wrapScale } from "./SqScale.js";
 import { SqValuePath } from "./SqValuePath.js";
 
-export const wrapValue = (value: Value, path?: SqValuePath): SqValue => {
-  const tag = value.type;
-
+export function wrapValue(value: Value, path?: SqValuePath) {
   switch (value.type) {
     case "Array":
       return new SqArrayValue(value, path);
@@ -43,7 +41,7 @@ export const wrapValue = (value: Value, path?: SqValuePath): SqValue => {
     default:
       throw new Error(`Unknown value ${JSON.stringify(value)}`);
   }
-};
+}
 
 export abstract class SqAbstractValue<T extends string, J> {
   abstract tag: T;
@@ -240,23 +238,8 @@ export class SqVoidValue extends SqAbstractValue<"Void", null> {
   }
 }
 
-// FIXME
-// type SqValue = typeof tagToClass[keyof typeof tagToClass];
-export type SqValue =
-  | SqArrayValue
-  | SqBoolValue
-  | SqDateValue
-  | SqDeclarationValue
-  | SqDistributionValue
-  | SqLambdaValue
-  | SqNumberValue
-  | SqRecordValue
-  | SqStringValue
-  | SqTimeDurationValue
-  | SqPlotValue
-  | SqScaleValue
-  | SqVoidValue;
+export type SqValue = ReturnType<typeof wrapValue>;
 
-export const toStringResult = (result: result<SqValue, SqError>) => {
+export function toStringResult(result: result<SqValue, SqError>) {
   return `${result.ok ? "Ok" : "Error"}(${result.value.toString()})`;
-};
+}
