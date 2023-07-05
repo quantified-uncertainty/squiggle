@@ -33,16 +33,27 @@ export function PanelWithToolbar<const ModalNames extends string[]>({
 
   const modal = modalName ? renderModal?.(modalName) : undefined;
 
+  //We want to center the title, so need similarly-widthed items on either side
+  const modalHeader = modal && (
+    <div className="h-full flex gap-2">
+      <ToolbarItem
+        className="flex-grow-0 flex-shrink-0 w-20"
+        onClick={closeModal}
+      >
+        &larr; Back
+      </ToolbarItem>
+      <div className="flex-grow flex-shrink text-center self-center text-sm text-slate-600 font-semibold">
+        {modal.title}
+      </div>
+      <div className="flex-grow-0 flex-shrink-0 w-20 invisible"></div>
+    </div>
+  );
+
   return (
     <div className="h-full flex flex-col">
       <div className="h-8 bg-slate-50 border-b border-slate-200 overflow-hidden mb-1 px-4">
         {modal ? (
-          <div className="h-full flex gap-2">
-            <ToolbarItem onClick={closeModal}>&larr; Back</ToolbarItem>
-            <div className="self-center text-sm font-medium text-slate-600">
-              {modal.title}
-            </div>
-          </div>
+          modalHeader
         ) : (
           <div className="h-full grid place-items-stretch">
             {renderToolbar({ openModal })}
