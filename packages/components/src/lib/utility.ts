@@ -121,6 +121,7 @@ export function adjustColorBrightness(color: string, amount: number) {
   );
 }
 
+// Ensures that the SqValue has a "path" parameter, which would otherwise be optional.
 export type SqValueWithPath = SqValue & Required<Pick<SqValue, "path">>;
 
 export function valueHasPath(value: SqValue): value is SqValueWithPath {
