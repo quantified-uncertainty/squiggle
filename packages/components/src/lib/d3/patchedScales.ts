@@ -88,6 +88,7 @@ export function scaleLog() {
       isCustomFormat(specifier)
         ? // Log scale tickFormat method supports functions, but @types/d3 is not aware of that:
           // https://github.com/d3/d3-scale/blob/83555bd759c7314420bd4240642beda5e258db9e/src/log.js#L109
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (squiggleDefaultFormat() as any)
         : specifier
     );
