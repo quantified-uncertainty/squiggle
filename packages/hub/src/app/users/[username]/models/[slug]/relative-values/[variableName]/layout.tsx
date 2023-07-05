@@ -63,9 +63,9 @@ export default function RelativeValuesModelLayout({
     throw new Error("Not found");
   }
 
-  const def = revision.forRelativeValues.definition;
+  const definition = revision.forRelativeValues.definition;
 
-  const definition = useFragment<RelativeValuesDefinitionRevision$key>(
+  const definitionRevision = useFragment<RelativeValuesDefinitionRevision$key>(
     RelativeValuesDefinitionRevisionFragment,
     revision.forRelativeValues.definition.currentRevision
   );
@@ -84,7 +84,7 @@ export default function RelativeValuesModelLayout({
   const body = evaluatorResult ? (
     evaluatorResult.ok ? (
       <RelativeValuesProvider
-        definition={definition}
+        definition={definitionRevision}
         evaluator={evaluatorResult.value}
       >
         {children}
@@ -100,8 +100,8 @@ export default function RelativeValuesModelLayout({
     <Link
       className="flex items-center text-blue-500 text-sm hover:underline"
       href={relativeValuesRoute({
-        username: def.owner.username,
-        slug: def.slug,
+        username: definition.owner.username,
+        slug: definition.slug,
       })}
     >
       <LinkIcon className="mr-1 opacity-50" size={18} />

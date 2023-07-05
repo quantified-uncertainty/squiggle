@@ -1,7 +1,6 @@
 import { graphql } from "react-relay";
 
 // shared by multiple components
-// TODO: Why doesn't the definition get the slug and owner?
 export const ModelRevisionFragment = graphql`
   fragment ModelRevision on ModelRevision
   @argumentDefinitions(
@@ -36,7 +35,6 @@ export const ModelRevisionFragment = graphql`
         owner {
           username
         }
-        createdAtTimestamp
         currentRevision {
           ...RelativeValuesDefinitionRevision
         }
