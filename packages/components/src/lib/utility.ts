@@ -120,3 +120,9 @@ export function adjustColorBrightness(color: string, amount: number) {
       )
   );
 }
+
+export type SqValueWithPath = SqValue & Required<Pick<SqValue, "path">>;
+
+export function valueHasPath(value: SqValue): value is SqValueWithPath {
+  return !!value.path;
+}

@@ -139,9 +139,9 @@ export function useCollapseChildren() {
   );
 }
 
-export function useIsFocused(location: SqValuePath | undefined) {
+export function useIsFocused(location: SqValuePath) {
   const { focused } = useViewerContext();
-  if (!focused || location === undefined) {
+  if (!focused) {
     return false;
   } else {
     return pathAsString(focused) === pathAsString(location);

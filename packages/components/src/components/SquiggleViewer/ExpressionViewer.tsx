@@ -8,6 +8,7 @@ import {
 } from "@quri/squiggle-lang";
 
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
+import { SqValueWithPath, valueHasPath } from "../../lib/utility.js";
 import { DistributionsChart } from "../DistributionsChart/index.js";
 import { DistFunctionChart } from "../FunctionChart/DistFunctionChart.js";
 import { NumericFunctionChart } from "../FunctionChart/NumericFunctionChart.js";
@@ -23,11 +24,12 @@ import {
   VariableBoxProps,
 } from "./VariableBox.js";
 import { MergedItemSettings, getChildrenValues } from "./utils.js";
+import { MessageAlert } from "../Alert.js";
 
 export const getBoxProps = (
-  value: SqValue
+  value: SqValueWithPath
 ): Omit<VariableBoxProps, "value"> => {
-  const environment = value.path!.project.getEnvironment();
+  const environment = value.path.project.getEnvironment();
 
   switch (value.tag) {
     case "Number":
@@ -45,9 +47,9 @@ export const getBoxProps = (
       return {
         heading: `${distType} Distribution`,
         renderSettingsMenu: ({ onChange }) => {
-          const shape = value.path
-            ? value.value.pointSet(value.path.project.getEnvironment())
-            : undefined;
+          const shape = value.value.pointSet(
+            value.path.project.getEnvironment()
+          );
 
           return (
             <ItemSettingsMenu
@@ -239,16 +241,17 @@ export const getBoxProps = (
   }
 };
 
-export interface Props {
+type Props = {
   /** The output of squiggle's run */
   value: SqValue;
   width?: number;
-}
+};
 
 export const ExpressionViewer: React.FC<Props> = ({ value }) => {
-  if (!value.path) {
-    throw new Error("Can't display pathless value");
+  if (!valueHasPath(value)) {
+    return <MessageAlert heading="Can't display pathless value" />;
   }
+
   const boxProps = getBoxProps(value);
   const heading = boxProps.heading || value.tag;
   const hasChildren = () => !!getChildrenValues(value);
