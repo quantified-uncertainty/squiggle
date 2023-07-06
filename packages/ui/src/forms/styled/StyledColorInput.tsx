@@ -1,6 +1,7 @@
 import { HexColorInput, HexColorPicker } from "react-colorful";
 
-import { Dropdown, DropdownMenu } from "../../index.js";
+import { Dropdown } from "../../components/Dropdown/index.js";
+import { DropdownMenu } from "../../components/Dropdown/DropdownMenu.js";
 
 type Props = {
   value: string;
