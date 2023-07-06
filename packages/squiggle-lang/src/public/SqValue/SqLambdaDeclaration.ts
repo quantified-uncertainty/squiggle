@@ -1,14 +1,17 @@
 import { LambdaDeclaration } from "@/reducer/declaration.js";
+import { SqValueContext } from "../SqValueContext.js";
 import { SqLambda } from "./SqLambda.js";
-import { SqValuePath } from "../SqValuePath.js";
 
 export class SqLambdaDeclaration {
-  constructor(private _value: LambdaDeclaration, public path?: SqValuePath) {}
+  constructor(
+    private _value: LambdaDeclaration,
+    public context?: SqValueContext
+  ) {}
 
   get fn() {
     return new SqLambda(
       this._value.fn,
-      this.path ? this.path.extend("fn") : undefined
+      this.context ? this.context.extend("fn") : undefined
     );
   }
 

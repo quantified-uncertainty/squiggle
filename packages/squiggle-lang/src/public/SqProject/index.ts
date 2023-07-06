@@ -1,20 +1,23 @@
-import { Env, defaultEnv } from "../../dist/env.js";
-import * as Library from "../../library/index.js";
-import { createContext } from "../../reducer/context.js";
-import { Bindings } from "../../reducer/stack.js";
-import * as Result from "../../utility/result.js";
-import { Value, vRecord } from "../../value/index.js";
+import { LocationRange } from "peggy";
+
+import { findAstByPath, isBindingStatement } from "@/ast/utils.js";
+import { Env, defaultEnv } from "@/dist/env.js";
+import * as Library from "@/library/index.js";
+import { createContext } from "@/reducer/context.js";
+import { Bindings } from "@/reducer/stack.js";
+import { ImmutableMap } from "@/utility/immutableMap.js";
+import * as Result from "@/utility/result.js";
+import { Value, vRecord } from "@/value/index.js";
+
 import { SqError, SqOtherError } from "../SqError.js";
 import { SqRecord } from "../SqValue/SqRecord.js";
 import { SqValue, wrapValue } from "../SqValue/index.js";
 import { SqValuePath } from "../SqValuePath.js";
 
-import { LocationRange } from "peggy";
-import { findLocationByPath } from "../../ast/utils.js";
-import { ImmutableMap } from "../../utility/immutableMap.js";
 import { ImportBinding, ProjectItem } from "./ProjectItem.js";
 import { Resolver } from "./Resolver.js";
 import * as Topology from "./Topology.js";
+import { SqValueContext } from "../SqValueContext.js";
 
 function getNeedToRunError() {
   return new SqOtherError("Need to run");
@@ -158,14 +161,38 @@ export class SqProject {
   }
 
   getResult(sourceId: string): Result.result<SqValue, SqError> {
-    return Result.fmap(this.getInternalResult(sourceId), (v) =>
+    const internalResult = this.getInternalResult(sourceId);
+    if (!internalResult.ok) {
+      return internalResult;
+    }
+
+    const astR = this.getItem(sourceId).ast;
+    if (!astR) {
+      throw new Error("Internal error: AST is missing when result is ok");
+    }
+    if (!astR.ok) {
+      return astR; // impossible
+    }
+
+    const ast = astR.value;
+
+    const lastStatement =
+      ast.type === "Program" ? ast.statements.at(-1) : undefined;
+
+    const hasEndExpression =
+      !!lastStatement && !isBindingStatement(lastStatement);
+
+    return Result.Ok(
       wrapValue(
-        v,
-        new SqValuePath({
+        internalResult.value,
+        new SqValueContext({
           project: this,
           sourceId,
-          root: "result",
-          items: [],
+          path: new SqValuePath({
+            root: "result",
+            items: [],
+          }),
+          ast,
         })
       )
     );
@@ -182,13 +209,24 @@ export class SqProject {
   }
 
   getBindings(sourceId: string): SqRecord {
+    const astR = this.getItem(sourceId).ast;
+    if (!astR) {
+      throw new Error("Internal error: AST is missing when result is ok");
+    }
+    if (!astR.ok) {
+      throw new Error(astR.value.toString()); // impossible
+    }
+
     return new SqRecord(
       this.getRawBindings(sourceId),
-      new SqValuePath({
+      new SqValueContext({
         project: this,
         sourceId,
-        root: "bindings",
-        items: [],
+        path: new SqValuePath({
+          root: "bindings",
+          items: [],
+        }),
+        ast: astR.value,
       })
     );
   }
@@ -350,8 +388,6 @@ export class SqProject {
       return ast;
     }
     const found = SqValuePath.findByOffset({
-      project: this,
-      sourceId,
       ast: ast.value,
       offset,
     });
@@ -359,21 +395,6 @@ export class SqProject {
       return Result.Err(new SqOtherError("Not found"));
     }
     return Result.Ok(found);
-  }
-
-  findLocationByValuePath(
-    sourceId: string,
-    path: SqValuePath
-  ): Result.result<LocationRange, SqError> {
-    const { ast: astR } = this.getItem(sourceId);
-    if (!astR) {
-      return Result.Err(new SqOtherError("Not parsed"));
-    }
-    if (!astR.ok) {
-      return astR;
-    }
-    const ast = astR.value;
-    return Result.Ok(findLocationByPath(ast, path.items));
   }
 }
 

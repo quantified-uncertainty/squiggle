@@ -15,7 +15,10 @@ export {
   SqRuntimeError,
 } from "./public/SqError.js";
 export { SqDistributionError } from "./public/SqValue/SqDistribution/SqDistributionError.js";
-export { SqShape } from "./public/SqValue/SqDistribution/SqPointSet.js";
+export {
+  type SqShape,
+  type SqPointSet,
+} from "./public/SqValue/SqDistribution/SqPointSet.js";
 export {
   SqAbstractDistribution,
   SqDistribution,

@@ -20,13 +20,13 @@ export type SqShape = {
   discrete: SqPoint[];
 };
 
-const shapePoints = (x: ContinuousShape | DiscreteShape): SqPoint[] => {
-  let xs = x.xyShape.xs;
-  let ys = x.xyShape.ys;
+function shapePoints(x: ContinuousShape | DiscreteShape): SqPoint[] {
+  const xs = x.xyShape.xs;
+  const ys = x.xyShape.ys;
   return zipWith(xs, ys, (x, y) => ({ x, y }));
-};
+}
 
-export const wrapPointSet = (value: AnyPointSet) => {
+export function wrapPointSet(value: AnyPointSet) {
   if (value instanceof ContinuousShape) {
     return new SqContinuousPointSet(value);
   } else if (value instanceof DiscreteShape) {
@@ -35,7 +35,7 @@ export const wrapPointSet = (value: AnyPointSet) => {
     return new SqMixedPointSet(value);
   }
   throw new Error(`Unknown PointSet shape ${value}`);
-};
+}
 
 abstract class SqAbstractPointSet<S extends AnyPointSet> {
   constructor(_value: S) {}

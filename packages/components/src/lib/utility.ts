@@ -93,9 +93,9 @@ export function adjustColorBrightness(color: string, amount: number) {
   );
 }
 
-// Ensures that the SqValue has a "path" parameter, which would otherwise be optional.
-export type SqValueWithPath = SqValue & Required<Pick<SqValue, "path">>;
+// Ensures that the SqValue has a "context" parameter, which would otherwise be optional.
+export type SqValueWithContext = SqValue & Required<Pick<SqValue, "context">>;
 
-export function valueHasPath(value: SqValue): value is SqValueWithPath {
-  return !!value.path;
+export function valueHasContext(value: SqValue): value is SqValueWithContext {
+  return !!value.context;
 }

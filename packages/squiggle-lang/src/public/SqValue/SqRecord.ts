@@ -1,13 +1,14 @@
 import { ValueMap, vRecord } from "@/value/index.js";
-import { SqValuePath } from "../SqValuePath.js";
+
+import { SqValueContext } from "../SqValueContext.js";
 import { SqRecordValue, SqValue, wrapValue } from "./index.js";
 
 export class SqRecord {
-  constructor(private _value: ValueMap, public path?: SqValuePath) {}
+  constructor(private _value: ValueMap, public context?: SqValueContext) {}
 
   entries() {
     return [...this._value.entries()].map(
-      ([k, v]) => [k, wrapValue(v, this.path?.extend(k))] as const
+      ([k, v]) => [k, wrapValue(v, this.context?.extend(k))] as const
     );
   }
 
@@ -16,7 +17,7 @@ export class SqRecord {
     if (value === undefined) {
       return undefined;
     }
-    return wrapValue(value, this.path?.extend(key));
+    return wrapValue(value, this.context?.extend(key));
   }
 
   toString() {
@@ -24,6 +25,6 @@ export class SqRecord {
   }
 
   asValue() {
-    return new SqRecordValue(vRecord(this._value), this.path);
+    return new SqRecordValue(vRecord(this._value), this.context);
   }
 }

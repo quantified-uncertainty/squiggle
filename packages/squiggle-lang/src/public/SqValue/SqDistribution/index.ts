@@ -16,7 +16,7 @@ export enum SqDistributionTag {
   Symbolic = "Symbolic",
 }
 
-export const wrapDistribution = (value: BaseDist): SqDistribution => {
+export function wrapDistribution(value: BaseDist): SqDistribution {
   if (value instanceof SymbolicDist) {
     return new SqSymbolicDistribution(value);
   } else if (value instanceof SampleSetDist) {
@@ -25,7 +25,7 @@ export const wrapDistribution = (value: BaseDist): SqDistribution => {
     return new SqPointSetDistribution(value);
   }
   throw new Error(`Unknown value ${value}`);
-};
+}
 
 export abstract class SqAbstractDistribution<T extends BaseDist> {
   abstract tag: SqDistributionTag;
