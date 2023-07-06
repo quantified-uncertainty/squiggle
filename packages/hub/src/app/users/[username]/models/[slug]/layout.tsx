@@ -22,6 +22,13 @@ export default function Layout({
       slug={params.slug}
       homepageUrl={url}
       isFluid={true}
+      headerChildren={
+        <div
+          style={{
+            height: 32, // matches the height of real header content
+          }}
+        />
+      }
     />
   );
 
