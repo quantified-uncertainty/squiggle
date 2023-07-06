@@ -65,6 +65,7 @@ export {
   ListBulletIcon,
   TableCellsIcon,
   ScatterPlotIcon,
+  Cog8ToothIcon,
 } from "./icons/HeroIcons.js";
 
 export { useToast, WithToasts } from "./components/WithToasts/index.js";

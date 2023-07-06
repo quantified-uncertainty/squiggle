@@ -11,6 +11,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuActionItem,
   TriangleIcon,
+  EditIcon,
+  ScaleIcon,
+  Dropdown,
+  Cog8ToothIcon,
 } from "@quri/ui";
 
 import {
@@ -29,9 +33,6 @@ import {
 } from "@/routes";
 import { DeleteModelAction } from "./DeleteModelAction";
 import { UpdateModelSlugAction } from "./UpdateModelSlugAction";
-import { ModelExportsPicker } from "@/components/exports/ModelExportsPicker";
-import { ScaleIcon } from "@quri/ui";
-import { Dropdown } from "@quri/ui";
 import { DropdownMenuLinkItem } from "@/components/ui/DropdownMenuLinkItem";
 
 // Doing this with a fragment would be too hard, because of how layouts work in Next.js.
@@ -69,8 +70,8 @@ type CommonProps = {
 
 const MenuButton: FC<CommonProps> = ({ username, slug }) => {
   return (
-    <DotsDropdownButton>
-      {({ close }) => (
+    <Dropdown
+      render={({ close }) => (
         <DropdownMenu>
           <UpdateModelSlugAction
             username={username}
@@ -80,7 +81,12 @@ const MenuButton: FC<CommonProps> = ({ username, slug }) => {
           <DeleteModelAction username={username} slug={slug} close={close} />
         </DropdownMenu>
       )}
-    </DotsDropdownButton>
+    >
+      <div className="flex items-center rounded cursor-pointer hover:bg-white px-2 py-1 select-none text-sm">
+        <Cog8ToothIcon size={16} className="text-gray-500 mr-1" />
+        <span>Settings</span>
+      </div>
+    </Dropdown>
   );
 };
 
