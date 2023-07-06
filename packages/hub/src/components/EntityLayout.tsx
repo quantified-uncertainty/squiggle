@@ -28,12 +28,12 @@ export const EntityLayout: FC<Props> = ({
       >
         <div
           className={clsx(
-            "flex items-center gap-4 pt-2 pb-1",
+            "flex items-center justify-between gap-4 pt-2 pb-1",
             !isFluid ? "max-w-4xl mx-auto" : "px-8"
           )}
         >
           <EntityInfo slug={slug} username={username} href={homepageUrl} />
-          {headerChildren}
+          <div className="flex items-center gap-4">{headerChildren}</div>
         </div>
       </div>
       <div className={clsx(!isFluid && "max-w-4xl mx-auto my-4")}>

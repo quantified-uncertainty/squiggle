@@ -24,7 +24,15 @@ export default function Layout({
           slug={params.slug}
           homepageUrl={url}
           isFluid={true}
-          headerChildren={<Skeleton height={16} />}
+          headerChildren={
+            <Skeleton
+              height={28}
+              width={320}
+              containerClassName="flex items-stretch"
+              baseColor="#dadee2"
+              highlightColor="#b8bfc7"
+            />
+          }
         />
       }
     >

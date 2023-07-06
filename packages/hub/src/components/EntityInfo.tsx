@@ -1,9 +1,7 @@
 import { FC } from "react";
-
-import { UsernameLink } from "./UsernameLink";
-import { userRoute } from "@/routes";
-import { StyledLink } from "@/components/ui/StyledLink";
 import Link from "next/link";
+
+import { userRoute } from "@/routes";
 
 // works both for models and for definitions
 export const EntityInfo: FC<{
@@ -12,7 +10,7 @@ export const EntityInfo: FC<{
   href: string;
 }> = ({ username, slug, href }) => {
   return (
-    <div className="flex justify-between w-full">
+    <div className="flex justify-between">
       <div className="flex items-center mr-3">
         <Link
           className="text-lg text-blue-600 hover:underline"
