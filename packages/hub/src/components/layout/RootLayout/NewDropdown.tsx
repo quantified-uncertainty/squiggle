@@ -1,32 +1,27 @@
 import { useRouter } from "next/navigation";
 import { FC } from "react";
-
-import {
-  CodeBracketIcon,
-  Dropdown,
-  DropdownMenu,
-  DropdownMenuActionItem,
-  ScaleIcon,
-} from "@quri/ui";
-
+import { CodeBracketIcon, Dropdown, DropdownMenu, ScaleIcon } from "@quri/ui";
 import { newDefinitionRoute, newModelRoute } from "@/routes";
 import { DropdownWithArrow } from "./DropdownWithArrow";
+import { DropdownMenuLinkItem } from "@/components/ui/DropdownMenuLinkItem";
 
 export const NewDropdown: FC = () => {
   const router = useRouter();
   return (
     <Dropdown
-      render={() => (
+      render={({ close }: { close: () => void }) => (
         <DropdownMenu>
-          <DropdownMenuActionItem
-            onClick={() => router.push(newModelRoute())}
+          <DropdownMenuLinkItem
+            href={newModelRoute()}
             icon={CodeBracketIcon}
             title="New Model"
+            close={close}
           />
-          <DropdownMenuActionItem
-            onClick={() => router.push(newDefinitionRoute())}
+          <DropdownMenuLinkItem
+            href={newDefinitionRoute()}
             icon={ScaleIcon}
             title="New Relative Value Definition"
+            close={close}
           />
         </DropdownMenu>
       )}

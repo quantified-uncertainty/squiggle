@@ -32,6 +32,7 @@ import { UpdateModelSlugAction } from "./UpdateModelSlugAction";
 import { ModelExportsPicker } from "@/components/exports/ModelExportsPicker";
 import { ScaleIcon } from "@quri/ui";
 import { Dropdown } from "@quri/ui";
+import { DropdownMenuLinkItem } from "@/components/ui/DropdownMenuLinkItem";
 
 // Doing this with a fragment would be too hard, because of how layouts work in Next.js.
 // So we have to do two GraphQL queries on most model pages.
@@ -109,24 +110,20 @@ export const ModelLayout: FC<Props> = ({ username, slug, children }) => {
 
   useFixModelUrlCasing(model);
 
-  const dropDown = (
+  const dropDown = (close: () => void) => (
     <DropdownMenu>
       <DropdownMenuHeader> Relative Value Functions </DropdownMenuHeader>
       <DropdownMenuSeparator />
       {model.currentRevision.relativeValuesExports.map((exportItem) => (
-        <DropdownMenuActionItem
+        <DropdownMenuLinkItem
           key={exportItem.variableName}
-          icon={ScaleIcon}
-          onClick={() =>
-            router.push(
-              modelForRelativeValuesExportRoute({
-                username: model.owner.username,
-                slug: model.slug,
-                variableName: exportItem.variableName,
-              })
-            )
-          }
+          href={modelForRelativeValuesExportRoute({
+            username: model.owner.username,
+            slug: model.slug,
+            variableName: exportItem.variableName,
+          })}
           title={exportItem.definition.slug}
+          close={close}
         />
       ))}
     </DropdownMenu>
@@ -141,7 +138,7 @@ export const ModelLayout: FC<Props> = ({ username, slug, children }) => {
       headerChildren={
         <>
           {Boolean(model.currentRevision.relativeValuesExports.length) && (
-            <Dropdown render={() => dropDown}>
+            <Dropdown render={({ close }) => dropDown(close)}>
               <div className="flex items-center rounded cursor-pointer hover:bg-white px-2 py-1 select-none text-sm">
                 <ScaleIcon size={16} className="text-gray-500" />
                 <TriangleIcon
