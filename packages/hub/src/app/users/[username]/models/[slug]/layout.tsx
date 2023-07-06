@@ -22,15 +22,6 @@ export default function Layout({
       slug={params.slug}
       homepageUrl={url}
       isFluid={true}
-      headerChildren={
-        <Skeleton
-          height={32}
-          containerClassName="flex-1 max-w-sm flex items-stretch"
-          // darker versions of EntityLayout background color
-          baseColor="#dadee2"
-          highlightColor="#b8bfc7"
-        />
-      }
     />
   );
 
