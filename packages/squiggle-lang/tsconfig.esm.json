@@ -14,7 +14,10 @@
     "declarationDir": null,
     "composite": true,
     "target": "ES6",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "include": ["src/**/*", "scripts/**/*", "__tests__/**/*", "benchmark/**/*"]
 }

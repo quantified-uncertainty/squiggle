@@ -1,5 +1,5 @@
 import { SqProject, evaluate } from "../../src/public/SqProject/index.js";
-import { toStringResult } from "../../src/public/SqValue.js";
+import { toStringResult } from "../../src/public/SqValue/index.js";
 import { defaultEnvironment } from "../../src/index.js";
 
 describe("SqProject Tutorial", () => {

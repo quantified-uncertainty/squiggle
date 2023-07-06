@@ -1,10 +1,5 @@
-import {
-  SqLambda,
-  SqNumberValue,
-  SqValue,
-  defaultEnvironment,
-} from "../src/index.js";
-import { SqSymbolicDistribution } from "../src/public/SqDistribution.js";
+import { SqLambda, SqNumberValue, defaultEnvironment } from "../src/index.js";
+import { SqSymbolicDistribution } from "../src/public/SqValue/SqDistribution/index.js";
 import { testRun } from "./helpers/helpers.js";
 
 describe("SqValue", () => {

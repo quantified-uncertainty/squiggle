@@ -1,14 +1,14 @@
-import { result } from "../utility/result.js";
-import { Value, vLambda, vNumber, vString } from "../value/index.js";
+import { result } from "../../utility/result.js";
+import { Value, vLambda, vNumber, vString } from "../../value/index.js";
 import { SqArray } from "./SqArray.js";
-import { SqDistribution, wrapDistribution } from "./SqDistribution.js";
-import { SqError } from "./SqError.js";
+import { SqDistribution, wrapDistribution } from "./SqDistribution/index.js";
+import { SqError } from "../SqError.js";
 import { SqLambda } from "./SqLambda.js";
 import { SqLambdaDeclaration } from "./SqLambdaDeclaration.js";
 import { SqPlot, wrapPlot } from "./SqPlot.js";
 import { SqRecord } from "./SqRecord.js";
 import { SqScale, wrapScale } from "./SqScale.js";
-import { SqValuePath } from "./SqValuePath.js";
+import { SqValuePath } from "../SqValuePath.js";
 
 export function wrapValue(value: Value, path?: SqValuePath) {
   switch (value.type) {
@@ -43,11 +43,11 @@ export function wrapValue(value: Value, path?: SqValuePath) {
   }
 }
 
-export abstract class SqAbstractValue<T extends string, J> {
-  abstract tag: T;
+export abstract class SqAbstractValue<Type extends string, JSType> {
+  abstract tag: Type;
 
   constructor(
-    public _value: Extract<Value, { type: T }>,
+    public _value: Extract<Value, { type: Type }>,
     public path?: SqValuePath
   ) {}
 
@@ -55,7 +55,7 @@ export abstract class SqAbstractValue<T extends string, J> {
     return this._value.toString();
   }
 
-  abstract asJS(): J;
+  abstract asJS(): JSType;
 }
 
 export class SqArrayValue extends SqAbstractValue<"Array", unknown[]> {

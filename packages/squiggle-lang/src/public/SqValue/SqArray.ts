@@ -1,6 +1,6 @@
-import { Value } from "../value/index.js";
-import { wrapValue } from "./SqValue.js";
-import { SqValuePath } from "./SqValuePath.js";
+import { Value } from "../../value/index.js";
+import { wrapValue } from "./index.js";
+import { SqValuePath } from "../SqValuePath.js";
 
 export class SqArray {
   constructor(private _value: Value[], public path?: SqValuePath) {}

@@ -5,8 +5,8 @@ import { Bindings } from "../../reducer/stack.js";
 import * as Result from "../../utility/result.js";
 import { Value, vRecord } from "../../value/index.js";
 import { SqError, SqOtherError } from "../SqError.js";
-import { SqRecord } from "../SqRecord.js";
-import { SqValue, wrapValue } from "../SqValue.js";
+import { SqRecord } from "../SqValue/SqRecord.js";
+import { SqValue, wrapValue } from "../SqValue/index.js";
 import { SqValuePath } from "../SqValuePath.js";
 
 import { LocationRange } from "peggy";

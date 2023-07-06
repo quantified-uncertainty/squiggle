@@ -1,54 +1,53 @@
 import { Env } from "./dist/env.js";
 import { SqProject } from "./public/SqProject/index.js";
 import {
-  SqValue,
-  SqStringValue,
-  SqNumberValue,
   SqLambdaValue,
-} from "./public/SqValue.js"; // TODO - reexport other values too
+  SqNumberValue,
+  SqStringValue,
+  SqValue,
+} from "./public/SqValue/index.js"; // TODO - reexport other values too
 
-export { SqValuePath } from "./public/SqValuePath.js";
-export { result, fmap as resultMap } from "./utility/result.js";
+export {
+  SqCompileError,
+  SqError,
+  SqFrame,
+  SqOtherError,
+  SqRuntimeError,
+} from "./public/SqError.js";
+export { SqDistributionError } from "./public/SqValue/SqDistribution/SqDistributionError.js";
+export { SqShape } from "./public/SqValue/SqDistribution/SqPointSet.js";
 export {
   SqAbstractDistribution,
-  SqSampleSetDistribution,
-  SqPointSetDistribution,
-  SqSymbolicDistribution,
   SqDistribution,
   SqDistributionTag,
-} from "./public/SqDistribution.js";
-export { SqDistributionError } from "./public/SqDistributionError.js";
-export { SqRecord } from "./public/SqRecord.js";
-export { SqLambda } from "./public/SqLambda.js";
+  SqPointSetDistribution,
+  SqSampleSetDistribution,
+  SqSymbolicDistribution,
+} from "./public/SqValue/SqDistribution/index.js";
+export { SqLambda } from "./public/SqValue/SqLambda.js";
 export {
-  SqError,
-  SqRuntimeError,
-  SqCompileError,
-  SqOtherError,
-  SqFrame,
-} from "./public/SqError.js";
-export { SqShape } from "./public/SqPointSet.js";
-export {
-  SqPlot,
+  SqDistFnPlot,
   SqDistributionsPlot,
   SqNumericFnPlot,
-  SqDistFnPlot,
-  SqScatterPlot,
+  SqPlot,
   SqRelativeValuesPlot,
-} from "./public/SqPlot.js";
+  SqScatterPlot,
+} from "./public/SqValue/SqPlot.js";
+export { SqRecord } from "./public/SqValue/SqRecord.js";
 export {
-  SqScale,
   SqLinearScale,
   SqLogScale,
-  SqSymlogScale,
   SqPowerScale,
-} from "./public/SqScale.js";
+  SqScale,
+  SqSymlogScale,
+} from "./public/SqValue/SqScale.js";
+export { SqValuePath } from "./public/SqValuePath.js";
 export { parse } from "./public/parse.js";
+export { result, fmap as resultMap } from "./utility/result.js";
 
-export { defaultEnv as defaultEnvironment } from "./dist/env.js";
-export { SqProject, SqValue, SqStringValue, SqNumberValue, SqLambdaValue };
-export { Env };
 export { LocationRange as SqLocation } from "peggy";
+export { defaultEnv as defaultEnvironment } from "./dist/env.js";
+export { Env, SqLambdaValue, SqNumberValue, SqProject, SqStringValue, SqValue };
 
 export { AST, ASTNode } from "./ast/parse.js";
 export { ASTCommentNode } from "./ast/peggyHelpers.js";

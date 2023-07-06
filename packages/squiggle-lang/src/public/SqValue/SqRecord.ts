@@ -1,6 +1,6 @@
-import { ValueMap, vRecord } from "../value/index.js";
-import { SqRecordValue, SqValue, wrapValue } from "./SqValue.js";
-import { SqValuePath } from "./SqValuePath.js";
+import { ValueMap, vRecord } from "@/value/index.js";
+import { SqValuePath } from "../SqValuePath.js";
+import { SqRecordValue, SqValue, wrapValue } from "./index.js";
 
 export class SqRecord {
   constructor(private _value: ValueMap, public path?: SqValuePath) {}

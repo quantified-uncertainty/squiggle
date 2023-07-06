@@ -1,5 +1,5 @@
 import { SqProject } from "../../src/index.js";
-import { toStringResult } from "../../src/public/SqValue.js";
+import { toStringResult } from "../../src/public/SqValue/index.js";
 
 /**
  * Case: Imports.

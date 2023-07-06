@@ -1,6 +1,6 @@
-import { LambdaDeclaration } from "../reducer/declaration.js";
+import { LambdaDeclaration } from "@/reducer/declaration.js";
 import { SqLambda } from "./SqLambda.js";
-import { SqValuePath } from "./SqValuePath.js";
+import { SqValuePath } from "../SqValuePath.js";
 
 export class SqLambdaDeclaration {
   constructor(private _value: LambdaDeclaration, public path?: SqValuePath) {}

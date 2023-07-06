@@ -1,14 +1,14 @@
-import { Env } from "../dist/env.js";
-import { IRuntimeError } from "../errors/IError.js";
-import { getStdLib } from "../library/index.js";
-import { registry } from "../library/registry/index.js";
-import { createContext } from "../reducer/context.js";
-import { Lambda } from "../reducer/lambda.js";
-import * as Result from "../utility/result.js";
-import { result } from "../utility/result.js";
-import { SqError, SqOtherError, SqRuntimeError } from "./SqError.js";
-import { SqValue, wrapValue } from "./SqValue.js";
-import { SqValuePath } from "./SqValuePath.js";
+import { Env } from "@/dist/env.js";
+import { IRuntimeError } from "@/errors/IError.js";
+import { getStdLib } from "@/library/index.js";
+import { createContext } from "@/reducer/context.js";
+import { Lambda } from "@/reducer/lambda.js";
+import * as Result from "@/utility/result.js";
+import { result } from "@/utility/result.js";
+
+import { SqError, SqOtherError, SqRuntimeError } from "../SqError.js";
+import { SqValuePath } from "../SqValuePath.js";
+import { SqValue, wrapValue } from "./index.js";
 
 export class SqLambda {
   constructor(
