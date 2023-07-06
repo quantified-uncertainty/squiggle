@@ -1,11 +1,6 @@
 import { TextareaHTMLAttributes, forwardRef } from "react";
-import ImportedTextareaAutosize from "react-textarea-autosize";
+import TextareaAutosize from "react-textarea-autosize";
 import { clsx } from "clsx";
-
-// ESM hack; can be removed after we upgrade to >8.5.0
-// but that depends on https://github.com/Andarist/react-textarea-autosize/issues/379
-const TextareaAutosize =
-  ImportedTextareaAutosize as unknown as typeof ImportedTextareaAutosize.default;
 
 export type StyledTextAreaProps = Omit<
   TextareaHTMLAttributes<HTMLTextAreaElement>,
