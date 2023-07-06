@@ -4,33 +4,30 @@ This website is built using [Docusaurus 2](https://docusaurus.io/), a modern sta
 
 # Build for development
 
-We assume you ran `yarn` at monorepo level.
+We assume you ran `pnpm i`.
 
-The website depends on `squiggle-lang` and `components`, which you have to build manually.
+Build dependencies:
 
 ```sh
-cd ../squiggle-lang
-yarn build
-cd ../components
-yarn build
+npx turbo build --filter=@quri/website^...
 ```
 
-Generate static content, to the `build` directory.
+Open a local dev server:
 
 ```sh
-yarn build
-```
-
-Open a local dev server
-
-```sh
-yarn start
+pnpm dev
 ```
 
 Most changes are reflected live without having to restart the server.
 
-Clean up the build artefacts.
+Build static website:
 
 ```sh
-yarn clean
+npx turbo build
+```
+
+Clean up the build artefacts:
+
+```sh
+pnpm clean
 ```

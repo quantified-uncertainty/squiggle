@@ -33,9 +33,9 @@ We use Vercel, and it should only concern Slava, Sam, and Ozzie.
 
 # Development environment, building, testing, dev server
 
-You need `yarn`.
+You'll need [pnpm](https://pnpm.io/).
 
-Being a monorepo, where packages are connected by dependency, it's important to follow `README.md`s closely. Each package has it's own `README.md`, which is where the bulk of information is.
+Being a monorepo, where packages are connected by dependency, it's important to follow `README.md`s closely. Each package has its own `README.md`, which is where the bulk of information is.
 
 We aspire for `ci.yaml` and `README.md`s to be in one-to-one correspondence.
 

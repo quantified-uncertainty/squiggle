@@ -5,7 +5,7 @@
 First, install the library:
 
 ```
-yarn add @quri/ui # or npm install if you use npm
+npm add @quri/ui # or `yarn add`, or `pnpm add`
 ```
 
 Then you have two options:
