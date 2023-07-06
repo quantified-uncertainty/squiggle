@@ -28,7 +28,7 @@ export const getWebviewContent = ({
   );
 
   const scriptUris = [
-    // vendor files are copied over by `yarn run compile`
+    // vendor files are copied over by `pnpm run compile`
     "media/vendor/react.js",
     "media/vendor/react-dom.js",
     "media/vendor/components.js",

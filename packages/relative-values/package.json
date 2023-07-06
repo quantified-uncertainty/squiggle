@@ -9,7 +9,7 @@
     "format": "prettier --write .",
     "cacheRV": "tsx ./src/cli/index.ts cacheRV",
     "next-build": "next build",
-    "build": "yarn cacheRV && next build"
+    "build": "pnpm cacheRV && next build"
   },
   "dependencies": {
     "@floating-ui/react": "^0.24.3",
