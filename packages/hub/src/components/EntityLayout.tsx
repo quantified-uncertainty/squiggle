@@ -1,13 +1,14 @@
 import { FC, ReactNode } from "react";
-import { EntityInfo } from "./EntityInfo";
 import { clsx } from "clsx";
+
+import { EntityInfo } from "./EntityInfo";
 
 type Props = {
   slug: string;
   username: string;
   homepageUrl: string;
-  headerChildren: ReactNode;
-  children: ReactNode;
+  headerChildren?: ReactNode;
+  children?: ReactNode;
   isFluid?: boolean;
 };
 
