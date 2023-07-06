@@ -21,7 +21,7 @@ export const Normal: Story = {
 };
 
 export const HeightAndScroll: Story = {
-  name: "Custom heigth and scrollbars",
+  name: "Custom height and scrollbars",
   args: {
     defaultCode:
       "List.upTo(1,10) -> map({|i| i to i + 1})" + new Array(100).join("\n"),

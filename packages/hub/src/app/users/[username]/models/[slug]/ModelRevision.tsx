@@ -31,6 +31,10 @@ export const ModelRevisionFragment = graphql`
       id
       ...RelativeValuesExportItem
       definition {
+        slug
+        owner {
+          username
+        }
         currentRevision {
           ...RelativeValuesDefinitionRevision
         }

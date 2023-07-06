@@ -12,11 +12,8 @@ importers:
         specifier: ^2.26.2
         version: 2.26.2
       prettier:
-        specifier: ^3.0.0-alpha.12
-        version: 3.0.0-alpha.12
-      prettier2:
-        specifier: npm:prettier@^2
-        version: /prettier@2.8.8
+        specifier: ^3.0.0
+        version: 3.0.0
       turbo:
         specifier: ^1.10.7
         version: 1.10.7
@@ -44,6 +41,10 @@ importers:
       indent-string:
         specifier: ^5.0.0
         version: 5.0.0
+    devDependencies:
+      prettier:
+        specifier: ^3.0.0
+        version: 3.0.0
 
   packages/components:
     dependencies:
@@ -108,8 +109,8 @@ importers:
         specifier: ^4.17.21
         version: 4.17.21
       prettier:
-        specifier: ^3.0.0-alpha.12
-        version: 3.0.0-alpha.12
+        specifier: ^3.0.0
+        version: 3.0.0
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -431,8 +432,8 @@ importers:
         specifier: workspace:*
         version: link:../squiggle-lang
       prettier:
-        specifier: ^3.0.0-alpha.12
-        version: 3.0.0-alpha.12
+        specifier: ^3.0.0
+        version: 3.0.0
     devDependencies:
       '@types/jest':
         specifier: ^29.5.2
@@ -16759,8 +16760,8 @@ packages:
     hasBin: true
     dev: true
 
-  /prettier@3.0.0-alpha.12:
-    resolution: {integrity: sha512-QCCLoJ+ttw/DV6zLiHJDZdC7sZ23fk3gCulQmjU6AuA/Uk8o6qbzM4afyEDIM94xhj7MEGDtKYo+ZFpxwjmSEg==}
+  /prettier@3.0.0:
+    resolution: {integrity: sha512-zBf5eHpwHOGPC47h0zrPyNn+eAEIdEzfywMoYn2XPi0P44Zp0tSq64rq0xAREh4auw2cJZHo9QUob+NqCQky4g==}
     engines: {node: '>=14'}
     hasBin: true
 

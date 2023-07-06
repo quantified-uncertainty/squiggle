@@ -14,12 +14,21 @@ import { StyledTabLink } from "@/components/ui/StyledTabLink";
 import { RelativeValuesDefinitionRevisionFragment } from "@/relative-values/components/RelativeValuesDefinitionRevision";
 import { RelativeValuesProvider } from "@/relative-values/components/views/RelativeValuesProvider";
 import { ModelEvaluator } from "@/relative-values/values/ModelEvaluator";
-import { modelForRelativeValuesExportRoute } from "@/routes";
+import {
+  modelForRelativeValuesExportRoute,
+  relativeValuesRoute,
+} from "@/routes";
 import { SquiggleContentFragment } from "@/squiggle/components/SquiggleContent";
 import { ModelPageFragment, useModelPageQuery } from "../../ModelPage";
 import { ModelRevisionFragment } from "../../ModelRevision";
-import { ViewModelRevision } from "../../ViewModelRevision";
 import { CacheMenu } from "./CacheMenu";
+import { Bars4Icon } from "@quri/ui";
+import { TableCellsIcon } from "@quri/ui";
+import { ScatterPlotIcon } from "@quri/ui";
+import { LinkIcon } from "@quri/ui";
+import { ScaleIcon } from "@quri/ui";
+import Link from "next/link";
+import { StyledLink } from "@/components/ui/StyledLink";
 
 export default function RelativeValuesModelLayout({
   params,
@@ -53,7 +62,9 @@ export default function RelativeValuesModelLayout({
     throw new Error("Not found");
   }
 
-  const definition = useFragment<RelativeValuesDefinitionRevision$key>(
+  const definition = revision.forRelativeValues.definition;
+
+  const definitionRevision = useFragment<RelativeValuesDefinitionRevision$key>(
     RelativeValuesDefinitionRevisionFragment,
     revision.forRelativeValues.definition.currentRevision
   );
@@ -72,7 +83,7 @@ export default function RelativeValuesModelLayout({
   const body = evaluatorResult ? (
     evaluatorResult.ok ? (
       <RelativeValuesProvider
-        definition={definition}
+        definition={definitionRevision}
         evaluator={evaluatorResult.value}
       >
         {children}
@@ -84,44 +95,65 @@ export default function RelativeValuesModelLayout({
     <Skeleton height={256} />
   );
 
-  return (
-    <ViewModelRevision
-      revisionRef={model.currentRevision}
-      modelUsername={params.username}
-      modelSlug={params.slug}
+  const definitionLink = (
+    <StyledLink
+      className="flex items-center text-sm"
+      href={relativeValuesRoute({
+        username: definition.owner.username,
+        slug: definition.slug,
+      })}
     >
-      <div className="mb-8 flex items-center gap-4">
-        <StyledTabLink.List>
-          <StyledTabLink
-            name="List"
-            href={modelForRelativeValuesExportRoute({
-              username: params.username,
-              slug: params.slug,
-              variableName: params.variableName,
-            })}
-          />
-          <StyledTabLink
-            name="Grid"
-            href={modelForRelativeValuesExportRoute({
-              username: params.username,
-              slug: params.slug,
-              variableName: params.variableName,
-              mode: "grid",
-            })}
-          />
-          <StyledTabLink
-            name="Plot"
-            href={modelForRelativeValuesExportRoute({
-              username: params.username,
-              slug: params.slug,
-              variableName: params.variableName,
-              mode: "plot",
-            })}
-          />
-        </StyledTabLink.List>
-        <CacheMenu revision={revision} />
+      <LinkIcon className="mr-1 opacity-50" size={18} />
+      <span className="font-mono">{`${definition.owner.username}/${definition.slug}`}</span>
+    </StyledLink>
+  );
+
+  return (
+    <div className="py-4 px-8">
+      <div className="mb-6 py-1 px-2 flex justify-between rounded-md bg-gray-50 border border-gray-100">
+        <div className="flex items-center">
+          <ScaleIcon className="text-gray-700 mr-2 opacity-40" size={22} />
+          <div className="flex text-md font-mono font-bold text-gray-700">
+            {params.variableName}
+          </div>
+        </div>
+        <div className="flex items-center gap-4">
+          {definitionLink}
+          <CacheMenu revision={revision} />
+          <StyledTabLink.List>
+            <StyledTabLink
+              name="List"
+              icon={Bars4Icon}
+              href={modelForRelativeValuesExportRoute({
+                username: params.username,
+                slug: params.slug,
+                variableName: params.variableName,
+              })}
+            />
+            <StyledTabLink
+              name="Grid"
+              icon={TableCellsIcon}
+              href={modelForRelativeValuesExportRoute({
+                username: params.username,
+                slug: params.slug,
+                variableName: params.variableName,
+                mode: "grid",
+              })}
+            />
+            <StyledTabLink
+              name="Plot"
+              icon={ScatterPlotIcon}
+              href={modelForRelativeValuesExportRoute({
+                username: params.username,
+                slug: params.slug,
+                variableName: params.variableName,
+                mode: "plot",
+              })}
+            />
+          </StyledTabLink.List>
+        </div>
       </div>
       {body}
-    </ViewModelRevision>
+    </div>
   );
 }

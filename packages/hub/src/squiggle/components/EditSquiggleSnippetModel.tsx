@@ -3,8 +3,12 @@ import { FC, useMemo } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { graphql, useFragment, useMutation } from "react-relay";
 
-import { SquigglePlayground } from "@quri/squiggle-components";
+import {
+  SquigglePlayground,
+  PlaygroundToolbarItem,
+} from "@quri/squiggle-components";
 import { Button, useToast } from "@quri/ui";
+import { LinkIcon, TriangleIcon } from "@quri/ui";
 
 import {
   EditSquiggleSnippetModelMutation,
@@ -136,9 +140,11 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
             renderExtraControls={({ openModal }) =>
               canSave && (
                 <div className="h-full flex items-center justify-end gap-2">
-                  <Button size="small" onClick={() => openModal("exports")}>
-                    Exports
-                  </Button>
+                  <PlaygroundToolbarItem
+                    tooltipText={"Exported Variables"}
+                    icon={LinkIcon}
+                    onClick={() => openModal("exports")}
+                  ></PlaygroundToolbarItem>
                   <Button theme="primary" onClick={save} size="small">
                     Save
                   </Button>
@@ -154,10 +160,11 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
                         append={appendVariableWithDefinition}
                         remove={removeVariableWithDefinition}
                         items={variablesWithDefinitionsFields}
+                        modelSlug={model.slug}
                       />
                     </div>
                   ),
-                  title: "Exports",
+                  title: "Exported Variables",
                 };
               }
             }}

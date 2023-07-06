@@ -1,41 +1,20 @@
-import { FC, PropsWithChildren } from "react";
+import { FC } from "react";
 import { useFragment } from "react-relay";
 
 import { ModelRevision$key } from "@/__generated__/ModelRevision.graphql";
-import { ModelExportsPicker } from "@/components/exports/ModelExportsPicker";
+import { SquiggleContent } from "@/squiggle/components/SquiggleContent";
 import { ModelRevisionFragment } from "./ModelRevision";
 
-// this is layout-like pattern, but we already use layout in this route for other purposes
-type Props = PropsWithChildren<{
-  modelUsername: string;
-  modelSlug: string;
+export const ViewModelRevision: FC<{
   revisionRef: ModelRevision$key;
-}>;
-
-export const ViewModelRevision: FC<Props> = ({
-  revisionRef,
-  modelUsername,
-  modelSlug,
-  children,
-}) => {
+}> = ({ revisionRef }) => {
   const revision = useFragment(ModelRevisionFragment, revisionRef);
+  const typename = revision.content.__typename;
 
-  return (
-    <div className="p-4">
-      {revision.relativeValuesExports.length ? (
-        <div className="pb-4 mb-4 border-b border-slate-200">
-          <div className="flex items-center gap-2 font-medium text-sm">
-            <header>View export:</header>
-            <ModelExportsPicker
-              dataRef={revision}
-              modelUsername={modelUsername}
-              modelSlug={modelSlug}
-              selected={revision.forRelativeValues ?? undefined}
-            />
-          </div>
-        </div>
-      ) : null}
-      <div>{children}</div>
-    </div>
-  );
+  switch (typename) {
+    case "SquiggleSnippet":
+      return <SquiggleContent dataRef={revision.content} />;
+    default:
+      return <div>Unknown model type {typename}</div>;
+  }
 };

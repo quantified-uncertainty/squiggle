@@ -290,8 +290,8 @@ export const RelativeValuesDefinitionForm: FC<Props> = ({
           {formSectionHeader("Editing Format")}
           <StyledTab.Group>
             <StyledTab.List>
-              <StyledTab name="Form" icon={() => <div />} />
-              <StyledTab name="JSON" icon={() => <div />} />
+              <StyledTab name="Form" />
+              <StyledTab name="JSON" />
             </StyledTab.List>
             <div className="mt-4">
               <StyledTab.Panels>
