@@ -50,6 +50,8 @@ export class CartesianFrame {
     };
   }
 
+  // TODO: `using framed = frame.enter()` would be good after Typescript 5.2 is released.
+  // See also: https://devblogs.microsoft.com/typescript/announcing-typescript-5-2-beta/#using-declarations-and-explicit-resource-management
   enter(): void {
     this.context.save();
     this.context.translate(this.x0, this.y0);

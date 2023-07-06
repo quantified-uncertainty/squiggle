@@ -14,8 +14,9 @@ import {
   useCanvas,
   useCanvasCursor,
 } from "../../lib/hooks/index.js";
-import { canvasClasses, sqScaleToD3 } from "../../lib/utility.js";
+import { canvasClasses } from "../../lib/utility.js";
 import { ErrorAlert } from "../Alert.js";
+import { sqScaleToD3 } from "../../lib/d3/index.js";
 
 type Props = {
   plot: SqScatterPlot;
@@ -97,11 +98,11 @@ export const ScatterChart: FC<Props> = ({ plot, height, environment }) => {
           cursor,
           x: {
             scale: xScale,
-            format: d3.format(",.4r"),
+            format: xSqScale.tickFormat,
           },
           y: {
             scale: yScale,
-            format: d3.format(",.4r"),
+            format: ySqScale.tickFormat,
           },
         });
       }

@@ -78,21 +78,6 @@ export const CustomTickFormat: Story = {
   },
 };
 
-/**
- * This feature is broken for now.
- */
-export const DateDistribution: Story = {
-  name: "Date Distribution",
-  // otherwise SquiggleChart defaults to ".9~s"
-  args: {
-    code: "mx(1661819770311, 1661829770311, 1661839770311)",
-    distributionChartSettings: {
-      xAxisType: "dateTime",
-      tickFormat: "",
-    },
-  },
-};
-
 export const Mixed: Story = {
   name: "Mixed",
   args: {

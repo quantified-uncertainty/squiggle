@@ -1,6 +1,7 @@
 import * as d3 from "d3";
 import { CartesianFrame } from "./CartesianFrame.js";
 import { Padding, Point } from "./types.js";
+import { defaultTickFormatSpecifier } from "../d3/patchedScales.js";
 
 const axisColor = "rgba(114, 125, 147, 0.1)";
 export const labelColor = "rgb(114, 125, 147)";
@@ -17,7 +18,6 @@ export function distance(point1: Point, point2: Point) {
   return Math.sqrt((point1.x - point2.x) ** 2 + (point1.y - point2.y) ** 2);
 }
 
-export const defaultTickFormatSpecifier = ".9~s";
 interface DrawAxesParams {
   context: CanvasRenderingContext2D;
   xScale: AnyChartScale;
@@ -29,7 +29,6 @@ interface DrawAxesParams {
   drawTicks?: boolean;
   xTickCount?: number;
   yTickCount?: number;
-  tickFormat?: string;
   xTickFormat?: string;
   yTickFormat?: string;
 }
@@ -115,7 +114,7 @@ export function drawAxes({
       if (i === 0) {
         startX = Math.max(x - textWidth / 2, prevBoundary);
       } else if (i === xTicks.length - 1) {
-        startX = Math.min(x - textWidth / 2, width - textWidth);
+        startX = Math.min(x - textWidth / 2, frame.width - textWidth);
       } else {
         startX = x - textWidth / 2;
       }
@@ -165,7 +164,7 @@ export function drawAxes({
       if (i === 0) {
         startY = Math.max(y - textHeight / 2, prevBoundary);
       } else if (i === yTicks.length - 1) {
-        startY = Math.min(y - textHeight / 2, height - textHeight);
+        startY = Math.min(y - textHeight / 2, frame.height - textHeight);
       } else {
         startY = y - textHeight / 2;
       }
@@ -203,11 +202,11 @@ export function drawCursorLines({
   frame: CartesianFrame;
   x?: {
     scale: d3.ScaleContinuousNumeric<number, number, never>;
-    format: (d: d3.NumberValue) => string;
+    format?: string | undefined;
   };
   y?: {
     scale: d3.ScaleContinuousNumeric<number, number, never>;
-    format: (d: d3.NumberValue) => string;
+    format?: string | undefined;
   };
 }) {
   const context = frame.context;
@@ -231,7 +230,10 @@ export function drawCursorLines({
 
     context.textAlign = "left";
     context.textBaseline = "bottom";
-    const text = xLine.format(xLine.scale.invert(point.x));
+    const text = xLine.scale.tickFormat(
+      undefined,
+      xLine.format
+    )(xLine.scale.invert(point.x));
     const measured = context.measureText(text);
 
     let boxWidth = measured.width + px * 2;
@@ -281,7 +283,10 @@ export function drawCursorLines({
 
     context.textAlign = "left";
     context.textBaseline = "bottom";
-    const text = yLine.format(yLine.scale.invert(point.y));
+    const text = yLine.scale.tickFormat(
+      undefined,
+      yLine.format
+    )(yLine.scale.invert(point.y));
     const measured = context.measureText(text);
 
     const boxWidth = measured.width + px * 2;

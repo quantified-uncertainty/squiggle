@@ -1,11 +1,4 @@
-import {
-  SqError,
-  SqScale,
-  SqValue,
-  result,
-  resultMap,
-} from "@quri/squiggle-lang";
-import * as d3 from "d3";
+import { SqError, SqValue, result, resultMap } from "@quri/squiggle-lang";
 
 import { SquiggleOutput } from "./hooks/useSquiggle.js";
 
@@ -57,27 +50,6 @@ export function getErrors(result: SquiggleOutput["result"]) {
     return [result.value];
   } else {
     return [];
-  }
-}
-
-export function sqScaleToD3(
-  scale: SqScale
-): d3.ScaleContinuousNumeric<number, number, never> {
-  // Note that we don't set the domain here based on scale.max/scale.min.
-  // That's because the domain can depend on the data that we draw, so that part is done later.
-
-  // See also: `scaleTypeToSqScale` function in PlaygroundSettingsForm, for default scales we create when SqScale is not provided.
-  switch (scale.tag) {
-    case "linear":
-      return d3.scaleLinear();
-    case "log":
-      return d3.scaleLog();
-    case "symlog":
-      return d3.scaleSymlog().constant(1);
-    case "power":
-      return d3.scalePow().exponent(scale.exponent);
-    default:
-      throw new Error(`Unknown scale: ${scale satisfies never}`);
   }
 }
 

@@ -1,7 +1,7 @@
 import { clsx } from "clsx";
 import * as d3 from "d3";
 import isEqual from "lodash/isEqual.js";
-import { FC, useCallback, useState } from "react";
+import { FC, useCallback, useMemo, useState } from "react";
 
 import {
   Env,
@@ -26,13 +26,13 @@ import {
   adjustColorBrightness,
   canvasClasses,
   flattenResult,
-  sqScaleToD3,
 } from "../../lib/utility.js";
 import { ErrorAlert } from "../Alert.js";
 import { SummaryTable } from "./SummaryTable.js";
 
 import { Point } from "../../lib/draw/types.js";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
+import { sqScaleToD3 } from "../../lib/d3/index.js";
 
 export type DistributionsChartProps = {
   plot: SqDistributionsPlot;
@@ -76,6 +76,25 @@ const InnerDistributionsChart: FC<{
   const height =
     innerHeight + legendHeight + titleHeight + samplesFooterHeight + 30;
 
+  const { xScale, yScale } = useMemo(() => {
+    const xScale = sqScaleToD3(plot.xScale);
+
+    const ensureFinite = (x: number | undefined) =>
+      Number.isFinite(x) ? x : undefined;
+    xScale.domain([
+      ensureFinite(plot.xScale.min) ?? d3.min(domain, (d) => d.x) ?? 0,
+      ensureFinite(plot.xScale.max) ?? d3.max(domain, (d) => d.x) ?? 0,
+    ]);
+
+    const yScale = sqScaleToD3(plot.yScale);
+    yScale.domain([
+      Math.min(...domain.map((p) => p.y), 0), // min value, but at least 0
+      Math.max(...domain.map((p) => p.y)),
+    ]);
+
+    return { xScale, yScale };
+  }, [domain, plot.xScale, plot.yScale]);
+
   const { cursor, initCursor } = useCanvasCursor();
 
   const draw = useCallback(
@@ -84,22 +103,6 @@ const InnerDistributionsChart: FC<{
 
       const getColor = (i: number) =>
         isMulti ? d3.schemeCategory10[i] : distributionColor;
-
-      const xScale = sqScaleToD3(plot.xScale);
-
-      const ifGood = (x: number | undefined) =>
-        Number.isFinite(x) ? x : undefined;
-      xScale.domain([
-        ifGood(plot.xScale.min) ?? d3.min(domain, (d) => d.x) ?? 0,
-        ifGood(plot.xScale.max) ?? d3.max(domain, (d) => d.x) ?? 0,
-      ]);
-
-      const yScale = sqScaleToD3(plot.yScale);
-      // TODO - use yScale.min/max?
-      yScale.domain([
-        Math.min(...domain.map((p) => p.y), 0), // min value, but at least 0
-        Math.max(...domain.map((p) => p.y)),
-      ]);
 
       const { padding, frame } = drawAxes({
         context,
@@ -255,7 +258,7 @@ const InnerDistributionsChart: FC<{
           cursor,
           x: {
             scale: xScale,
-            format: d3.format(",.4r"),
+            format: plot.xScale.tickFormat,
           },
         });
       }
@@ -267,12 +270,13 @@ const InnerDistributionsChart: FC<{
       samplesFooterHeight,
       shapes,
       samples,
-      domain,
       plot,
       discreteTooltip,
       cursor,
       isMulti,
       _showSamplesBar,
+      xScale,
+      yScale,
     ]
   );
 
@@ -292,9 +296,19 @@ const InnerDistributionsChart: FC<{
             }}
           >
             <div className="text-gray-500 text-right">Value:</div>
-            <div>{d3.format(",.6r")(discreteTooltip.value)}</div>
+            <div>
+              {xScale.tickFormat(
+                undefined,
+                plot.xScale.tickFormat
+              )(discreteTooltip.value)}
+            </div>
             <div className="text-gray-500 text-right">Probability:</div>
-            <div>{d3.format(",.6r")(discreteTooltip.probability)}</div>
+            <div>
+              {yScale.tickFormat(
+                undefined,
+                plot.yScale.tickFormat
+              )(discreteTooltip.probability)}
+            </div>
             <br />
           </div>
         ) : null
