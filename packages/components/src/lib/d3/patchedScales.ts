@@ -25,11 +25,17 @@ function squiggleDefaultFormat() {
 
   return (d: d3.NumberValue) => {
     const abs = Math.abs(Number(d));
-    if (abs === 0 || (abs >= 0.0001 && abs < 1e6)) {
+    if (abs === 0) {
       return fixedFormat(d);
-    } else if (abs >= 1e9 && abs < 1e12) {
+    } else if (abs < 0.00001) {
+      return expFormat(d);
+    } else if (abs < 1e6) {
+      return fixedFormat(d);
+    } else if (abs < 1e9) {
+      return siFormat(d);
+    } else if (abs < 1e12) {
       return fixedFormat(Number(d) / 1e9) + "B";
-    } else if (abs >= 1e6 && abs < 1e15) {
+    } else if (abs < 1e15) {
       return siFormat(d);
     } else {
       return expFormat(d);

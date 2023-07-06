@@ -79,11 +79,11 @@ const InnerDistributionsChart: FC<{
   const { xScale, yScale } = useMemo(() => {
     const xScale = sqScaleToD3(plot.xScale);
 
-    const ifGood = (x: number | undefined) =>
+    const ensureFinite = (x: number | undefined) =>
       Number.isFinite(x) ? x : undefined;
     xScale.domain([
-      ifGood(plot.xScale.min) ?? d3.min(domain, (d) => d.x) ?? 0,
-      ifGood(plot.xScale.max) ?? d3.max(domain, (d) => d.x) ?? 0,
+      ensureFinite(plot.xScale.min) ?? d3.min(domain, (d) => d.x) ?? 0,
+      ensureFinite(plot.xScale.max) ?? d3.max(domain, (d) => d.x) ?? 0,
     ]);
 
     const yScale = sqScaleToD3(plot.yScale);
