@@ -20,6 +20,7 @@ import { useFilteredItems } from "../hooks";
 import { averageMedian, averageUncertainty } from "../hooks/useSortedItems";
 import { distance } from "./ForcePlot";
 import { ItemTooltip } from "./ItemTooltip";
+import { d3Extended } from "@quri/squiggle-components";
 
 type Datum = {
   item: Item;
@@ -72,11 +73,11 @@ export const ValueAndUncertaintyPlot: FC<{
     ({ context, width }: DrawContext) => {
       context.clearRect(0, 0, width, height);
 
-      const xScale = d3
+      const xScale = d3Extended
         .scaleLog()
         .domain(d3.extent(data, (d) => Math.abs(d.median)) as [number, number]);
 
-      const yScale = d3
+      const yScale = d3Extended
         .scaleLinear()
         .domain(d3.extent(data, (d) => d.uncertainty) as [number, number]);
 

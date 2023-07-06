@@ -17,3 +17,17 @@ export {
 } from "./lib/hooks/index.js";
 
 export { drawAxes } from "./lib/draw/index.js";
+
+import {
+  scaleLinear,
+  scaleLog,
+  scaleSymlog,
+  scalePow,
+} from "./lib/d3/patchedScales.js";
+
+export const d3Extended = {
+  scaleLinear,
+  scaleLog,
+  scaleSymlog,
+  scalePow,
+};
