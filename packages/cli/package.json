@@ -19,5 +19,8 @@
     "fs": "^0.0.1-security",
     "glob": "^10.3.1",
     "indent-string": "^5.0.0"
+  },
+  "devDependencies": {
+    "prettier": "^3.0.0"
   }
 }

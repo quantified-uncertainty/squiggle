@@ -4342,7 +4342,7 @@ __metadata:
   dependencies:
     "@quri/squiggle-lang": "workspace:*"
     jest: ^29.5.0
-    prettier: ^3.0.0-alpha.12
+    prettier: ^3.0.0
     ts-jest: ^29.1.1
     typescript: ^5.1.6
   languageName: unknown
@@ -4426,7 +4426,7 @@ __metadata:
     lodash: ^4.17.21
     postcss: ^8.4.24
     postcss-cli: ^10.1.0
-    prettier: ^3.0.0-alpha.12
+    prettier: ^3.0.0
     react: ^18.2.0
     react-dom: ^18.2.0
     react-hook-form: ^7.45.1
@@ -18806,7 +18806,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier2@npm:prettier@^2, prettier@npm:^2.7.1, prettier@npm:^2.8.0, prettier@npm:^2.8.8":
+"prettier@npm:^2.7.1, prettier@npm:^2.8.0, prettier@npm:^2.8.8":
   version: 2.8.8
   resolution: "prettier@npm:2.8.8"
   bin:
@@ -18815,12 +18815,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:^3.0.0-alpha.12":
-  version: 3.0.0-alpha.12
-  resolution: "prettier@npm:3.0.0-alpha.12"
+"prettier@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "prettier@npm:3.0.0"
   bin:
     prettier: bin/prettier.cjs
-  checksum: a5e326653997c38dcc20c1b908f90089b0e7fd7613eec67c2ec298c7637f5a26b4ca7486ed6830d9b49160467d5442769f3b5b61cbce1850122cccecf1ce73a8
+  checksum: 6a832876a1552dc58330d2467874e5a0b46b9ccbfc5d3531eb69d15684743e7f83dc9fbd202db6270446deba9c82b79d24383d09924c462b457136a759425e33
   languageName: node
   linkType: hard
 
@@ -21307,6 +21307,7 @@ __metadata:
     fs: ^0.0.1-security
     glob: ^10.3.1
     indent-string: ^5.0.0
+    prettier: ^3.0.0
   bin:
     squiggle-cli-experimental: index.js
   languageName: unknown
@@ -21343,8 +21344,7 @@ __metadata:
   resolution: "squiggle@workspace:."
   dependencies:
     "@changesets/cli": ^2.26.2
-    prettier: ^3.0.0-alpha.12
-    prettier2: "npm:prettier@^2"
+    prettier: ^3.0.0
     turbo: ^1.10.7
     turbo-ignore: ^1.10.7
   languageName: unknown
