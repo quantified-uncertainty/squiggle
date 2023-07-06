@@ -124,7 +124,7 @@
   "scripts": {
     "vscode:prepublish": "pnpm run lint && pnpm run build",
     "build:grammar": "js-yaml syntaxes/squiggle.tmLanguage.yaml >syntaxes/squiggle.tmLanguage.json && js-yaml syntaxes/squiggle.js.yaml >syntaxes/squiggle.js.json && prettier -w syntaxes/squiggle.js.json",
-    "build:vendor": "mkdir -p media/vendor && cp ../components/dist/bundle.js media/vendor/components.js && cp ../components/dist/full.css media/vendor/components.css && cp ../../node_modules/react/umd/react.production.min.js media/vendor/react.js && cp ../../node_modules/react-dom/umd/react-dom.production.min.js media/vendor/react-dom.js && cp ../website/static/img/squiggle-logo.png media/vendor/icon.png",
+    "build:vendor": "mkdir -p media/vendor && cp ../components/dist/bundle.js media/vendor/components.js && cp ../components/dist/full.css media/vendor/components.css && cp ./node_modules/react/umd/react.production.min.js media/vendor/react.js && cp ./node_modules/react-dom/umd/react-dom.production.min.js media/vendor/react-dom.js && cp ../website/static/img/squiggle-logo.png media/vendor/icon.png",
     "build:bundle": "esbuild ./src/client/extension.ts ./src/server/server.ts --format=cjs --platform=node --sourcemap --minify --bundle --external:vscode --outdir=./dist",
     "build": "pnpm run build:vendor && pnpm run build:grammar && pnpm run build:bundle",
     "watch": "pnpm run compile:bundle --watch",
@@ -139,6 +139,8 @@
     "esbuild": "^0.18.11",
     "js-yaml": "^4.1.0",
     "prettier": "^2.8.8",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "typescript": "^5.1.6",
     "vsce": "^2.15.0"
   },
