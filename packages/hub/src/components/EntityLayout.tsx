@@ -33,7 +33,9 @@ export const EntityLayout: FC<Props> = ({
           )}
         >
           <EntityInfo slug={slug} username={username} href={homepageUrl} />
-          <div className="flex items-center gap-4">{headerChildren}</div>
+          <div className="flex-1 justify-end flex items-center gap-4">
+            {headerChildren}
+          </div>
         </div>
       </div>
       <div className={clsx(!isFluid && "max-w-4xl mx-auto my-4")}>

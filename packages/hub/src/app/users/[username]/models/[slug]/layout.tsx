@@ -16,27 +16,26 @@ export default function Layout({
 }) {
   const url = modelRoute({ username: params.username, slug: params.slug });
 
-  return (
-    <Suspense
-      fallback={
-        <EntityLayout
-          username={params.username}
-          slug={params.slug}
-          homepageUrl={url}
-          isFluid={true}
-          headerChildren={
-            <Skeleton
-              height={32}
-              width={320}
-              containerClassName="flex items-stretch"
-              // darker versions of EntityLayout background color
-              baseColor="#dadee2"
-              highlightColor="#b8bfc7"
-            />
-          }
+  const fallback = (
+    <EntityLayout
+      username={params.username}
+      slug={params.slug}
+      homepageUrl={url}
+      isFluid={true}
+      headerChildren={
+        <Skeleton
+          height={32}
+          containerClassName="flex-1 max-w-sm flex items-stretch"
+          // darker versions of EntityLayout background color
+          baseColor="#dadee2"
+          highlightColor="#b8bfc7"
         />
       }
-    >
+    />
+  );
+
+  return (
+    <Suspense fallback={fallback}>
       <ModelLayout {...params}>{children}</ModelLayout>
     </Suspense>
   );
