@@ -26,9 +26,10 @@ export default function Layout({
           isFluid={true}
           headerChildren={
             <Skeleton
-              height={28}
+              height={32}
               width={320}
               containerClassName="flex items-stretch"
+              // darker versions of EntityLayout background color
               baseColor="#dadee2"
               highlightColor="#b8bfc7"
             />
