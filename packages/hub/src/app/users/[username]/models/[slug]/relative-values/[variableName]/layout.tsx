@@ -21,15 +21,14 @@ import {
 import { SquiggleContentFragment } from "@/squiggle/components/SquiggleContent";
 import { ModelPageFragment, useModelPageQuery } from "../../ModelPage";
 import { ModelRevisionFragment } from "../../ModelRevision";
-import { ViewModelRevision } from "../../ViewModelRevision";
 import { CacheMenu } from "./CacheMenu";
 import { Bars4Icon } from "@quri/ui";
 import { TableCellsIcon } from "@quri/ui";
 import { ScatterPlotIcon } from "@quri/ui";
 import { LinkIcon } from "@quri/ui";
 import { ScaleIcon } from "@quri/ui";
-import { graphql } from "relay-runtime";
 import Link from "next/link";
+import { StyledLink } from "@/components/ui/StyledLink";
 
 export default function RelativeValuesModelLayout({
   params,
@@ -97,25 +96,21 @@ export default function RelativeValuesModelLayout({
   );
 
   const definitionLink = (
-    <Link
-      className="flex items-center text-blue-500 text-sm hover:underline"
+    <StyledLink
+      className="flex items-center text-sm"
       href={relativeValuesRoute({
         username: definition.owner.username,
         slug: definition.slug,
       })}
     >
       <LinkIcon className="mr-1 opacity-50" size={18} />
-      <span className="font-mono">{`${params.username}/${params.slug}`}</span>
-    </Link>
+      <span className="font-mono">{`${definition.owner.username}/${definition.slug}`}</span>
+    </StyledLink>
   );
 
   return (
-    <ViewModelRevision
-      revisionRef={model.currentRevision}
-      modelUsername={params.username}
-      modelSlug={params.slug}
-    >
-      <div className="mb-6 py-1 px-4 flex justify-between rounded-md bg-gray-50 border border-gray-100">
+    <div className="py-4 px-8">
+      <div className="mb-6 py-1 px-2 flex justify-between rounded-md bg-gray-50 border border-gray-100">
         <div className="flex items-center">
           <ScaleIcon className="text-gray-700 mr-2 opacity-40" size={22} />
           <div className="flex text-md font-mono font-bold text-gray-700">
@@ -159,6 +154,6 @@ export default function RelativeValuesModelLayout({
         </div>
       </div>
       {body}
-    </ViewModelRevision>
+    </div>
   );
 }

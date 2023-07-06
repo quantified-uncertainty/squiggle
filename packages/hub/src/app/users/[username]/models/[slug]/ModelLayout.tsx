@@ -106,7 +106,6 @@ export const ModelLayout: FC<Props> = ({ username, slug, children }) => {
   const { model } = useLazyLoadQuery<ModelLayoutQuery>(Query, {
     input: { ownerUsername: username, slug },
   });
-  const router = useRouter();
 
   useFixModelUrlCasing(model);
 
