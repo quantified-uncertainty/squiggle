@@ -154,10 +154,7 @@ export const ModelLayout: FC<Props> = ({ username, slug, children }) => {
             </Dropdown>
           )}
           <StyledTabLink.List>
-            <StyledTabLink
-              name="Editor"
-              href={modelRoute({ username, slug })}
-            />
+            <StyledTabLink name="Code" href={modelRoute({ username, slug })} />
             {model.currentRevision.relativeValuesExports.length ? (
               <StyledTabLink
                 name="Viewer"

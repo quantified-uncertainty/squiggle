@@ -1,14 +1,20 @@
 "use client";
 import { clsx } from "clsx";
-import { FC } from "react";
+import { FC, ReactElement } from "react";
 import { useFragment } from "react-relay";
 
 import {
   Dropdown,
   DropdownMenu,
+  DropdownMenuHeader,
+  DropdownMenuSeparator,
   DropdownMenuAsyncActionItem,
   RefreshIcon,
+  CheckIcon,
+  XIcon,
 } from "@quri/ui";
+
+import { useSession } from "next-auth/react";
 
 import { ModelRevision$data } from "@/__generated__/ModelRevision.graphql";
 import { RelativeValuesDefinitionRevision$key } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
@@ -18,10 +24,12 @@ import { BuildRelativeValuesCacheAction } from "./BuildRelativeValuesCacheAction
 
 export const CacheMenu: FC<{
   revision: ModelRevision$data;
-}> = ({ revision }) => {
+  ownerUsername: string;
+}> = ({ revision, ownerUsername }) => {
   if (!revision.forRelativeValues) {
     throw new Error("Not found");
   }
+  const { data: session } = useSession();
 
   const definition = useFragment<RelativeValuesDefinitionRevision$key>(
     RelativeValuesDefinitionRevisionFragment,
@@ -30,7 +38,35 @@ export const CacheMenu: FC<{
 
   const isEmpty = revision.forRelativeValues.cache.length === 0;
 
-  return (
+  const fullyCached =
+    !isEmpty &&
+    revision.forRelativeValues.cache.length >=
+      definition.items.length * definition.items.length;
+
+  const ownedByCurrentUser = ownerUsername === session?.user?.username;
+
+  const internals = (
+    <div
+      className={clsx(
+        "flex items-center text-sm text-gray-500 px-2 py-1 rounded-sm",
+        ownedByCurrentUser && "hover:bg-slate-200 cursor-pointer"
+      )}
+    >
+      {fullyCached ? (
+        <>
+          <CheckIcon className="text-gray-600" />
+          Cached
+        </>
+      ) : (
+        <>
+          <XIcon size={12} className="mr-1" />
+          Not Cached
+        </>
+      )}
+    </div>
+  );
+
+  let withDropdown = (internals: ReactElement) => (
     <Dropdown
       render={({ close }) => {
         if (!revision.forRelativeValues?.id) {
@@ -38,10 +74,21 @@ export const CacheMenu: FC<{
         }
         return (
           <DropdownMenu>
-            <BuildRelativeValuesCacheAction
-              exportId={revision.forRelativeValues.id}
-              close={close}
-            />
+            <DropdownMenuHeader>
+              {" "}
+              {isEmpty
+                ? "Not cached"
+                : `${revision.forRelativeValues.cache.length}/${
+                    definition.items.length * definition.items.length
+                  } pairs cached`}{" "}
+            </DropdownMenuHeader>
+            <DropdownMenuSeparator />
+            {!fullyCached && (
+              <BuildRelativeValuesCacheAction
+                exportId={revision.forRelativeValues.id}
+                close={close}
+              />
+            )}
             {isEmpty ? null : (
               <ClearRelativeValuesCacheAction
                 exportId={revision.forRelativeValues?.id}
@@ -52,18 +99,9 @@ export const CacheMenu: FC<{
         );
       }}
     >
-      <div
-        className={clsx(
-          "text-sm font-medium text-slate-500 bg-green-100 rounded-full px-3 py-1 cursor-pointer",
-          isEmpty ? "bg-red-100" : "bg-green-100"
-        )}
-      >
-        {isEmpty
-          ? "Not cached"
-          : `${revision.forRelativeValues.cache.length}/${
-              definition.items.length * definition.items.length
-            } pairs cached`}
-      </div>
+      {internals}
     </Dropdown>
   );
+
+  return ownedByCurrentUser ? withDropdown(internals) : internals;
 };

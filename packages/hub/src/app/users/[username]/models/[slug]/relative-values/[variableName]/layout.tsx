@@ -110,7 +110,7 @@ export default function RelativeValuesModelLayout({
 
   return (
     <div className="py-4 px-8">
-      <div className="mb-6 py-1 px-2 flex justify-between rounded-md bg-gray-50 border border-gray-100">
+      <div className="mb-6 py-2 px-2 flex justify-between">
         <div className="flex items-center">
           <ScaleIcon className="text-gray-700 mr-2 opacity-40" size={22} />
           <div className="flex text-md font-mono font-bold text-gray-700">
@@ -119,7 +119,7 @@ export default function RelativeValuesModelLayout({
         </div>
         <div className="flex items-center gap-4">
           {definitionLink}
-          <CacheMenu revision={revision} />
+          <CacheMenu revision={revision} ownerUsername={params.username} />
           <StyledTabLink.List>
             <StyledTabLink
               name="List"
