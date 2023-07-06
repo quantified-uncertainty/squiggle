@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@quri/squiggle-lang": "workspace:*",
-    "prettier": "^3.0.0-alpha.12"
+    "prettier": "^3.0.0"
   },
   "devDependencies": {
     "jest": "^29.5.0",

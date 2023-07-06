@@ -16,7 +16,7 @@
     "d3": "^7.8.5",
     "framer-motion": "^10.12.18",
     "lodash": "^4.17.21",
-    "prettier": "^3.0.0-alpha.12",
+    "prettier": "^3.0.0",
     "react": "^18.2.0",
     "react-hook-form": "^7.45.1",
     "react-resizable": "^3.0.5",
