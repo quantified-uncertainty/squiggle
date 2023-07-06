@@ -8,7 +8,7 @@
     "start": "docusaurus start",
     "build": "docusaurus build",
     "clean": "docusaurus clear",
-    "all": "yarn build",
+    "all": "pnpm build",
     "lint": "prettier --check .",
     "format": "prettier --write ."
   },

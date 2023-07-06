@@ -1,6 +1,5 @@
 {
-  "installCommand": "../../vercel-install.sh",
-  "buildCommand": "PLATFORM=vercel npx turbo build && yarn db:generate",
+  "buildCommand": "PLATFORM=vercel npx turbo build && pnpm run db:generate",
   "framework": "nextjs",
   "ignoreCommand": "npx turbo-ignore || ../../skip-dependabot.sh"
 }

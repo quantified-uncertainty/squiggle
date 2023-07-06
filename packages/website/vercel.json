@@ -1,5 +1,4 @@
 {
-  "installCommand": "../../vercel-install.sh",
   "buildCommand": "PLATFORM=vercel npx turbo build",
   "framework": "docusaurus-2",
   "ignoreCommand": "npx turbo-ignore || ../../skip-dependabot.sh"
