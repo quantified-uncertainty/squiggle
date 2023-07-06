@@ -61,7 +61,7 @@ export function PanelWithToolbar<const ModalNames extends string[]>({
         )}
       </div>
       <div className="flex-1 grid place-items-stretch overflow-auto">
-        {modal ? modal.body : renderBody()}
+        {modal ? <div className="px-4 py-4"> {modal.body} </div> : renderBody()}
       </div>
     </div>
   );

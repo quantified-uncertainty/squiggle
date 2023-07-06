@@ -132,12 +132,10 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
         return {
           title: "Configuration",
           body: (
-            <div className="px-4 py-2">
-              <GlobalSettingsModal
-                settings={props.settings}
-                onSettingsChange={props.onSettingsChange}
-              />
-            </div>
+            <GlobalSettingsModal
+              settings={props.settings}
+              onSettingsChange={props.onSettingsChange}
+            />
           ),
         };
       }
