@@ -16,6 +16,7 @@ import {
 
 import { chooseUsernameRoute, userRoute } from "@/routes";
 import { DropdownWithArrow } from "./DropdownWithArrow";
+import { DropdownMenuLinkItem } from "@/components/ui/DropdownMenuLinkItem";
 
 export const UserControls: FC<{ session: Session | null }> = ({ session }) => {
   if (
@@ -33,17 +34,21 @@ export const UserControls: FC<{ session: Session | null }> = ({ session }) => {
   return !!username ? (
     <div className="flex items-center gap-2">
       <Dropdown
-        render={() => (
+        render={({ close }: { close: () => void }) => (
           <DropdownMenu>
             <DropdownMenuHeader>User Actions</DropdownMenuHeader>
             <DropdownMenuSeparator />
-            <DropdownMenuActionItem
-              onClick={() => router.push(userRoute({ username: username! }))}
+            <DropdownMenuLinkItem
+              href={userRoute({ username: username! })}
               icon={UserCircleIcon}
               title="Profile"
+              close={close}
             />
             <DropdownMenuActionItem
-              onClick={() => signOut()}
+              onClick={() => {
+                signOut();
+                close();
+              }}
               icon={SignOutIcon}
               title="Sign Out"
             />

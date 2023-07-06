@@ -1,8 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
 import { StyledTab } from "../components/StyledTab.js";
-
-const Icon = () => <div />;
+import { BoltIcon, FireIcon } from "../index.js";
 
 /**
  * StyledTab component wraps the [\<Tab\>](https://headlessui.com/react/tabs) component from Headless UI.
@@ -18,8 +17,8 @@ export const Default: Story = {
   render: () => (
     <StyledTab.Group>
       <StyledTab.List>
-        <StyledTab name="Code" icon={Icon} />
-        <StyledTab name="Settings" icon={Icon} />
+        <StyledTab name="Code" icon={BoltIcon} />
+        <StyledTab name="Settings" icon={FireIcon} />
       </StyledTab.List>
       <div className="mt-2 border border-slate-200 p-2">
         <StyledTab.Panels>
@@ -31,4 +30,12 @@ export const Default: Story = {
   ),
 };
 
-// TODO - story for icon attribute
+export const JustRootComponents: Story = {
+  render: () => (
+    <StyledTab.ListDiv>
+      <StyledTab.Button name="Code" icon={BoltIcon} isSelected={false} />
+      <StyledTab.Button name="Settings" icon={FireIcon} isSelected={true} />
+      <StyledTab.Button name="Extra" isSelected={false} />
+    </StyledTab.ListDiv>
+  ),
+};
