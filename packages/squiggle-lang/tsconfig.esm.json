@@ -14,7 +14,8 @@
     "declarationDir": null,
     "composite": true,
     "target": "ES6",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "noImplicitOverride": true
   },
   "include": ["src/**/*", "scripts/**/*", "__tests__/**/*", "benchmark/**/*"]
 }

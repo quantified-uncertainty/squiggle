@@ -24,7 +24,7 @@ export abstract class SymbolicDist extends BaseDist {
   private static maxCdfValue = 0.9999;
 
   // all symbolic dists must override this
-  abstract toString(): string;
+  abstract override toString(): string;
 
   // FIXME - copy-pasted from SampleSetDist
   toSparkline(bucketCount: number, env: Env): Result.result<string, DistError> {
@@ -138,7 +138,7 @@ export abstract class SymbolicDist extends BaseDist {
     return result;
   }
 
-  expectedConvolutionCost(): number {
+  override expectedConvolutionCost(): number {
     return magicNumbers.OpCost.symbolicCost;
   }
 
@@ -196,7 +196,7 @@ export class Normal extends SymbolicDist {
     return jstat.normal.mean(this._mean, this._stdev);
   }
 
-  stdev(): Result.result<number, DistError> {
+  override stdev(): Result.result<number, DistError> {
     return Ok(this._stdev);
   }
   variance(): Result.result<number, DistError> {
@@ -390,7 +390,7 @@ export class Cauchy extends SymbolicDist {
   mean() {
     return NaN; // Cauchy distributions may have no mean value.
   }
-  stdev(): result<number, DistError> {
+  override stdev(): result<number, DistError> {
     return Ok(NaN);
   }
   variance(): result<number, DistError> {
@@ -456,10 +456,10 @@ export class Triangular extends SymbolicDist {
     return Ok(jstat.triangular.variance(this.low, this.high, this.medium));
   }
 
-  min() {
+  override min() {
     return this.low;
   }
-  max() {
+  override max() {
     return this.high;
   }
 }
@@ -731,7 +731,7 @@ export class Uniform extends SymbolicDist {
     }
   }
 
-  protected interpolateXs(opts: {
+  protected override interpolateXs(opts: {
     xSelection: PointsetXSelection;
     points: number;
     env: Env;
@@ -775,14 +775,14 @@ export class Uniform extends SymbolicDist {
     return Ok(Math.pow(this.high - this.low, 2) / 12);
   }
 
-  min() {
+  override min() {
     return this.low;
   }
-  max() {
+  override max() {
     return this.high;
   }
 
-  truncate(
+  override truncate(
     left: number | undefined,
     right: number | undefined
   ): result<Uniform, DistError> {
@@ -897,10 +897,10 @@ export class Bernoulli extends SymbolicDist {
     return this.inv(s);
   }
 
-  min() {
+  override min() {
     return this.p === 1 ? 1 : 0;
   }
-  max() {
+  override max() {
     return this.p === 0 ? 0 : 1;
   }
 
@@ -908,7 +908,7 @@ export class Bernoulli extends SymbolicDist {
     return Ok(this.p * (1 - this.p));
   }
 
-  toPointSetDist(): result<PointSetDist, DistError> {
+  override toPointSetDist(): result<PointSetDist, DistError> {
     return Ok(
       new PointSetDist(
         new DiscreteShape({
@@ -1003,21 +1003,21 @@ export class PointMass extends SymbolicDist {
     return this.t;
   }
 
-  min() {
+  override min() {
     return this.t;
   }
-  max() {
+  override max() {
     return this.t;
   }
 
-  expectedConvolutionCost(): number {
+  override expectedConvolutionCost(): number {
     return magicNumbers.OpCost.floatCost;
   }
 
-  isFloat(): boolean {
+  override isFloat(): boolean {
     return true;
   }
-  toPointSetDist(): result<PointSetDist, DistError> {
+  override toPointSetDist(): result<PointSetDist, DistError> {
     return Ok(
       new PointSetDist(
         new DiscreteShape({

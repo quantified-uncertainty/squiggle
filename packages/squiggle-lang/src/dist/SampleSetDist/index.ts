@@ -45,7 +45,7 @@ export class SampleSetDist extends BaseDist {
     return SampleSetDist.make(samples);
   }
 
-  toString() {
+  override toString() {
     return "Sample Set Distribution";
   }
 
@@ -146,7 +146,7 @@ sample everything.
   variance(): Result.result<number, DistError> {
     return Result.Ok(E_A_Floats.variance(this.samples));
   }
-  mode(): Result.result<number, DistError> {
+  override mode(): Result.result<number, DistError> {
     return Result.Err(
       otherError(
         "Not implemented, https://github.com/quantified-uncertainty/squiggle/issues/1392"

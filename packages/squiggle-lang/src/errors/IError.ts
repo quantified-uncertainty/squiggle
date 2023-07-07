@@ -45,7 +45,7 @@ export class IRuntimeError extends Error {
     }
   }
 
-  toString() {
+  override toString() {
     return this.m.toString();
   }
 
@@ -91,11 +91,11 @@ export function rethrowWithFrameStack(
 }
 
 export class ICompileError extends Error {
-  constructor(public message: string, public location: LocationRange) {
+  constructor(public override message: string, public location: LocationRange) {
     super();
   }
 
-  toString() {
+  override toString() {
     return this.message;
   }
 
