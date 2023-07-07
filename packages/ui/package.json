@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "storybook dev -p 6007",
-    "build:ts": "tsc",
+    "build:ts": "tsc -b",
     "build:css": "postcss ./src/styles/full.css -o ./dist/full.css",
     "build:storybook": "storybook build",
     "clean:ts": "rm -rf ./dist ./tsconfig.tsbuildinfo",
