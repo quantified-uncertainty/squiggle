@@ -99,20 +99,19 @@ function runSquiggle(code: string): SquiggleOutput {
   project.setSource(MAIN, code);
   project.run(MAIN);
 
-  const result = project.getResult(MAIN);
-  const bindings = project.getBindings(MAIN);
+  const outputR = project.getOutput(MAIN);
 
-  return result.ok
+  return outputR.ok
     ? {
         isCached: false,
         isOk: true,
-        resultJSON: squiggleValueToJSON(result.value),
-        bindingsJSON: squiggleValueToJSON(bindings.asValue()),
+        resultJSON: squiggleValueToJSON(outputR.value.result),
+        bindingsJSON: squiggleValueToJSON(outputR.value.bindings.asValue()),
       }
     : {
         isCached: false,
         isOk: false,
-        errorString: result.value.toString(),
+        errorString: outputR.value.toString(),
       };
 }
 

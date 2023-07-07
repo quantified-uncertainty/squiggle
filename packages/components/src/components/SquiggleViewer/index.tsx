@@ -1,6 +1,6 @@
 import { FC, forwardRef, memo } from "react";
 
-import { SqValue, SqValuePath } from "@quri/squiggle-lang";
+import { SqError, SqValue, SqValuePath, result } from "@quri/squiggle-lang";
 import { ChevronRightIcon } from "@quri/ui";
 import { useImperativeHandle } from "react";
 import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
@@ -23,7 +23,7 @@ export type SquiggleViewerHandle = {
 
 export type SquiggleViewerProps = {
   /** The output of squiggle's run */
-  result: SquiggleOutput["result"];
+  result: result<SqValue, SqError>;
   localSettingsEnabled?: boolean;
   editor?: CodeEditorHandle;
 } & PartialPlaygroundSettings;

@@ -67,9 +67,7 @@ export async function run(
     project.setEnvironment(options.environment);
   }
   await project.run("main");
-  const result = project.getResult("main");
-  const bindings = project.getBindings("main");
-  return { result, bindings };
+  return project.getOutput("main");
 }
 
 // can be used for syntax highlighting in JS/TS files if you have Squiggle VS Code extension installed.

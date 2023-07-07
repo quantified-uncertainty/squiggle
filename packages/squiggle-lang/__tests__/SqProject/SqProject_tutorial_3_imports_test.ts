@@ -1,5 +1,5 @@
 import { SqProject } from "../../src/index.js";
-import { toStringResult } from "../../src/public/SqValue/index.js";
+import "../helpers/toBeOkOutput.js";
 
 /**
  * Case: Imports.
@@ -121,14 +121,10 @@ describe("Recursive imports", () => {
 
     /* Let's run the project */
     await project.runAll();
-    const result = project.getResult("main");
-    const bindings = project.getBindings("main");
+    const output = project.getOutput("main");
 
     /* And see the result and bindings.. */
-    expect([toStringResult(result), bindings.toString()]).toEqual([
-      "Ok(6)",
-      "{a: 6,b: 2}",
-    ]);
+    expect(output).toBeOkOutput("6", "{a: 6,b: 2}");
     /* Everything as expected */
   });
 
@@ -144,12 +140,8 @@ describe("Recursive imports", () => {
     /* Let's run the project; this method will load imports recursively for you */
     await project.runWithImports("main", loadSource);
 
-    const result = project.getResult("main");
-    const bindings = project.getBindings("main");
+    const output = project.getOutput("main");
 
-    expect([toStringResult(result), bindings.toString()]).toEqual([
-      "Ok(6)",
-      "{a: 6,b: 2}",
-    ]);
+    expect(output).toBeOkOutput("6", "{a: 6,b: 2}");
   });
 });

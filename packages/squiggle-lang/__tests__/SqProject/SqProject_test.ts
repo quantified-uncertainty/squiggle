@@ -9,7 +9,11 @@ const runFetchResult = async (project: SqProject, sourceId: string) => {
 
 const runFetchFlatBindings = async (project: SqProject, sourceId: string) => {
   await project.run(sourceId);
-  return project.getBindings(sourceId).toString();
+  const bindingsR = project.getBindings(sourceId);
+  if (!bindingsR.ok) {
+    return `Error(${bindingsR.value})`;
+  }
+  return bindingsR.value.toString();
 };
 
 test("test result true", async () => {

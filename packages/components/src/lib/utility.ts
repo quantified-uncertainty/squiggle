@@ -37,15 +37,14 @@ export function some(arr: boolean[]): boolean {
 }
 
 export function getValueToRender({
-  result,
-  bindings,
+  output,
 }: SquiggleOutput): result<SqValue, SqError> {
-  return resultMap(result, (value) =>
-    value.tag === "Void" ? bindings.asValue() : value
+  return resultMap(output, (value) =>
+    value.result.tag === "Void" ? value.bindings.asValue() : value.result
   );
 }
 
-export function getErrors(result: SquiggleOutput["result"]) {
+export function getErrors(result: SquiggleOutput["output"]) {
   if (!result.ok) {
     return [result.value];
   } else {

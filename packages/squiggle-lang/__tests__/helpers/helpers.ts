@@ -1,44 +1,18 @@
-import { SqValue, run } from "../../src/index.js";
-
-declare global {
-  namespace jest {
-    interface Matchers<R> {
-      toEqualSqValue(expected: SqValue): CustomMatcherResult;
-    }
-  }
-}
-
-expect.extend({
-  toEqualSqValue(x, y) {
-    const xString = x.toString();
-    const yString = y.toString();
-    if (xString === yString) {
-      return {
-        pass: true,
-        message: () => "",
-      };
-    } else {
-      return {
-        pass: false,
-        message: () => `Expected: ${xString}\n` + `Received: ${yString}`,
-      };
-    }
-  },
-});
+import { run } from "../../src/index.js";
 
 export async function testRun(x: string) {
-  const { result } = await run(x, {
+  const outputR = await run(x, {
     environment: {
       sampleCount: 1000,
       xyPointLength: 100,
     },
   });
 
-  if (result.ok) {
-    return result.value;
+  if (outputR.ok) {
+    return outputR.value.result;
   } else {
     throw new Error(
-      `Expected squiggle expression to evaluate but got error: ${result.value}`
+      `Expected squiggle expression to evaluate but got error: ${outputR.value}`
     );
   }
 }

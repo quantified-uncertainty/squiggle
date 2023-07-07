@@ -13,9 +13,10 @@ import { SqValue, wrapValue } from "../SqValue/index.js";
 import { SqValuePath } from "../SqValuePath.js";
 
 import { SqValueContext } from "../SqValueContext.js";
-import { ImportBinding, ProjectItem } from "./ProjectItem.js";
+import { ImportBinding, ProjectItem, RunOutput } from "./ProjectItem.js";
 import { Resolver } from "./Resolver.js";
 import * as Topology from "./Topology.js";
+import { SqOutputResult } from "../types.js";
 
 function getNeedToRunError() {
   return new SqOtherError("Need to run");
@@ -149,24 +150,26 @@ export class SqProject {
     this.touchDependents(sourceId);
   }
 
-  private getResultOption(sourceId: string) {
-    return this.getItem(sourceId).result;
+  private getInternalOutput(
+    sourceId: string
+  ): Result.result<RunOutput, SqError> {
+    return this.getItem(sourceId).output ?? Result.Err(getNeedToRunError());
   }
 
-  private getInternalResult(sourceId: string): Result.result<Value, SqError> {
-    const result = this.getResultOption(sourceId);
-    return result ?? Result.Err(getNeedToRunError());
+  parseImports(sourceId: string): void {
+    // resolver can be undefined; in this case parseImports will fail if there are any imports
+    this.getItem(sourceId).parseImports(this.resolver);
   }
 
-  getResult(sourceId: string): Result.result<SqValue, SqError> {
-    const internalResult = this.getInternalResult(sourceId);
-    if (!internalResult.ok) {
-      return internalResult;
+  getOutput(sourceId: string): SqOutputResult {
+    const internalOutputR = this.getInternalOutput(sourceId);
+    if (!internalOutputR.ok) {
+      return internalOutputR;
     }
 
     const source = this.getSource(sourceId);
-    if (!source) {
-      throw new Error("Source not found");
+    if (source === undefined) {
+      throw new Error("Internal error: source not found");
     }
 
     const astR = this.getItem(sourceId).ast;
@@ -174,9 +177,8 @@ export class SqProject {
       throw new Error("Internal error: AST is missing when result is ok");
     }
     if (!astR.ok) {
-      return astR; // impossible
+      return astR; // impossible because output is valid
     }
-
     const ast = astR.value;
 
     const lastStatement =
@@ -185,51 +187,24 @@ export class SqProject {
     const hasEndExpression =
       !!lastStatement && !isBindingStatement(lastStatement);
 
-    return Result.Ok(
-      wrapValue(
-        internalResult.value,
-        new SqValueContext({
-          project: this,
-          sourceId,
-          source,
-          ast,
-          valueAst: hasEndExpression ? lastStatement : ast,
-          valueAstIsPrecise: hasEndExpression,
-          path: new SqValuePath({
-            root: "result",
-            items: [],
-          }),
-        })
-      )
+    const result = wrapValue(
+      internalOutputR.value.result,
+      new SqValueContext({
+        project: this,
+        sourceId,
+        source,
+        ast,
+        valueAst: hasEndExpression ? lastStatement : ast,
+        valueAstIsPrecise: hasEndExpression,
+        path: new SqValuePath({
+          root: "result",
+          items: [],
+        }),
+      })
     );
-  }
 
-  parseImports(sourceId: string): void {
-    // resolver can be undefined; in this case parseImports will fail if there are any imports
-    this.getItem(sourceId).parseImports(this.resolver);
-  }
-
-  private getRawBindings(sourceId: string): Bindings {
-    // FIXME - should fail if bindings are not set
-    return this.getItem(sourceId).bindings ?? ImmutableMap();
-  }
-
-  getBindings(sourceId: string): SqRecord {
-    const astR = this.getItem(sourceId).ast;
-    if (!astR) {
-      throw new Error("Internal error: AST is missing when result is ok");
-    }
-    if (!astR.ok) {
-      throw new Error(astR.value.toString()); // impossible
-    }
-
-    const source = this.getSource(sourceId);
-    if (!source) {
-      throw new Error("Source not found");
-    }
-
-    return new SqRecord(
-      this.getRawBindings(sourceId),
+    const bindings = new SqRecord(
+      internalOutputR.value.bindings,
       new SqValueContext({
         project: this,
         sourceId,
@@ -243,6 +218,16 @@ export class SqProject {
         }),
       })
     );
+
+    return Result.Ok({ result, bindings });
+  }
+
+  getResult(sourceId: string): Result.result<SqValue, SqError> {
+    return Result.fmap(this.getOutput(sourceId), ({ result }) => result);
+  }
+
+  getBindings(sourceId: string): Result.result<SqRecord, SqError> {
+    return Result.fmap(this.getOutput(sourceId), ({ bindings }) => bindings);
   }
 
   private buildExternals(sourceId: string): Result.result<Bindings, SqError> {
@@ -256,16 +241,12 @@ export class SqProject {
       if (!this.items.has(continueId)) {
         return Result.Err(getMissingDependencyError(continueId));
       }
-      const continueBindings = this.getItem(continueId).bindings;
-      if (!continueBindings) {
-        return Result.Err(getNeedToRunError());
+      const outputR = this.getInternalOutput(continueId);
+      if (!outputR.ok) {
+        return outputR;
       }
-      namespacesToMerge.push(continueBindings);
 
-      const result = this.getInternalResult(continueId);
-      if (!result.ok) {
-        return result;
-      }
+      namespacesToMerge.push(outputR.value.bindings);
     }
     let externals: Bindings = ImmutableMap<string, Value>().merge(
       ...namespacesToMerge
@@ -287,15 +268,18 @@ export class SqProject {
       if (!this.items.has(importBinding.sourceId)) {
         return Result.Err(getMissingDependencyError(importBinding.sourceId));
       }
-      const importBindings = this.getItem(importBinding.sourceId).bindings;
-      if (!importBindings) {
+      const importOutputR = this.getItem(importBinding.sourceId).output;
+      if (!importOutputR) {
         return Result.Err(getNeedToRunError());
+      }
+      if (!importOutputR.ok) {
+        return importOutputR;
       }
 
       // TODO - check for collisions?
       externals = externals.set(
         importBinding.variable,
-        vRecord(importBindings)
+        vRecord(importOutputR.value.bindings)
       );
     }
     return Result.Ok(externals);
@@ -316,11 +300,11 @@ export class SqProject {
   private async runIds(sourceIds: string[]) {
     let error: SqError | undefined;
     for (const sourceId of sourceIds) {
-      const cachedResult = this.getResultOption(sourceId);
-      if (cachedResult) {
+      const cachedOutput = this.getItem(sourceId).output;
+      if (cachedOutput) {
         // already ran
-        if (!cachedResult.ok) {
-          error = cachedResult.value;
+        if (!cachedOutput.ok) {
+          error = cachedOutput.value;
         }
         continue;
       }
@@ -331,9 +315,9 @@ export class SqProject {
       }
 
       await this.doLinkAndRun(sourceId);
-      const result = this.getResultOption(sourceId);
-      if (result && !result.ok) {
-        error = result.value;
+      const output = this.getItem(sourceId).output;
+      if (output && !output.ok) {
+        error = output.value;
       }
     }
   }
@@ -415,12 +399,10 @@ export class SqProject {
 // ------------------------------------------------------------------------------------
 
 // Shortcut for running a single piece of code without creating a project
-export function evaluate(
-  sourceCode: string
-): [Result.result<SqValue, SqError>, SqRecord] {
+export function evaluate(sourceCode: string): SqOutputResult {
   const project = SqProject.create();
   project.setSource("main", sourceCode);
   project.runAll();
 
-  return [project.getResult("main"), project.getBindings("main")];
+  return project.getOutput("main");
 }
