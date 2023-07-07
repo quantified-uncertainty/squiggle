@@ -3,7 +3,7 @@
     // build settings
     "module": "es2020",
     "moduleResolution": "node16",
-    "target": "es6", // TODO: es2020
+    "target": "es2022",
     "esModuleInterop": true,
     "allowJs": true, // necessary for peggy parser
     "composite": true,
