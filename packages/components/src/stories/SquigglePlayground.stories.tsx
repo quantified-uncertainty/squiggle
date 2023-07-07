@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 
 import { SquigglePlayground as Component } from "../components/SquigglePlayground/index.js";
 import { Button } from "@quri/ui";
+import { sq } from "@quri/squiggle-lang";
 
 /**
  * A Squiggle playground is an environment where you can play around with all settings, including sampling settings, in Squiggle.
@@ -91,5 +92,34 @@ export const WithExtraControls: Story = {
             body: <div>Extra content</div>,
           }
         : undefined,
+  },
+};
+
+export const Comments: Story = {
+  name: "With comments",
+  args: {
+    defaultCode: sq`
+/* this comment will be attached to x */
+x = 5
+
+// line comments work too, but maybe they shouldn't
+y = 6
+
+// this comment won't show because z is shadowed
+z = 7
+
+// if variable is redefined, we attach the last comment
+z = 7
+
+// line 1
+// line 2 - only this line will be shown, use block style for longer comments
+t = 3
+
+// record comment
+r = {
+  foo: 5,
+  /* comments on static record fields work too */
+  bar: 6,
+}`,
   },
 };
