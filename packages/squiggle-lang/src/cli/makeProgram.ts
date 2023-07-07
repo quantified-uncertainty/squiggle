@@ -57,7 +57,7 @@ export function makeProgram() {
 
       const src = loadSrc({ filename, inline: options.eval });
 
-      const sampleCount = process.env.SAMPLE_COUNT;
+      const sampleCount = process.env["SAMPLE_COUNT"];
 
       await run({ src, filename, output, measure: options.time, sampleCount });
     });

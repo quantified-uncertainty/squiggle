@@ -3,8 +3,7 @@
   "compilerOptions": {
     "module": "CommonJS",
     "moduleResolution": "node",
-    "outDir": "./dist/cjs",
-    "declaration": true
+    "outDir": "./dist/cjs"
   },
   "exclude": ["src/cli/index.ts", "__tests__/cli_test.ts"]
 }
