@@ -191,6 +191,13 @@ export const VariableBox: FC<VariableBoxProps> = ({
         <div className="border-l border-stone-200 group-hover:border-stone-500 w-2" />
       </div>
     );
+  const showComment = () => {
+    const comment = value.context.docstring();
+    return comment ? (
+      // TODO - markdown
+      <div className="text-xs text-slate-700">{comment}</div>
+    ) : null;
+  };
 
   return (
     <div ref={saveRef}>
@@ -218,6 +225,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
           {!isFocused && leftCollapseBorder()}
           {isFocused && <div className="w-2" />}
           <div className="grow">
+            {showComment()}
             {children(getAdjustedMergedSettings(path))}
           </div>
         </div>

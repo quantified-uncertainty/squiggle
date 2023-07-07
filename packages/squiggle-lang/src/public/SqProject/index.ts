@@ -164,6 +164,11 @@ export class SqProject {
       return internalResult;
     }
 
+    const source = this.getSource(sourceId);
+    if (!source) {
+      throw new Error("Source not found");
+    }
+
     const astR = this.getItem(sourceId).ast;
     if (!astR) {
       throw new Error("Internal error: AST is missing when result is ok");
@@ -186,11 +191,14 @@ export class SqProject {
         new SqValueContext({
           project: this,
           sourceId,
+          source,
+          ast,
+          valueAst: hasEndExpression ? lastStatement : ast,
+          valueAstIsPrecise: hasEndExpression,
           path: new SqValuePath({
             root: "result",
             items: [],
           }),
-          ast,
         })
       )
     );
@@ -215,16 +223,24 @@ export class SqProject {
       throw new Error(astR.value.toString()); // impossible
     }
 
+    const source = this.getSource(sourceId);
+    if (!source) {
+      throw new Error("Source not found");
+    }
+
     return new SqRecord(
       this.getRawBindings(sourceId),
       new SqValueContext({
         project: this,
         sourceId,
+        source,
+        ast: astR.value,
+        valueAst: astR.value,
+        valueAstIsPrecise: true,
         path: new SqValuePath({
           root: "bindings",
           items: [],
         }),
-        ast: astR.value,
       })
     );
   }
