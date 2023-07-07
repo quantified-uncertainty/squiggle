@@ -106,6 +106,11 @@ export class SqValueContext {
       return; // no comments
     }
 
+    if (this.path.root === "bindings" && this.path.isRoot()) {
+      // This is a comment on first variable, we don't want to duplicate it for top-level bindings record.
+      return;
+    }
+
     const valueStarts = this.valueAst.location.start.offset;
 
     // Binary search; looking for the last comment that ends before `valueStarts`.
