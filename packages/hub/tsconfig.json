@@ -1,13 +1,11 @@
 {
   "compilerOptions": {
+    "module": "es2020",
     "moduleResolution": "node",
     "target": "es2022",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
     "esModuleInterop": true,
-    "module": "esnext",
+    "noEmit": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
@@ -16,12 +14,12 @@
       "@/*": ["./src/*"],
       "@gen/*": ["./src/__generated__/*"]
     },
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
-    "allowJs": true
+    "allowJs": true,
+    // type check settings
+    "plugins": [{ "name": "next" }],
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true // default forced by Next.js, https://github.com/vercel/next.js/pull/51564
   },
   "include": [
     "next-env.d.ts",

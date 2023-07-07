@@ -93,7 +93,7 @@
   "scripts": {
     "start": "pnpm dev",
     "dev": "storybook dev -p 6006",
-    "build:ts": "rm -rf dist/src dist/tsconfig.tsbuildinfo && tsc",
+    "build:ts": "rm -rf dist/src dist/tsconfig.tsbuildinfo && tsc -b",
     "build:css": "postcss ./src/styles/full.css -o ./dist/full.css && postcss ./src/styles/common.css -o ./dist/common.css",
     "build:lezer": "cd ./src/languageSupport; mkdir -p generated; lezer-generator ./squiggle.grammar --output generated/squiggle.ts",
     "build:storybook": "storybook build",

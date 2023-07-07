@@ -1,13 +1,16 @@
 {
   "compilerOptions": {
+    // build settings
     "module": "commonjs",
     "target": "es2020",
     "lib": ["es2020", "dom"],
-    "skipLibCheck": true,
-    "strict": true,
     "noEmit": true,
-    "rootDir": "src"
+    "composite": true,
+    "rootDir": "src",
+    // type check settings
+    "strict": true,
+    "skipLibCheck": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", ".vscode-test"]
+  "references": [{ "path": "../squiggle-lang" }, { "path": "../components" }]
 }
