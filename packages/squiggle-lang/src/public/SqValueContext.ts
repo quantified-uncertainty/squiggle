@@ -130,11 +130,22 @@ export class SqValueContext {
         a = m + 1;
       }
     }
-    const comment = this.ast.comments[a];
 
-    // TODO - filter out line comments?
+    const comment = this.ast.comments[a];
     const commentEnds = comment.location.end.offset;
     if (commentEnds > valueStarts) {
+      return;
+    }
+
+    if (comment.type !== "blockComment") {
+      return;
+    }
+
+    // Check for the starting `*` and remove it.
+    // Docstrings must start with `/** */`, like in JSDoc. More than two stars, e.g. `/*** */`, won't work either.
+    // TODO: remove the starting `*` for each line.
+    const match = comment.value.match(/^\*(?!\*)(.*)/s);
+    if (!match) {
       return;
     }
 
@@ -142,7 +153,7 @@ export class SqValueContext {
     const ok = this.source.substring(commentEnds, valueStarts).match(/^\s*$/);
 
     if (ok) {
-      return comment.value;
+      return match[1].trim();
     }
   }
 }

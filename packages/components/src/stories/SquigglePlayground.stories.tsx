@@ -98,31 +98,37 @@ export const WithExtraControls: Story = {
 export const Comments: Story = {
   name: "With comments",
   args: {
-    defaultCode: sq`/* this comment will be attached to x */
-x = 5
+    defaultCode: sq`/** This comment will be attached to x */
+show1 = true
 
-// line comments work too, but maybe they shouldn't
-y = 6
+// Line comments won't work.
+noShow1 = false
 
-// this comment won't show because z is shadowed
-z = 7
+/* Block comments starting with a single star won't work either; we follow JSDoc conventions in this. */
+noShow2 = false
 
-// if variable is redefined, we attach the last comment
-z = 7
+/*** Triple stars are forbidden too; again, JSDoc convention. */
+noShow2 = false
 
-// line 1
-// line 2 - only this line will be shown, use block style for longer comments
+/** This comment won't show because \`show2\` is shadowed */
+show2 = false
+
+/** If variable is redefined, we attach the last comment */
+show2 = true
+
+/** line 1 */
+/** line 2 - only this line will be shown */
 t = 3
 
-// there can be any amount of space between the comment and the variable
+/** there can be any amount of space between the comment and the variable */
 
 
 
-far = 1
+showFar = true
 
-/* zero space is ok too */near = 2
+/** zero space is ok too */showNear = true
 
-/*
+/**
 Comments can be long.
 
 # There's no markdown support yet.
@@ -131,12 +137,12 @@ Squiggle is a minimalist programming language for probabilistic estimation. It's
 
 The basics of Squiggle are fairly straightforward. This can be enough for many models. The more advanced functionality can take some time to learn.
 */
-long = 3
+long = true
 
-// record comment
+/** record comment */
 r = {
   foo: 5,
-  /* comments on static record fields work too */
+  /** comments on static record fields work too */
   bar: 6,
 }
 `,
