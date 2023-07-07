@@ -1,15 +1,13 @@
 import { useSession } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
 import { FC, PropsWithChildren } from "react";
-import { useFragment, useLazyLoadQuery } from "react-relay";
+import { useLazyLoadQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import Link from "next/link";
 import {
   DropdownMenu,
   DropdownMenuHeader,
   DropdownMenuSeparator,
-  DropdownMenuActionItem,
   TriangleIcon,
 } from "@quri/ui";
 
@@ -19,6 +17,7 @@ import {
 } from "@/__generated__/ModelLayoutQuery.graphql";
 import { EntityLayout } from "@/components/EntityLayout";
 import { DotsDropdownButton } from "@/components/ui/DotsDropdownButton";
+import { DropdownMenuLinkItem } from "@/components/ui/DropdownMenuLinkItem";
 import { StyledTabLink } from "@/components/ui/StyledTabLink";
 import {
   modelForRelativeValuesExportRoute,
@@ -27,12 +26,9 @@ import {
   modelViewRoute,
   patchModelRoute,
 } from "@/routes";
+import { Dropdown, ScaleIcon } from "@quri/ui";
 import { DeleteModelAction } from "./DeleteModelAction";
 import { UpdateModelSlugAction } from "./UpdateModelSlugAction";
-import { ModelExportsPicker } from "@/components/exports/ModelExportsPicker";
-import { ScaleIcon } from "@quri/ui";
-import { Dropdown } from "@quri/ui";
-import { DropdownMenuLinkItem } from "@/components/ui/DropdownMenuLinkItem";
 
 // Doing this with a fragment would be too hard, because of how layouts work in Next.js.
 // So we have to do two GraphQL queries on most model pages.
