@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    // build settings
+    "module": "es2020",
+    "moduleResolution": "node16",
+    "target": "es2022",
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "composite": true,
+    "outDir": "./dist",
+    "declarationMap": true,
+    "sourceMap": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    // type check settings
+    "strict": true,
+    "skipLibCheck": true,
+    "noImplicitAny": false
+  },
+  "include": ["src/**/*"],
+  "references": [
+    { "path": "../squiggle-lang" },
+    { "path": "../ui" },
+    { "path": "../prettier-plugin" }
+  ]
+}

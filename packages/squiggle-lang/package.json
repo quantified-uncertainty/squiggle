@@ -12,7 +12,7 @@
   "scripts": {
     "build": "pnpm run build:peggy && pnpm run build:ts",
     "build:peggy": "peggy --cache --format es ./src/ast/peggyParser.peggy",
-    "build:ts": "tsc -b ./tsconfig.json ./tsconfig.cjs.json && echo '{\"type\": \"commonjs\"}' >dist/cjs/package.json",
+    "build:ts": "tsc -b && echo '{\"type\": \"commonjs\"}' >dist/cjs/package.json",
     "start": "tsc -b -w",
     "clean": "rm -rf dist && rm -f src/ast/peggyParser.js",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
@@ -25,7 +25,7 @@
     "format": "pnpm run format:prettier",
     "prepack": "pnpm run build && pnpm run test",
     "all": "pnpm run build && pnpm run test",
-    "cli": "node --experimental-vm-modules ./dist/esm/src/cli/index.js"
+    "cli": "node --experimental-vm-modules ./dist/esm/cli/index.js"
   },
   "dependencies": {
     "@commander-js/extra-typings": "^11.0.0",
@@ -59,12 +59,12 @@
   ],
   "type": "module",
   "source": "./src/index.ts",
-  "module": "./dist/esm/src/index.js",
-  "main": "./dist/cjs/src/index.js",
+  "module": "./dist/esm/index.js",
+  "main": "./dist/cjs/index.js",
   "exports": {
     ".": {
-      "import": "./dist/esm/src/index.js",
-      "require": "./dist/cjs/src/index.js"
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
     }
   },
   "bin": {

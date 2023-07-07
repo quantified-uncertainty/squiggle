@@ -1,22 +1,11 @@
 {
+  "files": [],
   "compilerOptions": {
-    // build settings
-    "module": "es2020",
-    "moduleResolution": "node16",
-    "target": "es2022",
-    "esModuleInterop": true,
-    "allowJs": true, // necessary for peggy parser
-    "composite": true,
-    "outDir": "./dist/esm",
-    "declarationMap": true,
-    "sourceMap": true,
-    "removeComments": true,
-    "preserveConstEnums": true, // TODO - disable?
-    // type check settings
-    "strict": true,
-    "skipLibCheck": true,
-    "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true
+    "composite": true
   },
-  "include": ["src/**/*", "__tests__/**/*"]
+  "references": [
+    { "path": "./tsconfig.esm.json" },
+    { "path": "./tsconfig.cjs.json" },
+    { "path": "./tsconfig.tests.json" }
+  ]
 }

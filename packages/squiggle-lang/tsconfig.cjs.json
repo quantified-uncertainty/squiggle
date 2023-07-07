@@ -1,9 +1,9 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "./tsconfig.esm.json",
   "compilerOptions": {
     "module": "commonjs",
     "moduleResolution": "node",
     "outDir": "./dist/cjs"
   },
-  "exclude": ["src/cli/index.ts", "__tests__/cli_test.ts"]
+  "exclude": ["src/cli/index.ts"]
 }
