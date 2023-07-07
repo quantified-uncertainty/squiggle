@@ -10,7 +10,7 @@
     "directory": "packages/prettier-plugin"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -b",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "dependencies": {
