@@ -59,33 +59,15 @@ export class SqValueContext {
       }
 
       switch (ast.type) {
-        // FIXME - there are a few O(N^2) here
         case "Program": {
           if (this.path.root === "bindings") {
-            // looking in bindings
-            for (const statement of ast.statements) {
-              if (!isBindingStatement(statement)) {
-                continue;
-              }
-              if (statement.variable.value === item) {
-                newAst = statement;
-                break;
-              }
-            }
+            newAst = ast.symbols[item];
+            break;
           }
           break;
         }
         case "Record":
-          for (const kv of ast.elements) {
-            const { key } = kv;
-            if (
-              (key.type === "String" || key.type === "Integer") &&
-              key.value === item
-            ) {
-              newAst = kv;
-              break;
-            }
-          }
+          newAst = ast.symbols[item];
           break;
         case "Array":
           if (typeof item === "number") {
