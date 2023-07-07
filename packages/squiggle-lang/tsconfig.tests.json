@@ -5,6 +5,6 @@
     "outDir": "dist/__tests__", // for tsbuildinfo
     "rootDir": "."
   },
-  "include": ["__tests__/**/*"],
+  "include": ["__tests__/**/*", "src/custom-types/**/*"],
   "references": [{ "path": "./tsconfig.esm.json" }]
 }
