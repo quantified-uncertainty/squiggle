@@ -44,9 +44,18 @@ export class SqValueContext {
     if (this.valueAstIsPrecise) {
       // we can try to look for the next nested valueAst
 
-      // TODO - unwrap binding statements and keyvalue nodes
-      while (ast.type === "Block") {
-        ast = ast.statements[ast.statements.length - 1];
+      // descend into trivial nodes
+      while (true) {
+        if (ast.type === "Block") {
+          ast = ast.statements[ast.statements.length - 1];
+        } else if (ast.type === "KeyValue") {
+          ast = ast.value;
+        } else if (isBindingStatement(ast)) {
+          ast = ast.value;
+        } else {
+          break;
+        }
+        // TODO - descend into calls
       }
 
       switch (ast.type) {
@@ -85,9 +94,6 @@ export class SqValueContext {
               newAst = element;
             }
           }
-          break;
-        case "Call":
-          // TODO - look in end expression of the lambda that's being called
           break;
       }
     }
