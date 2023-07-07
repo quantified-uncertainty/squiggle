@@ -160,6 +160,12 @@
       "last 1 safari version"
     ]
   },
+  "files": [
+    "dist",
+    "src",
+    "!**/tsconfig*.tsbuildinfo",
+    "!dist/test"
+  ],
   "type": "module",
   "exports": {
     ".": {

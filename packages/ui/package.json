@@ -18,6 +18,11 @@
     "lint:eslint": "eslint --ignore-path .gitignore ./src",
     "format": "prettier --write ."
   },
+  "files": [
+    "dist",
+    "src",
+    "!**/tsconfig*.tsbuildinfo"
+  ],
   "type": "module",
   "exports": {
     ".": {
