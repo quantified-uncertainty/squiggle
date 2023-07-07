@@ -11,7 +11,7 @@ export class SqValueContext {
   // top-level AST; we pull comments from it for docstrings
   public ast: AST;
 
-  /* Used for "focus in editor" feature in the playground.
+  /* Used for "focus in editor" feature in the playground, and for associating values with comments.
    * We try our best to find nested ASTs, but when the value is built dynamically, it's not always possible.
    * In that case, we store the outermost AST and set `valueAstIsPrecise` flag to `false`.
    */
@@ -42,7 +42,7 @@ export class SqValueContext {
 
     let newAst: ASTNode | undefined;
     if (this.valueAstIsPrecise) {
-      // we can try to look for the next nested valueAst
+      // now we can try to look for the next nested valueAst
 
       // descend into trivial nodes
       while (true) {
@@ -101,6 +101,8 @@ export class SqValueContext {
     if (!this.valueAstIsPrecise) {
       return;
     }
+
+    // Only assignments and record key-value pairs can have comments.
     if (
       !isBindingStatement(this.valueAst) &&
       this.valueAst.type !== "KeyValue"
@@ -108,26 +110,39 @@ export class SqValueContext {
       return;
     }
 
+    if (!this.ast.comments.length) {
+      return; // no comments
+    }
+
     const valueStarts = this.valueAst.location.start.offset;
-    // TODO - are comments sorted? should we use binary search?
-    for (const comment of this.ast.comments) {
-      // TODO - filter out line comments?
-      const commentEnds = comment.location.end.offset;
-      if (commentEnds > valueStarts) {
-        continue;
+
+    // Binary search; looking for the last comment that ends before `valueStarts`.
+    let a = 0,
+      b = this.ast.comments.length - 1;
+
+    while (a < b) {
+      const m = Math.floor((a + b) / 2);
+      const commentToCheck = this.ast.comments[m + 1];
+      if (commentToCheck.location.end.offset > valueStarts) {
+        // too far
+        b = m;
+      } else {
+        a = m + 1;
       }
-      let ok = true;
-      for (let offset = commentEnds; offset < valueStarts; offset++) {
-        const char = this.source[offset];
-        if (![" ", "\t", "\n"].includes(char)) {
-          // doesn't fit
-          ok = false;
-          break;
-        }
-      }
-      if (ok) {
-        return comment.value;
-      }
+    }
+    const comment = this.ast.comments[a];
+
+    // TODO - filter out line comments?
+    const commentEnds = comment.location.end.offset;
+    if (commentEnds > valueStarts) {
+      return;
+    }
+
+    // Let's check that all text between the comment and the value node is whitespace.
+    const ok = this.source.substring(commentEnds, valueStarts).match(/^\s*$/);
+
+    if (ok) {
+      return comment.value;
     }
   }
 }

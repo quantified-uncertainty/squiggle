@@ -98,8 +98,7 @@ export const WithExtraControls: Story = {
 export const Comments: Story = {
   name: "With comments",
   args: {
-    defaultCode: sq`
-/* this comment will be attached to x */
+    defaultCode: sq`/* this comment will be attached to x */
 x = 5
 
 // line comments work too, but maybe they shouldn't
@@ -115,11 +114,31 @@ z = 7
 // line 2 - only this line will be shown, use block style for longer comments
 t = 3
 
+// there can be any amount of space between the comment and the variable
+
+
+
+far = 1
+
+/* zero space is ok too */near = 2
+
+/*
+Comments can be long.
+
+# There's no markdown support yet.
+
+Squiggle is a minimalist programming language for probabilistic estimation. It's meant for intuitively-driven quantitative estimation instead of data analysis or data-driven statistical techniques.
+
+The basics of Squiggle are fairly straightforward. This can be enough for many models. The more advanced functionality can take some time to learn.
+*/
+long = 3
+
 // record comment
 r = {
   foo: 5,
   /* comments on static record fields work too */
   bar: 6,
-}`,
+}
+`,
   },
 };
