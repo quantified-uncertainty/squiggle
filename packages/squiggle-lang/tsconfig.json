@@ -1,9 +1,22 @@
 {
-  "extends": "./tsconfig.esm.json",
   "compilerOptions": {
-    "module": "CommonJS",
-    "moduleResolution": "node",
-    "outDir": "./dist/cjs"
+    // build settings
+    "module": "es2020",
+    "moduleResolution": "node16",
+    "target": "es6", // TODO: es2020
+    "esModuleInterop": true,
+    "allowJs": true, // necessary for peggy parser
+    "composite": true,
+    "outDir": "./dist/esm",
+    "declarationMap": true,
+    "sourceMap": true,
+    // type check settings
+    "strict": true,
+    "skipLibCheck": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "removeComments": true,
+    "preserveConstEnums": true // TODO - disable?
   },
-  "exclude": ["src/cli/index.ts", "__tests__/cli_test.ts"]
+  "include": ["src/**/*", "__tests__/**/*"]
 }

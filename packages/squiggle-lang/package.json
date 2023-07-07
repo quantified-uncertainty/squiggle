@@ -6,7 +6,7 @@
   "scripts": {
     "build": "pnpm run build:peggy && pnpm run build:ts",
     "build:peggy": "peggy --cache --format es ./src/ast/peggyParser.peggy",
-    "build:ts": "tsc -b ./tsconfig.esm.json ./tsconfig.json && echo '{\"type\": \"commonjs\"}' >dist/cjs/package.json",
+    "build:ts": "tsc -b ./tsconfig.json ./tsconfig.cjs.json && echo '{\"type\": \"commonjs\"}' >dist/cjs/package.json",
     "start": "tsc -b -w",
     "clean": "rm -rf dist && rm -f src/ast/peggyParser.js",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
