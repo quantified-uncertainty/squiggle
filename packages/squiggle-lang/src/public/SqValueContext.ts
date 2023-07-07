@@ -102,14 +102,6 @@ export class SqValueContext {
       return;
     }
 
-    // Only assignments and record key-value pairs can have comments.
-    if (
-      !isBindingStatement(this.valueAst) &&
-      this.valueAst.type !== "KeyValue"
-    ) {
-      return;
-    }
-
     if (!this.ast.comments.length) {
       return; // no comments
     }
