@@ -1,8 +1,14 @@
 {
   "name": "@quri/squiggle-lang",
   "version": "0.7.0",
-  "homepage": "https://squiggle-language.com",
   "license": "MIT",
+  "homepage": "https://squiggle-language.com",
+  "author": "Quantified Uncertainty Research Institute",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/quantified-uncertainty/squiggle.git",
+    "directory": "packages/squiggle-lang"
+  },
   "scripts": {
     "build": "pnpm run build:peggy && pnpm run build:ts",
     "build:peggy": "peggy --cache --format es ./src/ast/peggyParser.peggy",
@@ -21,7 +27,6 @@
     "all": "pnpm run build && pnpm run test",
     "cli": "node --experimental-vm-modules ./dist/esm/src/cli/index.js"
   },
-  "author": "Quantified Uncertainty Research Institute",
   "dependencies": {
     "@commander-js/extra-typings": "^11.0.0",
     "commander": "^11.0.0",
@@ -48,14 +53,14 @@
   },
   "type": "module",
   "source": "./src/index.ts",
+  "module": "./dist/esm/src/index.js",
+  "main": "./dist/cjs/src/index.js",
   "exports": {
     ".": {
       "import": "./dist/esm/src/index.js",
       "require": "./dist/cjs/src/index.js"
     }
   },
-  "module": "./dist/esm/src/index.js",
-  "main": "./dist/cjs/src/index.js",
   "bin": {
     "squiggle": "./dist/esm/src/cli/index.js"
   }

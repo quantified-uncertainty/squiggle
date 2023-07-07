@@ -2,6 +2,12 @@
   "name": "@quri/squiggle-components",
   "version": "0.7.0",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/quantified-uncertainty/squiggle.git",
+    "directory": "packages/components"
+  },
+  "author": "Quantified Uncertainty Research Institute",
   "dependencies": {
     "@codemirror/autocomplete": "^6.8.1",
     "@codemirror/commands": "^6.2.4",
