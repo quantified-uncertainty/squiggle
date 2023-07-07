@@ -1,4 +1,4 @@
-import { ValueMap, vRecord } from "@/value/index.js";
+import { ValueMap, vRecord } from "../../value/index.js";
 
 import { SqValueContext } from "../SqValueContext.js";
 import { SqRecordValue, SqValue, wrapValue } from "./index.js";

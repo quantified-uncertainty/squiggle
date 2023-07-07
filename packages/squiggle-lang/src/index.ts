@@ -46,7 +46,7 @@ export {
 } from "./public/SqValue/SqScale.js";
 export { SqValuePath } from "./public/SqValuePath.js";
 export { parse } from "./public/parse.js";
-export { result, fmap as resultMap } from "./utility/result.js";
+export { type result, fmap as resultMap } from "./utility/result.js";
 
 export { LocationRange as SqLocation } from "peggy";
 export { defaultEnv as defaultEnvironment } from "./dist/env.js";

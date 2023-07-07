@@ -1,4 +1,4 @@
-import { Value } from "@/value/index.js";
+import { Value } from "../../value/index.js";
 
 import { SqValueContext } from "../SqValueContext.js";
 import { wrapValue } from "./index.js";

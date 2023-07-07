@@ -1,10 +1,10 @@
 import zipWith from "lodash/zipWith.js";
 
-import { PointSetDist } from "@/dist/PointSetDist.js";
-import { ContinuousShape } from "@/PointSet/Continuous.js";
-import { DiscreteShape } from "@/PointSet/Discrete.js";
-import { MixedShape } from "@/PointSet/Mixed.js";
-import { AnyPointSet } from "@/PointSet/PointSet.js";
+import { PointSetDist } from "../../../dist/PointSetDist.js";
+import { ContinuousShape } from "../../../PointSet/Continuous.js";
+import { DiscreteShape } from "../../../PointSet/Discrete.js";
+import { MixedShape } from "../../../PointSet/Mixed.js";
+import { AnyPointSet } from "../../../PointSet/PointSet.js";
 
 import { SqPointSetDistribution } from "./index.js";
 

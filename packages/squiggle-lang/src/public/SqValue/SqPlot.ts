@@ -1,8 +1,8 @@
-import { BaseDist } from "@/dist/BaseDist.js";
-import { SampleSetDist } from "@/dist/SampleSetDist/index.js";
-import { Env } from "@/dist/env.js";
-import * as Result from "@/utility/result.js";
-import { Plot, vPlot } from "@/value/index.js";
+import { BaseDist } from "../../dist/BaseDist.js";
+import { SampleSetDist } from "../../dist/SampleSetDist/index.js";
+import { Env } from "../../dist/env.js";
+import * as Result from "../../utility/result.js";
+import { Plot, vPlot } from "../../value/index.js";
 
 import { SqError, SqOtherError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";

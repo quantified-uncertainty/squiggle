@@ -1,10 +1,10 @@
-import { Env } from "@/dist/env.js";
-import { IRuntimeError } from "@/errors/IError.js";
-import { getStdLib } from "@/library/index.js";
-import { createContext } from "@/reducer/context.js";
-import { Lambda } from "@/reducer/lambda.js";
-import * as Result from "@/utility/result.js";
-import { result } from "@/utility/result.js";
+import { Env } from "../../dist/env.js";
+import { IRuntimeError } from "../../errors/IError.js";
+import { getStdLib } from "../../library/index.js";
+import { createContext } from "../../reducer/context.js";
+import { Lambda } from "../../reducer/lambda.js";
+import * as Result from "../../utility/result.js";
+import { result } from "../../utility/result.js";
 
 import { SqError, SqOtherError, SqRuntimeError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";

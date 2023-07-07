@@ -1,23 +1,21 @@
-import { LocationRange } from "peggy";
-
-import { findAstByPath, isBindingStatement } from "@/ast/utils.js";
-import { Env, defaultEnv } from "@/dist/env.js";
-import * as Library from "@/library/index.js";
-import { createContext } from "@/reducer/context.js";
-import { Bindings } from "@/reducer/stack.js";
-import { ImmutableMap } from "@/utility/immutableMap.js";
-import * as Result from "@/utility/result.js";
-import { Value, vRecord } from "@/value/index.js";
+import { isBindingStatement } from "../../ast/utils.js";
+import { Env, defaultEnv } from "../../dist/env.js";
+import * as Library from "../../library/index.js";
+import { createContext } from "../../reducer/context.js";
+import { Bindings } from "../../reducer/stack.js";
+import { ImmutableMap } from "../../utility/immutableMap.js";
+import * as Result from "../../utility/result.js";
+import { Value, vRecord } from "../../value/index.js";
 
 import { SqError, SqOtherError } from "../SqError.js";
 import { SqRecord } from "../SqValue/SqRecord.js";
 import { SqValue, wrapValue } from "../SqValue/index.js";
 import { SqValuePath } from "../SqValuePath.js";
 
+import { SqValueContext } from "../SqValueContext.js";
 import { ImportBinding, ProjectItem } from "./ProjectItem.js";
 import { Resolver } from "./Resolver.js";
 import * as Topology from "./Topology.js";
-import { SqValueContext } from "../SqValueContext.js";
 
 function getNeedToRunError() {
   return new SqOtherError("Need to run");

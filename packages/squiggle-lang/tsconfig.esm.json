@@ -14,10 +14,9 @@
     "declarationDir": null,
     "composite": true,
     "target": "ES6",
-    "esModuleInterop": true,
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    "esModuleInterop": true
+    // Note: don't try to add "@/*": "./src/*" path alias here, it will break declaration files.
+    // See also: https://github.com/microsoft/TypeScript/issues/26722#issuecomment-580975983
   },
   "include": ["src/**/*", "scripts/**/*", "__tests__/**/*", "benchmark/**/*"]
 }

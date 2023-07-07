@@ -1,7 +1,7 @@
-import { AST } from "@/ast/parse.js";
+import { AST } from "../ast/parse.js";
+import { findAstByPath } from "../ast/utils.js";
 import { SqProject } from "./SqProject/index.js";
 import { PathItem, SqValuePath } from "./SqValuePath.js";
-import { findAstByPath } from "@/ast/utils.js";
 
 export class SqValueContext {
   public project: SqProject;

@@ -1,4 +1,4 @@
-import { LambdaDeclaration } from "@/reducer/declaration.js";
+import { LambdaDeclaration } from "../../reducer/declaration.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqLambda } from "./SqLambda.js";
 
