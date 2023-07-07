@@ -7,7 +7,7 @@
     "build": "pnpm run build:peggy && pnpm run build:ts",
     "build:peggy": "peggy --cache --format es ./src/ast/peggyParser.peggy",
     "build:ts": "tsc -b ./tsconfig.esm.json ./tsconfig.json && echo '{\"type\": \"commonjs\"}' >dist/cjs/package.json",
-    "start": "tsc -w",
+    "start": "tsc -b -w",
     "clean": "rm -rf dist && rm -f src/ast/peggyParser.js",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test:watch": "pnpm run test --watchAll",
@@ -51,13 +51,11 @@
   "exports": {
     ".": {
       "import": "./dist/esm/src/index.js",
-      "require": "./dist/cjs/src/index.js",
-      "types": "./dist/types/src/index.d.ts"
+      "require": "./dist/cjs/src/index.js"
     }
   },
   "module": "./dist/esm/src/index.js",
   "main": "./dist/cjs/src/index.js",
-  "types": "./dist/types/src/index.d.ts",
   "bin": {
     "squiggle": "./dist/esm/src/cli/index.js"
   }

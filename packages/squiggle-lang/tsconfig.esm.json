@@ -2,16 +2,13 @@
   "compilerOptions": {
     "module": "es2020",
     "moduleResolution": "node16",
-    "jsx": "react",
-    "allowJs": true,
+    "allowJs": true, // necessary for peggy parser
+    "strict": true,
     "skipLibCheck": true,
-    "noImplicitAny": true,
     "removeComments": true,
     "preserveConstEnums": true,
     "sourceMap": true,
-    "strict": true,
     "outDir": "./dist/esm",
-    "declarationDir": null,
     "composite": true,
     "target": "ES6",
     "esModuleInterop": true,
