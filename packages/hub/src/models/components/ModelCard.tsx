@@ -7,7 +7,7 @@ import { ModelCard$key } from "@/__generated__/ModelCard.graphql";
 import { UserLink } from "@/components/UserLink";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { modelRoute, modelForRelativeValuesExportRoute } from "@/routes";
-import { LinkIcon, ScaleIcon } from "@quri/ui";
+import { CodeBracketIcon, LinkIcon, ScaleIcon } from "@quri/ui";
 
 const Fragment = graphql`
   fragment ModelCard on Model {
@@ -38,7 +38,8 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner }) => {
   const exports = model.currentRevision.relativeValuesExports;
 
   return (
-    <div className="border p-3 rounded">
+    <div className="border p-3 rounded flex">
+      <CodeBracketIcon size={20} className="mt-3 ml-1 mr-3 text-slate-300" />
       <div>
         <div className="mb-1">
           <StyledLink

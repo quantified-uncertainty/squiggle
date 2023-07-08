@@ -40,9 +40,6 @@ export const FrontPageModelList: FC<Props> = ({ dataRef }) => {
   >(Fragment, dataRef);
 
   return (
-    <div>
-      <H2 size="normal">All models</H2>
-      <ModelList connectionRef={models} showOwner={true} loadNext={loadNext} />
-    </div>
+    <ModelList connectionRef={models} showOwner={true} loadNext={loadNext} />
   );
 };
