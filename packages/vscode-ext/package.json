@@ -129,7 +129,7 @@
     "build": "pnpm run build:vendor && pnpm run build:grammar && pnpm run build:bundle",
     "watch": "pnpm run compile:bundle --watch",
     "pretest": "pnpm run build && pnpm run lint",
-    "lint": "tsc && prettier --check .",
+    "lint": "tsc -b && prettier --check .",
     "format": "prettier --write .",
     "package": "vsce package --no-dependencies"
   },

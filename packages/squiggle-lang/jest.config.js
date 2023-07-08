@@ -10,6 +10,7 @@ const jestConfig = {
       "ts-jest",
       {
         useESM: true,
+        tsconfig: "tsconfig.tests.json",
       },
     ],
   },

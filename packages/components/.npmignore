@@ -1,9 +1,0 @@
-node_modules
-storybook-static
-public
-build
-.storybook
-.direnv
-.envrc
-webpack.config.js
-index.html

@@ -4,7 +4,7 @@ import { measure } from "../cli/utils.js";
 
 const maxP = 4;
 
-const sampleCount = process.env.SAMPLE_COUNT;
+const sampleCount = process.env["SAMPLE_COUNT"];
 
 async function main() {
   for (let p = 0; p <= maxP; p++) {
