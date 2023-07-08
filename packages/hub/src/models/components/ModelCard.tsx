@@ -6,7 +6,8 @@ import { graphql } from "relay-runtime";
 import { ModelCard$key } from "@/__generated__/ModelCard.graphql";
 import { UserLink } from "@/components/UserLink";
 import { StyledLink } from "@/components/ui/StyledLink";
-import { modelRoute } from "@/routes";
+import { modelRoute, modelForRelativeValuesExportRoute } from "@/routes";
+import { LinkIcon, ScaleIcon } from "@quri/ui";
 
 const Fragment = graphql`
   fragment ModelCard on Model {
@@ -15,6 +16,14 @@ const Fragment = graphql`
     owner {
       username
       ...UserLinkFragment
+    }
+    currentRevision {
+      relativeValuesExports {
+        variableName
+        definition {
+          slug
+        }
+      }
     }
   }
 `;
@@ -26,17 +35,24 @@ type Props = {
 
 export const ModelCard: FC<Props> = ({ modelRef, showOwner }) => {
   const model = useFragment(Fragment, modelRef);
+  const exports = model.currentRevision.relativeValuesExports;
 
   return (
-    <div className="border p-2 rounded">
+    <div className="border p-3 rounded">
       <div>
-        <div>
+        <div className="mb-1">
           <StyledLink
             href={modelRoute({
               username: model.owner.username,
               slug: model.slug,
             })}
+            className="hover:underline text-md font-medium"
           >
+            {showOwner ? (
+              <span>
+                <UserLink userRef={model.owner} />/
+              </span>
+            ) : null}
             {model.slug}
           </StyledLink>
         </div>
@@ -47,13 +63,25 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner }) => {
               addSuffix: true,
             })}
           </time>
-          {showOwner ? (
-            <span>
-              {" "}
-              by <UserLink userRef={model.owner} />
-            </span>
-          ) : null}
         </div>
+        {exports.length > 0 && (
+          <div className="mt-2">
+            {model.currentRevision.relativeValuesExports.map((e, i) => (
+              <StyledLink
+                key={i}
+                href={modelForRelativeValuesExportRoute({
+                  username: model.owner.username,
+                  slug: model.slug,
+                  variableName: e.variableName,
+                })}
+                className="items-center flex hover:underline font-mono text-xs"
+              >
+                <ScaleIcon size={14} className="opacity-60" />
+                <span className="flex ml-1">{`${e.variableName}:${e.definition.slug}`}</span>
+              </StyledLink>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

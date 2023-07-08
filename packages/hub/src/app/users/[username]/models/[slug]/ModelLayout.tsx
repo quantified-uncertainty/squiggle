@@ -118,7 +118,11 @@ export const entityNodes = (
   if (variableName) {
     nodes.push({
       slug: variableName,
-      href: modelRoute({ username, slug }),
+      href: modelForRelativeValuesExportRoute({
+        username: username,
+        slug: slug,
+        variableName: variableName,
+      }),
       icon: ScaleIcon,
     });
   }
@@ -147,7 +151,7 @@ export const ModelLayout: FC<Props> = ({ username, slug, children }) => {
             slug: model.slug,
             variableName: exportItem.variableName,
           })}
-          title={exportItem.definition.slug}
+          title={`${exportItem.variableName}: ${exportItem.definition.slug}`}
           close={close}
         />
       ))}
