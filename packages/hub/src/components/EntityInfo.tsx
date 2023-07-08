@@ -1,6 +1,7 @@
 import { FC, cloneElement, ReactNode } from "react";
 import Link from "next/link";
 
+import { clsx } from "clsx";
 import { IconProps } from "@/relative-values/components/ui/icons/Icon";
 
 // works both for models and for definitions
@@ -22,17 +23,25 @@ const ListWithSeparator: React.FC<{
   }, []);
 };
 
-const Entity: FC<entityNode> = ({ slug, href, icon: Icon }) => {
+const Entity: FC<entityNode & { isLast: boolean }> = ({
+  slug,
+  href,
+  icon: Icon,
+  isLast,
+}) => {
   return (
     <Link
-      className="text-lg text-blue-600 hover:underline flex items-center gap-1 group"
+      className={clsx(
+        "text-lg text-blue-600 hover:underline flex items-center gap-1 group",
+        isLast ? "font-semibold" : "font-medium"
+      )}
       href={href}
       key={href}
     >
       {Icon && (
         <Icon
-          className="text-blue-600 opacity-50 group-hover:opacity-100 trantition mr-0.5"
-          size={16}
+          className="text-blue-600 opacity-50 group-hover:opacity-100 trantition mr-1"
+          size={18}
         />
       )}
       {slug}
@@ -43,9 +52,11 @@ const Entity: FC<entityNode> = ({ slug, href, icon: Icon }) => {
 export const EntityInfo: FC<{
   nodes: entityNode[];
 }> = ({ nodes }) => {
-  const links = nodes.map((node, i) => <Entity {...node} key={i} />);
+  const links = nodes.map((node, i) => (
+    <Entity {...node} key={i} isLast={i === nodes.length - 1} />
+  ));
   const separator = (key: number) => (
-    <div key={`s${key}`} className="text-lg text-gray-400 mx-2">
+    <div key={`s${key}`} className="text-lg text-gray-300 mx-3">
       /
     </div>
   );

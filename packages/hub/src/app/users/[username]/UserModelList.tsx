@@ -35,7 +35,11 @@ export const UserModelList: FC<Props> = ({ dataRef }) => {
   return (
     <div>
       {models.edges.length ? (
-        <ModelList connectionRef={models} loadNext={loadNext} />
+        <ModelList
+          connectionRef={models}
+          loadNext={loadNext}
+          showOwner={false}
+        />
       ) : (
         <div className="text-slate-500">{"You don't have any models yet."}</div>
       )}
