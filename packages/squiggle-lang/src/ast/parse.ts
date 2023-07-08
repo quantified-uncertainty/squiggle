@@ -124,6 +124,10 @@ function nodeToString(node: ASTNode): string {
       );
     case "Void":
       return "()";
+    case "UnitValue":
+      // S-expression; we should migrate to S-expressions for other branches too, for easier testing.
+      return "(unit " + nodeToString(node.value) + " " + node.unit + ")";
+
     default:
       throw new Error(`Unknown node: ${node satisfies never}`);
   }

@@ -241,6 +241,15 @@ function compileToContent(
         return [result, context];
       }
     }
+    case "UnitValue": {
+      const fromUnitFn = getValueOrThrow(context, ast, `fromUnit_${ast.unit}`);
+      return [
+        expression.eCall({ ast, ...fromUnitFn }, [
+          innerCompileAst(ast.value, context)[0],
+        ]),
+        context,
+      ];
+    }
     default:
       throw new Error(`Unsupported AST value ${ast satisfies never}`);
   }
