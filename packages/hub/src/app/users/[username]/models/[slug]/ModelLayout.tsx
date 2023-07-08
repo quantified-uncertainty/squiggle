@@ -33,7 +33,6 @@ import {
 import { DeleteModelAction } from "./DeleteModelAction";
 import { UpdateModelSlugAction } from "./UpdateModelSlugAction";
 import { CodeBracketIcon } from "@quri/ui";
-import { UserIcon } from "@quri/ui";
 
 // Doing this with a fragment would be too hard, because of how layouts work in Next.js.
 // So we have to do two GraphQL queries on most model pages.

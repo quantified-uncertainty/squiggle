@@ -40,7 +40,9 @@ export const RelativeValuesDefinitionCard: FC<Props> = ({
               slug: definition.slug,
             })}
           >
-            {definition.slug}
+            {`${!!showOwner ? definition.owner.username + "/" : ""}${
+              definition.slug
+            }`}
           </StyledDefinitionLink>
         </div>
         <div className="text-xs text-slate-500">
@@ -56,12 +58,6 @@ export const RelativeValuesDefinitionCard: FC<Props> = ({
               }
             )}
           </time>
-          {showOwner ? (
-            <span>
-              {" "}
-              by <UserLink userRef={definition.owner} />
-            </span>
-          ) : null}
         </div>
       </div>
     </div>

@@ -48,12 +48,7 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner }) => {
             })}
             className="hover:underline text-md font-medium"
           >
-            {showOwner ? (
-              <span>
-                <UserLink userRef={model.owner} />/
-              </span>
-            ) : null}
-            {model.slug}
+            {`${!!showOwner ? model.owner.username + "/" : ""}${model.slug}`}
           </StyledLink>
         </div>
         <div className="text-xs text-slate-500">

@@ -41,7 +41,7 @@ export const UserDefinitionList: FC<Props> = ({ dataRef }) => {
       </div>
       <RelativeValuesDefinitionList
         connectionRef={relativeValuesDefinitions}
-        showOwner={true}
+        showOwner={false}
         loadNext={loadNext}
       />
     </section>
