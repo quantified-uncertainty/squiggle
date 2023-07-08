@@ -1,29 +1,58 @@
-import { FC } from "react";
+import { FC, cloneElement, ReactNode } from "react";
 import Link from "next/link";
 
-import { userRoute } from "@/routes";
+import { IconProps } from "@/relative-values/components/ui/icons/Icon";
 
 // works both for models and for definitions
-export const EntityInfo: FC<{
-  username: string;
+export type entityNode = {
   slug: string;
   href: string;
-}> = ({ username, slug, href }) => {
+  icon?: FC<IconProps>;
+};
+
+const ListWithSeparator: React.FC<{
+  items: ReactNode[];
+  separator: (r: number) => ReactNode;
+}> = ({ items, separator }) => {
+  return items.reduce<React.ReactNode[]>((accumulator, item, index) => {
+    const isLastItem = index === items.length - 1;
+    return isLastItem
+      ? [...accumulator, item]
+      : [...accumulator, item, separator(index)];
+  }, []);
+};
+
+const Entity: FC<entityNode> = ({ slug, href, icon: Icon }) => {
+  return (
+    <Link
+      className="text-lg text-blue-600 hover:underline flex items-center gap-1 group"
+      href={href}
+      key={href}
+    >
+      {Icon && (
+        <Icon
+          className="text-blue-600 opacity-50 group-hover:opacity-100 trantition mr-0.5"
+          size={16}
+        />
+      )}
+      {slug}
+    </Link>
+  );
+};
+
+export const EntityInfo: FC<{
+  nodes: entityNode[];
+}> = ({ nodes }) => {
+  const links = nodes.map((node, i) => <Entity {...node} key={i} />);
+  const separator = (key: number) => (
+    <div key={`s${key}`} className="text-lg text-gray-400 mx-2">
+      /
+    </div>
+  );
+
   return (
     <div className="flex items-center mr-3">
-      <Link
-        className="text-lg text-blue-600 hover:underline"
-        href={userRoute({ username })}
-      >
-        {username}
-      </Link>
-      <div className="text-lg text-gray-400 mx-1">/</div>
-      <Link
-        className="text-lg font-medium text-blue-600 hover:underline"
-        href={href}
-      >
-        {slug}
-      </Link>
+      <ListWithSeparator items={links} separator={separator} />
     </div>
   );
 };

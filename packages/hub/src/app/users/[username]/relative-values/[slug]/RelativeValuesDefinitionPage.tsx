@@ -3,11 +3,15 @@ import { graphql } from "relay-runtime";
 
 import { DotsDropdownButton } from "@/components/ui/DotsDropdownButton";
 import { StyledTabLink } from "@/components/ui/StyledTabLink";
-import { relativeValuesEditRoute, relativeValuesRoute } from "@/routes";
-import { DropdownMenu } from "@quri/ui";
+import {
+  userRoute,
+  relativeValuesEditRoute,
+  relativeValuesRoute,
+} from "@/routes";
+import { DropdownMenu, ScaleIcon } from "@quri/ui";
 import { DeleteDefinitionAction } from "./DeleteRelativeValuesDefinitionAction";
 import { useSession } from "next-auth/react";
-import { EntityLayout } from "@/components/EntityLayout";
+import { EntityLayout, entityNode } from "@/components/EntityLayout";
 
 export const RelativeValuesDefinitionPageFragment = graphql`
   fragment RelativeValuesDefinitionPage on RelativeValuesDefinition {
@@ -56,11 +60,14 @@ export const RelativeValuesDefinitionPage: FC<Props> = ({
 }) => {
   const { data: session } = useSession();
 
+  const nodes: entityNode[] = [
+    { slug: username, href: userRoute({ username }) },
+    { slug, href: relativeValuesRoute({ username, slug }), icon: ScaleIcon },
+  ];
+
   return (
     <EntityLayout
-      slug={slug}
-      username={username}
-      homepageUrl={relativeValuesRoute({ username, slug })}
+      nodes={nodes}
       headerChildren={
         session?.user.username === username ? (
           <>

@@ -3,9 +3,9 @@
 import { ReactNode, Suspense } from "react";
 import Skeleton from "react-loading-skeleton";
 
-import { ModelLayout } from "./ModelLayout";
+import { ModelLayout, entityNodes } from "./ModelLayout";
 import { EntityLayout } from "@/components/EntityLayout";
-import { modelRoute } from "@/routes";
+import { useParams } from "next/navigation";
 
 export default function Layout({
   params,
@@ -14,13 +14,10 @@ export default function Layout({
   params: { username: string; slug: string };
   children: ReactNode;
 }) {
-  const url = modelRoute({ username: params.username, slug: params.slug });
-
+  const { variableName } = useParams();
   const fallback = (
     <EntityLayout
-      username={params.username}
-      slug={params.slug}
-      homepageUrl={url}
+      nodes={entityNodes(params.username, params.slug, variableName)}
       isFluid={true}
       headerChildren={
         <div

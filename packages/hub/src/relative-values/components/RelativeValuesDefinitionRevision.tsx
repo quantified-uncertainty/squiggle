@@ -52,8 +52,8 @@ export const RelativeValuesDefinitionRevision: FC<Props> = ({
         null,
         2
       )}
-      onChange={(e) => e}
       name="json"
+      readOnly
     />
   );
 

@@ -1,5 +1,5 @@
 import { useSession } from "next-auth/react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useParams } from "next/navigation";
 import { FC, PropsWithChildren } from "react";
 import { useLazyLoadQuery } from "react-relay";
 import { graphql } from "relay-runtime";
@@ -19,8 +19,7 @@ import {
   ModelLayoutQuery,
   ModelLayoutQuery$data,
 } from "@/__generated__/ModelLayoutQuery.graphql";
-import { EntityLayout } from "@/components/EntityLayout";
-import { DotsDropdownButton } from "@/components/ui/DotsDropdownButton";
+import { EntityLayout, entityNode } from "@/components/EntityLayout";
 import { DropdownMenuLinkItem } from "@/components/ui/DropdownMenuLinkItem";
 import { StyledTabLink } from "@/components/ui/StyledTabLink";
 import {
@@ -29,9 +28,12 @@ import {
   modelRoute,
   modelViewRoute,
   patchModelRoute,
+  userRoute,
 } from "@/routes";
 import { DeleteModelAction } from "./DeleteModelAction";
 import { UpdateModelSlugAction } from "./UpdateModelSlugAction";
+import { CodeBracketIcon } from "@quri/ui";
+import { UserIcon } from "@quri/ui";
 
 // Doing this with a fragment would be too hard, because of how layouts work in Next.js.
 // So we have to do two GraphQL queries on most model pages.
@@ -104,8 +106,28 @@ function useFixModelUrlCasing(model: ModelLayoutQuery$data["model"]) {
 
 type Props = PropsWithChildren<CommonProps>;
 
+export const entityNodes = (
+  username: string,
+  slug: string,
+  variableName?: string
+): entityNode[] => {
+  let nodes: entityNode[] = [
+    { slug: username, href: userRoute({ username }) },
+    { slug, href: modelRoute({ username, slug }), icon: CodeBracketIcon },
+  ];
+  if (variableName) {
+    nodes.push({
+      slug: variableName,
+      href: modelRoute({ username, slug }),
+      icon: ScaleIcon,
+    });
+  }
+  return nodes;
+};
+
 export const ModelLayout: FC<Props> = ({ username, slug, children }) => {
   const { data: session } = useSession();
+  const { variableName } = useParams();
 
   const { model } = useLazyLoadQuery<ModelLayoutQuery>(Query, {
     input: { ownerUsername: username, slug },
@@ -134,9 +156,7 @@ export const ModelLayout: FC<Props> = ({ username, slug, children }) => {
 
   return (
     <EntityLayout
-      slug={slug}
-      username={username}
-      homepageUrl={modelRoute({ username, slug })}
+      nodes={entityNodes(username, slug, variableName)}
       isFluid={true}
       headerChildren={
         <>
