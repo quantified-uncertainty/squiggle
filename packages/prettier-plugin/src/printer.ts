@@ -309,7 +309,7 @@ export function createSquigglePrinter(
           case "KeyValue":
             return [node.key, node.value];
           default:
-            return [];
+            return undefined;
         }
       },
       canAttachComment: (node: ASTNode) => {

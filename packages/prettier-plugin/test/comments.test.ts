@@ -83,4 +83,15 @@ foo(x) = {
 }
 `);
   });
+
+  test("comment in expression", async () => {
+    expect(
+      await format(`
+x = 3 + /* comment */ 5
+`)
+    ).toBe(`x = 3 +
+/* comment */
+5
+`);
+  });
 });
