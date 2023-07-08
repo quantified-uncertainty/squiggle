@@ -6,4 +6,4 @@ None of these are bundled in the NPM package.
 
 Option 1. `ts-node ./scripts/run.ts`. Slow, but doesn't require rebuilds.
 
-Option 2. Run `yarn build` and then `node ./dist/scripts/run.js`.
+Option 2. Run `pnpm build` and then `node ./dist/esm/src/scripts/run.js`.

@@ -184,7 +184,11 @@ const evaluateTernary: SubReducerFn<"Ternary"> = (
     context
   );
   if (predicateResult.type !== "Bool") {
-    return throwFrom(new REExpectedType("Boolean", ""), context, ast);
+    return throwFrom(
+      new REExpectedType("Boolean", predicateResult.type),
+      context,
+      ast
+    );
   }
 
   const [value] = context.evaluate(

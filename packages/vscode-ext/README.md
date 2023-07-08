@@ -31,6 +31,6 @@ Check out the full list of Squiggle settings in the main VS Code settings.
 
 ## Build locally
 
-We assume you ran `yarn` at the monorepo level for all dependencies.
+We assume you ran `pnpm i -r` at the monorepo level for all dependencies.
 
-Then, run `turbo run build --filter=vscode-squiggle` at the top level. It will build `squiggle-lang`, `squiggle-components`, and the VS Code extension source code.
+Then, run `turbo run build` in this directory. It will build `squiggle-lang`, `squiggle-components`, and this VS Code extension.

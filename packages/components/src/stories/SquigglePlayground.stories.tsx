@@ -6,9 +6,9 @@ import { Button } from "@quri/ui";
 /**
  * A Squiggle playground is an environment where you can play around with all settings, including sampling settings, in Squiggle.
  */
-const meta = {
+const meta: Meta<typeof Component> = {
   component: Component,
-} satisfies Meta<typeof Component>;
+};
 export default meta;
 type Story = StoryObj<typeof meta>;
 

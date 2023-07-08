@@ -59,7 +59,7 @@ function patchLinearishTickFormat<
   T extends
     | d3.ScaleLinear<number, number, never>
     | d3.ScaleSymLog<number, number, never>
-    | d3.ScalePower<number, number, never>,
+    | d3.ScalePower<number, number, never>
 >(scale: T): T {
   // copy-pasted from https://github.com/d3/d3-scale/blob/83555bd759c7314420bd4240642beda5e258db9e/src/linear.js#L14
   scale.tickFormat = (count, specifier) => {

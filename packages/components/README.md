@@ -14,7 +14,7 @@ This package is pure ESM; if you have trouble with importing it, read [this docu
 First, install this library:
 
 ```
-yarn add @quri/squiggle-components # or npm install if you use npm
+npm add @quri/squiggle-components # or `yarn add`, or `pnpm add`
 ```
 
 ## Styles

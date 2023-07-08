@@ -10,7 +10,7 @@ _An estimation language_
 For instance, in a javascript project, you can
 
 ```sh
-yarn add @quri/squiggle-lang
+npm add @quri/squiggle-lang # or `yarn add`, or `pnpm add`
 ```
 
 The `@quri/squiggle-lang` package exports a single function, `run`, which given
@@ -36,22 +36,20 @@ when using this library to help navigate the return type.
 
 # Build for development
 
-We assume that you ran `yarn` at the monorepo level.
+We assume that you installed turborepo and ran `pnpm i`.
 
 ```sh
-yarn build
+npx turbo build
 ```
-
-`yarn bundle` is needed for a deployment.
 
 Other:
 
 ```sh
-yarn start  # listens to files and recompiles at every mutation
-yarn test
+pnpm dev  # listens to files and recompiles at every mutation
+pnpm test
 
 # where o := open in osx and o := xdg-open in linux,
-yarn coverage:local; o _coverage/lcov-report/index.html  # produces coverage report and opens it in browser
+pnpm coverage:local; o coverage/lcov-report/index.html  # produces coverage report and opens it in browser
 ```
 
 # Distributing this package or using this package from other monorepo packages

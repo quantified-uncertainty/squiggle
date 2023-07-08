@@ -1,4 +1,12 @@
-import { run } from "../../src/index.js";
+import { SqValue, run } from "../../src/index.js";
+
+declare global {
+  namespace jest {
+    interface Matchers<R> {
+      toEqualSqValue(expected: SqValue): CustomMatcherResult;
+    }
+  }
+}
 
 expect.extend({
   toEqualSqValue(x, y) {

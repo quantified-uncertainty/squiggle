@@ -9,7 +9,7 @@
     "build:css": "postcss ./src/styles/full.css -o ./dist/full.css",
     "build:storybook": "storybook build",
     "clean:ts": "rm -rf ./dist && rm -f ./tsconfig.tsbuildinfo",
-    "build": "yarn clean:ts && yarn build:ts && yarn build:css && yarn build:storybook",
+    "build": "pnpm clean:ts && pnpm build:ts && pnpm build:css && pnpm build:storybook",
     "lint": "prettier --check .",
     "lint:eslint": "eslint --ignore-path .gitignore ./src",
     "format": "prettier --write ."
@@ -50,6 +50,7 @@
     "@storybook/react-vite": "^7.0.24",
     "@storybook/testing-library": "^0.2.0",
     "@tailwindcss/forms": "^0.5.3",
+    "@types/react": "^18.2.14",
     "@typescript-eslint/eslint-plugin": "^5.61.0",
     "@typescript-eslint/parser": "^5.61.0",
     "autoprefixer": "^10.4.14",
