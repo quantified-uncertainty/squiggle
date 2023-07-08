@@ -172,7 +172,7 @@ export function createSquigglePrinter(
             )
           );
 
-          return group([args[0], " ", node.op, line, args[1]]);
+          return group([args[0], " ", node.op, indent([line, args[1]])]);
         case "UnaryCall":
           return group([
             node.op,
@@ -273,7 +273,7 @@ export function createSquigglePrinter(
       }
     },
     printComment: (path: AstPath<ASTCommentNode>) => {
-      const commentNode = path.getValue();
+      const commentNode = path.node;
       switch (commentNode.type) {
         case "lineComment":
           // I'm not sure why "hardline" at the end here is not necessary
@@ -283,6 +283,9 @@ export function createSquigglePrinter(
         default:
           throw new Error("Unknown comment type");
       }
+    },
+    isBlockComment: (node) => {
+      return node.type === "blockComment";
     },
     ...({
       getCommentChildNodes: (node: ASTNode) => {

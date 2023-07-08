@@ -62,9 +62,17 @@ foo = {
       await format(`
 foo() = { /* inner comment */ 5 }
 `)
+    ).toBe(`foo() = { /* inner comment */ 5 }
+`);
+  });
+
+  test("long comment in function definition", async () => {
+    expect(
+      await format(`
+foo() = { /* long long long long long long long long long long long long inner comment */ 5 }
+`)
     ).toBe(`foo() = {
-  /* inner comment */
-  5
+  /* long long long long long long long long long long long long inner comment */ 5
 }
 `);
   });
@@ -89,9 +97,7 @@ foo(x) = {
       await format(`
 x = 3 + /* comment */ 5
 `)
-    ).toBe(`x = 3 +
-/* comment */
-5
+    ).toBe(`x = 3 + /* comment */ 5
 `);
   });
 });

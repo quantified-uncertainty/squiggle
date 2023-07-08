@@ -21,4 +21,16 @@ describe("expressions", () => {
       '4 > (3 > 2 ? 3 : 5) && 2 == -(-1 + -3 -> {|x|x / 3}) ? "ok" : "not ok"'
     );
   });
+
+  test("line breaks", async () => {
+    expect(
+      await format(`
+    x = aweruihaweiruhaweilurhawuelirhawelriwaherilaw + auweryalweuirayiewurhawielrahwerilawherwearawer
+`)
+    ).toBe(
+      `x = aweruihaweiruhaweilurhawuelirhawelriwaherilaw +
+  auweryalweuirayiewurhawielrahwerilawherwearawer
+`
+    );
+  });
 });
