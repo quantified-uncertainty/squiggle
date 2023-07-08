@@ -68,6 +68,6 @@
     }
   },
   "bin": {
-    "squiggle": "./dist/esm/src/cli/index.js"
+    "squiggle": "./dist/esm/cli/index.js"
   }
 }

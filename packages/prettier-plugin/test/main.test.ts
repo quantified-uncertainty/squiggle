@@ -275,3 +275,9 @@ import "./foo3.squiggle" as foo3
 123`);
   });
 });
+
+describe("units", () => {
+  test("known", async () => {
+    expect(await format("x = 15k")).toBe("x = 15k\n");
+  });
+});

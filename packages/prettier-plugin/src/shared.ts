@@ -109,7 +109,7 @@ export function createPlugin(util: PrettierUtil): Plugin<Node> {
   const printers: Record<string, Printer<Node>> = {
     "squiggle-ast": {
       print: (path, options, print) => {
-        const node = path.getValue();
+        const { node } = path;
         const typedPath = <T extends Node>(_: T) => {
           return path as AstPath<T>;
         };
@@ -318,6 +318,8 @@ export function createPlugin(util: PrettierUtil): Plugin<Node> {
             ];
           case "Void":
             return "()";
+          case "UnitValue":
+            return [typedPath(node).call(print, "value"), node.unit];
           case "lineComment":
           case "blockComment":
             throw new Error("Didn't expect comment node in print()");
