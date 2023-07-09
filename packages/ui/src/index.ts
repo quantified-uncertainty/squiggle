@@ -47,6 +47,7 @@ export {
   PauseIcon,
   PlayIcon,
   CodeBracketIcon,
+  CodeBracketSquareIcon,
   ScaleIcon,
   CheckIcon,
   FireIcon,
@@ -66,6 +67,10 @@ export {
   TableCellsIcon,
   ScatterPlotIcon,
   Cog8ToothIcon,
+  RectangleStackIcon,
+  ArchiveBoxIcon,
+  ArrowUturnLeftIcon,
+  BackwardIcon,
 } from "./icons/HeroIcons.js";
 
 export { useToast, WithToasts } from "./components/WithToasts/index.js";

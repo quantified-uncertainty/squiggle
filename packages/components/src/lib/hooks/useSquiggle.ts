@@ -50,7 +50,7 @@ export type UseSquiggleOutput = [
     project: SqProject;
     isRunning: boolean;
     sourceId: string;
-  }
+  },
 ];
 
 // this array's identity must be constant because it's used in useEffect below

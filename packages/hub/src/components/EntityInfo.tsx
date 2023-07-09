@@ -23,17 +23,19 @@ const ListWithSeparator: React.FC<{
   }, []);
 };
 
-const Entity: FC<entityNode & { isLast: boolean }> = ({
+const Entity: FC<entityNode & { isFirst: boolean; isLast: boolean }> = ({
   slug,
   href,
   icon: Icon,
+  isFirst,
   isLast,
 }) => {
   return (
     <Link
       className={clsx(
-        "text-lg text-slate-700 hover:underline flex items-center gap-1 group pt-1 py-2 px-3",
-        isLast ? "font-semibold" : ""
+        "text-lg text-slate-700 hover:underline flex items-center gap-1 group pt-1 py-2 pr-3",
+        isLast ? "font-semibold" : "",
+        isFirst ? "" : "pl-3"
       )}
       href={href}
       key={href}
@@ -53,7 +55,12 @@ export const EntityInfo: FC<{
   nodes: entityNode[];
 }> = ({ nodes }) => {
   const links = nodes.map((node, i) => (
-    <Entity {...node} key={i} isLast={i === nodes.length - 1} />
+    <Entity
+      {...node}
+      key={i}
+      isFirst={i === 0}
+      isLast={i === nodes.length - 1}
+    />
   ));
   const separator = (key: number) => (
     <div key={`s${key}`} className="text-lg text-gray-300">
@@ -62,7 +69,7 @@ export const EntityInfo: FC<{
   );
 
   return (
-    <div className="flex items-center mr-3">
+    <div className="flex items-center">
       <ListWithSeparator items={links} separator={separator} />
     </div>
   );

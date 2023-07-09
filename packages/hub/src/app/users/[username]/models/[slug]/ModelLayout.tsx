@@ -13,6 +13,10 @@ import {
   ScaleIcon,
   Dropdown,
   Cog8ToothIcon,
+  CodeBracketSquareIcon,
+  BackwardIcon,
+  ArrowUturnLeftIcon,
+  RectangleStackIcon,
 } from "@quri/ui";
 
 import {
@@ -21,7 +25,7 @@ import {
 } from "@/__generated__/ModelLayoutQuery.graphql";
 import { EntityLayout, entityNode } from "@/components/EntityLayout";
 import { DropdownMenuLinkItem } from "@/components/ui/DropdownMenuLinkItem";
-import { StyledTabLink } from "@/components/ui/StyledTabLink2";
+import { EntityTab } from "@/components/ui/EntityTab";
 import {
   modelForRelativeValuesExportRoute,
   modelRevisionsRoute,
@@ -81,10 +85,7 @@ const MenuButton: FC<CommonProps> = ({ username, slug }) => {
         </DropdownMenu>
       )}
     >
-      <div className="flex items-center rounded cursor-pointer hover:bg-white px-2 py-1 select-none text-sm">
-        <Cog8ToothIcon size={16} className="text-gray-500 mr-1" />
-        <span>Settings</span>
-      </div>
+      <EntityTab.Div name="Settings" icon={Cog8ToothIcon} />
     </Dropdown>
   );
 };
@@ -151,6 +152,7 @@ export const ModelLayout: FC<Props> = ({ username, slug, children }) => {
             variableName: exportItem.variableName,
           })}
           title={`${exportItem.variableName}: ${exportItem.definition.slug}`}
+          icon={ScaleIcon}
           close={close}
         />
       ))}
@@ -163,43 +165,35 @@ export const ModelLayout: FC<Props> = ({ username, slug, children }) => {
       isFluid={true}
       headerChildren={
         <>
-          {Boolean(model.currentRevision.relativeValuesExports.length) && (
-            <Dropdown render={({ close }) => dropDown(close)}>
-              <div className="flex items-center rounded cursor-pointer hover:bg-white px-2 py-1 select-none text-sm">
-                <ScaleIcon size={16} className="text-gray-500" />
-                <TriangleIcon
-                  size={7}
-                  className="rotate-180 ml-2 text-slate-400"
-                />
-              </div>
-            </Dropdown>
-          )}
-          <StyledTabLink.List>
-            <StyledTabLink
+          <EntityTab.List>
+            <EntityTab.Link
               name="Code"
               icon={CodeBracketIcon}
               href={modelRoute({ username, slug })}
             />
-            {model.currentRevision.relativeValuesExports.length ? (
-              <StyledTabLink
-                name="Viewer"
-                href={modelViewRoute({ username, slug })}
-                selected={(pathname, href) =>
-                  pathname === href ||
-                  pathname.startsWith(
-                    modelRoute({ username, slug }) + "/relative-values"
-                  )
-                }
-              />
-            ) : null}
-            <StyledTabLink
+            {Boolean(model.currentRevision.relativeValuesExports.length) && (
+              <Dropdown render={({ close }) => dropDown(close)}>
+                <EntityTab.Div
+                  name="Exports"
+                  icon={ScaleIcon}
+                  count={model.currentRevision.relativeValuesExports.length}
+                  selected={(pathname) => {
+                    return pathname.startsWith(
+                      modelRoute({ username, slug }) + "/relative-values"
+                    );
+                  }}
+                />
+              </Dropdown>
+            )}
+            <EntityTab.Link
               name="Revisions"
+              icon={RectangleStackIcon}
               href={modelRevisionsRoute({ username, slug })}
             />
-          </StyledTabLink.List>
-          {session?.user.username === username ? (
-            <MenuButton username={username} slug={slug} />
-          ) : null}
+            {session?.user.username === username ? (
+              <MenuButton username={username} slug={slug} />
+            ) : null}
+          </EntityTab.List>
         </>
       }
     >

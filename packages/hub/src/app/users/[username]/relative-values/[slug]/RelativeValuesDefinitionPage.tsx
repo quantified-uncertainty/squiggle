@@ -2,16 +2,23 @@ import { FC, PropsWithChildren } from "react";
 import { graphql } from "relay-runtime";
 
 import { DotsDropdownButton } from "@/components/ui/DotsDropdownButton";
-import { StyledTabLink } from "@/components/ui/StyledTabLink";
 import {
   userRoute,
   relativeValuesEditRoute,
   relativeValuesRoute,
 } from "@/routes";
-import { DropdownMenu, ScaleIcon } from "@quri/ui";
+import {
+  Cog8ToothIcon,
+  Dropdown,
+  DropdownMenu,
+  EditIcon,
+  PlayIcon,
+  ScaleIcon,
+} from "@quri/ui";
 import { DeleteDefinitionAction } from "./DeleteRelativeValuesDefinitionAction";
 import { useSession } from "next-auth/react";
 import { EntityLayout, entityNode } from "@/components/EntityLayout";
+import { EntityTab } from "@/components/ui/EntityTab";
 
 export const RelativeValuesDefinitionPageFragment = graphql`
   fragment RelativeValuesDefinitionPage on RelativeValuesDefinition {
@@ -71,18 +78,20 @@ export const RelativeValuesDefinitionPage: FC<Props> = ({
       headerChildren={
         session?.user.username === username ? (
           <>
-            <StyledTabLink.List>
-              <StyledTabLink
+            <EntityTab.List>
+              <EntityTab.Link
                 name="View"
+                icon={ScaleIcon}
                 href={relativeValuesRoute({ username, slug })}
               />
-              <StyledTabLink
+              <EntityTab.Link
                 name="Edit"
+                icon={EditIcon}
                 href={relativeValuesEditRoute({ username, slug })}
               />
-            </StyledTabLink.List>
-            <DotsDropdownButton>
-              {({ close }) => (
+            </EntityTab.List>
+            <Dropdown
+              render={({ close }) => (
                 <DropdownMenu>
                   <DeleteDefinitionAction
                     username={username}
@@ -91,7 +100,9 @@ export const RelativeValuesDefinitionPage: FC<Props> = ({
                   />
                 </DropdownMenu>
               )}
-            </DotsDropdownButton>
+            >
+              <EntityTab.Div name="Settings" icon={Cog8ToothIcon} />
+            </Dropdown>
           </>
         ) : null
       }
