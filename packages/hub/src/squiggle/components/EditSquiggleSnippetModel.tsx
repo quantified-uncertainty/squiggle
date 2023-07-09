@@ -131,7 +131,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
 
   return (
     <FormProvider {...form}>
-      <form onSubmit={save}>
+      <form onSubmit={save} className="bg-white">
         <div ref={ref}>
           <SquigglePlayground
             height={height ?? "100vh"}

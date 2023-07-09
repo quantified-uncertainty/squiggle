@@ -35,14 +35,14 @@ const Entity: FC<entityNode & { isFirst: boolean; isLast: boolean }> = ({
       className={clsx(
         "text-lg text-slate-700 hover:underline flex items-center gap-1 group pt-1 py-2 pr-3",
         isLast ? "font-semibold" : "",
-        isFirst ? "" : "pl-3"
+        !isFirst && "pl-3"
       )}
       href={href}
       key={href}
     >
       {Icon && (
         <Icon
-          className="text-slate-600 opacity-50 group-hover:opacity-100 trantition mr-1"
+          className="text-slate-600 opacity-50 group-hover:opacity-100 transition mr-1"
           size={18}
         />
       )}
