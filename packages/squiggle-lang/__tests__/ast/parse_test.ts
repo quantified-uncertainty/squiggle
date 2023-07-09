@@ -109,6 +109,10 @@ describe("Peggy parse", () => {
   1`,
       "{1}"
     );
+
+    testParse("/* first comment */ 1 + /* second comment */ 2", "{(1 + 2)}");
+    testParse("/* comment * with * stars */ 1", "{1}");
+    testParse("/* /* */ 1", "{1}");
   });
 
   describe("ternary operator", () => {

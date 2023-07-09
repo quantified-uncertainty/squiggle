@@ -1,5 +1,5 @@
 import { SqProject } from "../../src/index.js";
-import { toStringResult } from "../../src/public/SqValue.js";
+import "../helpers/toBeOkOutput.js";
 
 describe("SqProject Tutorial", () => {
   describe("Multi source", () => {
@@ -24,11 +24,8 @@ describe("SqProject Tutorial", () => {
       await project.runAll();
 
       /* And let's check the result and bindings of source3 */
-      const result3 = project.getResult("source3");
-      let bindings3 = project.getBindings("source3");
-
-      expect(toStringResult(result3)).toBe("Ok(())");
-      expect(bindings3.toString()).toBe("{z: 3}");
+      const output = project.getOutput("source3");
+      expect(output).toBeOkOutput("()", "{z: 3}");
     });
 
     test("Depending", async () => {
@@ -48,11 +45,8 @@ describe("SqProject Tutorial", () => {
       await project.runAll();
 
       /* And let's check the result and bindings of source3 */
-      const result3 = project.getResult("source3");
-      const bindings3 = project.getBindings("source3");
-
-      expect(toStringResult(result3)).toBe("Ok(())");
-      expect(bindings3.toString()).toBe("{z: 3}");
+      const output = project.getOutput("source3");
+      expect(output).toBeOkOutput("()", "{z: 3}");
     });
 
     test("Intro to imports", async () => {
@@ -79,14 +73,10 @@ describe("SqProject Tutorial", () => {
       /* Now we can run the project */
       await project.runAll();
 
-      /* And let's check the result and bindings of source3 
-      This time you are getting all the variables because we are including the other sources 
-      Behind the scenes parseImports is setting the dependencies */
-      const result3 = project.getResult("source3");
-      const bindings3 = project.getBindings("source3");
+      /* And let's check the result and bindings of source3 */
+      const output = project.getOutput("source3");
 
-      expect(toStringResult(result3)).toBe("Ok(())");
-      expect(bindings3.toString()).toBe("{z: 3}");
+      expect(output).toBeOkOutput("()", "{z: 3}");
       /*
          Dealing with imports needs more. 
          - There are parse errors

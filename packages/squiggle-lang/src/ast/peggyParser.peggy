@@ -359,7 +359,11 @@ finalComment "line comment"
 whiteSpaceCharactersOrComment = whiteSpaceCharacters / delimitedComment
 
   delimitedComment  "comment"
-    = '/*' comment:($([^*]*)) '*/' { options.comments.push(h.blockComment(comment, location())); }
+    = '/*' comment:($(
+      ([^*] / [*][^/])*
+    )) '*/' { options.comments.push(h.blockComment(comment, location())); }
+  // delimitedComment  "comment"
+  //   = '/*' comment:($([^*])*) '*/' { options.comments.push(h.blockComment(comment, location())); }
 
   whiteSpaceCharacters = [ \t]
 

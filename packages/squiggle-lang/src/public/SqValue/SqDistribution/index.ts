@@ -1,13 +1,14 @@
-import { SampleSetDist } from "../dist/SampleSetDist/index.js";
-import { Env } from "../dist/env.js";
+import { SampleSetDist } from "../../../dist/SampleSetDist/index.js";
+import { Env } from "../../../dist/env.js";
+import * as Result from "../../../utility/result.js";
+import { Ok, result } from "../../../utility/result.js";
+import { BaseDist } from "../../../dist/BaseDist.js";
+import { DistError } from "../../../dist/DistError.js";
+import { SymbolicDist } from "../../../dist/SymbolicDist.js";
+import { PointSetDist } from "../../../dist/PointSetDist.js";
+
 import { SqDistributionError } from "./SqDistributionError.js";
 import { wrapPointSet } from "./SqPointSet.js";
-import * as Result from "../utility/result.js";
-import { BaseDist } from "../dist/BaseDist.js";
-import { DistError } from "../dist/DistError.js";
-import { SymbolicDist } from "../dist/SymbolicDist.js";
-import { PointSetDist } from "../dist/PointSetDist.js";
-import { Ok, result } from "../utility/result.js";
 
 export enum SqDistributionTag {
   PointSet = "PointSet",
@@ -15,7 +16,7 @@ export enum SqDistributionTag {
   Symbolic = "Symbolic",
 }
 
-export const wrapDistribution = (value: BaseDist): SqDistribution => {
+export function wrapDistribution(value: BaseDist): SqDistribution {
   if (value instanceof SymbolicDist) {
     return new SqSymbolicDistribution(value);
   } else if (value instanceof SampleSetDist) {
@@ -24,7 +25,7 @@ export const wrapDistribution = (value: BaseDist): SqDistribution => {
     return new SqPointSetDistribution(value);
   }
   throw new Error(`Unknown value ${value}`);
-};
+}
 
 export abstract class SqAbstractDistribution<T extends BaseDist> {
   abstract tag: SqDistributionTag;

@@ -1,45 +1,46 @@
-import { BaseDist } from "../dist/BaseDist.js";
-import { SampleSetDist } from "../dist/SampleSetDist/index.js";
-import { Env } from "../dist/env.js";
-import * as Result from "../utility/result.js";
-import { Plot, vPlot } from "../value/index.js";
+import { BaseDist } from "../../dist/BaseDist.js";
+import { SampleSetDist } from "../../dist/SampleSetDist/index.js";
+import { Env } from "../../dist/env.js";
+import * as Result from "../../utility/result.js";
+import { Plot, vPlot } from "../../value/index.js";
+
+import { SqError, SqOtherError } from "../SqError.js";
+import { SqValueContext } from "../SqValueContext.js";
 import {
   SqDistribution,
   SqSampleSetDistribution,
   wrapDistribution,
-} from "./SqDistribution.js";
-import { SqError, SqOtherError } from "./SqError.js";
+} from "./SqDistribution/index.js";
 import { SqLambda } from "./SqLambda.js";
 import { SqScale, wrapScale } from "./SqScale.js";
-import { SqPlotValue } from "./SqValue.js";
-import { SqValuePath } from "./SqValuePath.js";
+import { SqPlotValue } from "./index.js";
 
 type LabeledSqDistribution = {
   name?: string;
   distribution: SqDistribution;
 };
 
-export const wrapPlot = (value: Plot, path?: SqValuePath): SqPlot => {
+export function wrapPlot(value: Plot, context?: SqValueContext): SqPlot {
   switch (value.type) {
     case "distributions":
-      return new SqDistributionsPlot(value, path);
+      return new SqDistributionsPlot(value, context);
     case "numericFn":
-      return new SqNumericFnPlot(value, path);
+      return new SqNumericFnPlot(value, context);
     case "distFn":
-      return new SqDistFnPlot(value, path);
+      return new SqDistFnPlot(value, context);
     case "scatter":
-      return new SqScatterPlot(value, path);
+      return new SqScatterPlot(value, context);
     case "relativeValues":
-      return new SqRelativeValuesPlot(value, path);
+      return new SqRelativeValuesPlot(value, context);
   }
-};
+}
 
 abstract class SqAbstractPlot<T extends Plot["type"]> {
   abstract tag: T;
 
   constructor(
     protected _value: Extract<Plot, { type: T }>,
-    public path?: SqValuePath
+    public context?: SqValueContext
   ) {}
 
   toString() {
@@ -47,7 +48,7 @@ abstract class SqAbstractPlot<T extends Plot["type"]> {
   }
 
   asValue() {
-    return new SqPlotValue(vPlot(this._value), this.path);
+    return new SqPlotValue(vPlot(this._value), this.context);
   }
 }
 
@@ -126,7 +127,7 @@ export class SqNumericFnPlot extends SqAbstractPlot<"numericFn"> {
         yScale: yScale._value,
         points,
       },
-      fn.path
+      fn.context
     );
     result.createdProgrammatically = true;
     return result;
@@ -135,10 +136,10 @@ export class SqNumericFnPlot extends SqAbstractPlot<"numericFn"> {
   get fn() {
     return new SqLambda(
       this._value.fn,
-      this.path
+      this.context
         ? this.createdProgrammatically
-          ? this.path
-          : this.path.extend("fn")
+          ? this.context
+          : this.context.extend("fn")
         : undefined
     );
   }
@@ -184,7 +185,7 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
         distXScale: distXScale._value,
         points,
       },
-      fn.path
+      fn.context
     );
     result.createdProgrammatically = true;
     return result;
@@ -193,10 +194,10 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
   get fn() {
     return new SqLambda(
       this._value.fn,
-      this.path
+      this.context
         ? this.createdProgrammatically
-          ? this.path
-          : this.path.extend("fn")
+          ? this.context
+          : this.context.extend("fn")
         : undefined
     );
   }
@@ -275,7 +276,7 @@ export class SqRelativeValuesPlot extends SqAbstractPlot<"relativeValues"> {
   get fn(): SqLambda {
     return new SqLambda(
       this._value.fn,
-      this.path ? this.path.extend("fn") : undefined
+      this.context ? this.context.extend("fn") : undefined
     );
   }
 }

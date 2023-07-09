@@ -1,6 +1,7 @@
-import { SqProject, evaluate } from "../../src/public/SqProject/index.js";
-import { toStringResult } from "../../src/public/SqValue.js";
 import { defaultEnvironment } from "../../src/index.js";
+import { SqProject, evaluate } from "../../src/public/SqProject/index.js";
+import { toStringResult } from "../../src/public/SqValue/index.js";
+import "../helpers/toBeOkOutput.js";
 
 describe("SqProject Tutorial", () => {
   describe("Single source", () => {
@@ -36,19 +37,15 @@ describe("SqProject Tutorial", () => {
       Either with run or runAll you executed the project.
       You can get the result of a specific source by calling getResult for that source.
       You can get the bindings of a specific source by calling getBindings for that source.
-      If there is any runtime error, getResult will return the error.
-
-      Note that getResult returns None if the source has not been run.
-      Getting None means you have forgotten to run the source.
+      To get both, call getOutput.
+      If there is any runtime error, these functions will return the error result.
       */
-      const result = project.getResult("main");
-      const bindings = project.getBindings("main");
+      const output = project.getOutput("main");
+
+      /* Output is a result<{ result: SqValue, bindings: SqRecord }, SqError> */
 
       /* Let's display the result and bindings */
-      expect([toStringResult(result), bindings.toString()]).toEqual([
-        "Ok(3)",
-        "{}",
-      ]);
+      expect(output).toBeOkOutput("3", "{}");
       /* You've got 3 with empty bindings. */
     });
 
@@ -56,13 +53,9 @@ describe("SqProject Tutorial", () => {
       const project = SqProject.create();
       project.setSource("main", "1 + 2");
       await project.runAll();
-      const result = project.getResult("main");
-      const bindings = project.getBindings("main");
+      const output = project.getOutput("main");
       /* Now you have external bindings and external result. */
-      expect([toStringResult(result), bindings.toString()]).toEqual([
-        "Ok(3)",
-        "{}",
-      ]);
+      expect(output).toBeOkOutput("3", "{}");
     });
 
     test("run with an environment", async () => {
@@ -75,18 +68,20 @@ describe("SqProject Tutorial", () => {
       project.setSource("main", "1 + 2");
       await project.runAll();
       const result = project.getResult("main");
-      const _bindings = project.getBindings("main");
       expect(toStringResult(result)).toBe("Ok(3)");
     });
 
     test("shortcut", () => {
       // If you are running single source without imports and you don't need a custom environment, you can use the shortcut.
       // Examples above was to prepare you for the multi source tutorial.
-      const [result, bindings] = evaluate("1+2");
-      expect([toStringResult(result), bindings.toString()]).toEqual([
-        "Ok(3)",
-        "{}",
-      ]);
+      const outputR = evaluate("1+2");
+      expect(outputR.ok).toBe(true);
+
+      if (!outputR.ok) {
+        throw new Error("failed");
+      }
+
+      expect(outputR).toBeOkOutput("3", "{}");
     });
   });
 });

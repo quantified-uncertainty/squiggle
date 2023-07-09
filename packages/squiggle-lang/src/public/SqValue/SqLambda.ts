@@ -1,19 +1,19 @@
-import { Env } from "../dist/env.js";
-import { IRuntimeError } from "../errors/IError.js";
-import { getStdLib } from "../library/index.js";
-import { registry } from "../library/registry/index.js";
-import { createContext } from "../reducer/context.js";
-import { Lambda } from "../reducer/lambda.js";
-import * as Result from "../utility/result.js";
-import { result } from "../utility/result.js";
-import { SqError, SqOtherError, SqRuntimeError } from "./SqError.js";
-import { SqValue, wrapValue } from "./SqValue.js";
-import { SqValuePath } from "./SqValuePath.js";
+import { Env } from "../../dist/env.js";
+import { IRuntimeError } from "../../errors/IError.js";
+import { getStdLib } from "../../library/index.js";
+import { createContext } from "../../reducer/context.js";
+import { Lambda } from "../../reducer/lambda.js";
+import * as Result from "../../utility/result.js";
+import { result } from "../../utility/result.js";
+
+import { SqError, SqOtherError, SqRuntimeError } from "../SqError.js";
+import { SqValueContext } from "../SqValueContext.js";
+import { SqValue, wrapValue } from "./index.js";
 
 export class SqLambda {
   constructor(
     public _value: Lambda, // public because of SqFnPlot.create
-    public path?: SqValuePath
+    public context?: SqValueContext
   ) {}
 
   static createFromStdlibName(name: string) {
@@ -33,7 +33,7 @@ export class SqLambda {
 
   call(args: SqValue[], env?: Env): result<SqValue, SqError> {
     if (!env) {
-      if (!this.path) {
+      if (!this.context) {
         return Result.Err(
           new SqOtherError(
             "Programmatically constructed lambda call requires env argument"
@@ -41,7 +41,7 @@ export class SqLambda {
         );
       }
       // default to project environment that created this lambda
-      env = this.path.project.getEnvironment();
+      env = this.context.project.getEnvironment();
     }
     const rawArgs = args.map((arg) => arg._value);
     try {

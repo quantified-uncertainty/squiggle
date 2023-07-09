@@ -8,7 +8,7 @@ import {
 } from "@quri/squiggle-lang";
 
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
-import { SqValueWithPath, valueHasPath } from "../../lib/utility.js";
+import { SqValueWithContext, valueHasContext } from "../../lib/utility.js";
 import { DistributionsChart } from "../DistributionsChart/index.js";
 import { DistFunctionChart } from "../FunctionChart/DistFunctionChart.js";
 import { NumericFunctionChart } from "../FunctionChart/NumericFunctionChart.js";
@@ -27,9 +27,9 @@ import { MergedItemSettings, getChildrenValues } from "./utils.js";
 import { MessageAlert } from "../Alert.js";
 
 export const getBoxProps = (
-  value: SqValueWithPath
+  value: SqValueWithContext
 ): Omit<VariableBoxProps, "value"> => {
-  const environment = value.path.project.getEnvironment();
+  const environment = value.context.project.getEnvironment();
 
   switch (value.tag) {
     case "Number":
@@ -48,7 +48,7 @@ export const getBoxProps = (
         heading: `${distType} Distribution`,
         renderSettingsMenu: ({ onChange }) => {
           const shape = value.value.pointSet(
-            value.path.project.getEnvironment()
+            value.context.project.getEnvironment()
           );
 
           return (
@@ -248,7 +248,7 @@ type Props = {
 };
 
 export const ExpressionViewer: React.FC<Props> = ({ value }) => {
-  if (!valueHasPath(value)) {
+  if (!valueHasContext(value)) {
     return <MessageAlert heading="Can't display pathless value" />;
   }
 

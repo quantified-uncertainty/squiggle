@@ -5,7 +5,7 @@ import { FormProvider, useForm } from "react-hook-form";
 
 import { Modal, TextTooltip } from "@quri/ui";
 
-import { SqValueWithPath } from "../../lib/utility.js";
+import { SqValueWithContext } from "../../lib/utility.js";
 import {
   MetaSettings,
   PlaygroundSettingsForm,
@@ -20,7 +20,7 @@ import {
 import { pathAsString } from "./utils.js";
 
 type Props = {
-  value: SqValueWithPath;
+  value: SqValueWithContext;
   onChange: () => void;
   metaSettings?: MetaSettings;
   withFunctionSettings: boolean;
@@ -39,7 +39,9 @@ const ItemSettingsModal: React.FC<
   const setSettings = useSetSettings();
   const { getSettings, getMergedSettings } = useViewerContext();
 
-  const mergedSettings = getMergedSettings({ path: value.path });
+  const { path } = value.context;
+
+  const mergedSettings = getMergedSettings({ path });
 
   const form = useForm({
     resolver: zodResolver(viewSettingsSchema),
@@ -49,7 +51,7 @@ const ItemSettingsModal: React.FC<
 
   useEffect(() => {
     const submit = form.handleSubmit((data) => {
-      setSettings(value.path, {
+      setSettings(path, {
         collapsed: false,
         ...data,
       });
@@ -58,7 +60,7 @@ const ItemSettingsModal: React.FC<
 
     const subscription = form.watch(() => submit());
     return () => subscription.unsubscribe();
-  }, [getSettings, setSettings, onChange, value.path, form]);
+  }, [getSettings, setSettings, onChange, path, form]);
 
   const { getLeftPanelElement } = useContext(PlaygroundContext);
 
@@ -66,7 +68,7 @@ const ItemSettingsModal: React.FC<
     <Modal container={getLeftPanelElement()} close={close}>
       <Modal.Header>
         Chart settings
-        {value.path.items.length ? (
+        {path.items.length ? (
           <>
             {" for "}
             <span
@@ -74,7 +76,7 @@ const ItemSettingsModal: React.FC<
               className="cursor-pointer"
               onClick={resetScroll}
             >
-              {pathAsString(value.path)}
+              {pathAsString(path)}
             </span>
           </>
         ) : (
@@ -106,14 +108,14 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
     return null;
   }
 
-  const settings = getSettings({ path: props.value.path });
+  const { path } = props.value.context;
+
+  const settings = getSettings({ path });
 
   const resetScroll = () => {
     dispatch({
       type: "SCROLL_TO_PATH",
-      payload: {
-        path: props.value.path,
-      },
+      payload: { path },
     });
   };
 
@@ -128,9 +130,7 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
       {settings.distributionChartSettings ? (
         <button
           onClick={() => {
-            setSettings(props.value.path, {
-              collapsed: settings.collapsed,
-            });
+            setSettings(path, { collapsed: settings.collapsed });
             props.onChange();
           }}
           className="text-xs px-1 py-0.5 rounded bg-stone-200 hover:bg-stone-400"

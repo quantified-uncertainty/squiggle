@@ -1,4 +1,4 @@
-import { CommonScaleArgs, Scale, vScale } from "../value/index.js";
+import { CommonScaleArgs, Scale, vScale } from "../../value/index.js";
 
 export const wrapScale = (value: Scale): SqScale => {
   switch (value.type) {

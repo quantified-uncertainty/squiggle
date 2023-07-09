@@ -42,7 +42,7 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
     if (!squiggleOutput) {
       return [];
     }
-    return getErrors(squiggleOutput.result);
+    return getErrors(squiggleOutput.output);
   }, [squiggleOutput]);
 
   const editorRef = useRef<CodeEditorHandle>(null);
