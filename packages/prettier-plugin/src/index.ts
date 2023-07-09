@@ -1,7 +1,7 @@
 import { util } from "prettier";
 
-import { type PrettierUtil, createPlugin } from "./shared.js";
-export { type Node } from "./shared.js";
+import { createPlugin } from "./shared.js";
+import { type PrettierUtil } from "./types.js";
 
 export const { languages, parsers, printers, options, defaultOptions } =
   createPlugin(util as unknown as PrettierUtil);

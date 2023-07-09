@@ -5,6 +5,6 @@
     "outDir": "dist/tests", // for tsbuildinfo
     "rootDir": "."
   },
-  "include": ["test/**/*"],
+  "include": ["test/**/*", "jest.config.ts"],
   "references": [{ "path": "./tsconfig.build.json" }]
 }
