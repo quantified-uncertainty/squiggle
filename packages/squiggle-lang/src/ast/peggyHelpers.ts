@@ -39,7 +39,7 @@ type N<T extends string, V extends {}> = Node & { type: T } & V;
 type NodeBlock = N<
   "Block",
   {
-    statements: ASTNode[]; // should be NodeStatement[] ?
+    statements: ASTNode[];
   }
 >;
 
@@ -47,13 +47,26 @@ type NodeProgram = N<
   "Program",
   {
     imports: [NodeString, NodeIdentifier][];
-    statements: ASTNode[]; // should be NodeStatement[] ?
+    statements: ASTNode[];
+    // Var name -> statement node, for faster path resolution.
+    // Not used for evaluation.
+    symbols: { [k in string]: ASTNode };
   }
 >;
 
 type NodeArray = N<"Array", { elements: ASTNode[] }>;
 
-type NodeRecord = N<"Record", { elements: NodeKeyValue[] }>;
+type NodeRecord = N<
+  "Record",
+  {
+    elements: NodeKeyValue[];
+    // Static key -> node, for faster path resolution.
+    // Not used for evaluation.
+    symbols: { [k in number | string]: NodeKeyValue };
+  }
+>;
+
+type NodeUnitValue = N<"UnitValue", { value: ASTNode; unit: string }>;
 
 type NodeCall = N<"Call", { fn: ASTNode; args: ASTNode[] }>;
 
@@ -137,6 +150,7 @@ export type ASTNode =
   | NodeRecord
   | NodeBlock
   | NodeProgram
+  | NodeUnitValue
   | NodeCall
   | NodeInfixCall
   | NodeUnaryCall
@@ -220,17 +234,31 @@ export function nodeBracketLookup(
   return { type: "BracketLookup", arg, key, location };
 }
 
-export function constructArray(
+export function nodeArray(
   elements: ASTNode[],
   location: LocationRange
 ): NodeArray {
   return { type: "Array", elements, location };
 }
-export function constructRecord(
+export function nodeRecord(
   elements: NodeKeyValue[],
   location: LocationRange
 ): NodeRecord {
-  return { type: "Record", elements, location };
+  const symbols: NodeRecord["symbols"] = {};
+  for (const element of elements) {
+    if (element.key.type === "String" || element.key.type === "Integer") {
+      symbols[element.key.value] = element;
+    }
+  }
+  return { type: "Record", elements, symbols, location };
+}
+
+export function nodeUnitValue(
+  value: ASTNode,
+  unit: string,
+  location: LocationRange
+): NodeUnitValue {
+  return { type: "UnitValue", value, unit, location };
 }
 
 export function nodeBlock(
@@ -244,7 +272,16 @@ export function nodeProgram(
   statements: ASTNode[],
   location: LocationRange
 ): NodeProgram {
-  return { type: "Program", imports, statements, location };
+  const symbols: NodeProgram["symbols"] = {};
+  for (const statement of statements) {
+    if (
+      statement.type === "LetStatement" ||
+      statement.type === "DefunStatement"
+    ) {
+      symbols[statement.variable.value] = statement;
+    }
+  }
+  return { type: "Program", imports, statements, symbols, location };
 }
 export function nodeBoolean(
   value: boolean,

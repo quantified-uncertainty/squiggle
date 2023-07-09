@@ -66,15 +66,15 @@ describe("Distribution", () => {
 
   const buildDist = async (samples: number[]) => {
     const src = `SampleSet.fromList([${samples.join(",")}])`;
-    const { result } = await run(src, {
+    const output = await run(src, {
       environment: env,
     });
-    if (!result.ok) {
+    if (!output.ok) {
       throw new Error(
-        `Failed to build SampleSet: from ${src}: ${result.value}`
+        `Failed to build SampleSet: from ${src}: ${output.value}`
       );
     }
-    const dist = result.value;
+    const dist = output.value.result;
     if (dist.tag !== "Dist") {
       throw new Error("Expected Distribution");
     }

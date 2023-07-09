@@ -11,7 +11,7 @@ import { Ok } from "../utility/result.js";
 import * as Result from "../utility/result.js";
 import { Value, vArray, vNumber, vString } from "../value/index.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
-import { REOther } from "../errors/messages.js";
+import { REExpectedType, REOther } from "../errors/messages.js";
 import includes from "lodash/includes.js";
 import uniqBy from "lodash/uniqBy.js";
 
@@ -92,12 +92,29 @@ export const library = [
     name: "map",
     output: "Array",
     requiresNamespace: false,
-    examples: [`List.map([1,4,5], {|x| x+1})`],
+    examples: [
+      "List.map([1,4,5], {|x| x+1})",
+      "List.map([1,4,5], {|x,i| x+i+1})",
+    ],
     definitions: [
       makeDefinition([frArray(frAny), frLambda], ([array, lambda], context) => {
         const mapped: Value[] = new Array(array.length);
-        for (let i = 0; i < array.length; i++) {
-          mapped[i] = lambda.call([array[i]], context);
+        const parameters = lambda.getParameters().length;
+
+        // this code is intentionally duplicated for performance reasons
+        if (parameters === 1) {
+          for (let i = 0; i < array.length; i++) {
+            mapped[i] = lambda.call([array[i]], context);
+          }
+        } else if (parameters === 2) {
+          for (let i = 0; i < array.length; i++) {
+            mapped[i] = lambda.call([array[i], vNumber(i)], context);
+          }
+        } else {
+          throw new REExpectedType(
+            "(number, number?) => ...",
+            `(${lambda.getParameters().join(",")}) => ...`
+          );
         }
         return vArray(mapped);
       }),

@@ -112,10 +112,10 @@ export function useSetSettings() {
 
 export function useFocus() {
   const { dispatch } = useViewerContext();
-  return (location: SqValuePath) => {
+  return (path: SqValuePath) => {
     dispatch({
       type: "FOCUS",
-      payload: location,
+      payload: path,
     });
   };
 }
@@ -228,7 +228,7 @@ export const ViewerProvider: FC<
         case "COLLAPSE_CHILDREN": {
           const children = getChildrenValues(action.payload);
           for (const child of children) {
-            child.path && setCollapsed(child.path, true);
+            child.context && setCollapsed(child.context.path, true);
           }
           return;
         }

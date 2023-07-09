@@ -78,7 +78,7 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
       if (!squiggleOutput) {
         return [];
       }
-      return getErrors(squiggleOutput.result);
+      return getErrors(squiggleOutput.output);
     }, [squiggleOutput]);
 
     const editorRef = useRef<CodeEditorHandle>(null);

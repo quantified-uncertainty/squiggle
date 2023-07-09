@@ -1,47 +1,28 @@
-import { LocationRange } from "peggy";
 import { ASTNode } from "../ast/parse.js";
 import { locationContains } from "../ast/utils.js";
-import { SqProject } from "./SqProject/index.js";
-import * as Result from "../utility/result.js";
-import { SqError } from "./SqError.js";
 
-type PathItem = string | number;
+export type PathItem = string | number;
 
 export class SqValuePath {
-  public project: SqProject;
-  public sourceId: string;
   public root: "result" | "bindings";
   public items: PathItem[];
 
-  constructor(props: {
-    project: SqProject;
-    sourceId: string;
-    root: "result" | "bindings";
-    items: PathItem[];
-  }) {
-    this.project = props.project;
-    this.sourceId = props.sourceId;
+  constructor(props: { root: "result" | "bindings"; items: PathItem[] }) {
     this.root = props.root;
     this.items = props.items;
   }
 
   extend(item: PathItem) {
     return new SqValuePath({
-      project: this.project,
-      sourceId: this.sourceId,
       root: this.root,
       items: [...this.items, item],
     });
   }
 
   static findByOffset({
-    project,
-    sourceId,
     ast,
     offset,
   }: {
-    project: SqProject;
-    sourceId: string;
     ast: ASTNode;
     offset: number;
   }): SqValuePath | undefined {
@@ -101,23 +82,15 @@ export class SqValuePath {
     };
 
     return new SqValuePath({
-      project,
-      sourceId,
       root: "bindings", // not important, will probably be removed soon
       items: findLoop(ast),
     });
-  }
-
-  findLocation(): Result.result<LocationRange, SqError> {
-    return this.project.findLocationByValuePath(this.sourceId, this);
   }
 
   itemsAsValuePaths() {
     return this.items.map(
       (_, index) =>
         new SqValuePath({
-          project: this.project,
-          sourceId: this.sourceId,
           root: this.root,
           items: this.items.slice(0, index + 1),
         })

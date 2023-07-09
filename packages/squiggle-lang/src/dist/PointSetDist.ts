@@ -23,7 +23,7 @@ export class PointSetDist<
     this.pointSet = pointSet;
   }
 
-  toString() {
+  override toString() {
     return "Point Set Distribution";
   }
 

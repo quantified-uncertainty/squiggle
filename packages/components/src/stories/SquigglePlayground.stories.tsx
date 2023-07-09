@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 
 import { SquigglePlayground as Component } from "../components/SquigglePlayground/index.js";
 import { Button } from "@quri/ui";
+import { sq } from "@quri/squiggle-lang";
 
 /**
  * A Squiggle playground is an environment where you can play around with all settings, including sampling settings, in Squiggle.
@@ -91,5 +92,59 @@ export const WithExtraControls: Story = {
             body: <div>Extra content</div>,
           }
         : undefined,
+  },
+};
+
+export const Comments: Story = {
+  name: "With comments",
+  args: {
+    defaultCode: sq`/** This comment will be attached to x */
+show1 = true
+
+// Line comments won't work.
+noShow1 = false
+
+/* Block comments starting with a single star won't work either; we follow JSDoc conventions in this. */
+noShow2 = false
+
+/*** Triple stars are forbidden too; again, JSDoc convention. */
+noShow2 = false
+
+/** This comment won't show because \`show2\` is shadowed */
+show2 = false
+
+/** If variable is redefined, we attach the last comment */
+show2 = true
+
+/** line 1 */
+/** line 2 - only this line will be shown */
+t = 3
+
+/** there can be any amount of space between the comment and the variable */
+
+
+
+showFar = true
+
+/** zero space is ok too */showNear = true
+
+/**
+Comments can be long.
+
+# There's no markdown support yet.
+
+Squiggle is a minimalist programming language for probabilistic estimation. It's meant for intuitively-driven quantitative estimation instead of data analysis or data-driven statistical techniques.
+
+The basics of Squiggle are fairly straightforward. This can be enough for many models. The more advanced functionality can take some time to learn.
+*/
+long = true
+
+/** record comment */
+r = {
+  foo: 5,
+  /** comments on static record fields work too */
+  bar: 6,
+}
+`,
   },
 };

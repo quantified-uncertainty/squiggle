@@ -1,20 +1,21 @@
 {
   "compilerOptions": {
+    // build settings
     "module": "es2020",
     "moduleResolution": "node16",
+    "target": "es2022",
     "jsx": "react-jsx",
-    "target": "ES6",
-    "skipLibCheck": true,
-    "resolveJsonModule": true,
-    "noImplicitAny": false,
     "esModuleInterop": true,
-    "removeComments": true,
-    "strict": true,
-    "preserveConstEnums": true,
     "composite": true,
     "rootDir": "./src",
     "outDir": "./dist",
-    "sourceMap": true
+    "declarationMap": true,
+    "sourceMap": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    // type check settings
+    "strict": true,
+    "skipLibCheck": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]

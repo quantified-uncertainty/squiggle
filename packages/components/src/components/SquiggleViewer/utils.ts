@@ -40,7 +40,7 @@ export function extractSubvalueByPath(
   value: SqValue,
   path: SqValuePath
 ): SqValue | undefined {
-  if (!value.path) {
+  if (!value.context) {
     return;
   }
 

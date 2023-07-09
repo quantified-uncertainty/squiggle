@@ -11,7 +11,7 @@ import { clsx } from "clsx";
 import { CodeBracketIcon, TextTooltip, TriangleIcon } from "@quri/ui";
 import { SqValuePath } from "@quri/squiggle-lang";
 
-import { SqValueWithPath } from "../../lib/utility.js";
+import { SqValueWithContext } from "../../lib/utility.js";
 import {
   useCollapseChildren,
   useFocus,
@@ -32,7 +32,7 @@ type SettingsMenuParams = {
 };
 
 export type VariableBoxProps = {
-  value: SqValueWithPath;
+  value: SqValueWithContext;
   heading?: string;
   preview?: ReactNode;
   renderSettingsMenu?: (params: SettingsMenuParams) => ReactNode;
@@ -61,24 +61,18 @@ export const VariableBox: FC<VariableBoxProps> = ({
   const focus = useFocus();
   const { editor, getSettings, getMergedSettings, dispatch } =
     useViewerContext();
-  const isFocused = useIsFocused(value.path);
+  const isFocused = useIsFocused(value.context.path);
 
   const findInEditor = () => {
-    const locationR = value.path.findLocation();
-    if (!locationR.ok) {
-      return;
-    }
-    editor?.scrollTo(locationR.value.start.offset);
+    const location = value.context.findLocation();
+    editor?.scrollTo(location.start.offset);
   };
 
   // Since `ViewerContext` doesn't store settings, `VariableBox` won't rerender when `setSettings` is called.
   // So we use `forceUpdate` to force rerendering.
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
-  const { path } = value;
-  if (!path) {
-    throw new Error("Can't display pathless value");
-  }
+  const { path } = value.context;
 
   const isRoot = Boolean(path.isRoot());
 
@@ -197,6 +191,15 @@ export const VariableBox: FC<VariableBoxProps> = ({
         <div className="border-l border-stone-200 group-hover:border-stone-500 w-2" />
       </div>
     );
+  const showComment = () => {
+    const comment = value.context.docstring();
+    return comment ? (
+      // TODO - markdown
+      <div className="text-xs text-slate-700 whitespace-pre-line">
+        {comment}
+      </div>
+    ) : null;
+  };
 
   return (
     <div ref={saveRef}>
@@ -224,6 +227,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
           {!isFocused && leftCollapseBorder()}
           {isFocused && <div className="w-2" />}
           <div className="grow">
+            {showComment()}
             {children(getAdjustedMergedSettings(path))}
           </div>
         </div>

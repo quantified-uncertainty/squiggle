@@ -32,8 +32,13 @@ export type SquiggleArgs = {
 } & (StandaloneExecutionProps | ProjectExecutionProps);
 
 export type SquiggleOutput = {
-  result: result<SqValue, SqError>;
-  bindings: SqRecord;
+  output: result<
+    {
+      result: SqValue;
+      bindings: SqRecord;
+    },
+    SqError
+  >;
   code: string;
   executionId: number;
   executionTime: number;
@@ -91,11 +96,9 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
         project.setSource(sourceId, args.code);
         project.setContinues(sourceId, continues);
         await project.run(sourceId);
-        const result = project.getResult(sourceId);
-        const bindings = project.getBindings(sourceId);
+        const output = project.getOutput(sourceId);
         setSquiggleOutput({
-          result,
-          bindings,
+          output,
           code: args.code,
           executionId,
           executionTime: Date.now() - startTime,
@@ -126,7 +129,7 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
       return;
     }
     onChange?.(
-      squiggleOutput.result.ok ? squiggleOutput.result.value : undefined,
+      squiggleOutput.output.ok ? squiggleOutput.output.value.result : undefined,
       sourceId
     );
   }, [squiggleOutput, isRunning, onChange, sourceId]);

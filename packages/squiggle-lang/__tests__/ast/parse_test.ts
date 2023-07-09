@@ -1,4 +1,8 @@
-import { testParse } from "../helpers/reducerHelpers.js";
+import {
+  testEvalError,
+  testEvalToBe,
+  testParse,
+} from "../helpers/reducerHelpers.js";
 
 describe("Peggy parse", () => {
   describe("float", () => {
@@ -105,6 +109,10 @@ describe("Peggy parse", () => {
   1`,
       "{1}"
     );
+
+    testParse("/* first comment */ 1 + /* second comment */ 2", "{(1 + 2)}");
+    testParse("/* comment * with * stars */ 1", "{1}");
+    testParse("/* /* */ 1", "{1}");
   });
 
   describe("ternary operator", () => {
@@ -221,9 +229,11 @@ describe("Peggy parse", () => {
     );
   });
   describe("unit", () => {
-    testParse("1m", "{(:fromUnit_m 1)}");
-    testParse("1M", "{(:fromUnit_M 1)}");
-    testParse("1m+2cm", "{((:fromUnit_m 1) + (:fromUnit_cm 2))}");
+    testParse("1m", "{(unit 1 m)}");
+    testParse("1M", "{(unit 1 M)}");
+    testEvalToBe("1M", "1000000");
+    testEvalError("1q");
+    testParse("1k+2M", "{((unit 1 k) + (unit 2 M))}");
   });
   describe("Module", () => {
     testParse("x", "{:x}");

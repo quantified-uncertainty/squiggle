@@ -3,3 +3,4 @@
 /syntaxes/*.json
 dist
 /out
+/tsconfig.tsbuildinfo

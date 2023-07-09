@@ -2,15 +2,15 @@ import { run } from "../../index.js";
 import { blue, bold, green, red } from "../../cli/colors.js";
 
 const testRun = async (x: string) => {
-  const { result } = await run(x, {
+  const outputR = await run(x, {
     environment: { sampleCount: 100, xyPointLength: 100 },
   });
-  if (result.ok) {
-    return result.value;
+  if (outputR.ok) {
+    return outputR.value.result;
   } else {
     throw Error(
       "Expected squiggle expression to evaluate but got error: " +
-        result.value.toString()
+        outputR.value.toString()
     );
   }
 };

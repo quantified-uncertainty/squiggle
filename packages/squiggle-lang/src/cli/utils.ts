@@ -51,10 +51,9 @@ async function _run(args: {
   const time = await measure(
     async () => await project.runWithImports(filename, loader)
   );
-  const bindings = project.getBindings(filename);
-  const result = project.getResult(filename);
+  const output = project.getOutput(filename);
 
-  return { result, bindings, time };
+  return { output, time };
 }
 
 export async function run(args: RunArgs) {
@@ -66,7 +65,7 @@ export async function run(args: RunArgs) {
     };
   }
 
-  const { result, bindings, time } = await _run({
+  const { output, time } = await _run({
     src: args.src,
     filename: args.filename,
     environment,
@@ -82,20 +81,20 @@ export async function run(args: RunArgs) {
     lines.forEach((line) => console.log(line));
   };
 
-  if (!result.ok) {
-    printLines(red("Error:"), result.value.toStringWithDetails());
+  if (!output.ok) {
+    printLines(red("Error:"), output.value.toStringWithDetails());
   } else {
     switch (args.output) {
       case "RESULT_OR_BINDINGS":
-        if (result.value.tag === "Void") {
-          printLines(bindings.toString());
+        if (output.value.result.tag === "Void") {
+          printLines(output.value.bindings.toString());
         } else {
-          printLines(result.value.toString());
+          printLines(output.value.result.toString());
         }
         break;
       case "RESULT_AND_BINDINGS":
-        printLines(bold("Result:"), result.value.toString());
-        printLines(bold("Bindings:"), bindings.toString());
+        printLines(bold("Result:"), output.value.result.toString());
+        printLines(bold("Bindings:"), output.value.bindings.toString());
         break;
       case "NONE":
       // do nothing

@@ -1,6 +1,6 @@
-import { AST, ParseError, parse } from "../../ast/parse.js";
-import { compileAst } from "../../expression/compile.js";
+import { AST, parse } from "../../ast/parse.js";
 import { IRuntimeError } from "../../errors/IError.js";
+import { compileAst } from "../../expression/compile.js";
 import { ReducerContext } from "../../reducer/context.js";
 import { ReducerFn, evaluate } from "../../reducer/index.js";
 import { Bindings } from "../../reducer/stack.js";
@@ -18,6 +18,11 @@ import { Resolver } from "./Resolver.js";
 
 // source -> ast -> imports -> bindings & result
 
+export type RunOutput = {
+  result: Value;
+  bindings: Bindings;
+};
+
 export type ImportBinding = {
   sourceId: string;
   variable: string;
@@ -29,8 +34,7 @@ export class ProjectItem {
   continues: string[];
   ast?: result<AST, SqError>;
   imports?: result<ImportBinding[], SqError>;
-  bindings?: Bindings;
-  result?: result<Value, SqError>;
+  output?: result<RunOutput, SqError>;
 
   constructor(props: { sourceId: string; source: string }) {
     this.sourceId = props.sourceId;
@@ -41,8 +45,7 @@ export class ProjectItem {
   touchSource() {
     this.ast = undefined;
     this.imports = undefined;
-    this.bindings = undefined;
-    this.result = undefined;
+    this.output = undefined;
   }
 
   setSource(source: string) {
@@ -54,20 +57,17 @@ export class ProjectItem {
     this.ast = ast;
 
     this.imports = undefined;
-    this.result = undefined;
-    this.bindings = undefined;
+    this.output = undefined;
   }
 
   private setImports(imports: result<ImportBinding[], SqError>): void {
     this.imports = imports;
 
-    this.result = undefined;
-    this.bindings = undefined;
+    this.output = undefined;
   }
 
   clean() {
-    this.result = undefined;
-    this.bindings = undefined;
+    this.output = undefined;
   }
 
   getDependencies(): string[] {
@@ -139,12 +139,11 @@ export class ProjectItem {
   }
 
   failRun(e: SqError): void {
-    this.result = Result.Err(e);
-    this.bindings = ImmutableMap();
+    this.output = Result.Err(e);
   }
 
   async run(context: ReducerContext, externals: ImmutableMap<string, Value>) {
-    if (this.result) {
+    if (this.output) {
       return;
     }
 
@@ -179,8 +178,10 @@ export class ProjectItem {
         ...context,
         evaluate: asyncEvaluate,
       });
-      this.result = Ok(result);
-      this.bindings = contextAfterEvaluation.stack.asBindings();
+      this.output = Ok({
+        result,
+        bindings: contextAfterEvaluation.stack.asBindings(),
+      });
     } catch (e: unknown) {
       this.failRun(new SqRuntimeError(IRuntimeError.fromException(e)));
     }

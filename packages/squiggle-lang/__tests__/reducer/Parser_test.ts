@@ -1,5 +1,7 @@
-import { testRun } from "../helpers/helpers.js";
 import * as fc from "fast-check";
+
+import { testRun } from "../helpers/helpers.js";
+import "../helpers/toEqualSqValue.js";
 
 describe("Squiggle's parser is whitespace insensitive", () => {
   test("when assigning a distribution to a name and calling that name", async () => {
