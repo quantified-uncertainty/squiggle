@@ -195,7 +195,9 @@ export const VariableBox: FC<VariableBoxProps> = ({
     const comment = value.context.docstring();
     return comment ? (
       // TODO - markdown
-      <div className="text-xs text-slate-700">{comment}</div>
+      <div className="text-xs text-slate-700 whitespace-pre-line">
+        {comment}
+      </div>
     ) : null;
   };
 
