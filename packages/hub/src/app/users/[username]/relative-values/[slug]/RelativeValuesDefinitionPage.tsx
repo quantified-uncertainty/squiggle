@@ -89,20 +89,20 @@ export const RelativeValuesDefinitionPage: FC<Props> = ({
                 icon={EditIcon}
                 href={relativeValuesEditRoute({ username, slug })}
               />
+              <Dropdown
+                render={({ close }) => (
+                  <DropdownMenu>
+                    <DeleteDefinitionAction
+                      username={username}
+                      slug={slug}
+                      close={close}
+                    />
+                  </DropdownMenu>
+                )}
+              >
+                <EntityTab.Div name="Settings" icon={Cog8ToothIcon} />
+              </Dropdown>
             </EntityTab.List>
-            <Dropdown
-              render={({ close }) => (
-                <DropdownMenu>
-                  <DeleteDefinitionAction
-                    username={username}
-                    slug={slug}
-                    close={close}
-                  />
-                </DropdownMenu>
-              )}
-            >
-              <EntityTab.Div name="Settings" icon={Cog8ToothIcon} />
-            </Dropdown>
           </>
         ) : null
       }

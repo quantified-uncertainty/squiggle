@@ -31,7 +31,7 @@ const tabInnerSection = (
   Icon?: FC<IconProps>,
   count?: number
 ) => (
-  <div className="items-center flex group-hover:bg-white rounded-md px-4 py-1.5">
+  <div className="items-center flex group-hover:bg-white rounded-md px-3 py-1.5">
     {Icon && <Icon className="mr-2 opacity-60" size={16} />}
     {name}
     {count && (
@@ -44,7 +44,7 @@ const tabInnerSection = (
 
 const outerClass = (isSelected: boolean | undefined) =>
   clsx(
-    "flex whitespace-nowrap py-2 text-sm items-center border-b-2 group cursor-pointer",
+    "flex whitespace-nowrap py-2 px-1 text-sm items-center border-b-2 group cursor-pointer",
     isSelected
       ? "border-blue-700 text-gray-900"
       : "text-gray-600 border-transparent"
