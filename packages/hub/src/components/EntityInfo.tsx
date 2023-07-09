@@ -32,15 +32,15 @@ const Entity: FC<entityNode & { isLast: boolean }> = ({
   return (
     <Link
       className={clsx(
-        "text-lg text-blue-600 hover:underline flex items-center gap-1 group",
-        isLast ? "font-semibold" : "font-medium"
+        "text-lg text-slate-700 hover:underline flex items-center gap-1 group pt-1 py-2 px-3",
+        isLast ? "font-semibold" : ""
       )}
       href={href}
       key={href}
     >
       {Icon && (
         <Icon
-          className="text-blue-600 opacity-50 group-hover:opacity-100 trantition mr-1"
+          className="text-slate-600 opacity-50 group-hover:opacity-100 trantition mr-1"
           size={18}
         />
       )}
@@ -56,7 +56,7 @@ export const EntityInfo: FC<{
     <Entity {...node} key={i} isLast={i === nodes.length - 1} />
   ));
   const separator = (key: number) => (
-    <div key={`s${key}`} className="text-lg text-gray-300 mx-3">
+    <div key={`s${key}`} className="text-lg text-gray-300">
       /
     </div>
   );

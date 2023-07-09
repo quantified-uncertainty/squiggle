@@ -26,7 +26,7 @@ export const EntityLayout: FC<Props> = ({
       >
         <div
           className={clsx(
-            "flex items-center justify-between gap-4 pt-2 pb-1",
+            "flex items-center justify-between gap-4 pt-2",
             !isFluid ? "max-w-4xl mx-auto" : "px-8"
           )}
         >

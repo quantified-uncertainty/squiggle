@@ -21,7 +21,7 @@ import {
 } from "@/__generated__/ModelLayoutQuery.graphql";
 import { EntityLayout, entityNode } from "@/components/EntityLayout";
 import { DropdownMenuLinkItem } from "@/components/ui/DropdownMenuLinkItem";
-import { StyledTabLink } from "@/components/ui/StyledTabLink";
+import { StyledTabLink } from "@/components/ui/StyledTabLink2";
 import {
   modelForRelativeValuesExportRoute,
   modelRevisionsRoute,
@@ -175,7 +175,11 @@ export const ModelLayout: FC<Props> = ({ username, slug, children }) => {
             </Dropdown>
           )}
           <StyledTabLink.List>
-            <StyledTabLink name="Code" href={modelRoute({ username, slug })} />
+            <StyledTabLink
+              name="Code"
+              icon={CodeBracketIcon}
+              href={modelRoute({ username, slug })}
+            />
             {model.currentRevision.relativeValuesExports.length ? (
               <StyledTabLink
                 name="Viewer"
