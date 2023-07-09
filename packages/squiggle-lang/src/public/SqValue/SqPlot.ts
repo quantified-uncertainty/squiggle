@@ -156,7 +156,7 @@ export class SqNumericFnPlot extends SqAbstractPlot<"numericFn"> {
     return this._value.points;
   }
 
-  toString() {
+  override toString() {
     return this.fn.toString(); // TODO - scale info?
   }
 }
@@ -214,7 +214,7 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
     return this._value.points;
   }
 
-  toString() {
+  override toString() {
     return this.fn.toString(); // TODO - scale info?
   }
 }

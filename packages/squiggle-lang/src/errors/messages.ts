@@ -7,7 +7,7 @@ import { OperationError } from "../operationError.js";
 // Stdlib functions are allowed to throw messages, because they will be caught later
 // and wrapped in `IError.rethrowWithFrameStack`.
 export abstract class ErrorMessage extends Error {
-  abstract toString(): string;
+  abstract override toString(): string;
 }
 
 export class REArityError extends ErrorMessage {
@@ -116,7 +116,7 @@ export class RETodo extends ErrorMessage {
 
 // Wrapped JavaScript exception. See IError class for details.
 export class REJavaScriptExn extends ErrorMessage {
-  constructor(public msg: string, public name: string) {
+  constructor(public msg: string, public override name: string) {
     super();
   }
 

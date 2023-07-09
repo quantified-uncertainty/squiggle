@@ -66,6 +66,8 @@ type NodeRecord = N<
   }
 >;
 
+type NodeUnitValue = N<"UnitValue", { value: ASTNode; unit: string }>;
+
 type NodeCall = N<"Call", { fn: ASTNode; args: ASTNode[] }>;
 
 type NodeInfixCall = N<
@@ -148,6 +150,7 @@ export type ASTNode =
   | NodeRecord
   | NodeBlock
   | NodeProgram
+  | NodeUnitValue
   | NodeCall
   | NodeInfixCall
   | NodeUnaryCall
@@ -231,13 +234,13 @@ export function nodeBracketLookup(
   return { type: "BracketLookup", arg, key, location };
 }
 
-export function constructArray(
+export function nodeArray(
   elements: ASTNode[],
   location: LocationRange
 ): NodeArray {
   return { type: "Array", elements, location };
 }
-export function constructRecord(
+export function nodeRecord(
   elements: NodeKeyValue[],
   location: LocationRange
 ): NodeRecord {
@@ -248,6 +251,14 @@ export function constructRecord(
     }
   }
   return { type: "Record", elements, symbols, location };
+}
+
+export function nodeUnitValue(
+  value: ASTNode,
+  unit: string,
+  location: LocationRange
+): NodeUnitValue {
+  return { type: "UnitValue", value, unit, location };
 }
 
 export function nodeBlock(

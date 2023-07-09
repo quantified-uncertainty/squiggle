@@ -1,21 +1,10 @@
 {
+  "files": [],
   "compilerOptions": {
-    "module": "es2020",
-    "moduleResolution": "node16",
-    "skipLibCheck": true,
-    "strict": true,
-    "esModuleInterop": true,
-    "outDir": "./dist/esm",
-    "declarationDir": "./dist/types",
-    "target": "ES6",
-    "declaration": true,
-    "composite": true,
-    "incremental": true
+    "composite": true
   },
-  "include": ["src/**/*"],
   "references": [
-    {
-      "path": "../squiggle-lang"
-    }
+    { "path": "./tsconfig.build.json" },
+    { "path": "./tsconfig.tests.json" }
   ]
 }

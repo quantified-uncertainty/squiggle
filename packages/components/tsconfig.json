@@ -1,33 +1,10 @@
 {
+  "files": [],
   "compilerOptions": {
-    "paths": {
-      "@quri/squiggle-lang": ["../squiggle-lang/src"],
-      "@quri/prettier-plugin-squiggle": ["../prettier-plugin/src"]
-    },
-    "module": "es2020",
-    "moduleResolution": "node16",
-    "jsx": "react-jsx",
-    "target": "ES6",
-    "skipLibCheck": true,
-    "resolveJsonModule": true,
-    "noImplicitAny": false,
-    "esModuleInterop": true,
-    "removeComments": true,
-    "strict": true,
-    "preserveConstEnums": true,
-    "composite": true,
-    "outDir": "./dist",
-    "declaration": true,
-    "sourceMap": true
+    "composite": true
   },
-  "include": ["src/**/*", "test/**/*"],
-  "exclude": ["node_modules", "webpack.config.js"],
   "references": [
-    {
-      "path": "../squiggle-lang"
-    },
-    {
-      "path": "../prettier-plugin"
-    }
+    { "path": "./tsconfig.build.json" },
+    { "path": "./tsconfig.tests.json" }
   ]
 }

@@ -7,7 +7,6 @@
     "jsx": "react-jsx",
     "esModuleInterop": true,
     "composite": true,
-    "rootDir": "./src",
     "outDir": "./dist",
     "declarationMap": true,
     "sourceMap": true,
@@ -15,8 +14,13 @@
     "preserveConstEnums": true,
     // type check settings
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "noImplicitAny": false
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules"]
+  "references": [
+    { "path": "../squiggle-lang" },
+    { "path": "../ui" },
+    { "path": "../prettier-plugin" }
+  ]
 }

@@ -36,7 +36,7 @@ function pointwise(
   });
 }
 
-export const binaryOperations: { [k: string]: BinaryOperation } = {
+export const binaryOperations = {
   algebraicAdd: (t1, t2, { env }) => algebraic(t1, t2, env, "Add"),
   algebraicMultiply: (t1, t2, { env }) => algebraic(t1, t2, env, "Multiply"),
   algebraicDivide: (t1, t2, { env }) => algebraic(t1, t2, env, "Divide"),
@@ -50,4 +50,4 @@ export const binaryOperations: { [k: string]: BinaryOperation } = {
   pointwiseSubtract: (t1, t2, { env }) => pointwise(t1, t2, env, "Subtract"),
   pointwiseLogarithm: (t1, t2, { env }) => pointwise(t1, t2, env, "Logarithm"),
   pointwisePower: (t1, t2, { env }) => pointwise(t1, t2, env, "Power"),
-};
+} satisfies { [k: string]: BinaryOperation };

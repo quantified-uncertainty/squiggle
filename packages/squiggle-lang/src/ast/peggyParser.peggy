@@ -259,7 +259,7 @@ identifier 'identifier'
   = ([_a-z]+[_a-z0-9]i*) { return h.nodeIdentifier(text(), location()); }
 
 unitIdentifier 'identifier'
-  = ([_a-zA-Z]+[_a-z0-9]i*) { return h.nodeIdentifier(text(), location()); }
+  = 'n' / 'm' / 'k' / 'M' / 'B' / 'G' / 'T' / 'P' / 'minutes' / 'hours' / 'days' / 'years'
 
 dollarIdentifier 'identifier'
   = ([\$_a-z]+[\$_a-z0-9]i*) { return h.nodeIdentifier(text(), location()); }
@@ -275,7 +275,7 @@ number = number:(float / integer) unit:unitIdentifier?
       return number;
     }
     else {
-      return h.nodeCall(h.nodeIdentifier(`fromUnit_${unit.value}`, location()), [number], location());
+      return h.nodeUnitValue(number, unit, location());
     }
   }
 
@@ -313,17 +313,17 @@ lambda
 
 arrayConstructor 'array'
   = '[' _nl ']'
-    { return h.constructArray([], location()); }
+    { return h.nodeArray([], location()); }
   / '[' _nl args:array_elements _nl ']'
-    { return h.constructArray(args, location()); }
+    { return h.nodeArray(args, location()); }
 
   array_elements = @expression|1.., commaSeparator| commaSeparator?
 
 recordConstructor 'record'
   = '{' _nl '}'
-    { return h.constructRecord([], location()); }
+    { return h.nodeRecord([], location()); }
   / '{' _nl args:array_recordEntries _nl '}'
-    { return h.constructRecord(args, location()); }
+    { return h.nodeRecord(args, location()); }
 
   array_recordEntries = @keyValuePair|1.., commaSeparator| commaSeparator?
 

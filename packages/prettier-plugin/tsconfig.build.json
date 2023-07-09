@@ -4,19 +4,17 @@
     "module": "es2020",
     "moduleResolution": "node16",
     "target": "es2022",
-    "jsx": "react-jsx",
     "esModuleInterop": true,
     "composite": true,
-    "rootDir": "./src",
-    "outDir": "./dist",
+    "outDir": "./dist/esm",
+    "declarationDir": "./dist/types",
     "declarationMap": true,
     "sourceMap": true,
     "removeComments": true,
-    "preserveConstEnums": true,
     // type check settings
     "strict": true,
     "skipLibCheck": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules"]
+  "references": [{ "path": "../squiggle-lang" }]
 }

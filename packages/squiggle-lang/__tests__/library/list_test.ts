@@ -60,6 +60,9 @@ describe("List functions", () => {
     // wrong arg types
     testEvalError("addone(x)=x+1; map(2, addone)");
     testEvalError("addone(x)=x+1; map(2, {x: addone})");
+
+    // two-arg callback
+    testEvalToBe("[10,20,30] -> List.map({|x,i|x+i+1})", "[11,22,33]");
   });
 
   describe("uniq", () => {

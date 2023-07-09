@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.build.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "outDir": "dist/tests", // for tsbuildinfo
+    "rootDir": "."
+  },
+  "include": ["test/**/*", "jest.config.ts"],
+  "references": [{ "path": "./tsconfig.build.json" }]
+}
