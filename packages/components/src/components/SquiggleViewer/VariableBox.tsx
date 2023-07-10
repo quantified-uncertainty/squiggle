@@ -8,7 +8,12 @@ import {
 } from "react";
 import { clsx } from "clsx";
 
-import { CodeBracketIcon, TextTooltip, TriangleIcon } from "@quri/ui";
+import {
+  ChatBubbleLeftIcon,
+  CodeBracketIcon,
+  TextTooltip,
+  TriangleIcon,
+} from "@quri/ui";
 import { SqValuePath } from "@quri/squiggle-lang";
 
 import { SqValueWithContext } from "../../lib/utility.js";
@@ -153,7 +158,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
       className={clsx(
         "font-mono",
         isFocused
-          ? "text-md text-stone-900 ml-1"
+          ? "text-lg text-black ml-1"
           : "text-sm text-stone-800 cursor-pointer hover:underline"
       )}
       onClick={_focus}
@@ -163,14 +168,21 @@ export const VariableBox: FC<VariableBoxProps> = ({
   );
   const headerPreview = () =>
     !!preview && (
-      <div className="ml-2 text-sm text-stone-400 font-mono">{preview}</div>
+      <div
+        className={clsx(
+          "ml-2 text-sm text-blue-800 font-mono",
+          isOpen ? "opacity-40" : "opacity-60"
+        )}
+      >
+        {preview}
+      </div>
     );
   const headerFindInEditorButton = () => (
     <div className="ml-3">
       <TextTooltip text="Show in Editor" placement="bottom">
         <span>
           <CodeBracketIcon
-            className={`items-center h-4 w-4 cursor-pointer text-stone-200  group-hover:text-stone-400 hover:!text-stone-800 transition`}
+            className={`items-center h-4 w-4 cursor-pointer text-stone-400 opacity-0 group-hover:opacity-100 hover:!text-stone-800 transition`}
             onClick={() => findInEditor()}
           />
         </span>
@@ -191,15 +203,28 @@ export const VariableBox: FC<VariableBoxProps> = ({
         <div className="border-l border-stone-200 group-hover:border-stone-500 w-2" />
       </div>
     );
-  const showComment = () => {
-    const comment = value.context.docstring();
-    return comment ? (
-      // TODO - markdown
-      <div className="text-xs text-slate-700 whitespace-pre-line">
-        {comment}
-      </div>
-    ) : null;
-  };
+
+  const comment = value.context.docstring();
+  const hasComment = comment && comment !== "";
+
+  const hasCommentIcon = () => (
+    <div className="ml-3">
+      <TextTooltip text="This variable has a description" placement="bottom">
+        <span>
+          <ChatBubbleLeftIcon
+            size={13}
+            className={`text-purple-100 group-hover:text-purple-300`}
+          />
+        </span>
+      </TextTooltip>
+    </div>
+  );
+
+  const showComment = () => (
+    <div className="text-sm text-slate-800 whitespace-pre-line bg-purple-50 bg-opacity-60 pt-2 pb-2 mb-2 px-3 mt-2 rounded-md">
+      {comment}
+    </div>
+  );
 
   return (
     <div ref={saveRef}>
@@ -214,6 +239,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
             {!isFocused && triangleToggle()}
             {headerName}
             {!isFocused && headerPreview()}
+            {hasComment && !isFocused && hasCommentIcon()}
             {!isRoot && editor && headerFindInEditorButton()}
           </div>
           <div className="inline-flex space-x-1">
@@ -223,12 +249,11 @@ export const VariableBox: FC<VariableBoxProps> = ({
         </header>
       )}
       {isOpen && (
-        <div className="flex w-full">
+        <div className="flex w-full pt-1">
           {!isFocused && leftCollapseBorder()}
-          {isFocused && <div className="w-2" />}
-          <div className="grow">
-            {showComment()}
+          <div className={"grow"}>
             {children(getAdjustedMergedSettings(path))}
+            {hasComment && showComment()}
           </div>
         </div>
       )}

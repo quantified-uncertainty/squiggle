@@ -65,6 +65,9 @@ export {
   ListBulletIcon,
   TableCellsIcon,
   ScatterPlotIcon,
+  ChatBubbleBottomIcon,
+  ChatBubbleLeftIcon,
+  ChatBubbleOvalLeftIcon,
 } from "./icons/HeroIcons.js";
 
 export { useToast, WithToasts } from "./components/WithToasts/index.js";
