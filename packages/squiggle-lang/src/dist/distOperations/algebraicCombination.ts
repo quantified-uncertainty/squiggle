@@ -135,7 +135,7 @@ const preferConvolutionToMonteCarlo = (args: CombinationArgs): boolean => {
 
   const convolutionIsFasterThanMonteCarlo = () =>
     args.t1.expectedConvolutionCost() * args.t2.expectedConvolutionCost() <
-    magicNumbers.OpCost.monteCarloCost;
+    args.env.sampleCount;
 
   return (
     !hasSampleSetDist() &&

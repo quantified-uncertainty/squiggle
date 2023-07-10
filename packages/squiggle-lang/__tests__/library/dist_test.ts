@@ -146,7 +146,13 @@ describe("eval on distribution functions", () => {
   describe("subtract", () => {
     testEvalToBe("10 - normal(5, 1)", "Normal(5,1)");
     testEvalToBe("normal(5, 1) - 10", "Normal(-5,1)");
-    testEvalToBe("mean(1 - toPointSet(normal(5, 2)))", "-4.002309896304692");
+    test("mean(1 - toPointSet(normal(5, 2)))", async () => {
+      const result = await testRun("mean(1 - toPointSet(normal(5, 2)))");
+      if (result.tag !== "Number") {
+        fail();
+      }
+      expect(Math.abs(result.value - -4)).toBeLessThan(0.3); // FIXME - unstable
+    });
   });
   describe("multiply", () => {
     testEvalToBe("normal(10, 2) * 2", "Normal(20,4)");
