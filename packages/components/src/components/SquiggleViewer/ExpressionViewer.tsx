@@ -219,6 +219,7 @@ export const getBoxProps = (
       return {
         heading: `Record(${entries.length})`,
         preview: <SqTypeWithCount type="{}" count={entries.length} />,
+        isRecordOrList: true,
         children: () =>
           entries.map((r, i) => <ExpressionViewer key={i} value={r} />),
       };
@@ -229,6 +230,7 @@ export const getBoxProps = (
       return {
         heading: `List(${length})`,
         preview: <SqTypeWithCount type="[]" count={length} />,
+        isRecordOrList: true,
         children: () =>
           entries.map((r, i) => <ExpressionViewer key={i} value={r} />),
       };

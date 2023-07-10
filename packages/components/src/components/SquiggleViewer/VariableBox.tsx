@@ -40,6 +40,7 @@ export type VariableBoxProps = {
   value: SqValueWithContext;
   heading?: string;
   preview?: ReactNode;
+  isRecordOrList?: boolean;
   renderSettingsMenu?: (params: SettingsMenuParams) => ReactNode;
   children: (settings: MergedItemSettings) => ReactNode;
 };
@@ -57,6 +58,7 @@ export const SqTypeWithCount: FC<{
 export const VariableBox: FC<VariableBoxProps> = ({
   value,
   heading = "Error",
+  isRecordOrList = false,
   preview,
   renderSettingsMenu,
   children,
@@ -196,11 +198,17 @@ export const VariableBox: FC<VariableBoxProps> = ({
   );
   const headerSettingsButton = () =>
     renderSettingsMenu?.({ onChange: forceUpdate });
+
   const leftCollapseBorder = () =>
     hasBodyContent && (
       <div className="flex group cursor-pointer" onClick={toggleCollapsed}>
         <div className="p-1" />
-        <div className="border-l border-stone-200 group-hover:border-stone-500 w-2" />
+        <div
+          className={clsx(
+            "border-l border-stone-200 group-hover:border-stone-500 w-2",
+            !isRecordOrList && "border-hidden"
+          )}
+        />
       </div>
     );
 
@@ -221,7 +229,12 @@ export const VariableBox: FC<VariableBoxProps> = ({
   );
 
   const showComment = () => (
-    <div className="text-sm text-slate-800 whitespace-pre-line bg-purple-50 bg-opacity-60 pt-2 pb-2 mb-2 px-3 mt-2 rounded-md">
+    <div
+      className={clsx(
+        "text-sm text-slate-800 whitespace-pre-line bg-purple-50 bg-opacity-60 py-2 px-3 mb-2 rounded-md",
+        !isRecordOrList && "mt-2"
+      )}
+    >
       {comment}
     </div>
   );
@@ -239,7 +252,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
             {!isFocused && triangleToggle()}
             {headerName}
             {!isFocused && headerPreview()}
-            {hasComment && !isFocused && hasCommentIcon()}
+            {hasComment && !isFocused && !isOpen && hasCommentIcon()}
             {!isRoot && editor && headerFindInEditorButton()}
           </div>
           <div className="inline-flex space-x-1">
@@ -251,9 +264,10 @@ export const VariableBox: FC<VariableBoxProps> = ({
       {isOpen && (
         <div className="flex w-full pt-1">
           {!isFocused && leftCollapseBorder()}
-          <div className={"grow"}>
+          <div className="grow">
+            {isRecordOrList && hasComment && showComment()}
             {children(getAdjustedMergedSettings(path))}
-            {hasComment && showComment()}
+            {!isRecordOrList && hasComment && showComment()}
           </div>
         </div>
       )}
