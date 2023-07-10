@@ -25,6 +25,10 @@ import {
 } from "./VariableBox.js";
 import { MergedItemSettings, getChildrenValues } from "./utils.js";
 import { MessageAlert } from "../Alert.js";
+import { clsx } from "clsx";
+
+// We use an extra left margin for some elements to align them with parent variable name
+const leftMargin = "ml-1.5";
 
 export const getBoxProps = (
   value: SqValueWithContext
@@ -36,7 +40,7 @@ export const getBoxProps = (
       return {
         preview: <NumberShower precision={3} number={value.value} />,
         children: () => (
-          <div className="font-semibold text-neutral-600">
+          <div className={clsx("font-semibold text-indigo-800", leftMargin)}>
             <NumberShower precision={3} number={value.value} />
           </div>
         ),
@@ -99,9 +103,14 @@ export const getBoxProps = (
       return {
         preview: value.value.toString(),
         children: () => (
-          <span className="text-neutral-600 text-sm font-mono">
+          <div
+            className={clsx(
+              "text-indigo-800 text-sm font-mono font-semibold",
+              leftMargin
+            )}
+          >
             {value.value.toString()}
-          </span>
+          </div>
         ),
       };
     case "Date":
