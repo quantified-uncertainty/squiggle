@@ -199,18 +199,14 @@ export const VariableBox: FC<VariableBoxProps> = ({
   const headerSettingsButton = () =>
     renderSettingsMenu?.({ onChange: forceUpdate });
 
-  const leftCollapseBorder = () =>
-    hasBodyContent && (
-      <div className="flex group cursor-pointer" onClick={toggleCollapsed}>
-        <div className="p-1" />
-        <div
-          className={clsx(
-            "border-l border-stone-200 group-hover:border-stone-500 w-2",
-            !isRecordOrList && "border-hidden"
-          )}
-        />
-      </div>
-    );
+  const leftCollapseBorder = () => (
+    <div className={"flex group cursor-pointer"} onClick={toggleCollapsed}>
+      <div className="p-1" />
+      <div
+        className={"w-2 border-l border-stone-200 group-hover:border-stone-500"}
+      />
+    </div>
+  );
 
   const comment = value.context.docstring();
   const hasComment = comment && comment !== "";
@@ -263,7 +259,11 @@ export const VariableBox: FC<VariableBoxProps> = ({
       )}
       {isOpen && (
         <div className="flex w-full pt-1">
-          {!isFocused && leftCollapseBorder()}
+          {!isFocused && hasBodyContent && isRecordOrList ? (
+            leftCollapseBorder()
+          ) : (
+            <div className="flex w-4" />
+          )}
           <div className="grow">
             {isRecordOrList && hasComment && showComment()}
             {children(getAdjustedMergedSettings(path))}
