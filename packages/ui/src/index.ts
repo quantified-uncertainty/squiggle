@@ -71,6 +71,9 @@ export {
   ArchiveBoxIcon,
   ArrowUturnLeftIcon,
   BackwardIcon,
+  ChatBubbleBottomIcon,
+  ChatBubbleLeftIcon,
+  ChatBubbleOvalLeftIcon,
 } from "./icons/HeroIcons.js";
 
 export { useToast, WithToasts } from "./components/WithToasts/index.js";
