@@ -16,6 +16,11 @@ export function isModelRoute(url: string) {
   return url.match("^/users/[^/]+/models/[^/]+$");
 }
 
+//Triggers on the model route and all subroutes
+export function isModelSubroute(url: string) {
+  return url.match("^/users/[^/]+/models/*");
+}
+
 // used by useFixModelUrlCasing hook
 export function patchModelRoute({
   pathname,

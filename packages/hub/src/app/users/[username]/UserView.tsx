@@ -7,6 +7,7 @@ import { H1 } from "@/components/ui/Headers";
 import type { UserViewQuery } from "@gen/UserViewQuery.graphql";
 import { UserDefinitionList } from "./UserDefinitionList";
 import { UserModelList } from "./UserModelList";
+import { UserIcon } from "@quri/ui";
 
 const Query = graphql`
   query UserViewQuery($username: String!) {
@@ -27,10 +28,27 @@ export const UserView: FC<Props> = ({ username }) => {
 
   return (
     <div className="space-y-8">
-      <H1 size="large">{user.userByUsername.username}</H1>
+      <H1 size="large">
+        <div className="flex items-center">
+          <UserIcon className="opacity-50 mr-2" />
+          {user.userByUsername.username}
+        </div>
+      </H1>
       <div className="space-y-8">
-        <UserModelList dataRef={user.userByUsername} />
-        <UserDefinitionList dataRef={user.userByUsername} />
+        <section>
+          <h2 className="mt-1 mb-2 text-gray-600 text-lg font-semibold">
+            {" "}
+            Models{" "}
+          </h2>
+          <UserModelList dataRef={user.userByUsername} />
+        </section>
+        <section>
+          <h2 className="mt-1 mb-2 text-gray-700 text-lg font-semibold">
+            {" "}
+            Relative Value Definitions{" "}
+          </h2>
+          <UserDefinitionList dataRef={user.userByUsername} />
+        </section>
       </div>
     </div>
   );

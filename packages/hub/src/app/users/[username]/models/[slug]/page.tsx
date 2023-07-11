@@ -13,5 +13,9 @@ export default function Page({
     slug: params.slug,
   });
 
-  return <EditModelPageBody modelRef={modelRef} />;
+  return (
+    <div className="bg-white">
+      <EditModelPageBody modelRef={modelRef} />
+    </div>
+  );
 }

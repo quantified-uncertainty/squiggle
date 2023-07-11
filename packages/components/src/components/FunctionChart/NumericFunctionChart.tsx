@@ -60,7 +60,11 @@ export const NumericFunctionChart: FC<Props> = ({
         yTickFormat: plot.yScale.tickFormat,
       });
 
-      if (plot.xScale.tag === "log" && functionImage[0].x <= 0) {
+      if (
+        plot.xScale.tag === "log" &&
+        functionImage[0] &&
+        functionImage[0].x <= 0
+      ) {
         frame.enter();
         frame.fillText(
           "Invalid X Scale settings",

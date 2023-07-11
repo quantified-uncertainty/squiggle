@@ -1,21 +1,19 @@
 import { FC, ReactNode } from "react";
 import { clsx } from "clsx";
 
-import { EntityInfo } from "./EntityInfo";
+import { EntityInfo, EntityNode } from "./EntityInfo";
+
+export type { EntityNode };
 
 type Props = {
-  slug: string;
-  username: string;
-  homepageUrl: string;
+  nodes: EntityNode[];
   headerChildren?: ReactNode;
   children?: ReactNode;
   isFluid?: boolean;
 };
 
 export const EntityLayout: FC<Props> = ({
-  slug,
-  username,
-  homepageUrl,
+  nodes,
   headerChildren,
   children,
   isFluid = false,
@@ -28,11 +26,11 @@ export const EntityLayout: FC<Props> = ({
       >
         <div
           className={clsx(
-            "flex items-center justify-between gap-4 pt-2 pb-1",
+            "flex items-center justify-between gap-4 pt-1",
             !isFluid ? "max-w-4xl mx-auto" : "px-8"
           )}
         >
-          <EntityInfo slug={slug} username={username} href={homepageUrl} />
+          <EntityInfo nodes={nodes} />
           <div className="flex-1 justify-end flex items-center gap-4">
             {headerChildren}
           </div>

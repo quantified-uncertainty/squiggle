@@ -35,15 +35,10 @@ export const UserDefinitionList: FC<Props> = ({ dataRef }) => {
   } = usePaginationFragment(Fragment, dataRef);
 
   return (
-    <section>
-      <div className="mb-2">
-        <H1>Relative values definitions</H1>
-      </div>
-      <RelativeValuesDefinitionList
-        connectionRef={relativeValuesDefinitions}
-        showOwner={true}
-        loadNext={loadNext}
-      />
-    </section>
+    <RelativeValuesDefinitionList
+      connectionRef={relativeValuesDefinitions}
+      showOwner={false}
+      loadNext={loadNext}
+    />
   );
 };

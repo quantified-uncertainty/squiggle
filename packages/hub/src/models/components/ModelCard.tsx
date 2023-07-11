@@ -1,12 +1,12 @@
-import { formatDistance } from "date-fns";
 import { FC } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { ModelCard$key } from "@/__generated__/ModelCard.graphql";
-import { UserLink } from "@/components/UserLink";
 import { StyledLink } from "@/components/ui/StyledLink";
-import { modelRoute } from "@/routes";
+import { modelRoute, modelForRelativeValuesExportRoute } from "@/routes";
+import { CodeBracketIcon, LinkIcon, ScaleIcon } from "@quri/ui";
+import { EntityCard } from "@/components/EntityCard";
 
 const Fragment = graphql`
   fragment ModelCard on Model {
@@ -16,6 +16,14 @@ const Fragment = graphql`
       username
       ...UserLinkFragment
     }
+    currentRevision {
+      relativeValuesExports {
+        variableName
+        definition {
+          slug
+        }
+      }
+    }
   }
 `;
 
@@ -24,37 +32,40 @@ type Props = {
   showOwner?: boolean;
 };
 
-export const ModelCard: FC<Props> = ({ modelRef, showOwner }) => {
+export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
   const model = useFragment(Fragment, modelRef);
+  const exports = model.currentRevision.relativeValuesExports;
 
   return (
-    <div className="border p-2 rounded">
-      <div>
-        <div>
-          <StyledLink
-            href={modelRoute({
-              username: model.owner.username,
-              slug: model.slug,
-            })}
-          >
-            {model.slug}
-          </StyledLink>
+    <EntityCard
+      icon={CodeBracketIcon}
+      createdAtTimestamp={model.createdAtTimestamp}
+      href={modelRoute({
+        username: model.owner.username,
+        slug: model.slug,
+      })}
+      showOwner={showOwner}
+      ownerName={model.owner.username}
+      slug={model.slug}
+    >
+      {exports.length > 0 && (
+        <div className="mt-2">
+          {model.currentRevision.relativeValuesExports.map((e, i) => (
+            <StyledLink
+              key={i}
+              href={modelForRelativeValuesExportRoute({
+                username: model.owner.username,
+                slug: model.slug,
+                variableName: e.variableName,
+              })}
+              className="items-center flex font-mono text-xs"
+            >
+              <ScaleIcon size={14} className="opacity-60" />
+              <span className="ml-1">{`${e.variableName}:${e.definition.slug}`}</span>
+            </StyledLink>
+          ))}
         </div>
-        <div className="text-xs text-slate-500">
-          Created{" "}
-          <time dateTime={new Date(model.createdAtTimestamp).toISOString()}>
-            {formatDistance(new Date(model.createdAtTimestamp), new Date(), {
-              addSuffix: true,
-            })}
-          </time>
-          {showOwner ? (
-            <span>
-              {" "}
-              by <UserLink userRef={model.owner} />
-            </span>
-          ) : null}
-        </div>
-      </div>
-    </div>
+      )}
+    </EntityCard>
   );
 };

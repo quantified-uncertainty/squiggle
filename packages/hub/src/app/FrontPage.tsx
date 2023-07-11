@@ -1,5 +1,4 @@
 "use client";
-import { useSession } from "next-auth/react";
 import { FC } from "react";
 import { useLazyLoadQuery } from "react-relay";
 import { graphql } from "relay-runtime";
@@ -11,6 +10,8 @@ import { newDefinitionRoute, newModelRoute } from "@/routes";
 import { FrontPageDefinitionList } from "./FrontPageDefinitionList";
 import { FrontPageModelList } from "./FrontPageModelList";
 
+import { StyledTextArea, StyledTab } from "@quri/ui";
+
 const Query = graphql`
   query FrontPageQuery {
     ...FrontPageModelList
@@ -19,8 +20,6 @@ const Query = graphql`
 `;
 
 export const FrontPage: FC = () => {
-  const { data: session } = useSession();
-
   const data = useLazyLoadQuery<FrontPageQuery>(
     Query,
     {},
@@ -29,24 +28,22 @@ export const FrontPage: FC = () => {
 
   return (
     <div className="space-y-8">
-      <div className="space-y-4">
-        <FrontPageModelList dataRef={data} />
-        {session ? (
-          <div>
-            <StyledLink href={newModelRoute()}>Create new model</StyledLink>
-          </div>
-        ) : null}
-      </div>
-      <div className="space-y-4">
-        <FrontPageDefinitionList dataRef={data} />
-        {session ? (
-          <div>
-            <StyledLink href={newDefinitionRoute()}>
-              Create new relative values definition
-            </StyledLink>
-          </div>
-        ) : null}
-      </div>
+      <StyledTab.Group>
+        <StyledTab.List>
+          <StyledTab name="Models" />
+          <StyledTab name="Definitions" />
+        </StyledTab.List>
+        <div className="mt-4">
+          <StyledTab.Panels>
+            <StyledTab.Panel>
+              {<FrontPageModelList dataRef={data} />}
+            </StyledTab.Panel>
+            <StyledTab.Panel>
+              {<FrontPageDefinitionList dataRef={data} />}
+            </StyledTab.Panel>
+          </StyledTab.Panels>
+        </div>
+      </StyledTab.Group>
     </div>
   );
 };

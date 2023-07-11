@@ -1,12 +1,11 @@
-import { formatDistance } from "date-fns";
 import { FC } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { UserLink } from "@/components/UserLink";
-import { StyledDefinitionLink } from "@/components/ui/StyledDefinitionLink";
 import { relativeValuesRoute } from "@/routes";
 import { RelativeValuesDefinitionCard$key } from "@/__generated__/RelativeValuesDefinitionCard.graphql";
+import { ScaleIcon } from "@quri/ui";
+import { EntityCard } from "@/components/EntityCard";
 
 const Fragment = graphql`
   fragment RelativeValuesDefinitionCard on RelativeValuesDefinition {
@@ -26,44 +25,21 @@ type Props = {
 
 export const RelativeValuesDefinitionCard: FC<Props> = ({
   definitionRef,
-  showOwner,
+  showOwner = true,
 }) => {
   const definition = useFragment(Fragment, definitionRef);
 
   return (
-    <div className="border p-2 rounded">
-      <div>
-        <div>
-          <StyledDefinitionLink
-            href={relativeValuesRoute({
-              username: definition.owner.username,
-              slug: definition.slug,
-            })}
-          >
-            {definition.slug}
-          </StyledDefinitionLink>
-        </div>
-        <div className="text-xs text-slate-500">
-          Created{" "}
-          <time
-            dateTime={new Date(definition.createdAtTimestamp).toISOString()}
-          >
-            {formatDistance(
-              new Date(definition.createdAtTimestamp),
-              new Date(),
-              {
-                addSuffix: true,
-              }
-            )}
-          </time>
-          {showOwner ? (
-            <span>
-              {" "}
-              by <UserLink userRef={definition.owner} />
-            </span>
-          ) : null}
-        </div>
-      </div>
-    </div>
+    <EntityCard
+      icon={ScaleIcon}
+      createdAtTimestamp={definition.createdAtTimestamp}
+      href={relativeValuesRoute({
+        username: definition.owner.username,
+        slug: definition.slug,
+      })}
+      showOwner={showOwner}
+      ownerName={definition.owner.username}
+      slug={definition.slug}
+    ></EntityCard>
   );
 };
