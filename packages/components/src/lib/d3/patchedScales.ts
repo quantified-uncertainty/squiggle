@@ -55,11 +55,13 @@ function tickFormatWithCustom(
   return d3.tickFormat(start, stop, count, specifier);
 }
 
+type ScaleLinear = d3.ScaleLinear<number, number, never>;
+type ScaleLogarithmic = d3.ScaleLogarithmic<number, number, never>;
+type ScaleSymLog = d3.ScaleSymLog<number, number, never>;
+type ScalePower = d3.ScalePower<number, number, never>;
+
 function patchLinearishTickFormat<
-  T extends
-    | d3.ScaleLinear<number, number, never>
-    | d3.ScaleSymLog<number, number, never>
-    | d3.ScalePower<number, number, never>,
+  T extends ScaleLinear | ScaleSymLog | ScalePower,
 >(scale: T): T {
   // copy-pasted from https://github.com/d3/d3-scale/blob/83555bd759c7314420bd4240642beda5e258db9e/src/linear.js#L14
   scale.tickFormat = (count, specifier) => {
@@ -70,23 +72,11 @@ function patchLinearishTickFormat<
   return scale;
 }
 
-// Original d3.scale* should never be used; they won't support our custom tick formats.
-
-export function scaleLinear() {
-  return patchLinearishTickFormat(d3.scaleLinear());
+function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
+  return patchLinearishTickFormat(scale);
 }
 
-export function scaleSymlog() {
-  return patchLinearishTickFormat(d3.scaleSymlog());
-}
-
-export function scalePow() {
-  return patchLinearishTickFormat(d3.scalePow());
-}
-
-export function scaleLog() {
-  // log scale tickFormat is special
-  const scale = d3.scaleLog();
+function patchLogarithmicTickFormat(scale: ScaleLogarithmic): ScaleLogarithmic {
   const logScaleTickFormat = scale.tickFormat;
   scale.tickFormat = (count, specifier) => {
     return logScaleTickFormat(
@@ -100,4 +90,22 @@ export function scaleLog() {
     );
   };
   return scale;
+}
+
+// Original d3.scale* should never be used; they won't support our custom tick formats.
+
+export function scaleLinear() {
+  return patchLinearishTickFormat(d3.scaleLinear());
+}
+
+export function scaleSymlog() {
+  return patchSymlogTickFormat(d3.scaleSymlog());
+}
+
+export function scalePow() {
+  return patchLinearishTickFormat(d3.scalePow());
+}
+
+export function scaleLog() {
+  return patchLogarithmicTickFormat(d3.scaleLog());
 }
