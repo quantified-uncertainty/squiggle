@@ -87,7 +87,7 @@ class VArray extends BaseValue implements Indexable {
   }
 
   override toTypeString(): string {
-    return "[" + this.value.map((v) => v.toTypeString()).join(",") + "]";
+    return "[" + this.value.map((v) => v.toTypeString()).join(", ") + "]";
   }
 }
 export const vArray = (v: Value[]) => new VArray(v);
@@ -219,7 +219,7 @@ class VRecord extends BaseValue implements Indexable {
       "{" +
       [...this.value.entries()]
         .map(([k, v]) => `${k}: ${v.toTypeString()}`)
-        .join(",") +
+        .join(", ") +
       "}"
     );
   }

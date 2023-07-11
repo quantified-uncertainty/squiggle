@@ -7,10 +7,12 @@ import { OperationError } from "../operationError.js";
 // Stdlib functions are allowed to throw messages, because they will be caught later
 // and wrapped in `IError.rethrowWithFrameStack`.
 export abstract class ErrorMessage extends Error {
+  abstract errorTypeName: string;
   abstract override toString(): string;
 }
 
 export class REArityError extends ErrorMessage {
+  readonly errorTypeName = "Arity";
   constructor(
     public fn: string | undefined,
     public arity: number,
@@ -25,6 +27,7 @@ export class REArityError extends ErrorMessage {
 }
 
 export class REArrayIndexNotFound extends ErrorMessage {
+  readonly errorTypeName = "Array Index Not Found";
   constructor(public msg: string, public index: number) {
     super();
   }
@@ -35,16 +38,18 @@ export class REArrayIndexNotFound extends ErrorMessage {
 }
 
 export class REDistributionError extends ErrorMessage {
+  readonly errorTypeName = "Distribution Math";
   constructor(public err: DistError) {
     super();
   }
 
   toString() {
-    return `Distribution Math Error: ${distErrorToString(this.err)}`;
+    return `${distErrorToString(this.err)}`;
   }
 }
 
 export class REExpectedType extends ErrorMessage {
+  readonly errorTypeName = "Expected Type";
   constructor(public typeName: string, public valueString: string) {
     super();
   }
@@ -55,6 +60,7 @@ export class REExpectedType extends ErrorMessage {
 }
 
 export class RENotAFunction extends ErrorMessage {
+  readonly errorTypeName = "Not a Function";
   constructor(public value: string) {
     super();
   }
@@ -65,16 +71,18 @@ export class RENotAFunction extends ErrorMessage {
 }
 
 export class REOperationError extends ErrorMessage {
+  readonly errorTypeName = "Math Operation";
   constructor(public err: OperationError) {
     super();
   }
 
   toString() {
-    return `Math Error: ${this.err.toString()}`;
+    return `${this.err.toString()}`;
   }
 }
 
 export class RERecordPropertyNotFound extends ErrorMessage {
+  readonly errorTypeName = "Record Property Not Found";
   constructor(public msg: string, public index: string) {
     super();
   }
@@ -85,6 +93,7 @@ export class RERecordPropertyNotFound extends ErrorMessage {
 }
 
 export class RESymbolNotFound extends ErrorMessage {
+  readonly errorTypeName = "Symbol Not Found";
   constructor(public symbolName: string) {
     super();
   }
@@ -95,27 +104,31 @@ export class RESymbolNotFound extends ErrorMessage {
 }
 
 export class RESyntaxError extends ErrorMessage {
+  readonly errorTypeName = "Syntax";
   constructor(public desc: string) {
     super();
   }
 
   toString() {
-    return `Syntax Error: ${this.desc}`;
+    return `${this.desc}`;
   }
 }
 
 export class RETodo extends ErrorMessage {
+  readonly errorTypeName = "Undefined";
+
   constructor(public msg: string) {
     super();
   }
 
   toString() {
-    return `TODO: ${this.msg}`;
+    return `${this.msg}`;
   }
 }
 
 // Wrapped JavaScript exception. See IError class for details.
 export class REJavaScriptExn extends ErrorMessage {
+  readonly errorTypeName = "Javascript";
   constructor(public msg: string, public override name: string) {
     super();
   }
@@ -128,11 +141,12 @@ export class REJavaScriptExn extends ErrorMessage {
 }
 
 export class REOther extends ErrorMessage {
+  readonly errorTypeName = "Generic";
   constructor(public msg: string) {
     super();
   }
 
   toString() {
-    return `Error: ${this.msg}`;
+    return `${this.msg}`;
   }
 }

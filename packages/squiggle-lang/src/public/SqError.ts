@@ -6,6 +6,7 @@ abstract class SqAbstractError<T extends string> {
 
   abstract toString(): string;
   abstract toStringWithDetails(): string;
+  abstract toTypeString(): string[];
 }
 
 export class SqFrame {
@@ -17,6 +18,10 @@ export class SqFrame {
 
   location() {
     return this._value.location;
+  }
+
+  toTypeString(): string[] {
+    return ["Frame"];
   }
 }
 
@@ -48,6 +53,10 @@ export class SqRuntimeError extends SqAbstractError<"runtime"> {
   location() {
     return this.getTopFrame()?.location();
   }
+
+  toTypeString(): string[] {
+    return ["Runtime", this._value.m.errorTypeName];
+  }
 }
 
 export class SqCompileError extends SqAbstractError<"compile"> {
@@ -68,6 +77,10 @@ export class SqCompileError extends SqAbstractError<"compile"> {
   location() {
     return this._value.location;
   }
+
+  toTypeString(): string[] {
+    return ["Compile"];
+  }
 }
 
 export class SqOtherError extends SqAbstractError<"other"> {
@@ -84,6 +97,9 @@ export class SqOtherError extends SqAbstractError<"other"> {
   toStringWithDetails() {
     // no details on other errors
     return this._value;
+  }
+  toTypeString(): string[] {
+    return ["Other"];
   }
 }
 

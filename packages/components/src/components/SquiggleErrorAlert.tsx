@@ -25,9 +25,9 @@ const LocationLine: FC<{
   };
 
   return (
-    <div style={{ display: "inline-block" }}>
+    <div className="inline-block">
       <span
-        className="text-red-800 cursor-pointer items-center flex border-b border-red-900 border-opacity-50 hover:bg-red-200 leading-4"
+        className="text-xs text-blue-500 cursor-pointer items-center flex border-b border-blue-700 border-opacity-50 hover:bg-red-200 leading-4"
         onClick={findInEditor}
       >
         <CodeBracketIcon size={14} className="mr-1" />
@@ -42,16 +42,20 @@ const WithHeader: FC<PropsWithChildren<{ header: string }>> = ({
   children,
 }) => (
   <div>
-    <div className="font-medium">{header}</div>
-    <div className="ml-4">{children}</div>
+    <div className="font-normal text-red-900">{header}</div>
+    <div className="mt-1 ml-1 pl-2 border-l border-red-900 border-opacity-10">
+      {children}
+    </div>
   </div>
 );
 
 const StackTraceFrame: FC<{ frame: SqFrame }> = ({ frame }) => {
   const location = frame.location();
+  const name = frame.name();
   return (
-    <div className="text-sm font-mono">
-      {frame.name()} {location && <LocationLine location={location} />}
+    <div className="text-sm font-mono flex items-center space-x-2 text-stone-600">
+      {name !== "" && <div>{name}</div>}{" "}
+      {location && <LocationLine location={location} />}
     </div>
   );
 };
@@ -59,7 +63,7 @@ const StackTraceFrame: FC<{ frame: SqFrame }> = ({ frame }) => {
 const StackTrace: FC<{ error: SqRuntimeError }> = ({ error }) => {
   const frames = error.getFrameArray();
   return frames.length ? (
-    <WithHeader header="Stack trace:">
+    <WithHeader header="Stack Trace">
       {frames.map((frame, i) => (
         <StackTraceFrame frame={frame} key={i} />
       ))}
@@ -69,7 +73,7 @@ const StackTrace: FC<{ error: SqRuntimeError }> = ({ error }) => {
 
 export const SquiggleErrorAlert: FC<Props> = ({ error }) => {
   return (
-    <ErrorAlert heading="Error">
+    <ErrorAlert heading={`Error (${error.toTypeString().join(" / ")})`}>
       <div className="space-y-4">
         <div className="whitespace-pre-wrap">{error.toString()}</div>
         {error instanceof SqRuntimeError ? (
