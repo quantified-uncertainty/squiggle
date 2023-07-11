@@ -8,6 +8,7 @@ import {
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { vScale } from "../value/index.js";
+import { REOther } from "../errors/messages.js";
 
 const maker = new FnFactory({
   nameSpace: "Scale",
@@ -20,6 +21,14 @@ const commonRecord = frRecord(
   ["tickFormat", frOptional(frString)]
 );
 
+function checkMinMax(min: number | null, max: number | null) {
+  if (min !== null && max !== null && max <= min) {
+    throw new REOther(
+      `Max must be greater than min, got: min=${min}, max=${max}`
+    );
+  }
+}
+
 export const library = [
   maker.make({
     name: "linear",
@@ -27,6 +36,8 @@ export const library = [
     examples: [`Scale.linear({ min: 3, max: 10 })`],
     definitions: [
       makeDefinition([commonRecord], ([{ min, max, tickFormat }]) => {
+        checkMinMax(min, max);
+
         return vScale({
           type: "linear",
           min: min ?? undefined,
@@ -45,7 +56,11 @@ export const library = [
     examples: [`Scale.log({ min: 1, max: 100 })`],
     definitions: [
       makeDefinition([commonRecord], ([{ min, max, tickFormat }]) => {
-        // TODO - check that min > 0?
+        if (min !== null && min <= 0) {
+          throw new REOther(`Min must be over 0 for log scale, got: ${min}`);
+        }
+        checkMinMax(min, max);
+
         return vScale({
           type: "log",
           min: min ?? undefined,
@@ -64,6 +79,8 @@ export const library = [
     examples: [`Scale.symlog({ min: -10, max: 10 })`],
     definitions: [
       makeDefinition([commonRecord], ([{ min, max, tickFormat }]) => {
+        checkMinMax(min, max);
+
         return vScale({
           type: "symlog",
           min: min ?? undefined,
@@ -91,6 +108,8 @@ export const library = [
           ),
         ],
         ([{ min, max, tickFormat, exponent }]) => {
+          checkMinMax(min, max);
+
           return vScale({
             type: "power",
             min: min ?? undefined,

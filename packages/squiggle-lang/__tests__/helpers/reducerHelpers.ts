@@ -59,8 +59,19 @@ export async function expectEvalToBe(code: string, answer: string) {
   expect(resultToString(await evaluateStringToResult(code))).toBe(answer);
 }
 
+export async function expectEvalToMatch(
+  code: string,
+  expected: string | RegExp
+) {
+  expect(resultToString(await evaluateStringToResult(code))).toMatch(expected);
+}
+
 export function testEvalToBe(expr: string, answer: string) {
   test(expr, async () => await expectEvalToBe(expr, answer));
+}
+
+export function testEvalToMatch(expr: string, expected: string | RegExp) {
+  test(expr, async () => await expectEvalToMatch(expr, expected));
 }
 
 export const MySkip = {
