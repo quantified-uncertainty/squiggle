@@ -5,7 +5,7 @@ import { clsx } from "clsx";
 import { IconProps } from "@/relative-values/components/ui/icons/Icon";
 
 // works both for models and for definitions
-export type entityNode = {
+export type EntityNode = {
   slug: string;
   href: string;
   icon?: FC<IconProps>;
@@ -14,16 +14,14 @@ export type entityNode = {
 const ListWithSeparator: React.FC<{
   items: ReactNode[];
   separator: (r: number) => ReactNode;
-}> = ({ items, separator }) => {
-  return items.reduce<React.ReactNode[]>((accumulator, item, index) => {
-    const isLastItem = index === items.length - 1;
-    return isLastItem
-      ? [...accumulator, item]
-      : [...accumulator, item, separator(index)];
-  }, []);
-};
+}> = ({ items, separator }) =>
+  items
+    .map((item, index) =>
+      index < items.length - 1 ? [item, separator(index)] : item
+    )
+    .flat();
 
-const Entity: FC<entityNode & { isFirst: boolean; isLast: boolean }> = ({
+const Entity: FC<EntityNode & { isFirst: boolean; isLast: boolean }> = ({
   slug,
   href,
   icon: Icon,
@@ -33,7 +31,7 @@ const Entity: FC<entityNode & { isFirst: boolean; isLast: boolean }> = ({
   return (
     <Link
       className={clsx(
-        "text-lg text-slate-700 hover:underline flex items-center gap-1 group pt-1 py-2 pr-3",
+        "text-lg text-slate-700 hover:underline flex items-center gap-1 group py-2 pr-3",
         isLast ? "font-semibold" : "",
         !isFirst && "pl-3"
       )}
@@ -52,7 +50,7 @@ const Entity: FC<entityNode & { isFirst: boolean; isLast: boolean }> = ({
 };
 
 export const EntityInfo: FC<{
-  nodes: entityNode[];
+  nodes: EntityNode[];
 }> = ({ nodes }) => {
   const links = nodes.map((node, i) => (
     <Entity

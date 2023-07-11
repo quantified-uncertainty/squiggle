@@ -2,10 +2,10 @@ import { FC, ReactNode } from "react";
 import { formatDistance } from "date-fns";
 import Link from "next/link";
 
-import { EntityInfo, entityNode } from "./EntityInfo";
+import { EntityInfo, EntityNode } from "./EntityInfo";
 import { IconProps } from "@quri/ui";
 
-export type { entityNode };
+export type { EntityNode };
 
 type Props = {
   icon: FC<IconProps>;

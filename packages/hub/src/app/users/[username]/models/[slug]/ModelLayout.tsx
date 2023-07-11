@@ -23,7 +23,7 @@ import {
   ModelLayoutQuery,
   ModelLayoutQuery$data,
 } from "@/__generated__/ModelLayoutQuery.graphql";
-import { EntityLayout, entityNode } from "@/components/EntityLayout";
+import { EntityLayout, EntityNode } from "@/components/EntityLayout";
 import { DropdownMenuLinkItem } from "@/components/ui/DropdownMenuLinkItem";
 import { EntityTab } from "@/components/ui/EntityTab";
 import {
@@ -106,12 +106,12 @@ function useFixModelUrlCasing(model: ModelLayoutQuery$data["model"]) {
 
 type Props = PropsWithChildren<CommonProps>;
 
-export const entityNodes = (
+export const EntityNodes = (
   username: string,
   slug: string,
   variableName?: string
-): entityNode[] => {
-  let nodes: entityNode[] = [
+): EntityNode[] => {
+  let nodes: EntityNode[] = [
     { slug: username, href: userRoute({ username }) },
     { slug, href: modelRoute({ username, slug }), icon: CodeBracketIcon },
   ];
@@ -161,7 +161,7 @@ export const ModelLayout: FC<Props> = ({ username, slug, children }) => {
 
   return (
     <EntityLayout
-      nodes={entityNodes(username, slug, variableName)}
+      nodes={EntityNodes(username, slug, variableName)}
       isFluid={true}
       headerChildren={
         <>

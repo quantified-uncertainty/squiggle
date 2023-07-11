@@ -20,12 +20,6 @@ type TabLinkProps = {
   selected?: (pathname: string, href: string) => boolean;
 };
 
-type TabType = {
-  Link: FC<TabLinkProps>;
-  Div: FC<TabDivProps>;
-  List: FC<{ children: ReactNode }>;
-};
-
 const tabInnerSection = (
   name: string,
   Icon?: FC<IconProps>,
@@ -82,7 +76,7 @@ const TabList: FC<{ children: ReactNode }> = ({ children }) => (
   <div className="-mb-px flex">{children}</div>
 );
 
-export const EntityTab: TabType = {
+export const EntityTab = {
   Link: TabLink,
   Div: TabDiv,
   List: TabList,

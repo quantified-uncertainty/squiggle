@@ -75,12 +75,11 @@ export const CacheMenu: FC<{
         return (
           <DropdownMenu>
             <DropdownMenuHeader>
-              {" "}
               {isEmpty
                 ? "Not cached"
                 : `${revision.forRelativeValues.cache.length}/${
                     definition.items.length * definition.items.length
-                  } pairs cached`}{" "}
+                  } pairs cached`}
             </DropdownMenuHeader>
             <DropdownMenuSeparator />
             {!fullyCached && (

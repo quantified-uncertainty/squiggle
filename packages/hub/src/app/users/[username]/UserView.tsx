@@ -7,7 +7,7 @@ import { H1 } from "@/components/ui/Headers";
 import type { UserViewQuery } from "@gen/UserViewQuery.graphql";
 import { UserDefinitionList } from "./UserDefinitionList";
 import { UserModelList } from "./UserModelList";
-import { UserIcon, UserCircleIcon } from "@quri/ui";
+import { UserIcon } from "@quri/ui";
 
 const Query = graphql`
   query UserViewQuery($username: String!) {

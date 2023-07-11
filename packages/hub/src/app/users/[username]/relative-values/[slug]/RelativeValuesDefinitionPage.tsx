@@ -17,7 +17,7 @@ import {
 } from "@quri/ui";
 import { DeleteDefinitionAction } from "./DeleteRelativeValuesDefinitionAction";
 import { useSession } from "next-auth/react";
-import { EntityLayout, entityNode } from "@/components/EntityLayout";
+import { EntityLayout, EntityNode } from "@/components/EntityLayout";
 import { EntityTab } from "@/components/ui/EntityTab";
 
 export const RelativeValuesDefinitionPageFragment = graphql`
@@ -67,7 +67,7 @@ export const RelativeValuesDefinitionPage: FC<Props> = ({
 }) => {
   const { data: session } = useSession();
 
-  const nodes: entityNode[] = [
+  const nodes: EntityNode[] = [
     { slug: username, href: userRoute({ username }) },
     { slug, href: relativeValuesRoute({ username, slug }), icon: ScaleIcon },
   ];
