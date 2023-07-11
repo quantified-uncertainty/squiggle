@@ -84,7 +84,9 @@ export class Registry {
         .map(fnDefinitionToString)
         .map((def) => `  ${fnName}${def}\n`)
         .join("");
-      return `There are function matches for ${fnName}(), but with different arguments:\n${defsString}`;
+      return `There are function matches for ${fnName}(), but with different arguments:\n${defsString}\nWas given ${fnName}(${args
+        .map((r) => r.toTypeString())
+        .join(", ")})`;
     };
 
     for (const definition of definitions) {

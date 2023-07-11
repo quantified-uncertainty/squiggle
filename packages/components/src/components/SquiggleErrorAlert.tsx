@@ -9,6 +9,7 @@ import {
 
 import { ErrorAlert } from "./Alert.js";
 import { useViewerContext } from "./SquiggleViewer/ViewerProvider.js";
+import { CodeBracketIcon, LinkIcon } from "@quri/ui";
 
 type Props = {
   error: SqError;
@@ -24,9 +25,15 @@ const LocationLine: FC<{
   };
 
   return (
-    <span className="cursor-pointer hover:text-red-900" onClick={findInEditor}>
-      at line {location.start.line}, column {location.start.column}
-    </span>
+    <div style={{ display: "inline-block" }}>
+      <span
+        className="text-red-800 cursor-pointer items-center flex border-b border-red-900 border-opacity-50 hover:bg-red-200 leading-4"
+        onClick={findInEditor}
+      >
+        <CodeBracketIcon size={14} className="mr-1" />
+        line {location.start.line}, column {location.start.column}
+      </span>
+    </div>
   );
 };
 
@@ -43,8 +50,8 @@ const WithHeader: FC<PropsWithChildren<{ header: string }>> = ({
 const StackTraceFrame: FC<{ frame: SqFrame }> = ({ frame }) => {
   const location = frame.location();
   return (
-    <div>
-      {frame.name()} {location ? <LocationLine location={location} /> : ""}
+    <div className="text-sm font-mono">
+      {frame.name()} {location && <LocationLine location={location} />}
     </div>
   );
 };
@@ -68,9 +75,7 @@ export const SquiggleErrorAlert: FC<Props> = ({ error }) => {
         {error instanceof SqRuntimeError ? (
           <StackTrace error={error} />
         ) : error instanceof SqCompileError ? (
-          <WithHeader header="Location:">
-            <LocationLine location={error.location()} />
-          </WithHeader>
+          <LocationLine location={error.location()} />
         ) : null}
       </div>
     </ErrorAlert>
