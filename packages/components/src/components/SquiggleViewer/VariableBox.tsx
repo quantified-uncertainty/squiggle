@@ -259,9 +259,11 @@ export const VariableBox: FC<VariableBoxProps> = ({
       )}
       {isOpen && (
         <div className="flex w-full pt-1">
-          {!isFocused && hasBodyContent && isRecordOrList ? (
-            leftCollapseBorder()
-          ) : (
+          {!isFocused &&
+            hasBodyContent &&
+            isRecordOrList &&
+            leftCollapseBorder()}
+          {!isFocused && hasBodyContent && !isRecordOrList && !isRoot && (
             <div className="flex w-4" />
           )}
           <div className="grow">

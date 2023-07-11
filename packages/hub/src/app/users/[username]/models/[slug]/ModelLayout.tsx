@@ -106,7 +106,7 @@ function useFixModelUrlCasing(model: ModelLayoutQuery$data["model"]) {
 
 type Props = PropsWithChildren<CommonProps>;
 
-export const EntityNodes = (
+export const entityNodes = (
   username: string,
   slug: string,
   variableName?: string
@@ -161,7 +161,7 @@ export const ModelLayout: FC<Props> = ({ username, slug, children }) => {
 
   return (
     <EntityLayout
-      nodes={EntityNodes(username, slug, variableName)}
+      nodes={entityNodes(username, slug, variableName)}
       isFluid={true}
       headerChildren={
         <>

@@ -3,7 +3,7 @@
 import { ReactNode, Suspense } from "react";
 import Skeleton from "react-loading-skeleton";
 
-import { ModelLayout, EntityNodes } from "./ModelLayout";
+import { ModelLayout, entityNodes } from "./ModelLayout";
 import { EntityLayout } from "@/components/EntityLayout";
 import { useParams } from "next/navigation";
 
@@ -17,7 +17,7 @@ export default function Layout({
   const { variableName } = useParams();
   const fallback = (
     <EntityLayout
-      nodes={EntityNodes(params.username, params.slug, variableName)}
+      nodes={entityNodes(params.username, params.slug, variableName)}
       isFluid={true}
       headerChildren={
         <div
