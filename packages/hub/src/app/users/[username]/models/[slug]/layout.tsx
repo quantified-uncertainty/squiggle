@@ -22,7 +22,7 @@ export default function Layout({
       headerChildren={
         <div
           style={{
-            height: 50, // matches the height of real header content
+            height: 49, // matches the height of real header content
           }}
         />
       }
