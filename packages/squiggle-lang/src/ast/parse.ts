@@ -91,11 +91,12 @@ function nodeToString(node: ASTNode): string {
     case "UnaryCall":
       return "(" + node.op + nodeToString(node.arg) + ")";
     case "Float":
-      return String(node.value);
+      // see also: "Float" branch in expression/compile.ts
+      return `${node.integer}${
+        node.fractional === null ? "" : `.${node.fractional}`
+      }${node.exponent === null ? "" : `e${node.exponent}`}`;
     case "Identifier":
       return `:${node.value}`;
-    case "Integer":
-      return String(node.value);
     case "KeyValue":
       return nodeToString(node.key) + ": " + nodeToString(node.value);
     case "Lambda":

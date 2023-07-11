@@ -221,10 +221,17 @@ function compileToContent(
       ];
     case "Boolean":
       return [expression.eValue(vBool(ast.value)), context];
-    case "Float":
-      return [expression.eValue(vNumber(ast.value)), context];
-    case "Integer":
-      return [expression.eValue(vNumber(ast.value)), context];
+    case "Float": {
+      const value = parseFloat(
+        `${ast.integer}${ast.fractional === null ? "" : `.${ast.fractional}`}${
+          ast.exponent === null ? "" : `e${ast.exponent}`
+        }`
+      );
+      if (Number.isNaN(value)) {
+        throw new ICompileError("Failed to compile a number", ast.location);
+      }
+      return [expression.eValue(vNumber(value)), context];
+    }
     case "String":
       return [expression.eValue(vString(ast.value)), context];
     case "Void":
