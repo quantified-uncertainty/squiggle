@@ -9,15 +9,16 @@ describe("Peggy parse", () => {
     testParse("1.", "{1}");
     testParse("1.1", "{1.1}");
     testParse(".1", "{0.1}");
+    testParse(".001", "{0.001}");
     testParse("0.1", "{0.1}");
-    testParse("1e1", "{10}");
-    testParse("1e-1", "{0.1}");
-    testParse(".1e1", "{1}");
-    testParse("0.1e1", "{1}");
-    testParse("0.1e+3", "{100}");
-    testParse("0.1e+2+5", "{(10 + 5)}");
-    testParse("0.1e+2-5", "{(10 - 5)}");
-    testParse("100e-2-5", "{(1 - 5)}");
+    testParse("1e1", "{1e1}");
+    testParse("1e-1", "{1e-1}");
+    testParse(".1e1", "{0.1e1}");
+    testParse("0.1e1", "{0.1e1}");
+    testParse("0.1e+3", "{0.1e3}");
+    testParse("0.1e+2+5", "{(0.1e2 + 5)}");
+    testParse("0.1e+2-5", "{(0.1e2 - 5)}");
+    testParse("100e-2-5", "{(100e-2 - 5)}");
   });
 
   describe("literals operators parenthesis", () => {

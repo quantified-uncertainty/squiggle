@@ -90,9 +90,15 @@ type NodeDotLookup = N<"DotLookup", { arg: ASTNode; key: string }>;
 
 type NodeBracketLookup = N<"BracketLookup", { arg: ASTNode; key: ASTNode }>;
 
-type NodeFloat = N<"Float", { value: number }>;
-
-type NodeInteger = N<"Integer", { value: number }>;
+type NodeFloat = N<
+  "Float",
+  {
+    // floats are always positive, `-123` is an unary operation
+    integer: number;
+    fractional: string | null; // heading zeros are significant, so we can't store this as a number
+    exponent: number | null;
+  }
+>;
 
 type NodeIdentifier = N<"Identifier", { value: string }>;
 
@@ -158,7 +164,6 @@ export type ASTNode =
   | NodeDotLookup
   | NodeBracketLookup
   | NodeFloat
-  | NodeInteger
   | NodeIdentifier
   | NodeLetStatement
   | NodeDefunStatement
@@ -246,7 +251,7 @@ export function nodeRecord(
 ): NodeRecord {
   const symbols: NodeRecord["symbols"] = {};
   for (const element of elements) {
-    if (element.key.type === "String" || element.key.type === "Integer") {
+    if (element.key.type === "String") {
       symbols[element.key.value] = element;
     }
   }
@@ -289,20 +294,17 @@ export function nodeBoolean(
 ): NodeBoolean {
   return { type: "Boolean", value, location };
 }
-export function nodeFloat(value: number, location: LocationRange): NodeFloat {
-  return { type: "Float", value, location };
+export function nodeFloat(
+  args: Omit<NodeFloat, "type" | "location">,
+  location: LocationRange
+): NodeFloat {
+  return { type: "Float", ...args, location };
 }
 export function nodeIdentifier(
   value: string,
   location: LocationRange
 ): NodeIdentifier {
   return { type: "Identifier", value, location };
-}
-export function nodeInteger(
-  value: number,
-  location: LocationRange
-): NodeInteger {
-  return { type: "Integer", value, location };
 }
 export function nodeKeyValue(
   key: ASTNode,

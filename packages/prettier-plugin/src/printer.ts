@@ -139,10 +139,16 @@ export function createSquigglePrinter(
           ]);
         case "Boolean":
           return node.value ? "true" : "false";
-        case "Float":
-          return String(node.value);
-        case "Integer":
-          return String(node.value);
+        case "Float": {
+          const fractional =
+            node.fractional === null
+              ? ""
+              : "." + (node.fractional.replace(/0*$/, "") || "0"); // cut all trailing zeroes, but keep at least one
+
+          const exponent = node.exponent === null ? "" : `e${node.exponent}`;
+
+          return `${node.integer}${fractional}${exponent}`;
+        }
         case "Array":
           return group([
             "[",

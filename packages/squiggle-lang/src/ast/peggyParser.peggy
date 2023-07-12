@@ -269,7 +269,7 @@ string 'string'
   = characters:("'" @([^'])* "'") { return h.nodeString(characters.join(''), location()); }
   / characters:('"' @([^"])* '"') { return h.nodeString(characters.join(''), location()); }
 
-number = number:(float / integer) unit:unitIdentifier?
+number = number:float unit:unitIdentifier?
   {
     if (unit === null) {
       return number;
@@ -279,16 +279,39 @@ number = number:(float / integer) unit:unitIdentifier?
     }
   }
 
-integer 'number'
-  = d+ !"\." ![e]i
-  { return h.nodeInteger(parseInt(text()), location()); }
+float 'number' = significand:floatSignificand exponent:floatExponent?
+  {
+    return h.nodeFloat({
+      integer: significand.integer,
+      fractional: significand.fractional,
+      exponent,
+    }, location());
+  }
+  
+  floatSignificand =
+    integer:intLiteral "." fractional:($d+)? {
+      return {
+        integer,
+        fractional,
+      };
+    }
+    / integer:intLiteral {
+      return {
+        integer,
+        fractional: null,
+      };
+    }
+    / "." fractional:$(d+) {
+      return {
+        integer: 0,
+        fractional,
+      };
+    }
 
-float 'number'
-  = $(((d+ "\." d*) / ("\." d+)) floatExponent? / d+ floatExponent)
-  { return h.nodeFloat(parseFloat(text()), location()); }
-
-    floatExponent = [e]i ('-'/'+')? d+
-    d = [0-9]
+  floatExponent = [e]i @value:signedIntLiteral
+  intLiteral = d+ { return parseInt(text(), 10); }
+  signedIntLiteral = ('-'/'+')? d+ { return parseInt(text(), 10); }
+  d = [0-9]
 
 boolean 'boolean'
   = ('true' / 'false') ! [a-z]i ! [_$]
