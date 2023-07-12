@@ -46,50 +46,39 @@ export function parse(expr: string, source: string): ParseResult {
 // This function is just for the sake of tests.
 // For real generation of Squiggle code from AST try our prettier plugin.
 function nodeToString(node: ASTNode): string {
+  const sExpr = (components: (ASTNode | string)[]) =>
+    "(" +
+    node.type +
+    (components.length ? " " : "") +
+    components
+      .map((component) =>
+        typeof component === "string" ? component : nodeToString(component)
+      )
+      .join(" ") +
+    ")";
+
   switch (node.type) {
     case "Block":
     case "Program":
-      return "{" + node.statements.map(nodeToString).join("; ") + "}";
+      return sExpr(node.statements);
     case "Array":
-      return "[" + node.elements.map(nodeToString).join("; ") + "]";
+      return sExpr(node.elements);
     case "Record":
-      return "{" + node.elements.map(nodeToString).join(", ") + "}";
+      return sExpr(node.elements);
     case "Boolean":
       return String(node.value);
     case "Call":
-      return (
-        "(" +
-        nodeToString(node.fn) +
-        " " +
-        node.args.map(nodeToString).join(" ") +
-        ")"
-      );
+      return sExpr([node.fn, ...node.args]);
     case "InfixCall":
-      return (
-        "(" +
-        nodeToString(node.args[0]) +
-        " " +
-        node.op +
-        " " +
-        nodeToString(node.args[1]) +
-        ")"
-      );
+      return sExpr([node.op, ...node.args]);
     case "Pipe":
-      return (
-        "(" +
-        nodeToString(node.leftArg) +
-        " -> " +
-        nodeToString(node.fn) +
-        "(" +
-        node.rightArgs.map(nodeToString).join(",") +
-        "))"
-      );
+      return sExpr([node.leftArg, node.fn, ...node.rightArgs]);
     case "DotLookup":
-      return nodeToString(node.arg) + "." + node.key;
+      return sExpr([node.arg, node.key]);
     case "BracketLookup":
-      return nodeToString(node.arg) + "[" + nodeToString(node.key) + "]";
+      return sExpr([node.arg, node.key]);
     case "UnaryCall":
-      return "(" + node.op + nodeToString(node.arg) + ")";
+      return sExpr([node.op, node.arg]);
     case "Float":
       // see also: "Float" branch in expression/compile.ts
       return `${node.integer}${
@@ -98,36 +87,22 @@ function nodeToString(node: ASTNode): string {
     case "Identifier":
       return `:${node.value}`;
     case "KeyValue":
-      return nodeToString(node.key) + ": " + nodeToString(node.value);
+      return sExpr([node.key, node.value]);
     case "Lambda":
-      return (
-        "{|" +
-        node.args.map(nodeToString).join(",") +
-        "| " +
-        nodeToString(node.body) +
-        "}"
-      );
+      return sExpr([...node.args, node.body]);
     case "LetStatement":
-      return nodeToString(node.variable) + " = " + nodeToString(node.value);
+      return sExpr([node.variable, node.value]);
     case "DefunStatement":
-      return nodeToString(node.variable) + " = " + nodeToString(node.value);
+      return sExpr([node.variable, node.value]);
     case "String":
       return `'${node.value}'`; // TODO - quote?
     case "Ternary":
-      return (
-        "(::$$_ternary_$$ " +
-        nodeToString(node.condition) +
-        " " +
-        nodeToString(node.trueExpression) +
-        " " +
-        nodeToString(node.falseExpression) +
-        ")"
-      );
+      return sExpr([node.condition, node.trueExpression, node.falseExpression]);
     case "Void":
       return "()";
     case "UnitValue":
       // S-expression; we should migrate to S-expressions for other branches too, for easier testing.
-      return "(unit " + nodeToString(node.value) + " " + node.unit + ")";
+      return sExpr([node.value, node.unit]);
 
     default:
       throw new Error(`Unknown node: ${node satisfies never}`);
