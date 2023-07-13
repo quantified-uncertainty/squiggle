@@ -348,7 +348,11 @@ recordConstructor 'record'
   / '{' _nl args:array_recordEntries _nl '}'
     { return h.nodeRecord(args, location()); }
 
-  array_recordEntries = @keyValuePair|1.., commaSeparator| commaSeparator?
+  array_recordEntries = @(keyValuePair / keyValueInherit)| 1.., commaSeparator|commaSeparator?
+
+  keyValueInherit
+    = key:expression
+    { return h.nodeKeyValue(key, key, location()); }
 
   keyValuePair
     = key:expression _ ':' _nl value:expression
