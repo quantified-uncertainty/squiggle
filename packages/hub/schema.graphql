@@ -200,7 +200,7 @@ type Query {
   models(after: String, before: String, first: Int, last: Int): ModelConnection!
   node(id: ID!): Node
   nodes(ids: [ID!]!): [Node]!
-  relativeValuesDefinition(input: QueryRelativeValuesDefinitionInput!): RelativeValuesDefinition!
+  relativeValuesDefinition(input: QueryRelativeValuesDefinitionInput!): QueryRelativeValuesDefinitionResult!
   relativeValuesDefinitions(after: String, before: String, first: Int, input: RelativeValuesDefinitionsQueryInput, last: Int): RelativeValuesDefinitionConnection!
   runSquiggle(code: String!): SquiggleOutput!
   userByUsername(username: String!): User!
@@ -218,6 +218,8 @@ input QueryRelativeValuesDefinitionInput {
   ownerUsername: String!
   slug: String!
 }
+
+union QueryRelativeValuesDefinitionResult = BaseError | NotFoundError | RelativeValuesDefinition
 
 type QueryUsersConnection {
   edges: [QueryUsersConnectionEdge!]!

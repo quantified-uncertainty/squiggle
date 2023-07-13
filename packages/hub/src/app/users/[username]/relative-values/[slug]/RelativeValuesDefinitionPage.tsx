@@ -1,24 +1,22 @@
 import { FC, PropsWithChildren } from "react";
 import { graphql } from "relay-runtime";
 
-import { DotsDropdownButton } from "@/components/ui/DotsDropdownButton";
+import { EntityLayout, EntityNode } from "@/components/EntityLayout";
+import { EntityTab } from "@/components/ui/EntityTab";
 import {
-  userRoute,
   relativeValuesEditRoute,
   relativeValuesRoute,
+  userRoute,
 } from "@/routes";
 import {
   Cog8ToothIcon,
   Dropdown,
   DropdownMenu,
   EditIcon,
-  PlayIcon,
   ScaleIcon,
 } from "@quri/ui";
-import { DeleteDefinitionAction } from "./DeleteRelativeValuesDefinitionAction";
 import { useSession } from "next-auth/react";
-import { EntityLayout, EntityNode } from "@/components/EntityLayout";
-import { EntityTab } from "@/components/ui/EntityTab";
+import { DeleteDefinitionAction } from "./DeleteRelativeValuesDefinitionAction";
 
 export const RelativeValuesDefinitionPageFragment = graphql`
   fragment RelativeValuesDefinitionPage on RelativeValuesDefinition {
@@ -50,7 +48,16 @@ export const RelativeValuesDefinitionPageQuery = graphql`
     $input: QueryRelativeValuesDefinitionInput!
   ) {
     relativeValuesDefinition(input: $input) {
-      ...RelativeValuesDefinitionPage
+      __typename
+      ... on BaseError {
+        message
+      }
+      ... on NotFoundError {
+        message
+      }
+      ... on RelativeValuesDefinition {
+        ...RelativeValuesDefinitionPage
+      }
     }
   }
 `;

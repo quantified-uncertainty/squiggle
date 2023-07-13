@@ -32,6 +32,7 @@ import {
 } from "@/routes";
 import { DeleteModelAction } from "./DeleteModelAction";
 import { UpdateModelSlugAction } from "./UpdateModelSlugAction";
+import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 
 const Fragment = graphql`
   fragment ModelLayout on Model {
@@ -146,17 +147,8 @@ export const ModelLayout: FC<Props> = ({ username, slug, children }) => {
   const { result } = useLazyLoadQuery<ModelLayoutQuery>(Query, {
     input: { ownerUsername: username, slug },
   });
-
-  if (result.__typename === "NotFoundError") {
-    notFound();
-  }
-  if (result.__typename === "BaseError") {
-    throw new Error(result.message);
-  }
-  if (result.__typename !== "Model") {
-    throw new Error("Unexpected typename");
-  }
-  const model = useFragment<ModelLayout$key>(Fragment, result);
+  const modelRef = extractFromGraphqlErrorUnion(result, "Model");
+  const model = useFragment<ModelLayout$key>(Fragment, modelRef);
 
   useFixModelUrlCasing(model);
 

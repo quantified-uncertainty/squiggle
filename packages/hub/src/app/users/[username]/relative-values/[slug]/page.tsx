@@ -11,6 +11,7 @@ import {
   RelativeValuesDefinitionPageFragment,
   RelativeValuesDefinitionPageQuery,
 } from "./RelativeValuesDefinitionPage";
+import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 
 export default function OuterDefinitionPage({
   params,
@@ -18,17 +19,22 @@ export default function OuterDefinitionPage({
   params: { username: string; slug: string };
 }) {
   // should be de-duped by Next.js caches, so it's not a problem that we do this query twice
-  const data = useLazyLoadQuery<RelativeValuesDefinitionPageQueryType>(
-    RelativeValuesDefinitionPageQuery,
-    {
-      input: { ownerUsername: params.username, slug: params.slug },
-    },
-    { fetchPolicy: "store-and-network" }
+  const { relativeValuesDefinition: result } =
+    useLazyLoadQuery<RelativeValuesDefinitionPageQueryType>(
+      RelativeValuesDefinitionPageQuery,
+      {
+        input: { ownerUsername: params.username, slug: params.slug },
+      },
+      { fetchPolicy: "store-and-network" }
+    );
+  const definitionRef = extractFromGraphqlErrorUnion(
+    result,
+    "RelativeValuesDefinition"
   );
 
   const definition = useFragment<RelativeValuesDefinitionPage$key>(
     RelativeValuesDefinitionPageFragment,
-    data.relativeValuesDefinition
+    definitionRef
   );
 
   return (

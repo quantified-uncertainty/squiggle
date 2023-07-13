@@ -9,6 +9,7 @@ import { ModelRevisionViewQuery } from "@gen/ModelRevisionViewQuery.graphql";
 import { SquigglePlayground } from "@quri/squiggle-components";
 import { format } from "date-fns";
 import { notFound } from "next/navigation";
+import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 
 const ModelRevisionViewQuery = graphql`
   query ModelRevisionViewQuery($input: QueryModelInput!, $revisionId: ID!) {
@@ -55,16 +56,7 @@ export const ModelRevisionView: FC<Props> = ({
       revisionId,
     }
   );
-  if (result.__typename === "NotFoundError") {
-    notFound();
-  }
-  if (result.__typename === "BaseError") {
-    throw new Error(result.message);
-  }
-  if (result.__typename !== "Model") {
-    throw new Error("Unexpected typename");
-  }
-  const model = result;
+  const model = extractFromGraphqlErrorUnion(result, "Model");
 
   const typename = model.revision.content.__typename;
   if (typename !== "SquiggleSnippet") {
