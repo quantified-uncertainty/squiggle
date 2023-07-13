@@ -14,6 +14,7 @@ export default function Layout({
   children: ReactNode;
 }) {
   const { variableName } = useParams();
+
   const fallback = (
     <EntityLayout
       nodes={entityNodes(params.username, params.slug, variableName)}
