@@ -1,11 +1,10 @@
 "use client";
 
 import { ReactNode, Suspense } from "react";
-import Skeleton from "react-loading-skeleton";
 
-import { ModelLayout, entityNodes } from "./ModelLayout";
 import { EntityLayout } from "@/components/EntityLayout";
 import { useParams } from "next/navigation";
+import { ModelLayout, entityNodes } from "./ModelLayout";
 
 export default function Layout({
   params,

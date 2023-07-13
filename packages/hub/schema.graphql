@@ -183,6 +183,10 @@ interface Node {
   id: ID!
 }
 
+type NotFoundError implements Error {
+  message: String!
+}
+
 type PageInfo {
   endCursor: String
   hasNextPage: Boolean!
@@ -192,7 +196,7 @@ type PageInfo {
 
 type Query {
   me: Me!
-  model(input: QueryModelInput!): Model!
+  model(input: QueryModelInput!): QueryModelResult!
   models(after: String, before: String, first: Int, last: Int): ModelConnection!
   node(id: ID!): Node
   nodes(ids: [ID!]!): [Node]!
@@ -207,6 +211,8 @@ input QueryModelInput {
   ownerUsername: String!
   slug: String!
 }
+
+union QueryModelResult = BaseError | Model | NotFoundError
 
 input QueryRelativeValuesDefinitionInput {
   ownerUsername: String!
