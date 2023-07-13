@@ -203,7 +203,7 @@ type Query {
   relativeValuesDefinition(input: QueryRelativeValuesDefinitionInput!): QueryRelativeValuesDefinitionResult!
   relativeValuesDefinitions(after: String, before: String, first: Int, input: RelativeValuesDefinitionsQueryInput, last: Int): RelativeValuesDefinitionConnection!
   runSquiggle(code: String!): SquiggleOutput!
-  userByUsername(username: String!): User!
+  userByUsername(username: String!): QueryUserByUsernameResult!
   users(after: String, before: String, first: Int, input: UsersQueryInput, last: Int): QueryUsersConnection!
 }
 
@@ -220,6 +220,8 @@ input QueryRelativeValuesDefinitionInput {
 }
 
 union QueryRelativeValuesDefinitionResult = BaseError | NotFoundError | RelativeValuesDefinition
+
+union QueryUserByUsernameResult = BaseError | NotFoundError | User
 
 type QueryUsersConnection {
   edges: [QueryUsersConnectionEdge!]!
