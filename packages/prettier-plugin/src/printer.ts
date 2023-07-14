@@ -219,6 +219,8 @@ export function createSquigglePrinter(
           ]);
         case "Identifier":
           return node.value;
+        case "IdentifierWithDomain":
+          return [node.variable, ": ", typedPath(node).call(print, "domain")];
         case "KeyValue": {
           const key =
             node.key.type === "String" &&

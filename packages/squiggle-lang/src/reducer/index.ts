@@ -12,10 +12,19 @@ import { getStdLib } from "../library/index.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import * as Result from "../utility/result.js";
 import { Ok, result } from "../utility/result.js";
-import { Value, vArray, vLambda, vRecord, vVoid } from "../value/index.js";
+import {
+  VDomain,
+  Value,
+  vArray,
+  vDomain,
+  vLambda,
+  vRecord,
+  vVoid,
+} from "../value/index.js";
 import { ICompileError, IRuntimeError } from "../errors/IError.js";
 import * as Context from "./context.js";
-import { SquiggleLambda } from "./lambda.js";
+import { Lambda, LambdaParameter, SquiggleLambda } from "./lambda.js";
+import { valueToDomain } from "./domain.js";
 
 export type ReducerFn = (
   expression: Expression,
@@ -203,10 +212,25 @@ const evaluateLambda: SubReducerFn<"Lambda"> = (
   context,
   ast
 ) => {
+  const parameters: LambdaParameter[] = [];
+  for (const parameterExpression of expressionValue.parameters) {
+    let domain: VDomain | undefined;
+    if (parameterExpression.domain) {
+      const [domainValue] = context.evaluate(
+        parameterExpression.domain,
+        context
+      );
+      domain = vDomain(valueToDomain(domainValue));
+    }
+    parameters.push({
+      name: parameterExpression.name,
+      domain,
+    });
+  }
   const value = vLambda(
     new SquiggleLambda(
       expressionValue.name,
-      expressionValue.parameters,
+      parameters,
       context.stack,
       expressionValue.body,
       ast.location

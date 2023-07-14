@@ -77,7 +77,12 @@ defunStatement
 
   assignmentOp "assignment" = '='
 
-functionParameters = dollarIdentifier|.., commaSeparator|
+functionParameters = functionParameter|.., commaSeparator|
+  functionParameter
+    = id:dollarIdentifier domain:(_ ':' _nl @expression)?
+    {
+      return domain ? h.nodeIdentifierWithDomain(id.value, domain, location()) : id;
+    }
 
 /*
 Rules for expressions start here.

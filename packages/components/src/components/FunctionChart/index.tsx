@@ -60,6 +60,8 @@ export const FunctionChart: FC<FunctionChartProps> = ({
       </MessageAlert>
     );
   }
+  const domain = fn.parameters()[0].domain;
+
   const result1 = fn.call(
     [SqNumberValue.create(functionChartDefaults.min)],
     environment
@@ -87,7 +89,15 @@ export const FunctionChart: FC<FunctionChartProps> = ({
     case "Dist": {
       const plot = SqDistFnPlot.create({
         fn,
-        ...generateFunctionPlotSettings(settings),
+        ...(domain
+          ? {
+              xScale: SqLinearScale.create({
+                min: domain.min,
+                max: domain.max,
+              }),
+              points: settings.functionChartSettings.count,
+            }
+          : generateFunctionPlotSettings(settings)),
         distXScale: generateDistributionPlotSettings(
           settings.distributionChartSettings
         ).xScale,
@@ -104,7 +114,15 @@ export const FunctionChart: FC<FunctionChartProps> = ({
     case "Number": {
       const plot = SqNumericFnPlot.create({
         fn,
-        ...generateFunctionPlotSettings(settings),
+        ...(domain
+          ? {
+              xScale: SqLinearScale.create({
+                min: domain.min,
+                max: domain.max,
+              }),
+              points: settings.functionChartSettings.count,
+            }
+          : generateFunctionPlotSettings(settings)),
         yScale: SqLinearScale.create(),
       });
 

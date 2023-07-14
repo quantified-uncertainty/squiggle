@@ -156,17 +156,27 @@ function compileToContent(
       ];
     case "Lambda": {
       let newNameToPos = context.nameToPos;
-      const args: string[] = [];
+      const args: expression.LambdaExpressionParameter[] = [];
       for (let i = 0; i < ast.args.length; i++) {
-        const arg = ast.args[i];
-        if (arg.type !== "Identifier") {
+        const astArg = ast.args[i];
+
+        let arg: expression.LambdaExpressionParameter;
+        if (astArg.type === "Identifier") {
+          arg = { name: astArg.value, domain: undefined };
+        } else if (astArg.type === "IdentifierWithDomain") {
+          arg = {
+            name: astArg.variable,
+            domain: innerCompileAst(astArg.domain, context)[0],
+          };
+        } else {
+          // should never happen
           throw new ICompileError(
-            "Argument is not an identifier",
+            `Internal error: argument ${astArg.type} is not an identifier`,
             ast.location
           );
         }
-        args.push(arg.value);
-        newNameToPos = newNameToPos.set(arg.value, context.size + i);
+        args.push(arg);
+        newNameToPos = newNameToPos.set(arg.name, context.size + i);
       }
       const innerContext: CompileContext = {
         externals: context.externals,
@@ -257,6 +267,12 @@ function compileToContent(
         context,
       ];
     }
+    case "IdentifierWithDomain":
+      // should never happen
+      throw new ICompileError(
+        "Can't compile IdentifierWithDomain outside of lambda declaration",
+        ast.location
+      );
     default:
       throw new Error(`Unsupported AST value ${ast satisfies never}`);
   }

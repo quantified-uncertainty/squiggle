@@ -5,6 +5,11 @@
 import { ASTNode } from "../ast/parse.js";
 import { Value, vVoid } from "../value/index.js";
 
+export type LambdaExpressionParameter = {
+  name: string;
+  domain?: Expression;
+};
+
 // All shapes are type+value, to help with V8 monomorphism.
 export type ExpressionContent =
   | {
@@ -60,7 +65,7 @@ export type ExpressionContent =
       type: "Lambda";
       value: {
         name?: string;
-        parameters: string[];
+        parameters: LambdaExpressionParameter[];
         body: Expression;
       };
     }
@@ -94,7 +99,7 @@ export const eCall = (
 
 export const eLambda = (
   name: string | undefined,
-  parameters: string[],
+  parameters: LambdaExpressionParameter[],
   body: Expression
 ): ExpressionContent => ({
   type: "Lambda",
@@ -193,12 +198,12 @@ export function expressionToString(expression: Expression): string {
         expression.value.fn
       )})(${expression.value.args.map(expressionToString).join(", ")})`;
     case "Lambda":
-      return `{|${expression.value.parameters.join(", ")}| ${expressionToString(
-        expression.value.body
-      )}}`;
+      return `{|${expression.value.parameters
+        .map((parameter) => parameter.name)
+        .join(", ")}| ${expressionToString(expression.value.body)}}`;
     case "Value":
       return expression.value.toString();
     default:
-      return `Unknown expression ${expression}`;
+      return `Unknown expression ${expression satisfies never}`;
   }
 }

@@ -8,6 +8,7 @@ import { result } from "../../utility/result.js";
 
 import { SqError, SqOtherError, SqRuntimeError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
+import { wrapDomain } from "./SqDomain.js";
 import { SqValue, wrapValue } from "./index.js";
 
 export class SqLambda {
@@ -28,7 +29,14 @@ export class SqLambda {
   }
 
   parameters() {
-    return this._value.getParameters();
+    return this._value.getParameters().map((parameter) => {
+      return {
+        name: parameter.name,
+        domain: parameter.domain
+          ? wrapDomain(parameter.domain.value)
+          : undefined,
+      };
+    });
   }
 
   call(args: SqValue[], env?: Env): result<SqValue, SqError> {

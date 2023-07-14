@@ -2,6 +2,8 @@ import React from "react";
 import { z } from "zod";
 
 import {
+  SqDomain,
+  SqLambda,
   SqLinearScale,
   SqLogScale,
   SqPowerScale,

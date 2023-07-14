@@ -100,6 +100,11 @@ type NodeFloat = N<
   }
 >;
 
+type NodeIdentifierWithDomain = N<
+  "IdentifierWithDomain",
+  { variable: string; domain: ASTNode }
+>;
+
 type NodeIdentifier = N<"Identifier", { value: string }>;
 
 type NodeLetStatement = N<
@@ -165,6 +170,7 @@ export type ASTNode =
   | NodeBracketLookup
   | NodeFloat
   | NodeIdentifier
+  | NodeIdentifierWithDomain
   | NodeLetStatement
   | NodeDefunStatement
   | NodeLambda
@@ -294,18 +300,29 @@ export function nodeBoolean(
 ): NodeBoolean {
   return { type: "Boolean", value, location };
 }
+
 export function nodeFloat(
   args: Omit<NodeFloat, "type" | "location">,
   location: LocationRange
 ): NodeFloat {
   return { type: "Float", ...args, location };
 }
+
 export function nodeIdentifier(
   value: string,
   location: LocationRange
 ): NodeIdentifier {
   return { type: "Identifier", value, location };
 }
+
+export function nodeIdentifierWithDomain(
+  variable: string,
+  domain: ASTNode,
+  location: LocationRange
+): NodeIdentifierWithDomain {
+  return { type: "IdentifierWithDomain", variable, domain, location };
+}
+
 export function nodeKeyValue(
   key: ASTNode,
   value: ASTNode,

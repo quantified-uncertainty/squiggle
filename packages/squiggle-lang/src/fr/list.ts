@@ -99,7 +99,7 @@ export const library = [
     definitions: [
       makeDefinition([frArray(frAny), frLambda], ([array, lambda], context) => {
         const mapped: Value[] = new Array(array.length);
-        const parameters = lambda.getParameters().length;
+        const parameters = lambda.getParameterNames().length;
 
         // this code is intentionally duplicated for performance reasons
         if (parameters === 1) {
@@ -113,7 +113,7 @@ export const library = [
         } else {
           throw new REExpectedType(
             "(number, number?) => ...",
-            `(${lambda.getParameters().join(",")}) => ...`
+            `(${lambda.getParameterNames().join(",")}) => ...`
           );
         }
         return vArray(mapped);

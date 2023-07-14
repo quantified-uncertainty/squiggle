@@ -3,11 +3,16 @@ import { LocationRange } from "peggy";
 import { ASTNode } from "../ast/parse.js";
 import { REArityError } from "../errors/messages.js";
 import { Expression } from "../expression/index.js";
-import { Value } from "../value/index.js";
+import { VDomain, Value } from "../value/index.js";
 import * as IError from "../errors/IError.js";
 import * as Context from "./context.js";
 import { ReducerContext } from "./context.js";
 import { Stack } from "./stack.js";
+
+export type LambdaParameter = {
+  name: string;
+  domain?: VDomain;
+};
 
 type LambdaBody = (args: Value[], context: ReducerContext) => Value;
 
@@ -15,7 +20,8 @@ export abstract class Lambda {
   constructor(public body: LambdaBody) {}
 
   abstract getName(): string;
-  abstract getParameters(): string[];
+  abstract getParameterNames(): string[];
+  abstract getParameters(): LambdaParameter[];
   abstract toString(): string;
 
   callFrom(
@@ -50,13 +56,13 @@ export abstract class Lambda {
 
 // User-defined functions, e.g. `add2 = {|x, y| x + y}`, are instances of this class.
 export class SquiggleLambda extends Lambda {
-  parameters: string[];
+  parameters: LambdaParameter[];
   location: LocationRange;
   name?: string;
 
   constructor(
     name: string | undefined,
-    parameters: string[],
+    parameters: LambdaParameter[],
     stack: Stack,
     body: Expression,
     location: LocationRange
@@ -70,7 +76,7 @@ export class SquiggleLambda extends Lambda {
 
       let localStack = stack;
       for (let i = 0; i < parametersLength; i++) {
-        localStack = localStack.push(parameters[i], args[i]);
+        localStack = localStack.push(parameters[i].name, args[i]);
       }
 
       const lambdaContext: ReducerContext = {
@@ -100,8 +106,12 @@ export class SquiggleLambda extends Lambda {
     return this.parameters;
   }
 
+  getParameterNames() {
+    return this.parameters.map((parameter) => parameter.name);
+  }
+
   toString() {
-    return `lambda(${this.parameters.join(",")}=>internal code)`;
+    return `lambda(${this.getParameterNames().join(",")}=>internal code)`;
   }
 }
 
@@ -116,8 +126,12 @@ export class BuiltinLambda extends Lambda {
   }
 
   // this function doesn't scale to FunctionRegistry's polymorphic functions
-  getParameters() {
+  getParameterNames() {
     return ["..."];
+  }
+
+  override getParameters(): LambdaParameter[] {
+    return [{ name: "..." }];
   }
 
   toString() {
