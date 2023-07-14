@@ -320,10 +320,10 @@ boolean 'boolean'
 // Contructors - delimited blocks such as {} and []
 
 valueConstructor
-  = recordConstructor
-  / arrayConstructor
+  = arrayConstructor
   / lambda
   / quotedInnerBlock
+  / recordConstructor
 
 lambda
   = '{' _nl '|' _nl args:functionParameters _nl '|' _nl statements:statementsList  finalExpression: (statementSeparator @expression)  _nl '}'

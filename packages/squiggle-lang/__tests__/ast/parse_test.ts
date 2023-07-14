@@ -45,6 +45,7 @@ describe("Peggy parse", () => {
   });
 
   describe("literals operators parenthesis", () => {
+    testParse("{a}", "(Program (Block :a))");
     testParse("1", "(Program 1)");
     testParse("'hello'", "(Program 'hello')");
     testParse("true", "(Program true)");
