@@ -35,9 +35,11 @@ const RevisionsFragment = graphql`
 const ModelRevisionsListQuery = graphql`
   query ModelRevisionsListQuery($input: QueryModelInput!) {
     model(input: $input) {
-      id
-      ...FixModelUrlCasing
-      ...ModelRevisionsList
+      ... on Model {
+        id
+        ...FixModelUrlCasing
+        ...ModelRevisionsList
+      }
     }
   }
 `;

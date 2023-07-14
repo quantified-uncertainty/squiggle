@@ -4,13 +4,10 @@ import { useLazyLoadQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { FrontPageQuery } from "@/__generated__/FrontPageQuery.graphql";
-import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
-import { StyledLink } from "@/components/ui/StyledLink";
-import { newDefinitionRoute, newModelRoute } from "@/routes";
 import { FrontPageDefinitionList } from "./FrontPageDefinitionList";
 import { FrontPageModelList } from "./FrontPageModelList";
 
-import { StyledTextArea, StyledTab } from "@quri/ui";
+import { StyledTab } from "@quri/ui";
 
 const Query = graphql`
   query FrontPageQuery {

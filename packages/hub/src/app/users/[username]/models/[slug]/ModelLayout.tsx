@@ -1,28 +1,25 @@
 import { useSession } from "next-auth/react";
-import { usePathname, useRouter, useParams } from "next/navigation";
+import { notFound, useParams, usePathname, useRouter } from "next/navigation";
 import { FC, PropsWithChildren } from "react";
-import { useLazyLoadQuery } from "react-relay";
+import { useFragment, useLazyLoadQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import {
+  CodeBracketIcon,
+  Cog8ToothIcon,
+  Dropdown,
   DropdownMenu,
   DropdownMenuHeader,
   DropdownMenuSeparator,
-  TriangleIcon,
-  EditIcon,
-  ScaleIcon,
-  Dropdown,
-  Cog8ToothIcon,
-  CodeBracketSquareIcon,
-  BackwardIcon,
-  ArrowUturnLeftIcon,
   RectangleStackIcon,
+  ScaleIcon,
 } from "@quri/ui";
 
 import {
-  ModelLayoutQuery,
-  ModelLayoutQuery$data,
-} from "@/__generated__/ModelLayoutQuery.graphql";
+  ModelLayout$data,
+  ModelLayout$key,
+} from "@/__generated__/ModelLayout.graphql";
+import { ModelLayoutQuery } from "@/__generated__/ModelLayoutQuery.graphql";
 import { EntityLayout, EntityNode } from "@/components/EntityLayout";
 import { DropdownMenuLinkItem } from "@/components/ui/DropdownMenuLinkItem";
 import { EntityTab } from "@/components/ui/EntityTab";
@@ -30,37 +27,51 @@ import {
   modelForRelativeValuesExportRoute,
   modelRevisionsRoute,
   modelRoute,
-  modelViewRoute,
   patchModelRoute,
   userRoute,
 } from "@/routes";
 import { DeleteModelAction } from "./DeleteModelAction";
 import { UpdateModelSlugAction } from "./UpdateModelSlugAction";
-import { CodeBracketIcon } from "@quri/ui";
+import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
+
+const Fragment = graphql`
+  fragment ModelLayout on Model {
+    id
+    slug
+    owner {
+      username
+    }
+    currentRevision {
+      id
+      # for length; TODO - "hasExports" field?
+      relativeValuesExports {
+        id
+        variableName
+        definition {
+          slug
+          owner {
+            username
+          }
+        }
+      }
+    }
+  }
+`;
 
 // Doing this with a fragment would be too hard, because of how layouts work in Next.js.
 // So we have to do two GraphQL queries on most model pages.
 const Query = graphql`
   query ModelLayoutQuery($input: QueryModelInput!) {
-    model(input: $input) {
-      id
-      slug
-      owner {
-        username
+    result: model(input: $input) {
+      __typename
+      ... on BaseError {
+        message
       }
-      currentRevision {
-        id
-        # for length; TODO - "hasExports" field?
-        relativeValuesExports {
-          id
-          variableName
-          definition {
-            slug
-            owner {
-              username
-            }
-          }
-        }
+      ... on NotFoundError {
+        message
+      }
+      ... on Model {
+        ...ModelLayout
       }
     }
   }
@@ -90,7 +101,7 @@ const MenuButton: FC<CommonProps> = ({ username, slug }) => {
   );
 };
 
-function useFixModelUrlCasing(model: ModelLayoutQuery$data["model"]) {
+function useFixModelUrlCasing(model: ModelLayout$data) {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -133,9 +144,11 @@ export const ModelLayout: FC<Props> = ({ username, slug, children }) => {
   const { data: session } = useSession();
   const { variableName } = useParams();
 
-  const { model } = useLazyLoadQuery<ModelLayoutQuery>(Query, {
+  const { result } = useLazyLoadQuery<ModelLayoutQuery>(Query, {
     input: { ownerUsername: username, slug },
   });
+  const modelRef = extractFromGraphqlErrorUnion(result, "Model");
+  const model = useFragment<ModelLayout$key>(Fragment, modelRef);
 
   useFixModelUrlCasing(model);
 

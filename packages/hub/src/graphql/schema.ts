@@ -1,5 +1,8 @@
 import { builder } from "./builder";
 
+import "./errors/BaseError";
+import "./errors/NotFoundError";
+
 import "./queries/relativeValuesDefinition";
 import "./queries/relativeValuesDefinitions";
 import "./queries/me";

@@ -36,7 +36,7 @@
     "graphql-yoga": "^4.0.3",
     "immutable": "^4.3.0",
     "lodash": "^4.17.21",
-    "next": "^13.4.7",
+    "next": "^13.4.9",
     "next-auth": "^4.22.1",
     "nodemailer": "^6.9.3",
     "pako": "^2.1.0",
