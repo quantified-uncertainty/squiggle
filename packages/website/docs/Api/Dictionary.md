@@ -32,7 +32,7 @@ homeToItemsConversion = 0.1 to 0.4
 conversionFn(i) = [i[0], i[1] * homeToItemsConversion]
 updatedValueFromHomeItems = valueFromHomeItems |> Dict.toList |> map(conversionFn) |> Dict.fromList
 
-allItems = merge(valueFromOfficeItems, updatedValueFromHomeItems)
+allItems = Dict.merge(valueFromOfficeItems, updatedValueFromHomeItems)
 ```
 
 ### toList
