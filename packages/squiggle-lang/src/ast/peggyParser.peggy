@@ -351,7 +351,7 @@ recordConstructor 'record'
   array_recordEntries = @(keyValuePair / keyValueInherit)| 1.., commaSeparator|commaSeparator?
 
   keyValueInherit
-    = key:expression
+    = key:identifier
     { return h.nodeKeyValue(key, key, location()); }
 
   keyValuePair
