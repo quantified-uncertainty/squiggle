@@ -28,6 +28,9 @@ describe("Record", () => {
   test("Return record", async () => {
     expect((await testRun("{a:1}")).toString()).toEqual("{a: 1}");
   });
+  test("Inherit syntax for records", async () => {
+    expect((await testRun("a=1; {a, }")).toString()).toEqual("{a: 1}");
+  });
 });
 
 describe("Continues", () => {

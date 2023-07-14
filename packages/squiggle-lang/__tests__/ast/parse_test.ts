@@ -162,6 +162,10 @@ describe("Peggy parse", () => {
       "(Program (Record (KeyValue 'a' 1) (KeyValue 'b' 2)))"
     );
     testParse(
+      "{a, b, }",
+      "(Program (Record (KeyValue 'a' :a) (KeyValue 'b' :b)))"
+    );
+    testParse(
       "{1+0: 1, 2+0: 2}",
       "(Program (Record (KeyValue (InfixCall + 1 0) 1) (KeyValue (InfixCall + 2 0) 2)))"
     ); // key can be any expression
