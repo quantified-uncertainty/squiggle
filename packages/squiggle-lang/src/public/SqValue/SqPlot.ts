@@ -291,11 +291,7 @@ export class SqTable extends SqAbstractPlot<"table"> {
     return this._value.elements.map((r) => wrapValue(r, this.context));
   }
 
-  get fns(): Lambda[] {
-    return this._value.fns;
-  }
-
-  get fn(): SqLambda[] {
+  get fns(): SqLambda[] {
     return this._value.fns.map(
       (fn) =>
         new SqLambda(fn, this.context ? this.context.extend("fn") : undefined)
@@ -303,24 +299,29 @@ export class SqTable extends SqAbstractPlot<"table"> {
   }
 
   item(row: number, column: number, env: Env): Result.result<SqValue, SqError> {
-    const response = this.fn[column].call([this.elements[row]], env);
-    let fooContex: SqValueContext | undefined = this.context
-      ? this.context.extend("fn")
-      : undefined;
-    if (response.ok) {
-      const context = createContext(env);
-      return Result.Ok(wrapValue(response.value._value, fooContex));
+    const response = this.fns[column].call([this.elements[row]], env);
+    const context: SqValueContext | undefined =
+      this.context && this.context.extend(`item(${row}, ${column})`);
+
+    if (response.ok && context) {
+      return Result.Ok(wrapValue(response.value._value, context));
+    } else if (response.ok) {
+      return Result.Err(new SqOtherError("Context creation for table failed."));
     } else {
       return response;
     }
   }
 
   row(row: number, env: Env): Result.result<SqValue, SqError>[] {
-    return this.fns.map((fn, column) => this.item(row, column, env));
+    return this._value.fns.map((fn, column) => this.item(row, column, env));
   }
 
   items(env: Env): Result.result<SqValue, SqError>[][] {
     return this.elements.map((_, row) => this.row(row, env));
+  }
+
+  get columnNames(): string[] | undefined {
+    return this._value.columnNames;
   }
 }
 

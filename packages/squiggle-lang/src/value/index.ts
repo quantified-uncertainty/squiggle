@@ -273,7 +273,12 @@ export type Plot =
       fn: Lambda;
       ids: string[];
     }
-  | { type: "table"; elements: Value[]; fns: Lambda[] };
+  | {
+      type: "table";
+      elements: Value[];
+      fns: Lambda[];
+      columnNames: string[] | undefined;
+    };
 
 class VPlot extends BaseValue implements Indexable {
   readonly type = "Plot";

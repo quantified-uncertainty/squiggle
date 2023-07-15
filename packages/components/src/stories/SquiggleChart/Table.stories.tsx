@@ -16,7 +16,8 @@ export const Basic: Story = {
     code: `
     Plot.table({
       elements: [1,4,5],
-      fns:[{|e| e}, {|e| {|t| t + e}}, {|e| [e,e,e,e]}] 
+      fns:[{|e| e}, {|e| {|t| t + e}}, {|e| [e,e,e,e]}],
+      columnNames: ["e", "e + t", "e x 4"]
     })
 `,
   },
@@ -58,7 +59,8 @@ export const Long: Story = {
     
     Plot.table({
           elements: items -> Dict.values,
-          fns:[{|e| e.name}, {|e| e.id}, {|e| e.value}] 
+          fns:[{|e| e.id}, {|e| e.name}, {|e| e.value}],
+          columnNames: ["id", "name", "value"]
         })
 `,
   },

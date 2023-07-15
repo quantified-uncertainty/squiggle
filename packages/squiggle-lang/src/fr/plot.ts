@@ -197,12 +197,19 @@ export const library = [
     examples: [],
     definitions: [
       makeDefinition(
-        [frRecord(["elements", frArray(frAny)], ["fns", frArray(frLambda)])],
-        ([{ elements, fns }]) => {
+        [
+          frRecord(
+            ["elements", frArray(frAny)],
+            ["fns", frArray(frLambda)],
+            ["columnNames", frOptional(frArray(frString))]
+          ),
+        ],
+        ([{ elements, fns, columnNames }]) => {
           return vPlot({
             type: "table",
             elements,
             fns,
+            columnNames: columnNames ?? undefined,
           });
         }
       ),

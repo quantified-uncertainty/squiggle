@@ -34,30 +34,41 @@ import { clsx } from "clsx";
 const leftMargin = "ml-1.5";
 
 const showItem = (item: result<SqValue, SqError>, settings) => {
-  let out = <>Error</>;
-
   if (item.ok) {
     const value = item.value;
     if (valueHasContext(value)) {
-      out = <>{getBoxProps(value).children(settings)}</>;
+      return getBoxProps(value).children(settings);
+    } else {
+      return value.toString();
     }
   } else {
-    out = <>error</>;
+    return item.toString();
   }
-  return out;
 };
 
 const table = (value: SqTable, environment, settings) => {
   const rowsAndColumns = value.items(environment);
+  const columnNames = value.columnNames;
 
   return (
     <div className="not-prose relative rounded-md overflow-hidden border border-slate-200">
       <table className="table-fixed w-full">
+        {columnNames && (
+          <thead className="text-xs text-gray-700 bg-gray-50 border-b border-slate-200">
+            <tr>
+              {columnNames.map((name, i) => (
+                <th key={i} scope="col" className="px-4 py-2">
+                  {name}
+                </th>
+              ))}
+            </tr>
+          </thead>
+        )}
         <tbody>
           {rowsAndColumns.map((row, i) => (
-            <tr key={i}>
+            <tr key={i} className="border-b border-slate-100">
               {row.map((item, k) => (
-                <td key={k} className="border-b border-slate-100 p-4 pl-8">
+                <td key={k} className="px-2 py-2">
                   {showItem(item, settings)}
                 </td>
               ))}
