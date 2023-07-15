@@ -13,6 +13,7 @@ import {
 import { Lambda } from "../reducer/lambda.js";
 import * as DateTime from "../utility/DateTime.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
+import { SqValue } from "../public/SqValue/index.js";
 
 export type ValueMap = ImmutableMap<string, Value>;
 
@@ -271,7 +272,8 @@ export type Plot =
       type: "relativeValues";
       fn: Lambda;
       ids: string[];
-    };
+    }
+  | { type: "table"; elements: Value[]; fns: Lambda[] };
 
 class VPlot extends BaseValue implements Indexable {
   readonly type = "Plot";
@@ -294,6 +296,8 @@ class VPlot extends BaseValue implements Indexable {
         return `Scatter plot for distributions ${this.value.xDist} and ${this.value.yDist}`;
       case "relativeValues":
         return `Plot for relative values ${this.value.ids.join(", ")}`;
+      case "table":
+        return `Table`;
     }
   }
 

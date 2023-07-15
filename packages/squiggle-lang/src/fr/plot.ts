@@ -2,6 +2,7 @@ import { PointMass } from "../dist/SymbolicDist.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
+  frAny,
   frBool,
   frDist,
   frDistOrNumber,
@@ -185,6 +186,23 @@ export const library = [
             yDist,
             xScale: xScale ?? { type: "linear" },
             yScale: yScale ?? { type: "linear" },
+          });
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "table",
+    output: "Plot",
+    examples: [],
+    definitions: [
+      makeDefinition(
+        [frRecord(["elements", frArray(frAny)], ["fns", frArray(frLambda)])],
+        ([{ elements, fns }]) => {
+          return vPlot({
+            type: "table",
+            elements,
+            fns,
           });
         }
       ),

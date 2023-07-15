@@ -80,8 +80,6 @@ export class SqValueContext {
       }
     }
 
-    const path = this.path.extend(item);
-
     return new SqValueContext({
       project: this.project,
       sourceId: this.sourceId,

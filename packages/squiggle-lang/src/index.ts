@@ -35,6 +35,7 @@ export {
   SqPlot,
   SqRelativeValuesPlot,
   SqScatterPlot,
+  SqTable,
 } from "./public/SqValue/SqPlot.js";
 export { SqRecord } from "./public/SqValue/SqRecord.js";
 export {

@@ -5,6 +5,9 @@ import {
   SqPlot,
   SqScale,
   SqValue,
+  SqTable,
+  SqError,
+  result,
 } from "@quri/squiggle-lang";
 
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
@@ -29,6 +32,42 @@ import { clsx } from "clsx";
 
 // We use an extra left margin for some elements to align them with parent variable name
 const leftMargin = "ml-1.5";
+
+const showItem = (item: result<SqValue, SqError>, settings) => {
+  let out = <>Error</>;
+
+  if (item.ok) {
+    const value = item.value;
+    if (valueHasContext(value)) {
+      out = <>{getBoxProps(value).children(settings)}</>;
+    }
+  } else {
+    out = <>error</>;
+  }
+  return out;
+};
+
+const table = (value: SqTable, environment, settings) => {
+  const rowsAndColumns = value.items(environment);
+
+  return (
+    <div className="not-prose relative rounded-md overflow-hidden border border-slate-200">
+      <table className="table-fixed w-full">
+        <tbody>
+          {rowsAndColumns.map((row, i) => (
+            <tr key={i}>
+              {row.map((item, k) => (
+                <td key={k} className="border-b border-slate-100 p-4 pl-8">
+                  {showItem(item, settings)}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
 
 export const getBoxProps = (
   value: SqValueWithContext
@@ -201,6 +240,8 @@ export const getBoxProps = (
                   environment={environment}
                 />
               );
+            case "table":
+              return table(plot, environment, settings);
             default:
               // can happen if squiggle-lang version is too fresh and we messed up the components -> squiggle-lang dependency
               return `Unsupported plot ${plot satisfies never}`;
@@ -259,9 +300,11 @@ type Props = {
 };
 
 export const ExpressionViewer: React.FC<Props> = ({ value }) => {
+  const foo = value;
   if (!valueHasContext(value)) {
     return <MessageAlert heading="Can't display pathless value" />;
   }
+  const bar = value;
 
   const boxProps = getBoxProps(value);
   const heading = boxProps.heading || value.tag;

@@ -1,6 +1,8 @@
 import { BaseDist } from "../../dist/BaseDist.js";
 import { SampleSetDist } from "../../dist/SampleSetDist/index.js";
 import { Env } from "../../dist/env.js";
+import { createContext } from "../../reducer/context.js";
+import { Lambda } from "../../reducer/lambda.js";
 import * as Result from "../../utility/result.js";
 import { Plot, vPlot } from "../../value/index.js";
 
@@ -13,7 +15,7 @@ import {
 } from "./SqDistribution/index.js";
 import { SqLambda } from "./SqLambda.js";
 import { SqScale, wrapScale } from "./SqScale.js";
-import { SqPlotValue } from "./index.js";
+import { SqPlotValue, SqValue, wrapValue } from "./index.js";
 
 type LabeledSqDistribution = {
   name?: string;
@@ -32,6 +34,8 @@ export function wrapPlot(value: Plot, context?: SqValueContext): SqPlot {
       return new SqScatterPlot(value, context);
     case "relativeValues":
       return new SqRelativeValuesPlot(value, context);
+    case "table":
+      return new SqTable(value, context);
   }
 }
 
@@ -280,10 +284,50 @@ export class SqRelativeValuesPlot extends SqAbstractPlot<"relativeValues"> {
     );
   }
 }
+export class SqTable extends SqAbstractPlot<"table"> {
+  tag = "table" as const;
+
+  get elements(): SqValue[] {
+    return this._value.elements.map((r) => wrapValue(r, this.context));
+  }
+
+  get fns(): Lambda[] {
+    return this._value.fns;
+  }
+
+  get fn(): SqLambda[] {
+    return this._value.fns.map(
+      (fn) =>
+        new SqLambda(fn, this.context ? this.context.extend("fn") : undefined)
+    );
+  }
+
+  item(row: number, column: number, env: Env): Result.result<SqValue, SqError> {
+    const response = this.fn[column].call([this.elements[row]], env);
+    let fooContex: SqValueContext | undefined = this.context
+      ? this.context.extend("fn")
+      : undefined;
+    if (response.ok) {
+      const context = createContext(env);
+      return Result.Ok(wrapValue(response.value._value, fooContex));
+    } else {
+      return response;
+    }
+  }
+
+  row(row: number, env: Env): Result.result<SqValue, SqError>[] {
+    return this.fns.map((fn, column) => this.item(row, column, env));
+  }
+
+  items(env: Env): Result.result<SqValue, SqError>[][] {
+    return this.elements.map((_, row) => this.row(row, env));
+  }
+}
 
 export type SqPlot =
   | SqDistributionsPlot
   | SqNumericFnPlot
   | SqDistFnPlot
   | SqScatterPlot
-  | SqRelativeValuesPlot;
+  | SqRelativeValuesPlot
+  | SqTable;
