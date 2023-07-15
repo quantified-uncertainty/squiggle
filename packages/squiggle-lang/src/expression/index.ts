@@ -7,7 +7,7 @@ import { Value, vVoid } from "../value/index.js";
 
 export type LambdaExpressionParameter = {
   name: string;
-  domain?: Expression;
+  annotation?: Expression;
 };
 
 // All shapes are type+value, to help with V8 monomorphism.

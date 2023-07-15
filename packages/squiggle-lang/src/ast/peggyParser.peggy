@@ -79,9 +79,9 @@ defunStatement
 
 functionParameters = functionParameter|.., commaSeparator|
   functionParameter
-    = id:dollarIdentifier domain:(_ ':' _nl @expression)?
+    = id:dollarIdentifier annotation:(_ ':' _nl @expression)?
     {
-      return domain ? h.nodeIdentifierWithDomain(id.value, domain, location()) : id;
+      return annotation ? h.nodeIdentifierWithAnnotation(id.value, annotation, location()) : id;
     }
 
 /*

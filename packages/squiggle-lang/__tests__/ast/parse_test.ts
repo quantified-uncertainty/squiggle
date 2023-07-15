@@ -150,7 +150,7 @@ describe("Peggy parse", () => {
 
     testParse(
       "annotated(x: [3,5]) = x",
-      "(Program (DefunStatement :annotated (Lambda (IdentifierWithDomain x (Array 3 5)) (Block :x))))"
+      "(Program (DefunStatement :annotated (Lambda (IdentifierWithAnnotation x (Array 3 5)) (Block :x))))"
     );
   });
 

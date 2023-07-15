@@ -13,7 +13,7 @@ import { getStdLib } from "../library/index.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import * as Result from "../utility/result.js";
 import { Ok, result } from "../utility/result.js";
-import { valueToDomain } from "../value/domain.js";
+import { annotationToDomain } from "../value/domain.js";
 import {
   VDomain,
   Value,
@@ -216,16 +216,16 @@ const evaluateLambda: SubReducerFn<"Lambda"> = (
   for (const parameterExpression of expressionValue.parameters) {
     let domain: VDomain | undefined;
     // Processing annotations, e.g. f(x: [3, 5]) = { ... }
-    if (parameterExpression.domain) {
+    if (parameterExpression.annotation) {
       // First, we evaluate `[3, 5]` expression.
       const [annotationValue] = context.evaluate(
-        parameterExpression.domain,
+        parameterExpression.annotation,
         context
       );
       // Now we cast it to domain value, e.g. `Range(3 to 5)`.
       // Casting can fail, in which case we throw the error with a correct stacktrace.
       // TODO: extract annotations to a separate expression type; then stacktrace location would be more precise.
-      const domainResult = valueToDomain(annotationValue);
+      const domainResult = annotationToDomain(annotationValue);
       if (domainResult.ok) {
         domain = vDomain(domainResult.value);
       } else {

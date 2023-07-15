@@ -162,11 +162,11 @@ function compileToContent(
 
         let arg: expression.LambdaExpressionParameter;
         if (astArg.type === "Identifier") {
-          arg = { name: astArg.value, domain: undefined };
-        } else if (astArg.type === "IdentifierWithDomain") {
+          arg = { name: astArg.value, annotation: undefined };
+        } else if (astArg.type === "IdentifierWithAnnotation") {
           arg = {
             name: astArg.variable,
-            domain: innerCompileAst(astArg.domain, context)[0],
+            annotation: innerCompileAst(astArg.annotation, context)[0],
           };
         } else {
           // should never happen
@@ -267,10 +267,10 @@ function compileToContent(
         context,
       ];
     }
-    case "IdentifierWithDomain":
+    case "IdentifierWithAnnotation":
       // should never happen
       throw new ICompileError(
-        "Can't compile IdentifierWithDomain outside of lambda declaration",
+        "Can't compile IdentifierWithAnnotation outside of lambda declaration",
         ast.location
       );
     default:

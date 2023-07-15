@@ -1,10 +1,10 @@
-import { domainToString, valueToDomain } from "../../src/value/domain.js";
+import { domainToString, annotationToDomain } from "../../src/value/domain.js";
 import { vArray, vNumber } from "../../src/value/index.js";
 
 describe("valueToDomain", () => {
   describe("numeric range", () => {
     test("two-item tuple", () => {
-      const domainResult = valueToDomain(vArray([vNumber(3), vNumber(5)]));
+      const domainResult = annotationToDomain(vArray([vNumber(3), vNumber(5)]));
       if (!domainResult.ok) {
         fail("expected ok result");
       }
@@ -15,7 +15,7 @@ describe("valueToDomain", () => {
     });
 
     test("toString", () => {
-      const domainResult = valueToDomain(vArray([vNumber(3), vNumber(5)]));
+      const domainResult = annotationToDomain(vArray([vNumber(3), vNumber(5)]));
       if (!domainResult.ok) {
         fail("expected ok result");
       }
@@ -24,7 +24,7 @@ describe("valueToDomain", () => {
     });
 
     test("one-item array", () => {
-      const domainResult = valueToDomain(vArray([vNumber(3)]));
+      const domainResult = annotationToDomain(vArray([vNumber(3)]));
       if (domainResult.ok) {
         fail("expected error result");
       }
@@ -34,7 +34,7 @@ describe("valueToDomain", () => {
     });
 
     test("large array", () => {
-      const domainResult = valueToDomain(
+      const domainResult = annotationToDomain(
         vArray([vNumber(3), vNumber(10), vNumber(20)])
       );
       if (domainResult.ok) {

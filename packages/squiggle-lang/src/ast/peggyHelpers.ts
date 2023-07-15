@@ -100,9 +100,9 @@ type NodeFloat = N<
   }
 >;
 
-type NodeIdentifierWithDomain = N<
-  "IdentifierWithDomain",
-  { variable: string; domain: ASTNode }
+type NodeIdentifierWithAnnotation = N<
+  "IdentifierWithAnnotation",
+  { variable: string; annotation: ASTNode }
 >;
 
 type NodeIdentifier = N<"Identifier", { value: string }>;
@@ -170,7 +170,7 @@ export type ASTNode =
   | NodeBracketLookup
   | NodeFloat
   | NodeIdentifier
-  | NodeIdentifierWithDomain
+  | NodeIdentifierWithAnnotation
   | NodeLetStatement
   | NodeDefunStatement
   | NodeLambda
@@ -315,12 +315,12 @@ export function nodeIdentifier(
   return { type: "Identifier", value, location };
 }
 
-export function nodeIdentifierWithDomain(
+export function nodeIdentifierWithAnnotation(
   variable: string,
-  domain: ASTNode,
+  annotation: ASTNode,
   location: LocationRange
-): NodeIdentifierWithDomain {
-  return { type: "IdentifierWithDomain", variable, domain, location };
+): NodeIdentifierWithAnnotation {
+  return { type: "IdentifierWithAnnotation", variable, annotation, location };
 }
 
 export function nodeKeyValue(

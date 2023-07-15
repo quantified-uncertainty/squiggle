@@ -10,7 +10,7 @@ type NumericRangeDomain = {
 
 export type Domain = NumericRangeDomain;
 
-export function valueToDomain(value: Value): result<Domain, ErrorMessage> {
+export function annotationToDomain(value: Value): result<Domain, ErrorMessage> {
   if (value.type !== "Array") {
     return Err(new REOther("Only array domains are supported"));
   }

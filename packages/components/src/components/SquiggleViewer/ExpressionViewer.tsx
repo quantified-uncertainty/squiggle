@@ -236,6 +236,13 @@ export const getBoxProps = (
       };
     }
 
+    case "Domain": {
+      return {
+        // TODO - same styles as `Boolean`?
+        children: () => value.toString(),
+      };
+    }
+
     default: {
       return {
         heading: "Error",
