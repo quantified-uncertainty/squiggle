@@ -14,7 +14,8 @@ import {
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { LabeledDistribution, Scale, VDomain, vPlot } from "../value/index.js";
+import { Lambda } from "../reducer/lambda.js";
+import { LabeledDistribution, Scale, vPlot } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Plot",
@@ -23,21 +24,13 @@ const maker = new FnFactory({
 
 const defaultScale = { type: "linear" } satisfies Scale;
 
-function mergeScaleWithDomain(
-  scale: Scale | null,
-  vDomain: VDomain | undefined
-): Scale {
-  scale ??= defaultScale;
-  if (!vDomain) {
-    return scale;
+function verifyOneNumericArgFunction(fn: Lambda) {
+  const parameters = fn.getParameters();
+  if (parameters.length !== 1) {
+    throw new REOther("Expected a function with one parameter");
   }
-
-  const domain = vDomain.value;
-  if (domain.type !== "numericRange") {
-    throw new REOther("Expected numeric range domain");
-  }
-
-  return scale; // TODO - limit scale min/max based on domain?
+  // We could also verify a domain here, to be more confident that the function expects numeric args.
+  // But we might get other numeric domains besides `numericRange`, so checking domain type here would be risky.
 }
 
 export const library = [
@@ -140,14 +133,11 @@ export const library = [
           ),
         ],
         ([{ fn, xScale, yScale, points }]) => {
-          const parameters = fn.getParameters();
-          if (parameters.length !== 1) {
-            throw new REOther("Expected a function with one parameter");
-          }
+          verifyOneNumericArgFunction(fn);
           return vPlot({
             type: "numericFn",
             fn,
-            xScale: mergeScaleWithDomain(xScale, parameters[0].domain),
+            xScale: xScale ?? defaultScale,
             yScale: yScale ?? defaultScale,
             points: points ?? undefined,
           });
@@ -172,10 +162,7 @@ export const library = [
           ),
         ],
         ([{ fn, xScale, distXScale, points }]) => {
-          const parameters = fn.getParameters();
-          if (parameters.length !== 1) {
-            throw new REOther("Expected a function with one parameter");
-          }
+          verifyOneNumericArgFunction(fn);
           return vPlot({
             type: "distFn",
             fn,
