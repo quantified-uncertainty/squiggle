@@ -1,5 +1,6 @@
 import { ASTNode, parse } from "../ast/parse.js";
 import { defaultEnv } from "../dist/env.js";
+import { ICompileError, IRuntimeError } from "../errors/IError.js";
 import {
   ErrorMessage,
   REExpectedType,
@@ -12,6 +13,7 @@ import { getStdLib } from "../library/index.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import * as Result from "../utility/result.js";
 import { Ok, result } from "../utility/result.js";
+import { valueToDomain } from "../value/domain.js";
 import {
   VDomain,
   Value,
@@ -21,10 +23,8 @@ import {
   vRecord,
   vVoid,
 } from "../value/index.js";
-import { ICompileError, IRuntimeError } from "../errors/IError.js";
 import * as Context from "./context.js";
-import { Lambda, LambdaParameter, SquiggleLambda } from "./lambda.js";
-import { valueToDomain } from "./domain.js";
+import { LambdaParameter, SquiggleLambda } from "./lambda.js";
 
 export type ReducerFn = (
   expression: Expression,
@@ -215,12 +215,22 @@ const evaluateLambda: SubReducerFn<"Lambda"> = (
   const parameters: LambdaParameter[] = [];
   for (const parameterExpression of expressionValue.parameters) {
     let domain: VDomain | undefined;
+    // Processing annotations, e.g. f(x: [3, 5]) = { ... }
     if (parameterExpression.domain) {
-      const [domainValue] = context.evaluate(
+      // First, we evaluate `[3, 5]` expression.
+      const [annotationValue] = context.evaluate(
         parameterExpression.domain,
         context
       );
-      domain = vDomain(valueToDomain(domainValue));
+      // Now we cast it to domain value, e.g. `Range(3 to 5)`.
+      // Casting can fail, in which case we throw the error with a correct stacktrace.
+      // TODO: extract annotations to a separate expression type; then stacktrace location would be more precise.
+      const domainResult = valueToDomain(annotationValue);
+      if (domainResult.ok) {
+        domain = vDomain(domainResult.value);
+      } else {
+        throwFrom(domainResult.value, context, ast);
+      }
     }
     parameters.push({
       name: parameterExpression.name,

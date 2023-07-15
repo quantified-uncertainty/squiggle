@@ -13,7 +13,7 @@ import {
 import { Lambda } from "../reducer/lambda.js";
 import * as DateTime from "../utility/DateTime.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
-import { Domain } from "../reducer/domain.js";
+import { Domain, domainToString } from "./domain.js";
 
 export type ValueMap = ImmutableMap<string, Value>;
 
@@ -123,7 +123,7 @@ class VDeclaration extends BaseValue implements Indexable {
       return vLambda(this.value.fn);
     }
 
-    throw new REOther("Trying to access key on wrong value");
+    throw new REOther("Trying to access non-existent field");
   }
 }
 export const vLambdaDeclaration = (v: LambdaDeclaration) => new VDeclaration(v);
@@ -314,7 +314,7 @@ class VPlot extends BaseValue implements Indexable {
       return vLambda(this.value.fn);
     }
 
-    throw new REOther("Trying to access key on wrong value");
+    throw new REOther("Trying to access non-existent field");
   }
 }
 
@@ -374,7 +374,7 @@ export class VDomain extends BaseValue implements Indexable {
   }
 
   toString(): string {
-    return "Domain"; // TODO
+    return domainToString(this.value);
   }
 
   get(key: Value) {
@@ -387,7 +387,7 @@ export class VDomain extends BaseValue implements Indexable {
       }
     }
 
-    throw new REOther("Trying to access key on wrong value");
+    throw new REOther("Trying to access non-existent field");
   }
 }
 

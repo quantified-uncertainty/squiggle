@@ -1,4 +1,4 @@
-import { Domain } from "../../reducer/domain.js";
+import { Domain, domainToString } from "../../value/domain.js";
 
 export function wrapDomain(value: Domain) {
   switch (value.type) {
@@ -16,7 +16,7 @@ abstract class SqAbstractDomain<T extends Domain["type"]> {
   constructor(public _value: Domain) {}
 
   toString() {
-    return "Domain";
+    return domainToString(this._value);
   }
 }
 

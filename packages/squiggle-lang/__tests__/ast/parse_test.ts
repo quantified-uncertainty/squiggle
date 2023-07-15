@@ -147,6 +147,11 @@ describe("Peggy parse", () => {
       "(Program (DefunStatement :identity (Lambda :x (Block :x))))"
     ); // Function definitions become lambda assignments
     testParse("identity(x)", "(Program (Call :identity :x))");
+
+    testParse(
+      "annotated(x: [3,5]) = x",
+      "(Program (DefunStatement :annotated (Lambda (IdentifierWithDomain x (Array 3 5)) (Block :x))))"
+    );
   });
 
   describe("arrays", () => {

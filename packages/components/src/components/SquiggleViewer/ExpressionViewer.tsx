@@ -130,10 +130,7 @@ export const getBoxProps = (
     case "Lambda":
       return {
         heading: "",
-        preview: `fn(${value.value
-          .parameters()
-          .map((p) => p.name)
-          .join(", ")})`,
+        preview: `fn(${value.value.parameterNames().join(", ")})`,
         renderSettingsMenu: ({ onChange }) => {
           return (
             <ItemSettingsMenu

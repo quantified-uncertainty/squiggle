@@ -1,3 +1,6 @@
+import includes from "lodash/includes.js";
+import uniqBy from "lodash/uniqBy.js";
+import { REExpectedType, REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
@@ -7,13 +10,8 @@ import {
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { Ok } from "../utility/result.js";
-import * as Result from "../utility/result.js";
-import { Value, vArray, vNumber, vString } from "../value/index.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
-import { REExpectedType, REOther } from "../errors/messages.js";
-import includes from "lodash/includes.js";
-import uniqBy from "lodash/uniqBy.js";
+import { Value, vArray, vNumber, vString } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "List",

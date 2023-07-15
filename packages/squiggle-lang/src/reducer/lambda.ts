@@ -130,7 +130,7 @@ export class BuiltinLambda extends Lambda {
     return ["..."];
   }
 
-  override getParameters(): LambdaParameter[] {
+  getParameters(): LambdaParameter[] {
     return [{ name: "..." }];
   }
 

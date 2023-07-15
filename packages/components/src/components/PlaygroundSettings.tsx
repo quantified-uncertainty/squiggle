@@ -116,13 +116,11 @@ export function generateDistributionPlotSettings(
   };
 }
 
-// partial params for SqFnPlot.create; TODO - infer explicit type?
-export function generateFunctionPlotSettings(settings: PlaygroundSettings) {
-  const xScale = SqLinearScale.create({
+export function defaultFunctionPlotScale(settings: PlaygroundSettings) {
+  return SqLinearScale.create({
     min: settings.functionChartSettings.start,
     max: settings.functionChartSettings.stop,
   });
-  return { xScale, points: settings.functionChartSettings.count };
 }
 
 // settings for the settings form

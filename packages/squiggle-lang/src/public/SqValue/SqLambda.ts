@@ -39,6 +39,10 @@ export class SqLambda {
     });
   }
 
+  parameterNames() {
+    return this.parameters().map((parameter) => parameter.name);
+  }
+
   call(args: SqValue[], env?: Env): result<SqValue, SqError> {
     if (!env) {
       if (!this.context) {
