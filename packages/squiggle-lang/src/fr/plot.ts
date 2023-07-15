@@ -1,4 +1,5 @@
 import { PointMass } from "../dist/SymbolicDist.js";
+import { REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
@@ -13,14 +14,31 @@ import {
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { REOther } from "../errors/messages.js";
-import * as Result from "../utility/result.js";
-import { LabeledDistribution, vPlot } from "../value/index.js";
+import { LabeledDistribution, Scale, VDomain, vPlot } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Plot",
   requiresNamespace: true,
 });
+
+const defaultScale = { type: "linear" } satisfies Scale;
+
+function mergeScaleWithDomain(
+  scale: Scale | null,
+  vDomain: VDomain | undefined
+): Scale {
+  scale ??= defaultScale;
+  if (!vDomain) {
+    return scale;
+  }
+
+  const domain = vDomain.value;
+  if (domain.type !== "numericRange") {
+    throw new REOther("Expected numeric range domain");
+  }
+
+  return scale; // TODO - limit scale min/max based on domain?
+}
 
 export const library = [
   maker.make({
@@ -63,8 +81,8 @@ export const library = [
           return vPlot({
             type: "distributions",
             distributions,
-            xScale: xScale ?? { type: "linear" },
-            yScale: yScale ?? { type: "linear" },
+            xScale: xScale ?? defaultScale,
+            yScale: yScale ?? defaultScale,
             title: title ?? undefined,
             showSummary: showSummary ?? true,
           });
@@ -96,8 +114,8 @@ export const library = [
           return vPlot({
             type: "distributions",
             distributions: [{ distribution: dist }],
-            xScale: xScale ?? { type: "linear" },
-            yScale: yScale ?? { type: "linear" },
+            xScale: xScale ?? defaultScale,
+            yScale: yScale ?? defaultScale,
             title: title ?? undefined,
             showSummary: showSummary ?? true,
           });
@@ -109,7 +127,7 @@ export const library = [
     name: "numericFn",
     output: "Plot",
     examples: [
-      `Plot.numericFn({ fn: {|x|x*x}, xScale: Scale.linear({ min: 3, max: 5}), yScale: Scale.log({ tickFormat: ".2s" }) })`,
+      `Plot.numericFn({ fn: {|x|x*x}, xScale: Scale.linear({ min: 3, max: 5 }), yScale: Scale.log({ tickFormat: ".2s" }) })`,
     ],
     definitions: [
       makeDefinition(
@@ -122,11 +140,15 @@ export const library = [
           ),
         ],
         ([{ fn, xScale, yScale, points }]) => {
+          const parameters = fn.getParameters();
+          if (parameters.length !== 1) {
+            throw new REOther("Expected a function with one parameter");
+          }
           return vPlot({
             type: "numericFn",
             fn,
-            xScale: xScale ?? { type: "linear" },
-            yScale: yScale ?? { type: "linear" },
+            xScale: mergeScaleWithDomain(xScale, parameters[0].domain),
+            yScale: yScale ?? defaultScale,
             points: points ?? undefined,
           });
         }
@@ -150,11 +172,15 @@ export const library = [
           ),
         ],
         ([{ fn, xScale, distXScale, points }]) => {
+          const parameters = fn.getParameters();
+          if (parameters.length !== 1) {
+            throw new REOther("Expected a function with one parameter");
+          }
           return vPlot({
             type: "distFn",
             fn,
-            xScale: xScale ?? { type: "linear" },
-            distXScale: distXScale ?? { type: "linear" },
+            xScale: xScale ?? defaultScale,
+            distXScale: distXScale ?? defaultScale,
             points: points ?? undefined,
           });
         }
@@ -183,8 +209,8 @@ export const library = [
             type: "scatter",
             xDist,
             yDist,
-            xScale: xScale ?? { type: "linear" },
-            yScale: yScale ?? { type: "linear" },
+            xScale: xScale ?? defaultScale,
+            yScale: yScale ?? defaultScale,
           });
         }
       ),

@@ -11,7 +11,7 @@ import { Stack } from "./stack.js";
 
 export type LambdaParameter = {
   name: string;
-  domain?: VDomain;
+  domain?: VDomain; // should this be Domain instead of VDomain?
 };
 
 type LambdaBody = (args: Value[], context: ReducerContext) => Value;
