@@ -24,6 +24,11 @@ export function annotationToDomain(value: Value): result<Domain, ErrorMessage> {
   if (max.type !== "Number") {
     return Err(new REOther("Max value is not a number"));
   }
+
+  if (min.value > max.value) {
+    return Err(new REOther(`Min value ${min.value} > max value ${max.value}`));
+  }
+
   return Ok({
     type: "numericRange",
     min: min.value,

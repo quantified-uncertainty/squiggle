@@ -14,6 +14,16 @@ describe("valueToDomain", () => {
       expect(domain.max).toEqual(5);
     });
 
+    test("min > max", () => {
+      const domainResult = annotationToDomain(vArray([vNumber(5), vNumber(3)]));
+      if (domainResult.ok) {
+        fail("expected error result");
+      }
+      expect(domainResult.value.toString()).toBe(
+        "Error: Min value 5 > max value 3"
+      );
+    });
+
     test("toString", () => {
       const domainResult = annotationToDomain(vArray([vNumber(3), vNumber(5)]));
       if (!domainResult.ok) {
