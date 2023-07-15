@@ -65,3 +65,40 @@ export const Long: Story = {
 `,
   },
 };
+
+export const WithSimplePlots: Story = {
+  args: {
+    code: `
+    items = {
+      multiFileModels: { work: 1 to 5, value: 2 to 10 },
+      modelExports: { work: 3 to 10, value: 1 to 20 },
+      privateModels: { work: 1 to 3, value: 2 to 30 },
+    }
+    
+    Plot.table(
+      {
+        elements: Dict.keys(items),
+        fns: [
+          {|e|e},
+          {|e|Plot.dist(
+            {
+              dist: items[e].work,
+              xScale: Scale.linear({ min: 1, max: 14 }),
+              showSummary: false,
+            }
+          )},
+                {|e|Plot.dist(
+            {
+              dist: items[e].value,
+              xScale: Scale.linear({ min: 1, max: 40 }),
+              showSummary: false,
+            }
+          )},
+        ],
+        columnNames: ["name", "work", "value"],
+      }
+    )
+    
+`,
+  },
+};

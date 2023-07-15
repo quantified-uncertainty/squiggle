@@ -51,7 +51,7 @@ const table = (value: SqTable, environment, settings) => {
   const columnNames = value.columnNames;
 
   return (
-    <div className="not-prose relative rounded-md overflow-hidden border border-slate-200">
+    <div className="not-prose relative rounded-sm overflow-hidden border border-slate-200">
       <table className="table-fixed w-full">
         {columnNames && (
           <thead className="text-xs text-gray-700 bg-gray-50 border-b border-slate-200">
@@ -68,7 +68,7 @@ const table = (value: SqTable, environment, settings) => {
           {rowsAndColumns.map((row, i) => (
             <tr key={i} className="border-b border-slate-100">
               {row.map((item, k) => (
-                <td key={k} className="px-2 py-2">
+                <td key={k} className="px-1">
                   {showItem(item, settings)}
                 </td>
               ))}
