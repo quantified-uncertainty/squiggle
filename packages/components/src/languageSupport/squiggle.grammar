@@ -58,7 +58,10 @@ expression[@isGroup="Expression"] {
     | Boolean
     | Number
     | BlockExpr { "{" NonEmptyProgram "}" }
-    | RecordExpr { "{" commaSep1<Entry { Field {identifier | String} ":" expression }> "}" }
+    | RecordExpr { "{" commaSep1<
+        Entry { Field[@dynamicPrecedence=1] { expression } ~inheritAmbig ":" expression } 
+        | InheritEntry { Field[@dynamicPrecedence=0] {identifier} ~inheritAmbig }
+        > "}" }
     | LambdaExpr { "{" ArgsOpen { "|" } LambdaArgs "|" NonEmptyProgram "}" }
     | IfExpr { if expression then expression !else else expression }
     | ParenExpr { "(" expression ")" }

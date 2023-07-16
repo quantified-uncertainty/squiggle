@@ -320,10 +320,10 @@ boolean 'boolean'
 // Contructors - delimited blocks such as {} and []
 
 valueConstructor
-  = recordConstructor
-  / arrayConstructor
+  = arrayConstructor
   / lambda
   / quotedInnerBlock
+  / recordConstructor
 
 lambda
   = '{' _nl '|' _nl args:functionParameters _nl '|' _nl statements:statementsList  finalExpression: (statementSeparator @expression)  _nl '}'
@@ -348,7 +348,11 @@ recordConstructor 'record'
   / '{' _nl args:array_recordEntries _nl '}'
     { return h.nodeRecord(args, location()); }
 
-  array_recordEntries = @keyValuePair|1.., commaSeparator| commaSeparator?
+  array_recordEntries = @(keyValuePair / keyValueInherit)| 1.., commaSeparator|commaSeparator?
+
+  keyValueInherit
+    = key:identifier
+    { return h.nodeKeyValue(key, key, location()); }
 
   keyValuePair
     = key:expression _ ':' _nl value:expression

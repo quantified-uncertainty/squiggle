@@ -10,17 +10,21 @@ Dictionaries are unordered and duplicates are not allowed. They are meant to be 
 **Example**
 
 ```javascript
+table = 10 to 30
+chair = 0.01 to 0.5
+
 valueFromOfficeItems = {
   keyboard: 1,
-  chair: 0.01 to 0.5,
-  headphones: "ToDo"
+  headphones: "ToDo",
+  chair, table
 }
 
 valueFromHomeItems = {
   monitor: 1,
   bed: 0.2 to 0.6,
   lights: 0.02 to 0.2,
-  coffee: 5 to 20
+  coffee: 5 to 20,
+  chair, table
 }
 
 homeToItemsConversion = 0.1 to 0.4
@@ -28,7 +32,7 @@ homeToItemsConversion = 0.1 to 0.4
 conversionFn(i) = [i[0], i[1] * homeToItemsConversion]
 updatedValueFromHomeItems = valueFromHomeItems |> Dict.toList |> map(conversionFn) |> Dict.fromList
 
-allItems = merge(valueFromOfficeItems, updatedValueFromHomeItems)
+allItems = Dict.merge(valueFromOfficeItems, updatedValueFromHomeItems)
 ```
 
 ### toList
