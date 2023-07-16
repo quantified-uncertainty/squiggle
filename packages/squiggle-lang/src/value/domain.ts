@@ -10,7 +10,7 @@ abstract class BaseDomain {
   abstract includes(value: Value): boolean;
 }
 
-class NumericRangeDomain extends BaseDomain {
+export class NumericRangeDomain extends BaseDomain {
   readonly type = "NumericRange";
 
   constructor(public min: number, public max: number) {
@@ -18,7 +18,7 @@ class NumericRangeDomain extends BaseDomain {
   }
 
   toString() {
-    return `Range(${this.min} to ${this.max})`;
+    return `Number.rangeDomain({ min: ${this.min}, max: ${this.max} })`;
   }
 
   includes(value: Value) {
@@ -32,28 +32,29 @@ class NumericRangeDomain extends BaseDomain {
 
 export type Domain = NumericRangeDomain;
 
-export function annotationToDomain(value: Value): result<Domain, ErrorMessage> {
+export function annotationToDomain(value: Value): Domain {
+  if (value.type === "Domain") {
+    return value.value;
+  }
   if (value.type !== "Array") {
-    return Err(new REOther("Only array domains are supported"));
+    throw new REOther("Only array domains are supported");
   }
   if (value.value.length !== 2) {
-    return Err(new REOther("Expected two-value array"));
+    throw new REOther("Expected two-value array");
   }
   const [min, max] = value.value;
   if (min.type !== "Number") {
-    return Err(new REOther("Min value is not a number"));
+    throw new REOther("Min value is not a number");
   }
   if (max.type !== "Number") {
-    return Err(new REOther("Max value is not a number"));
+    throw new REOther("Max value is not a number");
   }
 
   if (min.value >= max.value) {
-    return Err(
-      new REOther(
-        `The range minimum (${min.value}) must be lower than the range maximum (${max.value})`
-      )
+    throw new REOther(
+      `The range minimum (${min.value}) must be lower than the range maximum (${max.value})`
     );
   }
 
-  return Ok(new NumericRangeDomain(min.value, max.value));
+  return new NumericRangeDomain(min.value, max.value);
 }

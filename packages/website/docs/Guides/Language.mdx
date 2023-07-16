@@ -57,11 +57,20 @@ f`}
 
 ### Parameter Annotations
 
-Annotations helps to document possible values that can be passed as a parameter's value.
+Function parameters can be annotated with _domains_.
+
+Examples:
+
+- `x: Number.rangeDomain({ min: 5, max: 10 })`
+- `x: [5, 10]` — shortcut for `Number.rangeDomain(...)`
+
+Annotations help to document possible values that can be passed as a parameter's value.
 
 Annotations will affect the default x scale used in the function's chart. For more control over function charts, you can use [Plot API](/docs/Api/Plot).
 
-We plan to support various kinds of annotations in the future; for now, only `[number, number]` tuples are supported, which are interpreted as numeric ranges.
+Domains are checked on function calls; `f(x: [1,2]) = x; f(3)` will fail.
+
+We plan to support other kinds of domains in the future; for now, only numeric ranges are supported.
 
 <SquiggleEditor
   defaultCode={`yearToValue(year: [2020, 2100]) = 1.04 ^ (year - 2020)`}
@@ -70,8 +79,16 @@ We plan to support various kinds of annotations in the future; for now, only `[n
 ### Reflection
 
 <SquiggleEditor
-  defaultCode={`f(x: [10, 20]) = x * x
+  defaultCode={`f(x: [1, 20]) = x * x
 f.parameters[0]`}
+/>
+
+Domain values extracted from `.parameters` can be reused in annotations of other parameters:
+
+<SquiggleEditor
+  defaultCode={`f(x: [1, 20]) = x * x
+g(x: f.parameters[0].domain) = x * x * x
+`}
 />
 
 ## Conditionals

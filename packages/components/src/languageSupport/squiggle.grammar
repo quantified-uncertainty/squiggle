@@ -43,8 +43,12 @@ commaSep1<content> { () | content ("," content?)* }
 
 Binding { VariableName { identifier } "=" expression }
 
+LambdaParameter {
+    identifier (":" expression)?
+}
+
 LambdaArgs {
-    () | LambdaParameter { identifier } ("," LambdaParameter { identifier })*
+    () | LambdaParameter ("," LambdaParameter)*
 }
 
 FunDeclaration { FunctionName[@dynamicPrecedence=0] { identifier }  ~fieldAmbig "(" LambdaArgs ")" "=" expression }

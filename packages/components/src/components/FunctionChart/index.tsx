@@ -62,7 +62,7 @@ export const FunctionChart: FC<FunctionChartProps> = ({
   const domain = parameters[0].domain;
 
   const min = domain?.min ?? settings.functionChartSettings.start;
-  const max = domain?.min ?? settings.functionChartSettings.stop;
+  const max = domain?.max ?? settings.functionChartSettings.stop;
 
   const xScale = SqLinearScale.create({ min, max });
 

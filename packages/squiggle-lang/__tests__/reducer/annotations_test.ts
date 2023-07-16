@@ -1,3 +1,4 @@
+import { evaluateStringToResult } from "../../src/reducer/index.js";
 import { testEvalToBe, testEvalToMatch } from "../helpers/reducerHelpers.js";
 
 describe("annotations", () => {
@@ -18,7 +19,45 @@ describe("annotations", () => {
     testEvalToBe("f(x: [3,5]) = x*2; f(5)", "10");
     testEvalToMatch(
       "f(x: [3,5]) = x*2; f(6)",
-      "Parameter 6 must be in domain Range(3 to 5)"
+      "Parameter 6 must be in domain Number.rangeDomain({ min: 3, max: 5 })"
     );
+  });
+
+  describe("explicit annotation object", () => {
+    testEvalToBe(
+      "f(x: Number.rangeDomain({ min: 3, max: 5 })) = x; f.parameters[0].domain.min",
+      "3"
+    );
+  });
+
+  describe("stack traces", () => {
+    test("Stacktrace on annotation -> domain conversion", async () => {
+      const result = await evaluateStringToResult(
+        "g() = { f(x: [3,5,6]) = x; f }; h() = g(); h()"
+      );
+      if (result.ok) {
+        fail("expected error");
+      }
+      expect(result.value.toStringWithDetails())
+        .toEqual(`Error: Expected two-value array
+Stack trace:
+  g at line 1, column 14, file main
+  h at line 1, column 39, file main
+  <top> at line 1, column 44, file main`);
+    });
+
+    test("Stacktrace on domain checks", async () => {
+      const result = await evaluateStringToResult(
+        "f(x: [3,5]) = x; g() = f(6); g()"
+      );
+      if (result.ok) {
+        fail("expected error");
+      }
+      expect(result.value.toStringWithDetails())
+        .toEqual(`Domain Error: Parameter 6 must be in domain Number.rangeDomain({ min: 3, max: 5 })
+Stack trace:
+  g at line 1, column 24, file main
+  <top> at line 1, column 30, file main`);
+    });
   });
 });

@@ -1,6 +1,10 @@
 import { ASTNode, parse } from "../ast/parse.js";
 import { defaultEnv } from "../dist/env.js";
-import { ICompileError, IRuntimeError } from "../errors/IError.js";
+import {
+  ICompileError,
+  IRuntimeError,
+  rethrowWithFrameStack,
+} from "../errors/IError.js";
 import {
   ErrorMessage,
   REExpectedType,
@@ -222,14 +226,19 @@ const evaluateLambda: SubReducerFn<"Lambda"> = (
         parameterExpression.annotation,
         context
       );
-      // Now we cast it to domain value, e.g. `Range(3 to 5)`.
+      // Now we cast it to domain value, e.g. `NumericRangeDomain(3, 5)`.
       // Casting can fail, in which case we throw the error with a correct stacktrace.
-      // TODO: extract annotations to a separate expression type; then stacktrace location would be more precise.
-      const domainResult = annotationToDomain(annotationValue);
-      if (domainResult.ok) {
-        domain = vDomain(domainResult.value);
-      } else {
-        throwFrom(domainResult.value, context, ast);
+      try {
+        domain = vDomain(annotationToDomain(annotationValue));
+      } catch (e) {
+        // see also: `Lambda.callFrom`
+        rethrowWithFrameStack(
+          e,
+          context.frameStack.extend(
+            Context.currentFunctionName(context),
+            parameterExpression.annotation.ast.location
+          )
+        );
       }
     }
     parameters.push({

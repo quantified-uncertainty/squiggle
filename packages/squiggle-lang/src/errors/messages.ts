@@ -140,10 +140,10 @@ export class REJavaScriptExn extends ErrorMessage {
 
 export class REOther extends ErrorMessage {
   constructor(public msg: string) {
-    super();
+    super(msg);
   }
 
   toString() {
-    return `Error: ${this.msg}`;
+    return `Error: ${this.message}`;
   }
 }
