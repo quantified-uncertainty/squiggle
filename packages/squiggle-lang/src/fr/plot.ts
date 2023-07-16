@@ -1,4 +1,5 @@
 import { PointMass } from "../dist/SymbolicDist.js";
+import { REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
@@ -13,14 +14,24 @@ import {
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { REOther } from "../errors/messages.js";
-import * as Result from "../utility/result.js";
-import { LabeledDistribution, vPlot } from "../value/index.js";
+import { Lambda } from "../reducer/lambda.js";
+import { LabeledDistribution, Scale, vPlot } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Plot",
   requiresNamespace: true,
 });
+
+const defaultScale = { type: "linear" } satisfies Scale;
+
+function verifyOneNumericArgFunction(fn: Lambda) {
+  const parameters = fn.getParameters();
+  if (parameters.length !== 1) {
+    throw new REOther("Expected a function with one parameter");
+  }
+  // We could also verify a domain here, to be more confident that the function expects numeric args.
+  // But we might get other numeric domains besides `NumericRange`, so checking domain type here would be risky.
+}
 
 export const library = [
   maker.make({
@@ -63,8 +74,8 @@ export const library = [
           return vPlot({
             type: "distributions",
             distributions,
-            xScale: xScale ?? { type: "linear" },
-            yScale: yScale ?? { type: "linear" },
+            xScale: xScale ?? defaultScale,
+            yScale: yScale ?? defaultScale,
             title: title ?? undefined,
             showSummary: showSummary ?? true,
           });
@@ -96,8 +107,8 @@ export const library = [
           return vPlot({
             type: "distributions",
             distributions: [{ distribution: dist }],
-            xScale: xScale ?? { type: "linear" },
-            yScale: yScale ?? { type: "linear" },
+            xScale: xScale ?? defaultScale,
+            yScale: yScale ?? defaultScale,
             title: title ?? undefined,
             showSummary: showSummary ?? true,
           });
@@ -109,7 +120,7 @@ export const library = [
     name: "numericFn",
     output: "Plot",
     examples: [
-      `Plot.numericFn({ fn: {|x|x*x}, xScale: Scale.linear({ min: 3, max: 5}), yScale: Scale.log({ tickFormat: ".2s" }) })`,
+      `Plot.numericFn({ fn: {|x|x*x}, xScale: Scale.linear({ min: 3, max: 5 }), yScale: Scale.log({ tickFormat: ".2s" }) })`,
     ],
     definitions: [
       makeDefinition(
@@ -122,11 +133,12 @@ export const library = [
           ),
         ],
         ([{ fn, xScale, yScale, points }]) => {
+          verifyOneNumericArgFunction(fn);
           return vPlot({
             type: "numericFn",
             fn,
-            xScale: xScale ?? { type: "linear" },
-            yScale: yScale ?? { type: "linear" },
+            xScale: xScale ?? defaultScale,
+            yScale: yScale ?? defaultScale,
             points: points ?? undefined,
           });
         }
@@ -150,11 +162,12 @@ export const library = [
           ),
         ],
         ([{ fn, xScale, distXScale, points }]) => {
+          verifyOneNumericArgFunction(fn);
           return vPlot({
             type: "distFn",
             fn,
-            xScale: xScale ?? { type: "linear" },
-            distXScale: distXScale ?? { type: "linear" },
+            xScale: xScale ?? defaultScale,
+            distXScale: distXScale ?? defaultScale,
             points: points ?? undefined,
           });
         }
@@ -183,8 +196,8 @@ export const library = [
             type: "scatter",
             xDist,
             yDist,
-            xScale: xScale ?? { type: "linear" },
-            yScale: yScale ?? { type: "linear" },
+            xScale: xScale ?? defaultScale,
+            yScale: yScale ?? defaultScale,
           });
         }
       ),

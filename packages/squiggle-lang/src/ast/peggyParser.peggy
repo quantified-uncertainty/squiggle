@@ -77,7 +77,12 @@ defunStatement
 
   assignmentOp "assignment" = '='
 
-functionParameters = dollarIdentifier|.., commaSeparator|
+functionParameters = functionParameter|.., commaSeparator|
+  functionParameter
+    = id:dollarIdentifier annotation:(_ ':' _nl @expression)?
+    {
+      return annotation ? h.nodeIdentifierWithAnnotation(id.value, annotation, location()) : id;
+    }
 
 /*
 Rules for expressions start here.

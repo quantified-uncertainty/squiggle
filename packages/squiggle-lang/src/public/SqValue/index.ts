@@ -4,6 +4,7 @@ import { SqError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqArray } from "./SqArray.js";
 import { SqDistribution, wrapDistribution } from "./SqDistribution/index.js";
+import { SqDomain, wrapDomain } from "./SqDomain.js";
 import { SqLambda } from "./SqLambda.js";
 import { SqLambdaDeclaration } from "./SqLambdaDeclaration.js";
 import { SqPlot, wrapPlot } from "./SqPlot.js";
@@ -38,8 +39,10 @@ export function wrapValue(value: Value, context?: SqValueContext) {
       return new SqTimeDurationValue(value, context);
     case "Void":
       return new SqVoidValue(value, context);
+    case "Domain":
+      return new SqDomainValue(value, context);
     default:
-      throw new Error(`Unknown value ${JSON.stringify(value)}`);
+      throw new Error(`Unknown value ${JSON.stringify(value satisfies never)}`);
   }
 }
 
@@ -235,6 +238,18 @@ export class SqVoidValue extends SqAbstractValue<"Void", null> {
 
   asJS() {
     return null;
+  }
+}
+
+export class SqDomainValue extends SqAbstractValue<"Domain", SqDomain> {
+  tag = "Domain" as const;
+
+  get value() {
+    return wrapDomain(this._value.value);
+  }
+
+  asJS() {
+    return this.value;
   }
 }
 

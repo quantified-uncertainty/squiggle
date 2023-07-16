@@ -86,6 +86,8 @@ function nodeToString(node: ASTNode): string {
       }${node.exponent === null ? "" : `e${node.exponent}`}`;
     case "Identifier":
       return `:${node.value}`;
+    case "IdentifierWithAnnotation":
+      return sExpr([node.variable, node.annotation]);
     case "KeyValue":
       return sExpr([node.key, node.value]);
     case "Lambda":

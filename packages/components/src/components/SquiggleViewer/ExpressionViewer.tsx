@@ -130,7 +130,7 @@ export const getBoxProps = (
     case "Lambda":
       return {
         heading: "",
-        preview: `fn(${value.value.parameters().join(", ")})`,
+        preview: `fn(${value.value.parameterNames().join(", ")})`,
         renderSettingsMenu: ({ onChange }) => {
           return (
             <ItemSettingsMenu
@@ -233,6 +233,13 @@ export const getBoxProps = (
         isRecordOrList: true,
         children: () =>
           entries.map((r, i) => <ExpressionViewer key={i} value={r} />),
+      };
+    }
+
+    case "Domain": {
+      return {
+        // TODO - same styles as `Boolean`?
+        children: () => value.toString(),
       };
     }
 

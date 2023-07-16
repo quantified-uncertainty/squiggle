@@ -14,12 +14,10 @@ import { MessageAlert } from "../Alert.js";
 import {
   PlaygroundSettings,
   generateDistributionPlotSettings,
-  generateFunctionPlotSettings,
 } from "../PlaygroundSettings.js";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 import { DistFunctionChart } from "./DistFunctionChart.js";
 import { NumericFunctionChart } from "./NumericFunctionChart.js";
-import { functionChartDefaults } from "./utils.js";
 
 type FunctionChartProps = {
   fn: SqLambda;
@@ -53,21 +51,23 @@ export const FunctionChart: FC<FunctionChartProps> = ({
   environment,
   height,
 }) => {
-  if (fn.parameters().length !== 1) {
+  const parameters = fn.parameters();
+  if (parameters.length !== 1) {
     return (
       <MessageAlert heading="Function Display Not Supported">
         Only functions with one parameter are displayed.
       </MessageAlert>
     );
   }
-  const result1 = fn.call(
-    [SqNumberValue.create(functionChartDefaults.min)],
-    environment
-  );
-  const result2 = fn.call(
-    [SqNumberValue.create(functionChartDefaults.max)],
-    environment
-  );
+  const domain = parameters[0].domain;
+
+  const min = domain?.min ?? settings.functionChartSettings.start;
+  const max = domain?.max ?? settings.functionChartSettings.stop;
+
+  const xScale = SqLinearScale.create({ min, max });
+
+  const result1 = fn.call([SqNumberValue.create(min)], environment);
+  const result2 = fn.call([SqNumberValue.create(max)], environment);
   const getValidResult = () => {
     if (result1.ok) {
       return result1;
@@ -87,7 +87,8 @@ export const FunctionChart: FC<FunctionChartProps> = ({
     case "Dist": {
       const plot = SqDistFnPlot.create({
         fn,
-        ...generateFunctionPlotSettings(settings),
+        xScale,
+        points: settings.functionChartSettings.count,
         distXScale: generateDistributionPlotSettings(
           settings.distributionChartSettings
         ).xScale,
@@ -104,7 +105,8 @@ export const FunctionChart: FC<FunctionChartProps> = ({
     case "Number": {
       const plot = SqNumericFnPlot.create({
         fn,
-        ...generateFunctionPlotSettings(settings),
+        xScale,
+        points: settings.functionChartSettings.count,
         yScale: SqLinearScale.create(),
       });
 

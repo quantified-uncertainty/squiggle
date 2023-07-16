@@ -16,8 +16,8 @@ export {
 } from "./public/SqError.js";
 export { SqDistributionError } from "./public/SqValue/SqDistribution/SqDistributionError.js";
 export {
-  type SqShape,
   type SqPointSet,
+  type SqShape,
 } from "./public/SqValue/SqDistribution/SqPointSet.js";
 export {
   SqAbstractDistribution,
@@ -27,6 +27,7 @@ export {
   SqSampleSetDistribution,
   SqSymbolicDistribution,
 } from "./public/SqValue/SqDistribution/index.js";
+export { SqDomain } from "./public/SqValue/SqDomain.js";
 export { SqLambda } from "./public/SqValue/SqLambda.js";
 export {
   SqDistFnPlot,
@@ -46,7 +47,7 @@ export {
 } from "./public/SqValue/SqScale.js";
 export { SqValuePath } from "./public/SqValuePath.js";
 export { parse } from "./public/parse.js";
-export { type result, fmap as resultMap } from "./utility/result.js";
+export { fmap as resultMap, type result } from "./utility/result.js";
 
 export { LocationRange as SqLocation } from "peggy";
 export { defaultEnv as defaultEnvironment } from "./dist/env.js";
