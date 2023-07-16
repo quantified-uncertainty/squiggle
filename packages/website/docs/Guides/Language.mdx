@@ -42,9 +42,36 @@ d.dist`}
 
 ## Functions
 
+### Basic syntax
+
 <SquiggleEditor
   defaultCode={`f(t) = normal(t^2, t^1.2+.01)
 f`}
+/>
+
+### Anonymous Functions
+
+`f(x) = x*x` and `f = {|x| x*x}` are equivalent.
+
+<SquiggleEditor defaultCode={`{|t| normal(t^2, t^1.2+.01)}`} />
+
+### Parameter Annotations
+
+Annotations helps to document possible values that can be passed as a parameter's value.
+
+Annotations will affect the default x scale used in the function's chart. For more control over function charts, you can use [Plot API](/docs/Api/Plot).
+
+We plan to support various kinds of annotations in the future; for now, only `[number, number]` tuples are supported, which are interpreted as numeric ranges.
+
+<SquiggleEditor
+  defaultCode={`yearToValue(year: [2020, 2100]) = 1.04 ^ (year - 2020)`}
+/>
+
+### Reflection
+
+<SquiggleEditor
+  defaultCode={`f(x: [10, 20]) = x * x
+f.parameters[0]`}
 />
 
 ## Conditionals
@@ -53,10 +80,6 @@ f`}
   defaultCode={`x = 5
 if x<8 then 10 else 3`}
 />
-
-## Anonymous Functions
-
-<SquiggleEditor defaultCode={`{|t| normal(t^2, t^1.2+.01)}`} />
 
 ## Comments
 
