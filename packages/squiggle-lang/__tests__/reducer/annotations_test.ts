@@ -18,7 +18,7 @@ describe("annotations", () => {
     testEvalToBe("f(x: [3,5]) = x*2; f(5)", "10");
     testEvalToMatch(
       "f(x: [3,5]) = x*2; f(6)",
-      "Parameter 6 doesn't match the domain Range(3 to 5)"
+      "Parameter 6 must be in domain Range(3 to 5)"
     );
   });
 });

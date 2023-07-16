@@ -47,8 +47,12 @@ export function annotationToDomain(value: Value): result<Domain, ErrorMessage> {
     return Err(new REOther("Max value is not a number"));
   }
 
-  if (min.value > max.value) {
-    return Err(new REOther(`Min value ${min.value} > max value ${max.value}`));
+  if (min.value >= max.value) {
+    return Err(
+      new REOther(
+        `The range minimum (${min.value}) must be lower than the range maximum (${max.value})`
+      )
+    );
   }
 
   return Ok(new NumericRangeDomain(min.value, max.value));

@@ -20,7 +20,17 @@ describe("valueToDomain", () => {
         fail("expected error result");
       }
       expect(domainResult.value.toString()).toBe(
-        "Error: Min value 5 > max value 3"
+        "Error: The range minimum (5) must be lower than the range maximum (3)"
+      );
+    });
+
+    test("min = max", () => {
+      const domainResult = annotationToDomain(vArray([vNumber(5), vNumber(5)]));
+      if (domainResult.ok) {
+        fail("expected error result");
+      }
+      expect(domainResult.value.toString()).toBe(
+        "Error: The range minimum (5) must be lower than the range maximum (5)"
       );
     });
 

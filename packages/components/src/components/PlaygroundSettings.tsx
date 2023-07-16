@@ -116,13 +116,6 @@ export function generateDistributionPlotSettings(
   };
 }
 
-export function defaultFunctionPlotScale(settings: PlaygroundSettings) {
-  return SqLinearScale.create({
-    min: settings.functionChartSettings.start,
-    max: settings.functionChartSettings.stop,
-  });
-}
-
 // settings for the settings form
 export type MetaSettings = {
   disableLogX?: boolean;

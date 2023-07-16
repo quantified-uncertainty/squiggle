@@ -1,5 +1,6 @@
 import { DistError, distErrorToString } from "../dist/DistError.js";
 import { OperationError } from "../operationError.js";
+import { VDomain, Value } from "../value/index.js";
 
 // Common error types.
 
@@ -111,6 +112,16 @@ export class RETodo extends ErrorMessage {
 
   toString() {
     return `TODO: ${this.msg}`;
+  }
+}
+
+export class REDomainError extends ErrorMessage {
+  constructor(public value: Value, public domain: VDomain) {
+    super();
+  }
+
+  toString() {
+    return `Domain Error: Parameter ${this.value} must be in domain ${this.domain}`;
   }
 }
 

@@ -1,7 +1,7 @@
 import { LocationRange } from "peggy";
 
 import { ASTNode } from "../ast/parse.js";
-import { REArityError, REOther } from "../errors/messages.js";
+import { REArityError, REDomainError, REOther } from "../errors/messages.js";
 import { Expression } from "../expression/index.js";
 import { VDomain, Value } from "../value/index.js";
 import * as IError from "../errors/IError.js";
@@ -79,9 +79,7 @@ export class SquiggleLambda extends Lambda {
         const parameter = parameters[i];
         localStack = localStack.push(parameter.name, args[i]);
         if (parameter.domain && !parameter.domain.value.includes(args[i])) {
-          throw new REOther(
-            `Parameter ${args[i]} doesn't match the domain ${parameter.domain}`
-          );
+          throw new REDomainError(args[i], parameter.domain);
         }
       }
 

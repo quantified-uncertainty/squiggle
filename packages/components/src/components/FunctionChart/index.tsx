@@ -14,12 +14,10 @@ import { MessageAlert } from "../Alert.js";
 import {
   PlaygroundSettings,
   generateDistributionPlotSettings,
-  defaultFunctionPlotScale,
 } from "../PlaygroundSettings.js";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 import { DistFunctionChart } from "./DistFunctionChart.js";
 import { NumericFunctionChart } from "./NumericFunctionChart.js";
-import { functionChartDefaults } from "./utils.js";
 
 type FunctionChartProps = {
   fn: SqLambda;
@@ -63,14 +61,13 @@ export const FunctionChart: FC<FunctionChartProps> = ({
   }
   const domain = parameters[0].domain;
 
-  const result1 = fn.call(
-    [SqNumberValue.create(functionChartDefaults.min)],
-    environment
-  );
-  const result2 = fn.call(
-    [SqNumberValue.create(functionChartDefaults.max)],
-    environment
-  );
+  const min = domain?.min ?? settings.functionChartSettings.start;
+  const max = domain?.min ?? settings.functionChartSettings.stop;
+
+  const xScale = SqLinearScale.create({ min, max });
+
+  const result1 = fn.call([SqNumberValue.create(min)], environment);
+  const result2 = fn.call([SqNumberValue.create(max)], environment);
   const getValidResult = () => {
     if (result1.ok) {
       return result1;
@@ -90,12 +87,7 @@ export const FunctionChart: FC<FunctionChartProps> = ({
     case "Dist": {
       const plot = SqDistFnPlot.create({
         fn,
-        xScale: domain
-          ? SqLinearScale.create({
-              min: domain.min,
-              max: domain.max,
-            })
-          : defaultFunctionPlotScale(settings),
+        xScale,
         points: settings.functionChartSettings.count,
         distXScale: generateDistributionPlotSettings(
           settings.distributionChartSettings
@@ -113,12 +105,7 @@ export const FunctionChart: FC<FunctionChartProps> = ({
     case "Number": {
       const plot = SqNumericFnPlot.create({
         fn,
-        xScale: domain
-          ? SqLinearScale.create({
-              min: domain.min,
-              max: domain.max,
-            })
-          : defaultFunctionPlotScale(settings),
+        xScale,
         points: settings.functionChartSettings.count,
         yScale: SqLinearScale.create(),
       });
