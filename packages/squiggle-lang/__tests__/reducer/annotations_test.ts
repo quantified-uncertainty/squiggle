@@ -1,4 +1,4 @@
-import { testEvalToBe } from "../helpers/reducerHelpers.js";
+import { testEvalToBe, testEvalToMatch } from "../helpers/reducerHelpers.js";
 
 describe("annotations", () => {
   describe(".parameters", () => {
@@ -10,5 +10,15 @@ describe("annotations", () => {
 
   describe("wrong annotation", () => {
     testEvalToBe("f(x: [3]) = x", "Error(Error: Expected two-value array)");
+  });
+
+  describe("runtime checks", () => {
+    testEvalToBe("f(x: [3,5]) = x*2; f(3)", "6");
+    testEvalToBe("f(x: [3,5]) = x*2; f(4)", "8");
+    testEvalToBe("f(x: [3,5]) = x*2; f(5)", "10");
+    testEvalToMatch(
+      "f(x: [3,5]) = x*2; f(6)",
+      "Parameter 6 doesn't match the domain Range(3 to 5)"
+    );
   });
 });

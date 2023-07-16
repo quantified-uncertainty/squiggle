@@ -2,11 +2,33 @@ import { ErrorMessage, REOther } from "../errors/messages.js";
 import { Err, Ok, result } from "../utility/result.js";
 import { Value } from "./index.js";
 
-type NumericRangeDomain = {
-  type: "numericRange";
-  min: number;
-  max: number;
-};
+abstract class BaseDomain {
+  abstract type: string;
+
+  abstract toString(): string;
+
+  abstract includes(value: Value): boolean;
+}
+
+class NumericRangeDomain extends BaseDomain {
+  readonly type = "NumericRange";
+
+  constructor(public min: number, public max: number) {
+    super();
+  }
+
+  toString() {
+    return `Range(${this.min} to ${this.max})`;
+  }
+
+  includes(value: Value) {
+    return (
+      value.type === "Number" &&
+      value.value >= this.min &&
+      value.value <= this.max
+    );
+  }
+}
 
 export type Domain = NumericRangeDomain;
 
@@ -29,13 +51,5 @@ export function annotationToDomain(value: Value): result<Domain, ErrorMessage> {
     return Err(new REOther(`Min value ${min.value} > max value ${max.value}`));
   }
 
-  return Ok({
-    type: "numericRange",
-    min: min.value,
-    max: max.value,
-  });
-}
-
-export function domainToString(domain: Domain): string {
-  return `Range(${domain.min} to ${domain.max})`;
+  return Ok(new NumericRangeDomain(min.value, max.value));
 }

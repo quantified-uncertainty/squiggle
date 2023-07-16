@@ -1,8 +1,8 @@
-import { Domain, domainToString } from "../../value/domain.js";
+import { Domain } from "../../value/domain.js";
 
 export function wrapDomain(value: Domain) {
   switch (value.type) {
-    case "numericRange":
+    case "NumericRange":
       return new SqNumericRangeDomain(value);
     default:
       throw new Error(`Unknown type ${value.type satisfies never}`);
@@ -16,12 +16,12 @@ abstract class SqAbstractDomain<T extends Domain["type"]> {
   constructor(public _value: Domain) {}
 
   toString() {
-    return domainToString(this._value);
+    return this._value.toString();
   }
 }
 
-class SqNumericRangeDomain extends SqAbstractDomain<"numericRange"> {
-  tag = "numericRange" as const;
+class SqNumericRangeDomain extends SqAbstractDomain<"NumericRange"> {
+  tag = "NumericRange" as const;
 
   get min() {
     return this._value.min;

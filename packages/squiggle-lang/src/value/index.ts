@@ -13,7 +13,7 @@ import {
 import { Lambda } from "../reducer/lambda.js";
 import * as DateTime from "../utility/DateTime.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
-import { Domain, domainToString } from "./domain.js";
+import { Domain } from "./domain.js";
 
 export type ValueMap = ImmutableMap<string, Value>;
 
@@ -374,11 +374,11 @@ export class VDomain extends BaseValue implements Indexable {
   }
 
   toString(): string {
-    return domainToString(this.value);
+    return this.value.toString();
   }
 
   get(key: Value) {
-    if (key.type === "String" && this.value.type === "numericRange") {
+    if (key.type === "String" && this.value.type === "NumericRange") {
       if (key.value === "min") {
         return vNumber(this.value.min);
       }

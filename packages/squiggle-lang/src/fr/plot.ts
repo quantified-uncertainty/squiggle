@@ -30,7 +30,7 @@ function verifyOneNumericArgFunction(fn: Lambda) {
     throw new REOther("Expected a function with one parameter");
   }
   // We could also verify a domain here, to be more confident that the function expects numeric args.
-  // But we might get other numeric domains besides `numericRange`, so checking domain type here would be risky.
+  // But we might get other numeric domains besides `NumericRange`, so checking domain type here would be risky.
 }
 
 export const library = [

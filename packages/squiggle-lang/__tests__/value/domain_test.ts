@@ -1,4 +1,4 @@
-import { domainToString, annotationToDomain } from "../../src/value/domain.js";
+import { annotationToDomain } from "../../src/value/domain.js";
 import { vArray, vNumber } from "../../src/value/index.js";
 
 describe("valueToDomain", () => {
@@ -9,7 +9,7 @@ describe("valueToDomain", () => {
         fail("expected ok result");
       }
       const domain = domainResult.value;
-      expect(domain.type).toEqual("numericRange");
+      expect(domain.type).toEqual("NumericRange");
       expect(domain.min).toEqual(3);
       expect(domain.max).toEqual(5);
     });
@@ -30,7 +30,7 @@ describe("valueToDomain", () => {
         fail("expected ok result");
       }
       const domain = domainResult.value;
-      expect(domainToString(domain)).toEqual("Range(3 to 5)");
+      expect(domain.toString()).toEqual("Range(3 to 5)");
     });
 
     test("one-item array", () => {
