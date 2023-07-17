@@ -30,6 +30,7 @@ import {
   getChildrenValues,
   pathToShortName,
 } from "./utils.js";
+import { useEffectRef } from "../../lib/hooks/useEffectRef.js";
 
 type SettingsMenuParams = {
   // Used to notify VariableBox that settings have changed, so that VariableBox could re-render itself.
@@ -120,28 +121,20 @@ export const VariableBox: FC<VariableBoxProps> = ({
 
   const name = pathToShortName(path);
 
-  // should be callback to not fire on each render
-  const saveRef = useCallback(
-    (element: HTMLDivElement) => {
-      dispatch({
-        type: "REGISTER_ITEM_HANDLE",
-        payload: { path, element },
-      });
-    },
-    [dispatch, path]
-  );
+  // We should switch to ref cleanups after https://github.com/facebook/react/pull/25686 is released.
+  const saveRef = useEffectRef((element: HTMLDivElement) => {
+    dispatch({
+      type: "REGISTER_ITEM_HANDLE",
+      payload: { path, element },
+    });
 
-  useEffect(() => {
-    // This code is a bit risky, because I'm not sure about the order in which ref callbacks and effect cleanups fire.
-    // But it works in practice.
-    // We should switch to ref cleanups after https://github.com/facebook/react/pull/25686 is released.
     return () => {
       dispatch({
         type: "UNREGISTER_ITEM_HANDLE",
         payload: { path },
       });
     };
-  }, [dispatch, path]);
+  });
 
   const hasBodyContent = Boolean(path.items.length);
   const isOpen = isFocused || !settings.collapsed;
