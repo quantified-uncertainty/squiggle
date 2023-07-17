@@ -1,7 +1,7 @@
 import { BaseDist } from "../dist/BaseDist.js";
-import { DistError } from "../dist/DistError.js";
 import * as SampleSetDist from "../dist/SampleSetDist/index.js";
 import * as SymbolicDist from "../dist/SymbolicDist.js";
+import { REDistributionError, REOther } from "../errors/messages.js";
 import { Env } from "../index.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
@@ -14,14 +14,9 @@ import { FnFactory } from "../library/registry/helpers.js";
 import { OtherOperationError } from "../operationError.js";
 import * as Result from "../utility/result.js";
 import { Value, vDist } from "../value/index.js";
-import {
-  ErrorMessage,
-  REDistributionError,
-  REOther,
-} from "../errors/messages.js";
 import { distResultToValue } from "./genericDist.js";
 
-const CI_CONFIG = [
+export const CI_CONFIG = [
   { lowKey: "p5", highKey: "p95", probability: 0.9 },
   { lowKey: "p10", highKey: "p90", probability: 0.8 },
   { lowKey: "p25", highKey: "p75", probability: 0.5 },
@@ -32,15 +27,15 @@ const maker = new FnFactory({
   requiresNamespace: false,
 });
 
-const makeSampleSet = (d: BaseDist, env: Env) => {
+function makeSampleSet(d: BaseDist, env: Env) {
   const result = SampleSetDist.SampleSetDist.fromDist(d, env);
   if (!result.ok) {
     throw new REDistributionError(result.value);
   }
   return result.value;
-};
+}
 
-const twoVarSample = (
+function twoVarSample(
   v1: BaseDist | number,
   v2: BaseDist | number,
   env: Env,
@@ -48,7 +43,7 @@ const twoVarSample = (
     v1: number,
     v2: number
   ) => Result.result<SymbolicDist.SymbolicDist, string>
-): Value => {
+): Value {
   const sampleFn = (a: number, b: number) =>
     Result.fmap2(
       fn(a, b),
@@ -77,54 +72,54 @@ const twoVarSample = (
     if (!result.ok) {
       throw new REOther(result.value);
     }
-    return vDist(result.value);
+    return vDist(makeSampleSet(result.value, env));
   }
   throw new REOther("Impossible branch");
-};
+}
 
-const makeTwoArgsDist = (
+function makeTwoArgsDist(
   fn: (
     v1: number,
     v2: number
   ) => Result.result<SymbolicDist.SymbolicDist, string>
-) => {
+) {
   return makeDefinition(
     [frDistOrNumber, frDistOrNumber],
     ([v1, v2], { environment }) => twoVarSample(v1, v2, environment, fn)
   );
-};
+}
 
-const makeCIDist = <K1 extends string, K2 extends string>(
+function makeCIDist<K1 extends string, K2 extends string>(
   lowKey: K1,
   highKey: K2,
   fn: (
     low: number,
     high: number
   ) => Result.result<SymbolicDist.SymbolicDist, string>
-) => {
+) {
   return makeDefinition(
     [frRecord([lowKey, frNumber], [highKey, frNumber])],
     ([record], { environment }) =>
       twoVarSample(record[lowKey], record[highKey], environment, fn)
   );
-};
+}
 
-const makeMeanStdevDist = (
+function makeMeanStdevDist(
   fn: (
     mean: number,
     stdev: number
   ) => Result.result<SymbolicDist.SymbolicDist, string>
-) => {
+) {
   return makeDefinition(
     [frRecord(["mean", frNumber], ["stdev", frNumber])],
     ([{ mean, stdev }], { environment }) =>
       twoVarSample(mean, stdev, environment, fn)
   );
-};
+}
 
-const makeOneArgDist = (
+function makeOneArgDist(
   fn: (v: number) => Result.result<SymbolicDist.SymbolicDist, string>
-) => {
+) {
   return makeDefinition([frDistOrNumber], ([v], { environment }) => {
     const sampleFn = (a: number) =>
       Result.fmap2(
@@ -141,11 +136,11 @@ const makeOneArgDist = (
       if (!result.ok) {
         throw new REOther(result.value);
       }
-      return vDist(result.value);
+      return vDist(makeSampleSet(result.value, environment));
     }
     throw new REOther("Impossible branch");
   });
-};
+}
 
 export const library: FRFunction[] = [
   maker.make({
@@ -204,14 +199,14 @@ export const library: FRFunction[] = [
   }),
   maker.make({
     name: "uniform",
-    examples: [`uniform(10, 12)`],
+    examples: ["uniform(10, 12)"],
     definitions: [
       makeTwoArgsDist((low, high) => SymbolicDist.Uniform.make({ low, high })),
     ],
   }),
   maker.make({
     name: "beta",
-    examples: [`beta(20, 25)`, `beta({mean: 0.39, stdev: 0.1})`],
+    examples: ["beta(20, 25)", "beta({mean: 0.39, stdev: 0.1})"],
     definitions: [
       makeTwoArgsDist((alpha, beta) => SymbolicDist.Beta.make({ alpha, beta })),
       makeMeanStdevDist((mean, stdev) =>
@@ -221,7 +216,7 @@ export const library: FRFunction[] = [
   }),
   maker.make({
     name: "cauchy",
-    examples: [`cauchy(5, 1)`],
+    examples: ["cauchy(5, 1)"],
     definitions: [
       makeTwoArgsDist((local, scale) =>
         SymbolicDist.Cauchy.make({ local, scale })
@@ -230,7 +225,7 @@ export const library: FRFunction[] = [
   }),
   maker.make({
     name: "gamma",
-    examples: [`gamma(5, 1)`],
+    examples: ["gamma(5, 1)"],
     definitions: [
       makeTwoArgsDist((shape, scale) =>
         SymbolicDist.Gamma.make({ shape, scale })
@@ -239,7 +234,7 @@ export const library: FRFunction[] = [
   }),
   maker.make({
     name: "logistic",
-    examples: [`logistic(5, 1)`],
+    examples: ["logistic(5, 1)"],
     definitions: [
       makeTwoArgsDist((location, scale) =>
         SymbolicDist.Logistic.make({ location, scale })
@@ -263,19 +258,14 @@ export const library: FRFunction[] = [
   ),
   maker.make({
     name: "exponential",
-    examples: [`exponential(2)`],
+    examples: ["exponential(2)"],
     definitions: [
       makeOneArgDist((rate) => SymbolicDist.Exponential.make(rate)),
     ],
   }),
   maker.make({
     name: "bernoulli",
-    examples: [`bernoulli(0.5)`],
+    examples: ["bernoulli(0.5)"],
     definitions: [makeOneArgDist((p) => SymbolicDist.Bernoulli.make(p))],
-  }),
-  maker.make({
-    name: "pointMass",
-    examples: [`pointMass(0.5)`],
-    definitions: [makeOneArgDist((f) => SymbolicDist.PointMass.make(f))],
   }),
 ];
