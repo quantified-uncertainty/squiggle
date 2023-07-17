@@ -126,9 +126,15 @@ export function createSquigglePrinter(
         case "DefunStatement":
           return group([
             node.variable.value,
-            "(",
-            join(", ", typedPath(node).map(print, "value", "args")),
-            ")",
+            group([
+              "(",
+              indent([
+                softline,
+                join([",", line], typedPath(node).map(print, "value", "args")),
+              ]),
+              softline,
+              ")",
+            ]),
             " = ",
             typedPath(node).call(print, "value", "body"),
             hardline,
@@ -153,7 +159,7 @@ export function createSquigglePrinter(
           return group([
             "[",
             indent([softline, join([",", line], path.map(print, "elements"))]),
-            ifBreak(",", ""),
+            ifBreak(",", ""), // trailing comma
             softline,
             "]",
           ]);
@@ -241,10 +247,22 @@ export function createSquigglePrinter(
         }
         case "Lambda":
           return group([
-            "{|",
-            join(", ", path.map(print, "args")),
-            "|",
+            "{",
+            indent([
+              softline,
+              group([
+                "|",
+                indent([
+                  softline,
+                  join([",", line], typedPath(node).map(print, "args")),
+                ]),
+                softline,
+                "|",
+              ]),
+              softline,
+            ]),
             path.call(print, "body"),
+            softline,
             "}",
           ]);
         case "Record":
