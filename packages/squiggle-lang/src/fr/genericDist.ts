@@ -1,5 +1,5 @@
 import { BaseDist } from "../dist/BaseDist.js";
-import { DistError, otherError } from "../dist/DistError.js";
+import { DistError } from "../dist/DistError.js";
 import * as SymbolicDist from "../dist/SymbolicDist.js";
 import {
   BinaryOperation,
@@ -98,16 +98,6 @@ export const library: FRFunction[] = [
   maker.d2n({ name: "mode", fn: (d) => unpackDistResult(d.mode()) }),
   maker.d2n({ name: "sample", fn: (d) => d.sample() }),
   maker.d2n({ name: "integralSum", fn: (d) => d.integralSum() }),
-  maker.fromDefinition(
-    "triangular",
-    makeDefinition([frNumber, frNumber, frNumber], ([low, medium, high]) => {
-      const result = SymbolicDist.Triangular.make({ low, medium, high });
-      if (!result.ok) {
-        throw new REDistributionError(otherError(result.value));
-      }
-      return vDist(result.value);
-    })
-  ),
   maker.fromDefinition(
     "sampleN",
     makeDefinition([frDist, frNumber], ([dist, n]) => {

@@ -1,4 +1,5 @@
 import { BaseDist } from "../dist/BaseDist.js";
+import { otherError } from "../dist/DistError.js";
 import * as SampleSetDist from "../dist/SampleSetDist/index.js";
 import * as SymbolicDist from "../dist/SymbolicDist.js";
 import { REDistributionError, REOther } from "../errors/messages.js";
@@ -267,5 +268,21 @@ export const library: FRFunction[] = [
     name: "bernoulli",
     examples: ["bernoulli(0.5)"],
     definitions: [makeOneArgDist((p) => SymbolicDist.Bernoulli.make(p))],
+  }),
+  maker.make({
+    name: "triangular",
+    examples: ["triangular(3, 5, 10)"],
+    definitions: [
+      makeDefinition(
+        [frNumber, frNumber, frNumber],
+        ([low, medium, high], { environment }) => {
+          const result = SymbolicDist.Triangular.make({ low, medium, high });
+          if (!result.ok) {
+            throw new REDistributionError(otherError(result.value));
+          }
+          return vDist(makeSampleSet(result.value, environment));
+        }
+      ),
+    ],
   }),
 ];

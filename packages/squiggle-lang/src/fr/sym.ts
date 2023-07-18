@@ -1,5 +1,5 @@
 import * as SymbolicDist from "../dist/SymbolicDist.js";
-import { REOther } from "../errors/messages.js";
+import { REDistributionError, REOther } from "../errors/messages.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import { frNumber, frRecord } from "../library/registry/frTypes.js";
@@ -7,6 +7,7 @@ import { FnFactory } from "../library/registry/helpers.js";
 import { Value, vDist } from "../value/index.js";
 import * as Result from "../utility/result.js";
 import { CI_CONFIG } from "./dist.js";
+import { otherError } from "../dist/DistError.js";
 
 const maker = new FnFactory({
   nameSpace: "Sym",
@@ -17,7 +18,7 @@ type SymDistResult = Result.result<SymbolicDist.SymbolicDist, string>;
 
 function symDistResultToValue(result: SymDistResult): Value {
   if (!result.ok) {
-    throw new REOther(result.value);
+    throw new REDistributionError(otherError(result.value));
   }
   return vDist(result.value);
 }
@@ -91,10 +92,10 @@ export const library: FRFunction[] = [
     name: "lognormal",
     examples: [
       "Sym.lognormal(0.5, 0.8)",
-      "Sym.lognormal({p5: 4, p95: 10})",
-      "Sym.lognormal({p10: 4, p90: 10})",
-      "Sym.lognormal({p25: 4, p75: 10})",
-      "Sym.lognormal({mean: 5, stdev: 2})",
+      "Sym.lognormal({ p5: 4, p95: 10 })",
+      "Sym.lognormal({ p10: 4, p90: 10 })",
+      "Sym.lognormal({ p25: 4, p75: 10 })",
+      "Sym.lognormal({ mean: 5, stdev: 2 })",
     ],
     definitions: [
       makeTwoArgsSymDist((mu, sigma) =>
@@ -125,7 +126,7 @@ export const library: FRFunction[] = [
   }),
   maker.make({
     name: "beta",
-    examples: ["Sym.beta(20, 25)", "Sym.beta({mean: 0.39, stdev: 0.1})"],
+    examples: ["Sym.beta(20, 25)", "Sym.beta({ mean: 0.39, stdev: 0.1 })"],
     definitions: [
       makeTwoArgsSymDist((alpha, beta) =>
         SymbolicDist.Beta.make({ alpha, beta })
@@ -181,10 +182,17 @@ export const library: FRFunction[] = [
     definitions: [
       makeDefinition([frNumber], ([v]) => {
         const result = SymbolicDist.PointMass.make(v);
-        if (!result.ok) {
-          throw new REOther(result.value);
-        }
-        return vDist(result.value);
+        return symDistResultToValue(result);
+      }),
+    ],
+  }),
+  maker.make({
+    name: "triangular",
+    examples: ["Sym.triangular(3, 5, 10)"],
+    definitions: [
+      makeDefinition([frNumber, frNumber, frNumber], ([low, medium, high]) => {
+        const result = SymbolicDist.Triangular.make({ low, medium, high });
+        return symDistResultToValue(result);
       }),
     ],
   }),
