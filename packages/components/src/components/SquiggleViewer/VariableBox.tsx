@@ -165,7 +165,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
     !!preview && (
       <div
         className={clsx(
-          "ml-2 text-sm text-blue-800 font-mono",
+          "ml-3 text-sm text-blue-800",
           isOpen ? "opacity-40" : "opacity-60"
         )}
       >
@@ -206,7 +206,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
 
   const hasCommentIcon = () => (
     <div className="ml-3">
-      <TextTooltip text="This variable has a description" placement="bottom">
+      <TextTooltip text={comment || ""} placement="bottom">
         <span>
           <ChatBubbleLeftIcon
             size={13}
