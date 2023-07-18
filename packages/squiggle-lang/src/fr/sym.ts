@@ -9,7 +9,7 @@ import * as Result from "../utility/result.js";
 import { CI_CONFIG } from "./dist.js";
 
 const maker = new FnFactory({
-  nameSpace: "Dist",
+  nameSpace: "Sym",
   requiresNamespace: true,
 });
 
@@ -30,7 +30,7 @@ function makeTwoArgsSymDist(fn: (v1: number, v2: number) => SymDistResult) {
 }
 
 function makeOneArgSymDist(fn: (v: number) => SymDistResult) {
-  return makeDefinition([frNumber, frNumber], ([v]) => {
+  return makeDefinition([frNumber], ([v]) => {
     const result = fn(v);
     return symDistResultToValue(result);
   });

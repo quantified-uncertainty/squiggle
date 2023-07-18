@@ -1,5 +1,8 @@
 import { run, sq } from "../../src/index.js";
-import { SqSymbolicDistribution } from "../../src/public/SqValue/SqDistribution/index.js";
+import {
+  SqSampleSetDistribution,
+  SqSymbolicDistribution,
+} from "../../src/public/SqValue/SqDistribution/index.js";
 import { testRun } from "../helpers/helpers.js";
 
 describe("SqValue.asJS", () => {
@@ -23,7 +26,7 @@ describe("SqValue.asJS", () => {
     ).asJS();
 
     expect((value as any).get("y")[2].get("dist")).toBeInstanceOf(
-      SqSymbolicDistribution
+      SqSampleSetDistribution
     );
   });
 });
