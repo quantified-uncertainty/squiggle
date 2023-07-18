@@ -5,7 +5,7 @@ title: Dictionary
 
 Squiggle dictionaries work similar to Python dictionaries. The syntax is similar to objects in Javascript.
 
-Dictionaries are unordered and duplicates are not allowed. They are meant to be immutable, like most types in Squiggle.
+Dictionaries are ordered. Duplicates are not allowed. They are immutable, like all types in Squiggle.
 
 **Example**
 
