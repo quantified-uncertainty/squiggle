@@ -416,11 +416,9 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
           showSamplesBar={_showSamplesBar}
         />
       )}
-      {!anyAreNonnormalized && (
-        <div className="flex justify-center pt-2">
-          {plot.showSummary && (
-            <SummaryTable plot={plot} environment={environment} />
-          )}
+      {!anyAreNonnormalized && plot.showSummary && (
+        <div className="flex justify-center pt-2 overflow-auto">
+          <SummaryTable plot={plot} environment={environment} />
         </div>
       )}
       {anyAreNonnormalized && nonNormalizedError()}

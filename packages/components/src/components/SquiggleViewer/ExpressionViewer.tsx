@@ -49,16 +49,41 @@ const showItem = (item: result<SqValue, SqError>, settings) => {
 const table = (value: SqTable, environment, settings) => {
   const rowsAndColumns = value.items(environment);
   const columnNames = value.columnNames;
+  const columnLength = Math.max(
+    columnNames ? columnNames.length : 0,
+    rowsAndColumns[0].length
+  );
+
+  const chartHeight = 40;
+  const distributionChartSettings = {
+    ...settings.distributionChartSettings,
+    showSummary: false,
+  };
+  const adjustedSettings = {
+    ...settings,
+    distributionChartSettings,
+    chartHeight,
+  };
 
   return (
-    <div className="not-prose relative rounded-sm overflow-hidden border border-slate-200">
-      <table className="table-fixed w-full">
+    <div className="relative rounded-sm overflow-hidden border border-slate-200">
+      <table
+        className="table-fixed w-full"
+        style={{ minWidth: `${columnLength * 100}px` }}
+      >
         {columnNames && (
           <thead className="text-xs text-gray-700 bg-gray-50 border-b border-slate-200">
             <tr>
-              {columnNames.map((name, i) => (
-                <th key={i} scope="col" className="px-4 py-2">
-                  {name}
+              {Array.from({ length: columnLength }, (_, i) => (
+                <th
+                  key={i}
+                  scope="col"
+                  className={clsx(
+                    "px-2 py-2",
+                    i !== 0 && "border-slate-200 border-l"
+                  )}
+                >
+                  {columnNames[i] || ""}
                 </th>
               ))}
             </tr>
@@ -68,8 +93,14 @@ const table = (value: SqTable, environment, settings) => {
           {rowsAndColumns.map((row, i) => (
             <tr key={i} className="border-b border-slate-100">
               {row.map((item, k) => (
-                <td key={k} className="px-1">
-                  {showItem(item, settings)}
+                <td
+                  key={k}
+                  className={clsx(
+                    "px-1 overflow-hidden",
+                    k !== 0 && "border-slate-100 border-l"
+                  )}
+                >
+                  {showItem(item, adjustedSettings)}
                 </td>
               ))}
             </tr>
@@ -144,7 +175,7 @@ export const getBoxProps = (
           </div>
         ),
         children: () => (
-          <div className="text-neutral-800 text-sm px-2 py-1 my-1 bg-stone-100">
+          <div className="text-neutral-800 text-sm px-2 py-1 my-1">
             {value.value}
           </div>
         ),
@@ -252,7 +283,7 @@ export const getBoxProps = (
                 />
               );
             case "table":
-              return table(plot, environment, settings);
+              return table(plot, environment, { ...settings, chartHeight: 40 });
             default:
               // can happen if squiggle-lang version is too fresh and we messed up the components -> squiggle-lang dependency
               return `Unsupported plot ${plot satisfies never}`;
