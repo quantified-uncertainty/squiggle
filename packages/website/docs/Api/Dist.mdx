@@ -12,6 +12,8 @@ These subtypes are [point set](/docs/Api/DistPointSet), [sample set](/docs/Api/D
 Several functions below only can work on particular distribution formats.
 For example, scoring and pointwise math requires the point set format. When this happens, the types are automatically converted to the correct format. These conversions are lossy.
 
+Distributions are created as [sample sets](/Docs/Api/DistSampleSet) by default. To create a symbolic distribution, use `Sym.` namespace: `Sym.normal`, `Sym.beta` and so on.
+
 <TOCInline toc={toc} />
 
 ## Distribution Creation
