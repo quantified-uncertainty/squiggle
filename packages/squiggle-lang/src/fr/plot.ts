@@ -24,6 +24,45 @@ const maker = new FnFactory({
 
 const defaultScale = { type: "linear" } satisfies Scale;
 
+function fnXScale(fn: Lambda, xScale: Scale | null): Scale {
+  if (xScale && xScale.min && xScale.max) {
+    // complete scale, nothing to improve
+    return xScale;
+  }
+
+  const parameters = fn.getParameters();
+  if (parameters.length !== 1) {
+    throw new REOther("Expected a function with one parameter");
+  }
+  const domain = parameters[0].domain;
+  if (!domain || domain.value.type !== "NumericRange") {
+    // no domain, use explicit scale or default scale
+    if (xScale) {
+      if (
+        (xScale.min === undefined && xScale.max !== undefined) ||
+        (xScale.min !== undefined && xScale.max === undefined)
+      ) {
+        throw new REOther(
+          "'max' and 'min' should either be simultaneously set or unset on xScale for a function plot"
+        );
+      }
+      return xScale;
+    } else {
+      return defaultScale;
+    }
+  }
+
+  if (xScale) {
+    return {
+      ...xScale,
+      min: xScale.min ?? domain.value.min,
+      max: xScale.max ?? domain.value.max,
+    };
+  } else {
+    return { type: "linear", min: domain.value.min, max: domain.value.max };
+  }
+}
+
 function verifyOneNumericArgFunction(fn: Lambda) {
   const parameters = fn.getParameters();
   if (parameters.length !== 1) {
@@ -137,7 +176,7 @@ export const library = [
           return vPlot({
             type: "numericFn",
             fn,
-            xScale: xScale ?? defaultScale,
+            xScale: fnXScale(fn, xScale),
             yScale: yScale ?? defaultScale,
             points: points ?? undefined,
           });
@@ -166,7 +205,7 @@ export const library = [
           return vPlot({
             type: "distFn",
             fn,
-            xScale: xScale ?? defaultScale,
+            xScale: fnXScale(fn, xScale),
             distXScale: distXScale ?? defaultScale,
             points: points ?? undefined,
           });
