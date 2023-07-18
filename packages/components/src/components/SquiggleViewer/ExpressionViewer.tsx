@@ -5,9 +5,6 @@ import {
   SqPlot,
   SqScale,
   SqValue,
-  SqTable,
-  SqError,
-  result,
 } from "@quri/squiggle-lang";
 
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
@@ -29,87 +26,10 @@ import {
 import { MergedItemSettings, getChildrenValues } from "./utils.js";
 import { MessageAlert } from "../Alert.js";
 import { clsx } from "clsx";
+import { Table } from "../Table/index.js";
 
 // We use an extra left margin for some elements to align them with parent variable name
 const leftMargin = "ml-1.5";
-
-const showItem = (item: result<SqValue, SqError>, settings) => {
-  if (item.ok) {
-    const value = item.value;
-    if (valueHasContext(value)) {
-      return getBoxProps(value).children(settings);
-    } else {
-      return value.toString();
-    }
-  } else {
-    return item.toString();
-  }
-};
-
-const table = (value: SqTable, environment, settings) => {
-  const rowsAndColumns = value.items(environment);
-  const columnNames = value.columnNames;
-  const columnLength = Math.max(
-    columnNames ? columnNames.length : 0,
-    rowsAndColumns[0].length
-  );
-
-  const chartHeight = 40;
-  const distributionChartSettings = {
-    ...settings.distributionChartSettings,
-    showSummary: false,
-  };
-  const adjustedSettings = {
-    ...settings,
-    distributionChartSettings,
-    chartHeight,
-  };
-
-  return (
-    <div className="relative rounded-sm overflow-hidden border border-slate-200">
-      <table
-        className="table-fixed w-full"
-        style={{ minWidth: `${columnLength * 100}px` }}
-      >
-        {columnNames && (
-          <thead className="text-xs text-gray-700 bg-gray-50 border-b border-slate-200">
-            <tr>
-              {Array.from({ length: columnLength }, (_, i) => (
-                <th
-                  key={i}
-                  scope="col"
-                  className={clsx(
-                    "px-2 py-2",
-                    i !== 0 && "border-slate-200 border-l"
-                  )}
-                >
-                  {columnNames[i] || ""}
-                </th>
-              ))}
-            </tr>
-          </thead>
-        )}
-        <tbody>
-          {rowsAndColumns.map((row, i) => (
-            <tr key={i} className="border-b border-slate-100">
-              {row.map((item, k) => (
-                <td
-                  key={k}
-                  className={clsx(
-                    "px-1 overflow-hidden",
-                    k !== 0 && "border-slate-100 border-l"
-                  )}
-                >
-                  {showItem(item, adjustedSettings)}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-};
 
 export const getBoxProps = (
   value: SqValueWithContext
@@ -210,7 +130,6 @@ export const getBoxProps = (
     }
     case "Lambda":
       return {
-        heading: "",
         preview: `fn(${value.value.parameters().join(", ")})`,
         renderSettingsMenu: ({ onChange }) => {
           return (
@@ -283,7 +202,14 @@ export const getBoxProps = (
                 />
               );
             case "table":
-              return table(plot, environment, { ...settings, chartHeight: 40 });
+              return (
+                <Table
+                  value={plot}
+                  environment={environment}
+                  settings={settings}
+                  getBoxProps={getBoxProps}
+                />
+              );
             default:
               // can happen if squiggle-lang version is too fresh and we messed up the components -> squiggle-lang dependency
               return `Unsupported plot ${plot satisfies never}`;
@@ -342,11 +268,9 @@ type Props = {
 };
 
 export const ExpressionViewer: React.FC<Props> = ({ value }) => {
-  const foo = value;
   if (!valueHasContext(value)) {
     return <MessageAlert heading="Can't display pathless value" />;
   }
-  const bar = value;
 
   const boxProps = getBoxProps(value);
   const heading = boxProps.heading || value.tag;

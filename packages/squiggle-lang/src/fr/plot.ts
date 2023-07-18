@@ -191,28 +191,4 @@ export const library = [
       ),
     ],
   }),
-  maker.make({
-    name: "table",
-    output: "Plot",
-    examples: [],
-    definitions: [
-      makeDefinition(
-        [
-          frRecord(
-            ["elements", frArray(frAny)],
-            ["fns", frArray(frLambda)],
-            ["columnNames", frOptional(frArray(frString))]
-          ),
-        ],
-        ([{ elements, fns, columnNames }]) => {
-          return vPlot({
-            type: "table",
-            elements,
-            fns,
-            columnNames: columnNames ?? undefined,
-          });
-        }
-      ),
-    ],
-  }),
 ];

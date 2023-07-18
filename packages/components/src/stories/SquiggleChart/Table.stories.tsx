@@ -14,11 +14,17 @@ type Story = StoryObj<typeof meta>;
 export const Basic: Story = {
   args: {
     code: `
-    Plot.table({
-      elements: [1,4,5],
-      fns:[{|e| e}, {|e| {|t| t + e}}, {|e| [e,e,e,e]}],
-      columnNames: ["e", "e + t", "e x 4"]
-    })
+    Table.make(
+      {
+        elements: [1, 4, 5],
+        columns: [
+          { fn: {|e|e}, name: "Number" },
+          { fn: {|e| normal(e^2, e^3)}, name: "Dist" },
+          { fn: {|e|[e, e, e, e]}, name: "Array" },
+          { fn: {|e|{first: e, second: e+1, third: e+2, fourth: e+3}}, name: "Record" },
+        ],
+      }
+    )
 `,
   },
 };
@@ -151,60 +157,25 @@ items = {
   },
 }
 
-Plot.table(
+Table.make(
   {
     elements: items -> Dict.values,
-    fns: [
-      {|e|e.id},
-      {|e|e.name},
-      {|e|Plot.dist(
-        {
-          dist: e.value,
-          xScale: Scale.symlog({ min: 0.01, max: 100000 }),
-          showSummary: false,
-        }
-      )},
+    columns: [
+      { fn: {|e|e.id}, title: "id" },
+      { fn: {|e|e.name}, title: "name" },
+      {
+        fn: {|e|Plot.dist(
+          {
+            dist: e.value,
+            xScale: Scale.symlog({ min: 0.01, max: 100000 }),
+            showSummary: false,
+          }
+        )},
+        title: "value",
+      },
     ],
-    columnNames: ["id", "name", "value"],
   }
 )
-`,
-  },
-};
-
-export const WithSimplePlots: Story = {
-  args: {
-    code: `
-    items = {
-      multiFileModels: { work: 1 to 5, value: 2 to 10 },
-      modelExports: { work: 3 to 10, value: 1 to 20 },
-      privateModels: { work: 1 to 3, value: 2 to 30 },
-    }
-    
-    Plot.table(
-      {
-        elements: Dict.keys(items),
-        fns: [
-          {|e|e},
-          {|e|Plot.dist(
-            {
-              dist: items[e].work,
-              xScale: Scale.linear({ min: 1, max: 14 }),
-              showSummary: false,
-            }
-          )},
-                {|e|Plot.dist(
-            {
-              dist: items[e].value,
-              xScale: Scale.linear({ min: 1, max: 40 }),
-              showSummary: false,
-            }
-          )},
-        ],
-        columnNames: ["name", "work", "value"],
-      }
-    )
-    
 `,
   },
 };

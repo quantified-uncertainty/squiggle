@@ -320,7 +320,7 @@ export class SqTable extends SqAbstractPlot<"table"> {
     return this.elements.map((_, row) => this.row(row, env));
   }
 
-  get columnNames(): string[] | undefined {
+  get columnNames(): (string | undefined)[] {
     return this._value.columnNames;
   }
 }
