@@ -44,6 +44,15 @@ Plot.numericFn({
   },
 };
 
+export const WithInfiniteValues: Story = {
+  name: "With Infinite Values",
+  args: {
+    code: sq`
+    fn(t:[1,100]) = if t < 40 then 1/0 else t
+`,
+  },
+};
+
 export const CustomTickFormat: Story = {
   name: "Custom tick format",
   args: {

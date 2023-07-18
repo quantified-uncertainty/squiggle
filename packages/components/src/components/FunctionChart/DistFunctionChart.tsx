@@ -121,17 +121,32 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
 
   const { xScale, yScale } = useMemo(() => {
     const xScale = sqScaleToD3(plot.xScale);
-    xScale.domain(d3.extent(data, (d) => d.x) as [number, number]);
+    xScale.domain(
+      d3.extent(
+        data.filter((d) => isFinite(d.x)),
+        (d) => d.x
+      ) as [number, number]
+    );
 
     const yScale = scaleLinear().domain([
       Math.min(
         ...data.map((d) =>
-          Math.min(...Object.values(d.areas).map((p) => p[0]), d[50])
+          Math.min(
+            ...Object.values(d.areas)
+              .map((p) => p[0])
+              .filter(isFinite),
+            d[50]
+          )
         )
       ),
       Math.max(
         ...data.map((d) =>
-          Math.max(...Object.values(d.areas).map((p) => p[1]), d[50])
+          Math.max(
+            ...Object.values(d.areas)
+              .map((p) => p[1])
+              .filter(isFinite),
+            d[50]
+          )
         )
       ),
     ]);
