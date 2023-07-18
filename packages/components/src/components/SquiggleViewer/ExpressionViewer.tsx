@@ -5,6 +5,7 @@ import {
   SqPlot,
   SqScale,
   SqValue,
+  result,
 } from "@quri/squiggle-lang";
 
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
@@ -30,6 +31,17 @@ import { clsx } from "clsx";
 // We use an extra left margin for some elements to align them with parent variable name
 const leftMargin = "ml-1.5";
 
+function unwrap<a, b>(x: result<a, b>): a {
+  if (x.ok) {
+    return x.value;
+  } else {
+    throw Error("FAILURE TO UNWRAP");
+  }
+}
+
+const truncateStr = (str, maxLength) =>
+  str.substring(0, maxLength) + (str.length > maxLength ? "..." : "");
+
 export const getBoxProps = (
   value: SqValueWithContext
 ): Omit<VariableBoxProps, "value"> => {
@@ -38,18 +50,30 @@ export const getBoxProps = (
   switch (value.tag) {
     case "Number":
       return {
-        preview: <NumberShower precision={3} number={value.value} />,
+        preview: <NumberShower precision={4} number={value.value} />,
         children: () => (
           <div className={clsx("font-semibold text-indigo-800", leftMargin)}>
-            <NumberShower precision={3} number={value.value} />
+            <NumberShower precision={4} number={value.value} />
           </div>
         ),
       };
     case "Dist": {
       const distType = value.value.tag;
-
+      const p05 = unwrap(value.value.inv(environment, 0.05));
+      const p95 = unwrap(value.value.inv(environment, 0.95));
+      const oneValue = p05 === p95;
       return {
         heading: `${distType} Distribution`,
+        preview: oneValue ? (
+          <NumberShower precision={2} number={p05} />
+        ) : (
+          <div>
+            <NumberShower precision={2} number={p05} />
+            <span className="mx-1 opacity-70">to</span>
+            <NumberShower precision={2} number={p95} />
+          </div>
+        ),
+        // preview:
         renderSettingsMenu: ({ onChange }) => {
           const shape = value.value.pointSet(
             value.context.project.getEnvironment()
@@ -89,8 +113,7 @@ export const getBoxProps = (
       return {
         preview: (
           <div className="overflow-ellipsis overflow-hidden">
-            {value.value.substring(0, 20) +
-              (value.value.length > 20 ? "..." : "")}
+            {truncateStr(value.value, 20)}
           </div>
         ),
         children: () => (
@@ -130,7 +153,15 @@ export const getBoxProps = (
     case "Lambda":
       return {
         heading: "",
-        preview: `fn(${value.value.parameterNames().join(", ")})`,
+        preview: (
+          <div>
+            fn(
+            <span className="opacity-60">
+              {truncateStr(value.value.parameterNames().join(", "), 15)}
+            </span>
+            )
+          </div>
+        ),
         renderSettingsMenu: ({ onChange }) => {
           return (
             <ItemSettingsMenu
