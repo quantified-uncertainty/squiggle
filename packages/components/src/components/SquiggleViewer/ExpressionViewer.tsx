@@ -42,6 +42,8 @@ function unwrap<a, b>(x: result<a, b>): a {
 const truncateStr = (str, maxLength) =>
   str.substring(0, maxLength) + (str.length > maxLength ? "..." : "");
 
+const CHART_TO_DIST = 0.5;
+
 export const getBoxProps = (
   value: SqValueWithContext
 ): Omit<VariableBoxProps, "value"> => {
@@ -103,7 +105,7 @@ export const getBoxProps = (
             <DistributionsChart
               plot={plot}
               environment={environment}
-              height={settings.chartHeight}
+              height={settings.chartHeight * CHART_TO_DIST}
             />
           );
         },
@@ -193,7 +195,7 @@ export const getBoxProps = (
                 <DistributionsChart
                   plot={plot}
                   environment={environment}
-                  height={settings.chartHeight}
+                  height={settings.chartHeight * CHART_TO_DIST}
                 />
               );
             case "numericFn": {

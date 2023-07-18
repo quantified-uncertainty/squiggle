@@ -1,11 +1,4 @@
-import {
-  FC,
-  ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useReducer,
-} from "react";
+import { FC, ReactNode, useMemo, useReducer } from "react";
 import { clsx } from "clsx";
 
 import {
@@ -28,6 +21,7 @@ import {
   LocalItemSettings,
   MergedItemSettings,
   getChildrenValues,
+  isRootItem,
   pathToShortName,
 } from "./utils.js";
 import { useEffectRef } from "../../lib/hooks/useEffectRef.js";
@@ -69,7 +63,8 @@ export const VariableBox: FC<VariableBoxProps> = ({
   const focus = useFocus();
   const { editor, getSettings, getMergedSettings, dispatch } =
     useViewerContext();
-  const isFocused = useIsFocused(value.context.path);
+  const { path } = value.context;
+  const isFocused = useIsFocused(path) || isRootItem(path);
 
   const findInEditor = () => {
     const location = value.context.findLocation();
@@ -79,8 +74,6 @@ export const VariableBox: FC<VariableBoxProps> = ({
   // Since `ViewerContext` doesn't store settings, `VariableBox` won't rerender when `setSettings` is called.
   // So we use `forceUpdate` to force rerendering.
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
-
-  const { path } = value.context;
 
   const isRoot = Boolean(path.isRoot());
 
