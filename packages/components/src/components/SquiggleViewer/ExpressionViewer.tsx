@@ -27,17 +27,10 @@ import {
 import { MergedItemSettings, getChildrenValues } from "./utils.js";
 import { MessageAlert } from "../Alert.js";
 import { clsx } from "clsx";
+import { DistPreview } from "../DistributionsChart/DistPreview.js";
 
 // We use an extra left margin for some elements to align them with parent variable name
 const leftMargin = "ml-1.5";
-
-function unwrap<a, b>(x: result<a, b>): a {
-  if (x.ok) {
-    return x.value;
-  } else {
-    throw Error("FAILURE TO UNWRAP");
-  }
-}
 
 const truncateStr = (str, maxLength) =>
   str.substring(0, maxLength) + (str.length > maxLength ? "..." : "");
@@ -58,21 +51,8 @@ export const getBoxProps = (
         ),
       };
     case "Dist": {
-      const distType = value.value.tag;
-      const p05 = unwrap(value.value.inv(environment, 0.05));
-      const p95 = unwrap(value.value.inv(environment, 0.95));
-      const oneValue = p05 === p95;
       return {
-        heading: `${distType} Distribution`,
-        preview: oneValue ? (
-          <NumberShower precision={2} number={p05} />
-        ) : (
-          <div>
-            <NumberShower precision={2} number={p05} />
-            <span className="mx-1 opacity-70">to</span>
-            <NumberShower precision={2} number={p95} />
-          </div>
-        ),
+        preview: <DistPreview dist={value.value} environment={environment} />,
         // preview:
         renderSettingsMenu: ({ onChange }) => {
           const shape = value.value.pointSet(
