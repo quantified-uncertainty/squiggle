@@ -1,4 +1,4 @@
-import { testEvalError, testEvalToBe } from "../helpers/reducerHelpers.js";
+import { testEvalToBe } from "../helpers/reducerHelpers.js";
 
 describe("Operators", () => {
   describe("concat", () => {

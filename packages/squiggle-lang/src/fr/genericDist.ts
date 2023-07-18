@@ -46,13 +46,6 @@ const pointwiseOps: OpPair[] = [
 ];
 
 const makeOperationFns = (): FRFunction[] => {
-  const twoArgTypes = [
-    // can't use DistOrNumber+DistOrNumber, since number+number should be delegated to builtin arithmetics
-    [frDist, frNumber],
-    [frNumber, frDist],
-    [frDist, frDist],
-  ];
-
   const fns: FRFunction[] = [];
 
   for (const [name, op] of [...algebraicOps, ...pointwiseOps]) {
