@@ -1,15 +1,7 @@
-import React, { FC, ReactNode } from "react";
+import { FC } from "react";
 
-import {
-  SqDistributionsPlot,
-  SqPlot,
-  SqScale,
-  SqValue,
-  SqTable,
-  SqError,
-  result,
-} from "@quri/squiggle-lang";
-import { Env, SqLinearScale, SqScatterPlot } from "@quri/squiggle-lang";
+import { SqValue, SqTable, SqError, result } from "@quri/squiggle-lang";
+import { Env } from "@quri/squiggle-lang";
 
 import { clsx } from "clsx";
 import { PlaygroundSettings } from "../PlaygroundSettings.js";
@@ -32,6 +24,7 @@ export const Table: FC<Props> = ({
 }) => {
   const rowsAndColumns = value.items(environment);
   const columnNames = value.columnNames;
+  const hasColumnNames = columnNames.filter((name) => !!name).length > 0;
   const columnLength = Math.max(
     columnNames ? columnNames.length : 0,
     rowsAndColumns[0].length
@@ -67,7 +60,7 @@ export const Table: FC<Props> = ({
         className="table-fixed w-full"
         style={{ minWidth: `${columnLength * 100}px` }}
       >
-        {columnNames && (
+        {hasColumnNames && (
           <thead className="text-xs text-gray-700 bg-gray-50 border-b border-slate-200">
             <tr>
               {Array.from({ length: columnLength }, (_, i) => (
