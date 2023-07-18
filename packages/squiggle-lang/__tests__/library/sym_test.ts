@@ -14,7 +14,7 @@ describe("Symbolic constructors", () => {
     );
     testEvalToBe(
       "Sym.normal({p5: 4, p95: -2})",
-      "Error(Error: Low value must be less than high value)"
+      "Error(Distribution Math Error: Low value must be less than high value)"
     );
 
     test("5% inv", async () => {
