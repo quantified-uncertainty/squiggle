@@ -96,7 +96,24 @@ export function createSquigglePrinter(
               typedPath(node).call(print, "imports", i, 1),
               hardline,
             ]),
-            path.map(print, "statements"),
+            join(
+              hardline,
+              node.statements.map((statement, i) => [
+                typedPath(node).call(print, "statements", i),
+                // keep extra new lines
+                util.isNextLineEmpty(
+                  options.originalText,
+                  statement.location.end.offset
+                )
+                  ? hardline
+                  : "",
+              ])
+            ),
+            ["LetStatement", "DefunStatement"].includes(
+              node.statements.at(-1)?.type ?? ""
+            )
+              ? hardline // new line if final expression is a statement
+              : "",
           ]);
         case "Block":
           if (
@@ -108,7 +125,22 @@ export function createSquigglePrinter(
           }
           return group([
             "{",
-            indent([line, path.map(print, "statements")]),
+            indent([
+              line,
+              join(
+                hardline,
+                node.statements.map((statement, i) => [
+                  typedPath(node).call(print, "statements", i),
+                  // keep extra new lines
+                  util.isNextLineEmpty(
+                    options.originalText,
+                    statement.location.end.offset
+                  )
+                    ? hardline
+                    : "",
+                ])
+              ),
+            ]),
             line,
             "}",
           ]);
@@ -117,11 +149,6 @@ export function createSquigglePrinter(
             node.variable.value,
             " = ",
             typedPath(node).call(print, "value"),
-            hardline,
-            // isNextLineEmpty is missing from prettier types in v3 alpha
-            util.isNextLineEmpty(options.originalText, node.location.end.offset)
-              ? hardline
-              : "",
           ]);
         case "DefunStatement":
           return group([
@@ -137,11 +164,6 @@ export function createSquigglePrinter(
             ]),
             " = ",
             typedPath(node).call(print, "value", "body"),
-            hardline,
-            // isNextLineEmpty is missing from prettier types in v3 alpha
-            util.isNextLineEmpty(options.originalText, node.location.end.offset)
-              ? hardline
-              : "",
           ]);
         case "Boolean":
           return node.value ? "true" : "false";
@@ -338,7 +360,7 @@ export function createSquigglePrinter(
           case "Record":
             return node.elements;
           case "Lambda":
-            return [node.body];
+            return [...node.args, node.body];
           case "KeyValue":
             return [node.key, node.value];
           default:
