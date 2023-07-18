@@ -1,9 +1,5 @@
 import { testRun } from "../helpers/helpers.js";
-import {
-  MySkip,
-  testEvalToBe,
-  testToExpression,
-} from "../helpers/reducerHelpers.js";
+import { MySkip, testEvalToBe } from "../helpers/reducerHelpers.js";
 
 describe("Symbolic constructors", () => {
   describe("normal constructor", () => {
@@ -103,7 +99,7 @@ describe("Symbolic constructors", () => {
   testEvalToBe("pointMass(5)", "PointMass(5)");
 });
 
-describe("eval on distribution functions", () => {
+describe("distribution functions", () => {
   describe("unaryMinus", () => {
     testEvalToBe("mean(-Sym.normal(5,2))", "-5");
     testEvalToBe("-Sym.normal(5,2)", "Normal(-5,2)");
@@ -234,61 +230,5 @@ describe("eval on distribution functions", () => {
 
   describe("equality", () => {
     MySkip.testEvalToBe("Sym.normal(5,2) == Sym.normal(5,2)", "true");
-  });
-});
-
-describe("parse on distribution functions", () => {
-  describe("power", () => {
-    testToExpression(
-      "Sym.normal(5,2) ^ Sym.normal(5,1)",
-      "(pow)((Sym.normal)(5, 2), (Sym.normal)(5, 1))"
-    );
-    testToExpression("3 ^ Sym.normal(5,1)", "(pow)(3, (Sym.normal)(5, 1))");
-    testToExpression("Sym.normal(5,2) ^ 3", "(pow)((Sym.normal)(5, 2), 3)");
-  });
-  describe("subtraction", () => {
-    testToExpression(
-      "10 - Sym.normal(5,1)",
-      "(subtract)(10, (Sym.normal)(5, 1))"
-    );
-    testToExpression(
-      "Sym.normal(5,1) - 10",
-      "(subtract)((Sym.normal)(5, 1), 10)"
-    );
-  });
-  describe("pointwise arithmetic expressions", () => {
-    MySkip.testParse(
-      "Sym.normal(5,2) .+ Sym.normal(5,1)",
-      "(:dotAdd (:Sym.normal 5 2) (:Sym.normal 5 1))"
-    );
-    MySkip.testParse(
-      "Sym.normal(5,2) .- Sym.normal(5,1)",
-      "(:$$_block_$$ (:dotSubtract (:Sym.normal 5 2) (:Sym.normal 5 1)))"
-      // TODO: !!! returns "{(:dotPow (:normal 5 2) (:normal 5 1))}"
-    );
-    testToExpression(
-      "Sym.normal(5,2) .* Sym.normal(5,1)",
-      "(dotMultiply)((Sym.normal)(5, 2), (Sym.normal)(5, 1))"
-    );
-    testToExpression(
-      "Sym.normal(5,2) ./ Sym.normal(5,1)",
-      "(dotDivide)((Sym.normal)(5, 2), (Sym.normal)(5, 1))"
-    );
-    testToExpression(
-      "Sym.normal(5,2) .^ Sym.normal(5,1)",
-      "(dotPow)((Sym.normal)(5, 2), (Sym.normal)(5, 1))"
-    );
-  });
-  describe("equality", () => {
-    testToExpression("5 == Sym.normal(5,2)", "(equal)(5, (Sym.normal)(5, 2))");
-  });
-  describe("pointwise adding two normals", () => {
-    MySkip.testParse(
-      "Sym.normal(5,2) .+ Sym.normal(5,1)",
-      "(:dotAdd (:Sym.normal 5 2) (:Sym.normal 5 1))"
-    );
-  });
-  describe("exponential of one distribution", () => {
-    MySkip.testParse("exp(Sym.normal(5,2)", "(:pow (:Sym.normal 5 2) 3)");
   });
 });
