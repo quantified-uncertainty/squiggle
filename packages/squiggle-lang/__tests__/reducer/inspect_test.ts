@@ -1,6 +1,6 @@
 import { jest } from "@jest/globals";
 
-import { expectEvalToBe, testEvalToBe } from "../helpers/reducerHelpers.js";
+import { expectEvalToBe } from "../helpers/reducerHelpers.js";
 
 /*
     You can wrap around any expression with inspect(expr) to log the value of that expression.
