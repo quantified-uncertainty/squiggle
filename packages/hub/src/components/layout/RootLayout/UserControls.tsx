@@ -36,8 +36,6 @@ export const UserControls: FC<{ session: Session | null }> = ({ session }) => {
       <Dropdown
         render={({ close }: { close: () => void }) => (
           <DropdownMenu>
-            <DropdownMenuHeader>User Actions</DropdownMenuHeader>
-            <DropdownMenuSeparator />
             <DropdownMenuLinkItem
               href={userRoute({ username: username! })}
               icon={UserCircleIcon}
@@ -51,6 +49,27 @@ export const UserControls: FC<{ session: Session | null }> = ({ session }) => {
               }}
               icon={SignOutIcon}
               title="Sign Out"
+            />
+            <DropdownMenuSeparator />
+            <DropdownMenuLinkItem
+              href={"/discord"}
+              icon={UserCircleIcon}
+              title="Discord"
+              close={close}
+            />
+            <DropdownMenuLinkItem
+              href={"https://github.com/quantified-uncertainty/squiggle"}
+              icon={UserCircleIcon}
+              title="Github"
+              close={close}
+            />
+            <DropdownMenuLinkItem
+              href={
+                "https://github.com/quantified-uncertainty/squiggle/discussions"
+              }
+              icon={UserCircleIcon}
+              title="Issues"
+              close={close}
             />
           </DropdownMenu>
         )}
