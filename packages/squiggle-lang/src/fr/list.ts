@@ -193,6 +193,41 @@ export const library = [
     ],
   }),
   maker.make({
+    name: "reduceWhile",
+    requiresNamespace: true,
+    examples: [
+      // Args: (list, initialValue, step, condition)
+      // Returns the last value that fits the condition.
+      // If even initial value doesn't fit the condition, it will be returned anyway;
+      // So the result isn't guaranteed to fit the condition.
+      `List.reduceWhile([1,4,5], 0, {|acc, curr| acc + curr }), {|acc| acc < 5})`,
+    ],
+    definitions: [
+      makeDefinition(
+        [frArray(frAny), frAny, frLambda, frLambda],
+        ([array, initialValue, step, condition], context) => {
+          let acc = initialValue;
+          for (let i = 0; i < array.length; i++) {
+            const newAcc = step.call([acc, array[i]], context);
+
+            const checkResult = condition.call([newAcc], context);
+            if (checkResult.type !== "Bool") {
+              throw new REOther(
+                `Condition should return a boolean value, got: ${checkResult.type}`
+              );
+            }
+            if (!checkResult.value) {
+              // condition failed
+              return acc;
+            }
+            acc = newAcc;
+          }
+          return acc;
+        }
+      ),
+    ],
+  }),
+  maker.make({
     name: "filter",
     requiresNamespace: false,
     examples: [`List.filter([1,4,5], {|x| x>3})`],
