@@ -65,7 +65,7 @@ async function makeSampleSet(samples: number[]) {
   if (result.tag === "Dist") {
     return result.value;
   } else {
-    fail("Expected to be distribution");
+    throw new Error("Expected to be distribution");
   }
 }
 
@@ -147,7 +147,7 @@ describe("cumulative density function", () => {
         } else if (typeof cdfValue == "number") {
           expect(Math.round(1e5 * cdfValue) / 1e5).toBeLessThanOrEqual(1);
         } else {
-          fail();
+          throw new Error();
         }
       })
     );
@@ -206,7 +206,7 @@ describe("mean is mean", () => {
               epsilon: 5e-1,
             });
           } else {
-            fail();
+            throw new Error();
           }
         }
       )
@@ -231,7 +231,7 @@ describe("mean is mean", () => {
               epsilon: 5e-1,
             });
           } else {
-            fail();
+            throw new Error();
           }
         }
       )

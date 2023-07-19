@@ -32,24 +32,36 @@ function fnXScale(fn: Lambda, xScale: Scale | null): Scale {
 
   const parameters = fn.getParameters();
   if (parameters.length !== 1) {
-    throw new REOther("Expected a function with one parameter");
+    throw new REOther(
+      `Plots only works with functions that have one parameter. This function has ${parameters.length} parameters.`
+    );
   }
+
+  if (xScale) {
+    if (xScale.min === undefined && xScale.max !== undefined) {
+      throw new REOther(
+        "xScale max set without min. Must set either both or neither."
+      );
+    }
+    if (xScale.min !== undefined && xScale.max === undefined) {
+      throw new REOther(
+        "xScale min set without max. Must set either both or neither."
+      );
+    }
+  }
+
+  /*
+   * There are many possible combinations here:
+   * 1. xScale with min/max (ignore domain)
+   * 2. xScale without min/max, domain defined -> copy min/max from domain
+   * 3. xScale without min/max, no domain -> keep xScale
+   * 4. no xScale and no domain -> default scale
+   */
+
   const domain = parameters[0].domain;
   if (!domain || domain.value.type !== "NumericRange") {
     // no domain, use explicit scale or default scale
-    if (xScale) {
-      if (
-        (xScale.min === undefined && xScale.max !== undefined) ||
-        (xScale.min !== undefined && xScale.max === undefined)
-      ) {
-        throw new REOther(
-          "'max' and 'min' should either be simultaneously set or unset on xScale for a function plot"
-        );
-      }
-      return xScale;
-    } else {
-      return defaultScale;
-    }
+    return xScale ?? defaultScale;
   }
 
   if (xScale) {

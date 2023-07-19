@@ -30,11 +30,11 @@ describe("Peggy parse", () => {
             result.value.statements.length === 1
           )
         ) {
-          fail();
+          throw new Error();
         }
         const value = result.value.statements[0];
         if (value.type !== "Float") {
-          fail();
+          throw new Error();
         }
         expect(value).toMatchObject(expected);
       }

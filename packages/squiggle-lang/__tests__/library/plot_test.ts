@@ -11,10 +11,10 @@ async function testPlotResult<T extends Plot["type"]>(
   test(name, async () => {
     const result = await evaluateStringToResult(code);
     if (!result.ok) {
-      fail("Expected ok result");
+      throw new Error("Expected ok result");
     }
     if (result.value.type !== "Plot" || result.value.value.type !== type) {
-      fail("Expected numericFn plot");
+      throw new Error("Expected numericFn plot");
     }
     cb(result.value.value as Extract<Plot, { type: T }>);
   });
@@ -96,7 +96,7 @@ describe("Plot", () => {
         fn: {|x| x * 5},
         xScale: Scale.linear({ min: 100 })
       })`,
-      "'max' and 'min' should either be simultaneously set or unset on xScale for a function plot"
+      "xScale min set without max. Must set either both or neither."
     );
 
     testEvalToMatch(
@@ -104,21 +104,16 @@ describe("Plot", () => {
         fn: {|x| x * 5},
         xScale: Scale.linear({ max: 100 })
       })`,
-      "'max' and 'min' should either be simultaneously set or unset on xScale for a function plot"
+      "xScale max set without min. Must set either both or neither."
     );
 
-    testPlotResult(
-      "scale with one of min/max inherits domain boundaries",
+    // scale with one of min/max fails even if domain is set
+    testEvalToMatch(
       `Plot.numericFn({
         fn: {|x: [3, 5]| x * 5},
         xScale: Scale.log({ min: 100 })
       })`,
-      "numericFn",
-      (plot) => {
-        expect(plot.xScale.type).toBe("log");
-        expect(plot.xScale.min).toBe(100);
-        expect(plot.xScale.max).toBe(5);
-      }
+      "xScale min set without max. Must set either both or neither."
     );
   });
 

@@ -32,7 +32,7 @@ describe("docstrings", () => {
   const runToResult = async (code: string) => {
     const outputR = await run(code);
     if (!outputR.ok) {
-      fail();
+      throw new Error();
     }
     const { result } = outputR.value;
 
@@ -42,7 +42,7 @@ describe("docstrings", () => {
   const runToBindings = async (code: string) => {
     const outputR = await run(code);
     if (!outputR.ok) {
-      fail();
+      throw new Error();
     }
     const { bindings } = outputR.value;
 
@@ -159,7 +159,7 @@ r = {
 
     const r = bindings.get("r");
     if (r?.tag !== "Record") {
-      fail();
+      throw new Error();
     }
 
     expect(r.value.context?.docstring()).toBe("global");
