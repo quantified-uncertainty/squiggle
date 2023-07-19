@@ -92,6 +92,44 @@ describe("List functions", () => {
       "9"
     );
   });
+
+  describe("reduceWhile", () => {
+    testEvalToBe(
+      "List.reduceWhile([5, 6, 7], 0, {|acc, curr| acc + curr}, {|acc| acc < 12})",
+      "11"
+    );
+
+    testEvalToBe(
+      "List.reduceWhile([5, 6, 7], 10, {|acc, curr| acc + curr}, {|acc| acc < 23})",
+      "21"
+    );
+
+    testEvalToBe(
+      "List.reduceWhile([5, 6, 7], { x: 0 }, {|acc, curr| { x: acc.x + curr }}, {|acc| acc.x < 13})",
+      "{x: 11}"
+    );
+
+    testEvalToBe(
+      "List.reduceWhile([5, 6, 7], 10, {|acc, curr| acc + curr}, {|acc| acc < 5})",
+      "10"
+    );
+
+    testEvalToBe(
+      "List.reduceWhile([5, 6, 7], 0, {|acc, curr| acc + curr}, {|acc| acc < 100})",
+      "18"
+    );
+
+    testEvalToBe(
+      "List.reduceWhile([], 5, {|acc, curr| acc + curr}, {|acc| acc < 10})",
+      "5"
+    );
+
+    testEvalToBe(
+      "List.reduceWhile([], 5, {|acc, curr| acc + curr}, {|acc| acc < 0})",
+      "5"
+    );
+  });
+
   describe("reverse", () => {
     testEvalToBe("arr=[1,2,3]; List.reverse(arr)", "[3,2,1]");
   });

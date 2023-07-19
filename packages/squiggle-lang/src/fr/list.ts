@@ -200,7 +200,7 @@ export const library = [
       // Returns the last value that fits the condition.
       // If even initial value doesn't fit the condition, it will be returned anyway;
       // So the result isn't guaranteed to fit the condition.
-      `List.reduceWhile([1,4,5], 0, {|acc, curr| acc + curr }), {|acc| acc < 5})`,
+      `List.reduceWhile([1,4,5], 0, {|acc, curr| acc + curr }, {|acc| acc < 5})`,
     ],
     definitions: [
       makeDefinition(
