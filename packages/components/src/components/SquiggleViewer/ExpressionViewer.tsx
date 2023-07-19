@@ -207,7 +207,9 @@ export const getBoxProps = (
                   value={plot}
                   environment={environment}
                   settings={settings}
-                  getBoxProps={getBoxProps}
+                  renderValue={(value, settings) =>
+                    getBoxProps(value).children(settings)
+                  }
                 />
               );
             default:

@@ -45,8 +45,10 @@ export const library = [
           return vPlot({
             type: "table",
             elements,
-            fns: columns.map(({ fn }) => fn),
-            columnNames: columns.map(({ name }) => name || ""),
+            columns: columns.map(({ fn, name }) => ({
+              fn,
+              name: name ?? undefined,
+            })),
           });
         }
       ),

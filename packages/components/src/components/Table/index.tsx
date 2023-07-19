@@ -1,4 +1,4 @@
-import { FC } from "react";
+import React, { FC, ReactNode } from "react";
 
 import { SqValue, SqTable, SqError, result } from "@quri/squiggle-lang";
 import { Env } from "@quri/squiggle-lang";
@@ -7,20 +7,21 @@ import { clsx } from "clsx";
 import { PlaygroundSettings } from "../PlaygroundSettings.js";
 import { SqValueWithContext, valueHasContext } from "../../lib/utility.js";
 
-import { VariableBoxProps } from "../SquiggleViewer/VariableBox.js";
-
 type Props = {
   value: SqTable;
   environment: Env;
   settings: PlaygroundSettings;
-  getBoxProps: (value: SqValueWithContext) => Omit<VariableBoxProps, "value">;
+  renderValue: (
+    value: SqValueWithContext,
+    settings: PlaygroundSettings
+  ) => ReactNode;
 };
 
 export const Table: FC<Props> = ({
   value,
   environment,
   settings,
-  getBoxProps,
+  renderValue,
 }) => {
   const rowsAndColumns = value.items(environment);
   const columnNames = value.columnNames;
@@ -45,12 +46,12 @@ export const Table: FC<Props> = ({
     if (item.ok) {
       const value = item.value;
       if (valueHasContext(value)) {
-        return getBoxProps(value).children(settings);
+        return renderValue(value, settings);
       } else {
         return value.toString();
       }
     } else {
-      return item.toString();
+      return item.value.toString();
     }
   };
 
@@ -58,7 +59,7 @@ export const Table: FC<Props> = ({
     <div className="relative rounded-sm overflow-hidden border border-slate-200">
       <table
         className="table-fixed w-full"
-        style={{ minWidth: `${columnLength * 100}px` }}
+        style={{ minWidth: columnLength * 100 }}
       >
         {hasColumnNames && (
           <thead className="text-xs text-gray-700 bg-gray-50 border-b border-slate-200">

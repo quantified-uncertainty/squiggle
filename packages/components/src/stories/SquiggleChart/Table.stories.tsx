@@ -2,9 +2,6 @@ import type { Meta, StoryObj } from "@storybook/react";
 
 import { SquiggleChart } from "../../components/SquiggleChart.js";
 
-/**
- * `Plot.scatter` objects in Squiggle are rendered with this chart.
- */
 const meta = {
   component: SquiggleChart,
 } satisfies Meta<typeof SquiggleChart>;

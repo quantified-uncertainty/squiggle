@@ -287,41 +287,42 @@ export class SqRelativeValuesPlot extends SqAbstractPlot<"relativeValues"> {
 export class SqTable extends SqAbstractPlot<"table"> {
   tag = "table" as const;
 
-  get elements(): SqValue[] {
-    return this._value.elements.map((r) => wrapValue(r, this.context));
-  }
+  items(env: Env): Result.result<SqValue, SqError>[][] {
+    const wrappedElements = this._value.elements.map((r) =>
+      wrapValue(r, this.context)
+    );
+    const wrappedFns = this._value.columns.map(
+      ({ fn }) => new SqLambda(fn, undefined)
+    );
 
-  get fns(): SqLambda[] {
-    return this._value.fns.map(
-      (fn) =>
-        new SqLambda(fn, this.context ? this.context.extend("fn") : undefined)
+    const getItem = (
+      rowI: number,
+      columnI: number,
+      element: SqValue,
+      fn: SqLambda
+    ): Result.result<SqValue, SqError> => {
+      const response = fn.call([element], env);
+      const context: SqValueContext | undefined =
+        this.context && this.context.extend(`item(${rowI}:${columnI})`);
+
+      if (response.ok && context) {
+        return Result.Ok(wrapValue(response.value._value, context));
+      } else if (response.ok) {
+        return Result.Err(
+          new SqOtherError("Context creation for table failed.")
+        );
+      } else {
+        return response;
+      }
+    };
+
+    return wrappedElements.map((element, rowI) =>
+      wrappedFns.map((fn, columnI) => getItem(rowI, columnI, element, fn))
     );
   }
 
-  item(row: number, column: number, env: Env): Result.result<SqValue, SqError> {
-    const response = this.fns[column].call([this.elements[row]], env);
-    const context: SqValueContext | undefined =
-      this.context && this.context.extend(`item(${row}, ${column})`);
-
-    if (response.ok && context) {
-      return Result.Ok(wrapValue(response.value._value, context));
-    } else if (response.ok) {
-      return Result.Err(new SqOtherError("Context creation for table failed."));
-    } else {
-      return response;
-    }
-  }
-
-  row(row: number, env: Env): Result.result<SqValue, SqError>[] {
-    return this._value.fns.map((fn, column) => this.item(row, column, env));
-  }
-
-  items(env: Env): Result.result<SqValue, SqError>[][] {
-    return this.elements.map((_, row) => this.row(row, env));
-  }
-
   get columnNames(): (string | undefined)[] {
-    return this._value.columnNames;
+    return this._value.columns.map(({ name }) => name);
   }
 }
 

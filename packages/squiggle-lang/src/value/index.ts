@@ -276,8 +276,7 @@ export type Plot =
   | {
       type: "table";
       elements: Value[];
-      fns: Lambda[];
-      columnNames: (string | undefined)[];
+      columns: { fn: Lambda; name: string | undefined }[];
     };
 
 class VPlot extends BaseValue implements Indexable {
