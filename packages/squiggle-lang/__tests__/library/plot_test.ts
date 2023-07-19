@@ -47,7 +47,7 @@ describe("Plot", () => {
       `Plot.numericFn({
         fn: {|x, y| x * y}
       })`,
-      "Expected a function with one parameter"
+      "Plots only work with functions that have one parameter. This function has 2 parameters."
     );
 
     testPlotResult(
@@ -129,7 +129,7 @@ describe("Plot", () => {
       `Plot.distFn({
         fn: {|x,y| x to x + y}
        })`,
-      "Expected a function with one parameter"
+      "Plots only work with functions that have one parameter. This function has 2 parameters."
     );
   });
 
