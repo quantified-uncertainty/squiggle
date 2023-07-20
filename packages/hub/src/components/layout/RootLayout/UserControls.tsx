@@ -28,7 +28,6 @@ export const UserControls: FC<{ session: Session | null }> = ({ session }) => {
     // https://github.com/vercel/next.js/issues/42556 (it's closed but not really solved)
     window.location.href = chooseUsernameRoute();
   }
-  const router = useRouter();
   const { username } = session?.user || { username: undefined };
 
   return !!username ? (

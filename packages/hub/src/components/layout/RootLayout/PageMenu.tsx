@@ -22,6 +22,7 @@ export const PageMenu: FC = () => {
         </Link>
       </div>
       <div className="flex gap-6 items-baseline">
+        {!session && <PageMenuLink href="/about" title="About" />}
         <PageMenuLink
           href="https://www.squiggle-language.com/docs/Api/Dist"
           icon={BookOpenIcon}
