@@ -35,7 +35,9 @@ const leftMargin = "ml-1.5";
 const truncateStr = (str, maxLength) =>
   str.substring(0, maxLength) + (str.length > maxLength ? "..." : "");
 
-const CHART_TO_DIST = 0.5;
+// Distributions should be smaller than charts.
+// Note that for distributions, this only applies to the internals, there's also extra margin and details.
+const CHART_TO_DIST_HEIGHT_ADJUSTMENT = 0.5;
 
 export const getBoxProps = (
   value: SqValueWithContext
@@ -55,7 +57,6 @@ export const getBoxProps = (
     case "Dist": {
       return {
         preview: <DistPreview dist={value.value} environment={environment} />,
-        // preview:
         renderSettingsMenu: ({ onChange }) => {
           const shape = value.value.pointSet(
             value.context.project.getEnvironment()
@@ -85,7 +86,7 @@ export const getBoxProps = (
             <DistributionsChart
               plot={plot}
               environment={environment}
-              height={settings.chartHeight * CHART_TO_DIST}
+              height={settings.chartHeight * CHART_TO_DIST_HEIGHT_ADJUSTMENT}
             />
           );
         },
@@ -175,7 +176,9 @@ export const getBoxProps = (
                 <DistributionsChart
                   plot={plot}
                   environment={environment}
-                  height={settings.chartHeight * CHART_TO_DIST}
+                  height={
+                    settings.chartHeight * CHART_TO_DIST_HEIGHT_ADJUSTMENT
+                  }
                 />
               );
             case "numericFn": {
