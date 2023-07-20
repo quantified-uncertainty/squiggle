@@ -3,7 +3,7 @@ import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 import remarkGfm from "remark-gfm";
 
 const markdown = `
-## PRIVACY POLICY
+# Privacy Policy
 
 **Last updated July 07, 2023**
 
@@ -392,7 +392,7 @@ This privacy policy was created using Termly's [Privacy Policy Generator](https:
 export default function TOS() {
   return (
     <NarrowPageLayout>
-      <ReactMarkdown className="prose" remarkPlugins={[remarkGfm]}>
+      <ReactMarkdown className="prose max-w-4xl" remarkPlugins={[remarkGfm]}>
         {markdown}
       </ReactMarkdown>
     </NarrowPageLayout>
