@@ -35,7 +35,7 @@ const leftMargin = "ml-1.5";
 const truncateStr = (str, maxLength) =>
   str.substring(0, maxLength) + (str.length > maxLength ? "..." : "");
 
-// Distributions should be smaller than charts.
+// Distributions should be smaller than the other charts.
 // Note that for distributions, this only applies to the internals, there's also extra margin and details.
 const CHART_TO_DIST_HEIGHT_ADJUSTMENT = 0.5;
 
