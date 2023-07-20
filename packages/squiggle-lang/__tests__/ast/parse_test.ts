@@ -463,6 +463,7 @@ describe("Peggy parse", () => {
     testParse("1m", "(Program (UnitValue 1 m))");
     testParse("1M", "(Program (UnitValue 1 M))");
     testEvalToBe("1M", "1000000");
+    testEvalToBe("3minutes", "3.00 minutes");
     testEvalError("1q");
     testParse(
       "1k+2M",
