@@ -1,15 +1,8 @@
 import { FC } from "react";
 
-import { SqDistribution, Env, result } from "@quri/squiggle-lang";
+import { SqDistribution, Env } from "@quri/squiggle-lang";
 import { NumberShower } from "../NumberShower.js";
-
-function unwrap<a, b>(x: result<a, b>): a {
-  if (x.ok) {
-    return x.value;
-  } else {
-    throw Error("FAILURE TO UNWRAP");
-  }
-}
+import { unwrapOrFailure } from "../../lib/utility.js";
 
 type SummaryTableProps = {
   dist: SqDistribution;
@@ -17,8 +10,8 @@ type SummaryTableProps = {
 };
 
 export const DistPreview: FC<SummaryTableProps> = ({ dist, environment }) => {
-  const p05 = unwrap(dist.inv(environment, 0.05));
-  const p95 = unwrap(dist.inv(environment, 0.95));
+  const p05 = unwrapOrFailure(dist.inv(environment, 0.05));
+  const p95 = unwrapOrFailure(dist.inv(environment, 0.95));
   const oneValue = p05 === p95;
   return oneValue ? (
     <NumberShower precision={2} number={p05} />

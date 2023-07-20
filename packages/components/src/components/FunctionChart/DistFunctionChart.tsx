@@ -25,19 +25,12 @@ import {
 import { Padding } from "../../lib/draw/types.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
-import { canvasClasses } from "../../lib/utility.js";
+import { canvasClasses, unwrapOrFailure } from "../../lib/utility.js";
 import { ErrorAlert } from "../Alert.js";
 import { DistributionsChart } from "../DistributionsChart/index.js";
 import { NumberShower } from "../NumberShower.js";
 import { getFunctionImage } from "./utils.js";
 
-function unwrap<a, b>(x: result<a, b>): a {
-  if (x.ok) {
-    return x.value;
-  } else {
-    throw Error("FAILURE TO UNWRAP");
-  }
-}
 type FunctionChart1DistProps = {
   plot: SqDistFnPlot;
   environment: Env;
@@ -91,13 +84,13 @@ const getPercentiles = ({
           return [
             width as Width,
             [
-              unwrap(dist.inv(environment, left)),
-              unwrap(dist.inv(environment, right)),
+              unwrapOrFailure(dist.inv(environment, left)),
+              unwrapOrFailure(dist.inv(environment, right)),
             ],
           ];
         })
       ),
-      50: unwrap(dist.inv(environment, 0.5)),
+      50: unwrapOrFailure(dist.inv(environment, 0.5)),
     } as Datum;
 
     return res;
