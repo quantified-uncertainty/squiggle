@@ -5,6 +5,7 @@ import {
   SqPlot,
   SqScale,
   SqValue,
+  result,
 } from "@quri/squiggle-lang";
 
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
@@ -26,9 +27,17 @@ import {
 import { MergedItemSettings, getChildrenValues } from "./utils.js";
 import { MessageAlert } from "../Alert.js";
 import { clsx } from "clsx";
+import { DistPreview } from "../DistributionsChart/DistPreview.js";
 
 // We use an extra left margin for some elements to align them with parent variable name
 const leftMargin = "ml-1.5";
+
+const truncateStr = (str, maxLength) =>
+  str.substring(0, maxLength) + (str.length > maxLength ? "..." : "");
+
+// Distributions should be smaller than the other charts.
+// Note that for distributions, this only applies to the internals, there's also extra margin and details.
+const CHART_TO_DIST_HEIGHT_ADJUSTMENT = 0.5;
 
 export const getBoxProps = (
   value: SqValueWithContext
@@ -38,18 +47,16 @@ export const getBoxProps = (
   switch (value.tag) {
     case "Number":
       return {
-        preview: <NumberShower precision={3} number={value.value} />,
+        preview: <NumberShower precision={4} number={value.value} />,
         children: () => (
           <div className={clsx("font-semibold text-indigo-800", leftMargin)}>
-            <NumberShower precision={3} number={value.value} />
+            <NumberShower precision={4} number={value.value} />
           </div>
         ),
       };
     case "Dist": {
-      const distType = value.value.tag;
-
       return {
-        heading: `${distType} Distribution`,
+        preview: <DistPreview dist={value.value} environment={environment} />,
         renderSettingsMenu: ({ onChange }) => {
           const shape = value.value.pointSet(
             value.context.project.getEnvironment()
@@ -79,7 +86,7 @@ export const getBoxProps = (
             <DistributionsChart
               plot={plot}
               environment={environment}
-              height={settings.chartHeight}
+              height={settings.chartHeight * CHART_TO_DIST_HEIGHT_ADJUSTMENT}
             />
           );
         },
@@ -89,8 +96,7 @@ export const getBoxProps = (
       return {
         preview: (
           <div className="overflow-ellipsis overflow-hidden">
-            {value.value.substring(0, 20) +
-              (value.value.length > 20 ? "..." : "")}
+            {truncateStr(value.value, 20)}
           </div>
         ),
         children: () => (
@@ -130,7 +136,15 @@ export const getBoxProps = (
     case "Lambda":
       return {
         heading: "",
-        preview: `fn(${value.value.parameterNames().join(", ")})`,
+        preview: (
+          <div>
+            fn(
+            <span className="opacity-60">
+              {truncateStr(value.value.parameterNames().join(", "), 15)}
+            </span>
+            )
+          </div>
+        ),
         renderSettingsMenu: ({ onChange }) => {
           return (
             <ItemSettingsMenu
@@ -162,7 +176,9 @@ export const getBoxProps = (
                 <DistributionsChart
                   plot={plot}
                   environment={environment}
-                  height={settings.chartHeight}
+                  height={
+                    settings.chartHeight * CHART_TO_DIST_HEIGHT_ADJUSTMENT
+                  }
                 />
               );
             case "numericFn": {
