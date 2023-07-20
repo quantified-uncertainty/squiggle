@@ -1,25 +1,19 @@
 import { clsx } from "clsx";
 
-export function HomepageFeatures() {
-  return <div>TODO</div>;
-}
+import { HomepageFeatures } from "../components/HomepageFeatures";
 
 export function HomepageHeader() {
-  // const { siteConfig } = useDocusaurusContext();
-  const siteConfig = {}; // FIXME
-  const styles = {}; // FIXME
   return (
-    <header className={clsx("hero hero--primary", styles.heroBanner)}>
-      <div className="container">
-        <img
-          alt={"Docusaurus with Keytar"}
-          className={styles.heroLogo}
-          src="/img/squiggle-logo.png"
-          width="70"
-        />
-        <h1 className="hero__title">{siteConfig.title}</h1>
-        <p className="hero__subtitle">Early Access</p>
-        <p className="hero__subtitle2">{siteConfig.tagline}</p>
+    <header className="p-8 bg-[#fff6ed]">
+      <div className="flex flex-col items-center">
+        <img alt="Squiggle logo" src="/img/squiggle-logo.png" width={70} />
+        <h1 className="text-[4rem] font-lato font-black text-[#e6484f]">
+          Squiggle
+        </h1>
+        <p>Beta</p>
+        <p>
+          A simple programming language for intuitive probabilistic estimation
+        </p>
       </div>
     </header>
   );

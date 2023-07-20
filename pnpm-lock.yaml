@@ -727,6 +727,12 @@ importers:
       '@quri/squiggle-components':
         specifier: workspace:*
         version: link:../components
+      '@quri/ui':
+        specifier: workspace:*
+        version: link:../ui
+      base64-js:
+        specifier: ^1.5.1
+        version: 1.5.1
       clsx:
         specifier: ^1.2.1
         version: 1.2.1
@@ -739,6 +745,9 @@ importers:
       nextra-theme-docs:
         specifier: ^2.10.0
         version: 2.10.0(next@13.4.9)(nextra@2.10.0)(react-dom@18.2.0)(react@18.2.0)
+      pako:
+        specifier: ^2.1.0
+        version: 2.1.0
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -749,9 +758,21 @@ importers:
       '@tailwindcss/forms':
         specifier: ^0.5.3
         version: 0.5.3(tailwindcss@3.3.2)
+      '@types/pako':
+        specifier: ^2.0.0
+        version: 2.0.0
+      '@types/react':
+        specifier: ^18.2.14
+        version: 18.2.14
       autoprefixer:
         specifier: ^10.4.14
         version: 10.4.14(postcss@8.4.25)
+      eslint:
+        specifier: ^8.44.0
+        version: 8.44.0
+      eslint-config-next:
+        specifier: ^13.4.7
+        version: 13.4.7(eslint@8.44.0)(typescript@5.1.6)
       postcss:
         specifier: ^8.4.24
         version: 8.4.25
@@ -11657,7 +11678,7 @@ packages:
     peerDependencies:
       eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8
     dependencies:
-      '@babel/runtime': 7.22.3
+      '@babel/runtime': 7.22.6
       aria-query: 4.2.2
       array-includes: 3.1.6
       ast-types-flow: 0.0.7
