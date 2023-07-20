@@ -67,7 +67,7 @@ export const library = [
   }),
   maker.make({
     name: "mapY",
-    examples: [`PointSet.mapY(mx(normal(5,2)), {|x| x + 1})`],
+    examples: [`PointSet.mapY(mx(Sym.normal(5,2)), {|x| x + 1})`],
     output: "Dist",
     definitions: [
       makeDefinition([frDist, frLambda], ([dist, lambda], context) => {

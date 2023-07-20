@@ -7,9 +7,9 @@ date: 02-19-2022
 
 Probability distributions have several subtle possible formats. Three important ones that we deal with in Squiggle are symbolic, sample set, and point set formats.
 
-_Symbolic_ formats are just the math equations. `normal(5,3)` is the symbolic representation of a normal distribution.
+_Symbolic_ formats are just the math equations. `Sym.normal(5,3)` is the symbolic representation of a normal distribution.
 
-When you sample distributions (usually starting with symbolic formats), you get lists of samples. Monte Carlo techniques return lists of samples. Let’s call this the “_Sample Set_” format.
+Distribution constructors that don't have `Sym.` prefix, e.g. `normal(5,3)`, are stored as lists of samples. Monte Carlo techniques also return lists of samples. Let’s call this the “_Sample Set_” format.
 
 Lastly is what I’ll refer to as the _Point Set_ format. It describes the coordinates, or the shape, of the distribution. You can save these formats in JSON, for instance, like, `{xs: [1, 2, 3, 4, …], ys: [.0001, .0003, .002, …]}`.
 
@@ -23,8 +23,8 @@ Note that the name "Symbolic" is fairly standard, but I haven't found common nam
 Mathematical representations. Require analytic solutions. These are often ideal where they can be applied, but apply to very few actual functions. Typically used sparsely, except for the starting distributions (before any computation is performed).
 
 **Examples**  
-`Normal(5,2)`  
-`pdf(normal(2,5), 1.2) + beta(5, log(2))`
+`Sym.normal(5,2)`  
+`pdf(Sym.normal(2,5), 1.2) + Sym.beta(5, log(2))`
 
 **How to Do Computation**  
 To perform calculations of symbolic systems, you need to find analytical solutions. For example, there are equations to find the pdf or cdf of most distribution shapes at any point. There are also lots of simplifications that could be done in particular situations. For example, there’s an analytical solution for combining normal distributions.

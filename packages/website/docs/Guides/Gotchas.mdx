@@ -34,8 +34,12 @@ Correlations with Sample Set distributions are a bit complicated. Monte Carlo ge
 In this example, we subtract all three types of distributions by themselves. Notice that the Sample Set distribution returns 1. The other two return the result of subtracting one normal distribution from a separate uncorrelated distribution. These results are clearly very different to each other.
 
 <SquiggleEditor
-  defaultCode={`sampleSetDist = normal(5,2) |> SampleSet.fromDist
-sampleSetDistToPointSet = sampleSetDist |> PointSet.fromDist
-symbolicDist = normal(5,2)
-[sampleSetDist-sampleSetDist, sampleSetDistToPointSet-sampleSetDistToPointSet, symbolicDist-symbolicDist]`}
+  defaultCode={`sampleSetDist = normal(5, 2)
+pointSetDist = sampleSetDist -> PointSet.fromDist
+symbolicDist = Sym.normal(5, 2)
+[
+  sampleSetDist - sampleSetDist,
+  pointSetDist - pointSetDist,
+  symbolicDist - symbolicDist,
+]`}
 />
