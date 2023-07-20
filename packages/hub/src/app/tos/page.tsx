@@ -3,7 +3,7 @@ import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 
 const markdown = `
 
-# Terms and Conditions
+# Terms of Service
 
 ## AGREEMENT TO OUR LEGAL TERMS
 
