@@ -264,7 +264,7 @@ identifier 'identifier'
   = ([_a-z]+[_a-z0-9]i*) { return h.nodeIdentifier(text(), location()); }
 
 unitIdentifier 'identifier'
-  = 'n' / 'm' / 'k' / 'M' / 'B' / 'G' / 'T' / 'P' / 'minutes' / 'hours' / 'days' / 'years'
+  = 'minutes' / 'hours' / 'days' / 'years' / 'n' / 'm' / 'k' / 'M' / 'B' / 'G' / 'T' / 'P'
 
 dollarIdentifier 'identifier'
   = ([\$_a-z]+[\$_a-z0-9]i*) { return h.nodeIdentifier(text(), location()); }

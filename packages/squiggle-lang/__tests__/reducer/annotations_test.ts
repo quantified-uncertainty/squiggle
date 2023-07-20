@@ -36,7 +36,7 @@ describe("annotations", () => {
         "g() = { f(x: [3,5,6]) = x; f }; h() = g(); h()"
       );
       if (result.ok) {
-        fail("expected error");
+        throw new Error("expected error");
       }
       expect(result.value.toStringWithDetails())
         .toEqual(`Error: Expected two-value array
@@ -51,7 +51,7 @@ Stack trace:
         "f(x: [3,5]) = x; g() = f(6); g()"
       );
       if (result.ok) {
-        fail("expected error");
+        throw new Error("expected error");
       }
       expect(result.value.toStringWithDetails())
         .toEqual(`Domain Error: Parameter 6 must be in domain Number.rangeDomain({ min: 3, max: 5 })

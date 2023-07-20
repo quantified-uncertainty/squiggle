@@ -42,7 +42,7 @@ describe("parseImports", () => {
     if (importIds.ok) {
       expect(importIds.value).toEqual(["./common"]);
     } else {
-      fail(importIds.value.toString());
+      throw new Error(importIds.value.toString());
     }
     /**
      * If the imports cannot be parsed then you get a syntax error.

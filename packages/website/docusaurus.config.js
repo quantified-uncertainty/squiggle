@@ -108,11 +108,15 @@ const config = {
             position: "left",
             label: "API",
           },
-          { to: "/blog", label: "Blog", position: "left" },
           { to: "/playground", label: "Playground", position: "left" },
           {
             href: "https://github.com/quantified-uncertainty/squiggle/discussions",
             label: "Issues & Discussion",
+            position: "right",
+          },
+          {
+            href: "https://quri.substack.com/t/squiggle",
+            label: "Newsletter",
             position: "right",
           },
           {

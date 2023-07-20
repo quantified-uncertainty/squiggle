@@ -42,6 +42,8 @@ class NumberShowerBuilder {
   evaluate(number: number) {
     if (number === 0) {
       return { value: this.metricSystem(0, 0) };
+    } else if (number === Infinity) {
+      return { value: "Infinity" };
     }
 
     const order = orderOfMagnitude(number);

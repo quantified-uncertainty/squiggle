@@ -52,6 +52,14 @@ export function getErrors(result: SquiggleOutput["output"]) {
   }
 }
 
+export function unwrapOrFailure<a, b>(x: result<a, b>): a {
+  if (x.ok) {
+    return x.value;
+  } else {
+    throw Error("FAILURE TO UNWRAP");
+  }
+}
+
 export function isMac() {
   // Browser-only. Defaults to `false` when `window` is not available.
 
