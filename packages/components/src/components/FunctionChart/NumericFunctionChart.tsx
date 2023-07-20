@@ -44,10 +44,20 @@ export const NumericFunctionChart: FC<Props> = ({
       context.clearRect(0, 0, width, height);
 
       const xScale = sqScaleToD3(plot.xScale);
-      xScale.domain(d3.extent(functionImage, (d) => d.x) as [number, number]);
+      xScale.domain(
+        d3.extent(
+          functionImage.filter((d) => isFinite(d.x)),
+          (d) => d.x
+        ) as [number, number]
+      );
 
       const yScale = sqScaleToD3(plot.yScale);
-      yScale.domain(d3.extent(functionImage, (d) => d.y) as [number, number]);
+      yScale.domain(
+        d3.extent(
+          functionImage.filter((d) => isFinite(d.y)),
+          (d) => d.y
+        ) as [number, number]
+      );
 
       const { frame, padding } = drawAxes({
         context,
