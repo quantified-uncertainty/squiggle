@@ -77,7 +77,12 @@ defunStatement
 
   assignmentOp "assignment" = '='
 
-functionParameters = dollarIdentifier|.., commaSeparator|
+functionParameters = functionParameter|.., commaSeparator|
+  functionParameter
+    = id:dollarIdentifier annotation:(_ ':' _nl @expression)?
+    {
+      return annotation ? h.nodeIdentifierWithAnnotation(id.value, annotation, location()) : id;
+    }
 
 /*
 Rules for expressions start here.
@@ -259,7 +264,7 @@ identifier 'identifier'
   = ([_a-z]+[_a-z0-9]i*) { return h.nodeIdentifier(text(), location()); }
 
 unitIdentifier 'identifier'
-  = 'n' / 'm' / 'k' / 'M' / 'B' / 'G' / 'T' / 'P' / 'minutes' / 'hours' / 'days' / 'years'
+  = 'minutes' / 'hours' / 'days' / 'years' / 'n' / 'm' / 'k' / 'M' / 'B' / 'G' / 'T' / 'P'
 
 dollarIdentifier 'identifier'
   = ([\$_a-z]+[\$_a-z0-9]i*) { return h.nodeIdentifier(text(), location()); }
@@ -320,10 +325,10 @@ boolean 'boolean'
 // Contructors - delimited blocks such as {} and []
 
 valueConstructor
-  = recordConstructor
-  / arrayConstructor
+  = arrayConstructor
   / lambda
   / quotedInnerBlock
+  / recordConstructor
 
 lambda
   = '{' _nl '|' _nl args:functionParameters _nl '|' _nl statements:statementsList  finalExpression: (statementSeparator @expression)  _nl '}'
@@ -348,7 +353,11 @@ recordConstructor 'record'
   / '{' _nl args:array_recordEntries _nl '}'
     { return h.nodeRecord(args, location()); }
 
-  array_recordEntries = @keyValuePair|1.., commaSeparator| commaSeparator?
+  array_recordEntries = @(keyValuePair / keyValueInherit)| 1.., commaSeparator|commaSeparator?
+
+  keyValueInherit
+    = key:identifier
+    { return h.nodeKeyValue(key, key, location()); }
 
   keyValuePair
     = key:expression _ ':' _nl value:expression

@@ -1,5 +1,6 @@
 import { DistError, distErrorToString } from "../dist/DistError.js";
 import { OperationError } from "../operationError.js";
+import { VDomain, Value } from "../value/index.js";
 
 // Common error types.
 
@@ -114,6 +115,16 @@ export class RETodo extends ErrorMessage {
   }
 }
 
+export class REDomainError extends ErrorMessage {
+  constructor(public value: Value, public domain: VDomain) {
+    super();
+  }
+
+  toString() {
+    return `Domain Error: Parameter ${this.value} must be in domain ${this.domain}`;
+  }
+}
+
 // Wrapped JavaScript exception. See IError class for details.
 export class REJavaScriptExn extends ErrorMessage {
   constructor(public msg: string, public override name: string) {
@@ -129,10 +140,10 @@ export class REJavaScriptExn extends ErrorMessage {
 
 export class REOther extends ErrorMessage {
   constructor(public msg: string) {
-    super();
+    super(msg);
   }
 
   toString() {
-    return `Error: ${this.msg}`;
+    return `Error: ${this.message}`;
   }
 }

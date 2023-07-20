@@ -13,7 +13,7 @@ import {
 import { Lambda } from "../reducer/lambda.js";
 import * as DateTime from "../utility/DateTime.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
-import { SqValue } from "../public/SqValue/index.js";
+import { Domain } from "./domain.js";
 
 export type ValueMap = ImmutableMap<string, Value>;
 
@@ -123,7 +123,7 @@ class VDeclaration extends BaseValue implements Indexable {
       return vLambda(this.value.fn);
     }
 
-    throw new REOther("Trying to access key on wrong value");
+    throw new REOther("Trying to access non-existent field");
   }
 }
 export const vLambdaDeclaration = (v: LambdaDeclaration) => new VDeclaration(v);
@@ -140,7 +140,7 @@ class VDist extends BaseValue {
 }
 export const vDist = (v: BaseDist) => new VDist(v);
 
-class VLambda extends BaseValue {
+class VLambda extends BaseValue implements Indexable {
   readonly type = "Lambda";
 
   constructor(public value: Lambda) {
@@ -148,6 +148,23 @@ class VLambda extends BaseValue {
   }
   toString() {
     return this.value.toString();
+  }
+
+  get(key: Value) {
+    if (key.type === "String" && key.value === "parameters") {
+      const parameters = this.value.getParameters();
+      return vArray(
+        parameters.map((parameter) => {
+          const fields: [string, Value][] = [["name", vString(parameter.name)]];
+          if (parameter.domain) {
+            fields.push(["domain", parameter.domain]);
+          }
+
+          return vRecord(ImmutableMap(fields));
+        })
+      );
+    }
+    throw new REOther("No such field");
   }
 }
 export const vLambda = (v: Lambda) => new VLambda(v);
@@ -220,18 +237,6 @@ class VTimeDuration extends BaseValue {
   }
 }
 export const vTimeDuration = (v: number) => new VTimeDuration(v);
-
-class VVoid extends BaseValue {
-  readonly type = "Void";
-
-  constructor() {
-    super();
-  }
-  toString() {
-    return "()";
-  }
-}
-export const vVoid = () => new VVoid();
 
 export type LabeledDistribution = {
   name?: string;
@@ -316,7 +321,7 @@ class VPlot extends BaseValue implements Indexable {
       return vLambda(this.value.fn);
     }
 
-    throw new REOther("Trying to access key on wrong value");
+    throw new REOther("Trying to access non-existent field");
   }
 }
 
@@ -368,6 +373,45 @@ class VScale extends BaseValue {
 
 export const vScale = (scale: Scale) => new VScale(scale);
 
+export class VDomain extends BaseValue implements Indexable {
+  readonly type = "Domain";
+
+  constructor(public value: Domain) {
+    super();
+  }
+
+  toString(): string {
+    return this.value.toString();
+  }
+
+  get(key: Value) {
+    if (key.type === "String" && this.value.type === "NumericRange") {
+      if (key.value === "min") {
+        return vNumber(this.value.min);
+      }
+      if (key.value === "max") {
+        return vNumber(this.value.max);
+      }
+    }
+
+    throw new REOther("Trying to access non-existent field");
+  }
+}
+
+export const vDomain = (domain: Domain) => new VDomain(domain);
+
+class VVoid extends BaseValue {
+  readonly type = "Void";
+
+  constructor() {
+    super();
+  }
+  toString() {
+    return "()";
+  }
+}
+export const vVoid = () => new VVoid();
+
 export type Value =
   | VArray
   | VBool
@@ -381,4 +425,5 @@ export type Value =
   | VTimeDuration
   | VPlot
   | VScale
+  | VDomain
   | VVoid;

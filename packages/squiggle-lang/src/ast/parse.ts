@@ -1,7 +1,7 @@
 import { LocationRange } from "peggy";
 import * as Result from "../utility/result.js";
 import { result } from "../utility/result.js";
-import { ASTCommentNode, type ASTNode } from "./peggyHelpers.js";
+import { type ASTCommentNode, type ASTNode } from "./peggyHelpers.js";
 
 export { type ASTNode } from "./peggyHelpers.js";
 
@@ -86,6 +86,8 @@ function nodeToString(node: ASTNode): string {
       }${node.exponent === null ? "" : `e${node.exponent}`}`;
     case "Identifier":
       return `:${node.value}`;
+    case "IdentifierWithAnnotation":
+      return sExpr([node.variable, node.annotation]);
     case "KeyValue":
       return sExpr([node.key, node.value]);
     case "Lambda":

@@ -21,6 +21,7 @@ import {
 import { library as samplesetLibrary } from "../../fr/sampleset.js";
 import { library as scaleLibrary } from "../../fr/scale.js";
 import { library as scoringLibrary } from "../../fr/scoring.js";
+import { library as symLibrary } from "../../fr/sym.js";
 import { library as unitsLibrary } from "../../fr/units.js";
 
 import { mxLambda } from "../../fr/mixture.js";
@@ -29,23 +30,24 @@ import { ImmutableMap } from "../../utility/immutableMap.js";
 
 const fnList: FRFunction[] = [
   ...builtinLibrary,
+  ...dangerLibrary,
+  ...dateLibrary,
   ...dictLibrary,
   ...distLibrary,
-  ...dangerLibrary,
   ...fnLibrary,
-  ...samplesetLibrary,
-  ...numberLibrary,
-  ...pointsetLibrary,
-  ...scoringLibrary,
   ...genericDistLibrary,
-  ...unitsLibrary,
   ...tableLibrary,
-  ...dateLibrary,
-  ...mathLibrary,
   ...listLibrary,
+  ...mathLibrary,
+  ...numberLibrary,
   ...plotLibrary,
-  ...scaleLibrary,
+  ...pointsetLibrary,
   ...relativeValuesLibrary,
+  ...samplesetLibrary,
+  ...scaleLibrary,
+  ...scoringLibrary,
+  ...symLibrary,
+  ...unitsLibrary,
 ];
 
 export const registry = Registry.make(fnList);

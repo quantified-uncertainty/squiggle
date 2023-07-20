@@ -30,11 +30,11 @@ describe("Peggy parse", () => {
             result.value.statements.length === 1
           )
         ) {
-          fail();
+          throw new Error();
         }
         const value = result.value.statements[0];
         if (value.type !== "Float") {
-          fail();
+          throw new Error();
         }
         expect(value).toMatchObject(expected);
       }
@@ -45,6 +45,7 @@ describe("Peggy parse", () => {
   });
 
   describe("literals operators parenthesis", () => {
+    testParse("{a}", "(Program (Block :a))");
     testParse("1", "(Program 1)");
     testParse("'hello'", "(Program 'hello')");
     testParse("true", "(Program true)");
@@ -147,6 +148,11 @@ describe("Peggy parse", () => {
       "(Program (DefunStatement :identity (Lambda :x (Block :x))))"
     ); // Function definitions become lambda assignments
     testParse("identity(x)", "(Program (Call :identity :x))");
+
+    testParse(
+      "annotated(x: [3,5]) = x",
+      "(Program (DefunStatement :annotated (Lambda (IdentifierWithAnnotation x (Array 3 5)) (Block :x))))"
+    );
   });
 
   describe("arrays", () => {
@@ -161,6 +167,19 @@ describe("Peggy parse", () => {
       "{a: 1, b: 2}",
       "(Program (Record (KeyValue 'a' 1) (KeyValue 'b' 2)))"
     );
+    testParse(
+      "{a, b, }",
+      "(Program (Record (KeyValue 'a' :a) (KeyValue 'b' :b)))"
+    );
+    testParse(
+      "{a, b}",
+      "(Program (Record (KeyValue 'a' :a) (KeyValue 'b' :b)))"
+    );
+    testParse(
+      "{a, b: 2}",
+      "(Program (Record (KeyValue 'a' :a) (KeyValue 'b' 2)))"
+    );
+    testParse("{a,}", "(Program (Record (KeyValue 'a' :a)))");
     testParse(
       "{1+0: 1, 2+0: 2}",
       "(Program (Record (KeyValue (InfixCall + 1 0) 1) (KeyValue (InfixCall + 2 0) 2)))"
@@ -307,6 +326,40 @@ describe("Peggy parse", () => {
     );
   });
 
+  describe("operators", () => {
+    describe("power", () => {
+      testParse("2 ^ 3", "(Program (InfixCall ^ 2 3))");
+    });
+    describe("pointwise arithmetic expressions", () => {
+      testParse(
+        "normal(5,2) .+ normal(5,1)",
+        "(Program (InfixCall .+ (Call :normal 5 2) (Call :normal 5 1)))"
+      );
+      testParse(
+        "normal(5,2) .- normal(5,1)",
+        "(Program (InfixCall .- (Call :normal 5 2) (Call :normal 5 1)))"
+      );
+      testParse(
+        "normal(5,2) .* normal(5,1)",
+        "(Program (InfixCall .* (Call :normal 5 2) (Call :normal 5 1)))"
+      );
+      testParse(
+        "normal(5,2) ./ normal(5,1)",
+        "(Program (InfixCall ./ (Call :normal 5 2) (Call :normal 5 1)))"
+      );
+      testParse(
+        "normal(5,2) .^ normal(5,1)",
+        "(Program (InfixCall .^ (Call :normal 5 2) (Call :normal 5 1)))"
+      );
+    });
+    describe("equality", () => {
+      testParse(
+        "5 == normal(5,2)",
+        "(Program (InfixCall == 5 (Call :normal 5 2)))"
+      );
+    });
+  });
+
   describe("pipe", () => {
     testParse("1 -> add(2)", "(Program (Pipe 1 :add 2))");
     testParse("-1 -> add(2)", "(Program (Pipe (UnaryCall - 1) :add 2))");
@@ -410,6 +463,7 @@ describe("Peggy parse", () => {
     testParse("1m", "(Program (UnitValue 1 m))");
     testParse("1M", "(Program (UnitValue 1 M))");
     testEvalToBe("1M", "1000000");
+    testEvalToBe("3minutes", "3.00 minutes");
     testEvalError("1q");
     testParse(
       "1k+2M",

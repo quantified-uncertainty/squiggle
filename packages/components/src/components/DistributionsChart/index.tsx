@@ -338,6 +338,19 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
     distributions.length > 1 ||
     !!(distributions.length === 1 && distributions[0].name);
 
+  // Collect samples to render them in a sample bar.
+  const samples: number[] = useMemo(() => {
+    const samplesToConcat: (readonly number[])[] = [];
+    for (const { distribution } of distributions) {
+      if (distribution.tag === SqDistributionTag.SampleSet) {
+        // It's important not to use the ...spread operator on samples, so that it works with >1M samples.
+        // (JS would fail with "Too many arguments" otherwise).
+        samplesToConcat.push(distribution.getSamples());
+      }
+    }
+    return ([] as number[]).concat(...samplesToConcat);
+  }, [distributions]);
+
   const shapes = flattenResult(
     distributions.map((x) =>
       resultMap(x.distribution.pointSet(environment), (pointSet) => ({
@@ -353,16 +366,6 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
         {shapes.value.toString()}
       </ErrorAlert>
     );
-  }
-
-  // if this is a sample set, include the samples
-  // It's important not to use the ...spread operator, so that it works with >1M samples.
-  const samples: number[] = [];
-  for (const { distribution } of distributions) {
-    if (distribution.tag === SqDistributionTag.SampleSet) {
-      const distSamples = distribution.getSamples();
-      samples.concat(distSamples);
-    }
   }
 
   const normalizedStatus = distributions.map(({ name, distribution }) => ({

@@ -1,6 +1,11 @@
 import { ASTNode, parse } from "../ast/parse.js";
 import { defaultEnv } from "../dist/env.js";
 import {
+  ICompileError,
+  IRuntimeError,
+  rethrowWithFrameStack,
+} from "../errors/IError.js";
+import {
   ErrorMessage,
   REExpectedType,
   RENotAFunction,
@@ -12,10 +17,18 @@ import { getStdLib } from "../library/index.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import * as Result from "../utility/result.js";
 import { Ok, result } from "../utility/result.js";
-import { Value, vArray, vLambda, vRecord, vVoid } from "../value/index.js";
-import { ICompileError, IRuntimeError } from "../errors/IError.js";
+import { annotationToDomain } from "../value/domain.js";
+import {
+  VDomain,
+  Value,
+  vArray,
+  vDomain,
+  vLambda,
+  vRecord,
+  vVoid,
+} from "../value/index.js";
 import * as Context from "./context.js";
-import { SquiggleLambda } from "./lambda.js";
+import { LambdaParameter, SquiggleLambda } from "./lambda.js";
 
 export type ReducerFn = (
   expression: Expression,
@@ -203,10 +216,40 @@ const evaluateLambda: SubReducerFn<"Lambda"> = (
   context,
   ast
 ) => {
+  const parameters: LambdaParameter[] = [];
+  for (const parameterExpression of expressionValue.parameters) {
+    let domain: VDomain | undefined;
+    // Processing annotations, e.g. f(x: [3, 5]) = { ... }
+    if (parameterExpression.annotation) {
+      // First, we evaluate `[3, 5]` expression.
+      const [annotationValue] = context.evaluate(
+        parameterExpression.annotation,
+        context
+      );
+      // Now we cast it to domain value, e.g. `NumericRangeDomain(3, 5)`.
+      // Casting can fail, in which case we throw the error with a correct stacktrace.
+      try {
+        domain = vDomain(annotationToDomain(annotationValue));
+      } catch (e) {
+        // see also: `Lambda.callFrom`
+        rethrowWithFrameStack(
+          e,
+          context.frameStack.extend(
+            Context.currentFunctionName(context),
+            parameterExpression.annotation.ast.location
+          )
+        );
+      }
+    }
+    parameters.push({
+      name: parameterExpression.name,
+      domain,
+    });
+  }
   const value = vLambda(
     new SquiggleLambda(
       expressionValue.name,
-      expressionValue.parameters,
+      parameters,
       context.stack,
       expressionValue.body,
       ast.location

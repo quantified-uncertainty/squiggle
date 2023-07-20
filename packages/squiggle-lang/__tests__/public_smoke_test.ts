@@ -2,8 +2,8 @@ import { run, SqProject } from "../src/index.js";
 import { testRun } from "./helpers/helpers.js";
 
 describe("Simple calculations and results", () => {
-  test("mean(normal(5,2))", async () => {
-    const result = await testRun("mean(normal(5,2))"); // FIXME
+  test("mean(Sym.normal(5,2))", async () => {
+    const result = await testRun("mean(Sym.normal(5,2))"); // FIXME
     expect(result.toString()).toEqual("5");
   });
   test("10+10", async () => {
@@ -27,6 +27,9 @@ describe("Array", () => {
 describe("Record", () => {
   test("Return record", async () => {
     expect((await testRun("{a:1}")).toString()).toEqual("{a: 1}");
+  });
+  test("Inherit syntax for records", async () => {
+    expect((await testRun("a=1; {a, }")).toString()).toEqual("{a: 1}");
   });
 });
 

@@ -56,6 +56,7 @@ const SquiggleViewerOuter = forwardRef<
       <span onClick={unfocus} className={navLinkStyle}>
         {focused.root === "bindings" ? "Variables" : focused.root}
       </span>
+
       {focused
         .itemsAsValuePaths()
         .slice(0, -1)
@@ -67,6 +68,7 @@ const SquiggleViewerOuter = forwardRef<
             </div>
           </div>
         ))}
+      <ChevronRightIcon className="text-slate-300" size={24} />
     </div>
   );
 
