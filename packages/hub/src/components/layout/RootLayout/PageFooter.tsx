@@ -26,7 +26,10 @@ export const PageFooter: FC = () => (
           </a>
         </div>
       </div>
-      <div className="flex flex-col space-y-2 text-sm">
+      <div className="flex flex-col space-y-2">
+        <Link href="/about" className="items-center flex hover:text-gray-900">
+          About
+        </Link>
         <Link href="/privacy" className="items-center flex hover:text-gray-900">
           Privacy Policy
         </Link>
@@ -40,7 +43,7 @@ export const PageFooter: FC = () => (
           Donate
         </a>
       </div>
-      <div className="flex flex-col space-y-2 text-sm">
+      <div className="flex flex-col space-y-2">
         <a
           href="https://github.com/quantified-uncertainty/squiggle"
           className="items-center flex hover:text-gray-900"
