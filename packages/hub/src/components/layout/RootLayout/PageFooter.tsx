@@ -5,6 +5,15 @@ import { SiGraphql } from "react-icons/si";
 import Image from "next/image";
 import logoPic from "@/public/logo.png";
 import Link from "next/link";
+import {
+  DISCORD_URL,
+  GITHUB_URL,
+  NEWSLETTER_URL,
+  QURI_DONATE_URL,
+} from "@/lib/common";
+import { aboutRoute, privacyPolicyRoute, termsOfServiceRoute } from "@/routes";
+
+const linkClasses = "items-center flex hover:text-gray-900";
 
 export const PageFooter: FC = () => (
   <div className="px-8 py-4 border-t border-t-slate-200 bg-slate-100">
@@ -28,49 +37,34 @@ export const PageFooter: FC = () => (
         </div>
       </div>
       <div className="flex flex-col space-y-2">
-        <Link href="/about" className="items-center flex hover:text-gray-900">
+        <Link href={aboutRoute()} className={linkClasses}>
           About
         </Link>
-        <Link href="/privacy" className="items-center flex hover:text-gray-900">
+        <Link href={privacyPolicyRoute()} className={linkClasses}>
           Privacy Policy
         </Link>
-        <Link href="/tos" className="items-center flex hover:text-gray-900">
+        <Link href={termsOfServiceRoute()} className={linkClasses}>
           Terms
         </Link>
-        <a
-          href="https://quantifieduncertainty.org/donate"
-          className="items-center flex hover:text-gray-900"
-        >
+        <a href={QURI_DONATE_URL} className={linkClasses}>
           Donate
         </a>
       </div>
       <div className="flex flex-col space-y-2">
-        <a
-          href="https://github.com/quantified-uncertainty/squiggle"
-          className="items-center flex hover:text-gray-900"
-        >
-          <FaGithub size="1.2em" className="mr-2" />
+        <a href={GITHUB_URL} className={linkClasses}>
+          <FaGithub size="1em" className="mr-2" />
           Github
         </a>
-        <a
-          href="https://discord.gg/nsTnQTgtG6"
-          className="items-center flex hover:text-gray-900"
-        >
-          <FaDiscord size="1.2em" className="mr-2" />
+        <a href={DISCORD_URL} className={linkClasses}>
+          <FaDiscord size="1em" className="mr-2" />
           Discord
         </a>
-        <a
-          href="https://quri.substack.com/t/squiggle"
-          className="items-center flex hover:text-gray-900"
-        >
-          <FaRss size="1.2em" className="mr-2" />
+        <a href={NEWSLETTER_URL} className={linkClasses}>
+          <FaRss size="1em" className="mr-2" />
           Newsletter
         </a>
-        <a
-          href="https://squigglehub.org/api/graphql"
-          className="items-center flex hover:text-gray-900"
-        >
-          <SiGraphql size="1.2em" className="mr-2" />
+        <a href={GITHUB_URL} className={linkClasses}>
+          <SiGraphql size="1em" className="mr-2" />
           API
         </a>
       </div>

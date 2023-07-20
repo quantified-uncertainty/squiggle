@@ -1,6 +1,14 @@
 import ReactMarkdown from "react-markdown";
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 import remarkGfm from "remark-gfm";
+import {
+  GITHUB_URL,
+  GITHUB_DISCUSSION_URL,
+  DISCORD_URL,
+  GRAPHQL_URL,
+  NEWSLETTER_URL,
+  QURI_DONATE_URL,
+} from "@/lib/common";
 
 const markdown = `
 # About
@@ -18,17 +26,17 @@ Squiggle Hub is made by the [Quantified Uncertainty Research Institute](https://
 
 ## Key Links
 - [Squiggle](https://www.squiggle-language.com/)
-- [Squiggle API](https://squigglehub.org/api/graphql)
-- [Squiggle Discord](https://discord.gg/nsTnQTgtG)
-- [Squiggle Github](https://github.com/quantified-uncertainty/squiggle)
-- [Squiggle Github Discussion, for Ideas and Issues](https://github.com/quantified-uncertainty/squiggle/discussions)
-- [Squiggle Newsletter (Part of the QURI Newsletter)](https://quri.substack.com/t/squiggle)
+- [Squiggle API](${GRAPHQL_URL})
+- [Squiggle Discord](${DISCORD_URL})
+- [Squiggle Github](${GITHUB_URL})
+- [Squiggle Github Discussion, for Ideas and Issues](${GITHUB_DISCUSSION_URL})
+- [Squiggle Newsletter (Part of the QURI Newsletter)](${NEWSLETTER_URL}})
 
 ## Code License
 Squiggle Hub is free to use. All of the code for both Squiggle Hub and Squiggle is open source, MIT-licensed, and available on [Github](https://github.com/quantified-uncertainty/squiggle).
 
 ## API
-Squiggle Hub is made using a GraphQL API. You can access it [here](https://squigglehub.org/api/graphql). The API will likely change in the future. This is useful for querying, but if you would like to use it for mutations, please contact us in the Discord. 
+Squiggle Hub is made using a GraphQL API. You can access it [here](${GRAPHQL_URL}). The API will likely change in the future. This is useful for querying, but if you would like to use it for mutations, please contact us in the Discord. 
 
 Squiggle code itself is implemented in Javascript and accessible with on [NPM](https://www.npmjs.com/package/squiggle-lang). It features several [integrations](https://www.squiggle-language.com/docs/Integrations), including with VSCode and Observable.
 
@@ -46,10 +54,10 @@ Squiggle Hub is still an early platform. Some ideas we have for the future inclu
 - Integration with Google Sheets, Guesstimate, LLMs, Github, and more
 - Model functions can be called directly from the API
 
-If you have thoughts on these or other features, please let us know in the [Discord](https://discord.gg/nsTnQTgtG) or [Github Discussion](https://github.com/quantified-uncertainty/squiggle/discussion)!
+If you have thoughts on these or other features, please let us know in the [Discord](${DISCORD_URL}) or [Github Discussion](${GITHUB_DISCUSSION_URL})!
 
 ## Donations
-If you'd like to support the development of Squiggle and Squiggle Hub, you can donate to QURI [here](https://quantifieduncertainty.org/donate). We rely on donors like you to keep our projects running.
+If you'd like to support the development of Squiggle and Squiggle Hub, you can donate to QURI [here](${QURI_DONATE_URL}). We rely on donors like you to keep our projects running.
 
 `;
 

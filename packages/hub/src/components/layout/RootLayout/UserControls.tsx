@@ -1,7 +1,8 @@
 import { Session } from "next-auth";
 import { signIn, signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { FC } from "react";
+import Link from "next/link";
+import { IconProps } from "@/relative-values/components/ui/icons/Icon";
 
 import {
   Button,
@@ -9,6 +10,7 @@ import {
   DropdownMenu,
   DropdownMenuActionItem,
   DropdownMenuHeader,
+  ActionItemInternal,
   DropdownMenuSeparator,
   SignOutIcon,
   UserCircleIcon,
@@ -17,6 +19,29 @@ import {
 import { chooseUsernameRoute, userRoute } from "@/routes";
 import { DropdownWithArrow } from "./DropdownWithArrow";
 import { DropdownMenuLinkItem } from "@/components/ui/DropdownMenuLinkItem";
+import {
+  DISCORD_URL,
+  GITHUB_DISCUSSION_URL,
+  NEWSLETTER_URL,
+} from "@/lib/common";
+
+export const MenuLink: FC<{
+  title: string;
+  icon?: FC<IconProps>;
+  href: string;
+  external?: boolean;
+  close: () => void;
+}> = ({ title, icon, href, external, close }) => {
+  return (
+    <Link
+      href={href}
+      target={external ? "_blank" : undefined}
+      onClick={() => close()}
+    >
+      <ActionItemInternal icon={icon} title={title} />
+    </Link>
+  );
+};
 
 export const UserControls: FC<{ session: Session | null }> = ({ session }) => {
   if (
@@ -35,6 +60,8 @@ export const UserControls: FC<{ session: Session | null }> = ({ session }) => {
       <Dropdown
         render={({ close }: { close: () => void }) => (
           <DropdownMenu>
+            <DropdownMenuHeader>User Actions</DropdownMenuHeader>
+            <DropdownMenuSeparator />
             <DropdownMenuLinkItem
               href={userRoute({ username: username! })}
               icon={UserCircleIcon}
@@ -50,25 +77,25 @@ export const UserControls: FC<{ session: Session | null }> = ({ session }) => {
               title="Sign Out"
             />
             <DropdownMenuSeparator />
-            <DropdownMenuLinkItem
-              href={"/discord"}
-              icon={UserCircleIcon}
+            <DropdownMenuHeader>Resources</DropdownMenuHeader>
+            <DropdownMenuSeparator />
+            <MenuLink
+              href={DISCORD_URL}
               title="Discord"
               close={close}
+              external
             />
-            <DropdownMenuLinkItem
-              href={"https://github.com/quantified-uncertainty/squiggle"}
-              icon={UserCircleIcon}
-              title="Github"
+            <MenuLink
+              href={GITHUB_DISCUSSION_URL}
+              title="Discussion"
               close={close}
+              external
             />
-            <DropdownMenuLinkItem
-              href={
-                "https://github.com/quantified-uncertainty/squiggle/discussions"
-              }
-              icon={UserCircleIcon}
-              title="Issues"
+            <MenuLink
+              href={NEWSLETTER_URL}
+              title="Newsletter"
               close={close}
+              external
             />
           </DropdownMenu>
         )}
