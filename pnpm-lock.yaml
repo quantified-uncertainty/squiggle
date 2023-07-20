@@ -745,6 +745,10 @@ importers:
       react-dom:
         specifier: ^18.2.0
         version: 18.2.0(react@18.2.0)
+    devDependencies:
+      prettier:
+        specifier: ^3.0.0
+        version: 3.0.0
 
 packages:
 

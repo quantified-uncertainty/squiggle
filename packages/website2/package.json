@@ -4,7 +4,9 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "dev": "next dev"
+    "dev": "next dev",
+    "build": "next build",
+    "lint": "prettier --check . && next lint"
   },
   "dependencies": {
     "@quri/squiggle-components": "workspace:*",
@@ -14,5 +16,8 @@
     "nextra-theme-docs": "^2.10.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "prettier": "^3.0.0"
   }
 }
