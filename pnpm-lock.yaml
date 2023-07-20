@@ -749,6 +749,9 @@ importers:
       prettier:
         specifier: ^3.0.0
         version: 3.0.0
+      typescript:
+        specifier: ^5.1.6
+        version: 5.1.6
 
 packages:
 
