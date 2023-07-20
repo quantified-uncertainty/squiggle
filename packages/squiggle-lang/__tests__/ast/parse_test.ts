@@ -326,6 +326,40 @@ describe("Peggy parse", () => {
     );
   });
 
+  describe("operators", () => {
+    describe("power", () => {
+      testParse("2 ^ 3", "(Program (InfixCall ^ 2 3))");
+    });
+    describe("pointwise arithmetic expressions", () => {
+      testParse(
+        "normal(5,2) .+ normal(5,1)",
+        "(Program (InfixCall .+ (Call :normal 5 2) (Call :normal 5 1)))"
+      );
+      testParse(
+        "normal(5,2) .- normal(5,1)",
+        "(Program (InfixCall .- (Call :normal 5 2) (Call :normal 5 1)))"
+      );
+      testParse(
+        "normal(5,2) .* normal(5,1)",
+        "(Program (InfixCall .* (Call :normal 5 2) (Call :normal 5 1)))"
+      );
+      testParse(
+        "normal(5,2) ./ normal(5,1)",
+        "(Program (InfixCall ./ (Call :normal 5 2) (Call :normal 5 1)))"
+      );
+      testParse(
+        "normal(5,2) .^ normal(5,1)",
+        "(Program (InfixCall .^ (Call :normal 5 2) (Call :normal 5 1)))"
+      );
+    });
+    describe("equality", () => {
+      testParse(
+        "5 == normal(5,2)",
+        "(Program (InfixCall == 5 (Call :normal 5 2)))"
+      );
+    });
+  });
+
   describe("pipe", () => {
     testParse("1 -> add(2)", "(Program (Pipe 1 :add 2))");
     testParse("-1 -> add(2)", "(Program (Pipe (UnaryCall - 1) :add 2))");

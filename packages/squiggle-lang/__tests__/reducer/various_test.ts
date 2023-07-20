@@ -140,11 +140,11 @@ describe("stacktraces", () => {
   add(number, number)
   add(string, string)
   add(string, any)
+  add(date, duration)
+  add(duration, duration)
   add(distribution, number)
   add(number, distribution)
   add(distribution, distribution)
-  add(date, duration)
-  add(duration, duration)
 
 Stack trace:
   f at line 4, column 5, file main
