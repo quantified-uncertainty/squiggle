@@ -96,7 +96,7 @@ describe("Plot", () => {
         fn: {|x| x * 5},
         xScale: Scale.linear({ min: 100 })
       })`,
-      "xScale min set without max. Must set either both or neither."
+      "Scale min set without max. Must set either both or neither."
     );
 
     testEvalToMatch(
@@ -104,7 +104,7 @@ describe("Plot", () => {
         fn: {|x| x * 5},
         xScale: Scale.linear({ max: 100 })
       })`,
-      "xScale max set without min. Must set either both or neither."
+      "Scale max set without min. Must set either both or neither."
     );
 
     // scale with one of min/max fails even if domain is set
@@ -113,7 +113,7 @@ describe("Plot", () => {
         fn: {|x: [3, 5]| x * 5},
         xScale: Scale.log({ min: 100 })
       })`,
-      "xScale min set without max. Must set either both or neither."
+      "Scale min set without max. Must set either both or neither."
     );
   });
 
