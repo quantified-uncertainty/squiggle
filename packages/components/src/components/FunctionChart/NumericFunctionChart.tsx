@@ -10,9 +10,9 @@ import {
 } from "../../lib/draw/index.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
 import { canvasClasses } from "../../lib/utility.js";
-import { ErrorAlert } from "../Alert.js";
 import { getFunctionImage } from "./utils.js";
 import { sqScaleToD3 } from "../../lib/d3/index.js";
+import { NumberShower } from "../NumberShower.js";
 
 type Props = {
   plot: SqNumericFnPlot;
@@ -28,7 +28,7 @@ export const NumericFunctionChart: FC<Props> = ({
   const height = innerHeight + 30; // consider paddings, should match suggestedPadding below
   const { cursor, initCursor } = useCanvasCursor();
 
-  const { functionImage, errors } = useMemo(
+  const { functionImage, errors, allValues } = useMemo(
     () => getFunctionImage(plot, environment),
     [plot, environment]
   );
@@ -133,16 +133,57 @@ export const NumericFunctionChart: FC<Props> = ({
 
   return (
     <div className="flex flex-col items-stretch">
+      {errors.length > 0 && (
+        <div className="w-20 rounded-sm px-1 py-0.5 bg-red-100 text-red-900 text-sm font-semibold">
+          {`${errors.length} Errors`}
+        </div>
+      )}
       <canvas ref={ref} className={canvasClasses}>
         Chart for {plot.toString()}
       </canvas>
-      <div className="space-y-1">
-        {errors.map(({ x, value }) => (
-          // TODO - group errors with identical value
-          <ErrorAlert key={x} heading={value}>
-            Error at point {x}
-          </ErrorAlert>
-        ))}
+      <div className="overflow-auto max-h-[500px] mt-3">
+        <table className="table-fixed width-full w-full border border-collapse border-slate-300 border-b text-sm">
+          <thead>
+            <tr className="text-slate-600 font-semibold text-xm bg-slate-100">
+              <th className="border border-slate-200 py-1 px-2 ">index</th>
+              <th className="border border-slate-200 py-1 px-2 ">x</th>
+              <th className="border border-slate-200 py-1 px-2 w-3/5">
+                y = f(x)
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {allValues.map((d, index) => (
+              <tr key={d.x}>
+                <td
+                  className={
+                    "px-5 py-1 border border-slate-200 opacity-50 font-mono overflow-hidden"
+                  }
+                >
+                  {index}
+                </td>
+                <td
+                  className={
+                    "px-5 py-1 border border-slate-200 overflow-hidden"
+                  }
+                >
+                  <NumberShower number={d.x} precision={4} />
+                </td>
+                <td
+                  className={
+                    "px-5 py-1 border border-slate-200 text-blue-800 overflow-hidden"
+                  }
+                >
+                  {d.y.ok && isFinite(d.y.value) ? (
+                    <NumberShower number={d.y.value} precision={4} />
+                  ) : (
+                    <span className="text-red-700">Error: {d.y.value}</span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

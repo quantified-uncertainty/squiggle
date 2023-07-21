@@ -30,6 +30,7 @@ import { ErrorAlert } from "../Alert.js";
 import { DistributionsChart } from "../DistributionsChart/index.js";
 import { NumberShower } from "../NumberShower.js";
 import { getFunctionImage } from "./utils.js";
+import { DistPreview } from "../DistributionsChart/DistPreview.js";
 
 type FunctionChart1DistProps = {
   plot: SqDistFnPlot;
@@ -268,6 +269,8 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
       />
     ) : null; // TODO - show error
 
+  const { functionImage } = getFunctionImage(plot, environment);
+
   return (
     <div className="flex flex-col items-stretch">
       <canvas ref={ref} className={canvasClasses}>
@@ -286,6 +289,35 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
             ))}
         </ErrorAlert>
       ))}
+
+      <table className="table-fixed bg-slate-50 border border-collapse border-slate-300 border-b text-sm">
+        <thead>
+          <tr className="text-slate-700 font-semibold text-xm">
+            <th className="border border-slate-200 py-1 px-2 ">Index</th>
+            <th className="border border-slate-200 py-1 px-2 ">x</th>
+            <th className="border border-slate-200 py-1 px-2">y = f(x)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {functionImage.map((d, index) => (
+            <tr key={d.x}>
+              <td
+                className={
+                  "px-5 py-1 border border-slate-200 opacity-50 font-mono"
+                }
+              >
+                {index}
+              </td>
+              <td className={"px-5 py-1 border border-slate-200"}>
+                <NumberShower number={d.x} precision={4} />
+              </td>
+              <td className={"px-5 py-1 border border-slate-200"}>
+                <DistPreview dist={d.y} environment={environment} />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };
