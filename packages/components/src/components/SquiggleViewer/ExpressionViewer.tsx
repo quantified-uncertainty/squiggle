@@ -4,8 +4,8 @@ import {
   SqDistributionsPlot,
   SqPlot,
   SqScale,
+  SqTableChart,
   SqValue,
-  result,
 } from "@quri/squiggle-lang";
 
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
@@ -27,7 +27,9 @@ import {
 import { MergedItemSettings, getChildrenValues } from "./utils.js";
 import { MessageAlert } from "../Alert.js";
 import { clsx } from "clsx";
+import { TableChart } from "../TableChart/index.js";
 import { DistPreview } from "../DistributionsChart/DistPreview.js";
+import { TableCellsIcon } from "@quri/ui";
 
 // We use an extra left margin for some elements to align them with parent variable name
 const leftMargin = "ml-1.5";
@@ -100,7 +102,7 @@ export const getBoxProps = (
           </div>
         ),
         children: () => (
-          <div className="text-neutral-800 text-sm px-2 py-1 my-1 bg-stone-100">
+          <div className="text-neutral-800 text-sm px-2 py-1 my-1">
             {value.value}
           </div>
         ),
@@ -123,7 +125,6 @@ export const getBoxProps = (
       return {
         children: () => value.value.toDateString(),
       };
-
     case "Void":
       return {
         children: () => "Void",
@@ -131,6 +132,32 @@ export const getBoxProps = (
     case "TimeDuration": {
       return {
         children: () => <NumberShower precision={3} number={value.value} />,
+      };
+    }
+    case "TableChart": {
+      const table: SqTableChart = value.value;
+      return {
+        preview: (
+          <div className="items-center flex space-x-1">
+            <TableCellsIcon size={14} className="flex opacity-60" />
+            <div>
+              {table.columnCount}
+              <span className="opacity-60">x</span>
+              {table.rowCount}
+            </div>
+          </div>
+        ),
+        heading: "Table",
+        children: (settings) => (
+          <TableChart
+            value={table}
+            environment={environment}
+            settings={settings}
+            renderValue={(value, settings) =>
+              getBoxProps(value).children(settings)
+            }
+          />
+        ),
       };
     }
     case "Lambda":
@@ -230,6 +257,7 @@ export const getBoxProps = (
         children: () => <div>{scale.toString()}</div>,
       };
     }
+
     case "Record": {
       const entries = getChildrenValues(value);
       return {

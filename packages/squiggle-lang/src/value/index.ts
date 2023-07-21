@@ -279,6 +279,23 @@ export type Plot =
       ids: string[];
     };
 
+export type TableChart = {
+  data: Value[];
+  columns: { fn: Lambda; name: string | undefined }[];
+};
+class VTableChart extends BaseValue {
+  readonly type = "TableChart";
+
+  constructor(public value: TableChart) {
+    super();
+  }
+  toString() {
+    return `Table with ${this.value.columns.length}x${this.value.data.length} elements`;
+  }
+}
+
+export const vTableChart = (v: TableChart) => new VTableChart(v);
+
 class VPlot extends BaseValue implements Indexable {
   readonly type = "Plot";
 
@@ -417,6 +434,7 @@ export type Value =
   | VRecord
   | VTimeDuration
   | VPlot
+  | VTableChart
   | VScale
   | VDomain
   | VVoid;

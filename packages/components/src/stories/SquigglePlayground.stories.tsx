@@ -148,3 +148,40 @@ r = {
 `,
   },
 };
+
+export const ManyTypes: Story = {
+  name: "Many types",
+  args: {
+    defaultCode: `varNum = 3333
+varBool = true
+varString = "This is a long string"
+varVoid = ()
+
+varArray = [1,2,3]
+varLambda = {|e| "Test"}
+varScale = Scale.symlog({ min: -2, max: 5})
+
+varRecord = {fir: 1, secon: 2}
+
+varTable = Table.make(
+  {
+    data: [1, 4, 5],
+    columns: [
+      { fn: {|e|e}, name: "Number" },
+      { fn: {|e| normal(e^2, e^3)}, name: "Dist" },
+      { fn: {|e|[e, e, e, e]}, name: "Array" },
+      { fn: {|e|{first: e, second: e+1, third: e+2, fourth: e+3}}, name: "Record" },
+    ],
+  }
+)
+
+varDist = SampleSet.fromDist(2 to 5)
+
+varScatter = Plot.scatter({
+  xDist: varDist,
+  yDist: (-3 to 3) * 5 - varDist ^ 2
+})
+`,
+    height: 800,
+  },
+};

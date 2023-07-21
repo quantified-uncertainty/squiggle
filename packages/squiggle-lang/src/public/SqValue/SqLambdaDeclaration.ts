@@ -11,7 +11,9 @@ export class SqLambdaDeclaration {
   get fn() {
     return new SqLambda(
       this._value.fn,
-      this.context ? this.context.extend("fn") : undefined
+      this.context
+        ? this.context.extend({ type: "string", value: "fn" })
+        : undefined
     );
   }
 

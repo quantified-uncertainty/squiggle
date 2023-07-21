@@ -12,6 +12,7 @@ import { library as listLibrary } from "../../fr/list.js";
 import { library as mathLibrary } from "../../fr/math.js";
 import { library as numberLibrary } from "../../fr/number.js";
 import { library as plotLibrary } from "../../fr/plot.js";
+import { library as tableLibrary } from "../../fr/table.js";
 import { library as pointsetLibrary } from "../../fr/pointset.js";
 import {
   makeSquiggleDefinitions as makeRelativeValuesSquiggleDefinitions,
@@ -35,6 +36,7 @@ const fnList: FRFunction[] = [
   ...distLibrary,
   ...fnLibrary,
   ...genericDistLibrary,
+  ...tableLibrary,
   ...listLibrary,
   ...mathLibrary,
   ...numberLibrary,

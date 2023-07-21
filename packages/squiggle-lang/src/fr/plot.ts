@@ -3,6 +3,7 @@ import { REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
+  frAny,
   frBool,
   frDist,
   frDistOrNumber,

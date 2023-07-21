@@ -1,8 +1,10 @@
+import * as React from "react";
+import { FC, memo } from "react";
 import {
   PartialPlaygroundSettings,
   PlaygroundSettings,
 } from "../PlaygroundSettings.js";
-import { SqValue, SqValuePath } from "@quri/squiggle-lang";
+import { SqValue, SqValuePath, PathItem } from "@quri/squiggle-lang";
 
 export type LocalItemSettings = {
   collapsed: boolean;
@@ -17,11 +19,24 @@ export function pathAsString(path: SqValuePath) {
   return path.items.join(".");
 }
 
+export const pathItemFormat = (item: PathItem): string => {
+  if (item.type === "cellAddress") {
+    return `Cell (${item.value.row},${item.value.column})`;
+  } else {
+    return String(item.value);
+  }
+};
+
 export function pathToShortName(path: SqValuePath): string | undefined {
   const isTopLevel = path.items.length === 0;
-  return isTopLevel
-    ? { result: undefined, bindings: "Variables" }[path.root]
-    : String(path.items[path.items.length - 1]);
+  if (isTopLevel && path.root === "result") {
+    return undefined; // We don't want to show in this case.
+  } else if (isTopLevel && path.root === "bindings") {
+    return "Variables";
+  } else {
+    const lastPathItem = path.items[path.items.length - 1];
+    return pathItemFormat(lastPathItem);
+  }
 }
 
 export function getChildrenValues(value: SqValue): SqValue[] {
@@ -43,13 +58,27 @@ export function extractSubvalueByPath(
   if (!value.context) {
     return;
   }
+  const { context } = value;
 
   for (const key of path.items) {
     let nextValue: SqValue | undefined;
-    if (typeof key === "number" && value.tag === "Array") {
-      nextValue = value.value.getValues()[key];
-    } else if (typeof key === "string" && value.tag === "Record") {
-      nextValue = value.value.get(key);
+    if (key.type === "number" && value.tag === "Array") {
+      nextValue = value.value.getValues()[key.value];
+    } else if (key.type === "string" && value.tag === "Record") {
+      nextValue = value.value.get(key.value);
+    } else if (key.type === "cellAddress" && value.tag === "TableChart") {
+      // Maybe it would be better to get the environment in a different way.
+      const environment = context.project.getEnvironment();
+      const item = value.value.item(
+        key.value.row,
+        key.value.column,
+        environment
+      );
+      if (item.ok) {
+        nextValue = item.value;
+      } else {
+        return;
+      }
     }
     if (!nextValue) {
       return;
