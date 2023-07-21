@@ -1,3 +1,5 @@
+import * as React from "react";
+import { FC, memo } from "react";
 import {
   PartialPlaygroundSettings,
   PlaygroundSettings,
@@ -17,19 +19,24 @@ export function pathAsString(path: SqValuePath) {
   return path.items.join(".");
 }
 
-export const pathItemFormat = (item: PathItem) => {
+export const pathItemFormat = (item: PathItem): string => {
   if (item.type === "cellAddress") {
-    return `table[${item.value.row}x${item.value.column}]`;
+    return `Cell (${item.value.row},${item.value.column})`;
   } else {
-    return String(item);
+    return String(item.value);
   }
 };
 
 export function pathToShortName(path: SqValuePath): string | undefined {
   const isTopLevel = path.items.length === 0;
-  return isTopLevel
-    ? { result: undefined, bindings: "Variables" }[path.root]
-    : String(pathItemFormat(path.items[path.items.length - 1]));
+  if (isTopLevel && path.root === "result") {
+    return undefined; // We don't want to show in this case.
+  } else if (isTopLevel && path.root === "bindings") {
+    return "Variables";
+  } else {
+    const lastPathItem = path.items[path.items.length - 1];
+    return pathItemFormat(lastPathItem);
+  }
 }
 
 export function getChildrenValues(value: SqValue): SqValue[] {
