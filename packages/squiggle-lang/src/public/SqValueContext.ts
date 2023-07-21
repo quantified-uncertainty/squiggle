@@ -1,7 +1,7 @@
 import { AST, ASTNode } from "../ast/parse.js";
 import { isBindingStatement } from "../ast/utils.js";
 import { SqProject } from "./SqProject/index.js";
-import { PathItem, SqValuePath, pathItemToIndexType } from "./SqValuePath.js";
+import { PathItem, SqValuePath } from "./SqValuePath.js";
 
 export class SqValueContext {
   public project: SqProject;

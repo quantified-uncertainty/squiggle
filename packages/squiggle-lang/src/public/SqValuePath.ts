@@ -6,24 +6,6 @@ export type PathItem =
   | { type: "number"; value: number }
   | { type: "cellAddress"; value: { row: number; column: number } };
 
-export const pathItemToIndexType = (item: PathItem) => {
-  if (item.type === "string") {
-    return item;
-  } else if (item.type === "number") {
-    return item;
-  } else if (item.type === "cellAddress") {
-    return `${item.value.row},${item.value.column}`;
-  }
-};
-
-export const pathItemToString = (item: PathItem): string => {
-  if (item.type === "cellAddress") {
-    return `${item.value.row}, ${item.value.column}`;
-  } else {
-    return String(item);
-  }
-};
-
 export class SqValuePath {
   public root: "result" | "bindings";
   public items: PathItem[];
