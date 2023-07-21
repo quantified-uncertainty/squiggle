@@ -35,9 +35,9 @@ export {
   SqNumericFnPlot,
   SqRelativeValuesPlot,
   SqScatterPlot,
-  SqTable,
   type SqPlot,
 } from "./public/SqValue/SqPlot.js";
+export { SqTableChart } from "./public/SqValue/SqTableChart.js";
 export { SqRecord } from "./public/SqValue/SqRecord.js";
 export {
   SqLinearScale,

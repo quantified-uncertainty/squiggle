@@ -16,7 +16,7 @@ import {
 import { FnFactory } from "../library/registry/helpers.js";
 import { REOther } from "../errors/messages.js";
 import * as Result from "../utility/result.js";
-import { LabeledDistribution, vPlot } from "../value/index.js";
+import { LabeledDistribution, vTableChart } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Table",
@@ -42,8 +42,7 @@ export const library = [
           ),
         ],
         ([{ elements, columns }]) => {
-          return vPlot({
-            type: "table",
+          return vTableChart({
             elements,
             columns: columns.map(({ fn, name }) => ({
               fn,

@@ -277,12 +277,24 @@ export type Plot =
       type: "relativeValues";
       fn: Lambda;
       ids: string[];
-    }
-  | {
-      type: "table";
-      elements: Value[];
-      columns: { fn: Lambda; name: string | undefined }[];
     };
+
+export type TableChart = {
+  elements: Value[];
+  columns: { fn: Lambda; name: string | undefined }[];
+};
+class VTableChart extends BaseValue {
+  readonly type = "TableChart";
+
+  constructor(public value: TableChart) {
+    super();
+  }
+  toString() {
+    return "TableChart";
+  }
+}
+
+export const vTableChart = (v: TableChart) => new VTableChart(v);
 
 class VPlot extends BaseValue implements Indexable {
   readonly type = "Plot";
@@ -305,8 +317,6 @@ class VPlot extends BaseValue implements Indexable {
         return `Scatter plot for distributions ${this.value.xDist} and ${this.value.yDist}`;
       case "relativeValues":
         return `Plot for relative values ${this.value.ids.join(", ")}`;
-      case "table":
-        return `Table`;
     }
   }
 
@@ -424,6 +434,7 @@ export type Value =
   | VRecord
   | VTimeDuration
   | VPlot
+  | VTableChart
   | VScale
   | VDomain
   | VVoid;

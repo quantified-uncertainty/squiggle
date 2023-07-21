@@ -1,6 +1,6 @@
 import React, { FC, ReactNode } from "react";
 
-import { SqValue, SqTable, SqError, result } from "@quri/squiggle-lang";
+import { SqValue, SqTableChart, SqError, result } from "@quri/squiggle-lang";
 import { Env } from "@quri/squiggle-lang";
 
 import { clsx } from "clsx";
@@ -8,7 +8,7 @@ import { PlaygroundSettings } from "../PlaygroundSettings.js";
 import { SqValueWithContext, valueHasContext } from "../../lib/utility.js";
 
 type Props = {
-  value: SqTable;
+  value: SqTableChart;
   environment: Env;
   settings: PlaygroundSettings;
   renderValue: (

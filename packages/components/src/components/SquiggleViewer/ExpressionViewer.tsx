@@ -4,6 +4,7 @@ import {
   SqDistributionsPlot,
   SqPlot,
   SqScale,
+  SqTableChart,
   SqValue,
   result,
 } from "@quri/squiggle-lang";
@@ -134,6 +135,21 @@ export const getBoxProps = (
         children: () => <NumberShower precision={3} number={value.value} />,
       };
     }
+    case "TableChart": {
+      const table: SqTableChart = value.value;
+      return {
+        children: (settings) => (
+          <Table
+            value={table}
+            environment={environment}
+            settings={settings}
+            renderValue={(value, settings) =>
+              getBoxProps(value).children(settings)
+            }
+          />
+        ),
+      };
+    }
     case "Lambda":
       return {
         heading: "",
@@ -218,17 +234,6 @@ export const getBoxProps = (
                   environment={environment}
                 />
               );
-            case "table":
-              return (
-                <Table
-                  value={plot}
-                  environment={environment}
-                  settings={settings}
-                  renderValue={(value, settings) =>
-                    getBoxProps(value).children(settings)
-                  }
-                />
-              );
             default:
               // can happen if squiggle-lang version is too fresh and we messed up the components -> squiggle-lang dependency
               return `Unsupported plot ${plot satisfies never}`;
@@ -242,6 +247,7 @@ export const getBoxProps = (
         children: () => <div>{scale.toString()}</div>,
       };
     }
+
     case "Record": {
       const entries = getChildrenValues(value);
       return {
