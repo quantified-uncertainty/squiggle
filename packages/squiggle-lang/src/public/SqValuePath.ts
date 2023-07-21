@@ -1,7 +1,25 @@
 import { ASTNode } from "../ast/parse.js";
 import { locationContains } from "../ast/utils.js";
 
-export type PathItem = string | number;
+export type PathItem = string | number | { row: number; column: number };
+
+export const pathItemToIndexType = (item: PathItem) => {
+  if (typeof item === "string") {
+    return item;
+  } else if (typeof item === "number") {
+    return item;
+  } else {
+    return `${item.row},${item.column}`;
+  }
+};
+
+export const pathItemToString = (item: PathItem): string => {
+  if (typeof item === "string" || typeof item === "number") {
+    return String(item);
+  } else {
+    return `(${item.row}, ${item.column})`;
+  }
+};
 
 export class SqValuePath {
   public root: "result" | "bindings";

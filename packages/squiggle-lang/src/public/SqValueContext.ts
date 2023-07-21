@@ -1,7 +1,7 @@
 import { AST, ASTNode } from "../ast/parse.js";
 import { isBindingStatement } from "../ast/utils.js";
 import { SqProject } from "./SqProject/index.js";
-import { PathItem, SqValuePath } from "./SqValuePath.js";
+import { PathItem, SqValuePath, pathItemToIndexType } from "./SqValuePath.js";
 
 export class SqValueContext {
   public project: SqProject;
@@ -61,13 +61,13 @@ export class SqValueContext {
       switch (ast.type) {
         case "Program": {
           if (this.path.root === "bindings") {
-            newAst = ast.symbols[item];
+            newAst = ast.symbols[pathItemToIndexType(item)];
             break;
           }
           break;
         }
         case "Record":
-          newAst = ast.symbols[item];
+          newAst = ast.symbols[pathItemToIndexType(item)];
           break;
         case "Array":
           if (typeof item === "number") {

@@ -46,7 +46,7 @@ export {
   SqSymlogScale,
   type SqScale,
 } from "./public/SqValue/SqScale.js";
-export { SqValuePath } from "./public/SqValuePath.js";
+export { PathItem, SqValuePath } from "./public/SqValuePath.js";
 export { parse } from "./public/parse.js";
 export { fmap as resultMap, type result } from "./utility/result.js";
 

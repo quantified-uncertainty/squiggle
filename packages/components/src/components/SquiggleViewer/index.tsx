@@ -1,6 +1,12 @@
 import { FC, forwardRef, memo } from "react";
 
-import { SqError, SqValue, SqValuePath, result } from "@quri/squiggle-lang";
+import {
+  SqError,
+  SqValue,
+  SqValuePath,
+  PathItem,
+  result,
+} from "@quri/squiggle-lang";
 import { ChevronRightIcon } from "@quri/ui";
 import { useImperativeHandle } from "react";
 import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
@@ -15,7 +21,7 @@ import {
   useUnfocus,
   useViewerContext,
 } from "./ViewerProvider.js";
-import { extractSubvalueByPath } from "./utils.js";
+import { extractSubvalueByPath, pathItemFormat } from "./utils.js";
 
 export type SquiggleViewerHandle = {
   viewValuePath(path: SqValuePath): void;
@@ -64,7 +70,7 @@ const SquiggleViewerOuter = forwardRef<
           <div key={i} className="flex items-center">
             <ChevronRightIcon className="text-slate-300" size={24} />
             <div onClick={() => focus(path)} className={navLinkStyle}>
-              {path.items[i]}
+              {pathItemFormat(path.items[i])}
             </div>
           </div>
         ))}
