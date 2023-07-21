@@ -332,6 +332,7 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
   showSamplesBar,
 }) => {
   const CUTOFF_TO_SHOW_SAMPLES_BAR = 100000; // Default to stop showing bottom samples bar if there are more than 100k samples
+  const HEIGHT_SAMPLES_BAR_CUTTOFF = 30; // Default to stop showing bottom samples bar if the height is less than 50px
   const distributions = plot.distributions;
 
   const isMulti =
@@ -379,7 +380,8 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
 
   const _showSamplesBar =
     showSamplesBar === undefined
-      ? samples.length < CUTOFF_TO_SHOW_SAMPLES_BAR
+      ? samples.length < CUTOFF_TO_SHOW_SAMPLES_BAR &&
+        height > HEIGHT_SAMPLES_BAR_CUTTOFF
       : showSamplesBar;
 
   const nonNormalizedError = () => {

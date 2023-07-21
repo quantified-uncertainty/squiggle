@@ -6,7 +6,6 @@ import {
   SqScale,
   SqTableChart,
   SqValue,
-  result,
 } from "@quri/squiggle-lang";
 
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
@@ -126,7 +125,6 @@ export const getBoxProps = (
       return {
         children: () => value.value.toDateString(),
       };
-
     case "Void":
       return {
         children: () => "Void",

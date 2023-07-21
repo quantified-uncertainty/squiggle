@@ -31,7 +31,7 @@ export const TableChart: FC<Props> = ({
     rowsAndColumns[0].length
   );
 
-  const chartHeight = 40;
+  const chartHeight = 50;
   const distributionChartSettings = {
     ...settings.distributionChartSettings,
     showSummary: false,
