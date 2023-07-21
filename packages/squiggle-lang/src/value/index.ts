@@ -290,7 +290,7 @@ class VTableChart extends BaseValue {
     super();
   }
   toString() {
-    return "TableChart";
+    return `Table with ${this.value.columns.length}x${this.value.data.length} elements`;
   }
 }
 
