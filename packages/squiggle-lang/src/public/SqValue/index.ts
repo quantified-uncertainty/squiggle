@@ -10,6 +10,7 @@ import { SqLambdaDeclaration } from "./SqLambdaDeclaration.js";
 import { SqPlot, wrapPlot } from "./SqPlot.js";
 import { SqRecord } from "./SqRecord.js";
 import { SqScale, wrapScale } from "./SqScale.js";
+import { SqTableChart } from "./SqTableChart.js";
 
 export function wrapValue(value: Value, context?: SqValueContext) {
   switch (value.type) {
@@ -33,6 +34,8 @@ export function wrapValue(value: Value, context?: SqValueContext) {
       return new SqStringValue(value, context);
     case "Plot":
       return new SqPlotValue(value, context);
+    case "TableChart":
+      return new SqTableChartValue(value, context);
     case "Scale":
       return new SqScaleValue(value, context);
     case "TimeDuration":
@@ -210,6 +213,20 @@ export class SqPlotValue extends SqAbstractValue<"Plot", SqPlot> {
 
   get value() {
     return wrapPlot(this._value.value, this.context);
+  }
+
+  asJS() {
+    return this.value;
+  }
+}
+export class SqTableChartValue extends SqAbstractValue<
+  "TableChart",
+  SqTableChart
+> {
+  tag = "TableChart" as const;
+
+  get value() {
+    return new SqTableChart(this._value.value, this.context);
   }
 
   asJS() {

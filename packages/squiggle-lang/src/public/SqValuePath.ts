@@ -1,7 +1,10 @@
 import { ASTNode } from "../ast/parse.js";
 import { locationContains } from "../ast/utils.js";
 
-export type PathItem = string | number;
+export type PathItem =
+  | { type: "string"; value: string }
+  | { type: "number"; value: number }
+  | { type: "cellAddress"; value: { row: number; column: number } };
 
 export class SqValuePath {
   public root: "result" | "bindings";
@@ -49,7 +52,10 @@ export class SqValuePath {
               ) &&
               pair.key.type === "String" // only string keys are supported
             ) {
-              return [pair.key.value, ...findLoop(pair.value)];
+              return [
+                { type: "string", value: pair.key.value },
+                ...findLoop(pair.value),
+              ];
             }
           }
           return [];
@@ -58,16 +64,22 @@ export class SqValuePath {
           for (let i = 0; i < ast.elements.length; i++) {
             const element = ast.elements[i];
             if (locationContains(element.location, offset)) {
-              return [i, ...findLoop(element)];
+              return [{ type: "number", value: i }, ...findLoop(element)];
             }
           }
           return [];
         }
         case "LetStatement": {
-          return [ast.variable.value, ...findLoop(ast.value)];
+          return [
+            { type: "string", value: ast.variable.value },
+            ...findLoop(ast.value),
+          ];
         }
         case "DefunStatement": {
-          return [ast.variable.value, ...findLoop(ast.value)];
+          return [
+            { type: "string", value: ast.variable.value },
+            ...findLoop(ast.value),
+          ];
         }
         case "Block": {
           if (
