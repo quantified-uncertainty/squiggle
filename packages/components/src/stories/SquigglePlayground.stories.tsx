@@ -155,7 +155,7 @@ export const ManyTypes: Story = {
     defaultCode: `
 table = Table.make(
   {
-    elements: [1, 4, 5],
+    data: [1, 4, 5],
     columns: [
       { fn: {|e|e}, name: "Number" },
       { fn: {|e| normal(e^2, e^3)}, name: "Dist" },

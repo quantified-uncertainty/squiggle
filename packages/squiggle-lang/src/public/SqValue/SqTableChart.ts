@@ -1,5 +1,3 @@
-import { BaseDist } from "../../dist/BaseDist.js";
-import { SampleSetDist } from "../../dist/SampleSetDist/index.js";
 import { Env } from "../../dist/env.js";
 import * as Result from "../../utility/result.js";
 import { TableChart } from "../../value/index.js";
@@ -10,9 +8,8 @@ import { SqLambda } from "./SqLambda.js";
 import { SqValue, wrapValue } from "./index.js";
 import { Value } from "../../value/index.js";
 import { Lambda } from "../../reducer/lambda.js";
-import { wrap } from "module";
 
-const wrapElement = (value: Value, context?: SqValueContext): SqValue => {
+const wrapItem = (value: Value, context?: SqValueContext): SqValue => {
   return wrapValue(value, context);
 };
 
@@ -30,7 +27,7 @@ const getItem = (
 ): Result.result<SqValue, SqError> => {
   const response = fn.call([element], env);
   const newContext: SqValueContext | undefined =
-    context && context.extend({ type: "coords", value: { row, column } });
+    context && context.extend({ type: "cellAddress", value: { row, column } });
 
   if (response.ok && context) {
     return Result.Ok(wrapValue(response.value._value, newContext));
@@ -52,7 +49,7 @@ export class SqTableChart {
     return getItem(
       rowI,
       columnI,
-      wrapElement(this._value.elements[rowI], this.context),
+      wrapItem(this._value.data[rowI], this.context),
       wrapFn(this._value.columns[columnI]),
       env,
       this.context
@@ -60,20 +57,20 @@ export class SqTableChart {
   }
 
   items(env: Env): Result.result<SqValue, SqError>[][] {
-    const wrappedElements = this._value.elements.map((r) =>
+    const wrappedDataItems = this._value.data.map((r) =>
       wrapValue(r, this.context)
     );
     const wrappedFns = this._value.columns.map(wrapFn);
 
-    return wrappedElements.map((element, rowI) =>
+    return wrappedDataItems.map((item, rowI) =>
       wrappedFns.map((fn, columnI) =>
-        getItem(rowI, columnI, element, fn, env, this.context)
+        getItem(rowI, columnI, item, fn, env, this.context)
       )
     );
   }
 
   get rowCount(): number {
-    return this._value.elements.length;
+    return this._value.data.length;
   }
 
   get columnCount(): number {

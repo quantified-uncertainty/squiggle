@@ -1,15 +1,8 @@
 import { FC, forwardRef, memo } from "react";
 
-import {
-  SqError,
-  SqValue,
-  SqValuePath,
-  PathItem,
-  result,
-} from "@quri/squiggle-lang";
+import { SqError, SqValue, SqValuePath, result } from "@quri/squiggle-lang";
 import { ChevronRightIcon } from "@quri/ui";
 import { useImperativeHandle } from "react";
-import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
 import { MessageAlert } from "../Alert.js";
 import { CodeEditorHandle } from "../CodeEditor.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";

@@ -32,7 +32,7 @@ export const library = [
       makeDefinition(
         [
           frRecord(
-            ["elements", frArray(frAny)],
+            ["data", frArray(frAny)],
             [
               "columns",
               frArray(
@@ -41,9 +41,9 @@ export const library = [
             ]
           ),
         ],
-        ([{ elements, columns }]) => {
+        ([{ data, columns }]) => {
           return vTableChart({
-            elements,
+            data,
             columns: columns.map(({ fn, name }) => ({
               fn,
               name: name ?? undefined,

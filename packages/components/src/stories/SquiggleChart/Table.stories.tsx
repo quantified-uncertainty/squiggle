@@ -13,7 +13,7 @@ export const Basic: Story = {
     code: `
     Table.make(
       {
-        elements: [1, 4, 5],
+        data: [1, 4, 5],
         columns: [
           { fn: {|e|e}, name: "Number" },
           { fn: {|e| normal(e^2, e^3)}, name: "Dist" },
@@ -156,7 +156,7 @@ items = {
 
 Table.make(
   {
-    elements: items -> Dict.values,
+    data: items -> Dict.values,
     columns: [
       { fn: {|e|e.id}, title: "id" },
       { fn: {|e|e.name}, title: "name" },

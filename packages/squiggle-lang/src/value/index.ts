@@ -280,7 +280,7 @@ export type Plot =
     };
 
 export type TableChart = {
-  elements: Value[];
+  data: Value[];
   columns: { fn: Lambda; name: string | undefined }[];
 };
 class VTableChart extends BaseValue {

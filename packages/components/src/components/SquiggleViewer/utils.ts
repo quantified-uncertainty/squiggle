@@ -18,7 +18,7 @@ export function pathAsString(path: SqValuePath) {
 }
 
 export const pathItemFormat = (item: PathItem) => {
-  if (item.type === "coords") {
+  if (item.type === "cellAddress") {
     return `table[${item.value.row}x${item.value.column}]`;
   } else {
     return String(item);
@@ -59,7 +59,7 @@ export function extractSubvalueByPath(
       nextValue = value.value.getValues()[key.value];
     } else if (key.type === "string" && value.tag === "Record") {
       nextValue = value.value.get(key.value);
-    } else if (key.type === "coords" && value.tag === "TableChart") {
+    } else if (key.type === "cellAddress" && value.tag === "TableChart") {
       // Maybe it would be better to get the environment in a different way.
       const environment = context.project.getEnvironment();
       const item = value.value.item(

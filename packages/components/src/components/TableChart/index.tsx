@@ -36,7 +36,7 @@ export const TableChart: FC<Props> = ({
     ...settings.distributionChartSettings,
     showSummary: false,
   };
-  const adjustedSettings = {
+  const adjustedSettings: PlaygroundSettings = {
     ...settings,
     distributionChartSettings,
     chartHeight,
