@@ -8,7 +8,11 @@ export class SqRecord {
 
   entries() {
     return [...this._value.entries()].map(
-      ([k, v]) => [k, wrapValue(v, this.context?.extend(k))] as const
+      ([k, v]) =>
+        [
+          k,
+          wrapValue(v, this.context?.extend({ type: "string", value: k })),
+        ] as const
     );
   }
 
@@ -17,7 +21,10 @@ export class SqRecord {
     if (value === undefined) {
       return undefined;
     }
-    return wrapValue(value, this.context?.extend(key));
+    return wrapValue(
+      value,
+      this.context?.extend({ type: "string", value: key })
+    );
   }
 
   toString() {

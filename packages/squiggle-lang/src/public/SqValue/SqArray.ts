@@ -7,6 +7,8 @@ export class SqArray {
   constructor(private _value: Value[], public context?: SqValueContext) {}
 
   getValues() {
-    return this._value.map((v, i) => wrapValue(v, this.context?.extend(i)));
+    return this._value.map((v, i) =>
+      wrapValue(v, this.context?.extend({ type: "number", value: i }))
+    );
   }
 }

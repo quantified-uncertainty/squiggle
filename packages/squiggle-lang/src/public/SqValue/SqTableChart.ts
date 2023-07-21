@@ -30,7 +30,7 @@ const getItem = (
 ): Result.result<SqValue, SqError> => {
   const response = fn.call([element], env);
   const newContext: SqValueContext | undefined =
-    context && context.extend({ row, column });
+    context && context.extend({ type: "coords", value: { row, column } });
 
   if (response.ok && context) {
     return Result.Ok(wrapValue(response.value._value, newContext));

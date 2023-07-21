@@ -41,8 +41,7 @@ export class SqValueContext {
     let ast = this.valueAst;
 
     let newAst: ASTNode | undefined;
-    const itemisNotTableIndex =
-      typeof item === "string" || typeof item === "number";
+    const itemisNotTableIndex = item.type !== "coords";
 
     if (this.valueAstIsPrecise && itemisNotTableIndex) {
       // now we can try to look for the next nested valueAst
@@ -64,13 +63,13 @@ export class SqValueContext {
       switch (ast.type) {
         case "Program": {
           if (this.path.root === "bindings") {
-            newAst = ast.symbols[pathItemToIndexType(item)];
+            newAst = ast.symbols[item.value];
             break;
           }
           break;
         }
         case "Record":
-          newAst = ast.symbols[pathItemToIndexType(item)];
+          newAst = ast.symbols[item.value];
           break;
         case "Array":
           if (typeof item === "number") {
