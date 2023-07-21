@@ -63,9 +63,7 @@ export class SqTableChart {
     const wrappedElements = this._value.elements.map((r) =>
       wrapValue(r, this.context)
     );
-    const wrappedFns = this._value.columns.map(
-      ({ fn }) => new SqLambda(fn, undefined)
-    );
+    const wrappedFns = this._value.columns.map(wrapFn);
 
     return wrappedElements.map((element, rowI) =>
       wrappedFns.map((fn, columnI) =>
