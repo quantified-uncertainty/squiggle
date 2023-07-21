@@ -11,7 +11,7 @@ import {
 } from "@/lib/common";
 
 const markdown = `
-# Overview
+# About Squiggle Hub
 Squiggle Hub serves as a communal platform for the creation and sharing of code written in [Squiggle](https://www.squiggle-language.com/). Both the platform and the source code are open-source and free to use.
 
 ## Squiggle: A Glimpse
@@ -23,7 +23,7 @@ Out team previously co-founded [Guesstimate](https://getguesstimate.com/), a dif
 ## QURI & Squiggle Hub
 The [Quantified Uncertainty Research Institute](https://quantifieduncertainty.org/), or QURI, is the proud creator of Squiggle Hub. As a registered 501(c)(3) nonprofit, QURI is devoted to the design and research of uncertainty quantification tools. Our ambition is for Squiggle Hub to aid effective nonprofits and funding bodies in making impactful decisions.
 
-## Essential Links
+## Key Links
 - [Squiggle](https://www.squiggle-language.com/)  
 - [Squiggle API](${GRAPHQL_URL})  
 - [Squiggle Discord](${DISCORD_URL})  
