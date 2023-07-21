@@ -4,7 +4,7 @@ import { FC } from "react";
 import { RefreshIcon } from "../../icons/RefreshIcon.js";
 import { IconProps } from "../../icons/Icon.js";
 
-export type CommonProps = {
+export type ActionItemInternalProps = {
   icon?: FC<IconProps>;
   title: string;
   acting?: boolean;
@@ -24,7 +24,7 @@ const iconDisplay = (icon?: FC<IconProps>, acting?: boolean) => {
   );
 };
 
-export const ActionItemInternal: FC<CommonProps> = ({
+export const ActionItemInternal: FC<ActionItemInternalProps> = ({
   title,
   icon,
   acting,

@@ -11,54 +11,40 @@ import {
 } from "@/lib/common";
 
 const markdown = `
-# About
-Squiggle Hub is a platform for people to write and share [Squiggle](https://www.squiggle-language.com/) code. The platform is free to use and is open source.
+# Overview
+Squiggle Hub serves as a communal platform for the creation and sharing of code written in [Squiggle](https://www.squiggle-language.com/). Both the platform and the source code are open-source and free to use.
 
-## Background
-### Squiggle
-Squiggle is a programming language for probablistic estimations that's build on Javascript. You can read more about it on the [Squiggle website](https://www.squiggle-language.com/).
+## Squiggle: A Glimpse
+[Squiggle](https://www.squiggle-language.com/) is a probabilistic estimation-oriented programming language that operates on the JavaScript platform. We think it's well-suited for intuition-based modeling and risk estimation. Additional details can be found on the Squiggle official website.
 
-### Connections to Guesstimate
-Our team members previously cofounded [Guesstimate](https://getguesstimate.com/), a tool for making estimations. Squiggle Hub is a spiritual successor to Guesstimate. Being based on a progamming language, it is significantly more powerful and flexible than Guesstimate, though it has a steeper learning curve.
+## Our Connection to Guesstimate
+Out team previously co-founded [Guesstimate](https://getguesstimate.com/), a different estimation tool. Squiggle Hub stands as a spiritual successor to Guesstimate. With the power of a full programming language at its disposal, it offers superior flexibility and power, albeit at the cost of a steeper learning curve.
 
-### QURI
-Squiggle Hub is made by the [Quantified Uncertainty Research Institute](https://quantifieduncertainty.org/). QURI is a 501(c)(3) nonprofit organization dedicated to the research and development of tools for quantifying uncertainty. We hope that Squiggle Hub will be used by effective nonprofits and funders to help make decisions that maximize their impacts.
+## QURI & Squiggle Hub
+The [Quantified Uncertainty Research Institute](https://quantifieduncertainty.org/), or QURI, is the proud creator of Squiggle Hub. As a registered 501(c)(3) nonprofit, QURI is devoted to the design and research of uncertainty quantification tools. Our ambition is for Squiggle Hub to aid effective nonprofits and funding bodies in making impactful decisions.
 
-## Key Links
-- [Squiggle](https://www.squiggle-language.com/)
-- [Squiggle API](${GRAPHQL_URL})
-- [Squiggle Discord](${DISCORD_URL})
-- [Squiggle Github](${GITHUB_URL})
-- [Squiggle Github Discussion, for Ideas and Issues](${GITHUB_DISCUSSION_URL})
-- [Squiggle Newsletter (Part of the QURI Newsletter)](${NEWSLETTER_URL}})
+## Essential Links
+- [Squiggle](https://www.squiggle-language.com/)  
+- [Squiggle API](${GRAPHQL_URL})  
+- [Squiggle Discord](${DISCORD_URL})  
+- [Squiggle Github](${GITHUB_URL})  
+- [Squiggle Github Discussion (For Ideas and Issues)](${GITHUB_DISCUSSION_URL})  
+- [Squiggle Newsletter (Part of the QURI Newsletter)](${NEWSLETTER_URL})
 
-## Code License
-Squiggle Hub is free to use. All of the code for both Squiggle Hub and Squiggle is open source, MIT-licensed, and available on [Github](https://github.com/quantified-uncertainty/squiggle).
+## Licensing
+Squiggle Hub, along with Squiggle, is available for free use, with the code being open-source and licensed under MIT. Access it [here](https://github.com/quantified-uncertainty/squiggle).
 
-## API
-Squiggle Hub is made using a GraphQL API. You can access it [here](${GRAPHQL_URL}). The API will likely change in the future. This is useful for querying, but if you would like to use it for mutations, please contact us in the Discord. 
+## Squiggle Hub API
+Developed using a GraphQL API, Squiggle Hub can be accessed [here](${GRAPHQL_URL}). The API is recommended for querying. If mutations are desired, kindly reach out to us via Discord. Squiggle's JavaScript implementation is available on [NPM](https://www.npmjs.com/package/squiggle-lang), and it includes several [integrations](https://www.squiggle-language.com/docs/Integrations) like VSCode and Observable.
 
-Squiggle code itself is implemented in Javascript and accessible with on [NPM](https://www.npmjs.com/package/squiggle-lang). It features several [integrations](https://www.squiggle-language.com/docs/Integrations), including with VSCode and Observable.
+## Feature: Relative Values
+Squiggle Hub currently supports experimental [relative values](https://forum.effectivealtruism.org/posts/EFEwBvuDrTLDndqCt/relative-value-functions-a-flexible-new-format-for-value), with future improvements planned.
 
-## Relative Values
-Squiggle Hub has experimental support for [relative values](https://forum.effectivealtruism.org/posts/EFEwBvuDrTLDndqCt/relative-value-functions-a-flexible-new-format-for-value). This will be improved in the future.
-
-## Possible Future Features
-Squiggle Hub is still an early platform. Some ideas we have for the future include:  
-- Private models and organizations
-- Models with multiple files
-- Code import/export between models
-- Notebook-style interfaces
-- Support for time functions and time series data
-- Function forecasting
-- Integration with Google Sheets, Guesstimate, LLMs, Github, and more
-- Model functions can be called directly from the API
-
-If you have thoughts on these or other features, please let us know in the [Discord](${DISCORD_URL}) or [Github Discussion](${GITHUB_DISCUSSION_URL})!
+## Future Developments
+Though Squiggle Hub is in its early stages, we envision the addition of numerous features, such as private models, multi-file models, code interchange between models, notebook-style interfaces, time-series data and time function support, function forecasting, integration with Google Sheets, Guesstimate, LLMs, Github, and more. The prospect of calling model functions directly from the API is also on the horizon. For input on these or any other features, please connect with us on [Discord](${DISCORD_URL}) or through the [Github Discussion](${GITHUB_DISCUSSION_URL}).
 
 ## Donations
-If you'd like to support the development of Squiggle and Squiggle Hub, you can donate to QURI [here](${QURI_DONATE_URL}). We rely on donors like you to keep our projects running.
-
+Support our endeavor to develop Squiggle and Squiggle Hub by donating to QURI [here](${QURI_DONATE_URL}). Your contributions help maintain the continuity of our projects.
 `;
 
 export default function About() {

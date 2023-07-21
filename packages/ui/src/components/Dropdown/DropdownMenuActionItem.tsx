@@ -1,10 +1,10 @@
 import { FC } from "react";
 import {
   ActionItemInternal,
-  CommonProps,
+  ActionItemInternalProps,
 } from "./DropdownMenuActionItemInternal.js";
 
-type ActionItemProps = CommonProps & {
+type ActionItemProps = ActionItemInternalProps & {
   onClick(): void;
 };
 

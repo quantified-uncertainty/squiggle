@@ -20,10 +20,10 @@ export const PageFooter: FC = () => (
     <div className="text-sm text-slate-400 flex flex-column justify-between max-w-4xl mx-auto">
       <div className="flex items-center gap-x-5 h-16">
         <Image
-          src={logoPic} // Route of the image file
+          src={logoPic}
           width={40}
           height={40}
-          alt="Description for the image"
+          alt="QURI Logo"
           className="flex opacity-50"
         />
         <div className="flex-1">
