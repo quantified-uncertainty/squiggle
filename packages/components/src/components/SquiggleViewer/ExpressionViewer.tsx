@@ -28,8 +28,9 @@ import {
 import { MergedItemSettings, getChildrenValues } from "./utils.js";
 import { MessageAlert } from "../Alert.js";
 import { clsx } from "clsx";
-import { Table } from "../Table/index.js";
+import { TableChart } from "../TableChart/index.js";
 import { DistPreview } from "../DistributionsChart/DistPreview.js";
+import { TableCellsIcon } from "@quri/ui";
 
 // We use an extra left margin for some elements to align them with parent variable name
 const leftMargin = "ml-1.5";
@@ -138,8 +139,19 @@ export const getBoxProps = (
     case "TableChart": {
       const table: SqTableChart = value.value;
       return {
+        preview: (
+          <div className="items-center flex space-x-1">
+            <TableCellsIcon size={14} className="flex opacity-60" />
+            <div>
+              {table.columnCount}
+              <span className="opacity-60">x</span>
+              {table.rowCount}
+            </div>
+          </div>
+        ),
+        heading: "Table",
         children: (settings) => (
-          <Table
+          <TableChart
             value={table}
             environment={environment}
             settings={settings}

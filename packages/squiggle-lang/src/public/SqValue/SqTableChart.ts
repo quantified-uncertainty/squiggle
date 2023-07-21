@@ -46,6 +46,14 @@ export class SqTableChart {
     );
   }
 
+  get rowCount(): number {
+    return this._value.elements.length;
+  }
+
+  get columnCount(): number {
+    return this._value.columns.length;
+  }
+
   get columnNames(): (string | undefined)[] {
     return this._value.columns.map(({ name }) => name);
   }

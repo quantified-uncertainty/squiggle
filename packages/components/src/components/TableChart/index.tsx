@@ -17,7 +17,7 @@ type Props = {
   ) => ReactNode;
 };
 
-export const Table: FC<Props> = ({
+export const TableChart: FC<Props> = ({
   value,
   environment,
   settings,
