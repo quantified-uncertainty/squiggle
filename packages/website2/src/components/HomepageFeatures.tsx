@@ -32,7 +32,7 @@ const Feature: FC<{ title: string; description: ReactNode }> = ({
   description,
 }) => {
   return (
-    <div className="text-center px-4">
+    <div className="text-center">
       <h3 className="font-lora font-bold text-2xl pb-4">{title}</h3>
       <p>{description}</p>
     </div>
@@ -41,7 +41,7 @@ const Feature: FC<{ title: string; description: ReactNode }> = ({
 
 export const HomepageFeatures: FC = () => {
   return (
-    <section className="mx-auto p-8 grid grid-cols-3">
+    <section className="max-w-7xl mx-auto p-8 grid grid-cols-1 lg:grid-cols-3 gap-4">
       {FeatureList.map((props, idx) => (
         <Feature key={idx} {...props} />
       ))}
