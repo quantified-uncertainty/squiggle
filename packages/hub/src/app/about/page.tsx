@@ -5,10 +5,10 @@ import {
   GITHUB_URL,
   GITHUB_DISCUSSION_URL,
   DISCORD_URL,
-  GRAPHQL_URL,
   NEWSLETTER_URL,
   QURI_DONATE_URL,
 } from "@/lib/common";
+import { graphqlPlaygroundRoute } from "@/routes";
 
 const markdown = `
 # About Squiggle Hub
@@ -25,7 +25,7 @@ The [Quantified Uncertainty Research Institute](https://quantifieduncertainty.or
 
 ## Key Links
 - [Squiggle](https://www.squiggle-language.com/)  
-- [Squiggle API](${GRAPHQL_URL})  
+- [Squiggle API](${graphqlPlaygroundRoute()})  
 - [Squiggle Discord](${DISCORD_URL})  
 - [Squiggle Github](${GITHUB_URL})  
 - [Squiggle Github Discussion (For Ideas and Issues)](${GITHUB_DISCUSSION_URL})  
@@ -35,7 +35,7 @@ The [Quantified Uncertainty Research Institute](https://quantifieduncertainty.or
 Squiggle Hub, along with Squiggle, is available for free use, with the code being open-source and licensed under MIT. Access it [here](https://github.com/quantified-uncertainty/squiggle).
 
 ## Squiggle Hub API
-Developed using a GraphQL API, Squiggle Hub can be accessed [here](${GRAPHQL_URL}). The API is recommended for querying. If mutations are desired, kindly reach out to us via Discord. Squiggle's JavaScript implementation is available on [NPM](https://www.npmjs.com/package/squiggle-lang), and it includes several [integrations](https://www.squiggle-language.com/docs/Integrations) like VSCode and Observable.
+Developed using a GraphQL API, Squiggle Hub can be accessed [here](${graphqlPlaygroundRoute()}). The API is recommended for querying. If mutations are desired, kindly reach out to us via Discord. Squiggle's JavaScript implementation is available on [NPM](https://www.npmjs.com/package/squiggle-lang), and it includes several [integrations](https://www.squiggle-language.com/docs/Integrations) like VSCode and Observable.
 
 ## Feature: Relative Values
 Squiggle Hub currently supports experimental [relative values](https://forum.effectivealtruism.org/posts/EFEwBvuDrTLDndqCt/relative-value-functions-a-flexible-new-format-for-value), with future improvements planned.
