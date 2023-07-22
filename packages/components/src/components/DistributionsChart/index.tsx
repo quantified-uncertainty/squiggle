@@ -2,6 +2,7 @@ import { clsx } from "clsx";
 import * as d3 from "d3";
 import isEqual from "lodash/isEqual.js";
 import { FC, useCallback, useMemo, useState } from "react";
+import { bin } from "d3-array";
 
 import {
   Env,
@@ -49,13 +50,19 @@ const InnerDistributionsChart: FC<{
   plot: SqDistributionsPlot;
   showSamplesBar: boolean;
 }> = ({
-  shapes,
+  shapes: unchangedShapes,
   samples,
   plot,
   height: innerHeight,
   isMulti,
   showSamplesBar,
 }) => {
+  const shapes = unchangedShapes.map(({ name, continuous, discrete }) => ({
+    name,
+    continuous: continuous.map(({ x, y }) => ({ x, y: y * Math.abs(x) })),
+    discrete,
+  }));
+
   const [discreteTooltip, setDiscreteTooltip] = useState<
     { value: number; probability: number } | undefined
   >();
@@ -153,6 +160,43 @@ const InnerDistributionsChart: FC<{
         }
       }
 
+      {
+        const _yScale = sqScaleToD3(plot.yScale);
+
+        const domain = xScale.domain();
+        const min = xScale(domain[0]);
+        const max = xScale(domain[1]);
+
+        const numBins = 40;
+
+        const thresholds: number[] = [];
+        const step = (max - min) / numBins;
+        for (let i = min; i < max; i += step) {
+          thresholds.push(xScale.invert(i));
+        }
+
+        const bins = bin()
+          .value((d) => d)
+          .thresholds(thresholds)(samples);
+        context.fillStyle = "#aaffaaff";
+
+        const binLengths = bins.map((p) => p.length);
+
+        _yScale.domain([
+          Math.min(...binLengths), // min value, but at least 0
+          Math.max(...binLengths),
+        ]);
+        _yScale.range([0, height - 40]);
+
+        bins.forEach((bin) => {
+          const barWidth = xScale(bin.x1 || 0) - xScale(bin.x0 || 0) + 1; //Add one to ensure there aren't any gaps between bars
+          const barHeight = _yScale(bin.length);
+          const barY = height - 30 - barHeight;
+
+          context.fillRect(xScale(bin.x0 || 0) + 9, barY, barWidth, barHeight);
+        });
+      }
+
       // shapes
       {
         frame.enter();
@@ -169,19 +213,21 @@ const InnerDistributionsChart: FC<{
 
           // continuous
           context.globalAlpha = isMulti ? 0.3 : 1;
-          context.fillStyle = getColor(i);
+          context.fillStyle = getColor(i) + "66";
           context.beginPath();
           d3
             .area<SqShape["continuous"][number]>()
             .x((d) => xScale(d.x))
-            .y0((d) => yScale(d.y))
+            .y0((d) => {
+              return yScale(d.y);
+            })
             .y1(0)
             .context(context)(shape.continuous);
           context.fill();
 
           // The top line
           context.globalAlpha = 1;
-          context.strokeStyle = context.fillStyle;
+          context.strokeStyle = getColor(i);
           context.beginPath();
           d3
             .line<SqShape["continuous"][number]>()

@@ -12,6 +12,39 @@ type ConversionResult = {
   discreteDist: XYShape;
 };
 
+const wrappedKde = (
+  samples: number[],
+  weight: number,
+  outputXYPoints: number,
+  negativePoints?: boolean
+): { xs: number[]; ys: number[] } => {
+  const _samples = negativePoints ? samples.map((x) => -x) : samples;
+  const adjustedSamples = _samples.map((x) => (x === 0 ? 0 : Math.log(x)));
+
+  const width = nrd0(adjustedSamples);
+  const { xs, ys } = kde(adjustedSamples, outputXYPoints, width, weight);
+  console.log("Before processing", { _samples, adjustedSamples, xs, ys });
+  const result = {
+    xs: xs.map((x) => Math.exp(x)),
+    ys: ys.map((y, index) => {
+      let xValue = xs[index];
+      return y / Math.exp(xValue);
+    }),
+  };
+  return negativePoints
+    ? {
+        xs: result.xs
+          .map((x) => -x)
+          .slice()
+          .reverse(),
+        ys: result.ys
+          .slice()
+          .reverse()
+          .map((y) => -y),
+      }
+    : result;
+};
+
 export const samplesToPointSetDist = (
   samples: readonly number[],
   outputXYPoints: number,
@@ -38,8 +71,25 @@ export const samplesToPointSetDist = (
     discretePart.ys.push(continuousPart[0]);
   } else {
     const width = kernelWidth ?? nrd0(continuousPart);
-    const { xs, ys } = kde(continuousPart, outputXYPoints, width, pointWeight);
-    continuousDist = { xs, ys };
+    let positiveValues: number[] = continuousPart.filter((value) => value > 0);
+    let negativeValues: number[] = continuousPart.filter((value) => value < 0);
+    let positiveWeight =
+      pointWeight * (positiveValues.length / continuousPart.length);
+    let negativeWeight =
+      pointWeight * (negativeValues.length / continuousPart.length);
+    const positivePart =
+      positiveValues.length > 5
+        ? wrappedKde(positiveValues, positiveWeight, outputXYPoints)
+        : { xs: [], ys: [] };
+
+    const negativePart =
+      negativeValues.length > 5
+        ? wrappedKde(negativeValues, negativeWeight, outputXYPoints, true)
+        : { xs: [], ys: [] };
+    continuousDist = {
+      xs: [...negativePart.xs, ...positivePart.xs],
+      ys: [...negativePart.ys, ...positivePart.ys],
+    };
   }
 
   discretePart.ys = discretePart.ys.map((count: number) => count * pointWeight);
