@@ -185,3 +185,23 @@ varScatter = Plot.scatter({
     height: 800,
   },
 };
+
+export const Markdown: Story = {
+  name: "Markdown",
+  args: {
+    defaultCode: `
+[
+  5 to 30,
+  "# Privacy Policy
+**Last updated July 07, 2023**
+      
+This privacy notice for Quantified Uncertainty Research Institute, describes how and why we might collect, store, use, and/or share your information when you use our services  such as when you:
+",
+  10 to 300,
+  "## Section 2: Key variables",
+  5 to 30,
+  10 to 30
+]`,
+    height: 800,
+  },
+};

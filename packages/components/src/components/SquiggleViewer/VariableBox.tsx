@@ -35,6 +35,7 @@ export type VariableBoxProps = {
   heading?: string;
   preview?: ReactNode;
   isRecordOrList?: boolean;
+  showHeader?: boolean;
   renderSettingsMenu?: (params: SettingsMenuParams) => ReactNode;
   children: (settings: MergedItemSettings) => ReactNode;
 };
@@ -53,6 +54,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
   value,
   heading = "Error",
   isRecordOrList = false,
+  showHeader = true,
   preview,
   renderSettingsMenu,
   children,
@@ -224,7 +226,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
 
   return (
     <div ref={saveRef}>
-      {name === undefined ? null : (
+      {name === undefined || !showHeader ? null : (
         <header
           className={clsx(
             "flex justify-between group",

@@ -23,6 +23,7 @@
     "@quri/squiggle-lang": "workspace:*",
     "@quri/ui": "workspace:*",
     "@react-hook/size": "^2.1.2",
+    "@tailwindcss/typography": "^0.5.9",
     "@types/d3": "^7.4.0",
     "clsx": "^1.2.1",
     "codemirror": "^6.0.1",
@@ -32,6 +33,7 @@
     "prettier": "^3.0.0",
     "react": "^18.2.0",
     "react-hook-form": "^7.45.1",
+    "react-markdown": "^8.0.7",
     "react-resizable": "^3.0.5",
     "vscode-uri": "^3.0.7",
     "zod": "^3.21.4"

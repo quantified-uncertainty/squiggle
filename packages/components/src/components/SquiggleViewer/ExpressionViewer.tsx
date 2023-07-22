@@ -7,6 +7,7 @@ import {
   SqTableChart,
   SqValue,
 } from "@quri/squiggle-lang";
+import ReactMarkdown from "react-markdown";
 
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
 import { SqValueWithContext, valueHasContext } from "../../lib/utility.js";
@@ -103,7 +104,9 @@ export const getBoxProps = (
         ),
         children: () => (
           <div className="text-neutral-800 text-sm px-2 py-1 my-1">
-            {value.value}
+            <ReactMarkdown className="prose max-w-4xl">
+              {value.value}
+            </ReactMarkdown>
           </div>
         ),
       };
@@ -276,7 +279,9 @@ export const getBoxProps = (
         preview: <SqTypeWithCount type="[]" count={length} />,
         isRecordOrList: true,
         children: () =>
-          entries.map((r, i) => <ExpressionViewer key={i} value={r} />),
+          entries.map((r, i) => (
+            <ExpressionViewer key={i} value={r} showHeader={false} />
+          )),
       };
     }
 
@@ -306,10 +311,14 @@ export const getBoxProps = (
 type Props = {
   /** The output of squiggle's run */
   value: SqValue;
+  showHeader?: boolean;
   width?: number;
 };
 
-export const ExpressionViewer: React.FC<Props> = ({ value }) => {
+export const ExpressionViewer: React.FC<Props> = ({
+  value,
+  showHeader = true,
+}) => {
   if (!valueHasContext(value)) {
     return <MessageAlert heading="Can't display pathless value" />;
   }
@@ -326,7 +335,12 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
         )
       : boxProps.children;
   return (
-    <VariableBox {...boxProps} value={value} heading={heading}>
+    <VariableBox
+      {...boxProps}
+      value={value}
+      heading={heading}
+      showHeader={showHeader}
+    >
       {children}
     </VariableBox>
   );
