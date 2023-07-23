@@ -19,11 +19,11 @@ export function sqScaleToD3(
     case "linear":
       return scaleLinear();
     case "symlog":
-      return scaleSymlog().constant(1);
+      return scaleSymlog().constant(scale.constant);
     case "power":
       return scalePow().exponent(scale.exponent);
     case "log":
-      return scaleLog();
+      return scaleLog().base(scale.base);
     default:
       throw new Error(`Unknown scale: ${scale satisfies never}`);
   }

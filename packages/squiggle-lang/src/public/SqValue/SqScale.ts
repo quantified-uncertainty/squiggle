@@ -47,16 +47,24 @@ export class SqLinearScale extends SqAbstractScale<"linear"> {
 export class SqLogScale extends SqAbstractScale<"log"> {
   tag = "log" as const;
 
-  static create(args: CommonScaleArgs = {}) {
+  static create(args: CommonScaleArgs & { base: number }) {
     return new SqLogScale({ type: "log", ...args });
+  }
+
+  get base() {
+    return this._value.base;
   }
 }
 
 export class SqSymlogScale extends SqAbstractScale<"symlog"> {
   tag = "symlog" as const;
 
-  static create(args: CommonScaleArgs = {}) {
+  static create(args: CommonScaleArgs & { constant: number }) {
     return new SqSymlogScale({ type: "symlog", ...args });
+  }
+
+  get constant() {
+    return this._value.constant;
   }
 }
 

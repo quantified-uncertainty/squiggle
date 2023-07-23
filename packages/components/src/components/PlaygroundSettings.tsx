@@ -41,9 +41,9 @@ function scaleTypeToSqScale(
     case "linear":
       return SqLinearScale.create(args);
     case "log":
-      return SqLogScale.create(args);
+      return SqLogScale.create({ base: 10, ...args });
     case "symlog":
-      return SqSymlogScale.create(args);
+      return SqSymlogScale.create({ constant: 10, ...args });
     case "exp":
       return SqPowerScale.create({ exponent: 0.1, ...args });
     default:

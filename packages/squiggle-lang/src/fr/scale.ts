@@ -55,21 +55,31 @@ export const library = [
     output: "Scale",
     examples: [`Scale.log({ min: 1, max: 100 })`],
     definitions: [
-      makeDefinition([commonRecord], ([{ min, max, tickFormat }]) => {
-        if (min !== null && min <= 0) {
-          throw new REOther(`Min must be over 0 for log scale, got: ${min}`);
+      makeDefinition(
+        [
+          frRecord(
+            ["min", frOptional(frNumber)],
+            ["max", frOptional(frNumber)],
+            ["tickFormat", frOptional(frString)],
+            ["base", frOptional(frNumber)]
+          ),
+        ],
+        ([{ min, max, tickFormat, base }]) => {
+          if (min !== null && min <= 0) {
+            throw new REOther(`Min must be over 0 for log scale, got: ${min}`);
+          }
+          checkMinMax(min, max);
+          return vScale({
+            type: "log",
+            min: min ?? undefined,
+            max: max ?? undefined,
+            tickFormat: tickFormat ?? undefined,
+            base: base || 10,
+          });
         }
-        checkMinMax(min, max);
-
-        return vScale({
-          type: "log",
-          min: min ?? undefined,
-          max: max ?? undefined,
-          tickFormat: tickFormat ?? undefined,
-        });
-      }),
+      ),
       makeDefinition([], () => {
-        return vScale({ type: "log" });
+        return vScale({ type: "log", base: 10 });
       }),
     ],
   }),
@@ -78,18 +88,29 @@ export const library = [
     output: "Scale",
     examples: [`Scale.symlog({ min: -10, max: 10 })`],
     definitions: [
-      makeDefinition([commonRecord], ([{ min, max, tickFormat }]) => {
-        checkMinMax(min, max);
+      makeDefinition(
+        [
+          frRecord(
+            ["min", frOptional(frNumber)],
+            ["max", frOptional(frNumber)],
+            ["tickFormat", frOptional(frString)],
+            ["constant", frOptional(frNumber)]
+          ),
+        ],
+        ([{ min, max, tickFormat, constant }]) => {
+          checkMinMax(min, max);
 
-        return vScale({
-          type: "symlog",
-          min: min ?? undefined,
-          max: max ?? undefined,
-          tickFormat: tickFormat ?? undefined,
-        });
-      }),
+          return vScale({
+            type: "symlog",
+            min: min ?? undefined,
+            max: max ?? undefined,
+            tickFormat: tickFormat ?? undefined,
+            constant: constant || 0.1,
+          });
+        }
+      ),
       makeDefinition([], () => {
-        return vScale({ type: "symlog" });
+        return vScale({ type: "symlog", constant: 0.1 });
       }),
     ],
   }),
@@ -104,7 +125,7 @@ export const library = [
             ["min", frOptional(frNumber)],
             ["max", frOptional(frNumber)],
             ["tickFormat", frOptional(frString)],
-            ["exponent", frNumber]
+            ["exponent", frOptional(frNumber)]
           ),
         ],
         ([{ min, max, tickFormat, exponent }]) => {
@@ -115,7 +136,7 @@ export const library = [
             min: min ?? undefined,
             max: max ?? undefined,
             tickFormat: tickFormat ?? undefined,
-            exponent,
+            exponent: exponent || 0.1,
           });
         }
       ),
