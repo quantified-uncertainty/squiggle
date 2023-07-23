@@ -2,9 +2,12 @@
   "name": "@quri/squiggle-textmate-grammar",
   "private": true,
   "scripts": {
-    "build": "mkdir -p dist && js-yaml src/squiggle.tmLanguage.yaml >dist/squiggle.tmLanguage.json && js-yaml src/squiggle.js.yaml >dist/squiggle.js.json"
+    "build": "mkdir -p dist && js-yaml src/squiggle.tmLanguage.yaml >dist/squiggle.tmLanguage.json && js-yaml src/squiggle.js.yaml >dist/squiggle.js.json",
+    "lint": "prettier --check .",
+    "format": "prettier --write ."
   },
   "devDependencies": {
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.1.0",
+    "prettier": "^3.0.0"
   }
 }
