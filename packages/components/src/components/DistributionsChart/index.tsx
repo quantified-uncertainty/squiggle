@@ -49,7 +49,7 @@ const InnerDistributionsChart: FC<{
   plot: SqDistributionsPlot;
   showSamplesBar: boolean;
 }> = ({
-  shapes,
+  shapes: unAdjustedShapes,
   samples,
   plot,
   height: innerHeight,
@@ -59,6 +59,16 @@ const InnerDistributionsChart: FC<{
   const [discreteTooltip, setDiscreteTooltip] = useState<
     { value: number; probability: number } | undefined
   >();
+
+  const yAdjustment = plot.xScale.pdfYAdjustment;
+  const shapes = unAdjustedShapes.map(({ name, continuous, discrete }) => ({
+    name,
+    continuous: continuous.map(({ x, y }) => ({
+      x,
+      y: yAdjustment(x, y),
+    })),
+    discrete,
+  }));
 
   const domain = shapes.flatMap((shape) =>
     shape.discrete.concat(shape.continuous)
