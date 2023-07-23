@@ -12,37 +12,78 @@ type ConversionResult = {
   discreteDist: XYShape;
 };
 
+const applyIf = <T>(value: T, condition: boolean, fn: (val: T) => T): T =>
+  condition ? fn(value) : value;
+
+// Zero values should ve very infrequent, but we need to catch them if they exist.
+const logValues = (samples: number[]) =>
+  samples.map((x) => (x === 0 ? 0 : Math.log(x)));
+
+const unLogValues = ({ xs, ys }: { xs: number[]; ys: number[] }) => ({
+  xs: xs.map(Math.exp),
+  ys: ys.map((y, index) => y / Math.exp(xs[index])),
+});
+
+const reverseNegative = ({ xs, ys }: { xs: number[]; ys: number[] }) => ({
+  xs: xs.map((x) => -x),
+  ys: ys.map((y) => -y),
+});
+
+// Takes a set of either all positive or all negative samples,
+// takes the log of them, takes the KDE, and then reversed that process.
 const wrappedKde = (
   samples: number[],
   weight: number,
   outputXYPoints: number,
-  negativePoints?: boolean
+  negativePoints: boolean = false
 ): { xs: number[]; ys: number[] } => {
-  const _samples = negativePoints ? samples.map((x) => -x) : samples;
-  const adjustedSamples = _samples.map((x) => (x === 0 ? 0 : Math.log(x)));
+  const adjustedSamples = logValues(
+    applyIf(samples, negativePoints, (s) => s.map(Math.abs))
+  );
 
   const width = nrd0(adjustedSamples);
   const { xs, ys } = kde(adjustedSamples, outputXYPoints, width, weight);
-  console.log("Before processing", { _samples, adjustedSamples, xs, ys });
-  const result = {
-    xs: xs.map((x) => Math.exp(x)),
-    ys: ys.map((y, index) => {
-      let xValue = xs[index];
-      return y / Math.exp(xValue);
-    }),
+
+  return applyIf(unLogValues({ xs, ys }), negativePoints, reverseNegative);
+};
+
+const logKde = (
+  samples: number[],
+  weight: number,
+  outputXYPoints: number
+): { xs: number[]; ys: number[] } => {
+  const [positiveValues, negativeValues] = [
+    samples.filter((value) => value > 0),
+    samples.filter((value) => value < 0),
+  ];
+
+  const [positiveWeight, negativeWeight] = [
+    weight * (positiveValues.length / samples.length),
+    weight * (negativeValues.length / samples.length),
+  ];
+
+  const [positivePart, negativePart] = [
+    positiveValues.length > 5
+      ? wrappedKde(positiveValues, positiveWeight, outputXYPoints)
+      : { xs: [], ys: [] },
+    negativeValues.length > 5
+      ? wrappedKde(negativeValues, negativeWeight, outputXYPoints, true)
+      : { xs: [], ys: [] },
+  ];
+
+  return {
+    xs: [...negativePart.xs, ...positivePart.xs],
+    ys: [...negativePart.ys, ...positivePart.ys],
   };
-  return negativePoints
-    ? {
-        xs: result.xs
-          .map((x) => -x)
-          .slice()
-          .reverse(),
-        ys: result.ys
-          .slice()
-          .reverse()
-          .map((y) => -y),
-      }
-    : result;
+};
+
+const regularKde = (
+  samples: number[],
+  weight: number,
+  outputXYPoints: number
+): { xs: number[]; ys: number[] } => {
+  const width = nrd0(samples);
+  return kde(samples, outputXYPoints, width, weight);
 };
 
 export const samplesToPointSetDist = (
@@ -71,25 +112,7 @@ export const samplesToPointSetDist = (
     discretePart.ys.push(continuousPart[0]);
   } else {
     const width = kernelWidth ?? nrd0(continuousPart);
-    let positiveValues: number[] = continuousPart.filter((value) => value > 0);
-    let negativeValues: number[] = continuousPart.filter((value) => value < 0);
-    let positiveWeight =
-      pointWeight * (positiveValues.length / continuousPart.length);
-    let negativeWeight =
-      pointWeight * (negativeValues.length / continuousPart.length);
-    const positivePart =
-      positiveValues.length > 5
-        ? wrappedKde(positiveValues, positiveWeight, outputXYPoints)
-        : { xs: [], ys: [] };
-
-    const negativePart =
-      negativeValues.length > 5
-        ? wrappedKde(negativeValues, negativeWeight, outputXYPoints, true)
-        : { xs: [], ys: [] };
-    continuousDist = {
-      xs: [...negativePart.xs, ...positivePart.xs],
-      ys: [...negativePart.ys, ...positivePart.ys],
-    };
+    continuousDist = regularKde(continuousPart, pointWeight, outputXYPoints);
   }
 
   discretePart.ys = discretePart.ys.map((count: number) => count * pointWeight);

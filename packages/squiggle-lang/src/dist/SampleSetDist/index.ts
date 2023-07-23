@@ -85,6 +85,11 @@ export class SampleSetDist extends BaseDist {
     return E_A_Floats.mean(this.samples);
   }
 
+  // This should never have errors, so don't need to call SampleSetDist.make()
+  abs() {
+    return new SampleSetDist(this.samples.map(Math.abs));
+  }
+
   truncate(leftCutoff: number | undefined, rightCutoff: number | undefined) {
     let truncated = this.samples;
     if (leftCutoff !== undefined) {
@@ -146,6 +151,21 @@ sample everything.
   variance(): Result.result<number, DistError> {
     return Result.Ok(E_A_Floats.variance(this.samples));
   }
+
+  range(
+    pWidth: number,
+    absolute: boolean = true
+  ): Result.result<{ low: number; high: number }, DistError> {
+    if (pWidth < 0 || pWidth > 1) {
+      return Result.Err(otherError("pWidth must be between 0 and 1"));
+    }
+    const dist = absolute ? this.abs() : this;
+    return Result.Ok({
+      low: dist.inv(0.5 - pWidth / 2),
+      high: dist.inv(0.5 + pWidth / 2),
+    });
+  }
+
   override mode(): Result.result<number, DistError> {
     return Result.Err(
       otherError(

@@ -59,7 +59,10 @@ const InnerDistributionsChart: FC<{
 }) => {
   const shapes = unchangedShapes.map(({ name, continuous, discrete }) => ({
     name,
-    continuous: continuous.map(({ x, y }) => ({ x, y: y * Math.abs(x) })),
+    continuous: continuous.map(({ x, y }) => ({
+      x,
+      y: y * Math.abs(x),
+    })),
     discrete,
   }));
 
