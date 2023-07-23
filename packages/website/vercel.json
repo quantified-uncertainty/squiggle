@@ -1,5 +1,5 @@
 {
   "buildCommand": "PLATFORM=vercel npx turbo build",
-  "framework": "docusaurus-2",
+  "framework": "nextjs",
   "ignoreCommand": "npx turbo-ignore || ../../skip-dependabot.sh"
 }
