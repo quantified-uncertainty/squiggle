@@ -32,7 +32,7 @@ import { SummaryTable } from "./SummaryTable.js";
 
 import { Point } from "../../lib/draw/types.js";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
-import { sqScaleToD3 } from "../../lib/d3/index.js";
+import { adjustPdfHeightToScale, sqScaleToD3 } from "../../lib/d3/index.js";
 
 export type DistributionsChartProps = {
   plot: SqDistributionsPlot;
@@ -60,14 +60,9 @@ const InnerDistributionsChart: FC<{
     { value: number; probability: number } | undefined
   >();
 
-  const yAdjustment = plot.xScale.pdfYAdjustment;
   const shapes = unAdjustedShapes.map(({ name, continuous, discrete }) => ({
     name,
-    continuous: continuous.map(({ x, y }) => ({
-      x,
-      y: yAdjustment(x, y),
-    })),
-    discrete,
+    ...adjustPdfHeightToScale({ discrete, continuous }, plot.yScale),
   }));
 
   const domain = shapes.flatMap((shape) =>
