@@ -8,6 +8,7 @@ const grammar = fs.readFileSync(
   "utf-8"
 );
 
+// not documented in nextra yet, but explained here: https://github.com/shuding/nextra/issues/555
 const rehypePrettyCodeOptions = {
   getHighlighter: (options) => {
     return getHighlighter({
