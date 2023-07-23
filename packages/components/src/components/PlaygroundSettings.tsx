@@ -43,7 +43,7 @@ function scaleTypeToSqScale(
     case "log":
       return SqLogScale.create(args);
     case "symlog":
-      return SqSymlogScale.create({ base: 10, ...args });
+      return SqSymlogScale.create({ base: 1e-30, ...args });
     case "exp":
       return SqPowerScale.create({ exponent: 0.1, ...args });
     default:

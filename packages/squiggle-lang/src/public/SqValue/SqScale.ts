@@ -59,7 +59,6 @@ export class SqLogScale extends SqAbstractScale<"log"> {
     return y * Math.abs(x);
   }
 }
-
 export class SqSymlogScale extends SqAbstractScale<"symlog"> {
   tag = "symlog" as const;
 
@@ -71,9 +70,9 @@ export class SqSymlogScale extends SqAbstractScale<"symlog"> {
     return this._value.base;
   }
 
-  pdfYAdjustment(x: number, y: number) {
+  pdfYAdjustment = (x: number, y: number) => {
     return y * Math.abs(x);
-  }
+  };
 }
 
 export class SqPowerScale extends SqAbstractScale<"power"> {

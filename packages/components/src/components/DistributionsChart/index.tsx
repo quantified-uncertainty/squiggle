@@ -172,7 +172,7 @@ const InnerDistributionsChart: FC<{
         const min = xScale(domain[0]);
         const max = xScale(domain[1]);
 
-        const numBins = 40;
+        const numBins = 30;
 
         const thresholds: number[] = [];
         const step = (max - min) / numBins;
@@ -183,7 +183,7 @@ const InnerDistributionsChart: FC<{
         const bins = bin()
           .value((d) => d)
           .thresholds(thresholds)(samples);
-        context.fillStyle = "#aaffaaff";
+        context.fillStyle = d3.schemeCategory10[0] + "88";
 
         const binLengths = bins.map((p) => p.length);
 
@@ -194,11 +194,11 @@ const InnerDistributionsChart: FC<{
         _yScale.range([0, height - 40]);
 
         bins.forEach((bin) => {
-          const barWidth = xScale(bin.x1 || 0) - xScale(bin.x0 || 0) + 1; //Add one to ensure there aren't any gaps between bars
+          const barWidth = xScale(bin.x1 || 0) - xScale(bin.x0 || 0); //Add one to ensure there aren't any gaps between bars
           const barHeight = _yScale(bin.length);
           const barY = height - 30 - barHeight;
 
-          context.fillRect(xScale(bin.x0 || 0) + 9, barY, barWidth, barHeight);
+          //context.fillRect(xScale(bin.x0 || 0) + 9, barY, barWidth, barHeight);
         });
       }
 
@@ -218,7 +218,7 @@ const InnerDistributionsChart: FC<{
 
           // continuous
           context.globalAlpha = isMulti ? 0.3 : 1;
-          context.fillStyle = getColor(i) + "66";
+          context.fillStyle = getColor(i) + "11";
           context.beginPath();
           d3
             .area<SqShape["continuous"][number]>()
@@ -232,7 +232,7 @@ const InnerDistributionsChart: FC<{
 
           // The top line
           context.globalAlpha = 1;
-          context.strokeStyle = getColor(i);
+          context.strokeStyle = getColor(i) + "ff";
           context.beginPath();
           d3
             .line<SqShape["continuous"][number]>()
