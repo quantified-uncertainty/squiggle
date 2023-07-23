@@ -1,11 +1,11 @@
 ---
-title: Invariants of Probability Distributions
-urlcolor: blue
 author:
   - Nuño Sempere
   - Quinn Dougherty
 abstract: This document outlines some properties about algebraic combinations of distributions. It is meant to facilitate property tests for [Squiggle](https://squiggle-language.com/), an estimation language for forecasters. So far, we are focusing on the means, the standard deviation and the shape of the pdfs.
 ---
+
+# Invariants of Probability Distributions
 
 Invariants to check with property tests.
 
