@@ -506,6 +506,12 @@ importers:
         specifier: ^5.1.6
         version: 5.1.6
 
+  packages/textmate-grammar:
+    devDependencies:
+      js-yaml:
+        specifier: ^4.1.0
+        version: 4.1.0
+
   packages/ui:
     dependencies:
       '@floating-ui/react':
@@ -617,12 +623,6 @@ importers:
 
   packages/vscode-ext:
     dependencies:
-      '@quri/squiggle-components':
-        specifier: workspace:*
-        version: link:../components
-      '@quri/squiggle-lang':
-        specifier: workspace:*
-        version: link:../squiggle-lang
       vscode-languageclient:
         specifier: ^8.1.0
         version: 8.1.0
@@ -633,6 +633,15 @@ importers:
         specifier: ^1.0.8
         version: 1.0.10
     devDependencies:
+      '@quri/squiggle-components':
+        specifier: workspace:*
+        version: link:../components
+      '@quri/squiggle-lang':
+        specifier: workspace:*
+        version: link:../squiggle-lang
+      '@quri/squiggle-textmate-grammar':
+        specifier: workspace:*
+        version: link:../textmate-grammar
       '@types/node':
         specifier: ^20.3.3
         version: 20.3.3

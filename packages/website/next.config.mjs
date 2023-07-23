@@ -1,11 +1,12 @@
 import nextra from "nextra";
 
-import fs from 'fs';
+import fs from "fs";
+import { BUNDLED_LANGUAGES, getHighlighter } from "shiki";
 
-const grammar = fs.readFileSync("../vscode-ext/syntaxes/squiggle.tmLanguage.json", 'utf-8');
-
-
-import { getHighlighter, BUNDLED_LANGUAGES } from "shiki";
+const grammar = fs.readFileSync(
+  "../textmate-grammar/dist/squiggle.tmLanguage.json",
+  "utf-8"
+);
 
 const rehypePrettyCodeOptions = {
   getHighlighter: (options) => {
