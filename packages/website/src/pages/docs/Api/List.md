@@ -2,8 +2,8 @@
 
 Squiggle lists are a lot like Python lists or Ruby arrays. They accept all types.
 
-```javascript
-myList = [3, normal(5, 2), "random"];
+```squiggle
+myList = [3, normal(5, 2), "random"]
 ```
 
 ### make
@@ -14,8 +14,8 @@ List.make: (number, 'a) => list<'a>
 
 Returns an array of size `n` filled with the value.
 
-```js
-List.make(4, 1); // creates the list [1, 1, 1, 1]
+```squiggle
+List.make(4, 1) // creates the list [1, 1, 1, 1]
 ```
 
 See [Rescript implementation](https://rescript-lang.org/docs/manual/latest/api/belt/array#make)
@@ -38,8 +38,8 @@ length: (list<'a>) => number
 List.upTo: (low:number, high:number) => list<number>
 ```
 
-```js
-List.upTo(0, 5); // creates the list [0, 1, 2, 3, 4, 5]
+```squiggle
+List.upTo(0, 5) // creates the list [0, 1, 2, 3, 4, 5]
 ```
 
 Syntax taken from [Ruby](https://apidock.com/ruby/v2_5_5/Integer/upto).
@@ -82,8 +82,8 @@ Filters the list for unique elements. Now only works on Strings, Numbers, and Bo
 List.uniq: (list<'a>) => list<'a>
 ```
 
-```js
-List.uniq(["foobar", "foobar", 1, 1, 2]); // ["foobar", 1, 2]
+```squiggle
+List.uniq(["foobar", "foobar", 1, 1, 2]) // ["foobar", 1, 2]
 ```
 
 ### map
@@ -93,7 +93,7 @@ map: (list<'a>, a => b) => list<'b>
 map: (list<'a>, (a, number) => b) => list<'b>
 ```
 
-```js
+```squiggle
 map(["foo", "bar"], {|s| s + "!"})
 map(["foo", "bar"], {|s, i| {word: s, index: i}})
 ```
@@ -122,7 +122,7 @@ reduce: (list<'b>, 'a, ('a, 'b) => 'a) => 'a
 
 Applies `f` to each element of `arr`. The function `f` has two paramaters, an accumulator and the next value from the array.
 
-```js
+```squiggle
 reduce([2, 3, 4], 1, {|acc, value| acc + value}) == 10
 ```
 
@@ -144,8 +144,8 @@ See [Rescript implementation](https://rescript-lang.org/docs/manual/latest/api/b
 List.join: (list<string>, string) => string
 ```
 
-```js
-List.join(["foo", "bar", "char"], "--"); // "foo--bar--char"
+```squiggle
+List.join(["foo", "bar", "char"], "--") // "foo--bar--char"
 ```
 
 ### flatten
@@ -154,9 +154,9 @@ List.join(["foo", "bar", "char"], "--"); // "foo--bar--char"
 flatten: (list<list>) => list
 ```
 
-```js
+```squiggle
 List.flatten([
   [1, 2],
   [3, 4],
-]); // [1,2,3,4]
+]) // [1,2,3,4]
 ```

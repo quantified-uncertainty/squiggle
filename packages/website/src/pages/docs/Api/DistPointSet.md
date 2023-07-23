@@ -20,13 +20,13 @@ Converts a set of x-y coordinates directly into a continuous distribution.
 PointSet.makeContinuous: (list<{x: number, y: number}>) => pointSetDist
 ```
 
-```javascript
+```squiggle
 PointSet.makeContinuous([
   { x: 0, y: 0.1 },
   { x: 1, y: 0.2 },
   { x: 2, y: 0.15 },
   { x: 3, y: 0.1 },
-]);
+])
 ```
 
 ### makeDiscrete
@@ -35,13 +35,13 @@ PointSet.makeContinuous([
 PointSet.makeDiscrete: (list<{x: number, y: number}>) => pointSetDist
 ```
 
-```javascript
+```squiggle
 PointSet.makeDiscrete([
   { x: 0, y: 0.1 },
   { x: 1, y: 0.2 },
   { x: 2, y: 0.15 },
   { x: 3, y: 0.1 },
-]);
+])
 ```
 
 ### mapY
@@ -50,6 +50,6 @@ PointSet.makeDiscrete([
 PointSet.mapY: (pointSetDist, (number => number)) => pointSetDist
 ```
 
-```javascript
+```squiggle
 normal(5,3) |> PointSet.fromDist |> PointSet.mapY({|x| x ^ 2}) |> normalize
 ```

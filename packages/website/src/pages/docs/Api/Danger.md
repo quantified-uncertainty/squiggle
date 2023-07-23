@@ -4,21 +4,21 @@ The Danger library contains newer experimental functions which are less stable t
 
 ### laplace
 
-```js
+```
 Danger.laplace: (number, number) => number
 ```
 
 Calculates the probability implied by [Laplace's rule of succession](https://en.wikipedia.org/wiki/Rule_of_succession)
 
-```js
-trials = 10;
-successes = 1;
+```squiggle
+trials = 10
+successes = 1
 Danger.laplace(trials, successes); //  (successes + 1) / (trials + 2)  = 2 / 12 = 0.1666
 ```
 
 ### factorial
 
-```js
+```
 Danger.factorial: (number) => number
 ```
 
@@ -26,7 +26,7 @@ Returns the factorial of a number
 
 ### choose
 
-```js
+```
 Danger.choose: (number, number) => number
 ```
 
@@ -34,7 +34,7 @@ Danger.choose: (number, number) => number
 
 ### binomial
 
-```js
+```
 Danger.binomial: (number, number, number) => number
 ```
 
@@ -42,7 +42,7 @@ Danger.binomial: (number, number, number) => number
 
 ### integrateFunctionBetweenWithNumIntegrationPoints
 
-```js
+```
 Danger.integrateFunctionBetweenWithNumIntegrationPoints: (number => number, number, number, number) => number
 ```
 
@@ -50,7 +50,7 @@ Danger.integrateFunctionBetweenWithNumIntegrationPoints: (number => number, numb
 
 Note that the function `f` has to take in and return numbers. To integrate a function which returns distributios, use:
 
-```js
+```squiggle
 auxiliaryF(x) = mean(f(x))
 
 Danger.integrateFunctionBetweenWithNumIntegrationPoints(auxiliaryF, min, max, numIntegrationPoints)
@@ -58,7 +58,7 @@ Danger.integrateFunctionBetweenWithNumIntegrationPoints(auxiliaryF, min, max, nu
 
 ### integrateFunctionBetweenWithEpsilon
 
-```js
+```
 Danger.integrateFunctionBetweenWithEpsilon: (number => number, number, number, number) => number
 ```
 
@@ -68,7 +68,7 @@ Same caveats as `integrateFunctionBetweenWithNumIntegrationPoints` apply.
 
 ### optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions
 
-```js
+```
 Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions: (array<number => number>, number, number) => number
 ```
 
@@ -76,8 +76,15 @@ Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions: (array<
 
 Example:
 
-```js
-Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions([{|x| 20-x}, {|y| 10}], 100, 0.01)
+```squiggle
+Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions(
+  [
+    {|x| 20-x},
+    {|y| 10}
+  ],
+  100,
+  0.01
+)
 ```
 
 Note also that the array ought to have more than one function in it.
