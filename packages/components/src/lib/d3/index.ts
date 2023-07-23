@@ -23,7 +23,7 @@ export function sqScaleToD3(
     case "power":
       return scalePow().exponent(scale.exponent);
     case "log":
-      return scaleLog().base(scale.base);
+      return scaleLog();
     default:
       throw new Error(`Unknown scale: ${scale satisfies never}`);
   }

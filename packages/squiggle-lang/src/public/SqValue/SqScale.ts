@@ -47,12 +47,8 @@ export class SqLinearScale extends SqAbstractScale<"linear"> {
 export class SqLogScale extends SqAbstractScale<"log"> {
   tag = "log" as const;
 
-  static create(args: CommonScaleArgs & { base: number }) {
+  static create(args: CommonScaleArgs = {}) {
     return new SqLogScale({ type: "log", ...args });
-  }
-
-  get base() {
-    return this._value.base;
   }
 }
 

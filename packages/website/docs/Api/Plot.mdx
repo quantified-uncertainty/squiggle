@@ -121,7 +121,7 @@ We use D3 for the tick formats. You can read about custom tick formats [here](ht
 ```js
 Scale.log: ({min: number, max: number, tickFormat: string}) => scale
 Scale.linear: ({min: number, max: number, tickFormat: string}) => scale
-Scale.symlog: ({min: number, max: number, tickFormat: string}) => scale
+Scale.symlog: ({min: number, max: number, tickFormat: string, constant: number}) => scale
 Scale.power: ({min: number, max: number, tickFormat: string, exponent: number}) => scale
 ```
 
@@ -130,7 +130,9 @@ Scale.power: ({min: number, max: number, tickFormat: string, exponent: number}) 
 ** Scale.linear **
 
 ** Scale.symlog **  
-Symmetric log scale. Useful for plotting data that includes negative values.
+Symmetric log scale. Useful for plotting data that includes zero or negative values.
+
+The function accepts an additional constant parameter, used as follows: Scale.symlog({constant: 0.1}). This parameter allows you to allocate more pixel space to data with lower or higher absolute values. By adjusting this constant, you effectively control the scale's focus, shifting it between smaller and larger values. For more detailed information on this parameter, refer to the [D3 Documentation](https://d3js.org/d3-scale/symlog).
 
 ** Scale.power **  
 Power scale. Accepts an extra `exponent` parameter, like, `Scale.power({exponent: 2, min: 0, max: 100})`.

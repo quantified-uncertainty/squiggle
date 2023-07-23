@@ -350,7 +350,6 @@ export type Scale = CommonScaleArgs &
       }
     | {
         type: "log";
-        base: number;
       }
     | {
         type: "symlog";

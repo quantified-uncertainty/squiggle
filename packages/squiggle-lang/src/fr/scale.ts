@@ -60,11 +60,10 @@ export const library = [
           frRecord(
             ["min", frOptional(frNumber)],
             ["max", frOptional(frNumber)],
-            ["tickFormat", frOptional(frString)],
-            ["base", frOptional(frNumber)]
+            ["tickFormat", frOptional(frString)]
           ),
         ],
-        ([{ min, max, tickFormat, base }]) => {
+        ([{ min, max, tickFormat }]) => {
           if (min !== null && min <= 0) {
             throw new REOther(`Min must be over 0 for log scale, got: ${min}`);
           }
@@ -74,12 +73,11 @@ export const library = [
             min: min ?? undefined,
             max: max ?? undefined,
             tickFormat: tickFormat ?? undefined,
-            base: base || 10,
           });
         }
       ),
       makeDefinition([], () => {
-        return vScale({ type: "log", base: 10 });
+        return vScale({ type: "log" });
       }),
     ],
   }),
