@@ -76,20 +76,31 @@ export const library = [
   maker.make({
     name: "symlog",
     output: "Scale",
-    examples: [`Scale.symlog({ min: -10, max: 10 })`],
+    examples: [`Scale.symlog({ min: -10, max: 10, base: 10 })`],
     definitions: [
-      makeDefinition([commonRecord], ([{ min, max, tickFormat }]) => {
-        checkMinMax(min, max);
+      makeDefinition(
+        [
+          frRecord(
+            ["min", frOptional(frNumber)],
+            ["max", frOptional(frNumber)],
+            ["tickFormat", frOptional(frString)],
+            ["base", frNumber]
+          ),
+        ],
+        ([{ min, max, tickFormat, base }]) => {
+          checkMinMax(min, max);
 
-        return vScale({
-          type: "symlog",
-          min: min ?? undefined,
-          max: max ?? undefined,
-          tickFormat: tickFormat ?? undefined,
-        });
-      }),
+          return vScale({
+            type: "symlog",
+            min: min ?? undefined,
+            max: max ?? undefined,
+            tickFormat: tickFormat ?? undefined,
+            base,
+          });
+        }
+      ),
       makeDefinition([], () => {
-        return vScale({ type: "symlog" });
+        return vScale({ type: "symlog", base: 10 });
       }),
     ],
   }),

@@ -19,7 +19,7 @@ export function sqScaleToD3(
     case "linear":
       return scaleLinear();
     case "symlog":
-      return scaleSymlog().constant(0.0001);
+      return scaleSymlog().constant(scale.base);
     case "power":
       return scalePow().exponent(scale.exponent);
     case "log":

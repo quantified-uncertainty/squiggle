@@ -353,6 +353,7 @@ export type Scale = CommonScaleArgs &
       }
     | {
         type: "symlog";
+        base: number;
       }
     | {
         type: "power";

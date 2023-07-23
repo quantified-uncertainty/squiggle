@@ -9,6 +9,7 @@ import {
   resultMap,
   SqDistributionsPlot,
   SqDistributionTag,
+  SqPowerScale,
   SqShape,
 } from "@quri/squiggle-lang";
 import { MouseTooltip, TextTooltip } from "@quri/ui";
@@ -57,11 +58,12 @@ const InnerDistributionsChart: FC<{
   isMulti,
   showSamplesBar,
 }) => {
+  const yAdjustment = plot.xScale.pdfYAdjustment;
   const shapes = unchangedShapes.map(({ name, continuous, discrete }) => ({
     name,
     continuous: continuous.map(({ x, y }) => ({
       x,
-      y: y * Math.abs(x),
+      y: yAdjustment(x, y),
     })),
     discrete,
   }));

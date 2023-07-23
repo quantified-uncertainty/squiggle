@@ -8,7 +8,7 @@ import { SqPowerScale } from "@quri/squiggle-lang";
 describe.each([
   SqLinearScale.create(),
   SqLogScale.create(),
-  SqSymlogScale.create(),
+  SqSymlogScale.create({ base: 10 }),
   SqPowerScale.create({ exponent: 10 }),
 ])("%s", (sqScale) => {
   const scale = sqScaleToD3(sqScale);

@@ -42,6 +42,10 @@ export class SqLinearScale extends SqAbstractScale<"linear"> {
   static create(args: CommonScaleArgs = {}) {
     return new SqLinearScale({ type: "linear", ...args });
   }
+
+  pdfYAdjustment(x: number, y: number) {
+    return y;
+  }
 }
 
 export class SqLogScale extends SqAbstractScale<"log"> {
@@ -50,13 +54,25 @@ export class SqLogScale extends SqAbstractScale<"log"> {
   static create(args: CommonScaleArgs = {}) {
     return new SqLogScale({ type: "log", ...args });
   }
+
+  pdfYAdjustment(x: number, y: number) {
+    return y * Math.abs(x);
+  }
 }
 
 export class SqSymlogScale extends SqAbstractScale<"symlog"> {
   tag = "symlog" as const;
 
-  static create(args: CommonScaleArgs = {}) {
+  static create(args: CommonScaleArgs & { base: number }) {
     return new SqSymlogScale({ type: "symlog", ...args });
+  }
+
+  get base() {
+    return this._value.base;
+  }
+
+  pdfYAdjustment(x: number, y: number) {
+    return y * Math.abs(x);
   }
 }
 
@@ -70,6 +86,10 @@ export class SqPowerScale extends SqAbstractScale<"power"> {
   get exponent() {
     return this._value.exponent;
   }
+
+  pdfYAdjustment = (x: number, y: number) => {
+    return y * Math.pow(x, 1 - this._value.exponent);
+  };
 }
 
 export type SqScale = SqLinearScale | SqLogScale | SqSymlogScale | SqPowerScale;

@@ -80,9 +80,10 @@ const logKde = (
 const regularKde = (
   samples: number[],
   weight: number,
-  outputXYPoints: number
+  outputXYPoints: number,
+  kernelWidth?: number
 ): { xs: number[]; ys: number[] } => {
-  const width = nrd0(samples);
+  const width = kernelWidth ?? nrd0(samples);
   return kde(samples, outputXYPoints, width, weight);
 };
 
@@ -111,8 +112,7 @@ export const samplesToPointSetDist = (
     discretePart.xs.push(contLength);
     discretePart.ys.push(continuousPart[0]);
   } else {
-    const width = kernelWidth ?? nrd0(continuousPart);
-    continuousDist = regularKde(continuousPart, pointWeight, outputXYPoints);
+    continuousDist = logKde(continuousPart, pointWeight, outputXYPoints);
   }
 
   discretePart.ys = discretePart.ys.map((count: number) => count * pointWeight);
