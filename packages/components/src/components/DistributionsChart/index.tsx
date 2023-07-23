@@ -62,7 +62,7 @@ const InnerDistributionsChart: FC<{
 
   const shapes = unAdjustedShapes.map(({ name, continuous, discrete }) => ({
     name,
-    ...adjustPdfHeightToScale({ discrete, continuous }, plot.yScale),
+    ...adjustPdfHeightToScale({ discrete, continuous }, plot.xScale),
   }));
 
   const domain = shapes.flatMap((shape) =>
