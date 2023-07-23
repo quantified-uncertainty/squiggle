@@ -3,13 +3,17 @@
 // samples:      Must be sorted!
 // outputLength: Number of points in output, >= 4
 // xWidth:       Width of the kernel in x axis units
+
+import { nrd0 } from "./bandwidth.js";
+
 // weight:       Probability mass for each point
 export const kde = (
   samples: number[],
   outputLength: number,
-  xWidth: number,
-  weight: number
+  weight: number,
+  _xWidth?: number
 ) => {
+  let xWidth = _xWidth ?? nrd0(samples);
   samples = samples.filter((v) => Number.isFinite(v)); // Not sure if this is needed?
   const len = samples.length;
   if (len === 0) return { usedWidth: xWidth, xs: [], ys: [] };
@@ -43,7 +47,6 @@ export const kde = (
   //            === stepsInside + 2 * width
   //            === outputLength - 1
   const min = smin - xWidth;
-  const range = srange + 2 * xWidth;
 
   // On our discrete set of x values, each triangle is indistinguishable
   // from a sum of two triangles with peaks at the sample's two nearest

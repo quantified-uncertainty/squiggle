@@ -155,11 +155,12 @@ sample everything.
   }
 
   toPointSetDist(env: Env): Result.result<PointSetDist, DistError> {
-    const dists = samplesToPointSetDist(
-      this.samples,
-      env.xyPointLength,
-      undefined
-    );
+    const dists = samplesToPointSetDist({
+      samples: this.samples,
+      outputPointLength: env.xyPointLength,
+      kernelWidth: undefined,
+      logScale: true,
+    });
 
     const result = buildMixedShape({
       continuous: dists.continuousDist

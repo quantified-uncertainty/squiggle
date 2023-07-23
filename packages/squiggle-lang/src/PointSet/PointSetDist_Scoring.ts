@@ -92,7 +92,8 @@ export const WithDistAnswer = {
     } else {
       return Result.fmap(
         getMixedSums(estimate, answer),
-        ([discretePart, continuousPart]) => discretePart + continuousPart
+        ([discreteSamples, continuousSamples]) =>
+          discreteSamples + continuousSamples
       );
     }
   },

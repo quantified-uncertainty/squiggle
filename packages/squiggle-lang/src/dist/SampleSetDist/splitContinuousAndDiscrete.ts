@@ -78,7 +78,7 @@ export const splitContinuousAndDiscrete = (
   continuous.push(...sortedArray.slice(i));
 
   return {
-    continuousPart: continuous,
-    discretePart: { xs: discreteValue, ys: discreteCount },
+    continuousSamples: continuous,
+    discreteSamples: { xs: discreteValue, ys: discreteCount },
   };
 };
