@@ -17,7 +17,7 @@ export const splitContinuousAndDiscrete = (
   sortedArray: readonly number[],
   minDiscreteWeight: number
 ) => {
-  const continuous: number[] = [];
+  let continuous: number[] = [];
   const discreteCount: number[] = [];
   const discreteValue: number[] = [];
 
@@ -26,7 +26,7 @@ export const splitContinuousAndDiscrete = (
       `Minimum discrete weight must be an integer. Got ${minDiscreteWeight}`
     );
   }
-  if (minDiscreteWeight <= 1) {
+  if (minDiscreteWeight < 2) {
     // Weight of 1 is pointless because it indicates only discrete values,
     // and causes an infinite loop in the doubling search used here.
     throw new Error("Minimum discrete weight must be at least 2");
@@ -77,8 +77,19 @@ export const splitContinuousAndDiscrete = (
   // Remaining values are continuous
   continuous.push(...sortedArray.slice(i));
 
+  // If all the continuous values are the same, we just convert them to discrete
+  const allContinuousAreSame =
+    continuous.length > 0 &&
+    continuous[0] === continuous[continuous.length - 1];
+
+  if (allContinuousAreSame) {
+    continuous = [];
+    discreteValue.push(continuous[0]);
+    discreteCount.push(continuous.length);
+  }
+
   return {
     continuousSamples: continuous,
-    discreteSamples: { xs: discreteValue, ys: discreteCount },
+    discreteShape: { xs: discreteValue, ys: discreteCount },
   };
 };

@@ -14,7 +14,7 @@ const makeTest = (params: {
   test(params.name, () =>
     expect(split(params.data, params.minWeight)).toEqual({
       continuousSamples: params.continuous,
-      discreteSamples: params.discrete,
+      discreteShape: params.discrete,
     })
   );
 };
@@ -58,15 +58,15 @@ describe("Continuous and discrete splits", () => {
   };
 
   test("split at count=10", () => {
-    expect(split(makeDuplicatedArray(10), 2).discreteSamples.xs.length).toEqual(
+    expect(split(makeDuplicatedArray(10), 2).discreteShape.xs.length).toEqual(
       10
     );
   });
 
   test("split at count=500", () => {
-    expect(
-      split(makeDuplicatedArray(500), 2).discreteSamples.xs.length
-    ).toEqual(500);
+    expect(split(makeDuplicatedArray(500), 2).discreteShape.xs.length).toEqual(
+      500
+    );
   });
 
   // Function for fast-check property testing
@@ -90,7 +90,7 @@ describe("Continuous and discrete splits", () => {
     const discSegments = segments.filter((s) => s.length >= weight);
 
     expect(result.continuousSamples).toEqual(flatten(contSegments));
-    expect(result.discreteSamples).toEqual({
+    expect(result.discreteShape).toEqual({
       xs: discSegments.map((s) => s[0]),
       ys: discSegments.map((s) => s.length),
     });

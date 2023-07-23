@@ -11,7 +11,7 @@ const MIN_SAMPLES_FOR_KDE = 5;
 
 type SamplesToPointSetDistParams = {
   samples: readonly number[];
-  outputPointLength: number;
+  continuousOutputLength: number;
   kernelWidth?: number;
   logScale?: boolean;
 };
@@ -23,58 +23,44 @@ type ConversionResult = {
 
 export const samplesToPointSetDist = ({
   samples,
-  outputPointLength,
+  continuousOutputLength,
   kernelWidth,
   logScale = true,
 }: SamplesToPointSetDistParams): ConversionResult => {
   samples = E_A_Floats.sort(samples);
+  let countedLength = samples.length;
 
-  const { continuousSamples, discreteSamples } = splitContinuousAndDiscrete(
+  let { continuousSamples, discreteShape } = splitContinuousAndDiscrete(
     samples,
     minDiscreteToKeep(samples)
   );
 
-  const contLength = continuousSamples.length;
-  let pointWeight = 1 / samples.length;
+  if (continuousSamples.length < MIN_SAMPLES_FOR_KDE) {
+    countedLength -= continuousSamples.length;
+    continuousSamples = [];
+  }
+
+  let pointWeight = 1 / countedLength;
 
   let continuousDist = undefined;
-
-  const allContinuousAreSame = () =>
-    continuousSamples[0] === continuousSamples[contLength - 1];
-
-  if (contLength <= MIN_SAMPLES_FOR_KDE) {
-    // Drop these points and adjust weight accordingly
-    pointWeight = 1 / (samples.length - contLength);
-  } else if (allContinuousAreSame()) {
-    // All the same value: treat as discrete
-    // TODO: Refactor this into the splitContinuousAndDiscrete function.
-    // Also, it seems like xs and ys should be swapped here.
-    discreteSamples.xs.push(contLength);
-    discreteSamples.ys.push(continuousSamples[0]);
-  } else {
+  if (continuousSamples.length > 0) {
+    const kdeParams = {
+      samples: continuousSamples,
+      outputLength: continuousOutputLength,
+      weight: pointWeight,
+      kernelWidth,
+    };
     if (logScale) {
-      continuousDist = logKde(
-        continuousSamples,
-        pointWeight,
-        outputPointLength,
-        kernelWidth
-      );
+      continuousDist = logKde(kdeParams);
     } else {
-      continuousDist = kde(
-        continuousSamples,
-        outputPointLength,
-        pointWeight,
-        kernelWidth
-      );
+      continuousDist = kde(kdeParams);
     }
   }
 
-  discreteSamples.ys = discreteSamples.ys.map(
-    (count: number) => count * pointWeight
-  );
+  discreteShape.ys = discreteShape.ys.map((y) => y * pointWeight);
 
   return {
     continuousDist,
-    discreteDist: discreteSamples,
+    discreteDist: discreteShape,
   };
 };

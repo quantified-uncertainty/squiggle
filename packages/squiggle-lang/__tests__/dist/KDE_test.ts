@@ -34,7 +34,12 @@ describe("Kernel density estimation", () => {
           xs,
           ys,
           usedWidth: width,
-        } = kde(sortedSamples, outputLength, weight, wantedWidth);
+        } = kde({
+          samples: sortedSamples,
+          outputLength,
+          weight,
+          kernelWidth: wantedWidth,
+        });
 
         test("lengths of xs and ys should match outputLength", () => {
           expect(xs.length).toEqual(outputLength);

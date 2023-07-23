@@ -157,7 +157,7 @@ sample everything.
   toPointSetDist(env: Env): Result.result<PointSetDist, DistError> {
     const dists = samplesToPointSetDist({
       samples: this.samples,
-      outputPointLength: env.xyPointLength,
+      continuousOutputLength: env.xyPointLength,
       kernelWidth: undefined,
       logScale: true,
     });
