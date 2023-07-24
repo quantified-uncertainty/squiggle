@@ -55,5 +55,5 @@ PointSet.mapY: (pointSetDist, (number => number)) => pointSetDist
 ```
 
 ```squiggle
-normal(5,3) |> PointSet.fromDist |> PointSet.mapY({|x| x ^ 2}) |> normalize
+normal(5,3) -> PointSet.fromDist -> PointSet.mapY({|x| x ^ 2}) -> normalize
 ```
