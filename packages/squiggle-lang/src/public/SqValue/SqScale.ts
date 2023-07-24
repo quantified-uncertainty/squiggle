@@ -54,9 +54,14 @@ export class SqLogScale extends SqAbstractScale<"log"> {
 
 export class SqSymlogScale extends SqAbstractScale<"symlog"> {
   tag = "symlog" as const;
+  static defaultConstant = 1;
 
-  static create(args: CommonScaleArgs & { constant: number }) {
-    return new SqSymlogScale({ type: "symlog", ...args });
+  static create(args: CommonScaleArgs & { constant?: number }) {
+    return new SqSymlogScale({
+      type: "symlog",
+      ...args,
+      constant: args.constant || this.defaultConstant,
+    });
   }
 
   get constant() {
@@ -66,9 +71,14 @@ export class SqSymlogScale extends SqAbstractScale<"symlog"> {
 
 export class SqPowerScale extends SqAbstractScale<"power"> {
   tag = "power" as const;
+  static defaultExponent = 0.1;
 
-  static create(args: CommonScaleArgs & { exponent: number }) {
-    return new SqPowerScale({ type: "power", ...args });
+  static create(args: CommonScaleArgs & { exponent?: number }) {
+    return new SqPowerScale({
+      type: "power",
+      ...args,
+      exponent: args.exponent || this.defaultExponent,
+    });
   }
 
   get exponent() {

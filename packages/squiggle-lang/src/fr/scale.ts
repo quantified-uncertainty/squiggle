@@ -9,6 +9,7 @@ import {
 import { FnFactory } from "../library/registry/helpers.js";
 import { vScale } from "../value/index.js";
 import { REOther } from "../errors/messages.js";
+import { SqPowerScale, SqSymlogScale } from "../public/SqValue/SqScale.js";
 
 const maker = new FnFactory({
   nameSpace: "Scale",
@@ -103,12 +104,15 @@ export const library = [
             min: min ?? undefined,
             max: max ?? undefined,
             tickFormat: tickFormat ?? undefined,
-            constant: constant || 0.1,
+            constant: constant || SqSymlogScale.defaultConstant,
           });
         }
       ),
       makeDefinition([], () => {
-        return vScale({ type: "symlog", constant: 0.1 });
+        return vScale({
+          type: "symlog",
+          constant: SqSymlogScale.defaultConstant,
+        });
       }),
     ],
   }),
@@ -134,7 +138,7 @@ export const library = [
             min: min ?? undefined,
             max: max ?? undefined,
             tickFormat: tickFormat ?? undefined,
-            exponent: exponent || 0.1,
+            exponent: exponent || SqPowerScale.defaultExponent,
           });
         }
       ),
