@@ -13,8 +13,14 @@ const unLogShape = ({ xs, ys }: XYShape): XYShape => ({
 });
 
 const reverseNegativeShape = ({ xs, ys }: XYShape): XYShape => ({
-  xs: xs.map((x) => -x),
-  ys: ys.map((y) => -y),
+  xs: xs
+    .slice()
+    .reverse()
+    .map((x) => -x),
+  ys: ys
+    .slice()
+    .reverse()
+    .map((y) => y),
 });
 
 type sign = "positive" | "negative";
@@ -30,9 +36,10 @@ const logKdeSingleSide = ({
 }: kdeParams & { sign: sign }): XYShape => {
   let adjustedSamples = samples;
   if (sign === "negative") {
-    adjustedSamples = adjustedSamples.map(Math.abs);
+    adjustedSamples = adjustedSamples.map(Math.abs).slice().reverse();
+    console.log("INSIDE", adjustedSamples);
   }
-  adjustedSamples = logSamples(samples);
+  adjustedSamples = logSamples(adjustedSamples);
 
   const { xs, ys } = kde({
     samples: adjustedSamples,
@@ -81,8 +88,10 @@ export const logKde = ({
     singleSideKde("negative"),
   ];
 
-  return {
+  const result = {
     xs: [...negativePart.xs, ...positivePart.xs],
     ys: [...negativePart.ys, ...positivePart.ys],
   };
+  console.log(positivePart, negativePart, result);
+  return result;
 };

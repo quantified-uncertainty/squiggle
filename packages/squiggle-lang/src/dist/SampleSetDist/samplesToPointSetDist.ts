@@ -3,6 +3,7 @@ import { XYShape } from "../../XYShape.js";
 import { splitContinuousAndDiscrete } from "./splitContinuousAndDiscrete.js";
 import * as E_A_Floats from "../../utility/E_A_Floats.js";
 import { logKde } from "./logKde.js";
+import { SampleSetDist } from "./index.js";
 
 const minDiscreteToKeep = (samples: readonly number[]) =>
   Math.max(20, Math.round(samples.length / 50));
@@ -21,11 +22,30 @@ type ConversionResult = {
   discreteDist: XYShape;
 };
 
+// This is a very rough heuristic. It's really not clear what's optimal.
+// I did this by testing that normal and uniform dists would not satisfy this, but
+// many lognormal distributions would.
+const shouldBeLogHeuristicFn = ({ p10, p90 }: { p10: number; p90: number }) => {
+  return Math.log(p90 / p10) > 3;
+};
+
+let checkIfShouldBeLog = (samples: number[]) => {
+  const dist = SampleSetDist.make(samples);
+  if (dist.ok) {
+    const range = dist.value.range(0.8, true);
+    if (range.ok) {
+      const { low, high } = range.value;
+      return shouldBeLogHeuristicFn({ p10: low, p90: high });
+    }
+  }
+  return undefined;
+};
+
 export const samplesToPointSetDist = ({
   samples,
   continuousOutputLength,
   kernelWidth,
-  logScale = true,
+  logScale,
 }: SamplesToPointSetDistParams): ConversionResult => {
   samples = E_A_Floats.sort(samples);
   let countedLength = samples.length;
@@ -50,7 +70,15 @@ export const samplesToPointSetDist = ({
       weight: pointWeight,
       kernelWidth,
     };
-    if (logScale) {
+
+    let _logScale = logScale;
+    if (_logScale === undefined) {
+      const shouldBeLogHeuristic = checkIfShouldBeLog(continuousSamples);
+      if (shouldBeLogHeuristic !== undefined) {
+        _logScale = shouldBeLogHeuristic;
+      }
+    }
+    if (_logScale) {
       continuousDist = logKde(kdeParams);
     } else {
       continuousDist = kde(kdeParams);
