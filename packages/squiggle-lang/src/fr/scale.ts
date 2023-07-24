@@ -142,6 +142,12 @@ export const library = [
           });
         }
       ),
+      makeDefinition([], () => {
+        return vScale({
+          type: "power",
+          exponent: SqPowerScale.defaultExponent,
+        });
+      }),
     ],
   }),
 ];
