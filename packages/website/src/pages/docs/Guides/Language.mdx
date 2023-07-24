@@ -8,9 +8,41 @@ import { SquiggleEditor } from "@quri/squiggle-components";
 
 Squiggle supports some simple types and language features.
 
-## Numbers
+## Basic types
 
-<SquiggleEditor defaultCode="4.32" />
+<SquiggleEditor defaultCode={`/**
+Number value.
+There's no difference between floats and integers in Squiggle.
+*/
+n = 4.32
+
+/** Boolean value.
+Can be \`true\` or \`false\`.
+*/
+f = false
+
+/** String value. */
+s = "Hello world"`} />
+
+## Container types
+
+### Lists
+
+Squiggle lists can contain items of any type, similar to those in Python. [API](/docs/Api/List).
+
+<SquiggleEditor
+  defaultCode={`[beta(1,10), 4, isNormalized(SampleSet.fromDist(1 to 2))]`}
+/>
+
+### Dictionaries
+
+Squiggle dictionaries work similarly to Python dictionaries or Javascript objects. [API](/docs/Api/Dictionary).
+
+<SquiggleEditor
+  defaultCode={`d = {dist: triangular(0, 1, 2), weight: 0.25}
+d.dist`}
+/>
+
 
 ## Distributions
 
@@ -20,25 +52,8 @@ There are several ways of easily entering distributions. See the [documentation]
   defaultCode={`a = normal(4,2)
 b = 30 to 50
 c = lognormal({mean:90, stdev: 7})
-d = mixture(a,b,c, [.3, .3, .4])
+d = mixture(a, b, c, [.3, .3, .4])
 d`}
-/>
-
-## Lists
-
-Squiggle lists can accept items of any type, similar to those in Python. [API](/docs/Api/List).
-
-<SquiggleEditor
-  defaultCode={`[beta(1,10), 4, isNormalized(SampleSet.fromDist(1 to 2))]`}
-/>
-
-## Dictionaries
-
-Squiggle dictionaries work similarly to Python dictionaries. [API](/docs/Api/Dictionary).
-
-<SquiggleEditor
-  defaultCode={`d = {dist: triangular(0, 1, 2), weight: 0.25}
-d.dist`}
 />
 
 ## Functions
@@ -107,7 +122,13 @@ if x<8 then 10 else 3`}
 This is a multiple
 -line comment.
 */
-""
+foo = 5
+
+/**
+This is a docstring.
+Because it starts with "/**", it will be displayed in the viewer if it precedes a public variable definition.
+*/
+bar = 6
 `}
 />
 
@@ -116,7 +137,7 @@ This is a multiple
 Squiggle features [data-first](https://www.javierchavarri.com/data-first-and-data-last-a-comparison/) pipes. Functions in the standard library are organized to make this convenient.
 
 <SquiggleEditor
-  defaultCode={`normal(5,2) |> truncateLeft(3) |> SampleSet.fromDist |> SampleSet.map({|r| r + 10})`}
+  defaultCode={`normal(5,2) -> truncateLeft(3) -> SampleSet.fromDist -> SampleSet.map({|r| r + 10})`}
 />
 
 ## Standard Library
