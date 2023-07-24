@@ -6,6 +6,7 @@ export { Dropdown } from "./components/Dropdown/index.js";
 export { DropdownMenu } from "./components/Dropdown/DropdownMenu.js";
 export { DropdownMenuHeader } from "./components/Dropdown/DropdownMenuHeader.js";
 export { DropdownMenuActionItem } from "./components/Dropdown/DropdownMenuActionItem.js";
+export { ActionItemInternal } from "./components/Dropdown/DropdownMenuActionItemInternal.js";
 export { DropdownMenuAsyncActionItem } from "./components/Dropdown/DropdownMenuAsyncActionItem.js";
 export { DropdownMenuSeparator } from "./components/Dropdown/DropdownMenuSeparator.js";
 

@@ -3,7 +3,7 @@ import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 
 const markdown = `
 
-# Terms and Conditions
+# Terms of Service
 
 ## AGREEMENT TO OUR LEGAL TERMS
 
@@ -266,7 +266,7 @@ Phone: (628) 313-3858
 ops@quantifieduncertainty.org
 `;
 
-export default function TOS() {
+export default function Terms() {
   return (
     <NarrowPageLayout>
       <ReactMarkdown className="prose max-w-4xl">{markdown}</ReactMarkdown>

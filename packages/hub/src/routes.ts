@@ -134,3 +134,15 @@ export function graphqlPlaygroundRoute(query?: string) {
 
   return `/api/graphql${paramsString}`;
 }
+
+export function aboutRoute() {
+  return "/about";
+}
+
+export function privacyPolicyRoute() {
+  return "/privacy";
+}
+
+export function termsOfServiceRoute() {
+  return "/terms";
+}

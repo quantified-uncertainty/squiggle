@@ -1,7 +1,7 @@
 import { FC, useState } from "react";
 
 import { IconProps } from "../../icons/Icon.js";
-import { CommonItem } from "./CommonItem.js";
+import { ActionItemInternal } from "./DropdownMenuActionItemInternal.js";
 
 type AsyncActionItemProps = {
   icon: FC<IconProps>;
@@ -29,7 +29,7 @@ export const DropdownMenuAsyncActionItem: FC<AsyncActionItemProps> = ({
 
   return (
     <div onClick={act}>
-      <CommonItem icon={icon} title={title} acting={acting} />
+      <ActionItemInternal icon={icon} title={title} acting={acting} />
     </div>
   );
 };
