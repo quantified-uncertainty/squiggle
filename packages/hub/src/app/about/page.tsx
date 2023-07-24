@@ -12,10 +12,10 @@ import { graphqlPlaygroundRoute } from "@/routes";
 
 const markdown = `
 # About Squiggle Hub
-Squiggle Hub serves as a communal platform for the creation and sharing of code written in [Squiggle](https://www.squiggle-language.com/). Both the platform and the source code are open-source and free to use.
+Squiggle Hub is a platform for the creation and sharing of code written in [Squiggle](https://www.squiggle-language.com/). Both the platform and the source code are [open-source](${GITHUB_URL}) and free to use.
 
 ## Squiggle: A Glimpse
-[Squiggle](https://www.squiggle-language.com/) is a probabilistic estimation-oriented programming language that operates on the JavaScript platform. We think it's well-suited for intuition-based modeling and risk estimation. Additional details can be found on the Squiggle official website.
+Squiggle is a probabilistic estimation-oriented programming language that operates on the JavaScript platform. We think it's well-suited for intuition-based modeling and risk estimation. Additional details can be found on the [Squiggle official website](https://www.squiggle-language.com/).
 
 ## Our Connection to Guesstimate
 Out team previously co-founded [Guesstimate](https://getguesstimate.com/), a different estimation tool. Squiggle Hub stands as a spiritual successor to Guesstimate. With the power of a full programming language at its disposal, it offers superior flexibility and power, albeit at the cost of a steeper learning curve.
@@ -35,7 +35,7 @@ The [Quantified Uncertainty Research Institute](https://quantifieduncertainty.or
 Squiggle Hub, along with Squiggle, is available for free use, with the code being open-source and licensed under MIT. Access it [here](https://github.com/quantified-uncertainty/squiggle).
 
 ## Squiggle Hub API
-Developed using a GraphQL API, Squiggle Hub can be accessed [here](${graphqlPlaygroundRoute()}). The API is recommended for querying. If mutations are desired, kindly reach out to us via Discord. Squiggle's JavaScript implementation is available on [NPM](https://www.npmjs.com/package/squiggle-lang), and it includes several [integrations](https://www.squiggle-language.com/docs/Integrations) like VSCode and Observable.
+Developed using a GraphQL API, Squiggle Hub can be accessed [here](${graphqlPlaygroundRoute()}). The API is recommended for querying. If mutations are desired, kindly reach out to us via [Discord](${DISCORD_URL}). Squiggle's JavaScript implementation is available on [NPM](https://www.npmjs.com/package/squiggle-lang), and it includes several [integrations](https://www.squiggle-language.com/docs/Integrations) like VS Code and Observable.
 
 ## Feature: Relative Values
 Squiggle Hub currently supports experimental [relative values](https://forum.effectivealtruism.org/posts/EFEwBvuDrTLDndqCt/relative-value-functions-a-flexible-new-format-for-value), with future improvements planned.
