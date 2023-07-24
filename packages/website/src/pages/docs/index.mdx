@@ -16,19 +16,30 @@ Say you're trying to estimate the number of piano tuners in New York City. You c
 (Tip: This is interactive! Feel free to modify the code directly.)
 
 <SquiggleEditor
-  defaultCode={`
-// Piano tuners in NYC over the next 5 years
-populationOfNewYork2022 = 8.1M to 8.4M // This means that you're 90% confident the value is between 8.1 and 8.4 Million.\n
+  defaultCode={`/**
+This means that you're 90% confident the value is between 8.1 and 8.4 Million.
+*/
+populationOfNewYork2022 = 8.1M to 8.4M
+
+/** We assume there are almost no people with multiple pianos. */
 proportionOfPopulationWithPianos = {
-    percentage = (.2 to 1)
-    percentage * 0.01
-} // We assume there are almost no people with multiple pianos\n
+  // This is a block.
+  percentage = 0.2 to 1 // Block body can declare local variables.
+  percentage * 0.01 // Final expression of a block is the block's value.
+}
+
 pianoTunersPerPiano = {
-    pianosPerPianoTuner = 2k to 50k // This is artificially narrow, to help graphics later
-    1 / pianosPerPianoTuner
-} \n
-totalTunersIn2022 = populationOfNewYork2022 * proportionOfPopulationWithPianos * pianoTunersPerPiano
-totalTunersIn2022
+  pianosPerPianoTuner = 2k to 50k // This is artificially narrow, to help graphics later.
+  1 / pianosPerPianoTuner
+}
+
+totalTunersIn2022 = populationOfNewYork2022 * proportionOfPopulationWithPianos *
+pianoTunersPerPiano
+
+/**
+Piano tuners in NYC over the next 5 years.
+*/
+totalTunersIn2022 // comment out this line with "//" to see other variables
 `}
 />
 
@@ -37,26 +48,34 @@ totalTunersIn2022
 Now let's take this a bit further. Let's imagine that you think that NYC will grow over time, and you'd like to estimate the number of piano tuners for every point in time for the next few years.
 
 <SquiggleEditor
-  defaultCode={`// Piano tuners in NYC over the next 5 years
-populationOfNewYork2022 = 8.1M to 8.4M\n
+  defaultCode={`populationOfNewYork2022 = 8.1M to 8.4M
+
 proportionOfPopulationWithPianos = {
     percentage = (.2 to 1)
     percentage * 0.01
-} // We assume there are almost no people with multiple pianos\n
+}
 pianoTunersPerPiano = {
-    pianosPerPianoTuner = 2k to 50k // This is artificially narrow, to help graphics later
+    pianosPerPianoTuner = 2k to 50k
     1 / pianosPerPianoTuner
-} \n
-//Time in years after 2022
-populationAtTime(t) = {
+}
+
+startYear = 2022
+domain = [startYear, startYear + 10]
+/** Time in years after 2022 */
+populationAtTime(t: domain) = {
     averageYearlyPercentageChange = -0.01 to 0.05 // We're expecting NYC to continuously grow with an mean of roughly between -1% and +4% per year
-    populationOfNewYork2022 * ((averageYearlyPercentageChange + 1) ^ t)
-}\n
+    populationOfNewYork2022 * ((averageYearlyPercentageChange + 1) ^ (t - startYear))
+}
 median(v) = quantile(v, .5)
-totalTunersAtTime(t) = populationAtTime(t) * proportionOfPopulationWithPianos * pianoTunersPerPiano\n
+totalTunersAtTime(t: domain) = (
+  populationAtTime(t) *
+  proportionOfPopulationWithPianos *
+  pianoTunersPerPiano
+)
+
 {
-    populationAtTime: populationAtTime,
-    totalTunersAtTimeMedian: {|t| median(totalTunersAtTime(t))}
+    populationAtTime,
+    totalTunersAtTimeMedian: {|t: domain| median(totalTunersAtTime(t))}
 }`}
 />
 
