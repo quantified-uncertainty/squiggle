@@ -19,9 +19,11 @@
     "nextra-theme-docs": "^2.10.0",
     "pako": "^2.1.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "shiki": "^0.14.3"
   },
   "devDependencies": {
+    "@quri/squiggle-textmate-grammar": "workspace:*",
     "@tailwindcss/forms": "^0.5.3",
     "@types/pako": "^2.0.0",
     "@types/react": "^18.2.14",

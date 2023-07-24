@@ -28,7 +28,7 @@ normal: (dict<{mean: distribution|number, stdev: distribution|number}>) => distr
 
 **Examples**
 
-```js
+```squiggle
 normal(5, 1)
 normal({ p5: 4, p95: 10 })
 normal({ p10: 5, p95: 9 })
@@ -50,12 +50,12 @@ lognormal: (dict<{mean: distribution|number, stdev: distribution|number}>) => di
 
 **Examples**
 
-```javascript
-lognormal(0.5, 0.8);
-lognormal({ p5: 4, p95: 10 });
-lognormal({ p10: 5, p95: 9 });
-lognormal({ p25: 5, p75: 9 });
-lognormal({ mean: 5, stdev: 2 });
+```squiggle
+lognormal(0.5, 0.8)
+lognormal({ p5: 4, p95: 10 })
+lognormal({ p10: 5, p95: 9 })
+lognormal({ p25: 5, p75: 9 })
+lognormal({ mean: 5, stdev: 2 })
 ```
 
 ### uniform
@@ -66,8 +66,8 @@ uniform: (distribution|number, distribution|number) => distribution
 
 **Examples**
 
-```javascript
-uniform(10, 12);
+```squiggle
+uniform(10, 12)
 ```
 
 ### beta
@@ -79,9 +79,9 @@ beta: (dict<{mean: distribution|number, stdev: distribution|number}>) => distrib
 
 **Examples**
 
-```javascript
-beta(20, 25);
-beta({ mean: 0.39, stdev: 0.1 });
+```squiggle
+beta(20, 25)
+beta({ mean: 0.39, stdev: 0.1 })
 ```
 
 ### cauchy
@@ -92,20 +92,20 @@ cauchy: (distribution|number, distribution|number) => distribution
 
 **Examples**
 
-```javascript
-cauchy(5, 1);
+```squiggle
+cauchy(5, 1)
 ```
 
 ### gamma
 
-```javascript
+```
 gamma: (distribution|number, distribution|number) => distribution
 ```
 
 **Examples**
 
-```js
-gamma(5, 1);
+```squiggle
+gamma(5, 1)
 ```
 
 ### logistic
@@ -116,8 +116,8 @@ logistic: (distribution|number, distribution|number) => distribution
 
 **Examples**
 
-```javascript
-gamma(5, 1);
+```squiggle
+gamma(5, 1)
 ```
 
 ### exponential
@@ -128,8 +128,8 @@ exponential: (distribution|number) => distribution
 
 **Examples**
 
-```javascript
-exponential(2);
+```squiggle
+exponential(2)
 ```
 
 ### bernoulli
@@ -140,20 +140,20 @@ bernoulli: (distribution|number) => distribution
 
 **Examples**
 
-```javascript
-bernoulli(0.5);
+```squiggle
+bernoulli(0.5)
 ```
 
 ### triangular
 
-```javascript
+```
 triangular: (number, number, number) => distribution;
 ```
 
 **Examples**
 
-```javascript
-triangular(5, 10, 20);
+```squiggle
+triangular(5, 10, 20)
 ```
 
 ### to / credibleIntervalToDistribution
@@ -171,7 +171,7 @@ credibleIntervalToDistribution(distribution|number, distribution|number) => dist
 
 **Examples**
 
-```javascript
+```squiggle
 5 to 10
 to(5,10)
 -5 to 5
@@ -186,10 +186,10 @@ mixture: (list<distributionLike>, weights?:list<float>) => distribution
 
 **Examples**
 
-```javascript
-mixture(normal(5, 1), normal(10, 1), 8);
-mx(normal(5, 1), normal(10, 1), [0.3, 0.7]);
-mx([normal(5, 1), normal(10, 1)], [0.3, 0.7]);
+```squiggle
+mixture(normal(5, 1), normal(10, 1), 8)
+mx(normal(5, 1), normal(10, 1), [0.3, 0.7])
+mx([normal(5, 1), normal(10, 1)], [0.3, 0.7])
 ```
 
 ## Functions
@@ -204,8 +204,8 @@ sample: (distribution) => number
 
 **Examples**
 
-```javascript
-sample(normal(5, 2));
+```squiggle
+sample(normal(5, 2))
 ```
 
 ### sampleN
@@ -218,8 +218,8 @@ sampleN: (distribution, number) => list<number>
 
 **Examples**
 
-```javascript
-sampleN(normal(5, 2), 100);
+```squiggle
+sampleN(normal(5, 2), 100)
 ```
 
 ### mean
@@ -232,8 +232,8 @@ mean: (distribution) => number
 
 **Examples**
 
-```javascript
-mean(normal(5, 2));
+```squiggle
+mean(normal(5, 2))
 ```
 
 ### stdev
@@ -260,8 +260,8 @@ cdf: (distribution, number) => number
 
 **Examples**
 
-```javascript
-cdf(normal(5, 2), 3);
+```squiggle
+cdf(normal(5, 2), 3)
 ```
 
 ### pdf
@@ -272,8 +272,8 @@ pdf: (distribution, number) => number
 
 **Examples**
 
-```javascript
-pdf(normal(5, 2), 3);
+```squiggle
+pdf(normal(5, 2), 3)
 ```
 
 ### quantile
@@ -284,8 +284,8 @@ quantile: (distribution, number) => number
 
 **Examples**
 
-```javascript
-quantile(normal(5, 2), 0.5);
+```squiggle
+quantile(normal(5, 2), 0.5)
 ```
 
 ### truncate
@@ -316,8 +316,8 @@ truncateLeft: (distribution, left: number) => distribution
 
 **Examples**
 
-```javascript
-truncateLeft(normal(5, 2), 3);
+```squiggle
+truncateLeft(normal(5, 2), 3)
 ```
 
 ### truncateRight
@@ -330,8 +330,8 @@ truncateRight: (distribution, right: number) => distribution
 
 **Examples**
 
-```javascript
-truncateRight(normal(5, 2), 6);
+```squiggle
+truncateRight(normal(5, 2), 6)
 ```
 
 ### klDivergence
@@ -346,8 +346,8 @@ klDivergence: (distribution, distribution) => number
 
 **Examples**
 
-```javascript
-Dist.klDivergence(normal(5, 2), normal(5, 4)); // returns 0.57
+```squiggle
+Dist.klDivergence(normal(5, 2), normal(5, 4)) // returns 0.57
 ```
 
 ### logScore
@@ -362,12 +362,12 @@ Dist.logScore: ({estimate: distribution, ?prior: distribution, answer: distribut
 
 **Examples**
 
-```javascript
+```squiggle
 Dist.logScore({
   estimate: normal(5, 2),
   answer: normal(4.5, 1.2),
   prior: normal(6, 4),
-}); // returns -0.597.57
+}) // returns -0.597.57
 ```
 
 ## Display
@@ -380,8 +380,8 @@ toString: (distribution) => string
 
 **Examples**
 
-```javascript
-toString(normal(5, 2));
+```squiggle
+toString(normal(5, 2))
 ```
 
 ### sparkline
@@ -394,8 +394,8 @@ sparkline: (distribution, n = 20) => string
 
 **Examples**
 
-```javascript
-sparkline(truncateLeft(normal(5, 2), 3), 20); // produces ▁▇█████▇▅▄▃▂▂▁▁▁▁▁▁▁
+```squiggle
+sparkline(truncateLeft(normal(5, 2), 3), 20) // produces ▁▇█████▇▅▄▃▂▂▁▁▁▁▁▁▁
 ```
 
 ## Normalization
@@ -414,8 +414,8 @@ normalize: (distribution) => distribution
 
 **Examples**
 
-```javascript
-normalize(normal(5, 2));
+```squiggle
+normalize(normal(5, 2))
 ```
 
 ### isNormalized
@@ -428,8 +428,8 @@ isNormalized: (distribution) => bool
 
 **Examples**
 
-```javascript
-isNormalized(normal(5, 2)); // returns true
+```squiggle
+isNormalized(normal(5, 2)) // returns true
 ```
 
 ### integralSum
@@ -444,8 +444,8 @@ integralSum: (distribution) => number
 
 **Examples**
 
-```javascript
-integralSum(normal(5, 2));
+```squiggle
+integralSum(normal(5, 2))
 ```
 
 ## Regular Arithmetic Operations
@@ -454,7 +454,7 @@ Regular arithmetic operations cover the basic mathematical operations on distrib
 
 The infixes `+`,`-`, `*`, `/`, `^` are supported for addition, subtraction, multiplication, division, power, and unaryMinus.
 
-```javascript
+```squiggle
 pointMass(5 + 10) == pointMass(5) + pointMass(10);
 ```
 
@@ -466,9 +466,9 @@ add: (distributionLike, distributionLike) => distribution
 
 **Examples**
 
-```javascript
-normal(0, 1) + normal(1, 3); // returns normal(1, 3.16...)
-add(normal(0, 1), normal(1, 3)); // returns normal(1, 3.16...)
+```squiggle
+normal(0, 1) + normal(1, 3) // returns normal(1, 3.16...)
+add(normal(0, 1), normal(1, 3)) // returns normal(1, 3.16...)
 ```
 
 ### multiply
@@ -527,9 +527,9 @@ unaryMinus: (distribution) => distribution
 
 **Examples**
 
-```javascript
--normal(5, 2); // same as normal(-5, 2)
-unaryMinus(normal(5, 2)); // same as normal(-5, 2)
+```squiggle
+-normal(5, 2) // same as normal(-5, 2)
+unaryMinus(normal(5, 2)) // same as normal(-5, 2)
 ```
 
 ## Pointwise Arithmetic Operations

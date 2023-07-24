@@ -8,7 +8,7 @@ This page documents control flow. Squiggle has if/else statements, but not for l
 
 ### If-else
 
-```js
+```squiggle
 if condition then result else alternative
 ```
 
@@ -21,7 +21,7 @@ if x == 1 then 1 else 2
 
 ### If-else as a ternary operator
 
-```js
+```squiggle
 test ? result : alternative;
 ```
 
@@ -73,7 +73,7 @@ This is overkill for simple examples becomes useful when the control conditions 
 
 Assigning a value inside an if/else flow isn't possible:
 
-```js
+```squiggle
 x = 10
 y = 20
 if x == 1 then {
@@ -99,7 +99,7 @@ y = if x == 1 then {
 
 Likewise, for assigning more than one value, you can't do this:
 
-```js
+```squiggle
 y = 0
 z = 0
 if x == 1 then {

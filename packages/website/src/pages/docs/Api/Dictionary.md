@@ -6,7 +6,7 @@ Dictionaries are ordered. Duplicates are not allowed. They are immutable, like a
 
 **Example**
 
-```javascript
+```squiggle
 table = 10 to 30
 chair = 0.01 to 0.5
 
@@ -38,8 +38,8 @@ allItems = Dict.merge(valueFromOfficeItems, updatedValueFromHomeItems)
 Dict.toList: (dict<'a>) => list<list<string|a>>
 ```
 
-```js
-Dict.toList({ foo: 3, bar: 20 }); // [["foo", 3], ["bar", 20]]
+```squiggle
+Dict.toList({ foo: 3, bar: 20 }) // [["foo", 3], ["bar", 20]]
 ```
 
 ### fromList
@@ -48,11 +48,11 @@ Dict.toList({ foo: 3, bar: 20 }); // [["foo", 3], ["bar", 20]]
 Dict.fromList: (list<list<string|'a>>) => dict<'a>
 ```
 
-```js
+```squiggle
 Dict.fromList([
   ["foo", 3],
   ["bar", 20],
-]); // {foo: 3, bar: 20}
+]) // {foo: 3, bar: 20}
 ```
 
 ### keys
@@ -61,8 +61,8 @@ Dict.fromList([
 Dict.keys: (dict<'a>) => list<string>
 ```
 
-```js
-Dict.keys({ foo: 3, bar: 20 }); // ["foo", "bar"]
+```squiggle
+Dict.keys({ foo: 3, bar: 20 }) // ["foo", "bar"]
 ```
 
 ### values
@@ -71,8 +71,8 @@ Dict.keys({ foo: 3, bar: 20 }); // ["foo", "bar"]
 Dict.values: (dict<'a>) => list<'a>
 ```
 
-```js
-Dict.values({ foo: 3, bar: 20 }); // [3, 20]
+```squiggle
+Dict.values({ foo: 3, bar: 20 }) // [3, 20]
 ```
 
 ### merge
@@ -81,7 +81,7 @@ Dict.values({ foo: 3, bar: 20 }); // [3, 20]
 Dict.merge: (dict<'a>, dict<'b>) => dict<'a|b>
 ```
 
-```js
+```squiggle
 first = { a: 1, b: 2 };
 snd = { b: 3, c: 5 };
 Dict.merge(first, snd); // {a: 1, b: 3, c: 5}
@@ -93,10 +93,10 @@ Dict.merge(first, snd); // {a: 1, b: 3, c: 5}
 Dict.mergeMany: (list<dict<'a>>) => dict<'a>
 ```
 
-```js
-first = { a: 1, b: 2 };
-snd = { b: 3, c: 5 };
-Dict.mergeMany([first, snd]); // {a: 1, b: 3, c: 5}
+```squiggle
+first = { a: 1, b: 2 }
+snd = { b: 3, c: 5 }
+Dict.mergeMany([first, snd]) // {a: 1, b: 3, c: 5}
 ```
 
 ### set
@@ -113,7 +113,7 @@ Creates a new dictionary that includes the added element, while leaving the orig
 Dict.map: (dict<'a>, (`a => `a)) => dict<'a>
 ```
 
-```js
+```squiggle
 Dict.map({a: 1, b: 2}, {|x| x + 1}) // { a: 2, b:3 }
 ```
 
@@ -123,6 +123,6 @@ Dict.map({a: 1, b: 2}, {|x| x + 1}) // { a: 2, b:3 }
 Dict.map: (dict<'a>, (string => string)) => dict<'a>
 ```
 
-```js
+```squiggle
 Dict.mapKeys({a: 1, b: 2}, {|x| x + "hi" }) // {ahi: 1, bhi: 2}
 ```
