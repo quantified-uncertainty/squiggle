@@ -30,20 +30,13 @@ const config = {
   },
   head: () => {
     const { asPath } = useRouter();
-    const { frontMatter } = useConfig();
     const url = `https://squiggle-language.com${asPath}`;
 
+    // Nextra automatically injects og:title and og:description.
+    // og:title is based on _meta.json; og:description comes from frontmatter.
     return (
       <>
         <meta property="og:url" content={url} />
-        <meta property="og:title" content={frontMatter.title || "Squiggle"} />
-        <meta
-          property="og:description"
-          content={
-            frontMatter.description ||
-            "A simple programming language for intuitive probabilistic estimation"
-          }
-        />
       </>
     );
   },

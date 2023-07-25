@@ -1,3 +1,7 @@
+---
+description: The Danger library contains newer experimental functions which are less stable than Squiggle as a whole
+---
+
 # Danger
 
 The Danger library contains newer experimental functions which are less stable than Squiggle as a whole. Beware: their name, behavior, namespace or existence may change at any time.

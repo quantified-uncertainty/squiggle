@@ -1,3 +1,7 @@
+---
+description: Links to various Squiggle models and writeups
+---
+
 # Gallery
 
 - [GiveWell's GiveDirectly cost effectiveness analysis](https://observablehq.com/@hazelfire/givewells-givedirectly-cost-effectiveness-analysis) by Sam Nolan

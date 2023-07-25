@@ -1,3 +1,7 @@
+---
+description: Squiggle is still very early. The main first goal is to become stable (to reach version 1.
+---
+
 # Future Features
 
 Squiggle is still very early. The main first goal is to become stable (to reach version 1.0). Right now we think it is useable to use for small projects, but do note that there are very likely some math bugs and performance problems.

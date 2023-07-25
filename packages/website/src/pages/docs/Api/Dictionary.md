@@ -1,3 +1,7 @@
+---
+description: Squiggle dictionaries work similar to Python dictionaries. The syntax is similar to objects in Javascript.
+---
+
 # Dictionary
 
 Squiggle dictionaries work similar to Python dictionaries. The syntax is similar to objects in Javascript.

@@ -1,3 +1,7 @@
+---
+description: Probability distributions have several subtle possible formats. Three important ones that we deal with in Squiggle are symbolic, sample set, and point set formats.
+---
+
 # Three Formats of Distributions
 
 _by Ozzie Gooen_

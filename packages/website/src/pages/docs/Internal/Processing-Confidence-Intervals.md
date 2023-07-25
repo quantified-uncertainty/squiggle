@@ -1,6 +1,7 @@
 ---
 title: Processing Confidence Intervals
 author: Nuño Sempere
+description: This page explains what we are doing when we take a 90% confidence interval, and we get a mean and a standard deviation from it.
 ---
 
 This page explains what we are doing when we take a 90% confidence interval, and we get a mean and a standard deviation from it.

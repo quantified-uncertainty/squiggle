@@ -1,3 +1,7 @@
+---
+description: Sample set distributions are one of the three distribution formats. Internally, they are stored as a list of numbers.
+---
+
 # Sample Set Distribution
 
 Sample set distributions are one of the three distribution formats. Internally, they are stored as a list of numbers. It's useful to distinguish point set distributions from arbitrary lists of numbers to make it clear which functions are applicable.

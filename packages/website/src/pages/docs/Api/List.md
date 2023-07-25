@@ -1,3 +1,7 @@
+---
+description: Squiggle lists are a lot like Python lists or Ruby arrays. They accept all types.
+---
+
 # List
 
 Squiggle lists are a lot like Python lists or Ruby arrays. They accept all types.

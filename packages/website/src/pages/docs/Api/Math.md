@@ -1,3 +1,7 @@
+---
+description: Math functions and constants
+---
+
 # Math
 
 ### E

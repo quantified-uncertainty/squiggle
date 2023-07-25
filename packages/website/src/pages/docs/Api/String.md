@@ -1,3 +1,7 @@
+---
+description: Functions for working with strings in Squiggle
+---
+
 # String
 
 ### concat

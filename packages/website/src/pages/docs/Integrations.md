@@ -1,3 +1,7 @@
+---
+description: How to use Squiggle in Node.js, web, VS Code and other environments
+---
+
 # Integrations
 
 ## Node Packages
