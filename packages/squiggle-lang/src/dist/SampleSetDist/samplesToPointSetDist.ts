@@ -60,7 +60,7 @@ export const samplesToPointSetDist = ({
     )
   );
 
-  // Some samples might have been filtered out in the filter stage above.
+  // Some samples might have been filtered out in the filter stage above, so we need to adjust the weights accordingly.
   const relevantSampleLength = continuousSamples.length + sum(discreteShape.ys);
   let pointWeight = 1 / relevantSampleLength;
 

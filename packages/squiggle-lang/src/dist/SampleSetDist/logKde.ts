@@ -1,14 +1,17 @@
 import { kde, kdeParams } from "./kde.js";
-import { XYShape, Range } from "../../XYShape.js";
+import { XYShape } from "../../XYShape.js";
+import { min } from "lodash";
 
-const MIN_SAMPLES_FOR_KDE = 5;
-
-// Zero values should ve very infrequent, but we need to catch them if they exist.
-const logSamples = (samples: number[]) => samples.map((x) => Math.log(x));
+const logSamples = (s: number[]) => s.map(Math.log);
+const reverseNegativeSamples = (s: number[]) =>
+  s.map(Math.abs).slice().reverse();
 
 const unLogShape = ({ xs, ys }: XYShape): XYShape => {
   const adjustedXs = xs.map(Math.exp);
-  const adjustedYs = ys.map((y, index) => y / adjustedXs[index]);
+  //Sometimes kde() gives us back negative values. This would lead to invalid PDFs, so we adjust these manually.
+  const adjustedYs = ys
+    .map((y, index) => y / adjustedXs[index])
+    .map((r) => (r < 0 ? 0 : r));
   return { xs: adjustedXs, ys: adjustedYs };
 };
 
@@ -33,7 +36,7 @@ const logKdeSingleSide = ({
 }: kdeParams & { sign: sign }): XYShape => {
   let adjustedSamples = samples;
   if (sign === "negative") {
-    adjustedSamples = adjustedSamples.map(Math.abs).slice().reverse();
+    adjustedSamples = reverseNegativeSamples(adjustedSamples);
   }
   adjustedSamples = logSamples(adjustedSamples);
 
@@ -43,7 +46,7 @@ const logKdeSingleSide = ({
     weight,
     kernelWidth,
   });
-
+  console.log("S", { ys });
   let result = unLogShape({ xs, ys });
   if (sign === "negative") {
     result = reverseNegativeShape(result);
@@ -54,6 +57,7 @@ const logKdeSingleSide = ({
 /**
  * Splits samples at 0 into positive and negative parts. Takes the log KDE of each part, and
  * then combines them.
+ * Removes samples that are 0.
  */
 export const logKde = ({
   samples,
@@ -61,6 +65,7 @@ export const logKde = ({
   weight,
   kernelWidth,
 }: kdeParams): XYShape => {
+  //Note that this process filters out samples that are at exactly 0.
   const singleSideKde = (sign: sign) => {
     let sideSamples =
       sign === "positive"

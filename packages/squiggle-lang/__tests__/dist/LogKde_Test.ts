@@ -53,6 +53,41 @@ const exampleSets = [
   ].sort((a, b) => a - b),
 ];
 
+const block = (samples: number[], outputLength: number) => {
+  const params = {
+    samples: samples.sort((a, b) => a - b),
+    outputLength: outputLength,
+    weight: 1,
+    kernelWidth: 1,
+  };
+  const { xs, ys } = logKde(params);
+  test("No invalid numbers", () => {
+    const invalid = [
+      ...xs.filter((x) => !Number.isFinite(x)),
+      ...ys.filter((y) => !Number.isFinite(y)),
+    ];
+    if (invalid.length > 0) console.log("invalid", invalid);
+    expect(invalid.length).toEqual(0);
+  });
+  test("lengths of xs and ys should match", () => {
+    expect(xs.length).toEqual(ys.length);
+  });
+  test("lengths of xs should almost match outputLength", () => {
+    //Sometimes this is off by 1, because of an intenral approximation.
+    expect(Math.abs(xs.length - outputLength)).toBeLessThan(2);
+  });
+  test("should have y value 0 on both sides to indicate no tails", () => {
+    expect(ys[0]).toBeCloseTo(0);
+    expect(ys[outputLength - 1]).toBeCloseTo(0);
+  });
+  test("should be sorted", () => {
+    expect(E_A_Floats.isSorted(xs)).toBe(true);
+  });
+  test("y values are all nonnegative", () => {
+    expect(ys.filter((r) => r < 0).length).toBe(0);
+  });
+};
+
 const propertyTests = () => {
   fc.assert(
     fc.property(
@@ -83,76 +118,16 @@ const propertyTests = () => {
         // small, so we test here.
         if (sortedSamples[len - 1] - sortedSamples[0] < 2 * 5) return true;
         if (sortedSamples.length < 5) return true;
-        const { xs, ys } = logKde({
-          samples: sortedSamples,
-          outputLength,
-          weight: 1,
-        });
-        test("No invalid numbers", () => {
-          const invalid = [
-            ...xs.filter((x) => !Number.isFinite(x)),
-            ...ys.filter((y) => !Number.isFinite(y)),
-          ];
-          expect(invalid.length).toEqual(0);
-        });
-        test("lengths of xs and ys should match", () => {
-          expect(xs.length).toEqual(ys.length);
-        });
-        test("lengths of xs should almost match outputLength", () => {
-          //Sometimes this is off by 1, because of an intenral approximation.
-          expect(Math.abs(xs.length - outputLength)).toBeLessThan(2);
-        });
-        test("should have y value 0 on both sides to indicate no tails", () => {
-          expect(ys[0]).toBeCloseTo(0);
-          expect(ys[outputLength - 1]).toBeCloseTo(0);
-        });
-        test("should have y value 0 on both sides to indicate no tails", () => {
-          expect(ys[0]).toBeCloseTo(0);
-          expect(ys[outputLength - 1]).toBeCloseTo(0);
-        });
-        test("should be sorted", () => {
-          if (!E_A_Floats.isSorted(xs))
-            console.log("NOT SORTED!!!. xs", xs, sortedSamples);
-          expect(E_A_Floats.isSorted(xs)).toBe(true);
-        });
+        block(sortedSamples, outputLength);
       }
     )
   );
 };
 
-const block = (samples: number[], outputLength: number) => {
-  const params = {
-    samples: samples.sort((a, b) => a - b),
-    outputLength: outputLength,
-    weight: 1,
-    kernelWidth: 1,
-  };
-  const { xs, ys } = logKde(params);
-  test("No invalid numbers", () => {
-    const invalid = [
-      ...xs.filter((x) => !Number.isFinite(x)),
-      ...ys.filter((y) => !Number.isFinite(y)),
-    ];
-    if (invalid.length > 0) console.log("invalid", invalid);
-    expect(invalid.length).toEqual(0);
-  });
-  test("lengths of xs and ys should match outputLength", () => {
-    expect(xs.length).toEqual(outputLength);
-    expect(ys.length).toEqual(outputLength);
-  });
-  test("should have y value 0 on both sides to indicate no tails", () => {
-    expect(ys[0]).toBeCloseTo(0);
-    expect(ys[outputLength - 1]).toBeCloseTo(0);
-  });
-  test("should be sorted", () => {
-    if (!E_A_Floats.isSorted(xs)) console.log("NOT SORTED!!!. xs", xs);
-    expect(E_A_Floats.isSorted(xs)).toBe(true);
-  });
-};
-
-describe("LogKDE", () => {
+describe("Log Kernel Density Estimation", () => {
   block(exampleSets[0], 100);
   block(exampleSets[1], 50);
   block(exampleSets[2], 50);
+  block(exampleSets[3], 50);
   propertyTests();
 });

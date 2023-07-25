@@ -91,6 +91,12 @@ export const splitContinuousAndDiscrete = (
   };
 };
 
+/*
+  These two filter functions are meant to run after
+  splitContinuousAndDiscrete(). They assume that this data is sorted.
+*/
+
+// If all the continous samples are the same, changes them to be part of the discrete data
 export const continuousAreSameFilter = ({
   continuousSamples,
   discreteShape: { xs, ys },
@@ -112,6 +118,7 @@ export const continuousAreSameFilter = ({
   return { continuousSamples, discreteShape: { xs, ys } };
 };
 
+// If there are fewer than N continuous samples, removes them
 export const minContinuousSamplesFilter = (
   minSampleCount: number,
   { continuousSamples, discreteShape }: splitSamples
