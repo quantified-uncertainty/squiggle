@@ -43,6 +43,37 @@ Squiggle dictionaries work similarly to Python dictionaries or Javascript object
 d.dist`}
 />
 
+## Immutability
+
+All variables in Squiggle are immutable, similar to other functional programming languages like OCaml or Haskell.
+
+In the case of container types (lists and dictionaries), this implies that an operation such as myList[3] = 10 is not permitted. Instead, we recommend using `List.map`, `List.reduce` or other [List functions](/docs/Api/List).
+
+In case of basic types such as numbers or strings, the impact of immutability is more subtle.
+
+Consider this code:
+
+```squiggle
+x = 5
+x = x + 5
+```
+
+While it appears that the value of x has changed, what actually occurred is the creation of a new variable with the same name, which [shadowed](https://en.wikipedia.org/wiki/Variable_shadowing) the previous x variable.
+
+In most shadowing scenarios, the result would be identical to what you'd expect in languages such as Javascript or Python.
+
+One case where shadowing matters is closures:
+
+<SquiggleEditor
+  defaultCode={`x = 5
+argPlusX(y) = x + y
+
+x = x + 5
+
+argPlusX(5)`}
+/>
+
+In the above example, the `argPlusX` function captures the value of `x` from line 1, not the newly shadowed `x` from line 4. As a result, `argPlusX(5)` returns 10, not 15.
 
 ## Distributions
 
