@@ -1,8 +1,10 @@
 import * as fc from "fast-check";
 import { kde } from "../../src/dist/SampleSetDist/kde.js";
+import { logKde } from "../../src/dist/SampleSetDist/logKde.js";
 import range from "lodash/range.js";
 import sum from "lodash/sum.js";
 import sumBy from "lodash/sumBy.js";
+import * as XYShape from "../../src/XYShape.js";
 
 // KDE by definition, with triangular kernel max(0, |1-x|)
 // https://en.wikipedia.org/wiki/Kernel_density_estimation#Definition
@@ -80,6 +82,12 @@ describe("Kernel density estimation", () => {
         test("should sum to 1 / dx, with x step size dx", () => {
           const dx = xs[1] - xs[0];
           expect(sum(ys)).toBeCloseTo(1 / dx);
+        });
+
+        test("should integrate to 1", () => {
+          const integral = XYShape.Range.integrateWithTriangles({ xs, ys });
+          // console.log("INTEGRAL", integral.ys[integral.ys.length - 1]);
+          expect(integral.ys[integral.ys.length - 1]).toBeCloseTo(1);
         });
       }
     )

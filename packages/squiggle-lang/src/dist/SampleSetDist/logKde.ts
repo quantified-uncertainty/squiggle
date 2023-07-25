@@ -1,5 +1,5 @@
 import { kde, kdeParams } from "./kde.js";
-import { XYShape } from "../../XYShape.js";
+import { XYShape, Range } from "../../XYShape.js";
 
 const MIN_SAMPLES_FOR_KDE = 5;
 
@@ -7,10 +7,11 @@ const MIN_SAMPLES_FOR_KDE = 5;
 const logSamples = (samples: number[]) =>
   samples.map((x) => (x === 0 ? 0 : Math.log(x)));
 
-const unLogShape = ({ xs, ys }: XYShape): XYShape => ({
-  xs: xs.map(Math.exp),
-  ys: ys.map((y, index) => y / Math.exp(xs[index])),
-});
+const unLogShape = ({ xs, ys }: XYShape): XYShape => {
+  const adjustedXs = xs.map((x) => Math.exp(x));
+  const adjustedYs = ys.map((y, index) => y * adjustedXs[index]);
+  return { xs: adjustedXs, ys: adjustedYs };
+};
 
 const reverseNegativeShape = ({ xs, ys }: XYShape): XYShape => ({
   xs: xs
@@ -37,13 +38,12 @@ const logKdeSingleSide = ({
   let adjustedSamples = samples;
   if (sign === "negative") {
     adjustedSamples = adjustedSamples.map(Math.abs).slice().reverse();
-    console.log("INSIDE", adjustedSamples);
   }
   adjustedSamples = logSamples(adjustedSamples);
 
   const { xs, ys } = kde({
     samples: adjustedSamples,
-    outputLength: outputLength,
+    outputLength: Math.round(outputLength),
     weight,
     kernelWidth,
   });
@@ -66,32 +66,38 @@ export const logKde = ({
   kernelWidth,
 }: kdeParams): XYShape => {
   const singleSideKde = (sign: sign) => {
-    const sideSamples =
+    let sideSamples =
       sign === "positive"
         ? samples.filter((v) => v >= 0)
         : samples.filter((v) => v < 0);
+    if (sideSamples.length < 2) {
+      sideSamples = [];
+    }
     const proportion = sideSamples.length / samples.length;
-
-    return sideSamples.length > MIN_SAMPLES_FOR_KDE
-      ? logKdeSingleSide({
-          samples: sideSamples,
-          weight: weight * proportion,
-          outputLength: outputLength * proportion,
-          kernelWidth,
-          sign,
-        })
-      : { xs: [], ys: [] };
+    return logKdeSingleSide({
+      samples: sideSamples,
+      weight: weight * proportion,
+      outputLength: Math.round(outputLength * proportion),
+      kernelWidth,
+      sign,
+    });
   };
 
   const [positivePart, negativePart] = [
     singleSideKde("positive"),
     singleSideKde("negative"),
   ];
+  // console.log("SIDES", positivePart, negativePart);
 
   const result = {
     xs: [...negativePart.xs, ...positivePart.xs],
     ys: [...negativePart.ys, ...positivePart.ys],
   };
-  console.log(positivePart, negativePart, result);
+  console.log(
+    "Integral",
+    Range.integrateWithTriangles(result),
+    "result",
+    result
+  );
   return result;
 };

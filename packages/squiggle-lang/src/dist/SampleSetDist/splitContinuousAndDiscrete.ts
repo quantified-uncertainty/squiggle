@@ -13,10 +13,18 @@
   If the comparison is true, it finds the complete run with recursive doubling then a binary search,
   which skips over many elements for long runs.
 */
+type splitSamples = {
+  continuousSamples: number[];
+  discreteShape: {
+    xs: number[];
+    ys: number[];
+  };
+};
+
 export const splitContinuousAndDiscrete = (
   sortedArray: readonly number[],
   minDiscreteWeight: number
-) => {
+): splitSamples => {
   let continuous: number[] = [];
   const discreteCount: number[] = [];
   const discreteValue: number[] = [];
@@ -77,19 +85,39 @@ export const splitContinuousAndDiscrete = (
   // Remaining values are continuous
   continuous.push(...sortedArray.slice(i));
 
-  // If all the continuous values are the same, we just convert them to discrete
-  const allContinuousAreSame =
-    continuous.length > 0 &&
-    continuous[0] === continuous[continuous.length - 1];
-
-  if (allContinuousAreSame) {
-    continuous = [];
-    discreteValue.push(continuous[0]);
-    discreteCount.push(continuous.length);
-  }
-
   return {
     continuousSamples: continuous,
     discreteShape: { xs: discreteValue, ys: discreteCount },
   };
+};
+
+export const continuousAreSameFilter = ({
+  continuousSamples,
+  discreteShape: { xs, ys },
+}: splitSamples): splitSamples => {
+  const allContinuousAreSame =
+    continuousSamples.length > 0 &&
+    continuousSamples[0] === continuousSamples[continuousSamples.length - 1];
+
+  if (allContinuousAreSame) {
+    return {
+      continuousSamples: [],
+      discreteShape: {
+        xs: [...xs, continuousSamples[0]],
+        ys: [...ys, continuousSamples.length],
+      },
+    };
+  }
+
+  return { continuousSamples, discreteShape: { xs, ys } };
+};
+
+export const minContinuousSamplesFilter = (
+  minSampleCount: number,
+  { continuousSamples, discreteShape }: splitSamples
+): splitSamples => {
+  if (continuousSamples.length < minSampleCount) {
+    return { continuousSamples: [], discreteShape };
+  }
+  return { continuousSamples, discreteShape };
 };

@@ -1,9 +1,14 @@
 import { kde } from "./kde.js";
 import { XYShape } from "../../XYShape.js";
-import { splitContinuousAndDiscrete } from "./splitContinuousAndDiscrete.js";
+import {
+  splitContinuousAndDiscrete,
+  continuousAreSameFilter,
+  minContinuousSamplesFilter,
+} from "./splitContinuousAndDiscrete.js";
 import * as E_A_Floats from "../../utility/E_A_Floats.js";
 import { logKde } from "./logKde.js";
 import { SampleSetDist } from "./index.js";
+import sum from "lodash/sum.js";
 
 const minDiscreteToKeep = (samples: readonly number[]) =>
   Math.max(20, Math.round(samples.length / 50));
@@ -29,7 +34,7 @@ const shouldBeLogHeuristicFn = ({ p10, p90 }: { p10: number; p90: number }) => {
   return Math.log(p90 / p10) > 3;
 };
 
-let checkIfShouldBeLog = (samples: number[]) => {
+let checkIfShouldBeLog = (samples: number[]): boolean => {
   const dist = SampleSetDist.make(samples);
   if (dist.ok) {
     const range = dist.value.range(0.8, true);
@@ -38,31 +43,28 @@ let checkIfShouldBeLog = (samples: number[]) => {
       return shouldBeLogHeuristicFn({ p10: low, p90: high });
     }
   }
-  return undefined;
+  return false;
 };
 
 export const samplesToPointSetDist = ({
-  samples,
+  samples: unsortedSamples,
   continuousOutputLength,
   kernelWidth,
   logScale,
 }: SamplesToPointSetDistParams): ConversionResult => {
-  samples = E_A_Floats.sort(samples);
-  let countedLength = samples.length;
-
-  let { continuousSamples, discreteShape } = splitContinuousAndDiscrete(
-    samples,
-    minDiscreteToKeep(samples)
+  const samples = E_A_Floats.sort(unsortedSamples);
+  let { continuousSamples, discreteShape } = minContinuousSamplesFilter(
+    MIN_SAMPLES_FOR_KDE,
+    continuousAreSameFilter(
+      splitContinuousAndDiscrete(samples, minDiscreteToKeep(samples))
+    )
   );
 
-  if (continuousSamples.length < MIN_SAMPLES_FOR_KDE) {
-    countedLength -= continuousSamples.length;
-    continuousSamples = [];
-  }
+  // Some samples might have been filtered out in the filter stage above.
+  const relevantSampleLength = continuousSamples.length + sum(discreteShape.ys);
+  let pointWeight = 1 / relevantSampleLength;
 
-  let pointWeight = 1 / countedLength;
-
-  let continuousDist = undefined;
+  let continuousDist;
   if (continuousSamples.length > 0) {
     const kdeParams = {
       samples: continuousSamples,
@@ -71,24 +73,18 @@ export const samplesToPointSetDist = ({
       kernelWidth,
     };
 
-    let _logScale = logScale;
-    if (_logScale === undefined) {
-      const shouldBeLogHeuristic = checkIfShouldBeLog(continuousSamples);
-      if (shouldBeLogHeuristic !== undefined) {
-        _logScale = shouldBeLogHeuristic;
-      }
+    if (logScale === undefined) {
+      logScale = checkIfShouldBeLog(continuousSamples);
     }
-    if (_logScale) {
-      continuousDist = logKde(kdeParams);
-    } else {
-      continuousDist = kde(kdeParams);
-    }
-  }
 
-  discreteShape.ys = discreteShape.ys.map((y) => y * pointWeight);
+    continuousDist = logScale ? logKde(kdeParams) : kde(kdeParams);
+  }
 
   return {
     continuousDist,
-    discreteDist: discreteShape,
+    discreteDist: {
+      xs: discreteShape.xs,
+      ys: discreteShape.ys.map((y) => y * pointWeight),
+    },
   };
 };
