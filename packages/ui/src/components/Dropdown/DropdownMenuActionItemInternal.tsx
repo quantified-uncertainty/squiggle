@@ -4,7 +4,7 @@ import { FC } from "react";
 import { RefreshIcon } from "../../icons/RefreshIcon.js";
 import { IconProps } from "../../icons/Icon.js";
 
-export type CommonProps = {
+export type ActionItemInternalProps = {
   icon?: FC<IconProps>;
   title: string;
   acting?: boolean;
@@ -24,7 +24,11 @@ const iconDisplay = (icon?: FC<IconProps>, acting?: boolean) => {
   );
 };
 
-export const CommonItem: FC<CommonProps> = ({ title, icon, acting }) => {
+export const ActionItemInternal: FC<ActionItemInternalProps> = ({
+  title,
+  icon,
+  acting,
+}) => {
   return (
     <div className="rounded px-2 py-1.5 flex items-center gap-2 group hover:bg-slate-100 transition-colors duration-75 cursor-pointer">
       {iconDisplay(icon, acting)}

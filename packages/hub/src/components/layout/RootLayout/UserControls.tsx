@@ -1,7 +1,8 @@
 import { Session } from "next-auth";
 import { signIn, signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { FC } from "react";
+import Link from "next/link";
+import { IconProps } from "@/relative-values/components/ui/icons/Icon";
 
 import {
   Button,
@@ -9,6 +10,7 @@ import {
   DropdownMenu,
   DropdownMenuActionItem,
   DropdownMenuHeader,
+  ActionItemInternal,
   DropdownMenuSeparator,
   SignOutIcon,
   UserCircleIcon,
@@ -17,6 +19,29 @@ import {
 import { chooseUsernameRoute, userRoute } from "@/routes";
 import { DropdownWithArrow } from "./DropdownWithArrow";
 import { DropdownMenuLinkItem } from "@/components/ui/DropdownMenuLinkItem";
+import {
+  DISCORD_URL,
+  GITHUB_DISCUSSION_URL,
+  NEWSLETTER_URL,
+} from "@/lib/common";
+
+export const MenuLink: FC<{
+  title: string;
+  icon?: FC<IconProps>;
+  href: string;
+  external?: boolean;
+  close: () => void;
+}> = ({ title, icon, href, external, close }) => {
+  return (
+    <Link
+      href={href}
+      target={external ? "_blank" : undefined}
+      onClick={() => close()}
+    >
+      <ActionItemInternal icon={icon} title={title} />
+    </Link>
+  );
+};
 
 export const UserControls: FC<{ session: Session | null }> = ({ session }) => {
   if (
@@ -28,7 +53,6 @@ export const UserControls: FC<{ session: Session | null }> = ({ session }) => {
     // https://github.com/vercel/next.js/issues/42556 (it's closed but not really solved)
     window.location.href = chooseUsernameRoute();
   }
-  const router = useRouter();
   const { username } = session?.user || { username: undefined };
 
   return !!username ? (
@@ -51,6 +75,27 @@ export const UserControls: FC<{ session: Session | null }> = ({ session }) => {
               }}
               icon={SignOutIcon}
               title="Sign Out"
+            />
+            <DropdownMenuSeparator />
+            <DropdownMenuHeader>Resources</DropdownMenuHeader>
+            <DropdownMenuSeparator />
+            <MenuLink
+              href={DISCORD_URL}
+              title="Discord"
+              close={close}
+              external
+            />
+            <MenuLink
+              href={GITHUB_DISCUSSION_URL}
+              title="Discussion"
+              close={close}
+              external
+            />
+            <MenuLink
+              href={NEWSLETTER_URL}
+              title="Newsletter"
+              close={close}
+              external
             />
           </DropdownMenu>
         )}

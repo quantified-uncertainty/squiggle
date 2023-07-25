@@ -71,7 +71,7 @@ describe("frDistOrNumber", () => {
   test("dist", () => {
     const dResult = Normal.make({ mean: 2, stdev: 5 });
     if (!dResult.ok) {
-      fail("oops");
+      throw new Error();
     }
     const dist = dResult.value;
     const value = vDist(dist);
@@ -83,7 +83,7 @@ describe("frDistOrNumber", () => {
 describe("frDist", () => {
   const dResult = Normal.make({ mean: 2, stdev: 5 });
   if (!dResult.ok) {
-    fail("oops");
+    throw new Error();
   }
   const dist = dResult.value;
   const value = vDist(dist);

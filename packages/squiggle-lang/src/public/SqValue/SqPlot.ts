@@ -1,6 +1,8 @@
 import { BaseDist } from "../../dist/BaseDist.js";
 import { SampleSetDist } from "../../dist/SampleSetDist/index.js";
 import { Env } from "../../dist/env.js";
+import { createContext } from "../../reducer/context.js";
+import { Lambda } from "../../reducer/lambda.js";
 import * as Result from "../../utility/result.js";
 import { Plot, vPlot } from "../../value/index.js";
 
@@ -13,7 +15,7 @@ import {
 } from "./SqDistribution/index.js";
 import { SqLambda } from "./SqLambda.js";
 import { SqScale, wrapScale } from "./SqScale.js";
-import { SqPlotValue } from "./index.js";
+import { SqPlotValue, SqValue, wrapValue } from "./index.js";
 
 type LabeledSqDistribution = {
   name?: string;
@@ -139,7 +141,7 @@ export class SqNumericFnPlot extends SqAbstractPlot<"numericFn"> {
       this.context
         ? this.createdProgrammatically
           ? this.context
-          : this.context.extend("fn")
+          : this.context.extend({ type: "string", value: "fn" })
         : undefined
     );
   }
@@ -197,7 +199,7 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
       this.context
         ? this.createdProgrammatically
           ? this.context
-          : this.context.extend("fn")
+          : this.context.extend({ type: "string", value: "fn" })
         : undefined
     );
   }
@@ -276,7 +278,9 @@ export class SqRelativeValuesPlot extends SqAbstractPlot<"relativeValues"> {
   get fn(): SqLambda {
     return new SqLambda(
       this._value.fn,
-      this.context ? this.context.extend("fn") : undefined
+      this.context
+        ? this.context.extend({ type: "string", value: "fn" })
+        : undefined
     );
   }
 }

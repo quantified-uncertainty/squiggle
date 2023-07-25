@@ -147,7 +147,7 @@ describe("distribution functions", () => {
     test("mean(1 - toPointSet(Sym.normal(5, 2)))", async () => {
       const result = await testRun("mean(1 - toPointSet(Sym.normal(5, 2)))");
       if (result.tag !== "Number") {
-        fail();
+        throw new Error();
       }
       expect(Math.abs(result.value - -4)).toBeLessThan(0.3); // FIXME - unstable
     });

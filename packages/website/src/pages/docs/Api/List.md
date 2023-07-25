@@ -142,6 +142,26 @@ Works like `reduce`, but the function is applied to each item from the last back
 
 See [Rescript implementation](https://rescript-lang.org/docs/manual/latest/api/belt/array#reducereverse).
 
+### reduceWhile
+
+```
+List.reduceWhile: (list<'b>, 'a, ('a, 'b) => 'a, ('a) => bool) => 'a
+```
+
+Works like `reduce`, but stops when the accumulator doesn't satisfy the condition, and returns the last accumulator that satisfies the condition (or the initial value if even the initial value doesn't satisfy the condition).
+
+This is useful for simulating processes that need to stop based on the process state.
+
+Example:
+
+```js
+/** Adds first two elements, returns `11`. */
+List.reduceWhile([5, 6, 7], 0, {|acc, curr| acc + curr}, {|acc| acc < 15})
+
+/** Adds first two elements, returns `{ x: 11 }`. */
+List.reduceWhile([5, 6, 7], { x: 0 }, {|acc, curr| { x: acc.x + curr }}, {|acc| acc.x < 15})
+```
+
 ### join
 
 ```

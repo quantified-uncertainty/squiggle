@@ -1,11 +1,4 @@
-import {
-  FC,
-  ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useReducer,
-} from "react";
+import { FC, ReactNode, useMemo, useReducer } from "react";
 import { clsx } from "clsx";
 
 import {
@@ -165,7 +158,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
     !!preview && (
       <div
         className={clsx(
-          "ml-2 text-sm text-blue-800 font-mono",
+          "ml-3 text-sm text-blue-800",
           isOpen ? "opacity-40" : "opacity-60"
         )}
       >
@@ -204,18 +197,19 @@ export const VariableBox: FC<VariableBoxProps> = ({
   const comment = value.context.docstring();
   const hasComment = comment && comment !== "";
 
-  const hasCommentIcon = () => (
-    <div className="ml-3">
-      <TextTooltip text="This variable has a description" placement="bottom">
-        <span>
-          <ChatBubbleLeftIcon
-            size={13}
-            className={`text-purple-100 group-hover:text-purple-300`}
-          />
-        </span>
-      </TextTooltip>
-    </div>
-  );
+  const commentIcon = () =>
+    comment && (
+      <div className="ml-3">
+        <TextTooltip text={comment} placement="bottom">
+          <span>
+            <ChatBubbleLeftIcon
+              size={13}
+              className={`text-purple-100 group-hover:text-purple-300`}
+            />
+          </span>
+        </TextTooltip>
+      </div>
+    );
 
   const showComment = () => (
     <div
@@ -241,7 +235,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
             {!isFocused && triangleToggle()}
             {headerName}
             {!isFocused && headerPreview()}
-            {hasComment && !isFocused && !isOpen && hasCommentIcon()}
+            {!isFocused && !isOpen && commentIcon()}
             {!isRoot && editor && headerFindInEditorButton()}
           </div>
           <div className="inline-flex space-x-1">
