@@ -4,12 +4,11 @@ import { XYShape, Range } from "../../XYShape.js";
 const MIN_SAMPLES_FOR_KDE = 5;
 
 // Zero values should ve very infrequent, but we need to catch them if they exist.
-const logSamples = (samples: number[]) =>
-  samples.map((x) => (x === 0 ? 0 : Math.log(x)));
+const logSamples = (samples: number[]) => samples.map((x) => Math.log(x));
 
 const unLogShape = ({ xs, ys }: XYShape): XYShape => {
-  const adjustedXs = xs.map((x) => Math.exp(x));
-  const adjustedYs = ys.map((y, index) => y * adjustedXs[index]);
+  const adjustedXs = xs.map(Math.exp);
+  const adjustedYs = ys.map((y, index) => y / adjustedXs[index]);
   return { xs: adjustedXs, ys: adjustedYs };
 };
 
@@ -18,10 +17,7 @@ const reverseNegativeShape = ({ xs, ys }: XYShape): XYShape => ({
     .slice()
     .reverse()
     .map((x) => -x),
-  ys: ys
-    .slice()
-    .reverse()
-    .map((y) => y),
+  ys: ys.slice().reverse(),
 });
 
 type sign = "positive" | "negative";
@@ -68,8 +64,10 @@ export const logKde = ({
   const singleSideKde = (sign: sign) => {
     let sideSamples =
       sign === "positive"
-        ? samples.filter((v) => v >= 0)
+        ? samples.filter((v) => v > 0)
         : samples.filter((v) => v < 0);
+
+    // We can only approximate a bandwidth if there are at least 2 samples.
     if (sideSamples.length < 2) {
       sideSamples = [];
     }
@@ -87,17 +85,10 @@ export const logKde = ({
     singleSideKde("positive"),
     singleSideKde("negative"),
   ];
-  // console.log("SIDES", positivePart, negativePart);
 
   const result = {
     xs: [...negativePart.xs, ...positivePart.xs],
     ys: [...negativePart.ys, ...positivePart.ys],
   };
-  console.log(
-    "Integral",
-    Range.integrateWithTriangles(result),
-    "result",
-    result
-  );
   return result;
 };

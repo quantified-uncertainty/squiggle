@@ -86,7 +86,7 @@ describe("Kernel density estimation", () => {
 
         test("should integrate to 1", () => {
           const integral = XYShape.Range.integrateWithTriangles({ xs, ys });
-          // console.log("INTEGRAL", integral.ys[integral.ys.length - 1]);
+          expect(integral.ys[0]).toBeCloseTo(0);
           expect(integral.ys[integral.ys.length - 1]).toBeCloseTo(1);
         });
       }
