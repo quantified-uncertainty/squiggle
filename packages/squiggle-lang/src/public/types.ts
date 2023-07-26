@@ -1,11 +1,11 @@
 import { result } from "../utility/result.js";
 import { SqError } from "./SqError.js";
 import { SqValue } from "./SqValue/index.js";
-import { SqRecord } from "./SqValue/SqRecord.js";
+import { SqDict } from "./SqValue/SqDict.js";
 
 export type SqOutput = {
   result: SqValue;
-  bindings: SqRecord;
+  bindings: SqDict;
 };
 
 export type SqOutputResult = result<SqOutput, SqError>;

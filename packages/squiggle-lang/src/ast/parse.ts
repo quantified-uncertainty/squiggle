@@ -63,7 +63,7 @@ function nodeToString(node: ASTNode): string {
       return sExpr(node.statements);
     case "Array":
       return sExpr(node.elements);
-    case "Record":
+    case "Dict":
       return sExpr(node.elements);
     case "Boolean":
       return String(node.value);

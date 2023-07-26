@@ -43,7 +43,7 @@ export function getChildrenValues(value: SqValue): SqValue[] {
   switch (value.tag) {
     case "Array":
       return value.value.getValues();
-    case "Record":
+    case "Dict":
       return value.value.entries().map((a) => a[1]);
     default: {
       return [];
@@ -64,7 +64,7 @@ export function extractSubvalueByPath(
     let nextValue: SqValue | undefined;
     if (key.type === "number" && value.tag === "Array") {
       nextValue = value.value.getValues()[key.value];
-    } else if (key.type === "string" && value.tag === "Record") {
+    } else if (key.type === "string" && value.tag === "Dict") {
       nextValue = value.value.get(key.value);
     } else if (key.type === "cellAddress" && value.tag === "TableChart") {
       // Maybe it would be better to get the environment in a different way.

@@ -59,9 +59,9 @@ function buildRelativeValue({
   if (!result.ok) {
     return { ok: false, value: result.value.toString() };
   }
-  const record = result.value.asJS();
-  if (!(record instanceof Map)) {
-    return { ok: false, value: "Expected record" };
+  const dict = result.value.asJS();
+  if (!(dict instanceof Map)) {
+    return { ok: false, value: "Expected dict" };
   }
 
   const rvSchema = z.object({
@@ -72,7 +72,7 @@ function buildRelativeValue({
     uncertainty: z.number(),
   });
 
-  const itemResult = rvSchema.safeParse(Object.fromEntries(record.entries()));
+  const itemResult = rvSchema.safeParse(Object.fromEntries(dict.entries()));
   if (!itemResult.success) {
     return {
       ok: false,

@@ -62,7 +62,7 @@ expression[@isGroup="Expression"] {
     | Boolean
     | Number
     | BlockExpr { "{" NonEmptyProgram "}" }
-    | RecordExpr { "{" commaSep1<
+    | DictExpr { "{" commaSep1<
         Entry { Field[@dynamicPrecedence=1] { expression } ~inheritAmbig ":" expression } 
         | InheritEntry { Field[@dynamicPrecedence=0] {identifier} ~inheritAmbig }
         > "}" }

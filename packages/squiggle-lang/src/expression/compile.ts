@@ -219,9 +219,9 @@ function compileToContent(
         ),
         context,
       ];
-    case "Record":
+    case "Dict":
       return [
-        expression.eRecord(
+        expression.eDict(
           ast.elements.map((kv) => [
             innerCompileAst(kv.key, context)[0],
             innerCompileAst(kv.value, context)[0],

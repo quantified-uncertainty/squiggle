@@ -5,7 +5,7 @@ import { SquiggleChart } from "../components/SquiggleChart.js";
 /**
  * Squiggle chart evaluates squiggle expressions, and then displays the resulting squiggle value.
  *
- * A squiggle value can be a nested tree of arrays and records. Possible leaf types are a distribution, a constant, and a function.
+ * A squiggle value can be a nested tree of arrays and dicts. Possible leaf types are a distribution, a constant, and a function.
  */
 const meta = {
   component: SquiggleChart,
@@ -44,7 +44,7 @@ export const Error: Story = {
   },
 };
 
-export const Record: Story = {
+export const Dict: Story = {
   args: {
     code: "{foo: 35 to 50, bar: [1,2,3]}",
   },

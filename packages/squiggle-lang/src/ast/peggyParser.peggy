@@ -329,7 +329,7 @@ valueConstructor
   = arrayConstructor
   / lambda
   / quotedInnerBlock
-  / recordConstructor
+  / dictConstructor
 
 lambda
   = '{' _nl '|' _nl args:functionParameters _nl '|' _nl statements:statementsList  finalExpression: (statementSeparator @expression)  _nl '}'
@@ -348,13 +348,13 @@ arrayConstructor 'array'
 
   array_elements = @expression|1.., commaSeparator| commaSeparator?
 
-recordConstructor 'record'
+dictConstructor 'dict'
   = '{' _nl '}'
-    { return h.nodeRecord([], location()); }
-  / '{' _nl args:array_recordEntries _nl '}'
-    { return h.nodeRecord(args, location()); }
+    { return h.nodeDict([], location()); }
+  / '{' _nl args:array_dictEntries _nl '}'
+    { return h.nodeDict(args, location()); }
 
-  array_recordEntries = @(keyValuePair / keyValueInherit)| 1.., commaSeparator|commaSeparator?
+  array_dictEntries = @(keyValuePair / keyValueInherit)| 1.., commaSeparator|commaSeparator?
 
   keyValueInherit
     = key:identifier

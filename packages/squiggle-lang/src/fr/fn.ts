@@ -3,7 +3,7 @@ import {
   frArray,
   frLambda,
   frNumber,
-  frRecord,
+  frDict,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { Ok } from "../utility/result.js";
@@ -33,9 +33,9 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frRecord(
+          frDict(
             ["fn", frLambda],
-            ["inputs", frArray(frRecord(["min", frNumber], ["max", frNumber]))]
+            ["inputs", frArray(frDict(["min", frNumber], ["max", frNumber]))]
           ),
         ],
         ([{ fn, inputs }]) => {

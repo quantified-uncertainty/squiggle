@@ -4,7 +4,7 @@ import { BaseDist } from "../dist/BaseDist.js";
 import {
   REArrayIndexNotFound,
   REOther,
-  RERecordPropertyNotFound,
+  REDictPropertyNotFound,
 } from "../errors/messages.js";
 import {
   LambdaDeclaration,
@@ -160,7 +160,7 @@ class VLambda extends BaseValue implements Indexable {
             fields.push(["domain", parameter.domain]);
           }
 
-          return vRecord(ImmutableMap(fields));
+          return vDict(ImmutableMap(fields));
         })
       );
     }
@@ -193,8 +193,8 @@ class VString extends BaseValue {
 }
 export const vString = (v: string) => new VString(v);
 
-class VRecord extends BaseValue implements Indexable {
-  readonly type = "Record";
+class VDict extends BaseValue implements Indexable {
+  readonly type = "Dict";
 
   constructor(public value: ValueMap) {
     super();
@@ -213,18 +213,15 @@ class VRecord extends BaseValue implements Indexable {
     if (key.type === "String") {
       const result = this.value.get(key.value);
       if (!result) {
-        throw new RERecordPropertyNotFound(
-          "Record property not found",
-          key.value
-        );
+        throw new REDictPropertyNotFound("Dict property not found", key.value);
       }
       return result;
     } else {
-      throw new REOther("Can't access non-string key on a record");
+      throw new REOther("Can't access non-string key on a dict");
     }
   }
 }
-export const vRecord = (v: ValueMap) => new VRecord(v);
+export const vDict = (v: ValueMap) => new VDict(v);
 
 class VTimeDuration extends BaseValue {
   readonly type = "TimeDuration";
@@ -435,7 +432,7 @@ export type Value =
   | VLambda
   | VNumber
   | VString
-  | VRecord
+  | VDict
   | VTimeDuration
   | VPlot
   | VTableChart

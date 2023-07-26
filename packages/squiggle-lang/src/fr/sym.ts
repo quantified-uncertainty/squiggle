@@ -2,7 +2,7 @@ import * as SymbolicDist from "../dist/SymbolicDist.js";
 import { REDistributionError, REOther } from "../errors/messages.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frNumber, frRecord } from "../library/registry/frTypes.js";
+import { frNumber, frDict } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { Value, vDist } from "../value/index.js";
 import * as Result from "../utility/result.js";
@@ -43,8 +43,8 @@ function makeCISymDist<K1 extends string, K2 extends string>(
   fn: (low: number, high: number) => SymDistResult
 ) {
   return makeDefinition(
-    [frRecord([lowKey, frNumber], [highKey, frNumber])],
-    ([record]) => symDistResultToValue(fn(record[lowKey], record[highKey]))
+    [frDict([lowKey, frNumber], [highKey, frNumber])],
+    ([dict]) => symDistResultToValue(fn(dict[lowKey], dict[highKey]))
   );
 }
 
@@ -55,7 +55,7 @@ function makeMeanStdevSymDist(
   ) => Result.result<SymbolicDist.SymbolicDist, string>
 ) {
   return makeDefinition(
-    [frRecord(["mean", frNumber], ["stdev", frNumber])],
+    [frDict(["mean", frNumber], ["stdev", frNumber])],
     ([{ mean, stdev }]) => symDistResultToValue(fn(mean, stdev))
   );
 }

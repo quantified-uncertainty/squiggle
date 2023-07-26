@@ -5,4 +5,4 @@
 "vscode-squiggle": minor
 ---
 
-Support for `{key, }` syntax in records
+Support for `{key, }` syntax in dicts

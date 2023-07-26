@@ -68,7 +68,7 @@ export class SqValueContext {
           }
           break;
         }
-        case "Record":
+        case "Dict":
           newAst = ast.symbols[item.value];
           break;
         case "Array":
@@ -107,7 +107,7 @@ export class SqValueContext {
     }
 
     if (this.path.root === "bindings" && this.path.isRoot()) {
-      // This is a comment on first variable, we don't want to duplicate it for top-level bindings record.
+      // This is a comment on first variable, we don't want to duplicate it for top-level bindings dict.
       return;
     }
 
