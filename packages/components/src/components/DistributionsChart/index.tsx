@@ -32,7 +32,8 @@ import { SummaryTable } from "./SummaryTable.js";
 
 import { Point } from "../../lib/draw/types.js";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
-import { adjustPdfHeightToScale, sqScaleToD3 } from "../../lib/d3/index.js";
+import { sqScaleToD3 } from "../../lib/d3/index.js";
+import { adjustPdfHeightToScale } from "./utils.js";
 
 export type DistributionsChartProps = {
   plot: SqDistributionsPlot;
