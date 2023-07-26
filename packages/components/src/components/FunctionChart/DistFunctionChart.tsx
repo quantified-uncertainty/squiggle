@@ -123,26 +123,28 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
 
     const yScale = sqScaleToD3(plot.yScale);
     yScale.domain([
-      Math.min(
-        ...data.map((d) =>
-          Math.min(
-            ...Object.values(d.areas)
-              .map((p) => p[0])
-              .filter(isFinite),
-            d[50]
+      plot.yScale.min ??
+        Math.min(
+          ...data.map((d) =>
+            Math.min(
+              ...Object.values(d.areas)
+                .map((p) => p[0])
+                .filter(isFinite),
+              d[50]
+            )
           )
-        )
-      ),
-      Math.max(
-        ...data.map((d) =>
-          Math.max(
-            ...Object.values(d.areas)
-              .map((p) => p[1])
-              .filter(isFinite),
-            d[50]
+        ),
+      plot.yScale.max ??
+        Math.max(
+          ...data.map((d) =>
+            Math.max(
+              ...Object.values(d.areas)
+                .map((p) => p[1])
+                .filter(isFinite),
+              d[50]
+            )
           )
-        )
-      ),
+        ),
     ]);
 
     return { xScale, yScale };
