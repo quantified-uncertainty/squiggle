@@ -12,8 +12,6 @@ Squiggle supports some simple types and language features.
 
 ### Numbers
 
-There's no difference between floats and integers in Squiggle.
-
 Numbers support a few scientific notation suffixes.
 
 | suffix | multiplier |
@@ -25,6 +23,8 @@ Numbers support a few scientific notation suffixes.
 | B,G    | 10^9       |
 | T      | 10^12      |
 | P      | 10^15      |
+
+There's no difference between floats and integers in Squiggle.
 
 <SquiggleEditor defaultCode={`n = 4.32
 kilo = 4.32k
@@ -80,7 +80,7 @@ bar = myList[3][1] // "bar"`}
 
 Squiggle dictionaries work similarly to Python dictionaries or Javascript objects.
 
-For common operations on dictionaries, refer to the [Dict module API](/docs/Api/Dictionary).
+For common operations on dictionaries, refer to the [Dictionary API](/docs/Api/Dictionary).
 
 <SquiggleEditor
   defaultCode={`d = {dist: triangular(0, 1, 2), weight: 0.25}
@@ -89,9 +89,10 @@ d.dist`}
 
 ## Other types
 
-Other value types that Squiggle has include:
+Other Squiggle types include:
+
 - [Functions](#functions)
-- [Plot objects](/docs/Api/Plot)
+- [Plots](/docs/Api/Plot)
 - [Scales](/docs/Api/Plot#scales)
 - [Domains](#parameter-annotations)
 
@@ -99,9 +100,7 @@ Other value types that Squiggle has include:
 
 A Squiggle program consists of a series of definitions (for example, `x = 5`, `f(x) = x * x`). This can optionally conclude with an "end expression".
 
-If an end expression is provided, it becomes the evaluated output of the program, and only this result will be displayed in the viewer.
-
-Otherwise, all top-level variable definitions will be displayed.
+If an end expression is provided, it becomes the evaluated output of the program, and only this result will be displayed in the viewer. Otherwise, all top-level variable definitions will be displayed.
 
 <SquiggleEditor
   defaultCode={`x = 5
@@ -188,7 +187,7 @@ Squiggle functions are values, and you can save them to variables, pass them to 
 
 ### Viewing functions
 
-Squiggle viewer supports two types of functions:
+The Squiggle viewer can automatically visualize two types of functions, without manual plots:
 
 1. `(number) => number`
 2. `(number) => distribution`
@@ -199,13 +198,13 @@ otherFunction(x, y) = x + y`} />
 
 When Squiggle displays a single parameter function, it needs to select some range of parameter values.
 
-The default range is `0...10`.
+The default range is 0 to 10.
 
-The default parameter value range can be overridden in several ways:
+You can manually set the the range in the following ways:
 
-- With `Plot.numericFn` or `Plot.distFn` plots (look for `xScale` parameter)
+- With `Plot.numericFn` or `Plot.distFn` plots, using the `xScale` parameter
 - Through the chart's settings in the UI (look for a gear icon next to the variable name)
-- By utilizing annotations (explained below)
+- With parameter annotations (explained below)
 
 ### Parameter Annotations
 
@@ -235,7 +234,7 @@ We plan to support other kinds of domains in the future; for now, only numeric r
 f.parameters[0]`}
 />
 
-Domains and parameter names can be accessed by `fn.parameters` property. 
+Domains and parameter names can be accessed by the `fn.parameters` property.
 
 For example, domains extracted with `.parameters` can be reused in annotations of other parameters:
 
