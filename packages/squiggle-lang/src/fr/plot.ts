@@ -205,17 +205,19 @@ export const library = [
           frDict(
             ["fn", frLambda],
             ["xScale", frOptional(frScale)],
+            ["yScale", frOptional(frScale)],
             ["distXScale", frOptional(frScale)],
             ["points", frOptional(frNumber)]
           ),
         ],
-        ([{ fn, xScale, distXScale, points }]) => {
+        ([{ fn, xScale, yScale, distXScale, points }]) => {
           const domain = extractDomainFromOneArgFunction(fn);
           return vPlot({
             type: "distFn",
             fn,
             xScale: createScale(xScale, domain),
-            distXScale: distXScale ?? defaultScale,
+            yScale: yScale ?? defaultScale,
+            distXScale: distXScale ?? yScale ?? defaultScale,
             points: points ?? undefined,
           });
         }

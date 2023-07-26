@@ -260,6 +260,7 @@ export type Plot =
       type: "distFn";
       fn: Lambda;
       xScale: Scale;
+      yScale: Scale;
       distXScale: Scale;
       points?: number;
     }
