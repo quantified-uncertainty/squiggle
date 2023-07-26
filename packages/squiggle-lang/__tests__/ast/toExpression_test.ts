@@ -66,7 +66,6 @@ describe("Peggy to Expression", () => {
   });
 
   describe("comments", () => {
-    testToExpression("1 # This is a line comment", "1", "1");
     testToExpression("1 // This is a line comment", "1", "1");
     testToExpression("1 /* This is a multi line comment */", "1", "1");
     testToExpression("/* This is a multi line comment */ 1", "1", "1");

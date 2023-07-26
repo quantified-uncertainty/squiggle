@@ -204,7 +204,6 @@ describe("Peggy parse", () => {
   });
 
   describe("comments", () => {
-    testParse("1 # This is a line comment", "(Program 1)");
     testParse("1 // This is a line comment", "(Program 1)");
     testParse("1 /* This is a multi line comment */", "(Program 1)");
     testParse("/* This is a multi line comment */ 1", "(Program 1)");
