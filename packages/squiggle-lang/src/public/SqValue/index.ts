@@ -8,7 +8,7 @@ import { SqDomain, wrapDomain } from "./SqDomain.js";
 import { SqLambda } from "./SqLambda.js";
 import { SqLambdaDeclaration } from "./SqLambdaDeclaration.js";
 import { SqPlot, wrapPlot } from "./SqPlot.js";
-import { SqRecord } from "./SqRecord.js";
+import { SqDict } from "./SqDict.js";
 import { SqScale, wrapScale } from "./SqScale.js";
 import { SqTableChart } from "./SqTableChart.js";
 
@@ -28,8 +28,8 @@ export function wrapValue(value: Value, context?: SqValueContext) {
       return new SqLambdaValue(value, context);
     case "Number":
       return new SqNumberValue(value, context);
-    case "Record":
-      return new SqRecordValue(value, context);
+    case "Dict":
+      return new SqDictValue(value, context);
     case "String":
       return new SqStringValue(value, context);
     case "Plot":
@@ -162,14 +162,11 @@ export class SqNumberValue extends SqAbstractValue<"Number", number> {
   }
 }
 
-export class SqRecordValue extends SqAbstractValue<
-  "Record",
-  Map<string, unknown>
-> {
-  tag = "Record" as const;
+export class SqDictValue extends SqAbstractValue<"Dict", Map<string, unknown>> {
+  tag = "Dict" as const;
 
   get value() {
-    return new SqRecord(this._value.value, this.context);
+    return new SqDict(this._value.value, this.context);
   }
 
   asJS(): Map<string, unknown> {

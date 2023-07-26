@@ -258,12 +258,12 @@ export const getBoxProps = (
       };
     }
 
-    case "Record": {
+    case "Dict": {
       const entries = getChildrenValues(value);
       return {
         heading: `Dict(${entries.length})`,
         preview: <SqTypeWithCount type="{}" count={entries.length} />,
-        isRecordOrList: true,
+        isDictOrList: true,
         children: () =>
           entries.map((r, i) => <ExpressionViewer key={i} value={r} />),
       };
@@ -274,7 +274,7 @@ export const getBoxProps = (
       return {
         heading: `List(${length})`,
         preview: <SqTypeWithCount type="[]" count={length} />,
-        isRecordOrList: true,
+        isDictOrList: true,
         children: () =>
           entries.map((r, i) => <ExpressionViewer key={i} value={r} />),
       };
@@ -318,7 +318,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
   const heading = boxProps.heading || value.tag;
   const hasChildren = () => !!getChildrenValues(value);
   const children: (settings: MergedItemSettings) => ReactNode =
-    (value.tag === "Record" || value.tag === "Array") && hasChildren()
+    (value.tag === "Dict" || value.tag === "Array") && hasChildren()
       ? (settings) => (
           <div className={"space-y-2 pt-1 mt-1"}>
             {boxProps.children(settings)}

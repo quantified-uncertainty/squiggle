@@ -54,13 +54,13 @@ describe("Peggy to Expression", () => {
     testToExpression("([0,1,2])[1]", "($_atIndex_$)([0, 1, 2], 1)", "1");
   });
 
-  describe("records", () => {
+  describe("dicts", () => {
     testToExpression("{a: 1, b: 2}", "{'a': 1, 'b': 2}", "{a: 1,b: 2}");
     testToExpression("{1+0: 1, 2+0: 2}", "{(add)(1, 0): 1, (add)(2, 0): 2}"); // key can be any expression
-    testToExpression("record.property", "Error(record is not defined)");
+    testToExpression("dict.property", "Error(dict is not defined)");
     testToExpression(
-      "record={property: 1}; record.property",
-      "record = {{'property': 1}}; ($_atIndex_$)(record, 'property')",
+      "dict={property: 1}; dict.property",
+      "dict = {{'property': 1}}; ($_atIndex_$)(dict, 'property')",
       "1"
     );
   });

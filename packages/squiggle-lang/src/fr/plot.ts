@@ -10,7 +10,7 @@ import {
   frLambda,
   frNumber,
   frOptional,
-  frRecord,
+  frDict,
   frScale,
   frString,
 } from "../library/registry/frTypes.js";
@@ -94,10 +94,10 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frRecord(
+          frDict(
             [
               "dists",
-              frArray(frRecord(["name", frString], ["value", frDistOrNumber])),
+              frArray(frDict(["name", frString], ["value", frDistOrNumber])),
             ],
             ["xScale", frOptional(frScale)],
             ["yScale", frOptional(frScale)],
@@ -143,7 +143,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frRecord(
+          frDict(
             ["dist", frDist],
             ["xScale", frOptional(frScale)],
             ["yScale", frOptional(frScale)],
@@ -173,7 +173,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frRecord(
+          frDict(
             ["fn", frLambda],
             ["xScale", frOptional(frScale)],
             ["yScale", frOptional(frScale)],
@@ -202,7 +202,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frRecord(
+          frDict(
             ["fn", frLambda],
             ["xScale", frOptional(frScale)],
             ["distXScale", frOptional(frScale)],
@@ -232,7 +232,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frRecord(
+          frDict(
             ["xDist", frDist],
             ["yDist", frDist],
             ["xScale", frOptional(frScale)],

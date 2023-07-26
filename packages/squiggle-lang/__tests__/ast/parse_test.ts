@@ -162,33 +162,30 @@ describe("Peggy parse", () => {
     testParse("([0,1,2])[1]", "(Program (BracketLookup (Array 0 1 2) 1))");
   });
 
-  describe("records", () => {
+  describe("dicts", () => {
     testParse(
       "{a: 1, b: 2}",
-      "(Program (Record (KeyValue 'a' 1) (KeyValue 'b' 2)))"
+      "(Program (Dict (KeyValue 'a' 1) (KeyValue 'b' 2)))"
     );
     testParse(
       "{a, b, }",
-      "(Program (Record (KeyValue 'a' :a) (KeyValue 'b' :b)))"
+      "(Program (Dict (KeyValue 'a' :a) (KeyValue 'b' :b)))"
     );
-    testParse(
-      "{a, b}",
-      "(Program (Record (KeyValue 'a' :a) (KeyValue 'b' :b)))"
-    );
+    testParse("{a, b}", "(Program (Dict (KeyValue 'a' :a) (KeyValue 'b' :b)))");
     testParse(
       "{a, b: 2}",
-      "(Program (Record (KeyValue 'a' :a) (KeyValue 'b' 2)))"
+      "(Program (Dict (KeyValue 'a' :a) (KeyValue 'b' 2)))"
     );
-    testParse("{a,}", "(Program (Record (KeyValue 'a' :a)))");
+    testParse("{a,}", "(Program (Dict (KeyValue 'a' :a)))");
     testParse(
       "{1+0: 1, 2+0: 2}",
-      "(Program (Record (KeyValue (InfixCall + 1 0) 1) (KeyValue (InfixCall + 2 0) 2)))"
+      "(Program (Dict (KeyValue (InfixCall + 1 0) 1) (KeyValue (InfixCall + 2 0) 2)))"
     ); // key can be any expression
-    testParse("record.property", "(Program (DotLookup :record property))");
+    testParse("dict.property", "(Program (DotLookup :dict property))");
   });
 
   describe("post operators", () => {
-    //function call, array and record access are post operators with higher priority than unary operators
+    //function call, array and dict access are post operators with higher priority than unary operators
     testParse(
       "a==!b(1)",
       "(Program (InfixCall == :a (UnaryCall ! (Call :b 1))))"
@@ -440,7 +437,7 @@ describe("Peggy parse", () => {
     );
     testParse(
       "myaddd(x,y)=x+y; z={x: myaddd}; z",
-      "(Program (DefunStatement :myaddd (Lambda :x :y (Block (InfixCall + :x :y)))) (LetStatement :z (Block (Record (KeyValue 'x' :myaddd)))) :z)"
+      "(Program (DefunStatement :myaddd (Lambda :x :y (Block (InfixCall + :x :y)))) (LetStatement :z (Block (Dict (KeyValue 'x' :myaddd)))) :z)"
     );
     testParse(
       "f({|x| x+1})",

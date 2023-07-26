@@ -1,9 +1,9 @@
-import { ValueMap, vRecord } from "../../value/index.js";
+import { ValueMap, vDict } from "../../value/index.js";
 
 import { SqValueContext } from "../SqValueContext.js";
-import { SqRecordValue, SqValue, wrapValue } from "./index.js";
+import { SqDictValue, SqValue, wrapValue } from "./index.js";
 
-export class SqRecord {
+export class SqDict {
   constructor(private _value: ValueMap, public context?: SqValueContext) {}
 
   entries() {
@@ -28,10 +28,10 @@ export class SqRecord {
   }
 
   toString() {
-    return vRecord(this._value).toString();
+    return vDict(this._value).toString();
   }
 
   asValue() {
-    return new SqRecordValue(vRecord(this._value), this.context);
+    return new SqDictValue(vDict(this._value), this.context);
   }
 }

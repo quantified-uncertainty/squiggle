@@ -26,7 +26,7 @@ export type ExpressionContent =
       value: Expression[];
     }
   | {
-      type: "Record";
+      type: "Dict";
       value: [Expression, Expression][];
     }
   | {
@@ -110,10 +110,8 @@ export const eLambda = (
   },
 });
 
-export const eRecord = (
-  aMap: [Expression, Expression][]
-): ExpressionContent => ({
-  type: "Record",
+export const eDict = (aMap: [Expression, Expression][]): ExpressionContent => ({
+  type: "Dict",
   value: aMap,
 });
 
@@ -173,7 +171,7 @@ export function expressionToString(expression: Expression): string {
       return expression.value.map(expressionToString).join("; ");
     case "Array":
       return `[${expression.value.map(expressionToString).join(", ")}]`;
-    case "Record":
+    case "Dict":
       return `{${expression.value
         .map(
           ([key, value]) =>

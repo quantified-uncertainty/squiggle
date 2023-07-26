@@ -24,7 +24,7 @@ import {
   vArray,
   vDomain,
   vLambda,
-  vRecord,
+  vDict,
   vVoid,
 } from "../value/index.js";
 import * as Context from "./context.js";
@@ -69,8 +69,8 @@ export const evaluate: ReducerFn = (expression, context) => {
       return evaluateProgram(expression.value, context, ast);
     case "Array":
       return evaluateArray(expression.value, context, ast);
-    case "Record":
-      return evaluateRecord(expression.value, context, ast);
+    case "Dict":
+      return evaluateDict(expression.value, context, ast);
     case "Assign":
       return evaluateAssign(expression.value, context, ast);
     case "ResolvedSymbol":
@@ -134,18 +134,14 @@ const evaluateArray: SubReducerFn<"Array"> = (
   return [value, context];
 };
 
-const evaluateRecord: SubReducerFn<"Record"> = (
-  expressionValue,
-  context,
-  ast
-) => {
-  const value = vRecord(
+const evaluateDict: SubReducerFn<"Dict"> = (expressionValue, context, ast) => {
+  const value = vDict(
     ImmutableMap(
       expressionValue.map(([eKey, eValue]) => {
         const [key] = context.evaluate(eKey, context);
         if (key.type !== "String") {
           return throwFrom(
-            new REOther("Record keys must be strings"),
+            new REOther("Dict keys must be strings"),
             context,
             ast
           );

@@ -39,7 +39,7 @@ export class SqValuePath {
           }
           return [];
         }
-        case "Record": {
+        case "Dict": {
           for (const pair of ast.elements) {
             if (
               locationContains(
@@ -84,7 +84,7 @@ export class SqValuePath {
         case "Block": {
           if (
             ast.statements.length === 1 &&
-            ["Array", "Record"].includes(ast.statements[0].type)
+            ["Array", "Dict"].includes(ast.statements[0].type)
           ) {
             return findLoop(ast.statements[0]);
           }

@@ -4,7 +4,7 @@ import {
   Env,
   SqError,
   SqProject,
-  SqRecord,
+  SqDict,
   SqValue,
   result,
 } from "@quri/squiggle-lang";
@@ -35,7 +35,7 @@ export type SquiggleOutput = {
   output: result<
     {
       result: SqValue;
-      bindings: SqRecord;
+      bindings: SqDict;
     },
     SqError
   >;

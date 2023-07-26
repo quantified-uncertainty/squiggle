@@ -287,7 +287,7 @@ export function createSquigglePrinter(
             softline,
             "}",
           ]);
-        case "Record":
+        case "Dict":
           return group([
             "{",
             node.elements.length
@@ -357,7 +357,7 @@ export function createSquigglePrinter(
             return [node.value];
           case "Call":
             return [...node.args, node.fn];
-          case "Record":
+          case "Dict":
             return node.elements;
           case "Lambda":
             return [...node.args, node.body];

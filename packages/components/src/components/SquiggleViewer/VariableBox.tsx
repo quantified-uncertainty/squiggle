@@ -34,7 +34,7 @@ export type VariableBoxProps = {
   value: SqValueWithContext;
   heading?: string;
   preview?: ReactNode;
-  isRecordOrList?: boolean;
+  isDictOrList?: boolean;
   renderSettingsMenu?: (params: SettingsMenuParams) => ReactNode;
   children: (settings: MergedItemSettings) => ReactNode;
 };
@@ -52,7 +52,7 @@ export const SqTypeWithCount: FC<{
 export const VariableBox: FC<VariableBoxProps> = ({
   value,
   heading = "Error",
-  isRecordOrList = false,
+  isDictOrList = false,
   preview,
   renderSettingsMenu,
   children,
@@ -215,7 +215,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
     <div
       className={clsx(
         "text-sm text-slate-800 whitespace-pre-line bg-purple-50 bg-opacity-60 py-2 px-3 mb-2 rounded-md",
-        !isRecordOrList && "mt-2"
+        !isDictOrList && "mt-2"
       )}
     >
       {comment}
@@ -246,17 +246,14 @@ export const VariableBox: FC<VariableBoxProps> = ({
       )}
       {isOpen && (
         <div className="flex w-full pt-1">
-          {!isFocused &&
-            hasBodyContent &&
-            isRecordOrList &&
-            leftCollapseBorder()}
-          {!isFocused && hasBodyContent && !isRecordOrList && !isRoot && (
+          {!isFocused && hasBodyContent && isDictOrList && leftCollapseBorder()}
+          {!isFocused && hasBodyContent && !isDictOrList && !isRoot && (
             <div className="flex w-4" />
           )}
           <div className="grow">
-            {isRecordOrList && hasComment && showComment()}
+            {isDictOrList && hasComment && showComment()}
             {children(getAdjustedMergedSettings(path))}
-            {!isRecordOrList && hasComment && showComment()}
+            {!isDictOrList && hasComment && showComment()}
           </div>
         </div>
       )}

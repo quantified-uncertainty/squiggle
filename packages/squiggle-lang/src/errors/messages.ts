@@ -75,7 +75,7 @@ export class REOperationError extends ErrorMessage {
   }
 }
 
-export class RERecordPropertyNotFound extends ErrorMessage {
+export class REDictPropertyNotFound extends ErrorMessage {
   constructor(public msg: string, public index: string) {
     super();
   }

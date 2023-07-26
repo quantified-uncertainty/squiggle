@@ -9,7 +9,7 @@ import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frDistOrNumber,
   frNumber,
-  frRecord,
+  frDict,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { OtherOperationError } from "../operationError.js";
@@ -99,9 +99,9 @@ function makeCIDist<K1 extends string, K2 extends string>(
   ) => Result.result<SymbolicDist.SymbolicDist, string>
 ) {
   return makeDefinition(
-    [frRecord([lowKey, frNumber], [highKey, frNumber])],
-    ([record], { environment }) =>
-      twoVarSample(record[lowKey], record[highKey], environment, fn)
+    [frDict([lowKey, frNumber], [highKey, frNumber])],
+    ([dict], { environment }) =>
+      twoVarSample(dict[lowKey], dict[highKey], environment, fn)
   );
 }
 
@@ -112,7 +112,7 @@ function makeMeanStdevDist(
   ) => Result.result<SymbolicDist.SymbolicDist, string>
 ) {
   return makeDefinition(
-    [frRecord(["mean", frNumber], ["stdev", frNumber])],
+    [frDict(["mean", frNumber], ["stdev", frNumber])],
     ([{ mean, stdev }], { environment }) =>
       twoVarSample(mean, stdev, environment, fn)
   );

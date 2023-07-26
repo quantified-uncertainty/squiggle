@@ -139,10 +139,10 @@ The basics of Squiggle are fairly straightforward. This can be enough for many m
 */
 long = true
 
-/** record comment */
+/** dict comment */
 r = {
   foo: 5,
-  /** comments on static record fields work too */
+  /** comments on static dict fields work too */
   bar: 6,
 }
 `,
@@ -161,7 +161,7 @@ varArray = [1,2,3]
 varLambda = {|e| "Test"}
 varScale = Scale.symlog({ min: -2, max: 5})
 
-varRecord = {fir: 1, secon: 2}
+varDict = {fir: 1, secon: 2}
 
 varTable = Table.make(
   {
@@ -170,7 +170,7 @@ varTable = Table.make(
       { fn: {|e|e}, name: "Number" },
       { fn: {|e| normal(e^2, e^3)}, name: "Dist" },
       { fn: {|e|[e, e, e, e]}, name: "Array" },
-      { fn: {|e|{first: e, second: e+1, third: e+2, fourth: e+3}}, name: "Record" },
+      { fn: {|e|{first: e, second: e+1, third: e+2, fourth: e+3}}, name: "Dict" },
     ],
   }
 )

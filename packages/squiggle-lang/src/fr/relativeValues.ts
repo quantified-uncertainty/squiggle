@@ -3,7 +3,7 @@ import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
   frLambda,
-  frRecord,
+  frDict,
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
@@ -16,7 +16,7 @@ const maker = new FnFactory({
   requiresNamespace: true,
 });
 
-const relativeValuesShape = frRecord(
+const relativeValuesShape = frDict(
   ["ids", frArray(frString)],
   ["fn", frLambda]
 );

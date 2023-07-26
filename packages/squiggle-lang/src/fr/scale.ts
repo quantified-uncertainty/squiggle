@@ -3,7 +3,7 @@ import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frNumber,
   frOptional,
-  frRecord,
+  frDict,
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
@@ -15,7 +15,7 @@ const maker = new FnFactory({
   requiresNamespace: true,
 });
 
-const commonRecord = frRecord(
+const commonDict = frDict(
   ["min", frOptional(frNumber)],
   ["max", frOptional(frNumber)],
   ["tickFormat", frOptional(frString)]
@@ -35,7 +35,7 @@ export const library = [
     output: "Scale",
     examples: [`Scale.linear({ min: 3, max: 10 })`],
     definitions: [
-      makeDefinition([commonRecord], ([{ min, max, tickFormat }]) => {
+      makeDefinition([commonDict], ([{ min, max, tickFormat }]) => {
         checkMinMax(min, max);
 
         return vScale({
@@ -55,7 +55,7 @@ export const library = [
     output: "Scale",
     examples: [`Scale.log({ min: 1, max: 100 })`],
     definitions: [
-      makeDefinition([commonRecord], ([{ min, max, tickFormat }]) => {
+      makeDefinition([commonDict], ([{ min, max, tickFormat }]) => {
         if (min !== null && min <= 0) {
           throw new REOther(`Min must be over 0 for log scale, got: ${min}`);
         }
@@ -78,7 +78,7 @@ export const library = [
     output: "Scale",
     examples: [`Scale.symlog({ min: -10, max: 10 })`],
     definitions: [
-      makeDefinition([commonRecord], ([{ min, max, tickFormat }]) => {
+      makeDefinition([commonDict], ([{ min, max, tickFormat }]) => {
         checkMinMax(min, max);
 
         return vScale({
@@ -100,7 +100,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frRecord(
+          frDict(
             ["min", frOptional(frNumber)],
             ["max", frOptional(frNumber)],
             ["tickFormat", frOptional(frString)],

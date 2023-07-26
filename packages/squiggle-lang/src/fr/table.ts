@@ -9,7 +9,7 @@ import {
   frLambda,
   frNumber,
   frOptional,
-  frRecord,
+  frDict,
   frScale,
   frString,
 } from "../library/registry/frTypes.js";
@@ -31,13 +31,11 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frRecord(
+          frDict(
             ["data", frArray(frAny)],
             [
               "columns",
-              frArray(
-                frRecord(["fn", frLambda], ["name", frOptional(frString)])
-              ),
+              frArray(frDict(["fn", frLambda], ["name", frOptional(frString)])),
             ]
           ),
         ],
