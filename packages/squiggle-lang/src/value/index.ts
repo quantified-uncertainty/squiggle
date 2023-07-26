@@ -353,13 +353,16 @@ export type Scale = CommonScaleArgs &
       }
     | {
         type: "symlog";
-        constant: number;
+        constant?: number;
       }
     | {
         type: "power";
-        exponent: number;
+        exponent?: number;
       }
   );
+
+export const SCALE_SYMLOG_DEFAULT_CONSTANT = 1;
+export const SCALE_POWER_DEFAULT_CONSTANT = 0.1;
 
 class VScale extends BaseValue {
   readonly type = "Scale";

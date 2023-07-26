@@ -1,15 +1,21 @@
-import { CommonScaleArgs, Scale, vScale } from "../../value/index.js";
+import {
+  CommonScaleArgs,
+  Scale,
+  vScale,
+  SCALE_SYMLOG_DEFAULT_CONSTANT,
+  SCALE_POWER_DEFAULT_CONSTANT,
+} from "../../value/index.js";
 
 export const wrapScale = (value: Scale): SqScale => {
   switch (value.type) {
     case "linear":
-      return new SqLinearScale(value);
+      return SqLinearScale.create(value);
     case "log":
-      return new SqLogScale(value);
+      return SqLogScale.create(value);
     case "symlog":
-      return new SqSymlogScale(value);
+      return SqSymlogScale.create(value);
     case "power":
-      return new SqPowerScale(value);
+      return SqPowerScale.create(value);
   }
 };
 
@@ -54,7 +60,7 @@ export class SqLogScale extends SqAbstractScale<"log"> {
 
 export class SqSymlogScale extends SqAbstractScale<"symlog"> {
   tag = "symlog" as const;
-  static defaultConstant = 1;
+  static defaultConstant = SCALE_SYMLOG_DEFAULT_CONSTANT;
 
   static create(args: CommonScaleArgs & { constant?: number }) {
     return new SqSymlogScale({
@@ -65,13 +71,13 @@ export class SqSymlogScale extends SqAbstractScale<"symlog"> {
   }
 
   get constant() {
-    return this._value.constant;
+    return this._value.constant || SCALE_SYMLOG_DEFAULT_CONSTANT;
   }
 }
 
 export class SqPowerScale extends SqAbstractScale<"power"> {
   tag = "power" as const;
-  static defaultExponent = 0.1;
+  static defaultExponent = SCALE_POWER_DEFAULT_CONSTANT;
 
   static create(args: CommonScaleArgs & { exponent?: number }) {
     return new SqPowerScale({
@@ -82,7 +88,7 @@ export class SqPowerScale extends SqAbstractScale<"power"> {
   }
 
   get exponent() {
-    return this._value.exponent;
+    return this._value.exponent || SCALE_POWER_DEFAULT_CONSTANT;
   }
 }
 

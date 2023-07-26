@@ -10,6 +10,10 @@ import { FnFactory } from "../library/registry/helpers.js";
 import { vScale } from "../value/index.js";
 import { REOther } from "../errors/messages.js";
 import { SqPowerScale, SqSymlogScale } from "../public/SqValue/SqScale.js";
+import {
+  SCALE_SYMLOG_DEFAULT_CONSTANT,
+  SCALE_POWER_DEFAULT_CONSTANT,
+} from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Scale",
@@ -104,14 +108,13 @@ export const library = [
             min: min ?? undefined,
             max: max ?? undefined,
             tickFormat: tickFormat ?? undefined,
-            constant: constant || SqSymlogScale.defaultConstant,
+            constant: constant ?? undefined,
           });
         }
       ),
       makeDefinition([], () => {
         return vScale({
           type: "symlog",
-          constant: SqSymlogScale.defaultConstant,
         });
       }),
     ],
@@ -138,14 +141,13 @@ export const library = [
             min: min ?? undefined,
             max: max ?? undefined,
             tickFormat: tickFormat ?? undefined,
-            exponent: exponent || SqPowerScale.defaultExponent,
+            exponent: exponent ?? undefined,
           });
         }
       ),
       makeDefinition([], () => {
         return vScale({
           type: "power",
-          exponent: SqPowerScale.defaultExponent,
         });
       }),
     ],
