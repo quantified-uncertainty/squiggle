@@ -61,7 +61,7 @@ function buildRelativeValue({
   }
   const record = result.value.asJS();
   if (!(record instanceof Map)) {
-    return { ok: false, value: "Expected record" };
+    return { ok: false, value: "Expected dict" };
   }
 
   const rvSchema = z.object({

@@ -261,7 +261,7 @@ export const getBoxProps = (
     case "Record": {
       const entries = getChildrenValues(value);
       return {
-        heading: `Record(${entries.length})`,
+        heading: `Dict(${entries.length})`,
         preview: <SqTypeWithCount type="{}" count={entries.length} />,
         isRecordOrList: true,
         children: () =>
