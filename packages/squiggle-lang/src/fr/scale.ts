@@ -9,11 +9,6 @@ import {
 import { FnFactory } from "../library/registry/helpers.js";
 import { vScale } from "../value/index.js";
 import { REOther } from "../errors/messages.js";
-import { SqPowerScale, SqSymlogScale } from "../public/SqValue/SqScale.js";
-import {
-  SCALE_SYMLOG_DEFAULT_CONSTANT,
-  SCALE_POWER_DEFAULT_CONSTANT,
-} from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Scale",
@@ -102,6 +97,9 @@ export const library = [
         ],
         ([{ min, max, tickFormat, constant }]) => {
           checkMinMax(min, max);
+          if (constant !== null && constant === 0) {
+            throw new REOther(`Symlog scale constant cannot be 0.`);
+          }
 
           return vScale({
             type: "symlog",
@@ -135,6 +133,9 @@ export const library = [
         ],
         ([{ min, max, tickFormat, exponent }]) => {
           checkMinMax(min, max);
+          if (exponent !== null && exponent <= 0) {
+            throw new REOther(`Power Scale exponent must be over 0.`);
+          }
 
           return vScale({
             type: "power",
