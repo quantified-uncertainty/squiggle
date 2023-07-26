@@ -411,3 +411,23 @@ export function blockComment(
     location,
   };
 }
+
+export function formString(
+  characters: string[],
+  quote: string,
+  location: LocationRange,
+  error: (e: any, l: LocationRange) => void
+) {
+  try {
+    let full = characters
+      .join("")
+      .split("\n")
+      .map((s) => JSON.parse(`${quote}${s}${quote}`))
+      .join("\n");
+    return nodeString(full, location);
+  } catch (e) {
+    let err = e as SyntaxError;
+    // TODO: write an error location conversion, or reimplement parsing
+    error(`${err.message}`, location);
+  }
+}

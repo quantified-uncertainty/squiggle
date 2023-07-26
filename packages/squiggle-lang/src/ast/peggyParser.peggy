@@ -269,11 +269,11 @@ unitIdentifier 'identifier'
 dollarIdentifier 'identifier'
   = ([\$_a-z]+[\$_a-z0-9]i*) { return h.nodeIdentifier(text(), location()); }
 
-escapeSeq = ("\\\\") { return "\\"; } / ('\\"') { return '"'; }  / ("\\'") { return "'"; }
+escapeSeq = @("\\" c:. { return `\\${c}`; })  // / ('\\"') { return '"'; }  / ("\\'") { return "'"; }
 
 string 'string'
-  = "'" characters:(!("'" / "\\") . { return text(); } / escapeSeq)* "'" { return h.nodeString(characters.join(''), location()); }
-  / '"' characters:(!('"' / "\\") . { return text(); } / escapeSeq)* '"' { return h.nodeString(characters.join(''), location()); }
+  = "'" characters:(!("'" / "\\") . { return text(); } / escapeSeq)* "'" { return h.formString(characters, "'", location(), error); }
+  / '"' characters:(!('"' / "\\") . { return text(); } / escapeSeq)* '"' { return h.formString(characters, '"', location(), error); }
 
 number = number:float unit:unitIdentifier?
   {
