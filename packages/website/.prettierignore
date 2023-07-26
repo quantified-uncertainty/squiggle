@@ -1,3 +1,1 @@
-.docusaurus
-build
-docs/Api/.*
+/src/pages/docs
