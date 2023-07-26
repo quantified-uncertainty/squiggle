@@ -121,7 +121,8 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
       ) as [number, number]
     );
 
-    const yScale = scaleLinear().domain([
+    const yScale = sqScaleToD3(plot.yScale);
+    yScale.domain([
       Math.min(
         ...data.map((d) =>
           Math.min(
@@ -145,7 +146,7 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
     ]);
 
     return { xScale, yScale };
-  }, [data, plot.xScale]);
+  }, [data, plot.xScale, plot.yScale]);
 
   const draw = useCallback(
     ({ context, width }: DrawContext) => {

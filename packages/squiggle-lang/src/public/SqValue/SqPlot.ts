@@ -171,11 +171,13 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
   static create({
     fn,
     xScale,
+    yScale,
     distXScale,
     points,
   }: {
     fn: SqLambda;
     xScale: SqScale;
+    yScale: SqScale;
     distXScale: SqScale;
     points?: number;
   }) {
@@ -184,6 +186,7 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
         type: "distFn",
         fn: fn._value,
         xScale: xScale._value,
+        yScale: yScale._value,
         distXScale: distXScale._value,
         points,
       },
@@ -206,6 +209,10 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
 
   get xScale() {
     return wrapScale(this._value.xScale);
+  }
+
+  get yScale() {
+    return wrapScale(this._value.yScale);
   }
 
   get distXScale() {

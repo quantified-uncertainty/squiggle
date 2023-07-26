@@ -65,6 +65,7 @@ export const FunctionChart: FC<FunctionChartProps> = ({
   const max = domain?.max ?? settings.functionChartSettings.stop;
 
   const xScale = SqLinearScale.create({ min, max });
+  const yScale = SqLinearScale.create({});
 
   const result1 = fn.call([SqNumberValue.create(min)], environment);
   const result2 = fn.call([SqNumberValue.create(max)], environment);
@@ -88,6 +89,7 @@ export const FunctionChart: FC<FunctionChartProps> = ({
       const plot = SqDistFnPlot.create({
         fn,
         xScale,
+        yScale,
         points: settings.functionChartSettings.count,
         distXScale: generateDistributionPlotSettings(
           settings.distributionChartSettings
