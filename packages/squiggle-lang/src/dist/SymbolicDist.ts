@@ -1029,18 +1029,6 @@ export class PointMass extends SymbolicDist {
   }
 }
 
-export function makeFromCredibleInterval({
-  low,
-  high,
-  probability,
-}: {
-  low: number;
-  high: number;
-  probability: number;
-}): result<SymbolicDist, string> {
-  return Lognormal.fromCredibleInterval({ low, high, probability });
-}
-
 /* Calling e.g. "Normal.operate" returns an optional Result.
    If the result is undefined, there is no valid analytic solution.
    If it's a Result object, it can still return an error if there is a serious problem,
