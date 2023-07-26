@@ -386,7 +386,7 @@ commentOrNewLine = finalComment? newLine
   newLine "newline" = [\n\r]
 
 finalComment "line comment"
-  = _ ('//'/'#') comment:($([^\r\n]*)) { options.comments.push(h.lineComment(comment, location())); }
+  = _ ('//') comment:($([^\r\n]*)) { options.comments.push(h.lineComment(comment, location())); }
 
 whiteSpaceCharactersOrComment = whiteSpaceCharacters / delimitedComment
 
