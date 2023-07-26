@@ -384,11 +384,6 @@ describe("Peggy parse", () => {
     );
   });
 
-  describe("elixir pipe", () => {
-    //handled together with -> so there is no need for seperate tests
-    testParse("1 |> add(2)", "(Program (Pipe 1 :add 2))");
-  });
-
   describe("to", () => {
     testParse("1 to 2", "(Program (InfixCall to 1 2))");
     testParse(
@@ -576,18 +571,18 @@ describe("parsing new line", () => {
   );
   testParse(
     `
-  a |>
-  b |>
-  c |>
+  a ->
+  b ->
+  c ->
   d 
  `,
     "(Program (Pipe (Pipe (Pipe :a :b) :c) :d))"
   );
   testParse(
     `
-  a |>
-  b |>
-  c |>
+  a ->
+  b ->
+  c ->
   d +
   e
  `,

@@ -153,7 +153,7 @@ power
   powerOp "operator" = '^' / '.^'
 
 chainFunctionCall
-  = head:unary tail:(_ ('->' / '|>') _nl @chainedFunction)*
+  = head:unary tail:(_ ('->') _nl @chainedFunction)*
   {
     return tail.reduce(function(result, element) {
       return h.nodePipe(result, element.callable, element.args, location());

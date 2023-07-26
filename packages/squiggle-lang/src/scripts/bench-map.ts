@@ -10,7 +10,7 @@ async function main() {
     const project = SqProject.create();
     project.setSource("list", `l = List.upTo(1,${size})`);
     project.run("list");
-    project.setSource("map", "l |> map({|x| x})");
+    project.setSource("map", "l -> map({|x| x})");
     project.setContinues("map", ["list"]);
     const time = await measure(async () => {
       await project.run("map");

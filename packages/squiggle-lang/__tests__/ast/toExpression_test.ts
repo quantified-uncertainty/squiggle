@@ -122,10 +122,6 @@ describe("Peggy to Expression", () => {
     testToExpression("1 -> add(2) * 3", "(multiply)((add)(1, 2), 3)", "9");
   });
 
-  describe("elixir pipe", () => {
-    testToExpression("1 |> add(2)", "(add)(1, 2)", "3");
-  });
-
   // see testParse for priorities of to and credibleIntervalToDistribution
 
   describe("inner block", () => {
