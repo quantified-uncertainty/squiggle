@@ -66,7 +66,6 @@ describe("Peggy to Expression", () => {
   });
 
   describe("comments", () => {
-    testToExpression("1 # This is a line comment", "1", "1");
     testToExpression("1 // This is a line comment", "1", "1");
     testToExpression("1 /* This is a multi line comment */", "1", "1");
     testToExpression("/* This is a multi line comment */ 1", "1", "1");
@@ -120,10 +119,6 @@ describe("Peggy to Expression", () => {
     testToExpression("1 -> add(2)", "(add)(1, 2)", "3");
     testToExpression("-1 -> add(2)", "(add)((unaryMinus)(1), 2)", "1"); // note that unary has higher priority naturally
     testToExpression("1 -> add(2) * 3", "(multiply)((add)(1, 2), 3)", "9");
-  });
-
-  describe("elixir pipe", () => {
-    testToExpression("1 |> add(2)", "(add)(1, 2)", "3");
   });
 
   // see testParse for priorities of to and credibleIntervalToDistribution
