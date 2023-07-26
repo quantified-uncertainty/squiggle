@@ -148,8 +148,9 @@ multiplicative
   multiplicativeOp "operator" = '*' / '/' / '.*' / './'
 
 power
-  = head:chainFunctionCall tail:(_ @powerOp _nl @chainFunctionCall)*
-  { return h.makeInfixChain(head, tail, location()); }
+  = left:chainFunctionCall _ operator:powerOp _nl right:power
+  { return h.nodeInfixCall(operator, left, right, location()); }
+  / chainFunctionCall
   powerOp "operator" = '^' / '.^'
 
 chainFunctionCall

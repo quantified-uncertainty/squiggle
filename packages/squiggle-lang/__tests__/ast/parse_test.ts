@@ -120,8 +120,10 @@ describe("Peggy parse", () => {
     );
     testParse(
       "1 * 2 - 3 * 4^5^6",
-      "(Program (InfixCall - (InfixCall * 1 2) (InfixCall * 3 (InfixCall ^ (InfixCall ^ 4 5) 6))))"
+      "(Program (InfixCall - (InfixCall * 1 2) (InfixCall * 3 (InfixCall ^ 4 (InfixCall ^ 5 6)))))"
     );
+    testParse("2^3^4", "(Program (InfixCall ^ 2 (InfixCall ^ 3 4)))");
+    testParse("2 .^ 3 .^ 4", "(Program (InfixCall .^ 2 (InfixCall .^ 3 4)))");
     testParse(
       "1 * -a[-2]",
       "(Program (InfixCall * 1 (UnaryCall - (BracketLookup :a (UnaryCall - 2)))))"
