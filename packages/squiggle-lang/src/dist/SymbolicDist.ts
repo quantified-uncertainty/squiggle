@@ -1038,11 +1038,7 @@ export function makeFromCredibleInterval({
   high: number;
   probability: number;
 }): result<SymbolicDist, string> {
-  if (low <= 0) {
-    return Normal.fromCredibleInterval({ low, high, probability });
-  } else {
-    return Lognormal.fromCredibleInterval({ low, high, probability });
-  }
+  return Lognormal.fromCredibleInterval({ low, high, probability });
 }
 
 /* Calling e.g. "Normal.operate" returns an optional Result.
