@@ -46,7 +46,7 @@ const config = {
   // squiggle components are not compatible with dark mode yet, see https://github.com/quantified-uncertainty/squiggle/issues/1192
   darkMode: false,
   nextThemes: {
-    forcedTheme: 'light',
+    forcedTheme: "light",
   },
   primaryHue: 17,
   docsRepositoryBase:

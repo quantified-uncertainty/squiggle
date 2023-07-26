@@ -1,10 +1,8 @@
 {
-  "Date": "Date",
   "Dictionary": "Dictionary",
   "Dist": "Distribution",
   "DistSampleSet": "Sample Set Distribution",
   "DistPointSet": "Point Set Distribution",
-  "Duration": "Duration",
   "List": "List",
   "Math": "Math",
   "Number": "Number",
