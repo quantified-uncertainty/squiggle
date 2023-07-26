@@ -86,7 +86,6 @@ export const library = [
     output: "Scale",
     examples: [`Scale.symlog({ min: -10, max: 10 })`],
     definitions: [
-
       makeDefinition(
         [
           frDict(
