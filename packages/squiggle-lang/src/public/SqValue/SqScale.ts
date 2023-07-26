@@ -82,7 +82,6 @@ export class SqSymlogScale extends SqAbstractScale<"symlog"> {
 
 export class SqPowerScale extends SqAbstractScale<"power"> {
   tag = "power" as const;
-  static readonly defaultExponent = SCALE_POWER_DEFAULT_CONSTANT;
 
   private _exponent: number;
 
@@ -91,7 +90,7 @@ export class SqPowerScale extends SqAbstractScale<"power"> {
       type: "power",
       ...args,
     });
-    this._exponent = args.exponent ?? SqPowerScale.defaultExponent;
+    this._exponent = args.exponent ?? SCALE_POWER_DEFAULT_CONSTANT;
   }
 
   static create(args: CommonScaleArgs & { exponent?: number }) {
