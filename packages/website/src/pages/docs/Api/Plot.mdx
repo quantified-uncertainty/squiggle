@@ -94,7 +94,7 @@ Plot.numericFn: ({yDist: sampleSetDist, xDist: sampleSetDist, xScale: Scale, ySc
 
 <SquiggleEditor
   defaultCode={`xDist = SampleSet.fromDist(2 to 5)
-yDist = (-3 to 3) * 5 - xDist ^ 2
+yDist = normal({p5:-3, p95:3}) * 5 - xDist ^ 2
 Plot.scatter({
   xDist: xDist,
   yDist: yDist,
@@ -103,8 +103,8 @@ Plot.scatter({
 />
 
 <SquiggleEditor
-  defaultCode={`xDist = SampleSet.fromDist(-2 to 5)
-yDist = (-3 to 3) * 5 - xDist
+  defaultCode={`xDist = SampleSet.fromDist(normal({p5:-2, p95:5}))
+yDist = normal({p5:-3, p95:3}) * 5 - xDist
 Plot.scatter({
   xDist: xDist,
   yDist: yDist,
@@ -126,18 +126,18 @@ Scale.symlog: ({min: number, max: number, tickFormat: string, constant: number})
 Scale.power: ({min: number, max: number, tickFormat: string, exponent: number}) => scale
 ```
 
-** Scale.log **
+**Scale.log**
 
-** Scale.linear **
+**Scale.linear**
 
-** Scale.symlog **  
+**Scale.symlog**  
 Symmetric log scale. Useful for plotting data that includes zero or negative values.
 
 The function accepts an additional `constant` parameter, used as follows: `Scale.symlog({constant: 0.1})`. This parameter allows you to allocate more pixel space to data with lower or higher absolute values. By adjusting this constant, you effectively control the scale's focus, shifting it between smaller and larger values. For more detailed information on this parameter, refer to the [D3 Documentation](https://d3js.org/d3-scale/symlog).
 
 The default value for `constant` is `1`.
 
-** Scale.power **  
+**Scale.power**  
 Power scale. Accepts an extra `exponent` parameter, like, `Scale.power({exponent: 2, min: 0, max: 100})`.
 
 The default value for `exponent` is `0.1`.

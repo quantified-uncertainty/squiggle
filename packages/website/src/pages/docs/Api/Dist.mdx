@@ -160,18 +160,14 @@ triangular: (number, number, number) => distribution;
 triangular(5, 10, 20)
 ```
 
-### to / credibleIntervalToDistribution
+### to
 
 The `to` function is an easy way to generate simple distributions using predicted _5th_ and _95th_ percentiles.
 
-If both values are above zero, a `lognormal` distribution is used. If not, a `normal` distribution is used.
-
-`To` is an alias for `credibleIntervalToDistribution`. However, because of its frequent use, it is recommended to use the shorter name.
+`To` is simply an alias for `lognormal({p5:low, p95:high})`. It does not accept values of 0 or less, as those are not valid for lognormal distributions.
 
 ```
 to: (distribution|number, distribution|number) => distribution
-to: (distribution|number, distribution|number) => distribution
-credibleIntervalToDistribution(distribution|number, distribution|number) => distribution
 ```
 
 **Examples**
@@ -179,7 +175,6 @@ credibleIntervalToDistribution(distribution|number, distribution|number) => dist
 ```squiggle
 5 to 10
 to(5,10)
--5 to 5
 ```
 
 ### mixture
