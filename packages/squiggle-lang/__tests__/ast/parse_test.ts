@@ -204,7 +204,6 @@ describe("Peggy parse", () => {
   });
 
   describe("comments", () => {
-    testParse("1 # This is a line comment", "(Program 1)");
     testParse("1 // This is a line comment", "(Program 1)");
     testParse("1 /* This is a multi line comment */", "(Program 1)");
     testParse("/* This is a multi line comment */ 1", "(Program 1)");
@@ -382,11 +381,6 @@ describe("Peggy parse", () => {
       "1 -> subtract(2) * 3",
       "(Program (InfixCall * (Pipe 1 :subtract 2) 3))"
     );
-  });
-
-  describe("elixir pipe", () => {
-    //handled together with -> so there is no need for seperate tests
-    testParse("1 |> add(2)", "(Program (Pipe 1 :add 2))");
   });
 
   describe("to", () => {
@@ -576,18 +570,18 @@ describe("parsing new line", () => {
   );
   testParse(
     `
-  a |>
-  b |>
-  c |>
+  a ->
+  b ->
+  c ->
   d 
  `,
     "(Program (Pipe (Pipe (Pipe :a :b) :c) :d))"
   );
   testParse(
     `
-  a |>
-  b |>
-  c |>
+  a ->
+  b ->
+  c ->
   d +
   e
  `,

@@ -187,7 +187,7 @@ describe("distribution functions", () => {
     testEvalToBe("truncateRight(Sym.normal(5,2), 3)", "Point Set Distribution");
     testEvalToBe("truncate(Sym.normal(5,2), 3, 8)", "Point Set Distribution");
     testEvalToBe(
-      "truncate(Sym.normal(5,2) |> SampleSet.fromDist, 3, 8)",
+      "truncate(Sym.normal(5,2) -> SampleSet.fromDist, 3, 8)",
       "Sample Set Distribution"
     );
     testEvalToBe("isNormalized(truncate(Sym.normal(5,2), 3, 8))", "true");
