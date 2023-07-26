@@ -1,0 +1,45 @@
+---
+description: Explore common pitfalls and misunderstandings in Squiggle's handling of distributions
+---
+
+import { SquiggleEditor } from "@quri/squiggle-components";
+
+# Gotchas
+
+## Point Set Distributions Conversions
+
+Point Set conversions are done with [kernel density estimation](https://en.wikipedia.org/wiki/Kernel_density_estimation), which is lossy. This might be particularly noticeable in cases where distributions should be entirely above zero.
+
+In this example, we see that the median of this (highly skewed) distribution is positive when it's in a Sample Set format, but negative when it's converted to a Point Set format.
+
+<SquiggleEditor
+  defaultCode={`dist = SampleSet.fromDist(5 to 100000000)
+{
+    sampleSetMedian: quantile(dist, .5),
+    pointSetMedian: quantile(PointSet.fromDist(dist), .5),
+    dist: dist
+}`}
+/>
+
+---
+
+This can be particularly confusing for visualizations. Visualizations automatically convert distributions into Point Set formats. Therefore, they might often show negative values, even if the underlying distribution is fully positive.
+
+We plan to later support more configuration of kernel density estimation, and for visualiations of Sample Set distributions to instead use histograms.
+
+## Sample Set Correlations
+
+Correlations with Sample Set distributions are a bit complicated. Monte Carlo generations with Squiggle are ordered. The first sample in one Sample Set distribution will correspond to the first sample in a distribution that comes from a resulting Monte Carlo generation. Therefore, Sample Set distributions in a chain of Monte Carlo generations are likely to all be correlated with each other. This connection breaks if any node changes to the Point Set or Symbolic format.
+
+In this example, we subtract all three types of distributions by themselves. Notice that the Sample Set distribution returns 1. The other two return the result of subtracting one normal distribution from a separate uncorrelated distribution. These results are clearly very different to each other.
+
+<SquiggleEditor
+  defaultCode={`sampleSetDist = normal(5, 2)
+pointSetDist = sampleSetDist -> PointSet.fromDist
+symbolicDist = Sym.normal(5, 2)
+[
+  sampleSetDist - sampleSetDist,
+  pointSetDist - pointSetDist,
+  symbolicDist - symbolicDist,
+]`}
+/>
