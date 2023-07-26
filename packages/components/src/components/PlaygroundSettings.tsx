@@ -45,7 +45,7 @@ function scaleTypeToSqScale(
     case "symlog":
       return SqSymlogScale.create(args);
     case "exp":
-      return SqPowerScale.create({ exponent: 0.1, ...args });
+      return SqPowerScale.create(args);
     default:
       // should never happen, just a precaution
       throw new Error("Internal error");

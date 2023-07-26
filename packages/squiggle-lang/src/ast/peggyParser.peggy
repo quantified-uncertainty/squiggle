@@ -148,12 +148,13 @@ multiplicative
   multiplicativeOp "operator" = '*' / '/' / '.*' / './'
 
 power
-  = head:chainFunctionCall tail:(_ @powerOp _nl @chainFunctionCall)*
-  { return h.makeInfixChain(head, tail, location()); }
+  = left:chainFunctionCall _ operator:powerOp _nl right:power
+  { return h.nodeInfixCall(operator, left, right, location()); }
+  / chainFunctionCall
   powerOp "operator" = '^' / '.^'
 
 chainFunctionCall
-  = head:unary tail:(_ ('->' / '|>') _nl @chainedFunction)*
+  = head:unary tail:(_ ('->') _nl @chainedFunction)*
   {
     return tail.reduce(function(result, element) {
       return h.nodePipe(result, element.callable, element.args, location());
@@ -386,7 +387,7 @@ commentOrNewLine = finalComment? newLine
   newLine "newline" = [\n\r]
 
 finalComment "line comment"
-  = _ ('//'/'#') comment:($([^\r\n]*)) { options.comments.push(h.lineComment(comment, location())); }
+  = _ ('//') comment:($([^\r\n]*)) { options.comments.push(h.lineComment(comment, location())); }
 
 whiteSpaceCharactersOrComment = whiteSpaceCharacters / delimitedComment
 
