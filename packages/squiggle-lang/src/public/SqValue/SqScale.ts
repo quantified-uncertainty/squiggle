@@ -60,35 +60,46 @@ export class SqLogScale extends SqAbstractScale<"log"> {
 
 export class SqSymlogScale extends SqAbstractScale<"symlog"> {
   tag = "symlog" as const;
-  static defaultConstant = SCALE_SYMLOG_DEFAULT_CONSTANT;
 
-  static create(args: CommonScaleArgs & { constant?: number }) {
-    return new SqSymlogScale({
+  private _constant: number;
+
+  constructor(args: CommonScaleArgs & { constant?: number }) {
+    super({
       type: "symlog",
       ...args,
-      constant: args.constant || this.defaultConstant,
     });
+    this._constant = args.constant ?? SCALE_SYMLOG_DEFAULT_CONSTANT;
+  }
+
+  static create(args: CommonScaleArgs & { exponent?: number }) {
+    return new SqSymlogScale(args);
   }
 
   get constant() {
-    return this._value.constant || SCALE_SYMLOG_DEFAULT_CONSTANT;
+    return this._constant;
   }
 }
 
 export class SqPowerScale extends SqAbstractScale<"power"> {
   tag = "power" as const;
-  static defaultExponent = SCALE_POWER_DEFAULT_CONSTANT;
+  static readonly defaultExponent = SCALE_POWER_DEFAULT_CONSTANT;
 
-  static create(args: CommonScaleArgs & { exponent?: number }) {
-    return new SqPowerScale({
+  private _exponent: number;
+
+  constructor(args: CommonScaleArgs & { constant?: number }) {
+    super({
       type: "power",
       ...args,
-      exponent: args.exponent || this.defaultExponent,
     });
+    this._exponent = args.constant ?? SqPowerScale.defaultExponent;
+  }
+
+  static create(args: CommonScaleArgs & { exponent?: number }) {
+    return new SqSymlogScale(args);
   }
 
   get exponent() {
-    return this._value.exponent || SCALE_POWER_DEFAULT_CONSTANT;
+    return this._exponent;
   }
 }
 
