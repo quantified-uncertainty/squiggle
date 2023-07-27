@@ -15,7 +15,6 @@ import {
 } from "@quri/squiggle-lang";
 
 import { sqScaleToD3 } from "../../lib/d3/index.js";
-import { scaleLinear } from "../../lib/d3/patchedScales.js";
 import {
   AnyChartScale,
   drawAxes,
