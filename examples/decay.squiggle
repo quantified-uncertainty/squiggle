@@ -1,11 +1,11 @@
-# The following code was provided by Nuño Sempere, it comes directly from the post https://www.lesswrong.com/s/rDe8QE5NvXcZYzgZ3/p/j8o6sgRerE3tqNWdj
-## Initial setup
+// The following code was provided by Nuño Sempere, it comes directly from the post https://www.lesswrong.com/s/rDe8QE5NvXcZYzgZ3/p/j8o6sgRerE3tqNWdj
+// Initial setup
 yearly_probability_max = 0.95
 yearly_probability_min = 0.66
 period_probability_function(epsilon, yearly_probability) = 1 - (1 - yearly_probability) ^ (1 / epsilon)
 probability_decayed(t, time_periods, period_probability) = 1 - (1 - period_probability) ^ (time_periods - t)
 
-## Monthly decomposition
+// Monthly decomposition
 months_in_a_year=12
 
 monthly_probability_min = period_probability_function(months_in_a_year, yearly_probability_min)
@@ -16,5 +16,5 @@ probability_decayed_monthly_max(t) = probability_decayed(t, months_in_a_year, mo
 probability_decayed_monthly(t) = probability_decayed_monthly_min(t) to probability_decayed_monthly_max(t)
 
 probability_decayed_monthly
-## probability_decayed_monthly(6)
-## mean(probability_decayed_monthly(6))
+// probability_decayed_monthly(6)
+// mean(probability_decayed_monthly(6))
