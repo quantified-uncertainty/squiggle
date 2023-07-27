@@ -19,7 +19,7 @@ export const infixFunctions = {
   ">": "larger",
   ">=": "largerEq",
   "||": "or",
-  to: "credibleIntervalToDistribution",
+  to: "to",
 };
 export type InfixOperator = keyof typeof infixFunctions;
 
