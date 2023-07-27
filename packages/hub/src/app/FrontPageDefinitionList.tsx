@@ -40,13 +40,10 @@ export const FrontPageDefinitionList: FC<Props> = ({ dataRef }) => {
   >(Fragment, dataRef);
 
   return (
-    <section>
-      <H2>All relative values definitions</H2>
-      <RelativeValuesDefinitionList
-        connectionRef={relativeValuesDefinitions}
-        showOwner={true}
-        loadNext={loadNext}
-      />
-    </section>
+    <RelativeValuesDefinitionList
+      connectionRef={relativeValuesDefinitions}
+      showOwner={true}
+      loadNext={loadNext}
+    />
   );
 };

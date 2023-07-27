@@ -56,8 +56,8 @@ type NodeProgram = N<
 
 type NodeArray = N<"Array", { elements: ASTNode[] }>;
 
-type NodeRecord = N<
-  "Record",
+type NodeDict = N<
+  "Dict",
   {
     elements: NodeKeyValue[];
     // Static key -> node, for faster path resolution.
@@ -90,9 +90,20 @@ type NodeDotLookup = N<"DotLookup", { arg: ASTNode; key: string }>;
 
 type NodeBracketLookup = N<"BracketLookup", { arg: ASTNode; key: ASTNode }>;
 
-type NodeFloat = N<"Float", { value: number }>;
+type NodeFloat = N<
+  "Float",
+  {
+    // floats are always positive, `-123` is an unary operation
+    integer: number;
+    fractional: string | null; // heading zeros are significant, so we can't store this as a number
+    exponent: number | null;
+  }
+>;
 
-type NodeInteger = N<"Integer", { value: number }>;
+type NodeIdentifierWithAnnotation = N<
+  "IdentifierWithAnnotation",
+  { variable: string; annotation: ASTNode }
+>;
 
 type NodeIdentifier = N<"Identifier", { value: string }>;
 
@@ -147,7 +158,7 @@ type NodeVoid = N<"Void", {}>;
 
 export type ASTNode =
   | NodeArray
-  | NodeRecord
+  | NodeDict
   | NodeBlock
   | NodeProgram
   | NodeUnitValue
@@ -158,8 +169,8 @@ export type ASTNode =
   | NodeDotLookup
   | NodeBracketLookup
   | NodeFloat
-  | NodeInteger
   | NodeIdentifier
+  | NodeIdentifierWithAnnotation
   | NodeLetStatement
   | NodeDefunStatement
   | NodeLambda
@@ -240,17 +251,17 @@ export function nodeArray(
 ): NodeArray {
   return { type: "Array", elements, location };
 }
-export function nodeRecord(
+export function nodeDict(
   elements: NodeKeyValue[],
   location: LocationRange
-): NodeRecord {
-  const symbols: NodeRecord["symbols"] = {};
+): NodeDict {
+  const symbols: NodeDict["symbols"] = {};
   for (const element of elements) {
-    if (element.key.type === "String" || element.key.type === "Integer") {
+    if (element.key.type === "String") {
       symbols[element.key.value] = element;
     }
   }
-  return { type: "Record", elements, symbols, location };
+  return { type: "Dict", elements, symbols, location };
 }
 
 export function nodeUnitValue(
@@ -289,21 +300,29 @@ export function nodeBoolean(
 ): NodeBoolean {
   return { type: "Boolean", value, location };
 }
-export function nodeFloat(value: number, location: LocationRange): NodeFloat {
-  return { type: "Float", value, location };
+
+export function nodeFloat(
+  args: Omit<NodeFloat, "type" | "location">,
+  location: LocationRange
+): NodeFloat {
+  return { type: "Float", ...args, location };
 }
+
 export function nodeIdentifier(
   value: string,
   location: LocationRange
 ): NodeIdentifier {
   return { type: "Identifier", value, location };
 }
-export function nodeInteger(
-  value: number,
+
+export function nodeIdentifierWithAnnotation(
+  variable: string,
+  annotation: ASTNode,
   location: LocationRange
-): NodeInteger {
-  return { type: "Integer", value, location };
+): NodeIdentifierWithAnnotation {
+  return { type: "IdentifierWithAnnotation", variable, annotation, location };
 }
+
 export function nodeKeyValue(
   key: ASTNode,
   value: ASTNode,

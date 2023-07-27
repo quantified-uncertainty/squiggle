@@ -100,4 +100,9 @@ x = 3 + /* comment */ 5
     ).toBe(`x = 3 + /* comment */ 5
 `);
   });
+
+  test("trailing comment", async () => {
+    expect(await format(`x = 5 // first line`)).toBe(`x = 5 // first line
+`);
+  });
 });

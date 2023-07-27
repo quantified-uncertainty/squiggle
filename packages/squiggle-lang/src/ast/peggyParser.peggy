@@ -77,7 +77,12 @@ defunStatement
 
   assignmentOp "assignment" = '='
 
-functionParameters = dollarIdentifier|.., commaSeparator|
+functionParameters = functionParameter|.., commaSeparator|
+  functionParameter
+    = id:dollarIdentifier annotation:(_ ':' _nl @expression)?
+    {
+      return annotation ? h.nodeIdentifierWithAnnotation(id.value, annotation, location()) : id;
+    }
 
 /*
 Rules for expressions start here.
@@ -143,12 +148,13 @@ multiplicative
   multiplicativeOp "operator" = '*' / '/' / '.*' / './'
 
 power
-  = head:chainFunctionCall tail:(_ @powerOp _nl @chainFunctionCall)*
-  { return h.makeInfixChain(head, tail, location()); }
+  = left:chainFunctionCall _ operator:powerOp _nl right:power
+  { return h.nodeInfixCall(operator, left, right, location()); }
+  / chainFunctionCall
   powerOp "operator" = '^' / '.^'
 
 chainFunctionCall
-  = head:unary tail:(_ ('->' / '|>') _nl @chainedFunction)*
+  = head:unary tail:(_ ('->') _nl @chainedFunction)*
   {
     return tail.reduce(function(result, element) {
       return h.nodePipe(result, element.callable, element.args, location());
@@ -259,7 +265,7 @@ identifier 'identifier'
   = ([_a-z]+[_a-z0-9]i*) { return h.nodeIdentifier(text(), location()); }
 
 unitIdentifier 'identifier'
-  = 'n' / 'm' / 'k' / 'M' / 'B' / 'G' / 'T' / 'P' / 'minutes' / 'hours' / 'days' / 'years'
+  = 'minutes' / 'hours' / 'days' / 'years' / 'n' / 'm' / 'k' / 'M' / 'B' / 'G' / 'T' / 'P'
 
 dollarIdentifier 'identifier'
   = ([\$_a-z]+[\$_a-z0-9]i*) { return h.nodeIdentifier(text(), location()); }
@@ -269,7 +275,7 @@ string 'string'
   = characters:("'" @([^'])* "'") { return h.nodeString(characters.join(''), location()); }
   / characters:('"' @([^"])* '"') { return h.nodeString(characters.join(''), location()); }
 
-number = number:(float / integer) unit:unitIdentifier?
+number = number:float unit:unitIdentifier?
   {
     if (unit === null) {
       return number;
@@ -279,16 +285,39 @@ number = number:(float / integer) unit:unitIdentifier?
     }
   }
 
-integer 'number'
-  = d+ !"\." ![e]i
-  { return h.nodeInteger(parseInt(text()), location()); }
+float 'number' = significand:floatSignificand exponent:floatExponent?
+  {
+    return h.nodeFloat({
+      integer: significand.integer,
+      fractional: significand.fractional,
+      exponent,
+    }, location());
+  }
+  
+  floatSignificand =
+    integer:intLiteral "." fractional:($d+)? {
+      return {
+        integer,
+        fractional,
+      };
+    }
+    / integer:intLiteral {
+      return {
+        integer,
+        fractional: null,
+      };
+    }
+    / "." fractional:$(d+) {
+      return {
+        integer: 0,
+        fractional,
+      };
+    }
 
-float 'number'
-  = $(((d+ "\." d*) / ("\." d+)) floatExponent? / d+ floatExponent)
-  { return h.nodeFloat(parseFloat(text()), location()); }
-
-    floatExponent = [e]i ('-'/'+')? d+
-    d = [0-9]
+  floatExponent = [e]i @value:signedIntLiteral
+  intLiteral = d+ { return parseInt(text(), 10); }
+  signedIntLiteral = ('-'/'+')? d+ { return parseInt(text(), 10); }
+  d = [0-9]
 
 boolean 'boolean'
   = ('true' / 'false') ! [a-z]i ! [_$]
@@ -297,10 +326,10 @@ boolean 'boolean'
 // Contructors - delimited blocks such as {} and []
 
 valueConstructor
-  = recordConstructor
-  / arrayConstructor
+  = arrayConstructor
   / lambda
   / quotedInnerBlock
+  / dictConstructor
 
 lambda
   = '{' _nl '|' _nl args:functionParameters _nl '|' _nl statements:statementsList  finalExpression: (statementSeparator @expression)  _nl '}'
@@ -319,13 +348,17 @@ arrayConstructor 'array'
 
   array_elements = @expression|1.., commaSeparator| commaSeparator?
 
-recordConstructor 'record'
+dictConstructor 'dict'
   = '{' _nl '}'
-    { return h.nodeRecord([], location()); }
-  / '{' _nl args:array_recordEntries _nl '}'
-    { return h.nodeRecord(args, location()); }
+    { return h.nodeDict([], location()); }
+  / '{' _nl args:array_dictEntries _nl '}'
+    { return h.nodeDict(args, location()); }
 
-  array_recordEntries = @keyValuePair|1.., commaSeparator| commaSeparator?
+  array_dictEntries = @(keyValuePair / keyValueInherit)| 1.., commaSeparator|commaSeparator?
+
+  keyValueInherit
+    = key:identifier
+    { return h.nodeKeyValue(key, key, location()); }
 
   keyValuePair
     = key:expression _ ':' _nl value:expression
@@ -354,7 +387,7 @@ commentOrNewLine = finalComment? newLine
   newLine "newline" = [\n\r]
 
 finalComment "line comment"
-  = _ ('//'/'#') comment:($([^\r\n]*)) { options.comments.push(h.lineComment(comment, location())); }
+  = _ ('//') comment:($([^\r\n]*)) { options.comments.push(h.lineComment(comment, location())); }
 
 whiteSpaceCharactersOrComment = whiteSpaceCharacters / delimitedComment
 

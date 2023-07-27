@@ -6,24 +6,29 @@ import { RelativeValuesDefinitionPageQuery as RelativeValuesDefinitionPageQueryT
 import { RelativeValuesDefinitionPageQuery } from "../RelativeValuesDefinitionPage";
 import { EditRelativeValuesDefinition } from "./EditRelativeValuesDefinition";
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
+import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 
 export default function Page({
   params,
 }: {
   params: { username: string; slug: string };
 }) {
-  const data = useLazyLoadQuery<RelativeValuesDefinitionPageQueryType>(
-    RelativeValuesDefinitionPageQuery,
-    {
-      input: { ownerUsername: params.username, slug: params.slug },
-    }
+  const { relativeValuesDefinition: result } =
+    useLazyLoadQuery<RelativeValuesDefinitionPageQueryType>(
+      RelativeValuesDefinitionPageQuery,
+      {
+        input: { ownerUsername: params.username, slug: params.slug },
+      }
+    );
+
+  const definitionRef = extractFromGraphqlErrorUnion(
+    result,
+    "RelativeValuesDefinition"
   );
 
   return (
     <NarrowPageLayout>
-      <EditRelativeValuesDefinition
-        definitionRef={data.relativeValuesDefinition}
-      />
+      <EditRelativeValuesDefinition definitionRef={definitionRef} />
     </NarrowPageLayout>
   );
 }

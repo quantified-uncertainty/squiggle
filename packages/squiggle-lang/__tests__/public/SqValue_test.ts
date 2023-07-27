@@ -1,9 +1,9 @@
 import { run, sq } from "../../src/index.js";
-import { SqSymbolicDistribution } from "../../src/public/SqValue/SqDistribution/index.js";
+import { SqSampleSetDistribution } from "../../src/public/SqValue/SqDistribution/index.js";
 import { testRun } from "../helpers/helpers.js";
 
 describe("SqValue.asJS", () => {
-  test("SqRecord -> Map", async () => {
+  test("SqDict -> Map", async () => {
     const value = (
       await testRun('{ x: 5, y: [3, "foo", { dist: normal(5,2) } ] }')
     ).asJS();
@@ -11,7 +11,7 @@ describe("SqValue.asJS", () => {
     expect(value).toBeInstanceOf(Map);
   });
 
-  test("Record fields", async () => {
+  test("Dict fields", async () => {
     const value = (await testRun("{ x: 5 }")).asJS();
 
     expect((value as any).get("x")).toBe(5);
@@ -23,7 +23,7 @@ describe("SqValue.asJS", () => {
     ).asJS();
 
     expect((value as any).get("y")[2].get("dist")).toBeInstanceOf(
-      SqSymbolicDistribution
+      SqSampleSetDistribution
     );
   });
 });
@@ -32,7 +32,7 @@ describe("docstrings", () => {
   const runToResult = async (code: string) => {
     const outputR = await run(code);
     if (!outputR.ok) {
-      fail();
+      throw new Error();
     }
     const { result } = outputR.value;
 
@@ -42,7 +42,7 @@ describe("docstrings", () => {
   const runToBindings = async (code: string) => {
     const outputR = await run(code);
     if (!outputR.ok) {
-      fail();
+      throw new Error();
     }
     const { bindings } = outputR.value;
 
@@ -145,7 +145,7 @@ x = 5
     );
   });
 
-  test("Record fields", async () => {
+  test("Dict fields", async () => {
     const bindings = await runToBindings(sq`
 /** global */
 r = {
@@ -158,8 +158,8 @@ r = {
     `);
 
     const r = bindings.get("r");
-    if (r?.tag !== "Record") {
-      fail();
+    if (r?.tag !== "Dict") {
+      throw new Error();
     }
 
     expect(r.value.context?.docstring()).toBe("global");

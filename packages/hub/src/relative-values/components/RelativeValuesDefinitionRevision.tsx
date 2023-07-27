@@ -5,6 +5,7 @@ import { graphql } from "relay-runtime";
 import { RelativeValuesDefinitionRevision$key } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
 import { H2 } from "@/components/ui/Headers";
 import { ClusterInfo } from "./common/ClusterInfo";
+import { StyledTextArea, StyledTab } from "@quri/ui";
 
 export const RelativeValuesDefinitionRevisionFragment = graphql`
   fragment RelativeValuesDefinitionRevision on RelativeValuesDefinitionRevision {
@@ -40,11 +41,24 @@ export const RelativeValuesDefinitionRevision: FC<Props> = ({
     content.clusters.map((cluster) => [cluster.id, cluster])
   );
 
-  return (
-    <section>
-      <div className="mb-4">
-        <H2 size="large">{content.title}</H2>
-      </div>
+  const jsonPart = (
+    <StyledTextArea
+      defaultValue={JSON.stringify(
+        {
+          clusters: content.clusters,
+          items: content.items,
+          recommendedUnit: content.recommendedUnit,
+        },
+        null,
+        2
+      )}
+      name="json"
+      readOnly
+    />
+  );
+
+  const regular = (
+    <>
       <section>
         <H2>Clusters</H2>
         <div
@@ -95,6 +109,26 @@ export const RelativeValuesDefinitionRevision: FC<Props> = ({
           ))}
         </div>
       </section>
+    </>
+  );
+
+  return (
+    <section>
+      <div className="mb-4">
+        <H2 size="large">{content.title}</H2>
+      </div>
+      <StyledTab.Group>
+        <StyledTab.List>
+          <StyledTab name="Tables" />
+          <StyledTab name="JSON" />
+        </StyledTab.List>
+        <div className="mt-4">
+          <StyledTab.Panels>
+            <StyledTab.Panel>{regular}</StyledTab.Panel>
+            <StyledTab.Panel>{jsonPart}</StyledTab.Panel>
+          </StyledTab.Panels>
+        </div>
+      </StyledTab.Group>
     </section>
   );
 };

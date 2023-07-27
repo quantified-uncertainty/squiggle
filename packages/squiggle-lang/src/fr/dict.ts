@@ -2,7 +2,7 @@ import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
   frArray,
-  frDict,
+  frDictWithArbitraryKeys,
   frLambda,
   frString,
   frTuple2,
@@ -10,7 +10,7 @@ import {
 import { FnFactory } from "../library/registry/helpers.js";
 import { Ok } from "../utility/result.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
-import { vArray, vRecord, vString, Value } from "../value/index.js";
+import { vArray, vDict, vString, Value } from "../value/index.js";
 import * as Result from "../utility/result.js";
 import { REOther } from "../errors/messages.js";
 
@@ -22,31 +22,33 @@ const maker = new FnFactory({
 export const library = [
   maker.make({
     name: "set",
-    output: "Record",
+    output: "Dict",
     examples: [`Dict.set({a: 1, b: 2}, "c", 3)`],
     definitions: [
-      makeDefinition([frDict(frAny), frString, frAny], ([dict, key, value]) =>
-        vRecord(dict.set(key, value))
+      makeDefinition(
+        [frDictWithArbitraryKeys(frAny), frString, frAny],
+        ([dict, key, value]) => vDict(dict.set(key, value))
       ),
     ],
   }),
   maker.make({
     name: "merge",
-    output: "Record",
+    output: "Dict",
     examples: [`Dict.merge({a: 1, b: 2}, {c: 3, d: 4})`],
     definitions: [
-      makeDefinition([frDict(frAny), frDict(frAny)], ([d1, d2]) =>
-        vRecord(ImmutableMap([...d1.entries(), ...d2.entries()]))
+      makeDefinition(
+        [frDictWithArbitraryKeys(frAny), frDictWithArbitraryKeys(frAny)],
+        ([d1, d2]) => vDict(ImmutableMap([...d1.entries(), ...d2.entries()]))
       ),
     ],
   }),
   maker.make({
     name: "mergeMany",
-    output: "Record",
+    output: "Dict",
     examples: [`Dict.mergeMany([{a: 1, b: 2}, {c: 3, d: 4}])`],
     definitions: [
-      makeDefinition([frArray(frDict(frAny))], ([dicts]) =>
-        vRecord(ImmutableMap(dicts.map((d) => [...d.entries()]).flat()))
+      makeDefinition([frArray(frDictWithArbitraryKeys(frAny))], ([dicts]) =>
+        vDict(ImmutableMap(dicts.map((d) => [...d.entries()]).flat()))
       ),
     ],
   }),
@@ -55,7 +57,7 @@ export const library = [
     output: "Array",
     examples: [`Dict.keys({a: 1, b: 2})`],
     definitions: [
-      makeDefinition([frDict(frAny)], ([d1]) =>
+      makeDefinition([frDictWithArbitraryKeys(frAny)], ([d1]) =>
         vArray([...d1.keys()].map((k) => vString(k)))
       ),
     ],
@@ -65,7 +67,9 @@ export const library = [
     output: "Array",
     examples: [`Dict.values({a: 1, b: 2})`],
     definitions: [
-      makeDefinition([frDict(frAny)], ([d1]) => vArray([...d1.values()])),
+      makeDefinition([frDictWithArbitraryKeys(frAny)], ([d1]) =>
+        vArray([...d1.values()])
+      ),
     ],
   }),
   maker.make({
@@ -73,56 +77,62 @@ export const library = [
     output: "Array",
     examples: [`Dict.toList({a: 1, b: 2})`],
     definitions: [
-      makeDefinition([frDict(frAny)], ([dict]) =>
+      makeDefinition([frDictWithArbitraryKeys(frAny)], ([dict]) =>
         vArray([...dict.entries()].map(([k, v]) => vArray([vString(k), v])))
       ),
     ],
   }),
   maker.make({
     name: "fromList",
-    output: "Record",
+    output: "Dict",
     examples: [`Dict.fromList([["a", 1], ["b", 2]])`],
     definitions: [
       makeDefinition([frArray(frTuple2(frString, frAny))], ([items]) =>
-        vRecord(ImmutableMap(items))
+        vDict(ImmutableMap(items))
       ),
     ],
   }),
   maker.make({
     name: "map",
-    output: "Record",
+    output: "Dict",
     examples: [`Dict.map({a: 1, b: 2}, {|x| x + 1})`],
     definitions: [
-      makeDefinition([frDict(frAny), frLambda], ([dict, lambda], context) => {
-        return vRecord(
-          ImmutableMap(
-            [...dict.entries()].map(([key, value]) => {
-              const mappedValue = lambda.call([value], context);
-              return [key, mappedValue];
-            })
-          )
-        );
-      }),
+      makeDefinition(
+        [frDictWithArbitraryKeys(frAny), frLambda],
+        ([dict, lambda], context) => {
+          return vDict(
+            ImmutableMap(
+              [...dict.entries()].map(([key, value]) => {
+                const mappedValue = lambda.call([value], context);
+                return [key, mappedValue];
+              })
+            )
+          );
+        }
+      ),
     ],
   }),
   maker.make({
     name: "mapKeys",
-    output: "Record",
+    output: "Dict",
     examples: [`Dict.mapKeys({a: 1, b: 2}, {|x| concat(x, "-1")})`],
     definitions: [
-      makeDefinition([frDict(frAny), frLambda], ([dict, lambda], context) => {
-        const mappedEntries: [string, Value][] = [];
-        for (const [key, value] of dict.entries()) {
-          const mappedKey = lambda.call([vString(key)], context);
+      makeDefinition(
+        [frDictWithArbitraryKeys(frAny), frLambda],
+        ([dict, lambda], context) => {
+          const mappedEntries: [string, Value][] = [];
+          for (const [key, value] of dict.entries()) {
+            const mappedKey = lambda.call([vString(key)], context);
 
-          if (mappedKey.type == "String") {
-            mappedEntries.push([mappedKey.value, value]);
-          } else {
-            throw new REOther("mapKeys: lambda must return a string");
+            if (mappedKey.type == "String") {
+              mappedEntries.push([mappedKey.value, value]);
+            } else {
+              throw new REOther("mapKeys: lambda must return a string");
+            }
           }
+          return vDict(ImmutableMap(mappedEntries));
         }
-        return vRecord(ImmutableMap(mappedEntries));
-      }),
+      ),
     ],
   }),
 ];

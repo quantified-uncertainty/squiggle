@@ -15,6 +15,7 @@ export default {
   },
   plugins: [
     require("@quri/squiggle-components/tailwind-plugin"),
+    require("@tailwindcss/typography"),
     require("@tailwindcss/forms")({
       strategy: "class", // strategy: 'base' interferes with react-select styles
     }),

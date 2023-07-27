@@ -1,14 +1,10 @@
-import {
-  FnDefinition,
-  makeDefinition,
-} from "../library/registry/fnDefinition.js";
-import { frArray, frNumber } from "../library/registry/frTypes.js";
+import { REOther } from "../errors/messages.js";
+import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { frArray, frNumber, frDict } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import * as Result from "../utility/result.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
-import { Ok } from "../utility/result.js";
-import { Value, vArray, vNumber } from "../value/index.js";
-import { ErrorMessage, REOther } from "../errors/messages.js";
+import { NumericRangeDomain } from "../value/domain.js";
+import { vArray, vDomain, vNumber } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Number",
@@ -171,5 +167,19 @@ export const library = [
     output: "Array",
     examples: [`diff([3,5,2,3,5])`],
     definitions: [makeNumberArrayToNumberArrayDefinition(E_A_Floats.diff)],
+  }),
+  maker.make({
+    name: "rangeDomain",
+    requiresNamespace: true,
+    output: "Domain",
+    examples: ["Number.rangeDomain({ min: 5, max: 10 })"],
+    definitions: [
+      makeDefinition(
+        [frDict(["min", frNumber], ["max", frNumber])],
+        ([{ min, max }]) => {
+          return vDomain(new NumericRangeDomain(min, max));
+        }
+      ),
+    ],
   }),
 ];

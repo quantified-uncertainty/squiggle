@@ -109,6 +109,9 @@ export function drawAxes({
       }
 
       const text = xTickFormat(xTick);
+      if (text === "") {
+        continue; // we're probably rendering scaleLog, which has empty labels
+      }
       const { width: textWidth } = context.measureText(text);
       let startX = 0;
       if (i === 0) {
@@ -231,7 +234,7 @@ export function drawCursorLines({
     context.textAlign = "left";
     context.textBaseline = "bottom";
     const text = xLine.scale.tickFormat(
-      undefined,
+      Infinity, // important for scaleLog; https://github.com/d3/d3-scale/tree/main#log_tickFormat
       xLine.format
     )(xLine.scale.invert(point.x));
     const measured = context.measureText(text);
@@ -284,7 +287,7 @@ export function drawCursorLines({
     context.textAlign = "left";
     context.textBaseline = "bottom";
     const text = yLine.scale.tickFormat(
-      undefined,
+      Infinity, // important for scaleLog; https://github.com/d3/d3-scale/tree/main#log_tickFormat
       yLine.format
     )(yLine.scale.invert(point.y));
     const measured = context.measureText(text);

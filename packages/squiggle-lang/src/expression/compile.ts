@@ -156,17 +156,27 @@ function compileToContent(
       ];
     case "Lambda": {
       let newNameToPos = context.nameToPos;
-      const args: string[] = [];
+      const args: expression.LambdaExpressionParameter[] = [];
       for (let i = 0; i < ast.args.length; i++) {
-        const arg = ast.args[i];
-        if (arg.type !== "Identifier") {
+        const astArg = ast.args[i];
+
+        let arg: expression.LambdaExpressionParameter;
+        if (astArg.type === "Identifier") {
+          arg = { name: astArg.value, annotation: undefined };
+        } else if (astArg.type === "IdentifierWithAnnotation") {
+          arg = {
+            name: astArg.variable,
+            annotation: innerCompileAst(astArg.annotation, context)[0],
+          };
+        } else {
+          // should never happen
           throw new ICompileError(
-            "Argument is not an identifier",
+            `Internal error: argument ${astArg.type} is not an identifier`,
             ast.location
           );
         }
-        args.push(arg.value);
-        newNameToPos = newNameToPos.set(arg.value, context.size + i);
+        args.push(arg);
+        newNameToPos = newNameToPos.set(arg.name, context.size + i);
       }
       const innerContext: CompileContext = {
         externals: context.externals,
@@ -209,9 +219,9 @@ function compileToContent(
         ),
         context,
       ];
-    case "Record":
+    case "Dict":
       return [
-        expression.eRecord(
+        expression.eDict(
           ast.elements.map((kv) => [
             innerCompileAst(kv.key, context)[0],
             innerCompileAst(kv.value, context)[0],
@@ -221,10 +231,17 @@ function compileToContent(
       ];
     case "Boolean":
       return [expression.eValue(vBool(ast.value)), context];
-    case "Float":
-      return [expression.eValue(vNumber(ast.value)), context];
-    case "Integer":
-      return [expression.eValue(vNumber(ast.value)), context];
+    case "Float": {
+      const value = parseFloat(
+        `${ast.integer}${ast.fractional === null ? "" : `.${ast.fractional}`}${
+          ast.exponent === null ? "" : `e${ast.exponent}`
+        }`
+      );
+      if (Number.isNaN(value)) {
+        throw new ICompileError("Failed to compile a number", ast.location);
+      }
+      return [expression.eValue(vNumber(value)), context];
+    }
     case "String":
       return [expression.eValue(vString(ast.value)), context];
     case "Void":
@@ -250,6 +267,12 @@ function compileToContent(
         context,
       ];
     }
+    case "IdentifierWithAnnotation":
+      // should never happen
+      throw new ICompileError(
+        "Can't compile IdentifierWithAnnotation outside of lambda declaration",
+        ast.location
+      );
     default:
       throw new Error(`Unsupported AST value ${ast satisfies never}`);
   }

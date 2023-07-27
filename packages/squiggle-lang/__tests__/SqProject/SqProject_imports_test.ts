@@ -20,7 +20,7 @@ x=1`
     if (mainImportIds.ok) {
       expect(mainImportIds.value).toEqual(["./common", "./myModule"]);
     } else {
-      fail(mainImportIds.value.toString());
+      throw new Error(mainImportIds.value.toString());
     }
   });
 

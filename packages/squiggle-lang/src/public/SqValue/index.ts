@@ -4,11 +4,13 @@ import { SqError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqArray } from "./SqArray.js";
 import { SqDistribution, wrapDistribution } from "./SqDistribution/index.js";
+import { SqDomain, wrapDomain } from "./SqDomain.js";
 import { SqLambda } from "./SqLambda.js";
 import { SqLambdaDeclaration } from "./SqLambdaDeclaration.js";
 import { SqPlot, wrapPlot } from "./SqPlot.js";
-import { SqRecord } from "./SqRecord.js";
+import { SqDict } from "./SqDict.js";
 import { SqScale, wrapScale } from "./SqScale.js";
+import { SqTableChart } from "./SqTableChart.js";
 
 export function wrapValue(value: Value, context?: SqValueContext) {
   switch (value.type) {
@@ -26,20 +28,24 @@ export function wrapValue(value: Value, context?: SqValueContext) {
       return new SqLambdaValue(value, context);
     case "Number":
       return new SqNumberValue(value, context);
-    case "Record":
-      return new SqRecordValue(value, context);
+    case "Dict":
+      return new SqDictValue(value, context);
     case "String":
       return new SqStringValue(value, context);
     case "Plot":
       return new SqPlotValue(value, context);
+    case "TableChart":
+      return new SqTableChartValue(value, context);
     case "Scale":
       return new SqScaleValue(value, context);
     case "TimeDuration":
       return new SqTimeDurationValue(value, context);
     case "Void":
       return new SqVoidValue(value, context);
+    case "Domain":
+      return new SqDomainValue(value, context);
     default:
-      throw new Error(`Unknown value ${JSON.stringify(value)}`);
+      throw new Error(`Unknown value ${JSON.stringify(value satisfies never)}`);
   }
 }
 
@@ -156,14 +162,11 @@ export class SqNumberValue extends SqAbstractValue<"Number", number> {
   }
 }
 
-export class SqRecordValue extends SqAbstractValue<
-  "Record",
-  Map<string, unknown>
-> {
-  tag = "Record" as const;
+export class SqDictValue extends SqAbstractValue<"Dict", Map<string, unknown>> {
+  tag = "Dict" as const;
 
   get value() {
-    return new SqRecord(this._value.value, this.context);
+    return new SqDict(this._value.value, this.context);
   }
 
   asJS(): Map<string, unknown> {
@@ -213,6 +216,20 @@ export class SqPlotValue extends SqAbstractValue<"Plot", SqPlot> {
     return this.value;
   }
 }
+export class SqTableChartValue extends SqAbstractValue<
+  "TableChart",
+  SqTableChart
+> {
+  tag = "TableChart" as const;
+
+  get value() {
+    return new SqTableChart(this._value.value, this.context);
+  }
+
+  asJS() {
+    return this.value;
+  }
+}
 
 export class SqScaleValue extends SqAbstractValue<"Scale", SqScale> {
   tag = "Scale" as const;
@@ -235,6 +252,18 @@ export class SqVoidValue extends SqAbstractValue<"Void", null> {
 
   asJS() {
     return null;
+  }
+}
+
+export class SqDomainValue extends SqAbstractValue<"Domain", SqDomain> {
+  tag = "Domain" as const;
+
+  get value() {
+    return wrapDomain(this._value.value);
+  }
+
+  asJS() {
+    return this.value;
   }
 }
 

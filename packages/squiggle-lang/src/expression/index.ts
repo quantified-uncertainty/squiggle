@@ -5,6 +5,11 @@
 import { ASTNode } from "../ast/parse.js";
 import { Value, vVoid } from "../value/index.js";
 
+export type LambdaExpressionParameter = {
+  name: string;
+  annotation?: Expression;
+};
+
 // All shapes are type+value, to help with V8 monomorphism.
 export type ExpressionContent =
   | {
@@ -21,7 +26,7 @@ export type ExpressionContent =
       value: Expression[];
     }
   | {
-      type: "Record";
+      type: "Dict";
       value: [Expression, Expression][];
     }
   | {
@@ -60,7 +65,7 @@ export type ExpressionContent =
       type: "Lambda";
       value: {
         name?: string;
-        parameters: string[];
+        parameters: LambdaExpressionParameter[];
         body: Expression;
       };
     }
@@ -94,7 +99,7 @@ export const eCall = (
 
 export const eLambda = (
   name: string | undefined,
-  parameters: string[],
+  parameters: LambdaExpressionParameter[],
   body: Expression
 ): ExpressionContent => ({
   type: "Lambda",
@@ -105,10 +110,8 @@ export const eLambda = (
   },
 });
 
-export const eRecord = (
-  aMap: [Expression, Expression][]
-): ExpressionContent => ({
-  type: "Record",
+export const eDict = (aMap: [Expression, Expression][]): ExpressionContent => ({
+  type: "Dict",
   value: aMap,
 });
 
@@ -168,7 +171,7 @@ export function expressionToString(expression: Expression): string {
       return expression.value.map(expressionToString).join("; ");
     case "Array":
       return `[${expression.value.map(expressionToString).join(", ")}]`;
-    case "Record":
+    case "Dict":
       return `{${expression.value
         .map(
           ([key, value]) =>
@@ -193,12 +196,12 @@ export function expressionToString(expression: Expression): string {
         expression.value.fn
       )})(${expression.value.args.map(expressionToString).join(", ")})`;
     case "Lambda":
-      return `{|${expression.value.parameters.join(", ")}| ${expressionToString(
-        expression.value.body
-      )}}`;
+      return `{|${expression.value.parameters
+        .map((parameter) => parameter.name)
+        .join(", ")}| ${expressionToString(expression.value.body)}}`;
     case "Value":
       return expression.value.toString();
     default:
-      return `Unknown expression ${expression}`;
+      return `Unknown expression ${expression satisfies never}`;
   }
 }

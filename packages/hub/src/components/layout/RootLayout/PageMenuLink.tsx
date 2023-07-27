@@ -6,7 +6,7 @@ import { IconProps } from "@/relative-values/components/ui/icons/Icon";
 export const PageMenuLink: FC<{
   title: string;
   href: string;
-  icon: FC<IconProps>;
+  icon?: FC<IconProps>;
   external?: boolean;
 }> = ({ title, icon, href, external }) => {
   const Icon = icon;
@@ -16,7 +16,7 @@ export const PageMenuLink: FC<{
       href={href}
       target={external ? "_blank" : undefined}
     >
-      <Icon className="inline-block mr-1 text-slate-400" size={14} />
+      {Icon && <Icon className="inline-block mr-1 text-slate-400" size={14} />}
       {title}
     </Link>
   );

@@ -10,7 +10,7 @@ import {
   frDist,
   frLambda,
   frNumber,
-  frRecord,
+  frDict,
 } from "../library/registry/frTypes.js";
 import {
   FnFactory,
@@ -67,7 +67,7 @@ export const library = [
   }),
   maker.make({
     name: "mapY",
-    examples: [`PointSet.mapY(mx(normal(5,2)), {|x| x + 1})`],
+    examples: [`PointSet.mapY(mx(Sym.normal(5,2)), {|x| x + 1})`],
     output: "Dist",
     definitions: [
       makeDefinition([frDist, frLambda], ([dist, lambda], context) => {
@@ -95,7 +95,7 @@ export const library = [
     output: "Dist",
     definitions: [
       makeDefinition(
-        [frArray(frRecord(["x", frNumber], ["y", frNumber]))],
+        [frArray(frDict(["x", frNumber], ["y", frNumber]))],
         ([arr]) => {
           return vDist(
             new PointSetDist(
@@ -119,7 +119,7 @@ export const library = [
     output: "Dist",
     definitions: [
       makeDefinition(
-        [frArray(frRecord(["x", frNumber], ["y", frNumber]))],
+        [frArray(frDict(["x", frNumber], ["y", frNumber]))],
         ([arr]) => {
           return vDist(
             new PointSetDist(

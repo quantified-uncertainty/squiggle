@@ -45,7 +45,7 @@ function scaleTypeToSqScale(
     case "symlog":
       return SqSymlogScale.create(args);
     case "exp":
-      return SqPowerScale.create({ exponent: 0.1, ...args });
+      return SqPowerScale.create(args);
     default:
       // should never happen, just a precaution
       throw new Error("Internal error");
@@ -112,15 +112,6 @@ export function generateDistributionPlotSettings(
     showSummary: settings.showSummary,
     title: settings.title,
   };
-}
-
-// partial params for SqFnPlot.create; TODO - infer explicit type?
-export function generateFunctionPlotSettings(settings: PlaygroundSettings) {
-  const xScale = SqLinearScale.create({
-    min: settings.functionChartSettings.start,
-    max: settings.functionChartSettings.stop,
-  });
-  return { xScale, points: settings.functionChartSettings.count };
 }
 
 // settings for the settings form

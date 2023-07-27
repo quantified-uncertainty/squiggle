@@ -96,7 +96,24 @@ export function createSquigglePrinter(
               typedPath(node).call(print, "imports", i, 1),
               hardline,
             ]),
-            path.map(print, "statements"),
+            join(
+              hardline,
+              node.statements.map((statement, i) => [
+                typedPath(node).call(print, "statements", i),
+                // keep extra new lines
+                util.isNextLineEmpty(
+                  options.originalText,
+                  statement.location.end.offset
+                )
+                  ? hardline
+                  : "",
+              ])
+            ),
+            ["LetStatement", "DefunStatement"].includes(
+              node.statements.at(-1)?.type ?? ""
+            )
+              ? hardline // new line if final expression is a statement
+              : "",
           ]);
         case "Block":
           if (
@@ -108,7 +125,22 @@ export function createSquigglePrinter(
           }
           return group([
             "{",
-            indent([line, path.map(print, "statements")]),
+            indent([
+              line,
+              join(
+                hardline,
+                node.statements.map((statement, i) => [
+                  typedPath(node).call(print, "statements", i),
+                  // keep extra new lines
+                  util.isNextLineEmpty(
+                    options.originalText,
+                    statement.location.end.offset
+                  )
+                    ? hardline
+                    : "",
+                ])
+              ),
+            ]),
             line,
             "}",
           ]);
@@ -117,37 +149,39 @@ export function createSquigglePrinter(
             node.variable.value,
             " = ",
             typedPath(node).call(print, "value"),
-            hardline,
-            // isNextLineEmpty is missing from prettier types in v3 alpha
-            util.isNextLineEmpty(options.originalText, node.location.end.offset)
-              ? hardline
-              : "",
           ]);
         case "DefunStatement":
           return group([
             node.variable.value,
-            "(",
-            join(", ", typedPath(node).map(print, "value", "args")),
-            ")",
+            group([
+              "(",
+              indent([
+                softline,
+                join([",", line], typedPath(node).map(print, "value", "args")),
+              ]),
+              softline,
+              ")",
+            ]),
             " = ",
             typedPath(node).call(print, "value", "body"),
-            hardline,
-            // isNextLineEmpty is missing from prettier types in v3 alpha
-            util.isNextLineEmpty(options.originalText, node.location.end.offset)
-              ? hardline
-              : "",
           ]);
         case "Boolean":
           return node.value ? "true" : "false";
-        case "Float":
-          return String(node.value);
-        case "Integer":
-          return String(node.value);
+        case "Float": {
+          const fractional =
+            node.fractional === null
+              ? ""
+              : "." + (node.fractional.replace(/0*$/, "") || "0"); // cut all trailing zeroes, but keep at least one
+
+          const exponent = node.exponent === null ? "" : `e${node.exponent}`;
+
+          return `${node.integer}${fractional}${exponent}`;
+        }
         case "Array":
           return group([
             "[",
             indent([softline, join([",", line], path.map(print, "elements"))]),
-            ifBreak(",", ""),
+            ifBreak(",", ""), // trailing comma
             softline,
             "]",
           ]);
@@ -213,6 +247,12 @@ export function createSquigglePrinter(
           ]);
         case "Identifier":
           return node.value;
+        case "IdentifierWithAnnotation":
+          return [
+            node.variable,
+            ": ",
+            typedPath(node).call(print, "annotation"),
+          ];
         case "KeyValue": {
           const key =
             node.key.type === "String" &&
@@ -229,13 +269,25 @@ export function createSquigglePrinter(
         }
         case "Lambda":
           return group([
-            "{|",
-            join(", ", path.map(print, "args")),
-            "|",
+            "{",
+            indent([
+              softline,
+              group([
+                "|",
+                indent([
+                  softline,
+                  join([",", line], typedPath(node).map(print, "args")),
+                ]),
+                softline,
+                "|",
+              ]),
+              softline,
+            ]),
             path.call(print, "body"),
+            softline,
             "}",
           ]);
-        case "Record":
+        case "Dict":
           return group([
             "{",
             node.elements.length
@@ -305,10 +357,10 @@ export function createSquigglePrinter(
             return [node.value];
           case "Call":
             return [...node.args, node.fn];
-          case "Record":
+          case "Dict":
             return node.elements;
           case "Lambda":
-            return [node.body];
+            return [...node.args, node.body];
           case "KeyValue":
             return [node.key, node.value];
           default:

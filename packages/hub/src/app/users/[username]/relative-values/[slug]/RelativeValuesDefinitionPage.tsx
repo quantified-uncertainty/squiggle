@@ -1,13 +1,22 @@
 import { FC, PropsWithChildren } from "react";
 import { graphql } from "relay-runtime";
 
-import { DotsDropdownButton } from "@/components/ui/DotsDropdownButton";
-import { StyledTabLink } from "@/components/ui/StyledTabLink";
-import { relativeValuesEditRoute, relativeValuesRoute } from "@/routes";
-import { DropdownMenu } from "@quri/ui";
-import { DeleteDefinitionAction } from "./DeleteRelativeValuesDefinitionAction";
+import { EntityLayout, EntityNode } from "@/components/EntityLayout";
+import { EntityTab } from "@/components/ui/EntityTab";
+import {
+  relativeValuesEditRoute,
+  relativeValuesRoute,
+  userRoute,
+} from "@/routes";
+import {
+  Cog8ToothIcon,
+  Dropdown,
+  DropdownMenu,
+  EditIcon,
+  ScaleIcon,
+} from "@quri/ui";
 import { useSession } from "next-auth/react";
-import { EntityLayout } from "@/components/EntityLayout";
+import { DeleteDefinitionAction } from "./DeleteRelativeValuesDefinitionAction";
 
 export const RelativeValuesDefinitionPageFragment = graphql`
   fragment RelativeValuesDefinitionPage on RelativeValuesDefinition {
@@ -39,7 +48,16 @@ export const RelativeValuesDefinitionPageQuery = graphql`
     $input: QueryRelativeValuesDefinitionInput!
   ) {
     relativeValuesDefinition(input: $input) {
-      ...RelativeValuesDefinitionPage
+      __typename
+      ... on BaseError {
+        message
+      }
+      ... on NotFoundError {
+        message
+      }
+      ... on RelativeValuesDefinition {
+        ...RelativeValuesDefinitionPage
+      }
     }
   }
 `;
@@ -56,35 +74,42 @@ export const RelativeValuesDefinitionPage: FC<Props> = ({
 }) => {
   const { data: session } = useSession();
 
+  const nodes: EntityNode[] = [
+    { slug: username, href: userRoute({ username }) },
+    { slug, href: relativeValuesRoute({ username, slug }), icon: ScaleIcon },
+  ];
+
   return (
     <EntityLayout
-      slug={slug}
-      username={username}
-      homepageUrl={relativeValuesRoute({ username, slug })}
+      nodes={nodes}
       headerChildren={
         session?.user.username === username ? (
           <>
-            <StyledTabLink.List>
-              <StyledTabLink
+            <EntityTab.List>
+              <EntityTab.Link
                 name="View"
+                icon={ScaleIcon}
                 href={relativeValuesRoute({ username, slug })}
               />
-              <StyledTabLink
+              <EntityTab.Link
                 name="Edit"
+                icon={EditIcon}
                 href={relativeValuesEditRoute({ username, slug })}
               />
-            </StyledTabLink.List>
-            <DotsDropdownButton>
-              {({ close }) => (
-                <DropdownMenu>
-                  <DeleteDefinitionAction
-                    username={username}
-                    slug={slug}
-                    close={close}
-                  />
-                </DropdownMenu>
-              )}
-            </DotsDropdownButton>
+              <Dropdown
+                render={({ close }) => (
+                  <DropdownMenu>
+                    <DeleteDefinitionAction
+                      username={username}
+                      slug={slug}
+                      close={close}
+                    />
+                  </DropdownMenu>
+                )}
+              >
+                <EntityTab.Div name="Settings" icon={Cog8ToothIcon} />
+              </Dropdown>
+            </EntityTab.List>
           </>
         ) : null
       }

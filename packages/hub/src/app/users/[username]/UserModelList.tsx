@@ -33,15 +33,16 @@ export const UserModelList: FC<Props> = ({ dataRef }) => {
   } = usePaginationFragment(Fragment, dataRef);
 
   return (
-    <section>
-      <div className="mb-2">
-        <H1>Models</H1>
-      </div>
+    <div>
       {models.edges.length ? (
-        <ModelList connectionRef={models} loadNext={loadNext} />
+        <ModelList
+          connectionRef={models}
+          loadNext={loadNext}
+          showOwner={false}
+        />
       ) : (
         <div className="text-slate-500">{"You don't have any models yet."}</div>
       )}
-    </section>
+    </div>
   );
 };

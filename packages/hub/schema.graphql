@@ -183,6 +183,10 @@ interface Node {
   id: ID!
 }
 
+type NotFoundError implements Error {
+  message: String!
+}
+
 type PageInfo {
   endCursor: String
   hasNextPage: Boolean!
@@ -192,14 +196,14 @@ type PageInfo {
 
 type Query {
   me: Me!
-  model(input: QueryModelInput!): Model!
+  model(input: QueryModelInput!): QueryModelResult!
   models(after: String, before: String, first: Int, last: Int): ModelConnection!
   node(id: ID!): Node
   nodes(ids: [ID!]!): [Node]!
-  relativeValuesDefinition(input: QueryRelativeValuesDefinitionInput!): RelativeValuesDefinition!
+  relativeValuesDefinition(input: QueryRelativeValuesDefinitionInput!): QueryRelativeValuesDefinitionResult!
   relativeValuesDefinitions(after: String, before: String, first: Int, input: RelativeValuesDefinitionsQueryInput, last: Int): RelativeValuesDefinitionConnection!
   runSquiggle(code: String!): SquiggleOutput!
-  userByUsername(username: String!): User!
+  userByUsername(username: String!): QueryUserByUsernameResult!
   users(after: String, before: String, first: Int, input: UsersQueryInput, last: Int): QueryUsersConnection!
 }
 
@@ -208,10 +212,16 @@ input QueryModelInput {
   slug: String!
 }
 
+union QueryModelResult = BaseError | Model | NotFoundError
+
 input QueryRelativeValuesDefinitionInput {
   ownerUsername: String!
   slug: String!
 }
+
+union QueryRelativeValuesDefinitionResult = BaseError | NotFoundError | RelativeValuesDefinition
+
+union QueryUserByUsernameResult = BaseError | NotFoundError | User
 
 type QueryUsersConnection {
   edges: [QueryUsersConnectionEdge!]!

@@ -16,6 +16,11 @@ export function isModelRoute(url: string) {
   return url.match("^/users/[^/]+/models/[^/]+$");
 }
 
+//Triggers on the model route and all subroutes
+export function isModelSubroute(url: string) {
+  return url.match("^/users/[^/]+/models/*");
+}
+
 // used by useFixModelUrlCasing hook
 export function patchModelRoute({
   pathname,
@@ -128,4 +133,16 @@ export function graphqlPlaygroundRoute(query?: string) {
         }).toString();
 
   return `/api/graphql${paramsString}`;
+}
+
+export function aboutRoute() {
+  return "/about";
+}
+
+export function privacyPolicyRoute() {
+  return "/privacy";
+}
+
+export function termsOfServiceRoute() {
+  return "/terms";
 }

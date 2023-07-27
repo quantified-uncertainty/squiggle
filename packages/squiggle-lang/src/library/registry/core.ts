@@ -1,18 +1,12 @@
+import { REOther, RESymbolNotFound } from "../../errors/messages.js";
 import { ReducerContext } from "../../reducer/context.js";
-import { result } from "../../utility/result.js";
-import * as Result from "../../utility/result.js";
+import { BuiltinLambda, Lambda } from "../../reducer/lambda.js";
 import { Value } from "../../value/index.js";
 import {
   FnDefinition,
   fnDefinitionToString,
   tryCallFnDefinition,
 } from "./fnDefinition.js";
-import {
-  ErrorMessage,
-  REOther,
-  RESymbolNotFound,
-} from "../../errors/messages.js";
-import { BuiltinLambda, Lambda } from "../../reducer/lambda.js";
 
 export type FRFunction = {
   name: string;
