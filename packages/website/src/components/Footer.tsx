@@ -1,28 +1,34 @@
 import { FC } from "react";
+import { FaGithub, FaDiscord, FaRss } from "react-icons/fa";
 
+const linkClasses = "items-center flex hover:text-gray-900";
+
+//Note: The footer is kept down because of the styling,
+// min-h-[calc(100vh-var(--nextra-navbar-height)-{HEIGHT}.
+// If you want to change the height of the footer, you need to change that as well.
 export const Footer: FC = () => {
+  const externalLinkSection = (
+    <div className="flex flex-col space-y-2">
+      <a
+        href={"https://github.com/quantified-uncertainty/squiggle"}
+        className={linkClasses}
+      >
+        <FaGithub size="1em" className="mr-2" />
+        Github
+      </a>
+      <a href={"https://discord.gg/nsTnQTgtG6"} className={linkClasses}>
+        <FaDiscord size="1em" className="mr-2" />
+        Discord
+      </a>
+      <a href={"https://quri.substack.com/t/squiggle"} className={linkClasses}>
+        <FaRss size="1em" className="mr-2" />
+        Newsletter
+      </a>
+    </div>
+  );
   return (
-    <div className="flex-1">
-      <div className="px-4 pb-8">
-        <div className="pb-4 font-bold">More</div>
-        <ul className="flex flex-col gap-2">
-          <li>
-            <a href="https://quri.substack.com/t/squiggle">Blog</a>
-          </li>
-          <li>
-            <a href="https://github.com/quantified-uncertainty/squiggle">
-              GitHub
-            </a>
-          </li>
-        </ul>
-      </div>
-      <div className="text-center">
-        CC0. Built with{" "}
-        <a href="https://nextra.site" target="_blank">
-          Nextra
-        </a>
-        .
-      </div>
+    <div className="flex-1 nx-mx-auto nx-flex mt-auto">
+      <div className="px-3 pb-4">{externalLinkSection}</div>
     </div>
   );
 };
