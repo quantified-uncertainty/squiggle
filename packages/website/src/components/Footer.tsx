@@ -16,7 +16,7 @@ export const Footer: FC = () => {
         <FaGithub size="1em" className="mr-2" />
         Github
       </a>
-      <a href={"https://discord.gg/nsTnQTgtG"} className={linkClasses}>
+      <a href={"https://discord.gg/nsTnQTgtG6"} className={linkClasses}>
         <FaDiscord size="1em" className="mr-2" />
         Discord
       </a>
