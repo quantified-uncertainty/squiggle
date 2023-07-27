@@ -79,7 +79,7 @@ export class SqCompileError extends SqAbstractError<"compile"> {
   }
 
   toTypeString(): string[] {
-    return ["Compile"];
+    return ["Compilation"];
   }
 }
 

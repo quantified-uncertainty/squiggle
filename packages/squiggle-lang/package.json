@@ -29,11 +29,13 @@
   },
   "dependencies": {
     "@commander-js/extra-typings": "^11.0.0",
+    "@tailwindcss/typography": "^0.5.9",
     "commander": "^11.0.0",
     "immutable": "^4.3.0",
     "jstat": "^1.9.6",
     "lodash": "^4.17.21",
-    "open": "^9.1.0"
+    "open": "^9.1.0",
+    "react-markdown": "^8.0.7"
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.22.5",

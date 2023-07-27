@@ -152,6 +152,17 @@ export class REJavaScriptExn extends ErrorMessage {
   }
 }
 
+export class REArgumentError extends ErrorMessage {
+  readonly errorTypeName = "Function Arguments";
+  constructor(public msg: string) {
+    super();
+  }
+
+  toString() {
+    return `${this.msg}`;
+  }
+}
+
 export class REOther extends ErrorMessage {
   readonly errorTypeName = "Generic";
   constructor(public msg: string) {
@@ -162,3 +173,5 @@ export class REOther extends ErrorMessage {
     return `${this.msg}`;
   }
 }
+
+// Discriminated union...

@@ -10,7 +10,7 @@ import {
 import { ErrorAlert } from "./Alert.js";
 import { useViewerContext } from "./SquiggleViewer/ViewerProvider.js";
 import { CodeBracketIcon, LinkIcon } from "@quri/ui";
-
+import ReactMarkdown from "react-markdown";
 type Props = {
   error: SqError;
 };
@@ -73,9 +73,11 @@ const StackTrace: FC<{ error: SqRuntimeError }> = ({ error }) => {
 
 export const SquiggleErrorAlert: FC<Props> = ({ error }) => {
   return (
-    <ErrorAlert heading={`Error (${error.toTypeString().join(" / ")})`}>
+    <ErrorAlert heading={`Error (${error.toTypeString().join(" - ")})`}>
       <div className="space-y-4">
-        <div className="whitespace-pre-wrap">{error.toString()}</div>
+        <div className="whitespace-pre-wrap">
+          <ReactMarkdown>{error.toString()}</ReactMarkdown>
+        </div>
         {error instanceof SqRuntimeError ? (
           <StackTrace error={error} />
         ) : error instanceof SqCompileError ? (

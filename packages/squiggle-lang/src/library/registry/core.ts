@@ -1,4 +1,8 @@
-import { REOther, RESymbolNotFound } from "../../errors/messages.js";
+import {
+  REArgumentError,
+  REOther,
+  RESymbolNotFound,
+} from "../../errors/messages.js";
 import { ReducerContext } from "../../reducer/context.js";
 import { BuiltinLambda, Lambda } from "../../reducer/lambda.js";
 import { Value } from "../../value/index.js";
@@ -73,14 +77,21 @@ export class Registry {
     if (definitions === undefined) {
       throw new RESymbolNotFound(fnName);
     }
+    const format = (
+      fnName: string,
+      defs: string,
+      givenFn: string
+    ) => `There are function matches for **\`${fnName}()\`**, but with different arguments:
+\`\`\`
+${defs}
+\`\`\`
+Was given **\`${givenFn})\`**`;
     const showNameMatchDefinitions = () => {
       const defsString = definitions
         .map(fnDefinitionToString)
-        .map((def) => `  ${fnName}${def}\n`)
+        .map((def) => `${fnName}${def}\n`)
         .join("");
-      return `There are function matches for ${fnName}(), but with different arguments:\n${defsString}\nWas given ${fnName}(${args
-        .map((r) => r.toTypeString())
-        .join(", ")})`;
+      return format(fnName, defsString, `${fnName}(${args.join(",")}`);
     };
 
     for (const definition of definitions) {
@@ -89,12 +100,12 @@ export class Registry {
         return callResult;
       }
     }
-    throw new REOther(showNameMatchDefinitions());
+    throw new REArgumentError(showNameMatchDefinitions());
   }
 
   makeLambda(fnName: string): Lambda {
     if (!this.fnNameDict.has(fnName)) {
-      throw new Error(`Function ${fnName} doesn't exist in registry`);
+      throw new Error(`Function **\'${fnName}\'** doesn't exist in registry`);
     }
     return new BuiltinLambda(fnName, (args, context) => {
       // Note: current bindings could be accidentally exposed here through context (compare with native lambda implementation above, where we override them with local bindings).

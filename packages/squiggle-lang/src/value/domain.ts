@@ -1,4 +1,4 @@
-import { ErrorMessage, REOther } from "../errors/messages.js";
+import { ErrorMessage, REArgumentError, REOther } from "../errors/messages.js";
 import { Err, Ok, result } from "../utility/result.js";
 import { Value } from "./index.js";
 
@@ -37,22 +37,26 @@ export function annotationToDomain(value: Value): Domain {
     return value.value;
   }
   if (value.type !== "Array") {
-    throw new REOther("Only array domains are supported");
+    throw new REArgumentError(
+      "Only array domains are supported."
+      // "You seem to be attempting to use a domain annotation. This must be in the format fn(t:[min,max]). For example, fn(t:[0,1]) = t + 1."
+    );
   }
+
   if (value.value.length !== 2) {
-    throw new REOther("Expected two-value array");
+    throw new REArgumentError("Expected two-value array");
   }
   const [min, max] = value.value;
   if (min.type !== "Number") {
-    throw new REOther("Min value is not a number");
+    throw new REArgumentError("Min value is not a *number*");
   }
   if (max.type !== "Number") {
-    throw new REOther("Max value is not a number");
+    throw new REArgumentError("Max value is not a *number*");
   }
 
   if (min.value >= max.value) {
-    throw new REOther(
-      `The range minimum (${min.value}) must be lower than the range maximum (${max.value})`
+    throw new REArgumentError(
+      `The range minimum *(${min.value})* must be lower than the range maximum *(${max.value})*`
     );
   }
 
