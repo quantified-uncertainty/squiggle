@@ -121,7 +121,7 @@ describe("Peggy to Expression", () => {
     testToExpression("1 -> add(2) * 3", "(multiply)((add)(1, 2), 3)", "9");
   });
 
-  // see testParse for priorities of to and credibleIntervalToDistribution
+  // see testParse for priorities of 'to'
 
   describe("inner block", () => {
     // inner blocks are 0 argument lambdas. They can be used whenever a value is required.
