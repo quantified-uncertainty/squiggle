@@ -44,6 +44,21 @@ describe("Various SampleSet functions", () => {
   );
 });
 
+describe("truncate", () => {
+  testEvalToBe(
+    "normal(3, 5) -> truncateLeft(0) -> SampleSet.toList -> List.length",
+    "1000"
+  );
+  testEvalToBe(
+    "normal(3, 5) -> truncateRight(0) -> SampleSet.toList -> List.length",
+    "1000"
+  );
+  testEvalToBe(
+    "(2 to 5) -> truncateRight(0)",
+    "Error(Distribution Math Error: Too few samples when constructing sample set)"
+  );
+});
+
 // Beware: float64Array makes it appear in an infinite loop.
 const arrayGen = () =>
   fc
