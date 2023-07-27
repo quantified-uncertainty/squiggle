@@ -63,7 +63,7 @@ startYear = 2022
 domain = [startYear, startYear + 10]
 /** Time in years after 2022 */
 populationAtTime(t: domain) = {
-    averageYearlyPercentageChange = -0.01 to 0.05 // We're expecting NYC to continuously grow with an mean of roughly between -1% and +4% per year
+    averageYearlyPercentageChange = normal({p5:-0.01, p95:0.05}) // We're expecting NYC to continuously grow with an mean of roughly between -1% and +4% per year
     populationOfNewYork2022 * ((averageYearlyPercentageChange + 1) ^ (t - startYear))
 }
 median(v) = quantile(v, .5)

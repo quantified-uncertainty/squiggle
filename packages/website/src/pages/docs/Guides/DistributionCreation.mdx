@@ -13,26 +13,15 @@ import { SquiggleEditor } from "@quri/squiggle-components";
 `(5thPercentile: number) to (95thPercentile: number)`  
 `to(5thPercentile: number, 95thPercentile: number)`
 
-The `to` function is an easy way to generate simple distributions using predicted _5th_ and _95th_ percentiles.
+The `to` function is an easy way to generate lognormal distributions using predicted _5th_ and _95th_ percentiles.
 
-If both values are above zero, a `lognormal` distribution is used. If not, a `normal` distribution is used.
-
-<Tabs items={["5 to 10", "to(5, 10)", "-5 to 5", "1 to 10000"]}>
+<Tabs items={["5 to 10", "to(5, 10)", "1 to 10000"]}>
   <Tab>
-    When <code>5 to 10</code> is entered, both numbers are positive, so it
-    generates a lognormal distribution with 5th and 95th percentiles at 5 and
-    10.
     <SquiggleEditor defaultCode="5 to 10" />
   </Tab>
   <Tab>
     <code>5 to 10</code> does the same thing as <code>to(5,10)</code>.
     <SquiggleEditor defaultCode="to(5,10)" />
-  </Tab>
-  <Tab>
-    When <code>-5 to 5</code> is entered, there's negative values, so it
-    generates a normal distribution. This has 5th and 95th percentiles at -5 and
-    5.
-    <SquiggleEditor defaultCode="-5 to 5" />
   </Tab>
   <Tab>
     It's very easy to generate distributions with very long tails. These can be
@@ -135,7 +124,7 @@ mx(hours_the_project_will_take, 0, [chance_of_doing_anything, 1 - chance_of_doin
 <SquiggleEditor
   defaultCode={`forecast = 3 to 30
 chance_completely_wrong = 0.05
-forecast_if_completely_wrong = -100 to 200
+forecast_if_completely_wrong = normal({p5:-100, p95:200})
 mx(forecast, forecast_if_completely_wrong, [1-chance_completely_wrong, chance_completely_wrong])`}
 />
 
