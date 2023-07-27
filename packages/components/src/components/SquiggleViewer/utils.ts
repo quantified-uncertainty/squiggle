@@ -1,10 +1,8 @@
-import * as React from "react";
-import { FC, memo } from "react";
+import { PathItem, SqValue, SqValuePath } from "@quri/squiggle-lang";
 import {
   PartialPlaygroundSettings,
   PlaygroundSettings,
 } from "../PlaygroundSettings.js";
-import { SqValue, SqValuePath, PathItem } from "@quri/squiggle-lang";
 
 export type LocalItemSettings = {
   collapsed: boolean;

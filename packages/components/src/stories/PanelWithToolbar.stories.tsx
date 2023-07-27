@@ -19,16 +19,16 @@ export const Primary: Story = {
     renderToolbar: ({ openModal }) => (
       <div className="flex items-center gap-2">
         <ToolbarItem>Item</ToolbarItem>
-        <Button size="small" onClick={() => openModal("m1" as any)}>
+        <Button size="small" onClick={() => openModal("m1")}>
           modal 1
         </Button>
-        <Button size="small" onClick={() => openModal("m2" as any)}>
+        <Button size="small" onClick={() => openModal("m2")}>
           modal 2
         </Button>
       </div>
     ),
     renderBody: () => <div>body</div>,
-    renderModal: (name: any) =>
+    renderModal: (name) =>
       name === "m1"
         ? { title: "Modal 1", body: <div>Modal 1 content</div> }
         : { title: "Modal 2", body: <div>Modal 2 content</div> },
