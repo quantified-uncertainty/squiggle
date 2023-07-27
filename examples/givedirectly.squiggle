@@ -35,5 +35,4 @@ amount_of_transfers_made = total_funding_available / size_of_transfer
 
 total_increase_in_ln_consumption = amount_of_transfers_made * consumption_increase_per_household
 
-// total_increase_in_ln_consumption
-
+total_increase_in_ln_consumption
