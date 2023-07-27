@@ -3,7 +3,7 @@
   "displayName": "Squiggle",
   "description": "Squiggle language support",
   "license": "MIT",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "private": true,
   "publisher": "QURI",
   "repository": {
@@ -12,7 +12,7 @@
   },
   "icon": "media/vendor/icon.png",
   "engines": {
-    "vscode": "^1.75.0"
+    "vscode": "^1.79.0"
   },
   "categories": [
     "Programming Languages",

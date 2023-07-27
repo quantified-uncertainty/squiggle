@@ -1,4 +1,4 @@
-# This is a cost effectiveness analysis of givedirectly, originally done by givewell, and translated into Squiggle by Sam Nolan
+// This is a cost effectiveness analysis of givedirectly, originally done by givewell, and translated into Squiggle by Sam Nolan
 donation_size = 10000
 proportion_of_funding_available = beta(10, 2)
 total_funding_available = donation_size * proportion_of_funding_available

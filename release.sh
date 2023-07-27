@@ -16,7 +16,7 @@ publish_vsce () {
     fi
     cd packages/vscode-ext
     # You need personal access token for this, see https://code.visualstudio.com/api/working-with-extensions/publishing-extension#create-a-publisher
-    vsce publish $opts
+    vsce publish --no-dependencies $opts
     cd -
 }
 
