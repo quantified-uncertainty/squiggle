@@ -5,6 +5,7 @@ import React, { FC } from "react";
 import { SquigglePlayground } from "@quri/squiggle-components";
 
 import { ShareButton } from "./ShareButton";
+import { useAvailableHeight } from "../utils/useAvailableHeight";
 
 const HASH_PREFIX = "#code=";
 function getHashData() {
@@ -43,15 +44,19 @@ export const PlaygroundPage: FC = () => {
     hashData.defaultCode = String(hashData.initialSquiggleString);
     delete hashData.initialSquiggleString;
   }
+  const { height, ref } = useAvailableHeight();
 
   return (
-    <div>
+    <div
+      className="min-h-[calc(100vh-var(--nextra-navbar-height)-200px)]"
+      ref={ref}
+    >
       <SquigglePlayground
         defaultCode={hashData.defaultCode ?? "normal(0, 1)"}
         distributionChartSettings={{
           showSummary: hashData.showSummary ?? true,
         }}
-        height={700}
+        height={height}
         renderExtraControls={() => (
           <div className="h-full flex justify-end items-center">
             <ShareButton />
