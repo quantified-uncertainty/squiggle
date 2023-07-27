@@ -3,8 +3,8 @@
 [![Packages check](https://github.com/quantified-uncertainty/squiggle/actions/workflows/ci.yml/badge.svg)](https://github.com/quantified-uncertainty/squiggle/actions/workflows/ci.yml)
 [![npm version - lang](https://badge.fury.io/js/@quri%2Fsquiggle-lang.svg)](https://www.npmjs.com/package/@quri/squiggle-lang)
 [![npm version - components](https://badge.fury.io/js/@quri%2Fsquiggle-components.svg)](https://www.npmjs.com/package/@quri/squiggle-components)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/quantified-uncertainty/squiggle/blob/develop/LICENSE)
-[![codecov](https://codecov.io/gh/quantified-uncertainty/squiggle/branch/develop/graph/badge.svg?token=QRLBL5CQ7C)](https://codecov.io/gh/quantified-uncertainty/squiggle)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/quantified-uncertainty/squiggle/blob/main/LICENSE)
+[![codecov](https://codecov.io/gh/quantified-uncertainty/squiggle/branch/main/graph/badge.svg?token=QRLBL5CQ7C)](https://codecov.io/gh/quantified-uncertainty/squiggle)
 
 _An estimation language_.
 

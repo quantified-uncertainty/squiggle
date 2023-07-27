@@ -12,7 +12,7 @@ Squiggle is currently in "Early Access" mode.
 
 # Bug reports
 
-Anyone (with a GitHub account) can file an issue at any time. Please allow [Slava](https://github.com/berekuk), [Sam](https://github.com/hazelfire), and [Ozzie](https://github.com/OAGr) to triage, but otherwise just follow the suggestions in the issue templates.
+Anyone (with a GitHub account) can file an issue at any time. Please allow [Slava](https://github.com/berekuk) and [Ozzie](https://github.com/OAGr) to triage, but otherwise just follow the suggestions in the issue templates.
 
 # Project structure
 
@@ -29,7 +29,7 @@ If you want to use [VS Code Jest extension](https://github.com/jest-community/vs
 
 # Deployment ops
 
-We use Vercel, and it should only concern Slava, Sam, and Ozzie.
+We use Vercel, and it should only concern Slava and Ozzie.
 
 # Development environment, building, testing, dev server
 
@@ -39,13 +39,13 @@ Being a monorepo, where packages are connected by dependency, it's important to 
 
 We aspire for `ci.yaml` and `README.md`s to be in one-to-one correspondence.
 
-# Try not to push directly to develop
+# Try not to push directly to `main`
 
 If you absolutely must, please prefix your commit message with `hotfix: `.
 
 # Pull request protocol
 
-Please work against `develop` branch. **Do not** work against `master`.
+Please work against `main` branch.
 
 For PRs from the core contributor team, we usually wait for at least one review unless the PR is trivial or urgent.
 

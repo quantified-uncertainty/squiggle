@@ -50,7 +50,7 @@ const config = {
   },
   primaryHue: 17,
   docsRepositoryBase:
-    "https://github.com/quantified-uncertainty/squiggle/blob/develop/packages/website",
+    "https://github.com/quantified-uncertainty/squiggle/blob/main/packages/website",
 } satisfies DocsThemeConfig;
 
 export default config;
