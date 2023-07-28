@@ -412,22 +412,18 @@ export function blockComment(
   };
 }
 
-export function formString(
-  characters: string[],
-  quote: string,
+export function parseEscapeSequence(
+  char: string[],
   location: LocationRange,
   error: (e: any, l: LocationRange) => void
 ) {
-  try {
-    let full = characters
-      .join("")
-      .split("\n")
-      .map((s) => JSON.parse(`${quote}${s}${quote}`))
-      .join("\n");
-    return nodeString(full, location);
-  } catch (e) {
-    let err = e as SyntaxError;
-    // TODO: write an error location conversion, or reimplement parsing
-    error(`${err.message}`, location);
+  if (char[0] == "'") {
+      return "'"
+  } else {
+    try {
+      return JSON.parse(`"\\${char.join("")}"`)
+    } catch (e) {
+      error(`Incorrect escape sequence: ${char.join("")}`, location);
+    }
   }
 }
