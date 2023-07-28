@@ -1,10 +1,10 @@
 ---
 description: Squiggle is a minimalist programming language for probabilistic estimation. It's meant for intuitively-driven quantitative estimation instead of data analysis or data-driven statistical techniques.
 ---
+import { SquiggleEditor } from "@quri/squiggle-components";
+import { Callout, Tabs, Tab } from "nextra/components";
 
 # Introduction
-
-import { SquiggleEditor } from "@quri/squiggle-components";
 
 Squiggle is a minimalist programming language for probabilistic estimation. It's meant for intuitively-driven quantitative estimation instead of data analysis or data-driven statistical techniques.
 
@@ -14,7 +14,12 @@ The basics of Squiggle are fairly straightforward. This can be enough for many m
 
 Say you're trying to estimate the number of piano tuners in New York City. You can build a simple model of this, like so.  
 
-*(Tip: This is interactive! Feel free to modify the code directly.)*
+<Callout>
+  **Tip**
+  <p>
+    This editor is interactive! Try changing the code.
+  </p>
+</Callout>
 
 <SquiggleEditor
   defaultCode={`//Here, you're expressing a 90% confidence that the value is between 8.1 and 8.4 Million.
@@ -75,8 +80,6 @@ totalTunersAtTime(t: domain) = (
     totalTunersAtTimeMedian: {|t: domain| median(totalTunersAtTime(t))}
 }`}
 />
-
-If you haven't noticed yet, you can hover over the `populationAtTime` graph to see the distribution of population at different points in time.
 
 ## Using Squiggle
 

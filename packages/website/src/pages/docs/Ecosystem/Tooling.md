@@ -37,3 +37,4 @@ An exportable [Observable Notebook](https://observablehq.com/@hazelfire/squiggle
 ## [NextJS starter](https://github.com/quantified-uncertainty/next-app-with-squiggle)
 
 A template for presenting estimates on a nextjs site.
+

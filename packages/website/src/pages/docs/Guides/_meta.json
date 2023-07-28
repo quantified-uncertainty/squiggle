@@ -1,8 +1,11 @@
 {
+  "DistributionCreation": "Distribution Creation",
+  "DistributionFunctions": "Distribution Functions",
   "BasicTypes": "Basic Types",
   "Functions": "Functions",
   "LanguageFeatures": "Language Features",
-  "DistributionCreation": "Distribution Creation",
-  "DistributionFunctions": "Distribution Functions",
-  "ControlFlow": "Control Flow"
+  "ControlFlow": "Control Flow",
+  "Bugs": "Known Bugs",
+  "Gotchas": "Gotchas",
+  "Roadmap": "Roadmap"
 }
