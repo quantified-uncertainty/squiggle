@@ -3,13 +3,9 @@ import isInteger from "lodash/isInteger.js";
 import { BaseDist } from "../dist/BaseDist.js";
 import {
   REArrayIndexNotFound,
-  REOther,
   REDictPropertyNotFound,
+  REOther,
 } from "../errors/messages.js";
-import {
-  LambdaDeclaration,
-  declarationToString,
-} from "../reducer/declaration.js";
 import { Lambda } from "../reducer/lambda.js";
 import * as DateTime from "../utility/DateTime.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
@@ -116,25 +112,6 @@ class VDate extends BaseValue {
   }
 }
 export const vDate = (v: Date) => new VDate(v);
-
-class VDeclaration extends BaseValue implements Indexable {
-  readonly type = "Declaration";
-
-  constructor(public value: LambdaDeclaration) {
-    super();
-  }
-  toString() {
-    return declarationToString(this.value, (f) => vLambda(f).toString());
-  }
-  get(key: Value) {
-    if (key.type === "String" && key.value === "fn") {
-      return vLambda(this.value.fn);
-    }
-
-    throw new REOther("Trying to access non-existent field");
-  }
-}
-export const vLambdaDeclaration = (v: LambdaDeclaration) => new VDeclaration(v);
 
 class VDist extends BaseValue {
   readonly type = "Dist";
@@ -446,7 +423,6 @@ export type Value =
   | VArray
   | VBool
   | VDate
-  | VDeclaration
   | VDist
   | VLambda
   | VNumber

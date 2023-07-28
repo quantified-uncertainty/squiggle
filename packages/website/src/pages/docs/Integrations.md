@@ -15,11 +15,11 @@ Types are available for both packages.
 
 ## [Squiggle Language](https://www.npmjs.com/package/@quri/squiggle-lang) ![npm version](https://badge.fury.io/js/@quri%2Fsquiggle-lang.svg)
 
-[_See `README.md` in Github_](https://github.com/quantified-uncertainty/squiggle/tree/develop/packages/squiggle-lang#use-the-npm-package)
+[_See `README.md` in Github_](https://github.com/quantified-uncertainty/squiggle/tree/main/packages/squiggle-lang#use-the-npm-package)
 
 ## [Squiggle Components](https://www.npmjs.com/package/@quri/squiggle-components) ![npm version](https://badge.fury.io/js/@quri%2Fsquiggle-components.svg)
 
-[_See `README.md` in Github_](https://github.com/quantified-uncertainty/squiggle/tree/develop/packages/components#usage-in-a-react-project)
+[_See `README.md` in Github_](https://github.com/quantified-uncertainty/squiggle/tree/main/packages/components#usage-in-a-react-project)
 
 This documentation uses `@quri/squiggle-components` frequently.
 

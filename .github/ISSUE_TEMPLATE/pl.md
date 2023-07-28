@@ -1,7 +1,7 @@
 ---
 name: Regarding the programming language (the `squiggle-lang` package)
 about: Anything concerning distributions/numerics, as well as the interpreter, parser, syntax, semantics
-labels: "programming language"
+labels: "Language"
 ---
 
 <!-- mark one with an x -->

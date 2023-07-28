@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import { useRouter } from "next/router";
-import { useConfig } from "nextra-theme-docs";
 import Image from "next/image";
+import { useRouter } from "next/router";
+import { DocsThemeConfig } from "nextra-theme-docs";
 
 import { Footer } from "./src/components/Footer";
 
@@ -45,9 +45,12 @@ const config = {
   },
   // squiggle components are not compatible with dark mode yet, see https://github.com/quantified-uncertainty/squiggle/issues/1192
   darkMode: false,
+  nextThemes: {
+    forcedTheme: "light",
+  },
   primaryHue: 17,
   docsRepositoryBase:
-    "https://github.com/quantified-uncertainty/squiggle/blob/develop/packages/website",
-};
+    "https://github.com/quantified-uncertainty/squiggle/blob/main/packages/website",
+} satisfies DocsThemeConfig;
 
 export default config;

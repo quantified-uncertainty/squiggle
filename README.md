@@ -3,10 +3,10 @@
 [![Packages check](https://github.com/quantified-uncertainty/squiggle/actions/workflows/ci.yml/badge.svg)](https://github.com/quantified-uncertainty/squiggle/actions/workflows/ci.yml)
 [![npm version - lang](https://badge.fury.io/js/@quri%2Fsquiggle-lang.svg)](https://www.npmjs.com/package/@quri/squiggle-lang)
 [![npm version - components](https://badge.fury.io/js/@quri%2Fsquiggle-components.svg)](https://www.npmjs.com/package/@quri/squiggle-components)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/quantified-uncertainty/squiggle/blob/develop/LICENSE)
-[![codecov](https://codecov.io/gh/quantified-uncertainty/squiggle/branch/develop/graph/badge.svg?token=QRLBL5CQ7C)](https://codecov.io/gh/quantified-uncertainty/squiggle)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/quantified-uncertainty/squiggle/blob/main/LICENSE)
+[![codecov](https://codecov.io/gh/quantified-uncertainty/squiggle/branch/main/graph/badge.svg?token=QRLBL5CQ7C)](https://codecov.io/gh/quantified-uncertainty/squiggle)
 
-_An estimation language_.
+_A simple programming language for probabilistic estimation that runs on Javascript.
 
 ## Get started
 
@@ -25,7 +25,7 @@ _An estimation language_.
 - **website/docs staging**: https://preview.squiggle-language.com
 - **components storybook prod**: https://components.squiggle-language.com
 - **components storybook staging**: https://preview-components.squiggle-language.com
-- **legacy (2020) playground**: https://playground.squiggle-language.com
+- **Squiggle Hub**: https://squigglehub.org/
 
 ## Packages
 
@@ -35,11 +35,10 @@ the packages can be found in `packages`.
 - `@quri/squiggle-lang` in `packages/squiggle-lang` contains the core language, particularly
   an interface to parse squiggle expressions and return descriptions of distributions
   or results.
-- `@quri/squiggle-components` in `packages/components` contains React components that
-  can be passed squiggle strings as props, and return a presentation of the result
-  of the calculation.
-- `packages/website` is the main descriptive website for squiggle,
-  it is hosted at `squiggle-language.com`.
+- `@quri/squiggle-ui` in `packages/ui` has React components for common QURI projects.
+- `@quri/squiggle-components` in `packages/components` contains React components particularly meant to be used with Squiggle visualizations.
+- `packages/website` is the main documentation website for squiggle. It is hosted at `squiggle-language.com`.
+- `packages/hub` is the code behind [Squiggle Hub](https://squigglehub.org/).
 - `packages/vscode-ext` is the VS Code extension for writing estimation functions.
 - `packages/cli` is an experimental way of using imports in squiggle, which is also on [npm](https://www.npmjs.com/package/squiggle-cli-experimental).
 
