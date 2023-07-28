@@ -3,12 +3,11 @@ import { Value, vLambda, vNumber, vString } from "../../value/index.js";
 import { SqError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqArray } from "./SqArray.js";
+import { SqDict } from "./SqDict.js";
 import { SqDistribution, wrapDistribution } from "./SqDistribution/index.js";
 import { SqDomain, wrapDomain } from "./SqDomain.js";
 import { SqLambda } from "./SqLambda.js";
-import { SqLambdaDeclaration } from "./SqLambdaDeclaration.js";
 import { SqPlot, wrapPlot } from "./SqPlot.js";
-import { SqDict } from "./SqDict.js";
 import { SqScale, wrapScale } from "./SqScale.js";
 import { SqTableChart } from "./SqTableChart.js";
 
@@ -20,8 +19,6 @@ export function wrapValue(value: Value, context?: SqValueContext) {
       return new SqBoolValue(value, context);
     case "Date":
       return new SqDateValue(value, context);
-    case "Declaration":
-      return new SqDeclarationValue(value, context);
     case "Dist":
       return new SqDistributionValue(value, context);
     case "Lambda":
@@ -93,21 +90,6 @@ export class SqDateValue extends SqAbstractValue<"Date", Date> {
 
   get value(): Date {
     return this._value.value;
-  }
-
-  asJS() {
-    return this.value;
-  }
-}
-
-export class SqDeclarationValue extends SqAbstractValue<
-  "Declaration",
-  SqLambdaDeclaration
-> {
-  tag = "Declaration" as const;
-
-  get value() {
-    return new SqLambdaDeclaration(this._value.value, this.context);
   }
 
   asJS() {
