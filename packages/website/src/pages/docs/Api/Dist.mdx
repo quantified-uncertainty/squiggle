@@ -62,6 +62,24 @@ lognormal({ p25: 5, p75: 9 })
 lognormal({ mean: 5, stdev: 2 })
 ```
 
+### to
+
+The `to` function is an easy way to generate simple distributions using predicted _5th_ and _95th_ percentiles.
+
+`To` is simply an alias for `lognormal({p5:low, p95:high})`. It does not accept values of 0 or less, as those are not valid for lognormal distributions.
+
+```
+to: (distribution|number, distribution|number) => distribution
+```
+
+**Examples**
+
+```squiggle
+5 to 10
+to(5,10)
+```
+
+
 ### uniform
 
 ```
@@ -158,23 +176,6 @@ triangular: (number, number, number) => distribution;
 
 ```squiggle
 triangular(5, 10, 20)
-```
-
-### to
-
-The `to` function is an easy way to generate simple distributions using predicted _5th_ and _95th_ percentiles.
-
-`To` is simply an alias for `lognormal({p5:low, p95:high})`. It does not accept values of 0 or less, as those are not valid for lognormal distributions.
-
-```
-to: (distribution|number, distribution|number) => distribution
-```
-
-**Examples**
-
-```squiggle
-5 to 10
-to(5,10)
 ```
 
 ### mixture

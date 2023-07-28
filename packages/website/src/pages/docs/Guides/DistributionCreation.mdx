@@ -6,123 +6,7 @@ import { Callout, Tabs, Tab } from "nextra/components";
 
 import { SquiggleEditor } from "@quri/squiggle-components";
 
-# Distributions Creation
-
-## To
-
-```squiggle
-(5thPercentile: number) to (95thPercentile: number)
-to(5thPercentile: number, 95thPercentile: number)
-```
-
-The `to` function is an easy way to generate lognormal distributions using predicted _5th_ and _95th_ percentiles. It's the same as ``lognormal({p5, p95})``, but easier to write and read.
-
-<Tabs items={["5 to 10", "to(5, 10)", "1 to 10000"]}>
-  <Tab>
-    <SquiggleEditor defaultCode="5 to 10" />
-  </Tab>
-  <Tab>
-    <code>5 to 10</code> does the same thing as <code>to(5,10)</code>.
-    <SquiggleEditor defaultCode="to(5,10)" />
-  </Tab>
-  <Tab>
-    It's very easy to generate distributions with very long tails. These can be
-    impossible to see without changing view settings. (These settings are
-    available in the Playground, but not this smaller editor component)
-    <SquiggleEditor defaultCode="1 to 10000" />
-  </Tab>
-</Tabs>
-
-### Arguments
-
-- `5thPercentile`: number
-- `95thPercentile`: number, greater than `5thPercentile`
-
-<Callout>
-  **Tip**  
-  "<bold>To</bold>" is a great way to generate probability distributions very
-  quickly from your intuitions. It's easy to write and easy to read. It's
-  often a good place to begin an estimate.
-</Callout>
-
-<Callout type="warning">
-  **Caution**  
-  If you haven't tried [calibration
-  training](https://www.lesswrong.com/posts/LdFbx9oqtKAAwtKF3/list-of-probability-calibration-exercises),
-  you're likely to be overconfident. We recommend doing calibration training
-  to get a feel for what a 90 percent confident interval feels like.
-</Callout>
-
-## Mixture
-
-```squiggle
-mixture(...distributions: Distribution[], weights?: number[])
-mixture(distributions: Distribution[], weights?: number[])
-mx(...distributions: Distribution[], weights?: number[])
-mx(distributions: Distribution[], weights?: number[])
-```
-
-The `mixture` mixes combines multiple distributions to create a mixture. You can optionally pass in a list of proportional weights.
-
-<Tabs
-  items={[
-    "Simple",
-    "With Weights",
-    "With Continuous and Discrete Inputs",
-    "Array of Distributions Input",
-  ]}
->
-  <Tab>
-    <SquiggleEditor defaultCode="mixture(1 to 2, 5 to 8, 9 to 10)" />
-  </Tab>
-  <Tab>
-    <SquiggleEditor defaultCode="mixture(1 to 2, 5 to 8, 9 to 10, [0.1, 0.1, 0.8])" />
-  </Tab>
-  <Tab>
-    <SquiggleEditor defaultCode="mixture(1 to 5, 8 to 10, 1, 3, 20)" />
-  </Tab>
-  <Tab>
-    <SquiggleEditor defaultCode="mx([1 to 2, exponential(1)], [1,1])" />
-  </Tab>
-</Tabs>
-
-### Arguments
-
-- `distributions`: A set of distributions or numbers, each passed as a paramater. Numbers will be converted into point mass distributions.
-- `weights`: An optional array of numbers, each representing the weight of its corresponding distribution. The weights will be re-scaled to add to `1.0`. If a weights array is provided, it must be the same length as the distribution paramaters.
-
-### Aliases
-
-- `mx`
-
-### Special Use Cases of Mixtures
-
-<details>
-  <summary>🕐 Zero or Continuous</summary>
-  One common reason to have mixtures of continous and discrete distributions is to handle the special case of 0.
-  Say I want to model the time I will spend on some upcoming project. I think I have an 80% chance of doing it.  
-
-  In this case, I have a 20% chance of spending 0 time with it. I might estimate my hours with,
-  <SquiggleEditor
-    defaultCode={`hours_the_project_will_take = 5 to 20
-chance_of_doing_anything = 0.8
-mx(hours_the_project_will_take, 0, [chance_of_doing_anything, 1 - chance_of_doing_anything])`}
-  />
-</details>
-
-<details>
-  <summary>🔒 Model Uncertainty Safeguarding</summary>
-  One technique several <a href="https://www.foretold.io/">Foretold.io</a> users used is to combine their main guess, with a
-  "just-in-case distribution". This latter distribution would have very low weight, but would be
-  very wide, just in case they were dramatically off for some weird reason.
-<SquiggleEditor
-  defaultCode={`forecast = 3 to 30
-chance_completely_wrong = 0.05
-forecast_if_completely_wrong = normal({p5:-100, p95:200})
-mx(forecast, forecast_if_completely_wrong, [1-chance_completely_wrong, chance_completely_wrong])`}
-/>
-
-</details>
+# Distribution Creation
 
 ## Normal
 
@@ -184,9 +68,56 @@ logOfLognormal = log(lognormal(normalMean, normalStdDev))
   />
 </details>
 
+## To
+
+```squiggle
+(5thPercentile: number) to (95thPercentile: number)
+to(5thPercentile: number, 95thPercentile: number)
+```
+
+The `to` function is an easy way to generate lognormal distributions using predicted _5th_ and _95th_ percentiles. It's the same as ``lognormal({p5, p95})``, but easier to write and read.
+
+<Tabs items={["5 to 10", "to(5, 10)", "1 to 10000"]}>
+  <Tab>
+    <SquiggleEditor defaultCode="5 to 10" />
+  </Tab>
+  <Tab>
+    <code>5 to 10</code> does the same thing as <code>to(5,10)</code>.
+    <SquiggleEditor defaultCode="to(5,10)" />
+  </Tab>
+  <Tab>
+    It's very easy to generate distributions with very long tails. These can be
+    impossible to see without changing view settings. (These settings are
+    available in the Playground, but not this smaller editor component)
+    <SquiggleEditor defaultCode="1 to 10000" />
+  </Tab>
+</Tabs>
+
+### Arguments
+
+- `5thPercentile`: number
+- `95thPercentile`: number, greater than `5thPercentile`
+
+<Callout>
+  **Tip**  
+  "<bold>To</bold>" is a great way to generate probability distributions very
+  quickly from your intuitions. It's easy to write and easy to read. It's
+  often a good place to begin an estimate.
+</Callout>
+
+<Callout type="warning">
+  **Caution**  
+  If you haven't tried [calibration
+  training](https://www.lesswrong.com/posts/LdFbx9oqtKAAwtKF3/list-of-probability-calibration-exercises),
+  you're likely to be overconfident. We recommend doing calibration training
+  to get a feel for what a 90 percent confident interval feels like.
+</Callout>
+
 ## Uniform
 
-`uniform(low:number, high:number)`
+```squiggle
+uniform(low:number, high:number)
+```
 
 Creates a [uniform distribution](<https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)>) with the given low and high values.
 
@@ -327,36 +258,78 @@ Creates a [beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) w
   </details>
 </Callout>
 
-## Exponential
-
-```squiggle
-exponential(rate:number)
-```
-
-Creates an [exponential distribution](https://en.wikipedia.org/wiki/Exponential_distribution) with the given rate.
-
-<SquiggleEditor defaultCode="Sym.exponential(4)" />
-
-### Arguments
-
-- `rate`: Number greater than zero
-
-## Triangular distribution
-
-```squiggle
-triangular(low:number, mode:number, high:number)
-```
-
-Creates a [triangular distribution](https://en.wikipedia.org/wiki/Triangular_distribution) with the given low, mode, and high values.
-
-### Arguments
-
-- `low`: Number
-- `mode`: Number greater than `low`
-- `high`: Number greater than `mode`
-
 <SquiggleEditor defaultCode="Sym.triangular(1, 2, 4)" />
 
+## Mixture
+
+```squiggle
+mixture(...distributions: Distribution[], weights?: number[])
+mixture(distributions: Distribution[], weights?: number[])
+mx(...distributions: Distribution[], weights?: number[])
+mx(distributions: Distribution[], weights?: number[])
+```
+
+The `mixture` mixes combines multiple distributions to create a mixture. You can optionally pass in a list of proportional weights.
+
+<Tabs
+  items={[
+    "Simple",
+    "With Weights",
+    "With Continuous and Discrete Inputs",
+    "Array of Distributions Input",
+  ]}
+>
+  <Tab>
+    <SquiggleEditor defaultCode="mixture(1 to 2, 5 to 8, 9 to 10)" />
+  </Tab>
+  <Tab>
+    <SquiggleEditor defaultCode="mixture(1 to 2, 5 to 8, 9 to 10, [0.1, 0.1, 0.8])" />
+  </Tab>
+  <Tab>
+    <SquiggleEditor defaultCode="mixture(1 to 5, 8 to 10, 1, 3, 20)" />
+  </Tab>
+  <Tab>
+    <SquiggleEditor defaultCode="mx([1 to 2, exponential(1)], [1,1])" />
+  </Tab>
+</Tabs>
+
+### Arguments
+
+- `distributions`: A set of distributions or numbers, each passed as a paramater. Numbers will be converted into point mass distributions.
+- `weights`: An optional array of numbers, each representing the weight of its corresponding distribution. The weights will be re-scaled to add to `1.0`. If a weights array is provided, it must be the same length as the distribution paramaters.
+
+### Aliases
+
+- `mx`
+
+### Special Use Cases of Mixtures
+
+<details>
+  <summary>🕐 Zero or Continuous</summary>
+  One common reason to have mixtures of continous and discrete distributions is to handle the special case of 0.
+  Say I want to model the time I will spend on some upcoming project. I think I have an 80% chance of doing it.  
+
+  In this case, I have a 20% chance of spending 0 time with it. I might estimate my hours with,
+  <SquiggleEditor
+    defaultCode={`hours_the_project_will_take = 5 to 20
+chance_of_doing_anything = 0.8
+mx(hours_the_project_will_take, 0, [chance_of_doing_anything, 1 - chance_of_doing_anything])`}
+  />
+</details>
+
+<details>
+  <summary>🔒 Model Uncertainty Safeguarding</summary>
+  One technique several <a href="https://www.foretold.io/">Foretold.io</a> users used is to combine their main guess, with a
+  "just-in-case distribution". This latter distribution would have very low weight, but would be
+  very wide, just in case they were dramatically off for some weird reason.
+<SquiggleEditor
+  defaultCode={`forecast = 3 to 30
+chance_completely_wrong = 0.05
+forecast_if_completely_wrong = normal({p5:-100, p95:200})
+mx(forecast, forecast_if_completely_wrong, [1-chance_completely_wrong, chance_completely_wrong])`}
+/>
+
+</details>
 ## SampleSet.fromList
 
 ```squiggle
@@ -392,7 +365,7 @@ Creates a continuous point set distribution using a list of points.
 
 <Callout type="warning">
   **Caution!**  
-  Distributions made with ``makeContinuous`` are not normalized. We suggest normalizing them manually using the ``normalize`` function.
+  Distributions made with ``makeContinuous`` are not automatically normalized. We suggest normalizing them manually using the ``normalize`` function.
 </Callout>
 
 ### Arguments

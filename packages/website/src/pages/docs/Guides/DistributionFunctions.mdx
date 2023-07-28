@@ -6,7 +6,7 @@ import { SquiggleEditor } from "@quri/squiggle-components";
 
 # Distribution Functions
 
-## Operating on distributions
+## Standard Operations
 
 Here are the ways we combine distributions.
 
@@ -72,14 +72,14 @@ the value one random sample chosen from the second distribution.
 
 <SquiggleEditor defaultCode={`(0.1 to 1) ^ beta(2, 3)`} />
 
-### Taking the base `e` exponential
+### The base `e` exponential
 
 <SquiggleEditor
   defaultCode={`dist = triangular(1,2,3)
 exp(dist)`}
 />
 
-### Taking logarithms
+### Logarithms
 
 A projection over a stretched x-axis.
 
@@ -94,32 +94,19 @@ Base `x`
 
 <SquiggleEditor defaultCode={`log(5 to 10, 2)`} />
 
-#### Validity
-
-- `x` must be a scalar
-- See [the current discourse](https://github.com/quantified-uncertainty/squiggle/issues/304)
-
 ### Pointwise addition
 
 For every point on the x-axis, operate the corresponding points in the y axis of the pdf.
 
 **Pointwise operations are done with `PointSetDist` internals rather than `SampleSetDist` internals**.
 
-<SquiggleEditor defaultCode={`(1 to 10) .+ triangular(1,2,3)`} />
-
-### Pointwise subtraction
-
-<SquiggleEditor defaultCode={`(1 to 10) .- triangular(1,2,3)`} />
+<SquiggleEditor defaultCode={`Sym.lognormal({p5: 1, p95: 3}) .+ Sym.triangular(5,6,7)`} />
 
 ### Pointwise multiplication
 
-<SquiggleEditor defaultCode={`(1 to 10) .* triangular(1,2,3)`} />
+<SquiggleEditor defaultCode={`Sym.lognormal({p5: 1, p95: 5}) .* Sym.uniform(1,8)`} />
 
-### Pointwise division
-
-<SquiggleEditor defaultCode={`(uniform(0,10)) ./ normal(10,4)`} />
-
-## Standard functions on distributions
+## Standard Functions
 
 ### Probability density function
 
@@ -174,11 +161,11 @@ The `sample(distribution)` samples a given distribution.
 
 ## Converting between distribution formats
 
-Recall the [three formats of distributions](/docs/Discussions/Three-Formats-Of-Distributions). We can force any distribution into `SampleSet` format
+We can convert any distribution into the `SampleSet` format
 
 <SquiggleEditor defaultCode="SampleSet.fromDist(normal(5, 10))" />
 
-Or `PointSet` format
+Or the `PointSet` format
 
 <SquiggleEditor defaultCode="PointSet.fromDist(normal(5, 10))" />
 
@@ -216,12 +203,12 @@ Save for a logging side effect, `inspect` does nothing to input and returns it.
 
 You can cut off from the left
 
-<SquiggleEditor defaultCode="truncateLeft(0.1 to 1, 0.5)" />
+<SquiggleEditor defaultCode="truncateLeft(Sym.normal(5,3), 6)" />
 
 You can cut off from the right
 
-<SquiggleEditor defaultCode="truncateRight(0.1 to 1, 0.5)" />
+<SquiggleEditor defaultCode="truncateRight(Sym.normal(5,3), 6)" />
 
 You can cut off from both sides
 
-<SquiggleEditor defaultCode="truncate(0.1 to 1, 0.5, 1.5)" />
+<SquiggleEditor defaultCode="truncate(Sym.normal(5,3), 1, 7)" />
