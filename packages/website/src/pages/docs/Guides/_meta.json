@@ -1,6 +1,8 @@
 {
-  "Language": "Language Basics",
-  "DistributionCreation": "Distributions: Creation",
-  "Functions": "Distributions: Key Functions",
+  "BasicTypes": "Basic Types",
+  "Functions": "Functions",
+  "LanguageFeatures": "Language Features",
+  "DistributionCreation": "Distribution Creation",
+  "DistributionFunctions": "Distribution Functions",
   "ControlFlow": "Control Flow"
 }

@@ -2,7 +2,7 @@
 description: Squiggle is a minimalist programming language for probabilistic estimation. It's meant for intuitively-driven quantitative estimation instead of data analysis or data-driven statistical techniques.
 ---
 
-# Overview
+# Introduction
 
 import { SquiggleEditor } from "@quri/squiggle-components";
 
@@ -10,36 +10,30 @@ Squiggle is a minimalist programming language for probabilistic estimation. It's
 
 The basics of Squiggle are fairly straightforward. This can be enough for many models. The more advanced functionality can take some time to learn.
 
-## Simple example
+## A Simple Example
 
 Say you're trying to estimate the number of piano tuners in New York City. You can build a simple model of this, like so.  
-(Tip: This is interactive! Feel free to modify the code directly.)
+
+*(Tip: This is interactive! Feel free to modify the code directly.)*
 
 <SquiggleEditor
-  defaultCode={`/**
-This means that you're 90% confident the value is between 8.1 and 8.4 Million.
-*/
+  defaultCode={`//Here, you're expressing a 90% confidence that the value is between 8.1 and 8.4 Million.
 populationOfNewYork2022 = 8.1M to 8.4M
 
-/** We assume there are almost no people with multiple pianos. */
 proportionOfPopulationWithPianos = {
   // This is a block.
   percentage = 0.2 to 1 // Block body can declare local variables.
-  percentage * 0.01 // Final expression of a block is the block's value.
+  percentToRatio = 0.01
+  percentage * percentToRatio // Final expression of a block is the block's value.
 }
 
 pianoTunersPerPiano = {
-  pianosPerPianoTuner = 2k to 50k // This is artificially narrow, to help graphics later.
+  pianosPerPianoTuner = 2k to 50k
   1 / pianosPerPianoTuner
 }
 
 totalTunersIn2022 = populationOfNewYork2022 * proportionOfPopulationWithPianos *
 pianoTunersPerPiano
-
-/**
-Piano tuners in NYC over the next 5 years.
-*/
-totalTunersIn2022 // comment out this line with "//" to see other variables
 `}
 />
 
@@ -59,9 +53,12 @@ pianoTunersPerPiano = {
     1 / pianosPerPianoTuner
 }
 
-startYear = 2022
-domain = [startYear, startYear + 10]
-/** Time in years after 2022 */
+//We only mean to make an estimate for the next 10 years.
+startYear = 2024
+endYear = 2034
+domain = [startYear, endYear]
+
+/** Time in years after 2024 */
 populationAtTime(t: domain) = {
     averageYearlyPercentageChange = normal({p5:-0.01, p95:0.05}) // We're expecting NYC to continuously grow with an mean of roughly between -1% and +4% per year
     populationOfNewYork2022 * ((averageYearlyPercentageChange + 1) ^ (t - startYear))
@@ -85,6 +82,9 @@ If you haven't noticed yet, you can hover over the `populationAtTime` graph to s
 
 You can currently interact with Squiggle in a few ways:
 
+**[Squiggle Hub](https://squigglehub.org/)**  
+Squiggle Hub is a platform for the creation and sharing of code written in Squiggle. It's a great way to get started with Squiggle or to share your models with others.
+
 **[Playground](/playground)**  
 The [Squiggle Playground](/playground) is a nice tool for working with small models and making prototypes. You can make simple shareable links, but you can't save models that change over time.
 
@@ -92,7 +92,7 @@ The [Squiggle Playground](/playground) is a nice tool for working with small mod
 There's a simple [VS Code extension](https://marketplace.visualstudio.com/items?itemName=QURI.vscode-squiggle) for running and visualizing Squiggle code. We find that VS Code is a useful editor for managing larger Squiggle setups.
 
 **[Typescript Library](https://www.npmjs.com/package/@quri/squiggle-lang)**  
-Squiggle is built using [Typescript](https://www.typescriptlang.org/), and is accessible via a simple Typescript library. You can use this library to either run Squiggle code in full, or to call select specific functions within Squiggle (though this latter functionality is very minimal).
+Squiggle is built using [Typescript](https://www.typescriptlang.org/), and is accessible via a simple Typescript library. You can use this library to either run Squiggle code in full, or to call select specific functions within Squiggle.
 
 **[React Components Library](https://www.npmjs.com/package/@quri/squiggle-components)**  
 All of the components used in the playground and documentation are available in a separate component NPM repo. You can see the full Storybook of components [here](https://components.squiggle-language.com).

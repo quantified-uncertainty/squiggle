@@ -1,9 +1,9 @@
 {
-  "index": "Overview",
-  "Integrations": "Integrations",
+  "index": "Introduction",
   "Guides": "Guides",
   "Api": "API",
   "Discussions": "Discussions",
+  "Integrations": "Integrations",
   "Internal": "Internal",
   "Changelog": "Changelog"
 }
