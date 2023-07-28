@@ -10,8 +10,10 @@ import { SquiggleEditor } from "@quri/squiggle-components";
 
 ## To
 
-`(5thPercentile: number) to (95thPercentile: number)`  
-`to(5thPercentile: number, 95thPercentile: number)`
+```squiggle
+(5thPercentile: number) to (95thPercentile: number)
+to(5thPercentile: number, 95thPercentile: number)
+```
 
 The `to` function is an easy way to generate lognormal distributions using predicted _5th_ and _95th_ percentiles. It's the same as ``lognormal({p5, p95})``, but easier to write and read.
 
@@ -53,10 +55,12 @@ The `to` function is an easy way to generate lognormal distributions using predi
 
 ## Mixture
 
-`mixture(...distributions: Distribution[], weights?: number[])`  
-`mx(...distributions: Distribution[], weights?: number[])`  
-`mixture(distributions: Distribution[], weights?: number[])`  
-`mx(distributions: Distribution[], weights?: number[])`
+```squiggle
+mixture(...distributions: Distribution[], weights?: number[])
+mixture(distributions: Distribution[], weights?: number[])
+mx(...distributions: Distribution[], weights?: number[])
+mx(distributions: Distribution[], weights?: number[])
+```
 
 The `mixture` mixes combines multiple distributions to create a mixture. You can optionally pass in a list of proportional weights.
 
@@ -122,9 +126,15 @@ mx(forecast, forecast_if_completely_wrong, [1-chance_completely_wrong, chance_co
 
 ## Normal
 
-`normal(mean:number, standardDeviation:number)`
+```squiggle
+normal(mean: number, standardDeviation: number)
+normal({mean: number, standardDeviation: number})
+normal({p5: number, p95: number})
+normal({p10: number, p90: number})
+normal({p25: number, p75: number})
+```
 
-Creates a [normal distribution](https://en.wikipedia.org/wiki/Normal_distribution) with the given mean and standard deviation.
+Creates a [normal distribution](https://en.wikipedia.org/wiki/Normal_distribution) with the given mean and standard deviation. This can be dangerous if the shape is not normalized; if this is the case, you should normalize it (``normalize(dist)``) before using.
 
 <Tabs items={["normal(5,1)", "normal(1B, 1B)"]}>
   <Tab>
@@ -135,29 +145,26 @@ Creates a [normal distribution](https://en.wikipedia.org/wiki/Normal_distributio
   </Tab>
 </Tabs>
 
-### Arguments
-
-- `mean`: Number
-- `standard deviation`: Number greater than zero
 
 [Wikipedia](https://en.wikipedia.org/wiki/Normal_distribution)
 
-## Log-normal
+## Lognormal
 
-`lognormal(mu: number, sigma: number)`
+```squiggle
+lognormal(mu: number, sigma: number)
+lognormal({mean: number, standardDeviation: number})
+lognormal({p5: number, p95: number})
+lognormal({p10: number, p90: number})
+lognormal({p25: number, p75: number})
+```
 
-Creates a [log-normal distribution](https://en.wikipedia.org/wiki/Log-normal_distribution) with the given mu and sigma.
+Creates a [lognormal distribution](https://en.wikipedia.org/wiki/Log-normal_distribution) with the given mu and sigma.
 
 `Mu` and `sigma` represent the mean and standard deviation of the normal which results when
-you take the log of our lognormal distribution. They can be difficult to directly reason about.
-Because of this complexity, we recommend typically using the <a href="#to">to</a> syntax instead of estimating `mu` and `sigma` directly.
+you take the log of our lognormal distribution. They can be difficult to directly reason about. However, there are several alternative ways to specify a lognormal distribution which are often easier to reason about.
 
 <SquiggleEditor defaultCode="lognormal(0, 0.7)" />
 
-### Arguments
-
-- `mu`: Number
-- `sigma`: Number greater than zero
 
 [Wikipedia](https://en.wikipedia.org/wiki/Log-normal_distribution)
 
@@ -204,11 +211,14 @@ Creates a [uniform distribution](<https://en.wikipedia.org/wiki/Uniform_distribu
 
 ## Point Mass
 
-`pointMass(value:number)`
+```squiggle
+pointMass(value:number)
+```
+
 
 Creates a discrete distribution with all of its probability mass at point `value`.
 
-Few Squiggle users call the function `pointMass()` directly. Numbers are converted into point mass distributions automatically, when it is appropriate.
+Few Squiggle users call the function `pointMass()` directly. Numbers are often (but not always) converted into point mass distributions automatically, when it is appropriate.
 
 For example, in the function `mixture(1,2,normal(5,2))`, the first two arguments will get converted into point mass distributions
 with values at 1 and 2. Therefore, this is the same as `mixture(pointMass(1),pointMass(2),pointMass(5,2))`.
@@ -220,8 +230,7 @@ with values at 1 and 2. Therefore, this is the same as `mixture(pointMass(1),poi
     "pointMass(3)",
     "mixture(1,3,5)",
     "normal(5,2) * 6",
-    "dotAdd(normal(5,2), 6)",
-    "dotMultiply(normal(5,2), 6)",
+    "dotAdd(normal(5,2), 6)"
   ]}
 >
   <Tab>
@@ -236,9 +245,6 @@ with values at 1 and 2. Therefore, this is the same as `mixture(pointMass(1),poi
   <Tab>
     <SquiggleEditor defaultCode="dotAdd(normal(5,2), 6)" />
   </Tab>
-  <Tab>
-    <SquiggleEditor defaultCode="dotMultiply(normal(5,2), 6)" />
-  </Tab>
 </Tabs>
 
 ### Arguments
@@ -247,8 +253,10 @@ with values at 1 and 2. Therefore, this is the same as `mixture(pointMass(1),poi
 
 ## Beta
 
-`beta(alpha:number, beta:number)`
-`beta({mean: number, stdev: number})`
+```squiggle
+beta(alpha:number, beta:number)
+beta({mean: number, stdev: number})
+```
 
 Creates a [beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) with the given `alpha` and `beta` values. For a good summary of the beta distribution, see [this explanation](https://stats.stackexchange.com/a/47782) on Stack Overflow.
 
@@ -263,22 +271,22 @@ Creates a [beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) w
   ]}
 >
   <Tab>
-    <SquiggleEditor defaultCode="beta(10,20)" />
+    <SquiggleEditor defaultCode="Sym.beta(10,20)" />
   </Tab>
   <Tab>
-    <SquiggleEditor defaultCode="beta(1000, 2000)" />
+    <SquiggleEditor defaultCode="Sym.beta(1000, 2000)" />
   </Tab>
   <Tab>
-    <SquiggleEditor defaultCode="beta(1, 10)" />
+    <SquiggleEditor defaultCode="Sym.beta(1, 10)" />
   </Tab>
   <Tab>
-    <SquiggleEditor defaultCode="beta(10, 1)" />
+    <SquiggleEditor defaultCode="Sym.beta(10, 1)" />
   </Tab>
   <Tab>
-    <SquiggleEditor defaultCode="beta(0.8, 0.8)" />
+    <SquiggleEditor defaultCode="Sym.beta(0.8, 0.8)" />
   </Tab>
   <Tab>
-    <SquiggleEditor defaultCode="beta({mean: 0.39, stdev: 0.1})" />
+    <SquiggleEditor defaultCode="Sym.beta({mean: 0.39, stdev: 0.1})" />
   </Tab>
 </Tabs>
 
@@ -304,16 +312,16 @@ Creates a [beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) w
       ]}
     >
       <Tab>
-        <SquiggleEditor defaultCode="beta(0.3, 0.3)" />
+        <SquiggleEditor defaultCode="Sym.beta(0.3, 0.3)" />
       </Tab>
       <Tab>
-        <SquiggleEditor defaultCode="beta(0.5, 0.5)" />
+        <SquiggleEditor defaultCode="Sym.beta(0.5, 0.5)" />
       </Tab>
       <Tab>
-        <SquiggleEditor defaultCode="beta(.8,.8)" />
+        <SquiggleEditor defaultCode="Sym.beta(.8,.8)" />
       </Tab>
       <Tab>
-        <SquiggleEditor defaultCode="beta(.9,.9)" />
+        <SquiggleEditor defaultCode="Sym.beta(.9,.9)" />
       </Tab>
     </Tabs>
   </details>
@@ -321,11 +329,13 @@ Creates a [beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) w
 
 ## Exponential
 
-`exponential(rate:number)`
+```squiggle
+exponential(rate:number)
+```
 
 Creates an [exponential distribution](https://en.wikipedia.org/wiki/Exponential_distribution) with the given rate.
 
-<SquiggleEditor defaultCode="exponential(4)" />
+<SquiggleEditor defaultCode="Sym.exponential(4)" />
 
 ### Arguments
 
@@ -333,7 +343,9 @@ Creates an [exponential distribution](https://en.wikipedia.org/wiki/Exponential_
 
 ## Triangular distribution
 
-`triangular(low:number, mode:number, high:number)`
+```squiggle
+triangular(low:number, mode:number, high:number)
+```
 
 Creates a [triangular distribution](https://en.wikipedia.org/wiki/Triangular_distribution) with the given low, mode, and high values.
 
@@ -343,13 +355,17 @@ Creates a [triangular distribution](https://en.wikipedia.org/wiki/Triangular_dis
 - `mode`: Number greater than `low`
 - `high`: Number greater than `mode`
 
-<SquiggleEditor defaultCode="triangular(1, 2, 4)" />
+<SquiggleEditor defaultCode="Sym.triangular(1, 2, 4)" />
 
 ## SampleSet.fromList
 
-`SampleSet.fromList(samples:number[])`
+```squiggle
+SampleSet.fromList(samples:number[])
+```
 
-Creates a sample set distribution using an array of samples.
+Creates a sample set distribution using an array of samples.  
+
+Samples are converted into PDFs automatically using [kernel density estimation](https://en.wikipedia.org/wiki/Kernel_density_estimation) and an approximated bandwidth. This is an approximation and can be error-prone.
 
 <SquiggleEditor defaultCode="SampleSet.fromList([1,2,3,4,6,5,5,5])" />
 
@@ -357,18 +373,11 @@ Creates a sample set distribution using an array of samples.
 
 - `samples`: An array of at least 5 numbers.
 
-<Callout type="warning">
-  **Caution!**  
-  Samples are converted into
-  [PDF](https://en.wikipedia.org/wiki/Probability_density_function) shapes
-  automatically using [kernel density
-  estimation](https://en.wikipedia.org/wiki/Kernel_density_estimation) and an
-  approximated bandwidth. Eventually Squiggle will allow for more specificity.
-</Callout>
-
 ## PointSet.makeContinuous
 
-`PointSet.makeContinuous(points:{x: number, y: number})`
+```squiggle
+PointSet.makeContinuous(points:{x: number, y: number})
+```
 
 Creates a continuous point set distribution using a list of points.
 
@@ -381,21 +390,28 @@ Creates a continuous point set distribution using a list of points.
 ])`}
 />
 
+<Callout type="warning">
+  **Caution!**  
+  Distributions made with ``makeContinuous`` are not normalized. We suggest normalizing them manually using the ``normalize`` function.
+</Callout>
+
 ### Arguments
 
 - `points`: An array of at least 3 coordinates.
 
 ## PointSet.makeDiscrete
 
-`PointSet.makeDiscrete(points:{x: number, y: number})`
+```squiggle
+PointSet.makeDiscrete(points:{x: number, y: number})
+```
 
 Creates a discrete point set distribution using a list of points.
 
 <SquiggleEditor
   defaultCode={`PointSet.makeDiscrete([
-  { x: 0, y: 0.1 },
-  { x: 1, y: 0.2 },
-  { x: 2, y: 0.15 },
+  { x: 0, y: 0.2 },
+  { x: 1, y: 0.3 },
+  { x: 2, y: 0.4 },
   { x: 3, y: 0.1 }
 ])`}
 />
