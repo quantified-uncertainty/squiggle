@@ -209,11 +209,11 @@ describe("distribution functions", () => {
   describe("log", () => {
     testEvalToBe("log(2, Sym.uniform(5,8))", "Sample Set Distribution");
     testEvalToBe(
-      "log(Sym.normal(5,2), 3)",
+      "log(Sym.normal(0,2), 3)",
       "Error(Distribution Math Error: Logarithm of input error: First input must be completely greater than 0)"
     );
     testEvalToBe(
-      "log(normal(5,2), Sym.normal(10,1))",
+      "log(normal(0,2), Sym.normal(10,1))",
       "Error(Distribution Math Error: Logarithm of input error: First input must be completely greater than 0)"
     );
     testEvalToBe("log(2, 0.0001 to 5)", "Sample Set Distribution"); // log with low values, see https://github.com/quantified-uncertainty/squiggle/issues/1098
