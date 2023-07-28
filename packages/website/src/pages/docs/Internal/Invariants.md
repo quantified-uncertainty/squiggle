@@ -115,14 +115,6 @@ let pdfOfSum = (pdf1, pdf2, cdf1, cdf2, z) => {
 };
 ```
 
-### Cumulative density functions
-
-TODO
-
-### Inverse cumulative density functions
-
-TODO
-
 ## `pdf`, `cdf`, and `quantile`
 
 With $\forall dist, pdf := x \mapsto \texttt{pdf}(dist, x) \land cdf := x \mapsto \texttt{cdf}(dist, x) \land quantile := p \mapsto \texttt{quantile}(dist, p)$,
@@ -141,6 +133,7 @@ $$
 
 ## To do:
 
+- Write out invariants for CDFs and Inverse CDFs
 - Provide sources or derivations, useful as this document becomes more complicated
 - Provide definitions for the probability density function, exponential, inverse, log, etc.
 - Provide at least some tests for division
