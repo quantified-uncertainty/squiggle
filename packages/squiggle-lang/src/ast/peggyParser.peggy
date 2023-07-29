@@ -270,10 +270,15 @@ unitIdentifier 'identifier'
 dollarIdentifier 'identifier'
   = ([\$_a-z]+[\$_a-z0-9]i*) { return h.nodeIdentifier(text(), location()); }
 
+escapeSeq 'escape sequence' 
+  = "\\"
+     @( esc:[^u]          { return h.parseEscapeSequence([esc], location(), error) }
+      / esc:("u" . . . .) { return h.parseEscapeSequence(esc, location(), error) }
+      )
 
-string 'string'
-  = characters:("'" @([^'])* "'") { return h.nodeString(characters.join(''), location()); }
-  / characters:('"' @([^"])* '"') { return h.nodeString(characters.join(''), location()); }
+string 'string' 
+  = "'" characters:(!("'" / "\\") @. / escapeSeq)* "'" { return h.nodeString(characters.join(""), location()); }
+  / '"' characters:(!('"' / "\\") @. / escapeSeq)* '"' { return h.nodeString(characters.join(""), location()); }
 
 number = number:float unit:unitIdentifier?
   {

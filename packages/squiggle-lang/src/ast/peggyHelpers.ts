@@ -411,3 +411,19 @@ export function blockComment(
     location,
   };
 }
+
+export function parseEscapeSequence(
+  char: string[],
+  location: LocationRange,
+  error: (e: any, l: LocationRange) => void
+) {
+  if (char[0] == "'") {
+    return "'";
+  } else {
+    try {
+      return JSON.parse(`"\\${char.join("")}"`);
+    } catch (e) {
+      error(`Incorrect escape sequence: ${char.join("")}`, location);
+    }
+  }
+}

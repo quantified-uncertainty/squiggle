@@ -586,4 +586,9 @@ describe("parsing new line", () => {
  `,
     "(Program (InfixCall + (Pipe (Pipe (Pipe :a :b) :c) :d) :e))"
   );
+  describe("strings", () => {
+    testParse(`"test\\"\\'\\u1234-\\b\\n"`, "(Program 'test\"'\u1234-\b\n')");
+    testParse(`'test\\"\\'\\u1234-\\b\\n'`, "(Program 'test\"'\u1234-\b\n')");
+    testEvalError("'\\h'");
+  });
 });

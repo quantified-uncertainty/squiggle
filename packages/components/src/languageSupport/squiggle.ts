@@ -45,6 +45,7 @@ export function squiggleLanguageSupport(projectRef: RefObject<SqProject>) {
             String: t.string,
             Comment: t.comment,
             Void: t.escape,
+            Escape: t.escape,
 
             FunctionName: t.function(t.variableName),
 
