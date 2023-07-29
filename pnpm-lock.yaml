@@ -672,6 +672,9 @@ importers:
       esbuild:
         specifier: ^0.18.17
         version: 0.18.17
+      eslint:
+        specifier: ^8.44.0
+        version: 8.44.0
       js-yaml:
         specifier: ^4.1.0
         version: 4.1.0

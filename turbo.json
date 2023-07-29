@@ -13,10 +13,10 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**", "build/**", ".next/**", "!.next/cache/**"]
     },
-    "format": {},
     "lint": {
       "dependsOn": ["^build", "@quri/prettier-plugin-squiggle#build"]
     },
+    "eslint": {},
     "test": {
       "dependsOn": ["build"]
     },
@@ -31,6 +31,9 @@
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "format": {
+      "cache": false
     }
   }
 }
