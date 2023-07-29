@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@commander-js/extra-typings": "^11.0.0",
+    "@tailwindcss/typography": "^0.5.9",
     "commander": "^11.0.0",
     "immutable": "^4.3.0",
     "jstat": "^1.9.6",

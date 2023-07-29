@@ -25,6 +25,10 @@ abstract class BaseValue {
     return Object.assign(Object.create(Object.getPrototypeOf(this)), this);
   }
 
+  toTypeString(): string {
+    return this.type;
+  }
+
   abstract toString(): string;
 }
 
@@ -77,6 +81,10 @@ class VArray extends BaseValue implements Indexable {
         []
       )
     );
+  }
+
+  override toTypeString(): string {
+    return "[" + this.value.map((v) => v.toTypeString()).join(", ") + "]";
   }
 }
 export const vArray = (v: Value[]) => new VArray(v);
@@ -196,6 +204,16 @@ class VDict extends BaseValue implements Indexable {
     } else {
       throw new REOther("Can't access non-string key on a dict");
     }
+  }
+
+  override toTypeString(): string {
+    return (
+      "{" +
+      [...this.value.entries()]
+        .map(([k, v]) => `${k}: ${v.toTypeString()}`)
+        .join(", ") +
+      "}"
+    );
   }
 }
 export const vDict = (v: ValueMap) => new VDict(v);

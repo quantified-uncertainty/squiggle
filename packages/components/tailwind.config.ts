@@ -5,5 +5,6 @@ export default {
   plugins: [
     require("./src/tailwind-plugin.cts"),
     require("@tailwindcss/forms"),
+    require("@tailwindcss/typography"),
   ],
 } satisfies Config;

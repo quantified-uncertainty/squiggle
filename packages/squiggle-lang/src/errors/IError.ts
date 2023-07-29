@@ -65,6 +65,10 @@ export class IRuntimeError extends Error {
   getFrameArray(): Frame[] {
     return this.frameStack.toFrameArray();
   }
+
+  toTypeString(): string[] {
+    return ["Runtime", this.m.errorTypeName];
+  }
 }
 
 // converts raw exceptions into exceptions with framestack attached

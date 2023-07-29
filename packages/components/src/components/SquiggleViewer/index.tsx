@@ -86,7 +86,9 @@ const SquiggleViewerOuter = forwardRef<
       {result.ok ? (
         <SquiggleViewerBody value={result.value} />
       ) : (
-        <SquiggleErrorAlert error={result.value} />
+        <div className="px-1">
+          <SquiggleErrorAlert error={result.value} />
+        </div>
       )}
     </div>
   );

@@ -146,6 +146,7 @@ describe("stacktraces", () => {
   add(number, distribution)
   add(distribution, distribution)
 
+  Was given types: (Number, String)
 Stack trace:
   f at line 4, column 5, file main
   g at line 6, column 12, file main
