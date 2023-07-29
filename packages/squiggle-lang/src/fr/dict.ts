@@ -1,3 +1,4 @@
+import { REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
@@ -8,11 +9,8 @@ import {
   frTuple2,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { Ok } from "../utility/result.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
-import { vArray, vDict, vString, Value } from "../value/index.js";
-import * as Result from "../utility/result.js";
-import { REOther } from "../errors/messages.js";
+import { Value, vArray, vDict, vString } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Dict",

@@ -21,11 +21,11 @@ export function test(name: string, fn: () => void) {
 }
 
 export async function expectEqual(expression1: string, expression2: string) {
-  let result1 = await testRun(expression1);
-  let result2 = await testRun(expression2);
+  const result1 = await testRun(expression1);
+  const result2 = await testRun(expression2);
   if (result1.tag === "Number" && result2.tag === "Number") {
-    let logloss = Math.log(Math.abs(result1.value - result2.value));
-    let isBadLogless = logloss > 1;
+    const logloss = Math.log(Math.abs(result1.value - result2.value));
+    const isBadLogless = logloss > 1;
     console.log(blue(`${expression1} = ${expression2}`));
     console.log(`${result1.value} = ${result2.value}`);
     console.log(

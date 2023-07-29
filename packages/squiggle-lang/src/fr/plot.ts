@@ -3,14 +3,13 @@ import { REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
-  frAny,
   frBool,
+  frDict,
   frDist,
   frDistOrNumber,
   frLambda,
   frNumber,
   frOptional,
-  frDict,
   frScale,
   frString,
 } from "../library/registry/frTypes.js";
@@ -106,7 +105,7 @@ export const library = [
           ),
         ],
         ([{ dists, xScale, yScale, title, showSummary }]) => {
-          let distributions: LabeledDistribution[] = [];
+          const distributions: LabeledDistribution[] = [];
           dists.forEach(({ name, value }) => {
             if (typeof value === "number") {
               const deltaResult = PointMass.make(value);

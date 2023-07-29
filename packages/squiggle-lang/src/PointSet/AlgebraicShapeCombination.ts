@@ -22,7 +22,7 @@ const toDiscretePointMassesFromTriangulars = (
   // TODO: what if there is only one point in the distribution?
   let n = XYShape.T.length(s);
   // first, double up the leftmost and rightmost points:
-  let { xs, ys } = s;
+  const { xs, ys } = s;
   // FIXME - danger, we shouldn't modify shapes
   xs.unshift(xs[0]);
   ys.unshift(ys[0]);
@@ -31,8 +31,8 @@ const toDiscretePointMassesFromTriangulars = (
   n = xs.length;
   // squares and neighbourly products of the xs
   const xsSq: number[] = new Array(n);
-  let xsProdN1: number[] = new Array(n - 1);
-  let xsProdN2: number[] = new Array(n - 2);
+  const xsProdN1: number[] = new Array(n - 1);
+  const xsProdN2: number[] = new Array(n - 2);
 
   for (let i = 0; i <= n - 1; i++) {
     xsSq[i] = xs[i] * xs[i];
@@ -64,7 +64,7 @@ const toDiscretePointMassesFromTriangulars = (
         (2 *
           ((a * Math.log(a / c)) / (a - c) + (b * Math.log(c / b)) / (b - c))) /
         (a - b);
-      let inverseVar =
+      const inverseVar =
         (2 * (Math.log(c / a) / (a - c) + (b * Math.log(b / c)) / (b - c))) /
           (a - b) -
         inverseMean ** 2;
@@ -128,9 +128,9 @@ export const combineShapesContinuousContinuous = (
   // TODO: If operating on two positive-domain distributions, we should take that into account
   let outputMinX = Infinity;
   let outputMaxX = -Infinity;
-  let masses: number[] = new Array(t1m.n * t2m.n);
-  let means: number[] = new Array(t1m.n * t2m.n);
-  let variances: number[] = new Array(t1m.n * t2m.n);
+  const masses: number[] = new Array(t1m.n * t2m.n);
+  const means: number[] = new Array(t1m.n * t2m.n);
+  const variances: number[] = new Array(t1m.n * t2m.n);
   // then convolve the two sets of pointMassesWithMoments
   for (let i = 0; i < t1m.n; i++) {
     for (let j = 0; j < t2m.n; j++) {
@@ -186,18 +186,18 @@ export const combineShapesContinuousContinuous = (
   return { xs: outputXs, ys: outputYs };
 };
 
-const toDiscretePointMassesFromDiscrete = (
-  s: XYShape.XYShape
-): PointMassesWithMoments => {
-  const { xs, ys } = s;
-  const n = xs.length;
+// const toDiscretePointMassesFromDiscrete = (
+//   s: XYShape.XYShape
+// ): PointMassesWithMoments => {
+//   const { xs, ys } = s;
+//   const n = xs.length;
 
-  const masses: number[] = [...ys];
-  const means: number[] = [...xs];
-  const variances: number[] = new Array(n).fill(0);
+//   const masses: number[] = [...ys];
+//   const means: number[] = [...xs];
+//   const variances: number[] = new Array(n).fill(0);
 
-  return { n, masses, means, variances };
-};
+//   return { n, masses, means, variances };
+// };
 
 export type ArgumentPosition = "First" | "Second";
 
@@ -244,7 +244,7 @@ export const combineShapesContinuousDiscrete = (
     case "Multiply":
       for (let j = 0; j <= t2n - 1; j++) {
         // creates a new continuous shape for each one of the discrete points, and collects them in outXYShapes.
-        let dxyShape: [number, number][] = new Array(t1n);
+        const dxyShape: [number, number][] = new Array(t1n);
         for (let i = 0; i <= t1n - 1; i++) {
           // If this operation would flip the x axis (such as -1 * normal(5, 2)),
           // then we want to fill the shape in backwards to ensure all the points

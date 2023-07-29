@@ -1,13 +1,13 @@
+import { otherError } from "../dist/DistError.js";
 import * as SymbolicDist from "../dist/SymbolicDist.js";
-import { REDistributionError, REOther } from "../errors/messages.js";
+import { REDistributionError } from "../errors/messages.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frNumber, frDict } from "../library/registry/frTypes.js";
+import { frDict, frNumber } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { Value, vDist } from "../value/index.js";
 import * as Result from "../utility/result.js";
+import { Value, vDist } from "../value/index.js";
 import { CI_CONFIG } from "./dist.js";
-import { otherError } from "../dist/DistError.js";
 
 const maker = new FnFactory({
   nameSpace: "Sym",

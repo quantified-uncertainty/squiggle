@@ -1,10 +1,10 @@
 import { LocationRange } from "peggy";
 
 import { ASTNode } from "../ast/parse.js";
-import { REArityError, REDomainError, REOther } from "../errors/messages.js";
+import * as IError from "../errors/IError.js";
+import { REArityError, REDomainError } from "../errors/messages.js";
 import { Expression } from "../expression/index.js";
 import { VDomain, Value } from "../value/index.js";
-import * as IError from "../errors/IError.js";
 import * as Context from "./context.js";
 import { ReducerContext } from "./context.js";
 import { Stack } from "./stack.js";

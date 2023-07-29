@@ -46,7 +46,7 @@ const klNormalUniform = (
     (mean ** 2 - (high + low) * mean + (low ** 2 + high * low + high ** 2) / 3);
 
 describe("klDivergence: continuous -> continuous -> float", () => {
-  let testUniform = (
+  const testUniform = (
     lowAnswer: number,
     highAnswer: number,
     lowPrediction: number,

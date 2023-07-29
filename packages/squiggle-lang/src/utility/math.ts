@@ -27,7 +27,10 @@ export function random_sample(
   const sum = probPrefixSums[probPrefixSums.length - 1];
 
   for (let index = 0; index < size; index++) {
-    let selection = binsearchFirstGreater(probPrefixSums, Math.random() * sum);
+    const selection = binsearchFirstGreater(
+      probPrefixSums,
+      Math.random() * sum
+    );
     sample[index] = dist[selection];
   }
   return sample;

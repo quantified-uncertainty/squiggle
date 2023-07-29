@@ -129,8 +129,8 @@ test("frDictWithArbitraryKeys", () => {
   ]);
   const value = vDict(
     ImmutableMap([
-      ["foo", vNumber(dict.get("foo")!)],
-      ["bar", vNumber(dict.get("bar")!)],
+      ["foo", vNumber(5)],
+      ["bar", vNumber(6)],
     ])
   );
   expect(frDictWithArbitraryKeys(frNumber).unpack(value)).toEqual(dict);

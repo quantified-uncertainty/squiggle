@@ -23,8 +23,8 @@ export const generateExponential = (): string =>
   `exponential(${generatePositiveInt()})`;
 
 export const generateUniform = (): string => {
-  let a = generateInt();
-  let b = generateIntMin(a + 1);
+  const a = generateInt();
+  const b = generateIntMin(a + 1);
   return `uniform(${a}, ${b})`;
 };
 

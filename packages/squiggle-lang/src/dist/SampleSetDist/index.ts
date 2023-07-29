@@ -1,13 +1,13 @@
-import * as Result from "../../utility/result.js";
-import * as E_A_Floats from "../../utility/E_A_Floats.js";
-import * as E_A_Sorted from "../../utility/E_A_Sorted.js";
 import * as Discrete from "../../PointSet/Discrete.js";
 import * as XYShape from "../../XYShape.js";
+import * as E_A_Floats from "../../utility/E_A_Floats.js";
+import * as E_A_Sorted from "../../utility/E_A_Sorted.js";
+import * as Result from "../../utility/result.js";
 
-import { OperationError } from "../../operationError.js";
 import { ContinuousShape } from "../../PointSet/Continuous.js";
 import { DiscreteShape } from "../../PointSet/Discrete.js";
-import { PointSetDist } from "../PointSetDist.js";
+import { buildMixedShape } from "../../PointSet/Mixed.js";
+import { OperationError } from "../../operationError.js";
 import { BaseDist } from "../BaseDist.js";
 import {
   DistError,
@@ -15,9 +15,9 @@ import {
   otherError,
   tooFewSamplesForConversionToPointSet,
 } from "../DistError.js";
+import { PointSetDist } from "../PointSetDist.js";
 import { Env } from "../env.js";
 import { samplesToPointSetDist } from "./samplesToPointSetDist.js";
-import { buildMixedShape } from "../../PointSet/Mixed.js";
 
 export class SampleSetDist extends BaseDist {
   samples: readonly number[];

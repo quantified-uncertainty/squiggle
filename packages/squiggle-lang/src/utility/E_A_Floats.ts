@@ -45,7 +45,7 @@ export const isSorted = (t: number[]): boolean => {
 
 export const sum = (t: readonly number[]): number => {
   let sum = 0;
-  for (let v of t) {
+  for (const v of t) {
     sum += v;
   }
   return sum;

@@ -157,7 +157,7 @@ describe("cumulative density function", () => {
         const cdfValue = dist.cdf(env, x).value;
         const max = Math.max(...xs);
         if (x > max) {
-          let epsilon = (x - max) / x;
+          const epsilon = (x - max) / x;
           expect(cdfValue).toBeGreaterThan(1 * (1 - epsilon));
         } else if (typeof cdfValue == "number") {
           expect(Math.round(1e5 * cdfValue) / 1e5).toBeLessThanOrEqual(1);

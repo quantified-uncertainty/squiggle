@@ -7,7 +7,6 @@ import {
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { Ok } from "../utility/result.js";
 import { vArray, vBool, vString } from "../value/index.js";
 
 const maker = new FnFactory({

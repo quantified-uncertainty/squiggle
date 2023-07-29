@@ -178,6 +178,7 @@ export const Scale = {
     }
   },
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   toIntegralCacheFn(x: ScaleOperation): undefined {
     // TODO: in case of "Multiply" this could probably just be multiplied out (using Continuous.scaleBy)
     return undefined;

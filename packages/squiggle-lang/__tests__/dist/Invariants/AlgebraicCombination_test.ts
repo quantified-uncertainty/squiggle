@@ -7,28 +7,16 @@ Also, there are some open comments in https://github.com/quantified-uncertainty/
 
 import * as Result from "../../../src/utility/result.js";
 import {
-  normalDist5, // mean=5, stdev=2
-  normalDist10, // mean=10, stdev=2
-  normalDist20, // mean=20, stdev=2
-  normalDist, // mean=5; stdev=2
-  uniformDist, // low=9; high=10
-  betaDist, // alpha=2; beta=5
-  lognormalDist, // mu=0; sigma=1
-  cauchyDist, // local=1; scale=1
-  triangularDist, // low=1; medium=2; high=3;
-  exponentialDist, // rate=2
+  betaDist,
+  normalDist10,
+  normalDist20,
+  normalDist5,
+  uniformDist,
 } from "../../fixtures/distFixtures.js";
 
 import { binaryOperations } from "../../../src/dist/distOperations/index.js";
 import { env, unpackResult } from "../../helpers/distHelpers.js";
-const {
-  algebraicAdd,
-  algebraicMultiply,
-  algebraicDivide,
-  algebraicSubtract,
-  algebraicLogarithm,
-  algebraicPower,
-} = binaryOperations;
+const { algebraicAdd } = binaryOperations;
 
 describe("(Algebraic) addition of distributions", () => {
   describe("mean", () => {

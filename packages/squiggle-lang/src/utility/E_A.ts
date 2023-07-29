@@ -1,5 +1,3 @@
-import { Ok, result } from "./result.js";
-
 export const zip = <A, B>(xs: A[], ys: B[]): [A, B][] => {
   // based on Belt.Array.zip
   const lenX = xs.length;

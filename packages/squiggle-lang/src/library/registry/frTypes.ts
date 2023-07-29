@@ -217,7 +217,7 @@ export function frDict<
   } & { [k in K5]: T5 }
 >;
 
-export function frDict<T extends {}>(
+export function frDict<T extends object>(
   ...allKvs: [string, FRType<unknown>][]
 ): FRType<T> {
   return {

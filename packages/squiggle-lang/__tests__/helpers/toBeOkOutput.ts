@@ -1,7 +1,9 @@
 import { SqOutputResult } from "../../src/public/types.js";
 
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace jest {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     interface Matchers<R> {
       toBeOkOutput(output: string, bindings: string): CustomMatcherResult;
     }
