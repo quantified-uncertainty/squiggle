@@ -10,7 +10,7 @@
       "outputs": ["dist/**"]
     },
     "lint": {
-      "dependsOn": ["@quri/squiggle-components#build:ts"]
+      "dependsOn": ["^build:ts"]
     }
   }
 }

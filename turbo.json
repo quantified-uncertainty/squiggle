@@ -7,11 +7,17 @@
     // dev target for pre-push checks
     "build:ts": {
       "dependsOn": ["^build:ts"],
-      "outputs": ["dist/**"]
+      "outputs": ["dist/**", "*.tsbuildinfo"]
     },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", "build/**", ".next/**", "!.next/cache/**"]
+      "outputs": [
+        "dist/**",
+        "build/**",
+        ".next/**",
+        "*.tsbuildinfo",
+        "!.next/cache/**"
+      ]
     },
     "lint": {},
     "eslint": {},
