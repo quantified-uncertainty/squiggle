@@ -8,7 +8,8 @@ const invalid = "#000000";
 const separators = "#2a2111";
 const comments = "#60553f";
 const variables = "#822500";
-const strings = "#c1410d";
+const strings = "#9b2d00";
+const escapes = "#e10303";
 const constants = "#003e7b";
 const keywords = "#096600";
 
@@ -51,11 +52,14 @@ export const lightThemeHighlightingStyle = HighlightStyle.define([
     color: numbers,
   },
   {
+    tag: [tags.escape],
+    color: escapes,
+  },
+  {
     tag: [
       tags.operator,
       tags.operatorKeyword,
       tags.url,
-      tags.escape,
       tags.regexp,
       tags.link,
       tags.special(tags.string),
