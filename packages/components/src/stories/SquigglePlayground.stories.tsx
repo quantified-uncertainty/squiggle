@@ -45,7 +45,15 @@ export const WithNestedResult: Story = {
 e = [1,2,3,4,5,6,7,8,9,10,11]
 b = a + 4
 c = a + 2
-d = {e: {f: {g1: a, g2: b, g3: {h: {i: a}}}}}
+nested = {e: {f: {g1: a, g2: b, g3: {h: {i: a}}}}}
+e = 6
+t = 7
+y = 7
+u = 1
+g = 1
+e = 3
+q = 5
+w = 2
     `,
     height: 800,
   },

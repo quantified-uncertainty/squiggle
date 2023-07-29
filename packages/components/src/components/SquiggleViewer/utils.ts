@@ -13,10 +13,6 @@ export type LocalItemSettings = {
 
 export type MergedItemSettings = PlaygroundSettings;
 
-export function pathAsString(path: SqValuePath) {
-  return path.items.join(".");
-}
-
 export const pathItemFormat = (item: PathItem): string => {
   if (item.type === "cellAddress") {
     return `Cell (${item.value.row},${item.value.column})`;
@@ -24,6 +20,10 @@ export const pathItemFormat = (item: PathItem): string => {
     return String(item.value);
   }
 };
+
+export function pathAsString(path: SqValuePath) {
+  return path.items.map(pathItemFormat).join(".");
+}
 
 export function pathToShortName(path: SqValuePath): string | undefined {
   const isTopLevel = path.items.length === 0;
