@@ -277,8 +277,8 @@ escapeSeq 'escape sequence'
       )
 
 string 'string' 
-  = "'" characters:(!("'" / "\\") @. / escapeSeq)* "'" { return h.nodeString(characters.join(""), location); }
-  / '"' characters:(!('"' / "\\") @. / escapeSeq)* '"' { return h.nodeString(characters.join(""), location); }
+  = "'" characters:(!("'" / "\\") @. / escapeSeq)* "'" { return h.nodeString(characters.join(""), location()); }
+  / '"' characters:(!('"' / "\\") @. / escapeSeq)* '"' { return h.nodeString(characters.join(""), location()); }
 
 number = number:float unit:unitIdentifier?
   {
