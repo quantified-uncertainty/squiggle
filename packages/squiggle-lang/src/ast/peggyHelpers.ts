@@ -418,10 +418,10 @@ export function parseEscapeSequence(
   error: (e: any, l: LocationRange) => void
 ) {
   if (char[0] == "'") {
-      return "'"
+    return "'";
   } else {
     try {
-      return JSON.parse(`"\\${char.join("")}"`)
+      return JSON.parse(`"\\${char.join("")}"`);
     } catch (e) {
       error(`Incorrect escape sequence: ${char.join("")}`, location);
     }
