@@ -1,0 +1,31 @@
+---
+description: A simple programming language for intuitive probabilistic estimation
+---
+
+import { clsx } from "clsx";
+
+import { HomepageFeatures } from "../components/HomepageFeatures";
+
+export function HomepageHeader() {
+  return (
+    <header className="p-8 bg-[#fff6ed]">
+      <div className="flex flex-col items-center">
+        <img alt="Squiggle logo" src="/img/squiggle-logo.png" width={70} />
+        <h1 className="text-[4rem] font-lato font-black text-[#e6484f]">
+          Squiggle
+        </h1>
+        <h2 className="text-xl text-stone-400 font-semibold">Beta</h2>
+        <p className="my-4 max-w-md font-lora text-2xl text-stone-500 font-semibold text-center leading-relaxed">
+          A simple programming language for intuitive probabilistic estimation
+        </p>
+      </div>
+    </header>
+  );
+}
+
+<div className="min-h-[calc(100vh-var(--nextra-navbar-height)-200px)]">
+  <HomepageHeader />
+  <main>
+    <HomepageFeatures />
+  </main>
+</div>

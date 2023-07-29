@@ -30,11 +30,11 @@ describe("Peggy parse", () => {
             result.value.statements.length === 1
           )
         ) {
-          fail();
+          throw new Error();
         }
         const value = result.value.statements[0];
         if (value.type !== "Float") {
-          fail();
+          throw new Error();
         }
         expect(value).toMatchObject(expected);
       }
@@ -120,8 +120,10 @@ describe("Peggy parse", () => {
     );
     testParse(
       "1 * 2 - 3 * 4^5^6",
-      "(Program (InfixCall - (InfixCall * 1 2) (InfixCall * 3 (InfixCall ^ (InfixCall ^ 4 5) 6))))"
+      "(Program (InfixCall - (InfixCall * 1 2) (InfixCall * 3 (InfixCall ^ 4 (InfixCall ^ 5 6)))))"
     );
+    testParse("2^3^4", "(Program (InfixCall ^ 2 (InfixCall ^ 3 4)))");
+    testParse("2 .^ 3 .^ 4", "(Program (InfixCall .^ 2 (InfixCall .^ 3 4)))");
     testParse(
       "1 * -a[-2]",
       "(Program (InfixCall * 1 (UnaryCall - (BracketLookup :a (UnaryCall - 2)))))"
@@ -162,33 +164,30 @@ describe("Peggy parse", () => {
     testParse("([0,1,2])[1]", "(Program (BracketLookup (Array 0 1 2) 1))");
   });
 
-  describe("records", () => {
+  describe("dicts", () => {
     testParse(
       "{a: 1, b: 2}",
-      "(Program (Record (KeyValue 'a' 1) (KeyValue 'b' 2)))"
+      "(Program (Dict (KeyValue 'a' 1) (KeyValue 'b' 2)))"
     );
     testParse(
       "{a, b, }",
-      "(Program (Record (KeyValue 'a' :a) (KeyValue 'b' :b)))"
+      "(Program (Dict (KeyValue 'a' :a) (KeyValue 'b' :b)))"
     );
-    testParse(
-      "{a, b}",
-      "(Program (Record (KeyValue 'a' :a) (KeyValue 'b' :b)))"
-    );
+    testParse("{a, b}", "(Program (Dict (KeyValue 'a' :a) (KeyValue 'b' :b)))");
     testParse(
       "{a, b: 2}",
-      "(Program (Record (KeyValue 'a' :a) (KeyValue 'b' 2)))"
+      "(Program (Dict (KeyValue 'a' :a) (KeyValue 'b' 2)))"
     );
-    testParse("{a,}", "(Program (Record (KeyValue 'a' :a)))");
+    testParse("{a,}", "(Program (Dict (KeyValue 'a' :a)))");
     testParse(
       "{1+0: 1, 2+0: 2}",
-      "(Program (Record (KeyValue (InfixCall + 1 0) 1) (KeyValue (InfixCall + 2 0) 2)))"
+      "(Program (Dict (KeyValue (InfixCall + 1 0) 1) (KeyValue (InfixCall + 2 0) 2)))"
     ); // key can be any expression
-    testParse("record.property", "(Program (DotLookup :record property))");
+    testParse("dict.property", "(Program (DotLookup :dict property))");
   });
 
   describe("post operators", () => {
-    //function call, array and record access are post operators with higher priority than unary operators
+    //function call, array and dict access are post operators with higher priority than unary operators
     testParse(
       "a==!b(1)",
       "(Program (InfixCall == :a (UnaryCall ! (Call :b 1))))"
@@ -204,7 +203,6 @@ describe("Peggy parse", () => {
   });
 
   describe("comments", () => {
-    testParse("1 # This is a line comment", "(Program 1)");
     testParse("1 // This is a line comment", "(Program 1)");
     testParse("1 /* This is a multi line comment */", "(Program 1)");
     testParse("/* This is a multi line comment */ 1", "(Program 1)");
@@ -326,6 +324,40 @@ describe("Peggy parse", () => {
     );
   });
 
+  describe("operators", () => {
+    describe("power", () => {
+      testParse("2 ^ 3", "(Program (InfixCall ^ 2 3))");
+    });
+    describe("pointwise arithmetic expressions", () => {
+      testParse(
+        "normal(5,2) .+ normal(5,1)",
+        "(Program (InfixCall .+ (Call :normal 5 2) (Call :normal 5 1)))"
+      );
+      testParse(
+        "normal(5,2) .- normal(5,1)",
+        "(Program (InfixCall .- (Call :normal 5 2) (Call :normal 5 1)))"
+      );
+      testParse(
+        "normal(5,2) .* normal(5,1)",
+        "(Program (InfixCall .* (Call :normal 5 2) (Call :normal 5 1)))"
+      );
+      testParse(
+        "normal(5,2) ./ normal(5,1)",
+        "(Program (InfixCall ./ (Call :normal 5 2) (Call :normal 5 1)))"
+      );
+      testParse(
+        "normal(5,2) .^ normal(5,1)",
+        "(Program (InfixCall .^ (Call :normal 5 2) (Call :normal 5 1)))"
+      );
+    });
+    describe("equality", () => {
+      testParse(
+        "5 == normal(5,2)",
+        "(Program (InfixCall == 5 (Call :normal 5 2)))"
+      );
+    });
+  });
+
   describe("pipe", () => {
     testParse("1 -> add(2)", "(Program (Pipe 1 :add 2))");
     testParse("-1 -> add(2)", "(Program (Pipe (UnaryCall - 1) :add 2))");
@@ -348,11 +380,6 @@ describe("Peggy parse", () => {
       "1 -> subtract(2) * 3",
       "(Program (InfixCall * (Pipe 1 :subtract 2) 3))"
     );
-  });
-
-  describe("elixir pipe", () => {
-    //handled together with -> so there is no need for seperate tests
-    testParse("1 |> add(2)", "(Program (Pipe 1 :add 2))");
   });
 
   describe("to", () => {
@@ -406,7 +433,7 @@ describe("Peggy parse", () => {
     );
     testParse(
       "myaddd(x,y)=x+y; z={x: myaddd}; z",
-      "(Program (DefunStatement :myaddd (Lambda :x :y (Block (InfixCall + :x :y)))) (LetStatement :z (Block (Record (KeyValue 'x' :myaddd)))) :z)"
+      "(Program (DefunStatement :myaddd (Lambda :x :y (Block (InfixCall + :x :y)))) (LetStatement :z (Block (Dict (KeyValue 'x' :myaddd)))) :z)"
     );
     testParse(
       "f({|x| x+1})",
@@ -429,6 +456,7 @@ describe("Peggy parse", () => {
     testParse("1m", "(Program (UnitValue 1 m))");
     testParse("1M", "(Program (UnitValue 1 M))");
     testEvalToBe("1M", "1000000");
+    testEvalToBe("3minutes", "3.00 minutes");
     testEvalError("1q");
     testParse(
       "1k+2M",
@@ -541,18 +569,18 @@ describe("parsing new line", () => {
   );
   testParse(
     `
-  a |>
-  b |>
-  c |>
+  a ->
+  b ->
+  c ->
   d 
  `,
     "(Program (Pipe (Pipe (Pipe :a :b) :c) :d))"
   );
   testParse(
     `
-  a |>
-  b |>
-  c |>
+  a ->
+  b ->
+  c ->
   d +
   e
  `,

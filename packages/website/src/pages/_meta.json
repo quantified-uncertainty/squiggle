@@ -1,0 +1,25 @@
+{
+  "index": {
+    "type": "page",
+    "theme": {
+      "layout": "raw"
+    },
+    "display": "hidden"
+  },
+  "docs": {
+    "title": "Documentation",
+    "type": "page"
+  },
+  "api": {
+    "title": "API",
+    "type": "page",
+    "href": "/docs/Api/Dist"
+  },
+  "playground": {
+    "type": "page",
+    "theme": {
+      "layout": "raw"
+    },
+    "title": "Playground"
+  }
+}

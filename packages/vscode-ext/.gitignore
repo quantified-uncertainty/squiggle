@@ -1,6 +1,6 @@
 /media/vendor
 /*.vsix
-/syntaxes/*.json
-dist
+/syntaxes
+/dist
 /out
 /tsconfig.tsbuildinfo

@@ -7,6 +7,8 @@ import { BookOpenIcon } from "@quri/ui";
 import { UserControls } from "./UserControls";
 import { PageMenuLink } from "./PageMenuLink";
 import { NewDropdown } from "./NewDropdown";
+import { aboutRoute } from "@/routes";
+import { SQUIGGLE_DOCS_URL } from "@/lib/common";
 
 export const PageMenu: FC = () => {
   const { data: session } = useSession();
@@ -22,8 +24,9 @@ export const PageMenu: FC = () => {
         </Link>
       </div>
       <div className="flex gap-6 items-baseline">
+        {!session && <PageMenuLink href={aboutRoute()} title="About" />}
         <PageMenuLink
-          href="https://www.squiggle-language.com/docs/Api/Dist"
+          href={SQUIGGLE_DOCS_URL}
           icon={BookOpenIcon}
           title="Docs"
           external

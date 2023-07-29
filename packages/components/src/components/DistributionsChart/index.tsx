@@ -332,11 +332,25 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
   showSamplesBar,
 }) => {
   const CUTOFF_TO_SHOW_SAMPLES_BAR = 100000; // Default to stop showing bottom samples bar if there are more than 100k samples
+  const HEIGHT_SAMPLES_BAR_CUTOFF = 30; // Default to stop showing bottom samples bar if the height is less than 50px
   const distributions = plot.distributions;
 
   const isMulti =
     distributions.length > 1 ||
     !!(distributions.length === 1 && distributions[0].name);
+
+  // Collect samples to render them in a sample bar.
+  const samples: number[] = useMemo(() => {
+    const samplesToConcat: (readonly number[])[] = [];
+    for (const { distribution } of distributions) {
+      if (distribution.tag === SqDistributionTag.SampleSet) {
+        // It's important not to use the ...spread operator on samples, so that it works with >1M samples.
+        // (JS would fail with "Too many arguments" otherwise).
+        samplesToConcat.push(distribution.getSamples());
+      }
+    }
+    return ([] as number[]).concat(...samplesToConcat);
+  }, [distributions]);
 
   const shapes = flattenResult(
     distributions.map((x) =>
@@ -355,16 +369,6 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
     );
   }
 
-  // if this is a sample set, include the samples
-  // It's important not to use the ...spread operator, so that it works with >1M samples.
-  const samples: number[] = [];
-  for (const { distribution } of distributions) {
-    if (distribution.tag === SqDistributionTag.SampleSet) {
-      const distSamples = distribution.getSamples();
-      samples.concat(distSamples);
-    }
-  }
-
   const normalizedStatus = distributions.map(({ name, distribution }) => ({
     name,
     isNormalized: distribution.isNormalized(),
@@ -376,7 +380,8 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
 
   const _showSamplesBar =
     showSamplesBar === undefined
-      ? samples.length < CUTOFF_TO_SHOW_SAMPLES_BAR
+      ? samples.length < CUTOFF_TO_SHOW_SAMPLES_BAR &&
+        height > HEIGHT_SAMPLES_BAR_CUTOFF
       : showSamplesBar;
 
   const nonNormalizedError = () => {
@@ -416,11 +421,9 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
           showSamplesBar={_showSamplesBar}
         />
       )}
-      {!anyAreNonnormalized && (
-        <div className="flex justify-center pt-2">
-          {plot.showSummary && (
-            <SummaryTable plot={plot} environment={environment} />
-          )}
+      {!anyAreNonnormalized && plot.showSummary && (
+        <div className="flex justify-center pt-2 overflow-auto">
+          <SummaryTable plot={plot} environment={environment} />
         </div>
       )}
       {anyAreNonnormalized && nonNormalizedError()}

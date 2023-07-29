@@ -43,17 +43,17 @@
   "dependencies": {
     "@floating-ui/react": "^0.24.3",
     "@headlessui/react": "^1.7.15",
-    "clsx": "^1.2.1",
+    "clsx": "^2.0.0",
     "framer-motion": "^10.12.18",
     "react-colorful": "^5.6.1",
-    "react-hook-form": "^7.45.1",
+    "react-hook-form": "^7.45.2",
     "react-textarea-autosize": "8.5.2",
     "react-use": "^17.4.0"
   },
   "devDependencies": {
-    "@storybook/addon-docs": "^7.0.24",
-    "@storybook/addon-essentials": "^7.0.24",
-    "@storybook/addon-interactions": "^7.0.24",
+    "@storybook/addon-docs": "^7.1.1",
+    "@storybook/addon-essentials": "^7.1.1",
+    "@storybook/addon-interactions": "^7.1.1",
     "@storybook/addon-links": "^7.0.24",
     "@storybook/blocks": "^7.0.24",
     "@storybook/react": "^7.0.24",
@@ -74,7 +74,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "rollup-plugin-node-builtins": "^2.1.2",
-    "storybook": "^7.0.24",
+    "storybook": "^7.1.1",
     "tailwindcss": "^3.3.2",
     "typescript": "^5.1.6",
     "vite": "^4.3.9"

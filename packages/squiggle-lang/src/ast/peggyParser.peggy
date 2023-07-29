@@ -148,12 +148,13 @@ multiplicative
   multiplicativeOp "operator" = '*' / '/' / '.*' / './'
 
 power
-  = head:chainFunctionCall tail:(_ @powerOp _nl @chainFunctionCall)*
-  { return h.makeInfixChain(head, tail, location()); }
+  = left:chainFunctionCall _ operator:powerOp _nl right:power
+  { return h.nodeInfixCall(operator, left, right, location()); }
+  / chainFunctionCall
   powerOp "operator" = '^' / '.^'
 
 chainFunctionCall
-  = head:unary tail:(_ ('->' / '|>') _nl @chainedFunction)*
+  = head:unary tail:(_ ('->') _nl @chainedFunction)*
   {
     return tail.reduce(function(result, element) {
       return h.nodePipe(result, element.callable, element.args, location());
@@ -264,7 +265,7 @@ identifier 'identifier'
   = ([_a-z]+[_a-z0-9]i*) { return h.nodeIdentifier(text(), location()); }
 
 unitIdentifier 'identifier'
-  = 'n' / 'm' / 'k' / 'M' / 'B' / 'G' / 'T' / 'P' / 'minutes' / 'hours' / 'days' / 'years'
+  = 'minutes' / 'hours' / 'days' / 'years' / 'n' / 'm' / 'k' / 'M' / 'B' / 'G' / 'T' / 'P'
 
 dollarIdentifier 'identifier'
   = ([\$_a-z]+[\$_a-z0-9]i*) { return h.nodeIdentifier(text(), location()); }
@@ -333,7 +334,7 @@ valueConstructor
   = arrayConstructor
   / lambda
   / quotedInnerBlock
-  / recordConstructor
+  / dictConstructor
 
 lambda
   = '{' _nl '|' _nl args:functionParameters _nl '|' _nl statements:statementsList  finalExpression: (statementSeparator @expression)  _nl '}'
@@ -352,13 +353,13 @@ arrayConstructor 'array'
 
   array_elements = @expression|1.., commaSeparator| commaSeparator?
 
-recordConstructor 'record'
+dictConstructor 'dict'
   = '{' _nl '}'
-    { return h.nodeRecord([], location()); }
-  / '{' _nl args:array_recordEntries _nl '}'
-    { return h.nodeRecord(args, location()); }
+    { return h.nodeDict([], location()); }
+  / '{' _nl args:array_dictEntries _nl '}'
+    { return h.nodeDict(args, location()); }
 
-  array_recordEntries = @(keyValuePair / keyValueInherit)| 1.., commaSeparator|commaSeparator?
+  array_dictEntries = @(keyValuePair / keyValueInherit)| 1.., commaSeparator|commaSeparator?
 
   keyValueInherit
     = key:identifier
@@ -391,7 +392,7 @@ commentOrNewLine = finalComment? newLine
   newLine "newline" = [\n\r]
 
 finalComment "line comment"
-  = _ ('//'/'#') comment:($([^\r\n]*)) { options.comments.push(h.lineComment(comment, location())); }
+  = _ ('//') comment:($([^\r\n]*)) { options.comments.push(h.lineComment(comment, location())); }
 
 whiteSpaceCharactersOrComment = whiteSpaceCharacters / delimitedComment
 

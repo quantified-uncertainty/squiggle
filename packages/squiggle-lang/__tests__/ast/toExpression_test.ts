@@ -54,19 +54,18 @@ describe("Peggy to Expression", () => {
     testToExpression("([0,1,2])[1]", "($_atIndex_$)([0, 1, 2], 1)", "1");
   });
 
-  describe("records", () => {
+  describe("dicts", () => {
     testToExpression("{a: 1, b: 2}", "{'a': 1, 'b': 2}", "{a: 1,b: 2}");
     testToExpression("{1+0: 1, 2+0: 2}", "{(add)(1, 0): 1, (add)(2, 0): 2}"); // key can be any expression
-    testToExpression("record.property", "Error(record is not defined)");
+    testToExpression("dict.property", "Error(dict is not defined)");
     testToExpression(
-      "record={property: 1}; record.property",
-      "record = {{'property': 1}}; ($_atIndex_$)(record, 'property')",
+      "dict={property: 1}; dict.property",
+      "dict = {{'property': 1}}; ($_atIndex_$)(dict, 'property')",
       "1"
     );
   });
 
   describe("comments", () => {
-    testToExpression("1 # This is a line comment", "1", "1");
     testToExpression("1 // This is a line comment", "1", "1");
     testToExpression("1 /* This is a multi line comment */", "1", "1");
     testToExpression("/* This is a multi line comment */ 1", "1", "1");
@@ -122,11 +121,7 @@ describe("Peggy to Expression", () => {
     testToExpression("1 -> add(2) * 3", "(multiply)((add)(1, 2), 3)", "9");
   });
 
-  describe("elixir pipe", () => {
-    testToExpression("1 |> add(2)", "(add)(1, 2)", "3");
-  });
-
-  // see testParse for priorities of to and credibleIntervalToDistribution
+  // see testParse for priorities of 'to'
 
   describe("inner block", () => {
     // inner blocks are 0 argument lambdas. They can be used whenever a value is required.

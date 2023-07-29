@@ -1,5 +1,0 @@
----
-"@quri/ui": minor
----
-
-EditIcon

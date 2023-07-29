@@ -3,13 +3,9 @@ import isInteger from "lodash/isInteger.js";
 import { BaseDist } from "../dist/BaseDist.js";
 import {
   REArrayIndexNotFound,
+  REDictPropertyNotFound,
   REOther,
-  RERecordPropertyNotFound,
 } from "../errors/messages.js";
-import {
-  LambdaDeclaration,
-  declarationToString,
-} from "../reducer/declaration.js";
 import { Lambda } from "../reducer/lambda.js";
 import * as DateTime from "../utility/DateTime.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
@@ -109,25 +105,6 @@ class VDate extends BaseValue {
 }
 export const vDate = (v: Date) => new VDate(v);
 
-class VDeclaration extends BaseValue implements Indexable {
-  readonly type = "Declaration";
-
-  constructor(public value: LambdaDeclaration) {
-    super();
-  }
-  toString() {
-    return declarationToString(this.value, (f) => vLambda(f).toString());
-  }
-  get(key: Value) {
-    if (key.type === "String" && key.value === "fn") {
-      return vLambda(this.value.fn);
-    }
-
-    throw new REOther("Trying to access non-existent field");
-  }
-}
-export const vLambdaDeclaration = (v: LambdaDeclaration) => new VDeclaration(v);
-
 class VDist extends BaseValue {
   readonly type = "Dist";
 
@@ -160,7 +137,7 @@ class VLambda extends BaseValue implements Indexable {
             fields.push(["domain", parameter.domain]);
           }
 
-          return vRecord(ImmutableMap(fields));
+          return vDict(ImmutableMap(fields));
         })
       );
     }
@@ -193,8 +170,8 @@ class VString extends BaseValue {
 }
 export const vString = (v: string) => new VString(v);
 
-class VRecord extends BaseValue implements Indexable {
-  readonly type = "Record";
+class VDict extends BaseValue implements Indexable {
+  readonly type = "Dict";
 
   constructor(public value: ValueMap) {
     super();
@@ -213,18 +190,15 @@ class VRecord extends BaseValue implements Indexable {
     if (key.type === "String") {
       const result = this.value.get(key.value);
       if (!result) {
-        throw new RERecordPropertyNotFound(
-          "Record property not found",
-          key.value
-        );
+        throw new REDictPropertyNotFound("Dict property not found", key.value);
       }
       return result;
     } else {
-      throw new REOther("Can't access non-string key on a record");
+      throw new REOther("Can't access non-string key on a dict");
     }
   }
 }
-export const vRecord = (v: ValueMap) => new VRecord(v);
+export const vDict = (v: ValueMap) => new VDict(v);
 
 class VTimeDuration extends BaseValue {
   readonly type = "TimeDuration";
@@ -263,6 +237,7 @@ export type Plot =
       type: "distFn";
       fn: Lambda;
       xScale: Scale;
+      yScale: Scale;
       distXScale: Scale;
       points?: number;
     }
@@ -278,6 +253,23 @@ export type Plot =
       fn: Lambda;
       ids: string[];
     };
+
+export type TableChart = {
+  data: Value[];
+  columns: { fn: Lambda; name: string | undefined }[];
+};
+class VTableChart extends BaseValue {
+  readonly type = "TableChart";
+
+  constructor(public value: TableChart) {
+    super();
+  }
+  toString() {
+    return `Table with ${this.value.columns.length}x${this.value.data.length} elements`;
+  }
+}
+
+export const vTableChart = (v: TableChart) => new VTableChart(v);
 
 class VPlot extends BaseValue implements Indexable {
   readonly type = "Plot";
@@ -336,12 +328,16 @@ export type Scale = CommonScaleArgs &
       }
     | {
         type: "symlog";
+        constant?: number;
       }
     | {
         type: "power";
-        exponent: number;
+        exponent?: number;
       }
   );
+
+export const SCALE_SYMLOG_DEFAULT_CONSTANT = 1;
+export const SCALE_POWER_DEFAULT_CONSTANT = 0.1;
 
 class VScale extends BaseValue {
   readonly type = "Scale";
@@ -409,14 +405,14 @@ export type Value =
   | VArray
   | VBool
   | VDate
-  | VDeclaration
   | VDist
   | VLambda
   | VNumber
   | VString
-  | VRecord
+  | VDict
   | VTimeDuration
   | VPlot
+  | VTableChart
   | VScale
   | VDomain
   | VVoid;

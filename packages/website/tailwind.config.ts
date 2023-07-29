@@ -1,15 +1,24 @@
 import type { Config } from "tailwindcss";
 
 export default {
-  content: ["../ui/src/**/*.{ts,tsx}", "../components/src/**/*.{ts,tsx}"],
+  content: [
+    "./src/**/*.{js,jsx,ts,tsx,md,mdx}",
+    "../ui/src/**/*.{ts,tsx}",
+    "../components/src/**/*.{ts,tsx}",
+    "./theme.config.jsx",
+  ],
+  theme: {
+    extend: {
+      fontFamily: {
+        lato: '"Lato", sans-serif',
+        lora: '"Lora"',
+      },
+    },
+  },
   plugins: [
     require("@quri/squiggle-components/tailwind-plugin"),
-    // I'm not sure if this is necessary - we already add scoped-forms.css, because it needs to be wrapped in .squiggle
-    require("@tailwindcss/forms")({ strategy: "class" }),
+    require("@tailwindcss/forms")({
+      strategy: "class", // strategy: 'base' interferes with react-select styles
+    }),
   ],
-  corePlugins: {
-    // Scoped Tailwind's preflight will be inserted manually
-    preflight: false,
-  },
-  important: ".squiggle",
 } satisfies Config;

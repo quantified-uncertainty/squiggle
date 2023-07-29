@@ -9,8 +9,8 @@ import {
   frTimeDuration,
   frArray,
   frTuple2,
+  frDictWithArbitraryKeys,
   frDict,
-  frRecord,
   frOptional,
   frAny,
 } from "../../src/library/registry/frTypes.js";
@@ -23,7 +23,7 @@ import {
   vDate,
   vDist,
   vNumber,
-  vRecord,
+  vDict,
   vString,
   vTimeDuration,
 } from "../../src/value/index.js";
@@ -71,7 +71,7 @@ describe("frDistOrNumber", () => {
   test("dist", () => {
     const dResult = Normal.make({ mean: 2, stdev: 5 });
     if (!dResult.ok) {
-      fail("oops");
+      throw new Error();
     }
     const dist = dResult.value;
     const value = vDist(dist);
@@ -83,7 +83,7 @@ describe("frDistOrNumber", () => {
 describe("frDist", () => {
   const dResult = Normal.make({ mean: 2, stdev: 5 });
   if (!dResult.ok) {
-    fail("oops");
+    throw new Error();
   }
   const dist = dResult.value;
   const value = vDist(dist);
@@ -122,57 +122,57 @@ test("frTuple2", () => {
   expect(frTuple2(frNumber, frString).pack(arr)).toEqual(value);
 });
 
-test("frDict", () => {
+test("frDictWithArbitraryKeys", () => {
   const dict = ImmutableMap([
     ["foo", 5],
     ["bar", 6],
   ]);
-  const value = vRecord(
+  const value = vDict(
     ImmutableMap([
       ["foo", vNumber(dict.get("foo")!)],
       ["bar", vNumber(dict.get("bar")!)],
     ])
   );
-  expect(frDict(frNumber).unpack(value)).toEqual(dict);
-  expect(frDict(frNumber).pack(dict)).toEqual(value);
+  expect(frDictWithArbitraryKeys(frNumber).unpack(value)).toEqual(dict);
+  expect(frDictWithArbitraryKeys(frNumber).pack(dict)).toEqual(value);
 });
 
-describe("frRecord", () => {
+describe("frDict", () => {
   test("two keys", () => {
-    const record = {
+    const dict = {
       foo: 5,
       bar: "hello",
     };
-    const v = vRecord(
+    const v = vDict(
       ImmutableMap<string, Value>([
-        ["foo", vNumber(record.foo)],
-        ["bar", vString(record.bar)],
+        ["foo", vNumber(dict.foo)],
+        ["bar", vString(dict.bar)],
       ])
     );
-    const t = frRecord(["foo", frNumber], ["bar", frString]);
+    const t = frDict(["foo", frNumber], ["bar", frString]);
 
-    expect(t.unpack(v)).toEqual(record);
-    expect(t.pack(record)).toEqual(v);
+    expect(t.unpack(v)).toEqual(dict);
+    expect(t.pack(dict)).toEqual(v);
   });
 
   test("with optionals", () => {
-    const record = {
+    const dict = {
       foo: 5,
       bar: "hello",
     };
-    const v = vRecord(
+    const v = vDict(
       ImmutableMap<string, Value>([
-        ["foo", vNumber(record.foo)],
-        ["bar", vString(record.bar)],
+        ["foo", vNumber(dict.foo)],
+        ["bar", vString(dict.bar)],
       ])
     );
-    const t = frRecord(
+    const t = frDict(
       ["foo", frNumber],
       ["bar", frString],
       ["baz", frOptional(frString)]
     );
 
-    expect(t.unpack(v)).toEqual(record);
-    expect(t.pack({ ...record, baz: null })).toEqual(v);
+    expect(t.unpack(v)).toEqual(dict);
+    expect(t.pack({ ...dict, baz: null })).toEqual(v);
   });
 });

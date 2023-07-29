@@ -1,6 +1,6 @@
 import { REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frArray, frNumber, frRecord } from "../library/registry/frTypes.js";
+import { frArray, frNumber, frDict } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
 import { NumericRangeDomain } from "../value/domain.js";
@@ -175,7 +175,7 @@ export const library = [
     examples: ["Number.rangeDomain({ min: 5, max: 10 })"],
     definitions: [
       makeDefinition(
-        [frRecord(["min", frNumber], ["max", frNumber])],
+        [frDict(["min", frNumber], ["max", frNumber])],
         ([{ min, max }]) => {
           return vDomain(new NumericRangeDomain(min, max));
         }

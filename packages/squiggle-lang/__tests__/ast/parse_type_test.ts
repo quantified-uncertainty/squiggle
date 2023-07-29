@@ -47,10 +47,10 @@ describe("Peggy parse type", () => {
       "{(::$_typeOf_$ :answer (::$_typeArray_$ #number)); (::$_endOfOuterBlock_$ () ())}"
     );
   });
-  describe("type record", () => {
+  describe("type dict", () => {
     testParse(
       "answer: {a: number, b: string}",
-      "{(::$_typeOf_$ :answer (::$_typeRecord_$ (::$_constructRecord_$ ('a': #number 'b': #string)))); (::$_endOfOuterBlock_$ () ())}"
+      "{(::$_typeOf_$ :answer (::$_typeDict_$ (::$_constructDict_$ ('a': #number 'b': #string)))); (::$_endOfOuterBlock_$ () ())}"
     );
   });
   describe("type constructor", () => {
@@ -64,7 +64,7 @@ describe("Peggy parse type", () => {
     );
     testParse(
       "answer: Person({age: number, name: string})",
-      "{(::$_typeOf_$ :answer (::$_typeConstructor_$ #Person (::$_constructArray_$ (::$_typeRecord_$ (::$_constructRecord_$ ('age': #number 'name': #string)))))); (::$_endOfOuterBlock_$ () ())}"
+      "{(::$_typeOf_$ :answer (::$_typeConstructor_$ #Person (::$_constructArray_$ (::$_typeDict_$ (::$_constructDict$ ('age': #number 'name': #string)))))); (::$_endOfOuterBlock_$ () ())}"
     );
     testParse(
       "weekend: Saturday | Sunday",

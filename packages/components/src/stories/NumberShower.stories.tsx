@@ -47,3 +47,21 @@ export const Tiny: Story = {
     precision: 2,
   },
 };
+
+export const InfinityNumber: Story = {
+  name: "Infinity",
+
+  args: {
+    number: Infinity,
+    precision: 2,
+  },
+};
+
+export const NegativeInfinityNumber: Story = {
+  name: "Negative Infinity",
+
+  args: {
+    number: -Infinity,
+    precision: 2,
+  },
+};

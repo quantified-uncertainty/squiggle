@@ -3,7 +3,7 @@
   "displayName": "Squiggle",
   "description": "Squiggle language support",
   "license": "MIT",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "private": true,
   "publisher": "QURI",
   "repository": {
@@ -12,7 +12,7 @@
   },
   "icon": "media/vendor/icon.png",
   "engines": {
-    "vscode": "^1.75.0"
+    "vscode": "^1.79.0"
   },
   "categories": [
     "Programming Languages",
@@ -123,8 +123,8 @@
   },
   "scripts": {
     "vscode:prepublish": "pnpm run lint && pnpm run build",
-    "build:grammar": "js-yaml syntaxes/squiggle.tmLanguage.yaml >syntaxes/squiggle.tmLanguage.json && js-yaml syntaxes/squiggle.js.yaml >syntaxes/squiggle.js.json && prettier -w syntaxes/squiggle.js.json",
-    "build:vendor": "mkdir -p media/vendor && cp ../components/dist/bundle.js media/vendor/components.js && cp ../components/dist/full.css media/vendor/components.css && cp ./node_modules/react/umd/react.production.min.js media/vendor/react.js && cp ./node_modules/react-dom/umd/react-dom.production.min.js media/vendor/react-dom.js && cp ../website/static/img/squiggle-logo.png media/vendor/icon.png",
+    "build:grammar": "rm -rf syntaxes && mkdir -p syntaxes && cp ../textmate-grammar/dist/*.json ./syntaxes/",
+    "build:vendor": "mkdir -p media/vendor && cp ../components/dist/bundle.js media/vendor/components.js && cp ../components/dist/full.css media/vendor/components.css && cp ./node_modules/react/umd/react.production.min.js media/vendor/react.js && cp ./node_modules/react-dom/umd/react-dom.production.min.js media/vendor/react-dom.js && cp ../website/public/img/squiggle-logo.png media/vendor/icon.png",
     "build:bundle": "esbuild ./src/client/extension.ts ./src/server/server.ts --format=cjs --platform=node --sourcemap --minify --bundle --external:vscode --outdir=./dist",
     "build": "pnpm run build:vendor && pnpm run build:grammar && pnpm run build:bundle",
     "watch": "pnpm run compile:bundle --watch",
@@ -136,7 +136,10 @@
   "devDependencies": {
     "@types/node": "^20.3.3",
     "@types/vscode": "^1.79.0",
-    "esbuild": "^0.18.11",
+    "@quri/squiggle-components": "workspace:*",
+    "@quri/squiggle-lang": "workspace:*",
+    "@quri/squiggle-textmate-grammar": "workspace:*",
+    "esbuild": "^0.18.17",
     "js-yaml": "^4.1.0",
     "prettier": "^2.8.8",
     "react": "^18.2.0",
@@ -145,8 +148,6 @@
     "vsce": "^2.15.0"
   },
   "dependencies": {
-    "@quri/squiggle-components": "workspace:*",
-    "@quri/squiggle-lang": "workspace:*",
     "vscode-languageclient": "^8.1.0",
     "vscode-languageserver": "^8.1.0",
     "vscode-languageserver-textdocument": "^1.0.8"

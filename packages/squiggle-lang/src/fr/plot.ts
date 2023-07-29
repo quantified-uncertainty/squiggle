@@ -3,19 +3,20 @@ import { REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
+  frAny,
   frBool,
   frDist,
   frDistOrNumber,
   frLambda,
   frNumber,
   frOptional,
-  frRecord,
+  frDict,
   frScale,
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { Lambda } from "../reducer/lambda.js";
-import { LabeledDistribution, Scale, vPlot } from "../value/index.js";
+import { LabeledDistribution, Scale, VDomain, vPlot } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Plot",
@@ -24,13 +25,60 @@ const maker = new FnFactory({
 
 const defaultScale = { type: "linear" } satisfies Scale;
 
-function verifyOneNumericArgFunction(fn: Lambda) {
+function createScale(scale: Scale | null, domain: VDomain | undefined): Scale {
+  if (scale && scale.min && scale.max) {
+    // complete scale, nothing to improve
+    return scale;
+  }
+
+  if (scale) {
+    if (scale.min === undefined && scale.max !== undefined) {
+      throw new REOther(
+        "Scale max set without min. Must set either both or neither."
+      );
+    }
+    if (scale.min !== undefined && scale.max === undefined) {
+      throw new REOther(
+        "Scale min set without max. Must set either both or neither."
+      );
+    }
+  }
+
+  /*
+   * There are several possible combinations here:
+   * 1. Scale with min/max -> ignore domain, keep scale
+   * 2. Scale without min/max, domain defined -> copy min/max from domain
+   * 3. Scale without min/max, no domain -> keep scale
+   * 4. No scale and no domain -> default scale
+   */
+
+  if (!domain || domain.value.type !== "NumericRange") {
+    // no domain, use explicit scale or default scale
+    return scale ?? defaultScale;
+  }
+
+  if (scale) {
+    return {
+      ...scale,
+      min: scale.min ?? domain.value.min,
+      max: scale.max ?? domain.value.max,
+    };
+  } else {
+    return { type: "linear", min: domain.value.min, max: domain.value.max };
+  }
+}
+
+// This function both extract the domain and checks that the function has only one parameter.
+function extractDomainFromOneArgFunction(fn: Lambda): VDomain | undefined {
   const parameters = fn.getParameters();
   if (parameters.length !== 1) {
-    throw new REOther("Expected a function with one parameter");
+    throw new REOther(
+      `Plots only work with functions that have one parameter. This function has ${parameters.length} parameters.`
+    );
   }
   // We could also verify a domain here, to be more confident that the function expects numeric args.
   // But we might get other numeric domains besides `NumericRange`, so checking domain type here would be risky.
+  return parameters[0].domain;
 }
 
 export const library = [
@@ -46,10 +94,10 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frRecord(
+          frDict(
             [
               "dists",
-              frArray(frRecord(["name", frString], ["value", frDistOrNumber])),
+              frArray(frDict(["name", frString], ["value", frDistOrNumber])),
             ],
             ["xScale", frOptional(frScale)],
             ["yScale", frOptional(frScale)],
@@ -95,7 +143,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frRecord(
+          frDict(
             ["dist", frDist],
             ["xScale", frOptional(frScale)],
             ["yScale", frOptional(frScale)],
@@ -125,7 +173,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frRecord(
+          frDict(
             ["fn", frLambda],
             ["xScale", frOptional(frScale)],
             ["yScale", frOptional(frScale)],
@@ -133,11 +181,11 @@ export const library = [
           ),
         ],
         ([{ fn, xScale, yScale, points }]) => {
-          verifyOneNumericArgFunction(fn);
+          const domain = extractDomainFromOneArgFunction(fn);
           return vPlot({
             type: "numericFn",
             fn,
-            xScale: xScale ?? defaultScale,
+            xScale: createScale(xScale, domain),
             yScale: yScale ?? defaultScale,
             points: points ?? undefined,
           });
@@ -154,20 +202,22 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frRecord(
+          frDict(
             ["fn", frLambda],
             ["xScale", frOptional(frScale)],
+            ["yScale", frOptional(frScale)],
             ["distXScale", frOptional(frScale)],
             ["points", frOptional(frNumber)]
           ),
         ],
-        ([{ fn, xScale, distXScale, points }]) => {
-          verifyOneNumericArgFunction(fn);
+        ([{ fn, xScale, yScale, distXScale, points }]) => {
+          const domain = extractDomainFromOneArgFunction(fn);
           return vPlot({
             type: "distFn",
             fn,
-            xScale: xScale ?? defaultScale,
-            distXScale: distXScale ?? defaultScale,
+            xScale: createScale(xScale, domain),
+            yScale: yScale ?? defaultScale,
+            distXScale: distXScale ?? yScale ?? defaultScale,
             points: points ?? undefined,
           });
         }
@@ -178,13 +228,13 @@ export const library = [
     name: "scatter",
     output: "Plot",
     examples: [
-      `Plot.scatter({ xDist: 2 to 5, yDist: SampleSet.fromDist(-3 to 3) })`,
-      `Plot.scatter({ xDist: 2 to 5, yDist: SampleSet.fromDist(-3 to 3), xScale: Scale.symlog(), yScale: Scale.symlog() })`,
+      `Plot.scatter({ xDist: 2 to 5, yDist: SampleSet.fromDist(1 to 3) })`,
+      `Plot.scatter({ xDist: 2 to 5, yDist: SampleSet.fromDist(1 to 3), xScale: Scale.symlog(), yScale: Scale.symlog() })`,
     ],
     definitions: [
       makeDefinition(
         [
-          frRecord(
+          frDict(
             ["xDist", frDist],
             ["yDist", frDist],
             ["xScale", frOptional(frScale)],

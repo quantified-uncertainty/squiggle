@@ -1,7 +1,10 @@
 import { FC } from "react";
-import { CommonItem, CommonProps } from "./CommonItem.js";
+import {
+  ActionItemInternal,
+  ActionItemInternalProps,
+} from "./DropdownMenuActionItemInternal.js";
 
-type ActionItemProps = CommonProps & {
+type ActionItemProps = ActionItemInternalProps & {
   onClick(): void;
 };
 
@@ -12,7 +15,7 @@ export const DropdownMenuActionItem: FC<ActionItemProps> = ({
 }) => {
   return (
     <div onClick={onClick}>
-      <CommonItem icon={icon} title={title} />
+      <ActionItemInternal icon={icon} title={title} />
     </div>
   );
 };

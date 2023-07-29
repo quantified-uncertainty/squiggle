@@ -41,7 +41,9 @@ export class SqValueContext {
     let ast = this.valueAst;
 
     let newAst: ASTNode | undefined;
-    if (this.valueAstIsPrecise) {
+    const itemisNotTableIndex = item.type !== "cellAddress";
+
+    if (this.valueAstIsPrecise && itemisNotTableIndex) {
       // now we can try to look for the next nested valueAst
 
       // descend into trivial nodes
@@ -61,13 +63,13 @@ export class SqValueContext {
       switch (ast.type) {
         case "Program": {
           if (this.path.root === "bindings") {
-            newAst = ast.symbols[item];
+            newAst = ast.symbols[item.value];
             break;
           }
           break;
         }
-        case "Record":
-          newAst = ast.symbols[item];
+        case "Dict":
+          newAst = ast.symbols[item.value];
           break;
         case "Array":
           if (typeof item === "number") {
@@ -79,8 +81,6 @@ export class SqValueContext {
           break;
       }
     }
-
-    const path = this.path.extend(item);
 
     return new SqValueContext({
       project: this.project,
@@ -107,7 +107,7 @@ export class SqValueContext {
     }
 
     if (this.path.root === "bindings" && this.path.isRoot()) {
-      // This is a comment on first variable, we don't want to duplicate it for top-level bindings record.
+      // This is a comment on first variable, we don't want to duplicate it for top-level bindings dict.
       return;
     }
 

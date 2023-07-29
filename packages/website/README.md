@@ -1,6 +1,6 @@
 # Website
 
-This website is built using [Docusaurus 2](https://docusaurus.io/), a modern static website generator.
+This website is built using [Nextra](https://nextra.site/), a Next.js-based site generation framework.
 
 # Build for development
 
@@ -9,7 +9,7 @@ We assume you ran `pnpm i`.
 Build dependencies:
 
 ```sh
-npx turbo build --filter=@quri/website^...
+npx turbo build --filter=squiggle-website^...
 ```
 
 Open a local dev server:

@@ -52,7 +52,7 @@ describe("eval", () => {
       );
     });
   });
-  describe("records", () => {
+  describe("dicts", () => {
     test("empty", async () => await expectEvalToBe("{}", "{}"));
     test("define", async () =>
       await expectEvalToBe("{a: 1, b: 2}", "{a: 1,b: 2}"));
@@ -60,7 +60,7 @@ describe("eval", () => {
     test("index", async () =>
       await expectEvalToBe(
         "r = {a: 1}; r.b",
-        "Error(Record property not found: b)"
+        "Error(Dict property not found: b)"
       ));
     testEvalError("{a: 1}.b"); // invalid syntax
     test("trailing comma", async () =>
@@ -140,11 +140,11 @@ describe("stacktraces", () => {
   add(number, number)
   add(string, string)
   add(string, any)
+  add(date, duration)
+  add(duration, duration)
   add(distribution, number)
   add(number, distribution)
   add(distribution, distribution)
-  add(date, duration)
-  add(duration, duration)
 
 Stack trace:
   f at line 4, column 5, file main

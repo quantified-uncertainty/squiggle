@@ -1,7 +1,7 @@
 import { LocationRange } from "peggy";
 import * as Result from "../utility/result.js";
 import { result } from "../utility/result.js";
-import { ASTCommentNode, type ASTNode } from "./peggyHelpers.js";
+import { type ASTCommentNode, type ASTNode } from "./peggyHelpers.js";
 
 export { type ASTNode } from "./peggyHelpers.js";
 
@@ -63,7 +63,7 @@ function nodeToString(node: ASTNode): string {
       return sExpr(node.statements);
     case "Array":
       return sExpr(node.elements);
-    case "Record":
+    case "Dict":
       return sExpr(node.elements);
     case "Boolean":
       return String(node.value);

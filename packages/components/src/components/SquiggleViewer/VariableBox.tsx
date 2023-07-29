@@ -1,11 +1,4 @@
-import {
-  FC,
-  ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useReducer,
-} from "react";
+import { FC, ReactNode, useMemo, useReducer } from "react";
 import { clsx } from "clsx";
 
 import {
@@ -30,6 +23,7 @@ import {
   getChildrenValues,
   pathToShortName,
 } from "./utils.js";
+import { useEffectRef } from "../../lib/hooks/useEffectRef.js";
 
 type SettingsMenuParams = {
   // Used to notify VariableBox that settings have changed, so that VariableBox could re-render itself.
@@ -40,7 +34,7 @@ export type VariableBoxProps = {
   value: SqValueWithContext;
   heading?: string;
   preview?: ReactNode;
-  isRecordOrList?: boolean;
+  isDictOrList?: boolean;
   renderSettingsMenu?: (params: SettingsMenuParams) => ReactNode;
   children: (settings: MergedItemSettings) => ReactNode;
 };
@@ -58,7 +52,7 @@ export const SqTypeWithCount: FC<{
 export const VariableBox: FC<VariableBoxProps> = ({
   value,
   heading = "Error",
-  isRecordOrList = false,
+  isDictOrList = false,
   preview,
   renderSettingsMenu,
   children,
@@ -120,28 +114,20 @@ export const VariableBox: FC<VariableBoxProps> = ({
 
   const name = pathToShortName(path);
 
-  // should be callback to not fire on each render
-  const saveRef = useCallback(
-    (element: HTMLDivElement) => {
-      dispatch({
-        type: "REGISTER_ITEM_HANDLE",
-        payload: { path, element },
-      });
-    },
-    [dispatch, path]
-  );
+  // We should switch to ref cleanups after https://github.com/facebook/react/pull/25686 is released.
+  const saveRef = useEffectRef((element: HTMLDivElement) => {
+    dispatch({
+      type: "REGISTER_ITEM_HANDLE",
+      payload: { path, element },
+    });
 
-  useEffect(() => {
-    // This code is a bit risky, because I'm not sure about the order in which ref callbacks and effect cleanups fire.
-    // But it works in practice.
-    // We should switch to ref cleanups after https://github.com/facebook/react/pull/25686 is released.
     return () => {
       dispatch({
         type: "UNREGISTER_ITEM_HANDLE",
         payload: { path },
       });
     };
-  }, [dispatch, path]);
+  });
 
   const hasBodyContent = Boolean(path.items.length);
   const isOpen = isFocused || !settings.collapsed;
@@ -172,7 +158,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
     !!preview && (
       <div
         className={clsx(
-          "ml-2 text-sm text-blue-800 font-mono",
+          "ml-3 text-sm text-blue-800",
           isOpen ? "opacity-40" : "opacity-60"
         )}
       >
@@ -211,24 +197,25 @@ export const VariableBox: FC<VariableBoxProps> = ({
   const comment = value.context.docstring();
   const hasComment = comment && comment !== "";
 
-  const hasCommentIcon = () => (
-    <div className="ml-3">
-      <TextTooltip text="This variable has a description" placement="bottom">
-        <span>
-          <ChatBubbleLeftIcon
-            size={13}
-            className={`text-purple-100 group-hover:text-purple-300`}
-          />
-        </span>
-      </TextTooltip>
-    </div>
-  );
+  const commentIcon = () =>
+    comment && (
+      <div className="ml-3">
+        <TextTooltip text={comment} placement="bottom">
+          <span>
+            <ChatBubbleLeftIcon
+              size={13}
+              className={`text-purple-100 group-hover:text-purple-300`}
+            />
+          </span>
+        </TextTooltip>
+      </div>
+    );
 
   const showComment = () => (
     <div
       className={clsx(
         "text-sm text-slate-800 whitespace-pre-line bg-purple-50 bg-opacity-60 py-2 px-3 mb-2 rounded-md",
-        !isRecordOrList && "mt-2"
+        !isDictOrList && "mt-2"
       )}
     >
       {comment}
@@ -248,7 +235,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
             {!isFocused && triangleToggle()}
             {headerName}
             {!isFocused && headerPreview()}
-            {hasComment && !isFocused && !isOpen && hasCommentIcon()}
+            {!isFocused && !isOpen && commentIcon()}
             {!isRoot && editor && headerFindInEditorButton()}
           </div>
           <div className="inline-flex space-x-1">
@@ -259,17 +246,14 @@ export const VariableBox: FC<VariableBoxProps> = ({
       )}
       {isOpen && (
         <div className="flex w-full pt-1">
-          {!isFocused &&
-            hasBodyContent &&
-            isRecordOrList &&
-            leftCollapseBorder()}
-          {!isFocused && hasBodyContent && !isRecordOrList && !isRoot && (
+          {!isFocused && hasBodyContent && isDictOrList && leftCollapseBorder()}
+          {!isFocused && hasBodyContent && !isDictOrList && !isRoot && (
             <div className="flex w-4" />
           )}
           <div className="grow">
-            {isRecordOrList && hasComment && showComment()}
+            {isDictOrList && hasComment && showComment()}
             {children(getAdjustedMergedSettings(path))}
-            {!isRecordOrList && hasComment && showComment()}
+            {!isDictOrList && hasComment && showComment()}
           </div>
         </div>
       )}

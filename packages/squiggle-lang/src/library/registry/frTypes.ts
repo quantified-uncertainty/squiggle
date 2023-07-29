@@ -10,7 +10,7 @@ import {
   vDist,
   vLambda,
   vNumber,
-  vRecord,
+  vDict,
   vScale,
   vString,
   vTimeDuration,
@@ -123,12 +123,12 @@ export const frTuple2 = <T1, T2>(
   };
 };
 
-export const frDict = <T>(
+export const frDictWithArbitraryKeys = <T>(
   itemType: FRType<T>
 ): FRType<ImmutableMap<string, T>> => {
   return {
     unpack: (v: Value) => {
-      if (v.type !== "Record") {
+      if (v.type !== "Dict") {
         return undefined;
       }
       // TODO - skip loop and copying if itemType is `any`
@@ -143,7 +143,7 @@ export const frDict = <T>(
       return unpackedMap;
     },
     pack: (v) =>
-      vRecord(
+      vDict(
         ImmutableMap([...v.entries()].map(([k, v]) => [k, itemType.pack(v)]))
       ),
     getName: () => `dict(${itemType.getName()})`,
@@ -156,16 +156,16 @@ export const frAny: FRType<Value> = {
   getName: () => "any",
 };
 
-// We currently support records with up to 5 pairs.
+// We currently support dicts with up to 5 pairs.
 // The limit could be increased with the same pattern, but there might be a better solution for this.
-export function frRecord<K1 extends string, T1>(
+export function frDict<K1 extends string, T1>(
   kv1: [K1, FRType<T1>]
 ): FRType<{ [k in K1]: T1 }>;
-export function frRecord<K1 extends string, T1, K2 extends string, T2>(
+export function frDict<K1 extends string, T1, K2 extends string, T2>(
   kv1: [K1, FRType<T1>],
   kv2: [K2, FRType<T2>]
 ): FRType<{ [k in K1]: T1 } & { [k in K2]: T2 }>;
-export function frRecord<
+export function frDict<
   K1 extends string,
   T1,
   K2 extends string,
@@ -177,7 +177,7 @@ export function frRecord<
   kv2: [K2, FRType<T2>],
   kv3: [K3, FRType<T3>]
 ): FRType<{ [k in K1]: T1 } & { [k in K2]: T2 } & { [k in K3]: T3 }>;
-export function frRecord<
+export function frDict<
   K1 extends string,
   T1,
   K2 extends string,
@@ -194,7 +194,7 @@ export function frRecord<
 ): FRType<
   { [k in K1]: T1 } & { [k in K2]: T2 } & { [k in K3]: T3 } & { [k in K4]: T4 }
 >;
-export function frRecord<
+export function frDict<
   K1 extends string,
   T1,
   K2 extends string,
@@ -217,14 +217,14 @@ export function frRecord<
   } & { [k in K5]: T5 }
 >;
 
-export function frRecord<T extends {}>(
+export function frDict<T extends {}>(
   ...allKvs: [string, FRType<unknown>][]
 ): FRType<T> {
   return {
     unpack: (v: Value) => {
       // extra keys are allowed
 
-      if (v.type !== "Record") {
+      if (v.type !== "Dict") {
         return undefined;
       }
       const r = v.value;
@@ -249,7 +249,7 @@ export function frRecord<T extends {}>(
       return result as any; // that's ok, overload signatures guarantee type safety
     },
     pack: (v) =>
-      vRecord(
+      vDict(
         ImmutableMap(
           allKvs
             .filter(
@@ -268,7 +268,7 @@ export function frRecord<T extends {}>(
   };
 }
 
-// Optionals are implemented for the sake of frRecords, which check for them explicitly.
+// Optionals are implemented for the sake of frDict, which check for them explicitly.
 // Don't try to use them in other contexts.
 export const frOptional = <T>(
   itemType: FRType<T>
@@ -279,7 +279,7 @@ export const frOptional = <T>(
     },
     pack: (v) => {
       if (v === null) {
-        // shouldn't happen if frRecord implementation is correct and frOptional is used correctly.
+        // shouldn't happen if frDict implementation is correct and frOptional is used correctly.
         throw new Error("Unable to pack null value");
       }
       return itemType.pack(v);

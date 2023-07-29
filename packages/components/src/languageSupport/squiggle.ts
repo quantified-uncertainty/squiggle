@@ -61,11 +61,11 @@ export function squiggleLanguageSupport(projectRef: RefObject<SqProject>) {
               to: context.getChild("NonEmptyProgram")?.to || 0,
             }),
             BlockExpr: foldInside,
-            RecordExpr: foldInside,
+            DictExpr: foldInside,
             ArrayExpr: foldInside,
           }),
           indentNodeProp.add({
-            RecordExpr: (context) =>
+            DictExpr: (context) =>
               context.baseIndent +
               (context.textAfter === "}" ? 0 : context.unit),
             BlockExpr: (context) =>

@@ -10,53 +10,53 @@ import * as E_A from "../utility/E_A.js";
 import * as Result from "../utility/result.js";
 import { Value, vDist } from "../value/index.js";
 
-const raiseArgumentError = (message: string) => {
+function raiseArgumentError(message: string): never {
   throw new REDistributionError(argumentError(message));
-};
+}
 
-let parseNumber = (arg: Value): number => {
+function parseNumber(arg: Value): number {
   if (arg.type === "Number") {
     return arg.value;
   } else {
-    return raiseArgumentError("Not a number");
+    raiseArgumentError("Not a number");
   }
-};
+}
 
 const parseNumberArray = (args: Value[]): number[] => args.map(parseNumber);
 
-const parseDist = (args: Value): BaseDist => {
+function parseDist(args: Value): BaseDist {
   if (args.type === "Dist") {
     return args.value;
   } else if (args.type === "Number") {
     return new SymbolicDist.PointMass(args.value);
   } else {
-    return raiseArgumentError("Not a distribution");
+    raiseArgumentError("Not a distribution");
   }
-};
+}
 
-let parseDistributionArray = (ags: Value[]): BaseDist[] => ags.map(parseDist);
+const parseDistributionArray = (ags: Value[]): BaseDist[] => ags.map(parseDist);
 
-let mixtureWithGivenWeights = (
+function mixtureWithGivenWeights(
   distributions: BaseDist[],
   weights: number[],
   env: Env
-): Result.result<BaseDist, DistError> => {
+): Result.result<BaseDist, DistError> {
   if (distributions.length === weights.length) {
     return distOperations.mixture(E_A.zip(distributions, weights), { env });
   } else {
-    return raiseArgumentError(
+    raiseArgumentError(
       "Error, mixture call has different number of distributions and weights"
     );
   }
-};
+}
 
-const mixtureWithDefaultWeights = (distributions: BaseDist[], env: Env) => {
+function mixtureWithDefaultWeights(distributions: BaseDist[], env: Env) {
   const length = distributions.length;
   const weights = new Array(length).fill(1 / length);
   return mixtureWithGivenWeights(distributions, weights, env);
-};
+}
 
-const mixture = (args: Value[], env: Env) => {
+function mixture(args: Value[], env: Env) {
   if (args.length === 1 && args[0].type === "Array") {
     return mixtureWithDefaultWeights(
       parseDistributionArray(args[0].value),
@@ -84,10 +84,8 @@ const mixture = (args: Value[], env: Env) => {
       return mixtureWithDefaultWeights(parseDistributionArray(args), env);
     }
   }
-  return raiseArgumentError(
-    "Last argument of mx must be array or distribution"
-  );
-};
+  raiseArgumentError("Last argument of mx must be array or distribution");
+}
 
 // impossible to implement with FR due to arbitrary parameters length
 export const mxLambda = new BuiltinLambda("mx", (inputs, context) => {

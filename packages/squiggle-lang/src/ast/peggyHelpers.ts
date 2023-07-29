@@ -19,7 +19,7 @@ export const infixFunctions = {
   ">": "larger",
   ">=": "largerEq",
   "||": "or",
-  to: "credibleIntervalToDistribution",
+  to: "to",
 };
 export type InfixOperator = keyof typeof infixFunctions;
 
@@ -56,8 +56,8 @@ type NodeProgram = N<
 
 type NodeArray = N<"Array", { elements: ASTNode[] }>;
 
-type NodeRecord = N<
-  "Record",
+type NodeDict = N<
+  "Dict",
   {
     elements: NodeKeyValue[];
     // Static key -> node, for faster path resolution.
@@ -158,7 +158,7 @@ type NodeVoid = N<"Void", {}>;
 
 export type ASTNode =
   | NodeArray
-  | NodeRecord
+  | NodeDict
   | NodeBlock
   | NodeProgram
   | NodeUnitValue
@@ -251,17 +251,17 @@ export function nodeArray(
 ): NodeArray {
   return { type: "Array", elements, location };
 }
-export function nodeRecord(
+export function nodeDict(
   elements: NodeKeyValue[],
   location: LocationRange
-): NodeRecord {
-  const symbols: NodeRecord["symbols"] = {};
+): NodeDict {
+  const symbols: NodeDict["symbols"] = {};
   for (const element of elements) {
     if (element.key.type === "String") {
       symbols[element.key.value] = element;
     }
   }
-  return { type: "Record", elements, symbols, location };
+  return { type: "Dict", elements, symbols, location };
 }
 
 export function nodeUnitValue(

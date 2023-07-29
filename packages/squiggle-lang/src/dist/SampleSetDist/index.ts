@@ -93,7 +93,10 @@ export class SampleSetDist extends BaseDist {
     if (rightCutoff !== undefined) {
       truncated = truncated.filter((x) => x <= rightCutoff);
     }
-    return SampleSetDist.make(truncated);
+    return Result.bind(
+      SampleSetDist.make(truncated),
+      (dist) => SampleSetDist.make(dist.sampleN(this.samples.length)) // resample to original length
+    );
   }
 
   // Randomly get one sample from the distribution
@@ -181,46 +184,6 @@ sample everything.
     );
   }
 }
-
-export type SampleSetError =
-  | {
-      type: "TooFewSamples";
-    }
-  | {
-      type: "NonNumericInput";
-      value: string;
-    }
-  | {
-      type: "OperationError";
-      value: OperationError;
-    };
-
-export type PointsetConversionError = "TooFewSamplesForConversionToPointSet";
-
-export const Error = {
-  pointsetConversionErrorToString(err: PointsetConversionError) {
-    if (err === "TooFewSamplesForConversionToPointSet") {
-      return "Too Few Samples to convert to point set";
-    } else {
-      throw new global.Error("Internal error");
-    }
-  },
-
-  toString(err: SampleSetError) {
-    switch (err.type) {
-      case "TooFewSamples":
-        return "Too few samples when constructing sample set";
-      case "NonNumericInput":
-        return `Found a non-number in input: ${err.value}`;
-      case "OperationError":
-        return err.value.toString();
-      default:
-        throw new global.Error(
-          `Internal error: unexpected error type ${(err as any).type}`
-        );
-    }
-  },
-};
 
 const buildSampleSetFromFn = (
   n: number,
@@ -313,7 +276,7 @@ export const mixture = (
   const samples = discreteSamples.map((distIndexToChoose, index) => {
     const chosenDist = dists[distIndexToChoose];
     if (chosenDist.samples.length < index) {
-      throw new global.Error("Mixture unreachable error"); // https://github.com/quantified-uncertainty/squiggle/issues/1405
+      throw new Error("Mixture unreachable error"); // https://github.com/quantified-uncertainty/squiggle/issues/1405
     }
     return chosenDist.samples[index];
   });
