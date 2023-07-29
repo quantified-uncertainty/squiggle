@@ -96,7 +96,7 @@ const toDiscretePointMassesFromTriangulars = (
   }
 };
 
-export let combineShapesContinuousContinuous = (
+export const combineShapesContinuousContinuous = (
   op: ConvolutionOperation,
   s1: XYShape.XYShape,
   s2: XYShape.XYShape

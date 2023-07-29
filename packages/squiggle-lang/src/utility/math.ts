@@ -32,13 +32,3 @@ export function random_sample(
   }
   return sample;
 }
-
-// Should be replaced by a lookup table if we ever use it too much
-// TODO - support fractional values through gamma function
-export function factorial(n: number): number {
-  let fct = 1;
-  while (n > 0) {
-    fct *= n--;
-  }
-  return fct;
-}

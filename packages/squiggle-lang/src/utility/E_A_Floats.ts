@@ -71,10 +71,6 @@ export const geomean = (t: readonly number[]): number => {
   return Math.pow(product(t), 1 / t.length);
 };
 
-export const percentile = (t: readonly number[]): number => {
-  return sum(t) / t.length; // TODO - handle empty arrays?
-};
-
 export const sort = (t: readonly number[]): number[] => {
   return Array.from(new Float64Array(t).sort());
 };

@@ -43,17 +43,6 @@ export const unzip = <A, B>(
   return [a1, a2];
 };
 
-export const toRanges = <T>(items: T[]): result<[T, T][], string> => {
-  if (items.length < 2) {
-    return {
-      ok: false,
-      value: "Must be at least 2 elements",
-    };
-  } else {
-    return Ok(zip(items, items.slice(1)));
-  }
-};
-
 export const pairwise = <T, R>(
   items: readonly T[],
   fn: (v1: T, v2: T) => R
