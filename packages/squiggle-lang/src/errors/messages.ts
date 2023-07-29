@@ -34,7 +34,7 @@ export class REArrayIndexNotFound extends ErrorMessage {
   }
 
   toString() {
-    return `${this.msg}: ${this.index}`;
+    return `${this.msg}: \`${this.index}\``;
   }
 }
 
@@ -56,7 +56,7 @@ export class REExpectedType extends ErrorMessage {
   }
 
   toString() {
-    return `Expected type: ${this.typeName} but got: ${this.valueString}`;
+    return `Expected type: \`${this.typeName}\` but got: \`${this.valueString}\``;
   }
 }
 
@@ -67,7 +67,7 @@ export class RENotAFunction extends ErrorMessage {
   }
 
   toString() {
-    return `${this.value} is not a function`;
+    return `\`${this.value}\` is not a function. Here, it was called as if it were a function.`;
   }
 }
 
@@ -89,7 +89,7 @@ export class REDictPropertyNotFound extends ErrorMessage {
   }
 
   toString() {
-    return `${this.msg}: ${this.index}`;
+    return `${this.msg}: \`${this.index}\``;
   }
 }
 
@@ -100,7 +100,7 @@ export class RESymbolNotFound extends ErrorMessage {
   }
 
   toString() {
-    return `${this.symbolName} is not defined`;
+    return `\`${this.symbolName}\` is not defined`;
   }
 }
 
@@ -134,7 +134,9 @@ export class REDomainError extends ErrorMessage {
   }
 
   toString() {
-    return `Domain Error: Parameter ${this.value} must be in domain ${this.domain}`;
+    return ` Parameter \`${
+      this.value
+    }\` must be in domain \`${this.domain.toString()}\``;
   }
 }
 

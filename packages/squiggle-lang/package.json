@@ -34,8 +34,7 @@
     "immutable": "^4.3.0",
     "jstat": "^1.9.6",
     "lodash": "^4.17.21",
-    "open": "^9.1.0",
-    "react-markdown": "^8.0.7"
+    "open": "^9.1.0"
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.22.5",

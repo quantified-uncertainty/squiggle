@@ -77,12 +77,12 @@ export class Registry {
     if (definitions === undefined) {
       throw new RESymbolNotFound(fnName);
     }
-    const format = (
+    const formatErr = (
       fnName: string,
       defs: string,
       givenFn: string
     ) => `There are function matches for **\`${fnName}()\`**, but with different arguments:
-\`\`\`
+\`\`\`js
 ${defs}
 \`\`\`
 Was given **\`${givenFn})\`**`;
@@ -91,7 +91,7 @@ Was given **\`${givenFn})\`**`;
         .map(fnDefinitionToString)
         .map((def) => `${fnName}${def}\n`)
         .join("");
-      return format(fnName, defsString, `${fnName}(${args.join(",")}`);
+      return formatErr(fnName, defsString, `${fnName}(${args.join(",")}`);
     };
 
     for (const definition of definitions) {

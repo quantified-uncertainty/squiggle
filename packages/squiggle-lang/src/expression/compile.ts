@@ -36,7 +36,7 @@ function createInitialCompileContext(externals: Bindings): CompileContext {
 function getValueOrThrow(context: CompileContext, ast: ASTNode, name: string) {
   const value = context.externals.get(name);
   if (value === undefined) {
-    throw new ICompileError(`${name} is not defined`, ast.location);
+    throw new ICompileError(`\`${name}\` is not defined`, ast.location);
   }
   return expression.eValue(value);
 }
