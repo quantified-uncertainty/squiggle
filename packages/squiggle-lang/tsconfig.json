@@ -4,8 +4,7 @@
     "composite": true
   },
   "references": [
-    { "path": "./tsconfig.esm.json" },
-    { "path": "./tsconfig.cjs.json" },
+    { "path": "./tsconfig.build.json" },
     { "path": "./tsconfig.tests.json" }
   ]
 }

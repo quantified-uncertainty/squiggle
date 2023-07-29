@@ -1,26 +1,16 @@
 .DS_Store
-.merlin
-.bsb.lock
 .cpuprofile
 npm-debug.log
 /node_modules/
-.cache
-.cache/*
 lib/*
 *.cache
 build
 yarn-error.log
-*.bs.js
-# Local Netlify folder
-.netlify
 .idea
-*.gen.ts
-*.gen.tsx
-*.gen.js
 /dist
+/*.tsbuildinfo
 *.coverage
 _coverage
 coverage
 .nyc_output/
 src/ast/peggyParser.js
-src/public/SqProject/IncludeParser.js
