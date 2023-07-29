@@ -32,14 +32,7 @@ export const LogScale: Story = {
   name: "Log scale",
   args: {
     code: sq`
-foo(t) = t^2
-Plot.numericFn({
-  fn: foo,
-  xScale: Scale.log({
-    min: 1,
-    max: 100
-  })
-})
+    f(t) = t < 5 ? t : "srstartsarst"
 `,
   },
 };

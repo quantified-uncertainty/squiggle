@@ -6,6 +6,7 @@ import {
   SqDistribution,
   SqNumberValue,
   Env,
+  result,
 } from "@quri/squiggle-lang";
 
 export const functionChartDefaults = {
@@ -39,6 +40,7 @@ export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot>(
     y: ImageValue<T>;
   }[] = [];
   const errors: { x: number; value: string }[] = [];
+  type genericImage = { x: number; y: result<ImageValue<T>, string> }[];
 
   for (const x of chartPointsToRender) {
     const result = plot.fn.call([SqNumberValue.create(x)], environment);
@@ -71,5 +73,17 @@ export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot>(
     }
   }
 
-  return { errors, functionImage };
+  const allValues = () => {
+    const _image: genericImage = functionImage.map(({ x, y }) => ({
+      x,
+      y: { ok: true, value: y },
+    }));
+    const _errors: genericImage = errors.map(({ x, value }) => ({
+      x,
+      y: { ok: false, value },
+    }));
+    return _image.concat(_errors).sort((a, b) => a.x - b.x);
+  };
+
+  return { errors, functionImage, allValues: allValues() };
 }

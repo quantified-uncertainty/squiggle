@@ -313,6 +313,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
   if (!valueHasContext(value)) {
     return <MessageAlert heading="Can't display pathless value" />;
   }
+  console.log("H", value.asJS());
 
   const boxProps = getBoxProps(value);
   const heading = boxProps.heading || value.tag;
