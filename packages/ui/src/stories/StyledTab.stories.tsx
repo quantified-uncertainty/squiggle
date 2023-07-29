@@ -8,6 +8,7 @@ import { BoltIcon, FireIcon } from "../index.js";
  */
 const meta = {
   // https://github.com/tailwindlabs/headlessui/issues/2306 causes problems with Typescript
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   component: StyledTab as any,
 } satisfies Meta<typeof StyledTab>;
 export default meta;

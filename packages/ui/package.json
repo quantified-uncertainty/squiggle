@@ -14,8 +14,9 @@
     "build:storybook": "storybook build",
     "clean:ts": "rm -rf ./dist ./tsconfig.tsbuildinfo",
     "build": "pnpm clean:ts && pnpm build:ts && pnpm build:css && pnpm build:storybook",
-    "lint": "prettier --check .",
-    "lint:eslint": "eslint --ignore-path .gitignore ./src",
+    "lint": "pnpm lint:prettier && pnpm eslint",
+    "lint:prettier": "prettier --check .",
+    "eslint": "eslint --ignore-path .gitignore ./src",
     "format": "prettier --write ."
   },
   "files": [
