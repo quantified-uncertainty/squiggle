@@ -7,6 +7,9 @@
     "build:ts": {
       "dependsOn": ["build:peggy"]
     },
+    "lint": {
+      "dependsOn": ["build", "@quri/prettier-plugin-squiggle#build"]
+    },
     "build:peggy": {
       "outputs": ["src/ast/peggyParser.js"]
     }
