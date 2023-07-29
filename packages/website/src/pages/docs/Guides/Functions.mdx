@@ -1,235 +1,91 @@
 ---
-description: Various functions for operating on distributions
+description: "Squiggle Function Overview"
 ---
-
 import { SquiggleEditor } from "@quri/squiggle-components";
 
-# Distributions: Key Functions
+# Functions
 
-## Operating on distributions
-
-Here are the ways we combine distributions.
-
-### Addition
-
-A horizontal right shift. The addition operation represents the distribution of the sum of
-the value of one random sample chosen from the first distribution and the value one random sample
-chosen from the second distribution.
+## Basic syntax
 
 <SquiggleEditor
-  defaultCode={`dist1 = 1 to 10
-dist2 = triangular(1,2,3)
-dist1 + dist2`}
+  defaultCode={`f(t) = normal(t^2, t^1.2+.01)
+f`}
 />
 
-### Subtraction
+There's no `return` statement in Squiggle; function definitions are values.
 
-A horizontal left shift. The subtraction operation represents the distribution of the value of
-one random sample chosen from the first distribution minus the value of one random sample chosen
-from the second distribution.
+If you need to define local variables in functions, you can use blocks:
 
 <SquiggleEditor
-  defaultCode={`dist1 = 1 to 10
-dist2 = triangular(1,2,3)
-dist1 - dist2`}
+  defaultCode={`mul6(x) = {
+  t = x * 2
+  t * 3
+}`}
 />
 
-### Multiplication
+## Anonymous Functions
 
-A proportional scaling. The multiplication operation represents the distribution of the multiplication of
-the value of one random sample chosen from the first distribution times the value one random sample
-chosen from the second distribution.
+`f(x, y) = x * y` and `f = {|x, y| x * y}` are equivalent.
+
+Squiggle functions are values, and you can save them to variables, pass them to other functions as arguments, return functions from functions, and so on.
+
+<SquiggleEditor defaultCode={`{|t| normal(t^2, t^1.2+.01)}`} />
+
+## Function Visualization
+
+The Squiggle viewer can automatically visualize two types of functions, without manual plots:
+
+1. `(number) => number`
+2. `(number) => distribution`
+
+<SquiggleEditor defaultCode={`numberToNumber(x) = x * x
+numberToDist(x) = normal(x + 1, 3)
+otherFunction(x, y) = x + y`} />
+
+When Squiggle displays a single parameter function, it needs to select some range of parameter values.
+
+The default range is 0 to 10.
+
+You can manually set the the range in the following ways:
+
+- With `Plot.numericFn` or `Plot.distFn` plots, using the `xScale` parameter
+- Through the chart's settings in the UI (look for a gear icon next to the variable name)
+- With parameter annotations (explained below)
+
+## Parameter Annotations
+
+Function parameters can be annotated with _domains_.
+
+Examples:
+
+- `x: Number.rangeDomain({ min: 5, max: 10 })`
+- `x: [5, 10]` — shortcut for `Number.rangeDomain(...)`
+
+Annotations help to document possible values that can be passed as a parameter's value.
+
+Annotations will affect the parameter range used in the function's chart. For more control over function charts, you can use the [Plot module API](/docs/Api/Plot).
+
+Domains are checked on function calls; `f(x: [1,2]) = x; f(3)` will fail.
+
+We plan to support other kinds of domains in the future; for now, only numeric ranges are supported.
 
 <SquiggleEditor
-  defaultCode={`dist1 = 1 to 10
-dist2 = triangular(1,2,3)
-dist1 * dist2`}
+  defaultCode={`yearToValue(year: [2020, 2100]) = 1.04 ^ (year - 2020)`}
 />
 
-We also provide concatenation of two distributions as a syntax sugar for `*`
-
-<SquiggleEditor defaultCode="(0.1 to 1) * triangular(1,2,3)" />
-
-### Division
-
-A proportional scaling (normally a shrinking if the second distribution has values higher than 1).
-The division operation represents the distribution of the division of
-the value of one random sample chosen from the first distribution over the value one random sample
-chosen from the second distribution. If the second distribution has some values near zero, it
-tends to be particularly unstable.
+### Annotation Reflection
 
 <SquiggleEditor
-  defaultCode={`dist1 = 1 to 10
-dist2 = triangular(1,2,3)
-dist1 / dist2`}
+  defaultCode={`f(x: [1, 20]) = x * x
+f.parameters[0]`}
 />
 
-### Exponentiation
+Domains and parameter names can be accessed by the `fn.parameters` property.
 
-A projection over a contracted x-axis. The exponentiation operation represents the distribution of
-the exponentiation of the value of one random sample chosen from the first distribution to the power of
-the value one random sample chosen from the second distribution.
-
-<SquiggleEditor defaultCode={`(0.1 to 1) ^ beta(2, 3)`} />
-
-### Taking the base `e` exponential
+For example, domains extracted with `.parameters` can be reused in annotations of other parameters:
 
 <SquiggleEditor
-  defaultCode={`dist = triangular(1,2,3)
-exp(dist)`}
+  defaultCode={`f(x: [1, 20]) = x * x
+g(x: f.parameters[0].domain) = x * x * x
+`}
 />
-
-### Taking logarithms
-
-A projection over a stretched x-axis.
-
-<SquiggleEditor
-  defaultCode={`dist = triangular(1,2,3)
-log(dist)`}
-/>
-
-<SquiggleEditor defaultCode={`log10(5 to 10)`} />
-
-Base `x`
-
-<SquiggleEditor defaultCode={`log(5 to 10, 2)`} />
-
-#### Validity
-
-- `x` must be a scalar
-- See [the current discourse](https://github.com/quantified-uncertainty/squiggle/issues/304)
-
-### Pointwise addition
-
-For every point on the x-axis, operate the corresponding points in the y axis of the pdf.
-
-**Pointwise operations are done with `PointSetDist` internals rather than `SampleSetDist` internals**.
-
-TODO: this isn't in the new interpreter/parser yet.
-
-<SquiggleEditor defaultCode={`(1 to 10) .+ triangular(1,2,3)`} />
-
-### Pointwise subtraction
-
-TODO: this isn't in the new interpreter/parser yet.
-
-<SquiggleEditor defaultCode={`(1 to 10) .- triangular(1,2,3)`} />
-
-### Pointwise multiplication
-
-<SquiggleEditor defaultCode={`(1 to 10) .* triangular(1,2,3)`} />
-
-### Pointwise division
-
-<SquiggleEditor defaultCode={`(uniform(0,10)) ./ normal(10,4)`} />
-
-### Pointwise exponentiation
-
-<SquiggleEditor defaultCode={`(1 to 10) .^ triangular(1,2,3)`} />
-
-## Standard functions on distributions
-
-### Probability density function
-
-The `pdf(dist, x)` function returns the density of a distribution at the
-given point x.
-
-<SquiggleEditor defaultCode="pdf(normal(0,1),0)" />
-
-#### Validity
-
-- `x` must be a scalar
-- `dist` must be a distribution
-
-### Cumulative density function
-
-The `cdf(dist, x)` gives the cumulative probability of the distribution
-or all values lower than x. It is the inverse of `quantile`.
-
-<SquiggleEditor defaultCode="cdf(normal(0,1),0)" />
-
-#### Validity
-
-- `x` must be a scalar
-- `dist` must be a distribution
-
-### Quantile
-
-The `quantile(dist, prob)` gives the value x for which the sum of the probability for all values
-lower than x is equal to prob. It is the inverse of `cdf`. In the literature, it
-is also known as the quantiles function. In the optional `summary stistics` panel which appears
-beneath distributions, the numbers beneath 5%, 10%, 25% etc are the quantiles of that distribution
-for those precentage values.
-
-<SquiggleEditor defaultCode="quantile(normal(0,1),0.5)" />
-
-#### Validity
-
-- `prob` must be a scalar (please only put it in `(0,1)`)
-- `dist` must be a distribution
-
-### Mean
-
-The `mean(distribution)` function gives the mean (expected value) of a distribution.
-
-<SquiggleEditor defaultCode="mean(normal(5, 10))" />
-
-### Sampling a distribution
-
-The `sample(distribution)` samples a given distribution.
-
-<SquiggleEditor defaultCode="sample(normal(0, 10))" />
-
-## Converting between distribution formats
-
-Recall the [three formats of distributions](/docs/Discussions/Three-Formats-Of-Distributions). We can force any distribution into `SampleSet` format
-
-<SquiggleEditor defaultCode="SampleSet.fromDist(normal(5, 10))" />
-
-Or `PointSet` format
-
-<SquiggleEditor defaultCode="PointSet.fromDist(normal(5, 10))" />
-
-#### Validity
-
-- Second argument to `SampleSet.fromDist` must be a number.
-
-## Normalization
-
-Some distribution operations (like horizontal shift) return an unnormalized distriibution.
-
-We provide a `normalize` function
-
-<SquiggleEditor defaultCode="normalize((0.1 to 1) + triangular(0.1, 1, 10))" />
-
-#### Validity - Input to `normalize` must be a dist
-
-We provide a predicate `isNormalized`, for when we have simple control flow
-
-<SquiggleEditor defaultCode="isNormalized((0.1 to 1) * triangular(0.1, 1, 10))" />
-
-#### Validity
-
-- Input to `isNormalized` must be a dist
-
-## `inspect`
-
-You may like to debug by right clicking your browser and using the _inspect_ functionality on the webpage, and viewing the _console_ tab. Then, wrap your squiggle output with `inspect` to log an internal representation.
-
-<SquiggleEditor defaultCode="inspect(SampleSet.fromDist(0.1 to 1))" />
-
-Save for a logging side effect, `inspect` does nothing to input and returns it.
-
-## Truncate
-
-You can cut off from the left
-
-<SquiggleEditor defaultCode="truncateLeft(0.1 to 1, 0.5)" />
-
-You can cut off from the right
-
-<SquiggleEditor defaultCode="truncateRight(0.1 to 1, 0.5)" />
-
-You can cut off from both sides
-
-<SquiggleEditor defaultCode="truncate(0.1 to 1, 0.5, 1.5)" />

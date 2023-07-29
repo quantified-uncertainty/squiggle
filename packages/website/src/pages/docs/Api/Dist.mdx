@@ -62,6 +62,24 @@ lognormal({ p25: 5, p75: 9 })
 lognormal({ mean: 5, stdev: 2 })
 ```
 
+### to
+
+The `to` function is an easy way to generate simple distributions using predicted _5th_ and _95th_ percentiles.
+
+`To` is simply an alias for `lognormal({p5:low, p95:high})`. It does not accept values of 0 or less, as those are not valid for lognormal distributions.
+
+```
+to: (distribution|number, distribution|number) => distribution
+```
+
+**Examples**
+
+```squiggle
+5 to 10
+to(5,10)
+```
+
+
 ### uniform
 
 ```
@@ -158,23 +176,6 @@ triangular: (number, number, number) => distribution;
 
 ```squiggle
 triangular(5, 10, 20)
-```
-
-### to
-
-The `to` function is an easy way to generate simple distributions using predicted _5th_ and _95th_ percentiles.
-
-`To` is simply an alias for `lognormal({p5:low, p95:high})`. It does not accept values of 0 or less, as those are not valid for lognormal distributions.
-
-```
-to: (distribution|number, distribution|number) => distribution
-```
-
-**Examples**
-
-```squiggle
-5 to 10
-to(5,10)
 ```
 
 ### mixture
@@ -297,13 +298,11 @@ truncate: (distribution, left: number, right: number) => distribution
 ```
 
 <Callout type="info">
-  **Implementation Details**
-  <p>
-    Sample set distributions are truncated by filtering samples, but point set
-    distributions are truncated using direct geometric manipulation. Uniform
-    distributions are truncated symbolically. Symbolic but non-uniform
-    distributions get converted to Point Set distributions.
-  </p>
+  **Implementation Details**  
+  Sample set distributions are truncated by filtering samples, but point set
+  distributions are truncated using direct geometric manipulation. Uniform
+  distributions are truncated symbolically. Symbolic but non-uniform
+  distributions get converted to Point Set distributions.
 </Callout>
 
 ### truncateLeft
@@ -535,13 +534,11 @@ unaryMinus(normal(5, 2)) // same as normal(-5, 2)
 ## Pointwise Arithmetic Operations
 
 <Callout type="warning">
-  **Unnormalized Results**
-  <p>
-    Pointwise arithmetic operations typically return unnormalized or completely
-    invalid distributions. For example, the operation{" "}
-    <code>normal(5,2) .- uniform(10,12)</code> results in a distribution-like
-    object with negative probability mass.
-  </p>
+  **Unnormalized Results**  
+  Pointwise arithmetic operations typically return unnormalized or completely
+  invalid distributions. For example, the operation{" "}
+  <code>normal(5,2) .- uniform(10,12)</code> results in a distribution-like
+  object with negative probability mass.
 </Callout>
 
 Pointwise arithmetic operations cover the standard arithmetic operations, but work in a different way than the regular operations. These operate on the y-values of the distributions instead of the x-values. A pointwise addition would add the y-values of two distributions.

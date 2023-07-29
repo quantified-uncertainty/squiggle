@@ -1,0 +1,100 @@
+---
+description: "Basic Types"
+---
+
+import { SquiggleEditor } from "@quri/squiggle-components";
+
+# Basic Types
+
+## Numbers
+
+Squiggle numbers are built directly on [Javascript numbers](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number). They can be integers or floats, and support all the usual arithmetic operations.  
+[Number API](/docs/Api/Number)
+
+Numbers support a few scientific notation suffixes.
+
+| Suffix | Multiplier |
+| ------ | ---------- |
+| n      | 10^-9      |
+| m      | 10^-3      |
+| k      | 10^3       |
+| M      | 10^6       |
+| B,G    | 10^9       |
+| T      | 10^12      |
+| P      | 10^15      |
+
+There's no difference between floats and integers in Squiggle.
+
+<SquiggleEditor defaultCode={`n = 4.32
+kilo = 4.32k
+micro = 4.32m
+veryLarge = 1e50
+verySmall = 1e-50
+`} />
+
+## Booleans
+
+Booleans can be `true` or `false`.
+
+<SquiggleEditor defaultCode={`t = true
+f = false`} />
+
+## Strings
+
+Strings can be created with either single or double quotes.  
+[String API](/docs/Api/String)
+
+<SquiggleEditor defaultCode={`s = "Double-quoted"
+s2 = 'Single-quoted'`} />
+
+## Distributions
+
+Distributions are first-class citizens. Use the syntax `a to b` to create a quick lognormal distribution, or write out the whole distribution name.
+
+<SquiggleEditor
+  defaultCode={`a = 30 to 50
+b = normal(4, 2)
+c = lognormal({ mean: 90, stdev: 7 })
+d = mixture(a, b, c, [.3, .3, .4])
+d`}
+/>
+
+See these pages for more information on distributions:
+- [Distribution Creation](/docs/Guides/DistributionCreation)
+- [Distribution Functions Guide](/docs/Guides/Functions)
+- [Distribution API](/docs/Api/Dist)
+
+There are [3 internal representation formats for distributions](docs/Discussions/Three-Formats-Of-Distributions): [Sample Set](/docs/API/DistSampleSet), [Point Set](/docs/API/DistPointSet), and Symbolic. By default, Squiggle will use sample set distributions, which allow for correlations between parameters. Point Set and Symbolic distributions will be more accurate and fast, but do not support correlations. If you prefer this tradeoff, you can manually use them by adding a `Sym.` before the distribution name, i.e. `Sym.normal(0, 1)`.
+
+## Lists
+
+Squiggle lists can contain items of any type, similar to lists in Python. You can access individual list elements with `[number]` notation, starting from `0`. 
+
+Squiggle is an immutable language, so you cannot modify lists in-place. Instead, you can use functions such as `List.map` or `List.reduce` to create new lists.  
+[List API](/docs/Api/List)
+
+<SquiggleEditor
+  defaultCode={`myList = [1, "hello", 3 to 5, ["foo", "bar"]]
+first = myList[0] // 1
+bar = myList[3][1] // "bar"`}
+/>
+
+
+## Dictionaries
+
+Squiggle dictionaries work similarly to Python dictionaries or Javascript objects. Like lists, they can contain values of any type. Keys must be strings.  
+[Dictionary API](/docs/Api/Dictionary)
+
+<SquiggleEditor
+  defaultCode={`d = {dist: triangular(0, 1, 2), weight: 0.25, innerDict: {foo: "bar"}}`}
+/>
+
+
+## Other types
+
+Other Squiggle types include:
+
+- [Functions](/docs/Guides/Functions)
+- [Plots](/docs/Api/Plot)
+- [Scales](/docs/Api/Plot#scales)
+- [Domains](#parameter-annotations)

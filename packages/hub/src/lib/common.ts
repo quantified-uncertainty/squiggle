@@ -1,7 +1,7 @@
 // for format() from date-fns
 export const commonDateFormat = "MMM d yyyy, H:mm";
 
-export const DISCORD_URL = "https://discord.gg/nsTnQTgtG";
+export const DISCORD_URL = "https://discord.gg/nsTnQTgtG6";
 export const GITHUB_URL = "https://github.com/quantified-uncertainty/squiggle";
 export const GITHUB_DISCUSSION_URL =
   "https://github.com/quantified-uncertainty/squiggle/discussions";

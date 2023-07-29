@@ -1,6 +1,11 @@
 {
-  "Language": "Language Basics",
-  "DistributionCreation": "Distributions: Creation",
-  "Functions": "Distributions: Key Functions",
-  "ControlFlow": "Control Flow"
+  "DistributionCreation": "Distribution Creation",
+  "DistributionFunctions": "Distribution Functions",
+  "BasicTypes": "Basic Types",
+  "Functions": "Functions",
+  "LanguageFeatures": "Language Features",
+  "ControlFlow": "Control Flow",
+  "Bugs": "Known Bugs",
+  "Gotchas": "Gotchas",
+  "Roadmap": "Roadmap"
 }

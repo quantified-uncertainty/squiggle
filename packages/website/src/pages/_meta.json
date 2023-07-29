@@ -10,16 +10,17 @@
     "title": "Documentation",
     "type": "page"
   },
-  "api": {
-    "title": "API",
-    "type": "page",
-    "href": "/docs/Api/Dist"
-  },
   "playground": {
     "type": "page",
     "theme": {
       "layout": "raw"
     },
     "title": "Playground"
+  },
+  "hub": {
+    "title": "Squiggle Hub",
+    "type": "page",
+    "href": "https://squigglehub.org/",
+    "newWindow": true
   }
 }
