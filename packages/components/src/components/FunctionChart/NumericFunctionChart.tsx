@@ -79,7 +79,7 @@ export const NumericFunctionChart: FC<Props> = ({
       ) {
         frame.enter();
         frame.fillText(
-          "Invalid X Scale settings",
+          "Log scale requires positive X Scale range",
           frame.width / 2,
           frame.height / 2,
           {
