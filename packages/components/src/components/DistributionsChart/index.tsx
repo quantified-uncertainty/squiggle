@@ -8,6 +8,7 @@ import {
   resultMap,
   SqDistributionsPlot,
   SqDistributionTag,
+  SqPointSet,
   SqShape,
 } from "@quri/squiggle-lang";
 import { MouseTooltip, TextTooltip } from "@quri/ui";
@@ -358,14 +359,19 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
     return ([] as number[]).concat(...samplesToConcat);
   }, [distributions]);
 
-  const shapes = flattenResult(
+  let shapes = flattenResult(
     distributions.map((x) =>
       resultMap(x.distribution.pointSet(environment), (pointSet) => ({
         name: x.name ?? x.distribution.toString(),
-        ...pointSet.asShape(),
+        pointSet: pointSet,
       }))
     )
   );
+
+  let foo: {
+    name: string;
+    pointSet: SqPointSet;
+  }[] = [];
 
   if (!shapes.ok) {
     return (
@@ -373,6 +379,31 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
         {shapes.value.toString()}
       </ErrorAlert>
     );
+  } else {
+    let value;
+    // if (plot.xScale.tag === "log") {
+    if (plot.xScale.tag === "log") {
+      const _shapes = shapes.value.map(({ name, pointSet }) => {
+        const outsideMass = pointSet.asDistribution().cdf(environment, 0);
+        if (outsideMass.ok && outsideMass.value > 0.00001) {
+          const truncatedDist = pointSet
+            .asDistribution()
+            .truncate(0.0001, undefined);
+          if (truncatedDist.ok) {
+            const _pointSet = truncatedDist.value.pointSet(environment);
+            console.log("393", outsideMass, pointSet, truncatedDist, _pointSet);
+            if (_pointSet.ok) {
+              return {
+                name,
+                pointSet: _pointSet.value,
+              };
+            }
+          }
+        }
+        return { name, pointSet };
+      });
+      shapes = { ok: true, value: _shapes };
+    }
   }
 
   const normalizedStatus = distributions.map(({ name, distribution }) => ({
@@ -411,22 +442,24 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
     );
   };
 
+  // const cutoffs = shapes.value.map(({ name,  }) => {
+  //   const foo: SqShape = { continuous, discrete };
+  // });
   return (
     <div className="flex flex-col items-stretch">
-      {plot.xScale.tag === "log" && shapes.value.some(hasMassBelowZero) ? (
-        <ErrorAlert heading="Log Domain Error">
-          Cannot graph distribution with negative values on logarithmic scale.
-        </ErrorAlert>
-      ) : (
+      {
         <InnerDistributionsChart
           isMulti={isMulti}
           samples={samples}
-          shapes={shapes.value}
+          shapes={shapes.value.map(({ name, pointSet }) => ({
+            name,
+            ...pointSet.asShape(),
+          }))}
           plot={plot}
           height={height}
           showSamplesBar={_showSamplesBar}
         />
-      )}
+      }
       {!anyAreNonnormalized && plot.showSummary && (
         <div className="flex justify-center pt-2 overflow-auto">
           <SummaryTable plot={plot} environment={environment} />

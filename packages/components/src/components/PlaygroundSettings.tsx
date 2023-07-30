@@ -6,6 +6,8 @@ import {
   SqLogScale,
   SqPowerScale,
   SqSymlogScale,
+  SqDistribution,
+  Env,
 } from "@quri/squiggle-lang";
 import { CheckboxFormField, NumberFormField, RadioFormField } from "@quri/ui";
 
@@ -25,6 +27,7 @@ export const functionSettingsSchema = z.object({
 });
 
 const scaleSchema = z.union([
+  z.literal("auto"),
   z.literal("linear"),
   z.literal("log"),
   z.literal("symlog"),
@@ -38,6 +41,8 @@ function scaleTypeToSqScale(
   args: { min?: number; max?: number } = {}
 ) {
   switch (scaleType) {
+    case "auto":
+      return SqLinearScale.create(args);
     case "linear":
       return SqLinearScale.create(args);
     case "log":
@@ -83,7 +88,7 @@ export const defaultPlaygroundSettings: PlaygroundSettings = {
     count: functionChartDefaults.points,
   },
   distributionChartSettings: {
-    xScale: "linear",
+    xScale: "auto",
     yScale: "linear",
     showSummary: true,
   },
@@ -102,6 +107,37 @@ export function generateDistributionPlotSettings(
   settings: z.infer<typeof distributionSettingsSchema>
 ) {
   const xScale = scaleTypeToSqScale(settings.xScale, {
+    min: settings.minX,
+    max: settings.maxX,
+  });
+  const yScale = scaleTypeToSqScale(settings.yScale);
+  return {
+    xScale,
+    yScale,
+    showSummary: settings.showSummary,
+    title: settings.title,
+  };
+}
+
+const chooseScale = (dist: SqDistribution, env: Env) => {
+  const negativeMass = dist.cdf(env, 0.0);
+  if (negativeMass.ok) {
+    if (negativeMass.value > 0.05) {
+      return "symlog";
+    } else return "log";
+  }
+  return "symlog";
+};
+
+export function generateDistributionPlotSettings2(
+  settings: z.infer<typeof distributionSettingsSchema>,
+  dist: SqDistribution,
+  env: Env
+) {
+  const xScaleTag =
+    settings.xScale === "auto" ? chooseScale(dist, env) : settings.xScale;
+
+  const xScale = scaleTypeToSqScale(xScaleTag, {
     min: settings.minX,
     max: settings.maxX,
   });
@@ -148,6 +184,10 @@ export const DistributionSettingsForm: React.FC<{
           name="distributionChartSettings.xScale"
           label="X Scale"
           options={[
+            {
+              id: "auto",
+              name: "Auto",
+            },
             {
               id: "linear",
               name: "Linear",

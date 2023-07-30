@@ -15,7 +15,7 @@ import { DistFunctionChart } from "../FunctionChart/DistFunctionChart.js";
 import { NumericFunctionChart } from "../FunctionChart/NumericFunctionChart.js";
 import { FunctionChart } from "../FunctionChart/index.js";
 import { NumberShower } from "../NumberShower.js";
-import { generateDistributionPlotSettings } from "../PlaygroundSettings.js";
+import { generateDistributionPlotSettings2 } from "../PlaygroundSettings.js";
 import { RelativeValuesGridChart } from "../RelativeValuesGridChart/index.js";
 import { ScatterChart } from "../ScatterChart/index.js";
 import { ItemSettingsMenu } from "./ItemSettingsMenu.js";
@@ -79,8 +79,10 @@ export const getBoxProps = (
         children: (settings) => {
           const plot = SqDistributionsPlot.create({
             distribution: value.value,
-            ...generateDistributionPlotSettings(
-              settings.distributionChartSettings
+            ...generateDistributionPlotSettings2(
+              settings.distributionChartSettings,
+              value.value,
+              environment
             ),
           });
 
