@@ -11,7 +11,7 @@ import {
   SelectUserQuery,
   SelectUserQuery$data,
 } from "@/__generated__/SelectUserQuery.graphql";
-import { environment } from "@/graphql/relayEnvironment";
+import { environment } from "@/relay/environment";
 
 const Query = graphql`
   query SelectUserQuery($input: UsersQueryInput!) {

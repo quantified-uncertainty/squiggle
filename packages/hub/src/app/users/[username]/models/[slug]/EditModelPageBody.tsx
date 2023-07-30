@@ -1,16 +1,21 @@
+"use client";
+
 import { FC } from "react";
 import { useFragment } from "react-relay";
 
 import { ModelPage$key } from "@/__generated__/ModelPage.graphql";
 import { EditSquiggleSnippetModel } from "@/squiggle/components/EditSquiggleSnippetModel";
-import { ModelPageFragment } from "./ModelPage";
+import {
+  ModelPageFragment,
+  PreloadedModelPageQuery,
+  useModelPageQuery,
+} from "./ModelPage";
 
-type Props = {
-  modelRef: ModelPage$key;
-};
-
-export const EditModelPageBody: FC<Props> = ({ modelRef }) => {
-  const model = useFragment(ModelPageFragment, modelRef);
+export const EditModelPageBody: FC<{
+  query: PreloadedModelPageQuery;
+}> = ({ query }) => {
+  const modelRef = useModelPageQuery(query);
+  const model = useFragment<ModelPage$key>(ModelPageFragment, modelRef);
   const typename = model.currentRevision.content.__typename;
 
   switch (typename) {

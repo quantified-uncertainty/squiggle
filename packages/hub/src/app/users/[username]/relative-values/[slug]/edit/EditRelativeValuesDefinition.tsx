@@ -1,7 +1,13 @@
+"use client";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
-import { graphql, useFragment, useMutation } from "react-relay";
+import {
+  graphql,
+  useFragment,
+  useMutation,
+  usePreloadedQuery,
+} from "react-relay";
 
 import { useToast } from "@quri/ui";
 
@@ -10,11 +16,20 @@ import {
   RelativeValuesDefinitionFormShape,
 } from "@/relative-values/components/RelativeValuesDefinitionForm";
 import { RelativeValuesDefinitionRevisionFragment } from "@/relative-values/components/RelativeValuesDefinitionRevision";
-import { RelativeValuesDefinitionPageFragment } from "../RelativeValuesDefinitionPage";
+import {
+  RelativeValuesDefinitionPageFragment,
+  RelativeValuesDefinitionPageQuery,
+} from "../RelativeValuesDefinitionPage";
 
 import { EditRelativeValuesDefinitionMutation } from "@/__generated__/EditRelativeValuesDefinitionMutation.graphql";
-import { RelativeValuesDefinitionPage$key } from "@/__generated__/RelativeValuesDefinitionPage.graphql";
+import QueryNode, {
+  RelativeValuesDefinitionPageQuery as QueryType,
+} from "@/__generated__/RelativeValuesDefinitionPageQuery.graphql";
 import { RelativeValuesDefinitionRevision$key } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
+import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
+import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
+import { useSerializablePreloadedQuery } from "@/relay/useSerializablePreloadedQuery";
+import { RelativeValuesDefinitionPage$key } from "@/__generated__/RelativeValuesDefinitionPage.graphql";
 
 const Mutation = graphql`
   mutation EditRelativeValuesDefinitionMutation(
@@ -34,18 +49,27 @@ const Mutation = graphql`
   }
 `;
 
-type Props = {
-  definitionRef: RelativeValuesDefinitionPage$key;
-};
-
-export const EditRelativeValuesDefinition: FC<Props> = ({ definitionRef }) => {
+export const EditRelativeValuesDefinition: FC<{
+  query: SerializablePreloadedQuery<typeof QueryNode, QueryType>;
+}> = ({ query }) => {
   useSession({ required: true });
+
+  const queryRef = useSerializablePreloadedQuery(query);
+  const { relativeValuesDefinition: result } = usePreloadedQuery(
+    RelativeValuesDefinitionPageQuery,
+    queryRef
+  );
+
+  const definitionRef = extractFromGraphqlErrorUnion(
+    result,
+    "RelativeValuesDefinition"
+  );
 
   const toast = useToast();
 
   const router = useRouter();
 
-  const definition = useFragment(
+  const definition = useFragment<RelativeValuesDefinitionPage$key>(
     RelativeValuesDefinitionPageFragment,
     definitionRef
   );

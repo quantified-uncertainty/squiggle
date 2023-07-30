@@ -1,14 +1,18 @@
 "use client";
 import { FC } from "react";
-import { useLazyLoadQuery } from "react-relay";
+import { usePreloadedQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
+import UserViewQueryNode, {
+  UserViewQuery,
+} from "@/__generated__/UserViewQuery.graphql";
 import { H1 } from "@/components/ui/Headers";
-import type { UserViewQuery } from "@gen/UserViewQuery.graphql";
+import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
+import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
+import { useSerializablePreloadedQuery } from "@/relay/useSerializablePreloadedQuery";
+import { UserIcon } from "@quri/ui";
 import { UserDefinitionList } from "./UserDefinitionList";
 import { UserModelList } from "./UserModelList";
-import { UserIcon } from "@quri/ui";
-import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 
 const Query = graphql`
   query UserViewQuery($username: String!) {
@@ -29,14 +33,12 @@ const Query = graphql`
   }
 `;
 
-type Props = {
-  username: string;
-};
+export const UserView: FC<{
+  query: SerializablePreloadedQuery<typeof UserViewQueryNode, UserViewQuery>;
+}> = ({ query }) => {
+  const queryRef = useSerializablePreloadedQuery(query);
+  const { userByUsername: result } = usePreloadedQuery(Query, queryRef);
 
-export const UserView: FC<Props> = ({ username }) => {
-  const { userByUsername: result } = useLazyLoadQuery<UserViewQuery>(Query, {
-    username,
-  });
   const user = extractFromGraphqlErrorUnion(result, "User");
 
   return (

@@ -6,7 +6,7 @@ import { FC, PropsWithChildren } from "react";
 import { RelayEnvironmentProvider } from "react-relay";
 
 import { RootLayout } from "@/components/layout/RootLayout";
-import { getCurrentEnvironment } from "@/graphql/relayEnvironment";
+import { getCurrentEnvironment } from "@/relay/environment";
 import { WithToasts } from "@quri/ui";
 
 export const ClientApp: FC<PropsWithChildren<{ session: Session | null }>> = ({

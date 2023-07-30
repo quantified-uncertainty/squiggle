@@ -1,21 +1,19 @@
-"use client";
-
 import { EditModelPageBody } from "./EditModelPageBody";
-import { useModelPageQuery } from "./ModelPage";
+import { loadModelPageQuery } from "./loadModelPageQuery";
 
-export default function Page({
+export default async function Page({
   params,
 }: {
   params: { username: string; slug: string };
 }) {
-  const modelRef = useModelPageQuery({
+  const query = await loadModelPageQuery({
     ownerUsername: params.username,
     slug: params.slug,
   });
 
   return (
     <div className="bg-white">
-      <EditModelPageBody modelRef={modelRef} />
+      <EditModelPageBody query={query} />
     </div>
   );
 }

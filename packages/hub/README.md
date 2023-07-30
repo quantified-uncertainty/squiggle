@@ -12,3 +12,7 @@ To deploy a migration to the production database:
 
 - obtain the database connection string from Digital Ocean;
 - run `DATABASE_URL=... prisma migrate deploy` locally.
+
+# Development notes
+
+[How to load GraphQL data in Next.js pages](/docs/relay-pages.md)

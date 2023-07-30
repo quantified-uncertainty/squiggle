@@ -1,12 +1,16 @@
 "use client";
 import { FC } from "react";
-import { useLazyLoadQuery } from "react-relay";
+import { usePreloadedQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { FrontPageQuery } from "@/__generated__/FrontPageQuery.graphql";
+import FrontPageQueryNode, {
+  FrontPageQuery,
+} from "@/__generated__/FrontPageQuery.graphql";
 import { FrontPageDefinitionList } from "./FrontPageDefinitionList";
 import { FrontPageModelList } from "./FrontPageModelList";
 
+import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
+import { useSerializablePreloadedQuery } from "@/relay/useSerializablePreloadedQuery";
 import { StyledTab } from "@quri/ui";
 
 const Query = graphql`
@@ -16,12 +20,11 @@ const Query = graphql`
   }
 `;
 
-export const FrontPage: FC = () => {
-  const data = useLazyLoadQuery<FrontPageQuery>(
-    Query,
-    {},
-    { fetchPolicy: "store-and-network" }
-  );
+export const FrontPage: FC<{
+  query: SerializablePreloadedQuery<typeof FrontPageQueryNode, FrontPageQuery>;
+}> = ({ query }) => {
+  const queryRef = useSerializablePreloadedQuery(query);
+  const data = usePreloadedQuery(Query, queryRef);
 
   return (
     <div className="space-y-8">

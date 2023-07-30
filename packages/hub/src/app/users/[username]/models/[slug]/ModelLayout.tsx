@@ -1,7 +1,9 @@
+"use client";
+
 import { useSession } from "next-auth/react";
-import { notFound, useParams, usePathname, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { FC, PropsWithChildren } from "react";
-import { useFragment, useLazyLoadQuery } from "react-relay";
+import { useFragment, usePreloadedQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import {
@@ -19,20 +21,24 @@ import {
   ModelLayout$data,
   ModelLayout$key,
 } from "@/__generated__/ModelLayout.graphql";
-import { ModelLayoutQuery } from "@/__generated__/ModelLayoutQuery.graphql";
-import { EntityLayout, EntityNode } from "@/components/EntityLayout";
+import ModelLayoutQueryNode, {
+  ModelLayoutQuery,
+} from "@/__generated__/ModelLayoutQuery.graphql";
+import { EntityLayout } from "@/components/EntityLayout";
 import { DropdownMenuLinkItem } from "@/components/ui/DropdownMenuLinkItem";
 import { EntityTab } from "@/components/ui/EntityTab";
+import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
+import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
+import { useSerializablePreloadedQuery } from "@/relay/useSerializablePreloadedQuery";
 import {
   modelForRelativeValuesExportRoute,
   modelRevisionsRoute,
   modelRoute,
   patchModelRoute,
-  userRoute,
 } from "@/routes";
 import { DeleteModelAction } from "./DeleteModelAction";
 import { UpdateModelSlugAction } from "./UpdateModelSlugAction";
-import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
+import { entityNodes } from "./utils";
 
 const Fragment = graphql`
   fragment ModelLayout on Model {
@@ -115,38 +121,20 @@ function useFixModelUrlCasing(model: ModelLayout$data) {
   }
 }
 
-type Props = PropsWithChildren<CommonProps>;
-
-export const entityNodes = (
-  username: string,
-  slug: string,
-  variableName?: string
-): EntityNode[] => {
-  let nodes: EntityNode[] = [
-    { slug: username, href: userRoute({ username }) },
-    { slug, href: modelRoute({ username, slug }), icon: CodeBracketIcon },
-  ];
-  if (variableName) {
-    nodes.push({
-      slug: variableName,
-      href: modelForRelativeValuesExportRoute({
-        username: username,
-        slug: slug,
-        variableName: variableName,
-      }),
-      icon: ScaleIcon,
-    });
-  }
-  return nodes;
-};
-
-export const ModelLayout: FC<Props> = ({ username, slug, children }) => {
+export const ModelLayout: FC<
+  PropsWithChildren<{
+    query: SerializablePreloadedQuery<
+      typeof ModelLayoutQueryNode,
+      ModelLayoutQuery
+    >;
+  }>
+> = ({ query, children }) => {
   const { data: session } = useSession();
   const { variableName } = useParams();
 
-  const { result } = useLazyLoadQuery<ModelLayoutQuery>(Query, {
-    input: { ownerUsername: username, slug },
-  });
+  const queryRef = useSerializablePreloadedQuery(query);
+  const { result } = usePreloadedQuery(Query, queryRef);
+
   const modelRef = extractFromGraphqlErrorUnion(result, "Model");
   const model = useFragment<ModelLayout$key>(Fragment, modelRef);
 
@@ -154,7 +142,7 @@ export const ModelLayout: FC<Props> = ({ username, slug, children }) => {
 
   const dropDown = (close: () => void) => (
     <DropdownMenu>
-      <DropdownMenuHeader> Relative Value Functions </DropdownMenuHeader>
+      <DropdownMenuHeader>Relative Value Functions</DropdownMenuHeader>
       <DropdownMenuSeparator />
       {model.currentRevision.relativeValuesExports.map((exportItem) => (
         <DropdownMenuLinkItem
@@ -172,9 +160,14 @@ export const ModelLayout: FC<Props> = ({ username, slug, children }) => {
     </DropdownMenu>
   );
 
+  const usernameAndSlug = {
+    username: model.owner.username,
+    slug: model.slug,
+  };
+
   return (
     <EntityLayout
-      nodes={entityNodes(username, slug, variableName)}
+      nodes={entityNodes(model.owner.username, model.slug, variableName)}
       isFluid={true}
       headerChildren={
         <>
@@ -182,7 +175,7 @@ export const ModelLayout: FC<Props> = ({ username, slug, children }) => {
             <EntityTab.Link
               name="Code"
               icon={CodeBracketIcon}
-              href={modelRoute({ username, slug })}
+              href={modelRoute(usernameAndSlug)}
             />
             {Boolean(model.currentRevision.relativeValuesExports.length) && (
               <Dropdown render={({ close }) => dropDown(close)}>
@@ -192,7 +185,7 @@ export const ModelLayout: FC<Props> = ({ username, slug, children }) => {
                   count={model.currentRevision.relativeValuesExports.length}
                   selected={(pathname) => {
                     return pathname.startsWith(
-                      modelRoute({ username, slug }) + "/relative-values"
+                      modelRoute(usernameAndSlug) + "/relative-values"
                     );
                   }}
                 />
@@ -201,10 +194,10 @@ export const ModelLayout: FC<Props> = ({ username, slug, children }) => {
             <EntityTab.Link
               name="Revisions"
               icon={RectangleStackIcon}
-              href={modelRevisionsRoute({ username, slug })}
+              href={modelRevisionsRoute(usernameAndSlug)}
             />
-            {session?.user.username === username ? (
-              <MenuButton username={username} slug={slug} />
+            {session?.user.username === model.owner.username ? (
+              <MenuButton {...usernameAndSlug} />
             ) : null}
           </EntityTab.List>
         </>

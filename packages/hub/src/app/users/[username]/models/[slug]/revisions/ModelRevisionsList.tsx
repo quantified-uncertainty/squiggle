@@ -1,14 +1,21 @@
+"use client";
+import { format } from "date-fns";
 import { FC } from "react";
-import { useLazyLoadQuery, usePaginationFragment } from "react-relay";
+import { usePaginationFragment, usePreloadedQuery } from "react-relay";
 import { graphql } from "relay-runtime";
+
+import { Button } from "@quri/ui";
 
 import { ModelRevisionsList$key } from "@/__generated__/ModelRevisionsList.graphql";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { commonDateFormat } from "@/lib/common";
+import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
+import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
+import { useSerializablePreloadedQuery } from "@/relay/useSerializablePreloadedQuery";
 import { modelRevisionRoute } from "@/routes";
-import { ModelRevisionsListQuery } from "@gen/ModelRevisionsListQuery.graphql";
-import { Button } from "@quri/ui";
-import { format } from "date-fns";
+import QueryNode, {
+  ModelRevisionsListQuery,
+} from "@gen/ModelRevisionsListQuery.graphql";
 
 const RevisionsFragment = graphql`
   fragment ModelRevisionsList on Model
@@ -32,11 +39,16 @@ const RevisionsFragment = graphql`
   }
 `;
 
-const ModelRevisionsListQuery = graphql`
+const Query = graphql`
   query ModelRevisionsListQuery($input: QueryModelInput!) {
     model(input: $input) {
+      __typename
       ... on Model {
         id
+        slug
+        owner {
+          username
+        }
         ...FixModelUrlCasing
         ...ModelRevisionsList
       }
@@ -44,19 +56,12 @@ const ModelRevisionsListQuery = graphql`
   }
 `;
 
-type Props = {
-  username: string;
-  slug: string;
-};
-
-export const ModelRevisionsList: FC<Props> = ({ username, slug }) => {
-  const { model: modelRef } = useLazyLoadQuery<ModelRevisionsListQuery>(
-    ModelRevisionsListQuery,
-    {
-      input: { ownerUsername: username, slug },
-    },
-    { fetchPolicy: "store-and-network" }
-  );
+export const ModelRevisionsList: FC<{
+  query: SerializablePreloadedQuery<typeof QueryNode, ModelRevisionsListQuery>;
+}> = ({ query }) => {
+  const queryRef = useSerializablePreloadedQuery(query);
+  const { model: result } = usePreloadedQuery(Query, queryRef);
+  const modelRef = extractFromGraphqlErrorUnion(result, "Model");
 
   const { data: model, loadNext } = usePaginationFragment<
     ModelRevisionsListQuery,
@@ -71,8 +76,8 @@ export const ModelRevisionsList: FC<Props> = ({ username, slug }) => {
           <div key={edge.node.id}>
             <StyledLink
               href={modelRevisionRoute({
-                username,
-                slug,
+                username: modelRef.owner.username,
+                slug: modelRef.slug,
                 revisionId: edge.node.id,
               })}
             >
