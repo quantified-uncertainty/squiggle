@@ -46,7 +46,6 @@ const logKdeSingleSide = ({
     weight,
     kernelWidth,
   });
-  console.log("S", { ys });
   let result = unLogShape({ xs, ys });
   if (sign === "negative") {
     result = reverseNegativeShape(result);
