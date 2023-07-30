@@ -3,13 +3,24 @@
 // samples:      Must be sorted!
 // outputLength: Number of points in output, >= 4
 // xWidth:       Width of the kernel in x axis units
+
+import { nrd0 } from "./bandwidth.js";
+
+export type kdeParams = {
+  samples: number[];
+  outputLength: number;
+  weight: number;
+  kernelWidth?: number;
+};
+
 // weight:       Probability mass for each point
-export const kde = (
-  samples: number[],
-  outputLength: number,
-  xWidth: number,
-  weight: number
-) => {
+export const kde = ({
+  samples,
+  outputLength,
+  weight,
+  kernelWidth,
+}: kdeParams) => {
+  let xWidth = kernelWidth ?? nrd0(samples);
   samples = samples.filter((v) => Number.isFinite(v)); // Not sure if this is needed?
   const len = samples.length;
   if (len === 0) return { usedWidth: xWidth, xs: [], ys: [] };

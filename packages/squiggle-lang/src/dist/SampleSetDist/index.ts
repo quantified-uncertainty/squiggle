@@ -85,6 +85,11 @@ export class SampleSetDist extends BaseDist {
     return E_A_Floats.mean(this.samples);
   }
 
+  // This should never have errors, so don't need to call SampleSetDist.make()
+  abs() {
+    return new SampleSetDist(this.samples.map(Math.abs));
+  }
+
   truncate(leftCutoff: number | undefined, rightCutoff: number | undefined) {
     let truncated = this.samples;
     if (leftCutoff !== undefined) {
@@ -157,12 +162,26 @@ sample everything.
     );
   }
 
+  range(
+    pWidth: number,
+    absolute = true
+  ): Result.result<{ low: number; high: number }, DistError> {
+    if (pWidth < 0 || pWidth > 1) {
+      return Result.Err(otherError("pWidth must be between 0 and 1"));
+    }
+    const dist = absolute ? this.abs() : this;
+    return Result.Ok({
+      low: dist.inv(0.5 - pWidth / 2),
+      high: dist.inv(0.5 + pWidth / 2),
+    });
+  }
+
   toPointSetDist(env: Env): Result.result<PointSetDist, DistError> {
-    const dists = samplesToPointSetDist(
-      this.samples,
-      env.xyPointLength,
-      undefined
-    );
+    const dists = samplesToPointSetDist({
+      samples: this.samples,
+      continuousOutputLength: env.xyPointLength,
+      kernelWidth: undefined,
+    });
 
     const result = buildMixedShape({
       continuous: dists.continuousDist
