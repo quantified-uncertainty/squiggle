@@ -16,7 +16,7 @@ export async function loadModelPageQuery(
     ModelPageQuery
   >(ModelPageQueryNode.params, {
     input,
-    forRelativeValues,
+    forRelativeValues: forRelativeValues ?? null, // important for relay caches
   });
 
   return query;
