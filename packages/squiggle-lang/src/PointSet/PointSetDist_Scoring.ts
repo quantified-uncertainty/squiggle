@@ -106,11 +106,11 @@ export const WithDistAnswer = {
     answer: AnyPointSet;
     prior: AnyPointSet;
   }): Result.result<number, OperationError> {
-    let kl1 = WithDistAnswer.sum({
+    const kl1 = WithDistAnswer.sum({
       estimate,
       answer,
     });
-    let kl2 = WithDistAnswer.sum({
+    const kl2 = WithDistAnswer.sum({
       estimate: prior,
       answer,
     });

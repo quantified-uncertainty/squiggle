@@ -43,7 +43,6 @@ export const kde = (
   //            === stepsInside + 2 * width
   //            === outputLength - 1
   const min = smin - xWidth;
-  const range = srange + 2 * xWidth;
 
   // On our discrete set of x values, each triangle is indistinguishable
   // from a sum of two triangles with peaks at the sample's two nearest

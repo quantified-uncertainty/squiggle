@@ -3,7 +3,9 @@ import { expect } from "@jest/globals";
 import { SqValue } from "../../src/index.js";
 
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace jest {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     interface Matchers<R> {
       toEqualSqValue(expected: SqValue): CustomMatcherResult;
     }

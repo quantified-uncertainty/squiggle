@@ -206,9 +206,10 @@ describe("project with import", () => {
 });
 
 describe("project with independent sources", () => {
-  let project = SqProject.create();
+  const project = SqProject.create();
   project.setSource("first", "1");
   project.setSource("second", "2");
+
   test("run order of first", () => {
     expect(project.getRunOrderFor("first")).toEqual(["first"]);
   });

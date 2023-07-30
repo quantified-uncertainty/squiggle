@@ -8,7 +8,7 @@
     "allowJs": true, // necessary for peggy parser
     "composite": true,
     "rootDir": "src",
-    "outDir": "./dist/esm",
+    "outDir": "./dist",
     "declarationMap": true,
     "sourceMap": true,
     "removeComments": true,

@@ -69,13 +69,10 @@ it("Quiet", async () => {
   expect(result.stdout).toBe("");
 });
 
-// via https://stackoverflow.com/a/6969486
-const escapeRegExp = (string: string) => {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
-};
 // via https://stackoverflow.com/a/29497680
 const stripAnsi = (string: string) =>
   string.replace(
+    // eslint-disable-next-line no-control-regex
     /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
     ""
   );

@@ -34,7 +34,7 @@ type Node = {
   location: LocationRange;
 };
 
-type N<T extends string, V extends {}> = Node & { type: T } & V;
+type N<T extends string, V extends object> = Node & { type: T } & V;
 
 type NodeBlock = N<
   "Block",
@@ -154,7 +154,7 @@ type NodeString = N<"String", { value: string }>;
 
 type NodeBoolean = N<"Boolean", { value: boolean }>;
 
-type NodeVoid = N<"Void", {}>;
+type NodeVoid = N<"Void", object>;
 
 export type ASTNode =
   | NodeArray

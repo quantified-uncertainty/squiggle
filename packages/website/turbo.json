@@ -1,0 +1,8 @@
+{
+  "extends": ["//"],
+  "pipeline": {
+    "lint": {
+      "dependsOn": ["@quri/squiggle-textmate-grammar#build"]
+    }
+  }
+}

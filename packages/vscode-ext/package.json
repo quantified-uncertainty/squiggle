@@ -134,12 +134,13 @@
     "package": "vsce package --no-dependencies"
   },
   "devDependencies": {
-    "@types/node": "^20.3.3",
-    "@types/vscode": "^1.79.0",
     "@quri/squiggle-components": "workspace:*",
     "@quri/squiggle-lang": "workspace:*",
     "@quri/squiggle-textmate-grammar": "workspace:*",
+    "@types/node": "^20.3.3",
+    "@types/vscode": "^1.79.0",
     "esbuild": "^0.18.17",
+    "eslint": "^8.44.0",
     "js-yaml": "^4.1.0",
     "prettier": "^2.8.8",
     "react": "^18.2.0",

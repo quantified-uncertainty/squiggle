@@ -12,7 +12,7 @@
   "scripts": {
     "build": "pnpm run build:peggy && pnpm run build:ts",
     "build:peggy": "peggy --cache --format es ./src/ast/peggyParser.peggy",
-    "build:ts": "tsc -b && echo '{\"type\": \"commonjs\"}' >dist/cjs/package.json",
+    "build:ts": "tsc -b",
     "start": "tsc -b -w",
     "clean": "rm -rf dist && rm -f src/ast/peggyParser.js",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
@@ -20,12 +20,13 @@
     "coverage:local": "pnpm run test --coverage && echo && echo 'Open ./coverage/lcov-report/index.html to see the detailed report.'",
     "coverage": "pnpm run test --coverage && codecov",
     "lint:prettier": "prettier --check .",
-    "lint": "pnpm run lint:prettier",
+    "lint": "pnpm run lint:prettier && pnpm eslint",
+    "eslint": "eslint src __tests__",
     "format:prettier": "prettier --write .",
     "format": "pnpm run format:prettier",
     "prepack": "pnpm run build && pnpm run test",
     "all": "pnpm run build && pnpm run test",
-    "cli": "node --experimental-vm-modules ./dist/esm/cli/index.js"
+    "cli": "node --experimental-vm-modules ./dist/cli/index.js"
   },
   "dependencies": {
     "@commander-js/extra-typings": "^11.0.0",
@@ -41,7 +42,10 @@
     "@types/jest": "^29.5.2",
     "@types/lodash": "^4.14.195",
     "@types/node": "^20.3.3",
+    "@typescript-eslint/eslint-plugin": "^5.61.0",
+    "@typescript-eslint/parser": "^5.61.0",
     "codecov": "^3.8.3",
+    "eslint": "^8.44.0",
     "fast-check": "^3.10.0",
     "jest": "^29.5.0",
     "peggy": "^3.0.2",
@@ -57,15 +61,12 @@
   ],
   "type": "module",
   "source": "./src/index.ts",
-  "module": "./dist/esm/index.js",
-  "main": "./dist/cjs/index.js",
+  "types": "./dist/index.d.ts",
+  "module": "./dist/index.js",
   "exports": {
-    ".": {
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js"
-    }
+    ".": "./dist/index.js"
   },
   "bin": {
-    "squiggle": "./dist/esm/cli/index.js"
+    "squiggle": "./dist/cli/index.js"
   }
 }

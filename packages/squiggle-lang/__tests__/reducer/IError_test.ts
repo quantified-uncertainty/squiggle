@@ -1,6 +1,6 @@
 import { IRuntimeError } from "../../src/errors/IError.js";
+import { REOther } from "../../src/errors/messages.js";
 import { FrameStack } from "../../src/reducer/frameStack.js";
-import { ErrorMessage, REOther } from "../../src/errors/messages.js";
 
 describe("ErrorMessage", () => {
   test("toString", () => {

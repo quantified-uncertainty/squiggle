@@ -74,7 +74,7 @@ describe("Continuous and discrete splits", () => {
     // Prepare segments of random-length equal numbers
     const segments: number[][] = [];
     let cur = 0;
-    for (let count of counts) {
+    for (const count of counts) {
       cur += 0.01 + Math.random(); // random() can produce 0
       const segment: number[] = [];
       for (let i = 0; i < count; i++) {

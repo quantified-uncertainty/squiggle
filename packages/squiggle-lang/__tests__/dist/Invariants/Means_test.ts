@@ -58,9 +58,9 @@ const testOperationMean = (
   dist2: BaseDist,
   { epsilon, env }: { epsilon: number; env: Env }
 ) => {
-  let received = unpackResult(distOp(dist1, dist2, { env })).mean();
+  const received = unpackResult(distOp(dist1, dist2, { env })).mean();
 
-  let expected = floatOp(dist1.mean(), dist2.mean());
+  const expected = floatOp(dist1.mean(), dist2.mean());
 
   expectErrorToBeBounded(received, expected, { epsilon });
 };
@@ -80,7 +80,7 @@ describe("Means are invariant", () => {
     ["subtraction", algebraicSubtract, (v1: number, v2: number) => v1 - v2],
     ["multiply", algebraicMultiply, (v1: number, v2: number) => v1 * v2],
   ])("for %s", (description, binaryOp, floatOp) => {
-    let testMean = (dist1: BaseDist, dist2: BaseDist) =>
+    const testMean = (dist1: BaseDist, dist2: BaseDist) =>
       testOperationMean(binaryOp, floatOp, dist1, dist2, { epsilon, env });
 
     test.each(distributions)(

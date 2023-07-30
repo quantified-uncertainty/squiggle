@@ -1,22 +1,14 @@
-import { PointMass } from "../dist/SymbolicDist.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
-  frArray,
   frAny,
-  frBool,
-  frDist,
-  frDistOrNumber,
-  frLambda,
-  frNumber,
-  frOptional,
+  frArray,
   frDict,
-  frScale,
+  frLambda,
+  frOptional,
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { REOther } from "../errors/messages.js";
-import * as Result from "../utility/result.js";
-import { LabeledDistribution, vTableChart } from "../value/index.js";
+import { vTableChart } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Table",

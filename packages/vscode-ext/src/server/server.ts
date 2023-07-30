@@ -1,18 +1,17 @@
 import {
-  createConnection,
-  TextDocuments,
   Diagnostic,
   DiagnosticSeverity,
-  ProposedFeatures,
   InitializeParams,
-  TextDocumentSyncKind,
   InitializeResult,
+  ProposedFeatures,
+  TextDocumentSyncKind,
+  TextDocuments,
+  createConnection,
 } from "vscode-languageserver/node";
 
 import { parse } from "@quri/squiggle-lang";
 
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { SqCompileError } from "@quri/squiggle-lang";
 
 // Documentation:
 // - https://code.visualstudio.com/api/language-extensions/language-server-extension-guide
@@ -20,7 +19,7 @@ import { SqCompileError } from "@quri/squiggle-lang";
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
-let connection = createConnection(ProposedFeatures.all);
+const connection = createConnection(ProposedFeatures.all);
 
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
 

@@ -85,7 +85,7 @@ describe("mixture", () => {
         )
       ).mean();
       const uniformMean = (low + high) / 2;
-      let lognormalMean = mu + sigma ** 2 / 2;
+      const lognormalMean = mu + sigma ** 2 / 2;
       expect(meanValue).toBeCloseTo(
         uniformWeight * uniformMean + lognormalWeight * lognormalMean,
         -1

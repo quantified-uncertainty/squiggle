@@ -493,9 +493,18 @@ importers:
       '@types/node':
         specifier: ^20.3.3
         version: 20.3.3
+      '@typescript-eslint/eslint-plugin':
+        specifier: ^5.61.0
+        version: 5.61.0(@typescript-eslint/parser@5.61.0)(eslint@8.44.0)(typescript@5.1.6)
+      '@typescript-eslint/parser':
+        specifier: ^5.61.0
+        version: 5.61.0(eslint@8.44.0)(typescript@5.1.6)
       codecov:
         specifier: ^3.8.3
         version: 3.8.3
+      eslint:
+        specifier: ^8.44.0
+        version: 8.44.0
       fast-check:
         specifier: ^3.10.0
         version: 3.10.0
@@ -663,6 +672,9 @@ importers:
       esbuild:
         specifier: ^0.18.17
         version: 0.18.17
+      eslint:
+        specifier: ^8.44.0
+        version: 8.44.0
       js-yaml:
         specifier: ^4.1.0
         version: 4.1.0

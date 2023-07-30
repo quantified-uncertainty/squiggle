@@ -1,14 +1,13 @@
-import * as Result from "../utility/result.js";
+import { REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
+  frDict,
   frNumber,
   frOptional,
-  frDict,
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { vScale } from "../value/index.js";
-import { REOther } from "../errors/messages.js";
 
 const maker = new FnFactory({
   nameSpace: "Scale",

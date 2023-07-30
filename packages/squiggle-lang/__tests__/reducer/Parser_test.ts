@@ -6,7 +6,7 @@ import "../helpers/toEqualSqValue.js";
 describe("Squiggle's parser is whitespace insensitive", () => {
   test("when assigning a distribution to a name and calling that name", async () => {
     // intersperse varying amounts of whitespace in a squiggle string
-    let squiggleString = (
+    const squiggleString = (
       a: string,
       b: string,
       c: string,
@@ -18,12 +18,12 @@ describe("Squiggle's parser is whitespace insensitive", () => {
     ): string => {
       return `theDist${a}=${b}beta(${c}4${d},${e}5e1)${f};${g}theDist${h}`;
     };
-    let squiggleOutput = await testRun(
+    const squiggleOutput = await testRun(
       squiggleString("", "", "", "", "", "", "", "")
     );
 
     // Add "\n" to this when multiline is introduced.
-    let whitespaceGen = () => {
+    const whitespaceGen = () => {
       return fc.constantFrom("", " ", "\t", "  ", "   ", "    ", "     ");
     };
 

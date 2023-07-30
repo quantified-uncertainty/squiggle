@@ -25,3 +25,4 @@ storybook-static
 dist
 
 /.vscode
+/*.tsbuildinfo

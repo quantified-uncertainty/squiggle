@@ -1,12 +1,6 @@
-import { ParseError } from "../ast/parse.js";
-import {
-  ErrorMessage,
-  REJavaScriptExn,
-  REOther,
-  RESyntaxError,
-} from "./messages.js";
-import { Frame, FrameStack } from "../reducer/frameStack.js";
 import { LocationRange } from "peggy";
+import { Frame, FrameStack } from "../reducer/frameStack.js";
+import { ErrorMessage, REJavaScriptExn, REOther } from "./messages.js";
 
 // "I" stands for "Internal", since we also have a more public SqError proxy
 export class IRuntimeError extends Error {

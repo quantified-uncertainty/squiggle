@@ -7,16 +7,20 @@
     // dev target for pre-push checks
     "build:ts": {
       "dependsOn": ["^build:ts"],
-      "outputs": ["dist/**"]
+      "outputs": ["dist/**", "*.tsbuildinfo"]
     },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", "build/**", ".next/**", "!.next/cache/**"]
+      "outputs": [
+        "dist/**",
+        "build/**",
+        ".next/**",
+        "*.tsbuildinfo",
+        "!.next/cache/**"
+      ]
     },
-    "format": {},
-    "lint": {
-      "dependsOn": ["^build", "@quri/prettier-plugin-squiggle#build"]
-    },
+    "lint": {},
+    "eslint": {},
     "test": {
       "dependsOn": ["build"]
     },
@@ -31,6 +35,9 @@
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "format": {
+      "cache": false
     }
   }
 }
