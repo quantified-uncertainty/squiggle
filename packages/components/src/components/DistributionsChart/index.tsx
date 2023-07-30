@@ -368,11 +368,6 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
     )
   );
 
-  let foo: {
-    name: string;
-    pointSet: SqPointSet;
-  }[] = [];
-
   if (!shapes.ok) {
     return (
       <ErrorAlert heading="Distribution Error">
