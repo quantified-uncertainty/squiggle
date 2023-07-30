@@ -33,6 +33,7 @@ import { SummaryTable } from "./SummaryTable.js";
 import { Point } from "../../lib/draw/types.js";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
 import { sqScaleToD3 } from "../../lib/d3/index.js";
+import { adjustPdfHeightToScale } from "./utils.js";
 
 export type DistributionsChartProps = {
   plot: SqDistributionsPlot;
@@ -49,7 +50,7 @@ const InnerDistributionsChart: FC<{
   plot: SqDistributionsPlot;
   showSamplesBar: boolean;
 }> = ({
-  shapes,
+  shapes: unAdjustedShapes,
   samples,
   plot,
   height: innerHeight,
@@ -59,6 +60,11 @@ const InnerDistributionsChart: FC<{
   const [discreteTooltip, setDiscreteTooltip] = useState<
     { value: number; probability: number } | undefined
   >();
+
+  const shapes = unAdjustedShapes.map(({ name, continuous, discrete }) => ({
+    name,
+    ...adjustPdfHeightToScale({ discrete, continuous }, plot.xScale),
+  }));
 
   const domain = shapes.flatMap((shape) =>
     shape.discrete.concat(shape.continuous)
