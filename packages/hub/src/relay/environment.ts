@@ -55,7 +55,7 @@ export async function networkFetch(
   return json;
 }
 
-export const responseCache: QueryResponseCache | null = IS_SERVER
+export const responseCache = IS_SERVER
   ? null
   : new QueryResponseCache({
       size: 100,
@@ -63,11 +63,11 @@ export const responseCache: QueryResponseCache | null = IS_SERVER
     });
 
 function createNetwork() {
-  async function fetchResponse(
+  const fetchResponse = async (
     params: RequestParameters,
     variables: Variables,
     cacheConfig: CacheConfig
-  ) {
+  ) => {
     const isQuery = params.operationKind === "query";
     const cacheKey = params.id ?? params.cacheID;
     const forceFetch = cacheConfig && cacheConfig.force;
@@ -79,7 +79,7 @@ function createNetwork() {
     }
 
     return networkFetch(params, variables);
-  }
+  };
 
   const network = Network.create(fetchResponse);
   return network;

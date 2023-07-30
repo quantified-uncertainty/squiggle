@@ -1,22 +1,19 @@
-import { FC, PropsWithChildren } from "react";
+"use client";
+import { FC } from "react";
+import { useFragment, usePreloadedQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { EntityLayout, EntityNode } from "@/components/EntityLayout";
-import { EntityTab } from "@/components/ui/EntityTab";
-import {
-  relativeValuesEditRoute,
-  relativeValuesRoute,
-  userRoute,
-} from "@/routes";
-import {
-  Cog8ToothIcon,
-  Dropdown,
-  DropdownMenu,
-  EditIcon,
-  ScaleIcon,
-} from "@quri/ui";
-import { useSession } from "next-auth/react";
-import { DeleteDefinitionAction } from "./DeleteRelativeValuesDefinitionAction";
+import { RelativeValuesDefinitionPage$key } from "@/__generated__/RelativeValuesDefinitionPage.graphql";
+import { H2 } from "@/components/ui/Headers";
+import { StyledLink } from "@/components/ui/StyledLink";
+import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
+import { RelativeValuesDefinitionRevision } from "@/relative-values/components/RelativeValuesDefinitionRevision";
+import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
+import { useSerializablePreloadedQuery } from "@/relay/useSerializablePreloadedQuery";
+import { modelForRelativeValuesExportRoute } from "@/routes";
+import QueryNode, {
+  RelativeValuesDefinitionPageQuery as QueryType,
+} from "@/__generated__/RelativeValuesDefinitionPageQuery.graphql";
 
 export const RelativeValuesDefinitionPageFragment = graphql`
   fragment RelativeValuesDefinitionPage on RelativeValuesDefinition {
@@ -43,6 +40,7 @@ export const RelativeValuesDefinitionPageFragment = graphql`
   }
 `;
 
+// Shared in this route and in /edit
 export const RelativeValuesDefinitionPageQuery = graphql`
   query RelativeValuesDefinitionPageQuery(
     $input: QueryRelativeValuesDefinitionInput!
@@ -62,59 +60,51 @@ export const RelativeValuesDefinitionPageQuery = graphql`
   }
 `;
 
-type Props = PropsWithChildren<{
-  username: string;
-  slug: string;
-}>;
+export const RelativeValuesDefinitionPage: FC<{
+  query: SerializablePreloadedQuery<typeof QueryNode, QueryType>;
+}> = ({ query }) => {
+  const queryRef = useSerializablePreloadedQuery(query);
+  const { relativeValuesDefinition: result } = usePreloadedQuery(
+    RelativeValuesDefinitionPageQuery,
+    queryRef
+  );
 
-export const RelativeValuesDefinitionPage: FC<Props> = ({
-  username,
-  slug,
-  children,
-}) => {
-  const { data: session } = useSession();
+  const definitionRef = extractFromGraphqlErrorUnion(
+    result,
+    "RelativeValuesDefinition"
+  );
 
-  const nodes: EntityNode[] = [
-    { slug: username, href: userRoute({ username }) },
-    { slug, href: relativeValuesRoute({ username, slug }), icon: ScaleIcon },
-  ];
+  const definition = useFragment<RelativeValuesDefinitionPage$key>(
+    RelativeValuesDefinitionPageFragment,
+    definitionRef
+  );
 
   return (
-    <EntityLayout
-      nodes={nodes}
-      headerChildren={
-        session?.user.username === username ? (
-          <>
-            <EntityTab.List>
-              <EntityTab.Link
-                name="View"
-                icon={ScaleIcon}
-                href={relativeValuesRoute({ username, slug })}
-              />
-              <EntityTab.Link
-                name="Edit"
-                icon={EditIcon}
-                href={relativeValuesEditRoute({ username, slug })}
-              />
-              <Dropdown
-                render={({ close }) => (
-                  <DropdownMenu>
-                    <DeleteDefinitionAction
-                      username={username}
-                      slug={slug}
-                      close={close}
-                    />
-                  </DropdownMenu>
-                )}
-              >
-                <EntityTab.Div name="Settings" icon={Cog8ToothIcon} />
-              </Dropdown>
-            </EntityTab.List>
-          </>
-        ) : null
-      }
-    >
-      {children}
-    </EntityLayout>
+    <div className="mt-4">
+      <div>
+        {definition.modelExports.length ? (
+          <section className="mb-4">
+            <H2>Implemented by:</H2>
+            <div className="flex flex-col">
+              {definition.modelExports.map((row) => (
+                <div key={row.id}>
+                  <StyledLink
+                    href={modelForRelativeValuesExportRoute({
+                      username: row.modelRevision.model.owner.username,
+                      slug: row.modelRevision.model.slug,
+                      variableName: row.variableName,
+                    })}
+                  >
+                    {row.modelRevision.model.owner.username}/
+                    {row.modelRevision.model.slug}
+                  </StyledLink>
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
+      </div>
+      <RelativeValuesDefinitionRevision dataRef={definition.currentRevision} />
+    </div>
   );
 };

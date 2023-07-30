@@ -6,7 +6,6 @@ import { graphql, usePaginationFragment } from "react-relay";
 import { FrontPageDefinitionList$key } from "@/__generated__/FrontPageDefinitionList.graphql";
 import { FrontPageDefinitionListPaginationQuery } from "@/__generated__/FrontPageDefinitionListPaginationQuery.graphql";
 import { RelativeValuesDefinitionList } from "@/relative-values/components/RelativeValuesDefinitionList";
-import { H2 } from "@/components/ui/Headers";
 
 const Fragment = graphql`
   fragment FrontPageDefinitionList on Query

@@ -1,17 +1,22 @@
+"use client";
+
 import { FC } from "react";
-import { useLazyLoadQuery } from "react-relay";
+import { usePreloadedQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { StyledLink } from "@/components/ui/StyledLink";
 import { commonDateFormat } from "@/lib/common";
+import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
+import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
+import { useSerializablePreloadedQuery } from "@/relay/useSerializablePreloadedQuery";
 import { modelRoute } from "@/routes";
-import { ModelRevisionViewQuery } from "@gen/ModelRevisionViewQuery.graphql";
+import QueryNode, {
+  ModelRevisionViewQuery,
+} from "@gen/ModelRevisionViewQuery.graphql";
 import { SquigglePlayground } from "@quri/squiggle-components";
 import { format } from "date-fns";
-import { notFound } from "next/navigation";
-import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 
-const ModelRevisionViewQuery = graphql`
+const Query = graphql`
   query ModelRevisionViewQuery($input: QueryModelInput!, $revisionId: ID!) {
     result: model(input: $input) {
       __typename
@@ -23,6 +28,10 @@ const ModelRevisionViewQuery = graphql`
       }
       ... on Model {
         id
+        slug
+        owner {
+          username
+        }
         ...FixModelUrlCasing
         revision(id: $revisionId) {
           createdAtTimestamp
@@ -38,24 +47,11 @@ const ModelRevisionViewQuery = graphql`
   }
 `;
 
-type Props = {
-  username: string;
-  slug: string;
-  revisionId: string;
-};
-
-export const ModelRevisionView: FC<Props> = ({
-  username,
-  slug,
-  revisionId,
-}) => {
-  const { result } = useLazyLoadQuery<ModelRevisionViewQuery>(
-    ModelRevisionViewQuery,
-    {
-      input: { ownerUsername: username, slug },
-      revisionId,
-    }
-  );
+export const ModelRevisionView: FC<{
+  query: SerializablePreloadedQuery<typeof QueryNode, ModelRevisionViewQuery>;
+}> = ({ query }) => {
+  const queryRef = useSerializablePreloadedQuery(query);
+  const { result } = usePreloadedQuery(Query, queryRef);
   const model = extractFromGraphqlErrorUnion(result, "Model");
 
   const typename = model.revision.content.__typename;
@@ -71,7 +67,12 @@ export const ModelRevisionView: FC<Props> = ({
             <span className="text-slate-500">Version from</span>{" "}
             {format(model.revision.createdAtTimestamp, commonDateFormat)}
           </div>
-          <StyledLink href={modelRoute({ username, slug })}>
+          <StyledLink
+            href={modelRoute({
+              username: model.owner.username,
+              slug: model.slug,
+            })}
+          >
             Go to latest version
           </StyledLink>
         </div>

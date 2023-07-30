@@ -4,13 +4,11 @@ import { FC, ReactElement } from "react";
 import { useFragment } from "react-relay";
 
 import {
+  CheckIcon,
   Dropdown,
   DropdownMenu,
   DropdownMenuHeader,
   DropdownMenuSeparator,
-  DropdownMenuAsyncActionItem,
-  RefreshIcon,
-  CheckIcon,
   XIcon,
 } from "@quri/ui";
 
@@ -19,8 +17,8 @@ import { useSession } from "next-auth/react";
 import { ModelRevision$data } from "@/__generated__/ModelRevision.graphql";
 import { RelativeValuesDefinitionRevision$key } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
 import { RelativeValuesDefinitionRevisionFragment } from "@/relative-values/components/RelativeValuesDefinitionRevision";
-import { ClearRelativeValuesCacheAction } from "./ClearRelativeValuesCacheAction";
 import { BuildRelativeValuesCacheAction } from "./BuildRelativeValuesCacheAction";
+import { ClearRelativeValuesCacheAction } from "./ClearRelativeValuesCacheAction";
 
 export const CacheMenu: FC<{
   revision: ModelRevision$data;

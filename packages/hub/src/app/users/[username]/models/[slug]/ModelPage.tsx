@@ -1,11 +1,12 @@
-import { useLazyLoadQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import {
+import ModelPageQueryNode, {
   ModelPageQuery,
-  ModelRevisionForRelativeValuesInput,
-  QueryModelInput,
 } from "@/__generated__/ModelPageQuery.graphql";
+
+import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
+import { useSerializablePreloadedQuery } from "@/relay/useSerializablePreloadedQuery";
+import { usePreloadedQuery } from "react-relay";
 
 export const ModelPageFragment = graphql`
   fragment ModelPage on Model
@@ -38,15 +39,14 @@ const Query = graphql`
   }
 `;
 
-// This is a common query used in multiple nested pages, but it should be de-duped by Next.js caching mechanisms.
-export function useModelPageQuery(
-  input: QueryModelInput,
-  forRelativeValues?: ModelRevisionForRelativeValuesInput
-) {
-  const { model: modelRef } = useLazyLoadQuery<ModelPageQuery>(Query, {
-    input,
-    forRelativeValues,
-  });
+export type PreloadedModelPageQuery = SerializablePreloadedQuery<
+  typeof ModelPageQueryNode,
+  ModelPageQuery
+>;
+
+export function useModelPageQuery(query: PreloadedModelPageQuery) {
+  const queryRef = useSerializablePreloadedQuery(query);
+  const { model: modelRef } = usePreloadedQuery(Query, queryRef);
 
   return modelRef;
 }

@@ -4,11 +4,10 @@ import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { graphql, useFragment, useMutation } from "react-relay";
 
 import {
-  SquigglePlayground,
   PlaygroundToolbarItem,
+  SquigglePlayground,
 } from "@quri/squiggle-components";
-import { Button, useToast } from "@quri/ui";
-import { LinkIcon, TriangleIcon } from "@quri/ui";
+import { Button, LinkIcon, useToast } from "@quri/ui";
 
 import {
   EditSquiggleSnippetModelMutation,

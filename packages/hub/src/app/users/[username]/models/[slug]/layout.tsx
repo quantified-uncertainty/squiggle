@@ -1,37 +1,36 @@
-"use client";
-
 import { ReactNode, Suspense } from "react";
 
-import { EntityLayout } from "@/components/EntityLayout";
-import { useParams } from "next/navigation";
-import { ModelLayout, entityNodes } from "./ModelLayout";
+import ModelLayoutQueryNode, {
+  ModelLayoutQuery,
+} from "@/__generated__/ModelLayoutQuery.graphql";
+import { loadSerializableQuery } from "@/relay/loadSerializableQuery";
+import { FallbackModelLayout } from "./FallbackLayout";
+import { ModelLayout } from "./ModelLayout";
 
-export default function Layout({
-  params,
-  children,
-}: {
+type Props = {
   params: { username: string; slug: string };
   children: ReactNode;
-}) {
-  const { variableName } = useParams();
+};
 
-  const fallback = (
-    <EntityLayout
-      nodes={entityNodes(params.username, params.slug, variableName)}
-      isFluid={true}
-      headerChildren={
-        <div
-          style={{
-            height: 49, // matches the height of real header content
-          }}
-        />
-      }
-    />
-  );
+async function LoadedLayout({ params, children }: Props) {
+  const query = await loadSerializableQuery<
+    typeof ModelLayoutQueryNode,
+    ModelLayoutQuery
+  >(ModelLayoutQueryNode.params, {
+    input: { ownerUsername: params.username, slug: params.slug },
+  });
 
+  return <ModelLayout query={query}>{children}</ModelLayout>;
+}
+
+export default function Layout({ params, children }: Props) {
   return (
-    <Suspense fallback={fallback}>
-      <ModelLayout {...params}>{children}</ModelLayout>
+    <Suspense
+      fallback={
+        <FallbackModelLayout username={params.username} slug={params.slug} />
+      }
+    >
+      <LoadedLayout params={params}>{children}</LoadedLayout>
     </Suspense>
   );
 }

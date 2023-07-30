@@ -7,7 +7,7 @@ import { fetchQuery, graphql } from "relay-runtime";
 
 import { ControlledFormField } from "@quri/ui";
 
-import { environment } from "@/graphql/relayEnvironment";
+import { environment } from "@/relay/environment";
 import {
   SelectRelativeValuesDefinitionQuery,
   SelectRelativeValuesDefinitionQuery$data,

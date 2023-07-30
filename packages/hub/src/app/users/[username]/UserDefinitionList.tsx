@@ -1,7 +1,4 @@
 import { UserDefinitionList$key } from "@/__generated__/UserDefinitionList.graphql";
-import { UserModelList$key } from "@/__generated__/UserModelList.graphql";
-import { H1 } from "@/components/ui/Headers";
-import { ModelList } from "@/models/components/ModelList";
 import { RelativeValuesDefinitionList } from "@/relative-values/components/RelativeValuesDefinitionList";
 import { FC } from "react";
 import { usePaginationFragment } from "react-relay";

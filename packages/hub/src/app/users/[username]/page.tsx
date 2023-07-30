@@ -1,15 +1,24 @@
 import { Metadata, ResolvingMetadata } from "next";
 import { UserView } from "./UserView";
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
+import { loadSerializableQuery } from "@/relay/loadSerializableQuery";
+import UserViewQueryNode, {
+  UserViewQuery,
+} from "@/__generated__/UserViewQuery.graphql";
 
 type Props = {
   params: { username: string };
 };
 
-export default function UserPage({ params }: Props) {
+export default async function UserPage({ params }: Props) {
+  const query = await loadSerializableQuery<
+    typeof UserViewQueryNode,
+    UserViewQuery
+  >(UserViewQueryNode.params, { username: params.username });
+
   return (
     <NarrowPageLayout>
-      <UserView username={params.username} />
+      <UserView query={query} />
     </NarrowPageLayout>
   );
 }
