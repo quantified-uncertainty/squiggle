@@ -10,7 +10,7 @@ import {
   scaleMultiply,
   scalePower,
 } from "../dist/distOperations/scaleOperations.js";
-import { ErrorMessage, REOther } from "../errors/messages.js";
+import { REOther } from "../errors/messages.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
@@ -23,7 +23,6 @@ import { FnFactory, unpackDistResult } from "../library/registry/helpers.js";
 import { ReducerContext } from "../reducer/context.js";
 import { Lambda } from "../reducer/lambda.js";
 import * as E_A from "../utility/E_A.js";
-import { Ok, result } from "../utility/result.js";
 import { Value, vArray, vNumber } from "../value/index.js";
 import { distResultToValue } from "./genericDist.js";
 
@@ -96,12 +95,12 @@ const integrateFunctionBetweenWithNumIntegrationPoints = (
     (i) => min + (i + 1) * innerPointIncrement
   );
   // Gotcha: makeBy goes from 0 to (n-1): <https://rescript-lang.org/docs/manual/latest/api/belt/array#makeby>
-  let ys = innerXs.map((x) => applyFunctionAtFloatToFloatOption(x));
+  const ys = innerXs.map((x) => applyFunctionAtFloatToFloatOption(x));
 
   /* Logging, with a worked example. */
   // Useful for understanding what is happening.
   // assuming min = 0, max = 10, numTotalPoints=10, results below:
-  let verbose = false;
+  const verbose = false;
   if (verbose) {
     console.log("numTotalPoints", numTotalPoints); // 5
     console.log("numInnerPoints", numInnerPoints); // 3

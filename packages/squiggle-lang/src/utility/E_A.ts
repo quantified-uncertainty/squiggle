@@ -1,5 +1,3 @@
-import { Ok, result } from "./result.js";
-
 export const zip = <A, B>(xs: A[], ys: B[]): [A, B][] => {
   // based on Belt.Array.zip
   const lenX = xs.length;
@@ -41,17 +39,6 @@ export const unzip = <A, B>(
     a2[i] = v2;
   }
   return [a1, a2];
-};
-
-export const toRanges = <T>(items: T[]): result<[T, T][], string> => {
-  if (items.length < 2) {
-    return {
-      ok: false,
-      value: "Must be at least 2 elements",
-    };
-  } else {
-    return Ok(zip(items, items.slice(1)));
-  }
 };
 
 export const pairwise = <T, R>(

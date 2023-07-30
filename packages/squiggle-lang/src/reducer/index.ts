@@ -22,9 +22,9 @@ import {
   VDomain,
   Value,
   vArray,
+  vDict,
   vDomain,
   vLambda,
-  vRecord,
   vVoid,
 } from "../value/index.js";
 import * as Context from "./context.js";
@@ -69,8 +69,8 @@ export const evaluate: ReducerFn = (expression, context) => {
       return evaluateProgram(expression.value, context, ast);
     case "Array":
       return evaluateArray(expression.value, context, ast);
-    case "Record":
-      return evaluateRecord(expression.value, context, ast);
+    case "Dict":
+      return evaluateDict(expression.value, context, ast);
     case "Assign":
       return evaluateAssign(expression.value, context, ast);
     case "ResolvedSymbol":
@@ -121,11 +121,7 @@ const evaluateProgram: SubReducerFn<"Program"> = (statements, context) => {
   return [currentValue, currentContext];
 };
 
-const evaluateArray: SubReducerFn<"Array"> = (
-  expressionValue,
-  context,
-  ast
-) => {
+const evaluateArray: SubReducerFn<"Array"> = (expressionValue, context) => {
   const values = expressionValue.map((element) => {
     const [value] = context.evaluate(element, context);
     return value;
@@ -134,18 +130,14 @@ const evaluateArray: SubReducerFn<"Array"> = (
   return [value, context];
 };
 
-const evaluateRecord: SubReducerFn<"Record"> = (
-  expressionValue,
-  context,
-  ast
-) => {
-  const value = vRecord(
+const evaluateDict: SubReducerFn<"Dict"> = (expressionValue, context, ast) => {
+  const value = vDict(
     ImmutableMap(
       expressionValue.map(([eKey, eValue]) => {
         const [key] = context.evaluate(eKey, context);
         if (key.type !== "String") {
           return throwFrom(
-            new REOther("Record keys must be strings"),
+            new REOther("Dict keys must be strings"),
             context,
             ast
           );
@@ -176,8 +168,7 @@ const evaluateAssign: SubReducerFn<"Assign"> = (expressionValue, context) => {
 
 const evaluateResolvedSymbol: SubReducerFn<"ResolvedSymbol"> = (
   expressionValue,
-  context,
-  ast
+  context
 ) => {
   const value = context.stack.get(expressionValue.offset);
   return [value, context];
@@ -265,13 +256,14 @@ const evaluateCall: SubReducerFn<"Call"> = (expressionValue, context, ast) => {
     return argValue;
   });
   switch (lambda.type) {
-    case "Lambda":
+    case "Lambda": {
       const result = lambda.value.callFrom(
         argValues,
         context,
         ast // we pass the ast of a current expression here, to put it on frameStack and in the resulting value
       );
       return [result, context];
+    }
     default:
       return throwFrom(new RENotAFunction(lambda.toString()), context, ast);
   }

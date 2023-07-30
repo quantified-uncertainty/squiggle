@@ -133,7 +133,7 @@ export const library = [
     examples: [`List.append([1,4],5)`],
     definitions: [
       makeDefinition([frArray(frAny), frAny], ([array, el]) => {
-        let newArr = [...array, el];
+        const newArr = [...array, el];
         return vArray(newArr);
       }),
     ],

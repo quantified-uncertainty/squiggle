@@ -270,10 +270,15 @@ unitIdentifier 'identifier'
 dollarIdentifier 'identifier'
   = ([\$_a-z]+[\$_a-z0-9]i*) { return h.nodeIdentifier(text(), location()); }
 
+escapeSeq 'escape sequence' 
+  = "\\"
+     @( esc:[^u]          { return h.parseEscapeSequence([esc], location(), error) }
+      / esc:("u" . . . .) { return h.parseEscapeSequence(esc, location(), error) }
+      )
 
-string 'string'
-  = characters:("'" @([^'])* "'") { return h.nodeString(characters.join(''), location()); }
-  / characters:('"' @([^"])* '"') { return h.nodeString(characters.join(''), location()); }
+string 'string' 
+  = "'" characters:(!("'" / "\\") @. / escapeSeq)* "'" { return h.nodeString(characters.join(""), location()); }
+  / '"' characters:(!('"' / "\\") @. / escapeSeq)* '"' { return h.nodeString(characters.join(""), location()); }
 
 number = number:float unit:unitIdentifier?
   {
@@ -329,7 +334,7 @@ valueConstructor
   = arrayConstructor
   / lambda
   / quotedInnerBlock
-  / recordConstructor
+  / dictConstructor
 
 lambda
   = '{' _nl '|' _nl args:functionParameters _nl '|' _nl statements:statementsList  finalExpression: (statementSeparator @expression)  _nl '}'
@@ -348,13 +353,13 @@ arrayConstructor 'array'
 
   array_elements = @expression|1.., commaSeparator| commaSeparator?
 
-recordConstructor 'record'
+dictConstructor 'dict'
   = '{' _nl '}'
-    { return h.nodeRecord([], location()); }
-  / '{' _nl args:array_recordEntries _nl '}'
-    { return h.nodeRecord(args, location()); }
+    { return h.nodeDict([], location()); }
+  / '{' _nl args:array_dictEntries _nl '}'
+    { return h.nodeDict(args, location()); }
 
-  array_recordEntries = @(keyValuePair / keyValueInherit)| 1.., commaSeparator|commaSeparator?
+  array_dictEntries = @(keyValuePair / keyValueInherit)| 1.., commaSeparator|commaSeparator?
 
   keyValueInherit
     = key:identifier

@@ -13,8 +13,8 @@ const makeTest = (params: {
 }) => {
   test(params.name, () =>
     expect(split(params.data, params.minWeight)).toEqual({
-      continuousPart: params.continuous,
-      discretePart: params.discrete,
+      continuousSamples: params.continuous,
+      discreteShape: params.discrete,
     })
   );
 };
@@ -58,13 +58,13 @@ describe("Continuous and discrete splits", () => {
   };
 
   test("split at count=10", () => {
-    expect(split(makeDuplicatedArray(10), 2).discretePart.xs.length).toEqual(
+    expect(split(makeDuplicatedArray(10), 2).discreteShape.xs.length).toEqual(
       10
     );
   });
 
   test("split at count=500", () => {
-    expect(split(makeDuplicatedArray(500), 2).discretePart.xs.length).toEqual(
+    expect(split(makeDuplicatedArray(500), 2).discreteShape.xs.length).toEqual(
       500
     );
   });
@@ -74,7 +74,7 @@ describe("Continuous and discrete splits", () => {
     // Prepare segments of random-length equal numbers
     const segments: number[][] = [];
     let cur = 0;
-    for (let count of counts) {
+    for (const count of counts) {
       cur += 0.01 + Math.random(); // random() can produce 0
       const segment: number[] = [];
       for (let i = 0; i < count; i++) {
@@ -89,8 +89,8 @@ describe("Continuous and discrete splits", () => {
     const contSegments = segments.filter((s) => s.length < weight);
     const discSegments = segments.filter((s) => s.length >= weight);
 
-    expect(result.continuousPart).toEqual(flatten(contSegments));
-    expect(result.discretePart).toEqual({
+    expect(result.continuousSamples).toEqual(flatten(contSegments));
+    expect(result.discreteShape).toEqual({
       xs: discSegments.map((s) => s[0]),
       ys: discSegments.map((s) => s.length),
     });

@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    // build settings
+    "module": "es2020",
+    "moduleResolution": "node16",
+    "target": "es2022",
+    "esModuleInterop": true,
+    "allowJs": true, // necessary for peggy parser
+    "composite": true,
+    "rootDir": "src",
+    "outDir": "./dist",
+    "declarationMap": true,
+    "sourceMap": true,
+    "removeComments": true,
+    "preserveConstEnums": true, // TODO - disable?
+    // type check settings
+    "strict": true,
+    "skipLibCheck": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true
+  },
+  "include": ["src/**/*"]
+}

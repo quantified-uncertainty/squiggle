@@ -12,7 +12,7 @@ describe("SqProject Tutorial", () => {
     const y = 2;
     const z = 3;
     /* Then we construct a source code to define those values */
-    let userCode = `
+    const userCode = `
       x = ${x}
       y = ${y}
       z = ${z}
@@ -23,7 +23,7 @@ describe("SqProject Tutorial", () => {
     project.setContinues("main", ["userCode"]);
     /* We can now run the project */
     await project.runAll();
-    let result = project.getResult("main");
+    const result = project.getResult("main");
     expect(toStringResult(result)).toBe("Ok(6)");
   });
 });

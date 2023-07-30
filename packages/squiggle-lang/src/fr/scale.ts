@@ -1,21 +1,20 @@
-import * as Result from "../utility/result.js";
+import { REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
+  frDict,
   frNumber,
   frOptional,
-  frRecord,
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { vScale } from "../value/index.js";
-import { REOther } from "../errors/messages.js";
 
 const maker = new FnFactory({
   nameSpace: "Scale",
   requiresNamespace: true,
 });
 
-const commonRecord = frRecord(
+const commonDict = frDict(
   ["min", frOptional(frNumber)],
   ["max", frOptional(frNumber)],
   ["tickFormat", frOptional(frString)]
@@ -35,7 +34,7 @@ export const library = [
     output: "Scale",
     examples: [`Scale.linear({ min: 3, max: 10 })`],
     definitions: [
-      makeDefinition([commonRecord], ([{ min, max, tickFormat }]) => {
+      makeDefinition([commonDict], ([{ min, max, tickFormat }]) => {
         checkMinMax(min, max);
 
         return vScale({
@@ -57,7 +56,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frRecord(
+          frDict(
             ["min", frOptional(frNumber)],
             ["max", frOptional(frNumber)],
             ["tickFormat", frOptional(frString)]
@@ -88,7 +87,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frRecord(
+          frDict(
             ["min", frOptional(frNumber)],
             ["max", frOptional(frNumber)],
             ["tickFormat", frOptional(frString)],
@@ -124,7 +123,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frRecord(
+          frDict(
             ["min", frOptional(frNumber)],
             ["max", frOptional(frNumber)],
             ["tickFormat", frOptional(frString)],

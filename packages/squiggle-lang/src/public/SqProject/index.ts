@@ -5,10 +5,10 @@ import { createContext } from "../../reducer/context.js";
 import { Bindings } from "../../reducer/stack.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
-import { Value, vRecord } from "../../value/index.js";
+import { Value, vDict } from "../../value/index.js";
 
 import { SqError, SqOtherError } from "../SqError.js";
-import { SqRecord } from "../SqValue/SqRecord.js";
+import { SqDict } from "../SqValue/SqDict.js";
 import { SqValue, wrapValue } from "../SqValue/index.js";
 import { SqValuePath } from "../SqValuePath.js";
 
@@ -203,7 +203,7 @@ export class SqProject {
       })
     );
 
-    const bindings = new SqRecord(
+    const bindings = new SqDict(
       internalOutputR.value.bindings,
       new SqValueContext({
         project: this,
@@ -226,7 +226,7 @@ export class SqProject {
     return Result.fmap(this.getOutput(sourceId), ({ result }) => result);
   }
 
-  getBindings(sourceId: string): Result.result<SqRecord, SqError> {
+  getBindings(sourceId: string): Result.result<SqDict, SqError> {
     return Result.fmap(this.getOutput(sourceId), ({ bindings }) => bindings);
   }
 
@@ -279,7 +279,7 @@ export class SqProject {
       // TODO - check for collisions?
       externals = externals.set(
         importBinding.variable,
-        vRecord(importOutputR.value.bindings)
+        vDict(importOutputR.value.bindings)
       );
     }
     return Result.Ok(externals);

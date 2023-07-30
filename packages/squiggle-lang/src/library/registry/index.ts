@@ -6,7 +6,6 @@ import { library as dangerLibrary } from "../../fr/danger.js";
 import { library as dateLibrary } from "../../fr/date.js";
 import { library as dictLibrary } from "../../fr/dict.js";
 import { library as distLibrary } from "../../fr/dist.js";
-import { library as fnLibrary } from "../../fr/fn.js";
 import { library as genericDistLibrary } from "../../fr/genericDist.js";
 import { library as listLibrary } from "../../fr/list.js";
 import { library as mathLibrary } from "../../fr/math.js";
@@ -34,7 +33,6 @@ const fnList: FRFunction[] = [
   ...dateLibrary,
   ...dictLibrary,
   ...distLibrary,
-  ...fnLibrary,
   ...genericDistLibrary,
   ...tableLibrary,
   ...listLibrary,

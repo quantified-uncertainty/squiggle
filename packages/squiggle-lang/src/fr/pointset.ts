@@ -10,7 +10,7 @@ import {
   frDist,
   frLambda,
   frNumber,
-  frRecord,
+  frDict,
 } from "../library/registry/frTypes.js";
 import {
   FnFactory,
@@ -95,7 +95,7 @@ export const library = [
     output: "Dist",
     definitions: [
       makeDefinition(
-        [frArray(frRecord(["x", frNumber], ["y", frNumber]))],
+        [frArray(frDict(["x", frNumber], ["y", frNumber]))],
         ([arr]) => {
           return vDist(
             new PointSetDist(
@@ -119,7 +119,7 @@ export const library = [
     output: "Dist",
     definitions: [
       makeDefinition(
-        [frArray(frRecord(["x", frNumber], ["y", frNumber]))],
+        [frArray(frDict(["x", frNumber], ["y", frNumber]))],
         ([arr]) => {
           return vDist(
             new PointSetDist(

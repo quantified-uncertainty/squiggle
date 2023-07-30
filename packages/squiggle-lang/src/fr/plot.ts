@@ -3,14 +3,13 @@ import { REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
-  frAny,
   frBool,
+  frDict,
   frDist,
   frDistOrNumber,
   frLambda,
   frNumber,
   frOptional,
-  frRecord,
   frScale,
   frString,
 } from "../library/registry/frTypes.js";
@@ -94,10 +93,10 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frRecord(
+          frDict(
             [
               "dists",
-              frArray(frRecord(["name", frString], ["value", frDistOrNumber])),
+              frArray(frDict(["name", frString], ["value", frDistOrNumber])),
             ],
             ["xScale", frOptional(frScale)],
             ["yScale", frOptional(frScale)],
@@ -106,7 +105,7 @@ export const library = [
           ),
         ],
         ([{ dists, xScale, yScale, title, showSummary }]) => {
-          let distributions: LabeledDistribution[] = [];
+          const distributions: LabeledDistribution[] = [];
           dists.forEach(({ name, value }) => {
             if (typeof value === "number") {
               const deltaResult = PointMass.make(value);
@@ -143,7 +142,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frRecord(
+          frDict(
             ["dist", frDist],
             ["xScale", frOptional(frScale)],
             ["yScale", frOptional(frScale)],
@@ -173,7 +172,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frRecord(
+          frDict(
             ["fn", frLambda],
             ["xScale", frOptional(frScale)],
             ["yScale", frOptional(frScale)],
@@ -202,20 +201,22 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frRecord(
+          frDict(
             ["fn", frLambda],
             ["xScale", frOptional(frScale)],
+            ["yScale", frOptional(frScale)],
             ["distXScale", frOptional(frScale)],
             ["points", frOptional(frNumber)]
           ),
         ],
-        ([{ fn, xScale, distXScale, points }]) => {
+        ([{ fn, xScale, yScale, distXScale, points }]) => {
           const domain = extractDomainFromOneArgFunction(fn);
           return vPlot({
             type: "distFn",
             fn,
             xScale: createScale(xScale, domain),
-            distXScale: distXScale ?? defaultScale,
+            yScale: yScale ?? defaultScale,
+            distXScale: distXScale ?? yScale ?? defaultScale,
             points: points ?? undefined,
           });
         }
@@ -226,13 +227,13 @@ export const library = [
     name: "scatter",
     output: "Plot",
     examples: [
-      `Plot.scatter({ xDist: 2 to 5, yDist: SampleSet.fromDist(-3 to 3) })`,
-      `Plot.scatter({ xDist: 2 to 5, yDist: SampleSet.fromDist(-3 to 3), xScale: Scale.symlog(), yScale: Scale.symlog() })`,
+      `Plot.scatter({ xDist: 2 to 5, yDist: SampleSet.fromDist(1 to 3) })`,
+      `Plot.scatter({ xDist: 2 to 5, yDist: SampleSet.fromDist(1 to 3), xScale: Scale.symlog(), yScale: Scale.symlog() })`,
     ],
     definitions: [
       makeDefinition(
         [
-          frRecord(
+          frDict(
             ["xDist", frDist],
             ["yDist", frDist],
             ["xScale", frOptional(frScale)],

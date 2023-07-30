@@ -13,10 +13,18 @@
   If the comparison is true, it finds the complete run with recursive doubling then a binary search,
   which skips over many elements for long runs.
 */
+type splitSamples = {
+  continuousSamples: number[];
+  discreteShape: {
+    xs: number[];
+    ys: number[];
+  };
+};
+
 export const splitContinuousAndDiscrete = (
   sortedArray: readonly number[],
   minDiscreteWeight: number
-) => {
+): splitSamples => {
   const continuous: number[] = [];
   const discreteCount: number[] = [];
   const discreteValue: number[] = [];
@@ -26,7 +34,7 @@ export const splitContinuousAndDiscrete = (
       `Minimum discrete weight must be an integer. Got ${minDiscreteWeight}`
     );
   }
-  if (minDiscreteWeight <= 1) {
+  if (minDiscreteWeight < 2) {
     // Weight of 1 is pointless because it indicates only discrete values,
     // and causes an infinite loop in the doubling search used here.
     throw new Error("Minimum discrete weight must be at least 2");
@@ -78,7 +86,45 @@ export const splitContinuousAndDiscrete = (
   continuous.push(...sortedArray.slice(i));
 
   return {
-    continuousPart: continuous,
-    discretePart: { xs: discreteValue, ys: discreteCount },
+    continuousSamples: continuous,
+    discreteShape: { xs: discreteValue, ys: discreteCount },
   };
+};
+
+/*
+  These two filter functions are meant to run after
+  splitContinuousAndDiscrete(). They assume that this data is sorted.
+*/
+
+// If all the continous samples are the same, changes them to be part of the discrete data
+export const continuousAreSameFilter = ({
+  continuousSamples,
+  discreteShape: { xs, ys },
+}: splitSamples): splitSamples => {
+  const allContinuousAreSame =
+    continuousSamples.length > 0 &&
+    continuousSamples[0] === continuousSamples[continuousSamples.length - 1];
+
+  if (allContinuousAreSame) {
+    return {
+      continuousSamples: [],
+      discreteShape: {
+        xs: [...xs, continuousSamples[0]],
+        ys: [...ys, continuousSamples.length],
+      },
+    };
+  }
+
+  return { continuousSamples, discreteShape: { xs, ys } };
+};
+
+// If there are fewer than N continuous samples, removes them
+export const minContinuousSamplesFilter = (
+  minSampleCount: number,
+  { continuousSamples, discreteShape }: splitSamples
+): splitSamples => {
+  if (continuousSamples.length < minSampleCount) {
+    return { continuousSamples: [], discreteShape };
+  }
+  return { continuousSamples, discreteShape };
 };

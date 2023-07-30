@@ -1,13 +1,13 @@
-import * as Result from "../../utility/result.js";
-import * as E_A_Floats from "../../utility/E_A_Floats.js";
-import * as E_A_Sorted from "../../utility/E_A_Sorted.js";
 import * as Discrete from "../../PointSet/Discrete.js";
 import * as XYShape from "../../XYShape.js";
+import * as E_A_Floats from "../../utility/E_A_Floats.js";
+import * as E_A_Sorted from "../../utility/E_A_Sorted.js";
+import * as Result from "../../utility/result.js";
 
-import { OperationError } from "../../operationError.js";
 import { ContinuousShape } from "../../PointSet/Continuous.js";
 import { DiscreteShape } from "../../PointSet/Discrete.js";
-import { PointSetDist } from "../PointSetDist.js";
+import { buildMixedShape } from "../../PointSet/Mixed.js";
+import { OperationError } from "../../operationError.js";
 import { BaseDist } from "../BaseDist.js";
 import {
   DistError,
@@ -15,9 +15,9 @@ import {
   otherError,
   tooFewSamplesForConversionToPointSet,
 } from "../DistError.js";
+import { PointSetDist } from "../PointSetDist.js";
 import { Env } from "../env.js";
 import { samplesToPointSetDist } from "./samplesToPointSetDist.js";
-import { buildMixedShape } from "../../PointSet/Mixed.js";
 
 export class SampleSetDist extends BaseDist {
   samples: readonly number[];
@@ -85,6 +85,11 @@ export class SampleSetDist extends BaseDist {
     return E_A_Floats.mean(this.samples);
   }
 
+  // This should never have errors, so don't need to call SampleSetDist.make()
+  abs() {
+    return new SampleSetDist(this.samples.map(Math.abs));
+  }
+
   truncate(leftCutoff: number | undefined, rightCutoff: number | undefined) {
     let truncated = this.samples;
     if (leftCutoff !== undefined) {
@@ -93,7 +98,10 @@ export class SampleSetDist extends BaseDist {
     if (rightCutoff !== undefined) {
       truncated = truncated.filter((x) => x <= rightCutoff);
     }
-    return SampleSetDist.make(truncated);
+    return Result.bind(
+      SampleSetDist.make(truncated),
+      (dist) => SampleSetDist.make(dist.sampleN(this.samples.length)) // resample to original length
+    );
   }
 
   // Randomly get one sample from the distribution
@@ -154,12 +162,26 @@ sample everything.
     );
   }
 
+  range(
+    pWidth: number,
+    absolute = true
+  ): Result.result<{ low: number; high: number }, DistError> {
+    if (pWidth < 0 || pWidth > 1) {
+      return Result.Err(otherError("pWidth must be between 0 and 1"));
+    }
+    const dist = absolute ? this.abs() : this;
+    return Result.Ok({
+      low: dist.inv(0.5 - pWidth / 2),
+      high: dist.inv(0.5 + pWidth / 2),
+    });
+  }
+
   toPointSetDist(env: Env): Result.result<PointSetDist, DistError> {
-    const dists = samplesToPointSetDist(
-      this.samples,
-      env.xyPointLength,
-      undefined
-    );
+    const dists = samplesToPointSetDist({
+      samples: this.samples,
+      continuousOutputLength: env.xyPointLength,
+      kernelWidth: undefined,
+    });
 
     const result = buildMixedShape({
       continuous: dists.continuousDist
@@ -181,46 +203,6 @@ sample everything.
     );
   }
 }
-
-export type SampleSetError =
-  | {
-      type: "TooFewSamples";
-    }
-  | {
-      type: "NonNumericInput";
-      value: string;
-    }
-  | {
-      type: "OperationError";
-      value: OperationError;
-    };
-
-export type PointsetConversionError = "TooFewSamplesForConversionToPointSet";
-
-export const Error = {
-  pointsetConversionErrorToString(err: PointsetConversionError) {
-    if (err === "TooFewSamplesForConversionToPointSet") {
-      return "Too Few Samples to convert to point set";
-    } else {
-      throw new global.Error("Internal error");
-    }
-  },
-
-  toString(err: SampleSetError) {
-    switch (err.type) {
-      case "TooFewSamples":
-        return "Too few samples when constructing sample set";
-      case "NonNumericInput":
-        return `Found a non-number in input: ${err.value}`;
-      case "OperationError":
-        return err.value.toString();
-      default:
-        throw new global.Error(
-          `Internal error: unexpected error type ${(err as any).type}`
-        );
-    }
-  },
-};
 
 const buildSampleSetFromFn = (
   n: number,
@@ -313,7 +295,7 @@ export const mixture = (
   const samples = discreteSamples.map((distIndexToChoose, index) => {
     const chosenDist = dists[distIndexToChoose];
     if (chosenDist.samples.length < index) {
-      throw new global.Error("Mixture unreachable error"); // https://github.com/quantified-uncertainty/squiggle/issues/1405
+      throw new Error("Mixture unreachable error"); // https://github.com/quantified-uncertainty/squiggle/issues/1405
     }
     return chosenDist.samples[index];
   });

@@ -8,9 +8,9 @@ describe("cumulative density function of a normal distribution", () => {
         fc.integer(),
         fc.integer({ min: 1 }),
         async (mean, stdev) => {
-          let threeStdevsAboveMean = mean + 3 * stdev;
-          let squiggleString = `cdf(Sym.normal(${mean}, ${stdev}), ${threeStdevsAboveMean})`;
-          let squiggleResult = await testRun(squiggleString);
+          const threeStdevsAboveMean = mean + 3 * stdev;
+          const squiggleString = `cdf(Sym.normal(${mean}, ${stdev}), ${threeStdevsAboveMean})`;
+          const squiggleResult = await testRun(squiggleString);
           expect(squiggleResult.value).toBeCloseTo(1);
         }
       )
@@ -23,9 +23,9 @@ describe("cumulative density function of a normal distribution", () => {
         fc.integer(),
         fc.integer({ min: 1 }),
         async (mean, stdev) => {
-          let threeStdevsBelowMean = mean - 3 * stdev;
-          let squiggleString = `cdf(Sym.normal(${mean}, ${stdev}), ${threeStdevsBelowMean})`;
-          let squiggleResult = await testRun(squiggleString);
+          const threeStdevsBelowMean = mean - 3 * stdev;
+          const squiggleString = `cdf(Sym.normal(${mean}, ${stdev}), ${threeStdevsBelowMean})`;
+          const squiggleResult = await testRun(squiggleString);
           expect(squiggleResult.value).toBeCloseTo(0);
         }
       )

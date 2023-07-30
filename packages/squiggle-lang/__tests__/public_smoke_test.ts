@@ -24,11 +24,11 @@ describe("Array", () => {
   });
 });
 
-describe("Record", () => {
-  test("Return record", async () => {
+describe("Dict", () => {
+  test("Return dict", async () => {
     expect((await testRun("{a:1}")).toString()).toEqual("{a: 1}");
   });
-  test("Inherit syntax for records", async () => {
+  test("Inherit syntax for dicts", async () => {
     expect((await testRun("a=1; {a, }")).toString()).toEqual("{a: 1}");
   });
 });
@@ -63,9 +63,9 @@ describe("Continues", () => {
 describe("Distribution", () => {
   //It's important that sampleCount is less than 9. If it's more, than that will create randomness
   //Also, note, the value should be created using makeSampleSetDist() later on.
-  let env = { sampleCount: 8, xyPointLength: 100 };
-  let dist1Samples = [3, 4, 5, 6, 6, 7, 10, 15, 30];
-  let dist1SampleCount = dist1Samples.length;
+  const env = { sampleCount: 8, xyPointLength: 100 };
+  const dist1Samples = [3, 4, 5, 6, 6, 7, 10, 15, 30];
+  const dist1SampleCount = dist1Samples.length;
 
   const buildDist = async (samples: number[]) => {
     const src = `SampleSet.fromList([${samples.join(",")}])`;

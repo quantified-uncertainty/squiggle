@@ -3,11 +3,7 @@ import * as distOperations from "../dist/distOperations/index.js";
 import { Env } from "../dist/env.js";
 import { REDistributionError, REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import {
-  frDist,
-  frDistOrNumber,
-  frRecord,
-} from "../library/registry/frTypes.js";
+import { frDist, frDistOrNumber, frDict } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { vNumber } from "../value/index.js";
 
@@ -64,7 +60,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frRecord(
+          frDict(
             ["estimate", frDist],
             ["answer", frDistOrNumber],
             ["prior", frDist]
@@ -91,7 +87,7 @@ export const library = [
         }
       ),
       makeDefinition(
-        [frRecord(["estimate", frDist], ["answer", frDistOrNumber])],
+        [frDict(["estimate", frDist], ["answer", frDistOrNumber])],
         ([{ estimate, answer }], context) => {
           if (answer instanceof BaseDist) {
             return runScoringDistAnswer(

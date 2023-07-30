@@ -27,18 +27,11 @@ export function random_sample(
   const sum = probPrefixSums[probPrefixSums.length - 1];
 
   for (let index = 0; index < size; index++) {
-    let selection = binsearchFirstGreater(probPrefixSums, Math.random() * sum);
+    const selection = binsearchFirstGreater(
+      probPrefixSums,
+      Math.random() * sum
+    );
     sample[index] = dist[selection];
   }
   return sample;
-}
-
-// Should be replaced by a lookup table if we ever use it too much
-// TODO - support fractional values through gamma function
-export function factorial(n: number): number {
-  let fct = 1;
-  while (n > 0) {
-    fct *= n--;
-  }
-  return fct;
 }

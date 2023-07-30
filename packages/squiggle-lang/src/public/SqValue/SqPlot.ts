@@ -1,8 +1,6 @@
 import { BaseDist } from "../../dist/BaseDist.js";
 import { SampleSetDist } from "../../dist/SampleSetDist/index.js";
 import { Env } from "../../dist/env.js";
-import { createContext } from "../../reducer/context.js";
-import { Lambda } from "../../reducer/lambda.js";
 import * as Result from "../../utility/result.js";
 import { Plot, vPlot } from "../../value/index.js";
 
@@ -15,7 +13,7 @@ import {
 } from "./SqDistribution/index.js";
 import { SqLambda } from "./SqLambda.js";
 import { SqScale, wrapScale } from "./SqScale.js";
-import { SqPlotValue, SqValue, wrapValue } from "./index.js";
+import { SqPlotValue } from "./index.js";
 
 type LabeledSqDistribution = {
   name?: string;
@@ -108,7 +106,7 @@ export class SqNumericFnPlot extends SqAbstractPlot<"numericFn"> {
   tag = "numericFn" as const;
   // Necessary because wrapped fn path is different based on whether this is a real `Plot.fn` or a wrapper in the components.
   // This can be removed when we get direct lambda evaluation back.
-  private createdProgrammatically: boolean = false;
+  private createdProgrammatically = false;
 
   static create({
     fn,
@@ -166,16 +164,18 @@ export class SqNumericFnPlot extends SqAbstractPlot<"numericFn"> {
 // TODO - mostly copy-pasted from SqNumericFnPlot, how can we avoid this?
 export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
   tag = "distFn" as const;
-  private createdProgrammatically: boolean = false;
+  private createdProgrammatically = false;
 
   static create({
     fn,
     xScale,
+    yScale,
     distXScale,
     points,
   }: {
     fn: SqLambda;
     xScale: SqScale;
+    yScale: SqScale;
     distXScale: SqScale;
     points?: number;
   }) {
@@ -184,6 +184,7 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
         type: "distFn",
         fn: fn._value,
         xScale: xScale._value,
+        yScale: yScale._value,
         distXScale: distXScale._value,
         points,
       },
@@ -206,6 +207,10 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
 
   get xScale() {
     return wrapScale(this._value.xScale);
+  }
+
+  get yScale() {
+    return wrapScale(this._value.yScale);
   }
 
   get distXScale() {

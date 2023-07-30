@@ -44,6 +44,21 @@ describe("Various SampleSet functions", () => {
   );
 });
 
+describe("truncate", () => {
+  testEvalToBe(
+    "normal(3, 5) -> truncateLeft(0) -> SampleSet.toList -> List.length",
+    "1000"
+  );
+  testEvalToBe(
+    "normal(3, 5) -> truncateRight(0) -> SampleSet.toList -> List.length",
+    "1000"
+  );
+  testEvalToBe(
+    "(2 to 5) -> truncateRight(0)",
+    "Error(Distribution Math Error: Too few samples when constructing sample set)"
+  );
+});
+
 // Beware: float64Array makes it appear in an infinite loop.
 const arrayGen = () =>
   fc
@@ -142,7 +157,7 @@ describe("cumulative density function", () => {
         const cdfValue = dist.cdf(env, x).value;
         const max = Math.max(...xs);
         if (x > max) {
-          let epsilon = (x - max) / x;
+          const epsilon = (x - max) / x;
           expect(cdfValue).toBeGreaterThan(1 * (1 - epsilon));
         } else if (typeof cdfValue == "number") {
           expect(Math.round(1e5 * cdfValue) / 1e5).toBeLessThanOrEqual(1);

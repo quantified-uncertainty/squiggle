@@ -411,8 +411,8 @@ export const combineAlgebraicallyWithDiscrete = (
   t2: DiscreteShape,
   discretePosition: AlgebraicShapeCombination.ArgumentPosition
 ): ContinuousShape => {
-  let t1s = t1.xyShape;
-  let t2s = t2.xyShape;
+  const t1s = t1.xyShape;
+  const t2s = t2.xyShape;
 
   if (XYShape.T.isEmpty(t1s) || XYShape.T.isEmpty(t2s)) {
     return empty();

@@ -1,5 +1,5 @@
 import { BaseDist } from "../dist/BaseDist.js";
-import { otherError } from "../dist/DistError.js";
+import { argumentError, otherError } from "../dist/DistError.js";
 import * as SampleSetDist from "../dist/SampleSetDist/index.js";
 import * as SymbolicDist from "../dist/SymbolicDist.js";
 import { REDistributionError, REOther } from "../errors/messages.js";
@@ -9,7 +9,7 @@ import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frDistOrNumber,
   frNumber,
-  frRecord,
+  frDict,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { OtherOperationError } from "../operationError.js";
@@ -99,9 +99,9 @@ function makeCIDist<K1 extends string, K2 extends string>(
   ) => Result.result<SymbolicDist.SymbolicDist, string>
 ) {
   return makeDefinition(
-    [frRecord([lowKey, frNumber], [highKey, frNumber])],
-    ([record], { environment }) =>
-      twoVarSample(record[lowKey], record[highKey], environment, fn)
+    [frDict([lowKey, frNumber], [highKey, frNumber])],
+    ([dict], { environment }) =>
+      twoVarSample(dict[lowKey], dict[highKey], environment, fn)
   );
 }
 
@@ -112,7 +112,7 @@ function makeMeanStdevDist(
   ) => Result.result<SymbolicDist.SymbolicDist, string>
 ) {
   return makeDefinition(
-    [frRecord(["mean", frNumber], ["stdev", frNumber])],
+    [frDict(["mean", frNumber], ["stdev", frNumber])],
     ([{ mean, stdev }], { environment }) =>
       twoVarSample(mean, stdev, environment, fn)
   );
@@ -242,21 +242,30 @@ export const library: FRFunction[] = [
       ),
     ],
   }),
-  ...["to", "credibleIntervalToDistribution"].map((name) =>
-    maker.make({
-      name,
-      examples: name === "to" ? ["5 to 10", "to(5,10)", "-5 to 5"] : [],
-      definitions: [
-        makeTwoArgsDist((low, high) =>
-          SymbolicDist.makeFromCredibleInterval({
-            low,
-            high,
-            probability: 0.9,
-          })
-        ),
-      ],
-    })
-  ),
+  maker.make({
+    name: "to",
+    examples: ["5 to 10", "to(5,10)"],
+    definitions: [
+      makeTwoArgsDist((low, high) => {
+        if (low >= high) {
+          throw new REDistributionError(
+            argumentError("Low value must be less than high value")
+          );
+        } else if (low <= 0 || high <= 0) {
+          throw new REDistributionError(
+            argumentError(
+              `The "to" function only accepts paramaters above 0. It's a shorthand for lognormal({p5:min, p95:max}), which is only valid with positive entries for then minimum and maximum. If you would like to use a normal distribution, which accepts values under 0, you can use it like this: normal({p5:${low}, p95:${high}}).`
+            )
+          );
+        }
+        return SymbolicDist.Lognormal.fromCredibleInterval({
+          low,
+          high,
+          probability: 0.9,
+        });
+      }),
+    ],
+  }),
   maker.make({
     name: "exponential",
     examples: ["exponential(2)"],

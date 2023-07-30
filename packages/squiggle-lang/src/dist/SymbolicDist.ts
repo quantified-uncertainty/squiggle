@@ -66,13 +66,14 @@ export abstract class SymbolicDist extends BaseDist {
     switch (xSelection) {
       case "Linear":
         return E_A_Floats.range(this.min(), this.max(), points);
-      case "ByWeight":
+      case "ByWeight": {
         const ys = E_A_Floats.range(
           SymbolicDist.minCdfValue,
           SymbolicDist.maxCdfValue,
           points
         );
         return ys.map((y) => this.inv(y));
+      }
       default:
         throw new Error(`Unknown xSelection value ${xSelection}`);
     }
@@ -833,7 +834,7 @@ export class Logistic extends SymbolicDist {
   }
   cdf(x: number) {
     if (this.scale === 0) return this.location < x ? 0 : 1; // should never happen, scale is strictly positive
-    let exp_delta = Math.pow(Math.E, -((x - this.location) / this.scale));
+    const exp_delta = Math.pow(Math.E, -((x - this.location) / this.scale));
     return 1 / (1 + exp_delta);
   }
   inv(p: number) {
@@ -1026,22 +1027,6 @@ export class PointMass extends SymbolicDist {
         })
       )
     );
-  }
-}
-
-export function makeFromCredibleInterval({
-  low,
-  high,
-  probability,
-}: {
-  low: number;
-  high: number;
-  probability: number;
-}): result<SymbolicDist, string> {
-  if (low <= 0) {
-    return Normal.fromCredibleInterval({ low, high, probability });
-  } else {
-    return Lognormal.fromCredibleInterval({ low, high, probability });
   }
 }
 

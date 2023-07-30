@@ -53,10 +53,12 @@ export const NumericFunctionChart: FC<Props> = ({
 
       const yScale = sqScaleToD3(plot.yScale);
       yScale.domain(
-        d3.extent(
-          functionImage.filter((d) => isFinite(d.y)),
-          (d) => d.y
-        ) as [number, number]
+        !!plot.yScale.min && !!plot.yScale.max
+          ? [plot.yScale.min, plot.yScale.max]
+          : (d3.extent(
+              functionImage.filter((d) => isFinite(d.y)),
+              (d) => d.y
+            ) as [number, number])
       );
 
       const { frame, padding } = drawAxes({

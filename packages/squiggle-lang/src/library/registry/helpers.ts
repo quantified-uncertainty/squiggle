@@ -2,7 +2,6 @@ import { BaseDist } from "../../dist/BaseDist.js";
 import { DistError } from "../../dist/DistError.js";
 import { Env } from "../../dist/env.js";
 import {
-  ErrorMessage,
   REDistributionError,
   REOperationError,
 } from "../../errors/messages.js";
@@ -10,7 +9,6 @@ import { SampleMapNeedsNtoNFunction } from "../../operationError.js";
 import { ReducerContext } from "../../reducer/context.js";
 import { Lambda } from "../../reducer/lambda.js";
 import * as Result from "../../utility/result.js";
-import { Ok } from "../../utility/result.js";
 import { Value, vBool, vDist, vNumber, vString } from "../../value/index.js";
 import { FRFunction } from "./core.js";
 import { FnDefinition, makeDefinition } from "./fnDefinition.js";

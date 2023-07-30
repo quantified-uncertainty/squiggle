@@ -1,12 +1,9 @@
 import { run, sq } from "../../src/index.js";
-import {
-  SqSampleSetDistribution,
-  SqSymbolicDistribution,
-} from "../../src/public/SqValue/SqDistribution/index.js";
+import { SqSampleSetDistribution } from "../../src/public/SqValue/SqDistribution/index.js";
 import { testRun } from "../helpers/helpers.js";
 
 describe("SqValue.asJS", () => {
-  test("SqRecord -> Map", async () => {
+  test("SqDict -> Map", async () => {
     const value = (
       await testRun('{ x: 5, y: [3, "foo", { dist: normal(5,2) } ] }')
     ).asJS();
@@ -14,7 +11,7 @@ describe("SqValue.asJS", () => {
     expect(value).toBeInstanceOf(Map);
   });
 
-  test("Record fields", async () => {
+  test("Dict fields", async () => {
     const value = (await testRun("{ x: 5 }")).asJS();
 
     expect((value as any).get("x")).toBe(5);
@@ -148,7 +145,7 @@ x = 5
     );
   });
 
-  test("Record fields", async () => {
+  test("Dict fields", async () => {
     const bindings = await runToBindings(sq`
 /** global */
 r = {
@@ -161,7 +158,7 @@ r = {
     `);
 
     const r = bindings.get("r");
-    if (r?.tag !== "Record") {
+    if (r?.tag !== "Dict") {
       throw new Error();
     }
 

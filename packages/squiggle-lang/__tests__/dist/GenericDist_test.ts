@@ -53,7 +53,7 @@ describe("toPointSet", () => {
 });
 
 describe("sparkline", () => {
-  let runTest = (
+  const runTest = (
     name: string,
     dist: BaseDist,
     expected: Result.result<string, DistError>

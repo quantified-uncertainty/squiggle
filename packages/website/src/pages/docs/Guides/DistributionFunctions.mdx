@@ -1,0 +1,216 @@
+---
+description: Various functions for operating on distributions
+---
+
+import { SquiggleEditor } from "@quri/squiggle-components";
+
+# Distribution Functions
+
+## Standard Operations
+
+Here are the ways we combine distributions.
+
+### Addition
+
+A horizontal right shift. The addition operation represents the distribution of the sum of
+the value of one random sample chosen from the first distribution and the value one random sample
+chosen from the second distribution.
+
+<SquiggleEditor
+  defaultCode={`dist1 = 1 to 10
+dist2 = triangular(1,2,3)
+dist1 + dist2`}
+/>
+
+### Subtraction
+
+A horizontal left shift. The subtraction operation represents the distribution of the value of
+one random sample chosen from the first distribution minus the value of one random sample chosen
+from the second distribution.
+
+<SquiggleEditor
+  defaultCode={`dist1 = 1 to 10
+dist2 = triangular(1,2,3)
+dist1 - dist2`}
+/>
+
+### Multiplication
+
+A proportional scaling. The multiplication operation represents the distribution of the multiplication of
+the value of one random sample chosen from the first distribution times the value one random sample
+chosen from the second distribution.
+
+<SquiggleEditor
+  defaultCode={`dist1 = 1 to 10
+dist2 = triangular(1,2,3)
+dist1 * dist2`}
+/>
+
+We also provide concatenation of two distributions as a syntax sugar for `*`
+
+<SquiggleEditor defaultCode="(0.1 to 1) * triangular(1,2,3)" />
+
+### Division
+
+A proportional scaling (normally a shrinking if the second distribution has values higher than 1).
+The division operation represents the distribution of the division of
+the value of one random sample chosen from the first distribution over the value one random sample
+chosen from the second distribution. If the second distribution has some values near zero, it
+tends to be particularly unstable.
+
+<SquiggleEditor
+  defaultCode={`dist1 = 1 to 10
+dist2 = triangular(1,2,3)
+dist1 / dist2`}
+/>
+
+### Exponentiation
+
+A projection over a contracted x-axis. The exponentiation operation represents the distribution of
+the exponentiation of the value of one random sample chosen from the first distribution to the power of
+the value one random sample chosen from the second distribution.
+
+<SquiggleEditor defaultCode={`(0.1 to 1) ^ beta(2, 3)`} />
+
+### The base `e` exponential
+
+<SquiggleEditor
+  defaultCode={`dist = triangular(1,2,3)
+exp(dist)`}
+/>
+
+### Logarithms
+
+A projection over a stretched x-axis.
+
+<SquiggleEditor
+  defaultCode={`dist = triangular(1,2,3)
+log(dist)`}
+/>
+
+<SquiggleEditor defaultCode={`log10(5 to 10)`} />
+
+Base `x`
+
+<SquiggleEditor defaultCode={`log(5 to 10, 2)`} />
+
+## Pointwise Operations
+
+### Pointwise addition
+
+For every point on the x-axis, operate the corresponding points in the y axis of the pdf.
+
+**Pointwise operations are done with `PointSetDist` internals rather than `SampleSetDist` internals**.
+
+<SquiggleEditor defaultCode={`Sym.lognormal({p5: 1, p95: 3}) .+ Sym.triangular(5,6,7)`} />
+
+### Pointwise multiplication
+
+<SquiggleEditor defaultCode={`Sym.lognormal({p5: 1, p95: 5}) .* Sym.uniform(1,8)`} />
+
+## Standard Functions
+
+### Probability density function
+
+The `pdf(dist, x)` function returns the density of a distribution at the
+given point x.
+
+<SquiggleEditor defaultCode="pdf(normal(0,1),0)" />
+
+#### Validity
+
+- `x` must be a scalar
+- `dist` must be a distribution
+
+### Cumulative density function
+
+The `cdf(dist, x)` gives the cumulative probability of the distribution
+or all values lower than x. It is the inverse of `quantile`.
+
+<SquiggleEditor defaultCode="cdf(normal(0,1),0)" />
+
+#### Validity
+
+- `x` must be a scalar
+- `dist` must be a distribution
+
+### Quantile
+
+The `quantile(dist, prob)` gives the value x for which the sum of the probability for all values
+lower than x is equal to prob. It is the inverse of `cdf`. In the literature, it
+is also known as the quantiles function. In the optional `summary statistics` panel which appears
+beneath distributions, the numbers beneath 5%, 10%, 25% etc are the quantiles of that distribution
+for those precentage values.
+
+<SquiggleEditor defaultCode="quantile(normal(0,1),0.5)" />
+
+#### Validity
+
+- `prob` must be a scalar (please only put it in `(0,1)`)
+- `dist` must be a distribution
+
+### Mean
+
+The `mean(distribution)` function gives the mean (expected value) of a distribution.
+
+<SquiggleEditor defaultCode="mean(normal(5, 10))" />
+
+### Sampling a distribution
+
+The `sample(distribution)` samples a given distribution.
+
+<SquiggleEditor defaultCode="sample(normal(0, 10))" />
+
+## Converting between distribution formats
+
+We can convert any distribution into the `SampleSet` format
+
+<SquiggleEditor defaultCode="SampleSet.fromDist(normal(5, 10))" />
+
+Or the `PointSet` format
+
+<SquiggleEditor defaultCode="PointSet.fromDist(normal(5, 10))" />
+
+#### Validity
+
+- Second argument to `SampleSet.fromDist` must be a number.
+
+## Normalization
+
+Some distribution operations (like horizontal shift) return an unnormalized distriibution.
+
+We provide a `normalize` function
+
+<SquiggleEditor defaultCode="normalize((0.1 to 1) + triangular(0.1, 1, 10))" />
+
+#### Validity - Input to `normalize` must be a dist
+
+We provide a predicate `isNormalized`, for when we have simple control flow
+
+<SquiggleEditor defaultCode="isNormalized((0.1 to 1) * triangular(0.1, 1, 10))" />
+
+#### Validity
+
+- Input to `isNormalized` must be a dist
+
+## `inspect`
+
+You may like to debug by right clicking your browser and using the _inspect_ functionality on the webpage, and viewing the _console_ tab. Then, wrap your squiggle output with `inspect` to log an internal representation.
+
+<SquiggleEditor defaultCode="inspect(SampleSet.fromDist(0.1 to 1))" />
+
+Save for a logging side effect, `inspect` does nothing to input and returns it.
+
+## Truncate
+
+You can cut off from the left
+
+<SquiggleEditor defaultCode="truncateLeft(Sym.normal(5,3), 6)" />
+
+You can cut off from the right
+
+<SquiggleEditor defaultCode="truncateRight(Sym.normal(5,3), 6)" />
+
+You can cut off from both sides
+
+<SquiggleEditor defaultCode="truncate(Sym.normal(5,3), 1, 7)" />

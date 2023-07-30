@@ -349,7 +349,10 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     }, [errors]);
 
     return (
-      <div style={{ minWidth: width, minHeight: height }} ref={editor}></div>
+      <div
+        style={{ minWidth: width, minHeight: height, fontSize: "13px" }}
+        ref={editor}
+      ></div>
     );
   }
 );

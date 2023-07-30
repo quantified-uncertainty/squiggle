@@ -1,0 +1,394 @@
+---
+description: Various ways to create Squiggle distributions
+---
+
+import { Callout, Tabs, Tab } from "nextra/components";
+
+import { SquiggleEditor } from "@quri/squiggle-components";
+
+# Distribution Creation
+
+## Normal
+
+```squiggle
+normal(mean: number, standardDeviation: number)
+normal({mean: number, standardDeviation: number})
+normal({p5: number, p95: number})
+normal({p10: number, p90: number})
+normal({p25: number, p75: number})
+```
+
+Creates a [normal distribution](https://en.wikipedia.org/wiki/Normal_distribution) with the given mean and standard deviation.
+
+<Tabs items={["normal(5,1)", "normal(1B, 1B)"]}>
+  <Tab>
+    <SquiggleEditor defaultCode="normal(5, 1)" />
+  </Tab>
+  <Tab>
+    <SquiggleEditor defaultCode="normal(1B, 1B)" />
+  </Tab>
+</Tabs>
+
+
+[Wikipedia](https://en.wikipedia.org/wiki/Normal_distribution)
+
+## Lognormal
+
+```squiggle
+lognormal(mu: number, sigma: number)
+lognormal({mean: number, standardDeviation: number})
+lognormal({p5: number, p95: number})
+lognormal({p10: number, p90: number})
+lognormal({p25: number, p75: number})
+```
+
+Creates a [lognormal distribution](https://en.wikipedia.org/wiki/Log-normal_distribution) with the given mu and sigma.
+
+`Mu` and `sigma` represent the mean and standard deviation of the normal which results when
+you take the log of our lognormal distribution. They can be difficult to directly reason about. However, there are several alternative ways to specify a lognormal distribution which are often easier to reason about.
+
+<SquiggleEditor defaultCode="lognormal(0, 0.7)" />
+
+
+[Wikipedia](https://en.wikipedia.org/wiki/Log-normal_distribution)
+
+<details>
+  <summary>
+    ❓ Understanding <bold>mu</bold> and <bold>sigma</bold>
+  </summary>  
+  The log of <code>lognormal(mu, sigma)</code> is a normal distribution with
+  mean <code>mu</code>
+  and standard deviation <code>sigma</code>. For example, these two distributions
+  are identical:  
+  <SquiggleEditor
+    defaultCode={`normalMean = 10
+normalStdDev = 2
+logOfLognormal = log(lognormal(normalMean, normalStdDev))
+[logOfLognormal, normal(normalMean, normalStdDev)]`}
+  />
+</details>
+
+## To
+
+```squiggle
+(5thPercentile: number) to (95thPercentile: number)
+to(5thPercentile: number, 95thPercentile: number)
+```
+
+The `to` function is an easy way to generate lognormal distributions using predicted _5th_ and _95th_ percentiles. It's the same as ``lognormal({p5, p95})``, but easier to write and read.
+
+<Tabs items={["5 to 10", "to(5, 10)", "1 to 10000"]}>
+  <Tab>
+    <SquiggleEditor defaultCode="5 to 10" />
+  </Tab>
+  <Tab>
+    <code>5 to 10</code> does the same thing as <code>to(5,10)</code>.
+    <SquiggleEditor defaultCode="to(5,10)" />
+  </Tab>
+  <Tab>
+    It's very easy to generate distributions with very long tails. These can be
+    impossible to see without changing view settings. (These settings are
+    available in the Playground, but not this smaller editor component)
+    <SquiggleEditor defaultCode="1 to 10000" />
+  </Tab>
+</Tabs>
+
+### Arguments
+
+- `5thPercentile`: number
+- `95thPercentile`: number, greater than `5thPercentile`
+
+<Callout>
+  **Tip**  
+  "<bold>To</bold>" is a great way to generate probability distributions very
+  quickly from your intuitions. It's easy to write and easy to read. It's
+  often a good place to begin an estimate.
+</Callout>
+
+<Callout type="warning">
+  **Caution**  
+  If you haven't tried [calibration
+  training](https://www.lesswrong.com/posts/LdFbx9oqtKAAwtKF3/list-of-probability-calibration-exercises),
+  you're likely to be overconfident. We recommend doing calibration training
+  to get a feel for what a 90 percent confident interval feels like.
+</Callout>
+
+## Uniform
+
+```squiggle
+uniform(low:number, high:number)
+```
+
+Creates a [uniform distribution](<https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)>) with the given low and high values.
+
+<SquiggleEditor defaultCode="uniform(3,7)" />
+
+### Arguments
+
+- `low`: Number
+- `high`: Number greater than `low`
+
+<Callout type="warning">
+  **Caution**  
+  While uniform distributions are very simple to understand, we find it rare
+  to find uncertainties that actually look like this. Before using a uniform
+  distribution, think hard about if you are really 100% confident that the
+  paramater will not wind up being just outside the stated boundaries.  
+  One good example of a uniform distribution uncertainty would be clear
+  physical limitations. You might have complete complete uncertainty on what
+  time of day an event will occur, but can say with 100% confidence it will
+  happen between the hours of 0:00 and 24:00.
+</Callout>
+
+## Point Mass
+
+```squiggle
+pointMass(value:number)
+```
+
+
+Creates a discrete distribution with all of its probability mass at point `value`.
+
+Few Squiggle users call the function `pointMass()` directly. Numbers are often (but not always) converted into point mass distributions automatically, when it is appropriate.
+
+For example, in the function `mixture(1,2,normal(5,2))`, the first two arguments will get converted into point mass distributions
+with values at 1 and 2. Therefore, this is the same as `mixture(pointMass(1),pointMass(2),pointMass(5,2))`.
+
+`pointMass()` distributions are currently the only discrete distributions accessible in Squiggle.
+
+<Tabs
+  items={[
+    "pointMass(3)",
+    "mixture(1,3,5)",
+    "normal(5,2) * 6",
+    "dotAdd(normal(5,2), 6)"
+  ]}
+>
+  <Tab>
+    <SquiggleEditor defaultCode="pointMass(3)" />
+  </Tab>
+  <Tab>
+    <SquiggleEditor defaultCode="mixture(1,3,5)" />
+  </Tab>
+  <Tab>
+    <SquiggleEditor defaultCode="normal(5,2) * 6" />
+  </Tab>
+  <Tab>
+    <SquiggleEditor defaultCode="dotAdd(normal(5,2), 6)" />
+  </Tab>
+</Tabs>
+
+### Arguments
+
+- `value`: Number
+
+## Beta
+
+```squiggle
+beta(alpha:number, beta:number)
+beta({mean: number, stdev: number})
+```
+
+Creates a [beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) with the given `alpha` and `beta` values. For a good summary of the beta distribution, see [this explanation](https://stats.stackexchange.com/a/47782) on Stack Overflow.
+
+<Tabs
+  items={[
+    "beta(10, 20)",
+    "beta(1000, 1000)",
+    "beta(1, 10)",
+    "beta(10, 1)",
+    "beta(0.8, 0.8)",
+    "beta({mean: 0.39, stdev: 0.1})",
+  ]}
+>
+  <Tab>
+    <SquiggleEditor defaultCode="Sym.beta(10,20)" />
+  </Tab>
+  <Tab>
+    <SquiggleEditor defaultCode="Sym.beta(1000, 2000)" />
+  </Tab>
+  <Tab>
+    <SquiggleEditor defaultCode="Sym.beta(1, 10)" />
+  </Tab>
+  <Tab>
+    <SquiggleEditor defaultCode="Sym.beta(10, 1)" />
+  </Tab>
+  <Tab>
+    <SquiggleEditor defaultCode="Sym.beta(0.8, 0.8)" />
+  </Tab>
+  <Tab>
+    <SquiggleEditor defaultCode="Sym.beta({mean: 0.39, stdev: 0.1})" />
+  </Tab>
+</Tabs>
+
+### Arguments
+
+- `alpha`: Number greater than zero
+- `beta`: Number greater than zero
+
+<Callout type="warning">
+  **Caution with small numbers**  
+  Squiggle struggles to show beta distributions when either alpha or beta are
+  below 1.0. This is because the tails at ~0.0 and ~1.0 are very high. Using a
+  log scale for the y-axis helps here.
+
+  <details>
+    <summary>Examples</summary>
+    <Tabs
+      items={[
+        "beta(0.3, 0.3)",
+        "beta(0.5, 0.5)",
+        "beta(0.8, 0.8)",
+        "beta(0.9, 0.9)",
+      ]}
+    >
+      <Tab>
+        <SquiggleEditor defaultCode="Sym.beta(0.3, 0.3)" />
+      </Tab>
+      <Tab>
+        <SquiggleEditor defaultCode="Sym.beta(0.5, 0.5)" />
+      </Tab>
+      <Tab>
+        <SquiggleEditor defaultCode="Sym.beta(.8,.8)" />
+      </Tab>
+      <Tab>
+        <SquiggleEditor defaultCode="Sym.beta(.9,.9)" />
+      </Tab>
+    </Tabs>
+  </details>
+</Callout>
+
+<SquiggleEditor defaultCode="Sym.triangular(1, 2, 4)" />
+
+## Mixture
+
+```squiggle
+mixture(...distributions: Distribution[], weights?: number[])
+mixture(distributions: Distribution[], weights?: number[])
+mx(...distributions: Distribution[], weights?: number[])
+mx(distributions: Distribution[], weights?: number[])
+```
+
+The `mixture` mixes combines multiple distributions to create a mixture. You can optionally pass in a list of proportional weights.
+
+<Tabs
+  items={[
+    "Simple",
+    "With Weights",
+    "With Continuous and Discrete Inputs",
+    "Array of Distributions Input",
+  ]}
+>
+  <Tab>
+    <SquiggleEditor defaultCode="mixture(1 to 2, 5 to 8, 9 to 10)" />
+  </Tab>
+  <Tab>
+    <SquiggleEditor defaultCode="mixture(1 to 2, 5 to 8, 9 to 10, [0.1, 0.1, 0.8])" />
+  </Tab>
+  <Tab>
+    <SquiggleEditor defaultCode="mixture(1 to 5, 8 to 10, 1, 3, 20)" />
+  </Tab>
+  <Tab>
+    <SquiggleEditor defaultCode="mx([1 to 2, exponential(1)], [1,1])" />
+  </Tab>
+</Tabs>
+
+### Arguments
+
+- `distributions`: A set of distributions or numbers, each passed as a paramater. Numbers will be converted into point mass distributions.
+- `weights`: An optional array of numbers, each representing the weight of its corresponding distribution. The weights will be re-scaled to add to `1.0`. If a weights array is provided, it must be the same length as the distribution paramaters.
+
+### Aliases
+
+- `mx`
+
+### Special Use Cases of Mixtures
+
+<details>
+  <summary>🕐 Zero or Continuous</summary>
+  One common reason to have mixtures of continous and discrete distributions is to handle the special case of 0.
+  Say I want to model the time I will spend on some upcoming project. I think I have an 80% chance of doing it.  
+
+  In this case, I have a 20% chance of spending 0 time with it. I might estimate my hours with,
+  <SquiggleEditor
+    defaultCode={`hours_the_project_will_take = 5 to 20
+chance_of_doing_anything = 0.8
+mx(hours_the_project_will_take, 0, [chance_of_doing_anything, 1 - chance_of_doing_anything])`}
+  />
+</details>
+
+<details>
+  <summary>🔒 Model Uncertainty Safeguarding</summary>
+  One technique several <a href="https://www.foretold.io/">Foretold.io</a> users used is to combine their main guess, with a
+  "just-in-case distribution". This latter distribution would have very low weight, but would be
+  very wide, just in case they were dramatically off for some weird reason.
+<SquiggleEditor
+  defaultCode={`forecast = 3 to 30
+chance_completely_wrong = 0.05
+forecast_if_completely_wrong = normal({p5:-100, p95:200})
+mx(forecast, forecast_if_completely_wrong, [1-chance_completely_wrong, chance_completely_wrong])`}
+/>
+
+</details>
+## SampleSet.fromList
+
+```squiggle
+SampleSet.fromList(samples:number[])
+```
+
+Creates a sample set distribution using an array of samples.  
+
+Samples are converted into PDFs automatically using [kernel density estimation](https://en.wikipedia.org/wiki/Kernel_density_estimation) and an approximated bandwidth. This is an approximation and can be error-prone.
+
+<SquiggleEditor defaultCode="SampleSet.fromList([1,2,3,4,6,5,5,5])" />
+
+### Arguments
+
+- `samples`: An array of at least 5 numbers.
+
+## PointSet.makeContinuous
+
+```squiggle
+PointSet.makeContinuous(points:{x: number, y: number})
+```
+
+Creates a continuous point set distribution using a list of points.
+
+<SquiggleEditor
+  defaultCode={`PointSet.makeContinuous([
+  { x: 0, y: 0.1 },
+  { x: 1, y: 0.2 },
+  { x: 2, y: 0.15 },
+  { x: 3, y: 0.1 }
+])`}
+/>
+
+<Callout type="warning">
+  **Caution!**  
+  Distributions made with ``makeContinuous`` are not automatically normalized. We suggest normalizing them manually using the ``normalize`` function.
+</Callout>
+
+### Arguments
+
+- `points`: An array of at least 3 coordinates.
+
+## PointSet.makeDiscrete
+
+```squiggle
+PointSet.makeDiscrete(points:{x: number, y: number})
+```
+
+Creates a discrete point set distribution using a list of points.
+
+<SquiggleEditor
+  defaultCode={`PointSet.makeDiscrete([
+  { x: 0, y: 0.2 },
+  { x: 1, y: 0.3 },
+  { x: 2, y: 0.4 },
+  { x: 3, y: 0.1 }
+])`}
+/>
+
+### Arguments
+
+- `points`: An array of at least 1 coordinate.

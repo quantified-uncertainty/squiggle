@@ -19,7 +19,7 @@ export const infixFunctions = {
   ">": "larger",
   ">=": "largerEq",
   "||": "or",
-  to: "credibleIntervalToDistribution",
+  to: "to",
 };
 export type InfixOperator = keyof typeof infixFunctions;
 
@@ -34,7 +34,7 @@ type Node = {
   location: LocationRange;
 };
 
-type N<T extends string, V extends {}> = Node & { type: T } & V;
+type N<T extends string, V extends object> = Node & { type: T } & V;
 
 type NodeBlock = N<
   "Block",
@@ -56,8 +56,8 @@ type NodeProgram = N<
 
 type NodeArray = N<"Array", { elements: ASTNode[] }>;
 
-type NodeRecord = N<
-  "Record",
+type NodeDict = N<
+  "Dict",
   {
     elements: NodeKeyValue[];
     // Static key -> node, for faster path resolution.
@@ -154,11 +154,11 @@ type NodeString = N<"String", { value: string }>;
 
 type NodeBoolean = N<"Boolean", { value: boolean }>;
 
-type NodeVoid = N<"Void", {}>;
+type NodeVoid = N<"Void", object>;
 
 export type ASTNode =
   | NodeArray
-  | NodeRecord
+  | NodeDict
   | NodeBlock
   | NodeProgram
   | NodeUnitValue
@@ -251,17 +251,17 @@ export function nodeArray(
 ): NodeArray {
   return { type: "Array", elements, location };
 }
-export function nodeRecord(
+export function nodeDict(
   elements: NodeKeyValue[],
   location: LocationRange
-): NodeRecord {
-  const symbols: NodeRecord["symbols"] = {};
+): NodeDict {
+  const symbols: NodeDict["symbols"] = {};
   for (const element of elements) {
     if (element.key.type === "String") {
       symbols[element.key.value] = element;
     }
   }
-  return { type: "Record", elements, symbols, location };
+  return { type: "Dict", elements, symbols, location };
 }
 
 export function nodeUnitValue(
@@ -410,4 +410,20 @@ export function blockComment(
     value: text,
     location,
   };
+}
+
+export function parseEscapeSequence(
+  char: string[],
+  location: LocationRange,
+  error: (e: any, l: LocationRange) => void
+) {
+  if (char[0] == "'") {
+    return "'";
+  } else {
+    try {
+      return JSON.parse(`"\\${char.join("")}"`);
+    } catch (e) {
+      error(`Incorrect escape sequence: ${char.join("")}`, location);
+    }
+  }
 }

@@ -1,0 +1,91 @@
+---
+description: "Squiggle Function Overview"
+---
+import { SquiggleEditor } from "@quri/squiggle-components";
+
+# Functions
+
+## Basic syntax
+
+<SquiggleEditor
+  defaultCode={`f(t) = normal(t^2, t^1.2+.01)
+f`}
+/>
+
+There's no `return` statement in Squiggle; function definitions are values.
+
+If you need to define local variables in functions, you can use blocks:
+
+<SquiggleEditor
+  defaultCode={`mul6(x) = {
+  t = x * 2
+  t * 3
+}`}
+/>
+
+## Anonymous Functions
+
+`f(x, y) = x * y` and `f = {|x, y| x * y}` are equivalent.
+
+Squiggle functions are values, and you can save them to variables, pass them to other functions as arguments, return functions from functions, and so on.
+
+<SquiggleEditor defaultCode={`{|t| normal(t^2, t^1.2+.01)}`} />
+
+## Function Visualization
+
+The Squiggle viewer can automatically visualize two types of functions, without manual plots:
+
+1. `(number) => number`
+2. `(number) => distribution`
+
+<SquiggleEditor defaultCode={`numberToNumber(x) = x * x
+numberToDist(x) = normal(x + 1, 3)
+otherFunction(x, y) = x + y`} />
+
+When Squiggle displays a single parameter function, it needs to select some range of parameter values.
+
+The default range is 0 to 10.
+
+You can manually set the the range in the following ways:
+
+- With `Plot.numericFn` or `Plot.distFn` plots, using the `xScale` parameter
+- Through the chart's settings in the UI (look for a gear icon next to the variable name)
+- With parameter annotations (explained below)
+
+## Parameter Annotations
+
+Function parameters can be annotated with _domains_.
+
+Examples:
+
+- `x: Number.rangeDomain({ min: 5, max: 10 })`
+- `x: [5, 10]` — shortcut for `Number.rangeDomain(...)`
+
+Annotations help to document possible values that can be passed as a parameter's value.
+
+Annotations will affect the parameter range used in the function's chart. For more control over function charts, you can use the [Plot module API](/docs/Api/Plot).
+
+Domains are checked on function calls; `f(x: [1,2]) = x; f(3)` will fail.
+
+We plan to support other kinds of domains in the future; for now, only numeric ranges are supported.
+
+<SquiggleEditor
+  defaultCode={`yearToValue(year: [2020, 2100]) = 1.04 ^ (year - 2020)`}
+/>
+
+### Annotation Reflection
+
+<SquiggleEditor
+  defaultCode={`f(x: [1, 20]) = x * x
+f.parameters[0]`}
+/>
+
+Domains and parameter names can be accessed by the `fn.parameters` property.
+
+For example, domains extracted with `.parameters` can be reused in annotations of other parameters:
+
+<SquiggleEditor
+  defaultCode={`f(x: [1, 20]) = x * x
+g(x: f.parameters[0].domain) = x * x * x
+`}
+/>

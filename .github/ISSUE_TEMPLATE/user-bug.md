@@ -1,7 +1,7 @@
 ---
 name: Bug reports for Squiggle users
 about: Rendering oddly? Is there a mathematical correctness problem?
-labels: "bug"
+labels: "Bug"
 ---
 
 # Description:

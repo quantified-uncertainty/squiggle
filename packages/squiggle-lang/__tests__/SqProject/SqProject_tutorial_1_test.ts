@@ -42,7 +42,7 @@ describe("SqProject Tutorial", () => {
       */
       const output = project.getOutput("main");
 
-      /* Output is a result<{ result: SqValue, bindings: SqRecord }, SqError> */
+      /* Output is a result<{ result: SqValue, bindings: SqDict }, SqError> */
 
       /* Let's display the result and bindings */
       expect(output).toBeOkOutput("3", "{}");

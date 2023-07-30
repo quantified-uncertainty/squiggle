@@ -71,7 +71,7 @@ describe("(Symbolic) mean", () => {
     [1e-16, 1e-16],
     [1e16, 1e16],
   ])("of beta distributions", (alpha, beta) => {
-    let meanValue = mkBeta(alpha, beta).mean();
+    const meanValue = mkBeta(alpha, beta).mean();
     expect(meanValue).toBeCloseTo(1 / (1 + beta / alpha)); // https://en.wikipedia.org/wiki/Beta_distribution#Mean
   });
 

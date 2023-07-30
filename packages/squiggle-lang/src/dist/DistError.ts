@@ -1,9 +1,9 @@
 import { OperationError } from "../operationError.js";
 import { XYShapeError } from "../XYShape.js";
 
-type SimpleError<S extends String> = { type: S };
-type StringError<S extends String> = { type: S; message: string };
-type ValueError<S extends String, V> = { type: S; value: V };
+type SimpleError<S extends string> = { type: S };
+type StringError<S extends string> = { type: S; message: string };
+type ValueError<S extends string, V> = { type: S; value: V };
 
 export type DistError =
   | SimpleError<"NotYetImplemented">
@@ -111,6 +111,6 @@ export const distErrorToString = (e: DistError): string => {
     case "TooFewSamples":
       return "Too few samples when constructing sample set";
     default:
-      return `Unknown error type ${(e as any).type}`;
+      return `Unknown error ${JSON.stringify(e satisfies never)}`;
   }
 };

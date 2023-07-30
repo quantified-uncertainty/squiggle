@@ -62,7 +62,7 @@ expression[@isGroup="Expression"] {
     | Boolean
     | Number
     | BlockExpr { "{" NonEmptyProgram "}" }
-    | RecordExpr { "{" commaSep1<
+    | DictExpr { "{" commaSep1<
         Entry { Field[@dynamicPrecedence=1] { expression } ~inheritAmbig ":" expression } 
         | InheritEntry { Field[@dynamicPrecedence=0] {identifier} ~inheritAmbig }
         > "}" }
@@ -118,6 +118,9 @@ as { kw<"as"> }
 @skip {} {
     BlockComment[@name="Comment"] { '/*' (blockCommentContent | blockCommentNewline)* blockCommentEnd }
 }
+@skip {} {
+    String { '"' (char|"'"|Escape {"\\"escape})* '"' | "'" (char|'"'|Escape {"\\"escape})* "'" }
+}
 
 @tokens {
 
@@ -126,7 +129,10 @@ as { kw<"as"> }
     newline[@export] { $[\n] }
     semicolon[@export] { $[;] }
 
-    String { '"' ![\"]* '"' | "'" ![\']* "'" }
+    char { $[\u{20}\u{21}\u{23}-\u{26}\u{28}-\u{5b}\u{5d}-\u{10ffff}] }
+    escape { $['"\\\/bfnrt] | "u" hex hex hex hex }
+    hex  { $[0-9a-fA-F] }
+    
     "{" "}" "[" "]" "(" ")" "," "." "="[@name="Equals"]
 
     ArithOp<expr> { expr }

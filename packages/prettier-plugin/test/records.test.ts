@@ -1,6 +1,6 @@
 import { format } from "./helpers.js";
 
-describe("records", () => {
+describe("dicts", () => {
   test("empty", async () => {
     expect(await format("{}")).toBe("{}");
   });

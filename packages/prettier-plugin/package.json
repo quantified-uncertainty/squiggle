@@ -1,6 +1,6 @@
 {
   "name": "@quri/prettier-plugin-squiggle",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "license": "MIT",
   "homepage": "https://squiggle-language.com",
   "author": "Quantified Uncertainty Research Institute",
@@ -25,18 +25,10 @@
   },
   "type": "module",
   "source": "./src/index.ts",
-  "exports": {
-    ".": {
-      "require": "./src/mock-cjs.cjs",
-      "import": "./dist/esm/src/index.js",
-      "types": "./dist/types/src/index.d.ts"
-    },
-    "./standalone": {
-      "import": "./dist/esm/src/standalone.js",
-      "types": "./dist/types/src/index.d.ts"
-    }
-  },
-  "main": "./src/mock-cjs.cjs",
   "module": "./dist/esm/src/index.js",
-  "types": "./dist/types/src/index.d.ts"
+  "types": "./dist/types/src/index.d.ts",
+  "exports": {
+    ".": "./dist/esm/src/index.js",
+    "./standalone": "./dist/esm/src/standalone.js"
+  }
 }

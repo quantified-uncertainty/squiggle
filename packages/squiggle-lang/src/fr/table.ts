@@ -1,22 +1,14 @@
-import { PointMass } from "../dist/SymbolicDist.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
-  frArray,
   frAny,
-  frBool,
-  frDist,
-  frDistOrNumber,
+  frArray,
+  frDict,
   frLambda,
-  frNumber,
   frOptional,
-  frRecord,
-  frScale,
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { REOther } from "../errors/messages.js";
-import * as Result from "../utility/result.js";
-import { LabeledDistribution, vTableChart } from "../value/index.js";
+import { vTableChart } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Table",
@@ -31,13 +23,11 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frRecord(
+          frDict(
             ["data", frArray(frAny)],
             [
               "columns",
-              frArray(
-                frRecord(["fn", frLambda], ["name", frOptional(frString)])
-              ),
+              frArray(frDict(["fn", frLambda], ["name", frOptional(frString)])),
             ]
           ),
         ],

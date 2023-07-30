@@ -45,7 +45,7 @@ export const isSorted = (t: number[]): boolean => {
 
 export const sum = (t: readonly number[]): number => {
   let sum = 0;
-  for (let v of t) {
+  for (const v of t) {
     sum += v;
   }
   return sum;
@@ -69,10 +69,6 @@ export const mean = (t: readonly number[]): number => {
 // based on jstat.geomean
 export const geomean = (t: readonly number[]): number => {
   return Math.pow(product(t), 1 / t.length);
-};
-
-export const percentile = (t: readonly number[]): number => {
-  return sum(t) / t.length; // TODO - handle empty arrays?
 };
 
 export const sort = (t: readonly number[]): number[] => {
