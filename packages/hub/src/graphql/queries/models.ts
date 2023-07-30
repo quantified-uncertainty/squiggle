@@ -12,7 +12,7 @@ builder.queryField("models", (t) =>
         prisma.model.findMany({
           ...query,
           orderBy: {
-            createdAt: "desc",
+            updatedAt: "desc",
           },
         }),
     },
