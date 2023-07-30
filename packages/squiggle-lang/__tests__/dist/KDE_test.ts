@@ -1,6 +1,5 @@
 import * as fc from "fast-check";
 import { kde } from "../../src/dist/SampleSetDist/kde.js";
-import { logKde } from "../../src/dist/SampleSetDist/logKde.js";
 import range from "lodash/range.js";
 import sum from "lodash/sum.js";
 import sumBy from "lodash/sumBy.js";

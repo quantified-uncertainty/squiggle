@@ -25,7 +25,7 @@ export const splitContinuousAndDiscrete = (
   sortedArray: readonly number[],
   minDiscreteWeight: number
 ): splitSamples => {
-  let continuous: number[] = [];
+  const continuous: number[] = [];
   const discreteCount: number[] = [];
   const discreteValue: number[] = [];
 

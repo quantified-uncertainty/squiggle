@@ -161,7 +161,7 @@ sample everything.
 
   range(
     pWidth: number,
-    absolute: boolean = true
+    absolute = true
   ): Result.result<{ low: number; high: number }, DistError> {
     if (pWidth < 0 || pWidth > 1) {
       return Result.Err(otherError("pWidth must be between 0 and 1"));

@@ -34,7 +34,7 @@ const shouldBeLogHeuristicFn = ({ p10, p90 }: { p10: number; p90: number }) => {
   return Math.log(p90 / p10) > 3;
 };
 
-let checkIfShouldBeLog = (samples: number[]): boolean => {
+const checkIfShouldBeLog = (samples: number[]): boolean => {
   const dist = SampleSetDist.make(samples);
   if (dist.ok) {
     const range = dist.value.range(0.8, true);
@@ -53,7 +53,7 @@ export const samplesToPointSetDist = ({
   logScale,
 }: SamplesToPointSetDistParams): ConversionResult => {
   const samples = E_A_Floats.sort(unsortedSamples);
-  let { continuousSamples, discreteShape } = minContinuousSamplesFilter(
+  const { continuousSamples, discreteShape } = minContinuousSamplesFilter(
     MIN_SAMPLES_FOR_KDE,
     continuousAreSameFilter(
       splitContinuousAndDiscrete(samples, minDiscreteToKeep(samples))
@@ -62,7 +62,7 @@ export const samplesToPointSetDist = ({
 
   // Some samples might have been filtered out in the filter stage above, so we need to adjust the weights accordingly.
   const relevantSampleLength = continuousSamples.length + sum(discreteShape.ys);
-  let pointWeight = 1 / relevantSampleLength;
+  const pointWeight = 1 / relevantSampleLength;
 
   let continuousDist;
   if (continuousSamples.length > 0) {
