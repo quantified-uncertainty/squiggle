@@ -1,5 +1,4 @@
 import * as d3 from "d3";
-import groupBy from "lodash/groupBy.js";
 import { FC, useCallback, useMemo, useRef } from "react";
 
 import {
@@ -25,10 +24,9 @@ import { Padding } from "../../lib/draw/types.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
 import { canvasClasses, unwrapOrFailure } from "../../lib/utility.js";
-import { ErrorAlert } from "../Alert.js";
 import { DistributionsChart } from "../DistributionsChart/index.js";
-import { NumberShower } from "../NumberShower.js";
 import { getFunctionImage } from "./utils.js";
+import { ImageErrors } from "./ImageErrors.js";
 
 type FunctionChart1DistProps = {
   plot: SqDistFnPlot;
@@ -55,27 +53,18 @@ type Datum = {
   50: number;
 };
 
-type Errors = {
-  [k: string]: {
-    x: number;
-    value: string;
-  }[];
-};
-
-const getPercentiles = ({
+function getPercentiles({
   plot,
   environment,
 }: {
   plot: SqDistFnPlot;
   environment: Env;
-}) => {
+}) {
   const { functionImage, errors } = getFunctionImage(plot, environment);
-
-  const groupedErrors: Errors = groupBy(errors, (x) => x.value);
 
   const data: Datum[] = functionImage.map(({ x, y: dist }) => {
     const res = {
-      x: x,
+      x,
       areas: Object.fromEntries(
         intervals.map(({ width }) => {
           const left = (1 - width) / 2;
@@ -95,8 +84,8 @@ const getPercentiles = ({
     return res;
   });
 
-  return { data, errors: groupedErrors };
-};
+  return { data, errors };
+}
 
 export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
   plot,
@@ -276,18 +265,7 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
         Chart for {plot.toString()}
       </canvas>
       {showChart}
-      {Object.entries(errors).map(([errorName, errorPoints]) => (
-        <ErrorAlert key={errorName} heading={errorName}>
-          Values:{" "}
-          {errorPoints
-            .map((r, i) => <NumberShower key={i} number={r.x} />)
-            .reduce((a, b) => (
-              <>
-                {a}, {b}
-              </>
-            ))}
-        </ErrorAlert>
-      ))}
+      <ImageErrors errors={errors} />
     </div>
   );
 };

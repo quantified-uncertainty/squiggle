@@ -10,9 +10,9 @@ import {
 } from "../../lib/draw/index.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
 import { canvasClasses } from "../../lib/utility.js";
-import { ErrorAlert } from "../Alert.js";
 import { getFunctionImage } from "./utils.js";
 import { sqScaleToD3 } from "../../lib/d3/index.js";
+import { ImageErrors } from "./ImageErrors.js";
 
 type Props = {
   plot: SqNumericFnPlot;
@@ -138,14 +138,7 @@ export const NumericFunctionChart: FC<Props> = ({
       <canvas ref={ref} className={canvasClasses}>
         Chart for {plot.toString()}
       </canvas>
-      <div className="space-y-1">
-        {errors.map(({ x, value }) => (
-          // TODO - group errors with identical value
-          <ErrorAlert key={x} heading={value}>
-            Error at point {x}
-          </ErrorAlert>
-        ))}
-      </div>
+      <ImageErrors errors={errors} />
     </div>
   );
 };
