@@ -54,27 +54,44 @@ builder.mutationField("updateRelativeValuesDefinition", (t) =>
         recommendedUnit: input.recommendedUnit,
       });
 
-      const revision = await prisma.relativeValuesDefinitionRevision.create({
-        data: {
-          title: input.title,
-          items: input.items,
-          clusters: input.clusters,
-          recommendedUnit: input.recommendedUnit,
-          definition: {
-            connect: {
-              slug_ownerId: {
-                slug: input.slug,
-                ownerId: owner.id,
+      const definition = await prisma.$transaction(async (tx) => {
+        const revision = await tx.relativeValuesDefinitionRevision.create({
+          data: {
+            title: input.title,
+            items: input.items,
+            clusters: input.clusters,
+            recommendedUnit: input.recommendedUnit,
+            definition: {
+              connect: {
+                slug_ownerId: {
+                  slug: input.slug,
+                  ownerId: owner.id,
+                },
               },
             },
           },
-        },
-        select: {
-          definition: true,
-        },
+          include: {
+            definition: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        });
+
+        const definition = await tx.relativeValuesDefinition.update({
+          where: {
+            id: revision.definition.id,
+          },
+          data: {
+            currentRevisionId: revision.id,
+          },
+        });
+
+        return definition;
       });
 
-      return { definition: revision.definition };
+      return { definition };
     },
   })
 );

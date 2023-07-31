@@ -32,11 +32,7 @@ builder.mutationField("buildRelativeValuesCache", (t) =>
           include: {
             definition: {
               select: {
-                revisions: {
-                  take: 1,
-                  orderBy: {
-                    createdAt: "desc",
-                  },
+                currentRevision: {
                   select: {
                     items: true,
                   },
@@ -80,7 +76,8 @@ builder.mutationField("buildRelativeValuesCache", (t) =>
       }
       const evaluator = evaluatorResult.value;
 
-      const definitionRevision = relativeValuesExport.definition.revisions[0];
+      const definitionRevision =
+        relativeValuesExport.definition.currentRevision;
       if (!definitionRevision) {
         throw new Error("Definition revision not found");
       }

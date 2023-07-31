@@ -10,7 +10,7 @@ import { EntityCard } from "@/components/EntityCard";
 const Fragment = graphql`
   fragment RelativeValuesDefinitionCard on RelativeValuesDefinition {
     slug
-    createdAtTimestamp
+    updatedAtTimestamp
     owner {
       username
       ...UserLinkFragment
@@ -32,7 +32,7 @@ export const RelativeValuesDefinitionCard: FC<Props> = ({
   return (
     <EntityCard
       icon={ScaleIcon}
-      createdAtTimestamp={definition.createdAtTimestamp}
+      updatedAtTimestamp={definition.updatedAtTimestamp}
       href={relativeValuesRoute({
         username: definition.owner.username,
         slug: definition.slug,

@@ -40,7 +40,7 @@ builder.queryField("relativeValuesDefinitions", (t) =>
             }),
           },
           orderBy: {
-            createdAt: "desc",
+            updatedAt: "desc",
           },
         }),
     },

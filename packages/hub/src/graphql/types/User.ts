@@ -13,7 +13,11 @@ export const User = builder.prismaNode("User", {
         return user.username;
       },
     }),
-    models: t.relatedConnection("models", { cursor: "id" }, ModelConnection),
+    models: t.relatedConnection(
+      "models",
+      { cursor: "id", query: () => ({ orderBy: { updatedAt: "desc" } }) },
+      ModelConnection
+    ),
     relativeValuesDefinitions: t.relatedConnection(
       "relativeValuesDefinitions",
       { cursor: "id" },
