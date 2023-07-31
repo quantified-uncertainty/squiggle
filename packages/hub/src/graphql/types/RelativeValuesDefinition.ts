@@ -33,6 +33,9 @@ export const RelativeValuesDefinition = builder.prismaNode(
       createdAtTimestamp: t.float({
         resolve: (obj) => obj.createdAt.getTime(),
       }),
+      updatedAtTimestamp: t.float({
+        resolve: (obj) => obj.updatedAt.getTime(),
+      }),
       modelExports: t.field({
         type: [RelativeValuesExport],
         resolve: async (definition) => {
@@ -60,19 +63,8 @@ export const RelativeValuesDefinition = builder.prismaNode(
           });
         },
       }),
-      currentRevision: t.field({
-        type: RelativeValuesDefinitionRevision,
-        select: (_, __, nestedSelection) => ({
-          revisions: nestedSelection({
-            take: 1,
-            orderBy: {
-              createdAt: "desc",
-            },
-          }),
-        }),
-        async resolve(obj) {
-          return obj.revisions[0];
-        },
+      currentRevision: t.relation("currentRevision", {
+        nullable: false,
       }),
     }),
   }

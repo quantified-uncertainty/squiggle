@@ -9,7 +9,7 @@ export type { EntityNode };
 
 type Props = {
   icon: FC<IconProps>;
-  createdAtTimestamp: number;
+  updatedAtTimestamp: number;
   href: string;
   showOwner: boolean;
   ownerName?: string;
@@ -19,7 +19,7 @@ type Props = {
 
 export const EntityCard: FC<Props> = ({
   icon: Icon,
-  createdAtTimestamp,
+  updatedAtTimestamp,
   href,
   showOwner,
   ownerName,
@@ -35,9 +35,9 @@ export const EntityCard: FC<Props> = ({
             {`${!!showOwner ? ownerName + "/" : ""}${slug}`}
           </div>
           <div className="text-xs text-slate-500">
-            Created{" "}
-            <time dateTime={new Date(createdAtTimestamp).toISOString()}>
-              {formatDistance(new Date(createdAtTimestamp), new Date(), {
+            Updated{" "}
+            <time dateTime={new Date(updatedAtTimestamp).toISOString()}>
+              {formatDistance(new Date(updatedAtTimestamp), new Date(), {
                 addSuffix: true,
               })}
             </time>

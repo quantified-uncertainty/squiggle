@@ -252,6 +252,7 @@ type RelativeValuesDefinition implements Node {
   modelExports: [RelativeValuesExport!]!
   owner: User!
   slug: String!
+  updatedAtTimestamp: Float!
 }
 
 type RelativeValuesDefinitionConnection {

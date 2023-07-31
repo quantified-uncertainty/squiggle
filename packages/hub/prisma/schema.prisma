@@ -135,9 +135,14 @@ model RelativeValuesDefinition {
   slug String @db.Citext
 
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   owner   User   @relation(fields: [ownerId], references: [id])
   ownerId String
+
+  // technically nullable, but won't ever be null in practice after the initial migration
+  currentRevision   RelativeValuesDefinitionRevision? @relation("CurrentRevision", fields: [currentRevisionId], references: [id])
+  currentRevisionId String?                           @unique
 
   revisions RelativeValuesDefinitionRevision[]
 
@@ -160,6 +165,9 @@ model RelativeValuesDefinitionRevision {
   items           Json
   clusters        Json
   recommendedUnit String?
+
+  // required by Prisma, but unused since `model` field should point at the same entity
+  relativeValuesDefinition RelativeValuesDefinition? @relation("CurrentRevision")
 }
 
 // Note that model revisions are associated with definitions (and not definition revisions).

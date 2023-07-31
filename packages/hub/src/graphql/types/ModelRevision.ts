@@ -22,7 +22,7 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
       resolve: (revision) => revision.createdAt.getTime(),
     }),
     // `relatedConnection` would be more principled, and in theory the number of variables with definitions could be high.
-    // But connection is harder to deal with on the UI side, since and we send all variables back on updates, so it doesn't make much sense there.
+    // But connection is harder to deal with on the UI side, and since we send all variables back on updates, so it doesn't make much sense there.
     relativeValuesExports: t.relation("relativeValuesExports"),
     model: t.relation("model"),
     content: t.field({
