@@ -20,13 +20,13 @@ import {
   drawCursorLines,
   primaryColor,
 } from "../../lib/draw/index.js";
-import { Padding } from "../../lib/draw/types.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
 import { canvasClasses, unwrapOrFailure } from "../../lib/utility.js";
 import { DistributionsChart } from "../DistributionsChart/index.js";
 import { getFunctionImage } from "./utils.js";
 import { ImageErrors } from "./ImageErrors.js";
+import { CartesianFrame } from "../../lib/draw/CartesianFrame.js";
 
 type FunctionChart1DistProps = {
   plot: SqDistFnPlot;
@@ -142,7 +142,7 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
     ({ context, width }: DrawContext) => {
       context.clearRect(0, 0, width, height);
 
-      const { padding, frame } = drawAxes({
+      const { frame } = drawAxes({
         suggestedPadding: { left: 20, right: 10, top: 10, bottom: 20 },
         xScale,
         yScale,
@@ -152,13 +152,13 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
         xTickFormat: plot.xScale.tickFormat,
       });
       d3ref.current = {
-        padding,
+        frame,
         xScale,
       };
 
-      // areas
       frame.enter();
 
+      // areas
       context.fillStyle = primaryColor;
       for (const { width, opacity } of intervals) {
         context.globalAlpha = opacity;
@@ -170,27 +170,23 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
           .context(context)(data);
         context.fill();
       }
-      context.globalAlpha = 1;
 
-      context.beginPath();
+      // central 50% line
+      context.globalAlpha = 1;
       context.strokeStyle = primaryColor;
       context.lineWidth = 2;
       context.imageSmoothingEnabled = true;
-
+      context.beginPath();
       d3
         .line<Datum>()
         .x((d) => xScale(d.x))
         .y((d) => yScale(d[50]))
         .context(context)(data);
-
       context.stroke();
+
       frame.exit();
 
-      if (
-        cursor &&
-        cursor.x >= padding.left &&
-        cursor.x - padding.left <= frame.width
-      ) {
+      if (cursor && frame.containsPoint(cursor)) {
         drawCursorLines({
           frame,
           cursor,
@@ -207,7 +203,7 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
   const { ref, width } = useCanvas({ height, init: initCursor, draw });
 
   const d3ref = useRef<{
-    padding: Padding;
+    frame: CartesianFrame;
     xScale: AnyChartScale;
   }>();
 
@@ -215,13 +211,10 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
     if (!d3ref.current || !cursor || width === undefined) {
       return;
     }
-    if (
-      cursor.x < d3ref.current.padding.left ||
-      cursor.x > width - d3ref.current.padding.right
-    ) {
+    if (!d3ref.current.frame.containsPoint(cursor)) {
       return;
     }
-    return d3ref.current.xScale.invert(cursor.x - d3ref.current.padding.left);
+    return d3ref.current.xScale.invert(cursor.x - d3ref.current.frame.x0);
   }, [cursor, width]);
 
   //TODO: This custom error handling is a bit hacky and should be improved.

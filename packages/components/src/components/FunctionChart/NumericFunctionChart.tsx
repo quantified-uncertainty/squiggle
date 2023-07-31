@@ -8,7 +8,11 @@ import {
   drawCursorLines,
   primaryColor,
 } from "../../lib/draw/index.js";
-import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
+import {
+  DrawContext,
+  useCanvas,
+  useCanvasCursor,
+} from "../../lib/hooks/index.js";
 import { canvasClasses } from "../../lib/utility.js";
 import { getFunctionImage } from "./utils.js";
 import { sqScaleToD3 } from "../../lib/d3/index.js";
@@ -34,13 +38,7 @@ export const NumericFunctionChart: FC<Props> = ({
   );
 
   const draw = useCallback(
-    ({
-      context,
-      width,
-    }: {
-      context: CanvasRenderingContext2D;
-      width: number;
-    }) => {
+    ({ context, width }: DrawContext) => {
       context.clearRect(0, 0, width, height);
 
       const xScale = sqScaleToD3(plot.xScale);
@@ -61,7 +59,7 @@ export const NumericFunctionChart: FC<Props> = ({
             ) as [number, number])
       );
 
-      const { frame, padding } = drawAxes({
+      const { frame } = drawAxes({
         context,
         width,
         height,
@@ -109,11 +107,7 @@ export const NumericFunctionChart: FC<Props> = ({
       context.stroke();
       frame.exit();
 
-      if (
-        cursor &&
-        cursor.x >= padding.left &&
-        cursor.x - padding.left <= frame.width
-      ) {
+      if (cursor && frame.containsPoint(cursor)) {
         drawCursorLines({
           frame,
           cursor,
