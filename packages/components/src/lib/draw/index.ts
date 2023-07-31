@@ -201,7 +201,9 @@ export function drawCursorLines({
   x: xLine,
   y: yLine,
 }: {
-  cursor: Point; // original canvas coordinates
+  // original canvas coordinates;
+  // can be undefined for convenience (this function will check if cursor lines are necessary)
+  cursor?: Point;
   frame: CartesianFrame;
   x?: {
     scale: d3.ScaleContinuousNumeric<number, number, never>;
@@ -212,6 +214,10 @@ export function drawCursorLines({
     format?: string | undefined;
   };
 }) {
+  if (!cursor || !frame.containsPoint(cursor)) {
+    return;
+  }
+
   const context = frame.context;
   frame.enter();
   const point = frame.translatedPoint(cursor);

@@ -56,7 +56,7 @@ export const ScatterChart: FC<Props> = ({ plot, height, environment }) => {
         ySqScale.max ?? d3.max(yDist.value.getSamples()) ?? 0,
       ]);
 
-      const { frame, padding } = drawAxes({
+      const { frame } = drawAxes({
         context,
         width,
         height,
@@ -86,26 +86,18 @@ export const ScatterChart: FC<Props> = ({ plot, height, environment }) => {
       context.globalAlpha = 1;
       frame.exit();
 
-      if (
-        cursor &&
-        cursor.x >= padding.left &&
-        cursor.x - padding.left <= frame.width &&
-        cursor.y >= padding.top &&
-        cursor.y - padding.top <= frame.height
-      ) {
-        drawCursorLines({
-          frame,
-          cursor,
-          x: {
-            scale: xScale,
-            format: xSqScale.tickFormat,
-          },
-          y: {
-            scale: yScale,
-            format: ySqScale.tickFormat,
-          },
-        });
-      }
+      drawCursorLines({
+        frame,
+        cursor,
+        x: {
+          scale: xScale,
+          format: xSqScale.tickFormat,
+        },
+        y: {
+          scale: yScale,
+          format: ySqScale.tickFormat,
+        },
+      });
     },
     [xDist, yDist, height, cursor, plot.xScale, plot.yScale]
   );

@@ -254,20 +254,14 @@ const InnerDistributionsChart: FC<{
         context.restore();
       }
 
-      if (
-        cursor &&
-        cursor.x >= padding.left &&
-        cursor.y - padding.left <= frame.width
-      ) {
-        drawCursorLines({
-          frame,
-          cursor,
-          x: {
-            scale: xScale,
-            format: plot.xScale.tickFormat,
-          },
-        });
-      }
+      drawCursorLines({
+        frame,
+        cursor,
+        x: {
+          scale: xScale,
+          format: plot.xScale.tickFormat,
+        },
+      });
     },
     [
       height,

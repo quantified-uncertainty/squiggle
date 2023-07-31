@@ -53,7 +53,7 @@ type Datum = {
   50: number;
 };
 
-function getPercentiles({
+function getDistPlotPercentiles({
   plot,
   environment,
 }: {
@@ -96,7 +96,7 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
   const { cursor, initCursor } = useCanvasCursor();
 
   const { data, errors } = useMemo(
-    () => getPercentiles({ plot, environment }),
+    () => getDistPlotPercentiles({ plot, environment }),
     [plot, environment]
   );
 
@@ -186,16 +186,14 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
 
       frame.exit();
 
-      if (cursor && frame.containsPoint(cursor)) {
-        drawCursorLines({
-          frame,
-          cursor,
-          x: {
-            scale: xScale,
-            format: plot.xScale.tickFormat,
-          },
-        });
-      }
+      drawCursorLines({
+        frame,
+        cursor,
+        x: {
+          scale: xScale,
+          format: plot.xScale.tickFormat,
+        },
+      });
     },
     [cursor, height, data, plot, xScale, yScale]
   );

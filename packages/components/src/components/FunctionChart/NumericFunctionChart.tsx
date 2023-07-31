@@ -107,20 +107,18 @@ export const NumericFunctionChart: FC<Props> = ({
       context.stroke();
       frame.exit();
 
-      if (cursor && frame.containsPoint(cursor)) {
-        drawCursorLines({
-          frame,
-          cursor,
-          x: {
-            scale: xScale,
-            format: plot.xScale.tickFormat,
-          },
-          y: {
-            scale: yScale,
-            format: plot.yScale.tickFormat,
-          },
-        });
-      }
+      drawCursorLines({
+        frame,
+        cursor,
+        x: {
+          scale: xScale,
+          format: plot.xScale.tickFormat,
+        },
+        y: {
+          scale: yScale,
+          format: plot.yScale.tickFormat,
+        },
+      });
     },
     [functionImage, height, cursor, plot]
   );
