@@ -3,7 +3,7 @@ import * as doc from "prettier/doc";
 
 import { type ASTCommentNode, type ASTNode } from "@quri/squiggle-lang";
 
-import { PrettierUtil, type SquiggleNode } from "./types.js";
+import { PatchedASTNode, PrettierUtil, type SquiggleNode } from "./types.js";
 
 const { group, indent, softline, line, hardline, join, ifBreak } = doc.builders;
 
@@ -29,7 +29,7 @@ function getNodePrecedence(node: SquiggleNode): number {
     "^": 9,
     ".^": 9,
     "->": 10,
-    "|>": 10,
+    "|>": 10, // removed since 0.8.0
   };
   switch (node.type) {
     case "Ternary":
@@ -118,15 +118,15 @@ export function createSquigglePrinter(
         case "Block":
           if (
             node.statements.length === 1 &&
-            !("comments" in node) &&
-            !("comments" in node.statements[0])
+            !node.comments &&
+            !(node.statements[0] as PatchedASTNode).comments
           ) {
             return typedPath(node).call(print, "statements", 0);
           }
           return group([
-            "{",
+            node.isLambdaBody ? "" : "{",
             indent([
-              line,
+              node.isLambdaBody ? "" : line,
               join(
                 hardline,
                 node.statements.map((statement, i) => [
@@ -141,8 +141,7 @@ export function createSquigglePrinter(
                 ])
               ),
             ]),
-            line,
-            "}",
+            node.isLambdaBody ? "" : [line, "}"],
           ]);
         case "LetStatement":
           return group([
@@ -268,6 +267,11 @@ export function createSquigglePrinter(
           ]);
         }
         case "Lambda":
+          if (node.body.type === "Block") {
+            (
+              node.body as Extract<PatchedASTNode, { type: "Block" }>
+            ).isLambdaBody = true;
+          }
           return group([
             "{",
             indent([

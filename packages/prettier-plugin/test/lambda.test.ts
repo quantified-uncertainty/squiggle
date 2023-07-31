@@ -43,4 +43,18 @@ describe("lambda", () => {
 `
     );
   });
+
+  test("unwrap body block", async () => {
+    expect(
+      await format(`f = {|x|
+  a = x
+  a
+}`)
+    ).toBe(`f = {
+  |x|
+  a = x
+  a
+}
+`);
+  });
 });
