@@ -35,7 +35,7 @@ interface DrawAxesParams {
 
 export function drawAxes({
   context,
-  xScale,
+  xScale, // will be mutated with the correct range
   yScale,
   suggestedPadding,
   width,

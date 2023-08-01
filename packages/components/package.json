@@ -17,6 +17,7 @@
     "@codemirror/state": "^6.2.1",
     "@codemirror/theme-one-dark": "^6.1.2",
     "@codemirror/view": "^6.15.3",
+    "@floating-ui/react": "^0.24.3",
     "@heroicons/react": "^1.0.6",
     "@hookform/resolvers": "^3.1.1",
     "@quri/prettier-plugin-squiggle": "workspace:*",

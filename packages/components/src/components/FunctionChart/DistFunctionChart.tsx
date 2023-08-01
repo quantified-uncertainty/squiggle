@@ -1,3 +1,10 @@
+import {
+  FloatingPortal,
+  flip,
+  offset,
+  size,
+  useFloating,
+} from "@floating-ui/react";
 import * as d3 from "d3";
 import { FC, useCallback, useMemo, useRef } from "react";
 
@@ -14,8 +21,8 @@ import {
 } from "@quri/squiggle-lang";
 
 import { sqScaleToD3 } from "../../lib/d3/index.js";
+import { CartesianFrame } from "../../lib/draw/CartesianFrame.js";
 import {
-  AnyChartScale,
   drawAxes,
   drawCursorLines,
   primaryColor,
@@ -24,9 +31,8 @@ import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
 import { canvasClasses, unwrapOrFailure } from "../../lib/utility.js";
 import { DistributionsChart } from "../DistributionsChart/index.js";
-import { getFunctionImage } from "./utils.js";
 import { ImageErrors } from "./ImageErrors.js";
-import { CartesianFrame } from "../../lib/draw/CartesianFrame.js";
+import { getFunctionImage } from "./utils.js";
 
 type FunctionChart1DistProps = {
   plot: SqDistFnPlot;
@@ -87,11 +93,7 @@ function getDistPlotPercentiles({
   return { data, errors };
 }
 
-export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
-  plot,
-  environment,
-  height: innerHeight,
-}) => {
+function useDrawDistFunctionChart({ plot, environment, height: innerHeight }) {
   const height = innerHeight + 30; // consider paddings, should match suggestedPadding below
   const { cursor, initCursor } = useCanvasCursor();
 
@@ -100,6 +102,7 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
     [plot, environment]
   );
 
+  // note that range is not set on these scales yet (it happens in `draw()` below), so you can't use these in the following code
   const { xScale, yScale } = useMemo(() => {
     const xScale = sqScaleToD3(plot.xScale);
     xScale.domain(
@@ -151,10 +154,7 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
         context,
         xTickFormat: plot.xScale.tickFormat,
       });
-      d3ref.current = {
-        frame,
-        xScale,
-      };
+      d3ref.current = { frame, xScale };
 
       frame.enter();
 
@@ -202,60 +202,113 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
 
   const d3ref = useRef<{
     frame: CartesianFrame;
-    xScale: AnyChartScale;
+    xScale: d3.ScaleContinuousNumeric<number, number, never>;
   }>();
 
-  const mouseX: number | undefined = useMemo(() => {
-    if (!d3ref.current || !cursor || width === undefined) {
-      return;
-    }
-    if (!d3ref.current.frame.containsPoint(cursor)) {
+  // Convert canvas coordinates to plot coordniates
+  const cursorX: number | undefined = useMemo(() => {
+    if (
+      !d3ref.current ||
+      !cursor ||
+      !width ||
+      !d3ref.current.frame.containsPoint(cursor)
+    ) {
       return;
     }
     return d3ref.current.xScale.invert(cursor.x - d3ref.current.frame.x0);
-  }, [cursor, width]);
+  }, [
+    cursor,
+    width, // it's important to depend on `width` because `draw()` mutates `xScale` which is located in d3ref, so it's not reactive directly
+  ]);
+
+  return {
+    ref,
+    cursorX,
+    xScale,
+    errors,
+  };
+}
+
+export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
+  plot,
+  environment,
+  height,
+}) => {
+  const {
+    ref: canvasRef,
+    xScale,
+    cursorX,
+    errors,
+  } = useDrawDistFunctionChart({
+    plot,
+    environment,
+    height,
+  });
 
   //TODO: This custom error handling is a bit hacky and should be improved.
-  const mouseItem: result<SqValue, SqError> | undefined = useMemo(() => {
-    return mouseX
-      ? plot.fn.call([SqNumberValue.create(mouseX)], environment)
+  const valueAtCursor: result<SqValue, SqError> | undefined = useMemo(() => {
+    return cursorX !== undefined
+      ? plot.fn.call([SqNumberValue.create(cursorX)], environment)
       : {
           ok: false,
-          value: new SqOtherError(
-            "Hover x-coordinate returned NaN. Expected a number."
-          ),
+          value: new SqOtherError("No cursor"), // will never happen, we check `cursorX` later
         };
-  }, [plot.fn, environment, mouseX]);
+  }, [plot.fn, environment, cursorX]);
 
-  const showChart =
-    mouseItem &&
-    mouseItem.ok &&
-    mouseItem.value.tag === "Dist" &&
-    d3ref.current &&
-    mouseX !== undefined ? (
+  const distChartAtCursor =
+    valueAtCursor?.ok &&
+    valueAtCursor.value.tag === "Dist" &&
+    cursorX !== undefined ? (
       <DistributionsChart
         plot={SqDistributionsPlot.create({
-          distribution: mouseItem.value.value,
+          distribution: valueAtCursor.value.value,
           xScale: plot.distXScale,
           yScale: SqLinearScale.create(),
           showSummary: false,
           // TODO - use an original function name? it could be obtained with `pathToShortName`, but there's a corner case for arrays.
-          title: `f(${d3ref.current.xScale.tickFormat(
+          title: `f(${xScale.tickFormat(
             undefined,
             plot.xScale.tickFormat
-          )(mouseX)})`,
+          )(cursorX)})`,
         })}
         environment={environment}
         height={50}
       />
     ) : null; // TODO - show error
 
+  const { x, y, strategy, refs } = useFloating({
+    open: distChartAtCursor !== null,
+    placement: "bottom-start",
+    middleware: [offset(4), flip()],
+  });
+
+  const renderChartAtCursor = () => {
+    return (
+      <FloatingPortal>
+        <div
+          ref={refs.setFloating}
+          className="z-30 rounded-md bg-white shadow-md border"
+          style={{
+            position: strategy,
+            top: y ?? 0,
+            left: x ?? 0,
+            width: refs.reference.current?.getBoundingClientRect().width,
+          }}
+        >
+          {distChartAtCursor}
+        </div>
+      </FloatingPortal>
+    );
+  };
+
   return (
     <div className="flex flex-col items-stretch">
-      <canvas ref={ref} className={canvasClasses}>
-        Chart for {plot.toString()}
-      </canvas>
-      {showChart}
+      <div ref={refs.setReference}>
+        <canvas ref={canvasRef} className={canvasClasses}>
+          Chart for {plot.toString()}
+        </canvas>
+      </div>
+      {distChartAtCursor && renderChartAtCursor()}
       <ImageErrors errors={errors} />
     </div>
   );
