@@ -16,7 +16,7 @@
     "@codemirror/search": "^6.5.0",
     "@codemirror/state": "^6.2.1",
     "@codemirror/theme-one-dark": "^6.1.2",
-    "@codemirror/view": "^6.15.3",
+    "@codemirror/view": "^6.16.0",
     "@floating-ui/react": "^0.24.3",
     "@heroicons/react": "^1.0.6",
     "@hookform/resolvers": "^3.1.1",
