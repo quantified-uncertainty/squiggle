@@ -137,7 +137,7 @@
     "@quri/squiggle-components": "workspace:*",
     "@quri/squiggle-lang": "workspace:*",
     "@quri/squiggle-textmate-grammar": "workspace:*",
-    "@types/node": "^20.3.3",
+    "@types/node": "^20.4.5",
     "@types/vscode": "^1.79.0",
     "esbuild": "^0.18.17",
     "eslint": "^8.44.0",
