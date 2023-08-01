@@ -44,6 +44,38 @@ export function getValueToRender({
   );
 }
 
+export function getResultVariables({
+  output,
+}: SquiggleOutput): result<SqValue, SqError> {
+  return resultMap(output, (value) => value.bindings.asValue());
+}
+
+export function getResultValue({
+  output,
+}: SquiggleOutput): result<SqValue, SqError> | undefined {
+  if (output.ok) {
+    console.log("HI", output.value.result.tag);
+    return output.value.result.tag !== "Void"
+      ? { ok: true, value: output.value.result }
+      : undefined;
+  } else {
+    return output;
+  }
+}
+// return resultMap(output, (value) => {
+//   if (value.result.tag === "Void") {
+//     return value.bindings.asValue();
+//   } else {
+//     return SqDict.makeFromPair(
+//       [
+//         ["variables", value.bindings.asValue()],
+//         ["result", value.result],
+//       ],
+//       value.result.context
+//     ).asValue();
+//   }
+// });
+
 export function getErrors(result: SquiggleOutput["output"]) {
   if (!result.ok) {
     return [result.value];

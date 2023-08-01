@@ -28,7 +28,7 @@ export function pathAsString(path: SqValuePath) {
 export function pathToShortName(path: SqValuePath): string | undefined {
   const isTopLevel = path.items.length === 0;
   if (isTopLevel && path.root === "result") {
-    return undefined; // We don't want to show in this case.
+    return "Result";
   } else if (isTopLevel && path.root === "bindings") {
     return "Variables";
   } else {

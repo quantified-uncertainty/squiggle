@@ -22,7 +22,8 @@ export type SquiggleViewerHandle = {
 
 export type SquiggleViewerProps = {
   /** The output of squiggle's run */
-  result: result<SqValue, SqError>;
+  resultVariables: result<SqValue, SqError>;
+  resultItem: result<SqValue, SqError> | undefined;
   localSettingsEnabled?: boolean;
   editor?: CodeEditorHandle;
 } & PartialPlaygroundSettings;
@@ -42,7 +43,7 @@ const SquiggleViewerBody: FC<{ value: SqValue }> = ({ value }) => {
 const SquiggleViewerOuter = forwardRef<
   SquiggleViewerHandle,
   SquiggleViewerProps
->(function SquiggleViewerOuter({ result }, ref) {
+>(function SquiggleViewerOuter({ resultVariables, resultItem }, ref) {
   const { focused, dispatch } = useViewerContext();
   const unfocus = useUnfocus();
   const focus = useFocus();
@@ -83,10 +84,19 @@ const SquiggleViewerOuter = forwardRef<
   return (
     <div>
       {focusedNavigation}
-      {result.ok ? (
-        <SquiggleViewerBody value={result.value} />
+      {resultVariables.ok ? (
+        <div>
+          <SquiggleViewerBody value={resultVariables.value} />
+          {resultItem &&
+            resultItem.ok &&
+            (!focused || focused.root !== "bindings") && (
+              <div className="mt-3">
+                <SquiggleViewerBody value={resultItem.value} />
+              </div>
+            )}
+        </div>
       ) : (
-        <SquiggleErrorAlert error={result.value} />
+        <SquiggleErrorAlert error={resultVariables.value} />
       )}
     </div>
   );
@@ -95,7 +105,8 @@ const SquiggleViewerOuter = forwardRef<
 const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
   function SquiggleViewer(
     {
-      result,
+      resultVariables,
+      resultItem,
       localSettingsEnabled = false,
       editor,
       ...partialPlaygroundSettings
@@ -108,7 +119,11 @@ const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
         localSettingsEnabled={localSettingsEnabled}
         editor={editor}
       >
-        <SquiggleViewerOuter result={result} ref={ref} />
+        <SquiggleViewerOuter
+          resultVariables={resultVariables}
+          resultItem={resultItem}
+          ref={ref}
+        />
       </ViewerProvider>
     );
   }

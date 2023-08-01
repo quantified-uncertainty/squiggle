@@ -2,7 +2,11 @@ import { forwardRef } from "react";
 
 import { SquiggleViewer } from "../index.js";
 import { SquiggleOutput } from "../lib/hooks/useSquiggle.js";
-import { getValueToRender } from "../lib/utility.js";
+import {
+  getValueToRender,
+  getResultVariables,
+  getResultValue,
+} from "../lib/utility.js";
 import { CodeEditorHandle } from "./CodeEditor.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
 import { SquiggleViewerHandle } from "./SquiggleViewer/index.js";
@@ -38,7 +42,8 @@ export const DynamicSquiggleViewer = forwardRef<SquiggleViewerHandle, Props>(
           {...settings}
           ref={viewerRef}
           localSettingsEnabled={localSettingsEnabled}
-          result={getValueToRender(squiggleOutput)}
+          resultVariables={getResultVariables(squiggleOutput)}
+          resultItem={getResultValue(squiggleOutput)}
           editor={editor}
         />
       </div>

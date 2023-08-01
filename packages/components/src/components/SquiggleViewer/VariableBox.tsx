@@ -141,16 +141,18 @@ export const VariableBox: FC<VariableBoxProps> = ({
       <TriangleIcon size={10} className={isOpen ? "rotate-180" : "rotate-90"} />
     </div>
   );
+  const getClasses = () => {
+    if (isFocused) {
+      return "text-lg text-black ml-1";
+    } else if (isRoot) {
+      return "text-sm text-stone-700 font-semibold";
+    } else {
+      return "text-sm text-stone-700 cursor-pointer hover:underline";
+    }
+  };
+
   const headerName = (
-    <div
-      className={clsx(
-        "font-mono",
-        isFocused
-          ? "text-lg text-black ml-1"
-          : "text-sm text-stone-800 cursor-pointer hover:underline"
-      )}
-      onClick={_focus}
-    >
+    <div className={clsx("font-mono", getClasses())} onClick={_focus}>
       {name}
     </div>
   );
@@ -224,7 +226,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
 
   return (
     <div ref={saveRef}>
-      {name === undefined ? null : (
+      {(name !== undefined || isRoot) && (
         <header
           className={clsx(
             "flex justify-between group",
