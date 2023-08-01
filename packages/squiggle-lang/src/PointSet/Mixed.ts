@@ -4,7 +4,6 @@ import * as Discrete from "./Discrete.js";
 import * as MixedPoint from "./MixedPoint.js";
 import * as Result from "../utility/result.js";
 import * as Common from "./Common.js";
-import { AnyPointSet } from "./PointSet.js";
 import { ContinuousShape } from "./Continuous.js";
 import { DiscreteShape } from "./Discrete.js";
 import { ConvolutionOperation, PointSet } from "./PointSet.js";
@@ -264,26 +263,6 @@ export class MixedShape implements PointSet<MixedShape> {
   }
 }
 
-// let totalLength = (t: t): int => {
-//   let continuousLength = t.continuous.xyShape->XYShape.T.length
-//   let discreteLength = t.discrete.xyShape->XYShape.T.length
-
-//   continuousLength + discreteLength
-// }
-
-// let scaleBy = (t: t, scale): t => {
-//   let scaledDiscrete = Discrete.scaleBy(t.discrete, scale)
-//   let scaledContinuous = Continuous.scaleBy(t.continuous, scale)
-//   let scaledIntegralCache = E.O.bind(t.integralCache, v => Some(Continuous.scaleBy(v, scale)))
-//   let scaledIntegralSumCache = E.O.bind(t.integralSumCache, s => Some(s *. scale))
-//   make(
-//     ~discrete=scaledDiscrete,
-//     ~continuous=scaledContinuous,
-//     ~integralSumCache=scaledIntegralSumCache,
-//     ~integralCache=scaledIntegralCache,
-//   )
-// }
-
 export const combineAlgebraically = (
   op: ConvolutionOperation,
   t1: MixedShape,
@@ -398,13 +377,13 @@ export const combinePointwise = <E>(
   );
 };
 
-export const buildMixedShape = ({
+export function buildMixedShape({
   continuous,
   discrete,
 }: {
   continuous?: ContinuousShape;
   discrete?: DiscreteShape;
-}): AnyPointSet | undefined => {
+}): MixedShape | undefined {
   continuous ??= new ContinuousShape({
     integralSumCache: 0,
     xyShape: { xs: [], ys: [] },
@@ -417,12 +396,7 @@ export const buildMixedShape = ({
   const dLength = discrete.xyShape.xs.length;
   if (cLength < 2 && dLength == 0) {
     return undefined;
-  } else if (cLength < 2) {
-    return discrete;
-  } else if (dLength == 0) {
-    return continuous;
   } else {
-    const mixedDist = new MixedShape({ continuous, discrete });
-    return mixedDist;
+    return new MixedShape({ continuous, discrete });
   }
-};
+}

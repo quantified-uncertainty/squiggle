@@ -99,7 +99,7 @@ export abstract class SymbolicDist extends BaseDist {
         new ContinuousShape({
           integralSumCache: 1.0,
           xyShape: xyShapeR.value,
-        })
+        }).toMixed()
       )
     );
   }
@@ -915,7 +915,7 @@ export class Bernoulli extends SymbolicDist {
         new DiscreteShape({
           integralSumCache: 1.0,
           xyShape: { xs: [0, 1], ys: [1 - this.p, this.p] },
-        })
+        }).toMixed()
       )
     );
   }
@@ -1024,7 +1024,7 @@ export class PointMass extends SymbolicDist {
         new DiscreteShape({
           integralSumCache: 1.0,
           xyShape: { xs: [this.t], ys: [1.0] },
-        })
+        }).toMixed()
       )
     );
   }

@@ -1,24 +1,22 @@
 import * as Continuous from "../PointSet/Continuous.js";
 import { ContinuousShape } from "../PointSet/Continuous.js";
 
+import * as Mixed from "../PointSet/Mixed.js";
 import { MixedShape } from "../PointSet/Mixed.js";
 
-import * as magicNumbers from "../magicNumbers.js";
 import * as Result from "../utility/result.js";
 
 import * as PointSet from "../PointSet/PointSet.js";
 
-import { BaseDist } from "./BaseDist.js";
 import { AnyPointSet } from "../PointSet/PointSet.js";
-import { DistError, sparklineError } from "./DistError.js";
 import { createSparkline } from "../utility/sparklines.js";
+import { BaseDist } from "./BaseDist.js";
+import { DistError, sparklineError } from "./DistError.js";
 
-export class PointSetDist<
-  T extends AnyPointSet = AnyPointSet
-> extends BaseDist {
-  pointSet: T;
+export class PointSetDist extends BaseDist {
+  pointSet: MixedShape;
 
-  constructor(pointSet: T) {
+  constructor(pointSet: MixedShape) {
     super();
     this.pointSet = pointSet;
   }
@@ -116,11 +114,7 @@ export class PointSetDist<
       | ((cache: ContinuousShape) => ContinuousShape | undefined)
   ): Result.result<PointSetDist, E> {
     return Result.fmap(
-      this.pointSet.mapYResult(
-        fn,
-        integralSumCacheFn,
-        integralCacheFn
-      ) as Result.result<AnyPointSet, E>,
+      this.pointSet.mapYResult(fn, integralSumCacheFn, integralCacheFn),
       (pointSet) => new PointSetDist(pointSet)
     );
   }
@@ -133,7 +127,7 @@ export const combineAlgebraically = (
   t2: PointSetDist
 ): PointSetDist => {
   return new PointSetDist(
-    PointSet.combineAlgebraically(op, t1.pointSet, t2.pointSet)
+    Mixed.combineAlgebraically(op, t1.pointSet, t2.pointSet)
   );
 };
 
@@ -149,7 +143,7 @@ export const combinePointwise = <E>(
   ) => ContinuousShape | undefined = () => undefined
 ): Result.result<PointSetDist, E> => {
   return Result.fmap(
-    PointSet.combinePointwise(
+    Mixed.combinePointwise(
       t1.pointSet,
       t2.pointSet,
       fn,
@@ -160,13 +154,9 @@ export const combinePointwise = <E>(
   );
 };
 
-export const expectedConvolutionCost = (d: PointSetDist): number => {
-  if (PointSet.isContinuous(d.pointSet)) {
-    return magicNumbers.OpCost.continuousCost;
-  } else if (PointSet.isDiscrete(d.pointSet)) {
-    return d.pointSet.xyShape.xs.length;
-  } else if (d.pointSet instanceof MixedShape) {
-    return magicNumbers.OpCost.mixedCost;
-  }
-  throw new Error(`Unknown PointSet ${d}`);
-};
+export function expectedConvolutionCost(d: PointSetDist): number {
+  return (
+    d.pointSet.toContinuous().xyShape.xs.length +
+    d.pointSet.toDiscrete().xyShape.xs.length
+  );
+}

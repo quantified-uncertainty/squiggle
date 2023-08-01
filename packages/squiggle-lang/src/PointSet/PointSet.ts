@@ -59,25 +59,6 @@ export interface PointSet<T> {
   variance(): number;
 }
 
-//TODO WARNING: The combineAlgebraicallyWithDiscrete will break for subtraction and division, like, discrete - continous
-export const combineAlgebraically = (
-  op: ConvolutionOperation,
-  t1: AnyPointSet,
-  t2: AnyPointSet
-): AnyPointSet => {
-  if (t1 instanceof ContinuousShape && t2 instanceof ContinuousShape) {
-    return Continuous.combineAlgebraically(op, t1, t2);
-  } else if (t1 instanceof DiscreteShape && t2 instanceof ContinuousShape) {
-    return Continuous.combineAlgebraicallyWithDiscrete(op, t2, t1, "First");
-  } else if (t1 instanceof ContinuousShape && t2 instanceof DiscreteShape) {
-    return Continuous.combineAlgebraicallyWithDiscrete(op, t1, t2, "Second");
-  } else if (t1 instanceof DiscreteShape && t2 instanceof DiscreteShape) {
-    return Discrete.combineAlgebraically(op, t1, t2);
-  } else {
-    return Mixed.combineAlgebraically(op, t1.toMixed(), t2.toMixed());
-  }
-};
-
 export const combinePointwise = <E>(
   t1: AnyPointSet,
   t2: AnyPointSet,

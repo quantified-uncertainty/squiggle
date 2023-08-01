@@ -405,6 +405,7 @@ export const reduce = <E>(
 
 /* This simply creates multiple copies of the continuous distribution, scaled and shifted according to
  each discrete data point, and then adds them all together. */
+//TODO WARNING: The combineAlgebraicallyWithDiscrete will break for subtraction and division, like, discrete - continous
 export const combineAlgebraicallyWithDiscrete = (
   op: ConvolutionOperation,
   t1: ContinuousShape,
