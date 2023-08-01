@@ -59,7 +59,7 @@
     "@types/jest": "^29.5.2",
     "@types/lodash": "^4.14.195",
     "@types/node": "^20.3.3",
-    "@types/react": "^18.2.14",
+    "@types/react": "^18.2.18",
     "@types/react-resizable": "^3.0.4",
     "@types/testing-library__jest-dom": "^5.14.7",
     "@types/webpack-bundle-analyzer": "^4.6.0",
