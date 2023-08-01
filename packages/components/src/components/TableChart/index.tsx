@@ -28,7 +28,7 @@ export const TableChart: FC<Props> = ({
   const hasColumnNames = columnNames.filter((name) => !!name).length > 0;
   const columnLength = Math.max(
     columnNames ? columnNames.length : 0,
-    rowsAndColumns[0].length
+    rowsAndColumns[0]?.length ?? 0
   );
 
   const chartHeight = 50;
