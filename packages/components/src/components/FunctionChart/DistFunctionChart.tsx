@@ -1,10 +1,4 @@
-import {
-  FloatingPortal,
-  flip,
-  offset,
-  size,
-  useFloating,
-} from "@floating-ui/react";
+import { flip, offset, useFloating } from "@floating-ui/react";
 import * as d3 from "d3";
 import { FC, useCallback, useMemo, useRef } from "react";
 
@@ -284,20 +278,18 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
 
   const renderChartAtCursor = () => {
     return (
-      <FloatingPortal>
-        <div
-          ref={refs.setFloating}
-          className="z-30 rounded-md bg-white shadow-md border"
-          style={{
-            position: strategy,
-            top: y ?? 0,
-            left: x ?? 0,
-            width: refs.reference.current?.getBoundingClientRect().width,
-          }}
-        >
-          {distChartAtCursor}
-        </div>
-      </FloatingPortal>
+      <div
+        ref={refs.setFloating}
+        className="z-30 rounded-md bg-white shadow-lg border"
+        style={{
+          position: strategy,
+          top: y ?? 0,
+          left: x ?? 0,
+          width: refs.reference.current?.getBoundingClientRect().width,
+        }}
+      >
+        {distChartAtCursor}
+      </div>
     );
   };
 
