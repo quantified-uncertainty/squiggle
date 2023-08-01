@@ -284,8 +284,8 @@ importers:
         specifier: ^3.11.1
         version: 3.11.1(@pothos/core@3.32.1)(graphql@16.7.1)
       '@pothos/plugin-prisma':
-        specifier: ^3.52.0
-        version: 3.52.0(@pothos/core@3.32.1)(@prisma/client@5.0.0)(graphql@16.7.1)(typescript@5.1.6)
+        specifier: ^3.53.0
+        version: 3.53.0(@pothos/core@3.32.1)(@prisma/client@5.0.0)(graphql@16.7.1)(typescript@5.1.6)
       '@pothos/plugin-relay':
         specifier: ^3.43.0
         version: 3.43.0(@pothos/core@3.32.1)(graphql@16.7.1)
@@ -3944,8 +3944,8 @@ packages:
       graphql: 16.7.1
     dev: false
 
-  /@pothos/plugin-prisma@3.52.0(@pothos/core@3.32.1)(@prisma/client@5.0.0)(graphql@16.7.1)(typescript@5.1.6):
-    resolution: {integrity: sha512-VTh5rj4ddj8XCnoA5OQWyrxFECYir1afDj71raZFdB7usnoHvCntluODPD/z8nSs1lQ4p3AAiJZ1NsS0gBNdjA==}
+  /@pothos/plugin-prisma@3.53.0(@pothos/core@3.32.1)(@prisma/client@5.0.0)(graphql@16.7.1)(typescript@5.1.6):
+    resolution: {integrity: sha512-ANUcQ4l5EFNK70D0YbYi8wadCi3ktX+z07xBf5RDhfm295Sshm4+gxOlJ9LRXobbT2XoWusoWAAbxK2g0J5xIQ==}
     hasBin: true
     peerDependencies:
       '@pothos/core': '*'
@@ -3955,7 +3955,7 @@ packages:
     dependencies:
       '@pothos/core': 3.32.1(graphql@16.7.1)
       '@prisma/client': 5.0.0(prisma@4.16.2)
-      '@prisma/generator-helper': 4.13.0
+      '@prisma/generator-helper': 5.1.0
       graphql: 16.7.1
       typescript: 5.1.6
     transitivePeerDependencies:
@@ -4028,10 +4028,10 @@ packages:
       prisma: 4.16.2
     dev: false
 
-  /@prisma/debug@4.13.0:
-    resolution: {integrity: sha512-JrltTewF/paRb5mcM5OvcEi9DtdX0sINOAswruxKQrwOLA7Phqb52OfY38MIzGrsrJ8iUGVqQ5bpYZYpxOGCsQ==}
+  /@prisma/debug@5.1.0:
+    resolution: {integrity: sha512-8jmiICy2uW+fHuoRDQGEB94XBkUmJu1wCaHWW/1ycbTNyaJqiTUL8EE7InzPcZRuebYKDU3QSUOlkUMH453A2Q==}
     dependencies:
-      '@types/debug': 4.1.7
+      '@types/debug': 4.1.8
       debug: 4.3.4
       strip-ansi: 6.0.1
     transitivePeerDependencies:
@@ -4046,13 +4046,13 @@ packages:
     resolution: {integrity: sha512-vx1nxVvN4QeT/cepQce68deh/Turxy5Mr+4L4zClFuK1GlxN3+ivxfuv+ej/gvidWn1cE1uAhW7ALLNlYbRUAw==}
     requiresBuild: true
 
-  /@prisma/generator-helper@4.13.0:
-    resolution: {integrity: sha512-Zx9rtbsEIU/9DKnGRvmjLdyeyhzeeXNFp1alkRh1w//rQ5jTcobiay/jU4Qo+EQOs2bnWEfUeiBoOjfaysdLNg==}
+  /@prisma/generator-helper@5.1.0:
+    resolution: {integrity: sha512-N/6nE76YFByywR5tTScevPJGfbftdRbANPlTsL5KvpJWnnLPBvNZCtGpto2Ax4Ot15zLA0/olql5609X2zzXcg==}
     dependencies:
-      '@prisma/debug': 4.13.0
+      '@prisma/debug': 5.1.0
       '@types/cross-spawn': 6.0.2
-      chalk: 4.1.2
       cross-spawn: 7.0.3
+      kleur: 4.1.5
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -5625,8 +5625,8 @@ packages:
       '@types/d3-transition': 3.0.3
       '@types/d3-zoom': 3.0.2
 
-  /@types/debug@4.1.7:
-    resolution: {integrity: sha512-9AonUzyTjXXhEOa0DnqpzZi6VHlqKMswga9EXjpXnnqxwLtdvPPtlO8evrI5D9S6asFRCQ6v+wpiUKbw+vKqyg==}
+  /@types/debug@4.1.8:
+    resolution: {integrity: sha512-/vPO1EPOs306Cvhwv7KfVfYvOJqA/S/AXjaHQiJboCZzcNDb+TIJFN9/2C9DZ//ijSKWioNyUxD792QmDJ+HKQ==}
     dependencies:
       '@types/ms': 0.7.31
     dev: false
@@ -7275,6 +7275,7 @@ packages:
     dependencies:
       ansi-styles: 4.3.0
       supports-color: 7.2.0
+    dev: true
 
   /chalk@5.3.0:
     resolution: {integrity: sha512-dLitG79d+GV1Nb/VYcCDFivJeK1hiukt9QjRNVOsUtTy1rR1YJsmpGGTZ3qJos+uw7WmWF4wUwBd9jxjocFC2w==}
@@ -10104,6 +10105,7 @@ packages:
   /has-flag@4.0.0:
     resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==}
     engines: {node: '>=8'}
+    dev: true
 
   /has-property-descriptors@1.0.0:
     resolution: {integrity: sha512-62DVLZGoiEBDHQyqG4w9xCuZ7eJEwNmJRWw2VY84Oedb7WFcA27fiEVe8oUQx9hAUJ4ekurquucTGwsyO1XGdQ==}
@@ -12734,7 +12736,7 @@ packages:
   /micromark@3.1.0:
     resolution: {integrity: sha512-6Mj0yHLdUZjHnOPgr5xfWIMqMWS12zDN6iws9SLuSz76W8jTtAv24MN4/CL7gJrl5vtxGInkkqDv/JIoRsQOvA==}
     dependencies:
-      '@types/debug': 4.1.7
+      '@types/debug': 4.1.8
       debug: 4.3.4
       decode-named-character-reference: 1.0.2
       micromark-core-commonmark: 1.0.6
@@ -15649,6 +15651,7 @@ packages:
     engines: {node: '>=8'}
     dependencies:
       has-flag: 4.0.0
+    dev: true
 
   /supports-color@8.1.1:
     resolution: {integrity: sha512-MpUEN2OodtUzxvKQl72cUF7RQ5EiHsGvSsVG0ia9c5RbWGL2CI4C7EpPS8UTBIplnlzZiNuV56w+FuNxy3ty2Q==}
