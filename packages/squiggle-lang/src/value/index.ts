@@ -336,7 +336,7 @@ export type Scale = CommonScaleArgs &
       }
   );
 
-export const SCALE_SYMLOG_DEFAULT_CONSTANT = 1;
+export const SCALE_SYMLOG_DEFAULT_CONSTANT = 0.0001;
 export const SCALE_POWER_DEFAULT_CONSTANT = 0.1;
 
 class VScale extends BaseValue {
