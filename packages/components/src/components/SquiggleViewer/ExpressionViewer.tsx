@@ -30,6 +30,7 @@ import { clsx } from "clsx";
 import { TableChart } from "../TableChart/index.js";
 import { DistPreview } from "../DistributionsChart/DistPreview.js";
 import { TableCellsIcon } from "@quri/ui";
+import ReactMarkdown from "react-markdown";
 
 // We use an extra left margin for some elements to align them with parent variable name
 const leftMargin = "ml-1.5";
@@ -103,7 +104,9 @@ export const getBoxProps = (
         ),
         children: () => (
           <div className="text-neutral-800 text-sm px-2 py-1 my-1">
-            {value.value}
+            <ReactMarkdown className="prose max-w-4xl">
+              {value.value}
+            </ReactMarkdown>
           </div>
         ),
       };
