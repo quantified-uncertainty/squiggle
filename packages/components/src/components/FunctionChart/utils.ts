@@ -24,6 +24,11 @@ function rangeByCount(start: number, stop: number, count: number) {
 type ImageValue<T extends SqNumericFnPlot | SqDistFnPlot> =
   T["tag"] extends "numericFn" ? number : SqDistribution;
 
+export type ImageError = {
+  x: number;
+  value: string;
+};
+
 export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot>(
   plot: T,
   environment: Env
@@ -38,7 +43,7 @@ export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot>(
     x: number;
     y: ImageValue<T>;
   }[] = [];
-  const errors: { x: number; value: string }[] = [];
+  const errors: ImageError[] = [];
 
   for (const x of chartPointsToRender) {
     const result = plot.fn.call([SqNumberValue.create(x)], environment);

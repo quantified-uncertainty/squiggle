@@ -50,6 +50,16 @@ export class CartesianFrame {
     };
   }
 
+  // `point` is in global canvas coordinates, e.g. `cursor` from `useCanvasCursor()`
+  containsPoint(point: Point): boolean {
+    return (
+      point.x >= this.x0 &&
+      point.x - this.x0 <= this.width &&
+      point.y <= this.y0 &&
+      this.y0 - point.y <= this.height
+    );
+  }
+
   // TODO: `using framed = frame.enter()` would be good after Typescript 5.2 is released.
   // See also: https://devblogs.microsoft.com/typescript/announcing-typescript-5-2-beta/#using-declarations-and-explicit-resource-management
   enter(): void {
