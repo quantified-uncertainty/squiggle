@@ -62,27 +62,29 @@ function getDistPlotPercentiles({
 }) {
   const { functionImage, errors } = getFunctionImage(plot, environment);
 
-  const data: Datum[] = functionImage.map(({ x, y: dist }) => {
-    const res = {
-      x,
-      areas: Object.fromEntries(
-        intervals.map(({ width }) => {
-          const left = (1 - width) / 2;
-          const right = left + width;
-          return [
-            width as Width,
-            [
-              unwrapOrFailure(dist.inv(environment, left)),
-              unwrapOrFailure(dist.inv(environment, right)),
-            ],
-          ];
-        })
-      ),
-      50: unwrapOrFailure(dist.inv(environment, 0.5)),
-    } as Datum;
+  const data: Datum[] = functionImage
+    .map(({ x, y: dist }) => {
+      const res = {
+        x,
+        areas: Object.fromEntries(
+          intervals.map(({ width }) => {
+            const left = (1 - width) / 2;
+            const right = left + width;
+            return [
+              width as Width,
+              [
+                unwrapOrFailure(dist.inv(environment, left)),
+                unwrapOrFailure(dist.inv(environment, right)),
+              ],
+            ];
+          })
+        ),
+        50: unwrapOrFailure(dist.inv(environment, 0.5)),
+      } as Datum;
 
-    return res;
-  });
+      return res;
+    })
+    .filter((d) => isFinite(d[50]));
 
   return { data, errors };
 }
@@ -115,7 +117,7 @@ function useDrawDistFunctionChart({ plot, environment, height: innerHeight }) {
               ...Object.values(d.areas)
                 .map((p) => p[0])
                 .filter(isFinite),
-              d[50]
+              isFinite(d[50]) ? d[50] : Infinity
             )
           )
         ),
@@ -126,7 +128,7 @@ function useDrawDistFunctionChart({ plot, environment, height: innerHeight }) {
               ...Object.values(d.areas)
                 .map((p) => p[1])
                 .filter(isFinite),
-              d[50]
+              isFinite(d[50]) ? d[50] : -Infinity
             )
           )
         ),
