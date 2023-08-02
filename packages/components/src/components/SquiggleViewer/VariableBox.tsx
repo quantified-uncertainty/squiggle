@@ -35,7 +35,6 @@ export type VariableBoxProps = {
   value: SqValueWithContext;
   heading?: string;
   preview?: ReactNode;
-  type: string;
   renderSettingsMenu?: (params: SettingsMenuParams) => ReactNode;
   children: (settings: MergedItemSettings) => ReactNode;
 };

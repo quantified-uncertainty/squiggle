@@ -44,7 +44,7 @@ const CHART_TO_DIST_HEIGHT_ADJUSTMENT = 0.5;
 
 export const getBoxProps = (
   value: SqValueWithContext
-): Omit<VariableBoxProps, "value" | "type"> => {
+): Omit<VariableBoxProps, "value"> => {
   const environment = value.context.project.getEnvironment();
 
   switch (value.tag) {
@@ -327,7 +327,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
         )
       : boxProps.children;
   return (
-    <VariableBox {...boxProps} type={value.tag} value={value} heading={heading}>
+    <VariableBox {...boxProps} value={value} heading={heading}>
       {children}
     </VariableBox>
   );
