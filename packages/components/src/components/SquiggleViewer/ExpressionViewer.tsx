@@ -44,7 +44,7 @@ const CHART_TO_DIST_HEIGHT_ADJUSTMENT = 0.5;
 
 export const getBoxProps = (
   value: SqValueWithContext
-): Omit<VariableBoxProps, "value"> => {
+): Omit<VariableBoxProps, "value" | "type"> => {
   const environment = value.context.project.getEnvironment();
 
   switch (value.tag) {
@@ -266,7 +266,6 @@ export const getBoxProps = (
       return {
         heading: `Dict(${entries.length})`,
         preview: <SqTypeWithCount type="{}" count={entries.length} />,
-        isDictOrList: true,
         children: () =>
           entries.map((r, i) => <ExpressionViewer key={i} value={r} />),
       };
@@ -277,7 +276,6 @@ export const getBoxProps = (
       return {
         heading: `List(${length})`,
         preview: <SqTypeWithCount type="[]" count={length} />,
-        isDictOrList: true,
         children: () =>
           entries.map((r, i) => <ExpressionViewer key={i} value={r} />),
       };
@@ -329,7 +327,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
         )
       : boxProps.children;
   return (
-    <VariableBox {...boxProps} value={value} heading={heading}>
+    <VariableBox {...boxProps} type={value.tag} value={value} heading={heading}>
       {children}
     </VariableBox>
   );
