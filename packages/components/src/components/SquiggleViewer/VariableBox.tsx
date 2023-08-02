@@ -8,6 +8,7 @@ import {
   TriangleIcon,
 } from "@quri/ui";
 import { SqValuePath } from "@quri/squiggle-lang";
+import ReactMarkdown from "react-markdown";
 
 import { SqValueWithContext } from "../../lib/utility.js";
 import {
@@ -34,7 +35,6 @@ export type VariableBoxProps = {
   value: SqValueWithContext;
   heading?: string;
   preview?: ReactNode;
-  isDictOrList?: boolean;
   renderSettingsMenu?: (params: SettingsMenuParams) => ReactNode;
   children: (settings: MergedItemSettings) => ReactNode;
 };
@@ -52,7 +52,6 @@ export const SqTypeWithCount: FC<{
 export const VariableBox: FC<VariableBoxProps> = ({
   value,
   heading = "Error",
-  isDictOrList = false,
   preview,
   renderSettingsMenu,
   children,
@@ -63,6 +62,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
   const { editor, getSettings, getMergedSettings, dispatch } =
     useViewerContext();
   const isFocused = useIsFocused(value.context.path);
+  const { tag } = value;
 
   const findInEditor = () => {
     const location = value.context.findLocation();
@@ -211,16 +211,28 @@ export const VariableBox: FC<VariableBoxProps> = ({
       </div>
     );
 
-  const showComment = () => (
-    <div
-      className={clsx(
-        "text-sm text-slate-800 whitespace-pre-line bg-purple-50 bg-opacity-60 py-2 px-3 mb-2 rounded-md",
-        !isDictOrList && "mt-2"
-      )}
-    >
-      {comment}
-    </div>
-  );
+  const tagsWithTopPosition = new Set([
+    "Dict",
+    "Array",
+    "TableChart",
+    "Plot",
+    "String",
+  ]);
+  const commentPosition = tagsWithTopPosition.has(tag) ? "top" : "bottom";
+
+  const isDictOrList = tag === "Dict" || tag === "Array";
+
+  const showComment = () =>
+    comment && (
+      <ReactMarkdown
+        className={clsx(
+          "prose max-w-4xl text-sm text-slate-800 bg-purple-50 bg-opacity-60 py-2 px-3 mb-2 rounded-md",
+          commentPosition === "bottom" && "mt-2"
+        )}
+      >
+        {comment}
+      </ReactMarkdown>
+    );
 
   return (
     <div ref={saveRef}>
@@ -251,9 +263,9 @@ export const VariableBox: FC<VariableBoxProps> = ({
             <div className="flex w-4" />
           )}
           <div className="grow">
-            {isDictOrList && hasComment && showComment()}
+            {commentPosition === "top" && hasComment && showComment()}
             {children(getAdjustedMergedSettings(path))}
-            {!isDictOrList && hasComment && showComment()}
+            {commentPosition === "bottom" && hasComment && showComment()}
           </div>
         </div>
       )}
