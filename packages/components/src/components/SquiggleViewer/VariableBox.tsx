@@ -250,7 +250,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
         <div className="flex w-full pt-1">
           {!isFocused && isDictOrList && leftCollapseBorder()}
           {!isFocused && !isDictOrList && !isRoot && (
-            <div className="flex w-4" />
+            <div className="flex w-4 min-w-[1rem]" /> // min-w-1rem = w-4
           )}
           <div className="grow">
             {isDictOrList && hasComment && showComment()}
