@@ -21,23 +21,34 @@ export const pathItemFormat = (item: PathItem): string => {
   }
 };
 
-export function pathAsString(path: SqValuePath) {
-  const isTopLevel = path.items.length === 0;
-  if (isTopLevel && path.root === "result") {
-    return "Result";
-  } else if (isTopLevel && path.root === "bindings") {
-    return "Variables";
+function isTopLevel(path: SqValuePath): boolean {
+  return path.items.length === 0;
+}
+
+const topLevelResultName = "Result";
+export const topLevelBindingsName = "Variables";
+
+function topLevelName(path: SqValuePath): string {
+  if (path.root === "result") {
+    return topLevelResultName;
+  } else if (path.root === "bindings") {
+    return topLevelBindingsName;
   } else {
-    return "Variables." + path.items.map(pathItemFormat).join(".");
+    return path.root;
+  }
+}
+
+export function pathAsString(path: SqValuePath) {
+  if (isTopLevel(path)) {
+    return topLevelName(path);
+  } else {
+    return [topLevelName(path), ...path.items.map(pathItemFormat)].join(".");
   }
 }
 
 export function pathToShortName(path: SqValuePath): string | undefined {
-  const isTopLevel = path.items.length === 0;
-  if (isTopLevel && path.root === "result") {
-    return "Result";
-  } else if (isTopLevel && path.root === "bindings") {
-    return "Variables";
+  if (isTopLevel(path)) {
+    return topLevelName(path);
   } else {
     const lastPathItem = path.items[path.items.length - 1];
     return pathItemFormat(lastPathItem);

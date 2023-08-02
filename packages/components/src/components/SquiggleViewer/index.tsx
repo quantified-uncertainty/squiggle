@@ -34,18 +34,6 @@ export type SquiggleViewerProps = {
   editor?: CodeEditorHandle;
 } & PartialPlaygroundSettings;
 
-const SquiggleViewerBody: FC<{ value: SqValue }> = ({ value }) => {
-  const { focused } = useViewerContext();
-
-  const valueToRender = focused ? extractSubvalueByPath(value, focused) : value;
-
-  if (!valueToRender) {
-    return <MessageAlert heading="Focused variable is not defined" />;
-  }
-
-  return <ExpressionViewer value={valueToRender} />;
-};
-
 const SquiggleViewerOuter = forwardRef<
   SquiggleViewerHandle,
   SquiggleViewerProps
@@ -91,22 +79,40 @@ const SquiggleViewerOuter = forwardRef<
     ? resultVariables.value.value.entries().length
     : 0;
 
+  let focusedItem: SqValue | undefined;
+  if (focused && resultVariables.ok && focused.root === "bindings") {
+    focusedItem = extractSubvalueByPath(resultVariables.value, focused);
+  } else if (focused && resultItem?.ok && focused.root === "result") {
+    focusedItem = extractSubvalueByPath(resultItem.value, focused);
+  }
+
+  const body = () => {
+    if (focused) {
+      if (focusedItem) {
+        return <ExpressionViewer value={focusedItem} />;
+      } else {
+        return <MessageAlert heading="Focused variable is not defined" />;
+      }
+    } else if (!resultVariables.ok) {
+      <SquiggleErrorAlert error={resultVariables.value} />;
+    } else {
+      return (
+        <div className="space-y-2">
+          {resultVariables.ok && resultVariableLength > 0 && (
+            <ExpressionViewer value={resultVariables.value} />
+          )}
+          {resultItem && resultItem.ok && (
+            <ExpressionViewer value={resultItem.value} />
+          )}
+        </div>
+      );
+    }
+  };
+
   return (
     <div>
       {focusedNavigation}
-      <div className="space-y-2">
-        {resultVariables.ok && resultVariableLength > 0 && (
-          <SquiggleViewerBody value={resultVariables.value} />
-        )}
-        {!resultVariables.ok && (
-          <SquiggleErrorAlert error={resultVariables.value} />
-        )}
-        {resultItem &&
-          resultItem.ok &&
-          (!focused || focused.root !== "bindings") && (
-            <SquiggleViewerBody value={resultItem.value} />
-          )}
-      </div>
+      {body()}
     </div>
   );
 });
