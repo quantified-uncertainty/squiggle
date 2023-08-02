@@ -145,9 +145,9 @@ export const VariableBox: FC<VariableBoxProps> = ({
     if (isFocused) {
       return "text-lg text-black ml-1";
     } else if (isRoot) {
-      return "text-sm text-stone-700 font-semibold";
+      return "text-sm text-stone-600 font-semibold";
     } else {
-      return "text-sm text-stone-700 cursor-pointer hover:underline";
+      return "text-sm text-stone-800 cursor-pointer hover:underline";
     }
   };
 
@@ -168,7 +168,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
       </div>
     );
   const headerFindInEditorButton = () => (
-    <div className="ml-3">
+    <div className="ml-3 font-">
       <TextTooltip text="Show in Editor" placement="bottom">
         <span>
           <CodeBracketIcon

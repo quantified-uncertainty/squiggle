@@ -1,6 +1,12 @@
-import { FC, forwardRef, memo } from "react";
+import { FC, forwardRef, useEffect, memo, useMemo } from "react";
 
-import { SqError, SqValue, SqValuePath, result } from "@quri/squiggle-lang";
+import {
+  SqError,
+  SqValue,
+  SqDictValue,
+  SqValuePath,
+  result,
+} from "@quri/squiggle-lang";
 import { ChevronRightIcon } from "@quri/ui";
 import { useImperativeHandle } from "react";
 import { MessageAlert } from "../Alert.js";
@@ -22,7 +28,7 @@ export type SquiggleViewerHandle = {
 
 export type SquiggleViewerProps = {
   /** The output of squiggle's run */
-  resultVariables: result<SqValue, SqError>;
+  resultVariables: result<SqDictValue, SqError>;
   resultItem: result<SqValue, SqError> | undefined;
   localSettingsEnabled?: boolean;
   editor?: CodeEditorHandle;
@@ -81,23 +87,26 @@ const SquiggleViewerOuter = forwardRef<
     },
   }));
 
+  const resultVariableLength = resultVariables.ok
+    ? resultVariables.value.value.entries().length
+    : 0;
+
   return (
     <div>
       {focusedNavigation}
-      {resultVariables.ok ? (
-        <div>
+      <div className="space-y-2">
+        {resultVariables.ok && resultVariableLength > 0 && (
           <SquiggleViewerBody value={resultVariables.value} />
-          {resultItem &&
-            resultItem.ok &&
-            (!focused || focused.root !== "bindings") && (
-              <div className="mt-3">
-                <SquiggleViewerBody value={resultItem.value} />
-              </div>
-            )}
-        </div>
-      ) : (
-        <SquiggleErrorAlert error={resultVariables.value} />
-      )}
+        )}
+        {!resultVariables.ok && (
+          <SquiggleErrorAlert error={resultVariables.value} />
+        )}
+        {resultItem &&
+          resultItem.ok &&
+          (!focused || focused.root !== "bindings") && (
+            <SquiggleViewerBody value={resultItem.value} />
+          )}
+      </div>
     </div>
   );
 });
@@ -118,6 +127,7 @@ const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
         partialPlaygroundSettings={partialPlaygroundSettings}
         localSettingsEnabled={localSettingsEnabled}
         editor={editor}
+        beginWithVariablesCollapsed={resultItem !== undefined && resultItem.ok}
       >
         <SquiggleViewerOuter
           resultVariables={resultVariables}

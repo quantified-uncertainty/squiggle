@@ -29,6 +29,7 @@ export {
 } from "./public/SqValue/SqDistribution/index.js";
 export { type SqDomain } from "./public/SqValue/SqDomain.js";
 export { SqLambda } from "./public/SqValue/SqLambda.js";
+export { SqDictValue } from "./public/SqValue/index.js";
 export {
   SqDistFnPlot,
   SqDistributionsPlot,

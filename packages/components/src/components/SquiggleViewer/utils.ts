@@ -22,7 +22,14 @@ export const pathItemFormat = (item: PathItem): string => {
 };
 
 export function pathAsString(path: SqValuePath) {
-  return path.items.map(pathItemFormat).join(".");
+  const isTopLevel = path.items.length === 0;
+  if (isTopLevel && path.root === "result") {
+    return "Result";
+  } else if (isTopLevel && path.root === "bindings") {
+    return "Variables";
+  } else {
+    return "Variables." + path.items.map(pathItemFormat).join(".");
+  }
 }
 
 export function pathToShortName(path: SqValuePath): string | undefined {

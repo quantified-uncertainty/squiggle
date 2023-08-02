@@ -1,4 +1,11 @@
-import { SqError, SqValue, result, resultMap } from "@quri/squiggle-lang";
+import {
+  SqError,
+  SqValue,
+  SqDict,
+  SqDictValue,
+  result,
+  resultMap,
+} from "@quri/squiggle-lang";
 
 import { SquiggleOutput } from "./hooks/useSquiggle.js";
 
@@ -36,17 +43,9 @@ export function some(arr: boolean[]): boolean {
   return arr.reduce((x, y) => x || y, false);
 }
 
-export function getValueToRender({
-  output,
-}: SquiggleOutput): result<SqValue, SqError> {
-  return resultMap(output, (value) =>
-    value.result.tag === "Void" ? value.bindings.asValue() : value.result
-  );
-}
-
 export function getResultVariables({
   output,
-}: SquiggleOutput): result<SqValue, SqError> {
+}: SquiggleOutput): result<SqDictValue, SqError> {
   return resultMap(output, (value) => value.bindings.asValue());
 }
 
@@ -54,27 +53,12 @@ export function getResultValue({
   output,
 }: SquiggleOutput): result<SqValue, SqError> | undefined {
   if (output.ok) {
-    console.log("HI", output.value.result.tag);
-    return output.value.result.tag !== "Void"
-      ? { ok: true, value: output.value.result }
-      : undefined;
+    const isResult = output.value.result.tag !== "Void";
+    return isResult ? { ok: true, value: output.value.result } : undefined;
   } else {
     return output;
   }
 }
-// return resultMap(output, (value) => {
-//   if (value.result.tag === "Void") {
-//     return value.bindings.asValue();
-//   } else {
-//     return SqDict.makeFromPair(
-//       [
-//         ["variables", value.bindings.asValue()],
-//         ["result", value.result],
-//       ],
-//       value.result.context
-//     ).asValue();
-//   }
-// });
 
 export function getErrors(result: SquiggleOutput["output"]) {
   if (!result.ok) {
