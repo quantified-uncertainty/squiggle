@@ -1,7 +1,6 @@
 import {
   SqError,
   SqValue,
-  SqDict,
   SqDictValue,
   result,
   resultMap,

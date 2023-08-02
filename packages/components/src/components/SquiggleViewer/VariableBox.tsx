@@ -129,9 +129,8 @@ export const VariableBox: FC<VariableBoxProps> = ({
     };
   });
 
-  const hasBodyContent = Boolean(path.items.length);
   const isOpen = isFocused || !settings.collapsed;
-  const _focus = () => !isFocused && hasBodyContent && focus(path);
+  const _focus = () => !isFocused && !isRoot && focus(path);
 
   const triangleToggle = () => (
     <div
@@ -141,9 +140,10 @@ export const VariableBox: FC<VariableBoxProps> = ({
       <TriangleIcon size={10} className={isOpen ? "rotate-180" : "rotate-90"} />
     </div>
   );
-  const getClasses = () => {
+
+  const headerClasses = () => {
     if (isFocused) {
-      return "text-lg text-black ml-1";
+      return "text-md text-black font-bold ml-1";
     } else if (isRoot) {
       return "text-sm text-stone-600 font-semibold";
     } else {
@@ -152,7 +152,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
   };
 
   const headerName = (
-    <div className={clsx("font-mono", getClasses())} onClick={_focus}>
+    <div className={clsx("font-mono", headerClasses())} onClick={_focus}>
       {name}
     </div>
   );
@@ -168,7 +168,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
       </div>
     );
   const headerFindInEditorButton = () => (
-    <div className="ml-3 font-">
+    <div className="ml-3">
       <TextTooltip text="Show in Editor" placement="bottom">
         <span>
           <CodeBracketIcon
@@ -248,8 +248,8 @@ export const VariableBox: FC<VariableBoxProps> = ({
       )}
       {isOpen && (
         <div className="flex w-full pt-1">
-          {!isFocused && hasBodyContent && isDictOrList && leftCollapseBorder()}
-          {!isFocused && hasBodyContent && !isDictOrList && !isRoot && (
+          {!isFocused && isDictOrList && leftCollapseBorder()}
+          {!isFocused && !isDictOrList && !isRoot && (
             <div className="flex w-4" />
           )}
           <div className="grow">
