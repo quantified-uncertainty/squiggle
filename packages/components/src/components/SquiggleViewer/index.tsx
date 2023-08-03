@@ -36,29 +36,6 @@ export type SquiggleViewerProps = {
   editor?: CodeEditorHandle;
 } & PartialPlaygroundSettings;
 
-const SquiggleViewerBody: FC<{ value: SqValue }> = ({ value }) => {
-  const { focused } = useViewerContext();
-
-  const valueToRender = focused ? extractSubvalueByPath(value, focused) : value;
-
-  if (!valueToRender) {
-    return <MessageAlert heading="Focused variable is not defined" />;
-  }
-
-  return (
-    <ErrorBoundary
-      fallback={
-        <ErrorAlert heading="Error">
-          There has been a JS error. It has been logged to he JS console.
-        </ErrorAlert>
-      }
-      onError={(error, info) => console.error(error, info)}
-    >
-      <ExpressionViewer value={valueToRender} />;
-    </ErrorBoundary>
-  );
-};
-
 const SquiggleViewerOuter = forwardRef<
   SquiggleViewerHandle,
   SquiggleViewerProps
@@ -119,7 +96,7 @@ const SquiggleViewerOuter = forwardRef<
         return <MessageAlert heading="Focused variable is not defined" />;
       }
     } else if (!resultVariables.ok) {
-      <SquiggleErrorAlert error={resultVariables.value} />;
+      return <SquiggleErrorAlert error={resultVariables.value} />;
     } else {
       return (
         <div className="space-y-2">
