@@ -11,5 +11,9 @@
     "prettier": "^3.0.0",
     "turbo": "^1.10.7",
     "turbo-ignore": "^1.10.7"
+  },
+  "dependencies": {
+    "fs-extra": "^11.1.1",
+    "glob": "^10.3.1"
   }
 }
