@@ -7,13 +7,15 @@
     "dev": "next dev",
     "build": "next build",
     "lint": "prettier --check . && next lint",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "compileDocsForLLM": "node scripts/compileDocs.js"
   },
   "dependencies": {
     "@quri/squiggle-components": "workspace:*",
     "@quri/ui": "workspace:*",
     "base64-js": "^1.5.1",
     "clsx": "^2.0.0",
+    "glob": "^10.3.1",
     "next": "^13.4.9",
     "nextra": "^2.10.0",
     "nextra-theme-docs": "^2.10.0",
