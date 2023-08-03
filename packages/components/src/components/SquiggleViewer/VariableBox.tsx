@@ -99,7 +99,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
     const { chartHeight } = mergedSettings;
     return {
       ...mergedSettings,
-      chartHeight: isFocused ? chartHeight * 3 : chartHeight,
+      chartHeight: isFocused || isRoot ? chartHeight * 4 : chartHeight,
     };
   };
 
