@@ -8,7 +8,6 @@ import {
   result,
 } from "@quri/squiggle-lang";
 import { ErrorAlert } from "../Alert.js";
-import { SqError, SqValue, SqValuePath, result } from "@quri/squiggle-lang";
 import { ChevronRightIcon } from "@quri/ui";
 import { useImperativeHandle } from "react";
 import { MessageAlert } from "../Alert.js";
