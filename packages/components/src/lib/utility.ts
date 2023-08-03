@@ -1,4 +1,10 @@
-import { SqError, SqValue, result, resultMap } from "@quri/squiggle-lang";
+import {
+  SqError,
+  SqValue,
+  SqDictValue,
+  result,
+  resultMap,
+} from "@quri/squiggle-lang";
 
 import { SquiggleOutput } from "./hooks/useSquiggle.js";
 
@@ -36,12 +42,21 @@ export function some(arr: boolean[]): boolean {
   return arr.reduce((x, y) => x || y, false);
 }
 
-export function getValueToRender({
+export function getResultVariables({
   output,
-}: SquiggleOutput): result<SqValue, SqError> {
-  return resultMap(output, (value) =>
-    value.result.tag === "Void" ? value.bindings.asValue() : value.result
-  );
+}: SquiggleOutput): result<SqDictValue, SqError> {
+  return resultMap(output, (value) => value.bindings.asValue());
+}
+
+export function getResultValue({
+  output,
+}: SquiggleOutput): result<SqValue, SqError> | undefined {
+  if (output.ok) {
+    const isResult = output.value.result.tag !== "Void";
+    return isResult ? { ok: true, value: output.value.result } : undefined;
+  } else {
+    return output;
+  }
 }
 
 export function getErrors(result: SquiggleOutput["output"]) {

@@ -21,6 +21,7 @@ import {
   MergedItemSettings,
   getChildrenValues,
   pathAsString,
+  topLevelBindingsName,
 } from "./utils.js";
 import { CodeEditorHandle } from "../CodeEditor.js";
 
@@ -154,15 +155,28 @@ type SettingsStore = {
 
 const defaultLocalSettings: LocalItemSettings = { collapsed: false };
 
+const collapsedVariablesDefault: SettingsStore = {
+  [topLevelBindingsName]: { collapsed: true },
+};
+
 export const ViewerProvider: FC<
   PropsWithChildren<{
     partialPlaygroundSettings: PartialPlaygroundSettings;
     localSettingsEnabled: boolean;
     editor?: CodeEditorHandle;
+    beginWithVariablesCollapsed?: boolean;
   }>
-> = ({ partialPlaygroundSettings, localSettingsEnabled, editor, children }) => {
+> = ({
+  partialPlaygroundSettings,
+  localSettingsEnabled,
+  editor,
+  beginWithVariablesCollapsed,
+  children,
+}) => {
   // can't store settings in the state because we don't want to rerender the entire tree on every change
-  const settingsStoreRef = useRef<SettingsStore>({});
+  const settingsStoreRef = useRef<SettingsStore>(
+    beginWithVariablesCollapsed ? collapsedVariablesDefault : {}
+  );
 
   const itemHandlesStoreRef = useRef<{ [k: string]: HTMLDivElement }>({});
 

@@ -129,9 +129,8 @@ export const VariableBox: FC<VariableBoxProps> = ({
     };
   });
 
-  const hasBodyContent = Boolean(path.items.length);
   const isOpen = isFocused || !settings.collapsed;
-  const _focus = () => !isFocused && hasBodyContent && focus(path);
+  const _focus = () => !isFocused && !isRoot && focus(path);
 
   const triangleToggle = () => (
     <div
@@ -141,16 +140,19 @@ export const VariableBox: FC<VariableBoxProps> = ({
       <TriangleIcon size={10} className={isOpen ? "rotate-180" : "rotate-90"} />
     </div>
   );
+
+  const headerClasses = () => {
+    if (isFocused) {
+      return "text-md text-black font-bold ml-1";
+    } else if (isRoot) {
+      return "text-sm text-stone-600 font-semibold";
+    } else {
+      return "text-sm text-stone-800 cursor-pointer hover:underline";
+    }
+  };
+
   const headerName = (
-    <div
-      className={clsx(
-        "font-mono",
-        isFocused
-          ? "text-lg text-black ml-1"
-          : "text-sm text-stone-800 cursor-pointer hover:underline"
-      )}
-      onClick={_focus}
-    >
+    <div className={clsx("font-mono", headerClasses())} onClick={_focus}>
       {name}
     </div>
   );
@@ -236,7 +238,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
 
   return (
     <div ref={saveRef}>
-      {name === undefined ? null : (
+      {(name !== undefined || isRoot) && (
         <header
           className={clsx(
             "flex justify-between group",
@@ -258,9 +260,9 @@ export const VariableBox: FC<VariableBoxProps> = ({
       )}
       {isOpen && (
         <div className="flex w-full pt-1">
-          {!isFocused && hasBodyContent && isDictOrList && leftCollapseBorder()}
-          {!isFocused && hasBodyContent && !isDictOrList && !isRoot && (
-            <div className="flex w-4" />
+          {!isFocused && isDictOrList && leftCollapseBorder()}
+          {!isFocused && !isDictOrList && !isRoot && (
+            <div className="flex w-4 min-w-[1rem]" /> // min-w-1rem = w-4
           )}
           <div className="grow">
             {commentPosition === "top" && hasComment && showComment()}

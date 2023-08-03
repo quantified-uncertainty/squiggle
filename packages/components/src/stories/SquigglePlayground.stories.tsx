@@ -188,7 +188,7 @@ varDist = SampleSet.fromDist(2 to 5)
 
 varScatter = Plot.scatter({
   xDist: varDist,
-  yDist: (-3 to 3) * 5 - varDist ^ 2
+  yDist: (1 to 3) * 5 - varDist ^ 2
 })
 `,
     height: 800,
