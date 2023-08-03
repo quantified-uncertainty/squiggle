@@ -7,6 +7,8 @@ import {
   SqValuePath,
   result,
 } from "@quri/squiggle-lang";
+import { ErrorAlert } from "../Alert.js";
+import { SqError, SqValue, SqValuePath, result } from "@quri/squiggle-lang";
 import { ChevronRightIcon } from "@quri/ui";
 import { useImperativeHandle } from "react";
 import { MessageAlert } from "../Alert.js";
@@ -14,6 +16,7 @@ import { CodeEditorHandle } from "../CodeEditor.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 import { ExpressionViewer } from "./ExpressionViewer.js";
+import { ErrorBoundary } from "react-error-boundary";
 import {
   ViewerProvider,
   useFocus,
@@ -33,6 +36,29 @@ export type SquiggleViewerProps = {
   localSettingsEnabled?: boolean;
   editor?: CodeEditorHandle;
 } & PartialPlaygroundSettings;
+
+const SquiggleViewerBody: FC<{ value: SqValue }> = ({ value }) => {
+  const { focused } = useViewerContext();
+
+  const valueToRender = focused ? extractSubvalueByPath(value, focused) : value;
+
+  if (!valueToRender) {
+    return <MessageAlert heading="Focused variable is not defined" />;
+  }
+
+  return (
+    <ErrorBoundary
+      fallback={
+        <ErrorAlert heading="Error">
+          There has been a JS error. It has been logged to he JS console.
+        </ErrorAlert>
+      }
+      onError={(error, info) => console.error(error, info)}
+    >
+      <ExpressionViewer value={valueToRender} />;
+    </ErrorBoundary>
+  );
+};
 
 const SquiggleViewerOuter = forwardRef<
   SquiggleViewerHandle,

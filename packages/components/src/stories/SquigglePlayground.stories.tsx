@@ -229,3 +229,13 @@ bar = 123
     height: 800,
   },
 };
+
+export const Failure: Story = {
+  name: "Failure",
+  args: {
+    defaultCode: `Table.make(
+      { data:[], columns: [{ name: "Features", fn: {|r|""} }] }
+    )`,
+    height: 800,
+  },
+};

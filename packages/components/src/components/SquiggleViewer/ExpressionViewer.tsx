@@ -266,7 +266,6 @@ export const getBoxProps = (
       return {
         heading: `Dict(${entries.length})`,
         preview: <SqTypeWithCount type="{}" count={entries.length} />,
-        isDictOrList: true,
         children: () =>
           entries.map((r, i) => <ExpressionViewer key={i} value={r} />),
       };
@@ -277,7 +276,6 @@ export const getBoxProps = (
       return {
         heading: `List(${length})`,
         preview: <SqTypeWithCount type="[]" count={length} />,
-        isDictOrList: true,
         children: () =>
           entries.map((r, i) => <ExpressionViewer key={i} value={r} />),
       };
