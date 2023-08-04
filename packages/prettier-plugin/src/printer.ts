@@ -254,7 +254,7 @@ export function createSquigglePrinter(
         case "KeyValue": {
           const key =
             node.key.type === "String" &&
-            node.key.value.match(/^[\$_a-z]+[\$_a-z0-9]*$/i)
+            node.key.value.match(/^[\$_a-z]+[\$_a-zA-Z0-9]*$/)
               ? node.key.value
               : typedPath(node).call(print, "key");
 
