@@ -165,7 +165,7 @@ class VString extends BaseValue {
     super();
   }
   toString() {
-    return `'${this.value}'`;
+    return JSON.stringify(this.value);
   }
 }
 export const vString = (v: string) => new VString(v);

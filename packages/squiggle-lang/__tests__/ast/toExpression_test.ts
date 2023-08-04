@@ -4,7 +4,7 @@ describe("Peggy to Expression", () => {
   describe("literals operators parenthesis", () => {
     // Note that there is always an outer block. Otherwise, external bindings are ignored at the first statement
     testToExpression("1", "1", "1");
-    testToExpression("'hello'", "'hello'", "'hello'");
+    testToExpression("'hello'", '"hello"', '"hello"');
     testToExpression("true", "true", "true");
     testToExpression("1+2", "(add)(1, 2)", "3");
     testToExpression("add(1,2)", "(add)(1, 2)", "3");
@@ -48,19 +48,19 @@ describe("Peggy to Expression", () => {
     testToExpression("[0, 1, 2]", "[0, 1, 2]", "[0,1,2]");
     testToExpression(
       "['hello', 'world']",
-      "['hello', 'world']",
-      "['hello','world']"
+      '["hello", "world"]',
+      '["hello","world"]'
     );
     testToExpression("([0,1,2])[1]", "($_atIndex_$)([0, 1, 2], 1)", "1");
   });
 
   describe("dicts", () => {
-    testToExpression("{a: 1, b: 2}", "{'a': 1, 'b': 2}", "{a: 1,b: 2}");
+    testToExpression("{a: 1, b: 2}", '{"a": 1, "b": 2}', "{a: 1,b: 2}");
     testToExpression("{1+0: 1, 2+0: 2}", "{(add)(1, 0): 1, (add)(2, 0): 2}"); // key can be any expression
     testToExpression("dict.property", "Error(dict is not defined)");
     testToExpression(
       "dict={property: 1}; dict.property",
-      "dict = {{'property': 1}}; ($_atIndex_$)(dict, 'property')",
+      'dict = {{"property": 1}}; ($_atIndex_$)(dict, "property")',
       "1"
     );
   });
