@@ -766,6 +766,9 @@ importers:
       eslint-config-next:
         specifier: ^13.4.7
         version: 13.4.7(eslint@8.44.0)(typescript@5.1.6)
+      glob:
+        specifier: ^10.3.1
+        version: 10.3.1
       postcss:
         specifier: ^8.4.24
         version: 8.4.24
