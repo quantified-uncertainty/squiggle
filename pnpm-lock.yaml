@@ -140,8 +140,8 @@ importers:
         version: 3.21.4
     devDependencies:
       '@jest/globals':
-        specifier: ^29.6.1
-        version: 29.6.1
+        specifier: ^29.6.2
+        version: 29.6.2
       '@juggle/resize-observer':
         specifier: ^3.4.0
         version: 3.4.0
@@ -494,8 +494,8 @@ importers:
         specifier: ^7.22.5
         version: 7.22.5(@babel/core@7.22.9)
       '@jest/globals':
-        specifier: ^29.6.1
-        version: 29.6.1
+        specifier: ^29.6.2
+        version: 29.6.2
       '@types/jest':
         specifier: ^29.5.3
         version: 29.5.3
@@ -3307,16 +3307,6 @@ packages:
       jest-get-type: 29.4.3
     dev: true
 
-  /@jest/expect@29.6.1:
-    resolution: {integrity: sha512-N5xlPrAYaRNyFgVf2s9Uyyvr795jnB6rObuPx4QFvNJz8aAjpZUDfO4bh5G/xuplMID8PrnuF1+SfSyDxhsgYg==}
-    engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
-    dependencies:
-      expect: 29.6.2
-      jest-snapshot: 29.6.2
-    transitivePeerDependencies:
-      - supports-color
-    dev: true
-
   /@jest/expect@29.6.2:
     resolution: {integrity: sha512-m6DrEJxVKjkELTVAztTLyS/7C92Y2b0VYqmDROYKLLALHn8T/04yPs70NADUYPrV3ruI+H3J0iUIuhkjp7vkfg==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
@@ -3337,18 +3327,6 @@ packages:
       jest-message-util: 29.6.2
       jest-mock: 29.6.2
       jest-util: 29.6.2
-    dev: true
-
-  /@jest/globals@29.6.1:
-    resolution: {integrity: sha512-2VjpaGy78JY9n9370H8zGRCFbYVWwjY6RdDMhoJHa1sYfwe6XM/azGN0SjY8kk7BOZApIejQ1BFPyH7FPG0w3A==}
-    engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
-    dependencies:
-      '@jest/environment': 29.6.1
-      '@jest/expect': 29.6.1
-      '@jest/types': 29.6.1
-      jest-mock: 29.6.1
-    transitivePeerDependencies:
-      - supports-color
     dev: true
 
   /@jest/globals@29.6.2:
