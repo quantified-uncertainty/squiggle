@@ -36,8 +36,8 @@ importers:
         specifier: ^0.0.1-security
         version: 0.0.1-security
       glob:
-        specifier: ^10.3.1
-        version: 10.3.1
+        specifier: ^10.3.3
+        version: 10.3.3
       indent-string:
         specifier: ^5.0.0
         version: 5.0.0
@@ -767,8 +767,8 @@ importers:
         specifier: ^13.4.7
         version: 13.4.7(eslint@8.44.0)(typescript@5.1.6)
       glob:
-        specifier: ^10.3.1
-        version: 10.3.1
+        specifier: ^10.3.3
+        version: 10.3.3
       postcss:
         specifier: ^8.4.24
         version: 8.4.24
@@ -3280,16 +3280,6 @@ packages:
       - ts-node
     dev: true
 
-  /@jest/environment@29.6.1:
-    resolution: {integrity: sha512-RMMXx4ws+Gbvw3DfLSuo2cfQlK7IwGbpuEWXCqyYDcqYTI+9Ju3a5hDnXaxjNsa6uKh9PQF2v+qg+RLe63tz5A==}
-    engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
-    dependencies:
-      '@jest/fake-timers': 29.6.2
-      '@jest/types': 29.6.1
-      '@types/node': 20.4.0
-      jest-mock: 29.6.2
-    dev: true
-
   /@jest/environment@29.6.2:
     resolution: {integrity: sha512-AEcW43C7huGd/vogTddNNTDRpO6vQ2zaQNrttvWV18ArBx9Z56h7BIsXkNFJVOO4/kblWEQz30ckw0+L3izc+Q==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
@@ -4990,7 +4980,7 @@ packages:
       '@storybook/preview-api': 7.2.1
       '@storybook/theming': 7.2.1(react-dom@18.2.0)(react@18.2.0)
       '@storybook/types': 7.2.1
-      '@types/lodash': 4.14.195
+      '@types/lodash': 4.14.196
       color-convert: 2.0.1
       dequal: 2.0.3
       lodash: 4.17.21
@@ -5345,7 +5335,7 @@ packages:
       find-cache-dir: 3.3.2
       find-up: 5.0.0
       fs-extra: 11.1.1
-      glob: 10.3.1
+      glob: 10.3.3
       handlebars: 4.7.7
       lazy-universal-dotenv: 4.0.0
       node-fetch: 2.6.12
@@ -5375,7 +5365,7 @@ packages:
       find-cache-dir: 3.3.2
       find-up: 5.0.0
       fs-extra: 11.1.1
-      glob: 10.3.1
+      glob: 10.3.3
       handlebars: 4.7.7
       lazy-universal-dotenv: 4.0.0
       node-fetch: 2.6.12
@@ -5405,7 +5395,7 @@ packages:
       find-cache-dir: 3.3.2
       find-up: 5.0.0
       fs-extra: 11.1.1
-      glob: 10.3.1
+      glob: 10.3.3
       handlebars: 4.7.7
       lazy-universal-dotenv: 4.0.0
       node-fetch: 2.6.12
@@ -10761,8 +10751,8 @@ packages:
   /glob-to-regexp@0.4.1:
     resolution: {integrity: sha512-lkX1HJXwyMcprw/5YUZc2s7DrpAiHB21/V+E1rHUrVNokkvB6bqMzT0VfV6/86ZNabt1k14YOIaT7nDvOX3Iiw==}
 
-  /glob@10.3.1:
-    resolution: {integrity: sha512-9BKYcEeIs7QwlCYs+Y3GBvqAMISufUS0i2ELd11zpZjxI5V9iyRj0HgzB5/cLf2NY4vcYBTYzJ7GIui7j/4DOw==}
+  /glob@10.3.3:
+    resolution: {integrity: sha512-92vPiMb/iqpmEgsOoIDvTjc50wf9CCCvMzsi6W0JLPeUKE8TWP1a73PgqSrqy7iAZxaSD1YdzU7QZR5LF51MJw==}
     engines: {node: '>=16 || 14 >=14.17'}
     hasBin: true
     dependencies:
@@ -10770,7 +10760,7 @@ packages:
       jackspeak: 2.2.0
       minimatch: 9.0.1
       minipass: 6.0.2
-      path-scurry: 1.10.0
+      path-scurry: 1.10.1
 
   /glob@7.1.6:
     resolution: {integrity: sha512-LwaxwyZ72Lk7vZINtNNrywX0ZuLyStrdDtabefZKAY5ZGJhVtgdznluResxNmPitE0SAO+O26sWTHeKSI2wMBA==}
@@ -14555,8 +14545,8 @@ packages:
   /path-parse@1.0.7:
     resolution: {integrity: sha512-LDJzPVEEEPR+y48z93A0Ed0yXb8pAByGWo/k5YYdYgpY2/2EsOsksJrq7lOHxryrVOn1ejG6oAp8ahvOIQD8sw==}
 
-  /path-scurry@1.10.0:
-    resolution: {integrity: sha512-tZFEaRQbMLjwrsmidsGJ6wDMv0iazJWk6SfIKnY4Xru8auXgmJkOBa5DUbYFcFD2Rzk2+KDlIiF0GVXNCbgC7g==}
+  /path-scurry@1.10.1:
+    resolution: {integrity: sha512-MkhCqzzBEpPvxxQ71Md0b1Kk51W01lrYvlMzSUaIzNsODdd7mqhiimSZlr+VegAz5Z6Vzt9Xg2ttE//XBhH3EQ==}
     engines: {node: '>=16 || 14 >=14.17'}
     dependencies:
       lru-cache: 10.0.0
