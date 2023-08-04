@@ -28,7 +28,7 @@
     "@quri/squiggle-textmate-grammar": "workspace:*",
     "@tailwindcss/forms": "^0.5.3",
     "@types/pako": "^2.0.0",
-    "@types/react": "^18.2.14",
+    "@types/react": "^18.2.18",
     "autoprefixer": "^10.4.14",
     "eslint": "^8.44.0",
     "eslint-config-next": "^13.4.7",
