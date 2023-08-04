@@ -221,8 +221,8 @@ importers:
         specifier: ^8.44.0
         version: 8.44.0
       eslint-plugin-react:
-        specifier: ^7.32.2
-        version: 7.32.2(eslint@8.44.0)
+        specifier: ^7.33.1
+        version: 7.33.1(eslint@8.44.0)
       eslint-plugin-react-hooks:
         specifier: ^4.6.0
         version: 4.6.0(eslint@8.44.0)
@@ -618,8 +618,8 @@ importers:
         specifier: ^8.44.0
         version: 8.44.0
       eslint-plugin-react:
-        specifier: ^7.32.2
-        version: 7.32.2(eslint@8.44.0)
+        specifier: ^7.33.1
+        version: 7.33.1(eslint@8.44.0)
       postcss:
         specifier: ^8.4.24
         version: 8.4.24
@@ -9038,7 +9038,7 @@ packages:
       eslint-import-resolver-typescript: 3.5.3(eslint-plugin-import@2.27.5)(eslint@8.44.0)
       eslint-plugin-import: 2.27.5(@typescript-eslint/parser@5.61.0)(eslint-import-resolver-typescript@3.5.3)(eslint@8.44.0)
       eslint-plugin-jsx-a11y: 6.6.1(eslint@8.44.0)
-      eslint-plugin-react: 7.32.2(eslint@8.44.0)
+      eslint-plugin-react: 7.33.1(eslint@8.44.0)
       eslint-plugin-react-hooks: 4.6.0(eslint@8.44.0)
       typescript: 5.1.6
     transitivePeerDependencies:
@@ -9170,8 +9170,8 @@ packages:
       eslint: 8.44.0
     dev: true
 
-  /eslint-plugin-react@7.32.2(eslint@8.44.0):
-    resolution: {integrity: sha512-t2fBMa+XzonrrNkyVirzKlvn5RXzzPwRHtMvLAtVZrt8oxgnTQaYbU6SXTOO1mwQgp1y5+toMSKInnzGr0Knqg==}
+  /eslint-plugin-react@7.33.1(eslint@8.44.0):
+    resolution: {integrity: sha512-L093k0WAMvr6VhNwReB8VgOq5s2LesZmrpPdKz/kZElQDzqS7G7+DnKoqT+w4JwuiGeAhAvHO0fvy0Eyk4ejDA==}
     engines: {node: '>=4'}
     peerDependencies:
       eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8
@@ -9190,7 +9190,7 @@ packages:
       object.values: 1.1.6
       prop-types: 15.8.1
       resolve: 2.0.0-next.4
-      semver: 6.3.0
+      semver: 6.3.1
       string.prototype.matchall: 4.0.8
     dev: true
 
@@ -15202,11 +15202,6 @@ packages:
 
   /semver@5.7.1:
     resolution: {integrity: sha512-sauaDf/PZdVgrLTNYHRtpXa1iRiKcaebiKQ1BJdpQlWH2lCvexQdX55snPFyK7QzpudqbCI0qXFfOasHdyNDGQ==}
-    hasBin: true
-    dev: true
-
-  /semver@6.3.0:
-    resolution: {integrity: sha512-b39TBaTSfV6yBrapU89p5fKekE2m/NwnDocOVruQFS1/veMgdzuPcnOM34M6CwxW8jH/lxEa5rBoDeUwu5HHTw==}
     hasBin: true
     dev: true
 
