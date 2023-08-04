@@ -518,8 +518,8 @@ importers:
         specifier: ^8.44.0
         version: 8.44.0
       fast-check:
-        specifier: ^3.10.0
-        version: 3.10.0
+        specifier: ^3.12.0
+        version: 3.12.0
       jest:
         specifier: ^29.6.2
         version: 29.6.2(@types/node@20.3.3)(ts-node@10.9.1)
@@ -10108,11 +10108,11 @@ packages:
       - supports-color
     dev: true
 
-  /fast-check@3.10.0:
-    resolution: {integrity: sha512-I2FldZwnCbcY6iL+H0rp9m4D+O3PotuFu9FasWjMCzUedYHMP89/37JbSt6/n7Yq/IZmJDW0B2h30sPYdzrfzw==}
+  /fast-check@3.12.0:
+    resolution: {integrity: sha512-SqahE9mlL3+lhjJ39joMLwcj6F+24hfZdf/tchlNO8sHcTdrUUdA5P/ZbSFZM9Xpzs36XaneGwE0FWepm/zyOA==}
     engines: {node: '>=8.0.0'}
     dependencies:
-      pure-rand: 6.0.0
+      pure-rand: 6.0.2
     dev: true
 
   /fast-decode-uri-component@1.0.1:
@@ -14902,10 +14902,6 @@ packages:
       - bufferutil
       - supports-color
       - utf-8-validate
-    dev: true
-
-  /pure-rand@6.0.0:
-    resolution: {integrity: sha512-rLSBxJjP+4DQOgcJAx6RZHT2he2pkhQdSnofG5VWyVl6GRq/K02ISOuOLcsMOrtKDIJb8JN2zm3FFzWNbezdPw==}
     dev: true
 
   /pure-rand@6.0.2:
