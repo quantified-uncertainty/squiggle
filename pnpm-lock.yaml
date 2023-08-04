@@ -717,9 +717,6 @@ importers:
       clsx:
         specifier: ^2.0.0
         version: 2.0.0
-      glob:
-        specifier: ^10.3.1
-        version: 10.3.1
       next:
         specifier: ^13.4.9
         version: 13.4.9(react-dom@18.2.0)(react@18.2.0)
@@ -766,6 +763,9 @@ importers:
       eslint-config-next:
         specifier: ^13.4.7
         version: 13.4.7(eslint@8.44.0)(typescript@5.1.6)
+      glob:
+        specifier: ^10.3.1
+        version: 10.3.1
       postcss:
         specifier: ^8.4.24
         version: 8.4.24
