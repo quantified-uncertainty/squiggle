@@ -64,7 +64,7 @@
     "@types/relay-runtime": "^14.1.12",
     "babel-plugin-relay": "^15.0.0",
     "eslint": "^8.46.0",
-    "eslint-config-next": "^13.4.7",
+    "eslint-config-next": "^13.4.12",
     "graphql": "^16.7.1",
     "postcss": "^8.4.24",
     "prettier": "^2.8.8",
