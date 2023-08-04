@@ -164,8 +164,8 @@ importers:
         specifier: ^7.2.1
         version: 7.2.1(@types/react-dom@18.2.7)(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0)
       '@storybook/addon-links':
-        specifier: ^7.0.24
-        version: 7.0.24(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^7.2.1
+        version: 7.2.1(react-dom@18.2.0)(react@18.2.0)
       '@storybook/blocks':
         specifier: ^7.0.24
         version: 7.0.24(react-dom@18.2.0)(react@18.2.0)
@@ -582,8 +582,8 @@ importers:
         specifier: ^7.1.1
         version: 7.1.1(react-dom@18.2.0)(react@18.2.0)
       '@storybook/addon-links':
-        specifier: ^7.0.24
-        version: 7.0.24(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^7.2.1
+        version: 7.2.1(react-dom@18.2.0)(react@18.2.0)
       '@storybook/blocks':
         specifier: ^7.0.24
         version: 7.0.24(react-dom@18.2.0)(react@18.2.0)
@@ -3280,16 +3280,6 @@ packages:
       - ts-node
     dev: true
 
-  /@jest/environment@29.6.1:
-    resolution: {integrity: sha512-RMMXx4ws+Gbvw3DfLSuo2cfQlK7IwGbpuEWXCqyYDcqYTI+9Ju3a5hDnXaxjNsa6uKh9PQF2v+qg+RLe63tz5A==}
-    engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
-    dependencies:
-      '@jest/fake-timers': 29.6.2
-      '@jest/types': 29.6.1
-      '@types/node': 20.4.0
-      jest-mock: 29.6.2
-    dev: true
-
   /@jest/environment@29.6.2:
     resolution: {integrity: sha512-AEcW43C7huGd/vogTddNNTDRpO6vQ2zaQNrttvWV18ArBx9Z56h7BIsXkNFJVOO4/kblWEQz30ckw0+L3izc+Q==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
@@ -4775,8 +4765,8 @@ packages:
       - supports-color
     dev: true
 
-  /@storybook/addon-links@7.0.24(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-/Hse4IC3ov2dVzpZiIpf2QNFczi4pxdjZdmR0FhKeRlFldEJyywgT8a/gzeEahXO9v1jsEDa7j7f8JQcu/+04w==}
+  /@storybook/addon-links@7.2.1(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-3UQfOZ1+wGlPsHWWjXjPskq6nsDXuB+8QvOcpqy51mK+5Zv/EQe386hWj9VUpjLNMxXarWETa5CXGfoQdFzJTA==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
@@ -4786,14 +4776,14 @@ packages:
       react-dom:
         optional: true
     dependencies:
-      '@storybook/client-logger': 7.0.24
-      '@storybook/core-events': 7.0.24
+      '@storybook/client-logger': 7.2.1
+      '@storybook/core-events': 7.2.1
       '@storybook/csf': 0.1.0
       '@storybook/global': 5.0.0
-      '@storybook/manager-api': 7.0.24(react-dom@18.2.0)(react@18.2.0)
-      '@storybook/preview-api': 7.0.24
-      '@storybook/router': 7.0.24(react-dom@18.2.0)(react@18.2.0)
-      '@storybook/types': 7.0.24
+      '@storybook/manager-api': 7.2.1(react-dom@18.2.0)(react@18.2.0)
+      '@storybook/preview-api': 7.2.1
+      '@storybook/router': 7.2.1(react-dom@18.2.0)(react@18.2.0)
+      '@storybook/types': 7.2.1
       prop-types: 15.8.1
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
@@ -4990,7 +4980,7 @@ packages:
       '@storybook/preview-api': 7.2.1
       '@storybook/theming': 7.2.1(react-dom@18.2.0)(react@18.2.0)
       '@storybook/types': 7.2.1
-      '@types/lodash': 4.14.195
+      '@types/lodash': 4.14.196
       color-convert: 2.0.1
       dequal: 2.0.3
       lodash: 4.17.21
