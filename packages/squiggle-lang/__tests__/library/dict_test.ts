@@ -11,9 +11,9 @@ describe("Dict", () => {
     "Dict.mergeMany([{a: 1, b: 2}, {c: 3, d: 4}, {c: 5, e: 6}])",
     "{a: 1,b: 2,c: 5,d: 4,e: 6}"
   );
-  testEvalToBe("Dict.keys({a: 1, b: 2})", "['a','b']");
+  testEvalToBe("Dict.keys({a: 1, b: 2})", '["a","b"]');
   testEvalToBe("Dict.values({a: 1, b: 2})", "[1,2]");
-  testEvalToBe("Dict.toList({a: 1, b: 2})", "[['a',1],['b',2]]");
+  testEvalToBe("Dict.toList({a: 1, b: 2})", '[["a",1],["b",2]]');
   testEvalToBe("Dict.fromList([['a', 1], ['b', 2]])", "{a: 1,b: 2}");
   testEvalToBe("Dict.map({a: 1, b: 2}, {|x| x * 2})", "{a: 2,b: 4}");
   testEvalToBe(

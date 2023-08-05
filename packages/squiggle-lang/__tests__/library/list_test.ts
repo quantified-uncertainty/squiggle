@@ -14,7 +14,7 @@ describe("List functions", () => {
   });
 
   describe("make", () => {
-    testEvalToBe("List.make(3, 'HI')", "['HI','HI','HI']");
+    testEvalToBe("List.make(3, 'HI')", '["HI","HI","HI"]');
     testEvalToBe("make(3, 'HI')", "Error(make is not defined)");
   });
 
@@ -36,7 +36,7 @@ describe("List functions", () => {
   describe("concat", () => {
     testEvalToBe("List.concat([1, 2, 3], [4, 5, 6])", "[1,2,3,4,5,6]");
     testEvalToBe("List.concat([], [1, 2, 3])", "[1,2,3]");
-    testEvalToBe("List.concat(['cake'], [1, 2, 3])", "['cake',1,2,3]");
+    testEvalToBe("List.concat(['cake'], [1, 2, 3])", '["cake",1,2,3]');
   });
 
   describe("reverse", () => {
@@ -67,10 +67,10 @@ describe("List functions", () => {
 
   describe("uniq", () => {
     testEvalToBe("arr=[1,2,3,1,2,3]; List.uniq(arr)", "[1,2,3]");
-    testEvalToBe("arr=[1,'1']; List.uniq(arr)", "[1,'1']");
+    testEvalToBe("arr=[1,'1']; List.uniq(arr)", '[1,"1"]');
     testEvalToBe(
       "arr=[1,1, 'test', 'test', false, false, true]; List.uniq(arr)",
-      "[1,'test',false,true]"
+      '[1,"test",false,true]'
     );
     testEvalToBe(
       "arr=[1,2,normal(50,1)]; List.uniq(arr)",
@@ -146,9 +146,9 @@ describe("List functions", () => {
   });
 
   describe("join", () => {
-    testEvalToBe("arr=['a', 'b', 'c']; List.join(arr, '-')", "'a-b-c'");
-    testEvalToBe("arr=['a', 'b', 'c']; List.join(arr, ' ')", "'a b c'");
-    testEvalToBe("arr=['a', 'b', 'c']; List.join(arr)", "'a,b,c'");
+    testEvalToBe("arr=['a', 'b', 'c']; List.join(arr, '-')", '"a-b-c"');
+    testEvalToBe("arr=['a', 'b', 'c']; List.join(arr, ' ')", '"a b c"');
+    testEvalToBe("arr=['a', 'b', 'c']; List.join(arr)", '"a,b,c"');
   });
 
   describe("flatten", () => {
