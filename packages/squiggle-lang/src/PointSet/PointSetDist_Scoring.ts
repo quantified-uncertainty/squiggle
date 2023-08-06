@@ -18,7 +18,7 @@ function minusScaledLogOfQuotient({
 }): Result.result<number, OperationError> {
   const quot = esti / answ;
   return quot < 0.0
-    ? Result.Err(ComplexNumberError)
+    ? Result.Err(new ComplexNumberError())
     : Result.Ok(-answ * logFn(quot));
 }
 
@@ -90,9 +90,9 @@ export const WithScalarAnswer = {
     ): Result.result<number, OperationError> => {
       const density = estimatePdf(answer);
       if (density === undefined) {
-        return Result.Err(PdfInvalidError);
+        return Result.Err(new PdfInvalidError());
       } else if (density < 0) {
-        return Result.Err(PdfInvalidError);
+        return Result.Err(new PdfInvalidError());
       } else if (density === 0) {
         return Result.Ok(Infinity);
       } else {

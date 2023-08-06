@@ -1,4 +1,8 @@
 export abstract class OperationError {
+  // Important for type safety.
+  // Requiring only `toString()` method is too generic and caused bugs like https://github.com/quantified-uncertainty/squiggle/issues/2211.
+  type = "OperationError";
+
   abstract toString(): string;
 }
 
