@@ -40,6 +40,7 @@ export interface PointSet<T> {
       | ((cache: ContinuousShape) => ContinuousShape | undefined)
   ): result<T, E>;
   xToY(x: number): MixedPoint;
+  isEmpty(): boolean;
   toContinuous(): ContinuousShape | undefined;
   toDiscrete(): DiscreteShape | undefined;
   toMixed(): MixedShape;

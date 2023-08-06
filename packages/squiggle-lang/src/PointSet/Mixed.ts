@@ -51,6 +51,9 @@ export class MixedShape implements PointSet<MixedShape> {
     return Math.max(this.continuous.maxX(), this.discrete.maxX());
   }
 
+  isEmpty() {
+    return this.continuous.isEmpty() && this.discrete.isEmpty();
+  }
   toContinuous() {
     return this.continuous;
   }
@@ -69,6 +72,15 @@ export class MixedShape implements PointSet<MixedShape> {
   }
 
   normalize() {
+    if (this.isEmpty()) {
+      return this; // still not normalized, throw an error?
+    }
+    if (this.continuous.isEmpty()) {
+      return this.discrete.normalize().toMixed();
+    }
+    if (this.discrete.isEmpty()) {
+      return this.continuous.normalize().toMixed();
+    }
     const continuousIntegralSum = this.continuous.integralSum();
     const discreteIntegralSum = this.discrete.integralSum();
 
@@ -231,7 +243,11 @@ export class MixedShape implements PointSet<MixedShape> {
     const discreteMean = this.discrete.mean();
     const continuousMean = this.continuous.mean();
     // means are already weighted by subshape probabilities
-    return (discreteMean + continuousMean) / this.integralSum();
+    return (
+      (discreteMean * this.discrete.integralSum() +
+        continuousMean * this.continuous.integralSum()) /
+      this.integralSum()
+    );
   }
   variance(): number {
     // the combined mean is the weighted sum of the two:
@@ -299,6 +315,7 @@ export const combineAlgebraically = (
     t2.discrete,
     "Second"
   );
+
   const continuousConvResult = Continuous.sum([
     ccConvResult,
     dcConvResult,
@@ -337,19 +354,18 @@ export const combinePointwise = <E>(
     v2: ContinuousShape
   ) => ContinuousShape | undefined = () => undefined
 ): Result.result<MixedShape, E> => {
-  const isDefined = <T>(argument: T | undefined): argument is T => {
-    return argument !== undefined;
-  };
-
-  const reducedDiscrete = Discrete.reduce(
-    [t1, t2].map((t) => t.toDiscrete()).filter(isDefined),
+  const reducedDiscrete = Discrete.combinePointwise(
+    t1.toDiscrete(),
+    t2.toDiscrete(),
     fn,
     integralSumCachesFn
   );
 
-  const reducedContinuous = Continuous.reduce(
-    [t1, t2].map((t) => t.toContinuous()).filter(isDefined),
+  const reducedContinuous = Continuous.combinePointwise(
+    t1.toContinuous(),
+    t2.toContinuous(),
     fn,
+    undefined,
     integralSumCachesFn
   );
 
