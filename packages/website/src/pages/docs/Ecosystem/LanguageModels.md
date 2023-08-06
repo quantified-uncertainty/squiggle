@@ -10,7 +10,7 @@ Manual training LLMs for writing Squiggle could make for a great project. If you
 
 ## Document with all documentation
 
-[All Squiggle Documentation, in One Document](https://github.com/quantified-uncertainty/squiggle/blob/main/packages/website/allContent.tx)
+[All Squiggle Documentation, in One Document](https://raw.githubusercontent.com/quantified-uncertainty/squiggle/main/packages/website/allContent.txt)
 
 ## Instructions for use with Claude
 
