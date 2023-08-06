@@ -1,6 +1,7 @@
 import { Session } from "next-auth";
 import { signIn, signOut } from "next-auth/react";
 import { FC } from "react";
+import { newDefinitionRoute } from "@/routes";
 import Link from "next/link";
 import { IconProps } from "@/relative-values/components/ui/icons/Icon";
 
@@ -14,6 +15,7 @@ import {
   DropdownMenuSeparator,
   SignOutIcon,
   UserCircleIcon,
+  ScaleIcon,
 } from "@quri/ui";
 
 import { chooseUsernameRoute, userRoute } from "@/routes";
@@ -77,25 +79,13 @@ export const UserControls: FC<{ session: Session | null }> = ({ session }) => {
               title="Sign Out"
             />
             <DropdownMenuSeparator />
-            <DropdownMenuHeader>Resources</DropdownMenuHeader>
+            <DropdownMenuHeader>Experimental</DropdownMenuHeader>
             <DropdownMenuSeparator />
-            <MenuLink
-              href={DISCORD_URL}
-              title="Discord"
+            <DropdownMenuLinkItem
+              href={newDefinitionRoute()}
+              icon={ScaleIcon}
+              title="New Relative Value Definition"
               close={close}
-              external
-            />
-            <MenuLink
-              href={GITHUB_DISCUSSION_URL}
-              title="Discussion"
-              close={close}
-              external
-            />
-            <MenuLink
-              href={NEWSLETTER_URL}
-              title="Newsletter"
-              close={close}
-              external
             />
           </DropdownMenu>
         )}
