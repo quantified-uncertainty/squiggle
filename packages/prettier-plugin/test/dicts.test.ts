@@ -17,6 +17,10 @@ describe("dicts", () => {
     expect(await format('{"foo bar": 5}')).toBe('{ "foo bar": 5 }');
   });
 
+  test("capitalized key", async () => {
+    expect(await format('{"FooBar": 5}')).toBe('{ "FooBar": 5 }');
+  });
+
   test("one line if possible", async () => {
     expect(
       await format(`{

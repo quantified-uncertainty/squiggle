@@ -122,7 +122,7 @@ describe("distribution functions", () => {
     testEvalToBe("stdev(Sym.logistic(5,1))", "1.8137993642342178");
   });
   describe("toString", () => {
-    testEvalToBe("toString(Sym.normal(5,2))", "'Normal(5,2)'");
+    testEvalToBe("toString(Sym.normal(5,2))", '"Normal(5,2)"');
   });
   describe("normalize", () => {
     testEvalToBe("normalize(Sym.normal(5,2))", "Normal(5,2)");
