@@ -245,7 +245,7 @@ export const EditorSettingsForm: React.FC = () => {
     <FormSection title="Editor Settings">
       <CheckboxFormField<PlaygroundSettings>
         name="editorSettings.lineWrapping"
-        label="LineWrapping"
+        label="Line Wrapping"
       />
     </FormSection>
   );
