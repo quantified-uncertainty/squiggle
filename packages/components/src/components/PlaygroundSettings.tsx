@@ -24,6 +24,10 @@ export const functionSettingsSchema = z.object({
   count: z.number().int().finite(),
 });
 
+export const editorSettings = z.object({
+  lineWrapping: z.boolean(),
+});
+
 const scaleSchema = z.union([
   z.literal("linear"),
   z.literal("log"),
@@ -65,6 +69,7 @@ export const viewSettingsSchema = z.object({
   environment: environmentSchema,
   distributionChartSettings: distributionSettingsSchema,
   functionChartSettings: functionSettingsSchema,
+  editorSettings: editorSettings,
   chartHeight: z.number().int().finite().gte(10).lte(5000),
 });
 
@@ -86,6 +91,9 @@ export const defaultPlaygroundSettings: PlaygroundSettings = {
     xScale: "linear",
     yScale: "linear",
     showSummary: true,
+  },
+  editorSettings: {
+    lineWrapping: false,
   },
 };
 
@@ -232,6 +240,17 @@ export const FunctionSettingsForm: React.FC = () => {
   );
 };
 
+export const EditorSettingsForm: React.FC = () => {
+  return (
+    <FormSection title="Editor Settings">
+      <CheckboxFormField<PlaygroundSettings>
+        name="editorSettings.lineWrapping"
+        label="LineWrapping"
+      />
+    </FormSection>
+  );
+};
+
 export const PlaygroundSettingsForm: React.FC<{
   withFunctionSettings?: boolean;
   withGlobalSettings?: boolean;
@@ -271,6 +290,10 @@ export const PlaygroundSettingsForm: React.FC<{
           <FunctionSettingsForm />
         </div>
       ) : null}
+
+      <div className="pt-6 mb-6">
+        <EditorSettingsForm />
+      </div>
     </div>
   );
 };

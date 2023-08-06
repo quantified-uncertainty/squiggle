@@ -120,6 +120,7 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
           project={project}
           sourceId={sourceId}
           showGutter={true}
+          lineWrapping={props.settings.editorSettings.lineWrapping}
           onChange={setCode}
           onViewValuePath={props.onViewValuePath}
           onSubmit={runnerState.run}
