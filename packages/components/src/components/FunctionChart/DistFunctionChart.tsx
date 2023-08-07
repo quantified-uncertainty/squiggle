@@ -1,6 +1,6 @@
-import { flip, offset, useFloating } from "@floating-ui/react";
+import { FloatingPortal, flip, offset, useFloating } from "@floating-ui/react";
 import * as d3 from "d3";
-import { FC, useCallback, useMemo, useRef } from "react";
+import { FC, useCallback, useContext, useMemo, useRef } from "react";
 
 import {
   Env,
@@ -27,6 +27,7 @@ import { canvasClasses, unwrapOrFailure } from "../../lib/utility.js";
 import { DistributionsChart } from "../DistributionsChart/index.js";
 import { ImageErrors } from "./ImageErrors.js";
 import { getFunctionImage } from "./utils.js";
+import { TailwindContext } from "@quri/ui";
 
 type FunctionChart1DistProps = {
   plot: SqDistFnPlot;
@@ -277,21 +278,26 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
     placement: "bottom-start",
     middleware: [offset(4), flip()],
   });
+  const { selector: tailwindSelector } = useContext(TailwindContext);
 
   const renderChartAtCursor = () => {
     return (
-      <div
-        ref={refs.setFloating}
-        className="z-30 rounded-md bg-white shadow-lg border"
-        style={{
-          position: strategy,
-          top: y ?? 0,
-          left: x ?? 0,
-          width: refs.reference.current?.getBoundingClientRect().width,
-        }}
-      >
-        {distChartAtCursor}
-      </div>
+      <FloatingPortal>
+        <div className={tailwindSelector}>
+          <div
+            ref={refs.setFloating}
+            className="z-30 rounded-md bg-white shadow-lg border"
+            style={{
+              position: strategy,
+              top: y ?? 0,
+              left: x ?? 0,
+              width: refs.reference.current?.getBoundingClientRect().width,
+            }}
+          >
+            {distChartAtCursor}
+          </div>
+        </div>
+      </FloatingPortal>
     );
   };
 
