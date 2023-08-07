@@ -68,7 +68,6 @@ export const XYShapeError = {
   },
 };
 
-// can be changed to enum after Typescript conversion is done
 export type InterpolationStrategy = "Stepwise" | "Linear";
 type ExtrapolationStrategy = "UseZero" | "UseOutermostPoints";
 
@@ -165,31 +164,6 @@ export const T = {
   },
   equallyDividedXs(t: XYShape, newLength: number): number[] {
     return E_A_Floats.range(T.minX(t), T.maxX(t), newLength);
-  },
-
-  // unused
-  toJs(t: XYShape) {
-    return t;
-  },
-
-  // unused
-  filterYValues(t: XYShape, fn: (y: number) => number): XYShape {
-    return T.fromZippedArray(T.zip(t).filter(([, y]) => fn(y)));
-  },
-
-  // unused
-  filterOkYs<B>(xs: number[], ys: Result.result<number, B>[]): XYShape {
-    const n = xs.length; // Assume length(xs) == length(ys)
-    const newXs: number[] = [];
-    const newYs: number[] = [];
-    for (let i = 0; i <= n - 1; i++) {
-      const y = ys[i];
-      if (y.ok) {
-        newXs.push(xs[i]);
-        newYs.push(y.value);
-      }
-    }
-    return { xs: newXs, ys: newYs };
   },
 
   Validator: {

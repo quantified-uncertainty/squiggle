@@ -41,17 +41,14 @@ export class PointSetDist extends BaseDist {
     return new PointSetDist(this.pointSet.downsample(n));
   }
 
-  private samplePointSet(pointSet: AnyPointSet) {
-    const randomItem = Math.random();
-    return pointSet.integralYtoX(randomItem);
-  }
   sample() {
-    return this.samplePointSet(this.pointSet);
+    const randomItem = Math.random();
+    return this.pointSet.integralYtoX(randomItem);
   }
   sampleN(n: number) {
     const items: number[] = new Array(n).fill(0);
-    for (let i = 0; i <= n - 1; i++) {
-      items[i] = this.samplePointSet(this.pointSet);
+    for (let i = 0; i < n; i++) {
+      items[i] = this.sample();
     }
     return items;
   }
