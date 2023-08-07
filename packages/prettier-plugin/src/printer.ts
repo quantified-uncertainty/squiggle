@@ -306,7 +306,7 @@ export function createSquigglePrinter(
             "}",
           ]);
         case "String":
-          return ['"', node.value, '"'];
+          return [JSON.stringify(node.value)];
         case "Ternary":
           return [
             node.kind === "C" ? [] : "if ",
