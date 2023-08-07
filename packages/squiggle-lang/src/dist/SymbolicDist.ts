@@ -97,7 +97,7 @@ export abstract class SymbolicDist extends BaseDist {
     return Ok(
       new PointSetDist(
         new ContinuousShape({
-          integralSumCache: 1.0,
+          integralSumCache: 1.0, // this is a lie; real integral sum is not exactly 1 because of linear interpolation.
           xyShape: xyShapeR.value,
         }).toMixed()
       )

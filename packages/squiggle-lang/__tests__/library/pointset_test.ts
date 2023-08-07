@@ -33,7 +33,7 @@ describe("Mean of mixture is weighted average of means", () => {
         fc.float({ min: toFloat32(1e-7), max: 100, noNaN: true }),
         async (normalMean, normalStdev, betaA, betaB, x, y) => {
           // normaalize is due to https://github.com/quantified-uncertainty/squiggle/issues/1400 bug
-          const squiggleString = `mean(mixture(normal(${normalMean},${normalStdev}), beta(${betaA},${betaB}), [${x}, ${y}])->normalize)`;
+          const squiggleString = `mean(mixture(Sym.normal(${normalMean},${normalStdev}), Sym.beta(${betaA},${betaB}), [${x}, ${y}])->normalize)`;
           const res = await testRun(squiggleString);
           const weightDenom = x + y;
           const normalWeight = x / weightDenom;
