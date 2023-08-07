@@ -496,24 +496,24 @@ export const PointwiseCombination = {
 
       // First four cases here are for adding two additional points when shapes don't overlap.
       // TODO - in rare cases, last point of the first shape + epsilon could be exactly first point of the second, which will cause "Xs is not sorted" error later.
-      if (i1 === t1n && i2 === 0) {
+      if (i1 > 0 && i1 === t1n && i2 === 0) {
         // Extrapolating after final point; second shape hasn't started yet.
         // Note the exact `i1 === t1n` check.
         x = t1.xs[i1 - 1] + epsilon_float;
         y1 = interpolator(t1, t1n, x);
         y2 = interpolator(t2, -1, x);
         i1++;
-      } else if (i1 === t1n + 1 && i2 === 0) {
+      } else if (i2 > 0 && i1 === t1n + 1 && i2 === 0) {
         x = t2.xs[0] - epsilon_float;
         y1 = interpolator(t1, t1n, x);
         y2 = interpolator(t2, -1, x);
         i1++;
-      } else if (i2 === t2n && i1 === 0) {
+      } else if (i2 > 0 && i2 === t2n && i1 === 0) {
         x = t2.xs[i2 - 1] + epsilon_float;
         y1 = interpolator(t1, -1, x);
         y2 = interpolator(t2, t2n, x);
         i2++;
-      } else if (i2 === t2n + 1 && i1 === 0) {
+      } else if (i1 > 0 && i2 === t2n + 1 && i1 === 0) {
         x = t1.xs[0] - epsilon_float;
         y1 = interpolator(t1, -1, x);
         y2 = interpolator(t2, t2n, x);
