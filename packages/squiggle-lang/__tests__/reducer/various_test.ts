@@ -71,6 +71,9 @@ describe("eval", () => {
     }`,
         "{a: 1,b: 2}"
       ));
+    test("shorthand", async () => {
+      await expectEvalToBe("a=1; {a, b: a }", "{a: 1,b: 1}");
+    });
   });
 
   describe("multi-line", () => {

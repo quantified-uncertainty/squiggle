@@ -33,12 +33,22 @@ function createInitialCompileContext(externals: Bindings): CompileContext {
   };
 }
 
-function getValueOrThrow(context: CompileContext, ast: ASTNode, name: string) {
-  const value = context.externals.get(name);
-  if (value === undefined) {
-    throw new ICompileError(`${name} is not defined`, ast.location);
+function resolveName(
+  context: CompileContext,
+  ast: ASTNode,
+  name: string
+): expression.ExpressionContent {
+  const offset = context.nameToPos.get(name);
+  if (offset !== undefined) {
+    return expression.eResolvedSymbol(name, context.size - 1 - offset);
   }
-  return expression.eValue(value);
+
+  const value = context.externals.get(name);
+  if (value !== undefined) {
+    return expression.eValue(value);
+  }
+
+  throw new ICompileError(`${name} is not defined`, ast.location);
 }
 
 function compileToContent(
@@ -110,7 +120,7 @@ function compileToContent(
     case "InfixCall": {
       return [
         expression.eCall(
-          { ast, ...getValueOrThrow(context, ast, infixFunctions[ast.op]) },
+          { ast, ...resolveName(context, ast, infixFunctions[ast.op]) },
           ast.args.map((arg) => innerCompileAst(arg, context)[0])
         ),
         context,
@@ -119,7 +129,7 @@ function compileToContent(
     case "UnaryCall":
       return [
         expression.eCall(
-          { ast, ...getValueOrThrow(context, ast, unaryFunctions[ast.op]) },
+          { ast, ...resolveName(context, ast, unaryFunctions[ast.op]) },
           [innerCompileAst(ast.arg, context)[0]]
         ),
         context,
@@ -135,7 +145,7 @@ function compileToContent(
     case "DotLookup":
       return [
         expression.eCall(
-          { ast, ...getValueOrThrow(context, ast, INDEX_LOOKUP_FUNCTION) },
+          { ast, ...resolveName(context, ast, INDEX_LOOKUP_FUNCTION) },
           [
             innerCompileAst(ast.arg, context)[0],
             { ast, ...expression.eValue(vString(ast.key)) },
@@ -146,7 +156,7 @@ function compileToContent(
     case "BracketLookup":
       return [
         expression.eCall(
-          { ast, ...getValueOrThrow(context, ast, INDEX_LOOKUP_FUNCTION) },
+          { ast, ...resolveName(context, ast, INDEX_LOOKUP_FUNCTION) },
           [
             innerCompileAst(ast.arg, context)[0],
             innerCompileAst(ast.key, context)[0],
@@ -222,10 +232,26 @@ function compileToContent(
     case "Dict":
       return [
         expression.eDict(
-          ast.elements.map((kv) => [
-            innerCompileAst(kv.key, context)[0],
-            innerCompileAst(kv.value, context)[0],
-          ])
+          ast.elements.map((kv) => {
+            if (kv.type === "KeyValue") {
+              return [
+                innerCompileAst(kv.key, context)[0],
+                innerCompileAst(kv.value, context)[0],
+              ];
+            } else if (kv.type === "Identifier") {
+              // shorthand
+              const key = { ast: kv, ...expression.eValue(vString(kv.value)) };
+              const value = {
+                ast: kv,
+                ...resolveName(context, kv, kv.value),
+              };
+              return [key, value];
+            } else {
+              throw new Error(
+                `Internal AST error: unexpected kv ${kv satisfies never}`
+              ); // parsed to incorrect AST, shouldn't happen
+            }
+          })
         ),
         context,
       ];
@@ -249,7 +275,7 @@ function compileToContent(
     case "Identifier": {
       const offset = context.nameToPos.get(ast.value);
       if (offset === undefined) {
-        return [getValueOrThrow(context, ast, ast.value), context];
+        return [resolveName(context, ast, ast.value), context];
       } else {
         const result = expression.eResolvedSymbol(
           ast.value,
@@ -259,7 +285,7 @@ function compileToContent(
       }
     }
     case "UnitValue": {
-      const fromUnitFn = getValueOrThrow(context, ast, `fromUnit_${ast.unit}`);
+      const fromUnitFn = resolveName(context, ast, `fromUnit_${ast.unit}`);
       return [
         expression.eCall({ ast, ...fromUnitFn }, [
           innerCompileAst(ast.value, context)[0],

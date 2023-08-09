@@ -9,6 +9,10 @@ describe("dicts", () => {
     expect(await format("{foo: 5}")).toBe("{ foo: 5 }");
   });
 
+  test("shorthand", async () => {
+    expect(await format("{foo, bar: bar, baz}")).toBe("{ foo, bar: bar, baz }");
+  });
+
   test("simple string key", async () => {
     expect(await format('{"fooBar123": 5}')).toBe("{ fooBar123: 5 }");
   });
