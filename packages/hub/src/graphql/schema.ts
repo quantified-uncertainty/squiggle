@@ -11,6 +11,7 @@ import "./queries/relativeValuesDefinitions";
 import "./queries/runSquiggle";
 import "./queries/userByUsername";
 import "./queries/users";
+import "./queries/globalStatistics";
 
 import "./mutations/buildRelativeValuesCache";
 import "./mutations/clearRelativeValuesCache";
