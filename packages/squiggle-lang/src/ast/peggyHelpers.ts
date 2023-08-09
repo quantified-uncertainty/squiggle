@@ -59,12 +59,20 @@ type NodeArray = N<"Array", { elements: ASTNode[] }>;
 type NodeDict = N<
   "Dict",
   {
-    elements: NodeKeyValue[];
+    elements: AnyNodeDictEntry[];
     // Static key -> node, for faster path resolution.
     // Not used for evaluation.
-    symbols: { [k in number | string]: NodeKeyValue };
+    symbols: { [k in number | string]: AnyNodeDictEntry };
   }
 >;
+type NodeKeyValue = N<
+  "KeyValue",
+  {
+    key: ASTNode;
+    value: ASTNode;
+  }
+>;
+type AnyNodeDictEntry = NodeKeyValue | NodeIdentifier;
 
 type NodeUnitValue = N<"UnitValue", { value: ASTNode; unit: string }>;
 
@@ -139,14 +147,6 @@ type NodeTernary = N<
     trueExpression: ASTNode;
     falseExpression: ASTNode;
     kind: "IfThenElse" | "C";
-  }
->;
-
-type NodeKeyValue = N<
-  "KeyValue",
-  {
-    key: ASTNode;
-    value: ASTNode;
   }
 >;
 
@@ -252,13 +252,15 @@ export function nodeArray(
   return { type: "Array", elements, location };
 }
 export function nodeDict(
-  elements: NodeKeyValue[],
+  elements: AnyNodeDictEntry[],
   location: LocationRange
 ): NodeDict {
   const symbols: NodeDict["symbols"] = {};
   for (const element of elements) {
-    if (element.key.type === "String") {
+    if (element.type === "KeyValue" && element.key.type === "String") {
       symbols[element.key.value] = element;
+    } else if (element.type === "Identifier") {
+      symbols[element.value] = element;
     }
   }
   return { type: "Dict", elements, symbols, location };

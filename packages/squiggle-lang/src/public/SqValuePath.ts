@@ -42,20 +42,28 @@ export class SqValuePath {
         case "Dict": {
           for (const pair of ast.elements) {
             if (
-              locationContains(
+              !locationContains(
                 {
                   source: ast.location.source,
-                  start: pair.key.location.start,
-                  end: pair.value.location.end,
+                  start: pair.location.start,
+                  end: pair.location.end,
                 },
                 offset
-              ) &&
+              )
+            ) {
+              continue;
+            }
+
+            if (
+              pair.type === "KeyValue" &&
               pair.key.type === "String" // only string keys are supported
             ) {
               return [
                 { type: "string", value: pair.key.value },
                 ...findLoop(pair.value),
               ];
+            } else if (pair.type === "Identifier") {
+              return [{ type: "string", value: pair.value }]; // this is a final node, no need to findLoop recursively
             }
           }
           return [];
