@@ -1,12 +1,13 @@
-import range from "lodash/range.js";
-
 import {
   SqNumericFnPlot,
   SqDistFnPlot,
   SqDistribution,
   SqNumberValue,
   Env,
+  SqScale,
 } from "@quri/squiggle-lang";
+import { sqScaleToD3 } from "../../lib/d3/index.js";
+import { ScaleContinuousNumeric } from "d3";
 
 export const functionChartDefaults = {
   min: 0,
@@ -14,11 +15,20 @@ export const functionChartDefaults = {
   points: 20,
 };
 
-function rangeByCount(start: number, stop: number, count: number) {
-  const step = (stop - start) / (count - 1);
-  const items = range(start, stop, step);
-  const result = items.concat([stop]);
-  return result;
+function rangeByCount({
+  scale,
+  count,
+}: {
+  scale: ScaleContinuousNumeric<number, number, never>;
+  count: number;
+}) {
+  scale.range([0, count - 1]);
+  const items: number[] = [];
+  for (let i = 0; i < count; i++) {
+    items.push(scale.invert(i));
+  }
+  scale.range([0, 1]); // reset to default range
+  return items;
 }
 
 type ImageValue<T extends SqNumericFnPlot | SqDistFnPlot> =
@@ -33,11 +43,16 @@ export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot>(
   plot: T,
   environment: Env
 ) {
-  const chartPointsToRender = rangeByCount(
+  const scale = sqScaleToD3(plot.xScale);
+  scale.domain([
     plot.xScale?.min ?? functionChartDefaults.min,
     plot.xScale?.max ?? functionChartDefaults.max,
-    plot.points ?? functionChartDefaults.points
-  );
+  ]);
+
+  const chartPointsToRender = rangeByCount({
+    scale,
+    count: plot.points ?? functionChartDefaults.points,
+  });
 
   const functionImage: {
     x: number;
@@ -76,5 +91,5 @@ export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot>(
     }
   }
 
-  return { errors, functionImage };
+  return { errors, functionImage, xScale: scale };
 }

@@ -61,7 +61,7 @@ function getDistPlotPercentiles({
   plot: SqDistFnPlot;
   environment: Env;
 }) {
-  const { functionImage, errors } = getFunctionImage(plot, environment);
+  const { functionImage, errors, xScale } = getFunctionImage(plot, environment);
 
   const data: Datum[] = functionImage
     .map(({ x, y: dist }) => {
@@ -87,28 +87,28 @@ function getDistPlotPercentiles({
     })
     .filter((d) => isFinite(d[50]));
 
-  return { data, errors };
+  return { data, errors, xScale };
 }
 
-function useDrawDistFunctionChart({ plot, environment, height: innerHeight }) {
+function useDrawDistFunctionChart({
+  plot,
+  environment,
+  height: innerHeight,
+}: {
+  plot: SqDistFnPlot;
+  environment: Env;
+  height: number;
+}) {
   const height = innerHeight + 30; // consider paddings, should match suggestedPadding below
   const { cursor, initCursor } = useCanvasCursor();
 
-  const { data, errors } = useMemo(
+  const { data, errors, xScale } = useMemo(
     () => getDistPlotPercentiles({ plot, environment }),
     [plot, environment]
   );
 
   // note that range is not set on these scales yet (it happens in `draw()` below), so you can't use these in the following code
-  const { xScale, yScale } = useMemo(() => {
-    const xScale = sqScaleToD3(plot.xScale);
-    xScale.domain(
-      d3.extent(
-        data.filter((d) => isFinite(d.x)),
-        (d) => d.x
-      ) as [number, number]
-    );
-
+  const yScale = useMemo(() => {
     const yScale = sqScaleToD3(plot.yScale);
     yScale.domain([
       plot.yScale.min ??
@@ -135,8 +135,8 @@ function useDrawDistFunctionChart({ plot, environment, height: innerHeight }) {
         ),
     ]);
 
-    return { xScale, yScale };
-  }, [data, plot.xScale, plot.yScale]);
+    return yScale;
+  }, [data, plot.yScale]);
 
   const draw = useCallback(
     ({ context, width }: DrawContext) => {
