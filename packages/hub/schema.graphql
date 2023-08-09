@@ -35,6 +35,12 @@ interface Error {
   message: String!
 }
 
+type GlobalStatistics {
+  models: Int!
+  relativeValuesDefinitions: Int!
+  users: Int!
+}
+
 type Me {
   email: String
   username: String
@@ -205,6 +211,7 @@ type PageInfo {
 }
 
 type Query {
+  globalStatistics: GlobalStatistics!
   me: Me!
   model(input: QueryModelInput!): QueryModelResult!
   models(after: String, before: String, first: Int, last: Int): ModelConnection!
