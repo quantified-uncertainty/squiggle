@@ -144,9 +144,9 @@ export const getBoxProps = (
           <div className="items-center flex space-x-1">
             <TableCellsIcon size={14} className="flex opacity-60" />
             <div>
-              {table.columnCount}
-              <span className="opacity-60">x</span>
               {table.rowCount}
+              <span className="opacity-60">x</span>
+              {table.columnCount}
             </div>
           </div>
         ),
