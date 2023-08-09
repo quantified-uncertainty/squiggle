@@ -37,13 +37,15 @@ import {
   patchModelRoute,
 } from "@/routes";
 import { DeleteModelAction } from "./DeleteModelAction";
+import { ModelAccessControls } from "./ModelAccessControls";
 import { UpdateModelSlugAction } from "./UpdateModelSlugAction";
 import { entityNodes } from "./utils";
 
-const Fragment = graphql`
+export const Fragment = graphql`
   fragment ModelLayout on Model {
     id
     slug
+    ...ModelAccessControls
     owner {
       username
     }
@@ -169,38 +171,37 @@ export const ModelLayout: FC<
     <EntityLayout
       nodes={entityNodes(model.owner.username, model.slug, variableName)}
       isFluid={true}
-      headerChildren={
-        <>
-          <EntityTab.List>
-            <EntityTab.Link
-              name="Code"
-              icon={CodeBracketIcon}
-              href={modelRoute(usernameAndSlug)}
-            />
-            {Boolean(model.currentRevision.relativeValuesExports.length) && (
-              <Dropdown render={({ close }) => dropDown(close)}>
-                <EntityTab.Div
-                  name="Exports"
-                  icon={ScaleIcon}
-                  count={model.currentRevision.relativeValuesExports.length}
-                  selected={(pathname) => {
-                    return pathname.startsWith(
-                      modelRoute(usernameAndSlug) + "/relative-values"
-                    );
-                  }}
-                />
-              </Dropdown>
-            )}
-            <EntityTab.Link
-              name="Revisions"
-              icon={RectangleStackIcon}
-              href={modelRevisionsRoute(usernameAndSlug)}
-            />
-            {session?.user.username === model.owner.username ? (
-              <MenuButton {...usernameAndSlug} />
-            ) : null}
-          </EntityTab.List>
-        </>
+      headerLeft={<ModelAccessControls modelRef={model} />}
+      headerRight={
+        <EntityTab.List>
+          <EntityTab.Link
+            name="Code"
+            icon={CodeBracketIcon}
+            href={modelRoute(usernameAndSlug)}
+          />
+          {Boolean(model.currentRevision.relativeValuesExports.length) && (
+            <Dropdown render={({ close }) => dropDown(close)}>
+              <EntityTab.Div
+                name="Exports"
+                icon={ScaleIcon}
+                count={model.currentRevision.relativeValuesExports.length}
+                selected={(pathname) => {
+                  return pathname.startsWith(
+                    modelRoute(usernameAndSlug) + "/relative-values"
+                  );
+                }}
+              />
+            </Dropdown>
+          )}
+          <EntityTab.Link
+            name="Revisions"
+            icon={RectangleStackIcon}
+            href={modelRevisionsRoute(usernameAndSlug)}
+          />
+          {session?.user.username === model.owner.username ? (
+            <MenuButton {...usernameAndSlug} />
+          ) : null}
+        </EntityTab.List>
       }
     >
       {children}

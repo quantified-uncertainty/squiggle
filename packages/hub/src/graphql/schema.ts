@@ -3,24 +3,25 @@ import { builder } from "./builder";
 import "./errors/BaseError";
 import "./errors/NotFoundError";
 
-import "./queries/relativeValuesDefinition";
-import "./queries/relativeValuesDefinitions";
 import "./queries/me";
 import "./queries/model";
 import "./queries/models";
+import "./queries/relativeValuesDefinition";
+import "./queries/relativeValuesDefinitions";
 import "./queries/runSquiggle";
 import "./queries/userByUsername";
 import "./queries/users";
 
+import "./mutations/buildRelativeValuesCache";
+import "./mutations/clearRelativeValuesCache";
 import "./mutations/createRelativeValuesDefinition";
 import "./mutations/createSquiggleSnippetModel";
-import "./mutations/deleteRelativeValuesDefinition";
 import "./mutations/deleteModel";
+import "./mutations/deleteRelativeValuesDefinition";
 import "./mutations/setUsername";
+import "./mutations/updateModelPrivacy";
 import "./mutations/updateModelSlug";
 import "./mutations/updateRelativeValuesDefinition";
 import "./mutations/updateSquiggleSnippetModel";
-import "./mutations/buildRelativeValuesCache";
-import "./mutations/clearRelativeValuesCache";
 
 export const schema = builder.toSchema();

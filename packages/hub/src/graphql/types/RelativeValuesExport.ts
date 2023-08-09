@@ -1,4 +1,5 @@
 import { builder } from "@/graphql/builder";
+import { modelWhereHasAccess } from "./Model";
 
 export const RelativeValuesPairCache = builder.prismaNode(
   "RelativeValuesPairCache",

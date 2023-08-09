@@ -1,5 +1,5 @@
 import { builder } from "../builder";
-import { ModelConnection } from "./Model";
+import { ModelConnection, modelWhereHasAccess } from "./Model";
 import { RelativeValuesDefinitionConnection } from "./RelativeValuesDefinition";
 
 export const User = builder.prismaNode("User", {
@@ -15,7 +15,13 @@ export const User = builder.prismaNode("User", {
     }),
     models: t.relatedConnection(
       "models",
-      { cursor: "id", query: () => ({ orderBy: { updatedAt: "desc" } }) },
+      {
+        cursor: "id",
+        query: (_, { session }) => ({
+          orderBy: { updatedAt: "desc" },
+          where: modelWhereHasAccess(session),
+        }),
+      },
       ModelConnection
     ),
     relativeValuesDefinitions: t.relatedConnection(

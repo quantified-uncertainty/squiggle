@@ -90,6 +90,8 @@ model Model {
   owner   User   @relation(fields: [ownerId], references: [id])
   ownerId String
 
+  isPrivate Boolean @default(false)
+
   revisions ModelRevision[] @relation("Revisions")
 
   // technically nullable, but won't ever be null in practice

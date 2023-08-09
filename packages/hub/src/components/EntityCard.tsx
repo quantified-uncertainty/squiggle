@@ -1,9 +1,10 @@
-import { FC, ReactNode } from "react";
 import { formatDistance } from "date-fns";
 import Link from "next/link";
+import { FC, ReactNode } from "react";
 
-import { EntityInfo, EntityNode } from "./EntityInfo";
-import { IconProps } from "@quri/ui";
+import { IconProps, LockIcon } from "@quri/ui";
+
+import { EntityNode } from "./EntityInfo";
 
 export type { EntityNode };
 
@@ -12,6 +13,7 @@ type Props = {
   updatedAtTimestamp: number;
   href: string;
   showOwner: boolean;
+  isPrivate?: boolean;
   ownerName?: string;
   slug: string;
   children?: ReactNode;
@@ -22,6 +24,7 @@ export const EntityCard: FC<Props> = ({
   updatedAtTimestamp,
   href,
   showOwner,
+  isPrivate,
   ownerName,
   slug,
   children,
@@ -31,8 +34,12 @@ export const EntityCard: FC<Props> = ({
       <Icon size={20} className="mt-3 ml-1 mr-3 text-slate-300" />
       <div className="w-full">
         <Link className="group" href={href}>
-          <div className="text-md font-semibold mb-1 text-blue-500 group-hover:underline">
-            {`${!!showOwner ? ownerName + "/" : ""}${slug}`}
+          <div className="flex items-center gap-1 mb-1">
+            <div className="text-md font-semibold text-blue-500 group-hover:underline">
+              {showOwner ? ownerName + "/" : ""}
+              {slug}
+            </div>
+            {isPrivate && <LockIcon className="text-slate-500" size={14} />}
           </div>
           <div className="text-xs text-slate-500">
             Updated{" "}

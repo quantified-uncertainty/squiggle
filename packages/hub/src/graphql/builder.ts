@@ -1,4 +1,4 @@
-import SchemaBuilder from "@pothos/core";
+import SchemaBuilder, { InputShapeFromFields } from "@pothos/core";
 
 import SimpleObjectsPlugin from "@pothos/plugin-simple-objects";
 import ScopeAuthPlugin from "@pothos/plugin-scope-auth";
@@ -19,7 +19,7 @@ type Context = {
   request: NextRequest;
 };
 
-export const builder = new SchemaBuilder<{
+type HubSchemaTypes = {
   PrismaTypes: PrismaTypes;
   DefaultEdgesNullability: false;
   Context: Context;
@@ -27,13 +27,16 @@ export const builder = new SchemaBuilder<{
     user: boolean;
   };
   AuthContexts: {
+    // https://pothos-graphql.dev/docs/plugins/scope-auth#change-context-types-based-on-scopes
     user: Context & {
       session: Session & {
         user: NonNullable<Session["user"]> & { email: string };
       };
     };
   };
-}>({
+};
+
+export const builder = new SchemaBuilder<HubSchemaTypes>({
   plugins: [
     // this plugin comes before auth plugin; see also: https://github.com/hayes/pothos/issues/464
     ErrorsPlugin, // https://pothos-graphql.dev/docs/plugins/errors

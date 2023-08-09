@@ -172,6 +172,9 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
           data: {
             currentRevisionId: revision.id,
           },
+          include: {
+            owner: true,
+          },
         });
 
         return model;

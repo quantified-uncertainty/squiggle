@@ -16,6 +16,7 @@ const Fragment = graphql`
       username
       ...UserLinkFragment
     }
+    isPrivate
     currentRevision {
       relativeValuesExports {
         variableName
@@ -45,6 +46,7 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
         slug: model.slug,
       })}
       showOwner={showOwner}
+      isPrivate={model.isPrivate}
       ownerName={model.owner.username}
       slug={model.slug}
     >

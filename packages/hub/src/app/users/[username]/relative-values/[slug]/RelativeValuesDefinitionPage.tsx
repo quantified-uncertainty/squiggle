@@ -14,6 +14,7 @@ import { modelForRelativeValuesExportRoute } from "@/routes";
 import QueryNode, {
   RelativeValuesDefinitionPageQuery as QueryType,
 } from "@/__generated__/RelativeValuesDefinitionPageQuery.graphql";
+import { LockIcon } from "@quri/ui";
 
 export const RelativeValuesDefinitionPageFragment = graphql`
   fragment RelativeValuesDefinitionPage on RelativeValuesDefinition {
@@ -34,6 +35,7 @@ export const RelativeValuesDefinitionPageFragment = graphql`
             username
           }
           slug
+          isPrivate
         }
       }
     }
@@ -87,7 +89,7 @@ export const RelativeValuesDefinitionPage: FC<{
             <H2>Implemented by:</H2>
             <div className="flex flex-col">
               {definition.modelExports.map((row) => (
-                <div key={row.id}>
+                <div key={row.id} className="flex items-center gap-1">
                   <StyledLink
                     href={modelForRelativeValuesExportRoute({
                       username: row.modelRevision.model.owner.username,
@@ -98,6 +100,9 @@ export const RelativeValuesDefinitionPage: FC<{
                     {row.modelRevision.model.owner.username}/
                     {row.modelRevision.model.slug}
                   </StyledLink>
+                  {row.modelRevision.model.isPrivate && (
+                    <LockIcon size={14} className="text-slate-500" />
+                  )}
                 </div>
               ))}
             </div>
