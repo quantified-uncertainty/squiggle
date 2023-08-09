@@ -25,7 +25,7 @@ builder.mutationField("clearRelativeValuesCache", (t) =>
 
       const relativeValuesExport =
         await prisma.relativeValuesExport.findUniqueOrThrow({
-          where: { id: input.exportId },
+          where: { id },
           include: {
             modelRevision: {
               select: {
