@@ -1,16 +1,16 @@
 "use client";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
-import { modelRoute } from "@/routes";
-import { H1 } from "@/components/ui/Headers";
 
 import { Button, TextFormField, useToast } from "@quri/ui";
 
 import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
+import { H1 } from "@/components/ui/Headers";
+import { modelRoute } from "@/routes";
 
 const Mutation = graphql`
   mutation NewModelMutation($input: MutationCreateSquiggleSnippetModelInput!) {
@@ -28,23 +28,37 @@ const Mutation = graphql`
   }
 `;
 
+const defaultCode = `/*
+Describe your code here
+*/
+
+a = normal(2, 5)
+`;
+
 export const NewModel: FC = () => {
   const { data: session } = useSession({ required: true });
 
   const toast = useToast();
 
   const form = useForm<{
-    code: string;
-    slug: string;
+    slug: string | undefined;
   }>({
     defaultValues: {
-      code: `/*
-Describe your code here
-*/
-
-a = normal(2, 5)`,
+      // don't pass `slug: ""` here, it will lead to form reset if a user started to type in a value before JS finished loading
     },
+    mode: "onChange",
   });
+
+  const watchSlug = form.watch("slug");
+
+  useEffect(() => {
+    // watchSlug can be undefined if the page was just loaded
+    if (watchSlug && watchSlug.includes(" ")) {
+      const patchedSlug = watchSlug.replaceAll(" ", "-");
+      form.setValue("slug", patchedSlug);
+      form.trigger();
+    }
+  }, [watchSlug, form]);
 
   const router = useRouter();
 
@@ -52,11 +66,17 @@ a = normal(2, 5)`,
     useMutation<NewModelMutation>(Mutation);
 
   const save = form.handleSubmit((data) => {
+    const slug = data.slug;
+    if (!slug) {
+      // shouldn't happen but satisfies Typescript
+      toast("Slug is undefined", "error");
+      return;
+    }
     saveMutation({
       variables: {
         input: {
-          code: data.code,
-          slug: data.slug,
+          code: defaultCode,
+          slug,
         },
       },
       onCompleted(completion) {
@@ -66,7 +86,7 @@ a = normal(2, 5)`,
           //My guess is that there are more elegant ways of returning the slug, but I wasn't sure what was the best way to do it
           const username = session?.user?.username;
           if (username) {
-            router.push(modelRoute({ username, slug: data.slug }));
+            router.push(modelRoute({ username, slug }));
           } else {
             router.push("/");
           }
@@ -98,7 +118,11 @@ a = normal(2, 5)`,
             }}
           />
         </div>
-        <Button onClick={save} disabled={isSaveInFlight} theme="primary">
+        <Button
+          onClick={save}
+          disabled={!form.formState.isValid || isSaveInFlight}
+          theme="primary"
+        >
           Save
         </Button>
       </FormProvider>
