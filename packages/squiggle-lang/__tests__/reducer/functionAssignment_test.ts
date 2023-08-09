@@ -1,4 +1,8 @@
-import { testEvalToBe, testToExpression } from "../helpers/reducerHelpers.js";
+import {
+  MySkip,
+  testEvalToBe,
+  testToExpression,
+} from "../helpers/reducerHelpers.js";
 
 describe("Parse function assignment", () => {
   testToExpression("f(x)=x", "f = {|x| {x}}");
@@ -11,4 +15,9 @@ describe("Evaluate function assignment", () => {
 
 describe("Shadowing", () => {
   testEvalToBe("x = 5; f(y) = x*y; x = 6; f(2)", "10");
+});
+
+describe("Shadowing builtins", () => {
+  // TODO, https://github.com/quantified-uncertainty/squiggle/issues/1336
+  MySkip.testEvalToBe("add(x, y) = x * y; 2 + 3", "5");
 });

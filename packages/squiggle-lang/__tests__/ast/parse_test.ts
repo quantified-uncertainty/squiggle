@@ -170,15 +170,13 @@ describe("Peggy parse", () => {
       "(Program (Dict (KeyValue 'a' 1) (KeyValue 'b' 2)))"
     );
     testParse(
-      "{a, b, }",
-      "(Program (Dict (KeyValue 'a' :a) (KeyValue 'b' :b)))"
+      "{a: 1, b: 2,}",
+      "(Program (Dict (KeyValue 'a' 1) (KeyValue 'b' 2)))"
     );
-    testParse("{a, b}", "(Program (Dict (KeyValue 'a' :a) (KeyValue 'b' :b)))");
-    testParse(
-      "{a, b: 2}",
-      "(Program (Dict (KeyValue 'a' :a) (KeyValue 'b' 2)))"
-    );
-    testParse("{a,}", "(Program (Dict (KeyValue 'a' :a)))");
+    testParse("{a, b, }", "(Program (Dict :a :b))");
+    testParse("{a, b}", "(Program (Dict :a :b))");
+    testParse("{a, b: 2}", "(Program (Dict :a (KeyValue 'b' 2)))");
+    testParse("{a,}", "(Program (Dict :a))");
     testParse(
       "{1+0: 1, 2+0: 2}",
       "(Program (Dict (KeyValue (InfixCall + 1 0) 1) (KeyValue (InfixCall + 2 0) 2)))"
