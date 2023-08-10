@@ -22,12 +22,22 @@ function rangeByCount({
   scale: ScaleContinuousNumeric<number, number, never>;
   count: number;
 }) {
+  const backupRange = scale.range();
   scale.range([0, count - 1]);
+
+  // Otherwise, precision issues can cause out-of-domain values.
+  // That would be bad because annotated functions check their parameters strictly.
+  const backupClamp = scale.clamp();
+  scale.clamp(true);
+
   const items: number[] = [];
   for (let i = 0; i < count; i++) {
     items.push(scale.invert(i));
   }
-  scale.range([0, 1]); // reset to default range
+
+  scale.range(backupRange);
+  scale.clamp(backupClamp);
+
   return items;
 }
 
