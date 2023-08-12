@@ -2,13 +2,13 @@ import { FC } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 
-import { BookOpenIcon } from "@quri/ui";
+import { BookOpenIcon, CodeBracketIcon } from "@quri/ui";
 
 import { UserControls } from "./UserControls";
 import { PageMenuLink } from "./PageMenuLink";
-import { NewDropdown } from "./NewDropdown";
-import { aboutRoute } from "@/routes";
+import { aboutRoute, newModelRoute } from "@/routes";
 import { SQUIGGLE_DOCS_URL } from "@/lib/common";
+import { FaPlus } from "react-icons/fa";
 
 export const PageMenu: FC = () => {
   const { data: session } = useSession();
@@ -31,7 +31,13 @@ export const PageMenu: FC = () => {
           title="Docs"
           external
         />
-        {session && <NewDropdown />}
+        {session && (
+          <PageMenuLink
+            href={newModelRoute()}
+            icon={FaPlus}
+            title="New Model"
+          />
+        )}
         <UserControls session={session} />
       </div>
     </div>

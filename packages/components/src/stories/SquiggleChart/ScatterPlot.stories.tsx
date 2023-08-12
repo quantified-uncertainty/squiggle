@@ -14,8 +14,8 @@ type Story = StoryObj<typeof meta>;
 export const Basic: Story = {
   args: {
     code: `
-xDist = SampleSet.fromDist(2 to 5)
-yDist = (-3 to 3) * 5 - xDist ^ 2
+xDist = 2 to 5
+yDist = normal(0, 10) * 5 - xDist ^ 2
 Plot.scatter({
   xDist: xDist,
   yDist: yDist
@@ -27,8 +27,8 @@ Plot.scatter({
 export const Logarithmic: Story = {
   args: {
     code: `
-xDist = SampleSet.fromDist(2 to 5)
-yDist = (-3 to 3) * 5 - xDist ^ 2
+xDist = 2 to 5
+yDist = normal(0, 10) * 5 - xDist ^ 2
 Plot.scatter({
   xDist: xDist,
   yDist: yDist,
@@ -42,7 +42,7 @@ export const DoubleSymlog: Story = {
   args: {
     code: `
 xDist = SampleSet.fromDist(-2 to 5)
-yDist = (-3 to 3) * 5 - xDist
+yDist = normal(0, 10) * 5 - xDist
 Plot.scatter({
   xDist: xDist,
   yDist: yDist,

@@ -8,11 +8,15 @@ import {
   drawCursorLines,
   primaryColor,
 } from "../../lib/draw/index.js";
-import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
+import {
+  DrawContext,
+  useCanvas,
+  useCanvasCursor,
+} from "../../lib/hooks/index.js";
 import { canvasClasses } from "../../lib/utility.js";
-import { ErrorAlert } from "../Alert.js";
 import { getFunctionImage } from "./utils.js";
 import { sqScaleToD3 } from "../../lib/d3/index.js";
+import { ImageErrors } from "./ImageErrors.js";
 
 type Props = {
   plot: SqNumericFnPlot;
@@ -28,28 +32,14 @@ export const NumericFunctionChart: FC<Props> = ({
   const height = innerHeight + 30; // consider paddings, should match suggestedPadding below
   const { cursor, initCursor } = useCanvasCursor();
 
-  const { functionImage, errors } = useMemo(
+  const { functionImage, errors, xScale } = useMemo(
     () => getFunctionImage(plot, environment),
     [plot, environment]
   );
 
   const draw = useCallback(
-    ({
-      context,
-      width,
-    }: {
-      context: CanvasRenderingContext2D;
-      width: number;
-    }) => {
+    ({ context, width }: DrawContext) => {
       context.clearRect(0, 0, width, height);
-
-      const xScale = sqScaleToD3(plot.xScale);
-      xScale.domain(
-        d3.extent(
-          functionImage.filter((d) => isFinite(d.x)),
-          (d) => d.x
-        ) as [number, number]
-      );
 
       const yScale = sqScaleToD3(plot.yScale);
       yScale.domain(
@@ -61,7 +51,7 @@ export const NumericFunctionChart: FC<Props> = ({
             ) as [number, number])
       );
 
-      const { frame, padding } = drawAxes({
+      const { frame } = drawAxes({
         context,
         width,
         height,
@@ -109,24 +99,18 @@ export const NumericFunctionChart: FC<Props> = ({
       context.stroke();
       frame.exit();
 
-      if (
-        cursor &&
-        cursor.x >= padding.left &&
-        cursor.x - padding.left <= frame.width
-      ) {
-        drawCursorLines({
-          frame,
-          cursor,
-          x: {
-            scale: xScale,
-            format: plot.xScale.tickFormat,
-          },
-          y: {
-            scale: yScale,
-            format: plot.yScale.tickFormat,
-          },
-        });
-      }
+      drawCursorLines({
+        frame,
+        cursor,
+        x: {
+          scale: xScale,
+          format: plot.xScale.tickFormat,
+        },
+        y: {
+          scale: yScale,
+          format: plot.yScale.tickFormat,
+        },
+      });
     },
     [functionImage, height, cursor, plot]
   );
@@ -138,14 +122,7 @@ export const NumericFunctionChart: FC<Props> = ({
       <canvas ref={ref} className={canvasClasses}>
         Chart for {plot.toString()}
       </canvas>
-      <div className="space-y-1">
-        {errors.map(({ x, value }) => (
-          // TODO - group errors with identical value
-          <ErrorAlert key={x} heading={value}>
-            Error at point {x}
-          </ErrorAlert>
-        ))}
-      </div>
+      <ImageErrors errors={errors} />
     </div>
   );
 };

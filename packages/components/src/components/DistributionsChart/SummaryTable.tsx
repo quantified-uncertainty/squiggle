@@ -51,7 +51,7 @@ const SummaryTableRow: FC<SummaryTableRowProps> = ({
     x: result<number, SqDistributionError>
   ): React.ReactNode => {
     if (x.ok) {
-      return <NumberShower number={x.value} />;
+      return <NumberShower number={x.value} precision={3} />;
     } else {
       return (
         <TextTooltip text={x.value.toString()}>

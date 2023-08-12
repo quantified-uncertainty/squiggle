@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { SquigglePlayground as Component } from "../components/SquigglePlayground/index.js";
 import { Button } from "@quri/ui";
 import { sq } from "@quri/squiggle-lang";
+import { blockComment } from "@codemirror/commands";
 
 /**
  * A Squiggle playground is an environment where you can play around with all settings, including sampling settings, in Squiggle.
@@ -187,9 +188,54 @@ varDist = SampleSet.fromDist(2 to 5)
 
 varScatter = Plot.scatter({
   xDist: varDist,
-  yDist: (-3 to 3) * 5 - varDist ^ 2
+  yDist: (1 to 3) * 5 - varDist ^ 2
 })
 `,
+    height: 800,
+  },
+};
+
+export const Markdown: Story = {
+  name: "Markdown",
+  args: {
+    defaultCode: `"# Header 1  
+Content under first header  
+## Header 2  
+Stuff under the second header. 
+Text continued on this line.
+
+This is a new paragraph.
+
+### Header 3  
+Stuff under the third header  
+
+Longer text goes here.
+[link](https://google.com)
+**bold** and *italics*
+
+![image](https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Dog_anatomy_lateral_skeleton_view.jpg/560px-Dog_anatomy_lateral_skeleton_view.jpg)
+
+---
+
+\`\`\`js
+foo = 23
+bar = 123
+\`\`\`
+
+\`test123\`
+\`\`test123\`\`
+"
+`,
+    height: 800,
+  },
+};
+
+export const Failure: Story = {
+  name: "Failure",
+  args: {
+    defaultCode: `Table.make(
+      { data:[], columns: [{ name: "Features", fn: {|r|""} }] }
+    )`,
     height: 800,
   },
 };

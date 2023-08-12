@@ -30,6 +30,7 @@ import { clsx } from "clsx";
 import { TableChart } from "../TableChart/index.js";
 import { DistPreview } from "../DistributionsChart/DistPreview.js";
 import { TableCellsIcon } from "@quri/ui";
+import ReactMarkdown from "react-markdown";
 
 // We use an extra left margin for some elements to align them with parent variable name
 const leftMargin = "ml-1.5";
@@ -103,7 +104,9 @@ export const getBoxProps = (
         ),
         children: () => (
           <div className="text-neutral-800 text-sm px-2 py-1 my-1">
-            {value.value}
+            <ReactMarkdown className="prose max-w-4xl">
+              {value.value}
+            </ReactMarkdown>
           </div>
         ),
       };
@@ -141,9 +144,9 @@ export const getBoxProps = (
           <div className="items-center flex space-x-1">
             <TableCellsIcon size={14} className="flex opacity-60" />
             <div>
-              {table.columnCount}
-              <span className="opacity-60">x</span>
               {table.rowCount}
+              <span className="opacity-60">x</span>
+              {table.columnCount}
             </div>
           </div>
         ),
@@ -221,11 +224,11 @@ export const getBoxProps = (
               return (
                 <DistFunctionChart
                   plot={plot}
-                  height={settings.chartHeight}
                   environment={{
                     sampleCount: environment.sampleCount / 10,
                     xyPointLength: environment.xyPointLength / 10,
                   }}
+                  height={settings.chartHeight}
                 />
               );
             }
@@ -233,8 +236,8 @@ export const getBoxProps = (
               return (
                 <ScatterChart
                   plot={plot}
-                  height={settings.chartHeight}
                   environment={environment}
+                  height={settings.chartHeight}
                 />
               );
             case "relativeValues":
@@ -263,7 +266,6 @@ export const getBoxProps = (
       return {
         heading: `Dict(${entries.length})`,
         preview: <SqTypeWithCount type="{}" count={entries.length} />,
-        isDictOrList: true,
         children: () =>
           entries.map((r, i) => <ExpressionViewer key={i} value={r} />),
       };
@@ -274,7 +276,6 @@ export const getBoxProps = (
       return {
         heading: `List(${length})`,
         preview: <SqTypeWithCount type="[]" count={length} />,
-        isDictOrList: true,
         children: () =>
           entries.map((r, i) => <ExpressionViewer key={i} value={r} />),
       };

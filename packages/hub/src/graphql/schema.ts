@@ -11,6 +11,7 @@ import "./queries/models";
 import "./queries/runSquiggle";
 import "./queries/userByUsername";
 import "./queries/users";
+import "./queries/globalStatistics";
 
 import "./mutations/createRelativeValuesDefinition";
 import "./mutations/createSquiggleSnippetModel";

@@ -115,7 +115,7 @@ export function createSquigglePrinter(
               ? hardline // new line if final expression is a statement
               : "",
           ]);
-        case "Block":
+        case "Block": {
           if (
             node.statements.length === 1 &&
             !node.comments &&
@@ -123,26 +123,25 @@ export function createSquigglePrinter(
           ) {
             return typedPath(node).call(print, "statements", 0);
           }
-          return group([
-            node.isLambdaBody ? "" : "{",
-            indent([
-              node.isLambdaBody ? "" : line,
-              join(
-                hardline,
-                node.statements.map((statement, i) => [
-                  typedPath(node).call(print, "statements", i),
-                  // keep extra new lines
-                  util.isNextLineEmpty(
-                    options.originalText,
-                    statement.location.end.offset
-                  )
-                    ? hardline
-                    : "",
-                ])
-              ),
-            ]),
-            node.isLambdaBody ? "" : [line, "}"],
-          ]);
+
+          const content = join(
+            hardline,
+            node.statements.map((statement, i) => [
+              typedPath(node).call(print, "statements", i),
+              // keep extra new lines
+              util.isNextLineEmpty(
+                options.originalText,
+                statement.location.end.offset
+              )
+                ? hardline
+                : "",
+            ])
+          );
+
+          return node.isLambdaBody
+            ? content
+            : group(["{", indent([line, content]), line, "}"]);
+        }
         case "LetStatement":
           return group([
             node.variable.value,
@@ -255,7 +254,7 @@ export function createSquigglePrinter(
         case "KeyValue": {
           const key =
             node.key.type === "String" &&
-            node.key.value.match(/^[\$_a-z]+[\$_a-z0-9]*$/i)
+            node.key.value.match(/^[\$_a-z]+[\$_a-zA-Z0-9]*$/)
               ? node.key.value
               : typedPath(node).call(print, "key");
 
@@ -286,8 +285,8 @@ export function createSquigglePrinter(
                 "|",
               ]),
               softline,
+              path.call(print, "body"),
             ]),
-            path.call(print, "body"),
             softline,
             "}",
           ]);
@@ -307,7 +306,7 @@ export function createSquigglePrinter(
             "}",
           ]);
         case "String":
-          return ['"', node.value, '"'];
+          return [JSON.stringify(node.value)];
         case "Ternary":
           return [
             node.kind === "C" ? [] : "if ",

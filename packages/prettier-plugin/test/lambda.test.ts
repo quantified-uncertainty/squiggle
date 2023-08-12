@@ -18,8 +18,8 @@ describe("lambda", () => {
       `f = {
   |x, y|
   yaewrtawieyra + auweyrauweyrauwyer + wekuryakwueyruaweyr +
-  wekuryakwueyruaweyr +
-  wekuryakwueyruaweyr
+    wekuryakwueyruaweyr +
+    wekuryakwueyruaweyr
 }\n`
     );
   });
@@ -54,6 +54,23 @@ describe("lambda", () => {
   |x|
   a = x
   a
+}
+`);
+  });
+
+  // https://github.com/quantified-uncertainty/squiggle/issues/2142
+  test("dedent in body", async () => {
+    expect(
+      await format(
+        `f = { |x| longlonglonglonglonglonglonglonglonglonglonglonglonglonglongName(foo, bar, baz) }`
+      )
+    ).toBe(`f = {
+  |x|
+  longlonglonglonglonglonglonglonglonglonglonglonglonglonglongName(
+    foo,
+    bar,
+    baz
+  )
 }
 `);
   });

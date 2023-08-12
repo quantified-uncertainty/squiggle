@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "module": "es2020",
+    "moduleResolution": "node16",
+    "target": "es2022",
+    "esModuleInterop": true,
+    "rootDir": "scripts",
+    "noEmit": true,
+    // type check settings
+    "strict": true,
+    "skipLibCheck": true
+  },
+  "include": ["scripts/**/*.ts"]
+}

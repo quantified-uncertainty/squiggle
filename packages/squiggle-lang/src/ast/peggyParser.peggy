@@ -359,11 +359,10 @@ dictConstructor 'dict'
   / '{' _nl args:array_dictEntries _nl '}'
     { return h.nodeDict(args, location()); }
 
-  array_dictEntries = @(keyValuePair / keyValueInherit)| 1.., commaSeparator|commaSeparator?
-
-  keyValueInherit
-    = key:identifier
-    { return h.nodeKeyValue(key, key, location()); }
+  array_dictEntries = @(
+    keyValuePair
+    / identifier // shorthand
+  )| 1.., commaSeparator|commaSeparator?
 
   keyValuePair
     = key:expression _ ':' _nl value:expression

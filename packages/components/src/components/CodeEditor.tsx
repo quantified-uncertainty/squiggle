@@ -60,6 +60,7 @@ interface CodeEditorProps {
   width?: number;
   height?: number;
   showGutter?: boolean;
+  lineWrapping?: boolean;
   errors?: SqError[];
   sourceId?: string;
   project: SqProject;
@@ -90,6 +91,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
       errors = [],
       sourceId,
       project,
+      lineWrapping = false,
     },
     ref
   ) {
@@ -149,41 +151,47 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     // Note the `useState` instead of `useMemo`; we never want to recreate EditorState, it would cause bugs.
     // `defaultValue` changes are ignored;
     // `languageSupport` changes (which depends on `project` prop) are handled with `projectRef`.
+
+    const basicExtensions = [
+      highlightSpecialChars(),
+      history(),
+      drawSelection(),
+      dropCursor(),
+      EditorState.allowMultipleSelections.of(true),
+      indentOnInput(),
+      syntaxHighlighting(lightThemeHighlightingStyle, { fallback: true }),
+      bracketMatching(),
+      closeBrackets(),
+      autocompletion(),
+      highlightSelectionMatches({
+        wholeWords: true,
+        highlightWordAroundCursor: false, // Works weird on fractions! 5.3e10K
+      }),
+      compSubmitListener.of([]),
+      compFormatListener.of([]),
+      compViewNodeListener.of([]),
+      keymap.of([
+        ...closeBracketsKeymap,
+        ...defaultKeymap,
+        ...searchKeymap,
+        ...historyKeymap,
+        ...foldKeymap,
+        ...completionKeymap,
+        ...lintKeymap,
+        indentWithTab,
+      ]),
+      compGutter.of([]),
+      compUpdateListener.of([]),
+      compTheme.of([]),
+      languageSupport,
+    ];
+
     const [state] = useState(() =>
       EditorState.create({
         doc: defaultValue,
         extensions: [
-          highlightSpecialChars(),
-          history(),
-          drawSelection(),
-          dropCursor(),
-          EditorState.allowMultipleSelections.of(true),
-          indentOnInput(),
-          syntaxHighlighting(lightThemeHighlightingStyle, { fallback: true }),
-          bracketMatching(),
-          closeBrackets(),
-          autocompletion(),
-          highlightSelectionMatches({
-            wholeWords: true,
-            highlightWordAroundCursor: false, // Works weird on fractions! 5.3e10K
-          }),
-          compSubmitListener.of([]),
-          compFormatListener.of([]),
-          compViewNodeListener.of([]),
-          keymap.of([
-            ...closeBracketsKeymap,
-            ...defaultKeymap,
-            ...searchKeymap,
-            ...historyKeymap,
-            ...foldKeymap,
-            ...completionKeymap,
-            ...lintKeymap,
-            indentWithTab,
-          ]),
-          compGutter.of([]),
-          compUpdateListener.of([]),
-          compTheme.of([]),
-          languageSupport,
+          ...basicExtensions,
+          lineWrapping ? [EditorView.lineWrapping] : [],
         ],
       })
     );

@@ -80,4 +80,7 @@ export {
 
 export { useToast, WithToasts } from "./components/WithToasts/index.js";
 
-export { TailwindProvider } from "./components/TailwindProvider.js";
+export {
+  TailwindProvider,
+  TailwindContext,
+} from "./components/TailwindProvider.js";

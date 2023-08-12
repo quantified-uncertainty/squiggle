@@ -1,6 +1,13 @@
-import { FC, forwardRef, memo } from "react";
+import { FC, forwardRef, useEffect, memo, useMemo } from "react";
 
-import { SqError, SqValue, SqValuePath, result } from "@quri/squiggle-lang";
+import {
+  SqError,
+  SqValue,
+  SqDictValue,
+  SqValuePath,
+  result,
+} from "@quri/squiggle-lang";
+import { ErrorAlert } from "../Alert.js";
 import { ChevronRightIcon } from "@quri/ui";
 import { useImperativeHandle } from "react";
 import { MessageAlert } from "../Alert.js";
@@ -8,6 +15,7 @@ import { CodeEditorHandle } from "../CodeEditor.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 import { ExpressionViewer } from "./ExpressionViewer.js";
+import { ErrorBoundary } from "react-error-boundary";
 import {
   ViewerProvider,
   useFocus,
@@ -22,27 +30,16 @@ export type SquiggleViewerHandle = {
 
 export type SquiggleViewerProps = {
   /** The output of squiggle's run */
-  result: result<SqValue, SqError>;
+  resultVariables: result<SqDictValue, SqError>;
+  resultItem: result<SqValue, SqError> | undefined;
   localSettingsEnabled?: boolean;
   editor?: CodeEditorHandle;
 } & PartialPlaygroundSettings;
 
-const SquiggleViewerBody: FC<{ value: SqValue }> = ({ value }) => {
-  const { focused } = useViewerContext();
-
-  const valueToRender = focused ? extractSubvalueByPath(value, focused) : value;
-
-  if (!valueToRender) {
-    return <MessageAlert heading="Focused variable is not defined" />;
-  }
-
-  return <ExpressionViewer value={valueToRender} />;
-};
-
 const SquiggleViewerOuter = forwardRef<
   SquiggleViewerHandle,
   SquiggleViewerProps
->(function SquiggleViewerOuter({ result }, ref) {
+>(function SquiggleViewerOuter({ resultVariables, resultItem }, ref) {
   const { focused, dispatch } = useViewerContext();
   const unfocus = useUnfocus();
   const focus = useFocus();
@@ -80,14 +77,44 @@ const SquiggleViewerOuter = forwardRef<
     },
   }));
 
+  const resultVariableLength = resultVariables.ok
+    ? resultVariables.value.value.entries().length
+    : 0;
+
+  let focusedItem: SqValue | undefined;
+  if (focused && resultVariables.ok && focused.root === "bindings") {
+    focusedItem = extractSubvalueByPath(resultVariables.value, focused);
+  } else if (focused && resultItem?.ok && focused.root === "result") {
+    focusedItem = extractSubvalueByPath(resultItem.value, focused);
+  }
+
+  const body = () => {
+    if (focused) {
+      if (focusedItem) {
+        return <ExpressionViewer value={focusedItem} />;
+      } else {
+        return <MessageAlert heading="Focused variable is not defined" />;
+      }
+    } else if (!resultVariables.ok) {
+      return <SquiggleErrorAlert error={resultVariables.value} />;
+    } else {
+      return (
+        <div className="space-y-2">
+          {resultVariables.ok && resultVariableLength > 0 && (
+            <ExpressionViewer value={resultVariables.value} />
+          )}
+          {resultItem && resultItem.ok && (
+            <ExpressionViewer value={resultItem.value} />
+          )}
+        </div>
+      );
+    }
+  };
+
   return (
     <div>
       {focusedNavigation}
-      {result.ok ? (
-        <SquiggleViewerBody value={result.value} />
-      ) : (
-        <SquiggleErrorAlert error={result.value} />
-      )}
+      {body()}
     </div>
   );
 });
@@ -95,7 +122,8 @@ const SquiggleViewerOuter = forwardRef<
 const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
   function SquiggleViewer(
     {
-      result,
+      resultVariables,
+      resultItem,
       localSettingsEnabled = false,
       editor,
       ...partialPlaygroundSettings
@@ -107,8 +135,13 @@ const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
         partialPlaygroundSettings={partialPlaygroundSettings}
         localSettingsEnabled={localSettingsEnabled}
         editor={editor}
+        beginWithVariablesCollapsed={resultItem !== undefined && resultItem.ok}
       >
-        <SquiggleViewerOuter result={result} ref={ref} />
+        <SquiggleViewerOuter
+          resultVariables={resultVariables}
+          resultItem={resultItem}
+          ref={ref}
+        />
       </ViewerProvider>
     );
   }

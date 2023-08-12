@@ -8,6 +8,7 @@ import {
   TriangleIcon,
 } from "@quri/ui";
 import { SqValuePath } from "@quri/squiggle-lang";
+import ReactMarkdown from "react-markdown";
 
 import { SqValueWithContext } from "../../lib/utility.js";
 import {
@@ -34,7 +35,6 @@ export type VariableBoxProps = {
   value: SqValueWithContext;
   heading?: string;
   preview?: ReactNode;
-  isDictOrList?: boolean;
   renderSettingsMenu?: (params: SettingsMenuParams) => ReactNode;
   children: (settings: MergedItemSettings) => ReactNode;
 };
@@ -52,7 +52,6 @@ export const SqTypeWithCount: FC<{
 export const VariableBox: FC<VariableBoxProps> = ({
   value,
   heading = "Error",
-  isDictOrList = false,
   preview,
   renderSettingsMenu,
   children,
@@ -63,6 +62,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
   const { editor, getSettings, getMergedSettings, dispatch } =
     useViewerContext();
   const isFocused = useIsFocused(value.context.path);
+  const { tag } = value;
 
   const findInEditor = () => {
     const location = value.context.findLocation();
@@ -99,7 +99,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
     const { chartHeight } = mergedSettings;
     return {
       ...mergedSettings,
-      chartHeight: isFocused ? chartHeight * 3 : chartHeight,
+      chartHeight: isFocused || isRoot ? chartHeight * 4 : chartHeight,
     };
   };
 
@@ -129,9 +129,8 @@ export const VariableBox: FC<VariableBoxProps> = ({
     };
   });
 
-  const hasBodyContent = Boolean(path.items.length);
   const isOpen = isFocused || !settings.collapsed;
-  const _focus = () => !isFocused && hasBodyContent && focus(path);
+  const _focus = () => !isFocused && !isRoot && focus(path);
 
   const triangleToggle = () => (
     <div
@@ -141,16 +140,19 @@ export const VariableBox: FC<VariableBoxProps> = ({
       <TriangleIcon size={10} className={isOpen ? "rotate-180" : "rotate-90"} />
     </div>
   );
+
+  const headerClasses = () => {
+    if (isFocused) {
+      return "text-md text-black font-bold ml-1";
+    } else if (isRoot) {
+      return "text-sm text-stone-600 font-semibold";
+    } else {
+      return "text-sm text-stone-800 cursor-pointer hover:underline";
+    }
+  };
+
   const headerName = (
-    <div
-      className={clsx(
-        "font-mono",
-        isFocused
-          ? "text-lg text-black ml-1"
-          : "text-sm text-stone-800 cursor-pointer hover:underline"
-      )}
-      onClick={_focus}
-    >
+    <div className={clsx("font-mono", headerClasses())} onClick={_focus}>
       {name}
     </div>
   );
@@ -211,20 +213,32 @@ export const VariableBox: FC<VariableBoxProps> = ({
       </div>
     );
 
-  const showComment = () => (
-    <div
-      className={clsx(
-        "text-sm text-slate-800 whitespace-pre-line bg-purple-50 bg-opacity-60 py-2 px-3 mb-2 rounded-md",
-        !isDictOrList && "mt-2"
-      )}
-    >
-      {comment}
-    </div>
-  );
+  const tagsWithTopPosition = new Set([
+    "Dict",
+    "Array",
+    "TableChart",
+    "Plot",
+    "String",
+  ]);
+  const commentPosition = tagsWithTopPosition.has(tag) ? "top" : "bottom";
+
+  const isDictOrList = tag === "Dict" || tag === "Array";
+
+  const showComment = () =>
+    comment && (
+      <ReactMarkdown
+        className={clsx(
+          "prose max-w-4xl text-sm text-slate-800 bg-purple-50 bg-opacity-60 py-2 px-3 mb-2 rounded-md",
+          commentPosition === "bottom" && "mt-2"
+        )}
+      >
+        {comment}
+      </ReactMarkdown>
+    );
 
   return (
     <div ref={saveRef}>
-      {name === undefined ? null : (
+      {(name !== undefined || isRoot) && (
         <header
           className={clsx(
             "flex justify-between group",
@@ -246,14 +260,14 @@ export const VariableBox: FC<VariableBoxProps> = ({
       )}
       {isOpen && (
         <div className="flex w-full pt-1">
-          {!isFocused && hasBodyContent && isDictOrList && leftCollapseBorder()}
-          {!isFocused && hasBodyContent && !isDictOrList && !isRoot && (
-            <div className="flex w-4" />
+          {!isFocused && isDictOrList && leftCollapseBorder()}
+          {!isFocused && !isDictOrList && !isRoot && (
+            <div className="flex w-4 min-w-[1rem]" /> // min-w-1rem = w-4
           )}
           <div className="grow">
-            {isDictOrList && hasComment && showComment()}
+            {commentPosition === "top" && hasComment && showComment()}
             {children(getAdjustedMergedSettings(path))}
-            {!isDictOrList && hasComment && showComment()}
+            {commentPosition === "bottom" && hasComment && showComment()}
           </div>
         </div>
       )}

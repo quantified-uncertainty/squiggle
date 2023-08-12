@@ -34,7 +34,7 @@ describe("eval", () => {
       await expectEvalToBe("[]", "[]");
     });
     testEvalToBe("[1, 2, 3]", "[1,2,3]");
-    testEvalToBe("['hello', 'world']", "['hello','world']");
+    testEvalToBe("['hello', 'world']", '["hello","world"]');
     testEvalToBe("([0,1,2])[1]", "1");
     testDescriptionEvalToBe(
       "index not found",
@@ -71,6 +71,9 @@ describe("eval", () => {
     }`,
         "{a: 1,b: 2}"
       ));
+    test("shorthand", async () => {
+      await expectEvalToBe("a=1; {a, b: a }", "{a: 1,b: 1}");
+    });
   });
 
   describe("multi-line", () => {
@@ -110,7 +113,7 @@ describe("test exceptions", () => {
   testDescriptionEvalToBe(
     "javascript exception",
     "javascriptraise('div by 0')",
-    "Error(JS Exception: Error: 'div by 0')"
+    'Error(JS Exception: Error: "div by 0")'
   );
   // testDescriptionEvalToBe(
   //   "rescript exception",

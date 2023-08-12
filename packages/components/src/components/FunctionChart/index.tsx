@@ -115,8 +115,8 @@ export const FunctionChart: FC<FunctionChartProps> = ({
       return (
         <NumericFunctionChart
           plot={plot}
-          height={height}
           environment={environment}
+          height={height}
         />
       );
     }

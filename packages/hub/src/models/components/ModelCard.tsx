@@ -11,7 +11,7 @@ import { EntityCard } from "@/components/EntityCard";
 const Fragment = graphql`
   fragment ModelCard on Model {
     slug
-    createdAtTimestamp
+    updatedAtTimestamp
     owner {
       username
       ...UserLinkFragment
@@ -39,7 +39,7 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
   return (
     <EntityCard
       icon={CodeBracketIcon}
-      createdAtTimestamp={model.createdAtTimestamp}
+      updatedAtTimestamp={model.updatedAtTimestamp}
       href={modelRoute({
         username: model.owner.username,
         slug: model.slug,

@@ -44,11 +44,46 @@ Plot.numericFn({
   },
 };
 
+export const FairLogScaleSampling: Story = {
+  name: "Fair log scale sampling",
+  args: {
+    code: sq`
+numericPlot = Plot.numericFn({
+  fn: {|t| t < 5 ? 1000 : t^2},
+  xScale: Scale.log({
+    min: 1,
+    max: 100
+  })
+})
+
+distPlot = Plot.distFn({
+  fn: {|t| t < 5 ? pointMass(1000) : t^2 to t^2 + 1000},
+  xScale: Scale.log({
+    min: 1,
+    max: 100
+  })
+})
+`,
+  },
+};
+
 export const WithInfiniteValues: Story = {
-  name: "With Infinite Values",
+  name: "Numeric, With Infinite Values",
   args: {
     code: sq`
     fn(t:[1,100]) = if t < 40 then 1/0 else t
+`,
+  },
+};
+
+// For some reason the first two have different errors
+export const WithInfiniteValuesDist: Story = {
+  name: "Dist, With Infinite Values",
+  args: {
+    code: sq`
+    fn1(t) = (100 to 200) * (1 / t)
+    fn2(t) = (100 to 200) * 1/t
+    fn3(t:[1,100]) = if t > 30  then mx(1/0) else normal(t,t)
 `,
   },
 };

@@ -26,10 +26,12 @@ export async function networkFetch(
   variables: Variables
 ): Promise<GraphQLResponse> {
   const resp = await fetch(HTTP_ENDPOINT, {
+    cache: "no-store",
     method: "POST",
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
+      // TODO - forward auth cookie
     },
     body: JSON.stringify({
       query: request.text,

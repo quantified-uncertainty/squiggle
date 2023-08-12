@@ -1,12 +1,13 @@
-import range from "lodash/range.js";
-
 import {
   SqNumericFnPlot,
   SqDistFnPlot,
   SqDistribution,
   SqNumberValue,
   Env,
+  SqScale,
 } from "@quri/squiggle-lang";
+import { sqScaleToD3 } from "../../lib/d3/index.js";
+import { ScaleContinuousNumeric } from "d3";
 
 export const functionChartDefaults = {
   min: 0,
@@ -14,31 +15,60 @@ export const functionChartDefaults = {
   points: 20,
 };
 
-function rangeByCount(start: number, stop: number, count: number) {
-  const step = (stop - start) / (count - 1);
-  const items = range(start, stop, step);
-  const result = items.concat([stop]);
-  return result;
+function rangeByCount({
+  scale,
+  count,
+}: {
+  scale: ScaleContinuousNumeric<number, number, never>;
+  count: number;
+}) {
+  const backupRange = scale.range();
+  scale.range([0, count - 1]);
+
+  // Otherwise, precision issues can cause out-of-domain values.
+  // That would be bad because annotated functions check their parameters strictly.
+  const backupClamp = scale.clamp();
+  scale.clamp(true);
+
+  const items: number[] = [];
+  for (let i = 0; i < count; i++) {
+    items.push(scale.invert(i));
+  }
+
+  scale.range(backupRange);
+  scale.clamp(backupClamp);
+
+  return items;
 }
 
 type ImageValue<T extends SqNumericFnPlot | SqDistFnPlot> =
   T["tag"] extends "numericFn" ? number : SqDistribution;
 
+export type ImageError = {
+  x: number;
+  value: string;
+};
+
 export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot>(
   plot: T,
   environment: Env
 ) {
-  const chartPointsToRender = rangeByCount(
+  const scale = sqScaleToD3(plot.xScale);
+  scale.domain([
     plot.xScale?.min ?? functionChartDefaults.min,
     plot.xScale?.max ?? functionChartDefaults.max,
-    plot.points ?? functionChartDefaults.points
-  );
+  ]);
+
+  const chartPointsToRender = rangeByCount({
+    scale,
+    count: plot.points ?? functionChartDefaults.points,
+  });
 
   const functionImage: {
     x: number;
     y: ImageValue<T>;
   }[] = [];
-  const errors: { x: number; value: string }[] = [];
+  const errors: ImageError[] = [];
 
   for (const x of chartPointsToRender) {
     const result = plot.fn.call([SqNumberValue.create(x)], environment);
@@ -71,5 +101,5 @@ export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot>(
     }
   }
 
-  return { errors, functionImage };
+  return { errors, functionImage, xScale: scale };
 }
