@@ -1,0 +1,27 @@
+name: Clean up Vercel deployments
+
+on:
+  workflow_dispatch:
+  # schedule:
+  #   - cron: "42 19 * * 0"
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install
+      - name: Run cleanup script
+        working-directory: ./packages/ops
+        env:
+          VERCEL_API_TOKEN: "${{ secrets.VERCEL_API_TOKEN }}"
+        run: tsx ./scripts/cleanup-vercel-deployments.tsx
