@@ -1,0 +1,13 @@
+{
+  "name": "@quri/ops",
+  "version": "0.1.0",
+  "private": true,
+  "devDependencies": {
+    "@types/node": "^20.4.7",
+    "tsx": "^3.12.7",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "zod": "^3.21.4"
+  }
+}

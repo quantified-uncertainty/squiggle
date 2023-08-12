@@ -32,7 +32,7 @@ export const NumericFunctionChart: FC<Props> = ({
   const height = innerHeight + 30; // consider paddings, should match suggestedPadding below
   const { cursor, initCursor } = useCanvasCursor();
 
-  const { functionImage, errors } = useMemo(
+  const { functionImage, errors, xScale } = useMemo(
     () => getFunctionImage(plot, environment),
     [plot, environment]
   );
@@ -40,14 +40,6 @@ export const NumericFunctionChart: FC<Props> = ({
   const draw = useCallback(
     ({ context, width }: DrawContext) => {
       context.clearRect(0, 0, width, height);
-
-      const xScale = sqScaleToD3(plot.xScale);
-      xScale.domain(
-        d3.extent(
-          functionImage.filter((d) => isFinite(d.x)),
-          (d) => d.x
-        ) as [number, number]
-      );
 
       const yScale = sqScaleToD3(plot.yScale);
       yScale.domain(

@@ -9,5 +9,5 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["squiggle-website", "@quri/hub"]
+  "ignore": ["squiggle-website", "@quri/hub", "@quri/ops"]
 }
