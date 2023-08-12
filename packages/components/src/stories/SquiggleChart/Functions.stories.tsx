@@ -44,6 +44,29 @@ Plot.numericFn({
   },
 };
 
+export const FairLogScaleSampling: Story = {
+  name: "Fair log scale sampling",
+  args: {
+    code: sq`
+numericPlot = Plot.numericFn({
+  fn: {|t| t < 5 ? 1000 : t^2},
+  xScale: Scale.log({
+    min: 1,
+    max: 100
+  })
+})
+
+distPlot = Plot.distFn({
+  fn: {|t| t < 5 ? pointMass(1000) : t^2 to t^2 + 1000},
+  xScale: Scale.log({
+    min: 1,
+    max: 100
+  })
+})
+`,
+  },
+};
+
 export const WithInfiniteValues: Story = {
   name: "Numeric, With Infinite Values",
   args: {

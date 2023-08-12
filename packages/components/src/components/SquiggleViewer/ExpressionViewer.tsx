@@ -224,11 +224,11 @@ export const getBoxProps = (
               return (
                 <DistFunctionChart
                   plot={plot}
-                  height={settings.chartHeight}
                   environment={{
                     sampleCount: environment.sampleCount / 10,
                     xyPointLength: environment.xyPointLength / 10,
                   }}
+                  height={settings.chartHeight}
                 />
               );
             }
@@ -236,8 +236,8 @@ export const getBoxProps = (
               return (
                 <ScatterChart
                   plot={plot}
-                  height={settings.chartHeight}
                   environment={environment}
+                  height={settings.chartHeight}
                 />
               );
             case "relativeValues":
