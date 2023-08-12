@@ -24,4 +24,4 @@ jobs:
         working-directory: ./packages/ops
         env:
           VERCEL_API_TOKEN: "${{ secrets.VERCEL_API_TOKEN }}"
-        run: tsx ./scripts/cleanup-vercel-deployments.tsx
+        run: npx tsx ./scripts/cleanup-vercel-deployments.tsx
