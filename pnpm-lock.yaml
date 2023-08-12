@@ -447,6 +447,22 @@ importers:
         specifier: ^3.12.7
         version: 3.12.7
 
+  packages/ops:
+    dependencies:
+      zod:
+        specifier: ^3.21.4
+        version: 3.21.4
+    devDependencies:
+      '@types/node':
+        specifier: ^20.4.7
+        version: 20.4.7
+      tsx:
+        specifier: ^3.12.7
+        version: 3.12.7
+      typescript:
+        specifier: ^5.1.6
+        version: 5.1.6
+
   packages/prettier-plugin:
     dependencies:
       '@quri/squiggle-lang':
