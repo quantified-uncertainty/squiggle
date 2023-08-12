@@ -106,7 +106,6 @@ async function cleanupOldProductionDeployments() {
   for await (const deployment of fetchDeployments({
     teamId,
     app: project,
-    state: "READY",
     target: "production",
   })) {
     if (deployment.uid === currentDeployment.id) {
@@ -140,7 +139,6 @@ async function cleanupOldPreviewDeployments() {
   for await (const deployment of fetchDeployments({
     teamId,
     app: project,
-    state: "READY",
     target: "preview",
   })) {
     if (deployment.created >= now - 86400 * keepDays) {
