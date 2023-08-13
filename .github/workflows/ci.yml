@@ -98,4 +98,4 @@ jobs:
         working-directory: ${{ env.dir }}
         run: |
           npx vercel deploy --prebuilt ${{ env.env == 'production' && '--prod' || '' }} --token=${{ secrets.VERCEL_API_TOKEN }} >vercel-deploy-url.txt
-          vercel alias set $(cat ./vercel-deploy-url.txt) squiggle-components-pr-${{ github.event.pull_request.number }}.vercel.app
+          vercel alias set $(cat ./vercel-deploy-url.txt) squiggle-components-pr-${{ github.event.pull_request.number }}.vercel.app --token=${{ secrets.VERCEL_API_TOKEN }}
