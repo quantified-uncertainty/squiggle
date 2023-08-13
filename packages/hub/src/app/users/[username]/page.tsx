@@ -1,10 +1,11 @@
-import { Metadata, ResolvingMetadata } from "next";
-import { UserView } from "./UserView";
-import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
-import { loadSerializableQuery } from "@/relay/loadSerializableQuery";
+import { Metadata } from "next";
+
 import UserViewQueryNode, {
   UserViewQuery,
 } from "@/__generated__/UserViewQuery.graphql";
+import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
+import { loadSerializableQuery } from "@/relay/loadSerializableQuery";
+import { UserView } from "./UserView";
 
 type Props = {
   params: { username: string };
@@ -23,9 +24,6 @@ export default async function UserPage({ params }: Props) {
   );
 }
 
-export async function generateMetadata(
-  { params }: Props,
-  parent: ResolvingMetadata
-): Promise<Metadata> {
-  return { title: `${params.username} | ${(await parent).title?.absolute}` };
+export function generateMetadata({ params }: Props): Metadata {
+  return { title: params.username };
 }

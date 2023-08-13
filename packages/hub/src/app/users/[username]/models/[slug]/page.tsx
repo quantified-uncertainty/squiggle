@@ -1,11 +1,11 @@
 import { EditModelPageBody } from "./EditModelPageBody";
 import { loadModelPageQuery } from "./loadModelPageQuery";
 
-export default async function Page({
-  params,
-}: {
+type Props = {
   params: { username: string; slug: string };
-}) {
+};
+
+export default async function Page({ params }: Props) {
   const query = await loadModelPageQuery({
     ownerUsername: params.username,
     slug: params.slug,

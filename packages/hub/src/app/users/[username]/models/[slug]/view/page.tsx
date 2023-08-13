@@ -1,11 +1,11 @@
 import { ViewModelRevision } from "../ViewModelRevision";
 import { loadModelPageQuery } from "../loadModelPageQuery";
 
-export default async function OuterModelPage({
-  params,
-}: {
+type Props = {
   params: { username: string; slug: string };
-}) {
+};
+
+export default async function OuterModelPage({ params }: Props) {
   const query = await loadModelPageQuery({
     ownerUsername: params.username,
     slug: params.slug,

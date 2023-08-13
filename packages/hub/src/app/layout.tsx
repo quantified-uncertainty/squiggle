@@ -26,5 +26,8 @@ export default async function RootLayout({ children }: PropsWithChildren) {
 }
 
 export const metadata: Metadata = {
-  title: "Squiggle Hub",
+  title: {
+    absolute: "Squiggle Hub",
+    template: "%s | Squiggle Hub",
+  },
 };
