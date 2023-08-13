@@ -60,6 +60,9 @@ jobs:
     name: Deploy to Vercel
     runs-on: ubuntu-latest
     needs: build-test-lint
+    environment:
+      name: Preview – squiggle-components
+      url: https://squiggle-components-pr-${{ github.event.pull_request.number }}.vercel.app
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_COMPONENTS_PROJECT_ID }} # TODO - make reusable
@@ -93,4 +96,6 @@ jobs:
 
       - name: Deploy Project Artifacts to Vercel
         working-directory: ${{ env.dir }}
-        run: npx vercel deploy --prebuilt ${{ env.env == 'production' && '--prod' || '' }} --token=${{ secrets.VERCEL_API_TOKEN }}
+        run: |
+          npx vercel deploy --prebuilt ${{ env.env == 'production' && '--prod' || '' }} --token=${{ secrets.VERCEL_API_TOKEN }} >vercel-deploy-url.txt
+          vercel alias set $(cat ./vercel-deploy-url.txt) squiggle-components-pr-${{ github.event.pull_request.number }}.vercel.app
