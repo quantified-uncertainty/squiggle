@@ -291,9 +291,11 @@ export const PlaygroundSettingsForm: React.FC<{
         </div>
       ) : null}
 
-      <div className="pt-6 mb-6">
-        <EditorSettingsForm />
-      </div>
+      {withGlobalSettings ? (
+        <div className="pt-6 mb-6">
+          <EditorSettingsForm />
+        </div>
+      ) : null}
     </div>
   );
 };
