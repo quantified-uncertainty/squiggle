@@ -7,11 +7,11 @@ import { fetchQuery, graphql } from "relay-runtime";
 
 import { ControlledFormField } from "@quri/ui";
 
-import { environment } from "@/relay/environment";
 import {
   SelectRelativeValuesDefinitionQuery,
   SelectRelativeValuesDefinitionQuery$data,
 } from "@/__generated__/SelectRelativeValuesDefinitionQuery.graphql";
+import { useRelayEnvironment } from "react-relay";
 
 const Query = graphql`
   query SelectRelativeValuesDefinitionQuery(
@@ -68,6 +68,7 @@ export function SelectRelativeValuesDefinition<
   userFieldName: TUserName;
 }) {
   const { watch } = useFormContext();
+  const environment = useRelayEnvironment();
   const username = watch(userFieldName);
 
   const loadOptions = async (inputValue: string): Promise<Option[]> => {

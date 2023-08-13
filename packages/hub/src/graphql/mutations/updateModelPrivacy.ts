@@ -3,9 +3,9 @@ import { builder } from "@/graphql/builder";
 
 import { Model } from "../types/Model";
 
-builder.mutationField("updateModelSlug", (t) =>
+builder.mutationField("updateModelPrivacy", (t) =>
   t.withAuth({ user: true }).fieldWithInput({
-    type: builder.simpleObject("UpdateModelSlugResult", {
+    type: builder.simpleObject("UpdateModelPrivacyResult", {
       fields: (t) => ({
         model: t.field({
           type: Model,
@@ -16,13 +16,8 @@ builder.mutationField("updateModelSlug", (t) =>
     errors: {},
     input: {
       username: t.input.string({ required: true }),
-      oldSlug: t.input.string({ required: true }),
-      newSlug: t.input.string({
-        required: true,
-        validate: {
-          regex: /^\w[\w\-]*$/,
-        },
-      }),
+      slug: t.input.string({ required: true }),
+      isPrivate: t.input.boolean({ required: true }),
     },
     resolve: async (_, { input }, { session }) => {
       if (session.user.username !== input.username) {
@@ -30,24 +25,13 @@ builder.mutationField("updateModelSlug", (t) =>
       }
 
       const owner = await prisma.user.findUniqueOrThrow({
-        where: {
-          username: input.username,
-        },
+        where: { username: input.username },
       });
 
       const model = await prisma.model.update({
-        where: {
-          slug_ownerId: {
-            slug: input.oldSlug,
-            ownerId: owner.id,
-          },
-        },
-        data: {
-          slug: input.newSlug,
-        },
-        include: {
-          owner: true,
-        },
+        where: { slug_ownerId: { slug: input.slug, ownerId: owner.id } },
+        data: { isPrivate: input.isPrivate },
+        include: { owner: true },
       });
 
       return { model };

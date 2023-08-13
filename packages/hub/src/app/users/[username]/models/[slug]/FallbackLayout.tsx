@@ -17,7 +17,7 @@ export const FallbackModelLayout: FC<Props> = ({ username, slug }) => {
     <EntityLayout
       nodes={entityNodes(username, slug, variableName)}
       isFluid={true}
-      headerChildren={
+      headerRight={
         <div
           style={{
             height: 49, // matches the height of real header content

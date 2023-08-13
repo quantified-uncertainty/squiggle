@@ -64,7 +64,7 @@ export const CacheMenu: FC<{
     </div>
   );
 
-  let withDropdown = (internals: ReactElement) => (
+  const withDropdown = (internals: ReactElement) => (
     <Dropdown
       render={({ close }) => {
         if (!revision.forRelativeValues?.id) {

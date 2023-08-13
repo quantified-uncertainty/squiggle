@@ -1,5 +1,4 @@
-// Convert preloaded query object (with raw GraphQL Response) into
-// Relay's PreloadedQuery.
+// Convert preloaded query object (with raw GraphQL Response) into Relay's PreloadedQuery.
 
 import { useMemo } from "react";
 import {
@@ -8,15 +7,13 @@ import {
   useRelayEnvironment,
 } from "react-relay";
 import { ConcreteRequest, OperationType } from "relay-runtime";
-import { responseCache } from "./environment";
-import { SerializablePreloadedQuery } from "./loadSerializableQuery";
 
-// This hook convert serializable preloaded query
-// into Relay's PreloadedQuery object.
-// It is also writes this serializable preloaded query
-// into QueryResponseCache, so we the network layer
-// can use these cache results when fetching data
-// in `usePreloadedQuery`.
+import { SerializablePreloadedQuery } from "./loadSerializableQuery";
+import { EnvironmentWithResponseCache } from "./environment";
+
+// This hook convert serializable preloaded query into Relay's PreloadedQuery object.
+// It also writes this serializable preloaded query into QueryResponseCache, so that
+// the network layer can use these cache results when fetching data in `usePreloadedQuery`.
 export function useSerializablePreloadedQuery<
   TRequest extends ConcreteRequest,
   TQuery extends OperationType
@@ -26,8 +23,11 @@ export function useSerializablePreloadedQuery<
 ): PreloadedQuery<TQuery> {
   const environment = useRelayEnvironment();
   useMemo(() => {
-    writePreloadedQueryToCache(preloadQuery);
-  }, [preloadQuery]);
+    writePreloadedQueryToCache(
+      preloadQuery,
+      environment as EnvironmentWithResponseCache
+    );
+  }, [preloadQuery, environment]);
 
   return {
     environment,
@@ -46,10 +46,14 @@ export function useSerializablePreloadedQuery<
 function writePreloadedQueryToCache<
   TRequest extends ConcreteRequest,
   TQuery extends OperationType
->(preloadedQueryObject: SerializablePreloadedQuery<TRequest, TQuery>) {
+>(
+  preloadedQueryObject: SerializablePreloadedQuery<TRequest, TQuery>,
+  environment: EnvironmentWithResponseCache
+) {
   const cacheKey =
     preloadedQueryObject.params.id ?? preloadedQueryObject.params.cacheID;
-  responseCache?.set(
+
+  environment.responseCache?.set(
     cacheKey,
     preloadedQueryObject.variables,
     preloadedQueryObject.response

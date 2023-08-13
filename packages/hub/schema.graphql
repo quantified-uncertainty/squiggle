@@ -50,6 +50,7 @@ type Model implements Node {
   createdAtTimestamp: Float!
   currentRevision: ModelRevision!
   id: ID!
+  isPrivate: Boolean!
   owner: User!
   revision(id: ID!): ModelRevision!
   revisions(after: String, before: String, first: Int, last: Int): ModelRevisionConnection!
@@ -106,6 +107,7 @@ type Mutation {
   deleteModel(input: MutationDeleteModelInput!): MutationDeleteModelResult!
   deleteRelativeValuesDefinition(input: MutationDeleteRelativeValuesDefinitionInput!): MutationDeleteRelativeValuesDefinitionResult!
   setUsername(username: String!): MutationSetUsernameResult!
+  updateModelPrivacy(input: MutationUpdateModelPrivacyInput!): MutationUpdateModelPrivacyResult!
   updateModelSlug(input: MutationUpdateModelSlugInput!): MutationUpdateModelSlugResult!
   updateRelativeValuesDefinition(input: MutationUpdateRelativeValuesDefinitionInput!): MutationUpdateRelativeValuesDefinitionResult!
   updateSquiggleSnippetModel(input: MutationUpdateSquiggleSnippetModelInput!): MutationUpdateSquiggleSnippetModelResult!
@@ -155,6 +157,14 @@ input MutationDeleteRelativeValuesDefinitionInput {
 union MutationDeleteRelativeValuesDefinitionResult = BaseError | DeleteRelativeValuesDefinitionResult
 
 union MutationSetUsernameResult = BaseError | Me
+
+input MutationUpdateModelPrivacyInput {
+  isPrivate: Boolean!
+  slug: String!
+  username: String!
+}
+
+union MutationUpdateModelPrivacyResult = BaseError | UpdateModelPrivacyResult
 
 input MutationUpdateModelSlugInput {
   newSlug: String!
@@ -342,6 +352,10 @@ type SquiggleSnippet implements Node {
 
 input SquiggleSnippetContentInput {
   code: String!
+}
+
+type UpdateModelPrivacyResult {
+  model: Model!
 }
 
 type UpdateModelSlugResult {

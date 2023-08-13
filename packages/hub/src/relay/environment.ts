@@ -9,6 +9,7 @@ import {
   Variables,
   GraphQLResponse,
   CacheConfig,
+  EnvironmentConfig,
 } from "relay-runtime";
 
 const IS_SERVER = typeof window === typeof undefined;
@@ -23,15 +24,16 @@ const CACHE_TTL = 5 * 1000; // 5 seconds, to resolve preloaded results
 
 export async function networkFetch(
   request: RequestParameters,
-  variables: Variables
+  variables: Variables,
+  cookieHeader?: string
 ): Promise<GraphQLResponse> {
   const resp = await fetch(HTTP_ENDPOINT, {
     cache: "no-store",
     method: "POST",
     headers: {
+      Cookie: cookieHeader ?? "",
       Accept: "application/json",
       "Content-Type": "application/json",
-      // TODO - forward auth cookie
     },
     body: JSON.stringify({
       query: request.text,
@@ -57,50 +59,61 @@ export async function networkFetch(
   return json;
 }
 
-export const responseCache = IS_SERVER
-  ? null
-  : new QueryResponseCache({
-      size: 100,
-      ttl: CACHE_TTL,
-    });
-
-function createNetwork() {
+export function createNetwork(responseCache: QueryResponseCache) {
   const fetchResponse = async (
     params: RequestParameters,
     variables: Variables,
     cacheConfig: CacheConfig
-  ) => {
+  ): Promise<GraphQLResponse> => {
     const isQuery = params.operationKind === "query";
     const cacheKey = params.id ?? params.cacheID;
     const forceFetch = cacheConfig && cacheConfig.force;
-    if (responseCache != null && isQuery && !forceFetch) {
+    if (isQuery && !forceFetch) {
       const fromCache = responseCache.get(cacheKey, variables);
-      if (fromCache != null) {
-        return Promise.resolve(fromCache);
+      if (fromCache) {
+        return fromCache;
       }
     }
 
-    return networkFetch(params, variables);
+    // TODO - on server, it might be better to run GraphQL query directly, instead of going through yoga and HTTP
+    return await networkFetch(params, variables);
   };
 
-  const network = Network.create(fetchResponse);
-  return network;
+  return Network.create(fetchResponse);
+}
+
+export class EnvironmentWithResponseCache extends Environment {
+  constructor(
+    config: EnvironmentConfig,
+    public responseCache: QueryResponseCache
+  ) {
+    super(config);
+  }
 }
 
 function createEnvironment() {
-  return new Environment({
-    network: createNetwork(),
-    store: new Store(RecordSource.create()),
-    isServer: IS_SERVER,
+  // We have response cache even on server; isolation is guaranteed by `getCurrentEnvironment()` logic.
+  // We expose it as `environment.responseCache` so that `useSerializablePreloadedQuery` could access it.
+  const responseCache = new QueryResponseCache({
+    size: 100,
+    ttl: CACHE_TTL,
   });
+  return new EnvironmentWithResponseCache(
+    {
+      network: createNetwork(responseCache),
+      store: new Store(RecordSource.create()),
+      isServer: IS_SERVER,
+    },
+    responseCache
+  );
 }
 
-export const environment = createEnvironment();
-
+let environment: EnvironmentWithResponseCache | undefined;
 export function getCurrentEnvironment() {
   if (IS_SERVER) {
     return createEnvironment();
   }
 
+  environment ??= createEnvironment();
   return environment;
 }

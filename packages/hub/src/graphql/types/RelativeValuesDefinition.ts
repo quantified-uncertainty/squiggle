@@ -5,6 +5,7 @@ import {
 } from "@/relative-values/types";
 import { RelativeValuesExport } from "./RelativeValuesExport";
 import { prisma } from "@/prisma";
+import { modelWhereHasAccess } from "./Model";
 
 const RelativeValuesCluster = builder.simpleObject("RelativeValuesCluster", {
   fields: (t) => ({
@@ -38,7 +39,7 @@ export const RelativeValuesDefinition = builder.prismaNode(
       }),
       modelExports: t.field({
         type: [RelativeValuesExport],
-        resolve: async (definition) => {
+        resolve: async (definition, _, { session }) => {
           const models = await prisma.model.findMany({
             where: {
               currentRevision: {
@@ -48,6 +49,7 @@ export const RelativeValuesDefinition = builder.prismaNode(
                   },
                 },
               },
+              ...modelWhereHasAccess(session),
             },
           });
 

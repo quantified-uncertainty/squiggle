@@ -62,16 +62,17 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
           },
         });
 
-        await tx.model.update({
+        return await tx.model.update({
           where: {
             id: model.id,
           },
           data: {
             currentRevisionId: revision.id,
           },
+          include: {
+            owner: true,
+          },
         });
-
-        return model;
       });
 
       return { model };

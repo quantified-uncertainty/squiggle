@@ -1,6 +1,10 @@
 name: Prisma Migrate Preview DB
 
-on: workflow_dispatch
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
   migrate:
@@ -21,5 +25,5 @@ jobs:
       - name: Migrate
         working-directory: ./packages/hub
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_DIRECT_URL }}
+          DATABASE_URL: "${{ secrets.DATABASE_DIRECT_URL }}"
         run: npx prisma migrate deploy

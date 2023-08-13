@@ -42,6 +42,7 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Session {
@@ -49,7 +50,10 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model User {
@@ -90,6 +94,8 @@ model Model {
   owner   User   @relation(fields: [ownerId], references: [id])
   ownerId String
 
+  isPrivate Boolean @default(false)
+
   revisions ModelRevision[] @relation("Revisions")
 
   // technically nullable, but won't ever be null in practice
@@ -97,6 +103,7 @@ model Model {
   currentRevisionId String?        @unique
 
   @@unique([slug, ownerId])
+  @@index([ownerId])
   @@index([createdAt])
 }
 
@@ -117,6 +124,8 @@ model ModelRevision {
 
   // required by Prisma, but unused since `model` field should point at the same entity
   currentRevisionModel Model? @relation("CurrentRevision")
+
+  @@index([modelId])
 }
 
 model SquiggleSnippet {
@@ -150,6 +159,7 @@ model RelativeValuesDefinition {
 
   @@unique([slug, ownerId])
   @@index([createdAt])
+  @@index([ownerId])
 }
 
 model RelativeValuesDefinitionRevision {
@@ -168,6 +178,8 @@ model RelativeValuesDefinitionRevision {
 
   // required by Prisma, but unused since `model` field should point at the same entity
   relativeValuesDefinition RelativeValuesDefinition? @relation("CurrentRevision")
+
+  @@index([definitionId])
 }
 
 // Note that model revisions are associated with definitions (and not definition revisions).
@@ -185,6 +197,8 @@ model RelativeValuesExport {
   cache RelativeValuesPairCache[]
 
   @@unique([modelRevisionId, definitionId, variableName], name: "uniqueKey")
+  @@index([modelRevisionId]) // duplicates the @@unique above and probably not necessary, but doesn't hurt
+  @@index([definitionId])
 }
 
 model RelativeValuesPairCache {
@@ -201,4 +215,6 @@ model RelativeValuesPairCache {
   // { median, mean, min, max, uncertainty } object.
   // Maybe this should be split into postgres columns later.
   result Json?
+
+  @@index([exportId])
 }

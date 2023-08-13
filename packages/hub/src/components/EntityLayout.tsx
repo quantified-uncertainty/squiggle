@@ -8,14 +8,16 @@ export type { EntityNode };
 
 type Props = {
   nodes: EntityNode[];
-  headerChildren?: ReactNode;
+  headerLeft?: ReactNode;
+  headerRight?: ReactNode;
   children?: ReactNode;
   isFluid?: boolean;
 };
 
 export const EntityLayout: FC<Props> = ({
   nodes,
-  headerChildren,
+  headerLeft,
+  headerRight,
   children,
   isFluid = false,
 }) => {
@@ -31,10 +33,11 @@ export const EntityLayout: FC<Props> = ({
             !isFluid ? "max-w-4xl mx-auto" : "px-8"
           )}
         >
-          <EntityInfo nodes={nodes} />
-          <div className="flex-1 justify-end flex items-center gap-4">
-            {headerChildren}
+          <div className="flex items-center gap-2">
+            <EntityInfo nodes={nodes} />
+            {headerLeft}
           </div>
+          <div>{headerRight}</div>
         </div>
       </div>
       <div className={clsx(!isFluid && "max-w-4xl mx-auto my-4")}>

@@ -76,6 +76,8 @@ export {
   ChatBubbleLeftIcon,
   ChatBubbleOvalLeftIcon,
   ClipboardCopyIcon,
+  GlobeIcon,
+  LockIcon,
 } from "./icons/HeroIcons.js";
 
 export { useToast, WithToasts } from "./components/WithToasts/index.js";

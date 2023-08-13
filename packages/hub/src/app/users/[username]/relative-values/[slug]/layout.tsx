@@ -36,35 +36,33 @@ export default function DefinitionLayout({
   return (
     <EntityLayout
       nodes={nodes}
-      headerChildren={
+      headerRight={
         session?.user.username === username ? (
-          <>
-            <EntityTab.List>
-              <EntityTab.Link
-                name="View"
-                icon={ScaleIcon}
-                href={relativeValuesRoute({ username, slug })}
-              />
-              <EntityTab.Link
-                name="Edit"
-                icon={EditIcon}
-                href={relativeValuesEditRoute({ username, slug })}
-              />
-              <Dropdown
-                render={({ close }) => (
-                  <DropdownMenu>
-                    <DeleteDefinitionAction
-                      username={username}
-                      slug={slug}
-                      close={close}
-                    />
-                  </DropdownMenu>
-                )}
-              >
-                <EntityTab.Div name="Settings" icon={Cog8ToothIcon} />
-              </Dropdown>
-            </EntityTab.List>
-          </>
+          <EntityTab.List>
+            <EntityTab.Link
+              name="View"
+              icon={ScaleIcon}
+              href={relativeValuesRoute({ username, slug })}
+            />
+            <EntityTab.Link
+              name="Edit"
+              icon={EditIcon}
+              href={relativeValuesEditRoute({ username, slug })}
+            />
+            <Dropdown
+              render={({ close }) => (
+                <DropdownMenu>
+                  <DeleteDefinitionAction
+                    username={username}
+                    slug={slug}
+                    close={close}
+                  />
+                </DropdownMenu>
+              )}
+            >
+              <EntityTab.Div name="Settings" icon={Cog8ToothIcon} />
+            </Dropdown>
+          </EntityTab.List>
         ) : null
       }
     >

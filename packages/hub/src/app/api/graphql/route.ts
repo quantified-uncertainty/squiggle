@@ -12,9 +12,7 @@ const yoga = createYoga({
     // getServerSession() obtains request data through Next.js cookies() and headers() functions
     // See also: https://github.com/nextauthjs/next-auth/issues/7355
     const session = await getServerSession(authOptions);
-    return {
-      session,
-    };
+    return { session };
   },
 });
 

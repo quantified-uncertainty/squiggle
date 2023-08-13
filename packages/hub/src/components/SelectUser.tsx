@@ -11,7 +11,7 @@ import {
   SelectUserQuery,
   SelectUserQuery$data,
 } from "@/__generated__/SelectUserQuery.graphql";
-import { environment } from "@/relay/environment";
+import { useRelayEnvironment } from "react-relay";
 
 const Query = graphql`
   query SelectUserQuery($input: UsersQueryInput!) {
@@ -61,6 +61,8 @@ export function SelectUser<
   label?: string;
   required?: boolean;
 }) {
+  const environment = useRelayEnvironment();
+
   const loadOptions = async (inputValue: string): Promise<Option[]> => {
     const result = await fetchQuery<SelectUserQuery>(environment, Query, {
       input: {
