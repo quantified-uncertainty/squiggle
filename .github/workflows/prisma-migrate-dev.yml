@@ -21,8 +21,8 @@ jobs:
               - 'packages/hub/prisma/migrations/**'
 
   migrate:
-    needs: needs-migrate
-    if: needs.needs-migrate.outputs.prisma == 'true'
+    needs: changes
+    if: needs.changes.outputs.prisma == 'true'
     runs-on: ubuntu-latest
     environment: Preview
     steps:
