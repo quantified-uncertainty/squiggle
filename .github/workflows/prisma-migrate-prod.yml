@@ -1,0 +1,26 @@
+name: Prisma Migrate Production DB
+# Copy-pasted from ./prisma-migrate-dev.yml
+
+on: workflow_dispatch
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    environment: Production
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install
+      - name: Migrate
+        working-directory: ./packages/hub
+        env:
+          DATABASE_URL: "${{ secrets.DATABASE_DIRECT_URL }}"
+        run: npx prisma migrate deploy
