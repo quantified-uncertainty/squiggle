@@ -62,7 +62,7 @@ jobs:
     needs: build-test-lint
     environment:
       name: Preview – squiggle-components
-      url: https://squiggle-components-pr-${{ github.event.pull_request.number }}.vercel.app
+      url: https://squiggle-components-pr-${{ github.event.pull_request.number }}-quantified-uncertainty.vercel.app
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_COMPONENTS_PROJECT_ID }} # TODO - make reusable

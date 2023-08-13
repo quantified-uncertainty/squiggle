@@ -7,10 +7,26 @@ on:
   workflow_dispatch:
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    # Required permissions
+    permissions:
+      pull-requests: read
+    steps:
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            prisma:
+              - 'packages/hub/prisma/migrations/**'
+
   migrate:
+    needs: needs-migrate
+    if: needs.needs-migrate.outputs.prisma == 'true'
     runs-on: ubuntu-latest
     environment: Preview
     steps:
+    
       - uses: actions/checkout@v3
       - uses: pnpm/action-setup@v2
         with:
