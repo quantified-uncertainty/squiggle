@@ -96,6 +96,7 @@ jobs:
 
       - name: Deploy Project Artifacts to Vercel
         working-directory: ${{ env.dir }}
+        # https://vercel.com/guides/how-to-alias-a-preview-deployment-using-the-cli
         run: |
-          npx vercel deploy --prebuilt ${{ env.env == 'production' && '--prod' || '' }} --scope quantified-uncertainty --token=${{ secrets.VERCEL_API_TOKEN }} >vercel-deploy-url.txt
-          vercel alias set $(cat ./vercel-deploy-url.txt) squiggle-components-pr-${{ github.event.pull_request.number }}-quantified-uncertainty.vercel.app --scope quantified-uncertainty --token=${{ secrets.VERCEL_API_TOKEN }}
+          deploy_url=$(npx vercel deploy --prebuilt ${{ env.env == 'production' && '--prod' || '' }} --scope quantified-uncertainty --token=${{ secrets.VERCEL_API_TOKEN }})
+          vercel alias set "$deploy_url" squiggle-components-pr-${{ github.event.pull_request.number }}-quantified-uncertainty.vercel.app --scope quantified-uncertainty --token=${{ secrets.VERCEL_API_TOKEN }}

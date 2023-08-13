@@ -20,3 +20,5 @@ shell.nix
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+.vercel
