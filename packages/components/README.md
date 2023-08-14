@@ -47,7 +47,7 @@ It's possible that in the future you might need to change the `content` or `plug
 In addition, you should import common styles (these include styles from the JS libraries that we use in squiggle-components):
 
 ```js
-import "@quri/squiggle-components/dist/common.css";
+import "@quri/squiggle-components/common.css";
 ```
 
 ### 2. Usage without Tailwind
@@ -55,7 +55,7 @@ import "@quri/squiggle-components/dist/common.css";
 You can import the CSS file that we bundle with this library:
 
 ```js
-import "@quri/squiggle-components/dist/full.css";
+import "@quri/squiggle-components/full.css";
 ```
 
 Note that you have to import this CSS file **only if you don't use Tailwind**.
@@ -118,7 +118,7 @@ Then, add `<TailwindProvider>...</TailwindProvider>` on top of your app (it can 
 In addition, you should import common styles (these include styles from the JS libraries that we use in squiggle-components):
 
 ```js
-import "@quri/squiggle-components/dist/common.css";
+import "@quri/squiggle-components/common.css";
 ```
 
 ## Components
