@@ -11,5 +11,8 @@
     "prettier": "^3.0.0",
     "turbo": "^1.10.12",
     "turbo-ignore": "^1.10.12"
+  },
+  "dependencies": {
+    "vercel": "^31.2.3"
   }
 }
