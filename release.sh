@@ -5,6 +5,7 @@
 set -e
 
 publish_npm () {
+    turbo run build lint test
     # doesn't support prereleases yet
     changeset publish
 }
