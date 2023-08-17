@@ -11,7 +11,7 @@ import * as prettier from "prettier/standalone";
 import { defaultKeymap } from "@codemirror/commands";
 import { syntaxHighlighting } from "@codemirror/language";
 import { setDiagnostics } from "@codemirror/lint";
-import { Compartment, EditorState, Extension } from "@codemirror/state";
+import { Compartment, EditorState } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 // From basic setup
 import {
@@ -76,6 +76,7 @@ const compSubmitListener = new Compartment();
 const compFormatListener = new Compartment();
 const compViewNodeListener = new Compartment();
 const compLineWrapping = new Compartment();
+const compLanguageSupport = new Compartment();
 
 export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
   function CodeEditor(
@@ -97,7 +98,6 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     // `useState` instead of `useMemo`, because we want to initialize view only once.
     // We'll handle further updates through `useEffect` calls.
     const [view] = useState(() => {
-      const languageSupport = squiggleLanguageSupport(project);
       const extensions = [
         highlightSpecialChars(),
         history(),
@@ -129,8 +129,9 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
         compGutter.of([]),
         compUpdateListener.of([]),
         compTheme.of([]),
+        compLanguageSupport.of([]),
+        // might be unnecessary, but might help with redraw if `useEffect` configuring the compartment fires too late
         compLineWrapping.of(lineWrapping ? [EditorView.lineWrapping] : []),
-        languageSupport,
       ];
 
       const state = EditorState.create({
@@ -196,6 +197,14 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
         ),
       });
     }, [showGutter, view]);
+
+    useEffect(() => {
+      view.dispatch({
+        effects: compLanguageSupport.reconfigure(
+          squiggleLanguageSupport(project)
+        ),
+      });
+    }, [project, view]);
 
     useEffect(() => {
       view.dispatch({
