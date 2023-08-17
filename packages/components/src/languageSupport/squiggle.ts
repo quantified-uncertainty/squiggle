@@ -8,13 +8,11 @@ import {
   syntaxTree,
 } from "@codemirror/language";
 import { styleTags, tags as t } from "@lezer/highlight";
-import { RefObject } from "react";
-
-import { SqProject } from "@quri/squiggle-lang";
 
 import { parser } from "./generated/squiggle.js";
+import { SqProject } from "@quri/squiggle-lang";
 
-export function squiggleLanguageSupport(projectRef: RefObject<SqProject>) {
+export function squiggleLanguageSupport(project: SqProject) {
   return new LanguageSupport(
     LRLanguage.define({
       name: "squiggle",
@@ -121,8 +119,8 @@ export function squiggleLanguageSupport(projectRef: RefObject<SqProject>) {
                 label: name,
                 type: "constant",
               })),
-              ...(projectRef.current
-                ?.getStdLib()
+              ...(project
+                .getStdLib()
                 .keySeq()
                 .toArray()
                 .map((name) => ({
