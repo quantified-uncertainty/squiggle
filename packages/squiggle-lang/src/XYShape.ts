@@ -68,7 +68,6 @@ export const XYShapeError = {
   },
 };
 
-// can be changed to enum after Typescript conversion is done
 export type InterpolationStrategy = "Stepwise" | "Linear";
 type ExtrapolationStrategy = "UseZero" | "UseOutermostPoints";
 
@@ -165,31 +164,6 @@ export const T = {
   },
   equallyDividedXs(t: XYShape, newLength: number): number[] {
     return E_A_Floats.range(T.minX(t), T.maxX(t), newLength);
-  },
-
-  // unused
-  toJs(t: XYShape) {
-    return t;
-  },
-
-  // unused
-  filterYValues(t: XYShape, fn: (y: number) => number): XYShape {
-    return T.fromZippedArray(T.zip(t).filter(([, y]) => fn(y)));
-  },
-
-  // unused
-  filterOkYs<B>(xs: number[], ys: Result.result<number, B>[]): XYShape {
-    const n = xs.length; // Assume length(xs) == length(ys)
-    const newXs: number[] = [];
-    const newYs: number[] = [];
-    for (let i = 0; i <= n - 1; i++) {
-      const y = ys[i];
-      if (y.ok) {
-        newXs.push(xs[i]);
-        newYs.push(y.value);
-      }
-    }
-    return { xs: newXs, ys: newYs };
   },
 
   Validator: {
@@ -482,51 +456,70 @@ export const PointwiseCombination = {
     const t2n = t2.xs.length;
     const outX: number[] = [];
     const outY: number[] = [];
-    let i = -1;
-    let j = -1;
+    // Next index that we want to consume.
+    // Possible range of values: [0..n+2], where:
+    // - `n` signifies "we consumed all points"
+    // - `n+1` signifies "we consumed all points _and_ one more "last x + epsilon" point for extrapolations when shapes don't overlap.
+    // - `n+2` signifies "we consumed all points _and_ "last x + epsilon" point _and_ "first x of another shape - epsilon".
+    // See https://github.com/quantified-uncertainty/squiggle/issues/1400#issuecomment-1666998578 for details why this might be important.
+    let i1 = 0,
+      i2 = 0;
 
-    while (i <= t1n - 1 && j <= t2n - 1) {
-      let x, ya, yb;
-      if ((j === t2n - 1 && i < t1n - 1) || t1.xs[i + 1] < t2.xs[j + 1]) {
-        // if a has to catch up to b, or if b is already done
-        i++;
+    while (i1 < t1n || i2 < t2n) {
+      let x, y1, y2;
 
-        x = t1.xs[i];
-        ya = t1.ys[i];
-
-        yb = interpolator(t2, j, x);
-      } else if (
-        (i === t1n - 1 && j < t2n - 1) ||
-        t1.xs[i + 1] > t2.xs[j + 1]
-      ) {
-        // if b has to catch up to a, or if a is already done
-        j++;
-
-        x = t2.xs[j];
-        yb = t2.ys[j];
-
-        ya = interpolator(t1, i, x);
-      } else if (i < t1n - 1 && j < t2n && t1.xs[i + 1] === t2.xs[j + 1]) {
-        // if they happen to be equal, move both ahead
-        i++;
-        j++;
-        x = t1.xs[i];
-        ya = t1.ys[i];
-        yb = t2.ys[j];
-      } else if (i === t1n - 1 && j === t2n - 1) {
-        // finished!
-        i = t1n;
-        j = t2n;
-        continue;
+      // First four cases here are for adding two additional points when shapes don't overlap.
+      // TODO - in rare cases, last point of the first shape + epsilon could be larger than the first point of the second, which will cause "Xs is not sorted" error later.
+      if (i1 > 0 && i1 === t1n && i2 === 0) {
+        // Extrapolating after final point; second shape hasn't started yet.
+        // Note the exact `i1 === t1n` check.
+        x = t1.xs[i1 - 1] + Number.EPSILON * t1.xs[i1 - 1]; // just using Number.EPSILON is not enough; see https://stackoverflow.com/a/72185420
+        y1 = interpolator(t1, t1n, x);
+        y2 = interpolator(t2, -1, x);
+        i1++;
+      } else if (i1 === t1n + 1 && i2 === 0) {
+        x = t2.xs[0] - Number.EPSILON * t2.xs[0];
+        y1 = interpolator(t1, t1n, x);
+        y2 = interpolator(t2, -1, x);
+        i1++;
+      } else if (i2 > 0 && i2 === t2n && i1 === 0) {
+        x = t2.xs[i2 - 1] + Number.EPSILON * t2.xs[i2 - 1];
+        y1 = interpolator(t1, -1, x);
+        y2 = interpolator(t2, t2n, x);
+        i2++;
+      } else if (i2 === t2n + 1 && i1 === 0) {
+        x = t1.xs[0] - Number.EPSILON * t1.xs[0];
+        y1 = interpolator(t1, -1, x);
+        y2 = interpolator(t2, t2n, x);
+        i2++;
+      } else if (i2 >= t2n || (i1 < t1n && t1.xs[i1] < t2.xs[i2])) {
+        // If i1 has to catch up to i2, or if i2 is already done.
+        x = t1.xs[i1];
+        y1 = t1.ys[i1];
+        y2 = interpolator(t2, i2 - 1, x);
+        i1++;
+      } else if (i1 >= t1n || (i2 < t2n && t1.xs[i1] > t2.xs[i2])) {
+        // If i2 has to catch up to i1, or if i1 is already done.
+        x = t2.xs[i2];
+        y1 = interpolator(t1, i1 - 1, x);
+        y2 = t2.ys[i2];
+        i2++;
+      } else if (i1 < t1n && i2 < t2n && t1.xs[i1] === t2.xs[i2]) {
+        // If they happen to be equal, move both ahead.
+        x = t1.xs[i1];
+        y1 = t1.ys[i1];
+        y2 = t2.ys[i2];
+        i1++;
+        i2++;
       } else {
-        throw new Error(`PointwiseCombination error: ${i}, ${j}`);
+        throw new Error(`PointwiseCombination error: ${i1}, ${i2}`);
       }
 
       outX.push(x);
 
       // Here I check whether the operation was a success. If it was
       // keep going. Otherwise, stop and throw the error back to user
-      const newY = fn(ya, yb);
+      const newY = fn(y1, y2);
       if (!newY.ok) {
         return newY;
       }

@@ -272,5 +272,5 @@ export function doNumberLambdaCall(
   if (value.type === "Number") {
     return value.value;
   }
-  throw new REOperationError(SampleMapNeedsNtoNFunction);
+  throw new REOperationError(new SampleMapNeedsNtoNFunction());
 }

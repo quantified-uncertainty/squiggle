@@ -196,6 +196,9 @@ export class ContinuousShape implements PointSet<ContinuousShape> {
     );
   }
 
+  isEmpty() {
+    return this.xyShape.xs.length === 0;
+  }
   toContinuous() {
     return this;
   }
@@ -380,31 +383,9 @@ export const sum = (continuousShapes: ContinuousShape[]): ContinuousShape => {
   }, empty());
 };
 
-export const reduce = <E>(
-  continuousShapes: ContinuousShape[],
-  fn: (v1: number, v2: number) => Result.result<number, E>,
-  integralSumCachesFn: (v1: number, v2: number) => number | undefined = () =>
-    undefined
-): Result.result<ContinuousShape, E> => {
-  let acc = empty();
-  for (const shape of continuousShapes) {
-    const result = combinePointwise(
-      acc,
-      shape,
-      fn,
-      undefined,
-      integralSumCachesFn
-    );
-    if (!result.ok) {
-      return result;
-    }
-    acc = result.value;
-  }
-  return Result.Ok(acc);
-};
-
 /* This simply creates multiple copies of the continuous distribution, scaled and shifted according to
  each discrete data point, and then adds them all together. */
+//TODO WARNING: The combineAlgebraicallyWithDiscrete will break for subtraction and division, like, discrete - continous
 export const combineAlgebraicallyWithDiscrete = (
   op: ConvolutionOperation,
   t1: ContinuousShape,

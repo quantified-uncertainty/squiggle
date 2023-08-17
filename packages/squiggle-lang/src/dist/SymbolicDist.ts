@@ -97,9 +97,9 @@ export abstract class SymbolicDist extends BaseDist {
     return Ok(
       new PointSetDist(
         new ContinuousShape({
-          integralSumCache: 1.0,
+          integralSumCache: 1.0, // this is a lie; real integral sum is not exactly 1 because of linear interpolation.
           xyShape: xyShapeR.value,
-        })
+        }).toMixed()
       )
     );
   }
@@ -915,7 +915,7 @@ export class Bernoulli extends SymbolicDist {
         new DiscreteShape({
           integralSumCache: 1.0,
           xyShape: { xs: [0, 1], ys: [1 - this.p, this.p] },
-        })
+        }).toMixed()
       )
     );
   }
@@ -1024,7 +1024,7 @@ export class PointMass extends SymbolicDist {
         new DiscreteShape({
           integralSumCache: 1.0,
           xyShape: { xs: [this.t], ys: [1.0] },
-        })
+        }).toMixed()
       )
     );
   }

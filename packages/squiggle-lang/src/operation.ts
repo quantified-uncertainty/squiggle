@@ -55,7 +55,7 @@ const power: OperationFn = (a, b) => {
   if (a >= 0) {
     return Ok(a ** b);
   } else {
-    return Result.Err(ComplexNumberError);
+    return Result.Err(new ComplexNumberError());
   }
 };
 
@@ -69,21 +69,21 @@ const divide: OperationFn = (a, b) => {
   if (b !== 0) {
     return Ok(a / b);
   } else {
-    return Result.Err(DivisionByZeroError);
+    return Result.Err(new DivisionByZeroError());
   }
 };
 
 const logarithm: OperationFn = (a, b) => {
   if (b === 1) {
-    return Result.Err(DivisionByZeroError);
+    return Result.Err(new DivisionByZeroError());
   } else if (b === 0) {
     return Ok(0);
   } else if (a > 0 && b > 0) {
     return Ok(Math.log(a) / Math.log(b));
   } else if (a === 0) {
-    return Result.Err(NegativeInfinityError);
+    return Result.Err(new NegativeInfinityError());
   } else {
-    return Result.Err(ComplexNumberError);
+    return Result.Err(new ComplexNumberError());
   }
 };
 

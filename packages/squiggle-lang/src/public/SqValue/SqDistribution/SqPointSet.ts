@@ -84,7 +84,7 @@ export class SqDiscretePointSet implements SqAbstractPointSet<DiscreteShape> {
   }
 
   asDistribution(): SqPointSetDistribution {
-    return new SqPointSetDistribution(new PointSetDist(this.value));
+    return new SqPointSetDistribution(new PointSetDist(this.value.toMixed()));
   }
 }
 
@@ -107,7 +107,7 @@ export class SqContinuousPointSet
   }
 
   asDistribution(): SqPointSetDistribution {
-    return new SqPointSetDistribution(new PointSetDist(this.value));
+    return new SqPointSetDistribution(new PointSetDist(this.value.toMixed()));
   }
 }
 

@@ -10,9 +10,6 @@ export const OpCost = {
   floatCost: 1,
   // FIXME - these depend on runtime env and other variables and shouldn't be global
   symbolicCost: 1000,
-  // Discrete cost is the length of the xyShape
-  mixedCost: 1000,
-  continuousCost: 1000,
   wildcardCost: 1000,
 };
 

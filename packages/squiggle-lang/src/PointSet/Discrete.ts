@@ -152,6 +152,9 @@ export class DiscreteShape implements PointSet<DiscreteShape> {
     );
   }
 
+  isEmpty() {
+    return this.xyShape.xs.length === 0;
+  }
   toContinuous() {
     return undefined;
   }
@@ -274,23 +277,6 @@ export const combinePointwise = <E>(
     combiner(XYShape.XtoY.discreteInterpolator, fn, t1.xyShape, t2.xyShape),
     (x) => new DiscreteShape({ xyShape: x })
   );
-};
-
-export const reduce = <E>(
-  shapes: DiscreteShape[],
-  fn: (v1: number, v2: number) => Result.result<number, E>,
-  integralSumCachesFn: (v1: number, v2: number) => number | undefined = () =>
-    undefined
-): Result.result<DiscreteShape, E> => {
-  let acc = empty();
-  for (const shape of shapes) {
-    const result = combinePointwise(acc, shape, fn, integralSumCachesFn);
-    if (!result.ok) {
-      return result;
-    }
-    acc = result.value;
-  }
-  return Result.Ok(acc);
 };
 
 /* This multiples all of the data points together and creates a new discrete distribution from the results.

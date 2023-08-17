@@ -99,7 +99,9 @@ export const library = [
         ([arr]) => {
           return vDist(
             new PointSetDist(
-              new Continuous.ContinuousShape({ xyShape: argsToXYShape(arr) })
+              new Continuous.ContinuousShape({
+                xyShape: argsToXYShape(arr),
+              }).toMixed()
             )
           );
         }
@@ -123,7 +125,9 @@ export const library = [
         ([arr]) => {
           return vDist(
             new PointSetDist(
-              new Discrete.DiscreteShape({ xyShape: argsToXYShape(arr) })
+              new Discrete.DiscreteShape({
+                xyShape: argsToXYShape(arr),
+              }).toMixed()
             )
           );
         }

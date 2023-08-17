@@ -40,7 +40,7 @@ describe("Scale logarithm", () => {
       (-Math.log2(high - low) / 2) * (high ** 2 - low ** 2);
     if (!meanResult.ok) {
       expect(meanResult.value).toEqual(
-        operationDistError(NegativeInfinityError)
+        operationDistError(new NegativeInfinityError())
       );
     } else {
       expect(meanResult.value).toBeCloseTo(meanAnalytical);
