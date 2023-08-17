@@ -3,8 +3,6 @@ import {
   useCallback,
   useEffect,
   useImperativeHandle,
-  useMemo,
-  useRef,
   useState,
 } from "react";
 
@@ -13,7 +11,7 @@ import * as prettier from "prettier/standalone";
 import { defaultKeymap } from "@codemirror/commands";
 import { syntaxHighlighting } from "@codemirror/language";
 import { setDiagnostics } from "@codemirror/lint";
-import { Compartment, EditorState } from "@codemirror/state";
+import { Compartment, EditorState, Extension } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 // From basic setup
 import {
@@ -77,6 +75,7 @@ const compUpdateListener = new Compartment();
 const compSubmitListener = new Compartment();
 const compFormatListener = new Compartment();
 const compViewNodeListener = new Compartment();
+const compLineWrapping = new Compartment();
 
 export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
   function CodeEditor(
@@ -130,8 +129,8 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
         compGutter.of([]),
         compUpdateListener.of([]),
         compTheme.of([]),
+        compLineWrapping.of(lineWrapping ? [EditorView.lineWrapping] : []),
         languageSupport,
-        lineWrapping ? [EditorView.lineWrapping] : [],
       ];
 
       const state = EditorState.create({
@@ -225,6 +224,14 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
         ),
       });
     }, [width, height, view]);
+
+    useEffect(() => {
+      view.dispatch({
+        effects: compLineWrapping.reconfigure(
+          lineWrapping ? [EditorView.lineWrapping] : []
+        ),
+      });
+    }, [lineWrapping, view]);
 
     useEffect(() => {
       view.dispatch({
