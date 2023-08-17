@@ -42,7 +42,10 @@ export const TableChart: FC<Props> = ({
     chartHeight,
   };
 
-  const showItem = (item: result<SqValue, SqError>, settings) => {
+  const showItem = (
+    item: result<SqValue, SqError>,
+    settings: PlaygroundSettings
+  ) => {
     if (item.ok) {
       const value = item.value;
       if (valueHasContext(value)) {

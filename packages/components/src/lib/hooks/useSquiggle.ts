@@ -54,7 +54,7 @@ export type UseSquiggleOutput = [
 ];
 
 // this array's identity must be constant because it's used in useEffect below
-const defaultContinues = [];
+const defaultContinues: string[] = [];
 
 export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
   // random; https://stackoverflow.com/a/12502559
