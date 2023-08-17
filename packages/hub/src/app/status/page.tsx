@@ -1,3 +1,5 @@
+import { Metadata } from "next";
+
 import QueryNode, {
   StatusPageQuery,
 } from "@/__generated__/StatusPageQuery.graphql";
@@ -17,3 +19,7 @@ export default async function OuterFrontPage() {
     </NarrowPageLayout>
   );
 }
+
+export const metadata: Metadata = {
+  title: "Status",
+};

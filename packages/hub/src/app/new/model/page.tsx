@@ -1,7 +1,7 @@
-"use client";
+import { Metadata } from "next";
 
-import { NewModel } from "./NewModel";
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
+import { NewModel } from "./NewModel";
 
 export default function NewModelPage() {
   return (
@@ -10,3 +10,7 @@ export default function NewModelPage() {
     </NarrowPageLayout>
   );
 }
+
+export const metadata: Metadata = {
+  title: "New model",
+};

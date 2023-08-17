@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import { ReactNode, Suspense } from "react";
 
 import ModelLayoutQueryNode, {
@@ -33,4 +34,8 @@ export default function Layout({ params, children }: Props) {
       <LoadedLayout params={params}>{children}</LoadedLayout>
     </Suspense>
   );
+}
+
+export function generateMetadata({ params }: Props): Metadata {
+  return { title: `${params.username}/${params.slug}` };
 }

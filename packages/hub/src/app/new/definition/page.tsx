@@ -1,7 +1,7 @@
-"use client";
+import { Metadata } from "next";
 
-import { NewDefinition } from "./NewDefinition";
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
+import { NewDefinition } from "./NewDefinition";
 
 export default function NewModelPage() {
   return (
@@ -10,3 +10,7 @@ export default function NewModelPage() {
     </NarrowPageLayout>
   );
 }
+
+export const metadata: Metadata = {
+  title: "New definition",
+};

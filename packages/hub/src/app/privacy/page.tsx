@@ -1,6 +1,8 @@
+import { Metadata } from "next";
 import ReactMarkdown from "react-markdown";
-import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 import remarkGfm from "remark-gfm";
+
+import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 
 const markdown = `
 # Privacy Policy
@@ -398,3 +400,7 @@ export default function TOS() {
     </NarrowPageLayout>
   );
 }
+
+export const metadata: Metadata = {
+  title: "Privacy policy",
+};

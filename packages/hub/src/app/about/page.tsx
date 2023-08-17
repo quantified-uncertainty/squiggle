@@ -1,10 +1,12 @@
+import { Metadata } from "next";
 import ReactMarkdown from "react-markdown";
-import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 import remarkGfm from "remark-gfm";
+
+import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 import {
-  GITHUB_URL,
-  GITHUB_DISCUSSION_URL,
   DISCORD_URL,
+  GITHUB_DISCUSSION_URL,
+  GITHUB_URL,
   NEWSLETTER_URL,
   QURI_DONATE_URL,
 } from "@/lib/common";
@@ -67,3 +69,7 @@ export default function About() {
     </NarrowPageLayout>
   );
 }
+
+export const metadata: Metadata = {
+  title: "About",
+};

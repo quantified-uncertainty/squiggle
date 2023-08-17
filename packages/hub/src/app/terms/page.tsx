@@ -1,5 +1,6 @@
-import ReactMarkdown from "react-markdown";
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
+import { Metadata } from "next";
+import ReactMarkdown from "react-markdown";
 
 const markdown = `
 
@@ -273,3 +274,7 @@ export default function Terms() {
     </NarrowPageLayout>
   );
 }
+
+export const metadata: Metadata = {
+  title: "Terms of Service",
+};
