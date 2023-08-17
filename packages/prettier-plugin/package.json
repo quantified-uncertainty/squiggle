@@ -34,7 +34,17 @@
   "module": "./dist/esm/src/index.js",
   "types": "./dist/types/src/index.d.ts",
   "exports": {
-    ".": "./dist/esm/src/index.js",
-    "./standalone": "./dist/esm/src/standalone.js"
+    ".": {
+      "import": {
+        "types": "./dist/esm/src/index.js",
+        "default": "./dist/types/src/index.d.ts"
+      }
+    },
+    "./standalone": {
+      "import": {
+        "types": "./dist/esm/src/standalone.js",
+        "default": "./dist/types/src/standalone.d.ts"
+      }
+    }
   }
 }
