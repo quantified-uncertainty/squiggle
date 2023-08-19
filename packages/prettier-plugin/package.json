@@ -34,12 +34,12 @@
   "types": "./dist/types/src/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/esm/src/index.js",
-      "import": "./dist/types/src/index.d.ts"
+      "types": "./dist/types/src/index.d.ts",
+      "import": "./dist/esm/src/index.js"
     },
     "./standalone": {
-      "types": "./dist/esm/src/standalone.js",
-      "import": "./dist/types/src/standalone.d.ts"
+      "types": "./dist/types/src/standalone.d.ts",
+      "import": "./dist/esm/src/standalone.js"
     }
   }
 }
