@@ -1,6 +1,5 @@
 import {
   Completion,
-  CompletionContext,
   CompletionSource,
   snippetCompletion,
 } from "@codemirror/autocomplete";
@@ -12,8 +11,8 @@ import {
   indentNodeProp,
   syntaxTree,
 } from "@codemirror/language";
+import { SyntaxNode, Tree } from "@lezer/common";
 import { styleTags, tags as t } from "@lezer/highlight";
-import { Tree, SyntaxNode } from "@lezer/common";
 
 import { SqProject } from "@quri/squiggle-lang";
 
