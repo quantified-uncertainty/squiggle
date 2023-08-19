@@ -1,4 +1,9 @@
-import { CompletionContext, snippetCompletion } from "@codemirror/autocomplete";
+import {
+  Completion,
+  CompletionContext,
+  CompletionSource,
+  snippetCompletion,
+} from "@codemirror/autocomplete";
 import {
   LRLanguage,
   LanguageSupport,
@@ -126,7 +131,7 @@ export function squiggleLanguageSupport(project: SqProject) {
     ],
   });
 
-  const autocomplete = (cmpl: CompletionContext) => {
+  const autocomplete: CompletionSource = (cmpl) => {
     const tree = syntaxTree(cmpl.state);
 
     {
@@ -146,22 +151,24 @@ export function squiggleLanguageSupport(project: SqProject) {
     }
     const field = cmpl.tokenBefore(["AccessExpr", "IdentifierExpr"]);
     if (field === null) {
-      return undefined;
+      return null;
     }
     const from = field.from;
 
     const nameNodes = getNameNodes(tree, from);
-    const names = nameNodes.map((node) =>
-      cmpl.state.doc.sliceString(node.from, node.to)
-    );
+    const localCompletions = nameNodes.map((node) => {
+      const name = cmpl.state.doc.sliceString(node.from, node.to);
+      const type = node.type.is("FunctionName") ? "function" : "variable";
+      return {
+        label: name,
+        type,
+      };
+    }) satisfies Completion[];
 
     return {
       from,
       options: [
-        ...names.map((name) => ({
-          label: name,
-          type: "constant",
-        })),
+        ...localCompletions,
         ...(project
           .getStdLib()
           .keySeq()
@@ -170,7 +177,7 @@ export function squiggleLanguageSupport(project: SqProject) {
             label: name,
             type: "function",
           })) ?? []),
-      ],
+      ] satisfies Completion[],
     };
   };
 

@@ -347,7 +347,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
 
     const setViewDom = useCallback(
       (element: HTMLDivElement | null) => {
-        // TODO: this doesn't work on hot reloading in dev, investigate
+        // TODO: the editor breaks on hot reloading in storybook, investigate
         element?.replaceChildren(view.dom);
       },
       [view]
