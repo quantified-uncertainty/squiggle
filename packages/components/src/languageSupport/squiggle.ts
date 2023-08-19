@@ -8,9 +8,62 @@ import {
   syntaxTree,
 } from "@codemirror/language";
 import { styleTags, tags as t } from "@lezer/highlight";
+import { Tree, SyntaxNode } from "@lezer/common";
+
+import { SqProject } from "@quri/squiggle-lang";
 
 import { parser } from "./generated/squiggle.js";
-import { SqProject } from "@quri/squiggle-lang";
+
+export function getNameNodes(tree: Tree, from: number) {
+  const cursor = tree.cursorAt(from, -1);
+  const nameNodes: SyntaxNode[] = [];
+
+  while (1) {
+    // Move to the next node and store the direction that we used.
+    const direction = cursor.prevSibling()
+      ? "sibling"
+      : cursor.parent()
+      ? "parent"
+      : undefined;
+
+    if (!direction) {
+      break;
+    }
+
+    if (cursor.type.is("Binding")) {
+      // Only if direction is not "parent"; `foo = { <cursor> }` shouldn't autocomplete `foo`.
+      if (direction === "sibling") {
+        const nameNode = cursor.node.getChild("VariableName");
+        if (nameNode) {
+          nameNodes.push(nameNode);
+        }
+      }
+    } else if (cursor.type.is("FunDeclaration")) {
+      // Only if direction is not "parent"; Squiggle doesn't support recursive calls.
+      if (direction === "sibling") {
+        const nameNode = cursor.node.getChild("FunctionName");
+        if (nameNode) {
+          nameNodes.push(nameNode);
+        }
+      }
+
+      if (direction === "parent") {
+        const parameterNodes = cursor.node
+          .getChild("LambdaArgs")
+          ?.getChildren("LambdaParameter");
+        if (parameterNodes) {
+          for (const parameter of parameterNodes) {
+            const nameNode = parameter.getChild("LambdaParameterName");
+            if (nameNode) {
+              nameNodes.push(nameNode);
+            }
+          }
+        }
+      }
+    }
+  }
+  return nameNodes;
+}
 
 export function squiggleLanguageSupport(project: SqProject) {
   const parserWithMetadata = parser.configure({
@@ -47,8 +100,9 @@ export function squiggleLanguageSupport(project: SqProject) {
         LambdaSyntax: t.blockComment,
 
         VariableName: t.constant(t.variableName),
+        IdentifierExpr: t.variableName,
         Field: t.variableName,
-        LambdaParameter: t.variableName,
+        LambdaParameterName: t.variableName,
       }),
       foldNodeProp.add({
         LambdaExpr: (context) => ({
@@ -72,6 +126,54 @@ export function squiggleLanguageSupport(project: SqProject) {
     ],
   });
 
+  const autocomplete = (cmpl: CompletionContext) => {
+    const tree = syntaxTree(cmpl.state);
+
+    {
+      const lambda = cmpl.tokenBefore(["ArgsOpen"]);
+      if (lambda) {
+        return {
+          from: lambda.from,
+          options: [
+            snippetCompletion("|${args}| ${body}", {
+              label: "|",
+              detail: "lambda function",
+              type: "syntax",
+            }),
+          ],
+        };
+      }
+    }
+    const field = cmpl.tokenBefore(["AccessExpr", "IdentifierExpr"]);
+    if (field === null) {
+      return undefined;
+    }
+    const from = field.from;
+
+    const nameNodes = getNameNodes(tree, from);
+    const names = nameNodes.map((node) =>
+      cmpl.state.doc.sliceString(node.from, node.to)
+    );
+
+    return {
+      from,
+      options: [
+        ...names.map((name) => ({
+          label: name,
+          type: "constant",
+        })),
+        ...(project
+          .getStdLib()
+          .keySeq()
+          .toArray()
+          .map((name) => ({
+            label: name,
+            type: "function",
+          })) ?? []),
+      ],
+    };
+  };
+
   return new LanguageSupport(
     LRLanguage.define({
       name: "squiggle",
@@ -80,54 +182,7 @@ export function squiggleLanguageSupport(project: SqProject) {
         commentTokens: {
           line: "//",
         },
-        autocomplete: (cmpl: CompletionContext) => {
-          const tree = syntaxTree(cmpl.state);
-          {
-            const lambda = cmpl.tokenBefore(["ArgsOpen"]);
-            if (lambda) {
-              return {
-                from: lambda.from,
-                options: [
-                  snippetCompletion("|${args}| ${body}", {
-                    label: "|",
-                    detail: "lambda function",
-                    type: "syntax",
-                  }),
-                ],
-              };
-            }
-          }
-          const field = cmpl.tokenBefore(["AccessIdentifier"]);
-          if (field === null) {
-            return undefined;
-          }
-          const from = field.from;
-
-          const cursor = tree.cursor();
-          const names: string[] = [];
-          while (cursor.next()) {
-            if (cursor.type.is("VariableName")) {
-              names.push(cmpl.state.doc.sliceString(cursor.from, cursor.to));
-            }
-          }
-          return {
-            from: from,
-            options: [
-              ...names.map((name) => ({
-                label: name,
-                type: "constant",
-              })),
-              ...(project
-                .getStdLib()
-                .keySeq()
-                .toArray()
-                .map((name) => ({
-                  label: name,
-                  type: "function",
-                })) ?? []),
-            ],
-          };
-        },
+        autocomplete,
         closeBrackets: {
           brackets: ['"', "'", "(", "{"],
         },

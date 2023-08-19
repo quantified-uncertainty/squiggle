@@ -347,6 +347,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
 
     const setViewDom = useCallback(
       (element: HTMLDivElement | null) => {
+        // TODO: this doesn't work on hot reloading in dev, investigate
         element?.replaceChildren(view.dom);
       },
       [view]

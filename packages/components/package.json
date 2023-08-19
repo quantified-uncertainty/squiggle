@@ -20,6 +20,7 @@
     "@floating-ui/react": "^0.24.3",
     "@heroicons/react": "^1.0.6",
     "@hookform/resolvers": "^3.1.1",
+    "@lezer/common": "^1.0.4",
     "@quri/prettier-plugin-squiggle": "workspace:*",
     "@quri/squiggle-lang": "workspace:*",
     "@quri/ui": "workspace:*",
@@ -130,6 +131,12 @@
       "@typescript-eslint"
     ],
     "rules": {
+      "no-constant-condition": [
+        "error",
+        {
+          "checkLoops": false
+        }
+      ],
       "no-console": "warn",
       "@typescript-eslint/no-empty-function": "off",
       "react/react-in-jsx-scope": "off",
