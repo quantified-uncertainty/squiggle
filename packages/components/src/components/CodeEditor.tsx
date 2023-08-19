@@ -98,6 +98,10 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     // `useState` instead of `useMemo`, because we want to initialize view only once.
     // We'll handle further updates through `useEffect` calls.
     const [view] = useState(() => {
+      if (typeof window === "undefined") {
+        return undefined; // CodeMirror view is not SSR-compatible
+      }
+
       const extensions = [
         highlightSpecialChars(),
         history(),
@@ -144,11 +148,12 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
 
     useEffect(() => {
       return () => {
-        view.destroy();
+        view?.destroy();
       };
     }, [view]);
 
     const format = useCallback(async () => {
+      if (!view) return;
       const code = view.state.doc.toString();
       const { formatted, cursorOffset } = await prettier.formatWithCursor(
         code,
@@ -172,19 +177,19 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     }, [onChange, view]);
 
     const scrollTo = (position: number) => {
-      view.dispatch({
+      view?.dispatch({
         selection: {
           anchor: position,
         },
         scrollIntoView: true,
       });
-      view.focus();
+      view?.focus();
     };
 
     useImperativeHandle(ref, () => ({ format, scrollTo }));
 
     useEffect(() => {
-      view.dispatch({
+      view?.dispatch({
         effects: compGutter.reconfigure(
           showGutter
             ? [
@@ -199,7 +204,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     }, [showGutter, view]);
 
     useEffect(() => {
-      view.dispatch({
+      view?.dispatch({
         effects: compLanguageSupport.reconfigure(
           squiggleLanguageSupport(project)
         ),
@@ -207,7 +212,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     }, [project, view]);
 
     useEffect(() => {
-      view.dispatch({
+      view?.dispatch({
         effects: compUpdateListener.reconfigure(
           EditorView.updateListener.of((update) => {
             if (update.docChanged) {
@@ -219,7 +224,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     }, [onChange, view]);
 
     useEffect(() => {
-      view.dispatch({
+      view?.dispatch({
         effects: compTheme.reconfigure(
           EditorView.theme({
             "&": {
@@ -235,7 +240,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     }, [width, height, view]);
 
     useEffect(() => {
-      view.dispatch({
+      view?.dispatch({
         effects: compLineWrapping.reconfigure(
           lineWrapping ? [EditorView.lineWrapping] : []
         ),
@@ -243,7 +248,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     }, [lineWrapping, view]);
 
     useEffect(() => {
-      view.dispatch({
+      view?.dispatch({
         effects: compSubmitListener.reconfigure(
           keymap.of([
             {
@@ -259,7 +264,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     }, [onSubmit, view]);
 
     useEffect(() => {
-      view.dispatch({
+      view?.dispatch({
         effects: compFormatListener.reconfigure(
           keymap.of([
             {
@@ -275,6 +280,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     }, [format, view]);
 
     useEffect(() => {
+      if (!view) return;
       view.dispatch({
         effects: compViewNodeListener.reconfigure(
           keymap.of([
@@ -307,6 +313,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     }, [onViewValuePath, project, sourceId, view]);
 
     useEffect(() => {
+      if (!view) return;
       const docLength = view.state.doc.length;
 
       view.dispatch(
@@ -347,6 +354,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
 
     const setViewDom = useCallback(
       (element: HTMLDivElement | null) => {
+        if (!view) return;
         // TODO: the editor breaks on hot reloading in storybook, investigate
         element?.replaceChildren(view.dom);
       },
