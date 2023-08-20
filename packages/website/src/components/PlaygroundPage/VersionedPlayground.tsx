@@ -2,9 +2,11 @@ import { ComponentType, FC } from "react";
 import dynamic from "next/dynamic";
 import { useAvailableHeight } from "../../utils/useAvailableHeight";
 
-export const versions = ["0.8.4", "latest"] as const;
+export const versions = ["0.8.4", "0.8.5-dev"] as const;
 
 export type Version = (typeof versions)[number];
+
+export const defaultVersion: Version = "0.8.4";
 
 type CommonProps = {
   defaultCode?: string;
@@ -32,7 +34,7 @@ const playgroundByVersion: {
   [k in Version]: ComponentType<CommonProps>;
 } = {
   "0.8.4": Playground084,
-  latest: PlaygroundLatest,
+  "0.8.5-dev": PlaygroundLatest,
 };
 
 type Props = Omit<CommonProps, "height"> & { version: Version };

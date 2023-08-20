@@ -10,7 +10,12 @@ import {
 } from "@quri/ui";
 
 import { ShareButton } from "./ShareButton";
-import { Version, VersionedPlayground, versions } from "./VersionedPlayground";
+import {
+  Version,
+  VersionedPlayground,
+  defaultVersion,
+  versions,
+} from "./VersionedPlayground";
 
 const HASH_PREFIX = "#code=";
 function getHashData() {
@@ -84,7 +89,7 @@ export const PlaygroundPage: FC = () => {
     delete hashData.initialSquiggleString;
   }
 
-  const [version, setVersion] = useState<Version>("latest");
+  const [version, setVersion] = useState<Version>(defaultVersion);
 
   return (
     <VersionedPlayground
