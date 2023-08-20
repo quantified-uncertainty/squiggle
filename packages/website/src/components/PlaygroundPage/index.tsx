@@ -44,13 +44,15 @@ type Data = {
   showSummary?: boolean;
 };
 
-function setHashData(data: Partial<Data>) {
+function updateUrl(data: Partial<Data>, version: Version) {
   const text = JSON.stringify({ ...getHashData(), ...data });
   const compressed = deflate(text, { level: 9 });
   window.history.replaceState(
     undefined,
     "",
-    HASH_PREFIX + encodeURIComponent(fromByteArray(compressed))
+    `/playground?v=${version}` +
+      HASH_PREFIX +
+      encodeURIComponent(fromByteArray(compressed))
   );
 }
 
@@ -82,14 +84,30 @@ const VersionPicker: FC<{
   );
 };
 
-export const PlaygroundPage: FC = () => {
+export const PlaygroundPage: FC<{ version: string | null }> = (props) => {
   const hashData = getHashData();
   if (hashData.initialSquiggleString) {
     hashData.defaultCode = String(hashData.initialSquiggleString);
     delete hashData.initialSquiggleString;
   }
 
-  const [version, setVersion] = useState<Version>(defaultVersion);
+  const [version, setVersion] = useState<Version>(() => {
+    for (const version of versions) {
+      if (props.version === version) {
+        return version;
+      }
+    }
+    if (props.version && typeof window !== "undefined") {
+      // wrong version, let's replace it
+      updateUrl({}, defaultVersion);
+    }
+    return defaultVersion;
+  });
+
+  const onVersionChange = (version: Version) => {
+    setVersion(version);
+    updateUrl({}, version);
+  };
 
   return (
     <VersionedPlayground
@@ -99,15 +117,15 @@ export const PlaygroundPage: FC = () => {
         showSummary: hashData.showSummary ?? true,
       }}
       renderExtraControls={() => (
-        <div className="h-full flex justify-end items-center">
+        <div className="h-full flex justify-end items-center gap-2">
           <ShareButton />
-          <VersionPicker version={version} onChange={setVersion} />
+          <VersionPicker version={version} onChange={onVersionChange} />
         </div>
       )}
-      onCodeChange={(code) => setHashData({ defaultCode: code })}
+      onCodeChange={(code) => updateUrl({ defaultCode: code }, version)}
       onSettingsChange={(settings) => {
         const showSummary = settings.distributionChartSettings?.showSummary;
-        setHashData({ showSummary });
+        updateUrl({ showSummary }, version);
       }}
     />
   );
