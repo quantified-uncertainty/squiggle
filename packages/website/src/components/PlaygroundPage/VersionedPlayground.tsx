@@ -2,6 +2,11 @@ import { ComponentType, FC } from "react";
 import dynamic from "next/dynamic";
 import { useAvailableHeight } from "../../utils/useAvailableHeight";
 
+// Imported non-dynamically as a demo of version pinning.
+// 0.8.4 had `exports` configuration in its `package.json` which wasn't compatible with Next.js resolutions.
+// For this reason, support for 0.8.4 should be removed later (preferably before the PR is merged).
+import { SquigglePlayground as Playground084 } from "components-0.8.4";
+
 export const versions = ["0.8.4", "0.8.5-dev"] as const;
 
 export type Version = (typeof versions)[number];
@@ -25,16 +30,14 @@ const PlaygroundLatest = dynamic(() =>
   import("@quri/squiggle-components").then((mod) => mod.SquigglePlayground)
 );
 
-const Playground084 = dynamic(() =>
-  import("components-0.8.4").then((mod) => mod.SquigglePlayground)
-);
-
 const playgroundByVersion: {
   // checking that all versions are compatible with props that we plan to pass
   [k in Version]: ComponentType<CommonProps>;
 } = {
   "0.8.4": Playground084,
-  "0.8.5-dev": PlaygroundLatest,
+  "0.8.5-dev": dynamic(() =>
+    import("@quri/squiggle-components").then((mod) => mod.SquigglePlayground)
+  ),
 };
 
 type Props = Omit<CommonProps, "height"> & { version: Version };
