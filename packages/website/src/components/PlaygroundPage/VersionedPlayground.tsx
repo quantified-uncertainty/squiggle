@@ -26,10 +26,6 @@ type CommonProps = {
   height?: string | number;
 };
 
-const PlaygroundLatest = dynamic(() =>
-  import("@quri/squiggle-components").then((mod) => mod.SquigglePlayground)
-);
-
 const playgroundByVersion: {
   // checking that all versions are compatible with props that we plan to pass
   [k in Version]: ComponentType<CommonProps>;
