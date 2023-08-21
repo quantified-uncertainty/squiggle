@@ -52,11 +52,14 @@ export const Convolution = {
 type OperationFn = (a: number, b: number) => result<number, OperationError>;
 
 const power: OperationFn = (a, b) => {
-  if (a >= 0) {
-    return Ok(a ** b);
-  } else {
+  const result = a ** b;
+  if (Number.isNaN(result)) {
+    if (Number.isNaN(a) || Number.isNaN(b)) {
+      return Ok(result); // bad, but the issue is upstream of `power` operation
+    }
     return Result.Err(new ComplexNumberError());
   }
+  return Ok(result);
 };
 
 const add: OperationFn = (a, b) => Ok(a + b);
