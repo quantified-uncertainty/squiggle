@@ -397,6 +397,9 @@ importers:
       remark-gfm:
         specifier: ^3.0.1
         version: 3.0.1
+      squiggle-components-0.8.5:
+        specifier: npm:@quri/squiggle-components@0.8.5
+        version: /@quri/squiggle-components@0.8.5(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0)(tailwindcss@3.3.2)
       typescript:
         specifier: ^5.1.6
         version: 5.1.6
@@ -795,7 +798,7 @@ importers:
         version: 2.0.0
       components-0.8.4:
         specifier: npm:@quri/squiggle-components@0.8.4
-        version: /@quri/squiggle-components@0.8.4(@lezer/common@1.0.3)(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0)(tailwindcss@3.3.2)
+        version: /@quri/squiggle-components@0.8.4(@lezer/common@1.0.4)(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0)(tailwindcss@3.3.2)
       next:
         specifier: ^13.5.2
         version: 13.5.2(@babel/core@7.22.19)(react-dom@18.2.0)(react@18.2.0)
@@ -889,7 +892,7 @@ packages:
       '@babel/core': 7.22.10
       '@babel/generator': 7.22.10
       '@babel/parser': 7.22.10
-      '@babel/runtime': 7.22.10
+      '@babel/runtime': 7.22.15
       '@babel/traverse': 7.22.10
       '@babel/types': 7.22.17
       babel-preset-fbjs: 3.4.0(@babel/core@7.22.10)
@@ -2815,7 +2818,6 @@ packages:
     engines: {node: '>=6.9.0'}
     dependencies:
       regenerator-runtime: 0.14.0
-    dev: true
 
   /@babel/runtime@7.22.3:
     resolution: {integrity: sha512-XsDuspWKLUsxwCp6r7EhsExHtYfbe5oAGQ19kqngTdCPUoPQzOPdUbD/pB9PJiwb2ptYKQDjSJT3R6dC+EPqfQ==}
@@ -5517,26 +5519,33 @@ packages:
     resolution: {integrity: sha512-dmEDQhqfWHr6ScpczmBpIJjhM916O5UlvmMS1Xpw398iDxen7stITzWW9utaAK2Lv6jHuf+H99ologE5QpPOIg==}
     dependencies:
       '@quri/squiggle-lang': 0.8.4
-      prettier: 3.0.0
+      prettier: 3.0.3
     dev: false
 
-  /@quri/squiggle-components@0.8.4(@lezer/common@1.0.3)(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0)(tailwindcss@3.3.2):
+  /@quri/prettier-plugin-squiggle@0.8.5:
+    resolution: {integrity: sha512-Av4kfu47EjPB6430d3JuZP96scpT058kvyoLE0xbHKqsOln8R3i8tIYvaNEyrbg8SFI4ixylFsFPDJqjQvy2aw==}
+    dependencies:
+      '@quri/squiggle-lang': 0.8.5
+      prettier: 3.0.3
+    dev: false
+
+  /@quri/squiggle-components@0.8.4(@lezer/common@1.0.4)(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0)(tailwindcss@3.3.2):
     resolution: {integrity: sha512-5CpkLkQuMlpCJVN6YXof5SDR0qeoBejqnkfxAgtGMDlbFVonSxWtFulsS7S/1oXn16mHMiVl54Rd9bv7IkaQMA==}
     peerDependencies:
       react: ^16.8.0 || ^17 || ^18
       react-dom: ^16.8.0 || ^17 || ^18
     dependencies:
-      '@codemirror/autocomplete': 6.9.0(@codemirror/language@6.8.0)(@codemirror/state@6.2.1)(@codemirror/view@6.16.0)(@lezer/common@1.0.3)
+      '@codemirror/autocomplete': 6.9.0(@codemirror/language@6.9.0)(@codemirror/state@6.2.1)(@codemirror/view@6.18.0)(@lezer/common@1.0.4)
       '@codemirror/commands': 6.2.4
-      '@codemirror/language': 6.8.0
+      '@codemirror/language': 6.9.0
       '@codemirror/lint': 6.4.0
       '@codemirror/search': 6.5.0
       '@codemirror/state': 6.2.1
       '@codemirror/theme-one-dark': 6.1.2
-      '@codemirror/view': 6.16.0
+      '@codemirror/view': 6.18.0
       '@floating-ui/react': 0.24.3(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0)
       '@heroicons/react': 1.0.6(react@18.2.0)
-      '@hookform/resolvers': 3.1.1(react-hook-form@7.45.2)
+      '@hookform/resolvers': 3.3.1(react-hook-form@7.45.2)
       '@quri/prettier-plugin-squiggle': 0.8.4
       '@quri/squiggle-lang': 0.8.4
       '@quri/ui': 0.1.3(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0)
@@ -5544,11 +5553,11 @@ packages:
       '@tailwindcss/typography': 0.5.9(tailwindcss@3.3.2)
       '@types/d3': 7.4.0
       clsx: 2.0.0
-      codemirror: 6.0.1(@lezer/common@1.0.3)
+      codemirror: 6.0.1(@lezer/common@1.0.4)
       d3: 7.8.5
       framer-motion: 10.12.18(react-dom@18.2.0)(react@18.2.0)
       lodash: 4.17.21
-      prettier: 3.0.0
+      prettier: 3.0.3
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       react-error-boundary: 4.0.10(react@18.2.0)
@@ -5564,8 +5573,64 @@ packages:
       - tailwindcss
     dev: false
 
+  /@quri/squiggle-components@0.8.5(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0)(tailwindcss@3.3.2):
+    resolution: {integrity: sha512-X7GYjZoLtITgUcoFx8isfHZhzK0f6b6Gks0TfGLwQ1BnJvP5OtOI0r+lj+mYjS38Z12M3KjX6VuWX6hgCsJskQ==}
+    peerDependencies:
+      react: ^16.8.0 || ^17 || ^18
+      react-dom: ^16.8.0 || ^17 || ^18
+    dependencies:
+      '@codemirror/autocomplete': 6.9.0(@codemirror/language@6.9.0)(@codemirror/state@6.2.1)(@codemirror/view@6.18.0)(@lezer/common@1.0.4)
+      '@codemirror/commands': 6.2.4
+      '@codemirror/language': 6.9.0
+      '@codemirror/lint': 6.4.0
+      '@codemirror/search': 6.5.0
+      '@codemirror/state': 6.2.1
+      '@codemirror/theme-one-dark': 6.1.2
+      '@codemirror/view': 6.18.0
+      '@floating-ui/react': 0.24.3(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0)
+      '@heroicons/react': 1.0.6(react@18.2.0)
+      '@hookform/resolvers': 3.3.1(react-hook-form@7.45.2)
+      '@lezer/common': 1.0.4
+      '@quri/prettier-plugin-squiggle': 0.8.5
+      '@quri/squiggle-lang': 0.8.5
+      '@quri/ui': 0.1.4(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0)
+      '@react-hook/size': 2.1.2(react@18.2.0)
+      '@tailwindcss/typography': 0.5.9(tailwindcss@3.3.2)
+      '@types/d3': 7.4.0
+      clsx: 2.0.0
+      codemirror: 6.0.1(@lezer/common@1.0.4)
+      d3: 7.8.5
+      framer-motion: 10.12.18(react-dom@18.2.0)(react@18.2.0)
+      lodash: 4.17.21
+      prettier: 3.0.3
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      react-error-boundary: 4.0.10(react@18.2.0)
+      react-hook-form: 7.45.2(react@18.2.0)
+      react-markdown: 8.0.7(@types/react@18.2.18)(react@18.2.0)
+      react-resizable: 3.0.5(react-dom@18.2.0)(react@18.2.0)
+      vscode-uri: 3.0.7
+      zod: 3.21.4
+    transitivePeerDependencies:
+      - '@types/react'
+      - supports-color
+      - tailwindcss
+    dev: false
+
   /@quri/squiggle-lang@0.8.4:
     resolution: {integrity: sha512-bM0HhXGXtHjrHchR1HtfRdSqZ8EE5HC3CHogvDMYCvBklIT/Mwsu8hVGFvvtvY8uvzebietnRiEtcdU1kJcrYw==}
+    hasBin: true
+    dependencies:
+      '@commander-js/extra-typings': 11.0.0(commander@11.0.0)
+      commander: 11.0.0
+      immutable: 4.3.1
+      jstat: 1.9.6
+      lodash: 4.17.21
+      open: 9.1.0
+    dev: false
+
+  /@quri/squiggle-lang@0.8.5:
+    resolution: {integrity: sha512-ymA/Y/3C8pppvYFy9RhpJyCjjttJPm+pWu1gWpaOFOs53qP61+GpGw0qtkduO0t2wYdj/3GDlQC/JyyxZMAOGw==}
     hasBin: true
     dependencies:
       '@commander-js/extra-typings': 11.0.0(commander@11.0.0)
@@ -5590,6 +5655,27 @@ packages:
       react-colorful: 5.6.1(react-dom@18.2.0)(react@18.2.0)
       react-dom: 18.2.0(react@18.2.0)
       react-hook-form: 7.45.2(react@18.2.0)
+      react-textarea-autosize: 8.5.2(@types/react@18.2.18)(react@18.2.0)
+      react-use: 17.4.0(react-dom@18.2.0)(react@18.2.0)
+    transitivePeerDependencies:
+      - '@types/react'
+    dev: false
+
+  /@quri/ui@0.1.4(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-aUAhpRN7gc4T8Tyk3Eg9ubC57QItlUEQSYi/XSgBu2Ghcc5Hoje5eKc/AKIvhvotCuwO/TbafSVq5HjNoojufQ==}
+    peerDependencies:
+      react: ^17 || ^18
+      react-dom: ^17 || ^18
+    dependencies:
+      '@floating-ui/react': 0.24.3(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0)
+      '@headlessui/react': 1.7.15(react-dom@18.2.0)(react@18.2.0)
+      clsx: 2.0.0
+      framer-motion: 10.12.18(react-dom@18.2.0)(react@18.2.0)
+      react: 18.2.0
+      react-colorful: 5.6.1(react-dom@18.2.0)(react@18.2.0)
+      react-dom: 18.2.0(react@18.2.0)
+      react-hook-form: 7.45.2(react@18.2.0)
+      react-select: 5.7.4(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0)
       react-textarea-autosize: 8.5.2(@types/react@18.2.18)(react@18.2.0)
       react-use: 17.4.0(react-dom@18.2.0)(react@18.2.0)
     transitivePeerDependencies:
@@ -5621,7 +5707,7 @@ packages:
       '@types/react-dom':
         optional: true
     dependencies:
-      '@babel/runtime': 7.22.10
+      '@babel/runtime': 7.22.15
       '@radix-ui/react-primitive': 1.0.3(@types/react-dom@18.2.7)(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0)
       '@types/react': 18.2.18
       '@types/react-dom': 18.2.7
@@ -5857,7 +5943,7 @@ packages:
       '@types/react-dom':
         optional: true
     dependencies:
-      '@babel/runtime': 7.22.10
+      '@babel/runtime': 7.22.15
       '@radix-ui/primitive': 1.0.1
       '@radix-ui/react-collection': 1.0.3(@types/react-dom@18.2.7)(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0)
       '@radix-ui/react-compose-refs': 1.0.1(@types/react@18.2.18)(react@18.2.0)
@@ -5927,7 +6013,7 @@ packages:
       '@types/react-dom':
         optional: true
     dependencies:
-      '@babel/runtime': 7.22.10
+      '@babel/runtime': 7.22.15
       '@radix-ui/react-primitive': 1.0.3(@types/react-dom@18.2.7)(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0)
       '@types/react': 18.2.18
       '@types/react-dom': 18.2.7
@@ -5963,7 +6049,7 @@ packages:
       '@types/react-dom':
         optional: true
     dependencies:
-      '@babel/runtime': 7.22.10
+      '@babel/runtime': 7.22.15
       '@radix-ui/primitive': 1.0.1
       '@radix-ui/react-context': 1.0.1(@types/react@18.2.18)(react@18.2.0)
       '@radix-ui/react-direction': 1.0.1(@types/react@18.2.18)(react@18.2.0)
@@ -5990,7 +6076,7 @@ packages:
       '@types/react-dom':
         optional: true
     dependencies:
-      '@babel/runtime': 7.22.10
+      '@babel/runtime': 7.22.15
       '@radix-ui/primitive': 1.0.1
       '@radix-ui/react-primitive': 1.0.3(@types/react-dom@18.2.7)(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0)
       '@radix-ui/react-use-controllable-state': 1.0.1(@types/react@18.2.18)(react@18.2.0)
@@ -6065,7 +6151,7 @@ packages:
       '@types/react':
         optional: true
     dependencies:
-      '@babel/runtime': 7.22.10
+      '@babel/runtime': 7.22.15
       '@radix-ui/react-use-callback-ref': 1.0.1(@types/react@18.2.18)(react@18.2.0)
       '@types/react': 18.2.18
       react: 18.2.0
@@ -6108,7 +6194,7 @@ packages:
       '@types/react':
         optional: true
     dependencies:
-      '@babel/runtime': 7.22.10
+      '@babel/runtime': 7.22.15
       '@radix-ui/rect': 1.0.1
       '@types/react': 18.2.18
       react: 18.2.0
@@ -6123,7 +6209,7 @@ packages:
       '@types/react':
         optional: true
     dependencies:
-      '@babel/runtime': 7.22.10
+      '@babel/runtime': 7.22.15
       '@radix-ui/react-use-layout-effect': 1.0.1(@types/react@18.2.18)(react@18.2.0)
       '@types/react': 18.2.18
       react: 18.2.0
@@ -6153,7 +6239,7 @@ packages:
   /@radix-ui/rect@1.0.1:
     resolution: {integrity: sha512-fyrgCaedtvMg9NK3en0pnOYJdtfwxUcNolezkNPUsoX57X8oQk+NkqcvzHXD2uKNij6GXmWU9NDru2IWjrO4BQ==}
     dependencies:
-      '@babel/runtime': 7.22.10
+      '@babel/runtime': 7.22.15
     dev: true
 
   /@react-hook/latest@1.0.3(react@18.2.0):
@@ -9254,7 +9340,7 @@ packages:
     resolution: {integrity: sha512-Cg7TFGpIr01vOQNODXOOaGz2NpCU5gl8x1qJFbb6hbZxR7XrcE2vtbAsTAbJ7/xwJtUuJEw8K8Zr/AE0LHlesg==}
     engines: {node: '>=10', npm: '>=6'}
     dependencies:
-      '@babel/runtime': 7.22.10
+      '@babel/runtime': 7.22.15
       cosmiconfig: 7.1.0
       resolve: 1.22.3
     dev: false
@@ -17633,7 +17719,7 @@ packages:
   /regenerator-transform@0.15.1:
     resolution: {integrity: sha512-knzmNAcuyxV+gQCufkYcvOqX/qIIfHLv0u5x79kRxuGojfYVky1f15TzZEu2Avte8QGepvUNTnLskf8E6X6Vyg==}
     dependencies:
-      '@babel/runtime': 7.22.10
+      '@babel/runtime': 7.22.15
     dev: true
 
   /regexp.prototype.flags@1.4.3:
@@ -17695,7 +17781,7 @@ packages:
   /relay-runtime@12.0.0:
     resolution: {integrity: sha512-QU6JKr1tMsry22DXNy9Whsq5rmvwr3LSZiiWV/9+DFpuTWvp+WFhobWMc8TC4OjKFfNhEZy7mOiqUAn5atQtug==}
     dependencies:
-      '@babel/runtime': 7.22.10
+      '@babel/runtime': 7.22.15
       fbjs: 3.0.4
       invariant: 2.2.4
     transitivePeerDependencies:
