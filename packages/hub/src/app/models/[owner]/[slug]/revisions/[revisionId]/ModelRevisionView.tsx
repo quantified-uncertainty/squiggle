@@ -1,5 +1,6 @@
 "use client";
 
+import { format } from "date-fns";
 import { FC } from "react";
 import { graphql } from "relay-runtime";
 
@@ -9,9 +10,8 @@ import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 import { modelRoute } from "@/routes";
+import { VersionedSquigglePlayground } from "@/squiggle/components/VersionedSquigglePlayground";
 import { ModelRevisionViewQuery } from "@gen/ModelRevisionViewQuery.graphql";
-import { SquigglePlayground } from "@quri/squiggle-components";
-import { format } from "date-fns";
 
 const Query = graphql`
   query ModelRevisionViewQuery($input: QueryModelInput!, $revisionId: ID!) {
@@ -35,6 +35,7 @@ const Query = graphql`
             __typename
             ... on SquiggleSnippet {
               code
+              version
             }
           }
         }
@@ -65,12 +66,17 @@ export const ModelRevisionView: FC<{
         <div className="pt-4 pb-8 px-8">
           <div>
             <span className="text-slate-500">Version from</span>{" "}
-            {format(model.revision.createdAtTimestamp, commonDateFormat)}
+            {format(model.revision.createdAtTimestamp, commonDateFormat)}.{" "}
+            <span className="text-slate-500">Squiggle</span>{" "}
+            {model.revision.content.version}.
           </div>
           <StyledLink href={modelUrl}>Go to latest version</StyledLink>
         </div>
       </div>
-      <SquigglePlayground defaultCode={model.revision.content.code} />
+      <VersionedSquigglePlayground
+        defaultCode={model.revision.content.code}
+        version={model.revision.content.version}
+      />
     </div>
   );
 };

@@ -1,8 +1,7 @@
-import { DropdownMenuActionItem } from "@quri/ui";
-import { ExternalLinkIcon, IconProps } from "@quri/ui";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
+
+import { DropdownMenuActionItem, IconProps } from "@quri/ui";
 
 type Props = {
   href: string;

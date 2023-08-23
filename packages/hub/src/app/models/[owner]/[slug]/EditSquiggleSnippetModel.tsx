@@ -14,12 +14,9 @@ import { EditModelExports } from "@/components/exports/EditModelExports";
 import { useAsyncMutation } from "@/hooks/useAsyncMutation";
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
-import {
-  PlaygroundVersionPicker,
-  Version,
-  VersionedSquigglePlayground,
-  defaultVersion,
-} from "@/squiggle/components/VersionedSquigglePlayground";
+import { VersionedSquigglePlayground } from "@/squiggle/components/VersionedSquigglePlayground";
+import { type SquiggleVersion } from "@/squiggle/versions";
+import { PlaygroundVersionPicker } from "@/squiggle/components/PlaygroundVersionPicker";
 
 export const Mutation = graphql`
   mutation EditSquiggleSnippetModelMutation(
@@ -70,6 +67,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
             ... on SquiggleSnippet {
               id
               code
+              version
             }
           }
 
@@ -114,6 +112,9 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
     defaultValues: initialFormValues,
   });
 
+  // could version picker be part of the form?
+  const [version, setVersion] = useState(content.version);
+
   const {
     fields: variablesWithDefinitionsFields,
     append: appendVariableWithDefinition,
@@ -137,6 +138,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
         input: {
           content: {
             code: formData.code,
+            version,
           },
           relativeValuesExports: formData.relativeValuesExports,
           slug: model.slug,
@@ -151,13 +153,11 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
     form.setValue("code", code);
   };
 
-  const [version, setVersion] = useState(defaultVersion);
-
   // We don't want to control SquigglePlayground, it's uncontrolled by design.
   // Instead, we reset the `defaultCode` that we pass to it when version is changed.
   const [defaultCode, setDefaultCode] = useState(content.code);
 
-  const handleVersionChange = (newVersion: Version) => {
+  const handleVersionChange = (newVersion: SquiggleVersion) => {
     setVersion(newVersion);
     setDefaultCode(form.getValues("code"));
   };

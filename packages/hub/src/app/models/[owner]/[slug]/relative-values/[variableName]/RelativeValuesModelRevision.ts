@@ -11,6 +11,7 @@ export const RelativeValuesModelRevisionFragment = graphql`
       ... on SquiggleSnippet {
         id
         code
+        version
       }
     }
 

@@ -243,6 +243,7 @@ input MutationCreateSquiggleSnippetModelInput {
   """Defaults to false"""
   isPrivate: Boolean
   slug: String!
+  version: String!
 }
 
 union MutationCreateSquiggleSnippetModelResult = BaseError | CreateSquiggleSnippetModelResult | ValidationError
@@ -336,8 +337,7 @@ input MutationUpdateRelativeValuesDefinitionInput {
 union MutationUpdateRelativeValuesDefinitionResult = BaseError | UpdateRelativeValuesDefinitionResult
 
 input MutationUpdateSquiggleSnippetModelInput {
-  code: String @deprecated(reason: "Use content arg instead")
-  content: SquiggleSnippetContentInput
+  content: SquiggleSnippetContentInput!
   owner: String!
   relativeValuesExports: [RelativeValuesExportInput!]
   slug: String!
@@ -523,10 +523,12 @@ interface SquiggleOutput {
 type SquiggleSnippet implements Node {
   code: String!
   id: ID!
+  version: String!
 }
 
 input SquiggleSnippetContentInput {
   code: String!
+  version: String!
 }
 
 type UpdateGroupInviteRoleResult {

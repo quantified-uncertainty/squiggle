@@ -13,6 +13,7 @@ import { H1 } from "@/components/ui/Headers";
 import { SlugFormField } from "@/components/ui/SlugFormField";
 import { useAsyncMutation } from "@/hooks/useAsyncMutation";
 import { modelRoute } from "@/routes";
+import { defaultSquiggleVersion } from "@/squiggle/versions";
 
 const Mutation = graphql`
   mutation NewModelMutation($input: MutationCreateSquiggleSnippetModelInput!) {
@@ -75,6 +76,7 @@ export const NewModel: FC = () => {
           groupSlug: data.group?.slug,
           isPrivate: data.isPrivate,
           code: defaultCode,
+          version: defaultSquiggleVersion,
         },
       },
       onCompleted: (result) => {
