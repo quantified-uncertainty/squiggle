@@ -119,11 +119,14 @@ export const NewModel: FC = () => {
           <ControlledFormField<FormShape, SquiggleVersion>
             name="version"
             label="Squiggle version"
+            standaloneLabel
           >
             {({ onChange, value }) => (
-              <div className="flex">
-                <PlaygroundVersionPicker version={value} onChange={onChange} />
-              </div>
+              <PlaygroundVersionPicker
+                size="medium"
+                version={value}
+                onChange={onChange}
+              />
             )}
           </ControlledFormField>
         </div>

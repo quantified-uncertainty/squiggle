@@ -33,37 +33,39 @@ export const PlaygroundVersionPicker: FC<{
   const CurrentIcon = versionIcon(version);
 
   return (
-    <Dropdown
-      render={({ close }) => (
-        <DropdownMenu>
-          {squiggleVersions.map((version) => (
-            <DropdownMenuActionItem
-              key={version}
-              title={versionTitle(version)}
-              icon={versionIcon(version)}
-              onClick={() => {
-                onChange(version);
-                close();
-              }}
+    <div className="flex">
+      <Dropdown
+        render={({ close }) => (
+          <DropdownMenu>
+            {squiggleVersions.map((version) => (
+              <DropdownMenuActionItem
+                key={version}
+                title={versionTitle(version)}
+                icon={versionIcon(version)}
+                onClick={() => {
+                  onChange(version);
+                  close();
+                }}
+              />
+            ))}
+            <DropdownMenuSeparator />
+            <DropdownMenuLinkItem
+              href="https://www.squiggle-language.com/docs/Changelog"
+              newTab={true}
+              title="Changelog"
+              close={close}
             />
-          ))}
-          <DropdownMenuSeparator />
-          <DropdownMenuLinkItem
-            href="https://www.squiggle-language.com/docs/Changelog"
-            newTab={true}
-            title="Changelog"
-            close={close}
-          />
-        </DropdownMenu>
-      )}
-    >
-      <Button size={size}>
-        <div className="flex items-center gap-2">
-          <CurrentIcon size={14} className="text-slate-500" />
-          {versionTitle(version)}
-          {versionIsValid ? "" : ` (unknown)`}
-        </div>
-      </Button>
-    </Dropdown>
+          </DropdownMenu>
+        )}
+      >
+        <Button size={size}>
+          <div className="flex items-center gap-2">
+            <CurrentIcon size={14} className="text-slate-500" />
+            {versionTitle(version)}
+            {versionIsValid ? "" : ` (unknown)`}
+          </div>
+        </Button>
+      </Dropdown>
+    </div>
   );
 };

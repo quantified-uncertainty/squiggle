@@ -88,7 +88,7 @@ export const UserControls: FC<{ session: Session | null }> = ({ session }) => {
               title="New Relative Value Definition"
               close={close}
             />
-            <DropdownMenuLinkItem
+            <DropdownMenuNextLinkItem
               href={newGroupRoute()}
               icon={GroupIcon}
               title="New Group"
