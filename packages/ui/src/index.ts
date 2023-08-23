@@ -4,6 +4,7 @@ export { StyledTab } from "./components/StyledTab.js";
 
 export { DropdownMenu } from "./components/Dropdown/DropdownMenu.js";
 export { DropdownMenuActionItem } from "./components/Dropdown/DropdownMenuActionItem.js";
+export { DropdownMenuLinkItem } from "./components/Dropdown/DropdownMenuLinkItem.js";
 export { ActionItemInternal } from "./components/Dropdown/DropdownMenuActionItemInternal.js";
 export { DropdownMenuAsyncActionItem } from "./components/Dropdown/DropdownMenuAsyncActionItem.js";
 export { DropdownMenuHeader } from "./components/Dropdown/DropdownMenuHeader.js";
@@ -77,6 +78,7 @@ export {
   TableCellsIcon,
   UserCircleIcon,
   UserIcon,
+  WrenchIcon,
 } from "./icons/HeroIcons.js";
 export type { IconProps } from "./icons/Icon.js";
 export { RefreshIcon } from "./icons/RefreshIcon.js";

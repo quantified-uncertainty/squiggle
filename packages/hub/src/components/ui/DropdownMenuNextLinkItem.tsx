@@ -10,7 +10,7 @@ type Props = {
   close: () => void;
 };
 
-export const DropdownMenuLinkItem: FC<Props> = ({
+export const DropdownMenuNextLinkItem: FC<Props> = ({
   title,
   href,
   icon,

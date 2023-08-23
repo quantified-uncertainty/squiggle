@@ -21,7 +21,7 @@ import {
 
 import { chooseUsernameRoute, userRoute } from "@/routes";
 import { DropdownWithArrow } from "./DropdownWithArrow";
-import { DropdownMenuLinkItem } from "@/components/ui/DropdownMenuLinkItem";
+import { DropdownMenuNextLinkItem } from "@/components/ui/DropdownMenuNextLinkItem";
 import {
   DISCORD_URL,
   GITHUB_DISCUSSION_URL,
@@ -65,7 +65,7 @@ export const UserControls: FC<{ session: Session | null }> = ({ session }) => {
           <DropdownMenu>
             <DropdownMenuHeader>User Actions</DropdownMenuHeader>
             <DropdownMenuSeparator />
-            <DropdownMenuLinkItem
+            <DropdownMenuNextLinkItem
               href={userRoute({ username: username! })}
               icon={UserCircleIcon}
               title="Profile"
@@ -82,7 +82,7 @@ export const UserControls: FC<{ session: Session | null }> = ({ session }) => {
             <DropdownMenuSeparator />
             <DropdownMenuHeader>Experimental</DropdownMenuHeader>
             <DropdownMenuSeparator />
-            <DropdownMenuLinkItem
+            <DropdownMenuNextLinkItem
               href={newDefinitionRoute()}
               icon={ScaleIcon}
               title="New Relative Value Definition"

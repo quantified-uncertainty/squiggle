@@ -183,6 +183,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
                 <PlaygroundVersionPicker
                   version={version}
                   onChange={handleVersionChange}
+                  size="small"
                 />
                 {model.isEditable && (
                   <Button
