@@ -17,36 +17,35 @@ import { DropdownMenuLinkItem } from "@/components/ui/DropdownMenuLinkItem";
 export const PlaygroundVersionPicker: FC<{
   version: string;
   onChange: (newVersion: SquiggleVersion) => void;
-}> = ({ version, onChange }) => {
+  size?: "small" | "medium";
+}> = ({ version, onChange, size }) => {
   const versionIsValid = checkSquiggleVersion(version);
 
   return (
-    <div className="flex gap-2 items-center">
-      <Dropdown
-        render={({ close }) => (
-          <DropdownMenu>
-            {squiggleVersions.map((version) => (
-              <DropdownMenuActionItem
-                key={version}
-                title={version}
-                onClick={() => {
-                  onChange(version);
-                  close();
-                }}
-              />
-            ))}
-            <DropdownMenuLinkItem
-              href="https://www.squiggle-language.com/docs/Changelog"
-              title="Changelog"
-              close={close}
+    <Dropdown
+      render={({ close }) => (
+        <DropdownMenu>
+          {squiggleVersions.map((version) => (
+            <DropdownMenuActionItem
+              key={version}
+              title={version === "dev" ? "Dev" : version}
+              onClick={() => {
+                onChange(version);
+                close();
+              }}
             />
-          </DropdownMenu>
-        )}
-      >
-        <Button size="small">
-          {versionIsValid ? version : `${version} (unknown)`}
-        </Button>
-      </Dropdown>
-    </div>
+          ))}
+          <DropdownMenuLinkItem
+            href="https://www.squiggle-language.com/docs/Changelog"
+            title="Changelog"
+            close={close}
+          />
+        </DropdownMenu>
+      )}
+    >
+      <Button size={size}>
+        {versionIsValid ? version : `${version} (unknown)`}
+      </Button>
+    </Dropdown>
   );
 };

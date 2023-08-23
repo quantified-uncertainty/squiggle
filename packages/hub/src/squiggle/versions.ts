@@ -1,4 +1,4 @@
-export const squiggleVersions = ["0.8.4", "dev"] as const;
+export const squiggleVersions = ["dev", "0.8.4"] as const;
 
 export type SquiggleVersion = (typeof squiggleVersions)[number];
 

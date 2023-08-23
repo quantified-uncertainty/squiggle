@@ -5,7 +5,7 @@ import { FC } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { graphql } from "relay-runtime";
 
-import { Button, CheckboxFormField } from "@quri/ui";
+import { Button, CheckboxFormField, ControlledFormField } from "@quri/ui";
 
 import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
 import { SelectGroup, SelectGroupOption } from "@/components/SelectGroup";
@@ -13,7 +13,8 @@ import { H1 } from "@/components/ui/Headers";
 import { SlugFormField } from "@/components/ui/SlugFormField";
 import { useAsyncMutation } from "@/hooks/useAsyncMutation";
 import { modelRoute } from "@/routes";
-import { defaultSquiggleVersion } from "@/squiggle/versions";
+import { PlaygroundVersionPicker } from "@/squiggle/components/PlaygroundVersionPicker";
+import { SquiggleVersion, defaultSquiggleVersion } from "@/squiggle/versions";
 
 const Mutation = graphql`
   mutation NewModelMutation($input: MutationCreateSquiggleSnippetModelInput!) {
@@ -41,6 +42,7 @@ a = normal(2, 5)
 
 type FormShape = {
   slug: string | undefined;
+  version: SquiggleVersion;
   group: SelectGroupOption | null;
   isPrivate: boolean;
 };
@@ -50,6 +52,7 @@ export const NewModel: FC = () => {
 
   const form = useForm<FormShape>({
     defaultValues: {
+      version: defaultSquiggleVersion,
       // don't pass `slug: ""` here, it will lead to form reset if a user started to type in a value before JS finished loading
       group: null,
       isPrivate: false,
@@ -76,7 +79,7 @@ export const NewModel: FC = () => {
           groupSlug: data.group?.slug,
           isPrivate: data.isPrivate,
           code: defaultCode,
-          version: defaultSquiggleVersion,
+          version: data.version,
         },
       },
       onCompleted: (result) => {
@@ -113,6 +116,16 @@ export const NewModel: FC = () => {
             myOnly={true}
           />
           <CheckboxFormField<FormShape> label="Private" name="isPrivate" />
+          <ControlledFormField<FormShape, SquiggleVersion>
+            name="version"
+            label="Squiggle version"
+          >
+            {({ onChange, value }) => (
+              <div className="flex">
+                <PlaygroundVersionPicker version={value} onChange={onChange} />
+              </div>
+            )}
+          </ControlledFormField>
         </div>
         <Button
           onClick={save}
