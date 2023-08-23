@@ -7,18 +7,13 @@ import { useAvailableHeight } from "../../utils/useAvailableHeight";
 // 0.8.4 had `exports` configuration in its `package.json` which wasn't compatible with Next.js resolutions.
 // For this reason, support for 0.8.4 should be removed later (preferably before the PR is merged).
 import { SquigglePlayground as Playground084 } from "components-0.8.4";
-
-export const versions = ["0.8.4", "0.8.5-dev"] as const;
-
-export type Version = (typeof versions)[number];
-
-export const defaultVersion: Version = "0.8.4";
+import { Version } from "./versions";
 
 // Note: typing this with `{ [k in Version]: ComponentType<CommonProps> }` won't work because of contravariance issues.
 // Instead, we pass all props explicitly to the playground component when it's instantiated to check that all props are compatible.
 const playgroundByVersion = {
   "0.8.4": Playground084,
-  "0.8.5-dev": dynamic(() =>
+  dev: dynamic(() =>
     import("@quri/squiggle-components").then((mod) => mod.SquigglePlayground)
   ),
 };
@@ -44,7 +39,7 @@ export const VersionedPlayground: FC<Props> = ({ version, ...props }) => {
 
   const Playground = playgroundByVersion[version];
   if (!Playground) {
-    return <div>Version not found</div>;
+    return <div>Version {version} not found</div>;
   }
 
   return (
