@@ -22,20 +22,10 @@ export function getNameNodes(tree: Tree, from: number) {
   const cursor = tree.cursorAt(from, -1);
   const nameNodes: SyntaxNode[] = [];
 
+  let direction: "start" | "sibling" | "parent" | undefined = "start";
   while (1) {
-    // Move to the next node and store the direction that we used.
-    const direction = cursor.prevSibling()
-      ? "sibling"
-      : cursor.parent()
-      ? "parent"
-      : undefined;
-
-    if (!direction) {
-      break;
-    }
-
     if (cursor.type.is("Binding")) {
-      // Only if direction is not "parent"; `foo = { <cursor> }` shouldn't autocomplete `foo`.
+      // Only for sibling nodes; `foo = { <cursor> }` shouldn't autocomplete `foo`.
       if (direction === "sibling") {
         const nameNode = cursor.node.getChild("VariableName");
         if (nameNode) {
@@ -43,7 +33,7 @@ export function getNameNodes(tree: Tree, from: number) {
         }
       }
     } else if (cursor.type.is("FunDeclaration")) {
-      // Only if direction is not "parent"; Squiggle doesn't support recursive calls.
+      // Only for sibling nodes; Squiggle doesn't support recursive calls.
       if (direction === "sibling") {
         const nameNode = cursor.node.getChild("FunctionName");
         if (nameNode) {
@@ -51,7 +41,7 @@ export function getNameNodes(tree: Tree, from: number) {
         }
       }
 
-      if (direction === "parent") {
+      if (direction !== "sibling") {
         const parameterNodes = cursor.node
           .getChild("LambdaArgs")
           ?.getChildren("LambdaParameter");
@@ -64,6 +54,17 @@ export function getNameNodes(tree: Tree, from: number) {
           }
         }
       }
+    }
+
+    // Move to the next node and store the direction that we used.
+    direction = cursor.prevSibling()
+      ? "sibling"
+      : cursor.parent()
+      ? "parent"
+      : undefined;
+
+    if (!direction) {
+      break;
     }
   }
   return nameNodes;

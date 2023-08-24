@@ -31,6 +31,17 @@ myFun(arg1, arg2) = 1+`;
     expect(getText(code, nodes[1])).toBe("arg2");
   });
 
+  test("Parameter names at the start of function body", () => {
+    const code = `
+myFun(arg1, arg2) = `;
+    const tree = parser.parse(code);
+
+    const nodes = getNameNodes(tree, code.length);
+    expect(nodes.length).toBe(2);
+    expect(getText(code, nodes[0])).toBe("arg1");
+    expect(getText(code, nodes[1])).toBe("arg2");
+  });
+
   test("Don't suggest current binding", () => {
     const code = `
 foo = 5
