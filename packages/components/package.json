@@ -20,6 +20,7 @@
     "@floating-ui/react": "^0.24.3",
     "@heroicons/react": "^1.0.6",
     "@hookform/resolvers": "^3.1.1",
+    "@lezer/common": "^1.0.4",
     "@quri/prettier-plugin-squiggle": "workspace:*",
     "@quri/squiggle-lang": "workspace:*",
     "@quri/ui": "workspace:*",
@@ -43,9 +44,9 @@
   "devDependencies": {
     "@jest/globals": "^29.6.2",
     "@juggle/resize-observer": "^3.4.0",
-    "@lezer/generator": "^1.3.0",
+    "@lezer/generator": "^1.4.2",
     "@lezer/highlight": "^1.1.6",
-    "@lezer/lr": "^1.3.9",
+    "@lezer/lr": "^1.3.10",
     "@storybook/addon-actions": "^7.2.1",
     "@storybook/addon-docs": "^7.2.1",
     "@storybook/addon-essentials": "^7.2.1",
@@ -130,6 +131,12 @@
       "@typescript-eslint"
     ],
     "rules": {
+      "no-constant-condition": [
+        "error",
+        {
+          "checkLoops": false
+        }
+      ],
       "no-console": "warn",
       "@typescript-eslint/no-empty-function": "off",
       "react/react-in-jsx-scope": "off",

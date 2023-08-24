@@ -1,13 +1,14 @@
+import { ScaleContinuousNumeric } from "d3";
+
 import {
-  SqNumericFnPlot,
+  Env,
   SqDistFnPlot,
   SqDistribution,
   SqNumberValue,
-  Env,
-  SqScale,
+  SqNumericFnPlot,
 } from "@quri/squiggle-lang";
+
 import { sqScaleToD3 } from "../../lib/d3/index.js";
-import { ScaleContinuousNumeric } from "d3";
 
 export const functionChartDefaults = {
   min: 0,

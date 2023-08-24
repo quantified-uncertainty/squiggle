@@ -3,6 +3,7 @@ import { FC, useCallback, useMemo } from "react";
 
 import { Env, SqNumericFnPlot } from "@quri/squiggle-lang";
 
+import { sqScaleToD3 } from "../../lib/d3/index.js";
 import {
   drawAxes,
   drawCursorLines,
@@ -14,9 +15,8 @@ import {
   useCanvasCursor,
 } from "../../lib/hooks/index.js";
 import { canvasClasses } from "../../lib/utility.js";
-import { getFunctionImage } from "./utils.js";
-import { sqScaleToD3 } from "../../lib/d3/index.js";
 import { ImageErrors } from "./ImageErrors.js";
+import { getFunctionImage } from "./utils.js";
 
 type Props = {
   plot: SqNumericFnPlot;
@@ -112,7 +112,7 @@ export const NumericFunctionChart: FC<Props> = ({
         },
       });
     },
-    [functionImage, height, cursor, plot]
+    [functionImage, height, cursor, plot, xScale]
   );
 
   const { ref } = useCanvas({ height, init: initCursor, draw });

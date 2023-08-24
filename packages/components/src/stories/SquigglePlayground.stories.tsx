@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { SquigglePlayground as Component } from "../components/SquigglePlayground/index.js";
-import { Button } from "@quri/ui";
 import { sq } from "@quri/squiggle-lang";
-import { blockComment } from "@codemirror/commands";
+import { Button } from "@quri/ui";
+
+import { SquigglePlayground as Component } from "../components/SquigglePlayground/index.js";
 
 /**
  * A Squiggle playground is an environment where you can play around with all settings, including sampling settings, in Squiggle.

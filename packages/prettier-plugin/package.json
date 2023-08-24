@@ -31,10 +31,15 @@
   ],
   "type": "module",
   "source": "./src/index.ts",
-  "module": "./dist/esm/src/index.js",
   "types": "./dist/types/src/index.d.ts",
   "exports": {
-    ".": "./dist/esm/src/index.js",
-    "./standalone": "./dist/esm/src/standalone.js"
+    ".": {
+      "types": "./dist/types/src/index.d.ts",
+      "import": "./dist/esm/src/index.js"
+    },
+    "./standalone": {
+      "types": "./dist/types/src/standalone.d.ts",
+      "import": "./dist/esm/src/standalone.js"
+    }
   }
 }

@@ -3,8 +3,6 @@ import {
   useCallback,
   useEffect,
   useImperativeHandle,
-  useMemo,
-  useRef,
   useState,
 } from "react";
 
@@ -77,6 +75,8 @@ const compUpdateListener = new Compartment();
 const compSubmitListener = new Compartment();
 const compFormatListener = new Compartment();
 const compViewNodeListener = new Compartment();
+const compLineWrapping = new Compartment();
+const compLanguageSupport = new Compartment();
 
 export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
   function CodeEditor(
@@ -95,120 +95,101 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     },
     ref
   ) {
-    const editor = useRef<HTMLDivElement>(null);
-    const editorView = useRef<EditorView | null>(null);
+    // `useState` instead of `useMemo`, because we want to initialize view only once.
+    // We'll handle further updates through `useEffect` calls.
+    const [view] = useState(() => {
+      if (typeof window === "undefined") {
+        return undefined; // CodeMirror view is not SSR-compatible
+      }
 
-    const projectRef = useRef<SqProject | null>(null);
-    const languageSupport = useMemo(
-      // We don't pass `project` because its value can be updated (in theory...),
-      // and I couldn't find quickly how to update EditorState extensions.
-      () => squiggleLanguageSupport(projectRef),
-      []
-    );
+      const extensions = [
+        highlightSpecialChars(),
+        history(),
+        drawSelection(),
+        dropCursor(),
+        EditorState.allowMultipleSelections.of(true),
+        indentOnInput(),
+        syntaxHighlighting(lightThemeHighlightingStyle, { fallback: true }),
+        bracketMatching(),
+        closeBrackets(),
+        autocompletion(),
+        highlightSelectionMatches({
+          wholeWords: true,
+          highlightWordAroundCursor: false, // Works weird on fractions! 5.3e10K
+        }),
+        compSubmitListener.of([]),
+        compFormatListener.of([]),
+        compViewNodeListener.of([]),
+        keymap.of([
+          ...closeBracketsKeymap,
+          ...defaultKeymap,
+          ...searchKeymap,
+          ...historyKeymap,
+          ...foldKeymap,
+          ...completionKeymap,
+          ...lintKeymap,
+          indentWithTab,
+        ]),
+        compGutter.of([]),
+        compUpdateListener.of([]),
+        compTheme.of([]),
+        compLanguageSupport.of([]),
+        // might be unnecessary, but might help with redraw if `useEffect` configuring the compartment fires too late
+        compLineWrapping.of(lineWrapping ? [EditorView.lineWrapping] : []),
+      ];
+
+      const state = EditorState.create({
+        doc: defaultValue,
+        extensions,
+      });
+      const view = new EditorView({ state });
+      return view;
+    });
+
     useEffect(() => {
-      projectRef.current = project;
-    }, [project]);
+      return () => {
+        view?.destroy();
+      };
+    }, [view]);
 
     const format = useCallback(async () => {
-      if (!editorView.current) {
-        return;
-      }
-      const view = editorView.current;
+      if (!view) return;
       const code = view.state.doc.toString();
       const { formatted, cursorOffset } = await prettier.formatWithCursor(
         code,
         {
           parser: "squiggle",
           plugins: [squigglePlugin],
-          cursorOffset: editorView.current.state.selection.main.to,
+          cursorOffset: view.state.selection.main.to,
         }
       );
       onChange(formatted);
       view.dispatch({
         changes: {
           from: 0,
-          to: editorView.current.state.doc.length,
+          to: view.state.doc.length,
           insert: formatted,
         },
         selection: {
           anchor: cursorOffset,
         },
       });
-    }, [onChange]);
+    }, [onChange, view]);
 
     const scrollTo = (position: number) => {
-      editorView.current?.dispatch({
+      view?.dispatch({
         selection: {
           anchor: position,
         },
         scrollIntoView: true,
       });
-      editorView.current?.focus();
+      view?.focus();
     };
 
     useImperativeHandle(ref, () => ({ format, scrollTo }));
 
-    // Note the `useState` instead of `useMemo`; we never want to recreate EditorState, it would cause bugs.
-    // `defaultValue` changes are ignored;
-    // `languageSupport` changes (which depends on `project` prop) are handled with `projectRef`.
-
-    const basicExtensions = [
-      highlightSpecialChars(),
-      history(),
-      drawSelection(),
-      dropCursor(),
-      EditorState.allowMultipleSelections.of(true),
-      indentOnInput(),
-      syntaxHighlighting(lightThemeHighlightingStyle, { fallback: true }),
-      bracketMatching(),
-      closeBrackets(),
-      autocompletion(),
-      highlightSelectionMatches({
-        wholeWords: true,
-        highlightWordAroundCursor: false, // Works weird on fractions! 5.3e10K
-      }),
-      compSubmitListener.of([]),
-      compFormatListener.of([]),
-      compViewNodeListener.of([]),
-      keymap.of([
-        ...closeBracketsKeymap,
-        ...defaultKeymap,
-        ...searchKeymap,
-        ...historyKeymap,
-        ...foldKeymap,
-        ...completionKeymap,
-        ...lintKeymap,
-        indentWithTab,
-      ]),
-      compGutter.of([]),
-      compUpdateListener.of([]),
-      compTheme.of([]),
-      languageSupport,
-    ];
-
-    const [state] = useState(() =>
-      EditorState.create({
-        doc: defaultValue,
-        extensions: [
-          ...basicExtensions,
-          lineWrapping ? [EditorView.lineWrapping] : [],
-        ],
-      })
-    );
-
     useEffect(() => {
-      if (editor.current) {
-        const view = new EditorView({ state, parent: editor.current });
-        editorView.current = view;
-
-        return () => {
-          view.destroy();
-        };
-      }
-    }, [state]);
-
-    useEffect(() => {
-      editorView.current?.dispatch({
+      view?.dispatch({
         effects: compGutter.reconfigure(
           showGutter
             ? [
@@ -220,10 +201,18 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
             : []
         ),
       });
-    }, [showGutter]);
+    }, [showGutter, view]);
 
     useEffect(() => {
-      editorView.current?.dispatch({
+      view?.dispatch({
+        effects: compLanguageSupport.reconfigure(
+          squiggleLanguageSupport(project)
+        ),
+      });
+    }, [project, view]);
+
+    useEffect(() => {
+      view?.dispatch({
         effects: compUpdateListener.reconfigure(
           EditorView.updateListener.of((update) => {
             if (update.docChanged) {
@@ -232,10 +221,10 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
           })
         ),
       });
-    }, [onChange]);
+    }, [onChange, view]);
 
     useEffect(() => {
-      editorView.current?.dispatch({
+      view?.dispatch({
         effects: compTheme.reconfigure(
           EditorView.theme({
             "&": {
@@ -248,10 +237,18 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
           })
         ),
       });
-    }, [width, height]);
+    }, [width, height, view]);
 
     useEffect(() => {
-      editorView.current?.dispatch({
+      view?.dispatch({
+        effects: compLineWrapping.reconfigure(
+          lineWrapping ? [EditorView.lineWrapping] : []
+        ),
+      });
+    }, [lineWrapping, view]);
+
+    useEffect(() => {
+      view?.dispatch({
         effects: compSubmitListener.reconfigure(
           keymap.of([
             {
@@ -264,10 +261,10 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
           ])
         ),
       });
-    }, [onSubmit]);
+    }, [onSubmit, view]);
 
     useEffect(() => {
-      editorView.current?.dispatch({
+      view?.dispatch({
         effects: compFormatListener.reconfigure(
           keymap.of([
             {
@@ -280,10 +277,11 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
           ])
         ),
       });
-    }, [format]);
+    }, [format, view]);
 
     useEffect(() => {
-      editorView.current?.dispatch({
+      if (!view) return;
+      view.dispatch({
         effects: compViewNodeListener.reconfigure(
           keymap.of([
             {
@@ -292,7 +290,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
                 if (!onViewValuePath) {
                   return true;
                 }
-                const offset = editorView.current?.state.selection.main.to;
+                const offset = view.state.selection.main.to;
                 if (offset === undefined) {
                   return true;
                 }
@@ -312,17 +310,15 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
           ])
         ),
       });
-    }, [onViewValuePath, project, sourceId]);
+    }, [onViewValuePath, project, sourceId, view]);
 
     useEffect(() => {
-      if (!editorView.current) {
-        return;
-      }
-      const docLength = editorView.current.state.doc.length;
+      if (!view) return;
+      const docLength = view.state.doc.length;
 
-      editorView.current?.dispatch(
+      view.dispatch(
         setDiagnostics(
-          editorView.current.state,
+          view.state,
           errors
             .map((err) => {
               if (
@@ -354,12 +350,21 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
             }))
         )
       );
-    }, [errors]);
+    }, [errors, view]);
+
+    const setViewDom = useCallback(
+      (element: HTMLDivElement | null) => {
+        if (!view) return;
+        // TODO: the editor breaks on hot reloading in storybook, investigate
+        element?.replaceChildren(view.dom);
+      },
+      [view]
+    );
 
     return (
       <div
         style={{ minWidth: width, minHeight: height, fontSize: "13px" }}
-        ref={editor}
+        ref={setViewDom}
       ></div>
     );
   }

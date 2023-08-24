@@ -15,7 +15,7 @@
     // type check settings
     "strict": true,
     "skipLibCheck": true,
-    "noImplicitAny": false
+    "noImplicitAny": false // waiting for https://github.com/lezer-parser/lezer/issues/41 to be fixed
   },
   "include": ["src/**/*"],
   "references": [

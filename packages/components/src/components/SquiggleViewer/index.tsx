@@ -1,21 +1,19 @@
-import { FC, forwardRef, useEffect, memo, useMemo } from "react";
+import { forwardRef, memo, useImperativeHandle } from "react";
 
 import {
+  SqDictValue,
   SqError,
   SqValue,
-  SqDictValue,
   SqValuePath,
   result,
 } from "@quri/squiggle-lang";
-import { ErrorAlert } from "../Alert.js";
 import { ChevronRightIcon } from "@quri/ui";
-import { useImperativeHandle } from "react";
+
 import { MessageAlert } from "../Alert.js";
 import { CodeEditorHandle } from "../CodeEditor.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 import { ExpressionViewer } from "./ExpressionViewer.js";
-import { ErrorBoundary } from "react-error-boundary";
 import {
   ViewerProvider,
   useFocus,

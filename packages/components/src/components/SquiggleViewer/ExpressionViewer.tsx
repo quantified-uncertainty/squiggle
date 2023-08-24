@@ -35,7 +35,7 @@ import ReactMarkdown from "react-markdown";
 // We use an extra left margin for some elements to align them with parent variable name
 const leftMargin = "ml-1.5";
 
-const truncateStr = (str, maxLength) =>
+const truncateStr = (str: string, maxLength: number) =>
   str.substring(0, maxLength) + (str.length > maxLength ? "..." : "");
 
 // Distributions should be smaller than the other charts.
