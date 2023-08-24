@@ -10,8 +10,8 @@ import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 import { modelRoute } from "@/routes";
-import { VersionedSquigglePlayground } from "@/squiggle/components/VersionedSquigglePlayground";
 import { ModelRevisionViewQuery } from "@gen/ModelRevisionViewQuery.graphql";
+import { VersionedSquigglePlayground } from "@quri/versioned-playground";
 
 const Query = graphql`
   query ModelRevisionViewQuery($input: QueryModelInput!, $revisionId: ID!) {

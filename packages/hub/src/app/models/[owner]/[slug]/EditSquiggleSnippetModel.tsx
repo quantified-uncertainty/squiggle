@@ -14,9 +14,11 @@ import { EditModelExports } from "@/components/exports/EditModelExports";
 import { useAsyncMutation } from "@/hooks/useAsyncMutation";
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
-import { VersionedSquigglePlayground } from "@/squiggle/components/VersionedSquigglePlayground";
-import { type SquiggleVersion } from "@/squiggle/versions";
-import { PlaygroundVersionPicker } from "@/squiggle/components/PlaygroundVersionPicker";
+import {
+  SquigglePlaygroundVersionPicker,
+  VersionedSquigglePlayground,
+  type SquiggleVersion,
+} from "@quri/versioned-playground";
 
 export const Mutation = graphql`
   mutation EditSquiggleSnippetModelMutation(
@@ -180,7 +182,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
                     onClick={() => openModal("exports")}
                   />
                 )}
-                <PlaygroundVersionPicker
+                <SquigglePlaygroundVersionPicker
                   version={version}
                   onChange={handleVersionChange}
                   size="small"

@@ -3,7 +3,7 @@ import { RelativeValuesDefinition } from "@prisma/client";
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
-import { squiggleVersions } from "@/squiggle/versions";
+import { squiggleVersions } from "@quri/versioned-playground";
 import { Model, getWriteableModel } from "../types/Model";
 
 const DefinitionRefInput = builder.inputType("DefinitionRefInput", {

@@ -1,3 +1,4 @@
+"use client";
 import { FC } from "react";
 
 import {
@@ -15,9 +16,9 @@ import {
   SquiggleVersion,
   checkSquiggleVersion,
   squiggleVersions,
-} from "../versions";
+} from "./versions.js";
 
-export const PlaygroundVersionPicker: FC<{
+export const SquigglePlaygroundVersionPicker: FC<{
   version: string;
   onChange: (newVersion: SquiggleVersion) => void;
   size: "small" | "medium";

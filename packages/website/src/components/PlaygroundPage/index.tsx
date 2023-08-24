@@ -3,9 +3,13 @@ import { deflate, inflate } from "pako";
 import { FC, useState } from "react";
 
 import { ShareButton } from "./ShareButton";
-import { VersionedPlayground } from "./VersionedPlayground";
-import { VersionPicker } from "./VersionPicker";
-import { defaultVersion, Version, versions } from "./versions";
+import {
+  VersionedSquigglePlayground,
+  SquigglePlaygroundVersionPicker,
+  defaultSquiggleVersion,
+  type SquiggleVersion,
+  squiggleVersions,
+} from "@quri/versioned-playground";
 
 const HASH_PREFIX = "#code=";
 function getHashData() {
@@ -34,7 +38,7 @@ type Data = {
   showSummary?: boolean;
 };
 
-function updateUrl(data: Partial<Data>, version: Version) {
+function updateUrl(data: Partial<Data>, version: SquiggleVersion) {
   const text = JSON.stringify({ ...getHashData(), ...data });
   const compressed = deflate(text, { level: 9 });
   window.history.replaceState(
@@ -53,26 +57,26 @@ export const PlaygroundPage: FC<{ version: string | null }> = (props) => {
     delete hashData.initialSquiggleString;
   }
 
-  const [version, setVersion] = useState<Version>(() => {
-    for (const version of versions) {
+  const [version, setVersion] = useState<SquiggleVersion>(() => {
+    for (const version of squiggleVersions) {
       if (props.version === version) {
         return version;
       }
     }
     if (props.version && typeof window !== "undefined") {
       // wrong version, let's replace it
-      updateUrl({}, defaultVersion);
+      updateUrl({}, defaultSquiggleVersion);
     }
-    return defaultVersion;
+    return defaultSquiggleVersion;
   });
 
-  const onVersionChange = (version: Version) => {
+  const onVersionChange = (version: SquiggleVersion) => {
     setVersion(version);
     updateUrl({}, version);
   };
 
   return (
-    <VersionedPlayground
+    <VersionedSquigglePlayground
       version={version}
       defaultCode={hashData.defaultCode ?? "normal(0, 1)"}
       distributionChartSettings={{
@@ -81,7 +85,11 @@ export const PlaygroundPage: FC<{ version: string | null }> = (props) => {
       renderExtraControls={() => (
         <div className="h-full flex justify-end items-center gap-2">
           <ShareButton />
-          <VersionPicker version={version} onChange={onVersionChange} />
+          <SquigglePlaygroundVersionPicker
+            size="small"
+            version={version}
+            onChange={onVersionChange}
+          />
         </div>
       )}
       onCodeChange={(code) => updateUrl({ defaultCode: code }, version)}

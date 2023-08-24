@@ -1,5 +1,7 @@
-import dynamic from "next/dynamic";
-import { FC, ReactNode, useMemo } from "react";
+"use client";
+import { FC, ReactNode, useMemo, lazy, Suspense } from "react";
+
+import { useToast } from "@quri/ui";
 
 // Imported non-dynamically as a demo of version pinning.
 // 0.8.4 had `exports` configuration in its `package.json` which wasn't compatible with Next.js resolutions.
@@ -10,16 +12,15 @@ import {
   SquiggleVersion,
   checkSquiggleVersion,
   defaultSquiggleVersion,
-} from "../versions";
-import { useToast } from "@quri/ui";
+} from "./versions.js";
 
 // Note: typing this with `{ [k in Version]: ComponentType<CommonProps> }` won't work because of contravariance issues.
 // Instead, we pass all props explicitly to the playground component when it's instantiated to check that all props are compatible.
 const playgroundByVersion = {
   "0.8.4": Playground084,
-  dev: dynamic(() =>
-    import("@quri/squiggle-components").then((mod) => mod.SquigglePlayground)
-  ),
+  dev: lazy(async () => ({
+    default: (await import("@quri/squiggle-components")).SquigglePlayground,
+  })),
 };
 
 // We expect all playground components to be a subtype of this type.
@@ -66,17 +67,20 @@ export const VersionedSquigglePlayground: FC<Props> = ({
 
   const Playground = playgroundByVersion[usedVersion];
 
+  // TODO - Suspense?
   return (
-    <Playground
-      // Listing all props for better type safety, instead of using `{...props}`.
-      // Playground props shape can change in the future and this allows us to catch those cases early.
-      defaultCode={props.defaultCode}
-      distributionChartSettings={props.distributionChartSettings}
-      renderExtraControls={props.renderExtraControls}
-      renderExtraModal={props.renderExtraModal}
-      onCodeChange={props.onCodeChange}
-      onSettingsChange={props.onSettingsChange}
-      height={props.height}
-    />
+    <Suspense fallback={null}>
+      <Playground
+        // Listing all props for better type safety, instead of using `{...props}`.
+        // Playground props shape can change in the future and this allows us to catch those cases early.
+        defaultCode={props.defaultCode}
+        distributionChartSettings={props.distributionChartSettings}
+        renderExtraControls={props.renderExtraControls}
+        renderExtraModal={props.renderExtraModal}
+        onCodeChange={props.onCodeChange}
+        onSettingsChange={props.onSettingsChange}
+        height={props.height}
+      />
+    </Suspense>
   );
 };

@@ -30,6 +30,7 @@
     "@quri/squiggle-components": "workspace:*",
     "@quri/squiggle-lang": "workspace:*",
     "@quri/ui": "workspace:*",
+    "@quri/versioned-playground": "workspace:*",
     "@tailwindcss/typography": "^0.5.9",
     "base64-js": "^1.5.1",
     "clsx": "^2.0.0",

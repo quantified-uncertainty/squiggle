@@ -6,6 +6,11 @@ import { FormProvider, useForm } from "react-hook-form";
 import { graphql } from "relay-runtime";
 
 import { Button, CheckboxFormField, ControlledFormField } from "@quri/ui";
+import {
+  SquigglePlaygroundVersionPicker,
+  defaultSquiggleVersion,
+  type SquiggleVersion,
+} from "@quri/versioned-playground";
 
 import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
 import { SelectGroup, SelectGroupOption } from "@/components/SelectGroup";
@@ -13,8 +18,6 @@ import { H1 } from "@/components/ui/Headers";
 import { SlugFormField } from "@/components/ui/SlugFormField";
 import { useAsyncMutation } from "@/hooks/useAsyncMutation";
 import { modelRoute } from "@/routes";
-import { PlaygroundVersionPicker } from "@/squiggle/components/PlaygroundVersionPicker";
-import { SquiggleVersion, defaultSquiggleVersion } from "@/squiggle/versions";
 
 const Mutation = graphql`
   mutation NewModelMutation($input: MutationCreateSquiggleSnippetModelInput!) {
@@ -122,7 +125,7 @@ export const NewModel: FC = () => {
             standaloneLabel
           >
             {({ onChange, value }) => (
-              <PlaygroundVersionPicker
+              <SquigglePlaygroundVersionPicker
                 size="medium"
                 version={value}
                 onChange={onChange}
