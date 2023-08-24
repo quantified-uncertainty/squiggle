@@ -10,6 +10,10 @@ type ClearRelativeValuesCacheResult {
   relativeValuesExport: RelativeValuesExport!
 }
 
+type CreateGroupResult {
+  group: Group!
+}
+
 type CreateRelativeValuesDefinitionResult {
   definition: RelativeValuesDefinition!
 }
@@ -39,6 +43,13 @@ type GlobalStatistics {
   models: Int!
   relativeValuesDefinitions: Int!
   users: Int!
+}
+
+type Group implements Node {
+  createdAtTimestamp: Float!
+  id: ID!
+  slug: String!
+  updatedAtTimestamp: Float!
 }
 
 type Me {
@@ -102,6 +113,7 @@ input ModelRevisionForRelativeValuesSlugUsernameInput {
 type Mutation {
   buildRelativeValuesCache(input: MutationBuildRelativeValuesCacheInput!): MutationBuildRelativeValuesCacheResult!
   clearRelativeValuesCache(input: MutationClearRelativeValuesCacheInput!): MutationClearRelativeValuesCacheResult!
+  createGroup(input: MutationCreateGroupInput!): MutationCreateGroupResult!
   createRelativeValuesDefinition(input: MutationCreateRelativeValuesDefinitionInput!): MutationCreateRelativeValuesDefinitionResult!
   createSquiggleSnippetModel(input: MutationCreateSquiggleSnippetModelInput!): MutationCreateSquiggleSnippetModelResult!
   deleteModel(input: MutationDeleteModelInput!): MutationDeleteModelResult!
@@ -124,6 +136,12 @@ input MutationClearRelativeValuesCacheInput {
 }
 
 union MutationClearRelativeValuesCacheResult = BaseError | ClearRelativeValuesCacheResult
+
+input MutationCreateGroupInput {
+  slug: String!
+}
+
+union MutationCreateGroupResult = BaseError | CreateGroupResult
 
 input MutationCreateRelativeValuesDefinitionInput {
   clusters: [RelativeValuesClusterInput!]!
@@ -212,6 +230,7 @@ type PageInfo {
 
 type Query {
   globalStatistics: GlobalStatistics!
+  group(slug: String!): QueryGroupResult!
   me: Me!
   model(input: QueryModelInput!): QueryModelResult!
   models(after: String, before: String, first: Int, last: Int): ModelConnection!
@@ -223,6 +242,8 @@ type Query {
   userByUsername(username: String!): QueryUserByUsernameResult!
   users(after: String, before: String, first: Int, input: UsersQueryInput, last: Int): QueryUsersConnection!
 }
+
+union QueryGroupResult = BaseError | Group | NotFoundError
 
 input QueryModelInput {
   ownerUsername: String!

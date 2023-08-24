@@ -1,17 +1,18 @@
-import SchemaBuilder, { InputShapeFromFields } from "@pothos/core";
+import SchemaBuilder from "@pothos/core";
 
-import SimpleObjectsPlugin from "@pothos/plugin-simple-objects";
-import ScopeAuthPlugin from "@pothos/plugin-scope-auth";
-import RelayPlugin from "@pothos/plugin-relay";
-import PrismaPlugin from "@pothos/plugin-prisma";
-import WithInputPlugin from "@pothos/plugin-with-input";
 import ErrorsPlugin from "@pothos/plugin-errors";
+import PrismaPlugin from "@pothos/plugin-prisma";
+import RelayPlugin from "@pothos/plugin-relay";
+import ScopeAuthPlugin from "@pothos/plugin-scope-auth";
+import SimpleObjectsPlugin from "@pothos/plugin-simple-objects";
 import ValidationPlugin from "@pothos/plugin-validation";
+import WithInputPlugin from "@pothos/plugin-with-input";
 
 import type PrismaTypes from "@pothos/plugin-prisma/generated";
 
 import { Session } from "next-auth";
 import { NextRequest } from "next/server";
+
 import { prisma } from "@/prisma";
 
 type Context = {

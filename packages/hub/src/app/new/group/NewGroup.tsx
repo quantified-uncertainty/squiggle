@@ -1,42 +1,35 @@
 "use client";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { FC, useEffect } from "react";
+import { FC } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { Button, TextFormField, useToast } from "@quri/ui";
 
-import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
+import { NewGroupMutation } from "@/__generated__/NewGroupMutation.graphql";
 import { H1 } from "@/components/ui/Headers";
-import { modelRoute } from "@/routes";
 import { useDashifyFormField } from "@/hooks/useDashifyFormField";
 
 const Mutation = graphql`
-  mutation NewModelMutation($input: MutationCreateSquiggleSnippetModelInput!) {
-    result: createSquiggleSnippetModel(input: $input) {
+  mutation NewGroupMutation($input: MutationCreateGroupInput!) {
+    result: createGroup(input: $input) {
       __typename
       ... on BaseError {
         message
       }
-      ... on CreateSquiggleSnippetResult {
-        model {
+      ... on CreateGroupResult {
+        group {
           id
+          slug
         }
       }
     }
   }
 `;
 
-const defaultCode = `/*
-Describe your code here
-*/
-
-a = normal(2, 5)
-`;
-
-export const NewModel: FC = () => {
+export const NewGroup: FC = () => {
   const { data: session } = useSession({ required: true });
 
   const toast = useToast();
@@ -44,9 +37,7 @@ export const NewModel: FC = () => {
   const form = useForm<{
     slug: string | undefined;
   }>({
-    defaultValues: {
-      // don't pass `slug: ""` here, it will lead to form reset if a user started to type in a value before JS finished loading
-    },
+    defaultValues: {},
     mode: "onChange",
   });
 
@@ -55,7 +46,7 @@ export const NewModel: FC = () => {
   const router = useRouter();
 
   const [saveMutation, isSaveInFlight] =
-    useMutation<NewModelMutation>(Mutation);
+    useMutation<NewGroupMutation>(Mutation);
 
   const save = form.handleSubmit((data) => {
     const slug = data.slug;
@@ -66,22 +57,13 @@ export const NewModel: FC = () => {
     }
     saveMutation({
       variables: {
-        input: {
-          code: defaultCode,
-          slug,
-        },
+        input: { slug },
       },
       onCompleted(completion) {
         if (completion.result.__typename === "BaseError") {
           toast(completion.result.message, "error");
         } else {
-          //My guess is that there are more elegant ways of returning the slug, but I wasn't sure what was the best way to do it
-          const username = session?.user?.username;
-          if (username) {
-            router.push(modelRoute({ username, slug }));
-          } else {
-            router.push("/");
-          }
+          router.push(groupRoute({ slug }));
         }
       },
       onError(e) {
@@ -93,18 +75,18 @@ export const NewModel: FC = () => {
   return (
     <form onSubmit={save}>
       <FormProvider {...form}>
-        <H1>New Model</H1>
+        <H1>New Group</H1>
         <div className="mb-4">
           <TextFormField
             name="slug"
-            description="Must be alphanumerical, with no spaces. Example: my-long-model"
-            label="Model Name"
-            placeholder="my-model"
+            description="Must be alphanumerical, with no spaces. Example: abc-project"
+            label="Group Name"
+            placeholder="my-group"
             rules={{
               pattern: {
                 value: /^[\w-]+$/,
                 message:
-                  "Must be alphanumerical, with no spaces. Example: my-long-model",
+                  "Must be alphanumerical, with no spaces. Example: abc-project",
               },
               required: true,
             }}
@@ -115,7 +97,7 @@ export const NewModel: FC = () => {
           disabled={!form.formState.isValid || isSaveInFlight}
           theme="primary"
         >
-          Save
+          Create
         </Button>
       </FormProvider>
     </form>

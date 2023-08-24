@@ -1,7 +1,7 @@
 import { Session } from "next-auth";
 import { signIn, signOut } from "next-auth/react";
 import { FC } from "react";
-import { newDefinitionRoute } from "@/routes";
+import { newDefinitionRoute, newGroupRoute } from "@/routes";
 import Link from "next/link";
 import { IconProps } from "@/relative-values/components/ui/icons/Icon";
 
@@ -85,6 +85,12 @@ export const UserControls: FC<{ session: Session | null }> = ({ session }) => {
               href={newDefinitionRoute()}
               icon={ScaleIcon}
               title="New Relative Value Definition"
+              close={close}
+            />
+            <DropdownMenuLinkItem
+              href={newGroupRoute()}
+              icon={ScaleIcon}
+              title="New Group"
               close={close}
             />
           </DropdownMenu>

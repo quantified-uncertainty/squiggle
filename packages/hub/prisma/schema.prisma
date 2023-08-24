@@ -67,6 +67,7 @@ model User {
   sessions                  Session[]
   models                    Model[]
   relativeValuesDefinitions RelativeValuesDefinition[]
+  memberships               UserGroupMembership[]
 }
 
 model VerificationToken {
@@ -75,6 +76,37 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Group {
+  id String @id @default(cuid())
+
+  slug String @unique @db.Citext
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships UserGroupMembership[]
+}
+
+enum MembershipRole {
+  Admin
+  Member
+}
+
+model UserGroupMembership {
+  id String @id @default(cuid())
+
+  role MembershipRole
+
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  String
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId String
+
+  @@unique([userId, groupId])
+  @@index([userId])
+  @@index([groupId])
 }
 
 // Models are polymorphic.

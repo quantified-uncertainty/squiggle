@@ -111,12 +111,20 @@ export function userRoute({ username }: { username: string }) {
   return `/users/${username}`;
 }
 
+export function groupRoute({ slug }: { slug: string }) {
+  return `/groups/${slug}`;
+}
+
 export function newModelRoute() {
   return "/new/model";
 }
 
 export function newDefinitionRoute() {
   return "/new/definition";
+}
+
+export function newGroupRoute() {
+  return "/new/group";
 }
 
 export function graphqlAPIRoute() {
