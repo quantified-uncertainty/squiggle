@@ -2,6 +2,7 @@ import { prisma } from "@/prisma";
 import { builder } from "@/graphql/builder";
 
 import { Model } from "../types/Model";
+import { rethrowOnConstraint } from "../errors/common";
 
 builder.mutationField("createSquiggleSnippetModel", (t) =>
   t.fieldWithInput({
@@ -37,14 +38,21 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
         // nested create is not possible here;
         // similar problem is described here: https://github.com/prisma/prisma/discussions/14937,
         // seems to be caused by multiple Model -> ModelRevision relations
-        const model = await tx.model.create({
-          data: {
-            owner: {
-              connect: { email },
-            },
-            slug: input.slug,
-          },
-        });
+        const model = await rethrowOnConstraint(
+          () =>
+            tx.model.create({
+              data: {
+                owner: {
+                  connect: { email },
+                },
+                slug: input.slug,
+              },
+            }),
+          {
+            target: ["slug", "ownerId"],
+            error: `The model ${input.slug} already exists on this account`,
+          }
+        );
 
         const revision = await tx.modelRevision.create({
           data: {

@@ -3,6 +3,7 @@ import { prisma } from "@/prisma";
 
 import { InputObjectRef } from "@pothos/core";
 import { RelativeValuesDefinition } from "../types/RelativeValuesDefinition";
+import { rethrowOnConstraint } from "../errors/common";
 
 export const validateItemId = { regex: /^\w[\w\-]*$/ };
 const validateColor = { regex: /^#[0-9a-f]{6}$/ };
@@ -119,22 +120,29 @@ builder.mutationField("createRelativeValuesDefinition", (t) =>
       });
 
       const definition = await prisma.$transaction(async (tx) => {
-        const definition = await tx.relativeValuesDefinition.create({
-          data: {
-            owner: {
-              connect: { email: session.user.email },
-            },
-            slug: input.slug,
-            revisions: {
-              create: {
-                title: input.title,
-                items: input.items,
-                clusters: input.clusters,
-                recommendedUnit: input.recommendedUnit,
+        const definition = await rethrowOnConstraint(
+          () =>
+            tx.relativeValuesDefinition.create({
+              data: {
+                owner: {
+                  connect: { email: session.user.email },
+                },
+                slug: input.slug,
+                revisions: {
+                  create: {
+                    title: input.title,
+                    items: input.items,
+                    clusters: input.clusters,
+                    recommendedUnit: input.recommendedUnit,
+                  },
+                },
               },
-            },
-          },
-        });
+            }),
+          {
+            target: ["slug", "ownerId"],
+            error: `The definition ${input.slug} already exists on this account`,
+          }
+        );
 
         const revision = await tx.relativeValuesDefinitionRevision.create({
           data: {

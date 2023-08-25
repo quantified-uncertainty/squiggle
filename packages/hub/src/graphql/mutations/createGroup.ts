@@ -1,6 +1,8 @@
 import { prisma } from "@/prisma";
 import { builder } from "../builder";
 import { Group } from "../types/Group";
+import { Prisma } from "@prisma/client";
+import { rethrowOnConstraint } from "../errors/common";
 
 builder.mutationField("createGroup", (t) =>
   t.withAuth({ user: true }).fieldWithInput({
@@ -21,14 +23,21 @@ builder.mutationField("createGroup", (t) =>
         where: { email: session.user.email },
       });
 
-      const group = await prisma.group.create({
-        data: {
-          slug: input.slug,
-          memberships: {
-            create: [{ userId: user.id, role: "Admin" }],
-          },
-        },
-      });
+      const group = await rethrowOnConstraint(
+        () =>
+          prisma.group.create({
+            data: {
+              slug: input.slug,
+              memberships: {
+                create: [{ userId: user.id, role: "Admin" }],
+              },
+            },
+          }),
+        {
+          target: ["slug"],
+          error: `The group ${input.slug} already exists`,
+        }
+      );
 
       return { group };
     },
