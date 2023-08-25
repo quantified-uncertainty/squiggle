@@ -5,6 +5,7 @@ import "./errors/NotFoundError";
 
 import "./queries/globalStatistics";
 import "./queries/group";
+import "./queries/groups";
 import "./queries/me";
 import "./queries/model";
 import "./queries/models";

@@ -16,6 +16,7 @@ import {
   SignOutIcon,
   UserCircleIcon,
   ScaleIcon,
+  GroupIcon,
 } from "@quri/ui";
 
 import { chooseUsernameRoute, userRoute } from "@/routes";
@@ -89,7 +90,7 @@ export const UserControls: FC<{ session: Session | null }> = ({ session }) => {
             />
             <DropdownMenuLinkItem
               href={newGroupRoute()}
-              icon={ScaleIcon}
+              icon={GroupIcon}
               title="New Group"
               close={close}
             />

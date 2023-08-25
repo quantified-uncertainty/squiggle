@@ -78,6 +78,7 @@ export {
   ClipboardCopyIcon,
   GlobeIcon,
   LockIcon,
+  GroupIcon,
 } from "./icons/HeroIcons.js";
 
 export { useToast, WithToasts } from "./components/WithToasts/index.js";

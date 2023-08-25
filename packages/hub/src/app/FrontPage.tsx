@@ -12,11 +12,13 @@ import { FrontPageModelList } from "./FrontPageModelList";
 import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
 import { useSerializablePreloadedQuery } from "@/relay/useSerializablePreloadedQuery";
 import { StyledTab } from "@quri/ui";
+import { FrontPageGroupList } from "./FrontPageGroupList";
 
 const Query = graphql`
   query FrontPageQuery {
     ...FrontPageModelList
     ...FrontPageDefinitionList
+    ...FrontPageGroupList
   }
 `;
 
@@ -32,14 +34,18 @@ export const FrontPage: FC<{
         <StyledTab.List>
           <StyledTab name="Models" />
           <StyledTab name="Definitions" />
+          <StyledTab name="Groups" />
         </StyledTab.List>
         <div className="mt-4">
           <StyledTab.Panels>
             <StyledTab.Panel>
-              {<FrontPageModelList dataRef={data} />}
+              <FrontPageModelList dataRef={data} />
             </StyledTab.Panel>
             <StyledTab.Panel>
-              {<FrontPageDefinitionList dataRef={data} />}
+              <FrontPageDefinitionList dataRef={data} />
+            </StyledTab.Panel>
+            <StyledTab.Panel>
+              <FrontPageGroupList dataRef={data} />
             </StyledTab.Panel>
           </StyledTab.Panels>
         </div>

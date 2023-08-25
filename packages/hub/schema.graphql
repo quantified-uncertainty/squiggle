@@ -52,6 +52,16 @@ type Group implements Node {
   updatedAtTimestamp: Float!
 }
 
+type GroupConnection {
+  edges: [GroupEdge!]!
+  pageInfo: PageInfo!
+}
+
+type GroupEdge {
+  cursor: String!
+  node: Group!
+}
+
 type Me {
   email: String
   username: String
@@ -231,6 +241,7 @@ type PageInfo {
 type Query {
   globalStatistics: GlobalStatistics!
   group(slug: String!): QueryGroupResult!
+  groups(after: String, before: String, first: Int, last: Int): GroupConnection!
   me: Me!
   model(input: QueryModelInput!): QueryModelResult!
   models(after: String, before: String, first: Int, last: Int): ModelConnection!

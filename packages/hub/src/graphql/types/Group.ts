@@ -12,3 +12,8 @@ export const Group = builder.prismaNode("Group", {
     }),
   }),
 });
+
+export const GroupConnection = builder.connectionObject({
+  type: Group,
+  name: "GroupConnection",
+});

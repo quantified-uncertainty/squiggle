@@ -2,11 +2,12 @@ import { FC } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
+import { CodeBracketIcon, ScaleIcon } from "@quri/ui";
+
 import { ModelCard$key } from "@/__generated__/ModelCard.graphql";
-import { StyledLink } from "@/components/ui/StyledLink";
-import { modelRoute, modelForRelativeValuesExportRoute } from "@/routes";
-import { CodeBracketIcon, LinkIcon, ScaleIcon } from "@quri/ui";
 import { EntityCard } from "@/components/EntityCard";
+import { StyledLink } from "@/components/ui/StyledLink";
+import { modelForRelativeValuesExportRoute, modelRoute } from "@/routes";
 
 const Fragment = graphql`
   fragment ModelCard on Model {
