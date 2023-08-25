@@ -5,12 +5,12 @@ import { FC } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { graphql } from "relay-runtime";
 
-import { Button, TextFormField, useToast } from "@quri/ui";
+import { Button, useToast } from "@quri/ui";
 
 import { NewGroupMutation } from "@/__generated__/NewGroupMutation.graphql";
 import { H1 } from "@/components/ui/Headers";
+import { SlugFormField } from "@/components/ui/SlugFormField";
 import { useAsyncMutation } from "@/hooks/useAsyncMutation";
-import { useDashifyFormField } from "@/hooks/useDashifyFormField";
 import { groupRoute } from "@/routes";
 
 const Mutation = graphql`
@@ -31,18 +31,18 @@ const Mutation = graphql`
 `;
 
 export const NewGroup: FC = () => {
-  const { data: session } = useSession({ required: true });
+  useSession({ required: true });
 
   const toast = useToast();
 
-  const form = useForm<{
+  type FormShape = {
     slug: string | undefined;
-  }>({
+  };
+
+  const form = useForm<FormShape>({
     defaultValues: {},
     mode: "onChange",
   });
-
-  useDashifyFormField(form, "slug");
 
   const router = useRouter();
 
@@ -74,19 +74,11 @@ export const NewGroup: FC = () => {
       <FormProvider {...form}>
         <H1>New Group</H1>
         <div className="mb-4">
-          <TextFormField
+          <SlugFormField<FormShape>
             name="slug"
-            description="Must be alphanumerical, with no spaces. Example: abc-project"
+            example="abc-project"
             label="Group Name"
             placeholder="my-group"
-            rules={{
-              pattern: {
-                value: /^[\w-]+$/,
-                message:
-                  "Must be alphanumerical, with no spaces. Example: abc-project",
-              },
-              required: true,
-            }}
           />
         </div>
         <Button
