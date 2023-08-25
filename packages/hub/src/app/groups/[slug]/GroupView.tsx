@@ -10,6 +10,7 @@ import { useSerializablePreloadedQuery } from "@/relay/useSerializablePreloadedQ
 import QueryNode, {
   GroupViewQuery,
 } from "@/__generated__/GroupViewQuery.graphql";
+import { GroupIcon } from "@quri/ui";
 
 const Query = graphql`
   query GroupViewQuery($slug: String!) {
@@ -39,7 +40,12 @@ export const GroupView: FC<{
 
   return (
     <div>
-      <H1 size="large">{group.slug}</H1>
+      <H1 size="large">
+        <div className="flex items-center">
+          <GroupIcon className="opacity-50 mr-2" />
+          {group.slug}
+        </div>
+      </H1>
     </div>
   );
 };

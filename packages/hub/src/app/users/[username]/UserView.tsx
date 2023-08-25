@@ -52,15 +52,13 @@ export const UserView: FC<{
       <div className="space-y-8">
         <section>
           <h2 className="mt-1 mb-2 text-gray-600 text-lg font-semibold">
-            {" "}
-            Models{" "}
+            Models
           </h2>
           <UserModelList dataRef={user} />
         </section>
         <section>
-          <h2 className="mt-1 mb-2 text-gray-700 text-lg font-semibold">
-            {" "}
-            Relative Value Definitions{" "}
+          <h2 className="mt-1 mb-2 text-gray-600 text-lg font-semibold">
+            Relative Value Definitions
           </h2>
           <UserDefinitionList dataRef={user} />
         </section>
