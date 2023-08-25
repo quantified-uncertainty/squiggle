@@ -43,13 +43,12 @@ export const ClearRelativeValuesCacheAction: FC<{
       expectedTypename: "ClearRelativeValuesCacheResult",
     });
 
-  const act = async () => {
-    await runMutation({
+  const act = () =>
+    runMutation({
       variables: {
         input: { exportId },
       },
     });
-  };
 
   return (
     <DropdownMenuAsyncActionItem

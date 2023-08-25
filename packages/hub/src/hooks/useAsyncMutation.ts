@@ -6,7 +6,13 @@ import {
   MutationParameters,
   VariablesOf,
 } from "relay-runtime";
+import { useState } from "react";
 
+/**
+ * Like the basic `useMutation`, this function returns a `[runMutation, isMutationInFlight]` pair.
+ * But unlike `useMutation`, returned `runMutation` is async and has more convenient `onCompleted` callback.
+ * Also, all errors will be displayed as notifications automatically.
+ */
 export function useAsyncMutation<
   TMutation extends MutationParameters & {
     response: {
@@ -16,29 +22,41 @@ export function useAsyncMutation<
             readonly message: string;
           }
         | {
-            readonly __typename: string;
+            readonly __typename: TTypename;
+          }
+        | {
+            readonly __typename: "%other";
           };
     };
-  }
+  },
+  TTypename extends string = string
 >({
   mutation,
   confirmation,
   expectedTypename,
+  blockOnSuccess,
 }: {
   mutation: GraphQLTaggedNode;
   confirmation?: string;
-  expectedTypename: string;
+  expectedTypename: TTypename;
+  blockOnSuccess?: boolean; // mark mutation as in flight on success; useful if `onCompleted` callback does `router.push`
 }) {
   const toast = useToast();
 
-  const [runMutation] = useMutation<TMutation>(mutation);
+  const [runMutation, inFlight] = useMutation<TMutation>(mutation);
+  const [wasCompleted, setWasCompleted] = useState(false);
+
+  type OkResult = Extract<
+    TMutation["response"]["result"],
+    { __typename: TTypename }
+  >;
 
   const act = ({
     variables,
     onCompleted,
   }: {
     variables: VariablesOf<TMutation>;
-    onCompleted?: () => void; // TODO - pass response
+    onCompleted?: (okResult: OkResult) => void; // TODO - pass response
   }): Promise<void> => {
     return new Promise((resolve, reject) => {
       runMutation({
@@ -48,7 +66,8 @@ export function useAsyncMutation<
             if (confirmation !== undefined) {
               toast(confirmation, "confirmation");
             }
-            onCompleted?.();
+            setWasCompleted(true);
+            onCompleted?.(response.result as OkResult);
             resolve();
           } else if (response.result.__typename === "BaseError") {
             toast(
@@ -71,5 +90,5 @@ export function useAsyncMutation<
     });
   };
 
-  return [act];
+  return [act, inFlight || Boolean(blockOnSuccess && wasCompleted)] as const;
 }

@@ -3,14 +3,15 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { Button, TextFormField, useToast } from "@quri/ui";
 
 import { NewGroupMutation } from "@/__generated__/NewGroupMutation.graphql";
 import { H1 } from "@/components/ui/Headers";
+import { useAsyncMutation } from "@/hooks/useAsyncMutation";
 import { useDashifyFormField } from "@/hooks/useDashifyFormField";
+import { groupRoute } from "@/routes";
 
 const Mutation = graphql`
   mutation NewGroupMutation($input: MutationCreateGroupInput!) {
@@ -45,29 +46,25 @@ export const NewGroup: FC = () => {
 
   const router = useRouter();
 
-  const [saveMutation, isSaveInFlight] =
-    useMutation<NewGroupMutation>(Mutation);
+  const [saveMutation, isSaveInFlight] = useAsyncMutation<NewGroupMutation>({
+    mutation: Mutation,
+    expectedTypename: "CreateGroupResult",
+    blockOnSuccess: true,
+  });
 
-  const save = form.handleSubmit((data) => {
+  const save = form.handleSubmit(async (data) => {
     const slug = data.slug;
     if (!slug) {
       // shouldn't happen but satisfies Typescript
       toast("Slug is undefined", "error");
       return;
     }
-    saveMutation({
+    await saveMutation({
       variables: {
         input: { slug },
       },
-      onCompleted(completion) {
-        if (completion.result.__typename === "BaseError") {
-          toast(completion.result.message, "error");
-        } else {
-          router.push(groupRoute({ slug }));
-        }
-      },
-      onError(e) {
-        toast(e.toString(), "error");
+      onCompleted() {
+        router.push(groupRoute({ slug }));
       },
     });
   });

@@ -40,10 +40,11 @@ export const NewDefinition: FC = () => {
     mutation: Mutation,
     expectedTypename: "CreateRelativeValuesDefinitionResult",
     confirmation: "Definition created",
+    blockOnSuccess: true,
   });
 
-  const save = (data: RelativeValuesDefinitionFormShape) => {
-    runMutation({
+  const save = async (data: RelativeValuesDefinitionFormShape) => {
+    await runMutation({
       variables: {
         input: {
           slug: data.slug,

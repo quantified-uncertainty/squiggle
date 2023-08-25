@@ -2,34 +2,27 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
-import {
-  graphql,
-  useFragment,
-  useMutation,
-  usePreloadedQuery,
-} from "react-relay";
+import { graphql, useFragment, usePreloadedQuery } from "react-relay";
 
-import { useToast } from "@quri/ui";
-
+import { EditRelativeValuesDefinitionMutation } from "@/__generated__/EditRelativeValuesDefinitionMutation.graphql";
+import { RelativeValuesDefinitionPage$key } from "@/__generated__/RelativeValuesDefinitionPage.graphql";
+import QueryNode, {
+  RelativeValuesDefinitionPageQuery as QueryType,
+} from "@/__generated__/RelativeValuesDefinitionPageQuery.graphql";
+import { RelativeValuesDefinitionRevision$key } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
+import { useAsyncMutation } from "@/hooks/useAsyncMutation";
+import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import {
   RelativeValuesDefinitionForm,
   RelativeValuesDefinitionFormShape,
 } from "@/relative-values/components/RelativeValuesDefinitionForm";
 import { RelativeValuesDefinitionRevisionFragment } from "@/relative-values/components/RelativeValuesDefinitionRevision";
+import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
+import { useSerializablePreloadedQuery } from "@/relay/useSerializablePreloadedQuery";
 import {
   RelativeValuesDefinitionPageFragment,
   RelativeValuesDefinitionPageQuery,
 } from "../RelativeValuesDefinitionPage";
-
-import { EditRelativeValuesDefinitionMutation } from "@/__generated__/EditRelativeValuesDefinitionMutation.graphql";
-import QueryNode, {
-  RelativeValuesDefinitionPageQuery as QueryType,
-} from "@/__generated__/RelativeValuesDefinitionPageQuery.graphql";
-import { RelativeValuesDefinitionRevision$key } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
-import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
-import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
-import { useSerializablePreloadedQuery } from "@/relay/useSerializablePreloadedQuery";
-import { RelativeValuesDefinitionPage$key } from "@/__generated__/RelativeValuesDefinitionPage.graphql";
 
 const Mutation = graphql`
   mutation EditRelativeValuesDefinitionMutation(
@@ -65,8 +58,6 @@ export const EditRelativeValuesDefinition: FC<{
     "RelativeValuesDefinition"
   );
 
-  const toast = useToast();
-
   const router = useRouter();
 
   const definition = useFragment<RelativeValuesDefinitionPage$key>(
@@ -78,11 +69,15 @@ export const EditRelativeValuesDefinition: FC<{
     definition.currentRevision
   );
 
-  const [saveMutation, isSaveInFlight] =
-    useMutation<EditRelativeValuesDefinitionMutation>(Mutation);
+  const [saveMutation] = useAsyncMutation<EditRelativeValuesDefinitionMutation>(
+    {
+      mutation: Mutation,
+      expectedTypename: "UpdateRelativeValuesDefinitionResult",
+    }
+  );
 
-  const save = (data: RelativeValuesDefinitionFormShape) => {
-    saveMutation({
+  const save = async (data: RelativeValuesDefinitionFormShape) => {
+    await saveMutation({
       variables: {
         input: {
           slug: definition.slug,
@@ -93,16 +88,9 @@ export const EditRelativeValuesDefinition: FC<{
           recommendedUnit: data.recommendedUnit,
         },
       },
-      onCompleted(data) {
-        if (data.result.__typename === "BaseError") {
-          toast(data.result.message, "error");
-        } else {
-          // TODO - go to definition page instead?
-          router.push("/");
-        }
-      },
-      onError(e) {
-        toast(e.toString(), "error");
+      onCompleted() {
+        // TODO - go to definition page instead?
+        router.push("/");
       },
     });
   };

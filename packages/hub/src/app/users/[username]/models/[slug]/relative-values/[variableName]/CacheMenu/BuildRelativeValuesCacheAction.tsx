@@ -43,9 +43,7 @@ export const BuildRelativeValuesCacheAction: FC<{
       expectedTypename: "BuildRelativeValuesCacheResult",
     });
 
-  const act = async () => {
-    await runMutation({ variables: { input: { exportId } } });
-  };
+  const act = () => runMutation({ variables: { input: { exportId } } });
 
   return (
     <DropdownMenuAsyncActionItem

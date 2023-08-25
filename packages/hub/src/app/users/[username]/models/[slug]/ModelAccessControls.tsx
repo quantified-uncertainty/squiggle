@@ -60,8 +60,8 @@ export const UpdateModelPrivacyAction: FC<{
     expectedTypename: "UpdateModelPrivacyResult",
   });
 
-  const act = async () => {
-    await runMutation({
+  const act = () =>
+    runMutation({
       variables: {
         input: {
           username: model.owner.username,
@@ -70,7 +70,6 @@ export const UpdateModelPrivacyAction: FC<{
         },
       },
     });
-  };
 
   return (
     <DropdownMenuAsyncActionItem

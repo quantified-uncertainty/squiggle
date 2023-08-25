@@ -12,6 +12,7 @@ import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
 import { H1 } from "@/components/ui/Headers";
 import { modelRoute } from "@/routes";
 import { useDashifyFormField } from "@/hooks/useDashifyFormField";
+import { useAsyncMutation } from "@/hooks/useAsyncMutation";
 
 const Mutation = graphql`
   mutation NewModelMutation($input: MutationCreateSquiggleSnippetModelInput!) {
@@ -23,6 +24,7 @@ const Mutation = graphql`
       ... on CreateSquiggleSnippetResult {
         model {
           id
+          slug
         }
       }
     }
@@ -36,14 +38,14 @@ Describe your code here
 a = normal(2, 5)
 `;
 
+type FormShape = {
+  slug: string | undefined;
+};
+
 export const NewModel: FC = () => {
   const { data: session } = useSession({ required: true });
 
-  const toast = useToast();
-
-  const form = useForm<{
-    slug: string | undefined;
-  }>({
+  const form = useForm<FormShape>({
     defaultValues: {
       // don't pass `slug: ""` here, it will lead to form reset if a user started to type in a value before JS finished loading
     },
@@ -54,38 +56,30 @@ export const NewModel: FC = () => {
 
   const router = useRouter();
 
-  const [saveMutation, isSaveInFlight] =
-    useMutation<NewModelMutation>(Mutation);
+  const [runMutation, inFlight] = useAsyncMutation<
+    NewModelMutation,
+    "CreateSquiggleSnippetResult"
+  >({
+    mutation: Mutation,
+    expectedTypename: "CreateSquiggleSnippetResult",
+    blockOnSuccess: true,
+  });
 
-  const save = form.handleSubmit((data) => {
-    const slug = data.slug;
-    if (!slug) {
-      // shouldn't happen but satisfies Typescript
-      toast("Slug is undefined", "error");
-      return;
-    }
-    saveMutation({
+  const save = form.handleSubmit(async (data) => {
+    await runMutation({
       variables: {
         input: {
+          slug: data.slug ?? "", // shouldn't happen but satisfies Typescript
           code: defaultCode,
-          slug,
         },
       },
-      onCompleted(completion) {
-        if (completion.result.__typename === "BaseError") {
-          toast(completion.result.message, "error");
+      onCompleted: (result) => {
+        const username = session?.user?.username;
+        if (username) {
+          router.push(modelRoute({ username, slug: result.model.slug }));
         } else {
-          //My guess is that there are more elegant ways of returning the slug, but I wasn't sure what was the best way to do it
-          const username = session?.user?.username;
-          if (username) {
-            router.push(modelRoute({ username, slug }));
-          } else {
-            router.push("/");
-          }
+          router.push("/");
         }
-      },
-      onError(e) {
-        toast(e.toString(), "error");
       },
     });
   });
@@ -112,10 +106,10 @@ export const NewModel: FC = () => {
         </div>
         <Button
           onClick={save}
-          disabled={!form.formState.isValid || isSaveInFlight}
+          disabled={!form.formState.isValid || inFlight}
           theme="primary"
         >
-          Save
+          Create
         </Button>
       </FormProvider>
     </form>

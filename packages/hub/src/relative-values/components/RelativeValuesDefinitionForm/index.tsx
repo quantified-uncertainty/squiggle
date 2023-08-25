@@ -255,7 +255,7 @@ const HTMLForm: FC = () => {
 type Props = {
   defaultValues?: RelativeValuesDefinitionFormShape;
   withoutSlug?: boolean;
-  save: (data: RelativeValuesDefinitionFormShape) => void;
+  save: (data: RelativeValuesDefinitionFormShape) => Promise<void>;
 };
 
 export const RelativeValuesDefinitionForm: FC<Props> = ({
@@ -265,8 +265,8 @@ export const RelativeValuesDefinitionForm: FC<Props> = ({
 }) => {
   const form = useForm<RelativeValuesDefinitionFormShape>({ defaultValues });
 
-  const onSubmit = form.handleSubmit((data) => {
-    save(data);
+  const onSubmit = form.handleSubmit(async (data) => {
+    await save(data);
   });
 
   return (
