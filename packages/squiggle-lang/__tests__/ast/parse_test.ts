@@ -45,8 +45,8 @@ describe("Peggy parse", () => {
   });
 
   describe("units", () => {
-    testEvalToBe("100%", "1")
-    testEvalToBe("1-0%", "1")
+    testEvalToBe("100%", "1");
+    testEvalToBe("1-0%", "1");
   });
 
   describe("literals operators parenthesis", () => {
