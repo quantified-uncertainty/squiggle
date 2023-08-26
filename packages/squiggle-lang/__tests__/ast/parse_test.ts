@@ -44,6 +44,11 @@ describe("Peggy parse", () => {
     testParse("100e-2-5", "(Program (InfixCall - 100e-2 5))");
   });
 
+  describe("units", () => {
+    testEvalToBe("100%", "1")
+    testEvalToBe("1-0%", "1")
+  });
+
   describe("literals operators parenthesis", () => {
     testParse("{a}", "(Program (Block :a))");
     testParse("1", "(Program 1)");
