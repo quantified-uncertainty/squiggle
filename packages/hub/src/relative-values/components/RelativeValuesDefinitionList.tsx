@@ -3,10 +3,9 @@
 import { FC } from "react";
 import { graphql, useFragment } from "react-relay";
 
-import { Button } from "@quri/ui";
-
-import { RelativeValuesDefinitionCard } from "./RelativeValuesDefinitionCard";
 import { RelativeValuesDefinitionList$key } from "@/__generated__/RelativeValuesDefinitionList.graphql";
+import { LoadMore } from "@/components/LoadMore";
+import { RelativeValuesDefinitionCard } from "./RelativeValuesDefinitionCard";
 
 const Fragment = graphql`
   fragment RelativeValuesDefinitionList on RelativeValuesDefinitionConnection {
@@ -46,11 +45,7 @@ export const RelativeValuesDefinitionList: FC<Props> = ({
           />
         ))}
       </div>
-      {connection.pageInfo.hasNextPage && (
-        <div className="mt-4">
-          <Button onClick={() => loadNext(20)}>Load more</Button>
-        </div>
-      )}
+      {connection.pageInfo.hasNextPage && <LoadMore loadNext={loadNext} />}
     </div>
   );
 };

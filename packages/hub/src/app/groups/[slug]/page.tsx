@@ -2,24 +2,24 @@ import { Metadata } from "next";
 
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 import { loadSerializableQuery } from "@/relay/loadSerializableQuery";
-import { GroupView } from "./GroupView";
+import { GroupPage } from "./GroupPage";
 import QueryNode, {
-  GroupViewQuery,
-} from "@/__generated__/GroupViewQuery.graphql";
+  GroupPageQuery,
+} from "@/__generated__/GroupPageQuery.graphql";
 
 type Props = {
   params: { slug: string };
 };
 
-export default async function GroupPage({ params }: Props) {
-  const query = await loadSerializableQuery<typeof QueryNode, GroupViewQuery>(
+export default async function OuterGroupPage({ params }: Props) {
+  const query = await loadSerializableQuery<typeof QueryNode, GroupPageQuery>(
     QueryNode.params,
     { slug: params.slug }
   );
 
   return (
     <NarrowPageLayout>
-      <GroupView query={query} />
+      <GroupPage query={query} />
     </NarrowPageLayout>
   );
 }

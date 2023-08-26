@@ -4,9 +4,8 @@ import { FC } from "react";
 import { usePaginationFragment, usePreloadedQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { Button } from "@quri/ui";
-
 import { ModelRevisionsList$key } from "@/__generated__/ModelRevisionsList.graphql";
+import { LoadMore } from "@/components/LoadMore";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { commonDateFormat } from "@/lib/common";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
@@ -85,10 +84,8 @@ export const ModelRevisionsList: FC<{
             </StyledLink>
           </div>
         ))}
-        {model.revisions.pageInfo.hasNextPage && (
-          <Button onClick={() => loadNext(20)}>Load more</Button>
-        )}
       </div>
+      {model.revisions.pageInfo.hasNextPage && <LoadMore loadNext={loadNext} />}
     </div>
   );
 };

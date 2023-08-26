@@ -1,5 +1,4 @@
 "use client";
-
 import { FC } from "react";
 import { graphql, usePaginationFragment } from "react-relay";
 

@@ -3,17 +3,19 @@ import { FC } from "react";
 import { usePreloadedQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
+import { GroupIcon } from "@quri/ui";
+
+import QueryNode, {
+  GroupPageQuery,
+} from "@/__generated__/GroupPageQuery.graphql";
 import { H1 } from "@/components/ui/Headers";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
 import { useSerializablePreloadedQuery } from "@/relay/useSerializablePreloadedQuery";
-import QueryNode, {
-  GroupViewQuery,
-} from "@/__generated__/GroupViewQuery.graphql";
-import { GroupIcon } from "@quri/ui";
+import { GroupMemberList } from "./GroupMemberList";
 
 const Query = graphql`
-  query GroupViewQuery($slug: String!) {
+  query GroupPageQuery($slug: String!) {
     result: group(slug: $slug) {
       __typename
       ... on BaseError {
@@ -25,13 +27,14 @@ const Query = graphql`
       ... on Group {
         id
         slug
+        ...GroupMemberList
       }
     }
   }
 `;
 
-export const GroupView: FC<{
-  query: SerializablePreloadedQuery<typeof QueryNode, GroupViewQuery>;
+export const GroupPage: FC<{
+  query: SerializablePreloadedQuery<typeof QueryNode, GroupPageQuery>;
 }> = ({ query }) => {
   const queryRef = useSerializablePreloadedQuery(query);
   const { result } = usePreloadedQuery(Query, queryRef);
@@ -46,6 +49,7 @@ export const GroupView: FC<{
           {group.slug}
         </div>
       </H1>
+      <GroupMemberList groupRef={group} />
     </div>
   );
 };

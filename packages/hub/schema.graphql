@@ -48,6 +48,7 @@ type GlobalStatistics {
 type Group implements Node {
   createdAtTimestamp: Float!
   id: ID!
+  members(after: String, before: String, first: Int, last: Int): GroupMembersConnection!
   slug: String!
   updatedAtTimestamp: Float!
 }
@@ -62,9 +63,26 @@ type GroupEdge {
   node: Group!
 }
 
+type GroupMembersConnection {
+  edges: [GroupMembersConnectionEdge!]!
+  pageInfo: PageInfo!
+}
+
+type GroupMembersConnectionEdge {
+  cursor: String!
+  id: ID!
+  node: User!
+  role: MembershipRole!
+}
+
 type Me {
   email: String
   username: String
+}
+
+enum MembershipRole {
+  Admin
+  Member
 }
 
 type Model implements Node {

@@ -1,10 +1,9 @@
 "use client";
-
 import { FC } from "react";
 import { graphql, useFragment } from "react-relay";
 
-import { Button } from "@quri/ui";
 import { GroupList$key } from "@/__generated__/GroupList.graphql";
+import { LoadMore } from "@/components/LoadMore";
 import { GroupCard } from "./GroupCard";
 
 const Fragment = graphql`
@@ -36,11 +35,7 @@ export const GroupList: FC<Props> = ({ connectionRef, loadNext }) => {
           <GroupCard key={edge.node.id} groupRef={edge.node} />
         ))}
       </div>
-      {connection.pageInfo.hasNextPage && (
-        <div className="mt-4">
-          <Button onClick={() => loadNext(20)}>Load more</Button>
-        </div>
-      )}
+      {connection.pageInfo.hasNextPage && <LoadMore loadNext={loadNext} />}
     </div>
   );
 };
