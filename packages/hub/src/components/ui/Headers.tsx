@@ -22,7 +22,7 @@ export const H2: FC<Props> = ({ children, size = "normal" }) => {
   return (
     <h2
       className={clsx(
-        size === "normal" && "text-lg font-bold mb-2",
+        size === "normal" && "text-lg text-gray-600 font-semibold mb-2",
         size === "large" && "text-xl font-bold mb-4"
       )}
     >
