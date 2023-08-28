@@ -15,6 +15,7 @@ const makeUnitFn = (name: string, multiplier: number) => {
 export const library = [
   makeUnitFn("n", 1e-9),
   makeUnitFn("m", 1e-3),
+  makeUnitFn("%", 1e-2),
   makeUnitFn("k", 1e3),
   makeUnitFn("M", 1e6),
   makeUnitFn("B", 1e9),
