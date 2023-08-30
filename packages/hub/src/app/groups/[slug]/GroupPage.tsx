@@ -1,20 +1,22 @@
 "use client";
-import { FC, ReactNode } from "react";
+import { FC } from "react";
 import { usePreloadedQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { DropdownMenu, DropdownMenuActionItem, GroupIcon } from "@quri/ui";
+import { DropdownMenu, GroupIcon } from "@quri/ui";
 
 import QueryNode, {
   GroupPageQuery,
 } from "@/__generated__/GroupPageQuery.graphql";
+import { DotsDropdown } from "@/components/ui/DotsDropdown";
 import { H1, H2 } from "@/components/ui/Headers";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
 import { useSerializablePreloadedQuery } from "@/relay/useSerializablePreloadedQuery";
 import { GroupMemberList } from "./GroupMemberList";
-import { DotsDropdownButton } from "@/components/ui/DotsDropdownButton";
-import { DotsDropdown } from "@/components/ui/DotsDropdown";
+import { InviteUserToGroupAction } from "./InviteUserToGroupAction";
+import { GroupInviteList } from "./GroupInviteList";
+import { useIsGroupAdmin } from "./hooks";
 
 const Query = graphql`
   query GroupPageQuery($slug: String!) {
@@ -30,10 +32,8 @@ const Query = graphql`
         id
         slug
         ...GroupMemberList
-        myMembership {
-          id
-          role
-        }
+        ...GroupInviteList
+        ...hooks_useIsGroupAdmin
       }
     }
   }
@@ -47,6 +47,8 @@ export const GroupPage: FC<{
 
   const group = extractFromGraphqlErrorUnion(result, "Group");
 
+  const isAdmin = useIsGroupAdmin(group);
+
   return (
     <div className="space-y-8">
       <H1 size="large">
@@ -58,22 +60,24 @@ export const GroupPage: FC<{
       <section>
         <div className="flex justify-between">
           <H2>Members</H2>
-          {group.myMembership?.role === "Admin" ? (
+          {isAdmin && (
             <DotsDropdown>
-              {() => (
+              {({ close }) => (
                 <DropdownMenu>
-                  <DropdownMenuActionItem
-                    title="Add member"
-                    onClick={function (): void {
-                      throw new Error("Function not implemented.");
-                    }}
+                  <InviteUserToGroupAction
+                    groupSlug={group.slug}
+                    close={close}
                   />
                 </DropdownMenu>
               )}
             </DotsDropdown>
-          ) : null}
+          )}
         </div>
         <GroupMemberList groupRef={group} />
+      </section>
+      <section>
+        <H2>Pending invites</H2>
+        <GroupInviteList groupRef={group} />
       </section>
     </div>
   );

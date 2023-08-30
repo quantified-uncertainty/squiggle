@@ -68,6 +68,7 @@ model User {
   models                    Model[]
   relativeValuesDefinitions RelativeValuesDefinition[]
   memberships               UserGroupMembership[]
+  invites                   GroupInvite[]
 }
 
 model VerificationToken {
@@ -87,6 +88,7 @@ model Group {
   updatedAt DateTime @updatedAt
 
   memberships UserGroupMembership[]
+  invites     GroupInvite[]
 }
 
 enum MembershipRole {
@@ -110,6 +112,37 @@ model UserGroupMembership {
   @@unique([userId, groupId])
   @@index([userId])
   @@index([groupId])
+}
+
+enum GroupInviteStatus {
+  Pending
+  Accepted
+  Declined
+  Canceled
+}
+
+model GroupInvite {
+  id String @id @default(cuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Polymorphic, one and only one of `userId` and `email` must be set; type safety guaranteed by GraphQL code.
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String?
+
+  email String?
+
+  role MembershipRole
+
+  status      GroupInviteStatus @default(Pending)
+  processedAt DateTime?
+
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId String
+
+  @@index([groupId])
+  @@index([userId])
 }
 
 // Models are polymorphic.

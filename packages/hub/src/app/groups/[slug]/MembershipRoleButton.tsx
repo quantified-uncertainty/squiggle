@@ -23,11 +23,11 @@ const Fragment = graphql`
 
 type Props = {
   membershipRef: MembershipRoleButton$key;
-  groupId: string;
 };
 
-export const MembershipRoleButton: FC<Props> = ({ membershipRef, groupId }) => {
+export const MembershipRoleButton: FC<Props> = ({ membershipRef }) => {
   const membership = useFragment(Fragment, membershipRef);
+
   return (
     <Dropdown
       render={() => (

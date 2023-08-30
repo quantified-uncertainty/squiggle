@@ -16,6 +16,12 @@ const Mutation = graphql`
       ... on BaseError {
         message
       }
+      ... on UpdateMembershipRoleResult {
+        membership {
+          id
+          role
+        }
+      }
     }
   }
 `;
@@ -47,11 +53,6 @@ export const SetMembershipRoleAction: FC<Props> = ({
     });
 
   return (
-    <DropdownMenuAsyncActionItem
-      title={role}
-      icon={RefreshIcon}
-      onClick={act}
-      close={close}
-    />
+    <DropdownMenuAsyncActionItem title={role} onClick={act} close={close} />
   );
 };

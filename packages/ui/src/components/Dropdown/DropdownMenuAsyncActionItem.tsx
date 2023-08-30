@@ -4,7 +4,7 @@ import { IconProps } from "../../icons/Icon.js";
 import { ActionItemInternal } from "./DropdownMenuActionItemInternal.js";
 
 type AsyncActionItemProps = {
-  icon: FC<IconProps>;
+  icon?: FC<IconProps>;
   title: string;
   onClick(): Promise<void>;
   close(): void;

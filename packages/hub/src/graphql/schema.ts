@@ -28,5 +28,8 @@ import "./mutations/updateModelSlug";
 import "./mutations/updateRelativeValuesDefinition";
 import "./mutations/updateSquiggleSnippetModel";
 import "./mutations/updateMembershipRole";
+import "./mutations/updateGroupInviteRole";
+import "./mutations/inviteUserToGroup";
+import "./mutations/cancelGroupInvite";
 
 export const schema = builder.toSchema();

@@ -6,6 +6,10 @@ type BuildRelativeValuesCacheResult {
   relativeValuesExport: RelativeValuesExport!
 }
 
+type CancelGroupInviteResult {
+  invite: GroupInvite!
+}
+
 type ClearRelativeValuesCacheResult {
   relativeValuesExport: RelativeValuesExport!
 }
@@ -35,6 +39,13 @@ type DeleteRelativeValuesDefinitionResult {
   ok: Boolean!
 }
 
+type EmailGroupInvite implements GroupInvite & Node {
+  email: String!
+  group: Group!
+  id: ID!
+  role: MembershipRole!
+}
+
 interface Error {
   message: String!
 }
@@ -48,6 +59,7 @@ type GlobalStatistics {
 type Group implements Node {
   createdAtTimestamp: Float!
   id: ID!
+  invites(after: String, before: String, first: Int, last: Int): GroupInviteConnection!
   memberships(after: String, before: String, first: Int, last: Int): UserGroupMembershipConnection!
   myMembership: UserGroupMembership
   slug: String!
@@ -62,6 +74,26 @@ type GroupConnection {
 type GroupEdge {
   cursor: String!
   node: Group!
+}
+
+interface GroupInvite {
+  group: Group!
+  id: ID!
+  role: MembershipRole!
+}
+
+type GroupInviteConnection {
+  edges: [GroupInviteEdge!]!
+  pageInfo: PageInfo!
+}
+
+type GroupInviteEdge {
+  cursor: String!
+  node: GroupInvite!
+}
+
+type InviteUserToGroupResult {
+  invite: GroupInvite!
 }
 
 type Me {
@@ -129,13 +161,16 @@ input ModelRevisionForRelativeValuesSlugUsernameInput {
 
 type Mutation {
   buildRelativeValuesCache(input: MutationBuildRelativeValuesCacheInput!): MutationBuildRelativeValuesCacheResult!
+  cancelGroupInvite(input: MutationCancelGroupInviteInput!): MutationCancelGroupInviteResult!
   clearRelativeValuesCache(input: MutationClearRelativeValuesCacheInput!): MutationClearRelativeValuesCacheResult!
   createGroup(input: MutationCreateGroupInput!): MutationCreateGroupResult!
   createRelativeValuesDefinition(input: MutationCreateRelativeValuesDefinitionInput!): MutationCreateRelativeValuesDefinitionResult!
   createSquiggleSnippetModel(input: MutationCreateSquiggleSnippetModelInput!): MutationCreateSquiggleSnippetModelResult!
   deleteModel(input: MutationDeleteModelInput!): MutationDeleteModelResult!
   deleteRelativeValuesDefinition(input: MutationDeleteRelativeValuesDefinitionInput!): MutationDeleteRelativeValuesDefinitionResult!
+  inviteUserToGroup(input: MutationInviteUserToGroupInput!): MutationInviteUserToGroupResult!
   setUsername(username: String!): MutationSetUsernameResult!
+  updateGroupInviteRole(input: MutationUpdateGroupInviteRoleInput!): MutationUpdateGroupInviteRoleResult!
   updateMembershipRole(input: MutationUpdateMembershipRoleInput!): MutationUpdateMembershipRoleResult!
   updateModelPrivacy(input: MutationUpdateModelPrivacyInput!): MutationUpdateModelPrivacyResult!
   updateModelSlug(input: MutationUpdateModelSlugInput!): MutationUpdateModelSlugResult!
@@ -148,6 +183,12 @@ input MutationBuildRelativeValuesCacheInput {
 }
 
 union MutationBuildRelativeValuesCacheResult = BaseError | BuildRelativeValuesCacheResult
+
+input MutationCancelGroupInviteInput {
+  inviteId: String!
+}
+
+union MutationCancelGroupInviteResult = BaseError | CancelGroupInviteResult
 
 input MutationClearRelativeValuesCacheInput {
   exportId: String!
@@ -192,7 +233,22 @@ input MutationDeleteRelativeValuesDefinitionInput {
 
 union MutationDeleteRelativeValuesDefinitionResult = BaseError | DeleteRelativeValuesDefinitionResult
 
+input MutationInviteUserToGroupInput {
+  group: String!
+  role: MembershipRole!
+  username: String!
+}
+
+union MutationInviteUserToGroupResult = BaseError | InviteUserToGroupResult
+
 union MutationSetUsernameResult = BaseError | Me
+
+input MutationUpdateGroupInviteRoleInput {
+  inviteId: String!
+  role: MembershipRole!
+}
+
+union MutationUpdateGroupInviteRoleResult = BaseError | UpdateGroupInviteRoleResult
 
 input MutationUpdateMembershipRoleInput {
   membershipId: String!
@@ -401,6 +457,10 @@ input SquiggleSnippetContentInput {
   code: String!
 }
 
+type UpdateGroupInviteRoleResult {
+  invite: GroupInvite!
+}
+
 type UpdateMembershipRoleResult {
   membership: UserGroupMembership!
 }
@@ -426,6 +486,13 @@ type User implements Node {
   models(after: String, before: String, first: Int, last: Int): ModelConnection!
   relativeValuesDefinitions(after: String, before: String, first: Int, last: Int): RelativeValuesDefinitionConnection!
   username: String!
+}
+
+type UserGroupInvite implements GroupInvite & Node {
+  group: Group!
+  id: ID!
+  role: MembershipRole!
+  user: User!
 }
 
 type UserGroupMembership implements Node {

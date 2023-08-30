@@ -2,6 +2,7 @@ import { MembershipRole } from "@prisma/client";
 
 import { prisma } from "@/prisma";
 import { builder } from "../builder";
+import { GroupInviteConnection } from "./GroupInvite";
 
 export const MembershipRoleType = builder.enumType(MembershipRole, {
   name: "MembershipRole",
@@ -22,18 +23,6 @@ export const UserGroupMembershipConnection = builder.connectionObject({
   type: UserGroupMembership,
   name: "UserGroupMembershipConnection",
 });
-
-// export const UserGroupInvite = builder.prismaNode("UserGroupInvite", {
-//   id: { field: "id" },
-//   fields: (t) => ({
-//     user: t.relation("user"),
-//     group: t.relation("group"),
-//     role: t.field({
-//       type: MembershipRoleType,
-//       resolve: (t) => t.role,
-//     }),
-//   }),
-// });
 
 export const Group = builder.prismaNode("Group", {
   id: { field: "id" },
@@ -78,6 +67,21 @@ export const Group = builder.prismaNode("Group", {
       "memberships",
       { cursor: "id" },
       UserGroupMembershipConnection
+    ),
+    invites: t.relatedConnection(
+      "invites",
+      {
+        cursor: "id",
+        query: () => ({
+          orderBy: {
+            createdAt: "desc",
+          },
+          where: {
+            status: "Pending",
+          },
+        }),
+      },
+      GroupInviteConnection
     ),
   }),
 });

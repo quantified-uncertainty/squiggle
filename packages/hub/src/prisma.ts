@@ -12,7 +12,19 @@ declare global {
 export const prisma =
   global._prisma ||
   new PrismaClient({
-    log: ["query"],
+    log: [
+      // "query",
+      {
+        emit: "event",
+        level: "query",
+      },
+    ],
   });
+
+// TODO: This prints each query multiple times, more than basic `log: ["query"]` mode, investigate
+// Prisma types are weird, using `any`
+(prisma as any).$on("query", async (e: any) => {
+  console.log(`${e.query} ${e.params}`);
+});
 
 if (process.env.NODE_ENV !== "production") global._prisma = prisma;

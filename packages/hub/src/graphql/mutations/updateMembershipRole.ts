@@ -8,10 +8,7 @@ builder.mutationField("updateMembershipRole", (t) =>
   t.withAuth({ user: true }).fieldWithInput({
     type: builder.simpleObject("UpdateMembershipRoleResult", {
       fields: (t) => ({
-        membership: t.field({
-          type: UserGroupMembership,
-          nullable: false,
-        }),
+        membership: t.field({ type: UserGroupMembership }),
       }),
     }),
     errors: {},
@@ -36,9 +33,7 @@ builder.mutationField("updateMembershipRole", (t) =>
 
       const membership = await prisma.userGroupMembership.findUniqueOrThrow({
         where: { id: decodedMembershipId },
-        include: {
-          group: true,
-        },
+        include: { group: true },
       });
       if (membership.role === input.role) {
         return { membership }; // nothing to do
@@ -70,12 +65,8 @@ builder.mutationField("updateMembershipRole", (t) =>
       }
 
       const updatedMembership = await prisma.userGroupMembership.update({
-        where: {
-          id: membership.id,
-        },
-        data: {
-          role: input.role,
-        },
+        where: { id: membership.id },
+        data: { role: input.role },
       });
 
       return { membership: updatedMembership };
