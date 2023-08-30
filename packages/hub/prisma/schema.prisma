@@ -97,6 +97,9 @@ enum MembershipRole {
 model UserGroupMembership {
   id String @id @default(cuid())
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   role MembershipRole
 
   user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)

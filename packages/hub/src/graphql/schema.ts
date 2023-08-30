@@ -27,5 +27,6 @@ import "./mutations/updateModelPrivacy";
 import "./mutations/updateModelSlug";
 import "./mutations/updateRelativeValuesDefinition";
 import "./mutations/updateSquiggleSnippetModel";
+import "./mutations/updateMembershipRole";
 
 export const schema = builder.toSchema();

@@ -48,7 +48,8 @@ type GlobalStatistics {
 type Group implements Node {
   createdAtTimestamp: Float!
   id: ID!
-  members(after: String, before: String, first: Int, last: Int): GroupMembersConnection!
+  memberships(after: String, before: String, first: Int, last: Int): UserGroupMembershipConnection!
+  myMembership: UserGroupMembership
   slug: String!
   updatedAtTimestamp: Float!
 }
@@ -61,18 +62,6 @@ type GroupConnection {
 type GroupEdge {
   cursor: String!
   node: Group!
-}
-
-type GroupMembersConnection {
-  edges: [GroupMembersConnectionEdge!]!
-  pageInfo: PageInfo!
-}
-
-type GroupMembersConnectionEdge {
-  cursor: String!
-  id: ID!
-  node: User!
-  role: MembershipRole!
 }
 
 type Me {
@@ -147,6 +136,7 @@ type Mutation {
   deleteModel(input: MutationDeleteModelInput!): MutationDeleteModelResult!
   deleteRelativeValuesDefinition(input: MutationDeleteRelativeValuesDefinitionInput!): MutationDeleteRelativeValuesDefinitionResult!
   setUsername(username: String!): MutationSetUsernameResult!
+  updateMembershipRole(input: MutationUpdateMembershipRoleInput!): MutationUpdateMembershipRoleResult!
   updateModelPrivacy(input: MutationUpdateModelPrivacyInput!): MutationUpdateModelPrivacyResult!
   updateModelSlug(input: MutationUpdateModelSlugInput!): MutationUpdateModelSlugResult!
   updateRelativeValuesDefinition(input: MutationUpdateRelativeValuesDefinitionInput!): MutationUpdateRelativeValuesDefinitionResult!
@@ -203,6 +193,13 @@ input MutationDeleteRelativeValuesDefinitionInput {
 union MutationDeleteRelativeValuesDefinitionResult = BaseError | DeleteRelativeValuesDefinitionResult
 
 union MutationSetUsernameResult = BaseError | Me
+
+input MutationUpdateMembershipRoleInput {
+  membershipId: String!
+  role: MembershipRole!
+}
+
+union MutationUpdateMembershipRoleResult = BaseError | UpdateMembershipRoleResult
 
 input MutationUpdateModelPrivacyInput {
   isPrivate: Boolean!
@@ -404,6 +401,10 @@ input SquiggleSnippetContentInput {
   code: String!
 }
 
+type UpdateMembershipRoleResult {
+  membership: UserGroupMembership!
+}
+
 type UpdateModelPrivacyResult {
   model: Model!
 }
@@ -425,6 +426,22 @@ type User implements Node {
   models(after: String, before: String, first: Int, last: Int): ModelConnection!
   relativeValuesDefinitions(after: String, before: String, first: Int, last: Int): RelativeValuesDefinitionConnection!
   username: String!
+}
+
+type UserGroupMembership implements Node {
+  id: ID!
+  role: MembershipRole!
+  user: User!
+}
+
+type UserGroupMembershipConnection {
+  edges: [UserGroupMembershipEdge!]!
+  pageInfo: PageInfo!
+}
+
+type UserGroupMembershipEdge {
+  cursor: String!
+  node: UserGroupMembership!
 }
 
 input UsersQueryInput {

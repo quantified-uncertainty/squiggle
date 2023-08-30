@@ -1,8 +1,7 @@
 import { prisma } from "@/prisma";
 import { builder } from "../builder";
-import { Group } from "../types/Group";
-import { Prisma } from "@prisma/client";
 import { rethrowOnConstraint } from "../errors/common";
+import { Group } from "../types/Group";
 
 builder.mutationField("createGroup", (t) =>
   t.withAuth({ user: true }).fieldWithInput({

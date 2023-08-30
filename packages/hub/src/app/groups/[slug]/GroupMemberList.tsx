@@ -1,10 +1,12 @@
 import { GroupMemberList$key } from "@/__generated__/GroupMemberList.graphql";
 import { GroupMemberListPaginationQuery } from "@/__generated__/GroupMemberListPaginationQuery.graphql";
+import { LoadMore } from "@/components/LoadMore";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { userRoute } from "@/routes";
 import { FC } from "react";
 import { usePaginationFragment } from "react-relay";
 import { graphql } from "relay-runtime";
+import { MembershipRoleButton } from "./MembershipRoleButton";
 
 const fragment = graphql`
   fragment GroupMemberList on Group
@@ -13,15 +15,25 @@ const fragment = graphql`
     count: { type: "Int", defaultValue: 20 }
   )
   @refetchable(queryName: "GroupMemberListPaginationQuery") {
-    members(first: $count, after: $cursor)
-      @connection(key: "GroupMemberList_members") {
+    myMembership {
+      id
+      role
+    }
+    memberships(first: $count, after: $cursor)
+      @connection(key: "GroupMemberList_memberships") {
       edges {
-        id
-        role
         node {
           id
-          username
+          role
+          user {
+            id
+            username
+          }
+          ...MembershipRoleButton
         }
+      }
+      pageInfo {
+        hasNextPage
       }
     }
   }
@@ -32,27 +44,38 @@ type Props = {
 };
 
 export const GroupMemberList: FC<Props> = ({ groupRef }) => {
-  const {
-    data: { members },
-    loadNext,
-  } = usePaginationFragment<
+  const { data: group, loadNext } = usePaginationFragment<
     GroupMemberListPaginationQuery,
     GroupMemberList$key
   >(fragment, groupRef);
 
+  const isAdmin = group.myMembership?.role === "Admin";
+
   return (
     <div>
-      {members.edges.map((membership) => (
+      {group.memberships.edges.map(({ node: membership }) => (
         <div
           key={membership.id}
           className="flex justify-between p-4 bg-white border"
         >
-          <StyledLink href={userRoute({ username: membership.node.username })}>
-            {membership.node.username}
+          <StyledLink href={userRoute({ username: membership.user.username })}>
+            {membership.user.username}
           </StyledLink>
-          <div>{membership.role}</div>
+          <div>
+            {isAdmin ? (
+              <MembershipRoleButton
+                membershipRef={membership}
+                groupId={group.id}
+              />
+            ) : (
+              membership.role
+            )}
+          </div>
         </div>
       ))}
+      {group.memberships.pageInfo.hasNextPage && (
+        <LoadMore loadNext={loadNext} />
+      )}
     </div>
   );
 };
