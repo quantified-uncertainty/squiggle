@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import { range } from "lodash";
+import { range, round } from "lodash";
 
 type CustomFormat = "squiggle-default" | undefined;
 
@@ -111,12 +111,20 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
       return mult * zeros * Math.sign(x);
     }
 
+    /**
+     * Fixes infinitecimal rounding weirdness
+     */
+    function roundFractions(x) {
+      // We try not to invoke this wicked function more than necessary
+      return Math.abs(x) < 0.0005 ? round(x, 8) : x;
+    }
+
     const tLower = transform(lower);
     const tUpper = transform(upper);
     const expStep = (tUpper - tLower) / (count ?? 10);
     const expShift = Math.ceil(tLower / expStep) * expStep;
     const tickRange = range(expShift, tUpper, expStep);
-    const ticks = tickRange.map(invert).map(closest10);
+    const ticks = tickRange.map(invert).map(closest10).map(roundFractions);
 
     return ticks;
   };
