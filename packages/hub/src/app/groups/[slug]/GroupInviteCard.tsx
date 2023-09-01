@@ -1,19 +1,20 @@
 import { GroupInviteCard$key } from "@/__generated__/GroupInviteCard.graphql";
+import { hooks_useIsGroupAdmin$key } from "@/__generated__/hooks_useIsGroupAdmin.graphql";
 import { Card } from "@/components/ui/Card";
+import { DotsDropdown } from "@/components/ui/DotsDropdown";
+import { DropdownMenu } from "@quri/ui";
 import { FC } from "react";
 import { graphql, useFragment } from "react-relay";
+import { CancelInviteAction } from "./CancelInviteAction";
 import { EmailGroupInvite } from "./EmailGroupInvite";
 import { InviteRoleButton } from "./InviteRoleButton";
 import { UserGroupInvite } from "./UserGroupInvite";
 import { useIsGroupAdmin } from "./hooks";
-import { hooks_useIsGroupAdmin$key } from "@/__generated__/hooks_useIsGroupAdmin.graphql";
-import { DotsDropdown } from "@/components/ui/DotsDropdown";
-import { DropdownMenu } from "@quri/ui";
-import { CancelInviteAction } from "./CancelInviteAction";
 
 export const GroupInviteCard: FC<{
   inviteRef: GroupInviteCard$key;
   groupRef: hooks_useIsGroupAdmin$key;
+  groupId: string;
 }> = (props) => {
   const invite = useFragment(
     graphql`
@@ -49,7 +50,11 @@ export const GroupInviteCard: FC<{
           <DotsDropdown>
             {({ close }) => (
               <DropdownMenu>
-                <CancelInviteAction close={close} inviteId={invite.id} />
+                <CancelInviteAction
+                  close={close}
+                  inviteId={invite.id}
+                  groupId={props.groupId}
+                />
               </DropdownMenu>
             )}
           </DotsDropdown>

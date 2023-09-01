@@ -5,6 +5,11 @@ import { FC } from "react";
 import { usePaginationFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 import { GroupMemberCard } from "./GroupMemberCard";
+import { H2 } from "@/components/ui/Headers";
+import { useIsGroupAdmin } from "./hooks";
+import { DotsDropdown } from "@/components/ui/DotsDropdown";
+import { DropdownMenu } from "@quri/ui";
+import { InviteUserToGroupAction } from "./InviteUserToGroupAction";
 
 const fragment = graphql`
   fragment GroupMemberList on Group
@@ -14,6 +19,8 @@ const fragment = graphql`
   )
   @refetchable(queryName: "GroupMemberListPaginationQuery") {
     ...hooks_useIsGroupAdmin
+    ...InviteUserToGroupAction_group
+
     memberships(first: $count, after: $cursor)
       @connection(key: "GroupMemberList_memberships") {
       edges {
@@ -39,9 +46,23 @@ export const GroupMemberList: FC<Props> = ({ groupRef }) => {
     GroupMemberList$key
   >(fragment, groupRef);
 
+  const isAdmin = useIsGroupAdmin(group);
+
   return (
     <div>
-      <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <H2>Members</H2>
+        {isAdmin && (
+          <DotsDropdown>
+            {({ close }) => (
+              <DropdownMenu>
+                <InviteUserToGroupAction groupRef={group} close={close} />
+              </DropdownMenu>
+            )}
+          </DotsDropdown>
+        )}
+      </div>
+      <div className="space-y-2 mt-2">
         {group.memberships.edges.map(({ node: membership }) => (
           <GroupMemberCard
             groupRef={group}

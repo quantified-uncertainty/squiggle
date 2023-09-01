@@ -1,4 +1,4 @@
-import { useMutation } from "react-relay";
+import { UseMutationConfig, useMutation } from "react-relay";
 
 import { useToast } from "@quri/ui";
 import {
@@ -10,7 +10,7 @@ import { useState } from "react";
 
 /**
  * Like the basic `useMutation`, this function returns a `[runMutation, isMutationInFlight]` pair.
- * But unlike `useMutation`, returned `runMutation` is async and has more convenient `onCompleted` callback.
+ * But unlike `useMutation`, returned `runMutation` is async and has more convenient `onCompleted` callback (it receives only an expected fragment, unwrapped from the result union).
  * Also, all errors will be displayed as notifications automatically.
  */
 export function useAsyncMutation<
@@ -51,23 +51,21 @@ export function useAsyncMutation<
     { __typename: TTypename }
   >;
 
-  const act = ({
-    variables,
-    onCompleted,
-  }: {
-    variables: VariablesOf<TMutation>;
-    onCompleted?: (okResult: OkResult) => void; // TODO - pass response
-  }): Promise<void> => {
+  const act = (
+    config: Omit<UseMutationConfig<TMutation>, "onCompleted" | "onError"> & {
+      onCompleted?: (okResult: OkResult) => void;
+    }
+  ): Promise<void> => {
     return new Promise((resolve, reject) => {
       runMutation({
-        variables,
+        ...config,
         onCompleted(response) {
           if (response.result.__typename === expectedTypename) {
             if (confirmation !== undefined) {
               toast(confirmation, "confirmation");
             }
             setWasCompleted(true);
-            onCompleted?.(response.result as OkResult);
+            config.onCompleted?.(response.result as OkResult);
             resolve();
           } else if (response.result.__typename === "BaseError") {
             toast(

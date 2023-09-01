@@ -3,19 +3,17 @@ import { FC } from "react";
 import { usePreloadedQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { DropdownMenu, GroupIcon } from "@quri/ui";
+import { GroupIcon, StyledTab } from "@quri/ui";
 
 import QueryNode, {
   GroupPageQuery,
 } from "@/__generated__/GroupPageQuery.graphql";
-import { DotsDropdown } from "@/components/ui/DotsDropdown";
-import { H1, H2 } from "@/components/ui/Headers";
+import { H1 } from "@/components/ui/Headers";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
 import { useSerializablePreloadedQuery } from "@/relay/useSerializablePreloadedQuery";
-import { GroupMemberList } from "./GroupMemberList";
-import { InviteUserToGroupAction } from "./InviteUserToGroupAction";
 import { GroupInviteList } from "./GroupInviteList";
+import { GroupMemberList } from "./GroupMemberList";
 import { useIsGroupAdmin } from "./hooks";
 
 const Query = graphql`
@@ -57,28 +55,27 @@ export const GroupPage: FC<{
           {group.slug}
         </div>
       </H1>
-      <section>
-        <div className="flex justify-between">
-          <H2>Members</H2>
-          {isAdmin && (
-            <DotsDropdown>
-              {({ close }) => (
-                <DropdownMenu>
-                  <InviteUserToGroupAction
-                    groupSlug={group.slug}
-                    close={close}
-                  />
-                </DropdownMenu>
+      <StyledTab.Group>
+        <StyledTab.List>
+          <StyledTab name="Models" />
+          <StyledTab name="Members" />
+        </StyledTab.List>
+        <div className="mt-4">
+          <StyledTab.Panels>
+            <StyledTab.Panel>TODO</StyledTab.Panel>
+            <StyledTab.Panel>
+              <section>
+                <GroupMemberList groupRef={group} />
+              </section>
+              {isAdmin && (
+                <section>
+                  <GroupInviteList groupRef={group} />
+                </section>
               )}
-            </DotsDropdown>
-          )}
+            </StyledTab.Panel>
+          </StyledTab.Panels>
         </div>
-        <GroupMemberList groupRef={group} />
-      </section>
-      <section>
-        <H2>Pending invites</H2>
-        <GroupInviteList groupRef={group} />
-      </section>
+      </StyledTab.Group>
     </div>
   );
 };

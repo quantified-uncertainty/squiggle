@@ -5,7 +5,7 @@ import { Model } from "../types/Model";
 import { rethrowOnConstraint } from "../errors/common";
 
 builder.mutationField("createSquiggleSnippetModel", (t) =>
-  t.fieldWithInput({
+  t.withAuth({ user: true }).fieldWithInput({
     type: builder.simpleObject("CreateSquiggleSnippetResult", {
       fields: (t) => ({
         model: t.field({
@@ -14,9 +14,6 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
         }),
       }),
     }),
-    authScopes: {
-      user: true,
-    },
     errors: {},
     input: {
       code: t.input.string({ required: true }),
@@ -28,12 +25,6 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
       }),
     },
     resolve: async (_, { input }, { session }) => {
-      const email = session?.user.email;
-      if (!email) {
-        // shouldn't happen because we checked user auth scope previously, but helps with type checks
-        throw new Error("Email is missing");
-      }
-
       const model = await prisma.$transaction(async (tx) => {
         // nested create is not possible here;
         // similar problem is described here: https://github.com/prisma/prisma/discussions/14937,
@@ -43,7 +34,7 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
             tx.model.create({
               data: {
                 owner: {
-                  connect: { email },
+                  connect: { email: session.user.email },
                 },
                 slug: input.slug,
               },

@@ -3,6 +3,7 @@ import { MembershipRole } from "@prisma/client";
 import { prisma } from "@/prisma";
 import { builder } from "../builder";
 import { GroupInviteConnection } from "./GroupInvite";
+import { Session } from "next-auth";
 
 export const MembershipRoleType = builder.enumType(MembershipRole, {
   name: "MembershipRole",
@@ -24,8 +25,28 @@ export const UserGroupMembershipConnection = builder.connectionObject({
   name: "UserGroupMembershipConnection",
 });
 
+async function getMyMembership(groupId: string, session: Session | null) {
+  const email = session?.user?.email;
+  if (!email) {
+    return null;
+  }
+  const user = await prisma.user.findUniqueOrThrow({
+    where: { email },
+  });
+  const myMembership = await prisma.userGroupMembership.findUnique({
+    where: {
+      userId_groupId: {
+        groupId: groupId,
+        userId: user.id,
+      },
+    },
+  });
+  return myMembership;
+}
+
 export const Group = builder.prismaNode("Group", {
   id: { field: "id" },
+  include: {},
   fields: (t) => ({
     slug: t.exposeString("slug"),
     createdAtTimestamp: t.float({
@@ -38,25 +59,7 @@ export const Group = builder.prismaNode("Group", {
       type: UserGroupMembership,
       nullable: true,
       resolve: async (root, _, { session }) => {
-        const email = session?.user?.email;
-        if (!email) {
-          return null;
-        }
-        const user = await prisma.user.findUniqueOrThrow({
-          where: { email },
-        });
-        const membership = await prisma.userGroupMembership.findUnique({
-          where: {
-            userId_groupId: {
-              groupId: root.id,
-              userId: user.id,
-            },
-          },
-        });
-        if (!membership) {
-          return null;
-        }
-        return membership;
+        return getMyMembership(root.id, session);
       },
     }),
     // Note: I also tried `members` field with membership data exposed on the connection edges, but had issues with it:
@@ -72,6 +75,17 @@ export const Group = builder.prismaNode("Group", {
       "invites",
       {
         cursor: "id",
+        nullable: true, // "null" means "forbidden"
+        authScopes: async (group, _, { session }) => {
+          // It would be nice to select membership at top level of Group object,
+          // since this is also useful for `myMembership` field.
+          // But unfortunately Prisma doesn't have select aliases:
+          // https://github.com/prisma/prisma/discussions/14316
+          // https://github.com/prisma/prisma/issues/8151
+          const myMembership = await getMyMembership(group.id, session);
+          return myMembership?.role === "Admin";
+        },
+        unauthorizedResolver: () => null,
         query: () => ({
           orderBy: {
             createdAt: "desc",
