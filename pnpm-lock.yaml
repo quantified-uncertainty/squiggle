@@ -18,8 +18,8 @@ importers:
         specifier: ^1.10.12
         version: 1.10.12
       turbo-ignore:
-        specifier: ^1.10.12
-        version: 1.10.12
+        specifier: ^1.10.13
+        version: 1.10.13
 
   packages/cli:
     dependencies:
@@ -2731,6 +2731,7 @@ packages:
 
   /@emotion/memoize@0.7.4:
     resolution: {integrity: sha512-Ja/Vfqe3HpuzRsG1oBtWTHk2PGZ7GR+2Vz5iYGelAw8dx32K0y7PjVuxK6z1nMpZOqAFsRUPCkK1YjJ56qJlgw==}
+    requiresBuild: true
     dev: false
     optional: true
 
@@ -16931,8 +16932,8 @@ packages:
     dev: true
     optional: true
 
-  /turbo-ignore@1.10.12:
-    resolution: {integrity: sha512-0qHUnQmP2Xo09Op5lq+Ev6ihWCNjMlSPywtdA8Hc6m09I1kr/WyTLdVMgajsuL6/pCsrqyvUB6iKi4OSKYIdgA==}
+  /turbo-ignore@1.10.13:
+    resolution: {integrity: sha512-M5Ku9ab06S2bn4OaqHfIpgI0v5K5yP097z/sQ+Ok42GYovDirvwz2AiYj4NFfUCanBV3lSTj8v6i50UoY116Bg==}
     hasBin: true
     dev: true
 
