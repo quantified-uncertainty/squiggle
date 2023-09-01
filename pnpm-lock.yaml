@@ -417,8 +417,8 @@ importers:
         specifier: ^18.2.18
         version: 18.2.18
       '@types/react-relay':
-        specifier: ^14.1.4
-        version: 14.1.4
+        specifier: ^14.1.5
+        version: 14.1.5
       '@types/relay-runtime':
         specifier: ^14.1.12
         version: 14.1.12
@@ -2731,6 +2731,7 @@ packages:
 
   /@emotion/memoize@0.7.4:
     resolution: {integrity: sha512-Ja/Vfqe3HpuzRsG1oBtWTHk2PGZ7GR+2Vz5iYGelAw8dx32K0y7PjVuxK6z1nMpZOqAFsRUPCkK1YjJ56qJlgw==}
+    requiresBuild: true
     dev: false
     optional: true
 
@@ -6556,8 +6557,8 @@ packages:
       '@types/react': 18.2.18
     dev: true
 
-  /@types/react-relay@14.1.4:
-    resolution: {integrity: sha512-Fv5KOnIleDR03Jx5ovfVEwjjBjAMOB8SkaVJcstFP2j6hKXXf3SiCJSv7Rzump9eZFMQAS0CC8Jdh+tBwnSYmg==}
+  /@types/react-relay@14.1.5:
+    resolution: {integrity: sha512-dvILoFPsFvGjYwcYiqt42droPnvVwHezmxWriJR+bwyUEUSI9v0jOv2AUp81BI94KGDxIjykD/6uErf2dD3bMA==}
     dependencies:
       '@types/react': 18.2.18
       '@types/relay-runtime': 14.1.12
