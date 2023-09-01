@@ -1,5 +1,4 @@
 import * as d3 from "d3";
-import { range } from "lodash";
 
 type CustomFormat = "squiggle-default" | undefined;
 
@@ -122,7 +121,7 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
     const tUpper = transform(upper);
     const expStep = (tUpper - tLower) / (count ?? 10);
     const expShift = Math.ceil(tLower / expStep) * expStep;
-    const tickRange = range(expShift, tUpper, expStep);
+    const tickRange = d3.range(expShift, tUpper, expStep);
     const ticks = tickRange.map(invert).map(closest10).map(roundFractions);
 
     return ticks;
