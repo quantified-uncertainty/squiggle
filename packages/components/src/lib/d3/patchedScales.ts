@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+import { range } from "lodash";
 
 type CustomFormat = "squiggle-default" | undefined;
 
@@ -73,7 +74,54 @@ function patchLinearishTickFormat<
 }
 
 function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
-  return patchLinearishTickFormat(scale);
+  // copy-pasted from https://github.com/d3/d3-scale/blob/83555bd759c7314420bd4240642beda5e258db9e/src/linear.js#L14
+  scale.tickFormat = (count, specifier) => {
+    const d = scale.domain();
+    return tickFormatWithCustom(d[0], d[d.length - 1], count ?? 10, specifier);
+  };
+  // UPSTREAM-ME: Patching symlog tick generator for better experience
+  scale.ticks = (count: number) => {
+    const [lower, upper] = scale.domain();
+    const c = scale.constant() ?? 1;
+
+    // We can't reliably use invert and transform from scale
+    // It converts relative to screen, and we would instead like it to be relative to 0
+    // const transform = scale
+    // const invert = scale.invert
+
+    function transform(x: number): number {
+      return Math.sign(x) * Math.log1p(Math.abs(x / c));
+    }
+
+    function invert(x: number): number {
+      return Math.sign(x) * Math.expm1(Math.abs(x)) * c;
+    }
+
+    /**
+     * @returns Closest number with a single significant digit
+     */
+    function closest10(x: number) {
+      if (x == 0) return 0;
+
+      const base = Math.floor(Math.log10(Math.abs(x)));
+      const zeros = Math.pow(10, base);
+
+      const mult = Math.round(Math.abs(x) / zeros);
+
+      return mult * zeros * Math.sign(x);
+    }
+
+    const tLower = transform(lower);
+    const tUpper = transform(upper);
+    const expStep = (tUpper - tLower) / (count ?? 10);
+    const expShift = Math.ceil(tLower / expStep) * expStep;
+    const tickRange = range(expShift, tUpper, expStep);
+    const ticks = tickRange.map(invert).map(closest10);
+
+    return ticks;
+  };
+
+  return scale;
 }
 
 function patchLogarithmicTickFormat(scale: ScaleLogarithmic): ScaleLogarithmic {
