@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import { range, round } from "lodash";
+import { range } from "lodash";
 
 type CustomFormat = "squiggle-default" | undefined;
 
@@ -100,7 +100,7 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
     /**
      * @returns Closest number with a single significant digit
      */
-    function closest10(x: number) {
+    function closest10(x: number): number {
       if (x == 0) return 0;
 
       const base = Math.floor(Math.log10(Math.abs(x)));
@@ -114,9 +114,8 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
     /**
      * Fixes infinitecimal rounding weirdness
      */
-    function roundFractions(x) {
-      // We try not to invoke this wicked function more than necessary
-      return Math.abs(x) < 0.0005 ? round(x, 8) : x;
+    function roundFractions(x: number): number {
+      return Math.abs(x) < 1e-15 ? 0 : x;
     }
 
     const tLower = transform(lower);
