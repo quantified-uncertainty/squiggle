@@ -113,7 +113,7 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
     /**
      * Fixes infinitecimal rounding weirdness
      */
-    function roundFractions(x: number): number {
+    function zeroFix(x: number): number {
       return Math.abs(x) < 1e-15 ? 0 : x;
     }
 
@@ -122,7 +122,7 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
     const expStep = (tUpper - tLower) / (count ?? 10);
     const expShift = Math.ceil(tLower / expStep) * expStep;
     const tickRange = d3.range(expShift, tUpper, expStep);
-    const ticks = tickRange.map(invert).map(closest10).map(roundFractions);
+    const ticks = tickRange.map(invert).map(closest10).map(zeroFix);
 
     return ticks;
   };
