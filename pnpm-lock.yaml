@@ -402,8 +402,8 @@ importers:
         version: 3.21.4
     devDependencies:
       '@tailwindcss/forms':
-        specifier: ^0.5.3
-        version: 0.5.3(tailwindcss@3.3.2)
+        specifier: ^0.5.6
+        version: 0.5.6(tailwindcss@3.3.2)
       '@types/d3':
         specifier: ^7.4.0
         version: 7.4.0
@@ -616,8 +616,8 @@ importers:
         specifier: ^0.2.0
         version: 0.2.0
       '@tailwindcss/forms':
-        specifier: ^0.5.3
-        version: 0.5.3(tailwindcss@3.3.2)
+        specifier: ^0.5.6
+        version: 0.5.6(tailwindcss@3.3.2)
       '@types/react':
         specifier: ^18.2.18
         version: 18.2.18
@@ -768,8 +768,8 @@ importers:
         specifier: workspace:*
         version: link:../textmate-grammar
       '@tailwindcss/forms':
-        specifier: ^0.5.3
-        version: 0.5.3(tailwindcss@3.3.2)
+        specifier: ^0.5.6
+        version: 0.5.6(tailwindcss@3.3.2)
       '@types/pako':
         specifier: ^2.0.0
         version: 2.0.0
@@ -2731,6 +2731,7 @@ packages:
 
   /@emotion/memoize@0.7.4:
     resolution: {integrity: sha512-Ja/Vfqe3HpuzRsG1oBtWTHk2PGZ7GR+2Vz5iYGelAw8dx32K0y7PjVuxK6z1nMpZOqAFsRUPCkK1YjJ56qJlgw==}
+    requiresBuild: true
     dev: false
     optional: true
 
@@ -5953,8 +5954,8 @@ packages:
       tslib: 2.5.3
     dev: false
 
-  /@tailwindcss/forms@0.5.3(tailwindcss@3.3.2):
-    resolution: {integrity: sha512-y5mb86JUoiUgBjY/o6FJSFZSEttfb3Q5gllE4xoKjAAD+vBrnIhE4dViwUuow3va8mpH4s9jyUbUbrRGoRdc2Q==}
+  /@tailwindcss/forms@0.5.6(tailwindcss@3.3.2):
+    resolution: {integrity: sha512-Fw+2BJ0tmAwK/w01tEFL5TiaJBX1NLT1/YbWgvm7ws3Qcn11kiXxzNTEQDMs5V3mQemhB56l3u0i9dwdzSQldA==}
     peerDependencies:
       tailwindcss: '>=3.0.0 || >= 3.0.0-alpha.1'
     dependencies:
