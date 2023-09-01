@@ -299,8 +299,8 @@ importers:
         specifier: ^3.53.0
         version: 3.53.0(@pothos/core@3.32.1)(@prisma/client@5.1.1)(graphql@16.7.1)(typescript@5.1.6)
       '@pothos/plugin-relay':
-        specifier: ^3.43.0
-        version: 3.43.0(@pothos/core@3.32.1)(graphql@16.7.1)
+        specifier: ^3.43.1
+        version: 3.43.1(@pothos/core@3.32.1)(graphql@16.7.1)
       '@pothos/plugin-scope-auth':
         specifier: ^3.20.0
         version: 3.20.0(@pothos/core@3.32.1)(graphql@16.7.1)
@@ -2731,6 +2731,7 @@ packages:
 
   /@emotion/memoize@0.7.4:
     resolution: {integrity: sha512-Ja/Vfqe3HpuzRsG1oBtWTHk2PGZ7GR+2Vz5iYGelAw8dx32K0y7PjVuxK6z1nMpZOqAFsRUPCkK1YjJ56qJlgw==}
+    requiresBuild: true
     dev: false
     optional: true
 
@@ -4165,8 +4166,8 @@ packages:
       - supports-color
     dev: false
 
-  /@pothos/plugin-relay@3.43.0(@pothos/core@3.32.1)(graphql@16.7.1):
-    resolution: {integrity: sha512-435jODSgj29IRgHlQjfLUoaTcg1FodqkOaNA0T0IZmjgmS8+2GxqYscRrZWQU7Ufr1MLRvGXOQ+14ri2jw5geQ==}
+  /@pothos/plugin-relay@3.43.1(@pothos/core@3.32.1)(graphql@16.7.1):
+    resolution: {integrity: sha512-T5oFVpTIQW69v2FhXhaxmX3BkqJqONy/wnvtBY110JhpbE8Qa04lDglufr56q0Kkv8CGXxl4387ZeX7NgGrZ7A==}
     peerDependencies:
       '@pothos/core': '*'
       graphql: '>=15.1.0'
