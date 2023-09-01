@@ -110,19 +110,12 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
       return mult * zeros * Math.sign(x);
     }
 
-    /**
-     * Fixes infinitecimal rounding weirdness
-     */
-    function zeroFix(x: number): number {
-      return Math.abs(x) < 1e-15 ? 0 : x;
-    }
-
     const tLower = transform(lower);
     const tUpper = transform(upper);
     const expStep = (tUpper - tLower) / (count ?? 10);
     const expShift = Math.ceil(tLower / expStep) * expStep;
     const tickRange = d3.range(expShift, tUpper, expStep);
-    const ticks = tickRange.map(invert).map(closest10).map(zeroFix);
+    const ticks = tickRange.map(invert).map(closest10);
 
     return ticks;
   };
