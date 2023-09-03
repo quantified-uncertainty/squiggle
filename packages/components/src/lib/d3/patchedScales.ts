@@ -115,8 +115,10 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
     const tLower = transform(lower);
     const tUpper = transform(upper);
     const expStep = (tUpper - tLower) / (count ?? 10);
-    const expShift = Math.ceil(tLower / expStep) * expStep;
-    const tickRange = d3.range(expShift, tUpper, expStep);
+    const tLowerAdjusted = !(tUpper > 0 && tLower < 0)
+      ? tLower + expStep / 2
+      : Math.ceil(tLower / expStep) * expStep;
+    const tickRange = d3.range(tLowerAdjusted, tUpper, expStep);
     const ticks = tickRange.map(invert).map(closest10);
 
     return ticks;
