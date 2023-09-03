@@ -80,7 +80,7 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
   };
   // UPSTREAM-ME: Patching symlog tick generator for better experience
   scale.ticks = (count?: number) => {
-    if (count == 0) return [];
+    if (count === 0) return [];
 
     const [lower, upper] = scale.domain();
     const c = scale.constant();
@@ -102,7 +102,7 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
      * @returns Closest number with a single significant digit
      */
     function closest10(x: number): number {
-      if (x == 0) return 0;
+      if (x === 0) return 0;
 
       const base = Math.floor(Math.log10(Math.abs(x)));
       const zeros = Math.pow(10, base);
