@@ -80,6 +80,8 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
   };
   // UPSTREAM-ME: Patching symlog tick generator for better experience
   scale.ticks = (count?: number) => {
+    if (count == 0) return [];
+
     const [lower, upper] = scale.domain();
     const c = scale.constant() ?? 1;
 
