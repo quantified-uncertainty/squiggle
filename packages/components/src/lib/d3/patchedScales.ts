@@ -83,7 +83,7 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
     if (count == 0) return [];
 
     const [lower, upper] = scale.domain();
-    const c = scale.constant() ?? 1;
+    const c = scale.constant();
 
     // We can't reliably use invert and transform from scale
     // It converts relative to screen, and we would instead like it to be relative to 0
