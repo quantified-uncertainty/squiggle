@@ -20,6 +20,7 @@ const fragment = graphql`
   @refetchable(queryName: "GroupMemberListPaginationQuery") {
     ...hooks_useIsGroupAdmin
     ...InviteUserToGroupAction_group
+    ...GroupMemberCard_group
 
     memberships(first: $count, after: $cursor)
       @connection(key: "GroupMemberList_memberships") {
@@ -65,9 +66,9 @@ export const GroupMemberList: FC<Props> = ({ groupRef }) => {
       <div className="space-y-2 mt-2">
         {group.memberships.edges.map(({ node: membership }) => (
           <GroupMemberCard
+            key={membership.id}
             groupRef={group}
             membershipRef={membership}
-            key={membership.id}
           />
         ))}
       </div>

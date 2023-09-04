@@ -2,7 +2,7 @@ import { MembershipRole } from "@prisma/client";
 
 import { prisma } from "@/prisma";
 import { builder } from "../builder";
-import { GroupInviteConnection } from "./GroupInvite";
+import { GroupInvite, GroupInviteConnection } from "./GroupInvite";
 import { Session } from "next-auth";
 
 export const MembershipRoleType = builder.enumType(MembershipRole, {
@@ -59,6 +59,8 @@ export const Group = builder.prismaNode("Group", {
       type: UserGroupMembership,
       nullable: true,
       resolve: async (root, _, { session }) => {
+        // TODO - `prismaField`?
+        // TODO - this causes an extra query, optimize somehow?
         return getMyMembership(root.id, session);
       },
     }),
@@ -97,6 +99,22 @@ export const Group = builder.prismaNode("Group", {
       },
       GroupInviteConnection
     ),
+    inviteForMe: t.withAuth({ user: true }).field({
+      type: GroupInvite,
+      nullable: true,
+      unauthorizedResolver: () => null,
+      select: (_, { session }) => ({
+        invites: {
+          where: {
+            user: {
+              email: session?.user.email,
+            },
+            status: "Pending",
+          },
+        },
+      }),
+      resolve: (group) => group.invites[0],
+    }),
   }),
 });
 

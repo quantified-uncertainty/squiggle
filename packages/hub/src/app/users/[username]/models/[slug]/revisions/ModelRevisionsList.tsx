@@ -1,7 +1,7 @@
 "use client";
 import { format } from "date-fns";
 import { FC } from "react";
-import { usePaginationFragment, usePreloadedQuery } from "react-relay";
+import { usePaginationFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { ModelRevisionsList$key } from "@/__generated__/ModelRevisionsList.graphql";
@@ -10,7 +10,7 @@ import { StyledLink } from "@/components/ui/StyledLink";
 import { commonDateFormat } from "@/lib/common";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
-import { useSerializablePreloadedQuery } from "@/relay/useSerializablePreloadedQuery";
+import { usePageQuery } from "@/relay/usePageQuery";
 import { modelRevisionRoute } from "@/routes";
 import QueryNode, {
   ModelRevisionsListQuery,
@@ -58,8 +58,7 @@ const Query = graphql`
 export const ModelRevisionsList: FC<{
   query: SerializablePreloadedQuery<typeof QueryNode, ModelRevisionsListQuery>;
 }> = ({ query }) => {
-  const queryRef = useSerializablePreloadedQuery(query);
-  const { model: result } = usePreloadedQuery(Query, queryRef);
+  const [{ model: result }] = usePageQuery(query, Query);
   const modelRef = extractFromGraphqlErrorUnion(result, "Model");
 
   const { data: model, loadNext } = usePaginationFragment<

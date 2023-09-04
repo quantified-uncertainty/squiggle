@@ -40,7 +40,7 @@ export const GroupInviteList: FC<Props> = ({ groupRef }) => {
     GroupInviteList$key
   >(fragment, groupRef);
 
-  return group.invites.edges.length ? (
+  return group.invites?.edges.length ? (
     <div>
       <H2>Pending invites</H2>
       <div className="space-y-2">

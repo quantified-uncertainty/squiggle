@@ -5,8 +5,7 @@ import ModelPageQueryNode, {
 } from "@/__generated__/ModelPageQuery.graphql";
 
 import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
-import { useSerializablePreloadedQuery } from "@/relay/useSerializablePreloadedQuery";
-import { usePreloadedQuery } from "react-relay";
+import { usePageQuery } from "@/relay/usePageQuery";
 
 export const ModelPageFragment = graphql`
   fragment ModelPage on Model
@@ -45,8 +44,7 @@ export type PreloadedModelPageQuery = SerializablePreloadedQuery<
 >;
 
 export function useModelPageQuery(query: PreloadedModelPageQuery) {
-  const queryRef = useSerializablePreloadedQuery(query);
-  const { model: modelRef } = usePreloadedQuery(Query, queryRef);
+  const [{ model: modelRef }] = usePageQuery(query, Query);
 
   return modelRef;
 }

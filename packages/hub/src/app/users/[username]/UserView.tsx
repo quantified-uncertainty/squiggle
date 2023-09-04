@@ -1,6 +1,5 @@
 "use client";
 import { FC } from "react";
-import { usePreloadedQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import UserViewQueryNode, {
@@ -9,7 +8,7 @@ import UserViewQueryNode, {
 import { H1, H2 } from "@/components/ui/Headers";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
-import { useSerializablePreloadedQuery } from "@/relay/useSerializablePreloadedQuery";
+import { usePageQuery } from "@/relay/usePageQuery";
 import { UserIcon } from "@quri/ui";
 import { UserDefinitionList } from "./UserDefinitionList";
 import { UserModelList } from "./UserModelList";
@@ -36,8 +35,7 @@ const Query = graphql`
 export const UserView: FC<{
   query: SerializablePreloadedQuery<typeof UserViewQueryNode, UserViewQuery>;
 }> = ({ query }) => {
-  const queryRef = useSerializablePreloadedQuery(query);
-  const { userByUsername: result } = usePreloadedQuery(Query, queryRef);
+  const [{ userByUsername: result }] = usePageQuery(query, Query);
 
   const user = extractFromGraphqlErrorUnion(result, "User");
 

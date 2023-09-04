@@ -8,10 +8,14 @@ import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 import { MembershipRoleButton } from "./MembershipRoleButton";
 import { useIsGroupAdmin } from "./hooks";
+import { DotsDropdown } from "@/components/ui/DotsDropdown";
+import { DropdownMenu } from "@quri/ui";
+import { DeleteMembershipAction } from "./DeleteMembershipAction";
+import { GroupMemberCard_group$key } from "@/__generated__/GroupMemberCard_group.graphql";
 
 export const GroupMemberCard: FC<{
   membershipRef: GroupMemberCard$key;
-  groupRef: hooks_useIsGroupAdmin$key;
+  groupRef: GroupMemberCard_group$key;
 }> = ({ membershipRef, groupRef }) => {
   const membership = useFragment(
     graphql`
@@ -28,7 +32,17 @@ export const GroupMemberCard: FC<{
     membershipRef
   );
 
-  const isAdmin = useIsGroupAdmin(groupRef);
+  const group = useFragment(
+    graphql`
+      fragment GroupMemberCard_group on Group {
+        id
+        ...hooks_useIsGroupAdmin
+      }
+    `,
+    groupRef
+  );
+
+  const isAdmin = useIsGroupAdmin(group);
 
   return (
     <Card key={membership.id}>
@@ -38,9 +52,24 @@ export const GroupMemberCard: FC<{
         </StyledLink>
         <div>
           {isAdmin ? (
-            <MembershipRoleButton membershipRef={membership} />
+            <div className="flex gap-1 items-center">
+              <MembershipRoleButton membershipRef={membership} />
+              <DotsDropdown>
+                {({ close }) => (
+                  <DropdownMenu>
+                    <DeleteMembershipAction
+                      close={close}
+                      membershipId={membership.id}
+                      groupId={group.id}
+                    />
+                  </DropdownMenu>
+                )}
+              </DotsDropdown>
+            </div>
           ) : (
-            membership.role
+            <div className="text-slate-500 text-sm font-medium">
+              {membership.role}
+            </div>
           )}
         </div>
       </div>

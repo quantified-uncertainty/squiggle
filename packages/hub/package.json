@@ -37,6 +37,7 @@
     "graphql": "^16.7.1",
     "graphql-yoga": "^4.0.3",
     "immutable": "^4.3.1",
+    "invariant": "^2.2.4",
     "lodash": "^4.17.21",
     "next": "^13.4.9",
     "next-auth": "^4.22.1",
@@ -50,6 +51,7 @@
     "react-markdown": "^8.0.7",
     "react-relay": "^15.0.0",
     "react-select": "^5.7.4",
+    "relay-runtime": "^15.0.0",
     "remark-breaks": "^3.0.3",
     "remark-gfm": "^3.0.1",
     "typescript": "^5.1.6",
@@ -58,6 +60,7 @@
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.3",
     "@types/d3": "^7.4.0",
+    "@types/invariant": "^2.2.35",
     "@types/lodash": "^4.14.196",
     "@types/pako": "^2.0.0",
     "@types/react": "^18.2.18",

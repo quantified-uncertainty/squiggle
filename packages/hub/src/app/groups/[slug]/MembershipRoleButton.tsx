@@ -30,7 +30,7 @@ export const MembershipRoleButton: FC<Props> = ({ membershipRef }) => {
 
   return (
     <Dropdown
-      render={() => (
+      render={({ close }) => (
         <DropdownMenu>
           {(["Admin", "Member"] satisfies MembershipRole[]).map((role) => (
             <SetMembershipRoleAction

@@ -3,7 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { FC, PropsWithChildren } from "react";
-import { useFragment, usePreloadedQuery } from "react-relay";
+import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import {
@@ -29,7 +29,7 @@ import { DropdownMenuLinkItem } from "@/components/ui/DropdownMenuLinkItem";
 import { EntityTab } from "@/components/ui/EntityTab";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
-import { useSerializablePreloadedQuery } from "@/relay/useSerializablePreloadedQuery";
+import { usePageQuery } from "@/relay/usePageQuery";
 import {
   modelForRelativeValuesExportRoute,
   modelRevisionsRoute,
@@ -134,8 +134,7 @@ export const ModelLayout: FC<
   const { data: session } = useSession();
   const { variableName } = useParams();
 
-  const queryRef = useSerializablePreloadedQuery(query);
-  const { result } = usePreloadedQuery(Query, queryRef);
+  const [{ result }] = usePageQuery(query, Query);
 
   const modelRef = extractFromGraphqlErrorUnion(result, "Model");
   const model = useFragment<ModelLayout$key>(Fragment, modelRef);

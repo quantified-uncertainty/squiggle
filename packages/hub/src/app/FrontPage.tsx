@@ -1,6 +1,5 @@
 "use client";
 import { FC } from "react";
-import { usePreloadedQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import FrontPageQueryNode, {
@@ -10,7 +9,7 @@ import { FrontPageDefinitionList } from "./FrontPageDefinitionList";
 import { FrontPageModelList } from "./FrontPageModelList";
 
 import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
-import { useSerializablePreloadedQuery } from "@/relay/useSerializablePreloadedQuery";
+import { usePageQuery } from "@/relay/usePageQuery";
 import { StyledTab } from "@quri/ui";
 import { FrontPageGroupList } from "./FrontPageGroupList";
 
@@ -25,8 +24,7 @@ const Query = graphql`
 export const FrontPage: FC<{
   query: SerializablePreloadedQuery<typeof FrontPageQueryNode, FrontPageQuery>;
 }> = ({ query }) => {
-  const queryRef = useSerializablePreloadedQuery(query);
-  const data = usePreloadedQuery(Query, queryRef);
+  const [data] = usePageQuery(query, Query);
 
   return (
     <div className="space-y-8">

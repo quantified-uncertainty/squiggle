@@ -2,7 +2,7 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
-import { graphql, useFragment, usePreloadedQuery } from "react-relay";
+import { graphql, useFragment } from "react-relay";
 
 import { EditRelativeValuesDefinitionMutation } from "@/__generated__/EditRelativeValuesDefinitionMutation.graphql";
 import { RelativeValuesDefinitionPage$key } from "@/__generated__/RelativeValuesDefinitionPage.graphql";
@@ -18,7 +18,7 @@ import {
 } from "@/relative-values/components/RelativeValuesDefinitionForm";
 import { RelativeValuesDefinitionRevisionFragment } from "@/relative-values/components/RelativeValuesDefinitionRevision";
 import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
-import { useSerializablePreloadedQuery } from "@/relay/useSerializablePreloadedQuery";
+import { usePageQuery } from "@/relay/usePageQuery";
 import {
   RelativeValuesDefinitionPageFragment,
   RelativeValuesDefinitionPageQuery,
@@ -47,10 +47,9 @@ export const EditRelativeValuesDefinition: FC<{
 }> = ({ query }) => {
   useSession({ required: true });
 
-  const queryRef = useSerializablePreloadedQuery(query);
-  const { relativeValuesDefinition: result } = usePreloadedQuery(
-    RelativeValuesDefinitionPageQuery,
-    queryRef
+  const [{ relativeValuesDefinition: result }] = usePageQuery(
+    query,
+    RelativeValuesDefinitionPageQuery
   );
 
   const definitionRef = extractFromGraphqlErrorUnion(

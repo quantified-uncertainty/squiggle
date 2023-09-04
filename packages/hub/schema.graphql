@@ -31,6 +31,10 @@ input DefinitionRefInput {
   username: String!
 }
 
+type DeleteMembershipResult {
+  ok: Boolean!
+}
+
 type DeleteModelResult {
   ok: Boolean!
 }
@@ -59,7 +63,8 @@ type GlobalStatistics {
 type Group implements Node {
   createdAtTimestamp: Float!
   id: ID!
-  invites(after: String, before: String, first: Int, last: Int): GroupInviteConnection!
+  inviteForMe: GroupInvite
+  invites(after: String, before: String, first: Int, last: Int): GroupInviteConnection
   memberships(after: String, before: String, first: Int, last: Int): UserGroupMembershipConnection!
   myMembership: UserGroupMembership
   slug: String!
@@ -90,6 +95,11 @@ type GroupInviteConnection {
 type GroupInviteEdge {
   cursor: String!
   node: GroupInvite!
+}
+
+enum GroupInviteReaction {
+  Accept
+  Decline
 }
 
 type InviteUserToGroupResult {
@@ -166,9 +176,11 @@ type Mutation {
   createGroup(input: MutationCreateGroupInput!): MutationCreateGroupResult!
   createRelativeValuesDefinition(input: MutationCreateRelativeValuesDefinitionInput!): MutationCreateRelativeValuesDefinitionResult!
   createSquiggleSnippetModel(input: MutationCreateSquiggleSnippetModelInput!): MutationCreateSquiggleSnippetModelResult!
+  deleteMembership(input: MutationDeleteMembershipInput!): MutationDeleteMembershipResult!
   deleteModel(input: MutationDeleteModelInput!): MutationDeleteModelResult!
   deleteRelativeValuesDefinition(input: MutationDeleteRelativeValuesDefinitionInput!): MutationDeleteRelativeValuesDefinitionResult!
   inviteUserToGroup(input: MutationInviteUserToGroupInput!): MutationInviteUserToGroupResult!
+  reactToGroupInvite(input: MutationReactToGroupInviteInput!): MutationReactToGroupInviteResult!
   setUsername(username: String!): MutationSetUsernameResult!
   updateGroupInviteRole(input: MutationUpdateGroupInviteRoleInput!): MutationUpdateGroupInviteRoleResult!
   updateMembershipRole(input: MutationUpdateMembershipRoleInput!): MutationUpdateMembershipRoleResult!
@@ -219,6 +231,12 @@ input MutationCreateSquiggleSnippetModelInput {
 
 union MutationCreateSquiggleSnippetModelResult = BaseError | CreateSquiggleSnippetResult
 
+input MutationDeleteMembershipInput {
+  membershipId: String!
+}
+
+union MutationDeleteMembershipResult = BaseError | DeleteMembershipResult
+
 input MutationDeleteModelInput {
   slug: String!
   username: String!
@@ -240,6 +258,13 @@ input MutationInviteUserToGroupInput {
 }
 
 union MutationInviteUserToGroupResult = BaseError | InviteUserToGroupResult
+
+input MutationReactToGroupInviteInput {
+  action: GroupInviteReaction!
+  inviteId: String!
+}
+
+union MutationReactToGroupInviteResult = BaseError | ReactToGroupInviteResult
 
 union MutationSetUsernameResult = BaseError | Me
 
@@ -351,6 +376,11 @@ type QueryUsersConnection {
 type QueryUsersConnectionEdge {
   cursor: String!
   node: User!
+}
+
+type ReactToGroupInviteResult {
+  invite: GroupInvite!
+  membership: UserGroupMembership
 }
 
 type RelativeValuesCluster {

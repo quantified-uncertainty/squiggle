@@ -1,6 +1,6 @@
 "use client";
 import { FC } from "react";
-import { usePreloadedQuery } from "react-relay";
+import { useSubscribeToInvalidationState } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { GroupIcon, StyledTab } from "@quri/ui";
@@ -11,9 +11,10 @@ import QueryNode, {
 import { H1 } from "@/components/ui/Headers";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
-import { useSerializablePreloadedQuery } from "@/relay/useSerializablePreloadedQuery";
+import { usePageQuery } from "@/relay/usePageQuery";
 import { GroupInviteList } from "./GroupInviteList";
 import { GroupMemberList } from "./GroupMemberList";
+import { InviteForMe } from "./InviteForMe";
 import { useIsGroupAdmin } from "./hooks";
 
 const Query = graphql`
@@ -32,6 +33,7 @@ const Query = graphql`
         ...GroupMemberList
         ...GroupInviteList
         ...hooks_useIsGroupAdmin
+        ...InviteForMe
       }
     }
   }
@@ -40,10 +42,11 @@ const Query = graphql`
 export const GroupPage: FC<{
   query: SerializablePreloadedQuery<typeof QueryNode, GroupPageQuery>;
 }> = ({ query }) => {
-  const queryRef = useSerializablePreloadedQuery(query);
-  const { result } = usePreloadedQuery(Query, queryRef);
+  const [{ result }, { reload }] = usePageQuery(query, Query);
 
   const group = extractFromGraphqlErrorUnion(result, "Group");
+
+  useSubscribeToInvalidationState([group.id], reload);
 
   const isAdmin = useIsGroupAdmin(group);
 
@@ -55,6 +58,7 @@ export const GroupPage: FC<{
           {group.slug}
         </div>
       </H1>
+      <InviteForMe groupRef={group} />
       <StyledTab.Group>
         <StyledTab.List>
           <StyledTab name="Models" />
@@ -64,14 +68,16 @@ export const GroupPage: FC<{
           <StyledTab.Panels>
             <StyledTab.Panel>TODO</StyledTab.Panel>
             <StyledTab.Panel>
-              <section>
-                <GroupMemberList groupRef={group} />
-              </section>
-              {isAdmin && (
+              <div className="space-y-8">
                 <section>
-                  <GroupInviteList groupRef={group} />
+                  <GroupMemberList groupRef={group} />
                 </section>
-              )}
+                {isAdmin && (
+                  <section>
+                    <GroupInviteList groupRef={group} />
+                  </section>
+                )}
+              </div>
             </StyledTab.Panel>
           </StyledTab.Panels>
         </div>

@@ -58,7 +58,7 @@ builder.mutationField("updateMembershipRole", (t) =>
           role: "Admin",
         },
       });
-      if (totalAdmins < 2) {
+      if (totalAdmins < 2 && input.role !== "Admin") {
         throw new Error(
           "Can't change the role, you're the last admin of this group"
         );

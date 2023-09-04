@@ -46,7 +46,7 @@ export const GroupInviteCard: FC<{
         </div>
         <div className="flex gap-1 items-center">
           <span className="text-slate-500 text-sm">Invited as:</span>
-          {isAdmin ? <InviteRoleButton inviteRef={invite} /> : invite.role}
+          <InviteRoleButton inviteRef={invite} />
           <DotsDropdown>
             {({ close }) => (
               <DropdownMenu>

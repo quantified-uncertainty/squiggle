@@ -31,5 +31,7 @@ import "./mutations/updateMembershipRole";
 import "./mutations/updateGroupInviteRole";
 import "./mutations/inviteUserToGroup";
 import "./mutations/cancelGroupInvite";
+import "./mutations/reactToGroupInvite";
+import "./mutations/deleteMembership";
 
 export const schema = builder.toSchema();

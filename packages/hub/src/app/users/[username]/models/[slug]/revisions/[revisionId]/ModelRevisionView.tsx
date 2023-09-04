@@ -1,14 +1,13 @@
 "use client";
 
 import { FC } from "react";
-import { usePreloadedQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { StyledLink } from "@/components/ui/StyledLink";
 import { commonDateFormat } from "@/lib/common";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
-import { useSerializablePreloadedQuery } from "@/relay/useSerializablePreloadedQuery";
+import { usePageQuery } from "@/relay/usePageQuery";
 import { modelRoute } from "@/routes";
 import QueryNode, {
   ModelRevisionViewQuery,
@@ -50,8 +49,7 @@ const Query = graphql`
 export const ModelRevisionView: FC<{
   query: SerializablePreloadedQuery<typeof QueryNode, ModelRevisionViewQuery>;
 }> = ({ query }) => {
-  const queryRef = useSerializablePreloadedQuery(query);
-  const { result } = usePreloadedQuery(Query, queryRef);
+  const [{ result }] = usePageQuery(query, Query);
   const model = extractFromGraphqlErrorUnion(result, "Model");
 
   const typename = model.revision.content.__typename;

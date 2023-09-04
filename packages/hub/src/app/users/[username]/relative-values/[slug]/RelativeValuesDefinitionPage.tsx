@@ -1,19 +1,19 @@
 "use client";
 import { FC } from "react";
-import { useFragment, usePreloadedQuery } from "react-relay";
+import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { RelativeValuesDefinitionPage$key } from "@/__generated__/RelativeValuesDefinitionPage.graphql";
+import QueryNode, {
+  RelativeValuesDefinitionPageQuery as QueryType,
+} from "@/__generated__/RelativeValuesDefinitionPageQuery.graphql";
 import { H2 } from "@/components/ui/Headers";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { RelativeValuesDefinitionRevision } from "@/relative-values/components/RelativeValuesDefinitionRevision";
 import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
-import { useSerializablePreloadedQuery } from "@/relay/useSerializablePreloadedQuery";
+import { usePageQuery } from "@/relay/usePageQuery";
 import { modelForRelativeValuesExportRoute } from "@/routes";
-import QueryNode, {
-  RelativeValuesDefinitionPageQuery as QueryType,
-} from "@/__generated__/RelativeValuesDefinitionPageQuery.graphql";
 import { LockIcon } from "@quri/ui";
 
 export const RelativeValuesDefinitionPageFragment = graphql`
@@ -65,10 +65,9 @@ export const RelativeValuesDefinitionPageQuery = graphql`
 export const RelativeValuesDefinitionPage: FC<{
   query: SerializablePreloadedQuery<typeof QueryNode, QueryType>;
 }> = ({ query }) => {
-  const queryRef = useSerializablePreloadedQuery(query);
-  const { relativeValuesDefinition: result } = usePreloadedQuery(
-    RelativeValuesDefinitionPageQuery,
-    queryRef
+  const [{ relativeValuesDefinition: result }] = usePageQuery(
+    query,
+    RelativeValuesDefinitionPageQuery
   );
 
   const definitionRef = extractFromGraphqlErrorUnion(

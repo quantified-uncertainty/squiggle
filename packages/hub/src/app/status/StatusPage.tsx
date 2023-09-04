@@ -5,9 +5,8 @@ import StatusPageQueryNode, {
 } from "@/__generated__/StatusPageQuery.graphql";
 import { H1 } from "@/components/ui/Headers";
 import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
-import { useSerializablePreloadedQuery } from "@/relay/useSerializablePreloadedQuery";
+import { usePageQuery } from "@/relay/usePageQuery";
 import { FC } from "react";
-import { usePreloadedQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
 const Query = graphql`
@@ -33,8 +32,7 @@ export const StatusPage: FC<{
     StatusPageQuery
   >;
 }> = ({ query }) => {
-  const queryRef = useSerializablePreloadedQuery(query);
-  const { globalStatistics: stats } = usePreloadedQuery(Query, queryRef);
+  const [{ globalStatistics: stats }] = usePageQuery(query, Query);
 
   return (
     <div>
