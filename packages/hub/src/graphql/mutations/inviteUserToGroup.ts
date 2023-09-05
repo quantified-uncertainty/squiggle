@@ -37,6 +37,10 @@ builder.mutationField("inviteUserToGroup", (t) =>
                       user: { email: session.user.email },
                       role: "Admin",
                     },
+                    // invited user is not yet a member
+                    none: {
+                      user: { username: input.username },
+                    },
                   },
                   // check that there are no pending invites
                   // FIXME - error message if this check fails is bad
