@@ -99,9 +99,9 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
     }
 
     /**
-     * @returns Closest number with a single significant digit
+     * @returns Closest number with a single significant digit being 1, 2 or 5
      */
-    function closest10(x: number): number {
+    function closestNice(x: number): number {
       if (x === 0) return 0;
 
       const base = Math.floor(Math.log10(Math.abs(x)));
@@ -109,7 +109,9 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
 
       const mult = Math.round(Math.abs(x) / zeros);
 
-      return mult * zeros * Math.sign(x);
+      const niceMult = mult > 7 ? 10 : mult > 3 ? 5 : mult > 2 ? 2 : mult;
+
+      return niceMult * zeros * Math.sign(x);
     }
 
     const tLower = transform(lower);
@@ -119,7 +121,7 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
       ? tLower + expStep / 2
       : Math.ceil(tLower / expStep) * expStep;
     const tickRange = d3.range(tLowerAdjusted, tUpper, expStep);
-    const ticks = tickRange.map(invert).map(closest10);
+    const ticks = tickRange.map(invert).map(closestNice);
 
     return ticks;
   };
