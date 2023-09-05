@@ -88,7 +88,7 @@ const InviteUserToGroupModal: FC<{
   return (
     <FormProvider {...form}>
       <Modal close={close}>
-        <Modal.Header>Add relative values export</Modal.Header>
+        <Modal.Header>Invite to group {group.slug}</Modal.Header>
         <Modal.Body>
           <div className="space-y-2">
             <SelectUser label="Username" name="username" />
