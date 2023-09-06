@@ -361,11 +361,6 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
       [view]
     );
 
-    return (
-      <div
-        style={{ minWidth: width, minHeight: height, fontSize: "13px" }}
-        ref={setViewDom}
-      ></div>
-    );
+    return <div style={{ fontSize: "13px" }} ref={setViewDom}></div>;
   }
 );
