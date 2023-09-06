@@ -13,7 +13,6 @@ export const prisma =
   global._prisma ||
   new PrismaClient({
     log: [
-      // "query",
       {
         emit: "event",
         level: "query",
@@ -24,6 +23,9 @@ export const prisma =
 // TODO: This prints each query multiple times, more than basic `log: ["query"]` mode, investigate
 // Prisma types are weird, using `any`
 (prisma as any).$on("query", async (e: any) => {
+  if (process.env.NODE_ENV === "test") {
+    return; // logs are too verbose for jest
+  }
   console.log(`${e.query} ${e.params}`);
 });
 

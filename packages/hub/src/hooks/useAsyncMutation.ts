@@ -1,12 +1,8 @@
 import { UseMutationConfig, useMutation } from "react-relay";
 
 import { useToast } from "@quri/ui";
-import {
-  GraphQLTaggedNode,
-  MutationParameters,
-  VariablesOf,
-} from "relay-runtime";
 import { useState } from "react";
+import { GraphQLTaggedNode, MutationParameters } from "relay-runtime";
 
 /**
  * Like the basic `useMutation`, this function returns a `[runMutation, isMutationInFlight]` pair.

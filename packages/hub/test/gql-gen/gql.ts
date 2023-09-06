@@ -1,0 +1,67 @@
+/* eslint-disable */
+import * as types from './graphql';
+import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
+
+/**
+ * Map of all GraphQL operations in the project.
+ *
+ * This map has several performance disadvantages:
+ * 1. It is not tree-shakeable, so it will include all operations in the project.
+ * 2. It is not minifiable, so the string of a GraphQL query will be multiple times inside the bundle.
+ * 3. It does not support dead code elimination, so it will add unused operations.
+ *
+ * Therefore it is highly recommended to use the babel or swc plugin for production.
+ */
+const documents = {
+    "\n  mutation CreateGroupTest {\n    result: createGroup(input: { slug: \"testgroup\" }) {\n      __typename\n      ... on CreateGroupResult {\n        group {\n          id\n          slug\n          memberships {\n            edges {\n              node {\n                user {\n                  username\n                }\n                role\n              }\n            }\n          }\n        }\n      }\n      ... on BaseError {\n        message\n      }\n    }\n  }\n": types.CreateGroupTestDocument,
+    "\n      mutation CreateGroup {\n        result: createGroup(input: { slug: \"testgroup\" }) {\n          __typename\n        }\n      }\n    ": types.CreateGroupDocument,
+    "\n      mutation InviteTest {\n        result: inviteUserToGroup(\n          input: { group: \"testgroup\", username: \"mockmember\", role: Member }\n        ) {\n          __typename\n          ... on BaseError {\n            message\n          }\n          ... on InviteUserToGroupResult {\n            invite {\n              id\n              role\n            }\n          }\n        }\n      }\n    ": types.InviteTestDocument,
+    "\n      mutation NoAuthInviteTest {\n        result: inviteUserToGroup(\n          input: { group: \"testgroup\", username: \"mockmember\", role: Member }\n        ) {\n          __typename\n          ... on BaseError {\n            message\n          }\n        }\n      }\n    ": types.NoAuthInviteTestDocument,
+    "\n      query TestMe {\n        me {\n          __typename\n          email\n          username\n        }\n      }\n    ": types.TestMeDocument,
+    "\n      query TestModels {\n        models {\n          edges {\n            node {\n              slug\n            }\n          }\n        }\n      }\n    ": types.TestModelsDocument,
+};
+
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ *
+ *
+ * @example
+ * ```ts
+ * const query = graphql(`query GetUser($id: ID!) { user(id: $id) { name } }`);
+ * ```
+ *
+ * The query argument is unknown!
+ * Please regenerate the types.
+ */
+export function graphql(source: string): unknown;
+
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation CreateGroupTest {\n    result: createGroup(input: { slug: \"testgroup\" }) {\n      __typename\n      ... on CreateGroupResult {\n        group {\n          id\n          slug\n          memberships {\n            edges {\n              node {\n                user {\n                  username\n                }\n                role\n              }\n            }\n          }\n        }\n      }\n      ... on BaseError {\n        message\n      }\n    }\n  }\n"): (typeof documents)["\n  mutation CreateGroupTest {\n    result: createGroup(input: { slug: \"testgroup\" }) {\n      __typename\n      ... on CreateGroupResult {\n        group {\n          id\n          slug\n          memberships {\n            edges {\n              node {\n                user {\n                  username\n                }\n                role\n              }\n            }\n          }\n        }\n      }\n      ... on BaseError {\n        message\n      }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n      mutation CreateGroup {\n        result: createGroup(input: { slug: \"testgroup\" }) {\n          __typename\n        }\n      }\n    "): (typeof documents)["\n      mutation CreateGroup {\n        result: createGroup(input: { slug: \"testgroup\" }) {\n          __typename\n        }\n      }\n    "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n      mutation InviteTest {\n        result: inviteUserToGroup(\n          input: { group: \"testgroup\", username: \"mockmember\", role: Member }\n        ) {\n          __typename\n          ... on BaseError {\n            message\n          }\n          ... on InviteUserToGroupResult {\n            invite {\n              id\n              role\n            }\n          }\n        }\n      }\n    "): (typeof documents)["\n      mutation InviteTest {\n        result: inviteUserToGroup(\n          input: { group: \"testgroup\", username: \"mockmember\", role: Member }\n        ) {\n          __typename\n          ... on BaseError {\n            message\n          }\n          ... on InviteUserToGroupResult {\n            invite {\n              id\n              role\n            }\n          }\n        }\n      }\n    "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n      mutation NoAuthInviteTest {\n        result: inviteUserToGroup(\n          input: { group: \"testgroup\", username: \"mockmember\", role: Member }\n        ) {\n          __typename\n          ... on BaseError {\n            message\n          }\n        }\n      }\n    "): (typeof documents)["\n      mutation NoAuthInviteTest {\n        result: inviteUserToGroup(\n          input: { group: \"testgroup\", username: \"mockmember\", role: Member }\n        ) {\n          __typename\n          ... on BaseError {\n            message\n          }\n        }\n      }\n    "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n      query TestMe {\n        me {\n          __typename\n          email\n          username\n        }\n      }\n    "): (typeof documents)["\n      query TestMe {\n        me {\n          __typename\n          email\n          username\n        }\n      }\n    "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n      query TestModels {\n        models {\n          edges {\n            node {\n              slug\n            }\n          }\n        }\n      }\n    "): (typeof documents)["\n      query TestModels {\n        models {\n          edges {\n            node {\n              slug\n            }\n          }\n        }\n      }\n    "];
+
+export function graphql(source: string) {
+  return (documents as any)[source] ?? {};
+}
+
+export type DocumentType<TDocumentNode extends DocumentNode<any, any>> = TDocumentNode extends DocumentNode<  infer TType,  any>  ? TType  : never;
