@@ -2,3 +2,4 @@
 .next
 src/__generated__
 schema.graphql
+test/gql-gen
