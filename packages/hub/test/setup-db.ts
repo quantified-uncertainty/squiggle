@@ -7,5 +7,7 @@ if (!process.env["DATABASE_URL"]?.includes("quri-test")) {
 beforeEach(async () => {
   await prisma.user.deleteMany();
   await prisma.group.deleteMany();
+  await prisma.userGroupMembership.deleteMany();
+  await prisma.groupInvite.deleteMany();
   // TODO - other models (but note that most would be removed by cascading from `user`)
 });

@@ -21,45 +21,69 @@ builder.mutationField("inviteUserToGroup", (t) =>
       }),
     },
     resolve: async (_, { input }, { session }) => {
-      const invite = await rethrowOnConstraint(
-        () =>
-          prisma.groupInvite.create({
-            data: {
-              user: {
-                connect: { username: input.username },
+      const invite = await prisma.$transaction(async (tx) => {
+        // We perform all checks one by one because that allows more precise error reporting.
+        // (It would be possible to check everything in one big query with clever nested `connect` checks.)
+        const isAdmin = await tx.group.count({
+          where: {
+            slug: input.group,
+            memberships: {
+              some: {
+                user: { email: session.user.email },
+                role: "Admin",
               },
-              group: {
-                connect: {
-                  slug: input.group,
-                  // check permissions
-                  memberships: {
-                    some: {
-                      user: { email: session.user.email },
-                      role: "Admin",
-                    },
-                    // invited user is not yet a member
-                    none: {
-                      user: { username: input.username },
-                    },
-                  },
-                  // check that there are no pending invites
-                  // FIXME - error message if this check fails is bad
-                  invites: {
-                    none: {
-                      user: { username: input.username },
-                      status: "Pending",
-                    },
-                  },
-                },
-              },
-              role: input.role,
             },
-          }),
-        {
-          target: ["userId", "groupId"],
-          error: "The invite already exists",
+          },
+        });
+        if (!isAdmin) {
+          throw new Error(`You're not a member of ${input.group} group`);
         }
-      );
+
+        const alreadyAMember = await tx.group.count({
+          where: {
+            slug: input.group,
+            memberships: {
+              some: {
+                user: { username: input.username },
+              },
+            },
+          },
+        });
+        if (alreadyAMember) {
+          throw new Error(
+            `${input.username} is already a member of ${input.group}`
+          );
+        }
+
+        const hasPendingInvite = await tx.group.count({
+          where: {
+            slug: input.group,
+            invites: {
+              some: {
+                user: { username: input.username },
+                status: "Pending",
+              },
+            },
+          },
+        });
+        if (hasPendingInvite) {
+          throw new Error(
+            `There's already a pending invite for ${input.username} to join ${input.group}`
+          );
+        }
+
+        return tx.groupInvite.create({
+          data: {
+            user: {
+              connect: { username: input.username },
+            },
+            group: {
+              connect: { slug: input.group },
+            },
+            role: input.role,
+          },
+        });
+      });
 
       return { invite };
     },

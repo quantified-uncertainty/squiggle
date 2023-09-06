@@ -99,5 +99,5 @@ test("invite to another's group", async () => {
     { expectedTypename: "BaseError" }
   );
 
-  expect(result.message).toMatch("Not authorized");
+  expect(result.message).toMatch("You're not a member of testgroup group");
 });
