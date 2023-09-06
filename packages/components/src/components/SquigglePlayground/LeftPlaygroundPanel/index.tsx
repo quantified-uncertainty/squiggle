@@ -110,22 +110,22 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
     );
 
     const renderBody = () => (
-      <div data-testid="squiggle-editor">
-        <CodeEditor
-          ref={editorRef}
-          // it's important to pass `code` and not `defaultCode` here;
-          // see https://github.com/quantified-uncertainty/squiggle/issues/1952
-          defaultValue={code}
-          errors={errors}
-          project={project}
-          sourceId={sourceId}
-          showGutter={true}
-          lineWrapping={props.settings.editorSettings.lineWrapping}
-          onChange={setCode}
-          onViewValuePath={props.onViewValuePath}
-          onSubmit={runnerState.run}
-        />
-      </div>
+      <CodeEditor
+        data-testid="squiggle-editor"
+        ref={editorRef}
+        // it's important to pass `code` and not `defaultCode` here;
+        // see https://github.com/quantified-uncertainty/squiggle/issues/1952
+        defaultValue={code}
+        errors={errors}
+        height={"100%"}
+        project={project}
+        sourceId={sourceId}
+        showGutter={true}
+        lineWrapping={props.settings.editorSettings.lineWrapping}
+        onChange={setCode}
+        onViewValuePath={props.onViewValuePath}
+        onSubmit={runnerState.run}
+      />
     );
 
     const renderModal = (modalName: string) => {

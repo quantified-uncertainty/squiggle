@@ -56,7 +56,7 @@ interface CodeEditorProps {
   onSubmit?: () => void;
   onViewValuePath?: (path: SqValuePath) => void;
   width?: number;
-  height?: number;
+  height?: number | string;
   showGutter?: boolean;
   lineWrapping?: boolean;
   errors?: SqError[];
