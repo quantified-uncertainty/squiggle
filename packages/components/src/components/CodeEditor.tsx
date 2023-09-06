@@ -228,8 +228,8 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
         effects: compTheme.reconfigure(
           EditorView.theme({
             "&": {
-              ...(width === undefined ? {} : { width: `${width}px` }),
-              ...(height === undefined ? {} : { height: `${height}px` }),
+              ...(width === undefined ? {} : { width }),
+              ...(height === undefined ? {} : { height }),
             },
             ".cm-selectionMatch": { backgroundColor: "#33ae661a" },
             ".cm-content": { padding: 0 },
