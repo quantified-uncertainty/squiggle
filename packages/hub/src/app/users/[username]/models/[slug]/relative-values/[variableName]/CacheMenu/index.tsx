@@ -19,11 +19,12 @@ import { RelativeValuesDefinitionRevision$key } from "@/__generated__/RelativeVa
 import { RelativeValuesDefinitionRevisionFragment } from "@/relative-values/components/RelativeValuesDefinitionRevision";
 import { BuildRelativeValuesCacheAction } from "./BuildRelativeValuesCacheAction";
 import { ClearRelativeValuesCacheAction } from "./ClearRelativeValuesCacheAction";
+import { Owner$key } from "@/__generated__/Owner.graphql";
 
 export const CacheMenu: FC<{
   revision: ModelRevision$data;
-  ownerUsername: string;
-}> = ({ revision, ownerUsername }) => {
+  isEditable: boolean;
+}> = ({ revision, isEditable }) => {
   if (!revision.forRelativeValues) {
     throw new Error("Not found");
   }
@@ -41,13 +42,11 @@ export const CacheMenu: FC<{
     revision.forRelativeValues.cache.length >=
       definition.items.length * definition.items.length;
 
-  const ownedByCurrentUser = ownerUsername === session?.user?.username;
-
   const internals = (
     <div
       className={clsx(
         "flex items-center text-sm text-gray-500 px-2 py-1 rounded-sm",
-        ownedByCurrentUser && "hover:bg-slate-200 cursor-pointer"
+        isEditable && "hover:bg-slate-200 cursor-pointer"
       )}
     >
       {fullyCached ? (
@@ -100,5 +99,5 @@ export const CacheMenu: FC<{
     </Dropdown>
   );
 
-  return ownedByCurrentUser ? withDropdown(internals) : internals;
+  return isEditable ? withDropdown(internals) : internals;
 };

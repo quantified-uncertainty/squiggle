@@ -15,7 +15,11 @@ export const FallbackModelLayout: FC<Props> = ({ username, slug }) => {
 
   return (
     <EntityLayout
-      nodes={entityNodes(username, slug, variableName)}
+      nodes={entityNodes(
+        { __typename: "User", slug: username, " $fragmentType": "Owner" },
+        slug,
+        variableName
+      )}
       isFluid={true}
       headerRight={
         <div

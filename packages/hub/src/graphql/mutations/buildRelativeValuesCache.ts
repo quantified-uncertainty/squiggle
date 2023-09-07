@@ -4,16 +4,16 @@ import { cartesianProduct } from "@/relative-values/lib/utils";
 import { relativeValuesItemsSchema } from "@/relative-values/types";
 import { ModelEvaluator } from "@/relative-values/values/ModelEvaluator";
 import { decodeGlobalID } from "@pothos/plugin-relay";
-import { RelativeValuesExport } from "../types/RelativeValuesExport";
+import {
+  RelativeValuesExport,
+  getRelativeValuesExportForWriteableModel,
+} from "../types/RelativeValuesExport";
 
 builder.mutationField("buildRelativeValuesCache", (t) =>
   t.withAuth({ user: true }).fieldWithInput({
     type: builder.simpleObject("BuildRelativeValuesCacheResult", {
       fields: (t) => ({
-        relativeValuesExport: t.field({
-          type: RelativeValuesExport,
-          nullable: false,
-        }),
+        relativeValuesExport: t.field({ type: RelativeValuesExport }),
       }),
     }),
     errors: {},
@@ -27,37 +27,12 @@ builder.mutationField("buildRelativeValuesCache", (t) =>
       }
 
       const relativeValuesExport =
-        await prisma.relativeValuesExport.findUniqueOrThrow({
-          where: { id: exportId },
-          include: {
-            definition: {
-              select: {
-                currentRevision: {
-                  select: {
-                    items: true,
-                  },
-                },
-              },
-            },
-            modelRevision: {
-              select: {
-                contentType: true,
-                squiggleSnippet: true,
-                model: {
-                  select: {
-                    owner: true,
-                  },
-                },
-              },
-            },
-          },
+        await getRelativeValuesExportForWriteableModel({
+          exportId,
+          session,
         });
 
       const { modelRevision } = relativeValuesExport;
-
-      if (modelRevision.model.owner.email !== session.user.email) {
-        throw new Error("You don't own this model");
-      }
 
       if (modelRevision.contentType !== "SquiggleSnippet") {
         throw new Error("Unsupported model revision content type");

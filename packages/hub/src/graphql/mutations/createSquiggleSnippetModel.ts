@@ -16,6 +16,7 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
     }),
     errors: {},
     input: {
+      groupSlug: t.input.string(),
       code: t.input.string({ required: true }),
       slug: t.input.string({
         required: true,
@@ -33,15 +34,36 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
           () =>
             tx.model.create({
               data: {
-                owner: {
-                  connect: { email: session.user.email },
-                },
+                ...(input.groupSlug
+                  ? {
+                      group: {
+                        connect: {
+                          slug: input.groupSlug,
+                          memberships: {
+                            some: {
+                              user: {
+                                email: session.user.email,
+                              },
+                            },
+                          },
+                        },
+                      },
+                    }
+                  : {
+                      user: {
+                        connect: { email: session.user.email },
+                      },
+                    }),
                 slug: input.slug,
               },
             }),
           {
-            target: ["slug", "ownerId"],
+            target: ["slug", "userId"],
             error: `The model ${input.slug} already exists on this account`,
+          },
+          {
+            target: ["slug", "groupId"],
+            error: `The model ${input.slug} already exists in this group`,
           }
         );
 
@@ -67,9 +89,6 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
           },
           data: {
             currentRevisionId: revision.id,
-          },
-          include: {
-            owner: true,
           },
         });
       });

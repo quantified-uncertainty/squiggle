@@ -11,7 +11,8 @@ import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
 import { H1 } from "@/components/ui/Headers";
 import { SlugFormField } from "@/components/ui/SlugFormField";
 import { useAsyncMutation } from "@/hooks/useAsyncMutation";
-import { modelRoute } from "@/routes";
+import { userModelRoute } from "@/routes";
+import { SelectGroup } from "@/components/SelectGroup";
 
 const Mutation = graphql`
   mutation NewModelMutation($input: MutationCreateSquiggleSnippetModelInput!) {
@@ -39,6 +40,7 @@ a = normal(2, 5)
 
 type FormShape = {
   slug: string | undefined;
+  groupSlug: string | undefined;
 };
 
 export const NewModel: FC = () => {
@@ -67,13 +69,14 @@ export const NewModel: FC = () => {
       variables: {
         input: {
           slug: data.slug ?? "", // shouldn't happen but satisfies Typescript
+          groupSlug: data.groupSlug,
           code: defaultCode,
         },
       },
       onCompleted: (result) => {
         const username = session?.user?.username;
         if (username) {
-          router.push(modelRoute({ username, slug: result.model.slug }));
+          router.push(userModelRoute({ username, slug: result.model.slug }));
         } else {
           router.push("/");
         }
@@ -92,6 +95,7 @@ export const NewModel: FC = () => {
             label="Model Name"
             placeholder="my-model"
           />
+          <SelectGroup<FormShape> label="Group" name="groupSlug" />
         </div>
         <Button
           onClick={save}

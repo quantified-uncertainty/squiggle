@@ -14,8 +14,10 @@ export const ModelPageFragment = graphql`
   ) {
     id
     slug
+    isEditable
+    ...EditModelExports_Model
     owner {
-      username
+      ...Owner
     }
     currentRevision {
       content {

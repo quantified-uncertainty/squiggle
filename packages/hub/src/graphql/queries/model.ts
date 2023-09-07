@@ -18,7 +18,7 @@ builder.queryField("model", (t) =>
         ...query,
         where: {
           slug: args.input.slug,
-          owner: {
+          user: {
             username: args.input.ownerUsername,
           },
           ...modelWhereHasAccess(session), // slightly risky - what if we change the query there and there's a collision?

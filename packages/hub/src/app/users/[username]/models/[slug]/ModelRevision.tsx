@@ -20,7 +20,6 @@ export const ModelRevisionFragment = graphql`
         }
       }
     }
-    ...ModelExports
 
     content {
       __typename

@@ -13,7 +13,9 @@ import {
   useToast,
 } from "@quri/ui";
 
+import { Owner$key } from "@/__generated__/Owner.graphql";
 import { UpdateModelSlugActionMutation } from "@/__generated__/UpdateModelSlugActionMutation.graphql";
+import { useOwner, useOwnerForInput } from "@/hooks/Owner";
 import { modelRoute } from "@/routes";
 
 const Mutation = graphql`
@@ -30,12 +32,12 @@ const Mutation = graphql`
 `;
 
 type Props = {
-  username: string;
+  ownerRef: Owner$key;
   slug: string;
   close(): void; // close is used by Modal and by Action, but has different meaning (it's just a coincidence that signature is the same)
 };
 
-const UpdateModelSlugModal: FC<Props> = ({ username, slug, close }) => {
+const UpdateModelSlugModal: FC<Props> = ({ ownerRef, slug, close }) => {
   const router = useRouter();
   const toast = useToast();
 
@@ -48,14 +50,19 @@ const UpdateModelSlugModal: FC<Props> = ({ username, slug, close }) => {
   const [mutation, mutationInFlight] =
     useMutation<UpdateModelSlugActionMutation>(Mutation);
 
+  const owner = useOwner(ownerRef);
+  const ownerInput = useOwnerForInput(ownerRef);
+
   const save = form.handleSubmit((data) => {
     mutation({
-      variables: { input: { username, oldSlug: slug, newSlug: data.slug } },
+      variables: {
+        input: { owner: ownerInput, oldSlug: slug, newSlug: data.slug },
+      },
       onCompleted(response) {
         if (response.result.__typename === "BaseError") {
           toast(response.result.message, "error");
         } else {
-          router.push(modelRoute({ username, slug: data.slug }));
+          router.push(modelRoute({ owner, slug: data.slug }));
           close();
         }
       },
@@ -69,7 +76,7 @@ const UpdateModelSlugModal: FC<Props> = ({ username, slug, close }) => {
     <FormProvider {...form}>
       <Modal close={close}>
         <Modal.Header>
-          Rename {username}/{slug}
+          Rename {owner.slug}/{slug}
         </Modal.Header>
         <Modal.Body>
           <div className="mb-4">
@@ -101,7 +108,11 @@ const UpdateModelSlugModal: FC<Props> = ({ username, slug, close }) => {
   );
 };
 
-export const UpdateModelSlugAction: FC<Props> = ({ username, slug, close }) => {
+export const UpdateModelSlugAction: FC<Props> = ({
+  ownerRef: owner,
+  slug,
+  close,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const closeModal = close; // closing the dropdown is enough, since this component will be destroyed
@@ -114,11 +125,7 @@ export const UpdateModelSlugAction: FC<Props> = ({ username, slug, close }) => {
         icon={EditIcon}
       />
       {isOpen && (
-        <UpdateModelSlugModal
-          slug={slug}
-          username={username}
-          close={closeModal}
-        />
+        <UpdateModelSlugModal slug={slug} ownerRef={owner} close={closeModal} />
       )}
     </>
   );

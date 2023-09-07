@@ -1,25 +1,26 @@
+import { Owner$data } from "@/__generated__/Owner.graphql";
 import { type EntityNode } from "@/components/EntityLayout";
 import {
   modelForRelativeValuesExportRoute,
   modelRoute,
-  userRoute,
+  ownerRoute,
 } from "@/routes";
 import { CodeBracketIcon, ScaleIcon } from "@quri/ui";
 
-export const entityNodes = (
-  username: string,
+export function entityNodes(
+  owner: Owner$data,
   slug: string,
   variableName?: string
-): EntityNode[] => {
+): EntityNode[] {
   const nodes: EntityNode[] = [
-    { slug: username, href: userRoute({ username }) },
-    { slug, href: modelRoute({ username, slug }), icon: CodeBracketIcon },
+    { slug: owner.slug, href: ownerRoute(owner) },
+    { slug, href: modelRoute({ owner, slug }), icon: CodeBracketIcon },
   ];
   if (variableName) {
     nodes.push({
       slug: variableName,
       href: modelForRelativeValuesExportRoute({
-        username,
+        owner,
         slug,
         variableName,
       }),
@@ -27,4 +28,4 @@ export const entityNodes = (
     });
   }
   return nodes;
-};
+}

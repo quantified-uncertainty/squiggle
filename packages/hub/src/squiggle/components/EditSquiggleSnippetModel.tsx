@@ -21,6 +21,7 @@ import { ModelRevisionFragment } from "@/app/users/[username]/models/[slug]/Mode
 import { EditModelExports } from "@/components/exports/EditModelExports";
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
 import { SquiggleContentFragment } from "./SquiggleContent";
+import { useOwnerForInput } from "@/hooks/Owner";
 
 export const Mutation = graphql`
   mutation EditSquiggleSnippetModelMutation(
@@ -53,7 +54,6 @@ type Props = {
 
 export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
   const toast = useToast();
-  const { data: session } = useSession();
 
   const model = useFragment(ModelPageFragment, modelRef);
   const revision = useFragment<ModelRevision$key>(
@@ -65,6 +65,8 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
     SquiggleContentFragment,
     revision.content
   );
+
+  const ownerInput = useOwnerForInput(model.owner);
 
   const { height, ref } = useAvailableHeight();
 
@@ -106,7 +108,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
           },
           relativeValuesExports: formData.relativeValuesExports,
           slug: model.slug,
-          username: model.owner.username,
+          owner: ownerInput,
         },
       },
       onCompleted(data) {
@@ -122,8 +124,6 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
     });
   });
 
-  const canSave = session?.user.username === model.owner.username;
-
   const onCodeChange = (code: string) => {
     form.setValue("code", code);
   };
@@ -137,7 +137,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
             onCodeChange={onCodeChange}
             defaultCode={content.code}
             renderExtraControls={({ openModal }) =>
-              canSave && (
+              model.isEditable && (
                 <div className="h-full flex items-center justify-end gap-2">
                   <PlaygroundToolbarItem
                     tooltipText={"Exported Variables"}
@@ -159,7 +159,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
                         append={appendVariableWithDefinition}
                         remove={removeVariableWithDefinition}
                         items={variablesWithDefinitionsFields}
-                        modelSlug={model.slug}
+                        modelRef={model}
                       />
                     </div>
                   ),

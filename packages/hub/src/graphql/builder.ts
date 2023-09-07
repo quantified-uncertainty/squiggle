@@ -20,12 +20,14 @@ type Context = {
   request: NextRequest;
 };
 
-type HubSchemaTypes = {
+export type HubSchemaTypes = {
   PrismaTypes: PrismaTypes;
   DefaultEdgesNullability: false;
   Context: Context;
   AuthScopes: {
     user: boolean;
+    userId: string;
+    memberOfGroup: string;
   };
   AuthContexts: {
     // https://pothos-graphql.dev/docs/plugins/scope-auth#change-context-types-based-on-scopes
@@ -58,8 +60,44 @@ export const builder = new SchemaBuilder<HubSchemaTypes>({
       nullable: false,
     },
   },
+  scopeAuthOptions: {
+    defaultStrategy: "all",
+  },
   authScopes: async (context) => ({
+    // TODO - rename to 'signedIn'
     user: !!context.session?.user,
+    userId: async (userId) => {
+      if (!context.session) {
+        return false;
+      }
+      return Boolean(
+        await prisma.user.count({
+          where: {
+            id: userId,
+            email: context.session.user.email,
+          },
+        })
+      );
+    },
+    memberOfGroup: async (groupId) => {
+      if (!context.session) {
+        return false;
+      }
+      return Boolean(
+        await prisma.group.count({
+          where: {
+            id: groupId,
+            memberships: {
+              some: {
+                user: {
+                  email: context.session.user.email,
+                },
+              },
+            },
+          },
+        })
+      );
+    },
   }),
   errorOptions: {
     defaultTypes: [Error],

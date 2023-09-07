@@ -16,6 +16,7 @@ import { GroupInviteList } from "./GroupInviteList";
 import { GroupMemberList } from "./GroupMemberList";
 import { InviteForMe } from "./InviteForMe";
 import { useIsGroupAdmin } from "./hooks";
+import { GroupModelList } from "./GroupModelList";
 
 const Query = graphql`
   query GroupPageQuery($slug: String!) {
@@ -32,6 +33,7 @@ const Query = graphql`
         slug
         ...GroupMemberList
         ...GroupInviteList
+        ...GroupModelList
         ...hooks_useIsGroupAdmin
         ...InviteForMe
       }
@@ -66,7 +68,9 @@ export const GroupPage: FC<{
         </StyledTab.List>
         <div className="mt-4">
           <StyledTab.Panels>
-            <StyledTab.Panel>TODO</StyledTab.Panel>
+            <StyledTab.Panel>
+              <GroupModelList groupRef={group} />
+            </StyledTab.Panel>
             <StyledTab.Panel>
               <div className="space-y-8">
                 <section>

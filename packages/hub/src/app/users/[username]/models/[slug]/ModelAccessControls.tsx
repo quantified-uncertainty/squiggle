@@ -14,14 +14,16 @@ import {
   GlobeIcon,
   LockIcon,
 } from "@quri/ui";
+import { useOwnerForInput } from "@/hooks/Owner";
 
 export const Fragment = graphql`
   fragment ModelAccessControls on Model {
     id
     slug
     isPrivate
+    isEditable
     owner {
-      username
+      ...Owner
     }
   }
 `;
@@ -60,11 +62,13 @@ export const UpdateModelPrivacyAction: FC<{
     expectedTypename: "UpdateModelPrivacyResult",
   });
 
+  const ownerInput = useOwnerForInput(model.owner);
+
   const act = () =>
     runMutation({
       variables: {
         input: {
-          username: model.owner.username,
+          owner: ownerInput,
           slug: model.slug,
           isPrivate: !model.isPrivate,
         },
@@ -85,8 +89,6 @@ export const ModelAccessControls: FC<{ modelRef: ModelAccessControls$key }> = ({
   modelRef,
 }) => {
   const model = useFragment(Fragment, modelRef);
-  const { data: session } = useSession();
-  const ownedByCurrentUser = model.owner.username === session?.user?.username;
 
   const Icon = getIconComponent(model.isPrivate);
 
@@ -95,7 +97,7 @@ export const ModelAccessControls: FC<{ modelRef: ModelAccessControls$key }> = ({
     <div
       className={clsx(
         "flex items-center text-sm text-gray-500 px-2 py-1 rounded-sm",
-        ownedByCurrentUser && "hover:bg-slate-200 cursor-pointer"
+        model.isEditable && "hover:bg-slate-200 cursor-pointer"
       )}
     >
       <Icon className="text-gray-500 mr-1" size={14} />
@@ -103,7 +105,7 @@ export const ModelAccessControls: FC<{ modelRef: ModelAccessControls$key }> = ({
     </div>
   );
 
-  return ownedByCurrentUser ? (
+  return model.isEditable ? (
     <Dropdown
       render={({ close }) => (
         <DropdownMenu>

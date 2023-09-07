@@ -1,55 +1,81 @@
+import { Owner$data } from "./__generated__/Owner.graphql";
+
 export function chooseUsernameRoute() {
   return "/settings/choose-username";
 }
 
 export function modelRoute({
+  owner,
+  slug,
+}: {
+  owner: Owner$data;
+  slug: string;
+}) {
+  const ownerUrl = ownerRoute(owner);
+  return `${ownerUrl}/models/${slug}`;
+}
+
+export function userModelRoute({
   username,
   slug,
 }: {
   username: string;
   slug: string;
 }) {
-  return `/users/${username}/models/${slug}`;
+  return `${userRoute({ username })}/models/${slug}`;
+}
+
+export function ownerRoute(owner: Owner$data) {
+  switch (owner.__typename) {
+    case "User":
+      return userRoute({ username: owner.slug });
+    case "Group":
+      return groupRoute({ slug: owner.slug });
+    default:
+      throw new Error(`Unknown owner type ${owner.__typename}`);
+  }
 }
 
 export function isModelRoute(url: string) {
-  return url.match("^/users/[^/]+/models/[^/]+$");
+  return url.match("^/(?:users|groups)/[^/]+/models/[^/]+$");
 }
 
 //Triggers on the model route and all subroutes
 export function isModelSubroute(url: string) {
-  return url.match("^/users/[^/]+/models/*");
+  return url.match("^/(?:users|groups)/[^/]+/models/*");
 }
 
 // used by useFixModelUrlCasing hook
 export function patchModelRoute({
   pathname,
-  username,
+  owner,
   slug,
 }: {
   pathname: string;
-  username: string;
+  owner: Owner$data;
   slug: string;
 }) {
-  const match = pathname.match("^/users/[^/]+/models/[^/]+($|/.*)");
+  const match = pathname.match("^/(?:users|groups)/[^/]+/models/[^/]+($|/.*)");
   if (!match) {
     throw new Error("Not a model route");
   }
-  return `/users/${username}/models/${slug}${match[1]}`;
+  const ownerUrl = ownerRoute(owner);
+  return `${ownerUrl}/models/${slug}${match[1]}`;
 }
 
 export function modelForRelativeValuesExportRoute({
-  username,
+  owner,
   slug,
   variableName,
   mode = "list",
 }: {
-  username: string;
+  owner: Owner$data;
   slug: string;
   variableName: string;
   mode?: "list" | "grid" | "plot";
 }) {
-  const baseRoute = `/users/${username}/models/${slug}/relative-values/${variableName}`;
+  const modelUrl = modelRoute({ owner, slug });
+  const baseRoute = `${modelUrl}/relative-values/${variableName}`;
   switch (mode) {
     case "list":
       return baseRoute;
@@ -68,26 +94,23 @@ export function modelViewRoute({
   return `/users/${username}/models/${slug}/view`;
 }
 
-export function modelRevisionsRoute({
-  username,
-  slug,
-}: {
-  username: string;
+export function modelRevisionsRoute(params: {
+  owner: Owner$data;
   slug: string;
 }) {
-  return `/users/${username}/models/${slug}/revisions`;
+  return `${modelRoute(params)}/revisions`;
 }
 
 export function modelRevisionRoute({
-  username,
+  owner,
   slug,
   revisionId,
 }: {
-  username: string;
+  owner: Owner$data;
   slug: string;
   revisionId: string;
 }) {
-  return `/users/${username}/models/${slug}/revisions/${revisionId}`;
+  return `${modelRoute({ owner, slug })}/revisions/${revisionId}`;
 }
 
 export function relativeValuesRoute({

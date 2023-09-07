@@ -15,6 +15,8 @@ import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 import { modelForRelativeValuesExportRoute } from "@/routes";
 import { LockIcon } from "@quri/ui";
+import { RelativeValuesDefinitionPage_export$key } from "@/__generated__/RelativeValuesDefinitionPage_export.graphql";
+import { useOwner } from "@/hooks/Owner";
 
 export const RelativeValuesDefinitionPageFragment = graphql`
   fragment RelativeValuesDefinitionPage on RelativeValuesDefinition {
@@ -28,16 +30,7 @@ export const RelativeValuesDefinitionPageFragment = graphql`
     }
     modelExports {
       id
-      variableName
-      modelRevision {
-        model {
-          owner {
-            username
-          }
-          slug
-          isPrivate
-        }
-      }
+      ...RelativeValuesDefinitionPage_export
     }
   }
 `;
@@ -61,6 +54,50 @@ export const RelativeValuesDefinitionPageQuery = graphql`
     }
   }
 `;
+
+const ExportItem: FC<{
+  exportRef: RelativeValuesDefinitionPage_export$key;
+}> = ({ exportRef }) => {
+  const modelExport = useFragment(
+    graphql`
+      fragment RelativeValuesDefinitionPage_export on RelativeValuesExport {
+        id
+        variableName
+        modelRevision {
+          model {
+            slug
+            isPrivate
+            owner {
+              slug
+              ...Owner
+            }
+          }
+        }
+      }
+    `,
+    exportRef
+  );
+
+  const owner = useOwner(modelExport.modelRevision.model.owner);
+
+  return (
+    <div className="flex items-center gap-1">
+      <StyledLink
+        href={modelForRelativeValuesExportRoute({
+          owner,
+          slug: modelExport.modelRevision.model.slug,
+          variableName: modelExport.variableName,
+        })}
+      >
+        {modelExport.modelRevision.model.owner.slug}/
+        {modelExport.modelRevision.model.slug}
+      </StyledLink>
+      {modelExport.modelRevision.model.isPrivate && (
+        <LockIcon size={14} className="text-slate-500" />
+      )}
+    </div>
+  );
+};
 
 export const RelativeValuesDefinitionPage: FC<{
   query: SerializablePreloadedQuery<typeof QueryNode, QueryType>;
@@ -88,21 +125,7 @@ export const RelativeValuesDefinitionPage: FC<{
             <H2>Implemented by:</H2>
             <div className="flex flex-col">
               {definition.modelExports.map((row) => (
-                <div key={row.id} className="flex items-center gap-1">
-                  <StyledLink
-                    href={modelForRelativeValuesExportRoute({
-                      username: row.modelRevision.model.owner.username,
-                      slug: row.modelRevision.model.slug,
-                      variableName: row.variableName,
-                    })}
-                  >
-                    {row.modelRevision.model.owner.username}/
-                    {row.modelRevision.model.slug}
-                  </StyledLink>
-                  {row.modelRevision.model.isPrivate && (
-                    <LockIcon size={14} className="text-slate-500" />
-                  )}
-                </div>
+                <ExportItem key={row.id} exportRef={row} />
               ))}
             </div>
           </section>

@@ -34,6 +34,7 @@ import {
 } from "../../ModelPage";
 import { ModelRevisionFragment } from "../../ModelRevision";
 import { CacheMenu } from "./CacheMenu";
+import { useOwner } from "@/hooks/Owner";
 
 export const RelativeValuesModelLayout: FC<
   PropsWithChildren<{
@@ -43,6 +44,7 @@ export const RelativeValuesModelLayout: FC<
 > = ({ query, variableName, children }) => {
   const modelRef = useModelPageQuery(query);
   const model = useFragment<ModelPage$key>(ModelPageFragment, modelRef);
+  const owner = useOwner(model.owner);
   const revision = useFragment<ModelRevision$key>(
     ModelRevisionFragment,
     model.currentRevision
@@ -114,13 +116,13 @@ export const RelativeValuesModelLayout: FC<
         </div>
         <div className="flex items-center gap-4">
           {definitionLink}
-          <CacheMenu revision={revision} ownerUsername={model.owner.username} />
+          <CacheMenu revision={revision} isEditable={model.isEditable} />
           <StyledTabLink.List>
             <StyledTabLink
               name="List"
               icon={Bars4Icon}
               href={modelForRelativeValuesExportRoute({
-                username: model.owner.username,
+                owner,
                 slug: model.slug,
                 variableName,
               })}
@@ -129,7 +131,7 @@ export const RelativeValuesModelLayout: FC<
               name="Grid"
               icon={TableCellsIcon}
               href={modelForRelativeValuesExportRoute({
-                username: model.owner.username,
+                owner,
                 slug: model.slug,
                 variableName,
                 mode: "grid",
@@ -139,7 +141,7 @@ export const RelativeValuesModelLayout: FC<
               name="Plot"
               icon={ScatterPlotIcon}
               href={modelForRelativeValuesExportRoute({
-                username: model.owner.username,
+                owner,
                 slug: model.slug,
                 variableName,
                 mode: "plot",

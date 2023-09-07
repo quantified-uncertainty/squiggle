@@ -14,6 +14,7 @@ import QueryNode, {
 } from "@gen/ModelRevisionViewQuery.graphql";
 import { SquigglePlayground } from "@quri/squiggle-components";
 import { format } from "date-fns";
+import { useOwner } from "@/hooks/Owner";
 
 const Query = graphql`
   query ModelRevisionViewQuery($input: QueryModelInput!, $revisionId: ID!) {
@@ -29,7 +30,7 @@ const Query = graphql`
         id
         slug
         owner {
-          username
+          ...Owner
         }
         ...FixModelUrlCasing
         revision(id: $revisionId) {
@@ -51,6 +52,12 @@ export const ModelRevisionView: FC<{
 }> = ({ query }) => {
   const [{ result }] = usePageQuery(query, Query);
   const model = extractFromGraphqlErrorUnion(result, "Model");
+  const owner = useOwner(model.owner);
+
+  const modelUrl = modelRoute({
+    owner,
+    slug: model.slug,
+  });
 
   const typename = model.revision.content.__typename;
   if (typename !== "SquiggleSnippet") {
@@ -65,14 +72,7 @@ export const ModelRevisionView: FC<{
             <span className="text-slate-500">Version from</span>{" "}
             {format(model.revision.createdAtTimestamp, commonDateFormat)}
           </div>
-          <StyledLink
-            href={modelRoute({
-              username: model.owner.username,
-              slug: model.slug,
-            })}
-          >
-            Go to latest version
-          </StyledLink>
+          <StyledLink href={modelUrl}>Go to latest version</StyledLink>
         </div>
       </div>
       <SquigglePlayground defaultCode={model.revision.content.code} />

@@ -1,7 +1,10 @@
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 import { decodeGlobalID } from "@pothos/plugin-relay";
-import { RelativeValuesExport } from "../types/RelativeValuesExport";
+import {
+  RelativeValuesExport,
+  getRelativeValuesExportForWriteableModel,
+} from "../types/RelativeValuesExport";
 
 builder.mutationField("clearRelativeValuesCache", (t) =>
   t.withAuth({ user: true }).fieldWithInput({
@@ -18,43 +21,23 @@ builder.mutationField("clearRelativeValuesCache", (t) =>
       exportId: t.input.string({ required: true }),
     },
     resolve: async (_, { input }, { session }) => {
-      const { typename, id } = decodeGlobalID(input.exportId);
+      const { typename, id: exportId } = decodeGlobalID(input.exportId);
       if (typename !== "RelativeValuesExport") {
         throw new Error("Expected RelativeValuesExport id");
       }
 
-      const relativeValuesExport =
-        await prisma.relativeValuesExport.findUniqueOrThrow({
-          where: { id },
-          include: {
-            modelRevision: {
-              select: {
-                model: {
-                  select: {
-                    owner: true,
-                  },
-                },
-              },
-            },
-          },
-        });
-
-      if (
-        relativeValuesExport.modelRevision.model.owner.email !==
-        session.user.email
-      ) {
-        throw new Error("You don't own this model");
-      }
+      await getRelativeValuesExportForWriteableModel({
+        exportId,
+        session,
+      });
 
       await prisma.relativeValuesPairCache.deleteMany({
-        where: {
-          exportId: id,
-        },
+        where: { exportId },
       });
 
       const updatedRelativeValuesExport =
         await prisma.relativeValuesExport.findUniqueOrThrow({
-          where: { id },
+          where: { id: exportId },
         });
       return { relativeValuesExport: updatedRelativeValuesExport };
     },

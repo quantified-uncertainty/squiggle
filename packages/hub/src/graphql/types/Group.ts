@@ -4,6 +4,8 @@ import { prisma } from "@/prisma";
 import { builder } from "../builder";
 import { GroupInvite, GroupInviteConnection } from "./GroupInvite";
 import { Session } from "next-auth";
+import { Owner } from "./Owner";
+import { ModelConnection, modelWhereHasAccess } from "./Model";
 
 export const MembershipRoleType = builder.enumType(MembershipRole, {
   name: "MembershipRole",
@@ -47,8 +49,8 @@ async function getMyMembership(groupId: string, session: Session | null) {
 export const Group = builder.prismaNode("Group", {
   id: { field: "id" },
   include: {},
+  interfaces: [Owner],
   fields: (t) => ({
-    slug: t.exposeString("slug"),
     createdAtTimestamp: t.float({
       resolve: (group) => group.createdAt.getTime(),
     }),
@@ -115,10 +117,16 @@ export const Group = builder.prismaNode("Group", {
       }),
       resolve: (group) => group.invites[0],
     }),
+    models: t.relatedConnection(
+      "models",
+      {
+        cursor: "id",
+        query: (_, { session }) => ({
+          orderBy: { updatedAt: "desc" },
+          where: modelWhereHasAccess(session),
+        }),
+      },
+      ModelConnection
+    ),
   }),
-});
-
-export const GroupConnection = builder.connectionObject({
-  type: Group,
-  name: "GroupConnection",
 });

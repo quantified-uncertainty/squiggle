@@ -1,9 +1,10 @@
 import { RelativeValuesDefinition } from "@prisma/client";
 
-import { prisma } from "@/prisma";
 import { builder } from "@/graphql/builder";
+import { prisma } from "@/prisma";
 
-import { Model } from "../types/Model";
+import { Model, getWriteableModel } from "../types/Model";
+import { OwnerInput, validateOwner } from "../types/Owner";
 
 const DefinitionRefInput = builder.inputType("DefinitionRefInput", {
   fields: (t) => ({
@@ -38,15 +39,12 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
   t.withAuth({ user: true }).fieldWithInput({
     type: builder.simpleObject("UpdateSquiggleSnippetResult", {
       fields: (t) => ({
-        model: t.field({
-          type: Model,
-          nullable: false,
-        }),
+        model: t.field({ type: Model }),
       }),
     }),
     errors: {},
     input: {
-      username: t.input.string({ required: true }),
+      owner: t.input.field({ type: OwnerInput, required: true }),
       slug: t.input.string({ required: true }),
       relativeValuesExports: t.input.field({
         type: [RelativeValuesExportInput],
@@ -58,14 +56,10 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
       }),
     },
     resolve: async (_, { input }, { session }) => {
-      if (session.user.username !== input.username) {
-        throw new Error("Can't edit another user's model");
-      }
-
-      const owner = await prisma.user.findUniqueOrThrow({
-        where: {
-          username: input.username,
-        },
+      const existingModel = await getWriteableModel({
+        slug: input.slug,
+        session,
+        owner: validateOwner(input.owner),
       });
 
       const code = input.code ?? input.content?.code;
@@ -100,7 +94,7 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
           Map<string, RelativeValuesDefinition>
         > = new Map();
         // now we need to match relativeValuesExports with definitions to get ids; I wonder if this could be simplified without sacrificing safety
-        for (let definition of selectedDefinitions) {
+        for (const definition of selectedDefinitions) {
           const { username } = definition.owner;
           if (username === null) {
             continue; // should never happen
@@ -136,10 +130,7 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
             contentType: "SquiggleSnippet",
             model: {
               connect: {
-                slug_ownerId: {
-                  slug: input.slug,
-                  ownerId: owner.id,
-                },
+                id: existingModel.id,
               },
             },
             relativeValuesExports: {
@@ -164,9 +155,7 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
           data: {
             currentRevisionId: revision.id,
           },
-          include: {
-            owner: true,
-          },
+          // TODO - optimize with queryFromInfo, https://pothos-graphql.dev/docs/plugins/prisma#optimized-queries-without-tprismafield
         });
 
         return model;

@@ -1,21 +1,34 @@
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
-import { Group, GroupConnection } from "../types/Group";
+import { Group } from "../types/Group";
+
+const GroupsQueryInput = builder.inputType("GroupsQueryInput", {
+  fields: (t) => ({
+    slugContains: t.string(),
+  }),
+});
 
 builder.queryField("groups", (t) =>
-  t.prismaConnection(
-    {
-      type: Group,
-      cursor: "id",
-      resolve: (query) => {
-        return prisma.group.findMany({
-          ...query,
-          orderBy: {
-            updatedAt: "desc",
-          },
-        });
-      },
+  t.prismaConnection({
+    type: Group,
+    cursor: "id",
+    args: {
+      input: t.arg({ type: GroupsQueryInput }),
     },
-    GroupConnection
-  )
+    resolve: (query, _, { input }) => {
+      return prisma.group.findMany({
+        ...query,
+        orderBy: {
+          updatedAt: "desc",
+        },
+        where: {
+          ...(input?.slugContains && {
+            slug: {
+              contains: input.slugContains,
+            },
+          }),
+        },
+      });
+    },
+  })
 );

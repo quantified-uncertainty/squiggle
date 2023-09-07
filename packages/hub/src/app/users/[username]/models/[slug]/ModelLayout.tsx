@@ -1,7 +1,6 @@
 "use client";
 
-import { useSession } from "next-auth/react";
-import { useParams, usePathname, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { FC, PropsWithChildren } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
@@ -17,13 +16,11 @@ import {
   ScaleIcon,
 } from "@quri/ui";
 
-import {
-  ModelLayout$data,
-  ModelLayout$key,
-} from "@/__generated__/ModelLayout.graphql";
+import { ModelLayout$key } from "@/__generated__/ModelLayout.graphql";
 import ModelLayoutQueryNode, {
   ModelLayoutQuery,
 } from "@/__generated__/ModelLayoutQuery.graphql";
+import { Owner$key } from "@/__generated__/Owner.graphql";
 import { EntityLayout } from "@/components/EntityLayout";
 import { DropdownMenuLinkItem } from "@/components/ui/DropdownMenuLinkItem";
 import { EntityTab } from "@/components/ui/EntityTab";
@@ -34,21 +31,24 @@ import {
   modelForRelativeValuesExportRoute,
   modelRevisionsRoute,
   modelRoute,
-  patchModelRoute,
 } from "@/routes";
 import { DeleteModelAction } from "./DeleteModelAction";
+import { useFixModelUrlCasing } from "./FixModelUrlCasing";
 import { ModelAccessControls } from "./ModelAccessControls";
 import { UpdateModelSlugAction } from "./UpdateModelSlugAction";
 import { entityNodes } from "./utils";
+import { useOwner } from "@/hooks/Owner";
 
 export const Fragment = graphql`
   fragment ModelLayout on Model {
     id
     slug
-    ...ModelAccessControls
+    isEditable
     owner {
-      username
+      ...Owner
     }
+    ...FixModelUrlCasing
+    ...ModelAccessControls
     currentRevision {
       id
       # for length; TODO - "hasExports" field?
@@ -57,9 +57,6 @@ export const Fragment = graphql`
         variableName
         definition {
           slug
-          owner {
-            username
-          }
         }
       }
     }
@@ -85,22 +82,16 @@ const Query = graphql`
   }
 `;
 
-type CommonProps = {
-  username: string;
+const MenuButton: FC<{
   slug: string;
-};
-
-const MenuButton: FC<CommonProps> = ({ username, slug }) => {
+  owner: Owner$key;
+}> = ({ owner, slug }) => {
   return (
     <Dropdown
       render={({ close }) => (
         <DropdownMenu>
-          <UpdateModelSlugAction
-            username={username}
-            slug={slug}
-            close={close}
-          />
-          <DeleteModelAction username={username} slug={slug} close={close} />
+          <UpdateModelSlugAction ownerRef={owner} slug={slug} close={close} />
+          <DeleteModelAction owner={owner} slug={slug} close={close} />
         </DropdownMenu>
       )}
     >
@@ -108,20 +99,6 @@ const MenuButton: FC<CommonProps> = ({ username, slug }) => {
     </Dropdown>
   );
 };
-
-function useFixModelUrlCasing(model: ModelLayout$data) {
-  const router = useRouter();
-  const pathname = usePathname();
-
-  const patchedPathname = patchModelRoute({
-    pathname,
-    slug: model.slug,
-    username: model.owner.username,
-  });
-  if (patchedPathname && patchedPathname !== pathname) {
-    router.replace(patchedPathname);
-  }
-}
 
 export const ModelLayout: FC<
   PropsWithChildren<{
@@ -131,13 +108,13 @@ export const ModelLayout: FC<
     >;
   }>
 > = ({ query, children }) => {
-  const { data: session } = useSession();
   const { variableName } = useParams();
 
   const [{ result }] = usePageQuery(query, Query);
 
   const modelRef = extractFromGraphqlErrorUnion(result, "Model");
   const model = useFragment<ModelLayout$key>(Fragment, modelRef);
+  const owner = useOwner(model.owner);
 
   useFixModelUrlCasing(model);
 
@@ -149,7 +126,7 @@ export const ModelLayout: FC<
         <DropdownMenuLinkItem
           key={exportItem.variableName}
           href={modelForRelativeValuesExportRoute({
-            username: model.owner.username,
+            owner,
             slug: model.slug,
             variableName: exportItem.variableName,
           })}
@@ -161,23 +138,25 @@ export const ModelLayout: FC<
     </DropdownMenu>
   );
 
-  const usernameAndSlug = {
-    username: model.owner.username,
+  const modelUrl = modelRoute({
+    owner,
     slug: model.slug,
-  };
+  });
+  const modelRevisionsUrl = modelRevisionsRoute({
+    owner,
+    slug: model.slug,
+  });
+
+  const ownerData = useOwner(model.owner);
 
   return (
     <EntityLayout
-      nodes={entityNodes(model.owner.username, model.slug, variableName)}
+      nodes={entityNodes(ownerData, model.slug, variableName)}
       isFluid={true}
       headerLeft={<ModelAccessControls modelRef={model} />}
       headerRight={
         <EntityTab.List>
-          <EntityTab.Link
-            name="Code"
-            icon={CodeBracketIcon}
-            href={modelRoute(usernameAndSlug)}
-          />
+          <EntityTab.Link name="Code" icon={CodeBracketIcon} href={modelUrl} />
           {Boolean(model.currentRevision.relativeValuesExports.length) && (
             <Dropdown render={({ close }) => dropDown(close)}>
               <EntityTab.Div
@@ -185,9 +164,7 @@ export const ModelLayout: FC<
                 icon={ScaleIcon}
                 count={model.currentRevision.relativeValuesExports.length}
                 selected={(pathname) => {
-                  return pathname.startsWith(
-                    modelRoute(usernameAndSlug) + "/relative-values"
-                  );
+                  return pathname.startsWith(modelUrl + "/relative-values");
                 }}
               />
             </Dropdown>
@@ -195,10 +172,10 @@ export const ModelLayout: FC<
           <EntityTab.Link
             name="Revisions"
             icon={RectangleStackIcon}
-            href={modelRevisionsRoute(usernameAndSlug)}
+            href={modelRevisionsUrl}
           />
-          {session?.user.username === model.owner.username ? (
-            <MenuButton {...usernameAndSlug} />
+          {model.isEditable ? (
+            <MenuButton slug={model.slug} owner={model.owner} />
           ) : null}
         </EntityTab.List>
       }

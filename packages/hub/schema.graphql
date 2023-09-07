@@ -60,25 +60,16 @@ type GlobalStatistics {
   users: Int!
 }
 
-type Group implements Node {
+type Group implements Node & Owner {
   createdAtTimestamp: Float!
   id: ID!
   inviteForMe: GroupInvite
   invites(after: String, before: String, first: Int, last: Int): GroupInviteConnection
   memberships(after: String, before: String, first: Int, last: Int): UserGroupMembershipConnection!
+  models(after: String, before: String, first: Int, last: Int): ModelConnection!
   myMembership: UserGroupMembership
   slug: String!
   updatedAtTimestamp: Float!
-}
-
-type GroupConnection {
-  edges: [GroupEdge!]!
-  pageInfo: PageInfo!
-}
-
-type GroupEdge {
-  cursor: String!
-  node: Group!
 }
 
 interface GroupInvite {
@@ -102,6 +93,10 @@ enum GroupInviteReaction {
   Decline
 }
 
+input GroupsQueryInput {
+  slugContains: String
+}
+
 type InviteUserToGroupResult {
   invite: GroupInvite!
 }
@@ -120,8 +115,9 @@ type Model implements Node {
   createdAtTimestamp: Float!
   currentRevision: ModelRevision!
   id: ID!
+  isEditable: Boolean!
   isPrivate: Boolean!
-  owner: User!
+  owner: Owner!
   revision(id: ID!): ModelRevision!
   revisions(after: String, before: String, first: Int, last: Int): ModelRevisionConnection!
   slug: String!
@@ -226,6 +222,7 @@ union MutationCreateRelativeValuesDefinitionResult = BaseError | CreateRelativeV
 
 input MutationCreateSquiggleSnippetModelInput {
   code: String!
+  groupSlug: String
   slug: String!
 }
 
@@ -238,8 +235,8 @@ input MutationDeleteMembershipInput {
 union MutationDeleteMembershipResult = BaseError | DeleteMembershipResult
 
 input MutationDeleteModelInput {
+  owner: OwnerInput!
   slug: String!
-  username: String!
 }
 
 union MutationDeleteModelResult = BaseError | DeleteModelResult
@@ -284,8 +281,8 @@ union MutationUpdateMembershipRoleResult = BaseError | UpdateMembershipRoleResul
 
 input MutationUpdateModelPrivacyInput {
   isPrivate: Boolean!
+  owner: OwnerInput!
   slug: String!
-  username: String!
 }
 
 union MutationUpdateModelPrivacyResult = BaseError | UpdateModelPrivacyResult
@@ -293,7 +290,7 @@ union MutationUpdateModelPrivacyResult = BaseError | UpdateModelPrivacyResult
 input MutationUpdateModelSlugInput {
   newSlug: String!
   oldSlug: String!
-  username: String!
+  owner: OwnerInput!
 }
 
 union MutationUpdateModelSlugResult = BaseError | UpdateModelSlugResult
@@ -312,9 +309,9 @@ union MutationUpdateRelativeValuesDefinitionResult = BaseError | UpdateRelativeV
 input MutationUpdateSquiggleSnippetModelInput {
   code: String @deprecated(reason: "Use content arg instead")
   content: SquiggleSnippetContentInput
+  owner: OwnerInput!
   relativeValuesExports: [RelativeValuesExportInput!]
   slug: String!
-  username: String!
 }
 
 union MutationUpdateSquiggleSnippetModelResult = BaseError | UpdateSquiggleSnippetResult
@@ -327,6 +324,16 @@ type NotFoundError implements Error {
   message: String!
 }
 
+interface Owner {
+  id: ID!
+  slug: String!
+}
+
+input OwnerInput {
+  groupSlug: String
+  username: String
+}
+
 type PageInfo {
   endCursor: String
   hasNextPage: Boolean!
@@ -337,7 +344,7 @@ type PageInfo {
 type Query {
   globalStatistics: GlobalStatistics!
   group(slug: String!): QueryGroupResult!
-  groups(after: String, before: String, first: Int, last: Int): GroupConnection!
+  groups(after: String, before: String, first: Int, input: GroupsQueryInput, last: Int): QueryGroupsConnection!
   me: Me!
   model(input: QueryModelInput!): QueryModelResult!
   models(after: String, before: String, first: Int, last: Int): ModelConnection!
@@ -351,6 +358,16 @@ type Query {
 }
 
 union QueryGroupResult = BaseError | Group | NotFoundError
+
+type QueryGroupsConnection {
+  edges: [QueryGroupsConnectionEdge!]!
+  pageInfo: PageInfo!
+}
+
+type QueryGroupsConnectionEdge {
+  cursor: String!
+  node: Group!
+}
 
 input QueryModelInput {
   ownerUsername: String!
@@ -511,10 +528,11 @@ type UpdateSquiggleSnippetResult {
   model: Model!
 }
 
-type User implements Node {
+type User implements Node & Owner {
   id: ID!
   models(after: String, before: String, first: Int, last: Int): ModelConnection!
   relativeValuesDefinitions(after: String, before: String, first: Int, last: Int): RelativeValuesDefinitionConnection!
+  slug: String!
   username: String!
 }
 

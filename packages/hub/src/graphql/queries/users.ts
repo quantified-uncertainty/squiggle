@@ -16,14 +16,14 @@ builder.queryField("users", (t) =>
     args: {
       input: t.arg({ type: UsersQueryInput }),
     },
-    resolve: (query, _, args) =>
+    resolve: (query, _, { input }) =>
       prisma.user.findMany({
         ...query,
         where: {
           username: { not: null },
-          ...(args.input?.usernameContains && {
+          ...(input?.usernameContains && {
             username: {
-              contains: args.input.usernameContains,
+              contains: input.usernameContains,
             },
           }),
         },

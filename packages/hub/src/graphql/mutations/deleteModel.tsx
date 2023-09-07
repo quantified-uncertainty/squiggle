@@ -1,6 +1,9 @@
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
+import { Model, getWriteableModel } from "../types/Model";
+import { OwnerInput, validateOwner } from "../types/Owner";
+
 builder.mutationField("deleteModel", (t) =>
   t.withAuth({ user: true }).fieldWithInput({
     type: builder.simpleObject("DeleteModelResult", {
@@ -9,26 +12,19 @@ builder.mutationField("deleteModel", (t) =>
       }),
     }),
     input: {
-      username: t.input.string({ required: true }),
+      owner: t.input.field({ type: OwnerInput, required: true }),
       slug: t.input.string({ required: true }),
     },
     errors: {},
-    async resolve(_, args, { session }) {
-      const { username, slug } = args.input;
-      if (session.user.username !== username) {
-        throw new Error("Can't delete another user's model");
-      }
-      const owner = await prisma.user.findUniqueOrThrow({
-        where: { username },
+    async resolve(_, { input }, { session }) {
+      let model = await getWriteableModel({
+        slug: input.slug,
+        owner: validateOwner(input.owner),
+        session,
       });
 
       await prisma.model.delete({
-        where: {
-          slug_ownerId: {
-            slug,
-            ownerId: owner.id,
-          },
-        },
+        where: { id: model.id },
       });
 
       return { ok: true };

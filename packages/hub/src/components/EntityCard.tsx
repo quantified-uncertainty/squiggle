@@ -1,6 +1,6 @@
 import { formatDistance } from "date-fns";
 import Link from "next/link";
-import { FC, ReactNode } from "react";
+import { FC, PropsWithChildren } from "react";
 
 import { IconProps, LockIcon } from "@quri/ui";
 
@@ -9,7 +9,7 @@ import { Card } from "./ui/Card";
 
 export type { EntityNode };
 
-type Props = {
+type Props = PropsWithChildren<{
   icon: FC<IconProps>;
   updatedAtTimestamp: number;
   href: string;
@@ -17,8 +17,7 @@ type Props = {
   isPrivate?: boolean;
   ownerName?: string;
   slug: string;
-  children?: ReactNode;
-};
+}>;
 
 export const EntityCard: FC<Props> = ({
   icon: Icon,

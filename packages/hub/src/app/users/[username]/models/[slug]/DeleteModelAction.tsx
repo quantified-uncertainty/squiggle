@@ -5,6 +5,8 @@ import { useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { DeleteModelActionMutation } from "@/__generated__/DeleteModelActionMutation.graphql";
+import { Owner$key } from "@/__generated__/Owner.graphql";
+import { useOwnerForInput } from "@/hooks/Owner";
 
 const Mutation = graphql`
   mutation DeleteModelActionMutation($input: MutationDeleteModelInput!) {
@@ -18,22 +20,24 @@ const Mutation = graphql`
 `;
 
 type Props = {
-  username: string;
+  owner: Owner$key;
   slug: string;
   close(): void;
 };
 
-export const DeleteModelAction: FC<Props> = ({ username, slug, close }) => {
+export const DeleteModelAction: FC<Props> = ({ owner, slug, close }) => {
   const router = useRouter();
 
   const [mutation] = useMutation<DeleteModelActionMutation>(Mutation);
 
   const toast = useToast();
 
+  const ownerInput = useOwnerForInput(owner);
+
   const onClick = useCallback((): Promise<void> => {
     return new Promise((resolve) => {
       mutation({
-        variables: { input: { username, slug } },
+        variables: { input: { owner: ownerInput, slug } },
         onCompleted(response) {
           if (response.deleteModel.__typename === "BaseError") {
             toast(response.deleteModel.message, "error");
@@ -49,7 +53,7 @@ export const DeleteModelAction: FC<Props> = ({ username, slug, close }) => {
         },
       });
     });
-  }, [mutation, username, slug, router, toast]);
+  }, [mutation, ownerInput, slug, router, toast]);
 
   return (
     <DropdownMenuAsyncActionItem

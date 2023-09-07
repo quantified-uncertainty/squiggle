@@ -65,10 +65,10 @@ model User {
   image                     String?
   accounts                  Account[]
   sessions                  Session[]
-  models                    Model[]
   relativeValuesDefinitions RelativeValuesDefinition[]
   memberships               UserGroupMembership[]
   invites                   GroupInvite[]
+  models                    Model[]
 }
 
 model VerificationToken {
@@ -89,6 +89,7 @@ model Group {
 
   memberships UserGroupMembership[]
   invites     GroupInvite[]
+  models      Model[]
 }
 
 enum MembershipRole {
@@ -159,8 +160,12 @@ model Model {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  owner   User   @relation(fields: [ownerId], references: [id])
-  ownerId String
+  // Only one of `user` and `group` should be set, guaranteed by GraphQL layer
+  user   User?   @relation(fields: [userId], references: [id])
+  userId String?
+
+  group   Group?  @relation(fields: [groupId], references: [id])
+  groupId String?
 
   isPrivate Boolean @default(false)
 
@@ -170,8 +175,10 @@ model Model {
   currentRevision   ModelRevision? @relation("CurrentRevision", fields: [currentRevisionId], references: [id])
   currentRevisionId String?        @unique
 
-  @@unique([slug, ownerId])
-  @@index([ownerId])
+  @@unique([slug, userId])
+  @@unique([slug, groupId])
+  @@index([userId])
+  @@index([groupId])
   @@index([createdAt])
 }
 
