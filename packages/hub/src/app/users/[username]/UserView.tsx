@@ -35,7 +35,7 @@ const Query = graphql`
 export const UserView: FC<{
   query: SerializablePreloadedQuery<typeof UserViewQueryNode, UserViewQuery>;
 }> = ({ query }) => {
-  const [{ userByUsername: result }] = usePageQuery(query, Query);
+  const [{ userByUsername: result }] = usePageQuery(Query, query);
 
   const user = extractFromGraphqlErrorUnion(result, "User");
 

@@ -44,7 +44,7 @@ const Query = graphql`
 export const GroupPage: FC<{
   query: SerializablePreloadedQuery<typeof QueryNode, GroupPageQuery>;
 }> = ({ query }) => {
-  const [{ result }, { reload }] = usePageQuery(query, Query);
+  const [{ result }, { reload }] = usePageQuery(Query, query);
 
   const group = extractFromGraphqlErrorUnion(result, "Group");
 

@@ -110,7 +110,7 @@ export const ModelLayout: FC<
 > = ({ query, children }) => {
   const { variableName } = useParams();
 
-  const [{ result }] = usePageQuery(query, Query);
+  const [{ result }] = usePageQuery(Query, query);
 
   const modelRef = extractFromGraphqlErrorUnion(result, "Model");
   const model = useFragment<ModelLayout$key>(Fragment, modelRef);

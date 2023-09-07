@@ -27,18 +27,18 @@ export function usePageQuery<
   TRequest extends ConcreteRequest,
   TQuery extends OperationType
 >(
-  rscQuery: SerializablePreloadedQuery<TRequest, TQuery>,
-  Query: GraphQLTaggedNode
+  Query: GraphQLTaggedNode,
+  rscQueryRef: SerializablePreloadedQuery<TRequest, TQuery>
 ) {
   const environment = useRelayEnvironment() as EnvironmentWithResponseCache;
 
   const [initialQueryRef, fetchKey] = useMemo(() => {
-    const fetchKey = rscQuery.params.id ?? rscQuery.params.cacheID;
+    const fetchKey = rscQueryRef.params.id ?? rscQueryRef.params.cacheID;
 
     environment.responseCache.set(
       fetchKey,
-      rscQuery.variables,
-      rscQuery.response
+      rscQueryRef.variables,
+      rscQueryRef.response
     );
 
     const preloadedQuery = {
@@ -50,25 +50,25 @@ export function usePageQuery<
       // Note: in dev, this will cause /api/graphql refetch on the client side, because of React strict mode. But it shouldn't do that in production.
       fetchPolicy: "store-and-network",
       isDisposed: false,
-      name: rscQuery.params.name,
+      name: rscQueryRef.params.name,
       kind: "PreloadedQuery",
-      variables: rscQuery.variables,
+      variables: rscQueryRef.variables,
       dispose: () => {},
     } as PreloadedQuery<TQuery>;
 
     return [preloadedQuery, fetchKey];
-  }, [rscQuery, environment]);
+  }, [rscQueryRef, environment]);
 
   useEffect(() => {
     return () => {
-      environment.responseCache.delete(fetchKey, rscQuery.variables);
+      environment.responseCache.delete(fetchKey, rscQueryRef.variables);
     };
-  }, [fetchKey, environment, initialQueryRef, rscQuery.variables]);
+  }, [fetchKey, environment, initialQueryRef, rscQueryRef.variables]);
 
   const [queryRef, loadQuery] = useQueryLoader<TQuery>(Query);
   const result = usePreloadedQuery(Query, queryRef ?? initialQueryRef);
 
-  const reload = () => loadQuery(rscQuery.variables);
+  const reload = () => loadQuery(rscQueryRef.variables);
 
   useEffect(() => {
     return () => {

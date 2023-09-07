@@ -67,7 +67,6 @@ export const ModelRevisionsList: FC<{
   query: SerializablePreloadedQuery<typeof QueryNode, ModelRevisionsListQuery>;
 }> = ({ query }) => {
   const [{ model: result }] = usePageQuery(
-    query,
     graphql`
       query ModelRevisionsListQuery($input: QueryModelInput!) {
         model(input: $input) {
@@ -80,7 +79,8 @@ export const ModelRevisionsList: FC<{
           }
         }
       }
-    `
+    `,
+    query
   );
 
   const modelRef = extractFromGraphqlErrorUnion(result, "Model");

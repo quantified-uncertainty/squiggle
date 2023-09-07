@@ -48,8 +48,8 @@ export const EditRelativeValuesDefinition: FC<{
   useSession({ required: true });
 
   const [{ relativeValuesDefinition: result }] = usePageQuery(
-    query,
-    RelativeValuesDefinitionPageQuery
+    RelativeValuesDefinitionPageQuery,
+    query
   );
 
   const definitionRef = extractFromGraphqlErrorUnion(

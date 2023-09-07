@@ -50,7 +50,7 @@ const Query = graphql`
 export const ModelRevisionView: FC<{
   query: SerializablePreloadedQuery<typeof QueryNode, ModelRevisionViewQuery>;
 }> = ({ query }) => {
-  const [{ result }] = usePageQuery(query, Query);
+  const [{ result }] = usePageQuery(Query, query);
   const model = extractFromGraphqlErrorUnion(result, "Model");
   const owner = useOwner(model.owner);
 

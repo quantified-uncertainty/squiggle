@@ -32,7 +32,7 @@ export const StatusPage: FC<{
     StatusPageQuery
   >;
 }> = ({ query }) => {
-  const [{ globalStatistics: stats }] = usePageQuery(query, Query);
+  const [{ globalStatistics: stats }] = usePageQuery(Query, query);
 
   return (
     <div>

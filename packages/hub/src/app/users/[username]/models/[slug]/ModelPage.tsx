@@ -46,7 +46,7 @@ export type PreloadedModelPageQuery = SerializablePreloadedQuery<
 >;
 
 export function useModelPageQuery(query: PreloadedModelPageQuery) {
-  const [{ model: modelRef }] = usePageQuery(query, Query);
+  const [{ model: modelRef }] = usePageQuery(Query, query);
 
   return modelRef;
 }

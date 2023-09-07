@@ -24,7 +24,7 @@ const Query = graphql`
 export const FrontPage: FC<{
   query: SerializablePreloadedQuery<typeof FrontPageQueryNode, FrontPageQuery>;
 }> = ({ query }) => {
-  const [data] = usePageQuery(query, Query);
+  const [data] = usePageQuery(Query, query);
 
   return (
     <div className="space-y-8">

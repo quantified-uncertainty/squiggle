@@ -103,8 +103,8 @@ export const RelativeValuesDefinitionPage: FC<{
   query: SerializablePreloadedQuery<typeof QueryNode, QueryType>;
 }> = ({ query }) => {
   const [{ relativeValuesDefinition: result }] = usePageQuery(
-    query,
-    RelativeValuesDefinitionPageQuery
+    RelativeValuesDefinitionPageQuery,
+    query
   );
 
   const definitionRef = extractFromGraphqlErrorUnion(
