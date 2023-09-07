@@ -18,7 +18,7 @@ async function LoadedLayout({ params, children }: Props) {
     typeof ModelLayoutQueryNode,
     ModelLayoutQuery
   >(ModelLayoutQueryNode.params, {
-    input: { ownerUsername: params.username, slug: params.slug },
+    input: { owner: { username: params.username }, slug: params.slug },
   });
 
   return <ModelLayout query={query}>{children}</ModelLayout>;

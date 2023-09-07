@@ -2,7 +2,7 @@ import { Metadata } from "next";
 
 import { ChooseUsername } from "./ChooseUsername";
 
-export default function ChooseUsernamePage() {
+export default function OuterChooseUsernamePage() {
   return <ChooseUsername />;
 }
 

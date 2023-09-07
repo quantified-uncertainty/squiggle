@@ -74,7 +74,6 @@ export const ModelRevisionsList: FC<{
           ... on Model {
             id
             ...ModelRevisionsList_model
-            ...FixModelUrlCasing
             ...ModelRevisionsList
           }
         }

@@ -1,24 +1,29 @@
-import { ReactNode } from "react";
+import { PropsWithChildren, ReactNode } from "react";
 
-import { loadModelPageQuery } from "../../loadModelPageQuery";
 import { RelativeValuesModelLayout } from "./RelativeValuesModelLayout";
+import { loadSerializableQuery } from "@/relay/loadSerializableQuery";
+import QueryNode, {
+  RelativeValuesModelLayoutQuery,
+} from "@/__generated__/RelativeValuesModelLayoutQuery.graphql";
 
 export default async function Layout({
   params,
   children,
-}: {
+}: PropsWithChildren<{
   params: { username: string; slug: string; variableName: string };
-  children: ReactNode;
-}) {
-  const query = await loadModelPageQuery(
-    {
-      ownerUsername: params.username,
+}>) {
+  const query = await loadSerializableQuery<
+    typeof QueryNode,
+    RelativeValuesModelLayoutQuery
+  >(QueryNode.params, {
+    input: {
+      owner: { username: params.username },
       slug: params.slug,
     },
-    {
+    forRelativeValues: {
       variableName: params.variableName,
-    }
-  );
+    },
+  });
 
   return (
     <RelativeValuesModelLayout query={query} variableName={params.variableName}>

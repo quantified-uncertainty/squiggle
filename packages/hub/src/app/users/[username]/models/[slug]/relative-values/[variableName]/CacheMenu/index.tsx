@@ -12,23 +12,19 @@ import {
   XIcon,
 } from "@quri/ui";
 
-import { useSession } from "next-auth/react";
-
-import { ModelRevision$data } from "@/__generated__/ModelRevision.graphql";
 import { RelativeValuesDefinitionRevision$key } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
 import { RelativeValuesDefinitionRevisionFragment } from "@/relative-values/components/RelativeValuesDefinitionRevision";
 import { BuildRelativeValuesCacheAction } from "./BuildRelativeValuesCacheAction";
 import { ClearRelativeValuesCacheAction } from "./ClearRelativeValuesCacheAction";
-import { Owner$key } from "@/__generated__/Owner.graphql";
+import { RelativeValuesModelRevision$data } from "@/__generated__/RelativeValuesModelRevision.graphql";
 
 export const CacheMenu: FC<{
-  revision: ModelRevision$data;
+  revision: RelativeValuesModelRevision$data;
   isEditable: boolean;
 }> = ({ revision, isEditable }) => {
   if (!revision.forRelativeValues) {
     throw new Error("Not found");
   }
-  const { data: session } = useSession();
 
   const definition = useFragment<RelativeValuesDefinitionRevision$key>(
     RelativeValuesDefinitionRevisionFragment,

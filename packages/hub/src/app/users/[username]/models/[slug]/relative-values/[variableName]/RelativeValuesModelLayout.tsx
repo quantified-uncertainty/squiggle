@@ -2,7 +2,7 @@
 
 import { FC, PropsWithChildren, useEffect, useState } from "react";
 import Skeleton from "react-loading-skeleton";
-import { useFragment } from "react-relay";
+import { graphql, useFragment } from "react-relay";
 
 import { result } from "@quri/squiggle-lang";
 import {
@@ -13,46 +13,75 @@ import {
   TableCellsIcon,
 } from "@quri/ui";
 
-import { ModelPage$key } from "@/__generated__/ModelPage.graphql";
-import { ModelRevision$key } from "@/__generated__/ModelRevision.graphql";
 import { RelativeValuesDefinitionRevision$key } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
-import { SquiggleContent$key } from "@/__generated__/SquiggleContent.graphql";
+import QueryNode, {
+  RelativeValuesModelLayoutQuery,
+} from "@/__generated__/RelativeValuesModelLayoutQuery.graphql";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { StyledTabLink } from "@/components/ui/StyledTabLink";
+import { useOwner } from "@/hooks/Owner";
+import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { RelativeValuesDefinitionRevisionFragment } from "@/relative-values/components/RelativeValuesDefinitionRevision";
 import { RelativeValuesProvider } from "@/relative-values/components/views/RelativeValuesProvider";
 import { ModelEvaluator } from "@/relative-values/values/ModelEvaluator";
+import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
+import { usePageQuery } from "@/relay/usePageQuery";
 import {
   modelForRelativeValuesExportRoute,
   relativeValuesRoute,
 } from "@/routes";
-import { SquiggleContentFragment } from "@/squiggle/components/SquiggleContent";
-import {
-  ModelPageFragment,
-  PreloadedModelPageQuery,
-  useModelPageQuery,
-} from "../../ModelPage";
-import { ModelRevisionFragment } from "../../ModelRevision";
 import { CacheMenu } from "./CacheMenu";
-import { useOwner } from "@/hooks/Owner";
+import { RelativeValuesModelRevisionFragment } from "./RelativeValuesModelRevision";
+import { RelativeValuesModelRevision$key } from "@/__generated__/RelativeValuesModelRevision.graphql";
 
 export const RelativeValuesModelLayout: FC<
   PropsWithChildren<{
-    query: PreloadedModelPageQuery;
+    query: SerializablePreloadedQuery<
+      typeof QueryNode,
+      RelativeValuesModelLayoutQuery
+    >;
     variableName: string;
   }>
 > = ({ query, variableName, children }) => {
-  const modelRef = useModelPageQuery(query);
-  const model = useFragment<ModelPage$key>(ModelPageFragment, modelRef);
+  const [{ model: result }] = usePageQuery(
+    graphql`
+      # used in ModelEvaluator
+      query RelativeValuesModelLayoutQuery(
+        $input: QueryModelInput!
+        $forRelativeValues: ModelRevisionForRelativeValuesInput!
+      ) {
+        model(input: $input) {
+          __typename
+          ... on Model {
+            id
+            slug
+            isEditable
+            ...EditModelExports_Model
+            owner {
+              ...Owner
+            }
+            currentRevision {
+              content {
+                __typename
+              }
+              ...RelativeValuesModelRevision
+            }
+          }
+        }
+      }
+    `,
+    query
+  );
+  const model = extractFromGraphqlErrorUnion(result, "Model");
   const owner = useOwner(model.owner);
-  const revision = useFragment<ModelRevision$key>(
-    ModelRevisionFragment,
+  const revision = useFragment<RelativeValuesModelRevision$key>(
+    RelativeValuesModelRevisionFragment,
     model.currentRevision
   );
 
-  const content = useFragment<SquiggleContent$key>(
-    SquiggleContentFragment,
-    revision.content
+  const content = extractFromGraphqlErrorUnion(
+    revision.content,
+    "SquiggleSnippet"
   );
 
   if (!revision.forRelativeValues) {

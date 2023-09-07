@@ -13,7 +13,7 @@ export default async function ModelPage({
     typeof QueryNode,
     ModelRevisionViewQuery
   >(QueryNode.params, {
-    input: { ownerUsername: params.username, slug: params.slug },
+    input: { owner: { username: params.username }, slug: params.slug },
     revisionId: params.revisionId,
   });
 

@@ -370,7 +370,7 @@ type QueryGroupsConnectionEdge {
 }
 
 input QueryModelInput {
-  ownerUsername: String!
+  owner: OwnerInput!
   slug: String!
 }
 

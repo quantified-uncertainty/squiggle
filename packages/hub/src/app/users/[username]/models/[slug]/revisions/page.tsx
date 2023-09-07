@@ -14,7 +14,7 @@ export default async function ModelPage({
     typeof QueryNode,
     ModelRevisionsListQuery
   >(QueryNode.params, {
-    input: { ownerUsername: params.username, slug: params.slug },
+    input: { owner: { username: params.username }, slug: params.slug },
   });
 
   return (

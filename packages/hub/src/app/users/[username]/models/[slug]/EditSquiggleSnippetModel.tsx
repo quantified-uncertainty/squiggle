@@ -1,4 +1,3 @@
-import { useSession } from "next-auth/react";
 import { FC, useMemo } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { graphql, useFragment, useMutation } from "react-relay";
@@ -9,19 +8,15 @@ import {
 } from "@quri/squiggle-components";
 import { Button, LinkIcon, useToast } from "@quri/ui";
 
+import { EditSquiggleSnippetModel$key } from "@/__generated__/EditSquiggleSnippetModel.graphql";
 import {
   EditSquiggleSnippetModelMutation,
   RelativeValuesExportInput,
 } from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
-import { ModelPage$key } from "@/__generated__/ModelPage.graphql";
-import { ModelRevision$key } from "@/__generated__/ModelRevision.graphql";
-import { SquiggleContent$key } from "@/__generated__/SquiggleContent.graphql";
-import { ModelPageFragment } from "@/app/users/[username]/models/[slug]/ModelPage";
-import { ModelRevisionFragment } from "@/app/users/[username]/models/[slug]/ModelRevision";
 import { EditModelExports } from "@/components/exports/EditModelExports";
-import { useAvailableHeight } from "@/hooks/useAvailableHeight";
-import { SquiggleContentFragment } from "./SquiggleContent";
 import { useOwnerForInput } from "@/hooks/Owner";
+import { useAvailableHeight } from "@/hooks/useAvailableHeight";
+import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 
 export const Mutation = graphql`
   mutation EditSquiggleSnippetModelMutation(
@@ -34,7 +29,7 @@ export const Mutation = graphql`
       }
       ... on UpdateSquiggleSnippetResult {
         model {
-          ...ModelPage
+          ...EditSquiggleSnippetModel
         }
       }
     }
@@ -49,21 +44,52 @@ type FormShape = {
 type Props = {
   // We have to pass the entire model here and not just content;
   // it's too hard to split the editing form into "content-type-specific" part and "generic model fields" part.
-  modelRef: ModelPage$key;
+  modelRef: EditSquiggleSnippetModel$key;
 };
 
 export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
   const toast = useToast();
 
-  const model = useFragment(ModelPageFragment, modelRef);
-  const revision = useFragment<ModelRevision$key>(
-    ModelRevisionFragment,
-    model.currentRevision
-  );
+  const model = useFragment(
+    graphql`
+      fragment EditSquiggleSnippetModel on Model {
+        id
+        slug
+        isEditable
+        ...EditModelExports_Model
+        owner {
+          ...Owner
+        }
+        currentRevision {
+          id
+          content {
+            __typename
+            ... on SquiggleSnippet {
+              id
+              code
+            }
+          }
 
-  const content = useFragment<SquiggleContent$key>(
-    SquiggleContentFragment,
-    revision.content
+          relativeValuesExports {
+            id
+            variableName
+            definition {
+              slug
+              owner {
+                username
+              }
+            }
+          }
+        }
+      }
+    `,
+    modelRef
+  );
+  const revision = model.currentRevision;
+
+  const content = extractFromGraphqlErrorUnion(
+    revision.content,
+    "SquiggleSnippet"
   );
 
   const ownerInput = useOwnerForInput(model.owner);

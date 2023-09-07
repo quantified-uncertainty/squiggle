@@ -9,7 +9,6 @@ type Props = {
 };
 
 export default async function OuterDefinitionPage({ params }: Props) {
-  // should be de-duped by Next.js caches, so it's not a problem that we do this query twice
   const query = await loadSerializableQuery<
     typeof QueryNode,
     RelativeValuesDefinitionPageQuery

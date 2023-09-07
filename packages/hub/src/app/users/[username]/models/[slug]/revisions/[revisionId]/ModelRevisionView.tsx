@@ -32,7 +32,6 @@ const Query = graphql`
         owner {
           ...Owner
         }
-        ...FixModelUrlCasing
         revision(id: $revisionId) {
           createdAtTimestamp
           content {
