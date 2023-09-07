@@ -5,18 +5,16 @@ import { graphql } from "relay-runtime";
 
 import { GroupIcon, StyledTab } from "@quri/ui";
 
-import QueryNode, {
-  GroupPageQuery,
-} from "@/__generated__/GroupPageQuery.graphql";
+import { GroupPageQuery } from "@/__generated__/GroupPageQuery.graphql";
 import { H1 } from "@/components/ui/Headers";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
-import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
+import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 import { GroupInviteList } from "./GroupInviteList";
 import { GroupMemberList } from "./GroupMemberList";
+import { GroupModelList } from "./GroupModelList";
 import { InviteForMe } from "./InviteForMe";
 import { useIsGroupAdmin } from "./hooks";
-import { GroupModelList } from "./GroupModelList";
 
 const Query = graphql`
   query GroupPageQuery($slug: String!) {
@@ -42,7 +40,7 @@ const Query = graphql`
 `;
 
 export const GroupPage: FC<{
-  query: SerializablePreloadedQuery<typeof QueryNode, GroupPageQuery>;
+  query: SerializablePreloadedQuery<GroupPageQuery>;
 }> = ({ query }) => {
   const [{ result }, { reload }] = usePageQuery(Query, query);
 

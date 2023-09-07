@@ -3,16 +3,14 @@
 import { FC } from "react";
 import { graphql } from "react-relay";
 
-import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
+import { EditModelPageQuery } from "@/__generated__/EditModelPageQuery.graphql";
+import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
+import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 import { EditSquiggleSnippetModel } from "./EditSquiggleSnippetModel";
-import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
-import QueryNode, {
-  EditModelPageQuery,
-} from "@/__generated__/EditModelPageQuery.graphql";
 
 export const EditModelPage: FC<{
-  query: SerializablePreloadedQuery<typeof QueryNode, EditModelPageQuery>;
+  query: SerializablePreloadedQuery<EditModelPageQuery>;
 }> = ({ query }) => {
   const [{ model: result }] = usePageQuery(
     graphql`

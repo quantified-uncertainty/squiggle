@@ -1,7 +1,7 @@
 import QueryNode, {
   EditModelPageQuery,
 } from "@/__generated__/EditModelPageQuery.graphql";
-import { loadSerializableQuery } from "@/relay/loadSerializableQuery";
+import { loadPageQuery } from "@/relay/loadPageQuery";
 import { EditModelPage } from "./EditModelPage";
 
 type Props = {
@@ -9,10 +9,7 @@ type Props = {
 };
 
 export default async function Page({ params }: Props) {
-  const query = await loadSerializableQuery<
-    typeof QueryNode,
-    EditModelPageQuery
-  >(QueryNode.params, {
+  const query = await loadPageQuery<EditModelPageQuery>(QueryNode, {
     input: {
       owner: { username: params.username },
       slug: params.slug,

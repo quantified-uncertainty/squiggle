@@ -7,14 +7,10 @@ import {
   useQueryLoader,
   useRelayEnvironment,
 } from "react-relay";
-import {
-  ConcreteRequest,
-  GraphQLTaggedNode,
-  OperationType,
-} from "relay-runtime";
+import { GraphQLTaggedNode, OperationType } from "relay-runtime";
 
 import { EnvironmentWithResponseCache } from "./environment";
-import { SerializablePreloadedQuery } from "./loadSerializableQuery";
+import { SerializablePreloadedQuery } from "./loadPageQuery";
 
 // This hook convert serializable preloaded query into Relay's PreloadedQuery object.
 // It also writes this serializable preloaded query into QueryResponseCache, so that
@@ -23,12 +19,9 @@ import { SerializablePreloadedQuery } from "./loadSerializableQuery";
 // In addition to the basic implementation from https://github.com/relayjs/relay-examples/tree/main/issue-tracker-next-v13, this hook:
 // - combines `useSerializablePreloadedQuery` and `usePreloadedQuery` into one call
 // - returns a `reload()` function that can be used together with `useSubscribeToInvalidationState` to reload page data.
-export function usePageQuery<
-  TRequest extends ConcreteRequest,
-  TQuery extends OperationType
->(
+export function usePageQuery<TQuery extends OperationType>(
   Query: GraphQLTaggedNode,
-  rscQueryRef: SerializablePreloadedQuery<TRequest, TQuery>
+  rscQueryRef: SerializablePreloadedQuery<TQuery>
 ) {
   const environment = useRelayEnvironment() as EnvironmentWithResponseCache;
 

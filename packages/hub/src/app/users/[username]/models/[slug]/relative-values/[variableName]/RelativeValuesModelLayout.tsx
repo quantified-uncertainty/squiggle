@@ -14,9 +14,8 @@ import {
 } from "@quri/ui";
 
 import { RelativeValuesDefinitionRevision$key } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
-import QueryNode, {
-  RelativeValuesModelLayoutQuery,
-} from "@/__generated__/RelativeValuesModelLayoutQuery.graphql";
+import { RelativeValuesModelLayoutQuery } from "@/__generated__/RelativeValuesModelLayoutQuery.graphql";
+import { RelativeValuesModelRevision$key } from "@/__generated__/RelativeValuesModelRevision.graphql";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { StyledTabLink } from "@/components/ui/StyledTabLink";
 import { useOwner } from "@/hooks/Owner";
@@ -24,7 +23,7 @@ import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { RelativeValuesDefinitionRevisionFragment } from "@/relative-values/components/RelativeValuesDefinitionRevision";
 import { RelativeValuesProvider } from "@/relative-values/components/views/RelativeValuesProvider";
 import { ModelEvaluator } from "@/relative-values/values/ModelEvaluator";
-import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
+import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 import {
   modelForRelativeValuesExportRoute,
@@ -32,14 +31,10 @@ import {
 } from "@/routes";
 import { CacheMenu } from "./CacheMenu";
 import { RelativeValuesModelRevisionFragment } from "./RelativeValuesModelRevision";
-import { RelativeValuesModelRevision$key } from "@/__generated__/RelativeValuesModelRevision.graphql";
 
 export const RelativeValuesModelLayout: FC<
   PropsWithChildren<{
-    query: SerializablePreloadedQuery<
-      typeof QueryNode,
-      RelativeValuesModelLayoutQuery
-    >;
+    query: SerializablePreloadedQuery<RelativeValuesModelLayoutQuery>;
     variableName: string;
   }>
 > = ({ query, variableName, children }) => {

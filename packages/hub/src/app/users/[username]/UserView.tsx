@@ -2,12 +2,10 @@
 import { FC } from "react";
 import { graphql } from "relay-runtime";
 
-import UserViewQueryNode, {
-  UserViewQuery,
-} from "@/__generated__/UserViewQuery.graphql";
+import { UserViewQuery } from "@/__generated__/UserViewQuery.graphql";
 import { H1, H2 } from "@/components/ui/Headers";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
-import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
+import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 import { UserIcon } from "@quri/ui";
 import { UserDefinitionList } from "./UserDefinitionList";
@@ -33,7 +31,7 @@ const Query = graphql`
 `;
 
 export const UserView: FC<{
-  query: SerializablePreloadedQuery<typeof UserViewQueryNode, UserViewQuery>;
+  query: SerializablePreloadedQuery<UserViewQuery>;
 }> = ({ query }) => {
   const [{ userByUsername: result }] = usePageQuery(Query, query);
 

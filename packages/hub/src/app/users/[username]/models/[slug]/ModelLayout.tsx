@@ -17,15 +17,14 @@ import {
 } from "@quri/ui";
 
 import { ModelLayout$key } from "@/__generated__/ModelLayout.graphql";
-import ModelLayoutQueryNode, {
-  ModelLayoutQuery,
-} from "@/__generated__/ModelLayoutQuery.graphql";
+import { ModelLayoutQuery } from "@/__generated__/ModelLayoutQuery.graphql";
 import { Owner$key } from "@/__generated__/Owner.graphql";
 import { EntityLayout } from "@/components/EntityLayout";
 import { DropdownMenuLinkItem } from "@/components/ui/DropdownMenuLinkItem";
 import { EntityTab } from "@/components/ui/EntityTab";
+import { useOwner } from "@/hooks/Owner";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
-import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
+import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 import {
   modelForRelativeValuesExportRoute,
@@ -37,7 +36,6 @@ import { useFixModelUrlCasing } from "./FixModelUrlCasing";
 import { ModelAccessControls } from "./ModelAccessControls";
 import { UpdateModelSlugAction } from "./UpdateModelSlugAction";
 import { entityNodes } from "./utils";
-import { useOwner } from "@/hooks/Owner";
 
 export const Fragment = graphql`
   fragment ModelLayout on Model {
@@ -102,10 +100,7 @@ const MenuButton: FC<{
 
 export const ModelLayout: FC<
   PropsWithChildren<{
-    query: SerializablePreloadedQuery<
-      typeof ModelLayoutQueryNode,
-      ModelLayoutQuery
-    >;
+    query: SerializablePreloadedQuery<ModelLayoutQuery>;
   }>
 > = ({ query, children }) => {
   const { variableName } = useParams();

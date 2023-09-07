@@ -1,6 +1,6 @@
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 import { ModelRevisionsList } from "./ModelRevisionsList";
-import { loadSerializableQuery } from "@/relay/loadSerializableQuery";
+import { loadPageQuery } from "@/relay/loadPageQuery";
 import QueryNode, {
   ModelRevisionsListQuery,
 } from "@/__generated__/ModelRevisionsListQuery.graphql";
@@ -10,10 +10,7 @@ export default async function ModelPage({
 }: {
   params: { username: string; slug: string };
 }) {
-  const query = await loadSerializableQuery<
-    typeof QueryNode,
-    ModelRevisionsListQuery
-  >(QueryNode.params, {
+  const query = await loadPageQuery<ModelRevisionsListQuery>(QueryNode, {
     input: { owner: { username: params.username }, slug: params.slug },
   });
 

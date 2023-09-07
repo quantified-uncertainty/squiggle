@@ -6,9 +6,7 @@ import { graphql, useFragment } from "react-relay";
 
 import { EditRelativeValuesDefinitionMutation } from "@/__generated__/EditRelativeValuesDefinitionMutation.graphql";
 import { RelativeValuesDefinitionPage$key } from "@/__generated__/RelativeValuesDefinitionPage.graphql";
-import QueryNode, {
-  RelativeValuesDefinitionPageQuery as QueryType,
-} from "@/__generated__/RelativeValuesDefinitionPageQuery.graphql";
+import { RelativeValuesDefinitionPageQuery as QueryType } from "@/__generated__/RelativeValuesDefinitionPageQuery.graphql";
 import { RelativeValuesDefinitionRevision$key } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
 import { useAsyncMutation } from "@/hooks/useAsyncMutation";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
@@ -17,7 +15,7 @@ import {
   RelativeValuesDefinitionFormShape,
 } from "@/relative-values/components/RelativeValuesDefinitionForm";
 import { RelativeValuesDefinitionRevisionFragment } from "@/relative-values/components/RelativeValuesDefinitionRevision";
-import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
+import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 import {
   RelativeValuesDefinitionPageFragment,
@@ -43,7 +41,7 @@ const Mutation = graphql`
 `;
 
 export const EditRelativeValuesDefinition: FC<{
-  query: SerializablePreloadedQuery<typeof QueryNode, QueryType>;
+  query: SerializablePreloadedQuery<QueryType>;
 }> = ({ query }) => {
   useSession({ required: true });
 

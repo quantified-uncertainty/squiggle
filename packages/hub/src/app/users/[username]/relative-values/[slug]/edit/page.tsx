@@ -1,5 +1,5 @@
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
-import { loadSerializableQuery } from "@/relay/loadSerializableQuery";
+import { loadPageQuery } from "@/relay/loadPageQuery";
 import QueryNode, {
   RelativeValuesDefinitionPageQuery,
 } from "@gen/RelativeValuesDefinitionPageQuery.graphql";
@@ -10,12 +10,12 @@ export default async function Page({
 }: {
   params: { username: string; slug: string };
 }) {
-  const query = await loadSerializableQuery<
-    typeof QueryNode,
-    RelativeValuesDefinitionPageQuery
-  >(QueryNode.params, {
-    input: { ownerUsername: params.username, slug: params.slug },
-  });
+  const query = await loadPageQuery<RelativeValuesDefinitionPageQuery>(
+    QueryNode,
+    {
+      input: { ownerUsername: params.username, slug: params.slug },
+    }
+  );
 
   return (
     <NarrowPageLayout>

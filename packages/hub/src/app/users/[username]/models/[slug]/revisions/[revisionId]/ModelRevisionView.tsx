@@ -4,17 +4,15 @@ import { FC } from "react";
 import { graphql } from "relay-runtime";
 
 import { StyledLink } from "@/components/ui/StyledLink";
+import { useOwner } from "@/hooks/Owner";
 import { commonDateFormat } from "@/lib/common";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
-import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
+import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 import { modelRoute } from "@/routes";
-import QueryNode, {
-  ModelRevisionViewQuery,
-} from "@gen/ModelRevisionViewQuery.graphql";
+import { ModelRevisionViewQuery } from "@gen/ModelRevisionViewQuery.graphql";
 import { SquigglePlayground } from "@quri/squiggle-components";
 import { format } from "date-fns";
-import { useOwner } from "@/hooks/Owner";
 
 const Query = graphql`
   query ModelRevisionViewQuery($input: QueryModelInput!, $revisionId: ID!) {
@@ -47,7 +45,7 @@ const Query = graphql`
 `;
 
 export const ModelRevisionView: FC<{
-  query: SerializablePreloadedQuery<typeof QueryNode, ModelRevisionViewQuery>;
+  query: SerializablePreloadedQuery<ModelRevisionViewQuery>;
 }> = ({ query }) => {
   const [{ result }] = usePageQuery(Query, query);
   const model = extractFromGraphqlErrorUnion(result, "Model");

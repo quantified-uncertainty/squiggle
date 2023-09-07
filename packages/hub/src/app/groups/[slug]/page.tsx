@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
-import { loadSerializableQuery } from "@/relay/loadSerializableQuery";
+import { loadPageQuery } from "@/relay/loadPageQuery";
 import { GroupPage } from "./GroupPage";
 import QueryNode, {
   GroupPageQuery,
@@ -12,10 +12,9 @@ type Props = {
 };
 
 export default async function OuterGroupPage({ params }: Props) {
-  const query = await loadSerializableQuery<typeof QueryNode, GroupPageQuery>(
-    QueryNode.params,
-    { slug: params.slug }
-  );
+  const query = await loadPageQuery<GroupPageQuery>(QueryNode, {
+    slug: params.slug,
+  });
 
   return (
     <NarrowPageLayout>

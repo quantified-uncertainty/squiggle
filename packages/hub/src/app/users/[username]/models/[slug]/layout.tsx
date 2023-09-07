@@ -4,7 +4,7 @@ import { ReactNode, Suspense } from "react";
 import ModelLayoutQueryNode, {
   ModelLayoutQuery,
 } from "@/__generated__/ModelLayoutQuery.graphql";
-import { loadSerializableQuery } from "@/relay/loadSerializableQuery";
+import { loadPageQuery } from "@/relay/loadPageQuery";
 import { FallbackModelLayout } from "./FallbackLayout";
 import { ModelLayout } from "./ModelLayout";
 
@@ -14,10 +14,7 @@ type Props = {
 };
 
 async function LoadedLayout({ params, children }: Props) {
-  const query = await loadSerializableQuery<
-    typeof ModelLayoutQueryNode,
-    ModelLayoutQuery
-  >(ModelLayoutQueryNode.params, {
+  const query = await loadPageQuery<ModelLayoutQuery>(ModelLayoutQueryNode, {
     input: { owner: { username: params.username }, slug: params.slug },
   });
 

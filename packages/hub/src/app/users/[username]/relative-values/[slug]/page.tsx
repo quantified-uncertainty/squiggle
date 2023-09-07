@@ -1,4 +1,4 @@
-import { loadSerializableQuery } from "@/relay/loadSerializableQuery";
+import { loadPageQuery } from "@/relay/loadPageQuery";
 import QueryNode, {
   RelativeValuesDefinitionPageQuery,
 } from "@gen/RelativeValuesDefinitionPageQuery.graphql";
@@ -9,12 +9,12 @@ type Props = {
 };
 
 export default async function OuterDefinitionPage({ params }: Props) {
-  const query = await loadSerializableQuery<
-    typeof QueryNode,
-    RelativeValuesDefinitionPageQuery
-  >(QueryNode.params, {
-    input: { ownerUsername: params.username, slug: params.slug },
-  });
+  const query = await loadPageQuery<RelativeValuesDefinitionPageQuery>(
+    QueryNode,
+    {
+      input: { ownerUsername: params.username, slug: params.slug },
+    }
+  );
 
   return <RelativeValuesDefinitionPage query={query} />;
 }

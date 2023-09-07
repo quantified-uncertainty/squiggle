@@ -1,4 +1,4 @@
-import { loadSerializableQuery } from "@/relay/loadSerializableQuery";
+import { loadPageQuery } from "@/relay/loadPageQuery";
 import { ModelRevisionView } from "./ModelRevisionView";
 import QueryNode, {
   ModelRevisionViewQuery,
@@ -9,10 +9,7 @@ export default async function ModelPage({
 }: {
   params: { username: string; slug: string; revisionId: string };
 }) {
-  const query = await loadSerializableQuery<
-    typeof QueryNode,
-    ModelRevisionViewQuery
-  >(QueryNode.params, {
+  const query = await loadPageQuery<ModelRevisionViewQuery>(QueryNode, {
     input: { owner: { username: params.username }, slug: params.slug },
     revisionId: params.revisionId,
   });

@@ -2,13 +2,11 @@
 import { FC } from "react";
 import { graphql } from "relay-runtime";
 
-import FrontPageQueryNode, {
-  FrontPageQuery,
-} from "@/__generated__/FrontPageQuery.graphql";
+import { FrontPageQuery } from "@/__generated__/FrontPageQuery.graphql";
 import { FrontPageDefinitionList } from "./FrontPageDefinitionList";
 import { FrontPageModelList } from "./FrontPageModelList";
 
-import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
+import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 import { StyledTab } from "@quri/ui";
 import { FrontPageGroupList } from "./FrontPageGroupList";
@@ -22,7 +20,7 @@ const Query = graphql`
 `;
 
 export const FrontPage: FC<{
-  query: SerializablePreloadedQuery<typeof FrontPageQueryNode, FrontPageQuery>;
+  query: SerializablePreloadedQuery<FrontPageQuery>;
 }> = ({ query }) => {
   const [data] = usePageQuery(Query, query);
 

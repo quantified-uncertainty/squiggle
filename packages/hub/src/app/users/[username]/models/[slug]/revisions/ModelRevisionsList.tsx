@@ -5,19 +5,17 @@ import { useFragment, usePaginationFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { ModelRevisionsList$key } from "@/__generated__/ModelRevisionsList.graphql";
-import { LoadMore } from "@/components/LoadMore";
-import { StyledLink } from "@/components/ui/StyledLink";
-import { commonDateFormat } from "@/lib/common";
-import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
-import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
-import { usePageQuery } from "@/relay/usePageQuery";
-import { modelRevisionRoute } from "@/routes";
-import QueryNode, {
-  ModelRevisionsListQuery,
-} from "@gen/ModelRevisionsListQuery.graphql";
 import { ModelRevisionsList_model$key } from "@/__generated__/ModelRevisionsList_model.graphql";
 import { ModelRevisionsList_revision$key } from "@/__generated__/ModelRevisionsList_revision.graphql";
+import { LoadMore } from "@/components/LoadMore";
+import { StyledLink } from "@/components/ui/StyledLink";
 import { useOwner } from "@/hooks/Owner";
+import { commonDateFormat } from "@/lib/common";
+import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
+import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
+import { usePageQuery } from "@/relay/usePageQuery";
+import { modelRevisionRoute } from "@/routes";
+import { ModelRevisionsListQuery } from "@gen/ModelRevisionsListQuery.graphql";
 
 const ModelRevisionItem: FC<{
   modelRef: ModelRevisionsList_model$key;
@@ -64,7 +62,7 @@ const ModelRevisionItem: FC<{
 };
 
 export const ModelRevisionsList: FC<{
-  query: SerializablePreloadedQuery<typeof QueryNode, ModelRevisionsListQuery>;
+  query: SerializablePreloadedQuery<ModelRevisionsListQuery>;
 }> = ({ query }) => {
   const [{ model: result }] = usePageQuery(
     graphql`
