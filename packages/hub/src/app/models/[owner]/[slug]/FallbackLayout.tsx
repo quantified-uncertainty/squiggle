@@ -16,9 +16,9 @@ export const FallbackModelLayout: FC<Props> = ({ username, slug }) => {
   return (
     <EntityLayout
       nodes={entityNodes(
-        // TODO - should we do something else while we don't have backend owner data?
-        // Perhaps we render a node as a plain text without a link until then.
-        { __typename: "User", slug: username },
+        // Note that we don't pass `__typename` here.
+        // This causes an entity node to not have an icon or a link until the owner type is known.
+        { slug: username },
         slug,
         variableName
       )}

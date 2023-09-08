@@ -41,15 +41,18 @@ export function SlugFormField<
   placeholder,
 }: {
   name: TName;
-  example: string;
+  example?: string;
   label: string;
-  placeholder: string;
+  placeholder?: string;
 }) {
   const form = useFormContext<TValues>();
 
   useDashifyFormField(form, name);
 
-  const description = `Must be alphanumerical, with no spaces. Example: ${example}`;
+  const description =
+    "Must be alphanumerical, with no spaces." +
+    (example ? `Example: ${example}` : "");
+
   return (
     <TextFormField
       name={name}

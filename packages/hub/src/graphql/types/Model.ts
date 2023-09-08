@@ -7,6 +7,7 @@ import { prisma } from "@/prisma";
 import { prismaConnectionHelpers } from "@pothos/plugin-prisma";
 import { ModelRevision, ModelRevisionConnection } from "./ModelRevision";
 import { Owner } from "./Owner";
+import { NotFoundError } from "../errors/NotFoundError";
 
 export function modelWhereHasAccess(
   session: Session | null
@@ -68,7 +69,10 @@ export async function getWriteableModel({
     },
   });
   if (!model) {
-    throw new Error("Can't find model"); // FIXME - this will happen if permissions are not sufficient
+    // FIXME - this will happen if permissions are not sufficient
+    // It would be better to throw a custom PermissionError
+    // (Note that we should throw PermissionError only if model is readable, but not writeable; otherwise it should still be "Can't find")
+    throw new NotFoundError("Can't find model");
   }
   return model;
 }

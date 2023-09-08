@@ -1,5 +1,5 @@
 import { graphql } from "../../gql-gen";
-import { executeCommonOperation, setCurrentUser } from "../executor";
+import { createRunners, setCurrentUser } from "../helpers";
 
 const CreateGroupTest = graphql(/* GraphQL */ `
   mutation CreateGroupTest {
@@ -28,18 +28,16 @@ const CreateGroupTest = graphql(/* GraphQL */ `
   }
 `);
 
+const { runOk, runError } = createRunners(CreateGroupTest, "CreateGroupResult");
+
 test("no auth", async () => {
-  const result = await executeCommonOperation(CreateGroupTest, {
-    expectedTypename: "BaseError",
-  });
+  const result = await runError({}, "BaseError");
   expect(result.message).toMatch("Not authorized");
 });
 
 test("basic", async () => {
   await setCurrentUser({ email: "mock@example.com", username: "mockuser" });
-  const result = await executeCommonOperation(CreateGroupTest, {
-    expectedTypename: "CreateGroupResult",
-  });
+  const result = await runOk({});
 
   expect(result).toMatchObject({
     group: {

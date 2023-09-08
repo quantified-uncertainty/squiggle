@@ -4,7 +4,7 @@ import {
   executeOperation,
   setCurrentUser,
   unsetCurrentUser,
-} from "../executor";
+} from "../helpers";
 
 const Query = graphql(/* GraphQL */ `
   query TestModels {

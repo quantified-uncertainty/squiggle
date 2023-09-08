@@ -81,15 +81,16 @@ export async function executeOperation<TResult, TVariables>(
   return yogaResponse.data;
 }
 
+type CommonResult = {
+  // see also: `useAsyncMutation` hook
+  readonly result: {
+    readonly __typename: string;
+  };
+};
+
 export async function executeCommonOperation<
-  TResult extends {
-    // see also: `useAsyncMutation` hook
-    readonly result: {
-      readonly __typename: TTypename;
-    };
-  },
-  TTypename,
-  const TExpectedTypename extends TTypename,
+  TResult extends CommonResult,
+  const TExpectedTypename extends string,
   TVariables
 >(
   operation: TypedDocumentNode<TResult, TVariables>,
@@ -121,4 +122,50 @@ export async function executeCommonOperation<
   }
 
   throw new Error(`Unexpected result: ${result.__typename}`);
+}
+
+// returns two wrappers on top of executeCommonOperation
+export function createRunners<
+  TResult extends CommonResult,
+  const TExpectedTypename extends string,
+  TVariables
+>(
+  mutation: TypedDocumentNode<TResult, TVariables>,
+  expectedTypename: TExpectedTypename
+) {
+  const runOk = async (variables: TVariables) => {
+    return await executeCommonOperation(mutation, {
+      variables,
+      expectedTypename,
+    });
+  };
+
+  const runError = async <T extends string>(
+    variables: TVariables,
+    typename: T
+  ) => {
+    return await executeCommonOperation(mutation, {
+      variables,
+      expectedTypename: typename,
+    });
+  };
+
+  return { runOk, runError };
+}
+
+// common convenient speicalization of createRunners - functions accept input instead of variables
+export function createInputRunners<
+  TResult extends CommonResult,
+  const TExpectedTypename extends string,
+  TInput
+>(
+  mutation: TypedDocumentNode<TResult, { input: TInput }>,
+  expectedTypename: TExpectedTypename
+) {
+  const { runOk, runError } = createRunners(mutation, expectedTypename);
+  return {
+    runOk: (input: TInput) => runOk({ input }),
+    runError: <T extends string>(input: TInput, typename: T) =>
+      runError({ input }, typename),
+  };
 }

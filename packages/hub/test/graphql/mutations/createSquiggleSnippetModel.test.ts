@@ -1,5 +1,6 @@
 import { graphql } from "../../gql-gen";
-import { executeCommonOperation, setCurrentUser } from "../executor";
+import { commonTestMutations } from "../commonMutations";
+import { createInputRunners, setCurrentUser } from "../helpers";
 
 const Mutation = graphql(/* GraphQL */ `
   mutation CreateSquiggleSnippetModelTest(
@@ -30,49 +31,33 @@ const Mutation = graphql(/* GraphQL */ `
   }
 `);
 
-const CreateGroup = graphql(/* GraphQL */ `
-  mutation CreateSquiggleSnippetModelTest_createGroup(
-    $input: MutationCreateGroupInput!
-  ) {
-    result: createGroup(input: $input) {
-      __typename
-      ... on Error {
-        message
-      }
-      ... on CreateGroupResult {
-        group {
-          id
-        }
-      }
-    }
-  }
-`);
-
 const user = { email: "mock@example.com", username: "mockuser" };
 
+const { runOk, runError } = createInputRunners(
+  Mutation,
+  "CreateSquiggleSnippetModelResult"
+);
+
 test("no auth", async () => {
-  const result = await executeCommonOperation(Mutation, {
-    variables: { input: { code: "2+2", slug: "testmodel" } },
-    expectedTypename: "BaseError",
-  });
+  const result = await runError(
+    { code: "2+2", slug: "testmodel" },
+    "BaseError"
+  );
   expect(result.message).toMatch("Not authorized");
 });
 
 test("bad slug", async () => {
   await setCurrentUser(user);
-  const result = await executeCommonOperation(Mutation, {
-    variables: { input: { code: "2+2", slug: "foo bar" } },
-    expectedTypename: "ValidationError",
-  });
+  const result = await runError(
+    { code: "2+2", slug: "foo bar" },
+    "ValidationError"
+  );
   expect(result.message).toMatch("[input.slug] Must be alphanumerical");
 });
 
 test("basic", async () => {
   await setCurrentUser(user);
-  const result = await executeCommonOperation(Mutation, {
-    variables: { input: { code: "2+2", slug: "testmodel" } },
-    expectedTypename: "CreateSquiggleSnippetModelResult",
-  });
+  const result = await runOk({ code: "2+2", slug: "testmodel" });
 
   expect(result.model.slug).toBe("testmodel");
   expect(result.model.owner.__typename).toBe("User");
@@ -82,9 +67,10 @@ test("basic", async () => {
 
 test("private", async () => {
   await setCurrentUser(user);
-  const result = await executeCommonOperation(Mutation, {
-    variables: { input: { code: "2+2", slug: "testmodel", isPrivate: true } },
-    expectedTypename: "CreateSquiggleSnippetModelResult",
+  const result = await runOk({
+    code: "2+2",
+    slug: "testmodel",
+    isPrivate: true,
   });
 
   expect(result.model.slug).toBe("testmodel");
@@ -95,18 +81,12 @@ test("private", async () => {
 
 test("for group", async () => {
   await setCurrentUser(user);
-  await executeCommonOperation(CreateGroup, {
-    variables: {
-      input: { slug: "testgroup" },
-    },
-    expectedTypename: "CreateGroupResult",
-  });
+  await commonTestMutations.createGroup("testgroup");
 
-  const result = await executeCommonOperation(Mutation, {
-    variables: {
-      input: { code: "2+2", slug: "testmodel", groupSlug: "testgroup" },
-    },
-    expectedTypename: "CreateSquiggleSnippetModelResult",
+  const result = await runOk({
+    code: "2+2",
+    slug: "testmodel",
+    groupSlug: "testgroup",
   });
 
   expect(result.model.owner.__typename).toBe("Group");
@@ -116,12 +96,14 @@ test("for group", async () => {
 test("for group with bad slug", async () => {
   await setCurrentUser(user);
 
-  const result = await executeCommonOperation(Mutation, {
-    variables: {
-      input: { code: "2+2", slug: "testmodel", groupSlug: "no such group" },
+  const result = await runError(
+    {
+      code: "2+2",
+      slug: "testmodel",
+      groupSlug: "no such group",
     },
-    expectedTypename: "ValidationError",
-  });
+    "ValidationError"
+  );
 
   expect(result.message).toMatch("[input.groupSlug] Must be alphanumerical");
 });
@@ -129,19 +111,12 @@ test("for group with bad slug", async () => {
 test("duplicate", async () => {
   await setCurrentUser(user);
 
-  await executeCommonOperation(Mutation, {
-    variables: {
-      input: { code: "2+2", slug: "testmodel" },
-    },
-    expectedTypename: "CreateSquiggleSnippetModelResult",
-  });
+  await runOk({ code: "2+2", slug: "testmodel" });
 
-  const result = await executeCommonOperation(Mutation, {
-    variables: {
-      input: { code: "2+2", slug: "testmodel" },
-    },
-    expectedTypename: "BaseError",
-  });
+  const result = await runError(
+    { code: "2+2", slug: "testmodel" },
+    "BaseError"
+  );
 
   expect(result.message).toMatch(
     "Model testmodel already exists on this account"

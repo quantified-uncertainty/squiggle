@@ -1,5 +1,5 @@
 import { graphql } from "../../gql-gen";
-import { executeOperation, setCurrentUser } from "../executor";
+import { executeOperation, setCurrentUser } from "../helpers";
 
 test("basic", async () => {
   await setCurrentUser({

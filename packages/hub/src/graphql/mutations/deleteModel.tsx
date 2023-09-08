@@ -2,6 +2,9 @@ import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
 import { getWriteableModel } from "../types/Model";
+import { validateSlug } from "../utils";
+import { ZodError } from "zod";
+import { NotFoundError } from "../errors/NotFoundError";
 
 builder.mutationField("deleteModel", (t) =>
   t.withAuth({ signedIn: true }).fieldWithInput({
@@ -11,12 +14,12 @@ builder.mutationField("deleteModel", (t) =>
       }),
     }),
     input: {
-      owner: t.input.string({ required: true }),
-      slug: t.input.string({ required: true }),
+      owner: t.input.string({ required: true, validate: validateSlug }),
+      slug: t.input.string({ required: true, validate: validateSlug }),
     },
-    errors: {},
+    errors: { types: [ZodError, NotFoundError] },
     async resolve(_, { input }, { session }) {
-      let model = await getWriteableModel({
+      const model = await getWriteableModel({
         slug: input.slug,
         owner: input.owner,
         session,

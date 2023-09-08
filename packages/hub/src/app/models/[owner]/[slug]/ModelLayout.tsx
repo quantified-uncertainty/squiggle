@@ -2,12 +2,10 @@
 
 import { useParams } from "next/navigation";
 import { FC, PropsWithChildren } from "react";
-import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import {
   CodeBracketIcon,
-  Cog8ToothIcon,
   Dropdown,
   DropdownMenu,
   DropdownMenuHeader,
@@ -16,7 +14,6 @@ import {
   ScaleIcon,
 } from "@quri/ui";
 
-import { ModelLayout$key } from "@/__generated__/ModelLayout.graphql";
 import { ModelLayoutQuery } from "@/__generated__/ModelLayoutQuery.graphql";
 import { EntityLayout } from "@/components/EntityLayout";
 import { DropdownMenuLinkItem } from "@/components/ui/DropdownMenuLinkItem";
@@ -29,39 +26,12 @@ import {
   modelRevisionsRoute,
   modelRoute,
 } from "@/routes";
-import { DeleteModelAction } from "./DeleteModelAction";
 import { useFixModelUrlCasing } from "./FixModelUrlCasing";
 import { ModelAccessControls } from "./ModelAccessControls";
-import { UpdateModelSlugAction } from "./UpdateModelSlugAction";
 import { entityNodes } from "./utils";
+import { ModelSettingsButton } from "./ModelSettingsButton";
 
-export const Fragment = graphql`
-  fragment ModelLayout on Model {
-    id
-    slug
-    isEditable
-    owner {
-      __typename
-      slug
-    }
-    ...FixModelUrlCasing
-    ...ModelAccessControls
-    currentRevision {
-      id
-      # for length; TODO - "hasExports" field?
-      relativeValuesExports {
-        id
-        variableName
-        definition {
-          slug
-        }
-      }
-    }
-  }
-`;
-
-// Doing this with a fragment would be too hard, because of how layouts work in Next.js.
-// So we have to do two GraphQL queries on most model pages.
+// Note that we have to do two GraphQL queries on most model pages: one for layout.tsx, and one for page.tsx.
 const Query = graphql`
   query ModelLayoutQuery($input: QueryModelInput!) {
     result: model(input: $input) {
@@ -73,29 +43,30 @@ const Query = graphql`
         message
       }
       ... on Model {
-        ...ModelLayout
+        id
+        slug
+        isEditable
+        owner {
+          __typename
+          slug
+        }
+        ...FixModelUrlCasing
+        ...ModelAccessControls
+        currentRevision {
+          id
+          # for length; TODO - "hasExports" field?
+          relativeValuesExports {
+            id
+            variableName
+            definition {
+              slug
+            }
+          }
+        }
       }
     }
   }
 `;
-
-const MenuButton: FC<{
-  slug: string;
-  owner: string;
-}> = ({ owner, slug }) => {
-  return (
-    <Dropdown
-      render={({ close }) => (
-        <DropdownMenu>
-          <UpdateModelSlugAction owner={owner} slug={slug} close={close} />
-          <DeleteModelAction owner={owner} slug={slug} close={close} />
-        </DropdownMenu>
-      )}
-    >
-      <EntityTab.Div name="Settings" icon={Cog8ToothIcon} />
-    </Dropdown>
-  );
-};
 
 export const ModelLayout: FC<
   PropsWithChildren<{
@@ -106,8 +77,7 @@ export const ModelLayout: FC<
 
   const [{ result }] = usePageQuery(Query, query);
 
-  const modelRef = extractFromGraphqlErrorUnion(result, "Model");
-  const model = useFragment<ModelLayout$key>(Fragment, modelRef);
+  const model = extractFromGraphqlErrorUnion(result, "Model");
 
   useFixModelUrlCasing(model);
 
@@ -163,7 +133,7 @@ export const ModelLayout: FC<
             href={modelRevisionsUrl}
           />
           {model.isEditable ? (
-            <MenuButton slug={model.slug} owner={model.owner.slug} />
+            <ModelSettingsButton slug={model.slug} owner={model.owner.slug} />
           ) : null}
         </EntityTab.List>
       }

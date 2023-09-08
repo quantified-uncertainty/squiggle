@@ -5,10 +5,11 @@ import { OptionProps, SingleValueProps, components } from "react-select";
 import AsyncSelect from "react-select/async";
 import { fetchQuery, graphql } from "relay-runtime";
 
-import { ControlledFormField } from "@quri/ui";
+import { ControlledFormField, GroupIcon, UserCircleIcon } from "@quri/ui";
 
 import { SelectOwnerQuery } from "@/__generated__/SelectOwnerQuery.graphql";
 import { useRelayEnvironment } from "react-relay";
+import { ownerIcon } from "@/lib/common";
 
 const Query = graphql`
   query SelectOwnerQuery(
@@ -37,14 +38,20 @@ const Query = graphql`
 `;
 
 type Option = {
-  readonly __typename: string;
+  readonly __typename: "User" | "Group";
   readonly id: string;
   readonly slug: string;
 };
 
-const OwnerInfo: FC<{ owner: Option }> = ({ owner }) => (
-  <div>{owner.slug}</div> // TODO - show User/Group type (icon?)
-);
+const OwnerInfo: FC<{ owner: Option }> = ({ owner }) => {
+  const Icon = ownerIcon(owner.__typename);
+  return (
+    <div className="flex items-center gap-2">
+      <Icon className="text-slate-500" size={16} />
+      <div>{owner.slug}</div>
+    </div>
+  );
+};
 
 const Option = ({ children, ...props }: OptionProps<Option>) => {
   return (

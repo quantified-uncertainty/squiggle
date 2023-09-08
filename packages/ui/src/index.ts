@@ -43,6 +43,7 @@ export { ExternalLinkIcon } from "./icons/ExternalLinkIcon.js";
 export { SignOutIcon } from "./icons/SignOutIcon.js";
 export { EditIcon } from "./icons/EditIcon.js";
 export { FocusIcon } from "./icons/FocusIcon.js";
+export { EmptyIcon } from "./icons/EmptyIcon.js";
 export {
   BarChartIcon,
   PauseIcon,

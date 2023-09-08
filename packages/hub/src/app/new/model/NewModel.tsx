@@ -93,7 +93,7 @@ export const NewModel: FC = () => {
     <form onSubmit={save}>
       <FormProvider {...form}>
         <H1>New Model</H1>
-        <div className="mb-4">
+        <div className="mb-4 space-y-4">
           <SlugFormField<FormShape>
             name="slug"
             example="my-long-model"

@@ -2,6 +2,8 @@ import { prisma } from "@/prisma";
 import { builder } from "../builder";
 import { MembershipRoleType } from "../types/Group";
 import { GroupInvite } from "../types/GroupInvite";
+import { validateSlug } from "../utils";
+import { ZodError } from "zod";
 
 builder.mutationField("inviteUserToGroup", (t) =>
   t.withAuth({ signedIn: true }).fieldWithInput({
@@ -10,10 +12,10 @@ builder.mutationField("inviteUserToGroup", (t) =>
         invite: t.field({ type: GroupInvite }),
       }),
     }),
-    errors: {},
+    errors: { types: [ZodError] },
     input: {
-      group: t.input.string({ required: true }),
-      username: t.input.string({ required: true }),
+      group: t.input.string({ required: true, validate: validateSlug }),
+      username: t.input.string({ required: true, validate: validateSlug }),
       role: t.input.field({
         type: MembershipRoleType,
         required: true,

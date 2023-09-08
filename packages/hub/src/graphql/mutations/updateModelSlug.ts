@@ -23,8 +23,8 @@ builder.mutationField("updateModelSlug", (t) =>
     },
     resolve: async (_, { input }, { session }) => {
       let model = await getWriteableModel({
-        slug: input.oldSlug,
         owner: input.owner,
+        slug: input.oldSlug,
         session,
       });
 

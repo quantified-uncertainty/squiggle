@@ -1,19 +1,14 @@
 import { useRouter } from "next/navigation";
-import { FC, useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
-import { useMutation } from "react-relay";
+import { FC, useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { graphql } from "relay-runtime";
 
-import {
-  Button,
-  DropdownMenuActionItem,
-  EditIcon,
-  Modal,
-  TextFormField,
-  useToast,
-} from "@quri/ui";
+import { DropdownMenuActionItem, EditIcon } from "@quri/ui";
 
 import { UpdateModelSlugActionMutation } from "@/__generated__/UpdateModelSlugActionMutation.graphql";
+import { FormModal } from "@/components/ui/FormModal";
+import { SlugFormField } from "@/components/ui/SlugFormField";
+import { useAsyncMutation } from "@/hooks/useAsyncMutation";
 import { modelRoute } from "@/routes";
 
 const Mutation = graphql`
@@ -22,8 +17,14 @@ const Mutation = graphql`
   ) {
     result: updateModelSlug(input: $input) {
       __typename
-      ... on BaseError {
+      ... on Error {
         message
+      }
+      ... on UpdateModelSlugResult {
+        model {
+          id
+          slug
+        }
       }
     }
   }
@@ -32,74 +33,54 @@ const Mutation = graphql`
 type Props = {
   owner: string;
   slug: string;
-  close(): void; // close is used by Modal and by Action, but has different meaning (it's just a coincidence that signature is the same)
+  // close is used by Modal and by Action, but has different meaning (it's just a coincidence that signature is the same)
+  close(): void;
 };
 
 const UpdateModelSlugModal: FC<Props> = ({ owner, slug, close }) => {
   const router = useRouter();
-  const toast = useToast();
 
-  const form = useForm<{ slug: string }>({
+  type FormShape = { slug: string };
+
+  const form = useForm<FormShape>({
     mode: "onChange",
-    defaultValues: {
-      slug,
-    },
+    defaultValues: { slug },
   });
-  const [mutation, mutationInFlight] =
-    useMutation<UpdateModelSlugActionMutation>(Mutation);
+  const [mutation, inFlight] = useAsyncMutation<UpdateModelSlugActionMutation>({
+    mutation: Mutation,
+    expectedTypename: "UpdateModelSlugResult",
+  });
 
   const save = form.handleSubmit((data) => {
     mutation({
       variables: {
         input: { owner, oldSlug: slug, newSlug: data.slug },
       },
-      onCompleted(response) {
-        if (response.result.__typename === "BaseError") {
-          toast(response.result.message, "error");
-        } else {
-          router.push(modelRoute({ owner, slug: data.slug }));
-          close();
-        }
-      },
-      onError(e) {
-        toast(e.toString(), "error");
+      onCompleted() {
+        router.push(modelRoute({ owner, slug: data.slug }));
+        close(); // shouldn't matter
       },
     });
   });
 
+  useEffect(() => {
+    form.setFocus("slug");
+  }, [form]);
+
   return (
-    <FormProvider {...form}>
-      <Modal close={close}>
-        <Modal.Header>
-          Rename {owner}/{slug}
-        </Modal.Header>
-        <Modal.Body>
-          <div className="mb-4">
-            Are you sure? All existing links to the model will break.
-          </div>
-          <TextFormField
-            name="slug"
-            label="New slug"
-            rules={{
-              pattern: {
-                value: /^[\w-]+$/,
-                message: "Must be alphanumerical",
-              },
-              required: true,
-            }}
-          />
-        </Modal.Body>
-        <Modal.Footer>
-          <Button
-            onClick={save}
-            theme="primary"
-            disabled={!form.formState.isValid || mutationInFlight}
-          >
-            Save
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </FormProvider>
+    <FormModal
+      close={close}
+      title={`Rename ${owner}/${slug}`}
+      submitText="Save"
+      form={form}
+      onSubmit={save}
+      inFlight={inFlight}
+    >
+      <div className="mb-4">
+        Are you sure? All existing links to the model will break.
+      </div>
+      <SlugFormField<FormShape> name="slug" label="New slug" />
+    </FormModal>
   );
 };
 

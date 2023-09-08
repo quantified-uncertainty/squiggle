@@ -3,9 +3,6 @@ import { clsx } from "clsx";
 import { FC } from "react";
 import { graphql, useFragment } from "react-relay";
 
-import { ModelAccessControls$key } from "@/__generated__/ModelAccessControls.graphql";
-import { ModelAccessControlsMutation } from "@/__generated__/ModelAccessControlsMutation.graphql";
-import { useAsyncMutation } from "@/hooks/useAsyncMutation";
 import {
   Dropdown,
   DropdownMenu,
@@ -13,6 +10,10 @@ import {
   GlobeIcon,
   LockIcon,
 } from "@quri/ui";
+
+import { ModelAccessControls$key } from "@/__generated__/ModelAccessControls.graphql";
+import { ModelAccessControlsMutation } from "@/__generated__/ModelAccessControlsMutation.graphql";
+import { useAsyncMutation } from "@/hooks/useAsyncMutation";
 
 export const Fragment = graphql`
   fragment ModelAccessControls on Model {
