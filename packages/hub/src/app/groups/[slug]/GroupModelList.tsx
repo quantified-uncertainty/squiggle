@@ -1,6 +1,4 @@
 import { GroupModelList$key } from "@/__generated__/GroupModelList.graphql";
-import { UserModelList$key } from "@/__generated__/UserModelList.graphql";
-import { H1 } from "@/components/ui/Headers";
 import { ModelList } from "@/models/components/ModelList";
 import { FC } from "react";
 import { usePaginationFragment } from "react-relay";

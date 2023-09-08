@@ -57,22 +57,22 @@ const SingleValue = ({
 export function SelectRelativeValuesDefinition<
   TValues extends FieldValues,
   TName extends FieldPath<TValues> = FieldPath<TValues>,
-  TUserName extends FieldPath<TValues> = FieldPath<TValues>
+  TOwnerName extends FieldPath<TValues> = FieldPath<TValues>
 >({
   name,
   label,
-  userFieldName,
+  ownerFieldName,
 }: {
   name: TName;
   label?: string;
-  userFieldName: TUserName;
+  ownerFieldName: TOwnerName;
 }) {
   const { watch } = useFormContext();
   const environment = useRelayEnvironment();
-  const username = watch(userFieldName);
+  const owner = watch(ownerFieldName);
 
   const loadOptions = async (inputValue: string): Promise<Option[]> => {
-    if (!username) {
+    if (!owner) {
       return [];
     }
     const result = await fetchQuery<SelectRelativeValuesDefinitionQuery>(
@@ -80,7 +80,7 @@ export function SelectRelativeValuesDefinition<
       Query,
       {
         input: {
-          ownerUsername: username,
+          owner,
           slugContains: inputValue,
         },
       }
@@ -100,7 +100,7 @@ export function SelectRelativeValuesDefinition<
           components={{ SingleValue, Option }}
           loadOptions={loadOptions}
           onChange={(user) => onChange(user?.slug)}
-          isDisabled={!username}
+          isDisabled={!owner}
           styles={{ menuPortal: (base) => ({ ...base, zIndex: 100 }) }}
           menuPortalTarget={document.body}
         />

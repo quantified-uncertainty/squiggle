@@ -8,7 +8,6 @@ import { ModelCard$key } from "@/__generated__/ModelCard.graphql";
 import { EntityCard } from "@/components/EntityCard";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { modelForRelativeValuesExportRoute, modelRoute } from "@/routes";
-import { useOwner } from "@/hooks/Owner";
 
 const Fragment = graphql`
   fragment ModelCard on Model {
@@ -17,7 +16,6 @@ const Fragment = graphql`
     updatedAtTimestamp
     owner {
       slug
-      ...Owner
     }
     isPrivate
     currentRevision {
@@ -39,10 +37,9 @@ type Props = {
 export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
   const model = useFragment(Fragment, modelRef);
   const exports = model.currentRevision.relativeValuesExports;
-  const owner = useOwner(model.owner);
 
   const modelUrl = modelRoute({
-    owner,
+    owner: model.owner.slug,
     slug: model.slug,
   });
 
@@ -62,7 +59,7 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
             <StyledLink
               key={i}
               href={modelForRelativeValuesExportRoute({
-                owner,
+                owner: model.owner.slug,
                 slug: model.slug,
                 variableName: e.variableName,
               })}

@@ -1,5 +1,6 @@
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
+import { getWriteableOwnerBySlug } from "../types/Owner";
 
 builder.mutationField("deleteRelativeValuesDefinition", (t) =>
   t.withAuth({ user: true }).fieldWithInput({
@@ -9,23 +10,17 @@ builder.mutationField("deleteRelativeValuesDefinition", (t) =>
       }),
     }),
     input: {
-      username: t.input.string({ required: true }),
+      owner: t.input.string({ required: true }),
       slug: t.input.string({ required: true }),
     },
     errors: {},
-    async resolve(_, args, { session }) {
-      const { username, slug } = args.input;
-      if (session.user.username !== username) {
-        throw new Error("Can't delete another user's definition");
-      }
-      const owner = await prisma.user.findUniqueOrThrow({
-        where: { username },
-      });
+    async resolve(_, { input }, { session }) {
+      const owner = await getWriteableOwnerBySlug(session, input.owner);
 
       await prisma.relativeValuesDefinition.delete({
         where: {
           slug_ownerId: {
-            slug,
+            slug: input.slug,
             ownerId: owner.id,
           },
         },

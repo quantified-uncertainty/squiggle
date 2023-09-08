@@ -12,21 +12,23 @@ declare global {
 export const prisma =
   global._prisma ||
   new PrismaClient({
-    log: [
-      {
-        emit: "event",
-        level: "query",
-      },
-    ],
+    log: ["query"],
+    // Uncomment the following and `prisma.$on` code below if you need to log query params for debugging.
+    // Enabling it causes duplicate log lines on code reloads, so it's not enabled by default.
+    // log: [
+    //   {
+    //     emit: "event",
+    //     level: "query",
+    //   },
+    // ],
   });
 
-// TODO: This prints each query multiple times, more than basic `log: ["query"]` mode, investigate
-// Prisma types are weird, using `any`
-(prisma as any).$on("query", async (e: any) => {
-  if (process.env.NODE_ENV === "test") {
-    return; // logs are too verbose for jest
-  }
-  console.log(`${e.query} ${e.params}`);
-});
+// // Prisma types are weird, using `any`
+// (prisma as any).$on("query", async (e: any) => {
+//   if (process.env.NODE_ENV === "test") {
+//     return; // logs are too verbose for jest
+//   }
+//   console.log(`${e.query} ${e.params}`);
+// });
 
 if (process.env.NODE_ENV !== "production") global._prisma = prisma;

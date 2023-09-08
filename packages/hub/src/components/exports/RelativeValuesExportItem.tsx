@@ -14,7 +14,7 @@ export const RelativeValuesExportItemFragment = graphql`
       id
       owner {
         id
-        username
+        slug
       }
       slug
     }
@@ -43,11 +43,11 @@ const NonEmptyItem: FC<Required<Props>> = ({ itemRef }) => {
       {item.variableName} &rarr;{" "}
       <StyledDefinitionLink
         href={relativeValuesRoute({
-          username: item.definition.owner.username,
+          owner: item.definition.owner.slug,
           slug: item.definition.slug,
         })}
       >
-        {item.definition.owner.username}/{item.definition.slug}
+        {item.definition.owner.slug}/{item.definition.slug}
       </StyledDefinitionLink>
     </Container>
   );

@@ -6,6 +6,8 @@ import {
 import { RelativeValuesExport } from "./RelativeValuesExport";
 import { prisma } from "@/prisma";
 import { modelWhereHasAccess } from "./Model";
+import { Owner } from "./Owner";
+import { prismaConnectionHelpers } from "@pothos/plugin-prisma";
 
 const RelativeValuesCluster = builder.simpleObject("RelativeValuesCluster", {
   fields: (t) => ({
@@ -30,7 +32,31 @@ export const RelativeValuesDefinition = builder.prismaNode(
     id: { field: "id" },
     fields: (t) => ({
       slug: t.exposeString("slug"),
-      owner: t.relation("owner"),
+      // FIXME - copy-pasted from Model.ts
+      owner: t.field({
+        type: Owner,
+        // TODO - we need to extract fragment data from Owner query and call nestedSelection(...) for optimal performance.
+        select: {
+          owner: {
+            include: {
+              user: true,
+              group: true,
+            },
+          },
+        },
+        resolve: (model) => {
+          const result = model.owner.user ?? model.owner.group;
+          (result as any)["ownerSlug"] = model.owner.slug; // necessary for Owner type
+          return result;
+        },
+      }),
+      isEditable: t.boolean({
+        authScopes: (definition) => ({
+          controlsOwnerId: definition.ownerId,
+        }),
+        resolve: () => true,
+        unauthorizedResolver: () => false,
+      }),
       createdAtTimestamp: t.float({
         resolve: (obj) => obj.createdAt.getTime(),
       }),
@@ -99,3 +125,8 @@ export const RelativeValuesDefinitionConnection = builder.connectionObject({
   type: RelativeValuesDefinition,
   name: "RelativeValuesDefinitionConnection",
 });
+
+export const relativeValuesDefinitionConnectionHelpers =
+  prismaConnectionHelpers(builder, "RelativeValuesDefinition", {
+    cursor: "id",
+  });

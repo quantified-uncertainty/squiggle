@@ -1,35 +1,80 @@
 import { builder } from "../builder";
-import { ModelConnection, modelWhereHasAccess } from "./Model";
+import {
+  ModelConnection,
+  modelConnectionHelpers,
+  modelWhereHasAccess,
+} from "./Model";
 import { Owner } from "./Owner";
-import { RelativeValuesDefinitionConnection } from "./RelativeValuesDefinition";
+import {
+  RelativeValuesDefinitionConnection,
+  relativeValuesDefinitionConnectionHelpers,
+} from "./RelativeValuesDefinition";
 
 export const User = builder.prismaNode("User", {
   id: { field: "id" },
   interfaces: [Owner],
   fields: (t) => ({
-    username: t.string({
-      // alias for `slug`, legacy
+    slug: t.string({
+      select: { asOwner: true },
       resolve(user) {
-        if (!user.username) {
+        if (!user.asOwner) {
           throw new Error("User has no username");
         }
-        return user.username;
+        return user.asOwner.slug;
       },
     }),
-    models: t.relatedConnection(
-      "models",
+    // legacy, alias for user.slug
+    username: t.string({
+      select: { asOwner: true },
+      resolve(user) {
+        if (!user.asOwner) {
+          throw new Error("User has no username");
+        }
+        return user.asOwner.slug;
+      },
+    }),
+    // models are stored on owner.models, wo we have to use indirect relation (https://pothos-graphql.dev/docs/plugins/prisma#indirect-relations-as-connections)
+    // See also: Group.models field.
+    models: t.connection(
       {
-        cursor: "id",
-        query: (_, { session }) => ({
-          orderBy: { updatedAt: "desc" },
-          where: modelWhereHasAccess(session),
+        type: modelConnectionHelpers.ref,
+        select: (args, ctx, nestedSelection) => ({
+          asOwner: {
+            select: {
+              models: {
+                ...modelConnectionHelpers.getQuery(args, ctx, nestedSelection),
+                where: modelWhereHasAccess(ctx.session),
+              },
+            },
+          },
         }),
+        resolve: (user, args, ctx) =>
+          modelConnectionHelpers.resolve(user.asOwner.models, args, ctx),
       },
       ModelConnection
     ),
-    relativeValuesDefinitions: t.relatedConnection(
-      "relativeValuesDefinitions",
-      { cursor: "id" },
+    relativeValuesDefinitions: t.connection(
+      {
+        type: relativeValuesDefinitionConnectionHelpers.ref,
+        select: (args, ctx, nestedSelection) => ({
+          asOwner: {
+            select: {
+              relativeValuesDefinitions:
+                relativeValuesDefinitionConnectionHelpers.getQuery(
+                  args,
+                  ctx,
+                  nestedSelection
+                ),
+            },
+          },
+        }),
+        resolve: (user, args, ctx) =>
+          relativeValuesDefinitionConnectionHelpers.resolve(
+            user.asOwner.relativeValuesDefinitions,
+            args,
+            ctx
+          ),
+      },
       RelativeValuesDefinitionConnection
     ),
   }),

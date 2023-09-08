@@ -11,7 +11,7 @@ import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
 import { H1 } from "@/components/ui/Headers";
 import { SlugFormField } from "@/components/ui/SlugFormField";
 import { useAsyncMutation } from "@/hooks/useAsyncMutation";
-import { userModelRoute } from "@/routes";
+import { modelRoute, userModelRoute } from "@/routes";
 import { SelectGroup } from "@/components/SelectGroup";
 
 const Mutation = graphql`
@@ -76,7 +76,12 @@ export const NewModel: FC = () => {
       onCompleted: (result) => {
         const username = session?.user?.username;
         if (username) {
-          router.push(userModelRoute({ username, slug: result.model.slug }));
+          router.push(
+            modelRoute({
+              owner: data.groupSlug ?? username,
+              slug: result.model.slug,
+            })
+          );
         } else {
           router.push("/");
         }
@@ -95,7 +100,11 @@ export const NewModel: FC = () => {
             label="Model Name"
             placeholder="my-model"
           />
-          <SelectGroup<FormShape> label="Group" name="groupSlug" />
+          <SelectGroup<FormShape>
+            label="Group"
+            name="groupSlug"
+            required={false}
+          />
         </div>
         <Button
           onClick={save}

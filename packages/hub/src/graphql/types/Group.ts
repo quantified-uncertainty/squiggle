@@ -1,11 +1,15 @@
 import { MembershipRole } from "@prisma/client";
 
 import { prisma } from "@/prisma";
+import { Session } from "next-auth";
 import { builder } from "../builder";
 import { GroupInvite, GroupInviteConnection } from "./GroupInvite";
-import { Session } from "next-auth";
+import {
+  ModelConnection,
+  modelConnectionHelpers,
+  modelWhereHasAccess,
+} from "./Model";
 import { Owner } from "./Owner";
-import { ModelConnection, modelWhereHasAccess } from "./Model";
 
 export const MembershipRoleType = builder.enumType(MembershipRole, {
   name: "MembershipRole",
@@ -48,9 +52,12 @@ async function getMyMembership(groupId: string, session: Session | null) {
 
 export const Group = builder.prismaNode("Group", {
   id: { field: "id" },
-  include: {},
   interfaces: [Owner],
   fields: (t) => ({
+    slug: t.string({
+      select: { asOwner: true },
+      resolve: (group) => group.asOwner.slug,
+    }),
     createdAtTimestamp: t.float({
       resolve: (group) => group.createdAt.getTime(),
     }),
@@ -117,14 +124,23 @@ export const Group = builder.prismaNode("Group", {
       }),
       resolve: (group) => group.invites[0],
     }),
-    models: t.relatedConnection(
-      "models",
+    // Models are stored on owner.models, wo we have to use indirect relation (https://pothos-graphql.dev/docs/plugins/prisma#indirect-relations-as-connections)
+    // See also: User.models field.
+    models: t.connection(
       {
-        cursor: "id",
-        query: (_, { session }) => ({
-          orderBy: { updatedAt: "desc" },
-          where: modelWhereHasAccess(session),
+        type: modelConnectionHelpers.ref,
+        select: (args, ctx, nestedSelection) => ({
+          asOwner: {
+            select: {
+              models: {
+                ...modelConnectionHelpers.getQuery(args, ctx, nestedSelection),
+                where: modelWhereHasAccess(ctx.session),
+              },
+            },
+          },
         }),
+        resolve: (user, args, ctx) =>
+          modelConnectionHelpers.resolve(user.asOwner.models, args, ctx),
       },
       ModelConnection
     ),

@@ -3,20 +3,18 @@ import { builder } from "@/graphql/builder";
 
 import { Model } from "../types/Model";
 import { rethrowOnConstraint } from "../errors/common";
+import { getWriteableOwner } from "../types/Owner";
 
 builder.mutationField("createSquiggleSnippetModel", (t) =>
   t.withAuth({ user: true }).fieldWithInput({
     type: builder.simpleObject("CreateSquiggleSnippetResult", {
       fields: (t) => ({
-        model: t.field({
-          type: Model,
-          nullable: false,
-        }),
+        model: t.field({ type: Model }),
       }),
     }),
     errors: {},
     input: {
-      groupSlug: t.input.string(),
+      groupSlug: t.input.string(), // optional, if not set, model will be created on current user's account
       code: t.input.string({ required: true }),
       slug: t.input.string({
         required: true,
@@ -27,6 +25,8 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
     },
     resolve: async (_, { input }, { session }) => {
       const model = await prisma.$transaction(async (tx) => {
+        const owner = await getWriteableOwner(session, input.groupSlug);
+
         // nested create is not possible here;
         // similar problem is described here: https://github.com/prisma/prisma/discussions/14937,
         // seems to be caused by multiple Model -> ModelRevision relations
@@ -34,36 +34,13 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
           () =>
             tx.model.create({
               data: {
-                ...(input.groupSlug
-                  ? {
-                      group: {
-                        connect: {
-                          slug: input.groupSlug,
-                          memberships: {
-                            some: {
-                              user: {
-                                email: session.user.email,
-                              },
-                            },
-                          },
-                        },
-                      },
-                    }
-                  : {
-                      user: {
-                        connect: { email: session.user.email },
-                      },
-                    }),
                 slug: input.slug,
+                ownerId: owner.id,
               },
             }),
           {
-            target: ["slug", "userId"],
+            target: ["slug", "ownerId"],
             error: `The model ${input.slug} already exists on this account`,
-          },
-          {
-            target: ["slug", "groupId"],
-            error: `The model ${input.slug} already exists in this group`,
           }
         );
 

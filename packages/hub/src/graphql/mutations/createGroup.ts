@@ -7,10 +7,7 @@ builder.mutationField("createGroup", (t) =>
   t.withAuth({ user: true }).fieldWithInput({
     type: builder.simpleObject("CreateGroupResult", {
       fields: (t) => ({
-        group: t.field({
-          type: Group,
-          nullable: false,
-        }),
+        group: t.field({ type: Group }),
       }),
     }),
     errors: {},
@@ -26,7 +23,11 @@ builder.mutationField("createGroup", (t) =>
         () =>
           prisma.group.create({
             data: {
-              slug: input.slug,
+              asOwner: {
+                create: {
+                  slug: input.slug,
+                },
+              },
               memberships: {
                 create: [{ userId: user.id, role: "Admin" }],
               },

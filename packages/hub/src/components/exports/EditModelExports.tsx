@@ -7,16 +7,15 @@ import { Button, Modal, TextFormField } from "@quri/ui";
 import { EditModelExports_Model$key } from "@/__generated__/EditModelExports_Model.graphql";
 import { RelativeValuesExportInput } from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
 import {
-  relativeValuesRoute,
   modelForRelativeValuesExportRoute,
+  relativeValuesRoute,
 } from "@/routes";
 import { graphql, useFragment } from "react-relay";
-import { SelectUser } from "../SelectUser";
+import { SelectOwner } from "../SelectOwner";
 import { H2 } from "../ui/Headers";
 import { StyledDefinitionLink } from "../ui/StyledDefinitionLink";
 import { StyledLink } from "../ui/StyledLink";
 import { SelectRelativeValuesDefinition } from "./SelectRelativeValuesDefinition";
-import { useOwner } from "@/hooks/Owner";
 
 const CreateVariableWithDefinitionModal: FC<{
   close: () => void;
@@ -40,11 +39,11 @@ const CreateVariableWithDefinitionModal: FC<{
               name="variableName"
               rules={{ required: true }}
             />
-            <SelectUser label="Username" name="definition.username" />
+            <SelectOwner label="Owner" name="definition.owner" />
             <SelectRelativeValuesDefinition
               label="Slug"
               name="definition.slug"
-              userFieldName="definition.username"
+              ownerFieldName="definition.owner"
             />
           </div>
         </Modal.Body>
@@ -69,13 +68,12 @@ const ExportItem: FC<{
         id
         slug
         owner {
-          ...Owner
+          slug
         }
       }
     `,
     modelRef
   );
-  const owner = useOwner(model.owner);
 
   return (
     <div className="flex items-center gap-2">
@@ -83,16 +81,16 @@ const ExportItem: FC<{
         {item.variableName} &rarr;{" "}
         <StyledDefinitionLink
           href={relativeValuesRoute({
-            username: item.definition.username,
+            owner: item.definition.owner,
             slug: item.definition.slug,
           })}
         >
-          {item.definition.username}/{item.definition.slug}
+          {item.definition.owner}/{item.definition.slug}
         </StyledDefinitionLink>
       </div>
       <StyledLink
         href={modelForRelativeValuesExportRoute({
-          owner,
+          owner: model.owner.slug,
           slug: model.slug,
           variableName: item.variableName,
         })}

@@ -4,7 +4,6 @@ import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
 import { getWriteableModel } from "./Model";
-import { validateOwner } from "./Owner";
 
 export async function getRelativeValuesExportForWriteableModel({
   exportId,
@@ -29,8 +28,7 @@ export async function getRelativeValuesExportForWriteableModel({
             squiggleSnippet: true,
             model: {
               include: {
-                user: true,
-                group: true,
+                owner: true,
               },
             },
           },
@@ -41,10 +39,7 @@ export async function getRelativeValuesExportForWriteableModel({
   // checking permissions
   await getWriteableModel({
     session,
-    owner: validateOwner({
-      username: relativeValuesExport.modelRevision.model.user?.username,
-      groupSlug: relativeValuesExport.modelRevision.model.group?.slug,
-    }),
+    owner: relativeValuesExport.modelRevision.model.owner.slug,
     slug: relativeValuesExport.modelRevision.model.slug,
   });
 

@@ -2,8 +2,9 @@ import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
 import { InputObjectRef } from "@pothos/core";
-import { RelativeValuesDefinition } from "../types/RelativeValuesDefinition";
 import { rethrowOnConstraint } from "../errors/common";
+import { getWriteableOwnerBySlug } from "../types/Owner";
+import { RelativeValuesDefinition } from "../types/RelativeValuesDefinition";
 
 export const validateItemId = { regex: /^\w[\w\-]*$/ };
 const validateColor = { regex: /^#[0-9a-f]{6}$/ };
@@ -86,14 +87,12 @@ builder.mutationField("createRelativeValuesDefinition", (t) =>
   t.withAuth({ user: true }).fieldWithInput({
     type: builder.simpleObject("CreateRelativeValuesDefinitionResult", {
       fields: (t) => ({
-        definition: t.field({
-          type: RelativeValuesDefinition,
-          nullable: false,
-        }),
+        definition: t.field({ type: RelativeValuesDefinition }),
       }),
     }),
     errors: {},
     input: {
+      owner: t.input.string({ required: true }),
       // TODO - extract to helper module
       slug: t.input.string({
         required: true,
@@ -113,6 +112,8 @@ builder.mutationField("createRelativeValuesDefinition", (t) =>
       }),
     },
     resolve: async (_, { input }, { session }) => {
+      const owner = await getWriteableOwnerBySlug(session, input.owner);
+
       validateRelativeValuesDefinition({
         items: input.items,
         clusters: input.clusters,
@@ -124,9 +125,7 @@ builder.mutationField("createRelativeValuesDefinition", (t) =>
           () =>
             tx.relativeValuesDefinition.create({
               data: {
-                owner: {
-                  connect: { email: session.user.email },
-                },
+                ownerId: owner.id,
                 slug: input.slug,
                 revisions: {
                   create: {

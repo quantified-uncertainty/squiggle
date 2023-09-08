@@ -1,40 +1,38 @@
-import { builder } from "@/graphql/builder";
 import { decodeGlobalID } from "@pothos/plugin-relay";
-import { ModelRevision, ModelRevisionConnection } from "./ModelRevision";
-
-import { prisma } from "@/prisma";
 import { Prisma, type Model as PrismaModel } from "@prisma/client";
 import { Session } from "next-auth";
-import { Owner, ValidatedOwnerInput } from "./Owner";
+
+import { builder } from "@/graphql/builder";
+import { prisma } from "@/prisma";
+import { prismaConnectionHelpers } from "@pothos/plugin-prisma";
+import { ModelRevision, ModelRevisionConnection } from "./ModelRevision";
+import { Owner } from "./Owner";
 
 export function modelWhereHasAccess(
   session: Session | null
 ): Prisma.ModelWhereInput {
-  return {
-    OR: [
-      { isPrivate: false },
-      ...(session
-        ? [
-            {
-              user: {
-                email: session.user.email,
-              },
-            },
-          ]
-        : []),
-      {
-        group: {
-          memberships: {
-            some: {
-              user: {
-                email: session?.user.email,
+  const orParts: Prisma.ModelWhereInput[] = [{ isPrivate: false }];
+  if (session) {
+    orParts.push({
+      owner: {
+        OR: [
+          {
+            user: { email: session.user.email },
+          },
+          {
+            group: {
+              memberships: {
+                some: {
+                  user: { email: session.user.email },
+                },
               },
             },
           },
-        },
+        ],
       },
-    ],
-  };
+    });
+  }
+  return { OR: orParts };
 }
 
 export async function getWriteableModel({
@@ -43,44 +41,30 @@ export async function getWriteableModel({
   slug,
 }: {
   session: Session;
-  owner: ValidatedOwnerInput;
+  owner: string;
   slug: string;
 }): Promise<PrismaModel> {
   // Note: `findUnique` would be safer, but then we won't be able to use nested queries
   const model = await prisma.model.findFirst({
     where: {
       slug,
-      ...(owner.type === "User"
-        ? {
-            user: {
-              username: owner.name,
-            },
-          }
-        : owner.type === "Group"
-        ? {
-            group: {
-              slug: owner.name,
-            },
-          }
-        : ({} as never)),
-      OR: [
-        {
-          user: {
-            email: session.user.email,
+      owner: {
+        slug: owner,
+        OR: [
+          {
+            user: { email: session.user.email },
           },
-        },
-        {
-          group: {
-            memberships: {
-              some: {
-                user: {
-                  email: session?.user.email,
+          {
+            group: {
+              memberships: {
+                some: {
+                  user: { email: session.user.email },
                 },
               },
             },
           },
-        },
-      ],
+        ],
+      },
     },
   });
   if (!model) {
@@ -99,10 +83,7 @@ export const Model = builder.prismaNode("Model", {
     // This might leak the info that the model exists, but we handle that in `model()` query and return NotFoundError.
     // It's probable that we leak this info somewhere else, though.
     return {
-      $any: {
-        ...(model.userId && { userId: model.userId }),
-        ...(model.groupId && { memberOfGroup: model.groupId }),
-      },
+      controlsOwnerId: model.ownerId,
     };
   },
   fields: (t) => ({
@@ -116,27 +97,28 @@ export const Model = builder.prismaNode("Model", {
     }),
     owner: t.field({
       type: Owner,
+      // TODO - we need to extract fragment data from Owner query and call nestedSelection(...) for optimal performance.
       select: {
-        user: true,
-        group: true,
+        owner: {
+          include: {
+            user: true,
+            group: true,
+          },
+        },
       },
       resolve: (model) => {
-        const result = model.user ?? model.group;
-        if (!result) {
-          throw new Error(
-            "Invalid model, one of `user` and `group` must be set"
-          );
-        }
+        const result = model.owner.user ?? model.owner.group;
+        // necessary for Owner type
+        (result as any)["_owner"] = {
+          type: model.owner.user ? "User" : "Group",
+        };
         return result;
       },
     }),
     isPrivate: t.exposeBoolean("isPrivate"),
     isEditable: t.boolean({
       authScopes: (model) => ({
-        $any: {
-          ...(model.userId && { userId: model.userId }),
-          ...(model.groupId && { memberOfGroup: model.groupId }),
-        },
+        controlsOwnerId: model.ownerId,
       }),
       resolve: () => true,
       unauthorizedResolver: () => false,
@@ -189,3 +171,9 @@ export const ModelConnection = builder.connectionObject({
   type: Model,
   name: "ModelConnection",
 });
+
+export const modelConnectionHelpers = prismaConnectionHelpers(
+  builder,
+  "Model",
+  { cursor: "id" }
+);

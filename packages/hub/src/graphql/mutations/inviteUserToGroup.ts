@@ -22,11 +22,17 @@ builder.mutationField("inviteUserToGroup", (t) =>
     },
     resolve: async (_, { input }, { session }) => {
       const invite = await prisma.$transaction(async (tx) => {
+        const owner = await tx.owner.findUniqueOrThrow({
+          where: {
+            slug: input.group,
+          },
+        });
+
         // We perform all checks one by one because that allows more precise error reporting.
         // (It would be possible to check everything in one big query with clever nested `connect` checks.)
         const isAdmin = await tx.group.count({
           where: {
-            slug: input.group,
+            ownerId: owner.id,
             memberships: {
               some: {
                 user: { email: session.user.email },
@@ -41,7 +47,7 @@ builder.mutationField("inviteUserToGroup", (t) =>
 
         const alreadyAMember = await tx.group.count({
           where: {
-            slug: input.group,
+            ownerId: owner.id,
             memberships: {
               some: {
                 user: { username: input.username },
@@ -57,7 +63,7 @@ builder.mutationField("inviteUserToGroup", (t) =>
 
         const hasPendingInvite = await tx.group.count({
           where: {
-            slug: input.group,
+            ownerId: owner.id,
             invites: {
               some: {
                 user: { username: input.username },
@@ -78,7 +84,7 @@ builder.mutationField("inviteUserToGroup", (t) =>
               connect: { username: input.username },
             },
             group: {
-              connect: { slug: input.group },
+              connect: { ownerId: owner.id },
             },
             role: input.role,
           },

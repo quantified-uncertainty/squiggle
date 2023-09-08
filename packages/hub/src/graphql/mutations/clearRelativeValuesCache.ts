@@ -10,10 +10,7 @@ builder.mutationField("clearRelativeValuesCache", (t) =>
   t.withAuth({ user: true }).fieldWithInput({
     type: builder.simpleObject("ClearRelativeValuesCacheResult", {
       fields: (t) => ({
-        relativeValuesExport: t.field({
-          type: RelativeValuesExport,
-          nullable: false,
-        }),
+        relativeValuesExport: t.field({ type: RelativeValuesExport }),
       }),
     }),
     errors: {},

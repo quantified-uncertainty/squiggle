@@ -26,6 +26,7 @@ export type HubSchemaTypes = {
   Context: Context;
   AuthScopes: {
     user: boolean;
+    controlsOwnerId: string | null;
     userId: string;
     memberOfGroup: string;
   };
@@ -66,6 +67,38 @@ export const builder = new SchemaBuilder<HubSchemaTypes>({
   authScopes: async (context) => ({
     // TODO - rename to 'signedIn'
     user: !!context.session?.user,
+    controlsOwnerId: async (ownerId) => {
+      if (!context.session) {
+        return false;
+      }
+      if (!ownerId) {
+        return false; // we're migrating to new ownerIds and ownerIds are nullable for now
+      }
+      return Boolean(
+        await prisma.owner.count({
+          where: {
+            id: ownerId,
+            OR: [
+              {
+                user: { email: context.session.user.email },
+              },
+              {
+                group: {
+                  memberships: {
+                    some: {
+                      user: {
+                        email: context.session.user.email,
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        })
+      );
+    },
+    // deprecated
     userId: async (userId) => {
       if (!context.session) {
         return false;
@@ -79,6 +112,7 @@ export const builder = new SchemaBuilder<HubSchemaTypes>({
         })
       );
     },
+    // deprecated
     memberOfGroup: async (groupId) => {
       if (!context.session) {
         return false;

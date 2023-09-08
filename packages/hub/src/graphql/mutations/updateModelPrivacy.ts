@@ -2,7 +2,6 @@ import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
 import { Model, getWriteableModel } from "../types/Model";
-import { OwnerInput, validateOwner } from "../types/Owner";
 
 builder.mutationField("updateModelPrivacy", (t) =>
   t.withAuth({ user: true }).fieldWithInput({
@@ -13,14 +12,14 @@ builder.mutationField("updateModelPrivacy", (t) =>
     }),
     errors: {},
     input: {
-      owner: t.input.field({ type: OwnerInput, required: true }),
+      owner: t.input.string({ required: true }),
       slug: t.input.string({ required: true }),
       isPrivate: t.input.boolean({ required: true }),
     },
     resolve: async (_, { input }, { session }) => {
       let model = await getWriteableModel({
         slug: input.slug,
-        owner: validateOwner(input.owner),
+        owner: input.owner,
         session,
       });
 

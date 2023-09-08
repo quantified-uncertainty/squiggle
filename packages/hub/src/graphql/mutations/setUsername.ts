@@ -24,7 +24,12 @@ builder.mutationField("setUsername", (t) =>
           email: session.user.email,
         },
         data: {
-          username: args.username,
+          username: args.username, // legacy
+          asOwner: {
+            create: {
+              slug: args.username,
+            },
+          },
         },
       });
 

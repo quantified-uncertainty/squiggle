@@ -52,8 +52,8 @@ export type CreateSquiggleSnippetResult = {
 };
 
 export type DefinitionRefInput = {
+  owner: Scalars['String']['input'];
   slug: Scalars['String']['input'];
-  username: Scalars['String']['input'];
 };
 
 export type DeleteMembershipResult = {
@@ -97,6 +97,7 @@ export type Group = Node & {
   inviteForMe?: Maybe<GroupInvite>;
   invites?: Maybe<GroupInviteConnection>;
   memberships: UserGroupMembershipConnection;
+  models: ModelConnection;
   myMembership?: Maybe<UserGroupMembership>;
   slug: Scalars['String']['output'];
   updatedAtTimestamp: Scalars['Float']['output'];
@@ -118,16 +119,12 @@ export type GroupMembershipsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
 };
 
-export type GroupConnection = {
-  __typename?: 'GroupConnection';
-  edges: Array<GroupEdge>;
-  pageInfo: PageInfo;
-};
 
-export type GroupEdge = {
-  __typename?: 'GroupEdge';
-  cursor: Scalars['String']['output'];
-  node: Group;
+export type GroupModelsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type GroupInvite = {
@@ -153,6 +150,10 @@ export enum GroupInviteReaction {
   Decline = 'Decline'
 }
 
+export type GroupsQueryInput = {
+  slugContains?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type InviteUserToGroupResult = {
   __typename?: 'InviteUserToGroupResult';
   invite: GroupInvite;
@@ -174,8 +175,9 @@ export type Model = Node & {
   createdAtTimestamp: Scalars['Float']['output'];
   currentRevision: ModelRevision;
   id: Scalars['ID']['output'];
+  isEditable: Scalars['Boolean']['output'];
   isPrivate: Scalars['Boolean']['output'];
-  owner: User;
+  owner: Owner;
   revision: ModelRevision;
   revisions: ModelRevisionConnection;
   slug: Scalars['String']['output'];
@@ -237,13 +239,13 @@ export type ModelRevisionEdge = {
 };
 
 export type ModelRevisionForRelativeValuesInput = {
-  for?: InputMaybe<ModelRevisionForRelativeValuesSlugUsernameInput>;
+  for?: InputMaybe<ModelRevisionForRelativeValuesSlugOwnerInput>;
   variableName: Scalars['String']['input'];
 };
 
-export type ModelRevisionForRelativeValuesSlugUsernameInput = {
+export type ModelRevisionForRelativeValuesSlugOwnerInput = {
+  owner: Scalars['String']['input'];
   slug: Scalars['String']['input'];
-  username: Scalars['String']['input'];
 };
 
 export type Mutation = {
@@ -394,6 +396,7 @@ export type MutationCreateRelativeValuesDefinitionResult = BaseError | CreateRel
 
 export type MutationCreateSquiggleSnippetModelInput = {
   code: Scalars['String']['input'];
+  groupSlug?: InputMaybe<Scalars['String']['input']>;
   slug: Scalars['String']['input'];
 };
 
@@ -406,8 +409,8 @@ export type MutationDeleteMembershipInput = {
 export type MutationDeleteMembershipResult = BaseError | DeleteMembershipResult;
 
 export type MutationDeleteModelInput = {
+  owner: Scalars['String']['input'];
   slug: Scalars['String']['input'];
-  username: Scalars['String']['input'];
 };
 
 export type MutationDeleteModelResult = BaseError | DeleteModelResult;
@@ -452,8 +455,8 @@ export type MutationUpdateMembershipRoleResult = BaseError | UpdateMembershipRol
 
 export type MutationUpdateModelPrivacyInput = {
   isPrivate: Scalars['Boolean']['input'];
+  owner: Scalars['String']['input'];
   slug: Scalars['String']['input'];
-  username: Scalars['String']['input'];
 };
 
 export type MutationUpdateModelPrivacyResult = BaseError | UpdateModelPrivacyResult;
@@ -461,7 +464,7 @@ export type MutationUpdateModelPrivacyResult = BaseError | UpdateModelPrivacyRes
 export type MutationUpdateModelSlugInput = {
   newSlug: Scalars['String']['input'];
   oldSlug: Scalars['String']['input'];
-  username: Scalars['String']['input'];
+  owner: Scalars['String']['input'];
 };
 
 export type MutationUpdateModelSlugResult = BaseError | UpdateModelSlugResult;
@@ -481,9 +484,9 @@ export type MutationUpdateSquiggleSnippetModelInput = {
   /** @deprecated Use content arg instead */
   code?: InputMaybe<Scalars['String']['input']>;
   content?: InputMaybe<SquiggleSnippetContentInput>;
+  owner: Scalars['String']['input'];
   relativeValuesExports?: InputMaybe<Array<RelativeValuesExportInput>>;
   slug: Scalars['String']['input'];
-  username: Scalars['String']['input'];
 };
 
 export type MutationUpdateSquiggleSnippetModelResult = BaseError | UpdateSquiggleSnippetResult;
@@ -495,6 +498,11 @@ export type Node = {
 export type NotFoundError = Error & {
   __typename?: 'NotFoundError';
   message: Scalars['String']['output'];
+};
+
+export type Owner = {
+  id: Scalars['ID']['output'];
+  slug: Scalars['String']['output'];
 };
 
 export type PageInfo = {
@@ -509,7 +517,7 @@ export type Query = {
   __typename?: 'Query';
   globalStatistics: GlobalStatistics;
   group: QueryGroupResult;
-  groups: GroupConnection;
+  groups: QueryGroupsConnection;
   me: Me;
   model: QueryModelResult;
   models: ModelConnection;
@@ -532,6 +540,7 @@ export type QueryGroupsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
+  input?: InputMaybe<GroupsQueryInput>;
   last?: InputMaybe<Scalars['Int']['input']>;
 };
 
@@ -593,15 +602,27 @@ export type QueryUsersArgs = {
 
 export type QueryGroupResult = BaseError | Group | NotFoundError;
 
+export type QueryGroupsConnection = {
+  __typename?: 'QueryGroupsConnection';
+  edges: Array<QueryGroupsConnectionEdge>;
+  pageInfo: PageInfo;
+};
+
+export type QueryGroupsConnectionEdge = {
+  __typename?: 'QueryGroupsConnectionEdge';
+  cursor: Scalars['String']['output'];
+  node: Group;
+};
+
 export type QueryModelInput = {
-  ownerUsername: Scalars['String']['input'];
+  owner: Scalars['String']['input'];
   slug: Scalars['String']['input'];
 };
 
 export type QueryModelResult = BaseError | Model | NotFoundError;
 
 export type QueryRelativeValuesDefinitionInput = {
-  ownerUsername: Scalars['String']['input'];
+  owner: Scalars['String']['input'];
   slug: Scalars['String']['input'];
 };
 
@@ -646,7 +667,7 @@ export type RelativeValuesDefinition = Node & {
   currentRevision: RelativeValuesDefinitionRevision;
   id: Scalars['ID']['output'];
   modelExports: Array<RelativeValuesExport>;
-  owner: User;
+  owner: Owner;
   slug: Scalars['String']['output'];
   updatedAtTimestamp: Scalars['Float']['output'];
 };
@@ -673,7 +694,7 @@ export type RelativeValuesDefinitionRevision = Node & {
 };
 
 export type RelativeValuesDefinitionsQueryInput = {
-  ownerUsername?: InputMaybe<Scalars['String']['input']>;
+  owner?: InputMaybe<Scalars['String']['input']>;
   slugContains?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -777,6 +798,7 @@ export type User = Node & {
   id: Scalars['ID']['output'];
   models: ModelConnection;
   relativeValuesDefinitions: RelativeValuesDefinitionConnection;
+  slug: Scalars['String']['output'];
   username: Scalars['String']['output'];
 };
 

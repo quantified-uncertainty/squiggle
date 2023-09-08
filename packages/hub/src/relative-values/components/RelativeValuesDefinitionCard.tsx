@@ -12,8 +12,7 @@ const Fragment = graphql`
     slug
     updatedAtTimestamp
     owner {
-      username
-      ...UserLinkFragment
+      slug
     }
   }
 `;
@@ -34,11 +33,11 @@ export const RelativeValuesDefinitionCard: FC<Props> = ({
       icon={ScaleIcon}
       updatedAtTimestamp={definition.updatedAtTimestamp}
       href={relativeValuesRoute({
-        username: definition.owner.username,
+        owner: definition.owner.slug,
         slug: definition.slug,
       })}
       showOwner={showOwner}
-      ownerName={definition.owner.username}
+      ownerName={definition.owner.slug}
       slug={definition.slug}
     ></EntityCard>
   );

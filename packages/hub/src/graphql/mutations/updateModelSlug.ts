@@ -2,7 +2,6 @@ import { prisma } from "@/prisma";
 import { builder } from "@/graphql/builder";
 
 import { Model, getWriteableModel } from "../types/Model";
-import { OwnerInput, validateOwner } from "../types/Owner";
 
 builder.mutationField("updateModelSlug", (t) =>
   t.withAuth({ user: true }).fieldWithInput({
@@ -13,7 +12,7 @@ builder.mutationField("updateModelSlug", (t) =>
     }),
     errors: {},
     input: {
-      owner: t.input.field({ type: OwnerInput, required: true }),
+      owner: t.input.string({ required: true }),
       oldSlug: t.input.string({ required: true }),
       newSlug: t.input.string({
         required: true,
@@ -25,7 +24,7 @@ builder.mutationField("updateModelSlug", (t) =>
     resolve: async (_, { input }, { session }) => {
       let model = await getWriteableModel({
         slug: input.oldSlug,
-        owner: validateOwner(input.owner),
+        owner: input.owner,
         session,
       });
 

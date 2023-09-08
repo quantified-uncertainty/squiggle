@@ -23,8 +23,10 @@ builder.queryField("groups", (t) =>
         },
         where: {
           ...(input?.slugContains && {
-            slug: {
-              contains: input.slugContains,
+            asOwner: {
+              slug: {
+                contains: input.slugContains,
+              },
             },
           }),
         },

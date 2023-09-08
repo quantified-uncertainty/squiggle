@@ -7,7 +7,7 @@ builder.queryField("relativeValuesDefinition", (t) =>
     type: "RelativeValuesDefinition",
     input: {
       slug: t.input.string({ required: true }),
-      ownerUsername: t.input.string({ required: true }),
+      owner: t.input.string({ required: true }),
     },
     errors: {
       types: [NotFoundError],
@@ -17,9 +17,7 @@ builder.queryField("relativeValuesDefinition", (t) =>
         ...query,
         where: {
           slug: args.input.slug,
-          owner: {
-            username: args.input.ownerUsername,
-          },
+          owner: { slug: args.input.slug },
         },
       });
       if (!definition) {

@@ -27,8 +27,8 @@ type CreateSquiggleSnippetResult {
 }
 
 input DefinitionRefInput {
+  owner: String!
   slug: String!
-  username: String!
 }
 
 type DeleteMembershipResult {
@@ -156,13 +156,13 @@ type ModelRevisionEdge {
 }
 
 input ModelRevisionForRelativeValuesInput {
-  for: ModelRevisionForRelativeValuesSlugUsernameInput
+  for: ModelRevisionForRelativeValuesSlugOwnerInput
   variableName: String!
 }
 
-input ModelRevisionForRelativeValuesSlugUsernameInput {
+input ModelRevisionForRelativeValuesSlugOwnerInput {
+  owner: String!
   slug: String!
-  username: String!
 }
 
 type Mutation {
@@ -235,15 +235,15 @@ input MutationDeleteMembershipInput {
 union MutationDeleteMembershipResult = BaseError | DeleteMembershipResult
 
 input MutationDeleteModelInput {
-  owner: OwnerInput!
+  owner: String!
   slug: String!
 }
 
 union MutationDeleteModelResult = BaseError | DeleteModelResult
 
 input MutationDeleteRelativeValuesDefinitionInput {
+  owner: String!
   slug: String!
-  username: String!
 }
 
 union MutationDeleteRelativeValuesDefinitionResult = BaseError | DeleteRelativeValuesDefinitionResult
@@ -281,7 +281,7 @@ union MutationUpdateMembershipRoleResult = BaseError | UpdateMembershipRoleResul
 
 input MutationUpdateModelPrivacyInput {
   isPrivate: Boolean!
-  owner: OwnerInput!
+  owner: String!
   slug: String!
 }
 
@@ -290,7 +290,7 @@ union MutationUpdateModelPrivacyResult = BaseError | UpdateModelPrivacyResult
 input MutationUpdateModelSlugInput {
   newSlug: String!
   oldSlug: String!
-  owner: OwnerInput!
+  owner: String!
 }
 
 union MutationUpdateModelSlugResult = BaseError | UpdateModelSlugResult
@@ -298,10 +298,10 @@ union MutationUpdateModelSlugResult = BaseError | UpdateModelSlugResult
 input MutationUpdateRelativeValuesDefinitionInput {
   clusters: [RelativeValuesClusterInput!]!
   items: [RelativeValuesItemInput!]!
+  owner: String!
   recommendedUnit: String
   slug: String!
   title: String!
-  username: String!
 }
 
 union MutationUpdateRelativeValuesDefinitionResult = BaseError | UpdateRelativeValuesDefinitionResult
@@ -309,7 +309,7 @@ union MutationUpdateRelativeValuesDefinitionResult = BaseError | UpdateRelativeV
 input MutationUpdateSquiggleSnippetModelInput {
   code: String @deprecated(reason: "Use content arg instead")
   content: SquiggleSnippetContentInput
-  owner: OwnerInput!
+  owner: String!
   relativeValuesExports: [RelativeValuesExportInput!]
   slug: String!
 }
@@ -327,11 +327,6 @@ type NotFoundError implements Error {
 interface Owner {
   id: ID!
   slug: String!
-}
-
-input OwnerInput {
-  groupSlug: String
-  username: String
 }
 
 type PageInfo {
@@ -370,14 +365,14 @@ type QueryGroupsConnectionEdge {
 }
 
 input QueryModelInput {
-  owner: OwnerInput!
+  owner: String!
   slug: String!
 }
 
 union QueryModelResult = BaseError | Model | NotFoundError
 
 input QueryRelativeValuesDefinitionInput {
-  ownerUsername: String!
+  owner: String!
   slug: String!
 }
 
@@ -416,8 +411,9 @@ type RelativeValuesDefinition implements Node {
   createdAtTimestamp: Float!
   currentRevision: RelativeValuesDefinitionRevision!
   id: ID!
+  isEditable: Boolean!
   modelExports: [RelativeValuesExport!]!
-  owner: User!
+  owner: Owner!
   slug: String!
   updatedAtTimestamp: Float!
 }
@@ -441,7 +437,7 @@ type RelativeValuesDefinitionRevision implements Node {
 }
 
 input RelativeValuesDefinitionsQueryInput {
-  ownerUsername: String
+  owner: String
   slugContains: String
 }
 

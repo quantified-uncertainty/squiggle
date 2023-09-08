@@ -9,6 +9,7 @@ import {
   validateItemId,
   validateRelativeValuesDefinition,
 } from "./createRelativeValuesDefinition";
+import { getWriteableOwnerBySlug } from "../types/Owner";
 
 builder.mutationField("updateRelativeValuesDefinition", (t) =>
   t.withAuth({ user: true }).fieldWithInput({
@@ -22,7 +23,7 @@ builder.mutationField("updateRelativeValuesDefinition", (t) =>
     }),
     errors: {},
     input: {
-      username: t.input.string({ required: true }),
+      owner: t.input.string({ required: true }),
       slug: t.input.string({ required: true }),
       title: t.input.string({ required: true }),
       items: t.input.field({
@@ -38,15 +39,7 @@ builder.mutationField("updateRelativeValuesDefinition", (t) =>
       }),
     },
     resolve: async (_, { input }, { session }) => {
-      if (session.user.username !== input.username) {
-        throw new Error("Can't edit another user's model");
-      }
-
-      const owner = await prisma.user.findUniqueOrThrow({
-        where: {
-          username: input.username,
-        },
-      });
+      const owner = await getWriteableOwnerBySlug(session, input.owner);
 
       validateRelativeValuesDefinition({
         items: input.items,

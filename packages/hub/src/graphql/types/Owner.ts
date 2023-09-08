@@ -1,68 +1,80 @@
-import { decodeGlobalID } from "@pothos/plugin-relay";
+import { prisma } from "@/prisma";
+import { Session } from "next-auth";
 import { builder } from "../builder";
-import { ExtractInputShape } from "../utils";
 
+export async function getWriteableOwnerBySlug(session: Session, slug: string) {
+  const owner = await prisma.owner.findFirst({
+    where: {
+      slug,
+      OR: [
+        {
+          group: {
+            memberships: {
+              some: {
+                user: {
+                  email: session.user.email,
+                },
+              },
+            },
+          },
+        },
+        {
+          user: {
+            email: session.user.email,
+          },
+        },
+      ],
+    },
+  });
+  if (!owner) {
+    // TODO - better error if membership test failed
+    throw new Error("Can't find owner");
+  }
+  return owner;
+}
+
+// deprecated, need to migrate to getWriteableOwnerBySlug everywhere
+export async function getWriteableOwner(
+  session: Session,
+  groupSlug?: string | null | undefined
+) {
+  const owner = await prisma.owner.findFirst({
+    where: {
+      ...(groupSlug
+        ? {
+            slug: groupSlug,
+            group: {
+              memberships: {
+                some: {
+                  user: {
+                    email: session.user.email,
+                  },
+                },
+              },
+            },
+          }
+        : {
+            user: {
+              email: session.user.email,
+            },
+          }),
+    },
+  });
+  if (!owner) {
+    // TODO - better error if membership test failed
+    throw new Error("Can't find owner");
+  }
+  return owner;
+}
+
+// Note: Owner table is not mapped to GraphQL type. This interface is a proxy for `User` and `Group`.
 // common for User and Group
 export const Owner = builder.interfaceRef<{ id: string }>("Owner").implement({
   resolveType: (obj) => {
-    if ("email" in obj) {
-      return "User";
-    }
-    if ("slug" in obj) {
-      return "Group"; // not very safe, we can rename `User.username` to `User.slug` later
-    }
-    throw new Error(`Unkown object ${obj.id}`);
+    return (obj as any)._owner.type;
   },
   fields: (t) => ({
     id: t.exposeID("id"),
-    slug: t.string({
-      resolve: (obj) => {
-        // `slug` is exposed in interface type because it won't be exactly compatible with User/Group prisma shapes.
-        // So we have to pick a field name in runtime.
-        if ("slug" in obj && typeof obj.slug === "string") {
-          return obj.slug;
-        }
-        if ("username" in obj && typeof obj.username === "string") {
-          return obj.username;
-        }
-        throw new Error(
-          "Expected either `slug` or `username` field to be present"
-        );
-      },
-    }),
+    slug: t.string(), // implemented on User and Group
   }),
 });
-
-export const OwnerInput = builder.inputType("OwnerInput", {
-  fields: (t) => ({
-    // one of these must be set
-    // (GraphQL doesn't have input unions yet; https://github.com/graphql/graphql-spec/pull/825)
-    username: t.string(),
-    groupSlug: t.string(),
-  }),
-});
-
-export type OwnerInput = ExtractInputShape<typeof OwnerInput>;
-export type ValidatedOwnerInput =
-  | { type: "User"; name: string }
-  | { type: "Group"; name: string };
-
-export function validateOwner(
-  owner: ExtractInputShape<typeof OwnerInput>
-): ValidatedOwnerInput {
-  if (owner.username) {
-    if (owner.groupSlug) {
-      throw new Error(
-        "Invalid input, only one of `username` and `groupSlug` must be set"
-      );
-    }
-    return { type: "User", name: owner.username };
-  } else {
-    if (!owner.groupSlug) {
-      throw new Error(
-        "Invalid input, one of `username` and `groupSlug` must be set"
-      );
-    }
-    return { type: "Group", name: owner.groupSlug };
-  }
-}

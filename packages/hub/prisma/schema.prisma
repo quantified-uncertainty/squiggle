@@ -57,18 +57,24 @@ model Session {
 }
 
 model User {
-  id                        String                     @id @default(cuid())
-  name                      String?
-  email                     String?                    @unique
-  username                  String?                    @unique @db.Citext
-  emailVerified             DateTime?
-  image                     String?
-  accounts                  Account[]
-  sessions                  Session[]
-  relativeValuesDefinitions RelativeValuesDefinition[]
-  memberships               UserGroupMembership[]
-  invites                   GroupInvite[]
-  models                    Model[]
+  id    String  @id @default(cuid())
+  name  String?
+  email String? @unique
+
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  memberships   UserGroupMembership[]
+  invites       GroupInvite[]
+
+  // Legacy, moved to Owner.slug, but necessary for migration
+  username String? @unique @db.Citext
+
+  // Usernames are stored through Owner table, because they share the same namespace with Groups.
+  // Users don't initially have an Owner entry, but are prompted to pick a slug and create one.
+  asOwner Owner?  @relation(fields: [ownerId], references: [id])
+  ownerId String? @unique
 }
 
 model VerificationToken {
@@ -82,14 +88,26 @@ model VerificationToken {
 model Group {
   id String @id @default(cuid())
 
-  slug String @unique @db.Citext
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   memberships UserGroupMembership[]
   invites     GroupInvite[]
-  models      Model[]
+
+  asOwner Owner  @relation(fields: [ownerId], references: [id])
+  ownerId String @unique
+}
+
+model Owner {
+  id String @id @default(cuid())
+
+  slug String @unique @db.Citext
+
+  group Group?
+  user  User?
+
+  models                    Model[]
+  relativeValuesDefinitions RelativeValuesDefinition[]
 }
 
 enum MembershipRole {
@@ -160,12 +178,8 @@ model Model {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Only one of `user` and `group` should be set, guaranteed by GraphQL layer
-  user   User?   @relation(fields: [userId], references: [id])
-  userId String?
-
-  group   Group?  @relation(fields: [groupId], references: [id])
-  groupId String?
+  owner   Owner  @relation(fields: [ownerId], references: [id])
+  ownerId String
 
   isPrivate Boolean @default(false)
 
@@ -175,10 +189,8 @@ model Model {
   currentRevision   ModelRevision? @relation("CurrentRevision", fields: [currentRevisionId], references: [id])
   currentRevisionId String?        @unique
 
-  @@unique([slug, userId])
-  @@unique([slug, groupId])
-  @@index([userId])
-  @@index([groupId])
+  @@unique([slug, ownerId])
+  @@index([ownerId])
   @@index([createdAt])
 }
 
@@ -221,7 +233,7 @@ model RelativeValuesDefinition {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  owner   User   @relation(fields: [ownerId], references: [id])
+  owner   Owner  @relation(fields: [ownerId], references: [id])
   ownerId String
 
   // technically nullable, but won't ever be null in practice after the initial migration

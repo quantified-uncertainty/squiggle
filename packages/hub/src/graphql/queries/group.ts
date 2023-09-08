@@ -12,10 +12,12 @@ builder.queryField("group", (t) =>
       types: [NotFoundError],
     },
     async resolve(query, _, args) {
-      const group = await prisma.group.findUnique({
+      const group = await prisma.group.findFirst({
         ...query,
         where: {
-          slug: args.slug,
+          asOwner: {
+            slug: args.slug,
+          },
         },
       });
       if (!group) {
