@@ -8,10 +8,6 @@ import { prisma } from "@/prisma";
 
 let currentUser: Session["user"] | null;
 
-export async function unsetCurrentUser() {
-  currentUser = null;
-}
-
 export async function setCurrentUser(user: {
   email: string;
   username?: string;
@@ -22,12 +18,27 @@ export async function setCurrentUser(user: {
     },
     create: {
       email: user.email,
-      username: user.username,
+      username: user.username, // deprecated
+      ...(user.username
+        ? {
+            asOwner: {
+              create: {
+                slug: user.username,
+              },
+            },
+          }
+        : {}),
     },
     update: {},
   });
   currentUser = user;
 }
+
+export async function unsetCurrentUser() {
+  currentUser = null;
+}
+
+beforeEach(unsetCurrentUser);
 
 const yoga = createYoga({
   schema,

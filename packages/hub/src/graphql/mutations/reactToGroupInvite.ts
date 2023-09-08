@@ -9,7 +9,7 @@ export const InviteReaction = builder.enumType("GroupInviteReaction", {
 });
 
 builder.mutationField("reactToGroupInvite", (t) =>
-  t.withAuth({ user: true }).fieldWithInput({
+  t.withAuth({ signedIn: true }).fieldWithInput({
     type: builder.simpleObject("ReactToGroupInviteResult", {
       fields: (t) => ({
         invite: t.field({ type: GroupInvite }),

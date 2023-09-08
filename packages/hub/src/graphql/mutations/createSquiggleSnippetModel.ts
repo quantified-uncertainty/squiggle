@@ -4,23 +4,33 @@ import { builder } from "@/graphql/builder";
 import { Model } from "../types/Model";
 import { rethrowOnConstraint } from "../errors/common";
 import { getWriteableOwner } from "../types/Owner";
+import { ZodError } from "zod";
+import { validateSlug } from "../utils";
 
 builder.mutationField("createSquiggleSnippetModel", (t) =>
-  t.withAuth({ user: true }).fieldWithInput({
-    type: builder.simpleObject("CreateSquiggleSnippetResult", {
+  t.withAuth({ signedIn: true }).fieldWithInput({
+    type: builder.simpleObject("CreateSquiggleSnippetModelResult", {
       fields: (t) => ({
         model: t.field({ type: Model }),
       }),
     }),
-    errors: {},
+    errors: { types: [ZodError] },
     input: {
-      groupSlug: t.input.string(), // optional, if not set, model will be created on current user's account
-      code: t.input.string({ required: true }),
+      groupSlug: t.input.string({
+        validate: validateSlug,
+        description:
+          "Optional, if not set, model will be created on current user's account",
+      }),
+      code: t.input.string({
+        required: true,
+        description: "Squiggle source code",
+      }),
       slug: t.input.string({
         required: true,
-        validate: {
-          regex: /^\w[\w\-]*$/,
-        },
+        validate: validateSlug,
+      }),
+      isPrivate: t.input.boolean({
+        description: "Defaults to false",
       }),
     },
     resolve: async (_, { input }, { session }) => {
@@ -36,11 +46,12 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
               data: {
                 slug: input.slug,
                 ownerId: owner.id,
+                isPrivate: input.isPrivate ?? false,
               },
             }),
           {
             target: ["slug", "ownerId"],
-            error: `The model ${input.slug} already exists on this account`,
+            error: `Model ${input.slug} already exists on this account`,
           }
         );
 

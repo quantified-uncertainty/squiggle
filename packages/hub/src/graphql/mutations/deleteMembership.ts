@@ -1,11 +1,9 @@
 import { prisma } from "@/prisma";
 import { decodeGlobalID } from "@pothos/plugin-relay";
-import { MembershipRole } from "@prisma/client";
 import { builder } from "../builder";
-import { MembershipRoleType, UserGroupMembership } from "../types/Group";
 
 builder.mutationField("deleteMembership", (t) =>
-  t.withAuth({ user: true }).fieldWithInput({
+  t.withAuth({ signedIn: true }).fieldWithInput({
     type: builder.simpleObject("DeleteMembershipResult", {
       fields: (t) => ({
         ok: t.boolean(),
@@ -16,10 +14,6 @@ builder.mutationField("deleteMembership", (t) =>
       membershipId: t.input.string({ required: true }),
     },
     resolve: async (_, { input }, { session }) => {
-      const user = await prisma.user.findUniqueOrThrow({
-        where: { email: session.user.email },
-      });
-
       const { typename, id: decodedMembershipId } = decodeGlobalID(
         input.membershipId
       );
@@ -27,7 +21,6 @@ builder.mutationField("deleteMembership", (t) =>
         throw new Error(`Expected UserGroupMembership id, got: ${typename}`);
       }
 
-      // delete self
       await prisma.userGroupMembership.delete({
         where: {
           id: decodedMembershipId,

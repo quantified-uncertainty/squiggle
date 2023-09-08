@@ -3,7 +3,7 @@ import { prisma } from "@/prisma";
 import { getWriteableOwnerBySlug } from "../types/Owner";
 
 builder.mutationField("deleteRelativeValuesDefinition", (t) =>
-  t.withAuth({ user: true }).fieldWithInput({
+  t.withAuth({ signedIn: true }).fieldWithInput({
     type: builder.simpleObject("DeleteRelativeValuesDefinitionResult", {
       fields: (t) => ({
         ok: t.boolean(),

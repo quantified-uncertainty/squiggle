@@ -63,9 +63,14 @@ export function useAsyncMutation<
             setWasCompleted(true);
             config.onCompleted?.(response.result as OkResult);
             resolve();
-          } else if (response.result.__typename === "BaseError") {
+          } else if (
+            // TODO - would `endsWith('Error')` be ok?
+            // Or can be ask Relay for all types that implement Error interface somehow?
+            response.result.__typename === "BaseError" ||
+            response.result.__typename === "ValidationError"
+          ) {
             toast(
-              // this is more cautious than necessary, simple casting to any would be fine too, but it doesn't hurt
+              // This is more cautious than necessary, simple casting to any would be fine too, but it doesn't hurt.
               (response.result as { message?: string })?.message ??
                 "Internal error",
               "error"

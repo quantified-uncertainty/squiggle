@@ -1,6 +1,5 @@
-import { InputObjectRef } from "@pothos/core";
+import { ValidationOptions } from "@pothos/plugin-validation";
 
-// It's possible that this helper exists in Pothos, but I couldn't find it quickly and it's easy enough to reimplement.
-export type ExtractInputShape<T> = T extends InputObjectRef<infer A>
-  ? A
-  : never;
+export const validateSlug: ValidationOptions<string> = {
+  regex: [/^\w[\w\-]*$/, { message: "Must be alphanumerical" }],
+};

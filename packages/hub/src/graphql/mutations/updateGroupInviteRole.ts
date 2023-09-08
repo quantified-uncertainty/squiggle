@@ -6,7 +6,7 @@ import { MembershipRoleType } from "../types/Group";
 import { GroupInvite } from "../types/GroupInvite";
 
 builder.mutationField("updateGroupInviteRole", (t) =>
-  t.withAuth({ user: true }).fieldWithInput({
+  t.withAuth({ signedIn: true }).fieldWithInput({
     type: builder.simpleObject("UpdateGroupInviteRoleResult", {
       fields: (t) => ({
         invite: t.field({ type: GroupInvite }),

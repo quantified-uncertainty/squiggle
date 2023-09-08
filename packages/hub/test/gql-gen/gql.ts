@@ -14,11 +14,15 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  */
 const documents = {
     "\n  mutation CreateGroupTest {\n    result: createGroup(input: { slug: \"testgroup\" }) {\n      __typename\n      ... on CreateGroupResult {\n        group {\n          id\n          slug\n          memberships {\n            edges {\n              node {\n                user {\n                  username\n                }\n                role\n              }\n            }\n          }\n        }\n      }\n      ... on BaseError {\n        message\n      }\n    }\n  }\n": types.CreateGroupTestDocument,
+    "\n  mutation CreateSquiggleSnippetModelTest(\n    $input: MutationCreateSquiggleSnippetModelInput!\n  ) {\n    result: createSquiggleSnippetModel(input: $input) {\n      __typename\n      ... on Error {\n        message\n      }\n      ... on ValidationError {\n        issues {\n          message\n        }\n      }\n      ... on CreateSquiggleSnippetModelResult {\n        model {\n          id\n          slug\n          isPrivate\n          owner {\n            __typename\n            slug\n          }\n        }\n      }\n    }\n  }\n": types.CreateSquiggleSnippetModelTestDocument,
+    "\n  mutation CreateSquiggleSnippetModelTest_createGroup(\n    $input: MutationCreateGroupInput!\n  ) {\n    result: createGroup(input: $input) {\n      __typename\n      ... on Error {\n        message\n      }\n      ... on CreateGroupResult {\n        group {\n          id\n        }\n      }\n    }\n  }\n": types.CreateSquiggleSnippetModelTest_CreateGroupDocument,
     "\n      mutation CreateGroup {\n        result: createGroup(input: { slug: \"testgroup\" }) {\n          __typename\n        }\n      }\n    ": types.CreateGroupDocument,
     "\n      mutation InviteTest {\n        result: inviteUserToGroup(\n          input: { group: \"testgroup\", username: \"mockmember\", role: Member }\n        ) {\n          __typename\n          ... on BaseError {\n            message\n          }\n          ... on InviteUserToGroupResult {\n            invite {\n              id\n              role\n            }\n          }\n        }\n      }\n    ": types.InviteTestDocument,
     "\n      mutation NoAuthInviteTest {\n        result: inviteUserToGroup(\n          input: { group: \"testgroup\", username: \"mockmember\", role: Member }\n        ) {\n          __typename\n          ... on BaseError {\n            message\n          }\n        }\n      }\n    ": types.NoAuthInviteTestDocument,
+    "\n  mutation SetUsernameTest($username: String!) {\n    result: setUsername(username: $username) {\n      __typename\n      ... on Error {\n        message\n      }\n      ... on Me {\n        email\n        username\n      }\n    }\n  }\n": types.SetUsernameTestDocument,
     "\n      query TestMe {\n        me {\n          __typename\n          email\n          username\n        }\n      }\n    ": types.TestMeDocument,
-    "\n      query TestModels {\n        models {\n          edges {\n            node {\n              slug\n            }\n          }\n        }\n      }\n    ": types.TestModelsDocument,
+    "\n  query TestModels {\n    models {\n      edges {\n        node {\n          slug\n          isEditable\n          isPrivate\n          owner {\n            __typename\n            slug\n          }\n        }\n      }\n    }\n  }\n": types.TestModelsDocument,
+    "\n  mutation TestModels_createModel(\n    $input: MutationCreateSquiggleSnippetModelInput!\n  ) {\n    result: createSquiggleSnippetModel(input: $input) {\n      __typename\n    }\n  }\n": types.TestModels_CreateModelDocument,
 };
 
 /**
@@ -42,6 +46,14 @@ export function graphql(source: "\n  mutation CreateGroupTest {\n    result: cre
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n  mutation CreateSquiggleSnippetModelTest(\n    $input: MutationCreateSquiggleSnippetModelInput!\n  ) {\n    result: createSquiggleSnippetModel(input: $input) {\n      __typename\n      ... on Error {\n        message\n      }\n      ... on ValidationError {\n        issues {\n          message\n        }\n      }\n      ... on CreateSquiggleSnippetModelResult {\n        model {\n          id\n          slug\n          isPrivate\n          owner {\n            __typename\n            slug\n          }\n        }\n      }\n    }\n  }\n"): (typeof documents)["\n  mutation CreateSquiggleSnippetModelTest(\n    $input: MutationCreateSquiggleSnippetModelInput!\n  ) {\n    result: createSquiggleSnippetModel(input: $input) {\n      __typename\n      ... on Error {\n        message\n      }\n      ... on ValidationError {\n        issues {\n          message\n        }\n      }\n      ... on CreateSquiggleSnippetModelResult {\n        model {\n          id\n          slug\n          isPrivate\n          owner {\n            __typename\n            slug\n          }\n        }\n      }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation CreateSquiggleSnippetModelTest_createGroup(\n    $input: MutationCreateGroupInput!\n  ) {\n    result: createGroup(input: $input) {\n      __typename\n      ... on Error {\n        message\n      }\n      ... on CreateGroupResult {\n        group {\n          id\n        }\n      }\n    }\n  }\n"): (typeof documents)["\n  mutation CreateSquiggleSnippetModelTest_createGroup(\n    $input: MutationCreateGroupInput!\n  ) {\n    result: createGroup(input: $input) {\n      __typename\n      ... on Error {\n        message\n      }\n      ... on CreateGroupResult {\n        group {\n          id\n        }\n      }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n      mutation CreateGroup {\n        result: createGroup(input: { slug: \"testgroup\" }) {\n          __typename\n        }\n      }\n    "): (typeof documents)["\n      mutation CreateGroup {\n        result: createGroup(input: { slug: \"testgroup\" }) {\n          __typename\n        }\n      }\n    "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -54,11 +66,19 @@ export function graphql(source: "\n      mutation NoAuthInviteTest {\n        re
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n  mutation SetUsernameTest($username: String!) {\n    result: setUsername(username: $username) {\n      __typename\n      ... on Error {\n        message\n      }\n      ... on Me {\n        email\n        username\n      }\n    }\n  }\n"): (typeof documents)["\n  mutation SetUsernameTest($username: String!) {\n    result: setUsername(username: $username) {\n      __typename\n      ... on Error {\n        message\n      }\n      ... on Me {\n        email\n        username\n      }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n      query TestMe {\n        me {\n          __typename\n          email\n          username\n        }\n      }\n    "): (typeof documents)["\n      query TestMe {\n        me {\n          __typename\n          email\n          username\n        }\n      }\n    "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n      query TestModels {\n        models {\n          edges {\n            node {\n              slug\n            }\n          }\n        }\n      }\n    "): (typeof documents)["\n      query TestModels {\n        models {\n          edges {\n            node {\n              slug\n            }\n          }\n        }\n      }\n    "];
+export function graphql(source: "\n  query TestModels {\n    models {\n      edges {\n        node {\n          slug\n          isEditable\n          isPrivate\n          owner {\n            __typename\n            slug\n          }\n        }\n      }\n    }\n  }\n"): (typeof documents)["\n  query TestModels {\n    models {\n      edges {\n        node {\n          slug\n          isEditable\n          isPrivate\n          owner {\n            __typename\n            slug\n          }\n        }\n      }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation TestModels_createModel(\n    $input: MutationCreateSquiggleSnippetModelInput!\n  ) {\n    result: createSquiggleSnippetModel(input: $input) {\n      __typename\n    }\n  }\n"): (typeof documents)["\n  mutation TestModels_createModel(\n    $input: MutationCreateSquiggleSnippetModelInput!\n  ) {\n    result: createSquiggleSnippetModel(input: $input) {\n      __typename\n    }\n  }\n"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};

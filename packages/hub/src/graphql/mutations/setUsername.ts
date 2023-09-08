@@ -4,7 +4,7 @@ import { builder } from "@/graphql/builder";
 import { Me } from "../types/Me";
 
 builder.mutationField("setUsername", (t) =>
-  t.withAuth({ user: true }).field({
+  t.withAuth({ signedIn: true }).field({
     type: Me,
     args: {
       username: t.arg.string({ required: true }),

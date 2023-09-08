@@ -35,7 +35,7 @@ const SquiggleSnippetContentInput = builder.inputType(
 );
 
 builder.mutationField("updateSquiggleSnippetModel", (t) =>
-  t.withAuth({ user: true }).fieldWithInput({
+  t.withAuth({ signedIn: true }).fieldWithInput({
     type: builder.simpleObject("UpdateSquiggleSnippetResult", {
       fields: (t) => ({
         model: t.field({ type: Model }),

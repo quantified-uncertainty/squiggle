@@ -46,7 +46,9 @@ export const RelativeValuesDefinition = builder.prismaNode(
         },
         resolve: (model) => {
           const result = model.owner.user ?? model.owner.group;
-          (result as any)["ownerSlug"] = model.owner.slug; // necessary for Owner type
+          (result as any)["_owner"] = {
+            type: model.owner.user ? "User" : "Group",
+          };
           return result;
         },
       }),

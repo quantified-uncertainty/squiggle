@@ -17,7 +17,7 @@ builder.queryField("relativeValuesDefinition", (t) =>
         ...query,
         where: {
           slug: args.input.slug,
-          owner: { slug: args.input.slug },
+          owner: { slug: args.input.owner },
         },
       });
       if (!definition) {

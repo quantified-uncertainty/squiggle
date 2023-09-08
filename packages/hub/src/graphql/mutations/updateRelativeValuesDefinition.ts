@@ -3,16 +3,16 @@ import { prisma } from "@/prisma";
 
 import { RelativeValuesDefinition } from "../types/RelativeValuesDefinition";
 
+import { getWriteableOwnerBySlug } from "../types/Owner";
 import {
   RelativeValuesClusterInput,
   RelativeValuesItemInput,
-  validateItemId,
   validateRelativeValuesDefinition,
 } from "./createRelativeValuesDefinition";
-import { getWriteableOwnerBySlug } from "../types/Owner";
+import { validateSlug } from "../utils";
 
 builder.mutationField("updateRelativeValuesDefinition", (t) =>
-  t.withAuth({ user: true }).fieldWithInput({
+  t.withAuth({ signedIn: true }).fieldWithInput({
     type: builder.simpleObject("UpdateRelativeValuesDefinitionResult", {
       fields: (t) => ({
         definition: t.field({
@@ -35,7 +35,7 @@ builder.mutationField("updateRelativeValuesDefinition", (t) =>
         required: true,
       }),
       recommendedUnit: t.input.string({
-        validate: validateItemId,
+        validate: validateSlug,
       }),
     },
     resolve: async (_, { input }, { session }) => {

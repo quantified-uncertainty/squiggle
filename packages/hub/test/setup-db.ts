@@ -9,5 +9,7 @@ beforeEach(async () => {
   await prisma.group.deleteMany();
   await prisma.userGroupMembership.deleteMany();
   await prisma.groupInvite.deleteMany();
+  await prisma.model.deleteMany();
+  await prisma.owner.deleteMany();
   // TODO - other models (but note that most would be removed by cascading from `user`)
 });

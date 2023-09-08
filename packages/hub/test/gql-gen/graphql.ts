@@ -46,8 +46,8 @@ export type CreateRelativeValuesDefinitionResult = {
   definition: RelativeValuesDefinition;
 };
 
-export type CreateSquiggleSnippetResult = {
-  __typename?: 'CreateSquiggleSnippetResult';
+export type CreateSquiggleSnippetModelResult = {
+  __typename?: 'CreateSquiggleSnippetModelResult';
   model: Model;
 };
 
@@ -90,7 +90,7 @@ export type GlobalStatistics = {
   users: Scalars['Int']['output'];
 };
 
-export type Group = Node & {
+export type Group = Node & Owner & {
   __typename?: 'Group';
   createdAtTimestamp: Scalars['Float']['output'];
   id: Scalars['ID']['output'];
@@ -387,6 +387,7 @@ export type MutationCreateGroupResult = BaseError | CreateGroupResult;
 export type MutationCreateRelativeValuesDefinitionInput = {
   clusters: Array<RelativeValuesClusterInput>;
   items: Array<RelativeValuesItemInput>;
+  owner: Scalars['String']['input'];
   recommendedUnit?: InputMaybe<Scalars['String']['input']>;
   slug: Scalars['String']['input'];
   title: Scalars['String']['input'];
@@ -395,12 +396,16 @@ export type MutationCreateRelativeValuesDefinitionInput = {
 export type MutationCreateRelativeValuesDefinitionResult = BaseError | CreateRelativeValuesDefinitionResult;
 
 export type MutationCreateSquiggleSnippetModelInput = {
+  /** Squiggle source code */
   code: Scalars['String']['input'];
+  /** Optional, if not set, model will be created on current user's account */
   groupSlug?: InputMaybe<Scalars['String']['input']>;
+  /** Defaults to false */
+  isPrivate?: InputMaybe<Scalars['Boolean']['input']>;
   slug: Scalars['String']['input'];
 };
 
-export type MutationCreateSquiggleSnippetModelResult = BaseError | CreateSquiggleSnippetResult;
+export type MutationCreateSquiggleSnippetModelResult = BaseError | CreateSquiggleSnippetModelResult | ValidationError;
 
 export type MutationDeleteMembershipInput = {
   membershipId: Scalars['String']['input'];
@@ -416,8 +421,8 @@ export type MutationDeleteModelInput = {
 export type MutationDeleteModelResult = BaseError | DeleteModelResult;
 
 export type MutationDeleteRelativeValuesDefinitionInput = {
+  owner: Scalars['String']['input'];
   slug: Scalars['String']['input'];
-  username: Scalars['String']['input'];
 };
 
 export type MutationDeleteRelativeValuesDefinitionResult = BaseError | DeleteRelativeValuesDefinitionResult;
@@ -472,10 +477,10 @@ export type MutationUpdateModelSlugResult = BaseError | UpdateModelSlugResult;
 export type MutationUpdateRelativeValuesDefinitionInput = {
   clusters: Array<RelativeValuesClusterInput>;
   items: Array<RelativeValuesItemInput>;
+  owner: Scalars['String']['input'];
   recommendedUnit?: InputMaybe<Scalars['String']['input']>;
   slug: Scalars['String']['input'];
   title: Scalars['String']['input'];
-  username: Scalars['String']['input'];
 };
 
 export type MutationUpdateRelativeValuesDefinitionResult = BaseError | UpdateRelativeValuesDefinitionResult;
@@ -666,6 +671,7 @@ export type RelativeValuesDefinition = Node & {
   createdAtTimestamp: Scalars['Float']['output'];
   currentRevision: RelativeValuesDefinitionRevision;
   id: Scalars['ID']['output'];
+  isEditable: Scalars['Boolean']['output'];
   modelExports: Array<RelativeValuesExport>;
   owner: Owner;
   slug: Scalars['String']['output'];
@@ -793,7 +799,7 @@ export type UpdateSquiggleSnippetResult = {
   model: Model;
 };
 
-export type User = Node & {
+export type User = Node & Owner & {
   __typename?: 'User';
   id: Scalars['ID']['output'];
   models: ModelConnection;
@@ -849,10 +855,35 @@ export type UsersQueryInput = {
   usernameContains?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type ValidationError = Error & {
+  __typename?: 'ValidationError';
+  issues: Array<ValidationErrorIssue>;
+  message: Scalars['String']['output'];
+};
+
+export type ValidationErrorIssue = {
+  __typename?: 'ValidationErrorIssue';
+  message: Scalars['String']['output'];
+};
+
 export type CreateGroupTestMutationVariables = Exact<{ [key: string]: never; }>;
 
 
 export type CreateGroupTestMutation = { __typename?: 'Mutation', result: { __typename: 'BaseError', message: string } | { __typename: 'CreateGroupResult', group: { __typename?: 'Group', id: string, slug: string, memberships: { __typename?: 'UserGroupMembershipConnection', edges: Array<{ __typename?: 'UserGroupMembershipEdge', node: { __typename?: 'UserGroupMembership', role: MembershipRole, user: { __typename?: 'User', username: string } } }> } } } };
+
+export type CreateSquiggleSnippetModelTestMutationVariables = Exact<{
+  input: MutationCreateSquiggleSnippetModelInput;
+}>;
+
+
+export type CreateSquiggleSnippetModelTestMutation = { __typename?: 'Mutation', result: { __typename: 'BaseError', message: string } | { __typename: 'CreateSquiggleSnippetModelResult', model: { __typename?: 'Model', id: string, slug: string, isPrivate: boolean, owner: { __typename: 'Group', slug: string } | { __typename: 'User', slug: string } } } | { __typename: 'ValidationError', message: string, issues: Array<{ __typename?: 'ValidationErrorIssue', message: string }> } };
+
+export type CreateSquiggleSnippetModelTest_CreateGroupMutationVariables = Exact<{
+  input: MutationCreateGroupInput;
+}>;
+
+
+export type CreateSquiggleSnippetModelTest_CreateGroupMutation = { __typename?: 'Mutation', result: { __typename: 'BaseError', message: string } | { __typename: 'CreateGroupResult', group: { __typename?: 'Group', id: string } } };
 
 export type CreateGroupMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -869,6 +900,13 @@ export type NoAuthInviteTestMutationVariables = Exact<{ [key: string]: never; }>
 
 export type NoAuthInviteTestMutation = { __typename?: 'Mutation', result: { __typename: 'BaseError', message: string } | { __typename: 'InviteUserToGroupResult' } };
 
+export type SetUsernameTestMutationVariables = Exact<{
+  username: Scalars['String']['input'];
+}>;
+
+
+export type SetUsernameTestMutation = { __typename?: 'Mutation', result: { __typename: 'BaseError', message: string } | { __typename: 'Me', email?: string | null, username?: string | null } };
+
 export type TestMeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -877,12 +915,23 @@ export type TestMeQuery = { __typename?: 'Query', me: { __typename: 'Me', email?
 export type TestModelsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type TestModelsQuery = { __typename?: 'Query', models: { __typename?: 'ModelConnection', edges: Array<{ __typename?: 'ModelEdge', node: { __typename?: 'Model', slug: string } }> } };
+export type TestModelsQuery = { __typename?: 'Query', models: { __typename?: 'ModelConnection', edges: Array<{ __typename?: 'ModelEdge', node: { __typename?: 'Model', slug: string, isEditable: boolean, isPrivate: boolean, owner: { __typename: 'Group', slug: string } | { __typename: 'User', slug: string } } }> } };
+
+export type TestModels_CreateModelMutationVariables = Exact<{
+  input: MutationCreateSquiggleSnippetModelInput;
+}>;
+
+
+export type TestModels_CreateModelMutation = { __typename?: 'Mutation', result: { __typename: 'BaseError' } | { __typename: 'CreateSquiggleSnippetModelResult' } | { __typename: 'ValidationError' } };
 
 
 export const CreateGroupTestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateGroupTest"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","alias":{"kind":"Name","value":"result"},"name":{"kind":"Name","value":"createGroup"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"slug"},"value":{"kind":"StringValue","value":"testgroup","block":false}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"CreateGroupResult"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"group"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"memberships"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"edges"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"node"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"username"}}]}},{"kind":"Field","name":{"kind":"Name","value":"role"}}]}}]}}]}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"BaseError"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]}}]} as unknown as DocumentNode<CreateGroupTestMutation, CreateGroupTestMutationVariables>;
+export const CreateSquiggleSnippetModelTestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateSquiggleSnippetModelTest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"MutationCreateSquiggleSnippetModelInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","alias":{"kind":"Name","value":"result"},"name":{"kind":"Name","value":"createSquiggleSnippetModel"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Error"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"message"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ValidationError"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"issues"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"CreateSquiggleSnippetModelResult"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"model"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"isPrivate"}},{"kind":"Field","name":{"kind":"Name","value":"owner"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<CreateSquiggleSnippetModelTestMutation, CreateSquiggleSnippetModelTestMutationVariables>;
+export const CreateSquiggleSnippetModelTest_CreateGroupDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateSquiggleSnippetModelTest_createGroup"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"MutationCreateGroupInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","alias":{"kind":"Name","value":"result"},"name":{"kind":"Name","value":"createGroup"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Error"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"message"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"CreateGroupResult"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"group"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]}}]}}]} as unknown as DocumentNode<CreateSquiggleSnippetModelTest_CreateGroupMutation, CreateSquiggleSnippetModelTest_CreateGroupMutationVariables>;
 export const CreateGroupDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateGroup"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","alias":{"kind":"Name","value":"result"},"name":{"kind":"Name","value":"createGroup"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"slug"},"value":{"kind":"StringValue","value":"testgroup","block":false}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}}]}}]}}]} as unknown as DocumentNode<CreateGroupMutation, CreateGroupMutationVariables>;
 export const InviteTestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"InviteTest"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","alias":{"kind":"Name","value":"result"},"name":{"kind":"Name","value":"inviteUserToGroup"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"group"},"value":{"kind":"StringValue","value":"testgroup","block":false}},{"kind":"ObjectField","name":{"kind":"Name","value":"username"},"value":{"kind":"StringValue","value":"mockmember","block":false}},{"kind":"ObjectField","name":{"kind":"Name","value":"role"},"value":{"kind":"EnumValue","value":"Member"}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"BaseError"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"message"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"InviteUserToGroupResult"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"invite"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"role"}}]}}]}}]}}]}}]} as unknown as DocumentNode<InviteTestMutation, InviteTestMutationVariables>;
 export const NoAuthInviteTestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"NoAuthInviteTest"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","alias":{"kind":"Name","value":"result"},"name":{"kind":"Name","value":"inviteUserToGroup"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"group"},"value":{"kind":"StringValue","value":"testgroup","block":false}},{"kind":"ObjectField","name":{"kind":"Name","value":"username"},"value":{"kind":"StringValue","value":"mockmember","block":false}},{"kind":"ObjectField","name":{"kind":"Name","value":"role"},"value":{"kind":"EnumValue","value":"Member"}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"BaseError"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]}}]} as unknown as DocumentNode<NoAuthInviteTestMutation, NoAuthInviteTestMutationVariables>;
+export const SetUsernameTestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"SetUsernameTest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"username"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","alias":{"kind":"Name","value":"result"},"name":{"kind":"Name","value":"setUsername"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"username"},"value":{"kind":"Variable","name":{"kind":"Name","value":"username"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Error"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"message"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Me"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"username"}}]}}]}}]}}]} as unknown as DocumentNode<SetUsernameTestMutation, SetUsernameTestMutationVariables>;
 export const TestMeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"TestMe"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"me"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"username"}}]}}]}}]} as unknown as DocumentNode<TestMeQuery, TestMeQueryVariables>;
-export const TestModelsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"TestModels"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"models"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"edges"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"node"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"slug"}}]}}]}}]}}]}}]} as unknown as DocumentNode<TestModelsQuery, TestModelsQueryVariables>;
+export const TestModelsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"TestModels"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"models"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"edges"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"node"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"isEditable"}},{"kind":"Field","name":{"kind":"Name","value":"isPrivate"}},{"kind":"Field","name":{"kind":"Name","value":"owner"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<TestModelsQuery, TestModelsQueryVariables>;
+export const TestModels_CreateModelDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"TestModels_createModel"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"MutationCreateSquiggleSnippetModelInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","alias":{"kind":"Name","value":"result"},"name":{"kind":"Name","value":"createSquiggleSnippetModel"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}}]}}]}}]} as unknown as DocumentNode<TestModels_CreateModelMutation, TestModels_CreateModelMutationVariables>;

@@ -5,7 +5,7 @@ import { builder } from "../builder";
 import { MembershipRoleType, UserGroupMembership } from "../types/Group";
 
 builder.mutationField("updateMembershipRole", (t) =>
-  t.withAuth({ user: true }).fieldWithInput({
+  t.withAuth({ signedIn: true }).fieldWithInput({
     type: builder.simpleObject("UpdateMembershipRoleResult", {
       fields: (t) => ({
         membership: t.field({ type: UserGroupMembership }),

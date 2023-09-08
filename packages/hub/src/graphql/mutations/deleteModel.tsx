@@ -4,7 +4,7 @@ import { prisma } from "@/prisma";
 import { getWriteableModel } from "../types/Model";
 
 builder.mutationField("deleteModel", (t) =>
-  t.withAuth({ user: true }).fieldWithInput({
+  t.withAuth({ signedIn: true }).fieldWithInput({
     type: builder.simpleObject("DeleteModelResult", {
       fields: (t) => ({
         ok: t.boolean(),

@@ -25,14 +25,12 @@ export type HubSchemaTypes = {
   DefaultEdgesNullability: false;
   Context: Context;
   AuthScopes: {
-    user: boolean;
+    signedIn: boolean;
     controlsOwnerId: string | null;
-    userId: string;
-    memberOfGroup: string;
   };
   AuthContexts: {
     // https://pothos-graphql.dev/docs/plugins/scope-auth#change-context-types-based-on-scopes
-    user: Context & {
+    signedIn: Context & {
       session: Session & {
         user: NonNullable<Session["user"]> & { email: string };
       };
@@ -65,8 +63,7 @@ export const builder = new SchemaBuilder<HubSchemaTypes>({
     defaultStrategy: "all",
   },
   authScopes: async (context) => ({
-    // TODO - rename to 'signedIn'
-    user: !!context.session?.user,
+    signedIn: !!context.session?.user,
     controlsOwnerId: async (ownerId) => {
       if (!context.session) {
         return false;
@@ -94,40 +91,6 @@ export const builder = new SchemaBuilder<HubSchemaTypes>({
                 },
               },
             ],
-          },
-        })
-      );
-    },
-    // deprecated
-    userId: async (userId) => {
-      if (!context.session) {
-        return false;
-      }
-      return Boolean(
-        await prisma.user.count({
-          where: {
-            id: userId,
-            email: context.session.user.email,
-          },
-        })
-      );
-    },
-    // deprecated
-    memberOfGroup: async (groupId) => {
-      if (!context.session) {
-        return false;
-      }
-      return Boolean(
-        await prisma.group.count({
-          where: {
-            id: groupId,
-            memberships: {
-              some: {
-                user: {
-                  email: context.session.user.email,
-                },
-              },
-            },
           },
         })
       );

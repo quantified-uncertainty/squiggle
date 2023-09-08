@@ -1,11 +1,10 @@
 import { prisma } from "@/prisma";
 import { builder } from "../builder";
-import { rethrowOnConstraint } from "../errors/common";
 import { MembershipRoleType } from "../types/Group";
 import { GroupInvite } from "../types/GroupInvite";
 
 builder.mutationField("inviteUserToGroup", (t) =>
-  t.withAuth({ user: true }).fieldWithInput({
+  t.withAuth({ signedIn: true }).fieldWithInput({
     type: builder.simpleObject("InviteUserToGroupResult", {
       fields: (t) => ({
         invite: t.field({ type: GroupInvite }),

@@ -4,7 +4,7 @@ import { builder } from "@/graphql/builder";
 import { Model, getWriteableModel } from "../types/Model";
 
 builder.mutationField("updateModelSlug", (t) =>
-  t.withAuth({ user: true }).fieldWithInput({
+  t.withAuth({ signedIn: true }).fieldWithInput({
     type: builder.simpleObject("UpdateModelSlugResult", {
       fields: (t) => ({
         model: t.field({ type: Model }),

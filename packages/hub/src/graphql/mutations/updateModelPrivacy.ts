@@ -4,7 +4,7 @@ import { prisma } from "@/prisma";
 import { Model, getWriteableModel } from "../types/Model";
 
 builder.mutationField("updateModelPrivacy", (t) =>
-  t.withAuth({ user: true }).fieldWithInput({
+  t.withAuth({ signedIn: true }).fieldWithInput({
     type: builder.simpleObject("UpdateModelPrivacyResult", {
       fields: (t) => ({
         model: t.field({ type: Model }),

@@ -7,7 +7,7 @@ import {
 } from "../types/RelativeValuesExport";
 
 builder.mutationField("clearRelativeValuesCache", (t) =>
-  t.withAuth({ user: true }).fieldWithInput({
+  t.withAuth({ signedIn: true }).fieldWithInput({
     type: builder.simpleObject("ClearRelativeValuesCacheResult", {
       fields: (t) => ({
         relativeValuesExport: t.field({ type: RelativeValuesExport }),

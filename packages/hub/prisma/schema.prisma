@@ -178,7 +178,7 @@ model Model {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  owner   Owner  @relation(fields: [ownerId], references: [id])
+  owner   Owner  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId String
 
   isPrivate Boolean @default(false)

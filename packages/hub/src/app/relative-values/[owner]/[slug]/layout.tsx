@@ -11,11 +11,11 @@ type Props = PropsWithChildren<{
   params: { owner: string; slug: string };
 }>;
 
-export default async function Layout({ params }: Props) {
+export default async function Layout({ params, children }: Props) {
   const query = await loadPageQuery<DefinitionLayoutQuery>(QueryNode, {
     input: { owner: params.owner, slug: params.slug },
   });
-  return <DefinitionLayout queryRef={query} />;
+  return <DefinitionLayout queryRef={query}>{children}</DefinitionLayout>;
 }
 
 export function generateMetadata({ params }: Props): Metadata {

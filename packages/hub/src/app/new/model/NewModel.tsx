@@ -21,7 +21,7 @@ const Mutation = graphql`
       ... on BaseError {
         message
       }
-      ... on CreateSquiggleSnippetResult {
+      ... on CreateSquiggleSnippetModelResult {
         model {
           id
           slug
@@ -57,10 +57,10 @@ export const NewModel: FC = () => {
 
   const [runMutation, inFlight] = useAsyncMutation<
     NewModelMutation,
-    "CreateSquiggleSnippetResult"
+    "CreateSquiggleSnippetModelResult"
   >({
     mutation: Mutation,
-    expectedTypename: "CreateSquiggleSnippetResult",
+    expectedTypename: "CreateSquiggleSnippetModelResult",
     blockOnSuccess: true,
   });
 

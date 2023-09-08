@@ -4,7 +4,7 @@ import { GroupInvite } from "../types/GroupInvite";
 import { decodeGlobalID } from "@pothos/plugin-relay";
 
 builder.mutationField("cancelGroupInvite", (t) =>
-  t.withAuth({ user: true }).fieldWithInput({
+  t.withAuth({ signedIn: true }).fieldWithInput({
     type: builder.simpleObject("CancelGroupInviteResult", {
       fields: (t) => ({
         invite: t.field({ type: GroupInvite }),

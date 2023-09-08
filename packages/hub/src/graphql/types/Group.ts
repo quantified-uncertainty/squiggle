@@ -108,7 +108,7 @@ export const Group = builder.prismaNode("Group", {
       },
       GroupInviteConnection
     ),
-    inviteForMe: t.withAuth({ user: true }).field({
+    inviteForMe: t.withAuth({ signedIn: true }).field({
       type: GroupInvite,
       nullable: true,
       unauthorizedResolver: () => null,

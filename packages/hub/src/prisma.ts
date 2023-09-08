@@ -12,7 +12,7 @@ declare global {
 export const prisma =
   global._prisma ||
   new PrismaClient({
-    log: ["query"],
+    log: process.env.NODE_ENV === "test" ? [] : ["query"],
     // Uncomment the following and `prisma.$on` code below if you need to log query params for debugging.
     // Enabling it causes duplicate log lines on code reloads, so it's not enabled by default.
     // log: [

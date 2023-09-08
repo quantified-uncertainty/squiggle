@@ -19,7 +19,7 @@ const Mutation = graphql`
   ) {
     result: createRelativeValuesDefinition(input: $input) {
       __typename
-      ... on BaseError {
+      ... on Error {
         message
       }
       ... on CreateRelativeValuesDefinitionResult {

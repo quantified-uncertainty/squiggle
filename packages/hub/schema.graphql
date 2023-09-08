@@ -22,7 +22,7 @@ type CreateRelativeValuesDefinitionResult {
   definition: RelativeValuesDefinition!
 }
 
-type CreateSquiggleSnippetResult {
+type CreateSquiggleSnippetModelResult {
   model: Model!
 }
 
@@ -212,21 +212,32 @@ union MutationCreateGroupResult = BaseError | CreateGroupResult
 
 input MutationCreateRelativeValuesDefinitionInput {
   clusters: [RelativeValuesClusterInput!]!
+
+  """
+  Optional, if not set, definition will be created on current user's account
+  """
+  groupSlug: String
   items: [RelativeValuesItemInput!]!
   recommendedUnit: String
   slug: String!
   title: String!
 }
 
-union MutationCreateRelativeValuesDefinitionResult = BaseError | CreateRelativeValuesDefinitionResult
+union MutationCreateRelativeValuesDefinitionResult = BaseError | CreateRelativeValuesDefinitionResult | ValidationError
 
 input MutationCreateSquiggleSnippetModelInput {
+  """Squiggle source code"""
   code: String!
+
+  """Optional, if not set, model will be created on current user's account"""
   groupSlug: String
+
+  """Defaults to false"""
+  isPrivate: Boolean
   slug: String!
 }
 
-union MutationCreateSquiggleSnippetModelResult = BaseError | CreateSquiggleSnippetResult
+union MutationCreateSquiggleSnippetModelResult = BaseError | CreateSquiggleSnippetModelResult | ValidationError
 
 input MutationDeleteMembershipInput {
   membershipId: String!
@@ -557,4 +568,14 @@ type UserGroupMembershipEdge {
 
 input UsersQueryInput {
   usernameContains: String
+}
+
+type ValidationError implements Error {
+  issues: [ValidationErrorIssue!]!
+  message: String!
+}
+
+type ValidationErrorIssue {
+  message: String!
+  path: [String!]!
 }

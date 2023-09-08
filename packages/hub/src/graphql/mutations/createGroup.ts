@@ -4,7 +4,7 @@ import { rethrowOnConstraint } from "../errors/common";
 import { Group } from "../types/Group";
 
 builder.mutationField("createGroup", (t) =>
-  t.withAuth({ user: true }).fieldWithInput({
+  t.withAuth({ signedIn: true }).fieldWithInput({
     type: builder.simpleObject("CreateGroupResult", {
       fields: (t) => ({
         group: t.field({ type: Group }),

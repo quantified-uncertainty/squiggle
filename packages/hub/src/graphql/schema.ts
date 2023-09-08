@@ -2,6 +2,7 @@ import { builder } from "./builder";
 
 import "./errors/BaseError";
 import "./errors/NotFoundError";
+import "./errors/ValidationError";
 
 import "./queries/globalStatistics";
 import "./queries/group";
