@@ -125,6 +125,10 @@ export function groupRoute({ slug }: { slug: string }) {
   return `/groups/${slug}`;
 }
 
+export function groupMembersRoute({ slug }: { slug: string }) {
+  return `${groupRoute({ slug })}/members`;
+}
+
 export function newModelRoute() {
   return "/new/model";
 }

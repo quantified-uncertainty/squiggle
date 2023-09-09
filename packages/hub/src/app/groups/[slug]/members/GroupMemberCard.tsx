@@ -7,7 +7,7 @@ import { FC } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 import { MembershipRoleButton } from "./MembershipRoleButton";
-import { useIsGroupAdmin } from "./hooks";
+import { useIsGroupAdmin } from "../hooks";
 import { DotsDropdown } from "@/components/ui/DotsDropdown";
 import { DropdownMenu } from "@quri/ui";
 import { DeleteMembershipAction } from "./DeleteMembershipAction";

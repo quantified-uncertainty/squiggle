@@ -6,7 +6,7 @@ import { usePaginationFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 import { GroupMemberCard } from "./GroupMemberCard";
 import { H2 } from "@/components/ui/Headers";
-import { useIsGroupAdmin } from "./hooks";
+import { useIsGroupAdmin } from "../hooks";
 import { DotsDropdown } from "@/components/ui/DotsDropdown";
 import { DropdownMenu } from "@quri/ui";
 import { InviteUserToGroupAction } from "./InviteUserToGroupAction";

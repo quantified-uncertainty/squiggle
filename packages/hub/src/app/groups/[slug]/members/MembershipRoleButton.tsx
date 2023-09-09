@@ -1,9 +1,4 @@
-import {
-  Button,
-  Dropdown,
-  DropdownMenu,
-  DropdownMenuActionItem,
-} from "@quri/ui";
+import { Button, Dropdown, DropdownMenu } from "@quri/ui";
 import { FC } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";

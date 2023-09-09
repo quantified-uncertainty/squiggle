@@ -135,6 +135,7 @@ export const Group = builder.prismaNode("Group", {
               models: {
                 ...modelConnectionHelpers.getQuery(args, ctx, nestedSelection),
                 where: modelWhereHasAccess(ctx.session),
+                orderBy: { updatedAt: "desc" },
               },
             },
           },

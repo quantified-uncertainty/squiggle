@@ -44,6 +44,7 @@ export const User = builder.prismaNode("User", {
               models: {
                 ...modelConnectionHelpers.getQuery(args, ctx, nestedSelection),
                 where: modelWhereHasAccess(ctx.session),
+                orderBy: { updatedAt: "desc" },
               },
             },
           },
@@ -59,12 +60,14 @@ export const User = builder.prismaNode("User", {
         select: (args, ctx, nestedSelection) => ({
           asOwner: {
             select: {
-              relativeValuesDefinitions:
-                relativeValuesDefinitionConnectionHelpers.getQuery(
+              relativeValuesDefinitions: {
+                ...relativeValuesDefinitionConnectionHelpers.getQuery(
                   args,
                   ctx,
                   nestedSelection
                 ),
+                orderBy: { updatedAt: "desc" },
+              },
             },
           },
         }),

@@ -37,9 +37,7 @@ builder.queryField("relativeValuesDefinitions", (t) =>
               owner: { slug: args.input.owner },
             }),
           },
-          orderBy: {
-            updatedAt: "desc",
-          },
+          orderBy: { updatedAt: "desc" },
         }),
     },
     RelativeValuesDefinitionConnection

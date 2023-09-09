@@ -5,11 +5,9 @@ import { DotsDropdown } from "@/components/ui/DotsDropdown";
 import { DropdownMenu } from "@quri/ui";
 import { FC } from "react";
 import { graphql, useFragment } from "react-relay";
-import { CancelInviteAction } from "./CancelInviteAction";
-import { EmailGroupInvite } from "./EmailGroupInvite";
 import { InviteRoleButton } from "./InviteRoleButton";
 import { UserGroupInvite } from "./UserGroupInvite";
-import { useIsGroupAdmin } from "./hooks";
+import { CancelInviteAction } from "./CancelInviteAction";
 
 export const GroupInviteCard: FC<{
   inviteRef: GroupInviteCard$key;
@@ -30,16 +28,12 @@ export const GroupInviteCard: FC<{
     props.inviteRef
   );
 
-  const isAdmin = useIsGroupAdmin(props.groupRef);
-
   return (
     <Card key={invite.id}>
       <div className="flex justify-between items-center">
         <div>
           {invite.__typename === "UserGroupInvite" ? (
             <UserGroupInvite inviteRef={invite} />
-          ) : invite.__typename === "EmailGroupInvite" ? (
-            <EmailGroupInvite inviteRef={invite} />
           ) : (
             "Unknown invite type"
           )}
