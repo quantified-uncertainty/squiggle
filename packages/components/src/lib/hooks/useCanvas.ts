@@ -16,7 +16,7 @@ type DrawFunction = (context: DrawContext) => void;
 
 // We throttle to get around a Firefox bug.
 // See: https://github.com/quantified-uncertainty/squiggle/issues/2263
-const THROTTLE_AMOUNT = 30;
+const RESIZE_DELAY = 30;
 
 export function useCanvas({
   height,
@@ -37,7 +37,7 @@ export function useCanvas({
 
   const throttleTimeout = useRef<number | null>(null);
 
-  const handleResize = (entries: ResizeObserverEntry[]) => {
+  const handleResize = useCallback((entries: ResizeObserverEntry[]) => {
     if (!entries[0]) return;
 
     if (throttleTimeout.current) {
@@ -46,15 +46,15 @@ export function useCanvas({
 
     throttleTimeout.current = window.setTimeout(() => {
       setWidth(entries[0].contentRect.width);
-    }, THROTTLE_AMOUNT);
-  };
+    }, RESIZE_DELAY);
+  }, []);
 
   const observer = useMemo(() => {
     if (typeof window === "undefined") {
       return undefined;
     }
     return new window.ResizeObserver(handleResize);
-  }, []);
+  }, [handleResize]);
 
   useEffect(() => {
     return () => {
