@@ -4,6 +4,7 @@ import {
   useLayoutEffect,
   useMemo,
   useState,
+  useRef,
 } from "react";
 
 export type DrawContext = {
@@ -30,24 +31,35 @@ export function useCanvas({
   const devicePixelRatio =
     typeof window === "undefined" ? 1 : window.devicePixelRatio;
 
+  const throttleTimeout = useRef<number | null>(null);
+
+  const handleResize = (entries: ResizeObserverEntry[]) => {
+    if (!entries[0]) return;
+
+    if (throttleTimeout.current) {
+      clearTimeout(throttleTimeout.current);
+    }
+
+    throttleTimeout.current = window.setTimeout(() => {
+      setWidth(entries[0].contentRect.width);
+    }, 100); // Throttle for 100ms
+  };
+
   const observer = useMemo(() => {
     if (typeof window === "undefined") {
       return undefined;
     }
-    return new window.ResizeObserver((entries) => {
-      if (!entries[0]) {
-        return;
-      }
-      setWidth(entries[0].contentRect.width);
-    });
+    return new window.ResizeObserver(handleResize);
   }, []);
 
   useEffect(() => {
     return () => {
+      if (throttleTimeout.current) {
+        clearTimeout(throttleTimeout.current);
+      }
       observer?.disconnect();
     };
   }, [observer]);
-
   const ref = useCallback(
     (canvas: HTMLCanvasElement) => {
       if (!canvas) {
