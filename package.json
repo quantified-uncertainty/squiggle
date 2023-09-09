@@ -10,6 +10,6 @@
     "@changesets/cli": "^2.26.2",
     "prettier": "^3.0.0",
     "turbo": "^1.10.12",
-    "turbo-ignore": "^1.10.12"
+    "turbo-ignore": "^1.10.13"
   }
 }
