@@ -1,3 +1,4 @@
+"use client";
 import { FC, PropsWithChildren, createContext } from "react";
 
 type TailwindContextShape = {

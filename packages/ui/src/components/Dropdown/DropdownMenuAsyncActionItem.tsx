@@ -1,3 +1,4 @@
+"use client";
 import { FC, useState } from "react";
 
 import { IconProps } from "../../icons/Icon.js";
