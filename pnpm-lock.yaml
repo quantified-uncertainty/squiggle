@@ -12,8 +12,8 @@ importers:
         specifier: ^2.26.2
         version: 2.26.2
       prettier:
-        specifier: ^3.0.0
-        version: 3.0.0
+        specifier: ^3.0.3
+        version: 3.0.3
       turbo:
         specifier: ^1.10.12
         version: 1.10.12
@@ -43,8 +43,8 @@ importers:
         version: 5.0.0
     devDependencies:
       prettier:
-        specifier: ^3.0.0
-        version: 3.0.0
+        specifier: ^3.0.3
+        version: 3.0.3
 
   packages/components:
     dependencies:
@@ -118,8 +118,8 @@ importers:
         specifier: ^4.17.21
         version: 4.17.21
       prettier:
-        specifier: ^3.0.0
-        version: 3.0.0
+        specifier: ^3.0.3
+        version: 3.0.3
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -435,8 +435,8 @@ importers:
         specifier: ^8.4.24
         version: 8.4.24
       prettier:
-        specifier: ^2.8.8
-        version: 2.8.8
+        specifier: ^3.0.3
+        version: 3.0.3
       prisma:
         specifier: ^5.2.0
         version: 5.2.0
@@ -472,8 +472,8 @@ importers:
         specifier: workspace:*
         version: link:../squiggle-lang
       prettier:
-        specifier: ^3.0.0
-        version: 3.0.0
+        specifier: ^3.0.3
+        version: 3.0.3
     devDependencies:
       '@babel/preset-typescript':
         specifier: ^7.22.15
@@ -546,8 +546,8 @@ importers:
         specifier: ^3.0.2
         version: 3.0.2
       prettier:
-        specifier: ^2.8.8
-        version: 2.8.8
+        specifier: ^3.0.3
+        version: 3.0.3
       ts-node:
         specifier: ^10.9.1
         version: 10.9.1(@types/node@20.4.7)(typescript@5.1.6)
@@ -561,8 +561,8 @@ importers:
         specifier: ^4.1.0
         version: 4.1.0
       prettier:
-        specifier: ^3.0.0
-        version: 3.0.0
+        specifier: ^3.0.3
+        version: 3.0.3
 
   packages/ui:
     dependencies:
@@ -646,8 +646,8 @@ importers:
         specifier: ^10.1.0
         version: 10.1.0(postcss@8.4.24)
       prettier:
-        specifier: ^2.8.8
-        version: 2.8.8
+        specifier: ^3.0.3
+        version: 3.0.3
       prop-types:
         specifier: ^15.8.1
         version: 15.8.1
@@ -710,8 +710,8 @@ importers:
         specifier: ^4.1.0
         version: 4.1.0
       prettier:
-        specifier: ^2.8.8
-        version: 2.8.8
+        specifier: ^3.0.3
+        version: 3.0.3
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -792,8 +792,8 @@ importers:
         specifier: ^8.4.24
         version: 8.4.24
       prettier:
-        specifier: ^3.0.0
-        version: 3.0.0
+        specifier: ^3.0.3
+        version: 3.0.3
       tailwindcss:
         specifier: ^3.3.2
         version: 3.3.2
@@ -14986,8 +14986,8 @@ packages:
     hasBin: true
     dev: true
 
-  /prettier@3.0.0:
-    resolution: {integrity: sha512-zBf5eHpwHOGPC47h0zrPyNn+eAEIdEzfywMoYn2XPi0P44Zp0tSq64rq0xAREh4auw2cJZHo9QUob+NqCQky4g==}
+  /prettier@3.0.3:
+    resolution: {integrity: sha512-L/4pUDMxcNa8R/EthV08Zt42WBO4h1rarVtK0K+QJG0X187OLo7l699jWw0GKuwzkPQ//jMFA/8Xm6Fh3J/DAg==}
     engines: {node: '>=14'}
     hasBin: true
 
