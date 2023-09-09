@@ -39,6 +39,7 @@ export {
   type SqPlot,
 } from "./public/SqValue/SqPlot.js";
 export { SqTableChart } from "./public/SqValue/SqTableChart.js";
+export { SqCalculator } from "./public/SqValue/SqCalculator.js";
 export { SqDict } from "./public/SqValue/SqDict.js";
 export {
   SqLinearScale,

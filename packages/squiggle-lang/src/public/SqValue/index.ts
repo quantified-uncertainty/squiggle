@@ -3,6 +3,7 @@ import { Value, vLambda, vNumber, vString } from "../../value/index.js";
 import { SqError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqArray } from "./SqArray.js";
+import { SqCalculator } from "./SqCalculator.js";
 import { SqDict } from "./SqDict.js";
 import { SqDistribution, wrapDistribution } from "./SqDistribution/index.js";
 import { SqDomain, wrapDomain } from "./SqDomain.js";
@@ -33,6 +34,8 @@ export function wrapValue(value: Value, context?: SqValueContext) {
       return new SqPlotValue(value, context);
     case "TableChart":
       return new SqTableChartValue(value, context);
+    case "Calculator":
+      return new SqCalculatorValue(value, context);
     case "Scale":
       return new SqScaleValue(value, context);
     case "TimeDuration":
@@ -206,6 +209,20 @@ export class SqTableChartValue extends SqAbstractValue<
 
   get value() {
     return new SqTableChart(this._value.value, this.context);
+  }
+
+  asJS() {
+    return this.value;
+  }
+}
+export class SqCalculatorValue extends SqAbstractValue<
+  "Calculator",
+  SqCalculator
+> {
+  tag = "Calculator" as const;
+
+  get value() {
+    return new SqCalculator(this._value.value, this.context);
   }
 
   asJS() {

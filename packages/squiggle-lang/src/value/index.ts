@@ -271,6 +271,24 @@ class VTableChart extends BaseValue {
 
 export const vTableChart = (v: TableChart) => new VTableChart(v);
 
+export type Calculator = {
+  inputs: { name: string | undefined }[];
+  fn: Lambda;
+};
+
+class VCalculator extends BaseValue {
+  readonly type = "Calculator";
+
+  constructor(public value: Calculator) {
+    super();
+  }
+  toString() {
+    return `Calculator`;
+  }
+}
+
+export const vCalculator = (v: Calculator) => new VCalculator(v);
+
 class VPlot extends BaseValue implements Indexable {
   readonly type = "Plot";
 
@@ -413,6 +431,7 @@ export type Value =
   | VTimeDuration
   | VPlot
   | VTableChart
+  | VCalculator
   | VScale
   | VDomain
   | VVoid;
