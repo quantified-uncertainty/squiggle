@@ -1,3 +1,4 @@
+"use client";
 import { FC, cloneElement, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
