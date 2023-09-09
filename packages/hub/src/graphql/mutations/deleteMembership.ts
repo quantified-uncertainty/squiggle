@@ -1,6 +1,10 @@
 import { prisma } from "@/prisma";
-import { decodeGlobalID } from "@pothos/plugin-relay";
 import { builder } from "../builder";
+import {
+  getMembership,
+  getMyMembership,
+  groupHasAdminsBesidesUser,
+} from "../types/Group";
 
 builder.mutationField("deleteMembership", (t) =>
   t.withAuth({ signedIn: true }).fieldWithInput({
@@ -11,38 +15,50 @@ builder.mutationField("deleteMembership", (t) =>
     }),
     errors: {},
     input: {
-      membershipId: t.input.string({ required: true }),
+      group: t.input.string({ required: true }),
+      user: t.input.string({ required: true }),
     },
     resolve: async (_, { input }, { session }) => {
-      const { typename, id: decodedMembershipId } = decodeGlobalID(
-        input.membershipId
-      );
-      if (typename !== "UserGroupMembership") {
-        throw new Error(`Expected UserGroupMembership id, got: ${typename}`);
+      // somewhat repetitive compared to `updateMembershipRole`, but with slightly different error messages
+      const myMembership = await getMyMembership({
+        groupSlug: input.group,
+        session,
+      });
+
+      if (!myMembership) {
+        throw new Error("You're not a member of this group");
+      }
+
+      if (
+        input.user !== session.user.username &&
+        myMembership.role !== "Admin"
+      ) {
+        throw new Error("Only admins can delete other members");
+      }
+
+      const membershipToDelete = await getMembership({
+        groupSlug: input.group,
+        userSlug: input.user,
+      });
+
+      if (!membershipToDelete) {
+        throw new Error(`${input.user} is not a member of ${input.group}`);
+      }
+
+      if (
+        !(await groupHasAdminsBesidesUser({
+          groupSlug: input.group,
+          userSlug: input.user,
+        }))
+      ) {
+        throw new Error(
+          `Can't delete, ${input.user} is the last admin of ${input.group}`
+        );
       }
 
       await prisma.userGroupMembership.delete({
         where: {
-          id: decodedMembershipId,
-          OR: [
-            // delete self
-            {
-              user: {
-                email: session.user.email,
-              },
-            },
-            // or delete user from the group that requester admins
-            {
-              group: {
-                memberships: {
-                  some: {
-                    user: { email: session.user.email },
-                    role: "Admin",
-                  },
-                },
-              },
-            },
-          ],
+          id: membershipToDelete.id,
         },
       });
 

@@ -36,7 +36,7 @@ test("no auth", async () => {
 });
 
 test("basic", async () => {
-  await setCurrentUser({ email: "mock@example.com", username: "mockuser" });
+  await setCurrentUser("mockuser");
   const result = await runOk({});
 
   expect(result).toMatchObject({

@@ -20,6 +20,10 @@ type Context = {
   request: NextRequest;
 };
 
+export type SignedInSession = Session & {
+  user: NonNullable<Session["user"]> & { email: string };
+};
+
 export type HubSchemaTypes = {
   PrismaTypes: PrismaTypes;
   DefaultEdgesNullability: false;
@@ -31,9 +35,7 @@ export type HubSchemaTypes = {
   AuthContexts: {
     // https://pothos-graphql.dev/docs/plugins/scope-auth#change-context-types-based-on-scopes
     signedIn: Context & {
-      session: Session & {
-        user: NonNullable<Session["user"]> & { email: string };
-      };
+      session: SignedInSession;
     };
   };
 };

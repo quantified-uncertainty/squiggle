@@ -10,6 +10,7 @@ import {
   modelWhereHasAccess,
 } from "./Model";
 import { Owner } from "./Owner";
+import { getSelf, isSignedIn } from "./User";
 
 export const MembershipRoleType = builder.enumType(MembershipRole, {
   name: "MembershipRole",
@@ -23,6 +24,7 @@ export const UserGroupMembership = builder.prismaNode("UserGroupMembership", {
       resolve: (t) => t.role,
     }),
     user: t.relation("user"),
+    // TODO - group relation
   }),
 });
 
@@ -31,23 +33,97 @@ export const UserGroupMembershipConnection = builder.connectionObject({
   name: "UserGroupMembershipConnection",
 });
 
-async function getMyMembership(groupId: string, session: Session | null) {
-  const email = session?.user?.email;
-  if (!email) {
+export async function getMembership({
+  groupSlug,
+  userSlug,
+}: {
+  groupSlug: string;
+  userSlug: string;
+}) {
+  const membership = await prisma.userGroupMembership.findFirst({
+    where: {
+      user: {
+        asOwner: {
+          slug: userSlug,
+        },
+      },
+      group: {
+        asOwner: {
+          slug: groupSlug,
+        },
+      },
+    },
+  });
+  return membership;
+}
+
+export async function getMyMembership({
+  groupSlug,
+  session,
+}: {
+  groupSlug: string;
+  session: Session | null;
+}) {
+  if (!isSignedIn(session)) {
     return null;
   }
-  const user = await prisma.user.findUniqueOrThrow({
-    where: { email },
-  });
-  const myMembership = await prisma.userGroupMembership.findUnique({
+  const self = await getSelf(session);
+  const myMembership = await prisma.userGroupMembership.findFirst({
     where: {
-      userId_groupId: {
-        groupId: groupId,
-        userId: user.id,
+      userId: self.id,
+      group: {
+        asOwner: {
+          slug: groupSlug,
+        },
       },
     },
   });
   return myMembership;
+}
+
+async function getMyMembershipById(groupId: string, session: Session | null) {
+  if (!isSignedIn(session)) {
+    return null;
+  }
+  const self = await getSelf(session);
+  const myMembership = await prisma.userGroupMembership.findUnique({
+    where: {
+      userId_groupId: {
+        groupId: groupId,
+        userId: self.id,
+      },
+    },
+  });
+  return myMembership;
+}
+
+// also returns true if user is not an admin
+export async function groupHasAdminsBesidesUser({
+  groupSlug,
+  userSlug,
+}: {
+  groupSlug: string;
+  userSlug: string;
+}) {
+  return Boolean(
+    await prisma.userGroupMembership.count({
+      where: {
+        group: {
+          asOwner: {
+            slug: groupSlug,
+          },
+        },
+        NOT: {
+          user: {
+            asOwner: {
+              slug: userSlug,
+            },
+          },
+        },
+        role: "Admin",
+      },
+    })
+  );
 }
 
 export const Group = builder.prismaNode("Group", {
@@ -70,7 +146,7 @@ export const Group = builder.prismaNode("Group", {
       resolve: async (root, _, { session }) => {
         // TODO - `prismaField`?
         // TODO - this causes an extra query, optimize somehow?
-        return getMyMembership(root.id, session);
+        return getMyMembershipById(root.id, session);
       },
     }),
     // Note: I also tried `members` field with membership data exposed on the connection edges, but had issues with it:
@@ -93,7 +169,7 @@ export const Group = builder.prismaNode("Group", {
           // But unfortunately Prisma doesn't have select aliases:
           // https://github.com/prisma/prisma/discussions/14316
           // https://github.com/prisma/prisma/issues/8151
-          const myMembership = await getMyMembership(group.id, session);
+          const myMembership = await getMyMembershipById(group.id, session);
           return myMembership?.role === "Admin";
         },
         unauthorizedResolver: () => null,

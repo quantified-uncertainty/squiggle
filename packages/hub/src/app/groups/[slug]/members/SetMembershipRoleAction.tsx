@@ -2,8 +2,11 @@ import {
   MembershipRole,
   SetMembershipRoleActionMutation,
 } from "@/__generated__/SetMembershipRoleActionMutation.graphql";
+import { SetMembershipRoleAction_Group$key } from "@/__generated__/SetMembershipRoleAction_Group.graphql";
+import { SetMembershipRoleAction_Membership$key } from "@/__generated__/SetMembershipRoleAction_Membership.graphql";
 import { MutationAction } from "@/components/ui/MutationAction";
 import { FC } from "react";
+import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
 const Mutation = graphql`
@@ -26,16 +29,40 @@ const Mutation = graphql`
 `;
 
 type Props = {
-  membershipId: string;
+  groupRef: SetMembershipRoleAction_Group$key;
+  membershipRef: SetMembershipRoleAction_Membership$key;
   role: MembershipRole;
   close: () => void;
 };
 
 export const SetMembershipRoleAction: FC<Props> = ({
-  membershipId,
+  groupRef,
+  membershipRef,
   role,
   close,
 }) => {
+  const group = useFragment(
+    graphql`
+      fragment SetMembershipRoleAction_Group on Group {
+        id
+        slug
+      }
+    `,
+    groupRef
+  );
+
+  const membership = useFragment(
+    graphql`
+      fragment SetMembershipRoleAction_Membership on UserGroupMembership {
+        id
+        user {
+          slug
+        }
+      }
+    `,
+    membershipRef
+  );
+
   return (
     <MutationAction<
       SetMembershipRoleActionMutation,
@@ -44,7 +71,8 @@ export const SetMembershipRoleAction: FC<Props> = ({
       mutation={Mutation}
       variables={{
         input: {
-          membershipId,
+          user: membership.user.slug,
+          group: group.slug,
           role,
         },
       }}

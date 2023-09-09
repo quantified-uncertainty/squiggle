@@ -84,6 +84,12 @@ export function useAsyncMutation<
             reject();
           }
         },
+        updater(store, response) {
+          if (response.result.__typename !== expectedTypename) {
+            return;
+          }
+          config.updater?.(store, response);
+        },
         onError(e) {
           toast(e.toString(), "error");
           resolve();

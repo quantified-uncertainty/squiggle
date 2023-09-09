@@ -1,5 +1,5 @@
 import { graphql } from "../../gql-gen";
-import { commonTestMutations } from "../commonMutations";
+import { commonTestMutations } from "../commonQueries";
 import { createInputRunners, setCurrentUser } from "../helpers";
 
 const Mutation = graphql(/* GraphQL */ `
@@ -31,8 +31,6 @@ const Mutation = graphql(/* GraphQL */ `
   }
 `);
 
-const user = { email: "mock@example.com", username: "mockuser" };
-
 const { runOk, runError } = createInputRunners(
   Mutation,
   "CreateSquiggleSnippetModelResult"
@@ -47,7 +45,7 @@ test("no auth", async () => {
 });
 
 test("bad slug", async () => {
-  await setCurrentUser(user);
+  await setCurrentUser("mockuser");
   const result = await runError(
     { code: "2+2", slug: "foo bar" },
     "ValidationError"
@@ -56,7 +54,7 @@ test("bad slug", async () => {
 });
 
 test("basic", async () => {
-  await setCurrentUser(user);
+  await setCurrentUser("mockuser");
   const result = await runOk({ code: "2+2", slug: "testmodel" });
 
   expect(result.model.slug).toBe("testmodel");
@@ -66,7 +64,7 @@ test("basic", async () => {
 });
 
 test("private", async () => {
-  await setCurrentUser(user);
+  await setCurrentUser("mockuser");
   const result = await runOk({
     code: "2+2",
     slug: "testmodel",
@@ -80,7 +78,7 @@ test("private", async () => {
 });
 
 test("for group", async () => {
-  await setCurrentUser(user);
+  await setCurrentUser("mockuser");
   await commonTestMutations.createGroup("testgroup");
 
   const result = await runOk({
@@ -94,7 +92,7 @@ test("for group", async () => {
 });
 
 test("for group with bad slug", async () => {
-  await setCurrentUser(user);
+  await setCurrentUser("mockuser");
 
   const result = await runError(
     {
@@ -109,7 +107,7 @@ test("for group with bad slug", async () => {
 });
 
 test("duplicate", async () => {
-  await setCurrentUser(user);
+  await setCurrentUser("mockuser");
 
   await runOk({ code: "2+2", slug: "testmodel" });
 

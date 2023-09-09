@@ -1,13 +1,13 @@
-import { decodeGlobalID } from "@pothos/plugin-relay";
 import { Prisma, type Model as PrismaModel } from "@prisma/client";
 import { Session } from "next-auth";
 
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 import { prismaConnectionHelpers } from "@pothos/plugin-prisma";
+import { NotFoundError } from "../errors/NotFoundError";
+import { decodeGlobalIdWithTypename } from "../utils";
 import { ModelRevision, ModelRevisionConnection } from "./ModelRevision";
 import { Owner } from "./Owner";
-import { NotFoundError } from "../errors/NotFoundError";
 
 export function modelWhereHasAccess(
   session: Session | null
@@ -136,10 +136,7 @@ export const Model = builder.prismaNode("Model", {
         id: t.arg.id({ required: true }),
       },
       select: (args, _, nestedSelection) => {
-        const { typename, id } = decodeGlobalID(String(args.id));
-        if (typename !== "ModelRevision") {
-          throw new Error("Expected ModelRevision id");
-        }
+        const id = decodeGlobalIdWithTypename(String(args.id), "ModelRevision");
 
         return {
           revisions: nestedSelection({

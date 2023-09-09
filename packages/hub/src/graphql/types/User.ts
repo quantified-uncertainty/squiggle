@@ -1,4 +1,5 @@
-import { builder } from "../builder";
+import { Session } from "next-auth";
+import { SignedInSession, builder } from "../builder";
 import {
   ModelConnection,
   modelConnectionHelpers,
@@ -9,6 +10,20 @@ import {
   RelativeValuesDefinitionConnection,
   relativeValuesDefinitionConnectionHelpers,
 } from "./RelativeValuesDefinition";
+import { prisma } from "@/prisma";
+
+export function isSignedIn(
+  session: Session | null
+): session is SignedInSession {
+  return Boolean(session?.user.email);
+}
+
+export async function getSelf(session: SignedInSession) {
+  const user = await prisma.user.findUniqueOrThrow({
+    where: { email: session.user.email },
+  });
+  return user;
+}
 
 export const User = builder.prismaNode("User", {
   id: { field: "id" },

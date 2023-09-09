@@ -3,8 +3,10 @@ import { FC } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { InviteRoleButton$key } from "@/__generated__/InviteRoleButton.graphql";
-import { MembershipRole } from "@/__generated__/MembershipRoleButton.graphql";
+import {
+  InviteRoleButton$key,
+  MembershipRole,
+} from "@/__generated__/InviteRoleButton.graphql";
 import { SetInviteRoleButton } from "./SetInviteRoleAction";
 
 const Fragment = graphql`

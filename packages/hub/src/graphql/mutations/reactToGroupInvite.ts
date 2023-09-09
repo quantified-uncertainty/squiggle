@@ -1,8 +1,8 @@
 import { prisma } from "@/prisma";
-import { decodeGlobalID } from "@pothos/plugin-relay";
 import { builder } from "../builder";
 import { UserGroupMembership } from "../types/Group";
 import { GroupInvite } from "../types/GroupInvite";
+import { decodeGlobalIdWithTypename } from "../utils";
 
 export const InviteReaction = builder.enumType("GroupInviteReaction", {
   values: ["Accept", "Decline"],
@@ -22,11 +22,11 @@ builder.mutationField("reactToGroupInvite", (t) =>
       action: t.input.field({ type: InviteReaction, required: true }),
     },
     resolve: async (_, { input }, { session }) => {
-      const { typename, id: decodedInviteId } = decodeGlobalID(input.inviteId);
       // Note: doesn't support email invites yet (which are not implemented anyway)
-      if (typename !== "UserGroupInvite") {
-        throw new Error("Expected UserGroupInvite id");
-      }
+      const decodedInviteId = decodeGlobalIdWithTypename(
+        input.inviteId,
+        "UserGroupInvite"
+      );
 
       const newStatus =
         input.action === "Accept"

@@ -2,7 +2,7 @@ import { graphql } from "../../gql-gen";
 import {
   createRunners,
   executeCommonOperation,
-  setCurrentUser,
+  setCurrentUserObject,
 } from "../helpers";
 
 const SetUsernameTest = graphql(/* GraphQL */ `
@@ -31,29 +31,33 @@ test("no auth", async () => {
 });
 
 test("already set", async () => {
-  await setCurrentUser({ email: "mock@example.com", username: "mockuser" });
+  await setCurrentUserObject({
+    email: "mock@example.com",
+    username: "mockuser",
+  });
+
   const result = await runError({ username: "mockuser2" }, "BaseError");
   expect(result.message).toMatch("Username is already set");
 });
 
 test("bad username", async () => {
-  await setCurrentUser({ email: "mock@example.com" });
+  await setCurrentUserObject({ email: "mock@example.com" });
   const result = await runError({ username: "foo bar" }, "ValidationError");
   expect(result.message).toMatch("[username] Must be alphanumerical");
 });
 
 test("not available", async () => {
-  await setCurrentUser({ email: "mock@example.com" });
+  await setCurrentUserObject({ email: "mock@example.com" });
   await runOk({ username: "mockuser" });
 
-  await setCurrentUser({ email: "mock2@example.com" });
+  await setCurrentUserObject({ email: "mock2@example.com" });
   const result = await runError({ username: "mockuser" }, "BaseError");
 
   expect(result.message).toMatch("Username mockuser is not available");
 });
 
 test("basic", async () => {
-  await setCurrentUser({ email: "mock@example.com" });
+  await setCurrentUserObject({ email: "mock@example.com" });
   const result = await runOk({ username: "mockuser" });
 
   expect(result).toMatchObject({

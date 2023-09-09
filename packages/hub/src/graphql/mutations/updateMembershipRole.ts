@@ -1,8 +1,12 @@
 import { prisma } from "@/prisma";
-import { decodeGlobalID } from "@pothos/plugin-relay";
-import { MembershipRole } from "@prisma/client";
 import { builder } from "../builder";
-import { MembershipRoleType, UserGroupMembership } from "../types/Group";
+import {
+  MembershipRoleType,
+  UserGroupMembership,
+  getMembership,
+  getMyMembership,
+  groupHasAdminsBesidesUser,
+} from "../types/Group";
 
 builder.mutationField("updateMembershipRole", (t) =>
   t.withAuth({ signedIn: true }).fieldWithInput({
@@ -13,59 +17,57 @@ builder.mutationField("updateMembershipRole", (t) =>
     }),
     errors: {},
     input: {
-      membershipId: t.input.string({ required: true }),
+      group: t.input.string({ required: true }),
+      user: t.input.string({ required: true }),
       role: t.input.field({
         type: MembershipRoleType,
         required: true,
       }),
     },
     resolve: async (_, { input }, { session }) => {
-      const user = await prisma.user.findUniqueOrThrow({
-        where: { email: session.user.email },
+      // somewhat repetitive compared to `deleteMembership`, but with slightly different error messages
+      const myMembership = await getMyMembership({
+        groupSlug: input.group,
+        session,
       });
 
-      const { typename, id: decodedMembershipId } = decodeGlobalID(
-        input.membershipId
-      );
-      if (typename !== "UserGroupMembership") {
-        throw new Error(`Expected UserGroupMembership id, got: ${typename}`);
+      if (!myMembership) {
+        throw new Error("You're not a member of this group");
       }
 
-      const membership = await prisma.userGroupMembership.findUniqueOrThrow({
-        where: { id: decodedMembershipId },
-        include: { group: true },
-      });
-      if (membership.role === input.role) {
-        return { membership }; // nothing to do
+      if (
+        input.user !== session.user.username &&
+        myMembership.role !== "Admin"
+      ) {
+        throw new Error("Only admins can update other members roles");
       }
 
-      const myMembership = await prisma.userGroupMembership.findUnique({
-        where: {
-          userId_groupId: {
-            userId: user.id,
-            groupId: membership.groupId,
-          },
-        },
+      const membershipToUpdate = await getMembership({
+        groupSlug: input.group,
+        userSlug: input.user,
       });
 
-      if (myMembership?.role !== MembershipRole.Admin) {
-        throw new Error("You're not an admin of this group");
+      if (!membershipToUpdate) {
+        throw new Error(`${input.user} is not a member of ${input.group}`);
       }
 
-      const totalAdmins = await prisma.userGroupMembership.count({
-        where: {
-          groupId: myMembership.groupId,
-          role: "Admin",
-        },
-      });
-      if (totalAdmins < 2 && input.role !== "Admin") {
+      if (membershipToUpdate.role === input.role) {
+        return { membership: membershipToUpdate }; // nothing to do
+      }
+
+      if (
+        !(await groupHasAdminsBesidesUser({
+          groupSlug: input.group,
+          userSlug: input.user,
+        }))
+      ) {
         throw new Error(
-          "Can't change the role, you're the last admin of this group"
+          `Can't change the role, ${input.user} is the last admin of ${input.group}`
         );
       }
 
       const updatedMembership = await prisma.userGroupMembership.update({
-        where: { id: membership.id },
+        where: { id: membershipToUpdate.id },
         data: { role: input.role },
       });
 

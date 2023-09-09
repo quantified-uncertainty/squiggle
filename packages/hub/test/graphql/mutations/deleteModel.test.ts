@@ -1,5 +1,5 @@
 import { graphql } from "../../gql-gen";
-import { commonTestMutations } from "../commonMutations";
+import { commonTestMutations } from "../commonQueries";
 import { createInputRunners, setCurrentUser } from "../helpers";
 
 const Mutation = graphql(/* GraphQL */ `
@@ -19,9 +19,6 @@ const Mutation = graphql(/* GraphQL */ `
   }
 `);
 
-const user = { email: "mock@example.com", username: "mockuser" };
-const user2 = { email: "mock2@example.com", username: "mockuser2" };
-
 const { runOk, runError } = createInputRunners(Mutation, "DeleteModelResult");
 
 test("no auth", async () => {
@@ -33,7 +30,7 @@ test("no auth", async () => {
 });
 
 test("no such model", async () => {
-  await setCurrentUser(user);
+  await setCurrentUser("mockuser");
   const result = await runError(
     { owner: "testuser", slug: "testmodel" },
     "NotFoundError"
@@ -42,32 +39,34 @@ test("no such model", async () => {
 });
 
 test("ok", async () => {
-  await setCurrentUser(user);
+  await setCurrentUser("mockuser");
   await commonTestMutations.createModel({ slug: "testmodel" });
 
-  const result = await runOk({ owner: user.username, slug: "testmodel" });
+  const result = await runOk({ owner: "mockuser", slug: "testmodel" });
   expect(result.ok).toBe(true);
 });
 
 test("double delete", async () => {
-  await setCurrentUser(user);
-  await commonTestMutations.createModel({ slug: "testmodel" });
+  const owner = "mockuser";
+  const slug = "testmodel";
+  await setCurrentUser(owner);
+  await commonTestMutations.createModel({ slug });
 
-  await runOk({ owner: user.username, slug: "testmodel" });
-  const result = await runError(
-    { owner: user.username, slug: "testmodel" },
-    "NotFoundError"
-  );
+  await runOk({ owner, slug });
+  const result = await runError({ owner, slug }, "NotFoundError");
+
   expect(result.message).toMatch("Can't find model");
 });
 
 test("wrong user", async () => {
-  await setCurrentUser(user);
+  const owner = "mockuser";
+  const otherUser = "user2";
+  await setCurrentUser(owner);
   await commonTestMutations.createModel({ slug: "testmodel" });
-  await setCurrentUser(user2);
+  await setCurrentUser(otherUser);
 
   const result = await runError(
-    { owner: user.username, slug: "testmodel" },
+    { owner, slug: "testmodel" },
     "NotFoundError" // TODO - error should be more specific
   );
   expect(result.message).toMatch("Can't find model");
@@ -76,7 +75,7 @@ test("wrong user", async () => {
 test("deleting group model", async () => {
   const groupSlug = "group1";
 
-  await setCurrentUser(user);
+  await setCurrentUser("mockuser");
   await commonTestMutations.createGroup(groupSlug);
   await commonTestMutations.createModel({ groupSlug, slug: "testmodel" });
 

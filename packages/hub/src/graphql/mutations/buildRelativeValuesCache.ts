@@ -3,11 +3,11 @@ import { prisma } from "@/prisma";
 import { cartesianProduct } from "@/relative-values/lib/utils";
 import { relativeValuesItemsSchema } from "@/relative-values/types";
 import { ModelEvaluator } from "@/relative-values/values/ModelEvaluator";
-import { decodeGlobalID } from "@pothos/plugin-relay";
 import {
   RelativeValuesExport,
   getRelativeValuesExportForWriteableModel,
 } from "../types/RelativeValuesExport";
+import { decodeGlobalIdWithTypename } from "../utils";
 
 builder.mutationField("buildRelativeValuesCache", (t) =>
   t.withAuth({ signedIn: true }).fieldWithInput({
@@ -21,10 +21,10 @@ builder.mutationField("buildRelativeValuesCache", (t) =>
       exportId: t.input.string({ required: true }),
     },
     resolve: async (_, { input }, { session }) => {
-      const { typename, id: exportId } = decodeGlobalID(input.exportId);
-      if (typename !== "RelativeValuesExport") {
-        throw new Error("Expected RelativeValuesExport id");
-      }
+      const exportId = decodeGlobalIdWithTypename(
+        input.exportId,
+        "RelativeValuesExport"
+      );
 
       const relativeValuesExport =
         await getRelativeValuesExportForWriteableModel({

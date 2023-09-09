@@ -3,6 +3,7 @@ import {
   executeCommonOperation,
   executeOperation,
   setCurrentUser,
+  setCurrentUserObject,
   unsetCurrentUser,
 } from "../helpers";
 
@@ -39,7 +40,7 @@ test("empty", async () => {
   expect(models.edges.length).toBe(0);
 });
 
-const user = { email: "mock@example.com", username: "mockuser" };
+const user = "mockuser";
 
 async function createModel(slug: string, options: { private?: boolean } = {}) {
   await executeCommonOperation(CreateModel, {
@@ -108,7 +109,7 @@ test("hide private models from other users", async () => {
   await createModel("model1");
   await createModel("model2", { private: true });
   await createModel("model3");
-  await setCurrentUser({ email: "other@example.com", username: "otheruser" });
+  await setCurrentUser("otheruser");
   const { models } = await executeOperation(Query);
 
   expect(models.edges.length).toBe(2);

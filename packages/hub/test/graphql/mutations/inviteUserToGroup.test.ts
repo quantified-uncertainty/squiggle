@@ -1,16 +1,9 @@
 import { graphql } from "../../gql-gen";
-import { commonTestMutations } from "../commonMutations";
+import { commonTestMutations } from "../commonQueries";
 import { createRunners, setCurrentUser, unsetCurrentUser } from "../helpers";
 
-const ownerUser = {
-  email: "mock-owner@example.com",
-  username: "mockowner",
-};
-
-const memberUser = {
-  email: "mock-member@example.com",
-  username: "mockmember",
-};
+const ownerUser = "mockowner";
+const memberUser = "mockmember";
 
 async function prepareGroup() {
   await setCurrentUser(ownerUser);

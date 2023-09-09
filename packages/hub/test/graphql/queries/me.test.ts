@@ -1,8 +1,8 @@
 import { graphql } from "../../gql-gen";
-import { executeOperation, setCurrentUser } from "../helpers";
+import { executeOperation, setCurrentUserObject } from "../helpers";
 
 test("basic", async () => {
-  await setCurrentUser({
+  await setCurrentUserObject({
     email: "mock@example.com",
     username: "mockuser",
   });

@@ -245,7 +245,8 @@ input MutationCreateSquiggleSnippetModelInput {
 union MutationCreateSquiggleSnippetModelResult = BaseError | CreateSquiggleSnippetModelResult | ValidationError
 
 input MutationDeleteMembershipInput {
-  membershipId: String!
+  group: String!
+  user: String!
 }
 
 union MutationDeleteMembershipResult = BaseError | DeleteMembershipResult
@@ -297,8 +298,9 @@ input MutationUpdateGroupInviteRoleInput {
 union MutationUpdateGroupInviteRoleResult = BaseError | UpdateGroupInviteRoleResult
 
 input MutationUpdateMembershipRoleInput {
-  membershipId: String!
+  group: String!
   role: MembershipRole!
+  user: String!
 }
 
 union MutationUpdateMembershipRoleResult = BaseError | UpdateMembershipRoleResult

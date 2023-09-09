@@ -8,7 +8,9 @@ import { prisma } from "@/prisma";
 
 let currentUser: Session["user"] | null;
 
-export async function setCurrentUser(user: {
+// Useful when you need a custom email or to create a user without username.
+// In other cases, `setCurrentUser` function below is more convenient.
+export async function setCurrentUserObject(user: {
   email: string;
   username?: string;
 }) {
@@ -32,6 +34,13 @@ export async function setCurrentUser(user: {
     update: {},
   });
   currentUser = user;
+}
+
+export async function setCurrentUser(username: string) {
+  await setCurrentUserObject({
+    email: `${username}@example.com`,
+    username,
+  });
 }
 
 export async function unsetCurrentUser() {

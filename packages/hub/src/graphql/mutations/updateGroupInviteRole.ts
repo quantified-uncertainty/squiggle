@@ -1,9 +1,9 @@
 import { prisma } from "@/prisma";
-import { decodeGlobalID } from "@pothos/plugin-relay";
 import { MembershipRole } from "@prisma/client";
 import { builder } from "../builder";
 import { MembershipRoleType } from "../types/Group";
 import { GroupInvite } from "../types/GroupInvite";
+import { decodeGlobalIdWithTypename } from "../utils";
 
 builder.mutationField("updateGroupInviteRole", (t) =>
   t.withAuth({ signedIn: true }).fieldWithInput({
@@ -25,10 +25,10 @@ builder.mutationField("updateGroupInviteRole", (t) =>
         where: { email: session.user.email },
       });
 
-      const { typename, id: decodedInviteId } = decodeGlobalID(input.inviteId);
-      if (["UserGroupInvite" || "EmailGroupInvite"].includes("GroupInvite")) {
-        throw new Error(`Expected GroupInvite id, got: ${typename}`);
-      }
+      const decodedInviteId = decodeGlobalIdWithTypename(input.inviteId, [
+        "UserGroupInvite",
+        "EmailGroupInvite",
+      ]);
 
       const invite = await prisma.groupInvite.findUniqueOrThrow({
         where: { id: decodedInviteId },
