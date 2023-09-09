@@ -8,11 +8,11 @@ import { graphql } from "relay-runtime";
 import { Button } from "@quri/ui";
 
 import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
+import { SelectGroup } from "@/components/SelectGroup";
 import { H1 } from "@/components/ui/Headers";
 import { SlugFormField } from "@/components/ui/SlugFormField";
 import { useAsyncMutation } from "@/hooks/useAsyncMutation";
-import { modelRoute, userModelRoute } from "@/routes";
-import { SelectGroup } from "@/components/SelectGroup";
+import { modelRoute } from "@/routes";
 
 const Mutation = graphql`
   mutation NewModelMutation($input: MutationCreateSquiggleSnippetModelInput!) {

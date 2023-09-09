@@ -2,8 +2,7 @@ import {
   MembershipRole,
   SetMembershipRoleActionMutation,
 } from "@/__generated__/SetMembershipRoleActionMutation.graphql";
-import { useAsyncMutation } from "@/hooks/useAsyncMutation";
-import { DropdownMenuAsyncActionItem, RefreshIcon } from "@quri/ui";
+import { MutationAction } from "@/components/ui/MutationAction";
 import { FC } from "react";
 import { graphql } from "relay-runtime";
 
@@ -37,22 +36,21 @@ export const SetMembershipRoleAction: FC<Props> = ({
   role,
   close,
 }) => {
-  const [runMutation] = useAsyncMutation<SetMembershipRoleActionMutation>({
-    mutation: Mutation,
-    expectedTypename: "UpdateMembershipRoleResult",
-  });
-
-  const act = () =>
-    runMutation({
-      variables: {
+  return (
+    <MutationAction<
+      SetMembershipRoleActionMutation,
+      "UpdateMembershipRoleResult"
+    >
+      mutation={Mutation}
+      variables={{
         input: {
           membershipId,
           role,
         },
-      },
-    });
-
-  return (
-    <DropdownMenuAsyncActionItem title={role} onClick={act} close={close} />
+      }}
+      expectedTypename="UpdateMembershipRoleResult"
+      title={role}
+      close={close}
+    />
   );
 };

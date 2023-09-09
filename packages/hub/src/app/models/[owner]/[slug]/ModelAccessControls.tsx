@@ -55,7 +55,6 @@ export const UpdateModelPrivacyAction: FC<{
   close(): void;
 }> = ({ modelRef, close }) => {
   const model = useFragment(Fragment, modelRef);
-  // TODO - fill cache in ModelEvaluator and re-render
   const [runMutation] = useAsyncMutation<ModelAccessControlsMutation>({
     mutation: Mutation,
     expectedTypename: "UpdateModelPrivacyResult",

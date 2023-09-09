@@ -1,15 +1,14 @@
-import { CancelInviteActionMutation } from "@/__generated__/CancelInviteActionMutation.graphql";
+import { FC } from "react";
+import { useFragment } from "react-relay";
+import { graphql } from "relay-runtime";
+
 import { InviteForMe$key } from "@/__generated__/InviteForMe.graphql";
 import {
   GroupInviteReaction,
   InviteForMeMutation,
 } from "@/__generated__/InviteForMeMutation.graphql";
 import { Card } from "@/components/ui/Card";
-import { useAsyncMutation } from "@/hooks/useAsyncMutation";
-import { Button, DropdownMenuAsyncActionItem, TrashIcon } from "@quri/ui";
-import { FC } from "react";
-import { useFragment } from "react-relay";
-import { ConnectionHandler, graphql } from "relay-runtime";
+import { MutationButton } from "@/components/ui/MutationButton";
 
 const Fragment = graphql`
   fragment InviteForMe on Group {
@@ -37,6 +36,30 @@ const Mutation = graphql`
   }
 `;
 
+const InviteReactButton: FC<{
+  inviteId: string;
+  groupId: string;
+  action: GroupInviteReaction;
+  title: string;
+  theme?: "default" | "primary";
+}> = ({ inviteId, groupId, action, title, theme }) => {
+  return (
+    <MutationButton<InviteForMeMutation, "ReactToGroupInviteResult">
+      mutation={Mutation}
+      variables={{
+        input: { inviteId, action },
+      }}
+      updater={(store) => {
+        // updating the invites connection is hard, let's just reload page data
+        store.get(groupId)?.invalidateRecord();
+      }}
+      expectedTypename="ReactToGroupInviteResult"
+      title={title}
+      theme={theme}
+    ></MutationButton>
+  );
+};
+
 type Props = {
   groupRef: InviteForMe$key;
 };
@@ -44,40 +67,30 @@ type Props = {
 export const InviteForMe: FC<Props> = ({ groupRef }) => {
   const group = useFragment(Fragment, groupRef);
 
-  const [runMutation] = useAsyncMutation<InviteForMeMutation>({
-    mutation: Mutation,
-    expectedTypename: "ReactToGroupInviteResult",
-  });
-
   if (!group.inviteForMe) {
     return null;
   }
 
   const inviteId = group.inviteForMe.id;
 
-  const act = async (action: GroupInviteReaction) => {
-    await runMutation({
-      variables: {
-        input: { inviteId, action },
-        // connections: [
-        //   ConnectionHandler.getConnectionID(groupId, "GroupInviteList_invites"),
-        // ],
-      },
-      updater: (store) => {
-        store.get(group.id)?.invalidateRecord();
-      },
-    });
-  };
-
   return (
     <Card>
       <div className="flex justify-between items-center">
         <div>{"You've been invited to this group."}</div>
         <div className="flex gap-2">
-          <Button onClick={() => act("Decline")}>Decline</Button>
-          <Button theme="primary" onClick={() => act("Accept")}>
-            Accept
-          </Button>
+          <InviteReactButton
+            groupId={group.id}
+            inviteId={inviteId}
+            action="Decline"
+            title="Decline"
+          />
+          <InviteReactButton
+            groupId={group.id}
+            inviteId={inviteId}
+            action="Accept"
+            title="Accept"
+            theme="primary"
+          />
         </div>
       </div>
     </Card>

@@ -248,6 +248,11 @@ export type ModelRevisionForRelativeValuesSlugOwnerInput = {
   slug: Scalars['String']['input'];
 };
 
+export type MoveModelResult = {
+  __typename?: 'MoveModelResult';
+  model: Model;
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   buildRelativeValuesCache: MutationBuildRelativeValuesCacheResult;
@@ -260,6 +265,7 @@ export type Mutation = {
   deleteModel: MutationDeleteModelResult;
   deleteRelativeValuesDefinition: MutationDeleteRelativeValuesDefinitionResult;
   inviteUserToGroup: MutationInviteUserToGroupResult;
+  moveModel: MutationMoveModelResult;
   reactToGroupInvite: MutationReactToGroupInviteResult;
   setUsername: MutationSetUsernameResult;
   updateGroupInviteRole: MutationUpdateGroupInviteRoleResult;
@@ -318,6 +324,11 @@ export type MutationDeleteRelativeValuesDefinitionArgs = {
 
 export type MutationInviteUserToGroupArgs = {
   input: MutationInviteUserToGroupInput;
+};
+
+
+export type MutationMoveModelArgs = {
+  input: MutationMoveModelInput;
 };
 
 
@@ -435,6 +446,14 @@ export type MutationInviteUserToGroupInput = {
 };
 
 export type MutationInviteUserToGroupResult = BaseError | InviteUserToGroupResult | ValidationError;
+
+export type MutationMoveModelInput = {
+  newOwner: Scalars['String']['input'];
+  oldOwner: Scalars['String']['input'];
+  slug: Scalars['String']['input'];
+};
+
+export type MutationMoveModelResult = BaseError | MoveModelResult | NotFoundError | ValidationError;
 
 export type MutationReactToGroupInviteInput = {
   action: GroupInviteReaction;

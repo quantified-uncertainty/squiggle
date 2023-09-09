@@ -9,6 +9,7 @@ import { graphql } from "relay-runtime";
 import { Button, TextFormField, useToast } from "@quri/ui";
 
 import { ChooseUsernameMutation } from "@gen/ChooseUsernameMutation.graphql";
+import { SlugFormField } from "@/components/ui/SlugFormField";
 
 const Mutation = graphql`
   mutation ChooseUsernameMutation($username: String!) {
@@ -27,9 +28,11 @@ const Mutation = graphql`
 export const ChooseUsername: FC = () => {
   const toast = useToast();
 
-  const form = useForm<{
+  type FormShape = {
     username: string;
-  }>({
+  };
+
+  const form = useForm<FormShape>({
     mode: "onChange",
   });
 
@@ -42,8 +45,7 @@ export const ChooseUsername: FC = () => {
     router.replace("/");
   }
 
-  const [mutation, isMutationInFlight] =
-    useMutation<ChooseUsernameMutation>(Mutation);
+  const [mutation, inFlight] = useMutation<ChooseUsernameMutation>(Mutation);
 
   const save = form.handleSubmit((data) => {
     mutation({
@@ -62,32 +64,27 @@ export const ChooseUsername: FC = () => {
     });
   });
 
-  const disabled = isMutationInFlight || !form.formState.isValid;
+  const disabled = inFlight || !form.formState.isValid;
 
   return (
-    <FormProvider {...form}>
-      <div className="flex flex-col items-center mt-20">
-        <div className="space-y-2">
-          <div>Pick a username:</div>
-          <div className="flex items-center gap-1">
-            <TextFormField
-              placeholder="Username"
-              name="username"
-              size="small"
-              rules={{
-                required: true,
-                pattern: {
-                  value: /^[\w-]+$/,
-                  message: "Must be alphanumerical",
-                },
-              }}
-            />
-            <Button onClick={save} disabled={disabled} theme="primary">
-              Save
-            </Button>
+    <form onSubmit={save}>
+      <FormProvider {...form}>
+        <div className="flex flex-col items-center mt-20">
+          <div className="space-y-2">
+            <div className="flex items-center gap-1">
+              <SlugFormField<FormShape>
+                placeholder="Username"
+                name="username"
+                label="Pick a username"
+                size="small"
+              />
+              <Button onClick={save} disabled={disabled} theme="primary">
+                Save
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
-    </FormProvider>
+      </FormProvider>
+    </form>
   );
 };

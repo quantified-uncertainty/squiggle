@@ -5,10 +5,9 @@ import { graphql } from "relay-runtime";
 import { EditIcon } from "@quri/ui";
 
 import { MoveModelActionMutation } from "@/__generated__/MoveModelActionMutation.graphql";
-import { MutationModalAction } from "@/components/ui/MutationModalAction";
-import { SlugFormField } from "@/components/ui/SlugFormField";
-import { modelRoute } from "@/routes";
 import { SelectOwner } from "@/components/SelectOwner";
+import { MutationModalAction } from "@/components/ui/MutationModalAction";
+import { modelRoute } from "@/routes";
 
 const Mutation = graphql`
   mutation MoveModelActionMutation($input: MutationMoveModelInput!) {
@@ -33,11 +32,13 @@ const Mutation = graphql`
 
 type FormShape = { owner: string };
 
-export const MoveModelAction: FC<{
+type Props = {
   owner: string;
   slug: string;
   close(): void;
-}> = ({ owner, slug, close }) => {
+};
+
+export const MoveModelAction: FC<Props> = ({ owner, slug, close }) => {
   const router = useRouter();
 
   return (

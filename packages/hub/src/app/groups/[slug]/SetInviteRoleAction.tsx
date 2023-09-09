@@ -1,9 +1,9 @@
-import { SetInviteRoleActionMutation } from "@/__generated__/SetInviteRoleActionMutation.graphql";
-import { MembershipRole } from "@/__generated__/SetMembershipRoleActionMutation.graphql";
-import { useAsyncMutation } from "@/hooks/useAsyncMutation";
-import { DropdownMenuAsyncActionItem, RefreshIcon } from "@quri/ui";
 import { FC } from "react";
 import { graphql } from "relay-runtime";
+
+import { SetInviteRoleActionMutation } from "@/__generated__/SetInviteRoleActionMutation.graphql";
+import { MembershipRole } from "@/__generated__/SetMembershipRoleActionMutation.graphql";
+import { MutationAction } from "@/components/ui/MutationAction";
 
 const Mutation = graphql`
   mutation SetInviteRoleActionMutation(
@@ -31,24 +31,18 @@ type Props = {
 };
 
 export const SetInviteRoleButton: FC<Props> = ({ inviteId, role, close }) => {
-  const [runMutation] = useAsyncMutation<SetInviteRoleActionMutation>({
-    mutation: Mutation,
-    expectedTypename: "UpdateGroupInviteRoleResult",
-  });
-
-  const act = async () => {
-    await runMutation({
-      variables: {
+  return (
+    <MutationAction<SetInviteRoleActionMutation, "UpdateGroupInviteRoleResult">
+      mutation={Mutation}
+      variables={{
         input: {
           inviteId,
           role,
         },
-      },
-    });
-    close();
-  };
-
-  return (
-    <DropdownMenuAsyncActionItem title={role} onClick={act} close={close} />
+      }}
+      expectedTypename="UpdateGroupInviteRoleResult"
+      title={role}
+      close={close}
+    />
   );
 };

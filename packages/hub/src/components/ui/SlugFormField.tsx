@@ -39,11 +39,13 @@ export function SlugFormField<
   example,
   label,
   placeholder,
+  size,
 }: {
   name: TName;
   example?: string;
   label: string;
   placeholder?: string;
+  size?: "small" | "normal";
 }) {
   const form = useFormContext<TValues>();
 
@@ -59,6 +61,7 @@ export function SlugFormField<
       description={description}
       label={label}
       placeholder={placeholder}
+      size={size}
       rules={{
         pattern: {
           value: /^[\w-]+$/,
