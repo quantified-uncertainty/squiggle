@@ -1,6 +1,11 @@
 import { Button, Modal } from "@quri/ui";
-import { PropsWithChildren } from "react";
-import { FieldValues, FormProvider, UseFormReturn } from "react-hook-form";
+import { PropsWithChildren, useEffect } from "react";
+import {
+  FieldPath,
+  FieldValues,
+  FormProvider,
+  UseFormReturn,
+} from "react-hook-form";
 
 type Props<TFieldValues extends FieldValues> = PropsWithChildren<{
   onSubmit: () => void;
@@ -9,6 +14,7 @@ type Props<TFieldValues extends FieldValues> = PropsWithChildren<{
   title: string;
   inFlight?: boolean;
   form: UseFormReturn<TFieldValues, any, undefined>;
+  initialFocus?: FieldPath<TFieldValues>;
 }>;
 
 // Common Modal component for forms.
@@ -19,8 +25,15 @@ export function FormModal<TFieldValues extends FieldValues>({
   title,
   inFlight,
   form,
+  initialFocus,
   children,
 }: Props<TFieldValues>) {
+  useEffect(() => {
+    if (initialFocus) {
+      form.setFocus(initialFocus);
+    }
+  }, [form, initialFocus]);
+
   return (
     <Modal close={close}>
       <form onSubmit={onSubmit}>

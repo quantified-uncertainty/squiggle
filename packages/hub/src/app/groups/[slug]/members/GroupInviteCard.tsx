@@ -22,7 +22,6 @@ export const GroupInviteCard: FC<{
         role
         ...InviteRoleButton
         ...UserGroupInvite
-        ...EmailGroupInvite
       }
     `,
     props.inviteRef

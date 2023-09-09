@@ -17,6 +17,16 @@ builder.mutationField("setUsername", (t) =>
         throw new Error("Username is already set");
       }
 
+      const existingOwner = await prisma.owner.count({
+        where: {
+          slug: args.username,
+        },
+      });
+
+      if (existingOwner) {
+        throw new Error(`Username ${args.username} is not available`);
+      }
+
       await prisma.user.update({
         where: {
           email: session.user.email,
@@ -24,9 +34,7 @@ builder.mutationField("setUsername", (t) =>
         data: {
           username: args.username, // legacy
           asOwner: {
-            create: {
-              slug: args.username,
-            },
+            create: { slug: args.username },
           },
         },
       });

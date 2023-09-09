@@ -69,18 +69,13 @@ function MutationFormModal<
     });
   });
 
-  useEffect(() => {
-    if (initialFocus) {
-      form.setFocus(initialFocus);
-    }
-  }, [form, initialFocus]);
-
   return (
     <FormModal
       close={close}
       title={title}
       submitText={submitText}
       form={form}
+      initialFocus={initialFocus}
       onSubmit={save}
       inFlight={inFlight}
     >

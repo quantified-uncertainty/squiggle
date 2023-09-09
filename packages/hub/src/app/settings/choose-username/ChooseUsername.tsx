@@ -3,17 +3,17 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { Button, TextFormField, useToast } from "@quri/ui";
+import { Button, useToast } from "@quri/ui";
 
-import { ChooseUsernameMutation } from "@gen/ChooseUsernameMutation.graphql";
 import { SlugFormField } from "@/components/ui/SlugFormField";
+import { useAsyncMutation } from "@/hooks/useAsyncMutation";
+import { ChooseUsernameMutation } from "@gen/ChooseUsernameMutation.graphql";
 
 const Mutation = graphql`
   mutation ChooseUsernameMutation($username: String!) {
-    setUsername(username: $username) {
+    result: setUsername(username: $username) {
       __typename
       ... on BaseError {
         message
@@ -45,21 +45,17 @@ export const ChooseUsername: FC = () => {
     router.replace("/");
   }
 
-  const [mutation, inFlight] = useMutation<ChooseUsernameMutation>(Mutation);
+  const [mutation, inFlight] = useAsyncMutation<ChooseUsernameMutation, "Me">({
+    mutation: Mutation,
+    expectedTypename: "Me",
+  });
 
-  const save = form.handleSubmit((data) => {
-    mutation({
+  const save = form.handleSubmit(async (data) => {
+    await mutation({
       variables: { username: data.username },
-      onCompleted(data) {
-        if (data.setUsername.__typename === "BaseError") {
-          toast(data.setUsername.message, "error");
-        } else {
-          updateSession();
-          router.replace("/");
-        }
-      },
-      onError(error) {
-        toast((error as any).source ?? error.toString(), "error");
+      onCompleted() {
+        updateSession();
+        router.replace("/");
       },
     });
   });

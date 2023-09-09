@@ -1,6 +1,6 @@
 import { FC, useMemo } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
-import { graphql, useFragment, useMutation } from "react-relay";
+import { graphql, useFragment } from "react-relay";
 
 import {
   PlaygroundToolbarItem,
@@ -14,6 +14,7 @@ import {
   RelativeValuesExportInput,
 } from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
 import { EditModelExports } from "@/components/exports/EditModelExports";
+import { useAsyncMutation } from "@/hooks/useAsyncMutation";
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 
@@ -119,8 +120,13 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
     control: form.control,
   });
 
-  const [saveMutation] =
-    useMutation<EditSquiggleSnippetModelMutation>(Mutation);
+  const [saveMutation, saveInFlight] = useAsyncMutation<
+    EditSquiggleSnippetModelMutation,
+    "UpdateSquiggleSnippetResult"
+  >({
+    mutation: Mutation,
+    expectedTypename: "UpdateSquiggleSnippetResult",
+  });
 
   const save = form.handleSubmit((formData) => {
     saveMutation({
@@ -134,16 +140,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
           owner: model.owner.slug,
         },
       },
-      onCompleted(data) {
-        if (data.result.__typename === "BaseError") {
-          toast(data.result.message, "error");
-        } else {
-          toast("Saved", "confirmation");
-        }
-      },
-      onError(e) {
-        toast(e.toString(), "error");
-      },
+      onCompleted: () => toast("Saved", "confirmation"),
     });
   });
 
@@ -167,7 +164,12 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
                     icon={LinkIcon}
                     onClick={() => openModal("exports")}
                   ></PlaygroundToolbarItem>
-                  <Button theme="primary" onClick={save} size="small">
+                  <Button
+                    theme="primary"
+                    onClick={save}
+                    size="small"
+                    disabled={saveInFlight}
+                  >
                     Save
                   </Button>
                 </div>

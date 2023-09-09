@@ -1,8 +1,8 @@
 "use client";
 import { FC, useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
-import { Button, Modal, TextFormField } from "@quri/ui";
+import { Button, TextFormField } from "@quri/ui";
 
 import { EditModelExports_Model$key } from "@/__generated__/EditModelExports_Model.graphql";
 import { RelativeValuesExportInput } from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
@@ -12,6 +12,7 @@ import {
 } from "@/routes";
 import { graphql, useFragment } from "react-relay";
 import { SelectOwner } from "../SelectOwner";
+import { FormModal } from "../ui/FormModal";
 import { H2 } from "../ui/Headers";
 import { StyledDefinitionLink } from "../ui/StyledDefinitionLink";
 import { StyledLink } from "../ui/StyledLink";
@@ -23,37 +24,37 @@ const CreateVariableWithDefinitionModal: FC<{
 }> = ({ close, append }) => {
   const form = useForm<RelativeValuesExportInput>();
 
-  const create = form.handleSubmit((data) => {
+  const onSubmit = form.handleSubmit((data) => {
     append(data);
     close();
   });
 
   return (
-    <FormProvider {...form}>
-      <Modal close={close}>
-        <Modal.Header>Add relative values export</Modal.Header>
-        <Modal.Body>
-          <div className="space-y-2">
-            <TextFormField
-              label="Variable"
-              name="variableName"
-              rules={{ required: true }}
-            />
-            <SelectOwner label="Owner" name="definition.owner" />
-            <SelectRelativeValuesDefinition
-              label="Slug"
-              name="definition.slug"
-              ownerFieldName="definition.owner"
-            />
-          </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button onClick={create} theme="primary">
-            Create
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </FormProvider>
+    <FormModal<RelativeValuesExportInput>
+      title="Add relative values export"
+      submitText="Create"
+      form={form}
+      onSubmit={onSubmit}
+      close={close}
+      initialFocus="variableName"
+    >
+      <div className="space-y-2">
+        <TextFormField
+          label="Variable"
+          name="variableName"
+          rules={{ required: true }}
+        />
+        <SelectOwner
+          label="Relative Values Definition Owner"
+          name="definition.owner"
+        />
+        <SelectRelativeValuesDefinition
+          label="Relative Values Definition Slug"
+          name="definition.slug"
+          ownerFieldName="definition.owner"
+        />
+      </div>
+    </FormModal>
   );
 };
 
