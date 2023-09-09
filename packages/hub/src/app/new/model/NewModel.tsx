@@ -5,7 +5,7 @@ import { FC } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { graphql } from "relay-runtime";
 
-import { Button } from "@quri/ui";
+import { Button, CheckboxFormField } from "@quri/ui";
 
 import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
 import { SelectGroup } from "@/components/SelectGroup";
@@ -41,6 +41,7 @@ a = normal(2, 5)
 type FormShape = {
   slug: string | undefined;
   groupSlug: string | undefined;
+  isPrivate: boolean;
 };
 
 export const NewModel: FC = () => {
@@ -49,6 +50,8 @@ export const NewModel: FC = () => {
   const form = useForm<FormShape>({
     defaultValues: {
       // don't pass `slug: ""` here, it will lead to form reset if a user started to type in a value before JS finished loading
+      groupSlug: undefined,
+      isPrivate: false,
     },
     mode: "onChange",
   });
@@ -70,6 +73,7 @@ export const NewModel: FC = () => {
         input: {
           slug: data.slug ?? "", // shouldn't happen but satisfies Typescript
           groupSlug: data.groupSlug,
+          isPrivate: data.isPrivate,
           code: defaultCode,
         },
       },
@@ -105,6 +109,7 @@ export const NewModel: FC = () => {
             name="groupSlug"
             required={false}
           />
+          <CheckboxFormField<FormShape> label="Private" name="isPrivate" />
         </div>
         <Button
           onClick={save}
