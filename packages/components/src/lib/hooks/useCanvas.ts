@@ -4,6 +4,7 @@ import {
   useLayoutEffect,
   useMemo,
   useState,
+  useRef,
 } from "react";
 
 export type DrawContext = {
@@ -12,6 +13,10 @@ export type DrawContext = {
 };
 
 type DrawFunction = (context: DrawContext) => void;
+
+// We throttle to get around a Firefox bug.
+// See: https://github.com/quantified-uncertainty/squiggle/issues/2263
+const RESIZE_DELAY = 30;
 
 export function useCanvas({
   height,
@@ -30,20 +35,32 @@ export function useCanvas({
   const devicePixelRatio =
     typeof window === "undefined" ? 1 : window.devicePixelRatio;
 
+  const throttleTimeout = useRef<number | null>(null);
+
+  const handleResize = useCallback((entries: ResizeObserverEntry[]) => {
+    if (!entries[0]) return;
+
+    if (throttleTimeout.current) {
+      clearTimeout(throttleTimeout.current);
+    }
+
+    throttleTimeout.current = window.setTimeout(() => {
+      setWidth(entries[0].contentRect.width);
+    }, RESIZE_DELAY);
+  }, []);
+
   const observer = useMemo(() => {
     if (typeof window === "undefined") {
       return undefined;
     }
-    return new window.ResizeObserver((entries) => {
-      if (!entries[0]) {
-        return;
-      }
-      setWidth(entries[0].contentRect.width);
-    });
-  }, []);
+    return new window.ResizeObserver(handleResize);
+  }, [handleResize]);
 
   useEffect(() => {
     return () => {
+      if (throttleTimeout.current) {
+        clearTimeout(throttleTimeout.current);
+      }
       observer?.disconnect();
     };
   }, [observer]);
