@@ -1,5 +1,3 @@
-import { GroupIcon, UserCircleIcon } from "@quri/ui";
-
 // for format() from date-fns
 export const commonDateFormat = "MMM d yyyy, H:mm";
 
@@ -13,14 +11,3 @@ export const NEWSLETTER_URL = "https://quri.substack.com/t/squiggle";
 export const QURI_DONATE_URL = "https://quantifieduncertainty.org/donate";
 export const SQUIGGLE_DOCS_URL =
   "https://www.squiggle-language.com/docs/Api/Dist";
-
-export function ownerIcon(typename: string) {
-  switch (typename) {
-    case "User":
-      return UserCircleIcon;
-    case "Group":
-      return GroupIcon;
-    default:
-      throw new Error("Expected User or Group");
-  }
-}

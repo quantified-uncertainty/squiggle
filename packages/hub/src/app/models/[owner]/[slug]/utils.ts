@@ -1,11 +1,12 @@
+import { CodeBracketIcon, EmptyIcon, ScaleIcon } from "@quri/ui";
+
 import { type EntityNode } from "@/components/EntityLayout";
-import { ownerIcon } from "@/lib/common";
+import { ownerIcon } from "@/lib/ownerIcon";
 import {
   modelForRelativeValuesExportRoute,
   modelRoute,
   ownerRoute,
 } from "@/routes";
-import { CodeBracketIcon, EmptyIcon, ScaleIcon } from "@quri/ui";
 
 function hasTypename(owner: {
   __typename?: string;

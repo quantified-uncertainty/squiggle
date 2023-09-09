@@ -4,12 +4,12 @@ import { FieldPath, FieldValues } from "react-hook-form";
 import { OptionProps, SingleValueProps, components } from "react-select";
 import AsyncSelect from "react-select/async";
 import { fetchQuery, graphql } from "relay-runtime";
+import { useRelayEnvironment } from "react-relay";
 
-import { ControlledFormField, GroupIcon, UserCircleIcon } from "@quri/ui";
+import { ControlledFormField } from "@quri/ui";
 
 import { SelectOwnerQuery } from "@/__generated__/SelectOwnerQuery.graphql";
-import { useRelayEnvironment } from "react-relay";
-import { ownerIcon } from "@/lib/common";
+import { ownerIcon } from "@/lib/ownerIcon";
 
 const Query = graphql`
   query SelectOwnerQuery(
