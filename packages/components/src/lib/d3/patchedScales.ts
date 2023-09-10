@@ -127,7 +127,7 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
     const expSize = Math.abs(transform(lower) - transform(upper));
 
     // If exponent window is too small, then let's try linear scale instead
-    if (expSize / normCount < 0.25) {
+    if (expSize / normCount < 0.20) {
       const linSize = upper - lower;
       // Alternative linear route.
       const digits = Math.floor(Math.log10(linSize));
