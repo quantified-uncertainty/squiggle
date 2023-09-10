@@ -69,7 +69,7 @@
     "graphql": "^16.7.1",
     "postcss": "^8.4.24",
     "prettier": "^3.0.3",
-    "prisma": "^5.1.1",
+    "prisma": "^5.2.0",
     "relay-compiler": "^15.0.0",
     "tailwindcss": "^3.3.2",
     "tsx": "^3.12.7"
