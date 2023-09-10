@@ -53,7 +53,7 @@ export function SlugFormField<
 
   const description =
     "Must be alphanumerical, with no spaces." +
-    (example ? `Example: ${example}` : "");
+    (example ? ` Example: ${example}` : "");
 
   return (
     <TextFormField
