@@ -2,7 +2,7 @@ import { useRouter } from "next/navigation";
 import { FC } from "react";
 import { graphql } from "relay-runtime";
 
-import { EditIcon } from "@quri/ui";
+import { RightArrowIcon } from "@quri/ui";
 
 import { MoveModelActionMutation } from "@/__generated__/MoveModelActionMutation.graphql";
 import { SelectOwner } from "@/components/SelectOwner";
@@ -53,7 +53,7 @@ export const MoveModelAction: FC<Props> = ({ owner, slug, close }) => {
       submitText="Save"
       close={close}
       title="Move"
-      icon={EditIcon}
+      icon={RightArrowIcon}
       modalTitle={`Move model ${owner}/${slug}`}
       onCompleted={({ model }) => {
         router.push(modelRoute({ owner: model.owner.slug, slug }));
