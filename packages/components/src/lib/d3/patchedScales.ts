@@ -136,7 +136,7 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
       return d3.range(lower, upper, linSize / ticks).concat([upper]);
     }
 
-    const ticks = [lower].concat(tickRange.map(invert).map(closestNice), [
+    const ticks = [lower].concat(tickRange.map(invert).map(closestNice).filter(a => a < upper), [
       upper,
     ]);
     return ticks;
