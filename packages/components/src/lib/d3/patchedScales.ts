@@ -114,15 +114,31 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
       return niceMult * zeros * Math.sign(x);
     }
 
+    const normCount = count ?? 10;
     const tLower = transform(lower);
     const tUpper = transform(upper);
-    const expStep = (tUpper - tLower) / (count ?? 10);
+    const expStep = (tUpper - tLower) / normCount;
     const tLowerAdjusted = !(tUpper > 0 && tLower < 0)
       ? tLower + expStep / 2
       : Math.ceil(tLower / expStep) * expStep;
     const tickRange = d3.range(tLowerAdjusted, tUpper, expStep);
-    const ticks = tickRange.map(invert).map(closestNice);
 
+    // Sometimes users don't know what they want -- and they actually don't want symlog
+    const expSize = Math.abs(transform(lower) - transform(upper));
+
+    // If exponent window is too small, then let's try linear scale instead
+    if (expSize / normCount < 0.25) {
+      const linSize = upper - lower;
+      // Alternative linear route.
+      const digits = Math.floor(Math.log10(linSize));
+      let ticks = linSize / Math.pow(10, digits);
+      while (ticks * 1.5 < normCount) ticks *= 2;
+      return d3.range(lower, upper, linSize / ticks).concat([upper]);
+    }
+
+    const ticks = [lower].concat(tickRange.map(invert).map(closestNice), [
+      upper,
+    ]);
     return ticks;
   };
 
