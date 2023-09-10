@@ -16,7 +16,7 @@ import { EnvironmentWithResponseCache } from "./environment";
 // the network layer can use these cache results when fetching data in `usePreloadedQuery`.
 export function useSerializablePreloadedQuery<
   TRequest extends ConcreteRequest,
-  TQuery extends OperationType
+  TQuery extends OperationType,
 >(
   preloadQuery: SerializablePreloadedQuery<TRequest, TQuery>,
   fetchPolicy: PreloadFetchPolicy = "store-or-network"
@@ -45,7 +45,7 @@ export function useSerializablePreloadedQuery<
 
 function writePreloadedQueryToCache<
   TRequest extends ConcreteRequest,
-  TQuery extends OperationType
+  TQuery extends OperationType,
 >(
   preloadedQueryObject: SerializablePreloadedQuery<TRequest, TQuery>,
   environment: EnvironmentWithResponseCache

@@ -11,7 +11,7 @@ import { WithRHFError } from "./WithRHFError.js";
 
 type Props<
   TValues extends FieldValues,
-  TFieldName extends FieldPath<TValues> = FieldPath<TValues>
+  TFieldName extends FieldPath<TValues> = FieldPath<TValues>,
 > = {
   name: TFieldName;
   rules?: RegisterOptions<TValues, TFieldName>;
@@ -21,7 +21,7 @@ type Props<
 // Helper component for various react-hook-form connected components.
 export function FormInput<
   TValues extends FieldValues,
-  TFieldName extends FieldPath<TValues> = FieldPath<TValues>
+  TFieldName extends FieldPath<TValues> = FieldPath<TValues>,
 >({ name, rules, children }: Props<TValues, TFieldName>) {
   const { register } = useFormContext<TValues>();
 

@@ -6,7 +6,7 @@ import { StyledCheckbox } from "../styled/StyledCheckbox.js";
 
 export function CheckboxFormField<
   TValues extends FieldValues,
-  TName extends FieldPath<TValues> = FieldPath<TValues>
+  TName extends FieldPath<TValues> = FieldPath<TValues>,
 >({ ...fieldProps }: CommonUnknownFieldProps<TValues, TName>) {
   return (
     <ControlledFormField {...fieldProps} inlineLabel>

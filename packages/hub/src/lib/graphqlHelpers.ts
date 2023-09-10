@@ -26,7 +26,7 @@ type ErrorUnionNode<OkTypename extends string, Content> =
  */
 export function extractFromGraphqlErrorUnion<
   OkTypename extends string,
-  Content
+  Content,
 >(node: ErrorUnionNode<OkTypename, Content>, typename: OkTypename) {
   if (node.__typename === "NotFoundError") {
     notFound();

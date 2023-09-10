@@ -19,7 +19,7 @@ export function useAsyncMutation<
             readonly __typename: string;
           };
     };
-  }
+  },
 >({
   mutation,
   confirmation,

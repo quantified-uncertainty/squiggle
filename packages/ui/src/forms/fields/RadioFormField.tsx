@@ -6,7 +6,7 @@ import { StyledRadio, type StyledRadioProps } from "../styled/StyledRadio.js";
 
 export function RadioFormField<
   TValues extends FieldValues,
-  TName extends FieldPath<TValues> = FieldPath<TValues>
+  TName extends FieldPath<TValues> = FieldPath<TValues>,
 >({
   options,
   ...fieldProps
