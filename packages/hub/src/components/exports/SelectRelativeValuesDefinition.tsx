@@ -57,7 +57,7 @@ const SingleValue = ({
 export function SelectRelativeValuesDefinition<
   TValues extends FieldValues,
   TName extends FieldPath<TValues> = FieldPath<TValues>,
-  TUserName extends FieldPath<TValues> = FieldPath<TValues>
+  TUserName extends FieldPath<TValues> = FieldPath<TValues>,
 >({
   name,
   label,

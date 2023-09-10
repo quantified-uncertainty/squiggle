@@ -12,7 +12,7 @@ export function TextAreaFormField<
   TName extends FieldPathByValue<TValues, string> = FieldPathByValue<
     TValues,
     string
-  >
+  >,
 >({
   placeholder,
   ...fieldProps

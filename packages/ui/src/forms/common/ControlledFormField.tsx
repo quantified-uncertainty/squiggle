@@ -15,7 +15,7 @@ export type ControlledFormFieldProps<
   TName extends FieldPathByValue<TValues, TValueType> = FieldPathByValue<
     TValues,
     TValueType
-  >
+  >,
 > = FormFieldLayoutProps & {
   name: TName;
   rules?: RegisterOptions<TValues, TName>;
@@ -30,7 +30,7 @@ export function ControlledFormField<
   TName extends FieldPathByValue<TValues, TValueType> = FieldPathByValue<
     TValues,
     TValueType
-  >
+  >,
 >({
   name,
   rules,

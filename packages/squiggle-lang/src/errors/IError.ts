@@ -5,7 +5,10 @@ import { ErrorMessage, REJavaScriptExn, REOther } from "./messages.js";
 // "I" stands for "Internal", since we also have a more public SqError proxy
 export class IRuntimeError extends Error {
   // TODO - it would be better to store `m` in `cause`, to like native Error objects do.
-  private constructor(public m: ErrorMessage, public frameStack: FrameStack) {
+  private constructor(
+    public m: ErrorMessage,
+    public frameStack: FrameStack
+  ) {
     // Should we pass `m.toString()`?
     // It'd be a bit costly and we override `IError.toString()` anyway.
     super();
@@ -85,7 +88,10 @@ export function rethrowWithFrameStack(
 }
 
 export class ICompileError extends Error {
-  constructor(public override message: string, public location: LocationRange) {
+  constructor(
+    public override message: string,
+    public location: LocationRange
+  ) {
     super();
   }
 

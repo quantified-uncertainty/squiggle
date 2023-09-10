@@ -26,7 +26,10 @@ export class REArityError extends ErrorMessage {
 }
 
 export class REArrayIndexNotFound extends ErrorMessage {
-  constructor(public msg: string, public index: number) {
+  constructor(
+    public msg: string,
+    public index: number
+  ) {
     super();
   }
 
@@ -46,7 +49,10 @@ export class REDistributionError extends ErrorMessage {
 }
 
 export class REExpectedType extends ErrorMessage {
-  constructor(public typeName: string, public valueString: string) {
+  constructor(
+    public typeName: string,
+    public valueString: string
+  ) {
     super();
   }
 
@@ -76,7 +82,10 @@ export class REOperationError extends ErrorMessage {
 }
 
 export class REDictPropertyNotFound extends ErrorMessage {
-  constructor(public msg: string, public index: string) {
+  constructor(
+    public msg: string,
+    public index: string
+  ) {
     super();
   }
 
@@ -116,7 +125,10 @@ export class RETodo extends ErrorMessage {
 }
 
 export class REDomainError extends ErrorMessage {
-  constructor(public value: Value, public domain: VDomain) {
+  constructor(
+    public value: Value,
+    public domain: VDomain
+  ) {
     super();
   }
 
@@ -127,7 +139,10 @@ export class REDomainError extends ErrorMessage {
 
 // Wrapped JavaScript exception. See IError class for details.
 export class REJavaScriptExn extends ErrorMessage {
-  constructor(public msg: string, public override name: string) {
+  constructor(
+    public msg: string,
+    public override name: string
+  ) {
     super();
   }
 

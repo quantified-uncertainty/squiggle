@@ -39,7 +39,10 @@ const getItem = (
 };
 
 export class SqTableChart {
-  constructor(private _value: TableChart, public context?: SqValueContext) {}
+  constructor(
+    private _value: TableChart,
+    public context?: SqValueContext
+  ) {}
 
   item(
     rowI: number,

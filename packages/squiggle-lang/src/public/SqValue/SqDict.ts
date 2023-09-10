@@ -4,7 +4,10 @@ import { SqValueContext } from "../SqValueContext.js";
 import { SqDictValue, SqValue, wrapValue } from "./index.js";
 
 export class SqDict {
-  constructor(private _value: ValueMap, public context?: SqValueContext) {}
+  constructor(
+    private _value: ValueMap,
+    public context?: SqValueContext
+  ) {}
 
   entries() {
     return [...this._value.entries()].map(
