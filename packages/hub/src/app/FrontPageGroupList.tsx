@@ -15,7 +15,6 @@ const Fragment = graphql`
   @refetchable(queryName: "FrontPageGroupListPaginationQuery") {
     groups(first: $count, after: $cursor)
       @connection(key: "FrontPageGroupList_groups") {
-      # necessary for Relay
       edges {
         __typename
       }

@@ -108,6 +108,7 @@ export const NewModel: FC = () => {
             label="Group"
             name="groupSlug"
             required={false}
+            myOnly={true}
           />
           <CheckboxFormField<FormShape> label="Private" name="isPrivate" />
         </div>

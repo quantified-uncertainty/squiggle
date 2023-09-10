@@ -3,7 +3,6 @@ import {
   executeCommonOperation,
   executeOperation,
   setCurrentUser,
-  setCurrentUserObject,
   unsetCurrentUser,
 } from "../helpers";
 

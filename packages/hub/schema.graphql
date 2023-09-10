@@ -94,6 +94,8 @@ enum GroupInviteReaction {
 }
 
 input GroupsQueryInput {
+  """List only groups that you're a member of"""
+  myOnly: Boolean
   slugContains: String
 }
 
@@ -102,7 +104,8 @@ type InviteUserToGroupResult {
 }
 
 type Me {
-  email: String
+  asUser: User!
+  email: String!
   username: String
 }
 

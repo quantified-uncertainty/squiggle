@@ -1,6 +1,7 @@
 "use client";
 import { FC } from "react";
 import { FieldPath, FieldValues } from "react-hook-form";
+import { useRelayEnvironment } from "react-relay";
 import { OptionProps, SingleValueProps, components } from "react-select";
 import AsyncSelect from "react-select/async";
 import { fetchQuery, graphql } from "relay-runtime";
@@ -11,7 +12,6 @@ import {
   SelectGroupQuery,
   SelectGroupQuery$data,
 } from "@/__generated__/SelectGroupQuery.graphql";
-import { useRelayEnvironment } from "react-relay";
 
 const Query = graphql`
   query SelectGroupQuery($input: GroupsQueryInput!) {
@@ -56,10 +56,12 @@ export function SelectGroup<
   name,
   label,
   required = true,
+  myOnly = false,
 }: {
   name: TName;
   label?: string;
   required?: boolean;
+  myOnly?: boolean;
 }) {
   const environment = useRelayEnvironment();
 
@@ -67,6 +69,7 @@ export function SelectGroup<
     const result = await fetchQuery<SelectGroupQuery>(environment, Query, {
       input: {
         slugContains: inputValue,
+        myOnly,
       },
     }).toPromise();
 
@@ -83,6 +86,8 @@ export function SelectGroup<
         <AsyncSelect
           components={{ SingleValue, Option }}
           loadOptions={loadOptions}
+          defaultOptions
+          isClearable={!required}
           onChange={(group) => onChange(group?.slug)}
           styles={{ menuPortal: (base) => ({ ...base, zIndex: 100 }) }}
           menuPortalTarget={document.body}

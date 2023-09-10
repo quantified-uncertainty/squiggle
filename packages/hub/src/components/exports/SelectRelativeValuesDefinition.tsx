@@ -98,6 +98,7 @@ export function SelectRelativeValuesDefinition<
       {({ onChange }) => (
         <AsyncSelect
           components={{ SingleValue, Option }}
+          defaultOptions
           loadOptions={loadOptions}
           onChange={(user) => onChange(user?.slug)}
           isDisabled={!owner}

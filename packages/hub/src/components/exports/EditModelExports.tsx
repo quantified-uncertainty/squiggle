@@ -47,6 +47,7 @@ const CreateVariableWithDefinitionModal: FC<{
         <SelectOwner
           label="Relative Values Definition Owner"
           name="definition.owner"
+          myOnly
         />
         <SelectRelativeValuesDefinition
           label="Relative Values Definition Slug"

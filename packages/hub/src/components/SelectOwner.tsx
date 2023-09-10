@@ -1,10 +1,10 @@
 "use client";
 import { FC } from "react";
 import { FieldPath, FieldValues } from "react-hook-form";
+import { useRelayEnvironment } from "react-relay";
 import { OptionProps, SingleValueProps, components } from "react-select";
 import AsyncSelect from "react-select/async";
 import { fetchQuery, graphql } from "relay-runtime";
-import { useRelayEnvironment } from "react-relay";
 
 import { ControlledFormField } from "@quri/ui";
 
@@ -12,11 +12,15 @@ import { SelectOwnerQuery } from "@/__generated__/SelectOwnerQuery.graphql";
 import { ownerIcon } from "@/lib/ownerIcon";
 
 const Query = graphql`
-  query SelectOwnerQuery(
-    $usersInput: UsersQueryInput!
-    $groupsInput: GroupsQueryInput!
-  ) {
-    users(input: $usersInput) {
+  query SelectOwnerQuery($search: String!, $myOnly: Boolean!) {
+    me @include(if: $myOnly) {
+      asUser {
+        __typename
+        id
+        slug
+      }
+    }
+    users(input: { usernameContains: $search }) @skip(if: $myOnly) {
       edges {
         node {
           __typename
@@ -25,7 +29,7 @@ const Query = graphql`
         }
       }
     }
-    groups(input: $groupsInput) {
+    groups(input: { slugContains: $search, myOnly: $myOnly }) {
       edges {
         node {
           __typename
@@ -79,31 +83,34 @@ export function SelectOwner<
   name,
   label,
   required = true,
+  myOnly = false,
 }: {
   name: TName;
   label?: string;
   required?: boolean;
+  myOnly?: boolean;
 }) {
   const environment = useRelayEnvironment();
 
   const loadOptions = async (inputValue: string): Promise<Option[]> => {
     const result = await fetchQuery<SelectOwnerQuery>(environment, Query, {
-      usersInput: {
-        usernameContains: inputValue,
-      },
-      groupsInput: {
-        slugContains: inputValue,
-      },
+      search: inputValue,
+      myOnly,
     }).toPromise();
 
     if (!result) {
       return [];
     }
 
-    return [
-      ...result.users.edges.map((edge) => edge.node),
-      ...result.groups.edges.map((edge) => edge.node),
-    ];
+    const options: Option[] = [];
+    if (result.me) {
+      options.push(result.me.asUser);
+    }
+    if (result.users) {
+      options.push(...(result.users.edges.map((edge) => edge.node) ?? []));
+    }
+    options.push(...result.groups.edges.map((edge) => edge.node));
+    return options;
   };
 
   return (
@@ -112,6 +119,7 @@ export function SelectOwner<
         <AsyncSelect
           components={{ SingleValue, Option }}
           loadOptions={loadOptions}
+          defaultOptions
           onChange={(owner) => onChange(owner?.slug)}
           styles={{ menuPortal: (base) => ({ ...base, zIndex: 100 }) }}
           menuPortalTarget={document.body}

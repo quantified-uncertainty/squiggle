@@ -64,7 +64,7 @@ export const MoveModelAction: FC<Props> = ({ owner, slug, close }) => {
           <div className="mb-4">
             Are you sure? All existing links to the model will break.
           </div>
-          <SelectOwner<FormShape> name="owner" label="New owner" />
+          <SelectOwner<FormShape> name="owner" label="New owner" myOnly />
         </div>
       )}
     </MutationModalAction>

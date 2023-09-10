@@ -25,6 +25,7 @@ const documents = {
     "\n  mutation DeleteModelTest($input: MutationDeleteModelInput!) {\n    result: deleteModel(input: $input) {\n      __typename\n      ... on Error {\n        message\n      }\n      ... on NotFoundError {\n        message\n      }\n      ... on DeleteModelResult {\n        ok\n      }\n    }\n  }\n": types.DeleteModelTestDocument,
     "\n    mutation InviteTest {\n      result: inviteUserToGroup(\n        input: { group: \"testgroup\", username: \"mockmember\", role: Member }\n      ) {\n        __typename\n        ... on BaseError {\n          message\n        }\n        ... on InviteUserToGroupResult {\n          invite {\n            id\n            role\n          }\n        }\n      }\n    }\n  ": types.InviteTestDocument,
     "\n  mutation SetUsernameTest($username: String!) {\n    result: setUsername(username: $username) {\n      __typename\n      ... on Error {\n        message\n      }\n      ... on ValidationError {\n        message\n      }\n      ... on Me {\n        email\n        username\n      }\n    }\n  }\n": types.SetUsernameTestDocument,
+    "\n    query TestGroups($input: GroupsQueryInput!) {\n      result: groups(first: 10, input: $input) {\n        __typename\n        edges {\n          node {\n            id\n            slug\n          }\n        }\n      }\n    }\n  ": types.TestGroupsDocument,
     "\n      query TestMe {\n        me {\n          __typename\n          email\n          username\n        }\n      }\n    ": types.TestMeDocument,
     "\n  query TestModels {\n    models {\n      edges {\n        node {\n          slug\n          isEditable\n          isPrivate\n          owner {\n            __typename\n            slug\n          }\n        }\n      }\n    }\n  }\n": types.TestModelsDocument,
     "\n  mutation TestModels_createModel(\n    $input: MutationCreateSquiggleSnippetModelInput!\n  ) {\n    result: createSquiggleSnippetModel(input: $input) {\n      __typename\n    }\n  }\n": types.TestModels_CreateModelDocument,
@@ -92,6 +93,10 @@ export function graphql(source: "\n    mutation InviteTest {\n      result: invi
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation SetUsernameTest($username: String!) {\n    result: setUsername(username: $username) {\n      __typename\n      ... on Error {\n        message\n      }\n      ... on ValidationError {\n        message\n      }\n      ... on Me {\n        email\n        username\n      }\n    }\n  }\n"): (typeof documents)["\n  mutation SetUsernameTest($username: String!) {\n    result: setUsername(username: $username) {\n      __typename\n      ... on Error {\n        message\n      }\n      ... on ValidationError {\n        message\n      }\n      ... on Me {\n        email\n        username\n      }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    query TestGroups($input: GroupsQueryInput!) {\n      result: groups(first: 10, input: $input) {\n        __typename\n        edges {\n          node {\n            id\n            slug\n          }\n        }\n      }\n    }\n  "): (typeof documents)["\n    query TestGroups($input: GroupsQueryInput!) {\n      result: groups(first: 10, input: $input) {\n        __typename\n        edges {\n          node {\n            id\n            slug\n          }\n        }\n      }\n    }\n  "];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
