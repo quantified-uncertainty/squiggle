@@ -107,12 +107,17 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
 
       const base = Math.floor(Math.log10(Math.abs(x)));
       const zeros = Math.pow(10, base);
-      const mult = Math.abs(rounding(x)) / zeros;
+      const mult = Math.abs(rounding(x / zeros));
 
       // https://oeis.org/A002522
       // It works for our range.
       const niceMult =
-        Math.pow(Math.abs(rounding(Math.sign(x) * Math.sqrt(mult - 1))), 2) + 1;
+        mult == 0
+          ? 0
+          : Math.pow(
+              Math.abs(rounding(Math.sign(x) * Math.sqrt(mult - 1))),
+              2
+            ) + 1;
 
       // There's also https://oeis.org/A051109, but I don't have whole day
 
