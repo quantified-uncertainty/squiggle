@@ -127,7 +127,7 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
     const expSize = Math.abs(transform(lower) - transform(upper));
 
     // If exponent window is too small, then let's try linear scale instead
-    if (expSize / normCount < 0.20) {
+    if (expSize / normCount < 0.2) {
       const linSize = upper - lower;
       // Alternative linear route.
       const digits = Math.floor(Math.log10(linSize));
@@ -136,9 +136,13 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
       return d3.range(lower, upper, linSize / ticks).concat([upper]);
     }
 
-    const ticks = [lower].concat(tickRange.map(invert).map(closestNice).filter(a => a < upper), [
-      upper,
-    ]);
+    const ticks = [closestNice(lower)].concat(
+      tickRange
+        .map(invert)
+        .map(closestNice)
+        .filter((a) => a < upper),
+      [closestNice(upper)]
+    );
     return ticks;
   };
 
