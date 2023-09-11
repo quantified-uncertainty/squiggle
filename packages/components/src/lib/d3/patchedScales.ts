@@ -99,8 +99,9 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
     }
 
     function limitDigits(x: number, digits = 2, rounding = Math.round): number {
-      const base = rounding(Math.log10(Math.abs(x) - digits));
-      return rounding(x / base) * base;
+      const base = rounding(Math.log10(Math.abs(x)) - digits);
+      const zeros = Math.pow(10, base)
+      return rounding(x / zeros) * zeros;
     }
 
     /**
