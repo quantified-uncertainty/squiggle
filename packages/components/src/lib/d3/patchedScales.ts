@@ -112,11 +112,14 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
 
       const base = Math.floor(Math.log10(Math.abs(x)));
       const zeros = Math.pow(10, base);
-
-      const mult = rounding(Math.abs(x) / zeros);
+      const mult = Math.abs(rounding(x)) / zeros;
 
       // https://oeis.org/A002522
-      const niceMult = Math.pow(rounding(Math.sqrt(mult - 1)), 2) + 1;
+      // It works for our range.
+      const niceMult =
+        Math.pow(Math.abs(rounding(Math.sign(x) * Math.sqrt(mult - 1))), 2) + 1;
+
+      // There's also https://oeis.org/A051109, but I don't have whole day
 
       return niceMult * zeros * Math.sign(x);
     }
@@ -126,13 +129,6 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
     }
 
     const normCount = count ?? 10;
-    const tLower = transform(lower);
-    const tUpper = transform(upper);
-    const expStep = (tUpper - tLower) / normCount;
-    const tLowerAdjusted = !(tUpper > 0 && tLower < 0)
-      ? tLower + expStep / 2
-      : Math.ceil(tLower / expStep) * expStep;
-    const tickRange = d3.range(tLowerAdjusted, tUpper, expStep);
 
     // Sometimes users don't know what they want -- and they actually don't want symlog
     const expSize = Math.abs(transform(lower) - transform(upper));
@@ -149,11 +145,18 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
       return d3.range(pLower, pUpper, linSize / ticks).concat([pUpper]);
     }
 
-    const ticks = [roundToNice(lower, Math.ceil)]
-      .concat(tickRange.map(invert).map(closestNice), [
-        roundToNice(upper, Math.floor),
-      ])
-      .filter((tick) => tick <= upper && tick >= lower);
+    const tLower = transform(roundToNice(lower, Math.ceil));
+    const tUpper = transform(roundToNice(upper, Math.floor));
+    const expStep = (tUpper - tLower) / normCount;
+    const tLowerAdjusted = !(tUpper > 0 && tLower < 0)
+      ? tLower + expStep / 2
+      : Math.ceil(tLower / expStep) * expStep;
+    const tickRange = d3.range(tLowerAdjusted, tUpper, expStep);
+
+    const ticks = [roundToNice(lower, Math.ceil)].concat(
+      tickRange.map(invert).map(closestNice),
+      [roundToNice(upper, Math.floor)]
+    );
     return ticks;
   };
 
