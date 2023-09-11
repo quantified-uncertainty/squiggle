@@ -9,7 +9,7 @@ export function TextFormField<
   TName extends FieldPathByValue<TValues, string> = FieldPathByValue<
     TValues,
     string
-  >
+  >,
 >({
   placeholder,
   size,

@@ -36,7 +36,7 @@ const SingleValue = ({
 
 export function SelectCluster<
   TValues extends FieldValues,
-  TName extends FieldPath<TValues> = FieldPath<TValues>
+  TName extends FieldPath<TValues> = FieldPath<TValues>,
 >({
   name,
   clusters,

@@ -11,7 +11,7 @@ import { headers } from "next/headers";
 
 export interface SerializablePreloadedQuery<
   TRequest extends ConcreteRequest,
-  TQuery extends OperationType
+  TQuery extends OperationType,
 > {
   params: TRequest["params"];
   variables: VariablesOf<TQuery>;
@@ -23,7 +23,7 @@ export interface SerializablePreloadedQuery<
 // to avoid the client fetches.
 export async function loadSerializableQuery<
   TRequest extends ConcreteRequest,
-  TQuery extends OperationType
+  TQuery extends OperationType,
 >(
   params: RequestParameters,
   variables: VariablesOf<TQuery>

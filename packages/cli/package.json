@@ -21,6 +21,6 @@
     "indent-string": "^5.0.0"
   },
   "devDependencies": {
-    "prettier": "^3.0.0"
+    "prettier": "^3.0.3"
   }
 }

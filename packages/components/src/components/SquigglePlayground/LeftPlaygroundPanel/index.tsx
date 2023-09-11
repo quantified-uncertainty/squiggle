@@ -110,13 +110,14 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
     );
 
     const renderBody = () => (
-      <div data-testid="squiggle-editor">
+      <div data-testid="squiggle-editor" style={{ display: "contents" }}>
         <CodeEditor
           ref={editorRef}
           // it's important to pass `code` and not `defaultCode` here;
           // see https://github.com/quantified-uncertainty/squiggle/issues/1952
           defaultValue={code}
           errors={errors}
+          height={"100%"}
           project={project}
           sourceId={sourceId}
           showGutter={true}

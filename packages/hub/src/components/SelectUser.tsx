@@ -51,7 +51,7 @@ const SingleValue = ({
 
 export function SelectUser<
   TValues extends FieldValues,
-  TName extends FieldPath<TValues> = FieldPath<TValues>
+  TName extends FieldPath<TValues> = FieldPath<TValues>,
 >({
   name,
   label,

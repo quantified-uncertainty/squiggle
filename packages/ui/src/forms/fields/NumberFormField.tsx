@@ -9,7 +9,7 @@ export function NumberFormField<
   TName extends FieldPathByValue<
     TValues,
     number | undefined
-  > = FieldPathByValue<TValues, number | undefined>
+  > = FieldPathByValue<TValues, number | undefined>,
 >({
   placeholder,
   rules = {},
