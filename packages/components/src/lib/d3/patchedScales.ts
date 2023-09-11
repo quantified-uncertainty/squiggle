@@ -99,24 +99,30 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
     }
 
     function limitDigits(x: number, digits = 2, rounding = Math.round): number {
-      const base = Math.floor(Math.log10(Math.abs(x) - digits));
+      const base = rounding(Math.log10(Math.abs(x) - digits));
       return rounding(x / base) * base;
     }
 
     /**
+     * @param [rounding=Math.round] Rounding method
      * @returns Closest number with a single significant digit being 1, 2 or 5
      */
-    function closestNice(x: number): number {
+    function roundToNice(x: number, rounding = Math.round): number {
       if (x === 0) return 0;
 
       const base = Math.floor(Math.log10(Math.abs(x)));
       const zeros = Math.pow(10, base);
 
-      const mult = Math.round(Math.abs(x) / zeros);
+      const mult = rounding(Math.abs(x) / zeros);
 
-      const niceMult = mult > 7 ? 10 : mult > 3 ? 5 : mult > 2 ? 2 : mult;
+      // https://oeis.org/A002522
+      const niceMult = Math.pow(rounding(Math.sqrt(mult - 1)), 2) + 1;
 
       return niceMult * zeros * Math.sign(x);
+    }
+
+    function closestNice(x: number) {
+      return roundToNice(x);
     }
 
     const normCount = count ?? 10;
@@ -143,13 +149,11 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
       return d3.range(pLower, pUpper, linSize / ticks).concat([pUpper]);
     }
 
-    const ticks = [closestNice(lower)].concat(
-      tickRange
-        .map(invert)
-        .map(closestNice)
-        .filter((a) => a < upper),
-      [closestNice(upper)]
-    );
+    const ticks = [roundToNice(lower, Math.ceil)]
+      .concat(tickRange.map(invert).map(closestNice), [
+        roundToNice(upper, Math.floor),
+      ])
+      .filter((tick) => tick <= upper && tick >= lower);
     return ticks;
   };
 
