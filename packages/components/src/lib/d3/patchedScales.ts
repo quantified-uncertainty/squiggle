@@ -98,12 +98,6 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
       return Math.sign(x) * Math.expm1(Math.abs(x)) * c;
     }
 
-    function limitDigits(x: number, digits = 2, rounding = Math.round): number {
-      const base = rounding(Math.log10(Math.abs(x)) - digits);
-      const zeros = Math.pow(10, base)
-      return rounding(x / zeros) * zeros;
-    }
-
     /**
      * @param [rounding=Math.round] Rounding method
      * @returns Closest number with a single significant digit being 1, 2 or 5
@@ -135,15 +129,21 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
     const expSize = Math.abs(transform(lower) - transform(upper));
 
     // If exponent window is too small, then let's try linear scale instead
-    if (expSize / normCount < 0.2) {
-      const pLower = limitDigits(lower, 2, Math.ceil);
-      const pUpper = limitDigits(upper, 2, Math.floor);
+    if (expSize / normCount < 0.5) {
+      const reqPrecision = Math.pow(
+        10,
+        Math.floor(Math.log10(upper - lower) - 1)
+      );
+      const pLower = Math.ceil(lower / reqPrecision) * reqPrecision;
+      const pUpper = Math.floor(upper / reqPrecision) * reqPrecision;
+
       const linSize = pUpper - pLower;
+
       // Alternative linear route.
       const digits = Math.floor(Math.log10(linSize));
-      let ticks = linSize / Math.pow(10, digits);
-      while (ticks * 1.5 < normCount) ticks *= 2;
-      return d3.range(pLower, pUpper, linSize / ticks).concat([pUpper]);
+      let tickNumber = linSize / Math.pow(10, digits);
+      while (tickNumber * 1.5 < normCount) tickNumber *= 2;
+      return d3.range(pLower, pUpper, linSize / tickNumber).concat([pUpper]);
     }
 
     const tLower = transform(roundToNice(lower, Math.ceil));
@@ -158,6 +158,7 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
       tickRange.map(invert).map(closestNice),
       [roundToNice(upper, Math.floor)]
     );
+
     return ticks;
   };
 
