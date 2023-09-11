@@ -98,6 +98,11 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
       return Math.sign(x) * Math.expm1(Math.abs(x)) * c;
     }
 
+    function limitDigits(x: number, digits = 2, rounding = Math.round): number {
+      const base = Math.floor(Math.log10(Math.abs(x) - digits));
+      return rounding(x / base) * base;
+    }
+
     /**
      * @returns Closest number with a single significant digit being 1, 2 or 5
      */
@@ -128,12 +133,14 @@ function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
 
     // If exponent window is too small, then let's try linear scale instead
     if (expSize / normCount < 0.2) {
-      const linSize = upper - lower;
+      const pLower = limitDigits(lower, 2, Math.ceil);
+      const pUpper = limitDigits(upper, 2, Math.floor);
+      const linSize = pUpper - pLower;
       // Alternative linear route.
       const digits = Math.floor(Math.log10(linSize));
       let ticks = linSize / Math.pow(10, digits);
       while (ticks * 1.5 < normCount) ticks *= 2;
-      return d3.range(lower, upper, linSize / ticks).concat([upper]);
+      return d3.range(pLower, pUpper, linSize / ticks).concat([pUpper]);
     }
 
     const ticks = [closestNice(lower)].concat(
