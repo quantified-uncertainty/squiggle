@@ -4,6 +4,7 @@ import {
   frLambda,
   frArray,
   frString,
+  frOptional,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { vCalculator } from "../value/index.js";
@@ -20,11 +21,31 @@ export const library = [
     examples: [],
     definitions: [
       makeDefinition(
-        [frDict(["fn", frLambda], ["rows", frArray(frString)])],
-        ([{ fn, rows }]) => {
+        [
+          frDict(
+            ["fn", frLambda],
+            ["description", frOptional(frString)],
+            [
+              "fields",
+              frArray(
+                frDict(
+                  ["name", frString],
+                  ["default", frOptional(frString)],
+                  ["description", frOptional(frString)]
+                )
+              ),
+            ]
+          ),
+        ],
+        ([{ fn, description, fields }]) => {
           return vCalculator({
             fn,
-            inputs: rows.map((name) => ({ name })),
+            description: description || undefined,
+            fields: fields.map((vars) => ({
+              name: vars.name,
+              default: vars.default || "",
+              description: vars.description || undefined,
+            })),
           });
         }
       ),

@@ -12,6 +12,9 @@ import { Env } from "@quri/squiggle-lang";
 import { PlaygroundSettings } from "../PlaygroundSettings.js";
 import { SqValueWithContext, valueHasContext } from "../../lib/utility.js";
 
+import ReactMarkdown from "react-markdown";
+import _ from "lodash";
+
 type Props = {
   value: SqCalculator;
   environment: Env;
@@ -21,7 +24,7 @@ type Props = {
     settings: PlaygroundSettings
   ) => ReactNode;
 };
-//calc.run([output.value.result], environment);
+
 const runSquiggleCode = async (
   calc: SqCalculator,
   code: string,
@@ -31,7 +34,7 @@ const runSquiggleCode = async (
   if (environment) {
     project.setEnvironment(environment);
   }
-  const sourceId = "test";
+  const sourceId = "calculator";
   project.setSource(sourceId, code);
   await project.run(sourceId);
   const output = project.getOutput(sourceId);
@@ -54,8 +57,8 @@ export const Calculator: FC<Props> = ({
 }) => {
   const [codes, setCodes] = useState<Record<string, string>>(() => {
     const initialCodes: Record<string, string> = {};
-    value.names.forEach((name) => {
-      initialCodes[name] = "40"; // Initial code value. This can be changed as needed.
+    value.rows.forEach((row) => {
+      initialCodes[row.name] = row.default; // Initial code value. This can be changed as needed.
     });
     return initialCodes;
   });
@@ -70,34 +73,43 @@ export const Calculator: FC<Props> = ({
   > | null>();
 
   useEffect(() => {
-    const fetchResults = async () => {
+    const fetchUpdatedResults = async (currentCodes, currentCachedResults) => {
       const newResults: Record<string, result<SqValue, SqError> | null> = {};
 
-      // Fetch all results
-      for (const name of value.names) {
-        const code = codes[name];
-        const res = await runSquiggleCode(value, code, environment);
-        newResults[name] = res;
+      for (const row of value.rows) {
+        const code = currentCodes[row.name];
+        const result = currentCachedResults[row.name];
+        const alreadyCached =
+          result?.ok && result.value?.context?.source === code;
+        if (!alreadyCached) {
+          const res = await runSquiggleCode(value, code, environment);
+          newResults[row.name] = res;
+        }
       }
 
-      // Once all results are fetched, update the state
-      setCachedResults(newResults);
+      return newResults;
+    };
+    const updateResults = async () => {
+      const newResults = await fetchUpdatedResults(codes, cachedResults); // Use cachedResults here
 
-      // Check validity
-      const allCodesAreValid = value.names.every((name) => {
-        const result = newResults[name];
+      if (_.isEmpty(newResults)) {
+        return;
+      }
+
+      const updatedResults = _.merge(newResults, cachedResults); // Merge in cachedResults here
+      setCachedResults(updatedResults);
+
+      const allCodesAreValid = value.rows.every((row) => {
+        const result = newResults[row.name];
         return result && result.ok;
       });
 
-      // If all codes are valid, calculate the final result
       if (allCodesAreValid) {
-        const results: SqValue[] = value.names.map((name) => {
-          const res = newResults[name];
+        const results: SqValue[] = value.rows.map((row) => {
+          const res = newResults[row.name];
           if (res && res.ok) {
             return res.value;
           } else {
-            // This shouldn't happen since we've already checked if all codes are valid.
-            // Just a fallback.
             throw new Error("Invalid result encountered.");
           }
         });
@@ -106,14 +118,17 @@ export const Calculator: FC<Props> = ({
           environment
         );
         setFinalResult(finalResult);
+      } else {
+        setFinalResult(null);
       }
     };
 
-    fetchResults();
-  }, [value, codes, environment]);
+    updateResults();
+  }, [value, codes, environment]); // Include cachedResults back as a dependency
 
   const handleChange =
-    (name: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    (name: string) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const newCode = e.target.value;
       setCodes((prevCodes) => ({
         ...prevCodes,
@@ -121,7 +136,7 @@ export const Calculator: FC<Props> = ({
       }));
     };
 
-  const showItem = (
+  const showSqValue = (
     item: result<SqValue, SqError>,
     settings: PlaygroundSettings
   ) => {
@@ -133,37 +148,72 @@ export const Calculator: FC<Props> = ({
         return value.toString();
       }
     } else {
-      return item.value.toString();
+      return (
+        <div className="text-sm text-red-800 text-opacity-70">
+          {item.value.toString()}
+        </div>
+      );
     }
   };
 
-  const chartHeight = 50;
-  const distributionChartSettings = {
-    ...settings.distributionChartSettings,
-    showSummary: false,
-  };
-  const adjustedSettings: PlaygroundSettings = {
+  const fieldShowSettings: PlaygroundSettings = {
     ...settings,
-    distributionChartSettings,
-    chartHeight,
+    distributionChartSettings: {
+      ...settings.distributionChartSettings,
+      showSummary: false,
+    },
+    chartHeight: 30,
+  };
+
+  const resultSettings: PlaygroundSettings = {
+    ...settings,
+    chartHeight: 200,
   };
 
   return (
-    <div className="relative rounded-sm overflow-hidden border border-slate-200">
-      {value.names.map((name) => (
-        <div key={name}>
-          <input
-            value={codes[name] || ""}
-            onChange={handleChange(name)}
-            placeholder={`Enter code for ${name}`}
-            className="my-2 p-2 border rounded"
-          />
-          {cachedResults[name]
-            ? showItem(cachedResults[name]!, adjustedSettings)
-            : "Loading..."}
+    <div className="relative space-y-4">
+      {value.description && (
+        <ReactMarkdown className={"prose text-sm text-slate-800 bg-opacity-60"}>
+          {value.description}
+        </ReactMarkdown>
+      )}
+
+      {value.rows.map((row) => {
+        const { name, description } = row;
+        const result = cachedResults[row.name];
+        const code = codes[name];
+        const resultHasInterestingError = result && !result.ok && code !== "";
+        return (
+          <div key={name} className="flex flex-col max-w-lg">
+            <div className="text-sm font-semibold text-slate-800">{name}</div>
+            {description && (
+              <div className="text-sm  text-slate-600">{description}</div>
+            )}
+            <div className="flex-grow">
+              <input
+                value={codes[name] || ""}
+                onChange={handleChange(name)}
+                placeholder={`Enter code for ${name}`}
+                className="my-2 p-2 border rounded w-full"
+              />
+            </div>
+            <div>
+              {result &&
+                resultHasInterestingError &&
+                showSqValue(result, fieldShowSettings)}
+              {!result && (
+                <div className="text-sm text-gray-500">No result</div>
+              )}
+            </div>
+          </div>
+        );
+      })}
+      {finalResult?.ok && (
+        <div>
+          <div className="text-md font-bold text-slate-800">Result</div>
+          {showSqValue(finalResult, resultSettings)}
         </div>
-      ))}
-      {finalResult && finalResult.ok && showItem(finalResult, adjustedSettings)}
+      )}
     </div>
   );
 };

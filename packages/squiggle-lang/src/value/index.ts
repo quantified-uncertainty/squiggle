@@ -272,8 +272,9 @@ class VTableChart extends BaseValue {
 export const vTableChart = (v: TableChart) => new VTableChart(v);
 
 export type Calculator = {
-  inputs: { name: string | undefined }[];
   fn: Lambda;
+  fields: { name: string; default: string; description?: string }[];
+  description?: string;
 };
 
 class VCalculator extends BaseValue {

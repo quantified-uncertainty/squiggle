@@ -30,7 +30,19 @@ export class SqCalculator {
     }
   }
 
-  get names(): string[] {
-    return this._value.inputs.map((x) => x.name || "");
+  get description(): string | undefined {
+    return this._value.description;
+  }
+
+  get rows(): {
+    name: string;
+    default: string;
+    description?: string;
+  }[] {
+    return this._value.fields.map((x) => ({
+      name: x.name,
+      default: x.default,
+      description: x.description,
+    }));
   }
 }
