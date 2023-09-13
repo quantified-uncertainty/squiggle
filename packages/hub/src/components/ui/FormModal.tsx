@@ -13,7 +13,7 @@ type Props<TFieldValues extends FieldValues> = PropsWithChildren<{
   submitText: string;
   title: string;
   inFlight?: boolean;
-  form: UseFormReturn<TFieldValues, any, undefined>;
+  form: UseFormReturn<TFieldValues, unknown, any>;
   initialFocus?: FieldPath<TFieldValues>;
 }>;
 

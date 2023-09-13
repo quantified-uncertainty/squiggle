@@ -11,26 +11,53 @@ import {
   relativeValuesRoute,
 } from "@/routes";
 import { graphql, useFragment } from "react-relay";
-import { SelectOwner } from "../SelectOwner";
+import { SelectOwner, SelectOwnerOption } from "../SelectOwner";
 import { FormModal } from "../ui/FormModal";
 import { H2 } from "../ui/Headers";
 import { StyledDefinitionLink } from "../ui/StyledDefinitionLink";
 import { StyledLink } from "../ui/StyledLink";
-import { SelectRelativeValuesDefinition } from "./SelectRelativeValuesDefinition";
+import {
+  SelectRelativeValuesDefinition,
+  SelectRelativeValuesDefinitionOption,
+} from "./SelectRelativeValuesDefinition";
 
 const CreateVariableWithDefinitionModal: FC<{
   close: () => void;
   append: (item: RelativeValuesExportInput) => void;
 }> = ({ close, append }) => {
-  const form = useForm<RelativeValuesExportInput>();
+  type FormShape = {
+    variableName: string;
+    owner: SelectOwnerOption | null;
+    definition: SelectRelativeValuesDefinitionOption | null;
+  };
+
+  type ValidatedFormShape = {
+    // all fields are rquired
+    [k in keyof FormShape]: NonNullable<FormShape[k]>;
+  };
+
+  const form = useForm<FormShape, unknown, ValidatedFormShape>({
+    // this is necessary for resetField in SelectRelativeValuesDefinition to work correctly
+    defaultValues: {
+      variableName: "",
+      owner: null,
+      definition: null,
+    },
+  });
 
   const onSubmit = form.handleSubmit((data) => {
-    append(data);
+    append({
+      variableName: data.variableName,
+      definition: {
+        owner: data.owner.slug,
+        slug: data.definition.slug,
+      },
+    });
     close();
   });
 
   return (
-    <FormModal<RelativeValuesExportInput>
+    <FormModal<FormShape>
       title="Add relative values export"
       submitText="Create"
       form={form}
@@ -39,20 +66,20 @@ const CreateVariableWithDefinitionModal: FC<{
       initialFocus="variableName"
     >
       <div className="space-y-2">
-        <TextFormField
+        <TextFormField<FormShape>
           label="Variable"
           name="variableName"
           rules={{ required: true }}
         />
-        <SelectOwner
+        <SelectOwner<FormShape>
           label="Relative Values Definition Owner"
-          name="definition.owner"
+          name="owner"
           myOnly
         />
-        <SelectRelativeValuesDefinition
+        <SelectRelativeValuesDefinition<FormShape>
           label="Relative Values Definition Slug"
-          name="definition.slug"
-          ownerFieldName="definition.owner"
+          name="definition"
+          ownerFieldName="owner"
         />
       </div>
     </FormModal>

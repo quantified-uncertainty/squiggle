@@ -80,6 +80,7 @@ export function SelectFormField<
   name,
   options,
   required = false,
+  disabled,
   renderOption,
   async = false,
   loadOptions,
@@ -91,6 +92,7 @@ export function SelectFormField<
 }: Pick<FormFieldLayoutProps, "label" | "description"> & {
   name: TName;
   required?: boolean;
+  disabled?: boolean;
   renderOption?: (option: TOption) => ReactNode;
 } & (
     | {
@@ -179,6 +181,7 @@ export function SelectFormField<
               loadOptions={loadOptions}
               defaultOptions={async ? true : undefined}
               placeholder={placeholder}
+              isDisabled={disabled}
               isClearable={!required}
               getOptionLabel={getOptionLabel}
               getOptionValue={getOptionValue}
