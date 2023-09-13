@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, useState, useEffect } from "react";
+import React, { FC, ReactNode, useState, useEffect, useReducer } from "react";
 
 import {
   SqValue,
@@ -9,11 +9,95 @@ import {
 } from "@quri/squiggle-lang";
 import { Env } from "@quri/squiggle-lang";
 
+import { useReducerAsync } from "use-reducer-async";
+
 import { PlaygroundSettings } from "../PlaygroundSettings.js";
 import { SqValueWithContext, valueHasContext } from "../../lib/utility.js";
 
 import ReactMarkdown from "react-markdown";
 import _ from "lodash";
+
+type FieldValue = {
+  name: string;
+  code: string;
+  value: result<SqValue, SqError> | null;
+};
+
+function isAlreadyCached(f: FieldValue) {
+  return f.value?.ok && f.value.value?.context?.source === f.code;
+}
+
+type ResultValue = {
+  value: result<SqValue, SqError> | null;
+};
+
+type CalculatorState = {
+  fieldNames: string[];
+  fields: Record<string, FieldValue>;
+  fn: ResultValue;
+};
+
+function allFields(state: CalculatorState) {
+  return state.fieldNames.map((name) => state.fields[name]);
+}
+function allFieldResults(state: CalculatorState) {
+  return allFields(state).map((r) => r.value);
+}
+
+function allFieldValuesAreValid(state: CalculatorState): boolean {
+  return _.every(allFieldResults(state), (result) => result && result.ok);
+}
+
+function initialState(calculator: SqCalculator): CalculatorState {
+  const fields: Record<string, FieldValue> = {};
+  calculator.rows.forEach((row) => {
+    fields[row.name] = {
+      name: row.name,
+      code: row.default,
+      value: null,
+    };
+  });
+  const fn = {
+    value: null,
+  };
+  return {
+    fieldNames: calculator.rows.map((row) => row.name),
+    fields,
+    fn,
+  };
+}
+
+type Action =
+  | { type: "SET_FIELD_CODE"; payload: { name: string; code: string } }
+  | {
+      type: "SET_FIELD_VALUE";
+      payload: { name: string; value: result<SqValue, SqError> | null };
+    }
+  | { type: "SET_FN_VALUE"; payload: result<SqValue, SqError> | null };
+
+const reducer = (state: CalculatorState, action: Action): CalculatorState => {
+  const modifyField = (name: string, newField) => {
+    const newFields = { ...state.fields, [name]: newField };
+    return { ...state, fields: newFields };
+  };
+  switch (action.type) {
+    case "SET_FIELD_CODE": {
+      const { name, code } = action.payload;
+      const field = state.fields[name];
+      const newField = { ...field, code };
+      return modifyField(name, newField);
+    }
+    case "SET_FIELD_VALUE": {
+      const { name, value } = action.payload;
+      const field = state.fields[name];
+      const newField = { ...field, value };
+      return modifyField(name, newField);
+    }
+    case "SET_FN_VALUE": {
+      return { ...state, fn: { value: action.payload } };
+    }
+  }
+};
 
 type Props = {
   value: SqCalculator;
@@ -26,7 +110,6 @@ type Props = {
 };
 
 const runSquiggleCode = async (
-  calc: SqCalculator,
   code: string,
   environment: Env
 ): Promise<result<SqValue, SqError>> => {
@@ -55,85 +138,63 @@ export const Calculator: FC<Props> = ({
   settings,
   renderValue,
 }) => {
-  const [codes, setCodes] = useState<Record<string, string>>(() => {
-    const initialCodes: Record<string, string> = {};
-    value.rows.forEach((row) => {
-      initialCodes[row.name] = row.default; // Initial code value. This can be changed as needed.
-    });
-    return initialCodes;
-  });
+  const [state, dispatch] = useReducer(reducer, initialState(value));
 
-  const [cachedResults, setCachedResults] = useState<
-    Record<string, result<SqValue, SqError> | null>
-  >({});
-
-  const [finalResult, setFinalResult] = useState<result<
-    SqValue,
-    SqError
-  > | null>();
+  async function tryRunningFn(state) {
+    if (allFieldValuesAreValid(state)) {
+      const results: SqValue[] = value.rows.map((row) => {
+        const res = state.fields[row.name];
+        if (res.value && res.value.ok) {
+          return res.value.value;
+        } else {
+          throw new Error("Invalid result encountered.");
+        }
+      });
+      const finalResult: result<SqValue, SqError> = value.run(
+        results,
+        environment
+      );
+      return finalResult;
+    } else {
+      return null;
+    }
+  }
 
   useEffect(() => {
-    const fetchUpdatedResults = async (currentCodes, currentCachedResults) => {
-      const newResults: Record<string, result<SqValue, SqError> | null> = {};
-
-      for (const row of value.rows) {
-        const code = currentCodes[row.name];
-        const result = currentCachedResults[row.name];
-        const alreadyCached =
-          result?.ok && result.value?.context?.source === code;
-        if (!alreadyCached) {
-          const res = await runSquiggleCode(value, code, environment);
-          newResults[row.name] = res;
+    async function executeCode() {
+      let thereWasChange = false;
+      for (const name of state.fieldNames) {
+        const field = state.fields[name];
+        if (!isAlreadyCached(field)) {
+          thereWasChange = true;
+          const valueResult = await runSquiggleCode(field.code, environment);
+          dispatch({
+            type: "SET_FIELD_VALUE",
+            payload: { name, value: valueResult },
+          });
         }
       }
 
-      return newResults;
-    };
-    const updateResults = async () => {
-      const newResults = await fetchUpdatedResults(codes, cachedResults); // Use cachedResults here
-
-      if (_.isEmpty(newResults)) {
-        return;
-      }
-
-      const updatedResults = _.merge(newResults, cachedResults); // Merge in cachedResults here
-      setCachedResults(updatedResults);
-
-      const allCodesAreValid = value.rows.every((row) => {
-        const result = newResults[row.name];
-        return result && result.ok;
-      });
-
-      if (allCodesAreValid) {
-        const results: SqValue[] = value.rows.map((row) => {
-          const res = newResults[row.name];
-          if (res && res.ok) {
-            return res.value;
-          } else {
-            throw new Error("Invalid result encountered.");
-          }
+      if (thereWasChange) {
+        const payload = await tryRunningFn(state);
+        dispatch({
+          type: "SET_FN_VALUE",
+          payload,
         });
-        const finalResult: result<SqValue, SqError> = value.run(
-          results,
-          environment
-        );
-        setFinalResult(finalResult);
-      } else {
-        setFinalResult(null);
       }
-    };
+    }
 
-    updateResults();
-  }, [value, codes, environment]); // Include cachedResults back as a dependency
+    executeCode();
+  }, [state, environment, value]);
 
   const handleChange =
     (name: string) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    async (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const newCode = e.target.value;
-      setCodes((prevCodes) => ({
-        ...prevCodes,
-        [name]: newCode,
-      }));
+      dispatch({
+        type: "SET_FIELD_CODE",
+        payload: { name, code: newCode },
+      });
     };
 
   const showSqValue = (
@@ -180,8 +241,8 @@ export const Calculator: FC<Props> = ({
 
       {value.rows.map((row) => {
         const { name, description } = row;
-        const result = cachedResults[row.name];
-        const code = codes[name];
+        const { value, code } = state.fields[name];
+        const result = value;
         const resultHasInterestingError = result && !result.ok && code !== "";
         return (
           <div key={name} className="flex flex-col max-w-lg">
@@ -191,7 +252,7 @@ export const Calculator: FC<Props> = ({
             )}
             <div className="flex-grow">
               <input
-                value={codes[name] || ""}
+                value={code || ""}
                 onChange={handleChange(name)}
                 placeholder={`Enter code for ${name}`}
                 className="my-2 p-2 border rounded w-full"
@@ -208,10 +269,10 @@ export const Calculator: FC<Props> = ({
           </div>
         );
       })}
-      {finalResult?.ok && (
+      {state.fn.value?.ok && (
         <div>
           <div className="text-md font-bold text-slate-800">Result</div>
-          {showSqValue(finalResult, resultSettings)}
+          {showSqValue(state.fn.value, resultSettings)}
         </div>
       )}
     </div>

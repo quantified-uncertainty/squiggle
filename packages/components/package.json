@@ -38,6 +38,7 @@
     "react-hook-form": "^7.45.2",
     "react-markdown": "^8.0.7",
     "react-resizable": "^3.0.5",
+    "use-reducer-async": "^2.1.1",
     "vscode-uri": "^3.0.7",
     "zod": "^3.21.4"
   },
