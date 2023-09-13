@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, useState, useEffect, useReducer } from "react";
+import React, { FC, ReactNode, Reducer, useEffect } from "react";
 
 import {
   SqValue,
@@ -9,7 +9,7 @@ import {
 } from "@quri/squiggle-lang";
 import { Env } from "@quri/squiggle-lang";
 
-import { useReducerAsync } from "use-reducer-async";
+import { useReducerAsync, AsyncActionHandlers } from "use-reducer-async";
 
 import { PlaygroundSettings } from "../PlaygroundSettings.js";
 import { SqValueWithContext, valueHasContext } from "../../lib/utility.js";
@@ -84,7 +84,8 @@ const reducer = (state: CalculatorState, action: Action): CalculatorState => {
     case "SET_FIELD_CODE": {
       const { name, code } = action.payload;
       const field = state.fields[name];
-      const newField = { ...field, code };
+      const newValue = null;
+      const newField = { ...field, code, value: newValue };
       return modifyField(name, newField);
     }
     case "SET_FIELD_VALUE": {
@@ -132,68 +133,113 @@ const runSquiggleCode = async (
   }
 };
 
+type AsyncAction =
+  | { type: "INITIALIZE"; env: Env; calc: SqCalculator }
+  | {
+      type: "UPDATE_FIELD";
+      name: string;
+      code: string;
+      env: Env;
+      calc: SqCalculator;
+    };
+
+const updateFnValue = async (
+  state: CalculatorState,
+  calc: SqCalculator,
+  env: Env,
+  dispatch: React.Dispatch<Action>
+) => {
+  let finalResult: result<SqValue, SqError> | null = null;
+  if (allFieldValuesAreValid(state)) {
+    const results: SqValue[] = allFieldResults(state).map((res) => {
+      if (res && res.ok) {
+        return res.value;
+      } else {
+        throw new Error("Invalid result encountered.");
+      }
+    });
+    finalResult = calc.run(results, env);
+  } else {
+    finalResult = null;
+  }
+
+  dispatch({
+    type: "SET_FN_VALUE",
+    payload: finalResult,
+  });
+};
+
+const asyncActionHandlers: AsyncActionHandlers<
+  Reducer<CalculatorState, Action>,
+  AsyncAction
+> = {
+  UPDATE_FIELD:
+    ({ dispatch, getState }) =>
+    async (action) => {
+      let state = getState();
+      const setCodeAction: Action = {
+        type: "SET_FIELD_CODE",
+        payload: { name: action.name, code: action.code },
+      };
+      dispatch(setCodeAction);
+
+      const valueResult = await runSquiggleCode(action.code, action.env);
+      const setValueAction: Action = {
+        type: "SET_FIELD_VALUE",
+        payload: { name: action.name, value: valueResult },
+      };
+      dispatch(setValueAction);
+      state = reducer(reducer(state, setCodeAction), setValueAction);
+      await updateFnValue(state, action.calc, action.env, dispatch);
+    },
+  INITIALIZE:
+    ({ dispatch, getState }) =>
+    async (action) => {
+      let state = getState();
+      for (const name of state.fieldNames) {
+        const field = state.fields[name];
+        const valueResult = await runSquiggleCode(field.code, action.env);
+        const _action: Action = {
+          type: "SET_FIELD_VALUE",
+          payload: { name, value: valueResult },
+        };
+        dispatch(_action);
+        state = reducer(state, _action);
+      }
+      await updateFnValue(state, action.calc, action.env, dispatch);
+    },
+};
+
 export const Calculator: FC<Props> = ({
   value,
   environment,
   settings,
   renderValue,
 }) => {
-  const [state, dispatch] = useReducer(reducer, initialState(value));
-
-  async function tryRunningFn(state) {
-    if (allFieldValuesAreValid(state)) {
-      const results: SqValue[] = value.rows.map((row) => {
-        const res = state.fields[row.name];
-        if (res.value && res.value.ok) {
-          return res.value.value;
-        } else {
-          throw new Error("Invalid result encountered.");
-        }
-      });
-      const finalResult: result<SqValue, SqError> = value.run(
-        results,
-        environment
-      );
-      return finalResult;
-    } else {
-      return null;
-    }
-  }
+  const [state, dispatch] = useReducerAsync(
+    reducer,
+    initialState(value),
+    asyncActionHandlers
+  );
 
   useEffect(() => {
-    async function executeCode() {
-      let thereWasChange = false;
-      for (const name of state.fieldNames) {
-        const field = state.fields[name];
-        if (!isAlreadyCached(field)) {
-          thereWasChange = true;
-          const valueResult = await runSquiggleCode(field.code, environment);
-          dispatch({
-            type: "SET_FIELD_VALUE",
-            payload: { name, value: valueResult },
-          });
-        }
-      }
-
-      if (thereWasChange) {
-        const payload = await tryRunningFn(state);
-        dispatch({
-          type: "SET_FN_VALUE",
-          payload,
-        });
-      }
-    }
-
-    executeCode();
-  }, [state, environment, value]);
+    dispatch({
+      type: "INITIALIZE",
+      env: environment,
+      calc: value,
+    });
+  }, []);
 
   const handleChange =
     (name: string) =>
     async (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const newCode = e.target.value;
       dispatch({
-        type: "SET_FIELD_CODE",
-        payload: { name, code: newCode },
+        type: "UPDATE_FIELD",
+        name,
+        code: newCode,
+        env: environment,
+        calc: value,
       });
     };
 
@@ -259,9 +305,7 @@ export const Calculator: FC<Props> = ({
               />
             </div>
             <div>
-              {result &&
-                resultHasInterestingError &&
-                showSqValue(result, fieldShowSettings)}
+              {result && showSqValue(result, fieldShowSettings)}
               {!result && (
                 <div className="text-sm text-gray-500">No result</div>
               )}
