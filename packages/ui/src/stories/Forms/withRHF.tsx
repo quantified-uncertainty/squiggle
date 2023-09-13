@@ -16,7 +16,9 @@ export const formDecorator /* NonNullable<Meta<unknown>["decorators"]>[number] *
         <FormProvider {...form}>
           <Story />
           <div className="mt-4">
-            <Button type="submit">Submit</Button>
+            <Button type="submit" disabled={!form.formState.isValid}>
+              Submit
+            </Button>
           </div>
           {result ? <pre>{JSON.stringify(result, null, 2)}</pre> : undefined}
         </FormProvider>

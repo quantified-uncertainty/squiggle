@@ -4,6 +4,7 @@ import {
   FieldValues,
   UseFormReturn,
   useFormContext,
+  useWatch,
 } from "react-hook-form";
 
 import { TextFormField } from "@quri/ui";
@@ -16,14 +17,17 @@ export function useDashifyFormField<
     string | undefined
   > = FieldPathByValue<TValues, string | undefined>
 >(form: UseFormReturn<TValues, unknown>, field: TName) {
-  const value = form.watch(field);
+  useWatch<TValues, TName>({ name: field });
+  // We discard useWatch result (use it for subscription only) and rely on form value instead.
+  // useWatch result can be stale and cause infinite loops.
+  const value = form.getValues(field);
 
   useEffect(() => {
     if (typeof value === "string" && value.includes(" ")) {
       const patchedValue = String(value).replaceAll(" ", "-");
       // TName definition should make this safe
       form.setValue(field, patchedValue as any);
-      form.trigger();
+      form.trigger(field);
     }
   }, [value, form, field]);
 }

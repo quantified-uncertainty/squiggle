@@ -20,6 +20,8 @@ export { NumberFormField } from "./forms/fields/NumberFormField.js";
 export { RadioFormField } from "./forms/fields/RadioFormField.js";
 export { TextAreaFormField } from "./forms/fields/TextAreaFormField.js";
 export { TextFormField } from "./forms/fields/TextFormField.js";
+export { SelectStringFormField } from "./forms/fields/SelectStringFormField.js";
+export { SelectFormField } from "./forms/fields/SelectFormField.js";
 
 // generic react-hook-form inputs
 export { ControlledFormField } from "./forms/common/ControlledFormField.js";

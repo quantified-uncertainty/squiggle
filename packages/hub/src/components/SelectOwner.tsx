@@ -1,12 +1,10 @@
 "use client";
 import { FC } from "react";
-import { FieldPath, FieldValues } from "react-hook-form";
+import { FieldPathByValue, FieldValues } from "react-hook-form";
 import { useRelayEnvironment } from "react-relay";
-import { OptionProps, SingleValueProps, components } from "react-select";
-import AsyncSelect from "react-select/async";
 import { fetchQuery, graphql } from "relay-runtime";
 
-import { ControlledFormField } from "@quri/ui";
+import { SelectFormField } from "@quri/ui";
 
 import { SelectOwnerQuery } from "@/__generated__/SelectOwnerQuery.graphql";
 import { ownerIcon } from "@/lib/ownerIcon";
@@ -41,13 +39,15 @@ const Query = graphql`
   }
 `;
 
-type Option = {
-  readonly __typename: "User" | "Group";
-  readonly id: string;
-  readonly slug: string;
+// Note: we can't wrap this in a fragment because it's not possible to call `useFragment`
+// in SelectFormField callbacks.
+export type SelectOwnerOption = {
+  __typename: "User" | "Group";
+  id: string;
+  slug: string;
 };
 
-const OwnerInfo: FC<{ owner: Option }> = ({ owner }) => {
+const OwnerInfo: FC<{ owner: SelectOwnerOption }> = ({ owner }) => {
   const Icon = ownerIcon(owner.__typename);
   return (
     <div className="flex items-center gap-2">
@@ -57,28 +57,12 @@ const OwnerInfo: FC<{ owner: Option }> = ({ owner }) => {
   );
 };
 
-const Option = ({ children, ...props }: OptionProps<Option>) => {
-  return (
-    <components.Option {...props}>
-      <OwnerInfo owner={props.data} />
-    </components.Option>
-  );
-};
-
-const SingleValue = ({
-  children,
-  ...props
-}: SingleValueProps<Option, false>) => {
-  return (
-    <components.SingleValue {...props}>
-      <OwnerInfo owner={props.data} />
-    </components.SingleValue>
-  );
-};
-
 export function SelectOwner<
   TValues extends FieldValues,
-  TName extends FieldPath<TValues> = FieldPath<TValues>
+  TName extends FieldPathByValue<
+    TValues,
+    SelectOwnerOption | null
+  > = FieldPathByValue<TValues, SelectOwnerOption | null>
 >({
   name,
   label,
@@ -92,7 +76,9 @@ export function SelectOwner<
 }) {
   const environment = useRelayEnvironment();
 
-  const loadOptions = async (inputValue: string): Promise<Option[]> => {
+  const loadOptions = async (
+    inputValue: string
+  ): Promise<SelectOwnerOption[]> => {
     const result = await fetchQuery<SelectOwnerQuery>(environment, Query, {
       search: inputValue,
       myOnly,
@@ -102,7 +88,7 @@ export function SelectOwner<
       return [];
     }
 
-    const options: Option[] = [];
+    const options: SelectOwnerOption[] = [];
     if (result.me) {
       options.push(result.me.asUser);
     }
@@ -114,17 +100,14 @@ export function SelectOwner<
   };
 
   return (
-    <ControlledFormField name={name} label={label} rules={{ required }}>
-      {({ onChange }) => (
-        <AsyncSelect
-          components={{ SingleValue, Option }}
-          loadOptions={loadOptions}
-          defaultOptions
-          onChange={(owner) => onChange(owner?.slug)}
-          styles={{ menuPortal: (base) => ({ ...base, zIndex: 100 }) }}
-          menuPortalTarget={document.body}
-        />
-      )}
-    </ControlledFormField>
+    <SelectFormField<TValues, SelectOwnerOption | null>
+      name={name}
+      label={label}
+      required={required}
+      async
+      loadOptions={loadOptions}
+      renderOption={(owner) => <OwnerInfo owner={owner} />}
+      getOptionValue={(owner) => owner.id}
+    />
   );
 }

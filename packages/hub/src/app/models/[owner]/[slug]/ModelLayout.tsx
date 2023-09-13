@@ -52,6 +52,7 @@ const Query = graphql`
         }
         ...FixModelUrlCasing
         ...ModelAccessControls
+        ...ModelSettingsButton
         currentRevision {
           id
           # for length; TODO - "hasExports" field?
@@ -132,9 +133,7 @@ export const ModelLayout: FC<
             icon={RectangleStackIcon}
             href={modelRevisionsUrl}
           />
-          {model.isEditable ? (
-            <ModelSettingsButton slug={model.slug} owner={model.owner.slug} />
-          ) : null}
+          {model.isEditable ? <ModelSettingsButton model={model} /> : null}
         </EntityTab.List>
       }
     >

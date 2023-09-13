@@ -8,7 +8,7 @@ import { graphql } from "relay-runtime";
 import { Button, CheckboxFormField } from "@quri/ui";
 
 import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
-import { SelectGroup } from "@/components/SelectGroup";
+import { SelectGroup, SelectGroupOption } from "@/components/SelectGroup";
 import { H1 } from "@/components/ui/Headers";
 import { SlugFormField } from "@/components/ui/SlugFormField";
 import { useAsyncMutation } from "@/hooks/useAsyncMutation";
@@ -40,7 +40,7 @@ a = normal(2, 5)
 
 type FormShape = {
   slug: string | undefined;
-  groupSlug: string | undefined;
+  group: SelectGroupOption | null;
   isPrivate: boolean;
 };
 
@@ -50,7 +50,7 @@ export const NewModel: FC = () => {
   const form = useForm<FormShape>({
     defaultValues: {
       // don't pass `slug: ""` here, it will lead to form reset if a user started to type in a value before JS finished loading
-      groupSlug: undefined,
+      group: null,
       isPrivate: false,
     },
     mode: "onChange",
@@ -72,7 +72,7 @@ export const NewModel: FC = () => {
       variables: {
         input: {
           slug: data.slug ?? "", // shouldn't happen but satisfies Typescript
-          groupSlug: data.groupSlug,
+          groupSlug: data.group?.slug,
           isPrivate: data.isPrivate,
           code: defaultCode,
         },
@@ -82,7 +82,7 @@ export const NewModel: FC = () => {
         if (username) {
           router.push(
             modelRoute({
-              owner: data.groupSlug ?? username,
+              owner: data.group?.slug ?? username,
               slug: result.model.slug,
             })
           );
@@ -106,7 +106,7 @@ export const NewModel: FC = () => {
           />
           <SelectGroup<FormShape>
             label="Group"
-            name="groupSlug"
+            name="group"
             required={false}
             myOnly={true}
           />

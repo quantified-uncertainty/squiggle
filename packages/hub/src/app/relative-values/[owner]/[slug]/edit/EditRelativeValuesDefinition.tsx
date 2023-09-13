@@ -10,10 +10,8 @@ import { RelativeValuesDefinitionPageQuery as QueryType } from "@/__generated__/
 import { RelativeValuesDefinitionRevision$key } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
 import { useAsyncMutation } from "@/hooks/useAsyncMutation";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
-import {
-  RelativeValuesDefinitionForm,
-  RelativeValuesDefinitionFormShape,
-} from "@/relative-values/components/RelativeValuesDefinitionForm";
+import { RelativeValuesDefinitionForm } from "@/relative-values/components/RelativeValuesDefinitionForm";
+import { FormShape } from "@/relative-values/components/RelativeValuesDefinitionForm/FormShape";
 import { RelativeValuesDefinitionRevisionFragment } from "@/relative-values/components/RelativeValuesDefinitionRevision";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
@@ -73,7 +71,7 @@ export const EditRelativeValuesDefinition: FC<{
     }
   );
 
-  const save = async (data: RelativeValuesDefinitionFormShape) => {
+  const save = async (data: FormShape) => {
     await saveMutation({
       variables: {
         input: {

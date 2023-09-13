@@ -1,13 +1,16 @@
 import { useRouter } from "next/navigation";
 import { FC } from "react";
+import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { RightArrowIcon } from "@quri/ui";
 
 import { MoveModelActionMutation } from "@/__generated__/MoveModelActionMutation.graphql";
-import { SelectOwner } from "@/components/SelectOwner";
+import { SelectOwner, SelectOwnerOption } from "@/components/SelectOwner";
 import { MutationModalAction } from "@/components/ui/MutationModalAction";
 import { modelRoute } from "@/routes";
+import { MoveModelAction$key } from "@/__generated__/MoveModelAction.graphql";
+import { DefaultValues } from "react-hook-form";
 
 const Mutation = graphql`
   mutation MoveModelActionMutation($input: MutationMoveModelInput!) {
@@ -22,6 +25,7 @@ const Mutation = graphql`
           slug
           owner {
             __typename
+            id
             slug
           }
         }
@@ -30,15 +34,29 @@ const Mutation = graphql`
   }
 `;
 
-type FormShape = { owner: string };
+type FormShape = { owner: SelectOwnerOption };
 
 type Props = {
-  owner: string;
-  slug: string;
+  model: MoveModelAction$key;
   close(): void;
 };
 
-export const MoveModelAction: FC<Props> = ({ owner, slug, close }) => {
+export const MoveModelAction: FC<Props> = ({ model: modelKey, close }) => {
+  const model = useFragment(
+    graphql`
+      fragment MoveModelAction on Model {
+        slug
+        owner {
+          # TODO - fragment?
+          __typename
+          id
+          slug
+        }
+      }
+    `,
+    modelKey
+  );
+
   const router = useRouter();
 
   return (
@@ -46,17 +64,25 @@ export const MoveModelAction: FC<Props> = ({ owner, slug, close }) => {
       mutation={Mutation}
       expectedTypename="MoveModelResult"
       formDataToVariables={(data) => ({
-        input: { oldOwner: owner, newOwner: data.owner, slug },
+        input: {
+          oldOwner: model.owner.slug,
+          newOwner: data.owner.slug,
+          slug: model.slug,
+        },
       })}
       initialFocus="owner"
-      defaultValues={{ owner }}
+      defaultValues={{
+        // __typename from fragment is string, while SelectOwner requires 'User' | 'Group' union,
+        // so we have to explicitly recast
+        owner: model.owner as SelectOwnerOption,
+      }}
       submitText="Save"
       close={close}
       title="Move"
       icon={RightArrowIcon}
-      modalTitle={`Move model ${owner}/${slug}`}
+      modalTitle={`Move model ${model.owner.slug}/${model.slug}`}
       onCompleted={({ model }) => {
-        router.push(modelRoute({ owner: model.owner.slug, slug }));
+        router.push(modelRoute({ owner: model.owner.slug, slug: model.slug }));
       }}
     >
       {() => (
