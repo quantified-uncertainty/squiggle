@@ -23,17 +23,32 @@ builder.mutationField("inviteUserToGroup", (t) =>
     },
     resolve: async (_, { input }, { session }) => {
       const invite = await prisma.$transaction(async (tx) => {
-        const owner = await tx.owner.findUniqueOrThrow({
+        const groupOwner = await tx.owner.findUnique({
           where: {
             slug: input.group,
           },
         });
+        if (!groupOwner) {
+          throw new Error(`Group ${input.group} not found`);
+        }
+
+        const invitedUser = await tx.user.findFirst({
+          where: {
+            asOwner: {
+              slug: input.username,
+            },
+          },
+        });
+
+        if (!invitedUser) {
+          throw new Error(`Invited user ${input.username} not found`);
+        }
 
         // We perform all checks one by one because that allows more precise error reporting.
         // (It would be possible to check everything in one big query with clever nested `connect` checks.)
         const isAdmin = await tx.group.count({
           where: {
-            ownerId: owner.id,
+            ownerId: groupOwner.id,
             memberships: {
               some: {
                 user: { email: session.user.email },
@@ -48,11 +63,9 @@ builder.mutationField("inviteUserToGroup", (t) =>
 
         const alreadyAMember = await tx.group.count({
           where: {
-            ownerId: owner.id,
+            ownerId: groupOwner.id,
             memberships: {
-              some: {
-                user: { username: input.username },
-              },
+              some: { userId: invitedUser.id },
             },
           },
         });
@@ -64,10 +77,10 @@ builder.mutationField("inviteUserToGroup", (t) =>
 
         const hasPendingInvite = await tx.group.count({
           where: {
-            ownerId: owner.id,
+            ownerId: groupOwner.id,
             invites: {
               some: {
-                user: { username: input.username },
+                userId: invitedUser.id,
                 status: "Pending",
               },
             },
@@ -79,13 +92,13 @@ builder.mutationField("inviteUserToGroup", (t) =>
           );
         }
 
-        return tx.groupInvite.create({
+        return await tx.groupInvite.create({
           data: {
             user: {
-              connect: { username: input.username },
+              connect: { id: invitedUser.id },
             },
             group: {
-              connect: { ownerId: owner.id },
+              connect: { ownerId: groupOwner.id },
             },
             role: input.role,
           },

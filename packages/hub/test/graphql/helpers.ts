@@ -20,7 +20,6 @@ export async function setCurrentUserObject(user: {
     },
     create: {
       email: user.email,
-      username: user.username, // deprecated
       ...(user.username
         ? {
             asOwner: {
