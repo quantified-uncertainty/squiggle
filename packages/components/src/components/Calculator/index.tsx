@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, useEffect, useReducer } from "react";
+import React, { FC, ReactNode, useEffect, useReducer, useState } from "react";
 
 import { SqValue, SqCalculator, SqError, result } from "@quri/squiggle-lang";
 import { Env } from "@quri/squiggle-lang";
@@ -32,6 +32,9 @@ export const Calculator: FC<Props> = ({
   const { path } = valueWithContext.context;
   const { getSettings, dispatch } = useViewerContext();
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
+  const [prevCalculator, setPrevCalculator] = useState<SqCalculator | null>(
+    null
+  );
 
   const itemSettings = getSettings({ path, defaults: undefined });
   const calculatorState = itemSettings.calculator;
@@ -46,9 +49,21 @@ export const Calculator: FC<Props> = ({
     forceUpdate();
   };
 
+  //When the component loads, if there is no saved calculator state, we want to initialize it
   useEffect(() => {
     !calculatorState && init();
   }, []);
+
+  //We want to reset the calculator state if the calculator changes
+  useEffect(() => {
+    const calculatorChanged =
+      prevCalculator !== null && prevCalculator !== calculator;
+
+    if (calculatorChanged) {
+      init();
+    }
+    setPrevCalculator(calculator);
+  }, [calculator]);
 
   const handleChange =
     (name: string) =>
@@ -113,33 +128,39 @@ export const Calculator: FC<Props> = ({
       {calculatorState &&
         calculator.rows.map((row) => {
           const { name, description } = row;
-          const { value, code } = calculatorState!.fields[name];
-          const result = value;
-          const resultHasInterestingError = result && !result.ok && code !== "";
-          return (
-            <div key={name} className="flex flex-col max-w-lg">
-              <div className="text-sm font-semibold text-slate-800">{name}</div>
-              {description && (
-                <div className="text-sm  text-slate-600">{description}</div>
-              )}
-              <div className="flex-grow">
-                <input
-                  value={code || ""}
-                  onChange={handleChange(name)}
-                  placeholder={`Enter code for ${name}`}
-                  className="my-2 p-2 border rounded w-full"
-                />
-              </div>
-              <div>
-                {result &&
-                  resultHasInterestingError &&
-                  showSqValue(result, fieldShowSettings)}
-                {!result && (
-                  <div className="text-sm text-gray-500">No result</div>
+          const field = calculatorState!.fields[name];
+          if (field) {
+            const { value, code } = field;
+            const result = value;
+            const resultHasInterestingError =
+              result && !result.ok && code !== "";
+            return (
+              <div key={name} className="flex flex-col max-w-lg">
+                <div className="text-sm font-semibold text-slate-800">
+                  {name}
+                </div>
+                {description && (
+                  <div className="text-sm  text-slate-600">{description}</div>
                 )}
+                <div className="flex-grow">
+                  <input
+                    value={code || ""}
+                    onChange={handleChange(name)}
+                    placeholder={`Enter code for ${name}`}
+                    className="my-2 p-2 border rounded w-full"
+                  />
+                </div>
+                <div>
+                  {result &&
+                    resultHasInterestingError &&
+                    showSqValue(result, fieldShowSettings)}
+                  {!result && (
+                    <div className="text-sm text-gray-500">No result</div>
+                  )}
+                </div>
               </div>
-            </div>
-          );
+            );
+          }
         })}
       {calculatorState?.fn.value?.ok && (
         <div>

@@ -7,7 +7,7 @@ import { CalculatorState } from "../Calculator/calculatorReducer.js";
 
 export type LocalItemSettings = {
   collapsed: boolean;
-  calculator: null | CalculatorState;
+  calculator?: CalculatorState;
 } & Pick<
   PartialPlaygroundSettings,
   "distributionChartSettings" | "functionChartSettings"

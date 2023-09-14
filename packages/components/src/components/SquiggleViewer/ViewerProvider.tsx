@@ -108,7 +108,7 @@ type ViewerContextShape = {
 };
 
 export const ViewerContext = createContext<ViewerContextShape>({
-  getSettings: () => ({ collapsed: false, calculator: null }),
+  getSettings: () => ({ collapsed: false }),
   getMergedSettings: () => defaultPlaygroundSettings,
   localSettingsEnabled: false,
   focused: undefined,
@@ -184,11 +184,10 @@ type SettingsStore = {
 
 const defaultLocalSettings: LocalItemSettings = {
   collapsed: false,
-  calculator: null,
 };
 
 const collapsedVariablesDefault: SettingsStore = {
-  [topLevelBindingsName]: { collapsed: true, calculator: null },
+  [topLevelBindingsName]: { collapsed: true },
 };
 
 export const ViewerProvider: FC<
@@ -275,7 +274,7 @@ export const ViewerProvider: FC<
     reduce: (calculator: CalculatorState) => CalculatorState
   ) => {
     const calculator = getSettingsRef(path).calculator;
-    if (calculator !== null) {
+    if (calculator) {
       setSettings(path, (state) => ({
         ...state,
         calculator: reduce(calculator),

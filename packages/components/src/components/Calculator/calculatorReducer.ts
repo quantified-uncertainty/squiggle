@@ -8,16 +8,16 @@ import {
 
 import _ from "lodash";
 
-export type optionalResultValue = result<SqValue, SqError> | null;
+export type optionalResultValue = result<SqValue, SqError> | undefined;
 
 export type FieldValue = {
   name: string;
   code: string;
-  value: optionalResultValue;
+  value?: optionalResultValue;
 };
 
 export type ResultValue = {
-  value: optionalResultValue;
+  value?: optionalResultValue;
 };
 
 export type CalculatorState = {
@@ -46,16 +46,12 @@ export function initialCalculatorState(
     fields[row.name] = {
       name: row.name,
       code: row.default,
-      value: null,
     };
   });
-  const fn = {
-    value: null,
-  };
   return {
     fieldNames: calculator.rows.map((row) => row.name),
     fields,
-    fn,
+    fn: {},
   };
 }
 
@@ -89,8 +85,7 @@ export const calculatorReducer = (
     case "CALCULATOR_SET_FIELD_CODE": {
       const { name, code } = action.payload;
       const field = state.fields[name];
-      const newValue = null;
-      const newField = { ...field, code, value: newValue };
+      const newField = { ...field, code, value: undefined };
       return modifyField(name, newField);
     }
     case "CALCULATOR_SET_FIELD_VALUE": {

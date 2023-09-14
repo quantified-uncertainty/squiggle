@@ -50,7 +50,7 @@ const updateFnValue = async (
   env: Env,
   dispatch: ViewProviderDispatch
 ) => {
-  let finalResult: optionalResultValue = null;
+  let finalResult: optionalResultValue = undefined;
   if (allFieldValuesAreValid(state)) {
     const results: SqValue[] = allFieldResults(state).map((result) => {
       if (result && result.ok) {
@@ -61,7 +61,7 @@ const updateFnValue = async (
     });
     finalResult = calc.run(results, env);
   } else {
-    finalResult = null;
+    finalResult = undefined;
   }
 
   dispatch({

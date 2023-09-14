@@ -280,9 +280,37 @@ export type Calculator = {
 class VCalculator extends BaseValue {
   readonly type = "Calculator";
 
+  private error: REOther | null = null;
+
   constructor(public value: Calculator) {
     super();
+    if (value.fn.getParameters().length !== value.fields.length) {
+      this.setError(
+        `Calculator function has ${
+          value.fn.getParameters().length
+        } parameters, but ${value.fields.length} fields were provided.`
+      );
+    }
+
+    if (value.fields.some((x) => x.name === "")) {
+      this.setError(`Calculator fields must all not be empty.`);
+    }
+
+    const fieldNames = value.fields.map((f) => f.name);
+    const uniqueNames = new Set(fieldNames);
+    if (fieldNames.length !== uniqueNames.size) {
+      this.setError(`Duplicate field names found.`);
+    }
   }
+
+  private setError(message: string): void {
+    this.error = new REOther(message);
+  }
+
+  getError(): REOther | null {
+    return this.error;
+  }
+
   toString() {
     return `Calculator`;
   }

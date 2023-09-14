@@ -38,7 +38,7 @@ export const library = [
           ),
         ],
         ([{ fn, description, fields }]) => {
-          return vCalculator({
+          const calc = vCalculator({
             fn,
             description: description || undefined,
             fields: fields.map((vars) => ({
@@ -47,6 +47,12 @@ export const library = [
               description: vars.description || undefined,
             })),
           });
+          const error = calc.getError();
+          if (error) {
+            throw error;
+          } else {
+            return calc;
+          }
         }
       ),
     ],

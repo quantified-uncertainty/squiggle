@@ -77,7 +77,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
 
   const isRoot = Boolean(path.isRoot());
 
-  // This doesn't just memoizes the defualts, but also affects children, in some cases.
+  // This doesn't just memoizes the defaults, but also affects children, in some cases.
   const defaults: LocalItemSettings = useMemo(() => {
     // TODO - value.size() would be faster.
     const childrenElements = getChildrenValues(value);
@@ -89,7 +89,6 @@ export const VariableBox: FC<VariableBoxProps> = ({
     }
     return {
       collapsed: !isRoot && childrenElements.length > 5,
-      calculator: null,
     };
   }, [value, collapseChildren, isRoot]);
 

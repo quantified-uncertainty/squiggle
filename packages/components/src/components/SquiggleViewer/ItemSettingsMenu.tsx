@@ -53,7 +53,6 @@ const ItemSettingsModal: React.FC<
     const submit = form.handleSubmit((data) => {
       setSettings(path, {
         collapsed: false,
-        calculator: null,
         ...data,
       });
       onChange();
@@ -133,7 +132,6 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
           onClick={() => {
             setSettings(path, {
               collapsed: settings.collapsed,
-              calculator: null,
             });
             props.onChange();
           }}
