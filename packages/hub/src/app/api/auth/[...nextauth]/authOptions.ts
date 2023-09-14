@@ -30,8 +30,16 @@ function buildAuthOptions() {
     adapter: PrismaAdapter(prisma),
     providers,
     callbacks: {
-      session({ session, user }) {
-        session.user.username = user.username;
+      async session({ session, user }) {
+        // is there a way to ask PrismaAdapter to select it by default?
+        const fullUser = await prisma.user.findUnique({
+          where: { id: user.id },
+          include: { asOwner: true },
+        });
+        const username = fullUser?.asOwner?.slug;
+        if (username) {
+          session.user.username = username;
+        }
         return session;
       },
     },
