@@ -182,11 +182,11 @@ model Model {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  newOwner Owner?  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  ownerId  String?
+  owner   Owner  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId String
 
-  owner  User   @relation(fields: [userId], references: [id])
-  userId String
+  legacyOwner User?   @relation(fields: [userId], references: [id])
+  userId      String?
 
   isPrivate Boolean @default(false)
 
@@ -242,11 +242,11 @@ model RelativeValuesDefinition {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  newOwner Owner?  @relation(fields: [ownerId], references: [id])
-  ownerId  String?
+  owner   Owner  @relation(fields: [ownerId], references: [id])
+  ownerId String
 
-  owner  User   @relation(fields: [userId], references: [id])
-  userId String
+  legacyOwner User?   @relation(fields: [userId], references: [id])
+  userId      String?
 
   // technically nullable, but won't ever be null in practice after the initial migration
   currentRevision   RelativeValuesDefinitionRevision? @relation("CurrentRevision", fields: [currentRevisionId], references: [id])

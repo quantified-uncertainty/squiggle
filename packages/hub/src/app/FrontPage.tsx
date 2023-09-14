@@ -1,30 +1,28 @@
 "use client";
 import { FC } from "react";
-import { usePreloadedQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import FrontPageQueryNode, {
-  FrontPageQuery,
-} from "@/__generated__/FrontPageQuery.graphql";
+import { FrontPageQuery } from "@/__generated__/FrontPageQuery.graphql";
 import { FrontPageDefinitionList } from "./FrontPageDefinitionList";
 import { FrontPageModelList } from "./FrontPageModelList";
 
-import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
-import { useSerializablePreloadedQuery } from "@/relay/useSerializablePreloadedQuery";
+import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
+import { usePageQuery } from "@/relay/usePageQuery";
 import { StyledTab } from "@quri/ui";
+import { FrontPageGroupList } from "./FrontPageGroupList";
 
 const Query = graphql`
   query FrontPageQuery {
     ...FrontPageModelList
     ...FrontPageDefinitionList
+    ...FrontPageGroupList
   }
 `;
 
 export const FrontPage: FC<{
-  query: SerializablePreloadedQuery<typeof FrontPageQueryNode, FrontPageQuery>;
+  query: SerializablePreloadedQuery<FrontPageQuery>;
 }> = ({ query }) => {
-  const queryRef = useSerializablePreloadedQuery(query);
-  const data = usePreloadedQuery(Query, queryRef);
+  const [data] = usePageQuery(Query, query);
 
   return (
     <div className="space-y-8">
@@ -32,14 +30,18 @@ export const FrontPage: FC<{
         <StyledTab.List>
           <StyledTab name="Models" />
           <StyledTab name="Definitions" />
+          <StyledTab name="Groups" />
         </StyledTab.List>
         <div className="mt-4">
           <StyledTab.Panels>
             <StyledTab.Panel>
-              {<FrontPageModelList dataRef={data} />}
+              <FrontPageModelList dataRef={data} />
             </StyledTab.Panel>
             <StyledTab.Panel>
-              {<FrontPageDefinitionList dataRef={data} />}
+              <FrontPageDefinitionList dataRef={data} />
+            </StyledTab.Panel>
+            <StyledTab.Panel>
+              <FrontPageGroupList dataRef={data} />
             </StyledTab.Panel>
           </StyledTab.Panels>
         </div>

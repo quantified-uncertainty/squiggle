@@ -1,13 +1,13 @@
 import { RelativeValuesDefinition } from "@prisma/client";
 
-import { prisma } from "@/prisma";
 import { builder } from "@/graphql/builder";
+import { prisma } from "@/prisma";
 
-import { Model } from "../types/Model";
+import { Model, getWriteableModel } from "../types/Model";
 
 const DefinitionRefInput = builder.inputType("DefinitionRefInput", {
   fields: (t) => ({
-    username: t.string({ required: true }),
+    owner: t.string({ required: true }),
     slug: t.string({ required: true }),
   }),
 });
@@ -35,21 +35,15 @@ const SquiggleSnippetContentInput = builder.inputType(
 );
 
 builder.mutationField("updateSquiggleSnippetModel", (t) =>
-  t.fieldWithInput({
+  t.withAuth({ signedIn: true }).fieldWithInput({
     type: builder.simpleObject("UpdateSquiggleSnippetResult", {
       fields: (t) => ({
-        model: t.field({
-          type: Model,
-          nullable: false,
-        }),
+        model: t.field({ type: Model }),
       }),
     }),
-    authScopes: {
-      user: true,
-    },
     errors: {},
     input: {
-      username: t.input.string({ required: true }),
+      owner: t.input.string({ required: true }),
       slug: t.input.string({ required: true }),
       relativeValuesExports: t.input.field({
         type: [RelativeValuesExportInput],
@@ -61,19 +55,10 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
       }),
     },
     resolve: async (_, { input }, { session }) => {
-      const email = session?.user.email;
-      if (!email) {
-        // shouldn't happen because we checked user auth scope previously, but helps with type checks
-        throw new Error("Email is missing");
-      }
-      if (session?.user.username !== input.username) {
-        throw new Error("Can't edit another user's model");
-      }
-
-      const owner = await prisma.user.findUniqueOrThrow({
-        where: {
-          username: input.username,
-        },
+      const existingModel = await getWriteableModel({
+        slug: input.slug,
+        session,
+        owner: input.owner,
       });
 
       const code = input.code ?? input.content?.code;
@@ -94,9 +79,7 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
             where: {
               OR: relativeValuesExports.map((pair) => ({
                 slug: pair.definition.slug,
-                owner: {
-                  username: pair.definition.username,
-                },
+                owner: { slug: pair.definition.owner },
               })),
             },
             include: { owner: true },
@@ -108,24 +91,24 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
           Map<string, RelativeValuesDefinition>
         > = new Map();
         // now we need to match relativeValuesExports with definitions to get ids; I wonder if this could be simplified without sacrificing safety
-        for (let definition of selectedDefinitions) {
-          const { username } = definition.owner;
-          if (username === null) {
+        for (const definition of selectedDefinitions) {
+          const { slug: ownerSlug } = definition.owner;
+          if (ownerSlug === null) {
             continue; // should never happen
           }
-          if (!linkedDefinitions.has(username)) {
-            linkedDefinitions.set(username, new Map());
+          if (!linkedDefinitions.has(ownerSlug)) {
+            linkedDefinitions.set(ownerSlug, new Map());
           }
-          linkedDefinitions.get(username)?.set(definition.slug, definition);
+          linkedDefinitions.get(ownerSlug)?.set(definition.slug, definition);
         }
         for (const pair of relativeValuesExports) {
           const definition = linkedDefinitions
-            .get(pair.definition.username)
+            .get(pair.definition.owner)
             ?.get(pair.definition.slug);
 
           if (!definition) {
             throw new Error(
-              `Definition with username=${pair.definition.username}, slug ${pair.definition.slug} not found`
+              `Definition with owner ${pair.definition.owner}, slug ${pair.definition.slug} not found`
             );
           }
           relativeValuesExportsToInsert.push({
@@ -144,10 +127,7 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
             contentType: "SquiggleSnippet",
             model: {
               connect: {
-                slug_userId: {
-                  slug: input.slug,
-                  userId: owner.id,
-                },
+                id: existingModel.id,
               },
             },
             relativeValuesExports: {
@@ -172,9 +152,7 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
           data: {
             currentRevisionId: revision.id,
           },
-          include: {
-            owner: true,
-          },
+          // TODO - optimize with queryFromInfo, https://pothos-graphql.dev/docs/plugins/prisma#optimized-queries-without-tprismafield
         });
 
         return model;

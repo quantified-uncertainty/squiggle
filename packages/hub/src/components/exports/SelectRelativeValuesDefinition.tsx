@@ -1,17 +1,15 @@
-"use client";
-import { FC } from "react";
-import { FieldPath, FieldValues, useFormContext } from "react-hook-form";
-import { OptionProps, SingleValueProps, components } from "react-select";
-import AsyncSelect from "react-select/async";
+import { FC, useEffect } from "react";
+import { FieldPathByValue, FieldValues, useFormContext } from "react-hook-form";
+import { useRelayEnvironment } from "react-relay";
 import { fetchQuery, graphql } from "relay-runtime";
 
-import { ControlledFormField } from "@quri/ui";
+import { SelectFormField } from "@quri/ui";
 
 import {
   SelectRelativeValuesDefinitionQuery,
   SelectRelativeValuesDefinitionQuery$data,
 } from "@/__generated__/SelectRelativeValuesDefinitionQuery.graphql";
-import { useRelayEnvironment } from "react-relay";
+import { SelectOwnerOption } from "../SelectOwner";
 
 const Query = graphql`
   query SelectRelativeValuesDefinitionQuery(
@@ -28,51 +26,32 @@ const Query = graphql`
   }
 `;
 
-type Option =
+export type SelectRelativeValuesDefinitionOption =
   SelectRelativeValuesDefinitionQuery$data["relativeValuesDefinitions"]["edges"][number]["node"];
 
-const DefinitionInfo: FC<{ option: Option }> = ({ option }) => (
-  <div>{option.slug}</div>
-);
-
-const Option = ({ children, ...props }: OptionProps<Option>) => {
-  return (
-    <components.Option {...props}>
-      <DefinitionInfo option={props.data} />
-    </components.Option>
-  );
-};
-
-const SingleValue = ({
-  children,
-  ...props
-}: SingleValueProps<Option, false>) => {
-  return (
-    <components.SingleValue {...props}>
-      <DefinitionInfo option={props.data} />
-    </components.SingleValue>
-  );
-};
+const DefinitionInfo: FC<{ option: SelectRelativeValuesDefinitionOption }> = ({
+  option,
+}) => <div>{option.slug}</div>;
 
 export function SelectRelativeValuesDefinition<
-  TValues extends FieldValues,
-  TName extends FieldPath<TValues> = FieldPath<TValues>,
-  TUserName extends FieldPath<TValues> = FieldPath<TValues>,
+  TValues extends FieldValues = never,
 >({
   name,
   label,
-  userFieldName,
+  ownerFieldName,
 }: {
-  name: TName;
+  name: FieldPathByValue<TValues, SelectRelativeValuesDefinitionOption | null>;
   label?: string;
-  userFieldName: TUserName;
+  ownerFieldName: FieldPathByValue<TValues, SelectOwnerOption | null>;
 }) {
-  const { watch } = useFormContext();
+  const { watch, resetField } = useFormContext<TValues>();
   const environment = useRelayEnvironment();
-  const username = watch(userFieldName);
+  const owner: SelectOwnerOption | null = watch(ownerFieldName);
 
-  const loadOptions = async (inputValue: string): Promise<Option[]> => {
-    if (!username) {
+  const loadOptions = async (
+    inputValue: string
+  ): Promise<SelectRelativeValuesDefinitionOption[]> => {
+    if (!owner) {
       return [];
     }
     const result = await fetchQuery<SelectRelativeValuesDefinitionQuery>(
@@ -80,7 +59,7 @@ export function SelectRelativeValuesDefinition<
       Query,
       {
         input: {
-          ownerUsername: username,
+          owner: owner.slug,
           slugContains: inputValue,
         },
       }
@@ -93,18 +72,20 @@ export function SelectRelativeValuesDefinition<
     return result.relativeValuesDefinitions.edges.map((edge) => edge.node);
   };
 
+  useEffect(() => {
+    resetField(name);
+  }, [name, owner, resetField]);
+
   return (
-    <ControlledFormField name={name} label={label} rules={{ required: true }}>
-      {({ onChange }) => (
-        <AsyncSelect
-          components={{ SingleValue, Option }}
-          loadOptions={loadOptions}
-          onChange={(user) => onChange(user?.slug)}
-          isDisabled={!username}
-          styles={{ menuPortal: (base) => ({ ...base, zIndex: 100 }) }}
-          menuPortalTarget={document.body}
-        />
-      )}
-    </ControlledFormField>
+    <SelectFormField<TValues, SelectRelativeValuesDefinitionOption | null>
+      key={owner?.slug ?? " "} // re-render the component when owner changes; this helps with default select options on initial open
+      name={name}
+      label={label}
+      required
+      async
+      loadOptions={loadOptions}
+      disabled={!owner}
+      renderOption={(option) => <DefinitionInfo option={option} />}
+    />
   );
 }

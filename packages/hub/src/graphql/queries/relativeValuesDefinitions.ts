@@ -11,7 +11,7 @@ const RelativeValuesDefinitionsQueryInput = builder.inputType(
   {
     fields: (t) => ({
       slugContains: t.string(),
-      ownerUsername: t.string(),
+      owner: t.string(),
     }),
   }
 );
@@ -33,15 +33,11 @@ builder.queryField("relativeValuesDefinitions", (t) =>
                 contains: args.input.slugContains,
               },
             }),
-            ...(args.input?.ownerUsername && {
-              owner: {
-                username: args.input.ownerUsername,
-              },
+            ...(args.input?.owner && {
+              owner: { slug: args.input.owner },
             }),
           },
-          orderBy: {
-            updatedAt: "desc",
-          },
+          orderBy: { updatedAt: "desc" },
         }),
     },
     RelativeValuesDefinitionConnection

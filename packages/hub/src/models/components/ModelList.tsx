@@ -1,11 +1,10 @@
 "use client";
-
 import { FC } from "react";
+import { graphql, useFragment } from "react-relay";
 
 import { ModelList$key } from "@/__generated__/ModelList.graphql";
-import { graphql, useFragment } from "react-relay";
+import { LoadMore } from "@/components/LoadMore";
 import { ModelCard } from "./ModelCard";
-import { Button } from "@quri/ui";
 
 const Fragment = graphql`
   fragment ModelList on ModelConnection {
@@ -45,11 +44,7 @@ export const ModelList: FC<Props> = ({
           />
         ))}
       </div>
-      {connection.pageInfo.hasNextPage && (
-        <div className="mt-4">
-          <Button onClick={() => loadNext(20)}>Load more</Button>
-        </div>
-      )}
+      {connection.pageInfo.hasNextPage && <LoadMore loadNext={loadNext} />}
     </div>
   );
 };

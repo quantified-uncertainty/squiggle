@@ -1,3 +1,4 @@
+"use client";
 import { HexColorInput, HexColorPicker } from "react-colorful";
 
 import { Dropdown } from "../../components/Dropdown/index.js";

@@ -1,13 +1,10 @@
 "use client";
 
-import StatusPageQueryNode, {
-  StatusPageQuery,
-} from "@/__generated__/StatusPageQuery.graphql";
+import { StatusPageQuery } from "@/__generated__/StatusPageQuery.graphql";
 import { H1 } from "@/components/ui/Headers";
-import { SerializablePreloadedQuery } from "@/relay/loadSerializableQuery";
-import { useSerializablePreloadedQuery } from "@/relay/useSerializablePreloadedQuery";
+import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
+import { usePageQuery } from "@/relay/usePageQuery";
 import { FC } from "react";
-import { usePreloadedQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
 const Query = graphql`
@@ -28,13 +25,9 @@ const StatRow: FC<{ name: string; value: number }> = ({ name, value }) => (
 );
 
 export const StatusPage: FC<{
-  query: SerializablePreloadedQuery<
-    typeof StatusPageQueryNode,
-    StatusPageQuery
-  >;
+  query: SerializablePreloadedQuery<StatusPageQuery>;
 }> = ({ query }) => {
-  const queryRef = useSerializablePreloadedQuery(query);
-  const { globalStatistics: stats } = usePreloadedQuery(Query, queryRef);
+  const [{ globalStatistics: stats }] = usePageQuery(Query, query);
 
   return (
     <div>

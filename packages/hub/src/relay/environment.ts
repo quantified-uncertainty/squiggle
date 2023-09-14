@@ -5,12 +5,13 @@ import {
   RecordSource,
   Store,
   RequestParameters,
-  QueryResponseCache,
   Variables,
   GraphQLResponse,
   CacheConfig,
   EnvironmentConfig,
 } from "relay-runtime";
+
+import { PatchedQueryResponseCache } from "./PatchedQueryResponseCache";
 
 const IS_SERVER = typeof window === typeof undefined;
 
@@ -59,7 +60,7 @@ export async function networkFetch(
   return json;
 }
 
-export function createNetwork(responseCache: QueryResponseCache) {
+export function createNetwork(responseCache: PatchedQueryResponseCache) {
   const fetchResponse = async (
     params: RequestParameters,
     variables: Variables,
@@ -67,8 +68,7 @@ export function createNetwork(responseCache: QueryResponseCache) {
   ): Promise<GraphQLResponse> => {
     const isQuery = params.operationKind === "query";
     const cacheKey = params.id ?? params.cacheID;
-    const forceFetch = cacheConfig && cacheConfig.force;
-    if (isQuery && !forceFetch) {
+    if (isQuery && !cacheConfig.force) {
       const fromCache = responseCache.get(cacheKey, variables);
       if (fromCache) {
         return fromCache;
@@ -85,7 +85,7 @@ export function createNetwork(responseCache: QueryResponseCache) {
 export class EnvironmentWithResponseCache extends Environment {
   constructor(
     config: EnvironmentConfig,
-    public responseCache: QueryResponseCache
+    public responseCache: PatchedQueryResponseCache
   ) {
     super(config);
   }
@@ -94,7 +94,7 @@ export class EnvironmentWithResponseCache extends Environment {
 function createEnvironment() {
   // We have response cache even on server; isolation is guaranteed by `getCurrentEnvironment()` logic.
   // We expose it as `environment.responseCache` so that `useSerializablePreloadedQuery` could access it.
-  const responseCache = new QueryResponseCache({
+  const responseCache = new PatchedQueryResponseCache({
     size: 100,
     ttl: CACHE_TTL,
   });

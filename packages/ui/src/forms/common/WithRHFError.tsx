@@ -1,3 +1,4 @@
+"use client";
 import { flip, offset, shift, useFloating } from "@floating-ui/react";
 import { clsx } from "clsx";
 import { PropsWithChildren } from "react";

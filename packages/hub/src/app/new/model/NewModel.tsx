@@ -1,15 +1,17 @@
 "use client";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { FC, useEffect } from "react";
+import { FC } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { Button, TextFormField, useToast } from "@quri/ui";
+import { Button, CheckboxFormField } from "@quri/ui";
 
 import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
+import { SelectGroup, SelectGroupOption } from "@/components/SelectGroup";
 import { H1 } from "@/components/ui/Headers";
+import { SlugFormField } from "@/components/ui/SlugFormField";
+import { useAsyncMutation } from "@/hooks/useAsyncMutation";
 import { modelRoute } from "@/routes";
 
 const Mutation = graphql`
@@ -19,9 +21,10 @@ const Mutation = graphql`
       ... on BaseError {
         message
       }
-      ... on CreateSquiggleSnippetResult {
+      ... on CreateSquiggleSnippetModelResult {
         model {
           id
+          slug
         }
       }
     }
@@ -35,65 +38,57 @@ Describe your code here
 a = normal(2, 5)
 `;
 
+type FormShape = {
+  slug: string | undefined;
+  group: SelectGroupOption | null;
+  isPrivate: boolean;
+};
+
 export const NewModel: FC = () => {
   const { data: session } = useSession({ required: true });
 
-  const toast = useToast();
-
-  const form = useForm<{
-    slug: string | undefined;
-  }>({
+  const form = useForm<FormShape>({
     defaultValues: {
       // don't pass `slug: ""` here, it will lead to form reset if a user started to type in a value before JS finished loading
+      group: null,
+      isPrivate: false,
     },
     mode: "onChange",
   });
 
-  const watchSlug = form.watch("slug");
-
-  useEffect(() => {
-    // watchSlug can be undefined if the page was just loaded
-    if (watchSlug && watchSlug.includes(" ")) {
-      const patchedSlug = watchSlug.replaceAll(" ", "-");
-      form.setValue("slug", patchedSlug);
-      form.trigger();
-    }
-  }, [watchSlug, form]);
-
   const router = useRouter();
 
-  const [saveMutation, isSaveInFlight] =
-    useMutation<NewModelMutation>(Mutation);
+  const [runMutation, inFlight] = useAsyncMutation<
+    NewModelMutation,
+    "CreateSquiggleSnippetModelResult"
+  >({
+    mutation: Mutation,
+    expectedTypename: "CreateSquiggleSnippetModelResult",
+    blockOnSuccess: true,
+  });
 
-  const save = form.handleSubmit((data) => {
-    const slug = data.slug;
-    if (!slug) {
-      // shouldn't happen but satisfies Typescript
-      toast("Slug is undefined", "error");
-      return;
-    }
-    saveMutation({
+  const save = form.handleSubmit(async (data) => {
+    await runMutation({
       variables: {
         input: {
+          slug: data.slug ?? "", // shouldn't happen but satisfies Typescript
+          groupSlug: data.group?.slug,
+          isPrivate: data.isPrivate,
           code: defaultCode,
-          slug,
         },
       },
-      onCompleted(completion) {
-        if (completion.result.__typename === "BaseError") {
-          toast(completion.result.message, "error");
+      onCompleted: (result) => {
+        const username = session?.user?.username;
+        if (username) {
+          router.push(
+            modelRoute({
+              owner: data.group?.slug ?? username,
+              slug: result.model.slug,
+            })
+          );
         } else {
-          //My guess is that there are more elegant ways of returning the slug, but I wasn't sure what was the best way to do it
-          const username = session?.user?.username;
-          if (username) {
-            router.push(modelRoute({ username, slug }));
-          } else {
-            router.push("/");
-          }
+          router.push("/");
         }
-      },
-      onError(e) {
-        toast(e.toString(), "error");
       },
     });
   });
@@ -102,28 +97,27 @@ export const NewModel: FC = () => {
     <form onSubmit={save}>
       <FormProvider {...form}>
         <H1>New Model</H1>
-        <div className="mb-4">
-          <TextFormField
+        <div className="mb-4 space-y-4">
+          <SlugFormField<FormShape>
             name="slug"
-            description="Must be alphanumerical, with no spaces. Example: my-long-model"
+            example="my-long-model"
             label="Model Name"
             placeholder="my-model"
-            rules={{
-              pattern: {
-                value: /^[\w-]+$/,
-                message:
-                  "Must be alphanumerical, with no spaces. Example: my-long-model",
-              },
-              required: true,
-            }}
           />
+          <SelectGroup<FormShape>
+            label="Group"
+            name="group"
+            required={false}
+            myOnly={true}
+          />
+          <CheckboxFormField<FormShape> label="Private" name="isPrivate" />
         </div>
         <Button
           onClick={save}
-          disabled={!form.formState.isValid || isSaveInFlight}
+          disabled={!form.formState.isValid || inFlight}
           theme="primary"
         >
-          Save
+          Create
         </Button>
       </FormProvider>
     </form>

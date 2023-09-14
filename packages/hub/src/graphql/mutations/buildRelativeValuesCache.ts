@@ -3,17 +3,17 @@ import { prisma } from "@/prisma";
 import { cartesianProduct } from "@/relative-values/lib/utils";
 import { relativeValuesItemsSchema } from "@/relative-values/types";
 import { ModelEvaluator } from "@/relative-values/values/ModelEvaluator";
-import { decodeGlobalID } from "@pothos/plugin-relay";
-import { RelativeValuesExport } from "../types/RelativeValuesExport";
+import {
+  RelativeValuesExport,
+  getRelativeValuesExportForWriteableModel,
+} from "../types/RelativeValuesExport";
+import { decodeGlobalIdWithTypename } from "../utils";
 
 builder.mutationField("buildRelativeValuesCache", (t) =>
-  t.withAuth({ user: true }).fieldWithInput({
+  t.withAuth({ signedIn: true }).fieldWithInput({
     type: builder.simpleObject("BuildRelativeValuesCacheResult", {
       fields: (t) => ({
-        relativeValuesExport: t.field({
-          type: RelativeValuesExport,
-          nullable: false,
-        }),
+        relativeValuesExport: t.field({ type: RelativeValuesExport }),
       }),
     }),
     errors: {},
@@ -21,43 +21,18 @@ builder.mutationField("buildRelativeValuesCache", (t) =>
       exportId: t.input.string({ required: true }),
     },
     resolve: async (_, { input }, { session }) => {
-      const { typename, id: exportId } = decodeGlobalID(input.exportId);
-      if (typename !== "RelativeValuesExport") {
-        throw new Error("Expected RelativeValuesExport id");
-      }
+      const exportId = decodeGlobalIdWithTypename(
+        input.exportId,
+        "RelativeValuesExport"
+      );
 
       const relativeValuesExport =
-        await prisma.relativeValuesExport.findUniqueOrThrow({
-          where: { id: exportId },
-          include: {
-            definition: {
-              select: {
-                currentRevision: {
-                  select: {
-                    items: true,
-                  },
-                },
-              },
-            },
-            modelRevision: {
-              select: {
-                contentType: true,
-                squiggleSnippet: true,
-                model: {
-                  select: {
-                    owner: true,
-                  },
-                },
-              },
-            },
-          },
+        await getRelativeValuesExportForWriteableModel({
+          exportId,
+          session,
         });
 
       const { modelRevision } = relativeValuesExport;
-
-      if (modelRevision.model.owner.email !== session.user.email) {
-        throw new Error("You don't own this model");
-      }
 
       if (modelRevision.contentType !== "SquiggleSnippet") {
         throw new Error("Unsupported model revision content type");

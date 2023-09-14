@@ -14,7 +14,8 @@ type ErrorUnionNode<OkTypename extends string, Content> =
     }
   | ({
       readonly __typename: OkTypename;
-    } & Content);
+    } & Content)
+  | null; // useful when node is obtained through top-level `node { ... }`
 
 /*
  * This function will render 404 on NotFoundError and throw on other errors;
@@ -28,7 +29,7 @@ export function extractFromGraphqlErrorUnion<
   OkTypename extends string,
   Content,
 >(node: ErrorUnionNode<OkTypename, Content>, typename: OkTypename) {
-  if (node.__typename === "NotFoundError") {
+  if (node === null || node.__typename === "NotFoundError") {
     notFound();
   }
   if (node.__typename === "BaseError") {

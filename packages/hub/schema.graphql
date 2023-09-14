@@ -6,21 +6,33 @@ type BuildRelativeValuesCacheResult {
   relativeValuesExport: RelativeValuesExport!
 }
 
+type CancelGroupInviteResult {
+  invite: GroupInvite!
+}
+
 type ClearRelativeValuesCacheResult {
   relativeValuesExport: RelativeValuesExport!
+}
+
+type CreateGroupResult {
+  group: Group!
 }
 
 type CreateRelativeValuesDefinitionResult {
   definition: RelativeValuesDefinition!
 }
 
-type CreateSquiggleSnippetResult {
+type CreateSquiggleSnippetModelResult {
   model: Model!
 }
 
 input DefinitionRefInput {
+  owner: String!
   slug: String!
-  username: String!
+}
+
+type DeleteMembershipResult {
+  ok: Boolean!
 }
 
 type DeleteModelResult {
@@ -29,6 +41,13 @@ type DeleteModelResult {
 
 type DeleteRelativeValuesDefinitionResult {
   ok: Boolean!
+}
+
+type EmailGroupInvite implements GroupInvite & Node {
+  email: String!
+  group: Group!
+  id: ID!
+  role: MembershipRole!
 }
 
 interface Error {
@@ -41,17 +60,67 @@ type GlobalStatistics {
   users: Int!
 }
 
+type Group implements Node & Owner {
+  createdAtTimestamp: Float!
+  id: ID!
+  inviteForMe: GroupInvite
+  invites(after: String, before: String, first: Int, last: Int): GroupInviteConnection
+  memberships(after: String, before: String, first: Int, last: Int): UserGroupMembershipConnection!
+  models(after: String, before: String, first: Int, last: Int): ModelConnection!
+  myMembership: UserGroupMembership
+  slug: String!
+  updatedAtTimestamp: Float!
+}
+
+interface GroupInvite {
+  group: Group!
+  id: ID!
+  role: MembershipRole!
+}
+
+type GroupInviteConnection {
+  edges: [GroupInviteEdge!]!
+  pageInfo: PageInfo!
+}
+
+type GroupInviteEdge {
+  cursor: String!
+  node: GroupInvite!
+}
+
+enum GroupInviteReaction {
+  Accept
+  Decline
+}
+
+input GroupsQueryInput {
+  """List only groups that you're a member of"""
+  myOnly: Boolean
+  slugContains: String
+}
+
+type InviteUserToGroupResult {
+  invite: GroupInvite!
+}
+
 type Me {
-  email: String
+  asUser: User!
+  email: String!
   username: String
+}
+
+enum MembershipRole {
+  Admin
+  Member
 }
 
 type Model implements Node {
   createdAtTimestamp: Float!
   currentRevision: ModelRevision!
   id: ID!
+  isEditable: Boolean!
   isPrivate: Boolean!
-  owner: User!
+  owner: Owner!
   revision(id: ID!): ModelRevision!
   revisions(after: String, before: String, first: Int, last: Int): ModelRevisionConnection!
   slug: String!
@@ -90,23 +159,35 @@ type ModelRevisionEdge {
 }
 
 input ModelRevisionForRelativeValuesInput {
-  for: ModelRevisionForRelativeValuesSlugUsernameInput
+  for: ModelRevisionForRelativeValuesSlugOwnerInput
   variableName: String!
 }
 
-input ModelRevisionForRelativeValuesSlugUsernameInput {
+input ModelRevisionForRelativeValuesSlugOwnerInput {
+  owner: String!
   slug: String!
-  username: String!
+}
+
+type MoveModelResult {
+  model: Model!
 }
 
 type Mutation {
   buildRelativeValuesCache(input: MutationBuildRelativeValuesCacheInput!): MutationBuildRelativeValuesCacheResult!
+  cancelGroupInvite(input: MutationCancelGroupInviteInput!): MutationCancelGroupInviteResult!
   clearRelativeValuesCache(input: MutationClearRelativeValuesCacheInput!): MutationClearRelativeValuesCacheResult!
+  createGroup(input: MutationCreateGroupInput!): MutationCreateGroupResult!
   createRelativeValuesDefinition(input: MutationCreateRelativeValuesDefinitionInput!): MutationCreateRelativeValuesDefinitionResult!
   createSquiggleSnippetModel(input: MutationCreateSquiggleSnippetModelInput!): MutationCreateSquiggleSnippetModelResult!
+  deleteMembership(input: MutationDeleteMembershipInput!): MutationDeleteMembershipResult!
   deleteModel(input: MutationDeleteModelInput!): MutationDeleteModelResult!
   deleteRelativeValuesDefinition(input: MutationDeleteRelativeValuesDefinitionInput!): MutationDeleteRelativeValuesDefinitionResult!
+  inviteUserToGroup(input: MutationInviteUserToGroupInput!): MutationInviteUserToGroupResult!
+  moveModel(input: MutationMoveModelInput!): MutationMoveModelResult!
+  reactToGroupInvite(input: MutationReactToGroupInviteInput!): MutationReactToGroupInviteResult!
   setUsername(username: String!): MutationSetUsernameResult!
+  updateGroupInviteRole(input: MutationUpdateGroupInviteRoleInput!): MutationUpdateGroupInviteRoleResult!
+  updateMembershipRole(input: MutationUpdateMembershipRoleInput!): MutationUpdateMembershipRoleResult!
   updateModelPrivacy(input: MutationUpdateModelPrivacyInput!): MutationUpdateModelPrivacyResult!
   updateModelSlug(input: MutationUpdateModelSlugInput!): MutationUpdateModelSlugResult!
   updateRelativeValuesDefinition(input: MutationUpdateRelativeValuesDefinitionInput!): MutationUpdateRelativeValuesDefinitionResult!
@@ -119,49 +200,118 @@ input MutationBuildRelativeValuesCacheInput {
 
 union MutationBuildRelativeValuesCacheResult = BaseError | BuildRelativeValuesCacheResult
 
+input MutationCancelGroupInviteInput {
+  inviteId: String!
+}
+
+union MutationCancelGroupInviteResult = BaseError | CancelGroupInviteResult
+
 input MutationClearRelativeValuesCacheInput {
   exportId: String!
 }
 
 union MutationClearRelativeValuesCacheResult = BaseError | ClearRelativeValuesCacheResult
 
+input MutationCreateGroupInput {
+  slug: String!
+}
+
+union MutationCreateGroupResult = BaseError | CreateGroupResult
+
 input MutationCreateRelativeValuesDefinitionInput {
   clusters: [RelativeValuesClusterInput!]!
+
+  """
+  Optional, if not set, definition will be created on current user's account
+  """
+  groupSlug: String
   items: [RelativeValuesItemInput!]!
   recommendedUnit: String
   slug: String!
   title: String!
 }
 
-union MutationCreateRelativeValuesDefinitionResult = BaseError | CreateRelativeValuesDefinitionResult
+union MutationCreateRelativeValuesDefinitionResult = BaseError | CreateRelativeValuesDefinitionResult | ValidationError
 
 input MutationCreateSquiggleSnippetModelInput {
+  """Squiggle source code"""
   code: String!
+
+  """Optional, if not set, model will be created on current user's account"""
+  groupSlug: String
+
+  """Defaults to false"""
+  isPrivate: Boolean
   slug: String!
 }
 
-union MutationCreateSquiggleSnippetModelResult = BaseError | CreateSquiggleSnippetResult
+union MutationCreateSquiggleSnippetModelResult = BaseError | CreateSquiggleSnippetModelResult | ValidationError
+
+input MutationDeleteMembershipInput {
+  group: String!
+  user: String!
+}
+
+union MutationDeleteMembershipResult = BaseError | DeleteMembershipResult
 
 input MutationDeleteModelInput {
+  owner: String!
   slug: String!
-  username: String!
 }
 
-union MutationDeleteModelResult = BaseError | DeleteModelResult
+union MutationDeleteModelResult = BaseError | DeleteModelResult | NotFoundError | ValidationError
 
 input MutationDeleteRelativeValuesDefinitionInput {
+  owner: String!
   slug: String!
-  username: String!
 }
 
 union MutationDeleteRelativeValuesDefinitionResult = BaseError | DeleteRelativeValuesDefinitionResult
 
-union MutationSetUsernameResult = BaseError | Me
+input MutationInviteUserToGroupInput {
+  group: String!
+  role: MembershipRole!
+  username: String!
+}
+
+union MutationInviteUserToGroupResult = BaseError | InviteUserToGroupResult | ValidationError
+
+input MutationMoveModelInput {
+  newOwner: String!
+  oldOwner: String!
+  slug: String!
+}
+
+union MutationMoveModelResult = BaseError | MoveModelResult | NotFoundError | ValidationError
+
+input MutationReactToGroupInviteInput {
+  action: GroupInviteReaction!
+  inviteId: String!
+}
+
+union MutationReactToGroupInviteResult = BaseError | ReactToGroupInviteResult
+
+union MutationSetUsernameResult = BaseError | Me | ValidationError
+
+input MutationUpdateGroupInviteRoleInput {
+  inviteId: String!
+  role: MembershipRole!
+}
+
+union MutationUpdateGroupInviteRoleResult = BaseError | UpdateGroupInviteRoleResult
+
+input MutationUpdateMembershipRoleInput {
+  group: String!
+  role: MembershipRole!
+  user: String!
+}
+
+union MutationUpdateMembershipRoleResult = BaseError | UpdateMembershipRoleResult
 
 input MutationUpdateModelPrivacyInput {
   isPrivate: Boolean!
+  owner: String!
   slug: String!
-  username: String!
 }
 
 union MutationUpdateModelPrivacyResult = BaseError | UpdateModelPrivacyResult
@@ -169,7 +319,7 @@ union MutationUpdateModelPrivacyResult = BaseError | UpdateModelPrivacyResult
 input MutationUpdateModelSlugInput {
   newSlug: String!
   oldSlug: String!
-  username: String!
+  owner: String!
 }
 
 union MutationUpdateModelSlugResult = BaseError | UpdateModelSlugResult
@@ -177,10 +327,10 @@ union MutationUpdateModelSlugResult = BaseError | UpdateModelSlugResult
 input MutationUpdateRelativeValuesDefinitionInput {
   clusters: [RelativeValuesClusterInput!]!
   items: [RelativeValuesItemInput!]!
+  owner: String!
   recommendedUnit: String
   slug: String!
   title: String!
-  username: String!
 }
 
 union MutationUpdateRelativeValuesDefinitionResult = BaseError | UpdateRelativeValuesDefinitionResult
@@ -188,9 +338,9 @@ union MutationUpdateRelativeValuesDefinitionResult = BaseError | UpdateRelativeV
 input MutationUpdateSquiggleSnippetModelInput {
   code: String @deprecated(reason: "Use content arg instead")
   content: SquiggleSnippetContentInput
+  owner: String!
   relativeValuesExports: [RelativeValuesExportInput!]
   slug: String!
-  username: String!
 }
 
 union MutationUpdateSquiggleSnippetModelResult = BaseError | UpdateSquiggleSnippetResult
@@ -203,6 +353,11 @@ type NotFoundError implements Error {
   message: String!
 }
 
+interface Owner {
+  id: ID!
+  slug: String!
+}
+
 type PageInfo {
   endCursor: String
   hasNextPage: Boolean!
@@ -212,6 +367,8 @@ type PageInfo {
 
 type Query {
   globalStatistics: GlobalStatistics!
+  group(slug: String!): QueryGroupResult!
+  groups(after: String, before: String, first: Int, input: GroupsQueryInput, last: Int): QueryGroupsConnection!
   me: Me!
   model(input: QueryModelInput!): QueryModelResult!
   models(after: String, before: String, first: Int, last: Int): ModelConnection!
@@ -224,15 +381,27 @@ type Query {
   users(after: String, before: String, first: Int, input: UsersQueryInput, last: Int): QueryUsersConnection!
 }
 
+union QueryGroupResult = BaseError | Group | NotFoundError
+
+type QueryGroupsConnection {
+  edges: [QueryGroupsConnectionEdge!]!
+  pageInfo: PageInfo!
+}
+
+type QueryGroupsConnectionEdge {
+  cursor: String!
+  node: Group!
+}
+
 input QueryModelInput {
-  ownerUsername: String!
+  owner: String!
   slug: String!
 }
 
 union QueryModelResult = BaseError | Model | NotFoundError
 
 input QueryRelativeValuesDefinitionInput {
-  ownerUsername: String!
+  owner: String!
   slug: String!
 }
 
@@ -248,6 +417,11 @@ type QueryUsersConnection {
 type QueryUsersConnectionEdge {
   cursor: String!
   node: User!
+}
+
+type ReactToGroupInviteResult {
+  invite: GroupInvite!
+  membership: UserGroupMembership
 }
 
 type RelativeValuesCluster {
@@ -266,8 +440,9 @@ type RelativeValuesDefinition implements Node {
   createdAtTimestamp: Float!
   currentRevision: RelativeValuesDefinitionRevision!
   id: ID!
+  isEditable: Boolean!
   modelExports: [RelativeValuesExport!]!
-  owner: User!
+  owner: Owner!
   slug: String!
   updatedAtTimestamp: Float!
 }
@@ -291,7 +466,7 @@ type RelativeValuesDefinitionRevision implements Node {
 }
 
 input RelativeValuesDefinitionsQueryInput {
-  ownerUsername: String
+  owner: String
   slugContains: String
 }
 
@@ -354,6 +529,14 @@ input SquiggleSnippetContentInput {
   code: String!
 }
 
+type UpdateGroupInviteRoleResult {
+  invite: GroupInvite!
+}
+
+type UpdateMembershipRoleResult {
+  membership: UserGroupMembership!
+}
+
 type UpdateModelPrivacyResult {
   model: Model!
 }
@@ -370,13 +553,47 @@ type UpdateSquiggleSnippetResult {
   model: Model!
 }
 
-type User implements Node {
+type User implements Node & Owner {
   id: ID!
   models(after: String, before: String, first: Int, last: Int): ModelConnection!
   relativeValuesDefinitions(after: String, before: String, first: Int, last: Int): RelativeValuesDefinitionConnection!
+  slug: String!
   username: String!
+}
+
+type UserGroupInvite implements GroupInvite & Node {
+  group: Group!
+  id: ID!
+  role: MembershipRole!
+  user: User!
+}
+
+type UserGroupMembership implements Node {
+  id: ID!
+  role: MembershipRole!
+  user: User!
+}
+
+type UserGroupMembershipConnection {
+  edges: [UserGroupMembershipEdge!]!
+  pageInfo: PageInfo!
+}
+
+type UserGroupMembershipEdge {
+  cursor: String!
+  node: UserGroupMembership!
 }
 
 input UsersQueryInput {
   usernameContains: String
+}
+
+type ValidationError implements Error {
+  issues: [ValidationErrorIssue!]!
+  message: String!
+}
+
+type ValidationErrorIssue {
+  message: String!
+  path: [String!]!
 }

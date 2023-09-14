@@ -3,7 +3,7 @@ import { Metadata } from "next";
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 import { NewModel } from "./NewModel";
 
-export default function NewModelPage() {
+export default function OuterNewModelPage() {
   return (
     <NarrowPageLayout>
       <NewModel />

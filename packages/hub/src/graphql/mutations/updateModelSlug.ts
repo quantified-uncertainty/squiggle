@@ -1,21 +1,18 @@
 import { prisma } from "@/prisma";
 import { builder } from "@/graphql/builder";
 
-import { Model } from "../types/Model";
+import { Model, getWriteableModel } from "../types/Model";
 
 builder.mutationField("updateModelSlug", (t) =>
-  t.withAuth({ user: true }).fieldWithInput({
+  t.withAuth({ signedIn: true }).fieldWithInput({
     type: builder.simpleObject("UpdateModelSlugResult", {
       fields: (t) => ({
-        model: t.field({
-          type: Model,
-          nullable: false,
-        }),
+        model: t.field({ type: Model }),
       }),
     }),
     errors: {},
     input: {
-      username: t.input.string({ required: true }),
+      owner: t.input.string({ required: true }),
       oldSlug: t.input.string({ required: true }),
       newSlug: t.input.string({
         required: true,
@@ -25,29 +22,15 @@ builder.mutationField("updateModelSlug", (t) =>
       }),
     },
     resolve: async (_, { input }, { session }) => {
-      if (session.user.username !== input.username) {
-        throw new Error("Can't edit another user's model");
-      }
-
-      const owner = await prisma.user.findUniqueOrThrow({
-        where: {
-          username: input.username,
-        },
+      let model = await getWriteableModel({
+        owner: input.owner,
+        slug: input.oldSlug,
+        session,
       });
 
-      const model = await prisma.model.update({
-        where: {
-          slug_userId: {
-            slug: input.oldSlug,
-            userId: owner.id,
-          },
-        },
-        data: {
-          slug: input.newSlug,
-        },
-        include: {
-          owner: true,
-        },
+      model = await prisma.model.update({
+        where: { id: model.id },
+        data: { slug: input.newSlug },
       });
 
       return { model };

@@ -2,19 +2,20 @@ import { FC } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
+import { CodeBracketIcon, ScaleIcon } from "@quri/ui";
+
 import { ModelCard$key } from "@/__generated__/ModelCard.graphql";
-import { StyledLink } from "@/components/ui/StyledLink";
-import { modelRoute, modelForRelativeValuesExportRoute } from "@/routes";
-import { CodeBracketIcon, LinkIcon, ScaleIcon } from "@quri/ui";
 import { EntityCard } from "@/components/EntityCard";
+import { StyledLink } from "@/components/ui/StyledLink";
+import { modelForRelativeValuesExportRoute, modelRoute } from "@/routes";
 
 const Fragment = graphql`
   fragment ModelCard on Model {
+    id
     slug
     updatedAtTimestamp
     owner {
-      username
-      ...UserLinkFragment
+      slug
     }
     isPrivate
     currentRevision {
@@ -37,17 +38,19 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
   const model = useFragment(Fragment, modelRef);
   const exports = model.currentRevision.relativeValuesExports;
 
+  const modelUrl = modelRoute({
+    owner: model.owner.slug,
+    slug: model.slug,
+  });
+
   return (
     <EntityCard
       icon={CodeBracketIcon}
       updatedAtTimestamp={model.updatedAtTimestamp}
-      href={modelRoute({
-        username: model.owner.username,
-        slug: model.slug,
-      })}
+      href={modelUrl}
       showOwner={showOwner}
       isPrivate={model.isPrivate}
-      ownerName={model.owner.username}
+      ownerName={model.owner.slug}
       slug={model.slug}
     >
       {exports.length > 0 && (
@@ -56,7 +59,7 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
             <StyledLink
               key={i}
               href={modelForRelativeValuesExportRoute({
-                username: model.owner.username,
+                owner: model.owner.slug,
                 slug: model.slug,
                 variableName: e.variableName,
               })}

@@ -44,11 +44,11 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
         for: t.input.field({
           required: false,
           type: builder.inputType(
-            "ModelRevisionForRelativeValuesSlugUsernameInput",
+            "ModelRevisionForRelativeValuesSlugOwnerInput",
             {
               fields: (t) => ({
                 slug: t.string({ required: true }),
-                username: t.string({ required: true }),
+                owner: t.string({ required: true }),
               }),
             }
           ),
@@ -69,9 +69,7 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
             ...(input.for
               ? {
                   definition: {
-                    owner: {
-                      username: input.for.username,
-                    },
+                    owner: { slug: input.for.owner },
                     slug: input.for.slug,
                   },
                 }
