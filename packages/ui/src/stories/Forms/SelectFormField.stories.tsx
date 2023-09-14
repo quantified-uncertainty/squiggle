@@ -45,6 +45,11 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof SelectFormField>;
 
+type Option = {
+  value: string;
+  label: string;
+};
+
 const options = [
   { value: "opt1", label: "Option 1" },
   { value: "opt2", label: "Option 2" },
@@ -55,8 +60,8 @@ export const Default: Story = {
     name: "fieldName",
     label: "Select",
     options,
-    optionToFieldValue: (option: any) => option.value,
-    fieldValueToOption: (value: any) =>
+    optionToFieldValue: (option: Option) => option.value,
+    fieldValueToOption: (value: string) =>
       options.find((option) => option.value === value),
   },
 };
@@ -66,14 +71,14 @@ export const CustomRender: Story = {
     name: "fieldName",
     label: "Select",
     options,
-    renderOption: (option: any) => (
+    renderOption: (option: Option) => (
       <div>
         <span>{option.label}</span>{" "}
         <span className="text-xs">({option.value})</span>
       </div>
     ),
-    optionToFieldValue: (option: any) => option.value,
-    fieldValueToOption: (value: any) =>
+    optionToFieldValue: (option: Option) => option.value,
+    fieldValueToOption: (value: string) =>
       options.find((option) => option.value === value),
   },
 };
