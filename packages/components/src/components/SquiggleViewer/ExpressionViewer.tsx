@@ -145,6 +145,7 @@ export const getBoxProps = (
         children: (settings) => (
           <Calculator
             value={calculator}
+            valueWithContext={value}
             environment={environment}
             settings={settings}
             renderValue={(value, settings) =>

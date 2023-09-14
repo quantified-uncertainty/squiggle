@@ -3,9 +3,11 @@ import {
   PartialPlaygroundSettings,
   PlaygroundSettings,
 } from "../PlaygroundSettings.js";
+import { CalculatorState } from "../Calculator/calculatorReducer.js";
 
 export type LocalItemSettings = {
   collapsed: boolean;
+  calculator: null | CalculatorState;
 } & Pick<
   PartialPlaygroundSettings,
   "distributionChartSettings" | "functionChartSettings"

@@ -10,7 +10,13 @@ import {
   useState,
 } from "react";
 
-import { SqValue, SqValuePath } from "@quri/squiggle-lang";
+import {
+  SqValue,
+  SqError,
+  result,
+  SqValuePath,
+  SqCalculator,
+} from "@quri/squiggle-lang";
 
 import {
   PartialPlaygroundSettings,
@@ -24,6 +30,11 @@ import {
   topLevelBindingsName,
 } from "./utils.js";
 import { CodeEditorHandle } from "../CodeEditor.js";
+import {
+  CalculatorState,
+  initialState,
+  type FieldValue,
+} from "../Calculator/calculatorReducer.js";
 
 type Action =
   | {
@@ -39,6 +50,10 @@ type Action =
     }
   | {
       type: "UNFOCUS";
+    }
+  | {
+      type: "TOGGLE_COLLAPSED";
+      payload: SqValuePath;
     }
   | {
       type: "COLLAPSE_CHILDREN";
@@ -61,6 +76,36 @@ type Action =
       type: "UNREGISTER_ITEM_HANDLE";
       payload: {
         path: SqValuePath;
+      };
+    }
+  | {
+      type: "CALCULATOR_NEW";
+      payload: {
+        path: SqValuePath;
+        calculator: SqCalculator;
+      };
+    }
+  | {
+      type: "CALCULATOR_SET_FIELD_CODE";
+      payload: {
+        path: SqValuePath;
+        name: string;
+        code: string;
+      };
+    }
+  | {
+      type: "CALCULATOR_SET_FIELD_VALUE";
+      payload: {
+        path: SqValuePath;
+        name: string;
+        value: result<SqValue, SqError> | null;
+      };
+    }
+  | {
+      type: "CALCULATOR_SET_FN_VALUE";
+      payload: {
+        path: SqValuePath;
+        value: result<SqValue, SqError> | null;
       };
     };
 
@@ -89,7 +134,7 @@ type ViewerContextShape = {
 };
 
 export const ViewerContext = createContext<ViewerContextShape>({
-  getSettings: () => ({ collapsed: false }),
+  getSettings: () => ({ collapsed: false, calculator: null }),
   getMergedSettings: () => defaultPlaygroundSettings,
   localSettingsEnabled: false,
   focused: undefined,
@@ -111,6 +156,16 @@ export function useSetSettings() {
   };
 }
 
+export function useToggleCollapsed() {
+  const { dispatch } = useViewerContext();
+  return (path: SqValuePath) => {
+    dispatch({
+      type: "TOGGLE_COLLAPSED",
+      payload: path,
+    });
+  };
+}
+
 export function useFocus() {
   const { dispatch } = useViewerContext();
   return (path: SqValuePath) => {
@@ -124,6 +179,14 @@ export function useFocus() {
 export function useUnfocus() {
   const { dispatch } = useViewerContext();
   return () => dispatch({ type: "UNFOCUS" });
+}
+
+export function useCalculatorFns() {
+  const { dispatch } = useViewerContext();
+  return {
+    intitialize: (path: SqValuePath, calculator: SqCalculator) =>
+      dispatch({ type: "CALCULATOR_NEW", payload: { path, calculator } }),
+  };
 }
 
 export function useCollapseChildren() {
@@ -153,10 +216,13 @@ type SettingsStore = {
   [k: string]: LocalItemSettings;
 };
 
-const defaultLocalSettings: LocalItemSettings = { collapsed: false };
+const defaultLocalSettings: LocalItemSettings = {
+  collapsed: false,
+  calculator: null,
+};
 
 const collapsedVariablesDefault: SettingsStore = {
-  [topLevelBindingsName]: { collapsed: true },
+  [topLevelBindingsName]: { collapsed: true, calculator: null },
 };
 
 export const ViewerProvider: FC<
@@ -226,10 +292,28 @@ export const ViewerProvider: FC<
     };
   };
 
+  const changeCalculator = (
+    path: SqValuePath,
+    fn: (calculator: CalculatorState) => CalculatorState
+  ) => {
+    const ref = settingsStoreRef.current[pathAsString(path)];
+    if (ref && ref.calculator !== null) {
+      settingsStoreRef.current[pathAsString(path)] = {
+        ...ref,
+        calculator: fn(ref.calculator),
+      };
+    }
+  };
+
   const dispatch = useCallback(
     (action: Action) => {
       switch (action.type) {
         case "SET_SETTINGS":
+          console.log(
+            "SET SETTINGS",
+            settingsStoreRef.current[pathAsString(action.payload.path)],
+            action.payload.value
+          );
           settingsStoreRef.current[pathAsString(action.payload.path)] =
             action.payload.value;
           return;
@@ -239,6 +323,11 @@ export const ViewerProvider: FC<
         case "UNFOCUS":
           setFocused(undefined);
           return;
+        case "TOGGLE_COLLAPSED": {
+          const ref = settingsStoreRef.current[pathAsString(action.payload)];
+          ref.collapsed = !ref.collapsed;
+          return;
+        }
         case "COLLAPSE_CHILDREN": {
           const children = getChildrenValues(action.payload);
           for (const child of children) {
@@ -258,6 +347,48 @@ export const ViewerProvider: FC<
         case "UNREGISTER_ITEM_HANDLE":
           delete itemHandlesStoreRef.current[pathAsString(action.payload.path)];
           return;
+        case "CALCULATOR_NEW": {
+          const ref =
+            settingsStoreRef.current[pathAsString(action.payload.path)];
+          settingsStoreRef.current[pathAsString(action.payload.path)] = {
+            ...ref,
+            calculator: initialState(action.payload.calculator),
+          };
+          return;
+        }
+        case "CALCULATOR_SET_FIELD_CODE": {
+          changeCalculator(action.payload.path, (state) => {
+            const modifyField = (name: string, newField: FieldValue) => {
+              const newFields = { ...state.fields, [name]: newField };
+              return { ...state, fields: newFields };
+            };
+            const { name, code } = action.payload;
+            const field = state.fields[name];
+            const newValue = null;
+            const newField = { ...field, code, value: newValue };
+            return modifyField(name, newField);
+          });
+          return;
+        }
+        case "CALCULATOR_SET_FIELD_VALUE": {
+          changeCalculator(action.payload.path, (state) => {
+            const modifyField = (name: string, newField: FieldValue) => {
+              const newFields = { ...state.fields, [name]: newField };
+              return { ...state, fields: newFields };
+            };
+            const { name, value } = action.payload;
+            const field = state.fields[name];
+            const newField = { ...field, value };
+            return modifyField(name, newField);
+          });
+          return;
+        }
+        case "CALCULATOR_SET_FN_VALUE": {
+          changeCalculator(action.payload.path, (state) => {
+            return { ...state, fn: { value: action.payload.value } };
+          });
+          return;
+        }
       }
     },
     [settingsStoreRef]

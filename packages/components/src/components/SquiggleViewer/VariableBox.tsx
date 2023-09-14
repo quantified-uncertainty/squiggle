@@ -16,6 +16,7 @@ import {
   useFocus,
   useIsFocused,
   useSetSettings,
+  useToggleCollapsed,
   useViewerContext,
 } from "./ViewerProvider.js";
 import {
@@ -57,6 +58,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
   children,
 }) => {
   const setSettings = useSetSettings();
+  const toggleCollapsed_ = useToggleCollapsed();
   const collapseChildren = useCollapseChildren();
   const focus = useFocus();
   const { editor, getSettings, getMergedSettings, dispatch } =
@@ -77,7 +79,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
 
   const isRoot = Boolean(path.isRoot());
 
-  // This doesn't just memoizes the detaults, but also affects children, in some cases.
+  // This doesn't just memoizes the defualts, but also affects children, in some cases.
   const defaults: LocalItemSettings = useMemo(() => {
     // TODO - value.size() would be faster.
     const childrenElements = getChildrenValues(value);
@@ -89,6 +91,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
     }
     return {
       collapsed: !isRoot && childrenElements.length > 5,
+      calculator: null,
     };
   }, [value, collapseChildren, isRoot]);
 
@@ -103,13 +106,9 @@ export const VariableBox: FC<VariableBoxProps> = ({
     };
   };
 
-  const setSettingsAndUpdate = (newSettings: LocalItemSettings) => {
-    setSettings(path, newSettings);
-    forceUpdate();
-  };
-
   const toggleCollapsed = () => {
-    setSettingsAndUpdate({ ...settings, collapsed: !settings.collapsed });
+    toggleCollapsed_(path);
+    forceUpdate();
   };
 
   const name = pathToShortName(path);

@@ -53,6 +53,7 @@ const ItemSettingsModal: React.FC<
     const submit = form.handleSubmit((data) => {
       setSettings(path, {
         collapsed: false,
+        calculator: null,
         ...data,
       });
       onChange();
@@ -130,7 +131,10 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
       {settings.distributionChartSettings ? (
         <button
           onClick={() => {
-            setSettings(path, { collapsed: settings.collapsed });
+            setSettings(path, {
+              collapsed: settings.collapsed,
+              calculator: null,
+            });
             props.onChange();
           }}
           className="text-xs px-1 py-0.5 rounded bg-stone-200 hover:bg-stone-400"
