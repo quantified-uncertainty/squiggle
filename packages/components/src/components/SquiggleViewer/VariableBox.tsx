@@ -15,7 +15,6 @@ import {
   useCollapseChildren,
   useFocus,
   useIsFocused,
-  useSetSettings,
   useToggleCollapsed,
   useViewerContext,
 } from "./ViewerProvider.js";
@@ -57,7 +56,6 @@ export const VariableBox: FC<VariableBoxProps> = ({
   renderSettingsMenu,
   children,
 }) => {
-  const setSettings = useSetSettings();
   const toggleCollapsed_ = useToggleCollapsed();
   const collapseChildren = useCollapseChildren();
   const focus = useFocus();

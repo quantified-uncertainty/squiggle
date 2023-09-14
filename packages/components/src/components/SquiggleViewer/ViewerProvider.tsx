@@ -10,13 +10,7 @@ import {
   useState,
 } from "react";
 
-import {
-  SqValue,
-  SqError,
-  result,
-  SqValuePath,
-  SqCalculator,
-} from "@quri/squiggle-lang";
+import { SqValue, SqValuePath } from "@quri/squiggle-lang";
 
 import {
   PartialPlaygroundSettings,
@@ -32,11 +26,11 @@ import {
 import { CodeEditorHandle } from "../CodeEditor.js";
 import {
   CalculatorState,
-  initialState,
-  type FieldValue,
+  CalculatorAction,
+  calculatorReducer,
 } from "../Calculator/calculatorReducer.js";
 
-type Action =
+export type Action =
   | {
       type: "SET_SETTINGS";
       payload: {
@@ -79,35 +73,15 @@ type Action =
       };
     }
   | {
-      type: "CALCULATOR_NEW";
+      type: "CALCULATOR_INITIALIZE";
       payload: {
         path: SqValuePath;
-        calculator: SqCalculator;
+        calculator: CalculatorState;
       };
     }
-  | {
-      type: "CALCULATOR_SET_FIELD_CODE";
-      payload: {
-        path: SqValuePath;
-        name: string;
-        code: string;
-      };
-    }
-  | {
-      type: "CALCULATOR_SET_FIELD_VALUE";
-      payload: {
-        path: SqValuePath;
-        name: string;
-        value: result<SqValue, SqError> | null;
-      };
-    }
-  | {
-      type: "CALCULATOR_SET_FN_VALUE";
-      payload: {
-        path: SqValuePath;
-        value: result<SqValue, SqError> | null;
-      };
-    };
+  | CalculatorAction;
+
+export type ViewProviderDispatch = (action: Action) => void;
 
 type ViewerContextShape = {
   // Note that we don't store settings themselves in the context (that would cause rerenders of the entire tree on each settings update).
@@ -181,14 +155,6 @@ export function useUnfocus() {
   return () => dispatch({ type: "UNFOCUS" });
 }
 
-export function useCalculatorFns() {
-  const { dispatch } = useViewerContext();
-  return {
-    intitialize: (path: SqValuePath, calculator: SqCalculator) =>
-      dispatch({ type: "CALCULATOR_NEW", payload: { path, calculator } }),
-  };
-}
-
 export function useCollapseChildren() {
   const { dispatch } = useViewerContext();
   // stable callback identity here is important, see VariableBox code
@@ -252,6 +218,18 @@ export const ViewerProvider: FC<
     return merge({}, defaultPlaygroundSettings, partialPlaygroundSettings);
   }, [partialPlaygroundSettings]);
 
+  const getStateRef = (path: SqValuePath): LocalItemSettings => {
+    return settingsStoreRef.current[pathAsString(path)];
+  };
+
+  const setState = (
+    path: SqValuePath,
+    fn: (settings: LocalItemSettings) => LocalItemSettings
+  ): void => {
+    const settings = fn(getStateRef(path));
+    settingsStoreRef.current[pathAsString(path)] = fn(settings);
+  };
+
   const getSettings = useCallback(
     ({
       path,
@@ -285,23 +263,22 @@ export const ViewerProvider: FC<
   );
 
   const setCollapsed = (path: SqValuePath, isCollapsed: boolean) => {
-    const ref = settingsStoreRef.current[pathAsString(path)];
-    settingsStoreRef.current[pathAsString(path)] = {
-      ...ref,
-      collapsed: ref?.collapsed ?? isCollapsed,
-    };
+    setState(path, (state) => ({
+      ...state,
+      collapsed: state?.collapsed ?? isCollapsed,
+    }));
   };
 
-  const changeCalculator = (
+  const updateCalculator = (
     path: SqValuePath,
-    fn: (calculator: CalculatorState) => CalculatorState
+    reduce: (calculator: CalculatorState) => CalculatorState
   ) => {
-    const ref = settingsStoreRef.current[pathAsString(path)];
-    if (ref && ref.calculator !== null) {
-      settingsStoreRef.current[pathAsString(path)] = {
-        ...ref,
-        calculator: fn(ref.calculator),
-      };
+    const calculator = getStateRef(path).calculator;
+    if (calculator !== null) {
+      setState(path, (state) => ({
+        ...state,
+        calculator: reduce(calculator),
+      }));
     }
   };
 
@@ -309,13 +286,7 @@ export const ViewerProvider: FC<
     (action: Action) => {
       switch (action.type) {
         case "SET_SETTINGS":
-          console.log(
-            "SET SETTINGS",
-            settingsStoreRef.current[pathAsString(action.payload.path)],
-            action.payload.value
-          );
-          settingsStoreRef.current[pathAsString(action.payload.path)] =
-            action.payload.value;
+          setState(action.payload.path, () => action.payload.value);
           return;
         case "FOCUS":
           setFocused(action.payload);
@@ -324,7 +295,7 @@ export const ViewerProvider: FC<
           setFocused(undefined);
           return;
         case "TOGGLE_COLLAPSED": {
-          const ref = settingsStoreRef.current[pathAsString(action.payload)];
+          const ref = getStateRef(action.payload);
           ref.collapsed = !ref.collapsed;
           return;
         }
@@ -347,46 +318,20 @@ export const ViewerProvider: FC<
         case "UNREGISTER_ITEM_HANDLE":
           delete itemHandlesStoreRef.current[pathAsString(action.payload.path)];
           return;
-        case "CALCULATOR_NEW": {
-          const ref =
-            settingsStoreRef.current[pathAsString(action.payload.path)];
-          settingsStoreRef.current[pathAsString(action.payload.path)] = {
-            ...ref,
-            calculator: initialState(action.payload.calculator),
-          };
+        case "CALCULATOR_INITIALIZE": {
+          const { path, calculator } = action.payload;
+          setState(path, (state) => ({
+            ...state,
+            calculator: calculator,
+          }));
           return;
         }
-        case "CALCULATOR_SET_FIELD_CODE": {
-          changeCalculator(action.payload.path, (state) => {
-            const modifyField = (name: string, newField: FieldValue) => {
-              const newFields = { ...state.fields, [name]: newField };
-              return { ...state, fields: newFields };
-            };
-            const { name, code } = action.payload;
-            const field = state.fields[name];
-            const newValue = null;
-            const newField = { ...field, code, value: newValue };
-            return modifyField(name, newField);
-          });
-          return;
-        }
-        case "CALCULATOR_SET_FIELD_VALUE": {
-          changeCalculator(action.payload.path, (state) => {
-            const modifyField = (name: string, newField: FieldValue) => {
-              const newFields = { ...state.fields, [name]: newField };
-              return { ...state, fields: newFields };
-            };
-            const { name, value } = action.payload;
-            const field = state.fields[name];
-            const newField = { ...field, value };
-            return modifyField(name, newField);
-          });
-          return;
-        }
+        case "CALCULATOR_SET_FIELD_CODE":
+        case "CALCULATOR_SET_FIELD_VALUE":
         case "CALCULATOR_SET_FN_VALUE": {
-          changeCalculator(action.payload.path, (state) => {
-            return { ...state, fn: { value: action.payload.value } };
-          });
+          updateCalculator(action.payload.path, (state) =>
+            calculatorReducer(state, action)
+          );
           return;
         }
       }

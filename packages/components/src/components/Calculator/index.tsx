@@ -1,30 +1,15 @@
 import React, { FC, ReactNode, useEffect, useReducer } from "react";
 
-import {
-  SqValue,
-  SqCalculator,
-  SqError,
-  result,
-  SqValuePath,
-} from "@quri/squiggle-lang";
+import { SqValue, SqCalculator, SqError, result } from "@quri/squiggle-lang";
 import { Env } from "@quri/squiggle-lang";
 
 import { PlaygroundSettings } from "../PlaygroundSettings.js";
 import { SqValueWithContext, valueHasContext } from "../../lib/utility.js";
 
 import ReactMarkdown from "react-markdown";
-import {
-  CalculatorState,
-  runSquiggleCode,
-  allFieldValuesAreValid,
-  allFieldResults,
-  initialState,
-} from "./calculatorReducer.js";
+import { initialize, updateCode } from "./asyncActions.js";
 
-import {
-  useViewerContext,
-  useCalculatorFns,
-} from "../SquiggleViewer/ViewerProvider.js";
+import { useViewerContext } from "../SquiggleViewer/ViewerProvider.js";
 
 type Props = {
   value: SqCalculator;
@@ -37,80 +22,8 @@ type Props = {
   ) => ReactNode;
 };
 
-const updateFnValue = async (
-  path: SqValuePath,
-  state: CalculatorState,
-  calc: SqCalculator,
-  env: Env,
-  dispatch
-) => {
-  let finalResult: result<SqValue, SqError> | null = null;
-  if (allFieldValuesAreValid(state)) {
-    const results: SqValue[] = allFieldResults(state).map((res) => {
-      if (res && res.ok) {
-        return res.value;
-      } else {
-        throw new Error("Invalid result encountered.");
-      }
-    });
-    finalResult = calc.run(results, env);
-  } else {
-    finalResult = null;
-  }
-
-  dispatch({
-    type: "CALCULATOR_SET_FN_VALUE",
-    payload: { path, value: finalResult },
-  });
-};
-
-async function initStuff(
-  dispatch,
-  path: SqValuePath,
-  state: CalculatorState,
-  calc: SqCalculator,
-  env
-) {
-  for (const name of state.fieldNames) {
-    const field = state.fields[name];
-    const valueResult = await runSquiggleCode(field.code, env);
-    const _action = {
-      type: "CALCULATOR_SET_FIELD_VALUE",
-      payload: { name, value: valueResult, path },
-    };
-    dispatch(_action);
-  }
-  updateFnValue(path, state, calc, env, dispatch);
-}
-
-async function updateCode(
-  dispatch,
-  path: SqValuePath,
-  state: CalculatorState,
-  calc: SqCalculator,
-  env,
-  name: string,
-  code: string,
-  forceUpdate: () => void
-) {
-  const setCodeAction = {
-    type: "CALCULATOR_SET_FIELD_CODE",
-    payload: { path, name: name, code: code },
-  };
-  dispatch(setCodeAction);
-  forceUpdate();
-
-  const valueResult = await runSquiggleCode(code, env);
-  const setValueAction = {
-    type: "CALCULATOR_SET_FIELD_VALUE",
-    payload: { path, name: name, value: valueResult },
-  };
-  dispatch(setValueAction);
-  forceUpdate();
-}
-
 export const Calculator: FC<Props> = ({
-  value,
+  value: calculator,
   environment,
   settings,
   renderValue,
@@ -120,19 +33,21 @@ export const Calculator: FC<Props> = ({
   const { getSettings, dispatch } = useViewerContext();
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
-  const gotSettings = getSettings({ path, defaults: undefined });
-  const { intitialize } = useCalculatorFns();
+  const itemSettings = getSettings({ path, defaults: undefined });
+  const calculatorState = itemSettings.calculator;
+
+  const init = async () => {
+    await initialize({
+      dispatch,
+      path,
+      calculator,
+      environment,
+    });
+    forceUpdate();
+  };
 
   useEffect(() => {
-    const init = async () => {
-      intitialize(path, value);
-      await initStuff(dispatch, path, initialState(value), value, environment);
-      forceUpdate();
-    };
-
-    if (!gotSettings.calculator) {
-      init();
-    }
+    !calculatorState && init();
   }, []);
 
   const handleChange =
@@ -140,18 +55,17 @@ export const Calculator: FC<Props> = ({
     async (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const newCode = e.target.value;
 
-      const state = gotSettings.calculator;
-      state &&
-        updateCode(
+      calculatorState &&
+        (await updateCode({
           dispatch,
           path,
-          state,
-          value,
-          environment,
+          environment: environment,
+          state: calculatorState,
           name,
-          newCode,
-          forceUpdate
-        );
+          code: newCode,
+          forceUpdate,
+          calculator,
+        }));
     };
 
   const showSqValue = (
@@ -190,16 +104,16 @@ export const Calculator: FC<Props> = ({
 
   return (
     <div className="relative space-y-4">
-      {value.description && (
+      {calculator.description && (
         <ReactMarkdown className={"prose text-sm text-slate-800 bg-opacity-60"}>
-          {value.description}
+          {calculator.description}
         </ReactMarkdown>
       )}
 
-      {gotSettings.calculator &&
-        value.rows.map((row) => {
+      {calculatorState &&
+        calculator.rows.map((row) => {
           const { name, description } = row;
-          const { value, code } = gotSettings.calculator!.fields[name];
+          const { value, code } = calculatorState!.fields[name];
           const result = value;
           const resultHasInterestingError = result && !result.ok && code !== "";
           return (
@@ -227,10 +141,10 @@ export const Calculator: FC<Props> = ({
             </div>
           );
         })}
-      {gotSettings.calculator?.fn.value?.ok && (
+      {calculatorState?.fn.value?.ok && (
         <div>
           <div className="text-md font-bold text-slate-800">Result</div>
-          {showSqValue(gotSettings.calculator.fn.value, resultSettings)}
+          {showSqValue(calculatorState.fn.value, resultSettings)}
         </div>
       )}
     </div>
