@@ -91,8 +91,8 @@ model Model {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  owner   User   @relation(fields: [ownerId], references: [id])
-  ownerId String
+  owner  User   @relation(fields: [userId], references: [id])
+  userId String
 
   isPrivate Boolean @default(false)
 
@@ -102,8 +102,8 @@ model Model {
   currentRevision   ModelRevision? @relation("CurrentRevision", fields: [currentRevisionId], references: [id])
   currentRevisionId String?        @unique
 
-  @@unique([slug, ownerId])
-  @@index([ownerId])
+  @@unique([slug, userId])
+  @@index([userId])
   @@index([createdAt])
 }
 
@@ -146,8 +146,8 @@ model RelativeValuesDefinition {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  owner   User   @relation(fields: [ownerId], references: [id])
-  ownerId String
+  owner  User   @relation(fields: [userId], references: [id])
+  userId String
 
   // technically nullable, but won't ever be null in practice after the initial migration
   currentRevision   RelativeValuesDefinitionRevision? @relation("CurrentRevision", fields: [currentRevisionId], references: [id])
@@ -157,9 +157,9 @@ model RelativeValuesDefinition {
 
   modelExports RelativeValuesExport[]
 
-  @@unique([slug, ownerId])
+  @@unique([slug, userId])
   @@index([createdAt])
-  @@index([ownerId])
+  @@index([userId])
 }
 
 model RelativeValuesDefinitionRevision {

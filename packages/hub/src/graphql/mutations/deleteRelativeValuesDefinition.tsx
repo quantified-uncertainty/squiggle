@@ -24,9 +24,9 @@ builder.mutationField("deleteRelativeValuesDefinition", (t) =>
 
       await prisma.relativeValuesDefinition.delete({
         where: {
-          slug_ownerId: {
+          slug_userId: {
             slug,
-            ownerId: owner.id,
+            userId: owner.id,
           },
         },
       });

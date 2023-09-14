@@ -29,7 +29,7 @@ builder.mutationField("updateModelPrivacy", (t) =>
       });
 
       const model = await prisma.model.update({
-        where: { slug_ownerId: { slug: input.slug, ownerId: owner.id } },
+        where: { slug_userId: { slug: input.slug, userId: owner.id } },
         data: { isPrivate: input.isPrivate },
         include: { owner: true },
       });
