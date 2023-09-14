@@ -144,9 +144,9 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
             contentType: "SquiggleSnippet",
             model: {
               connect: {
-                slug_ownerId: {
+                slug_userId: {
                   slug: input.slug,
-                  ownerId: owner.id,
+                  userId: owner.id,
                 },
               },
             },

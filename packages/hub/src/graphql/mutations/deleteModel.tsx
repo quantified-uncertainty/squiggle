@@ -24,9 +24,9 @@ builder.mutationField("deleteModel", (t) =>
 
       await prisma.model.delete({
         where: {
-          slug_ownerId: {
+          slug_userId: {
             slug,
-            ownerId: owner.id,
+            userId: owner.id,
           },
         },
       });

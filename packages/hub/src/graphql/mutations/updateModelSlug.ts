@@ -37,9 +37,9 @@ builder.mutationField("updateModelSlug", (t) =>
 
       const model = await prisma.model.update({
         where: {
-          slug_ownerId: {
+          slug_userId: {
             slug: input.oldSlug,
-            ownerId: owner.id,
+            userId: owner.id,
           },
         },
         data: {
