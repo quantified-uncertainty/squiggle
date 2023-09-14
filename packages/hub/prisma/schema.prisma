@@ -57,16 +57,28 @@ model Session {
 }
 
 model User {
-  id                        String                     @id @default(cuid())
-  name                      String?
-  email                     String?                    @unique
-  username                  String?                    @unique @db.Citext
-  emailVerified             DateTime?
-  image                     String?
-  accounts                  Account[]
-  sessions                  Session[]
+  id    String  @id @default(cuid())
+  name  String?
+  email String? @unique
+
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  memberships   UserGroupMembership[]
+  invites       GroupInvite[]
+
+  // Legacy, moved to Owner.slug, but necessary for migration
+  username String? @unique @db.Citext
+
+  // Legacy, will be moved under Owner
   models                    Model[]
   relativeValuesDefinitions RelativeValuesDefinition[]
+
+  // Usernames are stored through Owner table, because they share the same namespace with Groups.
+  // Users don't initially have an Owner entry, but are prompted to pick a slug and create one.
+  asOwner Owner?  @relation(fields: [ownerId], references: [id])
+  ownerId String? @unique
 }
 
 model VerificationToken {
@@ -75,6 +87,85 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Group {
+  id String @id @default(cuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships UserGroupMembership[]
+  invites     GroupInvite[]
+
+  asOwner Owner  @relation(fields: [ownerId], references: [id])
+  ownerId String @unique
+}
+
+model Owner {
+  id String @id @default(cuid())
+
+  slug String @unique @db.Citext
+
+  group Group?
+  user  User?
+
+  models                    Model[]
+  relativeValuesDefinitions RelativeValuesDefinition[]
+}
+
+enum MembershipRole {
+  Admin
+  Member
+}
+
+model UserGroupMembership {
+  id String @id @default(cuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  role MembershipRole
+
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  String
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId String
+
+  @@unique([userId, groupId])
+  @@index([userId])
+  @@index([groupId])
+}
+
+enum GroupInviteStatus {
+  Pending
+  Accepted
+  Declined
+  Canceled
+}
+
+model GroupInvite {
+  id String @id @default(cuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Polymorphic, one and only one of `userId` and `email` must be set; type safety guaranteed by GraphQL code.
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String?
+
+  email String?
+
+  role MembershipRole
+
+  status      GroupInviteStatus @default(Pending)
+  processedAt DateTime?
+
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId String
+
+  @@index([groupId])
+  @@index([userId])
 }
 
 // Models are polymorphic.
@@ -91,6 +182,9 @@ model Model {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  newOwner Owner?  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId  String?
+
   owner  User   @relation(fields: [userId], references: [id])
   userId String
 
@@ -103,8 +197,10 @@ model Model {
   currentRevisionId String?        @unique
 
   @@unique([slug, userId])
-  @@index([userId])
+  @@unique([slug, ownerId])
   @@index([createdAt])
+  @@index([userId])
+  @@index([ownerId])
 }
 
 model ModelRevision {
@@ -146,6 +242,9 @@ model RelativeValuesDefinition {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  newOwner Owner?  @relation(fields: [ownerId], references: [id])
+  ownerId  String?
+
   owner  User   @relation(fields: [userId], references: [id])
   userId String
 
@@ -158,8 +257,10 @@ model RelativeValuesDefinition {
   modelExports RelativeValuesExport[]
 
   @@unique([slug, userId])
+  @@unique([slug, ownerId])
   @@index([createdAt])
   @@index([userId])
+  @@index([ownerId])
 }
 
 model RelativeValuesDefinitionRevision {
