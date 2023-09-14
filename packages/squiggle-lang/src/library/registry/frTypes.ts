@@ -171,7 +171,7 @@ export function frDict<
   K2 extends string,
   T2,
   K3 extends string,
-  T3
+  T3,
 >(
   kv1: [K1, FRType<T1>],
   kv2: [K2, FRType<T2>],
@@ -185,7 +185,7 @@ export function frDict<
   K3 extends string,
   T3,
   K4 extends string,
-  T4
+  T4,
 >(
   kv1: [K1, FRType<T1>],
   kv2: [K2, FRType<T2>],
@@ -204,7 +204,7 @@ export function frDict<
   K4 extends string,
   T4,
   K5 extends string,
-  T5
+  T5,
 >(
   kv1: [K1, FRType<T1>],
   kv2: [K2, FRType<T2>],

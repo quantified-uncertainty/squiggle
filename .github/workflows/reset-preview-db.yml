@@ -1,14 +1,10 @@
-name: Prisma Migrate Preview DB
+name: Reset Preview DB
 
 on:
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:
   migrate:
-    if: ${{ github.actor != 'dependabot[bot]' }}
     runs-on: ubuntu-latest
     environment: Preview
     steps:
@@ -23,8 +19,8 @@ jobs:
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install
-      - name: Migrate
+      - name: Reset
         working-directory: ./packages/hub
         env:
           DATABASE_URL: "${{ secrets.DATABASE_DIRECT_URL }}"
-        run: npx prisma migrate deploy
+        run: npx prisma migrate reset --force

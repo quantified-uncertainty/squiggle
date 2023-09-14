@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module": "es2020",
     "moduleResolution": "node",
-    "target": "es2022",
+    "target": "es2021",
     "lib": ["dom", "dom.iterable", "esnext"],
     "esModuleInterop": true,
     "noEmit": true,

@@ -56,7 +56,7 @@ interface CodeEditorProps {
   onSubmit?: () => void;
   onViewValuePath?: (path: SqValuePath) => void;
   width?: number;
-  height?: number;
+  height?: number | string;
   showGutter?: boolean;
   lineWrapping?: boolean;
   errors?: SqError[];
@@ -228,8 +228,8 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
         effects: compTheme.reconfigure(
           EditorView.theme({
             "&": {
-              ...(width === undefined ? {} : { width: `${width}px` }),
-              ...(height === undefined ? {} : { height: `${height}px` }),
+              ...(width === undefined ? {} : { width }),
+              ...(height === undefined ? {} : { height }),
             },
             ".cm-selectionMatch": { backgroundColor: "#33ae661a" },
             ".cm-content": { padding: 0 },
@@ -361,11 +361,6 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
       [view]
     );
 
-    return (
-      <div
-        style={{ minWidth: width, minHeight: height, fontSize: "13px" }}
-        ref={setViewDom}
-      ></div>
-    );
+    return <div style={{ fontSize: "13px" }} ref={setViewDom}></div>;
   }
 );

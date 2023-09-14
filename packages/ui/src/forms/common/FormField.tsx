@@ -11,7 +11,7 @@ import { FormInput } from "./FormInput.js";
 
 export type FormFieldProps<
   TValues extends FieldValues,
-  TName extends FieldPath<TValues> = FieldPath<TValues>
+  TName extends FieldPath<TValues> = FieldPath<TValues>,
 > = FormFieldLayoutProps & {
   name: TName;
   rules?: RegisterOptions<TValues, TName>; // more related than CommonFieldProps
@@ -20,7 +20,7 @@ export type FormFieldProps<
 
 export function FormField<
   TValues extends FieldValues,
-  TName extends FieldPath<TValues> = FieldPath<TValues>
+  TName extends FieldPath<TValues> = FieldPath<TValues>,
 >({
   name,
   rules,

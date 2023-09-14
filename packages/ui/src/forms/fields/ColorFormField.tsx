@@ -9,7 +9,7 @@ export function ColorFormField<
   TName extends FieldPathByValue<TValues, string> = FieldPathByValue<
     TValues,
     string
-  >
+  >,
 >({ ...fieldProps }: CommonStringFieldProps<TValues, TName>) {
   return (
     <ControlledFormField<TValues, string, TName> {...fieldProps} inlineLabel>

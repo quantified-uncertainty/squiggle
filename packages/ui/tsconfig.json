@@ -3,7 +3,7 @@
     // build settings
     "module": "es2020",
     "moduleResolution": "node16",
-    "target": "es2022",
+    "target": "es2021",
     "jsx": "react-jsx",
     "esModuleInterop": true,
     "composite": true,

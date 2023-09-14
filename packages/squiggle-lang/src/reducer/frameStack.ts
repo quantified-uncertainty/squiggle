@@ -29,7 +29,10 @@ export class Frame {
 }
 
 export class FrameStack {
-  constructor(public frame: Frame, public parent?: FrameStack) {}
+  constructor(
+    public frame: Frame,
+    public parent?: FrameStack
+  ) {}
 
   static make(): FrameStack {
     return new FrameStack(new Frame("<root>")); // this top frame is always invisible
