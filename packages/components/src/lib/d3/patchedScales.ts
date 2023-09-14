@@ -73,7 +73,101 @@ function patchLinearishTickFormat<
 }
 
 function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
-  return patchLinearishTickFormat(scale);
+  // copy-pasted from https://github.com/d3/d3-scale/blob/83555bd759c7314420bd4240642beda5e258db9e/src/linear.js#L14
+  scale.tickFormat = (count, specifier) => {
+    const d = scale.domain();
+    return tickFormatWithCustom(d[0], d[d.length - 1], count ?? 10, specifier);
+  };
+  // UPSTREAM-ME: Patching symlog tick generator for better experience
+  scale.ticks = (count?: number) => {
+    if (count === 0) return [];
+
+    const [lower, upper] = scale.domain();
+    const c = scale.constant();
+
+    // We can't reliably use invert and transform from scale
+    // It converts relative to screen, and we would instead like it to be relative to 0
+    // const transform = scale
+    // const invert = scale.invert
+
+    function transform(x: number): number {
+      return Math.sign(x) * Math.log1p(Math.abs(x / c));
+    }
+
+    function invert(x: number): number {
+      return Math.sign(x) * Math.expm1(Math.abs(x)) * c;
+    }
+
+    /**
+     * @param [rounding=Math.round] Rounding method
+     * @returns Closest number with a single significant digit being 1, 2 or 5
+     */
+    function roundToNice(x: number, rounding = Math.round): number {
+      if (x === 0) return 0;
+
+      const base = Math.floor(Math.log10(Math.abs(x)));
+      const zeros = Math.pow(10, base);
+      const mult = Math.abs(rounding(x / zeros));
+
+      // https://oeis.org/A002522
+      // It works for our range.
+      const niceMult =
+        mult == 0
+          ? 0
+          : Math.pow(
+              Math.abs(rounding(Math.sign(x) * Math.sqrt(mult - 1))),
+              2
+            ) + 1;
+
+      // There's also https://oeis.org/A051109, but I don't have whole day
+
+      return niceMult * zeros * Math.sign(x);
+    }
+
+    function closestNice(x: number) {
+      return roundToNice(x);
+    }
+
+    const normCount = count ?? 10;
+
+    // Sometimes users don't know what they want -- and they actually don't want symlog
+    const expSize = Math.abs(transform(lower) - transform(upper));
+
+    // If exponent window is too small, then let's try linear scale instead
+    if (expSize / normCount < 0.5) {
+      const reqPrecision = Math.pow(
+        10,
+        Math.floor(Math.log10(upper - lower) - 1)
+      );
+      const pLower = Math.ceil(lower / reqPrecision) * reqPrecision;
+      const pUpper = Math.floor(upper / reqPrecision) * reqPrecision;
+
+      const linSize = pUpper - pLower;
+
+      // Alternative linear route.
+      const digits = Math.floor(Math.log10(linSize));
+      let tickNumber = linSize / Math.pow(10, digits);
+      while (tickNumber * 1.5 < normCount) tickNumber *= 2;
+      return d3.range(pLower, pUpper, linSize / tickNumber).concat([pUpper]);
+    }
+
+    const tLower = transform(roundToNice(lower, Math.ceil));
+    const tUpper = transform(roundToNice(upper, Math.floor));
+    const expStep = (tUpper - tLower) / normCount;
+    const tLowerAdjusted = !(tUpper > 0 && tLower < 0)
+      ? tLower + expStep / 2
+      : Math.ceil(tLower / expStep) * expStep;
+    const tickRange = d3.range(tLowerAdjusted, tUpper, expStep);
+
+    const ticks = [roundToNice(lower, Math.ceil)].concat(
+      tickRange.map(invert).map(closestNice),
+      [roundToNice(upper, Math.floor)]
+    );
+
+    return ticks;
+  };
+
+  return scale;
 }
 
 function patchLogarithmicTickFormat(scale: ScaleLogarithmic): ScaleLogarithmic {
