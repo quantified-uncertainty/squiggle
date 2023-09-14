@@ -218,15 +218,16 @@ export const ViewerProvider: FC<
     return merge({}, defaultPlaygroundSettings, partialPlaygroundSettings);
   }, [partialPlaygroundSettings]);
 
-  const getStateRef = (path: SqValuePath): LocalItemSettings => {
+  // I'm not sure if we should use this, or getSettings(), which is similar.
+  const getSettingsRef = (path: SqValuePath): LocalItemSettings => {
     return settingsStoreRef.current[pathAsString(path)];
   };
 
-  const setState = (
+  const setSettings = (
     path: SqValuePath,
     fn: (settings: LocalItemSettings) => LocalItemSettings
   ): void => {
-    const settings = fn(getStateRef(path));
+    const settings = fn(getSettingsRef(path));
     settingsStoreRef.current[pathAsString(path)] = fn(settings);
   };
 
@@ -263,7 +264,7 @@ export const ViewerProvider: FC<
   );
 
   const setCollapsed = (path: SqValuePath, isCollapsed: boolean) => {
-    setState(path, (state) => ({
+    setSettings(path, (state) => ({
       ...state,
       collapsed: state?.collapsed ?? isCollapsed,
     }));
@@ -273,9 +274,9 @@ export const ViewerProvider: FC<
     path: SqValuePath,
     reduce: (calculator: CalculatorState) => CalculatorState
   ) => {
-    const calculator = getStateRef(path).calculator;
+    const calculator = getSettingsRef(path).calculator;
     if (calculator !== null) {
-      setState(path, (state) => ({
+      setSettings(path, (state) => ({
         ...state,
         calculator: reduce(calculator),
       }));
@@ -286,7 +287,7 @@ export const ViewerProvider: FC<
     (action: Action) => {
       switch (action.type) {
         case "SET_SETTINGS":
-          setState(action.payload.path, () => action.payload.value);
+          setSettings(action.payload.path, () => action.payload.value);
           return;
         case "FOCUS":
           setFocused(action.payload);
@@ -295,7 +296,7 @@ export const ViewerProvider: FC<
           setFocused(undefined);
           return;
         case "TOGGLE_COLLAPSED": {
-          const ref = getStateRef(action.payload);
+          const ref = getSettingsRef(action.payload);
           ref.collapsed = !ref.collapsed;
           return;
         }
@@ -320,7 +321,7 @@ export const ViewerProvider: FC<
           return;
         case "CALCULATOR_INITIALIZE": {
           const { path, calculator } = action.payload;
-          setState(path, (state) => ({
+          setSettings(path, (state) => ({
             ...state,
             calculator: calculator,
           }));

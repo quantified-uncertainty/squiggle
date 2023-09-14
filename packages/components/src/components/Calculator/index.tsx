@@ -132,7 +132,7 @@ export const Calculator: FC<Props> = ({
               </div>
               <div>
                 {result &&
-                  // resultHasInterestingError &&
+                  resultHasInterestingError &&
                   showSqValue(result, fieldShowSettings)}
                 {!result && (
                   <div className="text-sm text-gray-500">No result</div>
