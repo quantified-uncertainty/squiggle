@@ -8,7 +8,7 @@ export function SelectStringFormField<
   TName extends FieldPathByValue<TValues, TValueType> = FieldPathByValue<
     TValues,
     TValueType
-  >
+  >,
 >({
   options,
   ...props

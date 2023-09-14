@@ -11,7 +11,7 @@ import {
 
 export function MutationButton<
   TMutation extends CommonMutationParameters<TTypename> = never,
-  const TTypename extends string = never
+  const TTypename extends string = never,
 >({
   mutation,
   variables,

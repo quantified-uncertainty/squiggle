@@ -6,7 +6,7 @@ export function SelectRecommendedUnit<
   TName extends FieldPathByValue<FormShape, string | null> = FieldPathByValue<
     FormShape,
     string | null
-  >
+  >,
 >({ name, label }: { name: TName; label?: string }) {
   const items = useWatch<FormShape, "items">({ name: "items" }) ?? [];
   const allItemIds = items.map((item) => item.id);

@@ -18,7 +18,7 @@ export function SelectCluster<
   TName extends FieldPathByValue<FormShape, string | null> = FieldPathByValue<
     FormShape,
     string | null
-  >
+  >,
 >({ name, label }: { name: TName; label?: string }) {
   const { resetField } = useFormContext<FormShape>();
   const needsReset = useRef<boolean>(false);

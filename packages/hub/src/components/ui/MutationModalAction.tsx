@@ -18,7 +18,7 @@ import {
 type CommonProps<
   TMutation extends CommonMutationParameters<TTypename>,
   TFormShape extends FieldValues,
-  TTypename extends string
+  TTypename extends string,
 > = {
   mutation: GraphQLTaggedNode;
   expectedTypename: TTypename;
@@ -35,7 +35,7 @@ type CommonProps<
 function MutationFormModal<
   TMutation extends CommonMutationParameters<TTypename>,
   TFormShape extends FieldValues,
-  const TTypename extends string
+  const TTypename extends string,
 >({
   mutation,
   expectedTypename,
@@ -87,7 +87,7 @@ function MutationFormModal<
 export function MutationModalAction<
   TMutation extends CommonMutationParameters<TTypename>,
   TFormShape extends FieldValues,
-  const TTypename extends string = string
+  const TTypename extends string = string,
 >({
   modalTitle,
   title,

@@ -31,7 +31,7 @@ export function SelectUser<
   TName extends FieldPathByValue<
     TValues,
     SelectUserOption | null
-  > = FieldPathByValue<TValues, SelectUserOption | null>
+  > = FieldPathByValue<TValues, SelectUserOption | null>,
 >({
   name,
   label,

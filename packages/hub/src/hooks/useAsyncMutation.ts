@@ -28,7 +28,7 @@ export type CommonMutationParameters<TTypename extends string> =
  */
 export function useAsyncMutation<
   TMutation extends CommonMutationParameters<TTypename>,
-  TTypename extends string = string
+  TTypename extends string = string,
 >({
   mutation,
   confirmation,

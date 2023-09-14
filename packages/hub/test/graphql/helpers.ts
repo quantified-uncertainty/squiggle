@@ -100,7 +100,7 @@ type CommonResult = {
 export async function executeCommonOperation<
   TResult extends CommonResult,
   const TExpectedTypename extends string,
-  TVariables
+  TVariables,
 >(
   operation: TypedDocumentNode<TResult, TVariables>,
   options: {
@@ -137,7 +137,7 @@ export async function executeCommonOperation<
 export function createRunners<
   TResult extends CommonResult,
   const TExpectedTypename extends string,
-  TVariables
+  TVariables,
 >(
   mutation: TypedDocumentNode<TResult, TVariables>,
   expectedTypename: TExpectedTypename
@@ -166,7 +166,7 @@ export function createRunners<
 export function createInputRunners<
   TResult extends CommonResult,
   const TExpectedTypename extends string,
-  TInput
+  TInput,
 >(
   mutation: TypedDocumentNode<TResult, { input: TInput }>,
   expectedTypename: TExpectedTypename

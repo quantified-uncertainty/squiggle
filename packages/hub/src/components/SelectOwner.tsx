@@ -62,7 +62,7 @@ export function SelectOwner<
   TName extends FieldPathByValue<
     TValues,
     SelectOwnerOption | null
-  > = FieldPathByValue<TValues, SelectOwnerOption | null>
+  > = FieldPathByValue<TValues, SelectOwnerOption | null>,
 >({
   name,
   label,

@@ -31,7 +31,7 @@ export function SelectGroup<
   TName extends FieldPathByValue<
     TValues,
     SelectGroupOption | null
-  > = FieldPathByValue<TValues, SelectGroupOption | null>
+  > = FieldPathByValue<TValues, SelectGroupOption | null>,
 >({
   name,
   label,

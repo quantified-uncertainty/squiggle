@@ -34,7 +34,7 @@ const DefinitionInfo: FC<{ option: SelectRelativeValuesDefinitionOption }> = ({
 }) => <div>{option.slug}</div>;
 
 export function SelectRelativeValuesDefinition<
-  TValues extends FieldValues = never
+  TValues extends FieldValues = never,
 >({
   name,
   label,

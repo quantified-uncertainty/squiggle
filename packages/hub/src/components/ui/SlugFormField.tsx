@@ -15,7 +15,7 @@ export function useDashifyFormField<
   TName extends FieldPathByValue<
     TValues,
     string | undefined
-  > = FieldPathByValue<TValues, string | undefined>
+  > = FieldPathByValue<TValues, string | undefined>,
 >(form: UseFormReturn<TValues, unknown>, field: TName) {
   useWatch<TValues, TName>({ name: field });
   // We discard useWatch result (use it for subscription only) and rely on form value instead.
@@ -37,7 +37,7 @@ export function SlugFormField<
   TName extends FieldPathByValue<
     TValues,
     string | undefined
-  > = FieldPathByValue<TValues, string | undefined>
+  > = FieldPathByValue<TValues, string | undefined>,
 >({
   name,
   example,

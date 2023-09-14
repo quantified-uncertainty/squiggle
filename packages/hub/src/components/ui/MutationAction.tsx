@@ -29,7 +29,7 @@ function resolveVariables<TQuery extends OperationType>(
 
 export function MutationAction<
   TMutation extends CommonMutationParameters<TTypename> = never,
-  const TTypename extends string = never
+  const TTypename extends string = never,
 >({
   mutation,
   variables,

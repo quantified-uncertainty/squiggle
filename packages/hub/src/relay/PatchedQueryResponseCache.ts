@@ -95,7 +95,7 @@ export class PatchedQueryResponseCache {
               ...payloadItem.extensions,
               cacheTimestamp: response.fetchTime,
             },
-          } satisfies GraphQLSingularResponse)
+          }) satisfies GraphQLSingularResponse
       );
     }
 

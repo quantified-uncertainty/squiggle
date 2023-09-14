@@ -73,7 +73,7 @@ export function SelectFormField<
   TName extends FieldPathByValue<TValues, TValue> = FieldPathByValue<
     TValues,
     TValue
-  >
+  >,
 >({
   label,
   description,
