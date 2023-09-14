@@ -71,12 +71,14 @@ model User {
   // Legacy, moved to Owner.slug, but necessary for migration
   username String? @unique @db.Citext
 
+  // Legacy, will be moved under Owner
+  models                    Model[]
+  relativeValuesDefinitions RelativeValuesDefinition[]
+
   // Usernames are stored through Owner table, because they share the same namespace with Groups.
   // Users don't initially have an Owner entry, but are prompted to pick a slug and create one.
-  asOwner                  Owner?                     @relation(fields: [ownerId], references: [id])
-  ownerId                  String?                    @unique
-  Model                    Model[]
-  RelativeValuesDefinition RelativeValuesDefinition[]
+  asOwner Owner?  @relation(fields: [ownerId], references: [id])
+  ownerId String? @unique
 }
 
 model VerificationToken {
@@ -183,8 +185,8 @@ model Model {
   owner   Owner  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId String
 
-  legacyOwner User   @relation(fields: [userId], references: [id])
-  userId      String
+  legacyOwner User?   @relation(fields: [userId], references: [id])
+  userId      String?
 
   isPrivate Boolean @default(false)
 
@@ -243,8 +245,8 @@ model RelativeValuesDefinition {
   owner   Owner  @relation(fields: [ownerId], references: [id])
   ownerId String
 
-  legacyOwner User   @relation(fields: [userId], references: [id])
-  userId      String
+  legacyOwner User?   @relation(fields: [userId], references: [id])
+  userId      String?
 
   // technically nullable, but won't ever be null in practice after the initial migration
   currentRevision   RelativeValuesDefinitionRevision? @relation("CurrentRevision", fields: [currentRevisionId], references: [id])
