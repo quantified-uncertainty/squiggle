@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom";
 import { act, render, screen, waitFor } from "@testing-library/react";
-import { userEvent } from "./user-event.js";
+import { userEvent } from "@testing-library/user-event";
 
 import { SquigglePlayground } from "../src/index.js";
 
@@ -14,7 +14,7 @@ test("Autorun is default", async () => {
 });
 
 test("Autorun can be switched off", async () => {
-  const user = userEvent.setup(); // typescript issue is due to ESM mess
+  const user = userEvent.setup();
   act(() => render(<SquigglePlayground defaultCode="70*30" />));
 
   expect(screen.getByTestId("autorun-controls")).toHaveAttribute(
@@ -28,10 +28,9 @@ test("Autorun can be switched off", async () => {
     )
   );
 
-  await act(
-    async () =>
-      await user.click(screen.getByTestId("autorun-controls").firstChild) // disable
-  );
+  await act(async () => {
+    await user.click(screen.getByTestId("autorun-controls").firstElementChild!); // disable
+  });
 
   expect(screen.getByTestId("autorun-controls")).toHaveAttribute(
     "aria-checked",
