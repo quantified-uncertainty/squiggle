@@ -24,7 +24,20 @@ export type CalculatorState = {
   fieldNames: string[];
   fields: Record<string, FieldValue>;
   fn: ResultValue;
+  hash: string;
 };
+
+// This function is used to determine if a calculator has changed.
+// It's obviously not perfect - it doesn't capture changes within the calculator function, but this would be much more complicated.
+function calculatorHash(calc: SqCalculator): string {
+  const rowData = JSON.stringify(calc.rows);
+  const paramData = (calc.parameterNames || []).join(",");
+  return rowData + paramData + calc.description;
+}
+
+export function hasSameCalculator(state: CalculatorState, calc: SqCalculator) {
+  return calculatorHash(calc) === state.hash;
+}
 
 export function allFields(state: CalculatorState): FieldValue[] {
   return state.fieldNames.map((name) => state.fields[name]);
@@ -52,10 +65,15 @@ export function initialCalculatorState(
     fieldNames: calculator.rows.map((row) => row.name),
     fields,
     fn: {},
+    hash: calculatorHash(calculator),
   };
 }
 
 export type CalculatorAction =
+  | {
+      type: "RESET";
+      payload: { path: SqValuePath; state: CalculatorState };
+    }
   | {
       type: "SET_FIELD_CODE";
       payload: { path: SqValuePath; name: string; code: string };
@@ -82,6 +100,9 @@ export const calculatorReducer = (
     return { ...state, fields: newFields };
   };
   switch (action.type) {
+    case "RESET": {
+      return action.payload.state;
+    }
     case "SET_FIELD_CODE": {
       const { name, code } = action.payload;
       const field = state.fields[name];

@@ -321,7 +321,6 @@ export const ViewerProvider: FC<
             ...state,
             calculator: calculator,
           }));
-          console.log("CALCULATOR_UPDATE", path, getSettingsRef(path));
           return;
         }
       }

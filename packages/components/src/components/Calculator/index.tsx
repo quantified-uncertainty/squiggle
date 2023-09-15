@@ -21,6 +21,7 @@ import {
   CalculatorAction,
   CalculatorState,
   calculatorReducer,
+  hasSameCalculator,
   initialCalculatorState,
 } from "./calculatorReducer.js";
 
@@ -61,9 +62,24 @@ export const Calculator: FC<Props> = ({
   const { getSettings, dispatch: viewerContextDispatch } = useViewerContext();
   const itemSettings = getSettings({ path });
 
+  //It's possible that the calculator was changed when ths component was not visible. If that's the case, we want to reset it. We only want to use the cached version if its the same calculator.
+  const getInitialCalculatorState = (calculator: SqCalculator) => {
+    const isSameCalculator =
+      itemSettings.calculator &&
+      hasSameCalculator(itemSettings.calculator, calculator);
+
+    console.log("INITIALIZING", isSameCalculator, itemSettings.calculator);
+
+    if (isSameCalculator) {
+      return itemSettings.calculator!;
+    } else {
+      return initialCalculatorState(calculator);
+    }
+  };
+
   const [calculatorState, calculatorDispatch] = useReducer(
     adjustedReducer(path, viewerContextDispatch),
-    itemSettings.calculator || initialCalculatorState(calculator)
+    getInitialCalculatorState(calculator)
   );
 
   const [prevCalculator, setPrevCalculator] = useState<SqCalculator | null>(
@@ -71,6 +87,7 @@ export const Calculator: FC<Props> = ({
   );
 
   const init = async () => {
+    console.log("AWAIT INITIALIZING");
     await initialize({
       dispatch: calculatorDispatch,
       state: calculatorState,
@@ -87,9 +104,18 @@ export const Calculator: FC<Props> = ({
   //We want to reset the calculator state if the calculator changes
   useEffect(() => {
     const calculatorChanged =
-      prevCalculator !== null && prevCalculator !== calculator;
+      prevCalculator !== null &&
+      !hasSameCalculator(calculatorState, prevCalculator);
 
     if (calculatorChanged) {
+      console.log("resetting calculator");
+      calculatorDispatch({
+        type: "RESET",
+        payload: {
+          path: path,
+          state: initialCalculatorState(calculator),
+        },
+      });
       init();
     }
     setPrevCalculator(calculator);
