@@ -89,6 +89,7 @@ type ViewerContextShape = {
     path: SqValuePath;
     defaults?: LocalItemSettings;
   }): LocalItemSettings;
+  getCalculator({ path }: { path: SqValuePath }): CalculatorState | undefined;
   getMergedSettings({
     path,
     defaults,
@@ -104,6 +105,7 @@ type ViewerContextShape = {
 
 export const ViewerContext = createContext<ViewerContextShape>({
   getSettings: () => ({ collapsed: false }),
+  getCalculator: () => undefined,
   getMergedSettings: () => defaultPlaygroundSettings,
   localSettingsEnabled: false,
   focused: undefined,
@@ -238,6 +240,14 @@ export const ViewerProvider: FC<
     [settingsStoreRef]
   );
 
+  const getCalculator = useCallback(
+    ({ path }: { path: SqValuePath }) => {
+      const response = settingsStoreRef.current[pathAsString(path)];
+      return response?.calculator;
+    },
+    [settingsStoreRef]
+  );
+
   const getMergedSettings = useCallback(
     ({
       path,
@@ -262,19 +272,6 @@ export const ViewerProvider: FC<
       ...state,
       collapsed: state?.collapsed ?? isCollapsed,
     }));
-  };
-
-  const updateCalculator = (
-    path: SqValuePath,
-    reduce: (calculator: CalculatorState) => CalculatorState
-  ) => {
-    const calculator = getSettingsRef(path)?.calculator;
-    if (calculator) {
-      setSettings(path, (state) => ({
-        ...state,
-        calculator: reduce(calculator),
-      }));
-    }
   };
 
   const dispatch = useCallback(
@@ -332,6 +329,7 @@ export const ViewerProvider: FC<
     <ViewerContext.Provider
       value={{
         getSettings,
+        getCalculator,
         getMergedSettings,
         localSettingsEnabled,
         editor,

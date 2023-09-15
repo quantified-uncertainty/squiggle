@@ -18,6 +18,8 @@ export type MergedItemSettings = PlaygroundSettings;
 export const pathItemFormat = (item: PathItem): string => {
   if (item.type === "cellAddress") {
     return `Cell (${item.value.row},${item.value.column})`;
+  } else if (item.type === "calculator") {
+    return `calculator`;
   } else {
     return String(item.value);
   }
@@ -69,16 +71,43 @@ export function getChildrenValues(value: SqValue): SqValue[] {
   }
 }
 
+type GetCalculatorFn = ({
+  path,
+}: {
+  path: SqValuePath;
+}) => CalculatorState | undefined;
+
+export function getCalculatorResult(
+  pathItem: SqValuePath,
+  getCalculator: GetCalculatorFn
+): SqValue | undefined {
+  const allItems = pathItem.itemsAsValuePaths({ includeRoot: true });
+  const previousPathItem: SqValuePath | undefined =
+    allItems[allItems.length - 2];
+
+  if (previousPathItem === undefined) {
+    return undefined;
+  }
+  const calculatorState = getCalculator({ path: previousPathItem });
+  const value = calculatorState?.fn.value;
+  if (value?.ok) {
+    return value.value;
+  } else {
+    return undefined;
+  }
+}
+
 export function extractSubvalueByPath(
   value: SqValue,
-  path: SqValuePath
+  path: SqValuePath,
+  getCalculator: GetCalculatorFn
 ): SqValue | undefined {
   if (!value.context) {
     return;
   }
   const { context } = value;
-
-  for (const key of path.items) {
+  for (const pathItem of path.itemsAsValuePaths({ includeRoot: false })) {
+    const key = pathItem.items[pathItem.items.length - 1];
     let nextValue: SqValue | undefined;
     if (key.type === "number" && value.tag === "Array") {
       nextValue = value.value.getValues()[key.value];
@@ -97,6 +126,8 @@ export function extractSubvalueByPath(
       } else {
         return;
       }
+    } else if (key.type === "calculator") {
+      nextValue = getCalculatorResult(pathItem, getCalculator);
     }
     if (!nextValue) {
       return;

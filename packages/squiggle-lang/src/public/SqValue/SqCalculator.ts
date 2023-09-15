@@ -19,7 +19,8 @@ export class SqCalculator {
     const response = wrapFn({ fn: this._value.fn }).call(items, env);
     const context = this.context;
 
-    const newContext: SqValueContext | undefined = context;
+    const newContext: SqValueContext | undefined =
+      context && context.extend({ type: "calculator" });
 
     if (response.ok && context) {
       return Result.Ok(wrapValue(response.value._value, newContext));

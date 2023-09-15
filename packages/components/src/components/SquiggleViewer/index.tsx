@@ -38,7 +38,7 @@ const SquiggleViewerOuter = forwardRef<
   SquiggleViewerHandle,
   SquiggleViewerProps
 >(function SquiggleViewerOuter({ resultVariables, resultItem }, ref) {
-  const { focused, dispatch } = useViewerContext();
+  const { focused, dispatch, getCalculator } = useViewerContext();
   const unfocus = useUnfocus();
   const focus = useFocus();
 
@@ -52,7 +52,7 @@ const SquiggleViewerOuter = forwardRef<
       </span>
 
       {focused
-        .itemsAsValuePaths()
+        .itemsAsValuePaths({ includeRoot: false })
         .slice(0, -1)
         .map((path, i) => (
           <div key={i} className="flex items-center">
@@ -81,9 +81,17 @@ const SquiggleViewerOuter = forwardRef<
 
   let focusedItem: SqValue | undefined;
   if (focused && resultVariables.ok && focused.root === "bindings") {
-    focusedItem = extractSubvalueByPath(resultVariables.value, focused);
+    focusedItem = extractSubvalueByPath(
+      resultVariables.value,
+      focused,
+      getCalculator
+    );
   } else if (focused && resultItem?.ok && focused.root === "result") {
-    focusedItem = extractSubvalueByPath(resultItem.value, focused);
+    focusedItem = extractSubvalueByPath(
+      resultItem.value,
+      focused,
+      getCalculator
+    );
   }
 
   const body = () => {

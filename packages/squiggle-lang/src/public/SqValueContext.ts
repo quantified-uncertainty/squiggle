@@ -41,9 +41,10 @@ export class SqValueContext {
     let ast = this.valueAst;
 
     let newAst: ASTNode | undefined;
-    const itemisNotTableIndex = item.type !== "cellAddress";
+    const itemisNotTableIndexOrCalculator =
+      item.type !== "cellAddress" && item.type !== "calculator";
 
-    if (this.valueAstIsPrecise && itemisNotTableIndex) {
+    if (this.valueAstIsPrecise && itemisNotTableIndexOrCalculator) {
       // now we can try to look for the next nested valueAst
 
       // descend into trivial nodes

@@ -11,7 +11,7 @@ type Story = StoryObj<typeof meta>;
 export const Basic: Story = {
   args: {
     code: `
-    f(a, b, c) = a + b
+    f(a, b, c) = [a + b, a, c]
 
     a = "\n## My favorite calculator\nA longer description of the calculator goes here...\n"
     
