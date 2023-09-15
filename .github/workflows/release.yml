@@ -26,6 +26,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Build changelog script
+        working-directory: packages/ops
+        run: pnpm turbo build
+
       # if there are existing changesets, PR will be created.
       # Otherwise, `publish` command will be invoked.
       - name: Create Release Pull Request or Publish to npm
