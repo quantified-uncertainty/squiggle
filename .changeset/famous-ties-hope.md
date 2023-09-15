@@ -5,4 +5,4 @@
 "@quri/ui": patch
 ---
 
-Change Typescript target to ES2021
+Downgrade Typescript target to ES2021. This should help with loading Squiggle components on Observable through unpkg.com.

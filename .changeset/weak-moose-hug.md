@@ -2,4 +2,4 @@
 "@quri/ui": patch
 ---
 
-`GroupIcon`
+New icons: `GroupIcon`, `RightArrowIcon` and `EmptyIcon`

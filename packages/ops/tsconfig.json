@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
-    "module": "es2020",
-    "moduleResolution": "node16",
+    "module": "Node16", // required by changeset for changelog.ts script
+    "moduleResolution": "Node16",
     "target": "es2021",
     "esModuleInterop": true,
     "rootDir": "scripts",
-    "noEmit": true,
+    "outDir": "dist",
     // type check settings
     "strict": true,
     "skipLibCheck": true

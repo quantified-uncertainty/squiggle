@@ -486,6 +486,12 @@ importers:
         specifier: ^3.21.4
         version: 3.21.4
     devDependencies:
+      '@changesets/get-github-info':
+        specifier: ^0.5.2
+        version: 0.5.2
+      '@changesets/types':
+        specifier: ^5.2.1
+        version: 5.2.1
       '@types/node':
         specifier: ^20.4.7
         version: 20.4.7
@@ -3002,6 +3008,15 @@ packages:
       chalk: 2.4.2
       fs-extra: 7.0.1
       semver: 7.5.4
+    dev: true
+
+  /@changesets/get-github-info@0.5.2:
+    resolution: {integrity: sha512-JppheLu7S114aEs157fOZDjFqUDpm7eHdq5E8SSR0gUBTEK0cNSHsrSR5a66xs0z3RWuo46QvA3vawp8BxDHvg==}
+    dependencies:
+      dataloader: 1.4.0
+      node-fetch: 2.6.12
+    transitivePeerDependencies:
+      - encoding
     dev: true
 
   /@changesets/get-release-plan@3.0.17:
@@ -10636,6 +10651,10 @@ packages:
       abab: 2.0.6
       whatwg-mimetype: 3.0.0
       whatwg-url: 12.0.1
+    dev: true
+
+  /dataloader@1.4.0:
+    resolution: {integrity: sha512-68s5jYdlvasItOJnCuI2Q9s4q98g0pCyL3HrcKJu8KNugUl8ahgmZYg38ysLTgQjjXX3H8CJLkAvWrclWfcalw==}
     dev: true
 
   /dataloader@2.2.2:

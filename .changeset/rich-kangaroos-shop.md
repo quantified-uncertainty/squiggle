@@ -2,4 +2,4 @@
 "@quri/ui": patch
 ---
 
-SelectFormField and SelectStringFormField components
+`SelectFormField` and `SelectStringFormField` components
