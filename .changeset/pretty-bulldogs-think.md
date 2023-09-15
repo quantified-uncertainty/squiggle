@@ -1,5 +1,5 @@
 ---
-"@quri/squiggle-components": minor
+"@quri/squiggle-components": patch
 ---
 
 Better symlog scale ticks
