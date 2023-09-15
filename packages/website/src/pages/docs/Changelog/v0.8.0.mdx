@@ -1,0 +1,81 @@
+## 0.8.0
+
+### [@quri/squiggle-lang](https://www.npmjs.com/package/@quri/squiggle-lang)
+
+#### Breaking changes
+
+- `SampleSet` distributions are now used as the default.
+  - This change is important because only SampleSet distributions handle correlations, and users expecting correlations got confused when the defaults were for symbolic distributions instead. If you want to use symbolic formats, you can, like: `Sym.normal(5,2)`.
+- `a to b` expressions always evaluate to lognormal distributions, limited to positive-only arguments.
+  - Previously these changed to use normal distributions at values zero or less, and this confused users. https://github.com/quantified-uncertainty/squiggle/issues/1095.
+- `|>` pipes syntax is removed, in favor of the `->` syntax.
+  - We had two syntaxes that did the same thing, and wanted to clean this up.
+- `#` comments support is removed, in favor of the `//` syntax.
+- Renamed functions such as `scaleLog`, `scalePow`, etc. to `Danger.mapYLog`, `Danger.mapYPow`, etc.
+  - These were infrequently used and prone to errors.
+- Default sampleCount in squiggle-lang is now 1k, matching playground.
+
+#### New features
+
+- Parameter annotations: `f(x: [0, 10]) = ...`; see [docs](https://preview.squiggle-language.com/docs/Guides/Language#parameter-annotations) for details
+- `Plot.distFn` and `Plot.numericFn` (`Plot.fn` is removed)
+- Support for manual plot [scales](https://squiggle-language.com/docs/Api/Plot#scales)
+- Support for docstrings. `/** ... */` comments are displayed in the viewer
+- `List.reduceWhile` function
+- Dicts and bindings are ordered
+- `map` callback supports an optional second `index` parameter
+- Support for `{ foo, bar }` shorthand in dicts
+- Mixture correlations https://github.com/quantified-uncertainty/squiggle/pull/1732
+
+#### Fixes
+
+- Exponentiation is right-associative
+- Units are whitelisted; `100blah` is a syntax error
+- Fixed error message when ternary condition is wrong
+
+#### Performance improvements
+
+- ~2x speedup on synthetic lambda-heavy benchmarks; similar improvements on real code, on average
+
+### [@quri/squiggle-components](https://www.npmjs.com/package/@quri/squiggle-components)
+
+#### Breaking changes
+
+- Many `@quri/squiggle-lang` APIs have changed, so this package should be updated at the same time as `@quri/squiggle-components`
+- "Input variables" tab was removed; you can inject your JSON data directly into Squiggle instead
+
+#### New features
+
+- Movable divider between editor and graph view
+- Support for new plots: `Plot.scatter`, `Table.make` and others
+- New default tick format. This fixes an error that small numbers (`0.01`) were shown as `10m`; #2007.
+- Ability to "zoom in" on any variable in viewer; #1913
+- "Find in editor" button in viewer
+- Other various updates to the playground UI
+
+#### Fixes
+
+- Display Infinity as "Infinity"
+- Fix shortcut tooltips on non-macs
+- Charts filter out infinity values from the domain
+- Improve tooltip for errors in editor
+
+### [VS Code extension](https://marketplace.visualstudio.com/items?itemName=QURI.vscode-squiggle)
+
+- Improvements to syntax highlighter
+
+### [@quri/prettier-plugin-squiggle](https://www.npmjs.com/package/@quri/prettier-plugin-squiggle)
+
+**Initial release.** Install this package to format any Squiggle code with [https://prettier.io](Prettier). Requires Prettier v3.
+
+### @quri/ui
+
+Initial release with common UI components by QURI, used in squiggle-components and Squiggle Hub. [Storybook](https://quri-ui.vercel.app/)
+
+You probably shouldn't use this package directly if you don't work at QURI, because we don't have any stability guarantees and optimize for our convenience.
+
+### Other
+
+- [Squiggle Hub](https://squigglehub.org/) was released
+- New [documentation](https://www.squiggle-language.com/), now with search
+- We've started work on relative values functionality in Squiggle Hub. This is still fairly error-prone, we'll work on cleaning it up in the next few months.
