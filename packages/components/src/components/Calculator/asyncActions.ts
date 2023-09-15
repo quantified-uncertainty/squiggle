@@ -15,10 +15,7 @@ import {
   optionalResultValue,
   allFieldResults,
   allFieldValuesAreValid,
-  initialCalculatorState,
 } from "./calculatorReducer.js";
-
-import { ViewProviderDispatch } from "../SquiggleViewer/ViewerProvider.js";
 
 const runSquiggleCode = async (
   code: string,
@@ -31,24 +28,17 @@ const runSquiggleCode = async (
   const sourceId = "calculator";
   project.setSource(sourceId, code);
   await project.run(sourceId);
-  const output = project.getOutput(sourceId);
-  if (output.ok) {
-    const result: result<SqValue, SqError> = {
-      ok: true,
-      value: output.value.result,
-    };
-    return result;
-  } else {
-    return output;
-  }
+  return project.getResult(sourceId);
 };
 
-const updateFnValue = async (
+type Dispatch = (action: CalculatorAction) => void;
+
+const updateFnValue = (
   path: SqValuePath,
   state: CalculatorState,
   calc: SqCalculator,
   env: Env,
-  dispatch: ViewProviderDispatch
+  dispatch: Dispatch
 ) => {
   let finalResult: optionalResultValue = undefined;
   if (allFieldValuesAreValid(state)) {
@@ -65,7 +55,7 @@ const updateFnValue = async (
   }
 
   dispatch({
-    type: "CALCULATOR_SET_FN_VALUE",
+    type: "SET_FUNCTION_VALUE",
     payload: { path, value: finalResult },
   });
 };
@@ -74,30 +64,27 @@ export async function initialize({
   dispatch,
   path,
   calculator,
+  state,
   environment,
 }: {
-  dispatch: ViewProviderDispatch;
+  dispatch: Dispatch;
   path: SqValuePath;
   calculator: SqCalculator;
+  state: CalculatorState;
   environment: Env;
 }) {
-  let state = initialCalculatorState(calculator);
-  dispatch({
-    type: "CALCULATOR_INITIALIZE",
-    payload: { path, calculator: state },
-  });
-
+  let _state = state;
   for (const name of state.fieldNames) {
     const field = state.fields[name];
     const valueResult = await runSquiggleCode(field.code, environment);
     const _action: CalculatorAction = {
-      type: "CALCULATOR_SET_FIELD_VALUE",
+      type: "SET_FIELD_VALUE",
       payload: { name, value: valueResult, path },
     };
-    state = calculatorReducer(state, _action);
+    _state = calculatorReducer(_state, _action);
     dispatch(_action);
   }
-  await updateFnValue(path, state, calculator, environment, dispatch);
+  updateFnValue(path, _state, calculator, environment, dispatch);
 }
 
 export async function updateCode({
@@ -108,33 +95,29 @@ export async function updateCode({
   calculator,
   name,
   code,
-  forceUpdate,
 }: {
-  dispatch: ViewProviderDispatch;
+  dispatch: Dispatch;
   path: SqValuePath;
   state: CalculatorState;
   calculator: SqCalculator;
   environment: Env;
   name: string;
   code: string;
-  forceUpdate: () => void;
 }) {
   const setCodeAction: CalculatorAction = {
-    type: "CALCULATOR_SET_FIELD_CODE",
+    type: "SET_FIELD_CODE",
     payload: { path, name: name, code: code },
   };
   dispatch(setCodeAction);
   let _state = calculatorReducer(state, setCodeAction);
-  forceUpdate();
 
   const valueResult = await runSquiggleCode(code, environment);
   const setValueAction: CalculatorAction = {
-    type: "CALCULATOR_SET_FIELD_VALUE",
+    type: "SET_FIELD_VALUE",
     payload: { path, name: name, value: valueResult },
   };
   dispatch(setValueAction);
   _state = calculatorReducer(_state, setValueAction);
 
-  await updateFnValue(path, _state, calculator, environment, dispatch);
-  forceUpdate();
+  updateFnValue(path, _state, calculator, environment, dispatch);
 }

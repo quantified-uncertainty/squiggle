@@ -57,11 +57,11 @@ export function initialCalculatorState(
 
 export type CalculatorAction =
   | {
-      type: "CALCULATOR_SET_FIELD_CODE";
+      type: "SET_FIELD_CODE";
       payload: { path: SqValuePath; name: string; code: string };
     }
   | {
-      type: "CALCULATOR_SET_FIELD_VALUE";
+      type: "SET_FIELD_VALUE";
       payload: {
         path: SqValuePath;
         name: string;
@@ -69,7 +69,7 @@ export type CalculatorAction =
       };
     }
   | {
-      type: "CALCULATOR_SET_FN_VALUE";
+      type: "SET_FUNCTION_VALUE";
       payload: { path: SqValuePath; value: optionalResultValue };
     };
 
@@ -82,19 +82,19 @@ export const calculatorReducer = (
     return { ...state, fields: newFields };
   };
   switch (action.type) {
-    case "CALCULATOR_SET_FIELD_CODE": {
+    case "SET_FIELD_CODE": {
       const { name, code } = action.payload;
       const field = state.fields[name];
       const newField = { ...field, code, value: undefined };
       return modifyField(name, newField);
     }
-    case "CALCULATOR_SET_FIELD_VALUE": {
+    case "SET_FIELD_VALUE": {
       const { name, value } = action.payload;
       const field = state.fields[name];
       const newField = { ...field, value };
       return modifyField(name, newField);
     }
-    case "CALCULATOR_SET_FN_VALUE": {
+    case "SET_FUNCTION_VALUE": {
       return { ...state, fn: { value: action.payload.value } };
     }
   }

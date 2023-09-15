@@ -24,11 +24,7 @@ import {
   topLevelBindingsName,
 } from "./utils.js";
 import { CodeEditorHandle } from "../CodeEditor.js";
-import {
-  CalculatorState,
-  CalculatorAction,
-  calculatorReducer,
-} from "../Calculator/calculatorReducer.js";
+import { CalculatorState } from "../Calculator/calculatorReducer.js";
 
 export type Action =
   | {
@@ -73,13 +69,12 @@ export type Action =
       };
     }
   | {
-      type: "CALCULATOR_INITIALIZE";
+      type: "CALCULATOR_UPDATE";
       payload: {
         path: SqValuePath;
         calculator: CalculatorState;
       };
-    }
-  | CalculatorAction;
+    };
 
 export type ViewProviderDispatch = (action: Action) => void;
 
@@ -218,7 +213,7 @@ export const ViewerProvider: FC<
   }, [partialPlaygroundSettings]);
 
   // I'm not sure if we should use this, or getSettings(), which is similar.
-  const getSettingsRef = (path: SqValuePath): LocalItemSettings => {
+  const getSettingsRef = (path: SqValuePath): LocalItemSettings | undefined => {
     return settingsStoreRef.current[pathAsString(path)];
   };
 
@@ -226,8 +221,8 @@ export const ViewerProvider: FC<
     path: SqValuePath,
     fn: (settings: LocalItemSettings) => LocalItemSettings
   ): void => {
-    const settings = fn(getSettingsRef(path));
-    settingsStoreRef.current[pathAsString(path)] = fn(settings);
+    const newSettings = fn(getSettingsRef(path) || defaultLocalSettings);
+    settingsStoreRef.current[pathAsString(path)] = newSettings;
   };
 
   const getSettings = useCallback(
@@ -273,7 +268,7 @@ export const ViewerProvider: FC<
     path: SqValuePath,
     reduce: (calculator: CalculatorState) => CalculatorState
   ) => {
-    const calculator = getSettingsRef(path).calculator;
+    const calculator = getSettingsRef(path)?.calculator;
     if (calculator) {
       setSettings(path, (state) => ({
         ...state,
@@ -295,8 +290,10 @@ export const ViewerProvider: FC<
           setFocused(undefined);
           return;
         case "TOGGLE_COLLAPSED": {
-          const ref = getSettingsRef(action.payload);
-          ref.collapsed = !ref.collapsed;
+          setSettings(action.payload, (state) => ({
+            ...state,
+            collapsed: !state?.collapsed,
+          }));
           return;
         }
         case "COLLAPSE_CHILDREN": {
@@ -318,20 +315,13 @@ export const ViewerProvider: FC<
         case "UNREGISTER_ITEM_HANDLE":
           delete itemHandlesStoreRef.current[pathAsString(action.payload.path)];
           return;
-        case "CALCULATOR_INITIALIZE": {
-          const { path, calculator } = action.payload;
+        case "CALCULATOR_UPDATE": {
+          const { calculator, path } = action.payload;
           setSettings(path, (state) => ({
             ...state,
             calculator: calculator,
           }));
-          return;
-        }
-        case "CALCULATOR_SET_FIELD_CODE":
-        case "CALCULATOR_SET_FIELD_VALUE":
-        case "CALCULATOR_SET_FN_VALUE": {
-          updateCalculator(action.payload.path, (state) =>
-            calculatorReducer(state, action)
-          );
+          console.log("CALCULATOR_UPDATE", path, getSettingsRef(path));
           return;
         }
       }

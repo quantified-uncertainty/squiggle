@@ -1,6 +1,12 @@
 import React, { FC, ReactNode, useEffect, useReducer, useState } from "react";
 
-import { SqValue, SqCalculator, SqError, result } from "@quri/squiggle-lang";
+import {
+  SqValue,
+  SqCalculator,
+  SqError,
+  result,
+  SqValuePath,
+} from "@quri/squiggle-lang";
 import { Env } from "@quri/squiggle-lang";
 
 import { PlaygroundSettings } from "../PlaygroundSettings.js";
@@ -9,7 +15,14 @@ import { SqValueWithContext, valueHasContext } from "../../lib/utility.js";
 import ReactMarkdown from "react-markdown";
 import { initialize, updateCode } from "./asyncActions.js";
 
-import { useViewerContext } from "../SquiggleViewer/ViewerProvider.js";
+import { Action, useViewerContext } from "../SquiggleViewer/ViewerProvider.js";
+import { StyledInput } from "@quri/ui";
+import {
+  CalculatorAction,
+  CalculatorState,
+  calculatorReducer,
+  initialCalculatorState,
+} from "./calculatorReducer.js";
 
 type Props = {
   value: SqCalculator;
@@ -22,6 +35,21 @@ type Props = {
   ) => ReactNode;
 };
 
+//We backup the calculator state in the viewer context, for when the user navigates away and back
+const adjustedReducer =
+  (path: SqValuePath, viewerContextDispatch: (action: Action) => void) =>
+  (state: CalculatorState, action: CalculatorAction) => {
+    const newState = calculatorReducer(state, action);
+    viewerContextDispatch({
+      type: "CALCULATOR_UPDATE",
+      payload: {
+        path: path,
+        calculator: newState,
+      },
+    });
+    return newState;
+  };
+
 export const Calculator: FC<Props> = ({
   value: calculator,
   environment,
@@ -30,28 +58,30 @@ export const Calculator: FC<Props> = ({
   valueWithContext,
 }) => {
   const { path } = valueWithContext.context;
-  const { getSettings, dispatch } = useViewerContext();
-  const [, forceUpdate] = useReducer((x) => x + 1, 0);
+  const { getSettings, dispatch: viewerContextDispatch } = useViewerContext();
+  const itemSettings = getSettings({ path });
+
+  const [calculatorState, calculatorDispatch] = useReducer(
+    adjustedReducer(path, viewerContextDispatch),
+    itemSettings.calculator || initialCalculatorState(calculator)
+  );
+
   const [prevCalculator, setPrevCalculator] = useState<SqCalculator | null>(
     null
   );
 
-  const itemSettings = getSettings({ path, defaults: undefined });
-  const calculatorState = itemSettings.calculator;
-
   const init = async () => {
     await initialize({
-      dispatch,
+      dispatch: calculatorDispatch,
+      state: calculatorState,
       path,
       calculator,
       environment,
     });
-    forceUpdate();
   };
 
-  //When the component loads, if there is no saved calculator state, we want to initialize it
   useEffect(() => {
-    !calculatorState && init();
+    init();
   }, []);
 
   //We want to reset the calculator state if the calculator changes
@@ -72,13 +102,12 @@ export const Calculator: FC<Props> = ({
 
       calculatorState &&
         (await updateCode({
-          dispatch,
+          dispatch: calculatorDispatch,
           path,
           environment: environment,
           state: calculatorState,
           name,
           code: newCode,
-          forceUpdate,
           calculator,
         }));
     };
@@ -143,11 +172,10 @@ export const Calculator: FC<Props> = ({
                   <div className="text-sm  text-slate-600">{description}</div>
                 )}
                 <div className="flex-grow">
-                  <input
+                  <StyledInput
                     value={code || ""}
                     onChange={handleChange(name)}
                     placeholder={`Enter code for ${name}`}
-                    className="my-2 p-2 border rounded w-full"
                   />
                 </div>
                 <div>
@@ -162,7 +190,7 @@ export const Calculator: FC<Props> = ({
             );
           }
         })}
-      {calculatorState?.fn.value?.ok && (
+      {calculatorState?.fn.value && (
         <div>
           <div className="text-md font-bold text-slate-800">Result</div>
           {showSqValue(calculatorState.fn.value, resultSettings)}
