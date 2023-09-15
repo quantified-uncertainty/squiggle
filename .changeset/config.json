@@ -1,9 +1,12 @@
 {
   "$schema": "https://unpkg.com/@changesets/config@2.3.0/schema.json",
-  "changelog": false,
-  "commit": false,
   "fixed": [
-    ["@quri/squiggle-lang", "@quri/squiggle-components", "vscode-squiggle"]
+    [
+      "@quri/squiggle-lang",
+      "@quri/squiggle-components",
+      "@quri/prettier-plugin-squiggle",
+      "vscode-squiggle"
+    ]
   ],
   "linked": [],
   "access": "public",
