@@ -293,13 +293,13 @@ class VCalculator extends BaseValue {
     }
 
     if (value.fields.some((x) => x.name === "")) {
-      this.setError(`Calculator fields must all not be empty.`);
+      this.setError(`Calculator field names can't be empty.`);
     }
 
     const fieldNames = value.fields.map((f) => f.name);
     const uniqueNames = new Set(fieldNames);
     if (fieldNames.length !== uniqueNames.size) {
-      this.setError(`Duplicate field names found.`);
+      this.setError(`Duplicate calculator field names found.`);
     }
   }
 

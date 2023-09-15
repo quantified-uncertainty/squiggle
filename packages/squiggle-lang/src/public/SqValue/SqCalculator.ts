@@ -15,19 +15,19 @@ const wrapFn = ({ fn }: { fn: Lambda }): SqLambda => {
 export class SqCalculator {
   constructor(private _value: Calculator, public context?: SqValueContext) {}
 
-  run(items: SqValue[], env: Env): Result.result<SqValue, SqError> {
-    const response = wrapFn({ fn: this._value.fn }).call(items, env);
-    const context = this.context;
+  run(_arguments: SqValue[], env: Env): Result.result<SqValue, SqError> {
+    const response = wrapFn({ fn: this._value.fn }).call(_arguments, env);
+    const newContext =
+      this.context && this.context.extend({ type: "calculator" });
 
-    const newContext: SqValueContext | undefined =
-      context && context.extend({ type: "calculator" });
-
-    if (response.ok && context) {
-      return Result.Ok(wrapValue(response.value._value, newContext));
-    } else if (response.ok) {
-      return Result.Err(new SqOtherError("Context creation for table failed."));
-    } else {
+    if (!newContext) {
+      return Result.Err(
+        new SqOtherError("Context creation for calculator failed.")
+      );
+    } else if (!response.ok) {
       return response;
+    } else {
+      return Result.Ok(wrapValue(response.value._value, newContext));
     }
   }
 
@@ -35,11 +35,11 @@ export class SqCalculator {
     return this._value.description;
   }
 
-  get parameterNames(): string[] {
+  get parameters(): string[] {
     return this._value.fn.getParameterNames();
   }
 
-  get rows(): {
+  get fields(): {
     name: string;
     default: string;
     description?: string;

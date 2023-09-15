@@ -30,8 +30,8 @@ export type CalculatorState = {
 // This function is used to determine if a calculator has changed.
 // It's obviously not perfect - it doesn't capture changes within the calculator function, but this would be much more complicated.
 function calculatorHash(calc: SqCalculator): string {
-  const rowData = JSON.stringify(calc.rows);
-  const paramData = (calc.parameterNames || []).join(",");
+  const rowData = JSON.stringify(calc.fields);
+  const paramData = (calc.parameters || []).join(",");
   return rowData + paramData + calc.description;
 }
 
@@ -55,14 +55,14 @@ export function initialCalculatorState(
   calculator: SqCalculator
 ): CalculatorState {
   const fields: Record<string, FieldValue> = {};
-  calculator.rows.forEach((row) => {
+  calculator.fields.forEach((row) => {
     fields[row.name] = {
       name: row.name,
       code: row.default,
     };
   });
   return {
-    fieldNames: calculator.rows.map((row) => row.name),
+    fieldNames: calculator.fields.map((row) => row.name),
     fields,
     fn: {},
     hash: calculatorHash(calculator),

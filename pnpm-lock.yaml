@@ -135,9 +135,6 @@ importers:
       react-resizable:
         specifier: ^3.0.5
         version: 3.0.5(react-dom@18.2.0)(react@18.2.0)
-      use-reducer-async:
-        specifier: ^2.1.1
-        version: 2.1.1(react@18.2.0)
       vscode-uri:
         specifier: ^3.0.7
         version: 3.0.7
@@ -17404,14 +17401,6 @@ packages:
       '@types/react': 18.2.18
       react: 18.2.0
       use-isomorphic-layout-effect: 1.1.2(@types/react@18.2.18)(react@18.2.0)
-    dev: false
-
-  /use-reducer-async@2.1.1(react@18.2.0):
-    resolution: {integrity: sha512-oPSFzOIEPgMenQkMHzqeRgsQLSpcyGkspAnyTWP4l1tKlt31wMVMz6wWj6g/jea/Ms7lRvBz4AL+Okt83Tntig==}
-    peerDependencies:
-      react: '>=16.8.0'
-    dependencies:
-      react: 18.2.0
     dev: false
 
   /use-resize-observer@9.1.0(react-dom@18.2.0)(react@18.2.0):

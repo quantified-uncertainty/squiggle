@@ -181,7 +181,7 @@ export const Calculator: FC<Props> = ({
       )}
 
       {calculatorState &&
-        calculator.rows.map((row) => {
+        calculator.fields.map((row) => {
           const { name, description } = row;
           const field = calculatorState!.fields[name];
           if (field) {

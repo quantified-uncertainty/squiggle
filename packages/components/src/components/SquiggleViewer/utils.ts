@@ -81,17 +81,20 @@ export function getCalculatorResult(
   pathItem: SqValuePath,
   getCalculator: GetCalculatorFn
 ): SqValue | undefined {
+  // The previous path item is the one that is the parent of the calculator result.
+  // This is the one that we use in the ProviderContext to store information about the calculator.
   const allItems = pathItem.itemsAsValuePaths({ includeRoot: true });
   const previousPathItem: SqValuePath | undefined =
-    allItems[allItems.length - 2];
+    allItems.length > 1 ? allItems[allItems.length - 2] : undefined;
 
-  if (previousPathItem === undefined) {
+  if (!previousPathItem) {
     return undefined;
   }
+
   const calculatorState = getCalculator({ path: previousPathItem });
-  const value = calculatorState?.fn.value;
-  if (value?.ok) {
-    return value.value;
+  const result = calculatorState?.fn.value;
+  if (result?.ok) {
+    return result.value;
   } else {
     return undefined;
   }
