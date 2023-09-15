@@ -1,5 +1,0 @@
----
-"@quri/ui": patch
----
-
-EmptyIcon

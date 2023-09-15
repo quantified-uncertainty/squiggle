@@ -2,4 +2,4 @@
 "@quri/squiggle-components": patch
 ---
 
-Better symlog scale ticks
+Improved symlog scale ticks
