@@ -2,11 +2,7 @@
 // Fork of https://github.com/svitejs/changesets-changelog-github-compact/blob/b9afa3e4c42762e842a310813d42f99b0aee4b6f/packages/changesets-changelog-github-compact/src/index.ts
 
 import type { ChangelogFunctions } from "@changesets/types";
-// @ts-ignore
-import { config } from "dotenv";
 import { getInfo, getInfoFromPullRequest } from "@changesets/get-github-info";
-
-config();
 
 const REPO = "quantified-uncertainty/squiggle";
 
