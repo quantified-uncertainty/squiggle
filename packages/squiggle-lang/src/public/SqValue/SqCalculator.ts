@@ -13,7 +13,10 @@ const wrapFn = ({ fn }: { fn: Lambda }): SqLambda => {
 };
 
 export class SqCalculator {
-  constructor(private _value: Calculator, public context?: SqValueContext) {}
+  constructor(
+    private _value: Calculator,
+    public context?: SqValueContext
+  ) {}
 
   run(_arguments: SqValue[], env: Env): Result.result<SqValue, SqError> {
     const response = wrapFn({ fn: this._value.fn }).call(_arguments, env);
