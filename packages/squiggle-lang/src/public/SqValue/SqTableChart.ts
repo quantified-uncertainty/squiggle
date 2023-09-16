@@ -6,12 +6,7 @@ import { SqError, SqOtherError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqLambda } from "./SqLambda.js";
 import { SqValue, wrapValue } from "./index.js";
-import { Value } from "../../value/index.js";
 import { Lambda } from "../../reducer/lambda.js";
-
-const wrapItem = (value: Value, context?: SqValueContext): SqValue => {
-  return wrapValue(value, context);
-};
 
 const wrapFn = ({ fn }: { fn: Lambda }): SqLambda => {
   return new SqLambda(fn, undefined);
@@ -52,7 +47,7 @@ export class SqTableChart {
     return getItem(
       rowI,
       columnI,
-      wrapItem(this._value.data[rowI], this.context),
+      wrapValue(this._value.data[rowI], this.context),
       wrapFn(this._value.columns[columnI]),
       env,
       this.context

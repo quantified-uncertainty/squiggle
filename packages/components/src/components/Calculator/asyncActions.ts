@@ -12,7 +12,7 @@ import {
   CalculatorState,
   CalculatorAction,
   calculatorReducer,
-  optionalResultValue,
+  resultSqValue,
   allFieldResults,
   allFieldValuesAreValid,
 } from "./calculatorReducer.js";
@@ -40,7 +40,7 @@ const updateFnValue = (
   env: Env,
   dispatch: Dispatch
 ) => {
-  let finalResult: optionalResultValue = undefined;
+  let finalResult: resultSqValue | undefined = undefined;
   if (allFieldValuesAreValid(state)) {
     const results: SqValue[] = allFieldResults(state).map((result) => {
       if (result && result.ok) {
@@ -60,7 +60,7 @@ const updateFnValue = (
   });
 };
 
-// Gets all field codes in th State. Runs them all, runs the function, and updates all these values in the stat all these values in the state.
+// Gets all field codes in the State. Runs them all, runs the function, and updates all these values in the state.
 export async function processAllFieldCodes({
   dispatch,
   path,

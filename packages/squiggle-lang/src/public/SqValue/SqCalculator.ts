@@ -6,12 +6,6 @@ import { SqError, SqOtherError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqLambda } from "./SqLambda.js";
 import { SqValue, wrapValue } from "./index.js";
-import { Lambda } from "../../reducer/lambda.js";
-
-const wrapFn = ({ fn }: { fn: Lambda }): SqLambda => {
-  return new SqLambda(fn, undefined);
-};
-
 export class SqCalculator {
   constructor(
     private _value: Calculator,
@@ -19,7 +13,9 @@ export class SqCalculator {
   ) {}
 
   run(_arguments: SqValue[], env: Env): Result.result<SqValue, SqError> {
-    const response = wrapFn({ fn: this._value.fn }).call(_arguments, env);
+    const sqLambda = new SqLambda(this._value.fn, undefined);
+    const response = sqLambda.call(_arguments, env);
+
     const newContext =
       this.context && this.context.extend({ type: "calculator" });
 

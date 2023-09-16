@@ -6,18 +6,16 @@ import {
   result,
 } from "@quri/squiggle-lang";
 
-import _ from "lodash";
-
-export type optionalResultValue = result<SqValue, SqError> | undefined;
+export type resultSqValue = result<SqValue, SqError>;
 
 export type FieldValue = {
   name: string;
   code: string;
-  value?: optionalResultValue;
+  value?: resultSqValue;
 };
 
 export type ResultValue = {
-  value?: optionalResultValue;
+  value?: resultSqValue;
 };
 
 export type CalculatorState = {
@@ -43,12 +41,14 @@ export function allFields(state: CalculatorState): FieldValue[] {
   return state.fieldNames.map((name) => state.fields[name]);
 }
 
-export function allFieldResults(state: CalculatorState): optionalResultValue[] {
+export function allFieldResults(
+  state: CalculatorState
+): (resultSqValue | undefined)[] {
   return allFields(state).map((r) => r.value);
 }
 
 export function allFieldValuesAreValid(state: CalculatorState): boolean {
-  return _.every(allFieldResults(state), (result) => result && result.ok);
+  return allFieldResults(state).every((result) => result?.ok);
 }
 
 export function initialCalculatorState(
@@ -83,12 +83,12 @@ export type CalculatorAction =
       payload: {
         path: SqValuePath;
         name: string;
-        value: optionalResultValue;
+        value?: resultSqValue;
       };
     }
   | {
       type: "SET_FUNCTION_VALUE";
-      payload: { path: SqValuePath; value: optionalResultValue };
+      payload: { path: SqValuePath; value?: resultSqValue };
     };
 
 export const calculatorReducer = (
