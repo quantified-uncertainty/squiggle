@@ -29,7 +29,7 @@ export type CalculatorState = {
 
 // This function is used to determine if a calculator has changed.
 // It's obviously not perfect - it doesn't capture changes within the calculator function, but this would be much more complicated.
-function calculatorHash(calc: SqCalculator): string {
+export function calculatorHash(calc: SqCalculator): string {
   const rowData = JSON.stringify(calc.fields);
   const paramData = (calc.parameters || []).join(",");
   return rowData + paramData + calc.description;

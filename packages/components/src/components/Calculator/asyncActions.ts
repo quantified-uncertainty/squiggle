@@ -60,7 +60,8 @@ const updateFnValue = (
   });
 };
 
-export async function initialize({
+// Gets all field codes in th State. Runs them all, runs the function, and updates all these values in the stat all these values in the state.
+export async function processAllFieldCodes({
   dispatch,
   path,
   calculator,
@@ -87,7 +88,8 @@ export async function initialize({
   updateFnValue(path, _state, calculator, environment, dispatch);
 }
 
-export async function updateCode({
+// Takes an updated field code, runs it, and runs the function.
+export async function updateAndProcessFieldCode({
   dispatch,
   path,
   environment,
