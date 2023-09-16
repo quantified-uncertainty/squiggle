@@ -1,5 +1,5 @@
 ---
-"@quri/squiggle-lang": minor
+"@quri/squiggle-lang": patch
 ---
 
 Added support for `%` as a number suffix

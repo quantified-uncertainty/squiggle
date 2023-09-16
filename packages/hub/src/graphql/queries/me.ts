@@ -3,15 +3,9 @@ import { builder } from "@/graphql/builder";
 import { Me } from "../types/Me";
 
 builder.queryField("me", (t) =>
-  t.field({
+  t.withAuth({ signedIn: true }).field({
     type: Me,
-    authScopes: {
-      user: true,
-    },
     async resolve(_, __, { session }) {
-      if (!session) {
-        throw new Error("Impossible, should be guaranteed by authScopes");
-      }
       return session.user;
     },
   })

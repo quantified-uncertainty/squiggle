@@ -6,7 +6,6 @@ import {
 } from "@quri/squiggle-lang";
 import { z } from "zod";
 
-import { ModelRevision$data } from "@/__generated__/ModelRevision.graphql";
 import { cartesianProduct } from "../lib/utils";
 import {
   RelativeValue,
@@ -14,6 +13,7 @@ import {
   RelativeValuesCacheRecord,
   relativeValueSchema,
 } from "./types";
+import { RelativeValuesModelRevision$data } from "@/__generated__/RelativeValuesModelRevision.graphql";
 
 export const extractOkValues = <A, B>(items: result<A, B>[]): A[] => {
   return items
@@ -95,7 +95,9 @@ export class ModelEvaluator {
 
   static async create(
     modelCode: string,
-    cache?: NonNullable<ModelRevision$data["forRelativeValues"]>["cache"]
+    cache?: NonNullable<
+      RelativeValuesModelRevision$data["forRelativeValues"]
+    >["cache"]
   ): Promise<result<ModelEvaluator, string>> {
     const project = SqProject.create();
     project.setSource("wrapper", "RelativeValues.wrap(fn)");

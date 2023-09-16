@@ -1,17 +1,18 @@
-import SchemaBuilder, { InputShapeFromFields } from "@pothos/core";
+import SchemaBuilder from "@pothos/core";
 
-import SimpleObjectsPlugin from "@pothos/plugin-simple-objects";
-import ScopeAuthPlugin from "@pothos/plugin-scope-auth";
-import RelayPlugin from "@pothos/plugin-relay";
-import PrismaPlugin from "@pothos/plugin-prisma";
-import WithInputPlugin from "@pothos/plugin-with-input";
 import ErrorsPlugin from "@pothos/plugin-errors";
+import PrismaPlugin from "@pothos/plugin-prisma";
+import RelayPlugin from "@pothos/plugin-relay";
+import ScopeAuthPlugin from "@pothos/plugin-scope-auth";
+import SimpleObjectsPlugin from "@pothos/plugin-simple-objects";
 import ValidationPlugin from "@pothos/plugin-validation";
+import WithInputPlugin from "@pothos/plugin-with-input";
 
 import type PrismaTypes from "@pothos/plugin-prisma/generated";
 
 import { Session } from "next-auth";
 import { NextRequest } from "next/server";
+
 import { prisma } from "@/prisma";
 
 type Context = {
@@ -19,19 +20,22 @@ type Context = {
   request: NextRequest;
 };
 
-type HubSchemaTypes = {
+export type SignedInSession = Session & {
+  user: NonNullable<Session["user"]> & { email: string };
+};
+
+export type HubSchemaTypes = {
   PrismaTypes: PrismaTypes;
   DefaultEdgesNullability: false;
   Context: Context;
   AuthScopes: {
-    user: boolean;
+    signedIn: boolean;
+    controlsOwnerId: string | null;
   };
   AuthContexts: {
     // https://pothos-graphql.dev/docs/plugins/scope-auth#change-context-types-based-on-scopes
-    user: Context & {
-      session: Session & {
-        user: NonNullable<Session["user"]> & { email: string };
-      };
+    signedIn: Context & {
+      session: SignedInSession;
     };
   };
 };
@@ -57,8 +61,42 @@ export const builder = new SchemaBuilder<HubSchemaTypes>({
       nullable: false,
     },
   },
+  scopeAuthOptions: {
+    defaultStrategy: "all",
+  },
   authScopes: async (context) => ({
-    user: !!context.session?.user,
+    signedIn: !!context.session?.user,
+    controlsOwnerId: async (ownerId) => {
+      if (!context.session) {
+        return false;
+      }
+      if (!ownerId) {
+        return false; // we're migrating to new ownerIds and ownerIds are nullable for now
+      }
+      return Boolean(
+        await prisma.owner.count({
+          where: {
+            id: ownerId,
+            OR: [
+              {
+                user: { email: context.session.user.email },
+              },
+              {
+                group: {
+                  memberships: {
+                    some: {
+                      user: {
+                        email: context.session.user.email,
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        })
+      );
+    },
   }),
   errorOptions: {
     defaultTypes: [Error],

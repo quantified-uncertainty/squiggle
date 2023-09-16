@@ -8,6 +8,7 @@ on:
 
 jobs:
   migrate:
+    if: ${{ github.actor != 'dependabot[bot]' }}
     runs-on: ubuntu-latest
     environment: Preview
     steps:

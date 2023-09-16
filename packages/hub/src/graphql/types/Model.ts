@@ -1,41 +1,94 @@
-import { builder } from "@/graphql/builder";
-import { ModelRevision, ModelRevisionConnection } from "./ModelRevision";
-import { decodeGlobalID } from "@pothos/plugin-relay";
-
+import { Prisma, type Model as PrismaModel } from "@prisma/client";
 import { Session } from "next-auth";
-import { Prisma } from "@prisma/client";
+
+import { builder } from "@/graphql/builder";
+import { prisma } from "@/prisma";
+import { prismaConnectionHelpers } from "@pothos/plugin-prisma";
+import { NotFoundError } from "../errors/NotFoundError";
+import { decodeGlobalIdWithTypename } from "../utils";
+import { ModelRevision, ModelRevisionConnection } from "./ModelRevision";
+import { Owner } from "./Owner";
 
 export function modelWhereHasAccess(
   session: Session | null
 ): Prisma.ModelWhereInput {
-  return {
-    OR: [
-      { isPrivate: false },
-      ...(session
-        ? [
-            {
-              owner: {
-                email: session.user.email,
+  const orParts: Prisma.ModelWhereInput[] = [{ isPrivate: false }];
+  if (session) {
+    orParts.push({
+      owner: {
+        OR: [
+          {
+            user: { email: session.user.email },
+          },
+          {
+            group: {
+              memberships: {
+                some: {
+                  user: { email: session.user.email },
+                },
               },
             },
-          ]
-        : []),
-    ],
-  };
+          },
+        ],
+      },
+    });
+  }
+  return { OR: orParts };
+}
+
+export async function getWriteableModel({
+  session,
+  owner,
+  slug,
+}: {
+  session: Session;
+  owner: string;
+  slug: string;
+}): Promise<PrismaModel> {
+  // Note: `findUnique` would be safer, but then we won't be able to use nested queries
+  const model = await prisma.model.findFirst({
+    where: {
+      slug,
+      owner: {
+        slug: owner,
+        OR: [
+          {
+            user: { email: session.user.email },
+          },
+          {
+            group: {
+              memberships: {
+                some: {
+                  user: { email: session.user.email },
+                },
+              },
+            },
+          },
+        ],
+      },
+    },
+  });
+  if (!model) {
+    // FIXME - this will happen if permissions are not sufficient
+    // It would be better to throw a custom PermissionError
+    // (Note that we should throw PermissionError only if model is readable, but not writeable; otherwise it should still be "Can't find")
+    throw new NotFoundError("Can't find model");
+  }
+  return model;
 }
 
 export const Model = builder.prismaNode("Model", {
   id: { field: "id" },
-  include: {
-    owner: true, // required for auth
-  },
-  authScopes: (model, context) => {
-    if (!model.isPrivate || context.session?.user.email === model.owner.email) {
+  authScopes: (model) => {
+    if (!model.isPrivate) {
       return true;
     }
+
     // This might leak the info that the model exists, but we handle that in `model()` query and return NotFoundError.
-    // It's still possible that we leak this info somewhere else, though.
-    return false;
+    // It's probable that we leak this info somewhere else, though.
+    return {
+      controlsOwnerId: model.ownerId,
+    };
   },
   fields: (t) => ({
     slug: t.exposeString("slug"),
@@ -46,8 +99,34 @@ export const Model = builder.prismaNode("Model", {
     updatedAtTimestamp: t.float({
       resolve: (model) => model.updatedAt.getTime(),
     }),
-    owner: t.relation("owner"),
+    owner: t.field({
+      type: Owner,
+      // TODO - we need to extract fragment data from Owner query and call nestedSelection(...) for optimal performance.
+      select: {
+        owner: {
+          include: {
+            user: true,
+            group: true,
+          },
+        },
+      },
+      resolve: (model) => {
+        const result = model.owner.user ?? model.owner.group;
+        // necessary for Owner type
+        (result as any)["_owner"] = {
+          type: model.owner.user ? "User" : "Group",
+        };
+        return result;
+      },
+    }),
     isPrivate: t.exposeBoolean("isPrivate"),
+    isEditable: t.boolean({
+      authScopes: (model) => ({
+        controlsOwnerId: model.ownerId,
+      }),
+      resolve: () => true,
+      unauthorizedResolver: () => false,
+    }),
     currentRevision: t.relation("currentRevision", {
       nullable: false,
     }),
@@ -57,10 +136,7 @@ export const Model = builder.prismaNode("Model", {
         id: t.arg.id({ required: true }),
       },
       select: (args, _, nestedSelection) => {
-        const { typename, id } = decodeGlobalID(String(args.id));
-        if (typename !== "ModelRevision") {
-          throw new Error("Expected ModelRevision id");
-        }
+        const id = decodeGlobalIdWithTypename(String(args.id), "ModelRevision");
 
         return {
           revisions: nestedSelection({
@@ -96,3 +172,9 @@ export const ModelConnection = builder.connectionObject({
   type: Model,
   name: "ModelConnection",
 });
+
+export const modelConnectionHelpers = prismaConnectionHelpers(
+  builder,
+  "Model",
+  { cursor: "id" }
+);

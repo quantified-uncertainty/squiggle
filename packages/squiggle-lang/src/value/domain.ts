@@ -12,7 +12,10 @@ abstract class BaseDomain {
 export class NumericRangeDomain extends BaseDomain {
   readonly type = "NumericRange";
 
-  constructor(public min: number, public max: number) {
+  constructor(
+    public min: number,
+    public max: number
+  ) {
     super();
   }
 

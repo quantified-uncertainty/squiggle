@@ -2,21 +2,26 @@ import { prisma } from "@/prisma";
 import { builder } from "@/graphql/builder";
 
 import { Me } from "../types/Me";
+import { validateSlug } from "../utils";
+import { ZodError } from "zod";
 
 builder.mutationField("setUsername", (t) =>
-  t.withAuth({ user: true }).field({
+  t.withAuth({ signedIn: true }).field({
     type: Me,
     args: {
-      username: t.arg.string({ required: true }),
+      username: t.arg.string({ required: true, validate: validateSlug }),
     },
-    errors: {},
+    errors: { types: [ZodError] },
     async resolve(_, args, { session }) {
       if (session.user.username) {
         throw new Error("Username is already set");
       }
 
-      if (!args.username.match("^[a-zA-Z]\\w+$")) {
-        throw new Error("Username must be alphanumerical");
+      const existingOwner = await prisma.owner.count({
+        where: { slug: args.username },
+      });
+      if (existingOwner) {
+        throw new Error(`Username ${args.username} is not available`);
       }
 
       await prisma.user.update({
@@ -24,7 +29,9 @@ builder.mutationField("setUsername", (t) =>
           email: session.user.email,
         },
         data: {
-          username: args.username,
+          asOwner: {
+            create: { slug: args.username },
+          },
         },
       });
 

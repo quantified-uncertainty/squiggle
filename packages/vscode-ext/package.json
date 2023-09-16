@@ -142,13 +142,13 @@
     "esbuild": "^0.18.17",
     "eslint": "^8.46.0",
     "js-yaml": "^4.1.0",
-    "prettier": "^2.8.8",
+    "prettier": "^3.0.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "typescript": "^5.1.6",
-    "vsce": "^2.15.0"
+    "typescript": "^5.1.6"
   },
   "dependencies": {
+    "@vscode/vsce": "^2.21.0",
     "vscode-languageclient": "^8.1.0",
     "vscode-languageserver": "^8.1.0",
     "vscode-languageserver-textdocument": "^1.0.8"

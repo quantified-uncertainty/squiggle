@@ -1,3 +1,4 @@
+"use client";
 import { flip, offset, shift, useFloating } from "@floating-ui/react";
 import { clsx } from "clsx";
 import { PropsWithChildren } from "react";
@@ -7,14 +8,14 @@ import { ErrorIcon } from "../../icons/ErrorIcon.js";
 
 type Props<
   TValues extends FieldValues,
-  TName extends FieldPath<TValues> = FieldPath<TValues>
+  TName extends FieldPath<TValues> = FieldPath<TValues>,
 > = {
   name: TName;
 };
 
 export function WithRHFError<
   TValues extends FieldValues,
-  TName extends FieldPath<TValues> = FieldPath<TValues>
+  TName extends FieldPath<TValues> = FieldPath<TValues>,
 >({ name, children }: PropsWithChildren<Props<TValues, TName>>) {
   const { getFieldState, formState, clearErrors } = useFormContext<TValues>();
 

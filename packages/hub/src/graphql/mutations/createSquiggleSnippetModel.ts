@@ -2,49 +2,58 @@ import { prisma } from "@/prisma";
 import { builder } from "@/graphql/builder";
 
 import { Model } from "../types/Model";
+import { rethrowOnConstraint } from "../errors/common";
+import { getWriteableOwner } from "../types/Owner";
+import { ZodError } from "zod";
+import { validateSlug } from "../utils";
 
 builder.mutationField("createSquiggleSnippetModel", (t) =>
-  t.fieldWithInput({
-    type: builder.simpleObject("CreateSquiggleSnippetResult", {
+  t.withAuth({ signedIn: true }).fieldWithInput({
+    type: builder.simpleObject("CreateSquiggleSnippetModelResult", {
       fields: (t) => ({
-        model: t.field({
-          type: Model,
-          nullable: false,
-        }),
+        model: t.field({ type: Model }),
       }),
     }),
-    authScopes: {
-      user: true,
-    },
-    errors: {},
+    errors: { types: [ZodError] },
     input: {
-      code: t.input.string({ required: true }),
+      groupSlug: t.input.string({
+        validate: validateSlug,
+        description:
+          "Optional, if not set, model will be created on current user's account",
+      }),
+      code: t.input.string({
+        required: true,
+        description: "Squiggle source code",
+      }),
       slug: t.input.string({
         required: true,
-        validate: {
-          regex: /^\w[\w\-]*$/,
-        },
+        validate: validateSlug,
+      }),
+      isPrivate: t.input.boolean({
+        description: "Defaults to false",
       }),
     },
     resolve: async (_, { input }, { session }) => {
-      const email = session?.user.email;
-      if (!email) {
-        // shouldn't happen because we checked user auth scope previously, but helps with type checks
-        throw new Error("Email is missing");
-      }
-
       const model = await prisma.$transaction(async (tx) => {
+        const owner = await getWriteableOwner(session, input.groupSlug);
+
         // nested create is not possible here;
         // similar problem is described here: https://github.com/prisma/prisma/discussions/14937,
         // seems to be caused by multiple Model -> ModelRevision relations
-        const model = await tx.model.create({
-          data: {
-            owner: {
-              connect: { email },
-            },
-            slug: input.slug,
-          },
-        });
+        const model = await rethrowOnConstraint(
+          () =>
+            tx.model.create({
+              data: {
+                slug: input.slug,
+                ownerId: owner.id,
+                isPrivate: input.isPrivate ?? false,
+              },
+            }),
+          {
+            target: ["slug", "ownerId"],
+            error: `Model ${input.slug} already exists on this account`,
+          }
+        );
 
         const revision = await tx.modelRevision.create({
           data: {
@@ -68,9 +77,6 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
           },
           data: {
             currentRevisionId: revision.id,
-          },
-          include: {
-            owner: true,
           },
         });
       });

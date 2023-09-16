@@ -8,10 +8,8 @@ import { graphql } from "relay-runtime";
 import { NewDefinitionMutation } from "@/__generated__/NewDefinitionMutation.graphql";
 import { H1 } from "@/components/ui/Headers";
 import { useAsyncMutation } from "@/hooks/useAsyncMutation";
-import {
-  RelativeValuesDefinitionForm,
-  RelativeValuesDefinitionFormShape,
-} from "@/relative-values/components/RelativeValuesDefinitionForm";
+import { RelativeValuesDefinitionForm } from "@/relative-values/components/RelativeValuesDefinitionForm";
+import { FormShape } from "@/relative-values/components/RelativeValuesDefinitionForm/FormShape";
 
 const Mutation = graphql`
   mutation NewDefinitionMutation(
@@ -19,7 +17,7 @@ const Mutation = graphql`
   ) {
     result: createRelativeValuesDefinition(input: $input) {
       __typename
-      ... on BaseError {
+      ... on Error {
         message
       }
       ... on CreateRelativeValuesDefinitionResult {
@@ -40,10 +38,11 @@ export const NewDefinition: FC = () => {
     mutation: Mutation,
     expectedTypename: "CreateRelativeValuesDefinitionResult",
     confirmation: "Definition created",
+    blockOnSuccess: true,
   });
 
-  const save = (data: RelativeValuesDefinitionFormShape) => {
-    runMutation({
+  const save = async (data: FormShape) => {
+    await runMutation({
       variables: {
         input: {
           slug: data.slug,

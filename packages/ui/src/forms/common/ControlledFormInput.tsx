@@ -1,3 +1,4 @@
+"use client";
 import { ReactNode } from "react";
 import {
   Controller,
@@ -16,7 +17,7 @@ type Props<
   TName extends FieldPathByValue<TValues, TValueType> = FieldPathByValue<
     TValues,
     TValueType
-  >
+  >,
 > = {
   name: TName;
   rules?: UseControllerProps<TValues, TName>["rules"];
@@ -32,7 +33,7 @@ export function ControlledFormInput<
   TName extends FieldPathByValue<TValues, TValueType> = FieldPathByValue<
     TValues,
     TValueType
-  >
+  >,
 >({ name, rules, children }: Props<TValues, TValueType, TName>) {
   const { control } = useFormContext<TValues>();
 

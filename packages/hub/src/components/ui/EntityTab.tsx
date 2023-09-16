@@ -1,9 +1,8 @@
-import { FC, ReactNode } from "react";
-import { IconProps, StyledTab } from "@quri/ui";
+import { IconProps } from "@quri/ui";
+import clsx from "clsx";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import clsx from "clsx";
-import React, { PropsWithChildren, createContext, useContext } from "react";
+import { FC, ReactNode } from "react";
 
 type TabDivProps = {
   name: string;

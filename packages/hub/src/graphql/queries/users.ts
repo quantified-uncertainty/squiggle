@@ -1,3 +1,5 @@
+import { Prisma } from "@prisma/client";
+
 import { prisma } from "@/prisma";
 import { builder } from "@/graphql/builder";
 
@@ -16,17 +18,21 @@ builder.queryField("users", (t) =>
     args: {
       input: t.arg({ type: UsersQueryInput }),
     },
-    resolve: (query, _, args) =>
-      prisma.user.findMany({
+    resolve: async (query, _, { input }) => {
+      const where: Prisma.UserWhereInput = {
+        ownerId: { not: null },
+      };
+
+      if (input?.usernameContains) {
+        where.asOwner = {
+          slug: { contains: input.usernameContains },
+        };
+      }
+
+      return await prisma.user.findMany({
         ...query,
-        where: {
-          username: { not: null },
-          ...(args.input?.usernameContains && {
-            username: {
-              contains: args.input.usernameContains,
-            },
-          }),
-        },
-      }),
+        where,
+      });
+    },
   })
 );

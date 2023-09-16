@@ -7,7 +7,7 @@ import { clsx } from "clsx";
 // works both for models and for definitions
 export type EntityNode = {
   slug: string;
-  href: string;
+  href?: string;
   icon?: FC<IconProps>;
 };
 
@@ -28,15 +28,12 @@ const Entity: FC<EntityNode & { isFirst: boolean; isLast: boolean }> = ({
   isFirst,
   isLast,
 }) => {
-  return (
-    <Link
+  const content = (
+    <div
       className={clsx(
-        "text-lg text-slate-700 hover:underline flex items-center gap-1 group py-2 pr-3",
-        isLast ? "font-semibold" : "",
+        "flex items-center gap-1 group py-2 pr-3",
         !isFirst && "pl-3"
       )}
-      href={href}
-      key={href}
     >
       {Icon && (
         <Icon
@@ -44,9 +41,23 @@ const Entity: FC<EntityNode & { isFirst: boolean; isLast: boolean }> = ({
           size={18}
         />
       )}
-      {slug}
-    </Link>
+      <div
+        className={clsx("text-lg text-slate-700", isLast && "font-semibold")}
+      >
+        {slug}
+      </div>
+    </div>
   );
+
+  if (href) {
+    return (
+      <Link className="hover:underline" href={href}>
+        {content}
+      </Link>
+    );
+  } else {
+    return content;
+  }
 };
 
 export const EntityInfo: FC<{

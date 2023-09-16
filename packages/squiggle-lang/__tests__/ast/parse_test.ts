@@ -19,26 +19,29 @@ describe("Peggy parse", () => {
       ["0.1e1", { integer: 0, fractional: "1", exponent: 1 }],
       ["0.1e+3", { integer: 0, fractional: "1", exponent: 3 }],
       ["0.1e-3", { integer: 0, fractional: "1", exponent: -3 }],
-    ] satisfies [string, Pick<Extract<ASTNode, { type: "Float" }>, "integer" | "fractional" | "exponent">][])(
-      "%s",
-      (code, expected) => {
-        const result = parse(code, "test");
-        if (
-          !(
-            result.ok &&
-            result.value.type === "Program" &&
-            result.value.statements.length === 1
-          )
-        ) {
-          throw new Error();
-        }
-        const value = result.value.statements[0];
-        if (value.type !== "Float") {
-          throw new Error();
-        }
-        expect(value).toMatchObject(expected);
+    ] satisfies [
+      string,
+      Pick<
+        Extract<ASTNode, { type: "Float" }>,
+        "integer" | "fractional" | "exponent"
+      >,
+    ][])("%s", (code, expected) => {
+      const result = parse(code, "test");
+      if (
+        !(
+          result.ok &&
+          result.value.type === "Program" &&
+          result.value.statements.length === 1
+        )
+      ) {
+        throw new Error();
       }
-    );
+      const value = result.value.statements[0];
+      if (value.type !== "Float") {
+        throw new Error();
+      }
+      expect(value).toMatchObject(expected);
+    });
     testParse("0.1e+2+5", "(Program (InfixCall + 0.1e2 5))");
     testParse("0.1e+2-5", "(Program (InfixCall - 0.1e2 5))");
     testParse("100e-2-5", "(Program (InfixCall - 100e-2 5))");

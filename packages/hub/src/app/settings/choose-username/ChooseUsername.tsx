@@ -3,16 +3,17 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { Button, TextFormField, useToast } from "@quri/ui";
+import { Button, useToast } from "@quri/ui";
 
+import { SlugFormField } from "@/components/ui/SlugFormField";
+import { useAsyncMutation } from "@/hooks/useAsyncMutation";
 import { ChooseUsernameMutation } from "@gen/ChooseUsernameMutation.graphql";
 
 const Mutation = graphql`
   mutation ChooseUsernameMutation($username: String!) {
-    setUsername(username: $username) {
+    result: setUsername(username: $username) {
       __typename
       ... on BaseError {
         message
@@ -27,9 +28,11 @@ const Mutation = graphql`
 export const ChooseUsername: FC = () => {
   const toast = useToast();
 
-  const form = useForm<{
+  type FormShape = {
     username: string;
-  }>({
+  };
+
+  const form = useForm<FormShape>({
     mode: "onChange",
   });
 
@@ -42,52 +45,42 @@ export const ChooseUsername: FC = () => {
     router.replace("/");
   }
 
-  const [mutation, isMutationInFlight] =
-    useMutation<ChooseUsernameMutation>(Mutation);
+  const [mutation, inFlight] = useAsyncMutation<ChooseUsernameMutation, "Me">({
+    mutation: Mutation,
+    expectedTypename: "Me",
+  });
 
-  const save = form.handleSubmit((data) => {
-    mutation({
+  const save = form.handleSubmit(async (data) => {
+    await mutation({
       variables: { username: data.username },
-      onCompleted(data) {
-        if (data.setUsername.__typename === "BaseError") {
-          toast(data.setUsername.message, "error");
-        } else {
-          updateSession();
-          router.replace("/");
-        }
-      },
-      onError(error) {
-        toast((error as any).source ?? error.toString(), "error");
+      onCompleted() {
+        updateSession();
+        router.replace("/");
       },
     });
   });
 
-  const disabled = isMutationInFlight || !form.formState.isValid;
+  const disabled = inFlight || !form.formState.isValid;
 
   return (
-    <FormProvider {...form}>
-      <div className="flex flex-col items-center mt-20">
-        <div className="space-y-2">
-          <div>Pick a username:</div>
-          <div className="flex items-center gap-1">
-            <TextFormField
-              placeholder="Username"
-              name="username"
-              size="small"
-              rules={{
-                required: true,
-                pattern: {
-                  value: /^[\w-]+$/,
-                  message: "Must be alphanumerical",
-                },
-              }}
-            />
-            <Button onClick={save} disabled={disabled} theme="primary">
-              Save
-            </Button>
+    <form onSubmit={save}>
+      <FormProvider {...form}>
+        <div className="flex flex-col items-center mt-20">
+          <div className="space-y-2">
+            <div className="flex items-center gap-1">
+              <SlugFormField<FormShape>
+                placeholder="Username"
+                name="username"
+                label="Pick a username"
+                size="small"
+              />
+              <Button onClick={save} disabled={disabled} theme="primary">
+                Save
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
-    </FormProvider>
+      </FormProvider>
+    </form>
   );
 };

@@ -1,10 +1,11 @@
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 import { NotFoundError } from "../errors/NotFoundError";
+import { User } from "../types/User";
 
 builder.queryField("userByUsername", (t) =>
   t.prismaField({
-    type: "User",
+    type: User,
     args: {
       username: t.arg.string({ required: true }),
     },
@@ -12,14 +13,16 @@ builder.queryField("userByUsername", (t) =>
       types: [NotFoundError],
     },
     async resolve(query, _, args) {
-      const user = await prisma.user.findUnique({
+      const user = await prisma.user.findFirst({
         ...query,
         where: {
-          username: args.username,
+          asOwner: {
+            slug: args.username,
+          },
         },
       });
       if (!user) {
-        throw new NotFoundError();
+        throw new NotFoundError(`User ${args.username} not found`);
       }
       return user;
     },

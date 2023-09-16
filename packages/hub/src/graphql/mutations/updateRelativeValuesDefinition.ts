@@ -3,15 +3,16 @@ import { prisma } from "@/prisma";
 
 import { RelativeValuesDefinition } from "../types/RelativeValuesDefinition";
 
+import { getWriteableOwnerBySlug } from "../types/Owner";
 import {
   RelativeValuesClusterInput,
   RelativeValuesItemInput,
-  validateItemId,
   validateRelativeValuesDefinition,
 } from "./createRelativeValuesDefinition";
+import { validateSlug } from "../utils";
 
 builder.mutationField("updateRelativeValuesDefinition", (t) =>
-  t.withAuth({ user: true }).fieldWithInput({
+  t.withAuth({ signedIn: true }).fieldWithInput({
     type: builder.simpleObject("UpdateRelativeValuesDefinitionResult", {
       fields: (t) => ({
         definition: t.field({
@@ -22,7 +23,7 @@ builder.mutationField("updateRelativeValuesDefinition", (t) =>
     }),
     errors: {},
     input: {
-      username: t.input.string({ required: true }),
+      owner: t.input.string({ required: true }),
       slug: t.input.string({ required: true }),
       title: t.input.string({ required: true }),
       items: t.input.field({
@@ -34,19 +35,11 @@ builder.mutationField("updateRelativeValuesDefinition", (t) =>
         required: true,
       }),
       recommendedUnit: t.input.string({
-        validate: validateItemId,
+        validate: validateSlug,
       }),
     },
     resolve: async (_, { input }, { session }) => {
-      if (session.user.username !== input.username) {
-        throw new Error("Can't edit another user's model");
-      }
-
-      const owner = await prisma.user.findUniqueOrThrow({
-        where: {
-          username: input.username,
-        },
-      });
+      const owner = await getWriteableOwnerBySlug(session, input.owner);
 
       validateRelativeValuesDefinition({
         items: input.items,

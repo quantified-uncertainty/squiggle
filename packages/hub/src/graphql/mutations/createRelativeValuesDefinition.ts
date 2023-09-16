@@ -2,9 +2,12 @@ import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
 import { InputObjectRef } from "@pothos/core";
+import { rethrowOnConstraint } from "../errors/common";
+import { getWriteableOwner, getWriteableOwnerBySlug } from "../types/Owner";
 import { RelativeValuesDefinition } from "../types/RelativeValuesDefinition";
+import { validateSlug } from "../utils";
+import { ZodError } from "zod";
 
-export const validateItemId = { regex: /^\w[\w\-]*$/ };
 const validateColor = { regex: /^#[0-9a-f]{6}$/ };
 
 export const RelativeValuesClusterInput = builder.inputType(
@@ -13,14 +16,14 @@ export const RelativeValuesClusterInput = builder.inputType(
     fields: (t) => ({
       id: t.string({
         required: true,
-        validate: validateItemId,
+        validate: validateSlug,
       }),
       color: t.string({
         required: true,
         validate: validateColor,
       }),
       recommendedUnit: t.string({
-        validate: validateItemId,
+        validate: validateSlug,
       }),
     }),
   }
@@ -32,7 +35,7 @@ export const RelativeValuesItemInput = builder.inputType(
     fields: (t) => ({
       id: t.string({
         required: true,
-        validate: validateItemId,
+        validate: validateSlug,
       }),
       name: t.string({
         required: true,
@@ -82,21 +85,22 @@ export function validateRelativeValuesDefinition({
 }
 
 builder.mutationField("createRelativeValuesDefinition", (t) =>
-  t.withAuth({ user: true }).fieldWithInput({
+  t.withAuth({ signedIn: true }).fieldWithInput({
     type: builder.simpleObject("CreateRelativeValuesDefinitionResult", {
       fields: (t) => ({
-        definition: t.field({
-          type: RelativeValuesDefinition,
-          nullable: false,
-        }),
+        definition: t.field({ type: RelativeValuesDefinition }),
       }),
     }),
-    errors: {},
+    errors: { types: [ZodError] },
     input: {
-      // TODO - extract to helper module
+      groupSlug: t.input.string({
+        validate: validateSlug,
+        description:
+          "Optional, if not set, definition will be created on current user's account",
+      }),
       slug: t.input.string({
         required: true,
-        validate: { regex: /^\w[\w\-]*$/ },
+        validate: validateSlug,
       }),
       title: t.input.string({ required: true }),
       items: t.input.field({
@@ -108,10 +112,12 @@ builder.mutationField("createRelativeValuesDefinition", (t) =>
         required: true,
       }),
       recommendedUnit: t.input.string({
-        validate: validateItemId,
+        validate: validateSlug,
       }),
     },
     resolve: async (_, { input }, { session }) => {
+      const owner = await getWriteableOwner(session, input.groupSlug);
+
       validateRelativeValuesDefinition({
         items: input.items,
         clusters: input.clusters,
@@ -119,22 +125,27 @@ builder.mutationField("createRelativeValuesDefinition", (t) =>
       });
 
       const definition = await prisma.$transaction(async (tx) => {
-        const definition = await tx.relativeValuesDefinition.create({
-          data: {
-            owner: {
-              connect: { email: session.user.email },
-            },
-            slug: input.slug,
-            revisions: {
-              create: {
-                title: input.title,
-                items: input.items,
-                clusters: input.clusters,
-                recommendedUnit: input.recommendedUnit,
+        const definition = await rethrowOnConstraint(
+          () =>
+            tx.relativeValuesDefinition.create({
+              data: {
+                ownerId: owner.id,
+                slug: input.slug,
+                revisions: {
+                  create: {
+                    title: input.title,
+                    items: input.items,
+                    clusters: input.clusters,
+                    recommendedUnit: input.recommendedUnit,
+                  },
+                },
               },
-            },
-          },
-        });
+            }),
+          {
+            target: ["slug", "ownerId"],
+            error: `The definition ${input.slug} already exists on this account`,
+          }
+        );
 
         const revision = await tx.relativeValuesDefinitionRevision.create({
           data: {

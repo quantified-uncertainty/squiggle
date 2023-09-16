@@ -1,34 +1,32 @@
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
+import { getWriteableModel } from "../types/Model";
+import { validateSlug } from "../utils";
+import { ZodError } from "zod";
+import { NotFoundError } from "../errors/NotFoundError";
+
 builder.mutationField("deleteModel", (t) =>
-  t.withAuth({ user: true }).fieldWithInput({
+  t.withAuth({ signedIn: true }).fieldWithInput({
     type: builder.simpleObject("DeleteModelResult", {
       fields: (t) => ({
         ok: t.boolean(),
       }),
     }),
     input: {
-      username: t.input.string({ required: true }),
-      slug: t.input.string({ required: true }),
+      owner: t.input.string({ required: true, validate: validateSlug }),
+      slug: t.input.string({ required: true, validate: validateSlug }),
     },
-    errors: {},
-    async resolve(_, args, { session }) {
-      const { username, slug } = args.input;
-      if (session.user.username !== username) {
-        throw new Error("Can't delete another user's model");
-      }
-      const owner = await prisma.user.findUniqueOrThrow({
-        where: { username },
+    errors: { types: [ZodError, NotFoundError] },
+    async resolve(_, { input }, { session }) {
+      const model = await getWriteableModel({
+        slug: input.slug,
+        owner: input.owner,
+        session,
       });
 
       await prisma.model.delete({
-        where: {
-          slug_ownerId: {
-            slug,
-            ownerId: owner.id,
-          },
-        },
+        where: { id: model.id },
       });
 
       return { ok: true };
