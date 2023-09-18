@@ -116,7 +116,13 @@ function combineChangelogs(changelogs: PackageChangelog[]): {
       (changelog) => changelog.packageInfo.name === packageName
     );
     if (!changelog) continue;
-    content += `### [${changelog.packageInfo.name}](https://www.npmjs.com/package/${changelog.packageInfo.name})\n\n`;
+
+    const link =
+      packageName === "vscode-squiggle"
+        ? "https://marketplace.visualstudio.com/items?itemName=QURI.vscode-squiggle"
+        : `https://www.npmjs.com/package/${packageName}`;
+
+    content += `### [${packageName}](${link})\n\n`;
     content += (changelog.changes || "_No changes._") + "\n\n";
   }
 
