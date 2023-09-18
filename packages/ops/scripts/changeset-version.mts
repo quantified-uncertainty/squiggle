@@ -35,65 +35,44 @@ async function getChangedPackages() {
 }
 
 // based on https://github.com/changesets/action/blob/2bb9bcbd6bf4996a55ce459a630a0aa699457f59/src/utils.ts
+//  heavily modified
 function getChangelogEntry(changelog: string, version: string) {
-  const BumpLevels = {
-    dep: 0,
-    patch: 1,
-    minor: 2,
-    major: 3,
-  } as const;
-
   // unified types and versions are currently a mess, might get better in a few months
   // @ts-expect-error
   const ast: Root = unified().use(remarkParse).parse(changelog);
 
-  let highestLevel: number = BumpLevels.dep;
+  const nodes = ast.children;
+  let started = false;
 
-  const nodes = ast.children as Array<any>;
-  let headingStartInfo:
-    | {
-        index: number;
-        depth: number;
-      }
-    | undefined;
-  let endIndex: number | undefined;
+  const pickedNodes: typeof nodes = [];
 
   for (let i = 0; i < nodes.length; i++) {
-    let node = nodes[i];
+    const node = nodes[i];
     if (node.type === "heading") {
-      let stringified: string = mdastToString(node);
-      let match = stringified.toLowerCase().match(/(major|minor|patch)/);
-      if (match !== null) {
-        let level = BumpLevels[match[0] as "major" | "minor" | "patch"];
-        highestLevel = Math.max(level, highestLevel);
-      }
-      if (headingStartInfo === undefined && stringified === version) {
-        headingStartInfo = {
-          index: i,
-          depth: node.depth,
-        };
+      const stringified: string = mdastToString(node);
+      if (!started && stringified === version) {
+        started = true;
         continue;
       }
-      if (
-        endIndex === undefined &&
-        headingStartInfo !== undefined &&
-        headingStartInfo.depth === node.depth
-      ) {
-        endIndex = i;
-        break;
+      if (!started) {
+        continue;
+      }
+      if (stringified.match(/(Major|Minor|Patch) Changes/) !== null) {
+        continue; // these headers are noise, skip
       }
     }
+
+    pickedNodes.push(node);
   }
-  if (headingStartInfo) {
-    ast.children = (ast.children as any).slice(
-      headingStartInfo.index + 1,
-      endIndex
-    );
+
+  if (!started) {
+    throw new Error(`Couldn't find ${version} entry`); // TODO - would be useful to output file name too
   }
+  ast.children = pickedNodes;
+
   return {
     // @ts-expect-error
-    content: unified().use(remarkStringify).stringify(ast) as string,
-    highestLevel: highestLevel,
+    content: (unified().use(remarkStringify).stringify(ast) as string).trim(),
   };
 }
 
@@ -138,7 +117,7 @@ function combineChangelogs(changelogs: PackageChangelog[]): {
     );
     if (!changelog) continue;
     content += `### [${changelog.packageInfo.name}](https://www.npmjs.com/package/${changelog.packageInfo.name})\n\n`;
-    content += changelog.changes;
+    content += (changelog.changes || "_No changes._") + "\n\n";
   }
 
   return {
