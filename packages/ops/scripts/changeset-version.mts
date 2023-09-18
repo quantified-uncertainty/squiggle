@@ -147,6 +147,20 @@ function combineChangelogs(changelogs: PackageChangelog[]): {
   };
 }
 
+async function updateChangelogMeta(version: string) {
+  const metaFilename = `${WEBSITE_CHANGELOG_ROOT}/_meta.json`;
+
+  const metaJson = JSON.parse(await readFile(metaFilename, "utf-8"));
+  const versionName = `v${version}`;
+  await writeFile(
+    metaFilename,
+    JSON.stringify({
+      [versionName]: versionName,
+      ...metaJson,
+    })
+  );
+}
+
 async function generateWebsiteChangelog() {
   const packageDirs = await getChangedPackages();
 
@@ -165,7 +179,7 @@ async function generateWebsiteChangelog() {
     fullChangelog.content
   );
 
-  // TODO - update _meta.json
+  await updateChangelogMeta(fullChangelog.version);
 }
 
 async function main() {
