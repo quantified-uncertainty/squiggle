@@ -5,7 +5,7 @@
     "nodeclean": "rm -r node_modules && rm -r packages/*/node_modules",
     "preinstall": "npx only-allow pnpm",
     "changeset-version": "cd packages/ops && pnpm run changeset-version",
-    "publish": "turbo lint build && changeset publish && cd packages/vscode-ext && pnpm run package && npx vsce publish --no-dependencies"
+    "publish": "turbo lint build && changeset publish && cd packages/vscode-ext && pnpm run package && npx vsce publish --no-dependencies --skip-duplicate"
   },
   "devDependencies": {
     "@changesets/cli": "^2.26.2",
