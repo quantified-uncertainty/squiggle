@@ -1,0 +1,70 @@
+## 0.8.4
+
+### [@quri/squiggle-lang](https://www.npmjs.com/package/@quri/squiggle-lang)
+
+#### Breaking changes
+
+- This package is now [ESM-only](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c)
+- Remove `Function.declare` method (it was never documented and was replaced with [annotations](https://www.squiggle-language.com/docs/Guides/Functions#parameter-annotations) in 0.8.0 release)
+
+#### New features
+
+- Support for unicode sequences in strings; any JSON that doesn't include null values is now a valid value in Squiggle
+- Apply logarithmic KDE on skewed distributions
+
+### [@quri/squiggle-components](https://www.npmjs.com/package/@quri/squiggle-components)
+
+#### New features
+
+- Playground viewer (and `SquiggleViewer` component) always shows both variables and the result
+- Comments and strings render as markdown
+- Line wrapping editor setting
+
+#### Improvements
+
+- Error boundary in `SquiggleViewer`; fatal errors won't crash the entire playground anymore
+- In distribution charts, adjust PDF height on non-linear scales
+- Better log scale error message
+- Swap row/column order in table chart dimension
+- Increase number precision in distribution summary tables
+
+##### Function chart improvements
+
+- Pick x scale points equidistantly on a mapped scale for non-linear scales
+- Group numeric function errors (we were already grouping dist function errors, but not numeric)
+- Don't draw cursor lines if cursor is outside of CartesianFrame
+- Floating dist function previews
+- Filter infinite values in dist functions
+
+### [@quri/prettier-plugin-squiggle](https://www.npmjs.com/package/@quri/prettier-plugin-squiggle)
+
+- Fix NPM release (0.8.0 didn't include JS files)
+- Don't wrap lambda body in extra `{}`
+- Correctly indent lambda body
+- Escape quotes in strings
+- Fix capitalized keys formatting in dicts
+- Preserve shorthand entries in dicts
+
+### [@quri/ui](https://www.npmjs.com/package/@quri/ui)
+
+- `GlobeIcon` and `LockIcon`
+
+### [Squiggle Hub](https://squigglehub.org)
+
+- Support for private models
+- Various performance improvements
+- Models are sorted by last updated time
+- /status page with basic statistics
+- Various minor improvements and bugfixes
+
+### [Documentation website](https://squiggle-language.com)
+
+- Documentation reorganization
+- [Guide for using Squiggle with language models](https://www.squiggle-language.com/docs/Ecosystem/LanguageModels)
+- Full-height [playground](https://www.squiggle-language.com/playground)
+
+### New Contributors
+
+- @agucova made their first contribution in https://github.com/quantified-uncertainty/squiggle/pull/2232
+
+**Full Changelog**: https://github.com/quantified-uncertainty/squiggle/compare/@quri/squiggle-components@0.8.0...0.8.1

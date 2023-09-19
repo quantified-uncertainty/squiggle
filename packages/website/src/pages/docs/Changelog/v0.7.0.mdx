@@ -1,0 +1,39 @@
+## 0.7.0
+
+### @quri/squiggle-lang
+
+Language:
+
+- New functions: `List.concat`, `List.uniq`, `List.append`, `List.flatten`, `List.join`, `Dict.mapKeys`.
+- `stdev` and `variance` work for all kinds of distributions.
+- Support for `==`, `!=` and `+` on strings.
+- Support for trailing comma in arrays: `arr = [5,6,]` is now allowed.
+- `Plot.fn` allows for programmatical control of `min..max` range in charts.
+- Support for `{ p10: ..., p90: ... }` and `{ p25: ..., p75: ... }` in `normal()` and `lognormal()`.
+- Non-integer key lookups in arrays are now disallowed; `arr[1.5]` and `arr[3/0]` will result in error; previously non-integer keys got rounded to 0 or the closest integer.
+- Fix for zero parameter function quirks; the checks are now stricter and some existing code might break.
+- Fix for `normal(5,2) * 0` special case.
+- Fix for summary stats and `inv` function on `pointMass` distributions.
+- Fix for `inv` and `sample` on discrete distributions.
+
+JS API:
+
+- `sq` function allows to embed Squiggle code in JS with syntax highlighting in VS Code (when VS Code extension is installed).
+- `value.asJS()` method for easier conversion of results to JS values.
+
+Other:
+
+- ES6 modules build (we still provide CommonJS build as well).
+
+### @quri/squiggle-components
+
+UI:
+
+- New code editor based on Codemirror, with the improved syntax highlighting and auto-completion for variables and stdlib functions.
+- Charts are now implemented in pure Canvas with D3 (instead of Vega), with some improvements in UI and rendering speed.
+
+Other:
+
+- This package is now ESM-only! We depend on D3, and D3 is ESM-only, so squiggle-components has to be ESM-only as well. If your project still uses CommonJS and you doesn't use Next.js or other smart transpiler, you might encounter problems. See [this document](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c) for advice.
+- Much smaller bundle size, thanks to removing some heavy dependencies.
+- `oneLine` prop in `SquiggleEditor` removed (probably no one used it).
