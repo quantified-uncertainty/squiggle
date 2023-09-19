@@ -170,6 +170,7 @@ async function generateWebsiteChangelog() {
 async function main() {
   process.chdir("../.."); // repo root
   await exec("npx changeset version");
+  await exec("cd packages/squiggle-lang && pnpm run update-system-version");
 
   await generateWebsiteChangelog();
 }
