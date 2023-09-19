@@ -35,8 +35,11 @@ jobs:
       - name: Create Release Pull Request or Publish to npm
         id: changesets
         uses: changesets/action@v1
-        # with:
-        #   publish: turbo build && changeset publish
+        with:
+          title: New release
+          version: pnpm run changeset-version
+          publish: turbo lint build && changeset publish && cd packages/vscode-ext && pnpm run package && npx vsce publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}

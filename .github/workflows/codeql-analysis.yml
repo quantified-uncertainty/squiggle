@@ -51,9 +51,16 @@ jobs:
         uses: github/codeql-action/autobuild@v2
       - name: Install dependencies
         run: pnpm install
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'pnpm'
       - name: Build
-        # TODO - turbo build all packages?
-        run: cd packages/squiggle-lang && pnpm run build
+        run: npx turbo run build
       # ℹ️ Command-line programs to run using the OS shell.
       # 📚 https://git.io/JvXDl
 

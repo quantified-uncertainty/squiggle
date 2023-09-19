@@ -1,0 +1,16 @@
+## 0.5.0
+
+- Performance improvements:
+  - Interpreter is now 5x-20x faster on code written in Squiggle
+  - SampleSet to PointSet conversions are 2x faster
+  - cdf function on SampleSets is 30x faster
+  - overall speedup is about 2x on average on real code written in Squiggle
+- 50% smaller bundle size for [@quri/squiggle-lang](https://www.npmjs.com/package/@quri/squiggle-lang); 20% smaller bundle size for [@quri/squiggle-components](https://www.npmjs.com/package/@quri/squiggle-components).
+
+### Breaking changes
+
+Some rarely used math functions got removed or moved to the `Math` namespace.
+
+For example, `cos(x)` is now `Math.cos(x)`, and `atanh(x)` doesn't exist.
+
+If your code is now failing with `<function> is not defined` for anything from [this list](https://mathjs.org/docs/reference/functions.html), try adding `Math.` prefix first, and then complain on [Github issues](https://github.com/quantified-uncertainty/squiggle/issues).

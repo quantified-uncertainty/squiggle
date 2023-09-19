@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "changeset-version": "pnpm run build && node ./dist/changeset-version.mjs"
   },
   "devDependencies": {
     "@changesets/get-github-info": "^0.5.2",
@@ -13,6 +14,10 @@
     "typescript": "^5.1.6"
   },
   "dependencies": {
+    "mdast-util-to-string": "^4.0.0",
+    "remark-parse": "^10.0.2",
+    "remark-stringify": "^10.0.3",
+    "unified": "^11.0.3",
     "zod": "^3.21.4"
   }
 }
