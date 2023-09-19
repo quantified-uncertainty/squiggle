@@ -12,7 +12,7 @@
   "dependencies": {
     "@quri/squiggle-components": "workspace:*",
     "@quri/ui": "workspace:*",
-    "squiggle-components-0.8.4": "npm:@quri/squiggle-components@0.8.4"
+    "squiggle-components-0.8.5": "npm:@quri/squiggle-components@0.8.5"
   },
   "devDependencies": {
     "@types/react": "^18.2.18",

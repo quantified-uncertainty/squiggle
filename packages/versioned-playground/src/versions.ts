@@ -1,8 +1,8 @@
-export const squiggleVersions = ["dev", "0.8.4"] as const;
+export const squiggleVersions = ["dev", "0.8.5"] as const;
 
 export type SquiggleVersion = (typeof squiggleVersions)[number];
 
-export const defaultSquiggleVersion: SquiggleVersion = "0.8.4";
+export const defaultSquiggleVersion: SquiggleVersion = "0.8.5";
 
 export function checkSquiggleVersion(
   version: string
