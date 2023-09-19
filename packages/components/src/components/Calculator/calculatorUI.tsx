@@ -67,49 +67,55 @@ export const CalculatorUI: FC<UIProps> = ({
   };
 
   return (
-    <div className="relative space-y-4">
+    <div className="border border-slate-200 rounded-sm max-w-4xl mx-auto">
       {calculator.description && (
-        <ReactMarkdown className={"prose text-sm text-slate-800 bg-opacity-60"}>
-          {calculator.description}
-        </ReactMarkdown>
+        <div className="py-3 px-5 border-b border-slate-200 bg-slate-100">
+          <ReactMarkdown className={"prose text-sm text-slate-800 max-w-4xl"}>
+            {calculator.description}
+          </ReactMarkdown>
+        </div>
       )}
 
-      {calculator.fields.map((row) => {
-        const { name, description } = row;
-        const field = calculatorState.fields[name];
-        if (field) {
-          const { value, code } = field;
-          const result = value;
-          const resultHasInterestingError = result && !result.ok && code !== "";
-          return (
-            <div key={name} className="flex flex-col max-w-lg">
-              <div className="text-sm font-semibold text-slate-800">{name}</div>
-              {description && (
-                <div className="text-sm  text-slate-600">{description}</div>
-              )}
-              <div className="flex-grow">
-                <StyledInput
-                  value={code || ""}
-                  onChange={onChange(name)}
-                  placeholder={`Enter code for ${name}`}
-                />
-              </div>
-              <div>
-                {result &&
-                  resultHasInterestingError &&
-                  showSqValue(renderValue, result, fieldShowSettings)}
-                {!result && (
-                  <div className="text-sm text-gray-500">No result</div>
+      <div className="py-3 px-5 border-b border-slate-200 bg-gray-50 space-y-3">
+        {calculator.fields.map((row) => {
+          const { name, description } = row;
+          const field = calculatorState.fields[name];
+          if (field) {
+            const { value, code } = field;
+            const result = value;
+            const resultHasInterestingError =
+              result && !result.ok && code !== "";
+            return (
+              <div key={name} className="flex flex-col mb-2">
+                <div className="text-sm font-medium text-gray-800">{name}</div>
+                {description && (
+                  <div className="text-sm  text-gray-400">{description}</div>
                 )}
+                <div className="flex-grow mt-1 max-w-xs">
+                  <StyledInput
+                    value={code || ""}
+                    onChange={onChange(name)}
+                    placeholder={`Enter code for ${name}`}
+                    size="small"
+                  />
+                </div>
+                <div>
+                  {result &&
+                    resultHasInterestingError &&
+                    showSqValue(renderValue, result, fieldShowSettings)}
+                  {!result && (
+                    <div className="text-sm text-gray-500">No result</div>
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        }
-      })}
+            );
+          }
+        })}
+      </div>
 
       {calculatorState.fn.value && (
-        <div>
-          <div className="text-md font-bold text-slate-800">Result</div>
+        <div className="py-3 px-5">
+          <div className="text-sm font-semibold text-gray-700 mb-2">Result</div>
           {showSqValue(renderValue, calculatorState.fn.value, resultSettings)}
         </div>
       )}
