@@ -15,6 +15,13 @@ on:
   schedule:
     - cron: "42 19 * * 0"
 
+# copy-pasted from ci.yml
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: quantified-uncertainty
+  # used by turbo cache hashes, see turbo.json
+  PLATFORM: github
+
 jobs:
   analyze:
     name: Analyze
@@ -58,7 +65,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
-          cache: 'pnpm'
+          cache: "pnpm"
       - name: Build
         run: npx turbo run build
       # ℹ️ Command-line programs to run using the OS shell.
