@@ -772,6 +772,9 @@ importers:
       '@quri/ui':
         specifier: workspace:*
         version: link:../ui
+      '@tailwindcss/typography':
+        specifier: ^0.5.9
+        version: 0.5.9(tailwindcss@3.3.2)
       base64-js:
         specifier: ^1.5.1
         version: 1.5.1
