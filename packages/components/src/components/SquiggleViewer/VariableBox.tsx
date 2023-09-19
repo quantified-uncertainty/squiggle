@@ -19,7 +19,7 @@ import {
   useViewerContext,
 } from "./ViewerProvider.js";
 import {
-  LocalItemSettings,
+  LocalItemState,
   MergedItemSettings,
   getChildrenValues,
   pathToShortName,
@@ -78,7 +78,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
   const isRoot = Boolean(path.isRoot());
 
   // This doesn't just memoizes the defaults, but also affects children, in some cases.
-  const defaults: LocalItemSettings = useMemo(() => {
+  const defaults: LocalItemState = useMemo(() => {
     // TODO - value.size() would be faster.
     const childrenElements = getChildrenValues(value);
 

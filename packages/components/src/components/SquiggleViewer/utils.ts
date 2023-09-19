@@ -5,7 +5,7 @@ import {
 } from "../PlaygroundSettings.js";
 import { CalculatorState } from "../Calculator/calculatorReducer.js";
 
-export type LocalItemSettings = {
+export type LocalItemState = {
   collapsed: boolean;
   calculator?: CalculatorState;
 } & Pick<

@@ -33,13 +33,19 @@ const runSquiggleCode = async (
 
 type Dispatch = (action: CalculatorAction) => void;
 
-const updateFnValue = (
-  path: SqValuePath,
-  state: CalculatorState,
-  calc: SqCalculator,
-  env: Env,
-  dispatch: Dispatch
-) => {
+export const updateFnValue = ({
+  path,
+  state,
+  calculator,
+  environment,
+  dispatch,
+}: {
+  path: SqValuePath;
+  state: CalculatorState;
+  calculator: SqCalculator;
+  environment: Env;
+  dispatch: Dispatch;
+}) => {
   let finalResult: resultSqValue | undefined = undefined;
   if (allFieldValuesAreValid(state)) {
     const results: SqValue[] = allFieldResults(state).map((result) => {
@@ -49,7 +55,7 @@ const updateFnValue = (
         throw new Error("Invalid result encountered.");
       }
     });
-    finalResult = calc.run(results, env);
+    finalResult = calculator.run(results, environment);
   } else {
     finalResult = undefined;
   }
@@ -85,7 +91,7 @@ export async function processAllFieldCodes({
     _state = calculatorReducer(_state, _action);
     dispatch(_action);
   }
-  updateFnValue(path, _state, calculator, environment, dispatch);
+  updateFnValue({ path, state: _state, calculator, environment, dispatch });
 }
 
 // Takes an updated field code, runs it, and runs the function.
@@ -121,5 +127,5 @@ export async function updateAndProcessFieldCode({
   dispatch(setValueAction);
   _state = calculatorReducer(_state, setValueAction);
 
-  updateFnValue(path, _state, calculator, environment, dispatch);
+  updateFnValue({ path, state: _state, calculator, environment, dispatch });
 }

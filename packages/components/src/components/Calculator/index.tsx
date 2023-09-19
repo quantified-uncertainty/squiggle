@@ -7,6 +7,7 @@ import { PlaygroundSettings } from "../PlaygroundSettings.js";
 import { SqValueWithContext } from "../../lib/utility.js";
 
 import {
+  updateFnValue,
   processAllFieldCodes,
   updateAndProcessFieldCode,
 } from "./asyncActions.js";
@@ -115,6 +116,14 @@ export const Calculator: FC<Props> = ({
         },
       });
       _processAllFieldCodes();
+    } else {
+      updateFnValue({
+        path,
+        state: calculatorState,
+        calculator,
+        environment,
+        dispatch: calculatorDispatch,
+      });
     }
     setPrevCalculator(calculator);
   }, [calculator]);

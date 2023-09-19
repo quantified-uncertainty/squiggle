@@ -17,7 +17,7 @@ import {
   defaultPlaygroundSettings,
 } from "../PlaygroundSettings.js";
 import {
-  LocalItemSettings,
+  LocalItemState,
   MergedItemSettings,
   getChildrenValues,
   pathAsString,
@@ -31,7 +31,7 @@ export type Action =
       type: "SET_SETTINGS";
       payload: {
         path: SqValuePath;
-        value: LocalItemSettings;
+        value: LocalItemState;
       };
     }
   | {
@@ -87,15 +87,15 @@ type ViewerContextShape = {
     defaults,
   }: {
     path: SqValuePath;
-    defaults?: LocalItemSettings;
-  }): LocalItemSettings;
+    defaults?: LocalItemState;
+  }): LocalItemState;
   getCalculator({ path }: { path: SqValuePath }): CalculatorState | undefined;
   getMergedSettings({
     path,
     defaults,
   }: {
     path: SqValuePath;
-    defaults?: LocalItemSettings;
+    defaults?: LocalItemState;
   }): MergedItemSettings;
   localSettingsEnabled: boolean; // show local settings icon in the UI
   focused?: SqValuePath;
@@ -119,7 +119,7 @@ export function useViewerContext() {
 
 export function useSetSettings() {
   const { dispatch } = useViewerContext();
-  return (path: SqValuePath, value: LocalItemSettings) => {
+  return (path: SqValuePath, value: LocalItemState) => {
     dispatch({
       type: "SET_SETTINGS",
       payload: { path, value },
@@ -176,10 +176,10 @@ export function useIsFocused(location: SqValuePath) {
 }
 
 type SettingsStore = {
-  [k: string]: LocalItemSettings;
+  [k: string]: LocalItemState;
 };
 
-const defaultLocalSettings: LocalItemSettings = {
+const defaultLocalSettings: LocalItemState = {
   collapsed: false,
 };
 
@@ -215,13 +215,13 @@ export const ViewerProvider: FC<
   }, [partialPlaygroundSettings]);
 
   // I'm not sure if we should use this, or getSettings(), which is similar.
-  const getSettingsRef = (path: SqValuePath): LocalItemSettings | undefined => {
+  const getSettingsRef = (path: SqValuePath): LocalItemState | undefined => {
     return settingsStoreRef.current[pathAsString(path)];
   };
 
   const setSettings = (
     path: SqValuePath,
-    fn: (settings: LocalItemSettings) => LocalItemSettings
+    fn: (settings: LocalItemState) => LocalItemState
   ): void => {
     const newSettings = fn(getSettingsRef(path) || defaultLocalSettings);
     settingsStoreRef.current[pathAsString(path)] = newSettings;
@@ -233,7 +233,7 @@ export const ViewerProvider: FC<
       defaults = defaultLocalSettings,
     }: {
       path: SqValuePath;
-      defaults?: LocalItemSettings;
+      defaults?: LocalItemState;
     }) => {
       return settingsStoreRef.current[pathAsString(path)] || defaults;
     },
@@ -254,7 +254,7 @@ export const ViewerProvider: FC<
       defaults = defaultLocalSettings,
     }: {
       path: SqValuePath;
-      defaults?: LocalItemSettings;
+      defaults?: LocalItemState;
     }) => {
       const localSettings = getSettings({ path, defaults });
       const result: MergedItemSettings = merge(
