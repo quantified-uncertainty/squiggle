@@ -59,7 +59,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
   const toggleCollapsed_ = useToggleCollapsed();
   const collapseChildren = useCollapseChildren();
   const focus = useFocus();
-  const { editor, getSettings, getMergedSettings, dispatch } =
+  const { editor, getLocalItemState, getMergedSettings, dispatch } =
     useViewerContext();
   const isFocused = useIsFocused(value.context.path);
   const { tag } = value;
@@ -89,10 +89,11 @@ export const VariableBox: FC<VariableBoxProps> = ({
     }
     return {
       collapsed: !isRoot && childrenElements.length > 5,
+      settings: {},
     };
   }, [value, collapseChildren, isRoot]);
 
-  const settings = getSettings({ path, defaults });
+  const settings = getLocalItemState({ path, defaults });
 
   const getAdjustedMergedSettings = (path: SqValuePath) => {
     const mergedSettings = getMergedSettings({ path });

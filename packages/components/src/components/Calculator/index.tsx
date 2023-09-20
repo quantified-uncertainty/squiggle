@@ -57,19 +57,20 @@ export const Calculator: FC<Props> = ({
   valueWithContext,
 }) => {
   const { path } = valueWithContext.context;
-  const { getSettings, dispatch: viewerContextDispatch } = useViewerContext();
-  const itemSettings = getSettings({ path });
+  const { getLocalItemState, dispatch: viewerContextDispatch } =
+    useViewerContext();
+  const itemState = getLocalItemState({ path });
   const [prevCalculator, setPrevCalculator] = useState<SqCalculator | null>(
     null
   );
 
   const getCalculatorStateFromCache = () => {
     const sameCalculatorCacheExists =
-      itemSettings.calculator &&
-      hasSameCalculator(itemSettings.calculator, calculator);
+      itemState.calculator &&
+      hasSameCalculator(itemState.calculator, calculator);
 
     if (sameCalculatorCacheExists) {
-      return itemSettings.calculator!;
+      return itemState.calculator!;
     } else {
       return undefined;
     }

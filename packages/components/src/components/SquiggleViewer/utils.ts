@@ -8,10 +8,11 @@ import { CalculatorState } from "../Calculator/calculatorReducer.js";
 export type LocalItemState = {
   collapsed: boolean;
   calculator?: CalculatorState;
-} & Pick<
-  PartialPlaygroundSettings,
-  "distributionChartSettings" | "functionChartSettings"
->;
+  settings: Pick<
+    PartialPlaygroundSettings,
+    "distributionChartSettings" | "functionChartSettings"
+  >;
+};
 
 export type MergedItemSettings = PlaygroundSettings;
 

@@ -28,7 +28,7 @@ import { CalculatorState } from "../Calculator/calculatorReducer.js";
 
 export type Action =
   | {
-      type: "SET_SETTINGS";
+      type: "SET_LOCAL_ITEM_STATE";
       payload: {
         path: SqValuePath;
         value: LocalItemState;
@@ -79,10 +79,10 @@ export type Action =
 export type ViewProviderDispatch = (action: Action) => void;
 
 type ViewerContextShape = {
-  // Note that we don't store settings themselves in the context (that would cause rerenders of the entire tree on each settings update).
-  // Instead, we keep settings in local state and notify the global context via setSettings to pass them down the component tree again if it got rebuilt from scratch.
+  // Note that we don't store localItemState themselves in the context (that would cause rerenders of the entire tree on each settings update).
+  // Instead, we keep localItemState in local state and notify the global context via setLocalItemState to pass them down the component tree again if it got rebuilt from scratch.
   // See ./SquiggleViewer.tsx and ./VariableBox.tsx for other implementation details on this.
-  getSettings({
+  getLocalItemState({
     path,
     defaults,
   }: {
@@ -104,7 +104,7 @@ type ViewerContextShape = {
 };
 
 export const ViewerContext = createContext<ViewerContextShape>({
-  getSettings: () => ({ collapsed: false }),
+  getLocalItemState: () => ({ collapsed: false, settings: {} }),
   getCalculator: () => undefined,
   getMergedSettings: () => defaultPlaygroundSettings,
   localSettingsEnabled: false,
@@ -117,11 +117,11 @@ export function useViewerContext() {
   return useContext(ViewerContext);
 }
 
-export function useSetSettings() {
+export function useSetLocalItemState() {
   const { dispatch } = useViewerContext();
   return (path: SqValuePath, value: LocalItemState) => {
     dispatch({
-      type: "SET_SETTINGS",
+      type: "SET_LOCAL_ITEM_STATE",
       payload: { path, value },
     });
   };
@@ -133,6 +133,21 @@ export function useToggleCollapsed() {
     dispatch({
       type: "TOGGLE_COLLAPSED",
       payload: path,
+    });
+  };
+}
+export function useResetStateSettings() {
+  const { dispatch } = useViewerContext();
+  return (path: SqValuePath, value: LocalItemState) => {
+    dispatch({
+      type: "SET_LOCAL_ITEM_STATE",
+      payload: {
+        path,
+        value: {
+          ...value,
+          settings: {},
+        },
+      },
     });
   };
 }
@@ -175,16 +190,17 @@ export function useIsFocused(location: SqValuePath) {
   }
 }
 
-type SettingsStore = {
+type LocalItemStateStore = {
   [k: string]: LocalItemState;
 };
 
-const defaultLocalSettings: LocalItemState = {
+const defaultLocalItemState: LocalItemState = {
   collapsed: false,
+  settings: {},
 };
 
-const collapsedVariablesDefault: SettingsStore = {
-  [topLevelBindingsName]: { collapsed: true },
+const collapsedVariablesDefault: LocalItemStateStore = {
+  [topLevelBindingsName]: { collapsed: true, settings: {} },
 };
 
 export const ViewerProvider: FC<
@@ -202,7 +218,7 @@ export const ViewerProvider: FC<
   children,
 }) => {
   // can't store settings in the state because we don't want to rerender the entire tree on every change
-  const settingsStoreRef = useRef<SettingsStore>(
+  const localItemStateStoreRef = useRef<LocalItemStateStore>(
     beginWithVariablesCollapsed ? collapsedVariablesDefault : {}
   );
 
@@ -214,61 +230,63 @@ export const ViewerProvider: FC<
     return merge({}, defaultPlaygroundSettings, partialPlaygroundSettings);
   }, [partialPlaygroundSettings]);
 
-  // I'm not sure if we should use this, or getSettings(), which is similar.
-  const getSettingsRef = (path: SqValuePath): LocalItemState | undefined => {
-    return settingsStoreRef.current[pathAsString(path)];
+  // I'm not sure if we should use this, or getLocalItemState(), which is similar.
+  const getLocalItemStateRef = (
+    path: SqValuePath
+  ): LocalItemState | undefined => {
+    return localItemStateStoreRef.current[pathAsString(path)];
   };
 
-  const setSettings = (
+  const setLocalItemState = (
     path: SqValuePath,
-    fn: (settings: LocalItemState) => LocalItemState
+    fn: (localItemState: LocalItemState) => LocalItemState
   ): void => {
-    const newSettings = fn(getSettingsRef(path) || defaultLocalSettings);
-    settingsStoreRef.current[pathAsString(path)] = newSettings;
+    const newSettings = fn(getLocalItemStateRef(path) || defaultLocalItemState);
+    localItemStateStoreRef.current[pathAsString(path)] = newSettings;
   };
 
-  const getSettings = useCallback(
+  const getLocalItemState = useCallback(
     ({
       path,
-      defaults = defaultLocalSettings,
+      defaults = defaultLocalItemState,
     }: {
       path: SqValuePath;
       defaults?: LocalItemState;
     }) => {
-      return settingsStoreRef.current[pathAsString(path)] || defaults;
+      return localItemStateStoreRef.current[pathAsString(path)] || defaults;
     },
-    [settingsStoreRef]
+    [localItemStateStoreRef]
   );
 
   const getCalculator = useCallback(
     ({ path }: { path: SqValuePath }) => {
-      const response = settingsStoreRef.current[pathAsString(path)];
+      const response = localItemStateStoreRef.current[pathAsString(path)];
       return response?.calculator;
     },
-    [settingsStoreRef]
+    [localItemStateStoreRef]
   );
 
   const getMergedSettings = useCallback(
     ({
       path,
-      defaults = defaultLocalSettings,
+      defaults = defaultLocalItemState,
     }: {
       path: SqValuePath;
       defaults?: LocalItemState;
     }) => {
-      const localSettings = getSettings({ path, defaults });
+      const localItemState = getLocalItemState({ path, defaults });
       const result: MergedItemSettings = merge(
         {},
         globalSettings,
-        localSettings
+        localItemState.settings
       );
       return result;
     },
-    [globalSettings, getSettings]
+    [globalSettings, getLocalItemState]
   );
 
   const setCollapsed = (path: SqValuePath, isCollapsed: boolean) => {
-    setSettings(path, (state) => ({
+    setLocalItemState(path, (state) => ({
       ...state,
       collapsed: state?.collapsed ?? isCollapsed,
     }));
@@ -277,8 +295,8 @@ export const ViewerProvider: FC<
   const dispatch = useCallback(
     (action: Action) => {
       switch (action.type) {
-        case "SET_SETTINGS":
-          setSettings(action.payload.path, () => action.payload.value);
+        case "SET_LOCAL_ITEM_STATE":
+          setLocalItemState(action.payload.path, () => action.payload.value);
           return;
         case "FOCUS":
           setFocused(action.payload);
@@ -287,7 +305,7 @@ export const ViewerProvider: FC<
           setFocused(undefined);
           return;
         case "TOGGLE_COLLAPSED": {
-          setSettings(action.payload, (state) => ({
+          setLocalItemState(action.payload, (state) => ({
             ...state,
             collapsed: !state?.collapsed,
           }));
@@ -314,7 +332,7 @@ export const ViewerProvider: FC<
           return;
         case "CALCULATOR_UPDATE": {
           const { calculator, path } = action.payload;
-          setSettings(path, (state) => ({
+          setLocalItemState(path, (state) => ({
             ...state,
             calculator: calculator,
           }));
@@ -322,13 +340,13 @@ export const ViewerProvider: FC<
         }
       }
     },
-    [settingsStoreRef]
+    [localItemStateStoreRef]
   );
 
   return (
     <ViewerContext.Provider
       value={{
-        getSettings,
+        getLocalItemState,
         getCalculator,
         getMergedSettings,
         localSettingsEnabled,
