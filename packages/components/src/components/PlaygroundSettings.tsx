@@ -93,7 +93,7 @@ export const defaultPlaygroundSettings: PlaygroundSettings = {
     showSummary: true,
   },
   editorSettings: {
-    lineWrapping: false,
+    lineWrapping: true,
   },
 };
 
