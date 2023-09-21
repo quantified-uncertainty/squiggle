@@ -4,6 +4,7 @@ import { REExpectedType, REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
+  frDist,
   frArray,
   frLambda,
   frNumber,
@@ -11,7 +12,9 @@ import {
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
-import { Value, vArray, vNumber, vString } from "../value/index.js";
+import { Value, vArray, vNumber, vString, vBool } from "../value/index.js";
+import { sampleSetAssert } from "./sampleset.js";
+import { unzip, zip } from "../utility/E_A.js";
 
 const maker = new FnFactory({
   nameSpace: "List",
@@ -63,6 +66,10 @@ export const library = [
         } else {
           throw new REOther("Expeced lambda with 0 or 1 parameters");
         }
+      }),
+      makeDefinition([frDist], ([dist]) => {
+        sampleSetAssert(dist);
+        return vArray(dist.samples.map(vNumber));
       }),
     ],
   }),
@@ -270,6 +277,21 @@ export const library = [
     ],
   }),
   maker.make({
+    name: "every",
+    requiresNamespace: false,
+    examples: [`List.every([1,4,5], {|el| el>3 })`],
+    definitions: [
+      makeDefinition([frArray(frAny), frLambda], ([array, lambda], context) => {
+        return vBool(
+          array.every((elem) => {
+            const result = lambda.call([elem], context);
+            return result.type === "Bool" && result.value;
+          })
+        );
+      }),
+    ],
+  }),
+  maker.make({
     name: "join",
     requiresNamespace: true,
     examples: [`List.join(["a", "b", "c"], ",")`],
@@ -287,6 +309,42 @@ export const library = [
     definitions: [
       makeDefinition([frArray(frAny)], ([arr]) => {
         return vArray(arr).flatten();
+      }),
+    ],
+  }),
+  maker.make({
+    name: "shuffle",
+    requiresNamespace: true,
+    examples: [`List.shuffle([1,3,4,20])`],
+    definitions: [
+      makeDefinition([frArray(frAny)], ([arr]) => {
+        return vArray(arr).shuffle();
+      }),
+    ],
+  }),
+  maker.make({
+    name: "zip",
+    requiresNamespace: true,
+    examples: [`List.zip([1,3,4,20], [2,4,5,6])`],
+    definitions: [
+      makeDefinition([frArray(frAny), frArray(frAny)], ([array1, array2]) => {
+        if (array1.length !== array2.length) {
+          throw new REOther("Array lengths must be equal");
+        }
+        return vArray(zip(array1, array2).map((pair) => vArray(pair)));
+      }),
+    ],
+  }),
+  maker.make({
+    name: "unzip",
+    requiresNamespace: true,
+    examples: [`List.unzip([[1,2], [2,3], [4,5]])`],
+    definitions: [
+      makeDefinition([frArray(frArray(frAny))], ([array]) => {
+        if (!array.every((v) => v.length === 2)) {
+          throw new REOther("Array must be an array of pairs");
+        }
+        return vArray(unzip(array as [Value, Value][]).map((r) => vArray(r)));
       }),
     ],
   }),

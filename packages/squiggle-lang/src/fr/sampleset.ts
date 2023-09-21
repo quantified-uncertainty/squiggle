@@ -11,7 +11,6 @@ import {
   FnFactory,
   doNumberLambdaCall,
   repackDistResult,
-  unpackDistResult,
 } from "../library/registry/helpers.js";
 import { REExpectedType, REOther } from "../errors/messages.js";
 import { Ok } from "../utility/result.js";
@@ -24,7 +23,7 @@ const maker = new FnFactory({
 
 // "asserts x is type doesn't work when using arrow functions"
 // https://github.com/microsoft/TypeScript/issues/34523
-function sampleSetAssert(
+export function sampleSetAssert(
   dist: BaseDist
 ): asserts dist is SampleSetDist.SampleSetDist {
   if (dist instanceof SampleSetDist.SampleSetDist) {

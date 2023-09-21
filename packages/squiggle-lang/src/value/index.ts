@@ -10,6 +10,7 @@ import { Lambda } from "../reducer/lambda.js";
 import * as DateTime from "../utility/DateTime.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { Domain } from "./domain.js";
+import { shuffle } from "../utility/E_A.js";
 
 export type ValueMap = ImmutableMap<string, Value>;
 
@@ -77,6 +78,10 @@ class VArray extends BaseValue implements Indexable {
         []
       )
     );
+  }
+
+  shuffle() {
+    return new VArray(shuffle(this.value));
   }
 }
 export const vArray = (v: Value[]) => new VArray(v);

@@ -8,6 +8,7 @@ import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frDistOrNumber,
+  frDist,
   frNumber,
   frDict,
 } from "../library/registry/frTypes.js";
@@ -16,16 +17,16 @@ import { OtherOperationError } from "../operationError.js";
 import * as Result from "../utility/result.js";
 import { Value, vDist } from "../value/index.js";
 import { distResultToValue } from "./genericDist.js";
-
-export const CI_CONFIG = [
-  { lowKey: "p5", highKey: "p95", probability: 0.9 },
-  { lowKey: "p10", highKey: "p90", probability: 0.8 },
-  { lowKey: "p25", highKey: "p75", probability: 0.5 },
-] as const;
+import { CI_CONFIG, symDistResultToValue } from "./distUtil.js";
 
 const maker = new FnFactory({
   nameSpace: "Dist",
   requiresNamespace: false,
+});
+
+const makerRequireNamespace = new FnFactory({
+  nameSpace: "Dist",
+  requiresNamespace: true,
 });
 
 function makeSampleSet(d: BaseDist, env: Env) {
@@ -144,6 +145,18 @@ function makeOneArgDist(
 }
 
 export const library: FRFunction[] = [
+  //We might want to later add all of the options to make() tht SampleSet has. For example, function() and list().
+  makerRequireNamespace.make({
+    name: "make",
+    examples: ["Dist.make(5)", "Dist.make(normal({p5: 4, p95: 10}))"],
+    definitions: [
+      makeDefinition([frDist], ([dist]) => vDist(dist)),
+      makeDefinition([frNumber], ([v]) => {
+        const result = SymbolicDist.PointMass.make(v);
+        return symDistResultToValue(result);
+      }),
+    ],
+  }),
   maker.make({
     name: "normal",
     examples: [
