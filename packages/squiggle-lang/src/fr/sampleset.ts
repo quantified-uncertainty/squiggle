@@ -13,9 +13,9 @@ import {
   repackDistResult,
   unpackDistResult,
 } from "../library/registry/helpers.js";
-import { REExpectedType } from "../errors/messages.js";
+import { REExpectedType, REOther } from "../errors/messages.js";
 import { Ok } from "../utility/result.js";
-import { vArray, vNumber } from "../value/index.js";
+import { vArray, vNumber, Value } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "SampleSet",
@@ -33,22 +33,56 @@ function sampleSetAssert(
   throw new REExpectedType("SampleSetDist", dist.toString());
 }
 
+const fromDist = makeDefinition([frDist], ([dist], { environment }) =>
+  repackDistResult(SampleSetDist.SampleSetDist.fromDist(dist, environment))
+);
+
+const fromNumber = makeDefinition([frNumber], ([number], context) =>
+  repackDistResult(
+    SampleSetDist.SampleSetDist.make(
+      new Array(context.environment.sampleCount).fill(number)
+    )
+  )
+);
+
+const fromList = makeDefinition([frArray(frNumber)], ([numbers]) =>
+  repackDistResult(SampleSetDist.SampleSetDist.make(numbers))
+);
+
+const fromFn = makeDefinition([frLambda], ([lambda], context) => {
+  const run = (fn: (i: number) => Value[]) =>
+    repackDistResult(
+      SampleSetDist.SampleSetDist.fromFn((index) => {
+        return doNumberLambdaCall(lambda, fn(index), context);
+      }, context.environment)
+    );
+
+  const parameterLength = lambda.getParameterNames().length;
+  if (parameterLength === 0) {
+    return run((_index) => []);
+  } else if (parameterLength === 1) {
+    return run((index) => [vNumber(index)]);
+  } else {
+    throw new REOther("Expected lambda with 0 or 1 parameters");
+  }
+});
+
 const baseLibrary = [
-  maker.d2d({
+  maker.make({
     name: "fromDist",
     examples: [`SampleSet.fromDist(normal(5,2))`],
-    fn: (dist, env) =>
-      unpackDistResult(SampleSetDist.SampleSetDist.fromDist(dist, env)),
+    definitions: [fromDist],
+  }),
+  maker.make({
+    name: "fromNumber",
+    examples: [`SampleSet.fromNumber(3)`],
+    definitions: [fromNumber],
   }),
   maker.make({
     name: "fromList",
     examples: [`SampleSet.fromList([3,5,2,3,5,2,3,5,2,3,3,5,3,2,3,1,1,3])`],
     output: "Dist",
-    definitions: [
-      makeDefinition([frArray(frNumber)], ([numbers]) =>
-        repackDistResult(SampleSetDist.SampleSetDist.make(numbers))
-      ),
-    ],
+    definitions: [fromList],
   }),
   maker.make({
     name: "toList",
@@ -65,15 +99,12 @@ const baseLibrary = [
     name: "fromFn",
     examples: [`SampleSet.fromFn({|i| sample(normal(5,2))})`],
     output: "Dist",
-    definitions: [
-      makeDefinition([frLambda], ([lambda], context) =>
-        repackDistResult(
-          SampleSetDist.SampleSetDist.fromFn((i: number) => {
-            return doNumberLambdaCall(lambda, [vNumber(i)], context);
-          }, context.environment)
-        )
-      ),
-    ],
+    definitions: [fromFn],
+  }),
+  maker.make({
+    name: "make",
+    output: "Dist",
+    definitions: [fromDist, fromNumber, fromList, fromFn],
   }),
   maker.make({
     name: "map",

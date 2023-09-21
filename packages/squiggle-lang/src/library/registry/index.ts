@@ -21,6 +21,7 @@ import { library as samplesetLibrary } from "../../fr/sampleset.js";
 import { library as scaleLibrary } from "../../fr/scale.js";
 import { library as scoringLibrary } from "../../fr/scoring.js";
 import { library as symLibrary } from "../../fr/sym.js";
+import { library as StringLibrary } from "../../fr/string.js";
 import { library as unitsLibrary } from "../../fr/units.js";
 
 import { mxLambda } from "../../fr/mixture.js";
@@ -41,6 +42,7 @@ const fnList: FRFunction[] = [
   ...plotLibrary,
   ...pointsetLibrary,
   ...relativeValuesLibrary,
+  ...StringLibrary,
   ...samplesetLibrary,
   ...scaleLibrary,
   ...scoringLibrary,

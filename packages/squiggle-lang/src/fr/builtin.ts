@@ -1,3 +1,4 @@
+import { REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
@@ -70,6 +71,38 @@ export const library = [
     ],
   }),
   maker.make({
+    name: "equal",
+    definitions: [
+      makeDefinition([frAny, frAny], ([a, b]) => {
+        if (a.toString() !== b.toString()) {
+          return vBool(false);
+        } else {
+          throw new REOther("Equal not implemented for these inputs");
+        }
+      }),
+    ],
+  }),
+  maker.make({
+    name: "unequal",
+    definitions: [
+      makeDefinition([frAny, frAny], ([a, b]) => {
+        if (a.toString() !== b.toString()) {
+          return vBool(true);
+        } else {
+          throw new REOther("Unequal not implemented for these inputs");
+        }
+      }),
+    ],
+  }),
+  maker.make({
+    name: "typeOf",
+    definitions: [
+      makeDefinition([frAny], ([v]) => {
+        return vString(v.type);
+      }),
+    ],
+  }),
+  maker.make({
     name: "inspect",
     definitions: [
       makeDefinition([frAny], ([value]) => {
@@ -79,14 +112,6 @@ export const library = [
       makeDefinition([frAny, frString], ([value, label]) => {
         console.log(`${label}: ${value.toString()}`);
         return value;
-      }),
-    ],
-  }),
-  maker.make({
-    name: "typeOf",
-    definitions: [
-      makeDefinition([frAny], ([v]) => {
-        return vString(v.type);
       }),
     ],
   }),

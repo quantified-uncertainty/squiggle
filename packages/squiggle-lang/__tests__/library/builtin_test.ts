@@ -14,6 +14,11 @@ describe("Operators", () => {
     testEvalToBe("3 == 5", "false");
     testEvalToBe('"foo" == "bar"', "false");
     testEvalToBe('"foo" == "foo"', "true");
+    testEvalToBe('"foo" == 3', "false");
+    testEvalToBe('"foo" == false', "false");
+    testEvalToBe('"foo" == false', "false");
+    testEvalToBe("3 to 8 == 3", "false");
+    testEvalToBe("3 to 8 != 3", "true");
   });
   describe("typeOf", () => {
     testEvalToBe("typeOf(3)", '"Number"');

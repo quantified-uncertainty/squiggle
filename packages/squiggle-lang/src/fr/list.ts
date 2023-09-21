@@ -18,6 +18,14 @@ const maker = new FnFactory({
   requiresNamespace: true,
 });
 
+const throwErrorIfInvalidArrayLength = (number: number) => {
+  if (number < 0) {
+    throw new REOther("Expected non-negative number");
+  } else if (Number.isInteger(number)) {
+    throw new REOther("Number must be an integer");
+  }
+};
+
 export const library = [
   maker.make({
     name: "length",
@@ -30,13 +38,32 @@ export const library = [
   maker.make({
     name: "make",
     output: "Array",
-    examples: [`List.make(2, "testValue")`],
+    examples: [
+      `List.make(2, 3)`,
+      `List.make(2, {|| 3})`,
+      `List.make(2, {|f| f+1})`,
+    ],
     definitions: [
-      // TODO: If the second item is a function with no args, it could be nice to run this function and return the result.
-      // TODO: check if number is int, and fail instead of silently rounding?
-      makeDefinition([frNumber, frAny], ([number, value]) =>
-        vArray(new Array(number | 0).fill(value))
-      ),
+      makeDefinition([frNumber, frAny], ([number, value]) => {
+        throwErrorIfInvalidArrayLength(number);
+        return vArray(new Array(number).fill(value));
+      }),
+      makeDefinition([frNumber, frLambda], ([number, lambda], context) => {
+        throwErrorIfInvalidArrayLength(number);
+        const parameterLength = lambda.getParameterNames().length;
+        const runLambda = (fn: (i: number) => Value[]) => {
+          return Array.from({ length: number }, (_, index) =>
+            lambda.call(fn(index), context)
+          );
+        };
+        if (parameterLength === 0) {
+          return vArray(runLambda((_index) => []));
+        } else if (parameterLength === 1) {
+          return vArray(runLambda((index) => [vNumber(index)]));
+        } else {
+          throw new REOther("Expeced lambda with 0 or 1 parameters");
+        }
+      }),
     ],
   }),
   maker.make({
