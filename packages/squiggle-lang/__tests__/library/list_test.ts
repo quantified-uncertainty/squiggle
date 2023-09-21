@@ -15,6 +15,16 @@ describe("List functions", () => {
 
   describe("make", () => {
     testEvalToBe("List.make(3, 'HI')", '["HI","HI","HI"]');
+    testEvalToBe("List.make(3, {|e| e})", "[0,1,2]");
+    testEvalToBe("List.make(3, {|| 1})", "[1,1,1]");
+    testEvalToBe(
+      "List.make(3.5, 'HI')",
+      "Error(Error: Number must be an integer)"
+    );
+    testEvalToBe(
+      "List.make(-4, 'HI')",
+      "Error(Error: Expected non-negative number)"
+    );
     testEvalToBe("make(3, 'HI')", "Error(make is not defined)");
   });
 
@@ -78,6 +88,21 @@ describe("List functions", () => {
     );
   });
 
+  describe("uniqBy", () => {
+    testEvalToBe(
+      "arr=[1.2, 1.6, 2.3, 2.8]; List.uniqBy(arr, floor)",
+      "[1.2,2.3]"
+    );
+    testEvalToBe(
+      "arr=[{a: 1, b: 2}, {a: 1, b: 3}, {a:2, b:5}]; List.uniqBy(arr, {|e| e.a})",
+      "[{a: 1,b: 2},{a: 2,b: 5}]"
+    );
+    testEvalToBe(
+      "arr=[{a: normal(5,2), b: 2}, {a: 1, b: 3}, {a:2, b:5}]; List.uniqBy(arr, {|e| e.a})",
+      "Error(Error: Can only apply uniq() to Strings, Numbers, or Bools)"
+    );
+  });
+
   describe("reduce", () => {
     testEvalToBe(
       "myadd(acc,x)=acc+x; arr=[1,2,3]; List.reduce(arr, 0, myadd)",
@@ -89,6 +114,10 @@ describe("List functions", () => {
     );
     testEvalToBe(
       "change(acc,x)=acc*x+x; arr=[1,2,3]; List.reduceReverse(arr, 0, change)",
+      "9"
+    );
+    testEvalToBe(
+      "myadd(acc,x,index)=acc+x+index; arr=[1,2,3]; List.reduce(arr, 0, myadd)",
       "9"
     );
   });
@@ -142,7 +171,31 @@ describe("List functions", () => {
   });
 
   describe("filter", () => {
-    testEvalToBe("check(x)=(x==2);arr=[1,2,3]; List.filter(arr,check)", "[2]");
+    testEvalToBe("arr=[1,2,3]; List.filter(arr,{|e| e > 1})", "[2,3]");
+    testEvalToBe("arr=[1,2,3]; List.filter(arr,{|e| e > 5})", "[]");
+  });
+
+  describe("every", () => {
+    testEvalToBe("List.every([2,4,6], {|e| e > 1})", "true");
+    testEvalToBe("List.every([2,4,5], {|e| e > 4})", "false");
+  });
+
+  describe("some", () => {
+    testEvalToBe("List.some([2,4,6], {|e| e > 1})", "true");
+    testEvalToBe("List.some([2,4,5], {|e| e > 7})", "false");
+  });
+
+  describe("find", () => {
+    testEvalToBe("List.find([2,4,6], {|e| e > 2})", "4");
+    testEvalToBe(
+      "List.find([2,4,5], {|e| e > 7})",
+      "Error(Error: No element found)"
+    );
+  });
+
+  describe("findIndex", () => {
+    testEvalToBe("List.findIndex([2,4,6], {|e| e > 2})", "1");
+    testEvalToBe("List.findIndex([2,4,5], {|e| e > 7})", "-1"); // We might prefer a regular error here
   });
 
   describe("join", () => {
@@ -154,5 +207,16 @@ describe("List functions", () => {
   describe("flatten", () => {
     testEvalToBe("List.flatten([[1,2], [3,4]])", "[1,2,3,4]");
     testEvalToBe("List.flatten([[1,2], [3,[4,5]]])", "[1,2,3,[4,5]]");
+  });
+
+  describe("zip", () => {
+    testEvalToBe("List.zip([1,2], [3,4])", "[[1,3],[2,4]]");
+    testEvalToBe("List.zip([1,2], [3,[4,5]])", "[[1,3],[2,[4,5]]]");
+  });
+
+  describe("unzip", () => {
+    testEvalToBe("List.unzip([[1,3],[2,4]])", "[[1,2],[3,4]]");
+    testEvalToBe("List.unzip([[1,3],[2,4],[5,6]])", "[[1,2,5],[3,4,6]]");
+    testEvalToBe("List.unzip([])", "[[],[]]");
   });
 });

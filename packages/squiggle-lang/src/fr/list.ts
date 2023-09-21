@@ -15,6 +15,8 @@ import * as E_A_Floats from "../utility/E_A_Floats.js";
 import { Value, vArray, vNumber, vString, vBool } from "../value/index.js";
 import { sampleSetAssert } from "./sampleset.js";
 import { unzip, zip } from "../utility/E_A.js";
+import { Lambda } from "../reducer/lambda.js";
+import { ReducerContext } from "../reducer/context.js";
 
 const maker = new FnFactory({
   nameSpace: "List",
@@ -24,7 +26,7 @@ const maker = new FnFactory({
 const throwErrorIfInvalidArrayLength = (number: number) => {
   if (number < 0) {
     throw new REOther("Expected non-negative number");
-  } else if (Number.isInteger(number)) {
+  } else if (!Number.isInteger(number)) {
     throw new REOther("Number must be an integer");
   }
 };
@@ -33,6 +35,39 @@ const isUniqableType = (t: Value) =>
   includes(["String", "Bool", "Number"], t.type);
 
 const uniqueValueKey = (t: Value) => t.toString() + t.type;
+
+function findHelper(findFunction: "find" | "findIndex") {
+  return ([array, lambda]: [any[], any], context: any) => {
+    const parameters = lambda.getParameterNames().length;
+    if (parameters !== 1 && parameters !== 2) {
+      throw new REOther("Expected function with 1 or 2 parameters");
+    }
+    const result = array[findFunction]((elem, index) => {
+      const inputs = parameters === 1 ? [elem] : [elem, vNumber(index)];
+      const result = lambda.call(inputs, context);
+      return result.type === "Bool" && result.value;
+    });
+    if (result === undefined) {
+      throw new REOther("No element found");
+    } else {
+      return findFunction === "find" ? result : vNumber(result);
+    }
+  };
+}
+function checkUniqable(
+  arr: Value[],
+  lambda?: Lambda,
+  context?: ReducerContext
+): void {
+  let _arr = [...arr];
+  if (lambda && context) {
+    _arr = arr.map((e) => lambda.call([e], context));
+  }
+  const allUniqable = _arr.every(isUniqableType);
+  if (!allUniqable) {
+    throw new REOther("Can only apply uniq() to Strings, Numbers, or Bools");
+  }
+}
 
 export const library = [
   maker.make({
@@ -52,10 +87,6 @@ export const library = [
       `List.make(2, {|f| f+1})`,
     ],
     definitions: [
-      makeDefinition([frNumber, frAny], ([number, value]) => {
-        throwErrorIfInvalidArrayLength(number);
-        return vArray(new Array(number).fill(value));
-      }),
       makeDefinition([frNumber, frLambda], ([number, lambda], context) => {
         throwErrorIfInvalidArrayLength(number);
         const parameterLength = lambda.getParameterNames().length;
@@ -71,6 +102,10 @@ export const library = [
         } else {
           throw new REOther("Expeced lambda with 0 or 1 parameters");
         }
+      }),
+      makeDefinition([frNumber, frAny], ([number, value]) => {
+        throwErrorIfInvalidArrayLength(number);
+        return vArray(new Array(number).fill(value));
       }),
       makeDefinition([frDist], ([dist]) => {
         sampleSetAssert(dist);
@@ -180,14 +215,8 @@ export const library = [
     examples: [`List.uniq([1,2,3,"hi",false,"hi"])`],
     definitions: [
       makeDefinition([frArray(frAny)], ([arr]) => {
-        const allUniqable = arr.every(isUniqableType);
-        if (allUniqable) {
-          return vArray(uniqBy(arr, uniqueValueKey));
-        } else {
-          throw new REOther(
-            "Can only apply uniq() to Strings, Numbers, or Bools"
-          );
-        }
+        checkUniqable(arr);
+        return vArray(uniqBy(arr, uniqueValueKey));
       }),
     ],
   }),
@@ -197,19 +226,10 @@ export const library = [
     examples: [`List.uniqBy([[1,5], [3,5], [5,7]], {|x| x[1]})`],
     definitions: [
       makeDefinition([frArray(frAny), frLambda], ([arr, lambda], context) => {
-        const allUniqable = arr
-          .map((e) => lambda.call([e], context))
-          .every(isUniqableType);
-
-        if (allUniqable) {
-          return vArray(
-            uniqBy(arr, (e) => uniqueValueKey(lambda.call([e], context)))
-          );
-        } else {
-          throw new REOther(
-            "Can only apply uniq() to Strings, Numbers, or Bools"
-          );
-        }
+        checkUniqable(arr, lambda, context);
+        return vArray(
+          uniqBy(arr, (e: Value) => uniqueValueKey(lambda.call([e], context)))
+        );
       }),
     ],
   }),
@@ -335,6 +355,22 @@ export const library = [
           })
         );
       }),
+    ],
+  }),
+  maker.make({
+    name: "find",
+    requiresNamespace: false,
+    examples: [`List.find([1,4,5], {|el| el>3 })`],
+    definitions: [
+      makeDefinition([frArray(frAny), frLambda], findHelper("find")),
+    ],
+  }),
+  maker.make({
+    name: "findIndex",
+    requiresNamespace: false,
+    examples: [`List.findIndex([1,4,5], {|el| el>3 })`],
+    definitions: [
+      makeDefinition([frArray(frAny), frLambda], findHelper("findIndex")),
     ],
   }),
   maker.make({
