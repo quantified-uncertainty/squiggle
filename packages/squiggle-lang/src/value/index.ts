@@ -271,6 +271,53 @@ class VTableChart extends BaseValue {
 
 export const vTableChart = (v: TableChart) => new VTableChart(v);
 
+export type Calculator = {
+  fn: Lambda;
+  fields: { name: string; default: string; description?: string }[];
+  description?: string;
+};
+
+class VCalculator extends BaseValue {
+  readonly type = "Calculator";
+
+  private error: REOther | null = null;
+
+  constructor(public value: Calculator) {
+    super();
+    if (value.fn.getParameters().length !== value.fields.length) {
+      this.setError(
+        `Calculator function has ${
+          value.fn.getParameters().length
+        } parameters, but ${value.fields.length} fields were provided.`
+      );
+    }
+
+    if (value.fields.some((x) => x.name === "")) {
+      this.setError(`Calculator field names can't be empty.`);
+    }
+
+    const fieldNames = value.fields.map((f) => f.name);
+    const uniqueNames = new Set(fieldNames);
+    if (fieldNames.length !== uniqueNames.size) {
+      this.setError(`Duplicate calculator field names found.`);
+    }
+  }
+
+  private setError(message: string): void {
+    this.error = new REOther(message);
+  }
+
+  getError(): REOther | null {
+    return this.error;
+  }
+
+  toString() {
+    return `Calculator`;
+  }
+}
+
+export const vCalculator = (v: Calculator) => new VCalculator(v);
+
 class VPlot extends BaseValue implements Indexable {
   readonly type = "Plot";
 
@@ -413,6 +460,7 @@ export type Value =
   | VTimeDuration
   | VPlot
   | VTableChart
+  | VCalculator
   | VScale
   | VDomain
   | VVoid;

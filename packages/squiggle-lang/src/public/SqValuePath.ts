@@ -4,7 +4,10 @@ import { locationContains } from "../ast/utils.js";
 export type PathItem =
   | { type: "string"; value: string }
   | { type: "number"; value: number }
-  | { type: "cellAddress"; value: { row: number; column: number } };
+  | { type: "cellAddress"; value: { row: number; column: number } }
+  | {
+      type: "calculator";
+    };
 
 export class SqValuePath {
   public root: "result" | "bindings";
@@ -107,14 +110,19 @@ export class SqValuePath {
     });
   }
 
-  itemsAsValuePaths() {
-    return this.items.map(
+  itemsAsValuePaths({ includeRoot = false }) {
+    const root = new SqValuePath({
+      root: this.root,
+      items: [],
+    });
+    const leafs = this.items.map(
       (_, index) =>
         new SqValuePath({
           root: this.root,
           items: this.items.slice(0, index + 1),
         })
     );
+    return includeRoot ? [root, ...leafs] : leafs;
   }
 
   isRoot() {

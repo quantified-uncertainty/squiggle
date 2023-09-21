@@ -15,7 +15,16 @@ Raw functions and distributions are plotted with default parameters, while plot 
 Plots one or more labeled distributions on the same plot. Distributions can be either continuous, discrete, or a single number.
 
 ```
-Plot.dists: ({dists: list<{name: string, value: distribution | number}>, xScale: scale, yScale: scale, title: string, showSummary: bool}) => plot
+Plot.dists: ({
+  dists: list<{
+    name: string,
+    value: distribution | number
+  }>,
+  xScale: scale,
+  yScale: scale,
+  title: string,
+  showSummary: bool
+}) => plot
 ```
 
 Examples:
@@ -35,7 +44,13 @@ Examples:
 Like `Plot.dists`, but plots a single distribution.
 
 ```
-Plot.dist: ({dist: dist, xScale: scale, yScale: scale, title: string, showSummary: bool}) => plot
+Plot.dist: ({
+  dist: dist,
+  xScale: scale,
+  yScale: scale,
+  title: string,
+  showSummary: bool
+}) => plot
 ```
 
 Examples:
@@ -54,7 +69,12 @@ Examples:
 Plots a function that outputs numeric values. This works by sampling the function at a fixed number of points. The number of points is adjustable with the `points` parameter.
 
 ```
-Plot.numericFn: ({fn: (number => number), xScale: scale, yScale: scale, points: number}) => plot
+Plot.numericFn: ({
+  fn: (number => number),
+  xScale: scale,
+  yScale: scale,
+  points: number
+}) => plot
 ```
 
 Examples:
@@ -73,7 +93,13 @@ Examples:
 ### Plot.distFn
 
 ```
-Plot.distFn: ({fn: (number => dist), xScale: scale, yScale: scale, distXScale: scale, points: number}) => plot
+Plot.distFn: ({
+  fn: (number => dist),
+  xScale: scale,
+  yScale: scale,
+  distXScale: scale,
+  points: number
+}) => plot
 ```
 
 <SquiggleEditor
@@ -89,7 +115,12 @@ Plot.distFn: ({fn: (number => dist), xScale: scale, yScale: scale, distXScale: s
 Plots a scatterplot. Requires two sample set distributions.
 
 ```
-Plot.numericFn: ({yDist: sampleSetDist, xDist: sampleSetDist, xScale: Scale, yScale: Scale}) => plot
+Plot.numericFn: ({
+  yDist: sampleSetDist,
+  xDist: sampleSetDist,
+  xScale: Scale,
+  yScale: Scale
+}) => plot
 ```
 
 <SquiggleEditor
@@ -120,10 +151,31 @@ Chart axes can be scaled using the following functions. Each scale function acce
 We use D3 for the tick formats. You can read about custom tick formats [here](https://github.com/d3/d3-format).
 
 ```
-Scale.log: ({min: number, max: number, tickFormat: string}) => scale
-Scale.linear: ({min: number, max: number, tickFormat: string}) => scale
-Scale.symlog: ({min: number, max: number, tickFormat: string, constant: number}) => scale
-Scale.power: ({min: number, max: number, tickFormat: string, exponent: number}) => scale
+Scale.log: ({
+  min: number,
+  max: number,
+  tickFormat: string
+}) => scale
+
+Scale.linear: ({
+  min: number,
+  max: number,
+  tickFormat: string
+}) => scale
+
+Scale.symlog: ({
+  min: number,
+  max: number,
+  tickFormat: string,
+  constant: number
+}) => scale
+
+Scale.power: ({
+  min: number,
+  max: number,
+  tickFormat: string,
+  exponent: number
+}) => scale
 ```
 
 **Scale.log**

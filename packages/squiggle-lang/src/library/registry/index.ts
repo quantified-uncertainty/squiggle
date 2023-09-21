@@ -7,6 +7,7 @@ import { library as dateLibrary } from "../../fr/date.js";
 import { library as dictLibrary } from "../../fr/dict.js";
 import { library as distLibrary } from "../../fr/dist.js";
 import { library as genericDistLibrary } from "../../fr/genericDist.js";
+import { library as calculatorLibrary } from "../../fr/calculator.js";
 import { library as listLibrary } from "../../fr/list.js";
 import { library as mathLibrary } from "../../fr/math.js";
 import { library as numberLibrary } from "../../fr/number.js";
@@ -46,6 +47,7 @@ const fnList: FRFunction[] = [
   ...scoringLibrary,
   ...symLibrary,
   ...unitsLibrary,
+  ...calculatorLibrary,
 ];
 
 export const registry = Registry.make(fnList);
