@@ -91,7 +91,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
       errors = [],
       sourceId,
       project,
-      lineWrapping = false,
+      lineWrapping = true,
     },
     ref
   ) {
