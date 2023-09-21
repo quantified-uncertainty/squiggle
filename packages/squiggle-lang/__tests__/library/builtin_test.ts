@@ -15,4 +15,10 @@ describe("Operators", () => {
     testEvalToBe('"foo" == "bar"', "false");
     testEvalToBe('"foo" == "foo"', "true");
   });
+  describe("typeOf", () => {
+    testEvalToBe("typeOf(3)", '"Number"');
+    testEvalToBe("typeOf(3 to 5)", '"Dist"');
+    testEvalToBe("typeOf(true)", '"Bool"');
+    testEvalToBe("typeOf({|f| f})", '"Lambda"');
+  });
 });

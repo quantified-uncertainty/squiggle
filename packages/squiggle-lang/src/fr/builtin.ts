@@ -83,6 +83,14 @@ export const library = [
     ],
   }),
   maker.make({
+    name: "typeOf",
+    definitions: [
+      makeDefinition([frAny], ([v]) => {
+        return vString(v.type);
+      }),
+    ],
+  }),
+  maker.make({
     name: "javascriptraise",
     definitions: [
       makeDefinition([frAny], ([msg]) => {
