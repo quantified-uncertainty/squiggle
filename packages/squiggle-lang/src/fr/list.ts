@@ -29,6 +29,11 @@ const throwErrorIfInvalidArrayLength = (number: number) => {
   }
 };
 
+const isUniqableType = (t: Value) =>
+  includes(["String", "Bool", "Number"], t.type);
+
+const uniqueValueKey = (t: Value) => t.toString() + t.type;
+
 export const library = [
   maker.make({
     name: "length",
@@ -143,10 +148,7 @@ export const library = [
             mapped[i] = lambda.call([array[i], vNumber(i)], context);
           }
         } else {
-          throw new REExpectedType(
-            "(number, number?) => ...",
-            `(${lambda.getParameterNames().join(",")}) => ...`
-          );
+          throw new REOther("Expected lambda with 1 or 2 parameters");
         }
         return vArray(mapped);
       }),
@@ -178,14 +180,31 @@ export const library = [
     examples: [`List.uniq([1,2,3,"hi",false,"hi"])`],
     definitions: [
       makeDefinition([frArray(frAny)], ([arr]) => {
-        const isUniqableType = (t: Value) =>
-          includes(["String", "Bool", "Number"], t.type);
-        //I'm not sure if the r.type concat is essential, but seems safe.
-        const uniqueValueKey = (t: Value) => t.toString() + t.type;
-
         const allUniqable = arr.every(isUniqableType);
         if (allUniqable) {
           return vArray(uniqBy(arr, uniqueValueKey));
+        } else {
+          throw new REOther(
+            "Can only apply uniq() to Strings, Numbers, or Bools"
+          );
+        }
+      }),
+    ],
+  }),
+  maker.make({
+    name: "uniqBy",
+    requiresNamespace: true,
+    examples: [`List.uniqBy([[1,5], [3,5], [5,7]], {|x| x[1]})`],
+    definitions: [
+      makeDefinition([frArray(frAny), frLambda], ([arr, lambda], context) => {
+        const allUniqable = arr
+          .map((e) => lambda.call([e], context))
+          .every(isUniqableType);
+
+        if (allUniqable) {
+          return vArray(
+            uniqBy(arr, (e) => uniqueValueKey(lambda.call([e], context)))
+          );
         } else {
           throw new REOther(
             "Can only apply uniq() to Strings, Numbers, or Bools"
@@ -201,11 +220,23 @@ export const library = [
     definitions: [
       makeDefinition(
         [frArray(frAny), frAny, frLambda],
-        ([array, initialValue, lambda], context) =>
-          array.reduce(
-            (acc, elem) => lambda.call([acc, elem], context),
-            initialValue
-          )
+        ([array, initialValue, lambda], context) => {
+          const parameters = lambda.getParameterNames().length;
+          if (parameters === 2) {
+            return array.reduce(
+              (acc, elem) => lambda.call([acc, elem], context),
+              initialValue
+            );
+          } else if (parameters === 3) {
+            return array.reduce(
+              (acc, elem, index) =>
+                lambda.call([acc, elem, vNumber(index)], context),
+              initialValue
+            );
+          } else {
+            throw new REOther("Expected lambda with 2 or 3 parameters");
+          }
+        }
       ),
     ],
   }),
@@ -284,6 +315,21 @@ export const library = [
       makeDefinition([frArray(frAny), frLambda], ([array, lambda], context) => {
         return vBool(
           array.every((elem) => {
+            const result = lambda.call([elem], context);
+            return result.type === "Bool" && result.value;
+          })
+        );
+      }),
+    ],
+  }),
+  maker.make({
+    name: "some",
+    requiresNamespace: false,
+    examples: [`List.some([1,4,5], {|el| el>3 })`],
+    definitions: [
+      makeDefinition([frArray(frAny), frLambda], ([array, lambda], context) => {
+        return vBool(
+          array.some((elem) => {
             const result = lambda.call([elem], context);
             return result.type === "Bool" && result.value;
           })
