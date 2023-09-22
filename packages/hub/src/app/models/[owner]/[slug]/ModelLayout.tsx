@@ -74,7 +74,7 @@ export const ModelLayout: FC<
     query: SerializablePreloadedQuery<ModelLayoutQuery>;
   }>
 > = ({ query, children }) => {
-  const { variableName } = useParams();
+  const { variableName } = useParams<{ variableName: string }>();
 
   const [{ result }] = usePageQuery(Query, query);
 
