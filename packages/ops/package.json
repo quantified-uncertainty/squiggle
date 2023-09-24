@@ -2,6 +2,7 @@
   "name": "@quri/ops",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "tsc",
     "changeset-version": "pnpm run build && node ./dist/changeset-version.mjs"

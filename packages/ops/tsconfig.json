@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "module": "Node16", // required by changeset for changelog.ts script
+    "module": "Node16",
     "moduleResolution": "Node16",
     "target": "es2021",
     "esModuleInterop": true,
@@ -10,5 +10,5 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "include": ["scripts/**/*.ts", "scripts/changeset-version.mts"]
+  "include": ["scripts/**/*.ts", "scripts/**/*.cts"]
 }
