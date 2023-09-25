@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc",
     "changeset-version": "node ./dist/scripts/changeset-version.js",
-    "publish-all": "node ./dist/scripts/publish-all.js"
+    "publish-all": "node ./dist/scripts/publish-all.js",
+    "post-publish": "node ./dist/scripts/post-publish.js"
   },
   "devDependencies": {
     "@changesets/get-github-info": "^0.5.2",
