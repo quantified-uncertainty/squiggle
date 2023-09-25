@@ -4,11 +4,11 @@
     "moduleResolution": "Node16",
     "target": "es2021",
     "esModuleInterop": true,
-    "rootDir": "scripts",
+    "rootDir": "src",
     "outDir": "dist",
     // type check settings
     "strict": true,
     "skipLibCheck": true
   },
-  "include": ["scripts/**/*.ts", "scripts/**/*.cts"]
+  "include": ["src/**/*.ts", "src/**/*.cts"]
 }

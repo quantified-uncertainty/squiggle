@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "changeset-version": "pnpm run build && node ./dist/changeset-version.mjs"
+    "changeset-version": "pnpm run build && node ./dist/scripts/changeset-version.js",
+    "publish-all": "pnpm run build && node ./dist/scripts/publish-all.js"
   },
   "devDependencies": {
     "@changesets/get-github-info": "^0.5.2",

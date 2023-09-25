@@ -18,5 +18,5 @@
     "@quri/ops",
     "@quri/versioned-playground"
   ],
-  "changelog": "../packages/ops/dist/changelog.cjs"
+  "changelog": "../packages/ops/dist/scripts/changelog.cjs"
 }

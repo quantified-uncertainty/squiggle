@@ -4,6 +4,7 @@
 import type { ChangelogFunctions } from "@changesets/types";
 import { getInfo, getInfoFromPullRequest } from "@changesets/get-github-info";
 
+// can't be moved to constants.ts because it's ESM and changesets requires this file to be CJS
 const REPO = "quantified-uncertainty/squiggle";
 
 const changelogFunctions: ChangelogFunctions = {

@@ -50,7 +50,7 @@ jobs:
         with:
           title: New release
           version: pnpm run changeset-version
-          publish: pnpm run publish
+          publish: pnpm run publish-all
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
