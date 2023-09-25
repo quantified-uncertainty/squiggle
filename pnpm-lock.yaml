@@ -402,7 +402,7 @@ importers:
         version: 3.0.1
       squiggle-components-0.8.5:
         specifier: npm:@quri/squiggle-components@0.8.5
-        version: /@quri/squiggle-components@0.8.5(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0)(tailwindcss@3.3.2)
+        version: link:../components
       typescript:
         specifier: ^5.1.6
         version: 5.1.6
@@ -833,15 +833,12 @@ importers:
       '@quri/ui':
         specifier: workspace:*
         version: link:../ui
-<<<<<<< HEAD
-      '@tailwindcss/typography':
-        specifier: ^0.5.9
-        version: 0.5.9(tailwindcss@3.3.2)
-=======
       '@quri/versioned-playground':
         specifier: workspace:*
         version: link:../versioned-playground
->>>>>>> 561f8566 (extract common components to internal versioned-playground package)
+      '@tailwindcss/typography':
+        specifier: ^0.5.9
+        version: 0.5.9(tailwindcss@3.3.2)
       base64-js:
         specifier: ^1.5.1
         version: 1.5.1
@@ -5562,90 +5559,6 @@ packages:
       kleur: 4.1.5
     transitivePeerDependencies:
       - supports-color
-    dev: false
-
-  /@quri/prettier-plugin-squiggle@0.8.5:
-    resolution: {integrity: sha512-Av4kfu47EjPB6430d3JuZP96scpT058kvyoLE0xbHKqsOln8R3i8tIYvaNEyrbg8SFI4ixylFsFPDJqjQvy2aw==}
-    dependencies:
-      '@quri/squiggle-lang': 0.8.5
-      prettier: 3.0.3
-    dev: false
-
-  /@quri/squiggle-components@0.8.5(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0)(tailwindcss@3.3.2):
-    resolution: {integrity: sha512-X7GYjZoLtITgUcoFx8isfHZhzK0f6b6Gks0TfGLwQ1BnJvP5OtOI0r+lj+mYjS38Z12M3KjX6VuWX6hgCsJskQ==}
-    peerDependencies:
-      react: ^16.8.0 || ^17 || ^18
-      react-dom: ^16.8.0 || ^17 || ^18
-    dependencies:
-      '@codemirror/autocomplete': 6.9.0(@codemirror/language@6.9.0)(@codemirror/state@6.2.1)(@codemirror/view@6.18.0)(@lezer/common@1.0.4)
-      '@codemirror/commands': 6.2.4
-      '@codemirror/language': 6.9.0
-      '@codemirror/lint': 6.4.0
-      '@codemirror/search': 6.5.0
-      '@codemirror/state': 6.2.1
-      '@codemirror/theme-one-dark': 6.1.2
-      '@codemirror/view': 6.18.0
-      '@floating-ui/react': 0.24.3(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0)
-      '@heroicons/react': 1.0.6(react@18.2.0)
-      '@hookform/resolvers': 3.3.1(react-hook-form@7.45.2)
-      '@lezer/common': 1.0.4
-      '@quri/prettier-plugin-squiggle': 0.8.5
-      '@quri/squiggle-lang': 0.8.5
-      '@quri/ui': 0.1.4(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0)
-      '@react-hook/size': 2.1.2(react@18.2.0)
-      '@tailwindcss/typography': 0.5.9(tailwindcss@3.3.2)
-      '@types/d3': 7.4.0
-      clsx: 2.0.0
-      codemirror: 6.0.1(@lezer/common@1.0.4)
-      d3: 7.8.5
-      framer-motion: 10.12.18(react-dom@18.2.0)(react@18.2.0)
-      lodash: 4.17.21
-      prettier: 3.0.3
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      react-error-boundary: 4.0.10(react@18.2.0)
-      react-hook-form: 7.45.2(react@18.2.0)
-      react-markdown: 8.0.7(@types/react@18.2.18)(react@18.2.0)
-      react-resizable: 3.0.5(react-dom@18.2.0)(react@18.2.0)
-      vscode-uri: 3.0.7
-      zod: 3.21.4
-    transitivePeerDependencies:
-      - '@types/react'
-      - supports-color
-      - tailwindcss
-    dev: false
-
-  /@quri/squiggle-lang@0.8.5:
-    resolution: {integrity: sha512-ymA/Y/3C8pppvYFy9RhpJyCjjttJPm+pWu1gWpaOFOs53qP61+GpGw0qtkduO0t2wYdj/3GDlQC/JyyxZMAOGw==}
-    hasBin: true
-    dependencies:
-      '@commander-js/extra-typings': 11.0.0(commander@11.0.0)
-      commander: 11.0.0
-      immutable: 4.3.1
-      jstat: 1.9.6
-      lodash: 4.17.21
-      open: 9.1.0
-    dev: false
-
-  /@quri/ui@0.1.4(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-aUAhpRN7gc4T8Tyk3Eg9ubC57QItlUEQSYi/XSgBu2Ghcc5Hoje5eKc/AKIvhvotCuwO/TbafSVq5HjNoojufQ==}
-    peerDependencies:
-      react: ^17 || ^18
-      react-dom: ^17 || ^18
-    dependencies:
-      '@floating-ui/react': 0.24.3(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0)
-      '@headlessui/react': 1.7.15(react-dom@18.2.0)(react@18.2.0)
-      clsx: 2.0.0
-      framer-motion: 10.12.18(react-dom@18.2.0)(react@18.2.0)
-      react: 18.2.0
-      react-colorful: 5.6.1(react-dom@18.2.0)(react@18.2.0)
-      react-dom: 18.2.0(react@18.2.0)
-      react-hook-form: 7.45.2(react@18.2.0)
-      react-select: 5.7.4(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0)
-      react-textarea-autosize: 8.5.2(@types/react@18.2.18)(react@18.2.0)
-      react-use: 17.4.0(react-dom@18.2.0)(react@18.2.0)
-    transitivePeerDependencies:
-      - '@types/react'
     dev: false
 
   /@radix-ui/number@1.0.1:
