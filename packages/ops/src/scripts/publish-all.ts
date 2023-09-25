@@ -7,7 +7,6 @@ import { PackageInfo, exec, exists, getPackageInfo } from "../lib.js";
 async function insertVersionToVersionedPlayground(version: string) {
   process.chdir("packages/versioned-playground");
 
-  console.log("insert version");
   const alias = `squiggle-components-${version}`;
   await exec(`pnpm add ${alias}@npm:@quri/squiggle-components@${version}`);
 
@@ -27,7 +26,6 @@ async function insertVersionToVersionedPlayground(version: string) {
   })),
   $&`
     );
-    console.log({ playgroundComponent });
     await writeFile(componentFilename, playgroundComponent, "utf-8");
   }
 
@@ -51,6 +49,8 @@ async function insertVersionToVersionedPlayground(version: string) {
     versionsCode = versionsCode.replace(defaultVersionRegex, `$1${version}`);
     await writeFile(versionsFilename, versionsCode, "utf-8");
   }
+
+  // TODO - run `pnpm format` to make sure we didn't break prettier?
 
   process.chdir("../..");
 }
