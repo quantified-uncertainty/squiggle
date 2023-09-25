@@ -63,8 +63,8 @@ export const VersionedSquigglePlayground: FC<Props> = ({
 
   const Playground = playgroundByVersion[usedVersion];
 
-  // TODO - Suspense?
   return (
+    // TODO - fallback spinner / loading message?
     <Suspense fallback={null}>
       <Playground
         // Listing all props for better type safety, instead of using `{...props}`.

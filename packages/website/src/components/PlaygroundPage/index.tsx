@@ -10,6 +10,7 @@ import {
   type SquiggleVersion,
   squiggleVersions,
 } from "@quri/versioned-playground";
+import { useAvailableHeight } from "../../utils/useAvailableHeight";
 
 const HASH_PREFIX = "#code=";
 function getHashData() {
@@ -75,28 +76,36 @@ export const PlaygroundPage: FC<{ version: string | null }> = (props) => {
     updateUrl({}, version);
   };
 
+  const { height, ref } = useAvailableHeight();
+
   return (
-    <VersionedSquigglePlayground
-      version={version}
-      defaultCode={hashData.defaultCode ?? "normal(0, 1)"}
-      distributionChartSettings={{
-        showSummary: hashData.showSummary ?? true,
-      }}
-      renderExtraControls={() => (
-        <div className="h-full flex justify-end items-center gap-2">
-          <ShareButton />
-          <SquigglePlaygroundVersionPicker
-            size="small"
-            version={version}
-            onChange={onVersionChange}
-          />
-        </div>
-      )}
-      onCodeChange={(code) => updateUrl({ defaultCode: code }, version)}
-      onSettingsChange={(settings) => {
-        const showSummary = settings.distributionChartSettings?.showSummary;
-        updateUrl({ showSummary }, version);
-      }}
-    />
+    <div
+      className="min-h-[calc(100vh-var(--nextra-navbar-height)-200px)]"
+      ref={ref}
+    >
+      <VersionedSquigglePlayground
+        version={version}
+        height={height}
+        defaultCode={hashData.defaultCode ?? "normal(0, 1)"}
+        distributionChartSettings={{
+          showSummary: hashData.showSummary ?? true,
+        }}
+        renderExtraControls={() => (
+          <div className="h-full flex justify-end items-center gap-2">
+            <ShareButton />
+            <SquigglePlaygroundVersionPicker
+              size="small"
+              version={version}
+              onChange={onVersionChange}
+            />
+          </div>
+        )}
+        onCodeChange={(code) => updateUrl({ defaultCode: code }, version)}
+        onSettingsChange={(settings) => {
+          const showSummary = settings.distributionChartSettings?.showSummary;
+          updateUrl({ showSummary }, version);
+        }}
+      />
+    </div>
   );
 };
