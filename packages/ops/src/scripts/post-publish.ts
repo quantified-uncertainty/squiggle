@@ -83,6 +83,8 @@ async function createEmptyChangeset() {
 }
 
 async function main() {
+  process.chdir("../..");
+
   // We have to do things in this order, because attempt to `pnpm add` a version to versioned-playground results in a local workspace: dependency
   // so we cache an old version first, then bump all package versions, and only then update versioned-playground
   const { version: releasedVersion } = await getPackageInfo(
