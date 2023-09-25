@@ -7,6 +7,7 @@ import { PackageInfo, exec, exists, getPackageInfo } from "../lib.js";
 async function insertVersionToVersionedPlayground(version: string) {
   process.chdir("packages/versioned-playground");
 
+  console.log("insert version");
   const alias = `squiggle-components-${version}`;
   await exec(`pnpm add ${alias}@npm:@quri/squiggle-components@${version}`);
 
@@ -14,7 +15,8 @@ async function insertVersionToVersionedPlayground(version: string) {
     const componentFilename = "src/VersionedSquigglePlayground.tsx";
     let playgroundComponent = await readFile(componentFilename, "utf-8");
 
-    const regex = escapeRegExp("dev: lazy(async () => ({");
+    // new RegExp is important! not sure why, it's not necessary for match(), but necessary for replace(), JS is weird
+    const regex = new RegExp(escapeRegExp("dev: lazy(async () => ({"));
     if (!playgroundComponent.match(regex)) {
       throw new Error("Can't find lazy load declarations to patch");
     }
@@ -25,6 +27,7 @@ async function insertVersionToVersionedPlayground(version: string) {
   })),
   $&`
     );
+    console.log({ playgroundComponent });
     await writeFile(componentFilename, playgroundComponent, "utf-8");
   }
 
@@ -32,7 +35,9 @@ async function insertVersionToVersionedPlayground(version: string) {
     const versionsFilename = "src/versions.ts";
     let versionsCode = await readFile(versionsFilename, "utf-8");
 
-    const versionsRegex = escapeRegExp("export const squiggleVersions = [");
+    const versionsRegex = new RegExp(
+      escapeRegExp("export const squiggleVersions = [")
+    );
     if (!versionsCode.match(versionsRegex)) {
       throw new Error("Can't find versions string");
     }
