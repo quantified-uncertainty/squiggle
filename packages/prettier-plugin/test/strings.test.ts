@@ -19,4 +19,15 @@ describe("strings", () => {
       `"This is something \\" ' \\" else"`
     );
   });
+
+  // https://github.com/quantified-uncertainty/squiggle/issues/2281
+  test("multiline string", async () => {
+    expect(
+      await format(`
+'foo\t"foo2"
+bar'
+`)
+    ).toBe(`"foo\\t\\"foo2\\"
+bar"`);
+  });
 });
