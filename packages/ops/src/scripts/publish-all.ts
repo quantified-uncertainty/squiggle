@@ -1,10 +1,14 @@
-import { exec as originalExec } from "node:child_process";
 import { writeFile } from "node:fs/promises";
-import util from "node:util";
 import { PRIMARY_SQUIGGLE_PACKAGE_DIRS } from "../constants.js";
-import { PackageInfo, exists, getPackageInfo } from "../lib.js";
+import { PackageInfo, exec, exists, getPackageInfo } from "../lib.js";
 
-const exec = util.promisify(originalExec);
+async function insertVersionToVersionedPlayground(version: string) {
+  process.chdir("packages/versioned-playground");
+  await exec(
+    `pnpm add squiggle-components-${version}@npm:@quri/squiggle-components@${version}`
+  );
+  process.chdir("../..");
+}
 
 async function bumpVersionsToDev() {
   for (const packageDir of PRIMARY_SQUIGGLE_PACKAGE_DIRS) {
@@ -41,9 +45,15 @@ async function main() {
   process.chdir("packages/vscode-ext");
   await exec("pnpm run package");
   // await exec("npx vsce publish --no-dependencies --skip-duplicate");
-
   process.chdir("../..");
+
+  // we have to use a weird order here, because attempt to `pnpm add` a version to versioned-playground results in a local workspace: dependency
+  // so we cache an old version first, then bump all package versions, and only then update versioned-playground
+  const { version: releasedVersion } = await getPackageInfo(
+    PRIMARY_SQUIGGLE_PACKAGE_DIRS[0]
+  );
   await bumpVersionsToDev();
+  await insertVersionToVersionedPlayground(releasedVersion);
 
   await exec("cd packages/squiggle-lang && pnpm run update-system-version");
 

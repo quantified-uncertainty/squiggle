@@ -1,4 +1,8 @@
+import { exec as originalExec } from "node:child_process";
+import util from "node:util";
 import fs from "node:fs/promises";
+
+export const exec = util.promisify(originalExec);
 
 export async function exists(f: string): Promise<boolean> {
   let exists = true;
