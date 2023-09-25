@@ -2,18 +2,19 @@ import { exec as originalExec } from "node:child_process";
 import { readFile, writeFile } from "node:fs/promises";
 import util from "node:util";
 
+import { toString as mdastToString } from "mdast-util-to-string";
 import remarkParse from "remark-parse";
 import { type Root } from "remark-parse/lib/index.js";
 import remarkStringify from "remark-stringify";
 import { unified } from "unified";
-import { toString as mdastToString } from "mdast-util-to-string";
 
 import {
-  WEBSITE_CHANGELOG_ROOT,
   PRIMARY_SQUIGGLE_PACKAGE_DIRS,
   VSCODE_EXTENSION_URL,
   VSCODE_PACKAGE_NAME,
+  WEBSITE_CHANGELOG_ROOT,
 } from "../constants.js";
+import { PackageInfo, getPackageInfo } from "../lib.js";
 
 const exec = util.promisify(originalExec);
 
@@ -71,18 +72,6 @@ function getChangelogEntry(changelog: string, version: string) {
     // @ts-expect-error
     content: (unified().use(remarkStringify).stringify(ast) as string).trim(),
   };
-}
-
-type PackageInfo = {
-  version: string;
-  name: string;
-};
-
-async function getPackageInfo(packageDir: string): Promise<PackageInfo> {
-  const packageJson = JSON.parse(
-    await readFile(`${packageDir}/package.json`, "utf-8")
-  );
-  return { version: packageJson.version, name: packageJson.name }; // TODO: zod
 }
 
 type PackageChangelog = {
