@@ -95,13 +95,12 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
     },
     ref
   ) {
-    // `useState` instead of `useMemo`, because we want to initialize view only once.
-    // We'll handle further updates through `useEffect` calls.
-    const [view] = useState(() => {
-      if (typeof window === "undefined") {
-        return undefined; // CodeMirror view is not SSR-compatible
-      }
+    const [view, setView] = useState<EditorView>();
 
+    useEffect(() => {
+      if (typeof window === "undefined") {
+        return; // no SSR
+      }
       const extensions = [
         highlightSpecialChars(),
         history(),
@@ -142,15 +141,13 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
         doc: defaultValue,
         extensions,
       });
-      const view = new EditorView({ state });
-      return view;
-    });
-
-    useEffect(() => {
+      setView(new EditorView({ state }));
       return () => {
         view?.destroy();
       };
-    }, [view]);
+      // we initialize the view only once; no need for deps
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const format = useCallback(async () => {
       if (!view) return;
