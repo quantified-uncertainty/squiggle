@@ -1,12 +1,52 @@
-import { writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
+import escapeRegExp from "lodash/escapeRegExp.js";
+
 import { PRIMARY_SQUIGGLE_PACKAGE_DIRS } from "../constants.js";
 import { PackageInfo, exec, exists, getPackageInfo } from "../lib.js";
 
 async function insertVersionToVersionedPlayground(version: string) {
   process.chdir("packages/versioned-playground");
-  await exec(
-    `pnpm add squiggle-components-${version}@npm:@quri/squiggle-components@${version}`
-  );
+
+  const alias = `squiggle-components-${version}`;
+  await exec(`pnpm add ${alias}@npm:@quri/squiggle-components@${version}`);
+
+  {
+    const componentFilename = "src/VersionedSquigglePlayground.tsx";
+    let playgroundComponent = await readFile(componentFilename, "utf-8");
+
+    const regex = escapeRegExp("dev: lazy(async () => ({");
+    if (!playgroundComponent.match(regex)) {
+      throw new Error("Can't find lazy load declarations to patch");
+    }
+    playgroundComponent = playgroundComponent.replace(
+      regex,
+      `"${version}": lazy(async () => ({
+    default: (await import("${alias}")).SquigglePlayground,
+  })),
+  $&`
+    );
+    await writeFile(componentFilename, playgroundComponent, "utf-8");
+  }
+
+  {
+    const versionsFilename = "src/versions.ts";
+    let versionsCode = await readFile(versionsFilename, "utf-8");
+
+    const versionsRegex = escapeRegExp("export const squiggleVersions = [");
+    if (!versionsCode.match(versionsRegex)) {
+      throw new Error("Can't find versions string");
+    }
+    versionsCode = versionsCode.replace(versionsRegex, `$&"${version}", `);
+
+    const defaultVersionRegex =
+      /(export const defaultSquiggleVersion: SquiggleVersion = ")[^"]+/;
+    if (!versionsCode.match(defaultVersionRegex)) {
+      throw new Error("Can't find default version string");
+    }
+    versionsCode = versionsCode.replace(defaultVersionRegex, `$1${version}`);
+    await writeFile(versionsFilename, versionsCode, "utf-8");
+  }
+
   process.chdir("../..");
 }
 

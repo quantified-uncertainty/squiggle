@@ -11,10 +11,9 @@ import {
 
 // Note: typing this with `{ [k in Version]: ComponentType<CommonProps> }` won't work because of contravariance issues.
 // Instead, we pass all props explicitly to the playground component when it's instantiated to check that all props are compatible.
+// Also, please don't change the formatting of this declaration unless you have to. It's edited with regexes in `publish-all.ts` script.
+// (TODO: using codemod would be nice)
 const playgroundByVersion = {
-  "0.8.5": lazy(async () => ({
-    default: (await import("squiggle-components-0.8.5")).SquigglePlayground,
-  })),
   dev: lazy(async () => ({
     default: (await import("@quri/squiggle-components")).SquigglePlayground,
   })),
