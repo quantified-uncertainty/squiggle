@@ -1,9 +1,9 @@
-import { UserModelList$key } from "@/__generated__/UserModelList.graphql";
-import { H1 } from "@/components/ui/Headers";
-import { ModelList } from "@/models/components/ModelList";
 import { FC } from "react";
 import { usePaginationFragment } from "react-relay";
 import { graphql } from "relay-runtime";
+
+import { UserModelList$key } from "@/__generated__/UserModelList.graphql";
+import { ModelList } from "@/models/components/ModelList";
 
 const Fragment = graphql`
   fragment UserModelList on User
@@ -13,7 +13,7 @@ const Fragment = graphql`
   )
   @refetchable(queryName: "UserModelListPaginationQuery") {
     models(first: $count, after: $cursor)
-      @connection(key: "UserViewList_models") {
+      @connection(key: "UserModelList_models") {
       edges {
         __typename
       }

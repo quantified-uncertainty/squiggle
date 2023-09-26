@@ -121,6 +121,14 @@ export function userRoute({ username }: { username: string }) {
   return `/users/${username}`;
 }
 
+export function userDefinitionsRoute({ username }: { username: string }) {
+  return `/users/${username}/definitions`;
+}
+
+export function userGroupsRoute({ username }: { username: string }) {
+  return `/users/${username}/groups`;
+}
+
 export function groupRoute({ slug }: { slug: string }) {
   return `/groups/${slug}`;
 }

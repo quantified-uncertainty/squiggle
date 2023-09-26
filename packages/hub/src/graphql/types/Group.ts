@@ -11,6 +11,7 @@ import {
 } from "./Model";
 import { Owner } from "./Owner";
 import { getSelf, isSignedIn } from "./User";
+import { prismaConnectionHelpers } from "@pothos/plugin-prisma";
 
 export const MembershipRoleType = builder.enumType(MembershipRole, {
   name: "MembershipRole",
@@ -223,3 +224,16 @@ export const Group = builder.prismaNode("Group", {
     ),
   }),
 });
+
+export const GroupConnection = builder.connectionObject({
+  type: Group,
+  name: "GroupConnection",
+});
+
+export const groupConnectionHelpers = prismaConnectionHelpers(
+  builder,
+  "Group",
+  {
+    cursor: "id",
+  }
+);

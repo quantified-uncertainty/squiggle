@@ -1,26 +1,21 @@
 import { Metadata } from "next";
 
 import QueryNode, {
-  UserViewQuery,
-} from "@/__generated__/UserViewQuery.graphql";
-import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
+  UserPageQuery,
+} from "@/__generated__/UserPageQuery.graphql";
 import { loadPageQuery } from "@/relay/loadPageQuery";
-import { UserView } from "./UserView";
+import { UserPage } from "./UserPage";
 
 type Props = {
   params: { username: string };
 };
 
-export default async function UserPage({ params }: Props) {
-  const query = await loadPageQuery<UserViewQuery>(QueryNode, {
+export default async function OuterUserPage({ params }: Props) {
+  const query = await loadPageQuery<UserPageQuery>(QueryNode, {
     username: params.username,
   });
 
-  return (
-    <NarrowPageLayout>
-      <UserView query={query} />
-    </NarrowPageLayout>
-  );
+  return <UserPage query={query} />;
 }
 
 export function generateMetadata({ params }: Props): Metadata {
