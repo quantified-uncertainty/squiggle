@@ -26,8 +26,6 @@ const Mutation = graphql`
 `;
 
 export const ChooseUsername: FC = () => {
-  const toast = useToast();
-
   type FormShape = {
     username: string;
   };
