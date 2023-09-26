@@ -2,10 +2,13 @@ import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { FC, useState } from "react";
 import { FaPlus } from "react-icons/fa";
+import { useFragment } from "react-relay";
+import { graphql } from "relay-runtime";
 
 import {
   BookOpenIcon,
   DotsHorizontalIcon,
+  Dropdown,
   DropdownMenu,
   DropdownMenuAsyncActionItem,
   DropdownMenuHeader,
@@ -14,6 +17,7 @@ import {
   UserCircleIcon,
 } from "@quri/ui";
 
+import { PageMenu$key } from "@/__generated__/PageMenu.graphql";
 import { useUsername } from "@/hooks/useUsername";
 import { SQUIGGLE_DOCS_URL } from "@/lib/common";
 import { aboutRoute, newModelRoute } from "@/routes";
@@ -21,6 +25,8 @@ import { DesktopUserControls } from "./DesktopUserControls";
 import { MenuLinkModeProps, PageMenuLink } from "./PageMenuLink";
 import { UserControlsMenu } from "./UserControlsMenu";
 import { useForceChooseUsername } from "./useForceChooseUsername";
+import { MyGroupsMenu } from "./MyGroupsMenu";
+import { DropdownWithArrow } from "./DropdownWithArrow";
 
 const AboutMenuLink: FC<MenuLinkModeProps> = (props) => {
   const { data: session } = useSession();
@@ -55,18 +61,40 @@ const NewModelMenuLink: FC<MenuLinkModeProps> = (props) => {
   );
 };
 
-const DesktopMenu: FC = () => {
+const fragment = graphql`
+  fragment PageMenu on Query {
+    ...MyGroupsMenu
+  }
+`;
+
+type MenuProps = {
+  queryRef: PageMenu$key;
+};
+
+const DesktopMenu: FC<MenuProps> = ({ queryRef }) => {
+  const menu = useFragment(fragment, queryRef);
   return (
     <div className="flex gap-6 items-baseline">
       <AboutMenuLink mode="desktop" />
       <DocsMenuLink mode="desktop" />
       <NewModelMenuLink mode="desktop" />
+      <Dropdown
+        render={({ close }) => (
+          <DropdownMenu>
+            <MyGroupsMenu groupsRef={menu} close={close} />
+          </DropdownMenu>
+        )}
+      >
+        <DropdownWithArrow text="My Groups" />
+      </Dropdown>
       <DesktopUserControls />
     </div>
   );
 };
 
-const MobileMenu: FC = () => {
+const MobileMenu: FC<MenuProps> = ({ queryRef }) => {
+  const menu = useFragment(fragment, queryRef);
+
   const username = useUsername();
   const [open, setOpen] = useState(false);
 
@@ -86,11 +114,11 @@ const MobileMenu: FC = () => {
         <>
           {/* overlay */}
           <div
-            className="absolute inset-0 z-10 bg-black opacity-10"
+            className="fixed inset-0 z-10 bg-black opacity-10 overflow-scroll"
             onClick={close}
           />
           {/* sidebar panel */}
-          <div className="absolute inset-y-0 right-0 z-20 bg-white shadow-xl">
+          <div className="fixed inset-y-0 right-0 z-20 bg-white shadow-xl overflow-y-auto overflow-x-hidden">
             <DropdownMenu>
               <DropdownMenuHeader>Menu</DropdownMenuHeader>
               <DropdownMenuSeparator />
@@ -99,11 +127,15 @@ const MobileMenu: FC = () => {
               <DocsMenuLink mode="mobile" close={close} />
               <DropdownMenuSeparator />
               {username ? (
-                <UserControlsMenu
-                  mode="mobile"
-                  username={username}
-                  close={close}
-                />
+                <>
+                  <MyGroupsMenu groupsRef={menu} close={close} />
+                  <DropdownMenuSeparator />
+                  <UserControlsMenu
+                    mode="mobile"
+                    username={username}
+                    close={close}
+                  />
+                </>
               ) : (
                 <>
                   <DropdownMenuHeader>User Actions</DropdownMenuHeader>
@@ -124,21 +156,19 @@ const MobileMenu: FC = () => {
   );
 };
 
-export const PageMenu: FC = () => {
+export const PageMenu: FC<MenuProps> = ({ queryRef }) => {
   useForceChooseUsername();
 
   return (
-    <div className="border-slate-200 h-10 flex items-center justify-between px-8 bg-gray-800">
-      <div className="flex gap-6 items-baseline">
-        <Link className="text-slate-300 font-semibold" href="/">
-          Squiggle Hub
-        </Link>
-      </div>
+    <div className="h-10 px-8 bg-gray-800 flex items-center justify-between">
+      <Link className="text-slate-300 font-semibold" href="/">
+        Squiggle Hub
+      </Link>
       <div className="hidden md:block">
-        <DesktopMenu />
+        <DesktopMenu queryRef={queryRef} />
       </div>
       <div className="block md:hidden">
-        <MobileMenu />
+        <MobileMenu queryRef={queryRef} />
       </div>
     </div>
   );

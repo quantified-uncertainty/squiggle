@@ -53,12 +53,6 @@ export const UserControlsMenu: FC<Props> = ({ close, username, mode }) => {
         title="New Relative Value Definition"
         close={close}
       />
-      <DropdownMenuLinkItem
-        href={newGroupRoute()}
-        icon={GroupIcon}
-        title="New Group"
-        close={close}
-      />
     </>
   );
 };

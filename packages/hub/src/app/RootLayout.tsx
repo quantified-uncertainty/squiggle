@@ -1,12 +1,31 @@
+"use client";
+
 import { clsx } from "clsx";
 import { FC, PropsWithChildren } from "react";
+import { graphql } from "relay-runtime";
+import { usePathname } from "next/navigation";
 
 import { isModelRoute, isModelSubroute } from "@/routes";
-import { usePathname } from "next/navigation";
-import { PageFooter } from "./PageFooter";
-import { PageMenu } from "./PageMenu";
+import { PageFooter } from "../components/layout/RootLayout/PageFooter";
+import { PageMenu } from "../components/layout/RootLayout/PageMenu";
+import { usePageQuery } from "@/relay/usePageQuery";
+import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
+import { RootLayoutQuery } from "@/__generated__/RootLayoutQuery.graphql";
 
-export const RootLayout: FC<PropsWithChildren> = ({ children }) => {
+export const RootLayout: FC<
+  PropsWithChildren<{
+    query: SerializablePreloadedQuery<RootLayoutQuery>;
+  }>
+> = ({ children, query }) => {
+  const [queryData] = usePageQuery(
+    graphql`
+      query RootLayoutQuery {
+        ...PageMenu
+      }
+    `,
+    query
+  );
+
   const pathname = usePathname();
 
   const showFooter = !isModelRoute(pathname);
@@ -14,7 +33,7 @@ export const RootLayout: FC<PropsWithChildren> = ({ children }) => {
 
   return (
     <div className={clsx("min-h-screen flex flex-col", backgroundColor)}>
-      <PageMenu />
+      <PageMenu queryRef={queryData} />
       <div
         // This allows us to center children vertically if necessary, e.g. in `not-found.tsx`.
         // Note that setting `height: 100%` instead of `flex-1` on children won't work;

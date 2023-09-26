@@ -9,16 +9,23 @@ import "@/styles/main.css";
 
 import { ClientApp } from "./ClientApp";
 import { authOptions } from "./api/auth/[...nextauth]/authOptions";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { loadPageQuery } from "@/relay/loadPageQuery";
+import QueryNode, {
+  RootLayoutQuery,
+} from "@/__generated__/RootLayoutQuery.graphql";
+import { RootLayout } from "./RootLayout";
 
-export default async function RootLayout({ children }: PropsWithChildren) {
+export default async function ServerRootLayout({
+  children,
+}: PropsWithChildren) {
   const session = await getServerSession(authOptions);
+  const query = await loadPageQuery<RootLayoutQuery>(QueryNode, {});
 
   return (
     <html>
       <body>
         <ClientApp session={session}>
-          <ErrorBoundary>{children}</ErrorBoundary>
+          <RootLayout query={query}>{children}</RootLayout>
         </ClientApp>
       </body>
     </html>
