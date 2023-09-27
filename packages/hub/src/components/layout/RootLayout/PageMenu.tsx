@@ -1,7 +1,6 @@
 import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { FC, useState } from "react";
-import { FaPlus } from "react-icons/fa";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
@@ -13,6 +12,7 @@ import {
   DropdownMenuAsyncActionItem,
   DropdownMenuHeader,
   DropdownMenuSeparator,
+  PlusIcon,
   SignOutIcon,
   UserCircleIcon,
 } from "@quri/ui";
@@ -22,11 +22,11 @@ import { useUsername } from "@/hooks/useUsername";
 import { SQUIGGLE_DOCS_URL } from "@/lib/common";
 import { aboutRoute, newModelRoute } from "@/routes";
 import { DesktopUserControls } from "./DesktopUserControls";
+import { DropdownWithArrow } from "./DropdownWithArrow";
+import { MyGroupsMenu } from "./MyGroupsMenu";
 import { MenuLinkModeProps, PageMenuLink } from "./PageMenuLink";
 import { UserControlsMenu } from "./UserControlsMenu";
 import { useForceChooseUsername } from "./useForceChooseUsername";
-import { MyGroupsMenu } from "./MyGroupsMenu";
-import { DropdownWithArrow } from "./DropdownWithArrow";
 
 const AboutMenuLink: FC<MenuLinkModeProps> = (props) => {
   const { data: session } = useSession();
@@ -55,7 +55,7 @@ const NewModelMenuLink: FC<MenuLinkModeProps> = (props) => {
     <PageMenuLink
       {...props}
       href={newModelRoute()}
-      icon={FaPlus}
+      icon={PlusIcon}
       title="New Model"
     />
   );

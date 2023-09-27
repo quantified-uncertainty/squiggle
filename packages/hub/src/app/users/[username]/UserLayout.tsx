@@ -1,11 +1,14 @@
 "use client";
-import { Button, UserIcon } from "@quri/ui";
+import { useRouter, useSelectedLayoutSegment } from "next/navigation";
 import { FC, PropsWithChildren } from "react";
 import { graphql } from "relay-runtime";
+
+import { Button, PlusIcon, UserIcon } from "@quri/ui";
 
 import { UserLayoutQuery } from "@/__generated__/UserLayoutQuery.graphql";
 import { H1 } from "@/components/ui/Headers";
 import { StyledTabLink } from "@/components/ui/StyledTabLink";
+import { useUsername } from "@/hooks/useUsername";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
@@ -17,9 +20,6 @@ import {
   userGroupsRoute,
   userRoute,
 } from "@/routes";
-import { useUsername } from "@/hooks/useUsername";
-import { FaPlus } from "react-icons/fa";
-import { useRouter, useSelectedLayoutSegment } from "next/navigation";
 
 const Query = graphql`
   query UserLayoutQuery($username: String!) {
@@ -57,7 +57,7 @@ const NewButton: FC = () => {
   return (
     <Button onClick={() => router.push(link)}>
       <div className="flex gap-1 items-center">
-        <FaPlus />
+        <PlusIcon size={16} />
         {text}
       </div>
     </Button>

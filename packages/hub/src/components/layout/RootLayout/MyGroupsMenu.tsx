@@ -3,9 +3,13 @@ import { graphql, useFragment } from "react-relay";
 
 import { MyGroupsMenu$key } from "@/__generated__/MyGroupsMenu.graphql";
 import { DropdownMenuLinkItem } from "@/components/ui/DropdownMenuLinkItem";
-import { DropdownMenuHeader, DropdownMenuSeparator, GroupIcon } from "@quri/ui";
+import {
+  DropdownMenuHeader,
+  DropdownMenuSeparator,
+  GroupIcon,
+  PlusIcon,
+} from "@quri/ui";
 import { groupRoute, newGroupRoute } from "@/routes";
-import { FaPlus } from "react-icons/fa";
 
 type Props = {
   groupsRef: MyGroupsMenu$key;
@@ -48,7 +52,7 @@ export const MyGroupsMenu: FC<Props> = ({ groupsRef, close }) => {
       ) : null}
       <DropdownMenuLinkItem
         href={newGroupRoute()}
-        icon={FaPlus}
+        icon={PlusIcon}
         title="New Group"
         close={close}
       />
