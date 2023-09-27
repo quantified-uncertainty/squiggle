@@ -2,29 +2,29 @@
 import { FC } from "react";
 import { graphql } from "relay-runtime";
 
-import { UserDefinitionsPageQuery } from "@/__generated__/UserDefinitionsPageQuery.graphql";
+import { UserGroupsPageQuery } from "@/__generated__/UserGroupsPageQuery.graphql";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
-import { UserDefinitionList } from "./UserDefinitionList";
+import { UserGroupList } from "./UserGroupList";
 
 const Query = graphql`
-  query UserDefinitionsPageQuery($username: String!) {
+  query UserGroupsPageQuery($username: String!) {
     userByUsername(username: $username) {
       __typename
       ... on User {
-        ...UserDefinitionList
+        ...UserGroupList
       }
     }
   }
 `;
 
-export const UserDefinitionsPage: FC<{
-  query: SerializablePreloadedQuery<UserDefinitionsPageQuery>;
+export const UserGroupsPage: FC<{
+  query: SerializablePreloadedQuery<UserGroupsPageQuery>;
 }> = ({ query }) => {
   const [{ userByUsername: result }] = usePageQuery(Query, query);
 
   const user = extractFromGraphqlErrorUnion(result, "User");
 
-  return <UserDefinitionList dataRef={user} />;
+  return <UserGroupList dataRef={user} />;
 };

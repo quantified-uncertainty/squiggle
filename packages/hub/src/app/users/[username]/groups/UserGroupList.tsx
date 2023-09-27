@@ -2,8 +2,8 @@ import { FC } from "react";
 import { usePaginationFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { UserDefinitionList$key } from "@/__generated__/UserDefinitionList.graphql";
-import { RelativeValuesDefinitionList } from "@/relative-values/components/RelativeValuesDefinitionList";
+import { UserGroupList$key } from "@/__generated__/UserGroupList.graphql";
+import { GroupList } from "@/groups/components/GroupList";
 
 const Fragment = graphql`
   fragment UserGroupList on User
@@ -12,8 +12,8 @@ const Fragment = graphql`
     count: { type: "Int", defaultValue: 20 }
   )
   @refetchable(queryName: "UserGroupListPaginationQuery") {
-    relativeValuesDefinitions(first: $count, after: $cursor)
-      @connection(key: "UserGroupList_connection") {
+    groups(first: $count, after: $cursor)
+      @connection(key: "UserGroupList_groups") {
       edges {
         __typename
       }
@@ -23,27 +23,21 @@ const Fragment = graphql`
 `;
 
 type Props = {
-  dataRef: UserDefinitionList$key;
+  dataRef: UserGroupList$key;
 };
 
-export const UserDefinitionList: FC<Props> = ({ dataRef }) => {
+export const UserGroupList: FC<Props> = ({ dataRef }) => {
   const {
-    data: { relativeValuesDefinitions },
+    data: { groups },
     loadNext,
   } = usePaginationFragment(Fragment, dataRef);
 
   return (
     <div>
-      {relativeValuesDefinitions.edges.length ? (
-        <RelativeValuesDefinitionList
-          connectionRef={relativeValuesDefinitions}
-          showOwner={false}
-          loadNext={loadNext}
-        />
+      {groups.edges.length ? (
+        <GroupList connectionRef={groups} loadNext={loadNext} />
       ) : (
-        <div className="text-slate-500">
-          {"You don't have any definitions yet."}
-        </div>
+        <div className="text-slate-500">{"You don't have any groups yet."}</div>
       )}
     </div>
   );

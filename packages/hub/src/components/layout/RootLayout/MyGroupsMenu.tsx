@@ -31,17 +31,21 @@ export const MyGroupsMenu: FC<Props> = ({ groupsRef, close }) => {
   return (
     <>
       <DropdownMenuHeader>My Groups</DropdownMenuHeader>
-      <DropdownMenuSeparator />
-      {groups.result.edges.map((edge) => (
-        <DropdownMenuLinkItem
-          key={edge.node.id}
-          href={groupRoute({ slug: edge.node.slug })}
-          icon={GroupIcon}
-          title={edge.node.slug}
-          close={close}
-        />
-      ))}
-      <DropdownMenuSeparator />
+
+      {groups.result.edges.length ? (
+        <>
+          <DropdownMenuSeparator />
+          {groups.result.edges.map((edge) => (
+            <DropdownMenuLinkItem
+              key={edge.node.id}
+              href={groupRoute({ slug: edge.node.slug })}
+              icon={GroupIcon}
+              title={edge.node.slug}
+              close={close}
+            />
+          ))}
+        </>
+      ) : null}
       <DropdownMenuLinkItem
         href={newGroupRoute()}
         icon={FaPlus}

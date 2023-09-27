@@ -14,7 +14,7 @@ import { prisma } from "@/prisma";
 import {
   GroupConnection,
   UserGroupMembershipConnection,
-  groupConnectionHelpers,
+  groupFromMembershipConnectionHelpers,
 } from "./Group";
 
 export function isSignedIn(
@@ -100,21 +100,23 @@ export const User = builder.prismaNode("User", {
       },
       RelativeValuesDefinitionConnection
     ),
-    // Memberships are public (is this ok? I hope so).
-    // To get "my groups", it might be easier to go through top-level `query { groups(input: { myOnly: true }) { ... } }`
-    memberships: t.relatedConnection(
-      "memberships",
-      { cursor: "id" },
-      UserGroupMembershipConnection
-    ),
     groups: t.connection(
       {
-        type: groupConnectionHelpers.ref,
+        type: groupFromMembershipConnectionHelpers.ref,
+
         select: (args, ctx, nestedSelection) => ({
-          memberships: true,
+          memberships: groupFromMembershipConnectionHelpers.getQuery(
+            args,
+            ctx,
+            nestedSelection
+          ),
         }),
         resolve: (user, args, ctx) =>
-          groupConnectionHelpers.resolve(user.memberships, args, ctx),
+          groupFromMembershipConnectionHelpers.resolve(
+            user.memberships,
+            args,
+            ctx
+          ),
       },
       GroupConnection
     ),

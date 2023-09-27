@@ -1,21 +1,21 @@
 import { Metadata } from "next";
 
 import QueryNode, {
-  UserDefinitionsPageQuery,
-} from "@/__generated__/UserDefinitionsPageQuery.graphql";
+  UserGroupsPageQuery,
+} from "@/__generated__/UserGroupsPageQuery.graphql";
 import { loadPageQuery } from "@/relay/loadPageQuery";
-import { UserDefinitionsPage } from "./UserDefinitionsPage";
+import { UserGroupsPage } from "./UserGroupsPage";
 
 type Props = {
   params: { username: string };
 };
 
-export default async function OuterUserDefinitionsPage({ params }: Props) {
-  const query = await loadPageQuery<UserDefinitionsPageQuery>(QueryNode, {
+export default async function OuterUserGroupsPage({ params }: Props) {
+  const query = await loadPageQuery<UserGroupsPageQuery>(QueryNode, {
     username: params.username,
   });
 
-  return <UserDefinitionsPage query={query} />;
+  return <UserGroupsPage query={query} />;
 }
 
 export function generateMetadata({ params }: Props): Metadata {

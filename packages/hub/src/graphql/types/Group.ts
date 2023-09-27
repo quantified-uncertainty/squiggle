@@ -230,10 +230,15 @@ export const GroupConnection = builder.connectionObject({
   name: "GroupConnection",
 });
 
-export const groupConnectionHelpers = prismaConnectionHelpers(
+// useful when we want to expose `groups` field on a `User`, instead of `memberships`
+export const groupFromMembershipConnectionHelpers = prismaConnectionHelpers(
   builder,
-  "Group",
+  "UserGroupMembership",
   {
     cursor: "id",
+    select: (nodeSelection) => ({
+      group: nodeSelection(),
+    }),
+    resolveNode: (node) => node.group,
   }
 );
