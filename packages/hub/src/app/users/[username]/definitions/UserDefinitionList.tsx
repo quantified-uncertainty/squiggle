@@ -4,6 +4,8 @@ import { graphql } from "relay-runtime";
 
 import { UserDefinitionList$key } from "@/__generated__/UserDefinitionList.graphql";
 import { RelativeValuesDefinitionList } from "@/relative-values/components/RelativeValuesDefinitionList";
+import { StyledLink } from "@/components/ui/StyledLink";
+import { newDefinitionRoute } from "@/routes";
 
 const Fragment = graphql`
   fragment UserDefinitionList on User
@@ -41,9 +43,7 @@ export const UserDefinitionList: FC<Props> = ({ dataRef }) => {
           loadNext={loadNext}
         />
       ) : (
-        <div className="text-slate-500">
-          {"You don't have any definitions yet."}
-        </div>
+        <div className="text-slate-500">No definitions to show.</div>
       )}
     </div>
   );

@@ -4,6 +4,9 @@ import { graphql } from "relay-runtime";
 
 import { UserModelList$key } from "@/__generated__/UserModelList.graphql";
 import { ModelList } from "@/models/components/ModelList";
+import Link from "next/link";
+import { StyledLink } from "@/components/ui/StyledLink";
+import { newModelRoute } from "@/routes";
 
 const Fragment = graphql`
   fragment UserModelList on User
@@ -41,7 +44,7 @@ export const UserModelList: FC<Props> = ({ dataRef }) => {
           showOwner={false}
         />
       ) : (
-        <div className="text-slate-500">{"You don't have any models yet."}</div>
+        <div className="text-slate-500">No models to show.</div>
       )}
     </div>
   );

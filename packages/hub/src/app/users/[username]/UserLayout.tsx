@@ -1,5 +1,5 @@
 "use client";
-import { UserIcon } from "@quri/ui";
+import { Button, UserIcon } from "@quri/ui";
 import { FC, PropsWithChildren } from "react";
 import { graphql } from "relay-runtime";
 
@@ -9,7 +9,17 @@ import { StyledTabLink } from "@/components/ui/StyledTabLink";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
-import { userDefinitionsRoute, userGroupsRoute, userRoute } from "@/routes";
+import {
+  newDefinitionRoute,
+  newGroupRoute,
+  newModelRoute,
+  userDefinitionsRoute,
+  userGroupsRoute,
+  userRoute,
+} from "@/routes";
+import { useUsername } from "@/hooks/useUsername";
+import { FaPlus } from "react-icons/fa";
+import { useRouter, useSelectedLayoutSegment } from "next/navigation";
 
 const Query = graphql`
   query UserLayoutQuery($username: String!) {
@@ -28,6 +38,32 @@ const Query = graphql`
   }
 `;
 
+const NewButton: FC = () => {
+  const segment = useSelectedLayoutSegment();
+
+  let link = newModelRoute();
+  let text = "New Model";
+
+  if (segment === "groups") {
+    link = newGroupRoute();
+    text = "New Group";
+  } else if (segment === "definitions") {
+    link = newDefinitionRoute();
+    text = "New Definition";
+  }
+
+  const router = useRouter();
+
+  return (
+    <Button onClick={() => router.push(link)}>
+      <div className="flex gap-1 items-center">
+        <FaPlus />
+        {text}
+      </div>
+    </Button>
+  );
+};
+
 export const UserLayout: FC<
   PropsWithChildren<{
     query: SerializablePreloadedQuery<UserLayoutQuery>;
@@ -37,6 +73,8 @@ export const UserLayout: FC<
 
   const user = extractFromGraphqlErrorUnion(result, "User");
 
+  const myUsername = useUsername();
+
   return (
     <div className="space-y-8">
       <H1 size="large">
@@ -45,20 +83,23 @@ export const UserLayout: FC<
           {user.username}
         </div>
       </H1>
-      <StyledTabLink.List>
-        <StyledTabLink
-          name="Models"
-          href={userRoute({ username: user.username })}
-        />
-        <StyledTabLink
-          name="Definitions"
-          href={userDefinitionsRoute({ username: user.username })}
-        />
-        <StyledTabLink
-          name="Groups"
-          href={userGroupsRoute({ username: user.username })}
-        />
-      </StyledTabLink.List>
+      <div className="flex gap-4 items-center">
+        <StyledTabLink.List>
+          <StyledTabLink
+            name="Models"
+            href={userRoute({ username: user.username })}
+          />
+          <StyledTabLink
+            name="Definitions"
+            href={userDefinitionsRoute({ username: user.username })}
+          />
+          <StyledTabLink
+            name="Groups"
+            href={userGroupsRoute({ username: user.username })}
+          />
+        </StyledTabLink.List>
+        {user.username === myUsername && <NewButton />}
+      </div>
       <div>{children}</div>
     </div>
   );

@@ -4,6 +4,8 @@ import { graphql } from "relay-runtime";
 
 import { UserGroupList$key } from "@/__generated__/UserGroupList.graphql";
 import { GroupList } from "@/groups/components/GroupList";
+import { StyledLink } from "@/components/ui/StyledLink";
+import { newGroupRoute } from "@/routes";
 
 const Fragment = graphql`
   fragment UserGroupList on User
@@ -37,7 +39,7 @@ export const UserGroupList: FC<Props> = ({ dataRef }) => {
       {groups.edges.length ? (
         <GroupList connectionRef={groups} loadNext={loadNext} />
       ) : (
-        <div className="text-slate-500">{"You don't have any groups yet."}</div>
+        <div className="text-slate-500">No groups to show.</div>
       )}
     </div>
   );
