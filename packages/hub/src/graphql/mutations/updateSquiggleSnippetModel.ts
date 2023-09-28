@@ -4,6 +4,7 @@ import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
 import { Model, getWriteableModel } from "../types/Model";
+import { getSelf } from "../types/User";
 
 const DefinitionRefInput = builder.inputType("DefinitionRefInput", {
   fields: (t) => ({
@@ -118,6 +119,8 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
         }
       }
 
+      const self = await getSelf(session);
+
       const model = await prisma.$transaction(async (tx) => {
         const revision = await tx.modelRevision.create({
           data: {
@@ -126,9 +129,10 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
             },
             contentType: "SquiggleSnippet",
             model: {
-              connect: {
-                id: existingModel.id,
-              },
+              connect: { id: existingModel.id },
+            },
+            author: {
+              connect: { id: self.id },
             },
             relativeValuesExports: {
               createMany: {

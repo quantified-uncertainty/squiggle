@@ -61,12 +61,13 @@ model User {
   name  String?
   email String? @unique
 
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  memberships   UserGroupMembership[]
-  invites       GroupInvite[]
+  emailVerified  DateTime?
+  image          String?
+  accounts       Account[]
+  sessions       Session[]
+  memberships    UserGroupMembership[]
+  invites        GroupInvite[]
+  modelRevisions ModelRevision[]
 
   // Usernames are stored through Owner table, because they share the same namespace with Groups.
   // Users don't initially have an Owner entry, but are prompted to pick a slug and create one.
@@ -198,6 +199,10 @@ model ModelRevision {
 
   model   Model  @relation("Revisions", fields: [modelId], references: [id], onDelete: Cascade)
   modelId String
+
+  // optional until we populate old rows after migration
+  author   User?   @relation(fields: [authorId], references: [id])
+  authorId String?
 
   contentType ModelType
 

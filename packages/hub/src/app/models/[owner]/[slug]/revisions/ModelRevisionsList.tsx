@@ -15,6 +15,7 @@ import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 import { modelRevisionRoute } from "@/routes";
 import { ModelRevisionsListQuery } from "@gen/ModelRevisionsListQuery.graphql";
+import { UsernameLink } from "@/components/UsernameLink";
 
 const ModelRevisionItem: FC<{
   modelRef: ModelRevisionsList_model$key;
@@ -25,6 +26,9 @@ const ModelRevisionItem: FC<{
       fragment ModelRevisionsList_revision on ModelRevision {
         id
         createdAtTimestamp
+        author {
+          username
+        }
       }
     `,
     revisionRef
@@ -54,6 +58,12 @@ const ModelRevisionItem: FC<{
       >
         {format(new Date(revision.createdAtTimestamp), commonDateFormat)}
       </StyledLink>
+      {revision.author ? (
+        <>
+          {" "}
+          by <UsernameLink username={revision.author.username} />
+        </>
+      ) : null}
     </div>
   );
 };

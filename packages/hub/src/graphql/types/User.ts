@@ -11,11 +11,7 @@ import {
   relativeValuesDefinitionConnectionHelpers,
 } from "./RelativeValuesDefinition";
 import { prisma } from "@/prisma";
-import {
-  GroupConnection,
-  UserGroupMembershipConnection,
-  groupFromMembershipConnectionHelpers,
-} from "./Group";
+import { GroupConnection, groupFromMembershipConnectionHelpers } from "./Group";
 
 export function isSignedIn(
   session: Session | null

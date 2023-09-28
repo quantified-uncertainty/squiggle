@@ -150,6 +150,7 @@ type ModelEdge {
 }
 
 type ModelRevision implements Node {
+  author: User
   content: ModelContent!
   createdAtTimestamp: Float!
   forRelativeValues(input: ModelRevisionForRelativeValuesInput): RelativeValuesExport

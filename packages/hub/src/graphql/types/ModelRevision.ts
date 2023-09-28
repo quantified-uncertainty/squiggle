@@ -25,6 +25,7 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
     // But connection is harder to deal with on the UI side, and since we send all variables back on updates, so it doesn't make much sense there.
     relativeValuesExports: t.relation("relativeValuesExports"),
     model: t.relation("model"),
+    author: t.relation("author", { nullable: true }),
     content: t.field({
       type: ModelContent,
       select: { squiggleSnippet: true },
@@ -54,9 +55,7 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
           ),
         }),
       },
-      argOptions: {
-        required: false,
-      },
+      argOptions: { required: false },
       async resolve(revision, { input }) {
         if (!input) {
           return null;
