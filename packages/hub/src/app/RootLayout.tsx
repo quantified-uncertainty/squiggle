@@ -19,8 +19,8 @@ export const RootLayout: FC<
 > = ({ children, query }) => {
   const [queryData] = usePageQuery(
     graphql`
-      query RootLayoutQuery {
-        ...PageMenu
+      query RootLayoutQuery($signedIn: Boolean!) {
+        ...PageMenu @arguments(signedIn: $signedIn)
       }
     `,
     query

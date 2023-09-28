@@ -62,8 +62,9 @@ const NewModelMenuLink: FC<MenuLinkModeProps> = (props) => {
 };
 
 const fragment = graphql`
-  fragment PageMenu on Query {
-    ...MyGroupsMenu
+  fragment PageMenu on Query
+  @argumentDefinitions(signedIn: { type: "Boolean!" }) {
+    ...MyGroupsMenu @include(if: $signedIn)
   }
 `;
 
@@ -72,21 +73,27 @@ type MenuProps = {
 };
 
 const DesktopMenu: FC<MenuProps> = ({ queryRef }) => {
+  const { data: session } = useSession();
   const menu = useFragment(fragment, queryRef);
+
   return (
     <div className="flex gap-6 items-baseline">
       <AboutMenuLink mode="desktop" />
       <DocsMenuLink mode="desktop" />
-      <NewModelMenuLink mode="desktop" />
-      <Dropdown
-        render={({ close }) => (
-          <DropdownMenu>
-            <MyGroupsMenu groupsRef={menu} close={close} />
-          </DropdownMenu>
-        )}
-      >
-        <DropdownWithArrow text="My Groups" />
-      </Dropdown>
+      {session ? (
+        <>
+          <NewModelMenuLink mode="desktop" />
+          <Dropdown
+            render={({ close }) => (
+              <DropdownMenu>
+                <MyGroupsMenu groupsRef={menu} close={close} />
+              </DropdownMenu>
+            )}
+          >
+            <DropdownWithArrow text="My Groups" />
+          </Dropdown>
+        </>
+      ) : null}
       <DesktopUserControls />
     </div>
   );

@@ -19,7 +19,9 @@ export default async function ServerRootLayout({
   children,
 }: PropsWithChildren) {
   const session = await getServerSession(authOptions);
-  const query = await loadPageQuery<RootLayoutQuery>(QueryNode, {});
+  const query = await loadPageQuery<RootLayoutQuery>(QueryNode, {
+    signedIn: !!session,
+  });
 
   return (
     <html>
