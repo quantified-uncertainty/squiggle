@@ -3,7 +3,7 @@ import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { graphql, useFragment } from "react-relay";
 
 import { PlaygroundToolbarItem } from "@quri/squiggle-components";
-import { Button, LinkIcon, useToast } from "@quri/ui";
+import { Button, LinkIcon, TextTooltip, useToast } from "@quri/ui";
 
 import { EditSquiggleSnippetModel$key } from "@/__generated__/EditSquiggleSnippetModel.graphql";
 import {
@@ -18,6 +18,7 @@ import {
   SquigglePlaygroundVersionPicker,
   VersionedSquigglePlayground,
   type SquiggleVersion,
+  SquiggleVersionShower,
 } from "@quri/versioned-playground";
 
 export const Mutation = graphql`
@@ -182,12 +183,25 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
                     onClick={() => openModal("exports")}
                   />
                 )}
-                <SquigglePlaygroundVersionPicker
-                  version={version}
-                  onChange={handleVersionChange}
-                  size="small"
-                  showUpdatePolicy
-                />
+                {model.isEditable ? (
+                  <SquigglePlaygroundVersionPicker
+                    version={version}
+                    onChange={handleVersionChange}
+                    size="small"
+                    showUpdatePolicy
+                  />
+                ) : (
+                  <TextTooltip
+                    text="Squiggle Version" // FIXME - positioning is bad for some reason
+                    placement="bottom"
+                    offset={5}
+                  >
+                    {/* div wrapper is required because TextTooltip clones its children and SquiggleVersionShower doesn't forwardRef */}
+                    <div>
+                      <SquiggleVersionShower version={version} />
+                    </div>
+                  </TextTooltip>
+                )}
                 {model.isEditable && (
                   <Button
                     theme="primary"

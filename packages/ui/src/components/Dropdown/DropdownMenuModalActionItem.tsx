@@ -1,3 +1,4 @@
+"use client";
 import { FC, ReactNode, useState } from "react";
 import { ItemLayoutProps } from "./DropdownMenuItemLayout.js";
 import { DropdownMenuActionItem } from "./DropdownMenuActionItem.js";

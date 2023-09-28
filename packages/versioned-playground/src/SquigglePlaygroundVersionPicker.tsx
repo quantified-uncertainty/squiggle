@@ -3,7 +3,6 @@ import { FC } from "react";
 
 import {
   Button,
-  CodeBracketIcon,
   Dropdown,
   DropdownMenu,
   DropdownMenuActionItem,
@@ -13,14 +12,14 @@ import {
   DropdownMenuSeparator,
   HelpIcon,
   Modal,
-  WrenchIcon,
 } from "@quri/ui";
 
 import {
-  SquiggleVersion,
-  checkSquiggleVersion,
-  squiggleVersions,
-} from "./versions.js";
+  SquiggleVersionShower,
+  versionIcon,
+  versionTitle,
+} from "./SquiggleVersionShower.js";
+import { SquiggleVersion, squiggleVersions } from "./versions.js";
 
 const CHANGELOG_URL = "https://www.squiggle-language.com/docs/Changelog";
 
@@ -32,16 +31,6 @@ export const SquigglePlaygroundVersionPicker: FC<{
   // "medium" was intended for "New Model" form in Squiggle Hub, but it's currently unused
   size: "small" | "medium";
 }> = ({ version, onChange, showUpdatePolicy, size }) => {
-  const versionIsValid = checkSquiggleVersion(version);
-
-  const versionTitle = (version: string) =>
-    version === "dev" ? "Next" : version;
-
-  const versionIcon = (version: string) =>
-    version === "dev" ? WrenchIcon : CodeBracketIcon;
-
-  const CurrentIcon = versionIcon(version);
-
   return (
     <div className="flex">
       <Dropdown
@@ -104,11 +93,7 @@ export const SquigglePlaygroundVersionPicker: FC<{
         )}
       >
         <Button size={size}>
-          <div className="flex items-center gap-2">
-            <CurrentIcon size={14} className="text-slate-500" />
-            {versionTitle(version)}
-            {versionIsValid ? "" : ` (unknown)`}
-          </div>
+          <SquiggleVersionShower version={version} />
         </Button>
       </Dropdown>
     </div>
