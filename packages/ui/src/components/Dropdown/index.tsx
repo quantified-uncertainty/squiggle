@@ -64,7 +64,7 @@ export const Dropdown: FC<Props> = ({ render, fullHeight, children }) => {
       <div className={tailwindSelector}>
         <div
           ref={refs.setFloating}
-          className="z-30 rounded-md bg-white shadow-md border"
+          className="z-30 rounded-md bg-white shadow-lg border border-slate-200 overflow-hidden"
           style={{
             position: strategy,
             top: y ?? 0,
