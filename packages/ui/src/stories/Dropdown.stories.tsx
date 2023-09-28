@@ -33,13 +33,13 @@ export const Default: Story = {
       return (
         <DropdownMenu>
           <DropdownMenuHeader>Header</DropdownMenuHeader>
-          <DropdownMenuSeparator />
           <DropdownMenuActionItem
             title="Refresh"
             icon={RefreshIcon}
             onClick={() => undefined}
           />
           <DropdownMenuActionItem title="Edit" onClick={() => undefined} />
+          <DropdownMenuSeparator />
           <DropdownMenuAsyncActionItem
             title="Delete (async)"
             icon={TrashIcon}
