@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { FC } from "react";
 
+import { DropdownMenuNextLinkItem } from "@/components/ui/DropdownMenuNextLinkItem";
 import { IconProps } from "@/relative-values/components/ui/icons/Icon";
-import { DropdownMenuLinkItem } from "@/components/ui/DropdownMenuLinkItem";
 import { EmptyIcon } from "@quri/ui";
 
 export type MenuLinkModeProps =
@@ -41,7 +41,7 @@ export const PageMenuLink: FC<Props> = ({
       {title}
     </Link>
   ) : (
-    <DropdownMenuLinkItem
+    <DropdownMenuNextLinkItem
       href={href}
       icon={icon ?? EmptyIcon}
       title={title}

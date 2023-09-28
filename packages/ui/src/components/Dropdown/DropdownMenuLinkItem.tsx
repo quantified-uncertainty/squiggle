@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { IconProps } from "../../icons/Icon.js";
-import { ActionItemInternal } from "./DropdownMenuActionItemInternal.js";
+import { DropdownMenuItemLayout } from "./DropdownMenuItemLayout.js";
 import { ExternalLinkIcon } from "../../index.js";
 
 type Props = {
@@ -27,7 +27,7 @@ export const DropdownMenuLinkItem: FC<Props> = ({
       target={newTab ? "_blank" : undefined}
       rel={newTab ? "noreferrer" : undefined}
     >
-      <ActionItemInternal icon={icon ?? ExternalLinkIcon} title={title} />
+      <DropdownMenuItemLayout icon={icon ?? ExternalLinkIcon} title={title} />
     </a>
   );
 };

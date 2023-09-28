@@ -1,7 +1,7 @@
-import { useRouter } from "next/navigation";
 import { FC } from "react";
+import Link from "next/link";
 
-import { DropdownMenuActionItem, IconProps } from "@quri/ui";
+import { DropdownMenuItemLayout, IconProps } from "@quri/ui";
 
 type Props = {
   href: string;
@@ -16,12 +16,9 @@ export const DropdownMenuNextLinkItem: FC<Props> = ({
   icon,
   close,
 }) => {
-  const router = useRouter();
-
-  const onClick = () => {
-    router.push(href);
-    close();
-  };
-
-  return <DropdownMenuActionItem onClick={onClick} title={title} icon={icon} />;
+  return (
+    <Link href={href} onClick={close}>
+      <DropdownMenuItemLayout icon={icon} title={title} />
+    </Link>
+  );
 };

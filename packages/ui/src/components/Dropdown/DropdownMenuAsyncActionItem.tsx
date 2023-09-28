@@ -2,7 +2,7 @@
 import { FC, useState } from "react";
 
 import { IconProps } from "../../icons/Icon.js";
-import { ActionItemInternal } from "./DropdownMenuActionItemInternal.js";
+import { DropdownMenuItemLayout } from "./DropdownMenuItemLayout.js";
 
 type AsyncActionItemProps = {
   icon?: FC<IconProps>;
@@ -30,7 +30,7 @@ export const DropdownMenuAsyncActionItem: FC<AsyncActionItemProps> = ({
 
   return (
     <div onClick={act}>
-      <ActionItemInternal icon={icon} title={title} acting={acting} />
+      <DropdownMenuItemLayout icon={icon} title={title} acting={acting} />
     </div>
   );
 };
