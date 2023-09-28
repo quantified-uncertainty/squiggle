@@ -2,15 +2,36 @@ import Link from "next/link";
 import { FC } from "react";
 
 import { IconProps } from "@/relative-values/components/ui/icons/Icon";
+import { DropdownMenuLinkItem } from "@/components/ui/DropdownMenuLinkItem";
+import { EmptyIcon } from "@quri/ui";
 
-export const PageMenuLink: FC<{
+export type MenuLinkModeProps =
+  | {
+      mode: "desktop";
+      close?: undefined;
+    }
+  | {
+      mode: "mobile";
+      close: () => void;
+    };
+
+type Props = {
   title: string;
   href: string;
   icon?: FC<IconProps>;
   external?: boolean;
-}> = ({ title, icon, href, external }) => {
+} & MenuLinkModeProps;
+
+export const PageMenuLink: FC<Props> = ({
+  mode,
+  close,
+  title,
+  icon,
+  href,
+  external,
+}) => {
   const Icon = icon;
-  return (
+  return mode === "desktop" ? (
     <Link
       className="text-white text-sm hover:bg-slate-700 px-2 py-1 rounded-md select-none"
       href={href}
@@ -19,5 +40,12 @@ export const PageMenuLink: FC<{
       {Icon && <Icon className="inline-block mr-1 text-slate-400" size={14} />}
       {title}
     </Link>
+  ) : (
+    <DropdownMenuLinkItem
+      href={href}
+      icon={icon ?? EmptyIcon}
+      title={title}
+      close={close}
+    />
   );
 };

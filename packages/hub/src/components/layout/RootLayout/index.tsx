@@ -1,10 +1,10 @@
+import { clsx } from "clsx";
 import { FC, PropsWithChildren } from "react";
 
-import { PageMenu } from "./PageMenu";
-import { PageFooter } from "./PageFooter";
-import { usePathname } from "next/navigation";
 import { isModelRoute, isModelSubroute } from "@/routes";
-import { clsx } from "clsx";
+import { usePathname } from "next/navigation";
+import { PageFooter } from "./PageFooter";
+import { PageMenu } from "./PageMenu";
 
 export const RootLayout: FC<PropsWithChildren> = ({ children }) => {
   const pathname = usePathname();
