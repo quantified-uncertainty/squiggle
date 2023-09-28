@@ -29,7 +29,6 @@ export const UserControlsMenu: FC<Props> = ({ close, username, mode }) => {
       <DropdownMenuHeader>
         {mode === "desktop" ? "User Actions" : `@${username}`}
       </DropdownMenuHeader>
-      <DropdownMenuSeparator />
       <DropdownMenuLinkItem
         href={userRoute({ username })}
         icon={UserCircleIcon}
@@ -44,9 +43,7 @@ export const UserControlsMenu: FC<Props> = ({ close, username, mode }) => {
         icon={SignOutIcon}
         title="Sign Out"
       />
-      <DropdownMenuSeparator />
       <DropdownMenuHeader>Experimental</DropdownMenuHeader>
-      <DropdownMenuSeparator />
       <DropdownMenuLinkItem
         href={newDefinitionRoute()}
         icon={ScaleIcon}

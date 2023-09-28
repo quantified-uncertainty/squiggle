@@ -121,15 +121,12 @@ const MobileMenu: FC<MenuProps> = ({ queryRef }) => {
           <div className="fixed inset-y-0 right-0 z-20 bg-white shadow-xl overflow-y-auto overflow-x-hidden">
             <DropdownMenu>
               <DropdownMenuHeader>Menu</DropdownMenuHeader>
-              <DropdownMenuSeparator />
               <NewModelMenuLink mode="mobile" close={close} />
               <AboutMenuLink mode="mobile" close={close} />
               <DocsMenuLink mode="mobile" close={close} />
-              <DropdownMenuSeparator />
               {username ? (
                 <>
                   <MyGroupsMenu groupsRef={menu} close={close} />
-                  <DropdownMenuSeparator />
                   <UserControlsMenu
                     mode="mobile"
                     username={username}
@@ -139,7 +136,6 @@ const MobileMenu: FC<MenuProps> = ({ queryRef }) => {
               ) : (
                 <>
                   <DropdownMenuHeader>User Actions</DropdownMenuHeader>
-                  <DropdownMenuSeparator />
                   <DropdownMenuAsyncActionItem
                     title="Sign In"
                     icon={SignOutIcon}

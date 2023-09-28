@@ -38,7 +38,6 @@ export const MyGroupsMenu: FC<Props> = ({ groupsRef, close }) => {
 
       {groups.result.edges.length ? (
         <>
-          <DropdownMenuSeparator />
           {groups.result.edges.map((edge) => (
             <DropdownMenuLinkItem
               key={edge.node.id}
