@@ -33,6 +33,23 @@ const Query = graphql`
       }
       ... on User {
         username
+        # fields for count (empty/non-empty)
+        # TODO: implement "totalCount" field instead
+        models(first: 1) {
+          edges {
+            __typename
+          }
+        }
+        relativeValuesDefinitions(first: 1) {
+          edges {
+            __typename
+          }
+        }
+        groups(first: 1) {
+          edges {
+            __typename
+          }
+        }
       }
     }
   }
@@ -74,6 +91,7 @@ export const UserLayout: FC<
   const user = extractFromGraphqlErrorUnion(result, "User");
 
   const myUsername = useUsername();
+  const isMe = user.username === myUsername;
 
   return (
     <div className="space-y-8">
@@ -85,20 +103,26 @@ export const UserLayout: FC<
       </H1>
       <div className="flex gap-4 items-center">
         <StyledTabLink.List>
-          <StyledTabLink
-            name="Models"
-            href={userRoute({ username: user.username })}
-          />
-          <StyledTabLink
-            name="Definitions"
-            href={userDefinitionsRoute({ username: user.username })}
-          />
-          <StyledTabLink
-            name="Groups"
-            href={userGroupsRoute({ username: user.username })}
-          />
+          {isMe || user.models.edges.length ? (
+            <StyledTabLink
+              name="Models"
+              href={userRoute({ username: user.username })}
+            />
+          ) : null}
+          {isMe || user.relativeValuesDefinitions.edges.length ? (
+            <StyledTabLink
+              name="Definitions"
+              href={userDefinitionsRoute({ username: user.username })}
+            />
+          ) : null}
+          {isMe || user.groups.edges.length ? (
+            <StyledTabLink
+              name="Groups"
+              href={userGroupsRoute({ username: user.username })}
+            />
+          ) : null}
         </StyledTabLink.List>
-        {user.username === myUsername && <NewButton />}
+        {isMe && <NewButton />}
       </div>
       <div>{children}</div>
     </div>
