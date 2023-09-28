@@ -14,6 +14,7 @@ import {
   CommonMutationParameters,
   useAsyncMutation,
 } from "@/hooks/useAsyncMutation";
+import { DropdownMenuModalActionItem } from "@quri/ui";
 
 type CommonProps<
   TMutation extends CommonMutationParameters<TTypename>,
@@ -100,25 +101,19 @@ export function MutationModalAction<
   icon?: FC<IconProps>;
   children: () => ReactNode;
 }): ReactNode {
-  const [isOpen, setIsOpen] = useState(false);
-
   return (
-    <>
-      <DropdownMenuActionItem
-        title={title}
-        onClick={() => setIsOpen(true)}
-        icon={icon}
-      />
-      {isOpen && (
+    <DropdownMenuModalActionItem
+      title={title}
+      icon={icon}
+      render={() => (
         <MutationFormModal<TMutation, TFormShape, TTypename>
           // Note that we pass the same `close` that's responsible for closing the dropdown.
-          // There's no need to call setIsOpen(false); closing the dropdown is enough, since this component will be destroyed.
           {...modalProps}
           title={modalTitle}
         >
           {children()}
         </MutationFormModal>
       )}
-    </>
+    />
   );
 }

@@ -186,6 +186,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
                   version={version}
                   onChange={handleVersionChange}
                   size="small"
+                  showUpdatePolicy
                 />
                 {model.isEditable && (
                   <Button

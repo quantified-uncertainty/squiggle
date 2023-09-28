@@ -8,7 +8,9 @@ import {
   DropdownMenuActionItem,
   DropdownMenuAsyncActionItem,
   DropdownMenuHeader,
+  DropdownMenuModalActionItem,
   DropdownMenuSeparator,
+  Modal,
   RefreshIcon,
   TrashIcon,
 } from "../index.js";
@@ -40,6 +42,15 @@ export const Default: Story = {
             onClick={() => undefined}
           />
           <DropdownMenuActionItem title="Edit" onClick={() => undefined} />
+          <DropdownMenuModalActionItem
+            title="Help"
+            render={() => (
+              <Modal close={close}>
+                <Modal.Header>Help modal</Modal.Header>
+                <Modal.Body>Lorem Ipsum</Modal.Body>
+              </Modal>
+            )}
+          />
           <DropdownMenuAsyncActionItem
             title="Delete (async)"
             icon={TrashIcon}

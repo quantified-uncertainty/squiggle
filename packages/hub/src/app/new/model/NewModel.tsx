@@ -5,12 +5,8 @@ import { FC } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { graphql } from "relay-runtime";
 
-import { Button, CheckboxFormField, ControlledFormField } from "@quri/ui";
-import {
-  SquigglePlaygroundVersionPicker,
-  defaultSquiggleVersion,
-  type SquiggleVersion,
-} from "@quri/versioned-playground";
+import { Button, CheckboxFormField } from "@quri/ui";
+import { defaultSquiggleVersion } from "@quri/versioned-playground";
 
 import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
 import { SelectGroup, SelectGroupOption } from "@/components/SelectGroup";
@@ -45,7 +41,6 @@ a = normal(2, 5)
 
 type FormShape = {
   slug: string | undefined;
-  version: SquiggleVersion;
   group: SelectGroupOption | null;
   isPrivate: boolean;
 };
@@ -55,7 +50,6 @@ export const NewModel: FC = () => {
 
   const form = useForm<FormShape>({
     defaultValues: {
-      version: defaultSquiggleVersion,
       // don't pass `slug: ""` here, it will lead to form reset if a user started to type in a value before JS finished loading
       group: null,
       isPrivate: false,
@@ -82,7 +76,7 @@ export const NewModel: FC = () => {
           groupSlug: data.group?.slug,
           isPrivate: data.isPrivate,
           code: defaultCode,
-          version: data.version,
+          version: defaultSquiggleVersion,
         },
       },
       onCompleted: (result) => {
@@ -119,19 +113,6 @@ export const NewModel: FC = () => {
             myOnly={true}
           />
           <CheckboxFormField<FormShape> label="Private" name="isPrivate" />
-          <ControlledFormField<FormShape, SquiggleVersion>
-            name="version"
-            label="Squiggle version"
-            standaloneLabel
-          >
-            {({ onChange, value }) => (
-              <SquigglePlaygroundVersionPicker
-                size="medium"
-                version={value}
-                onChange={onChange}
-              />
-            )}
-          </ControlledFormField>
         </div>
         <Button
           onClick={save}
