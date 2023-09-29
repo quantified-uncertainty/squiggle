@@ -7,10 +7,6 @@ import "react-loading-skeleton/dist/skeleton.css";
 
 import "@/styles/main.css";
 
-import QueryNode, {
-  RootLayoutQuery,
-} from "@/__generated__/RootLayoutQuery.graphql";
-import { loadPageQuery } from "@/relay/loadPageQuery";
 import { RootLayout } from "./RootLayout";
 import { authOptions } from "./api/auth/[...nextauth]/authOptions";
 
@@ -18,16 +14,11 @@ export default async function ServerRootLayout({
   children,
 }: PropsWithChildren) {
   const session = await getServerSession(authOptions);
-  const query = await loadPageQuery<RootLayoutQuery>(QueryNode, {
-    signedIn: !!session,
-  });
 
   return (
     <html>
       <body>
-        <RootLayout session={session} query={query}>
-          {children}
-        </RootLayout>
+        <RootLayout session={session}>{children}</RootLayout>
       </body>
     </html>
   );

@@ -1,30 +1,27 @@
 "use client";
 import { clsx } from "clsx";
+import { usePathname } from "next/navigation";
 import { FC, PropsWithChildren } from "react";
 import { graphql } from "relay-runtime";
-import { usePathname } from "next/navigation";
 
+import { RootLayoutQuery } from "@/__generated__/RootLayoutQuery.graphql";
 import { isModelRoute, isModelSubroute } from "@/routes";
+import { Session } from "next-auth";
+import { useSession } from "next-auth/react";
+import { useLazyLoadQuery } from "react-relay";
 import { PageFooter } from "../components/layout/RootLayout/PageFooter";
 import { PageMenu } from "../components/layout/RootLayout/PageMenu";
-import { usePageQuery } from "@/relay/usePageQuery";
-import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
-import { RootLayoutQuery } from "@/__generated__/RootLayoutQuery.graphql";
 import { ClientApp } from "./ClientApp";
-import { Session } from "next-auth";
 
-const InnerRootLayout: FC<
-  PropsWithChildren<{
-    query: SerializablePreloadedQuery<RootLayoutQuery>;
-  }>
-> = ({ query, children }) => {
-  const [queryData] = usePageQuery(
+const InnerRootLayout: FC<PropsWithChildren> = ({ children }) => {
+  const { data: session } = useSession();
+  const queryData = useLazyLoadQuery<RootLayoutQuery>(
     graphql`
       query RootLayoutQuery($signedIn: Boolean!) {
         ...PageMenu @arguments(signedIn: $signedIn)
       }
     `,
-    query
+    { signedIn: !!session }
   );
 
   const pathname = usePathname();
@@ -51,12 +48,11 @@ const InnerRootLayout: FC<
 export const RootLayout: FC<
   PropsWithChildren<{
     session: Session | null;
-    query: SerializablePreloadedQuery<RootLayoutQuery>;
   }>
-> = ({ session, query, children }) => {
+> = ({ session, children }) => {
   return (
     <ClientApp session={session}>
-      <InnerRootLayout query={query}>{children}</InnerRootLayout>
+      <InnerRootLayout>{children}</InnerRootLayout>
     </ClientApp>
   );
 };
