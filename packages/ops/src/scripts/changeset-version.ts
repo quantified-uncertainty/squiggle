@@ -145,6 +145,9 @@ async function generateWebsiteChangelog() {
       allChangelogs.push(changelog);
     }
   }
+  if (!allChangelogs.length) {
+    return;
+  }
   const fullChangelog = combineChangelogs(allChangelogs);
 
   await writeFile(
