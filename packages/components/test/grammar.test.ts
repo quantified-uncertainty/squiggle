@@ -46,4 +46,17 @@ foo(5)`
       'Program(FunDeclaration(FunctionName,"(",LambdaArgs(LambdaParameter(LambdaParameterName)),")",Equals,IdentifierExpr),CallExpr(IdentifierExpr,"(",Argument(Number),")"))'
     );
   });
+
+  // https://github.com/quantified-uncertainty/squiggle/issues/2246
+  test("Multiline strings", () => {
+    expect(
+      parser
+        .parse(
+          `x = "foo
+bar"
+`
+        )
+        .toString()
+    ).toBe("Program(Binding(VariableName,Equals,String))");
+  });
 });
