@@ -138,6 +138,10 @@ class VDist extends BaseValue {
   toString() {
     return this.value.toString();
   }
+  isEqual(other: VDist) {
+    //Expect this to fail, with different dist types
+    return this.value.isEqual(other.value);
+  }
 }
 export const vDist = (v: BaseDist) => new VDist(v);
 
@@ -543,6 +547,8 @@ export function isEqual(a: Value, b: Value): boolean {
       return (a as VNumber).isEqual(b as VNumber);
     case "String":
       return (a as VString).isEqual(b as VString);
+    case "Dist":
+      return (a as VDist).isEqual(b as VDist);
     case "Date":
       return (a as VDate).isEqual(b as VDate);
     case "TimeDuration":

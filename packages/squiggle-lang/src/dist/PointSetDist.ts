@@ -8,7 +8,6 @@ import * as Result from "../utility/result.js";
 
 import * as PointSet from "../PointSet/PointSet.js";
 
-import { AnyPointSet } from "../PointSet/PointSet.js";
 import { createSparkline } from "../utility/sparklines.js";
 import { BaseDist } from "./BaseDist.js";
 import { DistError, sparklineError } from "./DistError.js";
@@ -51,6 +50,9 @@ export class PointSetDist extends BaseDist {
       items[i] = this.sample();
     }
     return items;
+  }
+  isEqual(other: PointSetDist) {
+    return this.pointSet.isEqual(other.pointSet);
   }
 
   truncate(

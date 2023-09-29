@@ -103,6 +103,9 @@ export class DiscreteShape implements PointSet<DiscreteShape> {
   toDiscreteProbabilityMassFraction() {
     return 1;
   }
+  isEqual(t: DiscreteShape) {
+    return XYShape.T.isEqual(this.xyShape, t.xyShape);
+  }
 
   mapY(
     fn: (y: number) => number,

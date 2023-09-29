@@ -204,6 +204,10 @@ export class Normal extends SymbolicDist {
     return Ok(this._stdev ** 2);
   }
 
+  isEqual(other: Normal) {
+    return this._mean === other._mean && this._stdev === other._stdev;
+  }
+
   static fromCredibleInterval({
     low,
     high,
@@ -345,6 +349,9 @@ export class Exponential extends SymbolicDist {
   variance(): result<number, DistError> {
     return Ok(jstat.exponential.variance(this.rate));
   }
+  isEqual(other: Exponential) {
+    return this.rate === other.rate;
+  }
 }
 
 export class Cauchy extends SymbolicDist {
@@ -396,6 +403,9 @@ export class Cauchy extends SymbolicDist {
   }
   variance(): result<number, DistError> {
     return Ok(NaN);
+  }
+  isEqual(other: Cauchy) {
+    return this.local === other.local && this.scale === other.scale;
   }
 }
 
@@ -456,6 +466,13 @@ export class Triangular extends SymbolicDist {
   variance(): result<number, DistError> {
     return Ok(jstat.triangular.variance(this.low, this.high, this.medium));
   }
+  isEqual(other: Triangular) {
+    return (
+      this.low === other.low &&
+      this.medium === other.medium &&
+      this.high === other.high
+    );
+  }
 
   override min() {
     return this.low;
@@ -511,8 +528,13 @@ export class Beta extends SymbolicDist {
   mean() {
     return jstat.beta.mean(this.alpha, this.beta);
   }
+
   variance(): result<number, DistError> {
     return Ok(jstat.beta.variance(this.alpha, this.beta));
+  }
+
+  isEqual(other: Beta) {
+    return this.alpha === other.alpha && this.beta === other.beta;
   }
 
   static fromMeanAndSampleSize({
@@ -595,6 +617,9 @@ export class Lognormal extends SymbolicDist {
       (Math.exp(this.sigma * this.sigma) - 1) *
         Math.exp(2 * this.mu + this.sigma * this.sigma)
     );
+  }
+  isEqual(other: Lognormal) {
+    return this.mu === other.mu && this.sigma === other.sigma;
   }
 
   static fromCredibleInterval({
@@ -775,6 +800,9 @@ export class Uniform extends SymbolicDist {
   variance(): result<number, DistError> {
     return Ok(Math.pow(this.high - this.low, 2) / 12);
   }
+  isEqual(other: Uniform) {
+    return this.low === other.low && this.high === other.high;
+  }
 
   override min() {
     return this.low;
@@ -855,6 +883,9 @@ export class Logistic extends SymbolicDist {
   variance(): Result.result<number, DistError> {
     return Result.Ok((square(this.scale) * square(Math.PI)) / 3);
   }
+  isEqual(other: Logistic) {
+    return this.location === other.location && this.scale === other.scale;
+  }
 }
 
 export class Bernoulli extends SymbolicDist {
@@ -896,6 +927,9 @@ export class Bernoulli extends SymbolicDist {
   sample() {
     const s = Math.random();
     return this.inv(s);
+  }
+  isEqual(other: Bernoulli) {
+    return this.p === other.p;
   }
 
   override min() {
@@ -968,6 +1002,9 @@ export class Gamma extends SymbolicDist {
   variance(): Result.result<number, DistError> {
     return Ok(this.shape * this.scale * this.scale);
   }
+  isEqual(other: Gamma) {
+    return this.shape === other.shape && this.scale === other.scale;
+  }
 }
 
 export class PointMass extends SymbolicDist {
@@ -1002,6 +1039,9 @@ export class PointMass extends SymbolicDist {
   }
   sample() {
     return this.t;
+  }
+  isEqual(other: PointMass) {
+    return this.t === other.t;
   }
 
   override min() {
@@ -1066,4 +1106,8 @@ export const tryAnalyticalSimplification = (
   } else {
     return undefined; // no solution
   }
+};
+
+export const isEqual = (d1: SymbolicDist, d2: SymbolicDist): boolean => {
+  return d1.constructor === d2.constructor && d1.isEqual(d2);
 };

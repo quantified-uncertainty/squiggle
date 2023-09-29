@@ -124,3 +124,20 @@ export const cumProd = (t: readonly number[]): number[] => {
 export const diff = (t: readonly number[]): number[] => {
   return E_A.pairwise(t, (left, right) => right - left);
 };
+
+export const isEqual = (
+  arr1: readonly number[],
+  arr2: readonly number[]
+): boolean => {
+  if (arr1.length !== arr2.length) {
+    return false;
+  }
+
+  for (let i = 0; i < arr1.length; i++) {
+    if (arr1[i] !== arr2[i]) {
+      return false;
+    }
+  }
+
+  return true;
+};
