@@ -52,7 +52,7 @@ jobs:
       # Otherwise, `publish` command will be invoked.
       - name: Create Release Pull Request or Publish to npm
         id: changesets
-        if: inputs.post-publish-only != 'true'
+        if: inputs.post-publish-only != true
         uses: changesets/action@v1
         with:
           title: New release
