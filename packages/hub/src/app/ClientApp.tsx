@@ -1,13 +1,12 @@
 "use client";
-
 import { Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
 import { FC, PropsWithChildren } from "react";
 import { RelayEnvironmentProvider } from "react-relay";
 
-import { RootLayout } from "@/app/RootLayout";
-import { getCurrentEnvironment } from "@/relay/environment";
 import { WithToasts } from "@quri/ui";
+
+import { getCurrentEnvironment } from "@/relay/environment";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 export const ClientApp: FC<PropsWithChildren<{ session: Session | null }>> = ({

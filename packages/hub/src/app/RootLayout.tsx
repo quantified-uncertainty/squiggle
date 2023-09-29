@@ -1,5 +1,4 @@
 "use client";
-
 import { clsx } from "clsx";
 import { FC, PropsWithChildren } from "react";
 import { graphql } from "relay-runtime";
@@ -11,12 +10,14 @@ import { PageMenu } from "../components/layout/RootLayout/PageMenu";
 import { usePageQuery } from "@/relay/usePageQuery";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { RootLayoutQuery } from "@/__generated__/RootLayoutQuery.graphql";
+import { ClientApp } from "./ClientApp";
+import { Session } from "next-auth";
 
-export const RootLayout: FC<
+const InnerRootLayout: FC<
   PropsWithChildren<{
     query: SerializablePreloadedQuery<RootLayoutQuery>;
   }>
-> = ({ children, query }) => {
+> = ({ query, children }) => {
   const [queryData] = usePageQuery(
     graphql`
       query RootLayoutQuery($signedIn: Boolean!) {
@@ -44,5 +45,18 @@ export const RootLayout: FC<
       </div>
       {showFooter && <PageFooter />}
     </div>
+  );
+};
+
+export const RootLayout: FC<
+  PropsWithChildren<{
+    session: Session | null;
+    query: SerializablePreloadedQuery<RootLayoutQuery>;
+  }>
+> = ({ session, query, children }) => {
+  return (
+    <ClientApp session={session}>
+      <InnerRootLayout query={query}>{children}</InnerRootLayout>
+    </ClientApp>
   );
 };

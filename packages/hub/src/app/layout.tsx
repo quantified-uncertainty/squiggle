@@ -7,13 +7,12 @@ import "react-loading-skeleton/dist/skeleton.css";
 
 import "@/styles/main.css";
 
-import { ClientApp } from "./ClientApp";
-import { authOptions } from "./api/auth/[...nextauth]/authOptions";
-import { loadPageQuery } from "@/relay/loadPageQuery";
 import QueryNode, {
   RootLayoutQuery,
 } from "@/__generated__/RootLayoutQuery.graphql";
+import { loadPageQuery } from "@/relay/loadPageQuery";
 import { RootLayout } from "./RootLayout";
+import { authOptions } from "./api/auth/[...nextauth]/authOptions";
 
 export default async function ServerRootLayout({
   children,
@@ -26,9 +25,9 @@ export default async function ServerRootLayout({
   return (
     <html>
       <body>
-        <ClientApp session={session}>
-          <RootLayout query={query}>{children}</RootLayout>
-        </ClientApp>
+        <RootLayout session={session} query={query}>
+          {children}
+        </RootLayout>
       </body>
     </html>
   );
