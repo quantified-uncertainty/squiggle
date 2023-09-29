@@ -2,7 +2,7 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider } from "react-hook-form";
 import { graphql } from "relay-runtime";
 
 import { Button, CheckboxFormField } from "@quri/ui";
@@ -12,25 +12,8 @@ import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
 import { SelectGroup, SelectGroupOption } from "@/components/SelectGroup";
 import { H1 } from "@/components/ui/Headers";
 import { SlugFormField } from "@/components/ui/SlugFormField";
-import { useAsyncMutation } from "@/hooks/useAsyncMutation";
+import { useMutationForm } from "@/hooks/useMutationForm";
 import { modelRoute } from "@/routes";
-
-const Mutation = graphql`
-  mutation NewModelMutation($input: MutationCreateSquiggleSnippetModelInput!) {
-    result: createSquiggleSnippetModel(input: $input) {
-      __typename
-      ... on BaseError {
-        message
-      }
-      ... on CreateSquiggleSnippetModelResult {
-        model {
-          id
-          slug
-        }
-      }
-    }
-  }
-`;
 
 const defaultCode = `/*
 Describe your code here
@@ -46,57 +29,65 @@ type FormShape = {
 };
 
 export const NewModel: FC = () => {
-  const { data: session } = useSession({ required: true });
+  useSession({ required: true });
 
-  const form = useForm<FormShape>({
+  const router = useRouter();
+
+  const { form, onSubmit, inFlight } = useMutationForm<
+    FormShape,
+    NewModelMutation,
+    "CreateSquiggleSnippetModelResult"
+  >({
+    mode: "onChange",
     defaultValues: {
       // don't pass `slug: ""` here, it will lead to form reset if a user started to type in a value before JS finished loading
       group: null,
       isPrivate: false,
     },
-    mode: "onChange",
-  });
-
-  const router = useRouter();
-
-  const [runMutation, inFlight] = useAsyncMutation<
-    NewModelMutation,
-    "CreateSquiggleSnippetModelResult"
-  >({
-    mutation: Mutation,
+    mutation: graphql`
+      mutation NewModelMutation(
+        $input: MutationCreateSquiggleSnippetModelInput!
+      ) {
+        result: createSquiggleSnippetModel(input: $input) {
+          __typename
+          ... on BaseError {
+            message
+          }
+          ... on CreateSquiggleSnippetModelResult {
+            model {
+              id
+              slug
+              owner {
+                slug
+              }
+            }
+          }
+        }
+      }
+    `,
     expectedTypename: "CreateSquiggleSnippetModelResult",
     blockOnSuccess: true,
-  });
-
-  const save = form.handleSubmit(async (data) => {
-    await runMutation({
-      variables: {
-        input: {
-          slug: data.slug ?? "", // shouldn't happen but satisfies Typescript
-          groupSlug: data.group?.slug,
-          isPrivate: data.isPrivate,
-          code: defaultCode,
-          version: defaultSquiggleVersion,
-        },
+    formDataToVariables: (data) => ({
+      input: {
+        slug: data.slug ?? "", // shouldn't happen but satisfies Typescript
+        groupSlug: data.group?.slug,
+        isPrivate: data.isPrivate,
+        code: defaultCode,
+        version: defaultSquiggleVersion,
       },
-      onCompleted: (result) => {
-        const username = session?.user?.username;
-        if (username) {
-          router.push(
-            modelRoute({
-              owner: data.group?.slug ?? username,
-              slug: result.model.slug,
-            })
-          );
-        } else {
-          router.push("/");
-        }
-      },
-    });
+    }),
+    onCompleted: (result) => {
+      router.push(
+        modelRoute({
+          owner: result.model.owner.slug,
+          slug: result.model.slug,
+        })
+      );
+    },
   });
 
   return (
-    <form onSubmit={save}>
+    <form onSubmit={onSubmit}>
       <FormProvider {...form}>
         <H1>New Model</H1>
         <div className="space-y-4 mb-4 mt-4">
@@ -115,7 +106,7 @@ export const NewModel: FC = () => {
           <CheckboxFormField<FormShape> label="Private" name="isPrivate" />
         </div>
         <Button
-          onClick={save}
+          onClick={onSubmit}
           disabled={!form.formState.isValid || inFlight}
           theme="primary"
         >

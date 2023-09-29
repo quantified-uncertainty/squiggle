@@ -3,7 +3,7 @@ import { FormProvider, useFieldArray } from "react-hook-form";
 import { graphql, useFragment } from "react-relay";
 
 import { PlaygroundToolbarItem } from "@quri/squiggle-components";
-import { Button, LinkIcon, TextTooltip, useToast } from "@quri/ui";
+import { Button, LinkIcon, TextTooltip } from "@quri/ui";
 import {
   SquigglePlaygroundVersionPicker,
   SquiggleVersionShower,
@@ -76,8 +76,6 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
     "SquiggleSnippet"
   );
 
-  const toast = useToast();
-
   const initialFormValues: FormShape = useMemo(() => {
     return {
       code: content.code,
@@ -126,7 +124,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
         owner: model.owner.slug,
       },
     }),
-    onCompleted: () => toast("Saved", "confirmation"),
+    confirmation: "Saved",
   });
 
   // could version picker be part of the form?
