@@ -1,14 +1,14 @@
 "use client";
 import { clsx } from "clsx";
+import { Session } from "next-auth";
+import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { FC, PropsWithChildren } from "react";
+import { useLazyLoadQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { RootLayoutQuery } from "@/__generated__/RootLayoutQuery.graphql";
 import { isModelRoute, isModelSubroute } from "@/routes";
-import { Session } from "next-auth";
-import { useSession } from "next-auth/react";
-import { useLazyLoadQuery } from "react-relay";
 import { PageFooter } from "../components/layout/RootLayout/PageFooter";
 import { PageMenu } from "../components/layout/RootLayout/PageMenu";
 import { ClientApp } from "./ClientApp";

@@ -137,8 +137,11 @@ export function groupMembersRoute({ slug }: { slug: string }) {
   return `${groupRoute({ slug })}/members`;
 }
 
-export function newModelRoute() {
-  return "/new/model";
+export function newModelRoute(params?: { group: string }) {
+  const paramsString = params?.group
+    ? "?" + new URLSearchParams({ group: params.group }).toString()
+    : "";
+  return `/new/model${paramsString}`;
 }
 
 export function newDefinitionRoute() {

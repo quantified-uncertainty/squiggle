@@ -35,11 +35,13 @@ export function SelectGroup<
 >({
   name,
   label,
+  description,
   required = true,
   myOnly = false,
 }: {
   name: TName;
   label?: string;
+  description?: string;
   required?: boolean;
   myOnly?: boolean;
 }) {
@@ -66,6 +68,7 @@ export function SelectGroup<
     <SelectFormField<TValues, SelectGroupOption | null>
       name={name}
       label={label}
+      description={description}
       required={required}
       async
       loadOptions={loadOptions}
