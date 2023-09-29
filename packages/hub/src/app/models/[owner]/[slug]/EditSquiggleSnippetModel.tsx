@@ -1,9 +1,15 @@
 import { FC, useMemo, useState } from "react";
-import { FormProvider, useFieldArray, useForm } from "react-hook-form";
+import { FormProvider, useFieldArray } from "react-hook-form";
 import { graphql, useFragment } from "react-relay";
 
 import { PlaygroundToolbarItem } from "@quri/squiggle-components";
 import { Button, LinkIcon, TextTooltip, useToast } from "@quri/ui";
+import {
+  SquigglePlaygroundVersionPicker,
+  SquiggleVersionShower,
+  VersionedSquigglePlayground,
+  type SquiggleVersion,
+} from "@quri/versioned-playground";
 
 import { EditSquiggleSnippetModel$key } from "@/__generated__/EditSquiggleSnippetModel.graphql";
 import {
@@ -11,33 +17,9 @@ import {
   RelativeValuesExportInput,
 } from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
 import { EditModelExports } from "@/components/exports/EditModelExports";
-import { useAsyncMutation } from "@/hooks/useAsyncMutation";
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
+import { useMutationForm } from "@/hooks/useMutationForm";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
-import {
-  SquigglePlaygroundVersionPicker,
-  VersionedSquigglePlayground,
-  type SquiggleVersion,
-  SquiggleVersionShower,
-} from "@quri/versioned-playground";
-
-export const Mutation = graphql`
-  mutation EditSquiggleSnippetModelMutation(
-    $input: MutationUpdateSquiggleSnippetModelInput!
-  ) {
-    result: updateSquiggleSnippetModel(input: $input) {
-      __typename
-      ... on BaseError {
-        message
-      }
-      ... on UpdateSquiggleSnippetResult {
-        model {
-          ...EditSquiggleSnippetModel
-        }
-      }
-    }
-  }
-`;
 
 type FormShape = {
   code: string;
@@ -51,8 +33,6 @@ type Props = {
 };
 
 export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
-  const toast = useToast();
-
   const model = useFragment(
     graphql`
       fragment EditSquiggleSnippetModel on Model {
@@ -96,7 +76,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
     "SquiggleSnippet"
   );
 
-  const { height, ref } = useAvailableHeight();
+  const toast = useToast();
 
   const initialFormValues: FormShape = useMemo(() => {
     return {
@@ -111,8 +91,42 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
     };
   }, [content, revision.relativeValuesExports]);
 
-  const form = useForm<FormShape>({
+  const { form, onSubmit, inFlight } = useMutationForm<
+    FormShape,
+    EditSquiggleSnippetModelMutation,
+    "UpdateSquiggleSnippetResult"
+  >({
     defaultValues: initialFormValues,
+    mutation: graphql`
+      mutation EditSquiggleSnippetModelMutation(
+        $input: MutationUpdateSquiggleSnippetModelInput!
+      ) {
+        result: updateSquiggleSnippetModel(input: $input) {
+          __typename
+          ... on BaseError {
+            message
+          }
+          ... on UpdateSquiggleSnippetResult {
+            model {
+              ...EditSquiggleSnippetModel
+            }
+          }
+        }
+      }
+    `,
+    expectedTypename: "UpdateSquiggleSnippetResult",
+    formDataToVariables: (formData) => ({
+      input: {
+        content: {
+          code: formData.code,
+          version,
+        },
+        relativeValuesExports: formData.relativeValuesExports,
+        slug: model.slug,
+        owner: model.owner.slug,
+      },
+    }),
+    onCompleted: () => toast("Saved", "confirmation"),
   });
 
   // could version picker be part of the form?
@@ -125,31 +139,6 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
   } = useFieldArray({
     name: "relativeValuesExports",
     control: form.control,
-  });
-
-  const [saveMutation, saveInFlight] = useAsyncMutation<
-    EditSquiggleSnippetModelMutation,
-    "UpdateSquiggleSnippetResult"
-  >({
-    mutation: Mutation,
-    expectedTypename: "UpdateSquiggleSnippetResult",
-  });
-
-  const save = form.handleSubmit((formData) => {
-    saveMutation({
-      variables: {
-        input: {
-          content: {
-            code: formData.code,
-            version,
-          },
-          relativeValuesExports: formData.relativeValuesExports,
-          slug: model.slug,
-          owner: model.owner.slug,
-        },
-      },
-      onCompleted: () => toast("Saved", "confirmation"),
-    });
   });
 
   const onCodeChange = (code: string) => {
@@ -165,9 +154,11 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
     setDefaultCode(form.getValues("code"));
   };
 
+  const { height, ref } = useAvailableHeight();
+
   return (
     <FormProvider {...form}>
-      <form onSubmit={save}>
+      <form onSubmit={onSubmit}>
         <div ref={ref}>
           <VersionedSquigglePlayground
             version={version}
@@ -205,9 +196,9 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
                 {model.isEditable && (
                   <Button
                     theme="primary"
-                    onClick={save}
+                    onClick={onSubmit}
                     size="small"
-                    disabled={saveInFlight}
+                    disabled={inFlight}
                   >
                     Save
                   </Button>
