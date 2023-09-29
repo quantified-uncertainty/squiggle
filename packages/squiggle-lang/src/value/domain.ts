@@ -30,6 +30,10 @@ export class NumericRangeDomain extends BaseDomain {
       value.value <= this.max
     );
   }
+
+  isEqual(other: NumericRangeDomain) {
+    return this.min === other.min && this.max === other.max;
+  }
 }
 
 export type Domain = NumericRangeDomain;

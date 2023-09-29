@@ -1,4 +1,3 @@
-import { REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
@@ -12,7 +11,7 @@ import {
   vArray,
   vBool,
   vString,
-  Value,
+  isEqual,
   valueTypeName,
 } from "../value/index.js";
 
@@ -21,17 +20,6 @@ const maker = new FnFactory({
   requiresNamespace: false,
 });
 
-//I assume the latter should work for all types, assuming there isn't randomness in the toString() method.
-function isEqual(a: Value, b: Value) {
-  const sameType = a.type === b.type;
-  const sameToString = () => a.toString() === b.toString();
-  if (sameType || sameToString()) {
-    return false;
-  } else {
-    throw new REOther("Equal not implemented for these inputs");
-  }
-}
-
 export const library = [
   maker.nn2n({ name: "add", fn: (x, y) => x + y }), // infix + (see Reducer/Reducer_Peggy/helpers.ts)
   maker.ss2s({ name: "add", fn: (x, y) => x + y }), // infix + on strings
@@ -39,12 +27,6 @@ export const library = [
   maker.nn2n({ name: "multiply", fn: (x, y) => x * y }), // infix *
   maker.nn2n({ name: "divide", fn: (x, y) => x / y }), // infix /
   maker.nn2n({ name: "pow", fn: (x, y) => Math.pow(x, y) }), // infix ^
-  maker.nn2b({ name: "equal", fn: (x, y) => x === y }), // infix == on numbers
-  maker.bb2b({ name: "equal", fn: (x, y) => x === y }), // infix == on booleans
-  maker.ss2b({ name: "equal", fn: (x, y) => x === y }), // infix == on strings
-  maker.nn2b({ name: "unequal", fn: (x, y) => x !== y }), // infix != on numbers
-  maker.bb2b({ name: "unequal", fn: (x, y) => x !== y }), // infix != on booleans
-  maker.ss2b({ name: "unequal", fn: (x, y) => x !== y }), // infix != on strings
   maker.nn2b({ name: "smaller", fn: (x, y) => x < y }), // infix <
   maker.nn2b({ name: "smallerEq", fn: (x, y) => x <= y }), // infix <=
   maker.nn2b({ name: "larger", fn: (x, y) => x > y }), // infix >

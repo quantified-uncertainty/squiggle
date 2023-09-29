@@ -83,6 +83,19 @@ class VArray extends BaseValue implements Indexable {
   shuffle() {
     return new VArray(shuffle(this.value));
   }
+
+  isEqual(other: VArray, compareValues: (a: Value, b: Value) => boolean) {
+    if (this.value.length !== other.value.length) {
+      return false;
+    }
+
+    for (let i = 0; i < this.value.length; i++) {
+      if (!compareValues(this.value[i], other.value[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
 }
 export const vArray = (v: Value[]) => new VArray(v);
 
@@ -95,6 +108,9 @@ class VBool extends BaseValue {
   toString() {
     return String(this.value);
   }
+  isEqual(other: VBool) {
+    return this.value === other.value;
+  }
 }
 export const vBool = (v: boolean) => new VBool(v);
 
@@ -106,6 +122,9 @@ class VDate extends BaseValue {
   }
   toString() {
     return DateTime.Date.toString(this.value);
+  }
+  isEqual(other: VDate) {
+    return this.value === other.value;
   }
 }
 export const vDate = (v: Date) => new VDate(v);
@@ -160,6 +179,9 @@ class VNumber extends BaseValue {
   toString() {
     return String(this.value);
   }
+  isEqual(other: VNumber) {
+    return this.value === other.value;
+  }
 }
 export const vNumber = (v: number) => new VNumber(v);
 
@@ -171,6 +193,9 @@ class VString extends BaseValue {
   }
   toString() {
     return JSON.stringify(this.value);
+  }
+  isEqual(other: VString) {
+    return this.value === other.value;
   }
 }
 export const vString = (v: string) => new VString(v);
@@ -202,6 +227,31 @@ class VDict extends BaseValue implements Indexable {
       throw new REOther("Can't access non-string key on a dict");
     }
   }
+
+  isEqual(
+    other: VDict,
+    compareValues: (a: Value, b: Value) => boolean
+  ): boolean {
+    if (this.value.size !== other.value.size) {
+      return false;
+    }
+
+    for (const [key, valueA] of this.value.entries()) {
+      const valueB = other.value.get(key);
+
+      // Check if key exists in the other dictionary
+      if (!valueB) {
+        return false;
+      }
+
+      // Compare the values associated with the key
+      if (!compareValues(valueA, valueB)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
 }
 export const vDict = (v: ValueMap) => new VDict(v);
 
@@ -214,8 +264,94 @@ class VTimeDuration extends BaseValue {
   toString() {
     return DateTime.Duration.toString(this.value);
   }
+  isEqual(other: VTimeDuration) {
+    return this.value === other.value;
+  }
 }
 export const vTimeDuration = (v: number) => new VTimeDuration(v);
+
+export type CommonScaleArgs = {
+  min?: number;
+  max?: number;
+  tickFormat?: string;
+};
+
+export type Scale = CommonScaleArgs &
+  (
+    | {
+        type: "linear";
+      }
+    | {
+        type: "log";
+      }
+    | {
+        type: "symlog";
+        constant?: number;
+      }
+    | {
+        type: "power";
+        exponent?: number;
+      }
+  );
+
+function scaleIsEqual(scaleA: Scale, scaleB: Scale) {
+  const valueA = scaleA;
+  const valueB = scaleB;
+
+  if (
+    valueA.type !== valueB.type ||
+    valueA.min !== valueB.min ||
+    valueA.max !== valueB.max ||
+    valueA.tickFormat !== valueB.tickFormat
+  ) {
+    return false;
+  }
+
+  switch (valueA.type) {
+    case "symlog":
+      return (
+        (valueA as { constant?: number }).constant ===
+        (valueB as { constant?: number }).constant
+      );
+    case "power":
+      return (
+        (valueA as { exponent?: number }).exponent ===
+        (valueB as { exponent?: number }).exponent
+      );
+    default:
+      return true;
+  }
+}
+
+export const SCALE_SYMLOG_DEFAULT_CONSTANT = 0.0001;
+export const SCALE_POWER_DEFAULT_CONSTANT = 0.1;
+
+class VScale extends BaseValue {
+  readonly type = "Scale";
+
+  constructor(public value: Scale) {
+    super();
+  }
+
+  toString(): string {
+    switch (this.value.type) {
+      case "linear":
+        return "Linear scale"; // TODO - mix in min/max if specified
+      case "log":
+        return "Logarithmic scale";
+      case "symlog":
+        return `Symlog scale ({constant: ${this.value.constant}})`;
+      case "power":
+        return `Power scale ({exponent: ${this.value.exponent}})`;
+    }
+  }
+
+  isEqual(other: VScale) {
+    return scaleIsEqual(this.value, other.value);
+  }
+}
+
+export const vScale = (scale: Scale) => new VScale(scale);
 
 export type LabeledDistribution = {
   name?: string;
@@ -317,56 +453,6 @@ class VPlot extends BaseValue implements Indexable {
 
 export const vPlot = (plot: Plot) => new VPlot(plot);
 
-export type CommonScaleArgs = {
-  min?: number;
-  max?: number;
-  tickFormat?: string;
-};
-
-export type Scale = CommonScaleArgs &
-  (
-    | {
-        type: "linear";
-      }
-    | {
-        type: "log";
-      }
-    | {
-        type: "symlog";
-        constant?: number;
-      }
-    | {
-        type: "power";
-        exponent?: number;
-      }
-  );
-
-export const SCALE_SYMLOG_DEFAULT_CONSTANT = 0.0001;
-export const SCALE_POWER_DEFAULT_CONSTANT = 0.1;
-
-class VScale extends BaseValue {
-  readonly type = "Scale";
-
-  constructor(public value: Scale) {
-    super();
-  }
-
-  toString(): string {
-    switch (this.value.type) {
-      case "linear":
-        return "Linear scale"; // TODO - mix in min/max if specified
-      case "log":
-        return "Logarithmic scale";
-      case "symlog":
-        return "Symlog scale";
-      case "power":
-        return `Power scale (${this.value.exponent})`;
-    }
-  }
-}
-
-export const vScale = (scale: Scale) => new VScale(scale);
-
 export class VDomain extends BaseValue implements Indexable {
   readonly type = "Domain";
 
@@ -389,6 +475,10 @@ export class VDomain extends BaseValue implements Indexable {
     }
 
     throw new REOther("Trying to access non-existent field");
+  }
+
+  isEqual(other: VDomain) {
+    return this.value.isEqual(other.value);
   }
 }
 
@@ -441,3 +531,38 @@ export const valueTypeName = (v: Value) => {
   } as const;
   return names[v.type] || "Unknown";
 };
+
+export function isEqual(a: Value, b: Value): boolean {
+  if (a.type !== b.type) {
+    return false;
+  }
+  switch (a.type) {
+    case "Bool":
+      return (a as VBool).isEqual(b as VBool);
+    case "Number":
+      return (a as VNumber).isEqual(b as VNumber);
+    case "String":
+      return (a as VString).isEqual(b as VString);
+    case "Date":
+      return (a as VDate).isEqual(b as VDate);
+    case "TimeDuration":
+      return (a as VTimeDuration).isEqual(b as VTimeDuration);
+    case "Scale":
+      return scaleIsEqual((a as VScale).value, (b as VScale).value);
+    case "Domain":
+      return (a as VDomain).isEqual(b as VDomain);
+    case "Array": {
+      return (a as VArray).isEqual(b as VArray, isEqual);
+    }
+    case "Dict": {
+      return (a as VDict).isEqual(b as VDict, isEqual);
+    }
+    case "Void":
+      return true;
+  }
+
+  if (a.toString() !== b.toString()) {
+    return false;
+  }
+  throw new REOther("Equal not implemented for these inputs");
+}
