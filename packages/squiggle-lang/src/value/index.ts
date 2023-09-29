@@ -421,3 +421,23 @@ export type Value =
   | VScale
   | VDomain
   | VVoid;
+
+export const valueTypeName = (v: Value) => {
+  const names = {
+    Array: "Array",
+    Bool: "Boolean",
+    Date: "Date",
+    Dist: "Distribution",
+    Lambda: "Function",
+    Number: "Number",
+    String: "String",
+    Dict: "Dictionary",
+    TimeDuration: "Time Duration",
+    Plot: "Plot",
+    TableChart: "Table Chart",
+    Scale: "Scale",
+    Domain: "Domain",
+    Void: "Void",
+  } as const;
+  return names[v.type] || "Unknown";
+};

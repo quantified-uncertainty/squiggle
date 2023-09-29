@@ -1,6 +1,6 @@
 import includes from "lodash/includes.js";
 import uniqBy from "lodash/uniqBy.js";
-import { REExpectedType, REOther } from "../errors/messages.js";
+import { REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,

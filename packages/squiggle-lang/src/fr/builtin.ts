@@ -8,12 +8,29 @@ import {
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { vArray, vBool, vString } from "../value/index.js";
+import {
+  vArray,
+  vBool,
+  vString,
+  Value,
+  valueTypeName,
+} from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "", // no namespaced versions
   requiresNamespace: false,
 });
+
+//I assume the latter should work for all types, assuming there isn't randomness in the toString() method.
+function isEqual(a: Value, b: Value) {
+  const sameType = a.type === b.type;
+  const sameToString = () => a.toString() === b.toString();
+  if (sameType || sameToString()) {
+    return false;
+  } else {
+    throw new REOther("Equal not implemented for these inputs");
+  }
+}
 
 export const library = [
   maker.nn2n({ name: "add", fn: (x, y) => x + y }), // infix + (see Reducer/Reducer_Peggy/helpers.ts)
@@ -74,11 +91,7 @@ export const library = [
     name: "equal",
     definitions: [
       makeDefinition([frAny, frAny], ([a, b]) => {
-        if (a.toString() !== b.toString()) {
-          return vBool(false);
-        } else {
-          throw new REOther("Equal not implemented for these inputs");
-        }
+        return vBool(isEqual(a, b));
       }),
     ],
   }),
@@ -86,11 +99,7 @@ export const library = [
     name: "unequal",
     definitions: [
       makeDefinition([frAny, frAny], ([a, b]) => {
-        if (a.toString() !== b.toString()) {
-          return vBool(true);
-        } else {
-          throw new REOther("Unequal not implemented for these inputs");
-        }
+        return vBool(!isEqual(a, b));
       }),
     ],
   }),
@@ -98,7 +107,7 @@ export const library = [
     name: "typeOf",
     definitions: [
       makeDefinition([frAny], ([v]) => {
-        return vString(v.type);
+        return vString(valueTypeName(v));
       }),
     ],
   }),
