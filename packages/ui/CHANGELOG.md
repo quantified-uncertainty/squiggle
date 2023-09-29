@@ -1,5 +1,16 @@
 # @quri/ui
 
+## 0.1.5
+
+### Patch Changes
+
+- - `WrenchIcon` ([#2237](https://github.com/quantified-uncertainty/squiggle/pull/2237))
+  - `DropdownMenuLinkItem` for `<a href=...>` links
+
+- Expose DropdownMenuItemLayout component ([#2237](https://github.com/quantified-uncertainty/squiggle/pull/2237))
+
+- FormField and ControlledFormField components accept standaloneLabel prop ([#2237](https://github.com/quantified-uncertainty/squiggle/pull/2237))
+
 ## 0.1.4
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @quri/squiggle-components
 
+## 0.8.6
+
+### Patch Changes
+
+- Added calculator class to squiggle-lang and calculator component to squiggle-components. Useful for presenting functions to end-users. ([#2265](https://github.com/quantified-uncertainty/squiggle/pull/2265))
+
 ## 0.8.5
 
 ### Patch Changes
