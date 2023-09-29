@@ -11,14 +11,14 @@ export const ShareButton = () => {
   };
 
   return (
-    <div className="w-40">
+    <div className="w-32">
       <Button onClick={copy} wide size="small">
         {isCopied ? (
           "Copied!"
         ) : (
           <div className="flex items-center space-x-1">
             <ClipboardCopyIcon className="w-4 h-4" />
-            <span>Copy share link</span>
+            <span>Share link</span>
           </div>
         )}
       </Button>

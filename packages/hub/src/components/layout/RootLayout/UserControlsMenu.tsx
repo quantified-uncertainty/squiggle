@@ -2,18 +2,17 @@ import { signOut } from "next-auth/react";
 import { FC } from "react";
 
 import {
-  DropdownMenu,
+  DropdownMenuActionItem,
   DropdownMenuHeader,
   DropdownMenuSeparator,
-  UserCircleIcon,
-  DropdownMenuActionItem,
-  SignOutIcon,
-  ScaleIcon,
   GroupIcon,
+  ScaleIcon,
+  SignOutIcon,
+  UserCircleIcon,
 } from "@quri/ui";
 
-import { DropdownMenuLinkItem } from "@/components/ui/DropdownMenuLinkItem";
-import { userRoute, newDefinitionRoute, newGroupRoute } from "@/routes";
+import { DropdownMenuNextLinkItem } from "@/components/ui/DropdownMenuNextLinkItem";
+import { newDefinitionRoute, newGroupRoute, userRoute } from "@/routes";
 
 type Props = {
   close: () => void;
@@ -30,7 +29,7 @@ export const UserControlsMenu: FC<Props> = ({ close, username, mode }) => {
         {mode === "desktop" ? "User Actions" : `@${username}`}
       </DropdownMenuHeader>
       <DropdownMenuSeparator />
-      <DropdownMenuLinkItem
+      <DropdownMenuNextLinkItem
         href={userRoute({ username })}
         icon={UserCircleIcon}
         title="Profile"
@@ -47,13 +46,13 @@ export const UserControlsMenu: FC<Props> = ({ close, username, mode }) => {
       <DropdownMenuSeparator />
       <DropdownMenuHeader>Experimental</DropdownMenuHeader>
       <DropdownMenuSeparator />
-      <DropdownMenuLinkItem
+      <DropdownMenuNextLinkItem
         href={newDefinitionRoute()}
         icon={ScaleIcon}
         title="New Relative Value Definition"
         close={close}
       />
-      <DropdownMenuLinkItem
+      <DropdownMenuNextLinkItem
         href={newGroupRoute()}
         icon={GroupIcon}
         title="New Group"

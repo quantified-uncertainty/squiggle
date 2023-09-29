@@ -6,6 +6,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { graphql } from "relay-runtime";
 
 import { Button, CheckboxFormField } from "@quri/ui";
+import { defaultSquiggleVersion } from "@quri/versioned-playground";
 
 import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
 import { SelectGroup, SelectGroupOption } from "@/components/SelectGroup";
@@ -75,6 +76,7 @@ export const NewModel: FC = () => {
           groupSlug: data.group?.slug,
           isPrivate: data.isPrivate,
           code: defaultCode,
+          version: defaultSquiggleVersion,
         },
       },
       onCompleted: (result) => {
@@ -97,7 +99,7 @@ export const NewModel: FC = () => {
     <form onSubmit={save}>
       <FormProvider {...form}>
         <H1>New Model</H1>
-        <div className="mb-4 space-y-4">
+        <div className="space-y-4 mb-4 mt-4">
           <SlugFormField<FormShape>
             name="slug"
             example="my-long-model"

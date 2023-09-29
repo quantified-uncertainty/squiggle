@@ -1,6 +1,12 @@
 name: Release
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      force-post-publish:
+        type: boolean
+        description: "Force post-publish script and PR even if nothing was published"
+        default: false
 
 # copy-pasted from ci.yml
 env:
@@ -50,8 +56,25 @@ jobs:
         with:
           title: New release
           version: pnpm run changeset-version
-          publish: pnpm run publish
+          publish: pnpm run publish-all
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
+
+      - name: Extract published version
+        id: published-version
+        run: |
+          VERSION=$(cat packages/squiggle-lang/package.json | fgrep '"version"' | head -1 | perl -ne '/"version": "([^"]+)"/ && print $1')
+          echo "published-version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare for next release
+        if: steps.changesets.outputs.published == 'true' || inputs.force-post-publish
+        run: pnpm run post-publish
+
+      - name: Create PR with version patches
+        if: steps.changesets.outputs.published == 'true' || inputs.force-post-publish
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: Bump versions after ${{ steps.published-version.outputs.published-version }} release
+          title: Bump versions after ${{ steps.published-version.outputs.published-version }} release

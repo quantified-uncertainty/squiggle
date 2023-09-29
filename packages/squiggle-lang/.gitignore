@@ -8,7 +8,6 @@ build
 yarn-error.log
 .idea
 /dist
-/*.tsbuildinfo
 *.coverage
 _coverage
 coverage

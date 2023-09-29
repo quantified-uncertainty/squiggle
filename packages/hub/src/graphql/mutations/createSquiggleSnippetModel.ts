@@ -25,6 +25,7 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
         required: true,
         description: "Squiggle source code",
       }),
+      version: t.input.string({ required: true }),
       slug: t.input.string({
         required: true,
         validate: validateSlug,
@@ -60,6 +61,7 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
             squiggleSnippet: {
               create: {
                 code: input.code,
+                version: input.version,
               },
             },
             contentType: "SquiggleSnippet",
