@@ -1,10 +1,11 @@
 import { FC } from "react";
 import { graphql, useFragment } from "react-relay";
 
-import { MyGroupsMenu$key } from "@/__generated__/MyGroupsMenu.graphql";
-import { DropdownMenuLinkItem } from "@/components/ui/DropdownMenuLinkItem";
-import { groupRoute, newGroupRoute } from "@/routes";
 import { DropdownMenuHeader, GroupIcon, PlusIcon } from "@quri/ui";
+
+import { MyGroupsMenu$key } from "@/__generated__/MyGroupsMenu.graphql";
+import { DropdownMenuNextLinkItem } from "@/components/ui/DropdownMenuNextLinkItem";
+import { groupRoute, newGroupRoute } from "@/routes";
 
 type Props = {
   groupsRef: MyGroupsMenu$key;
@@ -34,7 +35,7 @@ export const MyGroupsMenu: FC<Props> = ({ groupsRef, close }) => {
       {groups.result.edges.length ? (
         <>
           {groups.result.edges.map((edge) => (
-            <DropdownMenuLinkItem
+            <DropdownMenuNextLinkItem
               key={edge.node.id}
               href={groupRoute({ slug: edge.node.slug })}
               icon={GroupIcon}
@@ -44,7 +45,7 @@ export const MyGroupsMenu: FC<Props> = ({ groupsRef, close }) => {
           ))}
         </>
       ) : null}
-      <DropdownMenuLinkItem
+      <DropdownMenuNextLinkItem
         href={newGroupRoute()}
         icon={PlusIcon}
         title="New Group"

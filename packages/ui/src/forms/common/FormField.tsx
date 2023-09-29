@@ -27,6 +27,7 @@ export function FormField<
   label,
   description,
   inlineLabel,
+  standaloneLabel,
   children,
 }: FormFieldProps<TValues, TName>) {
   return (
@@ -34,6 +35,7 @@ export function FormField<
       label={label}
       description={description}
       inlineLabel={inlineLabel}
+      standaloneLabel={standaloneLabel}
     >
       <FormInput name={name} rules={rules}>
         {children}

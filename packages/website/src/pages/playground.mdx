@@ -4,4 +4,8 @@ description: Squiggle Playground
 
 import { PlaygroundPage } from "../components/PlaygroundPage";
 
-<PlaygroundPage />
+<PlaygroundPage version={props.version} />
+
+export async function getServerSideProps({ query }) {
+  return { props: { version: query.v ?? null } };
+}

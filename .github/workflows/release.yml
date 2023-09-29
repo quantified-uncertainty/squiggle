@@ -1,6 +1,12 @@
 name: Release
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      post-publish-only:
+        type: boolean
+        description: "Run post-publish script without publishing"
+        default: false
 
 # copy-pasted from ci.yml
 env:
@@ -46,12 +52,30 @@ jobs:
       # Otherwise, `publish` command will be invoked.
       - name: Create Release Pull Request or Publish to npm
         id: changesets
+        if: inputs.post-publish-only != true
         uses: changesets/action@v1
         with:
           title: New release
           version: pnpm run changeset-version
-          publish: pnpm run publish
+          publish: pnpm run publish-all
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
+
+      - name: Extract published version
+        id: published-version
+        run: |
+          VERSION=$(cat packages/squiggle-lang/package.json | fgrep '"version"' | head -1 | perl -ne '/"version": "([^"]+)"/ && print $1')
+          echo "published-version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare for next release
+        if: steps.changesets.outputs.published == 'true' || inputs.post-publish-only
+        run: pnpm run post-publish
+
+      - name: Create PR with version patches
+        if: steps.changesets.outputs.published == 'true' || inputs.post-publish-only
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: Bump versions after ${{ steps.published-version.outputs.published-version }} release
+          title: Bump versions after ${{ steps.published-version.outputs.published-version }} release

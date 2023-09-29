@@ -16,7 +16,7 @@ import {
 
 import { ModelLayoutQuery } from "@/__generated__/ModelLayoutQuery.graphql";
 import { EntityLayout } from "@/components/EntityLayout";
-import { DropdownMenuLinkItem } from "@/components/ui/DropdownMenuLinkItem";
+import { DropdownMenuNextLinkItem } from "@/components/ui/DropdownMenuNextLinkItem";
 import { EntityTab } from "@/components/ui/EntityTab";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
@@ -86,7 +86,7 @@ export const ModelLayout: FC<
     <DropdownMenu>
       <DropdownMenuHeader>Relative Value Functions</DropdownMenuHeader>
       {model.currentRevision.relativeValuesExports.map((exportItem) => (
-        <DropdownMenuLinkItem
+        <DropdownMenuNextLinkItem
           key={exportItem.variableName}
           href={modelForRelativeValuesExportRoute({
             owner: model.owner.slug,

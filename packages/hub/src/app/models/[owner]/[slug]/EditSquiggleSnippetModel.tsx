@@ -1,12 +1,9 @@
-import { FC, useMemo } from "react";
+import { FC, useMemo, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { graphql, useFragment } from "react-relay";
 
-import {
-  PlaygroundToolbarItem,
-  SquigglePlayground,
-} from "@quri/squiggle-components";
-import { Button, LinkIcon, useToast } from "@quri/ui";
+import { PlaygroundToolbarItem } from "@quri/squiggle-components";
+import { Button, LinkIcon, TextTooltip, useToast } from "@quri/ui";
 
 import { EditSquiggleSnippetModel$key } from "@/__generated__/EditSquiggleSnippetModel.graphql";
 import {
@@ -17,6 +14,12 @@ import { EditModelExports } from "@/components/exports/EditModelExports";
 import { useAsyncMutation } from "@/hooks/useAsyncMutation";
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
+import {
+  SquigglePlaygroundVersionPicker,
+  VersionedSquigglePlayground,
+  type SquiggleVersion,
+  SquiggleVersionShower,
+} from "@quri/versioned-playground";
 
 export const Mutation = graphql`
   mutation EditSquiggleSnippetModelMutation(
@@ -67,6 +70,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
             ... on SquiggleSnippet {
               id
               code
+              version
             }
           }
 
@@ -111,6 +115,9 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
     defaultValues: initialFormValues,
   });
 
+  // could version picker be part of the form?
+  const [version, setVersion] = useState(content.version);
+
   const {
     fields: variablesWithDefinitionsFields,
     append: appendVariableWithDefinition,
@@ -134,6 +141,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
         input: {
           content: {
             code: formData.code,
+            version,
           },
           relativeValuesExports: formData.relativeValuesExports,
           slug: model.slug,
@@ -148,22 +156,53 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
     form.setValue("code", code);
   };
 
+  // We don't want to control SquigglePlayground, it's uncontrolled by design.
+  // Instead, we reset the `defaultCode` that we pass to it when version is changed.
+  const [defaultCode, setDefaultCode] = useState(content.code);
+
+  const handleVersionChange = (newVersion: SquiggleVersion) => {
+    setVersion(newVersion);
+    setDefaultCode(form.getValues("code"));
+  };
+
   return (
     <FormProvider {...form}>
       <form onSubmit={save}>
         <div ref={ref}>
-          <SquigglePlayground
+          <VersionedSquigglePlayground
+            version={version}
             height={height ?? "100vh"}
             onCodeChange={onCodeChange}
-            defaultCode={content.code}
-            renderExtraControls={({ openModal }) =>
-              model.isEditable && (
-                <div className="h-full flex items-center justify-end gap-2">
+            defaultCode={defaultCode}
+            renderExtraControls={({ openModal }) => (
+              <div className="h-full flex items-center justify-end gap-2">
+                {model.isEditable && (
                   <PlaygroundToolbarItem
-                    tooltipText={"Exported Variables"}
+                    tooltipText="Exported Variables"
                     icon={LinkIcon}
                     onClick={() => openModal("exports")}
-                  ></PlaygroundToolbarItem>
+                  />
+                )}
+                {model.isEditable ? (
+                  <SquigglePlaygroundVersionPicker
+                    version={version}
+                    onChange={handleVersionChange}
+                    size="small"
+                    showUpdatePolicy
+                  />
+                ) : (
+                  <TextTooltip
+                    text="Squiggle Version" // FIXME - positioning is bad for some reason
+                    placement="bottom"
+                    offset={5}
+                  >
+                    {/* div wrapper is required because TextTooltip clones its children and SquiggleVersionShower doesn't forwardRef */}
+                    <div>
+                      <SquiggleVersionShower version={version} />
+                    </div>
+                  </TextTooltip>
+                )}
+                {model.isEditable && (
                   <Button
                     theme="primary"
                     onClick={save}
@@ -172,9 +211,9 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
                   >
                     Save
                   </Button>
-                </div>
-              )
-            }
+                )}
+              </div>
+            )}
             renderExtraModal={(name) => {
               if (name === "exports") {
                 return {

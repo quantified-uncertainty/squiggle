@@ -2,18 +2,15 @@ import { signOut } from "next-auth/react";
 import { FC } from "react";
 
 import {
-  DropdownMenu,
-  DropdownMenuHeader,
-  DropdownMenuSeparator,
-  UserCircleIcon,
   DropdownMenuActionItem,
-  SignOutIcon,
+  DropdownMenuHeader,
   ScaleIcon,
-  GroupIcon,
+  SignOutIcon,
+  UserCircleIcon,
 } from "@quri/ui";
 
-import { DropdownMenuLinkItem } from "@/components/ui/DropdownMenuLinkItem";
-import { userRoute, newDefinitionRoute, newGroupRoute } from "@/routes";
+import { DropdownMenuNextLinkItem } from "@/components/ui/DropdownMenuNextLinkItem";
+import { newDefinitionRoute, userRoute } from "@/routes";
 
 type Props = {
   close: () => void;
@@ -29,7 +26,7 @@ export const UserControlsMenu: FC<Props> = ({ close, username, mode }) => {
       <DropdownMenuHeader>
         {mode === "desktop" ? "User Actions" : `@${username}`}
       </DropdownMenuHeader>
-      <DropdownMenuLinkItem
+      <DropdownMenuNextLinkItem
         href={userRoute({ username })}
         icon={UserCircleIcon}
         title="Profile"
@@ -44,7 +41,7 @@ export const UserControlsMenu: FC<Props> = ({ close, username, mode }) => {
         title="Sign Out"
       />
       <DropdownMenuHeader>Experimental</DropdownMenuHeader>
-      <DropdownMenuLinkItem
+      <DropdownMenuNextLinkItem
         href={newDefinitionRoute()}
         icon={ScaleIcon}
         title="New Relative Value Definition"

@@ -6,6 +6,7 @@ import { rethrowOnConstraint } from "../errors/common";
 import { getWriteableOwner } from "../types/Owner";
 import { ZodError } from "zod";
 import { validateSlug } from "../utils";
+import { getSelf } from "../types/User";
 
 builder.mutationField("createSquiggleSnippetModel", (t) =>
   t.withAuth({ signedIn: true }).fieldWithInput({
@@ -25,6 +26,7 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
         required: true,
         description: "Squiggle source code",
       }),
+      version: t.input.string({ required: true }),
       slug: t.input.string({
         required: true,
         validate: validateSlug,
@@ -55,12 +57,18 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
           }
         );
 
+        const self = await getSelf(session);
+
         const revision = await tx.modelRevision.create({
           data: {
             squiggleSnippet: {
               create: {
                 code: input.code,
+                version: input.version,
               },
+            },
+            author: {
+              connect: { id: self.id },
             },
             contentType: "SquiggleSnippet",
             model: {

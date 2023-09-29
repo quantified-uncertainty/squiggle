@@ -4,9 +4,9 @@
   "scripts": {
     "nodeclean": "rm -r node_modules && rm -r packages/*/node_modules",
     "preinstall": "npx only-allow pnpm",
-    "changeset-version": "cd packages/ops && pnpm run changeset-version",
-    "changeset": "changeset",
-    "publish": "turbo lint build && changeset publish && cd packages/vscode-ext && pnpm run package && npx vsce publish --no-dependencies --skip-duplicate"
+    "changeset-version": "cd packages/ops && turbo build && pnpm run changeset-version",
+    "publish-all": "cd packages/ops && turbo build && pnpm run publish-all",
+    "post-publish": "cd packages/ops && turbo build && pnpm run post-publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.26.2",

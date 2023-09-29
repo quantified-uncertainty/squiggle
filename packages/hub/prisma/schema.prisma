@@ -220,7 +220,8 @@ model ModelRevision {
 model SquiggleSnippet {
   id String @id @default(cuid())
 
-  code String
+  code    String
+  version String
 
   revision ModelRevision?
 }

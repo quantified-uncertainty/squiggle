@@ -3,6 +3,7 @@ import { RelativeValuesDefinition } from "@prisma/client";
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
+import { squiggleVersions } from "@quri/versioned-playground";
 import { Model, getWriteableModel } from "../types/Model";
 import { getSelf } from "../types/User";
 
@@ -31,6 +32,7 @@ const SquiggleSnippetContentInput = builder.inputType(
   {
     fields: (t) => ({
       code: t.string({ required: true }),
+      version: t.string({ required: true }),
     }),
   }
 );
@@ -49,10 +51,9 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
       relativeValuesExports: t.input.field({
         type: [RelativeValuesExportInput],
       }),
-      code: t.input.string({ deprecationReason: "Use content arg instead" }),
       content: t.input.field({
         type: SquiggleSnippetContentInput,
-        // TODO - should be required after `code` input is removed
+        required: true,
       }),
     },
     resolve: async (_, { input }, { session }) => {
@@ -62,10 +63,9 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
         owner: input.owner,
       });
 
-      const code = input.code ?? input.content?.code;
-      if (code === undefined) {
-        // remove this after `code` support is removed
-        throw new Error("One of `code` and `content.code` must be set");
+      const version = input.content.version;
+      if (!(squiggleVersions as readonly string[]).includes(version)) {
+        throw new Error(`Unknown Squiggle version ${version}`);
       }
 
       const relativeValuesExports = input.relativeValuesExports ?? [];
@@ -125,7 +125,10 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
         const revision = await tx.modelRevision.create({
           data: {
             squiggleSnippet: {
-              create: { code },
+              create: {
+                code: input.content.code,
+                version: input.content.version,
+              },
             },
             contentType: "SquiggleSnippet",
             model: {
