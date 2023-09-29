@@ -14,6 +14,9 @@ import {
 // Also, please don't change the formatting of this declaration unless you have to. It's edited with regexes in `publish-all.ts` script.
 // (TODO: using codemod would be nice)
 const playgroundByVersion = {
+  "0.8.5": lazy(async () => ({
+    default: (await import("squiggle-components-0.8.5")).SquigglePlayground,
+  })),
   dev: lazy(async () => ({
     default: (await import("@quri/squiggle-components")).SquigglePlayground,
   })),
