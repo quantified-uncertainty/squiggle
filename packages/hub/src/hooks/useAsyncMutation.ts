@@ -1,8 +1,8 @@
+import { useState } from "react";
 import { UseMutationConfig, useMutation } from "react-relay";
+import { GraphQLTaggedNode, MutationParameters } from "relay-runtime";
 
 import { useToast } from "@quri/ui";
-import { useState } from "react";
-import { GraphQLTaggedNode, MutationParameters } from "relay-runtime";
 
 export type CommonMutationParameters<TTypename extends string> =
   MutationParameters & {
@@ -22,7 +22,7 @@ export type CommonMutationParameters<TTypename extends string> =
   };
 
 /**
- * Like the basic `useMutation`, this function returns a `[runMutation, isMutationInFlight]` pair.
+ * Like the basic `useMutation` from Relay, this function returns a `[runMutation, isMutationInFlight]` pair.
  * But unlike `useMutation`, returned `runMutation` is async and has more convenient `onCompleted` callback (it receives only an expected fragment, unwrapped from the result union).
  * Also, all errors will be displayed as notifications automatically.
  */

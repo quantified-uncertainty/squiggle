@@ -3,6 +3,16 @@ import { VariablesOf } from "relay-runtime";
 
 import { CommonMutationParameters, useAsyncMutation } from "./useAsyncMutation";
 
+/**
+ * This hook ties together `useForm` and `useAsyncMutation`, which is a very common pattern for forms that submit data to our backend through mutations.
+ * It forwards some of its parameters to `useForm`, and others to `useAsyncMutation`, and converts form's data to mutation's variables with `formDataToVariables` function.
+ *
+ * See also:
+ * - `<MutationModalAction>` if your form is available through a Dropdown menu
+ * - `useAsyncMutation` if your mutation doesn't require a form, and for the details on parameters for this function
+ *
+ * All generic type parameters to this function default to `never`, so you'll have to set them explicitly to pass type checks.
+ */
 export function useMutationForm<
   FormShape extends FieldValues = never,
   TMutation extends CommonMutationParameters<TTypename> = never,
