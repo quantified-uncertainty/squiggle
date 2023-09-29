@@ -3,9 +3,9 @@ name: Release
 on:
   workflow_dispatch:
     inputs:
-      force-post-publish:
+      post-publish-only:
         type: boolean
-        description: "Force post-publish script and PR even if nothing was published"
+        description: "Run post-publish script without publishing"
         default: false
 
 # copy-pasted from ci.yml
@@ -52,6 +52,7 @@ jobs:
       # Otherwise, `publish` command will be invoked.
       - name: Create Release Pull Request or Publish to npm
         id: changesets
+        if: !inputs.post-publish-only
         uses: changesets/action@v1
         with:
           title: New release
@@ -69,11 +70,11 @@ jobs:
           echo "published-version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Prepare for next release
-        if: steps.changesets.outputs.published == 'true' || inputs.force-post-publish
+        if: steps.changesets.outputs.published == 'true' || inputs.post-publish-only
         run: pnpm run post-publish
 
       - name: Create PR with version patches
-        if: steps.changesets.outputs.published == 'true' || inputs.force-post-publish
+        if: steps.changesets.outputs.published == 'true' || inputs.post-publish-only
         uses: peter-evans/create-pull-request@v5
         with:
           commit-message: Bump versions after ${{ steps.published-version.outputs.published-version }} release
