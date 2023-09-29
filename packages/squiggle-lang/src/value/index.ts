@@ -139,7 +139,6 @@ class VDist extends BaseValue {
     return this.value.toString();
   }
   isEqual(other: VDist) {
-    //Expect this to fail, with different dist types
     return this.value.isEqual(other.value);
   }
 }

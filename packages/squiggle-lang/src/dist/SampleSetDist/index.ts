@@ -49,7 +49,7 @@ export class SampleSetDist extends BaseDist {
     return "Sample Set Distribution";
   }
 
-  isEqual(other: SampleSetDist) {
+  _isEqual(other: SampleSetDist) {
     return E_A_Floats.isEqual(this.samples, other.samples);
   }
 

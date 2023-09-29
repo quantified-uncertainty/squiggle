@@ -260,3 +260,31 @@ describe("PointMass", () => {
     expect(dist.inv(0.3)).toEqual(5);
   });
 });
+
+describe("isEqual", () => {
+  test("equal normal distributions", () => {
+    const n1 = mkNormal(0, 1);
+    const n2 = mkNormal(0, 1);
+    expect(n1.isEqual(n2)).toEqual(true);
+  });
+  test("unequal normal distributions", () => {
+    const n1 = mkNormal(0, 1);
+    const n2 = mkNormal(0, 2);
+    expect(n1.isEqual(n2)).toEqual(false);
+  });
+  test("equal bernoulli distributions", () => {
+    const n1 = mkBernoulli(0.5);
+    const n2 = mkBernoulli(0.5);
+    expect(n1.isEqual(n2)).toEqual(true);
+  });
+  test("unequal bernoulli distributions", () => {
+    const n1 = mkBernoulli(0.1);
+    const n2 = mkBernoulli(0.9);
+    expect(n1.isEqual(n2)).toEqual(false);
+  });
+  test("differend distributions", () => {
+    const n1 = mkNormal(0, 1);
+    const n2 = mkBernoulli(0.5);
+    expect(n1.isEqual(n2)).toEqual(false);
+  });
+});

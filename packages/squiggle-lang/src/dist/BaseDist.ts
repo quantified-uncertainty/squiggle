@@ -34,10 +34,10 @@ export abstract class BaseDist {
     return Result.fmap(this.variance(), Math.sqrt);
   }
   abstract variance(): result<number, DistError>;
-  abstract isEqual(b: BaseDist): boolean;
+  protected abstract _isEqual(b: BaseDist): boolean;
 
-  baseIsEqual(b: BaseDist): boolean {
-    return this.constructor === b.constructor && this.isEqual(b);
+  isEqual(b: BaseDist): boolean {
+    return this.constructor === b.constructor && this._isEqual(b);
   }
 
   mode(): result<number, DistError> {

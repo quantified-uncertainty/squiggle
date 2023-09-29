@@ -51,7 +51,7 @@ export class PointSetDist extends BaseDist {
     }
     return items;
   }
-  isEqual(other: PointSetDist) {
+  _isEqual(other: PointSetDist) {
     return this.pointSet.isEqual(other.pointSet);
   }
 
