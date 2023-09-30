@@ -74,7 +74,6 @@ export const CacheMenu: FC<{
                     definition.items.length * definition.items.length
                   } pairs cached`}
             </DropdownMenuHeader>
-            <DropdownMenuSeparator />
             {!fullyCached && (
               <BuildRelativeValuesCacheAction
                 exportId={revision.forRelativeValues.id}

@@ -7,7 +7,7 @@ import { LoadMore } from "@/components/LoadMore";
 import { GroupCard } from "./GroupCard";
 
 const Fragment = graphql`
-  fragment GroupList on QueryGroupsConnection {
+  fragment GroupList on GroupConnection {
     edges {
       node {
         id

@@ -14,7 +14,7 @@ export function StyledColorInput({ value, onChange }: Props) {
     <Dropdown
       render={({ close }) => (
         <DropdownMenu>
-          <div className="flex flex-col items-center p-1" onDoubleClick={close}>
+          <div className="flex flex-col items-center p-2" onDoubleClick={close}>
             <HexColorPicker color={value} onChange={onChange} />
             <HexColorInput
               color={value}

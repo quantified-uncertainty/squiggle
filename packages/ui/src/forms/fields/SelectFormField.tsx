@@ -187,7 +187,9 @@ export function SelectFormField<
               getOptionValue={getOptionValue}
               // TODO - only when in modal? boolean prop?
               styles={{ menuPortal: (base) => ({ ...base, zIndex: 100 }) }}
-              menuPortalTarget={document.body}
+              menuPortalTarget={
+                typeof document === "undefined" ? undefined : document.body
+              }
             />
           );
         }}

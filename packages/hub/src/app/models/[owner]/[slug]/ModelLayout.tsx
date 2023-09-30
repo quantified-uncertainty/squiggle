@@ -85,7 +85,6 @@ export const ModelLayout: FC<
   const dropDown = (close: () => void) => (
     <DropdownMenu>
       <DropdownMenuHeader>Relative Value Functions</DropdownMenuHeader>
-      <DropdownMenuSeparator />
       {model.currentRevision.relativeValuesExports.map((exportItem) => (
         <DropdownMenuNextLinkItem
           key={exportItem.variableName}

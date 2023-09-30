@@ -1,14 +1,14 @@
 import { FC } from "react";
-import { FaPlus } from "react-icons/fa";
 import { useFragment } from "react-relay";
 import { ConnectionHandler, graphql } from "relay-runtime";
+
+import { PlusIcon, SelectStringFormField } from "@quri/ui";
 
 import { InviteUserToGroupActionMutation } from "@/__generated__/InviteUserToGroupActionMutation.graphql";
 import { InviteUserToGroupAction_group$key } from "@/__generated__/InviteUserToGroupAction_group.graphql";
 import { MembershipRole } from "@/__generated__/SetMembershipRoleActionMutation.graphql";
 import { SelectUser, SelectUserOption } from "@/components/SelectUser";
 import { MutationModalAction } from "@/components/ui/MutationModalAction";
-import { SelectStringFormField } from "@quri/ui";
 
 const Mutation = graphql`
   mutation InviteUserToGroupActionMutation(
@@ -54,7 +54,7 @@ export const InviteUserToGroupAction: FC<Props> = ({ groupRef, close }) => {
   return (
     <MutationModalAction<InviteUserToGroupActionMutation, FormShape>
       title="Invite"
-      icon={FaPlus}
+      icon={PlusIcon}
       close={close}
       mutation={Mutation}
       expectedTypename="InviteUserToGroupResult"

@@ -1,8 +1,11 @@
-import { UserDefinitionList$key } from "@/__generated__/UserDefinitionList.graphql";
-import { RelativeValuesDefinitionList } from "@/relative-values/components/RelativeValuesDefinitionList";
 import { FC } from "react";
 import { usePaginationFragment } from "react-relay";
 import { graphql } from "relay-runtime";
+
+import { UserDefinitionList$key } from "@/__generated__/UserDefinitionList.graphql";
+import { RelativeValuesDefinitionList } from "@/relative-values/components/RelativeValuesDefinitionList";
+import { StyledLink } from "@/components/ui/StyledLink";
+import { newDefinitionRoute } from "@/routes";
 
 const Fragment = graphql`
   fragment UserDefinitionList on User
@@ -32,10 +35,16 @@ export const UserDefinitionList: FC<Props> = ({ dataRef }) => {
   } = usePaginationFragment(Fragment, dataRef);
 
   return (
-    <RelativeValuesDefinitionList
-      connectionRef={relativeValuesDefinitions}
-      showOwner={false}
-      loadNext={loadNext}
-    />
+    <div>
+      {relativeValuesDefinitions.edges.length ? (
+        <RelativeValuesDefinitionList
+          connectionRef={relativeValuesDefinitions}
+          showOwner={false}
+          loadNext={loadNext}
+        />
+      ) : (
+        <div className="text-slate-500">No definitions to show.</div>
+      )}
+    </div>
   );
 };

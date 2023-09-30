@@ -35,7 +35,6 @@ export const Default: Story = {
       return (
         <DropdownMenu>
           <DropdownMenuHeader>Header</DropdownMenuHeader>
-          <DropdownMenuSeparator />
           <DropdownMenuActionItem
             title="Refresh"
             icon={RefreshIcon}
@@ -51,6 +50,7 @@ export const Default: Story = {
               </Modal>
             )}
           />
+          <DropdownMenuSeparator />
           <DropdownMenuAsyncActionItem
             title="Delete (async)"
             icon={TrashIcon}

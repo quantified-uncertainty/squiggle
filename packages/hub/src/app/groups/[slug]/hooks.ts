@@ -15,3 +15,17 @@ export function useIsGroupAdmin(groupRef: hooks_useIsGroupAdmin$key) {
   );
   return myMembership?.role === "Admin";
 }
+
+export function useIsGroupMember(groupRef: hooks_useIsGroupAdmin$key) {
+  const { myMembership } = useFragment(
+    graphql`
+      fragment hooks_useIsGroupMember on Group {
+        myMembership {
+          id
+        }
+      }
+    `,
+    groupRef
+  );
+  return Boolean(myMembership);
+}
