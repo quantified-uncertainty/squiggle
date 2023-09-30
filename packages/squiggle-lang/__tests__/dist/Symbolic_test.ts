@@ -282,7 +282,7 @@ describe("isEqual", () => {
     const n2 = mkBernoulli(0.9);
     expect(n1.isEqual(n2)).toEqual(false);
   });
-  test("differend distributions", () => {
+  test("different distributions", () => {
     const n1 = mkNormal(0, 1);
     const n2 = mkBernoulli(0.5);
     expect(n1.isEqual(n2)).toEqual(false);

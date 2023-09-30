@@ -1,3 +1,5 @@
+import { REOther } from "../errors/messages.js";
+
 export const zip = <A, B>(xs: A[], ys: B[]): [A, B][] => {
   // based on Belt.Array.zip
   const lenX = xs.length;
@@ -67,4 +69,20 @@ export function shuffle<T>(array: T[]): T[] {
     [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
   }
   return shuffledArray;
+}
+
+export function first<T>(arr: T[]): T | undefined {
+  if (!arr.length) {
+    return undefined;
+  } else {
+    return arr[0];
+  }
+}
+
+export function last<T>(arr: T[]): T | undefined {
+  if (!arr.length) {
+    return undefined;
+  } else {
+    return arr[arr.length - 1];
+  }
 }

@@ -10,7 +10,7 @@ import { Lambda } from "../reducer/lambda.js";
 import * as DateTime from "../utility/DateTime.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { Domain } from "./domain.js";
-import { shuffle } from "../utility/E_A.js";
+import { shuffle, unzip } from "../utility/E_A.js";
 
 export type ValueMap = ImmutableMap<string, Value>;
 
