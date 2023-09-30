@@ -1,19 +1,12 @@
-import { FC, PropsWithChildren, ReactNode, useEffect, useState } from "react";
-import {
-  DefaultValues,
-  FieldPath,
-  FieldValues,
-  useForm,
-} from "react-hook-form";
+import { FC, PropsWithChildren, ReactNode } from "react";
+import { DefaultValues, FieldPath, FieldValues } from "react-hook-form";
 import { GraphQLTaggedNode, VariablesOf } from "relay-runtime";
 
-import { DropdownMenuActionItem, EditIcon, IconProps } from "@quri/ui";
+import { IconProps } from "@quri/ui";
 
 import { FormModal } from "@/components/ui/FormModal";
-import {
-  CommonMutationParameters,
-  useAsyncMutation,
-} from "@/hooks/useAsyncMutation";
+import { CommonMutationParameters } from "@/hooks/useAsyncMutation";
+import { useMutationForm } from "@/hooks/useMutationForm";
 import { DropdownMenuModalActionItem } from "@quri/ui";
 
 type CommonProps<
@@ -51,23 +44,20 @@ function MutationFormModal<
 }: PropsWithChildren<CommonProps<TMutation, TFormShape, TTypename>> & {
   title: string;
 }): ReactNode {
-  const form = useForm<TFormShape>({
+  const { form, onSubmit, inFlight } = useMutationForm<
+    TFormShape,
+    TMutation,
+    TTypename
+  >({
     mode: "onChange",
     defaultValues,
-  });
-  const [runMutation, inFlight] = useAsyncMutation<TMutation, TTypename>({
     mutation,
     expectedTypename,
-  });
-
-  const save = form.handleSubmit((data) => {
-    runMutation({
-      variables: formDataToVariables(data),
-      onCompleted(data) {
-        onCompleted?.(data);
-        close();
-      },
-    });
+    formDataToVariables,
+    onCompleted(data) {
+      onCompleted?.(data);
+      close();
+    },
   });
 
   return (
@@ -77,7 +67,7 @@ function MutationFormModal<
       submitText={submitText}
       form={form}
       initialFocus={initialFocus}
-      onSubmit={save}
+      onSubmit={onSubmit}
       inFlight={inFlight}
     >
       {children}
