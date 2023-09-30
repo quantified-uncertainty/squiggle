@@ -1,9 +1,12 @@
-import { UserModelList$key } from "@/__generated__/UserModelList.graphql";
-import { H1 } from "@/components/ui/Headers";
-import { ModelList } from "@/models/components/ModelList";
 import { FC } from "react";
 import { usePaginationFragment } from "react-relay";
 import { graphql } from "relay-runtime";
+
+import { UserModelList$key } from "@/__generated__/UserModelList.graphql";
+import { ModelList } from "@/models/components/ModelList";
+import Link from "next/link";
+import { StyledLink } from "@/components/ui/StyledLink";
+import { newModelRoute } from "@/routes";
 
 const Fragment = graphql`
   fragment UserModelList on User
@@ -13,7 +16,7 @@ const Fragment = graphql`
   )
   @refetchable(queryName: "UserModelListPaginationQuery") {
     models(first: $count, after: $cursor)
-      @connection(key: "UserViewList_models") {
+      @connection(key: "UserModelList_models") {
       edges {
         __typename
       }
@@ -41,7 +44,7 @@ export const UserModelList: FC<Props> = ({ dataRef }) => {
           showOwner={false}
         />
       ) : (
-        <div className="text-slate-500">{"You don't have any models yet."}</div>
+        <div className="text-slate-500">No models to show.</div>
       )}
     </div>
   );

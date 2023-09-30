@@ -121,6 +121,14 @@ export function userRoute({ username }: { username: string }) {
   return `/users/${username}`;
 }
 
+export function userDefinitionsRoute({ username }: { username: string }) {
+  return `/users/${username}/definitions`;
+}
+
+export function userGroupsRoute({ username }: { username: string }) {
+  return `/users/${username}/groups`;
+}
+
 export function groupRoute({ slug }: { slug: string }) {
   return `/groups/${slug}`;
 }
@@ -129,8 +137,11 @@ export function groupMembersRoute({ slug }: { slug: string }) {
   return `${groupRoute({ slug })}/members`;
 }
 
-export function newModelRoute() {
-  return "/new/model";
+export function newModelRoute(params?: { group: string }) {
+  const paramsString = params?.group
+    ? "?" + new URLSearchParams({ group: params.group }).toString()
+    : "";
+  return `/new/model${paramsString}`;
 }
 
 export function newDefinitionRoute() {

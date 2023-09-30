@@ -1,7 +1,7 @@
 "use client";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { FC } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { FC, useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { graphql } from "relay-runtime";
 
@@ -9,11 +9,15 @@ import { Button, CheckboxFormField } from "@quri/ui";
 import { defaultSquiggleVersion } from "@quri/versioned-playground";
 
 import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
+import { NewModelPageQuery } from "@/__generated__/NewModelPageQuery.graphql";
 import { SelectGroup, SelectGroupOption } from "@/components/SelectGroup";
 import { H1 } from "@/components/ui/Headers";
 import { SlugFormField } from "@/components/ui/SlugFormField";
 import { useAsyncMutation } from "@/hooks/useAsyncMutation";
-import { modelRoute } from "@/routes";
+import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
+import { usePageQuery } from "@/relay/usePageQuery";
+import { modelRoute, newModelRoute } from "@/routes";
+import { useLazyLoadQuery } from "react-relay";
 
 const Mutation = graphql`
   mutation NewModelMutation($input: MutationCreateSquiggleSnippetModelInput!) {
@@ -46,18 +50,43 @@ type FormShape = {
 };
 
 export const NewModel: FC = () => {
+  const searchParams = useSearchParams();
+
+  const { group: initialGroup } = useLazyLoadQuery<NewModelPageQuery>(
+    graphql`
+      query NewModelPageQuery($groupSlug: String!, $groupSlugIsSet: Boolean!) {
+        group(slug: $groupSlug) @include(if: $groupSlugIsSet) {
+          ... on Group {
+            id
+            slug
+            myMembership {
+              id
+            }
+          }
+        }
+      }
+    `,
+    {
+      groupSlug: searchParams.get("group") ?? "",
+      groupSlugIsSet: Boolean(searchParams.get("group")),
+    }
+  );
+
+  const router = useRouter();
+  useEffect(() => {
+    router.replace(newModelRoute()); // clean up group=... param
+  }, [router]);
+
   const { data: session } = useSession({ required: true });
 
   const form = useForm<FormShape>({
     defaultValues: {
       // don't pass `slug: ""` here, it will lead to form reset if a user started to type in a value before JS finished loading
-      group: null,
+      group: initialGroup?.myMembership ? initialGroup : null,
       isPrivate: false,
     },
     mode: "onChange",
   });
-
-  const router = useRouter();
 
   const [runMutation, inFlight] = useAsyncMutation<
     NewModelMutation,
@@ -107,6 +136,7 @@ export const NewModel: FC = () => {
             placeholder="my-model"
           />
           <SelectGroup<FormShape>
+            description="Optional. Models owned by a group are editable by all members of the group."
             label="Group"
             name="group"
             required={false}

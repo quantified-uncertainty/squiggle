@@ -78,9 +78,9 @@ export const MoveModelAction: FC<Props> = ({ model: modelKey, close }) => {
       }}
       submitText="Save"
       close={close}
-      title="Move"
+      title="Change Owner"
       icon={RightArrowIcon}
-      modalTitle={`Move model ${model.owner.slug}/${model.slug}`}
+      modalTitle={`Change owner for ${model.owner.slug}/${model.slug}`}
       onCompleted={({ model }) => {
         router.push(modelRoute({ owner: model.owner.slug, slug: model.slug }));
       }}
