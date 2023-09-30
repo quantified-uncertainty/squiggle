@@ -1,7 +1,7 @@
 "use client";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { FC } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { FC, useEffect } from "react";
 import { FormProvider } from "react-hook-form";
 import { graphql } from "relay-runtime";
 
@@ -13,7 +13,9 @@ import { SelectGroup, SelectGroupOption } from "@/components/SelectGroup";
 import { H1 } from "@/components/ui/Headers";
 import { SlugFormField } from "@/components/ui/SlugFormField";
 import { useMutationForm } from "@/hooks/useMutationForm";
-import { modelRoute } from "@/routes";
+import { modelRoute, newModelRoute } from "@/routes";
+import { useLazyLoadQuery } from "react-relay";
+import { NewModelPageQuery } from "@/__generated__/NewModelPageQuery.graphql";
 
 const defaultCode = `/*
 Describe your code here
@@ -31,7 +33,32 @@ type FormShape = {
 export const NewModel: FC = () => {
   useSession({ required: true });
 
+  const searchParams = useSearchParams();
+
+  const { group: initialGroup } = useLazyLoadQuery<NewModelPageQuery>(
+    graphql`
+      query NewModelPageQuery($groupSlug: String!, $groupSlugIsSet: Boolean!) {
+        group(slug: $groupSlug) @include(if: $groupSlugIsSet) {
+          ... on Group {
+            id
+            slug
+            myMembership {
+              id
+            }
+          }
+        }
+      }
+    `,
+    {
+      groupSlug: searchParams.get("group") ?? "",
+      groupSlugIsSet: Boolean(searchParams.get("group")),
+    }
+  );
+
   const router = useRouter();
+  useEffect(() => {
+    router.replace(newModelRoute()); // clean up group=... param
+  }, [router]);
 
   const { form, onSubmit, inFlight } = useMutationForm<
     FormShape,
@@ -41,7 +68,7 @@ export const NewModel: FC = () => {
     mode: "onChange",
     defaultValues: {
       // don't pass `slug: ""` here, it will lead to form reset if a user started to type in a value before JS finished loading
-      group: null,
+      group: initialGroup?.myMembership ? initialGroup : null,
       isPrivate: false,
     },
     mutation: graphql`
@@ -99,6 +126,7 @@ export const NewModel: FC = () => {
           />
           <SelectGroup<FormShape>
             label="Group"
+            description="Optional. Models owned by a group are editable by all members of the group."
             name="group"
             required={false}
             myOnly={true}
