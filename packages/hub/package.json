@@ -21,7 +21,7 @@
     "@pothos/core": "^3.33.0",
     "@pothos/plugin-errors": "^3.11.1",
     "@pothos/plugin-prisma": "^3.57.0",
-    "@pothos/plugin-relay": "^3.43.1",
+    "@pothos/plugin-relay": "^3.44.0",
     "@pothos/plugin-scope-auth": "^3.20.0",
     "@pothos/plugin-simple-objects": "^3.7.0",
     "@pothos/plugin-validation": "^3.10.0",
