@@ -24,11 +24,6 @@ const maker = new FnFactory({
   requiresNamespace: false,
 });
 
-const makerRequireNamespace = new FnFactory({
-  nameSpace: "Dist",
-  requiresNamespace: true,
-});
-
 function makeSampleSet(d: BaseDist, env: Env) {
   const result = SampleSetDist.SampleSetDist.fromDist(d, env);
   if (!result.ok) {
@@ -146,8 +141,9 @@ function makeOneArgDist(
 
 export const library: FRFunction[] = [
   //We might want to later add all of the options to make() tht SampleSet has. For example, function() and list().
-  makerRequireNamespace.make({
+  maker.make({
     name: "make",
+    requiresNamespace: true,
     examples: ["Dist.make(5)", "Dist.make(normal({p5: 4, p95: 10}))"],
     definitions: [
       makeDefinition([frDist], ([dist]) => vDist(dist)),

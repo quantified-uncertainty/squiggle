@@ -178,11 +178,13 @@ describe("List functions", () => {
   describe("every", () => {
     testEvalToBe("List.every([2,4,6], {|e| e > 1})", "true");
     testEvalToBe("List.every([2,4,5], {|e| e > 4})", "false");
+    testEvalToBe("List.every([], {|e| e > 1})", "true");
   });
 
   describe("some", () => {
     testEvalToBe("List.some([2,4,6], {|e| e > 1})", "true");
     testEvalToBe("List.some([2,4,5], {|e| e > 7})", "false");
+    testEvalToBe("List.some([], {|e| e > 7})", "false");
   });
 
   describe("find", () => {
@@ -212,11 +214,19 @@ describe("List functions", () => {
   describe("zip", () => {
     testEvalToBe("List.zip([1,2], [3,4])", "[[1,3],[2,4]]");
     testEvalToBe("List.zip([1,2], [3,[4,5]])", "[[1,3],[2,[4,5]]]");
+    testEvalToBe(
+      "List.zip([1,2], [3,[4,5], [5]])",
+      "Error(Error: Array lengths must be equal)"
+    );
   });
 
   describe("unzip", () => {
     testEvalToBe("List.unzip([[1,3],[2,4]])", "[[1,2],[3,4]]");
     testEvalToBe("List.unzip([[1,3],[2,4],[5,6]])", "[[1,2,5],[3,4,6]]");
     testEvalToBe("List.unzip([])", "[[],[]]");
+    testEvalToBe(
+      "List.unzip([[1,2],[2,5,1]])",
+      "Error(Error: Array must be an array of pairs)"
+    );
   });
 });

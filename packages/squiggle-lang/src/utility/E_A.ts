@@ -1,5 +1,3 @@
-import { REOther } from "../errors/messages.js";
-
 export const zip = <A, B>(xs: A[], ys: B[]): [A, B][] => {
   // based on Belt.Array.zip
   const lenX = xs.length;

@@ -50,7 +50,7 @@ export class SampleSetDist extends BaseDist {
   }
 
   _isEqual(other: SampleSetDist) {
-    return E_A_Floats.isEqual(this.samples, other.samples);
+    return this.samples === other.samples;
   }
 
   toSparkline(bucketCount: number, env: Env): Result.result<string, DistError> {

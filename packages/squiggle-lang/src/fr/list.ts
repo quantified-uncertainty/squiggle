@@ -1,50 +1,70 @@
 import { REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
+import * as E_A_Floats from "../utility/E_A_Floats.js";
 import {
   frAny,
   frDist,
   frArray,
+  frTuple2,
   frLambda,
   frNumber,
   frString,
 } from "../library/registry/frTypes.js";
-import { FnFactory } from "../library/registry/helpers.js";
-import { Value, vArray, vNumber, vString, vBool } from "../value/index.js";
+import { FnFactory, doBinaryLambdaCall } from "../library/registry/helpers.js";
+import {
+  Value,
+  vArray,
+  vNumber,
+  vString,
+  vBool,
+  uniq,
+  uniqBy,
+} from "../value/index.js";
 import { sampleSetAssert } from "./sampleset.js";
 import { unzip, zip } from "../utility/E_A.js";
 import {
-  every,
-  filter,
-  find,
-  findIndex,
-  first,
-  last,
   makeFromLambda,
-  makeFromValue,
   map,
   reduce,
   reduceReverse,
   reduceWhile,
-  some,
-  uniq,
-  uniqBy,
-  upTo,
 } from "../value/valueList.js";
+import { Lambda } from "../reducer/lambda.js";
+import { ReducerContext } from "../reducer/context.js";
+import { isInteger } from "lodash";
 
 const maker = new FnFactory({
   nameSpace: "List",
   requiresNamespace: true,
 });
 
+function _assert1ParamsLength(lambda: Lambda, len: number): void {
+  if (lambda.getParameterNames().length !== len) {
+    throw new REOther(`Expected function with ${len} parameters`);
+  }
+}
+
+const _assertValidArrayLength = (number: number) => {
+  if (number < 0) {
+    throw new REOther("Expected non-negative number");
+  } else if (!Number.isInteger(number)) {
+    throw new REOther("Number must be an integer");
+  }
+};
+const _assertUnemptyArray = (array: Value[]) => {
+  if (array.length === 0) {
+    throw new REOther("Array must not be empty");
+  }
+};
+
+function _binaryLambdaCheck1(
+  lambda: Lambda,
+  context: ReducerContext
+): (e: Value) => boolean {
+  return (el: Value) => doBinaryLambdaCall([el], lambda, context);
+}
+
 export const library = [
-  maker.make({
-    name: "length",
-    output: "Number",
-    examples: [`List.length([1,4,5])`],
-    definitions: [
-      makeDefinition([frArray(frAny)], ([values]) => vNumber(values.length)),
-    ],
-  }),
   maker.make({
     name: "make",
     output: "Array",
@@ -54,12 +74,14 @@ export const library = [
       `List.make(2, {|f| f+1})`,
     ],
     definitions: [
-      makeDefinition([frNumber, frLambda], ([number, lambda], context) =>
-        vArray(makeFromLambda(number, lambda, context))
-      ),
-      makeDefinition([frNumber, frAny], ([number, value]) =>
-        vArray(makeFromValue(number, value))
-      ),
+      makeDefinition([frNumber, frLambda], ([number, lambda], context) => {
+        _assertValidArrayLength(number);
+        return vArray(makeFromLambda(number, lambda, context));
+      }),
+      makeDefinition([frNumber, frAny], ([number, value]) => {
+        _assertValidArrayLength(number);
+        return vArray(new Array(number).fill(value));
+      }),
       makeDefinition([frDist], ([dist]) => {
         sampleSetAssert(dist);
         return vArray(dist.samples.map(vNumber));
@@ -71,20 +93,41 @@ export const library = [
     output: "Array",
     examples: [`List.upTo(1,4)`],
     definitions: [
-      makeDefinition([frNumber, frNumber], ([low, high]) =>
-        vArray(upTo(low, high))
-      ),
+      makeDefinition([frNumber, frNumber], ([low, high]) => {
+        if (!isInteger(low) || !isInteger(high)) {
+          throw new Error("upTo() requires integers");
+        }
+        return vArray(E_A_Floats.upTo(low, high).map(vNumber));
+      }),
+    ],
+  }),
+  maker.make({
+    name: "length",
+    output: "Number",
+    examples: [`List.length([1,4,5])`],
+    definitions: [
+      makeDefinition([frArray(frAny)], ([values]) => vNumber(values.length)),
     ],
   }),
   maker.make({
     name: "first",
     examples: [`List.first([1,4,5])`],
-    definitions: [makeDefinition([frArray(frAny)], ([array]) => first(array))],
+    definitions: [
+      makeDefinition([frArray(frAny)], ([array]) => {
+        _assertUnemptyArray(array);
+        return array[0];
+      }),
+    ],
   }),
   maker.make({
     name: "last",
     examples: [`List.last([1,4,5])`],
-    definitions: [makeDefinition([frArray(frAny)], ([array]) => last(array))],
+    definitions: [
+      makeDefinition([frArray(frAny)], ([array]) => {
+        _assertUnemptyArray(array);
+        return array[array.length - 1];
+      }),
+    ],
   }),
   maker.make({
     name: "reverse",
@@ -143,9 +186,10 @@ export const library = [
     requiresNamespace: true,
     examples: [`List.uniqBy([[1,5], [3,5], [5,7]], {|x| x[1]})`],
     definitions: [
-      makeDefinition([frArray(frAny), frLambda], ([arr, lambda], context) =>
-        vArray(uniqBy(arr, lambda, context))
-      ),
+      makeDefinition([frArray(frAny), frLambda], ([arr, lambda], context) => {
+        _assert1ParamsLength(lambda, 1);
+        return vArray(uniqBy(arr, (e) => lambda.call([e], context)));
+      }),
     ],
   }),
   maker.make({
@@ -195,49 +239,58 @@ export const library = [
     requiresNamespace: false,
     examples: [`List.filter([1,4,5], {|x| x>3})`],
     definitions: [
-      makeDefinition([frArray(frAny), frLambda], ([array, lambda], context) =>
-        vArray(filter(array, lambda, context))
-      ),
+      makeDefinition([frArray(frAny), frLambda], ([array, lambda], context) => {
+        _assert1ParamsLength(lambda, 1);
+        return vArray(array.filter(_binaryLambdaCheck1(lambda, context)));
+      }),
     ],
   }),
   maker.make({
     name: "every",
-    requiresNamespace: false,
+    requiresNamespace: true,
     examples: [`List.every([1,4,5], {|el| el>3 })`],
     definitions: [
-      makeDefinition([frArray(frAny), frLambda], ([array, lambda], context) =>
-        vBool(every(array, lambda, context))
-      ),
+      makeDefinition([frArray(frAny), frLambda], ([array, lambda], context) => {
+        _assert1ParamsLength(lambda, 1);
+        return vBool(array.every(_binaryLambdaCheck1(lambda, context)));
+      }),
     ],
   }),
   maker.make({
     name: "some",
-    requiresNamespace: false,
+    requiresNamespace: true,
     examples: [`List.some([1,4,5], {|el| el>3 })`],
     definitions: [
-      makeDefinition([frArray(frAny), frLambda], ([array, lambda], context) =>
-        vBool(some(array, lambda, context))
-      ),
+      makeDefinition([frArray(frAny), frLambda], ([array, lambda], context) => {
+        _assert1ParamsLength(lambda, 1);
+        return vBool(array.some(_binaryLambdaCheck1(lambda, context)));
+      }),
     ],
   }),
   maker.make({
     name: "find",
-    requiresNamespace: false,
+    requiresNamespace: true,
     examples: [`List.find([1,4,5], {|el| el>3 })`],
     definitions: [
-      makeDefinition([frArray(frAny), frLambda], ([array, lambda], context) =>
-        find(array, lambda, context)
-      ),
+      makeDefinition([frArray(frAny), frLambda], ([array, lambda], context) => {
+        _assert1ParamsLength(lambda, 1);
+        const result = array.find(_binaryLambdaCheck1(lambda, context));
+        if (!result) {
+          throw new REOther("No element found");
+        }
+        return result;
+      }),
     ],
   }),
   maker.make({
     name: "findIndex",
-    requiresNamespace: false,
+    requiresNamespace: true,
     examples: [`List.findIndex([1,4,5], {|el| el>3 })`],
     definitions: [
-      makeDefinition([frArray(frAny), frLambda], ([array, lambda], context) =>
-        vNumber(findIndex(array, lambda, context))
-      ),
+      makeDefinition([frArray(frAny), frLambda], ([array, lambda], context) => {
+        _assert1ParamsLength(lambda, 1);
+        return vNumber(array.findIndex(_binaryLambdaCheck1(lambda, context)));
+      }),
     ],
   }),
   maker.make({
@@ -274,7 +327,7 @@ export const library = [
     definitions: [
       makeDefinition([frArray(frAny), frArray(frAny)], ([array1, array2]) => {
         if (array1.length !== array2.length) {
-          throw new REOther("Array lengths must be equal");
+          throw new REOther("List lengths must be equal");
         }
         return vArray(zip(array1, array2).map((pair) => vArray(pair)));
       }),
@@ -285,10 +338,7 @@ export const library = [
     requiresNamespace: true,
     examples: [`List.unzip([[1,2], [2,3], [4,5]])`],
     definitions: [
-      makeDefinition([frArray(frArray(frAny))], ([array]) => {
-        if (!array.every((v) => v.length === 2)) {
-          throw new REOther("Array must be an array of pairs");
-        }
+      makeDefinition([frArray(frTuple2(frAny, frAny))], ([array]) => {
         return vArray(unzip(array as [Value, Value][]).map((r) => vArray(r)));
       }),
     ],

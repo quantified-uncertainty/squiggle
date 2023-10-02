@@ -17,6 +17,11 @@ describe("Operators", () => {
     testEvalToBe('"foo" == 3', "false");
     testEvalToBe('"foo" == false', "false");
     testEvalToBe('"foo" == false', "false");
+    testEvalToBe('"" == 0', "false");
+    testEvalToBe('"" == true', "false");
+    testEvalToBe("0 == true", "false");
+    testEvalToBe("0 == false", "false");
+    testEvalToBe('"" == false', "false");
     testEvalToBe("normal(5,2) == normal(5,2)", "false");
     testEvalToBe("Sym.normal(5,2) == Sym.normal(5,2)", "true");
     testEvalToBe("Sym.uniform(10,12) == Sym.normal(5,2)", "false");
@@ -28,12 +33,21 @@ describe("Operators", () => {
       "true"
     );
     testEvalToBe(
-      "SampleSet.fromList([3,5,2,3,5,2,3,5,2,3,3,5]) == SampleSet.fromList([3,5,2,3,5,1])",
+      "SampleSet.fromList([3,5,2,3,5,2,3,5,2,3,3,5]) == SampleSet.fromList([3,5,2,3,5,2])",
+      "false"
+    );
+    testEvalToBe(
+      "SampleSet.fromList([3,5,2,3,5,2]) == SampleSet.fromList([3,5,2,3,5,2,3,5,2,3,3,5])",
       "false"
     );
     testEvalToBe("SampleSet.fromList([3,5,2,3,5,2]) == normal(5,2)", "false");
     testEvalToBe("3 to 8 == 3", "false");
     testEvalToBe("3 to 8 != 3", "true");
+    testEvalToBe("[1, [2, 3]] == [1, [2, 3]]", "true");
+    testEvalToBe("{a: 1, b: {c: 2}} == {a: 1, b: {c: 2}}", "true");
+    testEvalToBe('"foo\\nbar" == "foo\\r\\nbar"', "false");
+    testEvalToBe("[] == []", "true");
+    testEvalToBe("true == 1", "false");
   });
   describe("typeOf", () => {
     testEvalToBe("typeOf(3)", '"Number"');

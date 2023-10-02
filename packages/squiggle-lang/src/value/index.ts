@@ -1,5 +1,4 @@
 import isInteger from "lodash/isInteger.js";
-
 import { BaseDist } from "../dist/BaseDist.js";
 import {
   REArrayIndexNotFound,
@@ -10,7 +9,7 @@ import { Lambda } from "../reducer/lambda.js";
 import * as DateTime from "../utility/DateTime.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { Domain } from "./domain.js";
-import { shuffle, unzip } from "../utility/E_A.js";
+import { shuffle } from "../utility/E_A.js";
 
 export type ValueMap = ImmutableMap<string, Value>;
 
@@ -297,10 +296,7 @@ export type Scale = CommonScaleArgs &
       }
   );
 
-function scaleIsEqual(scaleA: Scale, scaleB: Scale) {
-  const valueA = scaleA;
-  const valueB = scaleB;
-
+function scaleIsEqual(valueA: Scale, valueB: Scale) {
   if (
     valueA.type !== valueB.type ||
     valueA.min !== valueB.min ||
@@ -343,9 +339,13 @@ class VScale extends BaseValue {
       case "log":
         return "Logarithmic scale";
       case "symlog":
-        return `Symlog scale ({constant: ${this.value.constant}})`;
+        return `Symlog scale ({constant: ${
+          this.value.constant || SCALE_SYMLOG_DEFAULT_CONSTANT
+        }})`;
       case "power":
-        return `Power scale ({exponent: ${this.value.exponent}})`;
+        return `Power scale ({exponent: ${
+          this.value.exponent || SCALE_POWER_DEFAULT_CONSTANT
+        }})`;
     }
   }
 
@@ -570,4 +570,43 @@ export function isEqual(a: Value, b: Value): boolean {
     return false;
   }
   throw new REOther("Equal not implemented for these inputs");
+}
+
+const _isUniqableType = (t: Value) => "isEqual" in t;
+
+export function uniq(array: Value[]): Value[] {
+  const uniqueArray: Value[] = [];
+
+  for (const item of array) {
+    if (!_isUniqableType(item)) {
+      throw new REOther(`Can't apply uniq() to element with type ${item.type}`);
+    }
+    if (!uniqueArray.some((existingItem) => isEqual(existingItem, item))) {
+      uniqueArray.push(item);
+    }
+  }
+
+  return uniqueArray;
+}
+
+export function uniqBy(array: Value[], fn: (e: Value) => Value): Value[] {
+  const uniqueArray: Value[] = [];
+
+  const seen: Value[] = [];
+  const result: Value[] = [];
+
+  for (const item of array) {
+    const computed = fn(item);
+    if (!_isUniqableType(computed)) {
+      throw new REOther(
+        `Can't apply uniq() to element with type ${computed.type}`
+      );
+    }
+    if (!seen.some((existingItem) => isEqual(existingItem, computed))) {
+      seen.push(computed);
+      result.push(item);
+    }
+  }
+
+  return uniqueArray;
 }
