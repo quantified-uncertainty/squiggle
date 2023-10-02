@@ -83,7 +83,7 @@
     "prettier": "^3.0.3",
     "prisma": "^5.3.0",
     "relay-compiler": "^15.0.0",
-    "tailwindcss": "^3.3.2",
+    "tailwindcss": "^3.3.3",
     "tsx": "^3.12.7"
   }
 }
