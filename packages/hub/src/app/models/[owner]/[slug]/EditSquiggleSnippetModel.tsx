@@ -132,6 +132,9 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
       },
     }),
     confirmation: "Saved",
+    onCompleted() {
+      draftUtils.discard(draftLocator);
+    },
   });
 
   // could version picker be part of the form?
