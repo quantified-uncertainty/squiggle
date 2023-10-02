@@ -50,7 +50,7 @@
     "react-hook-form": "^7.45.2",
     "react-icons": "^4.10.1",
     "react-loading-skeleton": "^3.3.1",
-    "react-markdown": "^8.0.7",
+    "react-markdown": "^9.0.0",
     "react-relay": "^15.0.0",
     "relay-runtime": "^15.0.0",
     "remark-breaks": "^3.0.3",
