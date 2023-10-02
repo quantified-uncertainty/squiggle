@@ -299,8 +299,8 @@ importers:
         specifier: ^3.57.0
         version: 3.57.0(@pothos/core@3.33.0)(@prisma/client@5.3.0)(graphql@16.8.1)(typescript@5.1.6)
       '@pothos/plugin-relay':
-        specifier: ^3.43.1
-        version: 3.43.1(@pothos/core@3.33.0)(graphql@16.8.1)
+        specifier: ^3.44.0
+        version: 3.44.0(@pothos/core@3.33.0)(graphql@16.8.1)
       '@pothos/plugin-scope-auth':
         specifier: ^3.20.0
         version: 3.20.0(@pothos/core@3.33.0)(graphql@16.8.1)
@@ -5261,8 +5261,8 @@ packages:
       - supports-color
     dev: false
 
-  /@pothos/plugin-relay@3.43.1(@pothos/core@3.33.0)(graphql@16.8.1):
-    resolution: {integrity: sha512-T5oFVpTIQW69v2FhXhaxmX3BkqJqONy/wnvtBY110JhpbE8Qa04lDglufr56q0Kkv8CGXxl4387ZeX7NgGrZ7A==}
+  /@pothos/plugin-relay@3.44.0(@pothos/core@3.33.0)(graphql@16.8.1):
+    resolution: {integrity: sha512-7eOsgKL2qCQ+/hHpye4sNNbR2mYogDXPWpQboqniYvUdOjez3VDYjAuOn8Ntw73kZQF0N1iloZPikhCxvY7xuw==}
     peerDependencies:
       '@pothos/core': '*'
       graphql: '>=15.1.0'
