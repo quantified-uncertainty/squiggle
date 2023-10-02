@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     // build settings
-    "module": "es2020",
-    "moduleResolution": "node16",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "target": "es2021",
     "jsx": "react-jsx",
     "esModuleInterop": true,
