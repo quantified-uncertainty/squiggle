@@ -852,8 +852,8 @@ importers:
         specifier: ^2.10.0
         version: 2.10.0(next@13.5.2)(react-dom@18.2.0)(react@18.2.0)
       nextra-theme-docs:
-        specifier: ^2.10.0
-        version: 2.10.0(next@13.5.2)(nextra@2.10.0)(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^2.13.1
+        version: 2.13.1(next@13.5.2)(nextra@2.10.0)(react-dom@18.2.0)(react@18.2.0)
       pako:
         specifier: ^2.1.0
         version: 2.1.0
@@ -5379,7 +5379,7 @@ packages:
       react-markdown: 8.0.7(@types/react@18.2.18)(react@18.2.0)
       react-resizable: 3.0.5(react-dom@18.2.0)(react@18.2.0)
       vscode-uri: 3.0.7
-      zod: 3.21.4
+      zod: 3.22.2
     transitivePeerDependencies:
       - '@types/react'
       - supports-color
@@ -15608,17 +15608,18 @@ packages:
       - babel-plugin-macros
     dev: false
 
-  /nextra-theme-docs@2.10.0(next@13.5.2)(nextra@2.10.0)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-uXoqRoewbu0JoqQ1m67aIztWe9/nEhcSeHMimhLxZghKZxkYN0kTR5y5jmrwOHRPuJUTLL2YFwy1rvWJIZS2lw==}
+  /nextra-theme-docs@2.13.1(next@13.5.2)(nextra@2.10.0)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-mckNuKa0AmBbRdPCJ/OQ55KZx5MGH8moomMHYB3XVGXQqmXimOq1/2WZQiBdFx9u43KtfEvqZbQE8oGDIrfIsQ==}
     peerDependencies:
       next: '>=9.5.3'
-      nextra: 2.10.0
+      nextra: 2.13.1
       react: '>=16.13.1'
       react-dom: '>=16.13.1'
     dependencies:
       '@headlessui/react': 1.7.15(react-dom@18.2.0)(react@18.2.0)
       '@popperjs/core': 2.11.8
-      clsx: 1.2.1
+      clsx: 2.0.0
+      escape-string-regexp: 5.0.0
       flexsearch: 0.7.31
       focus-visible: 5.2.0
       git-url-parse: 13.1.0
@@ -15631,7 +15632,7 @@ packages:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       scroll-into-view-if-needed: 3.0.10
-      zod: 3.21.4
+      zod: 3.22.2
     dev: false
 
   /nextra@2.10.0(next@13.5.2)(react-dom@18.2.0)(react@18.2.0):
@@ -20142,6 +20143,10 @@ packages:
 
   /zod@3.21.4:
     resolution: {integrity: sha512-m46AKbrzKVzOzs/DZgVnG5H55N1sv1M8qZU3A8RIKbs3mrACDNeIOeilDymVb2HdmP8uwshOCF4uJ8uM9rCqJw==}
+    dev: false
+
+  /zod@3.22.2:
+    resolution: {integrity: sha512-wvWkphh5WQsJbVk1tbx1l1Ly4yg+XecD+Mq280uBGt9wa5BKSWf4Mhp6GmrkPixhMxmabYY7RbzlwVP32pbGCg==}
     dev: false
 
   /zwitch@2.0.4:
