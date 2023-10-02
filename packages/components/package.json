@@ -59,7 +59,7 @@
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.5.1",
     "@types/jest": "^29.5.3",
-    "@types/lodash": "^4.14.196",
+    "@types/lodash": "^4.14.199",
     "@types/node": "^20.8.0",
     "@types/react": "^18.2.18",
     "@types/react-resizable": "^3.0.4",
