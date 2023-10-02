@@ -642,8 +642,8 @@ importers:
         specifier: ^7.45.2
         version: 7.45.2(react@18.2.0)
       react-select:
-        specifier: ^5.7.4
-        version: 5.7.4(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^5.7.7
+        version: 5.7.7(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0)
       react-textarea-autosize:
         specifier: 8.5.3
         version: 8.5.3(@types/react@18.2.18)(react@18.2.0)
@@ -5433,7 +5433,7 @@ packages:
       react-colorful: 5.6.1(react-dom@18.2.0)(react@18.2.0)
       react-dom: 18.2.0(react@18.2.0)
       react-hook-form: 7.45.2(react@18.2.0)
-      react-select: 5.7.4(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0)
+      react-select: 5.7.7(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0)
       react-textarea-autosize: 8.5.2(@types/react@18.2.18)(react@18.2.0)
       react-use: 17.4.0(react-dom@18.2.0)(react@18.2.0)
     transitivePeerDependencies:
@@ -6564,7 +6564,7 @@ packages:
     dependencies:
       '@babel/core': 7.22.20
       '@babel/preset-env': 7.22.9(@babel/core@7.22.20)
-      '@babel/types': 7.22.19
+      '@babel/types': 7.23.0
       '@ndelangen/get-tarball': 3.0.7
       '@storybook/codemod': 7.2.1
       '@storybook/core-common': 7.2.1
@@ -17057,8 +17057,8 @@ packages:
       - react-dom
     dev: false
 
-  /react-select@5.7.4(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-NhuE56X+p9QDFh4BgeygHFIvJJszO1i1KSkg/JPcIJrbovyRtI+GuOEa4XzFCEpZRAEoEI8u/cAHK+jG/PgUzQ==}
+  /react-select@5.7.7(@types/react@18.2.18)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-HhashZZJDRlfF/AKj0a0Lnfs3sRdw/46VJIRd8IbB9/Ovr74+ZIwkAdSBjSPXsFMG+u72c5xShqwLSKIJllzqw==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
