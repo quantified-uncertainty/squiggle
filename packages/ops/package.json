@@ -20,7 +20,7 @@
   "dependencies": {
     "lodash": "^4.17.21",
     "mdast-util-to-string": "^4.0.0",
-    "remark-parse": "^10.0.2",
+    "remark-parse": "^11.0.0",
     "remark-stringify": "^10.0.3",
     "unified": "^11.0.3",
     "zod": "^3.21.4"
