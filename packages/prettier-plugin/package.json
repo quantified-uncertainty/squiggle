@@ -35,11 +35,11 @@
   "exports": {
     ".": {
       "types": "./dist/types/src/index.d.ts",
-      "import": "./dist/esm/src/index.js"
+      "default": "./dist/esm/src/index.js"
     },
     "./standalone": {
       "types": "./dist/types/src/standalone.d.ts",
-      "import": "./dist/esm/src/standalone.js"
+      "default": "./dist/esm/src/standalone.js"
     }
   }
 }
