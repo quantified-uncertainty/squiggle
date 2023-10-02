@@ -150,7 +150,9 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
 
   const onCodeChange = (code: string) => {
     form.setValue("code", code);
-    draftUtils.save(draftLocator, { formState: form.getValues(), version });
+    if (model.isEditable) {
+      draftUtils.save(draftLocator, { formState: form.getValues(), version });
+    }
   };
 
   // We don't want to control SquigglePlayground, it's uncontrolled by design.
