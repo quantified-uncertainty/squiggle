@@ -67,6 +67,16 @@ export const frLambda: FRType<Lambda> = {
   pack: vLambda,
   getName: () => "lambda",
 };
+export const frLambdaN = (paramLength: number): FRType<Lambda> => {
+  return {
+    unpack: (v: Value) =>
+      v.type === "Lambda" && v.value.getParameterNames().length === paramLength
+        ? v.value
+        : undefined,
+    pack: (v) => vLambda(v),
+    getName: () => `lambda(${paramLength})`,
+  };
+};
 export const frScale: FRType<Scale> = {
   unpack: (v) => (v.type === "Scale" ? v.value : undefined),
   pack: vScale,

@@ -4,9 +4,9 @@ import * as E_A_Floats from "../utility/E_A_Floats.js";
 import {
   frAny,
   frDist,
+  frLambdaN,
   frArray,
   frTuple2,
-  frLambda,
   frNumber,
   frString,
 } from "../library/registry/frTypes.js";
@@ -22,26 +22,74 @@ import {
 } from "../value/index.js";
 import { sampleSetAssert } from "./sampleset.js";
 import { unzip, zip } from "../utility/E_A.js";
-import {
-  makeFromLambda,
-  map,
-  reduce,
-  reduceReverse,
-  reduceWhile,
-} from "../value/valueList.js";
 import { Lambda } from "../reducer/lambda.js";
 import { ReducerContext } from "../reducer/context.js";
-import { isInteger } from "lodash";
 
-const maker = new FnFactory({
-  nameSpace: "List",
-  requiresNamespace: true,
-});
-
-function _assert1ParamsLength(lambda: Lambda, len: number): void {
-  if (lambda.getParameterNames().length !== len) {
-    throw new REOther(`Expected function with ${len} parameters`);
+export function _map(
+  array: Value[],
+  lambda: Lambda,
+  context: ReducerContext,
+  useIndex: boolean
+): Value[] {
+  const mapped: Value[] = new Array(array.length);
+  // this code is intentionally duplicated for performance reasons
+  if (!useIndex) {
+    for (let i = 0; i < array.length; i++) {
+      mapped[i] = lambda.call([array[i]], context);
+    }
+  } else {
+    for (let i = 0; i < array.length; i++) {
+      mapped[i] = lambda.call([array[i], vNumber(i)], context);
+    }
   }
+
+  return mapped;
+}
+
+export function _reduce(
+  array: Value[],
+  initialValue: Value,
+  lambda: Lambda,
+  context: ReducerContext,
+  useIndex: boolean
+): Value {
+  if (!useIndex) {
+    return array.reduce(
+      (acc, elem) => lambda.call([acc, elem], context),
+      initialValue
+    );
+  } else {
+    return array.reduce(
+      (acc, elem, index) => lambda.call([acc, elem, vNumber(index)], context),
+      initialValue
+    );
+  }
+}
+
+export function _reduceWhile(
+  array: Value[],
+  initialValue: Value,
+  step: Lambda,
+  condition: Lambda,
+  context: ReducerContext
+): Value {
+  let acc = initialValue;
+  for (let i = 0; i < array.length; i++) {
+    const newAcc = step.call([acc, array[i]], context);
+
+    const checkResult = condition.call([newAcc], context);
+    if (checkResult.type !== "Bool") {
+      throw new REOther(
+        `Condition should return a boolean value, got: ${checkResult.type}`
+      );
+    }
+    if (!checkResult.value) {
+      // condition failed
+      return acc;
+    }
+    acc = newAcc;
+  }
+  return acc;
 }
 
 const _assertValidArrayLength = (number: number) => {
@@ -64,6 +112,11 @@ function _binaryLambdaCheck1(
   return (el: Value) => doBinaryLambdaCall([el], lambda, context);
 }
 
+const maker = new FnFactory({
+  nameSpace: "List",
+  requiresNamespace: true,
+});
+
 export const library = [
   maker.make({
     name: "make",
@@ -74,9 +127,19 @@ export const library = [
       `List.make(2, {|f| f+1})`,
     ],
     definitions: [
-      makeDefinition([frNumber, frLambda], ([number, lambda], context) => {
+      makeDefinition([frNumber, frLambdaN(0)], ([number, lambda], context) => {
         _assertValidArrayLength(number);
-        return vArray(makeFromLambda(number, lambda, context));
+        return vArray(
+          Array.from({ length: number }, (_) => lambda.call([], context))
+        );
+      }),
+      makeDefinition([frNumber, frLambdaN(1)], ([number, lambda], context) => {
+        _assertValidArrayLength(number);
+        return vArray(
+          Array.from({ length: number }, (_, i) =>
+            lambda.call([vNumber(i)], context)
+          )
+        );
       }),
       makeDefinition([frNumber, frAny], ([number, value]) => {
         _assertValidArrayLength(number);
@@ -94,8 +157,8 @@ export const library = [
     examples: [`List.upTo(1,4)`],
     definitions: [
       makeDefinition([frNumber, frNumber], ([low, high]) => {
-        if (!isInteger(low) || !isInteger(high)) {
-          throw new Error("upTo() requires integers");
+        if (!Number.isInteger(low) || !Number.isInteger(high)) {
+          throw new REOther("upTo() requires integers");
         }
         return vArray(E_A_Floats.upTo(low, high).map(vNumber));
       }),
@@ -103,6 +166,7 @@ export const library = [
   }),
   maker.make({
     name: "length",
+    requiresNamespace: true,
     output: "Number",
     examples: [`List.length([1,4,5])`],
     definitions: [
@@ -111,6 +175,7 @@ export const library = [
   }),
   maker.make({
     name: "first",
+    requiresNamespace: true,
     examples: [`List.first([1,4,5])`],
     definitions: [
       makeDefinition([frArray(frAny)], ([array]) => {
@@ -121,6 +186,7 @@ export const library = [
   }),
   maker.make({
     name: "last",
+    requiresNamespace: true,
     examples: [`List.last([1,4,5])`],
     definitions: [
       makeDefinition([frArray(frAny)], ([array]) => {
@@ -149,8 +215,14 @@ export const library = [
       "List.map([1,4,5], {|x,i| x+i+1})",
     ],
     definitions: [
-      makeDefinition([frArray(frAny), frLambda], ([array, lambda], context) =>
-        vArray(map(array, lambda, context))
+      makeDefinition(
+        [frArray(frAny), frLambdaN(1)],
+        ([array, lambda], context) =>
+          vArray(_map(array, lambda, context, false))
+      ),
+      makeDefinition(
+        [frArray(frAny), frLambdaN(2)],
+        ([array, lambda], context) => vArray(_map(array, lambda, context, true))
       ),
     ],
   }),
@@ -166,6 +238,7 @@ export const library = [
   }),
   maker.make({
     name: "append",
+    requiresNamespace: true,
     examples: [`List.append([1,4],5)`],
     definitions: [
       makeDefinition([frArray(frAny), frAny], ([array, el]) =>
@@ -186,10 +259,9 @@ export const library = [
     requiresNamespace: true,
     examples: [`List.uniqBy([[1,5], [3,5], [5,7]], {|x| x[1]})`],
     definitions: [
-      makeDefinition([frArray(frAny), frLambda], ([arr, lambda], context) => {
-        _assert1ParamsLength(lambda, 1);
-        return vArray(uniqBy(arr, (e) => lambda.call([e], context)));
-      }),
+      makeDefinition([frArray(frAny), frLambdaN(1)], ([arr, lambda], context) =>
+        vArray(uniqBy(arr, (e) => lambda.call([e], context)))
+      ),
     ],
   }),
   maker.make({
@@ -198,9 +270,14 @@ export const library = [
     examples: [`List.reduce([1,4,5], 2, {|acc, el| acc+el})`],
     definitions: [
       makeDefinition(
-        [frArray(frAny), frAny, frLambda],
+        [frArray(frAny), frAny, frLambdaN(2)],
         ([array, initialValue, lambda], context) =>
-          reduce(array, initialValue, lambda, context)
+          _reduce(array, initialValue, lambda, context, false)
+      ),
+      makeDefinition(
+        [frArray(frAny), frAny, frLambdaN(3)],
+        ([array, initialValue, lambda], context) =>
+          _reduce(array, initialValue, lambda, context, true)
       ),
     ],
   }),
@@ -210,9 +287,9 @@ export const library = [
     examples: [`List.reduceReverse([1,4,5], 2, {|acc, el| acc-el})`],
     definitions: [
       makeDefinition(
-        [frArray(frAny), frAny, frLambda],
+        [frArray(frAny), frAny, frLambdaN(2)],
         ([array, initialValue, lambda], context) =>
-          reduceReverse(array, initialValue, lambda, context)
+          _reduce([...array].reverse(), initialValue, lambda, context, false)
       ),
     ],
   }),
@@ -228,9 +305,9 @@ export const library = [
     ],
     definitions: [
       makeDefinition(
-        [frArray(frAny), frAny, frLambda, frLambda],
+        [frArray(frAny), frAny, frLambdaN(2), frLambdaN(1)],
         ([array, initialValue, step, condition], context) =>
-          reduceWhile(array, initialValue, step, condition, context)
+          _reduceWhile(array, initialValue, step, condition, context)
       ),
     ],
   }),
@@ -239,10 +316,11 @@ export const library = [
     requiresNamespace: false,
     examples: [`List.filter([1,4,5], {|x| x>3})`],
     definitions: [
-      makeDefinition([frArray(frAny), frLambda], ([array, lambda], context) => {
-        _assert1ParamsLength(lambda, 1);
-        return vArray(array.filter(_binaryLambdaCheck1(lambda, context)));
-      }),
+      makeDefinition(
+        [frArray(frAny), frLambdaN(1)],
+        ([array, lambda], context) =>
+          vArray(array.filter(_binaryLambdaCheck1(lambda, context)))
+      ),
     ],
   }),
   maker.make({
@@ -250,10 +328,11 @@ export const library = [
     requiresNamespace: true,
     examples: [`List.every([1,4,5], {|el| el>3 })`],
     definitions: [
-      makeDefinition([frArray(frAny), frLambda], ([array, lambda], context) => {
-        _assert1ParamsLength(lambda, 1);
-        return vBool(array.every(_binaryLambdaCheck1(lambda, context)));
-      }),
+      makeDefinition(
+        [frArray(frAny), frLambdaN(1)],
+        ([array, lambda], context) =>
+          vBool(array.every(_binaryLambdaCheck1(lambda, context)))
+      ),
     ],
   }),
   maker.make({
@@ -261,10 +340,11 @@ export const library = [
     requiresNamespace: true,
     examples: [`List.some([1,4,5], {|el| el>3 })`],
     definitions: [
-      makeDefinition([frArray(frAny), frLambda], ([array, lambda], context) => {
-        _assert1ParamsLength(lambda, 1);
-        return vBool(array.some(_binaryLambdaCheck1(lambda, context)));
-      }),
+      makeDefinition(
+        [frArray(frAny), frLambdaN(1)],
+        ([array, lambda], context) =>
+          vBool(array.some(_binaryLambdaCheck1(lambda, context)))
+      ),
     ],
   }),
   maker.make({
@@ -272,14 +352,16 @@ export const library = [
     requiresNamespace: true,
     examples: [`List.find([1,4,5], {|el| el>3 })`],
     definitions: [
-      makeDefinition([frArray(frAny), frLambda], ([array, lambda], context) => {
-        _assert1ParamsLength(lambda, 1);
-        const result = array.find(_binaryLambdaCheck1(lambda, context));
-        if (!result) {
-          throw new REOther("No element found");
+      makeDefinition(
+        [frArray(frAny), frLambdaN(1)],
+        ([array, lambda], context) => {
+          const result = array.find(_binaryLambdaCheck1(lambda, context));
+          if (!result) {
+            throw new REOther("No element found");
+          }
+          return result;
         }
-        return result;
-      }),
+      ),
     ],
   }),
   maker.make({
@@ -287,10 +369,11 @@ export const library = [
     requiresNamespace: true,
     examples: [`List.findIndex([1,4,5], {|el| el>3 })`],
     definitions: [
-      makeDefinition([frArray(frAny), frLambda], ([array, lambda], context) => {
-        _assert1ParamsLength(lambda, 1);
-        return vNumber(array.findIndex(_binaryLambdaCheck1(lambda, context)));
-      }),
+      makeDefinition(
+        [frArray(frAny), frLambdaN(1)],
+        ([array, lambda], context) =>
+          vNumber(array.findIndex(_binaryLambdaCheck1(lambda, context)))
+      ),
     ],
   }),
   maker.make({
@@ -338,9 +421,9 @@ export const library = [
     requiresNamespace: true,
     examples: [`List.unzip([[1,2], [2,3], [4,5]])`],
     definitions: [
-      makeDefinition([frArray(frTuple2(frAny, frAny))], ([array]) => {
-        return vArray(unzip(array as [Value, Value][]).map((r) => vArray(r)));
-      }),
+      makeDefinition([frArray(frTuple2(frAny, frAny))], ([array]) =>
+        vArray(unzip(array as [Value, Value][]).map((r) => vArray(r)))
+      ),
     ],
   }),
 ];
