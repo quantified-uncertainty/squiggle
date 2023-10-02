@@ -14,8 +14,8 @@
     "@changesets/types": "^5.2.1",
     "@types/lodash": "^4.14.199",
     "@types/node": "^20.8.0",
-    "tsx": "^3.12.7",
-    "typescript": "^5.1.6"
+    "tsx": "^3.13.0",
+    "typescript": "^5.2.2"
   },
   "dependencies": {
     "lodash": "^4.17.21",
@@ -23,6 +23,6 @@
     "remark-parse": "^10.0.2",
     "remark-stringify": "^10.0.3",
     "unified": "^11.0.3",
-    "zod": "^3.21.4"
+    "zod": "^3.22.2"
   }
 }
