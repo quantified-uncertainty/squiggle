@@ -149,8 +149,8 @@ importers:
         specifier: ^3.4.0
         version: 3.4.0
       '@lezer/generator':
-        specifier: ^1.4.2
-        version: 1.4.2
+        specifier: ^1.5.1
+        version: 1.5.1
       '@lezer/highlight':
         specifier: ^1.1.6
         version: 1.1.6
@@ -4600,8 +4600,8 @@ packages:
   /@lezer/common@1.0.4:
     resolution: {integrity: sha512-lZHlk8p67x4aIDtJl6UQrXSOP6oi7dQR3W/geFVrENdA1JDaAJWldnVqVjPMJupbTKbzDfFcePfKttqVidS/dg==}
 
-  /@lezer/generator@1.4.2:
-    resolution: {integrity: sha512-6fRwiGnx6Sv2I25YKeC5Mw9LtIA3Yq4FmVdRk0NP+M8tCsLUHSJd4KzrEzYqW3SKqOR/ZRlGiw+HAXMRygyCZA==}
+  /@lezer/generator@1.5.1:
+    resolution: {integrity: sha512-vodJv2JPwsFsiBBHE463yBhvUI9TmhIu5duF/8MH304xNS6FyWH/vTyG61pjhERm5f+VBP94co0eiN+afWcvXw==}
     hasBin: true
     dependencies:
       '@lezer/common': 1.0.4
