@@ -5,8 +5,9 @@ import { Button, Modal, TextTooltip } from "@quri/ui";
 
 import { SquiggleSnippetDraftDialog_Model$key } from "@/__generated__/SquiggleSnippetDraftDialog_Model.graphql";
 import { SquiggleSnippetFormShape } from "./EditSquiggleSnippetModel";
+import { useClientOnlyRender } from "@/hooks/useClientOnlyRender";
 
-type Draft = {
+export type Draft = {
   formState: SquiggleSnippetFormShape;
   version: string;
 };
@@ -85,6 +86,7 @@ export const SquiggleSnippetDraftDialog: FC<Props> = ({
   draftLocator,
   restore,
 }) => {
+  const isClient = useClientOnlyRender();
   const [draftProcessed, setDraftProcessed] = useState(
     () => !draftUtils.exists(draftLocator)
   );
@@ -107,7 +109,7 @@ export const SquiggleSnippetDraftDialog: FC<Props> = ({
     setDraftProcessed(true);
   };
 
-  return draftProcessed ? null : (
+  return draftProcessed || !isClient ? null : (
     <Modal close={skip}>
       <Modal.Header>Unsaved Draft</Modal.Header>
       <Modal.Body>You have an unsaved draft for this model.</Modal.Body>
