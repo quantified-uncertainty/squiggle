@@ -68,19 +68,3 @@ export function shuffle<T>(array: T[]): T[] {
   }
   return shuffledArray;
 }
-
-export function first<T>(arr: T[]): T | undefined {
-  if (!arr.length) {
-    return undefined;
-  } else {
-    return arr[0];
-  }
-}
-
-export function last<T>(arr: T[]): T | undefined {
-  if (!arr.length) {
-    return undefined;
-  } else {
-    return arr[arr.length - 1];
-  }
-}

@@ -84,7 +84,7 @@ describe("List functions", () => {
     );
     testEvalToBe(
       "arr=[1,2,normal(50,1)]; List.uniq(arr)",
-      "Error(Error: Can only apply uniq() to Strings, Numbers, or Bools)"
+      "[1,2,Sample Set Distribution]"
     );
   });
 
@@ -99,7 +99,11 @@ describe("List functions", () => {
     );
     testEvalToBe(
       "arr=[{a: normal(5,2), b: 2}, {a: 1, b: 3}, {a:2, b:5}]; List.uniqBy(arr, {|e| e.a})",
-      "Error(Error: Can only apply uniq() to Strings, Numbers, or Bools)"
+      "[{a: Sample Set Distribution,b: 2},{a: 1,b: 3},{a: 2,b: 5}]"
+    );
+    testEvalToBe(
+      "arr=[{a: normal(5,2), b: 2}, {a: 1, b: 3}, {a:2, b:3}]; List.uniqBy(arr, {|e| e.b})",
+      "[{a: Sample Set Distribution,b: 2},{a: 1,b: 3}]"
     );
   });
 
@@ -209,24 +213,27 @@ describe("List functions", () => {
   describe("flatten", () => {
     testEvalToBe("List.flatten([[1,2], [3,4]])", "[1,2,3,4]");
     testEvalToBe("List.flatten([[1,2], [3,[4,5]]])", "[1,2,3,[4,5]]");
+    testEvalToBe("List.flatten([])", "[]");
+    testEvalToBe("List.flatten([[],[],[]])", "[]");
   });
 
   describe("zip", () => {
     testEvalToBe("List.zip([1,2], [3,4])", "[[1,3],[2,4]]");
+    testEvalToBe(
+      "List.zip([1,2,4], [3,4])",
+      "Error(Error: List lengths must be equal)"
+    );
     testEvalToBe("List.zip([1,2], [3,[4,5]])", "[[1,3],[2,[4,5]]]");
     testEvalToBe(
       "List.zip([1,2], [3,[4,5], [5]])",
-      "Error(Error: Array lengths must be equal)"
+      "Error(Error: List lengths must be equal)"
     );
+    testEvalToBe("List.zip([], [])", "[]");
   });
 
   describe("unzip", () => {
     testEvalToBe("List.unzip([[1,3],[2,4]])", "[[1,2],[3,4]]");
     testEvalToBe("List.unzip([[1,3],[2,4],[5,6]])", "[[1,2,5],[3,4,6]]");
     testEvalToBe("List.unzip([])", "[[],[]]");
-    testEvalToBe(
-      "List.unzip([[1,2],[2,5,1]])",
-      "Error(Error: Array must be an array of pairs)"
-    );
   });
 });

@@ -83,15 +83,13 @@ class VArray extends BaseValue implements Indexable {
     return new VArray(shuffle(this.value));
   }
 
-  isEqual(other: VArray, compareValues: (a: Value, b: Value) => boolean) {
+  isEqual(other: VArray) {
     if (this.value.length !== other.value.length) {
       return false;
     }
 
     for (let i = 0; i < this.value.length; i++) {
-      if (!compareValues(this.value[i], other.value[i])) {
-        return false;
-      }
+      isEqual(this.value[i], other.value[i]);
     }
     return true;
   }
@@ -230,10 +228,7 @@ class VDict extends BaseValue implements Indexable {
     }
   }
 
-  isEqual(
-    other: VDict,
-    compareValues: (a: Value, b: Value) => boolean
-  ): boolean {
+  isEqual(other: VDict): boolean {
     if (this.value.size !== other.value.size) {
       return false;
     }
@@ -247,7 +242,7 @@ class VDict extends BaseValue implements Indexable {
       }
 
       // Compare the values associated with the key
-      if (!compareValues(valueA, valueB)) {
+      if (!isEqual(valueA, valueB)) {
         return false;
       }
     }
@@ -541,27 +536,16 @@ export function isEqual(a: Value, b: Value): boolean {
   }
   switch (a.type) {
     case "Bool":
-      return (a as VBool).isEqual(b as VBool);
     case "Number":
-      return (a as VNumber).isEqual(b as VNumber);
     case "String":
-      return (a as VString).isEqual(b as VString);
     case "Dist":
-      return (a as VDist).isEqual(b as VDist);
     case "Date":
-      return (a as VDate).isEqual(b as VDate);
     case "TimeDuration":
-      return (a as VTimeDuration).isEqual(b as VTimeDuration);
     case "Scale":
-      return scaleIsEqual((a as VScale).value, (b as VScale).value);
     case "Domain":
-      return (a as VDomain).isEqual(b as VDomain);
-    case "Array": {
-      return (a as VArray).isEqual(b as VArray, isEqual);
-    }
-    case "Dict": {
-      return (a as VDict).isEqual(b as VDict, isEqual);
-    }
+    case "Array":
+    case "Dict":
+      return a.isEqual(b as any);
     case "Void":
       return true;
   }
@@ -590,10 +574,8 @@ export function uniq(array: Value[]): Value[] {
 }
 
 export function uniqBy(array: Value[], fn: (e: Value) => Value): Value[] {
-  const uniqueArray: Value[] = [];
-
   const seen: Value[] = [];
-  const result: Value[] = [];
+  const uniqueArray: Value[] = [];
 
   for (const item of array) {
     const computed = fn(item);
@@ -604,7 +586,7 @@ export function uniqBy(array: Value[], fn: (e: Value) => Value): Value[] {
     }
     if (!seen.some((existingItem) => isEqual(existingItem, computed))) {
       seen.push(computed);
-      result.push(item);
+      uniqueArray.push(item);
     }
   }
 
