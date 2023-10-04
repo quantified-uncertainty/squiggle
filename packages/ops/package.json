@@ -23,6 +23,6 @@
     "remark-parse": "^10.0.2",
     "remark-stringify": "^10.0.3",
     "unified": "^11.0.3",
-    "zod": "^3.22.2"
+    "zod": "^3.22.3"
   }
 }

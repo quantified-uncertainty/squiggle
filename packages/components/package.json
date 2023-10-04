@@ -39,7 +39,7 @@
     "react-markdown": "^8.0.7",
     "react-resizable": "^3.0.5",
     "vscode-uri": "^3.0.7",
-    "zod": "^3.22.2"
+    "zod": "^3.22.3"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
