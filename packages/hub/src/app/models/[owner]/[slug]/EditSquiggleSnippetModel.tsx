@@ -1,4 +1,4 @@
-import { FC, useMemo, useState } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import { FormProvider, useFieldArray } from "react-hook-form";
 import { graphql, useFragment } from "react-relay";
 
@@ -9,6 +9,7 @@ import {
   SquiggleVersionShower,
   VersionedSquigglePlayground,
   type SquiggleVersion,
+  checkSquiggleVersion,
 } from "@quri/versioned-playground";
 
 import { EditSquiggleSnippetModel$key } from "@/__generated__/EditSquiggleSnippetModel.graphql";
@@ -20,8 +21,14 @@ import { EditModelExports } from "@/components/exports/EditModelExports";
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
 import { useMutationForm } from "@/hooks/useMutationForm";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
+import {
+  Draft,
+  SquiggleSnippetDraftDialog,
+  draftUtils,
+  useDraftLocator,
+} from "./SquiggleSnippetDraftDialog";
 
-type FormShape = {
+export type SquiggleSnippetFormShape = {
   code: string;
   relativeValuesExports: RelativeValuesExportInput[];
 };
@@ -40,6 +47,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
         slug
         isEditable
         ...EditModelExports_Model
+        ...SquiggleSnippetDraftDialog_Model
         owner {
           slug
         }
@@ -76,7 +84,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
     "SquiggleSnippet"
   );
 
-  const initialFormValues: FormShape = useMemo(() => {
+  const initialFormValues: SquiggleSnippetFormShape = useMemo(() => {
     return {
       code: content.code,
       relativeValuesExports: revision.relativeValuesExports.map((item) => ({
@@ -90,7 +98,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
   }, [content, revision.relativeValuesExports]);
 
   const { form, onSubmit, inFlight } = useMutationForm<
-    FormShape,
+    SquiggleSnippetFormShape,
     EditSquiggleSnippetModelMutation,
     "UpdateSquiggleSnippetResult"
   >({
@@ -125,6 +133,9 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
       },
     }),
     confirmation: "Saved",
+    onCompleted() {
+      draftUtils.discard(draftLocator);
+    },
   });
 
   // could version picker be part of the form?
@@ -139,17 +150,41 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
     control: form.control,
   });
 
+  const draftLocator = useDraftLocator(model);
+
   const onCodeChange = (code: string) => {
     form.setValue("code", code);
+    if (model.isEditable) {
+      draftUtils.save(draftLocator, { formState: form.getValues(), version });
+    }
   };
 
   // We don't want to control SquigglePlayground, it's uncontrolled by design.
-  // Instead, we reset the `defaultCode` that we pass to it when version is changed.
+  // Instead, we reset the `defaultCode` that we pass to it when version is changed or draft is restored.
   const [defaultCode, setDefaultCode] = useState(content.code);
+  // Used for forcefully resetting the playground component.
+  const [playgroundKey, setPlaygroundKey] = useState(0);
+  // Force playground re-render. Cursor position and any other state will be lost.
+  const resetPlayground = () => {
+    setDefaultCode(form.getValues("code"));
+    setPlaygroundKey((key) => key + 1);
+  };
 
   const handleVersionChange = (newVersion: SquiggleVersion) => {
+    if (newVersion === version) {
+      return;
+    }
     setVersion(newVersion);
-    setDefaultCode(form.getValues("code"));
+    resetPlayground();
+  };
+
+  const restoreDraft = (draft: Draft) => {
+    form.reset(draft.formState);
+    resetPlayground();
+
+    if (checkSquiggleVersion(draft.version) && draft.version !== version) {
+      handleVersionChange(draft.version);
+    }
   };
 
   const { height, ref } = useAvailableHeight();
@@ -158,7 +193,12 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
     <FormProvider {...form}>
       <form onSubmit={onSubmit}>
         <div ref={ref}>
+          <SquiggleSnippetDraftDialog
+            draftLocator={draftLocator}
+            restore={restoreDraft}
+          />
           <VersionedSquigglePlayground
+            key={playgroundKey}
             version={version}
             height={height ?? "100vh"}
             onCodeChange={onCodeChange}
