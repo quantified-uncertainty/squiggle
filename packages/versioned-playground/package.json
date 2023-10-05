@@ -1,0 +1,42 @@
+{
+  "name": "@quri/versioned-playground",
+  "private": true,
+  "scripts": {
+    "build:ts": "tsc -b",
+    "build": "pnpm run build:ts",
+    "lint": "pnpm lint:prettier && pnpm eslint",
+    "lint:prettier": "prettier --check .",
+    "eslint": "eslint --ignore-path .gitignore .",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "@quri/squiggle-components": "workspace:*",
+    "@quri/ui": "workspace:*",
+    "squiggle-components-0.8.5": "npm:@quri/squiggle-components@0.8.5"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.24",
+    "@typescript-eslint/eslint-plugin": "^6.7.4",
+    "@typescript-eslint/parser": "^6.7.4",
+    "eslint": "^8.50.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tailwindcss": "^3.3.3",
+    "typescript": "^5.2.2"
+  },
+  "peerDependencies": {
+    "react": "^18",
+    "react-dom": "^18"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    }
+  },
+  "module": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts"
+}

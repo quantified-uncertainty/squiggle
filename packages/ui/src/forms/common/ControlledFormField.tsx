@@ -37,6 +37,7 @@ export function ControlledFormField<
   label,
   description,
   inlineLabel,
+  standaloneLabel,
   children,
 }: ControlledFormFieldProps<TValues, TValueType, TName>) {
   return (
@@ -44,6 +45,7 @@ export function ControlledFormField<
       label={label}
       description={description}
       inlineLabel={inlineLabel}
+      standaloneLabel={standaloneLabel}
     >
       <ControlledFormInput name={name} rules={rules}>
         {children}

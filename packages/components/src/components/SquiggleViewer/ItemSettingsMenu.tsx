@@ -14,8 +14,9 @@ import {
 import { PlaygroundContext } from "../SquigglePlayground/index.js";
 import {
   ViewerContext,
-  useSetSettings,
+  useSetLocalItemState,
   useViewerContext,
+  useResetStateSettings,
 } from "./ViewerProvider.js";
 import { pathAsString } from "./utils.js";
 
@@ -36,8 +37,8 @@ const ItemSettingsModal: React.FC<
   close,
   resetScroll,
 }) => {
-  const setSettings = useSetSettings();
-  const { getSettings, getMergedSettings } = useViewerContext();
+  const setLocalItemState = useSetLocalItemState();
+  const { getLocalItemState, getMergedSettings } = useViewerContext();
 
   const { path } = value.context;
 
@@ -51,16 +52,16 @@ const ItemSettingsModal: React.FC<
 
   useEffect(() => {
     const submit = form.handleSubmit((data) => {
-      setSettings(path, {
+      setLocalItemState(path, {
         collapsed: false,
-        ...data,
+        settings: data,
       });
       onChange();
     });
 
     const subscription = form.watch(() => submit());
     return () => subscription.unsubscribe();
-  }, [getSettings, setSettings, onChange, path, form]);
+  }, [getLocalItemState, setLocalItemState, onChange, path, form]);
 
   const { getLeftPanelElement } = useContext(PlaygroundContext);
 
@@ -98,8 +99,8 @@ const ItemSettingsModal: React.FC<
 
 export const ItemSettingsMenu: React.FC<Props> = (props) => {
   const [isOpen, setIsOpen] = useState(false);
-  const setSettings = useSetSettings();
-  const { localSettingsEnabled, getSettings, dispatch } =
+  const resetStateSettings = useResetStateSettings();
+  const { localSettingsEnabled, getLocalItemState, dispatch } =
     useContext(ViewerContext);
 
   const ref = useRef<HTMLDivElement | null>(null);
@@ -110,7 +111,7 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
 
   const { path } = props.value.context;
 
-  const settings = getSettings({ path });
+  const localState = getLocalItemState({ path });
 
   const resetScroll = () => {
     dispatch({
@@ -127,10 +128,10 @@ export const ItemSettingsMenu: React.FC<Props> = (props) => {
           onClick={() => setIsOpen(!isOpen)}
         />
       </TextTooltip>
-      {settings.distributionChartSettings ? (
+      {localState.settings.distributionChartSettings ? (
         <button
           onClick={() => {
-            setSettings(path, { collapsed: settings.collapsed });
+            resetStateSettings(path, localState);
             props.onChange();
           }}
           className="text-xs px-1 py-0.5 rounded bg-stone-200 hover:bg-stone-400"

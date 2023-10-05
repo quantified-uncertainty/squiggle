@@ -72,6 +72,16 @@ type Group implements Node & Owner {
   updatedAtTimestamp: Float!
 }
 
+type GroupConnection {
+  edges: [GroupEdge!]!
+  pageInfo: PageInfo!
+}
+
+type GroupEdge {
+  cursor: String!
+  node: Group!
+}
+
 interface GroupInvite {
   group: Group!
   id: ID!
@@ -140,6 +150,7 @@ type ModelEdge {
 }
 
 type ModelRevision implements Node {
+  author: User
   content: ModelContent!
   createdAtTimestamp: Float!
   forRelativeValues(input: ModelRevisionForRelativeValuesInput): RelativeValuesExport
@@ -243,6 +254,7 @@ input MutationCreateSquiggleSnippetModelInput {
   """Defaults to false"""
   isPrivate: Boolean
   slug: String!
+  version: String!
 }
 
 union MutationCreateSquiggleSnippetModelResult = BaseError | CreateSquiggleSnippetModelResult | ValidationError
@@ -336,8 +348,7 @@ input MutationUpdateRelativeValuesDefinitionInput {
 union MutationUpdateRelativeValuesDefinitionResult = BaseError | UpdateRelativeValuesDefinitionResult
 
 input MutationUpdateSquiggleSnippetModelInput {
-  code: String @deprecated(reason: "Use content arg instead")
-  content: SquiggleSnippetContentInput
+  content: SquiggleSnippetContentInput!
   owner: String!
   relativeValuesExports: [RelativeValuesExportInput!]
   slug: String!
@@ -368,7 +379,7 @@ type PageInfo {
 type Query {
   globalStatistics: GlobalStatistics!
   group(slug: String!): QueryGroupResult!
-  groups(after: String, before: String, first: Int, input: GroupsQueryInput, last: Int): QueryGroupsConnection!
+  groups(after: String, before: String, first: Int, input: GroupsQueryInput, last: Int): GroupConnection!
   me: Me!
   model(input: QueryModelInput!): QueryModelResult!
   models(after: String, before: String, first: Int, last: Int): ModelConnection!
@@ -382,16 +393,6 @@ type Query {
 }
 
 union QueryGroupResult = BaseError | Group | NotFoundError
-
-type QueryGroupsConnection {
-  edges: [QueryGroupsConnectionEdge!]!
-  pageInfo: PageInfo!
-}
-
-type QueryGroupsConnectionEdge {
-  cursor: String!
-  node: Group!
-}
 
 input QueryModelInput {
   owner: String!
@@ -523,10 +524,12 @@ interface SquiggleOutput {
 type SquiggleSnippet implements Node {
   code: String!
   id: ID!
+  version: String!
 }
 
 input SquiggleSnippetContentInput {
   code: String!
+  version: String!
 }
 
 type UpdateGroupInviteRoleResult {
@@ -554,6 +557,7 @@ type UpdateSquiggleSnippetResult {
 }
 
 type User implements Node & Owner {
+  groups(after: String, before: String, first: Int, last: Int): GroupConnection!
   id: ID!
   models(after: String, before: String, first: Int, last: Int): ModelConnection!
   relativeValuesDefinitions(after: String, before: String, first: Int, last: Int): RelativeValuesDefinitionConnection!

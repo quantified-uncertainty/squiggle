@@ -11,7 +11,7 @@ type Props = {
 };
 
 export const FallbackModelLayout: FC<Props> = ({ username, slug }) => {
-  const { variableName } = useParams();
+  const { variableName } = useParams<{ variableName: string }>();
 
   return (
     <EntityLayout

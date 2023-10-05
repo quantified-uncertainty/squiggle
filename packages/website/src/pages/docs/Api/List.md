@@ -107,9 +107,7 @@ See [Rescript implementation](https://rescript-lang.org/docs/manual/latest/api/b
 ### filter
 
 ```
-
 filter: (list<'a>, 'a => bool) => list<'a>
-
 ```
 
 See [Rescript implementation of keep](https://rescript-lang.org/docs/manual/latest/api/belt/array#keep), which is functionally equivalent.
@@ -117,9 +115,7 @@ See [Rescript implementation of keep](https://rescript-lang.org/docs/manual/late
 ### reduce
 
 ```
-
 reduce: (list<'b>, 'a, ('a, 'b) => 'a) => 'a
-
 ```
 
 `reduce(arr, init, f)`

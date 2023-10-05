@@ -109,8 +109,9 @@ export function createSquigglePrinter(
                   : "",
               ])
             ),
+            node.statements.length &&
             ["LetStatement", "DefunStatement"].includes(
-              node.statements.at(-1)?.type ?? ""
+              node.statements[node.statements.length - 1].type
             )
               ? hardline // new line if final expression is a statement
               : "",
@@ -306,7 +307,7 @@ export function createSquigglePrinter(
             "}",
           ]);
         case "String":
-          return [JSON.stringify(node.value)];
+          return [JSON.stringify(node.value).replaceAll("\\n", "\n")];
         case "Ternary":
           return [
             node.kind === "C" ? [] : "if ",

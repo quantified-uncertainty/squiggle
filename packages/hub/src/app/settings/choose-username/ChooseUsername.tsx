@@ -2,68 +2,61 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider } from "react-hook-form";
 import { graphql } from "relay-runtime";
 
-import { Button, useToast } from "@quri/ui";
+import { Button } from "@quri/ui";
 
 import { SlugFormField } from "@/components/ui/SlugFormField";
-import { useAsyncMutation } from "@/hooks/useAsyncMutation";
+import { useMutationForm } from "@/hooks/useMutationForm";
 import { ChooseUsernameMutation } from "@gen/ChooseUsernameMutation.graphql";
 
-const Mutation = graphql`
-  mutation ChooseUsernameMutation($username: String!) {
-    result: setUsername(username: $username) {
-      __typename
-      ... on BaseError {
-        message
-      }
-      ... on Me {
-        email
-      }
-    }
-  }
-`;
-
 export const ChooseUsername: FC = () => {
-  const toast = useToast();
+  const { data: session, update: updateSession } = useSession({
+    required: true,
+  });
+
+  const router = useRouter();
+  if (session?.user.username) {
+    router.replace("/");
+  }
 
   type FormShape = {
     username: string;
   };
 
-  const form = useForm<FormShape>({
+  const { form, onSubmit, inFlight } = useMutationForm<
+    FormShape,
+    ChooseUsernameMutation,
+    "Me"
+  >({
     mode: "onChange",
-  });
-
-  const router = useRouter();
-
-  const { data: session, update: updateSession } = useSession({
-    required: true,
-  });
-  if (session?.user.username) {
-    router.replace("/");
-  }
-
-  const [mutation, inFlight] = useAsyncMutation<ChooseUsernameMutation, "Me">({
-    mutation: Mutation,
+    mutation: graphql`
+      mutation ChooseUsernameMutation($username: String!) {
+        result: setUsername(username: $username) {
+          __typename
+          ... on BaseError {
+            message
+          }
+          ... on Me {
+            email
+          }
+        }
+      }
+    `,
     expectedTypename: "Me",
-  });
-
-  const save = form.handleSubmit(async (data) => {
-    await mutation({
-      variables: { username: data.username },
-      onCompleted() {
-        updateSession();
-        router.replace("/");
-      },
-    });
+    formDataToVariables: (data) => ({ username: data.username }),
+    onCompleted: () => {
+      updateSession();
+      router.replace("/");
+    },
+    blockOnSuccess: true,
   });
 
   const disabled = inFlight || !form.formState.isValid;
 
   return (
-    <form onSubmit={save}>
+    <form onSubmit={onSubmit}>
       <FormProvider {...form}>
         <div className="flex flex-col items-center mt-20">
           <div className="space-y-2">
@@ -74,7 +67,7 @@ export const ChooseUsername: FC = () => {
                 label="Pick a username"
                 size="small"
               />
-              <Button onClick={save} disabled={disabled} theme="primary">
+              <Button onClick={onSubmit} disabled={disabled} theme="primary">
                 Save
               </Button>
             </div>

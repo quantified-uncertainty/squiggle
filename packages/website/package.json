@@ -13,29 +13,31 @@
   "dependencies": {
     "@quri/squiggle-components": "workspace:*",
     "@quri/ui": "workspace:*",
+    "@quri/versioned-playground": "workspace:*",
+    "@tailwindcss/typography": "^0.5.10",
     "base64-js": "^1.5.1",
     "clsx": "^2.0.0",
-    "next": "^13.4.9",
+    "next": "^13.5.2",
     "nextra": "^2.10.0",
     "nextra-theme-docs": "^2.10.0",
     "pako": "^2.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-icons": "^4.10.1",
-    "shiki": "^0.14.3"
+    "react-icons": "^4.11.0",
+    "shiki": "^0.14.4"
   },
   "devDependencies": {
     "@quri/squiggle-textmate-grammar": "workspace:*",
     "@tailwindcss/forms": "^0.5.6",
-    "@types/pako": "^2.0.0",
-    "@types/react": "^18.2.18",
-    "autoprefixer": "^10.4.14",
-    "eslint": "^8.46.0",
-    "eslint-config-next": "^13.4.12",
-    "glob": "^10.3.3",
-    "postcss": "^8.4.24",
+    "@types/pako": "^2.0.1",
+    "@types/react": "^18.2.24",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.50.0",
+    "eslint-config-next": "^13.5.3",
+    "glob": "^10.3.10",
+    "postcss": "^8.4.31",
     "prettier": "^3.0.3",
-    "tailwindcss": "^3.3.2",
-    "typescript": "^5.1.6"
+    "tailwindcss": "^3.3.3",
+    "typescript": "^5.2.2"
   }
 }

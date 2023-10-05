@@ -239,3 +239,29 @@ export const Failure: Story = {
     height: 800,
   },
 };
+
+export const Calculator: Story = {
+  name: "Calculator",
+  args: {
+    defaultCode: `f(a, b, c) = [a + b, a, c]
+
+a = "## My favorite calculator\nA longer description of the calculator goes here...\n"
+
+Calculator.make(
+  {
+    fn: f,
+    description: a,
+    fields: [
+      {
+        name: "Variable 1",
+        default: "1",
+        description: "This is a short description of the first variable input",
+      },
+      { name: "Variable2", default: "2 to 40" },
+      { name: "Some array", default: "[3,3,5,2,2]" },
+    ],
+  }
+)  `,
+    height: 800,
+  },
+};

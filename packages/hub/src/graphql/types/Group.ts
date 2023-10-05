@@ -11,6 +11,7 @@ import {
 } from "./Model";
 import { Owner } from "./Owner";
 import { getSelf, isSignedIn } from "./User";
+import { prismaConnectionHelpers } from "@pothos/plugin-prisma";
 
 export const MembershipRoleType = builder.enumType(MembershipRole, {
   name: "MembershipRole",
@@ -223,3 +224,21 @@ export const Group = builder.prismaNode("Group", {
     ),
   }),
 });
+
+export const GroupConnection = builder.connectionObject({
+  type: Group,
+  name: "GroupConnection",
+});
+
+// useful when we want to expose `groups` field on a `User`, instead of `memberships`
+export const groupFromMembershipConnectionHelpers = prismaConnectionHelpers(
+  builder,
+  "UserGroupMembership",
+  {
+    cursor: "id",
+    select: (nodeSelection) => ({
+      group: nodeSelection(),
+    }),
+    resolveNode: (node) => node.group,
+  }
+);

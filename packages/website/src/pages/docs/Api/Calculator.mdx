@@ -1,0 +1,46 @@
+---
+description: The Calculator module helps you create custom calculators
+---
+
+import { SquiggleEditor } from "@quri/squiggle-components";
+
+# Calculator
+
+The Calculator module allows you to make custom calculators for functions. This is a form that's tied to a specific Squiggle function, where the inputs to the form are passed to that function, and the output of the function gets shown on the bottom.
+
+Calculators can be useful for debugging functions or to present functions to end users.
+
+### Calculator.make
+
+```
+Calculator.make: ({
+  fn: ...arguments => any,
+  description: string,
+  fields: list<{
+    name: string,
+    default?: string,
+    description?: string
+  }>
+}) => calculator
+```
+
+``Calculator.make`` takes in a function, a description, and a list of fields. The function should take in the same number of arguments as the number of fields, and the arguments should be of the same type as the default value of the field.
+
+Examples:
+
+<SquiggleEditor
+  defaultCode={`Calculator.make(
+  {
+    fn: {|a, b|a + b},
+    description: "### Sum()  \nThis takes in two arguments, and outputs the sum of those two arguments.",
+    fields: [
+      {
+        name: "First Param",
+        default: "10 to 11",
+        description: "Must be a number or distribution",
+      },
+      { name: "Second Param", default: "3" },
+    ],
+  }
+)`}
+/>

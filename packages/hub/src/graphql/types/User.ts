@@ -11,6 +11,7 @@ import {
   relativeValuesDefinitionConnectionHelpers,
 } from "./RelativeValuesDefinition";
 import { prisma } from "@/prisma";
+import { GroupConnection, groupFromMembershipConnectionHelpers } from "./Group";
 
 export function isSignedIn(
   session: Session | null
@@ -94,6 +95,26 @@ export const User = builder.prismaNode("User", {
           ),
       },
       RelativeValuesDefinitionConnection
+    ),
+    groups: t.connection(
+      {
+        type: groupFromMembershipConnectionHelpers.ref,
+
+        select: (args, ctx, nestedSelection) => ({
+          memberships: groupFromMembershipConnectionHelpers.getQuery(
+            args,
+            ctx,
+            nestedSelection
+          ),
+        }),
+        resolve: (user, args, ctx) =>
+          groupFromMembershipConnectionHelpers.resolve(
+            user.memberships,
+            args,
+            ctx
+          ),
+      },
+      GroupConnection
     ),
   }),
 });

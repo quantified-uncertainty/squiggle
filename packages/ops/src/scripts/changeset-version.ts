@@ -2,23 +2,21 @@ import { exec as originalExec } from "node:child_process";
 import { readFile, writeFile } from "node:fs/promises";
 import util from "node:util";
 
+import { toString as mdastToString } from "mdast-util-to-string";
 import remarkParse from "remark-parse";
 import { type Root } from "remark-parse/lib/index.js";
 import remarkStringify from "remark-stringify";
 import { unified } from "unified";
-import { toString as mdastToString } from "mdast-util-to-string";
+
+import {
+  PRIMARY_SQUIGGLE_PACKAGE_DIRS,
+  VSCODE_EXTENSION_URL,
+  VSCODE_PACKAGE_NAME,
+  WEBSITE_CHANGELOG_ROOT,
+} from "../constants.js";
+import { PackageInfo, getPackageInfo } from "../lib.js";
 
 const exec = util.promisify(originalExec);
-
-const WEBSITE_CHANGELOG_ROOT = "packages/website/src/pages/docs/Changelog";
-
-// versions of all these packages should be synced thanks to `fixed` field in `.changeset/config.json`
-const WEBSITE_CHANGELOG_PACKAGES = [
-  "@quri/squiggle-lang",
-  "@quri/squiggle-components",
-  "@quri/prettier-plugin-squiggle",
-  "vscode-squiggle",
-];
 
 async function getChangedPackages() {
   const { stdout } = await exec("git status -s");
@@ -76,18 +74,6 @@ function getChangelogEntry(changelog: string, version: string) {
   };
 }
 
-type PackageInfo = {
-  version: string;
-  name: string;
-};
-
-async function getPackageInfo(packageDir: string): Promise<PackageInfo> {
-  const packageJson = JSON.parse(
-    await readFile(`${packageDir}/package.json`, "utf-8")
-  );
-  return { version: packageJson.version, name: packageJson.name }; // TODO: zod
-}
-
 type PackageChangelog = {
   packageDir: string;
   packageInfo: PackageInfo;
@@ -111,15 +97,17 @@ function combineChangelogs(changelogs: PackageChangelog[]): {
 
   let content = `## ${version}\n\n`;
 
-  for (const packageName of WEBSITE_CHANGELOG_PACKAGES) {
+  for (const packageDir of PRIMARY_SQUIGGLE_PACKAGE_DIRS) {
     const changelog = changelogs.find(
-      (changelog) => changelog.packageInfo.name === packageName
+      (changelog) => changelog.packageInfo.name === packageDir
     );
     if (!changelog) continue;
 
+    const packageName = changelog.packageInfo.name;
+
     const link =
-      packageName === "vscode-squiggle"
-        ? "https://marketplace.visualstudio.com/items?itemName=QURI.vscode-squiggle"
+      packageName === VSCODE_PACKAGE_NAME
+        ? VSCODE_EXTENSION_URL
         : `https://www.npmjs.com/package/${packageName}`;
 
     content += `### [${packageName}](${link})\n\n`;
@@ -153,9 +141,12 @@ async function generateWebsiteChangelog() {
 
   for (const packageDir of packageDirs) {
     const changelog = await generatePackageChanges(packageDir);
-    if (WEBSITE_CHANGELOG_PACKAGES.includes(changelog.packageInfo.name)) {
+    if (PRIMARY_SQUIGGLE_PACKAGE_DIRS.includes(packageDir)) {
       allChangelogs.push(changelog);
     }
+  }
+  if (!allChangelogs.length) {
+    return;
   }
   const fullChangelog = combineChangelogs(allChangelogs);
 

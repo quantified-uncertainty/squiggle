@@ -59,6 +59,12 @@ Example (this is a simplified version of `<TextFormField>`):
 </FormField>
 ```
 
+Field components take the following arguments:
+
+- `name`, `label`, `description` — same as for specific form field components.
+- `inlineLabel` — boolean flag, if set, custom content is rendered first, and label is rendered after it in the same row.
+- `standaloneLabel` — boolean flag; if set, label won't wrap children and clickable area will be reduced. This is useful for some custom fields where outer label leads to too large clickable area.
+
 # Generic input components
 
 Third, there are `<FormInput>` and `<ControlledFormInput>`. These allow you to render an input with its React Hook Form error message, while doing a custom layout.

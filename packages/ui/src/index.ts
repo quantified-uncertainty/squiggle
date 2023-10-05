@@ -4,8 +4,10 @@ export { StyledTab } from "./components/StyledTab.js";
 
 export { DropdownMenu } from "./components/Dropdown/DropdownMenu.js";
 export { DropdownMenuActionItem } from "./components/Dropdown/DropdownMenuActionItem.js";
-export { ActionItemInternal } from "./components/Dropdown/DropdownMenuActionItemInternal.js";
+export { DropdownMenuLinkItem } from "./components/Dropdown/DropdownMenuLinkItem.js";
+export { DropdownMenuItemLayout } from "./components/Dropdown/DropdownMenuItemLayout.js";
 export { DropdownMenuAsyncActionItem } from "./components/Dropdown/DropdownMenuAsyncActionItem.js";
+export { DropdownMenuModalActionItem } from "./components/Dropdown/DropdownMenuModalActionItem.js";
 export { DropdownMenuHeader } from "./components/Dropdown/DropdownMenuHeader.js";
 export { DropdownMenuSeparator } from "./components/Dropdown/DropdownMenuSeparator.js";
 export { Dropdown } from "./components/Dropdown/index.js";
@@ -77,6 +79,8 @@ export {
   TableCellsIcon,
   UserCircleIcon,
   UserIcon,
+  WrenchIcon,
+  HelpIcon,
 } from "./icons/HeroIcons.js";
 export type { IconProps } from "./icons/Icon.js";
 export { RefreshIcon } from "./icons/RefreshIcon.js";
@@ -84,6 +88,7 @@ export { SignOutIcon } from "./icons/SignOutIcon.js";
 export { TrashIcon } from "./icons/TrashIcon.js";
 export { TriangleIcon } from "./icons/TriangleIcon.js";
 export { XIcon } from "./icons/XIcon.js";
+export { PlusIcon } from "./icons/PlusIcon.js";
 
 export { WithToasts, useToast } from "./components/WithToasts/index.js";
 

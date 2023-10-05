@@ -15,11 +15,11 @@ import {
   useCollapseChildren,
   useFocus,
   useIsFocused,
-  useSetSettings,
+  useToggleCollapsed,
   useViewerContext,
 } from "./ViewerProvider.js";
 import {
-  LocalItemSettings,
+  LocalItemState,
   MergedItemSettings,
   getChildrenValues,
   pathToShortName,
@@ -56,10 +56,10 @@ export const VariableBox: FC<VariableBoxProps> = ({
   renderSettingsMenu,
   children,
 }) => {
-  const setSettings = useSetSettings();
+  const toggleCollapsed_ = useToggleCollapsed();
   const collapseChildren = useCollapseChildren();
   const focus = useFocus();
-  const { editor, getSettings, getMergedSettings, dispatch } =
+  const { editor, getLocalItemState, getMergedSettings, dispatch } =
     useViewerContext();
   const isFocused = useIsFocused(value.context.path);
   const { tag } = value;
@@ -77,8 +77,8 @@ export const VariableBox: FC<VariableBoxProps> = ({
 
   const isRoot = Boolean(path.isRoot());
 
-  // This doesn't just memoizes the detaults, but also affects children, in some cases.
-  const defaults: LocalItemSettings = useMemo(() => {
+  // This doesn't just memoizes the defaults, but also affects children, in some cases.
+  const defaults: LocalItemState = useMemo(() => {
     // TODO - value.size() would be faster.
     const childrenElements = getChildrenValues(value);
 
@@ -89,10 +89,11 @@ export const VariableBox: FC<VariableBoxProps> = ({
     }
     return {
       collapsed: !isRoot && childrenElements.length > 5,
+      settings: {},
     };
   }, [value, collapseChildren, isRoot]);
 
-  const settings = getSettings({ path, defaults });
+  const settings = getLocalItemState({ path, defaults });
 
   const getAdjustedMergedSettings = (path: SqValuePath) => {
     const mergedSettings = getMergedSettings({ path });
@@ -103,13 +104,9 @@ export const VariableBox: FC<VariableBoxProps> = ({
     };
   };
 
-  const setSettingsAndUpdate = (newSettings: LocalItemSettings) => {
-    setSettings(path, newSettings);
-    forceUpdate();
-  };
-
   const toggleCollapsed = () => {
-    setSettingsAndUpdate({ ...settings, collapsed: !settings.collapsed });
+    toggleCollapsed_(path);
+    forceUpdate();
   };
 
   const name = pathToShortName(path);

@@ -2,22 +2,27 @@
   "name": "@quri/ops",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "tsc",
-    "changeset-version": "pnpm run build && node ./dist/changeset-version.mjs"
+    "changeset-version": "node ./dist/scripts/changeset-version.js",
+    "publish-all": "node ./dist/scripts/publish-all.js",
+    "post-publish": "node ./dist/scripts/post-publish.js"
   },
   "devDependencies": {
     "@changesets/get-github-info": "^0.5.2",
     "@changesets/types": "^5.2.1",
-    "@types/node": "^20.4.7",
-    "tsx": "^3.12.7",
-    "typescript": "^5.1.6"
+    "@types/lodash": "^4.14.199",
+    "@types/node": "^20.8.0",
+    "tsx": "^3.13.0",
+    "typescript": "^5.2.2"
   },
   "dependencies": {
+    "lodash": "^4.17.21",
     "mdast-util-to-string": "^4.0.0",
     "remark-parse": "^10.0.2",
     "remark-stringify": "^10.0.3",
     "unified": "^11.0.3",
-    "zod": "^3.21.4"
+    "zod": "^3.22.2"
   }
 }

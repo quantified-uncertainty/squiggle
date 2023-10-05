@@ -12,6 +12,7 @@ todo.txt
 result
 shell.nix
 .turbo
+*.tsbuildinfo
 
 .pnp.*
 .yarn/*

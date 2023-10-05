@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    // build settings
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "es2022",
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "composite": true,
+    "outDir": "./dist",
+    "declarationMap": true,
+    "sourceMap": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    // type check settings
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true // default forced by Next.js, https://github.com/vercel/next.js/pull/51564
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}
