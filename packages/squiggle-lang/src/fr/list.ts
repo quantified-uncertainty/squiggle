@@ -101,7 +101,7 @@ const _assertValidArrayLength = (number: number) => {
 };
 const _assertUnemptyArray = (array: Value[]) => {
   if (array.length === 0) {
-    throw new REOther("Array must not be empty");
+    throw new REOther("List must not be empty");
   }
 };
 

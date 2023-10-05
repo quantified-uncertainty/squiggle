@@ -69,10 +69,12 @@ export const frLambda: FRType<Lambda> = {
 };
 export const frLambdaN = (paramLength: number): FRType<Lambda> => {
   return {
-    unpack: (v: Value) =>
-      v.type === "Lambda" && v.value.getParameterNames().length === paramLength
+    unpack: (v: Value) => {
+      return v.type === "Lambda" &&
+        v.value.getParameterNames().length === paramLength
         ? v.value
-        : undefined,
+        : undefined;
+    },
     pack: (v) => vLambda(v),
     getName: () => `lambda(${paramLength})`,
   };

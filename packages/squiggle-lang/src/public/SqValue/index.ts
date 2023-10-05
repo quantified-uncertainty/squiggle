@@ -61,6 +61,10 @@ export abstract class SqAbstractValue<Type extends string, JSType> {
     return this._value.toString();
   }
 
+  publicName() {
+    return this._value.publicName;
+  }
+
   abstract asJS(): JSType;
 }
 

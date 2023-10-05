@@ -30,18 +30,18 @@ describe("List functions", () => {
 
   describe("upTo", () => {
     testEvalToBe("List.upTo(1,3)", "[1,2,3]");
-    // TODO - test fractional values
+    testEvalToBe("List.upTo(1.5,3)", "Error(Error: upTo() requires integers)");
     // TODO - test low > high condition
   });
 
   describe("first", () => {
     testEvalToBe("List.first([3,5,8])", "3");
-    // TODO - test on empty arrays
+    testEvalToBe("List.first([])", "Error(Error: List must not be empty)");
   });
 
   describe("last", () => {
     testEvalToBe("List.last([3,5,8])", "8");
-    // TODO - test on empty arrays
+    testEvalToBe("List.last([])", "Error(Error: List must not be empty)");
   });
   describe("concat", () => {
     testEvalToBe("List.concat([1, 2, 3], [4, 5, 6])", "[1,2,3,4,5,6]");
@@ -112,6 +112,7 @@ describe("List functions", () => {
       "myadd(acc,x)=acc+x; arr=[1,2,3]; List.reduce(arr, 0, myadd)",
       "6"
     );
+    testEvalToBe("arr=[1,2,3]; List.reduce(arr, 0, add)", "6");
     testEvalToBe(
       "change(acc,x)=acc*x+x; arr=[1,2,3]; List.reduce(arr, 0, change)",
       "15"
