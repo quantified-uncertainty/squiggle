@@ -1,10 +1,14 @@
 import { BaseDist } from "../dist/BaseDist.js";
 import * as SampleSetDist from "../dist/SampleSetDist/index.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
+import {
+  FnDefinition,
+  makeDefinition,
+} from "../library/registry/fnDefinition.js";
 import {
   frArray,
   frDist,
   frLambda,
+  frLambdaN,
   frNumber,
 } from "../library/registry/frTypes.js";
 import {
@@ -48,23 +52,21 @@ const fromList = makeDefinition([frArray(frNumber)], ([numbers]) =>
   repackDistResult(SampleSetDist.SampleSetDist.make(numbers))
 );
 
-const fromFn = makeDefinition([frLambda], ([lambda], context) => {
-  const run = (fn: (i: number) => Value[]) =>
-    repackDistResult(
-      SampleSetDist.SampleSetDist.fromFn((index) => {
-        return doNumberLambdaCall(lambda, fn(index), context);
-      }, context.environment)
-    );
+const fromFn = (lambda: any, context: any, fn: (i: number) => Value[]) =>
+  repackDistResult(
+    SampleSetDist.SampleSetDist.fromFn((index) => {
+      return doNumberLambdaCall(lambda, fn(index), context);
+    }, context.environment)
+  );
 
-  const parameterLength = lambda.getParameterNames().length;
-  if (parameterLength === 0) {
-    return run((_index) => []);
-  } else if (parameterLength === 1) {
-    return run((index) => [vNumber(index)]);
-  } else {
-    throw new REOther("Expected lambda with 0 or 1 parameters");
-  }
-});
+const fromFnDefinitions: FnDefinition[] = [
+  makeDefinition([frLambdaN(0)], ([lambda], context) => {
+    return fromFn(lambda, context, () => []);
+  }),
+  makeDefinition([frLambdaN(1)], ([lambda], context) => {
+    return fromFn(lambda, context, (index) => [vNumber(index)]);
+  }),
+];
 
 const baseLibrary = [
   maker.make({
@@ -98,12 +100,12 @@ const baseLibrary = [
     name: "fromFn",
     examples: [`SampleSet.fromFn({|i| sample(normal(5,2))})`],
     output: "Dist",
-    definitions: [fromFn],
+    definitions: fromFnDefinitions,
   }),
   maker.make({
     name: "make",
     output: "Dist",
-    definitions: [fromDist, fromNumber, fromList, fromFn],
+    definitions: [fromDist, fromNumber, fromList, ...fromFnDefinitions],
   }),
   maker.make({
     name: "map",

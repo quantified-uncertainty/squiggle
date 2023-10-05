@@ -17,6 +17,8 @@ describe("List functions", () => {
     testEvalToBe("List.make(3, 'HI')", '["HI","HI","HI"]');
     testEvalToBe("List.make(3, {|e| e})", "[0,1,2]");
     testEvalToBe("List.make(3, {|| 1})", "[1,1,1]");
+    testEvalToBe("List.make(3, {|index| 1 + index})", "[2,3,4]");
+    testEvalToBe("List.make(3, Math.add)", "[2,3,4]");
     testEvalToBe(
       "List.make(3.5, 'HI')",
       "Error(Error: Number must be an integer)"
@@ -73,6 +75,7 @@ describe("List functions", () => {
 
     // two-arg callback
     testEvalToBe("[10,20,30] -> List.map({|x,i|x+i+1})", "[11,22,33]");
+    testEvalToBe("List.map([[1]], Number.sum)", "[1]");
   });
 
   describe("uniq", () => {
@@ -112,7 +115,7 @@ describe("List functions", () => {
       "myadd(acc,x)=acc+x; arr=[1,2,3]; List.reduce(arr, 0, myadd)",
       "6"
     );
-    testEvalToBe("arr=[1,2,3]; List.reduce(arr, 0, add)", "6");
+    testEvalToBe("List.reduce([1,2,3], 0, add)", "6", true);
     testEvalToBe(
       "change(acc,x)=acc*x+x; arr=[1,2,3]; List.reduce(arr, 0, change)",
       "15"

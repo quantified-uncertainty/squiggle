@@ -147,10 +147,9 @@ export const library: FRFunction[] = [
     examples: ["Dist.make(5)", "Dist.make(normal({p5: 4, p95: 10}))"],
     definitions: [
       makeDefinition([frDist], ([dist]) => vDist(dist)),
-      makeDefinition([frNumber], ([v]) => {
-        const result = SymbolicDist.PointMass.make(v);
-        return symDistResultToValue(result);
-      }),
+      makeDefinition([frNumber], ([v]) =>
+        symDistResultToValue(SymbolicDist.PointMass.make(v))
+      ),
     ],
   }),
   maker.make({

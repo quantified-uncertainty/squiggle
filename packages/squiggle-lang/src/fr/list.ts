@@ -158,7 +158,7 @@ export const library = [
     definitions: [
       makeDefinition([frNumber, frNumber], ([low, high]) => {
         if (!Number.isInteger(low) || !Number.isInteger(high)) {
-          throw new REOther("upTo() requires integers");
+          throw new REOther("Low and high values must both be integers");
         }
         return vArray(E_A_Floats.upTo(low, high).map(vNumber));
       }),
