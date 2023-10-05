@@ -562,6 +562,7 @@ export const valueTypeName = (v: Value) => {
   const names = {
     Array: "Array",
     Bool: "Boolean",
+    Calculator: "Calculator",
     Date: "Date",
     Dist: "Distribution",
     Lambda: "Function",
