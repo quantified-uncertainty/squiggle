@@ -10,6 +10,14 @@ Monte Carlo calculations typically result in sample set distributions.
 
 All regular distribution function work on sample set distributions. In addition, there are several functions that only work on sample set distributions.
 
+### make
+
+Calls the correct conversion constructor, based on the corresponding input type, to create a Sample Set distribution. 
+
+```
+SampleSet.make: (distribution|list<number>|(float) => number|number) => pointSetDist
+```
+
 ### fromDist
 
 ```
@@ -26,6 +34,10 @@ SampleSet.fromList: (list<number>) => sampleSet
 
 ```
 SampleSet.fromFn: ((float) => number) => sampleSet
+```
+
+```
+PointSet.fromNumber: (number) => sampleSet
 ```
 
 ### toList

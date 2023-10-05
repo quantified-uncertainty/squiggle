@@ -20,6 +20,7 @@ type Indexable = {
 
 abstract class BaseValue {
   abstract type: string;
+  abstract publicName: string;
 
   clone() {
     return Object.assign(Object.create(Object.getPrototypeOf(this)), this);
@@ -42,6 +43,7 @@ If you add a new value class, don't forget to add it to the "Value" union type b
 
 class VArray extends BaseValue implements Indexable {
   readonly type = "Array";
+  readonly publicName = "List";
 
   constructor(public value: Value[]) {
     super();
@@ -98,6 +100,7 @@ export const vArray = (v: Value[]) => new VArray(v);
 
 class VBool extends BaseValue {
   readonly type = "Bool";
+  readonly publicName = "Boolean";
 
   constructor(public value: boolean) {
     super();
@@ -113,6 +116,7 @@ export const vBool = (v: boolean) => new VBool(v);
 
 class VDate extends BaseValue {
   readonly type = "Date";
+  readonly publicName = "Date";
 
   constructor(public value: Date) {
     super();
@@ -128,6 +132,7 @@ export const vDate = (v: Date) => new VDate(v);
 
 class VDist extends BaseValue {
   readonly type = "Dist";
+  readonly publicName = "Distribution";
 
   constructor(public value: BaseDist) {
     super();
@@ -143,6 +148,7 @@ export const vDist = (v: BaseDist) => new VDist(v);
 
 class VLambda extends BaseValue implements Indexable {
   readonly type = "Lambda";
+  readonly publicName = "Function";
 
   constructor(public value: Lambda) {
     super();
@@ -172,6 +178,7 @@ export const vLambda = (v: Lambda) => new VLambda(v);
 
 class VNumber extends BaseValue {
   readonly type = "Number";
+  readonly publicName = "Number";
 
   constructor(public value: number) {
     super();
@@ -187,6 +194,7 @@ export const vNumber = (v: number) => new VNumber(v);
 
 class VString extends BaseValue {
   readonly type = "String";
+  readonly publicName = "String";
 
   constructor(public value: string) {
     super();
@@ -202,6 +210,7 @@ export const vString = (v: string) => new VString(v);
 
 class VDict extends BaseValue implements Indexable {
   readonly type = "Dict";
+  readonly publicName = "Dictionary";
 
   constructor(public value: ValueMap) {
     super();
@@ -254,6 +263,7 @@ export const vDict = (v: ValueMap) => new VDict(v);
 
 class VTimeDuration extends BaseValue {
   readonly type = "TimeDuration";
+  readonly publicName = "Time Duration";
 
   constructor(public value: number) {
     super();
@@ -322,6 +332,7 @@ export const SCALE_POWER_DEFAULT_CONSTANT = 0.1;
 
 class VScale extends BaseValue {
   readonly type = "Scale";
+  readonly publicName = "Scale";
 
   constructor(public value: Scale) {
     super();
@@ -399,6 +410,7 @@ export type TableChart = {
 };
 class VTableChart extends BaseValue {
   readonly type = "TableChart";
+  readonly publicName = "Table Chart";
 
   constructor(public value: TableChart) {
     super();
@@ -418,6 +430,7 @@ export type Calculator = {
 
 class VCalculator extends BaseValue {
   readonly type = "Calculator";
+  readonly publicName = "Calculator";
 
   private error: REOther | null = null;
 
@@ -459,6 +472,7 @@ export const vCalculator = (v: Calculator) => new VCalculator(v);
 
 class VPlot extends BaseValue implements Indexable {
   readonly type = "Plot";
+  readonly publicName = "Plot";
 
   constructor(public value: Plot) {
     super();
@@ -500,6 +514,7 @@ export const vPlot = (plot: Plot) => new VPlot(plot);
 
 export class VDomain extends BaseValue implements Indexable {
   readonly type = "Domain";
+  readonly publicName = "Domain";
 
   constructor(public value: Domain) {
     super();
@@ -531,6 +546,7 @@ export const vDomain = (domain: Domain) => new VDomain(domain);
 
 class VVoid extends BaseValue {
   readonly type = "Void";
+  readonly publicName = "Void";
 
   constructor() {
     super();
@@ -557,27 +573,6 @@ export type Value =
   | VScale
   | VDomain
   | VVoid;
-
-export const valueTypeName = (v: Value) => {
-  const names = {
-    Array: "Array",
-    Bool: "Boolean",
-    Calculator: "Calculator",
-    Date: "Date",
-    Dist: "Distribution",
-    Lambda: "Function",
-    Number: "Number",
-    String: "String",
-    Dict: "Dictionary",
-    TimeDuration: "Time Duration",
-    Plot: "Plot",
-    TableChart: "Table Chart",
-    Scale: "Scale",
-    Domain: "Domain",
-    Void: "Void",
-  } as const;
-  return names[v.type] || "Unknown";
-};
 
 export function isEqual(a: Value, b: Value): boolean {
   if (a.type !== b.type) {

@@ -7,13 +7,7 @@ import {
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import {
-  vArray,
-  vBool,
-  vString,
-  isEqual,
-  valueTypeName,
-} from "../value/index.js";
+import { vArray, vBool, vString, isEqual } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "", // no namespaced versions
@@ -89,7 +83,7 @@ export const library = [
     name: "typeOf",
     definitions: [
       makeDefinition([frAny], ([v]) => {
-        return vString(valueTypeName(v));
+        return vString(v.publicName);
       }),
     ],
   }),
@@ -103,14 +97,6 @@ export const library = [
       makeDefinition([frAny, frString], ([value, label]) => {
         console.log(`${label}: ${value.toString()}`);
         return value;
-      }),
-    ],
-  }),
-  maker.make({
-    name: "javascriptraise",
-    definitions: [
-      makeDefinition([frAny], ([msg]) => {
-        throw new Error(msg.toString());
       }),
     ],
   }),

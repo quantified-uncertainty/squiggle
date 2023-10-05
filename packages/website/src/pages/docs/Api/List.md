@@ -80,7 +80,7 @@ reverse: (list<'a>) => list<'a>
 
 ### uniq
 
-Filters the list for unique elements. Now only works on Strings, Numbers, and Booleans.
+Filters the list for unique elements. Now only works on some Squiggle types.
 
 ```
 List.uniq: (list<'a>) => list<'a>
@@ -88,6 +88,18 @@ List.uniq: (list<'a>) => list<'a>
 
 ```squiggle
 List.uniq(["foobar", "foobar", 1, 1, 2]) // ["foobar", 1, 2]
+```
+
+### uniqBy
+
+Filters the list for unique elements. Now only works on some Squiggle types.
+
+```
+List.uniq: (list<'a>, ('a) => 'b) => list<'a>
+```
+
+```squiggle
+List.uniqBy([{a: 3, b: 10}, {a:3, b:40}, {a:5, b:20}], {|e| e.a}) // [{a: 3, b: 10}, {a:5, b:20}]
 ```
 
 ### map
@@ -111,6 +123,48 @@ filter: (list<'a>, 'a => bool) => list<'a>
 ```
 
 See [Rescript implementation of keep](https://rescript-lang.org/docs/manual/latest/api/belt/array#keep), which is functionally equivalent.
+
+### every
+
+```
+every: (list<'a>, ('a) => bool) => list<'a>
+```
+
+### some
+
+```
+some: (list<'a>, ('a) => bool) => list<'a>
+```
+
+### find
+
+```
+find: (list<'a>, ('a) => bool) => 'a
+```
+
+### findIndex
+
+```
+findIndex: (list<'a>, ('a) => bool) => number
+```
+
+### shuffle
+
+```
+shuffle: (list<'a>) => list<'a>
+```
+
+### zip
+
+```
+zip: (list<'a>, list<'b>) => list<['a,'b]>
+```
+
+### unzip
+
+```
+unzip: (list<['a,'b]>) => list<'a>, list<'b>
+```
 
 ### reduce
 
