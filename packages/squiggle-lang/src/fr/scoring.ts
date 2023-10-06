@@ -1,7 +1,7 @@
 import { BaseDist } from "../dist/BaseDist.js";
 import * as distOperations from "../dist/distOperations/index.js";
 import { Env } from "../dist/env.js";
-import { REDistributionError, REOther } from "../errors/messages.js";
+import { REArgumentError, REDistributionError } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import { frDist, frDistOrNumber, frDict } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
@@ -82,7 +82,7 @@ export const library = [
               context.environment
             );
           } else {
-            throw new REOther("Impossible type");
+            throw new REArgumentError("Impossible type");
           }
         }
       ),
@@ -104,7 +104,7 @@ export const library = [
               context.environment
             );
           } else {
-            throw new REOther("Impossible type");
+            throw new REArgumentError("Impossible type");
           }
         }
       ),

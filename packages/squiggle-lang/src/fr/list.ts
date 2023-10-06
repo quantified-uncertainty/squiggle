@@ -1,4 +1,4 @@
-import { REOther } from "../errors/messages.js";
+import { REArgumentError, REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
 import {
@@ -79,7 +79,7 @@ export function _reduceWhile(
 
     const checkResult = condition.call([newAcc], context);
     if (checkResult.type !== "Bool") {
-      throw new REOther(
+      throw new REArgumentError(
         `Condition should return a boolean value, got: ${checkResult.type}`
       );
     }
@@ -94,14 +94,14 @@ export function _reduceWhile(
 
 const _assertValidArrayLength = (number: number) => {
   if (number < 0) {
-    throw new REOther("Expected non-negative number");
+    throw new REArgumentError("Expected non-negative number");
   } else if (!Number.isInteger(number)) {
-    throw new REOther("Number must be an integer");
+    throw new REArgumentError("Number must be an integer");
   }
 };
 const _assertUnemptyArray = (array: Value[]) => {
   if (array.length === 0) {
-    throw new REOther("List must not be empty");
+    throw new REArgumentError("List must not be empty");
   }
 };
 
@@ -158,7 +158,9 @@ export const library = [
     definitions: [
       makeDefinition([frNumber, frNumber], ([low, high]) => {
         if (!Number.isInteger(low) || !Number.isInteger(high)) {
-          throw new REOther("Low and high values must both be integers");
+          throw new REArgumentError(
+            "Low and high values must both be integers"
+          );
         }
         return vArray(E_A_Floats.upTo(low, high).map(vNumber));
       }),
@@ -410,7 +412,7 @@ export const library = [
     definitions: [
       makeDefinition([frArray(frAny), frArray(frAny)], ([array1, array2]) => {
         if (array1.length !== array2.length) {
-          throw new REOther("List lengths must be equal");
+          throw new REArgumentError("List lengths must be equal");
         }
         return vArray(zip(array1, array2).map((pair) => vArray(pair)));
       }),

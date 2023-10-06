@@ -1,4 +1,4 @@
-import { REOther } from "../errors/messages.js";
+import { REArgumentError } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import { frArray, frNumber, frDict } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
@@ -12,7 +12,7 @@ const maker = new FnFactory({
 });
 
 const throwEmptyList = (): never => {
-  throw new REOther("List is empty");
+  throw new REArgumentError("List is empty");
 };
 
 function makeNumberArrayToNumberDefinition(fn: (arr: number[]) => number) {

@@ -153,6 +153,16 @@ export class REJavaScriptExn extends ErrorMessage {
   }
 }
 
+export class REArgumentError extends ErrorMessage {
+  constructor(public msg: string) {
+    super(msg);
+  }
+
+  toString() {
+    return `Argument Error: ${this.message}`;
+  }
+}
+
 export class REOther extends ErrorMessage {
   constructor(public msg: string) {
     super(msg);

@@ -1,5 +1,5 @@
 import { PointMass } from "../dist/SymbolicDist.js";
-import { REOther } from "../errors/messages.js";
+import { REArgumentError } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
@@ -32,12 +32,12 @@ function createScale(scale: Scale | null, domain: VDomain | undefined): Scale {
 
   if (scale) {
     if (scale.min === undefined && scale.max !== undefined) {
-      throw new REOther(
+      throw new REArgumentError(
         "Scale max set without min. Must set either both or neither."
       );
     }
     if (scale.min !== undefined && scale.max === undefined) {
-      throw new REOther(
+      throw new REArgumentError(
         "Scale min set without max. Must set either both or neither."
       );
     }
@@ -71,7 +71,7 @@ function createScale(scale: Scale | null, domain: VDomain | undefined): Scale {
 function extractDomainFromOneArgFunction(fn: Lambda): VDomain | undefined {
   const parameters = fn.getParameters();
   if (parameters.length !== 1) {
-    throw new REOther(
+    throw new REArgumentError(
       `Plots only work with functions that have one parameter. This function has ${parameters.length} parameters.`
     );
   }
@@ -110,7 +110,7 @@ export const library = [
             if (typeof value === "number") {
               const deltaResult = PointMass.make(value);
               if (deltaResult.ok === false) {
-                throw new REOther(deltaResult.value);
+                throw new REArgumentError(deltaResult.value);
               } else {
                 distributions.push({ name, distribution: deltaResult.value });
               }

@@ -1,4 +1,4 @@
-import { REOther } from "../errors/messages.js";
+import { REArgumentError, REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
@@ -125,7 +125,7 @@ export const library = [
             if (mappedKey.type == "String") {
               mappedEntries.push([mappedKey.value, value]);
             } else {
-              throw new REOther("mapKeys: lambda must return a string");
+              throw new REArgumentError("mapKeys: lambda must return a string");
             }
           }
           return vDict(ImmutableMap(mappedEntries));
