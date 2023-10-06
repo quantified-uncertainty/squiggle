@@ -10,31 +10,24 @@ Squiggle lists are a lot like Python lists or Ruby arrays. They accept all types
 myList = [3, normal(5, 2), "random"]
 ```
 
+## List Creation
+
 ### make
 
 ```
 List.make: (number, 'a) => list<'a>
+List.make: (number, () => 'a) => list<'a>
+List.make: (number, (index: number) => 'a) => list<'a>
 ```
 
 Returns an array of size `n` filled with the value.
 
 ```squiggle
-List.make(4, 1) // creates the list [1, 1, 1, 1]
+List.make(4, 1) // [1, 1, 1, 1]
+List.make(3, {|index| index * 2}) // [2,4,6]
 ```
 
 See [Rescript implementation](https://rescript-lang.org/docs/manual/latest/api/belt/array#make)
-
-### toString
-
-```
-toString: (list<'a>) => string
-```
-
-### length
-
-```
-length: (list<'a>) => number
-```
 
 ### upTo
 
@@ -43,23 +36,62 @@ List.upTo: (low:number, high:number) => list<number>
 ```
 
 ```squiggle
-List.upTo(0, 5) // creates the list [0, 1, 2, 3, 4, 5]
+List.upTo(0, 5) // [0, 1, 2, 3, 4, 5]
 ```
 
 Syntax taken from [Ruby](https://apidock.com/ruby/v2_5_5/Integer/upto).
 
+
+## List Querying and Reading 
+
 ### first
 
 ```
-first: (list<'a>) => 'a
+List.first: (list<'a>) => 'a
 ```
 
 ### last
 
 ```
-last: (list<'a>) => 'a
+List.last: (list<'a>) => 'a
 ```
 
+### length
+
+```
+List.length: (list<'a>) => number
+```
+
+### find
+
+Returns an error if there is no value found.
+```
+List.find: (list<'a>, ('a) => bool) => 'a
+```
+
+### findIndex
+
+Returns `-1` if there is no value found.
+
+```
+List.findIndex: (list<'a>, 'a => bool) => number
+```
+
+### every
+
+```
+List.every: (list<'a>, 'a => bool) => list<'a>
+```
+
+### some
+
+```
+List.some: (list<'a>, 'a => bool) => list<'a>
+```
+
+## List Modification
+
+Please note that methods in the standard library are immutable. They do not alter the input data; instead, they return a modified version.
 ### concat
 
 ```
@@ -75,8 +107,58 @@ List.append: (list<'a>, <'a>) => list<'a>
 ### reverse
 
 ```
-reverse: (list<'a>) => list<'a>
+List.reverse: (list<'a>) => list<'a>
 ```
+### shuffle
+
+```
+List.shuffle: (list<'a>) => list<'a>
+```
+
+### zip
+
+```
+List.zip: (list<'a>, list<'b>) => list<['a,'b]>
+```
+
+### unzip
+
+```
+List.unzip: (list<['a,'b]>) => list<'a>, list<'b>
+```
+
+### join
+
+```
+List.join: (list<string>, string) => string
+```
+
+```squiggle
+List.join(["foo", "bar", "char"], "--") // "foo--bar--char"
+```
+
+### flatten
+
+```
+flatten: (list<list>) => list
+```
+
+```squiggle
+List.flatten([
+  [1, 2],
+  [3, 4],
+]) // [1,2,3,4]
+```
+
+## List Filtering
+
+### filter
+
+```
+List.filter: (list<'a>, 'a => bool) => list<'a>
+```
+
+See [Rescript implementation of keep](https://rescript-lang.org/docs/manual/latest/api/belt/array#keep), which is functionally equivalent.
 
 ### uniq
 
@@ -95,18 +177,20 @@ List.uniq(["foobar", "foobar", 1, 1, 2]) // ["foobar", 1, 2]
 Filters the list for unique elements. Now only works on some Squiggle types.
 
 ```
-List.uniq: (list<'a>, ('a) => 'b) => list<'a>
+List.uniqBy: (list<'a>, 'a => 'b) => list<'a>
 ```
 
 ```squiggle
 List.uniqBy([{a: 3, b: 10}, {a:3, b:40}, {a:5, b:20}], {|e| e.a}) // [{a: 3, b: 10}, {a:5, b:20}]
 ```
 
+## Functional Transformations
+
 ### map
 
 ```
-map: (list<'a>, a => b) => list<'b>
-map: (list<'a>, (a, number) => b) => list<'b>
+map: (list<'a>, 'a => 'b) => list<'b>
+map: (list<'a>, ('a, index: number) => 'b) => list<'b>
 ```
 
 ```squiggle
@@ -116,65 +200,17 @@ map(["foo", "bar"], {|s, i| {word: s, index: i}})
 
 See [Rescript implementation](https://rescript-lang.org/docs/manual/latest/api/belt/array#map).
 
-### filter
-
-```
-filter: (list<'a>, 'a => bool) => list<'a>
-```
-
-See [Rescript implementation of keep](https://rescript-lang.org/docs/manual/latest/api/belt/array#keep), which is functionally equivalent.
-
-### every
-
-```
-every: (list<'a>, ('a) => bool) => list<'a>
-```
-
-### some
-
-```
-some: (list<'a>, ('a) => bool) => list<'a>
-```
-
-### find
-
-```
-find: (list<'a>, ('a) => bool) => 'a
-```
-
-### findIndex
-
-```
-findIndex: (list<'a>, ('a) => bool) => number
-```
-
-### shuffle
-
-```
-shuffle: (list<'a>) => list<'a>
-```
-
-### zip
-
-```
-zip: (list<'a>, list<'b>) => list<['a,'b]>
-```
-
-### unzip
-
-```
-unzip: (list<['a,'b]>) => list<'a>, list<'b>
-```
 
 ### reduce
 
 ```
 reduce: (list<'b>, 'a, ('a, 'b) => 'a) => 'a
+reduce: (list<'b>, 'a, ('a, 'b, index: number) => 'a) => 'a
 ```
 
 `reduce(arr, init, f)`
 
-Applies `f` to each element of `arr`. The function `f` has two paramaters, an accumulator and the next value from the array.
+Applies `f` to each element of `arr`. The function `f` has two main paramaters, an accumulator and the next value from the array. It can also accept an optional third `index` parameter.
 
 ```squiggle
 reduce([2, 3, 4], 1, {|acc, value| acc + value}) == 10
@@ -210,27 +246,4 @@ List.reduceWhile([5, 6, 7], 0, {|acc, curr| acc + curr}, {|acc| acc < 15})
 
 /** Adds first two elements, returns `{ x: 11 }`. */
 List.reduceWhile([5, 6, 7], { x: 0 }, {|acc, curr| { x: acc.x + curr }}, {|acc| acc.x < 15})
-```
-
-### join
-
-```
-List.join: (list<string>, string) => string
-```
-
-```squiggle
-List.join(["foo", "bar", "char"], "--") // "foo--bar--char"
-```
-
-### flatten
-
-```
-flatten: (list<list>) => list
-```
-
-```squiggle
-List.flatten([
-  [1, 2],
-  [3, 4],
-]) // [1,2,3,4]
 ```

@@ -15,7 +15,9 @@ All regular distribution function work on sample set distributions. In addition,
 Calls the correct conversion constructor, based on the corresponding input type, to create a Sample Set distribution. 
 
 ```
-SampleSet.make: (distribution|list<number>|(float) => number|number) => pointSetDist
+SampleSet.make: (distribution|list<number>) => pointSetDist
+SampleSet.make: (() => number) => pointSetDist
+SampleSet.make: ((index: number) => number) => pointSetDist
 ```
 
 ### fromDist

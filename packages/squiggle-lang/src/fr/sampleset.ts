@@ -16,7 +16,7 @@ import {
   doNumberLambdaCall,
   repackDistResult,
 } from "../library/registry/helpers.js";
-import { REExpectedType, REOther } from "../errors/messages.js";
+import { REExpectedType } from "../errors/messages.js";
 import { Ok } from "../utility/result.js";
 import { vArray, vNumber, Value } from "../value/index.js";
 
