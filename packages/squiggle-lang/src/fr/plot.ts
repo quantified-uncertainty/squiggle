@@ -1,3 +1,4 @@
+import includes from "lodash/includes.js";
 import { PointMass } from "../dist/SymbolicDist.js";
 import { REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
@@ -69,15 +70,18 @@ function createScale(scale: Scale | null, domain: VDomain | undefined): Scale {
 
 // This function both extract the domain and checks that the function has only one parameter.
 function extractDomainFromOneArgFunction(fn: Lambda): VDomain | undefined {
-  const parameters = fn.getParameters();
-  if (parameters.length !== 1) {
+  const counts = fn.paramCounts();
+  if (!includes(counts, 1)) {
     throw new REOther(
-      `Plots only work with functions that have one parameter. This function has ${parameters.length} parameters.`
+      `Plots only work with functions that have one parameter. This function only supports [${counts.join(
+        ","
+      )}] parameters.`
     );
   }
+  const domain = fn.getParameters()[0]?.domain;
   // We could also verify a domain here, to be more confident that the function expects numeric args.
   // But we might get other numeric domains besides `NumericRange`, so checking domain type here would be risky.
-  return parameters[0].domain;
+  return domain;
 }
 
 export const library = [

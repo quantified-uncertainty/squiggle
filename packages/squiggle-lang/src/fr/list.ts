@@ -97,21 +97,21 @@ export const library = [
     definitions: [
       makeDefinition([frArray(frAny), frLambda], ([array, lambda], context) => {
         const mapped: Value[] = new Array(array.length);
-        const parameters = lambda.getParameterNames().length;
+        const counts = lambda.paramCounts();
 
         // this code is intentionally duplicated for performance reasons
-        if (parameters === 1) {
-          for (let i = 0; i < array.length; i++) {
-            mapped[i] = lambda.call([array[i]], context);
-          }
-        } else if (parameters === 2) {
+        if (includes(counts, 2)) {
           for (let i = 0; i < array.length; i++) {
             mapped[i] = lambda.call([array[i], vNumber(i)], context);
+          }
+        } else if (includes(counts, 1)) {
+          for (let i = 0; i < array.length; i++) {
+            mapped[i] = lambda.call([array[i]], context);
           }
         } else {
           throw new REExpectedType(
             "(number, number?) => ...",
-            `(${lambda.getParameterNames().join(",")}) => ...`
+            `(${lambda.parameterString()}) => ...`
           );
         }
         return vArray(mapped);

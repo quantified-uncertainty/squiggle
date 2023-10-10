@@ -94,10 +94,6 @@ export class Registry {
     if (!this.fnNameDict.has(fnName)) {
       throw new Error(`Function ${fnName} doesn't exist in registry`);
     }
-    return new BuiltinLambda(fnName, (args, context) => {
-      // Note: current bindings could be accidentally exposed here through context (compare with native lambda implementation above, where we override them with local bindings).
-      // But FunctionRegistry API is too limited for that to matter. Please take care not to violate that in the future by accident.
-      return this.call(fnName, args, context);
-    });
+    return new BuiltinLambda(fnName, this.fnNameDict.get(fnName) || []);
   }
 }

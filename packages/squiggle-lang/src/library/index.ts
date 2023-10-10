@@ -12,21 +12,21 @@ import {
   registry,
 } from "./registry/index.js";
 import { makeVersionConstant } from "./version.js";
+import { frAny } from "./registry/frTypes.js";
+import { makeDefinition } from "./registry/fnDefinition.js";
 
-function makeLookupLambda(): Lambda {
-  return new BuiltinLambda(INDEX_LOOKUP_FUNCTION, (inputs) => {
-    if (inputs.length !== 2) {
-      // should never happen
-      throw new REOther("Index lookup internal error");
-    }
-
-    const [obj, key] = inputs;
+const definitions = [
+  makeDefinition([frAny, frAny], ([obj, key]) => {
     if ("get" in obj) {
       return obj.get(key).clone();
     } else {
       throw new REOther("Trying to access key on wrong value");
     }
-  });
+  }),
+];
+
+function makeLookupLambda(): Lambda {
+  return new BuiltinLambda(INDEX_LOOKUP_FUNCTION, definitions);
 }
 
 function makeStdLib(): Bindings {

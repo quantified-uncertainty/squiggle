@@ -2,12 +2,24 @@ import { LocationRange } from "peggy";
 
 import { ASTNode } from "../ast/parse.js";
 import * as IError from "../errors/IError.js";
-import { REArityError, REDomainError } from "../errors/messages.js";
+import {
+  REArityError,
+  REDomainError,
+  REOther,
+  RESymbolNotFound,
+} from "../errors/messages.js";
 import { Expression } from "../expression/index.js";
 import { VDomain, Value } from "../value/index.js";
 import * as Context from "./context.js";
 import { ReducerContext } from "./context.js";
 import { Stack } from "./stack.js";
+import {
+  FnDefinition,
+  fnDefinitionToString,
+  tryCallFnDefinition,
+} from "../library/registry/fnDefinition.js";
+import uniq from "lodash/uniq.js";
+import { sort } from "../utility/E_A_Floats.js";
 
 export type LambdaParameter = {
   name: string;
@@ -20,9 +32,10 @@ export abstract class Lambda {
   constructor(public body: LambdaBody) {}
 
   abstract getName(): string;
-  abstract getParameterNames(): string[];
   abstract getParameters(): LambdaParameter[];
   abstract toString(): string;
+  abstract parameterString(): string;
+  abstract paramCounts(): number[];
 
   callFrom(
     args: Value[],
@@ -110,31 +123,37 @@ export class SquiggleLambda extends Lambda {
     return this.parameters;
   }
 
-  getParameterNames() {
+  _getParameterNames() {
     return this.parameters.map((parameter) => parameter.name);
   }
 
+  parameterString() {
+    return this._getParameterNames().join(",");
+  }
+
   toString() {
-    return `lambda(${this.getParameterNames().join(",")}=>internal code)`;
+    return `lambda(${this._getParameterNames().join(",")}=>internal code)`;
+  }
+
+  paramCounts() {
+    return [this.parameters.length];
   }
 }
 
 // Stdlib functions (everything in FunctionRegistry) are instances of this class.
 export class BuiltinLambda extends Lambda {
+  definitions: FnDefinition[];
+
   constructor(
     public name: string,
-    body: LambdaBody
+    definitions: FnDefinition[]
   ) {
-    super(body);
+    super((args, context) => this._call(args, context));
+    this.definitions = definitions;
   }
 
   getName() {
     return this.name;
-  }
-
-  // this function doesn't scale to FunctionRegistry's polymorphic functions
-  getParameterNames() {
-    return ["..."];
   }
 
   getParameters(): LambdaParameter[] {
@@ -143,5 +162,32 @@ export class BuiltinLambda extends Lambda {
 
   toString() {
     return this.name;
+  }
+
+  parameterString() {
+    return "...";
+  }
+
+  _call(args: Value[], context: ReducerContext): Value {
+    const definitions = this.definitions;
+    const showNameMatchDefinitions = () => {
+      const defsString = definitions
+        .map(fnDefinitionToString)
+        .map((def) => `  ${this.name}${def}\n`)
+        .join("");
+      return `There are function matches for ${this.name}(), but with different arguments:\n${defsString}`;
+    };
+
+    for (const definition of definitions) {
+      const callResult = tryCallFnDefinition(definition, args, context);
+      if (callResult !== undefined) {
+        return callResult;
+      }
+    }
+    throw new REOther(showNameMatchDefinitions());
+  }
+
+  paramCounts() {
+    return sort(uniq(this.definitions.map((d) => d.inputs.length)));
   }
 }

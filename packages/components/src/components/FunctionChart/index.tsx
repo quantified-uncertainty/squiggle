@@ -9,7 +9,6 @@ import {
   SqNumberValue,
   SqNumericFnPlot,
 } from "@quri/squiggle-lang";
-
 import { MessageAlert } from "../Alert.js";
 import {
   PlaygroundSettings,
@@ -18,6 +17,7 @@ import {
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 import { DistFunctionChart } from "./DistFunctionChart.js";
 import { NumericFunctionChart } from "./NumericFunctionChart.js";
+import includes from "lodash/includes.js";
 
 type FunctionChartProps = {
   fn: SqLambda;
@@ -51,8 +51,8 @@ export const FunctionChart: FC<FunctionChartProps> = ({
   environment,
   height,
 }) => {
-  const parameters = fn.parameters();
-  if (parameters.length !== 1) {
+  const parameters = fn.paramCounts();
+  if (includes(parameters, 1)) {
     return (
       <MessageAlert heading="Function Display Not Supported">
         Only functions with one parameter are displayed.

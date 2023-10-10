@@ -10,6 +10,7 @@ import { Lambda } from "../reducer/lambda.js";
 import * as DateTime from "../utility/DateTime.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { Domain } from "./domain.js";
+import includes from "lodash/includes.js";
 
 export type ValueMap = ImmutableMap<string, Value>;
 
@@ -284,11 +285,13 @@ class VCalculator extends BaseValue {
 
   constructor(public value: Calculator) {
     super();
-    if (value.fn.getParameters().length !== value.fields.length) {
+    if (!includes(value.fn.paramCounts(), value.fields.length)) {
       this.setError(
-        `Calculator function has ${
-          value.fn.getParameters().length
-        } parameters, but ${value.fields.length} fields were provided.`
+        `Calculator function has ${value.fn
+          .paramCounts()
+          .join(", ")} parameters, but ${
+          value.fields.length
+        } fields were provided.`
       );
     }
 

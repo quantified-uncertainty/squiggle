@@ -34,10 +34,6 @@ export class SqCalculator {
     return this._value.description;
   }
 
-  get parameters(): string[] {
-    return this._value.fn.getParameterNames();
-  }
-
   get fields(): {
     name: string;
     default: string;
