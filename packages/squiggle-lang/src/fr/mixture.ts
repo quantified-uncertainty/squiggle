@@ -7,39 +7,14 @@ import { unpackDistResult } from "../library/registry/helpers.js";
 import { REDistributionError } from "../errors/messages.js";
 import { BuiltinLambda } from "../reducer/lambda.js";
 import * as E_A from "../utility/E_A.js";
-import * as Result from "../utility/result.js";
 import { Value, vDist } from "../value/index.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
-  frAny,
   frArray,
   frDistOrNumber,
   frNumber,
+  frTuple,
 } from "../library/registry/frTypes.js";
-
-function raiseArgumentError(message: string): never {
-  throw new REDistributionError(argumentError(message));
-}
-
-function parseNumber(arg: Value): number {
-  if (arg.type === "Number") {
-    return arg.value;
-  } else {
-    raiseArgumentError("Not a number");
-  }
-}
-
-const parseNumberArray = (args: Value[]): number[] => args.map(parseNumber);
-
-function parseDistFromValue(args: Value): BaseDist {
-  if (args.type === "Dist") {
-    return args.value;
-  } else if (args.type === "Number") {
-    return new SymbolicDist.PointMass(args.value);
-  } else {
-    raiseArgumentError("Not a distribution");
-  }
-}
 
 function parseDistFromType(d: number | BaseDist): BaseDist {
   if (d instanceof BaseDist) {
@@ -49,21 +24,16 @@ function parseDistFromType(d: number | BaseDist): BaseDist {
   }
 }
 
-const parseDistributionArray = (ags: Value[]): BaseDist[] =>
-  ags.map(parseDistFromValue);
-
 function mixtureWithGivenWeights(
   distributions: BaseDist[],
   weights: number[],
   env: Env
-): Result.result<BaseDist, DistError> {
-  if (distributions.length === weights.length) {
-    return distOperations.mixture(E_A.zip(distributions, weights), { env });
-  } else {
-    raiseArgumentError(
-      "Error, mixture call has different number of distributions and weights"
-    );
-  }
+): Value {
+  return vDist(
+    unpackDistResult(
+      distOperations.mixture(E_A.zip(distributions, weights), { env })
+    )
+  );
 }
 
 function mixtureWithDefaultWeights(distributions: BaseDist[], env: Env) {
@@ -72,65 +42,105 @@ function mixtureWithDefaultWeights(distributions: BaseDist[], env: Env) {
   return mixtureWithGivenWeights(distributions, weights, env);
 }
 
-const defs = [
-  makeDefinition([frDistOrNumber], ([dist], { environment }) => {
-    return vDist(
-      unpackDistResult(
-        mixtureWithDefaultWeights([parseDistFromType(dist)], environment)
-      )
-    );
-  }),
-  makeDefinition([frArray(frDistOrNumber)], ([ar], { environment }) => {
-    return vDist(
-      unpackDistResult(
-        mixtureWithDefaultWeights(ar.map(parseDistFromType), environment)
-      )
-    );
-  }),
-  makeDefinition(
-    [frArray(frDistOrNumber), frArray(frNumber)],
-    ([dists, weights], { environment }) =>
-      vDist(
-        unpackDistResult(
-          mixtureWithGivenWeights(
-            dists.map(parseDistFromType),
-            weights,
-            environment
-          )
+function mixtureWithWeightsAndMapping(
+  dists: (number | BaseDist)[],
+  weights: number[],
+  environment: any
+): Value {
+  return mixtureWithGivenWeights(
+    dists.map(parseDistFromType),
+    weights,
+    environment
+  );
+}
+
+const singleArrayDef = makeDefinition(
+  [frArray(frDistOrNumber)],
+  ([ar], { environment }) =>
+    mixtureWithDefaultWeights(ar.map(parseDistFromType), environment)
+);
+
+const twoArraysDef = makeDefinition(
+  [frArray(frDistOrNumber), frArray(frNumber)],
+  ([dists, weights], { environment }) => {
+    if (dists.length !== weights.length) {
+      throw new REDistributionError(
+        argumentError(
+          "Error, mixture call has different number of distributions and weights"
         )
+      );
+    }
+    return mixtureWithGivenWeights(
+      dists.map(parseDistFromType),
+      weights,
+      environment
+    );
+  }
+);
+
+const twoToFiveDistsWithWeightsDefs = [
+  makeDefinition(
+    [frDistOrNumber, frDistOrNumber, frTuple(frNumber, frNumber)],
+    ([dist1, dist2, weights], { environment }) =>
+      mixtureWithWeightsAndMapping([dist1, dist2], weights, environment)
+  ),
+  makeDefinition(
+    [
+      frDistOrNumber,
+      frDistOrNumber,
+      frDistOrNumber,
+      frTuple(frNumber, frNumber, frNumber),
+    ],
+    ([dist1, dist2, dist3, weights], { environment }) =>
+      mixtureWithWeightsAndMapping([dist1, dist2, dist3], weights, environment)
+  ),
+  makeDefinition(
+    [
+      frDistOrNumber,
+      frDistOrNumber,
+      frDistOrNumber,
+      frDistOrNumber,
+      frTuple(frNumber, frNumber, frNumber, frNumber),
+    ],
+    ([dist1, dist2, dist3, dist4, weights], { environment }) =>
+      mixtureWithWeightsAndMapping(
+        [dist1, dist2, dist3, dist4],
+        weights,
+        environment
       )
   ),
-  ...Array.from({ length: 9 }, (_, i) => {
-    const frArgs = [frAny, ...new Array(i).fill(frAny)];
-    return makeDefinition(frArgs, (args: Value[], { environment }) => {
-      const last: Value = args[args.length - 1];
-
-      function getMixture() {
-        if (last.type === "Array") {
-          const weights = parseNumberArray(last.value);
-          const distributions = parseDistributionArray(
-            args.slice(0, args.length - 1)
-          );
-          return mixtureWithGivenWeights(distributions, weights, environment);
-        } else if (last.type === "Number" || last.type === "Dist") {
-          return mixtureWithDefaultWeights(
-            parseDistributionArray(args),
-            environment
-          );
-        } else {
-          raiseArgumentError(
-            "Last argument of mx must be array or distribution"
-          );
-        }
-      }
-      return vDist(unpackDistResult(getMixture()));
-    });
-  }),
+  makeDefinition(
+    [
+      frDistOrNumber,
+      frDistOrNumber,
+      frDistOrNumber,
+      frDistOrNumber,
+      frDistOrNumber,
+      frTuple(frNumber, frNumber, frNumber, frNumber, frNumber),
+    ],
+    ([dist1, dist2, dist3, dist4, dist5, weights], { environment }) =>
+      mixtureWithWeightsAndMapping(
+        [dist1, dist2, dist3, dist4, dist5],
+        weights,
+        environment
+      )
+  ),
 ];
 
-// impossible to implement with FR due to arbitrary parameters length
-// export const mxLambda = new BuiltinLambda("mx", [], (inputs, context) => {
-//   return vDist(unpackDistResult(mixture(inputs, context.environment)));
-// });
+const oneToFiveDistsDefs = Array.from({ length: 5 }, (_, i) => {
+  const frArgs = new Array(i + 1).fill(frDistOrNumber);
+  return makeDefinition(
+    frArgs,
+    (args: (number | BaseDist)[], { environment }) =>
+      mixtureWithDefaultWeights(args.map(parseDistFromType), environment)
+  );
+});
+
+const defs = [
+  singleArrayDef,
+  twoArraysDef,
+  ...twoToFiveDistsWithWeightsDefs,
+  ...oneToFiveDistsDefs,
+];
 
 export const mxLambda = new BuiltinLambda("mx", defs);

@@ -18,6 +18,7 @@ import {
   frDist,
   frLambda,
   frNumber,
+  frTuple,
 } from "../library/registry/frTypes.js";
 import { FnFactory, unpackDistResult } from "../library/registry/helpers.js";
 import { ReducerContext } from "../reducer/context.js";

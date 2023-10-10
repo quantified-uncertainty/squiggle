@@ -123,6 +123,56 @@ export const frTuple2 = <T1, T2>(
   };
 };
 
+export function frTuple<T1, T2>(
+  type1: FRType<T1>,
+  type2: FRType<T2>
+): FRType<[T1, T2]>;
+
+export function frTuple<T1, T2, T3>(
+  type1: FRType<T1>,
+  type2: FRType<T2>,
+  type3: FRType<T3>
+): FRType<[T1, T2, T3]>;
+
+export function frTuple<T1, T2, T3, T4>(
+  type1: FRType<T1>,
+  type2: FRType<T2>,
+  type3: FRType<T3>,
+  type4: FRType<T4>
+): FRType<[T1, T2, T3, T4]>;
+
+export function frTuple<T1, T2, T3, T4, T5>(
+  type1: FRType<T1>,
+  type2: FRType<T2>,
+  type3: FRType<T3>,
+  type4: FRType<T4>,
+  type5: FRType<T5>
+): FRType<[T1, T2, T3, T4, T5]>;
+
+export function frTuple(...types: FRType<any>[]): any {
+  const numTypes = types.length;
+
+  return {
+    unpack: (v: Value) => {
+      if (v.type !== "Array" || v.value.length !== numTypes) {
+        return undefined;
+      }
+
+      const items = types.map((type, index) => type.unpack(v.value[index]));
+
+      if (items.some((item) => item === undefined)) {
+        return undefined;
+      }
+
+      return items as any;
+    },
+    pack: (values: any[]) => {
+      return vArray(values.map((val, index) => types[index].pack(val)));
+    },
+    getName: () => `tuple(${types.map((type) => type.getName()).join(", ")})`,
+  };
+}
+
 export const frDictWithArbitraryKeys = <T>(
   itemType: FRType<T>
 ): FRType<ImmutableMap<string, T>> => {
