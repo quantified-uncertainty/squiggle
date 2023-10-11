@@ -10,13 +10,11 @@ import {
   frDistOrNumber,
   frNumber,
   frDict,
-  frArray,
-  frAny,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { OtherOperationError } from "../operationError.js";
 import * as Result from "../utility/result.js";
-import { Value, vArray, vDist } from "../value/index.js";
+import { Value, vDist } from "../value/index.js";
 import { distResultToValue } from "./genericDist.js";
 
 export const CI_CONFIG = [
