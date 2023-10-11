@@ -1,5 +1,5 @@
 import { SqProject } from "../../src/index.js";
-import { Resolver } from "../../src/public/SqProject/Resolver.js";
+import { SqLinker } from "../../src/public/SqLinker.js";
 import "../helpers/toBeOkOutput.js";
 
 /*
@@ -8,11 +8,11 @@ import "../helpers/toBeOkOutput.js";
  */
 describe("SqProject with imports", () => {
   /*
-   * Let's make a simple resolver. Resolvers are responsible for two things:
+   * Let's make a simple linker. Linkers are responsible for two things:
    * 1. Converting a string name in `import "name"` to the source id (this is useful in some cases, e.g. for normalizing "../dir/file.squiggle" paths).
    * 2. Loading a source by its id.
    */
-  const resolver: Resolver = {
+  const linker: SqLinker = {
     resolve: (name) => name,
     loadSource: async (sourceName) => {
       switch (sourceName) {
@@ -46,9 +46,9 @@ describe("SqProject with imports", () => {
     doubleX = s1.x * 2
   `;
 
-  /* Basic approach is to call `run`; it's async and will load everything implicitly through the resolver. */
+  /* Basic approach is to call `run`; it's async and will load everything implicitly through the linker. */
   test("run", async () => {
-    const project = SqProject.create({ resolver });
+    const project = SqProject.create({ linker });
 
     project.setSource("main", mainSource);
 
@@ -73,7 +73,7 @@ describe("SqProject with imports", () => {
   });
 
   test("explicit loadImportsRecursively", async () => {
-    const project = SqProject.create({ resolver });
+    const project = SqProject.create({ linker });
 
     project.setSource("main", mainSource);
     /*
@@ -103,7 +103,7 @@ describe("parseImports", () => {
    * Let's look at the details of how you can analyze the imports of each source.
    */
   const project = SqProject.create({
-    resolver: {
+    linker: {
       resolve: (name) => name,
       loadSource: () => {
         throw new Error("loading not implemented");

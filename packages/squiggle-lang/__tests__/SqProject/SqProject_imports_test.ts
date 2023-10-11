@@ -1,8 +1,8 @@
 import { SqProject } from "../../src/index.js";
-import { Resolver } from "../../src/public/SqProject/Resolver.js";
+import { SqLinker } from "../../src/public/SqLinker.js";
 
-const buildResolver = (sources?: { [k: string]: string }) => {
-  const resolver: Resolver = {
+const buildLinker = (sources?: { [k: string]: string }) => {
+  const linker: SqLinker = {
     resolve: (name) => name,
     loadSource: async (id) => {
       if (sources && id in sources) {
@@ -11,11 +11,11 @@ const buildResolver = (sources?: { [k: string]: string }) => {
       throw new Error(`Unknown id ${id}`);
     },
   };
-  return resolver;
+  return linker;
 };
 
 describe("Parse imports", () => {
-  const project = SqProject.create({ resolver: buildResolver() });
+  const project = SqProject.create({ linker: buildLinker() });
   project.setSource(
     "main",
     `
@@ -54,7 +54,7 @@ x=1`
 });
 
 describe("Unknown imports", () => {
-  test("without resolver", async () => {
+  test("without linker", async () => {
     const project = SqProject.create();
     project.setSource(
       "main",
@@ -69,7 +69,7 @@ import './lib' as lib
   });
 
   test("unknown import", () => {
-    const project = SqProject.create({ resolver: buildResolver() });
+    const project = SqProject.create({ linker: buildLinker() });
     project.setSource(
       "main",
       `
@@ -82,7 +82,7 @@ lib.x`
 
   test("known import", async () => {
     const project = SqProject.create({
-      resolver: buildResolver({
+      linker: buildLinker({
         "./lib": "x = 5",
       }),
     });

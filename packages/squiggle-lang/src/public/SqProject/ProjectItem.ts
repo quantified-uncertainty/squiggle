@@ -14,7 +14,7 @@ import {
   SqOtherError,
   SqRuntimeError,
 } from "../SqError.js";
-import { Resolver } from "./Resolver.js";
+import { SqLinker } from "../SqLinker.js";
 
 // source -> ast -> imports -> bindings & result
 
@@ -85,7 +85,7 @@ export class ProjectItem {
     this.clean();
   }
 
-  parseImports(resolver: Resolver | undefined): void {
+  parseImports(linker: SqLinker | undefined): void {
     if (this.imports) {
       return;
     }
@@ -108,10 +108,10 @@ export class ProjectItem {
       return;
     }
 
-    if (!resolver) {
+    if (!linker) {
       this.setImports(
         Result.Err(
-          new SqOtherError("Can't use imports when resolver is not configured")
+          new SqOtherError("Can't use imports when linker is not configured")
         )
       );
       return;
@@ -120,7 +120,7 @@ export class ProjectItem {
     const resolvedImports: ImportBinding[] = program.imports.map(
       ([file, variable]) => ({
         variable: variable.value,
-        sourceId: resolver.resolve(file.value, this.sourceId),
+        sourceId: linker.resolve(file.value, this.sourceId),
       })
     );
 

@@ -14,7 +14,7 @@ import { SqValuePath } from "../SqValuePath.js";
 
 import { SqValueContext } from "../SqValueContext.js";
 import { ImportBinding, ProjectItem, RunOutput } from "./ProjectItem.js";
-import { Resolver } from "./Resolver.js";
+import { SqLinker } from "../SqLinker.js";
 import * as Topology from "./Topology.js";
 import { SqOutputResult } from "../types.js";
 
@@ -28,23 +28,23 @@ function getMissingDependencyError(id: string) {
 }
 
 type Options = {
-  resolver?: Resolver;
+  linker?: SqLinker;
 };
 
 export class SqProject {
   private readonly items: Map<string, ProjectItem>;
   private stdLib: Bindings;
   private environment: Env;
-  private resolver?: Resolver; // if not present, imports are forbidden
+  private linker?: SqLinker; // if not present, imports are forbidden
 
   constructor(options?: Options) {
     this.items = new Map();
     this.stdLib = Library.getStdLib();
     this.environment = defaultEnv;
-    this.resolver = options?.resolver;
+    this.linker = options?.linker;
   }
 
-  static create(options?: { resolver: Resolver }) {
+  static create(options?: { linker: SqLinker }) {
     return new SqProject(options);
   }
 
@@ -157,8 +157,8 @@ export class SqProject {
   }
 
   parseImports(sourceId: string): void {
-    // resolver can be undefined; in this case parseImports will fail if there are any imports
-    this.getItem(sourceId).parseImports(this.resolver);
+    // linker can be undefined; in this case parseImports will fail if there are any imports
+    this.getItem(sourceId).parseImports(this.linker);
   }
 
   getOutput(sourceId: string): SqOutputResult {
@@ -324,7 +324,7 @@ export class SqProject {
 
   async runAll() {
     // preload all imports
-    if (this.resolver) {
+    if (this.linker) {
       for (const id of this.getSourceIds()) {
         await this.loadImportsRecursively(id);
       }
@@ -335,15 +335,15 @@ export class SqProject {
   }
 
   async run(sourceId: string) {
-    if (this.resolver) {
+    if (this.linker) {
       await this.loadImportsRecursively(sourceId);
     }
     await this.runIds(this.getRunOrderFor(sourceId));
   }
 
   async loadImportsRecursively(initialSourceName: string) {
-    const resolver = this.resolver;
-    if (!resolver) {
+    const linker = this.linker;
+    if (!linker) {
       return;
     }
 
@@ -366,7 +366,7 @@ export class SqProject {
         if (this.getSource(newImportId) === undefined) {
           // We have got one of the new imports.
           // Let's load it and add it to the project.
-          const newSource = await resolver.loadSource(newImportId);
+          const newSource = await linker.loadSource(newImportId);
           this.setSource(newImportId, newSource);
         }
         // The new source is loaded and added to the project.

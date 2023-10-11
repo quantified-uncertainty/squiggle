@@ -5,7 +5,7 @@ import isFinite from "lodash/isFinite.js";
 import { Env } from "../dist/env.js";
 import { SqProject } from "../public/SqProject/index.js";
 import { bold, red } from "./colors.js";
-import { Resolver } from "../public/SqProject/Resolver.js";
+import { SqLinker } from "../public/SqLinker.js";
 
 export async function measure(callback: () => Promise<void>) {
   const t1 = new Date();
@@ -25,7 +25,7 @@ export type RunArgs = {
   sampleCount?: string | number;
 };
 
-const resolver: Resolver = {
+const linker: SqLinker = {
   resolve: (name, fromId) => {
     if (!name.startsWith("./") && !name.startsWith("../")) {
       throw new Error("Only relative paths in imports are allowed");
@@ -42,7 +42,7 @@ async function _run(args: {
   filename?: string;
   environment?: Env;
 }) {
-  const project = SqProject.create({ resolver });
+  const project = SqProject.create({ linker });
   if (args.environment) {
     project.setEnvironment(args.environment);
   }

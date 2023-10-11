@@ -56,7 +56,7 @@ describe("Multi source SqProject", () => {
      * You will see that parsing imports is setting the dependencies the same way as before.
      */
     const project = SqProject.create({
-      resolver: {
+      linker: {
         resolve: (name) => name,
         loadSource: () => {
           throw new Error("Loading not supported");
