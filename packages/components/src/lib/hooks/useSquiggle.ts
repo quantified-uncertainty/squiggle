@@ -28,7 +28,6 @@ export type ProjectExecutionProps = {
 export type SquiggleArgs = {
   code: string;
   executionId?: number;
-  onChange?: (expr: SqValue | undefined, sourceId: string) => void;
 } & (StandaloneExecutionProps | ProjectExecutionProps);
 
 export type SquiggleOutput = {
@@ -84,7 +83,7 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
     SquiggleOutput | undefined
   >(undefined);
 
-  const { executionId = 1, onChange } = args;
+  const { executionId = 1 } = args;
 
   useEffect(
     () => {
@@ -125,16 +124,6 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
   );
 
   useEffect(() => {
-    if (!squiggleOutput || isRunning) {
-      return;
-    }
-    onChange?.(
-      squiggleOutput.output.ok ? squiggleOutput.output.value.result : undefined,
-      sourceId
-    );
-  }, [squiggleOutput, isRunning, onChange, sourceId]);
-
-  useEffect(() => {
     return () => {
       project.removeSource(sourceId);
     };
@@ -144,7 +133,7 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
     squiggleOutput,
     {
       project,
-      isRunning: executionId !== squiggleOutput?.executionId,
+      isRunning,
       sourceId,
     },
   ];
