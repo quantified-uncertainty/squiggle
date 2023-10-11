@@ -4,6 +4,7 @@ module.exports = {
   plugins: ["@typescript-eslint"],
   rules: {
     "no-constant-condition": ["error", { checkLoops: false }],
+    // "multiline-comment-style": "warn",
     "@typescript-eslint/no-unused-vars": ["warn", { args: "none" }],
     "@typescript-eslint/no-empty-function": [
       "error",

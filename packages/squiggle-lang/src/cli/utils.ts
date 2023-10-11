@@ -5,6 +5,7 @@ import isFinite from "lodash/isFinite.js";
 import { Env } from "../dist/env.js";
 import { SqProject } from "../public/SqProject/index.js";
 import { bold, red } from "./colors.js";
+import { Resolver } from "../public/SqProject/Resolver.js";
 
 export async function measure(callback: () => Promise<void>) {
   const t1 = new Date();
@@ -24,33 +25,32 @@ export type RunArgs = {
   sampleCount?: string | number;
 };
 
+const resolver: Resolver = {
+  resolve: (name, fromId) => {
+    if (!name.startsWith("./") && !name.startsWith("../")) {
+      throw new Error("Only relative paths in imports are allowed");
+    }
+    return path.resolve(path.dirname(fromId), name);
+  },
+  loadSource: async (importId: string) => {
+    return await fs.readFile(importId, "utf-8");
+  },
+};
+
 async function _run(args: {
   src: string;
   filename?: string;
   environment?: Env;
 }) {
-  const project = SqProject.create({
-    resolver: (name, fromId) => {
-      if (!name.startsWith("./") && !name.startsWith("../")) {
-        throw new Error("Only relative paths in imports are allowed");
-      }
-      return path.resolve(path.dirname(fromId), name);
-    },
-  });
+  const project = SqProject.create({ resolver });
   if (args.environment) {
     project.setEnvironment(args.environment);
   }
   const filename = path.resolve(args.filename || "./__anonymous__");
 
-  const loader = async (importId: string) => {
-    return await fs.readFile(importId, "utf-8");
-  };
-
   project.setSource(filename, args.src);
 
-  const time = await measure(
-    async () => await project.runWithImports(filename, loader)
-  );
+  const time = await measure(async () => await project.run(filename));
   const output = project.getOutput(filename);
 
   return { output, time };

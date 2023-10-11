@@ -1,1 +1,4 @@
-export type Resolver = (name: string, fromId: string) => string;
+export type Resolver = {
+  resolve: (name: string, fromId: string) => string;
+  loadSource: (sourceId: string) => Promise<string>;
+};

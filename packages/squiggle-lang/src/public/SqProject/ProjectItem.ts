@@ -120,7 +120,7 @@ export class ProjectItem {
     const resolvedImports: ImportBinding[] = program.imports.map(
       ([file, variable]) => ({
         variable: variable.value,
-        sourceId: resolver(file.value, this.sourceId),
+        sourceId: resolver.resolve(file.value, this.sourceId),
       })
     );
 

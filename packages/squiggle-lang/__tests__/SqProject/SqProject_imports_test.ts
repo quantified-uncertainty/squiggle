@@ -1,7 +1,21 @@
 import { SqProject } from "../../src/index.js";
+import { Resolver } from "../../src/public/SqProject/Resolver.js";
+
+const buildResolver = (sources?: { [k: string]: string }) => {
+  const resolver: Resolver = {
+    resolve: (name) => name,
+    loadSource: async (id) => {
+      if (sources && id in sources) {
+        return sources[id];
+      }
+      throw new Error(`Unknown id ${id}`);
+    },
+  };
+  return resolver;
+};
 
 describe("Parse imports", () => {
-  const project = SqProject.create({ resolver: (name) => name });
+  const project = SqProject.create({ resolver: buildResolver() });
   project.setSource(
     "main",
     `
@@ -40,8 +54,8 @@ x=1`
 });
 
 describe("Unknown imports", () => {
-  test("run", async () => {
-    const project = SqProject.create({ resolver: (name) => name });
+  test("without resolver", async () => {
+    const project = SqProject.create();
     project.setSource(
       "main",
       `
@@ -54,8 +68,8 @@ import './lib' as lib
     expect(project.getResult("main").ok).toEqual(false);
   });
 
-  test("runWithImports", () => {
-    const project = SqProject.create({ resolver: (name) => name });
+  test("unknown import", () => {
+    const project = SqProject.create({ resolver: buildResolver() });
     project.setSource(
       "main",
       `
@@ -63,19 +77,25 @@ import './lib' as lib
 lib.x`
     );
 
-    expect(
-      project.runWithImports("main", async (id) => {
-        throw new Error(`Unknown id ${id}`);
-      })
-    ).rejects.toThrow();
+    expect(project.run("main")).rejects.toThrow();
+  });
 
-    expect(
-      project.runWithImports("main", async (id) => {
-        if (id === "./lib") {
-          return "x = 5";
-        }
-        throw new Error(`Unknown id ${id}`);
-      })
-    ).resolves.toBe(undefined);
+  test("known import", async () => {
+    const project = SqProject.create({
+      resolver: buildResolver({
+        "./lib": "x = 5",
+      }),
+    });
+    project.setSource(
+      "main",
+      `
+import './lib' as lib
+lib.x`
+    );
+
+    expect(project.run("main")).resolves.toBe(undefined);
+
+    await project.run("main");
+    expect(project.getResult("main").ok).toEqual(true);
   });
 });

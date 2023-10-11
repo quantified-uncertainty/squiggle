@@ -1,19 +1,114 @@
 import { SqProject } from "../../src/index.js";
+import { Resolver } from "../../src/public/SqProject/Resolver.js";
 import "../helpers/toBeOkOutput.js";
 
-/**
- * Case: Imports.
- * In the previous tutorial we have set the similarity between setContinues and parseImports.
- * Here we will finally proceed to a real life scenario
+/*
+ * Now let's look at explicit imports, possibly recursive and cyclic.
+ * In the previous tutorial we've used `setContinues` manually; now we'll rely on import statements in Squiggle to load the dependencies.
  */
+describe("SqProject with imports", () => {
+  /*
+   * Let's make a simple resolver. Resolvers are responsible for two things:
+   * 1. Converting a string name in `import "name"` to the source id (this is useful in some cases, e.g. for normalizing "../dir/file.squiggle" paths).
+   * 2. Loading a source by its id.
+   */
+  const resolver: Resolver = {
+    resolve: (name) => name,
+    loadSource: async (sourceName) => {
+      switch (sourceName) {
+        case "source1":
+          return "x=1";
+        case "source2":
+          return `
+            import "source1" as s1
+            y=2`;
+        case "source3":
+          return `
+            import "source2" as s2
+            z=3`;
+        default:
+          throw new Error(`source ${sourceName} not found`);
+      }
+    },
+  };
+
+  const mainSource = `
+    import "source1" as s1
+    import "source2" as s2
+    import "source3" as s3
+    a = s1.x + s2.y + s3.z
+    b = doubleX // available through continues
+    a
+  `;
+
+  const doubleXSource = `
+    import "source1" as s1
+    doubleX = s1.x * 2
+  `;
+
+  /* Basic approach is to call `run`; it's async and will load everything implicitly through the resolver. */
+  test("run", async () => {
+    const project = SqProject.create({ resolver });
+
+    project.setSource("main", mainSource);
+
+    /*
+     * Let's salt it more. Let's have another source in the project which also has imports.
+     * "doubleX" imports "source1" which is eventually imported by "main" as well.
+     */
+    project.setSource("doubleX", doubleXSource);
+
+    /*
+     * As doubleX is not imported by main, it is not loaded recursively.
+     * So we link it to the project as a dependency.
+     */
+    project.setContinues("main", ["doubleX"]);
+
+    /* Let's run the project; this method will load imports recursively for you. */
+    await project.run("main");
+
+    const output = project.getOutput("main");
+
+    expect(output).toBeOkOutput("6", "{a: 6,b: 2}");
+  });
+
+  test("explicit loadImportsRecursively", async () => {
+    const project = SqProject.create({ resolver });
+
+    project.setSource("main", mainSource);
+    /*
+     * Imports will be processed on the first attempt to run, but you can also pre-process them manually without running the source.
+     * Notice that `doubleX` in "main" source is not available yet, but that's fine because `loadImportsRecursively` only looks at import statements.
+     * Source code must be syntactically correct, though.
+     */
+    await project.loadImportsRecursively("main");
+
+    project.setSource("doubleX", doubleXSource);
+    await project.loadImportsRecursively("doubleX");
+
+    project.setContinues("main", ["doubleX"]);
+
+    /* Let's run the project */
+    await project.runAll();
+    const output = project.getOutput("main");
+
+    /* And see the result and bindings.. */
+    expect(output).toBeOkOutput("6", "{a: 6,b: 2}");
+    /* Everything as expected */
+  });
+});
 
 describe("parseImports", () => {
   /**
-   * Here we investigate the details about parseImports, before setting up a real life scenario in the next section.
-   * Everything happens inside a project, so let's have a project.
+   * Let's look at the details of how you can analyze the imports of each source.
    */
   const project = SqProject.create({
-    resolver: (name) => name,
+    resolver: {
+      resolve: (name) => name,
+      loadSource: () => {
+        throw new Error("loading not implemented");
+      },
+    },
   });
   project.setSource(
     "main",
@@ -22,14 +117,18 @@ describe("parseImports", () => {
     x=1
     `
   );
-  /* We need to parse imports after changing the source */
+
+  /*
+   * Parse import statements - this method is also used by `loadSourcesRecursively`,
+   * so if you've ever called or or ran your source, imports should be already parsed.
+   */
   project.parseImports("main");
 
   test("getDependencies", () => {
-    /* Parse imports has set the dependencies */
+    /* Parse imports has set the dependencies. */
     expect(project.getDependencies("main")).toEqual(["./common"]);
-    /**
-     * If there were no imports than there would be no dependencies.
+    /*
+     * If there were no imports then there would be no dependencies.
      * However if there was a syntax error at imports then would be no dependencies also.
      * Therefore looking at dependencies is not the right way to load imports.
      * `getDependencies` does not distinguish between `setContinues` and explicit import statements.
@@ -53,95 +152,12 @@ describe("parseImports", () => {
   });
 
   test("getDependents", () => {
-    /* For any reason, you are able to query what other sources
-        import or depend on the current source.
-        But you don't need to use this to execute the projects.
-        It is provided for completeness of information. */
+    /*
+     * For any reason, you are able to query what other sources import or depend on the current source.
+     * But you don't need to use this to execute the projects.
+     * It is provided for completeness of information.
+     */
     expect(project.getDependents("main")).toEqual([]);
     /* Nothing is depending on or including main */
-  });
-});
-
-/*
- * Now let's look at recursive and possibly cyclic imports.
- * There is no function provided to load the import files.
- * Because we have no idea if will it be an ordinary function or will it use promises.
- * Therefore one has to provide a function to load sources.
- */
-describe("Recursive imports", () => {
-  /* Let's make a dummy loader */
-  const loadSource = async (sourceName: string): Promise<string> => {
-    switch (sourceName) {
-      case "source1":
-        return "x=1";
-      case "source2":
-        return `
-            import "source1" as s1
-            y=2`;
-      case "source3":
-        return `
-            import "source2" as s2
-            z=3`;
-      default:
-        throw new Error(`source ${sourceName} not found`);
-    }
-  };
-
-  const mainSource = `
-    import "source1" as s1
-    import "source2" as s2
-    import "source3" as s3
-    a = s1.x + s2.y + s3.z
-    b = doubleX
-    a
-  `;
-
-  const doubleXSource = `
-    import "source1" as s1
-    doubleX = s1.x * 2
-  `;
-
-  /* First possible approach is to pre-load imports with loadImportsRecursively, and then use project.run() */
-  test("explicit loadImportsRecursively", async () => {
-    const project = SqProject.create({ resolver: (name) => name });
-
-    project.setSource("main", mainSource);
-    /* Setting source requires parsing and loading the imports recursively */
-    await project.loadImportsRecursively("main", loadSource); // Not visited yet
-
-    /* Let's salt it more. Let's have another source in the project which also has imports */
-    /* doubleX imports source1 which is eventually imported by main as well */
-    project.setSource("doubleX", doubleXSource);
-    await project.loadImportsRecursively("doubleX", loadSource);
-    /* Remember, any time you set a source, you need to load imports recursively */
-
-    /* As doubleX is not imported by main, it is not loaded recursively.
-         So we link it to the project as a dependency */
-    project.setContinues("main", ["doubleX"]);
-
-    /* Let's run the project */
-    await project.runAll();
-    const output = project.getOutput("main");
-
-    /* And see the result and bindings.. */
-    expect(output).toBeOkOutput("6", "{a: 6,b: 2}");
-    /* Everything as expected */
-  });
-
-  /* Second approach is to use async runWithImports method; this is recommended */
-  test("runWithImports", async () => {
-    const project = SqProject.create({ resolver: (name) => name });
-
-    project.setSource("main", mainSource);
-    project.setSource("doubleX", doubleXSource);
-
-    project.setContinues("main", ["doubleX"]);
-
-    /* Let's run the project; this method will load imports recursively for you */
-    await project.runWithImports("main", loadSource);
-
-    const output = project.getOutput("main");
-
-    expect(output).toBeOkOutput("6", "{a: 6,b: 2}");
   });
 });

@@ -143,7 +143,12 @@ describe("removing sources", () => {
 
 describe("project with import", () => {
   const project = SqProject.create({
-    resolver: (name) => name,
+    resolver: {
+      resolve: (name) => name,
+      loadSource: () => {
+        throw new Error("Loading not supported");
+      },
+    },
   });
 
   project.setSource(

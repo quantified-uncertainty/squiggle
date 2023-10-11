@@ -48,12 +48,12 @@ export class SqProject {
     return new SqProject(options);
   }
 
-  setEnvironment(environment: Env) {
-    this.environment = environment;
-  }
-
   getEnvironment(): Env {
     return this.environment;
+  }
+
+  setEnvironment(environment: Env) {
+    this.environment = environment;
   }
 
   getStdLib(): Bindings {
@@ -323,19 +323,30 @@ export class SqProject {
   }
 
   async runAll() {
+    // preload all imports
+    if (this.resolver) {
+      for (const id of this.getSourceIds()) {
+        await this.loadImportsRecursively(id);
+      }
+    }
+
+    // we intentionally call `getRunOrder` again because the order could've changed after we analyzed imports
     await this.runIds(this.getRunOrder());
   }
 
-  // Deprecated; this method won't handle imports correctly.
-  // Use `runWithImports` instead.
   async run(sourceId: string) {
-    await this.runIds(Topology.getRunOrderFor(this, sourceId));
+    if (this.resolver) {
+      await this.loadImportsRecursively(sourceId);
+    }
+    await this.runIds(this.getRunOrderFor(sourceId));
   }
 
-  async loadImportsRecursively(
-    initialSourceName: string,
-    loadSource: (sourceId: string) => Promise<string>
-  ) {
+  async loadImportsRecursively(initialSourceName: string) {
+    const resolver = this.resolver;
+    if (!resolver) {
+      return;
+    }
+
     const visited = new Set<string>();
     const inner = async (sourceName: string) => {
       if (visited.has(sourceName)) {
@@ -352,26 +363,19 @@ export class SqProject {
       }
 
       for (const newImportId of rImportIds.value) {
-        // We have got one of the new imports.
-        // Let's load it and add it to the project.
-        const newSource = await loadSource(newImportId);
-        this.setSource(newImportId, newSource);
+        if (this.getSource(newImportId) === undefined) {
+          // We have got one of the new imports.
+          // Let's load it and add it to the project.
+          const newSource = await resolver.loadSource(newImportId);
+          this.setSource(newImportId, newSource);
+        }
         // The new source is loaded and added to the project.
         // Of course the new source might have imports too.
         // Let's recursively load them.
-        await this.loadImportsRecursively(newImportId, loadSource);
+        await this.loadImportsRecursively(newImportId);
       }
     };
     await inner(initialSourceName);
-  }
-
-  async runWithImports(
-    sourceId: string,
-    loadSource: (sourceId: string) => Promise<string>
-  ) {
-    await this.loadImportsRecursively(sourceId, loadSource);
-
-    await this.run(sourceId);
   }
 
   findValuePathByOffset(
@@ -394,15 +398,4 @@ export class SqProject {
     }
     return Result.Ok(found);
   }
-}
-
-// ------------------------------------------------------------------------------------
-
-// Shortcut for running a single piece of code without creating a project
-export function evaluate(sourceCode: string): SqOutputResult {
-  const project = SqProject.create();
-  project.setSource("main", sourceCode);
-  project.runAll();
-
-  return project.getOutput("main");
 }
