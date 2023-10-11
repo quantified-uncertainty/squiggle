@@ -20,6 +20,7 @@ import { EditModelExports } from "@/components/exports/EditModelExports";
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
 import { useMutationForm } from "@/hooks/useMutationForm";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
+import { squiggleHubLinker } from "@/squiggle/components/linker";
 
 type FormShape = {
   code: string;
@@ -160,6 +161,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
         <div ref={ref}>
           <VersionedSquigglePlayground
             version={version}
+            linker={squiggleHubLinker}
             height={height ?? "100vh"}
             onCodeChange={onCodeChange}
             defaultCode={defaultCode}

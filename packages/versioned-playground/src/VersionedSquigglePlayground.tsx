@@ -42,9 +42,18 @@ type CommonProps = {
   height?: string | number;
 };
 
-type Props = CommonProps & {
-  version: string; // not SquiggleVersion, because it's easier to validate the version inside this component
+// supported only in modern playgrounds
+type LinkerProps = {
+  linker?: {
+    resolve: (name: string, fromId: string) => string;
+    loadSource: (sourceId: string) => Promise<string>;
+  };
 };
+
+type Props = CommonProps &
+  LinkerProps & {
+    version: string; // not SquiggleVersion, because it's easier to validate the version inside this component
+  };
 
 export const VersionedSquigglePlayground: FC<Props> = ({
   version,
@@ -79,6 +88,9 @@ export const VersionedSquigglePlayground: FC<Props> = ({
         onCodeChange={props.onCodeChange}
         onSettingsChange={props.onSettingsChange}
         height={props.height}
+        // older playgrounds don't support this, it'll be ignored, that's fine
+        // (TODO: why TypeScript doesn't error on this, if `linker` prop doesn't exist in 0.8.5? no idea)
+        linker={props.linker}
       />
     </Suspense>
   );

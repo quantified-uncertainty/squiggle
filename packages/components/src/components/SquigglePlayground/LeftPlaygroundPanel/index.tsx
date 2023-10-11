@@ -7,7 +7,7 @@ import {
   useRef,
 } from "react";
 
-import { SqValuePath } from "@quri/squiggle-lang";
+import { SqProject, SqValuePath } from "@quri/squiggle-lang";
 import { Bars3CenterLeftIcon } from "@quri/ui";
 
 import {
@@ -31,6 +31,7 @@ export type RenderExtraControls = (props: {
 }) => ReactNode;
 
 type Props = {
+  project: SqProject;
   defaultCode?: string;
   onCodeChange?(code: string): void;
   settings: PlaygroundSettings;
@@ -49,6 +50,8 @@ type Props = {
 export type LeftPlaygroundPanelHandle = {
   getEditor(): CodeEditorHandle | null; // used by "find in editor" feature
   getLeftPanelElement(): HTMLDivElement | null; // used by local settings modal window positioning
+  run(): void; // force re-run
+  invalidate(): void; // mark output as stale but don't re-run if autorun is disabled; useful on environment changes, triggered in <SquigglePlayground> code
 };
 
 export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
@@ -62,8 +65,8 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
 
     const [squiggleOutput, { project, isRunning, sourceId }] = useSquiggle({
       code: runnerState.renderedCode,
+      project: props.project,
       executionId: runnerState.executionId,
-      environment: props.settings.environment,
     });
 
     const { onOutputChange } = props;
@@ -87,6 +90,12 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
     useImperativeHandle(ref, () => ({
       getEditor: () => editorRef.current,
       getLeftPanelElement: () => containerRef.current,
+      run: () => runnerState.run(),
+      invalidate: () => {
+        if (runnerState.autorunMode) {
+          runnerState.run();
+        }
+      },
     }));
 
     const renderToolbar = ({
@@ -117,7 +126,7 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
           // see https://github.com/quantified-uncertainty/squiggle/issues/1952
           defaultValue={code}
           errors={errors}
-          height={"100%"}
+          height="100%"
           project={project}
           sourceId={sourceId}
           showGutter={true}
