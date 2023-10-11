@@ -1,5 +1,5 @@
 import { BaseDist } from "../dist/BaseDist.js";
-import { DistError, argumentError } from "../dist/DistError.js";
+import { argumentError } from "../dist/DistError.js";
 import * as SymbolicDist from "../dist/SymbolicDist.js";
 import * as distOperations from "../dist/distOperations/index.js";
 import { Env } from "../dist/env.js";

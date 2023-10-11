@@ -1,12 +1,6 @@
-import { REOther, RESymbolNotFound } from "../../errors/messages.js";
-import { ReducerContext } from "../../reducer/context.js";
 import { BuiltinLambda, Lambda } from "../../reducer/lambda.js";
 import { Value } from "../../value/index.js";
-import {
-  FnDefinition,
-  fnDefinitionToString,
-  tryCallFnDefinition,
-} from "./fnDefinition.js";
+import { FnDefinition } from "./fnDefinition.js";
 
 export type FRFunction = {
   name: string;
@@ -66,28 +60,6 @@ export class Registry {
 
   allNames(): string[] {
     return [...this.fnNameDict.keys()];
-  }
-
-  call(fnName: string, args: Value[], context: ReducerContext): Value {
-    const definitions = this.fnNameDict.get(fnName);
-    if (definitions === undefined) {
-      throw new RESymbolNotFound(fnName);
-    }
-    const showNameMatchDefinitions = () => {
-      const defsString = definitions
-        .map(fnDefinitionToString)
-        .map((def) => `  ${fnName}${def}\n`)
-        .join("");
-      return `There are function matches for ${fnName}(), but with different arguments:\n${defsString}`;
-    };
-
-    for (const definition of definitions) {
-      const callResult = tryCallFnDefinition(definition, args, context);
-      if (callResult !== undefined) {
-        return callResult;
-      }
-    }
-    throw new REOther(showNameMatchDefinitions());
   }
 
   makeLambda(fnName: string): Lambda {

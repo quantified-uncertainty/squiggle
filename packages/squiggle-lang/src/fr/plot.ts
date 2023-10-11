@@ -15,7 +15,7 @@ import {
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { Lambda } from "../reducer/lambda.js";
+import { Lambda, UserDefinedLambda } from "../reducer/lambda.js";
 import { LabeledDistribution, Scale, VDomain, vPlot } from "../value/index.js";
 
 const maker = new FnFactory({
@@ -78,7 +78,13 @@ function extractDomainFromOneArgFunction(fn: Lambda): VDomain | undefined {
       )}] parameters.`
     );
   }
-  const domain = fn.getParameters()[0]?.domain;
+
+  let domain;
+  if (fn instanceof UserDefinedLambda) {
+    domain = fn.parameters[0]?.domain;
+  } else {
+    domain = undefined;
+  }
   // We could also verify a domain here, to be more confident that the function expects numeric args.
   // But we might get other numeric domains besides `NumericRange`, so checking domain type here would be risky.
   return domain;

@@ -27,14 +27,9 @@ export type CalculatorState = {
 
 // This function is used to determine if a calculator has changed.
 // It's obviously not perfect - it doesn't capture changes within the calculator function, but this would be much more complicated.
-export function calculatorHash(calc: SqCalculator): string {
-  const rowData = JSON.stringify(calc.fields);
-  const paramData = (calc.parameters || []).join(",");
-  return rowData + paramData + calc.description;
-}
 
 export function hasSameCalculator(state: CalculatorState, calc: SqCalculator) {
-  return calculatorHash(calc) === state.hash;
+  return calc.hashString === state.hash;
 }
 
 export function allFields(state: CalculatorState): FieldValue[] {
@@ -65,7 +60,7 @@ export function initialCalculatorState(
     fieldNames: calculator.fields.map((row) => row.name),
     fields,
     fn: {},
-    hash: calculatorHash(calculator),
+    hash: calculator.hashString,
   };
 }
 

@@ -59,7 +59,8 @@ export const FunctionChart: FC<FunctionChartProps> = ({
       </MessageAlert>
     );
   }
-  const domain = parameters[0].domain;
+  const definitions = fn.definitions();
+  const domain = definitions[0][0]?.domain;
 
   const min = domain?.min ?? settings.functionChartSettings.start;
   const max = domain?.max ?? settings.functionChartSettings.stop;

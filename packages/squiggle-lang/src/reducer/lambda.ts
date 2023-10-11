@@ -2,12 +2,7 @@ import { LocationRange } from "peggy";
 
 import { ASTNode } from "../ast/parse.js";
 import * as IError from "../errors/IError.js";
-import {
-  REArityError,
-  REDomainError,
-  REOther,
-  RESymbolNotFound,
-} from "../errors/messages.js";
+import { REArityError, REDomainError, REOther } from "../errors/messages.js";
 import { Expression } from "../expression/index.js";
 import { VDomain, Value } from "../value/index.js";
 import * as Context from "./context.js";
@@ -20,8 +15,9 @@ import {
 } from "../library/registry/fnDefinition.js";
 import uniq from "lodash/uniq.js";
 import { sort } from "../utility/E_A_Floats.js";
+import { FRType } from "../library/registry/frTypes.js";
 
-export type LambdaParameter = {
+export type UserDefinedLambdaParameter = {
   name: string;
   domain?: VDomain; // should this be Domain instead of VDomain?
 };
@@ -31,8 +27,8 @@ type LambdaBody = (args: Value[], context: ReducerContext) => Value;
 export abstract class Lambda {
   constructor(public body: LambdaBody) {}
 
+  abstract type: string;
   abstract getName(): string;
-  abstract getParameters(): LambdaParameter[];
   abstract toString(): string;
   abstract parameterString(): string;
   abstract paramCounts(): number[];
@@ -68,14 +64,15 @@ export abstract class Lambda {
 }
 
 // User-defined functions, e.g. `add2 = {|x, y| x + y}`, are instances of this class.
-export class SquiggleLambda extends Lambda {
-  parameters: LambdaParameter[];
+export class UserDefinedLambda extends Lambda {
+  public parameters: UserDefinedLambdaParameter[];
   location: LocationRange;
   name?: string;
+  type = "UserDefinedLambda";
 
   constructor(
     name: string | undefined,
-    parameters: LambdaParameter[],
+    parameters: UserDefinedLambdaParameter[],
     stack: Stack,
     body: Expression,
     location: LocationRange
@@ -119,10 +116,6 @@ export class SquiggleLambda extends Lambda {
     return this.name || "<anonymous>";
   }
 
-  getParameters() {
-    return this.parameters;
-  }
-
   _getParameterNames() {
     return this.parameters.map((parameter) => parameter.name);
   }
@@ -142,22 +135,19 @@ export class SquiggleLambda extends Lambda {
 
 // Stdlib functions (everything in FunctionRegistry) are instances of this class.
 export class BuiltinLambda extends Lambda {
-  definitions: FnDefinition[];
+  type = "BuiltinLambda";
+  _definitions: FnDefinition[];
 
   constructor(
     public name: string,
     definitions: FnDefinition[]
   ) {
     super((args, context) => this._call(args, context));
-    this.definitions = definitions;
+    this._definitions = definitions;
   }
 
   getName() {
     return this.name;
-  }
-
-  getParameters(): LambdaParameter[] {
-    return [{ name: "..." }];
   }
 
   toString() {
@@ -165,11 +155,15 @@ export class BuiltinLambda extends Lambda {
   }
 
   parameterString() {
-    return "...";
+    return this._definitions.map(fnDefinitionToString).join(" | ");
+  }
+
+  definitions(): FRType<any>[][] {
+    return this._definitions.map((d) => d.inputs);
   }
 
   _call(args: Value[], context: ReducerContext): Value {
-    const definitions = this.definitions;
+    const definitions = this._definitions;
     const showNameMatchDefinitions = () => {
       const defsString = definitions
         .map(fnDefinitionToString)
@@ -188,6 +182,6 @@ export class BuiltinLambda extends Lambda {
   }
 
   paramCounts() {
-    return sort(uniq(this.definitions.map((d) => d.inputs.length)));
+    return sort(uniq(this._definitions.map((d) => d.inputs.length)));
   }
 }

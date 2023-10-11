@@ -6,7 +6,7 @@ import {
   REDictPropertyNotFound,
   REOther,
 } from "../errors/messages.js";
-import { Lambda } from "../reducer/lambda.js";
+import { Lambda, UserDefinedLambda } from "../reducer/lambda.js";
 import * as DateTime from "../utility/DateTime.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { Domain } from "./domain.js";
@@ -130,17 +130,23 @@ class VLambda extends BaseValue implements Indexable {
 
   get(key: Value) {
     if (key.type === "String" && key.value === "parameters") {
-      const parameters = this.value.getParameters();
-      return vArray(
-        parameters.map((parameter) => {
-          const fields: [string, Value][] = [["name", vString(parameter.name)]];
-          if (parameter.domain) {
-            fields.push(["domain", parameter.domain]);
-          }
-
-          return vDict(ImmutableMap(fields));
-        })
-      );
+      if (this.value instanceof UserDefinedLambda) {
+        return vArray(
+          this.value.parameters.map((parameter) => {
+            const fields: [string, Value][] = [
+              ["name", vString(parameter.name)],
+            ];
+            if (parameter.domain) {
+              fields.push(["domain", parameter.domain]);
+            }
+            return vDict(ImmutableMap(fields));
+          })
+        );
+      } else {
+        throw new REOther(
+          "VLambda: Can't access parameters on a builtin lambda"
+        );
+      }
     }
     throw new REOther("No such field");
   }
