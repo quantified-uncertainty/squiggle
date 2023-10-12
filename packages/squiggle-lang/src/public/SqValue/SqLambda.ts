@@ -17,7 +17,9 @@ export type SqLambdaParameter = {
   typeName?: string;
 };
 
-function lambdaToSqLambdaParameters(lambda: Lambda): SqLambdaParameter[][] {
+type SqLambdaSignature = SqLambdaParameter[];
+
+function lambdaToSqLambdaSignatures(lambda: Lambda): SqLambdaSignature[] {
   if (lambda.type === "UserDefinedLambda") {
     return [
       lambda.parameters.map((param) => {
@@ -55,12 +57,12 @@ export class SqLambda {
     return new SqLambda(value.value);
   }
 
-  paramCounts() {
-    return this._value.paramCounts();
+  parameterCounts() {
+    return this._value.parameterCounts();
   }
 
-  definitions(): SqLambdaParameter[][] {
-    return lambdaToSqLambdaParameters(this._value);
+  signatures(): SqLambdaSignature[] {
+    return lambdaToSqLambdaSignatures(this._value);
   }
 
   call(args: SqValue[], env?: Env): result<SqValue, SqError> {

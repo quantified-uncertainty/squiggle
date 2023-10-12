@@ -17,7 +17,6 @@ import {
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 import { DistFunctionChart } from "./DistFunctionChart.js";
 import { NumericFunctionChart } from "./NumericFunctionChart.js";
-import includes from "lodash/includes.js";
 
 type FunctionChartProps = {
   fn: SqLambda;
@@ -51,16 +50,16 @@ export const FunctionChart: FC<FunctionChartProps> = ({
   environment,
   height,
 }) => {
-  const parameters = fn.paramCounts();
-  if (!includes(parameters, 1)) {
+  const parameters = fn.parameterCounts();
+  if (!parameters.includes(1)) {
     return (
       <MessageAlert heading="Function Display Not Supported">
         Only functions with one parameter are displayed.
       </MessageAlert>
     );
   }
-  const definitions = fn.definitions();
-  const domain = definitions[0][0]?.domain;
+  const signatures = fn.signatures();
+  const domain = signatures[0][0]?.domain;
 
   const min = domain?.min ?? settings.functionChartSettings.start;
   const max = domain?.max ?? settings.functionChartSettings.stop;

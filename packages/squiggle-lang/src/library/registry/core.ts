@@ -66,6 +66,11 @@ export class Registry {
     if (!this.fnNameDict.has(fnName)) {
       throw new Error(`Function ${fnName} doesn't exist in registry`);
     }
-    return new BuiltinLambda(fnName, this.fnNameDict.get(fnName) || []);
+    const definitions = this.fnNameDict.get(fnName);
+    if (definitions === undefined) {
+      throw new Error(`Function ${fnName} has no definitions`);
+    } else {
+      return new BuiltinLambda(fnName, definitions);
+    }
   }
 }

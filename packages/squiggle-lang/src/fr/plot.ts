@@ -69,7 +69,7 @@ function createScale(scale: Scale | null, domain: VDomain | undefined): Scale {
 
 // This function both extract the domain and checks that the function has only one parameter.
 function extractDomainFromOneArgFunction(fn: Lambda): VDomain | undefined {
-  const counts = fn.paramCounts();
+  const counts = fn.parameterCounts();
   if (!counts.includes(1)) {
     throw new REOther(
       `Plots only work with functions that have one parameter. This function only supports ${fn.parameterCountString()} parameters.`

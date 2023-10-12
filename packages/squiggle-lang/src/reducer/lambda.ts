@@ -31,7 +31,7 @@ export abstract class BaseLambda {
   abstract getName(): string;
   abstract toString(): string;
   abstract parameterString(): string;
-  abstract paramCounts(): number[];
+  abstract parameterCounts(): number[];
   abstract parameterCountString(): string;
 
   callFrom(
@@ -66,7 +66,7 @@ export abstract class BaseLambda {
 
 // User-defined functions, e.g. `add2 = {|x, y| x + y}`, are instances of this class.
 export class UserDefinedLambda extends BaseLambda {
-  public parameters: UserDefinedLambdaParameter[];
+  parameters: UserDefinedLambdaParameter[];
   location: LocationRange;
   name?: string;
   readonly type = "UserDefinedLambda";
@@ -129,7 +129,7 @@ export class UserDefinedLambda extends BaseLambda {
     return `lambda(${this._getParameterNames().join(",")}=>internal code)`;
   }
 
-  paramCounts() {
+  parameterCounts() {
     return [this.parameters.length];
   }
 
@@ -190,7 +190,7 @@ export class BuiltinLambda extends BaseLambda {
     throw new REOther(showNameMatchDefinitions());
   }
 
-  paramCounts() {
+  parameterCounts() {
     return sort(uniq(this._signatures.map((d) => d.inputs.length)));
   }
 }

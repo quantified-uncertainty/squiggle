@@ -16,7 +16,7 @@ import {
   frTuple,
 } from "../library/registry/frTypes.js";
 
-function parseDistFromType(d: number | BaseDist): BaseDist {
+function parseDistFromDistOrNumber(d: number | BaseDist): BaseDist {
   if (d instanceof BaseDist) {
     return d;
   } else {
@@ -42,22 +42,10 @@ function mixtureWithDefaultWeights(distributions: BaseDist[], env: Env) {
   return mixtureWithGivenWeights(distributions, weights, env);
 }
 
-function mixtureWithWeightsAndMapping(
-  dists: (number | BaseDist)[],
-  weights: number[],
-  environment: any
-): Value {
-  return mixtureWithGivenWeights(
-    dists.map(parseDistFromType),
-    weights,
-    environment
-  );
-}
-
 const singleArrayDef = makeDefinition(
   [frArray(frDistOrNumber)],
   ([ar], { environment }) =>
-    mixtureWithDefaultWeights(ar.map(parseDistFromType), environment)
+    mixtureWithDefaultWeights(ar.map(parseDistFromDistOrNumber), environment)
 );
 
 const twoArraysDef = makeDefinition(
@@ -71,7 +59,7 @@ const twoArraysDef = makeDefinition(
       );
     }
     return mixtureWithGivenWeights(
-      dists.map(parseDistFromType),
+      dists.map(parseDistFromDistOrNumber),
       weights,
       environment
     );
@@ -82,7 +70,11 @@ const twoToFiveDistsWithWeightsDefs = [
   makeDefinition(
     [frDistOrNumber, frDistOrNumber, frTuple(frNumber, frNumber)],
     ([dist1, dist2, weights], { environment }) =>
-      mixtureWithWeightsAndMapping([dist1, dist2], weights, environment)
+      mixtureWithGivenWeights(
+        [dist1, dist2].map(parseDistFromDistOrNumber),
+        weights,
+        environment
+      )
   ),
   makeDefinition(
     [
@@ -92,7 +84,11 @@ const twoToFiveDistsWithWeightsDefs = [
       frTuple(frNumber, frNumber, frNumber),
     ],
     ([dist1, dist2, dist3, weights], { environment }) =>
-      mixtureWithWeightsAndMapping([dist1, dist2, dist3], weights, environment)
+      mixtureWithGivenWeights(
+        [dist1, dist2, dist3].map(parseDistFromDistOrNumber),
+        weights,
+        environment
+      )
   ),
   makeDefinition(
     [
@@ -103,8 +99,8 @@ const twoToFiveDistsWithWeightsDefs = [
       frTuple(frNumber, frNumber, frNumber, frNumber),
     ],
     ([dist1, dist2, dist3, dist4, weights], { environment }) =>
-      mixtureWithWeightsAndMapping(
-        [dist1, dist2, dist3, dist4],
+      mixtureWithGivenWeights(
+        [dist1, dist2, dist3, dist4].map(parseDistFromDistOrNumber),
         weights,
         environment
       )
@@ -119,8 +115,8 @@ const twoToFiveDistsWithWeightsDefs = [
       frTuple(frNumber, frNumber, frNumber, frNumber, frNumber),
     ],
     ([dist1, dist2, dist3, dist4, dist5, weights], { environment }) =>
-      mixtureWithWeightsAndMapping(
-        [dist1, dist2, dist3, dist4, dist5],
+      mixtureWithGivenWeights(
+        [dist1, dist2, dist3, dist4, dist5].map(parseDistFromDistOrNumber),
         weights,
         environment
       )
@@ -132,7 +128,10 @@ const oneToFiveDistsDefs = Array.from({ length: 5 }, (_, i) => {
   return makeDefinition(
     frArgs,
     (args: (number | BaseDist)[], { environment }) =>
-      mixtureWithDefaultWeights(args.map(parseDistFromType), environment)
+      mixtureWithDefaultWeights(
+        args.map(parseDistFromDistOrNumber),
+        environment
+      )
   );
 });
 
@@ -143,4 +142,4 @@ const defs = [
   ...oneToFiveDistsDefs,
 ];
 
-export const mxLambda = () => new BuiltinLambda("mx", defs);
+export const mxLambda = (name: string) => new BuiltinLambda(name, defs);

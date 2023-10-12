@@ -96,7 +96,7 @@ export const library = [
     definitions: [
       makeDefinition([frArray(frAny), frLambda], ([array, lambda], context) => {
         const mapped: Value[] = new Array(array.length);
-        const counts = lambda.paramCounts();
+        const counts = lambda.parameterCounts();
 
         // this code is intentionally duplicated for performance reasons
         if (counts.includes(2)) {

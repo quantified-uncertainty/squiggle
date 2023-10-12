@@ -289,10 +289,10 @@ class VCalculator extends BaseValue {
 
   constructor(public value: Calculator) {
     super();
-    if (!value.fn.paramCounts().includes(value.fields.length)) {
+    if (!value.fn.parameterCounts().includes(value.fields.length)) {
       this.setError(
         `Calculator function needs ${value.fn
-          .paramCounts()
+          .parameterCounts()
           .join(", ")} parameters, but ${
           value.fields.length
         } fields were provided.`
