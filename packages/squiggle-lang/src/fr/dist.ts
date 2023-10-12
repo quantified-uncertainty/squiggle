@@ -16,6 +16,7 @@ import { OtherOperationError } from "../operationError.js";
 import * as Result from "../utility/result.js";
 import { Value, vDist } from "../value/index.js";
 import { distResultToValue } from "./genericDist.js";
+import { mixtureDefinitions } from "./mixture.js";
 
 export const CI_CONFIG = [
   { lowKey: "p5", highKey: "p95", probability: 0.9 },
@@ -144,6 +145,16 @@ function makeOneArgDist(
 }
 
 export const library: FRFunction[] = [
+  maker.make({
+    name: "mx",
+    examples: ["mx(1,normal(5,2))"],
+    definitions: mixtureDefinitions,
+  }),
+  maker.make({
+    name: "mixture",
+    examples: ["mixture(1,normal(5,2))"],
+    definitions: mixtureDefinitions,
+  }),
   maker.make({
     name: "normal",
     examples: [

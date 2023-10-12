@@ -115,7 +115,7 @@ describe("frArray", () => {
   });
 });
 
-test("frTuple", () => {
+describe("frTuple", () => {
   test("two elements", () => {
     const arr = [3, "foo"] as [number, string];
     const value = vArray([vNumber(arr[0]), vString(arr[1])]);

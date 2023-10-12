@@ -6,11 +6,7 @@ import { vLambda } from "../value/index.js";
 import { Bindings } from "../reducer/stack.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { makeMathConstants } from "./math.js";
-import {
-  makeSquiggleBindings,
-  nonRegistryLambdas,
-  registry,
-} from "./registry/index.js";
+import { makeSquiggleBindings, registry } from "./registry/index.js";
 import { makeVersionConstant } from "./version.js";
 import { frAny } from "./registry/frTypes.js";
 import { makeDefinition } from "./registry/fnDefinition.js";
@@ -38,11 +34,6 @@ function makeStdLib(): Bindings {
 
   // field lookups
   res = res.set(INDEX_LOOKUP_FUNCTION, vLambda(makeLookupLambda()));
-
-  // some lambdas can't be expressed in function registry (e.g. `mx` with its variadic number of parameters)
-  for (const [name, lambda] of nonRegistryLambdas) {
-    res = res.set(name, vLambda(lambda));
-  }
 
   // bind the entire FunctionRegistry
   for (const name of registry.allNames()) {

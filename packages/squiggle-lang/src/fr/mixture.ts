@@ -5,7 +5,6 @@ import * as distOperations from "../dist/distOperations/index.js";
 import { Env } from "../dist/env.js";
 import { unpackDistResult } from "../library/registry/helpers.js";
 import { REDistributionError } from "../errors/messages.js";
-import { BuiltinLambda } from "../reducer/lambda.js";
 import * as E_A from "../utility/E_A.js";
 import { Value, vDist } from "../value/index.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
@@ -135,11 +134,9 @@ const oneToFiveDistsDefs = Array.from({ length: 5 }, (_, i) => {
   );
 });
 
-const defs = [
+export const mixtureDefinitions = [
   singleArrayDef,
   twoArraysDef,
   ...twoToFiveDistsWithWeightsDefs,
   ...oneToFiveDistsDefs,
 ];
-
-export const mxLambda = (name: string) => new BuiltinLambda(name, defs);
