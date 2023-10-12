@@ -143,4 +143,4 @@ const defs = [
   ...oneToFiveDistsDefs,
 ];
 
-export const mxLambda = new BuiltinLambda("mx", defs);
+export const mxLambda = () => new BuiltinLambda("mx", defs);

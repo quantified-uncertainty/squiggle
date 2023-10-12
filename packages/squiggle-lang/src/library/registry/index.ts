@@ -52,9 +52,9 @@ const fnList: FRFunction[] = [
 
 export const registry = Registry.make(fnList);
 
-export const nonRegistryLambdas: [string, Lambda][] = [
-  ["mx", mxLambda],
-  ["mixture", mxLambda],
+export const nonRegistryLambdas: () => [string, Lambda][] = () => [
+  ["mx", mxLambda()],
+  ["mixture", mxLambda()],
 ];
 
 export function makeSquiggleBindings(builtins: Bindings): Bindings {

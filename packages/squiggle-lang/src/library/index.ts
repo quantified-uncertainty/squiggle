@@ -40,7 +40,7 @@ function makeStdLib(): Bindings {
   res = res.set(INDEX_LOOKUP_FUNCTION, vLambda(makeLookupLambda()));
 
   // some lambdas can't be expressed in function registry (e.g. `mx` with its variadic number of parameters)
-  for (const [name, lambda] of nonRegistryLambdas) {
+  for (const [name, lambda] of nonRegistryLambdas()) {
     res = res.set(name, vLambda(lambda));
   }
 

@@ -28,27 +28,27 @@ export type FRType<T> = {
 
 export const frNumber: FRType<number> = {
   unpack: (v: Value) => (v.type === "Number" ? v.value : undefined),
-  pack: vNumber,
+  pack: (v) => vNumber(v),
   getName: () => "number",
 };
 export const frString: FRType<string> = {
   unpack: (v: Value) => (v.type === "String" ? v.value : undefined),
-  pack: vString,
+  pack: (v) => vString(v),
   getName: () => "string",
 };
 export const frBool: FRType<boolean> = {
   unpack: (v: Value) => (v.type === "Bool" ? v.value : undefined),
-  pack: vBool,
+  pack: (v) => vBool(v),
   getName: () => "bool",
 };
 export const frDate: FRType<Date> = {
   unpack: (v) => (v.type === "Date" ? v.value : undefined),
-  pack: vDate,
+  pack: (v) => vDate(v),
   getName: () => "date",
 };
 export const frTimeDuration: FRType<number> = {
   unpack: (v) => (v.type === "TimeDuration" ? v.value : undefined),
-  pack: vTimeDuration,
+  pack: (v) => vTimeDuration(v),
   getName: () => "duration",
 };
 export const frDistOrNumber: FRType<BaseDist | number> = {
@@ -59,17 +59,17 @@ export const frDistOrNumber: FRType<BaseDist | number> = {
 };
 export const frDist: FRType<BaseDist> = {
   unpack: (v) => (v.type === "Dist" ? v.value : undefined),
-  pack: vDist,
+  pack: (v) => vDist(v),
   getName: () => "distribution",
 };
 export const frLambda: FRType<Lambda> = {
   unpack: (v) => (v.type === "Lambda" ? v.value : undefined),
-  pack: vLambda,
+  pack: (v) => vLambda(v),
   getName: () => "lambda",
 };
 export const frScale: FRType<Scale> = {
   unpack: (v) => (v.type === "Scale" ? v.value : undefined),
-  pack: vScale,
+  pack: (v) => vScale(v),
   getName: () => "scale",
 };
 
