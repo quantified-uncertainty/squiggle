@@ -47,7 +47,7 @@ describe("Plot", () => {
       `Plot.numericFn({
         fn: {|x, y| x * y}
       })`,
-      "Error(Error: Plots only work with functions that have one parameter. This function only supports [2] parameters.)"
+      "Error(Error: Plots only work with functions that have one parameter. This function only supports 2 parameters.)"
     );
 
     testPlotResult(
@@ -129,7 +129,7 @@ describe("Plot", () => {
       `Plot.distFn({
         fn: {|x,y| x to x + y}
        })`,
-      "Error(Error: Plots only work with functions that have one parameter. This function only supports [2] parameters.)"
+      "Error(Error: Plots only work with functions that have one parameter. This function only supports 2 parameters.)"
     );
   });
 

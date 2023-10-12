@@ -10,7 +10,6 @@ import { Lambda, UserDefinedLambda } from "../reducer/lambda.js";
 import * as DateTime from "../utility/DateTime.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { Domain } from "./domain.js";
-import includes from "lodash/includes.js";
 
 export type ValueMap = ImmutableMap<string, Value>;
 
@@ -144,9 +143,7 @@ class VLambda extends BaseValue implements Indexable {
           })
         );
       } else {
-        throw new REOther(
-          "VLambda: Can't access parameters on a builtin lambda"
-        );
+        throw new REOther("Can't access parameters on built in functions");
       }
     }
     throw new REOther("No such field");
@@ -292,9 +289,9 @@ class VCalculator extends BaseValue {
 
   constructor(public value: Calculator) {
     super();
-    if (!includes(value.fn.paramCounts(), value.fields.length)) {
+    if (!value.fn.paramCounts().includes(value.fields.length)) {
       this.setError(
-        `Calculator function has ${value.fn
+        `Calculator function needs ${value.fn
           .paramCounts()
           .join(", ")} parameters, but ${
           value.fields.length

@@ -32,6 +32,7 @@ export abstract class Lambda {
   abstract toString(): string;
   abstract parameterString(): string;
   abstract paramCounts(): number[];
+  abstract getParameterCountString(): string;
 
   callFrom(
     args: Value[],
@@ -131,6 +132,10 @@ export class UserDefinedLambda extends Lambda {
   paramCounts() {
     return [this.parameters.length];
   }
+
+  getParameterCountString() {
+    return this.parameters.length.toString();
+  }
 }
 
 // Stdlib functions (everything in FunctionRegistry) are instances of this class.
@@ -156,6 +161,10 @@ export class BuiltinLambda extends Lambda {
 
   parameterString() {
     return this._definitions.map(fnDefinitionToString).join(" | ");
+  }
+
+  getParameterCountString() {
+    return `[${this._definitions.map((d) => d.inputs.length).join(",")}]`;
   }
 
   definitions(): FRType<any>[][] {

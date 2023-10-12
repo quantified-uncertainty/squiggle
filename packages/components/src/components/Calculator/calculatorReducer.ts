@@ -25,9 +25,6 @@ export type CalculatorState = {
   hash: string;
 };
 
-// This function is used to determine if a calculator has changed.
-// It's obviously not perfect - it doesn't capture changes within the calculator function, but this would be much more complicated.
-
 export function hasSameCalculator(state: CalculatorState, calc: SqCalculator) {
   return calc.hashString === state.hash;
 }

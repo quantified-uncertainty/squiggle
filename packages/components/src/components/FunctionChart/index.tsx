@@ -52,7 +52,7 @@ export const FunctionChart: FC<FunctionChartProps> = ({
   height,
 }) => {
   const parameters = fn.paramCounts();
-  if (includes(parameters, 1)) {
+  if (!includes(parameters, 1)) {
     return (
       <MessageAlert heading="Function Display Not Supported">
         Only functions with one parameter are displayed.

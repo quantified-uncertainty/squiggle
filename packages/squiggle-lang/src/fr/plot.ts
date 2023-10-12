@@ -1,4 +1,3 @@
-import includes from "lodash/includes.js";
 import { PointMass } from "../dist/SymbolicDist.js";
 import { REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
@@ -71,11 +70,9 @@ function createScale(scale: Scale | null, domain: VDomain | undefined): Scale {
 // This function both extract the domain and checks that the function has only one parameter.
 function extractDomainFromOneArgFunction(fn: Lambda): VDomain | undefined {
   const counts = fn.paramCounts();
-  if (!includes(counts, 1)) {
+  if (!counts.includes(1)) {
     throw new REOther(
-      `Plots only work with functions that have one parameter. This function only supports [${counts.join(
-        ","
-      )}] parameters.`
+      `Plots only work with functions that have one parameter. This function only supports ${fn.getParameterCountString()} parameters.`
     );
   }
 
