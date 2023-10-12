@@ -130,9 +130,10 @@ class VLambda extends BaseValue implements Indexable {
 
   get(key: Value) {
     if (key.type === "String" && key.value === "parameters") {
-      if (this.value instanceof UserDefinedLambda) {
+      //Note: If you try using instanceof here, it won't work because of circular dependencies.
+      if (this.value.type === "UserDefinedLambda") {
         return vArray(
-          this.value.parameters.map((parameter) => {
+          (this.value as UserDefinedLambda).parameters.map((parameter) => {
             const fields: [string, Value][] = [
               ["name", vString(parameter.name)],
             ];
