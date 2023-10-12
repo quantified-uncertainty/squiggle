@@ -6,7 +6,7 @@ import {
   REDictPropertyNotFound,
   REOther,
 } from "../errors/messages.js";
-import { Lambda, UserDefinedLambda } from "../reducer/lambda.js";
+import { Lambda } from "../reducer/lambda.js";
 import * as DateTime from "../utility/DateTime.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { Domain } from "./domain.js";
@@ -132,7 +132,7 @@ class VLambda extends BaseValue implements Indexable {
       //Note: If you try using instanceof here, it won't work because of circular dependencies.
       if (this.value.type === "UserDefinedLambda") {
         return vArray(
-          (this.value as UserDefinedLambda).parameters.map((parameter) => {
+          this.value.parameters.map((parameter) => {
             const fields: [string, Value][] = [
               ["name", vString(parameter.name)],
             ];

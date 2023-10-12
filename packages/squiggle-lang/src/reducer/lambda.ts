@@ -24,15 +24,15 @@ export type UserDefinedLambdaParameter = {
 
 type LambdaBody = (args: Value[], context: ReducerContext) => Value;
 
-export abstract class Lambda {
+export abstract class BaseLambda {
   constructor(public body: LambdaBody) {}
 
-  abstract type: string;
+  abstract readonly type: string;
   abstract getName(): string;
   abstract toString(): string;
   abstract parameterString(): string;
   abstract paramCounts(): number[];
-  abstract getParameterCountString(): string;
+  abstract parameterCountString(): string;
 
   callFrom(
     args: Value[],
@@ -65,11 +65,11 @@ export abstract class Lambda {
 }
 
 // User-defined functions, e.g. `add2 = {|x, y| x + y}`, are instances of this class.
-export class UserDefinedLambda extends Lambda {
+export class UserDefinedLambda extends BaseLambda {
   public parameters: UserDefinedLambdaParameter[];
   location: LocationRange;
   name?: string;
-  type = "UserDefinedLambda";
+  readonly type = "UserDefinedLambda";
 
   constructor(
     name: string | undefined,
@@ -133,22 +133,22 @@ export class UserDefinedLambda extends Lambda {
     return [this.parameters.length];
   }
 
-  getParameterCountString() {
+  parameterCountString() {
     return this.parameters.length.toString();
   }
 }
 
 // Stdlib functions (everything in FunctionRegistry) are instances of this class.
-export class BuiltinLambda extends Lambda {
-  type = "BuiltinLambda";
-  _definitions: FnDefinition[];
+export class BuiltinLambda extends BaseLambda {
+  readonly type = "BuiltinLambda";
+  _signatures: FnDefinition[];
 
   constructor(
     public name: string,
-    definitions: FnDefinition[]
+    signatures: FnDefinition[]
   ) {
     super((args, context) => this._call(args, context));
-    this._definitions = definitions;
+    this._signatures = signatures;
   }
 
   getName() {
@@ -160,29 +160,29 @@ export class BuiltinLambda extends Lambda {
   }
 
   parameterString() {
-    return this._definitions.map(fnDefinitionToString).join(" | ");
+    return this._signatures.map(fnDefinitionToString).join(" | ");
   }
 
-  getParameterCountString() {
-    return `[${this._definitions.map((d) => d.inputs.length).join(",")}]`;
+  parameterCountString() {
+    return `[${this._signatures.map((d) => d.inputs.length).join(",")}]`;
   }
 
-  definitions(): FRType<any>[][] {
-    return this._definitions.map((d) => d.inputs);
+  signatures(): FRType<any>[][] {
+    return this._signatures.map((d) => d.inputs);
   }
 
   _call(args: Value[], context: ReducerContext): Value {
-    const definitions = this._definitions;
+    const signatures = this._signatures;
     const showNameMatchDefinitions = () => {
-      const defsString = definitions
+      const defsString = signatures
         .map(fnDefinitionToString)
         .map((def) => `  ${this.name}${def}\n`)
         .join("");
       return `There are function matches for ${this.name}(), but with different arguments:\n${defsString}`;
     };
 
-    for (const definition of definitions) {
-      const callResult = tryCallFnDefinition(definition, args, context);
+    for (const signature of signatures) {
+      const callResult = tryCallFnDefinition(signature, args, context);
       if (callResult !== undefined) {
         return callResult;
       }
@@ -191,6 +191,8 @@ export class BuiltinLambda extends Lambda {
   }
 
   paramCounts() {
-    return sort(uniq(this._definitions.map((d) => d.inputs.length)));
+    return sort(uniq(this._signatures.map((d) => d.inputs.length)));
   }
 }
+
+export type Lambda = UserDefinedLambda | BuiltinLambda;

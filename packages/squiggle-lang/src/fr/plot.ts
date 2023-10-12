@@ -72,12 +72,12 @@ function extractDomainFromOneArgFunction(fn: Lambda): VDomain | undefined {
   const counts = fn.paramCounts();
   if (!counts.includes(1)) {
     throw new REOther(
-      `Plots only work with functions that have one parameter. This function only supports ${fn.getParameterCountString()} parameters.`
+      `Plots only work with functions that have one parameter. This function only supports ${fn.parameterCountString()} parameters.`
     );
   }
 
   let domain;
-  if (fn instanceof UserDefinedLambda) {
+  if (fn.type === "UserDefinedLambda") {
     domain = fn.parameters[0]?.domain;
   } else {
     domain = undefined;

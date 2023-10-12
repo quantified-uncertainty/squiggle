@@ -2,14 +2,14 @@ import { Env } from "../dist/env.js";
 import { Stack } from "./stack.js";
 import { FrameStack, topFrameName } from "./frameStack.js";
 import { ReducerFn, evaluate } from "./index.js";
-import { Lambda } from "./lambda.js";
+import { BaseLambda } from "./lambda.js";
 
 export type ReducerContext = Readonly<{
   stack: Stack;
   environment: Env;
   frameStack: FrameStack;
   evaluate: ReducerFn;
-  inFunction: Lambda | undefined;
+  inFunction: BaseLambda | undefined;
 }>;
 
 export function createContext(environment: Env): ReducerContext {

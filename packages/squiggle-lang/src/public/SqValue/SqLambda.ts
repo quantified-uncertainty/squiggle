@@ -2,11 +2,7 @@ import { Env } from "../../dist/env.js";
 import { IRuntimeError } from "../../errors/IError.js";
 import { getStdLib } from "../../library/index.js";
 import { createContext } from "../../reducer/context.js";
-import {
-  BuiltinLambda,
-  Lambda,
-  UserDefinedLambda,
-} from "../../reducer/lambda.js";
+import { Lambda } from "../../reducer/lambda.js";
 import * as Result from "../../utility/result.js";
 import { result } from "../../utility/result.js";
 
@@ -22,7 +18,7 @@ export type SqLambdaParameter = {
 };
 
 function lambdaToSqLambdaParameters(lambda: Lambda): SqLambdaParameter[][] {
-  if (lambda instanceof UserDefinedLambda) {
+  if (lambda.type === "UserDefinedLambda") {
     return [
       lambda.parameters.map((param) => {
         return {
@@ -31,16 +27,14 @@ function lambdaToSqLambdaParameters(lambda: Lambda): SqLambdaParameter[][] {
         };
       }),
     ];
-  } else if (lambda instanceof BuiltinLambda) {
-    return lambda.definitions().map((def) =>
+  } else {
+    return lambda.signatures().map((def) =>
       def.map((p, index) => ({
         name: index.toString(),
         domain: undefined,
         typeName: p.getName(),
       }))
     );
-  } else {
-    throw new Error("Unknown lambda type");
   }
 }
 
