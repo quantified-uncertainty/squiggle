@@ -167,7 +167,7 @@ export class BuiltinLambda extends BaseLambda {
     return `[${this._signatures.map((d) => d.inputs.length).join(",")}]`;
   }
 
-  signatures(): FRType<any>[][] {
+  signatures(): FRType<unknown>[][] {
     return this._signatures.map((d) => d.inputs);
   }
 

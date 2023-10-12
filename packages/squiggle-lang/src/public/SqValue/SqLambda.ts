@@ -20,23 +20,24 @@ export type SqLambdaParameter = {
 type SqLambdaSignature = SqLambdaParameter[];
 
 function lambdaToSqLambdaSignatures(lambda: Lambda): SqLambdaSignature[] {
-  if (lambda.type === "UserDefinedLambda") {
-    return [
-      lambda.parameters.map((param) => {
-        return {
-          name: param.name,
-          domain: param.domain ? wrapDomain(param.domain.value) : undefined,
-        };
-      }),
-    ];
-  } else {
-    return lambda.signatures().map((def) =>
-      def.map((p, index) => ({
-        name: index.toString(),
-        domain: undefined,
-        typeName: p.getName(),
-      }))
-    );
+  switch (lambda.type) {
+    case "UserDefinedLambda":
+      return [
+        lambda.parameters.map((param) => {
+          return {
+            name: param.name,
+            domain: param.domain ? wrapDomain(param.domain.value) : undefined,
+          };
+        }),
+      ];
+    case "BuiltinLambda":
+      return lambda.signatures().map((def) =>
+        def.map((p, index) => ({
+          name: index.toString(),
+          domain: undefined,
+          typeName: p.getName(),
+        }))
+      );
   }
 }
 

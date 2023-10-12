@@ -1,4 +1,3 @@
-import { Lambda } from "../../reducer/lambda.js";
 import { FRFunction, Registry } from "./core.js";
 
 import { library as builtinLibrary } from "../../fr/builtin.js";
