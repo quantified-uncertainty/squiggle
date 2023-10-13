@@ -16,7 +16,7 @@ Distributions are created as [sample sets](/Docs/Api/DistSampleSet) by default. 
 
 ## Distribution Creation
 
-These are functions for creating primative distributions. Many of these could optionally take in distributions as inputs. In these cases, Monte Carlo Sampling will be used to generate the greater distribution. This can be used for simple hierarchical models.
+These are functions for creating primitive distributions. Many of these could optionally take in distributions as inputs. In these cases, Monte Carlo Sampling will be used to generate the greater distribution. This can be used for simple hierarchical models.
 
 See a longer tutorial on creating distributions [here](/docs/Guides/DistributionCreation).
 
@@ -196,6 +196,15 @@ mx([normal(5, 1), normal(10, 1)], [0.3, 0.7])
 ```
 
 ## Functions
+
+### make 
+
+Make a distribution, starting with either a number of a distribution.
+
+```
+make: (distribution|number) => distribution 
+```
+
 
 ### sample
 

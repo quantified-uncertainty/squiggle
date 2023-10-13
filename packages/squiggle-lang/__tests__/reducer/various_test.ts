@@ -109,19 +109,6 @@ describe("eval", () => {
   });
 });
 
-describe("test exceptions", () => {
-  testDescriptionEvalToBe(
-    "javascript exception",
-    "javascriptraise('div by 0')",
-    'Error(JS Exception: Error: "div by 0")'
-  );
-  // testDescriptionEvalToBe(
-  //   "rescript exception",
-  //   "rescriptraise()",
-  //   "Error(TODO: unhandled rescript exception)",
-  // )
-});
-
 describe("stacktraces", () => {
   test("nested calls", async () => {
     const result = await evaluateStringToResult(`

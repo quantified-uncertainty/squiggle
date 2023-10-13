@@ -10,7 +10,10 @@ describe("annotations", () => {
   });
 
   describe("wrong annotation", () => {
-    testEvalToBe("f(x: [3]) = x", "Error(Error: Expected two-value array)");
+    testEvalToBe(
+      "f(x: [3]) = x",
+      "Error(Argument Error: Expected two-value array)"
+    );
   });
 
   describe("runtime checks", () => {
@@ -39,7 +42,7 @@ describe("annotations", () => {
         throw new Error("expected error");
       }
       expect(result.value.toStringWithDetails())
-        .toEqual(`Error: Expected two-value array
+        .toEqual(`Argument Error: Expected two-value array
 Stack trace:
   g at line 1, column 14, file main
   h at line 1, column 39, file main

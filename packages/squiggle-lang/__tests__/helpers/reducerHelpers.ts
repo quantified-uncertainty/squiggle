@@ -67,11 +67,9 @@ export async function expectEvalToMatch(
 }
 
 export function testEvalToBe(expr: string, answer: string, only = false) {
-  if (only) {
-    test.only(expr, async () => await expectEvalToBe(expr, answer));
-  } else {
-    test(expr, async () => await expectEvalToBe(expr, answer));
-  }
+  only
+    ? test.only(expr, async () => await expectEvalToBe(expr, answer))
+    : test(expr, async () => await expectEvalToBe(expr, answer));
 }
 
 export function testEvalToMatch(expr: string, expected: string | RegExp) {

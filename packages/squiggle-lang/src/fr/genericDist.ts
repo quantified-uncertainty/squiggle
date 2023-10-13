@@ -86,7 +86,6 @@ export const library: FRFunction[] = [
     name: "sparkline",
     fn: (d, n, env) => unpackDistResult(d.toSparkline(n | 0, env)),
   }),
-  maker.d2s({ name: "toString", fn: (d) => d.toString() }),
   maker.d2n({
     name: "mean",
     fn: (d) => d.mean(),

@@ -7,7 +7,7 @@ import {
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { vArray, vBool, vString } from "../value/index.js";
+import { vArray, vBool, vString, isEqual } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "", // no namespaced versions
@@ -21,12 +21,6 @@ export const library = [
   maker.nn2n({ name: "multiply", fn: (x, y) => x * y }), // infix *
   maker.nn2n({ name: "divide", fn: (x, y) => x / y }), // infix /
   maker.nn2n({ name: "pow", fn: (x, y) => Math.pow(x, y) }), // infix ^
-  maker.nn2b({ name: "equal", fn: (x, y) => x === y }), // infix == on numbers
-  maker.bb2b({ name: "equal", fn: (x, y) => x === y }), // infix == on booleans
-  maker.ss2b({ name: "equal", fn: (x, y) => x === y }), // infix == on strings
-  maker.nn2b({ name: "unequal", fn: (x, y) => x !== y }), // infix != on numbers
-  maker.bb2b({ name: "unequal", fn: (x, y) => x !== y }), // infix != on booleans
-  maker.ss2b({ name: "unequal", fn: (x, y) => x !== y }), // infix != on strings
   maker.nn2b({ name: "smaller", fn: (x, y) => x < y }), // infix <
   maker.nn2b({ name: "smallerEq", fn: (x, y) => x <= y }), // infix <=
   maker.nn2b({ name: "larger", fn: (x, y) => x > y }), // infix >
@@ -70,6 +64,30 @@ export const library = [
     ],
   }),
   maker.make({
+    name: "equal",
+    definitions: [
+      makeDefinition([frAny, frAny], ([a, b]) => {
+        return vBool(isEqual(a, b));
+      }),
+    ],
+  }),
+  maker.make({
+    name: "unequal",
+    definitions: [
+      makeDefinition([frAny, frAny], ([a, b]) => {
+        return vBool(!isEqual(a, b));
+      }),
+    ],
+  }),
+  maker.make({
+    name: "typeOf",
+    definitions: [
+      makeDefinition([frAny], ([v]) => {
+        return vString(v.publicName);
+      }),
+    ],
+  }),
+  maker.make({
     name: "inspect",
     definitions: [
       makeDefinition([frAny], ([value]) => {
@@ -79,14 +97,6 @@ export const library = [
       makeDefinition([frAny, frString], ([value, label]) => {
         console.log(`${label}: ${value.toString()}`);
         return value;
-      }),
-    ],
-  }),
-  maker.make({
-    name: "javascriptraise",
-    definitions: [
-      makeDefinition([frAny], ([msg]) => {
-        throw new Error(msg.toString());
       }),
     ],
   }),

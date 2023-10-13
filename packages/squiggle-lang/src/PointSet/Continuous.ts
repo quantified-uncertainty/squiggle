@@ -49,16 +49,23 @@ export class ContinuousShape implements PointSet<ContinuousShape> {
     });
   }
 
-  lastY() {
+  lastY(): number {
     return XYShape.T.lastY(this.xyShape);
   }
 
-  minX() {
+  minX(): number {
     return XYShape.T.minX(this.xyShape);
   }
 
-  maxX() {
+  maxX(): number {
     return XYShape.T.maxX(this.xyShape);
+  }
+
+  isEqual(t: ContinuousShape): boolean {
+    return (
+      XYShape.T.isEqual(this.xyShape, t.xyShape) &&
+      this.interpolation === t.interpolation
+    );
   }
 
   mapY(

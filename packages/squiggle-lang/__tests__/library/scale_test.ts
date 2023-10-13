@@ -17,13 +17,13 @@ describe("Scales", () => {
     "Min must be over 0 for log scale, got: -1"
   );
 
-  testEvalToBe("Scale.symlog()", "Symlog scale");
+  testEvalToBe("Scale.symlog()", "Symlog scale ({constant: 0.0001})");
   testEvalToMatch(
     "Scale.symlog({ min: 10, max: 5 })",
     "Max must be greater than min, got: min=10, max=5"
   );
 
-  testEvalToBe("Scale.power({ exponent: 2 })", "Power scale (2)");
+  testEvalToBe("Scale.power({ exponent: 2 })", "Power scale ({exponent: 2})");
   testEvalToMatch(
     "Scale.power({ min: 10, max: 5, exponent: 2 })",
     "Max must be greater than min, got: min=10, max=5"

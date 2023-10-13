@@ -6,19 +6,20 @@ class RangeError extends Error {}
 export const range = (min: number, max: number, n: number): number[] => {
   if (!isInteger(n)) {
     throw new Error("n must be integer");
+  } else if (n < 0) {
+    throw new RangeError("n must be greater than 0");
+  } else if (min > max) {
+    throw new RangeError("Min value is higher then max value");
   }
+
   if (n === 0) {
     return [];
   } else if (n === 1) {
     return [min];
   } else if (n === 2) {
     return [min, max];
-  } else if (n < 0) {
-    throw new RangeError("n must be greater than 0");
   } else if (min === max) {
     return new Array(n).fill(min);
-  } else if (min > max) {
-    throw new RangeError("Min value is higher then max value");
   } else {
     const diff = (max - min) / (n - 1);
     const result: number[] = [];
@@ -27,6 +28,11 @@ export const range = (min: number, max: number, n: number): number[] => {
     }
     return result;
   }
+};
+
+// Returns integers from low to high
+export const upTo = (low: number, high: number): number[] => {
+  return range(low, high, high - low + 1);
 };
 
 // must be strictly growing - based on E.A.Floats
@@ -123,4 +129,22 @@ export const cumProd = (t: readonly number[]): number[] => {
 // diff([1,5,3,7]) = [4,-2,4]
 export const diff = (t: readonly number[]): number[] => {
   return E_A.pairwise(t, (left, right) => right - left);
+};
+
+export const isEqual = (
+  arr1: readonly number[],
+  arr2: readonly number[]
+): boolean => {
+  // If lengths of the arrays are different, they are not equal
+  if (arr1.length !== arr2.length) {
+    return false;
+  }
+
+  for (let i = 0; i < arr1.length; i++) {
+    if (arr1[i] !== arr2[i]) {
+      return false;
+    }
+  }
+
+  return true;
 };

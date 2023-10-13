@@ -4,6 +4,7 @@ import { Env } from "../../dist/env.js";
 import {
   REDistributionError,
   REOperationError,
+  REOther,
 } from "../../errors/messages.js";
 import { SampleMapNeedsNtoNFunction } from "../../operationError.js";
 import { ReducerContext } from "../../reducer/context.js";
@@ -267,10 +268,22 @@ export function doNumberLambdaCall(
   lambda: Lambda,
   args: Value[],
   context: ReducerContext
-) {
+): number {
   const value = lambda.call(args, context);
   if (value.type === "Number") {
     return value.value;
   }
   throw new REOperationError(new SampleMapNeedsNtoNFunction());
+}
+
+export function doBinaryLambdaCall(
+  args: Value[],
+  lambda: Lambda,
+  context: ReducerContext
+): boolean {
+  const value = lambda.call(args, context);
+  if (value.type === "Bool") {
+    return value.value;
+  }
+  throw new REOther("Expected function to return a boolean value");
 }

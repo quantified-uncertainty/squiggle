@@ -1,21 +1,24 @@
 import { BaseDist } from "../dist/BaseDist.js";
 import * as SampleSetDist from "../dist/SampleSetDist/index.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
+import {
+  FnDefinition,
+  makeDefinition,
+} from "../library/registry/fnDefinition.js";
 import {
   frArray,
   frDist,
   frLambda,
+  frLambdaN,
   frNumber,
 } from "../library/registry/frTypes.js";
 import {
   FnFactory,
   doNumberLambdaCall,
   repackDistResult,
-  unpackDistResult,
 } from "../library/registry/helpers.js";
 import { REExpectedType } from "../errors/messages.js";
 import { Ok } from "../utility/result.js";
-import { vArray, vNumber } from "../value/index.js";
+import { vArray, vNumber, Value } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "SampleSet",
@@ -24,7 +27,7 @@ const maker = new FnFactory({
 
 // "asserts x is type doesn't work when using arrow functions"
 // https://github.com/microsoft/TypeScript/issues/34523
-function sampleSetAssert(
+export function sampleSetAssert(
   dist: BaseDist
 ): asserts dist is SampleSetDist.SampleSetDist {
   if (dist instanceof SampleSetDist.SampleSetDist) {
@@ -33,22 +36,54 @@ function sampleSetAssert(
   throw new REExpectedType("SampleSetDist", dist.toString());
 }
 
+const fromDist = makeDefinition([frDist], ([dist], { environment }) =>
+  repackDistResult(SampleSetDist.SampleSetDist.fromDist(dist, environment))
+);
+
+const fromNumber = makeDefinition([frNumber], ([number], context) =>
+  repackDistResult(
+    SampleSetDist.SampleSetDist.make(
+      new Array(context.environment.sampleCount).fill(number)
+    )
+  )
+);
+
+const fromList = makeDefinition([frArray(frNumber)], ([numbers]) =>
+  repackDistResult(SampleSetDist.SampleSetDist.make(numbers))
+);
+
+const fromFn = (lambda: any, context: any, fn: (i: number) => Value[]) =>
+  repackDistResult(
+    SampleSetDist.SampleSetDist.fromFn((index) => {
+      return doNumberLambdaCall(lambda, fn(index), context);
+    }, context.environment)
+  );
+
+const fromFnDefinitions: FnDefinition[] = [
+  makeDefinition([frLambdaN(0)], ([lambda], context) => {
+    return fromFn(lambda, context, () => []);
+  }),
+  makeDefinition([frLambdaN(1)], ([lambda], context) => {
+    return fromFn(lambda, context, (index) => [vNumber(index)]);
+  }),
+];
+
 const baseLibrary = [
-  maker.d2d({
+  maker.make({
     name: "fromDist",
     examples: [`SampleSet.fromDist(normal(5,2))`],
-    fn: (dist, env) =>
-      unpackDistResult(SampleSetDist.SampleSetDist.fromDist(dist, env)),
+    definitions: [fromDist],
+  }),
+  maker.make({
+    name: "fromNumber",
+    examples: [`SampleSet.fromNumber(3)`],
+    definitions: [fromNumber],
   }),
   maker.make({
     name: "fromList",
     examples: [`SampleSet.fromList([3,5,2,3,5,2,3,5,2,3,3,5,3,2,3,1,1,3])`],
     output: "Dist",
-    definitions: [
-      makeDefinition([frArray(frNumber)], ([numbers]) =>
-        repackDistResult(SampleSetDist.SampleSetDist.make(numbers))
-      ),
-    ],
+    definitions: [fromList],
   }),
   maker.make({
     name: "toList",
@@ -65,15 +100,12 @@ const baseLibrary = [
     name: "fromFn",
     examples: [`SampleSet.fromFn({|i| sample(normal(5,2))})`],
     output: "Dist",
-    definitions: [
-      makeDefinition([frLambda], ([lambda], context) =>
-        repackDistResult(
-          SampleSetDist.SampleSetDist.fromFn((i: number) => {
-            return doNumberLambdaCall(lambda, [vNumber(i)], context);
-          }, context.environment)
-        )
-      ),
-    ],
+    definitions: fromFnDefinitions,
+  }),
+  maker.make({
+    name: "make",
+    output: "Dist",
+    definitions: [fromDist, fromNumber, fromList, ...fromFnDefinitions],
   }),
   maker.make({
     name: "map",
