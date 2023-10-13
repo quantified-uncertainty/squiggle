@@ -99,30 +99,6 @@ export const frArray = <T>(itemType: FRType<T>): FRType<T[]> => {
   };
 };
 
-export const frTuple2 = <T1, T2>(
-  type1: FRType<T1>,
-  type2: FRType<T2>
-): FRType<[T1, T2]> => {
-  return {
-    unpack: (v: Value) => {
-      if (v.type !== "Array") {
-        return undefined;
-      }
-      if (v.value.length !== 2) {
-        return undefined;
-      }
-      const item1 = type1.unpack(v.value[0]);
-      const item2 = type2.unpack(v.value[1]);
-      if (item1 === undefined || item2 === undefined) {
-        return undefined;
-      }
-      return [item1, item2];
-    },
-    pack: ([v1, v2]) => vArray([type1.pack(v1), type2.pack(v2)]),
-    getName: () => `tuple(${type1.getName()}, ${type2.getName()})`,
-  };
-};
-
 export function frTuple<T1, T2>(
   type1: FRType<T1>,
   type2: FRType<T2>
