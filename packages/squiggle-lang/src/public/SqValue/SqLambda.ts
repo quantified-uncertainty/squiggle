@@ -8,8 +8,38 @@ import { result } from "../../utility/result.js";
 
 import { SqError, SqOtherError, SqRuntimeError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
-import { wrapDomain } from "./SqDomain.js";
+import { SqDomain, wrapDomain } from "./SqDomain.js";
 import { SqValue, wrapValue } from "./index.js";
+
+export type SqLambdaParameter = {
+  name: string;
+  domain?: SqDomain;
+  typeName?: string;
+};
+
+type SqLambdaSignature = SqLambdaParameter[];
+
+function lambdaToSqLambdaSignatures(lambda: Lambda): SqLambdaSignature[] {
+  switch (lambda.type) {
+    case "UserDefinedLambda":
+      return [
+        lambda.parameters.map((param) => {
+          return {
+            name: param.name,
+            domain: param.domain ? wrapDomain(param.domain.value) : undefined,
+          };
+        }),
+      ];
+    case "BuiltinLambda":
+      return lambda.signatures().map((def) =>
+        def.map((p, index) => ({
+          name: index.toString(),
+          domain: undefined,
+          typeName: p.getName(),
+        }))
+      );
+  }
+}
 
 export class SqLambda {
   constructor(
@@ -28,19 +58,12 @@ export class SqLambda {
     return new SqLambda(value.value);
   }
 
-  parameters() {
-    return this._value.getParameters().map((parameter) => {
-      return {
-        name: parameter.name,
-        domain: parameter.domain
-          ? wrapDomain(parameter.domain.value)
-          : undefined,
-      };
-    });
+  parameterCounts() {
+    return this._value.parameterCounts();
   }
 
-  parameterNames() {
-    return this.parameters().map((parameter) => parameter.name);
+  signatures(): SqLambdaSignature[] {
+    return lambdaToSqLambdaSignatures(this._value);
   }
 
   call(args: SqValue[], env?: Env): result<SqValue, SqError> {
@@ -67,5 +90,9 @@ export class SqLambda {
 
   toString() {
     return this._value.toString();
+  }
+
+  parameterString() {
+    return this._value.parameterString();
   }
 }

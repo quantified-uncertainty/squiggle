@@ -1,4 +1,3 @@
-import { Lambda } from "../../reducer/lambda.js";
 import { FRFunction, Registry } from "./core.js";
 
 import { library as builtinLibrary } from "../../fr/builtin.js";
@@ -24,7 +23,6 @@ import { library as scoringLibrary } from "../../fr/scoring.js";
 import { library as symLibrary } from "../../fr/sym.js";
 import { library as unitsLibrary } from "../../fr/units.js";
 
-import { mxLambda } from "../../fr/mixture.js";
 import { Bindings } from "../../reducer/stack.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 
@@ -51,11 +49,6 @@ const fnList: FRFunction[] = [
 ];
 
 export const registry = Registry.make(fnList);
-
-export const nonRegistryLambdas: [string, Lambda][] = [
-  ["mx", mxLambda],
-  ["mixture", mxLambda],
-];
 
 export function makeSquiggleBindings(builtins: Bindings): Bindings {
   let squiggleBindings: Bindings = ImmutableMap();

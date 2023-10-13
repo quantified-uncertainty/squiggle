@@ -1,4 +1,3 @@
-import includes from "lodash/includes.js";
 import uniqBy from "lodash/uniqBy.js";
 import { REExpectedType, REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
@@ -97,21 +96,21 @@ export const library = [
     definitions: [
       makeDefinition([frArray(frAny), frLambda], ([array, lambda], context) => {
         const mapped: Value[] = new Array(array.length);
-        const parameters = lambda.getParameterNames().length;
+        const counts = lambda.parameterCounts();
 
         // this code is intentionally duplicated for performance reasons
-        if (parameters === 1) {
-          for (let i = 0; i < array.length; i++) {
-            mapped[i] = lambda.call([array[i]], context);
-          }
-        } else if (parameters === 2) {
+        if (counts.includes(2)) {
           for (let i = 0; i < array.length; i++) {
             mapped[i] = lambda.call([array[i], vNumber(i)], context);
+          }
+        } else if (counts.includes(1)) {
+          for (let i = 0; i < array.length; i++) {
+            mapped[i] = lambda.call([array[i]], context);
           }
         } else {
           throw new REExpectedType(
             "(number, number?) => ...",
-            `(${lambda.getParameterNames().join(",")}) => ...`
+            `(${lambda.parameterString()}) => ...`
           );
         }
         return vArray(mapped);
@@ -145,7 +144,7 @@ export const library = [
     definitions: [
       makeDefinition([frArray(frAny)], ([arr]) => {
         const isUniqableType = (t: Value) =>
-          includes(["String", "Bool", "Number"], t.type);
+          ["String", "Bool", "Number"].includes(t.type);
         //I'm not sure if the r.type concat is essential, but seems safe.
         const uniqueValueKey = (t: Value) => t.toString() + t.type;
 
