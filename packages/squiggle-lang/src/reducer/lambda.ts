@@ -141,14 +141,14 @@ export class UserDefinedLambda extends BaseLambda {
 // Stdlib functions (everything in FunctionRegistry) are instances of this class.
 export class BuiltinLambda extends BaseLambda {
   readonly type = "BuiltinLambda";
-  _signatures: FnDefinition[];
+  _definitions: FnDefinition[];
 
   constructor(
     public name: string,
     signatures: FnDefinition[]
   ) {
     super((args, context) => this._call(args, context));
-    this._signatures = signatures;
+    this._definitions = signatures;
   }
 
   getName() {
@@ -160,19 +160,23 @@ export class BuiltinLambda extends BaseLambda {
   }
 
   parameterString() {
-    return this._signatures.map(fnDefinitionToString).join(" | ");
+    return this._definitions.map(fnDefinitionToString).join(" | ");
+  }
+
+  parameterCounts() {
+    return sort(uniq(this._definitions.map((d) => d.inputs.length)));
   }
 
   parameterCountString() {
-    return `[${this._signatures.map((d) => d.inputs.length).join(",")}]`;
+    return `[${this.parameterCounts().join(",")}]`;
   }
 
   signatures(): FRType<unknown>[][] {
-    return this._signatures.map((d) => d.inputs);
+    return this._definitions.map((d) => d.inputs);
   }
 
   _call(args: Value[], context: ReducerContext): Value {
-    const signatures = this._signatures;
+    const signatures = this._definitions;
     const showNameMatchDefinitions = () => {
       const defsString = signatures
         .map(fnDefinitionToString)
@@ -188,10 +192,6 @@ export class BuiltinLambda extends BaseLambda {
       }
     }
     throw new REOther(showNameMatchDefinitions());
-  }
-
-  parameterCounts() {
-    return sort(uniq(this._signatures.map((d) => d.inputs.length)));
   }
 }
 
