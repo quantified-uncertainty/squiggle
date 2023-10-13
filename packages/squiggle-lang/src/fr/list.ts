@@ -6,9 +6,9 @@ import {
   frDist,
   frLambdaN,
   frArray,
-  frTuple2,
   frNumber,
   frString,
+  frTuple,
 } from "../library/registry/frTypes.js";
 import { FnFactory, doBinaryLambdaCall } from "../library/registry/helpers.js";
 import {
@@ -423,7 +423,7 @@ export const library = [
     requiresNamespace: true,
     examples: [`List.unzip([[1,2], [2,3], [4,5]])`],
     definitions: [
-      makeDefinition([frArray(frTuple2(frAny, frAny))], ([array]) =>
+      makeDefinition([frArray(frTuple(frAny, frAny))], ([array]) =>
         vArray(unzip(array as [Value, Value][]).map((r) => vArray(r)))
       ),
     ],
