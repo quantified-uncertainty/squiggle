@@ -63,9 +63,6 @@ export class Registry {
   }
 
   makeLambda(fnName: string): Lambda {
-    if (!this.fnNameDict.has(fnName)) {
-      throw new Error(`Function ${fnName} doesn't exist in registry`);
-    }
     const definitions = this.fnNameDict.get(fnName);
     if (definitions === undefined) {
       throw new Error(`Function ${fnName} has no definitions`);
