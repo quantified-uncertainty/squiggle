@@ -1,4 +1,4 @@
-import { REArgumentError, REOther } from "../errors/messages.js";
+import { REAmbiguous, REArgumentError, REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
 import {
@@ -9,6 +9,7 @@ import {
   frNumber,
   frString,
   frTuple,
+  frLambdaNand,
 } from "../library/registry/frTypes.js";
 import { FnFactory, doBinaryLambdaCall } from "../library/registry/helpers.js";
 import {
@@ -127,6 +128,9 @@ export const library = [
       `List.make(2, {|f| f+1})`,
     ],
     definitions: [
+      makeDefinition([frNumber, frLambdaNand([0, 1])], ([number, lambda]) => {
+        throw new REAmbiguous("Call with either 0 or 1 arguments, not both");
+      }),
       makeDefinition([frNumber, frLambdaN(0)], ([number, lambda], context) => {
         _assertValidArrayLength(number);
         return vArray(
@@ -217,6 +221,9 @@ export const library = [
       "List.map([1,4,5], {|x,i| x+i+1})",
     ],
     definitions: [
+      makeDefinition([frNumber, frLambdaNand([1, 2])], ([number, lambda]) => {
+        throw new REAmbiguous("Call with either 1 or 2 arguments, not both.");
+      }),
       makeDefinition(
         [frArray(frAny), frLambdaN(1)],
         ([array, lambda], context) =>
@@ -271,6 +278,9 @@ export const library = [
     requiresNamespace: false,
     examples: [`List.reduce([1,4,5], 2, {|acc, el| acc+el})`],
     definitions: [
+      makeDefinition([frNumber, frLambdaNand([2, 3])], ([number, lambda]) => {
+        throw new REAmbiguous("Call with either 2 or 3 arguments, not both");
+      }),
       makeDefinition(
         [frArray(frAny), frAny, frLambdaN(2)],
         ([array, initialValue, lambda], context) =>

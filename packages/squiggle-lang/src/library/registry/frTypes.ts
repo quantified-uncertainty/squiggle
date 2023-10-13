@@ -79,6 +79,18 @@ export const frLambdaN = (paramLength: number): FRType<Lambda> => {
     getName: () => `lambda(${paramLength})`,
   };
 };
+export const frLambdaNand = (paramLengths: number[]): FRType<Lambda> => {
+  return {
+    unpack: (v: Value) => {
+      const counts = v.type === "Lambda" && v.value.parameterCounts();
+      return counts && paramLengths.every((p) => counts.includes(p))
+        ? v.value
+        : undefined;
+    },
+    pack: (v) => vLambda(v),
+    getName: () => `lambda(${paramLengths.join(",")})`,
+  };
+};
 export const frScale: FRType<Scale> = {
   unpack: (v) => (v.type === "Scale" ? v.value : undefined),
   pack: (v) => vScale(v),

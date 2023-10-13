@@ -172,3 +172,13 @@ export class REOther extends ErrorMessage {
     return `Error: ${this.message}`;
   }
 }
+
+export class REAmbiguous extends ErrorMessage {
+  constructor(public msg: string) {
+    super(msg);
+  }
+
+  toString() {
+    return `Ambiguous Error: ${this.message}`;
+  }
+}
