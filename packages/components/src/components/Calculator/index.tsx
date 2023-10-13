@@ -16,7 +16,6 @@ import { Action, useViewerContext } from "../SquiggleViewer/ViewerProvider.js";
 import {
   CalculatorAction,
   CalculatorState,
-  calculatorHash,
   calculatorReducer,
   hasSameCalculator,
   initialCalculatorState,
@@ -106,7 +105,7 @@ export const Calculator: FC<Props> = ({
   useEffect(() => {
     const calculatorChanged =
       prevCalculator !== null &&
-      calculatorHash(calculator) !== calculatorHash(prevCalculator);
+      calculator.hashString !== prevCalculator.hashString;
 
     if (calculatorChanged) {
       calculatorDispatch({

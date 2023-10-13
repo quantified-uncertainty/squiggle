@@ -18,6 +18,7 @@ import * as Result from "../utility/result.js";
 import { Value, vDist } from "../value/index.js";
 import { distResultToValue } from "./genericDist.js";
 import { CI_CONFIG, symDistResultToValue } from "./distUtil.js";
+import { mixtureDefinitions } from "./mixture.js";
 
 const maker = new FnFactory({
   nameSpace: "Dist",
@@ -151,6 +152,16 @@ export const library: FRFunction[] = [
         symDistResultToValue(SymbolicDist.PointMass.make(v))
       ),
     ],
+  }),
+  maker.make({
+    name: "mx",
+    examples: ["mx(1,normal(5,2))"],
+    definitions: mixtureDefinitions,
+  }),
+  maker.make({
+    name: "mixture",
+    examples: ["mixture(1,normal(5,2))"],
+    definitions: mixtureDefinitions,
   }),
   maker.make({
     name: "normal",

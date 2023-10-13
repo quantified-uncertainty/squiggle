@@ -9,7 +9,6 @@ import {
   SqNumberValue,
   SqNumericFnPlot,
 } from "@quri/squiggle-lang";
-
 import { MessageAlert } from "../Alert.js";
 import {
   PlaygroundSettings,
@@ -51,15 +50,16 @@ export const FunctionChart: FC<FunctionChartProps> = ({
   environment,
   height,
 }) => {
-  const parameters = fn.parameters();
-  if (parameters.length !== 1) {
+  const parameters = fn.parameterCounts();
+  if (!parameters.includes(1)) {
     return (
       <MessageAlert heading="Function Display Not Supported">
         Only functions with one parameter are displayed.
       </MessageAlert>
     );
   }
-  const domain = parameters[0].domain;
+  const signatures = fn.signatures();
+  const domain = signatures[0][0]?.domain;
 
   const min = domain?.min ?? settings.functionChartSettings.start;
   const max = domain?.max ?? settings.functionChartSettings.stop;

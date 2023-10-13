@@ -187,7 +187,7 @@ export const getBoxProps = (
           <div>
             fn(
             <span className="opacity-60">
-              {truncateStr(value.value.parameterNames().join(", "), 15)}
+              {truncateStr(value.value.parameterString(), 15)}
             </span>
             )
           </div>

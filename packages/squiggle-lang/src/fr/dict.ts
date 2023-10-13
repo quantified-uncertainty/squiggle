@@ -1,4 +1,4 @@
-import { REArgumentError, REOther } from "../errors/messages.js";
+import { REArgumentError } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
@@ -6,7 +6,7 @@ import {
   frDictWithArbitraryKeys,
   frLambda,
   frString,
-  frTuple2,
+  frTuple,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
@@ -85,7 +85,7 @@ export const library = [
     output: "Dict",
     examples: [`Dict.fromList([["a", 1], ["b", 2]])`],
     definitions: [
-      makeDefinition([frArray(frTuple2(frString, frAny))], ([items]) =>
+      makeDefinition([frArray(frTuple(frString, frAny))], ([items]) =>
         vDict(ImmutableMap(items))
       ),
     ],

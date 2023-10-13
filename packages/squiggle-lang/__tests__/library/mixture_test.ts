@@ -2,6 +2,7 @@ import { testRun } from "../helpers/helpers.js";
 import { testEvalToBe } from "../helpers/reducerHelpers.js";
 
 describe("mixture", () => {
+  testEvalToBe("mx(Sym.normal(5,2))", "Point Set Distribution");
   testEvalToBe(
     "mx(Sym.normal(5,2), Sym.normal(10,1), Sym.normal(15, 1))",
     "Point Set Distribution"

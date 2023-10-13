@@ -6,27 +6,23 @@ import { vLambda } from "../value/index.js";
 import { Bindings } from "../reducer/stack.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { makeMathConstants } from "./math.js";
-import {
-  makeSquiggleBindings,
-  nonRegistryLambdas,
-  registry,
-} from "./registry/index.js";
+import { makeSquiggleBindings, registry } from "./registry/index.js";
 import { makeVersionConstant } from "./version.js";
+import { frAny } from "./registry/frTypes.js";
+import { makeDefinition } from "./registry/fnDefinition.js";
 
-function makeLookupLambda(): Lambda {
-  return new BuiltinLambda(INDEX_LOOKUP_FUNCTION, (inputs) => {
-    if (inputs.length !== 2) {
-      // should never happen
-      throw new REOther("Index lookup internal error");
-    }
-
-    const [obj, key] = inputs;
+const definitions = [
+  makeDefinition([frAny, frAny], ([obj, key]) => {
     if ("get" in obj) {
       return obj.get(key).clone();
     } else {
       throw new REOther("Trying to access key on wrong value");
     }
-  });
+  }),
+];
+
+function makeLookupLambda(): Lambda {
+  return new BuiltinLambda(INDEX_LOOKUP_FUNCTION, definitions);
 }
 
 function makeStdLib(): Bindings {
@@ -38,11 +34,6 @@ function makeStdLib(): Bindings {
 
   // field lookups
   res = res.set(INDEX_LOOKUP_FUNCTION, vLambda(makeLookupLambda()));
-
-  // some lambdas can't be expressed in function registry (e.g. `mx` with its variadic number of parameters)
-  for (const [name, lambda] of nonRegistryLambdas) {
-    res = res.set(name, vLambda(lambda));
-  }
 
   // bind the entire FunctionRegistry
   for (const name of registry.allNames()) {
