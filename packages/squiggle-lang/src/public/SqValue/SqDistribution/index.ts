@@ -93,6 +93,18 @@ export abstract class SqAbstractDistribution<T extends BaseDist> {
       (e: DistError) => new SqDistributionError(e)
     );
   }
+
+  truncate(
+    left: number | undefined,
+    right: number | undefined,
+    opts?: { env: Env } // needed for SymbolicDists
+  ): result<SqDistribution, SqDistributionError> {
+    return Result.fmap2(
+      this._value.truncate(left, right, opts),
+      (v: BaseDist) => wrapDistribution(v),
+      (e: DistError) => new SqDistributionError(e)
+    );
+  }
 }
 
 export class SqPointSetDistribution extends SqAbstractDistribution<PointSetDist> {
