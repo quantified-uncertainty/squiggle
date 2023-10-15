@@ -286,6 +286,7 @@ export type CommonScaleArgs = {
   min?: number;
   max?: number;
   tickFormat?: string;
+  title?: string;
 };
 
 export type Scale = CommonScaleArgs &
@@ -386,6 +387,7 @@ export type Plot =
       fn: Lambda;
       xScale: Scale;
       yScale: Scale;
+      title?: string;
       points?: number;
     }
   | {
@@ -394,6 +396,7 @@ export type Plot =
       xScale: Scale;
       yScale: Scale;
       distXScale: Scale;
+      title?: string;
       points?: number;
     }
   | {
@@ -402,6 +405,7 @@ export type Plot =
       yDist: BaseDist;
       xScale: Scale;
       yScale: Scale;
+      title?: string;
     }
   | {
       type: "relativeValues";

@@ -91,7 +91,7 @@ export const library = [
     name: "inspect",
     definitions: [
       makeDefinition([frAny], ([value]) => {
-        console.log(value.toString());
+        console.log(value);
         return value;
       }),
       makeDefinition([frAny, frString], ([value, label]) => {

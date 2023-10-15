@@ -60,6 +60,8 @@ export const NumericFunctionChart: FC<Props> = ({
         yScale,
         xTickFormat: plot.xScale.tickFormat,
         yTickFormat: plot.yScale.tickFormat,
+        xAxisTitle: plot.xScale.title,
+        yAxisTitle: plot.yScale.title,
       });
 
       if (
@@ -119,6 +121,11 @@ export const NumericFunctionChart: FC<Props> = ({
 
   return (
     <div className="flex flex-col items-stretch">
+      {plot.title && (
+        <div className="text-center font-semibold text-slate-600 text-sm">
+          {plot.title}
+        </div>
+      )}
       <canvas ref={ref} className={canvasClasses}>
         Chart for {plot.toString()}
       </canvas>

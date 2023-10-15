@@ -53,7 +53,7 @@ export const ContinuousSampleSet1MSamples: Story = {
 
 export const Discrete: Story = {
   args: {
-    code: "mx(0, 1, 3, 5, 8, 10, [0.1, 0.8, 0.5, 0.3, 0.2, 0.1])",
+    code: "mx([0, 1, 3, 5, 8, 10], [0.1, 0.8, 0.5, 0.3, 0.2, 0.1])",
   },
 };
 
@@ -61,7 +61,7 @@ export const Scales: Story = {
   name: "Continuous with scales",
   args: {
     code: `Plot.dist({
-  dist: -1 to 5,
+  dist: 1 to 5,
   xScale: Scale.symlog(),
   yScale: Scale.power({ exponent: 0.1 }),
 })`,
@@ -81,7 +81,7 @@ export const CustomTickFormat: Story = {
 export const Mixed: Story = {
   name: "Mixed",
   args: {
-    code: "mx(0, 1, 3, 5, 8, normal(8, 1), [0.1, 0.3, 0.4, 0.35, 0.2, 0.8])",
+    code: "mx([0, 1, 3, 5, 8, normal(8, 1)], [0.1, 0.3, 0.4, 0.35, 0.2, 0.8])",
   },
 };
 
@@ -90,6 +90,7 @@ export const MultiplePlots: Story = {
   args: {
     code: `
 Plot.dists({
+  title: "Multiple plots",
 dists: [
 {
  name: "one",

@@ -66,7 +66,7 @@ export class SqDistributionsPlot extends SqAbstractPlot<"distributions"> {
     xScale: SqScale;
     yScale: SqScale;
     showSummary: boolean;
-    title?: string;
+    title: string;
   }) {
     return new SqDistributionsPlot({
       type: "distributions",
@@ -113,11 +113,13 @@ export class SqNumericFnPlot extends SqAbstractPlot<"numericFn"> {
     xScale,
     yScale,
     points,
+    title,
   }: {
     fn: SqLambda;
     xScale: SqScale;
     yScale: SqScale;
     points?: number;
+    title: string;
   }) {
     const result = new SqNumericFnPlot(
       {
@@ -125,6 +127,7 @@ export class SqNumericFnPlot extends SqAbstractPlot<"numericFn"> {
         fn: fn._value,
         xScale: xScale._value,
         yScale: yScale._value,
+        title: title,
         points,
       },
       fn.context
@@ -152,6 +155,10 @@ export class SqNumericFnPlot extends SqAbstractPlot<"numericFn"> {
     return wrapScale(this._value.yScale);
   }
 
+  get title(): string | undefined {
+    return this._value.title;
+  }
+
   get points(): number | undefined {
     return this._value.points;
   }
@@ -171,12 +178,14 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
     xScale,
     yScale,
     distXScale,
+    title,
     points,
   }: {
     fn: SqLambda;
     xScale: SqScale;
     yScale: SqScale;
     distXScale: SqScale;
+    title: string;
     points?: number;
   }) {
     const result = new SqDistFnPlot(
@@ -186,6 +195,7 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
         xScale: xScale._value,
         yScale: yScale._value,
         distXScale: distXScale._value,
+        title: title,
         points,
       },
       fn.context
@@ -215,6 +225,10 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
 
   get distXScale() {
     return wrapScale(this._value.distXScale);
+  }
+
+  get title(): string | undefined {
+    return this._value.title;
   }
 
   get points(): number | undefined {
@@ -254,6 +268,10 @@ export class SqScatterPlot extends SqAbstractPlot<"scatter"> {
   get yScale(): SqScale | undefined {
     const scale = this._value.yScale;
     return scale ? wrapScale(scale) : undefined;
+  }
+
+  get title(): string | undefined {
+    return this._value.title;
   }
 
   static zipToPoints(

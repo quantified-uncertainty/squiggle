@@ -31,6 +31,8 @@ interface DrawAxesParams {
   yTickCount?: number;
   xTickFormat?: string;
   yTickFormat?: string;
+  xAxisTitle?: string;
+  yAxisTitle?: string;
 }
 
 export function drawAxes({
@@ -46,6 +48,8 @@ export function drawAxes({
   yTickCount = Math.max(Math.min(Math.floor(height / 100), 12), 3),
   xTickFormat: xTickFormatSpecifier = defaultTickFormatSpecifier,
   yTickFormat: yTickFormatSpecifier = defaultTickFormatSpecifier,
+  xAxisTitle,
+  yAxisTitle,
 }: DrawAxesParams) {
   const xTicks = xScale.ticks(xTickCount);
   const xTickFormat = xScale.tickFormat(xTickCount, xTickFormatSpecifier);
@@ -56,6 +60,12 @@ export function drawAxes({
   const tickSize = 2;
 
   const padding: Padding = { ...suggestedPadding };
+  if (xAxisTitle) {
+    padding.bottom = padding.bottom + 20;
+  }
+  if (yAxisTitle) {
+    padding.left = padding.left + 35;
+  }
 
   // measure tick sizes for dynamic padding
   if (!hideYAxis) {
@@ -68,6 +78,27 @@ export function drawAxes({
           yLabelOffset
       );
     });
+  }
+
+  if (xAxisTitle) {
+    const titleX = width / 2; // center the title
+    const titleY = height - 8; // adjust this value based on desired distance from x-axis
+    context.textAlign = "center";
+    context.textBaseline = "bottom";
+    context.font = "bold 12px Arial";
+    context.fillText(xAxisTitle, titleX, titleY);
+  }
+  if (yAxisTitle) {
+    const titleY = height / 2; // center the title vertically
+    const titleX = 0;
+    context.save(); // save the current context state
+    context.translate(titleX, titleY);
+    context.rotate(-Math.PI / 2); // rotate 90 degrees counter-clockwise
+    context.textAlign = "center";
+    context.textBaseline = "top";
+    context.font = "bold 12px Arial"; // adjust font size and style as needed
+    context.fillText(yAxisTitle, 0, 0);
+    context.restore(); // restore the context state to before rotation and translation
   }
 
   const frame = new CartesianFrame({

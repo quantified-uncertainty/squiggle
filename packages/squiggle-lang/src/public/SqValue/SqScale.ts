@@ -40,6 +40,9 @@ abstract class SqAbstractScale<T extends Scale["type"]> {
   get tickFormat() {
     return this._value.tickFormat;
   }
+  get title() {
+    return this._value.title;
+  }
 }
 
 export class SqLinearScale extends SqAbstractScale<"linear"> {

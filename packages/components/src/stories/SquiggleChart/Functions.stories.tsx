@@ -35,9 +35,16 @@ export const LogScale: Story = {
 foo(t) = t^2
 Plot.numericFn({
   fn: foo,
+  title: "My Plot's Title",
   xScale: Scale.log({
     min: 1,
-    max: 100
+    max: 100,
+    title: "x Axis Title"
+  }),
+  yScale: Scale.linear({
+    min: 1,
+    max: 10000,
+    title: "y Axis Title"
   })
 })
 `,
@@ -50,6 +57,7 @@ export const FairLogScaleSampling: Story = {
     code: sq`
 numericPlot = Plot.numericFn({
   fn: {|t| t < 5 ? 1000 : t^2},
+  title: "Fair Long Scale Sampling Title",
   xScale: Scale.log({
     min: 1,
     max: 100

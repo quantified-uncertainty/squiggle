@@ -17,6 +17,7 @@ import {
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 import { DistFunctionChart } from "./DistFunctionChart.js";
 import { NumericFunctionChart } from "./NumericFunctionChart.js";
+import { ErrorBoundary } from "../ErrorBoundary.js";
 
 type FunctionChartProps = {
   fn: SqLambda;
@@ -113,11 +114,13 @@ export const FunctionChart: FC<FunctionChartProps> = ({
       });
 
       return (
-        <NumericFunctionChart
-          plot={plot}
-          environment={environment}
-          height={height}
-        />
+        <ErrorBoundary>
+          <NumericFunctionChart
+            plot={plot}
+            environment={environment}
+            height={height}
+          />
+        </ErrorBoundary>
       );
     }
     default:

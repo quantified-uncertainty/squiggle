@@ -6,6 +6,7 @@ import { getResultVariables, getResultValue } from "../lib/utility.js";
 import { CodeEditorHandle } from "./CodeEditor.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
 import { SquiggleViewerHandle } from "./SquiggleViewer/index.js";
+import { ErrorBoundary } from "./ErrorBoundary.js";
 
 type Props = {
   squiggleOutput: SquiggleOutput | undefined;
@@ -34,14 +35,16 @@ export const DynamicSquiggleViewer = forwardRef<SquiggleViewerHandle, Props>(
           // `opacity-0 squiggle-semi-appear` would be better, but won't work reliably until we move Squiggle evaluation to Web Workers
           <div className="absolute z-10 inset-0 bg-white opacity-50" />
         )}
-        <SquiggleViewer
-          {...settings}
-          ref={viewerRef}
-          localSettingsEnabled={localSettingsEnabled}
-          resultVariables={getResultVariables(squiggleOutput)}
-          resultItem={getResultValue(squiggleOutput)}
-          editor={editor}
-        />
+        <ErrorBoundary>
+          <SquiggleViewer
+            {...settings}
+            ref={viewerRef}
+            localSettingsEnabled={localSettingsEnabled}
+            resultVariables={getResultVariables(squiggleOutput)}
+            resultItem={getResultValue(squiggleOutput)}
+            editor={editor}
+          />
+        </ErrorBoundary>
       </div>
     ) : null;
 

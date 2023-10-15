@@ -183,10 +183,11 @@ export const library = [
             ["fn", frLambda],
             ["xScale", frOptional(frScale)],
             ["yScale", frOptional(frScale)],
+            ["title", frOptional(frString)],
             ["points", frOptional(frNumber)]
           ),
         ],
-        ([{ fn, xScale, yScale, points }]) => {
+        ([{ fn, xScale, yScale, title, points }]) => {
           const domain = extractDomainFromOneArgFunction(fn);
           return vPlot({
             type: "numericFn",
@@ -194,6 +195,7 @@ export const library = [
             xScale: createScale(xScale, domain),
             yScale: yScale ?? defaultScale,
             points: points ?? undefined,
+            title: title ?? undefined,
           });
         }
       ),
@@ -213,10 +215,11 @@ export const library = [
             ["xScale", frOptional(frScale)],
             ["yScale", frOptional(frScale)],
             ["distXScale", frOptional(frScale)],
+            ["title", frOptional(frString)],
             ["points", frOptional(frNumber)]
           ),
         ],
-        ([{ fn, xScale, yScale, distXScale, points }]) => {
+        ([{ fn, xScale, yScale, distXScale, title, points }]) => {
           const domain = extractDomainFromOneArgFunction(fn);
           return vPlot({
             type: "distFn",
@@ -224,6 +227,7 @@ export const library = [
             xScale: createScale(xScale, domain),
             yScale: yScale ?? defaultScale,
             distXScale: distXScale ?? yScale ?? defaultScale,
+            title: title ?? undefined,
             points: points ?? undefined,
           });
         }
@@ -244,16 +248,18 @@ export const library = [
             ["xDist", frDist],
             ["yDist", frDist],
             ["xScale", frOptional(frScale)],
-            ["yScale", frOptional(frScale)]
+            ["yScale", frOptional(frScale)],
+            ["title", frOptional(frString)]
           ),
         ],
-        ([{ xDist, yDist, xScale, yScale }]) => {
+        ([{ xDist, yDist, xScale, yScale, title }]) => {
           return vPlot({
             type: "scatter",
             xDist,
             yDist,
             xScale: xScale ?? defaultScale,
             yScale: yScale ?? defaultScale,
+            title: title ?? undefined,
           });
         }
       ),

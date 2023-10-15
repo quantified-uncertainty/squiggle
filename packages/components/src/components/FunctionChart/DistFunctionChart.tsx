@@ -150,6 +150,9 @@ function useDrawDistFunctionChart({
         height,
         context,
         xTickFormat: plot.xScale.tickFormat,
+        yTickFormat: plot.yScale.tickFormat,
+        xAxisTitle: plot.xScale.title,
+        yAxisTitle: plot.yScale.title,
       });
       d3ref.current = { frame, xScale };
 
@@ -303,6 +306,11 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
 
   return (
     <div className="flex flex-col items-stretch">
+      {plot.title && (
+        <div className="text-center font-semibold text-slate-600 text-sm">
+          {plot.title}
+        </div>
+      )}
       <div ref={refs.setReference}>
         <canvas ref={canvasRef} className={canvasClasses}>
           Chart for {plot.toString()}
