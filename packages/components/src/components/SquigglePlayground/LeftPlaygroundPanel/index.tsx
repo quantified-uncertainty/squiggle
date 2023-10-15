@@ -14,7 +14,7 @@ import {
   Dropdown,
   DropdownMenu,
   DropdownMenuActionItem,
-  TextTooltip,
+  PuzzleIcon,
   TriangleIcon,
 } from "@quri/ui";
 
@@ -30,9 +30,9 @@ import { PlaygroundSettings } from "../../PlaygroundSettings.js";
 import { ToolbarItem } from "../../ui/PanelWithToolbar/ToolbarItem.js";
 import { PanelWithToolbar } from "../../ui/PanelWithToolbar/index.js";
 import { AutorunnerMenuItem } from "./AutorunnerMenuItem.js";
+import { DependencyGraphModal } from "./DependencyGraphModal.js";
 import { GlobalSettingsModal } from "./GlobalSettingsModal.js";
 import { RunMenuItem } from "./RunMenuItem.js";
-import { ProjectInfoModal } from "./ProjectInfoModal.js";
 
 export type RenderExtraControls = (props: {
   openModal: (name: string) => void;
@@ -126,19 +126,6 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
         <Dropdown
           render={() => (
             <DropdownMenu>
-              <TextTooltip
-                text={`${altKey()}+Shift+f`}
-                placement="right"
-                offset={5}
-              >
-                <div>
-                  <DropdownMenuActionItem
-                    title="Format Code"
-                    icon={Bars3CenterLeftIcon}
-                    onClick={() => editorRef.current?.format}
-                  />
-                </div>
-              </TextTooltip>
               <DropdownMenuActionItem
                 title="Configuration"
                 icon={AdjustmentsVerticalIcon}
@@ -154,9 +141,9 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
               /> */
               }
               <DropdownMenuActionItem
-                title="Project Info"
-                icon={AdjustmentsVerticalIcon}
-                onClick={() => openModal("project-info")}
+                title="Dependency Graph"
+                icon={PuzzleIcon}
+                onClick={() => openModal("dependency-graph")}
               />
               {props.renderExtraDropdownItems?.({ openModal })}
             </DropdownMenu>
@@ -204,10 +191,10 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
               />
             ),
           };
-        case "project-info":
+        case "dependency-graph":
           return {
-            title: "Project Info",
-            body: <ProjectInfoModal project={project} />,
+            title: "Dependency Graph",
+            body: <DependencyGraphModal project={project} />,
           };
         default:
           return props.renderExtraModal?.(modalName);
