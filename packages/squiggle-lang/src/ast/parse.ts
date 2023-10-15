@@ -17,7 +17,7 @@ export type ParseError = {
   message: string;
 };
 
-export type AST = ASTNode & {
+export type AST = Extract<ASTNode, { type: "Program" }> & {
   comments: ASTCommentNode[];
 };
 
@@ -30,6 +30,9 @@ export function parse(expr: string, source: string): ParseResult {
       grammarSource: source,
       comments,
     });
+    if (parsed.type !== "Program") {
+      throw new Error("Expected parse to result in a Program node");
+    }
     parsed.comments = comments;
     return Result.Ok(parsed);
   } catch (e) {

@@ -10,25 +10,21 @@ import { Value, vDict } from "../../value/index.js";
 import { SqError, SqOtherError } from "../SqError.js";
 import { SqDict } from "../SqValue/SqDict.js";
 import { SqValue, wrapValue } from "../SqValue/index.js";
+import { SqValueContext } from "../SqValueContext.js";
 import { SqValuePath } from "../SqValuePath.js";
 
-import { SqValueContext } from "../SqValueContext.js";
-import { ImportBinding, ProjectItem, RunOutput } from "./ProjectItem.js";
 import { SqLinker } from "../SqLinker.js";
-import * as Topology from "./Topology.js";
 import { SqOutputResult } from "../types.js";
+import { Import, ProjectItem, RunOutput } from "./ProjectItem.js";
 
 function getNeedToRunError() {
   return new SqOtherError("Need to run");
 }
 
-// TODO - pass the the id from which the dependency was imported/continued too
-function getMissingDependencyError(id: string) {
-  return new SqOtherError(`Dependency ${id} is missing`);
-}
-
 type Options = {
   linker?: SqLinker;
+  stdLib?: Bindings;
+  environment?: Env;
 };
 
 export class SqProject {
@@ -37,14 +33,23 @@ export class SqProject {
   private environment: Env;
   private linker?: SqLinker; // if not present, imports are forbidden
 
+  // Direct graph of dependencies is maintained inside each ProjectItem,
+  // while the inverse one is stored in this variable.
+  // We need to update it every time we update the list of direct dependencies:
+  // - when sources are deleted
+  // - on `setContinues`
+  // - on `parseImports`
+  // (this list might be incomplete)
+  private inverseGraph: Map<string, Set<string>> = new Map();
+
   constructor(options?: Options) {
     this.items = new Map();
-    this.stdLib = Library.getStdLib();
-    this.environment = defaultEnv;
+    this.stdLib = options?.stdLib ?? Library.getStdLib();
+    this.environment = options?.environment ?? defaultEnv;
     this.linker = options?.linker;
   }
 
-  static create(options?: { linker: SqLinker }) {
+  static create(options?: Options) {
     return new SqProject(options);
   }
 
@@ -53,15 +58,12 @@ export class SqProject {
   }
 
   setEnvironment(environment: Env) {
+    // TODO - should we invalidate all outputs?
     this.environment = environment;
   }
 
   getStdLib(): Bindings {
     return this.stdLib;
-  }
-
-  setStdLib(value: Bindings) {
-    this.stdLib = value;
   }
 
   getSourceIds(): string[] {
@@ -76,42 +78,64 @@ export class SqProject {
     return item;
   }
 
-  private touchDependents(sourceId: string) {
-    Topology.traverseDependents(this, sourceId, (id) => this.clean(id));
+  private cleanDependents(initialSourceId: string) {
+    // Traverse dependents recursively and call "clean" on each.
+    const visited = new Set<string>();
+    const inner = (currentSourceId: string) => {
+      visited.add(currentSourceId);
+      if (currentSourceId !== initialSourceId) {
+        this.clean(currentSourceId);
+      }
+      for (const sourceId of this.getDependents(currentSourceId)) {
+        if (visited.has(sourceId)) {
+          continue;
+        }
+        inner(sourceId);
+      }
+    };
+    inner(initialSourceId);
+  }
+
+  getDependents(sourceId: string): string[] {
+    return [...(this.inverseGraph.get(sourceId)?.values() ?? [])];
   }
 
   getDependencies(sourceId: string): string[] {
+    this.parseImports(sourceId);
     return this.getItem(sourceId).getDependencies();
   }
 
-  getRunOrder(): string[] {
-    return Topology.getRunOrder(this);
-  }
-
-  getRunOrderFor(sourceId: string): string[] {
-    return Topology.getRunOrderFor(this, sourceId);
-  }
-
-  getDependents(sourceId: string) {
-    return Topology.getDependents(this, sourceId);
+  // Removes only explicit imports (not continues).
+  // Useful on source changes.
+  private removeImportEdges(fromSourceId: string) {
+    const item = this.getItem(fromSourceId);
+    if (item.imports?.ok) {
+      for (const importData of item.imports.value) {
+        this.inverseGraph.get(importData.sourceId)?.delete(fromSourceId);
+      }
+    }
   }
 
   touchSource(sourceId: string) {
+    this.removeImportEdges(sourceId);
     this.getItem(sourceId).touchSource();
-    this.touchDependents(sourceId);
+    this.cleanDependents(sourceId);
   }
 
   setSource(sourceId: string, value: string) {
     if (this.items.has(sourceId)) {
+      this.removeImportEdges(sourceId);
       this.getItem(sourceId).setSource(value);
+      this.cleanDependents(sourceId);
     } else {
       this.items.set(sourceId, new ProjectItem({ sourceId, source: value }));
     }
-    this.touchDependents(sourceId);
   }
 
   removeSource(sourceId: string) {
-    this.touchDependents(sourceId);
+    this.cleanDependents(sourceId);
+    this.removeImportEdges(sourceId);
+    this.setContinues(sourceId, []);
     this.items.delete(sourceId);
   }
 
@@ -135,9 +159,7 @@ export class SqProject {
     return Result.fmap(imports, (imports) => imports.map((i) => i.sourceId));
   }
 
-  getImports(
-    sourceId: string
-  ): Result.result<ImportBinding[], SqError> | undefined {
+  getImports(sourceId: string): Result.result<Import[], SqError> | undefined {
     return this.getItem(sourceId).imports;
   }
 
@@ -146,8 +168,17 @@ export class SqProject {
   }
 
   setContinues(sourceId: string, continues: string[]): void {
+    for (const continueId of this.getContinues(sourceId)) {
+      this.inverseGraph.get(continueId)?.delete(sourceId);
+    }
+    for (const continueId of continues) {
+      if (!this.inverseGraph.has(continueId)) {
+        this.inverseGraph.set(continueId, new Set());
+      }
+      this.inverseGraph.get(continueId)?.add(sourceId);
+    }
     this.getItem(sourceId).setContinues(continues);
-    this.touchDependents(sourceId);
+    this.cleanDependents(sourceId);
   }
 
   private getInternalOutput(
@@ -156,9 +187,21 @@ export class SqProject {
     return this.getItem(sourceId).output ?? Result.Err(getNeedToRunError());
   }
 
-  parseImports(sourceId: string): void {
+  private parseImports(sourceId: string): void {
     // linker can be undefined; in this case parseImports will fail if there are any imports
-    this.getItem(sourceId).parseImports(this.linker);
+    const item = this.getItem(sourceId);
+    if (item.imports) {
+      // already set, shortcut so that we don't have to update `inverseGraph`
+      return;
+    }
+
+    item.parseImports(this.linker);
+    for (const dependencyId of item.getDependencies()) {
+      if (!this.inverseGraph.has(dependencyId)) {
+        this.inverseGraph.set(dependencyId, new Set());
+      }
+      this.inverseGraph.get(dependencyId)?.add(sourceId);
+    }
   }
 
   getOutput(sourceId: string): SqOutputResult {
@@ -181,8 +224,7 @@ export class SqProject {
     }
     const ast = astR.value;
 
-    const lastStatement =
-      ast.type === "Program" ? ast.statements.at(-1) : undefined;
+    const lastStatement = ast.statements.at(-1);
 
     const hasEndExpression =
       !!lastStatement && !isBindingStatement(lastStatement);
@@ -230,154 +272,106 @@ export class SqProject {
     return Result.fmap(this.getOutput(sourceId), ({ bindings }) => bindings);
   }
 
-  private buildExternals(sourceId: string): Result.result<Bindings, SqError> {
-    const continues = this.getContinues(sourceId);
-
-    // We start from stdLib and add more bindings on top of it.
-    const namespacesToMerge = [this.getStdLib()];
-
-    // First, merge continues.
-    for (const continueId of continues) {
-      if (!this.items.has(continueId)) {
-        return Result.Err(getMissingDependencyError(continueId));
-      }
-      const outputR = this.getInternalOutput(continueId);
-      if (!outputR.ok) {
-        return outputR;
-      }
-
-      namespacesToMerge.push(outputR.value.bindings);
-    }
-    let externals: Bindings = ImmutableMap<string, Value>().merge(
-      ...namespacesToMerge
-    );
-
-    // Second, merge imports.
+  private async buildExternals(
+    sourceId: string,
+    pendingIds: Set<string>
+  ): Promise<Result.result<Bindings, SqError>> {
     this.parseImports(sourceId);
     const rImports = this.getImports(sourceId);
     if (!rImports) {
       // Shouldn't happen, we just called parseImports.
-      return Result.Err(new SqOtherError("Internal logic error"));
+      throw new Error("Internal logic error");
     }
 
     if (!rImports.ok) {
-      // Shouldn't happen, getImports fail only if parse failed.
+      // There's something wrong with imports, that's fatal.
       return rImports;
     }
-    for (const importBinding of rImports.value) {
+
+    // We start from stdLib and add imports on top of it.
+    let externals: Bindings = ImmutableMap<string, Value>().merge(
+      this.getStdLib()
+    );
+
+    // Now, let's process everything and populate our externals bindings.
+    for (const importBinding of [
+      ...this.getItem(sourceId).getImplicitImports(), // first, inject all variables from `continues`
+      ...rImports.value, // then bind all explicit imports
+    ]) {
       if (!this.items.has(importBinding.sourceId)) {
-        return Result.Err(getMissingDependencyError(importBinding.sourceId));
-      }
-      const importOutputR = this.getItem(importBinding.sourceId).output;
-      if (!importOutputR) {
-        return Result.Err(getNeedToRunError());
-      }
-      if (!importOutputR.ok) {
-        return importOutputR;
+        if (!this.linker) {
+          throw new Error(
+            `Can't load source for ${importBinding.sourceId}, linker is missing`
+          );
+        }
+
+        // We have got one of the new imports.
+        // Let's load it and add it to the project.
+        let newSource: string;
+        try {
+          newSource = await this.linker.loadSource(importBinding.sourceId);
+        } catch (e) {
+          return Result.Err(
+            new SqOtherError(`Failed to load import ${importBinding.sourceId}`)
+          );
+        }
+        this.setSource(importBinding.sourceId, newSource);
       }
 
-      // TODO - check for collisions?
-      externals = externals.set(
-        importBinding.variable,
-        vDict(importOutputR.value.bindings)
-      );
+      if (pendingIds.has(importBinding.sourceId)) {
+        // Oh we have already visited this source. There is an import cycle.
+        return Result.Err(
+          new SqOtherError(`Cyclic import ${importBinding.sourceId}`)
+        );
+      }
+
+      await this.innerRun(importBinding.sourceId, pendingIds);
+      const outputR = this.getInternalOutput(importBinding.sourceId);
+      if (!outputR.ok) {
+        return outputR;
+      }
+      const bindings = outputR.value.bindings;
+
+      // TODO - check for name collisions?
+      switch (importBinding.type) {
+        case "flat":
+          externals = externals.merge(bindings);
+          break;
+        case "named":
+          externals = externals.set(importBinding.variable, vDict(bindings));
+          break;
+        // exhaustiveness check for TypeScript
+        default:
+          throw new Error(`Internal error, ${importBinding satisfies never}`);
+      }
     }
+
     return Result.Ok(externals);
   }
 
-  private async doLinkAndRun(sourceId: string): Promise<void> {
-    const rExternals = this.buildExternals(sourceId);
+  private async innerRun(sourceId: string, pendingIds: Set<string>) {
+    pendingIds.add(sourceId);
 
-    if (rExternals.ok) {
-      const context = createContext(this.getEnvironment());
+    const cachedOutput = this.getItem(sourceId).output;
+    if (!cachedOutput) {
+      const rExternals = await this.buildExternals(sourceId, pendingIds);
 
-      await this.getItem(sourceId).run(context, rExternals.value);
-    } else {
-      this.getItem(sourceId).failRun(rExternals.value);
-    }
-  }
-
-  private async runIds(sourceIds: string[]) {
-    let error: SqError | undefined;
-    for (const sourceId of sourceIds) {
-      const cachedOutput = this.getItem(sourceId).output;
-      if (cachedOutput) {
-        // already ran
-        if (!cachedOutput.ok) {
-          error = cachedOutput.value;
-        }
-        continue;
-      }
-
-      if (error) {
-        this.getItem(sourceId).failRun(error);
-        continue;
-      }
-
-      await this.doLinkAndRun(sourceId);
-      const output = this.getItem(sourceId).output;
-      if (output && !output.ok) {
-        error = output.value;
-      }
-    }
-  }
-
-  async runAll() {
-    // preload all imports
-    if (this.linker) {
-      for (const id of this.getSourceIds()) {
-        await this.loadImportsRecursively(id);
+      if (!rExternals.ok) {
+        this.getItem(sourceId).failRun(rExternals.value);
+      } else {
+        const context = createContext(this.getEnvironment());
+        await this.getItem(sourceId).run(context, rExternals.value);
       }
     }
 
-    // we intentionally call `getRunOrder` again because the order could've changed after we analyzed imports
-    await this.runIds(this.getRunOrder());
+    pendingIds.delete(sourceId);
   }
 
   async run(sourceId: string) {
-    if (this.linker) {
-      await this.loadImportsRecursively(sourceId);
-    }
-    await this.runIds(this.getRunOrderFor(sourceId));
+    await this.innerRun(sourceId, new Set());
   }
 
-  async loadImportsRecursively(initialSourceName: string) {
-    const linker = this.linker;
-    if (!linker) {
-      return;
-    }
-
-    const visited = new Set<string>();
-    const inner = async (sourceName: string) => {
-      if (visited.has(sourceName)) {
-        // Oh we have already visited this source. There is an import cycle.
-        throw new Error(`Cyclic import ${sourceName}`);
-      }
-      visited.add(sourceName);
-      // Let's parse the imports and dive into them.
-      this.parseImports(sourceName);
-      const rImportIds = this.getImportIds(sourceName);
-      if (!rImportIds.ok) {
-        // Maybe there is an import syntax error.
-        throw new Error(rImportIds.value.toString());
-      }
-
-      for (const newImportId of rImportIds.value) {
-        if (this.getSource(newImportId) === undefined) {
-          // We have got one of the new imports.
-          // Let's load it and add it to the project.
-          const newSource = await linker.loadSource(newImportId);
-          this.setSource(newImportId, newSource);
-        }
-        // The new source is loaded and added to the project.
-        // Of course the new source might have imports too.
-        // Let's recursively load them.
-        await this.loadImportsRecursively(newImportId);
-      }
-    };
-    await inner(initialSourceName);
-  }
-
+  // Helper method for "Find in Editor" feature
   findValuePathByOffset(
     sourceId: string,
     offset: number

@@ -16,6 +16,7 @@ describe("Single source SqProject", () => {
     const project = SqProject.create();
     /* Every source has a name. This is used for debugging, dependencies and error messages. */
     project.setSource("main", "1 + 2");
+
     /* Let's run "main" source. */
     await project.run("main");
     /*
@@ -26,14 +27,7 @@ describe("Single source SqProject", () => {
      */
 
     /*
-     * However, you could also run the whole project.
-     * If you have all the sources, you can always run the whole project.
-     * Dependencies and recompiling on demand will be taken care of by the project.
-     */
-    await project.runAll();
-
-    /*
-     * Either with `run` or `runAll` you executed the project.
+     * With `run` you executed a source.
      * You can get the result of a specific source by calling `getResult` for that source.
      * You can get the bindings of a specific source by calling `getBindings` for that source.
      * To get both, call `getOutput`.
@@ -47,31 +41,24 @@ describe("Single source SqProject", () => {
     /* You've got 3 with empty bindings. */
   });
 
-  test("run summary", async () => {
-    const project = SqProject.create();
-    project.setSource("main", "1 + 2");
-    await project.runAll();
-    const output = project.getOutput("main");
-    /* Now you have external bindings and external result. */
-    expect(output).toBeOkOutput("3", "{}");
-  });
-
   test("run with an environment", async () => {
     /* Running the source code like above allows you to set a custom environment */
-    const project = SqProject.create();
+    const project = SqProject.create({
+      environment: {
+        ...defaultEnvironment,
+        sampleCount: 50,
+      },
+    });
 
-    /* Optional. Set your custom environment anytime before running */
-    project.setEnvironment(defaultEnvironment);
-
-    project.setSource("main", "1 + 2");
-    await project.runAll();
+    project.setSource("main", "(2 to 5) -> SampleSet.toList -> List.length");
+    await project.run("main");
     const result = project.getResult("main");
-    expect(toStringResult(result)).toBe("Ok(3)");
+    expect(toStringResult(result)).toBe("Ok(50)");
   });
 
   test("shortcut", async () => {
     /*
-     * If you are running a single source without imports and you don't need a custom environment, you can use the shortcut.
+     * If you are running a single source without imports, you can use the shortcut.
      * Examples above were to prepare you for the multi source tutorial.
      */
     const outputR = await run("1+2");
