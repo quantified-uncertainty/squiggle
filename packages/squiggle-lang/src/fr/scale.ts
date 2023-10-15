@@ -1,4 +1,4 @@
-import { REOther } from "../errors/messages.js";
+import { REAmbiguous, REArgumentError, REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frDict,
@@ -8,6 +8,7 @@ import {
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { vScale } from "../value/index.js";
+import { formatSpecifier } from "d3-format";
 
 const maker = new FnFactory({
   nameSpace: "Scale",
@@ -22,9 +23,19 @@ const commonDict = frDict(
 
 function checkMinMax(min: number | null, max: number | null) {
   if (min !== null && max !== null && max <= min) {
-    throw new REOther(
+    throw new REArgumentError(
       `Max must be greater than min, got: min=${min}, max=${max}`
     );
+  }
+}
+
+function checkTickFormat(tickFormat: string | null) {
+  if (tickFormat) {
+    try {
+      formatSpecifier(tickFormat ?? "");
+    } catch (e) {
+      throw new REArgumentError(`Tick format [${tickFormat}] is invalid.`);
+    }
   }
 }
 
@@ -37,6 +48,7 @@ export const library = [
       makeDefinition([commonDict], ([{ min, max, tickFormat }]) => {
         checkMinMax(min, max);
 
+        checkTickFormat(tickFormat);
         return vScale({
           type: "linear",
           min: min ?? undefined,
@@ -67,6 +79,7 @@ export const library = [
             throw new REOther(`Min must be over 0 for log scale, got: ${min}`);
           }
           checkMinMax(min, max);
+          checkTickFormat(tickFormat);
           return vScale({
             type: "log",
             min: min ?? undefined,
@@ -96,6 +109,7 @@ export const library = [
         ],
         ([{ min, max, tickFormat, constant }]) => {
           checkMinMax(min, max);
+          checkTickFormat(tickFormat);
           if (constant !== null && constant === 0) {
             throw new REOther(`Symlog scale constant cannot be 0.`);
           }
@@ -132,6 +146,7 @@ export const library = [
         ],
         ([{ min, max, tickFormat, exponent }]) => {
           checkMinMax(min, max);
+          checkTickFormat(tickFormat);
           if (exponent !== null && exponent <= 0) {
             throw new REOther(`Power Scale exponent must be over 0.`);
           }

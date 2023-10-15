@@ -6,6 +6,10 @@ describe("Scales", () => {
     "Scale.linear({ min: 10, max: 5 })",
     "Max must be greater than min, got: min=10, max=5"
   );
+  testEvalToMatch(
+    "Scale.linear({ min: 5, max: 10, tickFormat: '....' })",
+    "Error(Argument Error: Tick format [....] is invalid.)"
+  );
 
   testEvalToBe("Scale.log()", "Logarithmic scale");
   testEvalToMatch(
