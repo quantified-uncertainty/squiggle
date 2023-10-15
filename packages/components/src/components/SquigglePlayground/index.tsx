@@ -42,7 +42,7 @@ type PlaygroundProps = {
   height?: CSSProperties["height"];
 } & Pick<
   Parameters<typeof LeftPlaygroundPanel>[0],
-  "renderExtraControls" | "renderExtraModal"
+  "renderExtraControls" | "renderExtraDropdownItems" | "renderExtraModal"
 > &
   PartialPlaygroundSettings;
 
@@ -61,6 +61,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     onCodeChange,
     onSettingsChange,
     renderExtraControls,
+    renderExtraDropdownItems,
     renderExtraModal,
     height = 500,
     ...defaultSettings
@@ -119,6 +120,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
       onSettingsChange={handleSettingsChange}
       onOutputChange={setOutput}
       renderExtraControls={renderExtraControls}
+      renderExtraDropdownItems={renderExtraDropdownItems}
       renderExtraModal={renderExtraModal}
       onViewValuePath={(path) => rightPanelRef.current?.viewValuePath(path)}
       ref={leftPanelRef}

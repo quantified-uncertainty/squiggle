@@ -27,6 +27,7 @@ export type ProjectExecutionProps = {
 
 export type SquiggleArgs = {
   code: string;
+  sourceId?: string;
   executionId?: number;
 } & (StandaloneExecutionProps | ProjectExecutionProps);
 
@@ -58,7 +59,9 @@ const defaultContinues: string[] = [];
 export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
   // random; https://stackoverflow.com/a/12502559
   // TODO - React.useId?
-  const sourceId = useMemo(() => Math.random().toString(36).slice(2), []);
+  const sourceId = useMemo(() => {
+    return args.sourceId ?? Math.random().toString(36).slice(2);
+  }, [args.sourceId]);
 
   const projectArg = "project" in args ? args.project : undefined;
   const environment = "environment" in args ? args.environment : undefined;

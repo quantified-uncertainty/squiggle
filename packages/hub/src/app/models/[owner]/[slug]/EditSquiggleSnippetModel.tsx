@@ -3,7 +3,13 @@ import { FormProvider, useFieldArray } from "react-hook-form";
 import { graphql, useFragment } from "react-relay";
 
 import { PlaygroundToolbarItem } from "@quri/squiggle-components";
-import { Button, LinkIcon, TextTooltip } from "@quri/ui";
+import {
+  Button,
+  DropdownMenuActionItem,
+  DropdownMenuHeader,
+  LinkIcon,
+  TextTooltip,
+} from "@quri/ui";
 import {
   SquigglePlaygroundVersionPicker,
   SquiggleVersionShower,
@@ -165,15 +171,20 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
             height={height ?? "100vh"}
             onCodeChange={onCodeChange}
             defaultCode={defaultCode}
-            renderExtraControls={({ openModal }) => (
-              <div className="h-full flex items-center justify-end gap-2">
-                {model.isEditable && (
-                  <PlaygroundToolbarItem
-                    tooltipText="Exported Variables"
+            renderExtraDropdownItems={({ openModal }) =>
+              model.isEditable ? (
+                <>
+                  <DropdownMenuHeader>Experimental</DropdownMenuHeader>
+                  <DropdownMenuActionItem
+                    title="Exported Variables"
                     icon={LinkIcon}
                     onClick={() => openModal("exports")}
                   />
-                )}
+                </>
+              ) : null
+            }
+            renderExtraControls={({ openModal }) => (
+              <div className="h-full flex items-center justify-end gap-2">
                 {model.isEditable ? (
                   <SquigglePlaygroundVersionPicker
                     version={version}

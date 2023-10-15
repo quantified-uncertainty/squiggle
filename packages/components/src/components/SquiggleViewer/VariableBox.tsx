@@ -131,10 +131,10 @@ export const VariableBox: FC<VariableBoxProps> = ({
 
   const triangleToggle = () => (
     <div
-      className="cursor-pointer p-1 mr-1 text-stone-300 hover:text-slate-700"
+      className="w-4 mr-1.5 flex justify-center cursor-pointer text-stone-300 hover:text-slate-700"
       onClick={toggleCollapsed}
     >
-      <TriangleIcon size={10} className={isOpen ? "rotate-180" : "rotate-90"} />
+      <TriangleIcon size={12} className={isOpen ? "rotate-180" : "rotate-90"} />
     </div>
   );
 
@@ -185,11 +185,11 @@ export const VariableBox: FC<VariableBoxProps> = ({
     renderSettingsMenu?.({ onChange: forceUpdate });
 
   const leftCollapseBorder = () => (
-    <div className={"flex group cursor-pointer"} onClick={toggleCollapsed}>
-      <div className="p-1" />
-      <div
-        className={"w-2 border-l border-stone-200 group-hover:border-stone-500"}
-      />
+    <div
+      className="group w-4 shrink-0 flex justify-center cursor-pointer"
+      onClick={toggleCollapsed}
+    >
+      <div className="w-px bg-stone-200 group-hover:bg-stone-500" />
     </div>
   );
 
@@ -203,7 +203,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
           <span>
             <ChatBubbleLeftIcon
               size={13}
-              className={`text-purple-100 group-hover:text-purple-300`}
+              className="text-purple-100 group-hover:text-purple-300"
             />
           </span>
         </TextTooltip>

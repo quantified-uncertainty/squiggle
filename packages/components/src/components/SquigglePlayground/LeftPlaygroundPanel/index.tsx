@@ -8,7 +8,15 @@ import {
 } from "react";
 
 import { SqProject, SqValuePath } from "@quri/squiggle-lang";
-import { Bars3CenterLeftIcon } from "@quri/ui";
+import {
+  AdjustmentsVerticalIcon,
+  Bars3CenterLeftIcon,
+  Dropdown,
+  DropdownMenu,
+  DropdownMenuActionItem,
+  TextTooltip,
+  TriangleIcon,
+} from "@quri/ui";
 
 import {
   SquiggleOutput,
@@ -42,6 +50,8 @@ type Props = {
   }): void;
   /* Allows to inject extra buttons to the left panel's menu, e.g. share button on the website, or save button in Squiggle Hub. */
   renderExtraControls?: RenderExtraControls;
+  /* Allows to inject extra items to the left panel's dropdown menu. */
+  renderExtraDropdownItems?: RenderExtraControls;
   renderExtraModal?: Parameters<typeof PanelWithToolbar>[0]["renderModal"];
   onViewValuePath?: (path: SqValuePath) => void;
 };
@@ -111,7 +121,35 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
           icon={Bars3CenterLeftIcon}
           onClick={editorRef.current?.format}
         />
-        <SetttingsMenuItem onClick={() => openModal("settings")} />
+        <Dropdown
+          render={() => (
+            <DropdownMenu>
+              <TextTooltip
+                text={`${altKey()}+Shift+f`}
+                placement="right"
+                offset={5}
+              >
+                <div>
+                  <DropdownMenuActionItem
+                    title="Format Code"
+                    icon={Bars3CenterLeftIcon}
+                    onClick={() => editorRef.current?.format}
+                  />
+                </div>
+              </TextTooltip>
+              <DropdownMenuActionItem
+                title="Configuration"
+                icon={AdjustmentsVerticalIcon}
+                onClick={() => openModal("settings")}
+              />
+              {props.renderExtraDropdownItems?.({ openModal })}
+            </DropdownMenu>
+          )}
+        >
+          <ToolbarItem icon={TriangleIcon} iconClasses="rotate-180">
+            Menu
+          </ToolbarItem>
+        </Dropdown>
         <div className="flex-1">
           {props.renderExtraControls?.({ openModal })}
         </div>

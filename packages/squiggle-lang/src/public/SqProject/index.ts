@@ -133,6 +133,9 @@ export class SqProject {
   }
 
   removeSource(sourceId: string) {
+    if (!this.items.has(sourceId)) {
+      return;
+    }
     this.cleanDependents(sourceId);
     this.removeImportEdges(sourceId);
     this.setContinues(sourceId, []);

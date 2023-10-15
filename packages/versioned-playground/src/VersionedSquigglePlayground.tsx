@@ -26,6 +26,10 @@ const playgroundByVersion = {
 type CommonProps = {
   defaultCode?: string;
   distributionChartSettings?: { showSummary?: boolean }; // simplified
+  // available since 0.8.6
+  renderExtraDropdownItems?: (options: {
+    openModal: (name: string) => void;
+  }) => ReactNode;
   renderExtraControls?: (options: {
     openModal: (name: string) => void;
   }) => ReactNode;
@@ -83,6 +87,7 @@ export const VersionedSquigglePlayground: FC<Props> = ({
         // Playground props shape can change in the future and this allows us to catch those cases early.
         defaultCode={props.defaultCode}
         distributionChartSettings={props.distributionChartSettings}
+        renderExtraDropdownItems={props.renderExtraDropdownItems}
         renderExtraControls={props.renderExtraControls}
         renderExtraModal={props.renderExtraModal}
         onCodeChange={props.onCodeChange}
