@@ -67,6 +67,7 @@ interface CodeEditorProps {
 export type CodeEditorHandle = {
   format(): void;
   scrollTo(position: number): void;
+  viewCurrentPosition(): void;
 };
 
 const compTheme = new Compartment();
@@ -183,7 +184,21 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
       view?.focus();
     };
 
-    useImperativeHandle(ref, () => ({ format, scrollTo }));
+    const viewCurrentPosition = useCallback(() => {
+      if (!onViewValuePath || !view || !sourceId) {
+        return;
+      }
+      const offset = view.state.selection.main.to;
+      if (offset === undefined) {
+        return;
+      }
+      const valuePathResult = project.findValuePathByOffset(sourceId, offset);
+      if (valuePathResult.ok) {
+        onViewValuePath(valuePathResult.value);
+      }
+    }, [onViewValuePath, project, sourceId, view]);
+
+    useImperativeHandle(ref, () => ({ format, scrollTo, viewCurrentPosition }));
 
     useEffect(() => {
       view?.dispatch({
@@ -284,30 +299,14 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
             {
               key: "Alt-Shift-v",
               run: () => {
-                if (!onViewValuePath) {
-                  return true;
-                }
-                const offset = view.state.selection.main.to;
-                if (offset === undefined) {
-                  return true;
-                }
-                if (sourceId === undefined) {
-                  return true;
-                }
-                const valuePathResult = project.findValuePathByOffset(
-                  sourceId,
-                  offset
-                );
-                if (valuePathResult.ok) {
-                  onViewValuePath(valuePathResult.value);
-                }
+                viewCurrentPosition();
                 return true;
               },
             },
           ])
         ),
       });
-    }, [onViewValuePath, project, sourceId, view]);
+    }, [view, viewCurrentPosition]);
 
     useEffect(() => {
       if (!view) return;

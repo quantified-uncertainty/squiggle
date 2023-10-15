@@ -26,10 +26,6 @@ const playgroundByVersion = {
 type CommonProps = {
   defaultCode?: string;
   distributionChartSettings?: { showSummary?: boolean }; // simplified
-  // available since 0.8.6
-  renderExtraDropdownItems?: (options: {
-    openModal: (name: string) => void;
-  }) => ReactNode;
   renderExtraControls?: (options: {
     openModal: (name: string) => void;
   }) => ReactNode;
@@ -44,6 +40,11 @@ type CommonProps = {
     distributionChartSettings: { showSummary: boolean };
   }) => void;
   height?: string | number;
+  // available since 0.8.6
+  sourceId?: string;
+  renderExtraDropdownItems?: (options: {
+    openModal: (name: string) => void;
+  }) => ReactNode;
 };
 
 // supported only in modern playgrounds
@@ -87,15 +88,16 @@ export const VersionedSquigglePlayground: FC<Props> = ({
         // Playground props shape can change in the future and this allows us to catch those cases early.
         defaultCode={props.defaultCode}
         distributionChartSettings={props.distributionChartSettings}
-        renderExtraDropdownItems={props.renderExtraDropdownItems}
         renderExtraControls={props.renderExtraControls}
         renderExtraModal={props.renderExtraModal}
         onCodeChange={props.onCodeChange}
         onSettingsChange={props.onSettingsChange}
         height={props.height}
-        // older playgrounds don't support this, it'll be ignored, that's fine
-        // (TODO: why TypeScript doesn't error on this, if `linker` prop doesn't exist in 0.8.5? no idea)
+        // older playgrounds don't support these, it'll be ignored, that's fine
+        // (why TypeScript doesn't error on this, these props didn't exist in 0.8.5? no idea)
         linker={props.linker}
+        renderExtraDropdownItems={props.renderExtraDropdownItems}
+        sourceId={props.sourceId}
       />
     </Suspense>
   );

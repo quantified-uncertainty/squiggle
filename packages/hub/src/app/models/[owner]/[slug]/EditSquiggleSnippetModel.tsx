@@ -167,6 +167,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
         <div ref={ref}>
           <VersionedSquigglePlayground
             version={version}
+            sourceId={`hub:${model.owner.slug}/${model.slug}`}
             linker={squiggleHubLinker}
             height={height ?? "100vh"}
             onCodeChange={onCodeChange}
@@ -183,7 +184,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
                 </>
               ) : null
             }
-            renderExtraControls={({ openModal }) => (
+            renderExtraControls={() => (
               <div className="h-full flex items-center justify-end gap-2">
                 {model.isEditable ? (
                   <SquigglePlaygroundVersionPicker

@@ -34,6 +34,7 @@ type PlaygroundProps = {
    * So updates to it are completely ignored.
    */
   defaultCode?: string;
+  sourceId?: string;
   linker?: SqLinker;
   onCodeChange?(code: string): void;
   /* When settings change */
@@ -64,6 +65,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     renderExtraDropdownItems,
     renderExtraModal,
     height = 500,
+    sourceId,
     ...defaultSettings
   } = props;
 
@@ -115,6 +117,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     <LeftPlaygroundPanel
       project={project}
       defaultCode={defaultCode}
+      sourceId={sourceId}
       onCodeChange={onCodeChange}
       settings={settings}
       onSettingsChange={handleSettingsChange}

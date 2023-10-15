@@ -32,7 +32,7 @@ import { PanelWithToolbar } from "../../ui/PanelWithToolbar/index.js";
 import { AutorunnerMenuItem } from "./AutorunnerMenuItem.js";
 import { GlobalSettingsModal } from "./GlobalSettingsModal.js";
 import { RunMenuItem } from "./RunMenuItem.js";
-import { SetttingsMenuItem } from "./SettingsMenuItem.js";
+import { ProjectInfoModal } from "./ProjectInfoModal.js";
 
 export type RenderExtraControls = (props: {
   openModal: (name: string) => void;
@@ -41,6 +41,7 @@ export type RenderExtraControls = (props: {
 type Props = {
   project: SqProject;
   defaultCode?: string;
+  sourceId?: string;
   onCodeChange?(code: string): void;
   settings: PlaygroundSettings;
   onSettingsChange(settings: PlaygroundSettings): void;
@@ -76,6 +77,7 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
     const [squiggleOutput, { project, isRunning, sourceId }] = useSquiggle({
       code: runnerState.renderedCode,
       project: props.project,
+      sourceId: props.sourceId,
       executionId: runnerState.executionId,
     });
 
@@ -142,6 +144,20 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
                 icon={AdjustmentsVerticalIcon}
                 onClick={() => openModal("settings")}
               />
+
+              {
+                // experimental, won't always work, so disabled for now
+                /* <DropdownMenuActionItem
+                title="Find in Viewer"
+                icon={AdjustmentsVerticalIcon}
+                onClick={() => editorRef.current?.viewCurrentPosition()}
+              /> */
+              }
+              <DropdownMenuActionItem
+                title="Project Info"
+                icon={AdjustmentsVerticalIcon}
+                onClick={() => openModal("project-info")}
+              />
               {props.renderExtraDropdownItems?.({ openModal })}
             </DropdownMenu>
           )}
@@ -177,18 +193,25 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
     );
 
     const renderModal = (modalName: string) => {
-      if (modalName === "settings") {
-        return {
-          title: "Configuration",
-          body: (
-            <GlobalSettingsModal
-              settings={props.settings}
-              onSettingsChange={props.onSettingsChange}
-            />
-          ),
-        };
+      switch (modalName) {
+        case "settings":
+          return {
+            title: "Configuration",
+            body: (
+              <GlobalSettingsModal
+                settings={props.settings}
+                onSettingsChange={props.onSettingsChange}
+              />
+            ),
+          };
+        case "project-info":
+          return {
+            title: "Project Info",
+            body: <ProjectInfoModal project={project} />,
+          };
+        default:
+          return props.renderExtraModal?.(modalName);
       }
-      return props.renderExtraModal?.(modalName);
     };
 
     return (
