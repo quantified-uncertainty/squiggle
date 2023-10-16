@@ -377,7 +377,7 @@ export type CommonPlotArgs = {
   title?: string;
 };
 
-export type Plot = CommonScaleArgs &
+export type Plot = CommonPlotArgs &
   (
     | {
         type: "distributions";
