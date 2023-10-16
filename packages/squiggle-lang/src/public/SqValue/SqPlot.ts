@@ -47,8 +47,12 @@ abstract class SqAbstractPlot<T extends Plot["type"]> {
     return vPlot(this._value).toString();
   }
 
-  asValue() {
+  get asValue() {
     return new SqPlotValue(vPlot(this._value), this.context);
+  }
+
+  get title(): string | undefined {
+    return this._value.title;
   }
 }
 
@@ -83,10 +87,6 @@ export class SqDistributionsPlot extends SqAbstractPlot<"distributions"> {
       name,
       distribution: wrapDistribution(distribution),
     }));
-  }
-
-  get title(): string | undefined {
-    return this._value.title;
   }
 
   get showSummary(): boolean {
@@ -153,10 +153,6 @@ export class SqNumericFnPlot extends SqAbstractPlot<"numericFn"> {
 
   get yScale() {
     return wrapScale(this._value.yScale);
-  }
-
-  get title(): string | undefined {
-    return this._value.title;
   }
 
   get points(): number | undefined {
@@ -227,10 +223,6 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
     return wrapScale(this._value.distXScale);
   }
 
-  get title(): string | undefined {
-    return this._value.title;
-  }
-
   get points(): number | undefined {
     return this._value.points;
   }
@@ -268,10 +260,6 @@ export class SqScatterPlot extends SqAbstractPlot<"scatter"> {
   get yScale(): SqScale | undefined {
     const scale = this._value.yScale;
     return scale ? wrapScale(scale) : undefined;
-  }
-
-  get title(): string | undefined {
-    return this._value.title;
   }
 
   static zipToPoints(

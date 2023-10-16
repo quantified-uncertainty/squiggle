@@ -75,6 +75,7 @@ fn = { |id1, id2|
 }
 
 RelativeValues.gridPlot({
+  title: "My Relative Values Plot",
   ids: ids,
   fn: fn
 })

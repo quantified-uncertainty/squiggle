@@ -9,6 +9,7 @@ import { SqLambdaValue } from "@quri/squiggle-lang";
 import { SqStringValue } from "@quri/squiggle-lang";
 import { ErrorAlert } from "../Alert.js";
 import { Env } from "@quri/squiggle-lang";
+import { PlotTitle } from "../PlotTitle.js";
 
 const rvSchema = z.object({
   median: z.number(),
@@ -99,34 +100,41 @@ export const RelativeValuesGridChart: FC<Props> = ({ plot, environment }) => {
   const wrapFn = wrapFnResult.value.value;
 
   return (
-    <div
-      className="grid w-fit border-r border-b border-gray-200"
-      style={{
-        gridTemplateColumns: `repeat(${ids.length + 1}, 140px)`,
-      }}
-    >
-      <div />
-      {ids.map((columnId) => (
-        <CellBox key={columnId} header>
-          <Header text={columnId} />
-        </CellBox>
-      ))}
-      {ids.map((rowId) => (
-        <Fragment key={rowId}>
-          <CellBox header>
-            <Header text={rowId} />
+    <div>
+      {plot.title && (
+        <div className="mb-2">
+          <PlotTitle title={plot.title} />
+        </div>
+      )}
+      <div
+        className="grid w-fit border-r border-b border-gray-200"
+        style={{
+          gridTemplateColumns: `repeat(${ids.length + 1}, 140px)`,
+        }}
+      >
+        <div />
+        {ids.map((columnId) => (
+          <CellBox key={columnId} header>
+            <Header text={columnId} />
           </CellBox>
-          {ids.map((columnId) => (
-            <Cell
-              wrapFn={wrapFn}
-              id1={rowId}
-              id2={columnId}
-              key={columnId}
-              environment={environment}
-            />
-          ))}
-        </Fragment>
-      ))}
+        ))}
+        {ids.map((rowId) => (
+          <Fragment key={rowId}>
+            <CellBox header>
+              <Header text={rowId} />
+            </CellBox>
+            {ids.map((columnId) => (
+              <Cell
+                wrapFn={wrapFn}
+                id1={rowId}
+                id2={columnId}
+                key={columnId}
+                environment={environment}
+              />
+            ))}
+          </Fragment>
+        ))}
+      </div>
     </div>
   );
 };

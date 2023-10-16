@@ -28,7 +28,7 @@ import { DistributionsChart } from "../DistributionsChart/index.js";
 import { ImageErrors } from "./ImageErrors.js";
 import { getFunctionImage } from "./utils.js";
 import { TailwindContext } from "@quri/ui";
-import { PlotTitle } from "../../lib/plotTitle.js";
+import { PlotTitle } from "../PlotTitle.js";
 
 type FunctionChart1DistProps = {
   plot: SqDistFnPlot;

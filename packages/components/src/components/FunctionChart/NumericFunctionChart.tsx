@@ -17,7 +17,7 @@ import {
 import { canvasClasses } from "../../lib/utility.js";
 import { ImageErrors } from "./ImageErrors.js";
 import { getFunctionImage } from "./utils.js";
-import { PlotTitle } from "../../lib/plotTitle.js";
+import { PlotTitle } from "../PlotTitle.js";
 
 type Props = {
   plot: SqNumericFnPlot;

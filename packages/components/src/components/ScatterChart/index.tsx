@@ -17,7 +17,7 @@ import {
 import { canvasClasses } from "../../lib/utility.js";
 import { ErrorAlert } from "../Alert.js";
 import { sqScaleToD3 } from "../../lib/d3/index.js";
-import { PlotTitle } from "../../lib/plotTitle.js";
+import { PlotTitle } from "../PlotTitle.js";
 
 type Props = {
   plot: SqScatterPlot;

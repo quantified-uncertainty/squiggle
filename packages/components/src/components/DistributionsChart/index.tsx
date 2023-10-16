@@ -34,7 +34,7 @@ import { Point } from "../../lib/draw/types.js";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
 import { sqScaleToD3 } from "../../lib/d3/index.js";
 import { adjustPdfHeightToScale } from "./utils.js";
-import { PlotTitle } from "../../lib/plotTitle.js";
+import { PlotTitle } from "../PlotTitle.js";
 
 export type DistributionsChartProps = {
   plot: SqDistributionsPlot;

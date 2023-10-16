@@ -19,9 +19,9 @@ function squiggleDefaultFormat() {
     currency: ["$", ""],
     minus: "-",
   });
-  const siFormat = locale.format(".3~s");
-  const expFormat = locale.format(".3~e");
-  const fixedFormat = locale.format(".3~f");
+  const siFormat = locale.format(".9~s");
+  const expFormat = locale.format(".9~e");
+  const fixedFormat = locale.format(".9~f");
 
   return (d: d3.NumberValue) => {
     const abs = Math.abs(Number(d));
