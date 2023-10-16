@@ -119,7 +119,7 @@ export class SqNumericFnPlot extends SqAbstractPlot<"numericFn"> {
     xScale: SqScale;
     yScale: SqScale;
     points?: number;
-    title: string;
+    title?: string;
   }) {
     const result = new SqNumericFnPlot(
       {
@@ -185,7 +185,7 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
     xScale: SqScale;
     yScale: SqScale;
     distXScale: SqScale;
-    title: string;
+    title?: string;
     points?: number;
   }) {
     const result = new SqDistFnPlot(

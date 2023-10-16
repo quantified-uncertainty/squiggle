@@ -28,6 +28,7 @@ import { DistributionsChart } from "../DistributionsChart/index.js";
 import { ImageErrors } from "./ImageErrors.js";
 import { getFunctionImage } from "./utils.js";
 import { TailwindContext } from "@quri/ui";
+import { PlotTitle } from "../../lib/plotTitle.js";
 
 type FunctionChart1DistProps = {
   plot: SqDistFnPlot;
@@ -306,11 +307,7 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
 
   return (
     <div className="flex flex-col items-stretch">
-      {plot.title && (
-        <div className="text-center font-semibold text-slate-600 text-sm">
-          {plot.title}
-        </div>
-      )}
+      {plot.title && <PlotTitle title={plot.title} />}
       <div ref={refs.setReference}>
         <canvas ref={canvasRef} className={canvasClasses}>
           Chart for {plot.toString()}

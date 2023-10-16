@@ -8,6 +8,8 @@ export const labelColor = "rgb(114, 125, 147)";
 export const cursorLineColor = "#888";
 export const primaryColor = "#4c78a8"; // for lines and areas
 export const distributionColor = "#6d9bce"; // for distributions. Slightly lighter than primaryColor
+export const axisTitleColor = "rgb(100 116 139)";
+export const axisTitleFont = "bold 12px ui-sans-serif, system-ui";
 const labelFont = "10px sans-serif";
 const xLabelOffset = 6;
 const yLabelOffset = 6;
@@ -85,7 +87,8 @@ export function drawAxes({
     const titleY = height - 8; // adjust this value based on desired distance from x-axis
     context.textAlign = "center";
     context.textBaseline = "bottom";
-    context.font = "bold 12px Arial";
+    context.font = axisTitleFont;
+    context.fillStyle = axisTitleColor;
     context.fillText(xAxisTitle, titleX, titleY);
   }
   if (yAxisTitle) {
@@ -96,7 +99,8 @@ export function drawAxes({
     context.rotate(-Math.PI / 2); // rotate 90 degrees counter-clockwise
     context.textAlign = "center";
     context.textBaseline = "top";
-    context.font = "bold 12px Arial"; // adjust font size and style as needed
+    context.font = axisTitleFont;
+    context.fillStyle = axisTitleColor;
     context.fillText(yAxisTitle, 0, 0);
     context.restore(); // restore the context state to before rotation and translation
   }

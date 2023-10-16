@@ -34,6 +34,7 @@ import { Point } from "../../lib/draw/types.js";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
 import { sqScaleToD3 } from "../../lib/d3/index.js";
 import { adjustPdfHeightToScale } from "./utils.js";
+import { PlotTitle } from "../../lib/plotTitle.js";
 
 export type DistributionsChartProps = {
   plot: SqDistributionsPlot;
@@ -393,11 +394,7 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
 
   return (
     <div className="flex flex-col items-stretch">
-      {plot.title && (
-        <div className="text-center font-semibold text-slate-600 text-sm">
-          {plot.title}
-        </div>
-      )}
+      {plot.title && <PlotTitle title={plot.title} />}
       {plot.xScale.tag === "log" && shapes.value.some(hasMassBelowZero) ? (
         <ErrorAlert heading="Log Domain Error">
           Cannot graph distribution with negative values on logarithmic scale.
