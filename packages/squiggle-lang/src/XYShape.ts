@@ -159,6 +159,9 @@ export const T = {
     const cys = [...t1.ys, ...t2.ys];
     return { xs: cxs, ys: cys };
   },
+  isEqual(t1: XYShape, t2: XYShape): boolean {
+    return E_A_Floats.isEqual(t1.xs, t2.xs) && E_A_Floats.isEqual(t1.ys, t2.ys);
+  },
   fromZippedArray(pairs: [number, number][]): XYShape {
     return T.fromArray(E_A.unzip(pairs));
   },

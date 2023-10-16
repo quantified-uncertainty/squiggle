@@ -28,7 +28,7 @@ import {
   vVoid,
 } from "../value/index.js";
 import * as Context from "./context.js";
-import { LambdaParameter, SquiggleLambda } from "./lambda.js";
+import { UserDefinedLambdaParameter, UserDefinedLambda } from "./lambda.js";
 
 export type ReducerFn = (
   expression: Expression,
@@ -93,7 +93,7 @@ const evaluateBlock: SubReducerFn<"Block"> = (statements, context) => {
    * We could call `bindings.extend()` here, but we don't, since scopes are costly and bindings are immutable anyway.
    * So we just have to be careful to throw away block's bindings at the end of a block scope and return the original context.
    * Note: We'll have to remove this optimization if we add any kind of `locals()` (like in Python) function or debugging utilities.
-   * See also: similar note in `SquiggleLambda` constructor.
+   * See also: similar note in `UserDefinedLambda` constructor.
    */
   let currentContext = context;
   let currentValue: Value = vVoid();
@@ -207,7 +207,7 @@ const evaluateLambda: SubReducerFn<"Lambda"> = (
   context,
   ast
 ) => {
-  const parameters: LambdaParameter[] = [];
+  const parameters: UserDefinedLambdaParameter[] = [];
   for (const parameterExpression of expressionValue.parameters) {
     let domain: VDomain | undefined;
     // Processing annotations, e.g. f(x: [3, 5]) = { ... }
@@ -238,7 +238,7 @@ const evaluateLambda: SubReducerFn<"Lambda"> = (
     });
   }
   const value = vLambda(
-    new SquiggleLambda(
+    new UserDefinedLambda(
       expressionValue.name,
       parameters,
       context.stack,

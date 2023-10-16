@@ -20,6 +20,8 @@ import {
   cauchyDist,
   triangularDist,
   exponentialDist,
+  point1,
+  normalDist10,
 } from "../fixtures/distFixtures.js";
 
 describe("toPointSet", () => {
@@ -77,4 +79,16 @@ describe("sparkline", () => {
   runTest("triangular", triangularDist, Ok(`▁▁▂▃▄▅▆▇████▇▆▅▄▃▂▁▁`));
 
   runTest("exponential", exponentialDist, Ok(`█▅▄▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁`));
+});
+
+describe("isEqual", () => {
+  test("equal normal distributions", () => {
+    expect(normalDist.isEqual(normalDist)).toBe(true);
+  });
+  test("different normal distributions", () => {
+    expect(normalDist5.isEqual(normalDist10)).toBe(false);
+  });
+  test("different distribution types", () => {
+    expect(normalDist.isEqual(point1)).toBe(false);
+  });
 });

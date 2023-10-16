@@ -1,12 +1,6 @@
-import { REOther, RESymbolNotFound } from "../../errors/messages.js";
-import { ReducerContext } from "../../reducer/context.js";
 import { BuiltinLambda, Lambda } from "../../reducer/lambda.js";
 import { Value } from "../../value/index.js";
-import {
-  FnDefinition,
-  fnDefinitionToString,
-  tryCallFnDefinition,
-} from "./fnDefinition.js";
+import { FnDefinition } from "./fnDefinition.js";
 
 export type FRFunction = {
   name: string;
@@ -68,36 +62,12 @@ export class Registry {
     return [...this.fnNameDict.keys()];
   }
 
-  call(fnName: string, args: Value[], context: ReducerContext): Value {
+  makeLambda(fnName: string): Lambda {
     const definitions = this.fnNameDict.get(fnName);
     if (definitions === undefined) {
-      throw new RESymbolNotFound(fnName);
+      throw new Error(`Function ${fnName} has no definitions`);
+    } else {
+      return new BuiltinLambda(fnName, definitions);
     }
-    const showNameMatchDefinitions = () => {
-      const defsString = definitions
-        .map(fnDefinitionToString)
-        .map((def) => `  ${fnName}${def}\n`)
-        .join("");
-      return `There are function matches for ${fnName}(), but with different arguments:\n${defsString}`;
-    };
-
-    for (const definition of definitions) {
-      const callResult = tryCallFnDefinition(definition, args, context);
-      if (callResult !== undefined) {
-        return callResult;
-      }
-    }
-    throw new REOther(showNameMatchDefinitions());
-  }
-
-  makeLambda(fnName: string): Lambda {
-    if (!this.fnNameDict.has(fnName)) {
-      throw new Error(`Function ${fnName} doesn't exist in registry`);
-    }
-    return new BuiltinLambda(fnName, (args, context) => {
-      // Note: current bindings could be accidentally exposed here through context (compare with native lambda implementation above, where we override them with local bindings).
-      // But FunctionRegistry API is too limited for that to matter. Please take care not to violate that in the future by accident.
-      return this.call(fnName, args, context);
-    });
   }
 }

@@ -168,7 +168,6 @@ export const getBoxProps = (
             </div>
           </div>
         ),
-        heading: "Table",
         children: (settings) => (
           <TableChart
             value={table}
@@ -188,7 +187,7 @@ export const getBoxProps = (
           <div>
             fn(
             <span className="opacity-60">
-              {truncateStr(value.value.parameterNames().join(", "), 15)}
+              {truncateStr(value.value.parameterString(), 15)}
             </span>
             )
           </div>
@@ -334,7 +333,7 @@ export const ExpressionViewer: React.FC<Props> = ({ value }) => {
   }
 
   const boxProps = getBoxProps(value);
-  const heading = boxProps.heading || value.tag;
+  const heading = boxProps.heading || value.publicName();
   const hasChildren = () => !!getChildrenValues(value);
   const children: (settings: MergedItemSettings) => ReactNode =
     (value.tag === "Dict" || value.tag === "Array") && hasChildren()

@@ -1,5 +1,5 @@
 import { PointMass } from "../dist/SymbolicDist.js";
-import { REOther } from "../errors/messages.js";
+import { REArgumentError, REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
@@ -32,12 +32,12 @@ function createScale(scale: Scale | null, domain: VDomain | undefined): Scale {
 
   if (scale) {
     if (scale.min === undefined && scale.max !== undefined) {
-      throw new REOther(
+      throw new REArgumentError(
         "Scale max set without min. Must set either both or neither."
       );
     }
     if (scale.min !== undefined && scale.max === undefined) {
-      throw new REOther(
+      throw new REArgumentError(
         "Scale min set without max. Must set either both or neither."
       );
     }
@@ -69,15 +69,22 @@ function createScale(scale: Scale | null, domain: VDomain | undefined): Scale {
 
 // This function both extract the domain and checks that the function has only one parameter.
 function extractDomainFromOneArgFunction(fn: Lambda): VDomain | undefined {
-  const parameters = fn.getParameters();
-  if (parameters.length !== 1) {
+  const counts = fn.parameterCounts();
+  if (!counts.includes(1)) {
     throw new REOther(
-      `Plots only work with functions that have one parameter. This function has ${parameters.length} parameters.`
+      `Plots only work with functions that have one parameter. This function only supports ${fn.parameterCountString()} parameters.`
     );
+  }
+
+  let domain;
+  if (fn.type === "UserDefinedLambda") {
+    domain = fn.parameters[0]?.domain;
+  } else {
+    domain = undefined;
   }
   // We could also verify a domain here, to be more confident that the function expects numeric args.
   // But we might get other numeric domains besides `NumericRange`, so checking domain type here would be risky.
-  return parameters[0].domain;
+  return domain;
 }
 
 export const library = [
@@ -110,7 +117,7 @@ export const library = [
             if (typeof value === "number") {
               const deltaResult = PointMass.make(value);
               if (deltaResult.ok === false) {
-                throw new REOther(deltaResult.value);
+                throw new REArgumentError(deltaResult.value);
               } else {
                 distributions.push({ name, distribution: deltaResult.value });
               }

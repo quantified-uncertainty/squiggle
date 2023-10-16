@@ -66,8 +66,10 @@ export async function expectEvalToMatch(
   expect(resultToString(await evaluateStringToResult(code))).toMatch(expected);
 }
 
-export function testEvalToBe(expr: string, answer: string) {
-  test(expr, async () => await expectEvalToBe(expr, answer));
+export function testEvalToBe(expr: string, answer: string, only = false) {
+  only
+    ? test.only(expr, async () => await expectEvalToBe(expr, answer))
+    : test(expr, async () => await expectEvalToBe(expr, answer));
 }
 
 export function testEvalToMatch(expr: string, expected: string | RegExp) {

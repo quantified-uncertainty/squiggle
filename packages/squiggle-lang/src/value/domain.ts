@@ -1,4 +1,4 @@
-import { REOther } from "../errors/messages.js";
+import { REArgumentError } from "../errors/messages.js";
 import { Value } from "./index.js";
 
 abstract class BaseDomain {
@@ -30,6 +30,10 @@ export class NumericRangeDomain extends BaseDomain {
       value.value <= this.max
     );
   }
+
+  isEqual(other: NumericRangeDomain) {
+    return this.min === other.min && this.max === other.max;
+  }
 }
 
 export type Domain = NumericRangeDomain;
@@ -39,21 +43,21 @@ export function annotationToDomain(value: Value): Domain {
     return value.value;
   }
   if (value.type !== "Array") {
-    throw new REOther("Only array domains are supported");
+    throw new REArgumentError("Only array domains are supported");
   }
   if (value.value.length !== 2) {
-    throw new REOther("Expected two-value array");
+    throw new REArgumentError("Expected two-value array");
   }
   const [min, max] = value.value;
   if (min.type !== "Number") {
-    throw new REOther("Min value is not a number");
+    throw new REArgumentError("Min value is not a number");
   }
   if (max.type !== "Number") {
-    throw new REOther("Max value is not a number");
+    throw new REArgumentError("Max value is not a number");
   }
 
   if (min.value >= max.value) {
-    throw new REOther(
+    throw new REArgumentError(
       `The range minimum (${min.value}) must be lower than the range maximum (${max.value})`
     );
   }

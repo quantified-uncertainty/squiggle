@@ -121,9 +121,6 @@ describe("distribution functions", () => {
     testEvalToBe("stdev(Sym.bernoulli(0.8))", "0.39999999999999997");
     testEvalToBe("stdev(Sym.logistic(5,1))", "1.8137993642342178");
   });
-  describe("toString", () => {
-    testEvalToBe("toString(Sym.normal(5,2))", '"Normal(5,2)"');
-  });
   describe("normalize", () => {
     testEvalToBe("normalize(Sym.normal(5,2))", "Normal(5,2)");
   });

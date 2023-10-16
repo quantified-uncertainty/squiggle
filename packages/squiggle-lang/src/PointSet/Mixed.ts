@@ -63,6 +63,12 @@ export class MixedShape implements PointSet<MixedShape> {
   toMixed() {
     return this;
   }
+  isEqual(other: MixedShape): boolean {
+    return (
+      this.continuous.isEqual(other.continuous) &&
+      this.discrete.isEqual(other.discrete)
+    );
+  }
 
   truncate(leftCutoff: number | undefined, rightCutoff: number | undefined) {
     return new MixedShape({

@@ -33,15 +33,6 @@ const makeDurationToNumberFn = (
   });
 
 export const library = [
-  maker.make({
-    name: "toString",
-    definitions: [
-      makeDefinition([frDate], ([t]) => vString(DateTime.Date.toString(t))),
-      makeDefinition([frTimeDuration], ([t]) =>
-        vString(DateTime.Duration.toString(t))
-      ),
-    ],
-  }),
   maker.fromDefinition(
     "makeDateFromYear",
     makeDefinition([frNumber], ([year]) => {

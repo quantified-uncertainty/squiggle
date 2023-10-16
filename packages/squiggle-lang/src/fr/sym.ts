@@ -1,27 +1,15 @@
-import { otherError } from "../dist/DistError.js";
 import * as SymbolicDist from "../dist/SymbolicDist.js";
-import { REDistributionError } from "../errors/messages.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import { frDict, frNumber } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import * as Result from "../utility/result.js";
-import { Value, vDist } from "../value/index.js";
-import { CI_CONFIG } from "./dist.js";
+import { CI_CONFIG, SymDistResult, symDistResultToValue } from "./distUtil.js";
 
 const maker = new FnFactory({
   nameSpace: "Sym",
   requiresNamespace: true,
 });
-
-type SymDistResult = Result.result<SymbolicDist.SymbolicDist, string>;
-
-function symDistResultToValue(result: SymDistResult): Value {
-  if (!result.ok) {
-    throw new REDistributionError(otherError(result.value));
-  }
-  return vDist(result.value);
-}
 
 function makeTwoArgsSymDist(fn: (v1: number, v2: number) => SymDistResult) {
   return makeDefinition([frNumber, frNumber], ([v1, v2]) => {

@@ -20,6 +20,7 @@ import {
 import { REDistributionError, REExpectedType } from "../errors/messages.js";
 import { Ok } from "../utility/result.js";
 import { vDist, vNumber } from "../value/index.js";
+import { PointMass } from "../dist/SymbolicDist.js";
 
 const maker = new FnFactory({
   nameSpace: "PointSet",
@@ -43,16 +44,33 @@ function pointSetAssert(dist: BaseDist): asserts dist is PointSetDist {
   throw new REExpectedType("PointSetDist", dist.toString());
 }
 
+const fromDist = makeDefinition([frDist], ([dist], context) =>
+  repackDistResult(dist.toPointSetDist(context.environment))
+);
+
+const fromNumber = makeDefinition([frNumber], ([num], _) => {
+  const pointMass = new PointMass(num);
+  return repackDistResult(pointMass.toPointSetDist());
+});
+
 export const library = [
   maker.make({
     name: "fromDist",
     examples: [`PointSet.fromDist(normal(5,2))`],
     output: "Dist",
-    definitions: [
-      makeDefinition([frDist], ([dist], context) =>
-        repackDistResult(dist.toPointSetDist(context.environment))
-      ),
-    ],
+    definitions: [fromDist],
+  }),
+  maker.make({
+    name: "fromNumber",
+    examples: [`PointSet.fromNumber(3)`],
+    output: "Dist",
+    definitions: [fromNumber],
+  }),
+  maker.make({
+    name: "make",
+    examples: [`PointSet.make(normal(5,10))`, `PointSet.make(3)`],
+    output: "Dist",
+    definitions: [fromDist, fromNumber],
   }),
   maker.make({
     name: "downsample",

@@ -28,27 +28,27 @@ export type FRType<T> = {
 
 export const frNumber: FRType<number> = {
   unpack: (v: Value) => (v.type === "Number" ? v.value : undefined),
-  pack: vNumber,
+  pack: (v) => vNumber(v),
   getName: () => "number",
 };
 export const frString: FRType<string> = {
   unpack: (v: Value) => (v.type === "String" ? v.value : undefined),
-  pack: vString,
+  pack: (v) => vString(v),
   getName: () => "string",
 };
 export const frBool: FRType<boolean> = {
   unpack: (v: Value) => (v.type === "Bool" ? v.value : undefined),
-  pack: vBool,
+  pack: (v) => vBool(v),
   getName: () => "bool",
 };
 export const frDate: FRType<Date> = {
   unpack: (v) => (v.type === "Date" ? v.value : undefined),
-  pack: vDate,
+  pack: (v) => vDate(v),
   getName: () => "date",
 };
 export const frTimeDuration: FRType<number> = {
   unpack: (v) => (v.type === "TimeDuration" ? v.value : undefined),
-  pack: vTimeDuration,
+  pack: (v) => vTimeDuration(v),
   getName: () => "duration",
 };
 export const frDistOrNumber: FRType<BaseDist | number> = {
@@ -59,17 +59,41 @@ export const frDistOrNumber: FRType<BaseDist | number> = {
 };
 export const frDist: FRType<BaseDist> = {
   unpack: (v) => (v.type === "Dist" ? v.value : undefined),
-  pack: vDist,
+  pack: (v) => vDist(v),
   getName: () => "distribution",
 };
 export const frLambda: FRType<Lambda> = {
   unpack: (v) => (v.type === "Lambda" ? v.value : undefined),
-  pack: vLambda,
+  pack: (v) => vLambda(v),
   getName: () => "lambda",
+};
+export const frLambdaN = (paramLength: number): FRType<Lambda> => {
+  return {
+    unpack: (v: Value) => {
+      return v.type === "Lambda" &&
+        v.value.parameterCounts().includes(paramLength)
+        ? v.value
+        : undefined;
+    },
+    pack: (v) => vLambda(v),
+    getName: () => `lambda(${paramLength})`,
+  };
+};
+export const frLambdaNand = (paramLengths: number[]): FRType<Lambda> => {
+  return {
+    unpack: (v: Value) => {
+      const counts = v.type === "Lambda" && v.value.parameterCounts();
+      return counts && paramLengths.every((p) => counts.includes(p))
+        ? v.value
+        : undefined;
+    },
+    pack: (v) => vLambda(v),
+    getName: () => `lambda(${paramLengths.join(",")})`,
+  };
 };
 export const frScale: FRType<Scale> = {
   unpack: (v) => (v.type === "Scale" ? v.value : undefined),
-  pack: vScale,
+  pack: (v) => vScale(v),
   getName: () => "scale",
 };
 
@@ -99,29 +123,55 @@ export const frArray = <T>(itemType: FRType<T>): FRType<T[]> => {
   };
 };
 
-export const frTuple2 = <T1, T2>(
+export function frTuple<T1, T2>(
   type1: FRType<T1>,
   type2: FRType<T2>
-): FRType<[T1, T2]> => {
+): FRType<[T1, T2]>;
+
+export function frTuple<T1, T2, T3>(
+  type1: FRType<T1>,
+  type2: FRType<T2>,
+  type3: FRType<T3>
+): FRType<[T1, T2, T3]>;
+
+export function frTuple<T1, T2, T3, T4>(
+  type1: FRType<T1>,
+  type2: FRType<T2>,
+  type3: FRType<T3>,
+  type4: FRType<T4>
+): FRType<[T1, T2, T3, T4]>;
+
+export function frTuple<T1, T2, T3, T4, T5>(
+  type1: FRType<T1>,
+  type2: FRType<T2>,
+  type3: FRType<T3>,
+  type4: FRType<T4>,
+  type5: FRType<T5>
+): FRType<[T1, T2, T3, T4, T5]>;
+
+export function frTuple(...types: FRType<unknown>[]): FRType<any> {
+  const numTypes = types.length;
+
   return {
     unpack: (v: Value) => {
-      if (v.type !== "Array") {
+      if (v.type !== "Array" || v.value.length !== numTypes) {
         return undefined;
       }
-      if (v.value.length !== 2) {
+
+      const items = types.map((type, index) => type.unpack(v.value[index]));
+
+      if (items.some((item) => item === undefined)) {
         return undefined;
       }
-      const item1 = type1.unpack(v.value[0]);
-      const item2 = type2.unpack(v.value[1]);
-      if (item1 === undefined || item2 === undefined) {
-        return undefined;
-      }
-      return [item1, item2];
+
+      return items;
     },
-    pack: ([v1, v2]) => vArray([type1.pack(v1), type2.pack(v2)]),
-    getName: () => `tuple(${type1.getName()}, ${type2.getName()})`,
+    pack: (values: unknown[]) => {
+      return vArray(values.map((val, index) => types[index].pack(val)));
+    },
+    getName: () => `tuple(${types.map((type) => type.getName()).join(", ")})`,
   };
-};
+}
 
 export const frDictWithArbitraryKeys = <T>(
   itemType: FRType<T>
