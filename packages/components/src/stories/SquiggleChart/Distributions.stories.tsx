@@ -68,6 +68,17 @@ export const Scales: Story = {
   },
 };
 
+export const SymbolicWithXLabel: Story = {
+  name: "Symbolic with x label",
+  args: {
+    code: `Plot.dist({
+  dist: Sym.normal(5,2),
+  xScale: Scale.linear({title: "X Scale"}),
+  yScale: Scale.linear(),
+})`,
+  },
+};
+
 export const CustomTickFormat: Story = {
   name: "Custom tick format",
   args: {
