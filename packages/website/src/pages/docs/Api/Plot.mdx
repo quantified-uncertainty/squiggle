@@ -58,7 +58,7 @@ Examples:
 <SquiggleEditor
   defaultCode={`Plot.dist({
     dist: normal(5,2),
-    xScale: Scale.linear({ min: -2, max: 6}),
+    xScale: Scale.linear({ min: -2, max: 6, title: "X Axis Title"}),
     title: "A Simple Normal Distribution",
     showSummary: true
 })`}
@@ -73,6 +73,7 @@ Plot.numericFn: ({
   fn: (number => number),
   xScale: scale,
   yScale: scale,
+  title: string,
   points: number
 }) => plot
 ```
@@ -97,6 +98,7 @@ Plot.distFn: ({
   fn: (number => dist),
   xScale: scale,
   yScale: scale,
+  title: string,
   distXScale: scale,
   points: number
 }) => plot
@@ -105,7 +107,9 @@ Plot.distFn: ({
 <SquiggleEditor
   defaultCode={`Plot.distFn({
   fn: {|t| normal(t,2)*normal(5,3)},
-  xScale: Scale.log({ min: 3, max: 100 }),
+  title: "A Function of Value over Time",
+  xScale: Scale.log({ min: 3, max: 100, title: "Time (years)"}),
+  yScale: Scale.linear({ title: "Value"}),
   distXScale: Scale.linear({ tickFormat: '#x' }),
 })`}
 />
@@ -115,11 +119,12 @@ Plot.distFn: ({
 Plots a scatterplot. Requires two sample set distributions.
 
 ```
-Plot.numericFn: ({
+Plot.scatter: ({
   yDist: sampleSetDist,
   xDist: sampleSetDist,
   xScale: Scale,
-  yScale: Scale
+  yScale: Scale,
+  title: string,
 }) => plot
 ```
 
@@ -137,10 +142,11 @@ Plot.scatter({
   defaultCode={`xDist = SampleSet.fromDist(normal({p5:-2, p95:5}))
 yDist = normal({p5:-3, p95:3}) * 5 - xDist
 Plot.scatter({
+  title: "A Scatterplot",
   xDist: xDist,
   yDist: yDist,
-  xScale: Scale.symlog(),
-  yScale: Scale.symlog(),
+  xScale: Scale.symlog({title: "X Axis Title"}),
+  yScale: Scale.symlog({title: "Y Axis Title"}),
 })`}
 />
 
@@ -154,19 +160,22 @@ We use D3 for the tick formats. You can read about custom tick formats [here](ht
 Scale.log: ({
   min: number,
   max: number,
-  tickFormat: string
+  tickFormat: string,
+  title: string
 }) => scale
 
 Scale.linear: ({
   min: number,
   max: number,
-  tickFormat: string
+  tickFormat: string,
+  title: string
 }) => scale
 
 Scale.symlog: ({
   min: number,
   max: number,
   tickFormat: string,
+  title: string,
   constant: number
 }) => scale
 
@@ -174,6 +183,7 @@ Scale.power: ({
   min: number,
   max: number,
   tickFormat: string,
+  title: string,
   exponent: number
 }) => scale
 ```

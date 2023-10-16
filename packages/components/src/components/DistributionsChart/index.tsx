@@ -123,6 +123,7 @@ const InnerDistributionsChart: FC<{
         hideYAxis: true,
         drawTicks: true,
         xTickFormat: plot.xScale.tickFormat,
+        xAxisTitle: plot.xScale.title,
       });
 
       if (isMulti) {

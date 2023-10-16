@@ -83,7 +83,8 @@ export function drawAxes({
   }
 
   if (xAxisTitle) {
-    const titleX = width / 2; // center the title
+    const chartWidth = width - padding.left - padding.right; // Actual charting area width
+    const titleX = padding.left + chartWidth / 2; // center the title within the charting area
     const titleY = height - 8; // adjust this value based on desired distance from x-axis
     context.textAlign = "center";
     context.textBaseline = "bottom";
@@ -92,7 +93,8 @@ export function drawAxes({
     context.fillText(xAxisTitle, titleX, titleY);
   }
   if (yAxisTitle) {
-    const titleY = height / 2; // center the title vertically
+    const chartHeight = height - padding.top - padding.bottom; // Actual charting area height
+    const titleY = padding.top + chartHeight / 2; // center the title vertically within the charting area
     const titleX = 0;
     context.save(); // save the current context state
     context.translate(titleX, titleY);

@@ -15,7 +15,7 @@ type Story = StoryObj<typeof meta>;
 export const ContinuousSymbolic: Story = {
   name: "Continuous Symbolic",
   args: {
-    code: "normal(5,2)",
+    code: "Sym.normal(5,2)",
   },
 };
 
@@ -73,7 +73,8 @@ export const CustomTickFormat: Story = {
   args: {
     code: `Plot.dist({
   dist: beta(3, 5),
-  xScale: Scale.linear({ tickFormat: ".0%" }),
+  title: "Beta(3, 5)",
+  xScale: Scale.linear({ tickFormat: ".0%" , title: "X Scale"}),
 })`,
   },
 };
@@ -91,6 +92,7 @@ export const MultiplePlots: Story = {
     code: `
 Plot.dists({
   title: "Multiple plots",
+  xScale: Scale.linear({ title: "X Scale" }),
 dists: [
 {
  name: "one",

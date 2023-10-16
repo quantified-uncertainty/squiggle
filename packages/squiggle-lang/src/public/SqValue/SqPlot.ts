@@ -66,7 +66,7 @@ export class SqDistributionsPlot extends SqAbstractPlot<"distributions"> {
     xScale: SqScale;
     yScale: SqScale;
     showSummary: boolean;
-    title: string;
+    title?: string;
   }) {
     return new SqDistributionsPlot({
       type: "distributions",
