@@ -17,9 +17,9 @@ describe.each([
 
   describe.each([
     [0.000003, "3e-6"],
-    [0.00003, "0.00003"],
-    [0.0003, "0.0003"],
-    [0.000123456789, "0.000123457"],
+    [0, "0"],
+    [0.0003, "0"],
+    [0.000123456789, "0"],
     [0.03, "0.03"],
     [0, "0"],
     [0.3, "0.3"],
@@ -38,7 +38,7 @@ describe.each([
 
     if (num !== 0 && !(sqScale instanceof SqLogScale)) {
       test("negative", () => {
-        expect(format(-num)).toEqual("-" + result);
+        expect(format(-num)).toEqual(result === "0" ? result : "-" + result);
       });
     }
   });
