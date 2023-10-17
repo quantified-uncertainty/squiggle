@@ -139,8 +139,8 @@ importers:
         specifier: ^3.0.7
         version: 3.0.7
       zod:
-        specifier: ^3.22.2
-        version: 3.22.2
+        specifier: ^3.22.3
+        version: 3.22.3
     devDependencies:
       '@jest/globals':
         specifier: ^29.7.0
@@ -309,7 +309,7 @@ importers:
         version: 3.7.0(@pothos/core@3.38.0)(graphql@16.8.1)
       '@pothos/plugin-validation':
         specifier: ^3.10.0
-        version: 3.10.0(@pothos/core@3.38.0)(graphql@16.8.1)(zod@3.22.2)
+        version: 3.10.0(@pothos/core@3.38.0)(graphql@16.8.1)(zod@3.22.3)
       '@pothos/plugin-with-input':
         specifier: ^3.10.1
         version: 3.10.1(@pothos/core@3.38.0)(graphql@16.8.1)
@@ -404,8 +404,8 @@ importers:
         specifier: ^5.2.2
         version: 5.2.2
       zod:
-        specifier: ^3.22.2
-        version: 3.22.2
+        specifier: ^3.22.3
+        version: 3.22.3
     devDependencies:
       '@graphql-codegen/cli':
         specifier: ^5.0.0
@@ -501,8 +501,8 @@ importers:
         specifier: ^11.0.3
         version: 11.0.3
       zod:
-        specifier: ^3.22.2
-        version: 3.22.2
+        specifier: ^3.22.3
+        version: 3.22.3
     devDependencies:
       '@changesets/get-github-info':
         specifier: ^0.5.2
@@ -4650,7 +4650,7 @@ packages:
       graphql: 16.8.1
     dev: false
 
-  /@pothos/plugin-validation@3.10.0(@pothos/core@3.38.0)(graphql@16.8.1)(zod@3.22.2):
+  /@pothos/plugin-validation@3.10.0(@pothos/core@3.38.0)(graphql@16.8.1)(zod@3.22.3):
     resolution: {integrity: sha512-/f5u7XYSXeuLDohYB5qerhrWS9eJWa913oJyRI51Ur/fW0Ekuc5HQjGJ+EZjAgKh4FnyWMD/zpwWiXqZzxua5g==}
     peerDependencies:
       '@pothos/core': '*'
@@ -4659,7 +4659,7 @@ packages:
     dependencies:
       '@pothos/core': 3.38.0(graphql@16.8.1)
       graphql: 16.8.1
-      zod: 3.22.2
+      zod: 3.22.3
     dev: false
 
   /@pothos/plugin-with-input@3.10.1(@pothos/core@3.38.0)(graphql@16.8.1):
@@ -4759,7 +4759,7 @@ packages:
       react-markdown: 8.0.7(@types/react@18.2.24)(react@18.2.0)
       react-resizable: 3.0.5(react-dom@18.2.0)(react@18.2.0)
       vscode-uri: 3.0.7
-      zod: 3.22.2
+      zod: 3.22.3
     transitivePeerDependencies:
       - '@types/react'
       - supports-color
@@ -8316,6 +8316,7 @@ packages:
 
   /buffer@5.7.1:
     resolution: {integrity: sha512-EHcyIPBQ4BSGlvjB16k5KgAJ27CIsHY/2JBmCRReo48y9rQ3MaUzWX3KVlBa4U7MyX02HdVj0K7C3WaB3ju7FQ==}
+    requiresBuild: true
     dependencies:
       base64-js: 1.5.1
       ieee754: 1.2.1
@@ -8584,6 +8585,7 @@ packages:
 
   /chownr@1.1.4:
     resolution: {integrity: sha512-jJ0bqzaylmJtVnNgzTeSOs8DPavpbYgEr/b0YL8/2GO3xJEhInFmhKMUnEJQjZumK7KXGFhUy89PrsJWlakBVg==}
+    requiresBuild: true
 
   /chownr@2.0.0:
     resolution: {integrity: sha512-bIomtDF5KGpdogkLd9VspvFzk9KfpyyGlS8YFVZl7TGPBHL5snIOnxeshwVgPteQ9b4Eydl+pVbIyE1DcvCWgQ==}
@@ -11032,6 +11034,7 @@ packages:
 
   /fs-constants@1.0.0:
     resolution: {integrity: sha512-y6OAwoSIf7FyjMIv94u+b5rdheZEjzR63GTyZJm5qh4Bi+2YgwLCcI/fPFZkL5PSixOt6ZNKm+w+Hfp/Bciwow==}
+    requiresBuild: true
 
   /fs-extra@11.1.1:
     resolution: {integrity: sha512-MGIE4HOvQCeUCzmlHs0vXpih4ysz4wg9qiSAu6cd42lVwPbTM1TjV7RusoyQqMmk/95gdQZX72u+YW+c3eEpFQ==}
@@ -11836,6 +11839,7 @@ packages:
 
   /ieee754@1.2.1:
     resolution: {integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==}
+    requiresBuild: true
 
   /ignore-walk@3.0.4:
     resolution: {integrity: sha512-PY6Ii8o1jMRA1z4F2hRkH/xN59ox43DavKvD3oDpfurRlOJyAHpifIwpbdv1n4jt4ov0jSpw3kQ4GhJnpBL6WQ==}
@@ -14457,6 +14461,7 @@ packages:
 
   /mkdirp-classic@0.5.3:
     resolution: {integrity: sha512-gKLcREMhtuZRwRAfqP3RFW+TK4JqApVBtOIftVgjuABpAtpxhPGaDcfvbhNvD0B8iD1oUr/txX35NjcaY6Ns/A==}
+    requiresBuild: true
 
   /mkdirp@0.5.6:
     resolution: {integrity: sha512-FP+p8RB8OWpF3YZBCrP5gtADmtXApB5AMLn+vdyA+PyxCjrCs00mjyUozssO33cwDeT3wNGdLxJ5M//YqtHAJw==}
@@ -14721,7 +14726,7 @@ packages:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       scroll-into-view-if-needed: 3.0.10
-      zod: 3.22.2
+      zod: 3.22.3
     dev: false
 
   /nextra@2.10.0(next@13.5.2)(react-dom@18.2.0)(react@18.2.0):
@@ -14759,7 +14764,7 @@ packages:
       title: 3.5.3
       unist-util-remove: 4.0.0
       unist-util-visit: 5.0.0
-      zod: 3.22.2
+      zod: 3.22.3
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -17337,6 +17342,7 @@ packages:
 
   /string_decoder@1.3.0:
     resolution: {integrity: sha512-hkRX8U1WjJFd8LsDJ2yQ/wWWxaopEsABU1XfkM8A+j0+85JAGppt16cr1Whg6KIbb4okU6Mql6BOj+uup/wKeA==}
+    requiresBuild: true
     dependencies:
       safe-buffer: 5.2.1
 
@@ -17563,6 +17569,7 @@ packages:
   /tar-stream@2.2.0:
     resolution: {integrity: sha512-ujeqbceABgwMZxEJnk2HDY2DlnUZ+9oEcb1KzTVfYHio0UE6dG71n60d8D2I4qNvleWrrXpmjpt7vZeF1LnMZQ==}
     engines: {node: '>=6'}
+    requiresBuild: true
     dependencies:
       bl: 4.1.0
       end-of-stream: 1.4.4
@@ -19329,8 +19336,8 @@ packages:
     resolution: {integrity: sha512-m46AKbrzKVzOzs/DZgVnG5H55N1sv1M8qZU3A8RIKbs3mrACDNeIOeilDymVb2HdmP8uwshOCF4uJ8uM9rCqJw==}
     dev: false
 
-  /zod@3.22.2:
-    resolution: {integrity: sha512-wvWkphh5WQsJbVk1tbx1l1Ly4yg+XecD+Mq280uBGt9wa5BKSWf4Mhp6GmrkPixhMxmabYY7RbzlwVP32pbGCg==}
+  /zod@3.22.3:
+    resolution: {integrity: sha512-EjIevzuJRiRPbVH4mGc8nApb/lVLKVpmUhAaR5R5doKGfAnGJ6Gr3CViAVjP+4FWSxCsybeWQdcgCtbX+7oZug==}
     dev: false
 
   /zwitch@2.0.4:
