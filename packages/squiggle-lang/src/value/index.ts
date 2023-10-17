@@ -286,6 +286,7 @@ export type CommonScaleArgs = {
   min?: number;
   max?: number;
   tickFormat?: string;
+  title?: string;
 };
 
 export type Scale = CommonScaleArgs &
@@ -372,42 +373,47 @@ export type LabeledDistribution = {
   distribution: BaseDist;
 };
 
-export type Plot =
-  | {
-      type: "distributions";
-      distributions: LabeledDistribution[];
-      xScale: Scale;
-      yScale: Scale;
-      title?: string;
-      showSummary: boolean;
-    }
-  | {
-      type: "numericFn";
-      fn: Lambda;
-      xScale: Scale;
-      yScale: Scale;
-      points?: number;
-    }
-  | {
-      type: "distFn";
-      fn: Lambda;
-      xScale: Scale;
-      yScale: Scale;
-      distXScale: Scale;
-      points?: number;
-    }
-  | {
-      type: "scatter";
-      xDist: BaseDist;
-      yDist: BaseDist;
-      xScale: Scale;
-      yScale: Scale;
-    }
-  | {
-      type: "relativeValues";
-      fn: Lambda;
-      ids: string[];
-    };
+export type CommonPlotArgs = {
+  title?: string;
+};
+
+export type Plot = CommonPlotArgs &
+  (
+    | {
+        type: "distributions";
+        distributions: LabeledDistribution[];
+        xScale: Scale;
+        yScale: Scale;
+        showSummary: boolean;
+      }
+    | {
+        type: "numericFn";
+        fn: Lambda;
+        xScale: Scale;
+        yScale: Scale;
+        points?: number;
+      }
+    | {
+        type: "distFn";
+        fn: Lambda;
+        xScale: Scale;
+        yScale: Scale;
+        distXScale: Scale;
+        points?: number;
+      }
+    | {
+        type: "scatter";
+        xDist: BaseDist;
+        yDist: BaseDist;
+        xScale: Scale;
+        yScale: Scale;
+      }
+    | {
+        type: "relativeValues";
+        fn: Lambda;
+        ids: string[];
+      }
+  );
 
 export type TableChart = {
   data: Value[];

@@ -25,6 +25,7 @@ import {
   pathToShortName,
 } from "./utils.js";
 import { useEffectRef } from "../../lib/hooks/useEffectRef.js";
+import { ErrorBoundary } from "../ErrorBoundary.js";
 
 type SettingsMenuParams = {
   // Used to notify VariableBox that settings have changed, so that VariableBox could re-render itself.
@@ -234,40 +235,42 @@ export const VariableBox: FC<VariableBoxProps> = ({
     );
 
   return (
-    <div ref={saveRef}>
-      {(name !== undefined || isRoot) && (
-        <header
-          className={clsx(
-            "flex justify-between group",
-            isFocused ? "mb-2" : "hover:bg-stone-100 rounded-md"
-          )}
-        >
-          <div className="inline-flex items-center">
-            {!isFocused && triangleToggle()}
-            {headerName}
-            {!isFocused && headerPreview()}
-            {!isFocused && !isOpen && commentIcon()}
-            {!isRoot && editor && headerFindInEditorButton()}
+    <ErrorBoundary>
+      <div ref={saveRef}>
+        {(name !== undefined || isRoot) && (
+          <header
+            className={clsx(
+              "flex justify-between group",
+              isFocused ? "mb-2" : "hover:bg-stone-100 rounded-md"
+            )}
+          >
+            <div className="inline-flex items-center">
+              {!isFocused && triangleToggle()}
+              {headerName}
+              {!isFocused && headerPreview()}
+              {!isFocused && !isOpen && commentIcon()}
+              {!isRoot && editor && headerFindInEditorButton()}
+            </div>
+            <div className="inline-flex space-x-1">
+              {isOpen && headerString()}
+              {isOpen && headerSettingsButton()}
+            </div>
+          </header>
+        )}
+        {isOpen && (
+          <div className="flex w-full pt-1">
+            {!isFocused && isDictOrList && leftCollapseBorder()}
+            {!isFocused && !isDictOrList && !isRoot && (
+              <div className="flex w-4 min-w-[1rem]" /> // min-w-1rem = w-4
+            )}
+            <div className="grow">
+              {commentPosition === "top" && hasComment && showComment()}
+              {children(getAdjustedMergedSettings(path))}
+              {commentPosition === "bottom" && hasComment && showComment()}
+            </div>
           </div>
-          <div className="inline-flex space-x-1">
-            {isOpen && headerString()}
-            {isOpen && headerSettingsButton()}
-          </div>
-        </header>
-      )}
-      {isOpen && (
-        <div className="flex w-full pt-1">
-          {!isFocused && isDictOrList && leftCollapseBorder()}
-          {!isFocused && !isDictOrList && !isRoot && (
-            <div className="flex w-4 min-w-[1rem]" /> // min-w-1rem = w-4
-          )}
-          <div className="grow">
-            {commentPosition === "top" && hasComment && showComment()}
-            {children(getAdjustedMergedSettings(path))}
-            {commentPosition === "bottom" && hasComment && showComment()}
-          </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </ErrorBoundary>
   );
 };

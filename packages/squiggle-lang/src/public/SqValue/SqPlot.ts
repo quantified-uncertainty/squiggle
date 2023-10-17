@@ -47,8 +47,12 @@ abstract class SqAbstractPlot<T extends Plot["type"]> {
     return vPlot(this._value).toString();
   }
 
-  asValue() {
+  get asValue() {
     return new SqPlotValue(vPlot(this._value), this.context);
+  }
+
+  get title(): string | undefined {
+    return this._value.title;
   }
 }
 
@@ -85,10 +89,6 @@ export class SqDistributionsPlot extends SqAbstractPlot<"distributions"> {
     }));
   }
 
-  get title(): string | undefined {
-    return this._value.title;
-  }
-
   get showSummary(): boolean {
     return this._value.showSummary;
   }
@@ -113,11 +113,13 @@ export class SqNumericFnPlot extends SqAbstractPlot<"numericFn"> {
     xScale,
     yScale,
     points,
+    title,
   }: {
     fn: SqLambda;
     xScale: SqScale;
     yScale: SqScale;
     points?: number;
+    title?: string;
   }) {
     const result = new SqNumericFnPlot(
       {
@@ -125,6 +127,7 @@ export class SqNumericFnPlot extends SqAbstractPlot<"numericFn"> {
         fn: fn._value,
         xScale: xScale._value,
         yScale: yScale._value,
+        title: title,
         points,
       },
       fn.context
@@ -171,12 +174,14 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
     xScale,
     yScale,
     distXScale,
+    title,
     points,
   }: {
     fn: SqLambda;
     xScale: SqScale;
     yScale: SqScale;
     distXScale: SqScale;
+    title?: string;
     points?: number;
   }) {
     const result = new SqDistFnPlot(
@@ -186,6 +191,7 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
         xScale: xScale._value,
         yScale: yScale._value,
         distXScale: distXScale._value,
+        title: title,
         points,
       },
       fn.context

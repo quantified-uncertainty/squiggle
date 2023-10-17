@@ -34,6 +34,7 @@ import { Point } from "../../lib/draw/types.js";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
 import { sqScaleToD3 } from "../../lib/d3/index.js";
 import { adjustPdfHeightToScale } from "./utils.js";
+import { PlotTitle } from "../PlotTitle.js";
 
 export type DistributionsChartProps = {
   plot: SqDistributionsPlot;
@@ -73,14 +74,11 @@ const InnerDistributionsChart: FC<{
   const legendItemHeight = 16;
   const sampleBarHeight = 5;
 
-  const showTitle = !!plot.title;
-  const titleHeight = showTitle ? 20 : 4;
   const legendHeight = isMulti ? legendItemHeight * shapes.length : 0;
   const _showSamplesBar = showSamplesBar && samples.length;
   const samplesFooterHeight = _showSamplesBar ? 10 : 0;
 
-  const height =
-    innerHeight + legendHeight + titleHeight + samplesFooterHeight + 30;
+  const height = innerHeight + legendHeight + samplesFooterHeight + 34;
 
   const { xScale, yScale } = useMemo(() => {
     const xScale = sqScaleToD3(plot.xScale);
@@ -117,7 +115,7 @@ const InnerDistributionsChart: FC<{
         suggestedPadding: {
           left: 10,
           right: 10,
-          top: 10 + legendHeight + titleHeight,
+          top: 10 + legendHeight,
           bottom: 20 + samplesFooterHeight,
         },
         xScale,
@@ -125,23 +123,14 @@ const InnerDistributionsChart: FC<{
         hideYAxis: true,
         drawTicks: true,
         xTickFormat: plot.xScale.tickFormat,
+        xAxisTitle: plot.xScale.title,
       });
-
-      if (plot.title) {
-        context.save();
-        context.textAlign = "center";
-        context.textBaseline = "top";
-        context.fillStyle = "black";
-        context.font = "bold 12px sans-serif";
-        context.fillText(plot.title, width / 2, 4);
-        context.restore();
-      }
 
       if (isMulti) {
         const radius = 5;
         for (let i = 0; i < shapes.length; i++) {
           context.save();
-          context.translate(padding.left, titleHeight + legendItemHeight * i);
+          context.translate(padding.left, legendItemHeight * i);
           context.fillStyle = getColor(i);
           drawCircle({
             context,
@@ -266,7 +255,6 @@ const InnerDistributionsChart: FC<{
     [
       height,
       legendHeight,
-      titleHeight,
       samplesFooterHeight,
       shapes,
       samples,
@@ -407,6 +395,7 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
 
   return (
     <div className="flex flex-col items-stretch">
+      {plot.title && <PlotTitle title={plot.title} />}
       {plot.xScale.tag === "log" && shapes.value.some(hasMassBelowZero) ? (
         <ErrorAlert heading="Log Domain Error">
           Cannot graph distribution with negative values on logarithmic scale.

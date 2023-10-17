@@ -41,13 +41,14 @@ Plot.scatter({
 export const DoubleSymlog: Story = {
   args: {
     code: `
-xDist = SampleSet.fromDist(-2 to 5)
+xDist = SampleSet.fromDist(1 to 5)
 yDist = normal(0, 10) * 5 - xDist
 Plot.scatter({
+  title: "Double Symlog Scatter Plot",
   xDist: xDist,
   yDist: yDist,
-  xScale: Scale.symlog(),
-  yScale: Scale.symlog(),
+  xScale: Scale.symlog({title: "X Scale"}),
+  yScale: Scale.symlog({title: "Y Scale"}),
 })
 `,
   },

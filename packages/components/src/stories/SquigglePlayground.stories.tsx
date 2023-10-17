@@ -75,6 +75,7 @@ fn = { |id1, id2|
 }
 
 RelativeValues.gridPlot({
+  title: "My Relative Values Plot",
   ids: ids,
   fn: fn
 })
@@ -226,16 +227,6 @@ bar = 123
 \`\`test123\`\`
 "
 `,
-    height: 800,
-  },
-};
-
-export const Failure: Story = {
-  name: "Failure",
-  args: {
-    defaultCode: `Table.make(
-      { data:[], columns: [{ name: "Features", fn: {|r|""} }] }
-    )`,
     height: 800,
   },
 };

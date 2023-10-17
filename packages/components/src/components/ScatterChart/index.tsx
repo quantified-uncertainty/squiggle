@@ -17,6 +17,7 @@ import {
 import { canvasClasses } from "../../lib/utility.js";
 import { ErrorAlert } from "../Alert.js";
 import { sqScaleToD3 } from "../../lib/d3/index.js";
+import { PlotTitle } from "../PlotTitle.js";
 
 type Props = {
   plot: SqScatterPlot;
@@ -70,6 +71,8 @@ export const ScatterChart: FC<Props> = ({ plot, height, environment }) => {
         yScale,
         xTickFormat: plot.xScale?.tickFormat,
         yTickFormat: plot.yScale?.tickFormat,
+        xAxisTitle: plot.xScale?.title,
+        yAxisTitle: plot.yScale?.title,
         drawTicks: true,
       });
 
@@ -106,6 +109,7 @@ export const ScatterChart: FC<Props> = ({ plot, height, environment }) => {
 
   return (
     <div className="flex flex-col items-stretch">
+      {plot.title && <PlotTitle title={plot.title} />}
       <canvas ref={ref} className={canvasClasses}>
         Chart for {plot.toString()}
       </canvas>
