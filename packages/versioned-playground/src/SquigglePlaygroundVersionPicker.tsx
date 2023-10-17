@@ -37,7 +37,6 @@ export const SquigglePlaygroundVersionPicker: FC<{
         render={({ close }) => (
           <DropdownMenu>
             <DropdownMenuHeader>Squiggle Version</DropdownMenuHeader>
-            <DropdownMenuSeparator />
             {squiggleVersions.map((version) => (
               <DropdownMenuActionItem
                 key={version}
