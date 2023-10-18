@@ -417,6 +417,7 @@ export type Plot = CommonPlotArgs &
 
 export type TableChart = {
   data: Value[];
+  title?: string;
   columns: { fn: Lambda; name: string | undefined }[];
 };
 class VTableChart extends BaseValue {
@@ -437,6 +438,7 @@ export type Calculator = {
   fn: Lambda;
   fields: { name: string; default: string; description?: string }[];
   description?: string;
+  title?: string;
 };
 
 class VCalculator extends BaseValue {

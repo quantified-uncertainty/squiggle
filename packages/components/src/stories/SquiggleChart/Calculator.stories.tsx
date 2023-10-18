@@ -13,11 +13,12 @@ export const Basic: Story = {
     code: `
     f(a, b, c) = [a + b, a, c]
 
-    a = "\n## My favorite calculator\nA longer description of the calculator goes here...\n"
+    a = "A longer description of the calculator goes here...\n"
     
     Calculator.make(
       {
         fn: f,
+        title: "My Calculator",
         description: a,
         fields: [
           {
