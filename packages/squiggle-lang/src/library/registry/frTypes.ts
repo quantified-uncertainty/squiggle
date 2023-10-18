@@ -57,6 +57,12 @@ export const frDistOrNumber: FRType<BaseDist | number> = {
   pack: (v) => (typeof v === "number" ? vNumber(v) : vDist(v)),
   getName: () => "distribution|number",
 };
+export const frNumberOrString: FRType<string | number> = {
+  unpack: (v) =>
+    v.type === "String" ? v.value : v.type === "Number" ? v.value : undefined,
+  pack: (v) => (typeof v === "number" ? vNumber(v) : vString(v)),
+  getName: () => "number|string",
+};
 export const frDist: FRType<BaseDist> = {
   unpack: (v) => (v.type === "Dist" ? v.value : undefined),
   pack: (v) => vDist(v),

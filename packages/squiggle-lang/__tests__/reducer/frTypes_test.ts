@@ -13,6 +13,7 @@ import {
   frDict,
   frOptional,
   frAny,
+  frNumberOrString,
 } from "../../src/library/registry/frTypes.js";
 import { ImmutableMap } from "../../src/utility/immutableMap.js";
 
@@ -77,6 +78,22 @@ describe("frDistOrNumber", () => {
     const value = vDist(dist);
     expect(frDistOrNumber.unpack(value)).toBe(dist);
     expect(frDistOrNumber.pack(dist)).toEqual(value);
+  });
+});
+
+describe("frNumberOrString", () => {
+  test("number", () => {
+    const number = 123;
+    const value = vNumber(number);
+    expect(frNumberOrString.unpack(value)).toBe(number);
+    expect(frNumberOrString.pack(number)).toEqual(value);
+  });
+
+  test("string", () => {
+    const string = "foo";
+    const value = vString(string);
+    expect(frNumberOrString.unpack(value)).toBe(string);
+    expect(frNumberOrString.pack(string)).toEqual(value);
   });
 });
 
