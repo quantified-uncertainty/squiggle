@@ -9,7 +9,7 @@ import { Lambda } from "../reducer/lambda.js";
 import * as DateTime from "../utility/DateTime.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { Domain } from "./domain.js";
-import { shuffle } from "../utility/E_A.js";
+import { shuffle, isEqual as arrayIsEqual } from "../utility/E_A.js";
 
 export type ValueMap = ImmutableMap<string, Value>;
 
@@ -368,6 +368,75 @@ class VScale extends BaseValue {
 
 export const vScale = (scale: Scale) => new VScale(scale);
 
+export type CommonInputArgs = {
+  name: string;
+};
+
+export type Input = CommonInputArgs &
+  (
+    | {
+        type: "text";
+        default?: string;
+      }
+    | {
+        type: "textArea";
+        default?: string;
+      }
+    | {
+        type: "select";
+        default?: string;
+        options: string[];
+      }
+  );
+
+function inputIsEqual(valueA: Input, valueB: Input) {
+  if (valueA.type !== valueB.type) {
+    return false;
+  }
+  if (valueA.name !== valueB.name || valueA.default !== valueB.default) {
+    return false;
+  }
+
+  switch (valueA.type) {
+    case "text":
+    case "textArea":
+      return true;
+    case "select":
+      return arrayIsEqual(
+        (valueA as { options: string[] }).options,
+        (valueB as { options: string[] }).options
+      );
+  }
+}
+
+class VInput extends BaseValue {
+  readonly type = "Input";
+  readonly publicName = "Input";
+
+  constructor(public value: Input) {
+    super();
+  }
+
+  toString(): string {
+    switch (this.value.type) {
+      case "text":
+        return "Text input";
+      case "textArea":
+        return "Text area input";
+      case "select":
+        return `Select input (${(
+          this.value as { options: string[] }
+        ).options.join(", ")})`;
+    }
+  }
+
+  isEqual(other: VInput) {
+    return inputIsEqual(this.value, other.value);
+  }
+}
+
+export const vInput = (input: Input) => new VInput(input);
+
 export type LabeledDistribution = {
   name?: string;
   distribution: BaseDist;
@@ -436,7 +505,7 @@ export const vTableChart = (v: TableChart) => new VTableChart(v);
 
 export type Calculator = {
   fn: Lambda;
-  fields: { name: string; default: string; description?: string }[];
+  fields: Input[];
   description?: string;
   title?: string;
 };
@@ -584,6 +653,7 @@ export type Value =
   | VTableChart
   | VCalculator
   | VScale
+  | VInput
   | VDomain
   | VVoid;
 

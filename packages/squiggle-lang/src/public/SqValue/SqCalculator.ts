@@ -6,6 +6,7 @@ import { SqError, SqOtherError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqLambda } from "./SqLambda.js";
 import { SqValue, wrapValue } from "./index.js";
+import { SqInput, wrapInput } from "./SqInput.js";
 export class SqCalculator {
   constructor(
     private _value: Calculator,
@@ -47,15 +48,7 @@ export class SqCalculator {
     return rowData + paramData + this._value.description;
   }
 
-  get fields(): {
-    name: string;
-    default: string;
-    description?: string;
-  }[] {
-    return this._value.fields.map((x) => ({
-      name: x.name,
-      default: x.default,
-      description: x.description,
-    }));
+  get fields(): SqInput[] {
+    return this._value.fields.map(wrapInput);
   }
 }

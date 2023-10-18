@@ -5,6 +5,7 @@ import {
   SCALE_SYMLOG_DEFAULT_CONSTANT,
   SCALE_POWER_DEFAULT_CONSTANT,
 } from "../../value/index.js";
+import { SqSelectInput, SqTextAreaInput, SqTextInput } from "./SqInput.js";
 
 export const wrapScale = (value: Scale): SqScale => {
   switch (value.type) {
@@ -106,3 +107,4 @@ export class SqPowerScale extends SqAbstractScale<"power"> {
 }
 
 export type SqScale = SqLinearScale | SqLogScale | SqSymlogScale | SqPowerScale;
+export type SqInput = SqTextInput | SqTextAreaInput | SqSelectInput;
