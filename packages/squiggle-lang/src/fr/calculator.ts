@@ -35,6 +35,7 @@ export const library = [
         [
           frDict(
             ["fn", frLambda],
+            ["title", frOptional(frString)],
             ["description", frOptional(frString)],
             [
               "fields",
@@ -48,9 +49,10 @@ export const library = [
             ]
           ),
         ],
-        ([{ fn, description, fields }]) => {
+        ([{ fn, title, description, fields }]) => {
           const calc = vCalculator({
             fn,
+            title: title || undefined,
             description: description || undefined,
             fields: fields.map((vars) => ({
               name: vars.name,

@@ -13,6 +13,7 @@ export const Basic: Story = {
     code: `
     Table.make(
       {
+        title: "Basic Table",
         data: [1, 4, 5],
         columns: [
           { fn: {|e|e}, name: "Number" },

@@ -30,6 +30,10 @@ export class SqCalculator {
     }
   }
 
+  get title(): string | undefined {
+    return this._value.title;
+  }
+
   get description(): string | undefined {
     return this._value.description;
   }

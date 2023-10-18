@@ -66,13 +66,21 @@ export const CalculatorUI: FC<UIProps> = ({
     chartHeight: 200,
   };
 
+  const hasTitleOrDescription = !!calculator.title || !!calculator.description;
   return (
     <div className="border border-slate-200 rounded-sm max-w-4xl mx-auto">
-      {calculator.description && (
-        <div className="py-3 px-5 border-b border-slate-200 bg-slate-100">
-          <ReactMarkdown className={"prose text-sm text-slate-800 max-w-4xl"}>
-            {calculator.description}
-          </ReactMarkdown>
+      {hasTitleOrDescription && (
+        <div className="py-3 px-5 border-b border-slate-200 bg-slate-100 max-w-4xl">
+          {calculator.title && (
+            <div className={"text-lg text-slate-900 font-semibold mb-1"}>
+              {calculator.title}
+            </div>
+          )}
+          {calculator.description && (
+            <ReactMarkdown className={"prose text-sm text-slate-700"}>
+              {calculator.description}
+            </ReactMarkdown>
+          )}
         </div>
       )}
 

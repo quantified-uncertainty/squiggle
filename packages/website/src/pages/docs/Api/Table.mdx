@@ -13,6 +13,7 @@ The Table module allows you to make tables of data.
 ```
 Table.make: ({
   data: list<'a>,
+  title?: string,
   columns: list<{
     name?:string,
     fn: 'a => any
