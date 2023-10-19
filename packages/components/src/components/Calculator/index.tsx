@@ -128,22 +128,20 @@ export const Calculator: FC<Props> = ({
     setPrevCalculator(calculator);
   }, [calculator]);
 
-  const onChange =
-    (name: string) =>
-    async (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      const newCode = e.target.value;
+  const onChange = (name: string) => async (fn: () => string) => {
+    const newCode = fn();
 
-      calculatorState &&
-        (await updateAndProcessFieldCode({
-          dispatch: calculatorDispatch,
-          path,
-          state: calculatorState,
-          calculator,
-          environment: environment,
-          name,
-          code: newCode,
-        }));
-    };
+    calculatorState &&
+      (await updateAndProcessFieldCode({
+        dispatch: calculatorDispatch,
+        path,
+        state: calculatorState,
+        calculator,
+        environment: environment,
+        name,
+        code: newCode,
+      }));
+  };
 
   return (
     calculator &&

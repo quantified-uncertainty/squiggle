@@ -50,7 +50,7 @@ export function initialCalculatorState(
   calculator.fields.forEach((row) => {
     fields[row.name] = {
       name: row.name,
-      code: row.default,
+      code: row.default || "",
     };
   });
   return {

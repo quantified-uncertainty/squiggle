@@ -7,9 +7,9 @@ import { SqValueWithContext, valueHasContext } from "../../lib/utility.js";
 
 import ReactMarkdown from "react-markdown";
 
-import { StyledInput } from "@quri/ui";
+import { StyledInput, StyledTextArea } from "@quri/ui";
 import { CalculatorState } from "./calculatorReducer.js";
-
+import Select from "react-select";
 type UIProps = {
   calculator: SqCalculator;
   settings: PlaygroundSettings;
@@ -18,7 +18,7 @@ type UIProps = {
     settings: PlaygroundSettings
   ) => ReactNode;
   calculatorState: CalculatorState;
-  onChange: (name: string) => (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (name: string) => (fn: () => string) => void;
 };
 
 const showSqValue = (
@@ -99,14 +99,53 @@ export const CalculatorUI: FC<UIProps> = ({
                 {description && (
                   <div className="text-sm  text-gray-400">{description}</div>
                 )}
-                <div className="flex-grow mt-1 max-w-xs">
-                  <StyledInput
-                    value={code || ""}
-                    onChange={onChange(name)}
-                    placeholder={`Enter code for ${name}`}
-                    size="small"
-                  />
-                </div>
+                {row.tag === "text" && (
+                  <div className="flex-grow mt-1 max-w-xs">
+                    <StyledInput
+                      value={code || ""}
+                      onChange={(e) =>
+                        onChange(name)(() => {
+                          return e.target.value;
+                        })
+                      }
+                      placeholder={`Enter code for ${name}`}
+                      size="small"
+                    />
+                  </div>
+                )}
+                {row.tag === "textArea" && (
+                  <div className="flex-grow mt-1 max-w-xs">
+                    <StyledTextArea
+                      value={code || ""}
+                      onChange={(e) =>
+                        onChange(name)(() => {
+                          return e.target.value;
+                        })
+                      }
+                      placeholder={`Enter code for ${name}`}
+                    />
+                  </div>
+                )}
+                {row.tag === "select" && (
+                  <div className="flex-grow mt-1 max-w-xs">
+                    <Select
+                      onChange={(option) =>
+                        onChange(name)(() => {
+                          if (option) {
+                            return option.value;
+                          } else {
+                            return "";
+                          }
+                        })
+                      }
+                      value={{ value: code, label: code }}
+                      options={row.options.map((option) => ({
+                        value: option,
+                        label: option,
+                      }))}
+                    />
+                  </div>
+                )}
                 <div>
                   {result &&
                     resultHasInterestingError &&

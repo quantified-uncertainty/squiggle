@@ -11,7 +11,7 @@ type Story = StoryObj<typeof meta>;
 export const Basic: Story = {
   args: {
     code: `
-    f(a, b, c) = [a + b, a, c]
+    f(a, b, c) = [a,b,c]
 
     a = "A longer description of the calculator goes here...\n"
     
@@ -21,13 +21,9 @@ export const Basic: Story = {
         title: "My Calculator",
         description: a,
         fields: [
-          {
-            name: "Variable 1",
-            default: "1",
-            description: "This is a short description of the first variable input",
-          },
-          { name: "Variable2", default: "2 to 40" },
-          { name: "Some array", default: "[3,3,5,2,2]" },
+          Input.select({name: "Variable3", default: "alice", options: ["alice", "charles", "bob"]}),
+          Input.textArea({name: "Variable2", default: "2 to 40"}),
+          Input.text({name: "Variable1", default: 1})
         ],
       }
     )

@@ -26,8 +26,13 @@ abstract class SqAbstractInput<T extends Input["type"]> {
   get name() {
     return this._value.name;
   }
+
+  get description() {
+    return this._value.description;
+  }
+
   get default() {
-    return this._value.name;
+    return this._value.default;
   }
 }
 
@@ -35,7 +40,7 @@ export class SqTextInput extends SqAbstractInput<"text"> {
   tag = "text" as const;
 
   static create(args: CommonInputArgs) {
-    return new SqTextInput({ type: "text", ...args });
+    return new SqTextInput({ type: "text", description: "text", ...args });
   }
 }
 
@@ -57,6 +62,10 @@ export class SqSelectInput extends SqAbstractInput<"select"> {
       ...args,
     });
     this._options = args.options;
+  }
+
+  get options() {
+    return this._options;
   }
 
   static create(args: CommonInputArgs & { options: string[] }) {

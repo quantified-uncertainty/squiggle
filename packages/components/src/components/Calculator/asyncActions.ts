@@ -66,6 +66,15 @@ export const updateFnValue = ({
   });
 };
 
+const modifyCode = (code: string, calculator: SqCalculator, name: string) => {
+  const input = calculator.fields.find((row) => row.name === name);
+  if (input && input.tag === "select") {
+    return `"${code}"`;
+  } else {
+    return code;
+  }
+};
+
 // Gets all field codes in the State. Runs them all, runs the function, and updates all these values in the state.
 export async function processAllFieldCodes({
   dispatch,
@@ -83,7 +92,10 @@ export async function processAllFieldCodes({
   let _state = state;
   for (const name of state.fieldNames) {
     const field = state.fields[name];
-    const valueResult = await runSquiggleCode(field.code, environment);
+    const valueResult = await runSquiggleCode(
+      modifyCode(field.code, calculator, name),
+      environment
+    );
     const _action: CalculatorAction = {
       type: "SET_FIELD_VALUE",
       payload: { name, value: valueResult, path },
@@ -119,7 +131,10 @@ export async function updateAndProcessFieldCode({
   dispatch(setCodeAction);
   let _state = calculatorReducer(state, setCodeAction);
 
-  const valueResult = await runSquiggleCode(code, environment);
+  const valueResult = await runSquiggleCode(
+    modifyCode(code, calculator, name),
+    environment
+  );
   const setValueAction: CalculatorAction = {
     type: "SET_FIELD_VALUE",
     payload: { path, name: name, value: valueResult },

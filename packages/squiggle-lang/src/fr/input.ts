@@ -31,11 +31,18 @@ export const library = [
     examples: [`Input.text({ name: "First", default: "John" })`],
     definitions: [
       makeDefinition(
-        [frDict(["name", frString], ["default", frOptional(frNumberOrString)])],
+        [
+          frDict(
+            ["name", frString],
+            ["description", frOptional(frString)],
+            ["default", frOptional(frNumberOrString)]
+          ),
+        ],
         ([vars]) => {
           return vInput({
             type: "text",
             name: vars.name,
+            description: vars.description || "",
             default: convertFieldDefault(vars.default),
           });
         }
@@ -48,11 +55,18 @@ export const library = [
     examples: [`Input.textArea({ name: "First", default: "John" })`],
     definitions: [
       makeDefinition(
-        [frDict(["name", frString], ["default", frOptional(frNumberOrString)])],
+        [
+          frDict(
+            ["name", frString],
+            ["description", frOptional(frString)],
+            ["default", frOptional(frNumberOrString)]
+          ),
+        ],
         ([vars]) => {
           return vInput({
             type: "textArea",
             name: vars.name,
+            description: vars.description || "",
             default: convertFieldDefault(vars.default),
           });
         }
@@ -70,6 +84,7 @@ export const library = [
         [
           frDict(
             ["name", frString],
+            ["description", frOptional(frString)],
             ["options", frArray(frString)],
             ["default", frOptional(frString)]
           ),
@@ -78,6 +93,7 @@ export const library = [
           return vInput({
             type: "select",
             name: vars.name,
+            description: vars.description || "",
             options: vars.options,
             default: vars.default ?? vars.options[0],
           });

@@ -38,6 +38,7 @@
     "react-hook-form": "^7.47.0",
     "react-markdown": "^8.0.7",
     "react-resizable": "^3.0.5",
+    "react-select": "^5.7.7",
     "vscode-uri": "^3.0.7",
     "zod": "^3.22.3"
   },
