@@ -186,7 +186,15 @@ export function SelectFormField<
               getOptionLabel={getOptionLabel}
               getOptionValue={getOptionValue}
               // TODO - only when in modal? boolean prop?
-              styles={{ menuPortal: (base) => ({ ...base, zIndex: 100 }) }}
+              styles={{
+                menuPortal: (base) => ({ ...base, zIndex: 100 }),
+                input: (base) => ({
+                  ...base,
+                  "input:focus": {
+                    boxShadow: "none",
+                  },
+                }),
+              }}
               menuPortalTarget={
                 typeof document === "undefined" ? undefined : document.body
               }

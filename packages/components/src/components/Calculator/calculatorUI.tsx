@@ -143,6 +143,14 @@ export const CalculatorUI: FC<UIProps> = ({
                         value: option,
                         label: option,
                       }))}
+                      styles={{
+                        input: (base) => ({
+                          ...base,
+                          "input:focus": {
+                            boxShadow: "none",
+                          },
+                        }),
+                      }}
                     />
                   </div>
                 )}
