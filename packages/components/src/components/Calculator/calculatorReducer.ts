@@ -5,6 +5,7 @@ import {
   SqValuePath,
   result,
 } from "@quri/squiggle-lang";
+import { defaultAsString } from "../../lib/inputUtils.js";
 
 export type resultSqValue = result<SqValue, SqError>;
 
@@ -50,7 +51,7 @@ export function initialCalculatorState(
   calculator.fields.forEach((row) => {
     fields[row.name] = {
       name: row.name,
-      code: row.default || "",
+      code: defaultAsString(row),
     };
   });
   return {

@@ -16,6 +16,7 @@ import {
   allFieldResults,
   allFieldValuesAreValid,
 } from "./calculatorReducer.js";
+import { alterCodeForSquiggleRun } from "../../lib/inputUtils.js";
 
 const runSquiggleCode = async (
   code: string,
@@ -66,15 +67,17 @@ export const updateFnValue = ({
   });
 };
 
-const modifyCode = (code: string, calculator: SqCalculator, name: string) => {
+function modifyCode(
+  name: string,
+  calculator: SqCalculator,
+  code: string
+): string {
   const input = calculator.fields.find((row) => row.name === name);
-  if (input && input.tag === "select") {
-    return `"${code}"`;
-  } else {
-    return code;
+  if (!input) {
+    throw new Error("Invalid input name.");
   }
-};
-
+  return alterCodeForSquiggleRun(input, code);
+}
 // Gets all field codes in the State. Runs them all, runs the function, and updates all these values in the state.
 export async function processAllFieldCodes({
   dispatch,
@@ -93,7 +96,7 @@ export async function processAllFieldCodes({
   for (const name of state.fieldNames) {
     const field = state.fields[name];
     const valueResult = await runSquiggleCode(
-      modifyCode(field.code, calculator, name),
+      modifyCode(name, calculator, field.code),
       environment
     );
     const _action: CalculatorAction = {
@@ -132,7 +135,7 @@ export async function updateAndProcessFieldCode({
   let _state = calculatorReducer(state, setCodeAction);
 
   const valueResult = await runSquiggleCode(
-    modifyCode(code, calculator, name),
+    modifyCode(name, calculator, code),
     environment
   );
   const setValueAction: CalculatorAction = {

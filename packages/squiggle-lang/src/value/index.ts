@@ -384,6 +384,10 @@ export type Input = CommonInputArgs &
         default?: string;
       }
     | {
+        type: "checkbox";
+        default?: boolean;
+      }
+    | {
         type: "select";
         default?: string;
         options: string[];
@@ -424,6 +428,8 @@ class VInput extends BaseValue {
         return "Text input";
       case "textArea":
         return "Text area input";
+      case "checkbox":
+        return "Check box input";
       case "select":
         return `Select input (${(
           this.value as { options: string[] }

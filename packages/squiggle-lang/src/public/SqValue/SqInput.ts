@@ -6,6 +6,8 @@ export const wrapInput = (value: Input): SqInput => {
       return SqTextInput.create(value);
     case "textArea":
       return SqTextAreaInput.create(value);
+    case "checkbox":
+      return SqCheckboxInput.create(value);
     case "select":
       return SqSelectInput.create(value);
   }
@@ -52,6 +54,14 @@ export class SqTextAreaInput extends SqAbstractInput<"textArea"> {
   }
 }
 
+export class SqCheckboxInput extends SqAbstractInput<"checkbox"> {
+  tag = "checkbox" as const;
+
+  static create(args: CommonInputArgs) {
+    return new SqCheckboxInput({ type: "checkbox", ...args });
+  }
+}
+
 export class SqSelectInput extends SqAbstractInput<"select"> {
   tag = "select" as const;
   private _options: string[];
@@ -73,4 +83,8 @@ export class SqSelectInput extends SqAbstractInput<"select"> {
   }
 }
 
-export type SqInput = SqTextInput | SqTextAreaInput | SqSelectInput;
+export type SqInput =
+  | SqTextInput
+  | SqTextAreaInput
+  | SqSelectInput
+  | SqCheckboxInput;

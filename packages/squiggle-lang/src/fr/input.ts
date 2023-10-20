@@ -1,6 +1,7 @@
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
+  frBool,
   frDict,
   frNumberOrString,
   frOptional,
@@ -68,6 +69,30 @@ export const library = [
             name: vars.name,
             description: vars.description || "",
             default: convertFieldDefault(vars.default),
+          });
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "checkbox",
+    output: "Input",
+    examples: [`Input.checkbox({ name: "First", default: true })`],
+    definitions: [
+      makeDefinition(
+        [
+          frDict(
+            ["name", frString],
+            ["description", frOptional(frString)],
+            ["default", frOptional(frBool)]
+          ),
+        ],
+        ([vars]) => {
+          return vInput({
+            type: "checkbox",
+            name: vars.name,
+            description: vars.description || "",
+            default: vars.default ?? false,
           });
         }
       ),
