@@ -87,10 +87,12 @@ export const Calculator: FC<Props> = ({
     calculatorStateOnFirstRender
   );
 
-  const _processAllFieldCodes = async () => {
+  const _processAllFieldCodes = async (
+    _calculatorState: CalculatorState = calculatorState
+  ) => {
     await processAllFieldCodes({
       dispatch: calculatorDispatch,
-      state: calculatorState,
+      state: _calculatorState,
       path,
       calculator,
       environment,
@@ -108,14 +110,15 @@ export const Calculator: FC<Props> = ({
       calculator.hashString !== prevCalculator.hashString;
 
     if (calculatorChanged) {
+      const newCalculatorState = initialCalculatorState(calculator);
       calculatorDispatch({
         type: "RESET",
         payload: {
           path: path,
-          state: initialCalculatorState(calculator),
+          state: newCalculatorState,
         },
       });
-      _processAllFieldCodes();
+      _processAllFieldCodes(newCalculatorState);
     } else {
       updateFnValue({
         path,
