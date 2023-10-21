@@ -128,9 +128,7 @@ export const Calculator: FC<Props> = ({
     setPrevCalculator(calculator);
   }, [calculator]);
 
-  const onChange = (name: string) => async (fn: () => string) => {
-    const newCode = fn();
-
+  const onChange = (name: string) => async (newCode: string) => {
     calculatorState &&
       (await updateAndProcessFieldCode({
         dispatch: calculatorDispatch,

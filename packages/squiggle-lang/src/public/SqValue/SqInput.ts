@@ -1,25 +1,22 @@
-import { CommonInputArgs, Input, vInput } from "../../value/index.js";
+import { Input, vInput } from "../../value/index.js";
 
 export const wrapInput = (value: Input): SqInput => {
   switch (value.type) {
     case "text":
-      return SqTextInput.create(value);
+      return new SqTextInput(value);
     case "textArea":
-      return SqTextAreaInput.create(value);
+      return new SqTextAreaInput(value);
     case "checkbox":
-      return SqCheckboxInput.create(value);
+      return new SqCheckboxInput(value);
     case "select":
-      return SqSelectInput.create(value);
+      return new SqSelectInput(value);
   }
 };
 
 abstract class SqAbstractInput<T extends Input["type"]> {
   abstract tag: T;
 
-  constructor(
-    // public because of SqFnPlot.create
-    public _value: Extract<Input, { type: T }>
-  ) {}
+  constructor(public _value: Extract<Input, { type: T }>) {}
 
   toString() {
     return vInput(this._value).toString();
@@ -40,46 +37,21 @@ abstract class SqAbstractInput<T extends Input["type"]> {
 
 export class SqTextInput extends SqAbstractInput<"text"> {
   tag = "text" as const;
-
-  static create(args: CommonInputArgs) {
-    return new SqTextInput({ type: "text", description: "text", ...args });
-  }
 }
 
 export class SqTextAreaInput extends SqAbstractInput<"textArea"> {
   tag = "textArea" as const;
-
-  static create(args: CommonInputArgs) {
-    return new SqTextAreaInput({ type: "textArea", ...args });
-  }
 }
 
 export class SqCheckboxInput extends SqAbstractInput<"checkbox"> {
   tag = "checkbox" as const;
-
-  static create(args: CommonInputArgs) {
-    return new SqCheckboxInput({ type: "checkbox", ...args });
-  }
 }
 
 export class SqSelectInput extends SqAbstractInput<"select"> {
   tag = "select" as const;
-  private _options: string[];
-
-  constructor(args: CommonInputArgs & { options: string[] }) {
-    super({
-      type: "select",
-      ...args,
-    });
-    this._options = args.options;
-  }
 
   get options() {
-    return this._options;
-  }
-
-  static create(args: CommonInputArgs & { options: string[] }) {
-    return new SqSelectInput(args);
+    return this._value.options;
   }
 }
 

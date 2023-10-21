@@ -107,4 +107,3 @@ export class SqPowerScale extends SqAbstractScale<"power"> {
 }
 
 export type SqScale = SqLinearScale | SqLogScale | SqSymlogScale | SqPowerScale;
-export type SqInput = SqTextInput | SqTextAreaInput | SqSelectInput;

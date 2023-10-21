@@ -18,7 +18,7 @@ type UIProps = {
     settings: PlaygroundSettings
   ) => ReactNode;
   calculatorState: CalculatorState;
-  onChange: (name: string) => (fn: () => string) => void;
+  onChange: (name: string) => (fn: string) => void;
 };
 
 const showSqValue = (
@@ -103,11 +103,7 @@ export const CalculatorUI: FC<UIProps> = ({
                   <div className="flex-grow mt-1 max-w-xs">
                     <StyledInput
                       value={code || ""}
-                      onChange={(e) =>
-                        onChange(name)(() => {
-                          return e.target.value;
-                        })
-                      }
+                      onChange={(e) => onChange(name)(e.target.value)}
                       placeholder={`Enter code for ${name}`}
                       size="small"
                     />
@@ -117,11 +113,7 @@ export const CalculatorUI: FC<UIProps> = ({
                   <div className="flex-grow mt-1 max-w-xs">
                     <StyledTextArea
                       value={code || ""}
-                      onChange={(e) =>
-                        onChange(name)(() => {
-                          return e.target.value;
-                        })
-                      }
+                      onChange={(e) => onChange(name)(e.target.value)}
                       placeholder={`Enter code for ${name}`}
                     />
                   </div>
@@ -131,9 +123,7 @@ export const CalculatorUI: FC<UIProps> = ({
                     <StyledCheckbox
                       checked={(code || "true") == "true"}
                       onChange={(e) =>
-                        onChange(name)(() => {
-                          return e.target.checked.toString();
-                        })
+                        onChange(name)(e.target.checked.toString())
                       }
                     />
                   </div>
@@ -142,13 +132,7 @@ export const CalculatorUI: FC<UIProps> = ({
                   <div className="flex-grow mt-1 max-w-xs">
                     <Select
                       onChange={(option) =>
-                        onChange(name)(() => {
-                          if (option) {
-                            return option.value;
-                          } else {
-                            return "";
-                          }
-                        })
+                        onChange(name)(option ? option.value : "")
                       }
                       value={{ value: code, label: code }}
                       options={row.options.map((option) => ({

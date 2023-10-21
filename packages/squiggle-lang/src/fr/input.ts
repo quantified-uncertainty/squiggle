@@ -1,3 +1,4 @@
+import { REArgumentError } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
@@ -102,7 +103,7 @@ export const library = [
     name: "select",
     output: "Input",
     examples: [
-      `Input.select({ name: "First", default: "John", options: ["Mary", "Sue"] })`,
+      `Input.select({ name: "First", default: "John", options: ["John", "Mary", "Sue"] })`,
     ],
     definitions: [
       makeDefinition(
@@ -115,6 +116,19 @@ export const library = [
           ),
         ],
         ([vars]) => {
+          //Throw error if options are empty, if default is not in options, or if options have duplicate
+          if (vars.options.length === 0) {
+            throw new REArgumentError("Options cannot be empty");
+          } else if (
+            vars.default &&
+            !vars.options.includes(vars.default as string)
+          ) {
+            throw new REArgumentError(
+              "Default value must be one of the options provided"
+            );
+          } else if (new Set(vars.options).size !== vars.options.length) {
+            throw new REArgumentError("Options cannot have duplicate values");
+          }
           return vInput({
             type: "select",
             name: vars.name,
