@@ -623,6 +623,9 @@ importers:
       prettier:
         specifier: ^3.0.3
         version: 3.0.3
+      vscode-tmgrammar-test:
+        specifier: ^0.1.2
+        version: 0.1.2
 
   packages/ui:
     dependencies:
@@ -8824,6 +8827,11 @@ packages:
     resolution: {integrity: sha512-OkTL9umf+He2DZkUq8f8J9of7yL6RJKI24dVITBmNfZBmri9zYZQrKkuXiKhyfPSu8tUhnVBB1iKXevvnlR4Ww==}
     engines: {node: '>= 12'}
     dev: false
+
+  /commander@9.5.0:
+    resolution: {integrity: sha512-KRs7WVDKg86PWiuAqhDrAQnTXZKraVcCc6vFdL14qrZ/DcWwuRo7VoiYXalXO7S5GKpqYiVEwCbgFDfxNHKJBQ==}
+    engines: {node: ^12.20.0 || >=14}
+    dev: true
 
   /common-tags@1.8.2:
     resolution: {integrity: sha512-gk/Z852D2Wtb//0I+kRFNKKE9dIIVirjoqPoA1wJU+XePVXZfGeBpk45+A1rKO4Q43prqWBNY/MiIeRLbPWUaA==}
@@ -18752,11 +18760,26 @@ packages:
 
   /vscode-oniguruma@1.7.0:
     resolution: {integrity: sha512-L9WMGRfrjOhgHSdOYgCt/yRMsXzLDJSL7BPrOZt73gU0iWO4mpqzqQzOz5srxqTvMBaR0XZTSrVWo4j55Rc6cA==}
-    dev: false
+
+  /vscode-textmate@7.0.4:
+    resolution: {integrity: sha512-9hJp0xL7HW1Q5OgGe03NACo7yiCTMEk3WU/rtKXUbncLtdg6rVVNJnHwD88UhbIYU2KoxY0Dih0x+kIsmUKn2A==}
+    dev: true
 
   /vscode-textmate@8.0.0:
     resolution: {integrity: sha512-AFbieoL7a5LMqcnOF04ji+rpXadgOXnZsxQr//r83kLPr7biP7am3g9zbaZIaBGwBRWeSvoMD4mgPdX3e4NWBg==}
     dev: false
+
+  /vscode-tmgrammar-test@0.1.2:
+    resolution: {integrity: sha512-tLJZMAP/NWeRwlpHzjSXx+HvjJzFltndoyR6AK9fJRGjALJX6Pg7EOiYyznpJ4TNC2eMmF3IRbcZBWzJwN+n5g==}
+    hasBin: true
+    dependencies:
+      chalk: 2.4.2
+      commander: 9.5.0
+      diff: 4.0.2
+      glob: 7.2.3
+      vscode-oniguruma: 1.7.0
+      vscode-textmate: 7.0.4
+    dev: true
 
   /vscode-uri@3.0.7:
     resolution: {integrity: sha512-eOpPHogvorZRobNqJGhapa0JdwaxpjVvyBp0QIUMRMSf8ZAlqOdEquKuRmw9Qwu0qXtJIWqFtMkmvJjUZmMjVA==}

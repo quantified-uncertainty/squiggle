@@ -30,9 +30,11 @@ repository:
       "4":
         name: variable.other.squiggle
   let:
-    match: ^\s*(\w+)\s*=
+    match: ^\s*(?:(export)\s+)?(\w+)\s*=
     captures:
       "1":
+        name: keyword.control.squiggle
+      "2":
         name: variable.other.squiggle
   function-call:
     begin: (\w+)\s*(\()

@@ -28,7 +28,7 @@ describe("SqProject with imports", () => {
     });
 
     /* This time source1 and source2 are not depending on anything */
-    project.setSource("source1", "x=1");
+    project.setSource("source1", "export x=1");
 
     project.setSource(
       "source3",
@@ -38,7 +38,7 @@ describe("SqProject with imports", () => {
       z=s1.x+s2.y`
     );
     /* We're creating source1, source2, source3 in a weird order to check that `run` loads imports on demand */
-    project.setSource("source2", "y=2");
+    project.setSource("source2", "export y=2");
 
     /* Now we can run the project */
     await project.run("source3");
@@ -56,15 +56,17 @@ describe("SqProject with imports", () => {
         // Note how this function is async and can load sources remotely on demand.
         switch (sourceName) {
           case "source1":
-            return "x=1";
+            return "export x=1";
           case "source2":
             return `
-            import "source1" as s1
-            y=2`;
+              import "source1" as s1
+              export y=2
+            `;
           case "source3":
             return `
-            import "source2" as s2
-            z=3`;
+              import "source2" as s2
+              export z=3
+            `;
           default:
             throw new Error(`source ${sourceName} not found`);
         }

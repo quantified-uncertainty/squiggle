@@ -1,5 +1,9 @@
 import { SqProject } from "../../src/public/SqProject/index.js";
-import { runFetchBindings, runFetchResult } from "../helpers/projectHelpers.js";
+import {
+  runFetchBindings,
+  runFetchExports,
+  runFetchResult,
+} from "../helpers/projectHelpers.js";
 
 test("test result true", async () => {
   const project = SqProject.create();
@@ -25,6 +29,12 @@ test("test bindings", async () => {
   expect(await runFetchBindings(project, "variables")).toBe(
     "{myVariable: 666}"
   );
+});
+
+test("test exports", async () => {
+  const project = SqProject.create();
+  project.setSource("main", "x = 5; export y = 6; z = 7; export t = 8");
+  expect(await runFetchExports(project, "main")).toBe("{y: 6,t: 8}");
 });
 
 describe("removing sources", () => {

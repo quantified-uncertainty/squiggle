@@ -87,7 +87,7 @@ lib.x`
   test("Known import", async () => {
     const project = SqProject.create({
       linker: buildNaiveLinker({
-        "./lib": "x = 5",
+        "./lib": "export x = 5",
       }),
     });
     project.setSource(
@@ -117,7 +117,7 @@ lib.x`
     );
     expect(project.getDependencies("first")).toEqual(["common"]);
 
-    project.setSource("common", "common = 0");
+    project.setSource("common", "export common = 0");
     project.setSource(
       "second",
       `
@@ -193,15 +193,15 @@ lib.x`
     const project = SqProject.create({
       linker: buildNaiveLinker({
         common: `
-          x = 10
+          export x = 10
         `,
         bar: `
           import "common" as common
-          x = common.x * 2
+          export x = common.x * 2
         `,
         foo: `
           import "common" as common
-          x = common.x * 3
+          export x = common.x * 3
         `,
       }),
     });

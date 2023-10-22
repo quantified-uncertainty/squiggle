@@ -17,9 +17,13 @@ export type ExpressionContent =
       value: Expression[];
     }
   | {
-      // programs are similar to blocks, but don't create an inner scope. there can be only one program at the top level of the expression.
+      // Programs are similar to blocks, but they can export things for other modules to use.
+      // There can be only one program at the top level of the expression.
       type: "Program";
-      value: Expression[];
+      value: {
+        statements: Expression[];
+        exports: string[];
+      };
     }
   | {
       type: "Array";
@@ -128,9 +132,15 @@ export const eBlock = (exprs: Expression[]): ExpressionContent => ({
   value: exprs,
 });
 
-export const eProgram = (statements: Expression[]): ExpressionContent => ({
+export const eProgram = (
+  statements: Expression[],
+  exports: string[]
+): ExpressionContent => ({
   type: "Program",
-  value: statements,
+  value: {
+    statements,
+    exports,
+  },
 });
 
 export const eLetStatement = (
@@ -167,8 +177,18 @@ export function expressionToString(expression: Expression): string {
   switch (expression.type) {
     case "Block":
       return `{${expression.value.map(expressionToString).join("; ")}}`;
-    case "Program":
-      return expression.value.map(expressionToString).join("; ");
+    case "Program": {
+      const exports = new Set<string>(expression.value.exports);
+      return expression.value.statements
+        .map((statement) => {
+          const statementString = expressionToString(statement);
+          return statement.type === "Assign" &&
+            exports.has(statement.value.left)
+            ? `export ${statementString}`
+            : statementString;
+        })
+        .join("; ");
+    }
     case "Array":
       return `[${expression.value.map(expressionToString).join(", ")}]`;
     case "Dict":

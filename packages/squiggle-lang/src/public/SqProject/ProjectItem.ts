@@ -11,16 +11,20 @@ import { Value } from "../../value/index.js";
 import { SqCompileError, SqError, SqRuntimeError } from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
 
-// source -> ast -> imports -> bindings & result
+// source -> ast -> imports -> result/bindings/exports
 
 export type RunOutput = {
   result: Value;
   bindings: Bindings;
+  exports: Bindings;
 };
 
 export type Import =
   | {
-      type: "flat"; // for now, only `continues` can be flattened, but this might change in the future
+      // For now, only `continues` can be flattened, but this might change in the future.
+      // Also, because of this, flat imports import _all_ bindings, not just exports. In the future, we might prefer to change that,
+      // and allow flat imports of exports only (for `import "foo" as *` syntax).
+      type: "flat";
       sourceId: string;
     }
   | {
@@ -211,13 +215,23 @@ export class ProjectItem {
         return wrappedEvaluate(expression, context);
       };
 
+      if (expression.value.type !== "Program") {
+        // mostly for TypeScript, so that we could access `expression.value.exports`
+        throw new Error("Expected Program expression");
+      }
+
       const [result, contextAfterEvaluation] = evaluate(expression.value, {
         ...context,
         evaluate: asyncEvaluate,
       });
+
+      const bindings = contextAfterEvaluation.stack.asBindings();
+      const exportNames = new Set(expression.value.value.exports);
+      const exports = bindings.filter((_, key) => exportNames.has(key));
       this.output = Ok({
         result,
-        bindings: contextAfterEvaluation.stack.asBindings(),
+        bindings,
+        exports,
       });
     } catch (e: unknown) {
       this.failRun(new SqRuntimeError(IRuntimeError.fromException(e)));

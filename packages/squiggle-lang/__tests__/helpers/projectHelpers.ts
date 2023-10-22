@@ -17,6 +17,15 @@ export async function runFetchBindings(project: SqProject, sourceId: string) {
   return bindingsR.value.toString();
 }
 
+export async function runFetchExports(project: SqProject, sourceId: string) {
+  await project.run(sourceId);
+  const outputR = project.getOutput(sourceId);
+  if (!outputR.ok) {
+    return `Error(${outputR.value})`;
+  }
+  return outputR.value.exports.toString();
+}
+
 export function buildNaiveLinker(sources?: { [k: string]: string }) {
   const linker: SqLinker = {
     resolve: (name) => name,

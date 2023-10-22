@@ -248,23 +248,26 @@ export class SqProject {
       })
     );
 
-    const bindings = new SqDict(
-      internalOutputR.value.bindings,
-      new SqValueContext({
-        project: this,
-        sourceId,
-        source,
-        ast: astR.value,
-        valueAst: astR.value,
-        valueAstIsPrecise: true,
-        path: new SqValuePath({
-          root: "bindings",
-          items: [],
-        }),
-      })
+    const [bindings, exports] = (["bindings", "exports"] as const).map(
+      (field) =>
+        new SqDict(
+          internalOutputR.value[field],
+          new SqValueContext({
+            project: this,
+            sourceId,
+            source,
+            ast: astR.value,
+            valueAst: astR.value,
+            valueAstIsPrecise: true,
+            path: new SqValuePath({
+              root: "bindings",
+              items: [],
+            }),
+          })
+        )
     );
 
-    return Result.Ok({ result, bindings });
+    return Result.Ok({ result, bindings, exports });
   }
 
   getResult(sourceId: string): Result.result<SqValue, SqError> {
@@ -333,15 +336,17 @@ export class SqProject {
       if (!outputR.ok) {
         return outputR;
       }
-      const bindings = outputR.value.bindings;
 
       // TODO - check for name collisions?
       switch (importBinding.type) {
         case "flat":
-          externals = externals.merge(bindings);
+          externals = externals.merge(outputR.value.bindings);
           break;
         case "named":
-          externals = externals.set(importBinding.variable, vDict(bindings));
+          externals = externals.set(
+            importBinding.variable,
+            vDict(outputR.value.exports)
+          );
           break;
         // exhaustiveness check for TypeScript
         default:
