@@ -27,15 +27,15 @@ export const library = [
             ["fn", frLambda],
             ["title", frOptional(frString)],
             ["description", frOptional(frString)],
-            ["fields", frArray(frInput)]
+            ["inputs", frArray(frInput)]
           ),
         ],
-        ([{ fn, title, description, fields }]) => {
+        ([{ fn, title, description, inputs }]) => {
           const calc = vCalculator({
             fn,
             title: title || undefined,
             description: description || undefined,
-            fields: fields,
+            inputs: inputs,
           });
           const error = calc.getError();
           if (error) {

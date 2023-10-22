@@ -52,7 +52,7 @@ export const CalculatorUI: FC<UIProps> = ({
   calculatorState,
   onChange,
 }) => {
-  const fieldShowSettings: PlaygroundSettings = {
+  const inputShowSettings: PlaygroundSettings = {
     ...settings,
     distributionChartSettings: {
       ...settings.distributionChartSettings,
@@ -85,11 +85,11 @@ export const CalculatorUI: FC<UIProps> = ({
       )}
 
       <div className="py-3 px-5 border-b border-slate-200 bg-gray-50 space-y-3">
-        {calculator.fields.map((row) => {
+        {calculator.inputs.map((row) => {
           const { name, description } = row;
-          const field = calculatorState.fields[name];
-          if (field) {
-            const { value, code } = field;
+          const input = calculatorState.inputs[name];
+          if (input) {
+            const { value, code } = input;
             const result = value;
             const resultHasInterestingError =
               result && !result.ok && code !== "";
@@ -176,7 +176,7 @@ export const CalculatorUI: FC<UIProps> = ({
                 <div>
                   {result &&
                     resultHasInterestingError &&
-                    showSqValue(renderValue, result, fieldShowSettings)}
+                    showSqValue(renderValue, result, inputShowSettings)}
                   {!result && (
                     <div className="text-sm text-gray-500">No result</div>
                   )}

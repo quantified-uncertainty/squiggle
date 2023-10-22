@@ -20,8 +20,8 @@ export type ResultValue = {
 };
 
 export type CalculatorState = {
-  fieldNames: string[];
-  fields: Record<string, FieldValue>;
+  inputNames: string[];
+  inputs: Record<string, FieldValue>;
   fn: ResultValue;
   hash: string;
 };
@@ -31,7 +31,7 @@ export function hasSameCalculator(state: CalculatorState, calc: SqCalculator) {
 }
 
 export function allFields(state: CalculatorState): FieldValue[] {
-  return state.fieldNames.map((name) => state.fields[name]);
+  return state.inputNames.map((name) => state.inputs[name]);
 }
 
 export function allFieldResults(
@@ -47,16 +47,16 @@ export function allFieldValuesAreValid(state: CalculatorState): boolean {
 export function initialCalculatorState(
   calculator: SqCalculator
 ): CalculatorState {
-  const fields: Record<string, FieldValue> = {};
-  calculator.fields.forEach((row) => {
-    fields[row.name] = {
+  const inputs: Record<string, FieldValue> = {};
+  calculator.inputs.forEach((row) => {
+    inputs[row.name] = {
       name: row.name,
       code: defaultAsString(row),
     };
   });
   return {
-    fieldNames: calculator.fields.map((row) => row.name),
-    fields,
+    inputNames: calculator.inputs.map((row) => row.name),
+    inputs,
     fn: {},
     hash: calculator.hashString,
   };
@@ -89,8 +89,8 @@ export const calculatorReducer = (
   action: CalculatorAction
 ): CalculatorState => {
   const modifyField = (name: string, newField: FieldValue) => {
-    const newFields = { ...state.fields, [name]: newField };
-    return { ...state, fields: newFields };
+    const newFields = { ...state.inputs, [name]: newField };
+    return { ...state, inputs: newFields };
   };
   switch (action.type) {
     case "RESET": {
@@ -98,14 +98,14 @@ export const calculatorReducer = (
     }
     case "SET_FIELD_CODE": {
       const { name, code } = action.payload;
-      const field = state.fields[name];
-      const newField = { ...field, code, value: undefined };
+      const input = state.inputs[name];
+      const newField = { ...input, code, value: undefined };
       return modifyField(name, newField);
     }
     case "SET_FIELD_VALUE": {
       const { name, value } = action.payload;
-      const field = state.fields[name];
-      const newField = { ...field, value };
+      const input = state.inputs[name];
+      const newField = { ...input, value };
       return modifyField(name, newField);
     }
     case "SET_FUNCTION_VALUE": {

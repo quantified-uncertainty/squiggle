@@ -43,12 +43,12 @@ export class SqCalculator {
   // It's obviously not perfect - it doesn't capture changes within the calculator function, but this would be much more complicated.
 
   get hashString(): string {
-    const rowData = JSON.stringify(this._value.fields);
+    const rowData = JSON.stringify(this._value.inputs);
     const paramData = this._value.fn.toString() || "";
     return rowData + paramData + this._value.description;
   }
 
-  get fields(): SqInput[] {
-    return this._value.fields.map(wrapInput);
+  get inputs(): SqInput[] {
+    return this._value.inputs.map(wrapInput);
   }
 }

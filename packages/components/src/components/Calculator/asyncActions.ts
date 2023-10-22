@@ -72,13 +72,13 @@ function modifyCode(
   calculator: SqCalculator,
   code: string
 ): string {
-  const input = calculator.fields.find((row) => row.name === name);
+  const input = calculator.inputs.find((row) => row.name === name);
   if (!input) {
     throw new Error("Invalid input name.");
   }
   return alterCodeForSquiggleRun(input, code);
 }
-// Gets all field codes in the State. Runs them all, runs the function, and updates all these values in the state.
+// Gets all input codes in the State. Runs them all, runs the function, and updates all these values in the state.
 export async function processAllFieldCodes({
   dispatch,
   path,
@@ -93,10 +93,10 @@ export async function processAllFieldCodes({
   environment: Env;
 }) {
   let _state = state;
-  for (const name of state.fieldNames) {
-    const field = state.fields[name];
+  for (const name of state.inputNames) {
+    const input = state.inputs[name];
     const valueResult = await runSquiggleCode(
-      modifyCode(name, calculator, field.code),
+      modifyCode(name, calculator, input.code),
       environment
     );
     const _action: CalculatorAction = {
@@ -109,7 +109,7 @@ export async function processAllFieldCodes({
   updateFnValue({ path, state: _state, calculator, environment, dispatch });
 }
 
-// Takes an updated field code, runs it, and runs the function.
+// Takes an updated input code, runs it, and runs the function.
 export async function updateAndProcessFieldCode({
   dispatch,
   path,

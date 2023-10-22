@@ -491,7 +491,7 @@ export const vTableChart = (v: TableChart) => new VTableChart(v);
 
 export type Calculator = {
   fn: Lambda;
-  fields: Input[];
+  inputs: Input[];
   description?: string;
   title?: string;
 };
@@ -504,19 +504,19 @@ class VCalculator extends BaseValue {
 
   constructor(public value: Calculator) {
     super();
-    if (!value.fn.parameterCounts().includes(value.fields.length)) {
+    if (!value.fn.parameterCounts().includes(value.inputs.length)) {
       this.setError(
         `Calculator function needs ${value.fn.parameterCountString()} parameters, but ${
-          value.fields.length
+          value.inputs.length
         } fields were provided.`
       );
     }
 
-    if (value.fields.some((x) => x.name === "")) {
+    if (value.inputs.some((x) => x.name === "")) {
       this.setError(`Calculator field names can't be empty.`);
     }
 
-    const fieldNames = value.fields.map((f) => f.name);
+    const fieldNames = value.inputs.map((f) => f.name);
     const uniqueNames = new Set(fieldNames);
     if (fieldNames.length !== uniqueNames.size) {
       this.setError(`Duplicate calculator field names found.`);

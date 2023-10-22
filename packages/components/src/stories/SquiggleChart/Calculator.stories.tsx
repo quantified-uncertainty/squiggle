@@ -20,8 +20,8 @@ export const Basic: Story = {
         fn: f,
         title: "My Calculator",
         description: a,
-        fields: [
-          Input.checkbox({name: "VariableCheckbox", description: "This is a long name", default: true}),
+        inputs: [
+          Input.checkbox({name: "VariableCheckbox", description: "This is a long name", default: false}),
           Input.textArea({name: "Variable2", description: "This is a long name", default: "2 to 40"}),
           Input.text({name: "Variable1", description: "This is a very long description This is a very long description This is a very long description This is a very long description This is a very long description", default: 1}),
           Input.select({name: "Variable3", default: "alice", options: ["alice", "charles", "bob", "bill", "maven", "billy", "samantha", "becky"]})
