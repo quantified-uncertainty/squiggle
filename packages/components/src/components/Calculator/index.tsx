@@ -1,5 +1,4 @@
 import { FC, ReactNode, useEffect, useReducer, useState } from "react";
-import { FormProvider } from "react-hook-form";
 
 import { Env, SqCalculator, SqValuePath } from "@quri/squiggle-lang";
 
@@ -41,7 +40,7 @@ const adjustedReducer =
     viewerContextDispatch({
       type: "CALCULATOR_UPDATE",
       payload: {
-        path: path,
+        path,
         calculator: newState,
       },
     });
@@ -91,7 +90,6 @@ export const Calculator: FC<Props> = ({
     await processAllFieldCodes({
       dispatch: calculatorDispatch,
       state: calculatorState,
-      path,
       calculator,
       environment,
     });
@@ -111,14 +109,12 @@ export const Calculator: FC<Props> = ({
       calculatorDispatch({
         type: "RESET",
         payload: {
-          path: path,
           state: initialCalculatorState(calculator),
         },
       });
       _processAllFieldCodes();
     } else {
       updateFnValue({
-        path,
         state: calculatorState,
         calculator,
         environment,
@@ -131,7 +127,6 @@ export const Calculator: FC<Props> = ({
   const onChange = async (name: string, newCode: string) => {
     await updateAndProcessFieldCode({
       dispatch: calculatorDispatch,
-      path,
       state: calculatorState,
       calculator,
       environment,

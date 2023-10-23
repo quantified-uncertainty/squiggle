@@ -2,7 +2,13 @@ import { FC, ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
 import Select from "react-select";
 
-import { SqCalculator, SqError, SqValue, result } from "@quri/squiggle-lang";
+import {
+  SqCalculator,
+  SqError,
+  SqInput,
+  SqValue,
+  result,
+} from "@quri/squiggle-lang";
 import { StyledCheckbox, StyledInput, StyledTextArea } from "@quri/ui";
 
 import { SqValueWithContext, valueHasContext } from "../../lib/utility.js";
@@ -43,6 +49,99 @@ const showSqValue = (
       </div>
     );
   }
+};
+
+const CalculatorInput: FC<
+  { input: SqInput } & Pick<
+    UIProps,
+    "settings" | "renderValue" | "onChange" | "calculatorState"
+  >
+> = ({ input, settings, renderValue, onChange, calculatorState }) => {
+  const { name, description } = input;
+  const inputState = calculatorState.inputs[name];
+  if (!inputState) {
+    return null;
+  }
+  const { value, code } = inputState;
+  const result = value;
+  const resultHasInterestingError = result && !result.ok && code !== "";
+  return (
+    <div className="flex flex-col mb-2">
+      <div className="text-sm font-medium text-gray-800">{name}</div>
+      {description && (
+        <div className="text-sm text-gray-400">{description}</div>
+      )}
+
+      <div className="flex-grow mt-1 max-w-xs">
+        {input.tag === "text" && (
+          <StyledInput
+            value={code || ""}
+            onChange={(e) => onChange(name, e.target.value)}
+            placeholder={`Enter code for ${name}`}
+            size="small"
+          />
+        )}
+        {input.tag === "textArea" && (
+          <StyledTextArea
+            value={code || ""}
+            onChange={(e) => onChange(name, e.target.value)}
+            placeholder={`Enter code for ${name}`}
+          />
+        )}
+        {input.tag === "checkbox" && (
+          <StyledCheckbox
+            checked={(code || "false") == "false"}
+            onChange={(e) => onChange(name, e.target.checked.toString())}
+          />
+        )}
+        {input.tag === "select" && (
+          <Select
+            onChange={(option) => onChange(name, option ? option.value : "")}
+            value={{ value: code, label: code }}
+            options={input.options.map((option) => ({
+              value: option,
+              label: option,
+            }))}
+            styles={{
+              input: (base) => ({
+                ...base,
+                "input:focus": {
+                  boxShadow: "none",
+                },
+                className: "text-sm placeholder:text-slate-300",
+              }),
+              control: (provided, state) => ({
+                ...provided,
+                minHeight: "10px",
+                height: "34px",
+                borderColor: state.isFocused ? "#6610f2" : provided.borderColor,
+                "&:hover": {
+                  borderColor: state.isFocused
+                    ? "#6610f2"
+                    : provided.borderColor,
+                },
+                borderRadius: "0.375rem",
+              }),
+              option: (provided) => ({
+                ...provided,
+                fontSize: "0.875rem",
+              }),
+              placeholder: (provided) => ({
+                ...provided,
+                color: "#93C5FD",
+              }),
+            }}
+          />
+        )}
+      </div>
+      <div>
+        {result &&
+          resultHasInterestingError &&
+          showSqValue(renderValue, result, settings)}
+        {!result && <div className="text-sm text-gray-500">No result</div>}
+      </div>
+    </div>
+  );
 };
 
 export const CalculatorUI: FC<UIProps> = ({
@@ -86,99 +185,16 @@ export const CalculatorUI: FC<UIProps> = ({
 
       <div className="py-3 px-5 border-b border-slate-200 bg-gray-50 space-y-3">
         {calculator.inputs.map((row) => {
-          const { name, description } = row;
-          const input = calculatorState.inputs[name];
-          if (input) {
-            const { value, code } = input;
-            const result = value;
-            const resultHasInterestingError =
-              result && !result.ok && code !== "";
-            return (
-              <div key={name} className="flex flex-col mb-2">
-                <div className="text-sm font-medium text-gray-800">{name}</div>
-                {description && (
-                  <div className="text-sm text-gray-400">{description}</div>
-                )}
-
-                <div className="flex-grow mt-1 max-w-xs">
-                  {row.tag === "text" && (
-                    <StyledInput
-                      value={code || ""}
-                      onChange={(e) => onChange(name, e.target.value)}
-                      placeholder={`Enter code for ${name}`}
-                      size="small"
-                    />
-                  )}
-                  {row.tag === "textArea" && (
-                    <StyledTextArea
-                      value={code || ""}
-                      onChange={(e) => onChange(name, e.target.value)}
-                      placeholder={`Enter code for ${name}`}
-                    />
-                  )}
-                  {row.tag === "checkbox" && (
-                    <StyledCheckbox
-                      checked={(code || "false") == "false"}
-                      onChange={(e) =>
-                        onChange(name, e.target.checked.toString())
-                      }
-                    />
-                  )}
-                  {row.tag === "select" && (
-                    <Select
-                      onChange={(option) =>
-                        onChange(name, option ? option.value : "")
-                      }
-                      value={{ value: code, label: code }}
-                      options={row.options.map((option) => ({
-                        value: option,
-                        label: option,
-                      }))}
-                      styles={{
-                        input: (base) => ({
-                          ...base,
-                          "input:focus": {
-                            boxShadow: "none",
-                          },
-                          className: "text-sm placeholder:text-slate-300",
-                        }),
-                        control: (provided, state) => ({
-                          ...provided,
-                          minHeight: "10px",
-                          height: "34px",
-                          borderColor: state.isFocused
-                            ? "#6610f2"
-                            : provided.borderColor,
-                          "&:hover": {
-                            borderColor: state.isFocused
-                              ? "#6610f2"
-                              : provided.borderColor,
-                          },
-                          borderRadius: "0.375rem",
-                        }),
-                        option: (provided) => ({
-                          ...provided,
-                          fontSize: "0.875rem",
-                        }),
-                        placeholder: (provided) => ({
-                          ...provided,
-                          color: "#93C5FD",
-                        }),
-                      }}
-                    />
-                  )}
-                </div>
-                <div>
-                  {result &&
-                    resultHasInterestingError &&
-                    showSqValue(renderValue, result, inputShowSettings)}
-                  {!result && (
-                    <div className="text-sm text-gray-500">No result</div>
-                  )}
-                </div>
-              </div>
-            );
-          }
+          return (
+            <CalculatorInput
+              key={row.name}
+              input={row}
+              settings={inputShowSettings}
+              onChange={onChange}
+              renderValue={renderValue}
+              calculatorState={calculatorState}
+            />
+          );
         })}
       </div>
 

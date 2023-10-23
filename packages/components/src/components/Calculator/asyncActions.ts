@@ -35,13 +35,11 @@ const runSquiggleCode = async (
 type Dispatch = (action: CalculatorAction) => void;
 
 export const updateFnValue = ({
-  path,
   state,
   calculator,
   environment,
   dispatch,
 }: {
-  path: SqValuePath;
   state: CalculatorState;
   calculator: SqCalculator;
   environment: Env;
@@ -63,7 +61,7 @@ export const updateFnValue = ({
 
   dispatch({
     type: "SET_FUNCTION_VALUE",
-    payload: { path, value: finalResult },
+    payload: { value: finalResult },
   });
 };
 
@@ -81,13 +79,11 @@ function modifyCode(
 // Gets all input codes in the State. Runs them all, runs the function, and updates all these values in the state.
 export async function processAllFieldCodes({
   dispatch,
-  path,
   calculator,
   state,
   environment,
 }: {
   dispatch: Dispatch;
-  path: SqValuePath;
   calculator: SqCalculator;
   state: CalculatorState;
   environment: Env;
@@ -101,18 +97,17 @@ export async function processAllFieldCodes({
     );
     const _action: CalculatorAction = {
       type: "SET_FIELD_VALUE",
-      payload: { name, value: valueResult, path },
+      payload: { name, value: valueResult },
     };
     _state = calculatorReducer(_state, _action);
     dispatch(_action);
   }
-  updateFnValue({ path, state: _state, calculator, environment, dispatch });
+  updateFnValue({ state: _state, calculator, environment, dispatch });
 }
 
 // Takes an updated input code, runs it, and runs the function.
 export async function updateAndProcessFieldCode({
   dispatch,
-  path,
   environment,
   state,
   calculator,
@@ -120,7 +115,6 @@ export async function updateAndProcessFieldCode({
   code,
 }: {
   dispatch: Dispatch;
-  path: SqValuePath;
   state: CalculatorState;
   calculator: SqCalculator;
   environment: Env;
@@ -129,7 +123,7 @@ export async function updateAndProcessFieldCode({
 }) {
   const setCodeAction: CalculatorAction = {
     type: "SET_FIELD_CODE",
-    payload: { path, name: name, code: code },
+    payload: { name: name, code: code },
   };
   dispatch(setCodeAction);
   let _state = calculatorReducer(state, setCodeAction);
@@ -140,10 +134,10 @@ export async function updateAndProcessFieldCode({
   );
   const setValueAction: CalculatorAction = {
     type: "SET_FIELD_VALUE",
-    payload: { path, name: name, value: valueResult },
+    payload: { name: name, value: valueResult },
   };
   dispatch(setValueAction);
   _state = calculatorReducer(_state, setValueAction);
 
-  updateFnValue({ path, state: _state, calculator, environment, dispatch });
+  updateFnValue({ state: _state, calculator, environment, dispatch });
 }

@@ -65,23 +65,22 @@ export function initialCalculatorState(
 export type CalculatorAction =
   | {
       type: "RESET";
-      payload: { path: SqValuePath; state: CalculatorState };
+      payload: { state: CalculatorState };
     }
   | {
       type: "SET_FIELD_CODE";
-      payload: { path: SqValuePath; name: string; code: string };
+      payload: { name: string; code: string };
     }
   | {
       type: "SET_FIELD_VALUE";
       payload: {
-        path: SqValuePath;
         name: string;
         value?: resultSqValue;
       };
     }
   | {
       type: "SET_FUNCTION_VALUE";
-      payload: { path: SqValuePath; value?: resultSqValue };
+      payload: { value?: resultSqValue };
     };
 
 export const calculatorReducer = (
