@@ -1,16 +1,16 @@
-import React, { ReactNode } from "react";
-
+import { clsx } from "clsx";
+import ReactMarkdown from "react-markdown";
 import {
-  SqCalculator,
   SqDistributionsPlot,
   SqPlot,
   SqScale,
   SqTableChart,
-  SqValue,
 } from "@quri/squiggle-lang";
-
+import { TableCellsIcon } from "@quri/ui";
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
-import { SqValueWithContext, valueHasContext } from "../../lib/utility.js";
+import { SqValueWithContext } from "../../lib/utility.js";
+import { Calculator } from "../Calculator/index.js";
+import { DistPreview } from "../DistributionsChart/DistPreview.js";
 import { DistributionsChart } from "../DistributionsChart/index.js";
 import { DistFunctionChart } from "../FunctionChart/DistFunctionChart.js";
 import { NumericFunctionChart } from "../FunctionChart/NumericFunctionChart.js";
@@ -19,34 +19,20 @@ import { NumberShower } from "../NumberShower.js";
 import { generateDistributionPlotSettings } from "../PlaygroundSettings.js";
 import { RelativeValuesGridChart } from "../RelativeValuesGridChart/index.js";
 import { ScatterChart } from "../ScatterChart/index.js";
-import { ItemSettingsMenu } from "./ItemSettingsMenu.js";
-import {
-  SqTypeWithCount,
-  VariableBox,
-  VariableBoxProps,
-} from "./VariableBox.js";
-import { MergedItemSettings, getChildrenValues } from "./utils.js";
-import { MessageAlert } from "../Alert.js";
-import { clsx } from "clsx";
 import { TableChart } from "../TableChart/index.js";
-import { DistPreview } from "../DistributionsChart/DistPreview.js";
-import { TableCellsIcon } from "@quri/ui";
-import ReactMarkdown from "react-markdown";
-import { Calculator } from "../Calculator/index.js";
+import { ItemSettingsMenu } from "./ItemSettingsMenu.js";
+import { SqTypeWithCount, VariableBoxProps } from "./VariableBox.js";
+import { getChildrenValues } from "./utils.js";
+import {
+  leftMargin,
+  CHART_TO_DIST_HEIGHT_ADJUSTMENT,
+  truncateStr,
+  ValueViewer,
+} from "./ValueViewer.js";
 
-// We use an extra left margin for some elements to align them with parent variable name
-const leftMargin = "ml-1.5";
-
-const truncateStr = (str: string, maxLength: number) =>
-  str.substring(0, maxLength) + (str.length > maxLength ? "..." : "");
-
-// Distributions should be smaller than the other charts.
-// Note that for distributions, this only applies to the internals, there's also extra margin and details.
-const CHART_TO_DIST_HEIGHT_ADJUSTMENT = 0.5;
-
-export const getBoxProps = (
+export function getBoxProps(
   value: SqValueWithContext
-): Omit<VariableBoxProps, "value"> => {
+): Omit<VariableBoxProps, "value"> {
   const environment = value.context.project.getEnvironment();
 
   switch (value.tag) {
@@ -180,7 +166,6 @@ export const getBoxProps = (
     }
     case "Lambda":
       return {
-        heading: "",
         preview: (
           <div>
             fn(
@@ -282,7 +267,7 @@ export const getBoxProps = (
         heading: `Dict(${entries.length})`,
         preview: <SqTypeWithCount type="{}" count={entries.length} />,
         children: () =>
-          entries.map((r, i) => <ExpressionViewer key={i} value={r} />),
+          entries.map((r, i) => <ValueViewer key={i} value={r} />),
       };
     }
     case "Array": {
@@ -292,7 +277,7 @@ export const getBoxProps = (
         heading: `List(${length})`,
         preview: <SqTypeWithCount type="[]" count={length} />,
         children: () =>
-          entries.map((r, i) => <ExpressionViewer key={i} value={r} />),
+          entries.map((r, i) => <ValueViewer key={i} value={r} />),
       };
     }
 
@@ -317,33 +302,4 @@ export const getBoxProps = (
       };
     }
   }
-};
-
-type Props = {
-  /** The output of squiggle's run */
-  value: SqValue;
-  width?: number;
-};
-
-export const ExpressionViewer: React.FC<Props> = ({ value }) => {
-  if (!valueHasContext(value)) {
-    return <MessageAlert heading="Can't display pathless value" />;
-  }
-
-  const boxProps = getBoxProps(value);
-  const heading = boxProps.heading || value.publicName();
-  const hasChildren = () => !!getChildrenValues(value);
-  const children: (settings: MergedItemSettings) => ReactNode =
-    (value.tag === "Dict" || value.tag === "Array") && hasChildren()
-      ? (settings) => (
-          <div className={"space-y-2 pt-1 mt-1"}>
-            {boxProps.children(settings)}
-          </div>
-        )
-      : boxProps.children;
-  return (
-    <VariableBox {...boxProps} value={value} heading={heading}>
-      {children}
-    </VariableBox>
-  );
-};
+}

@@ -7,7 +7,7 @@ import {
   TextTooltip,
   TriangleIcon,
 } from "@quri/ui";
-import { SqValuePath } from "@quri/squiggle-lang";
+import { SqValue, SqValuePath } from "@quri/squiggle-lang";
 import ReactMarkdown from "react-markdown";
 
 import { SqValueWithContext } from "../../lib/utility.js";
