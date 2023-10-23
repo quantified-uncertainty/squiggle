@@ -1,15 +1,15 @@
-import React, { FC, ReactNode } from "react";
-
-import { SqValue, SqCalculator, SqError, result } from "@quri/squiggle-lang";
-
-import { PlaygroundSettings } from "../PlaygroundSettings.js";
-import { SqValueWithContext, valueHasContext } from "../../lib/utility.js";
-
+import { FC, ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
-
-import { StyledCheckbox, StyledInput, StyledTextArea } from "@quri/ui";
-import { CalculatorState } from "./calculatorReducer.js";
 import Select from "react-select";
+
+import { SqCalculator, SqError, SqValue, result } from "@quri/squiggle-lang";
+import { StyledCheckbox, StyledInput, StyledTextArea } from "@quri/ui";
+
+import { SqValueWithContext, valueHasContext } from "../../lib/utility.js";
+import { PlaygroundSettings } from "../PlaygroundSettings.js";
+
+import { CalculatorState } from "./calculatorReducer.js";
+
 type UIProps = {
   calculator: SqCalculator;
   settings: PlaygroundSettings;
@@ -18,7 +18,7 @@ type UIProps = {
     settings: PlaygroundSettings
   ) => ReactNode;
   calculatorState: CalculatorState;
-  onChange: (name: string) => (fn: string) => void;
+  onChange: (name: string, code: string) => void;
 };
 
 const showSqValue = (
@@ -97,14 +97,14 @@ export const CalculatorUI: FC<UIProps> = ({
               <div key={name} className="flex flex-col mb-2">
                 <div className="text-sm font-medium text-gray-800">{name}</div>
                 {description && (
-                  <div className="text-sm  text-gray-400">{description}</div>
+                  <div className="text-sm text-gray-400">{description}</div>
                 )}
 
                 <div className="flex-grow mt-1 max-w-xs">
                   {row.tag === "text" && (
                     <StyledInput
                       value={code || ""}
-                      onChange={(e) => onChange(name)(e.target.value)}
+                      onChange={(e) => onChange(name, e.target.value)}
                       placeholder={`Enter code for ${name}`}
                       size="small"
                     />
@@ -112,7 +112,7 @@ export const CalculatorUI: FC<UIProps> = ({
                   {row.tag === "textArea" && (
                     <StyledTextArea
                       value={code || ""}
-                      onChange={(e) => onChange(name)(e.target.value)}
+                      onChange={(e) => onChange(name, e.target.value)}
                       placeholder={`Enter code for ${name}`}
                     />
                   )}
@@ -120,14 +120,14 @@ export const CalculatorUI: FC<UIProps> = ({
                     <StyledCheckbox
                       checked={(code || "false") == "false"}
                       onChange={(e) =>
-                        onChange(name)(e.target.checked.toString())
+                        onChange(name, e.target.checked.toString())
                       }
                     />
                   )}
                   {row.tag === "select" && (
                     <Select
                       onChange={(option) =>
-                        onChange(name)(option ? option.value : "")
+                        onChange(name, option ? option.value : "")
                       }
                       value={{ value: code, label: code }}
                       options={row.options.map((option) => ({

@@ -1,15 +1,15 @@
-import React, { FC, ReactNode, useEffect, useReducer, useState } from "react";
+import { FC, ReactNode, useEffect, useReducer, useState } from "react";
+import { FormProvider } from "react-hook-form";
 
-import { SqCalculator, SqValuePath } from "@quri/squiggle-lang";
-import { Env } from "@quri/squiggle-lang";
+import { Env, SqCalculator, SqValuePath } from "@quri/squiggle-lang";
 
-import { PlaygroundSettings } from "../PlaygroundSettings.js";
 import { SqValueWithContext } from "../../lib/utility.js";
+import { PlaygroundSettings } from "../PlaygroundSettings.js";
 
 import {
-  updateFnValue,
   processAllFieldCodes,
   updateAndProcessFieldCode,
+  updateFnValue,
 } from "./asyncActions.js";
 
 import { Action, useViewerContext } from "../SquiggleViewer/ViewerProvider.js";
@@ -128,31 +128,27 @@ export const Calculator: FC<Props> = ({
     setPrevCalculator(calculator);
   }, [calculator]);
 
-  const onChange = (name: string) => async (newCode: string) => {
-    calculatorState &&
-      (await updateAndProcessFieldCode({
-        dispatch: calculatorDispatch,
-        path,
-        state: calculatorState,
-        calculator,
-        environment: environment,
-        name,
-        code: newCode,
-      }));
+  const onChange = async (name: string, newCode: string) => {
+    await updateAndProcessFieldCode({
+      dispatch: calculatorDispatch,
+      path,
+      state: calculatorState,
+      calculator,
+      environment,
+      name,
+      code: newCode,
+    });
   };
 
   return (
-    calculator &&
-    calculatorState && (
-      <CalculatorUI
-        {...{
-          renderValue,
-          settings,
-          calculator,
-          calculatorState,
-          onChange,
-        }}
-      />
-    )
+    <CalculatorUI
+      {...{
+        renderValue,
+        settings,
+        calculator,
+        calculatorState,
+        onChange,
+      }}
+    />
   );
 };
