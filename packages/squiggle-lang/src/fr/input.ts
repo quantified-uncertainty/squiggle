@@ -16,13 +16,15 @@ const maker = new FnFactory({
   requiresNamespace: true,
 });
 
-const convertFieldDefault = (value: number | string | null): string => {
+const convertInputDefault = (
+  value: number | string | null
+): string | undefined => {
   if (typeof value === "number") {
     return value.toString();
   } else if (typeof value === "string") {
     return value;
   } else {
-    return "";
+    return undefined;
   }
 };
 
@@ -44,8 +46,8 @@ export const library = [
           return vInput({
             type: "text",
             name: vars.name,
-            description: vars.description || "",
-            default: convertFieldDefault(vars.default),
+            description: vars.description || undefined,
+            default: convertInputDefault(vars.default),
           });
         }
       ),
@@ -68,8 +70,8 @@ export const library = [
           return vInput({
             type: "textArea",
             name: vars.name,
-            description: vars.description || "",
-            default: convertFieldDefault(vars.default),
+            description: vars.description || undefined,
+            default: convertInputDefault(vars.default),
           });
         }
       ),
@@ -92,8 +94,8 @@ export const library = [
           return vInput({
             type: "checkbox",
             name: vars.name,
-            description: vars.description || "",
-            default: vars.default ?? false,
+            description: vars.description || undefined,
+            default: vars.default ?? undefined,
           });
         }
       ),
@@ -117,24 +119,27 @@ export const library = [
         ],
         ([vars]) => {
           //Throw error if options are empty, if default is not in options, or if options have duplicate
-          if (vars.options.length === 0) {
+          const isEmpty = () => vars.options.length === 0;
+          const defaultNotInOptions = () =>
+            vars.default && !vars.options.includes(vars.default as string);
+          const hasDuplicates = () =>
+            new Set(vars.options).size !== vars.options.length;
+
+          if (isEmpty()) {
             throw new REArgumentError("Options cannot be empty");
-          } else if (
-            vars.default &&
-            !vars.options.includes(vars.default as string)
-          ) {
+          } else if (defaultNotInOptions()) {
             throw new REArgumentError(
               "Default value must be one of the options provided"
             );
-          } else if (new Set(vars.options).size !== vars.options.length) {
+          } else if (hasDuplicates()) {
             throw new REArgumentError("Options cannot have duplicate values");
           }
           return vInput({
             type: "select",
             name: vars.name,
-            description: vars.description || "",
+            description: vars.description || undefined,
             options: vars.options,
-            default: vars.default ?? vars.options[0],
+            default: vars.default ?? undefined,
           });
         }
       ),

@@ -99,37 +99,32 @@ export const CalculatorUI: FC<UIProps> = ({
                 {description && (
                   <div className="text-sm  text-gray-400">{description}</div>
                 )}
-                {row.tag === "text" && (
-                  <div className="flex-grow mt-1 max-w-xs">
+
+                <div className="flex-grow mt-1 max-w-xs">
+                  {row.tag === "text" && (
                     <StyledInput
                       value={code || ""}
                       onChange={(e) => onChange(name)(e.target.value)}
                       placeholder={`Enter code for ${name}`}
                       size="small"
                     />
-                  </div>
-                )}
-                {row.tag === "textArea" && (
-                  <div className="flex-grow mt-1 max-w-xs">
+                  )}
+                  {row.tag === "textArea" && (
                     <StyledTextArea
                       value={code || ""}
                       onChange={(e) => onChange(name)(e.target.value)}
                       placeholder={`Enter code for ${name}`}
                     />
-                  </div>
-                )}
-                {row.tag === "checkbox" && (
-                  <div className="mt-1">
+                  )}
+                  {row.tag === "checkbox" && (
                     <StyledCheckbox
-                      checked={(code || "true") == "true"}
+                      checked={(code || "false") == "false"}
                       onChange={(e) =>
                         onChange(name)(e.target.checked.toString())
                       }
                     />
-                  </div>
-                )}
-                {row.tag === "select" && (
-                  <div className="flex-grow mt-1 max-w-xs">
+                  )}
+                  {row.tag === "select" && (
                     <Select
                       onChange={(option) =>
                         onChange(name)(option ? option.value : "")
@@ -171,8 +166,8 @@ export const CalculatorUI: FC<UIProps> = ({
                         }),
                       }}
                     />
-                  </div>
-                )}
+                  )}
+                </div>
                 <div>
                   {result &&
                     resultHasInterestingError &&
