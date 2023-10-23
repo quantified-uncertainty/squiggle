@@ -19,7 +19,7 @@ import {
   hasSameCalculator,
   initialCalculatorState,
 } from "./calculatorReducer.js";
-import { CalculatorUI } from "./calculatorUI.js";
+import { CalculatorUI } from "./CalculatorUI.js";
 
 type Props = {
   value: SqCalculator;
@@ -74,7 +74,7 @@ export const Calculator: FC<Props> = ({
     }
   };
 
-  //It's possible that the calculator was changed when ths component was not visible. If that's the case, we want to reset it. We only want to use the cached version if its the same calculator.
+  //It's possible that the calculator was changed when the component was not visible. If that's the case, we want to reset it. We only want to use the cached version if its the same calculator.
   const calculatorStateOnFirstRender = (calculator: SqCalculator) => {
     const cache = getCalculatorStateFromCache();
     return cache ? cache : initialCalculatorState(calculator);
