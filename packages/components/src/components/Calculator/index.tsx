@@ -1,6 +1,6 @@
-import { FC, ReactNode, useEffect, useReducer, useState } from "react";
+import { FC, ReactNode, Reducer, useEffect, useReducer, useState } from "react";
 
-import { Env, SqCalculator, SqValuePath } from "@quri/squiggle-lang";
+import { Env, SqCalculator } from "@quri/squiggle-lang";
 
 import { SqValueWithContext } from "../../lib/utility.js";
 import { PlaygroundSettings } from "../PlaygroundSettings.js";
@@ -11,31 +11,62 @@ import {
   updateFnValue,
 } from "./asyncActions.js";
 
-import { Action, useViewerContext } from "../SquiggleViewer/ViewerProvider.js";
+import { useViewerContext } from "../SquiggleViewer/ViewerProvider.js";
 import {
   CalculatorAction,
-  CalculatorState,
   calculatorReducer,
+  CalculatorState,
   hasSameCalculator,
   initialCalculatorState,
 } from "./calculatorReducer.js";
 import { CalculatorUI } from "./CalculatorUI.js";
 
+type SqCalculatorValueWithContext = Extract<
+  SqValueWithContext,
+  { tag: "Calculator" }
+>;
+
 type Props = {
-  value: SqCalculator;
   environment: Env;
   settings: PlaygroundSettings;
-  valueWithContext: SqValueWithContext;
+  valueWithContext: SqCalculatorValueWithContext;
   renderValue: (
     value: SqValueWithContext,
     settings: PlaygroundSettings
   ) => ReactNode;
 };
 
-//We backup the calculator state in the viewer context, for when the user navigates away and back
-const adjustedReducer =
-  (path: SqValuePath, viewerContextDispatch: (action: Action) => void) =>
-  (state: CalculatorState, action: CalculatorAction) => {
+function useCalculatorReducer(calculatorValue: SqCalculatorValueWithContext) {
+  const calculator = calculatorValue.value;
+  const { path } = calculatorValue.context;
+  const { getLocalItemState, dispatch: viewerContextDispatch } =
+    useViewerContext();
+
+  const getCalculatorStateFromCache = () => {
+    const itemState = getLocalItemState({ path });
+
+    const sameCalculatorCacheExists =
+      itemState.calculator &&
+      hasSameCalculator(itemState.calculator, calculatorValue.value);
+
+    if (sameCalculatorCacheExists) {
+      return itemState.calculator!;
+    } else {
+      return undefined;
+    }
+  };
+
+  // It's possible that the calculator was changed when the component was not visible. If that's the case, we want to reset it. We only want to use the cached version if its the same calculator.
+  const calculatorStateOnFirstRender = () => {
+    const cache = getCalculatorStateFromCache();
+    return cache ?? initialCalculatorState(calculator);
+  };
+
+  // We backup the calculator state in the viewer context, for when the user navigates away and back.
+  const adjustedReducer: Reducer<CalculatorState, CalculatorAction> = (
+    state,
+    action
+  ) => {
     const newState = calculatorReducer(state, action);
     viewerContextDispatch({
       type: "CALCULATOR_UPDATE",
@@ -47,49 +78,22 @@ const adjustedReducer =
     return newState;
   };
 
+  return useReducer(adjustedReducer, null, calculatorStateOnFirstRender);
+}
+
 export const Calculator: FC<Props> = ({
-  value: calculator,
   environment,
   settings,
   renderValue,
   valueWithContext,
 }) => {
-  const { path } = valueWithContext.context;
-  const { getLocalItemState, dispatch: viewerContextDispatch } =
-    useViewerContext();
-  const itemState = getLocalItemState({ path });
-  const [prevCalculator, setPrevCalculator] = useState<SqCalculator | null>(
-    null
-  );
-
-  const getCalculatorStateFromCache = () => {
-    const sameCalculatorCacheExists =
-      itemState.calculator &&
-      hasSameCalculator(itemState.calculator, calculator);
-
-    if (sameCalculatorCacheExists) {
-      return itemState.calculator!;
-    } else {
-      return undefined;
-    }
-  };
-
-  //It's possible that the calculator was changed when the component was not visible. If that's the case, we want to reset it. We only want to use the cached version if its the same calculator.
-  const calculatorStateOnFirstRender = (calculator: SqCalculator) => {
-    const cache = getCalculatorStateFromCache();
-    return cache ? cache : initialCalculatorState(calculator);
-  };
-
-  const [calculatorState, calculatorDispatch] = useReducer(
-    adjustedReducer(path, viewerContextDispatch),
-    calculator,
-    calculatorStateOnFirstRender
-  );
+  const calculator = valueWithContext.value;
+  const [state, dispatch] = useCalculatorReducer(valueWithContext);
 
   const _processAllFieldCodes = async () => {
     await processAllFieldCodes({
-      dispatch: calculatorDispatch,
-      state: calculatorState,
+      state,
+      dispatch,
       calculator,
       environment,
     });
@@ -99,6 +103,10 @@ export const Calculator: FC<Props> = ({
     _processAllFieldCodes();
   }, []);
 
+  const [prevCalculator, setPrevCalculator] = useState<SqCalculator | null>(
+    null
+  );
+
   //We want to reset the calculator state if the calculator changes
   useEffect(() => {
     const calculatorChanged =
@@ -106,7 +114,7 @@ export const Calculator: FC<Props> = ({
       calculator.hashString !== prevCalculator.hashString;
 
     if (calculatorChanged) {
-      calculatorDispatch({
+      dispatch({
         type: "RESET",
         payload: {
           state: initialCalculatorState(calculator),
@@ -115,23 +123,23 @@ export const Calculator: FC<Props> = ({
       _processAllFieldCodes();
     } else {
       updateFnValue({
-        state: calculatorState,
+        state,
+        dispatch,
         calculator,
         environment,
-        dispatch: calculatorDispatch,
       });
     }
     setPrevCalculator(calculator);
   }, [calculator]);
 
-  const onChange = async (name: string, newCode: string) => {
+  const onChange = async (name: string, code: string) => {
     await updateAndProcessFieldCode({
-      dispatch: calculatorDispatch,
-      state: calculatorState,
+      state,
+      dispatch,
       calculator,
       environment,
       name,
-      code: newCode,
+      code,
     });
   };
 
@@ -141,7 +149,7 @@ export const Calculator: FC<Props> = ({
         renderValue,
         settings,
         calculator,
-        calculatorState,
+        calculatorState: state,
         onChange,
       }}
     />

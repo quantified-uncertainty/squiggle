@@ -140,11 +140,9 @@ export const getBoxProps = (
       };
     }
     case "Calculator": {
-      const calculator: SqCalculator = value.value;
       return {
         children: (settings) => (
           <Calculator
-            value={calculator}
             valueWithContext={value}
             environment={environment}
             settings={settings}

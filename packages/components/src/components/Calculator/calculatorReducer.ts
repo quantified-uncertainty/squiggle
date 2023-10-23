@@ -1,10 +1,4 @@
-import {
-  SqValue,
-  SqCalculator,
-  SqError,
-  SqValuePath,
-  result,
-} from "@quri/squiggle-lang";
+import { SqValue, SqCalculator, SqError, result } from "@quri/squiggle-lang";
 import { defaultAsString } from "../../lib/inputUtils.js";
 
 export type resultSqValue = result<SqValue, SqError>;
