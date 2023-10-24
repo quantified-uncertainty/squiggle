@@ -256,6 +256,20 @@ export const library = [
     ],
   }),
   maker.make({
+    name: "slice",
+    requiresNamespace: true,
+    examples: [`List.slice([1,2,5,10],1,3)`],
+    definitions: [
+      makeDefinition([frArray(frAny), frNumber], ([array, start]) =>
+        vArray(array.slice(start))
+      ),
+      makeDefinition(
+        [frArray(frAny), frNumber, frNumber],
+        ([array, start, end]) => vArray(array.slice(start, end))
+      ),
+    ],
+  }),
+  maker.make({
     name: "uniq",
     requiresNamespace: true,
     examples: [`List.uniq([1,2,3,"hi",false,"hi"])`],
