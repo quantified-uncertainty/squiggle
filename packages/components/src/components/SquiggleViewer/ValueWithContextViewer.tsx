@@ -1,5 +1,5 @@
 import { clsx } from "clsx";
-import { FC, ReactNode, useMemo, useReducer } from "react";
+import { FC, ReactNode, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 
 import { SqValuePath } from "@quri/squiggle-lang";
@@ -10,7 +10,7 @@ import {
   TriangleIcon,
 } from "@quri/ui";
 
-import { useEffectRef } from "../../lib/hooks/useEffectRef.js";
+import { useEffectRef, useForceUpdate } from "../../lib/hooks/index.js";
 import { SqValueWithContext } from "../../lib/utility.js";
 import { ErrorBoundary } from "../ErrorBoundary.js";
 import {
@@ -29,25 +29,18 @@ import {
 } from "./utils.js";
 
 export type SettingsMenuParams = {
-  // Used to notify VariableBox that settings have changed, so that VariableBox could re-render itself.
+  // Used to notify this component that settings have changed, so that it could re-render itself.
   onChange: () => void;
 };
 
-export type VariableBoxProps = {
+type Props = {
   value: SqValueWithContext;
 };
 
-export const SqTypeWithCount: FC<{
-  type: string;
-  count: number;
-}> = ({ type, count }) => (
-  <div>
-    {type}
-    <span className="ml-0.5">{count}</span>
-  </div>
-);
+export const ValueWithContextViewer: FC<Props> = ({ value }) => {
+  const { tag } = value;
+  const { path } = value.context;
 
-export const ValueWithContextViewer: FC<VariableBoxProps> = ({ value }) => {
   const widget = getWidget(value);
   const heading = widget.heading || value.publicName();
   const hasChildren = () => !!getChildrenValues(value);
@@ -63,21 +56,18 @@ export const ValueWithContextViewer: FC<VariableBoxProps> = ({ value }) => {
   const focus = useFocus();
   const { editor, getLocalItemState, getMergedSettings, dispatch } =
     useViewerContext();
-  const isFocused = useIsFocused(value.context.path);
-  const { tag } = value;
+  const isFocused = useIsFocused(path);
 
   const findInEditor = () => {
     const location = value.context.findLocation();
     editor?.scrollTo(location.start.offset);
   };
 
-  // Since `ViewerContext` doesn't store settings, `VariableBox` won't rerender when `setSettings` is called.
+  // Since `ViewerContext` doesn't store settings, this component won't rerender when `setSettings` is called.
   // So we use `forceUpdate` to force rerendering.
-  const [, forceUpdate] = useReducer((x) => x + 1, 0);
+  const forceUpdate = useForceUpdate();
 
-  const { path } = value.context;
-
-  const isRoot = Boolean(path.isRoot());
+  const isRoot = path.isRoot();
 
   // This doesn't just memoizes the defaults, but also affects children, in some cases.
   const defaults: LocalItemState = useMemo(() => {
@@ -156,14 +146,14 @@ export const ValueWithContextViewer: FC<VariableBoxProps> = ({ value }) => {
     </div>
   );
   const headerPreview = () =>
-    !!widget.preview && (
+    !!widget.renderPreview && (
       <div
         className={clsx(
           "ml-3 text-sm text-blue-800",
           isOpen ? "opacity-40" : "opacity-60"
         )}
       >
-        {widget.preview()}
+        {widget.renderPreview()}
       </div>
     );
   const headerFindInEditorButton = () => (
@@ -187,11 +177,9 @@ export const ValueWithContextViewer: FC<VariableBoxProps> = ({ value }) => {
     widget.renderSettingsMenu?.({ onChange: forceUpdate });
 
   const leftCollapseBorder = () => (
-    <div className={"flex group cursor-pointer"} onClick={toggleCollapsed}>
+    <div className="flex group cursor-pointer" onClick={toggleCollapsed}>
       <div className="p-1" />
-      <div
-        className={"w-2 border-l border-stone-200 group-hover:border-stone-500"}
-      />
+      <div className="w-2 border-l border-stone-200 group-hover:border-stone-500" />
     </div>
   );
 
@@ -205,7 +193,7 @@ export const ValueWithContextViewer: FC<VariableBoxProps> = ({ value }) => {
           <span>
             <ChatBubbleLeftIcon
               size={13}
-              className={`text-purple-100 group-hover:text-purple-300`}
+              className="text-purple-100 group-hover:text-purple-300"
             />
           </span>
         </TextTooltip>

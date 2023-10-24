@@ -7,7 +7,6 @@ import { MessageAlert } from "../Alert.js";
 import { ValueWithContextViewer } from "./ValueWithContextViewer.js";
 
 type Props = {
-  /** The output of squiggle's run */
   value: SqValue;
 };
 

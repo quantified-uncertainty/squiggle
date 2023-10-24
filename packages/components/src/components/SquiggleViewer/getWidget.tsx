@@ -1,5 +1,5 @@
 import { clsx } from "clsx";
-import { ReactNode } from "react";
+import { FC, ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
 
 import {
@@ -25,10 +25,7 @@ import { ScatterChart } from "../ScatterChart/index.js";
 import { TableChart } from "../TableChart/index.js";
 import { ItemSettingsMenu } from "./ItemSettingsMenu.js";
 import { ValueViewer } from "./ValueViewer.js";
-import {
-  SettingsMenuParams,
-  SqTypeWithCount,
-} from "./ValueWithContextViewer.js";
+import { SettingsMenuParams } from "./ValueWithContextViewer.js";
 import { MergedItemSettings, getChildrenValues } from "./utils.js";
 
 // Distributions should be smaller than the other charts.
@@ -41,9 +38,19 @@ const leftMargin = "ml-1.5";
 const truncateStr = (str: string, maxLength: number) =>
   str.substring(0, maxLength) + (str.length > maxLength ? "..." : "");
 
+export const SqTypeWithCount: FC<{
+  type: string;
+  count: number;
+}> = ({ type, count }) => (
+  <div>
+    {type}
+    <span className="ml-0.5">{count}</span>
+  </div>
+);
+
 export type ValueWidget = {
   heading?: string;
-  preview?: () => ReactNode;
+  renderPreview?: () => ReactNode;
   renderSettingsMenu?: (params: SettingsMenuParams) => ReactNode;
   render: (settings: MergedItemSettings) => ReactNode;
 };
@@ -54,7 +61,9 @@ export function getWidget(value: SqValueWithContext): ValueWidget {
   switch (value.tag) {
     case "Number":
       return {
-        preview: () => <NumberShower precision={4} number={value.value} />,
+        renderPreview: () => (
+          <NumberShower precision={4} number={value.value} />
+        ),
         render: () => (
           <div className={clsx("font-semibold text-indigo-800", leftMargin)}>
             <NumberShower precision={4} number={value.value} />
@@ -63,7 +72,7 @@ export function getWidget(value: SqValueWithContext): ValueWidget {
       };
     case "Dist": {
       return {
-        preview: () => (
+        renderPreview: () => (
           <DistPreview dist={value.value} environment={environment} />
         ),
         renderSettingsMenu: ({ onChange }) => {
@@ -103,7 +112,7 @@ export function getWidget(value: SqValueWithContext): ValueWidget {
     }
     case "String":
       return {
-        preview: () => (
+        renderPreview: () => (
           <div className="overflow-ellipsis overflow-hidden">
             {truncateStr(value.value, 20)}
           </div>
@@ -118,7 +127,7 @@ export function getWidget(value: SqValueWithContext): ValueWidget {
       };
     case "Bool":
       return {
-        preview: () => value.value.toString(),
+        renderPreview: () => value.value.toString(),
         render: () => (
           <div
             className={clsx(
@@ -157,7 +166,7 @@ export function getWidget(value: SqValueWithContext): ValueWidget {
     case "TableChart": {
       const table: SqTableChart = value.value;
       return {
-        preview: () => (
+        renderPreview: () => (
           <div className="items-center flex space-x-1">
             <TableCellsIcon size={14} className="flex opacity-60" />
             <div>
@@ -178,7 +187,7 @@ export function getWidget(value: SqValueWithContext): ValueWidget {
     }
     case "Lambda":
       return {
-        preview: () => (
+        renderPreview: () => (
           <div>
             fn(
             <span className="opacity-60">
@@ -277,7 +286,9 @@ export function getWidget(value: SqValueWithContext): ValueWidget {
       const entries = getChildrenValues(value);
       return {
         heading: `Dict(${entries.length})`,
-        preview: () => <SqTypeWithCount type="{}" count={entries.length} />,
+        renderPreview: () => (
+          <SqTypeWithCount type="{}" count={entries.length} />
+        ),
         render: () => entries.map((r, i) => <ValueViewer key={i} value={r} />),
       };
     }
@@ -286,7 +297,7 @@ export function getWidget(value: SqValueWithContext): ValueWidget {
       const length = entries.length;
       return {
         heading: `List(${length})`,
-        preview: () => <SqTypeWithCount type="[]" count={length} />,
+        renderPreview: () => <SqTypeWithCount type="[]" count={length} />,
         render: () => entries.map((r, i) => <ValueViewer key={i} value={r} />),
       };
     }

@@ -24,10 +24,10 @@ type UIProps = {
   onChange: (name: string, code: string) => void;
 };
 
-const showSqValue = (
+function showSqValue(
   item: result<SqValue, SqError>,
   settings: PlaygroundSettings
-) => {
+) {
   if (item.ok) {
     const value = item.value;
     if (valueHasContext(value)) {
@@ -42,7 +42,7 @@ const showSqValue = (
       </div>
     );
   }
-};
+}
 
 const CalculatorInput: FC<
   { input: SqInput } & Pick<

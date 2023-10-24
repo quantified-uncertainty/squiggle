@@ -81,7 +81,7 @@ export type ViewProviderDispatch = (action: Action) => void;
 type ViewerContextShape = {
   // Note that we don't store localItemState themselves in the context (that would cause rerenders of the entire tree on each settings update).
   // Instead, we keep localItemState in local state and notify the global context via setLocalItemState to pass them down the component tree again if it got rebuilt from scratch.
-  // See ./SquiggleViewer.tsx and ./VariableBox.tsx for other implementation details on this.
+  // See ./SquiggleViewer.tsx and ./ValueWithContextViewer.tsx for other implementation details on this.
   getLocalItemState({
     path,
     defaults,
@@ -169,7 +169,7 @@ export function useUnfocus() {
 
 export function useCollapseChildren() {
   const { dispatch } = useViewerContext();
-  // stable callback identity here is important, see VariableBox code
+  // stable callback identity here is important, see ValueWithContextViewer code
   return useCallback(
     (value: SqValue) => {
       dispatch({
