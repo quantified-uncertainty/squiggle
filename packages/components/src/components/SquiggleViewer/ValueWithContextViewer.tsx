@@ -1,16 +1,18 @@
-import { FC, ReactNode, useMemo, useReducer } from "react";
 import { clsx } from "clsx";
+import { FC, ReactNode, useMemo, useReducer } from "react";
+import ReactMarkdown from "react-markdown";
 
+import { SqValuePath } from "@quri/squiggle-lang";
 import {
   ChatBubbleLeftIcon,
   CodeBracketIcon,
   TextTooltip,
   TriangleIcon,
 } from "@quri/ui";
-import { SqValue, SqValuePath } from "@quri/squiggle-lang";
-import ReactMarkdown from "react-markdown";
 
+import { useEffectRef } from "../../lib/hooks/useEffectRef.js";
 import { SqValueWithContext } from "../../lib/utility.js";
+import { ErrorBoundary } from "../ErrorBoundary.js";
 import {
   useCollapseChildren,
   useFocus,
@@ -18,26 +20,21 @@ import {
   useToggleCollapsed,
   useViewerContext,
 } from "./ViewerProvider.js";
+import { getWidget } from "./getWidget.js";
 import {
   LocalItemState,
   MergedItemSettings,
   getChildrenValues,
   pathToShortName,
 } from "./utils.js";
-import { useEffectRef } from "../../lib/hooks/useEffectRef.js";
-import { ErrorBoundary } from "../ErrorBoundary.js";
 
-type SettingsMenuParams = {
+export type SettingsMenuParams = {
   // Used to notify VariableBox that settings have changed, so that VariableBox could re-render itself.
   onChange: () => void;
 };
 
 export type VariableBoxProps = {
   value: SqValueWithContext;
-  heading?: string;
-  preview?: ReactNode;
-  renderSettingsMenu?: (params: SettingsMenuParams) => ReactNode;
-  children: (settings: MergedItemSettings) => ReactNode;
 };
 
 export const SqTypeWithCount: FC<{
@@ -50,13 +47,17 @@ export const SqTypeWithCount: FC<{
   </div>
 );
 
-export const VariableBox: FC<VariableBoxProps> = ({
-  value,
-  heading = "Error",
-  preview,
-  renderSettingsMenu,
-  children,
-}) => {
+export const ValueWithContextViewer: FC<VariableBoxProps> = ({ value }) => {
+  const widget = getWidget(value);
+  const heading = widget.heading || value.publicName();
+  const hasChildren = () => !!getChildrenValues(value);
+  const render: (settings: MergedItemSettings) => ReactNode =
+    (value.tag === "Dict" || value.tag === "Array") && hasChildren()
+      ? (settings) => (
+          <div className="space-y-2 pt-1 mt-1">{widget.render(settings)}</div>
+        )
+      : widget.render;
+
   const toggleCollapsed_ = useToggleCollapsed();
   const collapseChildren = useCollapseChildren();
   const focus = useFocus();
@@ -155,14 +156,14 @@ export const VariableBox: FC<VariableBoxProps> = ({
     </div>
   );
   const headerPreview = () =>
-    !!preview && (
+    !!widget.preview && (
       <div
         className={clsx(
           "ml-3 text-sm text-blue-800",
           isOpen ? "opacity-40" : "opacity-60"
         )}
       >
-        {preview}
+        {widget.preview()}
       </div>
     );
   const headerFindInEditorButton = () => (
@@ -183,7 +184,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
     </div>
   );
   const headerSettingsButton = () =>
-    renderSettingsMenu?.({ onChange: forceUpdate });
+    widget.renderSettingsMenu?.({ onChange: forceUpdate });
 
   const leftCollapseBorder = () => (
     <div className={"flex group cursor-pointer"} onClick={toggleCollapsed}>
@@ -265,7 +266,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
             )}
             <div className="grow">
               {commentPosition === "top" && hasComment && showComment()}
-              {children(getAdjustedMergedSettings(path))}
+              {render(getAdjustedMergedSettings(path))}
               {commentPosition === "bottom" && hasComment && showComment()}
             </div>
           </div>

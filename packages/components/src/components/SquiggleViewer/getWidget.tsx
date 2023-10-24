@@ -1,5 +1,7 @@
 import { clsx } from "clsx";
+import { ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
+
 import {
   SqDistributionsPlot,
   SqPlot,
@@ -7,6 +9,7 @@ import {
   SqTableChart,
 } from "@quri/squiggle-lang";
 import { TableCellsIcon } from "@quri/ui";
+
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
 import { SqValueWithContext } from "../../lib/utility.js";
 import { Calculator } from "../Calculator/index.js";
@@ -21,25 +24,38 @@ import { RelativeValuesGridChart } from "../RelativeValuesGridChart/index.js";
 import { ScatterChart } from "../ScatterChart/index.js";
 import { TableChart } from "../TableChart/index.js";
 import { ItemSettingsMenu } from "./ItemSettingsMenu.js";
-import { SqTypeWithCount, VariableBoxProps } from "./VariableBox.js";
-import { getChildrenValues } from "./utils.js";
+import { ValueViewer } from "./ValueViewer.js";
 import {
-  leftMargin,
-  CHART_TO_DIST_HEIGHT_ADJUSTMENT,
-  truncateStr,
-  ValueViewer,
-} from "./ValueViewer.js";
+  SettingsMenuParams,
+  SqTypeWithCount,
+} from "./ValueWithContextViewer.js";
+import { MergedItemSettings, getChildrenValues } from "./utils.js";
 
-export function getBoxProps(
-  value: SqValueWithContext
-): Omit<VariableBoxProps, "value"> {
+// Distributions should be smaller than the other charts.
+// Note that for distributions, this only applies to the internals, there's also extra margin and details.
+const CHART_TO_DIST_HEIGHT_ADJUSTMENT = 0.5;
+
+// We use an extra left margin for some elements to align them with parent variable name
+const leftMargin = "ml-1.5";
+
+const truncateStr = (str: string, maxLength: number) =>
+  str.substring(0, maxLength) + (str.length > maxLength ? "..." : "");
+
+export type ValueWidget = {
+  heading?: string;
+  preview?: () => ReactNode;
+  renderSettingsMenu?: (params: SettingsMenuParams) => ReactNode;
+  render: (settings: MergedItemSettings) => ReactNode;
+};
+
+export function getWidget(value: SqValueWithContext): ValueWidget {
   const environment = value.context.project.getEnvironment();
 
   switch (value.tag) {
     case "Number":
       return {
-        preview: <NumberShower precision={4} number={value.value} />,
-        children: () => (
+        preview: () => <NumberShower precision={4} number={value.value} />,
+        render: () => (
           <div className={clsx("font-semibold text-indigo-800", leftMargin)}>
             <NumberShower precision={4} number={value.value} />
           </div>
@@ -47,7 +63,9 @@ export function getBoxProps(
       };
     case "Dist": {
       return {
-        preview: <DistPreview dist={value.value} environment={environment} />,
+        preview: () => (
+          <DistPreview dist={value.value} environment={environment} />
+        ),
         renderSettingsMenu: ({ onChange }) => {
           const shape = value.value.pointSet(
             value.context.project.getEnvironment()
@@ -65,7 +83,7 @@ export function getBoxProps(
             />
           );
         },
-        children: (settings) => {
+        render: (settings) => {
           const plot = SqDistributionsPlot.create({
             distribution: value.value,
             ...generateDistributionPlotSettings(
@@ -85,12 +103,12 @@ export function getBoxProps(
     }
     case "String":
       return {
-        preview: (
+        preview: () => (
           <div className="overflow-ellipsis overflow-hidden">
             {truncateStr(value.value, 20)}
           </div>
         ),
-        children: () => (
+        render: () => (
           <div className="text-neutral-800 text-sm px-2 py-1 my-1">
             <ReactMarkdown className="prose max-w-4xl">
               {value.value}
@@ -100,8 +118,8 @@ export function getBoxProps(
       };
     case "Bool":
       return {
-        preview: value.value.toString(),
-        children: () => (
+        preview: () => value.value.toString(),
+        render: () => (
           <div
             className={clsx(
               "text-indigo-800 text-sm font-mono font-semibold",
@@ -114,27 +132,24 @@ export function getBoxProps(
       };
     case "Date":
       return {
-        children: () => value.value.toDateString(),
+        render: () => value.value.toDateString(),
       };
     case "Void":
       return {
-        children: () => "Void",
+        render: () => "Void",
       };
     case "TimeDuration": {
       return {
-        children: () => <NumberShower precision={3} number={value.value} />,
+        render: () => <NumberShower precision={3} number={value.value} />,
       };
     }
     case "Calculator": {
       return {
-        children: (settings) => (
+        render: (settings) => (
           <Calculator
             valueWithContext={value}
             environment={environment}
             settings={settings}
-            renderValue={(value, settings) =>
-              getBoxProps(value).children(settings)
-            }
           />
         ),
       };
@@ -142,7 +157,7 @@ export function getBoxProps(
     case "TableChart": {
       const table: SqTableChart = value.value;
       return {
-        preview: (
+        preview: () => (
           <div className="items-center flex space-x-1">
             <TableCellsIcon size={14} className="flex opacity-60" />
             <div>
@@ -152,21 +167,18 @@ export function getBoxProps(
             </div>
           </div>
         ),
-        children: (settings) => (
+        render: (settings) => (
           <TableChart
             value={table}
             environment={environment}
             settings={settings}
-            renderValue={(value, settings) =>
-              getBoxProps(value).children(settings)
-            }
           />
         ),
       };
     }
     case "Lambda":
       return {
-        preview: (
+        preview: () => (
           <div>
             fn(
             <span className="opacity-60">
@@ -184,7 +196,7 @@ export function getBoxProps(
             />
           );
         },
-        children: (settings) => (
+        render: (settings) => (
           <FunctionChart
             fn={value.value}
             settings={settings}
@@ -199,7 +211,7 @@ export function getBoxProps(
     case "Plot": {
       const plot: SqPlot = value.value;
       return {
-        children: (settings) => {
+        render: (settings) => {
           switch (plot.tag) {
             case "distributions":
               return (
@@ -257,7 +269,7 @@ export function getBoxProps(
     case "Scale": {
       const scale: SqScale = value.value;
       return {
-        children: () => <div>{scale.toString()}</div>,
+        render: () => <div>{scale.toString()}</div>,
       };
     }
 
@@ -265,9 +277,8 @@ export function getBoxProps(
       const entries = getChildrenValues(value);
       return {
         heading: `Dict(${entries.length})`,
-        preview: <SqTypeWithCount type="{}" count={entries.length} />,
-        children: () =>
-          entries.map((r, i) => <ValueViewer key={i} value={r} />),
+        preview: () => <SqTypeWithCount type="{}" count={entries.length} />,
+        render: () => entries.map((r, i) => <ValueViewer key={i} value={r} />),
       };
     }
     case "Array": {
@@ -275,23 +286,22 @@ export function getBoxProps(
       const length = entries.length;
       return {
         heading: `List(${length})`,
-        preview: <SqTypeWithCount type="[]" count={length} />,
-        children: () =>
-          entries.map((r, i) => <ValueViewer key={i} value={r} />),
+        preview: () => <SqTypeWithCount type="[]" count={length} />,
+        render: () => entries.map((r, i) => <ValueViewer key={i} value={r} />),
       };
     }
 
     case "Domain": {
       return {
         // TODO - same styles as `Boolean`?
-        children: () => value.toString(),
+        render: () => value.toString(),
       };
     }
 
     default: {
       return {
         heading: "Error",
-        children: () => (
+        render: () => (
           <div>
             <span>No display for type: </span>{" "}
             <span className="font-semibold text-neutral-600">

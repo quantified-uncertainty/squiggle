@@ -1,4 +1,4 @@
-import { FC, ReactNode } from "react";
+import { FC } from "react";
 import ReactMarkdown from "react-markdown";
 import Select from "react-select";
 
@@ -11,34 +11,27 @@ import {
 } from "@quri/squiggle-lang";
 import { StyledCheckbox, StyledInput, StyledTextArea } from "@quri/ui";
 
-import { SqValueWithContext, valueHasContext } from "../../lib/utility.js";
+import { valueHasContext } from "../../lib/utility.js";
 import { PlaygroundSettings } from "../PlaygroundSettings.js";
 
+import { getWidget } from "../SquiggleViewer/getWidget.js";
 import { CalculatorState } from "./calculatorReducer.js";
 
 type UIProps = {
   calculator: SqCalculator;
   settings: PlaygroundSettings;
-  renderValue: (
-    value: SqValueWithContext,
-    settings: PlaygroundSettings
-  ) => ReactNode;
   calculatorState: CalculatorState;
   onChange: (name: string, code: string) => void;
 };
 
 const showSqValue = (
-  renderValue: (
-    value: SqValueWithContext,
-    settings: PlaygroundSettings
-  ) => ReactNode,
   item: result<SqValue, SqError>,
   settings: PlaygroundSettings
 ) => {
   if (item.ok) {
     const value = item.value;
     if (valueHasContext(value)) {
-      return renderValue(value, settings);
+      return getWidget(value).render(settings);
     } else {
       return value.toString();
     }
@@ -54,16 +47,16 @@ const showSqValue = (
 const CalculatorInput: FC<
   { input: SqInput } & Pick<
     UIProps,
-    "settings" | "renderValue" | "onChange" | "calculatorState"
+    "settings" | "onChange" | "calculatorState"
   >
-> = ({ input, settings, renderValue, onChange, calculatorState }) => {
+> = ({ input, settings, onChange, calculatorState }) => {
   const { name, description } = input;
   const inputState = calculatorState.inputs[name];
   if (!inputState) {
     return null;
   }
-  const { value, code } = inputState;
-  const result = value;
+
+  const { value: result, code } = inputState;
   const resultHasInterestingError = result && !result.ok && code !== "";
   return (
     <div className="flex flex-col mb-2">
@@ -135,9 +128,7 @@ const CalculatorInput: FC<
         )}
       </div>
       <div>
-        {result &&
-          resultHasInterestingError &&
-          showSqValue(renderValue, result, settings)}
+        {result && resultHasInterestingError && showSqValue(result, settings)}
         {!result && <div className="text-sm text-gray-500">No result</div>}
       </div>
     </div>
@@ -145,7 +136,6 @@ const CalculatorInput: FC<
 };
 
 export const CalculatorUI: FC<UIProps> = ({
-  renderValue,
   settings,
   calculator,
   calculatorState,
@@ -191,7 +181,6 @@ export const CalculatorUI: FC<UIProps> = ({
               input={row}
               settings={inputShowSettings}
               onChange={onChange}
-              renderValue={renderValue}
               calculatorState={calculatorState}
             />
           );
@@ -201,7 +190,7 @@ export const CalculatorUI: FC<UIProps> = ({
       {calculatorState.fn.value && (
         <div className="py-3 px-5">
           <div className="text-sm font-semibold text-gray-700 mb-2">Result</div>
-          {showSqValue(renderValue, calculatorState.fn.value, resultSettings)}
+          {showSqValue(calculatorState.fn.value, resultSettings)}
         </div>
       )}
     </div>

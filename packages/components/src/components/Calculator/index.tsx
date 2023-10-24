@@ -1,4 +1,4 @@
-import { FC, ReactNode, Reducer, useEffect, useReducer, useState } from "react";
+import { FC, Reducer, useEffect, useReducer, useState } from "react";
 
 import { Env, SqCalculator } from "@quri/squiggle-lang";
 
@@ -30,10 +30,6 @@ type Props = {
   environment: Env;
   settings: PlaygroundSettings;
   valueWithContext: SqCalculatorValueWithContext;
-  renderValue: (
-    value: SqValueWithContext,
-    settings: PlaygroundSettings
-  ) => ReactNode;
 };
 
 function useCalculatorReducer(calculatorValue: SqCalculatorValueWithContext) {
@@ -84,7 +80,6 @@ function useCalculatorReducer(calculatorValue: SqCalculatorValueWithContext) {
 export const Calculator: FC<Props> = ({
   environment,
   settings,
-  renderValue,
   valueWithContext,
 }) => {
   const calculator = valueWithContext.value;
@@ -146,7 +141,6 @@ export const Calculator: FC<Props> = ({
   return (
     <CalculatorUI
       {...{
-        renderValue,
         settings,
         calculator,
         calculatorState: state,

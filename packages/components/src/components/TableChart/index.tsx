@@ -1,28 +1,25 @@
-import React, { FC, ReactNode } from "react";
+import { FC } from "react";
 
-import { SqValue, SqTableChart, SqError, result } from "@quri/squiggle-lang";
-import { Env } from "@quri/squiggle-lang";
+import {
+  Env,
+  SqError,
+  SqTableChart,
+  SqValue,
+  result,
+} from "@quri/squiggle-lang";
 
 import { clsx } from "clsx";
+import { valueHasContext } from "../../lib/utility.js";
 import { PlaygroundSettings } from "../PlaygroundSettings.js";
-import { SqValueWithContext, valueHasContext } from "../../lib/utility.js";
+import { getWidget } from "../SquiggleViewer/getWidget.js";
 
 type Props = {
   value: SqTableChart;
   environment: Env;
   settings: PlaygroundSettings;
-  renderValue: (
-    value: SqValueWithContext,
-    settings: PlaygroundSettings
-  ) => ReactNode;
 };
 
-export const TableChart: FC<Props> = ({
-  value,
-  environment,
-  settings,
-  renderValue,
-}) => {
+export const TableChart: FC<Props> = ({ value, environment, settings }) => {
   const rowsAndColumns = value.items(environment);
   const columnNames = value.columnNames;
   const hasColumnNames = columnNames.filter((name) => !!name).length > 0;
@@ -49,7 +46,7 @@ export const TableChart: FC<Props> = ({
     if (item.ok) {
       const value = item.value;
       if (valueHasContext(value)) {
-        return renderValue(value, settings);
+        return getWidget(value).render(settings);
       } else {
         return value.toString();
       }
@@ -106,7 +103,7 @@ export const TableChart: FC<Props> = ({
             ))}
           </tbody>
         </table>
-      </div>{" "}
+      </div>
     </div>
   );
 };
