@@ -17,14 +17,21 @@ import {
   allFieldValuesAreValid,
 } from "./calculatorReducer.js";
 
+const getEnvironment = (
+  modelEnvironment: Env,
+  calculator: SqCalculator
+): Env => ({
+  sampleCount: calculator.sampleCount || modelEnvironment.sampleCount,
+  xyPointLength: modelEnvironment.xyPointLength,
+});
+
 const runSquiggleCode = async (
   code: string,
-  environment: Env
+  environment: Env,
+  calculator: SqCalculator
 ): Promise<result<SqValue, SqError>> => {
   const project = SqProject.create();
-  if (environment) {
-    project.setEnvironment(environment);
-  }
+  project.setEnvironment(getEnvironment(environment, calculator));
   const sourceId = "calculator";
   project.setSource(sourceId, code);
   await project.run(sourceId);
@@ -55,7 +62,10 @@ export const updateFnValue = ({
         throw new Error("Invalid result encountered.");
       }
     });
-    finalResult = calculator.run(results, environment);
+    finalResult = calculator.run(
+      results,
+      getEnvironment(environment, calculator)
+    );
   } else {
     finalResult = undefined;
   }
@@ -83,7 +93,11 @@ export async function processAllFieldCodes({
   let _state = state;
   for (const name of state.fieldNames) {
     const field = state.fields[name];
-    const valueResult = await runSquiggleCode(field.code, environment);
+    const valueResult = await runSquiggleCode(
+      field.code,
+      environment,
+      calculator
+    );
     const _action: CalculatorAction = {
       type: "SET_FIELD_VALUE",
       payload: { name, value: valueResult, path },
@@ -119,7 +133,7 @@ export async function updateAndProcessFieldCode({
   dispatch(setCodeAction);
   let _state = calculatorReducer(state, setCodeAction);
 
-  const valueResult = await runSquiggleCode(code, environment);
+  const valueResult = await runSquiggleCode(code, environment, calculator);
   const setValueAction: CalculatorAction = {
     type: "SET_FIELD_VALUE",
     payload: { path, name: name, value: valueResult },

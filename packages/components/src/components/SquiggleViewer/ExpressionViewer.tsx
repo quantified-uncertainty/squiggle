@@ -32,7 +32,7 @@ import { TableChart } from "../TableChart/index.js";
 import { DistPreview } from "../DistributionsChart/DistPreview.js";
 import { TableCellsIcon } from "@quri/ui";
 import ReactMarkdown from "react-markdown";
-import { Calculator } from "../Calculator/index.js";
+import { Calculator, ShowErrorIfInvalid } from "../Calculator/index.js";
 
 // We use an extra left margin for some elements to align them with parent variable name
 const leftMargin = "ml-1.5";
@@ -143,15 +143,17 @@ export const getBoxProps = (
       const calculator: SqCalculator = value.value;
       return {
         children: (settings) => (
-          <Calculator
-            value={calculator}
-            valueWithContext={value}
-            environment={environment}
-            settings={settings}
-            renderValue={(value, settings) =>
-              getBoxProps(value).children(settings)
-            }
-          />
+          <ShowErrorIfInvalid calculator={calculator}>
+            <Calculator
+              value={calculator}
+              valueWithContext={value}
+              environment={environment}
+              settings={settings}
+              renderValue={(value, settings) =>
+                getBoxProps(value).children(settings)
+              }
+            />
+          </ShowErrorIfInvalid>
         ),
       };
     }

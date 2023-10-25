@@ -21,6 +21,8 @@ import {
   initialCalculatorState,
 } from "./calculatorReducer.js";
 import { CalculatorUI } from "./calculatorUI.js";
+import { ErrorAlert } from "../Alert.js";
+import { SAMPLE_COUNT_MAX, SAMPLE_COUNT_MIN } from "../../lib/constants.js";
 
 type Props = {
   value: SqCalculator;
@@ -161,5 +163,24 @@ export const Calculator: FC<Props> = ({
         }}
       />
     )
+  );
+};
+
+export const ShowErrorIfInvalid: React.FC<{
+  calculator: SqCalculator;
+  children: React.ReactNode;
+}> = ({ calculator, children }) => {
+  const { sampleCount } = calculator;
+
+  const sampleCountIsInvalid =
+    sampleCount &&
+    (sampleCount < SAMPLE_COUNT_MIN || sampleCount > SAMPLE_COUNT_MAX);
+
+  return sampleCountIsInvalid ? (
+    <ErrorAlert
+      heading={`Calculator sampleCount must be between ${SAMPLE_COUNT_MIN} and ${SAMPLE_COUNT_MAX}. It is set to ${sampleCount}.`}
+    />
+  ) : (
+    children
   );
 };

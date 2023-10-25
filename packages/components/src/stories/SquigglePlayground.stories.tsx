@@ -242,6 +242,7 @@ Calculator.make(
   {
     fn: f,
     description: a,
+    sampleCount: 10000,
     fields: [
       {
         name: "Variable 1",

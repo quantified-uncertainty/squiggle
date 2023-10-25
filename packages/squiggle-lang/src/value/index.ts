@@ -439,6 +439,7 @@ export type Calculator = {
   fields: { name: string; default: string; description?: string }[];
   description?: string;
   title?: string;
+  sampleCount?: number;
 };
 
 class VCalculator extends BaseValue {

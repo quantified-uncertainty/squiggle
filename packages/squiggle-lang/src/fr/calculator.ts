@@ -6,6 +6,7 @@ import {
   frString,
   frOptional,
   frNumberOrString,
+  frNumber,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { vCalculator } from "../value/index.js";
@@ -37,6 +38,7 @@ export const library = [
             ["fn", frLambda],
             ["title", frOptional(frString)],
             ["description", frOptional(frString)],
+            ["sampleCount", frOptional(frNumber)],
             [
               "fields",
               frArray(
@@ -49,11 +51,12 @@ export const library = [
             ]
           ),
         ],
-        ([{ fn, title, description, fields }]) => {
+        ([{ fn, title, description, sampleCount, fields }]) => {
           const calc = vCalculator({
             fn,
             title: title || undefined,
             description: description || undefined,
+            sampleCount: sampleCount || undefined,
             fields: fields.map((vars) => ({
               name: vars.name,
               default: convertFieldDefault(vars.default),
