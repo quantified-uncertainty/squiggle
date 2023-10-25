@@ -1,4 +1,5 @@
 import { FC } from "react";
+import { useFormContext } from "react-hook-form";
 import ReactMarkdown from "react-markdown";
 import Select from "react-select";
 
@@ -9,7 +10,12 @@ import {
   SqValue,
   result,
 } from "@quri/squiggle-lang";
-import { StyledCheckbox, StyledInput, StyledTextArea } from "@quri/ui";
+import {
+  CheckboxFormField,
+  ControlledFormField,
+  TextAreaFormField,
+  TextFormField,
+} from "@quri/ui";
 
 import { valueHasContext } from "../../lib/utility.js";
 import { PlaygroundSettings } from "../PlaygroundSettings.js";
@@ -21,7 +27,6 @@ type UIProps = {
   calculator: SqCalculator;
   settings: PlaygroundSettings;
   calculatorState: CalculatorState;
-  onChange: (name: string, code: string) => void;
 };
 
 function showSqValue(
@@ -45,19 +50,19 @@ function showSqValue(
 }
 
 const CalculatorInput: FC<
-  { input: SqInput } & Pick<
-    UIProps,
-    "settings" | "onChange" | "calculatorState"
-  >
-> = ({ input, settings, onChange, calculatorState }) => {
+  { input: SqInput } & Pick<UIProps, "settings" | "calculatorState">
+> = ({ input, settings, calculatorState }) => {
+  const form = useFormContext();
   const { name, description } = input;
+
   const inputState = calculatorState.inputs[name];
   if (!inputState) {
     return null;
   }
 
-  const { value: result, code } = inputState;
-  const resultHasInterestingError = result && !result.ok && code !== "";
+  const { value: result } = inputState;
+  const code = form.getValues(input.name);
+
   return (
     <div className="flex flex-col mb-2">
       <div className="text-sm font-medium text-gray-800">{name}</div>
@@ -67,70 +72,66 @@ const CalculatorInput: FC<
 
       <div className="flex-grow mt-1 max-w-xs">
         {input.tag === "text" && (
-          <StyledInput
-            value={code || ""}
-            onChange={(e) => onChange(name, e.target.value)}
+          <TextFormField
+            name={name}
             placeholder={`Enter code for ${name}`}
             size="small"
           />
         )}
         {input.tag === "textArea" && (
-          <StyledTextArea
-            value={code || ""}
-            onChange={(e) => onChange(name, e.target.value)}
+          <TextAreaFormField
+            name={name}
             placeholder={`Enter code for ${name}`}
           />
         )}
-        {input.tag === "checkbox" && (
-          <StyledCheckbox
-            checked={(code || "false") == "false"}
-            onChange={(e) => onChange(name, e.target.checked.toString())}
-          />
-        )}
+        {input.tag === "checkbox" && <CheckboxFormField name={name} />}
         {input.tag === "select" && (
-          <Select
-            onChange={(option) => onChange(name, option ? option.value : "")}
-            value={{ value: code, label: code }}
-            options={input.options.map((option) => ({
-              value: option,
-              label: option,
-            }))}
-            styles={{
-              input: (base) => ({
-                ...base,
-                "input:focus": {
-                  boxShadow: "none",
-                },
-                className: "text-sm placeholder:text-slate-300",
-              }),
-              control: (provided, state) => ({
-                ...provided,
-                minHeight: "10px",
-                height: "34px",
-                borderColor: state.isFocused ? "#6610f2" : provided.borderColor,
-                "&:hover": {
-                  borderColor: state.isFocused
-                    ? "#6610f2"
-                    : provided.borderColor,
-                },
-                borderRadius: "0.375rem",
-              }),
-              option: (provided) => ({
-                ...provided,
-                fontSize: "0.875rem",
-              }),
-              placeholder: (provided) => ({
-                ...provided,
-                color: "#93C5FD",
-              }),
-            }}
-          />
+          <ControlledFormField name={name}>
+            {({ value, onChange }) => (
+              <Select
+                onChange={(option) => onChange(option?.value ?? "")}
+                value={{ value, label: value }}
+                options={input.options.map((option) => ({
+                  value: option,
+                  label: option,
+                }))}
+                styles={{
+                  input: (base) => ({
+                    ...base,
+                    "input:focus": {
+                      boxShadow: "none",
+                    },
+                    className: "text-sm placeholder:text-slate-300",
+                  }),
+                  control: (provided, state) => ({
+                    ...provided,
+                    minHeight: "10px",
+                    height: "34px",
+                    borderColor: state.isFocused
+                      ? "#6610f2"
+                      : provided.borderColor,
+                    "&:hover": {
+                      borderColor: state.isFocused
+                        ? "#6610f2"
+                        : provided.borderColor,
+                    },
+                    borderRadius: "0.375rem",
+                  }),
+                  option: (provided) => ({
+                    ...provided,
+                    fontSize: "0.875rem",
+                  }),
+                  placeholder: (provided) => ({
+                    ...provided,
+                    color: "#93C5FD",
+                  }),
+                }}
+              />
+            )}
+          </ControlledFormField>
         )}
       </div>
-      <div>
-        {result && resultHasInterestingError && showSqValue(result, settings)}
-        {!result && <div className="text-sm text-gray-500">No result</div>}
-      </div>
+      {result && !result.ok && code !== "" && showSqValue(result, settings)}
     </div>
   );
 };
@@ -139,7 +140,6 @@ export const CalculatorUI: FC<UIProps> = ({
   settings,
   calculator,
   calculatorState,
-  onChange,
 }) => {
   const inputShowSettings: PlaygroundSettings = {
     ...settings,
@@ -180,7 +180,6 @@ export const CalculatorUI: FC<UIProps> = ({
               key={row.name}
               input={row}
               settings={inputShowSettings}
-              onChange={onChange}
               calculatorState={calculatorState}
             />
           );

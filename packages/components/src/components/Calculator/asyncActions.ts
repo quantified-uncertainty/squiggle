@@ -3,7 +3,6 @@ import {
   SqCalculator,
   SqError,
   SqProject,
-  SqValuePath,
   result,
   Env,
 } from "@quri/squiggle-lang";
@@ -12,16 +11,16 @@ import {
   CalculatorState,
   CalculatorAction,
   calculatorReducer,
-  resultSqValue,
+  SqValueResult,
   allFieldResults,
   allFieldValuesAreValid,
 } from "./calculatorReducer.js";
 import { alterCodeForSquiggleRun } from "../../lib/inputUtils.js";
 
-const runSquiggleCode = async (
+async function runSquiggleCode(
   code: string,
   environment: Env
-): Promise<result<SqValue, SqError>> => {
+): Promise<result<SqValue, SqError>> {
   const project = SqProject.create();
   if (environment) {
     project.setEnvironment(environment);
@@ -30,11 +29,11 @@ const runSquiggleCode = async (
   project.setSource(sourceId, code);
   await project.run(sourceId);
   return project.getResult(sourceId);
-};
+}
 
 type Dispatch = (action: CalculatorAction) => void;
 
-export const updateFnValue = ({
+export function updateFnValue({
   state,
   calculator,
   environment,
@@ -44,8 +43,8 @@ export const updateFnValue = ({
   calculator: SqCalculator;
   environment: Env;
   dispatch: Dispatch;
-}) => {
-  let finalResult: resultSqValue | undefined = undefined;
+}) {
+  let finalResult: SqValueResult | undefined = undefined;
   if (allFieldValuesAreValid(state)) {
     const results: SqValue[] = allFieldResults(state).map((result) => {
       if (result && result.ok) {
@@ -63,7 +62,7 @@ export const updateFnValue = ({
     type: "SET_FUNCTION_VALUE",
     payload: { value: finalResult },
   });
-};
+}
 
 function modifyCode(
   name: string,
@@ -76,13 +75,16 @@ function modifyCode(
   }
   return alterCodeForSquiggleRun(input, code);
 }
-// Gets all input codes in the State. Runs them all, runs the function, and updates all these values in the state.
+
+// Gets all input codes. Runs them all, runs the function, and updates all these values in the state.
 export async function processAllFieldCodes({
+  codes,
   dispatch,
   calculator,
   state,
   environment,
 }: {
+  codes: Record<string, string>;
   dispatch: Dispatch;
   calculator: SqCalculator;
   state: CalculatorState;
@@ -90,17 +92,17 @@ export async function processAllFieldCodes({
 }) {
   let _state = state;
   for (const name of state.inputNames) {
-    const input = state.inputs[name];
+    const code = codes[name];
     const valueResult = await runSquiggleCode(
-      modifyCode(name, calculator, input.code),
+      modifyCode(name, calculator, code),
       environment
     );
-    const _action: CalculatorAction = {
+    const action: CalculatorAction = {
       type: "SET_FIELD_VALUE",
       payload: { name, value: valueResult },
     };
-    _state = calculatorReducer(_state, _action);
-    dispatch(_action);
+    _state = calculatorReducer(_state, action);
+    dispatch(action);
   }
   updateFnValue({ state: _state, calculator, environment, dispatch });
 }
@@ -121,23 +123,16 @@ export async function updateAndProcessFieldCode({
   name: string;
   code: string;
 }) {
-  const setCodeAction: CalculatorAction = {
-    type: "SET_FIELD_CODE",
-    payload: { name: name, code: code },
-  };
-  dispatch(setCodeAction);
-  let _state = calculatorReducer(state, setCodeAction);
-
   const valueResult = await runSquiggleCode(
     modifyCode(name, calculator, code),
     environment
   );
   const setValueAction: CalculatorAction = {
     type: "SET_FIELD_VALUE",
-    payload: { name: name, value: valueResult },
+    payload: { name, value: valueResult },
   };
   dispatch(setValueAction);
-  _state = calculatorReducer(_state, setValueAction);
+  const _state = calculatorReducer(state, setValueAction);
 
   updateFnValue({ state: _state, calculator, environment, dispatch });
 }

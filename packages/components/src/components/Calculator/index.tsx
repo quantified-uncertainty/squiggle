@@ -1,4 +1,4 @@
-import { FC, Reducer, useEffect, useReducer, useState } from "react";
+import { FC, Reducer, useEffect, useMemo, useReducer, useState } from "react";
 
 import { Env, SqCalculator } from "@quri/squiggle-lang";
 
@@ -20,6 +20,8 @@ import {
   initialCalculatorState,
 } from "./calculatorReducer.js";
 import { CalculatorUI } from "./CalculatorUI.js";
+import { FormProvider, useForm } from "react-hook-form";
+import { defaultAsString } from "../../lib/inputUtils.js";
 
 type SqCalculatorValueWithContext = Extract<
   SqValueWithContext,
@@ -77,16 +79,29 @@ function useCalculatorReducer(calculatorValue: SqCalculatorValueWithContext) {
   return useReducer(adjustedReducer, null, calculatorStateOnFirstRender);
 }
 
+function getFormValues(calculator: SqCalculator) {
+  return Object.fromEntries(
+    calculator.inputs.map((input) => [input.name, defaultAsString(input)])
+  );
+}
+
 export const Calculator: FC<Props> = ({
   environment,
   settings,
   valueWithContext,
 }) => {
-  const calculator = valueWithContext.value;
+  // useMemo here is important; valueWithContext.value is a getter that creates a new calculator value every time
+  const calculator = useMemo(() => valueWithContext.value, [valueWithContext]);
+
+  const form = useForm({
+    defaultValues: getFormValues(calculator),
+  });
+
   const [state, dispatch] = useCalculatorReducer(valueWithContext);
 
   const _processAllFieldCodes = async () => {
     await processAllFieldCodes({
+      codes: form.getValues(),
       state,
       dispatch,
       calculator,
@@ -115,6 +130,7 @@ export const Calculator: FC<Props> = ({
           state: initialCalculatorState(calculator),
         },
       });
+      form.reset(getFormValues(calculator));
       _processAllFieldCodes();
     } else {
       updateFnValue({
@@ -127,25 +143,30 @@ export const Calculator: FC<Props> = ({
     setPrevCalculator(calculator);
   }, [calculator]);
 
-  const onChange = async (name: string, code: string) => {
-    await updateAndProcessFieldCode({
-      state,
-      dispatch,
-      calculator,
-      environment,
-      name,
-      code,
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === undefined) return;
+      const inputValue = value[name];
+      if (inputValue === undefined) return;
+      updateAndProcessFieldCode({
+        state,
+        dispatch,
+        calculator,
+        environment,
+        name,
+        code: inputValue,
+      });
     });
-  };
+    return () => subscription.unsubscribe();
+  }, [form.watch]);
 
   return (
-    <CalculatorUI
-      {...{
-        settings,
-        calculator,
-        calculatorState: state,
-        onChange,
-      }}
-    />
+    <FormProvider {...form}>
+      <CalculatorUI
+        settings={settings}
+        calculator={calculator}
+        calculatorState={state}
+      />
+    </FormProvider>
   );
 };

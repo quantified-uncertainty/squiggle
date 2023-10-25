@@ -1,16 +1,14 @@
 import { SqValue, SqCalculator, SqError, result } from "@quri/squiggle-lang";
-import { defaultAsString } from "../../lib/inputUtils.js";
+import { Reducer } from "react";
 
-export type resultSqValue = result<SqValue, SqError>;
+export type SqValueResult = result<SqValue, SqError>;
 
 export type FieldValue = {
-  name: string;
-  code: string;
-  value?: resultSqValue;
+  value?: SqValueResult;
 };
 
 export type ResultValue = {
-  value?: resultSqValue;
+  value?: SqValueResult;
 };
 
 export type CalculatorState = {
@@ -30,7 +28,7 @@ export function allFields(state: CalculatorState): FieldValue[] {
 
 export function allFieldResults(
   state: CalculatorState
-): (resultSqValue | undefined)[] {
+): (SqValueResult | undefined)[] {
   return allFields(state).map((r) => r.value);
 }
 
@@ -43,10 +41,7 @@ export function initialCalculatorState(
 ): CalculatorState {
   const inputs: Record<string, FieldValue> = {};
   calculator.inputs.forEach((row) => {
-    inputs[row.name] = {
-      name: row.name,
-      code: defaultAsString(row),
-    };
+    inputs[row.name] = {};
   });
   return {
     inputNames: calculator.inputs.map((row) => row.name),
@@ -62,25 +57,21 @@ export type CalculatorAction =
       payload: { state: CalculatorState };
     }
   | {
-      type: "SET_FIELD_CODE";
-      payload: { name: string; code: string };
-    }
-  | {
       type: "SET_FIELD_VALUE";
       payload: {
         name: string;
-        value?: resultSqValue;
+        value?: SqValueResult;
       };
     }
   | {
       type: "SET_FUNCTION_VALUE";
-      payload: { value?: resultSqValue };
+      payload: { value?: SqValueResult };
     };
 
-export const calculatorReducer = (
-  state: CalculatorState,
-  action: CalculatorAction
-): CalculatorState => {
+export const calculatorReducer: Reducer<CalculatorState, CalculatorAction> = (
+  state,
+  action
+) => {
   const modifyField = (name: string, newField: FieldValue) => {
     const newFields = { ...state.inputs, [name]: newField };
     return { ...state, inputs: newFields };
@@ -88,12 +79,6 @@ export const calculatorReducer = (
   switch (action.type) {
     case "RESET": {
       return action.payload.state;
-    }
-    case "SET_FIELD_CODE": {
-      const { name, code } = action.payload;
-      const input = state.inputs[name];
-      const newField = { ...input, code, value: undefined };
-      return modifyField(name, newField);
     }
     case "SET_FIELD_VALUE": {
       const { name, value } = action.payload;
