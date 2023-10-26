@@ -17,7 +17,7 @@ export const accumulate = <A>(
   fn: (x: A, y: A) => A
 ): A[] => {
   const len = items.length;
-  const result = new Array(length);
+  const result = new Array(len);
   for (let i = 0; i < len; i++) {
     const element = items[i];
     if (i === 0) {

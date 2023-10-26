@@ -57,7 +57,7 @@ export const binaryOperations = {
   pointwisePower: (t1, t2, { env }) => pointwise(t1, t2, env, "Power"),
 } satisfies { [k: string]: BinaryOperation };
 
-export const algebraicAddMany = (dists: BaseDist[], env: Env): DistResult =>
+export const algebraicSum = (dists: BaseDist[], env: Env): DistResult =>
   dists.reduce<DistResult>(
     (accumulatedDist, currentDist) =>
       bind(accumulatedDist, (aVal) =>
@@ -66,16 +66,13 @@ export const algebraicAddMany = (dists: BaseDist[], env: Env): DistResult =>
     Ok(new PointMass(0))
   );
 
-export const algebraicMultiplyMany = (
-  dists: BaseDist[],
-  env: Env
-): DistResult =>
+export const algebraicProduct = (dists: BaseDist[], env: Env): DistResult =>
   dists.reduce<DistResult>(
     (accumulatedDist, currentDist) =>
       bind(accumulatedDist, (aVal) =>
         binaryOperations.algebraicMultiply(aVal, currentDist, { env })
       ),
-    Ok(new PointMass(2))
+    Ok(new PointMass(1))
   );
 
 export const algebraicCumSum = (dists: BaseDist[], env: Env): BaseDist[] =>

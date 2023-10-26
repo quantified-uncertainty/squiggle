@@ -12,7 +12,13 @@ describe("Numbers", () => {
   testEvalToBe("Number.log2(10)", "3.321928094887362");
   testEvalToBe("Number.sum([2,5,3])", "10");
   testEvalToBe("sum([2,5,3])", "10");
+  testEvalToBe("sum([2,Dist.make(2),Dist.make(4)])", "PointMass(8)");
+  testEvalToBe("sum([2,Dist.make(2),2 to 10])", "Sample Set Distribution");
   testEvalToBe("Number.product([2,5,3])", "30");
+  testEvalToBe(
+    "Number.product([Dist.make(2),Dist.make(5),Dist.make(3)])",
+    "PointMass(30)"
+  );
   testEvalToBe("Number.min([2,5,3])", "2");
   testEvalToBe("Number.max([2,5,3])", "5");
   testEvalToBe("Number.mean([0,5,10])", "5");
@@ -21,6 +27,18 @@ describe("Numbers", () => {
   testEvalToBe("Number.variance([0,5,10,15])", "31.25");
   testEvalToBe("Number.sort([10,0,15,5])", "[0,5,10,15]");
   testEvalToBe("Number.cumsum([1,5,3])", "[1,6,9]");
+  testEvalToBe(
+    "Number.cumsum([Dist.make(1), Dist.make(5), Dist.make(3)])",
+    "[PointMass(1),PointMass(6),PointMass(9)]"
+  );
   testEvalToBe("Number.cumprod([1,5,3])", "[1,5,15]");
+  testEvalToBe(
+    "Number.cumprod([Dist.make(1),Dist.make(5),Dist.make(3)])",
+    "[PointMass(1),PointMass(5),PointMass(15)]"
+  );
   testEvalToBe("Number.diff([1,5,3])", "[4,-2]");
+  testEvalToBe(
+    "Number.diff([Dist.make(1),Dist.make(5),Dist.make(3)])",
+    "[PointMass(4),PointMass(-2)]"
+  );
 });
