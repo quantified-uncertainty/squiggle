@@ -185,14 +185,37 @@ export function SelectFormField<
               isClearable={!required}
               getOptionLabel={getOptionLabel}
               getOptionValue={getOptionValue}
-              // TODO - only when in modal? boolean prop?
               styles={{
+                // TODO - only when in modal? boolean prop?
                 menuPortal: (base) => ({ ...base, zIndex: 100 }),
                 input: (base) => ({
                   ...base,
                   "input:focus": {
                     boxShadow: "none",
                   },
+                  className: "text-sm placeholder:text-slate-300",
+                }),
+                control: (provided, state) => ({
+                  ...provided,
+                  minHeight: "10px",
+                  height: "34px",
+                  borderColor: state.isFocused
+                    ? "#6610f2"
+                    : provided.borderColor,
+                  "&:hover": {
+                    borderColor: state.isFocused
+                      ? "#6610f2"
+                      : provided.borderColor,
+                  },
+                  borderRadius: "0.375rem",
+                }),
+                option: (provided) => ({
+                  ...provided,
+                  fontSize: "0.875rem",
+                }),
+                placeholder: (provided) => ({
+                  ...provided,
+                  color: "#93C5FD",
                 }),
               }}
               menuPortalTarget={

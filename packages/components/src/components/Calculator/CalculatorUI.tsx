@@ -1,7 +1,6 @@
 import { FC } from "react";
 import { useFormContext } from "react-hook-form";
 import ReactMarkdown from "react-markdown";
-import Select from "react-select";
 
 import {
   SqCalculator,
@@ -12,7 +11,7 @@ import {
 } from "@quri/squiggle-lang";
 import {
   CheckboxFormField,
-  ControlledFormField,
+  SelectStringFormField,
   TextAreaFormField,
   TextFormField,
 } from "@quri/ui";
@@ -86,49 +85,7 @@ const CalculatorInput: FC<
         )}
         {input.tag === "checkbox" && <CheckboxFormField name={name} />}
         {input.tag === "select" && (
-          <ControlledFormField name={name}>
-            {({ value, onChange }) => (
-              <Select
-                onChange={(option) => onChange(option?.value ?? "")}
-                value={{ value, label: value }}
-                options={input.options.map((option) => ({
-                  value: option,
-                  label: option,
-                }))}
-                styles={{
-                  input: (base) => ({
-                    ...base,
-                    "input:focus": {
-                      boxShadow: "none",
-                    },
-                    className: "text-sm placeholder:text-slate-300",
-                  }),
-                  control: (provided, state) => ({
-                    ...provided,
-                    minHeight: "10px",
-                    height: "34px",
-                    borderColor: state.isFocused
-                      ? "#6610f2"
-                      : provided.borderColor,
-                    "&:hover": {
-                      borderColor: state.isFocused
-                        ? "#6610f2"
-                        : provided.borderColor,
-                    },
-                    borderRadius: "0.375rem",
-                  }),
-                  option: (provided) => ({
-                    ...provided,
-                    fontSize: "0.875rem",
-                  }),
-                  placeholder: (provided) => ({
-                    ...provided,
-                    color: "#93C5FD",
-                  }),
-                }}
-              />
-            )}
-          </ControlledFormField>
+          <SelectStringFormField name={name} options={input.options} required />
         )}
       </div>
       {result && !result.ok && code !== "" && showSqValue(result, settings)}
