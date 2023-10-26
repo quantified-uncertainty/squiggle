@@ -10,7 +10,7 @@ import {
   scaleMultiply,
   scalePower,
 } from "../dist/distOperations/scaleOperations.js";
-import { REOther } from "../errors/messages.js";
+import { REArgumentError, REOther } from "../errors/messages.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
@@ -374,6 +374,19 @@ const mapYLibrary: FRFunction[] = [
             })
           )
       ),
+    ],
+  }),
+  maker.make({
+    name: "combinations",
+    definitions: [
+      makeDefinition([frArray(frAny), frNumber], ([elements, n]) => {
+        if (n > elements.length) {
+          throw new REArgumentError(
+            `Combinations of length ${n} were requested, but full list is only ${elements.length} long.`
+          );
+        }
+        return vArray(combinations(elements, n).map((v) => vArray(v)));
+      }),
     ],
   }),
   maker.make({
