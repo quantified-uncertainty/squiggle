@@ -12,9 +12,12 @@ export const zip = <A, B>(xs: A[], ys: B[]): [A, B][] => {
 
 // This is like map, but
 // accumulate([1,2,3], (a,b) => a + b) => [1, 3, 6]
-export const accumulate = <A>(items: A[], fn: (x: A, y: A) => A): A[] => {
+export const accumulate = <A>(
+  items: readonly A[],
+  fn: (x: A, y: A) => A
+): A[] => {
   const len = items.length;
-  const result = new Array(len).fill(0);
+  const result = new Array(length);
   for (let i = 0; i < len; i++) {
     const element = items[i];
     if (i === 0) {

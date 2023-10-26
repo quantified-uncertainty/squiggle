@@ -1,10 +1,17 @@
+import * as SymbolicDist from "../dist/SymbolicDist.js";
+import { binaryOperations } from "../dist/distOperations/binaryOperations.js";
 import { REArgumentError } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frArray, frNumber, frDict } from "../library/registry/frTypes.js";
+import {
+  frArray,
+  frNumber,
+  frDict,
+  frDistOrNumber,
+} from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
 import { NumericRangeDomain } from "../value/domain.js";
-import { vArray, vDomain, vNumber } from "../value/index.js";
+import { vArray, vDomain, vNumber, vDist } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Number",
@@ -84,6 +91,31 @@ export const library = [
     examples: [`sum([3,5,2])`],
     definitions: [
       makeNumberArrayToNumberDefinition((arr) => E_A_Floats.sum(arr)),
+      makeDefinition([frArray(frDistOrNumber)], ([dists], { environment }) => {
+        const d = dists.map((dist) => {
+          if (typeof dist == "number") {
+            const result = SymbolicDist.PointMass.make(dist);
+            if (result.ok) {
+              return result.value;
+            } else {
+              throw new Error(result.value);
+            }
+          } else {
+            return dist;
+          }
+        });
+        const ee = d.reduce((a, b) => {
+          const result = binaryOperations.algebraicAdd(a, b, {
+            env: environment,
+          });
+          if (result.ok) {
+            return result.value;
+          } else {
+            throw new Error("FAIL");
+          }
+        }, new SymbolicDist.PointMass(0));
+        return vDist(ee);
+      }),
     ],
   }),
   maker.make({

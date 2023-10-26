@@ -78,3 +78,13 @@ export function getError<T, E>(r: result<T, E>): E | undefined {
     return undefined;
   }
 }
+
+export function getExt<T, E>(r: result<T, E>, formatError?: (v: E) => any): T {
+  if (r.ok) {
+    return r.value;
+  } else if (formatError) {
+    throw formatError(r.value);
+  } else {
+    throw r.value;
+  }
+}
