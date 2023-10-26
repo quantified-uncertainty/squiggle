@@ -15,7 +15,10 @@ import {
   frDict,
   frDistOrNumber,
 } from "../library/registry/frTypes.js";
-import { FnFactory } from "../library/registry/helpers.js";
+import {
+  FnFactory,
+  parseDistFromDistOrNumber,
+} from "../library/registry/helpers.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
 import { getExt } from "../utility/result.js";
 import { NumericRangeDomain } from "../value/domain.js";
@@ -48,14 +51,6 @@ function makeNumberArrayToNumberArrayDefinition(
     }
     return vArray(fn(arr).map(vNumber));
   });
-}
-
-function distOrNumberToDistOrNumber(d: BaseDist | number): BaseDist {
-  if (typeof d == "number") {
-    return getExt(SymbolicDist.PointMass.make(d));
-  } else {
-    return d;
-  }
 }
 
 export const library = [
@@ -110,7 +105,7 @@ export const library = [
       makeDefinition([frArray(frDistOrNumber)], ([dists], { environment }) =>
         vDist(
           getExt(
-            algebraicSum(dists.map(distOrNumberToDistOrNumber), environment)
+            algebraicSum(dists.map(parseDistFromDistOrNumber), environment)
           )
         )
       ),
@@ -125,7 +120,7 @@ export const library = [
       makeDefinition([frArray(frDistOrNumber)], ([dists], { environment }) =>
         vDist(
           getExt(
-            algebraicProduct(dists.map(distOrNumberToDistOrNumber), environment)
+            algebraicProduct(dists.map(parseDistFromDistOrNumber), environment)
           )
         )
       ),
@@ -195,7 +190,7 @@ export const library = [
       makeDefinition([frArray(frDistOrNumber)], ([dists], { environment }) =>
         vArray(
           algebraicCumSum(
-            dists.map(distOrNumberToDistOrNumber),
+            dists.map(parseDistFromDistOrNumber),
             environment
           ).map((r) => vDist(r))
         )
@@ -212,7 +207,7 @@ export const library = [
       makeDefinition([frArray(frDistOrNumber)], ([dists], { environment }) =>
         vArray(
           algebraicCumProd(
-            dists.map(distOrNumberToDistOrNumber),
+            dists.map(parseDistFromDistOrNumber),
             environment
           ).map((r) => vDist(r))
         )
@@ -228,7 +223,7 @@ export const library = [
       makeDefinition([frArray(frDistOrNumber)], ([dists], { environment }) =>
         vArray(
           algebraicCumDiff(
-            dists.map(distOrNumberToDistOrNumber),
+            dists.map(parseDistFromDistOrNumber),
             environment
           ).map((r) => vDist(r))
         )

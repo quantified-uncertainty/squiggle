@@ -1,5 +1,6 @@
 import { BaseDist } from "../../dist/BaseDist.js";
 import { DistError } from "../../dist/DistError.js";
+import { PointMass } from "../../dist/SymbolicDist.js";
 import { Env } from "../../dist/env.js";
 import {
   REDistributionError,
@@ -287,3 +288,6 @@ export function doBinaryLambdaCall(
   }
   throw new REOther("Expected function to return a boolean value");
 }
+
+export const parseDistFromDistOrNumber = (d: number | BaseDist): BaseDist =>
+  typeof d == "number" ? Result.getExt(PointMass.make(d)) : d;
