@@ -13,7 +13,7 @@ export default function ModelRelativeValuesPage({ owner, slug, variableName }) {
   }
 
   if (!data || !data.relativeValuesPage) {
-    throw new NotFoundError(`Page ${variableName} does not exist.`);
+    return res.status(404).send({ error: `Page ${variableName} does not exist.` });
   }
 
   return <ListView data={data.relativeValuesPage} />;
