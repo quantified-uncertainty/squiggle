@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 import { Button, TextFormField } from "@quri/ui";
 
 import { SlugFormField } from "@/components/ui/SlugFormField";
-import { updateRelativeValuesDefinition } from "@/graphql/mutations/updateRelativeValuesDefinition";
+import { updateRelativeValuesDefinition } from "@/graphql/mutations";
 import { FormShape } from "./FormShape";
 
 // Removed exportData function as it was not performing any operations on the data
@@ -26,14 +26,15 @@ export const RelativeValuesDefinitionForm: FC<Props> = ({
 }) => {
   const form = useForm<FormShape>({ defaultValues });
 
-  const onSubmit = form.handleSubmit((data) => {
+  const onSubmit = form.handleSubmit(async (data) => {
       // Save operation
-      save(data)
-        .then(() => updateRelativeValuesDefinition(data))
-        .catch((error) => {
-          // Handle error
-          toast.error("Failed to save data: " + error.message);
-        });
+      try {
+        await save(data);
+        await updateRelativeValuesDefinition(data);
+      } catch (error) {
+        // Handle error
+        toast.error("Failed to save data: " + error.message);
+      }
     });
 
   return (
