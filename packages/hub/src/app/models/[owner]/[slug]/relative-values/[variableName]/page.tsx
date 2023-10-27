@@ -21,8 +21,4 @@ export default function ModelRelativeValuesPage({ owner, slug, variableName }) {
     } else {
       return <ListView data={data.relativeValuesPage} />;
     }
-
-  // This line is removed as it is redundant
-
-  return <ListView data={data.relativeValuesPage} />;
 }
