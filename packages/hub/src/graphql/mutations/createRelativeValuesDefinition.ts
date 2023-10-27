@@ -8,7 +8,7 @@ import { RelativeValuesDefinition } from "../types/RelativeValuesDefinition";
 import { validateSlug } from "../utils";
 import { ZodError } from "zod";
 
-const validateColor = { regex: /^#[0-9a-f]{6}$/ };
+const validateColor = { regex: /^#[0-9a-fA-F]{6}$/ };
 
 export const RelativeValuesClusterInput = builder.inputType(
   "RelativeValuesClusterInput",
