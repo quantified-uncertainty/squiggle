@@ -137,6 +137,8 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
         className="border border-grey-200 p-2 m-4"
         data-testid="squiggle-editor"
       >
+        <label>Unsaved Draft</label>
+        <button onClick={copyToClipboard} disabled={!code}>Copy to Clipboard</button>
         <CodeEditor
           defaultValue={defaultCode ?? ""}
           onChange={setCode}
