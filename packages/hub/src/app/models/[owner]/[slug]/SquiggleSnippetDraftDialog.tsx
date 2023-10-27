@@ -3,11 +3,7 @@ import { graphql, useFragment } from "react-relay";
 
 import { Button, Modal, TextTooltip } from "@quri/ui";
 
-import { SquiggleSnippetDraftDialog_Model$key } from "@/__generated__/SquiggleSnippetDraftDialog_Model.graphql";
-import { SquiggleSnippetFormShape } from "./EditSquiggleSnippetModel";
-import { useClientOnlyRender } from "@/hooks/useClientOnlyRender";
-
-const { navigator } = window;
+          // Removed the second occurrence of the "Copy to Clipboard" button code block.
 
 export type Draft = {
   formState: SquiggleSnippetFormShape;
