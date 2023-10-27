@@ -26,15 +26,14 @@ export const RelativeValuesDefinitionForm: FC<Props> = ({
 }) => {
   const form = useForm<FormShape>({ defaultValues });
 
-  const onSubmit = form.handleSubmit(async (data) => {
+  const onSubmit = form.handleSubmit((data) => {
       // Save operation
-      try {
-        await save(data);
-        await updateRelativeValuesDefinition(data);
-      } catch (error) {
-        // Handle error
-        displayError("Failed to save data: " + error.message);
-      }
+      save(data)
+        .then(() => updateRelativeValuesDefinition(data))
+        .catch((error) => {
+          // Handle error
+          toast.error("Failed to save data: " + error.message);
+        });
     });
 
   return (
