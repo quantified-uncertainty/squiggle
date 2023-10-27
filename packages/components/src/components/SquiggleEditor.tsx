@@ -1,4 +1,5 @@
 import { FC, useMemo, useRef } from "react";
+import { useClipboard } from 'react-use';
 
 import { useUncontrolledCode } from "../lib/hooks/index.js";
 import { useSquiggle } from "../lib/hooks/useSquiggle.js";
@@ -29,6 +30,56 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
     defaultCode: propsDefaultCode,
     onCodeChange,
   });
+  const { code, setCode, defaultCode } = useUncontrolledCode({
+    defaultCode: propsDefaultCode,
+    onCodeChange,
+  });
+  
+  const { code, setCode, defaultCode } = useUncontrolledCode({
+    defaultCode: propsDefaultCode,
+    onCodeChange,
+  });
+  =======
+  const { code, setCode, defaultCode } = useUncontrolledCode({
+    defaultCode: propsDefaultCode,
+    onCodeChange,
+  });
+  
+  const [isCopied, copyToClipboard] = useClipboard(code);
+  
+  // Rest of the component code...
+  
+  return (
+    <div>
+      <div
+        className="border border-grey-200 p-2 m-4"
+        data-testid="squiggle-editor"
+      >
+        <CodeEditor
+          defaultValue={defaultCode ?? ""}
+          onChange={setCode}
+          showGutter={false}
+          errors={errors}
+          project={project}
+          ref={editorRef}
+          onSubmit={() => runnerState.run()}
+        />
+        <button onClick={copyToClipboard} disabled={!code}>
+          Copy to Clipboard
+        </button>
+      </div>
+      {hideViewer || !squiggleOutput?.code ? null : (
+        <DynamicSquiggleViewer
+          squiggleOutput={squiggleOutput}
+          isRunning={isRunning}
+          localSettingsEnabled={localSettingsEnabled}
+          editor={editorRef.current ?? undefined}
+          environment={environment}
+          {...settings}
+        />
+      )}
+    </div>
+  );
 
   const runnerState = useRunnerState(code);
 
