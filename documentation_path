@@ -1,0 +1,63 @@
+// list.ts
+import { makeDefinition, frDict, frArray, frString, vDict } from './dependencies';
+
+// Existing code...
+
+maker.make({
+  name: "pick",
+  output: "Dict",
+  examples: [`Dict.pick({a: 1, b: 2, c: 3}, ['a', 'c'])`],
+  definitions: [
+    makeDefinition([frDict(frAny), frArray(frString)], ([dict, keys]) => {
+      const picked = keys.reduce((acc, key) => {
+        if (key in dict) {
+          acc[key] = dict[key];
+        }
+        return acc;
+      }, {});
+      return vDict(picked);
+    }),
+  ],
+});
+
+maker.make({
+  name: "omit",
+  output: "Dict",
+  examples: [`Dict.omit({a: 1, b: 2, c: 3}, ['b'])`],
+  definitions: [
+    makeDefinition([frDict(frAny), frArray(frString)], ([dict, keys]) => {
+      const omitted = { ...dict };
+      keys.forEach(key => {
+        delete omitted[key];
+      });
+      return vDict(omitted);
+    }),
+  ],
+});
+
+// Existing code...
+```
+
+```typescript
+// list_test.ts
+import { testEvalToBe } from "../helpers/reducerHelpers.js";
+
+// Existing code...
+
+describe("Dict functions", () => {
+  describe("pick", () => {
+    testEvalToBe("Dict.pick({a: 1, b: 2, c: 3}, ['a', 'c'])", "{a: 1, c: 3}");
+    testEvalToBe("Dict.pick({a: 1, b: 2, c: 3}, ['b'])", "{b: 2}");
+    testEvalToBe("Dict.pick({a: 1, b: 2, c: 3}, [])", "{}");
+    testEvalToBe("Dict.pick({}, ['a', 'b'])", "{}");
+  });
+
+  describe("omit", () => {
+    testEvalToBe("Dict.omit({a: 1, b: 2, c: 3}, ['b'])", "{a: 1, c: 3}");
+    testEvalToBe("Dict.omit({a: 1, b: 2, c: 3}, ['a', 'c'])", "{b: 2}");
+    testEvalToBe("Dict.omit({a: 1, b: 2, c: 3}, [])", "{a: 1, b: 2, c: 3}");
+    testEvalToBe("Dict.omit({}, ['a', 'b'])", "{}");
+  });
+});
+
+// Existing code...
