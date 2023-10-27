@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 import { Button, TextFormField } from "@quri/ui";
 
 import { SlugFormField } from "@/components/ui/SlugFormField";
-import { updateRelativeValuesDefinition } from "@/graphql/mutations/updateRelativeValuesDefinition";
+import { updateRelativeValuesDefinition } from "@/graphql/mutations";
 import { FormShape } from "./FormShape";
 
 // Removed exportData function as it was not performing any operations on the data
@@ -40,20 +40,6 @@ export const RelativeValuesDefinitionForm: FC<Props> = ({
   return (
     <FormProvider {...form}>
       <form onSubmit={onSubmit}>
-        <div className="space-y-2">
-          {withoutSlug ? null : (
-            <SlugFormField<FormShape>
-              name="slug"
-              label="Slug"
-              placeholder="my_definition"
-            />
-          )}
-          <TextFormField<FormShape>
-            name="title"
-            label="Title"
-            placeholder="My definition"
-          />
-        </div>
         <div className="mt-4">
           <Button onClick={onSubmit} theme="primary">
             Save
