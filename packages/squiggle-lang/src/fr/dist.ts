@@ -30,7 +30,6 @@ import {
   algebraicProduct,
   algebraicSum,
 } from "../dist/distOperations/binaryOperations.js";
-import { algebraicCombination } from "../dist/distOperations/algebraicCombination.js";
 
 const maker = new FnFactory({
   nameSpace: "Dist",
