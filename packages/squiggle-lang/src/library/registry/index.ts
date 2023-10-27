@@ -29,6 +29,7 @@ import { ImmutableMap } from "../../utility/immutableMap.js";
 
 const fnList: FRFunction[] = [
   ...builtinLibrary,
+  ...numberLibrary,
   ...dangerLibrary,
   ...dateLibrary,
   ...dictLibrary,
@@ -37,7 +38,6 @@ const fnList: FRFunction[] = [
   ...tableLibrary,
   ...listLibrary,
   ...mathLibrary,
-  ...numberLibrary,
   ...plotLibrary,
   ...pointsetLibrary,
   ...relativeValuesLibrary,

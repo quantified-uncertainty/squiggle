@@ -1,4 +1,3 @@
-import { PointMass } from "../dist/SymbolicDist.js";
 import { REArgumentError, REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {

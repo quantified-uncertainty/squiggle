@@ -1,28 +1,10 @@
-import { BaseDist } from "../dist/BaseDist.js";
-import * as SymbolicDist from "../dist/SymbolicDist.js";
-import {
-  algebraicSum,
-  algebraicCumDiff,
-  algebraicCumProd,
-  algebraicCumSum,
-  algebraicProduct,
-} from "../dist/distOperations/binaryOperations.js";
 import { REArgumentError } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import {
-  frArray,
-  frNumber,
-  frDict,
-  frDistOrNumber,
-} from "../library/registry/frTypes.js";
-import {
-  FnFactory,
-  parseDistFromDistOrNumber,
-} from "../library/registry/helpers.js";
+import { frArray, frNumber, frDict } from "../library/registry/frTypes.js";
+import { FnFactory } from "../library/registry/helpers.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
-import { getExt } from "../utility/result.js";
 import { NumericRangeDomain } from "../value/domain.js";
-import { vArray, vDomain, vNumber, vDist } from "../value/index.js";
+import { vArray, vDomain, vNumber } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Number",
@@ -102,13 +84,6 @@ export const library = [
     examples: [`sum([3,5,2])`],
     definitions: [
       makeNumberArrayToNumberDefinition((arr) => E_A_Floats.sum(arr)),
-      makeDefinition([frArray(frDistOrNumber)], ([dists], { environment }) =>
-        vDist(
-          getExt(
-            algebraicSum(dists.map(parseDistFromDistOrNumber), environment)
-          )
-        )
-      ),
     ],
   }),
   maker.make({
@@ -117,13 +92,6 @@ export const library = [
     examples: [`product([3,5,2])`],
     definitions: [
       makeNumberArrayToNumberDefinition((arr) => E_A_Floats.product(arr)),
-      makeDefinition([frArray(frDistOrNumber)], ([dists], { environment }) =>
-        vDist(
-          getExt(
-            algebraicProduct(dists.map(parseDistFromDistOrNumber), environment)
-          )
-        )
-      ),
     ],
   }),
   maker.make({
@@ -185,50 +153,20 @@ export const library = [
     output: "Array",
     description: "cumulative sum",
     examples: [`cumsum([3,5,2,3,5])`],
-    definitions: [
-      makeNumberArrayToNumberArrayDefinition(E_A_Floats.cumSum),
-      makeDefinition([frArray(frDistOrNumber)], ([dists], { environment }) =>
-        vArray(
-          algebraicCumSum(
-            dists.map(parseDistFromDistOrNumber),
-            environment
-          ).map((r) => vDist(r))
-        )
-      ),
-    ],
+    definitions: [makeNumberArrayToNumberArrayDefinition(E_A_Floats.cumSum)],
   }),
   maker.make({
     name: "cumprod",
     description: "cumulative product",
     output: "Array",
     examples: [`cumprod([3,5,2,3,5])`],
-    definitions: [
-      makeNumberArrayToNumberArrayDefinition(E_A_Floats.cumProd),
-      makeDefinition([frArray(frDistOrNumber)], ([dists], { environment }) =>
-        vArray(
-          algebraicCumProd(
-            dists.map(parseDistFromDistOrNumber),
-            environment
-          ).map((r) => vDist(r))
-        )
-      ),
-    ],
+    definitions: [makeNumberArrayToNumberArrayDefinition(E_A_Floats.cumProd)],
   }),
   maker.make({
     name: "diff",
     output: "Array",
     examples: [`diff([3,5,2,3,5])`],
-    definitions: [
-      makeNumberArrayToNumberArrayDefinition(E_A_Floats.diff),
-      makeDefinition([frArray(frDistOrNumber)], ([dists], { environment }) =>
-        vArray(
-          algebraicCumDiff(
-            dists.map(parseDistFromDistOrNumber),
-            environment
-          ).map((r) => vDist(r))
-        )
-      ),
-    ],
+    definitions: [makeNumberArrayToNumberArrayDefinition(E_A_Floats.diff)],
   }),
   maker.make({
     name: "rangeDomain",
