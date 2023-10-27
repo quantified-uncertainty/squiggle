@@ -4,10 +4,10 @@ import { FC } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { toast } from 'react-toastify';
 
-import { Button, StyledTab, TextFormField } from "@quri/ui";
+import { Button, TextFormField } from "@quri/ui";
 
 import { SlugFormField } from "@/components/ui/SlugFormField";
-import { JSONForm } from "./JSONForm";
+import { updateRelativeValuesDefinition } from "packages/hub/src/graphql/mutations/updateRelativeValuesDefinition";
 import { FormShape } from "./FormShape";
 
 // Removed exportData function as it was not performing any operations on the data
@@ -30,6 +30,7 @@ export const RelativeValuesDefinitionForm: FC<Props> = ({
       // Save operation
       try {
         await save(data);
+        await updateRelativeValuesDefinition(data);
       } catch (error) {
         // Handle error
         displayError("Failed to save data: " + error.message);
@@ -53,25 +54,6 @@ export const RelativeValuesDefinitionForm: FC<Props> = ({
             placeholder="My definition"
           />
         </div>
-        <div className="pt-8">
-          <FormSectionHeader headerName="Editing Format" />
-          <StyledTab.Group>
-            <StyledTab.List>
-              <StyledTab name="Form" />
-              <StyledTab name="JSON" />
-            </StyledTab.List>
-            <div className="mt-4">
-              <StyledTab.Panels>
-                <StyledTab.Panel>
-                  <HTMLForm />
-                </StyledTab.Panel>
-                <StyledTab.Panel>
-                  <JSONForm />
-                </StyledTab.Panel>
-              </StyledTab.Panels>
-            </div>
-          </StyledTab.Group>
-        </div>
         <div className="mt-4">
           <Button onClick={onSubmit} theme="primary">
             Save
@@ -91,6 +73,7 @@ export const RelativeValuesDefinitionForm: FC<Props> = ({
       // Save operation
       try {
         await save(data);
+        await updateRelativeValuesDefinition(data);
       } catch (error) {
         // Handle error
         displayError("Failed to save data: " + error.message);
