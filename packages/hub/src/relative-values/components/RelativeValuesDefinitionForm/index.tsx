@@ -8,6 +8,12 @@ import { Button, StyledTab, TextFormField } from "@quri/ui";
 import { SlugFormField } from "@/components/ui/SlugFormField";
 import { JSONForm } from "./JSONForm";
 import { FormShape } from "./FormShape";
+
+// Function to export data
+const exportData = async (data: FormShape) => {
+  // Transform data if necessary
+  return data;
+};
 import { FormSectionHeader, HTMLForm } from "./HTMLForm";
 
 type Props = {
@@ -25,7 +31,6 @@ export const RelativeValuesDefinitionForm: FC<Props> = ({
 
   const onSubmit = form.handleSubmit(async (data) => {
     // Export operation
-    // Assuming exportData is a function that handles the export operation
     const exportedData = await exportData(data);
   
     // Save operation
