@@ -48,10 +48,6 @@ export const RelativeValuesDefinitionForm: FC<Props> = ({
     </FormProvider>
   );
 };
-      </form>
-    </FormProvider>
-  );
-};
 // Function to display error message
 const displayError = (message: string) => {
   // Display a toast notification with the error message
