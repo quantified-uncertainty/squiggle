@@ -7,7 +7,7 @@ import {
   frLambdaN,
   frArray,
   frNumber,
-  frString
+  frString,
   frDict,
   frTuple,
   frLambdaNand,
@@ -427,14 +427,6 @@ export const library = [
         }
         return vArray(zip(array1, array2).map((pair) => vArray(pair)));
       }),
-    ],
-  }),
-    requiresNamespace: true,
-    examples: [`List.unzip([[1,2], [2,3], [4,5]])`],
-    definitions: [
-      makeDefinition([frArray(frTuple(frAny, frAny))], ([array]) =>
-        vArray(unzip(array as [Value, Value][]).map((r) => vArray(r)))
-      ),
     ],
   }),
 ];
