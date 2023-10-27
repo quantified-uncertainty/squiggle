@@ -3,7 +3,12 @@ import { graphql, useFragment } from "react-relay";
 
 import { Button, Modal, TextTooltip } from "@quri/ui";
 
-          // Removed the second occurrence of the "Copy to Clipboard" button code block.
+import { SquiggleSnippetDraftDialog_Model$key } from "@/__generated__/SquiggleSnippetDraftDialog_Model.graphql";
+import { SquiggleSnippetFormShape } from "./EditSquiggleSnippetModel";
+import { useClientOnlyRender } from "@/hooks/useClientOnlyRender";
+
+// No changes needed in this snippet
+const { navigator } = window;
 
 export type Draft = {
   formState: SquiggleSnippetFormShape;
@@ -130,32 +135,18 @@ export const SquiggleSnippetDraftDialog: FC<Props> = ({
               </Button>
             </div>
           </TextTooltip>
-          // Removed the second occurrence of the "Copy to Clipboard" button code block.
-        </div>
-        <div className="flex items-center justify-end gap-2">
-          <TextTooltip text="Draft will be ignored but you'll see this prompt again on next load.">
+          <TextTooltip text="Draft will be copied to clipboard.">
             <div>
-              <Button onClick={skip}>Ignore</Button>
-            </div>
-          </TextTooltip>
-          <TextTooltip text="Draft will be discarded.">
-            <div>
-              <Button onClick={discard}>Discard</Button>
-            </div>
-          </TextTooltip>
-          <TextTooltip text="Code and version will be replaced by draft version. You'll still need to save it manually.">
-            <div>
-              <Button theme="primary" onClick={_restore}>
-                Restore
-              </Button>
-            </div>
-          </TextTooltip>
-        </div>
-      </Modal.Footer>          <TextTooltip text="Code and version will be replaced by draft version. You'll still need to save it manually.">
-            <div>
-              <Button theme="primary" onClick={_restore}>
-                Restore
-              </Button>
+              <Button onClick={() => {
+                const draft = draftUtils.load(draftLocator);
+                if (draft) {
+                  try {
+                    navigator.clipboard.writeText(JSON.stringify(draft));
+                  } catch (error) {
+                    alert('Failed to copy draft to clipboard. Please try again.');
+                  }
+                }
+              }}>Copy to Clipboard</Button>
             </div>
           </TextTooltip>
         </div>
