@@ -6,7 +6,6 @@ import { Button, Modal, TextTooltip } from "@quri/ui";
 import { SquiggleSnippetDraftDialog_Model$key } from "@/__generated__/SquiggleSnippetDraftDialog_Model.graphql";
 import { SquiggleSnippetFormShape } from "./EditSquiggleSnippetModel";
 import { useClientOnlyRender } from "@/hooks/useClientOnlyRender";
-
 // No changes needed in this snippet
 const { navigator } = window;
 
@@ -141,7 +140,7 @@ export const SquiggleSnippetDraftDialog: FC<Props> = ({
                 const draft = draftUtils.load(draftLocator);
                 if (draft) {
                   try {
-                    navigator.clipboard.writeText(draft.formState.code);
+                    navigator.clipboard.writeText(JSON.stringify(draft));
                   } catch (error) {
                     alert('Failed to copy draft to clipboard. Please try again.');
                   }
