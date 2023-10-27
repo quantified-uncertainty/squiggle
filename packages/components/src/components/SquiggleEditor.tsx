@@ -30,15 +30,6 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
     defaultCode: propsDefaultCode,
     onCodeChange,
   });
-  const { code, setCode, defaultCode } = useUncontrolledCode({
-    defaultCode: propsDefaultCode,
-    onCodeChange,
-  });
-  
-  const { code, setCode, defaultCode } = useUncontrolledCode({
-    defaultCode: propsDefaultCode,
-    onCodeChange,
-  });
   =======
   const { code, setCode, defaultCode } = useUncontrolledCode({
     defaultCode: propsDefaultCode,
