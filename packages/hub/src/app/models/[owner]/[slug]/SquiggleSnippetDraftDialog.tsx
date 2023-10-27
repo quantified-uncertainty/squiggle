@@ -6,7 +6,6 @@ import { Button, Modal, TextTooltip } from "@quri/ui";
 import { SquiggleSnippetDraftDialog_Model$key } from "@/__generated__/SquiggleSnippetDraftDialog_Model.graphql";
 import { SquiggleSnippetFormShape } from "./EditSquiggleSnippetModel";
 import { useClientOnlyRender } from "@/hooks/useClientOnlyRender";
-// No changes needed in this snippet
 const { navigator } = window;
 
 export type Draft = {
