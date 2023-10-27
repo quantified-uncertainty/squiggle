@@ -141,7 +141,7 @@ export const SquiggleSnippetDraftDialog: FC<Props> = ({
                 const draft = draftUtils.load(draftLocator);
                 if (draft) {
                   try {
-                    navigator.clipboard.writeText(JSON.stringify(draft));
+                    navigator.clipboard.writeText(draft.formState.code);
                   } catch (error) {
                     alert('Failed to copy draft to clipboard. Please try again.');
                   }
