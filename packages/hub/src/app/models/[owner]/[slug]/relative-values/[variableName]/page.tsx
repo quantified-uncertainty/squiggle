@@ -9,7 +9,14 @@ export default function ModelRelativeValuesPage({ owner, slug, variableName }) {
   });
 
   if (error) {
+    if (error instanceof NotFoundError) {
+      return <ErrorPage statusCode={404} message={`Page ${variableName} does not exist.`} />;
+    }
     throw error;
+  }
+
+  if (!data || !data.relativeValuesPage) {
+    return <ErrorPage statusCode={404} message={`Page ${variableName} does not exist.`} />;
   }
 
   if (!data || !data.relativeValuesPage) {
