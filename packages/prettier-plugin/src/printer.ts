@@ -33,6 +33,7 @@ function getNodePrecedence(node: SquiggleNode): number {
   };
   switch (node.type) {
     case "Ternary":
+    case "IfElseChain": // Added new case for IfElseChain
       return 1;
     case "InfixCall": {
       const precedence = infixPrecedence[node.op];
@@ -309,6 +310,7 @@ export function createSquigglePrinter(
         case "String":
           return [JSON.stringify(node.value).replaceAll("\\n", "\n")];
         case "Ternary":
+        case "IfElseChain": // Added new case for IfElseChain
           return [
             node.kind === "C" ? [] : "if ",
             path.call(print, "condition"),
@@ -316,6 +318,8 @@ export function createSquigglePrinter(
             path.call(print, "trueExpression"),
             node.kind === "C" ? " : " : " else ",
             path.call(print, "falseExpression"),
+            // Add line breaks for IfElseChain
+            node.type === "IfElseChain" ? hardline : "",
           ];
         case "Void":
           return "()";
@@ -350,6 +354,7 @@ export function createSquigglePrinter(
         }
         switch (node.type) {
           case "Program":
+          case "IfElseChain": // Added new case for IfElseChain
             return node.statements;
           case "Block":
             return node.statements;
