@@ -429,18 +429,6 @@ export const library = [
       }),
     ],
   }),
-  maker.make({
-    name: "unzip",
-    requiresNamespace: true,
-    examples: [`List.unzip([[1,2], [2,3], [4,5]])`],
-    definitions: [
-      makeDefinition([frArray(frTuple(frAny, frAny))], ([array]) =>
-        vArray(unzip(array as [Value, Value][]).map((r) => vArray(r)))
-      ),
-    ],
-  }),
-];  maker.make({
-    name: "unzip",
     requiresNamespace: true,
     examples: [`List.unzip([[1,2], [2,3], [4,5]])`],
     definitions: [
@@ -462,7 +450,7 @@ export const library = [
             result[key] = dict[key];
           }
         });
-        return result;
+        return vDict(result);
       }),
     ],
   }),
@@ -476,7 +464,7 @@ export const library = [
         keys.forEach((key) => {
           delete result[key];
         });
-        return result;
+        return vDict(result);
       }),
     ],
   }),
