@@ -7,7 +7,7 @@ import {
   frLambdaN,
   frArray,
   frNumber,
-  frString,
+  frString
   frDict,
   frTuple,
   frLambdaNand,
@@ -438,33 +438,3 @@ export const library = [
     ],
   }),
 ];
-  maker.make({
-    name: "pick",
-    requiresNamespace: true,
-    examples: [`Dict.pick({"a": 1, "b": 2, "c": 3}, ["a", "c"])`],
-    definitions: [
-      makeDefinition([frDict(frAny), frArray(frString)], ([dict, keys]) => {
-        const result = {};
-        keys.forEach((key) => {
-          if (dict.hasOwnProperty(key)) {
-            result[key] = dict[key];
-          }
-        });
-        return vDict(result);
-      }),
-    ],
-  }),
-  maker.make({
-    name: "omit",
-    requiresNamespace: true,
-    examples: [`Dict.omit({"a": 1, "b": 2, "c": 3}, ["a", "c"])`],
-    definitions: [
-      makeDefinition([frDict(frAny), frArray(frString)], ([dict, keys]) => {
-        const result = { ...dict };
-        keys.forEach((key) => {
-          delete result[key];
-        });
-        return vDict(result);
-      }),
-    ],
-  }),
