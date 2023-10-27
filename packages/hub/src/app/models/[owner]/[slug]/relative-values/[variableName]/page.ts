@@ -2,7 +2,7 @@
 import { useQuery } from "@apollo/client";
 import { NotFoundError } from "graphql/errors";
 import { ListView } from "@/relative-values/components/views/ListView";
-import { GET_RELATIVE_VALUES_PAGE } from "@/relative-values/graphql/queries";
+import { GET_RELATIVE_VALUES_PAGE } from "@/relative-values/graphql/queries/GET_RELATIVE_VALUES_PAGE.ts";
 
 export default function ModelRelativeValuesPage({ owner, slug, variableName }) {
   const { data, error } = useQuery(GET_RELATIVE_VALUES_PAGE, {
