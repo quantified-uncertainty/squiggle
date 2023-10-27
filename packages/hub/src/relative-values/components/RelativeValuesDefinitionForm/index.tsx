@@ -2,6 +2,7 @@
 
 import { FC } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { toast } from 'react-toastify';
 
 import { Button, StyledTab, TextFormField } from "@quri/ui";
 
@@ -143,7 +144,6 @@ export const RelativeValuesDefinitionForm: FC<Props> = ({
 };
 // Function to display error message
 const displayError = (message: string) => {
-  // Display a toast notification or a modal with the error message
-  // This is a placeholder and should be replaced with actual code to display a toast notification or a modal
-  console.log("Error: " + message);
+  // Display a toast notification with the error message
+  toast.error(message);
 };
