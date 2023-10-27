@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import { linearRegression } from 'packages/squiggle-lang/src/fr/linearRegression.ts';
 
 import { SquiggleChart } from "../../components/SquiggleChart.js";
 
@@ -9,8 +10,17 @@ import { SquiggleChart } from "../../components/SquiggleChart.js";
 const meta = {
   component: SquiggleChart,
 } satisfies Meta<typeof SquiggleChart>;
-export default meta;
-type Story = StoryObj<typeof meta>;
+
+export default {
+  ...meta,
+  title: 'Squiggle/Distributions',
+  parameters: {
+    controls: { hideNoControlsWarning: true },
+  },
+  argTypes: {
+    environment: { table: { disable: true } },
+  },
+} as Meta<typeof SquiggleChart>;
 
 export const ContinuousSymbolic: Story = {
   name: "Continuous Symbolic",
@@ -116,5 +126,36 @@ dists: [
 ]
 })
 `,
+  },
+};export const MultiplePlots: Story = {
+  name: "Multiple plots",
+  args: {
+    code: `
+Plot.dists({
+  title: "Multiple plots",
+  xScale: Scale.linear({ title: "X Scale" }),
+dists: [
+{
+ name: "one",
+ value: mx(0.5, normal(0,1))
+},
+{
+ name: "two",
+ value: mx(2, normal(5, 2)),
+}
+]
+})
+`,
+  },
+};
+export const LinearRegressionStory: Story = {
+  name: "Linear Regression",
+  args: {
+    code: `
+      let x = normal(0, 1, 1000);
+      let y = x.map(val => 2 * val + 3);
+      let { slope, intercept } = linearRegression(x, y);
+      [slope, intercept]
+    `,
   },
 };
