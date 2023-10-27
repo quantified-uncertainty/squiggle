@@ -8,6 +8,7 @@ import {
   frArray,
   frNumber,
   frString,
+  frDict,
   frTuple,
   frLambdaNand,
 } from "../library/registry/frTypes.js";
@@ -438,4 +439,44 @@ export const library = [
       ),
     ],
   }),
+];  maker.make({
+    name: "unzip",
+    requiresNamespace: true,
+    examples: [`List.unzip([[1,2], [2,3], [4,5]])`],
+    definitions: [
+      makeDefinition([frArray(frTuple(frAny, frAny))], ([array]) =>
+        vArray(unzip(array as [Value, Value][]).map((r) => vArray(r)))
+      ),
+    ],
+  }),
 ];
+  maker.make({
+    name: "pick",
+    requiresNamespace: true,
+    examples: [`Dict.pick({"a": 1, "b": 2, "c": 3}, ["a", "c"])`],
+    definitions: [
+      makeDefinition([frDict(frAny), frArray(frString)], ([dict, keys]) => {
+        const result = {};
+        keys.forEach((key) => {
+          if (dict.hasOwnProperty(key)) {
+            result[key] = dict[key];
+          }
+        });
+        return result;
+      }),
+    ],
+  }),
+  maker.make({
+    name: "omit",
+    requiresNamespace: true,
+    examples: [`Dict.omit({"a": 1, "b": 2, "c": 3}, ["a", "c"])`],
+    definitions: [
+      makeDefinition([frDict(frAny), frArray(frString)], ([dict, keys]) => {
+        const result = { ...dict };
+        keys.forEach((key) => {
+          delete result[key];
+        });
+        return result;
+      }),
+    ],
+  }),
