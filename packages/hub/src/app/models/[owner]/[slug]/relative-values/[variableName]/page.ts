@@ -1,4 +1,4 @@
-// "use client"; removed as it's not valid in JavaScript or TypeScript
+// Removed invalid comment
 import { useQuery } from "@apollo/client";
 import { NotFoundError } from "graphql/errors";
 import { ListView } from "@/relative-values/components/views/ListView";
