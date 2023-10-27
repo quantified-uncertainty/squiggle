@@ -6,7 +6,7 @@ import { type SquiggleNode } from "./types.js";
 
 export const squiggleParser: Parser<SquiggleNode> = {
   parse: (text) => {
-    const parseResult = parse(text);
+    const parseResult = parse(text, { recognizeIfElseChains: true });
     if (!parseResult.ok) {
       throw new Error(`Parse failed. ${parseResult.value}`);
     }
