@@ -1,6 +1,5 @@
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
-
 import { InputObjectRef } from "@pothos/core";
 import { rethrowOnConstraint } from "../errors/common";
 import { getWriteableOwner, getWriteableOwnerBySlug } from "../types/Owner";
