@@ -149,7 +149,6 @@ export const SquiggleSnippetDraftDialog: FC<Props> = ({
             </div>
           </TextTooltip>
         </div>
-      </Modal.Footer>
         <div className="flex items-center justify-end gap-2">
           <TextTooltip text="Draft will be ignored but you'll see this prompt again on next load.">
             <div>
