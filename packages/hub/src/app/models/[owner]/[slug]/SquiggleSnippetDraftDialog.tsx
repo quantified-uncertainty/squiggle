@@ -135,7 +135,41 @@ export const SquiggleSnippetDraftDialog: FC<Props> = ({
             </div>
           </TextTooltip>
         </div>
-      </Modal.Footer>      <Modal.Footer>
+      <Modal.Footer>
+        <div className="flex items-center justify-end gap-2">
+          <TextTooltip text="Draft will be ignored but you'll see this prompt again on next load.">
+            <div>
+              <Button onClick={skip}>Ignore</Button>
+            </div>
+          </TextTooltip>
+          <TextTooltip text="Draft will be discarded.">
+            <div>
+              <Button onClick={discard}>Discard</Button>
+            </div>
+          </TextTooltip>
+          <TextTooltip text="Code and version will be replaced by draft version. You'll still need to save it manually.">
+            <div>
+              <Button theme="primary" onClick={_restore}>
+                Restore
+              </Button>
+            </div>
+          </TextTooltip>
+          <TextTooltip text="Draft will be copied to clipboard.">
+            <div>
+              <Button onClick={() => {
+                const draft = draftUtils.load(draftLocator);
+                if (draft) {
+                  try {
+                    navigator.clipboard.writeText(JSON.stringify(draft));
+                  } catch (error) {
+                    alert('Failed to copy draft to clipboard. Please try again.');
+                  }
+                }
+              }}>Copy to Clipboard</Button>
+            </div>
+          </TextTooltip>
+        </div>
+      </Modal.Footer>
         <div className="flex items-center justify-end gap-2">
           <TextTooltip text="Draft will be ignored but you'll see this prompt again on next load.">
             <div>
