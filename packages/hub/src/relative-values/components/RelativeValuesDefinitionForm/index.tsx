@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 import { Button, TextFormField } from "@quri/ui";
 
 import { SlugFormField } from "@/components/ui/SlugFormField";
-import { updateRelativeValuesDefinition } from "@/graphql/mutations";
+import { updateRelativeValuesDefinition } from "@/graphql/mutations/updateRelativeValuesDefinition";
 import { FormShape } from "./FormShape";
 
 // Removed exportData function as it was not performing any operations on the data
@@ -26,15 +26,14 @@ export const RelativeValuesDefinitionForm: FC<Props> = ({
 }) => {
   const form = useForm<FormShape>({ defaultValues });
 
-  const onSubmit = form.handleSubmit(async (data) => {
+  const onSubmit = form.handleSubmit((data) => {
       // Save operation
-      try {
-        await save(data);
-        await updateRelativeValuesDefinition(data);
-      } catch (error) {
-        // Handle error
-        toast.error("Failed to save data: " + error.message);
-      }
+      save(data)
+        .then(() => updateRelativeValuesDefinition(data))
+        .catch((error) => {
+          // Handle error
+          toast.error("Failed to save data: " + error.message);
+        });
     });
 
   return (
@@ -49,44 +48,6 @@ export const RelativeValuesDefinitionForm: FC<Props> = ({
     </FormProvider>
   );
 };
-        <div className="space-y-2">
-          {withoutSlug ? null : (
-            <SlugFormField<FormShape>
-              name="slug"
-              label="Slug"
-              placeholder="my_definition"
-            />
-          )}
-          <TextFormField<FormShape>
-            name="title"
-            label="Title"
-            placeholder="My definition"
-          />
-        </div>
-        <div className="pt-8">
-          <FormSectionHeader headerName="Editing Format" />
-          <StyledTab.Group>
-            <StyledTab.List>
-              <StyledTab name="Form" />
-              <StyledTab name="JSON" />
-            </StyledTab.List>
-            <div className="mt-4">
-              <StyledTab.Panels>
-                <StyledTab.Panel>
-                  <HTMLForm />
-                </StyledTab.Panel>
-                <StyledTab.Panel>
-                  <JSONForm />
-                </StyledTab.Panel>
-              </StyledTab.Panels>
-            </div>
-          </StyledTab.Group>
-        </div>
-        <div className="mt-4">
-          <Button onClick={onSubmit} theme="primary">
-            Save
-          </Button>
-        </div>
       </form>
     </FormProvider>
   );
