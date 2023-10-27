@@ -24,7 +24,17 @@ export const RelativeValuesDefinitionForm: FC<Props> = ({
   const form = useForm<FormShape>({ defaultValues });
 
   const onSubmit = form.handleSubmit(async (data) => {
-    await save(data);
+    // Export operation
+    // Assuming exportData is a function that handles the export operation
+    const exportedData = await exportData(data);
+  
+    // Save operation
+    try {
+      await save(exportedData);
+    } catch (error) {
+      // Handle error
+      console.error("Failed to save data:", error);
+    }
   });
 
   return (
