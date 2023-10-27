@@ -8,7 +8,6 @@ import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 import { EditSquiggleSnippetModel } from "./EditSquiggleSnippetModel";
-import { clipboard } from "clipboard";
 
 export const EditModelPage: FC<{
   query: SerializablePreloadedQuery<EditModelPageQuery>;
