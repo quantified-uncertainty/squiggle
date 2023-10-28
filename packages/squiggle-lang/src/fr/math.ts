@@ -15,6 +15,15 @@ export const library: FRFunction[] = [
   maker.n2n({ name: "asin", fn: Math.asin }),
   maker.n2n({ name: "acos", fn: Math.acos }),
   maker.n2n({ name: "atan", fn: Math.atan }),
+  maker.n2n({ name: "square", fn: Math.square }),
+  maker.n2n({ name: "minBy", fn: Math.minBy }),
+  maker.n2n({ name: "maxBy", fn: Math.maxBy }),
+  maker.n2n({ name: "log", fn: Math.log }),
+  maker.n2n({ name: "cos", fn: Math.cos }),
+  maker.n2n({ name: "tan", fn: Math.tan }),
+  maker.n2n({ name: "asin", fn: Math.asin }),
+  maker.n2n({ name: "acos", fn: Math.acos }),
+  maker.n2n({ name: "atan", fn: Math.atan }),
   // ported MathJS functionsimport { FRFunction } from "../library/registry/core.js";
 import { FnFactory } from "../library/registry/helpers.js";
 
@@ -68,6 +77,7 @@ export const library: FRFunction[] = [
   maker.n2n({ name: "ceil", fn: Math.ceil }),
   maker.n2n({ name: "floor", fn: Math.floor }),
   maker.n2n({ name: "max", fn: Math.max }),
+  maker.n2n({ name: "maxBy", fn: Math.maxBy }),
   maker.n2n({ name: "mean", fn: Math.mean }),
   maker.n2n({ name: "product", fn: Math.product }),
   maker.n2n({ name: "sum", fn: Math.sum }),
@@ -77,6 +87,9 @@ export const library: FRFunction[] = [
   maker.n2n({ name: "exp", fn: Math.exp }),
   maker.n2n({ name: "log10", fn: Math.log10 }),
   maker.n2n({ name: "log2", fn: Math.log2 }),
+  maker.n2n({ name: "log", fn: Math.log }),
+  maker.n2n({ name: "square", fn: Math.square }),
+  maker.n2n({ name: "log", fn: Math.log }),
   maker.n2n({ name: "pow", fn: Math.pow }),  maker.n2n({ name: "ceil", fn: Math.ceil }),
   maker.n2n({ name: "floor", fn: Math.floor }),
   maker.n2n({ name: "max", fn: Math.max }),
