@@ -37,6 +37,7 @@ export const library: FRFunction[] = [
   maker.n2n({ name: "acos", fn: Math.acos }),
   maker.n2n({ name: "atan", fn: Math.atan }),
 ];
+  
   maker.n2n({ name: "ceil", fn: Math.ceil }),
   maker.n2n({ name: "floor", fn: Math.floor }),
   maker.n2n({ name: "max", fn: Math.max }),
