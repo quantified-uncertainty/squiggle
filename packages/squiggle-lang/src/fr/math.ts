@@ -7,6 +7,25 @@ const maker = new FnFactory({
 });
 
 export const library: FRFunction[] = [
+  // ported MathJS functionsimport { FRFunction } from "../library/registry/core.js";
+import { FnFactory } from "../library/registry/helpers.js";
+
+const maker = new FnFactory({
+  nameSpace: "Math",
+  requiresNamespace: true,
+});
+
+export const library: FRFunction[] = [
+  // ported MathJS functions
+import { FRFunction } from "../library/registry/core.js";
+import { FnFactory } from "../library/registry/helpers.js";
+
+const maker = new FnFactory({
+  nameSpace: "Math",
+  requiresNamespace: true,
+});
+
+export const library: FRFunction[] = [
   // ported MathJS functions
   // https://docs.google.com/spreadsheets/d/1bUK2RaBFg8aJHuzZcw9yXp8StCBH5If5sU2iRw1T_HY/edit
   // TODO - implement the rest of useful stuff
@@ -63,5 +82,4 @@ export const library: FRFunction[] = [
   maker.n2n({ name: "log10", fn: Math.log10 }),
   maker.n2n({ name: "log2", fn: Math.log2 }),
   maker.n2n({ name: "pow", fn: Math.pow }),
-  maker.n2n({ name: "sqrt", fn: Math.sqrt }),
-  maker.n2n({ name: "subtract", fn: Math.subtract }),
+  // Remove duplicate function definitions
