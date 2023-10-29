@@ -93,6 +93,12 @@ export function _reduceWhile(
   return acc;
 }
 
+const _assertInteger = (number: number) => {
+  if (!Number.isInteger(number)) {
+    throw new REArgumentError(`Number ${number} must be an integer`);
+  }
+};
+
 const _assertValidArrayLength = (number: number) => {
   if (number < 0) {
     throw new REArgumentError("Expected non-negative number");
@@ -252,6 +258,25 @@ export const library = [
     definitions: [
       makeDefinition([frArray(frAny), frAny], ([array, el]) =>
         vArray([...array, el])
+      ),
+    ],
+  }),
+  maker.make({
+    name: "slice",
+    requiresNamespace: true,
+    examples: [`List.slice([1,2,5,10],1,3)`],
+    definitions: [
+      makeDefinition([frArray(frAny), frNumber], ([array, start]) => {
+        _assertInteger(start);
+        return vArray(array.slice(start));
+      }),
+      makeDefinition(
+        [frArray(frAny), frNumber, frNumber],
+        ([array, start, end]) => {
+          _assertInteger(start);
+          _assertInteger(end);
+          return vArray(array.slice(start, end));
+        }
       ),
     ],
   }),
