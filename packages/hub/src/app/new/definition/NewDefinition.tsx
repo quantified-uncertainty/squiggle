@@ -10,6 +10,7 @@ import { H1 } from "@/components/ui/Headers";
 import { useAsyncMutation } from "@/hooks/useAsyncMutation";
 import { RelativeValuesDefinitionForm } from "@/relative-values/components/RelativeValuesDefinitionForm";
 import { FormShape } from "@/relative-values/components/RelativeValuesDefinitionForm/FormShape";
+import { relativeValuesRoute } from "@/routes";
 
 const Mutation = graphql`
   mutation NewDefinitionMutation(
@@ -53,8 +54,12 @@ export const NewDefinition: FC = () => {
         },
       },
       onCompleted: () => {
-        // TODO - go to definition page instead?
-        router.push("/");
+        router.push(
+          relativeValuesRoute({
+            owner: definition.owner.slug,
+            slug: definition.slug,
+          })
+        );
       },
     });
   };
