@@ -249,8 +249,14 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
                   body: (
                     <div className="px-6 py-2">
                       <EditModelExports
-                        append={appendVariableWithDefinition}
-                        remove={removeVariableWithDefinition}
+                        append={(item) => {
+                          appendVariableWithDefinition(item);
+                          onSubmit();
+                        }}
+                        remove={(id) => {
+                          removeVariableWithDefinition(id);
+                          onSubmit();
+                        }}
                         items={variablesWithDefinitionsFields}
                         modelRef={model}
                       />
