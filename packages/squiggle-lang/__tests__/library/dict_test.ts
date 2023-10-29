@@ -20,4 +20,30 @@ describe("Dict", () => {
     "Dict.mapKeys({a: 1, b: 2}, {|x| concat(x, 'hi')})",
     "{ahi: 1,bhi: 2}"
   );
+
+  describe("Dict.pick", () => {
+    testEvalToBe(
+      'Dict.pick({"a": 1, "b": 2, "c": 3}, ["a", "b"])',
+      '{"a": 1, "b": 2}'
+    );
+    testEvalToBe('Dict.pick({"a": 1, "b": 2, "c": 3}, ["a", "d"])', '{"a": 1}');
+    testEvalToBe('Dict.pick({"a": 1, "b": 2, "c": 3}, ["d", "e"])', "{}");
+    testEvalToBe('Dict.pick({"a": 1, "b": 2, "c": 3}, [])', "{}");
+  });
+
+  describe("Dict.omit", () => {
+    testEvalToBe('Dict.omit({"a": 1, "b": 2, "c": 3}, ["a", "b"])', '{"c": 3}');
+    testEvalToBe(
+      'Dict.omit({"a": 1, "b": 2, "c": 3}, ["a", "d"])',
+      '{"b": 2, "c": 3}'
+    );
+    testEvalToBe(
+      'Dict.omit({"a": 1, "b": 2, "c": 3}, ["d", "e"])',
+      '{"a": 1, "b": 2, "c": 3}'
+    );
+    testEvalToBe(
+      'Dict.omit({"a": 1, "b": 2, "c": 3}, [])',
+      '{"a": 1, "b": 2, "c": 3}'
+    );
+  });
 });
