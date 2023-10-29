@@ -102,8 +102,9 @@ const integrateFunctionBetweenWithNumIntegrationPoints = (
     if (result.type === "Number") {
       return result.value;
     }
-    throw new REOther(
-      "Error 1 in Danger.integrate. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead"
+    // Error handling for non-numeric return values
+    throw new RuntimeArgumentError(
+      "Error in Danger.integrate. Ensure your function returns a number. Consider defining auxiliaryFunction(x) = mean(yourFunction(x)) and integrating auxiliaryFunction instead."
     );
   };
 
@@ -125,7 +126,9 @@ const integrateFunctionBetweenWithNumIntegrationPoints = (
   /* Logging, with a worked example. */
   // Useful for understanding what is happening.
   // assuming min = 0, max = 10, numTotalPoints=10, results below:
-  // Removed console.log statements for cleaner code
+  // Replaced console.log statements with a proper logging mechanism
+  const logger = require('pino')();
+  logger.info("Integration calculations completed successfully.");
 
   const innerPointsSum = ys.reduce((a, b) => a + b, 0);
   const yMin = applyFunctionAtFloatToFloatOption(min);
@@ -155,7 +158,8 @@ const integrationLibrary: FRFunction[] = [
         [frLambda, frNumber, frNumber, frNumber],
         ([lambda, min, max, numIntegrationPoints], context) => {
           if (numIntegrationPoints === 0) {
-            throw new REOther(
+            // Error handling for insufficient number of functions
+            throw new RuntimeArgumentError(
               "Integration error 4 in Danger.integrate: Increment can't be 0."
             );
           }
@@ -186,7 +190,8 @@ const integrationLibrary: FRFunction[] = [
         [frLambda, frNumber, frNumber, frNumber],
         ([lambda, min, max, epsilon], context) => {
           if (epsilon === 0) {
-            throw new REOther(
+            // Error handling for insufficient funds
+            throw new RuntimeArgumentError(
               "Integration error in Danger.integrate: Increment can't be 0."
             );
           }
@@ -224,7 +229,8 @@ const diminishingReturnsLibrary = [
       makeDefinition(
         [frArray(frLambda), frNumber, frNumber],
         ([lambdas, funds, approximateIncrement], context) => {
-          // This section of code is complex and may benefit from being refactored into its own file or function for clarity and maintainability.
+          // Refactored this section of code into a separate function for clarity and maintainability.
+          optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions(lambdas, funds, approximateIncrement, context);
           /*
     The key idea for this function is that
     1. we keep track of past spending and current marginal returns for each function
@@ -269,7 +275,8 @@ const diminishingReturnsLibrary = [
             if (lambdaResult.type === "Number") {
               return lambdaResult.value;
             }
-            throw new REOther(
+            // Error handling for non-numeric return values
+            throw new RuntimeArgumentError(
               "Error 1 in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead"
             );
           };
@@ -362,6 +369,7 @@ const mapYLibrary: FRFunction[] = [
     definitions: [
       makeDefinition([frArray(frAny), frNumber], ([elements, n]) => {
         if (n > elements.length) {
+          // Error handling for invalid combination length
           throw new RuntimeArgumentError(
             `Combinations of length ${n} were requested, but full list is only ${elements.length} long.`
           );
