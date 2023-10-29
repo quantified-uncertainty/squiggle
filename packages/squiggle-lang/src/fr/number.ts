@@ -20,7 +20,7 @@ function makeNumberArrayToNumberDefinition(
     throwIfEmpty = true
 ) {
     return makeDefinition([frArray(frNumber)], ([arr]) => {
-        if (arr.length === 0 && throwIfEmpty) {
+        if ((arr.length === 0) && throwIfEmpty) {
             return throwEmptyList();
         }
         return vNumber(fn(arr));
@@ -32,7 +32,7 @@ function makeNumberArrayToNumberArrayDefinition(
     throwIfEmpty = true
 ) {
     return makeDefinition([frArray(frNumber)], ([arr]) => {
-        if (arr.length === 0 && throwIfEmpty) {
+        if ((arr.length === 0) && throwIfEmpty) {
             return throwEmptyList();
         }
         return vArray(fn(arr).map(vNumber));
