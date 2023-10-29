@@ -1,5 +1,6 @@
 /* Notes: See commit 5ce0a6979d9f95d77e4ddbdffc40009de73821e3 for last commit which has more detailed helper functions. These might be useful when coming back to this code after a long time. */
 
+// Importing necessary modules
 import jstat from "jstat";
 
 import {
@@ -34,6 +35,7 @@ const maker = new FnFactory({
   requiresNamespace: true,
 });
 
+// Function to generate all possible combinations of a given array
 function generateCombinations<T>(arr: T[], k: number): T[][] {
   if (k === 0) return [[]];
   if (k === arr.length) return [arr];
@@ -47,6 +49,7 @@ function generateCombinations<T>(arr: T[], k: number): T[][] {
   return withFirst.concat(withoutFirst);
 }
 
+// Function to generate all possible combinations of a given array
 function generateAllCombinations<T>(arr: T[]): T[][] {
   let allCombs: T[][] = [];
   for (let k = 1; k <= arr.length; k++) {
@@ -122,29 +125,7 @@ const integrateFunctionBetweenWithNumIntegrationPoints = (
   /* Logging, with a worked example. */
   // Useful for understanding what is happening.
   // assuming min = 0, max = 10, numTotalPoints=10, results below:
-  const verbose = false;
-  if (verbose) {
-    console.log("numTotalPoints", numTotalPoints); // 5
-    console.log("numInnerPoints", numInnerPoints); // 3
-    console.log("numOuterPoints", numOuterPoints); // always 2
-    console.log("totalWeight", totalWeight); // 10 - 0 = 10
-    console.log("weightForAnInnerPoint", weightForAnInnerPoint); // 10/4 = 2.5
-    console.log("weightForAnOuterPoint", weightForAnOuterPoint); // 10/4/2 = 1.25
-    console.log(
-      "weightForAnInnerPoint * numInnerPoints + weightForAnOuterPoint * numOuterPoints",
-      weightForAnInnerPoint * numInnerPoints +
-        weightForAnOuterPoint * numOuterPoints
-    ); // should be 10
-    console.log(
-      "sum of weights == totalWeight",
-      weightForAnInnerPoint * numInnerPoints +
-        weightForAnOuterPoint * numOuterPoints ===
-        totalWeight
-    ); // true
-    console.log("innerPointIncrement", innerPointIncrement); // (10-0)/4 = 2.5
-    console.log("innerXs", innerXs); // 2.5, 5, 7.5
-    console.log("ys", ys);
-  }
+  // Removed console.log statements for cleaner code
 
   const innerPointsSum = ys.reduce((a, b) => a + b, 0);
   const yMin = applyFunctionAtFloatToFloatOption(min);
@@ -243,7 +224,7 @@ const diminishingReturnsLibrary = [
       makeDefinition(
         [frArray(frLambda), frNumber, frNumber],
         ([lambdas, funds, approximateIncrement], context) => {
-          // TODO: This is so complicated, it probably should be its own file. It might also make sense to have it work in Rescript directly, taking in a function rather than a reducer; then something else can wrap that function in the reducer/lambdas/context.
+          // This section of code is complex and may benefit from being refactored into its own file or function for clarity and maintainability.
           /*
     The key idea for this function is that
     1. we keep track of past spending and current marginal returns for each function
@@ -385,6 +366,7 @@ const mapYLibrary: FRFunction[] = [
             `Combinations of length ${n} were requested, but full list is only ${elements.length} long.`
           );
         }
+        // Generate combinations of elements and return as an array
         return vArray(generateCombinations(elements, n).map((v) => vArray(v)));
       }),
     ],
@@ -407,7 +389,7 @@ const mapYLibrary: FRFunction[] = [
   }),
   maker.d2d({
     name: "mapYExp",
-    // TODO - shouldn't it be other way around, e^value?
+    // Note: Consider if the calculation should be e^value instead for correct results
     fn: (dist, env) => unpackDistResult(scalePower(dist, Math.E, { env })),
   }),
 ];
