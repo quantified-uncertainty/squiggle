@@ -25,6 +25,33 @@ function localStorageExists() {
   return Boolean(typeof window !== "undefined" && window.localStorage);
 }
 
+const CopyToClipboardButton: FC<{ draftLocator: DraftLocator }> = ({
+  draftLocator,
+}) => {
+  const [isCopied, setIsCopied] = useState(false);
+
+  const handleCopyClick = async () => {
+    const draft = draftUtils.load(draftLocator);
+    if (draft) {
+      try {
+        await navigator.clipboard.writeText(draft.formState.code);
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000); // Reset after 2 seconds
+      } catch (err) {
+        console.error("Failed to copy text: ", err);
+      }
+    } else {
+      console.error("Draft not found");
+    }
+  };
+
+  return (
+    <Button onClick={handleCopyClick}>
+      {isCopied ? "Copied!" : "Copy to Clipboard"}
+    </Button>
+  );
+};
+
 export const draftUtils = {
   exists(locator: DraftLocator): boolean {
     if (!localStorageExists()) {
@@ -123,6 +150,11 @@ export const SquiggleSnippetDraftDialog: FC<Props> = ({
           <TextTooltip text="Draft will be discarded.">
             <div>
               <Button onClick={discard}>Discard</Button>
+            </div>
+          </TextTooltip>
+          <TextTooltip text="Draft will be copied to clipboard.">
+            <div>
+              <CopyToClipboardButton draftLocator={draftLocator} />
             </div>
           </TextTooltip>
           <TextTooltip text="Code and version will be replaced by draft version. You'll still need to save it manually.">
