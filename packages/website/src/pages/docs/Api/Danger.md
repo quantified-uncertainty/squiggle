@@ -93,15 +93,6 @@ Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions(
 
 Note also that the array ought to have more than one function in it.
 
-### combinations
-```
-Danger.combinations: (list<any>, number) => list<list<any>>
-```
-Generates all possible combinations of length r from the given list. 
-
-```squiggle
-Danger.combinations([1, 2, 3], 2)) // [[1, 2], [1, 3], [2, 3]]
-```
 
 ### allCombinations
 ```
@@ -121,13 +112,4 @@ Generates all possible combinations of length r from the given list.
 Danger.combinations([1, 2, 3], 2)) // [[1, 2], [1, 3], [2, 3]]
 ```
 
-### allCombinations
-```
-Danger.allCombinations: (list<any>) => list<list<any>>
-```
-Returns all possible combinations of the elements in the input list.
-
-```squiggle
-Danger.allCombinations([1, 2, 3])) // [[1], [2], [3], [1, 2], [1, 3], [2, 3], [1, 2, 3]]
-```
 Returns all possible combinations of any length from the given list.
