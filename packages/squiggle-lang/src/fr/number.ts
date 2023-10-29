@@ -10,8 +10,6 @@ const maker = new FnFactory({
     nameSpace: "Number",
     requiresNamespace: false,
 });
-  requiresNamespace: false,
-});
 
 const throwEmptyList = (): never => {
   throw new REArgumentError("List is empty");
