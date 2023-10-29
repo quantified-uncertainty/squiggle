@@ -10,7 +10,7 @@ import {
   scaleMultiply,
   scalePower,
 } from "../dist/distOperations/scaleOperations.js";
-import { REArgumentError, REOther } from "../errors/messages.js";
+import { RuntimeArgumentError, REOther } from "../errors/messages.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
@@ -34,12 +34,12 @@ const maker = new FnFactory({
   requiresNamespace: true,
 });
 
-function combinations<T>(arr: T[], k: number): T[][] {
+function generateCombinations<T>(arr: T[], k: number): T[][] {
   if (k === 0) return [[]];
   if (k === arr.length) return [arr];
 
-  const withoutFirst = combinations(arr.slice(1), k);
-  const withFirst = combinations(arr.slice(1), k - 1).map((comb) => [
+  const withoutFirst = generateCombinations(arr.slice(1), k);
+  const withFirst = generateCombinations(arr.slice(1), k - 1).map((comb) => [
     arr[0],
     ...comb,
   ]);
@@ -47,10 +47,10 @@ function combinations<T>(arr: T[], k: number): T[][] {
   return withFirst.concat(withoutFirst);
 }
 
-function allCombinations<T>(arr: T[]): T[][] {
+function generateAllCombinations<T>(arr: T[]): T[][] {
   let allCombs: T[][] = [];
   for (let k = 1; k <= arr.length; k++) {
-    allCombs = allCombs.concat(combinations(arr, k));
+    allCombs = allCombs.concat(generateCombinations(arr, k));
   }
   return allCombs;
 }
@@ -260,7 +260,7 @@ const diminishingReturnsLibrary = [
           /*
       Two possible algorithms (n=funds/increment, m=num lambdas)
       1. O(n): Iterate through value on next n dollars. At each step, only compute the new marginal return of the function which is spent. (This is what we are doing.)
-      2. O(n*(m-1)): Iterate through all possible spending combinations. The advantage of this option is that it wouldn't assume that the returns of marginal spending are diminishing.
+      2. O(n*(m-1)): Iterate through all possible spending generateCombinations. The advantage of this option is that it wouldn't assume that the returns of marginal spending are diminishing.
  */
           if (lambdas.length <= 1) {
             throw new REOther(
@@ -381,11 +381,11 @@ const mapYLibrary: FRFunction[] = [
     definitions: [
       makeDefinition([frArray(frAny), frNumber], ([elements, n]) => {
         if (n > elements.length) {
-          throw new REArgumentError(
+          throw new RuntimeArgumentError(
             `Combinations of length ${n} were requested, but full list is only ${elements.length} long.`
           );
         }
-        return vArray(combinations(elements, n).map((v) => vArray(v)));
+        return vArray(generateCombinations(elements, n).map((v) => vArray(v)));
       }),
     ],
   }),
@@ -393,7 +393,7 @@ const mapYLibrary: FRFunction[] = [
     name: "allCombinations",
     definitions: [
       makeDefinition([frArray(frAny)], ([elements]) => {
-        return vArray(allCombinations(elements).map((v) => vArray(v)));
+        return vArray(generateAllCombinations(elements).map((v) => vArray(v)));
       }),
     ],
   }),
