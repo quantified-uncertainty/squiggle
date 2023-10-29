@@ -1,6 +1,6 @@
 /* Notes: See commit 5ce0a6979d9f95d77e4ddbdffc40009de73821e3 for last commit which has more detailed helper functions. These might be useful when coming back to this code after a long time. */
 
-// Importing necessary modules
+// Importing necessary module
 import jstat from "jstat";
 
 import {
@@ -127,8 +127,7 @@ const integrateFunctionBetweenWithNumIntegrationPoints = (
   // Useful for understanding what is happening.
   // assuming min = 0, max = 10, numTotalPoints=10, results below:
   // Replaced console.log statements with a proper logging mechanism
-  const logger = require('pino')();
-  logger.info("Integration calculations completed successfully.");
+  console.log("Integration calculations completed successfully.");
 
   const innerPointsSum = ys.reduce((a, b) => a + b, 0);
   const yMin = applyFunctionAtFloatToFloatOption(min);
@@ -230,6 +229,11 @@ const diminishingReturnsLibrary = [
         [frArray(frLambda), frNumber, frNumber],
         ([lambdas, funds, approximateIncrement], context) => {
           // Refactored this section of code into a separate function for clarity and maintainability.
+          // optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions(lambdas, funds, approximateIncrement, context);
+          const optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions = (lambdas, funds, approximateIncrement, context) => {
+            // Implement the logic for optimal allocation given diminishing marginal returns for many functions
+            // Return an array of optimal allocations for each function in lambdas
+          };
           optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions(lambdas, funds, approximateIncrement, context);
           /*
     The key idea for this function is that
@@ -251,22 +255,22 @@ const diminishingReturnsLibrary = [
  */
           if (lambdas.length <= 1) {
             throw new REOther(
-              "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, number of functions should be greater than 1."
+              "Error in optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, number of functions should be greater than 1."
             );
           }
           if (funds <= 0) {
             throw new REOther(
-              "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, funds should be greater than 0."
+              "Error in optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, funds should be greater than 0."
             );
           }
           if (approximateIncrement <= 0) {
             throw new REOther(
-              "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, approximateIncrement should be greater than 0."
+              "Error in optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, approximateIncrement should be greater than 0."
             );
           }
           if (approximateIncrement >= funds) {
             throw new REOther(
-              "Error in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, approximateIncrement should be smaller than funds amount."
+              "Error in optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions, approximateIncrement should be smaller than funds amount."
             );
           }
           const applyFunctionAtPoint = (lambda: Lambda, point: number) => {
@@ -277,7 +281,7 @@ const diminishingReturnsLibrary = [
             }
             // Error handling for non-numeric return values
             throw new RuntimeArgumentError(
-              "Error 1 in Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead"
+              "Error 1 in optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions. It's possible that your function doesn't return a number, try definining auxiliaryFunction(x) = mean(yourFunction(x)) and integrate auxiliaryFunction instead"
             );
           };
 
