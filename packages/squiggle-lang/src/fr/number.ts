@@ -87,7 +87,7 @@ export const library = [
     output: "Number",
     examples: [`sum([3,5,2])`],
     definitions: [
-      makeNumberArrayToNumberDefinition((arr) => E_A_Floats.sum(arr), false),
+      makeNumberArrayToNumberDefinition((arr) => E_A_Floats.sum(arr), false)
     ],
   }),
   maker.make({
@@ -153,9 +153,9 @@ export const library = [
     examples: [`sort([3,5,2,3,5])`],
     definitions: [
       makeNumberArrayToNumberArrayDefinition(
-        (arr) => E_A_Floats.sort(arr),
-        false
-      ),
+              (arr) => E_A_Floats.sort(arr),
+              false
+            )
     ],
   }),
   maker.make({
