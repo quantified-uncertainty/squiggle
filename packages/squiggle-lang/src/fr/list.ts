@@ -429,7 +429,10 @@ export const library = [
     requiresNamespace: true,
     examples: [`List.flatten([[1,2], [3,4]])`],
     definitions: [
-      makeDefinition([frArray(frAny)], ([arr]) => vArray(arr).flatten()),
+      makeDefinition([frArray(frArray(frAny))], ([arr]) => {
+        const flattenedArray = [].concat(...arr);
+        return vArray(flattenedArray);
+      }),
     ],
   }),
   maker.make({
@@ -437,7 +440,13 @@ export const library = [
     requiresNamespace: true,
     examples: [`List.shuffle([1,3,4,20])`],
     definitions: [
-      makeDefinition([frArray(frAny)], ([arr]) => vArray(arr).shuffle()),
+      makeDefinition([frArray(frAny)], ([arr]) => {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return vArray(arr);
+      }),
     ],
   }),
   maker.make({
@@ -449,7 +458,8 @@ export const library = [
         if (array1.length !== array2.length) {
           throw new REArgumentError("List lengths must be equal");
         }
-        return vArray(zip(array1, array2).map((pair) => vArray(pair)));
+        const zippedArray = array1.map((e, i) => [e, array2[i]]);
+        return vArray(zippedArray);
       }),
     ],
   }),
@@ -458,9 +468,11 @@ export const library = [
     requiresNamespace: true,
     examples: [`List.unzip([[1,2], [2,3], [4,5]])`],
     definitions: [
-      makeDefinition([frArray(frTuple(frAny, frAny))], ([array]) =>
-        vArray(unzip(array as [Value, Value][]).map((r) => vArray(r)))
-      ),
+      makeDefinition([frArray(frTuple(frAny, frAny))], ([array]) => {
+        const unzippedArray1 = array.map(([first]) => first);
+        const unzippedArray2 = array.map(([, second]) => second);
+        return [vArray(unzippedArray1), vArray(unzippedArray2)];
+      }),
     ],
   }),
 ];
