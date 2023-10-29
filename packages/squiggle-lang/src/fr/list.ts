@@ -93,13 +93,13 @@ export function _reduceWhile(
   return acc;
 }
 
-const _assertInteger = (number: number) => {
+const validateInteger = (number: number) => {
   if (!Number.isInteger(number)) {
     throw new REArgumentError(`Number ${number} must be an integer`);
   }
 };
 
-const _assertValidArrayLength = (number: number) => {
+const validateArrayLength = (number: number) => {
   if (number < 0) {
     throw new REArgumentError("Expected non-negative number");
   } else if (!Number.isInteger(number)) {
@@ -138,13 +138,13 @@ export const library = [
         throw new REAmbiguous("Call with either 0 or 1 arguments, not both");
       }),
       makeDefinition([frNumber, frLambdaN(0)], ([number, lambda], context) => {
-        _assertValidArrayLength(number);
+        validateArrayLength(number);
         return vArray(
           Array.from({ length: number }, (_) => lambda.call([], context))
         );
       }),
       makeDefinition([frNumber, frLambdaN(1)], ([number, lambda], context) => {
-        _assertValidArrayLength(number);
+        validateArrayLength(number);
         return vArray(
           Array.from({ length: number }, (_, i) =>
             lambda.call([vNumber(i)], context)
@@ -152,7 +152,7 @@ export const library = [
         );
       }),
       makeDefinition([frNumber, frAny], ([number, value]) => {
-        _assertValidArrayLength(number);
+        validateArrayLength(number);
         return vArray(new Array(number).fill(value));
       }),
       makeDefinition([frDist], ([dist]) => {
@@ -267,14 +267,14 @@ export const library = [
     examples: [`List.slice([1,2,5,10],1,3)`],
     definitions: [
       makeDefinition([frArray(frAny), frNumber], ([array, start]) => {
-        _assertInteger(start);
+        validateInteger(start);
         return vArray(array.slice(start));
       }),
       makeDefinition(
         [frArray(frAny), frNumber, frNumber],
         ([array, start, end]) => {
-          _assertInteger(start);
-          _assertInteger(end);
+          validateInteger(start);
+          validateInteger(end);
           return vArray(array.slice(start, end));
         }
       ),
