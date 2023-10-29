@@ -22,55 +22,28 @@ import {
 import { relativeValuesRoute } from "@/routes";
 
 const Mutation = graphql`
-  mutation EditRelativeValuesDefinitionMutation(
-    $input: MutationUpdateRelativeValuesDefinitionInput!
-  ) {
-    result: updateRelativeValuesDefinition(input: $input) {
-      __typename
-      ... on BaseError {
-        message
-      }
-      ... on UpdateRelativeValuesDefinitionResult {
-        definition {
-          id
-        }
+mutation EditRelativeValuesDefinitionMutation($input: MutationUpdateRelativeValuesDefinitionInput!) {
+  result: updateRelativeValuesDefinition(input: $input) {
+    __typename
+    ... on BaseError {
+      message
+    }
+    ... on UpdateRelativeValuesDefinitionResult {
+      definition {
+        id
       }
     }
   }
-`;
+}`;
 
-export const EditRelativeValuesDefinition: FC<{
-  query: SerializablePreloadedQuery<QueryType>;
-}> = ({ query }) => {
+export const EditRelativeValuesDefinition: FC<{ query: SerializablePreloadedQuery<QueryType>; }> = ({ query }) => {
   useSession({ required: true });
-
-  const [{ relativeValuesDefinition: result }] = usePageQuery(
-    RelativeValuesDefinitionPageQuery,
-    query
-  );
-
-  const definitionRef = extractFromGraphqlErrorUnion(
-    result,
-    "RelativeValuesDefinition"
-  );
-
+  const [{ relativeValuesDefinition: result }] = usePageQuery(RelativeValuesDefinitionPageQuery, query);
+  const definitionRef = extractFromGraphqlErrorUnion(result, "RelativeValuesDefinition");
   const router = useRouter();
-
-  const definition = useFragment<RelativeValuesDefinitionPage$key>(
-    RelativeValuesDefinitionPageFragment,
-    definitionRef
-  );
-  const revision = useFragment<RelativeValuesDefinitionRevision$key>(
-    RelativeValuesDefinitionRevisionFragment,
-    definition.currentRevision
-  );
-
-  const [saveMutation] = useAsyncMutation<EditRelativeValuesDefinitionMutation>(
-    {
-      mutation: Mutation,
-      expectedTypename: "UpdateRelativeValuesDefinitionResult",
-    }
-  );
+  const definition = useFragment<RelativeValuesDefinitionPage$key>(RelativeValuesDefinitionPageFragment, definitionRef);
+  const revision = useFragment<RelativeValuesDefinitionRevision$key>(RelativeValuesDefinitionRevisionFragment, definition.currentRevision);
+  const [saveMutation] = useAsyncMutation<EditRelativeValuesDefinitionMutation>({ mutation: Mutation, expectedTypename: "UpdateRelativeValuesDefinitionResult" });
 
   const save = async (data: FormShape) => {
     await saveMutation({
@@ -85,12 +58,7 @@ export const EditRelativeValuesDefinition: FC<{
         },
       },
       onCompleted() {
-        router.push(
-          relativeValuesRoute({
-            owner: definition.owner.slug,
-            slug: definition.slug,
-          })
-        );
+        router.push(relativeValuesRoute({ owner: definition.owner.slug, slug: definition.slug }));
       },
     });
   };
