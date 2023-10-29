@@ -18,12 +18,16 @@ const Mutation = graphql`
   ) {
     result: createRelativeValuesDefinition(input: $input) {
       __typename
-      ... on Error {
+      ... on ValidationError {
         message
       }
       ... on CreateRelativeValuesDefinitionResult {
         definition {
           id
+          slug
+          owner {
+            slug
+          }
         }
       }
     }
@@ -53,13 +57,15 @@ export const NewDefinition: FC = () => {
           recommendedUnit: data.recommendedUnit,
         },
       },
-      onCompleted: () => {
-        router.push(
-          relativeValuesRoute({
-            owner: definition.owner.slug,
-            slug: definition.slug,
-          })
-        );
+      onCompleted: (result) => {
+        if (result.__typename === "CreateRelativeValuesDefinitionResult") {
+          router.push(
+            relativeValuesRoute({
+              owner: result.definition.owner.slug,
+              slug: result.definition.slug,
+            })
+          );
+        }
       },
     });
   };
