@@ -1,11 +1,11 @@
 /* Notes: See commit 5ce0a6979d9f95d77e4ddbdffc40009de73821e3 for last commit which has more detailed helper functions. These might be useful when coming back to this code after a long time. */
 
-import jstat from "jstat";
-
+// Importing necessary modules and functions
+import jstat from "jstat"; // For statistical calculations
 import {
   scaleLog,
   scaleLogWithThreshold,
-} from "../dist/distOperations/index.js";
+} from "../dist/distOperations/index.js"; // For logarithmic scaling operations
 import {
   scaleMultiply,
   scalePower,
@@ -34,6 +34,12 @@ const maker = new FnFactory({
   requiresNamespace: true,
 });
 
+/**
+ * Generates all possible combinations of length k from the given array.
+ * @param {T[]} arr - The array from which to generate combinations.
+ * @param {number} k - The length of each combination.
+ * @returns {T[][]} An array of all combinations of length k.
+ */
 function combinations<T>(arr: T[], k: number): T[][] {
   if (k === 0) return [[]];
   if (k === arr.length) return [arr];
@@ -47,6 +53,11 @@ function combinations<T>(arr: T[], k: number): T[][] {
   return withFirst.concat(withoutFirst);
 }
 
+/**
+ * Generates all possible combinations of any length from the given array.
+ * @param {T[]} arr - The array from which to generate combinations.
+ * @returns {T[][]} An array of all combinations of any length.
+ */
 function allCombinations<T>(arr: T[]): T[][] {
   let allCombs: T[][] = [];
   for (let k = 1; k <= arr.length; k++) {
@@ -55,6 +66,12 @@ function allCombinations<T>(arr: T[]): T[][] {
   return allCombs;
 }
 
+/**
+ * Calculates the binomial coefficient, also known as "n choose k".
+ * @param {number} n - The total number of items.
+ * @param {number} k - The number of items to choose.
+ * @returns {number} The binomial coefficient.
+ */
 const choose = (n: number, k: number) =>
   factorial(n) / (factorial(n - k) * factorial(k));
 
@@ -86,6 +103,15 @@ const combinatoricsLibrary: FRFunction[] = [
   }),
 ];
 
+/**
+ * Integrates a function between two points with a specified number of integration points.
+ * @param {Lambda} lambda - The function to integrate.
+ * @param {number} min - The lower limit of integration.
+ * @param {number} max - The upper limit of integration.
+ * @param {number} numIntegrationPoints - The number of points at which to evaluate the function.
+ * @param {ReducerContext} context - The context in which to evaluate the function.
+ * @returns {Value} The result of the integration.
+ */
 const integrateFunctionBetweenWithNumIntegrationPoints = (
   lambda: Lambda,
   min: number,
@@ -222,6 +248,11 @@ const integrationLibrary: FRFunction[] = [
   }),
 ];
 
+/**
+ * Finds the index of the largest element in an array.
+ * @param {number[]} xs - The array to search.
+ * @returns {number} The index of the largest element.
+ */
 const findBiggestElementIndex = (xs: number[]) =>
   xs.reduce((acc, newElement, index) => {
     if (newElement > xs[acc]) {
