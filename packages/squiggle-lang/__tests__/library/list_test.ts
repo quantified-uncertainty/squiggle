@@ -1,17 +1,25 @@
 import { testEvalError, testEvalToBe } from "../helpers/reducerHelpers.js";
 
 describe("List functions", () => {
+  // Testing the lookup function
   describe("lookup", () => {
-    testEvalToBe("[3,5,8][1.8]", "Error(Array index must be an integer: 1.8)");
-    testEvalToBe("[3,5,8][0/0]", "Error(Array index must be an integer: NaN)");
-    testEvalToBe("[3,5,8][2]", "8");
-  });
+      // Testing the lookup function with a non-integer index
+      testEvalToBe("[3,5,8][1.8]", "Error(Array index must be an integer: 1.8)");
+      // Testing the lookup function with a NaN index
+      testEvalToBe("[3,5,8][0/0]", "Error(Array index must be an integer: NaN)");
+      // Testing the lookup function with a valid index
+      testEvalToBe("[3,5,8][2]", "8");
+    });
 
+  // Testing the length function
   describe("length", () => {
-    testEvalToBe("List.length([3,5,8])", "3");
-    testEvalToBe("List.length([])", "0");
-    testEvalError('List.length("abc")');
-  });
+      // Testing the length function with a list of 3 elements
+      testEvalToBe("List.length([3,5,8])", "3");
+      // Testing the length function with an empty list
+      testEvalToBe("List.length([])", "0");
+      // Testing the length function with a non-list argument
+      testEvalError('List.length("abc")');
+    });
 
   describe("make", () => {
     testEvalToBe("List.make(3, 'HI')", '["HI","HI","HI"]');
