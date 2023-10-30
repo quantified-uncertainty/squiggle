@@ -375,12 +375,12 @@ const mapYLibrary: FRFunction[] = [
   }),
   maker.make({
     name: "binomialDist",
-    examples: ["binomialDist(8, 0.5)"],
+    examples: ["Danger.binomialDist(8, 0.5)"],
     definitions: [makeTwoArgsDist((n, p) => SymbolicDist.Binomial.make(n, p))],
   }),
   maker.make({
     name: "poissonDist",
-    examples: ["poissonDist(10)"],
+    examples: ["Danger.poissonDist(10)"],
     definitions: [
       makeOneArgDist((lambda) => SymbolicDist.Poisson.make(lambda)),
     ],

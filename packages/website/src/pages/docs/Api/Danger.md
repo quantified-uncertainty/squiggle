@@ -48,7 +48,7 @@ Danger.binomial: (number, number, number) => number
 ### binomialDist
 
 ```
-binomialDist: (n: distribution|number,p: distribution|number) => distribution
+Danger.binomialDist: (n: distribution|number,p: distribution|number) => distribution
 ```
 A binomial distribution.
 
@@ -66,7 +66,7 @@ binomialDist(10, 0.3)
 ### poissonDist 
 
 ```
-poissonDist: (distribution|number) => distribution
+Danger.poissonDist: (distribution|number) => distribution
 ```
 
 Note: The poisson distribution is a discrete distribution. When representing this, the Squiggle distribution component might show it as particially or fully continuous.  This is a visual mistake; if you inspect the underlying data, it should be discrete.
