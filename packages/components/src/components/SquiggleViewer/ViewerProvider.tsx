@@ -24,7 +24,7 @@ import {
   topLevelBindingsName,
 } from "./utils.js";
 import { CodeEditorHandle } from "../CodeEditor.js";
-import { CalculatorState } from "../Calculator/calculatorReducer.js";
+import { CalculatorState } from "../Calculator/index.js";
 
 export type Action =
   | {

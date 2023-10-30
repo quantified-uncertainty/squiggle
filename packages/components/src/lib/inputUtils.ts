@@ -13,7 +13,7 @@ export function defaultAsString(row: SqInput): string {
 
 // Inputs give us strings, but we need to wrap them in quotes so that Squiggle knows they are meant as strings instead of variables.
 export function alterCodeForSquiggleRun(input: SqInput, code: string) {
-  if (input && input.tag === "select") {
+  if (input.tag === "select") {
     return `"${code}"`;
   } else {
     return code;
