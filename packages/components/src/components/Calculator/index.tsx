@@ -73,30 +73,24 @@ function getFormValues(calculator: SqCalculator) {
   );
 }
 
-export const Calculator: FC<Props> = ({
-  environment,
-  settings,
-  valueWithContext,
-}) => {
-  // useMemo here is important; valueWithContext.value is a getter that creates a new calculator value every time
-  const calculator = useMemo(() => valueWithContext.value, [valueWithContext]);
-
-  const inputNames = useMemo(
-    () => calculator.inputs.map((row) => row.name),
-    [calculator]
-  );
-
-  const path = useMemo(() => valueWithContext.context.path, [valueWithContext]);
+// Takes a calculator value; returns the cache from ViewerContext for this calculator and a function for updating the cache.
+// Note that the returned cached value is never updated! It's write-only after the initial load.
+function useSavedCalculatorState(
+  calculatorValue: SqCalculatorValueWithContext
+) {
+  const path = useMemo(() => calculatorValue.context.path, [calculatorValue]);
 
   const { getLocalItemState, dispatch: viewerContextDispatch } =
     useViewerContext();
-  // Load just once on initial render, after the initial load, this component owns the state and pushes it to ViewerContext.
+
+  // Load cache just once on initial render.
+  // After the initial load, this component owns the state and pushes it to ViewerContext.
   const [cachedState] = useState<CalculatorState | undefined>(() => {
     const itemState = getLocalItemState({ path });
 
     const sameCalculatorCacheExists =
       itemState.calculator &&
-      itemState.calculator.hashString === calculator.hashString;
+      itemState.calculator.hashString === calculatorValue.value.hashString;
 
     if (sameCalculatorCacheExists) {
       return itemState.calculator;
@@ -105,6 +99,35 @@ export const Calculator: FC<Props> = ({
     }
   });
 
+  const updateCachedState = useCallback(
+    (state: CalculatorState) => {
+      viewerContextDispatch({
+        type: "CALCULATOR_UPDATE",
+        payload: {
+          path,
+          calculator: state,
+        },
+      });
+    },
+    [path, viewerContextDispatch]
+  );
+
+  return [cachedState, updateCachedState] as const;
+}
+
+export const Calculator: FC<Props> = ({
+  environment,
+  settings,
+  valueWithContext,
+}) => {
+  // useMemo here is important; valueWithContext.value is a getter that creates a new calculator value every time
+  const calculator = useMemo(() => valueWithContext.value, [valueWithContext]);
+
+  const [cachedState, updateCachedState] =
+    useSavedCalculatorState(valueWithContext);
+
+  // Calculator input codes (Squiggle strings, selected options in <select>, etc.) are tracked by react-hook-form.
+  // Everything else is tracked in local state and backed up to ViewerContext.
   const form = useForm({
     defaultValues: cachedState?.codes ?? getFormValues(calculator),
   });
@@ -113,36 +136,45 @@ export const Calculator: FC<Props> = ({
     () => cachedState?.inputValues ?? {}
   );
 
-  // Takes all input codes and runs them all.  All values are updated simultaneously, to avoid too many rerenders.
-  const processAllFieldCodes = useCallback(async () => {
-    const codes = form.getValues();
-    const newInputValues: typeof inputValues = {};
-    for (const name of inputNames) {
-      const code = codes[name];
-      const valueResult = await runSquiggleCode(
-        modifyCode(name, calculator, code),
-        environment
-      );
-      newInputValues[name] = valueResult;
-    }
-    setInputValues(newInputValues);
-  }, [calculator, environment, form, inputNames]);
-
   const hashString = useMemo(() => calculator.hashString, [calculator]);
   const [prevHashString, setPrevHashString] = useState<string | undefined>();
 
-  // We want to reset the form and calculated values if the calculator changes.
+  // This effect has two branches:
+  // - when the calculator is updated, it resets the form
+  // - on initial render, it calculates all input values (which will trigger calculator value calculation)
+  // In both cases, it updates `prevHashString`, which tracks the calculator identity.
   useEffect(() => {
-    processAllFieldCodes();
-    if (prevHashString && prevHashString !== hashString) {
+    if (prevHashString === hashString) {
+      return;
+    }
+
+    if (prevHashString) {
+      // Calculator identity has changed. Let's reset the form because there might be new inputs or new defaults.
+      // (In the future, we could do something more complicated here, for example check if any form fields were touched.)
       form.reset(getFormValues(calculator));
+    } else {
+      // Component was mounted. Let's take all input codes and run them all.
+      const processAllFieldCodes = async () => {
+        const codes = form.getValues();
+        const newInputValues: typeof inputValues = {};
+        for (const input of calculator.inputs) {
+          const name = input.name;
+          const code = codes[name];
+          const valueResult = await runSquiggleCode(
+            modifyCode(name, calculator, code),
+            environment
+          );
+          newInputValues[name] = valueResult;
+        }
+        // All values are updated simultaneously, to avoid too many rerenders.
+        setInputValues(newInputValues);
+      };
+      processAllFieldCodes();
     }
     setPrevHashString(hashString);
-    // dependencies are intentionally incomplete; we don't want to process codes on unrelated changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hashString]);
+  }, [calculator, environment, hashString, prevHashString, form]);
 
-  // Update input value based on input code.
+  // Update input value if input code has changed.
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
       if (name === undefined) return;
@@ -167,55 +199,46 @@ export const Calculator: FC<Props> = ({
     () => cachedState?.fnValue
   );
 
-  // Store calculator state in ViewerContext, since calculator can disappear on code changes.
+  // Whenever `inputValues` change, we recalculate `fnValue`.
+  useEffect(() => {
+    const parameters: SqValue[] = [];
+
+    // Unpack all input values.
+    for (const input of calculator.inputs) {
+      const inputValue = inputValues[input.name];
+      if (!inputValue || !inputValue.ok) {
+        // One of inputs is incorrect.
+        setFnValue(undefined);
+        return;
+      }
+      parameters.push(inputValue.value);
+    }
+
+    const finalResult = calculator.run(parameters, environment);
+    setFnValue(finalResult);
+  }, [calculator, environment, inputValues]);
+
+  // Back up calculator state outside of this component, since calculator can disappear on code changes,
+  // (for example, on short syntax errors when autorun is enabled), and we don't want to lose user input
+  // or calculator output when calculator component is rendered again.
   const backupState = useCallback(() => {
-    viewerContextDispatch({
-      type: "CALCULATOR_UPDATE",
-      payload: {
-        path,
-        calculator: {
-          hashString,
-          codes: form.getValues(),
-          inputValues,
-          fnValue,
-        },
-      },
+    updateCachedState({
+      hashString,
+      codes: form.getValues(),
+      inputValues,
+      fnValue,
     });
-  }, [fnValue, inputValues, path, viewerContextDispatch, form, hashString]);
+  }, [fnValue, inputValues, form, hashString, updateCachedState]);
 
-  // Backup whenever any calculated value changes.
-  useEffect(() => {
-    backupState();
-  }, [backupState]);
+  // Back up whenever any calculated value changes.
+  useEffect(() => backupState(), [backupState]);
 
-  // Also backup whenever form state changes (backups are cheap).
+  // Also back up whenever form state changes (backups are cheap).
   useEffect(() => {
-    const subscription = form.watch(() => {
-      backupState();
-    });
+    const subscription = form.watch(() => backupState());
 
     return () => subscription.unsubscribe();
   }, [backupState, form]);
-
-  // Whenever inputValues change, we recalculate fnValue.
-  useEffect(() => {
-    const allFields = inputNames.map((name) => inputValues[name]);
-    const allFieldValuesAreValid = allFields.every((result) => result?.ok);
-
-    let finalResult: SqValueResult | undefined;
-    if (allFieldValuesAreValid) {
-      const results: SqValue[] = allFields.map((result) => {
-        if (result && result.ok) {
-          return result.value;
-        } else {
-          throw new Error("Invalid result encountered.");
-        }
-      });
-      finalResult = calculator.run(results, environment);
-    }
-
-    setFnValue(finalResult);
-  }, [calculator, inputNames, environment, inputValues]);
 
   const inputShowSettings: PlaygroundSettings = {
     ...settings,
