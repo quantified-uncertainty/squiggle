@@ -44,6 +44,39 @@ Danger.binomial: (number, number, number) => number
 
 `Danger.binomial(n, k, p)` returns `choose((n, k)) * pow(p, k) * pow(1 - p, n - k)`, i.e., the probability that an event of probability p will happen exactly k times in n draws.
 
+
+### binomialDist
+
+```
+binomialDist: (n: distribution|number,p: distribution|number) => distribution
+```
+A binomial distribution.
+
+``n`` must be above 0, and ``p`` must be between 0 and 1. 
+
+Note: The binomial distribution is a discrete distribution. When representing this, the Squiggle distribution component might show it as particially or fully continuous. This is a visual mistake; if you inspect the underlying data, it should be discrete.
+
+**Examples**
+
+```squiggle
+binomialDist(5, 0.5)
+binomialDist(10, 0.3)
+```
+
+### poissonDist 
+
+```
+poissonDist: (distribution|number) => distribution
+```
+
+Note: The poisson distribution is a discrete distribution. When representing this, the Squiggle distribution component might show it as particially or fully continuous.  This is a visual mistake; if you inspect the underlying data, it should be discrete.
+
+**Examples**
+
+```squiggle
+poissonDist(20)
+```
+
 ### integrateFunctionBetweenWithNumIntegrationPoints
 
 ```

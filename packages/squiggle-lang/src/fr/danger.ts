@@ -19,12 +19,18 @@ import {
   frLambda,
   frNumber,
 } from "../library/registry/frTypes.js";
-import { FnFactory, unpackDistResult } from "../library/registry/helpers.js";
+import {
+  FnFactory,
+  unpackDistResult,
+  distResultToValue,
+  makeTwoArgsDist,
+  makeOneArgDist,
+} from "../library/registry/helpers.js";
 import { ReducerContext } from "../reducer/context.js";
 import { Lambda } from "../reducer/lambda.js";
 import * as E_A from "../utility/E_A.js";
 import { Value, vArray, vNumber } from "../value/index.js";
-import { distResultToValue } from "./genericDist.js";
+import * as SymbolicDist from "../dist/SymbolicDist.js";
 
 const { factorial } = jstat;
 
@@ -366,6 +372,18 @@ const mapYLibrary: FRFunction[] = [
     name: "mapYExp",
     // TODO - shouldn't it be other way around, e^value?
     fn: (dist, env) => unpackDistResult(scalePower(dist, Math.E, { env })),
+  }),
+  maker.make({
+    name: "binomialDist",
+    examples: ["binomialDist(8, 0.5)"],
+    definitions: [makeTwoArgsDist((n, p) => SymbolicDist.Binomial.make(n, p))],
+  }),
+  maker.make({
+    name: "poissonDist",
+    examples: ["poissonDist(10)"],
+    definitions: [
+      makeOneArgDist((lambda) => SymbolicDist.Poisson.make(lambda)),
+    ],
   }),
 ];
 

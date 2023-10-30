@@ -1082,6 +1082,14 @@ export class Binomial extends SymbolicDist {
     return `Binomial(${this.n},{${this.p}})`;
   }
   static make(n: number, p: number): result<Binomial, string> {
+    if (!Number.isInteger(n) || n < 0) {
+      return Result.Err(
+        "The number of trials (n) must be a non-negative integer."
+      );
+    }
+    if (p < 0 || p > 1) {
+      return Result.Err("Binomial p must be between 0 and 1");
+    }
     return Ok(new Binomial(n, p));
   }
 
@@ -1093,9 +1101,8 @@ export class Binomial extends SymbolicDist {
     return jstat.binomial.cdf(k, this.n, this.p);
   }
 
-  inv(p: number) {
+  inv(p: number): number {
     throw new Error("Binomial inv not implemented");
-    return 3;
   }
 
   mean() {
@@ -1109,10 +1116,10 @@ export class Binomial extends SymbolicDist {
   sample() {
     const bernoulli = Bernoulli.make(this.p);
     if (bernoulli.ok) {
-      const arr = Array.from({ length: this.n }, () =>
-        bernoulli.value.sample()
+      // less space efficient than adding a bunch of draws, but cleaner. Taken from Guesstimate.
+      return sum(
+        Array.from({ length: this.n }, () => bernoulli.value.sample())
       );
-      return sum(arr);
     } else {
       throw new Error("Binomial sampling failed");
     }
@@ -1126,44 +1133,50 @@ export class Binomial extends SymbolicDist {
     return Result.Err(notYetImplemented());
   }
 }
+
 export class Poisson extends SymbolicDist {
-  constructor(public l: number) {
+  constructor(public lambda: number) {
     super();
   }
   toString() {
-    return `Poisson(${this.l}})`;
+    return `Poisson(${this.lambda}})`;
   }
-  static make(l: number): result<Poisson, string> {
-    return Ok(new Poisson(l));
+  static make(lambda: number): result<Poisson, string> {
+    if (lambda <= 0) {
+      throw new Error(
+        "Lambda must be a positive number for a Poisson distribution."
+      );
+    }
+
+    return Ok(new Poisson(lambda));
   }
 
   simplePdf(x: number) {
-    return jstat.poisson.pdf(x, this.l);
+    return jstat.poisson.pdf(x, this.lambda);
   }
 
   cdf(k: number) {
-    return jstat.poisson.cdf(k, this.l);
+    return jstat.poisson.cdf(k, this.lambda);
   }
 
-  inv(p: number) {
+  inv(p: number): number {
     throw new Error("Poisson inv not implemented");
-    return 3;
   }
 
   mean() {
-    return this.l;
+    return this.lambda;
   }
 
   variance(): result<number, DistError> {
-    return Ok(this.l);
+    return Ok(this.lambda);
   }
 
   sample() {
-    return jstat.poisson.sample(this.l);
+    return jstat.poisson.sample(this.lambda);
   }
 
   _isEqual(other: Poisson) {
-    return this.l === other.l;
+    return this.lambda === other.lambda;
   }
 
   override toPointSetDist(): result<PointSetDist, DistError> {

@@ -23,7 +23,7 @@ export const kde = ({
   let xWidth = kernelWidth ?? nrd0(samples);
   samples = samples.filter((v) => Number.isFinite(v)); // Not sure if this is needed?
   const len = samples.length;
-  if (len === 0) return { usedWidth: xWidth, xs: [], ys: [] };
+  if (len === 0 || xWidth === 0) return { usedWidth: xWidth, xs: [], ys: [] };
 
   // Sample min and range
   const smin = samples[0];

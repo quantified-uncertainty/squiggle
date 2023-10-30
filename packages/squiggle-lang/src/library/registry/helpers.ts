@@ -23,7 +23,6 @@ import {
 import * as SampleSetDist from "../../dist/SampleSetDist/index.js";
 import * as SymbolicDist from "../../dist/SymbolicDist.js";
 import { OtherOperationError } from "../../operationError.js";
-import { distResultToValue } from "../../fr/genericDist.js";
 
 type SimplifiedArgs = Omit<FRFunction, "nameSpace" | "requiresNamespace"> &
   Partial<Pick<FRFunction, "nameSpace" | "requiresNamespace">>;
@@ -296,6 +295,15 @@ export function doBinaryLambdaCall(
     return value.value;
   }
   throw new REOther("Expected function to return a boolean value");
+}
+
+export function distResultToValue(
+  result: Result.result<BaseDist, DistError>
+): Value {
+  if (!result.ok) {
+    throw new REDistributionError(result.value);
+  }
+  return vDist(result.value);
 }
 
 export function makeSampleSet(d: BaseDist, env: Env) {

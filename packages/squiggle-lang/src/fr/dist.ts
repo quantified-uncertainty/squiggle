@@ -1,22 +1,18 @@
-import { BaseDist } from "../dist/BaseDist.js";
 import { argumentError, otherError } from "../dist/DistError.js";
-import * as SampleSetDist from "../dist/SampleSetDist/index.js";
 import * as SymbolicDist from "../dist/SymbolicDist.js";
-import { REDistributionError, REOther } from "../errors/messages.js";
-import { Env } from "../index.js";
+import { REDistributionError } from "../errors/messages.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { frDist, frNumber, frDict } from "../library/registry/frTypes.js";
 import {
-  frDistOrNumber,
-  frDist,
-  frNumber,
-  frDict,
-} from "../library/registry/frTypes.js";
-import { FnFactory } from "../library/registry/helpers.js";
-import { OtherOperationError } from "../operationError.js";
+  FnFactory,
+  makeOneArgDist,
+  makeSampleSet,
+  makeTwoArgsDist,
+  twoVarSample,
+} from "../library/registry/helpers.js";
 import * as Result from "../utility/result.js";
-import { Value, vDist } from "../value/index.js";
-import { distResultToValue } from "./genericDist.js";
+import { vDist } from "../value/index.js";
 import { CI_CONFIG, symDistResultToValue } from "./distUtil.js";
 import { mixtureDefinitions } from "./mixture.js";
 
@@ -24,68 +20,6 @@ const maker = new FnFactory({
   nameSpace: "Dist",
   requiresNamespace: false,
 });
-
-function makeSampleSet(d: BaseDist, env: Env) {
-  const result = SampleSetDist.SampleSetDist.fromDist(d, env);
-  if (!result.ok) {
-    throw new REDistributionError(result.value);
-  }
-  return result.value;
-}
-
-function twoVarSample(
-  v1: BaseDist | number,
-  v2: BaseDist | number,
-  env: Env,
-  fn: (
-    v1: number,
-    v2: number
-  ) => Result.result<SymbolicDist.SymbolicDist, string>
-): Value {
-  const sampleFn = (a: number, b: number) =>
-    Result.fmap2(
-      fn(a, b),
-      (d) => d.sample(),
-      (e) => new OtherOperationError(e)
-    );
-
-  if (v1 instanceof BaseDist && v2 instanceof BaseDist) {
-    const s1 = makeSampleSet(v1, env);
-    const s2 = makeSampleSet(v2, env);
-    return distResultToValue(
-      SampleSetDist.map2({
-        fn: sampleFn,
-        t1: s1,
-        t2: s2,
-      })
-    );
-  } else if (v1 instanceof BaseDist && typeof v2 === "number") {
-    const s1 = makeSampleSet(v1, env);
-    return distResultToValue(s1.samplesMap((a) => sampleFn(a, v2)));
-  } else if (typeof v1 === "number" && v2 instanceof BaseDist) {
-    const s2 = makeSampleSet(v2, env);
-    return distResultToValue(s2.samplesMap((a) => sampleFn(v1, a)));
-  } else if (typeof v1 === "number" && typeof v2 === "number") {
-    const result = fn(v1, v2);
-    if (!result.ok) {
-      throw new REOther(result.value);
-    }
-    return vDist(makeSampleSet(result.value, env));
-  }
-  throw new REOther("Impossible branch");
-}
-
-function makeTwoArgsDist(
-  fn: (
-    v1: number,
-    v2: number
-  ) => Result.result<SymbolicDist.SymbolicDist, string>
-) {
-  return makeDefinition(
-    [frDistOrNumber, frDistOrNumber],
-    ([v1, v2], { environment }) => twoVarSample(v1, v2, environment, fn)
-  );
-}
 
 function makeCIDist<K1 extends string, K2 extends string>(
   lowKey: K1,
@@ -113,31 +47,6 @@ function makeMeanStdevDist(
     ([{ mean, stdev }], { environment }) =>
       twoVarSample(mean, stdev, environment, fn)
   );
-}
-
-function makeOneArgDist(
-  fn: (v: number) => Result.result<SymbolicDist.SymbolicDist, string>
-) {
-  return makeDefinition([frDistOrNumber], ([v], { environment }) => {
-    const sampleFn = (a: number) =>
-      Result.fmap2(
-        fn(a),
-        (d) => d.sample(),
-        (e) => new OtherOperationError(e)
-      );
-
-    if (v instanceof BaseDist) {
-      const s = makeSampleSet(v, environment);
-      return distResultToValue(s.samplesMap(sampleFn));
-    } else if (typeof v === "number") {
-      const result = fn(v);
-      if (!result.ok) {
-        throw new REOther(result.value);
-      }
-      return vDist(makeSampleSet(result.value, environment));
-    }
-    throw new REOther("Impossible branch");
-  });
 }
 
 export const library: FRFunction[] = [
