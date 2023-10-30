@@ -81,4 +81,15 @@ declare module "jstat" {
   }
 
   export function factorial(x: number): number;
+
+  export namespace binomial {
+    export function pdf(k: number, n: number, p: number): number;
+    export function cdf(k: number, n: number, p: number): number;
+  }
+
+  export namespace poisson {
+    export function pdf(k: number, l: number): number;
+    export function cdf(x: number, l: number): number;
+    export function sample(l: number): number;
+  }
 }

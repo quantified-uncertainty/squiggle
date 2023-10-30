@@ -1,5 +1,6 @@
 import { BaseDist } from "./BaseDist.js";
 import * as Result from "../utility/result.js";
+import sum from "lodash/sum.js";
 import jstat from "jstat";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
 import * as XYShape from "../XYShape.js";
@@ -8,7 +9,7 @@ import * as Operation from "../operation.js";
 import { PointSetDist } from "./PointSetDist.js";
 import { Ok, result } from "../utility/result.js";
 import { ContinuousShape } from "../PointSet/Continuous.js";
-import { DistError, xyShapeDistError } from "./DistError.js";
+import { DistError, notYetImplemented, xyShapeDistError } from "./DistError.js";
 import { OperationError } from "../operationError.js";
 import { DiscreteShape } from "../PointSet/Discrete.js";
 import { Env } from "./env.js";
@@ -1067,6 +1068,106 @@ export class PointMass extends SymbolicDist {
         }).toMixed()
       )
     );
+  }
+}
+
+export class Binomial extends SymbolicDist {
+  constructor(
+    public n: number,
+    public p: number
+  ) {
+    super();
+  }
+  toString() {
+    return `Binomial(${this.n},{${this.p}})`;
+  }
+  static make(n: number, p: number): result<Binomial, string> {
+    return Ok(new Binomial(n, p));
+  }
+
+  simplePdf(x: number) {
+    return jstat.binomial.pdf(x, this.n, this.p);
+  }
+
+  cdf(k: number) {
+    return jstat.binomial.cdf(k, this.n, this.p);
+  }
+
+  inv(p: number) {
+    throw new Error("Binomial inv not implemented");
+    return 3;
+  }
+
+  mean() {
+    return this.n * this.p;
+  }
+
+  variance(): result<number, DistError> {
+    return Ok(this.n * this.p * (1 - this.p));
+  }
+
+  sample() {
+    const bernoulli = Bernoulli.make(this.p);
+    if (bernoulli.ok) {
+      const arr = Array.from({ length: this.n }, () =>
+        bernoulli.value.sample()
+      );
+      return sum(arr);
+    } else {
+      throw new Error("Binomial sampling failed");
+    }
+  }
+
+  _isEqual(other: Binomial) {
+    return this.n === other.n && this.p === other.p;
+  }
+
+  override toPointSetDist(): result<PointSetDist, DistError> {
+    return Result.Err(notYetImplemented());
+  }
+}
+export class Poisson extends SymbolicDist {
+  constructor(public l: number) {
+    super();
+  }
+  toString() {
+    return `Poisson(${this.l}})`;
+  }
+  static make(l: number): result<Poisson, string> {
+    return Ok(new Poisson(l));
+  }
+
+  simplePdf(x: number) {
+    return jstat.poisson.pdf(x, this.l);
+  }
+
+  cdf(k: number) {
+    return jstat.poisson.cdf(k, this.l);
+  }
+
+  inv(p: number) {
+    throw new Error("Poisson inv not implemented");
+    return 3;
+  }
+
+  mean() {
+    return this.l;
+  }
+
+  variance(): result<number, DistError> {
+    return Ok(this.l);
+  }
+
+  sample() {
+    return jstat.poisson.sample(this.l);
+  }
+
+  _isEqual(other: Poisson) {
+    return this.l === other.l;
+  }
+
+  override toPointSetDist(): result<PointSetDist, DistError> {
+    return Result.Err(notYetImplemented());
   }
 }
 
