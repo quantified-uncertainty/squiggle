@@ -11,10 +11,6 @@ import {
   result,
 } from "@quri/squiggle-lang";
 
-import {
-  alterCodeForSquiggleRun,
-  defaultAsString,
-} from "../../lib/inputUtils.js";
 import { SqValueWithContext } from "../../lib/utility.js";
 import { PlaygroundSettings } from "../PlaygroundSettings.js";
 import { useViewerContext } from "../SquiggleViewer/ViewerProvider.js";
@@ -26,7 +22,10 @@ export type SqValueResult = result<SqValue, SqError>;
 async function runSquiggleCode(
   code: string,
   environment: Env
-): Promise<SqValueResult> {
+): Promise<SqValueResult | undefined> {
+  if (!code) {
+    return undefined;
+  }
   const project = SqProject.create();
   if (environment) {
     project.setEnvironment(environment);
@@ -37,16 +36,24 @@ async function runSquiggleCode(
   return project.getResult(sourceId);
 }
 
-function modifyCode(
+function fieldValueToCode(
   name: string,
   calculator: SqCalculator,
-  code: string
+  fieldValue: string | boolean
 ): string {
   const input = calculator.inputs.find((row) => row.name === name);
   if (!input) {
     throw new Error("Invalid input name.");
   }
-  return alterCodeForSquiggleRun(input, code);
+  if (typeof fieldValue === "boolean") {
+    return fieldValue.toString();
+  }
+
+  if (input.tag === "select") {
+    return `"${fieldValue}"`;
+  } else {
+    return fieldValue;
+  }
 }
 
 type SqCalculatorValueWithContext = Extract<
@@ -60,18 +67,16 @@ type Props = {
   valueWithContext: SqCalculatorValueWithContext;
 };
 
+type FormShape = Record<string, string | boolean>;
+type InputValues = Record<string, SqValueResult | undefined>;
+
+// This type is used for backing up calculator state to ViewerContext.
 export type CalculatorState = {
   hashString: string;
-  codes: Record<string, string>;
-  inputValues: Record<string, SqValueResult>;
+  formValues: FormShape;
+  inputValues: InputValues;
   fnValue: SqValueResult | undefined;
 };
-
-function getFormValues(calculator: SqCalculator) {
-  return Object.fromEntries(
-    calculator.inputs.map((input) => [input.name, defaultAsString(input)])
-  );
-}
 
 // Takes a calculator value; returns the cache from ViewerContext for this calculator and a function for updating the cache.
 // Note that the returned cached value is never updated! It's write-only after the initial load.
@@ -115,12 +120,20 @@ function useSavedCalculatorState(
   return [cachedState, updateCachedState] as const;
 }
 
-export const Calculator: FC<Props> = ({
-  environment,
-  settings,
-  valueWithContext,
-}) => {
-  // useMemo here is important; valueWithContext.value is a getter that creates a new calculator value every time
+function getFormValues(calculator: SqCalculator): FormShape {
+  return Object.fromEntries(
+    calculator.inputs.map((input) => [input.name, input.default ?? ""])
+  );
+}
+
+/**
+ * This function implements all state flow logic for <Calculator />.
+ */
+function useCalculator(
+  valueWithContext: SqCalculatorValueWithContext,
+  environment: Env
+) {
+  // useMemo here is important; valueWithContext.value is a getter that creates a new calculator value every time.
   const calculator = useMemo(() => valueWithContext.value, [valueWithContext]);
 
   const [cachedState, updateCachedState] =
@@ -128,20 +141,22 @@ export const Calculator: FC<Props> = ({
 
   // Calculator input codes (Squiggle strings, selected options in <select>, etc.) are tracked by react-hook-form.
   // Everything else is tracked in local state and backed up to ViewerContext.
-  const form = useForm({
-    defaultValues: cachedState?.codes ?? getFormValues(calculator),
+  const form = useForm<FormShape>({
+    defaultValues: cachedState?.formValues ?? getFormValues(calculator),
   });
 
-  const [inputValues, setInputValues] = useState<Record<string, SqValueResult>>(
+  const [inputValues, setInputValues] = useState<InputValues>(
     () => cachedState?.inputValues ?? {}
   );
 
   const hashString = useMemo(() => calculator.hashString, [calculator]);
-  const [prevHashString, setPrevHashString] = useState<string | undefined>();
+  const [prevHashString, setPrevHashString] = useState<string | undefined>(
+    cachedState?.hashString
+  );
 
-  // This effect has two branches:
+  // This effect does two things:
   // - when the calculator is updated, it resets the form
-  // - on initial render, it calculates all input values (which will trigger calculator value calculation)
+  // - also, on initial render and on calculator updates, it calculates all input values (which will trigger calculator result calculation)
   // In both cases, it updates `prevHashString`, which tracks the calculator identity.
   useEffect(() => {
     if (prevHashString === hashString) {
@@ -152,48 +167,48 @@ export const Calculator: FC<Props> = ({
       // Calculator identity has changed. Let's reset the form because there might be new inputs or new defaults.
       // (In the future, we could do something more complicated here, for example check if any form fields were touched.)
       form.reset(getFormValues(calculator));
-    } else {
-      // Component was mounted. Let's take all input codes and run them all.
-      const processAllFieldCodes = async () => {
-        const codes = form.getValues();
-        const newInputValues: typeof inputValues = {};
-        for (const input of calculator.inputs) {
-          const name = input.name;
-          const code = codes[name];
-          const valueResult = await runSquiggleCode(
-            modifyCode(name, calculator, code),
-            environment
-          );
-          newInputValues[name] = valueResult;
-        }
-        // All values are updated simultaneously, to avoid too many rerenders.
-        setInputValues(newInputValues);
-      };
-      processAllFieldCodes();
     }
+
+    // Calculator has updated (or this component just mounted). Let's take all input codes and run them.
+    const processAllFieldCodes = async () => {
+      const formValues = form.getValues();
+      const newInputValues: typeof inputValues = {};
+      for (const input of calculator.inputs) {
+        const name = input.name;
+        const fieldValue = formValues[name];
+        const inputValueResult = await runSquiggleCode(
+          fieldValueToCode(name, calculator, fieldValue),
+          environment
+        );
+        newInputValues[name] = inputValueResult;
+      }
+      // All values are updated simultaneously, to avoid too many rerenders.
+      setInputValues(newInputValues);
+    };
+    processAllFieldCodes();
+
     setPrevHashString(hashString);
   }, [calculator, environment, hashString, prevHashString, form]);
 
   // Update input value if input code has changed.
   useEffect(() => {
-    const subscription = form.watch((value, { name }) => {
+    const subscription = form.watch(async (formValues, { name }) => {
       if (name === undefined) return;
-      const inputValue = value[name];
-      if (inputValue === undefined) return;
+      const fieldValue = formValues[name];
+      if (fieldValue === undefined) return;
 
-      runSquiggleCode(
-        modifyCode(name, calculator, inputValue),
+      const valueResult = await runSquiggleCode(
+        fieldValueToCode(name, calculator, fieldValue),
         environment
-      ).then((valueResult) => {
-        setInputValues((inputValues) => ({
-          ...inputValues,
-          [name]: valueResult,
-        }));
-      });
+      );
+      setInputValues((inputValues) => ({
+        ...inputValues,
+        [name]: valueResult,
+      }));
     });
 
     return () => subscription.unsubscribe();
-  }, [calculator, environment, form, form.watch]);
+  }, [calculator, environment, form]);
 
   const [fnValue, setFnValue] = useState<SqValueResult | undefined>(
     () => cachedState?.fnValue
@@ -224,7 +239,7 @@ export const Calculator: FC<Props> = ({
   const backupState = useCallback(() => {
     updateCachedState({
       hashString,
-      codes: form.getValues(),
+      formValues: form.getValues(),
       inputValues,
       fnValue,
     });
@@ -233,12 +248,25 @@ export const Calculator: FC<Props> = ({
   // Back up whenever any calculated value changes.
   useEffect(() => backupState(), [backupState]);
 
-  // Also back up whenever form state changes (backups are cheap).
+  // Also back up whenever form state changes (backups are cheap, so there's no reason not to do this).
   useEffect(() => {
     const subscription = form.watch(() => backupState());
 
     return () => subscription.unsubscribe();
   }, [backupState, form]);
+
+  return { calculator, form, inputValues, fnValue };
+}
+
+export const Calculator: FC<Props> = ({
+  environment,
+  settings,
+  valueWithContext,
+}) => {
+  const { calculator, form, inputValues, fnValue } = useCalculator(
+    valueWithContext,
+    environment
+  );
 
   const inputShowSettings: PlaygroundSettings = {
     ...settings,
@@ -274,16 +302,14 @@ export const Calculator: FC<Props> = ({
         )}
 
         <div className="py-3 px-5 border-b border-slate-200 bg-gray-50 space-y-3">
-          {calculator.inputs.map((row) => {
-            return (
-              <CalculatorInput
-                key={row.name}
-                input={row}
-                result={inputValues[row.name]}
-                settings={inputShowSettings}
-              />
-            );
-          })}
+          {calculator.inputs.map((row) => (
+            <CalculatorInput
+              key={row.name}
+              input={row}
+              result={inputValues[row.name]}
+              settings={inputShowSettings}
+            />
+          ))}
         </div>
 
         {fnValue && (

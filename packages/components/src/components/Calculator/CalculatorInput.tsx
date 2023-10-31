@@ -1,5 +1,4 @@
 import { FC } from "react";
-import { useFormContext } from "react-hook-form";
 
 import { SqInput } from "@quri/squiggle-lang";
 import {
@@ -18,38 +17,41 @@ export const CalculatorInput: FC<{
   result: SqValueResult | undefined;
   settings: PlaygroundSettings;
 }> = ({ input, result, settings }) => {
-  const form = useFormContext();
   const { name, description } = input;
 
-  const code = form.getValues(input.name);
+  // common props for all *FormField components
+  const commonProps = {
+    name,
+    label: name,
+    description,
+  };
 
   return (
-    <div className="flex flex-col mb-2">
-      <div className="text-sm font-medium text-gray-800">{name}</div>
-      {description && (
-        <div className="text-sm text-gray-400">{description}</div>
-      )}
-
-      <div className="flex-grow mt-1 max-w-xs">
+    <div className="flex flex-col">
+      <div className="flex-grow max-w-sm">
         {input.tag === "text" && (
           <TextFormField
-            name={name}
+            {...commonProps}
             placeholder={`Enter code for ${name}`}
             size="small"
           />
         )}
         {input.tag === "textArea" && (
           <TextAreaFormField
-            name={name}
+            {...commonProps}
             placeholder={`Enter code for ${name}`}
           />
         )}
-        {input.tag === "checkbox" && <CheckboxFormField name={name} />}
+        {input.tag === "checkbox" && <CheckboxFormField {...commonProps} />}
         {input.tag === "select" && (
-          <SelectStringFormField name={name} options={input.options} required />
+          <SelectStringFormField
+            {...commonProps}
+            options={input.options}
+            required
+          />
         )}
       </div>
-      {result && !result.ok && code !== "" && (
+      {result && !result.ok && (
         <ValueResultViewer result={result} settings={settings} />
       )}
     </div>
