@@ -24,7 +24,7 @@ import {
   topLevelBindingsName,
 } from "./utils.js";
 import { CodeEditorHandle } from "../CodeEditor.js";
-import { CalculatorState } from "../Calculator/index.js";
+import { CalculatorState } from "../Calculator/useSavedCalculatorState.js";
 
 export type Action =
   | {
@@ -334,7 +334,14 @@ export const ViewerProvider: FC<
           const { calculator, path } = action.payload;
           setLocalItemState(path, (state) => ({
             ...state,
-            calculator: calculator,
+            calculator:
+              state.calculator?.hashString === calculator.hashString
+                ? {
+                    // merge with existing value
+                    ...state.calculator,
+                    ...calculator,
+                  }
+                : calculator,
           }));
           return;
         }

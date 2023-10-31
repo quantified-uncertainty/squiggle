@@ -2,22 +2,18 @@ import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import ReactMarkdown from "react-markdown";
 
-import {
-  Env,
-  SqCalculator,
-  SqError,
-  SqProject,
-  SqValue,
-  result,
-} from "@quri/squiggle-lang";
+import { Env, SqCalculator, SqProject } from "@quri/squiggle-lang";
 
-import { SqValueWithContext } from "../../lib/utility.js";
 import { PlaygroundSettings } from "../PlaygroundSettings.js";
-import { useViewerContext } from "../SquiggleViewer/ViewerProvider.js";
 import { CalculatorInput } from "./CalculatorInput.js";
-import { ValueResultViewer } from "./ValueResultViewer.js";
-
-export type SqValueResult = result<SqValue, SqError>;
+import { CalculatorResult } from "./CalculatorResult.js";
+import {
+  FormShape,
+  InputValues,
+  SqCalculatorValueWithContext,
+  SqValueResult,
+} from "./types.js";
+import { useSavedCalculatorState } from "./useSavedCalculatorState.js";
 
 async function runSquiggleCode(
   code: string,
@@ -56,70 +52,6 @@ function fieldValueToCode(
   }
 }
 
-type SqCalculatorValueWithContext = Extract<
-  SqValueWithContext,
-  { tag: "Calculator" }
->;
-
-type Props = {
-  environment: Env;
-  settings: PlaygroundSettings;
-  valueWithContext: SqCalculatorValueWithContext;
-};
-
-type FormShape = Record<string, string | boolean>;
-type InputValues = Record<string, SqValueResult | undefined>;
-
-// This type is used for backing up calculator state to ViewerContext.
-export type CalculatorState = {
-  hashString: string;
-  formValues: FormShape;
-  inputValues: InputValues;
-  fnValue: SqValueResult | undefined;
-};
-
-// Takes a calculator value; returns the cache from ViewerContext for this calculator and a function for updating the cache.
-// Note that the returned cached value is never updated! It's write-only after the initial load.
-function useSavedCalculatorState(
-  calculatorValue: SqCalculatorValueWithContext
-) {
-  const path = useMemo(() => calculatorValue.context.path, [calculatorValue]);
-
-  const { getLocalItemState, dispatch: viewerContextDispatch } =
-    useViewerContext();
-
-  // Load cache just once on initial render.
-  // After the initial load, this component owns the state and pushes it to ViewerContext.
-  const [cachedState] = useState<CalculatorState | undefined>(() => {
-    const itemState = getLocalItemState({ path });
-
-    const sameCalculatorCacheExists =
-      itemState.calculator &&
-      itemState.calculator.hashString === calculatorValue.value.hashString;
-
-    if (sameCalculatorCacheExists) {
-      return itemState.calculator;
-    } else {
-      return undefined;
-    }
-  });
-
-  const updateCachedState = useCallback(
-    (state: CalculatorState) => {
-      viewerContextDispatch({
-        type: "CALCULATOR_UPDATE",
-        payload: {
-          path,
-          calculator: state,
-        },
-      });
-    },
-    [path, viewerContextDispatch]
-  );
-
-  return [cachedState, updateCachedState] as const;
-}
-
 function getFormValues(calculator: SqCalculator): FormShape {
   return Object.fromEntries(
     calculator.inputs.map((input) => [input.name, input.default ?? ""])
@@ -127,7 +59,7 @@ function getFormValues(calculator: SqCalculator): FormShape {
 }
 
 /**
- * This function implements all state flow logic for <Calculator />.
+ * This function implements all state flow logic for calculator inputs.
  */
 function useCalculator(
   valueWithContext: SqCalculatorValueWithContext,
@@ -210,30 +142,7 @@ function useCalculator(
     return () => subscription.unsubscribe();
   }, [calculator, environment, form]);
 
-  const [fnValue, setFnValue] = useState<SqValueResult | undefined>(
-    () => cachedState?.fnValue
-  );
-
-  // Whenever `inputValues` change, we recalculate `fnValue`.
-  useEffect(() => {
-    const parameters: SqValue[] = [];
-
-    // Unpack all input values.
-    for (const input of calculator.inputs) {
-      const inputValue = inputValues[input.name];
-      if (!inputValue || !inputValue.ok) {
-        // One of inputs is incorrect.
-        setFnValue(undefined);
-        return;
-      }
-      parameters.push(inputValue.value);
-    }
-
-    const finalResult = calculator.run(parameters, environment);
-    setFnValue(finalResult);
-  }, [calculator, environment, inputValues]);
-
-  // Back up calculator state outside of this component, since calculator can disappear on code changes,
+  // Back up calculator state outside of this component, since calculator can disappear on code changes
   // (for example, on short syntax errors when autorun is enabled), and we don't want to lose user input
   // or calculator output when calculator component is rendered again.
   const backupState = useCallback(() => {
@@ -241,9 +150,8 @@ function useCalculator(
       hashString,
       formValues: form.getValues(),
       inputValues,
-      fnValue,
     });
-  }, [fnValue, inputValues, form, hashString, updateCachedState]);
+  }, [inputValues, form, hashString, updateCachedState]);
 
   // Back up whenever any calculated value changes.
   useEffect(() => backupState(), [backupState]);
@@ -251,19 +159,24 @@ function useCalculator(
   // Also back up whenever form state changes (backups are cheap, so there's no reason not to do this).
   useEffect(() => {
     const subscription = form.watch(() => backupState());
-
     return () => subscription.unsubscribe();
   }, [backupState, form]);
 
-  return { calculator, form, inputValues, fnValue };
+  return { calculator, form, inputValues };
 }
+
+type Props = {
+  environment: Env;
+  settings: PlaygroundSettings;
+  valueWithContext: SqCalculatorValueWithContext;
+};
 
 export const Calculator: FC<Props> = ({
   environment,
   settings,
   valueWithContext,
 }) => {
-  const { calculator, form, inputValues, fnValue } = useCalculator(
+  const { calculator, form, inputValues } = useCalculator(
     valueWithContext,
     environment
   );
@@ -312,14 +225,12 @@ export const Calculator: FC<Props> = ({
           ))}
         </div>
 
-        {fnValue && (
-          <div className="py-3 px-5">
-            <div className="text-sm font-semibold text-gray-700 mb-2">
-              Result
-            </div>
-            <ValueResultViewer result={fnValue} settings={resultSettings} />
-          </div>
-        )}
+        <CalculatorResult
+          valueWithContext={valueWithContext}
+          inputValues={inputValues}
+          environment={environment}
+          settings={resultSettings}
+        />
       </div>
     </FormProvider>
   );

@@ -3,7 +3,7 @@ import {
   PartialPlaygroundSettings,
   PlaygroundSettings,
 } from "../PlaygroundSettings.js";
-import { CalculatorState } from "../Calculator/index.js";
+import { CalculatorState } from "../Calculator/useSavedCalculatorState.js";
 
 export type LocalItemState = {
   collapsed: boolean;
@@ -78,7 +78,7 @@ type GetCalculatorFn = ({
   path: SqValuePath;
 }) => CalculatorState | undefined;
 
-export function getCalculatorResult(
+function getCalculatorResult(
   pathItem: SqValuePath,
   getCalculator: GetCalculatorFn
 ): SqValue | undefined {

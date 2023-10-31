@@ -3,7 +3,7 @@ import { FC } from "react";
 import { valueHasContext } from "../../lib/utility.js";
 import { PlaygroundSettings } from "../PlaygroundSettings.js";
 import { getWidget } from "../SquiggleViewer/getWidget.js";
-import { SqValueResult } from "./index.js";
+import { SqValueResult } from "./types.js";
 
 // Unlike ValueViewer/ValueWithContextViewer, this just renders the raw widget; TODO - better name?
 export const ValueResultViewer: FC<{

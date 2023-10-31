@@ -10,7 +10,7 @@ import {
 
 import { PlaygroundSettings } from "../PlaygroundSettings.js";
 import { ValueResultViewer } from "./ValueResultViewer.js";
-import { SqValueResult } from "./index.js";
+import { SqValueResult } from "./types.js";
 
 export const CalculatorInput: FC<{
   input: SqInput;
