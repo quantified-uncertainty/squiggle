@@ -6,6 +6,7 @@ import {
   frString,
   frOptional,
   frInput,
+  frBool,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { vCalculator } from "../value/index.js";
@@ -27,15 +28,17 @@ export const library = [
             ["fn", frLambda],
             ["title", frOptional(frString)],
             ["description", frOptional(frString)],
-            ["inputs", frArray(frInput)]
+            ["inputs", frArray(frInput)],
+            ["autorun", frOptional(frBool)]
           ),
         ],
-        ([{ fn, title, description, inputs }]) => {
+        ([{ fn, title, description, inputs, autorun }]) => {
           const calc = vCalculator({
             fn,
             title: title || undefined,
             description: description || undefined,
             inputs: inputs,
+            autoRun: autorun == null ? true : autorun,
           });
           const error = calc.getError();
           if (error) {

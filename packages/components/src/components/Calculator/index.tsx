@@ -239,6 +239,7 @@ export const Calculator: FC<Props> = ({
           environment={environment}
           settings={resultSettings}
           processAllFieldCodes={processAllFieldCodes}
+          autoRun={calculator.autoRun}
         />
       </div>
     </FormProvider>

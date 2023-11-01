@@ -17,13 +17,16 @@ Calculator.make: ({
   fn: ...arguments => any,
   title?: string,
   description?: string,
-  fields: list<input>
+  fields: list<input>,
+  autorun?: boolean = true,
 }) => calculator
 ```
 
 ``Calculator.make`` takes in a function, a description, and a list of fields. The function should take in the same number of arguments as the number of fields, and the arguments should be of the same type as the default value of the field.
 
 Calculators require a list of Inputs to be passed in. Inputs are created using the ``Input`` module. The ``Input`` module has a few different functions for creating different types of inputs.
+
+For calculators that take a long time to run, we recommend setting ``autorun`` to false. This will produce a button that the user can click to run the calculator.
 
 Example:
 
@@ -33,6 +36,7 @@ Example:
     fn: {|a, b,c,d| [a,b,c,d]},
     title: "Concat()",
     description: "This function takes in 4 arguments, then displays them",
+    autorun: true,
     inputs: [
       Input.text({
         name: "First Param",

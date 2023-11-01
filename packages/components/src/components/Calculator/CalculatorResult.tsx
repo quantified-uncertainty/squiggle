@@ -18,6 +18,7 @@ type Props = {
   environment: Env;
   settings: PlaygroundSettings;
   processAllFieldCodes: () => void;
+  autoRun: boolean;
 };
 
 export const CalculatorResult: FC<Props> = ({
@@ -26,10 +27,10 @@ export const CalculatorResult: FC<Props> = ({
   environment,
   settings,
   processAllFieldCodes,
+  autoRun,
 }) => {
   const [cachedState, updateCachedState] =
     useSavedCalculatorState(valueWithContext);
-  const autoRun: boolean = true;
 
   const calculator = useMemo(() => valueWithContext.value, [valueWithContext]);
 
