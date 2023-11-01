@@ -1,15 +1,16 @@
+import { clsx } from "clsx";
+import { ReactNode, createContext, useCallback, useContext } from "react";
+import { FieldPathByValue, FieldValues, useFormContext } from "react-hook-form";
 import Select, {
-  type Props as SelectProps,
-  type OptionProps,
-  type SingleValueProps,
   components,
+  type OptionProps,
+  type Props as SelectProps,
+  type SingleValueProps,
 } from "react-select";
 import AsyncSelect from "react-select/async";
-import { FieldPathByValue, FieldValues, useFormContext } from "react-hook-form";
 
 import { ControlledFormField } from "../common/ControlledFormField.js";
 import { FormFieldLayoutProps } from "../common/FormFieldLayout.js";
-import { ReactNode, createContext, useCallback, useContext } from "react";
 
 type Equal<T1, T2> = T1 extends T2 ? (T2 extends T1 ? true : false) : false;
 
@@ -81,6 +82,7 @@ export function SelectFormField<
   options,
   required = false,
   disabled,
+  size = "normal",
   renderOption,
   async = false,
   loadOptions,
@@ -93,6 +95,9 @@ export function SelectFormField<
   name: TName;
   required?: boolean;
   disabled?: boolean;
+  // This affects only the outer Control height; resizing options with `renderOption` is your responsibility.
+  // See SelectStringFormField for a example.
+  size?: "normal" | "small";
   renderOption?: (option: TOption) => ReactNode;
 } & (
     | {
@@ -185,8 +190,43 @@ export function SelectFormField<
               isClearable={!required}
               getOptionLabel={getOptionLabel}
               getOptionValue={getOptionValue}
-              // TODO - only when in modal? boolean prop?
-              styles={{ menuPortal: (base) => ({ ...base, zIndex: 100 }) }}
+              unstyled
+              classNames={{
+                // based on StyledInput styles
+                control: () =>
+                  clsx(
+                    size === "small" && "h-8",
+                    size === "normal" && "h-10",
+                    /* react-select sets min-height even in unstyled mode.
+                     * We could get rid of `!` modifier with this:
+                     * https://github.com/JedWatson/react-select/blob/2f94e8d228ea32dbd0faa1f7685a67b74c70420f/storybook/stories/ClassNamesWithTailwind.stories.tsx#L19
+                     * But it would require @emotion/cache dependency and also I'm unsure about performance implications.
+                     */
+                    "!min-h-0",
+                    "bg-white border-slate-300 border rounded-md shadow-sm focus-within:ring-indigo-500 focus-within:border-indigo-500 focus-within:ring-1"
+                  ),
+                // disable default browser focus style
+                input: () => "[&_input:focus]:!ring-transparent",
+                placeholder: () =>
+                  clsx("text-slate-300", size === "small" && "text-sm"),
+                valueContainer: () => "px-3",
+                clearIndicator: () =>
+                  "text-slate-300 hover:text-slate-500 px-2",
+                loadingIndicator: () =>
+                  "text-slate-300 hover:text-slate-500 px-2",
+                indicatorSeparator: () => "w-px bg-slate-300 my-2",
+                dropdownIndicator: () =>
+                  "text-slate-300 hover:text-slate-500 px-2",
+                menuPortal: () => "!z-[100]",
+                // based on Dropdown styles
+                menu: () =>
+                  "mt-2 rounded-md bg-white shadow-xl border border-slate-300 overflow-hidden",
+                menuList: () => "p-1 overflow-auto",
+                option: () =>
+                  "px-2 py-1.5 rounded hover:bg-blue-100 text-slate-700 hover:text-slate-900",
+                loadingMessage: () => "text-slate-500",
+                noOptionsMessage: () => "text-slate-400 p-2",
+              }}
               menuPortalTarget={
                 typeof document === "undefined" ? undefined : document.body
               }
