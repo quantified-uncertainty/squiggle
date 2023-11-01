@@ -55,7 +55,7 @@ export type ValueWidget = {
   render: (settings: MergedItemSettings) => ReactNode;
 };
 
-export function getWidget(value: SqValueWithContext): ValueWidget {
+export function getSqValueWidget(value: SqValueWithContext): ValueWidget {
   const environment = value.context.project.getEnvironment();
 
   switch (value.tag) {

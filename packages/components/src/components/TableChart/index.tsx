@@ -11,7 +11,7 @@ import {
 import { clsx } from "clsx";
 import { valueHasContext } from "../../lib/utility.js";
 import { PlaygroundSettings } from "../PlaygroundSettings.js";
-import { getWidget } from "../SquiggleViewer/getWidget.js";
+import { getSqValueWidget } from "../SquiggleViewer/getSqValueWidget.js";
 
 type Props = {
   value: SqTableChart;
@@ -46,7 +46,7 @@ export const TableChart: FC<Props> = ({ value, environment, settings }) => {
     if (item.ok) {
       const value = item.value;
       if (valueHasContext(value)) {
-        return getWidget(value).render(settings);
+        return getSqValueWidget(value).render(settings);
       } else {
         return value.toString();
       }
