@@ -140,7 +140,7 @@
     "@types/node": "^20.8.0",
     "@types/vscode": "^1.82.0",
     "esbuild": "^0.18.20",
-    "eslint": "^8.50.0",
+    "eslint": "^8.52.0",
     "js-yaml": "^4.1.0",
     "prettier": "^3.0.3",
     "react": "^18.2.0",
