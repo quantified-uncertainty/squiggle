@@ -142,8 +142,8 @@ importers:
         specifier: ^3.0.8
         version: 3.0.8
       zod:
-        specifier: ^3.22.3
-        version: 3.22.3
+        specifier: ^3.22.4
+        version: 3.22.4
     devDependencies:
       '@jest/globals':
         specifier: ^29.7.0
@@ -312,7 +312,7 @@ importers:
         version: 3.7.0(@pothos/core@3.38.0)(graphql@16.8.1)
       '@pothos/plugin-validation':
         specifier: ^3.10.1
-        version: 3.10.1(@pothos/core@3.38.0)(graphql@16.8.1)(zod@3.22.3)
+        version: 3.10.1(@pothos/core@3.38.0)(graphql@16.8.1)(zod@3.22.4)
       '@pothos/plugin-with-input':
         specifier: ^3.10.1
         version: 3.10.1(@pothos/core@3.38.0)(graphql@16.8.1)
@@ -407,8 +407,8 @@ importers:
         specifier: ^5.2.2
         version: 5.2.2
       zod:
-        specifier: ^3.22.3
-        version: 3.22.3
+        specifier: ^3.22.4
+        version: 3.22.4
     devDependencies:
       '@graphql-codegen/cli':
         specifier: ^5.0.0
@@ -504,8 +504,8 @@ importers:
         specifier: ^11.0.4
         version: 11.0.4
       zod:
-        specifier: ^3.22.3
-        version: 3.22.3
+        specifier: ^3.22.4
+        version: 3.22.4
     devDependencies:
       '@changesets/get-github-info':
         specifier: ^0.5.2
@@ -4656,7 +4656,7 @@ packages:
       graphql: 16.8.1
     dev: false
 
-  /@pothos/plugin-validation@3.10.1(@pothos/core@3.38.0)(graphql@16.8.1)(zod@3.22.3):
+  /@pothos/plugin-validation@3.10.1(@pothos/core@3.38.0)(graphql@16.8.1)(zod@3.22.4):
     resolution: {integrity: sha512-FdYHzVSbrHZ4cDPOW/RB8Zsyx7qNuybAbC5DO3zVSsPPgY/FWLNWtQ6CaE+tkg5Je1RxpmO5od7Ig1Wt+akqnA==}
     peerDependencies:
       '@pothos/core': '*'
@@ -4665,7 +4665,7 @@ packages:
     dependencies:
       '@pothos/core': 3.38.0(graphql@16.8.1)
       graphql: 16.8.1
-      zod: 3.22.3
+      zod: 3.22.4
     dev: false
 
   /@pothos/plugin-with-input@3.10.1(@pothos/core@3.38.0)(graphql@16.8.1):
@@ -4765,7 +4765,7 @@ packages:
       react-markdown: 8.0.7(@types/react@18.2.33)(react@18.2.0)
       react-resizable: 3.0.5(react-dom@18.2.0)(react@18.2.0)
       vscode-uri: 3.0.8
-      zod: 3.22.3
+      zod: 3.22.4
     transitivePeerDependencies:
       - '@types/react'
       - supports-color
@@ -14746,7 +14746,7 @@ packages:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       scroll-into-view-if-needed: 3.0.10
-      zod: 3.22.3
+      zod: 3.22.4
     dev: false
 
   /nextra@2.10.0(next@13.5.2)(react-dom@18.2.0)(react@18.2.0):
@@ -14784,7 +14784,7 @@ packages:
       title: 3.5.3
       unist-util-remove: 4.0.0
       unist-util-visit: 5.0.0
-      zod: 3.22.3
+      zod: 3.22.4
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -19370,8 +19370,8 @@ packages:
     resolution: {integrity: sha512-m46AKbrzKVzOzs/DZgVnG5H55N1sv1M8qZU3A8RIKbs3mrACDNeIOeilDymVb2HdmP8uwshOCF4uJ8uM9rCqJw==}
     dev: false
 
-  /zod@3.22.3:
-    resolution: {integrity: sha512-EjIevzuJRiRPbVH4mGc8nApb/lVLKVpmUhAaR5R5doKGfAnGJ6Gr3CViAVjP+4FWSxCsybeWQdcgCtbX+7oZug==}
+  /zod@3.22.4:
+    resolution: {integrity: sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg==}
     dev: false
 
   /zwitch@2.0.4:
