@@ -551,8 +551,8 @@ importers:
   packages/squiggle-lang:
     dependencies:
       '@commander-js/extra-typings':
-        specifier: ^11.0.0
-        version: 11.0.0(commander@11.1.0)
+        specifier: ^11.1.0
+        version: 11.1.0(commander@11.1.0)
       commander:
         specifier: ^11.1.0
         version: 11.1.0
@@ -2597,10 +2597,10 @@ packages:
     dev: true
     optional: true
 
-  /@commander-js/extra-typings@11.0.0(commander@11.1.0):
-    resolution: {integrity: sha512-06ol6Kn5gPjFY6v0vWOZ84nQwyqhZdaeZCHYH3vhwewjpOEjniF1KHZxh18887G3poWiJ8qyq5pb6ANuiddfPQ==}
+  /@commander-js/extra-typings@11.1.0(commander@11.1.0):
+    resolution: {integrity: sha512-GuvZ38d23H+7Tz2C9DhzCepivsOsky03s5NI+KCy7ke1FNUvsJ2oO47scQ9YaGGhgjgNW5OYYNSADmbjcSoIhw==}
     peerDependencies:
-      commander: 11.0.x
+      commander: 11.1.x
     dependencies:
       commander: 11.1.0
     dev: false
@@ -4776,7 +4776,7 @@ packages:
     resolution: {integrity: sha512-ymA/Y/3C8pppvYFy9RhpJyCjjttJPm+pWu1gWpaOFOs53qP61+GpGw0qtkduO0t2wYdj/3GDlQC/JyyxZMAOGw==}
     hasBin: true
     dependencies:
-      '@commander-js/extra-typings': 11.0.0(commander@11.1.0)
+      '@commander-js/extra-typings': 11.1.0(commander@11.1.0)
       commander: 11.1.0
       immutable: 4.3.4
       jstat: 1.9.6
