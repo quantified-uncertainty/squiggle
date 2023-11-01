@@ -25,15 +25,17 @@ export const library = [
         [
           frDict(
             ["data", frArray(frAny)],
+            ["title", frOptional(frString)],
             [
               "columns",
               frArray(frDict(["fn", frLambda], ["name", frOptional(frString)])),
             ]
           ),
         ],
-        ([{ data, columns }]) => {
+        ([{ data, title, columns }]) => {
           return vTableChart({
             data,
+            title: title || undefined,
             columns: columns.map(({ fn, name }) => ({
               fn,
               name: name ?? undefined,

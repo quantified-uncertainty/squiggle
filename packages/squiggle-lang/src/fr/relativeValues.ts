@@ -5,6 +5,7 @@ import {
   frLambda,
   frDict,
   frString,
+  frOptional,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { makeSquiggleDefinition } from "../library/registry/squiggleDefinition.js";
@@ -18,7 +19,8 @@ const maker = new FnFactory({
 
 const relativeValuesShape = frDict(
   ["ids", frArray(frString)],
-  ["fn", frLambda]
+  ["fn", frLambda],
+  ["title", frOptional(frString)]
 );
 
 export const library = [
@@ -32,11 +34,12 @@ export const library = [
   })`,
     ],
     definitions: [
-      makeDefinition([relativeValuesShape], ([{ ids, fn }]) => {
+      makeDefinition([relativeValuesShape], ([{ ids, fn, title }]) => {
         return vPlot({
           type: "relativeValues",
           fn,
           ids,
+          title: title ?? undefined,
         });
       }),
     ],

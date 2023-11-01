@@ -8,6 +8,8 @@ export const labelColor = "rgb(114, 125, 147)";
 export const cursorLineColor = "#888";
 export const primaryColor = "#4c78a8"; // for lines and areas
 export const distributionColor = "#6d9bce"; // for distributions. Slightly lighter than primaryColor
+export const axisTitleColor = "rgb(100 116 139)";
+export const axisTitleFont = "bold 12px ui-sans-serif, system-ui";
 const labelFont = "10px sans-serif";
 const xLabelOffset = 6;
 const yLabelOffset = 6;
@@ -31,6 +33,8 @@ interface DrawAxesParams {
   yTickCount?: number;
   xTickFormat?: string;
   yTickFormat?: string;
+  xAxisTitle?: string;
+  yAxisTitle?: string;
 }
 
 export function drawAxes({
@@ -46,6 +50,8 @@ export function drawAxes({
   yTickCount = Math.max(Math.min(Math.floor(height / 100), 12), 3),
   xTickFormat: xTickFormatSpecifier = defaultTickFormatSpecifier,
   yTickFormat: yTickFormatSpecifier = defaultTickFormatSpecifier,
+  xAxisTitle,
+  yAxisTitle,
 }: DrawAxesParams) {
   const xTicks = xScale.ticks(xTickCount);
   const xTickFormat = xScale.tickFormat(xTickCount, xTickFormatSpecifier);
@@ -56,6 +62,12 @@ export function drawAxes({
   const tickSize = 2;
 
   const padding: Padding = { ...suggestedPadding };
+  if (xAxisTitle) {
+    padding.bottom = padding.bottom + 20;
+  }
+  if (yAxisTitle) {
+    padding.left = padding.left + 35;
+  }
 
   // measure tick sizes for dynamic padding
   if (!hideYAxis) {
@@ -184,6 +196,31 @@ export function drawAxes({
       prevBoundary = startY + textHeight;
     }
     frame.exit();
+  }
+
+  if (xAxisTitle) {
+    const chartWidth = width - padding.left - padding.right; // Actual charting area width
+    const titleX = padding.left + chartWidth / 2; // center the title within the charting area
+    const titleY = height - padding.bottom + 33; // adjust this value based on desired distance from x-axis
+    context.textAlign = "center";
+    context.textBaseline = "bottom";
+    context.font = axisTitleFont;
+    context.fillStyle = axisTitleColor;
+    context.fillText(xAxisTitle, titleX, titleY);
+  }
+  if (yAxisTitle) {
+    const chartHeight = height - padding.top - padding.bottom; // Actual charting area height
+    const titleY = padding.top + chartHeight / 2; // center the title vertically within the charting area
+    const titleX = 0;
+    context.save(); // save the current context state
+    context.translate(titleX, titleY);
+    context.rotate(-Math.PI / 2); // rotate 90 degrees counter-clockwise
+    context.textAlign = "center";
+    context.textBaseline = "top";
+    context.font = axisTitleFont;
+    context.fillStyle = axisTitleColor;
+    context.fillText(yAxisTitle, 0, 0);
+    context.restore(); // restore the context state to before rotation and translation
   }
 
   return {

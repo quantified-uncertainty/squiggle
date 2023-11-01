@@ -17,6 +17,7 @@ import {
 import { canvasClasses } from "../../lib/utility.js";
 import { ImageErrors } from "./ImageErrors.js";
 import { getFunctionImage } from "./utils.js";
+import { PlotTitle } from "../PlotTitle.js";
 
 type Props = {
   plot: SqNumericFnPlot;
@@ -60,6 +61,8 @@ export const NumericFunctionChart: FC<Props> = ({
         yScale,
         xTickFormat: plot.xScale.tickFormat,
         yTickFormat: plot.yScale.tickFormat,
+        xAxisTitle: plot.xScale.title,
+        yAxisTitle: plot.yScale.title,
       });
 
       if (
@@ -119,6 +122,7 @@ export const NumericFunctionChart: FC<Props> = ({
 
   return (
     <div className="flex flex-col items-stretch">
+      {plot.title && <PlotTitle title={plot.title} />}
       <canvas ref={ref} className={canvasClasses}>
         Chart for {plot.toString()}
       </canvas>

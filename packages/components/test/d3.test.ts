@@ -38,7 +38,7 @@ describe.each([
 
     if (num !== 0 && !(sqScale instanceof SqLogScale)) {
       test("negative", () => {
-        expect(format(-num)).toEqual("-" + result);
+        expect(format(-num)).toEqual(result === "0" ? result : "-" + result);
       });
     }
   });

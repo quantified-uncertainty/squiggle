@@ -19,6 +19,7 @@ import {
   RelativeValuesDefinitionPageFragment,
   RelativeValuesDefinitionPageQuery,
 } from "../RelativeValuesDefinitionPage";
+import { relativeValuesRoute } from "@/routes";
 
 const Mutation = graphql`
   mutation EditRelativeValuesDefinitionMutation(
@@ -84,8 +85,12 @@ export const EditRelativeValuesDefinition: FC<{
         },
       },
       onCompleted() {
-        // TODO - go to definition page instead?
-        router.push("/");
+        router.push(
+          relativeValuesRoute({
+            owner: definition.owner.slug,
+            slug: definition.slug,
+          })
+        );
       },
     });
   };

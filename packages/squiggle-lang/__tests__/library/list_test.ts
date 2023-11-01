@@ -17,33 +17,41 @@ describe("List functions", () => {
     testEvalToBe("List.make(3, 'HI')", '["HI","HI","HI"]');
     testEvalToBe("List.make(3, {|e| e})", "[0,1,2]");
     testEvalToBe("List.make(3, {|| 1})", "[1,1,1]");
-    testEvalToBe("List.make(3, {|index| 1 + index})", "[2,3,4]");
-    testEvalToBe("List.make(3, Math.add)", "[2,3,4]");
+    testEvalToBe("List.make(3, {|index| 1 + index})", "[1,2,3]");
     testEvalToBe(
       "List.make(3.5, 'HI')",
-      "Error(Error: Number must be an integer)"
+      "Error(Argument Error: Number must be an integer)"
     );
     testEvalToBe(
       "List.make(-4, 'HI')",
-      "Error(Error: Expected non-negative number)"
+      "Error(Argument Error: Expected non-negative number)"
     );
     testEvalToBe("make(3, 'HI')", "Error(make is not defined)");
   });
 
   describe("upTo", () => {
     testEvalToBe("List.upTo(1,3)", "[1,2,3]");
-    testEvalToBe("List.upTo(1.5,3)", "Error(Error: upTo() requires integers)");
+    testEvalToBe(
+      "List.upTo(1.5,3)",
+      "Error(Argument Error: Low and high values must both be integers)"
+    );
     // TODO - test low > high condition
   });
 
   describe("first", () => {
     testEvalToBe("List.first([3,5,8])", "3");
-    testEvalToBe("List.first([])", "Error(Error: List must not be empty)");
+    testEvalToBe(
+      "List.first([])",
+      "Error(Argument Error: List must not be empty)"
+    );
   });
 
   describe("last", () => {
     testEvalToBe("List.last([3,5,8])", "8");
-    testEvalToBe("List.last([])", "Error(Error: List must not be empty)");
+    testEvalToBe(
+      "List.last([])",
+      "Error(Argument Error: List must not be empty)"
+    );
   });
   describe("concat", () => {
     testEvalToBe("List.concat([1, 2, 3], [4, 5, 6])", "[1,2,3,4,5,6]");
@@ -76,6 +84,19 @@ describe("List functions", () => {
     // two-arg callback
     testEvalToBe("[10,20,30] -> List.map({|x,i|x+i+1})", "[11,22,33]");
     testEvalToBe("List.map([[1]], Number.sum)", "[1]");
+  });
+
+  describe("slice", () => {
+    testEvalToBe("List.slice([1,2,3,4,5,6], 2)", "[3,4,5,6]");
+    testEvalToBe("List.slice([1,2,3,4,5,6], 2, 4)", "[3,4]");
+    testEvalToBe("List.slice([1,2,3,4,5,6], 8, 3)", "[]");
+    testEvalToBe("List.slice([], 8, 3)", "[]");
+    testEvalToBe("List.slice([1,2,3,4,5,6], -4)", "[3,4,5,6]");
+    testEvalToBe("List.slice([1,2,3,4,5,6], 2, -1)", "[3,4,5]");
+    testEvalToBe(
+      "List.slice([], 3.5, 3)",
+      "Error(Argument Error: Number 3.5 must be an integer)"
+    );
   });
 
   describe("uniq", () => {
@@ -115,7 +136,7 @@ describe("List functions", () => {
       "myadd(acc,x)=acc+x; arr=[1,2,3]; List.reduce(arr, 0, myadd)",
       "6"
     );
-    testEvalToBe("List.reduce([1,2,3], 0, add)", "6", true);
+    testEvalToBe("List.reduce([1,2,3], 0, add)", "6");
     testEvalToBe(
       "change(acc,x)=acc*x+x; arr=[1,2,3]; List.reduce(arr, 0, change)",
       "15"
@@ -225,12 +246,12 @@ describe("List functions", () => {
     testEvalToBe("List.zip([1,2], [3,4])", "[[1,3],[2,4]]");
     testEvalToBe(
       "List.zip([1,2,4], [3,4])",
-      "Error(Error: List lengths must be equal)"
+      "Error(Argument Error: List lengths must be equal)"
     );
     testEvalToBe("List.zip([1,2], [3,[4,5]])", "[[1,3],[2,[4,5]]]");
     testEvalToBe(
       "List.zip([1,2], [3,[4,5], [5]])",
-      "Error(Error: List lengths must be equal)"
+      "Error(Argument Error: List lengths must be equal)"
     );
     testEvalToBe("List.zip([], [])", "[]");
   });

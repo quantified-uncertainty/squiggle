@@ -57,6 +57,12 @@ export const frDistOrNumber: FRType<BaseDist | number> = {
   pack: (v) => (typeof v === "number" ? vNumber(v) : vDist(v)),
   getName: () => "distribution|number",
 };
+export const frNumberOrString: FRType<string | number> = {
+  unpack: (v) =>
+    v.type === "String" ? v.value : v.type === "Number" ? v.value : undefined,
+  pack: (v) => (typeof v === "number" ? vNumber(v) : vString(v)),
+  getName: () => "number|string",
+};
 export const frDist: FRType<BaseDist> = {
   unpack: (v) => (v.type === "Dist" ? v.value : undefined),
   pack: (v) => vDist(v),
@@ -265,6 +271,31 @@ export function frDict<
   { [k in K1]: T1 } & { [k in K2]: T2 } & { [k in K3]: T3 } & {
     [k in K4]: T4;
   } & { [k in K5]: T5 }
+>;
+export function frDict<
+  K1 extends string,
+  T1,
+  K2 extends string,
+  T2,
+  K3 extends string,
+  T3,
+  K4 extends string,
+  T4,
+  K5 extends string,
+  T5,
+  K6 extends string,
+  T6,
+>(
+  kv1: [K1, FRType<T1>],
+  kv2: [K2, FRType<T2>],
+  kv3: [K3, FRType<T3>],
+  kv4: [K4, FRType<T4>],
+  kv5: [K5, FRType<T5>],
+  kv6: [K6, FRType<T6>]
+): FRType<
+  { [k in K1]: T1 } & { [k in K2]: T2 } & { [k in K3]: T3 } & {
+    [k in K4]: T4;
+  } & { [k in K5]: T5 } & { [k in K6]: T6 }
 >;
 
 export function frDict<T extends object>(
