@@ -664,8 +664,8 @@ importers:
         specifier: ^7.4.5
         version: 7.4.5(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)
       '@storybook/addon-interactions':
-        specifier: ^7.4.5
-        version: 7.4.5(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^7.5.2
+        version: 7.5.2(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)
       '@storybook/addon-links':
         specifier: ^7.5.2
         version: 7.5.2(react-dom@18.2.0)(react@18.2.0)
@@ -5638,8 +5638,8 @@ packages:
       '@storybook/preview-api': 7.4.5
     dev: true
 
-  /@storybook/addon-interactions@7.4.5(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-KDdV/THxj38VsuOevrUefev0rZPhzqUXCgrw1Jc2PsJGidHf9d9nnB7wbA9ZFYsxTz90M/Vk5sm7i1QkMmsquA==}
+  /@storybook/addon-interactions@7.5.2(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-upddA+pvJtU3pRZqu3Chl5QbVfVv2eCIuUxaAG9rvasaqkLTTrNvna8rmnXwqL8sBKHL1XzSyO2sQF4vzQwymg==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
@@ -5649,16 +5649,16 @@ packages:
       react-dom:
         optional: true
     dependencies:
-      '@storybook/client-logger': 7.4.5
-      '@storybook/components': 7.4.5(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)
-      '@storybook/core-common': 7.4.5
-      '@storybook/core-events': 7.4.5
+      '@storybook/client-logger': 7.5.2
+      '@storybook/components': 7.5.2(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)
+      '@storybook/core-common': 7.5.2
+      '@storybook/core-events': 7.5.2
       '@storybook/global': 5.0.0
-      '@storybook/instrumenter': 7.4.5
-      '@storybook/manager-api': 7.4.5(react-dom@18.2.0)(react@18.2.0)
-      '@storybook/preview-api': 7.4.5
-      '@storybook/theming': 7.4.5(react-dom@18.2.0)(react@18.2.0)
-      '@storybook/types': 7.4.5
+      '@storybook/instrumenter': 7.5.2
+      '@storybook/manager-api': 7.5.2(react-dom@18.2.0)(react@18.2.0)
+      '@storybook/preview-api': 7.5.2
+      '@storybook/theming': 7.5.2(react-dom@18.2.0)(react@18.2.0)
+      '@storybook/types': 7.5.2
       jest-mock: 27.5.1
       polished: 4.2.2
       react: 18.2.0
@@ -6316,14 +6316,14 @@ packages:
     resolution: {integrity: sha512-FcOqPAXACP0I3oJ/ws6/rrPT9WGhu915Cg8D02a9YxLo0DE9zI+a9A5gRGvmQ09fiWPukqI8ZAEoQEdWUKMQdQ==}
     dev: true
 
-  /@storybook/instrumenter@7.4.5:
-    resolution: {integrity: sha512-VLFOcmG75QhWa7MtmfEybIJEz5oT2Ry8xAy/pIVhQwyBaeW0kRT0MHWkixRTtWQmJs/78FmHE3FlgMnqpa5JoA==}
+  /@storybook/instrumenter@7.5.2:
+    resolution: {integrity: sha512-1l36cc7GaVeTiknhToZcaqI6RsIOfcBgdnvgJ0tiL1naN1GkneCMr+1oLWnlHVrWIOXgh6vNyD792kE3uTLkFg==}
     dependencies:
-      '@storybook/channels': 7.4.5
-      '@storybook/client-logger': 7.4.5
-      '@storybook/core-events': 7.4.5
+      '@storybook/channels': 7.5.2
+      '@storybook/client-logger': 7.5.2
+      '@storybook/core-events': 7.5.2
       '@storybook/global': 5.0.0
-      '@storybook/preview-api': 7.4.5
+      '@storybook/preview-api': 7.5.2
     dev: true
 
   /@storybook/manager-api@7.4.5(react-dom@18.2.0)(react@18.2.0):
