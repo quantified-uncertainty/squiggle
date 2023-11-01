@@ -7,7 +7,6 @@ type Props = {
   icon?: ComponentType<{ className?: string }>;
   children?: ReactNode;
   iconClasses?: string;
-  iconColorClasses?: string;
   iconSpin?: boolean;
   onClick?: () => void;
   tooltipText?: string;
@@ -16,7 +15,7 @@ type Props = {
 
 export const ToolbarItem: FC<Props> = ({
   icon: Icon,
-  iconColorClasses,
+  iconClasses,
   iconSpin,
   className,
   onClick,
@@ -41,8 +40,8 @@ export const ToolbarItem: FC<Props> = ({
         <Icon
           className={clsx(
             iconSize,
-            "flex-shrink-0",
-            iconColorClasses || "text-slate-400",
+            "flex-shrink-0 text-slate-400",
+            iconClasses,
             iconSpin && "animate-spin"
           )}
         />

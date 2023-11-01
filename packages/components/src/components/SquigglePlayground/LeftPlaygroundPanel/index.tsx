@@ -7,8 +7,16 @@ import {
   useRef,
 } from "react";
 
-import { SqValuePath } from "@quri/squiggle-lang";
-import { Bars3CenterLeftIcon } from "@quri/ui";
+import { SqProject, SqValuePath } from "@quri/squiggle-lang";
+import {
+  AdjustmentsVerticalIcon,
+  Bars3CenterLeftIcon,
+  Dropdown,
+  DropdownMenu,
+  DropdownMenuActionItem,
+  PuzzleIcon,
+  TriangleIcon,
+} from "@quri/ui";
 
 import {
   SquiggleOutput,
@@ -22,16 +30,18 @@ import { PlaygroundSettings } from "../../PlaygroundSettings.js";
 import { ToolbarItem } from "../../ui/PanelWithToolbar/ToolbarItem.js";
 import { PanelWithToolbar } from "../../ui/PanelWithToolbar/index.js";
 import { AutorunnerMenuItem } from "./AutorunnerMenuItem.js";
+import { DependencyGraphModal } from "./DependencyGraphModal.js";
 import { GlobalSettingsModal } from "./GlobalSettingsModal.js";
 import { RunMenuItem } from "./RunMenuItem.js";
-import { SetttingsMenuItem } from "./SettingsMenuItem.js";
 
 export type RenderExtraControls = (props: {
   openModal: (name: string) => void;
 }) => ReactNode;
 
 type Props = {
+  project: SqProject;
   defaultCode?: string;
+  sourceId?: string;
   onCodeChange?(code: string): void;
   settings: PlaygroundSettings;
   onSettingsChange(settings: PlaygroundSettings): void;
@@ -41,6 +51,8 @@ type Props = {
   }): void;
   /* Allows to inject extra buttons to the left panel's menu, e.g. share button on the website, or save button in Squiggle Hub. */
   renderExtraControls?: RenderExtraControls;
+  /* Allows to inject extra items to the left panel's dropdown menu. */
+  renderExtraDropdownItems?: RenderExtraControls;
   renderExtraModal?: Parameters<typeof PanelWithToolbar>[0]["renderModal"];
   onViewValuePath?: (path: SqValuePath) => void;
 };
@@ -49,6 +61,8 @@ type Props = {
 export type LeftPlaygroundPanelHandle = {
   getEditor(): CodeEditorHandle | null; // used by "find in editor" feature
   getLeftPanelElement(): HTMLDivElement | null; // used by local settings modal window positioning
+  run(): void; // force re-run
+  invalidate(): void; // mark output as stale but don't re-run if autorun is disabled; useful on environment changes, triggered in <SquigglePlayground> code
 };
 
 export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
@@ -62,8 +76,9 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
 
     const [squiggleOutput, { project, isRunning, sourceId }] = useSquiggle({
       code: runnerState.renderedCode,
+      project: props.project,
+      sourceId: props.sourceId,
       executionId: runnerState.executionId,
-      environment: props.settings.environment,
     });
 
     const { onOutputChange } = props;
@@ -87,6 +102,12 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
     useImperativeHandle(ref, () => ({
       getEditor: () => editorRef.current,
       getLeftPanelElement: () => containerRef.current,
+      run: () => runnerState.run(),
+      invalidate: () => {
+        if (runnerState.autorunMode) {
+          runnerState.run();
+        }
+      },
     }));
 
     const renderToolbar = ({
@@ -102,7 +123,36 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
           icon={Bars3CenterLeftIcon}
           onClick={editorRef.current?.format}
         />
-        <SetttingsMenuItem onClick={() => openModal("settings")} />
+        <Dropdown
+          render={() => (
+            <DropdownMenu>
+              <DropdownMenuActionItem
+                title="Configuration"
+                icon={AdjustmentsVerticalIcon}
+                onClick={() => openModal("settings")}
+              />
+
+              {
+                // experimental, won't always work, so disabled for now
+                /* <DropdownMenuActionItem
+                title="Find in Viewer"
+                icon={AdjustmentsVerticalIcon}
+                onClick={() => editorRef.current?.viewCurrentPosition()}
+              /> */
+              }
+              <DropdownMenuActionItem
+                title="Dependency Graph"
+                icon={PuzzleIcon}
+                onClick={() => openModal("dependency-graph")}
+              />
+              {props.renderExtraDropdownItems?.({ openModal })}
+            </DropdownMenu>
+          )}
+        >
+          <ToolbarItem icon={TriangleIcon} iconClasses="rotate-180">
+            Menu
+          </ToolbarItem>
+        </Dropdown>
         <div className="flex-1">
           {props.renderExtraControls?.({ openModal })}
         </div>
@@ -117,7 +167,7 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
           // see https://github.com/quantified-uncertainty/squiggle/issues/1952
           defaultValue={code}
           errors={errors}
-          height={"100%"}
+          height="100%"
           project={project}
           sourceId={sourceId}
           showGutter={true}
@@ -130,18 +180,25 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
     );
 
     const renderModal = (modalName: string) => {
-      if (modalName === "settings") {
-        return {
-          title: "Configuration",
-          body: (
-            <GlobalSettingsModal
-              settings={props.settings}
-              onSettingsChange={props.onSettingsChange}
-            />
-          ),
-        };
+      switch (modalName) {
+        case "settings":
+          return {
+            title: "Configuration",
+            body: (
+              <GlobalSettingsModal
+                settings={props.settings}
+                onSettingsChange={props.onSettingsChange}
+              />
+            ),
+          };
+        case "dependency-graph":
+          return {
+            title: "Dependency Graph",
+            body: <DependencyGraphModal project={project} />,
+          };
+        default:
+          return props.renderExtraModal?.(modalName);
       }
-      return props.renderExtraModal?.(modalName);
     };
 
     return (

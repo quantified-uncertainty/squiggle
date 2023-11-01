@@ -107,12 +107,12 @@ const evaluateBlock: SubReducerFn<"Block"> = (statements, context) => {
   return [currentValue, context]; // throw away block's context
 };
 
-const evaluateProgram: SubReducerFn<"Program"> = (statements, context) => {
-  // Same as Block, but doesn't drop the context, so that we could return bindings from it.
+const evaluateProgram: SubReducerFn<"Program"> = (expressionValue, context) => {
+  // Same as Block, but doesn't drop the context, so that we could return bindings and exports from it.
   let currentContext = context;
   let currentValue: Value = vVoid();
 
-  for (const statement of statements) {
+  for (const statement of expressionValue.statements) {
     [currentValue, currentContext] = context.evaluate(
       statement,
       currentContext

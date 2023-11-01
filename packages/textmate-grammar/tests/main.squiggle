@@ -1,0 +1,9 @@
+// SYNTAX TEST "source.squiggle" "main testcase"
+import "mod" as mod
+// <------ keyword.control.squiggle
+foo = 5
+// <--- variable.other.squiggle
+//    ^ constant.numeric.integer.squiggle
+export bar = 6
+// <------ keyword.control.squiggle
+//     ^^^ variable.other.squiggle
