@@ -30,6 +30,7 @@ export type SquiggleViewerProps = {
   /** The output of squiggle's run */
   resultVariables: result<SqDictValue, SqError>;
   resultItem: result<SqValue, SqError> | undefined;
+  resultExports: result<SqDictValue, SqError>;
   localSettingsEnabled?: boolean;
   editor?: CodeEditorHandle;
 } & PartialPlaygroundSettings;
@@ -37,7 +38,10 @@ export type SquiggleViewerProps = {
 const SquiggleViewerOuter = forwardRef<
   SquiggleViewerHandle,
   SquiggleViewerProps
->(function SquiggleViewerOuter({ resultVariables, resultItem }, ref) {
+>(function SquiggleViewerOuter(
+  { resultVariables, resultExports, resultItem },
+  ref
+) {
   const { focused, dispatch, getCalculator } = useViewerContext();
   const unfocus = useUnfocus();
   const focus = useFocus();
@@ -45,10 +49,16 @@ const SquiggleViewerOuter = forwardRef<
   const navLinkStyle =
     "text-sm text-slate-500 hover:text-slate-900 hover:underline font-mono cursor-pointer";
 
+  const nameToShow = {
+    bindings: "Variables",
+    exports: "Exports",
+    result: "Result",
+  };
+
   const focusedNavigation = focused && (
     <div className="flex items-center mb-3 pl-1">
       <span onClick={unfocus} className={navLinkStyle}>
-        {focused.root === "bindings" ? "Variables" : focused.root}
+        {nameToShow[focused.root]}
       </span>
 
       {focused
@@ -79,10 +89,20 @@ const SquiggleViewerOuter = forwardRef<
     ? resultVariables.value.value.entries().length
     : 0;
 
+  const resultExportLength = resultExports.ok
+    ? resultExports.value.value.entries().length
+    : 0;
+
   let focusedItem: SqValue | undefined;
   if (focused && resultVariables.ok && focused.root === "bindings") {
     focusedItem = extractSubvalueByPath(
       resultVariables.value,
+      focused,
+      getCalculator
+    );
+  } else if (focused && resultExports.ok && focused.root === "exports") {
+    focusedItem = extractSubvalueByPath(
+      resultExports.value,
       focused,
       getCalculator
     );
@@ -109,6 +129,9 @@ const SquiggleViewerOuter = forwardRef<
           {resultVariables.ok && resultVariableLength > 0 && (
             <ExpressionViewer value={resultVariables.value} />
           )}
+          {resultExports.ok && resultExportLength > 0 && (
+            <ExpressionViewer value={resultExports.value} />
+          )}
           {resultItem && resultItem.ok && (
             <ExpressionViewer value={resultItem.value} />
           )}
@@ -130,6 +153,7 @@ const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
     {
       resultVariables,
       resultItem,
+      resultExports,
       localSettingsEnabled = false,
       editor,
       ...partialPlaygroundSettings
@@ -145,6 +169,7 @@ const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
       >
         <SquiggleViewerOuter
           resultVariables={resultVariables}
+          resultExports={resultExports}
           resultItem={resultItem}
           ref={ref}
         />

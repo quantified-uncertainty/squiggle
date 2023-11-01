@@ -260,7 +260,7 @@ export class SqProject {
             valueAst: astR.value,
             valueAstIsPrecise: true,
             path: new SqValuePath({
-              root: "bindings",
+              root: field,
               items: [],
             }),
           })

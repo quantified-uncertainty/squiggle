@@ -36,6 +36,7 @@ export type SquiggleOutput = {
     {
       result: SqValue;
       bindings: SqDict;
+      exports: SqDict;
     },
     SqError
   >;

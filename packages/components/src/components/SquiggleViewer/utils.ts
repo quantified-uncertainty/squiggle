@@ -38,6 +38,8 @@ function topLevelName(path: SqValuePath): string {
     return topLevelResultName;
   } else if (path.root === "bindings") {
     return topLevelBindingsName;
+  } else if (path.root === "exports") {
+    return "Exports";
   } else {
     return path.root;
   }
