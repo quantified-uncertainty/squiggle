@@ -46,6 +46,13 @@ export type Action =
       payload: SqValuePath;
     }
   | {
+      type: "SET_COLLAPSED";
+      payload: {
+        path: SqValuePath;
+        value: boolean;
+      };
+    }
+  | {
       type: "COLLAPSE_CHILDREN";
       payload: SqValue;
     }
@@ -136,6 +143,17 @@ export function useToggleCollapsed() {
     });
   };
 }
+
+export function useSetCollapsed() {
+  const { dispatch } = useViewerContext();
+  return (path: SqValuePath, isCollapsed: boolean) => {
+    dispatch({
+      type: "SET_COLLAPSED",
+      payload: { path, value: isCollapsed },
+    });
+  };
+}
+
 export function useResetStateSettings() {
   const { dispatch } = useViewerContext();
   return (path: SqValuePath, value: LocalItemState) => {
@@ -308,6 +326,13 @@ export const ViewerProvider: FC<
           setLocalItemState(action.payload, (state) => ({
             ...state,
             collapsed: !state?.collapsed,
+          }));
+          return;
+        }
+        case "SET_COLLAPSED": {
+          setLocalItemState(action.payload.path, (state) => ({
+            ...state,
+            collapsed: action.payload.value,
           }));
           return;
         }
