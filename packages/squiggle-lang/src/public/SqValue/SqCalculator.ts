@@ -39,8 +39,8 @@ export class SqCalculator {
     return this._value.description;
   }
 
-  get autoRun(): boolean {
-    return this._value.autoRun;
+  get autorun(): boolean {
+    return this._value.autorun;
   }
 
   // This function is used to determine if a calculator has changed.
@@ -54,7 +54,7 @@ export class SqCalculator {
       paramData +
       this._value.description +
       this._value.title +
-      this._value.autoRun
+      this._value.autorun
     );
   }
 

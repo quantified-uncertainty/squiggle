@@ -227,7 +227,7 @@ export const Calculator: FC<Props> = ({
           inputResults={inputResults}
           environment={environment}
           processAllFieldCodes={processAllFieldCodes}
-          autoRun={calculator.autoRun}
+          autorun={calculator.autorun}
           settings={calculatorResultSettings}
         />
       </div>

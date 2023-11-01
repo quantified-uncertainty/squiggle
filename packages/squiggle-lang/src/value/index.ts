@@ -492,7 +492,7 @@ export const vTableChart = (v: TableChart) => new VTableChart(v);
 export type Calculator = {
   fn: Lambda;
   inputs: Input[];
-  autoRun: boolean;
+  autorun: boolean;
   description?: string;
   title?: string;
 };

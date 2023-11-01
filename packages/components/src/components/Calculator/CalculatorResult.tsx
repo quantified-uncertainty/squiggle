@@ -18,7 +18,7 @@ type Props = {
   environment: Env;
   settings: PlaygroundSettings;
   processAllFieldCodes: () => void;
-  autoRun: boolean;
+  autorun: boolean;
 };
 
 export const CalculatorResult: FC<Props> = ({
@@ -27,7 +27,7 @@ export const CalculatorResult: FC<Props> = ({
   environment,
   settings,
   processAllFieldCodes,
-  autoRun,
+  autorun,
 }) => {
   const [savedState, updateSavedState] =
     useSavedCalculatorState(valueWithContext);
@@ -39,7 +39,7 @@ export const CalculatorResult: FC<Props> = ({
   >(() => savedState?.calculatorResult);
 
   const runCalculator = useCallback(() => {
-    !autoRun && processAllFieldCodes();
+    !autorun && processAllFieldCodes();
     const parameters: SqValue[] = [];
 
     // Unpack all input values.
@@ -55,12 +55,12 @@ export const CalculatorResult: FC<Props> = ({
 
     const finalResult = calculator.run(parameters, environment);
     setCalculatorResult(finalResult);
-  }, [calculator, environment, inputResults, processAllFieldCodes, autoRun]);
+  }, [calculator, environment, inputResults, processAllFieldCodes, autorun]);
 
   //runCalculator is updated every time that the inputResults or calculator changes, after which this will trigger.
   useEffect(() => {
-    autoRun && runCalculator();
-  }, [runCalculator, autoRun]);
+    autorun && runCalculator();
+  }, [runCalculator, autorun]);
 
   // Back up calculatorResult to ViewerContext.
   useEffect(() => {
@@ -72,7 +72,7 @@ export const CalculatorResult: FC<Props> = ({
 
   return (
     <div className="py-3 px-5">
-      {!autoRun && (
+      {!autorun && (
         <div className="mb-3">
           <Button size="small" onClick={runCalculator} theme="primary">
             Run

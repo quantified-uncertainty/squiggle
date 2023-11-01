@@ -38,7 +38,7 @@ export const library = [
             title: title || undefined,
             description: description || undefined,
             inputs: inputs,
-            autoRun: autorun == null ? true : autorun,
+            autorun: autorun == null ? true : autorun,
           });
           const error = calc.getError();
           if (error) {
