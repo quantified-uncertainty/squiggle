@@ -79,8 +79,8 @@ importers:
         specifier: ^1.0.6
         version: 1.0.6(react@18.2.0)
       '@hookform/resolvers':
-        specifier: ^3.3.1
-        version: 3.3.1(react-hook-form@7.47.0)
+        specifier: ^3.3.2
+        version: 3.3.2(react-hook-form@7.47.0)
       '@lezer/common':
         specifier: ^1.1.0
         version: 1.1.0
@@ -3644,8 +3644,8 @@ packages:
       react: 18.2.0
     dev: false
 
-  /@hookform/resolvers@3.3.1(react-hook-form@7.47.0):
-    resolution: {integrity: sha512-K7KCKRKjymxIB90nHDQ7b9nli474ru99ZbqxiqDAWYsYhOsU3/4qLxW91y+1n04ic13ajjZ66L3aXbNef8PELQ==}
+  /@hookform/resolvers@3.3.2(react-hook-form@7.47.0):
+    resolution: {integrity: sha512-Tw+GGPnBp+5DOsSg4ek3LCPgkBOuOgS5DsDV7qsWNH9LZc433kgsWICjlsh2J9p04H2K66hsXPPb9qn9ILdUtA==}
     peerDependencies:
       react-hook-form: ^7.0.0
     dependencies:
@@ -4744,7 +4744,7 @@ packages:
       '@codemirror/view': 6.21.2
       '@floating-ui/react': 0.24.8(react-dom@18.2.0)(react@18.2.0)
       '@heroicons/react': 1.0.6(react@18.2.0)
-      '@hookform/resolvers': 3.3.1(react-hook-form@7.47.0)
+      '@hookform/resolvers': 3.3.2(react-hook-form@7.47.0)
       '@lezer/common': 1.1.0
       '@quri/prettier-plugin-squiggle': 0.8.5
       '@quri/squiggle-lang': 0.8.5
