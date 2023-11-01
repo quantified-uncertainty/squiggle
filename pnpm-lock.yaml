@@ -429,8 +429,8 @@ importers:
         specifier: ^7.4.2
         version: 7.4.2
       '@types/invariant':
-        specifier: ^2.2.35
-        version: 2.2.35
+        specifier: ^2.2.36
+        version: 2.2.36
       '@types/jest':
         specifier: ^29.5.7
         version: 29.5.7
@@ -6784,8 +6784,8 @@ packages:
     resolution: {integrity: sha512-lPG6KlZs88gef6aD85z3HNkztpj7w2R7HmR3gygjfXCQmsLloWNARFkMuzKiiY8FGdh1XDpgBdrSf4aKDiA7Kg==}
     dev: true
 
-  /@types/invariant@2.2.35:
-    resolution: {integrity: sha512-DxX1V9P8zdJPYQat1gHyY0xj3efl8gnMVjiM9iCY6y27lj+PoQWkgjt8jDqmovPqULkKVpKRg8J36iQiA+EtEg==}
+  /@types/invariant@2.2.36:
+    resolution: {integrity: sha512-WdRjvN2y1PiXCmCIEBbe+eoHGylBQa2oIBGEQsfKMJzqff7fwv2OhyXcGQn70+dWII6a5W8Y3ipYwVnhf+IXig==}
     dev: true
 
   /@types/is-ci@3.0.0:
