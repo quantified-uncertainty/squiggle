@@ -1,4 +1,4 @@
-"use client";
+// Removed "use client" directive
 import { FC, Fragment, ReactNode } from "react";
 import { Tab } from "@headlessui/react";
 import { clsx } from "clsx";
