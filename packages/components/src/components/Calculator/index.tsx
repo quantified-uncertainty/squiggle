@@ -86,6 +86,21 @@ function useCalculator(
     cachedState?.hashString
   );
 
+  const processAllFieldCodes = useCallback(async () => {
+    const formValues = form.getValues();
+    const newInputValues: typeof inputValues = {};
+    for (const input of calculator.inputs) {
+      const name = input.name;
+      const fieldValue = formValues[name];
+      const inputValueResult = await runSquiggleCode(
+        fieldValueToCode(name, calculator, fieldValue),
+        environment
+      );
+      newInputValues[name] = inputValueResult;
+    }
+    setInputValues(newInputValues);
+  }, [calculator.inputs, environment, form, setInputValues]);
+
   // This effect does two things:
   // - when the calculator is updated, it resets the form
   // - also, on initial render and on calculator updates, it calculates all input values (which will trigger calculator result calculation)
@@ -102,25 +117,18 @@ function useCalculator(
     }
 
     // Calculator has updated (or this component just mounted). Let's take all input codes and run them.
-    const processAllFieldCodes = async () => {
-      const formValues = form.getValues();
-      const newInputValues: typeof inputValues = {};
-      for (const input of calculator.inputs) {
-        const name = input.name;
-        const fieldValue = formValues[name];
-        const inputValueResult = await runSquiggleCode(
-          fieldValueToCode(name, calculator, fieldValue),
-          environment
-        );
-        newInputValues[name] = inputValueResult;
-      }
-      // All values are updated simultaneously, to avoid too many rerenders.
-      setInputValues(newInputValues);
-    };
+
     processAllFieldCodes();
 
     setPrevHashString(hashString);
-  }, [calculator, environment, hashString, prevHashString, form]);
+  }, [
+    calculator,
+    environment,
+    hashString,
+    prevHashString,
+    form,
+    processAllFieldCodes,
+  ]);
 
   // Update input value if input code has changed.
   useEffect(() => {
@@ -162,7 +170,7 @@ function useCalculator(
     return () => subscription.unsubscribe();
   }, [backupState, form]);
 
-  return { calculator, form, inputValues };
+  return { calculator, form, inputValues, processAllFieldCodes };
 }
 
 type Props = {
@@ -176,7 +184,7 @@ export const Calculator: FC<Props> = ({
   settings,
   valueWithContext,
 }) => {
-  const { calculator, form, inputValues } = useCalculator(
+  const { calculator, form, inputValues, processAllFieldCodes } = useCalculator(
     valueWithContext,
     environment
   );
@@ -230,6 +238,7 @@ export const Calculator: FC<Props> = ({
           inputValues={inputValues}
           environment={environment}
           settings={resultSettings}
+          processAllFieldCodes={processAllFieldCodes}
         />
       </div>
     </FormProvider>

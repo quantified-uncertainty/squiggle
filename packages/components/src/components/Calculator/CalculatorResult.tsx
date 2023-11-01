@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useState } from "react";
+import { FC, useEffect, useMemo, useState, useCallback } from "react";
 
 import { Env, SqValue } from "@quri/squiggle-lang";
 
@@ -10,12 +10,14 @@ import {
   SqValueResult,
 } from "./types.js";
 import { useSavedCalculatorState } from "./useSavedCalculatorState.js";
+import { Button } from "@quri/ui";
 
 type Props = {
   valueWithContext: SqCalculatorValueWithContext;
   inputValues: InputValues;
   environment: Env;
   settings: PlaygroundSettings;
+  processAllFieldCodes: () => void;
 };
 
 export const CalculatorResult: FC<Props> = ({
@@ -23,9 +25,11 @@ export const CalculatorResult: FC<Props> = ({
   inputValues,
   environment,
   settings,
+  processAllFieldCodes,
 }) => {
   const [cachedState, updateCachedState] =
     useSavedCalculatorState(valueWithContext);
+  const autoRun: boolean = true;
 
   const calculator = useMemo(() => valueWithContext.value, [valueWithContext]);
 
@@ -33,8 +37,8 @@ export const CalculatorResult: FC<Props> = ({
     () => cachedState?.fnValue
   );
 
-  // Whenever `inputValues` change, we recalculate `fnValue`.
-  useEffect(() => {
+  const runCalculator = useCallback(() => {
+    !autoRun && processAllFieldCodes();
     const parameters: SqValue[] = [];
 
     // Unpack all input values.
@@ -50,7 +54,11 @@ export const CalculatorResult: FC<Props> = ({
 
     const finalResult = calculator.run(parameters, environment);
     setFnValue(finalResult);
-  }, [calculator, environment, inputValues]);
+  }, [calculator, environment, inputValues, processAllFieldCodes, autoRun]);
+
+  useEffect(() => {
+    autoRun && runCalculator();
+  }, [runCalculator, autoRun]);
 
   // Back up fnValue to ViewerContext.
   useEffect(() => {
@@ -60,10 +68,19 @@ export const CalculatorResult: FC<Props> = ({
     });
   }, [updateCachedState, calculator, fnValue]);
 
-  return fnValue ? (
+  return (
     <div className="py-3 px-5">
-      <div className="text-sm font-semibold text-gray-700 mb-2">Result</div>
-      <ValueResultViewer result={fnValue} settings={settings} />
+      {!autoRun && (
+        <Button size="small" onClick={runCalculator} theme="primary">
+          Run
+        </Button>
+      )}
+      {fnValue ? (
+        <div>
+          <div className="text-sm font-semibold text-gray-700 mb-2">Result</div>
+          <ValueResultViewer result={fnValue} settings={settings} />
+        </div>
+      ) : null}
     </div>
-  ) : null;
+  );
 };
