@@ -5,23 +5,41 @@ import { SqLinker } from "@quri/squiggle-lang";
 import { getCurrentEnvironment } from "@/relay/environment";
 import { linkerQuery } from "@/__generated__/linkerQuery.graphql";
 
+type ParsedSourceId = {
+  owner: string;
+  slug: string;
+};
+
+const PREFIX = "hub";
+
+function parseSourceId(sourceId: string): ParsedSourceId {
+  const match = sourceId.match(/^(\w+):([\w-]+)\/([\w-]+)$/);
+
+  if (!match) {
+    throw new Error("Invalid import name");
+  }
+
+  const prefix = match[1];
+  if (prefix !== PREFIX) {
+    throw new Error(`Only ${PREFIX}: imports are supported`);
+  }
+
+  const owner = match[2];
+  const slug = match[3];
+
+  return { owner, slug };
+}
+
+export function serializeSourceId({ owner, slug }: ParsedSourceId): string {
+  return `${PREFIX}:${owner}/${slug}`;
+}
+
 export const squiggleHubLinker: SqLinker = {
   resolve(name) {
     return name;
   },
   async loadSource(sourceId: string) {
-    if (!sourceId.startsWith("hub:")) {
-      throw new Error("Only hub: imports are supported");
-    }
-
-    const match = sourceId.match(/^hub:(\w+)\/(\w+)$/);
-
-    if (!match) {
-      throw new Error("Invalid import name");
-    }
-
-    const ownerSlug = match[1];
-    const modelSlug = match[2];
+    const { owner, slug } = parseSourceId(sourceId);
 
     const environment = getCurrentEnvironment();
 
@@ -46,10 +64,7 @@ export const squiggleHubLinker: SqLinker = {
         }
       `,
       {
-        input: {
-          owner: ownerSlug,
-          slug: modelSlug,
-        },
+        input: { owner, slug },
       }
       // toPromise is discouraged by Relay docs, but should be fine if we don't do any streaming
     ).toPromise();

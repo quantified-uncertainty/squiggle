@@ -5,7 +5,7 @@ import {
   runFetchResult,
 } from "../helpers/projectHelpers.js";
 
-describe("Imports tests", () => {
+describe("Imports", () => {
   describe("Parse imports", () => {
     const project = SqProject.create({ linker: buildNaiveLinker() });
     project.setSource(
@@ -103,7 +103,7 @@ lib.x`
     expect(project.getResult("main").value.toString()).toEqual("5");
   });
 
-  describe("Another import test", () => {
+  describe("Mix imports and continues", () => {
     const project = SqProject.create({
       linker: buildNaiveLinker(),
     });
@@ -192,24 +192,24 @@ lib.x`
   test("Diamond shape", async () => {
     const project = SqProject.create({
       linker: buildNaiveLinker({
-        common: `
+        root: `
           export x = 10
         `,
-        bar: `
-          import "common" as common
-          export x = common.x * 2
+        left: `
+          import "root" as root
+          export x = root.x * 2
         `,
-        foo: `
-          import "common" as common
-          export x = common.x * 3
+        right: `
+          import "root" as root
+          export x = root.x * 3
         `,
       }),
     });
     project.setSource(
       "main",
       `
-        import "foo" as foo
-        import "bar" as bar
+        import "left" as foo
+        import "right" as bar
         foo.x + bar.x
       `
     );

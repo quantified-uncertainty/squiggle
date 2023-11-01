@@ -26,7 +26,10 @@ import { EditModelExports } from "@/components/exports/EditModelExports";
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
 import { useMutationForm } from "@/hooks/useMutationForm";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
-import { squiggleHubLinker } from "@/squiggle/components/linker";
+import {
+  serializeSourceId,
+  squiggleHubLinker,
+} from "@/squiggle/components/linker";
 import {
   Draft,
   SquiggleSnippetDraftDialog,
@@ -206,7 +209,10 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
           <VersionedSquigglePlayground
             key={playgroundKey}
             version={version}
-            sourceId={`hub:${model.owner.slug}/${model.slug}`}
+            sourceId={serializeSourceId({
+              owner: model.owner.slug,
+              slug: model.slug,
+            })}
             linker={squiggleHubLinker}
             height={height ?? "100vh"}
             onCodeChange={onCodeChange}
