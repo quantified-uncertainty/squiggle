@@ -57,6 +57,7 @@ export const CalculatorResult: FC<Props> = ({
     setCalculatorResult(finalResult);
   }, [calculator, environment, inputResults, processAllFieldCodes, autoRun]);
 
+  //runCalculator is updated every time that the inputResults or calculator changes, after which this will trigger.
   useEffect(() => {
     autoRun && runCalculator();
   }, [runCalculator, autoRun]);

@@ -118,18 +118,8 @@ function useCalculator(
     setPrevHashString(hashString);
 
     // Calculator has updated (or this component just mounted). Let's take all input codes and run them.
-
     processAllFieldCodes();
-
-    setPrevHashString(hashString);
-  }, [
-    calculator,
-    environment,
-    hashString,
-    prevHashString,
-    form,
-    processAllFieldCodes,
-  ]);
+  }, [calculator, hashString, prevHashString, form, processAllFieldCodes]);
 
   // Update input result if input code has changed.
   useEffect(() => {
