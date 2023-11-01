@@ -185,38 +185,24 @@ export function SelectFormField<
               isClearable={!required}
               getOptionLabel={getOptionLabel}
               getOptionValue={getOptionValue}
-              styles={{
-                // TODO - only when in modal? boolean prop?
-                menuPortal: (base) => ({ ...base, zIndex: 100 }),
-                input: (base) => ({
-                  ...base,
-                  "input:focus": {
-                    boxShadow: "none",
-                  },
-                  className: "text-sm placeholder:text-slate-300",
-                }),
-                control: (provided, state) => ({
-                  ...provided,
-                  minHeight: "10px",
-                  height: "34px",
-                  borderColor: state.isFocused
-                    ? "#6610f2"
-                    : provided.borderColor,
-                  "&:hover": {
-                    borderColor: state.isFocused
-                      ? "#6610f2"
-                      : provided.borderColor,
-                  },
-                  borderRadius: "0.375rem",
-                }),
-                option: (provided) => ({
-                  ...provided,
-                  fontSize: "0.875rem",
-                }),
-                placeholder: (provided) => ({
-                  ...provided,
-                  color: "#93C5FD",
-                }),
+              unstyled
+              classNames={{
+                menuPortal: () => "z-[100]",
+                control: () =>
+                  "h-10 border-slate-300 border rounded-md shadow-sm focus-within:ring-indigo-500 focus-within:border-indigo-500 focus-within:ring-1",
+                input: () => "[&_input:focus]:!ring-transparent", // disable default browser focus style
+                menu: () =>
+                  "mt-2 rounded-md bg-white shadow-xl border border-slate-300 p-1",
+                placeholder: () => "text-slate-300",
+                valueContainer: () => "px-3 py-2",
+                clearIndicator: () => "text-slate-300 hover:text-slate-500 p-2",
+                indicatorSeparator: () => "w-px bg-slate-300 my-2",
+                dropdownIndicator: () =>
+                  "text-slate-300 hover:text-slate-500 p-2",
+                option: () =>
+                  "px-2 py-1.5 rounded hover:bg-blue-100 text-slate-700 hover:text-slate-900",
+                loadingMessage: () => "text-slate-500",
+                noOptionsMessage: () => "text-slate-400 p-2",
               }}
               menuPortalTarget={
                 typeof document === "undefined" ? undefined : document.body
