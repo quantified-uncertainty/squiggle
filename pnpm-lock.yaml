@@ -203,8 +203,8 @@ importers:
         specifier: ^18.2.33
         version: 18.2.33
       '@types/react-resizable':
-        specifier: ^3.0.5
-        version: 3.0.5
+        specifier: ^3.0.6
+        version: 3.0.6
       '@types/testing-library__jest-dom':
         specifier: ^5.14.9
         version: 5.14.9
@@ -6946,8 +6946,8 @@ packages:
       '@types/relay-runtime': 14.1.14
     dev: true
 
-  /@types/react-resizable@3.0.5:
-    resolution: {integrity: sha512-7E8ySYq89uhJi0KpA8A0czhVzIl0uN2LCfdJjFmvx0bePHV9SdjzVrjCv5QASlFD4tGL/VRqHhff4nwvrPSrHw==}
+  /@types/react-resizable@3.0.6:
+    resolution: {integrity: sha512-7BHYsFJkkmkG0v7uIub8+aVrqw6jYibpsChrrMQLp1LMV/Yyb3f4gB82kjRpN4QPXy3tWPtZ/oUVeNHbs5BusA==}
     dependencies:
       '@types/react': 18.2.33
     dev: true
