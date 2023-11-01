@@ -15,9 +15,12 @@ const throwEmptyList = (): never => {
   throw new REArgumentError("List is empty");
 };
 
-function makeNumberArrayToNumberDefinition(fn: (arr: number[]) => number) {
+function makeNumberArrayToNumberDefinition(
+  fn: (arr: number[]) => number,
+  throwIfEmpty = true
+) {
   return makeDefinition([frArray(frNumber)], ([arr]) => {
-    if (arr.length === 0) {
+    if (arr.length === 0 && throwIfEmpty) {
       return throwEmptyList();
     }
     return vNumber(fn(arr));
@@ -25,10 +28,11 @@ function makeNumberArrayToNumberDefinition(fn: (arr: number[]) => number) {
 }
 
 function makeNumberArrayToNumberArrayDefinition(
-  fn: (arr: number[]) => number[]
+  fn: (arr: number[]) => number[],
+  throwIfEmpty = true
 ) {
   return makeDefinition([frArray(frNumber)], ([arr]) => {
-    if (arr.length === 0) {
+    if (arr.length === 0 && throwIfEmpty) {
       return throwEmptyList();
     }
     return vArray(fn(arr).map(vNumber));
@@ -83,7 +87,7 @@ export const library = [
     output: "Number",
     examples: [`sum([3,5,2])`],
     definitions: [
-      makeNumberArrayToNumberDefinition((arr) => E_A_Floats.sum(arr)),
+      makeNumberArrayToNumberDefinition((arr) => E_A_Floats.sum(arr), false),
     ],
   }),
   maker.make({
@@ -91,7 +95,10 @@ export const library = [
     output: "Number",
     examples: [`product([3,5,2])`],
     definitions: [
-      makeNumberArrayToNumberDefinition((arr) => E_A_Floats.product(arr)),
+      makeNumberArrayToNumberDefinition(
+        (arr) => E_A_Floats.product(arr),
+        false
+      ),
     ],
   }),
   maker.make({
@@ -145,7 +152,10 @@ export const library = [
     output: "Array",
     examples: [`sort([3,5,2,3,5])`],
     definitions: [
-      makeNumberArrayToNumberArrayDefinition((arr) => E_A_Floats.sort(arr)),
+      makeNumberArrayToNumberArrayDefinition(
+        (arr) => E_A_Floats.sort(arr),
+        false
+      ),
     ],
   }),
   maker.make({
@@ -153,14 +163,18 @@ export const library = [
     output: "Array",
     description: "cumulative sum",
     examples: [`cumsum([3,5,2,3,5])`],
-    definitions: [makeNumberArrayToNumberArrayDefinition(E_A_Floats.cumSum)],
+    definitions: [
+      makeNumberArrayToNumberArrayDefinition(E_A_Floats.cumSum, false),
+    ],
   }),
   maker.make({
     name: "cumprod",
     description: "cumulative product",
     output: "Array",
     examples: [`cumprod([3,5,2,3,5])`],
-    definitions: [makeNumberArrayToNumberArrayDefinition(E_A_Floats.cumProd)],
+    definitions: [
+      makeNumberArrayToNumberArrayDefinition(E_A_Floats.cumProd, false),
+    ],
   }),
   maker.make({
     name: "diff",

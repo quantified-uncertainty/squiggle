@@ -195,6 +195,7 @@ export const Calculator: FC<Props> = ({
   };
 
   const hasTitleOrDescription = !!calculator.title || !!calculator.description;
+
   return (
     <FormProvider {...form}>
       <div className="border border-slate-200 rounded-sm max-w-4xl mx-auto">
