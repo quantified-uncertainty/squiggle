@@ -191,8 +191,8 @@ importers:
         specifier: ^14.5.1
         version: 14.5.1(@testing-library/dom@9.3.3)
       '@types/jest':
-        specifier: ^29.5.5
-        version: 29.5.5
+        specifier: ^29.5.7
+        version: 29.5.7
       '@types/lodash':
         specifier: ^4.14.199
         version: 4.14.199
@@ -429,8 +429,8 @@ importers:
         specifier: ^2.2.35
         version: 2.2.35
       '@types/jest':
-        specifier: ^29.5.5
-        version: 29.5.5
+        specifier: ^29.5.7
+        version: 29.5.7
       '@types/lodash':
         specifier: ^4.14.199
         version: 4.14.199
@@ -536,8 +536,8 @@ importers:
         specifier: ^7.23.0
         version: 7.23.0(@babel/core@7.23.0)
       '@types/jest':
-        specifier: ^29.5.5
-        version: 29.5.5
+        specifier: ^29.5.7
+        version: 29.5.7
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@20.8.0)(ts-node@10.9.1)
@@ -573,8 +573,8 @@ importers:
         specifier: ^29.7.0
         version: 29.7.0
       '@types/jest':
-        specifier: ^29.5.5
-        version: 29.5.5
+        specifier: ^29.5.7
+        version: 29.5.7
       '@types/lodash':
         specifier: ^4.14.199
         version: 4.14.199
@@ -6804,8 +6804,8 @@ packages:
       '@types/istanbul-lib-report': 3.0.0
     dev: true
 
-  /@types/jest@29.5.5:
-    resolution: {integrity: sha512-ebylz2hnsWR9mYvmBFbXJXr+33UPc4+ZdxyDXh5w0FlPBTfCVN3wPL+kuOiQt3xvrK419v7XWeAs+AeOksafXg==}
+  /@types/jest@29.5.7:
+    resolution: {integrity: sha512-HLyetab6KVPSiF+7pFcUyMeLsx25LDNDemw9mGsJBkai/oouwrjTycocSDYopMEwFhN2Y4s9oPyOCZNofgSt2g==}
     dependencies:
       expect: 29.7.0
       pretty-format: 29.7.0
@@ -6998,7 +6998,7 @@ packages:
   /@types/testing-library__jest-dom@5.14.9:
     resolution: {integrity: sha512-FSYhIjFlfOpGSRyVoMBMuS3ws5ehFQODymf3vlI7U1K8c7PHwWwFY7VREfmsuzHSOnoKs/9/Y983ayOs7eRzqw==}
     dependencies:
-      '@types/jest': 29.5.5
+      '@types/jest': 29.5.7
     dev: true
 
   /@types/tough-cookie@4.0.2:
