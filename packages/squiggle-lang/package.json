@@ -30,7 +30,7 @@
     "update-system-version": "node ./dist/scripts/update-system-version.js"
   },
   "dependencies": {
-    "@commander-js/extra-typings": "^11.0.0",
+    "@commander-js/extra-typings": "^11.1.0",
     "commander": "^11.1.0",
     "immutable": "^4.3.4",
     "jstat": "^1.9.6",
