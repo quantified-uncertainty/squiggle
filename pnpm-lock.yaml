@@ -49,8 +49,8 @@ importers:
   packages/components:
     dependencies:
       '@codemirror/autocomplete':
-        specifier: ^6.9.1
-        version: 6.9.1(@codemirror/language@6.9.1)(@codemirror/state@6.2.1)(@codemirror/view@6.21.2)(@lezer/common@1.1.0)
+        specifier: ^6.10.2
+        version: 6.10.2(@codemirror/language@6.9.1)(@codemirror/state@6.2.1)(@codemirror/view@6.21.2)(@lezer/common@1.1.0)
       '@codemirror/commands':
         specifier: ^6.3.0
         version: 6.3.0
@@ -2513,8 +2513,8 @@ packages:
       prettier: 2.8.8
     dev: true
 
-  /@codemirror/autocomplete@6.9.1(@codemirror/language@6.9.1)(@codemirror/state@6.2.1)(@codemirror/view@6.21.2)(@lezer/common@1.1.0):
-    resolution: {integrity: sha512-yma56tqD7khIZK4gy4X5lX3/k5ArMiCGat7HEWRF/8L2kqOjVdp2qKZqpcJjwTIjSj6fqKAHqi7IjtH3QFE+Bw==}
+  /@codemirror/autocomplete@6.10.2(@codemirror/language@6.9.1)(@codemirror/state@6.2.1)(@codemirror/view@6.21.2)(@lezer/common@1.1.0):
+    resolution: {integrity: sha512-3dCL7b0j2GdtZzWN5j7HDpRAJ26ip07R4NGYz7QYthIYMiX8I4E4TNrYcdTayPJGeVQtd/xe7lWU4XL7THFb/w==}
     peerDependencies:
       '@codemirror/language': ^6.0.0
       '@codemirror/state': ^6.0.0
@@ -4728,7 +4728,7 @@ packages:
       react: ^16.8.0 || ^17 || ^18
       react-dom: ^16.8.0 || ^17 || ^18
     dependencies:
-      '@codemirror/autocomplete': 6.9.1(@codemirror/language@6.9.1)(@codemirror/state@6.2.1)(@codemirror/view@6.21.2)(@lezer/common@1.1.0)
+      '@codemirror/autocomplete': 6.10.2(@codemirror/language@6.9.1)(@codemirror/state@6.2.1)(@codemirror/view@6.21.2)(@lezer/common@1.1.0)
       '@codemirror/commands': 6.3.0
       '@codemirror/language': 6.9.1
       '@codemirror/lint': 6.4.2
@@ -8741,7 +8741,7 @@ packages:
   /codemirror@6.0.1(@lezer/common@1.1.0):
     resolution: {integrity: sha512-J8j+nZ+CdWmIeFIGXEFbFPtpiYacFMDR8GlHK3IyHQJMCaVRfGx9NT+Hxivv1ckLWPvNdZqndbr/7lVhrf/Svg==}
     dependencies:
-      '@codemirror/autocomplete': 6.9.1(@codemirror/language@6.9.1)(@codemirror/state@6.2.1)(@codemirror/view@6.21.2)(@lezer/common@1.1.0)
+      '@codemirror/autocomplete': 6.10.2(@codemirror/language@6.9.1)(@codemirror/state@6.2.1)(@codemirror/view@6.21.2)(@lezer/common@1.1.0)
       '@codemirror/commands': 6.3.0
       '@codemirror/language': 6.9.1
       '@codemirror/lint': 6.4.2
