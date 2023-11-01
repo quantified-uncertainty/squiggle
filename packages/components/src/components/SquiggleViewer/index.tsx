@@ -13,7 +13,7 @@ import { MessageAlert } from "../Alert.js";
 import { CodeEditorHandle } from "../CodeEditor.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
-import { ExpressionViewer } from "./ExpressionViewer.js";
+import { ValueViewer } from "./ValueViewer.js";
 import {
   ViewerProvider,
   useFocus,
@@ -97,7 +97,7 @@ const SquiggleViewerOuter = forwardRef<
   const body = () => {
     if (focused) {
       if (focusedItem) {
-        return <ExpressionViewer value={focusedItem} />;
+        return <ValueViewer value={focusedItem} />;
       } else {
         return <MessageAlert heading="Focused variable is not defined" />;
       }
@@ -107,10 +107,10 @@ const SquiggleViewerOuter = forwardRef<
       return (
         <div className="space-y-2">
           {resultVariables.ok && resultVariableLength > 0 && (
-            <ExpressionViewer value={resultVariables.value} />
+            <ValueViewer value={resultVariables.value} />
           )}
           {resultItem && resultItem.ok && (
-            <ExpressionViewer value={resultItem.value} />
+            <ValueViewer value={resultItem.value} />
           )}
         </div>
       );

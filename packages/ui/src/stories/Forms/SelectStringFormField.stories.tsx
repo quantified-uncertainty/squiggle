@@ -18,6 +18,23 @@ export const Default: Story = {
   },
 };
 
+export const Small: Story = {
+  args: {
+    name: "small",
+    label: "Small select",
+    options: ["option 1", "option 2"],
+    size: "small",
+  },
+};
+
+export const LongAndScrollable: Story = {
+  args: {
+    name: "fieldName",
+    label: "Scrollable select",
+    options: new Array(20).fill(null).map((_, i) => `Option ${i + 1}`),
+  },
+};
+
 /** Form is initially not valid and there's no "X" clear button on the select. */
 export const Required: Story = {
   args: {
