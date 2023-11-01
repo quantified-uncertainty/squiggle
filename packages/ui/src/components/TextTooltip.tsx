@@ -1,4 +1,4 @@
-// "use client";
+// Removed "use client" directive
 import { FC, cloneElement, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
