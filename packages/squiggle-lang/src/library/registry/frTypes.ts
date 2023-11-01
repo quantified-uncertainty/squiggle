@@ -14,6 +14,8 @@ import {
   vScale,
   vString,
   vTimeDuration,
+  vInput,
+  Input,
 } from "../../value/index.js";
 
 /*
@@ -101,6 +103,11 @@ export const frScale: FRType<Scale> = {
   unpack: (v) => (v.type === "Scale" ? v.value : undefined),
   pack: (v) => vScale(v),
   getName: () => "scale",
+};
+export const frInput: FRType<Input> = {
+  unpack: (v) => (v.type === "Input" ? v.value : undefined),
+  pack: (v) => vInput(v),
+  getName: () => "input",
 };
 
 export const frArray = <T>(itemType: FRType<T>): FRType<T[]> => {

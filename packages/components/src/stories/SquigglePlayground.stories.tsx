@@ -234,25 +234,22 @@ bar = 123
 export const Calculator: Story = {
   name: "Calculator",
   args: {
-    defaultCode: `f(a, b, c) = [a + b, a, c]
-
-a = "## My favorite calculator\nA longer description of the calculator goes here...\n"
-
+    defaultCode: `f(a, b, c, d) = [a,b,c,d]
+a = "A longer description of the calculator goes here...\n"
 Calculator.make(
   {
     fn: f,
+    title: "My Calculator",
     description: a,
-    fields: [
-      {
-        name: "Variable 1",
-        default: "1",
-        description: "This is a short description of the first variable input",
-      },
-      { name: "Variable2", default: "2 to 40" },
-      { name: "Some array", default: "[3,3,5,2,2]" },
+    inputs: [
+      Input.checkbox({name: "VariableCheckbox", description: "This is a long name", default: false}),
+      Input.textArea({name: "Variable2", description: "This is a long name", default: "2 to 40"}),
+      Input.text({name: "Variable1", description: "This is a very long description This is a very long description This is a very long description This is a very long description This is a very long description", default: 1}),
+      Input.select({name: "Variable3", default: "alice", options: ["alice", "charles", "bob", "bill", "maven", "billy", "samantha", "becky"]})
     ],
   }
-)  `,
+)
+  `,
     height: 800,
   },
 };

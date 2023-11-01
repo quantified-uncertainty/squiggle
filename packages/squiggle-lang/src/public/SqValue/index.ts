@@ -7,6 +7,7 @@ import { SqCalculator } from "./SqCalculator.js";
 import { SqDict } from "./SqDict.js";
 import { SqDistribution, wrapDistribution } from "./SqDistribution/index.js";
 import { SqDomain, wrapDomain } from "./SqDomain.js";
+import { SqInput, wrapInput } from "./SqInput.js";
 import { SqLambda } from "./SqLambda.js";
 import { SqPlot, wrapPlot } from "./SqPlot.js";
 import { SqScale, wrapScale } from "./SqScale.js";
@@ -44,6 +45,8 @@ export function wrapValue(value: Value, context?: SqValueContext) {
       return new SqVoidValue(value, context);
     case "Domain":
       return new SqDomainValue(value, context);
+    case "Input":
+      return new SqInputValue(value, context);
     default:
       throw new Error(`Unknown value ${JSON.stringify(value satisfies never)}`);
   }
@@ -239,6 +242,18 @@ export class SqScaleValue extends SqAbstractValue<"Scale", SqScale> {
 
   get value() {
     return wrapScale(this._value.value);
+  }
+
+  asJS() {
+    return this.value;
+  }
+}
+
+export class SqInputValue extends SqAbstractValue<"Input", SqInput> {
+  tag = "Input" as const;
+
+  get value() {
+    return wrapInput(this._value.value);
   }
 
   asJS() {
