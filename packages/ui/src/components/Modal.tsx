@@ -1,4 +1,4 @@
-"use client";
+// "use client";
 import { XIcon } from "../icons/XIcon.js";
 import { clsx } from "clsx";
 import { motion } from "framer-motion";
