@@ -18,6 +18,15 @@ export const Default: Story = {
   },
 };
 
+export const Small: Story = {
+  args: {
+    name: "small",
+    label: "Small select",
+    options: ["option 1", "option 2"],
+    size: "small",
+  },
+};
+
 /** Form is initially not valid and there's no "X" clear button on the select. */
 export const Required: Story = {
   args: {
