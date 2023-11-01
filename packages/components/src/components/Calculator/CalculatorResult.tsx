@@ -72,9 +72,11 @@ export const CalculatorResult: FC<Props> = ({
   return (
     <div className="py-3 px-5">
       {!autoRun && (
-        <Button size="small" onClick={runCalculator} theme="primary">
-          Run
-        </Button>
+        <div className="mb-3">
+          <Button size="small" onClick={runCalculator} theme="primary">
+            Run
+          </Button>
+        </div>
       )}
       {fnValue ? (
         <div>

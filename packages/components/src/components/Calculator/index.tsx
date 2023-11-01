@@ -99,7 +99,7 @@ function useCalculator(
       newInputValues[name] = inputValueResult;
     }
     setInputValues(newInputValues);
-  }, [calculator.inputs, environment, form, setInputValues]);
+  }, [calculator, environment, form, setInputValues]);
 
   // This effect does two things:
   // - when the calculator is updated, it resets the form
