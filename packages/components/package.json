@@ -51,7 +51,7 @@
     "@storybook/addon-actions": "^7.4.5",
     "@storybook/addon-docs": "^7.2.1",
     "@storybook/addon-essentials": "^7.2.1",
-    "@storybook/addon-links": "^7.5.2",
+    "@storybook/addon-links": "^7.52",
     "@storybook/blocks": "^7.4.0",
     "@storybook/node-logger": "^7.5.2",
     "@storybook/react": "^7.0.24",
