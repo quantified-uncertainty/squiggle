@@ -308,8 +308,8 @@ importers:
         specifier: ^3.7.0
         version: 3.7.0(@pothos/core@3.38.0)(graphql@16.8.1)
       '@pothos/plugin-validation':
-        specifier: ^3.10.0
-        version: 3.10.0(@pothos/core@3.38.0)(graphql@16.8.1)(zod@3.22.3)
+        specifier: ^3.10.1
+        version: 3.10.1(@pothos/core@3.38.0)(graphql@16.8.1)(zod@3.22.3)
       '@pothos/plugin-with-input':
         specifier: ^3.10.1
         version: 3.10.1(@pothos/core@3.38.0)(graphql@16.8.1)
@@ -4650,8 +4650,8 @@ packages:
       graphql: 16.8.1
     dev: false
 
-  /@pothos/plugin-validation@3.10.0(@pothos/core@3.38.0)(graphql@16.8.1)(zod@3.22.3):
-    resolution: {integrity: sha512-/f5u7XYSXeuLDohYB5qerhrWS9eJWa913oJyRI51Ur/fW0Ekuc5HQjGJ+EZjAgKh4FnyWMD/zpwWiXqZzxua5g==}
+  /@pothos/plugin-validation@3.10.1(@pothos/core@3.38.0)(graphql@16.8.1)(zod@3.22.3):
+    resolution: {integrity: sha512-FdYHzVSbrHZ4cDPOW/RB8Zsyx7qNuybAbC5DO3zVSsPPgY/FWLNWtQ6CaE+tkg5Je1RxpmO5od7Ig1Wt+akqnA==}
     peerDependencies:
       '@pothos/core': '*'
       graphql: '>=15.1.0'

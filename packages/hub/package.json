@@ -24,7 +24,7 @@
     "@pothos/plugin-relay": "^3.44.0",
     "@pothos/plugin-scope-auth": "^3.20.0",
     "@pothos/plugin-simple-objects": "^3.7.0",
-    "@pothos/plugin-validation": "^3.10.0",
+    "@pothos/plugin-validation": "^3.10.1",
     "@pothos/plugin-with-input": "^3.10.1",
     "@prisma/client": "5.3.1",
     "@quri/squiggle-components": "workspace:*",
