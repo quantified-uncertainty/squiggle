@@ -173,8 +173,8 @@ importers:
         specifier: ^7.5.2
         version: 7.5.2(react-dom@18.2.0)(react@18.2.0)
       '@storybook/blocks':
-        specifier: ^7.4.0
-        version: 7.4.5(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^7.5.2
+        version: 7.5.2(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)
       '@storybook/node-logger':
         specifier: ^7.5.2
         version: 7.5.2
@@ -670,8 +670,8 @@ importers:
         specifier: ^7.5.2
         version: 7.5.2(react-dom@18.2.0)(react@18.2.0)
       '@storybook/blocks':
-        specifier: ^7.4.5
-        version: 7.4.5(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^7.5.2
+        version: 7.5.2(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)
       '@storybook/react':
         specifier: ^7.4.5
         version: 7.4.5(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2)
