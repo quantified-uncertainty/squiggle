@@ -47,6 +47,7 @@ export const CalculatorInput: FC<{
           <SelectStringFormField
             {...commonProps}
             options={input.options}
+            size="small"
             required
           />
         )}

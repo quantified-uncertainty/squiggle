@@ -2,19 +2,12 @@ import { useCallback, useMemo, useState } from "react";
 
 import { useViewerContext } from "../SquiggleViewer/ViewerProvider.js";
 import { SqCalculatorValueWithContext } from "./types.js";
-import { SqValueResult } from "./types.js";
-import { FormShape } from "./types.js";
-import { InputValues } from "./types.js";
+import { CalculatorState } from "./types.js";
 
-export type CalculatorState = {
-  hashString: string;
-  formValues?: FormShape;
-  inputValues?: InputValues;
-  fnValue?: SqValueResult;
-};
-
-// Takes a calculator value; returns the cache from ViewerContext for this calculator and a function for updating the cache.
-// Note that the returned cached value is never updated! It's write-only after the initial load.
+/**
+ * Takes a calculator value; returns the state from ViewerContext for this calculator and a function for updating the state.
+ * The state is only used for calculator initialization. After that, update function get called to keep the state updated.
+ */
 export function useSavedCalculatorState(
   calculatorValue: SqCalculatorValueWithContext
 ) {
@@ -23,9 +16,9 @@ export function useSavedCalculatorState(
   const { getLocalItemState, dispatch: viewerContextDispatch } =
     useViewerContext();
 
-  // Load cache just once on initial render.
-  // After the initial load, this component owns the state and pushes it to ViewerContext.
-  const [cachedState] = useState<CalculatorState | undefined>(() => {
+  // Load state just once on initial render.
+  // After the initial load, Calculator component owns the state and pushes it to ViewerContext.
+  const [savedState] = useState<CalculatorState | undefined>(() => {
     const itemState = getLocalItemState({ path });
 
     const sameCalculatorCacheExists =
@@ -39,7 +32,7 @@ export function useSavedCalculatorState(
     }
   });
 
-  const updateCachedState = useCallback(
+  const updateSavedState = useCallback(
     (state: CalculatorState) => {
       viewerContextDispatch({
         type: "CALCULATOR_UPDATE",
@@ -52,5 +45,5 @@ export function useSavedCalculatorState(
     [path, viewerContextDispatch]
   );
 
-  return [cachedState, updateCachedState] as const;
-} // This type is used for backing up calculator state to ViewerContext.
+  return [savedState, updateSavedState] as const;
+}

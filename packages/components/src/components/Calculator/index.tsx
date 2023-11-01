@@ -9,7 +9,7 @@ import { CalculatorInput } from "./CalculatorInput.js";
 import { CalculatorResult } from "./CalculatorResult.js";
 import {
   FormShape,
-  InputValues,
+  InputResults,
   SqCalculatorValueWithContext,
   SqValueResult,
 } from "./types.js";
@@ -68,42 +68,42 @@ function useCalculator(
   // useMemo here is important; valueWithContext.value is a getter that creates a new calculator value every time.
   const calculator = useMemo(() => valueWithContext.value, [valueWithContext]);
 
-  const [cachedState, updateCachedState] =
+  const [savedState, updateSavedState] =
     useSavedCalculatorState(valueWithContext);
 
   // Calculator input codes (Squiggle strings, selected options in <select>, etc.) are tracked by react-hook-form.
   // Everything else is tracked in local state and backed up to ViewerContext.
   const form = useForm<FormShape>({
-    defaultValues: cachedState?.formValues ?? getFormValues(calculator),
+    defaultValues: savedState?.formValues ?? getFormValues(calculator),
   });
 
-  const [inputValues, setInputValues] = useState<InputValues>(
-    () => cachedState?.inputValues ?? {}
+  const [inputResults, setInputResults] = useState<InputResults>(
+    () => savedState?.inputResults ?? {}
   );
 
   const hashString = useMemo(() => calculator.hashString, [calculator]);
   const [prevHashString, setPrevHashString] = useState<string | undefined>(
-    cachedState?.hashString
+    savedState?.hashString
   );
 
   const processAllFieldCodes = useCallback(async () => {
     const formValues = form.getValues();
-    const newInputValues: typeof inputValues = {};
+    const newInputResults: typeof inputResults = {};
     for (const input of calculator.inputs) {
       const name = input.name;
       const fieldValue = formValues[name];
-      const inputValueResult = await runSquiggleCode(
+      const inputResult = await runSquiggleCode(
         fieldValueToCode(name, calculator, fieldValue),
         environment
       );
-      newInputValues[name] = inputValueResult;
+      newInputResults[name] = inputResult;
     }
-    setInputValues(newInputValues);
-  }, [calculator, environment, form, setInputValues]);
+    setInputResults(newInputResults);
+  }, [calculator, environment, form, setInputResults]);
 
   // This effect does two things:
   // - when the calculator is updated, it resets the form
-  // - also, on initial render and on calculator updates, it calculates all input values (which will trigger calculator result calculation)
+  // - also, on initial render and on calculator updates, it calculates all input results (which will trigger calculator result calculation)
   // In both cases, it updates `prevHashString`, which tracks the calculator identity.
   useEffect(() => {
     if (prevHashString === hashString) {
@@ -115,6 +115,7 @@ function useCalculator(
       // (In the future, we could do something more complicated here, for example check if any form fields were touched.)
       form.reset(getFormValues(calculator));
     }
+    setPrevHashString(hashString);
 
     // Calculator has updated (or this component just mounted). Let's take all input codes and run them.
 
@@ -130,20 +131,20 @@ function useCalculator(
     processAllFieldCodes,
   ]);
 
-  // Update input value if input code has changed.
+  // Update input result if input code has changed.
   useEffect(() => {
     const subscription = form.watch(async (formValues, { name }) => {
       if (name === undefined) return;
       const fieldValue = formValues[name];
       if (fieldValue === undefined) return;
 
-      const valueResult = await runSquiggleCode(
+      const inputResult = await runSquiggleCode(
         fieldValueToCode(name, calculator, fieldValue),
         environment
       );
-      setInputValues((inputValues) => ({
-        ...inputValues,
-        [name]: valueResult,
+      setInputResults((inputResults) => ({
+        ...inputResults,
+        [name]: inputResult,
       }));
     });
 
@@ -153,24 +154,24 @@ function useCalculator(
   // Back up calculator state outside of this component, since calculator can disappear on code changes
   // (for example, on short syntax errors when autorun is enabled), and we don't want to lose user input
   // or calculator output when calculator component is rendered again.
-  const backupState = useCallback(() => {
-    updateCachedState({
+  const _updateSavedState = useCallback(() => {
+    updateSavedState({
       hashString,
       formValues: form.getValues(),
-      inputValues,
+      inputResults: inputResults,
     });
-  }, [inputValues, form, hashString, updateCachedState]);
+  }, [inputResults, form, hashString, updateSavedState]);
 
-  // Back up whenever any calculated value changes.
-  useEffect(() => backupState(), [backupState]);
+  // Back up whenever any calculated input result changes.
+  useEffect(() => _updateSavedState(), [_updateSavedState]);
 
   // Also back up whenever form state changes (backups are cheap, so there's no reason not to do this).
   useEffect(() => {
-    const subscription = form.watch(() => backupState());
+    const subscription = form.watch(() => _updateSavedState());
     return () => subscription.unsubscribe();
-  }, [backupState, form]);
+  }, [_updateSavedState, form]);
 
-  return { calculator, form, inputValues, processAllFieldCodes };
+  return { calculator, form, inputResults, processAllFieldCodes };
 }
 
 type Props = {
@@ -184,12 +185,10 @@ export const Calculator: FC<Props> = ({
   settings,
   valueWithContext,
 }) => {
-  const { calculator, form, inputValues, processAllFieldCodes } = useCalculator(
-    valueWithContext,
-    environment
-  );
+  const { calculator, form, inputResults, processAllFieldCodes } =
+    useCalculator(valueWithContext, environment);
 
-  const inputShowSettings: PlaygroundSettings = {
+  const inputResultSettings: PlaygroundSettings = {
     ...settings,
     distributionChartSettings: {
       ...settings.distributionChartSettings,
@@ -198,7 +197,7 @@ export const Calculator: FC<Props> = ({
     chartHeight: 30,
   };
 
-  const resultSettings: PlaygroundSettings = {
+  const calculatorResultSettings: PlaygroundSettings = {
     ...settings,
     chartHeight: 200,
   };
@@ -227,19 +226,19 @@ export const Calculator: FC<Props> = ({
             <CalculatorInput
               key={row.name}
               input={row}
-              result={inputValues[row.name]}
-              settings={inputShowSettings}
+              result={inputResults[row.name]}
+              settings={inputResultSettings}
             />
           ))}
         </div>
 
         <CalculatorResult
           valueWithContext={valueWithContext}
-          inputValues={inputValues}
+          inputResults={inputResults}
           environment={environment}
-          settings={resultSettings}
           processAllFieldCodes={processAllFieldCodes}
           autoRun={calculator.autoRun}
+          settings={calculatorResultSettings}
         />
       </div>
     </FormProvider>

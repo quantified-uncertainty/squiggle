@@ -3,7 +3,7 @@ import {
   PartialPlaygroundSettings,
   PlaygroundSettings,
 } from "../PlaygroundSettings.js";
-import { CalculatorState } from "../Calculator/useSavedCalculatorState.js";
+import { CalculatorState } from "../Calculator/types.js";
 
 export type LocalItemState = {
   collapsed: boolean;
@@ -93,7 +93,7 @@ function getCalculatorResult(
   }
 
   const calculatorState = getCalculator({ path: previousPathItem });
-  const result = calculatorState?.fnValue;
+  const result = calculatorState?.calculatorResult;
   if (result?.ok) {
     return result.value;
   } else {

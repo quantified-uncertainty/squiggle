@@ -20,7 +20,7 @@ import {
   useToggleCollapsed,
   useViewerContext,
 } from "./ViewerProvider.js";
-import { getWidget } from "./getWidget.js";
+import { getSqValueWidget } from "./getSqValueWidget.js";
 import {
   LocalItemState,
   MergedItemSettings,
@@ -41,7 +41,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
   const { tag } = value;
   const { path } = value.context;
 
-  const widget = getWidget(value);
+  const widget = getSqValueWidget(value);
   const heading = widget.heading || value.publicName();
   const hasChildren = () => !!getChildrenValues(value);
   const render: (settings: MergedItemSettings) => ReactNode =
