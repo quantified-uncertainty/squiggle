@@ -138,11 +138,15 @@ export const VariableBox: FC<VariableBoxProps> = ({
     </div>
   );
 
+  const isExport = path.root == "exports";
+
   const headerClasses = () => {
     if (isFocused) {
       return "text-md text-black font-bold ml-1";
     } else if (isRoot) {
       return "text-sm text-stone-600 font-semibold";
+    } else if (isExport) {
+      return "text-sm font-semibold text-purple-800 cursor-pointer hover:underline";
     } else {
       return "text-sm text-stone-800 cursor-pointer hover:underline";
     }
@@ -153,6 +157,7 @@ export const VariableBox: FC<VariableBoxProps> = ({
       {name}
     </div>
   );
+
   const headerPreview = () =>
     !!preview && (
       <div
