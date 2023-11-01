@@ -150,7 +150,7 @@
   "dependencies": {
     "@vscode/vsce": "^2.21.1",
     "vscode-languageclient": "^8.1.0",
-    "vscode-languageserver": "^8.1.0",
+    "vscode-languageserver": "^9.0.1",
     "vscode-languageserver-textdocument": "^1.0.11"
   }
 }
