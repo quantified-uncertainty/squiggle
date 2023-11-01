@@ -100,8 +100,8 @@ importers:
         specifier: ^0.5.10
         version: 0.5.10(tailwindcss@3.3.3)
       '@types/d3':
-        specifier: ^7.4.1
-        version: 7.4.1
+        specifier: ^7.4.2
+        version: 7.4.2
       clsx:
         specifier: ^2.0.0
         version: 2.0.0
@@ -423,8 +423,8 @@ importers:
         specifier: ^0.5.6
         version: 0.5.6(tailwindcss@3.3.3)
       '@types/d3':
-        specifier: ^7.4.1
-        version: 7.4.1
+        specifier: ^7.4.2
+        version: 7.4.2
       '@types/invariant':
         specifier: ^2.2.35
         version: 2.2.35
@@ -4745,7 +4745,7 @@ packages:
       '@quri/ui': 0.1.4(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)
       '@react-hook/size': 2.1.2(react@18.2.0)
       '@tailwindcss/typography': 0.5.10(tailwindcss@3.3.3)
-      '@types/d3': 7.4.1
+      '@types/d3': 7.4.2
       clsx: 2.0.0
       codemirror: 6.0.1(@lezer/common@1.1.0)
       d3: 7.8.5
@@ -6637,8 +6637,8 @@ packages:
       '@types/d3-interpolate': 3.0.1
       '@types/d3-selection': 3.0.4
 
-  /@types/d3@7.4.1:
-    resolution: {integrity: sha512-lBpYmbHTCtFKO1DB1R7E9dXp9/g1F3JXSGOF7iKPZ+wRmYg/Q6tCRHODGOc5Qk25fJRe2PI60EDRf2HLPUncMA==}
+  /@types/d3@7.4.2:
+    resolution: {integrity: sha512-Y4g2Yb30ZJmmtqAJTqMRaqXwRawfvpdpVmyEYEcyGNhrQI/Zvkq3k7yE1tdN07aFSmNBfvmegMQ9Fe2qy9ZMhw==}
     dependencies:
       '@types/d3-array': 3.0.4
       '@types/d3-axis': 3.0.2
