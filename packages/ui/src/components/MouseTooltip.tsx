@@ -1,4 +1,4 @@
-"use client";
+// Removed "use client" directive
 import { FC, PropsWithChildren, ReactNode, memo, useContext } from "react";
 
 import {
