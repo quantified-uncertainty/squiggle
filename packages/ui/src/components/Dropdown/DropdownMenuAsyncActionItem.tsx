@@ -1,4 +1,4 @@
-"use client";
+// Removed "use client" directive
 import { FC, useState } from "react";
 
 import { IconProps } from "../../icons/Icon.js";
