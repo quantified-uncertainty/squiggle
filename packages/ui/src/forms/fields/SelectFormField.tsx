@@ -220,8 +220,8 @@ export function SelectFormField<
                 menuPortal: () => "!z-[100]",
                 // based on Dropdown styles
                 menu: () =>
-                  "mt-2 rounded-md bg-white shadow-xl border border-slate-300",
-                menuList: () => "p-1",
+                  "mt-2 rounded-md bg-white shadow-xl border border-slate-300 overflow-hidden",
+                menuList: () => "p-1 overflow-auto",
                 option: () =>
                   "px-2 py-1.5 rounded hover:bg-blue-100 text-slate-700 hover:text-slate-900",
                 loadingMessage: () => "text-slate-500",
