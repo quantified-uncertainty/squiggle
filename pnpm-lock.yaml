@@ -291,7 +291,7 @@ importers:
     dependencies:
       '@next-auth/prisma-adapter':
         specifier: ^1.0.7
-        version: 1.0.7(@prisma/client@5.3.1)(next-auth@4.23.2)
+        version: 1.0.7(@prisma/client@5.5.2)(next-auth@4.23.2)
       '@pothos/core':
         specifier: ^3.38.0
         version: 3.38.0(graphql@16.8.1)
@@ -300,7 +300,7 @@ importers:
         version: 3.11.1(@pothos/core@3.38.0)(graphql@16.8.1)
       '@pothos/plugin-prisma':
         specifier: ^3.60.0
-        version: 3.60.0(@pothos/core@3.38.0)(@prisma/client@5.3.1)(graphql@16.8.1)(typescript@5.2.2)
+        version: 3.60.0(@pothos/core@3.38.0)(@prisma/client@5.5.2)(graphql@16.8.1)(typescript@5.2.2)
       '@pothos/plugin-relay':
         specifier: ^3.44.0
         version: 3.44.0(@pothos/core@3.38.0)(graphql@16.8.1)
@@ -317,8 +317,8 @@ importers:
         specifier: ^3.10.1
         version: 3.10.1(@pothos/core@3.38.0)(graphql@16.8.1)
       '@prisma/client':
-        specifier: 5.3.1
-        version: 5.3.1(prisma@5.3.1)
+        specifier: 5.5.2
+        version: 5.5.2(prisma@5.3.1)
       '@quri/squiggle-components':
         specifier: workspace:*
         version: link:../components
@@ -4199,13 +4199,13 @@ packages:
       tar-fs: 2.1.1
     dev: true
 
-  /@next-auth/prisma-adapter@1.0.7(@prisma/client@5.3.1)(next-auth@4.23.2):
+  /@next-auth/prisma-adapter@1.0.7(@prisma/client@5.5.2)(next-auth@4.23.2):
     resolution: {integrity: sha512-Cdko4KfcmKjsyHFrWwZ//lfLUbcLqlyFqjd/nYE2m3aZ7tjMNUjpks47iw7NTCnXf+5UWz5Ypyt1dSs1EP5QJw==}
     peerDependencies:
       '@prisma/client': '>=2.26.0 || >=3'
       next-auth: ^4
     dependencies:
-      '@prisma/client': 5.3.1(prisma@5.3.1)
+      '@prisma/client': 5.5.2(prisma@5.3.1)
       next-auth: 4.23.2(next@13.5.3)(nodemailer@6.9.7)(react-dom@18.2.0)(react@18.2.0)
     dev: false
 
@@ -4608,7 +4608,7 @@ packages:
       graphql: 16.8.1
     dev: false
 
-  /@pothos/plugin-prisma@3.60.0(@pothos/core@3.38.0)(@prisma/client@5.3.1)(graphql@16.8.1)(typescript@5.2.2):
+  /@pothos/plugin-prisma@3.60.0(@pothos/core@3.38.0)(@prisma/client@5.5.2)(graphql@16.8.1)(typescript@5.2.2):
     resolution: {integrity: sha512-IVy5NJjJzVZM4KQiEB/4Q75+CMi8tEkbJ4v2MKKTgYBKgR9GJatjtOtoCbzag4GPK1Ko13VwpPH07Q9LFePtKw==}
     hasBin: true
     peerDependencies:
@@ -4618,7 +4618,7 @@ packages:
       typescript: '>=4.7.2'
     dependencies:
       '@pothos/core': 3.38.0(graphql@16.8.1)
-      '@prisma/client': 5.3.1(prisma@5.3.1)
+      '@prisma/client': 5.5.2(prisma@5.3.1)
       '@prisma/generator-helper': 5.3.1
       graphql: 16.8.1
       typescript: 5.2.2
@@ -4678,8 +4678,8 @@ packages:
       graphql: 16.8.1
     dev: false
 
-  /@prisma/client@5.3.1(prisma@5.3.1):
-    resolution: {integrity: sha512-ArOKjHwdFZIe1cGU56oIfy7wRuTn0FfZjGuU/AjgEBOQh+4rDkB6nF+AGHP8KaVpkBIiHGPQh3IpwQ3xDMdO0Q==}
+  /@prisma/client@5.5.2(prisma@5.3.1):
+    resolution: {integrity: sha512-54XkqR8M+fxbzYqe+bIXimYnkkcGqgOh0dn0yWtIk6CQT4IUCAvNFNcQZwk2KqaLU+/1PHTSWrcHtx4XjluR5w==}
     engines: {node: '>=16.13'}
     requiresBuild: true
     peerDependencies:
@@ -4688,7 +4688,7 @@ packages:
       prisma:
         optional: true
     dependencies:
-      '@prisma/engines-version': 5.3.1-2.61e140623197a131c2a6189271ffee05a7aa9a59
+      '@prisma/engines-version': 5.5.1-1.aebc046ce8b88ebbcb45efe31cbe7d06fd6abc0a
       prisma: 5.3.1
     dev: false
 
@@ -4702,8 +4702,8 @@ packages:
       - supports-color
     dev: false
 
-  /@prisma/engines-version@5.3.1-2.61e140623197a131c2a6189271ffee05a7aa9a59:
-    resolution: {integrity: sha512-y5qbUi3ql2Xg7XraqcXEdMHh0MocBfnBzDn5GbV1xk23S3Mq8MGs+VjacTNiBh3dtEdUERCrUUG7Z3QaJ+h79w==}
+  /@prisma/engines-version@5.5.1-1.aebc046ce8b88ebbcb45efe31cbe7d06fd6abc0a:
+    resolution: {integrity: sha512-O+qHFnZvAyOFk1tUco2/VdiqS0ym42a3+6CYLScllmnpbyiTplgyLt2rK/B9BTjYkSHjrgMhkG47S0oqzdIckA==}
     dev: false
 
   /@prisma/engines@5.3.1:
