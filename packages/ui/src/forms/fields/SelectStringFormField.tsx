@@ -8,7 +8,7 @@ import { SelectFormField } from "./SelectFormField.js";
 type Size = "small" | "normal";
 
 const TextOption: FC<{ text: string; size: Size }> = ({ text, size }) => {
-  return <div className={clsx()}>{text}</div>;
+  return <div className={clsx(size === "small" && "text-sm")}>{text}</div>;
 };
 
 export function SelectStringFormField<

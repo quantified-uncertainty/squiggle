@@ -1,11 +1,5 @@
 import { clsx } from "clsx";
-import {
-  ReactNode,
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-} from "react";
+import { ReactNode, createContext, useCallback, useContext } from "react";
 import { FieldPathByValue, FieldValues, useFormContext } from "react-hook-form";
 import Select, {
   components,
@@ -209,11 +203,12 @@ export function SelectFormField<
                      * But it would require @emotion/cache dependency and also I'm unsure about performance implications.
                      */
                     "!min-h-0",
-                    "border-slate-300 border rounded-md shadow-sm focus-within:ring-indigo-500 focus-within:border-indigo-500 focus-within:ring-1"
+                    "bg-white border-slate-300 border rounded-md shadow-sm focus-within:ring-indigo-500 focus-within:border-indigo-500 focus-within:ring-1"
                   ),
                 // disable default browser focus style
                 input: () => "[&_input:focus]:!ring-transparent",
-                placeholder: () => "text-slate-300",
+                placeholder: () =>
+                  clsx("text-slate-300", size === "small" && "text-sm"),
                 valueContainer: () => "px-3",
                 clearIndicator: () =>
                   "text-slate-300 hover:text-slate-500 px-2",
@@ -225,7 +220,8 @@ export function SelectFormField<
                 menuPortal: () => "!z-[100]",
                 // based on Dropdown styles
                 menu: () =>
-                  "mt-2 rounded-md bg-white shadow-xl border border-slate-300 p-1",
+                  "mt-2 rounded-md bg-white shadow-xl border border-slate-300",
+                menuList: () => "p-1",
                 option: () =>
                   "px-2 py-1.5 rounded hover:bg-blue-100 text-slate-700 hover:text-slate-900",
                 loadingMessage: () => "text-slate-500",
