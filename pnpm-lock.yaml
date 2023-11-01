@@ -30,8 +30,8 @@ importers:
         specifier: ^3.5.3
         version: 3.5.3
       commander:
-        specifier: ^11.0.0
-        version: 11.0.0
+        specifier: ^11.1.0
+        version: 11.1.0
       fs:
         specifier: ^0.0.1-security
         version: 0.0.1-security
@@ -552,10 +552,10 @@ importers:
     dependencies:
       '@commander-js/extra-typings':
         specifier: ^11.0.0
-        version: 11.0.0(commander@11.0.0)
+        version: 11.0.0(commander@11.1.0)
       commander:
-        specifier: ^11.0.0
-        version: 11.0.0
+        specifier: ^11.1.0
+        version: 11.1.0
       immutable:
         specifier: ^4.3.4
         version: 4.3.4
@@ -2597,12 +2597,12 @@ packages:
     dev: true
     optional: true
 
-  /@commander-js/extra-typings@11.0.0(commander@11.0.0):
+  /@commander-js/extra-typings@11.0.0(commander@11.1.0):
     resolution: {integrity: sha512-06ol6Kn5gPjFY6v0vWOZ84nQwyqhZdaeZCHYH3vhwewjpOEjniF1KHZxh18887G3poWiJ8qyq5pb6ANuiddfPQ==}
     peerDependencies:
       commander: 11.0.x
     dependencies:
-      commander: 11.0.0
+      commander: 11.1.0
     dev: false
 
   /@cspotcode/source-map-support@0.8.1:
@@ -4776,8 +4776,8 @@ packages:
     resolution: {integrity: sha512-ymA/Y/3C8pppvYFy9RhpJyCjjttJPm+pWu1gWpaOFOs53qP61+GpGw0qtkduO0t2wYdj/3GDlQC/JyyxZMAOGw==}
     hasBin: true
     dependencies:
-      '@commander-js/extra-typings': 11.0.0(commander@11.0.0)
-      commander: 11.0.0
+      '@commander-js/extra-typings': 11.0.0(commander@11.1.0)
+      commander: 11.1.0
       immutable: 4.3.4
       jstat: 1.9.6
       lodash: 4.17.21
@@ -8808,8 +8808,8 @@ packages:
     engines: {node: '>=14'}
     dev: true
 
-  /commander@11.0.0:
-    resolution: {integrity: sha512-9HMlXtt/BNoYr8ooyjjNRdIilOTkVJXB+GhxMTtOKwk0R4j4lS4NpjuqmRxroBfnfTSHQIHQB7wryHhXarNjmQ==}
+  /commander@11.1.0:
+    resolution: {integrity: sha512-yPVavfyCcRhmorC7rWlkHn15b4wDVgVmBA7kV4QVBsF7kv/9TKJAbAXVTxvTnwP8HHKjRCJDClKbciiYS7p0DQ==}
     engines: {node: '>=16'}
     dev: false
 
