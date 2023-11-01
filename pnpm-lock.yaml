@@ -533,8 +533,8 @@ importers:
         version: 3.0.3
     devDependencies:
       '@babel/preset-typescript':
-        specifier: ^7.23.0
-        version: 7.23.0(@babel/core@7.23.0)
+        specifier: ^7.23.2
+        version: 7.23.2(@babel/core@7.23.0)
       '@types/jest':
         specifier: ^29.5.7
         version: 29.5.7
@@ -567,8 +567,8 @@ importers:
         version: 9.1.0
     devDependencies:
       '@babel/preset-typescript':
-        specifier: ^7.23.0
-        version: 7.23.0(@babel/core@7.23.0)
+        specifier: ^7.23.2
+        version: 7.23.2(@babel/core@7.23.0)
       '@jest/globals':
         specifier: ^29.7.0
         version: 29.7.0
@@ -2237,8 +2237,8 @@ packages:
       esutils: 2.0.3
     dev: true
 
-  /@babel/preset-typescript@7.23.0(@babel/core@7.23.0):
-    resolution: {integrity: sha512-6P6VVa/NM/VlAYj5s2Aq/gdVg8FSENCg3wlZ6Qau9AcPaoF5LbN1nyGlR9DTRIw9PpxI94e+ReydsJHcjwAweg==}
+  /@babel/preset-typescript@7.23.2(@babel/core@7.23.0):
+    resolution: {integrity: sha512-u4UJc1XsS1GhIGteM8rnGiIvf9rJpiVgMEeCnwlLA7WJPC+jcXWJAGxYmeqs5hOZD8BbAfnV5ezBOxQbb4OUxA==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
@@ -13013,7 +13013,7 @@ packages:
       '@babel/plugin-transform-modules-commonjs': 7.23.0(@babel/core@7.23.0)
       '@babel/preset-env': 7.22.20(@babel/core@7.23.0)
       '@babel/preset-flow': 7.22.15(@babel/core@7.23.0)
-      '@babel/preset-typescript': 7.23.0(@babel/core@7.23.0)
+      '@babel/preset-typescript': 7.23.2(@babel/core@7.23.0)
       '@babel/register': 7.22.15(@babel/core@7.23.0)
       babel-core: 7.0.0-bridge.0(@babel/core@7.23.0)
       chalk: 4.1.2

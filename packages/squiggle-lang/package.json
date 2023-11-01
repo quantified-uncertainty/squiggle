@@ -38,7 +38,7 @@
     "open": "^9.1.0"
   },
   "devDependencies": {
-    "@babel/preset-typescript": "^7.23.0",
+    "@babel/preset-typescript": "^7.23.2",
     "@jest/globals": "^29.7.0",
     "@types/jest": "^29.5.7",
     "@types/lodash": "^4.14.199",
