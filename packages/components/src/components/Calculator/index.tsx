@@ -86,6 +86,21 @@ function useCalculator(
     savedState?.hashString
   );
 
+  const processAllFieldCodes = useCallback(async () => {
+    const formValues = form.getValues();
+    const newInputResults: typeof inputResults = {};
+    for (const input of calculator.inputs) {
+      const name = input.name;
+      const fieldValue = formValues[name];
+      const inputResult = await runSquiggleCode(
+        fieldValueToCode(name, calculator, fieldValue),
+        environment
+      );
+      newInputResults[name] = inputResult;
+    }
+    setInputResults(newInputResults);
+  }, [calculator, environment, form, setInputResults]);
+
   // This effect does two things:
   // - when the calculator is updated, it resets the form
   // - also, on initial render and on calculator updates, it calculates all input results (which will trigger calculator result calculation)
@@ -103,23 +118,8 @@ function useCalculator(
     setPrevHashString(hashString);
 
     // Calculator has updated (or this component just mounted). Let's take all input codes and run them.
-    const processAllInputCodes = async () => {
-      const formValues = form.getValues();
-      const newInputResults: typeof inputResults = {};
-      for (const input of calculator.inputs) {
-        const name = input.name;
-        const fieldValue = formValues[name];
-        const inputResult = await runSquiggleCode(
-          fieldValueToCode(name, calculator, fieldValue),
-          environment
-        );
-        newInputResults[name] = inputResult;
-      }
-      // All results are updated simultaneously, to avoid too many rerenders.
-      setInputResults(newInputResults);
-    };
-    processAllInputCodes();
-  }, [calculator, environment, hashString, prevHashString, form]);
+    processAllFieldCodes();
+  }, [calculator, hashString, prevHashString, form, processAllFieldCodes]);
 
   // Update input result if input code has changed.
   useEffect(() => {
@@ -161,7 +161,7 @@ function useCalculator(
     return () => subscription.unsubscribe();
   }, [_updateSavedState, form]);
 
-  return { calculator, form, inputResults };
+  return { calculator, form, inputResults, processAllFieldCodes };
 }
 
 type Props = {
@@ -175,10 +175,8 @@ export const Calculator: FC<Props> = ({
   settings,
   valueWithContext,
 }) => {
-  const { calculator, form, inputResults } = useCalculator(
-    valueWithContext,
-    environment
-  );
+  const { calculator, form, inputResults, processAllFieldCodes } =
+    useCalculator(valueWithContext, environment);
 
   const inputResultSettings: PlaygroundSettings = {
     ...settings,
@@ -229,6 +227,8 @@ export const Calculator: FC<Props> = ({
           valueWithContext={valueWithContext}
           inputResults={inputResults}
           environment={environment}
+          processAllFieldCodes={processAllFieldCodes}
+          autorun={calculator.autorun}
           settings={calculatorResultSettings}
         />
       </div>
