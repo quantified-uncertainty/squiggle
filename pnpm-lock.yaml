@@ -389,8 +389,8 @@ importers:
         specifier: ^8.0.7
         version: 8.0.7(@types/react@18.2.33)(react@18.2.0)
       react-relay:
-        specifier: ^15.0.0
-        version: 15.0.0(react@18.2.0)
+        specifier: ^16.0.0
+        version: 16.0.0(react@18.2.0)
       relay-runtime:
         specifier: ^15.0.0
         version: 15.0.0
@@ -441,8 +441,8 @@ importers:
         specifier: ^18.2.33
         version: 18.2.33
       '@types/react-relay':
-        specifier: ^14.1.6
-        version: 14.1.6
+        specifier: ^16.0.0
+        version: 16.0.0
       '@types/relay-runtime':
         specifier: ^14.1.14
         version: 14.1.14
@@ -7455,8 +7455,8 @@ packages:
       '@types/react': 18.2.33
     dev: true
 
-  /@types/react-relay@14.1.6:
-    resolution: {integrity: sha512-nTueAhz2lhVVCJeQPuPSkrR3x9WMhfahMbdYlknvipT6LuptBjoJ/w86+YikI6ldHOjcZMi+KnTIiAs8bStYdw==}
+  /@types/react-relay@16.0.0:
+    resolution: {integrity: sha512-oaKLjC/cD7oTC4YVR0cOya/a/fqWJewrjNq3Nk6wJFGbUBd+2TMFCc0BEHewobpSH/YqZONiLpdJ1uRk+W3M3g==}
     dependencies:
       '@types/react': 18.2.33
       '@types/relay-runtime': 14.1.14
@@ -16548,8 +16548,8 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: true
 
-  /react-relay@15.0.0(react@18.2.0):
-    resolution: {integrity: sha512-KWdeMMKMJanOL9LsGZYkyAekayYIi+Y4mbDM8VYbHVPgTWJWAQP6yJKS+V4D17qIMo1L84QJQjGaQWEG139p9Q==}
+  /react-relay@16.0.0(react@18.2.0):
+    resolution: {integrity: sha512-3Dje0NLJFwt6b3xqgbiCGlTnpxoZe1OTPsXIPtFdftgDWQzSfrwqkBYUKab6bV2HhCKWCzXWafb8wURLDAlNJQ==}
     peerDependencies:
       react: ^16.9.0 || ^17 || ^18
     dependencies:
@@ -16558,7 +16558,7 @@ packages:
       invariant: 2.2.4
       nullthrows: 1.1.1
       react: 18.2.0
-      relay-runtime: 15.0.0
+      relay-runtime: 16.0.0
     transitivePeerDependencies:
       - encoding
     dev: false
@@ -16955,6 +16955,16 @@ packages:
 
   /relay-runtime@15.0.0:
     resolution: {integrity: sha512-7AXkXLQo6gpJNBhk4Kii5b+Yat62HSDD1TgJBi021iSjT1muI8iYd4UZG4f/If209LmaVjkZt2HTNAlk6xtslw==}
+    dependencies:
+      '@babel/runtime': 7.23.1
+      fbjs: 3.0.4
+      invariant: 2.2.4
+    transitivePeerDependencies:
+      - encoding
+    dev: false
+
+  /relay-runtime@16.0.0:
+    resolution: {integrity: sha512-gJ70upfOxmFgtvFEKn7sU72uN2XF9Bg5Bml9oGRqe0rFWJDj1ItsljWzOZ972EyDE+pZG/VKbqiz3gUjhbsejQ==}
     dependencies:
       '@babel/runtime': 7.23.1
       fbjs: 3.0.4
