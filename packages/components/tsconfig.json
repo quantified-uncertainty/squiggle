@@ -1,8 +1,9 @@
 {
   "files": [],
   "compilerOptions": {
-    "composite": true
-  },
+      "composite": true,
+      "types": ["testing-library__jest-dom"]
+    },
   "references": [
     { "path": "./tsconfig.build.json" },
     { "path": "./tsconfig.tests.json" }
