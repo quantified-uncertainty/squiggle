@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate deploy",
+    "db:generate": "PRISMA_HIDE_UPDATE_MESSAGE=1 prisma generate",
+    "db:migrate": "PRISMA_HIDE_UPDATE_MESSAGE=1 prisma migrate deploy",
     "dev": "next dev -p 3001",
     "start": "__NEXT_PRIVATE_PREBUNDLED_REACT=next next start",
     "generate": "pnpm db:generate && pnpm print-schema && pnpm relay",
