@@ -179,8 +179,8 @@ importers:
         specifier: ^7.5.2
         version: 7.5.2
       '@storybook/react':
-        specifier: ^7.0.24
-        version: 7.4.5(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2)
+        specifier: ^7.5.2
+        version: 7.5.2(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2)
       '@storybook/react-vite':
         specifier: ^7.5.2
         version: 7.5.2(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2)(vite@4.5.0)
@@ -670,8 +670,8 @@ importers:
         specifier: ^7.5.2
         version: 7.5.2(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)
       '@storybook/react':
-        specifier: ^7.4.5
-        version: 7.4.5(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2)
+        specifier: ^7.5.2
+        version: 7.5.2(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2)
       '@storybook/react-vite':
         specifier: ^7.5.2
         version: 7.5.2(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2)(vite@4.5.0)
@@ -6284,13 +6284,6 @@ packages:
       - '@types/react-dom'
     dev: true
 
-  /@storybook/core-client@7.4.5:
-    resolution: {integrity: sha512-d/qiCUZeOKY0HX/YmomxlccxJ2NKC3ttRrAsAXzJGypClKabv20X+qbeO/E7Kp5UQxIEJx1wuwJPcnlCvjgPDA==}
-    dependencies:
-      '@storybook/client-logger': 7.4.5
-      '@storybook/preview-api': 7.4.5
-    dev: true
-
   /@storybook/core-client@7.5.2:
     resolution: {integrity: sha512-mMDSBxc7esMCu0FOkama9XYHzIHYGhBj8roX+XaTaLDYXaw/UajcCuzcO7fFBHNn3Vdqh2ufIxlI7359v3IqPw==}
     dependencies:
@@ -6686,46 +6679,6 @@ packages:
       - supports-color
       - typescript
       - vite-plugin-glimmerx
-    dev: true
-
-  /@storybook/react@7.4.5(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2):
-    resolution: {integrity: sha512-Tiylrs3uFO8QSvH1w3ueSxlAgh2fteH0edRVKaX01M/h47+QqEiZqq/dYkVDvLHngF+CCCwE3OY8nNe6L14Xkw==}
-    engines: {node: '>=16.0.0'}
-    peerDependencies:
-      react: ^16.8.0 || ^17.0.0 || ^18.0.0
-      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
-      typescript: '*'
-    peerDependenciesMeta:
-      typescript:
-        optional: true
-    dependencies:
-      '@storybook/client-logger': 7.4.5
-      '@storybook/core-client': 7.4.5
-      '@storybook/docs-tools': 7.4.5
-      '@storybook/global': 5.0.0
-      '@storybook/preview-api': 7.4.5
-      '@storybook/react-dom-shim': 7.4.5(react-dom@18.2.0)(react@18.2.0)
-      '@storybook/types': 7.4.5
-      '@types/escodegen': 0.0.6
-      '@types/estree': 0.0.51
-      '@types/node': 16.18.55
-      acorn: 7.4.1
-      acorn-jsx: 5.3.2(acorn@7.4.1)
-      acorn-walk: 7.2.0
-      escodegen: 2.1.0
-      html-tags: 3.2.0
-      lodash: 4.17.21
-      prop-types: 15.8.1
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      react-element-to-jsx-string: 15.0.0(react-dom@18.2.0)(react@18.2.0)
-      ts-dedent: 2.2.0
-      type-fest: 2.19.0
-      typescript: 5.2.2
-      util-deprecate: 1.0.2
-    transitivePeerDependencies:
-      - encoding
-      - supports-color
     dev: true
 
   /@storybook/react@7.5.2(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2):
