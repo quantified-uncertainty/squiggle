@@ -18,8 +18,8 @@ importers:
         specifier: ^1.10.16
         version: 1.10.16
       turbo-ignore:
-        specifier: ^1.10.14
-        version: 1.10.14
+        specifier: ^1.10.16
+        version: 1.10.16
 
   packages/cli:
     dependencies:
@@ -19274,8 +19274,8 @@ packages:
     dev: true
     optional: true
 
-  /turbo-ignore@1.10.14:
-    resolution: {integrity: sha512-wIH+2+zJGNstUzU1idxvreNhhDgqT/pyz8IaEQFWiTCzcn7NJBwcV2xu+62Y/SRG3bgOoEAwhLzxlwuJqGPABA==}
+  /turbo-ignore@1.10.16:
+    resolution: {integrity: sha512-Xm2/pnXsunH2UQ3S92hQwRKiANNgXUhv2owqCFOmqwl3G2E+0yM2lSk+QLNYUu4XUqXkJrDv32GtZTDaPJ47vA==}
     hasBin: true
     dev: true
 
