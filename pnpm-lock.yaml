@@ -392,8 +392,8 @@ importers:
         specifier: ^15.0.0
         version: 15.0.0(react@18.2.0)
       relay-runtime:
-        specifier: ^15.0.0
-        version: 15.0.0
+        specifier: ^16.0.0
+        version: 16.0.0
       remark-breaks:
         specifier: ^3.0.3
         version: 3.0.3
@@ -17002,6 +17002,16 @@ packages:
 
   /relay-runtime@15.0.0:
     resolution: {integrity: sha512-7AXkXLQo6gpJNBhk4Kii5b+Yat62HSDD1TgJBi021iSjT1muI8iYd4UZG4f/If209LmaVjkZt2HTNAlk6xtslw==}
+    dependencies:
+      '@babel/runtime': 7.23.1
+      fbjs: 3.0.4
+      invariant: 2.2.4
+    transitivePeerDependencies:
+      - encoding
+    dev: false
+
+  /relay-runtime@16.0.0:
+    resolution: {integrity: sha512-gJ70upfOxmFgtvFEKn7sU72uN2XF9Bg5Bml9oGRqe0rFWJDj1ItsljWzOZ972EyDE+pZG/VKbqiz3gUjhbsejQ==}
     dependencies:
       '@babel/runtime': 7.23.1
       fbjs: 3.0.4
