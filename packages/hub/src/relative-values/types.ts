@@ -16,7 +16,7 @@ export const relativeValuesClustersSchema = z.array(
   z.object({
     id: z.string(),
     color: z.string(),
-    recommendedUnit: z.nullable(z.string()).optional(),
+    recommendedUnit: z.string().nullable().optional(),
   })
 );
 
@@ -24,7 +24,7 @@ export const relativeValuesItemsSchema = z.array(
   z.object({
     id: z.string(),
     name: z.string().default(""),
-    clusterId: z.string().optional(),
+    clusterId: z.string().nullable().optional(),
     description: z.string().default(""),
   })
 );
