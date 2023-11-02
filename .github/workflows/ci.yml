@@ -18,6 +18,9 @@ jobs:
   build-test-lint:
     name: Build, test, lint
     runs-on: ubuntu-latest
+    concurrency:
+      group: ci-build-test-lint-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v2
@@ -36,6 +39,9 @@ jobs:
   coverage:
     name: Coverage
     runs-on: ubuntu-latest
+    concurrency:
+      group: ci-coverage-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v4
         with:

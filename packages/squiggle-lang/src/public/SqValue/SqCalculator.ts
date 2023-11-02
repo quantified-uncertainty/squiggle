@@ -39,13 +39,23 @@ export class SqCalculator {
     return this._value.description;
   }
 
+  get autorun(): boolean {
+    return this._value.autorun;
+  }
+
   // This function is used to determine if a calculator has changed.
   // It's obviously not perfect - it doesn't capture changes within the calculator function, but this would be much more complicated.
 
   get hashString(): string {
     const rowData = JSON.stringify(this._value.inputs);
     const paramData = this._value.fn.toString() || "";
-    return rowData + paramData + this._value.description;
+    return (
+      rowData +
+      paramData +
+      this._value.description +
+      this._value.title +
+      this._value.autorun
+    );
   }
 
   get inputs(): SqInput[] {

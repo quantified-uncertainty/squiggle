@@ -138,8 +138,8 @@
     "@quri/squiggle-lang": "workspace:*",
     "@quri/squiggle-textmate-grammar": "workspace:*",
     "@types/node": "^20.8.10",
-    "@types/vscode": "^1.82.0",
-    "esbuild": "^0.18.20",
+    "@types/vscode": "^1.83.2",
+    "esbuild": "^0.19.5",
     "eslint": "^8.52.0",
     "js-yaml": "^4.1.0",
     "prettier": "^3.0.3",
@@ -149,7 +149,7 @@
   },
   "dependencies": {
     "@vscode/vsce": "^2.22.0",
-    "vscode-languageclient": "^8.1.0",
+    "vscode-languageclient": "^9.0.1",
     "vscode-languageserver": "^9.0.1",
     "vscode-languageserver-textdocument": "^1.0.11"
   }
