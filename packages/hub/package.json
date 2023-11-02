@@ -53,7 +53,7 @@
     "react-markdown": "^8.0.7",
     "react-relay": "^15.0.0",
     "relay-runtime": "^15.0.0",
-    "remark-breaks": "^3.0.3",
+    "remark-breaks": "^4.0.0",
     "remark-gfm": "^3.0.1",
     "typescript": "^5.2.2",
     "zod": "^3.22.4"

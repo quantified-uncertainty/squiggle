@@ -395,8 +395,8 @@ importers:
         specifier: ^15.0.0
         version: 15.0.0
       remark-breaks:
-        specifier: ^3.0.3
-        version: 3.0.3
+        specifier: ^4.0.0
+        version: 4.0.0
       remark-gfm:
         specifier: ^3.0.1
         version: 3.0.1
@@ -14185,6 +14185,15 @@ packages:
       unist-util-visit-parents: 5.1.3
     dev: false
 
+  /mdast-util-find-and-replace@3.0.1:
+    resolution: {integrity: sha512-SG21kZHGC3XRTSUhtofZkBzZTJNM5ecCi0SK2IMKmSXR8vO3peL+kb1O0z7Zl83jKtutG4k5Wv/W7V3/YHvzPA==}
+    dependencies:
+      '@types/mdast': 4.0.1
+      escape-string-regexp: 5.0.0
+      unist-util-is: 6.0.0
+      unist-util-visit-parents: 6.0.1
+    dev: false
+
   /mdast-util-from-markdown@1.3.1:
     resolution: {integrity: sha512-4xTO/M8c82qBcnQc1tgpNtubGUW/Y1tBQ1B0i5CtSoelOLKFYlElIr3bvgREYYO5iRqbMY1YuqZng0GVOI8Qww==}
     dependencies:
@@ -14323,11 +14332,11 @@ packages:
       - supports-color
     dev: false
 
-  /mdast-util-newline-to-break@1.0.0:
-    resolution: {integrity: sha512-491LcYv3gbGhhCrLoeALncQmega2xPh+m3gbsIhVsOX4sw85+ShLFPvPyibxc1Swx/6GtzxgVodq+cGa/47ULg==}
+  /mdast-util-newline-to-break@2.0.0:
+    resolution: {integrity: sha512-MbgeFca0hLYIEx/2zGsszCSEJJ1JSCdiY5xQxRcLDDGa8EPvlLPupJ4DSajbMPAnC0je8jfb9TiUATnxxrHUog==}
     dependencies:
-      '@types/mdast': 3.0.13
-      mdast-util-find-and-replace: 2.2.2
+      '@types/mdast': 4.0.1
+      mdast-util-find-and-replace: 3.0.1
     dev: false
 
   /mdast-util-phrasing@3.0.1:
@@ -16963,12 +16972,12 @@ packages:
       - encoding
     dev: false
 
-  /remark-breaks@3.0.3:
-    resolution: {integrity: sha512-C7VkvcUp1TPUc2eAYzsPdaUh8Xj4FSbQnYA5A9f80diApLZscTDeG7efiWP65W8hV2sEy3JuGVU0i6qr5D8Hug==}
+  /remark-breaks@4.0.0:
+    resolution: {integrity: sha512-IjEjJOkH4FuJvHZVIW0QCDWxcG96kCq7An/KVH2NfJe6rKZU2AsHeB3OEjPNRxi4QC34Xdx7I2KGYn6IpT7gxQ==}
     dependencies:
-      '@types/mdast': 3.0.13
-      mdast-util-newline-to-break: 1.0.0
-      unified: 10.1.2
+      '@types/mdast': 4.0.1
+      mdast-util-newline-to-break: 2.0.0
+      unified: 11.0.4
     dev: false
 
   /remark-external-links@8.0.0:
