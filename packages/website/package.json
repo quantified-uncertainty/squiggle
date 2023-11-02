@@ -33,7 +33,7 @@
     "@types/react": "^18.2.33",
     "autoprefixer": "^10.4.16",
     "eslint": "^8.52.0",
-    "eslint-config-next": "^13.5.3",
+    "eslint-config-next": "^14.0.1",
     "glob": "^10.3.10",
     "postcss": "^8.4.31",
     "prettier": "^3.0.3",
