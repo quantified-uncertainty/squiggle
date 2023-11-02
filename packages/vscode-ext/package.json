@@ -139,7 +139,7 @@
     "@quri/squiggle-textmate-grammar": "workspace:*",
     "@types/node": "^20.8.10",
     "@types/vscode": "^1.82.0",
-    "esbuild": "^0.18.20",
+    "esbuild": "^0.19.5",
     "eslint": "^8.52.0",
     "js-yaml": "^4.1.0",
     "prettier": "^3.0.3",
