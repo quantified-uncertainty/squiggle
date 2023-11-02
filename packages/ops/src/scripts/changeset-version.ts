@@ -4,7 +4,6 @@ import util from "node:util";
 
 import { toString as mdastToString } from "mdast-util-to-string";
 import remarkParse from "remark-parse";
-import { type Root } from "remark-parse/lib/index.js";
 import remarkStringify from "remark-stringify";
 import { unified } from "unified";
 
@@ -35,9 +34,7 @@ async function getChangedPackages() {
 // based on https://github.com/changesets/action/blob/2bb9bcbd6bf4996a55ce459a630a0aa699457f59/src/utils.ts
 //  heavily modified
 function getChangelogEntry(changelog: string, version: string) {
-  // unified types and versions are currently a mess, might get better in a few months
-  // @ts-expect-error
-  const ast: Root = unified().use(remarkParse).parse(changelog);
+  const ast = unified().use(remarkParse).parse(changelog);
 
   const nodes = ast.children;
   let started = false;
@@ -69,7 +66,6 @@ function getChangelogEntry(changelog: string, version: string) {
   ast.children = pickedNodes;
 
   return {
-    // @ts-expect-error
     content: (unified().use(remarkStringify).stringify(ast) as string).trim(),
   };
 }

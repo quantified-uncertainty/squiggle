@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useState } from "react";
+import { FC, useEffect, useMemo, useState, useCallback } from "react";
 
 import { Env, SqValue } from "@quri/squiggle-lang";
 
@@ -10,12 +10,15 @@ import {
   SqValueResult,
 } from "./types.js";
 import { useSavedCalculatorState } from "./useSavedCalculatorState.js";
+import { Button } from "@quri/ui";
 
 type Props = {
   valueWithContext: SqCalculatorValueWithContext;
   inputResults: InputResults;
   environment: Env;
   settings: PlaygroundSettings;
+  processAllFieldCodes: () => void;
+  autorun: boolean;
 };
 
 export const CalculatorResult: FC<Props> = ({
@@ -23,6 +26,8 @@ export const CalculatorResult: FC<Props> = ({
   inputResults,
   environment,
   settings,
+  processAllFieldCodes,
+  autorun,
 }) => {
   const [savedState, updateSavedState] =
     useSavedCalculatorState(valueWithContext);
@@ -33,8 +38,8 @@ export const CalculatorResult: FC<Props> = ({
     SqValueResult | undefined
   >(() => savedState?.calculatorResult);
 
-  // Whenever `inputResults` change, we recalculate `calculatorResult`.
-  useEffect(() => {
+  const runCalculator = useCallback(() => {
+    !autorun && processAllFieldCodes();
     const parameters: SqValue[] = [];
 
     // Unpack all input values.
@@ -50,7 +55,12 @@ export const CalculatorResult: FC<Props> = ({
 
     const finalResult = calculator.run(parameters, environment);
     setCalculatorResult(finalResult);
-  }, [calculator, environment, inputResults]);
+  }, [calculator, environment, inputResults, processAllFieldCodes, autorun]);
+
+  //runCalculator is updated every time that the inputResults or calculator changes, after which this will trigger.
+  useEffect(() => {
+    autorun && runCalculator();
+  }, [runCalculator, autorun]);
 
   // Back up calculatorResult to ViewerContext.
   useEffect(() => {
@@ -60,10 +70,21 @@ export const CalculatorResult: FC<Props> = ({
     });
   }, [updateSavedState, calculator, calculatorResult]);
 
-  return calculatorResult ? (
+  return (
     <div className="py-3 px-5">
-      <div className="text-sm font-semibold text-gray-700 mb-2">Result</div>
-      <ValueResultViewer result={calculatorResult} settings={settings} />
+      {!autorun && (
+        <div className="mb-3">
+          <Button size="small" onClick={runCalculator} theme="primary">
+            Run
+          </Button>
+        </div>
+      )}
+      {calculatorResult ? (
+        <div>
+          <div className="text-sm font-semibold text-gray-700 mb-2">Result</div>
+          <ValueResultViewer result={calculatorResult} settings={settings} />
+        </div>
+      ) : null}
     </div>
-  ) : null;
+  );
 };
