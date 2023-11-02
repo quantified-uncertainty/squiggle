@@ -474,8 +474,8 @@ importers:
         specifier: ^5.3.1
         version: 5.3.1
       relay-compiler:
-        specifier: ^15.0.0
-        version: 15.0.0
+        specifier: ^16.0.0
+        version: 16.0.0
       tailwindcss:
         specifier: ^3.3.5
         version: 3.3.5
@@ -16735,8 +16735,8 @@ packages:
       vfile: 6.0.1
     dev: false
 
-  /relay-compiler@15.0.0:
-    resolution: {integrity: sha512-19gIIdrVe/lk7Dkz/hqxpBd54bBDWAKG+kR5ael+xznJPdjlr/rlAmh5Tqi6Mgf/wiEQGdtKiZqeNdOW2/wVRw==}
+  /relay-compiler@16.0.0:
+    resolution: {integrity: sha512-qZKII4EN1R7VdEoJyDxzBtsfhLOJ8WLfl7iESk8h3HfbyHJzw2ygFuk334Qjeq+QN6soCim4quhJpAgp0+qBlQ==}
     hasBin: true
     dev: true
 
