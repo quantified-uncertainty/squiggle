@@ -130,3 +130,29 @@ Dict.map: (dict<'a>, (string => string)) => dict<'a>
 ```squiggle
 Dict.mapKeys({a: 1, b: 2}, {|x| x + "hi" }) // {ahi: 1, bhi: 2}
 ```
+
+### pick
+
+```
+Dict.pick: (dict<'a>, list<string>) => dict<'a>
+```
+
+Selects only the keys from the dictionary that are specified in the list, and returns a new dictionary with those keys.
+
+```squiggle
+data = { a: 1, b: 2, c: 3, d: 4 }
+Dict.pick(data, ["a", "c"]) // {a: 1, c: 3}
+```
+
+### omit
+
+```
+Dict.omit: (dict<'a>, list<string>) => dict<'a>
+```
+
+Removes the keys from the dictionary that are specified in the list, and returns a new dictionary without those keys.
+
+```squiggle
+data = { a: 1, b: 2, c: 3, d: 4 }
+Dict.omit(data, ["b", "d"]) // {a: 1, c: 3}
+```
