@@ -7,7 +7,7 @@ import {
   ChatBubbleLeftIcon,
   CodeBracketIcon,
   TextTooltip,
-  TriangleIcon,
+  TriangleIcon
 } from "@quri/ui";
 
 import { useEffectRef, useForceUpdate } from "../../lib/hooks/index.js";
