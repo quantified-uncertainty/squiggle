@@ -1,5 +1,5 @@
 import { clsx } from "clsx";
-import { FC, ReactNode, useMemo } from "react";
+import { FC, ReactNode, useState } from "react";
 import ReactMarkdown from "react-markdown";
 
 import { SqValuePath } from "@quri/squiggle-lang";
@@ -17,12 +17,12 @@ import {
   useCollapseChildren,
   useFocus,
   useIsFocused,
+  useSetCollapsed,
   useToggleCollapsed,
   useViewerContext,
 } from "./ViewerProvider.js";
 import { getSqValueWidget } from "./getSqValueWidget.js";
 import {
-  LocalItemState,
   MergedItemSettings,
   getChildrenValues,
   pathToShortName,
@@ -52,6 +52,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
       : widget.render;
 
   const toggleCollapsed_ = useToggleCollapsed();
+  const setCollapsed = useSetCollapsed();
   const collapseChildren = useCollapseChildren();
   const focus = useFocus();
   const { editor, getLocalItemState, getMergedSettings, dispatch } =
@@ -69,23 +70,31 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
 
   const isRoot = path.isRoot();
 
-  // This doesn't just memoizes the defaults, but also affects children, in some cases.
-  const defaults: LocalItemState = useMemo(() => {
-    // TODO - value.size() would be faster.
-    const childrenElements = getChildrenValues(value);
+  // Collapse children and element if desired. Uses crude heuristics.
+  useState(() => {
+    const tagsDefaultCollapsed = new Set(["Bool", "Number", "Void", "Input"]);
+    // TODO - value.size() could be faster.
+    const childrenCount = getChildrenValues(value).length;
 
-    // I'm unsure what good defaults will be here. These are heuristics.
-    // Firing this in `useEffect` would be too late in some cases; see https://github.com/quantified-uncertainty/squiggle/pull/1943#issuecomment-1610583706
-    if (childrenElements.length > 10) {
+    const shouldCollapseChildren = childrenCount > 10;
+
+    function shouldCollapseElement() {
+      if (isRoot) {
+        return childrenCount > 30;
+      } else {
+        return childrenCount > 5 || tagsDefaultCollapsed.has(tag);
+      }
+    }
+
+    if (shouldCollapseChildren) {
       collapseChildren(value);
     }
-    return {
-      collapsed: !isRoot && childrenElements.length > 5,
-      settings: {},
-    };
-  }, [value, collapseChildren, isRoot]);
+    if (shouldCollapseElement()) {
+      setCollapsed(path, true);
+    }
+  });
 
-  const settings = getLocalItemState({ path, defaults });
+  const settings = getLocalItemState({ path });
 
   const getAdjustedMergedSettings = (path: SqValuePath) => {
     const mergedSettings = getMergedSettings({ path });
