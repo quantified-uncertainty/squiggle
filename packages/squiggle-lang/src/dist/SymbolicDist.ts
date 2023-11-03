@@ -1101,8 +1101,9 @@ export class Binomial extends SymbolicDist {
     return jstat.binomial.cdf(k, this.n, this.p);
   }
 
+  // Not needed, until we support Sym.Binomial
   inv(p: number): number {
-    throw new Error("Binomial inv not implemented");
+    throw notYetImplemented();
   }
 
   mean() {
@@ -1129,6 +1130,7 @@ export class Binomial extends SymbolicDist {
     return this.n === other.n && this.p === other.p;
   }
 
+  // Not needed, until we support Sym.Binomial
   override toPointSetDist(): result<PointSetDist, DistError> {
     return Result.Err(notYetImplemented());
   }
@@ -1159,6 +1161,7 @@ export class Poisson extends SymbolicDist {
     return jstat.poisson.cdf(k, this.lambda);
   }
 
+  // Not needed, until we support Sym.Poisson
   inv(p: number): number {
     throw new Error("Poisson inv not implemented");
   }
@@ -1179,6 +1182,7 @@ export class Poisson extends SymbolicDist {
     return this.lambda === other.lambda;
   }
 
+  // Not needed, until we support Sym.Poisson
   override toPointSetDist(): result<PointSetDist, DistError> {
     return Result.Err(notYetImplemented());
   }
