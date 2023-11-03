@@ -54,7 +54,7 @@ A binomial distribution.
 
 ``n`` must be above 0, and ``p`` must be between 0 and 1. 
 
-Note: The binomial distribution is a discrete distribution. When representing this, the Squiggle distribution component might show it as particially or fully continuous. This is a visual mistake; if you inspect the underlying data, it should be discrete.
+Note: The binomial distribution is a discrete distribution. When representing this, the Squiggle distribution component might show it as partially or fully continuous. This is a visual mistake; if you inspect the underlying data, it should be discrete.
 
 **Examples**
 
