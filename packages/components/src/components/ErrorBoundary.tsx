@@ -1,4 +1,4 @@
-"use client";
+// Removed "use client" directive
 
 import { Component, PropsWithChildren } from "react";
 
