@@ -33,6 +33,41 @@ const config = {
   output: {
     filename: "bundle.js",
     path: path.resolve(__dirname, "dist"),
+    chunkFilename: '[name].[chunkhash].js',
+    library: {
+      name: "squiggle_components",
+      type: "umd",
+    },
+  },
+  optimization: {
+    splitChunks: {
+      chunks: 'all',
+    },
+  },
+  devServer: {
+        test: /\.tsx?$/,
+        loader: "ts-loader",
+        options: { 
+          projectReferences: true,
+          transpileOnly: true,
+          experimentalWatchApi: true,
+        },
+        exclude: /node_modules/,
+      },
+    ],
+  },
+  resolve: {
+    extensions: [".ts", ".tsx", ".js"],
+    extensionAlias: {
+      ".js": [".js", ".ts", ".tsx"],
+    },
+    alias: {
+      "@quri/squiggle-lang": path.resolve(__dirname, "../squiggle-lang/src"),
+    },
+  },
+  output: {
+    filename: "bundle.js",
+    path: path.resolve(__dirname, "dist"),
     library: {
       name: "squiggle_components",
       type: "umd",
@@ -66,3 +101,8 @@ if (process.env.ANALYZE) {
 }
 
 export default config;
+performance: {
+  hints: process.env.NODE_ENV === 'production' ? "warning" : false,
+  maxEntrypointSize: 500000,
+  maxAssetSize: 300000,
+},
