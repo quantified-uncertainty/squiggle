@@ -40,7 +40,7 @@ commaSep<content> {
 // when trailing comma is allowed
 commaSep1<content> { "" | content ("," content?)* }
 
-Binding { VariableName { identifier } "=" expression }
+Binding { export? VariableName { identifier } "=" expression }
 
 LambdaParameter {
     LambdaParameterName { identifier } (":" expression)?
@@ -50,7 +50,7 @@ LambdaArgs {
     () | LambdaParameter ("," LambdaParameter)*
 }
 
-FunDeclaration { FunctionName { identifier } ~callOrDeclaration "(" LambdaArgs ")" "=" expression }
+FunDeclaration { export? FunctionName { identifier } ~callOrDeclaration "(" LambdaArgs ")" "=" expression }
 
 statement[@isGroup="Statement"] {
     Binding
@@ -111,6 +111,7 @@ if { kw<"if"> }
 then { kw<"then"> }
 else { kw<"else"> }
 import { kw<"import"> }
+export { kw<"export"> }
 as { kw<"as"> }
 @skip { spaces | newline | Comment | BlockComment }
 

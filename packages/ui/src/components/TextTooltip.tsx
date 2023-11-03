@@ -11,6 +11,7 @@ import {
   useInteractions,
   useRole,
   Placement,
+  FloatingPortal,
 } from "@floating-ui/react";
 
 type Props = {
@@ -49,23 +50,25 @@ export const TextTooltip: FC<Props> = ({
       )}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.07 }}
-            {...getFloatingProps({
-              ref: refs.setFloating,
-              className: "text-sm px-2 py-1 rounded bg-gray-800 z-10",
-              style: {
-                position: strategy,
-                top: y ?? 0,
-                left: x ?? 0,
-              },
-            })}
-          >
-            <div className="text-white max-w-sm">{text}</div>
-          </motion.div>
+          <FloatingPortal>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.07 }}
+              {...getFloatingProps({
+                ref: refs.setFloating,
+                className: "text-sm px-2 py-1 rounded bg-gray-800 z-10",
+                style: {
+                  position: strategy,
+                  top: y ?? 0,
+                  left: x ?? 0,
+                },
+              })}
+            >
+              <div className="text-white max-w-sm">{text}</div>
+            </motion.div>
+          </FloatingPortal>
         )}
       </AnimatePresence>
     </>

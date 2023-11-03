@@ -1,16 +1,19 @@
-import React, { ReactNode } from "react";
+import { clsx } from "clsx";
+import { FC, ReactNode } from "react";
+import ReactMarkdown from "react-markdown";
 
 import {
-  SqCalculator,
   SqDistributionsPlot,
   SqPlot,
   SqScale,
   SqTableChart,
-  SqValue,
 } from "@quri/squiggle-lang";
+import { TableCellsIcon } from "@quri/ui";
 
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
-import { SqValueWithContext, valueHasContext } from "../../lib/utility.js";
+import { SqValueWithContext } from "../../lib/utility.js";
+import { Calculator } from "../Calculator/index.js";
+import { DistPreview } from "../DistributionsChart/DistPreview.js";
 import { DistributionsChart } from "../DistributionsChart/index.js";
 import { DistFunctionChart } from "../FunctionChart/DistFunctionChart.js";
 import { NumericFunctionChart } from "../FunctionChart/NumericFunctionChart.js";
@@ -19,20 +22,15 @@ import { NumberShower } from "../NumberShower.js";
 import { generateDistributionPlotSettings } from "../PlaygroundSettings.js";
 import { RelativeValuesGridChart } from "../RelativeValuesGridChart/index.js";
 import { ScatterChart } from "../ScatterChart/index.js";
-import { ItemSettingsMenu } from "./ItemSettingsMenu.js";
-import {
-  SqTypeWithCount,
-  VariableBox,
-  VariableBoxProps,
-} from "./VariableBox.js";
-import { MergedItemSettings, getChildrenValues } from "./utils.js";
-import { MessageAlert } from "../Alert.js";
-import { clsx } from "clsx";
 import { TableChart } from "../TableChart/index.js";
-import { DistPreview } from "../DistributionsChart/DistPreview.js";
-import { TableCellsIcon } from "@quri/ui";
-import ReactMarkdown from "react-markdown";
-import { Calculator } from "../Calculator/index.js";
+import { ItemSettingsMenu } from "./ItemSettingsMenu.js";
+import { ValueViewer } from "./ValueViewer.js";
+import { SettingsMenuParams } from "./ValueWithContextViewer.js";
+import { MergedItemSettings, getChildrenValues } from "./utils.js";
+
+// Distributions should be smaller than the other charts.
+// Note that for distributions, this only applies to the internals, there's also extra margin and details.
+const CHART_TO_DIST_HEIGHT_ADJUSTMENT = 0.5;
 
 // We use an extra left margin for some elements to align them with parent variable name
 const leftMargin = "ml-1.5";
@@ -40,20 +38,33 @@ const leftMargin = "ml-1.5";
 const truncateStr = (str: string, maxLength: number) =>
   str.substring(0, maxLength) + (str.length > maxLength ? "..." : "");
 
-// Distributions should be smaller than the other charts.
-// Note that for distributions, this only applies to the internals, there's also extra margin and details.
-const CHART_TO_DIST_HEIGHT_ADJUSTMENT = 0.5;
+export const SqTypeWithCount: FC<{
+  type: string;
+  count: number;
+}> = ({ type, count }) => (
+  <div>
+    {type}
+    <span className="ml-0.5">{count}</span>
+  </div>
+);
 
-export const getBoxProps = (
-  value: SqValueWithContext
-): Omit<VariableBoxProps, "value"> => {
+export type ValueWidget = {
+  heading?: string;
+  renderPreview?: () => ReactNode;
+  renderSettingsMenu?: (params: SettingsMenuParams) => ReactNode;
+  render: (settings: MergedItemSettings) => ReactNode;
+};
+
+export function getSqValueWidget(value: SqValueWithContext): ValueWidget {
   const environment = value.context.project.getEnvironment();
 
   switch (value.tag) {
     case "Number":
       return {
-        preview: <NumberShower precision={4} number={value.value} />,
-        children: () => (
+        renderPreview: () => (
+          <NumberShower precision={4} number={value.value} />
+        ),
+        render: () => (
           <div className={clsx("font-semibold text-indigo-800", leftMargin)}>
             <NumberShower precision={4} number={value.value} />
           </div>
@@ -61,7 +72,9 @@ export const getBoxProps = (
       };
     case "Dist": {
       return {
-        preview: <DistPreview dist={value.value} environment={environment} />,
+        renderPreview: () => (
+          <DistPreview dist={value.value} environment={environment} />
+        ),
         renderSettingsMenu: ({ onChange }) => {
           const shape = value.value.pointSet(
             value.context.project.getEnvironment()
@@ -79,7 +92,7 @@ export const getBoxProps = (
             />
           );
         },
-        children: (settings) => {
+        render: (settings) => {
           const plot = SqDistributionsPlot.create({
             distribution: value.value,
             ...generateDistributionPlotSettings(
@@ -99,12 +112,12 @@ export const getBoxProps = (
     }
     case "String":
       return {
-        preview: (
+        renderPreview: () => (
           <div className="overflow-ellipsis overflow-hidden">
             {truncateStr(value.value, 20)}
           </div>
         ),
-        children: () => (
+        render: () => (
           <div className="text-neutral-800 text-sm px-2 py-1 my-1">
             <ReactMarkdown className="prose max-w-4xl">
               {value.value}
@@ -114,8 +127,8 @@ export const getBoxProps = (
       };
     case "Bool":
       return {
-        preview: value.value.toString(),
-        children: () => (
+        renderPreview: () => value.value.toString(),
+        render: () => (
           <div
             className={clsx(
               "text-indigo-800 text-sm font-mono font-semibold",
@@ -128,29 +141,24 @@ export const getBoxProps = (
       };
     case "Date":
       return {
-        children: () => value.value.toDateString(),
+        render: () => value.value.toDateString(),
       };
     case "Void":
       return {
-        children: () => "Void",
+        render: () => "Void",
       };
     case "TimeDuration": {
       return {
-        children: () => <NumberShower precision={3} number={value.value} />,
+        render: () => <NumberShower precision={3} number={value.value} />,
       };
     }
     case "Calculator": {
-      const calculator: SqCalculator = value.value;
       return {
-        children: (settings) => (
+        render: (settings) => (
           <Calculator
-            value={calculator}
             valueWithContext={value}
             environment={environment}
             settings={settings}
-            renderValue={(value, settings) =>
-              getBoxProps(value).children(settings)
-            }
           />
         ),
       };
@@ -158,7 +166,7 @@ export const getBoxProps = (
     case "TableChart": {
       const table: SqTableChart = value.value;
       return {
-        preview: (
+        renderPreview: () => (
           <div className="items-center flex space-x-1">
             <TableCellsIcon size={14} className="flex opacity-60" />
             <div>
@@ -168,22 +176,18 @@ export const getBoxProps = (
             </div>
           </div>
         ),
-        children: (settings) => (
+        render: (settings) => (
           <TableChart
             value={table}
             environment={environment}
             settings={settings}
-            renderValue={(value, settings) =>
-              getBoxProps(value).children(settings)
-            }
           />
         ),
       };
     }
     case "Lambda":
       return {
-        heading: "",
-        preview: (
+        renderPreview: () => (
           <div>
             fn(
             <span className="opacity-60">
@@ -201,7 +205,7 @@ export const getBoxProps = (
             />
           );
         },
-        children: (settings) => (
+        render: (settings) => (
           <FunctionChart
             fn={value.value}
             settings={settings}
@@ -216,7 +220,7 @@ export const getBoxProps = (
     case "Plot": {
       const plot: SqPlot = value.value;
       return {
-        children: (settings) => {
+        render: (settings) => {
           switch (plot.tag) {
             case "distributions":
               return (
@@ -274,7 +278,7 @@ export const getBoxProps = (
     case "Scale": {
       const scale: SqScale = value.value;
       return {
-        children: () => <div>{scale.toString()}</div>,
+        render: () => <div>{scale.toString()}</div>,
       };
     }
 
@@ -282,9 +286,10 @@ export const getBoxProps = (
       const entries = getChildrenValues(value);
       return {
         heading: `Dict(${entries.length})`,
-        preview: <SqTypeWithCount type="{}" count={entries.length} />,
-        children: () =>
-          entries.map((r, i) => <ExpressionViewer key={i} value={r} />),
+        renderPreview: () => (
+          <SqTypeWithCount type="{}" count={entries.length} />
+        ),
+        render: () => entries.map((r, i) => <ValueViewer key={i} value={r} />),
       };
     }
     case "Array": {
@@ -292,23 +297,22 @@ export const getBoxProps = (
       const length = entries.length;
       return {
         heading: `List(${length})`,
-        preview: <SqTypeWithCount type="[]" count={length} />,
-        children: () =>
-          entries.map((r, i) => <ExpressionViewer key={i} value={r} />),
+        renderPreview: () => <SqTypeWithCount type="[]" count={length} />,
+        render: () => entries.map((r, i) => <ValueViewer key={i} value={r} />),
       };
     }
 
     case "Domain": {
       return {
         // TODO - same styles as `Boolean`?
-        children: () => value.toString(),
+        render: () => value.toString(),
       };
     }
 
     default: {
       return {
         heading: "Error",
-        children: () => (
+        render: () => (
           <div>
             <span>No display for type: </span>{" "}
             <span className="font-semibold text-neutral-600">
@@ -319,33 +323,4 @@ export const getBoxProps = (
       };
     }
   }
-};
-
-type Props = {
-  /** The output of squiggle's run */
-  value: SqValue;
-  width?: number;
-};
-
-export const ExpressionViewer: React.FC<Props> = ({ value }) => {
-  if (!valueHasContext(value)) {
-    return <MessageAlert heading="Can't display pathless value" />;
-  }
-
-  const boxProps = getBoxProps(value);
-  const heading = boxProps.heading || value.publicName();
-  const hasChildren = () => !!getChildrenValues(value);
-  const children: (settings: MergedItemSettings) => ReactNode =
-    (value.tag === "Dict" || value.tag === "Array") && hasChildren()
-      ? (settings) => (
-          <div className={"space-y-2 pt-1 mt-1"}>
-            {boxProps.children(settings)}
-          </div>
-        )
-      : boxProps.children;
-  return (
-    <VariableBox {...boxProps} value={value} heading={heading}>
-      {children}
-    </VariableBox>
-  );
-};
+}

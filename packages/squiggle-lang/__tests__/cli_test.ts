@@ -11,7 +11,7 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 
-const runCLI = async (args: string[]) => {
+async function runCLI(args: string[]) {
   let stdout = "";
   let stderr = "";
 
@@ -47,7 +47,7 @@ const runCLI = async (args: string[]) => {
 
   jest.restoreAllMocks();
   return { stdout, stderr, exitCode };
-};
+}
 
 it("Usage output", async () => {
   const result = await runCLI([]);

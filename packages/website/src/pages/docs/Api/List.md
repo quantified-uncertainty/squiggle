@@ -152,6 +152,20 @@ List.flatten([
 
 ## List Filtering
 
+### slice
+```
+List.slice: (list<'a>, minIndex: number) => list<'a>
+List.slice: (list<'a>, minIndex: number, maxIndex: number) => list<'a>
+```
+
+Returns a copy of the list, between the selected ``start`` and ``end``, end not included. Directly uses the [Javascript implementation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/slice) underneath.
+
+```squiggle
+List.slice([1,2,3,4,5,6], 2) // [3,4,5,6]
+List.slice([1,2,3,4,5,6], 2, 4) // [3,4]
+```
+
+
 ### filter
 
 ```

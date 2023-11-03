@@ -61,18 +61,18 @@ voidStatement
   = "call" _nl value:zeroOMoreArgumentsBlockOrExpression
     {
       const variable = h.nodeIdentifier("_", location());
-      return h.nodeLetStatement(variable, value, location());
+      return h.nodeLetStatement(variable, value, false, location());
     }
 
 letStatement
-  = variable:variable _ assignmentOp _nl value:zeroOMoreArgumentsBlockOrExpression
-    { return h.nodeLetStatement(variable, value, location()); }
+  = exported:("export" __nl)? variable:variable _ assignmentOp _nl value:zeroOMoreArgumentsBlockOrExpression
+    { return h.nodeLetStatement(variable, value, Boolean(exported), location()); }
 
 defunStatement
-  = variable:variable '(' _nl args:functionParameters _nl ')' _ assignmentOp _nl body:innerBlockOrExpression
+  = exported:("export" __nl)? variable:variable '(' _nl args:functionParameters _nl ')' _ assignmentOp _nl body:innerBlockOrExpression
     {
       const value = h.nodeLambda(args, body, location(), variable);
-      return h.nodeDefunStatement(variable, value, location());
+      return h.nodeDefunStatement(variable, value, Boolean(exported), location());
     }
 
   assignmentOp "assignment" = '='

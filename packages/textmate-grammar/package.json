@@ -8,6 +8,24 @@
   },
   "devDependencies": {
     "js-yaml": "^4.1.0",
-    "prettier": "^3.0.3"
+    "prettier": "^3.0.3",
+    "vscode-tmgrammar-test": "^0.1.2"
+  },
+  "contributes": {
+    "languages": [
+      {
+        "id": "squiggle",
+        "extensions": [
+          ".squiggle"
+        ]
+      }
+    ],
+    "grammars": [
+      {
+        "language": "squiggle",
+        "scopeName": "source.squiggle",
+        "path": "./dist/squiggle.tmLanguage.json"
+      }
+    ]
   }
 }

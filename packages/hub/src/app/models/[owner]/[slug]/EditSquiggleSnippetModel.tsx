@@ -1,15 +1,20 @@
-import { FC, useEffect, useMemo, useState } from "react";
+import { FC, useMemo, useState } from "react";
 import { FormProvider, useFieldArray } from "react-hook-form";
 import { graphql, useFragment } from "react-relay";
 
-import { PlaygroundToolbarItem } from "@quri/squiggle-components";
-import { Button, LinkIcon, TextTooltip } from "@quri/ui";
+import {
+  Button,
+  DropdownMenuActionItem,
+  DropdownMenuHeader,
+  LinkIcon,
+  TextTooltip,
+} from "@quri/ui";
 import {
   SquigglePlaygroundVersionPicker,
   SquiggleVersionShower,
   VersionedSquigglePlayground,
-  type SquiggleVersion,
   checkSquiggleVersion,
+  type SquiggleVersion,
 } from "@quri/versioned-playground";
 
 import { EditSquiggleSnippetModel$key } from "@/__generated__/EditSquiggleSnippetModel.graphql";
@@ -21,6 +26,10 @@ import { EditModelExports } from "@/components/exports/EditModelExports";
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
 import { useMutationForm } from "@/hooks/useMutationForm";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
+import {
+  serializeSourceId,
+  squiggleHubLinker,
+} from "@/squiggle/components/linker";
 import {
   Draft,
   SquiggleSnippetDraftDialog,
@@ -200,18 +209,28 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
           <VersionedSquigglePlayground
             key={playgroundKey}
             version={version}
+            sourceId={serializeSourceId({
+              owner: model.owner.slug,
+              slug: model.slug,
+            })}
+            linker={squiggleHubLinker}
             height={height ?? "100vh"}
             onCodeChange={onCodeChange}
             defaultCode={defaultCode}
-            renderExtraControls={({ openModal }) => (
-              <div className="h-full flex items-center justify-end gap-2">
-                {model.isEditable && (
-                  <PlaygroundToolbarItem
-                    tooltipText="Exported Variables"
+            renderExtraDropdownItems={({ openModal }) =>
+              model.isEditable ? (
+                <>
+                  <DropdownMenuHeader>Experimental</DropdownMenuHeader>
+                  <DropdownMenuActionItem
+                    title="Exported Variables"
                     icon={LinkIcon}
                     onClick={() => openModal("exports")}
                   />
-                )}
+                </>
+              ) : null
+            }
+            renderExtraControls={() => (
+              <div className="h-full flex items-center justify-end gap-2">
                 {model.isEditable ? (
                   <SquigglePlaygroundVersionPicker
                     version={version}
@@ -249,8 +268,14 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
                   body: (
                     <div className="px-6 py-2">
                       <EditModelExports
-                        append={appendVariableWithDefinition}
-                        remove={removeVariableWithDefinition}
+                        append={(item) => {
+                          appendVariableWithDefinition(item);
+                          onSubmit();
+                        }}
+                        remove={(id) => {
+                          removeVariableWithDefinition(id);
+                          onSubmit();
+                        }}
                         items={variablesWithDefinitionsFields}
                         modelRef={model}
                       />

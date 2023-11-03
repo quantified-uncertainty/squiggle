@@ -6,6 +6,7 @@ import { SqDict } from "./SqValue/SqDict.js";
 export type SqOutput = {
   result: SqValue;
   bindings: SqDict;
+  exports: SqDict;
 };
 
 export type SqOutputResult = result<SqOutput, SqError>;

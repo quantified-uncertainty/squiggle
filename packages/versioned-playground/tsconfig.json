@@ -17,6 +17,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true // default forced by Next.js, https://github.com/vercel/next.js/pull/51564
   },
+  "references": [{ "path": "../components" }],
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
 }

@@ -21,10 +21,10 @@ gha_enabled: True
 # Example:
 #
 # description: sweepai/sweep is a python project. The main api endpoints are in sweepai/api.py. Write code that adheres to PEP8.
-description: ''
+description: 'A custom programming language that works with probability distributions. Contains several packages. "squiggle-lang" is the language, "components" is a set of high-level React components, "hub" is a web application that stores Squiggle code, similar to Github, and "website" is for documentation.'
 
 # This sets whether to create pull requests as drafts. If this is set to True, then all pull requests will be created as drafts and GitHub Actions will not be triggered.
-draft: False
+draft: True
 
 # This is a list of directories that Sweep will not be able to edit.
 blocked_dirs: []
@@ -35,12 +35,18 @@ blocked_dirs: []
 #
 # docs:
 #   - PyGitHub: ["https://pygithub.readthedocs.io/en/latest/", "We use pygithub to interact with the GitHub API"]
-docs: []
+docs:
+  - Squiggle: ["https://www.squiggle-language.com/docs", "Our main language. This comes from this repo, but is used in many parts of it."]
+  - Codemirror: ["https://codemirror.net/docs/", "We use codemirror in /packages/components, for our editor"]
+  - d3: ["https://d3js.org/getting-started", "We use d3 for components, for charts and diagrams."]
+  - React: ["https://legacy.reactjs.org/docs/getting-started.html", "We use React for all frontend stuff"]
+  - Pathos: ["https://pathos.readthedocs.io/en/latest/pathos.html", "Used in /components/hub for our GraphQL Server"]
 
 # Sandbox executes commands in a sandboxed environment to validate code changes after every edit to guarantee pristine code. For more details, see the [Sandbox](./sandbox) page.
 sandbox:
   install:
-    - trunk init
+    - pnpm install
+    - npx turbo run build
   check:
-    - trunk fmt {file_path} || return 0
-    - trunk check --fix --print-failures {file_path}
+    - npx turbo run lint
+    - npx turbo run test

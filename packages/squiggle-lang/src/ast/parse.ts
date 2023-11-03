@@ -17,7 +17,7 @@ export type ParseError = {
   message: string;
 };
 
-export type AST = ASTNode & {
+export type AST = Extract<ASTNode, { type: "Program" }> & {
   comments: ASTCommentNode[];
 };
 
@@ -30,6 +30,9 @@ export function parse(expr: string, source: string): ParseResult {
       grammarSource: source,
       comments,
     });
+    if (parsed.type !== "Program") {
+      throw new Error("Expected parse to result in a Program node");
+    }
     parsed.comments = comments;
     return Result.Ok(parsed);
   } catch (e) {
@@ -93,7 +96,9 @@ function nodeToString(node: ASTNode): string {
     case "Lambda":
       return sExpr([...node.args, node.body]);
     case "LetStatement":
-      return sExpr([node.variable, node.value]);
+      return node.exported
+        ? sExpr(["export", node.variable, node.value])
+        : sExpr([node.variable, node.value]);
     case "DefunStatement":
       return sExpr([node.variable, node.value]);
     case "String":

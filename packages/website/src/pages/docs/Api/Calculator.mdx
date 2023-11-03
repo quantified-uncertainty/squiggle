@@ -17,32 +17,67 @@ Calculator.make: ({
   fn: ...arguments => any,
   title?: string,
   description?: string,
-  fields: list<{
-    name: string,
-    default?: string | number,
-    description?: string
-  }>
+  fields: list<input>,
+  autorun?: boolean = true,
 }) => calculator
 ```
 
 ``Calculator.make`` takes in a function, a description, and a list of fields. The function should take in the same number of arguments as the number of fields, and the arguments should be of the same type as the default value of the field.
 
-Examples:
+Calculators require a list of Inputs to be passed in. Inputs are created using the ``Input`` module. The ``Input`` module has a few different functions for creating different types of inputs.
+
+For calculators that take a long time to run, we recommend setting ``autorun`` to false. This will produce a button that the user can click to run the calculator.
+
+Example:
 
 <SquiggleEditor
   defaultCode={`Calculator.make(
   {
-    fn: {|a, b|a + b},
-    title: "Sum()"
-    description: "This takes in two arguments, and outputs the sum of those two arguments.",
-    fields: [
-      {
+    fn: {|a, b,c,d| [a,b,c,d]},
+    title: "Concat()",
+    description: "This function takes in 4 arguments, then displays them",
+    autorun: true,
+    inputs: [
+      Input.text({
         name: "First Param",
-        default: "10 to 11",
+        default: "10 to 13",
         description: "Must be a number or distribution",
-      },
-      { name: "Second Param", default: "3" },
-    ],
+      }),
+      Input.textArea({ name: "Second Param", default: "[4,5,2,3,4,5,3,3,2,2,2,3,3,4,45,5,5,2,1]" }),
+      Input.select({ name: "Third Param", default: "Option 1", options: ["Option 1", "Option 2", "Option 3"] }),
+      Input.checkbox({ name: "Fourth Param", default: false})
+    ]
   }
 )`}
 />
+
+## Inputs
+
+Inputs are now only used for creating calculators, as shown above. They are created using the ``Input`` module.
+
+```
+Input.text: ({
+  name: string,
+  description?: string,
+  default?: string,
+}) => input
+
+Input.textArea: ({
+  name: string,
+  description?: string,
+  default?: string,
+}) => input
+
+Input.checkbox: ({
+  name: string,
+  description?: string,
+  default?: boolean,
+}) => input
+
+Input.select: ({
+  name: string,
+  description?: string,
+  default?: string,
+  options: string[]
+}) => input
+```

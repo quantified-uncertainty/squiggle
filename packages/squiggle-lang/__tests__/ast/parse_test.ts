@@ -473,6 +473,11 @@ describe("Peggy parse", () => {
     testParse("x", "(Program :x)");
     testParse("Math.pi", "(Program :Math.pi)");
   });
+
+  describe("Exports", () => {
+    testParse("export x = 5", "(Program (LetStatement export :x (Block 5)))");
+    testParse("exportx = 5", "(Program (LetStatement :exportx (Block 5)))");
+  });
 });
 
 describe("parsing new line", () => {

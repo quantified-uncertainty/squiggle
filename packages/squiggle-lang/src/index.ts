@@ -1,5 +1,12 @@
 import { type Env } from "./dist/env.js";
 import { SqProject } from "./public/SqProject/index.js";
+export {
+  type SqInput,
+  SqTextAreaInput,
+  SqCheckboxInput,
+  SqSelectInput,
+  SqTextInput,
+} from "./public/SqValue/SqInput.js";
 import {
   SqLambdaValue,
   SqNumberValue,
@@ -65,6 +72,7 @@ export {
 
 export { type AST, type ASTNode } from "./ast/parse.js";
 export { type ASTCommentNode } from "./ast/peggyHelpers.js";
+export { type SqLinker } from "./public/SqLinker.js";
 
 export async function run(
   code: string,

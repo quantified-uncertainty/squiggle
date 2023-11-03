@@ -81,6 +81,7 @@ export {
   UserIcon,
   WrenchIcon,
   HelpIcon,
+  PuzzleIcon,
 } from "./icons/HeroIcons.js";
 export type { IconProps } from "./icons/Icon.js";
 export { RefreshIcon } from "./icons/RefreshIcon.js";

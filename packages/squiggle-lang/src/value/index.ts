@@ -10,6 +10,7 @@ import * as DateTime from "../utility/DateTime.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { Domain } from "./domain.js";
 import { shuffle } from "../utility/E_A.js";
+import lodashIsEqual from "lodash/isEqual.js";
 
 export type ValueMap = ImmutableMap<string, Value>;
 
@@ -368,6 +369,60 @@ class VScale extends BaseValue {
 
 export const vScale = (scale: Scale) => new VScale(scale);
 
+export type CommonInputArgs = {
+  name: string;
+  description?: string;
+};
+
+export type Input = CommonInputArgs &
+  (
+    | {
+        type: "text";
+        default?: string;
+      }
+    | {
+        type: "textArea";
+        default?: string;
+      }
+    | {
+        type: "checkbox";
+        default?: boolean;
+      }
+    | {
+        type: "select";
+        default?: string;
+        options: string[];
+      }
+  );
+
+class VInput extends BaseValue {
+  readonly type = "Input";
+  readonly publicName = "Input";
+
+  constructor(public value: Input) {
+    super();
+  }
+
+  toString(): string {
+    switch (this.value.type) {
+      case "text":
+        return "Text input";
+      case "textArea":
+        return "Text area input";
+      case "checkbox":
+        return "Check box input";
+      case "select":
+        return `Select input (${this.value.options.join(", ")})`;
+    }
+  }
+
+  isEqual(other: VInput) {
+    return lodashIsEqual(this.value, other.value);
+  }
+}
+
+export const vInput = (input: Input) => new VInput(input);
+
 export type LabeledDistribution = {
   name?: string;
   distribution: BaseDist;
@@ -436,7 +491,8 @@ export const vTableChart = (v: TableChart) => new VTableChart(v);
 
 export type Calculator = {
   fn: Lambda;
-  fields: { name: string; default: string; description?: string }[];
+  inputs: Input[];
+  autorun: boolean;
   description?: string;
   title?: string;
 };
@@ -449,19 +505,19 @@ class VCalculator extends BaseValue {
 
   constructor(public value: Calculator) {
     super();
-    if (!value.fn.parameterCounts().includes(value.fields.length)) {
+    if (!value.fn.parameterCounts().includes(value.inputs.length)) {
       this.setError(
         `Calculator function needs ${value.fn.parameterCountString()} parameters, but ${
-          value.fields.length
+          value.inputs.length
         } fields were provided.`
       );
     }
 
-    if (value.fields.some((x) => x.name === "")) {
+    if (value.inputs.some((x) => x.name === "")) {
       this.setError(`Calculator field names can't be empty.`);
     }
 
-    const fieldNames = value.fields.map((f) => f.name);
+    const fieldNames = value.inputs.map((f) => f.name);
     const uniqueNames = new Set(fieldNames);
     if (fieldNames.length !== uniqueNames.size) {
       this.setError(`Duplicate calculator field names found.`);
@@ -584,6 +640,7 @@ export type Value =
   | VTableChart
   | VCalculator
   | VScale
+  | VInput
   | VDomain
   | VVoid;
 
