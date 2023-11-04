@@ -5,7 +5,7 @@ import { userEvent } from "@testing-library/user-event";
 import { SquigglePlayground } from "../src/index.js";
 
 test("Autorun is default", async () => {
-  act(() => render(<SquigglePlayground defaultCode="70*30" />));
+  render(<SquigglePlayground defaultCode="70*30" />);
   await waitFor(() =>
     expect(screen.getByTestId("dynamic-viewer-result")).toHaveTextContent(
       "2100"
@@ -14,8 +14,8 @@ test("Autorun is default", async () => {
 });
 
 test("Autorun can be switched off", async () => {
-  const user = userEvent.setup();
-  act(() => render(<SquigglePlayground defaultCode="70*30" />));
+  render(<SquigglePlayground defaultCode="70*30" />);
+  const user = userEvent;
 
   expect(screen.getByTestId("autorun-controls")).toHaveAttribute(
     "aria-checked",
@@ -28,18 +28,14 @@ test("Autorun can be switched off", async () => {
     )
   );
 
-  await act(async () => {
-    await user.click(screen.getByTestId("autorun-controls").firstElementChild!); // disable
-  });
+  user.click(screen.getByTestId("autorun-controls").firstElementChild!); // disable
 
   expect(screen.getByTestId("autorun-controls")).toHaveAttribute(
     "aria-checked",
     "false"
   );
 
-  await act(
-    async () => await user.click(screen.getByTestId("autorun-controls")) // enable autorun again
-  );
+  user.click(screen.getByTestId("autorun-controls")); // enable autorun again
 
   expect(screen.getByTestId("autorun-controls")).toHaveTextContent("Autorun");
 
