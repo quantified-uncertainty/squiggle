@@ -4,6 +4,6 @@
 
 ### Patch Changes
 
-- ([#2300](https://github.com/quantified-uncertainty/squiggle/pull/2300))
+Use 0.8.6 Squiggle. No extension-specific changes.
 
 ## 0.8.5

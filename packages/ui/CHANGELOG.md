@@ -4,14 +4,14 @@
 
 ### Patch Changes
 
-- - `WrenchIcon` ([#2237](https://github.com/quantified-uncertainty/squiggle/pull/2237))
-  - `DropdownMenuLinkItem` for `<a href=...>` links
+- `WrenchIcon` ([#2237](https://github.com/quantified-uncertainty/squiggle/pull/2237))
+- `DropdownMenuLinkItem` for `<a href=...>` links
 
-- Expose DropdownMenuItemLayout component ([#2237](https://github.com/quantified-uncertainty/squiggle/pull/2237))
+- Expose `<DropdownMenuItemLayout>` component ([#2237](https://github.com/quantified-uncertainty/squiggle/pull/2237))
 
-- FormField and ControlledFormField components accept standaloneLabel prop ([#2237](https://github.com/quantified-uncertainty/squiggle/pull/2237))
+- `<FormField>` and `<ControlledFormField>`` components accept `standaloneLabel` prop ([#2237](https://github.com/quantified-uncertainty/squiggle/pull/2237))
 
-- Improved Dropdown styles ([#2296](https://github.com/quantified-uncertainty/squiggle/pull/2296))
+- Improved `<Dropdown>` styles ([#2296](https://github.com/quantified-uncertainty/squiggle/pull/2296))
 
 - `PlusIcon` ([#2296](https://github.com/quantified-uncertainty/squiggle/pull/2296))
 

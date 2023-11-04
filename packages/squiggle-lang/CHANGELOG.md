@@ -4,25 +4,19 @@
 
 ### Patch Changes
 
-- Added calculator class to squiggle-lang and calculator component to squiggle-components. Useful for presenting functions to end-users. ([#2265](https://github.com/quantified-uncertainty/squiggle/pull/2265))
+- Added [Calculators](https://www.squiggle-language.com/docs/Api/Calculator), useful for presenting functions to end-users ([#2265](https://github.com/quantified-uncertainty/squiggle/pull/2265), [#2343](https://github.com/quantified-uncertainty/squiggle/pull/2343))
 
-- Breaking: Changed Calculator fields attribute, to inputs, which now requires Input objects. These allow for multiple types of inputs ([#2343](https://github.com/quantified-uncertainty/squiggle/pull/2343))
+- Added `title` to all [plots](https://www.squiggle-language.com/docs/Api/Plot), and to scales for labeling x and y axes. Added validation for `tickFormat`. ([#2337](https://github.com/quantified-uncertainty/squiggle/pull/2337))
 
-- Added sampleCount field to Calculator.make ([#2474](https://github.com/quantified-uncertainty/squiggle/pull/2474))
+- Improved [mixture()](https://www.squiggle-language.com/docs/Api/Dist#mixture) typing, but limited to 5 parameters maximum ([#2334](https://github.com/quantified-uncertainty/squiggle/pull/2334))
 
-- Added title to all plots, and to scales for xAxisLabel and yAxisLabel. Added validation for tickFormat. ([#2337](https://github.com/quantified-uncertainty/squiggle/pull/2337))
+- Added [Dict.pick](https://www.squiggle-language.com/docs/Api/Dictionary#pick), [Dict.omit](https://www.squiggle-language.com/docs/Api/Dictionary#omit) ([#2376](https://github.com/quantified-uncertainty/squiggle/pull/2376))
 
-- Improved mixture() typing, but limited to 5 parameters maximum. Also adjusted SqLambda to output SqLamdaParameters. ([#2334](https://github.com/quantified-uncertainty/squiggle/pull/2334))
+- [sum](https://www.squiggle-language.com/docs/Api/Number#sum), [product](https://www.squiggle-language.com/docs/Api/Number#product), [sort](https://www.squiggle-language.com/docs/Api/Number#sort), [cumsum](https://www.squiggle-language.com/docs/Api/Number#cumulative-sum), [cumprod](https://www.squiggle-language.com/docs/Api/Number#cumulative-product) all accept lists with 0 elements ([#2351](https://github.com/quantified-uncertainty/squiggle/pull/2351))
 
-- ([#2300](https://github.com/quantified-uncertainty/squiggle/pull/2300))
+- Added [Dist.sum](https://www.squiggle-language.com/docs/Api/Dist#sum), [Dist.product](https://www.squiggle-language.com/docs/Api/Dist#product), [Dist.cumsum](https://www.squiggle-language.com/docs/Api/Dist#cumulative-sum), [Dist.cumprod](https://www.squiggle-language.com/docs/Api/Dist#cumulative-product), [Dist.diff](https://www.squiggle-language.com/docs/Api/Dist#diff) ([#2356](https://github.com/quantified-uncertainty/squiggle/pull/2356))
 
-- Added Dict.pick, Dict.omit ([#2376](https://github.com/quantified-uncertainty/squiggle/pull/2376))
-
-- Number.sum, product, sort, cumsum, cumprod, should all accept lists with 0 elements ([#2351](https://github.com/quantified-uncertainty/squiggle/pull/2351))
-
-- Added Dist.sum, Dist.product, Dist.cumsum, Dist.cumprod, Dist.diff ([#2356](https://github.com/quantified-uncertainty/squiggle/pull/2356))
-
-- Added List.slice, Danger.combinations, Danger.allCombinations ([#2347](https://github.com/quantified-uncertainty/squiggle/pull/2347))
+- Added [List.slice](https://www.squiggle-language.com/docs/Api/List#slice), [Danger.combinations](https://www.squiggle-language.com/docs/Api/Danger#combinations), [Danger.allCombinations](https://www.squiggle-language.com/docs/Api/Danger#allcombinations) ([#2347](https://github.com/quantified-uncertainty/squiggle/pull/2347))
 
 ## 0.8.5
 

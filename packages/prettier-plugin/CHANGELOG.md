@@ -4,8 +4,6 @@
 
 ### Patch Changes
 
-- ([#2300](https://github.com/quantified-uncertainty/squiggle/pull/2300))
-
 - Improve package.json exports ([#2329](https://github.com/quantified-uncertainty/squiggle/pull/2329))
 
 - Don't quote new lines in strings ([#2293](https://github.com/quantified-uncertainty/squiggle/pull/2293))
