@@ -4,6 +4,7 @@
   "scripts": {
     "build": "mkdir -p dist && js-yaml src/squiggle.tmLanguage.yaml >dist/squiggle.tmLanguage.json && js-yaml src/squiggle.js.yaml >dist/squiggle.js.json",
     "lint": "prettier --check .",
+    "test": "vscode-tmgrammar-test tests/**/*.squiggle",
     "format": "prettier --write ."
   },
   "devDependencies": {
