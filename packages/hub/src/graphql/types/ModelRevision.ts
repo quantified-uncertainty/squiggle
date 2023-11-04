@@ -85,7 +85,7 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
         }
 
         if (exports.length === 0) {
-          return null; // not found
+          return null;
         }
 
         return exports[0];
