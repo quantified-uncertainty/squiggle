@@ -1,5 +1,6 @@
 import { BaseDist } from "../../dist/BaseDist.js";
 import { DistError } from "../../dist/DistError.js";
+import { PointMass } from "../../dist/SymbolicDist.js";
 import { Env } from "../../dist/env.js";
 import {
   REDistributionError,
@@ -10,7 +11,14 @@ import { SampleMapNeedsNtoNFunction } from "../../operationError.js";
 import { ReducerContext } from "../../reducer/context.js";
 import { Lambda } from "../../reducer/lambda.js";
 import * as Result from "../../utility/result.js";
-import { Value, vBool, vDist, vNumber, vString } from "../../value/index.js";
+import {
+  Value,
+  vArray,
+  vBool,
+  vDist,
+  vNumber,
+  vString,
+} from "../../value/index.js";
 import { FRFunction } from "./core.js";
 import { FnDefinition, makeDefinition } from "./fnDefinition.js";
 import {
@@ -297,6 +305,9 @@ export function doBinaryLambdaCall(
   throw new REOther("Expected function to return a boolean value");
 }
 
+export const parseDistFromDistOrNumber = (d: number | BaseDist): BaseDist =>
+  typeof d == "number" ? Result.getExt(PointMass.make(d)) : d;
+
 export function distResultToValue(
   result: Result.result<BaseDist, DistError>
 ): Value {
@@ -304,6 +315,15 @@ export function distResultToValue(
     throw new REDistributionError(result.value);
   }
   return vDist(result.value);
+}
+
+export function distsResultToValue(
+  result: Result.result<BaseDist[], DistError>
+): Value {
+  if (!result.ok) {
+    throw new REDistributionError(result.value);
+  }
+  return vArray(result.value.map((r) => vDist(r)));
 }
 
 export function makeSampleSet(d: BaseDist, env: Env) {

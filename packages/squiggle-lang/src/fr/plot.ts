@@ -1,4 +1,3 @@
-import { PointMass } from "../dist/SymbolicDist.js";
 import { REArgumentError, REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
@@ -13,7 +12,10 @@ import {
   frScale,
   frString,
 } from "../library/registry/frTypes.js";
-import { FnFactory } from "../library/registry/helpers.js";
+import {
+  FnFactory,
+  parseDistFromDistOrNumber,
+} from "../library/registry/helpers.js";
 import { Lambda } from "../reducer/lambda.js";
 import { LabeledDistribution, Scale, VDomain, vPlot } from "../value/index.js";
 
@@ -114,16 +116,10 @@ export const library = [
         ([{ dists, xScale, yScale, title, showSummary }]) => {
           const distributions: LabeledDistribution[] = [];
           dists.forEach(({ name, value }) => {
-            if (typeof value === "number") {
-              const deltaResult = PointMass.make(value);
-              if (deltaResult.ok === false) {
-                throw new REArgumentError(deltaResult.value);
-              } else {
-                distributions.push({ name, distribution: deltaResult.value });
-              }
-            } else {
-              distributions.push({ name, distribution: value });
-            }
+            distributions.push({
+              name,
+              distribution: parseDistFromDistOrNumber(value),
+            });
           });
           return vPlot({
             type: "distributions",

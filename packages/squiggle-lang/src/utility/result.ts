@@ -78,3 +78,11 @@ export function getError<T, E>(r: result<T, E>): E | undefined {
     return undefined;
   }
 }
+
+export function getExt<T, E>(r: result<T, E>): T {
+  if (r.ok) {
+    return r.value;
+  } else {
+    throw r.value;
+  }
+}

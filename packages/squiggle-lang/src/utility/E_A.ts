@@ -1,3 +1,5 @@
+import { Ok, result } from "./result.js";
+
 export const zip = <A, B>(xs: A[], ys: B[]): [A, B][] => {
   // based on Belt.Array.zip
   const lenX = xs.length;
@@ -12,18 +14,38 @@ export const zip = <A, B>(xs: A[], ys: B[]): [A, B][] => {
 
 // This is like map, but
 // accumulate([1,2,3], (a,b) => a + b) => [1, 3, 6]
-export const accumulate = <A>(items: A[], fn: (x: A, y: A) => A): A[] => {
+export const accumulate = <A>(
+  items: readonly A[],
+  fn: (x: A, y: A) => A
+): A[] => {
   const len = items.length;
-  const result = new Array(len).fill(0);
-  for (let i = 0; i < len; i++) {
-    const element = items[i];
-    if (i === 0) {
-      result[i] = element;
-    } else {
-      result[i] = fn(element, result[i - 1]);
-    }
+  if (len === 0) return [];
+  const result = new Array(len);
+  result[0] = items[0]; // handle the first element separately
+
+  for (let i = 1; i < len; i++) {
+    result[i] = fn(items[i], result[i - 1]);
   }
+
   return result;
+};
+
+export const accumulateWithError = <A, E>(
+  items: readonly A[],
+  fn: (x: A, y: A) => result<A, E>
+): result<A[], E> => {
+  const len = items.length;
+  if (len === 0) return Ok([]);
+  const results: A[] = new Array(len);
+  results[0] = items[0]; // First element is directly assigned
+
+  for (let i = 1; i < len; i++) {
+    const r: result<A, E> = fn(items[i], results[i - 1]);
+    if (!r.ok) return r; // Early return on error
+    results[i] = r.value;
+  }
+
+  return Ok(results);
 };
 
 export const unzip = <A, B>(
@@ -50,6 +72,19 @@ export const pairwise = <T, R>(
     result.push(fn(items[i - 1], items[i]));
   }
   return result;
+};
+
+export const pairwiseWithError = <T, R, E>(
+  items: readonly T[],
+  fn: (v1: T, v2: T) => result<R, E>
+): result<R[], E> => {
+  const result: R[] = [];
+  for (let i = 1; i < items.length; i++) {
+    const r: result<R, E> = fn(items[i - 1], items[i]);
+    if (!r.ok) return r; // Immediately return on error
+    result.push(r.value);
+  }
+  return Ok(result);
 };
 
 export const makeBy = <T>(n: number, fn: (i: number) => T): T[] => {

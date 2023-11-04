@@ -481,6 +481,18 @@ normal(0, 1) + normal(1, 3) // returns normal(1, 3.16...)
 add(normal(0, 1), normal(1, 3)) // returns normal(1, 3.16...)
 ```
 
+### sum
+
+```
+sum: (list<distributionLike>) => distribution
+```
+
+### cumulative sum
+
+```
+cumsum: (list<distributionLike>) => distribution
+```
+
 ### multiply
 
 ```
@@ -492,6 +504,19 @@ multiply: (distributionLike, distributionLike) => distribution
 ```
 product: (list<distributionLike>) => distribution
 ```
+
+### cumulative product
+
+```
+cumprod: (list<distributionLike>) => list<distribution>
+```
+
+### diff
+
+```
+diff: (list<distributionLike>) => list<distribution>
+```
+
 
 ### subtract
 

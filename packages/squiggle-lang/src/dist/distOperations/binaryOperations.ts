@@ -1,16 +1,20 @@
 import { AlgebraicOperation } from "../../operation.js";
-import { result } from "../../utility/result.js";
+import { accumulateWithError, pairwiseWithError } from "../../utility/E_A.js";
+import { result, Ok, bind } from "../../utility/result.js";
 import { BaseDist } from "../BaseDist.js";
 import { DistError } from "../DistError.js";
+import { PointMass } from "../SymbolicDist.js";
 import { Env } from "../env.js";
 import { algebraicCombination } from "./algebraicCombination.js";
 import { pointwiseCombination } from "./pointwiseCombination.js";
+
+type DistResult = result<BaseDist, DistError>;
 
 export type BinaryOperation = (
   t1: BaseDist,
   t2: BaseDist,
   opts: { env: Env }
-) => result<BaseDist, DistError>;
+) => DistResult;
 
 // private helpers
 function algebraic(
@@ -51,3 +55,39 @@ export const binaryOperations = {
   pointwiseLogarithm: (t1, t2, { env }) => pointwise(t1, t2, env, "Logarithm"),
   pointwisePower: (t1, t2, { env }) => pointwise(t1, t2, env, "Power"),
 } satisfies { [k: string]: BinaryOperation };
+
+type DistsResult = result<BaseDist[], DistError>;
+export const algebraicSum = (dists: BaseDist[], env: Env): DistResult =>
+  dists.reduce<DistResult>(
+    (accumulatedDist, currentDist) =>
+      bind(accumulatedDist, (aVal) =>
+        binaryOperations.algebraicAdd(aVal, currentDist, { env })
+      ),
+    Ok(new PointMass(0))
+  );
+
+export const algebraicProduct = (dists: BaseDist[], env: Env): DistResult =>
+  dists.reduce<DistResult>(
+    (accumulatedDist, currentDist) =>
+      bind(accumulatedDist, (aVal) =>
+        binaryOperations.algebraicMultiply(aVal, currentDist, { env })
+      ),
+    Ok(new PointMass(1))
+  );
+
+export const algebraicCumSum = (dists: BaseDist[], env: Env): DistsResult =>
+  accumulateWithError(dists, (a, b) =>
+    binaryOperations.algebraicAdd(a, b, { env })
+  );
+
+export const algebraicCumProd = (dists: BaseDist[], env: Env): DistsResult =>
+  accumulateWithError(dists, (a, b) =>
+    binaryOperations.algebraicMultiply(a, b, { env })
+  );
+
+export const algebraicDiff = (dists: BaseDist[], env: Env): DistsResult =>
+  pairwiseWithError(dists, (a, b) =>
+    binaryOperations.algebraicSubtract(b, a, {
+      env,
+    })
+  );

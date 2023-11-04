@@ -1,9 +1,11 @@
 import { BaseDist } from "../dist/BaseDist.js";
 import { argumentError } from "../dist/DistError.js";
-import * as SymbolicDist from "../dist/SymbolicDist.js";
 import * as distOperations from "../dist/distOperations/index.js";
 import { Env } from "../dist/env.js";
-import { unpackDistResult } from "../library/registry/helpers.js";
+import {
+  parseDistFromDistOrNumber,
+  unpackDistResult,
+} from "../library/registry/helpers.js";
 import { REDistributionError } from "../errors/messages.js";
 import * as E_A from "../utility/E_A.js";
 import { Value, vDist } from "../value/index.js";
@@ -14,14 +16,6 @@ import {
   frNumber,
   frTuple,
 } from "../library/registry/frTypes.js";
-
-function parseDistFromDistOrNumber(d: number | BaseDist): BaseDist {
-  if (d instanceof BaseDist) {
-    return d;
-  } else {
-    return new SymbolicDist.PointMass(d);
-  }
-}
 
 function mixtureWithGivenWeights(
   distributions: BaseDist[],
