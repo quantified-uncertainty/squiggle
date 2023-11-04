@@ -14,6 +14,55 @@ import { OperationError } from "../operationError.js";
 import { DiscreteShape } from "../PointSet/Discrete.js";
 import { Env } from "./env.js";
 
+export class Normal {
+  private _mean: number;
+  private _stdev: number;
+
+  constructor({ mean, stdev }: { mean: number; stdev: number }) {
+    this._mean = mean;
+    this._stdev = stdev;
+  }
+
+  mean(): number {
+    return this._mean;
+  }
+  
+  cdf(x: number) {
+    return jstat.normal.cdf(x, this._mean, this._stdev);
+  }
+
+  inv(x: number) {
+    return jstat.normal.inv(x, this._mean, this._stdev);
+  }
+
+  sample() {
+    return jstat.normal.sample(this._mean, this._stdev);
+  }
+
+  variance(): result<number, DistError> {
+    return Ok(this._stdev ** 2);
+  }
+
+  _isEqual(other: Normal) {
+    return this._mean === other._mean && this._stdev === other._stdev;
+  }
+
+  static make({
+    mean,
+    stdev,
+  }: {
+    mean: number;
+    stdev: number;
+  }): result<Normal, string> {
+    if (stdev <= 0) {
+      return Result.Err(
+        "Standard deviation of normal distribution must be larger than 0"
+      );
+    }
+    return Ok(new Normal({ mean, stdev }));
+  }
+}
+
 const square = (n: number): number => {
   return n * n;
 };
@@ -1398,13 +1447,6 @@ export class Poisson extends SymbolicDist {
    *
    * @returns {number} A random sample from the Poisson distribution.
    */
-  /**
-   * Checks if this Poisson distribution is equal to another.
-   *
-   * @param {Poisson} other - The other Poisson distribution to compare to.
-   * @returns {boolean} True if the two distributions are equal, false otherwise.
-   */
-
 /* Calling e.g. "Normal.operate" returns an optional Result.
    If the result is undefined, there is no valid analytic solution.
    If it's a Result object, it can still return an error if there is a serious problem,
