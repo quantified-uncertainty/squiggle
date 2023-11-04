@@ -14,7 +14,16 @@ import * as Result from "../../utility/result.js";
 import { Value, vBool, vDist, vNumber, vString } from "../../value/index.js";
 import { FRFunction } from "./core.js";
 import { FnDefinition, makeDefinition } from "./fnDefinition.js";
-import { frBool, frDist, frNumber, frString } from "./frTypes.js";
+import {
+  frBool,
+  frDist,
+  frDistOrNumber,
+  frNumber,
+  frString,
+} from "./frTypes.js";
+import * as SampleSetDist from "../../dist/SampleSetDist/index.js";
+import * as SymbolicDist from "../../dist/SymbolicDist.js";
+import { OtherOperationError } from "../../operationError.js";
 
 type SimplifiedArgs = Omit<FRFunction, "nameSpace" | "requiresNamespace"> &
   Partial<Pick<FRFunction, "nameSpace" | "requiresNamespace">>;
@@ -291,3 +300,99 @@ export function doBinaryLambdaCall(
 
 export const parseDistFromDistOrNumber = (d: number | BaseDist): BaseDist =>
   typeof d == "number" ? Result.getExt(PointMass.make(d)) : d;
+
+export function distResultToValue(
+  result: Result.result<BaseDist, DistError>
+): Value {
+  if (!result.ok) {
+    throw new REDistributionError(result.value);
+  }
+  return vDist(result.value);
+}
+
+export function makeSampleSet(d: BaseDist, env: Env) {
+  const result = SampleSetDist.SampleSetDist.fromDist(d, env);
+  if (!result.ok) {
+    throw new REDistributionError(result.value);
+  }
+  return result.value;
+}
+
+export function twoVarSample(
+  v1: BaseDist | number,
+  v2: BaseDist | number,
+  env: Env,
+  fn: (
+    v1: number,
+    v2: number
+  ) => Result.result<SymbolicDist.SymbolicDist, string>
+): Value {
+  const sampleFn = (a: number, b: number) =>
+    Result.fmap2(
+      fn(a, b),
+      (d) => d.sample(),
+      (e) => new OtherOperationError(e)
+    );
+
+  if (v1 instanceof BaseDist && v2 instanceof BaseDist) {
+    const s1 = makeSampleSet(v1, env);
+    const s2 = makeSampleSet(v2, env);
+    return distResultToValue(
+      SampleSetDist.map2({
+        fn: sampleFn,
+        t1: s1,
+        t2: s2,
+      })
+    );
+  } else if (v1 instanceof BaseDist && typeof v2 === "number") {
+    const s1 = makeSampleSet(v1, env);
+    return distResultToValue(s1.samplesMap((a) => sampleFn(a, v2)));
+  } else if (typeof v1 === "number" && v2 instanceof BaseDist) {
+    const s2 = makeSampleSet(v2, env);
+    return distResultToValue(s2.samplesMap((a) => sampleFn(v1, a)));
+  } else if (typeof v1 === "number" && typeof v2 === "number") {
+    const result = fn(v1, v2);
+    if (!result.ok) {
+      throw new REOther(result.value);
+    }
+    return vDist(makeSampleSet(result.value, env));
+  }
+  throw new REOther("Impossible branch");
+}
+
+export function makeTwoArgsDist(
+  fn: (
+    v1: number,
+    v2: number
+  ) => Result.result<SymbolicDist.SymbolicDist, string>
+) {
+  return makeDefinition(
+    [frDistOrNumber, frDistOrNumber],
+    ([v1, v2], { environment }) => twoVarSample(v1, v2, environment, fn)
+  );
+}
+
+export function makeOneArgDist(
+  fn: (v: number) => Result.result<SymbolicDist.SymbolicDist, string>
+) {
+  return makeDefinition([frDistOrNumber], ([v], { environment }) => {
+    const sampleFn = (a: number) =>
+      Result.fmap2(
+        fn(a),
+        (d) => d.sample(),
+        (e) => new OtherOperationError(e)
+      );
+
+    if (v instanceof BaseDist) {
+      const s = makeSampleSet(v, environment);
+      return distResultToValue(s.samplesMap(sampleFn));
+    } else if (typeof v === "number") {
+      const result = fn(v);
+      if (!result.ok) {
+        throw new REOther(result.value);
+      }
+      return vDist(makeSampleSet(result.value, environment));
+    }
+    throw new REOther("Impossible branch");
+  });
+}

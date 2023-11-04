@@ -1,3 +1,4 @@
+import { OrderedMap } from "immutable";
 import { REArgumentError } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
@@ -129,6 +130,52 @@ export const library = [
             }
           }
           return vDict(ImmutableMap(mappedEntries));
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "pick",
+    output: "Dict",
+    examples: [`Dict.pick({a: 1, b: 2, c: 3}, ['a', 'c'])`],
+    definitions: [
+      makeDefinition(
+        [frDictWithArbitraryKeys(frAny), frArray(frString)],
+        ([dict, keys]) => {
+          const response: OrderedMap<string, Value> = OrderedMap<
+            string,
+            Value
+          >().withMutations((result) => {
+            keys.forEach((key) => {
+              const value = dict.get(key);
+              if (dict.has(key) && value) {
+                result.set(key, value);
+              }
+            });
+          });
+          return vDict(response);
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "omit",
+    output: "Dict",
+    examples: [`Dict.omit({a: 1, b: 2, c: 3}, ['b'])`],
+    definitions: [
+      makeDefinition(
+        [frDictWithArbitraryKeys(frAny), frArray(frString)],
+        ([dict, keys]) => {
+          const response: OrderedMap<string, Value> = dict.withMutations(
+            (result) => {
+              keys.forEach((key) => {
+                if (result.has(key)) {
+                  result.delete(key);
+                }
+              });
+            }
+          );
+          return vDict(response);
         }
       ),
     ],

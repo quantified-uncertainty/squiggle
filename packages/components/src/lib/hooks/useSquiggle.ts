@@ -27,8 +27,8 @@ export type ProjectExecutionProps = {
 
 export type SquiggleArgs = {
   code: string;
+  sourceId?: string;
   executionId?: number;
-  onChange?: (expr: SqValue | undefined, sourceId: string) => void;
 } & (StandaloneExecutionProps | ProjectExecutionProps);
 
 export type SquiggleOutput = {
@@ -59,7 +59,9 @@ const defaultContinues: string[] = [];
 export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
   // random; https://stackoverflow.com/a/12502559
   // TODO - React.useId?
-  const sourceId = useMemo(() => Math.random().toString(36).slice(2), []);
+  const sourceId = useMemo(() => {
+    return args.sourceId ?? Math.random().toString(36).slice(2);
+  }, [args.sourceId]);
 
   const projectArg = "project" in args ? args.project : undefined;
   const environment = "environment" in args ? args.environment : undefined;
@@ -84,7 +86,7 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
     SquiggleOutput | undefined
   >(undefined);
 
-  const { executionId = 1, onChange } = args;
+  const { executionId = 1 } = args;
 
   useEffect(
     () => {
@@ -125,16 +127,6 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
   );
 
   useEffect(() => {
-    if (!squiggleOutput || isRunning) {
-      return;
-    }
-    onChange?.(
-      squiggleOutput.output.ok ? squiggleOutput.output.value.result : undefined,
-      sourceId
-    );
-  }, [squiggleOutput, isRunning, onChange, sourceId]);
-
-  useEffect(() => {
     return () => {
       project.removeSource(sourceId);
     };
@@ -144,7 +136,7 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
     squiggleOutput,
     {
       project,
-      isRunning: executionId !== squiggleOutput?.executionId,
+      isRunning,
       sourceId,
     },
   ];

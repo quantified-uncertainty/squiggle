@@ -6,6 +6,7 @@ import { SqError, SqOtherError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqLambda } from "./SqLambda.js";
 import { SqValue, wrapValue } from "./index.js";
+import { SqInput, wrapInput } from "./SqInput.js";
 export class SqCalculator {
   constructor(
     private _value: Calculator,
@@ -38,24 +39,31 @@ export class SqCalculator {
     return this._value.description;
   }
 
+  get autorun(): boolean {
+    return this._value.autorun;
+  }
+
+  get sampleCount(): number | undefined {
+    return this._value.sampleCount;
+  }
+
   // This function is used to determine if a calculator has changed.
   // It's obviously not perfect - it doesn't capture changes within the calculator function, but this would be much more complicated.
 
   get hashString(): string {
-    const rowData = JSON.stringify(this._value.fields);
+    const rowData = JSON.stringify(this._value.inputs);
     const paramData = this._value.fn.toString() || "";
-    return rowData + paramData + this._value.description;
+    return (
+      rowData +
+      paramData +
+      this._value.description +
+      this._value.title +
+      this._value.autorun +
+      this._value.sampleCount
+    );
   }
 
-  get fields(): {
-    name: string;
-    default: string;
-    description?: string;
-  }[] {
-    return this._value.fields.map((x) => ({
-      name: x.name,
-      default: x.default,
-      description: x.description,
-    }));
+  get inputs(): SqInput[] {
+    return this._value.inputs.map(wrapInput);
   }
 }

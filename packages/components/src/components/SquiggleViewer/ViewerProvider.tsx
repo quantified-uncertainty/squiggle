@@ -24,7 +24,7 @@ import {
   topLevelBindingsName,
 } from "./utils.js";
 import { CodeEditorHandle } from "../CodeEditor.js";
-import { CalculatorState } from "../Calculator/calculatorReducer.js";
+import { CalculatorState } from "../Calculator/types.js";
 
 export type Action =
   | {
@@ -44,6 +44,13 @@ export type Action =
   | {
       type: "TOGGLE_COLLAPSED";
       payload: SqValuePath;
+    }
+  | {
+      type: "SET_COLLAPSED";
+      payload: {
+        path: SqValuePath;
+        value: boolean;
+      };
     }
   | {
       type: "COLLAPSE_CHILDREN";
@@ -81,7 +88,7 @@ export type ViewProviderDispatch = (action: Action) => void;
 type ViewerContextShape = {
   // Note that we don't store localItemState themselves in the context (that would cause rerenders of the entire tree on each settings update).
   // Instead, we keep localItemState in local state and notify the global context via setLocalItemState to pass them down the component tree again if it got rebuilt from scratch.
-  // See ./SquiggleViewer.tsx and ./VariableBox.tsx for other implementation details on this.
+  // See ./SquiggleViewer.tsx and ./ValueWithContextViewer.tsx for other implementation details on this.
   getLocalItemState({
     path,
     defaults,
@@ -136,6 +143,17 @@ export function useToggleCollapsed() {
     });
   };
 }
+
+export function useSetCollapsed() {
+  const { dispatch } = useViewerContext();
+  return (path: SqValuePath, isCollapsed: boolean) => {
+    dispatch({
+      type: "SET_COLLAPSED",
+      payload: { path, value: isCollapsed },
+    });
+  };
+}
+
 export function useResetStateSettings() {
   const { dispatch } = useViewerContext();
   return (path: SqValuePath, value: LocalItemState) => {
@@ -169,7 +187,7 @@ export function useUnfocus() {
 
 export function useCollapseChildren() {
   const { dispatch } = useViewerContext();
-  // stable callback identity here is important, see VariableBox code
+  // stable callback identity here is important, see ValueWithContextViewer code
   return useCallback(
     (value: SqValue) => {
       dispatch({
@@ -311,6 +329,13 @@ export const ViewerProvider: FC<
           }));
           return;
         }
+        case "SET_COLLAPSED": {
+          setLocalItemState(action.payload.path, (state) => ({
+            ...state,
+            collapsed: action.payload.value,
+          }));
+          return;
+        }
         case "COLLAPSE_CHILDREN": {
           const children = getChildrenValues(action.payload);
           for (const child of children) {
@@ -334,7 +359,14 @@ export const ViewerProvider: FC<
           const { calculator, path } = action.payload;
           setLocalItemState(path, (state) => ({
             ...state,
-            calculator: calculator,
+            calculator:
+              state.calculator?.hashString === calculator.hashString
+                ? {
+                    // merge with existing value
+                    ...state.calculator,
+                    ...calculator,
+                  }
+                : calculator,
           }));
           return;
         }

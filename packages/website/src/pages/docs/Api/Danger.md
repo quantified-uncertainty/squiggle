@@ -44,6 +44,39 @@ Danger.binomial: (number, number, number) => number
 
 `Danger.binomial(n, k, p)` returns `choose((n, k)) * pow(p, k) * pow(1 - p, n - k)`, i.e., the probability that an event of probability p will happen exactly k times in n draws.
 
+
+### binomialDist
+
+```
+Danger.binomialDist: (n: distribution|number,p: distribution|number) => distribution
+```
+A binomial distribution.
+
+``n`` must be above 0, and ``p`` must be between 0 and 1. 
+
+Note: The binomial distribution is a discrete distribution. When representing this, the Squiggle distribution component might show it as partially or fully continuous. This is a visual mistake; if you inspect the underlying data, it should be discrete.
+
+**Examples**
+
+```squiggle
+binomialDist(5, 0.5)
+binomialDist(10, 0.3)
+```
+
+### poissonDist 
+
+```
+Danger.poissonDist: (distribution|number) => distribution
+```
+
+Note: The Poisson distribution is a discrete distribution. When representing this, the Squiggle distribution component might show it as partially or fully continuous.  This is a visual mistake; if you inspect the underlying data, it should be discrete.
+
+**Examples**
+
+```squiggle
+poissonDist(20)
+```
+
 ### integrateFunctionBetweenWithNumIntegrationPoints
 
 ```
@@ -92,3 +125,23 @@ Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions(
 ```
 
 Note also that the array ought to have more than one function in it.
+
+### combinations
+```
+Danger.combinations: (list<any>, number) => list<list<any>>
+```
+Returns all combinations of the input list taken r elements at a time. 
+
+```squiggle
+Danger.combinations([1, 2, 3], 2)) // [[1, 2], [1, 3], [2, 3]]
+```
+
+### allCombinations
+```
+Danger.allCombinations: (list<any>) => list<list<any>>
+```
+Returns all possible combinations of the elements in the input list.
+
+```squiggle
+Danger.allCombinations([1, 2, 3])) // [[1], [2], [3], [1, 2], [1, 3], [2, 3], [1, 2, 3]]
+```

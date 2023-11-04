@@ -19,6 +19,16 @@ export const Default: Story = {
   },
 };
 
+export const Small: Story = {
+  args: {
+    name: "small",
+    label: "Small",
+    description: "size=small",
+    placeholder: "Placeholder",
+    size: "small",
+  },
+};
+
 export const WithValidation: Story = {
   args: {
     ...Default.args,

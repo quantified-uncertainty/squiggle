@@ -5,7 +5,9 @@ import {
   frArray,
   frString,
   frOptional,
-  frNumberOrString,
+  frInput,
+  frBool,
+  frNumber,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { vCalculator } from "../value/index.js";
@@ -14,16 +16,6 @@ const maker = new FnFactory({
   nameSpace: "Calculator",
   requiresNamespace: true,
 });
-
-const convertFieldDefault = (value: number | string | null): string => {
-  if (typeof value === "number") {
-    return value.toString();
-  } else if (typeof value === "string") {
-    return value;
-  } else {
-    return "";
-  }
-};
 
 export const library = [
   maker.make({
@@ -37,28 +29,19 @@ export const library = [
             ["fn", frLambda],
             ["title", frOptional(frString)],
             ["description", frOptional(frString)],
-            [
-              "fields",
-              frArray(
-                frDict(
-                  ["name", frString],
-                  ["default", frOptional(frNumberOrString)],
-                  ["description", frOptional(frString)]
-                )
-              ),
-            ]
+            ["inputs", frArray(frInput)],
+            ["autorun", frOptional(frBool)],
+            ["sampleCount", frOptional(frNumber)]
           ),
         ],
-        ([{ fn, title, description, fields }]) => {
+        ([{ fn, title, description, inputs, autorun, sampleCount }]) => {
           const calc = vCalculator({
             fn,
             title: title || undefined,
             description: description || undefined,
-            fields: fields.map((vars) => ({
-              name: vars.name,
-              default: convertFieldDefault(vars.default),
-              description: vars.description || undefined,
-            })),
+            inputs: inputs,
+            autorun: autorun == null ? true : autorun,
+            sampleCount: sampleCount || undefined,
           });
           const error = calc.getError();
           if (error) {

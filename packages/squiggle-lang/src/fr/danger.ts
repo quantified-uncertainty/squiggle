@@ -10,21 +10,28 @@ import {
   scaleMultiply,
   scalePower,
 } from "../dist/distOperations/scaleOperations.js";
-import { REOther } from "../errors/messages.js";
+import { REArgumentError, REOther } from "../errors/messages.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
+  frAny,
   frArray,
   frDist,
   frLambda,
   frNumber,
 } from "../library/registry/frTypes.js";
-import { FnFactory, unpackDistResult } from "../library/registry/helpers.js";
+import {
+  FnFactory,
+  unpackDistResult,
+  distResultToValue,
+  makeTwoArgsDist,
+  makeOneArgDist,
+} from "../library/registry/helpers.js";
 import { ReducerContext } from "../reducer/context.js";
 import { Lambda } from "../reducer/lambda.js";
 import * as E_A from "../utility/E_A.js";
 import { Value, vArray, vNumber } from "../value/index.js";
-import { distResultToValue } from "./genericDist.js";
+import * as SymbolicDist from "../dist/SymbolicDist.js";
 
 const { factorial } = jstat;
 
@@ -32,6 +39,27 @@ const maker = new FnFactory({
   nameSpace: "Danger",
   requiresNamespace: true,
 });
+
+function combinations<T>(arr: T[], k: number): T[][] {
+  if (k === 0) return [[]];
+  if (k === arr.length) return [arr];
+
+  const withoutFirst = combinations(arr.slice(1), k);
+  const withFirst = combinations(arr.slice(1), k - 1).map((comb) => [
+    arr[0],
+    ...comb,
+  ]);
+
+  return withFirst.concat(withoutFirst);
+}
+
+function allCombinations<T>(arr: T[]): T[][] {
+  let allCombs: T[][] = [];
+  for (let k = 1; k <= arr.length; k++) {
+    allCombs = allCombs.concat(combinations(arr, k));
+  }
+  return allCombs;
+}
 
 const choose = (n: number, k: number) =>
   factorial(n) / (factorial(n - k) * factorial(k));
@@ -354,6 +382,27 @@ const mapYLibrary: FRFunction[] = [
       ),
     ],
   }),
+  maker.make({
+    name: "combinations",
+    definitions: [
+      makeDefinition([frArray(frAny), frNumber], ([elements, n]) => {
+        if (n > elements.length) {
+          throw new REArgumentError(
+            `Combinations of length ${n} were requested, but full list is only ${elements.length} long.`
+          );
+        }
+        return vArray(combinations(elements, n).map((v) => vArray(v)));
+      }),
+    ],
+  }),
+  maker.make({
+    name: "allCombinations",
+    definitions: [
+      makeDefinition([frArray(frAny)], ([elements]) => {
+        return vArray(allCombinations(elements).map((v) => vArray(v)));
+      }),
+    ],
+  }),
   maker.dn2d({
     name: "mapYMultiply",
     fn: (dist, f, env) => unpackDistResult(scaleMultiply(dist, f, { env })),
@@ -366,6 +415,18 @@ const mapYLibrary: FRFunction[] = [
     name: "mapYExp",
     // TODO - shouldn't it be other way around, e^value?
     fn: (dist, env) => unpackDistResult(scalePower(dist, Math.E, { env })),
+  }),
+  maker.make({
+    name: "binomialDist",
+    examples: ["Danger.binomialDist(8, 0.5)"],
+    definitions: [makeTwoArgsDist((n, p) => SymbolicDist.Binomial.make(n, p))],
+  }),
+  maker.make({
+    name: "poissonDist",
+    examples: ["Danger.poissonDist(10)"],
+    definitions: [
+      makeOneArgDist((lambda) => SymbolicDist.Poisson.make(lambda)),
+    ],
   }),
 ];
 

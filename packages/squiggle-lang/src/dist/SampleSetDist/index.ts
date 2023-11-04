@@ -18,6 +18,7 @@ import {
 import { PointSetDist } from "../PointSetDist.js";
 import { Env } from "../env.js";
 import { samplesToPointSetDist } from "./samplesToPointSetDist.js";
+import { isEqual } from "../../utility/E_A.js";
 
 export class SampleSetDist extends BaseDist {
   samples: readonly number[];
@@ -53,7 +54,7 @@ export class SampleSetDist extends BaseDist {
     if (this.samples === other.samples) {
       return true;
     } else {
-      return E_A_Floats.isEqual(this.samples, other.samples);
+      return isEqual(this.samples, other.samples);
     }
   }
 

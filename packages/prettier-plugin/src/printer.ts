@@ -145,12 +145,14 @@ export function createSquigglePrinter(
         }
         case "LetStatement":
           return group([
+            node.exported ? "export " : "",
             node.variable.value,
             " = ",
             typedPath(node).call(print, "value"),
           ]);
         case "DefunStatement":
           return group([
+            node.exported ? "export " : "",
             node.variable.value,
             group([
               "(",

@@ -18,13 +18,16 @@ jobs:
   build-test-lint:
     name: Build, test, lint
     runs-on: ubuntu-latest
+    concurrency:
+      group: ci-build-test-lint-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v2
         with:
           version: 8
       - name: Setup Node.js environment
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
           cache: 'pnpm'
@@ -36,6 +39,9 @@ jobs:
   coverage:
     name: Coverage
     runs-on: ubuntu-latest
+    concurrency:
+      group: ci-coverage-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v4
         with:
@@ -44,7 +50,7 @@ jobs:
         with:
           version: 8
       - name: Setup Node.js environment
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
           cache: 'pnpm'

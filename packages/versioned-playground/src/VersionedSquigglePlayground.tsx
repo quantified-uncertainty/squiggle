@@ -40,11 +40,25 @@ type CommonProps = {
     distributionChartSettings: { showSummary: boolean };
   }) => void;
   height?: string | number;
+  // available since 0.8.6
+  sourceId?: string;
+  renderExtraDropdownItems?: (options: {
+    openModal: (name: string) => void;
+  }) => ReactNode;
 };
 
-type Props = CommonProps & {
-  version: string; // not SquiggleVersion, because it's easier to validate the version inside this component
+// supported only in modern playgrounds
+type LinkerProps = {
+  linker?: {
+    resolve: (name: string, fromId: string) => string;
+    loadSource: (sourceId: string) => Promise<string>;
+  };
 };
+
+type Props = CommonProps &
+  LinkerProps & {
+    version: string; // not SquiggleVersion, because it's easier to validate the version inside this component
+  };
 
 export const VersionedSquigglePlayground: FC<Props> = ({
   version,
@@ -79,6 +93,11 @@ export const VersionedSquigglePlayground: FC<Props> = ({
         onCodeChange={props.onCodeChange}
         onSettingsChange={props.onSettingsChange}
         height={props.height}
+        // older playgrounds don't support these, it'll be ignored, that's fine
+        // (why TypeScript doesn't error on this, these props didn't exist in 0.8.5? no idea)
+        linker={props.linker}
+        renderExtraDropdownItems={props.renderExtraDropdownItems}
+        sourceId={props.sourceId}
       />
     </Suspense>
   );

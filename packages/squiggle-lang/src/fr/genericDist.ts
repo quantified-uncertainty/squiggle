@@ -1,32 +1,23 @@
-import { BaseDist } from "../dist/BaseDist.js";
-import { DistError } from "../dist/DistError.js";
 import * as SymbolicDist from "../dist/SymbolicDist.js";
 import {
   BinaryOperation,
   binaryOperations,
 } from "../dist/distOperations/index.js";
-import { REDistributionError } from "../errors/messages.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import { frDist, frNumber } from "../library/registry/frTypes.js";
-import { FnFactory, unpackDistResult } from "../library/registry/helpers.js";
+import {
+  FnFactory,
+  distResultToValue,
+  unpackDistResult,
+} from "../library/registry/helpers.js";
 import * as magicNumbers from "../magicNumbers.js";
-import * as Result from "../utility/result.js";
-import { Value, vArray, vDist, vNumber } from "../value/index.js";
+import { vArray, vNumber } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "",
   requiresNamespace: false,
 });
-
-export function distResultToValue(
-  result: Result.result<BaseDist, DistError>
-): Value {
-  if (!result.ok) {
-    throw new REDistributionError(result.value);
-  }
-  return vDist(result.value);
-}
 
 type OpPair = [string, BinaryOperation];
 const algebraicOps: OpPair[] = [

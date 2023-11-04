@@ -117,7 +117,11 @@ type NodeIdentifier = N<"Identifier", { value: string }>;
 
 type NodeLetStatement = N<
   "LetStatement",
-  { variable: NodeIdentifier; value: ASTNode }
+  {
+    variable: NodeIdentifier;
+    value: ASTNode;
+    exported: boolean;
+  }
 >;
 
 type NodeLambda = N<
@@ -137,6 +141,7 @@ type NodeDefunStatement = N<
   {
     variable: NodeIdentifier;
     value: NamedNodeLambda;
+    exported: boolean;
   }
 >;
 
@@ -349,18 +354,26 @@ export function nodeLambda(
 export function nodeLetStatement(
   variable: NodeIdentifier,
   value: ASTNode,
+  exported: boolean,
   location: LocationRange
 ): NodeLetStatement {
   const patchedValue =
     value.type === "Lambda" ? { ...value, name: variable.value } : value;
-  return { type: "LetStatement", variable, value: patchedValue, location };
+  return {
+    type: "LetStatement",
+    variable,
+    value: patchedValue,
+    exported,
+    location,
+  };
 }
 export function nodeDefunStatement(
   variable: NodeIdentifier,
   value: NamedNodeLambda,
+  exported: boolean,
   location: LocationRange
 ): NodeDefunStatement {
-  return { type: "DefunStatement", variable, value, location };
+  return { type: "DefunStatement", variable, value, exported, location };
 }
 export function nodeString(value: string, location: LocationRange): NodeString {
   return { type: "String", value, location };

@@ -65,6 +65,16 @@ function compileToContent(
       };
       const statements: expression.Expression[] = [];
       for (const astStatement of ast.statements) {
+        if (
+          (astStatement.type === "LetStatement" ||
+            astStatement.type === "DefunStatement") &&
+          astStatement.exported
+        ) {
+          throw new ICompileError(
+            "Exports aren't allowed in blocks",
+            astStatement.location
+          );
+        }
         const [statement, newContext] = innerCompileAst(
           astStatement,
           currentContext
@@ -82,15 +92,23 @@ function compileToContent(
         size: context.size,
       };
       const statements: expression.Expression[] = [];
+      const exports: string[] = [];
       for (const astStatement of ast.statements) {
         const [statement, newContext] = innerCompileAst(
           astStatement,
           currentContext
         );
         statements.push(statement);
+        if (
+          (astStatement.type === "LetStatement" ||
+            astStatement.type === "DefunStatement") &&
+          astStatement.exported
+        ) {
+          exports.push(astStatement.variable.value);
+        }
         currentContext = newContext;
       }
-      return [expression.eProgram(statements), currentContext];
+      return [expression.eProgram(statements, exports), currentContext];
     }
     case "DefunStatement":
     case "LetStatement": {

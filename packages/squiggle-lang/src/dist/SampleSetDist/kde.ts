@@ -23,7 +23,9 @@ export const kde = ({
   let xWidth = kernelWidth ?? nrd0(samples);
   samples = samples.filter((v) => Number.isFinite(v)); // Not sure if this is needed?
   const len = samples.length;
-  if (len === 0) return { usedWidth: xWidth, xs: [], ys: [] };
+
+  // It's not clear what to do when xWidth is zero. We might want to throw an error or otherwise instead. This was an issue for discrete distributions, like binomial.
+  if (len === 0 || xWidth === 0) return { usedWidth: xWidth, xs: [], ys: [] };
 
   // Sample min and range
   const smin = samples[0];
