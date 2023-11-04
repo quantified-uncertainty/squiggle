@@ -124,7 +124,11 @@ export abstract class SymbolicDist extends BaseDist {
     return pointSetDistR.value.truncate(left, right);
   }
 
-  min() {
+  mean(): number {
+    return this.n * this.p;
+  }
+  
+  min(): number {
     return this.inv(SymbolicDist.minCdfValue);
   }
 
@@ -169,20 +173,9 @@ export class Normal extends SymbolicDist {
     if (stdev <= 0) {
       return Result.Err(
         "Standard deviation of normal distribution must be larger than 0"
-      );
-    }
-    return Ok(new Normal({ mean, stdev }));
+  mean(): number {
+    return jstat.beta.mean(this.alpha, this.beta);
   }
-
-  toString() {
-    return `Normal(${this._mean},${this._stdev})`;
-  }
-
-  simplePdf(x: number) {
-    return jstat.normal.pdf(x, this._mean, this._stdev);
-  }
-
-  cdf(x: number) {
     return jstat.normal.cdf(x, this._mean, this._stdev);
   }
 
@@ -396,7 +389,9 @@ export class Exponential extends SymbolicDist {
   sample() {
     return jstat.exponential.sample(this.rate);
   }
-  mean() {
+  mean(): number {
+    return jstat.beta.mean(this.alpha, this.beta);
+  }
     return jstat.exponential.mean(this.rate);
   }
   variance(): result<number, DistError> {
@@ -440,6 +435,30 @@ export class Cauchy extends SymbolicDist {
     return jstat.cauchy.pdf(x, this.local, this.scale);
   }
   cdf(x: number) {
+    return jstat.normal.cdf(x, this._mean, this._stdev);
+  }
+
+  inv(x: number) {
+    return jstat.normal.inv(x, this._mean, this._stdev);
+  }
+
+  sample() {
+    return jstat.beta.sample(this.alpha, this.beta);
+  }
+
+  mean(): number {
+    return jstat.beta.mean(this.alpha, this.beta);
+  }
+
+  variance(): result<number, DistError> {
+    return Ok(jstat.beta.variance(this.alpha, this.beta));
+  }
+
+  _isEqual(other: Beta) {
+    return this.alpha === other.alpha && this.beta === other.beta;
+  }
+
+  static fromMeanAndSampleSize({
     return jstat.cauchy.cdf(x, this.local, this.scale);
   }
   inv(p: number) {
@@ -858,7 +877,7 @@ export class Uniform extends SymbolicDist {
     return this.low === other.low && this.high === other.high;
   }
 
-  mean() {
+  mean(): number {
     return this.n * this.p;
   }
 
@@ -1229,6 +1248,11 @@ export class Binomial extends SymbolicDist {
    * @returns {result<number, DistError>} The variance of the Poisson distribution.
    */
   /**
+   * Generates a random sample from the Poisson distribution.
+   *
+   * @returns {number} A random sample from the Poisson distribution.
+   */
+  }
    * Generates a random sample from the Poisson distribution.
    *
    * @returns {number} A random sample from the Poisson distribution.
