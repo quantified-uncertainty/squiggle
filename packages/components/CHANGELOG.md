@@ -4,15 +4,9 @@
 
 ### Patch Changes
 
-- Added calculator class to squiggle-lang and calculator component to squiggle-components. Useful for presenting functions to end-users. ([#2265](https://github.com/quantified-uncertainty/squiggle/pull/2265))
+- Added [Calculators](https://www.squiggle-language.com/docs/Api/Calculator), useful for presenting functions to end-users ([#2265](https://github.com/quantified-uncertainty/squiggle/pull/2265), [#2343](https://github.com/quantified-uncertainty/squiggle/pull/2343))
 
-- Breaking: Changed Calculator fields attribute, to inputs, which now requires Input objects. These allow for multiple types of inputs ([#2343](https://github.com/quantified-uncertainty/squiggle/pull/2343))
-
-- Added sampleCount field to Calculator.make ([#2474](https://github.com/quantified-uncertainty/squiggle/pull/2474))
-
-- Added title to all plots, and to scales for xAxisLabel and yAxisLabel. Added validation for tickFormat. ([#2337](https://github.com/quantified-uncertainty/squiggle/pull/2337))
-
-- ([#2300](https://github.com/quantified-uncertainty/squiggle/pull/2300))
+- Added `title` to all [plots](https://www.squiggle-language.com/docs/Api/Plot), and to scales for labeling x and y axes. Added validation for `tickFormat`. ([#2337](https://github.com/quantified-uncertainty/squiggle/pull/2337))
 
 - Highlight multiline strings correctly ([#2302](https://github.com/quantified-uncertainty/squiggle/pull/2302))
 
