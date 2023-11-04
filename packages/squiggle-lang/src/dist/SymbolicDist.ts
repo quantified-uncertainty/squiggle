@@ -174,8 +174,10 @@ export class Normal extends SymbolicDist {
       return Result.Err(
         "Standard deviation of normal distribution must be larger than 0"
   mean(): number {
-    return jstat.beta.mean(this.alpha, this.beta);
+    return this._mean;
   }
+  
+  cdf(x: number) {
     return jstat.normal.cdf(x, this._mean, this._stdev);
   }
 
