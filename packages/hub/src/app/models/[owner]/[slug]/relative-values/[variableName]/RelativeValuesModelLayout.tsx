@@ -30,6 +30,7 @@ import {
 } from "@/routes";
 import { CacheMenu } from "./CacheMenu";
 import { RelativeValuesModelRevisionFragment } from "./RelativeValuesModelRevision";
+import { notFound } from "next/navigation";
 
 export const RelativeValuesModelLayout: FC<
   PropsWithChildren<{
@@ -78,7 +79,7 @@ export const RelativeValuesModelLayout: FC<
   );
 
   if (!revision.forRelativeValues) {
-    throw new Error("Not found");
+    notFound();
   }
 
   const definition = revision.forRelativeValues.definition;
