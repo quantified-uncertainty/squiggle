@@ -4,6 +4,7 @@ import { sq } from "@quri/squiggle-lang";
 import { Button } from "@quri/ui";
 
 import { SquigglePlayground as Component } from "../components/SquigglePlayground/index.js";
+import { SAMPLE_COUNT_MAX } from "../lib/constants";
 
 /**
  * A Squiggle playground is an environment where you can play around with all settings, including sampling settings, in Squiggle.
@@ -247,7 +248,7 @@ Calculator.make(
       Input.text({name: "Variable1", description: "This is a very long description This is a very long description This is a very long description This is a very long description This is a very long description", default: 1}),
       Input.select({name: "Variable3", default: "alice", options: ["alice", "charles", "bob", "bill", "maven", "billy", "samantha", "becky"]})
     ],
-    sampleCount: 1000
+    sampleCount: SAMPLE_COUNT_MAX
   }
 )
   `,
