@@ -136,6 +136,7 @@ export const ForcePlot: FC<{
   const forceFn = getforceFn();
 
   const simulation = useMemo(() => {
+  const forceFn = getforceFn();
     const simulation = d3.forceSimulation(nodes);
 
     simulation.alphaTarget(0.5);
