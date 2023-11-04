@@ -191,8 +191,60 @@ export class Normal extends SymbolicDist {
   }
 
   sample() {
-    return jstat.normal.sample(this._mean, this._stdev);
+    return jstat.beta.sample(this.alpha, this.beta);
   }
+
+  mean() {
+    return jstat.beta.mean(this.alpha, this.beta);
+  }
+
+  variance(): result<number, DistError> {
+    return Ok(jstat.beta.variance(this.alpha, this.beta));
+  }
+
+  _isEqual(other: Beta) {
+    return this.alpha === other.alpha && this.beta === other.beta;
+  }
+
+  static fromMeanAndSampleSize({
+    mean,
+    sampleSize,
+  }: {
+    mean: number;
+    sampleSize: number;
+  }): result<Beta, string> {
+    // https://en.wikipedia.org/wiki/Beta_distribution#Mean_and_sample_size
+    const alpha = mean * sampleSize;
+    const beta = (1 - mean) * sampleSize;
+    return Beta.make({ alpha, beta });
+  }
+
+  static fromMeanAndStdev({
+    mean,
+    stdev,
+  }: {
+    mean: number;
+    stdev: number;
+  }): result<Beta, string> {
+    // https://en.wikipedia.org/wiki/Beta_distribution#Mean_and_variance
+    if (!(0 < stdev && stdev <= 0.5)) {
+      return Result.Err("Stdev must be in in between 0 and 0.5.");
+    } else if (!(0 <= mean && mean <= 1)) {
+      return Result.Err("Mean must be in between 0 and 1.0.");
+    } else {
+      const variance = stdev * stdev;
+      const sampleSize = (mean * (1 - mean)) / variance - 1;
+      return Beta.fromMeanAndSampleSize({ mean, sampleSize });
+    }
+  }
+}
+/**
+ * Represents a Poisson distribution.
+ *
+ * @param {number} lambda - The average rate of success over a given time period.
+ */
+export class Poisson extends SymbolicDist {
+}
 
   mean() {
     return jstat.normal.mean(this._mean, this._stdev);
@@ -520,13 +572,6 @@ export class Beta extends SymbolicDist {
 
   inv(x: number) {
     return jstat.beta.inv(x, this.alpha, this.beta);
-  }
-  /**
-   * Represents a Poisson distribution.
-   *
-   * @param {number} lambda - The average rate of success over a given time period.
-   */
-  export class Poisson extends SymbolicDist {
   }
 
   sample() {
@@ -1142,23 +1187,58 @@ export class Binomial extends SymbolicDist {
 
   // Not needed, until we support Sym.Binomial
   inv(p: number): number {
-  /**
-   * Returns a string representation of the binomial distribution.
-   */
-  /**
-   * Creates a new Binomial distribution.
-   *
-   * @param {number} n - The number of trials.
-   * @param {number} p - The probability of success on each trial.
-   * @returns {result<Binomial, string>} A new Binomial distribution.
-   */
-  /**
+    throw notYetImplemented();
+  }
    * Calculates the probability density function of the binomial distribution.
    *
    * @param {number} x - The value to calculate the probability for.
    * @returns {number} The probability density function at x.
    */
   /**
+  /**
+  * Represents a Poisson distribution.
+  *
+  * @param {number} lambda - The average rate of success over a given time period.
+  */
+  export class Poisson extends SymbolicDist {
+  /**
+   * Returns a string representation of the Poisson distribution.
+   */
+  /**
+   * Creates a new Poisson distribution.
+   *
+   * @param {number} lambda - The average rate of success over a given time period.
+   * @returns {result<Poisson, string>} A new Poisson distribution.
+   */
+  /**
+   * Calculates the probability density function of the Poisson distribution.
+   *
+   * @param {number} x - The value to calculate the probability for.
+   * @returns {number} The probability density function at x.
+   */
+  /**
+   * Calculates the cumulative distribution function of the Poisson distribution.
+   *
+   * @param {number} k - The value to calculate the cumulative distribution for.
+   * @returns {number} The cumulative distribution function at k.
+   */
+  /**
+   * Calculates the variance of the Poisson distribution.
+   *
+   * @returns {result<number, DistError>} The variance of the Poisson distribution.
+   */
+  /**
+   * Generates a random sample from the Poisson distribution.
+   *
+   * @returns {number} A random sample from the Poisson distribution.
+   */
+  /**
+   * Checks if this Poisson distribution is equal to another.
+   *
+   * @param {Poisson} other - The other Poisson distribution to compare to.
+   * @returns {boolean} True if the two distributions are equal, false otherwise.
+   */
+  }
    * Calculates the cumulative distribution function of the binomial distribution.
    *
    * @param {number} k - The value to calculate the cumulative distribution for.
