@@ -3,32 +3,18 @@ import * as SymbolicDist from "../dist/SymbolicDist.js";
 import { REDistributionError } from "../errors/messages.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import {
-  frDistOrNumber,
-  frDist,
-  frNumber,
-  frDict,
-  frArray,
-} from "../library/registry/frTypes.js";
+import { frDist, frNumber, frDict } from "../library/registry/frTypes.js";
 import {
   FnFactory,
-  parseDistFromDistOrNumber,
   makeOneArgDist,
   makeSampleSet,
   makeTwoArgsDist,
   twoVarSample,
 } from "../library/registry/helpers.js";
 import * as Result from "../utility/result.js";
-import { vArray, vDist } from "../value/index.js";
+import { vDist } from "../value/index.js";
 import { CI_CONFIG, symDistResultToValue } from "./distUtil.js";
 import { mixtureDefinitions } from "./mixture.js";
-import {
-  algebraicCumDiff,
-  algebraicCumProd,
-  algebraicCumSum,
-  algebraicProduct,
-  algebraicSum,
-} from "../dist/distOperations/binaryOperations.js";
 
 const maker = new FnFactory({
   nameSpace: "Dist",
@@ -233,69 +219,6 @@ export const library: FRFunction[] = [
           }
           return vDist(makeSampleSet(result.value, environment));
         }
-      ),
-    ],
-  }),
-  maker.make({
-    name: "sum",
-    definitions: [
-      makeDefinition([frArray(frDistOrNumber)], ([dists], { environment }) =>
-        vDist(
-          Result.getExt(
-            algebraicSum(dists.map(parseDistFromDistOrNumber), environment)
-          )
-        )
-      ),
-    ],
-  }),
-  maker.make({
-    name: "product",
-    definitions: [
-      makeDefinition([frArray(frDistOrNumber)], ([dists], { environment }) =>
-        vDist(
-          Result.getExt(
-            algebraicProduct(dists.map(parseDistFromDistOrNumber), environment)
-          )
-        )
-      ),
-    ],
-  }),
-  maker.make({
-    name: "cumsum",
-    definitions: [
-      makeDefinition([frArray(frDistOrNumber)], ([dists], { environment }) =>
-        vArray(
-          algebraicCumSum(
-            dists.map(parseDistFromDistOrNumber),
-            environment
-          ).map((r) => vDist(r))
-        )
-      ),
-    ],
-  }),
-  maker.make({
-    name: "cumprod",
-    definitions: [
-      makeDefinition([frArray(frDistOrNumber)], ([dists], { environment }) =>
-        vArray(
-          algebraicCumProd(
-            dists.map(parseDistFromDistOrNumber),
-            environment
-          ).map((r) => vDist(r))
-        )
-      ),
-    ],
-  }),
-  maker.make({
-    name: "diff",
-    definitions: [
-      makeDefinition([frArray(frDistOrNumber)], ([dists], { environment }) =>
-        vArray(
-          algebraicCumDiff(
-            dists.map(parseDistFromDistOrNumber),
-            environment
-          ).map((r) => vDist(r))
-        )
       ),
     ],
   }),

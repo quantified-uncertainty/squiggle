@@ -1,3 +1,5 @@
+import { Ok, result } from "./result";
+
 export const zip = <A, B>(xs: A[], ys: B[]): [A, B][] => {
   // based on Belt.Array.zip
   const lenX = xs.length;
@@ -29,6 +31,29 @@ export const accumulate = <A>(
   return result;
 };
 
+export const accumulateWithError = <A, E>(
+  items: readonly A[],
+  fn: (x: A, y: A) => result<A, E>
+): result<A[], E> => {
+  const len = items.length;
+  const result = new Array(len);
+  for (let i = 0; i < len; i++) {
+    const element = items[i];
+    let r: result<A, E>;
+    if (i === 0) {
+      r = Ok(element);
+    } else {
+      r = fn(element, result[i - 1]);
+    }
+    if (r.ok) {
+      result[i] = r.value;
+    } else {
+      return r;
+    }
+  }
+  return Ok(result);
+};
+
 export const unzip = <A, B>(
   items: readonly (readonly [A, B])[]
 ): [A[], B[]] => {
@@ -53,6 +78,22 @@ export const pairwise = <T, R>(
     result.push(fn(items[i - 1], items[i]));
   }
   return result;
+};
+
+export const pairwiseWithError = <T, R, E>(
+  items: readonly T[],
+  fn: (v1: T, v2: T) => result<R, E>
+): result<R[], E> => {
+  const result: R[] = [];
+  for (let i = 1; i < items.length; i++) {
+    const r: result<R, E> = fn(items[i - 1], items[i]);
+    if (r.ok) {
+      result.push(r.value);
+    } else {
+      return r;
+    }
+  }
+  return Ok(result);
 };
 
 export const makeBy = <T>(n: number, fn: (i: number) => T): T[] => {

@@ -11,7 +11,14 @@ import { SampleMapNeedsNtoNFunction } from "../../operationError.js";
 import { ReducerContext } from "../../reducer/context.js";
 import { Lambda } from "../../reducer/lambda.js";
 import * as Result from "../../utility/result.js";
-import { Value, vBool, vDist, vNumber, vString } from "../../value/index.js";
+import {
+  Value,
+  vArray,
+  vBool,
+  vDist,
+  vNumber,
+  vString,
+} from "../../value/index.js";
 import { FRFunction } from "./core.js";
 import { FnDefinition, makeDefinition } from "./fnDefinition.js";
 import {
@@ -308,6 +315,15 @@ export function distResultToValue(
     throw new REDistributionError(result.value);
   }
   return vDist(result.value);
+}
+
+export function distsResultToValue(
+  result: Result.result<BaseDist[], DistError>
+): Value {
+  if (!result.ok) {
+    throw new REDistributionError(result.value);
+  }
+  return vArray(result.value.map((r) => vDist(r)));
 }
 
 export function makeSampleSet(d: BaseDist, env: Env) {

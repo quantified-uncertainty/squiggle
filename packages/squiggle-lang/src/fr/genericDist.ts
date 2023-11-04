@@ -1,18 +1,32 @@
 import * as SymbolicDist from "../dist/SymbolicDist.js";
 import {
+  algebraicCumProd,
+  algebraicCumSum,
+  algebraicDiff,
+  algebraicProduct,
+  algebraicSum,
+} from "../dist/distOperations/binaryOperations.js";
+import {
   BinaryOperation,
   binaryOperations,
 } from "../dist/distOperations/index.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frDist, frNumber } from "../library/registry/frTypes.js";
+import {
+  frArray,
+  frDist,
+  frDistOrNumber,
+  frNumber,
+} from "../library/registry/frTypes.js";
 import {
   FnFactory,
   distResultToValue,
+  distsResultToValue,
+  parseDistFromDistOrNumber,
   unpackDistResult,
 } from "../library/registry/helpers.js";
 import * as magicNumbers from "../magicNumbers.js";
-import { vArray, vNumber } from "../value/index.js";
+import { vArray, vDist, vNumber } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "",
@@ -154,6 +168,56 @@ export const library: FRFunction[] = [
         distResultToValue(dist.truncate(left, right, { env: environment }))
     )
   ),
+  maker.make({
+    name: "sum",
+    definitions: [
+      makeDefinition([frArray(frDistOrNumber)], ([dists], { environment }) =>
+        distResultToValue(
+          algebraicSum(dists.map(parseDistFromDistOrNumber), environment)
+        )
+      ),
+    ],
+  }),
+  maker.make({
+    name: "product",
+    definitions: [
+      makeDefinition([frArray(frDistOrNumber)], ([dists], { environment }) =>
+        distResultToValue(
+          algebraicProduct(dists.map(parseDistFromDistOrNumber), environment)
+        )
+      ),
+    ],
+  }),
+  maker.make({
+    name: "cumsum",
+    definitions: [
+      makeDefinition([frArray(frDistOrNumber)], ([dists], { environment }) =>
+        distsResultToValue(
+          algebraicCumSum(dists.map(parseDistFromDistOrNumber), environment)
+        )
+      ),
+    ],
+  }),
+  maker.make({
+    name: "cumprod",
+    definitions: [
+      makeDefinition([frArray(frDistOrNumber)], ([dists], { environment }) =>
+        distsResultToValue(
+          algebraicCumProd(dists.map(parseDistFromDistOrNumber), environment)
+        )
+      ),
+    ],
+  }),
+  maker.make({
+    name: "diff",
+    definitions: [
+      makeDefinition([frArray(frDistOrNumber)], ([dists], { environment }) =>
+        distsResultToValue(
+          algebraicDiff(dists.map(parseDistFromDistOrNumber), environment)
+        )
+      ),
+    ],
+  }),
   maker.d2d({
     name: "log",
     fn: (dist, env) =>

@@ -30,10 +30,11 @@ import { ImmutableMap } from "../../utility/immutableMap.js";
 
 const fnList: FRFunction[] = [
   ...builtinLibrary,
-  ...numberLibrary,
   ...dangerLibrary,
   ...dateLibrary,
   ...dictLibrary,
+  //It's important that numberLibrary comes before distLibrary, because we want Number.sum[] to be prioritized over Dist.sum[].
+  ...numberLibrary,
   ...distLibrary,
   ...genericDistLibrary,
   ...tableLibrary,
