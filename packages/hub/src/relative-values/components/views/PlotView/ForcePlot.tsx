@@ -1,26 +1,13 @@
 import * as d3 from "d3";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
-
-import {
-  DrawContext,
-  useCanvas,
-  useCanvasCursor,
-} from "@quri/squiggle-components";
+import { DrawContext, useCanvas, useCanvasCursor } from "@quri/squiggle-components";
 import { MouseTooltip } from "@quri/ui";
-
 import { ModelEvaluator } from "@/relative-values/values/ModelEvaluator";
-import {
-  useDefinition,
-  useDefinitionClusters,
-  useRelativeValuesContext,
-} from "../RelativeValuesProvider";
+import { useDefinition, useDefinitionClusters, useRelativeValuesContext } from "../RelativeValuesProvider";
 import { useFilteredItems } from "../hooks";
 import { ItemTooltip } from "./ItemTooltip";
 
-export const distance = (
-  p1: { x: number; y: number },
-  p2: { x: number; y: number }
-) => {
+export const distance = (p1: { x: number; y: number }, p2: { x: number; y: number }) => {
   return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
 };
 
