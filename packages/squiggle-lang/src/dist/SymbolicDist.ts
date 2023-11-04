@@ -151,12 +151,11 @@ export abstract class SymbolicDist extends BaseDist {
   isFloat(): boolean {
     return false;
   }
-export class Normal extends SymbolicDist {
+export class Normal {
   private _mean: number;
   private _stdev: number;
 
-  private constructor({ mean, stdev }: { mean: number; stdev: number }) {
-    super();
+  constructor({ mean, stdev }: { mean: number; stdev: number }) {
     this._mean = mean;
     this._stdev = stdev;
   }
@@ -1411,12 +1410,11 @@ export class Poisson extends SymbolicDist {
    If it's a Result object, it can still return an error if there is a serious problem,
    like in the case of a divide by 0.
 */
-export class Normal extends SymbolicDist {
+export class Normal {
   private _mean: number;
   private _stdev: number;
 
   constructor({ mean, stdev }: { mean: number; stdev: number }) {
-    super();
     this._mean = mean;
     this._stdev = stdev;
   }
