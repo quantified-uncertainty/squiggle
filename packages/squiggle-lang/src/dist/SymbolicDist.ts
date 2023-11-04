@@ -847,8 +847,9 @@ export class Uniform extends SymbolicDist {
   sample() {
     return jstat.uniform.sample(this.low, this.high);
   }
-  mean() {
+  mean(): number {
     return jstat.uniform.mean(this.low, this.high);
+  };
   }
   variance(): result<number, DistError> {
     return Ok(Math.pow(this.high - this.low, 2) / 12);
