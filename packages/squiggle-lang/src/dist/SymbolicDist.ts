@@ -151,8 +151,6 @@ export abstract class SymbolicDist extends BaseDist {
   isFloat(): boolean {
     return false;
   }
-}
-
 export class Normal extends SymbolicDist {
   private _mean: number;
   private _stdev: number;
@@ -163,16 +161,6 @@ export class Normal extends SymbolicDist {
     this._stdev = stdev;
   }
 
-  static make({
-    mean,
-    stdev,
-  }: {
-    mean: number;
-    stdev: number;
-  }): result<Normal, string> {
-    if (stdev <= 0) {
-      return Result.Err(
-        "Standard deviation of normal distribution must be larger than 0"
   mean(): number {
     return this._mean;
   }
@@ -186,14 +174,26 @@ export class Normal extends SymbolicDist {
   }
 
   sample() {
-    return jstat.beta.sample(this.alpha, this.beta);
-  }
-
-  mean() {
-    return jstat.beta.mean(this.alpha, this.beta);
+    return jstat.normal.sample(this._mean, this._stdev);
   }
 
   variance(): result<number, DistError> {
+    return Ok(this._stdev ** 2);
+  }
+
+  _isEqual(other: Normal) {
+    return this._mean === other._mean && this._stdev === other._stdev;
+  }
+
+  static make({
+    mean,
+    stdev,
+  }: {
+    mean: number;
+    stdev: number;
+    if (stdev <= 0) {
+      return Result.Err(
+        "Standard deviation of normal distribution must be larger than 0"
     return Ok(jstat.beta.variance(this.alpha, this.beta));
   }
 
@@ -1411,17 +1411,55 @@ export class Poisson extends SymbolicDist {
    If it's a Result object, it can still return an error if there is a serious problem,
    like in the case of a divide by 0.
 */
-export const tryAnalyticalSimplification = (
-  d1: SymbolicDist,
-  d2: SymbolicDist,
-  op: Operation.AlgebraicOperation
-): result<SymbolicDist, OperationError> | undefined => {
-  if (d1 instanceof PointMass && d2 instanceof PointMass) {
-    return Result.fmap(
-      Operation.Algebraic.toFn(op)(d1.t, d2.t),
-      (v) => new PointMass(v)
-    );
-  } else if (d1 instanceof Normal && d2 instanceof Normal) {
+export class Normal extends SymbolicDist {
+  private _mean: number;
+  private _stdev: number;
+
+  constructor({ mean, stdev }: { mean: number; stdev: number }) {
+    super();
+    this._mean = mean;
+    this._stdev = stdev;
+  }
+
+  mean(): number {
+    return this._mean;
+  }
+
+  cdf(x: number) {
+    return jstat.normal.cdf(x, this._mean, this._stdev);
+  }
+
+  inv(x: number) {
+    return jstat.normal.inv(x, this._mean, this._stdev);
+  }
+
+  sample() {
+    return jstat.normal.sample(this._mean, this._stdev);
+  }
+
+  variance(): result<number, DistError> {
+    return Ok(this._stdev ** 2);
+  }
+
+  _isEqual(other: Normal) {
+    return this._mean === other._mean && this._stdev === other._stdev;
+  }
+
+  static make({
+    mean,
+    stdev,
+  }: {
+    mean: number;
+    stdev: number;
+  }): result<Normal, string> {
+    if (stdev <= 0) {
+      return Result.Err(
+        "Standard deviation of normal distribution must be larger than 0"
+      );
+    }
+    return Ok(new Normal({ mean, stdev }));
+  }
+}
     const out = Normal.operate(op, d1, d2);
     return out ? Ok(out) : undefined;
   } else if (d1 instanceof PointMass && d2 instanceof Normal) {
