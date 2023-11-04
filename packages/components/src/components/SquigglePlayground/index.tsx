@@ -66,6 +66,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     renderExtraModal,
     height = 500,
     sourceId,
+    autorun = true,
     ...defaultSettings
   } = props;
 
@@ -79,7 +80,8 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
         defaultPlaygroundSettings,
         Object.fromEntries(
           Object.entries(defaultSettings).filter(([, v]) => v !== undefined)
-        )
+        ),
+        { autorun }
       ) as PlaygroundSettings
   );
   const handleSettingsChange = useCallback(
