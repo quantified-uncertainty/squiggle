@@ -19,6 +19,7 @@ Calculator.make: ({
   description?: string,
   fields: list<input>,
   autorun?: boolean = true,
+  sampleCount?: number,
 }) => calculator
 ```
 
@@ -37,6 +38,7 @@ Example:
     title: "Concat()",
     description: "This function takes in 4 arguments, then displays them",
     autorun: true,
+    sampleCount: 10000,
     inputs: [
       Input.text({
         name: "First Param",

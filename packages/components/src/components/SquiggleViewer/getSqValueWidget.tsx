@@ -12,7 +12,10 @@ import { TableCellsIcon } from "@quri/ui";
 
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
 import { SqValueWithContext } from "../../lib/utility.js";
-import { Calculator } from "../Calculator/index.js";
+import {
+  Calculator,
+  CalculatorSampleCountValidation,
+} from "../Calculator/index.js";
 import { DistPreview } from "../DistributionsChart/DistPreview.js";
 import { DistributionsChart } from "../DistributionsChart/index.js";
 import { DistFunctionChart } from "../FunctionChart/DistFunctionChart.js";
@@ -155,11 +158,13 @@ export function getSqValueWidget(value: SqValueWithContext): ValueWidget {
     case "Calculator": {
       return {
         render: (settings) => (
-          <Calculator
-            valueWithContext={value}
-            environment={environment}
-            settings={settings}
-          />
+          <CalculatorSampleCountValidation calculator={value}>
+            <Calculator
+              valueWithContext={value}
+              environment={environment}
+              settings={settings}
+            />
+          </CalculatorSampleCountValidation>
         ),
       };
     }

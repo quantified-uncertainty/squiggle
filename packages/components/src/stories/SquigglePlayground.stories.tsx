@@ -247,6 +247,7 @@ Calculator.make(
       Input.text({name: "Variable1", description: "This is a very long description This is a very long description This is a very long description This is a very long description This is a very long description", default: 1}),
       Input.select({name: "Variable3", default: "alice", options: ["alice", "charles", "bob", "bill", "maven", "billy", "samantha", "becky"]})
     ],
+    sampleCount: 1000
   }
 )
   `,

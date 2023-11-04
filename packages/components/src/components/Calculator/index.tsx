@@ -14,6 +14,16 @@ import {
   SqValueResult,
 } from "./types.js";
 import { useSavedCalculatorState } from "./useSavedCalculatorState.js";
+import { SAMPLE_COUNT_MAX, SAMPLE_COUNT_MIN } from "../../lib/constants.js";
+import { ErrorAlert } from "../Alert.js";
+
+const getEnvironment = (
+  modelEnvironment: Env,
+  calculator: SqCalculator
+): Env => ({
+  sampleCount: calculator.sampleCount || modelEnvironment.sampleCount,
+  xyPointLength: modelEnvironment.xyPointLength,
+});
 
 async function runSquiggleCode(
   code: string,
@@ -170,13 +180,37 @@ type Props = {
   valueWithContext: SqCalculatorValueWithContext;
 };
 
+export const CalculatorSampleCountValidation: React.FC<{
+  calculator: SqCalculatorValueWithContext;
+  children: React.ReactNode;
+}> = ({ calculator, children }) => {
+  const { sampleCount } = calculator.value;
+
+  const sampleCountIsInvalid =
+    sampleCount &&
+    (sampleCount < SAMPLE_COUNT_MIN || sampleCount > SAMPLE_COUNT_MAX);
+
+  return sampleCountIsInvalid ? (
+    <ErrorAlert
+      heading={`Calculator sampleCount must be between ${SAMPLE_COUNT_MIN} and ${SAMPLE_COUNT_MAX}. It is set to ${sampleCount}.`}
+    />
+  ) : (
+    children
+  );
+};
+
 export const Calculator: FC<Props> = ({
   environment,
   settings,
   valueWithContext,
 }) => {
+  const _environment = useMemo(
+    () => getEnvironment(environment, valueWithContext.value),
+    [environment, valueWithContext]
+  );
+
   const { calculator, form, inputResults, processAllFieldCodes } =
-    useCalculator(valueWithContext, environment);
+    useCalculator(valueWithContext, _environment);
 
   const inputResultSettings: PlaygroundSettings = {
     ...settings,
@@ -226,7 +260,7 @@ export const Calculator: FC<Props> = ({
         <CalculatorResult
           valueWithContext={valueWithContext}
           inputResults={inputResults}
-          environment={environment}
+          environment={_environment}
           processAllFieldCodes={processAllFieldCodes}
           autorun={calculator.autorun}
           settings={calculatorResultSettings}
