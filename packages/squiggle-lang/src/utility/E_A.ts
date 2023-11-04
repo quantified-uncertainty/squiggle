@@ -19,15 +19,14 @@ export const accumulate = <A>(
   fn: (x: A, y: A) => A
 ): A[] => {
   const len = items.length;
+  if (len === 0) return [];
   const result = new Array(len);
-  for (let i = 0; i < len; i++) {
-    const element = items[i];
-    if (i === 0) {
-      result[i] = element;
-    } else {
-      result[i] = fn(element, result[i - 1]);
-    }
+  result[0] = items[0]; // handle the first element separately
+
+  for (let i = 1; i < len; i++) {
+    result[i] = fn(items[i], result[i - 1]);
   }
+
   return result;
 };
 
@@ -36,22 +35,17 @@ export const accumulateWithError = <A, E>(
   fn: (x: A, y: A) => result<A, E>
 ): result<A[], E> => {
   const len = items.length;
-  const result = new Array(len);
-  for (let i = 0; i < len; i++) {
-    const element = items[i];
-    let r: result<A, E>;
-    if (i === 0) {
-      r = Ok(element);
-    } else {
-      r = fn(element, result[i - 1]);
-    }
-    if (r.ok) {
-      result[i] = r.value;
-    } else {
-      return r;
-    }
+  if (len === 0) return Ok([]);
+  const results: A[] = new Array(len);
+  results[0] = items[0]; // First element is directly assigned
+
+  for (let i = 1; i < len; i++) {
+    const r: result<A, E> = fn(items[i], results[i - 1]);
+    if (!r.ok) return r; // Early return on error
+    results[i] = r.value;
   }
-  return Ok(result);
+
+  return Ok(results);
 };
 
 export const unzip = <A, B>(
@@ -87,11 +81,8 @@ export const pairwiseWithError = <T, R, E>(
   const result: R[] = [];
   for (let i = 1; i < items.length; i++) {
     const r: result<R, E> = fn(items[i - 1], items[i]);
-    if (r.ok) {
-      result.push(r.value);
-    } else {
-      return r;
-    }
+    if (!r.ok) return r; // Immediately return on error
+    result.push(r.value);
   }
   return Ok(result);
 };
