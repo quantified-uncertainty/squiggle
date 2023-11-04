@@ -519,6 +519,13 @@ export class Beta extends SymbolicDist {
   }
 
   inv(x: number) {
+  }
+  /**
+  +   * Represents a Poisson distribution.
+  +   *
+  +   * @param {number} lambda - The average rate of success over a given time period.
+  +   */
+  +  export class Poisson extends SymbolicDist {
     return jstat.beta.inv(x, this.alpha, this.beta);
   }
 
@@ -805,7 +812,33 @@ export class Uniform extends SymbolicDist {
     return this.low === other.low && this.high === other.high;
   }
 
-  override min() {
+  mean() {
+    return this.n * this.p;
+  }
+
+  variance(): result<number, DistError> {
+    return Ok(this.n * this.p * (1 - this.p));
+  }
+
+  sample() {
+    const bernoulli = Bernoulli.make(this.p);
+    if (bernoulli.ok) {
+      // less space efficient than adding a bunch of draws, but cleaner. Taken from Guesstimate.
+      return sum(
+        Array.from({ length: this.n }, () => bernoulli.value.sample())
+      );
+    } else {
+      throw new Error("Binomial sampling failed");
+    }
+  }
+
+  _isEqual(other: Binomial) {
+    return this.n === other.n && this.p === other.p;
+  }
+
+  // Not needed, until we support Sym.Binomial
+  override toPointSetDist(): result<PointSetDist, DistError> {
+  }
     return this.low;
   }
   override max() {
