@@ -43,6 +43,10 @@ export class SqCalculator {
     return this._value.autorun;
   }
 
+  get sampleCount(): number | undefined {
+    return this._value.sampleCount;
+  }
+
   // This function is used to determine if a calculator has changed.
   // It's obviously not perfect - it doesn't capture changes within the calculator function, but this would be much more complicated.
 
@@ -54,7 +58,8 @@ export class SqCalculator {
       paramData +
       this._value.description +
       this._value.title +
-      this._value.autorun
+      this._value.autorun +
+      this._value.sampleCount
     );
   }
 

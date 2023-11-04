@@ -12,9 +12,10 @@ import { CheckboxFormField, NumberFormField, RadioFormField } from "@quri/ui";
 import { functionChartDefaults } from "./FunctionChart/utils.js";
 import { FormComment } from "./ui/FormComment.js";
 import { FormSection } from "./ui/FormSection.js";
+import { SAMPLE_COUNT_MAX, SAMPLE_COUNT_MIN } from "../lib/constants.js";
 
 export const environmentSchema = z.object({
-  sampleCount: z.number().int().gte(10).lte(1000000),
+  sampleCount: z.number().int().gte(SAMPLE_COUNT_MIN).lte(SAMPLE_COUNT_MAX),
   xyPointLength: z.number().int().gte(10).lte(10000),
 });
 

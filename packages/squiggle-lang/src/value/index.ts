@@ -495,6 +495,7 @@ export type Calculator = {
   autorun: boolean;
   description?: string;
   title?: string;
+  sampleCount?: number;
 };
 
 class VCalculator extends BaseValue {
