@@ -519,14 +519,14 @@ export class Beta extends SymbolicDist {
   }
 
   inv(x: number) {
+    return jstat.beta.inv(x, this.alpha, this.beta);
   }
   /**
-  +   * Represents a Poisson distribution.
-  +   *
-  +   * @param {number} lambda - The average rate of success over a given time period.
-  +   */
-  +  export class Poisson extends SymbolicDist {
-    return jstat.beta.inv(x, this.alpha, this.beta);
+   * Represents a Poisson distribution.
+   *
+   * @param {number} lambda - The average rate of success over a given time period.
+   */
+  export class Poisson extends SymbolicDist {
   }
 
   sample() {
@@ -1166,6 +1166,14 @@ export class Binomial extends SymbolicDist {
    */
     throw notYetImplemented();
   }
+  }
+  
+  /**
+  * Represents a Poisson distribution.
+  *
+  * @param {number} lambda - The average rate of success over a given time period.
+  */
+  export class Poisson extends SymbolicDist {
 
   mean() {
     return this.n * this.p;
