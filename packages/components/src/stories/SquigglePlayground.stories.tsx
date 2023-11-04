@@ -4,6 +4,7 @@ import { sq } from "@quri/squiggle-lang";
 import { Button } from "@quri/ui";
 
 import { SquigglePlayground as Component } from "../components/SquigglePlayground/index.js";
+import { SAMPLE_COUNT_MAX } from "../lib/constants";
 =======
 
 /**
