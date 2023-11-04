@@ -1071,6 +1071,12 @@ export class PointMass extends SymbolicDist {
   }
 }
 
+/**
+ * Represents a binomial distribution.
+ *
+ * @param {number} n - The number of trials.
+ * @param {number} p - The probability of success on each trial.
+ */
 export class Binomial extends SymbolicDist {
   constructor(
     public n: number,
@@ -1103,6 +1109,28 @@ export class Binomial extends SymbolicDist {
 
   // Not needed, until we support Sym.Binomial
   inv(p: number): number {
+  /**
+   * Returns a string representation of the binomial distribution.
+   */
+  /**
+   * Creates a new Binomial distribution.
+   *
+   * @param {number} n - The number of trials.
+   * @param {number} p - The probability of success on each trial.
+   * @returns {result<Binomial, string>} A new Binomial distribution.
+   */
+  /**
+   * Calculates the probability density function of the binomial distribution.
+   *
+   * @param {number} x - The value to calculate the probability for.
+   * @returns {number} The probability density function at x.
+   */
+  /**
+   * Calculates the cumulative distribution function of the binomial distribution.
+   *
+   * @param {number} k - The value to calculate the cumulative distribution for.
+   * @returns {number} The cumulative distribution function at k.
+   */
     throw notYetImplemented();
   }
 
@@ -1170,7 +1198,12 @@ export class Poisson extends SymbolicDist {
     return this.lambda;
   }
 
-  variance(): result<number, DistError> {
+  /**
+   * Represents a Poisson distribution.
+   *
+   * @param {number} lambda - The average rate of success over a given time period.
+   */
+  export class Poisson extends SymbolicDist {
     return Ok(this.lambda);
   }
 
@@ -1187,6 +1220,43 @@ export class Poisson extends SymbolicDist {
     return Result.Err(notYetImplemented());
   }
 }
+  /**
+   * Returns a string representation of the Poisson distribution.
+   */
+  /**
+   * Creates a new Poisson distribution.
+   *
+   * @param {number} lambda - The average rate of success over a given time period.
+   * @returns {result<Poisson, string>} A new Poisson distribution.
+   */
+  /**
+   * Calculates the probability density function of the Poisson distribution.
+   *
+   * @param {number} x - The value to calculate the probability for.
+   * @returns {number} The probability density function at x.
+   */
+  /**
+   * Calculates the cumulative distribution function of the Poisson distribution.
+   *
+   * @param {number} k - The value to calculate the cumulative distribution for.
+   * @returns {number} The cumulative distribution function at k.
+   */
+  /**
+   * Calculates the variance of the Poisson distribution.
+   *
+   * @returns {result<number, DistError>} The variance of the Poisson distribution.
+   */
+  /**
+   * Generates a random sample from the Poisson distribution.
+   *
+   * @returns {number} A random sample from the Poisson distribution.
+   */
+  /**
+   * Checks if this Poisson distribution is equal to another.
+   *
+   * @param {Poisson} other - The other Poisson distribution to compare to.
+   * @returns {boolean} True if the two distributions are equal, false otherwise.
+   */
 
 /* Calling e.g. "Normal.operate" returns an optional Result.
    If the result is undefined, there is no valid analytic solution.
