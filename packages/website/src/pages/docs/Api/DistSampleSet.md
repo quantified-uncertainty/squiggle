@@ -26,6 +26,12 @@ SampleSet.make: ((index: number) => number) => pointSetDist
 SampleSet.fromDist: (distribution) => sampleSet
 ```
 
+### fromNumber
+
+```
+SampleSet.fromNumber: (number) => sampleSet
+```
+
 ### fromList
 
 ```

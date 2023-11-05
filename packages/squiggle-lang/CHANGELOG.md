@@ -18,6 +18,10 @@
 
 - Added [List.slice](https://www.squiggle-language.com/docs/Api/List#slice), [Danger.combinations](https://www.squiggle-language.com/docs/Api/Danger#combinations), [Danger.allCombinations](https://www.squiggle-language.com/docs/Api/Danger#allcombinations) ([#2347](https://github.com/quantified-uncertainty/squiggle/pull/2347))
 
+- Added more standard library functions: [typeOf](https://www.squiggle-language.com/docs/Api/Builtin#typeof), [List.every](https://www.squiggle-language.com/docs/Api/List#every), [List.some](https://www.squiggle-language.com/docs/Api/List#some), [List.find](https://www.squiggle-language.com/docs/Api/List#find), [List.findIndex](https://www.squiggle-language.com/docs/Api/List#findindex), [List.zip](https://www.squiggle-language.com/docs/Api/List#zip), [List.unzip](https://www.squiggle-language.com/docs/Api/List#unzip), [List.shuffle](https://www.squiggle-language.com/docs/Api/List#shuffle), [List.uniq](https://www.squiggle-language.com/docs/Api/List#uniq) (works with more types now), [List.uniqBy](https://www.squiggle-language.com/docs/Api/List#uniqby), [Dist.make](https://www.squiggle-language.com/docs/Api/Dist#make), [PointSet.fromNumber](https://www.squiggle-language.com/docs/Api/DistPointSet#fromnumber), [PointSet.make](https://www.squiggle-language.com/docs/Api/DistPointSet#make), [SampleSet.fromNumber](https://www.squiggle-language.com/docs/Api/DistSampleSet#fromnumber), [SampleSet.make](https://www.squiggle-language.com/docs/Api/DistSampleSet#make), [String.make](https://www.squiggle-language.com/docs/Api/String#make), [String.split](https://www.squiggle-language.com/docs/Api/String#split) ([#2290](https://github.com/quantified-uncertainty/squiggle/pull/2290))
+
+- Expanded equality comparisons to include all distributions, dates, time durations, scales, domains, arrays, and dictionaries.
+
 ## 0.8.5
 
 ### Patch Changes

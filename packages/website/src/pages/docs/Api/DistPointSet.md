@@ -26,9 +26,8 @@ PointSet.fromDist: (distribution) => pointSetDist
 ### fromNumber
 
 ```
-SampleSet.fromNumber: (number) => sampleSet
+PointSet.fromNumber: (number) => pointSetDist
 ```
-
 
 ### makeContinuous
 
