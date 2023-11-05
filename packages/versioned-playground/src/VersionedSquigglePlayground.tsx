@@ -17,6 +17,9 @@ const playgroundByVersion = {
   "0.8.5": lazy(async () => ({
     default: (await import("squiggle-components-0.8.5")).SquigglePlayground,
   })),
+  "0.8.6": lazy(async () => ({
+    default: (await import("squiggle-components-0.8.6")).SquigglePlayground,
+  })),
   dev: lazy(async () => ({
     default: (await import("@quri/squiggle-components")).SquigglePlayground,
   })),
