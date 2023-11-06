@@ -1,3 +1,7 @@
+type AdminUpdateModelVersionResult {
+  model: Model!
+}
+
 type BaseError implements Error {
   message: String!
 }
@@ -179,11 +183,20 @@ input ModelRevisionForRelativeValuesSlugOwnerInput {
   slug: String!
 }
 
+type ModelsByVersion {
+  count: Int!
+  models: [Model!]!
+  privateCount: Int!
+  version: String!
+}
+
 type MoveModelResult {
   model: Model!
 }
 
 type Mutation {
+  """Admin-only query for upgrading model versions"""
+  adminUpdateModelVersion(input: MutationAdminUpdateModelVersionInput!): MutationAdminUpdateModelVersionResult!
   buildRelativeValuesCache(input: MutationBuildRelativeValuesCacheInput!): MutationBuildRelativeValuesCacheResult!
   cancelGroupInvite(input: MutationCancelGroupInviteInput!): MutationCancelGroupInviteResult!
   clearRelativeValuesCache(input: MutationClearRelativeValuesCacheInput!): MutationClearRelativeValuesCacheResult!
@@ -204,6 +217,13 @@ type Mutation {
   updateRelativeValuesDefinition(input: MutationUpdateRelativeValuesDefinitionInput!): MutationUpdateRelativeValuesDefinitionResult!
   updateSquiggleSnippetModel(input: MutationUpdateSquiggleSnippetModelInput!): MutationUpdateSquiggleSnippetModelResult!
 }
+
+input MutationAdminUpdateModelVersionInput {
+  modelId: String!
+  version: String!
+}
+
+union MutationAdminUpdateModelVersionResult = AdminUpdateModelVersionResult | BaseError
 
 input MutationBuildRelativeValuesCacheInput {
   exportId: String!
@@ -383,6 +403,9 @@ type Query {
   me: Me!
   model(input: QueryModelInput!): QueryModelResult!
   models(after: String, before: String, first: Int, last: Int): ModelConnection!
+
+  """Admin-only query for listing models in /admin UI"""
+  modelsByVersion: [ModelsByVersion!]!
   node(id: ID!): Node
   nodes(ids: [ID!]!): [Node]!
   relativeValuesDefinition(input: QueryRelativeValuesDefinitionInput!): QueryRelativeValuesDefinitionResult!
@@ -559,6 +582,7 @@ type UpdateSquiggleSnippetResult {
 type User implements Node & Owner {
   groups(after: String, before: String, first: Int, last: Int): GroupConnection!
   id: ID!
+  isRoot: Boolean!
   models(after: String, before: String, first: Int, last: Int): ModelConnection!
   relativeValuesDefinitions(after: String, before: String, first: Int, last: Int): RelativeValuesDefinitionConnection!
   slug: String!

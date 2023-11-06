@@ -46,9 +46,13 @@ type Props = {
   // We have to pass the entire model here and not just content;
   // it's too hard to split the editing form into "content-type-specific" part and "generic model fields" part.
   modelRef: EditSquiggleSnippetModel$key;
+  forceVersionPicker?: boolean;
 };
 
-export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
+export const EditSquiggleSnippetModel: FC<Props> = ({
+  modelRef,
+  forceVersionPicker,
+}) => {
   const model = useFragment(
     graphql`
       fragment EditSquiggleSnippetModel on Model {
@@ -231,7 +235,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({ modelRef }) => {
             }
             renderExtraControls={() => (
               <div className="h-full flex items-center justify-end gap-2">
-                {model.isEditable ? (
+                {model.isEditable || forceVersionPicker ? (
                   <SquigglePlaygroundVersionPicker
                     version={version}
                     onChange={handleVersionChange}

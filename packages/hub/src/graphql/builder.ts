@@ -30,11 +30,15 @@ export type HubSchemaTypes = {
   Context: Context;
   AuthScopes: {
     signedIn: boolean;
+    isRootUser: boolean;
     controlsOwnerId: string | null;
   };
   AuthContexts: {
     // https://pothos-graphql.dev/docs/plugins/scope-auth#change-context-types-based-on-scopes
     signedIn: Context & {
+      session: SignedInSession;
+    };
+    isRootUser: Context & {
       session: SignedInSession;
     };
   };
@@ -66,6 +70,12 @@ export const builder = new SchemaBuilder<HubSchemaTypes>({
   },
   authScopes: async (context) => ({
     signedIn: !!context.session?.user,
+    isRootUser: () => {
+      const email = context.session?.user.email;
+      // Note: there's no emailVerified field in session, is this a problem? Probably not.
+      // See also: `isRootUser` function in `types/User.ts`.
+      return !!(email && process.env.ROOT_EMAILS?.includes(email));
+    },
     controlsOwnerId: async (ownerId) => {
       if (!context.session) {
         return false;

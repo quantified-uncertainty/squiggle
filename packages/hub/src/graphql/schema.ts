@@ -15,6 +15,7 @@ import "./queries/relativeValuesDefinitions";
 import "./queries/runSquiggle";
 import "./queries/userByUsername";
 import "./queries/users";
+import "./queries/modelsByVersion";
 
 import "./mutations/buildRelativeValuesCache";
 import "./mutations/cancelGroupInvite";
@@ -35,5 +36,6 @@ import "./mutations/updateModelPrivacy";
 import "./mutations/updateModelSlug";
 import "./mutations/updateRelativeValuesDefinition";
 import "./mutations/updateSquiggleSnippetModel";
+import "./mutations/adminUpdateModelVersion";
 
 export const schema = builder.toSchema();
