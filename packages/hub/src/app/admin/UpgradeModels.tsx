@@ -131,6 +131,11 @@ export const UpgradeModels: FC<{
         Check models with their current version and the new version, then press
         the upgrade button if everything is ok.
       </p>
+      <p>
+        <strong>
+          {`Code edits won't be saved, "Upgrade" buttton bumps only the model's version.`}
+        </strong>
+      </p>
       <div className="space-y-8">
         {modelsByVersion.map((entry) => {
           if (
