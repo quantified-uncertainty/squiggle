@@ -29,6 +29,7 @@ const ModelRevisionItem: FC<{
         author {
           username
         }
+        comment
       }
     `,
     revisionRef
@@ -49,20 +50,25 @@ const ModelRevisionItem: FC<{
 
   return (
     <div key={revision.id}>
-      <StyledLink
-        href={modelRevisionRoute({
-          owner: model.owner.slug,
-          slug: model.slug,
-          revisionId: revision.id,
-        })}
-      >
-        {format(new Date(revision.createdAtTimestamp), commonDateFormat)}
-      </StyledLink>
-      {revision.author ? (
-        <>
-          {" "}
-          by <UsernameLink username={revision.author.username} />
-        </>
+      <div>
+        <StyledLink
+          href={modelRevisionRoute({
+            owner: model.owner.slug,
+            slug: model.slug,
+            revisionId: revision.id,
+          })}
+        >
+          {format(new Date(revision.createdAtTimestamp), commonDateFormat)}
+        </StyledLink>
+        {revision.author ? (
+          <>
+            {" "}
+            by <UsernameLink username={revision.author.username} />
+          </>
+        ) : null}
+      </div>
+      {revision.comment ? (
+        <div className="text-xs text-slate-700">{revision.comment}</div>
       ) : null}
     </div>
   );
