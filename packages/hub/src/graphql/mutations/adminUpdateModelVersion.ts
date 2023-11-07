@@ -64,7 +64,12 @@ builder.mutationField("adminUpdateModelVersion", (t) =>
             },
             relativeValuesExports: {
               createMany: {
-                data: model.currentRevision.relativeValuesExports,
+                data: model.currentRevision.relativeValuesExports.map(
+                  (exp) => ({
+                    variableName: exp.variableName,
+                    definitionId: exp.definitionId,
+                  })
+                ),
               },
             },
           },
