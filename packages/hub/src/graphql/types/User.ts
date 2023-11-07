@@ -21,7 +21,6 @@ export function isSignedIn(
   return Boolean(session?.user.email);
 }
 
-export async function getSelf(session: SignedInSession) {
   const user = await prisma.user.findUniqueOrThrow({
     where: { email: session.user.email },
   });
@@ -37,7 +36,6 @@ export async function isRootUser(user: PrismaUser) {
 
 const ROOT_EMAILS = (process.env.ROOT_EMAILS ?? "").split(",");
 
-export const User = builder.prismaNode("User", {
   id: { field: "id" },
   interfaces: [Owner],
   fields: (t) => ({
@@ -62,7 +60,6 @@ export const User = builder.prismaNode("User", {
     }),
     // models are stored on owner.models, wo we have to use indirect relation (https://pothos-graphql.dev/docs/plugins/prisma#indirect-relations-as-connections)
     // See also: Group.models field.
-    models: t.connection(
       {
         type: modelConnectionHelpers.ref,
         select: (args, ctx, nestedSelection) => ({
@@ -81,7 +78,6 @@ export const User = builder.prismaNode("User", {
       },
       ModelConnection
     ),
-    relativeValuesDefinitions: t.connection(
       {
         type: relativeValuesDefinitionConnectionHelpers.ref,
         select: (args, ctx, nestedSelection) => ({
@@ -107,7 +103,6 @@ export const User = builder.prismaNode("User", {
       },
       RelativeValuesDefinitionConnection
     ),
-    groups: t.connection(
       {
         type: groupFromMembershipConnectionHelpers.ref,
 
