@@ -1,12 +1,15 @@
 import { FC, useMemo, useState } from "react";
-import { FormProvider, useFieldArray } from "react-hook-form";
+import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { graphql, useFragment } from "react-relay";
 
 import {
-  Button,
+  ButtonWithDropdown,
+  DropdownMenu,
   DropdownMenuActionItem,
   DropdownMenuHeader,
+  DropdownMenuModalActionItem,
   LinkIcon,
+  TextAreaFormField,
   TextTooltip,
 } from "@quri/ui";
 import {
@@ -36,10 +39,64 @@ import {
   draftUtils,
   useDraftLocator,
 } from "./SquiggleSnippetDraftDialog";
+import { FormModal } from "@/components/ui/FormModal";
 
 export type SquiggleSnippetFormShape = {
   code: string;
   relativeValuesExports: RelativeValuesExportInput[];
+};
+
+type OnSubmit = (extraData?: { comment: string }) => Promise<void>;
+
+const SaveDialog: FC<{ onSubmit: OnSubmit; close: () => void }> = ({
+  onSubmit,
+  close,
+}) => {
+  type SaveFormShape = {
+    comment: string;
+  };
+  const form = useForm<SaveFormShape>(); // TODO
+
+  const handleSubmit = form.handleSubmit(async ({ comment }) => {
+    await onSubmit({ comment });
+    close();
+  });
+
+  return (
+    <FormModal
+      onSubmit={handleSubmit}
+      title="Save with comment"
+      form={form}
+      close={close}
+      submitText="Save"
+    >
+      <TextAreaFormField<SaveFormShape> name="comment" label="Comment" />
+    </FormModal>
+  );
+};
+
+const SaveButton: FC<{ onSubmit: OnSubmit; disabled: boolean }> = ({
+  onSubmit,
+  disabled,
+}) => {
+  return (
+    <ButtonWithDropdown
+      theme="primary"
+      size="small"
+      onClick={onSubmit}
+      disabled={disabled}
+      renderDropdown={({ close }) => (
+        <DropdownMenu>
+          <DropdownMenuModalActionItem
+            render={() => <SaveDialog onSubmit={onSubmit} close={close} />}
+            title="Save with comment..."
+          />
+        </DropdownMenu>
+      )}
+    >
+      Save
+    </ButtonWithDropdown>
+  );
 };
 
 type Props = {
@@ -74,7 +131,6 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
               version
             }
           }
-
           relativeValuesExports {
             id
             variableName
@@ -113,7 +169,8 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
   const { form, onSubmit, inFlight } = useMutationForm<
     SquiggleSnippetFormShape,
     EditSquiggleSnippetModelMutation,
-    "UpdateSquiggleSnippetResult"
+    "UpdateSquiggleSnippetResult",
+    { comment: string }
   >({
     defaultValues: initialFormValues,
     mutation: graphql`
@@ -134,13 +191,14 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
       }
     `,
     expectedTypename: "UpdateSquiggleSnippetResult",
-    formDataToVariables: (formData) => ({
+    formDataToVariables: (formData, extraData) => ({
       input: {
         content: {
           code: formData.code,
           version,
         },
         relativeValuesExports: formData.relativeValuesExports,
+        comment: extraData?.comment,
         slug: model.slug,
         owner: model.owner.slug,
       },
@@ -204,7 +262,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
 
   return (
     <FormProvider {...form}>
-      <form onSubmit={onSubmit}>
+      <form onSubmit={() => onSubmit()}>
         <div ref={ref}>
           <SquiggleSnippetDraftDialog
             draftLocator={draftLocator}
@@ -255,14 +313,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
                   </TextTooltip>
                 )}
                 {model.isEditable && (
-                  <Button
-                    theme="primary"
-                    onClick={onSubmit}
-                    size="small"
-                    disabled={inFlight}
-                  >
-                    Save
-                  </Button>
+                  <SaveButton onSubmit={onSubmit} disabled={inFlight} />
                 )}
               </div>
             )}

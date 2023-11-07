@@ -2,6 +2,7 @@ import { FieldValues, UseFormProps, useForm } from "react-hook-form";
 import { VariablesOf } from "relay-runtime";
 
 import { CommonMutationParameters, useAsyncMutation } from "./useAsyncMutation";
+import { useCallback } from "react";
 
 /**
  * This hook ties together `useForm` and `useAsyncMutation`, which is a very common pattern for forms that submit data to our backend through mutations.
@@ -17,6 +18,9 @@ export function useMutationForm<
   FormShape extends FieldValues = never,
   TMutation extends CommonMutationParameters<TTypename> = never,
   TTypename extends string = never,
+  // In some cases, you might want to pass extra data to the mutation, which isn't available in `formDataToVariables`.
+  // See `SaveButton` implementation in `EditSquiggleSnippetModel` for an example where it's needed.
+  ExtraData extends Record<string, any> = Record<string, never>,
 >({
   // useForm params
   defaultValues,
@@ -35,7 +39,10 @@ export function useMutationForm<
   // See also: https://stackoverflow.com/questions/72111571/typescript-exact-return-type-of-function
   // This could be solved by converting the return type to generic, but I expect that the lack of partial type parameters in TypeScript
   // would get in the way, so I won't even try.
-  formDataToVariables: (data: FormShape) => VariablesOf<TMutation>;
+  formDataToVariables: (
+    data: FormShape,
+    extraData?: ExtraData
+  ) => VariablesOf<TMutation>;
 } & Pick<UseFormProps<FormShape>, "defaultValues" | "mode"> &
   Pick<
     Parameters<typeof useAsyncMutation<TMutation, TTypename>>[0],
@@ -58,12 +65,16 @@ export function useMutationForm<
     confirmation,
   });
 
-  const onSubmit = form.handleSubmit((formData) => {
-    runMutation({
-      variables: formDataToVariables(formData),
-      onCompleted,
-    });
-  });
+  const onSubmit = useCallback(
+    (extraData?: ExtraData) =>
+      form.handleSubmit((formData) => {
+        runMutation({
+          variables: formDataToVariables(formData, extraData),
+          onCompleted,
+        });
+      })(),
+    [form, formDataToVariables, onCompleted, runMutation]
+  );
 
   return { form, onSubmit, inFlight };
 }

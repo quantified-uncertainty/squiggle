@@ -20,3 +20,16 @@ export const Default: Story = {
     ),
   },
 };
+
+export const Small: Story = {
+  args: {
+    children: "Button With Dropdown",
+    size: "small",
+    onClick: () => window.alert("button clicked"),
+    renderDropdown: ({ close }) => (
+      <DropdownMenu>
+        <DropdownMenuActionItem title="Example item" onClick={() => close()} />
+      </DropdownMenu>
+    ),
+  },
+};
