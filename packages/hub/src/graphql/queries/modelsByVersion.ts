@@ -13,7 +13,6 @@ const ModelsByVersion = builder.simpleObject("ModelsByVersion", {
   }),
 });
 
-builder.queryField("modelsByVersion", (t) =>
   t.field({
     description: "Admin-only query for listing models in /admin UI",
     type: [ModelsByVersion],
@@ -38,7 +37,6 @@ builder.queryField("modelsByVersion", (t) =>
       const privateStats: Record<string, number> = {};
       const versions = new Set<string>();
 
-      for (const model of models) {
         const version = model.currentRevision?.squiggleSnippet?.version;
         if (!version) continue;
 
