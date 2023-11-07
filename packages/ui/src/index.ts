@@ -1,14 +1,15 @@
 export { Button } from "./components/Button.js";
+export { ButtonWithDropdown } from "./components/ButtonWithDropdown.js";
 export { Modal } from "./components/Modal.js";
 export { StyledTab } from "./components/StyledTab.js";
 
 export { DropdownMenu } from "./components/Dropdown/DropdownMenu.js";
 export { DropdownMenuActionItem } from "./components/Dropdown/DropdownMenuActionItem.js";
-export { DropdownMenuLinkItem } from "./components/Dropdown/DropdownMenuLinkItem.js";
-export { DropdownMenuItemLayout } from "./components/Dropdown/DropdownMenuItemLayout.js";
 export { DropdownMenuAsyncActionItem } from "./components/Dropdown/DropdownMenuAsyncActionItem.js";
-export { DropdownMenuModalActionItem } from "./components/Dropdown/DropdownMenuModalActionItem.js";
 export { DropdownMenuHeader } from "./components/Dropdown/DropdownMenuHeader.js";
+export { DropdownMenuItemLayout } from "./components/Dropdown/DropdownMenuItemLayout.js";
+export { DropdownMenuLinkItem } from "./components/Dropdown/DropdownMenuLinkItem.js";
+export { DropdownMenuModalActionItem } from "./components/Dropdown/DropdownMenuModalActionItem.js";
 export { DropdownMenuSeparator } from "./components/Dropdown/DropdownMenuSeparator.js";
 export { Dropdown } from "./components/Dropdown/index.js";
 
@@ -20,10 +21,10 @@ export { CheckboxFormField } from "./forms/fields/CheckboxFormField.js";
 export { ColorFormField } from "./forms/fields/ColorFormField.js";
 export { NumberFormField } from "./forms/fields/NumberFormField.js";
 export { RadioFormField } from "./forms/fields/RadioFormField.js";
+export { SelectFormField } from "./forms/fields/SelectFormField.js";
+export { SelectStringFormField } from "./forms/fields/SelectStringFormField.js";
 export { TextAreaFormField } from "./forms/fields/TextAreaFormField.js";
 export { TextFormField } from "./forms/fields/TextFormField.js";
-export { SelectStringFormField } from "./forms/fields/SelectStringFormField.js";
-export { SelectFormField } from "./forms/fields/SelectFormField.js";
 
 // generic react-hook-form inputs
 export { ControlledFormField } from "./forms/common/ControlledFormField.js";
@@ -67,11 +68,13 @@ export {
   FireIcon,
   GlobeIcon,
   GroupIcon,
+  HelpIcon,
   LinkIcon,
   ListBulletIcon,
   LockIcon,
   PauseIcon,
   PlayIcon,
+  PuzzleIcon,
   RectangleStackIcon,
   RightArrowIcon,
   ScaleIcon,
@@ -80,16 +83,14 @@ export {
   UserCircleIcon,
   UserIcon,
   WrenchIcon,
-  HelpIcon,
-  PuzzleIcon,
 } from "./icons/HeroIcons.js";
 export type { IconProps } from "./icons/Icon.js";
+export { PlusIcon } from "./icons/PlusIcon.js";
 export { RefreshIcon } from "./icons/RefreshIcon.js";
 export { SignOutIcon } from "./icons/SignOutIcon.js";
 export { TrashIcon } from "./icons/TrashIcon.js";
 export { TriangleIcon } from "./icons/TriangleIcon.js";
 export { XIcon } from "./icons/XIcon.js";
-export { PlusIcon } from "./icons/PlusIcon.js";
 
 export { WithToasts, useToast } from "./components/WithToasts/index.js";
 
