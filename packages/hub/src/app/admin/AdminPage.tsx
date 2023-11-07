@@ -117,7 +117,11 @@ export const AdminPage: FC<{
                       title={`Upgrade to ${defaultSquiggleVersion}`}
                     />
                   </div>
-                  <EditSquiggleSnippetModel key={model.id} modelRef={model} />
+                  <EditSquiggleSnippetModel
+                    key={model.id}
+                    modelRef={model}
+                    forceVersionPicker
+                  />
                 </div>
               ))}
             </section>
