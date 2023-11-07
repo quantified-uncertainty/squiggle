@@ -88,6 +88,7 @@ builder.mutationField("adminUpdateModelVersion", (t) =>
           },
           data: {
             currentRevisionId: revision.id,
+            updatedAt: model.updatedAt,
           },
           // TODO - optimize with queryFromInfo, https://pothos-graphql.dev/docs/plugins/prisma#optimized-queries-without-tprismafield
         });
