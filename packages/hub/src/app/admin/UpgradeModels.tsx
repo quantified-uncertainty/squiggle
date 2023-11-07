@@ -84,6 +84,7 @@ const ModelList: FC<{ modelsRef: UpgradeModels_List$key }> = ({
             },
           }}
           title={`Upgrade to ${defaultSquiggleVersion}`}
+          theme="primary"
         />
         <Button onClick={() => setPos(usedPos - 1)} disabled={usedPos <= 0}>
           &larr; Prev
