@@ -32,7 +32,7 @@ export const StatusPage: FC<{
   return (
     <div>
       <H1>Global statistics</H1>
-      <table className="table-auto mt-8">
+      <table className="table-auto mt-8 bg-white">
         <tbody>
           <StatRow name="Users" value={stats.users} />
           <StatRow name="Models" value={stats.models} />

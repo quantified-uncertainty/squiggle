@@ -1,5 +1,9 @@
+import { type User as PrismaUser } from "@prisma/client";
 import { Session } from "next-auth";
+
+import { prisma } from "@/prisma";
 import { SignedInSession, builder } from "../builder";
+import { GroupConnection, groupFromMembershipConnectionHelpers } from "./Group";
 import {
   ModelConnection,
   modelConnectionHelpers,
@@ -10,8 +14,6 @@ import {
   RelativeValuesDefinitionConnection,
   relativeValuesDefinitionConnectionHelpers,
 } from "./RelativeValuesDefinition";
-import { prisma } from "@/prisma";
-import { GroupConnection, groupFromMembershipConnectionHelpers } from "./Group";
 
 export function isSignedIn(
   session: Session | null
@@ -25,6 +27,15 @@ export async function getSelf(session: SignedInSession) {
   });
   return user;
 }
+
+export async function isRootUser(user: PrismaUser) {
+  // see also: `isRootUser` auth scope in builder.ts
+  return Boolean(
+    user.email && user.emailVerified && ROOT_EMAILS.includes(user.email)
+  );
+}
+
+const ROOT_EMAILS = (process.env.ROOT_EMAILS ?? "").split(",");
 
 export const User = builder.prismaNode("User", {
   id: { field: "id" },
@@ -116,5 +127,15 @@ export const User = builder.prismaNode("User", {
       },
       GroupConnection
     ),
+    isRoot: t.boolean({
+      authScopes: async (user, _, { session }) => {
+        return !!(
+          user.emailVerified &&
+          user.email &&
+          user.email === session?.user.email
+        );
+      },
+      resolve: async (user) => isRootUser(user),
+    }),
   }),
 });
