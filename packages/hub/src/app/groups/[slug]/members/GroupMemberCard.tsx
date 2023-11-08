@@ -1,5 +1,5 @@
-import { FC } from "react";
-import { useFragment } from "react-relay";
+import { FC, useContext } from "react";
+import { useFragment, useLazyLoadQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { DropdownMenu } from "@quri/ui";
@@ -13,6 +13,8 @@ import { userRoute } from "@/routes";
 import { useIsGroupAdmin } from "../hooks";
 import { DeleteMembershipAction } from "./DeleteMembershipAction";
 import { MembershipRoleButton } from "./MembershipRoleButton";
+import { groupQuery } from "@/graphql/queries/group";
+import { UserContext } from "@/contexts/UserContext";
 
 export const GroupMemberCard: FC<{
   membershipRef: GroupMemberCard$key;
@@ -38,6 +40,9 @@ export const GroupMemberCard: FC<{
     graphql`
       fragment GroupMemberCard_group on Group {
         id
+        members {
+          id
+        }
         ...hooks_useIsGroupAdmin
         ...DeleteMembershipAction_Group
         ...MembershipRoleButton_Group
@@ -46,6 +51,9 @@ export const GroupMemberCard: FC<{
     groupRef
   );
 
+  const { user } = useContext(UserContext);
+  const groupData = useLazyLoadQuery(groupQuery, { slug: group.id });
+  const isMember = groupData?.members?.some(member => member.id === user.id);
   const isAdmin = useIsGroupAdmin(group);
 
   return (
@@ -74,9 +82,11 @@ export const GroupMemberCard: FC<{
               </DotsDropdown>
             </div>
           ) : (
-            <div className="text-slate-500 text-sm font-medium">
-              {membership.role}
-            </div>
+            isMember && (
+              <div className="text-slate-500 text-sm font-medium">
+                {membership.role}
+              </div>
+            )
           )}
         </div>
       </div>
