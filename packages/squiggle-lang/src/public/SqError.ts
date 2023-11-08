@@ -1,5 +1,5 @@
-import { ICompileError, IRuntimeError } from "../errors/IError.js";
 import { Frame } from "../reducer/frameStack.js";
+import { ICompileError, IRuntimeError } from "../errors/IError.js";
 
 abstract class SqAbstractError<T extends string> {
   abstract tag: T;
