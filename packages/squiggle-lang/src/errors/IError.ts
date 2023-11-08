@@ -1,6 +1,6 @@
-import { LocationRange } from "peggy";
-import { Frame, FrameStack } from "../reducer/frameStack.js";
 import { ErrorMessage, REJavaScriptExn, REOther } from "./messages.js";
+import { Frame, FrameStack } from "../reducer/frameStack.js";
+import { LocationRange } from "peggy";
 
 // "I" stands for "Internal", since we also have a more public SqError proxy
 export class IRuntimeError extends Error {
