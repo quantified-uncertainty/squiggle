@@ -12,6 +12,7 @@ import { usePageQuery } from "@/relay/usePageQuery";
 import { modelRoute } from "@/routes";
 import { ModelRevisionViewQuery } from "@gen/ModelRevisionViewQuery.graphql";
 import { VersionedSquigglePlayground } from "@quri/versioned-playground";
+import { CommentIcon } from "@quri/ui";
 
 const Query = graphql`
   query ModelRevisionViewQuery($input: QueryModelInput!, $revisionId: ID!) {
@@ -30,6 +31,7 @@ const Query = graphql`
           slug
         }
         revision(id: $revisionId) {
+          comment
           createdAtTimestamp
           content {
             __typename
@@ -63,14 +65,22 @@ export const ModelRevisionView: FC<{
   return (
     <div>
       <div className="border-b border-gray-300">
-        <div className="pt-4 pb-8 px-8">
-          <div>
+        <div className="pt-4 pb-4 px-8 space-y-1">
+          <div className="text-sm">
             <span className="text-slate-500">Version from</span>{" "}
             {format(model.revision.createdAtTimestamp, commonDateFormat)}.{" "}
             <span className="text-slate-500">Squiggle</span>{" "}
             {model.revision.content.version}.
           </div>
-          <StyledLink href={modelUrl}>Go to latest version</StyledLink>
+          <div className="text-sm">
+            <StyledLink href={modelUrl}>Go to latest version</StyledLink>
+          </div>
+          {model.revision.comment ? (
+            <div className="flex gap-2 items-center">
+              <CommentIcon size={14} className="text-slate-400" />
+              <div className="text-sm">{model.revision.comment}</div>
+            </div>
+          ) : null}
         </div>
       </div>
       <VersionedSquigglePlayground

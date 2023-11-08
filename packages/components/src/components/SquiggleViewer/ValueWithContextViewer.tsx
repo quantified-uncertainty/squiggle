@@ -4,7 +4,7 @@ import ReactMarkdown from "react-markdown";
 
 import { SqValuePath } from "@quri/squiggle-lang";
 import {
-  ChatBubbleLeftIcon,
+  CommentIcon,
   CodeBracketIcon,
   TextTooltip,
   TriangleIcon,
@@ -202,7 +202,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
       <div className="ml-3">
         <TextTooltip text={comment} placement="bottom">
           <span>
-            <ChatBubbleLeftIcon
+            <CommentIcon
               size={13}
               className="text-purple-100 group-hover:text-purple-300"
             />
