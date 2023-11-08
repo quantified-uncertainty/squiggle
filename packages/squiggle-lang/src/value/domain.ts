@@ -1,5 +1,5 @@
-import { REArgumentError } from "../errors/messages.js";
 import { Value } from "./index.js";
+import { REArgumentError } from "../errors/messages.js";
 
 abstract class BaseDomain {
   abstract type: string;
