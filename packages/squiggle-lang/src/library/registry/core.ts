@@ -1,6 +1,6 @@
+import { FnDefinition } from "./fnDefinition.js";
 import { BuiltinLambda, Lambda } from "../../reducer/lambda.js";
 import { Value } from "../../value/index.js";
-import { FnDefinition } from "./fnDefinition.js";
 
 export type FRFunction = {
   name: string;
