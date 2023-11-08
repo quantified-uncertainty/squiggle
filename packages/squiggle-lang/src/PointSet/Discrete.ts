@@ -253,49 +253,11 @@ export function combinePointwise<E>(
   t2: DiscreteShape,
   fn: (v1: number, v2: number) => Result.result<number, E>
 ): Result.result<DiscreteShape, E> {
-  let i1 = 0,
-    i2 = 0;
-  const xs1 = t1.xyShape.xs,
-    xs2 = t2.xyShape.xs;
-  const ys1 = t1.xyShape.ys,
-    ys2 = t2.xyShape.ys;
-  const len1 = xs1.length,
-    len2 = xs2.length;
-
-  const xs: number[] = [];
-  const ys: number[] = [];
-  while (i1 < len1 || i2 < len2) {
-    let x: number, y1: number, y2: number;
-    if (i2 == len2 || (i1 < len1 && xs1[i1] < xs2[i2])) {
-      // take from xs1
-      x = xs1[i1];
-      y1 = ys1[i1];
-      y2 = 0;
-      i1++;
-    } else if (i1 < len1 && xs1[i1] == xs2[i2]) {
-      // combine
-      x = xs1[i1];
-      y1 = ys1[i1];
-      y2 = ys2[i2];
-      i1++;
-      i2++;
-    } else {
-      // take from xs2
-      x = xs2[i2];
-      y1 = 0;
-      y2 = ys2[i2];
-      i2++;
-    }
-    const result = fn(y1, y2);
-    if (!result.ok) {
-      return result; // combiner function has failed
-    }
-    xs.push(x);
-    ys.push(result.value);
-  }
   // TODO: should we also combine the integrals here?
-
-  return Result.Ok(new DiscreteShape({ xyShape: { xs, ys } }));
+  return Result.fmap(
+    XYShape.PointwiseCombination.combineDiscrete(fn, t1.xyShape, t2.xyShape),
+    (xyShape) => new DiscreteShape({ xyShape })
+  );
 }
 
 /* This multiples all of the data points together and creates a new discrete distribution from the results.
