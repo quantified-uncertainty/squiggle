@@ -1,9 +1,9 @@
-import { result } from "../utility/result.js";
-import * as Result from "../utility/result.js";
 import { DistError, notYetImplemented } from "./DistError.js";
-import { PointSetDist } from "./PointSetDist.js";
-import * as magicNumbers from "../magicNumbers.js";
 import { Env } from "./env.js";
+import * as magicNumbers from "../magicNumbers.js";
+import { PointSetDist } from "./PointSetDist.js";
+import * as Result from "../utility/result.js";
+import { result } from "../utility/result.js";
 
 export abstract class BaseDist {
   abstract min(): number;
