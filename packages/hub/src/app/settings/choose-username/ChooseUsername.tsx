@@ -56,7 +56,7 @@ export const ChooseUsername: FC = () => {
   const disabled = inFlight || !form.formState.isValid;
 
   return (
-    <form onSubmit={onSubmit}>
+    <form onSubmit={() => onSubmit()}>
       <FormProvider {...form}>
         <div className="flex flex-col items-center mt-20">
           <div className="space-y-2">

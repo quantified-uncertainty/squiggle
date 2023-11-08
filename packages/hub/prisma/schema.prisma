@@ -204,6 +204,8 @@ model ModelRevision {
   author   User?   @relation(fields: [authorId], references: [id])
   authorId String?
 
+  comment String @default("")
+
   contentType ModelType
 
   squiggleSnippet SquiggleSnippet? @relation(fields: [contentId], references: [id], map: "squiggleSnippet_contentId")

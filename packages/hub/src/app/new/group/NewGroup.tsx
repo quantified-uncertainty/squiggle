@@ -60,7 +60,7 @@ export const NewGroup: FC = () => {
   });
 
   return (
-    <form onSubmit={onSubmit}>
+    <form onSubmit={() => onSubmit()}>
       <FormProvider {...form}>
         <H1>New Group</H1>
         <div className="mb-4">
