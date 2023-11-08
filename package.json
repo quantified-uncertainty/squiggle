@@ -6,7 +6,8 @@
     "preinstall": "npx only-allow pnpm",
     "changeset-version": "cd packages/ops && turbo build && pnpm run changeset-version",
     "publish-all": "cd packages/ops && turbo build && pnpm run publish-all",
-    "post-publish": "cd packages/ops && turbo build && pnpm run post-publish"
+    "post-publish": "cd packages/ops && turbo build && pnpm run post-publish",
+    "gen:prisma": "PRISMA_HIDE_UPDATE_MESSAGE=1 prisma generate"
   },
   "devDependencies": {
     "@changesets/cli": "^2.26.2",
