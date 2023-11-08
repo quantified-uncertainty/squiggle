@@ -104,10 +104,10 @@ export const NewModel: FC = () => {
       },
     }),
     onCompleted: (result) => {
-      if (result.model.owner.slug === currentUser.username) {
+      if (result.deleteModel.owner.slug === currentUser.username) {
         router.push(userProfileRoute({ username: currentUser.username }));
       } else {
-        router.push(organizationRoute({ organizationName: result.model.owner.slug }));
+        router.push(organizationRoute({ organizationName: result.deleteModel.owner.slug }));
       }
     },
   });
