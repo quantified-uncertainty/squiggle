@@ -1,8 +1,10 @@
-import { GroupModelList$key } from "@/__generated__/GroupModelList.graphql";
-import { ModelList } from "@/models/components/ModelList";
 import { FC } from "react";
 import { usePaginationFragment } from "react-relay";
 import { graphql } from "relay-runtime";
+
+import { GroupModelList$key } from "@/__generated__/GroupModelList.graphql";
+import { ModelList } from "@/models/components/ModelList";
+import { useIsGroupMember } from "./hooks";
 
 const Fragment = graphql`
   fragment GroupModelList on Group
@@ -11,6 +13,7 @@ const Fragment = graphql`
     count: { type: "Int", defaultValue: 20 }
   )
   @refetchable(queryName: "GroupModelListPaginationQuery") {
+    ...hooks_useIsGroupMember
     models(first: $count, after: $cursor)
       @connection(key: "GroupModelList_models") {
       edges {
@@ -26,10 +29,10 @@ type Props = {
 };
 
 export const GroupModelList: FC<Props> = ({ groupRef }) => {
-  const {
-    data: { models },
-    loadNext,
-  } = usePaginationFragment(Fragment, groupRef);
+  const { data: group, loadNext } = usePaginationFragment(Fragment, groupRef);
+
+  const { models } = group;
+  const isMember = useIsGroupMember(group);
 
   return (
     <div>
@@ -41,7 +44,9 @@ export const GroupModelList: FC<Props> = ({ groupRef }) => {
         />
       ) : (
         <div className="text-slate-500">
-          {"This group doesn't have any models yet."}
+          {isMember
+            ? "This group doesn't have any models."
+            : "This group does not have any public models."}
         </div>
       )}
     </div>
