@@ -363,8 +363,7 @@ export const combinePointwise = <E>(
   const reducedDiscrete = Discrete.combinePointwise(
     t1.toDiscrete(),
     t2.toDiscrete(),
-    fn,
-    integralSumCachesFn
+    fn
   );
 
   const reducedContinuous = Continuous.combinePointwise(
