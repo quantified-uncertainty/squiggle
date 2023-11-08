@@ -1,14 +1,13 @@
-import { List as ImmutableList } from "immutable";
-
 import { ASTNode } from "../ast/parse.js";
-import { infixFunctions, unaryFunctions } from "../ast/peggyHelpers.js";
-import { ICompileError } from "../errors/IError.js";
 import { Bindings } from "../reducer/stack.js";
+import { ICompileError } from "../errors/IError.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
+import { INDEX_LOOKUP_FUNCTION } from "./constants.js";
+import { infixFunctions, unaryFunctions } from "../ast/peggyHelpers.js";
+import { List as ImmutableList } from "immutable";
+import * as expression from "./index.js";
 import * as Result from "../utility/result.js";
 import { vBool, vNumber, vString } from "../value/index.js";
-import { INDEX_LOOKUP_FUNCTION } from "./constants.js";
-import * as expression from "./index.js";
 
 type CompileContext = Readonly<{
   // Externals will include:
