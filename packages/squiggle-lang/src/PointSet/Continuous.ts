@@ -4,7 +4,11 @@ import * as Discrete from "./Discrete.js";
 import * as MixedPoint from "./MixedPoint.js";
 import * as Result from "../utility/result.js";
 import * as XYShape from "../XYShape.js";
-import { ConvolutionOperation, DistributionType, PointSet } from "./PointSet.js";
+import {
+  ConvolutionOperation,
+  DistributionType,
+  PointSet,
+} from "./PointSet.js";
 import { DiscreteShape } from "./Discrete.js";
 import { epsilon_float } from "../magicNumbers.js";
 import { MixedShape } from "./Mixed.js";
