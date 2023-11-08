@@ -1,12 +1,12 @@
+import { AnyPointSet } from "./PointSet.js";
 import {
   ComplexNumberError,
   OperationError,
   PdfInvalidError,
 } from "../operationError.js";
-import * as Result from "../utility/result.js";
 import * as Mixed from "./Mixed.js";
 import { MixedPoint } from "./MixedPoint.js";
-import { AnyPointSet } from "./PointSet.js";
+import * as Result from "../utility/result.js";
 
 const logFn = Math.log; // base e
 function minusScaledLogOfQuotient({
