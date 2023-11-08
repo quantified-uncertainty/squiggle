@@ -1,15 +1,14 @@
+import { ICompileError } from "../errors/IError.js";
 import { LocationRange } from "peggy";
 import * as Result from "../utility/result.js";
 import { result } from "../utility/result.js";
-import { type ASTCommentNode, type ASTNode } from "./peggyHelpers.js";
-
-export { type ASTNode } from "./peggyHelpers.js";
-
-import { ICompileError } from "../errors/IError.js";
 import {
   SyntaxError as PeggySyntaxError,
   parse as peggyParse,
 } from "./peggyParser.js";
+import { type ASTCommentNode, type ASTNode } from "./peggyHelpers.js";
+
+export { type ASTNode } from "./peggyHelpers.js";
 
 export type ParseError = {
   type: "SyntaxError";
