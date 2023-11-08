@@ -20,6 +20,7 @@ export function useMutationForm<
   TTypename extends string = never,
   // In some cases, you might want to pass extra data to the mutation, which isn't available in `formDataToVariables`.
   // See `SaveButton` implementation in `EditSquiggleSnippetModel` for an example where it's needed.
+  // Longer comment: https://github.com/quantified-uncertainty/squiggle/pull/2498#discussion_r1385665972
   ExtraData extends Record<string, any> = Record<string, never>,
 >({
   // useForm params

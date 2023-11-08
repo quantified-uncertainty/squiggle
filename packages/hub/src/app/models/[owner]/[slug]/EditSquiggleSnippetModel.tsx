@@ -4,6 +4,7 @@ import { graphql, useFragment } from "react-relay";
 
 import {
   ButtonWithDropdown,
+  CommentIcon,
   DropdownMenu,
   DropdownMenuActionItem,
   DropdownMenuHeader,
@@ -26,6 +27,7 @@ import {
   RelativeValuesExportInput,
 } from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
 import { EditModelExports } from "@/components/exports/EditModelExports";
+import { FormModal } from "@/components/ui/FormModal";
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
 import { useMutationForm } from "@/hooks/useMutationForm";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
@@ -39,7 +41,6 @@ import {
   draftUtils,
   useDraftLocator,
 } from "./SquiggleSnippetDraftDialog";
-import { FormModal } from "@/components/ui/FormModal";
 
 export type SquiggleSnippetFormShape = {
   code: string;
@@ -55,7 +56,7 @@ const SaveDialog: FC<{ onSubmit: OnSubmit; close: () => void }> = ({
   type SaveFormShape = {
     comment: string;
   };
-  const form = useForm<SaveFormShape>(); // TODO
+  const form = useForm<SaveFormShape>();
 
   const handleSubmit = form.handleSubmit(async ({ comment }) => {
     await onSubmit({ comment });
@@ -88,8 +89,9 @@ const SaveButton: FC<{ onSubmit: OnSubmit; disabled: boolean }> = ({
       renderDropdown={({ close }) => (
         <DropdownMenu>
           <DropdownMenuModalActionItem
-            render={() => <SaveDialog onSubmit={onSubmit} close={close} />}
             title="Save with comment..."
+            icon={CommentIcon}
+            render={() => <SaveDialog onSubmit={onSubmit} close={close} />}
           />
         </DropdownMenu>
       )}

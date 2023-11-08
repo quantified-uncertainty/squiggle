@@ -47,6 +47,8 @@ export const Button: FC<ButtonProps> = ({
         wide && "w-full",
         size === "medium" && "h-8 rounded-md",
         size === "small" && "h-6 rounded-sm",
+        // This could probably be simplified, but I'm not sure how.
+        // Tailwind group-* styles don't allow styling based on parent, only on parent state.
         "[.button-group_&:not(:first-child)]:rounded-l-none",
         "[.button-group_&:not(:first-child)]:border-l-0",
         "[.button-group_&:not(:last-child)]:rounded-r-none"
