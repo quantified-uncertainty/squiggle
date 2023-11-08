@@ -1,3 +1,4 @@
+import { FnFactory } from "../library/registry/helpers.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
@@ -6,8 +7,7 @@ import {
   frNumber,
   frString,
 } from "../library/registry/frTypes.js";
-import { FnFactory } from "../library/registry/helpers.js";
-import { vArray, vBool, vString, isEqual } from "../value/index.js";
+import { isEqual, vArray, vBool, vString } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "", // no namespaced versions
