@@ -3,18 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "db:generate": "PRISMA_HIDE_UPDATE_MESSAGE=1 prisma generate",
     "db:migrate": "PRISMA_HIDE_UPDATE_MESSAGE=1 prisma migrate deploy",
     "dev": "next dev -p 3001",
     "start": "__NEXT_PRIVATE_PREBUNDLED_REACT=next next start",
-    "generate": "pnpm db:generate && pnpm print-schema && pnpm relay",
-    "build:ts": "pnpm generate && tsc",
-    "build": "pnpm generate && __NEXT_PRIVATE_PREBUNDLED_REACT=next next build",
+    "gen:prisma": "PRISMA_HIDE_UPDATE_MESSAGE=1 prisma generate",
+    "gen:relay": "relay-compiler",
+    "gen:schema": "tsx ./src/graphql/print-schema.ts",
+    "gen": "pnpm gen:prisma && pnpm gen:schema && pnpm gen:relay",
+    "build:ts": "pnpm gen && tsc",
+    "build": "pnpm gen && __NEXT_PRIVATE_PREBUNDLED_REACT=next next build",
     "lint": "prettier --check . && next lint",
     "format": "prettier --write .",
-    "relay": "relay-compiler",
-    "test:manual": "dotenv -e .env.test -- jest -i",
-    "print-schema": "tsx ./src/graphql/print-schema.ts"
+    "test:manual": "dotenv -e .env.test -- jest -i"
   },
   "dependencies": {
     "@next-auth/prisma-adapter": "^1.0.7",
