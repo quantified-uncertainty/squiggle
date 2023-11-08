@@ -13,7 +13,7 @@ import { SelectGroup, SelectGroupOption } from "@/components/SelectGroup";
 import { H1 } from "@/components/ui/Headers";
 import { SlugFormField } from "@/components/ui/SlugFormField";
 import { useMutationForm } from "@/hooks/useMutationForm";
-import { modelRoute, newModelRoute } from "@/routes";
+import { modelRoute, newModelRoute, userProfileRoute, organizationRoute } from "@/routes";
 import { useLazyLoadQuery } from "react-relay";
 import { NewModelPageQuery } from "@/__generated__/NewModelPageQuery.graphql";
 
@@ -104,12 +104,11 @@ export const NewModel: FC = () => {
       },
     }),
     onCompleted: (result) => {
-      router.push(
-        modelRoute({
-          owner: result.model.owner.slug,
-          slug: result.model.slug,
-        })
-      );
+      if (result.model.owner.slug === currentUser.username) {
+        router.push(userProfileRoute({ username: currentUser.username }));
+      } else {
+        router.push(organizationRoute({ organizationName: result.model.owner.slug }));
+      }
     },
   });
 
