@@ -8,6 +8,7 @@ import { ModelRevisionsList$key } from "@/__generated__/ModelRevisionsList.graph
 import { ModelRevisionsList_model$key } from "@/__generated__/ModelRevisionsList_model.graphql";
 import { ModelRevisionsList_revision$key } from "@/__generated__/ModelRevisionsList_revision.graphql";
 import { LoadMore } from "@/components/LoadMore";
+import { UsernameLink } from "@/components/UsernameLink";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { commonDateFormat } from "@/lib/common";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
@@ -15,7 +16,6 @@ import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 import { modelRevisionRoute } from "@/routes";
 import { ModelRevisionsListQuery } from "@gen/ModelRevisionsListQuery.graphql";
-import { UsernameLink } from "@/components/UsernameLink";
 
 const ModelRevisionItem: FC<{
   modelRef: ModelRevisionsList_model$key;
@@ -29,6 +29,7 @@ const ModelRevisionItem: FC<{
         author {
           username
         }
+        comment
       }
     `,
     revisionRef
@@ -49,20 +50,25 @@ const ModelRevisionItem: FC<{
 
   return (
     <div key={revision.id}>
-      <StyledLink
-        href={modelRevisionRoute({
-          owner: model.owner.slug,
-          slug: model.slug,
-          revisionId: revision.id,
-        })}
-      >
-        {format(new Date(revision.createdAtTimestamp), commonDateFormat)}
-      </StyledLink>
-      {revision.author ? (
-        <>
-          {" "}
-          by <UsernameLink username={revision.author.username} />
-        </>
+      <div>
+        <StyledLink
+          href={modelRevisionRoute({
+            owner: model.owner.slug,
+            slug: model.slug,
+            revisionId: revision.id,
+          })}
+        >
+          {format(new Date(revision.createdAtTimestamp), commonDateFormat)}
+        </StyledLink>
+        {revision.author ? (
+          <>
+            {" "}
+            by <UsernameLink username={revision.author.username} />
+          </>
+        ) : null}
+      </div>
+      {revision.comment ? (
+        <div className="text-xs text-slate-700">{revision.comment}</div>
       ) : null}
     </div>
   );

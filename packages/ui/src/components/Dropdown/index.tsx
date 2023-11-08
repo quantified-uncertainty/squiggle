@@ -4,6 +4,7 @@ import {
   flip,
   FloatingPortal,
   offset,
+  Placement,
   Side,
   useClick,
   useDismiss,
@@ -27,9 +28,15 @@ type Props = PropsWithChildren<{
   // in some cases, you want the dropdown to fill its container;
   // since dropdowns put its children in an extra div, this option might be necessary
   fullHeight?: boolean;
+  placement?: Placement;
 }>;
 
-export const Dropdown: FC<Props> = ({ render, fullHeight, children }) => {
+export const Dropdown: FC<Props> = ({
+  render,
+  fullHeight,
+  placement: suggestedPlacement = "bottom-start",
+  children,
+}) => {
   const { selector: tailwindSelector } = useContext(TailwindContext);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -40,7 +47,7 @@ export const Dropdown: FC<Props> = ({ render, fullHeight, children }) => {
     useFloating({
       open: isOpen,
       onOpenChange: setIsOpen,
-      placement: "bottom-start",
+      placement: suggestedPlacement,
       middleware: [offset(4), flip(), arrow({ element: arrowRef })],
     });
 
