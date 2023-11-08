@@ -1,5 +1,5 @@
-import { Ok, result } from "./result.js";
 import * as Result from "./result.js";
+import { Ok, result } from "./result.js";
 
 // Stores in Unix milliseconds
 export type Duration = number;
