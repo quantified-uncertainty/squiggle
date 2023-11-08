@@ -1,4 +1,5 @@
 import isInteger from "lodash/isInteger.js";
+import lodashIsEqual from "lodash/isEqual.js";
 import { BaseDist } from "../dist/BaseDist.js";
 import {
   REArrayIndexNotFound,
@@ -8,9 +9,8 @@ import {
 import { Lambda } from "../reducer/lambda.js";
 import * as DateTime from "../utility/DateTime.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
-import { Domain } from "./domain.js";
 import { shuffle } from "../utility/E_A.js";
-import lodashIsEqual from "lodash/isEqual.js";
+import { Domain } from "./domain.js";
 
 export type ValueMap = ImmutableMap<string, Value>;
 
