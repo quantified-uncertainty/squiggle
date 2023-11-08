@@ -34,7 +34,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Turbo run
-        run: npx turbo run build test lint bundle
+        run: npx turbo run build test lint
 
   coverage:
     name: Coverage
