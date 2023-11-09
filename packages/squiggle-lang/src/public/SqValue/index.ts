@@ -1,5 +1,11 @@
 import { result } from "../../utility/result.js";
-import { Value, vLambda, vNumber, vString } from "../../value/index.js";
+import {
+  Value,
+  vLambda,
+  vNumber,
+  vString,
+  getTitle,
+} from "../../value/index.js";
 import { SqError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqArray } from "./SqArray.js";
@@ -66,6 +72,10 @@ export abstract class SqAbstractValue<Type extends string, JSType> {
 
   publicName() {
     return this._value.publicName;
+  }
+
+  title(): string | undefined {
+    return undefined;
   }
 
   abstract asJS(): JSType;
@@ -204,6 +214,10 @@ export class SqPlotValue extends SqAbstractValue<"Plot", SqPlot> {
     return wrapPlot(this._value.value, this.context);
   }
 
+  override title() {
+    return this.value.title;
+  }
+
   asJS() {
     return this.value;
   }
@@ -216,6 +230,10 @@ export class SqTableChartValue extends SqAbstractValue<
 
   get value() {
     return new SqTableChart(this._value.value, this.context);
+  }
+
+  override title() {
+    return this.value.title;
   }
 
   asJS() {
@@ -234,6 +252,10 @@ export class SqCalculatorValue extends SqAbstractValue<
 
   asJS() {
     return this.value;
+  }
+
+  override title() {
+    return this.value.title;
   }
 }
 

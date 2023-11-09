@@ -114,13 +114,11 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
 
   useEffect(() => {
     const _output = output.output?.output;
-    console.log("Output changed");
     if (_output && _output.ok) {
       const exports = _output.value.exports;
-      const _exports: ModelExport[] = exports
-        .entries()
-        .map((e) => ({ variableName: e[0] }));
-      console.log("Calling onExportsChange", onExportsChange, _exports);
+      const _exports: ModelExport[] = exports.entries().map((e) => {
+        return { variableName: e[0], title: e[1].title() };
+      });
       onExportsChange && onExportsChange(_exports);
     } else {
       onExportsChange && onExportsChange([]);

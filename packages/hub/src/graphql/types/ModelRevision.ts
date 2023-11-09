@@ -1,7 +1,6 @@
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 import { RelativeValuesExport } from "./RelativeValuesExport";
-// import { ModelExport } from "./ModelExport";
 
 export const SquiggleSnippet = builder.prismaNode("SquiggleSnippet", {
   id: { field: "id" },

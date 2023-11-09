@@ -85,7 +85,6 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
         variableName: string;
         title: string | null;
       }[] = [];
-      console.log("-----------------");
 
       for (const modelExport of modelExports) {
         modelExportsToInsert.push({
@@ -93,8 +92,6 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
           title: modelExport.title ?? null,
         });
       }
-
-      console.log("MODEL EXPORTS", modelExportsToInsert);
 
       const relativeValuesExportsToInsert: {
         definitionId: string;
@@ -184,7 +181,6 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
             },
           },
         });
-        console.log("REVISION", revision);
 
         const model = await tx.model.update({
           where: {
