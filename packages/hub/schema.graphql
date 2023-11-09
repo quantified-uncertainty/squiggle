@@ -153,6 +153,13 @@ type ModelEdge {
   node: Model!
 }
 
+type ModelExport implements Node {
+  id: ID!
+  modelRevision: ModelRevision!
+  title: String
+  variableName: String!
+}
+
 type ModelRevision implements Node {
   author: User
   comment: String!
@@ -161,6 +168,7 @@ type ModelRevision implements Node {
   forRelativeValues(input: ModelRevisionForRelativeValuesInput): RelativeValuesExport
   id: ID!
   model: Model!
+  modelExports: [ModelExport!]!
   relativeValuesExports: [RelativeValuesExport!]!
 }
 

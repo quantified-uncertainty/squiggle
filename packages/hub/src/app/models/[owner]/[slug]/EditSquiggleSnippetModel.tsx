@@ -46,7 +46,7 @@ import {
 export type SquiggleSnippetFormShape = {
   code: string;
   relativeValuesExports: RelativeValuesExportInput[];
-  modelExports: SquiggleModelExportInput[];
+  exports: SquiggleModelExportInput[];
 };
 
 type OnSubmit = (extraData?: { comment: string }) => Promise<void>;
@@ -168,7 +168,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
           slug: item.definition.slug,
         },
       })),
-      modelExports: [],
+      exports: [],
     };
   }, [content, revision.relativeValuesExports]);
 
