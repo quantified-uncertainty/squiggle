@@ -304,3 +304,6 @@ export const sampleN = (t: DiscreteShape, n: number): number[] => {
   const normalized = t.normalize().xyShape;
   return random_sample(normalized.xs, { probs: normalized.ys, size: n });
 };
+export const getShape = () => {
+  // Implementation of getShape function
+};
