@@ -1,11 +1,5 @@
 import { result } from "../../utility/result.js";
-import {
-  Value,
-  vLambda,
-  vNumber,
-  vString,
-  getTitle,
-} from "../../value/index.js";
+import { Value, vLambda, vNumber, vString } from "../../value/index.js";
 import { SqError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqArray } from "./SqArray.js";
