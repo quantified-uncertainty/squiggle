@@ -160,6 +160,9 @@ export const ForcePlot: FC<{
     simulation.force("weak", d3.forceManyBody().strength(1));
 
     const links: { source: Node; target: Node }[] = [];
+  }, [model, nodes]);
+=======
+  }, [model, nodes, forceFn]);
     for (let i = 0; i < nodes.length; i++) {
       for (let j = i + 1; j < nodes.length; j++) {
         links.push({
