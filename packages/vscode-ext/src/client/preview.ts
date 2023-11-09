@@ -23,7 +23,7 @@ export const registerPreviewCommand = (context: vscode.ExtensionContext) => {
         context,
         webview: panel.webview,
         title,
-        script: "media/previewWebview.js",
+        script: "dist/webview/index.js",
       });
 
       const updateWebview = () => {

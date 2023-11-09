@@ -10,7 +10,7 @@
     "type": "git",
     "url": "https://github.com/quantified-uncertainty/squiggle.git"
   },
-  "icon": "media/vendor/icon.png",
+  "icon": "dist/media/icon.png",
   "engines": {
     "vscode": "^1.83.0"
   },
@@ -124,9 +124,10 @@
   "scripts": {
     "vscode:prepublish": "pnpm run lint && pnpm run build",
     "build:grammar": "rm -rf syntaxes && mkdir -p syntaxes && cp ../textmate-grammar/dist/*.json ./syntaxes/",
-    "build:vendor": "mkdir -p media/vendor && cp ../components/dist/bundle.js media/vendor/components.js && cp ../components/dist/full.css media/vendor/components.css && cp ./node_modules/react/umd/react.production.min.js media/vendor/react.js && cp ./node_modules/react-dom/umd/react-dom.production.min.js media/vendor/react-dom.js && cp ../website/public/img/squiggle-logo.png media/vendor/icon.png",
-    "build:bundle": "esbuild ./src/client/extension.ts ./src/server/server.ts --format=cjs --platform=node --sourcemap --minify --bundle --external:vscode --outdir=./dist",
-    "build": "pnpm run build:vendor && pnpm run build:grammar && pnpm run build:bundle",
+    "build:media": "mkdir -p dist/media && cp ../website/public/img/squiggle-logo.png dist/media/icon.png && cp ../components/dist/full.css dist/media/components.css",
+    "build:bundle": "esbuild ./src/client/extension.ts ./src/server/server.ts --format=cjs --platform=node --sourcemap --minify --bundle --external:vscode '--define:process.env.NODE_ENV=\"production\"' --outdir=./dist",
+    "build:webview": "esbuild ./src/webview/index.tsx --format=esm --platform=browser --sourcemap --minify --bundle '--define:process.env.NODE_ENV=\"production\"' --outdir=./dist/webview",
+    "build": "pnpm run build:media && pnpm run build:grammar && pnpm run build:bundle && pnpm run build:webview",
     "watch": "pnpm run compile:bundle --watch",
     "pretest": "pnpm run build && pnpm run lint",
     "lint": "tsc -b && prettier --check .",
@@ -138,7 +139,10 @@
     "@quri/squiggle-lang": "workspace:*",
     "@quri/squiggle-textmate-grammar": "workspace:*",
     "@types/node": "^20.8.10",
+    "@types/react": "^18.2.34",
+    "@types/react-dom": "^18.2.14",
     "@types/vscode": "^1.83.2",
+    "@types/vscode-webview": "^1.57.4",
     "esbuild": "^0.19.5",
     "eslint": "^8.52.0",
     "js-yaml": "^4.1.0",
