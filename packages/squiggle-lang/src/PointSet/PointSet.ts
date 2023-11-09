@@ -96,3 +96,4 @@ export const isContinuous = (d: AnyPointSet): d is ContinuousShape =>
   d instanceof ContinuousShape;
 export const isDiscrete = (d: AnyPointSet): d is DiscreteShape =>
   d instanceof DiscreteShape;
+export { combinePointwise };
