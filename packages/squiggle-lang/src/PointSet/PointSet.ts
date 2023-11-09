@@ -80,7 +80,7 @@ export const combinePointwise = <E>(
       integralSumCachesFn
     );
   } else if (t1 instanceof DiscreteShape && t2 instanceof DiscreteShape) {
-    return Discrete.combinePointwise(t1, t2, fn, integralSumCachesFn);
+    return Discrete.combinePointwise(t1, t2, fn);
   } else {
     return Mixed.combinePointwise(
       t1.toMixed(),
