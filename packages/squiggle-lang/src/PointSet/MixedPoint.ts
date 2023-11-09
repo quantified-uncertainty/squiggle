@@ -24,3 +24,5 @@ export function add(p1: MixedPoint, p2: MixedPoint): MixedPoint {
     discrete: p1.discrete + p2.discrete,
   };
 }
+
+export { makeContinuous, makeDiscrete, add };
