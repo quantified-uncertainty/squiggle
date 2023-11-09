@@ -1,6 +1,7 @@
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 import { RelativeValuesExport } from "./RelativeValuesExport";
+import { ModelExport } from "./ModelExport";
 
 export const SquiggleSnippet = builder.prismaNode("SquiggleSnippet", {
   id: { field: "id" },
@@ -25,6 +26,7 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
     // `relatedConnection` would be more principled, and in theory the number of variables with definitions could be high.
     // But connection is harder to deal with on the UI side, and since we send all variables back on updates, so it doesn't make much sense there.
     relativeValuesExports: t.relation("relativeValuesExports"),
+    modelExports: t.relation("modelExports"),
     model: t.relation("model"),
     author: t.relation("author", { nullable: true }),
     comment: t.exposeString("comment"),

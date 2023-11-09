@@ -25,6 +25,7 @@ import { EditSquiggleSnippetModel$key } from "@/__generated__/EditSquiggleSnippe
 import {
   EditSquiggleSnippetModelMutation,
   RelativeValuesExportInput,
+  SquiggleModelExportInput,
 } from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
 import { EditModelExports } from "@/components/exports/EditModelExports";
 import { FormModal } from "@/components/ui/FormModal";
@@ -45,6 +46,7 @@ import {
 export type SquiggleSnippetFormShape = {
   code: string;
   relativeValuesExports: RelativeValuesExportInput[];
+  modelExports: SquiggleModelExportInput[];
 };
 
 type OnSubmit = (extraData?: { comment: string }) => Promise<void>;
@@ -149,6 +151,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
     modelRef
   );
   const revision = model.currentRevision;
+  console.log("REVISION", revision);
 
   const content = extractFromGraphqlErrorUnion(
     revision.content,
@@ -165,6 +168,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
           slug: item.definition.slug,
         },
       })),
+      modelExports: [],
     };
   }, [content, revision.relativeValuesExports]);
 
@@ -200,6 +204,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
           version,
         },
         relativeValuesExports: formData.relativeValuesExports,
+        modelExports: [{ title: "My export", variableName: "myGreatExport" }],
         comment: extraData?.comment,
         slug: model.slug,
         owner: model.owner.slug,

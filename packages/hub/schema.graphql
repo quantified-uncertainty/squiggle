@@ -371,6 +371,7 @@ union MutationUpdateRelativeValuesDefinitionResult = BaseError | UpdateRelativeV
 input MutationUpdateSquiggleSnippetModelInput {
   comment: String
   content: SquiggleSnippetContentInput!
+  modelExports: [SquiggleModelExportInput!]
   owner: String!
   relativeValuesExports: [RelativeValuesExportInput!]
   slug: String!
@@ -534,6 +535,11 @@ type RelativeValuesPairCache implements Node {
 type SquiggleErrorOutput implements SquiggleOutput {
   errorString: String!
   isCached: Boolean!
+}
+
+input SquiggleModelExportInput {
+  title: String
+  variableName: String!
 }
 
 type SquiggleOkOutput implements SquiggleOutput {

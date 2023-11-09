@@ -212,6 +212,7 @@ model ModelRevision {
   contentId       String?          @unique
 
   relativeValuesExports RelativeValuesExport[]
+  modelExports          ModelExport[]
 
   // required by Prisma, but unused since `model` field should point at the same entity
   currentRevisionModel Model? @relation("CurrentRevision")
@@ -226,6 +227,16 @@ model SquiggleSnippet {
   version String
 
   revision ModelRevision?
+}
+
+model ModelExport {
+  id              String        @id @default(cuid())
+  modelRevision   ModelRevision @relation(fields: [modelRevisionId], references: [id], onDelete: Cascade)
+  modelRevisionId String
+  variableName    String
+  title           String?
+
+  @@unique([modelRevisionId, variableName], name: "uniqueKey")
 }
 
 // Definitions are polymorphic, but organized differently from Models, without content types.

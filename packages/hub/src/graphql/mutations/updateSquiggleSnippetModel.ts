@@ -37,6 +37,13 @@ const SquiggleSnippetContentInput = builder.inputType(
   }
 );
 
+const SquiggleModelExportInput = builder.inputType("SquiggleModelExportInput", {
+  fields: (t) => ({
+    variableName: t.string({ required: true }),
+    title: t.string({ required: false }),
+  }),
+});
+
 builder.mutationField("updateSquiggleSnippetModel", (t) =>
   t.withAuth({ signedIn: true }).fieldWithInput({
     type: builder.simpleObject("UpdateSquiggleSnippetResult", {
@@ -50,6 +57,9 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
       slug: t.input.string({ required: true }),
       relativeValuesExports: t.input.field({
         type: [RelativeValuesExportInput],
+      }),
+      modelExports: t.input.field({
+        type: [SquiggleModelExportInput],
       }),
       content: t.input.field({
         type: SquiggleSnippetContentInput,
@@ -70,6 +80,22 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
       }
 
       const relativeValuesExports = input.relativeValuesExports ?? [];
+      const modelExports = input.modelExports ?? [];
+      const modelExportsToInsert: {
+        variableName: string;
+        title: string | null;
+      }[] = [];
+      console.log("-----------------");
+
+      for (const modelExport of modelExports) {
+        modelExportsToInsert.push({
+          variableName: modelExport.variableName,
+          title: modelExport.title ?? null,
+        });
+      }
+
+      console.log("MODEL EXPORTS", modelExportsToInsert);
+
       const relativeValuesExportsToInsert: {
         definitionId: string;
         variableName: string;
@@ -144,6 +170,11 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
                 data: relativeValuesExportsToInsert,
               },
             },
+            modelExports: {
+              createMany: {
+                data: modelExportsToInsert,
+              },
+            },
           },
           include: {
             model: {
@@ -153,6 +184,7 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
             },
           },
         });
+        console.log("REVISION", revision);
 
         const model = await tx.model.update({
           where: {
