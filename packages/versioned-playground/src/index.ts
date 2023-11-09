@@ -1,4 +1,7 @@
-export { VersionedSquigglePlayground } from "./VersionedSquigglePlayground.js";
+export {
+  VersionedSquigglePlayground,
+  type ModelExport,
+} from "./VersionedSquigglePlayground.js";
 export { SquigglePlaygroundVersionPicker } from "./SquigglePlaygroundVersionPicker.js";
 export { SquiggleVersionShower } from "./SquiggleVersionShower.js";
 

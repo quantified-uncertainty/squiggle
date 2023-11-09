@@ -43,6 +43,7 @@ type Props = {
   defaultCode?: string;
   sourceId?: string;
   onCodeChange?(code: string): void;
+  onExportsChange?(exports: string[]): void;
   settings: PlaygroundSettings;
   onSettingsChange(settings: PlaygroundSettings): void;
   onOutputChange(output: {

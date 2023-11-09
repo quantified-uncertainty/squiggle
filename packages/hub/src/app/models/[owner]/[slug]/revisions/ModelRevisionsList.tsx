@@ -30,6 +30,11 @@ const ModelRevisionItem: FC<{
           username
         }
         comment
+        modelExports {
+          id
+          variableName
+          title
+        }
       }
     `,
     revisionRef
@@ -69,6 +74,13 @@ const ModelRevisionItem: FC<{
       </div>
       {revision.comment ? (
         <div className="text-xs text-slate-700">{revision.comment}</div>
+      ) : null}
+      {revision.modelExports.length > 0 ? (
+        <div className="text-xs text-slate-700">
+          {revision.modelExports
+            .map((export_) => export_.variableName)
+            .join(", ")}
+        </div>
       ) : null}
     </div>
   );
@@ -113,6 +125,11 @@ export const ModelRevisionsList: FC<{
               ...ModelRevisionsList_revision
               id
               createdAtTimestamp
+              modelExports {
+                id
+                title
+                variableName
+              }
             }
           }
           pageInfo {
@@ -123,6 +140,7 @@ export const ModelRevisionsList: FC<{
     `,
     modelRef
   );
+  console.log("REVISIONS", revisions);
 
   return (
     <div>

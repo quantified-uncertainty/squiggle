@@ -9,6 +9,11 @@ import {
   defaultSquiggleVersion,
 } from "./versions.js";
 
+export type ModelExport = {
+  variableName: string;
+  title?: string;
+};
+
 // Note: typing this with `{ [k in Version]: ComponentType<CommonProps> }` won't work because of contravariance issues.
 // Instead, we pass all props explicitly to the playground component when it's instantiated to check that all props are compatible.
 // Also, please don't change the formatting of this declaration unless you have to. It's edited with regexes in `publish-all.ts` script.
@@ -39,6 +44,7 @@ type CommonProps = {
       }
     | undefined;
   onCodeChange?: (code: string) => void;
+  onExportsChange?: (exports: ModelExport[]) => void;
   onSettingsChange?: (settings: {
     distributionChartSettings: { showSummary: boolean };
   }) => void;
@@ -94,6 +100,7 @@ export const VersionedSquigglePlayground: FC<Props> = ({
         renderExtraControls={props.renderExtraControls}
         renderExtraModal={props.renderExtraModal}
         onCodeChange={props.onCodeChange}
+        onExportsChange={props.onExportsChange}
         onSettingsChange={props.onSettingsChange}
         height={props.height}
         // older playgrounds don't support these, it'll be ignored, that's fine

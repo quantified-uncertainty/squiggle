@@ -19,6 +19,7 @@ import {
   VersionedSquigglePlayground,
   checkSquiggleVersion,
   type SquiggleVersion,
+  type ModelExport,
 } from "@quri/versioned-playground";
 
 import { EditSquiggleSnippetModel$key } from "@/__generated__/EditSquiggleSnippetModel.graphql";
@@ -135,6 +136,11 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
               version
             }
           }
+          modelExports {
+            id
+            variableName
+            title
+          }
           relativeValuesExports {
             id
             variableName
@@ -151,7 +157,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
     modelRef
   );
   const revision = model.currentRevision;
-  console.log("REVISION", revision);
+  console.log("GOT REVISION BACK", revision);
 
   const content = extractFromGraphqlErrorUnion(
     revision.content,
@@ -204,7 +210,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
           version,
         },
         relativeValuesExports: formData.relativeValuesExports,
-        modelExports: [{ title: "My export", variableName: "myGreatExport" }],
+        modelExports: formData.exports,
         comment: extraData?.comment,
         slug: model.slug,
         owner: model.owner.slug,
@@ -235,6 +241,11 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
     if (model.isEditable) {
       draftUtils.save(draftLocator, { formState: form.getValues(), version });
     }
+  };
+
+  const onExportsChange = (exports: ModelExport[]) => {
+    console.log("EXPORTS", exports);
+    form.setValue("exports", exports);
   };
 
   // We don't want to control SquigglePlayground, it's uncontrolled by design.
@@ -285,6 +296,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
             linker={squiggleHubLinker}
             height={height ?? "100vh"}
             onCodeChange={onCodeChange}
+            onExportsChange={onExportsChange}
             defaultCode={defaultCode}
             renderExtraDropdownItems={({ openModal }) =>
               model.isEditable ? (

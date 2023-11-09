@@ -22,6 +22,11 @@ import {
 } from "./LeftPlaygroundPanel/index.js";
 import { ResizableTwoPanelLayout } from "./ResizableTwoPanelLayout.js";
 
+export type ModelExport = {
+  variableName: string;
+  title?: string;
+};
+
 /*
  * We don't support `project` or `continues` in the playground.
  * First, because playground will support multi-file mode by itself.
@@ -37,6 +42,7 @@ type PlaygroundProps = {
   sourceId?: string;
   linker?: SqLinker;
   onCodeChange?(code: string): void;
+  onExportsChange?(exports: ModelExport[]): void;
   /* When settings change */
   onSettingsChange?(settings: PlaygroundSettings): void;
   /* Height of the playground */
@@ -60,6 +66,7 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     defaultCode,
     linker,
     onCodeChange,
+    onExportsChange,
     onSettingsChange,
     renderExtraControls,
     renderExtraDropdownItems,
@@ -104,6 +111,21 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     output: SquiggleOutput | undefined;
     isRunning: boolean;
   }>({ output: undefined, isRunning: false });
+
+  useEffect(() => {
+    const _output = output.output?.output;
+    console.log("Output changed");
+    if (_output && _output.ok) {
+      const exports = _output.value.exports;
+      const _exports: ModelExport[] = exports
+        .entries()
+        .map((e) => ({ variableName: e[0] }));
+      console.log("Calling onExportsChange", onExportsChange, _exports);
+      onExportsChange && onExportsChange(_exports);
+    } else {
+      onExportsChange && onExportsChange([]);
+    }
+  }, [output, onExportsChange]);
 
   const leftPanelRef = useRef<LeftPlaygroundPanelHandle>(null);
   const rightPanelRef = useRef<SquiggleViewerHandle>(null);
