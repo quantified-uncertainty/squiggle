@@ -349,6 +349,10 @@ export const combineAlgebraically = (
   });
 };
 
+export const getShape = () => {
+  // Implementation of getShape function
+};
+
 export const combinePointwise = <E>(
   t1: MixedShape,
   t2: MixedShape,
