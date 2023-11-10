@@ -58,7 +58,7 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
       relativeValuesExports: t.input.field({
         type: [RelativeValuesExportInput],
       }),
-      modelExports: t.input.field({
+      exports: t.input.field({
         type: [SquiggleModelExportInput],
       }),
       content: t.input.field({
@@ -80,7 +80,7 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
       }
 
       const relativeValuesExports = input.relativeValuesExports ?? [];
-      const modelExports = input.modelExports ?? [];
+      const modelExports = input.exports ?? [];
       const modelExportsToInsert: {
         variableName: string;
         title: string | null;
@@ -167,7 +167,7 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
                 data: relativeValuesExportsToInsert,
               },
             },
-            modelExports: {
+            exports: {
               createMany: {
                 data: modelExportsToInsert,
               },

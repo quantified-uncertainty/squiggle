@@ -212,7 +212,7 @@ model ModelRevision {
   contentId       String?          @unique
 
   relativeValuesExports RelativeValuesExport[]
-  modelExports          ModelExport[]
+  exports               ModelExport[]
 
   // required by Prisma, but unused since `model` field should point at the same entity
   currentRevisionModel Model? @relation("CurrentRevision")

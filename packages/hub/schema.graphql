@@ -165,10 +165,10 @@ type ModelRevision implements Node {
   comment: String!
   content: ModelContent!
   createdAtTimestamp: Float!
+  exports: [ModelExport!]!
   forRelativeValues(input: ModelRevisionForRelativeValuesInput): RelativeValuesExport
   id: ID!
   model: Model!
-  modelExports: [ModelExport!]!
   relativeValuesExports: [RelativeValuesExport!]!
 }
 
@@ -379,7 +379,7 @@ union MutationUpdateRelativeValuesDefinitionResult = BaseError | UpdateRelativeV
 input MutationUpdateSquiggleSnippetModelInput {
   comment: String
   content: SquiggleSnippetContentInput!
-  modelExports: [SquiggleModelExportInput!]
+  exports: [SquiggleModelExportInput!]
   owner: String!
   relativeValuesExports: [RelativeValuesExportInput!]
   slug: String!

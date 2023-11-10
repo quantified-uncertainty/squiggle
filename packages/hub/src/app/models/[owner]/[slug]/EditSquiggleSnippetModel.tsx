@@ -136,7 +136,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
               version
             }
           }
-          modelExports {
+          exports {
             id
             variableName
             title
@@ -157,7 +157,6 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
     modelRef
   );
   const revision = model.currentRevision;
-  console.log("GOT REVISION BACK", revision);
 
   const content = extractFromGraphqlErrorUnion(
     revision.content,
@@ -174,12 +173,12 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
           slug: item.definition.slug,
         },
       })),
-      exports: revision.modelExports.map((item) => ({
+      exports: revision.exports.map((item) => ({
         title: item.title,
         variableName: item.variableName,
       })),
     };
-  }, [content, revision.relativeValuesExports, revision.modelExports]);
+  }, [content, revision.relativeValuesExports, revision.exports]);
 
   const { form, onSubmit, inFlight } = useMutationForm<
     SquiggleSnippetFormShape,
@@ -213,7 +212,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
           version,
         },
         relativeValuesExports: formData.relativeValuesExports,
-        modelExports: formData.exports,
+        exports: formData.exports,
         comment: extraData?.comment,
         slug: model.slug,
         owner: model.owner.slug,
