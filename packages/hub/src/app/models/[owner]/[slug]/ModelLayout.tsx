@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { FC, PropsWithChildren } from "react";
 import { graphql } from "relay-runtime";
 
@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
   RectangleStackIcon,
   ScaleIcon,
+  ShareIcon,
 } from "@quri/ui";
 
 import { ModelLayoutQuery } from "@/__generated__/ModelLayoutQuery.graphql";
@@ -22,6 +23,8 @@ import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 import {
+  isModelRelativeValuesRoute,
+  modelExportRoute,
   modelForRelativeValuesExportRoute,
   modelRevisionsRoute,
   modelRoute,
@@ -30,6 +33,7 @@ import { useFixModelUrlCasing } from "./FixModelUrlCasing";
 import { ModelAccessControls } from "./ModelAccessControls";
 import { entityNodes } from "./utils";
 import { ModelSettingsButton } from "./ModelSettingsButton";
+import { useRouter } from "next/router";
 
 // Note that we have to do two GraphQL queries on most model pages: one for layout.tsx, and one for page.tsx.
 const Query = graphql`
@@ -56,6 +60,11 @@ const Query = graphql`
         currentRevision {
           id
           # for length; TODO - "hasExports" field?
+          exports {
+            id
+            variableName
+            title
+          }
           relativeValuesExports {
             id
             variableName
@@ -74,6 +83,7 @@ export const ModelLayout: FC<
     query: SerializablePreloadedQuery<ModelLayoutQuery>;
   }>
 > = ({ query, children }) => {
+  const pathname = usePathname();
   const { variableName } = useParams<{ variableName: string }>();
 
   const [{ result }] = usePageQuery(Query, query);
@@ -84,6 +94,20 @@ export const ModelLayout: FC<
 
   const dropDown = (close: () => void) => (
     <DropdownMenu>
+      <DropdownMenuHeader>Exports</DropdownMenuHeader>
+      {model.currentRevision.exports.map((exportItem) => (
+        <DropdownMenuNextLinkItem
+          key={exportItem.variableName}
+          href={modelExportRoute({
+            owner: model.owner.slug,
+            slug: model.slug,
+            variableName: exportItem.variableName,
+          })}
+          title={`${exportItem.title || exportItem.variableName}`}
+          icon={ShareIcon}
+          close={close}
+        />
+      ))}{" "}
       <DropdownMenuHeader>Relative Value Functions</DropdownMenuHeader>
       {model.currentRevision.relativeValuesExports.map((exportItem) => (
         <DropdownMenuNextLinkItem
@@ -109,7 +133,12 @@ export const ModelLayout: FC<
 
   return (
     <EntityLayout
-      nodes={entityNodes(model.owner, model.slug, variableName)}
+      nodes={entityNodes(
+        model.owner,
+        model.slug,
+        variableName,
+        isModelRelativeValuesRoute(pathname) ? "RELATIVE_VALUE" : "EXPORT"
+      )}
       isFluid={true}
       headerLeft={<ModelAccessControls modelRef={model} />}
       headerRight={
@@ -119,10 +148,16 @@ export const ModelLayout: FC<
             <Dropdown render={({ close }) => dropDown(close)}>
               <EntityTab.Div
                 name="Exports"
-                icon={ScaleIcon}
-                count={model.currentRevision.relativeValuesExports.length}
+                icon={ShareIcon}
+                count={
+                  model.currentRevision.relativeValuesExports.length +
+                  model.currentRevision.exports.length
+                }
                 selected={(pathname) => {
-                  return pathname.startsWith(modelUrl + "/relative-values");
+                  return (
+                    pathname.startsWith(modelUrl + "/relative-values") ||
+                    pathname.startsWith(modelUrl + "/exports")
+                  );
                 }}
               />
             </Dropdown>

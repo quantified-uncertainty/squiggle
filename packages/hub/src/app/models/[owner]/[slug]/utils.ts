@@ -1,8 +1,9 @@
-import { CodeBracketIcon, EmptyIcon, ScaleIcon } from "@quri/ui";
+import { CodeBracketIcon, EmptyIcon, ScaleIcon, ShareIcon } from "@quri/ui";
 
 import { type EntityNode } from "@/components/EntityLayout";
 import { ownerIcon } from "@/lib/ownerIcon";
 import {
+  modelExportRoute,
   modelForRelativeValuesExportRoute,
   modelRoute,
   ownerRoute,
@@ -22,7 +23,8 @@ export function entityNodes(
     slug: string;
   },
   slug: string,
-  variableName?: string
+  variableName?: string,
+  variableNodeType?: "RELATIVE_VALUE" | "EXPORT"
 ): EntityNode[] {
   const ownerNode: EntityNode = { slug: owner.slug };
   if (hasTypename(owner)) {
@@ -41,7 +43,7 @@ export function entityNodes(
     },
   ];
 
-  if (variableName) {
+  if (variableName && variableNodeType === "RELATIVE_VALUE") {
     nodes.push({
       slug: variableName,
       href: modelForRelativeValuesExportRoute({
@@ -50,6 +52,14 @@ export function entityNodes(
         variableName,
       }),
       icon: ScaleIcon,
+    });
+  }
+
+  if (variableName && variableNodeType === "EXPORT") {
+    nodes.push({
+      slug: variableName,
+      href: modelExportRoute({ owner: owner.slug, slug, variableName }),
+      icon: ShareIcon,
     });
   }
   return nodes;

@@ -20,7 +20,8 @@ export const FallbackModelLayout: FC<Props> = ({ username, slug }) => {
         // This causes an entity node to not have an icon or a link until the owner type is known.
         { slug: username },
         slug,
-        variableName
+        variableName,
+        "EXPORT"
       )}
       isFluid={true}
       headerRight={
