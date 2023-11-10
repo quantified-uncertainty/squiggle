@@ -76,10 +76,8 @@ const ModelRevisionItem: FC<{
         <div className="text-xs text-slate-700">{revision.comment}</div>
       ) : null}
       {revision.modelExports.length > 0 ? (
-        <div className="text-xs text-slate-700">
-          {revision.modelExports
-            .map((export_) => export_.variableName)
-            .join(", ")}
+        <div className="text-xs text-green-700">
+          {`${revision.modelExports.length} exports `}
         </div>
       ) : null}
     </div>
@@ -140,7 +138,6 @@ export const ModelRevisionsList: FC<{
     `,
     modelRef
   );
-  console.log("REVISIONS", revisions);
 
   return (
     <div>

@@ -174,9 +174,12 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
           slug: item.definition.slug,
         },
       })),
-      exports: [],
+      exports: revision.modelExports.map((item) => ({
+        title: item.title,
+        variableName: item.variableName,
+      })),
     };
-  }, [content, revision.relativeValuesExports]);
+  }, [content, revision.relativeValuesExports, revision.modelExports]);
 
   const { form, onSubmit, inFlight } = useMutationForm<
     SquiggleSnippetFormShape,
@@ -244,7 +247,6 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
   };
 
   const onExportsChange = (exports: ModelExport[]) => {
-    console.log("EXPORTS", exports);
     form.setValue("exports", exports);
   };
 
