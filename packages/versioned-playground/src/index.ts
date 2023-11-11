@@ -7,4 +7,6 @@ export {
   type SquiggleVersion,
   defaultSquiggleVersion,
   checkSquiggleVersion,
+  useValidSquiggleVersion,
+  versionSupportsDropdownMenu,
 } from "./versions.js";
