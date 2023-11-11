@@ -10,12 +10,13 @@ import {
 import { DynamicSquiggleViewer } from "./DynamicSquiggleViewer.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
 import { useRunnerState } from "../lib/hooks/useRunnerState.js";
+import { SqValuePath } from "@quri/squiggle-lang";
 
 type Props = {
   code: string;
   showHeader?: boolean;
   localSettingsEnabled?: boolean;
-  selectedExport?: string;
+  rootPathOverride?: SqValuePath;
 } & (StandaloneExecutionProps | ProjectExecutionProps) &
   // `environment` is passed through StandaloneExecutionProps; this way we guarantee that it's not compatible with `project` prop
   Omit<PartialPlaygroundSettings, "environment">;
@@ -27,7 +28,7 @@ export const SquiggleChart: FC<Props> = memo(function SquiggleChart({
   project,
   continues,
   environment,
-  selectedExport,
+  rootPathOverride,
   ...settings
 }) {
   // We go through runnerState to bump executionId on code changes;
@@ -47,7 +48,7 @@ export const SquiggleChart: FC<Props> = memo(function SquiggleChart({
 
   return (
     <DynamicSquiggleViewer
-      selectedExport={selectedExport}
+      rootPathOverride={rootPathOverride}
       squiggleOutput={squiggleOutput}
       isRunning={isRunning}
       showHeader={showHeader}

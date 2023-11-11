@@ -20,12 +20,7 @@ import {
   useUnfocus,
   useViewerContext,
 } from "./ViewerProvider.js";
-import {
-  extractSubvalueByPath,
-  pathIsEqual,
-  pathItemFormat,
-  selectedExportPath,
-} from "./utils.js";
+import { extractSubvalueByPath, pathIsEqual, pathItemFormat } from "./utils.js";
 
 export type SquiggleViewerHandle = {
   viewValuePath(path: SqValuePath): void;
@@ -37,14 +32,14 @@ export type SquiggleViewerProps = {
   resultItem: result<SqValue, SqError> | undefined;
   localSettingsEnabled?: boolean;
   editor?: CodeEditorHandle;
-  selectedExport?: string;
+  rootPathOverride?: SqValuePath;
 } & PartialPlaygroundSettings;
 
 const SquiggleViewerOuter = forwardRef<
   SquiggleViewerHandle,
   SquiggleViewerProps
 >(function SquiggleViewerOuter(
-  { resultVariables, resultItem, selectedExport = undefined },
+  { resultVariables, resultItem, rootPathOverride = undefined },
   ref
 ) {
   const { focused, dispatch, getCalculator } = useViewerContext();
@@ -55,13 +50,11 @@ const SquiggleViewerOuter = forwardRef<
     "text-sm text-slate-500 hover:text-slate-900 hover:underline font-mono cursor-pointer";
 
   const isFocusedOnSelectedExport =
-    focused &&
-    selectedExport &&
-    pathIsEqual(focused, selectedExportPath(selectedExport));
+    focused && rootPathOverride && pathIsEqual(focused, rootPathOverride);
 
   const focusedNavigation = focused && !isFocusedOnSelectedExport && (
     <div className="flex items-center mb-3 pl-1">
-      {!selectedExport && (
+      {!rootPathOverride && (
         <div>
           <span onClick={unfocus} className={navLinkStyle}>
             {focused.root === "bindings" ? "Variables" : focused.root}
@@ -151,7 +144,7 @@ const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
       resultItem,
       localSettingsEnabled = false,
       editor,
-      selectedExport,
+      rootPathOverride,
       ...partialPlaygroundSettings
     },
     ref
@@ -162,12 +155,12 @@ const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
         localSettingsEnabled={localSettingsEnabled}
         editor={editor}
         beginWithVariablesCollapsed={resultItem !== undefined && resultItem.ok}
-        beginWithVariableSelected={selectedExport}
+        rootPathOverride={rootPathOverride}
       >
         <SquiggleViewerOuter
           resultVariables={resultVariables}
           resultItem={resultItem}
-          selectedExport={selectedExport}
+          rootPathOverride={rootPathOverride}
           ref={ref}
         />
       </ViewerProvider>

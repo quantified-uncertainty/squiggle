@@ -21,7 +21,6 @@ import {
   MergedItemSettings,
   getChildrenValues,
   pathAsString,
-  selectedExportPath,
   topLevelBindingsName,
 } from "./utils.js";
 import { CodeEditorHandle } from "../CodeEditor.js";
@@ -109,6 +108,7 @@ type ViewerContextShape = {
   focused?: SqValuePath;
   editor?: CodeEditorHandle;
   dispatch(action: Action): void;
+  rootPathOverride?: SqValuePath;
 };
 
 export const ViewerContext = createContext<ViewerContextShape>({
@@ -119,6 +119,7 @@ export const ViewerContext = createContext<ViewerContextShape>({
   focused: undefined,
   editor: undefined,
   dispatch() {},
+  rootPathOverride: undefined,
 });
 
 export function useViewerContext() {
@@ -228,17 +229,18 @@ export const ViewerProvider: FC<
     localSettingsEnabled: boolean;
     editor?: CodeEditorHandle;
     beginWithVariablesCollapsed?: boolean;
-    beginWithVariableSelected?: string | undefined;
+    rootPathOverride?: SqValuePath;
   }>
 > = ({
   partialPlaygroundSettings,
   localSettingsEnabled,
   editor,
   beginWithVariablesCollapsed,
-  beginWithVariableSelected,
+  rootPathOverride,
   children,
 }) => {
   // can't store settings in the state because we don't want to rerender the entire tree on every change
+
   const localItemStateStoreRef = useRef<LocalItemStateStore>(
     beginWithVariablesCollapsed ? collapsedVariablesDefault : {}
   );
@@ -246,9 +248,7 @@ export const ViewerProvider: FC<
   const itemHandlesStoreRef = useRef<{ [k: string]: HTMLDivElement }>({});
 
   const [focused, setFocused] = useState<SqValuePath | undefined>(
-    beginWithVariableSelected
-      ? selectedExportPath(beginWithVariableSelected)
-      : undefined
+    rootPathOverride
   );
 
   const globalSettings = useMemo(() => {
@@ -392,6 +392,7 @@ export const ViewerProvider: FC<
         editor,
         focused,
         dispatch,
+        rootPathOverride,
       }}
     >
       {children}

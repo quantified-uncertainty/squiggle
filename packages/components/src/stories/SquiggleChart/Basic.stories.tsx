@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
 import { SquiggleChart } from "../../components/SquiggleChart.js";
+import { SqValuePath } from "@quri/squiggle-lang";
 
 const meta = {
   component: SquiggleChart,
@@ -32,13 +33,19 @@ export const String: Story = {
   },
 };
 
-export const WithSelect: Story = {
-  name: "WithSelect",
+const rootPathOverridePath = (varName: string) =>
+  new SqValuePath({
+    root: "bindings",
+    items: [{ type: "string", value: varName || "" }],
+  });
+
+export const WithPathOverride: Story = {
+  name: "WithPathOverride",
   args: {
     code: `
     export foo = {bar: 10}
     export bar = {baz: 20}
   `,
-    selectedExport: "foo",
+    rootPathOverride: rootPathOverridePath("foo"),
   },
 };
