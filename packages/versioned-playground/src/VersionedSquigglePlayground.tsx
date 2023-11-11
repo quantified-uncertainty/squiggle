@@ -51,6 +51,7 @@ type CommonProps = {
   height?: string | number;
   // available since 0.8.6
   sourceId?: string;
+  globalSelectVariableName?: string;
   renderExtraDropdownItems?: (options: {
     openModal: (name: string) => void;
   }) => ReactNode;
@@ -108,6 +109,7 @@ export const VersionedSquigglePlayground: FC<Props> = ({
         linker={props.linker}
         renderExtraDropdownItems={props.renderExtraDropdownItems}
         sourceId={props.sourceId}
+        globalSelectVariableName={props.globalSelectVariableName}
       />
     </Suspense>
   );

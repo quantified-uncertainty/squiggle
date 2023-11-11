@@ -47,6 +47,7 @@ type PlaygroundProps = {
   onSettingsChange?(settings: PlaygroundSettings): void;
   /* Height of the playground */
   height?: CSSProperties["height"];
+  globalSelectVariableName?: string | undefined;
 } & Pick<
   Parameters<typeof LeftPlaygroundPanel>[0],
   "renderExtraControls" | "renderExtraDropdownItems" | "renderExtraModal"
@@ -158,6 +159,8 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
       editor={leftPanelRef.current?.getEditor() ?? undefined}
       ref={rightPanelRef}
       localSettingsEnabled={true}
+      globalSelectVariableName={props.globalSelectVariableName}
+      showNavigation={props.globalSelectVariableName !== undefined}
       {...settings}
     />
   );

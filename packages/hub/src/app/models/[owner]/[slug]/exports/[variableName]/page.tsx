@@ -5,7 +5,7 @@ import { loadPageQuery } from "@/relay/loadPageQuery";
 import { ModelExportPage } from "./modelExportPage";
 
 type Props = {
-  params: { owner: string; slug: string };
+  params: { owner: string; slug: string; variableName: string };
 };
 
 export default async function OuterModelPage({ params }: Props) {
@@ -15,7 +15,7 @@ export default async function OuterModelPage({ params }: Props) {
 
   return (
     <div className="py-4 px-8">
-      <ModelExportPage query={query} />
+      <ModelExportPage query={query} params={params} />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { forwardRef, memo, useImperativeHandle } from "react";
+import { forwardRef, memo, useEffect, useImperativeHandle } from "react";
 
 import {
   SqDictValue,
@@ -32,15 +32,35 @@ export type SquiggleViewerProps = {
   resultItem: result<SqValue, SqError> | undefined;
   localSettingsEnabled?: boolean;
   editor?: CodeEditorHandle;
+  globalSelectVariableName?: string;
+  showNavigation?: boolean;
 } & PartialPlaygroundSettings;
 
 const SquiggleViewerOuter = forwardRef<
   SquiggleViewerHandle,
   SquiggleViewerProps
->(function SquiggleViewerOuter({ resultVariables, resultItem }, ref) {
+>(function SquiggleViewerOuter(
+  {
+    resultVariables,
+    resultItem,
+    showNavigation = true,
+    globalSelectVariableName = undefined,
+  },
+  ref
+) {
   const { focused, dispatch, getCalculator } = useViewerContext();
   const unfocus = useUnfocus();
   const focus = useFocus();
+
+  useEffect(() => {
+    if (globalSelectVariableName) {
+      const globalSelectedVariableNamePath: SqValuePath = new SqValuePath({
+        root: "bindings",
+        items: [{ type: "string", value: globalSelectVariableName || "" }],
+      });
+      focus(globalSelectedVariableNamePath);
+    }
+  }, []);
 
   const navLinkStyle =
     "text-sm text-slate-500 hover:text-slate-900 hover:underline font-mono cursor-pointer";
@@ -119,7 +139,7 @@ const SquiggleViewerOuter = forwardRef<
 
   return (
     <div>
-      {focusedNavigation}
+      {showNavigation && focusedNavigation}
       {body()}
     </div>
   );
@@ -132,6 +152,8 @@ const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
       resultItem,
       localSettingsEnabled = false,
       editor,
+      globalSelectVariableName,
+      showNavigation,
       ...partialPlaygroundSettings
     },
     ref
@@ -146,6 +168,8 @@ const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
         <SquiggleViewerOuter
           resultVariables={resultVariables}
           resultItem={resultItem}
+          globalSelectVariableName={globalSelectVariableName}
+          showNavigation={showNavigation}
           ref={ref}
         />
       </ViewerProvider>
