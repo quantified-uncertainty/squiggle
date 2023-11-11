@@ -33,19 +33,19 @@ export const String: Story = {
   },
 };
 
-const rootPathOverridePath = (varName: string) =>
-  new SqValuePath({
-    root: "bindings",
-    items: [{ type: "string", value: varName || "" }],
-  });
-
 export const WithPathOverride: Story = {
   name: "WithPathOverride",
   args: {
     code: `
-    export foo = {bar: 10}
+    export foo = {bar: {char: {baz: 10}}}
     export bar = {baz: 20}
   `,
-    rootPathOverride: rootPathOverridePath("foo"),
+    rootPathOverride: new SqValuePath({
+      root: "bindings",
+      items: [
+        { type: "string", value: "foo" },
+        { type: "string", value: "bar" },
+      ],
+    }),
   },
 };

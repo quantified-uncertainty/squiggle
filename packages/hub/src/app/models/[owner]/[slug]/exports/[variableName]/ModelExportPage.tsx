@@ -1,13 +1,14 @@
 "use client";
 
 import { FC } from "react";
-import { graphql, useFragment } from "react-relay";
+import { graphql } from "react-relay";
 
 import { ModelExportPageQuery } from "@/__generated__/ModelExportPageQuery.graphql";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 import { SquiggleChart } from "@quri/squiggle-components";
+import { SqValuePath } from "@quri/squiggle-lang";
 
 export const ModelExportPage: FC<{
   params: {
@@ -47,14 +48,19 @@ export const ModelExportPage: FC<{
   const content = model.currentRevision.content;
 
   switch (content.__typename) {
-    case "SquiggleSnippet":
+    case "SquiggleSnippet": {
+      const rootPath = new SqValuePath({
+        root: "bindings",
+        items: [{ type: "string", value: params.variableName }],
+      });
       return (
         <SquiggleChart
           code={content.code}
           showHeader={false}
-          globalSelectVariableName={params.variableName}
+          rootPathOverride={rootPath}
         />
       );
+    }
     default:
       return <div>Unknown model type {content.__typename}</div>;
   }

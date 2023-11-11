@@ -108,7 +108,6 @@ type ViewerContextShape = {
   focused?: SqValuePath;
   editor?: CodeEditorHandle;
   dispatch(action: Action): void;
-  rootPathOverride?: SqValuePath;
 };
 
 export const ViewerContext = createContext<ViewerContextShape>({
@@ -119,7 +118,6 @@ export const ViewerContext = createContext<ViewerContextShape>({
   focused: undefined,
   editor: undefined,
   dispatch() {},
-  rootPathOverride: undefined,
 });
 
 export function useViewerContext() {
@@ -392,7 +390,6 @@ export const ViewerProvider: FC<
         editor,
         focused,
         dispatch,
-        rootPathOverride,
       }}
     >
       {children}

@@ -39,7 +39,7 @@ const SquiggleViewerOuter = forwardRef<
   SquiggleViewerHandle,
   SquiggleViewerProps
 >(function SquiggleViewerOuter(
-  { resultVariables, resultItem, rootPathOverride = undefined },
+  { resultVariables, resultItem, rootPathOverride },
   ref
 ) {
   const { focused, dispatch, getCalculator } = useViewerContext();
@@ -49,10 +49,15 @@ const SquiggleViewerOuter = forwardRef<
   const navLinkStyle =
     "text-sm text-slate-500 hover:text-slate-900 hover:underline font-mono cursor-pointer";
 
-  const isFocusedOnSelectedExport =
+  const isFocusedOnRootPathOverride =
     focused && rootPathOverride && pathIsEqual(focused, rootPathOverride);
 
-  const focusedNavigation = focused && !isFocusedOnSelectedExport && (
+  // If we're focused on the root path override, we need to adjust the focused path accordingly when presenting the navigation, so that it begins with the root path intead. This is a bit confusing.
+  const rootPathFocusedAdjustment: number = rootPathOverride
+    ? rootPathOverride.items.length - 1
+    : 0;
+
+  const focusedNavigation = focused && !isFocusedOnRootPathOverride && (
     <div className="flex items-center mb-3 pl-1">
       {!rootPathOverride && (
         <div>
@@ -66,11 +71,11 @@ const SquiggleViewerOuter = forwardRef<
 
       {focused
         .itemsAsValuePaths({ includeRoot: false })
-        .slice(0, -1)
+        .slice(rootPathFocusedAdjustment, -1)
         .map((path, i) => (
           <div key={i} className="flex items-center">
             <div onClick={() => focus(path)} className={navLinkStyle}>
-              {pathItemFormat(path.items[i])}
+              {pathItemFormat(path.items[i + rootPathFocusedAdjustment])}
             </div>
             <ChevronRightIcon className="text-slate-300" size={24} />
           </div>
