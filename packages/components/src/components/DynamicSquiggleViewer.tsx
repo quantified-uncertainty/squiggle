@@ -14,7 +14,7 @@ type Props = {
   showHeader?: boolean;
   localSettingsEnabled?: boolean;
   editor?: CodeEditorHandle;
-  globalSelectVariableName?: string;
+  selectedExport?: string;
 } & PartialPlaygroundSettings;
 
 /* Wrapper for SquiggleViewer that shows the rendering stats and isRunning state. */
@@ -26,7 +26,7 @@ export const DynamicSquiggleViewer = forwardRef<SquiggleViewerHandle, Props>(
       showHeader = true,
       localSettingsEnabled,
       editor,
-      globalSelectVariableName,
+      selectedExport,
       ...settings
     },
     viewerRef
@@ -45,7 +45,7 @@ export const DynamicSquiggleViewer = forwardRef<SquiggleViewerHandle, Props>(
             resultVariables={getResultVariables(squiggleOutput)}
             resultItem={getResultValue(squiggleOutput)}
             editor={editor}
-            globalSelectVariableName={globalSelectVariableName}
+            selectedExport={selectedExport}
           />
         </ErrorBoundary>
       </div>

@@ -21,6 +21,7 @@ import {
   MergedItemSettings,
   getChildrenValues,
   pathAsString,
+  selectedExportPath,
   topLevelBindingsName,
 } from "./utils.js";
 import { CodeEditorHandle } from "../CodeEditor.js";
@@ -221,12 +222,6 @@ const collapsedVariablesDefault: LocalItemStateStore = {
   [topLevelBindingsName]: { collapsed: true, settings: {} },
 };
 
-const globalVariablePath = (name: string) =>
-  new SqValuePath({
-    root: "bindings",
-    items: [{ type: "string", value: name || "" }],
-  });
-
 export const ViewerProvider: FC<
   PropsWithChildren<{
     partialPlaygroundSettings: PartialPlaygroundSettings;
@@ -252,7 +247,7 @@ export const ViewerProvider: FC<
 
   const [focused, setFocused] = useState<SqValuePath | undefined>(
     beginWithVariableSelected
-      ? globalVariablePath(beginWithVariableSelected)
+      ? selectedExportPath(beginWithVariableSelected)
       : undefined
   );
 

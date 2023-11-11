@@ -39,6 +39,6 @@ export const WithSelect: Story = {
     export foo = {bar: 10}
     export bar = {baz: 20}
   `,
-    globalSelectVariableName: "foo",
+    selectedExport: "foo",
   },
 };

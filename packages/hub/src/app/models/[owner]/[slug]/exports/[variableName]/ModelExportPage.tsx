@@ -9,16 +9,6 @@ import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 import { SquiggleChart } from "@quri/squiggle-components";
 
-// export const ModelExportPageCode: FC<Props> = ({ dataRef, params }) => {
-//   return (
-//     <SquiggleChart
-//       code={content.code}
-//       showHeader={false}
-//       globalSelectVariableName={params.variableName}
-//     />
-//   );
-// };
-
 export const ModelExportPage: FC<{
   params: {
     owner: string;

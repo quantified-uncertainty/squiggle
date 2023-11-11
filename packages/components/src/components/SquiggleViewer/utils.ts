@@ -51,6 +51,16 @@ export function pathAsString(path: SqValuePath) {
   }
 }
 
+export function pathIsEqual(path1: SqValuePath, path2: SqValuePath) {
+  return pathAsString(path1) === pathAsString(path2);
+}
+
+export const selectedExportPath = (varName: string) =>
+  new SqValuePath({
+    root: "bindings",
+    items: [{ type: "string", value: varName || "" }],
+  });
+
 export function pathToShortName(path: SqValuePath): string | undefined {
   if (isTopLevel(path)) {
     return topLevelName(path);

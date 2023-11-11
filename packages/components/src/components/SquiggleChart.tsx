@@ -15,7 +15,7 @@ type Props = {
   code: string;
   showHeader?: boolean;
   localSettingsEnabled?: boolean;
-  globalSelectVariableName?: string;
+  selectedExport?: string;
 } & (StandaloneExecutionProps | ProjectExecutionProps) &
   // `environment` is passed through StandaloneExecutionProps; this way we guarantee that it's not compatible with `project` prop
   Omit<PartialPlaygroundSettings, "environment">;
@@ -27,7 +27,7 @@ export const SquiggleChart: FC<Props> = memo(function SquiggleChart({
   project,
   continues,
   environment,
-  globalSelectVariableName,
+  selectedExport,
   ...settings
 }) {
   // We go through runnerState to bump executionId on code changes;
@@ -47,7 +47,7 @@ export const SquiggleChart: FC<Props> = memo(function SquiggleChart({
 
   return (
     <DynamicSquiggleViewer
-      globalSelectVariableName={globalSelectVariableName}
+      selectedExport={selectedExport}
       squiggleOutput={squiggleOutput}
       isRunning={isRunning}
       showHeader={showHeader}

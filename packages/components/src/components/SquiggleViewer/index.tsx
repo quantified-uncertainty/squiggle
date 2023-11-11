@@ -22,8 +22,9 @@ import {
 } from "./ViewerProvider.js";
 import {
   extractSubvalueByPath,
-  pathAsString,
+  pathIsEqual,
   pathItemFormat,
+  selectedExportPath,
 } from "./utils.js";
 
 export type SquiggleViewerHandle = {
@@ -36,20 +37,14 @@ export type SquiggleViewerProps = {
   resultItem: result<SqValue, SqError> | undefined;
   localSettingsEnabled?: boolean;
   editor?: CodeEditorHandle;
-  globalSelectVariableName?: string;
+  selectedExport?: string;
 } & PartialPlaygroundSettings;
-
-const globalVariablePath = (name: string) =>
-  new SqValuePath({
-    root: "bindings",
-    items: [{ type: "string", value: name || "" }],
-  });
 
 const SquiggleViewerOuter = forwardRef<
   SquiggleViewerHandle,
   SquiggleViewerProps
 >(function SquiggleViewerOuter(
-  { resultVariables, resultItem, globalSelectVariableName = undefined },
+  { resultVariables, resultItem, selectedExport = undefined },
   ref
 ) {
   const { focused, dispatch, getCalculator } = useViewerContext();
@@ -59,15 +54,14 @@ const SquiggleViewerOuter = forwardRef<
   const navLinkStyle =
     "text-sm text-slate-500 hover:text-slate-900 hover:underline font-mono cursor-pointer";
 
-  const isFocusedOnGlobalSelectVariableName =
+  const isFocusedOnSelectedExport =
     focused &&
-    globalSelectVariableName &&
-    pathAsString(globalVariablePath(globalSelectVariableName)) ==
-      pathAsString(focused);
+    selectedExport &&
+    pathIsEqual(focused, selectedExportPath(selectedExport));
 
-  const focusedNavigation = focused && !isFocusedOnGlobalSelectVariableName && (
+  const focusedNavigation = focused && !isFocusedOnSelectedExport && (
     <div className="flex items-center mb-3 pl-1">
-      {!globalSelectVariableName && (
+      {!selectedExport && (
         <div>
           <span onClick={unfocus} className={navLinkStyle}>
             {focused.root === "bindings" ? "Variables" : focused.root}
@@ -157,7 +151,7 @@ const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
       resultItem,
       localSettingsEnabled = false,
       editor,
-      globalSelectVariableName,
+      selectedExport,
       ...partialPlaygroundSettings
     },
     ref
@@ -168,12 +162,12 @@ const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
         localSettingsEnabled={localSettingsEnabled}
         editor={editor}
         beginWithVariablesCollapsed={resultItem !== undefined && resultItem.ok}
-        beginWithVariableSelected={globalSelectVariableName}
+        beginWithVariableSelected={selectedExport}
       >
         <SquiggleViewerOuter
           resultVariables={resultVariables}
           resultItem={resultItem}
-          globalSelectVariableName={globalSelectVariableName}
+          selectedExport={selectedExport}
           ref={ref}
         />
       </ViewerProvider>
