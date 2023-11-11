@@ -48,7 +48,6 @@ export const SquiggleChart: FC<Props> = memo(function SquiggleChart({
   return (
     <DynamicSquiggleViewer
       globalSelectVariableName={globalSelectVariableName}
-      showNavigation={!!globalSelectVariableName}
       squiggleOutput={squiggleOutput}
       isRunning={isRunning}
       showHeader={showHeader}

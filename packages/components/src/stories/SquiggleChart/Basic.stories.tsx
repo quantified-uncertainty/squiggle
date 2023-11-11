@@ -31,3 +31,14 @@ export const String: Story = {
     code: '"Lucky day!"',
   },
 };
+
+export const WithSelect: Story = {
+  name: "WithSelect",
+  args: {
+    code: `
+    export foo = {bar: 10}
+    export bar = {baz: 20}
+  `,
+    globalSelectVariableName: "foo",
+  },
+};

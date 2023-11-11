@@ -160,7 +160,6 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
       ref={rightPanelRef}
       localSettingsEnabled={true}
       globalSelectVariableName={props.globalSelectVariableName}
-      showNavigation={props.globalSelectVariableName !== undefined}
       {...settings}
     />
   );

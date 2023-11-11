@@ -221,18 +221,26 @@ const collapsedVariablesDefault: LocalItemStateStore = {
   [topLevelBindingsName]: { collapsed: true, settings: {} },
 };
 
+const globalVariablePath = (name: string) =>
+  new SqValuePath({
+    root: "bindings",
+    items: [{ type: "string", value: name || "" }],
+  });
+
 export const ViewerProvider: FC<
   PropsWithChildren<{
     partialPlaygroundSettings: PartialPlaygroundSettings;
     localSettingsEnabled: boolean;
     editor?: CodeEditorHandle;
     beginWithVariablesCollapsed?: boolean;
+    beginWithVariableSelected?: string | undefined;
   }>
 > = ({
   partialPlaygroundSettings,
   localSettingsEnabled,
   editor,
   beginWithVariablesCollapsed,
+  beginWithVariableSelected,
   children,
 }) => {
   // can't store settings in the state because we don't want to rerender the entire tree on every change
@@ -242,7 +250,11 @@ export const ViewerProvider: FC<
 
   const itemHandlesStoreRef = useRef<{ [k: string]: HTMLDivElement }>({});
 
-  const [focused, setFocused] = useState<SqValuePath | undefined>();
+  const [focused, setFocused] = useState<SqValuePath | undefined>(
+    beginWithVariableSelected
+      ? globalVariablePath(beginWithVariableSelected)
+      : undefined
+  );
 
   const globalSettings = useMemo(() => {
     return merge({}, defaultPlaygroundSettings, partialPlaygroundSettings);

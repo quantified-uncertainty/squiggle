@@ -1,4 +1,4 @@
-import { forwardRef, memo, useEffect, useImperativeHandle } from "react";
+import { forwardRef, memo, useImperativeHandle } from "react";
 
 import {
   SqDictValue,
@@ -20,7 +20,11 @@ import {
   useUnfocus,
   useViewerContext,
 } from "./ViewerProvider.js";
-import { extractSubvalueByPath, pathItemFormat } from "./utils.js";
+import {
+  extractSubvalueByPath,
+  pathAsString,
+  pathItemFormat,
+} from "./utils.js";
 
 export type SquiggleViewerHandle = {
   viewValuePath(path: SqValuePath): void;
@@ -33,56 +37,57 @@ export type SquiggleViewerProps = {
   localSettingsEnabled?: boolean;
   editor?: CodeEditorHandle;
   globalSelectVariableName?: string;
-  showNavigation?: boolean;
 } & PartialPlaygroundSettings;
+
+const globalVariablePath = (name: string) =>
+  new SqValuePath({
+    root: "bindings",
+    items: [{ type: "string", value: name || "" }],
+  });
 
 const SquiggleViewerOuter = forwardRef<
   SquiggleViewerHandle,
   SquiggleViewerProps
 >(function SquiggleViewerOuter(
-  {
-    resultVariables,
-    resultItem,
-    showNavigation = true,
-    globalSelectVariableName = undefined,
-  },
+  { resultVariables, resultItem, globalSelectVariableName = undefined },
   ref
 ) {
   const { focused, dispatch, getCalculator } = useViewerContext();
   const unfocus = useUnfocus();
   const focus = useFocus();
 
-  useEffect(() => {
-    if (globalSelectVariableName) {
-      const globalSelectedVariableNamePath: SqValuePath = new SqValuePath({
-        root: "bindings",
-        items: [{ type: "string", value: globalSelectVariableName || "" }],
-      });
-      focus(globalSelectedVariableNamePath);
-    }
-  }, []);
-
   const navLinkStyle =
     "text-sm text-slate-500 hover:text-slate-900 hover:underline font-mono cursor-pointer";
 
-  const focusedNavigation = focused && (
+  const isFocusedOnGlobalSelectVariableName =
+    focused &&
+    globalSelectVariableName &&
+    pathAsString(globalVariablePath(globalSelectVariableName)) ==
+      pathAsString(focused);
+
+  const focusedNavigation = focused && !isFocusedOnGlobalSelectVariableName && (
     <div className="flex items-center mb-3 pl-1">
-      <span onClick={unfocus} className={navLinkStyle}>
-        {focused.root === "bindings" ? "Variables" : focused.root}
-      </span>
+      {!globalSelectVariableName && (
+        <div>
+          <span onClick={unfocus} className={navLinkStyle}>
+            {focused.root === "bindings" ? "Variables" : focused.root}
+          </span>
+
+          <ChevronRightIcon className="text-slate-300" size={24} />
+        </div>
+      )}
 
       {focused
         .itemsAsValuePaths({ includeRoot: false })
         .slice(0, -1)
         .map((path, i) => (
           <div key={i} className="flex items-center">
-            <ChevronRightIcon className="text-slate-300" size={24} />
             <div onClick={() => focus(path)} className={navLinkStyle}>
               {pathItemFormat(path.items[i])}
             </div>
+            <ChevronRightIcon className="text-slate-300" size={24} />
           </div>
         ))}
-      <ChevronRightIcon className="text-slate-300" size={24} />
     </div>
   );
 
@@ -139,7 +144,7 @@ const SquiggleViewerOuter = forwardRef<
 
   return (
     <div>
-      {showNavigation && focusedNavigation}
+      {focusedNavigation}
       {body()}
     </div>
   );
@@ -153,7 +158,6 @@ const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
       localSettingsEnabled = false,
       editor,
       globalSelectVariableName,
-      showNavigation,
       ...partialPlaygroundSettings
     },
     ref
@@ -164,12 +168,12 @@ const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
         localSettingsEnabled={localSettingsEnabled}
         editor={editor}
         beginWithVariablesCollapsed={resultItem !== undefined && resultItem.ok}
+        beginWithVariableSelected={globalSelectVariableName}
       >
         <SquiggleViewerOuter
           resultVariables={resultVariables}
           resultItem={resultItem}
           globalSelectVariableName={globalSelectVariableName}
-          showNavigation={showNavigation}
           ref={ref}
         />
       </ViewerProvider>
