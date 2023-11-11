@@ -92,38 +92,48 @@ export const ModelLayout: FC<
 
   useFixModelUrlCasing(model);
 
-  const dropDown = (close: () => void) => (
-    <DropdownMenu>
-      <DropdownMenuHeader>Exports</DropdownMenuHeader>
-      {model.currentRevision.exports.map((exportItem) => (
-        <DropdownMenuNextLinkItem
-          key={exportItem.variableName}
-          href={modelExportRoute({
-            owner: model.owner.slug,
-            slug: model.slug,
-            variableName: exportItem.variableName,
-          })}
-          title={`${exportItem.title || exportItem.variableName}`}
-          icon={ShareIcon}
-          close={close}
-        />
-      ))}{" "}
-      <DropdownMenuHeader>Relative Value Functions</DropdownMenuHeader>
-      {model.currentRevision.relativeValuesExports.map((exportItem) => (
-        <DropdownMenuNextLinkItem
-          key={exportItem.variableName}
-          href={modelForRelativeValuesExportRoute({
-            owner: model.owner.slug,
-            slug: model.slug,
-            variableName: exportItem.variableName,
-          })}
-          title={`${exportItem.variableName}: ${exportItem.definition.slug}`}
-          icon={ScaleIcon}
-          close={close}
-        />
-      ))}
-    </DropdownMenu>
+  const relativeValuesExports = model.currentRevision.relativeValuesExports;
+
+  //We remove the relative values exports from the exports list, to not double count them.
+  const modelExports = model.currentRevision.exports.filter(
+    ({ variableName }) =>
+      !relativeValuesExports.find(({ variableName: v }) => v === variableName)
   );
+
+  const dropDown = (close: () => void) => {
+    return (
+      <DropdownMenu>
+        <DropdownMenuHeader>Exports</DropdownMenuHeader>
+        {modelExports.map((exportItem) => (
+          <DropdownMenuNextLinkItem
+            key={exportItem.variableName}
+            href={modelExportRoute({
+              owner: model.owner.slug,
+              slug: model.slug,
+              variableName: exportItem.variableName,
+            })}
+            title={`${exportItem.title || exportItem.variableName}`}
+            icon={ShareIcon}
+            close={close}
+          />
+        ))}{" "}
+        <DropdownMenuHeader>Relative Value Functions</DropdownMenuHeader>
+        {relativeValuesExports.map((exportItem) => (
+          <DropdownMenuNextLinkItem
+            key={exportItem.variableName}
+            href={modelForRelativeValuesExportRoute({
+              owner: model.owner.slug,
+              slug: model.slug,
+              variableName: exportItem.variableName,
+            })}
+            title={`${exportItem.variableName}: ${exportItem.definition.slug}`}
+            icon={ScaleIcon}
+            close={close}
+          />
+        ))}
+      </DropdownMenu>
+    );
+  };
 
   const modelUrl = modelRoute({ owner: model.owner.slug, slug: model.slug });
   const modelRevisionsUrl = modelRevisionsRoute({
@@ -149,10 +159,7 @@ export const ModelLayout: FC<
               <EntityTab.Div
                 name="Exports"
                 icon={ShareIcon}
-                count={
-                  model.currentRevision.relativeValuesExports.length +
-                  model.currentRevision.exports.length
-                }
+                count={relativeValuesExports.length + modelExports.length}
                 selected={(pathname) => {
                   return (
                     pathname.startsWith(modelUrl + "/relative-values") ||
