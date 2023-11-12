@@ -91,7 +91,7 @@ builder.objectType(
   }
 );
 
-async function runSquiggle(code: string): Promise<SquiggleOutput> {
+export async function runSquiggle(code: string): Promise<SquiggleOutput> {
   const MAIN = "main";
 
   const project = SqProject.create();
