@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useState, useCallback } from "react";
+import { FC, useEffect, useMemo, useState, useCallback, useRef } from "react";
 
 import { Env, SqValue } from "@quri/squiggle-lang";
 
@@ -21,6 +21,18 @@ type Props = {
   autorun: boolean;
 };
 
+function useDeepCompareMemoize(
+  value: PlaygroundSettings
+): PlaygroundSettings | undefined {
+  const ref = useRef<PlaygroundSettings | undefined>();
+
+  if (JSON.stringify(value) !== JSON.stringify(ref.current)) {
+    ref.current = value;
+  }
+
+  return ref.current;
+}
+
 export const CalculatorResult: FC<Props> = ({
   valueWithContext,
   inputResults,
@@ -29,6 +41,7 @@ export const CalculatorResult: FC<Props> = ({
   processAllFieldCodes,
   autorun,
 }) => {
+  const _settings = useDeepCompareMemoize(settings);
   const [savedState, updateSavedState] =
     useSavedCalculatorState(valueWithContext);
 
@@ -37,6 +50,15 @@ export const CalculatorResult: FC<Props> = ({
   const [calculatorResult, setCalculatorResult] = useState<
     SqValueResult | undefined
   >(() => savedState?.calculatorResult);
+
+  const valueResultViewer = useMemo(() => {
+    return (
+      !!calculatorResult &&
+      _settings && (
+        <ValueResultViewer result={calculatorResult} settings={_settings} />
+      )
+    );
+  }, [calculatorResult, _settings]);
 
   const runCalculator = useCallback(() => {
     !autorun && processAllFieldCodes();
@@ -82,7 +104,7 @@ export const CalculatorResult: FC<Props> = ({
       {calculatorResult ? (
         <div>
           <div className="text-sm font-semibold text-gray-700 mb-2">Result</div>
-          <ValueResultViewer result={calculatorResult} settings={settings} />
+          {valueResultViewer}
         </div>
       ) : null}
     </div>

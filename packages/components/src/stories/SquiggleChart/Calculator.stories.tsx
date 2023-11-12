@@ -11,10 +11,9 @@ type Story = StoryObj<typeof meta>;
 export const Basic: Story = {
   args: {
     code: `
-    f(a, b, c, d) = [a,b,c,d]
-
-    a = "A longer description of the calculator goes here...\n"
-    
+    f(a, b, c, d) = {|f| normal(f*10+b, 1)}
+    a = "A longer description of the calculator goes here...
+    "
     Calculator.make(
       {
         fn: f,
@@ -26,8 +25,11 @@ export const Basic: Story = {
           Input.text({name: "Variable1", description: "This is a very long description This is a very long description This is a very long description This is a very long description This is a very long description", default: 1}),
           Input.select({name: "Variable3", default: "alice", options: ["alice", "charles", "bob", "bill", "maven", "billy", "samantha", "becky"]})
         ],
+        sampleCount: 1000,
+        autorun: false
       }
     )
+      
 `,
   },
 };
