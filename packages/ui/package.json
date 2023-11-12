@@ -8,10 +8,10 @@
     "directory": "packages/ui"
   },
   "scripts": {
-    "dev": "storybook dev -p 6007",
+    "dev": "webpack --config webpack.config.dev.js",
     "build:ts": "tsc -b",
     "build:css": "postcss ./src/styles/full.css -o ./dist/full.css",
-    "build:storybook": "storybook build",
+    "build:storybook": "webpack --config webpack.config.prod.js",
     "clean:ts": "rm -rf ./dist ./tsconfig.tsbuildinfo",
     "build": "pnpm clean:ts && pnpm build:ts && pnpm build:css && pnpm build:storybook",
     "lint": "pnpm lint:prettier && pnpm eslint",
@@ -74,6 +74,10 @@
     "prettier": "^3.0.3",
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
+    "webpack": "^5.64.4",
+    "webpack-cli": "^4.9.1",
+    "webpack-dev-server": "^4.7.2",
+    "webpack-merge": "^5.8.0",
     "react-dom": "^18.2.0",
     "rollup-plugin-node-builtins": "^2.1.2",
     "storybook": "^7.5.2",
