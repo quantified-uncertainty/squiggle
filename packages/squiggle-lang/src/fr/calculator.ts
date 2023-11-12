@@ -29,7 +29,7 @@ export const library = [
             ["fn", frLambda],
             ["title", frOptional(frString)],
             ["description", frOptional(frString)],
-            ["inputs", frArray(frInput)],
+            ["inputs", frOptional(frArray(frInput))],
             ["autorun", frOptional(frBool)],
             ["sampleCount", frOptional(frNumber)]
           ),
@@ -39,7 +39,7 @@ export const library = [
             fn,
             title: title || undefined,
             description: description || undefined,
-            inputs: inputs,
+            inputs: inputs || [],
             autorun: autorun == null ? true : autorun,
             sampleCount: sampleCount || undefined,
           });
