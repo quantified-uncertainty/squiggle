@@ -1,34 +1,36 @@
 "use client";
 import { FC, Suspense, lazy } from "react";
+
+import { SquiggleVersion } from "./versions.js";
+
+/*
+ * We have to type all playground components explicitly; otherwise, TypeScript will complain with TS2742 "likely not portable" error.
+ * But we also need lazy imports and not load all playground versions immediately.
+ * This means that types should be imported immediately with `import { type ... }`, which are removed by TypeScript
+ * (`importsNotUsedAsValues`, https://www.typescriptlang.org/tsconfig#importsNotUsedAsValues, defaults to "remove"),
+ * but components themselves should be imported lazily.
+ */
 import {
   SquigglePlaygroundProps_0_8_5,
   SquigglePlaygroundProps_0_8_6,
 } from "./oldPlaygroundTypes.js";
 
-// We have to type all playground components explicitly; otherwise, TypeScript will complain with TS2742 "likely not portable" error.
+/*
+ * Please don't change the formatting of these imports and the following `playgroundByVersion` declaration unless you have to.
+ * It's edited with babel transformation in `publish-all.ts` script.
+ */
+import { type SquigglePlaygroundProps as SquigglePlaygroundProps_dev } from "@quri/squiggle-components";
 
-const playground_0_8_5: FC<SquigglePlaygroundProps_0_8_5> = lazy(async () => ({
-  default: (await import("squiggle-components-0.8.5")).SquigglePlayground,
-}));
-
-const playground_0_8_6: FC<SquigglePlaygroundProps_0_8_6> = lazy(async () => ({
-  default: (await import("squiggle-components-0.8.6")).SquigglePlayground,
-}));
-
-import { type SquigglePlaygroundProps } from "@quri/squiggle-components";
-import { SquiggleVersion } from "./versions.js";
-const playground_dev: FC<SquigglePlaygroundProps> = lazy(async () => ({
-  default: (await import("@quri/squiggle-components")).SquigglePlayground,
-}));
-
-// Note: typing this with `{ [k in Version]: ComponentType<CommonProps> }` won't work because of contravariance issues.
-// Instead, we pass all props explicitly to the playground component when it's instantiated to check that all props are compatible.
-// Also, please don't change the formatting of this declaration unless you have to. It's edited with regexes in `publish-all.ts` script.
-// (TODO: using codemod would be nice)
 const playgroundByVersion = {
-  "0.8.5": playground_0_8_5,
-  "0.8.6": playground_0_8_6,
-  dev: playground_dev,
+  "0.8.5": lazy(async () => ({
+    default: (await import("squiggle-components-0.8.5")).SquigglePlayground,
+  })) as FC<SquigglePlaygroundProps_0_8_5>,
+  "0.8.6": lazy(async () => ({
+    default: (await import("squiggle-components-0.8.6")).SquigglePlayground,
+  })) as FC<SquigglePlaygroundProps_0_8_6>,
+  dev: lazy(async () => ({
+    default: (await import("@quri/squiggle-components")).SquigglePlayground,
+  })) as FC<SquigglePlaygroundProps_dev>,
 } as const;
 
 type PlaygroundProps<T extends SquiggleVersion> = Parameters<
