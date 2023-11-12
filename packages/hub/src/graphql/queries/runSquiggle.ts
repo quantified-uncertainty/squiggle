@@ -97,7 +97,7 @@ async function runSquiggle(code: string): Promise<SquiggleOutput> {
   const project = SqProject.create();
 
   project.setSource(MAIN, code);
-  await project.run(MAIN);
+    await project.run(MAIN);
 
   const outputR = project.getOutput(MAIN);
 
