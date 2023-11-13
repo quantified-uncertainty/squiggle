@@ -16,7 +16,7 @@ type Props = {
   code: string;
   showHeader?: boolean;
   localSettingsEnabled?: boolean;
-  rootPathOverride?: SqValuePath;
+  rootPathOverride?: SqValuePath; // Note: This should be static. We don't support rootPathOverride to change once set.
 } & (StandaloneExecutionProps | ProjectExecutionProps) &
   // `environment` is passed through StandaloneExecutionProps; this way we guarantee that it's not compatible with `project` prop
   Omit<PartialPlaygroundSettings, "environment">;

@@ -23,8 +23,10 @@ export function entityNodes(
     slug: string;
   },
   slug: string,
-  variableName?: string,
-  variableNodeType?: "RELATIVE_VALUE" | "EXPORT"
+  variable?: {
+    name: string;
+    type: "RELATIVE_VALUE" | "EXPORT";
+  }
 ): EntityNode[] {
   const ownerNode: EntityNode = { slug: owner.slug };
   if (hasTypename(owner)) {
@@ -43,22 +45,26 @@ export function entityNodes(
     },
   ];
 
-  if (variableName && variableNodeType === "RELATIVE_VALUE") {
+  if (variable && variable.type === "RELATIVE_VALUE") {
     nodes.push({
-      slug: variableName,
+      slug: variable.type,
       href: modelForRelativeValuesExportRoute({
         owner: owner.slug,
         slug,
-        variableName,
+        variableName: variable.name,
       }),
       icon: ScaleIcon,
     });
   }
 
-  if (variableName && variableNodeType === "EXPORT") {
+  if (variable && variable.type === "EXPORT") {
     nodes.push({
-      slug: variableName,
-      href: modelExportRoute({ owner: owner.slug, slug, variableName }),
+      slug: variable.name,
+      href: modelExportRoute({
+        owner: owner.slug,
+        slug,
+        variableName: variable.name,
+      }),
       icon: ShareIcon,
     });
   }

@@ -143,12 +143,12 @@ export const ModelLayout: FC<
 
   return (
     <EntityLayout
-      nodes={entityNodes(
-        model.owner,
-        model.slug,
-        variableName,
-        isModelRelativeValuesRoute(pathname) ? "RELATIVE_VALUE" : "EXPORT"
-      )}
+      nodes={entityNodes(model.owner, model.slug, {
+        name: variableName,
+        type: isModelRelativeValuesRoute(pathname)
+          ? "RELATIVE_VALUE"
+          : "EXPORT",
+      })}
       isFluid={true}
       headerLeft={<ModelAccessControls modelRef={model} />}
       headerRight={

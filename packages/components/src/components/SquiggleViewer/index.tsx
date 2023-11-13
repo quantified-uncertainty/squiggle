@@ -60,25 +60,25 @@ const SquiggleViewerOuter = forwardRef<
   const focusedNavigation = focused && !isFocusedOnRootPathOverride && (
     <div className="flex items-center mb-3 pl-1">
       {!rootPathOverride && (
-        <div>
+        <>
           <span onClick={unfocus} className={navLinkStyle}>
             {focused.root === "bindings" ? "Variables" : focused.root}
           </span>
 
           <ChevronRightIcon className="text-slate-300" size={24} />
-        </div>
+        </>
       )}
 
       {focused
         .itemsAsValuePaths({ includeRoot: false })
         .slice(rootPathFocusedAdjustment, -1)
         .map((path, i) => (
-          <div key={i} className="flex items-center">
+          <>
             <div onClick={() => focus(path)} className={navLinkStyle}>
               {pathItemFormat(path.items[i + rootPathFocusedAdjustment])}
             </div>
             <ChevronRightIcon className="text-slate-300" size={24} />
-          </div>
+          </>
         ))}
     </div>
   );
