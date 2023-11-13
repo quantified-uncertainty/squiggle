@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import ReactMarkdown from "react-markdown";
 
@@ -180,6 +180,16 @@ type Props = {
   valueWithContext: SqCalculatorValueWithContext;
 };
 
+function useDeepCompareMemoize(value: PlaygroundSettings): PlaygroundSettings {
+  const ref = useRef<PlaygroundSettings | undefined>();
+
+  if (JSON.stringify(value) !== JSON.stringify(ref.current)) {
+    ref.current = value;
+  }
+
+  return ref.current as PlaygroundSettings;
+}
+
 export const CalculatorSampleCountValidation: React.FC<{
   calculator: SqCalculatorValueWithContext;
   children: React.ReactNode;
@@ -208,14 +218,15 @@ export const Calculator: FC<Props> = ({
     () => getEnvironment(environment, valueWithContext.value),
     [environment, valueWithContext]
   );
+  const _settings: PlaygroundSettings = useDeepCompareMemoize(settings);
 
   const { calculator, form, inputResults, processAllFieldCodes } =
     useCalculator(valueWithContext, _environment);
 
   const inputResultSettings: PlaygroundSettings = {
-    ...settings,
+    ..._settings,
     distributionChartSettings: {
-      ...settings.distributionChartSettings,
+      ..._settings.distributionChartSettings,
       showSummary: false,
     },
     chartHeight: 30,
@@ -224,10 +235,10 @@ export const Calculator: FC<Props> = ({
   //This memoization is useful to make sure that CalculatorResult ResultViewer doesn't get updated too frequently.
   const calculatorResultSettings: PlaygroundSettings = useMemo(
     () => ({
-      ...settings,
+      ..._settings,
       chartHeight: 200,
     }),
-    [settings]
+    [_settings]
   );
 
   const hasTitleOrDescription = !!calculator.title || !!calculator.description;
