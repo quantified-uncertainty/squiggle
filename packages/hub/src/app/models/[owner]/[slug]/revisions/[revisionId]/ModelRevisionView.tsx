@@ -13,7 +13,7 @@ import { modelRoute } from "@/routes";
 import { ModelRevisionViewQuery } from "@gen/ModelRevisionViewQuery.graphql";
 import {
   VersionedSquigglePlayground,
-  useValidSquiggleVersion,
+  useAdjustSquiggleVersion,
 } from "@quri/versioned-playground";
 import { CommentIcon } from "@quri/ui";
 
@@ -65,7 +65,7 @@ export const ModelRevisionView: FC<{
     throw new Error(`Unknown model type ${typename}`);
   }
 
-  const checkedVersion = useValidSquiggleVersion(
+  const checkedVersion = useAdjustSquiggleVersion(
     model.revision.content.version
   );
 

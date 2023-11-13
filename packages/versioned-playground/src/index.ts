@@ -10,4 +10,4 @@ export {
   type SquiggleVersion,
 } from "./versions.js";
 
-export { useValidSquiggleVersion } from "./hooks.js";
+export { useAdjustSquiggleVersion } from "./hooks.js";

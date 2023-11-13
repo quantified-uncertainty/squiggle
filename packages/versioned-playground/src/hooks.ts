@@ -8,7 +8,7 @@ import {
   defaultSquiggleVersion,
 } from "./versions.js";
 
-export function useValidSquiggleVersion(version: string): SquiggleVersion {
+export function useAdjustSquiggleVersion(version: string): SquiggleVersion {
   const toast = useToast();
 
   const usedVersion = useMemo<SquiggleVersion>(() => {

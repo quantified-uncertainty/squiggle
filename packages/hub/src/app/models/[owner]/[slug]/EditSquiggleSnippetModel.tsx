@@ -18,7 +18,7 @@ import {
   SquiggleVersionShower,
   VersionedSquigglePlayground,
   checkSquiggleVersion,
-  useValidSquiggleVersion,
+  useAdjustSquiggleVersion,
   type SquiggleVersion,
   versionSupportsDropdownMenu,
 } from "@quri/versioned-playground";
@@ -264,8 +264,10 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
 
   const { height, ref } = useAvailableHeight();
 
-  const checkedVersion = useValidSquiggleVersion(version);
+  const checkedVersion = useAdjustSquiggleVersion(version);
 
+  // Build props for VersionedSquigglePlayground first, since they might depend on the version we use,
+  // and we want to populate them incrementally.
   const playgroundProps: Parameters<typeof VersionedSquigglePlayground>[0] = {
     version: checkedVersion,
     defaultCode,

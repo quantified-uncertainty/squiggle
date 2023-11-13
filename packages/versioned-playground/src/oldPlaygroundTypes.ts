@@ -1,7 +1,7 @@
 /*
  * Older playgrounds didn't export their props type, and it's not possible to import the type when we're doing lazy loading.
  * (Attempt to implicitly type the lazy import causes TS2742 "likely not portable" error.)
- * So we have to duplicate heir type definitions here.
+ * So we have to duplicate their type definitions here.
  */
 
 import { CSSProperties, ReactNode } from "react";
