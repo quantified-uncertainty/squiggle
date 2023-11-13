@@ -225,9 +225,9 @@ export const Calculator: FC<Props> = ({
   const _settings: PlaygroundSettings = useDeepCompareMemoize(settings);
 
   const inputResultSettings: PlaygroundSettings = {
-    ...settings,
+    ..._settings,
     distributionChartSettings: {
-      ...settings.distributionChartSettings,
+      ..._settings.distributionChartSettings,
       showSummary: false,
     },
     chartHeight: 30,
