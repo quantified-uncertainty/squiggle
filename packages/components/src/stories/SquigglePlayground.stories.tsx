@@ -227,7 +227,7 @@ bar = 123
 \`\`test123\`\`
 "
 `,
-    height: 800,
+    height: 1200,
   },
 };
 
@@ -236,7 +236,7 @@ export const Calculator: Story = {
   args: {
     defaultCode: `calculatorCorrectlyUpdatesTest = 343 //changing this should propery update the calculator
     
-    f(a, b, c, d) =  {|f| normal(f*b, f*b)}
+    f(a, b, c, d) =  [a,b,c,d,{|f| normal(f*b, f*b)}]
 a = "A longer description of the calculator goes here...\n"
 Calculator.make(
   {

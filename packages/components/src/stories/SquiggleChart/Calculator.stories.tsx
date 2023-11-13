@@ -11,7 +11,7 @@ type Story = StoryObj<typeof meta>;
 export const Basic: Story = {
   args: {
     code: `
-    f(a, b, c, d) = {|f| normal(f*10+b, 1)}
+    f(a, b, c, d) = [{|f| normal(f*10+b, 1)},a,b,c,d]
     a = "A longer description of the calculator goes here...
     "
     Calculator.make(

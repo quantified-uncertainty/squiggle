@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import ReactMarkdown from "react-markdown";
 
@@ -199,6 +199,16 @@ export const CalculatorSampleCountValidation: React.FC<{
   );
 };
 
+function useDeepCompareMemoize(value: PlaygroundSettings): PlaygroundSettings {
+  const ref = useRef<PlaygroundSettings | undefined>();
+
+  if (JSON.stringify(value) !== JSON.stringify(ref.current)) {
+    ref.current = value;
+  }
+
+  return ref.current as PlaygroundSettings;
+}
+
 export const Calculator: FC<Props> = ({
   environment,
   settings,
@@ -209,22 +219,30 @@ export const Calculator: FC<Props> = ({
     [environment, valueWithContext]
   );
 
+  const _settings: PlaygroundSettings = useDeepCompareMemoize(settings);
+
   const { calculator, form, inputResults, processAllFieldCodes } =
     useCalculator(valueWithContext, _environment);
 
-  const inputResultSettings: PlaygroundSettings = {
-    ...settings,
-    distributionChartSettings: {
-      ...settings.distributionChartSettings,
-      showSummary: false,
-    },
-    chartHeight: 30,
-  };
+  const inputResultSettings: PlaygroundSettings = useMemo(
+    () => ({
+      ..._settings,
+      distributionChartSettings: {
+        ..._settings.distributionChartSettings,
+        showSummary: false,
+      },
+      chartHeight: 30,
+    }),
+    [_settings]
+  );
 
-  const calculatorResultSettings: PlaygroundSettings = {
-    ...settings,
-    chartHeight: 200,
-  };
+  const calculatorResultSettings: PlaygroundSettings = useMemo(
+    () => ({
+      ..._settings,
+      chartHeight: 200,
+    }),
+    [_settings]
+  );
 
   const hasTitleOrDescription = !!calculator.title || !!calculator.description;
 
