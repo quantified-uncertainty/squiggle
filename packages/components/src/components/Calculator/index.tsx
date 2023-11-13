@@ -180,16 +180,6 @@ type Props = {
   valueWithContext: SqCalculatorValueWithContext;
 };
 
-function useDeepCompareMemoize(value: PlaygroundSettings): PlaygroundSettings {
-  const ref = useRef<PlaygroundSettings | undefined>();
-
-  if (JSON.stringify(value) !== JSON.stringify(ref.current)) {
-    ref.current = value;
-  }
-
-  return ref.current as PlaygroundSettings;
-}
-
 export const CalculatorSampleCountValidation: React.FC<{
   calculator: SqCalculatorValueWithContext;
   children: React.ReactNode;
@@ -209,6 +199,16 @@ export const CalculatorSampleCountValidation: React.FC<{
   );
 };
 
+function useDeepCompareMemoize(value: PlaygroundSettings): PlaygroundSettings {
+  const ref = useRef<PlaygroundSettings | undefined>();
+
+  if (JSON.stringify(value) !== JSON.stringify(ref.current)) {
+    ref.current = value;
+  }
+
+  return ref.current as PlaygroundSettings;
+}
+
 export const Calculator: FC<Props> = ({
   environment,
   settings,
@@ -218,10 +218,11 @@ export const Calculator: FC<Props> = ({
     () => getEnvironment(environment, valueWithContext.value),
     [environment, valueWithContext]
   );
-  const _settings: PlaygroundSettings = useDeepCompareMemoize(settings);
 
   const { calculator, form, inputResults, processAllFieldCodes } =
     useCalculator(valueWithContext, _environment);
+
+  const _settings: PlaygroundSettings = useDeepCompareMemoize(settings);
 
   const inputResultSettings: PlaygroundSettings = {
     ..._settings,
