@@ -7,6 +7,8 @@ import {
   SqDistribution,
   SqProject,
   SqValue,
+  SqPointSetDistribution,
+  SqSampleSetDistribution,
 } from "@quri/squiggle-lang";
 
 import { builder } from "@/graphql/builder";
@@ -25,6 +27,17 @@ export const squiggleValueToJSON = (value: SqValue) => {
       }
       if (value instanceof SqLambda) {
         return value.toString();
+      }
+      if (value instanceof SqSampleSetDistribution) {
+        return {
+          type: "SampleSetDistribution",
+          first100Samples: value._value.samples.slice(0, 100),
+          sampleCount: value._value.samples.length,
+          mean: value._value.mean(),
+          stdev: value._value.stdev(),
+          p5: value._value.cdf(0.05),
+          p95: value._value.cdf(0.95),
+        };
       }
       if (value instanceof SqAbstractDistribution) {
         return value.toString();
@@ -99,7 +112,12 @@ builder.objectType(
 export async function runSquiggle(code: string): Promise<SquiggleOutput> {
   const MAIN = "main";
 
-  const project = SqProject.create();
+  const env = {
+    sampleCount: 1000, // int
+    xyPointLength: 1000, // int
+  };
+
+  const project = SqProject.create({ environment: env });
 
   project.setSource(MAIN, code);
   await project.run(MAIN);
