@@ -39,34 +39,42 @@ export const ExportsDropdown: FC<
     <Dropdown
       render={({ close }) => (
         <DropdownMenu>
-          <DropdownMenuHeader>Exports</DropdownMenuHeader>
-          {exports.map((exportItem) => (
-            <DropdownMenuNextLinkItem
-              key={exportItem.variableName}
-              href={modelExportRoute({
-                owner: owner,
-                slug: slug,
-                variableName: exportItem.variableName,
-              })}
-              title={`${exportItem.title || exportItem.variableName}`}
-              icon={ShareIcon}
-              close={close}
-            />
-          ))}{" "}
-          <DropdownMenuHeader>Relative Value Functions</DropdownMenuHeader>
-          {relativeValuesExports.map((exportItem) => (
-            <DropdownMenuNextLinkItem
-              key={exportItem.variableName}
-              href={modelForRelativeValuesExportRoute({
-                owner: owner,
-                slug: slug,
-                variableName: exportItem.variableName,
-              })}
-              title={`${exportItem.variableName}: ${exportItem.slug}`}
-              icon={ScaleIcon}
-              close={close}
-            />
-          ))}
+          {exports.length > 0 && (
+            <>
+              <DropdownMenuHeader>Exports</DropdownMenuHeader>
+              {exports.map((exportItem) => (
+                <DropdownMenuNextLinkItem
+                  key={exportItem.variableName}
+                  href={modelExportRoute({
+                    owner: owner,
+                    slug: slug,
+                    variableName: exportItem.variableName,
+                  })}
+                  title={`${exportItem.title || exportItem.variableName}`}
+                  icon={ShareIcon}
+                  close={close}
+                />
+              ))}{" "}
+            </>
+          )}
+          {exports.length > 0 && (
+            <>
+              <DropdownMenuHeader>Relative Value Functions</DropdownMenuHeader>
+              {relativeValuesExports.map((exportItem) => (
+                <DropdownMenuNextLinkItem
+                  key={exportItem.variableName}
+                  href={modelForRelativeValuesExportRoute({
+                    owner: owner,
+                    slug: slug,
+                    variableName: exportItem.variableName,
+                  })}
+                  title={`${exportItem.variableName}: ${exportItem.slug}`}
+                  icon={ScaleIcon}
+                  close={close}
+                />
+              ))}
+            </>
+          )}
         </DropdownMenu>
       )}
     >
