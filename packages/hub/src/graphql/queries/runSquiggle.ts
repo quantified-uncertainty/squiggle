@@ -3,6 +3,8 @@ import { Prisma } from "@prisma/client";
 
 import {
   SqAbstractDistribution,
+  SqLambda,
+  SqDistribution,
   SqProject,
   SqValue,
 } from "@quri/squiggle-lang";
@@ -20,6 +22,9 @@ export const squiggleValueToJSON = (value: SqValue) => {
     JSON.stringify(value.asJS(), (key, value) => {
       if (value instanceof Map) {
         return Object.fromEntries(value.entries());
+      }
+      if (value instanceof SqLambda) {
+        return value.toString();
       }
       if (value instanceof SqAbstractDistribution) {
         return value.toString();
