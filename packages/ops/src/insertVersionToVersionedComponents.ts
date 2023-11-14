@@ -9,17 +9,18 @@ const t = babel.types;
 
 const parserPlugins: babelParser.ParserPlugin[] = [["typescript", {}], "jsx"];
 
-// assumes that cwd is packages/versioned-playground
-export async function insertVersionToVersionedPlayground(version: string) {
+// assumes that cwd is packages/versioned-components
+export async function insertVersionToVersionedComponents(version: string) {
   const alias = `squiggle-components-${version}`;
   await exec(`pnpm add ${alias}@npm:@quri/squiggle-components@${version}`);
 
-  const propsIdentifier =
-    "SquigglePlaygroundProps_" + version.split(".").join("_");
-
-  {
-    const filename = "src/VersionedSquigglePlayground.tsx";
+  for (const componentName of ["SquigglePlayground", "SquiggleChart"]) {
+    const filename = `src/Versioned${componentName}.tsx`;
     let src = await readFile(filename, "utf-8");
+
+    const propsIdentifier = `${componentName}Props_${version
+      .split(".")
+      .join("_")}`;
 
     let patchedImports = false,
       patchedComponents = false;
@@ -33,7 +34,7 @@ export async function insertVersionToVersionedPlayground(version: string) {
               if (path.node.source.value === "@quri/squiggle-components") {
                 const specifier = t.importSpecifier(
                   t.identifier(propsIdentifier),
-                  t.identifier("SquigglePlaygroundProps")
+                  t.identifier(`${componentName}Props`)
                 );
                 specifier.importKind = "type";
                 path.insertBefore(
@@ -45,9 +46,11 @@ export async function insertVersionToVersionedPlayground(version: string) {
             VariableDeclarator(path) {
               if (
                 path.node.id.type === "Identifier" &&
-                path.node.id.name === "playgroundByVersion"
+                path.node.id.name === "componentByVersion"
               ) {
-                const entries = path.get("init.expression.properties");
+                const entries = path.get(
+                  "init.expression.expression.properties"
+                );
                 if (!Array.isArray(entries)) {
                   throw new Error("Expected an array");
                 }
@@ -58,7 +61,7 @@ export async function insertVersionToVersionedPlayground(version: string) {
 
                 const lazyImport = babelParser.parseExpression(
                   `(lazy(async () => ({
-                    default: (await import("${alias}")).SquigglePlayground
+                    default: (await import("${alias}")).${componentName}
                   })) as FC<${propsIdentifier}>)`,
                   { plugins: parserPlugins }
                 );

@@ -14,7 +14,7 @@ import { ModelRevisionViewQuery } from "@gen/ModelRevisionViewQuery.graphql";
 import {
   VersionedSquigglePlayground,
   useAdjustSquiggleVersion,
-} from "@quri/versioned-playground";
+} from "@quri/versioned-squiggle-components";
 import { CommentIcon } from "@quri/ui";
 
 const Query = graphql`

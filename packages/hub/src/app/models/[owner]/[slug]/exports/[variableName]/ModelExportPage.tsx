@@ -6,7 +6,7 @@ import { SqValuePath } from "@quri/squiggle-lang";
 import {
   VersionedSquiggleChart,
   useAdjustSquiggleVersion,
-} from "@quri/versioned-playground";
+} from "@quri/versioned-squiggle-components";
 
 import { ModelExportPageQuery } from "@/__generated__/ModelExportPageQuery.graphql";
 import { ModelExportPage_SquiggleContent$key } from "@/__generated__/ModelExportPage_SquiggleContent.graphql";

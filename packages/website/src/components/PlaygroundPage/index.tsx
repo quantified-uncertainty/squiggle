@@ -9,7 +9,7 @@ import {
   defaultSquiggleVersion,
   type SquiggleVersion,
   squiggleVersions,
-} from "@quri/versioned-playground";
+} from "@quri/versioned-squiggle-components";
 import { useAvailableHeight } from "../../utils/useAvailableHeight";
 
 const HASH_PREFIX = "#code=";

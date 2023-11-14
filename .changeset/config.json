@@ -16,7 +16,7 @@
     "squiggle-website",
     "@quri/hub",
     "@quri/ops",
-    "@quri/versioned-playground"
+    "@quri/versioned-squiggle-components"
   ],
   "changelog": "../packages/ops/dist/scripts/changelog.cjs"
 }
