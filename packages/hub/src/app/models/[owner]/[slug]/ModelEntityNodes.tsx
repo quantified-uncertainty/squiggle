@@ -52,7 +52,7 @@ function entityNodes(
 
   if (variable && variable.type === "RELATIVE_VALUE") {
     nodes.push({
-      slug: variable.type,
+      slug: variable.name,
       href: modelForRelativeValuesExportRoute({
         owner: owner.slug,
         slug,
