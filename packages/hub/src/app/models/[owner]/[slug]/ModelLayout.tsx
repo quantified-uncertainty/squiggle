@@ -3,15 +3,7 @@
 import { FC, PropsWithChildren } from "react";
 import { graphql } from "relay-runtime";
 
-import {
-  CodeBracketIcon,
-  Dropdown,
-  DropdownMenu,
-  DropdownMenuHeader,
-  RectangleStackIcon,
-  ScaleIcon,
-  ShareIcon,
-} from "@quri/ui";
+import { CodeBracketIcon, RectangleStackIcon, ShareIcon } from "@quri/ui";
 
 import { ModelLayoutQuery } from "@/__generated__/ModelLayoutQuery.graphql";
 import { EntityLayout } from "@/components/EntityLayout";
@@ -30,6 +22,7 @@ import { useFixModelUrlCasing } from "./FixModelUrlCasing";
 import { ModelAccessControls } from "./ModelAccessControls";
 import { ModelSettingsButton } from "./ModelSettingsButton";
 import { ModelEntityNodes } from "./ModelEntityNodes";
+import { ExportsDropdown } from "@/lib/ExportsDropdown";
 
 // Note that we have to do two GraphQL queries on most model pages: one for layout.tsx, and one for page.tsx.
 const Query = graphql`
@@ -87,47 +80,6 @@ export const ModelLayout: FC<
 
   const relativeValuesExports = model.currentRevision.relativeValuesExports;
 
-  //We remove the relative values exports from the exports list, to not double count them.
-  const modelExports = model.currentRevision.exports.filter(
-    ({ variableName }) =>
-      !relativeValuesExports.find(({ variableName: v }) => v === variableName)
-  );
-
-  const dropDown = (close: () => void) => {
-    return (
-      <DropdownMenu>
-        <DropdownMenuHeader>Exports</DropdownMenuHeader>
-        {modelExports.map((exportItem) => (
-          <DropdownMenuNextLinkItem
-            key={exportItem.variableName}
-            href={modelExportRoute({
-              owner: model.owner.slug,
-              slug: model.slug,
-              variableName: exportItem.variableName,
-            })}
-            title={`${exportItem.title || exportItem.variableName}`}
-            icon={ShareIcon}
-            close={close}
-          />
-        ))}{" "}
-        <DropdownMenuHeader>Relative Value Functions</DropdownMenuHeader>
-        {relativeValuesExports.map((exportItem) => (
-          <DropdownMenuNextLinkItem
-            key={exportItem.variableName}
-            href={modelForRelativeValuesExportRoute({
-              owner: model.owner.slug,
-              slug: model.slug,
-              variableName: exportItem.variableName,
-            })}
-            title={`${exportItem.variableName}: ${exportItem.definition.slug}`}
-            icon={ScaleIcon}
-            close={close}
-          />
-        ))}
-      </DropdownMenu>
-    );
-  };
-
   const modelUrl = modelRoute({ owner: model.owner.slug, slug: model.slug });
   const modelRevisionsUrl = modelRevisionsRoute({
     owner: model.owner.slug,
@@ -143,11 +95,26 @@ export const ModelLayout: FC<
         <EntityTab.List>
           <EntityTab.Link name="Code" icon={CodeBracketIcon} href={modelUrl} />
           {Boolean(model.currentRevision.relativeValuesExports.length) && (
-            <Dropdown render={({ close }) => dropDown(close)}>
+            <ExportsDropdown
+              modelExports={model.currentRevision.exports.map(
+                ({ variableName, title }) => ({
+                  variableName,
+                  title: title || variableName,
+                })
+              )}
+              relativeValuesExports={model.currentRevision.relativeValuesExports.map(
+                ({ variableName, definition: { slug } }) => ({
+                  variableName,
+                  slug,
+                })
+              )}
+              owner={model.owner.slug}
+              slug={model.slug}
+            >
               <EntityTab.Div
                 name="Exports"
                 icon={ShareIcon}
-                count={relativeValuesExports.length + modelExports.length}
+                count={model.currentRevision.exports.length}
                 selected={(pathname) => {
                   return (
                     pathname.startsWith(modelUrl + "/relative-values") ||
@@ -155,7 +122,7 @@ export const ModelLayout: FC<
                   );
                 }}
               />
-            </Dropdown>
+            </ExportsDropdown>
           )}
           <EntityTab.Link
             name="Revisions"
