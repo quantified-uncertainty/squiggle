@@ -15,12 +15,12 @@ import {
 import { LazyVersionedComponents, VersionedComponentProps } from "./types.js";
 
 /*
- * Please don't change the formatting of these imports and the following `playgroundByVersion` declaration unless you have to.
+ * Please don't change the formatting of these imports and the following `componentByVersion` declaration unless you have to.
  * It's edited with babel transformation in `publish-all.ts` script.
  */
 import { type SquigglePlaygroundProps as SquigglePlaygroundProps_dev } from "@quri/squiggle-components";
 
-const playgroundByVersion = {
+const componentByVersion = {
   "0.8.5": lazy(async () => ({
     default: (await import("squiggle-components-0.8.5")).SquigglePlayground,
   })) as FC<SquigglePlaygroundProps_0_8_5>,
@@ -32,13 +32,13 @@ const playgroundByVersion = {
   })) as FC<SquigglePlaygroundProps_dev>,
 } as const satisfies LazyVersionedComponents;
 
-type Props = VersionedComponentProps<typeof playgroundByVersion>;
+type Props = VersionedComponentProps<typeof componentByVersion>;
 
 export const VersionedSquigglePlayground: FC<Props> = ({
   version,
   ...props
 }) => {
-  const Playground = playgroundByVersion[version];
+  const Playground = componentByVersion[version];
 
   return (
     // TODO - fallback spinner / loading message?
