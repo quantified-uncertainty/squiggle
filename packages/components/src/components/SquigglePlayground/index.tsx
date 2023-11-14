@@ -27,7 +27,7 @@ import { ResizableTwoPanelLayout } from "./ResizableTwoPanelLayout.js";
  * First, because playground will support multi-file mode by itself.
  * Second, because environment is configurable through playground settings and it should match the project.getEnvironment(), so this component owns the project to guarantee that.
  */
-type PlaygroundProps = {
+export type SquigglePlaygroundProps = {
   /*
    * Playground code is not reactive, because Codemirror editor is stateful and it would be hard/impossible to support code updates.
    * For example, it's not clear what we could do with the cursor position or selection if this prop is changed.
@@ -55,7 +55,9 @@ export const PlaygroundContext = React.createContext<PlaygroundContextShape>({
   getLeftPanelElement: () => undefined,
 });
 
-export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
+export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
+  props
+) => {
   const {
     defaultCode,
     linker,

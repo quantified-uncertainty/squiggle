@@ -11,3 +11,14 @@ export function checkSquiggleVersion(
 ): version is SquiggleVersion {
   return (squiggleVersions as readonly string[]).includes(version);
 }
+
+/*
+ * This is an example of a type predicate (https://www.typescriptlang.org/docs/handbook/2/narrowing.html#using-type-predicates)
+ * that's useful for setting component props conditionally.
+ * See `EditSquiggleSnippetModel` in the Squiggle Hub source code for an example how it's used.
+ */
+export function versionSupportsDropdownMenu<
+  T extends { version: SquiggleVersion },
+>(arg: T): arg is Extract<T, { version: Exclude<SquiggleVersion, "0.8.5"> }> {
+  return !["0.8.5"].includes(arg.version);
+}

@@ -1,106 +1,65 @@
 "use client";
-import { FC, ReactNode, useMemo, lazy, Suspense } from "react";
+import { FC, Suspense, lazy } from "react";
 
-import { useToast } from "@quri/ui";
+import { SquiggleVersion } from "./versions.js";
 
+/*
+ * We have to type all playground components explicitly; otherwise, TypeScript will complain with TS2742 "likely not portable" error.
+ * But we also need lazy imports and not load all playground versions immediately.
+ * This means that types should be imported immediately with `import { type ... }`, which are removed by TypeScript
+ * (`importsNotUsedAsValues`, https://www.typescriptlang.org/tsconfig#importsNotUsedAsValues, defaults to "remove"),
+ * but components themselves should be imported lazily.
+ */
 import {
-  SquiggleVersion,
-  checkSquiggleVersion,
-  defaultSquiggleVersion,
-} from "./versions.js";
+  SquigglePlaygroundProps_0_8_5,
+  SquigglePlaygroundProps_0_8_6,
+} from "./oldPlaygroundTypes.js";
 
-// Note: typing this with `{ [k in Version]: ComponentType<CommonProps> }` won't work because of contravariance issues.
-// Instead, we pass all props explicitly to the playground component when it's instantiated to check that all props are compatible.
-// Also, please don't change the formatting of this declaration unless you have to. It's edited with regexes in `publish-all.ts` script.
-// (TODO: using codemod would be nice)
+/*
+ * Please don't change the formatting of these imports and the following `playgroundByVersion` declaration unless you have to.
+ * It's edited with babel transformation in `publish-all.ts` script.
+ */
+import { type SquigglePlaygroundProps as SquigglePlaygroundProps_dev } from "@quri/squiggle-components";
+
 const playgroundByVersion = {
   "0.8.5": lazy(async () => ({
     default: (await import("squiggle-components-0.8.5")).SquigglePlayground,
-  })),
+  })) as FC<SquigglePlaygroundProps_0_8_5>,
   "0.8.6": lazy(async () => ({
     default: (await import("squiggle-components-0.8.6")).SquigglePlayground,
-  })),
+  })) as FC<SquigglePlaygroundProps_0_8_6>,
   dev: lazy(async () => ({
     default: (await import("@quri/squiggle-components")).SquigglePlayground,
-  })),
-};
+  })) as FC<SquigglePlaygroundProps_dev>,
+} as const;
 
-// We expect all playground components to be a subtype of this type.
-type CommonProps = {
-  defaultCode?: string;
-  distributionChartSettings?: { showSummary?: boolean }; // simplified
-  renderExtraControls?: (options: {
-    openModal: (name: string) => void;
-  }) => ReactNode;
-  renderExtraModal?: (name: string) =>
-    | {
-        title: string;
-        body: ReactNode;
-      }
-    | undefined;
-  onCodeChange?: (code: string) => void;
-  onSettingsChange?: (settings: {
-    distributionChartSettings: { showSummary: boolean };
-  }) => void;
-  height?: string | number;
-  // available since 0.8.6
-  sourceId?: string;
-  renderExtraDropdownItems?: (options: {
-    openModal: (name: string) => void;
-  }) => ReactNode;
-};
+type PlaygroundProps<T extends SquiggleVersion> = Parameters<
+  (typeof playgroundByVersion)[T]
+>[0];
 
-// supported only in modern playgrounds
-type LinkerProps = {
-  linker?: {
-    resolve: (name: string, fromId: string) => string;
-    loadSource: (sourceId: string) => Promise<string>;
-  };
-};
+// Conditional is a trick from https://stackoverflow.com/a/51691257, so that we don't have to list all versions individually in `Props` definition below.
+type PropsForVersion<T extends SquiggleVersion> = T extends string
+  ? {
+      version: T;
+    } & PlaygroundProps<T>
+  : never;
 
-type Props = CommonProps &
-  LinkerProps & {
-    version: string; // not SquiggleVersion, because it's easier to validate the version inside this component
-  };
+type Props = PropsForVersion<SquiggleVersion>;
 
 export const VersionedSquigglePlayground: FC<Props> = ({
   version,
   ...props
 }) => {
-  const toast = useToast();
-
-  const usedVersion = useMemo<SquiggleVersion>(() => {
-    if (!checkSquiggleVersion(version)) {
-      toast(
-        `Playground for version ${version} is not available. Rendering with
-          ${defaultSquiggleVersion} instead.`,
-        "error"
-      );
-      return defaultSquiggleVersion;
-    }
-    return version;
-  }, [version, toast]);
-
-  const Playground = playgroundByVersion[usedVersion];
+  const Playground = playgroundByVersion[version];
 
   return (
     // TODO - fallback spinner / loading message?
     <Suspense fallback={null}>
       <Playground
-        // Listing all props for better type safety, instead of using `{...props}`.
-        // Playground props shape can change in the future and this allows us to catch those cases early.
-        defaultCode={props.defaultCode}
-        distributionChartSettings={props.distributionChartSettings}
-        renderExtraControls={props.renderExtraControls}
-        renderExtraModal={props.renderExtraModal}
-        onCodeChange={props.onCodeChange}
-        onSettingsChange={props.onSettingsChange}
-        height={props.height}
-        // older playgrounds don't support these, it'll be ignored, that's fine
-        // (why TypeScript doesn't error on this, these props didn't exist in 0.8.5? no idea)
-        linker={props.linker}
-        renderExtraDropdownItems={props.renderExtraDropdownItems}
-        sourceId={props.sourceId}
+        {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ...(props as any) // we've checked the types in Props already so this is fine
+        }
       />
     </Suspense>
   );

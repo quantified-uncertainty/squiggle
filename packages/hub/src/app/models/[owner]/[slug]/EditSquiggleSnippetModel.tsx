@@ -18,7 +18,9 @@ import {
   SquiggleVersionShower,
   VersionedSquigglePlayground,
   checkSquiggleVersion,
+  useAdjustSquiggleVersion,
   type SquiggleVersion,
+  versionSupportsDropdownMenu,
 } from "@quri/versioned-playground";
 
 import { EditSquiggleSnippetModel$key } from "@/__generated__/EditSquiggleSnippetModel.graphql";
@@ -262,6 +264,89 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
 
   const { height, ref } = useAvailableHeight();
 
+  const checkedVersion = useAdjustSquiggleVersion(version);
+
+  // Build props for VersionedSquigglePlayground first, since they might depend on the version we use,
+  // and we want to populate them incrementally.
+  const playgroundProps: Parameters<typeof VersionedSquigglePlayground>[0] = {
+    version: checkedVersion,
+    defaultCode,
+    sourceId: serializeSourceId({
+      owner: model.owner.slug,
+      slug: model.slug,
+    }),
+    linker: squiggleHubLinker,
+    height: height ?? "100vh",
+    onCodeChange,
+    renderExtraControls: () => (
+      <div className="h-full flex items-center justify-end gap-2">
+        {model.isEditable || forceVersionPicker ? (
+          <SquigglePlaygroundVersionPicker
+            version={version}
+            onChange={handleVersionChange}
+            size="small"
+            showUpdatePolicy
+          />
+        ) : (
+          <TextTooltip
+            text="Squiggle Version" // FIXME - positioning is bad for some reason
+            placement="bottom"
+            offset={5}
+          >
+            {/* div wrapper is required because TextTooltip clones its children and SquiggleVersionShower doesn't forwardRef */}
+            <div>
+              <SquiggleVersionShower version={version} />
+            </div>
+          </TextTooltip>
+        )}
+        {model.isEditable && (
+          <SaveButton onSubmit={onSubmit} disabled={inFlight} />
+        )}
+      </div>
+    ),
+    renderExtraModal: (name) => {
+      if (name === "exports") {
+        return {
+          body: (
+            <div className="px-6 py-2">
+              <EditModelExports
+                append={(item) => {
+                  appendVariableWithDefinition(item);
+                  onSubmit();
+                }}
+                remove={(id) => {
+                  removeVariableWithDefinition(id);
+                  onSubmit();
+                }}
+                items={variablesWithDefinitionsFields}
+                modelRef={model}
+              />
+            </div>
+          ),
+          title: "Exported Variables",
+        };
+      }
+    },
+  };
+
+  /* This is an example of how we could narrow versions to inject props conditionally.
+   * (In this simple case, we could always set `renderExtraDropdownItems` prop since it'd be ignored by older playground versions.)
+   * It relies on `versionSupportsDropdownMenu` type predicate which narrows down `playgroundProps` type.
+   */
+  if (versionSupportsDropdownMenu(playgroundProps)) {
+    playgroundProps.renderExtraDropdownItems = ({ openModal }) =>
+      model.isEditable ? (
+        <>
+          <DropdownMenuHeader>Experimental</DropdownMenuHeader>
+          <DropdownMenuActionItem
+            title="Exported Variables"
+            icon={LinkIcon}
+            onClick={() => openModal("exports")}
+          />
+        </>
+      ) : null;
+  }
+
   return (
     <FormProvider {...form}>
       <form onSubmit={() => onSubmit()}>
@@ -272,76 +357,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
           />
           <VersionedSquigglePlayground
             key={playgroundKey}
-            version={version}
-            sourceId={serializeSourceId({
-              owner: model.owner.slug,
-              slug: model.slug,
-            })}
-            linker={squiggleHubLinker}
-            height={height ?? "100vh"}
-            onCodeChange={onCodeChange}
-            defaultCode={defaultCode}
-            renderExtraDropdownItems={({ openModal }) =>
-              model.isEditable ? (
-                <>
-                  <DropdownMenuHeader>Experimental</DropdownMenuHeader>
-                  <DropdownMenuActionItem
-                    title="Exported Variables"
-                    icon={LinkIcon}
-                    onClick={() => openModal("exports")}
-                  />
-                </>
-              ) : null
-            }
-            renderExtraControls={() => (
-              <div className="h-full flex items-center justify-end gap-2">
-                {model.isEditable || forceVersionPicker ? (
-                  <SquigglePlaygroundVersionPicker
-                    version={version}
-                    onChange={handleVersionChange}
-                    size="small"
-                    showUpdatePolicy
-                  />
-                ) : (
-                  <TextTooltip
-                    text="Squiggle Version" // FIXME - positioning is bad for some reason
-                    placement="bottom"
-                    offset={5}
-                  >
-                    {/* div wrapper is required because TextTooltip clones its children and SquiggleVersionShower doesn't forwardRef */}
-                    <div>
-                      <SquiggleVersionShower version={version} />
-                    </div>
-                  </TextTooltip>
-                )}
-                {model.isEditable && (
-                  <SaveButton onSubmit={onSubmit} disabled={inFlight} />
-                )}
-              </div>
-            )}
-            renderExtraModal={(name) => {
-              if (name === "exports") {
-                return {
-                  body: (
-                    <div className="px-6 py-2">
-                      <EditModelExports
-                        append={(item) => {
-                          appendVariableWithDefinition(item);
-                          onSubmit();
-                        }}
-                        remove={(id) => {
-                          removeVariableWithDefinition(id);
-                          onSubmit();
-                        }}
-                        items={variablesWithDefinitionsFields}
-                        modelRef={model}
-                      />
-                    </div>
-                  ),
-                  title: "Exported Variables",
-                };
-              }
-            }}
+            {...playgroundProps}
           />
         </div>
       </form>
