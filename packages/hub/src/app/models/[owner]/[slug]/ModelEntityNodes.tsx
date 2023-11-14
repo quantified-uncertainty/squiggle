@@ -3,7 +3,6 @@
 import { FC } from "react";
 import { useParams, usePathname } from "next/navigation";
 import { EntityInfo } from "@/components/EntityInfo";
-import { isModelRelativeValuesRoute } from "@/routes";
 import { CodeBracketIcon, EmptyIcon, ScaleIcon, ShareIcon } from "@quri/ui";
 import { type EntityNode } from "@/components/EntityLayout";
 import { ownerIcon } from "@/lib/ownerIcon";
@@ -12,6 +11,7 @@ import {
   modelForRelativeValuesExportRoute,
   modelRoute,
   ownerRoute,
+  isModelRelativeValuesRoute,
 } from "@/routes";
 
 function hasTypename(owner: {
@@ -21,7 +21,7 @@ function hasTypename(owner: {
   return Boolean(owner.__typename);
 }
 
-export function entityNodes(
+function entityNodes(
   owner: {
     // can be undefined in FallbackLayout, when model is not loaded yet.
     __typename?: string;
