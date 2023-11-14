@@ -1,8 +1,6 @@
 "use client";
 import { FC, Suspense, lazy } from "react";
 
-import { SquiggleVersion } from "./versions.js";
-
 /*
  * We have to type all playground components explicitly; otherwise, TypeScript will complain with TS2742 "likely not portable" error.
  * But we also need lazy imports and not load all playground versions immediately.
@@ -14,6 +12,7 @@ import {
   SquigglePlaygroundProps_0_8_5,
   SquigglePlaygroundProps_0_8_6,
 } from "./oldPlaygroundTypes.js";
+import { LazyVersionedComponents, VersionedComponentProps } from "./types.js";
 
 /*
  * Please don't change the formatting of these imports and the following `playgroundByVersion` declaration unless you have to.
@@ -31,20 +30,9 @@ const playgroundByVersion = {
   dev: lazy(async () => ({
     default: (await import("@quri/squiggle-components")).SquigglePlayground,
   })) as FC<SquigglePlaygroundProps_dev>,
-} as const;
+} as const satisfies LazyVersionedComponents;
 
-type PlaygroundProps<T extends SquiggleVersion> = Parameters<
-  (typeof playgroundByVersion)[T]
->[0];
-
-// Conditional is a trick from https://stackoverflow.com/a/51691257, so that we don't have to list all versions individually in `Props` definition below.
-type PropsForVersion<T extends SquiggleVersion> = T extends string
-  ? {
-      version: T;
-    } & PlaygroundProps<T>
-  : never;
-
-type Props = PropsForVersion<SquiggleVersion>;
+type Props = VersionedComponentProps<typeof playgroundByVersion>;
 
 export const VersionedSquigglePlayground: FC<Props> = ({
   version,
