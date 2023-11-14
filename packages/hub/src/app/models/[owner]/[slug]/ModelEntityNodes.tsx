@@ -1,5 +1,10 @@
-import { CodeBracketIcon, EmptyIcon, ScaleIcon, ShareIcon } from "@quri/ui";
+"use client";
 
+import { FC } from "react";
+import { useParams, usePathname } from "next/navigation";
+import { EntityInfo } from "@/components/EntityInfo";
+import { isModelRelativeValuesRoute } from "@/routes";
+import { CodeBracketIcon, EmptyIcon, ScaleIcon, ShareIcon } from "@quri/ui";
 import { type EntityNode } from "@/components/EntityLayout";
 import { ownerIcon } from "@/lib/ownerIcon";
 import {
@@ -70,3 +75,35 @@ export function entityNodes(
   }
   return nodes;
 }
+
+type Props = {
+  owner: {
+    // can be undefined in FallbackLayout, when model is not loaded yet.
+    __typename?: string;
+    slug: string;
+  };
+};
+
+export const ModelEntityNodes: FC<Props> = ({ owner }) => {
+  const pathname = usePathname();
+  const { slug, variableName } = useParams<{
+    slug: string;
+    variableName?: string;
+  }>();
+
+  return (
+    <EntityInfo
+      nodes={entityNodes(
+        owner,
+        slug,
+        (variableName && {
+          name: variableName,
+          type: isModelRelativeValuesRoute(pathname)
+            ? "RELATIVE_VALUE"
+            : "EXPORT",
+        }) ||
+          undefined
+      )}
+    />
+  );
+};

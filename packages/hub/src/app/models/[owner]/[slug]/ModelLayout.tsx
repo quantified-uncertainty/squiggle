@@ -1,6 +1,5 @@
 "use client";
 
-import { useParams, usePathname } from "next/navigation";
 import { FC, PropsWithChildren } from "react";
 import { graphql } from "relay-runtime";
 
@@ -9,7 +8,6 @@ import {
   Dropdown,
   DropdownMenu,
   DropdownMenuHeader,
-  DropdownMenuSeparator,
   RectangleStackIcon,
   ScaleIcon,
   ShareIcon,
@@ -23,7 +21,6 @@ import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 import {
-  isModelRelativeValuesRoute,
   modelExportRoute,
   modelForRelativeValuesExportRoute,
   modelRevisionsRoute,
@@ -31,9 +28,8 @@ import {
 } from "@/routes";
 import { useFixModelUrlCasing } from "./FixModelUrlCasing";
 import { ModelAccessControls } from "./ModelAccessControls";
-import { entityNodes } from "./utils";
 import { ModelSettingsButton } from "./ModelSettingsButton";
-import { useRouter } from "next/router";
+import { ModelEntityNodes } from "./ModelEntityNodes";
 
 // Note that we have to do two GraphQL queries on most model pages: one for layout.tsx, and one for page.tsx.
 const Query = graphql`
@@ -83,9 +79,6 @@ export const ModelLayout: FC<
     query: SerializablePreloadedQuery<ModelLayoutQuery>;
   }>
 > = ({ query, children }) => {
-  const pathname = usePathname();
-  const { variableName } = useParams<{ variableName: string }>();
-
   const [{ result }] = usePageQuery(Query, query);
 
   const model = extractFromGraphqlErrorUnion(result, "Model");
@@ -143,12 +136,7 @@ export const ModelLayout: FC<
 
   return (
     <EntityLayout
-      nodes={entityNodes(model.owner, model.slug, {
-        name: variableName,
-        type: isModelRelativeValuesRoute(pathname)
-          ? "RELATIVE_VALUE"
-          : "EXPORT",
-      })}
+      nodes={<ModelEntityNodes owner={model.owner} />}
       isFluid={true}
       headerLeft={<ModelAccessControls modelRef={model} />}
       headerRight={
