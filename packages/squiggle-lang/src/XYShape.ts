@@ -398,9 +398,6 @@ export const XtoY = {
       ); // should never happen
     }
   },
-  /* Returns a between-points-interpolating function that can be used with PointwiseCombination.combine.
-     For discrete distributions, the probability density between points is zero, so we just return zero here. */
-  discreteInterpolator: (() => 0) as Interpolator,
 };
 
 export const XsConversion = {
@@ -532,6 +529,55 @@ export const PointwiseCombination = {
     return Result.Ok({ xs: outX, ys: outY });
   },
 
+  combineDiscrete<E>(
+    fn: (a: number, b: number) => Result.result<number, E>,
+    t1: XYShape,
+    t2: XYShape
+  ): Result.result<XYShape, E> {
+    let i1 = 0,
+      i2 = 0;
+    const xs1 = t1.xs,
+      xs2 = t2.xs;
+    const ys1 = t1.ys,
+      ys2 = t2.ys;
+    const len1 = xs1.length,
+      len2 = xs2.length;
+
+    const xs: number[] = [];
+    const ys: number[] = [];
+    while (i1 < len1 || i2 < len2) {
+      let x: number, y1: number, y2: number;
+      if (i2 == len2 || (i1 < len1 && xs1[i1] < xs2[i2])) {
+        // take from xs1
+        x = xs1[i1];
+        y1 = ys1[i1];
+        y2 = 0;
+        i1++;
+      } else if (i1 < len1 && xs1[i1] == xs2[i2]) {
+        // combine
+        x = xs1[i1];
+        y1 = ys1[i1];
+        y2 = ys2[i2];
+        i1++;
+        i2++;
+      } else {
+        // take from xs2
+        x = xs2[i2];
+        y1 = 0;
+        y2 = ys2[i2];
+        i2++;
+      }
+      const result = fn(y1, y2);
+      if (!result.ok) {
+        return result; // combiner function has failed
+      }
+      xs.push(x);
+      ys.push(result.value);
+    }
+
+    return Result.Ok({ xs, ys });
+  },
+
   addCombine(interpolator: Interpolator, t1: XYShape, t2: XYShape): XYShape {
     const result = PointwiseCombination.combine(
       interpolator,
@@ -577,47 +623,6 @@ export const Range = {
 
     return { xs: newXs, ys: newYs };
   },
-
-  // Unused code:
-
-  // I'm really not sure this part is actually what we want at this point.
-  // ((lastX, lastY), (nextX, nextY))
-  // type ZippedRange = [[number, number], [number, number]];
-  // derivative(t: XYShape) {
-  //   return Range.mapYsBasedOnRanges(t, Range.delta_y_over_delta_x);
-  // },
-
-  // nextX([, [nextX]]: ZippedRange) {
-  //   return nextX;
-  // },
-
-  // rangePointAssumingSteps([[, lastY], [nextX]]: ZippedRange) {
-  //   return [nextX, lastY];
-  // },
-
-  // rangeAreaAssumingTriangles([[lastX, lastY], [nextX, nextY]]: ZippedRange) {
-  //   return ((nextX - lastX) * (lastY + nextY)) / 2;
-  // },
-
-  // //Todo: figure out how to without making new array.
-  // rangeAreaAssumingTrapezoids([[lastX, lastY], [nextX, nextY]]: ZippedRange) {
-  //   return (nextX - lastX) * (Math.min(lastY, nextY) + (lastY + nextY) / 2);
-  // },
-
-  // delta_y_over_delta_x([[lastX, lastY], [nextX, nextY]]: ZippedRange) {
-  //   return (nextY - lastY) / (nextX - lastX);
-  // },
-
-  // mapYsBasedOnRanges(
-  //   t: XYShape,
-  //   fn: (r: ZippedRange) => number
-  // ): [number, number][] | undefined {
-  //   const ranges = E_A.toRanges(E_A.zip(t.xs, t.ys));
-  //   if (!ranges.ok) {
-  //     return undefined; // probably length=1
-  //   }
-  //   return ranges.value.map((r) => [Range.nextX(r), fn(r)]);
-  // },
 };
 
 export const Analysis = {

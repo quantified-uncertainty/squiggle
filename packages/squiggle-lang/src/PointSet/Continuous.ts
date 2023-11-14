@@ -298,8 +298,6 @@ export class ContinuousShape implements PointSet<ContinuousShape> {
   }
 }
 
-export const Analysis = {};
-
 const emptyIntegral = () =>
   new ContinuousShape({
     xyShape: {
@@ -377,8 +375,6 @@ export const combinePointwise = <E>(
       })
   );
 };
-
-export const getShape = (t: ContinuousShape) => t.xyShape;
 
 export const sum = (continuousShapes: ContinuousShape[]): ContinuousShape => {
   return continuousShapes.reduce((x, y) => {

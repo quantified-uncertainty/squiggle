@@ -24,16 +24,10 @@ export const getWebviewContent = ({
   const nonce = getNonce();
 
   const styleUri = webview.asWebviewUri(
-    vscode.Uri.joinPath(context.extensionUri, "media/vendor/components.css")
+    vscode.Uri.joinPath(context.extensionUri, "dist/media/components.css")
   );
 
-  const scriptUris = [
-    // vendor files are copied over by `pnpm run compile`
-    "media/vendor/react.js",
-    "media/vendor/react-dom.js",
-    "media/vendor/components.js",
-    script,
-  ].map((script) =>
+  const scriptUris = [script].map((script) =>
     webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, script))
   );
 

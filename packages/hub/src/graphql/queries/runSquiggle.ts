@@ -91,13 +91,13 @@ builder.objectType(
   }
 );
 
-function runSquiggle(code: string): SquiggleOutput {
+async function runSquiggle(code: string): Promise<SquiggleOutput> {
   const MAIN = "main";
 
   const project = SqProject.create();
 
   project.setSource(MAIN, code);
-  project.run(MAIN);
+  await project.run(MAIN);
 
   const outputR = project.getOutput(MAIN);
 
@@ -136,7 +136,7 @@ builder.queryField("runSquiggle", (t) =>
           bindingsJSON: cached.bindings,
         } as unknown as SquiggleOutput; // cache is less strictly typed than SquiggleOutput, so we have to force-cast it
       }
-      const result = runSquiggle(code);
+      const result = await runSquiggle(code);
       await prisma.squiggleCache.upsert({
         where: { id: key },
         create: {

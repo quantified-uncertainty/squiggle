@@ -11,7 +11,10 @@ import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 import { modelRoute } from "@/routes";
 import { ModelRevisionViewQuery } from "@gen/ModelRevisionViewQuery.graphql";
-import { VersionedSquigglePlayground } from "@quri/versioned-playground";
+import {
+  VersionedSquigglePlayground,
+  useAdjustSquiggleVersion,
+} from "@quri/versioned-playground";
 import { CommentIcon } from "@quri/ui";
 
 const Query = graphql`
@@ -59,8 +62,12 @@ export const ModelRevisionView: FC<{
 
   const typename = model.revision.content.__typename;
   if (typename !== "SquiggleSnippet") {
-    return <div>Unknown model type {typename}</div>;
+    throw new Error(`Unknown model type ${typename}`);
   }
+
+  const checkedVersion = useAdjustSquiggleVersion(
+    model.revision.content.version
+  );
 
   return (
     <div>
@@ -84,8 +91,8 @@ export const ModelRevisionView: FC<{
         </div>
       </div>
       <VersionedSquigglePlayground
+        version={checkedVersion}
         defaultCode={model.revision.content.code}
-        version={model.revision.content.version}
       />
     </div>
   );

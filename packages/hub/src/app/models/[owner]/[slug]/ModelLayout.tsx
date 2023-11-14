@@ -94,7 +94,9 @@ export const ModelLayout: FC<
       headerRight={
         <EntityTab.List>
           <EntityTab.Link name="Code" icon={CodeBracketIcon} href={modelUrl} />
-          {Boolean(model.currentRevision.relativeValuesExports.length) && (
+          {Boolean(
+            relativeValuesExports.length || model.currentRevision.exports.length
+          ) && (
             <ExportsDropdown
               modelExports={model.currentRevision.exports.map(
                 ({ variableName, title }) => ({
