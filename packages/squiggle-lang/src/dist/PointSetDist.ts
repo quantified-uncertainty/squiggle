@@ -100,7 +100,7 @@ export class PointSetDist extends BaseDist {
       );
     }
     const downsampled = continuous.downsampleEquallyOverX(bucketCount);
-    return Result.Ok(createSparkline(Continuous.getShape(downsampled).ys));
+    return Result.Ok(createSparkline(downsampled.xyShape.ys));
   }
 
   // PointSet-only methods

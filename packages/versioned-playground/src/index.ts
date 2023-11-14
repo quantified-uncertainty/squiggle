@@ -1,13 +1,13 @@
-export {
-  VersionedSquigglePlayground,
-  type ModelExport,
-} from "./VersionedSquigglePlayground.js";
 export { SquigglePlaygroundVersionPicker } from "./SquigglePlaygroundVersionPicker.js";
 export { SquiggleVersionShower } from "./SquiggleVersionShower.js";
+export { VersionedSquigglePlayground } from "./VersionedSquigglePlayground.js";
 
 export {
-  squiggleVersions,
-  type SquiggleVersion,
-  defaultSquiggleVersion,
   checkSquiggleVersion,
+  defaultSquiggleVersion,
+  squiggleVersions,
+  versionSupportsDropdownMenu,
+  type SquiggleVersion,
 } from "./versions.js";
+
+export { useAdjustSquiggleVersion } from "./hooks.js";
