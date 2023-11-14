@@ -227,22 +227,27 @@ export const ViewerProvider: FC<
     localSettingsEnabled: boolean;
     editor?: CodeEditorHandle;
     beginWithVariablesCollapsed?: boolean;
+    rootPathOverride?: SqValuePath;
   }>
 > = ({
   partialPlaygroundSettings,
   localSettingsEnabled,
   editor,
   beginWithVariablesCollapsed,
+  rootPathOverride,
   children,
 }) => {
   // can't store settings in the state because we don't want to rerender the entire tree on every change
+
   const localItemStateStoreRef = useRef<LocalItemStateStore>(
     beginWithVariablesCollapsed ? collapsedVariablesDefault : {}
   );
 
   const itemHandlesStoreRef = useRef<{ [k: string]: HTMLDivElement }>({});
 
-  const [focused, setFocused] = useState<SqValuePath | undefined>();
+  const [focused, setFocused] = useState<SqValuePath | undefined>(
+    rootPathOverride
+  );
 
   const globalSettings = useMemo(() => {
     return merge({}, defaultPlaygroundSettings, partialPlaygroundSettings);

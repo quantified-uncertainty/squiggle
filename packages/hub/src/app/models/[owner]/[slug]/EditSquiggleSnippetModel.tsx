@@ -19,14 +19,15 @@ import {
   VersionedSquigglePlayground,
   checkSquiggleVersion,
   useAdjustSquiggleVersion,
-  type SquiggleVersion,
   versionSupportsDropdownMenu,
+  type SquiggleVersion,
 } from "@quri/versioned-playground";
 
 import { EditSquiggleSnippetModel$key } from "@/__generated__/EditSquiggleSnippetModel.graphql";
 import {
   EditSquiggleSnippetModelMutation,
   RelativeValuesExportInput,
+  SquiggleModelExportInput,
 } from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
 import { EditModelExports } from "@/components/exports/EditModelExports";
 import { FormModal } from "@/components/ui/FormModal";
@@ -47,6 +48,7 @@ import {
 export type SquiggleSnippetFormShape = {
   code: string;
   relativeValuesExports: RelativeValuesExportInput[];
+  exports: SquiggleModelExportInput[];
 };
 
 type OnSubmit = (extraData?: { comment: string }) => Promise<void>;
@@ -135,6 +137,11 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
               version
             }
           }
+          exports {
+            id
+            variableName
+            title
+          }
           relativeValuesExports {
             id
             variableName
@@ -167,8 +174,12 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
           slug: item.definition.slug,
         },
       })),
+      exports: revision.exports.map((item) => ({
+        title: item.title,
+        variableName: item.variableName,
+      })),
     };
-  }, [content, revision.relativeValuesExports]);
+  }, [content, revision.relativeValuesExports, revision.exports]);
 
   const { form, onSubmit, inFlight } = useMutationForm<
     SquiggleSnippetFormShape,
@@ -202,6 +213,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
           version,
         },
         relativeValuesExports: formData.relativeValuesExports,
+        exports: formData.exports,
         comment: extraData?.comment,
         slug: model.slug,
         owner: model.owner.slug,
@@ -345,6 +357,12 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
           />
         </>
       ) : null;
+  }
+
+  if (playgroundProps.version === "dev") {
+    playgroundProps.onExportsChange = (exports) => {
+      form.setValue("exports", exports);
+    };
   }
 
   return (

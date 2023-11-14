@@ -30,6 +30,11 @@ const ModelRevisionItem: FC<{
           username
         }
         comment
+        exports {
+          id
+          variableName
+          title
+        }
       }
     `,
     revisionRef
@@ -69,6 +74,11 @@ const ModelRevisionItem: FC<{
       </div>
       {revision.comment ? (
         <div className="text-xs text-slate-700">{revision.comment}</div>
+      ) : null}
+      {revision.exports.length > 0 ? (
+        <div className="text-xs text-green-700">
+          {`${revision.exports.length} exports `}
+        </div>
       ) : null}
     </div>
   );
@@ -113,6 +123,11 @@ export const ModelRevisionsList: FC<{
               ...ModelRevisionsList_revision
               id
               createdAtTimestamp
+              exports {
+                id
+                title
+                variableName
+              }
             }
           }
           pageInfo {
