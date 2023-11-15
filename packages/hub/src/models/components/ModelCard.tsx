@@ -48,14 +48,14 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
     slug: model.slug,
   });
 
-  const modelExports = modelExports.map(
+  const mappedModelExports = modelExports.map(
     ({ variableName, title }) => ({
       variableName,
       title: title || undefined,
     })
   );
 
-  const relativeValuesExports = relativeValuesExports.map(
+  const mappedRelativeValuesExports = relativeValuesExports.map(
     ({ variableName, definition: { slug } }) => ({
       variableName,
       slug,
@@ -63,8 +63,8 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
   );
 
   const _totalImportLength = totalImportLength(
-    modelExports,
-    relativeValuesExports
+    mappedModelExports,
+    mappedRelativeValuesExports
   );
 
   return (
