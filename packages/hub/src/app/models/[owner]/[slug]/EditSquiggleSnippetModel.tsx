@@ -21,7 +21,7 @@ import {
   useAdjustSquiggleVersion,
   versionSupportsDropdownMenu,
   type SquiggleVersion,
-} from "@quri/versioned-playground";
+} from "@quri/versioned-squiggle-components";
 
 import { EditSquiggleSnippetModel$key } from "@/__generated__/EditSquiggleSnippetModel.graphql";
 import {

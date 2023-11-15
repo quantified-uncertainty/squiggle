@@ -1,14 +1,57 @@
 "use client";
-
 import { FC } from "react";
-import { graphql } from "react-relay";
+import { graphql, useFragment } from "react-relay";
+
+import { SqValuePath } from "@quri/squiggle-lang";
+import {
+  VersionedSquiggleChart,
+  useAdjustSquiggleVersion,
+} from "@quri/versioned-squiggle-components";
 
 import { ModelExportPageQuery } from "@/__generated__/ModelExportPageQuery.graphql";
+import { ModelExportPage_SquiggleContent$key } from "@/__generated__/ModelExportPage_SquiggleContent.graphql";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
-import { SquiggleChart } from "@quri/squiggle-components";
-import { SqValuePath } from "@quri/squiggle-lang";
+
+const SquiggleModelExportPage: FC<{
+  variableName: string;
+  contentRef: ModelExportPage_SquiggleContent$key;
+}> = ({ variableName, contentRef }) => {
+  const content = useFragment(
+    graphql`
+      fragment ModelExportPage_SquiggleContent on SquiggleSnippet {
+        id
+        code
+        version
+      }
+    `,
+    contentRef
+  );
+
+  const checkedVersion = useAdjustSquiggleVersion(content.version);
+
+  if (checkedVersion === "0.8.5" || checkedVersion === "0.8.6") {
+    return (
+      <div className="p-4 bg-red-100 text-red-900">
+        Export view pages don&apos;t support Squiggle {checkedVersion}.
+      </div>
+    );
+  }
+
+  const rootPath = new SqValuePath({
+    root: "bindings",
+    items: [{ type: "string", value: variableName }],
+  });
+  return (
+    <VersionedSquiggleChart
+      version={checkedVersion}
+      code={content.code}
+      showHeader={false}
+      rootPathOverride={rootPath}
+    />
+  );
+};
 
 export const ModelExportPage: FC<{
   params: {
@@ -30,11 +73,7 @@ export const ModelExportPage: FC<{
               id
               content {
                 __typename
-                ... on SquiggleSnippet {
-                  id
-                  code
-                  version
-                }
+                ...ModelExportPage_SquiggleContent
               }
             }
           }
@@ -49,15 +88,10 @@ export const ModelExportPage: FC<{
 
   switch (content.__typename) {
     case "SquiggleSnippet": {
-      const rootPath = new SqValuePath({
-        root: "bindings",
-        items: [{ type: "string", value: params.variableName }],
-      });
       return (
-        <SquiggleChart
-          code={content.code}
-          showHeader={false}
-          rootPathOverride={rootPath}
+        <SquiggleModelExportPage
+          variableName={params.variableName}
+          contentRef={content}
         />
       );
     }

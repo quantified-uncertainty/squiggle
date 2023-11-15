@@ -2,16 +2,17 @@ import { FC, useState } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
+import { Button } from "@quri/ui";
+import { defaultSquiggleVersion } from "@quri/versioned-squiggle-components";
+
+import { UpgradeModels$key } from "@/__generated__/UpgradeModels.graphql";
+import { UpgradeModels_List$key } from "@/__generated__/UpgradeModels_List.graphql";
 import { UpgradeModels_updateMutation } from "@/__generated__/UpgradeModels_updateMutation.graphql";
 import { H2 } from "@/components/ui/Headers";
 import { MutationButton } from "@/components/ui/MutationButton";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { modelRoute } from "@/routes";
-import { defaultSquiggleVersion } from "@quri/versioned-playground";
 import { EditSquiggleSnippetModel } from "../models/[owner]/[slug]/EditSquiggleSnippetModel";
-import { UpgradeModels$key } from "@/__generated__/UpgradeModels.graphql";
-import { UpgradeModels_List$key } from "@/__generated__/UpgradeModels_List.graphql";
-import { Button } from "@quri/ui";
 
 const ModelList: FC<{ modelsRef: UpgradeModels_List$key }> = ({
   modelsRef,

@@ -1,7 +1,7 @@
 import { writeFile } from "node:fs/promises";
 
 import { PRIMARY_SQUIGGLE_PACKAGE_DIRS } from "../constants.js";
-import { insertVersionToVersionedPlayground } from "../insertVersionToVersionedPlayground.js";
+import { insertVersionToVersionedComponents } from "../insertVersionToVersionedComponents.js";
 import { PackageInfo, exec, exists, getPackageInfo } from "../lib.js";
 
 async function bumpVersionsToDev() {
@@ -34,16 +34,16 @@ async function createEmptyChangeset() {
 async function main() {
   process.chdir("../..");
 
-  // We have to do things in this order, because attempt to `pnpm add` a version to versioned-playground results in a local workspace: dependency
-  // so we cache an old version first, then bump all package versions, and only then update versioned-playground
+  // We have to do things in this order, because attempt to `pnpm add` a version to versioned-components results in a local workspace: dependency
+  // so we cache an old version first, then bump all package versions, and only then update versioned-components
   const { version: releasedVersion } = await getPackageInfo(
     PRIMARY_SQUIGGLE_PACKAGE_DIRS[0]
   );
   await bumpVersionsToDev();
 
   {
-    process.chdir("packages/versioned-playground");
-    await insertVersionToVersionedPlayground(releasedVersion);
+    process.chdir("packages/versioned-components");
+    await insertVersionToVersionedComponents(releasedVersion);
     process.chdir("../..");
   }
 

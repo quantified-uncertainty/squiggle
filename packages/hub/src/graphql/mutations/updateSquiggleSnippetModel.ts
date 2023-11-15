@@ -1,9 +1,10 @@
 import { RelativeValuesDefinition } from "@prisma/client";
 
+import { squiggleVersions } from "@quri/versioned-squiggle-components";
+
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
-import { squiggleVersions } from "@quri/versioned-playground";
 import { Model, getWriteableModel } from "../types/Model";
 import { getSelf } from "../types/User";
 
