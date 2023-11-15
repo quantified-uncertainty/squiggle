@@ -85,8 +85,8 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
           slug={model.slug}
         >
           <div className="flex">
-            <div className="cursor-pointer group items-center flex hover:bg-slate-200 rounded-md px-1 py-1 mt-1 text-sm">
-              <span className="mr-1.5 text-xs text-slate-700 bg-slate-200 group-hover:bg-slate-300 px-1.5 py-0.5 text-center rounded-full">
+            <div className="cursor-pointer group items-center flex hover:bg-slate-200 text-slate-500 rounded-md px-1 py-1 text-xs">
+              <span className="mr-1.5 text-xs text-slate-700 bg-slate-200 group-hover:bg-slate-300 px-1 py-0.25 text-center rounded-full">
                 {_totalImportLength}
               </span>
               Exports
