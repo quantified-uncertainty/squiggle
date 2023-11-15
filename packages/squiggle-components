@@ -19,11 +19,3 @@ module.directive = newDirective;
 
 // Code-split the application
 const loadComponent = () => import('./Component');
-
-// Adjust chunk size limit
-module.exports = {
-  performance: {
-    maxAssetSize: 1000000,
-    maxEntrypointSize: 1000000,
-  },
-};
