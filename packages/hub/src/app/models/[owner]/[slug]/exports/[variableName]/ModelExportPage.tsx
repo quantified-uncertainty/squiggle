@@ -1,8 +1,8 @@
 "use client";
-import { FC } from "react";
+import { FC, useState } from "react";
 import { graphql, useFragment } from "react-relay";
 
-import { SqValuePath } from "@quri/squiggle-lang";
+import { SqProject, SqValuePath } from "@quri/squiggle-lang";
 import {
   VersionedSquiggleChart,
   useAdjustSquiggleVersion,
@@ -13,6 +13,7 @@ import { ModelExportPage_SquiggleContent$key } from "@/__generated__/ModelExport
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
+import { squiggleHubLinker } from "@/squiggle/components/linker";
 
 const SquiggleModelExportPage: FC<{
   variableName: string;
@@ -30,6 +31,10 @@ const SquiggleModelExportPage: FC<{
   );
 
   const checkedVersion = useAdjustSquiggleVersion(content.version);
+
+  const [project] = useState(() => {
+    return new SqProject({ linker: squiggleHubLinker });
+  });
 
   if (checkedVersion === "0.8.5" || checkedVersion === "0.8.6") {
     return (
@@ -49,6 +54,7 @@ const SquiggleModelExportPage: FC<{
       code={content.code}
       showHeader={false}
       rootPathOverride={rootPath}
+      project={project}
     />
   );
 };
