@@ -40,22 +40,22 @@ type Props = {
 
 export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
   const model = useFragment(Fragment, modelRef);
-  const rvExports = model.currentRevision.relativeValuesExports;
-  const exports = model.currentRevision.exports;
+  const relativeValuesExports = model.currentRevision.relativeValuesExports;
+  const modelExports = model.currentRevision.exports;
 
   const modelUrl = modelRoute({
     owner: model.owner.slug,
     slug: model.slug,
   });
 
-  const modelExports = model.currentRevision.exports.map(
+  const modelExports = modelExports.map(
     ({ variableName, title }) => ({
       variableName,
       title: title || undefined,
     })
   );
 
-  const relativeValuesExports = model.currentRevision.relativeValuesExports.map(
+  const relativeValuesExports = relativeValuesExports.map(
     ({ variableName, definition: { slug } }) => ({
       variableName,
       slug,
