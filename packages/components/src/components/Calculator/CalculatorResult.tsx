@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useState, useCallback, memo } from "react";
+import { FC, useEffect, useMemo, useState, useCallback } from "react";
 
 import { Env, SqValue } from "@quri/squiggle-lang";
 
@@ -20,16 +20,6 @@ type Props = {
   processAllFieldCodes: () => void;
   autorun: boolean;
 };
-
-const MemoizedValueResultViewer = memo(function MemoizedValueResultViewer({
-  calculatorResult,
-  settings,
-}: {
-  calculatorResult: SqValueResult;
-  settings: PlaygroundSettings;
-}) {
-  return <ValueResultViewer result={calculatorResult} settings={settings} />;
-});
 
 export const CalculatorResult: FC<Props> = ({
   valueWithContext,
@@ -92,10 +82,7 @@ export const CalculatorResult: FC<Props> = ({
       {calculatorResult ? (
         <div>
           <div className="text-sm font-semibold text-gray-700 mb-2">Result</div>
-          <MemoizedValueResultViewer
-            calculatorResult={calculatorResult}
-            settings={settings}
-          />
+          <ValueResultViewer result={calculatorResult} settings={settings} />
         </div>
       ) : null}
     </div>
