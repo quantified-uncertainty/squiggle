@@ -140,6 +140,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
           exports {
             id
             variableName
+            variableType
             title
           }
           relativeValuesExports {
@@ -177,6 +178,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
       exports: revision.exports.map((item) => ({
         title: item.title,
         variableName: item.variableName,
+        variableType: item.variableType,
       })),
     };
   }, [content, revision.relativeValuesExports, revision.exports]);

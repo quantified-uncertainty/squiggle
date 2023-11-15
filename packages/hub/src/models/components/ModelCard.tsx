@@ -21,6 +21,7 @@ const Fragment = graphql`
     currentRevision {
       exports {
         variableName
+        variableType
         title
       }
       relativeValuesExports {
@@ -40,8 +41,6 @@ type Props = {
 
 export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
   const model = useFragment(Fragment, modelRef);
-  const rvExports = model.currentRevision.relativeValuesExports;
-  const exports = model.currentRevision.exports;
 
   const modelUrl = modelRoute({
     owner: model.owner.slug,
@@ -49,8 +48,9 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
   });
 
   const modelExports = model.currentRevision.exports.map(
-    ({ variableName, title }) => ({
+    ({ variableName, variableType, title }) => ({
       variableName,
+      variableType,
       title: title || undefined,
     })
   );

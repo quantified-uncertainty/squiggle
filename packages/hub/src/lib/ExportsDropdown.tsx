@@ -4,23 +4,21 @@ import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { graphql, useFragment } from "react-relay";
 
 import {
-  ButtonWithDropdown,
-  CommentIcon,
   Dropdown,
   DropdownMenu,
-  DropdownMenuActionItem,
   DropdownMenuHeader,
-  DropdownMenuModalActionItem,
-  LinkIcon,
   ScaleIcon,
   ShareIcon,
-  TextAreaFormField,
-  TextTooltip,
 } from "@quri/ui";
 import { modelExportRoute, modelForRelativeValuesExportRoute } from "@/routes";
 import { DropdownMenuNextLinkItem } from "@/components/ui/DropdownMenuNextLinkItem";
+import { VariableType } from "@/__generated__/ModelLayoutQuery.graphql";
 
-type ModelExport = { variableName: string; title?: string };
+type ModelExport = {
+  title?: string;
+  variableName: string;
+  variableType: VariableType;
+};
 type RelativeValuesExport = { slug: string; variableName: string };
 
 const nonRelativeValuesExports = (
