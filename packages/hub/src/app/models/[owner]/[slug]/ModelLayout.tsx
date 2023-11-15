@@ -7,22 +7,16 @@ import { CodeBracketIcon, RectangleStackIcon, ShareIcon } from "@quri/ui";
 
 import { ModelLayoutQuery } from "@/__generated__/ModelLayoutQuery.graphql";
 import { EntityLayout } from "@/components/EntityLayout";
-import { DropdownMenuNextLinkItem } from "@/components/ui/DropdownMenuNextLinkItem";
 import { EntityTab } from "@/components/ui/EntityTab";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
-import {
-  modelExportRoute,
-  modelForRelativeValuesExportRoute,
-  modelRevisionsRoute,
-  modelRoute,
-} from "@/routes";
+import { modelRevisionsRoute, modelRoute } from "@/routes";
 import { useFixModelUrlCasing } from "./FixModelUrlCasing";
 import { ModelAccessControls } from "./ModelAccessControls";
 import { ModelSettingsButton } from "./ModelSettingsButton";
 import { ModelEntityNodes } from "./ModelEntityNodes";
-import { ExportsDropdown } from "@/lib/ExportsDropdown";
+import { ExportsDropdown, totalImportLength } from "@/lib/ExportsDropdown";
 
 // Note that we have to do two GraphQL queries on most model pages: one for layout.tsx, and one for page.tsx.
 const Query = graphql`
@@ -78,13 +72,30 @@ export const ModelLayout: FC<
 
   useFixModelUrlCasing(model);
 
-  const relativeValuesExports = model.currentRevision.relativeValuesExports;
-
   const modelUrl = modelRoute({ owner: model.owner.slug, slug: model.slug });
   const modelRevisionsUrl = modelRevisionsRoute({
     owner: model.owner.slug,
     slug: model.slug,
   });
+
+  const modelExports = model.currentRevision.exports.map(
+    ({ variableName, title }) => ({
+      variableName,
+      title: title || undefined,
+    })
+  );
+
+  const relativeValuesExports = model.currentRevision.relativeValuesExports.map(
+    ({ variableName, definition: { slug } }) => ({
+      variableName,
+      slug,
+    })
+  );
+
+  const _totalImportLength = totalImportLength(
+    modelExports,
+    relativeValuesExports
+  );
 
   return (
     <EntityLayout
@@ -94,29 +105,17 @@ export const ModelLayout: FC<
       headerRight={
         <EntityTab.List>
           <EntityTab.Link name="Code" icon={CodeBracketIcon} href={modelUrl} />
-          {Boolean(
-            relativeValuesExports.length || model.currentRevision.exports.length
-          ) && (
+          {Boolean(_totalImportLength) && (
             <ExportsDropdown
-              modelExports={model.currentRevision.exports.map(
-                ({ variableName, title }) => ({
-                  variableName,
-                  title: title || variableName,
-                })
-              )}
-              relativeValuesExports={model.currentRevision.relativeValuesExports.map(
-                ({ variableName, definition: { slug } }) => ({
-                  variableName,
-                  slug,
-                })
-              )}
+              modelExports={modelExports}
+              relativeValuesExports={relativeValuesExports}
               owner={model.owner.slug}
               slug={model.slug}
             >
               <EntityTab.Div
                 name="Exports"
                 icon={ShareIcon}
-                count={model.currentRevision.exports.length}
+                count={_totalImportLength}
                 selected={(pathname) => {
                   return (
                     pathname.startsWith(modelUrl + "/relative-values") ||

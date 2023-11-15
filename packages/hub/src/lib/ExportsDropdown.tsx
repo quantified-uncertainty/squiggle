@@ -1,4 +1,4 @@
-import { FC, useMemo, useState } from "react";
+import React, { FC, useMemo, useState } from "react";
 import { PropsWithChildren } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { graphql, useFragment } from "react-relay";
@@ -20,21 +20,38 @@ import {
 import { modelExportRoute, modelForRelativeValuesExportRoute } from "@/routes";
 import { DropdownMenuNextLinkItem } from "@/components/ui/DropdownMenuNextLinkItem";
 
-export const ExportsDropdown: FC<
-  PropsWithChildren<{
-    modelExports: { variableName: string; title?: string }[];
-    relativeValuesExports: { slug: string; variableName: string }[];
-    owner: string;
-    slug: string;
-  }>
-> = ({ modelExports, relativeValuesExports, owner, slug, children }) => {
-  //We remove the relative values exports from the exports list, to not double count them.
-  const exports = modelExports.filter(
+type ModelExport = { variableName: string; title?: string };
+type RelativeValuesExport = { slug: string; variableName: string };
+
+const nonRelativeValuesExports = (
+  modelExports: ModelExport[],
+  relativeValuesExports: RelativeValuesExport[]
+) =>
+  modelExports.filter(
     (exportItem) =>
       !relativeValuesExports.find(
         ({ variableName: v }) => v === exportItem.variableName
       )
   );
+
+//It's a bit awkward that this here, but it's fairly closely coupled to ExportsDropdown.
+export const totalImportLength = (
+  modelExports: ModelExport[],
+  relativeValuesExports: RelativeValuesExport[]
+) =>
+  nonRelativeValuesExports(modelExports, relativeValuesExports).length +
+  relativeValuesExports.length;
+
+export const ExportsDropdown: FC<
+  PropsWithChildren<{
+    modelExports: ModelExport[];
+    relativeValuesExports: RelativeValuesExport[];
+    owner: string;
+    slug: string;
+  }>
+> = ({ modelExports, relativeValuesExports, owner, slug, children }) => {
+  //We remove the relative values exports from the exports list, to not double count them.
+  const exports = nonRelativeValuesExports(modelExports, relativeValuesExports);
   return (
     <Dropdown
       render={({ close }) => (
@@ -57,7 +74,7 @@ export const ExportsDropdown: FC<
               ))}{" "}
             </>
           )}
-          {exports.length > 0 && (
+          {relativeValuesExports.length > 0 && (
             <>
               <DropdownMenuHeader>Relative Value Functions</DropdownMenuHeader>
               {relativeValuesExports.map((exportItem) => (
