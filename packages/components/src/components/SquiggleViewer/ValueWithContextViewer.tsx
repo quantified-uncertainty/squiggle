@@ -1,5 +1,5 @@
 import { clsx } from "clsx";
-import { FC, ReactNode, useState } from "react";
+import { FC, PropsWithChildren, ReactNode, useState } from "react";
 import ReactMarkdown from "react-markdown";
 
 import { SqValuePath } from "@quri/squiggle-lang";
@@ -31,6 +31,67 @@ import {
 export type SettingsMenuParams = {
   // Used to notify this component that settings have changed, so that it could re-render itself.
   onChange: () => void;
+};
+
+function useComment(value: SqValueWithContext): string | undefined {
+  return value.context.docstring();
+}
+
+const CommentIconForValue: FC<{ value: SqValueWithContext }> = ({ value }) => {
+  const comment = useComment(value);
+
+  return comment ? (
+    <div className="ml-3">
+      <TextTooltip text={comment} placement="bottom">
+        <span>
+          <CommentIcon
+            size={13}
+            className="text-purple-100 group-hover:text-purple-300"
+          />
+        </span>
+      </TextTooltip>
+    </div>
+  ) : null;
+};
+
+const WithComment: FC<PropsWithChildren<{ value: SqValueWithContext }>> = ({
+  value,
+  children,
+}) => {
+  const comment = useComment(value);
+
+  if (!comment) {
+    return children;
+  }
+
+  const tagsWithTopPosition = new Set([
+    "Dict",
+    "Array",
+    "TableChart",
+    "Plot",
+    "String",
+  ]);
+  const commentPosition = tagsWithTopPosition.has(value.tag) ? "top" : "bottom";
+
+  const commentEl = (
+    <ReactMarkdown
+      className={clsx(
+        "prose max-w-4xl text-sm text-slate-800 bg-purple-50 bg-opacity-60 py-2 px-3 mb-2 rounded-md",
+        commentPosition === "bottom" && "mt-2"
+      )}
+    >
+      {comment}
+    </ReactMarkdown>
+  );
+
+  return (
+    // TODO - can be simplified with flex-col-reverse
+    <div>
+      {commentPosition === "top" && commentEl}
+      {children}
+      {commentPosition === "bottom" && commentEl}
+    </div>
+  );
 };
 
 type Props = {
@@ -78,13 +139,13 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
 
     const shouldCollapseChildren = childrenCount > 10;
 
-    function shouldCollapseElement() {
+    const shouldCollapseElement = () => {
       if (isRoot) {
         return childrenCount > 30;
       } else {
         return childrenCount > 5 || tagsDefaultCollapsed.has(tag);
       }
-    }
+    };
 
     if (shouldCollapseChildren) {
       collapseChildren(value);
@@ -170,7 +231,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
       <TextTooltip text="Show in Editor" placement="bottom">
         <span>
           <CodeBracketIcon
-            className={`items-center h-4 w-4 cursor-pointer text-stone-400 opacity-0 group-hover:opacity-100 hover:!text-stone-800 transition`}
+            className="items-center h-4 w-4 cursor-pointer text-stone-400 opacity-0 group-hover:opacity-100 hover:!text-stone-800 transition"
             onClick={() => findInEditor()}
           />
         </span>
@@ -185,88 +246,53 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
   const headerSettingsButton = () =>
     widget.renderSettingsMenu?.({ onChange: forceUpdate });
 
-  const leftCollapseBorder = () => (
-    <div
-      className="group w-4 shrink-0 flex justify-center cursor-pointer"
-      onClick={toggleCollapsed}
-    >
-      <div className="w-px bg-stone-200 group-hover:bg-stone-500" />
-    </div>
-  );
-
-  const comment = value.context.docstring();
-  const hasComment = comment && comment !== "";
-
-  const commentIcon = () =>
-    comment && (
-      <div className="ml-3">
-        <TextTooltip text={comment} placement="bottom">
-          <span>
-            <CommentIcon
-              size={13}
-              className="text-purple-100 group-hover:text-purple-300"
-            />
-          </span>
-        </TextTooltip>
-      </div>
-    );
-
-  const tagsWithTopPosition = new Set([
-    "Dict",
-    "Array",
-    "TableChart",
-    "Plot",
-    "String",
-  ]);
-  const commentPosition = tagsWithTopPosition.has(tag) ? "top" : "bottom";
-
-  const isDictOrList = tag === "Dict" || tag === "Array";
-
-  const showComment = () =>
-    comment && (
-      <ReactMarkdown
-        className={clsx(
-          "prose max-w-4xl text-sm text-slate-800 bg-purple-50 bg-opacity-60 py-2 px-3 mb-2 rounded-md",
-          commentPosition === "bottom" && "mt-2"
-        )}
-      >
-        {comment}
-      </ReactMarkdown>
-    );
+  const leftCollapseBorder = () => {
+    const isDictOrList = tag === "Dict" || tag === "Array";
+    if (isDictOrList) {
+      return (
+        <div
+          className="group w-4 shrink-0 flex justify-center cursor-pointer"
+          onClick={toggleCollapsed}
+        >
+          <div className="w-px bg-stone-200 group-hover:bg-stone-500" />
+        </div>
+      );
+    } else if (!isRoot) {
+      // non-root leaf elements have unclickable padding to align with dict/list elements
+      return <div className="flex w-4 min-w-[1rem]" />; // min-w-1rem = w-4
+    } else {
+      return null;
+    }
+  };
 
   return (
     <ErrorBoundary>
       <div ref={saveRef}>
-        {(name !== undefined || isRoot) && (
-          <header
-            className={clsx(
-              "flex justify-between group",
-              isFocused ? "mb-2" : "hover:bg-stone-100 rounded-md"
-            )}
-          >
-            <div className="inline-flex items-center">
-              {!isFocused && triangleToggle()}
-              {headerName}
-              {!isFocused && headerPreview()}
-              {!isFocused && !isOpen && commentIcon()}
-              {!isRoot && editor && headerFindInEditorButton()}
-            </div>
-            <div className="inline-flex space-x-1">
-              {isOpen && headerString()}
-              {isOpen && headerSettingsButton()}
-            </div>
-          </header>
-        )}
+        <header
+          className={clsx(
+            "flex justify-between group",
+            isFocused ? "mb-2" : "hover:bg-stone-100 rounded-md"
+          )}
+        >
+          <div className="inline-flex items-center">
+            {!isFocused && triangleToggle()}
+            {headerName}
+            {!isFocused && headerPreview()}
+            {!isFocused && !isOpen && <CommentIconForValue value={value} />}
+            {!isRoot && editor && headerFindInEditorButton()}
+          </div>
+          <div className="inline-flex space-x-1">
+            {isOpen && headerString()}
+            {isOpen && headerSettingsButton()}
+          </div>
+        </header>
         {isOpen && (
           <div className="flex w-full pt-1">
-            {!isFocused && isDictOrList && leftCollapseBorder()}
-            {!isFocused && !isDictOrList && !isRoot && (
-              <div className="flex w-4 min-w-[1rem]" /> // min-w-1rem = w-4
-            )}
+            {!isFocused && leftCollapseBorder()}
             <div className="grow">
-              {commentPosition === "top" && hasComment && showComment()}
-              {render(getAdjustedMergedSettings(path))}
-              {commentPosition === "bottom" && hasComment && showComment()}
+              <WithComment value={value}>
+                {render(getAdjustedMergedSettings(path))}
+              </WithComment>
             </div>
           </div>
         )}

@@ -1,7 +1,8 @@
-import { FC, useEffect, useMemo, useState, useCallback } from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 
 import { Env, SqValue } from "@quri/squiggle-lang";
 
+import { Button } from "@quri/ui";
 import { PlaygroundSettings } from "../PlaygroundSettings.js";
 import { ValueResultViewer } from "./ValueResultViewer.js";
 import {
@@ -10,7 +11,6 @@ import {
   SqValueResult,
 } from "./types.js";
 import { useSavedCalculatorState } from "./useSavedCalculatorState.js";
-import { Button } from "@quri/ui";
 
 type Props = {
   valueWithContext: SqCalculatorValueWithContext;
