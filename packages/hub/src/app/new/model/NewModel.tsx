@@ -6,7 +6,7 @@ import { FormProvider } from "react-hook-form";
 import { graphql } from "relay-runtime";
 
 import { Button, CheckboxFormField } from "@quri/ui";
-import { defaultSquiggleVersion } from "@quri/versioned-playground";
+import { defaultSquiggleVersion } from "@quri/versioned-squiggle-components";
 
 import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
 import { SelectGroup, SelectGroupOption } from "@/components/SelectGroup";

@@ -1,5 +1,5 @@
 {
-  "name": "@quri/versioned-playground",
+  "name": "@quri/versioned-squiggle-components",
   "private": true,
   "scripts": {
     "build:ts": "tsc -b",

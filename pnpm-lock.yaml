@@ -301,9 +301,9 @@ importers:
       '@quri/ui':
         specifier: workspace:*
         version: link:../ui
-      '@quri/versioned-playground':
+      '@quri/versioned-squiggle-components':
         specifier: workspace:*
-        version: link:../versioned-playground
+        version: link:../versioned-components
       '@tailwindcss/typography':
         specifier: ^0.5.10
         version: 0.5.10(tailwindcss@3.3.5)
@@ -724,7 +724,7 @@ importers:
         specifier: ^4.5.0
         version: 4.5.0(@types/node@20.8.10)
 
-  packages/versioned-playground:
+  packages/versioned-components:
     dependencies:
       '@quri/squiggle-components':
         specifier: workspace:*
@@ -839,9 +839,9 @@ importers:
       '@quri/ui':
         specifier: workspace:*
         version: link:../ui
-      '@quri/versioned-playground':
+      '@quri/versioned-squiggle-components':
         specifier: workspace:*
-        version: link:../versioned-playground
+        version: link:../versioned-components
       '@tailwindcss/typography':
         specifier: ^0.5.10
         version: 0.5.10(tailwindcss@3.3.5)

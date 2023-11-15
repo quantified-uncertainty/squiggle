@@ -1,8 +1,6 @@
 "use client";
 import { FC, Suspense, lazy } from "react";
 
-import { SquiggleVersion } from "./versions.js";
-
 /*
  * We have to type all playground components explicitly; otherwise, TypeScript will complain with TS2742 "likely not portable" error.
  * But we also need lazy imports and not load all playground versions immediately.
@@ -14,14 +12,15 @@ import {
   SquigglePlaygroundProps_0_8_5,
   SquigglePlaygroundProps_0_8_6,
 } from "./oldPlaygroundTypes.js";
+import { LazyVersionedComponents, VersionedComponentProps } from "./types.js";
 
 /*
- * Please don't change the formatting of these imports and the following `playgroundByVersion` declaration unless you have to.
+ * Please don't change the formatting of these imports and the following `componentByVersion` declaration unless you have to.
  * It's edited with babel transformation in `publish-all.ts` script.
  */
 import { type SquigglePlaygroundProps as SquigglePlaygroundProps_dev } from "@quri/squiggle-components";
 
-const playgroundByVersion = {
+const componentByVersion = {
   "0.8.5": lazy(async () => ({
     default: (await import("squiggle-components-0.8.5")).SquigglePlayground,
   })) as FC<SquigglePlaygroundProps_0_8_5>,
@@ -31,26 +30,15 @@ const playgroundByVersion = {
   dev: lazy(async () => ({
     default: (await import("@quri/squiggle-components")).SquigglePlayground,
   })) as FC<SquigglePlaygroundProps_dev>,
-} as const;
+} as const satisfies LazyVersionedComponents;
 
-type PlaygroundProps<T extends SquiggleVersion> = Parameters<
-  (typeof playgroundByVersion)[T]
->[0];
-
-// Conditional is a trick from https://stackoverflow.com/a/51691257, so that we don't have to list all versions individually in `Props` definition below.
-type PropsForVersion<T extends SquiggleVersion> = T extends string
-  ? {
-      version: T;
-    } & PlaygroundProps<T>
-  : never;
-
-type Props = PropsForVersion<SquiggleVersion>;
+type Props = VersionedComponentProps<typeof componentByVersion>;
 
 export const VersionedSquigglePlayground: FC<Props> = ({
   version,
   ...props
 }) => {
-  const Playground = playgroundByVersion[version];
+  const Playground = componentByVersion[version];
 
   return (
     // TODO - fallback spinner / loading message?
