@@ -229,27 +229,13 @@ model SquiggleSnippet {
   revision ModelRevision?
 }
 
-enum VariableType {
-  NUMBER
-  STRING
-  LIST
-  DICT
-  BOOLEAN
-  CALCULATOR
-  FUNCTION
-  SAMPLE_SET_DISTRIBUTION
-  POINT_SET_DISTRIBUTION
-  SYMBOLIC_DISTRIBUTION
-  OTHER
-}
-
 model ModelExport {
   id              String        @id @default(cuid())
   modelRevision   ModelRevision @relation(fields: [modelRevisionId], references: [id], onDelete: Cascade)
   modelRevisionId String
   variableName    String
   title           String?
-  variableType    VariableType  @default(OTHER)
+  variableType    String        @default("OTHER")
 
   @@unique([modelRevisionId, variableName], name: "uniqueKey")
 }

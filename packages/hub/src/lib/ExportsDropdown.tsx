@@ -4,20 +4,31 @@ import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { graphql, useFragment } from "react-relay";
 
 import {
+  BarChartIcon,
+  BookOpenIcon,
+  CalculatorIcon,
+  CodeBracketIcon,
+  CommentIcon,
+  CurlyBracketsIcon,
   Dropdown,
   DropdownMenu,
   DropdownMenuHeader,
+  HashIcon,
+  LineChartIcon,
   ScaleIcon,
   ShareIcon,
+  SquareBracketIcon,
+  TableCellsIcon,
+  TextIcon,
+  VariableIcon,
 } from "@quri/ui";
 import { modelExportRoute, modelForRelativeValuesExportRoute } from "@/routes";
 import { DropdownMenuNextLinkItem } from "@/components/ui/DropdownMenuNextLinkItem";
-import { VariableType } from "@/__generated__/ModelLayoutQuery.graphql";
 
 type ModelExport = {
   title?: string;
   variableName: string;
-  variableType: VariableType;
+  variableType: string;
 };
 type RelativeValuesExport = { slug: string; variableName: string };
 
@@ -39,6 +50,29 @@ export const totalImportLength = (
 ) =>
   nonRelativeValuesExports(modelExports, relativeValuesExports).length +
   relativeValuesExports.length;
+
+const typeIcon = (type: string) => {
+  switch (type) {
+    case "Number":
+      return HashIcon;
+    case "Array":
+      return SquareBracketIcon;
+    case "Dict":
+      return CurlyBracketsIcon;
+    case "String":
+      return TextIcon;
+    case "Lambda":
+      return CodeBracketIcon;
+    case "TableChart":
+      return TableCellsIcon;
+    case "Calculator":
+      return CalculatorIcon;
+    case "Plot":
+      return LineChartIcon;
+    default:
+      return ShareIcon;
+  }
+};
 
 export const ExportsDropdown: FC<
   PropsWithChildren<{
@@ -66,7 +100,7 @@ export const ExportsDropdown: FC<
                     variableName: exportItem.variableName,
                   })}
                   title={`${exportItem.title || exportItem.variableName}`}
-                  icon={ShareIcon}
+                  icon={typeIcon(exportItem.variableType)}
                   close={close}
                 />
               ))}{" "}

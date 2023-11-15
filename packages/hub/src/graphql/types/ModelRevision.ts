@@ -1,6 +1,5 @@
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
-import { VariableType } from "@prisma/client";
 import { RelativeValuesExport } from "./RelativeValuesExport";
 
 export const SquiggleSnippet = builder.prismaNode("SquiggleSnippet", {
@@ -17,20 +16,12 @@ export const ModelContent = builder.unionType("ModelContent", {
   resolveType: () => SquiggleSnippet,
 });
 
-builder.enumType(VariableType, {
-  name: "VariableType",
-});
-
 builder.prismaNode("ModelExport", {
   id: { field: "id" },
   fields: (t) => ({
     modelRevision: t.relation("modelRevision"),
     variableName: t.exposeString("variableName"),
-    variableType: t.field({
-      type: VariableType,
-      resolve: (modelExport) =>
-        VariableType[modelExport.variableType as keyof typeof VariableType],
-    }),
+    variableType: t.exposeString("variableType"),
     title: t.exposeString("title", { nullable: true }),
   }),
 });

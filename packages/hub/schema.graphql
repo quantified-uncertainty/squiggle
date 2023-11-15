@@ -158,7 +158,7 @@ type ModelExport implements Node {
   modelRevision: ModelRevision!
   title: String
   variableName: String!
-  variableType: VariableType!
+  variableType: String!
 }
 
 type ModelRevision implements Node {
@@ -549,6 +549,7 @@ type SquiggleErrorOutput implements SquiggleOutput {
 input SquiggleModelExportInput {
   title: String
   variableName: String!
+  variableType: String!
 }
 
 type SquiggleOkOutput implements SquiggleOutput {
@@ -641,18 +642,4 @@ type ValidationError implements Error {
 type ValidationErrorIssue {
   message: String!
   path: [String!]!
-}
-
-enum VariableType {
-  BOOLEAN
-  CALCULATOR
-  DICT
-  FUNCTION
-  LIST
-  NUMBER
-  OTHER
-  POINT_SET_DISTRIBUTION
-  SAMPLE_SET_DISTRIBUTION
-  STRING
-  SYMBOLIC_DISTRIBUTION
 }

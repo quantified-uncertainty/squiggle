@@ -80,8 +80,15 @@ export {
   ScatterPlotIcon,
   TableCellsIcon,
   UserCircleIcon,
+  CalculatorIcon,
   UserIcon,
   WrenchIcon,
+  VariableIcon,
+  SquareBracketIcon,
+  CurlyBracketsIcon,
+  TextIcon,
+  LineChartIcon,
+  HashIcon,
 } from "./icons/HeroIcons.js";
 export type { IconProps } from "./icons/Icon.js";
 export { PlusIcon } from "./icons/PlusIcon.js";
