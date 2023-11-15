@@ -33,3 +33,12 @@ describe("Numbers", () => {
   testEvalToBe("Number.diff([1])", "[]");
   testEvalToBe("Number.diff([1,5,3])", "[4,-2]");
 });
+
+  testEvalToBe("Number.min([2,5,3])", "2");
+  testEvalToBe("Number.min(2,5)", "2");
+  testEvalToBe("Number.min(5,5)", "5");
+  testEvalToBe("Number.min(5,2)", "2");
+  testEvalToBe("Number.max([2,5,3])", "5");
+  testEvalToBe("Number.max(2,5)", "5");
+  testEvalToBe("Number.max(5,5)", "5");
+  testEvalToBe("Number.max(5,2)", "5");
