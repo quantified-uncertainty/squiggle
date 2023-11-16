@@ -29,6 +29,7 @@ type ModelExport = {
   title?: string;
   variableName: string;
   variableType: string;
+  docstring?: string;
 };
 type RelativeValuesExport = { slug: string; variableName: string };
 

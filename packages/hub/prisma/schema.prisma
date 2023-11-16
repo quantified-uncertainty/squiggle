@@ -235,6 +235,7 @@ model ModelExport {
   modelRevisionId String
   variableName    String
   title           String?
+  docstring       String?
   variableType    String        @default("OTHER")
 
   @@unique([modelRevisionId, variableName], name: "uniqueKey")

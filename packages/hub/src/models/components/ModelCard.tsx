@@ -23,6 +23,7 @@ const Fragment = graphql`
         variableName
         variableType
         title
+        docstring
       }
       relativeValuesExports {
         variableName
@@ -48,9 +49,10 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
   });
 
   const modelExports = model.currentRevision.exports.map(
-    ({ variableName, variableType, title }) => ({
+    ({ variableName, variableType, docstring, title }) => ({
       variableName,
       variableType,
+      docstring: docstring || undefined,
       title: title || undefined,
     })
   );
