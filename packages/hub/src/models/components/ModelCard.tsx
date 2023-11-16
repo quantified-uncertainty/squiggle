@@ -2,12 +2,12 @@ import { FC } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { CodeBracketIcon, ScaleIcon } from "@quri/ui";
+import { CodeBracketIcon } from "@quri/ui";
 
 import { ModelCard$key } from "@/__generated__/ModelCard.graphql";
 import { EntityCard } from "@/components/EntityCard";
-import { StyledLink } from "@/components/ui/StyledLink";
-import { modelForRelativeValuesExportRoute, modelRoute } from "@/routes";
+import { modelRoute } from "@/routes";
+import { ExportsDropdown, totalImportLength } from "@/lib/ExportsDropdown";
 
 const Fragment = graphql`
   fragment ModelCard on Model {
@@ -19,6 +19,10 @@ const Fragment = graphql`
     }
     isPrivate
     currentRevision {
+      exports {
+        variableName
+        title
+      }
       relativeValuesExports {
         variableName
         definition {
@@ -36,12 +40,32 @@ type Props = {
 
 export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
   const model = useFragment(Fragment, modelRef);
-  const exports = model.currentRevision.relativeValuesExports;
+  const rvExports = model.currentRevision.relativeValuesExports;
+  const exports = model.currentRevision.exports;
 
   const modelUrl = modelRoute({
     owner: model.owner.slug,
     slug: model.slug,
   });
+
+  const modelExports = model.currentRevision.exports.map(
+    ({ variableName, title }) => ({
+      variableName,
+      title: title || undefined,
+    })
+  );
+
+  const relativeValuesExports = model.currentRevision.relativeValuesExports.map(
+    ({ variableName, definition: { slug } }) => ({
+      variableName,
+      slug,
+    })
+  );
+
+  const _totalImportLength = totalImportLength(
+    modelExports,
+    relativeValuesExports
+  );
 
   return (
     <EntityCard
@@ -53,23 +77,22 @@ export const ModelCard: FC<Props> = ({ modelRef, showOwner = true }) => {
       ownerName={model.owner.slug}
       slug={model.slug}
     >
-      {exports.length > 0 && (
-        <div className="mt-2">
-          {model.currentRevision.relativeValuesExports.map((e, i) => (
-            <StyledLink
-              key={i}
-              href={modelForRelativeValuesExportRoute({
-                owner: model.owner.slug,
-                slug: model.slug,
-                variableName: e.variableName,
-              })}
-              className="items-center flex font-mono text-xs"
-            >
-              <ScaleIcon size={14} className="opacity-60" />
-              <span className="ml-1">{`${e.variableName}:${e.definition.slug}`}</span>
-            </StyledLink>
-          ))}
-        </div>
+      {_totalImportLength > 0 && (
+        <ExportsDropdown
+          modelExports={modelExports}
+          relativeValuesExports={relativeValuesExports}
+          owner={model.owner.slug}
+          slug={model.slug}
+        >
+          <div className="flex">
+            <div className="cursor-pointer group items-center flex hover:bg-slate-200 text-slate-500 rounded-md px-1 py-1 text-xs">
+              <span className="mr-1.5 text-xs text-slate-700 bg-slate-200 group-hover:bg-slate-300 px-1 py-0.25 text-center rounded-full">
+                {_totalImportLength}
+              </span>
+              Exports
+            </div>
+          </div>
+        </ExportsDropdown>
       )}
     </EntityCard>
   );

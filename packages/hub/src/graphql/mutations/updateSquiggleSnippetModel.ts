@@ -1,9 +1,10 @@
 import { RelativeValuesDefinition } from "@prisma/client";
 
+import { squiggleVersions } from "@quri/versioned-squiggle-components";
+
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
-import { squiggleVersions } from "@quri/versioned-playground";
 import { Model, getWriteableModel } from "../types/Model";
 import { getSelf } from "../types/User";
 
@@ -37,6 +38,13 @@ const SquiggleSnippetContentInput = builder.inputType(
   }
 );
 
+const SquiggleModelExportInput = builder.inputType("SquiggleModelExportInput", {
+  fields: (t) => ({
+    variableName: t.string({ required: true }),
+    title: t.string({ required: false }),
+  }),
+});
+
 builder.mutationField("updateSquiggleSnippetModel", (t) =>
   t.withAuth({ signedIn: true }).fieldWithInput({
     type: builder.simpleObject("UpdateSquiggleSnippetResult", {
@@ -50,6 +58,9 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
       slug: t.input.string({ required: true }),
       relativeValuesExports: t.input.field({
         type: [RelativeValuesExportInput],
+      }),
+      exports: t.input.field({
+        type: [SquiggleModelExportInput],
       }),
       content: t.input.field({
         type: SquiggleSnippetContentInput,
@@ -70,6 +81,7 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
       }
 
       const relativeValuesExports = input.relativeValuesExports ?? [];
+
       const relativeValuesExportsToInsert: {
         definitionId: string;
         variableName: string;
@@ -142,6 +154,14 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
             relativeValuesExports: {
               createMany: {
                 data: relativeValuesExportsToInsert,
+              },
+            },
+            exports: {
+              createMany: {
+                data: (input.exports ?? []).map(({ variableName, title }) => ({
+                  variableName,
+                  title: title ?? null,
+                })),
               },
             },
           },

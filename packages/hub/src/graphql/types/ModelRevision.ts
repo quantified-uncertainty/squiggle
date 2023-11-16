@@ -16,6 +16,15 @@ export const ModelContent = builder.unionType("ModelContent", {
   resolveType: () => SquiggleSnippet,
 });
 
+builder.prismaNode("ModelExport", {
+  id: { field: "id" },
+  fields: (t) => ({
+    modelRevision: t.relation("modelRevision"),
+    variableName: t.exposeString("variableName"),
+    title: t.exposeString("title", { nullable: true }),
+  }),
+});
+
 export const ModelRevision = builder.prismaNode("ModelRevision", {
   id: { field: "id" },
   fields: (t) => ({
@@ -25,6 +34,7 @@ export const ModelRevision = builder.prismaNode("ModelRevision", {
     // `relatedConnection` would be more principled, and in theory the number of variables with definitions could be high.
     // But connection is harder to deal with on the UI side, and since we send all variables back on updates, so it doesn't make much sense there.
     relativeValuesExports: t.relation("relativeValuesExports"),
+    exports: t.relation("exports"),
     model: t.relation("model"),
     author: t.relation("author", { nullable: true }),
     comment: t.exposeString("comment"),

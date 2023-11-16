@@ -46,7 +46,11 @@ export function pathAsString(path: SqValuePath) {
   }
 }
 
-export function pathToShortName(path: SqValuePath): string {
+export function pathIsEqual(path1: SqValuePath, path2: SqValuePath) {
+  return pathAsString(path1) === pathAsString(path2);
+}
+
+export function pathToShortName(path: SqValuePath): string | undefined {
   if (isTopLevel(path)) {
     return topLevelName(path);
   } else {

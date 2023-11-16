@@ -74,6 +74,23 @@ export function modelForRelativeValuesExportRoute({
   }
 }
 
+export function isModelRelativeValuesRoute(url: string) {
+  return url.match("^/models/[^/]+/[^/]+/relative-values/[^/]+$");
+}
+
+export function modelExportRoute({
+  owner,
+  slug,
+  variableName,
+}: {
+  owner: string;
+  slug: string;
+  variableName: string;
+}) {
+  const modelUrl = modelRoute({ owner, slug });
+  return `${modelUrl}/exports/${variableName}`;
+}
+
 export function modelViewRoute({
   username,
   slug,

@@ -34,6 +34,7 @@ export type SquiggleArgs = {
 export type SquiggleOutput = {
   output: result<
     {
+      exports: SqDict;
       result: SqValue;
       bindings: SqDict;
     },

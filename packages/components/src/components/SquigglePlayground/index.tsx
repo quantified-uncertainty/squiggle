@@ -22,12 +22,17 @@ import {
 } from "./LeftPlaygroundPanel/index.js";
 import { ResizableTwoPanelLayout } from "./ResizableTwoPanelLayout.js";
 
+export type ModelExport = {
+  variableName: string;
+  title?: string;
+};
+
 /*
  * We don't support `project` or `continues` in the playground.
  * First, because playground will support multi-file mode by itself.
  * Second, because environment is configurable through playground settings and it should match the project.getEnvironment(), so this component owns the project to guarantee that.
  */
-type PlaygroundProps = {
+export type SquigglePlaygroundProps = {
   /*
    * Playground code is not reactive, because Codemirror editor is stateful and it would be hard/impossible to support code updates.
    * For example, it's not clear what we could do with the cursor position or selection if this prop is changed.
@@ -37,6 +42,7 @@ type PlaygroundProps = {
   sourceId?: string;
   linker?: SqLinker;
   onCodeChange?(code: string): void;
+  onExportsChange?(exports: ModelExport[]): void;
   /* When settings change */
   onSettingsChange?(settings: PlaygroundSettings): void;
   /* Height of the playground */
@@ -55,11 +61,14 @@ export const PlaygroundContext = React.createContext<PlaygroundContextShape>({
   getLeftPanelElement: () => undefined,
 });
 
-export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
+export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
+  props
+) => {
   const {
     defaultCode,
     linker,
     onCodeChange,
+    onExportsChange,
     onSettingsChange,
     renderExtraControls,
     renderExtraDropdownItems,
@@ -104,6 +113,19 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
     output: SquiggleOutput | undefined;
     isRunning: boolean;
   }>({ output: undefined, isRunning: false });
+
+  useEffect(() => {
+    const _output = output.output?.output;
+    if (_output && _output.ok) {
+      const exports = _output.value.exports;
+      const _exports: ModelExport[] = exports.entries().map((e) => {
+        return { variableName: e[0], title: e[1].title() };
+      });
+      onExportsChange && onExportsChange(_exports);
+    } else {
+      onExportsChange && onExportsChange([]);
+    }
+  }, [output, onExportsChange]);
 
   const leftPanelRef = useRef<LeftPlaygroundPanelHandle>(null);
   const rightPanelRef = useRef<SquiggleViewerHandle>(null);

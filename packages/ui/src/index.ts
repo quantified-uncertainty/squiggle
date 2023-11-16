@@ -73,6 +73,7 @@ export {
   PauseIcon,
   PlayIcon,
   PuzzleIcon,
+  ShareIcon,
   RectangleStackIcon,
   RightArrowIcon,
   ScaleIcon,

@@ -22,6 +22,7 @@ import {
   relativeValuesRoute,
 } from "@/routes";
 import { DeleteDefinitionAction } from "./DeleteRelativeValuesDefinitionAction";
+import { EntityInfo } from "@/components/EntityInfo";
 
 type Props = PropsWithChildren<{
   queryRef: SerializablePreloadedQuery<DefinitionLayoutQuery>;
@@ -71,7 +72,7 @@ export const DefinitionLayout: FC<Props> = ({ queryRef, children }) => {
 
   return (
     <EntityLayout
-      nodes={nodes}
+      nodes={<EntityInfo nodes={nodes} />}
       headerRight={
         definition.isEditable ? (
           <EntityTab.List>

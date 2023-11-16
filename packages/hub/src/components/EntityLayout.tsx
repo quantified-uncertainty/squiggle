@@ -7,7 +7,7 @@ import { EntityInfo, EntityNode } from "./EntityInfo";
 export type { EntityNode };
 
 type Props = {
-  nodes: EntityNode[];
+  nodes: ReactNode;
   headerLeft?: ReactNode;
   headerRight?: ReactNode;
   children?: ReactNode;
@@ -34,7 +34,7 @@ export const EntityLayout: FC<Props> = ({
           )}
         >
           <div className="flex items-center gap-2">
-            <EntityInfo nodes={nodes} />
+            {nodes}
             {headerLeft}
           </div>
           <div>{headerRight}</div>

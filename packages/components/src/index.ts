@@ -1,10 +1,16 @@
 export { SqProject } from "@quri/squiggle-lang";
 
-export { SquiggleChart } from "./components/SquiggleChart.js";
-export { SquiggleViewer } from "./components/SquiggleViewer/index.js";
-export { SquiggleEditor } from "./components/SquiggleEditor.js";
-export { SquigglePlayground } from "./components/SquigglePlayground/index.js";
 export { NumberShower } from "./components/NumberShower.js";
+export {
+  SquiggleChart,
+  type SquiggleChartProps,
+} from "./components/SquiggleChart.js";
+export { SquiggleEditor } from "./components/SquiggleEditor.js";
+export {
+  SquigglePlayground,
+  type SquigglePlaygroundProps,
+} from "./components/SquigglePlayground/index.js";
+export { SquiggleViewer } from "./components/SquiggleViewer/index.js";
 export { ToolbarItem as PlaygroundToolbarItem } from "./components/ui/PanelWithToolbar/ToolbarItem.js";
 
 export { RelativeValueCell } from "./components/RelativeValuesGridChart/RelativeValueCell.js";
@@ -21,8 +27,8 @@ export { drawAxes } from "./lib/draw/index.js";
 import {
   scaleLinear,
   scaleLog,
-  scaleSymlog,
   scalePow,
+  scaleSymlog,
 } from "./lib/d3/patchedScales.js";
 
 export const d3Extended = {
