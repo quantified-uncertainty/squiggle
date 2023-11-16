@@ -102,7 +102,7 @@ function nodeToString(node: ASTNode): string {
     case "DefunStatement":
       return sExpr([node.variable, node.value]);
     case "String":
-      return `'${node.value}'`; // TODO - quote?
+      return node.value.length < 20 ? `'${node.value}'` : `"${node.value}"`;
     case "Ternary":
       return sExpr([node.condition, node.trueExpression, node.falseExpression]);
     case "Void":
