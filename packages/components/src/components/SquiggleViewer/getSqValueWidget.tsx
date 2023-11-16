@@ -22,14 +22,17 @@ import { DistFunctionChart } from "../FunctionChart/DistFunctionChart.js";
 import { NumericFunctionChart } from "../FunctionChart/NumericFunctionChart.js";
 import { FunctionChart } from "../FunctionChart/index.js";
 import { NumberShower } from "../NumberShower.js";
-import { generateDistributionPlotSettings } from "../PlaygroundSettings.js";
+import {
+  PlaygroundSettings,
+  generateDistributionPlotSettings,
+} from "../PlaygroundSettings.js";
 import { RelativeValuesGridChart } from "../RelativeValuesGridChart/index.js";
 import { ScatterChart } from "../ScatterChart/index.js";
 import { TableChart } from "../TableChart/index.js";
 import { ItemSettingsMenu } from "./ItemSettingsMenu.js";
 import { ValueViewer } from "./ValueViewer.js";
 import { SettingsMenuParams } from "./ValueWithContextViewer.js";
-import { MergedItemSettings, getChildrenValues } from "./utils.js";
+import { getChildrenValues } from "./utils.js";
 
 // Distributions should be smaller than the other charts.
 // Note that for distributions, this only applies to the internals, there's also extra margin and details.
@@ -55,7 +58,7 @@ export type ValueWidget = {
   heading?: string;
   renderPreview?: () => ReactNode;
   renderSettingsMenu?: (params: SettingsMenuParams) => ReactNode;
-  render: (settings: MergedItemSettings) => ReactNode;
+  render: (settings: PlaygroundSettings) => ReactNode;
 };
 
 export function getSqValueWidget(value: SqValueWithContext): ValueWidget {
@@ -294,7 +297,13 @@ export function getSqValueWidget(value: SqValueWithContext): ValueWidget {
         renderPreview: () => (
           <SqTypeWithCount type="{}" count={entries.length} />
         ),
-        render: () => entries.map((r, i) => <ValueViewer key={i} value={r} />),
+        render: () => (
+          <div className="space-y-2 pt-1 mt-1">
+            {entries.map((r, i) => (
+              <ValueViewer key={i} value={r} />
+            ))}
+          </div>
+        ),
       };
     }
     case "Array": {
@@ -303,7 +312,13 @@ export function getSqValueWidget(value: SqValueWithContext): ValueWidget {
       return {
         heading: `List(${length})`,
         renderPreview: () => <SqTypeWithCount type="[]" count={length} />,
-        render: () => entries.map((r, i) => <ValueViewer key={i} value={r} />),
+        render: () => (
+          <div className="space-y-2 pt-1 mt-1">
+            {entries.map((r, i) => (
+              <ValueViewer key={i} value={r} />
+            ))}
+          </div>
+        ),
       };
     }
 

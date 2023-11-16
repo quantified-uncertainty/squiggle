@@ -17,6 +17,7 @@ import {
   useSetLocalItemState,
   useViewerContext,
   useResetStateSettings,
+  useMergedSettings,
 } from "./ViewerProvider.js";
 import { pathAsString } from "./utils.js";
 
@@ -38,11 +39,11 @@ const ItemSettingsModal: React.FC<
   resetScroll,
 }) => {
   const setLocalItemState = useSetLocalItemState();
-  const { getLocalItemState, getMergedSettings } = useViewerContext();
+  const { getLocalItemState } = useViewerContext();
 
   const { path } = value.context;
 
-  const mergedSettings = getMergedSettings({ path });
+  const mergedSettings = useMergedSettings(path);
 
   const form = useForm({
     resolver: zodResolver(viewSettingsSchema),

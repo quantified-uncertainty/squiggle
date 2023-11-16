@@ -199,16 +199,6 @@ export const CalculatorSampleCountValidation: React.FC<{
   );
 };
 
-function useDeepCompareMemoize(value: PlaygroundSettings): PlaygroundSettings {
-  const ref = useRef<PlaygroundSettings | undefined>();
-
-  if (JSON.stringify(value) !== JSON.stringify(ref.current)) {
-    ref.current = value;
-  }
-
-  return ref.current as PlaygroundSettings;
-}
-
 export const Calculator: FC<Props> = ({
   environment,
   settings,
@@ -222,24 +212,25 @@ export const Calculator: FC<Props> = ({
   const { calculator, form, inputResults, processAllFieldCodes } =
     useCalculator(valueWithContext, _environment);
 
-  const _settings: PlaygroundSettings = useDeepCompareMemoize(settings);
-
-  const inputResultSettings: PlaygroundSettings = {
-    ..._settings,
-    distributionChartSettings: {
-      ..._settings.distributionChartSettings,
-      showSummary: false,
-    },
-    chartHeight: 30,
-  };
+  const inputResultSettings: PlaygroundSettings = useMemo(
+    () => ({
+      ...settings,
+      distributionChartSettings: {
+        ...settings.distributionChartSettings,
+        showSummary: false,
+      },
+      chartHeight: 30,
+    }),
+    [settings]
+  );
 
   //This memoization is useful to make sure that CalculatorResult ResultViewer doesn't get updated too frequently.
   const calculatorResultSettings: PlaygroundSettings = useMemo(
     () => ({
-      ..._settings,
+      ...settings,
       chartHeight: 200,
     }),
-    [_settings]
+    [settings]
   );
 
   const hasTitleOrDescription = !!calculator.title || !!calculator.description;

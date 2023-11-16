@@ -1,9 +1,6 @@
 import { PathItem, SqValue, SqValuePath } from "@quri/squiggle-lang";
-import {
-  PartialPlaygroundSettings,
-  PlaygroundSettings,
-} from "../PlaygroundSettings.js";
 import { CalculatorState } from "../Calculator/types.js";
+import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 
 export type LocalItemState = {
   collapsed: boolean;
@@ -13,8 +10,6 @@ export type LocalItemState = {
     "distributionChartSettings" | "functionChartSettings"
   >;
 };
-
-export type MergedItemSettings = PlaygroundSettings;
 
 export const pathItemFormat = (item: PathItem): string => {
   if (item.type === "cellAddress") {
@@ -51,7 +46,7 @@ export function pathAsString(path: SqValuePath) {
   }
 }
 
-export function pathToShortName(path: SqValuePath): string | undefined {
+export function pathToShortName(path: SqValuePath): string {
   if (isTopLevel(path)) {
     return topLevelName(path);
   } else {
