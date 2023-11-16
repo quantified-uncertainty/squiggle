@@ -46,7 +46,7 @@ export const TableChart: FC<Props> = ({ value, environment, settings }) => {
     if (item.ok) {
       const value = item.value;
       if (valueHasContext(value)) {
-        return getSqValueWidget(value).render(settings);
+        return getSqValueWidget(value.tag).render(value, settings);
       } else {
         return value.toString();
       }

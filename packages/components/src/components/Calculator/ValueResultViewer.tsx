@@ -16,7 +16,7 @@ export const ValueResultViewer = memo(function ValueResultViewer({
   if (result.ok) {
     const value = result.value;
     if (valueHasContext(value)) {
-      return getSqValueWidget(value).render(settings);
+      return getSqValueWidget(value.tag).render(value, settings);
     } else {
       return value.toString();
     }

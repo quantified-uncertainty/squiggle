@@ -92,7 +92,7 @@ const WithComment: FC<PropsWithChildren<Props>> = ({ value, children }) => {
 };
 
 const ValueViewerBody: FC<Props> = ({ value }) => {
-  const widget = getSqValueWidget(value);
+  const widget = getSqValueWidget(value.tag);
 
   const { path } = value.context;
   const isFocused = useIsFocused(path);
@@ -109,7 +109,7 @@ const ValueViewerBody: FC<Props> = ({ value }) => {
 
   return (
     <WithComment value={value}>
-      {widget.render(adjustedMergedSettings)}
+      {widget.render(value, adjustedMergedSettings)}
     </WithComment>
   );
 };
@@ -118,7 +118,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
   const { tag } = value;
   const { path } = value.context;
 
-  const widget = getSqValueWidget(value);
+  const widget = getSqValueWidget(value.tag);
 
   const toggleCollapsed_ = useToggleCollapsed();
   const setCollapsed = useSetCollapsed();
@@ -214,7 +214,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
           isOpen ? "opacity-40" : "opacity-60"
         )}
       >
-        {widget.renderPreview()}
+        {widget.renderPreview(value)}
       </div>
     );
   const headerFindInEditorButton = () => {
@@ -237,7 +237,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
     );
   };
 
-  const heading = widget.heading || value.publicName();
+  const heading = widget.heading?.(value) || value.publicName();
   const headerString = () => (
     <div className="text-stone-400 group-hover:text-stone-600 text-sm transition">
       {heading}
@@ -245,7 +245,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
   );
 
   const headerSettingsButton = () =>
-    widget.renderSettingsMenu?.({ onChange: forceUpdate });
+    widget.renderSettingsMenu?.(value, { onChange: forceUpdate });
 
   const leftCollapseBorder = () => {
     const isDictOrList = tag === "Dict" || tag === "Array";

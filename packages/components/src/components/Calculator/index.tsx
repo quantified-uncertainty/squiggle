@@ -175,7 +175,6 @@ function useCalculator(
 }
 
 type Props = {
-  environment: Env;
   settings: PlaygroundSettings;
   valueWithContext: SqCalculatorValueWithContext;
 };
@@ -199,14 +198,14 @@ export const CalculatorSampleCountValidation: React.FC<{
   );
 };
 
-export const Calculator: FC<Props> = ({
-  environment,
-  settings,
-  valueWithContext,
-}) => {
+export const Calculator: FC<Props> = ({ settings, valueWithContext }) => {
   const _environment = useMemo(
-    () => getEnvironment(environment, valueWithContext.value),
-    [environment, valueWithContext]
+    () =>
+      getEnvironment(
+        valueWithContext.context.project.getEnvironment(),
+        valueWithContext.value
+      ),
+    [valueWithContext]
   );
 
   const { calculator, form, inputResults, processAllFieldCodes } =
