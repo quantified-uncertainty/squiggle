@@ -193,6 +193,18 @@ export function squiggleLanguageSupport(project: SqProject) {
         autocomplete,
         closeBrackets: {
           brackets: ['"', "'", "(", "{"],
+          beforeTyping: (char, state) => {
+            if (char === '"' || char === "'") {
+              const cursorPos = state.selection.main.head;
+              const line = state.doc.lineAt(cursorPos);
+              const stringStart = line.text.lastIndexOf(char, cursorPos - line.from - 1);
+              if (stringStart !== -1) {
+                const stringContent = line.text.slice(stringStart + 1, cursorPos - line.from);
+                return stringContent.length <= 20;
+              }
+            }
+            return true;
+          },
         },
       },
     }),
