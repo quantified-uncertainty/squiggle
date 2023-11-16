@@ -9,7 +9,7 @@ import {
 } from "@quri/ui";
 
 import { PlaygroundSettings } from "../PlaygroundSettings.js";
-import { ValueResultViewer } from "./ValueResultViewer.js";
+import { SquiggleValueResultChart } from "../SquiggleViewer/SquiggleValueResultViewer.js";
 import { SqValueResult } from "./types.js";
 
 export const CalculatorInput: FC<{
@@ -53,7 +53,7 @@ export const CalculatorInput: FC<{
         )}
       </div>
       {result && !result.ok && (
-        <ValueResultViewer result={result} settings={settings} />
+        <SquiggleValueResultChart result={result} settings={settings} />
       )}
     </div>
   );

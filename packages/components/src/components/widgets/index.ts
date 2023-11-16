@@ -1,0 +1,12 @@
+import "./ArrayWidget.js";
+import "./BoolWidget.js";
+import "./CalculatorWidget.js";
+import "./DateWidget.js";
+import "./DictWidget.js";
+import "./DistWidget.js";
+import "./LambdaWidget.js";
+import "./NumberWidget.js";
+import "./PlotWidget.js";
+import "./StringWidget.js";
+import "./TableChartWidget.js";
+import "./TimeDurationWidget.js";

@@ -4,7 +4,7 @@ import { Env, SqValue } from "@quri/squiggle-lang";
 
 import { Button } from "@quri/ui";
 import { PlaygroundSettings } from "../PlaygroundSettings.js";
-import { ValueResultViewer } from "./ValueResultViewer.js";
+import { SquiggleValueResultChart } from "../SquiggleViewer/SquiggleValueResultViewer.js";
 import {
   InputResults,
   SqCalculatorValueWithContext,
@@ -82,7 +82,10 @@ export const CalculatorResult: FC<Props> = ({
       {calculatorResult ? (
         <div>
           <div className="text-sm font-semibold text-gray-700 mb-2">Result</div>
-          <ValueResultViewer result={calculatorResult} settings={settings} />
+          <SquiggleValueResultChart
+            result={calculatorResult}
+            settings={settings}
+          />
         </div>
       ) : null}
     </div>

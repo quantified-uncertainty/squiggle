@@ -2,11 +2,11 @@ import { memo } from "react";
 
 import { valueHasContext } from "../../lib/utility.js";
 import { PlaygroundSettings } from "../PlaygroundSettings.js";
-import { SquiggleValueChart } from "../SquiggleValueChart.js";
-import { SqValueResult } from "./types.js";
+import { SquiggleValueChart } from "./SquiggleValueChart.js";
+import { SqValueResult } from "../Calculator/types.js";
 
-// Unlike ValueViewer/ValueWithContextViewer, this just renders the raw widget; TODO - better name?
-export const ValueResultViewer = memo(function ValueResultViewer({
+// Unlike ValueViewer/ValueWithContextViewer, this just renders the raw widget, or displays an error.
+export const SquiggleValueResultChart = memo(function ValueResultViewer({
   result,
   settings,
 }: {

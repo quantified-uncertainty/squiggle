@@ -11,7 +11,7 @@ import {
 import { clsx } from "clsx";
 import { valueHasContext } from "../../lib/utility.js";
 import { PlaygroundSettings } from "../PlaygroundSettings.js";
-import { SquiggleValueChart } from "../SquiggleValueChart.js";
+import { SquiggleValueChart } from "../SquiggleViewer/SquiggleValueChart.js";
 
 type Props = {
   value: SqTableChart;

@@ -12,6 +12,10 @@ import {
 import { useEffectRef, useForceUpdate } from "../../lib/hooks/index.js";
 import { SqValueWithContext } from "../../lib/utility.js";
 import { ErrorBoundary } from "../ErrorBoundary.js";
+import { SquiggleValueChart } from "./SquiggleValueChart.js";
+import { SquiggleValueHeader } from "./SquiggleValueHeader.js";
+import { SquiggleValuePreview } from "./SquiggleValuePreview.js";
+import { SquiggleValueSettingsMenu } from "./SquiggleValueSettingsMenu.js";
 import {
   useCollapseChildren,
   useFocus,
@@ -21,9 +25,10 @@ import {
   useToggleCollapsed,
   useViewerContext,
 } from "./ViewerProvider.js";
-import { getSqValueWidget } from "./getSqValueWidget.js";
 import { getChildrenValues, pathToShortName } from "./utils.js";
-import { SquiggleValueChart } from "../SquiggleValueChart.js";
+
+// make sure all widgets are in registry
+import "../widgets/index.js";
 
 export type SettingsMenuParams = {
   // Used to notify this component that settings have changed, so that it could re-render itself.
@@ -117,8 +122,6 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
   const { tag } = value;
   const { path } = value.context;
 
-  const widget = getSqValueWidget(value.tag);
-
   const toggleCollapsed_ = useToggleCollapsed();
   const setCollapsed = useSetCollapsed();
   const collapseChildren = useCollapseChildren();
@@ -205,17 +208,6 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
       {name}
     </div>
   );
-  const headerPreview = () =>
-    !!widget.renderPreview && (
-      <div
-        className={clsx(
-          "ml-3 text-sm text-blue-800",
-          isOpen ? "opacity-40" : "opacity-60"
-        )}
-      >
-        {widget.renderPreview(value)}
-      </div>
-    );
   const headerFindInEditorButton = () => {
     const findInEditor = () => {
       const location = value.context.findLocation();
@@ -235,16 +227,6 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
       </div>
     );
   };
-
-  const heading = widget.heading?.(value) || value.publicName();
-  const headerString = () => (
-    <div className="text-stone-400 group-hover:text-stone-600 text-sm transition">
-      {heading}
-    </div>
-  );
-
-  const headerSettingsButton = () =>
-    widget.renderSettingsMenu?.(value, { onChange: forceUpdate });
 
   const leftCollapseBorder = () => {
     const isDictOrList = tag === "Dict" || tag === "Array";
@@ -277,13 +259,17 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
           <div className="inline-flex items-center">
             {!isFocused && triangleToggle()}
             {headerName}
-            {!isFocused && headerPreview()}
+            {!isFocused && (
+              <SquiggleValuePreview value={value} isOpen={isOpen} />
+            )}
             {!isFocused && !isOpen && <CommentIconForValue value={value} />}
             {!isRoot && editor && headerFindInEditorButton()}
           </div>
           <div className="inline-flex space-x-1">
-            {isOpen && headerString()}
-            {isOpen && headerSettingsButton()}
+            {isOpen && <SquiggleValueHeader value={value} />}
+            {isOpen && (
+              <SquiggleValueSettingsMenu value={value} onChange={forceUpdate} />
+            )}
           </div>
         </header>
         {isOpen && (
