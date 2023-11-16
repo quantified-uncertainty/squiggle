@@ -23,6 +23,7 @@ import {
 } from "./ViewerProvider.js";
 import { getSqValueWidget } from "./getSqValueWidget.js";
 import { getChildrenValues, pathToShortName } from "./utils.js";
+import { SquiggleValueChart } from "../SquiggleValueChart.js";
 
 export type SettingsMenuParams = {
   // Used to notify this component that settings have changed, so that it could re-render itself.
@@ -92,8 +93,6 @@ const WithComment: FC<PropsWithChildren<Props>> = ({ value, children }) => {
 };
 
 const ValueViewerBody: FC<Props> = ({ value }) => {
-  const widget = getSqValueWidget(value.tag);
-
   const { path } = value.context;
   const isFocused = useIsFocused(path);
   const isRoot = path.isRoot();
@@ -109,7 +108,7 @@ const ValueViewerBody: FC<Props> = ({ value }) => {
 
   return (
     <WithComment value={value}>
-      {widget.render(value, adjustedMergedSettings)}
+      <SquiggleValueChart value={value} settings={adjustedMergedSettings} />
     </WithComment>
   );
 };

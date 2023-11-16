@@ -2,7 +2,7 @@ import { memo } from "react";
 
 import { valueHasContext } from "../../lib/utility.js";
 import { PlaygroundSettings } from "../PlaygroundSettings.js";
-import { getSqValueWidget } from "../SquiggleViewer/getSqValueWidget.js";
+import { SquiggleValueChart } from "../SquiggleValueChart.js";
 import { SqValueResult } from "./types.js";
 
 // Unlike ValueViewer/ValueWithContextViewer, this just renders the raw widget; TODO - better name?
@@ -16,7 +16,7 @@ export const ValueResultViewer = memo(function ValueResultViewer({
   if (result.ok) {
     const value = result.value;
     if (valueHasContext(value)) {
-      return getSqValueWidget(value.tag).render(value, settings);
+      return <SquiggleValueChart value={value} settings={settings} />;
     } else {
       return value.toString();
     }
