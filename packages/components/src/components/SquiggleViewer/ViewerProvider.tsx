@@ -14,11 +14,11 @@ import { SqValue, SqValuePath } from "@quri/squiggle-lang";
 
 import {
   PartialPlaygroundSettings,
+  PlaygroundSettings,
   defaultPlaygroundSettings,
 } from "../PlaygroundSettings.js";
 import {
   LocalItemState,
-  MergedItemSettings,
   getChildrenValues,
   pathAsString,
   topLevelBindingsName,
@@ -89,6 +89,7 @@ type ViewerContextShape = {
   // Note that we don't store localItemState themselves in the context (that would cause rerenders of the entire tree on each settings update).
   // Instead, we keep localItemState in local state and notify the global context via setLocalItemState to pass them down the component tree again if it got rebuilt from scratch.
   // See ./SquiggleViewer.tsx and ./ValueWithContextViewer.tsx for other implementation details on this.
+  globalSettings: PlaygroundSettings;
   getLocalItemState({
     path,
     defaults,
@@ -97,13 +98,6 @@ type ViewerContextShape = {
     defaults?: LocalItemState;
   }): LocalItemState;
   getCalculator({ path }: { path: SqValuePath }): CalculatorState | undefined;
-  getMergedSettings({
-    path,
-    defaults,
-  }: {
-    path: SqValuePath;
-    defaults?: LocalItemState;
-  }): MergedItemSettings;
   localSettingsEnabled: boolean; // show local settings icon in the UI
   focused?: SqValuePath;
   editor?: CodeEditorHandle;
@@ -111,9 +105,9 @@ type ViewerContextShape = {
 };
 
 export const ViewerContext = createContext<ViewerContextShape>({
+  globalSettings: defaultPlaygroundSettings,
   getLocalItemState: () => ({ collapsed: false, settings: {} }),
   getCalculator: () => undefined,
-  getMergedSettings: () => defaultPlaygroundSettings,
   localSettingsEnabled: false,
   focused: undefined,
   editor: undefined,
@@ -199,13 +193,25 @@ export function useCollapseChildren() {
   );
 }
 
-export function useIsFocused(location: SqValuePath) {
+export function useIsFocused(path: SqValuePath) {
   const { focused } = useViewerContext();
   if (!focused) {
     return false;
   } else {
-    return pathAsString(focused) === pathAsString(location);
+    return pathAsString(focused) === pathAsString(path);
   }
+}
+
+export function useMergedSettings(path: SqValuePath) {
+  const { getLocalItemState, globalSettings } = useViewerContext();
+
+  const localItemState = getLocalItemState({ path });
+
+  const result: PlaygroundSettings = useMemo(
+    () => merge({}, globalSettings, localItemState.settings),
+    [globalSettings, localItemState.settings]
+  );
+  return result;
 }
 
 type LocalItemStateStore = {
@@ -289,25 +295,6 @@ export const ViewerProvider: FC<
     [localItemStateStoreRef]
   );
 
-  const getMergedSettings = useCallback(
-    ({
-      path,
-      defaults = defaultLocalItemState,
-    }: {
-      path: SqValuePath;
-      defaults?: LocalItemState;
-    }) => {
-      const localItemState = getLocalItemState({ path, defaults });
-      const result: MergedItemSettings = merge(
-        {},
-        globalSettings,
-        localItemState.settings
-      );
-      return result;
-    },
-    [globalSettings, getLocalItemState]
-  );
-
   const setCollapsed = (path: SqValuePath, isCollapsed: boolean) => {
     setLocalItemState(path, (state) => ({
       ...state,
@@ -383,9 +370,9 @@ export const ViewerProvider: FC<
   return (
     <ViewerContext.Provider
       value={{
+        globalSettings,
         getLocalItemState,
         getCalculator,
-        getMergedSettings,
         localSettingsEnabled,
         editor,
         focused,

@@ -212,19 +212,26 @@ export const Calculator: FC<Props> = ({
   const { calculator, form, inputResults, processAllFieldCodes } =
     useCalculator(valueWithContext, _environment);
 
-  const inputResultSettings: PlaygroundSettings = {
-    ...settings,
-    distributionChartSettings: {
-      ...settings.distributionChartSettings,
-      showSummary: false,
-    },
-    chartHeight: 30,
-  };
+  const inputResultSettings: PlaygroundSettings = useMemo(
+    () => ({
+      ...settings,
+      distributionChartSettings: {
+        ...settings.distributionChartSettings,
+        showSummary: false,
+      },
+      chartHeight: 30,
+    }),
+    [settings]
+  );
 
-  const calculatorResultSettings: PlaygroundSettings = {
-    ...settings,
-    chartHeight: 200,
-  };
+  //This memoization is useful to make sure that CalculatorResult ResultViewer doesn't get updated too frequently.
+  const calculatorResultSettings: PlaygroundSettings = useMemo(
+    () => ({
+      ...settings,
+      chartHeight: 200,
+    }),
+    [settings]
+  );
 
   const hasTitleOrDescription = !!calculator.title || !!calculator.description;
 

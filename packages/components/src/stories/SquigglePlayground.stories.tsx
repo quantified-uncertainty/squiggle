@@ -227,14 +227,16 @@ bar = 123
 \`\`test123\`\`
 "
 `,
-    height: 800,
+    height: 1200,
   },
 };
 
 export const Calculator: Story = {
   name: "Calculator",
   args: {
-    defaultCode: `f(a, b, c, d) = [a,b,c,d]
+    defaultCode: `calculatorCorrectlyUpdatesTest = 343 //changing this should propery update the calculator
+    
+    f(a, b, c, d) =  [a,b,c,d,{|f| normal(f*b, f*b)}]
 a = "A longer description of the calculator goes here...\n"
 Calculator.make(
   {
@@ -247,7 +249,8 @@ Calculator.make(
       Input.text({name: "Variable1", description: "This is a very long description This is a very long description This is a very long description This is a very long description This is a very long description", default: 1}),
       Input.select({name: "Variable3", default: "alice", options: ["alice", "charles", "bob", "bill", "maven", "billy", "samantha", "becky"]})
     ],
-    sampleCount: 1000
+    sampleCount: 1000,
+    autorun: false,
   }
 )
   `,
