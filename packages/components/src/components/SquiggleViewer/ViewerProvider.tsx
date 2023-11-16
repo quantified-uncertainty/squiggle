@@ -12,6 +12,8 @@ import {
 
 import { SqValue, SqValuePath } from "@quri/squiggle-lang";
 
+import { CalculatorState } from "../../widgets/CalculatorWidget/types.js";
+import { CodeEditorHandle } from "../CodeEditor.js";
 import {
   PartialPlaygroundSettings,
   PlaygroundSettings,
@@ -23,8 +25,6 @@ import {
   pathAsString,
   topLevelBindingsName,
 } from "./utils.js";
-import { CodeEditorHandle } from "../CodeEditor.js";
-import { CalculatorState } from "../Calculator/types.js";
 
 export type Action =
   | {

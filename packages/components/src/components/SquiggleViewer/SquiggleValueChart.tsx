@@ -1,8 +1,8 @@
 import { FC } from "react";
 
 import { SqValueWithContext } from "../../lib/utility.js";
+import { widgetRegistry } from "../../widgets/registry.js";
 import { PlaygroundSettings } from "../PlaygroundSettings.js";
-import { widgetRegistry } from "../widgets/registry.js";
 
 export const SquiggleValueChart: FC<{
   value: SqValueWithContext;
@@ -13,5 +13,5 @@ export const SquiggleValueChart: FC<{
     return value.toString();
   }
 
-  return widget.render(value, settings);
+  return <widget.Chart value={value} settings={settings} />;
 };

@@ -9,10 +9,10 @@ import {
 } from "@quri/squiggle-lang";
 import { CheckboxFormField, NumberFormField, RadioFormField } from "@quri/ui";
 
-import { functionChartDefaults } from "./FunctionChart/utils.js";
+import { SAMPLE_COUNT_MAX, SAMPLE_COUNT_MIN } from "../lib/constants.js";
+import { functionChartDefaults } from "../widgets/LambdaWidget/FunctionChart/utils.js";
 import { FormComment } from "./ui/FormComment.js";
 import { FormSection } from "./ui/FormSection.js";
-import { SAMPLE_COUNT_MAX, SAMPLE_COUNT_MIN } from "../lib/constants.js";
 
 export const environmentSchema = z.object({
   sampleCount: z.number().int().gte(SAMPLE_COUNT_MIN).lte(SAMPLE_COUNT_MAX),

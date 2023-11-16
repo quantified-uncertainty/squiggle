@@ -1,15 +1,15 @@
-import { FC } from "react";
 import { clsx } from "clsx";
+import { FC } from "react";
 
 import { SqValueWithContext } from "../../lib/utility.js";
-import { widgetRegistry } from "../widgets/registry.js";
+import { widgetRegistry } from "../../widgets/registry.js";
 
 export const SquiggleValuePreview: FC<{
   value: SqValueWithContext;
   isOpen: boolean;
 }> = ({ value, isOpen }) => {
   const widget = widgetRegistry.widgets.get(value.tag);
-  if (!widget?.renderPreview) {
+  if (!widget?.Preview) {
     return null;
   }
 
@@ -20,7 +20,7 @@ export const SquiggleValuePreview: FC<{
         isOpen ? "opacity-40" : "opacity-60"
       )}
     >
-      {widget.renderPreview(value)}
+      <widget.Preview value={value} />
     </div>
   );
 };

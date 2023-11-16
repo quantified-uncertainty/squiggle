@@ -1,9 +1,9 @@
 import { memo } from "react";
 
 import { valueHasContext } from "../../lib/utility.js";
+import { SqValueResult } from "../../widgets/CalculatorWidget/types.js";
 import { PlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleValueChart } from "./SquiggleValueChart.js";
-import { SqValueResult } from "../Calculator/types.js";
 
 // Unlike ValueViewer/ValueWithContextViewer, this just renders the raw widget, or displays an error.
 export const SquiggleValueResultChart = memo(function ValueResultViewer({

@@ -28,7 +28,7 @@ import {
 import { getChildrenValues, pathToShortName } from "./utils.js";
 
 // make sure all widgets are in registry
-import "../widgets/index.js";
+import "../../widgets/index.js";
 
 export type SettingsMenuParams = {
   // Used to notify this component that settings have changed, so that it could re-render itself.

@@ -1,7 +1,7 @@
 import { FC } from "react";
 
 import { SqValueWithContext } from "../../lib/utility.js";
-import { widgetRegistry } from "../widgets/registry.js";
+import { widgetRegistry } from "../../widgets/registry.js";
 
 export const SquiggleValueSettingsMenu: FC<{
   value: SqValueWithContext;
@@ -9,8 +9,8 @@ export const SquiggleValueSettingsMenu: FC<{
 }> = ({ value, onChange }) => {
   const widget = widgetRegistry.widgets.get(value.tag);
 
-  if (!widget) {
+  if (!widget?.Menu) {
     return null;
   }
-  return widget.renderSettingsMenu?.(value, { onChange });
+  return <widget.Menu value={value} params={{ onChange }} />;
 };

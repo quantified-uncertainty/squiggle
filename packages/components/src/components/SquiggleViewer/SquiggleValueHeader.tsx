@@ -1,7 +1,7 @@
 import { FC } from "react";
 
 import { SqValueWithContext } from "../../lib/utility.js";
-import { widgetRegistry } from "../widgets/registry.js";
+import { widgetRegistry } from "../../widgets/registry.js";
 
 export const SquiggleValueHeader: FC<{
   value: SqValueWithContext;

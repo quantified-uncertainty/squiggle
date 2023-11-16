@@ -1,5 +1,6 @@
 import { PathItem, SqValue, SqValuePath } from "@quri/squiggle-lang";
-import { CalculatorState } from "../Calculator/types.js";
+
+import { CalculatorState } from "../../widgets/CalculatorWidget/types.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 
 export type LocalItemState = {
