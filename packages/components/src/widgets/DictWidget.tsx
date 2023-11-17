@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+
 import { ValueViewer } from "../components/SquiggleViewer/ValueViewer.js";
 import { SqTypeWithCount } from "./SqTypeWithCount.js";
 import { widgetRegistry } from "./registry.js";
@@ -7,11 +9,12 @@ widgetRegistry.register("Dict", {
   renderPreview: (value) => (
     <SqTypeWithCount type="{}" count={value.value.entries().length} />
   ),
-  render: (value) => (
+  render: (value) => {
+    const entries = useMemo(() => value.value.entries(), [value]);
     <div className="space-y-2 pt-1 mt-1">
-      {value.value.entries().map(([k, v]) => (
+      {entries.map(([k, v]) => (
         <ValueViewer key={k} value={v} />
       ))}
-    </div>
-  ),
+    </div>;
+  },
 });

@@ -21,6 +21,7 @@ import {
   useViewerContext,
 } from "./ViewerProvider.js";
 import { extractSubvalueByPath, pathItemFormat } from "./utils.js";
+import { useStabilizeObjectIdentity } from "../../lib/hooks/useStabilizeObject.js";
 
 export type SquiggleViewerHandle = {
   viewValuePath(path: SqValuePath): void;
@@ -136,9 +137,17 @@ const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
     },
     ref
   ) {
+    /**
+     * Because we obtain `partialPlaygroundSettings` with spread syntax, its identity changes on each render, which could
+     * cause extra unnecessary re-renders of widgets, in some cases.
+     * Related discussion: https://github.com/quantified-uncertainty/squiggle/pull/2525#discussion_r1393398447
+     */
+    const stablePartialPlaygroundSettings = useStabilizeObjectIdentity(
+      partialPlaygroundSettings
+    );
     return (
       <ViewerProvider
-        partialPlaygroundSettings={partialPlaygroundSettings}
+        partialPlaygroundSettings={stablePartialPlaygroundSettings}
         localSettingsEnabled={localSettingsEnabled}
         editor={editor}
         beginWithVariablesCollapsed={resultItem !== undefined && resultItem.ok}
