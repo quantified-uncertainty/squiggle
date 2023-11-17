@@ -53,10 +53,32 @@ describe("List functions", () => {
       "Error(Argument Error: List must not be empty)"
     );
   });
+
   describe("concat", () => {
     testEvalToBe("List.concat([1, 2, 3], [4, 5, 6])", "[1,2,3,4,5,6]");
     testEvalToBe("List.concat([], [1, 2, 3])", "[1,2,3]");
     testEvalToBe("List.concat(['cake'], [1, 2, 3])", '["cake",1,2,3]');
+  });
+
+  describe("sortBy", () => {
+    testEvalToBe(
+      "arr=[5, 2, 3, 1, 4]; List.sortBy(arr, {|n| n})",
+      "[1,2,3,4,5]"
+    );
+    testEvalToBe(
+      "arr=[{a: 3}, {a: 1}, {a: 2}]; List.sortBy(arr, {|obj| obj.a})",
+      "[{a: 1},{a: 2},{a: 3}]"
+    );
+    testEvalToBe(
+      "arr=[{a: '3'}, {a: '1'}, {a: '2'}]; List.sortBy(arr, {|obj| obj.a})",
+      "Error(Argument Error: Function must return a number)"
+    );
+
+    // Edge cases
+    testEvalToBe("arr=[]; List.sortBy(arr, {|n| n})", "[]"); // Empty array
+    testEvalToBe("arr=[1]; List.sortBy(arr, {|n| n})", "[1]"); // Single-element array
+    testEvalToBe("arr=[3, 2, 1]; List.sortBy(arr, {|n| -n})", "[3,2,1]"); // Descending order
+    testEvalToBe("arr=[1, 2, 3]; List.sortBy(arr, {|n| 0})", "[1,2,3]"); // Lambda function always returns the same value
   });
 
   describe("reverse", () => {
