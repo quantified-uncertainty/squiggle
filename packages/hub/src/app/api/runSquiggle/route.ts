@@ -1,14 +1,6 @@
 import { runSquiggle } from "@/graphql/queries/runSquiggle";
 import { NextRequest, NextResponse } from "next/server";
 
-export function GET(request: NextRequest) {
-  return new NextResponse(JSON.stringify({ foo: 3 }), {
-    status: 200,
-    statusText: "OK",
-    headers: { "Content-Type": "application/json" },
-  });
-}
-
 export async function POST(req: NextRequest) {
   // Assuming 'code' is sent in the request body and is a string
   const body = await req.json();

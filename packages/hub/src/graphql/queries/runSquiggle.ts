@@ -9,6 +9,7 @@ import {
   SqValue,
   SqPointSetDistribution,
   SqSampleSetDistribution,
+  SqCalculator,
 } from "@quri/squiggle-lang";
 
 import { builder } from "@/graphql/builder";
@@ -37,6 +38,14 @@ export const squiggleValueToJSON = (value: SqValue) => {
           stdev: value._value.stdev(),
           p5: value._value.cdf(0.05),
           p95: value._value.cdf(0.95),
+        };
+      }
+      if (value instanceof SqCalculator) {
+        return {
+          type: "Calculator",
+          title: value.title,
+          description: value.description,
+          inputs: value.inputs,
         };
       }
       if (value instanceof SqAbstractDistribution) {
