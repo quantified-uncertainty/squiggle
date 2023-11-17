@@ -10,8 +10,9 @@ export type SqCalculatorValueWithContext = Extract<
   { tag: "Calculator" }
 >;
 
-export type SqValueResult = result<SqValue, SqError>; /**
+export type SqValueResult = result<SqValue, SqError>;
 
+/**
  * This type is used for backing up calculator state to ViewerContext.
  * The backup is necessary for two reasons:
  * 1. Calculator component can be destroyed and recreated on code changes.
