@@ -17,6 +17,7 @@ export const ModelSettingsButton: FC<{
         slug
         ...MoveModelAction
         owner {
+          __typename
           slug
         }
       }
@@ -35,7 +36,7 @@ export const ModelSettingsButton: FC<{
           />
           <MoveModelAction model={model} close={close} />
           <DeleteModelAction
-            owner={model.owner.slug}
+            owner={model.owner}
             slug={model.slug}
             close={close}
           />

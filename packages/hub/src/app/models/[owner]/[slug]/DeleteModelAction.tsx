@@ -5,6 +5,7 @@ import { useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { DeleteModelActionMutation } from "@/__generated__/DeleteModelActionMutation.graphql";
+import { ownerRoute } from "@/routes";
 
 const Mutation = graphql`
   mutation DeleteModelActionMutation($input: MutationDeleteModelInput!) {
@@ -18,7 +19,7 @@ const Mutation = graphql`
 `;
 
 type Props = {
-  owner: string;
+  owner: { slug: string; __typename: string };
   slug: string;
   close(): void;
 };
@@ -33,14 +34,14 @@ export const DeleteModelAction: FC<Props> = ({ owner, slug, close }) => {
   const onClick = useCallback((): Promise<void> => {
     return new Promise((resolve) => {
       mutation({
-        variables: { input: { owner, slug } },
+        variables: { input: { owner: owner.slug, slug } },
         onCompleted(response) {
           if (response.deleteModel.__typename === "BaseError") {
             toast(response.deleteModel.message, "error");
             resolve();
           } else {
             // TODO - this is risky, what if we add more error types to GraphQL schema?
-            router.push("/");
+            router.push(ownerRoute(owner));
           }
         },
         onError(e) {
