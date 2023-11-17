@@ -1,10 +1,11 @@
 import { DropdownMenuAsyncActionItem, TrashIcon, useToast } from "@quri/ui";
 import { useRouter } from "next/navigation";
 import { FC, useCallback } from "react";
-import { useMutation } from "react-relay";
+import { useFragment, useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { DeleteModelActionMutation } from "@/__generated__/DeleteModelActionMutation.graphql";
+import { DeleteModelAction$key } from "@/__generated__/DeleteModelAction.graphql";
 import { ownerRoute } from "@/routes";
 
 const Mutation = graphql`
@@ -19,12 +20,25 @@ const Mutation = graphql`
 `;
 
 type Props = {
-  owner: { slug: string; __typename: string };
-  slug: string;
+  model: DeleteModelAction$key;
   close(): void;
 };
 
-export const DeleteModelAction: FC<Props> = ({ owner, slug, close }) => {
+export const DeleteModelAction: FC<Props> = ({ model: modelKey, close }) => {
+  const model = useFragment(
+    graphql`
+      fragment DeleteModelAction on Model {
+        slug
+        owner {
+          __typename
+          id
+          slug
+        }
+      }
+    `,
+    modelKey
+  );
+
   const router = useRouter();
 
   const [mutation] = useMutation<DeleteModelActionMutation>(Mutation);
@@ -34,14 +48,14 @@ export const DeleteModelAction: FC<Props> = ({ owner, slug, close }) => {
   const onClick = useCallback((): Promise<void> => {
     return new Promise((resolve) => {
       mutation({
-        variables: { input: { owner: owner.slug, slug } },
+        variables: { input: { owner: model.owner.slug, slug: model.slug } },
         onCompleted(response) {
           if (response.deleteModel.__typename === "BaseError") {
             toast(response.deleteModel.message, "error");
             resolve();
           } else {
             // TODO - this is risky, what if we add more error types to GraphQL schema?
-            router.push(ownerRoute(owner));
+            router.push(ownerRoute(model.owner));
           }
         },
         onError(e) {
@@ -50,7 +64,7 @@ export const DeleteModelAction: FC<Props> = ({ owner, slug, close }) => {
         },
       });
     });
-  }, [mutation, owner, slug, router, toast]);
+  }, [mutation, model.owner, model.slug, router, toast]);
 
   return (
     <DropdownMenuAsyncActionItem

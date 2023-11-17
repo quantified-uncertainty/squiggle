@@ -10,7 +10,6 @@ import { SelectOwner, SelectOwnerOption } from "@/components/SelectOwner";
 import { MutationModalAction } from "@/components/ui/MutationModalAction";
 import { modelRoute } from "@/routes";
 import { MoveModelAction$key } from "@/__generated__/MoveModelAction.graphql";
-import { DefaultValues } from "react-hook-form";
 
 const Mutation = graphql`
   mutation MoveModelActionMutation($input: MutationMoveModelInput!) {
