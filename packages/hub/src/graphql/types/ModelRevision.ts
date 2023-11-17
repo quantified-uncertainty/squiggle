@@ -22,7 +22,7 @@ builder.prismaNode("ModelExport", {
     modelRevision: t.relation("modelRevision"),
     variableName: t.exposeString("variableName"),
     variableType: t.exposeString("variableType"),
-    docstring: t.exposeString("docstring", { nullable: true }),
+    docstring: t.exposeString("docstring"),
     title: t.exposeString("title", { nullable: true }),
   }),
 });

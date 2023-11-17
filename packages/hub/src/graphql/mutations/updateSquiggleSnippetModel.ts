@@ -164,7 +164,7 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
                   ({ variableName, variableType, docstring, title }) => ({
                     variableName,
                     variableType,
-                    docstring: docstring ?? null,
+                    docstring: docstring ?? undefined,
                     title: title ?? null,
                   })
                 ),

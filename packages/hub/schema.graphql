@@ -154,7 +154,7 @@ type ModelEdge {
 }
 
 type ModelExport implements Node {
-  docstring: String
+  docstring: String!
   id: ID!
   modelRevision: ModelRevision!
   title: String
