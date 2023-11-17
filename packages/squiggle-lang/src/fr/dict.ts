@@ -11,7 +11,14 @@ import {
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
-import { Value, vArray, vDict, vString } from "../value/index.js";
+import {
+  Value,
+  vArray,
+  vNumber,
+  vBool,
+  vDict,
+  vString,
+} from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Dict",
@@ -27,6 +34,38 @@ export const library = [
       makeDefinition(
         [frDictWithArbitraryKeys(frAny), frString, frAny],
         ([dict, key, value]) => vDict(dict.set(key, value))
+      ),
+    ],
+  }),
+  maker.make({
+    name: "has",
+    output: "Bool",
+    examples: [`Dict.has({a: 1, b: 2}, "c")`],
+    definitions: [
+      makeDefinition(
+        [frDictWithArbitraryKeys(frAny), frString],
+        ([dict, key]) => vBool(dict.has(key))
+      ),
+    ],
+  }),
+  maker.make({
+    name: "size",
+    output: "Number",
+    examples: [`Dict.size({a: 1, b: 2})`],
+    definitions: [
+      makeDefinition([frDictWithArbitraryKeys(frAny)], ([dict]) =>
+        vNumber(dict.size)
+      ),
+    ],
+  }),
+  maker.make({
+    name: "delete",
+    output: "Dict",
+    examples: [`Dict.delete({a: 1, b: 2}, "a")`],
+    definitions: [
+      makeDefinition(
+        [frDictWithArbitraryKeys(frAny), frString],
+        ([dict, key]) => vDict(dict.delete(key))
       ),
     ],
   }),

@@ -150,6 +150,33 @@ List.flatten([
 ]) // [1,2,3,4]
 ```
 
+## List Sorting
+
+### sortBy
+```
+List.sortBy: (list<'a>, ('a => number)) => list<'a>
+```
+
+```squiggle
+List.sortBy(
+[
+  {a:2, b:10}
+  {a:10, b:3}
+],
+{|obj| obj.b}
+) // [{a:10, b:3}, {a:2, b:10}]
+```
+
+### minBy
+```
+List.minBy: (list<'a>, ('a => number)) => 'a
+```
+
+### maxBy
+```
+List.maxBy: (list<'a>, ('a => number)) => 'a
+```
+
 ## List Filtering
 
 ### slice
