@@ -1,19 +1,72 @@
-import { ImmutableMap } from "../utility/immutableMap.js";
-import { Value, vNumber } from "../value/index.js";
+// Add math functions
+export function ceil(x: number): number {
+  return Math.ceil(x);
+}
 
-const availableNumbers: [string, number][] = [
-  ["Math.pi", Math.PI],
-  ["Math.e", Math.E],
-  ["Math.ln2", Math.LN2],
-  ["Math.ln10", Math.LN10],
-  ["Math.log2e", Math.LOG2E],
-  ["Math.log10e", Math.LOG10E],
-  ["Math.sqrt2", Math.SQRT2],
-  ["Math.sqrt1_2", Math.SQRT1_2],
-  ["Math.phi", 1.618033988749895],
-  ["Math.tau", 6.283185307179586],
-];
+export function divide(a: number, b: number): number {
+  return Math.divide(a, b);
+}
 
-export function makeMathConstants(): ImmutableMap<string, Value> {
-  return ImmutableMap(availableNumbers.map(([name, v]) => [name, vNumber(v)]));
+export function floor(x: number): number {
+  return Math.floor(x);
+}
+
+export function max(list: number[]): number {
+  return Math.max(list);
+}
+
+export function maxBy(list: number[], fn: (element: number) => number): number {
+  return Math.maxBy(list, fn);
+}
+
+export function mean(list: number[]): number {
+  return Math.mean(list);
+}
+
+export function minBy(list: number[], fn: (element: number) => number): number {
+  return Math.minBy(list, fn);
+}
+
+export function product(list: number[]): number {
+  return Math.product(list);
+}
+
+export function sum(list: number[]): number {
+  return Math.sum(list);
+}
+
+export function abs(x: number): number {
+  return Math.abs(x);
+}
+
+export function add(a: number, b: number): number {
+  return Math.add(a, b);
+}
+
+export function divide(a: number, b: number): number {
+  return Math.divide(a, b);
+}
+
+export function exp(x: number): number {
+  return Math.exp(x);
+}
+
+export function log10(x: number): number {
+  return Math.log10(x);
+}
+
+export function log2(x: number): number {
+  return Math.log2(x);
+}
+
+export function pow(x: number, y: number): number {
+  return Math.pow(x, y);
+}
+
+export function sqrt(x: number): number {
+  return Math.sqrt(x);
+}
+
+export function subtract(x: number, y: number): number {
+  return Math.subtract(x, y);
 }
