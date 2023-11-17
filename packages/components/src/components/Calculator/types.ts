@@ -10,6 +10,11 @@ export type SqCalculatorValueWithContext = Extract<
   { tag: "Calculator" }
 >;
 
+export type SqLambdaValueWithContext = Extract<
+  SqValueWithContext,
+  { tag: "Lambda" }
+>;
+
 export type SqValueResult = result<SqValue, SqError>; /**
 
  * This type is used for backing up calculator state to ViewerContext.

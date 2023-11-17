@@ -215,7 +215,7 @@ export function getSqValueWidget(value: SqValueWithContext): ValueWidget {
         },
         render: (settings) => (
           <FunctionChart
-            fn={value.value}
+            fnValue={value}
             settings={settings}
             height={settings.chartHeight}
             environment={{

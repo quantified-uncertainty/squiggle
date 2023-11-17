@@ -8,6 +8,7 @@ import { result } from "../../utility/result.js";
 
 import { SqError, SqOtherError, SqRuntimeError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
+import { SqCalculator } from "./SqCalculator.js";
 import { SqDomain, wrapDomain } from "./SqDomain.js";
 import { SqValue, wrapValue } from "./index.js";
 
@@ -94,5 +95,10 @@ export class SqLambda {
 
   parameterString() {
     return this._value.parameterString();
+  }
+
+  toCalculator(): SqCalculator | undefined {
+    const calc = this._value.toCalculator();
+    return calc ? new SqCalculator(calc, this.context) : undefined;
   }
 }

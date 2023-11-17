@@ -4,7 +4,7 @@ import { ASTNode } from "../ast/parse.js";
 import * as IError from "../errors/IError.js";
 import { REArityError, REDomainError, REOther } from "../errors/messages.js";
 import { Expression } from "../expression/index.js";
-import { VDomain, Value } from "../value/index.js";
+import { Calculator, VDomain, Value } from "../value/index.js";
 import * as Context from "./context.js";
 import { ReducerContext } from "./context.js";
 import { Stack } from "./stack.js";
@@ -61,6 +61,10 @@ export abstract class BaseLambda {
 
   call(args: Value[], context: ReducerContext): Value {
     return this.callFrom(args, context, undefined);
+  }
+
+  toCalculator(): Calculator | undefined {
+    return undefined;
   }
 }
 
@@ -135,6 +139,17 @@ export class UserDefinedLambda extends BaseLambda {
 
   parameterCountString() {
     return this.parameters.length.toString();
+  }
+
+  override toCalculator(): Calculator {
+    return {
+      fn: this,
+      inputs: this._getParameterNames().map((name) => ({
+        name: name,
+        type: "text",
+      })),
+      autorun: false,
+    };
   }
 }
 

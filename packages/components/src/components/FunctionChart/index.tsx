@@ -4,7 +4,6 @@ import {
   Env,
   SqDistFnPlot,
   SqError,
-  SqLambda,
   SqLinearScale,
   SqNumberValue,
   SqNumericFnPlot,
@@ -18,9 +17,15 @@ import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 import { DistFunctionChart } from "./DistFunctionChart.js";
 import { NumericFunctionChart } from "./NumericFunctionChart.js";
 import { ErrorBoundary } from "../ErrorBoundary.js";
+import { Calculator } from "../Calculator/index.js";
+import {
+  SqCalculatorValueWithContext,
+  SqLambdaValueWithContext,
+} from "../Calculator/types.js";
+import { valueHasContext } from "../../lib/utility.js";
 
 type FunctionChartProps = {
-  fn: SqLambda;
+  fnValue: SqLambdaValueWithContext;
   settings: PlaygroundSettings;
   environment: Env;
   height: number;
@@ -46,14 +51,32 @@ const FunctionCallErrorAlert: FC<{ error: SqError }> = ({ error }) => {
 };
 
 export const FunctionChart: FC<FunctionChartProps> = ({
-  fn,
+  fnValue,
   settings,
   environment,
   height,
 }) => {
+  const fn = fnValue.value;
   const parameters = fn.parameterCounts();
+  const toCalc = () => {
+    const foo = fnValue.toCalculator();
+    if (foo && valueHasContext(foo)) {
+      return (
+        <Calculator
+          valueWithContext={foo as SqCalculatorValueWithContext}
+          environment={environment}
+          settings={settings}
+        />
+      );
+    } else {
+      return undefined;
+    }
+  };
   if (!parameters.includes(1)) {
-    return (
+    const asCalc = toCalc();
+    return asCalc ? (
+      asCalc
+    ) : (
       <MessageAlert heading="Function Display Not Supported">
         Only functions with one parameter are displayed.
       </MessageAlert>
@@ -82,7 +105,12 @@ export const FunctionChart: FC<FunctionChartProps> = ({
   const validResult = getValidResult();
 
   if (!validResult.ok) {
-    return <FunctionCallErrorAlert error={validResult.value} />;
+    const asCalc = toCalc();
+    return asCalc ? (
+      asCalc
+    ) : (
+      <FunctionCallErrorAlert error={validResult.value} />
+    );
   }
 
   switch (validResult.value.tag) {
