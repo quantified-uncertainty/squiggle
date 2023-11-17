@@ -14,7 +14,6 @@ import { useRunnerState } from "../lib/hooks/useRunnerState.js";
 type Props = {
   code: string;
   showHeader?: boolean;
-  localSettingsEnabled?: boolean;
 } & (StandaloneExecutionProps | ProjectExecutionProps) &
   // `environment` is passed through StandaloneExecutionProps; this way we guarantee that it's not compatible with `project` prop
   Omit<PartialPlaygroundSettings, "environment">;
@@ -22,7 +21,6 @@ type Props = {
 export const SquiggleChart: FC<Props> = memo(function SquiggleChart({
   code,
   showHeader = false,
-  localSettingsEnabled,
   project,
   continues,
   environment,
@@ -48,7 +46,6 @@ export const SquiggleChart: FC<Props> = memo(function SquiggleChart({
       squiggleOutput={squiggleOutput}
       isRunning={isRunning}
       showHeader={showHeader}
-      localSettingsEnabled={localSettingsEnabled}
       environment={environment}
       {...settings}
     />

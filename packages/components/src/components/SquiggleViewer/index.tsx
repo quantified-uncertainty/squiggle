@@ -31,7 +31,6 @@ export type SquiggleViewerProps = {
   /** The output of squiggle's run */
   resultVariables: result<SqDictValue, SqError>;
   resultItem: result<SqValue, SqError> | undefined;
-  localSettingsEnabled?: boolean;
   editor?: CodeEditorHandle;
 } & PartialPlaygroundSettings;
 
@@ -128,13 +127,7 @@ const SquiggleViewerOuter = forwardRef<
 
 const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
   function SquiggleViewer(
-    {
-      resultVariables,
-      resultItem,
-      localSettingsEnabled = false,
-      editor,
-      ...partialPlaygroundSettings
-    },
+    { resultVariables, resultItem, editor, ...partialPlaygroundSettings },
     ref
   ) {
     /**
@@ -148,7 +141,6 @@ const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
     return (
       <ViewerProvider
         partialPlaygroundSettings={stablePartialPlaygroundSettings}
-        localSettingsEnabled={localSettingsEnabled}
         editor={editor}
         beginWithVariablesCollapsed={resultItem !== undefined && resultItem.ok}
       >

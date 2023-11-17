@@ -12,21 +12,13 @@ type Props = {
   squiggleOutput: SquiggleOutput | undefined;
   isRunning: boolean;
   showHeader?: boolean;
-  localSettingsEnabled?: boolean;
   editor?: CodeEditorHandle;
 } & PartialPlaygroundSettings;
 
 /* Wrapper for SquiggleViewer that shows the rendering stats and isRunning state. */
 export const DynamicSquiggleViewer = forwardRef<SquiggleViewerHandle, Props>(
   function DynamicSquiggleViewer(
-    {
-      squiggleOutput,
-      isRunning,
-      showHeader = true,
-      localSettingsEnabled,
-      editor,
-      ...settings
-    },
+    { squiggleOutput, isRunning, showHeader = true, editor, ...settings },
     viewerRef
   ) {
     const squiggleViewer = squiggleOutput?.code ? (
@@ -39,7 +31,6 @@ export const DynamicSquiggleViewer = forwardRef<SquiggleViewerHandle, Props>(
           <SquiggleViewer
             {...settings}
             ref={viewerRef}
-            localSettingsEnabled={localSettingsEnabled}
             resultVariables={getResultVariables(squiggleOutput)}
             resultItem={getResultValue(squiggleOutput)}
             editor={editor}

@@ -98,7 +98,6 @@ type ViewerContextShape = {
     defaults?: LocalItemState;
   }): LocalItemState;
   getCalculator({ path }: { path: SqValuePath }): CalculatorState | undefined;
-  localSettingsEnabled: boolean; // show local settings icon in the UI
   focused?: SqValuePath;
   editor?: CodeEditorHandle;
   dispatch(action: Action): void;
@@ -108,7 +107,6 @@ export const ViewerContext = createContext<ViewerContextShape>({
   globalSettings: defaultPlaygroundSettings,
   getLocalItemState: () => ({ collapsed: false, settings: {} }),
   getCalculator: () => undefined,
-  localSettingsEnabled: false,
   focused: undefined,
   editor: undefined,
   dispatch() {},
@@ -230,13 +228,11 @@ const collapsedVariablesDefault: LocalItemStateStore = {
 export const ViewerProvider: FC<
   PropsWithChildren<{
     partialPlaygroundSettings: PartialPlaygroundSettings;
-    localSettingsEnabled: boolean;
     editor?: CodeEditorHandle;
     beginWithVariablesCollapsed?: boolean;
   }>
 > = ({
   partialPlaygroundSettings,
-  localSettingsEnabled,
   editor,
   beginWithVariablesCollapsed,
   children,
@@ -368,7 +364,6 @@ export const ViewerProvider: FC<
         globalSettings,
         getLocalItemState,
         getCalculator,
-        localSettingsEnabled,
         editor,
         focused,
         dispatch,

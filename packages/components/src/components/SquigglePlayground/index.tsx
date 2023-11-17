@@ -137,7 +137,6 @@ export const SquigglePlayground: React.FC<PlaygroundProps> = (props) => {
       // FIXME - this will cause viewer to be rendered twice on initial render
       editor={leftPanelRef.current?.getEditor() ?? undefined}
       ref={rightPanelRef}
-      localSettingsEnabled={true}
       {...settings}
     />
   );

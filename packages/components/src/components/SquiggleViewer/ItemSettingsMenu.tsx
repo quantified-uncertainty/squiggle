@@ -101,14 +101,9 @@ const ItemSettingsModal: React.FC<
 export const ItemSettingsMenu: React.FC<Props> = (props) => {
   const [isOpen, setIsOpen] = useState(false);
   const resetStateSettings = useResetStateSettings();
-  const { localSettingsEnabled, getLocalItemState, dispatch } =
-    useContext(ViewerContext);
+  const { getLocalItemState, dispatch } = useContext(ViewerContext);
 
   const ref = useRef<HTMLDivElement | null>(null);
-
-  if (!localSettingsEnabled) {
-    return null;
-  }
 
   const { path } = props.value.context;
 
