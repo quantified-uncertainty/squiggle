@@ -105,13 +105,23 @@ export const library = [
     name: "min",
     output: "Number",
     examples: [`min([3,5,2])`],
-    definitions: [makeNumberArrayToNumberDefinition((arr) => Math.min(...arr))],
+    definitions: [
+      makeNumberArrayToNumberDefinition((arr) => Math.min(...arr)),
+      makeDefinition([frNumber, frNumber], ([a, b]) => {
+        return vNumber(Math.min(a, b));
+      }),
+    ],
   }),
   maker.make({
     name: "max",
     output: "Number",
     examples: [`max([3,5,2])`],
-    definitions: [makeNumberArrayToNumberDefinition((arr) => Math.max(...arr))],
+    definitions: [
+      makeNumberArrayToNumberDefinition((arr) => Math.max(...arr)),
+      makeDefinition([frNumber, frNumber], ([a, b]) => {
+        return vNumber(Math.max(a, b));
+      }),
+    ],
   }),
   maker.make({
     name: "mean",

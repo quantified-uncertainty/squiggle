@@ -111,6 +111,26 @@ Dict.set: (dict<'a>, string, 'a) => dict<'a>
 
 Creates a new dictionary that includes the added element, while leaving the original dictionary unaltered.
 
+### has
+
+```
+Dict.has: (dict<'a>, string) => boolean
+```
+
+### size
+
+```
+Dict.size: (dict<'a>) => number
+```
+
+### delete
+
+```
+Dict.delete: (dict<'a>, string) => dist<'a>
+```
+
+Creates a new dictionary, excluding the key-value pair associated with the specified key.
+
 ### map
 
 ```

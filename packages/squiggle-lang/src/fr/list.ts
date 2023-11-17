@@ -25,6 +25,9 @@ import { sampleSetAssert } from "./sampleset.js";
 import { unzip, zip } from "../utility/E_A.js";
 import { Lambda } from "../reducer/lambda.js";
 import { ReducerContext } from "../reducer/context.js";
+import sortBy from "lodash/sortBy.js";
+import minBy from "lodash/minBy.js";
+import maxBy from "lodash/maxBy.js";
 
 export function _map(
   array: Value[],
@@ -117,6 +120,18 @@ function _binaryLambdaCheck1(
   context: ReducerContext
 ): (e: Value) => boolean {
   return (el: Value) => doBinaryLambdaCall([el], lambda, context);
+}
+
+function applyLambdaAndCheckNumber(
+  element: Value,
+  lambda: Lambda,
+  context: ReducerContext
+): number {
+  const item = lambda.call([element], context);
+  if (item.type !== "Number") {
+    throw new REArgumentError("Function must return a number");
+  }
+  return item.value;
 }
 
 const maker = new FnFactory({
@@ -248,6 +263,63 @@ export const library = [
     definitions: [
       makeDefinition([frArray(frAny), frArray(frAny)], ([array1, array2]) =>
         vArray([...array1].concat(array2))
+      ),
+    ],
+  }),
+  maker.make({
+    name: "sortBy",
+    requiresNamespace: true,
+    examples: [`List.sortBy([{a:3}, {a:1}], {|f| f.a})`],
+    definitions: [
+      makeDefinition(
+        [frArray(frAny), frLambdaN(1)],
+        ([array, lambda], context) => {
+          return vArray(
+            sortBy(array, (e) => applyLambdaAndCheckNumber(e, lambda, context))
+          );
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "minBy",
+    requiresNamespace: true,
+    examples: [`List.minBy([{a:3}, {a:1}], {|f| f.a})`],
+    definitions: [
+      makeDefinition(
+        [frArray(frAny), frLambdaN(1)],
+        ([array, lambda], context) => {
+          _assertUnemptyArray(array);
+          const el = minBy(array, (e) =>
+            applyLambdaAndCheckNumber(e, lambda, context)
+          );
+          if (!el) {
+            //This should never be reached, because we checked that the array is not empty
+            throw new REOther("No element found");
+          }
+          return el;
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "maxBy",
+    requiresNamespace: true,
+    examples: [`List.maxBy([{a:3}, {a:1}], {|f| f.a})`],
+    definitions: [
+      makeDefinition(
+        [frArray(frAny), frLambdaN(1)],
+        ([array, lambda], context) => {
+          _assertUnemptyArray(array);
+          const el = maxBy(array, (e) =>
+            applyLambdaAndCheckNumber(e, lambda, context)
+          );
+          if (!el) {
+            //This should never be reached, because we checked that the array is not empty
+            throw new REOther("No element found");
+          }
+          return el;
+        }
       ),
     ],
   }),
