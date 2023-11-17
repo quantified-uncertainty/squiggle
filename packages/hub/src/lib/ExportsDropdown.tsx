@@ -4,23 +4,29 @@ import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { graphql, useFragment } from "react-relay";
 
 import {
-  ButtonWithDropdown,
+  BarChartIcon,
+  BookOpenIcon,
+  CalculatorIcon,
+  CodeBracketIcon,
   CommentIcon,
+  CurlyBracketsIcon,
   Dropdown,
   DropdownMenu,
-  DropdownMenuActionItem,
   DropdownMenuHeader,
-  DropdownMenuModalActionItem,
-  LinkIcon,
+  HashIcon,
   ScaleIcon,
   ShareIcon,
-  TextAreaFormField,
-  TextTooltip,
+  SquareBracketIcon,
+  TableCellsIcon,
 } from "@quri/ui";
 import { modelExportRoute, modelForRelativeValuesExportRoute } from "@/routes";
 import { DropdownMenuNextLinkItem } from "@/components/ui/DropdownMenuNextLinkItem";
 
-type ModelExport = { variableName: string; title?: string };
+type ModelExport = {
+  title?: string;
+  variableName: string;
+  variableType: string;
+};
 type RelativeValuesExport = { slug: string; variableName: string };
 
 const nonRelativeValuesExports = (
@@ -41,6 +47,26 @@ export const totalImportLength = (
 ) =>
   nonRelativeValuesExports(modelExports, relativeValuesExports).length +
   relativeValuesExports.length;
+
+// I assume it would be appropriate to move this elsewhere, once we need it elsewhere.
+const typeIcon = (type: string) => {
+  switch (type) {
+    case "Number":
+      return HashIcon;
+    case "Array":
+      return SquareBracketIcon;
+    case "Dict":
+      return CurlyBracketsIcon;
+    case "Lambda":
+      return CodeBracketIcon;
+    case "TableChart":
+      return TableCellsIcon;
+    case "Calculator":
+      return CalculatorIcon;
+    default:
+      return ShareIcon;
+  }
+};
 
 export const ExportsDropdown: FC<
   PropsWithChildren<{
@@ -68,7 +94,7 @@ export const ExportsDropdown: FC<
                     variableName: exportItem.variableName,
                   })}
                   title={`${exportItem.title || exportItem.variableName}`}
-                  icon={ShareIcon}
+                  icon={typeIcon(exportItem.variableType)}
                   close={close}
                 />
               ))}{" "}

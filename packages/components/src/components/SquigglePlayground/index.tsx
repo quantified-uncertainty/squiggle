@@ -24,7 +24,9 @@ import { ResizableTwoPanelLayout } from "./ResizableTwoPanelLayout.js";
 
 export type ModelExport = {
   variableName: string;
+  variableType: string;
   title?: string;
+  docstring: string;
 };
 
 /*
@@ -118,9 +120,12 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     const _output = output.output?.output;
     if (_output && _output.ok) {
       const exports = _output.value.exports;
-      const _exports: ModelExport[] = exports.entries().map((e) => {
-        return { variableName: e[0], title: e[1].title() };
-      });
+      const _exports: ModelExport[] = exports.entries().map((e) => ({
+        variableName: e[0],
+        variableType: e[1].tag,
+        title: e[1].title(),
+        docstring: e[1].context?.docstring() || "",
+      }));
       onExportsChange && onExportsChange(_exports);
     } else {
       onExportsChange && onExportsChange([]);

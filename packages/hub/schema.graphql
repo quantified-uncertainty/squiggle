@@ -154,10 +154,12 @@ type ModelEdge {
 }
 
 type ModelExport implements Node {
+  docstring: String!
   id: ID!
   modelRevision: ModelRevision!
   title: String
   variableName: String!
+  variableType: String!
 }
 
 type ModelRevision implements Node {
@@ -546,8 +548,10 @@ type SquiggleErrorOutput implements SquiggleOutput {
 }
 
 input SquiggleModelExportInput {
+  docstring: String
   title: String
   variableName: String!
+  variableType: String!
 }
 
 type SquiggleOkOutput implements SquiggleOutput {

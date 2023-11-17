@@ -41,6 +41,8 @@ const SquiggleSnippetContentInput = builder.inputType(
 const SquiggleModelExportInput = builder.inputType("SquiggleModelExportInput", {
   fields: (t) => ({
     variableName: t.string({ required: true }),
+    variableType: t.string({ required: true }),
+    docstring: t.string({ required: false }),
     title: t.string({ required: false }),
   }),
 });
@@ -158,10 +160,14 @@ builder.mutationField("updateSquiggleSnippetModel", (t) =>
             },
             exports: {
               createMany: {
-                data: (input.exports ?? []).map(({ variableName, title }) => ({
-                  variableName,
-                  title: title ?? null,
-                })),
+                data: (input.exports ?? []).map(
+                  ({ variableName, variableType, docstring, title }) => ({
+                    variableName,
+                    variableType,
+                    docstring: docstring ?? undefined,
+                    title: title ?? null,
+                  })
+                ),
               },
             },
           },
