@@ -151,12 +151,16 @@ export const FunctionChart: FC<FunctionChartProps> = ({
         </ErrorBoundary>
       );
     }
-    default:
-      return (
+    default: {
+      const asCalc = toCalc();
+      return asCalc ? (
+        asCalc
+      ) : (
         <MessageAlert heading="Function Display Not Supported">
           There is no function visualization for this type of output:{" "}
           <span className="font-bold">{validResult.value.tag}</span>
         </MessageAlert>
       );
+    }
   }
 };
