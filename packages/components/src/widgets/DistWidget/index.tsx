@@ -13,7 +13,7 @@ import { widgetRegistry } from "../registry.js";
 export const CHART_TO_DIST_HEIGHT_ADJUSTMENT = 0.5;
 
 widgetRegistry.register("Dist", {
-  renderPreview(value) {
+  Preview(value) {
     const dist = value.value;
     const environment = value.context.project.getEnvironment();
 
@@ -30,7 +30,7 @@ widgetRegistry.register("Dist", {
       </div>
     );
   },
-  renderSettingsMenu(value, { onChange }) {
+  Menu(value, { onChange }) {
     const shape = value.value.pointSet(value.context.project.getEnvironment());
 
     return (
@@ -44,7 +44,7 @@ widgetRegistry.register("Dist", {
       />
     );
   },
-  render(value, settings) {
+  Chart(value, settings) {
     const plot = SqDistributionsPlot.create({
       distribution: value.value,
       ...generateDistributionPlotSettings(settings.distributionChartSettings),

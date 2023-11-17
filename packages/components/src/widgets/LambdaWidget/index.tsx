@@ -4,7 +4,7 @@ import { truncateStr } from "../utils.js";
 import { FunctionChart } from "./FunctionChart/index.js";
 
 widgetRegistry.register("Lambda", {
-  renderPreview: (value) => (
+  Preview: (value) => (
     <div>
       fn(
       <span className="opacity-60">
@@ -13,7 +13,7 @@ widgetRegistry.register("Lambda", {
       )
     </div>
   ),
-  renderSettingsMenu: (value, { onChange }) => {
+  Menu: (value, { onChange }) => {
     return (
       <ItemSettingsMenu
         value={value}
@@ -22,7 +22,7 @@ widgetRegistry.register("Lambda", {
       />
     );
   },
-  render: (value, settings) => {
+  Chart: (value, settings) => {
     const environment = value.context.project.getEnvironment();
     return (
       <FunctionChart

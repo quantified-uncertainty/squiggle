@@ -9,7 +9,7 @@ import { valueHasContext } from "../lib/utility.js";
 import { widgetRegistry } from "./registry.js";
 
 widgetRegistry.register("TableChart", {
-  renderPreview: (value) => (
+  Preview: (value) => (
     <div className="items-center flex space-x-1">
       <TableCellsIcon size={14} className="flex opacity-60" />
       <div>
@@ -19,7 +19,7 @@ widgetRegistry.register("TableChart", {
       </div>
     </div>
   ),
-  render: (valueWithContext, settings) => {
+  Chart: (valueWithContext, settings) => {
     const environment = valueWithContext.context.project.getEnvironment();
     const value = valueWithContext.value;
 

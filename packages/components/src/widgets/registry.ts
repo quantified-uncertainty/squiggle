@@ -24,16 +24,13 @@ type Widget<T extends SqValueTag = SqValueTag> = {
 };
 
 type WidgetConfig<T extends SqValueTag = SqValueTag> = {
-  render(
+  Chart(
     value: Extract<SqValueWithContext, { tag: T }>,
     settings: PlaygroundSettings
   ): ReactNode;
+  Preview?: (value: ValueByTag<T>) => ReactNode;
+  Menu?: (value: ValueByTag<T>, params: SettingsMenuParams) => ReactNode;
   heading?: (value: ValueByTag<T>) => string;
-  renderPreview?: (value: ValueByTag<T>) => ReactNode;
-  renderSettingsMenu?: (
-    value: ValueByTag<T>,
-    params: SettingsMenuParams
-  ) => ReactNode;
 };
 
 class WidgetRegistry {
@@ -43,34 +40,34 @@ class WidgetRegistry {
     // We erase widget subtype because it'd be hard to maintain dynamically, but rely on map key/value types being matched.
     // It's not perfect but type-unsafe parts are contained in a few helper components such as `SquiggleValueChart`.
 
-    const { render, renderPreview, renderSettingsMenu } = config;
-
-    const Chart: Widget["Chart"] = ({ value, settings }) => {
-      if (value.tag !== tag) {
-        throw new Error(`${tag} widget used incorrectly`);
-      }
-      return render(value as ValueByTag<T>, settings);
+    const widget: Widget = {
+      Chart: ({ value, settings }) => {
+        if (value.tag !== tag) {
+          throw new Error(`${tag} widget used incorrectly`);
+        }
+        return config.Chart(value as ValueByTag<T>, settings);
+      },
     };
-    Chart.displayName = `${tag}Chart`;
+    widget.Chart.displayName = `${tag}Chart`;
 
-    const widget: Widget = { Chart };
+    const { Preview, Menu } = config;
 
-    if (renderPreview) {
+    if (Preview) {
       widget.Preview = ({ value }) => {
         if (value.tag !== tag) {
           throw new Error(`${tag} widget used incorrectly`);
         }
-        return renderPreview(value as ValueByTag<T>);
+        return Preview(value as ValueByTag<T>);
       };
       widget.Preview.displayName = `${tag}Preview`;
     }
 
-    if (renderSettingsMenu) {
+    if (Menu) {
       widget.Menu = ({ value, params }) => {
         if (value.tag !== tag) {
           throw new Error(`${tag} widget used incorrectly`);
         }
-        return renderSettingsMenu(value as ValueByTag<T>, params);
+        return Menu(value as ValueByTag<T>, params);
       };
       widget.Menu.displayName = `${tag}Menu`;
     }

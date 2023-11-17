@@ -3,8 +3,8 @@ import { widgetRegistry } from "./registry.js";
 import { leftWidgetMargin } from "./utils.js";
 
 widgetRegistry.register("Bool", {
-  renderPreview: (value) => value.value.toString(),
-  render: (value) => (
+  Preview: (value) => value.value.toString(),
+  Chart: (value) => (
     <div
       className={clsx(
         "text-indigo-800 text-sm font-mono font-semibold",

@@ -7,7 +7,7 @@ import { RelativeValuesGridChart } from "./RelativeValuesGridChart/index.js";
 import { ScatterChart } from "./ScatterChart/index.js";
 
 widgetRegistry.register("Plot", {
-  render: (value, settings) => {
+  Chart: (value, settings) => {
     const plot = value.value;
     const environment = value.context.project.getEnvironment();
 
