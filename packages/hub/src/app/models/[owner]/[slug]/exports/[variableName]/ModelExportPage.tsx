@@ -64,8 +64,6 @@ export const ModelExportPage: FC<{
     owner: string;
     slug: string;
     variableName: string;
-    variableType: string;
-    docstring: string;
   };
   query: SerializablePreloadedQuery<ModelExportPageQuery>;
 }> = ({ query, params }) => {
