@@ -149,7 +149,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
         return (
           getChildrenValues(v).length > 5 ||
           tagsDefaultCollapsed.has(v.tag) ||
-          (v.tag === "String" && v.value.length < SHORT_STRING_LENGTH)
+          (v.tag === "String" && v.value.length <= SHORT_STRING_LENGTH)
         );
       }
     };
