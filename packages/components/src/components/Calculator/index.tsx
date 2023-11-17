@@ -253,16 +253,18 @@ export const Calculator: FC<Props> = ({
           </div>
         )}
 
-        <div className="py-3 px-5 border-b border-slate-200 bg-gray-50 space-y-3">
-          {calculator.inputs.map((row) => (
-            <CalculatorInput
-              key={row.name}
-              input={row}
-              result={inputResults[row.name]}
-              settings={inputResultSettings}
-            />
-          ))}
-        </div>
+        {Boolean(calculator.inputs.length) && (
+          <div className="py-3 px-5 border-b border-slate-200 bg-gray-50 space-y-3">
+            {calculator.inputs.map((row) => (
+              <CalculatorInput
+                key={row.name}
+                input={row}
+                result={inputResults[row.name]}
+                settings={inputResultSettings}
+              />
+            ))}
+          </div>
+        )}
 
         <CalculatorResult
           valueWithContext={valueWithContext}
