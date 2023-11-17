@@ -1,5 +1,5 @@
 ---
-description: Squiggle dictionaries work similar to Python dictionaries. The syntax is similar to objects in Javascript.
+description: Squiggle dictionaries work similar to Python dictionaries. The syntax is similar to objects in Javascript. They are ordered, duplicates are not allowed, and they are immutable.
 ---
 
 # Dictionary
@@ -13,11 +13,11 @@ Dictionaries are ordered. Duplicates are not allowed. They are immutable, like a
 ```squiggle
 table = 10 to 30
 chair = 0.01 to 0.5
-
 valueFromOfficeItems = {
   keyboard: 1,
-  headphones: "ToDo",
-  chair, table
+  headphones: 2,
+  chair: chair,
+  table: table
 }
 
 valueFromHomeItems = {
@@ -58,7 +58,6 @@ Dict.fromList([
   ["bar", 20],
 ]) // {foo: 3, bar: 20}
 ```
-
 ### keys
 
 ```
@@ -118,7 +117,6 @@ Dict.has: (dict<'a>, string) => boolean
 ```
 
 ### size
-
 ```
 Dict.size: (dict<'a>) => number
 ```
@@ -163,7 +161,6 @@ Selects only the keys from the dictionary that are specified in the list, and re
 data = { a: 1, b: 2, c: 3, d: 4 }
 Dict.pick(data, ["a", "c"]) // {a: 1, c: 3}
 ```
-
 ### omit
 
 ```
