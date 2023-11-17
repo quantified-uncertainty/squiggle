@@ -33,6 +33,7 @@ import { ItemSettingsMenu } from "./ItemSettingsMenu.js";
 import { ValueViewer } from "./ValueViewer.js";
 import { SettingsMenuParams } from "./ValueWithContextViewer.js";
 import { getChildrenValues } from "./utils.js";
+import { SHORT_STRING_LENGTH } from "../../lib/constants.js";
 
 // Distributions should be smaller than the other charts.
 // Note that for distributions, this only applies to the internals, there's also extra margin and details.
@@ -120,7 +121,7 @@ export function getSqValueWidget(value: SqValueWithContext): ValueWidget {
       return {
         renderPreview: () => (
           <div className="overflow-ellipsis overflow-hidden">
-            {truncateStr(value.value, 20)}
+            {truncateStr(value.value, SHORT_STRING_LENGTH)}
           </div>
         ),
         render: () => (

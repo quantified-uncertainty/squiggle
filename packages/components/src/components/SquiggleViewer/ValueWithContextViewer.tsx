@@ -23,6 +23,7 @@ import {
 } from "./ViewerProvider.js";
 import { getSqValueWidget } from "./getSqValueWidget.js";
 import { getChildrenValues, pathToShortName } from "./utils.js";
+import { SHORT_STRING_LENGTH } from "../../lib/constants.js";
 
 export type SettingsMenuParams = {
   // Used to notify this component that settings have changed, so that it could re-render itself.
@@ -116,21 +117,6 @@ const ValueViewerBody: FC<Props> = ({ value }) => {
 
 const tagsDefaultCollapsed = new Set(["Bool", "Number", "Void", "Input"]);
 
-const shouldBeginCollapsed = (
-  isRoot: boolean,
-  v: SqValueWithContext
-): boolean => {
-  if (isRoot) {
-    return getChildrenValues(v).length > 30;
-  } else {
-    return (
-      getChildrenValues(v).length > 5 ||
-      tagsDefaultCollapsed.has(v.tag) ||
-      (v.tag === "String" && v.value.length < 25)
-    );
-  }
-};
-
 export const ValueWithContextViewer: FC<Props> = ({ value }) => {
   const { tag } = value;
   const { path } = value.context;
@@ -153,6 +139,21 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
   // Collapse children and element if desired. Uses crude heuristics.
   // TODO - this code has side effects, it'd be better if we ran it somewhere else, e.g. traverse values recursively when `ViewerProvider` is initialized.
   useState(() => {
+    const shouldBeginCollapsed = (
+      isRoot: boolean,
+      v: SqValueWithContext
+    ): boolean => {
+      if (isRoot) {
+        return getChildrenValues(v).length > 30;
+      } else {
+        return (
+          getChildrenValues(v).length > 5 ||
+          tagsDefaultCollapsed.has(v.tag) ||
+          (v.tag === "String" && v.value.length < SHORT_STRING_LENGTH)
+        );
+      }
+    };
+
     if (getChildrenValues(value).length > 10) {
       collapseChildren(value);
     }
