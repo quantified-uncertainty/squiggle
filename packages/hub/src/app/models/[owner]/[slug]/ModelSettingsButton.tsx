@@ -16,6 +16,7 @@ export const ModelSettingsButton: FC<{
       fragment ModelSettingsButton on Model {
         slug
         ...MoveModelAction
+        ...DeleteModelAction
         owner {
           slug
         }
@@ -34,11 +35,7 @@ export const ModelSettingsButton: FC<{
             close={close}
           />
           <MoveModelAction model={model} close={close} />
-          <DeleteModelAction
-            owner={model.owner.slug}
-            slug={model.slug}
-            close={close}
-          />
+          <DeleteModelAction model={model} close={close} />
         </DropdownMenu>
       )}
     >

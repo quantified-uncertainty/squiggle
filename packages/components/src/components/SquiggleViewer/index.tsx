@@ -112,14 +112,14 @@ const SquiggleViewerOuter = forwardRef<
   }
 
   const body = () => {
-    if (focused) {
+    if (!resultVariables.ok) {
+      return <SquiggleErrorAlert error={resultVariables.value} />;
+    } else if (focused) {
       if (focusedItem) {
         return <ValueViewer value={focusedItem} />;
       } else {
         return <MessageAlert heading="Focused variable is not defined" />;
       }
-    } else if (!resultVariables.ok) {
-      return <SquiggleErrorAlert error={resultVariables.value} />;
     } else {
       return (
         <div className="space-y-2">
