@@ -81,6 +81,30 @@ describe("List functions", () => {
     testEvalToBe("arr=[1, 2, 3]; List.sortBy(arr, {|n| 0})", "[1,2,3]"); // Lambda function always returns the same value
   });
 
+  describe("minBy", () => {
+    testEvalToBe("arr=[5, 2, 3, 1, 4]; List.minBy(arr, {|n| n})", "1");
+    testEvalToBe(
+      "arr=[{a: 3}, {a: 1}, {a: 2}]; List.minBy(arr, {|obj| obj.a})",
+      "{a: 1}"
+    );
+    testEvalToBe(
+      "arr=[]; List.minBy(arr, {|n| n})",
+      "Error(Argument Error: List must not be empty)"
+    );
+  });
+
+  describe("maxBy", () => {
+    testEvalToBe("arr=[5, 2, 3, 1, 4]; List.maxBy(arr, {|n| n})", "5");
+    testEvalToBe(
+      "arr=[{a: 3}, {a: 1}, {a: 2}]; List.maxBy(arr, {|obj| obj.a})",
+      "{a: 3}"
+    );
+    testEvalToBe(
+      "arr=[]; List.maxBy(arr, {|n| n})",
+      "Error(Argument Error: List must not be empty)"
+    );
+  });
+
   describe("reverse", () => {
     testEvalToBe("List.reverse([3,5,8])", "[8,5,3]");
     testEvalToBe("List.reverse([])", "[]");
