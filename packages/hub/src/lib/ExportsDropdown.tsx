@@ -14,13 +14,10 @@ import {
   DropdownMenu,
   DropdownMenuHeader,
   HashIcon,
-  LineChartIcon,
   ScaleIcon,
   ShareIcon,
   SquareBracketIcon,
   TableCellsIcon,
-  TextIcon,
-  VariableIcon,
 } from "@quri/ui";
 import { modelExportRoute, modelForRelativeValuesExportRoute } from "@/routes";
 import { DropdownMenuNextLinkItem } from "@/components/ui/DropdownMenuNextLinkItem";
@@ -29,7 +26,6 @@ type ModelExport = {
   title?: string;
   variableName: string;
   variableType: string;
-  docstring?: string;
 };
 type RelativeValuesExport = { slug: string; variableName: string };
 
@@ -52,6 +48,7 @@ export const totalImportLength = (
   nonRelativeValuesExports(modelExports, relativeValuesExports).length +
   relativeValuesExports.length;
 
+// I assume it would be appropriate to move this elsewhere, once we need it elsewhere.
 const typeIcon = (type: string) => {
   switch (type) {
     case "Number":
@@ -60,16 +57,12 @@ const typeIcon = (type: string) => {
       return SquareBracketIcon;
     case "Dict":
       return CurlyBracketsIcon;
-    case "String":
-      return TextIcon;
     case "Lambda":
       return CodeBracketIcon;
     case "TableChart":
       return TableCellsIcon;
     case "Calculator":
       return CalculatorIcon;
-    case "Plot":
-      return LineChartIcon;
     default:
       return ShareIcon;
   }

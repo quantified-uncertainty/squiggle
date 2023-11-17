@@ -47,7 +47,6 @@ const Query = graphql`
             id
             variableName
             variableType
-            docstring
             title
           }
           relativeValuesExports {
@@ -81,10 +80,9 @@ export const ModelLayout: FC<
   });
 
   const modelExports = model.currentRevision.exports.map(
-    ({ variableName, variableType, docstring, title }) => ({
+    ({ variableName, variableType, title }) => ({
       variableName,
       variableType,
-      docstring: docstring || undefined,
       title: title || undefined,
     })
   );

@@ -86,8 +86,6 @@ export {
   VariableIcon,
   SquareBracketIcon,
   CurlyBracketsIcon,
-  TextIcon,
-  LineChartIcon,
   HashIcon,
 } from "./icons/HeroIcons.js";
 export type { IconProps } from "./icons/Icon.js";

@@ -120,15 +120,12 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     const _output = output.output?.output;
     if (_output && _output.ok) {
       const exports = _output.value.exports;
-      const _exports: ModelExport[] = exports.entries().map((e) => {
-        // const foo: SqValue = e[1];
-        return {
-          variableName: e[0],
-          variableType: e[1].tag,
-          title: e[1].title(),
-          docstring: e[1].context?.docstring() || undefined,
-        };
-      });
+      const _exports: ModelExport[] = exports.entries().map((e) => ({
+        variableName: e[0],
+        variableType: e[1].tag,
+        title: e[1].title(),
+        docstring: e[1].context?.docstring() || undefined,
+      }));
       onExportsChange && onExportsChange(_exports);
     } else {
       onExportsChange && onExportsChange([]);
