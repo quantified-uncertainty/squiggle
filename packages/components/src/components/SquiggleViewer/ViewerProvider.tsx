@@ -20,7 +20,6 @@ import {
   defaultPlaygroundSettings,
 } from "../PlaygroundSettings.js";
 import {
-  LocalItemState,
   getChildrenValues,
   pathAsString,
   topLevelBindingsName,
@@ -29,6 +28,19 @@ import {
 type ItemHandle = {
   element: HTMLDivElement;
   forceUpdate: () => void;
+};
+
+type LocalItemState = {
+  collapsed: boolean;
+  calculator?: CalculatorState;
+  settings: Pick<
+    PartialPlaygroundSettings,
+    "distributionChartSettings" | "functionChartSettings"
+  >;
+};
+
+type LocalItemStateStore = {
+  [k: string]: LocalItemState;
 };
 
 export type Action =
@@ -101,13 +113,7 @@ type ViewerContextShape = {
   // Instead, we keep localItemState in local state and notify the global context via setLocalItemState to pass them down the component tree again if it got rebuilt from scratch.
   // See ./SquiggleViewer.tsx and ./ValueWithContextViewer.tsx for other implementation details on this.
   globalSettings: PlaygroundSettings;
-  getLocalItemState({
-    path,
-    defaults,
-  }: {
-    path: SqValuePath;
-    defaults?: LocalItemState;
-  }): LocalItemState;
+  getLocalItemState({ path }: { path: SqValuePath }): LocalItemState;
   getCalculator({ path }: { path: SqValuePath }): CalculatorState | undefined;
   focused?: SqValuePath;
   editor?: CodeEditorHandle;
@@ -232,10 +238,6 @@ export function useMergedSettings(path: SqValuePath) {
   return result;
 }
 
-type LocalItemStateStore = {
-  [k: string]: LocalItemState;
-};
-
 const defaultLocalItemState: LocalItemState = {
   collapsed: false,
   settings: {},
@@ -262,6 +264,7 @@ export const ViewerProvider: FC<
     beginWithVariablesCollapsed ? collapsedVariablesDefault : {}
   );
 
+  // TODO - merge this with localItemStateStoreRef?
   const itemHandlesStoreRef = useRef<{ [k: string]: ItemHandle }>({});
 
   const [focused, setFocused] = useState<SqValuePath | undefined>();
@@ -270,48 +273,41 @@ export const ViewerProvider: FC<
     return merge({}, defaultPlaygroundSettings, partialPlaygroundSettings);
   }, [partialPlaygroundSettings]);
 
-  // I'm not sure if we should use this, or getLocalItemState(), which is similar.
-  const getLocalItemStateRef = (
-    path: SqValuePath
-  ): LocalItemState | undefined => {
-    return localItemStateStoreRef.current[pathAsString(path)];
-  };
-
-  const setLocalItemState = (
-    path: SqValuePath,
-    fn: (localItemState: LocalItemState) => LocalItemState
-  ): void => {
-    const newSettings = fn(getLocalItemStateRef(path) || defaultLocalItemState);
-    localItemStateStoreRef.current[pathAsString(path)] = newSettings;
-  };
-
-  const getLocalItemState = useCallback(
-    ({
-      path,
-      defaults = defaultLocalItemState,
-    }: {
-      path: SqValuePath;
-      defaults?: LocalItemState;
-    }) => {
-      return localItemStateStoreRef.current[pathAsString(path)] || defaults;
+  const setLocalItemState = useCallback(
+    (
+      path: SqValuePath,
+      fn: (localItemState: LocalItemState) => LocalItemState
+    ): void => {
+      const pathString = pathAsString(path);
+      const newSettings = fn(
+        localItemStateStoreRef.current[pathString] || defaultLocalItemState
+      );
+      localItemStateStoreRef.current[pathString] = newSettings;
     },
-    [localItemStateStoreRef]
+    []
   );
 
-  const getCalculator = useCallback(
-    ({ path }: { path: SqValuePath }) => {
-      const response = localItemStateStoreRef.current[pathAsString(path)];
-      return response?.calculator;
-    },
-    [localItemStateStoreRef]
-  );
+  const getLocalItemState = useCallback(({ path }: { path: SqValuePath }) => {
+    return (
+      localItemStateStoreRef.current[pathAsString(path)] ||
+      defaultLocalItemState
+    );
+  }, []);
 
-  const setInitialCollapsed = (path: SqValuePath, isCollapsed: boolean) => {
-    setLocalItemState(path, (state) => ({
-      ...state,
-      collapsed: state?.collapsed ?? isCollapsed,
-    }));
-  };
+  const getCalculator = useCallback(({ path }: { path: SqValuePath }) => {
+    const response = localItemStateStoreRef.current[pathAsString(path)];
+    return response?.calculator;
+  }, []);
+
+  const setInitialCollapsed = useCallback(
+    (path: SqValuePath, isCollapsed: boolean) => {
+      setLocalItemState(path, (state) => ({
+        ...state,
+        collapsed: state?.collapsed ?? isCollapsed,
+      }));
+    },
+    [setLocalItemState]
+  );
 
   const forceUpdate = useCallback((path: SqValuePath) => {
     itemHandlesStoreRef.current[pathAsString(path)]?.forceUpdate();
@@ -387,7 +383,7 @@ export const ViewerProvider: FC<
         }
       }
     },
-    [localItemStateStoreRef]
+    [forceUpdate, setInitialCollapsed, setLocalItemState]
   );
 
   return (

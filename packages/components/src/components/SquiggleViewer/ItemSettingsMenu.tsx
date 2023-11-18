@@ -24,7 +24,6 @@ import {
   useMergedSettings,
   useResetStateSettings,
   useSetLocalItemState,
-  useViewerContext,
 } from "./ViewerProvider.js";
 import { pathAsString } from "./utils.js";
 
@@ -41,7 +40,6 @@ const ItemSettingsModal: FC<Props> = ({
 }) => {
   const close = useCloseDropdown();
   const setLocalItemState = useSetLocalItemState();
-  const { getLocalItemState } = useViewerContext();
 
   const { path } = value.context;
 
@@ -63,7 +61,7 @@ const ItemSettingsModal: FC<Props> = ({
 
     const subscription = form.watch(() => submit());
     return () => subscription.unsubscribe();
-  }, [getLocalItemState, setLocalItemState, path, form]);
+  }, [setLocalItemState, path, form]);
 
   const { getLeftPanelElement } = useContext(PlaygroundContext);
 
