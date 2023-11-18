@@ -74,14 +74,20 @@ export {
   PauseIcon,
   PlayIcon,
   PuzzleIcon,
+  ShareIcon,
   RectangleStackIcon,
   RightArrowIcon,
   ScaleIcon,
   ScatterPlotIcon,
   TableCellsIcon,
   UserCircleIcon,
+  CalculatorIcon,
   UserIcon,
   WrenchIcon,
+  VariableIcon,
+  SquareBracketIcon,
+  CurlyBracketsIcon,
+  HashIcon,
 } from "./icons/HeroIcons.js";
 export type { IconProps } from "./icons/Icon.js";
 export { PlusIcon } from "./icons/PlusIcon.js";

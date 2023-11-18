@@ -9,6 +9,7 @@ import {
 } from "@quri/squiggle-lang";
 import { ChevronRightIcon } from "@quri/ui";
 
+import { useStabilizeObjectIdentity } from "../../lib/hooks/useStabilizeObject.js";
 import { MessageAlert } from "../Alert.js";
 import { CodeEditorHandle } from "../CodeEditor.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
@@ -20,8 +21,7 @@ import {
   useUnfocus,
   useViewerContext,
 } from "./ViewerProvider.js";
-import { extractSubvalueByPath, pathItemFormat } from "./utils.js";
-import { useStabilizeObjectIdentity } from "../../lib/hooks/useStabilizeObject.js";
+import { extractSubvalueByPath, pathIsEqual, pathItemFormat } from "./utils.js";
 
 export type SquiggleViewerHandle = {
   viewValuePath(path: SqValuePath): void;
@@ -32,12 +32,16 @@ export type SquiggleViewerProps = {
   resultVariables: result<SqDictValue, SqError>;
   resultItem: result<SqValue, SqError> | undefined;
   editor?: CodeEditorHandle;
+  rootPathOverride?: SqValuePath;
 } & PartialPlaygroundSettings;
 
 const SquiggleViewerOuter = forwardRef<
   SquiggleViewerHandle,
   SquiggleViewerProps
->(function SquiggleViewerOuter({ resultVariables, resultItem }, ref) {
+>(function SquiggleViewerOuter(
+  { resultVariables, resultItem, rootPathOverride },
+  ref
+) {
   const { focused, dispatch, getCalculator } = useViewerContext();
   const unfocus = useUnfocus();
   const focus = useFocus();
@@ -45,24 +49,37 @@ const SquiggleViewerOuter = forwardRef<
   const navLinkStyle =
     "text-sm text-slate-500 hover:text-slate-900 hover:underline font-mono cursor-pointer";
 
-  const focusedNavigation = focused && (
+  const isFocusedOnRootPathOverride =
+    focused && rootPathOverride && pathIsEqual(focused, rootPathOverride);
+
+  // If we're focused on the root path override, we need to adjust the focused path accordingly when presenting the navigation, so that it begins with the root path intead. This is a bit confusing.
+  const rootPathFocusedAdjustment: number = rootPathOverride
+    ? rootPathOverride.items.length - 1
+    : 0;
+
+  const focusedNavigation = focused && !isFocusedOnRootPathOverride && (
     <div className="flex items-center mb-3 pl-1">
-      <span onClick={unfocus} className={navLinkStyle}>
-        {focused.root === "bindings" ? "Variables" : focused.root}
-      </span>
+      {!rootPathOverride && (
+        <>
+          <span onClick={unfocus} className={navLinkStyle}>
+            {focused.root === "bindings" ? "Variables" : focused.root}
+          </span>
+
+          <ChevronRightIcon className="text-slate-300" size={24} />
+        </>
+      )}
 
       {focused
         .itemsAsValuePaths({ includeRoot: false })
-        .slice(0, -1)
+        .slice(rootPathFocusedAdjustment, -1)
         .map((path, i) => (
-          <div key={i} className="flex items-center">
-            <ChevronRightIcon className="text-slate-300" size={24} />
+          <>
             <div onClick={() => focus(path)} className={navLinkStyle}>
-              {pathItemFormat(path.items[i])}
+              {pathItemFormat(path.items[i + rootPathFocusedAdjustment])}
             </div>
-          </div>
+            <ChevronRightIcon className="text-slate-300" size={24} />
+          </>
         ))}
-      <ChevronRightIcon className="text-slate-300" size={24} />
     </div>
   );
 
@@ -95,14 +112,14 @@ const SquiggleViewerOuter = forwardRef<
   }
 
   const body = () => {
-    if (focused) {
+    if (!resultVariables.ok) {
+      return <SquiggleErrorAlert error={resultVariables.value} />;
+    } else if (focused) {
       if (focusedItem) {
         return <ValueViewer value={focusedItem} />;
       } else {
         return <MessageAlert heading="Focused variable is not defined" />;
       }
-    } else if (!resultVariables.ok) {
-      return <SquiggleErrorAlert error={resultVariables.value} />;
     } else {
       return (
         <div className="space-y-2">
@@ -127,7 +144,13 @@ const SquiggleViewerOuter = forwardRef<
 
 const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
   function SquiggleViewer(
-    { resultVariables, resultItem, editor, ...partialPlaygroundSettings },
+    {
+      resultVariables,
+      resultItem,
+      editor,
+      rootPathOverride,
+      ...partialPlaygroundSettings
+    },
     ref
   ) {
     /**
@@ -143,10 +166,12 @@ const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
         partialPlaygroundSettings={stablePartialPlaygroundSettings}
         editor={editor}
         beginWithVariablesCollapsed={resultItem !== undefined && resultItem.ok}
+        rootPathOverride={rootPathOverride}
       >
         <SquiggleViewerOuter
           resultVariables={resultVariables}
           resultItem={resultItem}
+          rootPathOverride={rootPathOverride}
           ref={ref}
         />
       </ViewerProvider>

@@ -153,11 +153,21 @@ type ModelEdge {
   node: Model!
 }
 
+type ModelExport implements Node {
+  docstring: String!
+  id: ID!
+  modelRevision: ModelRevision!
+  title: String
+  variableName: String!
+  variableType: String!
+}
+
 type ModelRevision implements Node {
   author: User
   comment: String!
   content: ModelContent!
   createdAtTimestamp: Float!
+  exports: [ModelExport!]!
   forRelativeValues(input: ModelRevisionForRelativeValuesInput): RelativeValuesExport
   id: ID!
   model: Model!
@@ -371,6 +381,7 @@ union MutationUpdateRelativeValuesDefinitionResult = BaseError | UpdateRelativeV
 input MutationUpdateSquiggleSnippetModelInput {
   comment: String
   content: SquiggleSnippetContentInput!
+  exports: [SquiggleModelExportInput!]
   owner: String!
   relativeValuesExports: [RelativeValuesExportInput!]
   slug: String!
@@ -534,6 +545,13 @@ type RelativeValuesPairCache implements Node {
 type SquiggleErrorOutput implements SquiggleOutput {
   errorString: String!
   isCached: Boolean!
+}
+
+input SquiggleModelExportInput {
+  docstring: String
+  title: String
+  variableName: String!
+  variableType: String!
 }
 
 type SquiggleOkOutput implements SquiggleOutput {

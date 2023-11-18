@@ -1,11 +1,13 @@
 import ReactMarkdown from "react-markdown";
+
 import { widgetRegistry } from "./registry.js";
 import { truncateStr } from "./utils.js";
+import { SHORT_STRING_LENGTH } from "../lib/constants.js";
 
 widgetRegistry.register("String", {
   Preview: (value) => (
     <div className="overflow-ellipsis overflow-hidden">
-      {truncateStr(value.value, 20)}
+      {truncateStr(value.value, SHORT_STRING_LENGTH)}
     </div>
   ),
   Chart: (value) => (

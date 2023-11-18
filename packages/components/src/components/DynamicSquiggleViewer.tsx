@@ -7,18 +7,27 @@ import { CodeEditorHandle } from "./CodeEditor.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
 import { SquiggleViewerHandle } from "./SquiggleViewer/index.js";
 import { ErrorBoundary } from "./ErrorBoundary.js";
+import { SqValuePath } from "@quri/squiggle-lang";
 
 type Props = {
   squiggleOutput: SquiggleOutput | undefined;
   isRunning: boolean;
   showHeader?: boolean;
   editor?: CodeEditorHandle;
+  rootPathOverride?: SqValuePath;
 } & PartialPlaygroundSettings;
 
 /* Wrapper for SquiggleViewer that shows the rendering stats and isRunning state. */
 export const DynamicSquiggleViewer = forwardRef<SquiggleViewerHandle, Props>(
   function DynamicSquiggleViewer(
-    { squiggleOutput, isRunning, showHeader = true, editor, ...settings },
+    {
+      squiggleOutput,
+      isRunning,
+      showHeader = true,
+      editor,
+      rootPathOverride,
+      ...settings
+    },
     viewerRef
   ) {
     const squiggleViewer = squiggleOutput?.code ? (
@@ -34,6 +43,7 @@ export const DynamicSquiggleViewer = forwardRef<SquiggleViewerHandle, Props>(
             resultVariables={getResultVariables(squiggleOutput)}
             resultItem={getResultValue(squiggleOutput)}
             editor={editor}
+            rootPathOverride={rootPathOverride}
           />
         </ErrorBoundary>
       </div>

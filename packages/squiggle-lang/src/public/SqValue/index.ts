@@ -68,6 +68,10 @@ export abstract class SqAbstractValue<Type extends string, JSType> {
     return this._value.publicName;
   }
 
+  title(): string | undefined {
+    return undefined;
+  }
+
   abstract asJS(): JSType;
 }
 
@@ -204,6 +208,10 @@ export class SqPlotValue extends SqAbstractValue<"Plot", SqPlot> {
     return wrapPlot(this._value.value, this.context);
   }
 
+  override title() {
+    return this.value.title;
+  }
+
   asJS() {
     return this.value;
   }
@@ -216,6 +224,10 @@ export class SqTableChartValue extends SqAbstractValue<
 
   get value() {
     return new SqTableChart(this._value.value, this.context);
+  }
+
+  override title() {
+    return this.value.title;
   }
 
   asJS() {
@@ -234,6 +246,10 @@ export class SqCalculatorValue extends SqAbstractValue<
 
   asJS() {
     return this.value;
+  }
+
+  override title() {
+    return this.value.title;
   }
 }
 
