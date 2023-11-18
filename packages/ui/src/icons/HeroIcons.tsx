@@ -240,7 +240,7 @@ export const ArchiveBoxIcon: FC<IconProps> = (props) => (
   </Icon>
 );
 
-export const ArrowUturnLeftIcon: FC<IconProps> = (props) => (
+export const ResetIcon: FC<IconProps> = (props) => (
   <Icon {...props}>
     <path
       fillRule="evenodd"

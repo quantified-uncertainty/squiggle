@@ -6,8 +6,8 @@ import {
   Cog8ToothIcon,
   DropdownMenuActionItem,
   DropdownMenuModalActionItem,
-  EmptyIcon,
   Modal,
+  ResetIcon,
   useCloseDropdown,
 } from "@quri/ui";
 
@@ -116,7 +116,7 @@ const ResetSettingsItem: FC<Props> = (props) => {
         closeDropdown();
       }}
       title="Reset Settings"
-      icon={EmptyIcon}
+      icon={ResetIcon}
     />
   );
 };

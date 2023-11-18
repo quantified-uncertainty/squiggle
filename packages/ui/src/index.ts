@@ -48,7 +48,7 @@ export {
   AdjustmentsHorizontalIcon,
   AdjustmentsVerticalIcon,
   ArchiveBoxIcon,
-  ArrowUturnLeftIcon,
+  ResetIcon,
   BackwardIcon,
   BarChartIcon,
   Bars3CenterLeftIcon,
