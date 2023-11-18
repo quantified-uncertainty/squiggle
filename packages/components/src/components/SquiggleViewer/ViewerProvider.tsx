@@ -26,6 +26,11 @@ import {
   topLevelBindingsName,
 } from "./utils.js";
 
+type ItemHandle = {
+  element: HTMLDivElement;
+  forceUpdate: () => void;
+};
+
 export type Action =
   | {
       type: "SET_LOCAL_ITEM_STATE";
@@ -63,10 +68,16 @@ export type Action =
       };
     }
   | {
+      type: "FORCE_UPDATE";
+      payload: {
+        path: SqValuePath;
+      };
+    }
+  | {
       type: "REGISTER_ITEM_HANDLE";
       payload: {
         path: SqValuePath;
-        element: HTMLDivElement;
+        handle: ItemHandle;
       };
     }
   | {
@@ -147,19 +158,29 @@ export function useSetCollapsed() {
 }
 
 export function useResetStateSettings() {
-  const { dispatch } = useViewerContext();
-  return (path: SqValuePath, value: LocalItemState) => {
+  const { dispatch, getLocalItemState } = useViewerContext();
+  return (path: SqValuePath) => {
+    const localState = getLocalItemState({ path });
     dispatch({
       type: "SET_LOCAL_ITEM_STATE",
       payload: {
         path,
         value: {
-          ...value,
+          ...localState,
           settings: {},
         },
       },
     });
   };
+}
+
+export function useHasLocalSettings(path: SqValuePath) {
+  const { getLocalItemState } = useViewerContext();
+  const localState = getLocalItemState({ path });
+  return Boolean(
+    localState.settings.distributionChartSettings ||
+      localState.settings.functionChartSettings
+  );
 }
 
 export function useFocus() {
@@ -179,7 +200,6 @@ export function useUnfocus() {
 
 export function useCollapseChildren() {
   const { dispatch } = useViewerContext();
-  // stable callback identity here is important, see ValueWithContextViewer code
   return useCallback(
     (value: SqValue) => {
       dispatch({
@@ -242,7 +262,7 @@ export const ViewerProvider: FC<
     beginWithVariablesCollapsed ? collapsedVariablesDefault : {}
   );
 
-  const itemHandlesStoreRef = useRef<{ [k: string]: HTMLDivElement }>({});
+  const itemHandlesStoreRef = useRef<{ [k: string]: ItemHandle }>({});
 
   const [focused, setFocused] = useState<SqValuePath | undefined>();
 
@@ -286,18 +306,23 @@ export const ViewerProvider: FC<
     [localItemStateStoreRef]
   );
 
-  const setCollapsed = (path: SqValuePath, isCollapsed: boolean) => {
+  const setInitialCollapsed = (path: SqValuePath, isCollapsed: boolean) => {
     setLocalItemState(path, (state) => ({
       ...state,
       collapsed: state?.collapsed ?? isCollapsed,
     }));
   };
 
+  const forceUpdate = useCallback((path: SqValuePath) => {
+    itemHandlesStoreRef.current[pathAsString(path)]?.forceUpdate();
+  }, []);
+
   const dispatch = useCallback(
     (action: Action) => {
       switch (action.type) {
         case "SET_LOCAL_ITEM_STATE":
           setLocalItemState(action.payload.path, () => action.payload.value);
+          forceUpdate(action.payload.path);
           return;
         case "FOCUS":
           setFocused(action.payload);
@@ -306,34 +331,41 @@ export const ViewerProvider: FC<
           setFocused(undefined);
           return;
         case "TOGGLE_COLLAPSED": {
-          setLocalItemState(action.payload, (state) => ({
+          const path = action.payload;
+          setLocalItemState(path, (state) => ({
             ...state,
             collapsed: !state?.collapsed,
           }));
+          forceUpdate(path);
           return;
         }
         case "SET_COLLAPSED": {
-          setLocalItemState(action.payload.path, (state) => ({
+          const { path } = action.payload;
+          setLocalItemState(path, (state) => ({
             ...state,
             collapsed: action.payload.value,
           }));
+          forceUpdate(path);
           return;
         }
         case "COLLAPSE_CHILDREN": {
           const children = getChildrenValues(action.payload);
           for (const child of children) {
-            child.context && setCollapsed(child.context.path, true);
+            child.context && setInitialCollapsed(child.context.path, true);
           }
           return;
         }
         case "SCROLL_TO_PATH":
           itemHandlesStoreRef.current[
             pathAsString(action.payload.path)
-          ]?.scrollIntoView({ behavior: "smooth" });
+          ]?.element.scrollIntoView({ behavior: "smooth" });
+          return;
+        case "FORCE_UPDATE":
+          forceUpdate(action.payload.path);
           return;
         case "REGISTER_ITEM_HANDLE":
           itemHandlesStoreRef.current[pathAsString(action.payload.path)] =
-            action.payload.element;
+            action.payload.handle;
           return;
         case "UNREGISTER_ITEM_HANDLE":
           delete itemHandlesStoreRef.current[pathAsString(action.payload.path)];

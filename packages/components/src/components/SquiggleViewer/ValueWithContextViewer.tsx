@@ -1,15 +1,17 @@
 import { clsx } from "clsx";
-import { FC, PropsWithChildren, useMemo, useState } from "react";
+import {
+  FC,
+  PropsWithChildren,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import ReactMarkdown from "react-markdown";
 
-import {
-  CodeBracketIcon,
-  CommentIcon,
-  TextTooltip,
-  TriangleIcon,
-} from "@quri/ui";
+import { CommentIcon, TextTooltip, TriangleIcon } from "@quri/ui";
 
-import { useEffectRef, useForceUpdate } from "../../lib/hooks/index.js";
+import { useForceUpdate } from "../../lib/hooks/index.js";
 import { SqValueWithContext } from "../../lib/utility.js";
 import { ErrorBoundary } from "../ErrorBoundary.js";
 import { SquiggleValueChart } from "./SquiggleValueChart.js";
@@ -29,11 +31,6 @@ import { getChildrenValues, pathToShortName } from "./utils.js";
 
 // make sure all widgets are in registry
 import "../../widgets/index.js";
-
-export type SettingsMenuParams = {
-  // Used to notify this component that settings have changed, so that it could re-render itself.
-  onChange: () => void;
-};
 
 function getComment(value: SqValueWithContext): string | undefined {
   return value.context.docstring();
@@ -126,11 +123,14 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
   const setCollapsed = useSetCollapsed();
   const collapseChildren = useCollapseChildren();
   const focus = useFocus();
-  const { editor, getLocalItemState, dispatch } = useViewerContext();
+  const { getLocalItemState, dispatch } = useViewerContext();
   const isFocused = useIsFocused(path);
 
-  // Since `ViewerContext` doesn't store settings, this component won't rerender when `setSettings` is called.
-  // So we use `forceUpdate` to force rerendering.
+  /**
+   * Since `ViewerContext` doesn't store settings, this component won't rerender when `setSettings` is called.
+   * So we use `forceUpdate` to force rerendering.
+   * (This function is not used directly in this component. Instead, it's passed to `<ViewerProvider>` to be called when necessary, sometimes from other components.)
+   */
   const forceUpdate = useForceUpdate();
 
   const isRoot = path.isRoot();
@@ -162,14 +162,19 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
 
   const toggleCollapsed = () => {
     toggleCollapsed_(path);
-    forceUpdate();
   };
 
-  // We should switch to ref cleanups after https://github.com/facebook/react/pull/25686 is released.
-  const saveRef = useEffectRef((element: HTMLDivElement) => {
+  const ref = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) {
+      return;
+    }
+
     dispatch({
       type: "REGISTER_ITEM_HANDLE",
-      payload: { path, element },
+      payload: { path, handle: { element, forceUpdate } },
     });
 
     return () => {
@@ -208,25 +213,6 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
       {name}
     </div>
   );
-  const headerFindInEditorButton = () => {
-    const findInEditor = () => {
-      const location = value.context.findLocation();
-      editor?.scrollTo(location.start.offset);
-    };
-
-    return (
-      <div className="ml-3">
-        <TextTooltip text="Show in Editor" placement="bottom">
-          <span>
-            <CodeBracketIcon
-              className="items-center h-4 w-4 cursor-pointer text-stone-400 opacity-0 group-hover:opacity-100 hover:!text-stone-800 transition"
-              onClick={findInEditor}
-            />
-          </span>
-        </TextTooltip>
-      </div>
-    );
-  };
 
   const leftCollapseBorder = () => {
     const isDictOrList = tag === "Dict" || tag === "Array";
@@ -249,10 +235,10 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
 
   return (
     <ErrorBoundary>
-      <div ref={saveRef}>
+      <div ref={ref}>
         <header
           className={clsx(
-            "flex justify-between group",
+            "flex justify-between group pr-0.5",
             isFocused ? "mb-2" : "hover:bg-stone-100 rounded-md"
           )}
         >
@@ -263,13 +249,10 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
               <SquiggleValuePreview value={value} isOpen={isOpen} />
             )}
             {!isFocused && !isOpen && <CommentIconForValue value={value} />}
-            {!isRoot && editor && headerFindInEditorButton()}
           </div>
-          <div className="inline-flex space-x-1">
+          <div className="inline-flex space-x-1 items-center">
             {isOpen && <SquiggleValueHeader value={value} />}
-            {isOpen && (
-              <SquiggleValueSettingsMenu value={value} onChange={forceUpdate} />
-            )}
+            <SquiggleValueSettingsMenu value={value} />
           </div>
         </header>
         {isOpen && (

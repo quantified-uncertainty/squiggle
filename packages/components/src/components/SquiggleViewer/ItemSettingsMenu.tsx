@@ -1,9 +1,15 @@
-import { CogIcon } from "@heroicons/react/solid/esm/index.js";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import { FC, useContext, useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
-import { Modal, TextTooltip } from "@quri/ui";
+import {
+  Cog8ToothIcon,
+  DropdownMenuActionItem,
+  DropdownMenuModalActionItem,
+  EmptyIcon,
+  Modal,
+  useCloseDropdown,
+} from "@quri/ui";
 
 import { SqValueWithContext } from "../../lib/utility.js";
 import {
@@ -14,30 +20,26 @@ import {
 import { PlaygroundContext } from "../SquigglePlayground/index.js";
 import {
   ViewerContext,
+  useHasLocalSettings,
+  useMergedSettings,
+  useResetStateSettings,
   useSetLocalItemState,
   useViewerContext,
-  useResetStateSettings,
-  useMergedSettings,
 } from "./ViewerProvider.js";
 import { pathAsString } from "./utils.js";
 
 type Props = {
   value: SqValueWithContext;
-  onChange: () => void;
   metaSettings?: MetaSettings;
   withFunctionSettings: boolean;
 };
 
-const ItemSettingsModal: React.FC<
-  Props & { close: () => void; resetScroll: () => void }
-> = ({
+const ItemSettingsModal: FC<Props> = ({
   value,
-  onChange,
   metaSettings,
   withFunctionSettings,
-  close,
-  resetScroll,
 }) => {
+  const close = useCloseDropdown();
   const setLocalItemState = useSetLocalItemState();
   const { getLocalItemState } = useViewerContext();
 
@@ -57,14 +59,21 @@ const ItemSettingsModal: React.FC<
         collapsed: false,
         settings: data,
       });
-      onChange();
     });
 
     const subscription = form.watch(() => submit());
     return () => subscription.unsubscribe();
-  }, [getLocalItemState, setLocalItemState, onChange, path, form]);
+  }, [getLocalItemState, setLocalItemState, path, form]);
 
   const { getLeftPanelElement } = useContext(PlaygroundContext);
+
+  const { dispatch } = useContext(ViewerContext);
+  const resetScroll = () => {
+    dispatch({
+      type: "SCROLL_TO_PATH",
+      payload: { path },
+    });
+  };
 
   return (
     <Modal container={getLeftPanelElement()} close={close}>
@@ -98,50 +107,33 @@ const ItemSettingsModal: React.FC<
   );
 };
 
-export const ItemSettingsMenu: React.FC<Props> = (props) => {
-  const [isOpen, setIsOpen] = useState(false);
+const ResetSettingsItem: FC<Props> = (props) => {
+  const closeDropdown = useCloseDropdown();
   const resetStateSettings = useResetStateSettings();
-  const { getLocalItemState, dispatch } = useContext(ViewerContext);
-
-  const ref = useRef<HTMLDivElement | null>(null);
-
-  const { path } = props.value.context;
-
-  const localState = getLocalItemState({ path });
-
-  const resetScroll = () => {
-    dispatch({
-      type: "SCROLL_TO_PATH",
-      payload: { path },
-    });
-  };
 
   return (
-    <div className="flex gap-2" ref={ref}>
-      <TextTooltip text="Settings" placement="bottom-end">
-        <CogIcon
-          className="h-5 w-5 cursor-pointer text-stone-100 hover:!text-stone-500 group-hover:text-stone-400 transition"
-          onClick={() => setIsOpen(!isOpen)}
-        />
-      </TextTooltip>
-      {localState.settings.distributionChartSettings ? (
-        <button
-          onClick={() => {
-            resetStateSettings(path, localState);
-            props.onChange();
-          }}
-          className="text-xs px-1 py-0.5 rounded bg-stone-200 hover:bg-stone-400"
-        >
-          Reset settings
-        </button>
-      ) : null}
-      {isOpen ? (
-        <ItemSettingsModal
-          {...props}
-          close={() => setIsOpen(false)}
-          resetScroll={resetScroll}
-        />
-      ) : null}
-    </div>
+    <DropdownMenuActionItem
+      onClick={() => {
+        resetStateSettings(props.value.context.path);
+        closeDropdown();
+      }}
+      title="Reset Settings"
+      icon={EmptyIcon}
+    />
+  );
+};
+
+export const ItemSettingsMenu: FC<Props> = (props) => {
+  const hasLocalSettings = useHasLocalSettings(props.value.context.path);
+
+  return (
+    <>
+      <DropdownMenuModalActionItem
+        title="Chart Settings"
+        icon={Cog8ToothIcon}
+        render={() => <ItemSettingsModal {...props} />}
+      />
+      {hasLocalSettings && <ResetSettingsItem {...props} />}
+    </>
   );
 };

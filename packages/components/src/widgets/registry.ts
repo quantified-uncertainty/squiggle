@@ -4,7 +4,6 @@ import { SqValue } from "@quri/squiggle-lang";
 
 import { SqValueWithContext } from "../lib/utility.js";
 import { PlaygroundSettings } from "../components/PlaygroundSettings.js";
-import { SettingsMenuParams } from "../components/SquiggleViewer/ValueWithContextViewer.js";
 
 type SqValueTag = SqValue["tag"];
 
@@ -18,7 +17,6 @@ type Widget<T extends SqValueTag = SqValueTag> = {
   Preview?: FC<{ value: ValueByTag<T> }>;
   Menu?: FC<{
     value: ValueByTag<T>;
-    params: SettingsMenuParams;
   }>;
   heading?: (value: ValueByTag<T>) => string;
 };
@@ -29,7 +27,7 @@ type WidgetConfig<T extends SqValueTag = SqValueTag> = {
     settings: PlaygroundSettings
   ): ReactNode;
   Preview?: (value: ValueByTag<T>) => ReactNode;
-  Menu?: (value: ValueByTag<T>, params: SettingsMenuParams) => ReactNode;
+  Menu?: (value: ValueByTag<T>) => ReactNode;
   heading?: (value: ValueByTag<T>) => string;
 };
 
@@ -63,11 +61,11 @@ class WidgetRegistry {
     }
 
     if (Menu) {
-      widget.Menu = ({ value, params }) => {
+      widget.Menu = ({ value }) => {
         if (value.tag !== tag) {
           throw new Error(`${tag} widget used incorrectly`);
         }
-        return Menu(value as ValueByTag<T>, params);
+        return Menu(value as ValueByTag<T>);
       };
       widget.Menu.displayName = `${tag}Menu`;
     }

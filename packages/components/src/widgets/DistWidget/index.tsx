@@ -1,12 +1,12 @@
 import { SqDistributionsPlot } from "@quri/squiggle-lang";
 
-import { DistributionsChart } from "./DistributionsChart.js";
 import { NumberShower } from "../../components/NumberShower.js";
 import { generateDistributionPlotSettings } from "../../components/PlaygroundSettings.js";
 import { ItemSettingsMenu } from "../../components/SquiggleViewer/ItemSettingsMenu.js";
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
 import { unwrapOrFailure } from "../../lib/utility.js";
 import { widgetRegistry } from "../registry.js";
+import { DistributionsChart } from "./DistributionsChart.js";
 
 // Distributions should be smaller than the other charts.
 // Note that for distributions, this only applies to the internals, there's also extra margin and details.
@@ -30,13 +30,12 @@ widgetRegistry.register("Dist", {
       </div>
     );
   },
-  Menu(value, { onChange }) {
+  Menu(value) {
     const shape = value.value.pointSet(value.context.project.getEnvironment());
 
     return (
       <ItemSettingsMenu
         value={value}
-        onChange={onChange}
         metaSettings={{
           disableLogX: shape?.ok && hasMassBelowZero(shape.value.asShape()),
         }}

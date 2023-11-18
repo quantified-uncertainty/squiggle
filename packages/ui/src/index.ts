@@ -3,6 +3,7 @@ export { ButtonWithDropdown } from "./components/ButtonWithDropdown.js";
 export { Modal } from "./components/Modal.js";
 export { StyledTab } from "./components/StyledTab.js";
 
+export { useCloseDropdown } from "./components/Dropdown/DropdownContext.js";
 export { DropdownMenu } from "./components/Dropdown/DropdownMenu.js";
 export { DropdownMenuActionItem } from "./components/Dropdown/DropdownMenuActionItem.js";
 export { DropdownMenuAsyncActionItem } from "./components/Dropdown/DropdownMenuAsyncActionItem.js";
@@ -54,7 +55,6 @@ export {
   Bars4Icon,
   BoltIcon,
   BookOpenIcon,
-  CommentIcon,
   CheckIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -62,6 +62,7 @@ export {
   CodeBracketIcon,
   CodeBracketSquareIcon,
   Cog8ToothIcon,
+  CommentIcon,
   DocumentTextIcon,
   FireIcon,
   GlobeIcon,

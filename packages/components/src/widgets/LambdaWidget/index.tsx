@@ -13,14 +13,8 @@ widgetRegistry.register("Lambda", {
       )
     </div>
   ),
-  Menu: (value, { onChange }) => {
-    return (
-      <ItemSettingsMenu
-        value={value}
-        onChange={onChange}
-        withFunctionSettings={true}
-      />
-    );
+  Menu: (value) => {
+    return <ItemSettingsMenu value={value} withFunctionSettings={true} />;
   },
   Chart: (value, settings) => {
     const environment = value.context.project.getEnvironment();
