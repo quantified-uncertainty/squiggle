@@ -7,6 +7,7 @@ import {
   DropdownMenu,
   DropdownMenuActionItem,
   EmptyIcon,
+  FocusIcon,
   TextTooltip,
   useCloseDropdown,
 } from "@quri/ui";
@@ -14,12 +15,15 @@ import {
 import { SqValueWithContext } from "../../lib/utility.js";
 import { widgetRegistry } from "../../widgets/registry.js";
 import {
+  useFocus,
   useHasLocalSettings,
+  useIsFocused,
   useSetCollapsed,
   useViewerContext,
 } from "./ViewerProvider.js";
 import { getChildrenValues } from "./utils.js";
 import { clsx } from "clsx";
+import { CollapsedIcon, ExpandedIcon } from "./icons.js";
 
 const FindInEditorItem: FC<{ value: SqValueWithContext }> = ({ value }) => {
   const { editor } = useViewerContext();
@@ -44,6 +48,23 @@ const FindInEditorItem: FC<{ value: SqValueWithContext }> = ({ value }) => {
   );
 };
 
+const FocusItem: FC<{ value: SqValueWithContext }> = ({ value }) => {
+  const { path } = value.context;
+  const isFocused = useIsFocused(path);
+  const focus = useFocus();
+  if (isFocused || path.isRoot()) {
+    return null;
+  }
+
+  return (
+    <DropdownMenuActionItem
+      title="Focus"
+      icon={FocusIcon}
+      onClick={() => focus(path)}
+    />
+  );
+};
+
 const SetChildrenCollapsedStateItem: FC<{
   value: SqValueWithContext;
   title: string;
@@ -52,12 +73,27 @@ const SetChildrenCollapsedStateItem: FC<{
   const setCollapsed = useSetCollapsed();
   const closeDropdown = useCloseDropdown();
 
+  const { getLocalItemState } = useViewerContext();
+
   if (value.tag !== "Array" && value.tag !== "Dict") {
     return null;
   }
 
+  const childrenValues = getChildrenValues(value);
+  const allChildrenInRequiredState = childrenValues.every((childValue) => {
+    const childPath = childValue.context?.path;
+    return (
+      childPath &&
+      getLocalItemState({ path: childPath }).collapsed === collapsed
+    );
+  });
+
+  if (allChildrenInRequiredState) {
+    return null;
+  }
+
   const act = () => {
-    for (const childValue of getChildrenValues(value)) {
+    for (const childValue of childrenValues) {
       if (!childValue.context) {
         // shouldn't happen, but getChildrenValues doesn't infer that if `value` has context then its children must have it too
         continue;
@@ -67,12 +103,12 @@ const SetChildrenCollapsedStateItem: FC<{
     closeDropdown();
   };
 
-  return (
-    <DropdownMenuActionItem title={title} onClick={act} icon={EmptyIcon} />
-  );
+  const Icon = collapsed ? CollapsedIcon : ExpandedIcon;
+
+  return <DropdownMenuActionItem title={title} onClick={act} icon={Icon} />;
 };
 
-export const SquiggleValueSettingsMenu: FC<{
+export const SquiggleValueMenu: FC<{
   value: SqValueWithContext;
 }> = ({ value }) => {
   const widget = widgetRegistry.widgets.get(value.tag);
@@ -85,6 +121,7 @@ export const SquiggleValueSettingsMenu: FC<{
         render={() => (
           <DropdownMenu>
             <FindInEditorItem value={value} />
+            <FocusItem value={value} />
             <SetChildrenCollapsedStateItem
               value={value}
               title="Collapse Children"

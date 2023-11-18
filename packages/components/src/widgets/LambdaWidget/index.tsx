@@ -1,4 +1,4 @@
-import { ItemSettingsMenu } from "../../components/SquiggleViewer/ItemSettingsMenu.js";
+import { ItemSettingsMenuItems } from "../../components/SquiggleViewer/ItemSettingsMenuItems.js";
 import { widgetRegistry } from "../registry.js";
 import { truncateStr } from "../utils.js";
 import { FunctionChart } from "./FunctionChart/index.js";
@@ -14,7 +14,7 @@ widgetRegistry.register("Lambda", {
     </div>
   ),
   Menu: (value) => {
-    return <ItemSettingsMenu value={value} withFunctionSettings={true} />;
+    return <ItemSettingsMenuItems value={value} withFunctionSettings={true} />;
   },
   Chart: (value, settings) => {
     const environment = value.context.project.getEnvironment();

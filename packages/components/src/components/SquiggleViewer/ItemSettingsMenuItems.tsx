@@ -121,7 +121,7 @@ const ResetSettingsItem: FC<Props> = (props) => {
   );
 };
 
-export const ItemSettingsMenu: FC<Props> = (props) => {
+export const ItemSettingsMenuItems: FC<Props> = (props) => {
   const hasLocalSettings = useHasLocalSettings(props.value.context.path);
 
   return (

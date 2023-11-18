@@ -17,7 +17,7 @@ import { ErrorBoundary } from "../ErrorBoundary.js";
 import { SquiggleValueChart } from "./SquiggleValueChart.js";
 import { SquiggleValueHeader } from "./SquiggleValueHeader.js";
 import { SquiggleValuePreview } from "./SquiggleValuePreview.js";
-import { SquiggleValueSettingsMenu } from "./SquiggleValueSettingsMenu.js";
+import { SquiggleValueMenu } from "./SquiggleValueMenu.js";
 import {
   useCollapseChildren,
   useFocus,
@@ -31,6 +31,7 @@ import { getChildrenValues, pathToShortName } from "./utils.js";
 
 // make sure all widgets are in registry
 import "../../widgets/index.js";
+import { CollapsedIcon, ExpandedIcon } from "./icons.js";
 
 function getComment(value: SqValueWithContext): string | undefined {
   return value.context.docstring();
@@ -188,14 +189,17 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
   const isOpen = isFocused || !getLocalItemState({ path }).collapsed;
   const _focus = () => !isFocused && !isRoot && focus(path);
 
-  const triangleToggle = () => (
-    <div
-      className="w-4 mr-1.5 flex justify-center cursor-pointer text-stone-300 hover:text-slate-700"
-      onClick={toggleCollapsed}
-    >
-      <TriangleIcon size={12} className={isOpen ? "rotate-180" : "rotate-90"} />
-    </div>
-  );
+  const triangleToggle = () => {
+    const Icon = isOpen ? ExpandedIcon : CollapsedIcon;
+    return (
+      <div
+        className="w-4 mr-1.5 flex justify-center cursor-pointer text-stone-300 hover:text-slate-700"
+        onClick={toggleCollapsed}
+      >
+        <Icon size={12} />
+      </div>
+    );
+  };
 
   const headerClasses = () => {
     if (isFocused) {
@@ -252,7 +256,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
           </div>
           <div className="inline-flex space-x-1 items-center">
             {isOpen && <SquiggleValueHeader value={value} />}
-            <SquiggleValueSettingsMenu value={value} />
+            <SquiggleValueMenu value={value} />
           </div>
         </header>
         {isOpen && (

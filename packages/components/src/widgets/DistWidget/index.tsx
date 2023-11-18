@@ -2,7 +2,7 @@ import { SqDistributionsPlot } from "@quri/squiggle-lang";
 
 import { NumberShower } from "../../components/NumberShower.js";
 import { generateDistributionPlotSettings } from "../../components/PlaygroundSettings.js";
-import { ItemSettingsMenu } from "../../components/SquiggleViewer/ItemSettingsMenu.js";
+import { ItemSettingsMenuItems } from "../../components/SquiggleViewer/ItemSettingsMenuItems.js";
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
 import { unwrapOrFailure } from "../../lib/utility.js";
 import { widgetRegistry } from "../registry.js";
@@ -34,7 +34,7 @@ widgetRegistry.register("Dist", {
     const shape = value.value.pointSet(value.context.project.getEnvironment());
 
     return (
-      <ItemSettingsMenu
+      <ItemSettingsMenuItems
         value={value}
         metaSettings={{
           disableLogX: shape?.ok && hasMassBelowZero(shape.value.asShape()),
