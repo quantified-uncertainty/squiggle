@@ -1,3 +1,4 @@
+import { clsx } from "clsx";
 import { FC } from "react";
 
 import {
@@ -6,7 +7,6 @@ import {
   Dropdown,
   DropdownMenu,
   DropdownMenuActionItem,
-  EmptyIcon,
   FocusIcon,
   TextTooltip,
   useCloseDropdown,
@@ -21,9 +21,8 @@ import {
   useSetCollapsed,
   useViewerContext,
 } from "./ViewerProvider.js";
-import { getChildrenValues } from "./utils.js";
-import { clsx } from "clsx";
 import { CollapsedIcon, ExpandedIcon } from "./icons.js";
+import { getChildrenValues } from "./utils.js";
 
 const FindInEditorItem: FC<{ value: SqValueWithContext }> = ({ value }) => {
   const { editor } = useViewerContext();
@@ -80,6 +79,7 @@ const SetChildrenCollapsedStateItem: FC<{
   }
 
   const childrenValues = getChildrenValues(value);
+
   const allChildrenInRequiredState = childrenValues.every((childValue) => {
     const childPath = childValue.context?.path;
     return (
@@ -87,9 +87,8 @@ const SetChildrenCollapsedStateItem: FC<{
       getLocalItemState({ path: childPath }).collapsed === collapsed
     );
   });
-
   if (allChildrenInRequiredState) {
-    return null;
+    return null; // action won't do anything useful
   }
 
   const act = () => {

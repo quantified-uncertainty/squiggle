@@ -5,6 +5,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -24,6 +25,7 @@ import {
   pathAsString,
   topLevelBindingsName,
 } from "./utils.js";
+import { useForceUpdate } from "../../lib/hooks/useForceUpdate.js";
 
 type ItemHandle = {
   element: HTMLDivElement;
@@ -131,6 +133,43 @@ export const ViewerContext = createContext<ViewerContextShape>({
 
 export function useViewerContext() {
   return useContext(ViewerContext);
+}
+
+// `<ValueWithContextViewer>` calls this hook to register its handle in `<ViewerProvider>`.
+// This allows us to do two things later:
+// 1. Implement `SCROLL_TO_PATH` action.
+// 2. Re-render individual item viewers on demand, for example on "Collapse Children" menu action.
+export function useRegisterAsItemViewer(path: SqValuePath) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const { dispatch } = useViewerContext();
+
+  /**
+   * Since `ViewerContext` doesn't store settings, this component won't rerender when `setSettings` is called.
+   * So we use `forceUpdate` to force rerendering.
+   * (This function is not used directly in this component. Instead, it's passed to `<ViewerProvider>` to be called when necessary, sometimes from other components.)
+   */
+  const forceUpdate = useForceUpdate();
+
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) {
+      return;
+    }
+
+    dispatch({
+      type: "REGISTER_ITEM_HANDLE",
+      payload: { path, handle: { element, forceUpdate } },
+    });
+
+    return () => {
+      dispatch({
+        type: "UNREGISTER_ITEM_HANDLE",
+        payload: { path },
+      });
+    };
+  });
+
+  return ref;
 }
 
 export function useSetLocalItemState() {

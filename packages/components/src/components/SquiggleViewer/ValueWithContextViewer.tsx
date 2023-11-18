@@ -1,28 +1,21 @@
 import { clsx } from "clsx";
-import {
-  FC,
-  PropsWithChildren,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { FC, PropsWithChildren, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 
-import { CommentIcon, TextTooltip, TriangleIcon } from "@quri/ui";
+import { CommentIcon, TextTooltip } from "@quri/ui";
 
-import { useForceUpdate } from "../../lib/hooks/index.js";
 import { SqValueWithContext } from "../../lib/utility.js";
 import { ErrorBoundary } from "../ErrorBoundary.js";
 import { SquiggleValueChart } from "./SquiggleValueChart.js";
 import { SquiggleValueHeader } from "./SquiggleValueHeader.js";
-import { SquiggleValuePreview } from "./SquiggleValuePreview.js";
 import { SquiggleValueMenu } from "./SquiggleValueMenu.js";
+import { SquiggleValuePreview } from "./SquiggleValuePreview.js";
 import {
   useCollapseChildren,
   useFocus,
   useIsFocused,
   useMergedSettings,
+  useRegisterAsItemViewer,
   useSetCollapsed,
   useToggleCollapsed,
   useViewerContext,
@@ -124,15 +117,8 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
   const setCollapsed = useSetCollapsed();
   const collapseChildren = useCollapseChildren();
   const focus = useFocus();
-  const { getLocalItemState, dispatch } = useViewerContext();
+  const { getLocalItemState } = useViewerContext();
   const isFocused = useIsFocused(path);
-
-  /**
-   * Since `ViewerContext` doesn't store settings, this component won't rerender when `setSettings` is called.
-   * So we use `forceUpdate` to force rerendering.
-   * (This function is not used directly in this component. Instead, it's passed to `<ViewerProvider>` to be called when necessary, sometimes from other components.)
-   */
-  const forceUpdate = useForceUpdate();
 
   const isRoot = path.isRoot();
 
@@ -165,26 +151,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
     toggleCollapsed_(path);
   };
 
-  const ref = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const element = ref.current;
-    if (!element) {
-      return;
-    }
-
-    dispatch({
-      type: "REGISTER_ITEM_HANDLE",
-      payload: { path, handle: { element, forceUpdate } },
-    });
-
-    return () => {
-      dispatch({
-        type: "UNREGISTER_ITEM_HANDLE",
-        payload: { path },
-      });
-    };
-  });
+  const ref = useRegisterAsItemViewer(path);
 
   const isOpen = isFocused || !getLocalItemState({ path }).collapsed;
   const _focus = () => !isFocused && !isRoot && focus(path);
