@@ -68,18 +68,18 @@ voidStatement
   = "call" _nl value:zeroOMoreArgumentsBlockOrExpression
     {
       const variable = h.nodeIdentifier("_", location());
-      return h.nodeLetStatement(variable, value, location());
+      return h.nodeLetStatement(variable, value, false, location());
     }
 
 letStatement
-  = variable:variable _ assignmentOp _nl value:zeroOMoreArgumentsBlockOrExpression
-    { return h.nodeLetStatement(variable, value, location()); }
+  = exported:("export" __nl)? variable:variable _ assignmentOp _nl value:zeroOMoreArgumentsBlockOrExpression
+    { return h.nodeLetStatement(variable, value, Boolean(exported), location()); }
 
 defunStatement
-  = variable:variable '(' _nl args:functionParameters _nl ')' _ assignmentOp _nl body:innerBlockOrExpression
+  = exported:("export" __nl)? variable:variable '(' _nl args:functionParameters _nl ')' _ assignmentOp _nl body:innerBlockOrExpression
     {
       const value = h.nodeLambda(args, body, location(), variable);
-      return h.nodeDefunStatement(variable, value, location());
+      return h.nodeDefunStatement(variable, value, Boolean(exported), location());
     }
 
   assignmentOp "assignment" = '='
@@ -416,342 +416,6 @@ whiteSpaceCharactersOrComment = whiteSpaceCharacters / delimitedComment
  --- 
 
  ---
-description: Squiggle is a minimalist programming language for probabilistic estimation. It's meant for intuitively-driven quantitative estimation instead of data analysis or data-driven statistical techniques.
----
-import { SquiggleEditor } from "@quri/squiggle-components";
-import { Callout, Tabs, Tab } from "nextra/components";
-
-# Introduction
-
-Squiggle is a minimalist programming language for probabilistic estimation. It's meant for intuitively-driven quantitative estimation instead of data analysis or data-driven statistical techniques.
-
-The basics of Squiggle are fairly straightforward. This can be enough for many models. The more advanced functionality can take some time to learn.
-
-## A Simple Example
-
-Say you're trying to estimate the number of piano tuners in New York City. You can build a simple model of this, like so.  
-
-<Callout>
-  {/* don't try to use <p> here, it will cause hydration errors */}
-  **Tip** <br />
-  This editor is interactive! Try changing the code.
-</Callout>
-
-<SquiggleEditor
-  defaultCode={`//Here, you're expressing a 90% confidence that the value is between 8.1 and 8.4 Million.
-populationOfNewYork2022 = 8.1M to 8.4M
-
-proportionOfPopulationWithPianos = {
-  // This is a block.
-  percentage = 0.2 to 1 // Block body can declare local variables.
-  percentToRatio = 0.01
-  percentage * percentToRatio // Final expression of a block is the block's value.
-}
-
-pianoTunersPerPiano = {
-  pianosPerPianoTuner = 2k to 50k
-  1 / pianosPerPianoTuner
-}
-
-totalTunersIn2022 = populationOfNewYork2022 * proportionOfPopulationWithPianos *
-pianoTunersPerPiano
-`}
-/>
-
----
-
-Now let's take this a bit further. Let's imagine that you think that NYC will grow over time, and you'd like to estimate the number of piano tuners for every point in time for the next few years.
-
-<SquiggleEditor
-  defaultCode={`populationOfNewYork2022 = 8.1M to 8.4M
-
-proportionOfPopulationWithPianos = {
-    percentage = (.2 to 1)
-    percentage * 0.01
-}
-pianoTunersPerPiano = {
-    pianosPerPianoTuner = 2k to 50k
-    1 / pianosPerPianoTuner
-}
-
-//We only mean to make an estimate for the next 10 years.
-startYear = 2024
-endYear = 2034
-domain = [startYear, endYear]
-
-/** Time in years after 2024 */
-populationAtTime(t: domain) = {
-    averageYearlyPercentageChange = normal({p5:-0.01, p95:0.05}) // We're expecting NYC to continuously grow with an mean of roughly between -1% and +4% per year
-    populationOfNewYork2022 * ((averageYearlyPercentageChange + 1) ^ (t - startYear))
-}
-median(v) = quantile(v, .5)
-totalTunersAtTime(t: domain) = (
-  populationAtTime(t) *
-  proportionOfPopulationWithPianos *
-  pianoTunersPerPiano
-)
-
-{
-    populationAtTime,
-    totalTunersAtTimeMedian: {|t: domain| median(totalTunersAtTime(t))}
-}`}
-/>
-
-## Using Squiggle
-
-You can currently interact with Squiggle in a few ways:
-
-**[Squiggle Hub](https://squigglehub.org/)**  
-Squiggle Hub is a platform for the creation and sharing of code written in Squiggle. It's a great way to get started with Squiggle or to share your models with others.
-
-**[Playground](/playground)**  
-The [Squiggle Playground](/playground) is a nice tool for working with small models and making prototypes. You can make simple shareable links, but you can't save models that change over time.
-
-**[Visual Studio Code Extension](https://marketplace.visualstudio.com/items?itemName=QURI.vscode-squiggle)**  
-There's a simple [VS Code extension](https://marketplace.visualstudio.com/items?itemName=QURI.vscode-squiggle) for running and visualizing Squiggle code. We find that VS Code is a useful editor for managing larger Squiggle setups.
-
-**[Typescript Library](https://www.npmjs.com/package/@quri/squiggle-lang)**  
-Squiggle is built using [Typescript](https://www.typescriptlang.org/), and is accessible via a simple Typescript library. You can use this library to either run Squiggle code in full, or to call select specific functions within Squiggle.
-
-**[React Components Library](https://www.npmjs.com/package/@quri/squiggle-components)**  
-All of the components used in the playground and documentation are available in a separate component NPM repo. You can see the full Storybook of components [here](https://components.squiggle-language.com).
-
-**[Observable](https://observablehq.com/@hazelfire/squiggle)**  
-You can use Squiggle Components in Observable notebooks. Sam Nolan put together an exportable [Observable Notebook](https://observablehq.com/@hazelfire/squiggle) of the key components that you can directly import and use in your Observable notebooks.
-
-## Squiggle Vs. Other Tools
-
-### What Squiggle Is
-
-- A simple programming language for doing math with probability distributions.
-- An embeddable language that can be used in Javascript applications.
-- A tool to encode functions as forecasts that can be embedded in other applications.
-
-### What Squiggle Is Not
-
-- A complete replacement for enterprise Risk Analysis tools. (See [Crystal Ball](https://www.oracle.com/applications/crystalball/), [@Risk](https://www.palisade.com/risk/), [Lumina Analytica](https://lumina.com/))
-- A [probabilistic programming language](https://en.wikipedia.org/wiki/Probabilistic_programming). Squiggle does not support Bayesian inference.
-- A tool for substantial data analysis. (See programming languages like [Python](https://www.python.org/) or [Julia](https://julialang.org/))
-- A programming language for anything other than estimation.
-- A visually-driven tool. (See [Guesstimate](https://www.getguesstimate.com/) and [Causal](https://causal.app/))
-
-### Strengths
-
-- Simple and readable syntax, especially for dealing with probabilistic math.
-- Fast for relatively small models. Strong for rapid prototyping.
-- Optimized for using some numeric and symbolic approaches, not just Monte Carlo.
-- Embeddable in Javascript.
-- Free and open-source.
-
-### Weaknesses
-
-- Limited scientific capabilities.
-- Much slower than serious probabilistic programming languages on sizeable models.
-- Can't do Bayesian backwards inference.
-- Essentially no support for libraries or modules (yet).
-- Still very new, so a tiny ecosystem.
-- Still very new, so there are likely math bugs.
-- Generally not as easy to use as Guesstimate or Causal, especially for non programmers.
-
-## Organization
-
-Squiggle is one of the main projects of [The Quantified Uncertainty Research Institute](https://quantifieduncertainty.org/). QURI is a nonprofit funded primarily by [Effective Altruist](https://www.effectivealtruism.org/) donors.
-
-
-
-We split this page into separate pages for each release. (See the sidebar.)
-
-You can also find full changelogs at [GitHub](https://github.com/quantified-uncertainty/squiggle/releases) or our [Substack](https://quri.substack.com/t/squiggle).
-
-
-
----
-title: Processing Confidence Intervals
-author: Nuño Sempere
-description: This page explains what we are doing when we take a 90% confidence interval, and we get a mean and a standard deviation from it.
----
-
-This page explains what we are doing when we take a 90% confidence interval, and we get a mean and a standard deviation from it.
-
-## For normals
-
-```js
-module Normal = {
-  //...
-  let from90PercentCI = (low, high) => {
-    let mean = E.A.Floats.mean([low, high])
-    let stdev = (high -. low) /. (2. *. 1.6448536269514722)
-    #Normal({mean: mean, stdev: stdev})
-  }
-  //...
-}
-```
-
-We know that for a normal with mean $\mu$ and standard deviation $\sigma$,
-
-$$
-a \cdot Normal(\mu, \sigma) = Normal(a \cdot \mu, |a| \cdot \sigma)
-$$
-
-We can now look at the quantile of a $Normal(0,1)$. We find that the 95% point is reached at $1.6448536269514722$. ([source](https://stackoverflow.com/questions/20626994/how-to-calculate-the-inverse-of-the-normal-cumulative-distribution-function-in-p)) This means that the 90% confidence interval is $[-1.6448536269514722, 1.6448536269514722]$, which has a width of $2 \cdot 1.6448536269514722$.
-
-So then, if we take a $Normal(0,1)$ and we multiply it by $\frac{(high -. low)}{(2. *. 1.6448536269514722)}$, it's 90% confidence interval will be multiplied by the same amount. Then we just have to shift it by the mean to get our target normal.
-
-
----
-author:
-  - Nuño Sempere
-  - Quinn Dougherty
-abstract: This document outlines some properties about algebraic combinations of distributions. It is meant to facilitate property tests for [Squiggle](https://squiggle-language.com/), an estimation language for forecasters. So far, we are focusing on the means, the standard deviation and the shape of the pdfs.
-description: Invariants to check with property tests.
----
-
-# Invariants of Probability Distributions
-
-Invariants to check with property tests.
-
-_This document right now is normative and aspirational, not a description of the testing that's currently done_.
-
-## Algebraic combinations
-
-The academic keyword to search for in relation to this document is "[algebra of random variables](https://wikiless.org/wiki/Algebra_of_random_variables?lang=en)". Squiggle doesn't yet support getting the standard deviation, denoted by $\sigma$, but such support could yet be added.
-
-### Means and standard deviations
-
-#### Sums
-
-$$
-mean(f+g) = mean(f) + mean(g)
-$$
-
-$$
-\sigma(f+g) = \sqrt{\sigma(f)^2 + \sigma(g)^2}
-$$
-
-In the case of normal distributions,
-
-$$
-mean(normal(a,b) + normal(c,d)) = mean(normal(a+c, \sqrt{b^2 + d^2}))
-$$
-
-#### Subtractions
-
-$$
-mean(f-g) = mean(f) - mean(g)
-$$
-
-$$
-\sigma(f-g) = \sqrt{\sigma(f)^2 + \sigma(g)^2}
-$$
-
-#### Multiplications
-
-$$
-mean(f \cdot g) = mean(f) \cdot mean(g)
-$$
-
-$$
-\sigma(f \cdot g) = \sqrt{ (\sigma(f)^2 + mean(f)) \cdot (\sigma(g)^2 + mean(g)) - (mean(f) \cdot mean(g))^2}
-$$
-
-#### Divisions
-
-Divisions are tricky, and in general we don't have good expressions to characterize properties of ratios. In particular, the ratio of two normals is a Cauchy distribution, which doesn't have to have a mean.
-
-### Probability density functions (pdfs)
-
-Specifying the pdf of the sum/multiplication/... of distributions as a function of the pdfs of the individual arguments can still be done. But it requires integration. My sense is that this is still doable, and I (Nuño) provide some _pseudocode_ to do this.
-
-#### Sums
-
-Let $f, g$ be two independently distributed functions. Then, the pdf of their sum, evaluated at a point $z$, expressed as $(f + g)(z)$, is given by:
-
-$$
-(f + g)(z)= \int_{-\infty}^{\infty} f(x)\cdot g(z-x) \,dx
-$$
-
-See a proof sketch [here](https://www.milefoot.com/math/stat/rv-sums.htm)
-
-Here is some pseudocode to approximate this:
-
-```js
-// pdf1 and pdf2 are pdfs,
-// and cdf1 and cdf2 are their corresponding cdfs
-
-let epsilonForBounds = 2 ** -16;
-let getBounds = (cdf) => {
-  let cdf_min = -1;
-  let cdf_max = 1;
-  let n = 0;
-  while (
-    (cdf(cdf_min) > epsilonForBounds || 1 - cdf(cdf_max) > epsilonForBounds) &&
-    n < 10
-  ) {
-    if (cdf(cdf_min) > epsilonForBounds) {
-      cdf_min = cdf_min * 2;
-    }
-    if (1 - cdf(cdf_max) > epsilonForBounds) {
-      cdf_max = cdf_max * 2;
-    }
-  }
-  return [cdf_min, cdf_max];
-};
-
-let epsilonForIntegrals = 2 ** -16;
-let pdfOfSum = (pdf1, pdf2, cdf1, cdf2, z) => {
-  let bounds1 = getBounds(cdf1);
-  let bounds2 = getBounds(cdf2);
-  let bounds = [
-    Math.min(bounds1[0], bounds2[0]),
-    Math.max(bounds1[1], bounds2[1]),
-  ];
-
-  let result = 0;
-  for (let x = bounds[0]; (x = x + epsilonForIntegrals); x < bounds[1]) {
-    let delta = pdf1(x) * pdf2(z - x);
-    result = result + delta * epsilonForIntegrals;
-  }
-  return result;
-};
-```
-
-## `pdf`, `cdf`, and `quantile`
-
-With $\forall dist, pdf := x \mapsto \texttt{pdf}(dist, x) \land cdf := x \mapsto \texttt{cdf}(dist, x) \land quantile := p \mapsto \texttt{quantile}(dist, p)$,
-
-### `cdf` and `quantile` are inverses
-
-$$
-\forall x \in (0,1), cdf(quantile(x)) = x \land \forall x \in \texttt{dom}(cdf), x = quantile(cdf(x))
-$$
-
-### The codomain of `cdf` equals the open interval `(0,1)` equals the codomain of `pdf`
-
-$$
-\texttt{cod}(cdf) = (0,1) = \texttt{cod}(pdf)
-$$
-
-## To do:
-
-- Write out invariants for CDFs and Inverse CDFs
-- Provide sources or derivations, useful as this document becomes more complicated
-- Provide definitions for the probability density function, exponential, inverse, log, etc.
-- Provide at least some tests for division
-- See if playing around with characteristic functions turns out anything useful
-
-
-
----
-description: Squiggle's grammar is described with Peggy
----
-
-# Grammar
-
-Squiggle grammar is described with [Peggy](https://peggyjs.org) in [this file](https://github.com/quantified-uncertainty/squiggle/blob/main/packages/squiggle-lang/src/ast/peggyParser.peggy).
-
-
-
----
 description: Squiggle is still very early. The main first goal is to become stable (to reach version 1.
 ---
 
@@ -1743,7 +1407,7 @@ or
 <SquiggleEditor
   defaultCode={`
 x = 10
-x = 20
+y = 20
 if x == 1 then {
   (
     if y == 0 then {
@@ -1991,526 +1655,6 @@ Other Squiggle types include:
 
 
 ---
-description: How to use Squiggle in Node.js, web, VS Code and other environments
----
-
-# Integrations
-
-## Node Packages
-
-There are two JavaScript packages currently available for Squiggle:
-
-- [`@quri/squiggle-lang`](https://www.npmjs.com/package/@quri/squiggle-lang)
-- [`@quri/squiggle-components`](https://www.npmjs.com/package/@quri/squiggle-components)
-
-Types are available for both packages.
-
-## [Squiggle Language](https://www.npmjs.com/package/@quri/squiggle-lang) ![npm version](https://badge.fury.io/js/@quri%2Fsquiggle-lang.svg)
-
-[_See `README.md` in Github_](https://github.com/quantified-uncertainty/squiggle/tree/main/packages/squiggle-lang#use-the-npm-package)
-
-## [Squiggle Components](https://www.npmjs.com/package/@quri/squiggle-components) ![npm version](https://badge.fury.io/js/@quri%2Fsquiggle-components.svg)
-
-[_See `README.md` in Github_](https://github.com/quantified-uncertainty/squiggle/tree/main/packages/components#usage-in-a-react-project)
-
-This documentation uses `@quri/squiggle-components` frequently.
-
-We host [a storybook](https://components.squiggle-language.com) with details
-and usage of each of the components made available.
-
-## [Visual Studio Code Extension](https://marketplace.visualstudio.com/items?itemName=QURI.vscode-squiggle)
-
-This extention allows you to run and visualize Squiggle code.
-
-## [Observable Library](https://observablehq.com/@hazelfire/squiggle)
-
-An exportable [Observable Notebook](https://observablehq.com/@hazelfire/squiggle) of the key components that you can directly import and use in Observable notebooks.
-
-## [NextJS starter](https://github.com/quantified-uncertainty/next-app-with-squiggle)
-
-A template for presenting estimates on a nextjs site.
-
-
-
-
----
-description: Link to LLM documentation
----
-
-# Use with Language Models
-
-There are not yet any language models trained on Squiggle. However, we have compiled our documentation and grammar into one document. You can use this with Anthropic's [Claude](https://www.anthropic.com/index/introducing-claude) chat interface or other interfaces with large context windows, after which you can get Squiggle help. We've found that it's able to get Squiggle code mostly correct, but often needs some manual assistance.
-
-Manual training LLMs for writing Squiggle could make for a great project. If you might be interested in doing this, let us know!
-
-## Document with all documentation
-
-[All Squiggle Documentation, in One Document](https://raw.githubusercontent.com/quantified-uncertainty/squiggle/main/packages/website/allContent.txt)
-
-## Instructions for use with Claude
-
-1. Copy the Squiggle documentation file listed above.
-2. Go to the [Claude Chat Interface](https://console.anthropic.com/claude). Paste the file.
-3. Ask a question, like, `"Write a Squiggle model to estimate the costs of taking a plane flight from SFO to London. Include Include the environmental impact, social impact, cost of ticket, cost of time, cost of jet lag."`
-4. You should get an attempt at a Squiggle Model. Try it out in the Squiggle Playground. There will likely be a few errors, so try fixing these errors.
-
-
-
----
-description: Links to various Squiggle models and writeups
----
-
-# Gallery
-
-- Many models are on the [Squiggle Hub](https://squigglehub.org/) application.
-- Several models are listed under the [Squiggle](https://forum.effectivealtruism.org/topics/squiggle) tag on the Effective Altruism Forum.
-
-- [GiveWell's GiveDirectly cost effectiveness analysis](https://observablehq.com/@hazelfire/givewells-givedirectly-cost-effectiveness-analysis) by Sam Nolan
-- [A Critical Review of Open Philanthropy’s Bet On Criminal Justice Reform](https://forum.effectivealtruism.org/posts/h2N9qEbvQ6RHABcae/a-critical-review-of-open-philanthropy-s-bet-on-criminal) by Nuño Sempere
-- [Samotsvety Nuclear Risk Forecasts — March 2022](https://forum.effectivealtruism.org/posts/KRFXjCqqfGQAYirm5/samotsvety-nuclear-risk-forecasts-march-2022) by Nuño Sempere, Misha Yagudin, Eli Lifland
-- [Adjusting probabilities for the passage of time](https://www.lesswrong.com/s/rDe8QE5NvXcZYzgZ3/p/j8o6sgRerE3tqNWdj) by Nuño Sempere
-- [List of QURI Squiggle Models](https://github.com/quantified-uncertainty/squiggle-models) by Nuño Sempere, Sam Nolan, and Ozzie Gooen
-
-
-
----
-description: Probability distributions have several subtle possible formats. Three important ones that we deal with in Squiggle are symbolic, sample set, and point set formats.
----
-
-# Three Formats of Distributions
-
-_by Ozzie Gooen_
-
-Probability distributions have several subtle possible formats. Three important ones that we deal with in Squiggle are symbolic, sample set, and point set formats.
-
-_Symbolic_ formats are just the math equations. `Sym.normal(5,3)` is the symbolic representation of a normal distribution.
-
-Distribution constructors that don't have `Sym.` prefix, e.g. `normal(5,3)`, are stored as lists of samples. Monte Carlo techniques also return lists of samples. Let’s call this the “_Sample Set_” format.
-
-Lastly is what I’ll refer to as the _Point Set_ format. It describes the coordinates, or the shape, of the distribution. You can save these formats in JSON, for instance, like, `{xs: [1, 2, 3, 4, …], ys: [.0001, .0003, .002, …]}`.
-
-Symbolic, Sample Set, and Point Set formats all have very different advantages and disadvantages.
-
-Note that the name "Symbolic" is fairly standard, but I haven't found common names for what I'm referring to as "Sample Set" and "Point Set" formats. The formats aren't often specifically referred to for these purposes, from what I can tell.
-
-## Symbolic Formats
-
-**TL;DR**  
-Mathematical representations. Require analytic solutions. These are often ideal where they can be applied, but apply to very few actual functions. Typically used sparsely, except for the starting distributions (before any computation is performed).
-
-**Examples**  
-`Sym.normal(5,2)`  
-`pdf(Sym.normal(2,5), 1.2) + Sym.beta(5, log(2))`
-
-**How to Do Computation**  
-To perform calculations of symbolic systems, you need to find analytical solutions. For example, there are equations to find the pdf or cdf of most distribution shapes at any point. There are also lots of simplifications that could be done in particular situations. For example, there’s an analytical solution for combining normal distributions.
-
-**Advantages**
-
-- Maximally compressed; i.e. very easy to store.
-- Very readable.
-- When symbolic operations are feasible and easy to discover, they are trivially fast and completely accurate.
-
-**Disadvantages**
-
-- It’s often either impossible or computationally infeasible to find analytical solutions to most symbolic equations.
-- Solving symbolic equations requires very specialized tooling that’s very rare. There are a few small symbolic solver libraries out there, but not many. Wolfram Research is the main group that seems very strong here, and their work is mostly closed source + expensive.
-
-**Converting to Point Set Formats**
-
-- Very easy. Choose X points such that you capture most of the distribution (you can set a threshold, like 99.9%). For each X point, calculate the pdf, and save as the Y points.
-
-**Converting to Sample List Formats**
-
-- Very easy. Just sample a bunch of times. The regular way is to randomly sample (This is trivial to do for all distributions with inverse-cdf functions.) If you want to get more fancy, you could provide extra samples from the tails, that would be weighted lower. Or, you could take samples in equal distances (of probability mass) along the entire distribution, then optionally shuffle it. (In the latter case, these would not be random samples, but sometimes that’s fine.)
-
-**How to Visualize**  
-Convert to point set, then display that. (Optionally, you can also convert to samples, then display those using a histogram, but this is often worse you have both options.)
-
-**Bonus: The Metalog Distribution**
-
-The Metalog distribution seems like it can represent almost any reasonable distribution. It’s symbolic. This is great for storage, but it’s not clear if it helps with calculation. My impression is that we don’t have symbolic ways of doing most functions (addition, multiplication, etc) on metalog distributions. Also, note that it can take a fair bit of computation to fit a shape to the Metalog distribution.
-
-## Point Set Formats
-
-**TL;DR**  
-Lists of the x-y coordinates of the shape of a distribution. (Usually the pdf, which is more compressed than the cdf). Some key functions (like pdf, cdf) and manipulations can work on almost any point set distribution.
-
-**Alternative Names:**  
-Grid, Mesh, Graph, Vector, Pdf, PdfCoords/PdfPoints, Discretised, Bezier, Curve  
-See [this facebook thread](https://www.facebook.com/ozzie.gooen/posts/10165936265785363?notif_id=1644937423623638&notif_t=feedback_reaction_generic&ref=notif).
-
-**How to Do Computation**  
-Use point set techniques. These can be fairly computationally-intensive (particularly finding integrals, which take a whole lot of adding). In the case that you want to multiply independent distributions, you can try convolution, but it’s pretty expensive.
-
-**Examples**  
-`{xs: [1, 2, 3, 4…], ys: [.0001, .0003, .002, .04, ...]} `  
-`[[1, .0001], [2, .0003], [3, .002]...] `
-
-**Advantages**
-
-- Much more compressed than Sample List formats, but much less compressed than Symbolic formats.
-- Many functions (pdf, cdf, percentiles, mean, integration, etc) and manipulations (truncation, scaling horizontally or vertically), are possible on essentially all point set distributions.
-
-**Disadvantages**
-
-- Most calculations are infeasible/impossible to perform using point sets formats. In these cases, you need to use sampling.
-- Not as accurate or fast as symbolic methods, where the symbolic methods are applicable.
-- The tails get cut off, which is subideal. It’s assumed that the value of the pdf outside of the bounded range is exactly 0, which is not correct. (Note: If you have ideas on how to store point set formats that don’t cut off tails, let me know)
-
-**Converting to Symbolic Formats**
-
-- Okay, if you are okay with a Metalog approximation or similar. Metaculus uses an additive combination of up to [Logistic distributions](https://www.metaculus.com/help/faq/); you could also fit this. Fitting takes a little time (it requires several attempts and some optimization), can be arbitrarily accurate.
-- If you want to be very fancy, you could try to fit point set distributions into normal / lognormal / etc. but this seems like a lot of work for little gain.
-
-**Converting to Sample List Formats**
-
-- Just sample a lot. The same as converting symbolic formats into samples.
-
-**How to Visualize**
-
-- It’s already in a good format for visualization, just plot it in any library.
-
-**Handling Long Tails / Optimization**
-
-- You can choose specific points to use to save computation. For example, taking extra points at the ends.
-
-**Additional Metadata**
-
-- The format mentioned above does not suggest any specific form of interpolation, or strategy of dealing with the tails. Several interpolation methods are possible; for example, linear interpolation, or stepwise interpolation.
-
-**Potential Alternatives**
-
-- [Bézier curves](https://en.wikipedia.org/wiki/B%C3%A9zier_curve) could, in theory, be more optimal. Bézier are used for vector image programs. They represent a more complicated format than a list of x-y coordinate pairs, but come with much more flexibility. Arguably, they sit somewhere between fitting distributions to Metalog distributions, and just taking many x-y points.
-
-## Sample Set Formats
-
-**TL;DR**  
-Random samples. Use Monte Carlo simulation to perform calculations. This is the predominant technique using Monte Carlo methods; in these cases, most nodes are essentially represented as sample sets. [Guesstimate](https://www.getguesstimate.com/) works this way.
-
-**How to Do Computation**  
-Use [Monte Carlo methods](https://en.wikipedia.org/wiki/Monte_Carlo_method). You could get fancy with these with a [probabilistic programming language](https://en.wikipedia.org/wiki/Probabilistic_programming), which often have highly optimized Monte Carlo tooling. Variational inference is used for very similar problems.
-
-**Examples**  
-`[3.23848, 4.82081, 1.382833, 9.238383…]`
-
-**Advantages**
-
-- Monte Carlo methods are effectively the only ways to calculate many/most functions.
-- The use of Monte Carlo methods make for very easy sensitivity analysis.
-- [Probabilistic inference](https://machinelearningmastery.com/markov-chain-monte-carlo-for-probability/) is only possible using Monte Carlo methods.
-- In some cases, Monte Carlo computation functionally represents possible worlds. There’s no very clear line between Monte Carlo methods and agent based modeling simulations.
-- You can handle math with distributions that are correlated with each other. (I believe, but am not sure).
-
-**Disadvantages**
-
-- Monte Carlo methods can be very slow.
-- Requires fairly heavy tooling to make efficient.
-- Sampling methods are very lossy, especially for tails.
-
-**Converting to Symbolic Formats**  
-I don’t know of a straightforward way of doing this. Convert to Sample List first, then you can convert to Metalog or similar.
-
-**Converting to Sample List Formats**  
-[Kernel density estimation](https://en.wikipedia.org/wiki/Kernel_density_estimation) works. However, it requires a few parameters from the user, for tuning. There are functions to estimate these parameters, but this is tricky. Two forms of density estimation are shown as code [here](https://github.com/jasondavies/science.js/blob/master/src/stats/bandwidth.js). There’s some more description in the webppl documentation [here](https://webppl.readthedocs.io/en/master/distributions.html#KDE).
-
-**Handling Long Tails / Optimization**
-
-- You can weight samples differently. This allows you to save more at the tails, for more granularity there, without biasing the results. (I’m not sure how difficult this would be.)
-
-**How to Visualize**  
-Use a histogram.
-
-|                        | Symbolic                                                                                                                 | Symbolic(metalog)                                                 | Numeric                                                                                         | Samples/MC                                                  |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| Example                | normal(5,2)                                                                                                              | metalog([(2,3)])                                                  | [[1,2,3,4], [3,5,9,10]]                                                                         | [1.38483, 0.233, 38.8383, …]                                |
-| Techniques             | Analytic                                                                                                                 | Analytic                                                          | Numeric                                                                                         | Monte Carlo, variational inference                          |
-| Available calculations | Pdf(), cdf(), sample, inverse Add or multiply normal distributions Add lognormal distributions Select other calculations | Pdf(), cdf(), sample(), inverseCdf()                              | Pointwise operations Truncate Mixture Select regular operations by constants (normal(5,2) \* 3) | Normal operations, most functions. Not pointwise functions. |
-| Use for computation    | Lossless, Very fast, Extremely limited                                                                                   |                                                                   | Medium speed, Minor accuracy loss, Select useful, but limited functions                         | Slow and lossy, but very general-purpose.                   |
-| Use for storage        | Tiny, Lossless, Extremely limited                                                                                        | (Assuming other data is fit to metalog) High information densityt | Medium information density                                                                      | Low information density                                     |
-
-
-
-## 0.8.5
-
-### [@quri/squiggle-lang](https://www.npmjs.com/package/@quri/squiggle-lang)
-
-*   Downgrade Typescript target to ES2021. This should help with loading Squiggle components on Observable through unpkg.com. ([#2269](https://github.com/quantified-uncertainty/squiggle/pull/2269))
-
-*   Added support for `%` as a number suffix ([#2239](https://github.com/quantified-uncertainty/squiggle/pull/2239))
-
-*   Support `pow(dist, integer)` on distributions with negative samples ([#2235](https://github.com/quantified-uncertainty/squiggle/pull/2235))
-
-### [@quri/squiggle-components](https://www.npmjs.com/package/@quri/squiggle-components)
-
-*   Downgrade Typescript target to ES2021. This should help with loading Squiggle components on Observable through unpkg.com. ([#2269](https://github.com/quantified-uncertainty/squiggle/pull/2269))
-
-*   Autocompletion improvements: ([#2233](https://github.com/quantified-uncertainty/squiggle/pull/2233))
-
-    *   suggest local function names
-    *   suggest parameter names
-    *   don't suggest unreachable vars (declared below or in unreachable local scopes)
-    *   different icon for local functions
-
-    Editor grammar improvements:
-
-    *   functions with 0 parameters don't break the parser
-    *   trailing expressions are now really optional (they weren't, but Lezer recovered from it so it didn't matter)
-
-*   Improved symlog scale ticks ([#2245](https://github.com/quantified-uncertainty/squiggle/pull/2245))
-
-### [@quri/prettier-plugin-squiggle](https://www.npmjs.com/package/@quri/prettier-plugin-squiggle)
-
-*   Downgrade Typescript target to ES2021. This should help with loading Squiggle components on Observable through unpkg.com. ([#2269](https://github.com/quantified-uncertainty/squiggle/pull/2269))
-
-*   Fixed exports field order in package.json ([#2276](https://github.com/quantified-uncertainty/squiggle/pull/2276))
-
-### [vscode-squiggle](https://marketplace.visualstudio.com/items?itemName=QURI.vscode-squiggle)
-
-_No changes._
-
-
-
-
-## 0.8.4
-
-### [@quri/squiggle-lang](https://www.npmjs.com/package/@quri/squiggle-lang)
-
-#### Breaking changes
-
-- This package is now [ESM-only](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c)
-- Remove `Function.declare` method (it was never documented and was replaced with [annotations](https://www.squiggle-language.com/docs/Guides/Functions#parameter-annotations) in 0.8.0 release)
-
-#### New features
-
-- Support for unicode sequences in strings; any JSON that doesn't include null values is now a valid value in Squiggle
-- Apply logarithmic KDE on skewed distributions
-
-### [@quri/squiggle-components](https://www.npmjs.com/package/@quri/squiggle-components)
-
-#### New features
-
-- Playground viewer (and `SquiggleViewer` component) always shows both variables and the result
-- Comments and strings render as markdown
-- Line wrapping editor setting
-
-#### Improvements
-
-- Error boundary in `SquiggleViewer`; fatal errors won't crash the entire playground anymore
-- In distribution charts, adjust PDF height on non-linear scales
-- Better log scale error message
-- Swap row/column order in table chart dimension
-- Increase number precision in distribution summary tables
-
-##### Function chart improvements
-
-- Pick x scale points equidistantly on a mapped scale for non-linear scales
-- Group numeric function errors (we were already grouping dist function errors, but not numeric)
-- Don't draw cursor lines if cursor is outside of CartesianFrame
-- Floating dist function previews
-- Filter infinite values in dist functions
-
-### [@quri/prettier-plugin-squiggle](https://www.npmjs.com/package/@quri/prettier-plugin-squiggle)
-
-- Fix NPM release (0.8.0 didn't include JS files)
-- Don't wrap lambda body in extra `{}`
-- Correctly indent lambda body
-- Escape quotes in strings
-- Fix capitalized keys formatting in dicts
-- Preserve shorthand entries in dicts
-
-### [@quri/ui](https://www.npmjs.com/package/@quri/ui)
-
-- `GlobeIcon` and `LockIcon`
-
-### [Squiggle Hub](https://squigglehub.org)
-
-- Support for private models
-- Various performance improvements
-- Models are sorted by last updated time
-- /status page with basic statistics
-- Various minor improvements and bugfixes
-
-### [Documentation website](https://squiggle-language.com)
-
-- Documentation reorganization
-- [Guide for using Squiggle with language models](https://www.squiggle-language.com/docs/Ecosystem/LanguageModels)
-- Full-height [playground](https://www.squiggle-language.com/playground)
-
-### New Contributors
-
-- @agucova made their first contribution in https://github.com/quantified-uncertainty/squiggle/pull/2232
-
-**Full Changelog**: https://github.com/quantified-uncertainty/squiggle/compare/@quri/squiggle-components@0.8.0...0.8.1
-
-
-
-## 0.8.0
-
-### [@quri/squiggle-lang](https://www.npmjs.com/package/@quri/squiggle-lang)
-
-#### Breaking changes
-
-- `SampleSet` distributions are now used as the default.
-  - This change is important because only SampleSet distributions handle correlations, and users expecting correlations got confused when the defaults were for symbolic distributions instead. If you want to use symbolic formats, you can, like: `Sym.normal(5,2)`.
-- `a to b` expressions always evaluate to lognormal distributions, limited to positive-only arguments.
-  - Previously these changed to use normal distributions at values zero or less, and this confused users. https://github.com/quantified-uncertainty/squiggle/issues/1095.
-- `|>` pipes syntax is removed, in favor of the `->` syntax.
-  - We had two syntaxes that did the same thing, and wanted to clean this up.
-- `#` comments support is removed, in favor of the `//` syntax.
-- Renamed functions such as `scaleLog`, `scalePow`, etc. to `Danger.mapYLog`, `Danger.mapYPow`, etc.
-  - These were infrequently used and prone to errors.
-- Default sampleCount in squiggle-lang is now 1k, matching playground.
-
-#### New features
-
-- Parameter annotations: `f(x: [0, 10]) = ...`; see [docs](https://preview.squiggle-language.com/docs/Guides/Language#parameter-annotations) for details
-- `Plot.distFn` and `Plot.numericFn` (`Plot.fn` is removed)
-- Support for manual plot [scales](https://squiggle-language.com/docs/Api/Plot#scales)
-- Support for docstrings. `/** ... */` comments are displayed in the viewer
-- `List.reduceWhile` function
-- Dicts and bindings are ordered
-- `map` callback supports an optional second `index` parameter
-- Support for `{ foo, bar }` shorthand in dicts
-- Mixture correlations https://github.com/quantified-uncertainty/squiggle/pull/1732
-
-#### Fixes
-
-- Exponentiation is right-associative
-- Units are whitelisted; `100blah` is a syntax error
-- Fixed error message when ternary condition is wrong
-
-#### Performance improvements
-
-- ~2x speedup on synthetic lambda-heavy benchmarks; similar improvements on real code, on average
-
-### [@quri/squiggle-components](https://www.npmjs.com/package/@quri/squiggle-components)
-
-#### Breaking changes
-
-- Many `@quri/squiggle-lang` APIs have changed, so this package should be updated at the same time as `@quri/squiggle-components`
-- "Input variables" tab was removed; you can inject your JSON data directly into Squiggle instead
-
-#### New features
-
-- Movable divider between editor and graph view
-- Support for new plots: `Plot.scatter`, `Table.make` and others
-- New default tick format. This fixes an error that small numbers (`0.01`) were shown as `10m`; #2007.
-- Ability to "zoom in" on any variable in viewer; #1913
-- "Find in editor" button in viewer
-- Other various updates to the playground UI
-
-#### Fixes
-
-- Display Infinity as "Infinity"
-- Fix shortcut tooltips on non-macs
-- Charts filter out infinity values from the domain
-- Improve tooltip for errors in editor
-
-### [VS Code extension](https://marketplace.visualstudio.com/items?itemName=QURI.vscode-squiggle)
-
-- Improvements to syntax highlighter
-
-### [@quri/prettier-plugin-squiggle](https://www.npmjs.com/package/@quri/prettier-plugin-squiggle)
-
-**Initial release.** Install this package to format any Squiggle code with [https://prettier.io](Prettier). Requires Prettier v3.
-
-### @quri/ui
-
-Initial release with common UI components by QURI, used in squiggle-components and Squiggle Hub. [Storybook](https://quri-ui.vercel.app/)
-
-You probably shouldn't use this package directly if you don't work at QURI, because we don't have any stability guarantees and optimize for our convenience.
-
-### Other
-
-- [Squiggle Hub](https://squigglehub.org/) was released
-- New [documentation](https://www.squiggle-language.com/), now with search
-- We've started work on relative values functionality in Squiggle Hub. This is still fairly error-prone, we'll work on cleaning it up in the next few months.
-
-
-
-## 0.7.0
-
-### @quri/squiggle-lang
-
-Language:
-
-- New functions: `List.concat`, `List.uniq`, `List.append`, `List.flatten`, `List.join`, `Dict.mapKeys`.
-- `stdev` and `variance` work for all kinds of distributions.
-- Support for `==`, `!=` and `+` on strings.
-- Support for trailing comma in arrays: `arr = [5,6,]` is now allowed.
-- `Plot.fn` allows for programmatical control of `min..max` range in charts.
-- Support for `{ p10: ..., p90: ... }` and `{ p25: ..., p75: ... }` in `normal()` and `lognormal()`.
-- Non-integer key lookups in arrays are now disallowed; `arr[1.5]` and `arr[3/0]` will result in error; previously non-integer keys got rounded to 0 or the closest integer.
-- Fix for zero parameter function quirks; the checks are now stricter and some existing code might break.
-- Fix for `normal(5,2) * 0` special case.
-- Fix for summary stats and `inv` function on `pointMass` distributions.
-- Fix for `inv` and `sample` on discrete distributions.
-
-JS API:
-
-- `sq` function allows to embed Squiggle code in JS with syntax highlighting in VS Code (when VS Code extension is installed).
-- `value.asJS()` method for easier conversion of results to JS values.
-
-Other:
-
-- ES6 modules build (we still provide CommonJS build as well).
-
-### @quri/squiggle-components
-
-UI:
-
-- New code editor based on Codemirror, with the improved syntax highlighting and auto-completion for variables and stdlib functions.
-- Charts are now implemented in pure Canvas with D3 (instead of Vega), with some improvements in UI and rendering speed.
-
-Other:
-
-- This package is now ESM-only! We depend on D3, and D3 is ESM-only, so squiggle-components has to be ESM-only as well. If your project still uses CommonJS and you doesn't use Next.js or other smart transpiler, you might encounter problems. See [this document](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c) for advice.
-- Much smaller bundle size, thanks to removing some heavy dependencies.
-- `oneLine` prop in `SquiggleEditor` removed (probably no one used it).
-
-
-
-## 0.6.0
-
-- Language reimplemented in Typescript instead of Rescript.
-- 2x performance boost on average on typical Squiggle code. Most improvements come from optimizations in distribution operations.
-- Color fixes and improved distribution charts in components.
-- `mean()` on mixed pointsets now works correctly.
-
-
-
-## 0.5.1
-
-- Error locations and stacktraces.
-- New functions: `List.length`, `Dist.set` and `Dist.map`.
-- Improved `to` precedence order.
-- Improvements to `->` operator: more stuff can be passed on the right side, e.g. anonymous functions.
-- Support for empty dicts (`{}`).
-- Various performance improvements; overall speedup on real code is around 5%.
-
-
-
-## 0.5.0
-
-- Performance improvements:
-  - Interpreter is now 5x-20x faster on code written in Squiggle
-  - SampleSet to PointSet conversions are 2x faster
-  - cdf function on SampleSets is 30x faster
-  - overall speedup is about 2x on average on real code written in Squiggle
-- 50% smaller bundle size for [@quri/squiggle-lang](https://www.npmjs.com/package/@quri/squiggle-lang); 20% smaller bundle size for [@quri/squiggle-components](https://www.npmjs.com/package/@quri/squiggle-components).
-
-### Breaking changes
-
-Some rarely used math functions got removed or moved to the `Math` namespace.
-
-For example, `cos(x)` is now `Math.cos(x)`, and `atanh(x)` doesn't exist.
-
-If your code is now failing with `<function> is not defined` for anything from [this list](https://mathjs.org/docs/reference/functions.html), try adding `Math.` prefix first, and then complain on [Github issues](https://github.com/quantified-uncertainty/squiggle/issues).
-
-
-
----
 description: The table module helps you create tables of data.
 ---
 
@@ -2525,6 +1669,7 @@ The Table module allows you to make tables of data.
 ```
 Table.make: ({
   data: list<'a>,
+  title?: string,
   columns: list<{
     name?:string,
     fn: 'a => any
@@ -2692,7 +1837,7 @@ Examples:
 <SquiggleEditor
   defaultCode={`Plot.dist({
     dist: normal(5,2),
-    xScale: Scale.linear({ min: -2, max: 6}),
+    xScale: Scale.linear({ min: -2, max: 6, title: "X Axis Title"}),
     title: "A Simple Normal Distribution",
     showSummary: true
 })`}
@@ -2707,6 +1852,7 @@ Plot.numericFn: ({
   fn: (number => number),
   xScale: scale,
   yScale: scale,
+  title: string,
   points: number
 }) => plot
 ```
@@ -2731,6 +1877,7 @@ Plot.distFn: ({
   fn: (number => dist),
   xScale: scale,
   yScale: scale,
+  title: string,
   distXScale: scale,
   points: number
 }) => plot
@@ -2739,7 +1886,9 @@ Plot.distFn: ({
 <SquiggleEditor
   defaultCode={`Plot.distFn({
   fn: {|t| normal(t,2)*normal(5,3)},
-  xScale: Scale.log({ min: 3, max: 100 }),
+  title: "A Function of Value over Time",
+  xScale: Scale.log({ min: 3, max: 100, title: "Time (years)"}),
+  yScale: Scale.linear({ title: "Value"}),
   distXScale: Scale.linear({ tickFormat: '#x' }),
 })`}
 />
@@ -2749,11 +1898,12 @@ Plot.distFn: ({
 Plots a scatterplot. Requires two sample set distributions.
 
 ```
-Plot.numericFn: ({
+Plot.scatter: ({
   yDist: sampleSetDist,
   xDist: sampleSetDist,
   xScale: Scale,
-  yScale: Scale
+  yScale: Scale,
+  title: string,
 }) => plot
 ```
 
@@ -2771,10 +1921,11 @@ Plot.scatter({
   defaultCode={`xDist = SampleSet.fromDist(normal({p5:-2, p95:5}))
 yDist = normal({p5:-3, p95:3}) * 5 - xDist
 Plot.scatter({
+  title: "A Scatterplot",
   xDist: xDist,
   yDist: yDist,
-  xScale: Scale.symlog(),
-  yScale: Scale.symlog(),
+  xScale: Scale.symlog({title: "X Axis Title"}),
+  yScale: Scale.symlog({title: "Y Axis Title"}),
 })`}
 />
 
@@ -2788,19 +1939,22 @@ We use D3 for the tick formats. You can read about custom tick formats [here](ht
 Scale.log: ({
   min: number,
   max: number,
-  tickFormat: string
+  tickFormat: string,
+  title: string
 }) => scale
 
 Scale.linear: ({
   min: number,
   max: number,
-  tickFormat: string
+  tickFormat: string,
+  title: string
 }) => scale
 
 Scale.symlog: ({
   min: number,
   max: number,
   tickFormat: string,
+  title: string,
   constant: number
 }) => scale
 
@@ -2808,6 +1962,7 @@ Scale.power: ({
   min: number,
   max: number,
   tickFormat: string,
+  title: string,
   exponent: number
 }) => scale
 ```
@@ -2870,12 +2025,14 @@ round: (number) => number
 
 ```
 max: (list<number>) => number
+max: (number, number) => number
 ```
 
 ### min
 
 ```
 min: (list<number>) => number
+min: (number, number) => number
 ```
 
 ### mean
@@ -2956,6 +2113,12 @@ cumprod: (list<number>) => list<number>
 
 ```
 diff: (list<number>) => list<number>
+```
+
+### sort
+
+```
+sort: (list<number>) => list<number>
 ```
 
 ### subtract
@@ -3242,7 +2405,48 @@ List.flatten([
 ]) // [1,2,3,4]
 ```
 
+## List Sorting
+
+### sortBy
+```
+List.sortBy: (list<'a>, ('a => number)) => list<'a>
+```
+
+```squiggle
+List.sortBy(
+[
+  {a:2, b:10}
+  {a:10, b:3}
+],
+{|obj| obj.b}
+) // [{a:10, b:3}, {a:2, b:10}]
+```
+
+### minBy
+```
+List.minBy: (list<'a>, ('a => number)) => 'a
+```
+
+### maxBy
+```
+List.maxBy: (list<'a>, ('a => number)) => 'a
+```
+
 ## List Filtering
+
+### slice
+```
+List.slice: (list<'a>, minIndex: number) => list<'a>
+List.slice: (list<'a>, minIndex: number, maxIndex: number) => list<'a>
+```
+
+Returns a copy of the list, between the selected ``start`` and ``end``, end not included. Directly uses the [Javascript implementation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/slice) underneath.
+
+```squiggle
+List.slice([1,2,3,4,5,6], 2) // [3,4,5,6]
+List.slice([1,2,3,4,5,6], 2, 4) // [3,4]
+```
+
 
 ### filter
 
@@ -3370,6 +2574,12 @@ SampleSet.make: ((index: number) => number) => pointSetDist
 SampleSet.fromDist: (distribution) => sampleSet
 ```
 
+### fromNumber
+
+```
+SampleSet.fromNumber: (number) => sampleSet
+```
+
 ### fromList
 
 ```
@@ -3454,9 +2664,8 @@ PointSet.fromDist: (distribution) => pointSetDist
 ### fromNumber
 
 ```
-SampleSet.fromNumber: (number) => sampleSet
+PointSet.fromNumber: (number) => pointSetDist
 ```
-
 
 ### makeContinuous
 
@@ -3985,6 +3194,18 @@ normal(0, 1) + normal(1, 3) // returns normal(1, 3.16...)
 add(normal(0, 1), normal(1, 3)) // returns normal(1, 3.16...)
 ```
 
+### sum
+
+```
+sum: (list<distributionLike>) => distribution
+```
+
+### cumulative sum
+
+```
+cumsum: (list<distributionLike>) => distribution
+```
+
 ### multiply
 
 ```
@@ -3996,6 +3217,19 @@ multiply: (distributionLike, distributionLike) => distribution
 ```
 product: (list<distributionLike>) => distribution
 ```
+
+### cumulative product
+
+```
+cumprod: (list<distributionLike>) => list<distribution>
+```
+
+### diff
+
+```
+diff: (list<distributionLike>) => list<distribution>
+```
+
 
 ### subtract
 
@@ -4213,6 +3447,26 @@ Dict.set: (dict<'a>, string, 'a) => dict<'a>
 
 Creates a new dictionary that includes the added element, while leaving the original dictionary unaltered.
 
+### has
+
+```
+Dict.has: (dict<'a>, string) => boolean
+```
+
+### size
+
+```
+Dict.size: (dict<'a>) => number
+```
+
+### delete
+
+```
+Dict.delete: (dict<'a>, string) => dist<'a>
+```
+
+Creates a new dictionary, excluding the key-value pair associated with the specified key.
+
 ### map
 
 ```
@@ -4233,6 +3487,31 @@ Dict.map: (dict<'a>, (string => string)) => dict<'a>
 Dict.mapKeys({a: 1, b: 2}, {|x| x + "hi" }) // {ahi: 1, bhi: 2}
 ```
 
+### pick
+
+```
+Dict.pick: (dict<'a>, list<string>) => dict<'a>
+```
+
+Selects only the keys from the dictionary that are specified in the list, and returns a new dictionary with those keys.
+
+```squiggle
+data = { a: 1, b: 2, c: 3, d: 4 }
+Dict.pick(data, ["a", "c"]) // {a: 1, c: 3}
+```
+
+### omit
+
+```
+Dict.omit: (dict<'a>, list<string>) => dict<'a>
+```
+
+Removes the keys from the dictionary that are specified in the list, and returns a new dictionary without those keys.
+
+```squiggle
+data = { a: 1, b: 2, c: 3, d: 4 }
+Dict.omit(data, ["b", "d"]) // {a: 1, c: 3}
+```
 
 
 ---
@@ -4280,6 +3559,39 @@ Danger.binomial: (number, number, number) => number
 ```
 
 `Danger.binomial(n, k, p)` returns `choose((n, k)) * pow(p, k) * pow(1 - p, n - k)`, i.e., the probability that an event of probability p will happen exactly k times in n draws.
+
+
+### binomialDist
+
+```
+Danger.binomialDist: (n: distribution|number,p: distribution|number) => distribution
+```
+A binomial distribution.
+
+``n`` must be above 0, and ``p`` must be between 0 and 1. 
+
+Note: The binomial distribution is a discrete distribution. When representing this, the Squiggle distribution component might show it as partially or fully continuous. This is a visual mistake; if you inspect the underlying data, it should be discrete.
+
+**Examples**
+
+```squiggle
+binomialDist(5, 0.5)
+binomialDist(10, 0.3)
+```
+
+### poissonDist 
+
+```
+Danger.poissonDist: (distribution|number) => distribution
+```
+
+Note: The Poisson distribution is a discrete distribution. When representing this, the Squiggle distribution component might show it as partially or fully continuous.  This is a visual mistake; if you inspect the underlying data, it should be discrete.
+
+**Examples**
+
+```squiggle
+poissonDist(20)
+```
 
 ### integrateFunctionBetweenWithNumIntegrationPoints
 
@@ -4330,6 +3642,25 @@ Danger.optimalAllocationGivenDiminishingMarginalReturnsForManyFunctions(
 
 Note also that the array ought to have more than one function in it.
 
+### combinations
+```
+Danger.combinations: (list<any>, number) => list<list<any>>
+```
+Returns all combinations of the input list taken r elements at a time. 
+
+```squiggle
+Danger.combinations([1, 2, 3], 2)) // [[1, 2], [1, 3], [2, 3]]
+```
+
+### allCombinations
+```
+Danger.allCombinations: (list<any>) => list<list<any>>
+```
+Returns all possible combinations of the elements in the input list.
+
+```squiggle
+Danger.allCombinations([1, 2, 3])) // [[1], [2], [3], [1, 2], [1, 3], [2, 3], [1, 2, 3]]
+```
 
 
 ---
@@ -4349,35 +3680,74 @@ Calculators can be useful for debugging functions or to present functions to end
 ```
 Calculator.make: ({
   fn: ...arguments => any,
-  description: string,
-  fields: list<{
-    name: string,
-    default?: string,
-    description?: string
-  }>
+  title?: string,
+  description?: string,
+  fields: list<input>,
+  autorun?: boolean = true,
+  sampleCount?: number,
 }) => calculator
 ```
 
 ``Calculator.make`` takes in a function, a description, and a list of fields. The function should take in the same number of arguments as the number of fields, and the arguments should be of the same type as the default value of the field.
 
-Examples:
+Calculators require a list of Inputs to be passed in. Inputs are created using the ``Input`` module. The ``Input`` module has a few different functions for creating different types of inputs.
+
+For calculators that take a long time to run, we recommend setting ``autorun`` to false. This will produce a button that the user can click to run the calculator.
+
+Example:
 
 <SquiggleEditor
   defaultCode={`Calculator.make(
   {
-    fn: {|a, b|a + b},
-    description: "### Sum()  \nThis takes in two arguments, and outputs the sum of those two arguments.",
-    fields: [
-      {
+    fn: {|a, b,c,d| [a,b,c,d]},
+    title: "Concat()",
+    description: "This function takes in 4 arguments, then displays them",
+    autorun: true,
+    sampleCount: 10000,
+    inputs: [
+      Input.text({
         name: "First Param",
-        default: "10 to 11",
+        default: "10 to 13",
         description: "Must be a number or distribution",
-      },
-      { name: "Second Param", default: "3" },
-    ],
+      }),
+      Input.textArea({ name: "Second Param", default: "[4,5,2,3,4,5,3,3,2,2,2,3,3,4,45,5,5,2,1]" }),
+      Input.select({ name: "Third Param", default: "Option 1", options: ["Option 1", "Option 2", "Option 3"] }),
+      Input.checkbox({ name: "Fourth Param", default: false})
+    ]
   }
 )`}
 />
+
+## Inputs
+
+Inputs are now only used for creating calculators, as shown above. They are created using the ``Input`` module.
+
+```
+Input.text: ({
+  name: string,
+  description?: string,
+  default?: string,
+}) => input
+
+Input.textArea: ({
+  name: string,
+  description?: string,
+  default?: string,
+}) => input
+
+Input.checkbox: ({
+  name: string,
+  description?: string,
+  default?: boolean,
+}) => input
+
+Input.select: ({
+  name: string,
+  description?: string,
+  default?: string,
+  options: string[]
+}) => input
+```
 
 
 ---

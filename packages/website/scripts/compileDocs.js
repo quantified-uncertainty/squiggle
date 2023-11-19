@@ -19,7 +19,9 @@ const getGrammarContent = async () => {
 };
 
 const getDocumentationContent = async () => {
-  const documentationFiles = await glob("./src/pages/docs/**/*.{md,mdx}");
+  const documentationFiles = await glob(
+    "./src/pages/docs/{Api,Guides}/*.{md,mdx}"
+  );
   return documentationFiles.map(readFile).join("\n\n\n");
 };
 
