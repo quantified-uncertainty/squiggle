@@ -13,7 +13,7 @@ export {
 export { SquiggleViewer } from "./components/SquiggleViewer/index.js";
 export { ToolbarItem as PlaygroundToolbarItem } from "./components/ui/PanelWithToolbar/ToolbarItem.js";
 
-export { RelativeValueCell } from "./components/RelativeValuesGridChart/RelativeValueCell.js";
+export { RelativeValueCell } from "./widgets/PlotWidget/RelativeValuesGridChart/RelativeValueCell.js";
 
 // for use in relative values
 export {

@@ -16,17 +16,20 @@ import {
   FC,
   PropsWithChildren,
   ReactNode,
+  useCallback,
   useContext,
   useRef,
   useState,
 } from "react";
 
 import { TailwindContext } from "../TailwindProvider.js";
+import { DropdownContext } from "./DropdownContext.js";
 
 type Props = PropsWithChildren<{
+  // `close` option is for backward compatibility; new code should use `useCloseDropdown` instead.
   render(options: { close(): void }): ReactNode;
-  // in some cases, you want the dropdown to fill its container;
-  // since dropdowns put its children in an extra div, this option might be necessary
+  // In some cases, you want the dropdown to fill its container;
+  // since dropdowns put its children in an extra div, this option might be necessary.
   fullHeight?: boolean;
   placement?: Placement;
 }>;
@@ -66,6 +69,10 @@ export const Dropdown: FC<Props> = ({
     left: "right",
   }[placement.split("-")[0] as Side];
 
+  const closeDropdown = useCallback(() => {
+    setIsOpen(false);
+  }, []);
+
   const renderTooltip = () => (
     <FloatingPortal>
       <div className={tailwindSelector}>
@@ -79,7 +86,7 @@ export const Dropdown: FC<Props> = ({
           }}
           {...getFloatingProps()}
         >
-          {render({ close: () => setIsOpen(false) })}
+          {render({ close: closeDropdown })}
           {
             // arrow is disabled for now - has rendering issues
             false && (
@@ -100,7 +107,7 @@ export const Dropdown: FC<Props> = ({
   );
 
   return (
-    <>
+    <DropdownContext.Provider value={{ closeDropdown }}>
       <div
         className={clsx(fullHeight && "h-full grid place-items-stretch")}
         ref={refs.setReference}
@@ -109,6 +116,6 @@ export const Dropdown: FC<Props> = ({
         {children}
       </div>
       {isOpen ? renderTooltip() : null}
-    </>
+    </DropdownContext.Provider>
   );
 };

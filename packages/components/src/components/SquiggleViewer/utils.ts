@@ -1,15 +1,6 @@
 import { PathItem, SqValue, SqValuePath } from "@quri/squiggle-lang";
-import { CalculatorState } from "../Calculator/types.js";
-import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 
-export type LocalItemState = {
-  collapsed: boolean;
-  calculator?: CalculatorState;
-  settings: Pick<
-    PartialPlaygroundSettings,
-    "distributionChartSettings" | "functionChartSettings"
-  >;
-};
+import { CalculatorState } from "../../widgets/CalculatorWidget/types.js";
 
 export const pathItemFormat = (item: PathItem): string => {
   if (item.type === "cellAddress") {

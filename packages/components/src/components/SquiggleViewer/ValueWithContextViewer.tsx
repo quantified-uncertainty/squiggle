@@ -2,33 +2,30 @@ import { clsx } from "clsx";
 import { FC, PropsWithChildren, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 
-import {
-  CodeBracketIcon,
-  CommentIcon,
-  TextTooltip,
-  TriangleIcon,
-} from "@quri/ui";
+import { CommentIcon, TextTooltip } from "@quri/ui";
 
-import { useEffectRef, useForceUpdate } from "../../lib/hooks/index.js";
 import { SqValueWithContext } from "../../lib/utility.js";
 import { ErrorBoundary } from "../ErrorBoundary.js";
+import { SquiggleValueChart } from "./SquiggleValueChart.js";
+import { SquiggleValueHeader } from "./SquiggleValueHeader.js";
+import { SquiggleValueMenu } from "./SquiggleValueMenu.js";
+import { SquiggleValuePreview } from "./SquiggleValuePreview.js";
 import {
   useCollapseChildren,
   useFocus,
   useIsFocused,
   useMergedSettings,
+  useRegisterAsItemViewer,
   useSetCollapsed,
   useToggleCollapsed,
   useViewerContext,
 } from "./ViewerProvider.js";
-import { getSqValueWidget } from "./getSqValueWidget.js";
 import { getChildrenValues, pathToShortName } from "./utils.js";
 import { SHORT_STRING_LENGTH } from "../../lib/constants.js";
 
-export type SettingsMenuParams = {
-  // Used to notify this component that settings have changed, so that it could re-render itself.
-  onChange: () => void;
-};
+// make sure all widgets are in registry
+import "../../widgets/index.js";
+import { CollapsedIcon, ExpandedIcon } from "./icons.js";
 
 function getComment(value: SqValueWithContext): string | undefined {
   return value.context.docstring();
@@ -93,8 +90,6 @@ const WithComment: FC<PropsWithChildren<Props>> = ({ value, children }) => {
 };
 
 const ValueViewerBody: FC<Props> = ({ value }) => {
-  const widget = getSqValueWidget(value);
-
   const { path } = value.context;
   const isFocused = useIsFocused(path);
   const isRoot = path.isRoot();
@@ -110,7 +105,7 @@ const ValueViewerBody: FC<Props> = ({ value }) => {
 
   return (
     <WithComment value={value}>
-      {widget.render(adjustedMergedSettings)}
+      <SquiggleValueChart value={value} settings={adjustedMergedSettings} />
     </WithComment>
   );
 };
@@ -121,18 +116,12 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
   const { tag } = value;
   const { path } = value.context;
 
-  const widget = getSqValueWidget(value);
-
   const toggleCollapsed_ = useToggleCollapsed();
   const setCollapsed = useSetCollapsed();
   const collapseChildren = useCollapseChildren();
   const focus = useFocus();
-  const { editor, getLocalItemState, dispatch } = useViewerContext();
+  const { getLocalItemState } = useViewerContext();
   const isFocused = useIsFocused(path);
-
-  // Since `ViewerContext` doesn't store settings, this component won't rerender when `setSettings` is called.
-  // So we use `forceUpdate` to force rerendering.
-  const forceUpdate = useForceUpdate();
 
   const isRoot = path.isRoot();
 
@@ -164,35 +153,24 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
 
   const toggleCollapsed = () => {
     toggleCollapsed_(path);
-    forceUpdate();
   };
 
-  // We should switch to ref cleanups after https://github.com/facebook/react/pull/25686 is released.
-  const saveRef = useEffectRef((element: HTMLDivElement) => {
-    dispatch({
-      type: "REGISTER_ITEM_HANDLE",
-      payload: { path, element },
-    });
-
-    return () => {
-      dispatch({
-        type: "UNREGISTER_ITEM_HANDLE",
-        payload: { path },
-      });
-    };
-  });
+  const ref = useRegisterAsItemViewer(path);
 
   const isOpen = isFocused || !getLocalItemState({ path }).collapsed;
   const _focus = () => !isFocused && !isRoot && focus(path);
 
-  const triangleToggle = () => (
-    <div
-      className="w-4 mr-1.5 flex justify-center cursor-pointer text-stone-300 hover:text-slate-700"
-      onClick={toggleCollapsed}
-    >
-      <TriangleIcon size={12} className={isOpen ? "rotate-180" : "rotate-90"} />
-    </div>
-  );
+  const triangleToggle = () => {
+    const Icon = isOpen ? ExpandedIcon : CollapsedIcon;
+    return (
+      <div
+        className="w-4 mr-1.5 flex justify-center cursor-pointer text-stone-300 hover:text-slate-700"
+        onClick={toggleCollapsed}
+      >
+        <Icon size={12} />
+      </div>
+    );
+  };
 
   const headerClasses = () => {
     if (isFocused) {
@@ -210,46 +188,6 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
       {name}
     </div>
   );
-  const headerPreview = () =>
-    !!widget.renderPreview && (
-      <div
-        className={clsx(
-          "ml-3 text-sm text-blue-800",
-          isOpen ? "opacity-40" : "opacity-60"
-        )}
-      >
-        {widget.renderPreview()}
-      </div>
-    );
-  const headerFindInEditorButton = () => {
-    const findInEditor = () => {
-      const location = value.context.findLocation();
-      editor?.scrollTo(location.start.offset);
-    };
-
-    return (
-      <div className="ml-3">
-        <TextTooltip text="Show in Editor" placement="bottom">
-          <span>
-            <CodeBracketIcon
-              className="items-center h-4 w-4 cursor-pointer text-stone-400 opacity-0 group-hover:opacity-100 hover:!text-stone-800 transition"
-              onClick={findInEditor}
-            />
-          </span>
-        </TextTooltip>
-      </div>
-    );
-  };
-
-  const heading = widget.heading || value.publicName();
-  const headerString = () => (
-    <div className="text-stone-400 group-hover:text-stone-600 text-sm transition">
-      {heading}
-    </div>
-  );
-
-  const headerSettingsButton = () =>
-    widget.renderSettingsMenu?.({ onChange: forceUpdate });
 
   const leftCollapseBorder = () => {
     const isDictOrList = tag === "Dict" || tag === "Array";
@@ -272,23 +210,24 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
 
   return (
     <ErrorBoundary>
-      <div ref={saveRef}>
+      <div ref={ref}>
         <header
           className={clsx(
-            "flex justify-between group",
+            "flex justify-between group pr-0.5",
             isFocused ? "mb-2" : "hover:bg-stone-100 rounded-md"
           )}
         >
           <div className="inline-flex items-center">
             {!isFocused && triangleToggle()}
             {headerName}
-            {!isFocused && headerPreview()}
+            {!isFocused && (
+              <SquiggleValuePreview value={value} isOpen={isOpen} />
+            )}
             {!isFocused && !isOpen && <CommentIconForValue value={value} />}
-            {!isRoot && editor && headerFindInEditorButton()}
           </div>
-          <div className="inline-flex space-x-1">
-            {isOpen && headerString()}
-            {isOpen && headerSettingsButton()}
+          <div className="inline-flex space-x-1 items-center">
+            {isOpen && <SquiggleValueHeader value={value} />}
+            <SquiggleValueMenu value={value} />
           </div>
         </header>
         {isOpen && (

@@ -13,7 +13,6 @@ type Props = {
   squiggleOutput: SquiggleOutput | undefined;
   isRunning: boolean;
   showHeader?: boolean;
-  localSettingsEnabled?: boolean;
   editor?: CodeEditorHandle;
   rootPathOverride?: SqValuePath;
 } & PartialPlaygroundSettings;
@@ -25,7 +24,6 @@ export const DynamicSquiggleViewer = forwardRef<SquiggleViewerHandle, Props>(
       squiggleOutput,
       isRunning,
       showHeader = true,
-      localSettingsEnabled,
       editor,
       rootPathOverride,
       ...settings
@@ -42,7 +40,6 @@ export const DynamicSquiggleViewer = forwardRef<SquiggleViewerHandle, Props>(
           <SquiggleViewer
             {...settings}
             ref={viewerRef}
-            localSettingsEnabled={localSettingsEnabled}
             resultVariables={getResultVariables(squiggleOutput)}
             resultItem={getResultValue(squiggleOutput)}
             editor={editor}

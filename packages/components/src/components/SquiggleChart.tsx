@@ -15,7 +15,6 @@ import { SqValuePath } from "@quri/squiggle-lang";
 export type SquiggleChartProps = {
   code: string;
   showHeader?: boolean;
-  localSettingsEnabled?: boolean;
   rootPathOverride?: SqValuePath; // Note: This should be static. We don't support rootPathOverride to change once set.
 } & (StandaloneExecutionProps | ProjectExecutionProps) &
   // `environment` is passed through StandaloneExecutionProps; this way we guarantee that it's not compatible with `project` prop
@@ -25,7 +24,6 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
   function SquiggleChart({
     code,
     showHeader = false,
-    localSettingsEnabled,
     project,
     continues,
     environment,
@@ -53,7 +51,6 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
         squiggleOutput={squiggleOutput}
         isRunning={isRunning}
         showHeader={showHeader}
-        localSettingsEnabled={localSettingsEnabled}
         environment={environment}
         {...settings}
       />

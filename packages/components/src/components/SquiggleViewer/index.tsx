@@ -9,6 +9,7 @@ import {
 } from "@quri/squiggle-lang";
 import { ChevronRightIcon } from "@quri/ui";
 
+import { useStabilizeObjectIdentity } from "../../lib/hooks/useStabilizeObject.js";
 import { MessageAlert } from "../Alert.js";
 import { CodeEditorHandle } from "../CodeEditor.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
@@ -30,7 +31,6 @@ export type SquiggleViewerProps = {
   /** The output of squiggle's run */
   resultVariables: result<SqDictValue, SqError>;
   resultItem: result<SqValue, SqError> | undefined;
-  localSettingsEnabled?: boolean;
   editor?: CodeEditorHandle;
   rootPathOverride?: SqValuePath;
 } & PartialPlaygroundSettings;
@@ -147,17 +147,23 @@ const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
     {
       resultVariables,
       resultItem,
-      localSettingsEnabled = false,
       editor,
       rootPathOverride,
       ...partialPlaygroundSettings
     },
     ref
   ) {
+    /**
+     * Because we obtain `partialPlaygroundSettings` with spread syntax, its identity changes on each render, which could
+     * cause extra unnecessary re-renders of widgets, in some cases.
+     * Related discussion: https://github.com/quantified-uncertainty/squiggle/pull/2525#discussion_r1393398447
+     */
+    const stablePartialPlaygroundSettings = useStabilizeObjectIdentity(
+      partialPlaygroundSettings
+    );
     return (
       <ViewerProvider
-        partialPlaygroundSettings={partialPlaygroundSettings}
-        localSettingsEnabled={localSettingsEnabled}
+        partialPlaygroundSettings={stablePartialPlaygroundSettings}
         editor={editor}
         beginWithVariablesCollapsed={resultItem !== undefined && resultItem.ok}
         rootPathOverride={rootPathOverride}

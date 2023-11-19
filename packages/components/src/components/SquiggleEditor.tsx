@@ -11,7 +11,6 @@ import { SquiggleCodeProps } from "./types.js";
 
 export type SquiggleEditorProps = SquiggleCodeProps & {
   hideViewer?: boolean;
-  localSettingsEnabled?: boolean;
   // environment comes from SquiggleCodeProps
 } & Omit<PartialPlaygroundSettings, "environment">;
 
@@ -22,7 +21,6 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
   continues,
   environment,
   hideViewer,
-  localSettingsEnabled,
   ...settings
 }) => {
   const { code, setCode, defaultCode } = useUncontrolledCode({
@@ -67,7 +65,6 @@ export const SquiggleEditor: FC<SquiggleEditorProps> = ({
         <DynamicSquiggleViewer
           squiggleOutput={squiggleOutput}
           isRunning={isRunning}
-          localSettingsEnabled={localSettingsEnabled}
           editor={editorRef.current ?? undefined}
           environment={environment}
           {...settings}
