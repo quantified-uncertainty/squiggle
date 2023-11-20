@@ -104,7 +104,7 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
 
         //Set the output to the window so that it can be accessed by users/developers there
         //This is useful for debugging
-        if (window) {
+        if (typeof window !== "undefined") {
           window[WINDOW_VARIABLE_NAME] = output;
         }
 
