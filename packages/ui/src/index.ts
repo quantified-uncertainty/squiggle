@@ -88,6 +88,7 @@ export {
   SquareBracketIcon,
   CurlyBracketsIcon,
   HashIcon,
+  CommandLineIcon,
 } from "./icons/HeroIcons.js";
 export type { IconProps } from "./icons/Icon.js";
 export { PlusIcon } from "./icons/PlusIcon.js";

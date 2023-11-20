@@ -4,6 +4,7 @@ import { FC } from "react";
 import {
   CodeBracketIcon,
   Cog8ToothIcon,
+  CommandLineIcon,
   Dropdown,
   DropdownMenu,
   DropdownMenuActionItem,
@@ -16,13 +17,14 @@ import { SqValueWithContext } from "../../lib/utility.js";
 import { widgetRegistry } from "../../widgets/registry.js";
 import {
   useFocus,
+  useUnfocus,
   useHasLocalSettings,
   useIsFocused,
   useSetCollapsed,
   useViewerContext,
 } from "./ViewerProvider.js";
 import { CollapsedIcon, ExpandedIcon } from "./icons.js";
-import { getChildrenValues } from "./utils.js";
+import { getChildrenValues, pathAsString } from "./utils.js";
 
 const FindInEditorItem: FC<{ value: SqValueWithContext }> = ({ value }) => {
   const { editor } = useViewerContext();
@@ -51,15 +53,46 @@ const FocusItem: FC<{ value: SqValueWithContext }> = ({ value }) => {
   const { path } = value.context;
   const isFocused = useIsFocused(path);
   const focus = useFocus();
-  if (isFocused || path.isRoot()) {
+  const unfocus = useUnfocus();
+  if (path.isRoot()) {
     return null;
   }
 
+  if (isFocused) {
+    return (
+      <DropdownMenuActionItem
+        title="Unfocus"
+        icon={FocusIcon}
+        onClick={unfocus}
+      />
+    );
+  } else {
+    return (
+      <DropdownMenuActionItem
+        title="Focus"
+        icon={FocusIcon}
+        onClick={() => focus(path)}
+      />
+    );
+  }
+};
+
+const LogToConsoleItem: FC<{ value: SqValueWithContext }> = ({ value }) => {
+  const closeDropdown = useCloseDropdown();
+
   return (
     <DropdownMenuActionItem
-      title="Focus"
-      icon={FocusIcon}
-      onClick={() => focus(path)}
+      title="Log to JS Console"
+      icon={CommandLineIcon}
+      onClick={() => {
+        // eslint-disable-next-line no-console
+        console.log({
+          variable: pathAsString(value.context.path),
+          value: value._value,
+          context: value.context,
+        });
+        closeDropdown();
+      }}
     />
   );
 };
@@ -132,6 +165,7 @@ export const SquiggleValueMenu: FC<{
               collapsed={false}
             />
             {widget?.Menu && <widget.Menu value={value} />}
+            <LogToConsoleItem value={value} />
           </DropdownMenu>
         )}
       >
