@@ -148,7 +148,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
       };
       // we initialize the view only once; no need for deps
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [defaultValue]);
 
     const format = useCallback(async () => {
       if (!view) return;

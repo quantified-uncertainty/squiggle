@@ -33,6 +33,7 @@
     "framer-motion": "^10.16.4",
     "lodash": "^4.17.21",
     "mermaid": "^10.6.0",
+    "openai": "^4.19.0",
     "prettier": "^3.0.3",
     "react": "^18.2.0",
     "react-hook-form": "^7.47.0",
