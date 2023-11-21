@@ -43,8 +43,8 @@ export const CalculatorResult: FC<Props> = ({
     const parameters: SqValue[] = [];
 
     // Unpack all input values.
-    for (const input of calculator.inputs) {
-      const inputResult = inputResults[input.name];
+    for (let i = 0; i < calculator.inputs.length; i++) {
+      const inputResult = inputResults[i];
       if (!inputResult || !inputResult.ok) {
         // One of inputs is incorrect.
         setCalculatorResult(undefined);

@@ -13,15 +13,16 @@ import { SquiggleValueResultChart } from "../../components/SquiggleViewer/Squigg
 import { SqValueResult } from "./types.js";
 
 export const CalculatorInput: FC<{
+  id: number;
   input: SqInput;
   result: SqValueResult | undefined;
   settings: PlaygroundSettings;
-}> = ({ input, result, settings }) => {
+}> = ({ id, input, result, settings }) => {
   const { name, description } = input;
 
   // common props for all *FormField components
   const commonProps = {
-    name,
+    name: `inputs.${id}` as const,
     label: name,
     description,
   };

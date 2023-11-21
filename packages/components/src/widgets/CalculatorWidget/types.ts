@@ -1,9 +1,11 @@
 import { SqError, SqValue, result } from "@quri/squiggle-lang";
 import { SqValueWithContext } from "../../lib/utility.js";
 
-export type InputResults = Record<string, SqValueResult | undefined>;
+export type InputResults = (SqValueResult | undefined)[];
 
-export type FormShape = Record<string, string | boolean>;
+export type FormShape = {
+  inputs: (string | boolean)[];
+};
 
 export type SqCalculatorValueWithContext = Extract<
   SqValueWithContext,
