@@ -4,10 +4,13 @@ import { graphql } from "relay-runtime";
 
 import { EditIcon } from "@quri/ui";
 
+import { UpdateModelSlugAction$key } from "@/__generated__/UpdateModelSlugAction.graphql";
 import { UpdateModelSlugActionMutation } from "@/__generated__/UpdateModelSlugActionMutation.graphql";
 import { MutationModalAction } from "@/components/ui/MutationModalAction";
 import { SlugFormField } from "@/components/ui/SlugFormField";
 import { modelRoute } from "@/routes";
+import { useFragment } from "react-relay";
+import { draftUtils, modelToDraftLocator } from "./SquiggleSnippetDraftDialog";
 
 const Mutation = graphql`
   mutation UpdateModelSlugActionMutation(
@@ -32,14 +35,30 @@ const Mutation = graphql`
 `;
 
 type Props = {
-  owner: string;
-  slug: string;
+  model: UpdateModelSlugAction$key;
   close(): void;
 };
 
 type FormShape = { slug: string };
 
-export const UpdateModelSlugAction: FC<Props> = ({ owner, slug, close }) => {
+export const UpdateModelSlugAction: FC<Props> = ({
+  model: modelKey,
+  close,
+}) => {
+  const model = useFragment(
+    graphql`
+      fragment UpdateModelSlugAction on Model {
+        slug
+        owner {
+          __typename
+          id
+          slug
+        }
+      }
+    `,
+    modelKey
+  );
+
   const router = useRouter();
 
   return (
@@ -53,13 +72,23 @@ export const UpdateModelSlugAction: FC<Props> = ({ owner, slug, close }) => {
       mutation={Mutation}
       expectedTypename="UpdateModelSlugResult"
       formDataToVariables={(data) => ({
-        input: { owner, oldSlug: slug, newSlug: data.slug },
+        input: {
+          owner: model.owner.slug,
+          oldSlug: model.slug,
+          newSlug: data.slug,
+        },
       })}
-      onCompleted={({ model }) => {
-        router.push(modelRoute({ owner: model.owner.slug, slug }));
+      onCompleted={({ model: newModel }) => {
+        draftUtils.rename(
+          modelToDraftLocator(model),
+          modelToDraftLocator(newModel)
+        );
+        router.push(
+          modelRoute({ owner: newModel.owner.slug, slug: newModel.slug })
+        );
       }}
       submitText="Save"
-      modalTitle={`Rename ${owner}/${slug}`}
+      modalTitle={`Rename ${model.owner.slug}/${model.slug}`}
       initialFocus="slug"
       close={close}
     >
