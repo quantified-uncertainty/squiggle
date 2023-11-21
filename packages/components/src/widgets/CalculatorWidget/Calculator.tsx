@@ -9,7 +9,7 @@ import {
 import { FormProvider, useForm } from "react-hook-form";
 import ReactMarkdown from "react-markdown";
 
-import { Env, SqCalculator, SqProject } from "@quri/squiggle-lang";
+import { Env, SqCalculator, SqInput, SqProject } from "@quri/squiggle-lang";
 
 import { ErrorAlert } from "../../components/Alert.js";
 import { PlaygroundSettings } from "../../components/PlaygroundSettings.js";
@@ -50,14 +50,9 @@ async function runSquiggleCode(
 }
 
 function fieldValueToCode(
-  name: string,
-  calculator: SqCalculator,
+  input: SqInput,
   fieldValue: string | boolean
 ): string {
-  const input = calculator.inputs.find((row) => row.name === name);
-  if (!input) {
-    throw new Error("Invalid input name.");
-  }
   if (typeof fieldValue === "boolean") {
     return fieldValue.toString();
   }
@@ -70,9 +65,9 @@ function fieldValueToCode(
 }
 
 function getFormValues(calculator: SqCalculator): FormShape {
-  return Object.fromEntries(
-    calculator.inputs.map((input) => [input.name, input.default ?? ""])
-  );
+  return {
+    inputs: calculator.inputs.map((input) => input.default ?? ""),
+  };
 }
 
 /**
@@ -95,7 +90,7 @@ function useCalculator(
   });
 
   const [inputResults, setInputResults] = useState<InputResults>(
-    () => savedState?.inputResults ?? {}
+    () => savedState?.inputResults ?? []
   );
 
   const hashString = useMemo(() => calculator.hashString, [calculator]);
@@ -105,15 +100,15 @@ function useCalculator(
 
   const processAllFieldCodes = useCallback(async () => {
     const formValues = form.getValues();
-    const newInputResults: typeof inputResults = {};
-    for (const input of calculator.inputs) {
-      const name = input.name;
-      const fieldValue = formValues[name];
+    const newInputResults: typeof inputResults = [];
+    for (const [i, input] of calculator.inputs.entries()) {
+      const fieldValue = formValues.inputs?.at(i);
+      if (fieldValue === undefined) continue; // shouldn't happen if we set the form correctly
       const inputResult = await runSquiggleCode(
-        fieldValueToCode(name, calculator, fieldValue),
+        fieldValueToCode(input, fieldValue),
         environment
       );
-      newInputResults[name] = inputResult;
+      newInputResults[i] = inputResult;
     }
     setInputResults(newInputResults);
   }, [calculator, environment, form, setInputResults]);
@@ -140,19 +135,25 @@ function useCalculator(
 
   // Update input result if input code has changed.
   useEffect(() => {
-    const subscription = form.watch(async (formValues, { name }) => {
-      if (name === undefined) return;
-      const fieldValue = formValues[name];
+    const subscription = form.watch(async (formValues, { name: fieldName }) => {
+      if (fieldName === undefined) return;
+      // fieldName is "inputs.N"
+      const id = parseInt(fieldName.split(".")[1]);
+      if (Number.isNaN(id)) {
+        return; // wrong field name
+      }
+      const fieldValue = formValues.inputs?.at(id);
       if (fieldValue === undefined) return;
 
+      const input = calculator.inputs[id];
+
       const inputResult = await runSquiggleCode(
-        fieldValueToCode(name, calculator, fieldValue),
+        fieldValueToCode(input, fieldValue),
         environment
       );
-      setInputResults((inputResults) => ({
-        ...inputResults,
-        [name]: inputResult,
-      }));
+      setInputResults((inputResults) =>
+        inputResults.map((item, i) => (i === id ? inputResult : item))
+      );
     });
 
     return () => subscription.unsubscribe();
@@ -165,7 +166,7 @@ function useCalculator(
     updateSavedState({
       hashString,
       formValues: form.getValues(),
-      inputResults: inputResults,
+      inputResults,
     });
   }, [inputResults, form, hashString, updateSavedState]);
 
@@ -261,11 +262,12 @@ export const Calculator: FC<Props> = ({ settings, valueWithContext }) => {
 
         {Boolean(calculator.inputs.length) && (
           <div className="py-3 px-5 border-b border-slate-200 bg-gray-50 space-y-3">
-            {calculator.inputs.map((row) => (
+            {calculator.inputs.map((row, i) => (
               <CalculatorInput
-                key={row.name}
+                key={i}
+                id={i}
                 input={row}
-                result={inputResults[row.name]}
+                result={inputResults[i]}
                 settings={inputResultSettings}
               />
             ))}
