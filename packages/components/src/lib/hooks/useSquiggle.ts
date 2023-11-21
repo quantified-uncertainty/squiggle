@@ -101,20 +101,30 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
         project.setContinues(sourceId, continues);
         await project.run(sourceId);
         const output = project.getOutput(sourceId);
-
-        //Set the output to the window so that it can be accessed by users/developers there
-        //This is useful for debugging
-        if (typeof window !== "undefined") {
-          window[WINDOW_VARIABLE_NAME] = output;
-        }
+        const executionTime = Date.now() - startTime;
 
         setSquiggleOutput({
           output,
           code: args.code,
           executionId,
-          executionTime: Date.now() - startTime,
+          executionTime,
         });
         setIsRunning(false);
+
+        //Set the output to the window so that it can be accessed by users/developers there
+        //This is useful for debugging
+        if (typeof window !== "undefined") {
+          if (!window[WINDOW_VARIABLE_NAME]) {
+            window[WINDOW_VARIABLE_NAME] = {};
+          }
+          window[WINDOW_VARIABLE_NAME][sourceId] = {
+            output,
+            code: args.code,
+            executionId,
+            executionTime,
+            startTime,
+          };
+        }
       };
 
       if (typeof MessageChannel === "undefined") {
