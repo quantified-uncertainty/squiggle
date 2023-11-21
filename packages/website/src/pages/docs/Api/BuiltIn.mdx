@@ -4,14 +4,27 @@ description: Builtin functions that work on many types.
 
 ### typeOf 
 
-Returns the type of the value passed in as a string.
+Returns the type of the value passed in as a string. This is useful when you want to treat a value differently depending on its type.
+
 ```
 typeOf: (any) => string
 ```
 
+```squiggle
+fn(v) = if typeOf(v) == "String" then v else if typeOf(v) ==
+  "Number" then "the number: " + v else "other"
+```
+
 ### inspect 
 
-Runs Console.log() in the Javascript console and returns the value passed in.
+Runs Console.log() in the [Javascript developer console](https://www.digitalocean.com/community/tutorials/how-to-use-the-javascript-developer-console) and returns the value passed in.
+
 ```
 inspect: (`a) => `a
+inspect: (`a, string) => `a
+```
+
+```squiggle
+foo = inspect(5 to 10) // sets foo to (5 to 10) and logs it to the console
+foo = inspect(5 to 10, "my range")
 ```
