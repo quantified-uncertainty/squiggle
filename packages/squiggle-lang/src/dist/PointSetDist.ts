@@ -1,4 +1,3 @@
-import * as Continuous from "../PointSet/Continuous.js";
 import { ContinuousShape } from "../PointSet/Continuous.js";
 
 import * as Mixed from "../PointSet/Mixed.js";

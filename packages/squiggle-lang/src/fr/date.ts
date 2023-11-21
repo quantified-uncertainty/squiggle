@@ -7,7 +7,7 @@ import {
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import * as DateTime from "../utility/DateTime.js";
-import { vDate, vNumber, vString, vTimeDuration } from "../value/index.js";
+import { vDate, vNumber, vTimeDuration } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "",
