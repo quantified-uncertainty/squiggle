@@ -26,7 +26,7 @@ import {
   unpackDistResult,
 } from "../library/registry/helpers.js";
 import * as magicNumbers from "../magicNumbers.js";
-import { vArray, vDist, vNumber } from "../value/index.js";
+import { vArray, vNumber } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "",

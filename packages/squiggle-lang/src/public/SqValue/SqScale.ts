@@ -1,11 +1,10 @@
 import {
   CommonScaleArgs,
+  SCALE_POWER_DEFAULT_CONSTANT,
+  SCALE_SYMLOG_DEFAULT_CONSTANT,
   Scale,
   vScale,
-  SCALE_SYMLOG_DEFAULT_CONSTANT,
-  SCALE_POWER_DEFAULT_CONSTANT,
 } from "../../value/index.js";
-import { SqSelectInput, SqTextAreaInput, SqTextInput } from "./SqInput.js";
 
 export const wrapScale = (value: Scale): SqScale => {
   switch (value.type) {
