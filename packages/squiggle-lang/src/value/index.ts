@@ -8,7 +8,7 @@ import {
 import { Lambda } from "../reducer/lambda.js";
 import * as DateTime from "../utility/DateTime.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
-import { Domain } from "./domain.js";
+import { DateRangeDomain, Domain, NumericRangeDomain } from "./domain.js";
 import { shuffle } from "../utility/E_A.js";
 import lodashIsEqual from "lodash/isEqual.js";
 
@@ -587,6 +587,24 @@ class VPlot extends BaseValue implements Indexable {
 
 export const vPlot = (plot: Plot) => new VPlot(plot);
 
+function domainIsEqual(valueA: Domain, valueB: Domain) {
+  if (valueA.type !== valueB.type) {
+    return false;
+  }
+  switch (valueA.type) {
+    case "DateRange":
+      return (valueA.value as DateRangeDomain).isEqual(
+        valueB.value as DateRangeDomain
+      );
+    case "NumericRange":
+      return (valueA.value as NumericRangeDomain).isEqual(
+        valueB.value as NumericRangeDomain
+      );
+    default:
+      return true;
+  }
+}
+
 export class VDomain extends BaseValue implements Indexable {
   readonly type = "Domain";
   readonly publicName = "Domain";
@@ -599,13 +617,17 @@ export class VDomain extends BaseValue implements Indexable {
     return this.value.toString();
   }
 
-  get(key: Value) {
-    if (key.type === "String" && this.value.type === "NumericRange") {
+  get(key: Value): VDate | VNumber {
+    if (key.type === "String") {
       if (key.value === "min") {
-        return vNumber(this.value.min);
+        return this.value.type == "DateRange"
+          ? vDate(this.value.value.min)
+          : vNumber(this.value.value.min);
       }
       if (key.value === "max") {
-        return vNumber(this.value.max);
+        return this.value.type == "DateRange"
+          ? vDate(this.value.value.max)
+          : vNumber(this.value.value.max);
       }
     }
 
@@ -613,7 +635,7 @@ export class VDomain extends BaseValue implements Indexable {
   }
 
   isEqual(other: VDomain) {
-    return this.value.isEqual(other.value);
+    return domainIsEqual(this.value, other.value);
   }
 }
 

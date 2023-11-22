@@ -61,11 +61,15 @@ function createScale(scale: Scale | null, domain: VDomain | undefined): Scale {
   if (scale) {
     return {
       ...scale,
-      min: scale.min ?? domain.value.min,
-      max: scale.max ?? domain.value.max,
+      min: scale.min ?? domain.value.value.min,
+      max: scale.max ?? domain.value.value.max,
     };
   } else {
-    return { type: "linear", min: domain.value.min, max: domain.value.max };
+    return {
+      type: "linear",
+      min: domain.value.value.min,
+      max: domain.value.value.max,
+    };
   }
 }
 

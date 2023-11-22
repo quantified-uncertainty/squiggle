@@ -85,6 +85,14 @@ export const DateModule = {
       return DateModule.addDuration(earlyDate, diff * Duration.year);
     });
   },
+  makeFromString(str: string): result<Date, string> {
+    const date = new Date(str);
+    if (isNaN(date.getTime())) {
+      return Result.Err("Invalid date string");
+    } else {
+      return Ok(date);
+    }
+  },
 };
 
 export { DateModule as Date };

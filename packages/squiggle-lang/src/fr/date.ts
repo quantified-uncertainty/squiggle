@@ -3,6 +3,7 @@ import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frDate,
   frNumber,
+  frString,
   frTimeDuration,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
@@ -10,7 +11,7 @@ import * as DateTime from "../utility/DateTime.js";
 import { vDate, vNumber, vTimeDuration } from "../value/index.js";
 
 const maker = new FnFactory({
-  nameSpace: "",
+  nameSpace: "Date",
   requiresNamespace: false,
 });
 
@@ -34,7 +35,17 @@ const makeDurationToNumberFn = (
 
 export const library = [
   maker.fromDefinition(
-    "makeDateFromYear",
+    "make",
+    makeDefinition([frString], ([str]) => {
+      const result = DateTime.Date.makeFromString(str);
+      if (!result.ok) {
+        throw new REOther(result.value);
+      }
+      return vDate(result.value);
+    })
+  ),
+  maker.fromDefinition(
+    "fromYear",
     makeDefinition([frNumber], ([year]) => {
       const result = DateTime.Date.makeFromYear(year);
       if (!result.ok) {
@@ -44,7 +55,7 @@ export const library = [
     })
   ),
   maker.fromDefinition(
-    "dateFromNumber",
+    "fromNumber",
     makeDefinition([frNumber], ([f]) => vDate(new Date(f)))
   ),
   maker.fromDefinition(
