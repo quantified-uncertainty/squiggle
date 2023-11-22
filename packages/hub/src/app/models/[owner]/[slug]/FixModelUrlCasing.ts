@@ -25,7 +25,14 @@ export function useFixModelUrlCasing(modelRef: FixModelUrlCasing$key) {
     slug: model.slug,
     owner: model.owner.slug,
   });
-  if (patchedPathname && patchedPathname !== pathname) {
-    router.replace(patchedPathname);
+  if (
+    patchedPathname &&
+    patchedPathname !== pathname &&
+    typeof window !== "undefined"
+  ) {
+    // delay to avoid React warnings
+    window.setTimeout(() => {
+      router.replace(patchedPathname);
+    }, 0);
   }
 }
