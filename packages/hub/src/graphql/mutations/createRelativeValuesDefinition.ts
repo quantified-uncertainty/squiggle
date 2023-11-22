@@ -2,7 +2,10 @@ import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 import { InputObjectRef } from "@pothos/core";
 import { rethrowOnConstraint } from "../errors/common";
-import { getWriteableOwner, getWriteableOwnerBySlug } from "../types/Owner";
+import {
+  getWriteableOwner,
+  getWriteableOwnerBySlug,
+} from "../helpers/ownerHelpers";
 import { RelativeValuesDefinition } from "../types/RelativeValuesDefinition";
 import { validateSlug } from "../utils";
 import { ZodError } from "zod";

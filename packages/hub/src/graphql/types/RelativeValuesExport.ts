@@ -3,7 +3,7 @@ import { Session } from "next-auth";
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
-import { getWriteableModel } from "./Model";
+import { getWriteableModel } from "../helpers/modelHelpers";
 
 export async function getRelativeValuesExportForWriteableModel({
   exportId,

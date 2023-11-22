@@ -14,6 +14,7 @@ import { Session } from "next-auth";
 import { NextRequest } from "next/server";
 
 import { prisma } from "@/prisma";
+import { getMyMembershipById } from "./helpers/groupHelpers";
 
 type Context = {
   session: Session | null;
@@ -31,7 +32,8 @@ export type HubSchemaTypes = {
   AuthScopes: {
     signedIn: boolean;
     isRootUser: boolean;
-    controlsOwnerId: string | null;
+    isGroupAdmin: string;
+    controlsOwnerId: string;
   };
   AuthContexts: {
     // https://pothos-graphql.dev/docs/plugins/scope-auth#change-context-types-based-on-scopes
@@ -76,12 +78,13 @@ export const builder = new SchemaBuilder<HubSchemaTypes>({
       // See also: `isRootUser` function in `types/User.ts`.
       return !!(email && process.env.ROOT_EMAILS?.includes(email));
     },
+    isGroupAdmin: async (groupId) => {
+      const myMembership = await getMyMembershipById(groupId, context.session);
+      return myMembership?.role === "Admin";
+    },
     controlsOwnerId: async (ownerId) => {
       if (!context.session) {
         return false;
-      }
-      if (!ownerId) {
-        return false; // we're migrating to new ownerIds and ownerIds are nullable for now
       }
       return Boolean(
         await prisma.owner.count({
