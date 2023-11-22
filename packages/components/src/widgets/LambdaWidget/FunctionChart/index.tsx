@@ -6,6 +6,7 @@ import {
   SqError,
   SqLambda,
   SqLinearScale,
+  SqDateScale,
   SqNumberValue,
   SqNumericFnPlot,
 } from "@quri/squiggle-lang";
@@ -66,7 +67,12 @@ export const FunctionChart: FC<FunctionChartProps> = ({
   const min = domain?.min ?? settings.functionChartSettings.start;
   const max = domain?.max ?? settings.functionChartSettings.stop;
 
-  const xScale = SqLinearScale.create({ min, max });
+  let xScale;
+  if (domain?._value.type === "DateRange") {
+    xScale = SqDateScale.create({ min, max });
+  } else {
+    xScale = SqLinearScale.create({ min, max });
+  }
   const yScale = SqLinearScale.create({});
 
   const result1 = fn.call([SqNumberValue.create(min)], environment);

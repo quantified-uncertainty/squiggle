@@ -53,6 +53,7 @@ export {
   SqLogScale,
   SqPowerScale,
   SqSymlogScale,
+  SqDateScale,
   type SqScale,
 } from "./public/SqValue/SqScale.js";
 export { type PathItem, SqValuePath } from "./public/SqValuePath.js";

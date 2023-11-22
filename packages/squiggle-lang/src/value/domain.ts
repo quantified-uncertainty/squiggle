@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { REArgumentError } from "../errors/messages.js";
 import { Value } from "./index.js";
 
@@ -37,12 +38,16 @@ export class NumericRangeDomain extends BaseDomain {
 }
 export class DateRangeDomain extends BaseDomain {
   readonly type = "DateRange";
+  public min;
+  public max;
 
   constructor(
-    public min: Date,
-    public max: Date
+    private _min: Date,
+    private _max: Date
   ) {
     super();
+    this.min = _min.getTime();
+    this.max = _max.getTime();
   }
 
   toString() {
@@ -50,11 +55,15 @@ export class DateRangeDomain extends BaseDomain {
   }
 
   includes(value: Value) {
-    return (
-      value.type === "Date" &&
-      value.value >= this.min &&
-      value.value <= this.max
-    );
+    if (value.type === "Date") {
+      return (
+        value.value.getTime() >= this.min && value.value.getTime() <= this.max
+      );
+    } else if (value.type === "Number") {
+      return value.value >= this.min && value.value <= this.max;
+    } else {
+      return false;
+    }
   }
 
   isEqual(other: DateRangeDomain) {
@@ -62,9 +71,7 @@ export class DateRangeDomain extends BaseDomain {
   }
 }
 
-export type Domain =
-  | { type: "NumericRange"; value: NumericRangeDomain }
-  | { type: "DateRange"; value: DateRangeDomain };
+export type Domain = NumericRangeDomain | DateRangeDomain;
 
 export function annotationToDomain(value: Value): Domain {
   if (value.type === "Domain") {
@@ -91,15 +98,9 @@ export function annotationToDomain(value: Value): Domain {
   }
 
   if (min.type === "Date" && max.type === "Date") {
-    return {
-      type: "DateRange",
-      value: new DateRangeDomain(min.value, max.value),
-    };
+    return new DateRangeDomain(min.value, max.value);
   } else if (min.type === "Number" && max.type === "Number") {
-    return {
-      type: "NumericRange",
-      value: new NumericRangeDomain(min.value, max.value),
-    };
+    return new NumericRangeDomain(min.value, max.value);
   } else {
     throw new REArgumentError(
       `The range minimum (${min.value}) and maximum (${max.value}) must be of the same type`

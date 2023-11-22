@@ -4,8 +4,10 @@ export function wrapDomain(value: Domain) {
   switch (value.type) {
     case "NumericRange":
       return new SqNumericRangeDomain(value);
+    case "DateRange":
+      return new SqDateRangeDomain(value);
     default:
-      throw new Error(`Unknown type ${value.type satisfies never}`);
+      throw new Error(`Unknown type`);
   }
 }
 
@@ -22,6 +24,17 @@ abstract class SqAbstractDomain<T extends Domain["type"]> {
 
 class SqNumericRangeDomain extends SqAbstractDomain<"NumericRange"> {
   tag = "NumericRange" as const;
+
+  get min() {
+    return this._value.min;
+  }
+
+  get max() {
+    return this._value.max;
+  }
+}
+class SqDateRangeDomain extends SqAbstractDomain<"DateRange"> {
+  tag = "DateRange" as const;
 
   get min() {
     return this._value.min;

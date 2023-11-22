@@ -53,7 +53,10 @@ function createScale(scale: Scale | null, domain: VDomain | undefined): Scale {
    * 4. No scale and no domain -> default scale
    */
 
-  if (!domain || domain.value.type !== "NumericRange") {
+  if (
+    !domain ||
+    (domain.value.type !== "NumericRange" && domain.value.type !== "DateRange")
+  ) {
     // no domain, use explicit scale or default scale
     return scale ?? defaultScale;
   }
@@ -61,14 +64,14 @@ function createScale(scale: Scale | null, domain: VDomain | undefined): Scale {
   if (scale) {
     return {
       ...scale,
-      min: scale.min ?? domain.value.value.min,
-      max: scale.max ?? domain.value.value.max,
+      min: scale.min ?? domain.value.min,
+      max: scale.max ?? domain.value.max,
     };
   } else {
     return {
       type: "linear",
-      min: domain.value.value.min,
-      max: domain.value.value.max,
+      min: domain.value.min,
+      max: domain.value.max,
     };
   }
 }

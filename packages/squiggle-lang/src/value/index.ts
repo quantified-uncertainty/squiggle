@@ -593,12 +593,10 @@ function domainIsEqual(valueA: Domain, valueB: Domain) {
   }
   switch (valueA.type) {
     case "DateRange":
-      return (valueA.value as DateRangeDomain).isEqual(
-        valueB.value as DateRangeDomain
-      );
+      return (valueA as DateRangeDomain).isEqual(valueB as DateRangeDomain);
     case "NumericRange":
-      return (valueA.value as NumericRangeDomain).isEqual(
-        valueB.value as NumericRangeDomain
+      return (valueA as NumericRangeDomain).isEqual(
+        valueB as NumericRangeDomain
       );
     default:
       return true;
@@ -617,17 +615,13 @@ export class VDomain extends BaseValue implements Indexable {
     return this.value.toString();
   }
 
-  get(key: Value): VDate | VNumber {
+  get(key: Value): VNumber {
     if (key.type === "String") {
       if (key.value === "min") {
-        return this.value.type == "DateRange"
-          ? vDate(this.value.value.min)
-          : vNumber(this.value.value.min);
+        return vNumber(this.value.min);
       }
       if (key.value === "max") {
-        return this.value.type == "DateRange"
-          ? vDate(this.value.value.max)
-          : vNumber(this.value.value.max);
+        return vNumber(this.value.max);
       }
     }
 
