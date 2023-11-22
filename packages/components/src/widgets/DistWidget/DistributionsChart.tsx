@@ -13,7 +13,7 @@ import {
 import { MouseTooltip, TextTooltip } from "@quri/ui";
 
 import { ErrorAlert } from "../../components/Alert.js";
-import { sqScaleToD3 } from "../../lib/d3/index.js";
+import { sqScaleToD3, sqScaleToD3v2 } from "../../lib/d3/index.js";
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
 import {
   distance,
@@ -84,12 +84,12 @@ const InnerDistributionsChart: FC<{
 
     const ensureFinite = (x: number | undefined) =>
       Number.isFinite(x) ? x : undefined;
-    xScale.domain([
+    xScale.value.domain([
       ensureFinite(plot.xScale.min) ?? d3.min(domain, (d) => d.x) ?? 0,
       ensureFinite(plot.xScale.max) ?? d3.max(domain, (d) => d.x) ?? 0,
     ]);
 
-    const yScale = sqScaleToD3(plot.yScale);
+    const yScale = sqScaleToD3v2(plot.yScale);
     yScale.domain([
       Math.min(...domain.map((p) => p.y), 0), // min value, but at least 0
       Math.max(...domain.map((p) => p.y)),
@@ -167,7 +167,7 @@ const InnerDistributionsChart: FC<{
           context.beginPath();
           d3
             .area<SqShape["continuous"][number]>()
-            .x((d) => xScale(d.x))
+            .x((d) => xScale.value(d.x))
             .y0((d) => yScale(d.y))
             .y1(0)
             .context(context)(shape.continuous);
@@ -202,7 +202,7 @@ const InnerDistributionsChart: FC<{
           for (const point of shape.discrete) {
             context.beginPath();
             context.lineWidth = 1;
-            const x = xScale(point.x);
+            const x = xScale.value(point.x);
             const y = yScale(point.y);
             if (
               translatedCursor &&
@@ -232,7 +232,7 @@ const InnerDistributionsChart: FC<{
 
         samples.forEach((sample) => {
           context.beginPath();
-          const x = xScale(sample);
+          const x = xScale.value(sample);
 
           context.beginPath();
           context.moveTo(padding.left + x, height - sampleBarHeight);
@@ -246,7 +246,7 @@ const InnerDistributionsChart: FC<{
         frame,
         cursor,
         x: {
-          scale: xScale,
+          scale: xScale.value,
           format: plot.xScale.tickFormat,
         },
       });

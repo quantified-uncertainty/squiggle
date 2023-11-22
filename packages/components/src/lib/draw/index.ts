@@ -2,6 +2,7 @@ import * as d3 from "d3";
 import { CartesianFrame } from "./CartesianFrame.js";
 import { Padding, Point } from "./types.js";
 import { defaultTickFormatSpecifier } from "../d3/patchedScales.js";
+import { ScaleType } from "../d3/index.js";
 
 const axisColor = "rgba(114, 125, 147, 0.1)";
 export const labelColor = "rgb(114, 125, 147)";
@@ -20,9 +21,16 @@ export function distance(point1: Point, point2: Point) {
   return Math.sqrt((point1.x - point2.x) ** 2 + (point1.y - point2.y) ** 2);
 }
 
+export type FnType =
+  | {
+      type: "continuous";
+      value: (x: d3.NumberValue) => string;
+    }
+  | { type: "time"; value: (d: Date) => string };
+
 interface DrawAxesParams {
   context: CanvasRenderingContext2D;
-  xScale: AnyChartScale;
+  xScale: ScaleType;
   yScale: AnyChartScale;
   suggestedPadding: Padding;
   width: number;
@@ -39,8 +47,8 @@ interface DrawAxesParams {
 
 export function drawAxes({
   context,
-  xScale, // will be mutated with the correct range
   yScale,
+  xScale,
   suggestedPadding,
   width,
   height,
@@ -53,8 +61,22 @@ export function drawAxes({
   xAxisTitle,
   yAxisTitle,
 }: DrawAxesParams) {
-  const xTicks = xScale.ticks(xTickCount);
-  const xTickFormat = xScale.tickFormat(xTickCount, xTickFormatSpecifier);
+  // const _xScale = d3
+  //   .scaleUtc()
+  //   .domain([new Date("2022-01-01"), new Date("2030-01-02")]); // Set your date range here
+
+  const xTicks = xScale.value.ticks(xTickCount);
+
+  const xTickFormat: FnType =
+    xScale.type === "continuous"
+      ? {
+          type: "continuous",
+          value: xScale.value.tickFormat(xTickCount, xTickFormatSpecifier),
+        }
+      : {
+          type: "time",
+          value: xScale.value.tickFormat(xTickCount, xTickFormatSpecifier),
+        };
 
   const yTicks = yScale.ticks(yTickCount);
   const yTickFormat = yScale.tickFormat(yTickCount, yTickFormatSpecifier);
@@ -89,7 +111,7 @@ export function drawAxes({
     width: width - padding.left - padding.right,
     height: height - padding.top - padding.bottom,
   });
-  xScale.range([0, frame.width]);
+  xScale.value.range([0, frame.width]);
   yScale.range([0, frame.height]);
 
   // x axis
@@ -108,7 +130,7 @@ export function drawAxes({
     let prevBoundary = -padding.left;
     for (let i = 0; i < xTicks.length; i++) {
       const xTick = xTicks[i];
-      const x = xScale(xTick);
+      const x: number | Date = xScale.value(xTick);
       const y = 0;
 
       if (drawTicks) {
@@ -120,7 +142,8 @@ export function drawAxes({
         context.stroke();
       }
 
-      const text = xTickFormat(xTick);
+      const text =
+        (xTickFormat.type === "continuous" && xTickFormat.value(xTick)) || "";
       if (text === "") {
         continue; // we're probably rendering scaleLog, which has empty labels
       }
