@@ -132,8 +132,23 @@ export class REDomainError extends ErrorMessage {
     super();
   }
 
+  //It's awkward that we need to check the specific type of error here, given we already needed to calculate this in order to throw the error, but this way we don't need to pass in the error specifics to the constructor.
   toString() {
-    return `Domain Error: Parameter ${this.value} must be in domain ${this.domain}`;
+    const { domainType } = this.domain;
+    const { type: valueType } = this.value;
+
+    if (
+      (domainType === "NumericRange" && valueType !== "Number") ||
+      (domainType === "DateRange" && valueType !== "Date")
+    ) {
+      return `Domain Error: Parameter ${this.value.toString()}, of type ${valueType}, must be a ${
+        domainType === "NumericRange" ? "number" : "date"
+      }.`;
+    }
+
+    return `Domain Error: Parameter ${this.value.toString()} must be in domain ${
+      this.domain
+    }`;
   }
 }
 

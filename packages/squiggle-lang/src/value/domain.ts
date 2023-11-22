@@ -59,8 +59,6 @@ export class DateRangeDomain extends BaseDomain {
       return (
         value.value.getTime() >= this.min && value.value.getTime() <= this.max
       );
-    } else if (value.type === "Number") {
-      return value.value >= this.min && value.value <= this.max;
     } else {
       return false;
     }

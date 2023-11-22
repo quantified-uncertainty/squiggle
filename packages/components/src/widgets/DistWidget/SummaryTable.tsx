@@ -4,6 +4,7 @@ import * as d3 from "d3";
 
 import { XIcon } from "@heroicons/react/solid/esm/index.js";
 import {
+  duration,
   Env,
   result,
   SqDistribution,
@@ -32,6 +33,7 @@ type SummaryTableRowProps = {
   showName: boolean;
   environment: Env;
   tickFormat: string | undefined;
+  isDate: boolean;
 };
 
 const percentiles = [0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95];
@@ -42,6 +44,7 @@ const SummaryTableRow: FC<SummaryTableRowProps> = ({
   showName,
   environment,
   tickFormat,
+  isDate,
 }) => {
   const mean = distribution.mean(environment);
   const stdev = distribution.stdev(environment);
@@ -50,8 +53,15 @@ const SummaryTableRow: FC<SummaryTableRowProps> = ({
     distribution.inv(environment, percentile)
   );
 
-  const formatNumber = (number: number) => {
-    if (tickFormat) {
+  const formatNumber = (number: number, isRange: boolean) => {
+    if (isDate) {
+      // When dealing with dates, the standard deviation is a duration, not a date, so we need to format it differently
+      if (isRange) {
+        return duration.toString(number);
+      }
+      const _tickFormat = tickFormat ?? "%Y-%m-%d";
+      return d3.timeFormat(_tickFormat)(new Date(number));
+    } else if (tickFormat) {
       return d3.format(tickFormat)(number);
     } else {
       return <NumberShower number={number} precision={3} />;
@@ -59,10 +69,11 @@ const SummaryTableRow: FC<SummaryTableRowProps> = ({
   };
 
   const unwrapResult = (
-    x: result<number, SqDistributionError>
+    x: result<number, SqDistributionError>,
+    isRange: boolean
   ): React.ReactNode => {
     if (x.ok) {
-      return formatNumber(x.value);
+      return formatNumber(x.value, isRange);
     } else {
       return (
         <TextTooltip text={x.value.toString()}>
@@ -75,10 +86,10 @@ const SummaryTableRow: FC<SummaryTableRowProps> = ({
   return (
     <tr>
       {showName && <Cell>{name}</Cell>}
-      <Cell>{formatNumber(mean)}</Cell>
-      <Cell>{unwrapResult(stdev)}</Cell>
+      <Cell>{formatNumber(mean, false)}</Cell>
+      <Cell>{unwrapResult(stdev, true)}</Cell>
       {percentileValues.map((value, i) => (
-        <Cell key={i}>{unwrapResult(value)}</Cell>
+        <Cell key={i}>{unwrapResult(value, false)}</Cell>
       ))}
     </tr>
   );
@@ -91,7 +102,8 @@ type SummaryTableProps = {
 
 export const SummaryTable: FC<SummaryTableProps> = ({ plot, environment }) => {
   const showNames = plot.distributions.some((d) => d.name);
-  const tickFormat = ".0%"; // plot.xScale?.tickFormat;
+  const isDate = plot.xScale?.tag === "date";
+  const tickFormat = plot.xScale?.tickFormat;
   return (
     <table className="table border border-collapse border-slate-400">
       <thead className="bg-slate-50">
@@ -113,6 +125,7 @@ export const SummaryTable: FC<SummaryTableProps> = ({ plot, environment }) => {
             showName={showNames}
             environment={environment}
             tickFormat={tickFormat}
+            isDate={isDate}
           />
         ))}
       </tbody>

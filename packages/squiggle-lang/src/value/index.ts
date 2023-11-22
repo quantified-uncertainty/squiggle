@@ -6,7 +6,7 @@ import {
   REOther,
 } from "../errors/messages.js";
 import { Lambda } from "../reducer/lambda.js";
-import * as DateTime from "../utility/DateTime.js";
+import { date, duration } from "../utility/DateTime.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { DateRangeDomain, Domain, NumericRangeDomain } from "./domain.js";
 import { shuffle } from "../utility/E_A.js";
@@ -123,7 +123,7 @@ class VDate extends BaseValue {
     super();
   }
   toString() {
-    return DateTime.Date.toString(this.value);
+    return date.toString(this.value);
   }
   isEqual(other: VDate) {
     return this.value === other.value;
@@ -275,7 +275,7 @@ class VTimeDuration extends BaseValue {
     super();
   }
   toString() {
-    return DateTime.Duration.toString(this.value);
+    return duration.toString(this.value);
   }
   isEqual(other: VTimeDuration) {
     return this.value === other.value;
@@ -613,6 +613,10 @@ export class VDomain extends BaseValue implements Indexable {
 
   toString(): string {
     return this.value.toString();
+  }
+
+  get domainType(): "NumericRange" | "DateRange" {
+    return this.value.type;
   }
 
   get(key: Value): VNumber {

@@ -6,48 +6,58 @@ export type Duration = number;
 
 // TODO - should we just use date-fns instead? Dates are hard to implement correctly.
 
-export const Duration = {
-  minute: 60 * 1000,
-  hour: 60 * 60 * 1000,
-  day: 24 * 60 * 60 * 1000,
-  year: 24 * 60 * 60 * 1000 * 365.25,
+enum DurationUnits {
+  Second = 1000,
+  Minute = 60 * 1000,
+  Hour = 60 * 60 * 1000,
+  Day = 24 * 60 * 60 * 1000,
+  Year = 24 * 60 * 60 * 1000 * 365.25,
+}
+
+export const duration = {
   fromFloat: (f: number): Duration => f,
   toFloat: (d: Duration): number => d,
-  fromMinutes: (h: number): Duration => h * Duration.minute,
-  fromHours: (h: number): Duration => h * Duration.hour,
-  fromDays: (d: number): Duration => d * Duration.day,
-  fromYears: (y: number): Duration => y * Duration.year,
-  toMinutes: (t: Duration): number => t / Duration.minute,
-  toHours: (t: Duration): number => t / Duration.hour,
-  toDays: (t: Duration): number => t / Duration.day,
-  toYears: (t: Duration): number => t / Duration.year,
-  toString(t: number): string {
-    const shouldPluralize = (f: number) => f !== 1.0;
-    const display = (f: number, s: string) =>
-      `${f.toPrecision(3)} ${s}${shouldPluralize(f) ? "s" : ""}`;
-    const abs = Math.abs(t);
-    if (abs >= Duration.year) {
-      return display(t / Duration.year, "year");
-    } else if (abs >= Duration.day) {
-      return display(t / Duration.day, "day");
-    } else if (abs >= Duration.hour) {
-      return display(t / Duration.hour, "hour");
-    } else if (abs >= Duration.minute) {
-      return display(t / Duration.minute, "minute");
-    } else {
-      return t.toFixed() + "ms";
+
+  fromMinutes: (h: number): Duration => h * DurationUnits.Minute,
+  fromHours: (h: number): Duration => h * DurationUnits.Hour,
+  fromDays: (d: number): Duration => d * DurationUnits.Day,
+  fromYears: (y: number): Duration => y * DurationUnits.Year,
+
+  toMinutes: (t: Duration): number => t / DurationUnits.Minute,
+  toHours: (t: Duration): number => t / DurationUnits.Hour,
+  toDays: (t: Duration): number => t / DurationUnits.Day,
+  toYears: (t: Duration): number => t / DurationUnits.Year,
+
+  toString: (duration: Duration): string => {
+    const units: [number, string][] = [
+      [DurationUnits.Year, "year"],
+      [DurationUnits.Day, "day"],
+      [DurationUnits.Hour, "hour"],
+      [DurationUnits.Minute, "minute"],
+      [DurationUnits.Second, "second"],
+    ];
+
+    for (const [unitValue, unitName] of units) {
+      if (Math.abs(duration) >= unitValue) {
+        const value = duration / unitValue;
+        const suffix = value !== 1.0 ? "s" : "";
+        return `${value.toPrecision(3)} ${unitName}${suffix}`;
+      }
     }
+
+    return `${duration.toFixed()} ms`;
   },
+
   add: (t1: Duration, t2: Duration): Duration => t1 + t2,
   subtract: (t1: Duration, t2: Duration): Duration => t1 - t2,
   multiply: (t1: Duration, t2: number): Duration => t1 * t2,
   divide: (t1: Duration, t2: number): Duration => t1 / t2,
 };
 
-export const DateModule = {
+export const date = {
   //   //The Rescript/JS implementation of Date is pretty mediocre. It would be good to improve upon later.
   //   let getFullYear = Js.Date.getFullYear
-  toString(d: Date) {
+  toString(d: Date): string {
     return d.toDateString();
   },
   fmap(t: Date, fn: (v: number) => number): Date {
@@ -59,16 +69,15 @@ export const DateModule = {
     if (diff < 0) {
       return Result.Err("Cannot subtract a date by one that is in its future");
     } else {
-      return Ok(Duration.fromFloat(diff));
+      return Ok(duration.fromFloat(diff));
     }
   },
   addDuration(t: Date, duration: Duration) {
-    return DateModule.fmap(t, (t) => t + duration);
+    return date.fmap(t, (t) => t + duration);
   },
   subtractDuration(t: Date, duration: Duration) {
-    return DateModule.fmap(t, (t) => t - duration);
+    return date.fmap(t, (t) => t - duration);
   },
-
   makeWithYearInt(y: number): result<Date, string> {
     if (y < 100) {
       return Result.Err("Year must be over 100");
@@ -80,19 +89,17 @@ export const DateModule = {
   },
   makeFromYear(year: number): result<Date, string> {
     const floor = Math.floor(year);
-    return Result.fmap(DateModule.makeWithYearInt(floor), (earlyDate) => {
+    return Result.fmap(date.makeWithYearInt(floor), (earlyDate) => {
       const diff = year - floor;
-      return DateModule.addDuration(earlyDate, diff * Duration.year);
+      return date.addDuration(earlyDate, diff * DurationUnits.Year);
     });
   },
   makeFromString(str: string): result<Date, string> {
-    const date = new Date(str);
-    if (isNaN(date.getTime())) {
+    const parsedDate = new Date(str);
+    if (isNaN(parsedDate.getTime())) {
       return Result.Err("Invalid date string");
     } else {
-      return Ok(date);
+      return Ok(parsedDate);
     }
   },
 };
-
-export { DateModule as Date };
