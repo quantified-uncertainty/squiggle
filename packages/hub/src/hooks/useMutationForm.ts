@@ -67,14 +67,13 @@ export function useMutationForm<
   });
 
   const onSubmit = useCallback(
-    (event?: BaseSyntheticEvent, extraData?: ExtraData) => {
+    (event?: BaseSyntheticEvent, extraData?: ExtraData) =>
       form.handleSubmit((formData) => {
         runMutation({
           variables: formDataToVariables(formData, extraData),
           onCompleted,
         });
-      })(event);
-    },
+      })(event),
     [form, formDataToVariables, onCompleted, runMutation]
   );
 
