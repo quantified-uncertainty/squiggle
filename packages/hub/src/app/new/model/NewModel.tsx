@@ -114,7 +114,7 @@ export const NewModel: FC = () => {
   });
 
   return (
-    <form onSubmit={() => onSubmit()}>
+    <form onSubmit={onSubmit}>
       <FormProvider {...form}>
         <H1>New Model</H1>
         <div className="space-y-4 mb-4 mt-4">
