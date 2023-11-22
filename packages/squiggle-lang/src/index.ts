@@ -11,6 +11,7 @@ import {
   SqLambdaValue,
   SqNumberValue,
   SqStringValue,
+  SqDateValue,
   type SqValue,
 } from "./public/SqValue/index.js"; // TODO - reexport other values too
 
@@ -65,6 +66,7 @@ export { defaultEnv as defaultEnvironment } from "./dist/env.js";
 export {
   SqLambdaValue,
   SqNumberValue,
+  SqDateValue,
   SqProject,
   SqStringValue,
   type Env,

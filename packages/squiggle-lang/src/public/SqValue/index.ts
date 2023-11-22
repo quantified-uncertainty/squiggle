@@ -1,5 +1,5 @@
 import { result } from "../../utility/result.js";
-import { Value, vLambda, vNumber, vString } from "../../value/index.js";
+import { Value, vDate, vLambda, vNumber, vString } from "../../value/index.js";
 import { SqError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqArray } from "./SqArray.js";
@@ -101,6 +101,14 @@ export class SqBoolValue extends SqAbstractValue<"Bool", boolean> {
 
 export class SqDateValue extends SqAbstractValue<"Date", Date> {
   tag = "Date" as const;
+
+  static create(value: Date) {
+    return new SqDateValue(vDate(value));
+  }
+
+  static fromNumber(value: number) {
+    return new SqDateValue(vDate(new Date(value)));
+  }
 
   get value(): Date {
     return this._value.value;
