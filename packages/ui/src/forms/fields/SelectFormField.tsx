@@ -177,7 +177,7 @@ export function SelectFormField<
 
           return (
             <SelectComponent<TOption>
-              instanceId={name}
+              instanceId={name} // important to avoid hydration errors
               name={name}
               components={{
                 Option: OptionComponent,
