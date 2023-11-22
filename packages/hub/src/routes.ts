@@ -196,3 +196,12 @@ export function privacyPolicyRoute() {
 export function termsOfServiceRoute() {
   return "/terms";
 }
+
+export function groupInviteLink(params: {
+  groupSlug: string;
+  inviteToken: string;
+}) {
+  return `${groupRoute({
+    slug: params.groupSlug,
+  })}/invite-link?token=${params.inviteToken}`;
+}

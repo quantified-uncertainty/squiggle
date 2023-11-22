@@ -9,6 +9,8 @@ import {
   useAsyncMutation,
 } from "@/hooks/useAsyncMutation";
 
+type ButtonProps = Parameters<typeof Button>[0];
+
 export function MutationButton<
   TMutation extends CommonMutationParameters<TTypename> = never,
   const TTypename extends string = never,
@@ -19,13 +21,15 @@ export function MutationButton<
   expectedTypename,
   title,
   theme = "default",
+  size,
 }: {
   mutation: GraphQLTaggedNode;
   variables: VariablesOf<TMutation>;
   updater?: UseMutationConfig<TMutation>["updater"];
   expectedTypename: TTypename;
   title: string;
-  theme?: "default" | "primary"; // TODO - extract type from <Button>
+  theme?: ButtonProps["theme"];
+  size?: ButtonProps["size"];
 }): ReactNode {
   const [runMutation, inFlight] = useAsyncMutation<TMutation>({
     mutation,
@@ -40,7 +44,7 @@ export function MutationButton<
   };
 
   return (
-    <Button onClick={act} disabled={inFlight} theme={theme}>
+    <Button onClick={act} disabled={inFlight} theme={theme} size={size}>
       {title}
     </Button>
   );

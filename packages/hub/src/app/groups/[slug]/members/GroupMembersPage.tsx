@@ -10,6 +10,7 @@ import { usePageQuery } from "@/relay/usePageQuery";
 import { GroupInviteList } from "./GroupInviteList";
 import { GroupMemberList } from "./GroupMemberList";
 import { useIsGroupAdmin } from "../hooks";
+import { GroupReusableInviteSection } from "./GroupReusableInviteSection";
 
 const Query = graphql`
   query GroupMembersPageQuery($slug: String!) {
@@ -25,6 +26,7 @@ const Query = graphql`
         id
         ...GroupMemberList
         ...GroupInviteList
+        ...GroupReusableInviteSection
         ...hooks_useIsGroupAdmin
       }
     }
@@ -48,9 +50,14 @@ export const GroupMembersPage: FC<{
         <GroupMemberList groupRef={group} />
       </section>
       {isAdmin && (
-        <section>
-          <GroupInviteList groupRef={group} />
-        </section>
+        <>
+          <section>
+            <GroupInviteList groupRef={group} />
+          </section>
+          <section>
+            <GroupReusableInviteSection groupRef={group} />
+          </section>
+        </>
       )}
     </div>
   );

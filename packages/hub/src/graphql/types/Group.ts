@@ -2,11 +2,11 @@ import { prismaConnectionHelpers } from "@pothos/plugin-prisma";
 import { MembershipRole } from "@prisma/client";
 
 import { builder } from "../builder";
+import { getMyMembershipById } from "../helpers/groupHelpers";
+import { modelWhereHasAccess } from "../helpers/modelHelpers";
 import { GroupInvite, GroupInviteConnection } from "./GroupInvite";
 import { ModelConnection, modelConnectionHelpers } from "./Model";
-import { modelWhereHasAccess } from "../helpers/modelHelpers";
 import { Owner } from "./Owner";
-import { getMyMembershipById } from "../helpers/groupHelpers";
 
 export const MembershipRoleType = builder.enumType(MembershipRole, {
   name: "MembershipRole",
@@ -20,7 +20,7 @@ export const UserGroupMembership = builder.prismaNode("UserGroupMembership", {
       resolve: (t) => t.role,
     }),
     user: t.relation("user"),
-    // TODO - group relation
+    group: t.relation("group"),
   }),
 });
 
@@ -42,6 +42,13 @@ export const Group = builder.prismaNode("Group", {
     }),
     updatedAtTimestamp: t.float({
       resolve: (group) => group.updatedAt.getTime(),
+    }),
+    reusableInviteToken: t.exposeString("reusableInviteToken", {
+      nullable: true,
+      unauthorizedResolver: () => null,
+      authScopes: (group) => ({
+        isGroupAdmin: group.id,
+      }),
     }),
     myMembership: t.field({
       type: UserGroupMembership,

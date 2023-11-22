@@ -14,7 +14,10 @@ import { Session } from "next-auth";
 import { NextRequest } from "next/server";
 
 import { prisma } from "@/prisma";
-import { getMyMembershipById } from "./helpers/groupHelpers";
+import {
+  getMyMembershipById,
+  getMyMembershipBySlug,
+} from "./helpers/groupHelpers";
 
 type Context = {
   session: Session | null;
@@ -33,6 +36,7 @@ export type HubSchemaTypes = {
     signedIn: boolean;
     isRootUser: boolean;
     isGroupAdmin: string;
+    isGroupAdminBySlug: string;
     controlsOwnerId: string;
   };
   AuthContexts: {
@@ -80,6 +84,13 @@ export const builder = new SchemaBuilder<HubSchemaTypes>({
     },
     isGroupAdmin: async (groupId) => {
       const myMembership = await getMyMembershipById(groupId, context.session);
+      return myMembership?.role === "Admin";
+    },
+    isGroupAdminBySlug: async (groupSlug) => {
+      const myMembership = await getMyMembershipBySlug(
+        groupSlug,
+        context.session
+      );
       return myMembership?.role === "Admin";
     },
     controlsOwnerId: async (ownerId) => {

@@ -21,6 +21,28 @@ export async function getMyMembershipById(
   });
   return myMembership;
 }
+
+export async function getMyMembershipBySlug(
+  groupSlug: string,
+  session: Session | null
+) {
+  if (!isSignedIn(session)) {
+    return null;
+  }
+  const self = await getSelf(session);
+  const myMembership = await prisma.userGroupMembership.findFirst({
+    where: {
+      userId: self.id,
+      group: {
+        asOwner: {
+          slug: groupSlug,
+        },
+      },
+    },
+  });
+  return myMembership;
+}
+
 export async function getMembership({
   groupSlug,
   userSlug,
