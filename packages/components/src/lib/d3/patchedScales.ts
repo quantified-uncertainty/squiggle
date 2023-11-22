@@ -72,6 +72,33 @@ function patchLinearishTickFormat<
   return scale;
 }
 
+function patchDateTickFormat<T extends ScaleLinear>(scale: T): T {
+  // copy-pasted from https://github.com/d3/d3-scale/blob/83555bd759c7314420bd4240642beda5e258db9e/src/linear.js#L14
+  scale.tickFormat = (count, specifier) => {
+    return (dd: d3.NumberValue) => {
+      const date = new Date(dd as number);
+      // Format the date as desired, here using a simple format
+      if (isCustomFormat(specifier)) {
+        return d3.timeFormat("%Y-%m-%d")(date);
+      } else {
+        return d3.timeFormat(specifier)(date);
+      }
+    };
+  };
+
+  scale.ticks = (count?: number) => {
+    if (count === 0) return [];
+
+    const [lower, upper] = scale.domain();
+    return d3
+      .scaleTime()
+      .domain([new Date(lower), new Date(upper)])
+      .ticks(count ?? 10)
+      .map((d) => d.getTime());
+  };
+  return scale;
+}
+
 function patchSymlogTickFormat(scale: ScaleSymLog): ScaleSymLog {
   // copy-pasted from https://github.com/d3/d3-scale/blob/83555bd759c7314420bd4240642beda5e258db9e/src/linear.js#L14
   scale.tickFormat = (count, specifier) => {
@@ -202,4 +229,8 @@ export function scalePow() {
 
 export function scaleLog() {
   return patchLogarithmicTickFormat(d3.scaleLog());
+}
+
+export function scaleDate() {
+  return patchDateTickFormat(d3.scaleLinear());
 }

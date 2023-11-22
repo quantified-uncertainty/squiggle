@@ -1,6 +1,7 @@
 import { REArgumentError, REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
+  frDate,
   frDict,
   frNumber,
   frOptional,
@@ -21,6 +22,13 @@ const commonDict = frDict(
   ["title", frOptional(frString)]
 );
 
+const dateDict = frDict(
+  ["min", frOptional(frDate)],
+  ["max", frOptional(frDate)],
+  ["tickFormat", frOptional(frString)],
+  ["title", frOptional(frString)]
+);
+
 function checkMinMax(min: number | null, max: number | null) {
   if (min !== null && max !== null && max <= min) {
     throw new REArgumentError(
@@ -35,9 +43,9 @@ const d3TickFormatRegex =
   /^(?:(.)?([<>=^]))?([+\-( ])?([$#])?(0)?(\d+)?(,)?(\.\d+)?(~)?([a-z%])?$/i;
 
 function checkTickFormat(tickFormat: string | null) {
-  if (tickFormat && !d3TickFormatRegex.test(tickFormat)) {
-    throw new REArgumentError(`Tick format [${tickFormat}] is invalid.`);
-  }
+  // if (tickFormat && !d3TickFormatRegex.test(tickFormat)) {
+  //   throw new REArgumentError(`Tick format [${tickFormat}] is invalid.`);
+  // }
 }
 
 export const library = [
@@ -161,6 +169,27 @@ export const library = [
         return vScale({
           type: "power",
         });
+      }),
+    ],
+  }),
+  maker.make({
+    name: "date",
+    output: "Scale",
+    examples: [`Scale.date({ min: 3, max: 10 })`],
+    definitions: [
+      makeDefinition([dateDict], ([{ min, max, tickFormat, title }]) => {
+        checkMinMax(min?.getTime() || null, max?.getTime() || null);
+        checkTickFormat(tickFormat);
+        return vScale({
+          type: "date",
+          min: min?.getTime() ?? undefined,
+          max: max?.getTime() ?? undefined,
+          tickFormat: tickFormat ?? undefined,
+          title: title ?? undefined,
+        });
+      }),
+      makeDefinition([], () => {
+        return vScale({ type: "date" });
       }),
     ],
   }),

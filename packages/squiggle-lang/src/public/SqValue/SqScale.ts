@@ -10,6 +10,8 @@ export const wrapScale = (value: Scale): SqScale => {
   switch (value.type) {
     case "linear":
       return SqLinearScale.create(value);
+    case "date":
+      return SqDateScale.create(value);
     case "log":
       return SqLogScale.create(value);
     case "symlog":
@@ -104,5 +106,17 @@ export class SqPowerScale extends SqAbstractScale<"power"> {
     return this._exponent;
   }
 }
+export class SqDateScale extends SqAbstractScale<"date"> {
+  tag = "date" as const;
 
-export type SqScale = SqLinearScale | SqLogScale | SqSymlogScale | SqPowerScale;
+  static create(args: CommonScaleArgs = {}) {
+    return new SqDateScale({ type: "date", ...args });
+  }
+}
+
+export type SqScale =
+  | SqLinearScale
+  | SqLogScale
+  | SqSymlogScale
+  | SqPowerScale
+  | SqDateScale;

@@ -296,6 +296,9 @@ export type Scale = CommonScaleArgs &
         type: "linear";
       }
     | {
+        type: "date";
+      }
+    | {
         type: "log";
       }
     | {
@@ -359,6 +362,8 @@ class VScale extends BaseValue {
         return `Power scale ({exponent: ${
           this.value.exponent || SCALE_POWER_DEFAULT_CONSTANT
         }})`;
+      case "date":
+        return "Date scale"; // TODO - mix in min/max if specified
     }
   }
 

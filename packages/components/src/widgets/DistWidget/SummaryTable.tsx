@@ -91,7 +91,7 @@ type SummaryTableProps = {
 
 export const SummaryTable: FC<SummaryTableProps> = ({ plot, environment }) => {
   const showNames = plot.distributions.some((d) => d.name);
-  const tickFormat = plot.xScale?.tickFormat;
+  const tickFormat = ".0%"; // plot.xScale?.tickFormat;
   return (
     <table className="table border border-collapse border-slate-400">
       <thead className="bg-slate-50">
