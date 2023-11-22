@@ -2,9 +2,7 @@ import { useRouter } from "next/navigation";
 import { FC } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
-
 import { RightArrowIcon } from "@quri/ui";
-
 import { MoveModelActionMutation } from "@/__generated__/MoveModelActionMutation.graphql";
 import { SelectOwner, SelectOwnerOption } from "@/components/SelectOwner";
 import { MutationModalAction } from "@/components/ui/MutationModalAction";
