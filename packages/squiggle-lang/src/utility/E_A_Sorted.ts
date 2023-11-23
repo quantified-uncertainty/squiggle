@@ -17,7 +17,7 @@ export const firstGreaterIndex = (xs: readonly number[], x: number): number => {
 };
 
 // based on Jstat.percentile in inclusive mode
-export const percentile = (xs: number[], k: number) => {
+export const quantile = (xs: number[], k: number) => {
   const realIndex = k * (xs.length - 1);
   const index = Math.floor(realIndex);
   if (index + 1 < xs.length) {

@@ -11,6 +11,12 @@ const maker = new FnFactory({
   requiresNamespace: false,
 });
 
+const assertIsNotEmpty = (arr: readonly number[]) => {
+  if (arr.length === 0) {
+    throw new REArgumentError("List is empty");
+  }
+};
+
 const throwEmptyList = (): never => {
   throw new REArgumentError("List is empty");
 };
@@ -20,9 +26,7 @@ function makeNumberArrayToNumberDefinition(
   throwIfEmpty = true
 ) {
   return makeDefinition([frArray(frNumber)], ([arr]) => {
-    if (arr.length === 0 && throwIfEmpty) {
-      return throwEmptyList();
-    }
+    throwIfEmpty && assertIsNotEmpty(arr);
     return vNumber(fn(arr));
   });
 }
@@ -129,6 +133,28 @@ export const library = [
     examples: [`mean([3,5,2])`],
     definitions: [
       makeNumberArrayToNumberDefinition((arr) => E_A_Floats.mean(arr)),
+    ],
+  }),
+  maker.make({
+    name: "quantile",
+    output: "Number",
+    examples: [`quantile([1,5,10,40,2,4], 0.3)`],
+    definitions: [
+      makeDefinition([frArray(frNumber), frNumber], ([arr, i]) => {
+        assertIsNotEmpty(arr);
+        return vNumber(E_A_Floats.quantile(arr, i));
+      }),
+    ],
+  }),
+  maker.make({
+    name: "median",
+    output: "Number",
+    examples: [`median([1,5,10,40,2,4])`],
+    definitions: [
+      makeDefinition([frArray(frNumber)], ([arr]) => {
+        assertIsNotEmpty(arr);
+        return vNumber(E_A_Floats.quantile(arr, 0.5));
+      }),
     ],
   }),
   maker.make({

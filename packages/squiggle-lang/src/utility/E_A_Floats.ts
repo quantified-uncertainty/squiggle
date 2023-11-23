@@ -1,5 +1,6 @@
 import isInteger from "lodash/isInteger.js";
 import * as E_A from "./E_A.js";
+import * as E_A_Sorted from "./E_A_Sorted.js";
 
 class RangeError extends Error {}
 
@@ -111,4 +112,9 @@ export const cumProd = (t: readonly number[]): number[] => {
 // diff([1,5,3,7]) = [4,-2,4]
 export const diff = (t: readonly number[]): number[] => {
   return E_A.pairwise(t, (left, right) => right - left);
+};
+
+export const quantile = (samples: readonly number[], point: number): number => {
+  const sorted = sort(samples);
+  return E_A_Sorted.quantile(sorted, point);
 };

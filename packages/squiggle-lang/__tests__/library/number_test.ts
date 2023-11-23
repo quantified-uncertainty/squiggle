@@ -24,6 +24,8 @@ describe("Numbers", () => {
   testEvalToBe("Number.geomean([1,5,18])", "4.481404746557164");
   testEvalToBe("Number.stdev([0,5,10,15])", "5.5901699437494745");
   testEvalToBe("Number.variance([0,5,10,15])", "31.25");
+  testEvalToBe("Number.quantile([0,5,10,15,20], 0.25)", "5");
+  testEvalToBe("Number.median([0,5,10,15,20])", "10");
   testEvalToBe("Number.sort([])", "[]");
   testEvalToBe("Number.sort([10,0,15,5])", "[0,5,10,15]");
   testEvalToBe("Number.cumsum([])", "[]");
