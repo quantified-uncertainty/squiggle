@@ -67,6 +67,12 @@ function createScale(scale: Scale | null, domain: VDomain | undefined): Scale {
       min: scale.min ?? domain.value.min,
       max: scale.max ?? domain.value.max,
     };
+  } else if (domain.value.type === "DateRange") {
+    return {
+      type: "date",
+      min: domain.value.min,
+      max: domain.value.max,
+    };
   } else {
     return {
       type: "linear",

@@ -363,7 +363,7 @@ class VScale extends BaseValue {
           this.value.exponent || SCALE_POWER_DEFAULT_CONSTANT
         }})`;
       case "date":
-        return "Date scale"; // TODO - mix in min/max if specified
+        return "Date scale";
     }
   }
 

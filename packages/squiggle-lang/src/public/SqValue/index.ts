@@ -107,7 +107,7 @@ export class SqDateValue extends SqAbstractValue<"Date", Date> {
   }
 
   static fromNumber(value: number) {
-    return new SqDateValue(vDate(new Date(value)));
+    return SqDateValue.create(new Date(value));
   }
 
   get value(): Date {

@@ -147,7 +147,7 @@ export const Date: Story = {
   foo(t) = normal(t,2)*normal(5,3)
   Plot.distFn({
     fn: foo,
-    xScale: Scale.date({ min: 40000000000 , max: 60000000000, tickFormat: "%Y-%m-%d" })
+    xScale: Scale.date({ min: 40000000000 , max: 60000000000 })
   })
   `,
   },

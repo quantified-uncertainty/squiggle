@@ -1,4 +1,3 @@
-import _ from "lodash";
 import { REArgumentError } from "../errors/messages.js";
 import { Value } from "./index.js";
 
@@ -51,7 +50,7 @@ export class DateRangeDomain extends BaseDomain {
   }
 
   toString() {
-    return `Number.rangeDomain({ min: ${this.min}, max: ${this.max} })`;
+    return `Date.rangeDomain({ min: ${this.min}, max: ${this.max} })`;
   }
 
   includes(value: Value) {

@@ -14,6 +14,7 @@ import {
 import { TextTooltip } from "@quri/ui";
 
 import { NumberShower } from "../../components/NumberShower.js";
+import { DEFAULT_DATE_FORMAT } from "../../lib/constants.js";
 
 const TableHeadCell: FC<PropsWithChildren> = ({ children }) => (
   <th className="border border-slate-200 py-1 px-2 text-slate-700 text-xs font-light">
@@ -33,7 +34,7 @@ type SummaryTableRowProps = {
   showName: boolean;
   environment: Env;
   tickFormat: string | undefined;
-  isDate: boolean;
+  valueType: "date" | "number";
 };
 
 const percentiles = [0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95];
@@ -44,7 +45,7 @@ const SummaryTableRow: FC<SummaryTableRowProps> = ({
   showName,
   environment,
   tickFormat,
-  isDate,
+  valueType,
 }) => {
   const mean = distribution.mean(environment);
   const stdev = distribution.stdev(environment);
@@ -54,13 +55,15 @@ const SummaryTableRow: FC<SummaryTableRowProps> = ({
   );
 
   const formatNumber = (number: number, isRange: boolean) => {
-    if (isDate) {
+    if (valueType == "date") {
       // When dealing with dates, the standard deviation is a duration, not a date, so we need to format it differently
       if (isRange) {
         return duration.toString(number);
+      } else {
+        return d3.timeFormat(tickFormat ?? DEFAULT_DATE_FORMAT)(
+          new Date(number)
+        );
       }
-      const _tickFormat = tickFormat ?? "%Y-%m-%d";
-      return d3.timeFormat(_tickFormat)(new Date(number));
     } else if (tickFormat) {
       return d3.format(tickFormat)(number);
     } else {
@@ -125,7 +128,7 @@ export const SummaryTable: FC<SummaryTableProps> = ({ plot, environment }) => {
             showName={showNames}
             environment={environment}
             tickFormat={tickFormat}
-            isDate={isDate}
+            valueType={isDate ? "date" : "number"}
           />
         ))}
       </tbody>
