@@ -1,4 +1,5 @@
 import { GroupInviteCard$key } from "@/__generated__/GroupInviteCard.graphql";
+import { hooks_useIsGroupAdmin$key } from "@/__generated__/hooks_useIsGroupAdmin.graphql";
 import { Card } from "@/components/ui/Card";
 import { DotsDropdown } from "@/components/ui/DotsDropdown";
 import { DropdownMenu } from "@quri/ui";
@@ -10,7 +11,6 @@ import { CancelInviteAction } from "./CancelInviteAction";
 
 export const GroupInviteCard: FC<{
   inviteRef: GroupInviteCard$key;
-  groupRef: GroupInviteCard$key;
   groupId: string;
 }> = (props) => {
   const invite = useFragment(

@@ -46,7 +46,6 @@ export const GroupInviteList: FC<Props> = ({ groupRef }) => {
         {group.invites.edges.map(({ node: invite }) => (
           <GroupInviteCard
             inviteRef={invite}
-            groupRef={group}
             groupId={group.id}
             key={invite.id}
           />
