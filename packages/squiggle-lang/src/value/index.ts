@@ -619,13 +619,15 @@ export class VDomain extends BaseValue implements Indexable {
     return this.value.type;
   }
 
-  get(key: Value): VNumber {
+  get(key: Value): VNumber | VDate {
+    const mapValue = (value: number) =>
+      this.domainType === "DateRange" ? vDate(new Date(value)) : vNumber(value);
     if (key.type === "String") {
       if (key.value === "min") {
-        return vNumber(this.value.min);
+        return mapValue(this.value.min);
       }
       if (key.value === "max") {
-        return vNumber(this.value.max);
+        return mapValue(this.value.max);
       }
     }
 

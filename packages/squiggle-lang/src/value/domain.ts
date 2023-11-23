@@ -50,7 +50,9 @@ export class DateRangeDomain extends BaseDomain {
   }
 
   toString() {
-    return `Date.rangeDomain({ min: ${this.min}, max: ${this.max} })`;
+    return `Date.rangeDomain({ min: ${new Date(
+      this.min
+    ).toDateString()}, max: ${new Date(this.max).toDateString()} })`;
   }
 
   includes(value: Value) {
@@ -100,7 +102,7 @@ export function annotationToDomain(value: Value): Domain {
     return new NumericRangeDomain(min.value, max.value);
   } else {
     throw new REArgumentError(
-      `The range minimum (${min.value}) and maximum (${max.value}) must be of the same type`
+      `The range minimum and maximum must be of the same type. Got ${min.type} and ${max.type}`
     );
   }
 }

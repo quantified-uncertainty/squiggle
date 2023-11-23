@@ -147,6 +147,19 @@ describe("Plot", () => {
   );
 
   testPlotResult(
+    "default scale based on time domain",
+    `Plot.distFn({
+        fn: {|t: [1500year, 1600year]| uniform(toYears(t)-1500year, 3)}
+      })`,
+    "distFn",
+    (plot) => {
+      expect(plot.xScale.type).toBe("date");
+      expect(plot.xScale.min).toBe(new Date(1500, 0, 1).getTime());
+      expect(plot.xScale.max).toBe(new Date(1600, 0, 1).getTime());
+    }
+  );
+
+  testPlotResult(
     "explicit scale with min/max ignores the domain",
     `Plot.distFn({
         fn: {|x: [3, 5]| uniform(x, x + 1)},

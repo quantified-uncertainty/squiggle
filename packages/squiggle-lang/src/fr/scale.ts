@@ -37,6 +37,14 @@ function checkMinMax(min: number | null, max: number | null) {
   }
 }
 
+function checkMinMaxDates(min: Date | null, max: Date | null) {
+  if (min !== null && max !== null && max <= min) {
+    throw new REArgumentError(
+      `Max must be greater than min, got: min=${min.toDateString()}, max=${max.toDateString()}`
+    );
+  }
+}
+
 // Regex taken from d3-format.
 // https://github.com/d3/d3-format/blob/f3cb31091df80a08f25afd4a7af2dcb3a6cd5eef/src/formatSpecifier.js#L1C65-L2C85
 const d3TickFormatRegex =
@@ -178,7 +186,7 @@ export const library = [
     examples: [`Scale.date({ min: 2022year, max: 2025year })`],
     definitions: [
       makeDefinition([dateDict], ([{ min, max, tickFormat, title }]) => {
-        checkMinMax(min?.getTime() || null, max?.getTime() || null);
+        checkMinMaxDates(min, max);
         // We don't check the tick format, because the format is much more complicated for dates.
         return vScale({
           type: "date",
