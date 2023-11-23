@@ -36,27 +36,45 @@ const makeDurationToNumberFn = (name: string, fn: (v: Duration) => number) =>
   });
 
 export const library = [
-  maker.fromDefinition(
-    "make",
-    makeDefinition([frString], ([str]) => {
-      const result = date.makeFromString(str);
-      if (!result.ok) {
-        throw new REOther(result.value);
-      }
-      return vDate(result.value);
-    })
-  ),
-  maker.fromDefinition("fromYear", makeYearFn),
+  maker.make({
+    name: "make",
+    requiresNamespace: true,
+    examples: ['Date.make("2020-05-12")', "Date.make(2020, 5, 10)"],
+    definitions: [
+      makeDefinition([frString], ([str]) => {
+        const result = date.makeFromString(str);
+        if (!result.ok) {
+          throw new REOther(result.value);
+        }
+        return vDate(result.value);
+      }),
+
+      makeDefinition([frNumber, frNumber, frNumber], ([yr, month, date]) => {
+        return vDate(new Date(yr, month + 1, date));
+      }),
+    ],
+  }),
+  // same name as used in date-fns
+  maker.make({
+    name: "fromUnixTime",
+    requiresNamespace: true,
+    definitions: [
+      makeDefinition([frNumber], ([num]) => {
+        return vDate(new Date(num * 1000));
+      }),
+    ],
+  }),
+  maker.make({
+    name: "toUnixTime",
+    requiresNamespace: true,
+    definitions: [
+      makeDefinition([frDate], ([date]) => {
+        return vNumber(date.getTime() / 1000);
+      }),
+    ],
+  }),
   maker.fromDefinition("year", makeYearFn),
   maker.fromDefinition("fromUnit_year", makeYearFn),
-  maker.fromDefinition(
-    "fromNumber",
-    makeDefinition([frNumber], ([f]) => vDate(new Date(f)))
-  ),
-  maker.fromDefinition(
-    "toNumber",
-    makeDefinition([frDate], ([f]) => vNumber(f.getTime()))
-  ),
   maker.make({
     name: "subtract",
     definitions: [

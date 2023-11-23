@@ -1,6 +1,11 @@
 import { REArgumentError } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frArray, frNumber, frDict } from "../library/registry/frTypes.js";
+import {
+  frArray,
+  frNumber,
+  frDict,
+  frDate,
+} from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
 import { NumericRangeDomain } from "../value/domain.js";
@@ -40,6 +45,15 @@ function makeNumberArrayToNumberArrayDefinition(
 }
 
 export const library = [
+  maker.make({
+    name: "make",
+    requiresNamespace: true,
+    definitions: [
+      makeDefinition([frNumber], ([num]) => {
+        return vNumber(num);
+      }),
+    ],
+  }),
   maker.n2n({
     name: "floor",
     examples: [`floor(3.5)`],

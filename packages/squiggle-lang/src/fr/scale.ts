@@ -43,9 +43,9 @@ const d3TickFormatRegex =
   /^(?:(.)?([<>=^]))?([+\-( ])?([$#])?(0)?(\d+)?(,)?(\.\d+)?(~)?([a-z%])?$/i;
 
 function checkTickFormat(tickFormat: string | null) {
-  // if (tickFormat && !d3TickFormatRegex.test(tickFormat)) {
-  //   throw new REArgumentError(`Tick format [${tickFormat}] is invalid.`);
-  // }
+  if (tickFormat && !d3TickFormatRegex.test(tickFormat)) {
+    throw new REArgumentError(`Tick format [${tickFormat}] is invalid.`);
+  }
 }
 
 export const library = [
@@ -175,11 +175,11 @@ export const library = [
   maker.make({
     name: "date",
     output: "Scale",
-    examples: [`Scale.date({ min: 3, max: 10 })`],
+    examples: [`Scale.date({ min: 2022year, max: 2025year })`],
     definitions: [
       makeDefinition([dateDict], ([{ min, max, tickFormat, title }]) => {
         checkMinMax(min?.getTime() || null, max?.getTime() || null);
-        checkTickFormat(tickFormat);
+        // We don't check the tick format, because the format is much more complicated for dates.
         return vScale({
           type: "date",
           min: min?.getTime() ?? undefined,
