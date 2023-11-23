@@ -252,6 +252,7 @@ type Mutation {
   updateModelSlug(input: MutationUpdateModelSlugInput!): MutationUpdateModelSlugResult!
   updateRelativeValuesDefinition(input: MutationUpdateRelativeValuesDefinitionInput!): MutationUpdateRelativeValuesDefinitionResult!
   updateSquiggleSnippetModel(input: MutationUpdateSquiggleSnippetModelInput!): MutationUpdateSquiggleSnippetModelResult!
+  validateReusableGroupInviteToken(input: MutationValidateReusableGroupInviteTokenInput!): MutationValidateReusableGroupInviteTokenResult!
 }
 
 input MutationAcceptReusableGroupInviteTokenInput {
@@ -432,6 +433,13 @@ input MutationUpdateSquiggleSnippetModelInput {
 }
 
 union MutationUpdateSquiggleSnippetModelResult = BaseError | UpdateSquiggleSnippetResult
+
+input MutationValidateReusableGroupInviteTokenInput {
+  groupSlug: String!
+  inviteToken: String!
+}
+
+union MutationValidateReusableGroupInviteTokenResult = BaseError | ValidateReusableGroupInviteTokenResult
 
 interface Node {
   id: ID!
@@ -679,6 +687,10 @@ type UserGroupMembershipEdge {
 
 input UsersQueryInput {
   usernameContains: String
+}
+
+type ValidateReusableGroupInviteTokenResult {
+  ok: Boolean!
 }
 
 type ValidationError implements Error {

@@ -1,7 +1,7 @@
 "use client";
 import { useSession } from "next-auth/react";
-import { redirect, useSearchParams } from "next/navigation";
-import { FC } from "react";
+import { redirect, useRouter, useSearchParams } from "next/navigation";
+import { FC, useEffect } from "react";
 import { graphql } from "relay-runtime";
 
 import { AcceptGroupInvitePageMutation } from "@/__generated__/AcceptGroupInvitePageMutation.graphql";
@@ -12,6 +12,9 @@ import { AcceptGroupInvitePageQuery } from "@/__generated__/AcceptGroupInvitePag
 import { useIsGroupMember } from "../hooks";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { groupRoute } from "@/routes";
+import { useAsyncMutation } from "@/hooks/useAsyncMutation";
+import { AcceptGroupInvitePage_ValidateMutation } from "@/__generated__/AcceptGroupInvitePage_ValidateMutation.graphql";
+import { useToast } from "@quri/ui";
 
 export const AcceptGroupInvitePage: FC<{
   query: SerializablePreloadedQuery<AcceptGroupInvitePageQuery>;
@@ -44,6 +47,48 @@ export const AcceptGroupInvitePage: FC<{
   if (!inviteToken) {
     throw new Error("Token is missing");
   }
+
+  const [validateMutation] = useAsyncMutation<
+    AcceptGroupInvitePage_ValidateMutation,
+    "ValidateReusableGroupInviteTokenResult"
+  >({
+    mutation: graphql`
+      mutation AcceptGroupInvitePage_ValidateMutation(
+        $input: MutationValidateReusableGroupInviteTokenInput!
+      ) {
+        result: validateReusableGroupInviteToken(input: $input) {
+          __typename
+          ... on BaseError {
+            message
+          }
+          ... on ValidateReusableGroupInviteTokenResult {
+            ok
+          }
+        }
+      }
+    `,
+    expectedTypename: "ValidateReusableGroupInviteTokenResult",
+  });
+
+  const toast = useToast();
+  const router = useRouter();
+
+  useEffect(() => {
+    validateMutation({
+      variables: {
+        input: {
+          groupSlug: group.slug,
+          inviteToken,
+        },
+      },
+      onCompleted({ ok }) {
+        if (!ok) {
+          toast("Invalid token", "error");
+          router.replace(groupRoute({ slug: group.slug }));
+        }
+      },
+    });
+  }, []);
 
   return (
     <div>
@@ -82,6 +127,7 @@ export const AcceptGroupInvitePage: FC<{
         }}
         title="Join this group"
         theme="primary"
+        onCompleted={() => toast("Joined", "confirmation")}
       />
     </div>
   );

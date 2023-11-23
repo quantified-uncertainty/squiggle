@@ -16,6 +16,11 @@ export type Scalars = {
   Float: { input: number; output: number; }
 };
 
+export type AcceptReusableGroupInviteTokenResult = {
+  __typename?: 'AcceptReusableGroupInviteTokenResult';
+  membership: UserGroupMembership;
+};
+
 export type AdminUpdateModelVersionResult = {
   __typename?: 'AdminUpdateModelVersionResult';
   model: Model;
@@ -51,6 +56,11 @@ export type CreateRelativeValuesDefinitionResult = {
   definition: RelativeValuesDefinition;
 };
 
+export type CreateReusableGroupInviteTokenResult = {
+  __typename?: 'CreateReusableGroupInviteTokenResult';
+  group: Group;
+};
+
 export type CreateSquiggleSnippetModelResult = {
   __typename?: 'CreateSquiggleSnippetModelResult';
   model: Model;
@@ -74,6 +84,11 @@ export type DeleteModelResult = {
 export type DeleteRelativeValuesDefinitionResult = {
   __typename?: 'DeleteRelativeValuesDefinitionResult';
   ok: Scalars['Boolean']['output'];
+};
+
+export type DeleteReusableGroupInviteTokenResult = {
+  __typename?: 'DeleteReusableGroupInviteTokenResult';
+  group: Group;
 };
 
 export type EmailGroupInvite = GroupInvite & Node & {
@@ -104,6 +119,7 @@ export type Group = Node & Owner & {
   memberships: UserGroupMembershipConnection;
   models: ModelConnection;
   myMembership?: Maybe<UserGroupMembership>;
+  reusableInviteToken?: Maybe<Scalars['String']['output']>;
   slug: Scalars['String']['output'];
   updatedAtTimestamp: Scalars['Float']['output'];
 };
@@ -296,6 +312,7 @@ export type MoveModelResult = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  acceptReusableGroupInviteToken: MutationAcceptReusableGroupInviteTokenResult;
   /** Admin-only query for upgrading model versions */
   adminUpdateModelVersion: MutationAdminUpdateModelVersionResult;
   buildRelativeValuesCache: MutationBuildRelativeValuesCacheResult;
@@ -303,10 +320,18 @@ export type Mutation = {
   clearRelativeValuesCache: MutationClearRelativeValuesCacheResult;
   createGroup: MutationCreateGroupResult;
   createRelativeValuesDefinition: MutationCreateRelativeValuesDefinitionResult;
+  /**
+   * Create or replace a reusable invite token for a group, available as `reusableInviteToken` field on group object.
+   *
+   * You must be an admin of the group to call this mutation. Previous invite token, if it existed, will stop working.
+   */
+  createReusableGroupInviteToken: MutationCreateReusableGroupInviteTokenResult;
   createSquiggleSnippetModel: MutationCreateSquiggleSnippetModelResult;
   deleteMembership: MutationDeleteMembershipResult;
   deleteModel: MutationDeleteModelResult;
   deleteRelativeValuesDefinition: MutationDeleteRelativeValuesDefinitionResult;
+  /** Disable a reusable invite token for a group. */
+  deleteReusableGroupInviteToken: MutationDeleteReusableGroupInviteTokenResult;
   inviteUserToGroup: MutationInviteUserToGroupResult;
   moveModel: MutationMoveModelResult;
   reactToGroupInvite: MutationReactToGroupInviteResult;
@@ -317,6 +342,11 @@ export type Mutation = {
   updateModelSlug: MutationUpdateModelSlugResult;
   updateRelativeValuesDefinition: MutationUpdateRelativeValuesDefinitionResult;
   updateSquiggleSnippetModel: MutationUpdateSquiggleSnippetModelResult;
+};
+
+
+export type MutationAcceptReusableGroupInviteTokenArgs = {
+  input: MutationAcceptReusableGroupInviteTokenInput;
 };
 
 
@@ -350,6 +380,11 @@ export type MutationCreateRelativeValuesDefinitionArgs = {
 };
 
 
+export type MutationCreateReusableGroupInviteTokenArgs = {
+  input: MutationCreateReusableGroupInviteTokenInput;
+};
+
+
 export type MutationCreateSquiggleSnippetModelArgs = {
   input: MutationCreateSquiggleSnippetModelInput;
 };
@@ -367,6 +402,11 @@ export type MutationDeleteModelArgs = {
 
 export type MutationDeleteRelativeValuesDefinitionArgs = {
   input: MutationDeleteRelativeValuesDefinitionInput;
+};
+
+
+export type MutationDeleteReusableGroupInviteTokenArgs = {
+  input: MutationDeleteReusableGroupInviteTokenInput;
 };
 
 
@@ -419,6 +459,13 @@ export type MutationUpdateSquiggleSnippetModelArgs = {
   input: MutationUpdateSquiggleSnippetModelInput;
 };
 
+export type MutationAcceptReusableGroupInviteTokenInput = {
+  groupSlug: Scalars['String']['input'];
+  inviteToken: Scalars['String']['input'];
+};
+
+export type MutationAcceptReusableGroupInviteTokenResult = AcceptReusableGroupInviteTokenResult | BaseError;
+
 export type MutationAdminUpdateModelVersionInput = {
   modelId: Scalars['String']['input'];
   version: Scalars['String']['input'];
@@ -462,6 +509,12 @@ export type MutationCreateRelativeValuesDefinitionInput = {
 
 export type MutationCreateRelativeValuesDefinitionResult = BaseError | CreateRelativeValuesDefinitionResult | ValidationError;
 
+export type MutationCreateReusableGroupInviteTokenInput = {
+  slug: Scalars['String']['input'];
+};
+
+export type MutationCreateReusableGroupInviteTokenResult = BaseError | CreateReusableGroupInviteTokenResult;
+
 export type MutationCreateSquiggleSnippetModelInput = {
   /** Squiggle source code */
   code: Scalars['String']['input'];
@@ -495,6 +548,12 @@ export type MutationDeleteRelativeValuesDefinitionInput = {
 };
 
 export type MutationDeleteRelativeValuesDefinitionResult = BaseError | DeleteRelativeValuesDefinitionResult;
+
+export type MutationDeleteReusableGroupInviteTokenInput = {
+  slug: Scalars['String']['input'];
+};
+
+export type MutationDeleteReusableGroupInviteTokenResult = BaseError | DeleteReusableGroupInviteTokenResult;
 
 export type MutationInviteUserToGroupInput = {
   group: Scalars['String']['input'];
@@ -921,6 +980,7 @@ export type UserGroupInvite = GroupInvite & Node & {
 
 export type UserGroupMembership = Node & {
   __typename?: 'UserGroupMembership';
+  group: Group;
   id: Scalars['ID']['output'];
   role: MembershipRole;
   user: User;
