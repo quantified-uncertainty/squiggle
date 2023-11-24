@@ -96,10 +96,10 @@ export const date = {
   },
   makeFromString(str: string): result<Date, string> {
     const parsedDate = new Date(str);
-    if (isNaN(parsedDate.getTime())) {
-      return Result.Err("Invalid date string");
-    } else {
+    if (parsedDate instanceof Date && isFinite(parsedDate.getTime())) {
       return Ok(parsedDate);
+    } else {
+      return Result.Err("Invalid date string");
     }
   },
 };

@@ -144,10 +144,12 @@ export const Unrenderable: Story = {
 export const Date: Story = {
   args: {
     code: sq`
-  foo(t) = normal(t,2)*normal(5,3)
+  foo(t: [1500year, 3000year]) = {
+    yearDelta = toYears(t - 1480year)
+    normal(yearDelta,yearDelta/4)
+  }
   Plot.distFn({
-    fn: foo,
-    xScale: Scale.date({ min: 40000000000 , max: 60000000000 })
+    fn: foo
   })
   `,
   },

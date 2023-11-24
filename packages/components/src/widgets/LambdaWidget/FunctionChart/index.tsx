@@ -6,7 +6,6 @@ import {
   SqError,
   SqLambda,
   SqLinearScale,
-  SqDateScale,
   SqNumberValue,
   SqDateValue,
   SqNumericFnPlot,
@@ -65,16 +64,14 @@ export const FunctionChart: FC<FunctionChartProps> = ({
   const signatures = fn.signatures();
   const domain = signatures[0][0]?.domain;
 
-  const min: number = domain?.min ?? settings.functionChartSettings.start;
-  const max: number = domain?.max ?? settings.functionChartSettings.stop;
+  const min: number = settings.functionChartSettings.start;
+  const max: number = settings.functionChartSettings.stop;
 
-  let xScale;
-  const isDateRange = domain?._value.type === "DateRange";
-  if (isDateRange) {
-    xScale = SqDateScale.create({ min, max });
-  } else {
-    xScale = SqLinearScale.create({ min, max });
-  }
+  const xScale =
+    domain?.toScale({ min, max }) || SqLinearScale.create({ min, max });
+
+  const isDateRange = xScale.tag === "date";
+
   const yScale = SqLinearScale.create({});
 
   const wrapWithType = (v: number) =>

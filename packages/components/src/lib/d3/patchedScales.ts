@@ -76,13 +76,15 @@ function patchLinearishTickFormat<
 
 function patchDateTickFormat<T extends ScaleLinear>(scale: T): T {
   scale.tickFormat = (_, specifier) => {
+    // Format the date as desired, here using a simple format
+    const format = shouldUseSquiggleDefaultFormat(specifier)
+      ? DEFAULT_DATE_FORMAT
+      : specifier;
+    const formatter = d3.timeFormat(format);
+
     return (num: d3.NumberValue) => {
       const date = new Date(num as number);
-      // Format the date as desired, here using a simple format
-      const format = shouldUseSquiggleDefaultFormat(specifier)
-        ? DEFAULT_DATE_FORMAT
-        : specifier;
-      return d3.timeFormat(format)(date);
+      return formatter(date);
     };
   };
 
