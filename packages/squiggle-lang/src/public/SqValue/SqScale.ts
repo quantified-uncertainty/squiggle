@@ -5,6 +5,7 @@ import {
   Scale,
   vScale,
 } from "../../value/index.js";
+import { SqNumberValue } from "./index.js";
 
 export const wrapScale = (value: Scale): SqScale => {
   switch (value.type) {
@@ -44,6 +45,9 @@ abstract class SqAbstractScale<T extends Scale["type"]> {
   }
   get title() {
     return this._value.title;
+  }
+  numberToValue(v: number) {
+    return SqNumberValue.create(v);
   }
 }
 
@@ -111,6 +115,10 @@ export class SqDateScale extends SqAbstractScale<"date"> {
 
   static create(args: CommonScaleArgs = {}) {
     return new SqDateScale({ type: "date", ...args });
+  }
+
+  override numberToValue(v: number) {
+    return SqNumberValue.create(v);
   }
 }
 

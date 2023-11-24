@@ -2,10 +2,8 @@ import { ScaleContinuousNumeric } from "d3";
 
 import {
   Env,
-  SqDateValue,
   SqDistFnPlot,
   SqDistribution,
-  SqNumberValue,
   SqNumericFnPlot,
 } from "@quri/squiggle-lang";
 
@@ -57,17 +55,10 @@ export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot>(
 ) {
   const scale = sqScaleToD3(plot.xScale);
 
-  const signatures = plot.fn.signatures();
-  const domain = signatures[0][0]?.domain;
-  const isDateRange = domain?._value.type === "DateRange";
-
   scale.domain([
     plot.xScale?.min ?? functionChartDefaults.min,
     plot.xScale?.max ?? functionChartDefaults.max,
   ]);
-
-  const wrapWithType = (v: number) =>
-    isDateRange ? SqDateValue.fromNumber(v) : SqNumberValue.create(v);
 
   const chartPointsToRender = rangeByCount({
     scale,
@@ -81,7 +72,7 @@ export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot>(
   const errors: ImageError[] = [];
 
   for (const x of chartPointsToRender) {
-    const result = plot.fn.call([wrapWithType(x)], environment);
+    const result = plot.fn.call([plot.xScale.numberToValue(x)], environment);
     if (result.ok) {
       if (result.value.tag === "Number" && plot.tag === "numericFn") {
         functionImage.push({
