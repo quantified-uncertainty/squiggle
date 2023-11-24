@@ -6,49 +6,24 @@ import {
   useState,
 } from "react";
 
-import * as prettier from "prettier/standalone";
-
-import { defaultKeymap } from "@codemirror/commands";
-import { syntaxHighlighting } from "@codemirror/language";
-import { setDiagnostics } from "@codemirror/lint";
-import { Compartment, EditorState } from "@codemirror/state";
+import { EditorState } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
-// From basic setup
-import {
-  autocompletion,
-  closeBrackets,
-  closeBracketsKeymap,
-  completionKeymap,
-} from "@codemirror/autocomplete";
-import { history, historyKeymap, indentWithTab } from "@codemirror/commands";
-import {
-  bracketMatching,
-  foldGutter,
-  foldKeymap,
-  indentOnInput,
-} from "@codemirror/language";
-import { lintKeymap } from "@codemirror/lint";
-import { highlightSelectionMatches, searchKeymap } from "@codemirror/search";
-import {
-  drawSelection,
-  dropCursor,
-  highlightActiveLine,
-  highlightActiveLineGutter,
-  highlightSpecialChars,
-  lineNumbers,
-} from "@codemirror/view";
 
-import * as squigglePlugin from "@quri/prettier-plugin-squiggle/standalone";
-import {
-  SqCompileError,
-  SqError,
-  SqProject,
-  SqRuntimeError,
-  SqValuePath,
-} from "@quri/squiggle-lang";
+import { SqError, SqProject, SqValuePath } from "@quri/squiggle-lang";
 
-import { lightThemeHighlightingStyle } from "./languageSupport/highlightingStyle.js";
-import { squiggleLanguageSupport } from "./languageSupport/squiggle.js";
+import {
+  compViewNodeListener,
+  formatSquiggle,
+  getCodeEditorExtensions,
+  scrollTo,
+  setErrors,
+  setLineWrapping,
+  setOnChange,
+  setOnSubmit,
+  setProject,
+  setShowGutter,
+  setWidthHeight,
+} from "./getCodeEditorExtensions.js";
 
 interface CodeEditorProps {
   defaultValue: string;
@@ -69,15 +44,6 @@ export type CodeEditorHandle = {
   scrollTo(position: number): void;
   viewCurrentPosition(): void;
 };
-
-const compTheme = new Compartment();
-const compGutter = new Compartment();
-const compUpdateListener = new Compartment();
-const compSubmitListener = new Compartment();
-const compFormatListener = new Compartment();
-const compViewNodeListener = new Compartment();
-const compLineWrapping = new Compartment();
-const compLanguageSupport = new Compartment();
 
 export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
   function CodeEditor(
@@ -102,41 +68,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
       if (typeof window === "undefined") {
         return; // no SSR
       }
-      const extensions = [
-        highlightSpecialChars(),
-        history(),
-        drawSelection(),
-        dropCursor(),
-        EditorState.allowMultipleSelections.of(true),
-        indentOnInput(),
-        syntaxHighlighting(lightThemeHighlightingStyle, { fallback: true }),
-        bracketMatching(),
-        closeBrackets(),
-        autocompletion(),
-        highlightSelectionMatches({
-          wholeWords: true,
-          highlightWordAroundCursor: false, // Works weird on fractions! 5.3e10K
-        }),
-        compSubmitListener.of([]),
-        compFormatListener.of([]),
-        compViewNodeListener.of([]),
-        keymap.of([
-          ...closeBracketsKeymap,
-          ...defaultKeymap,
-          ...searchKeymap,
-          ...historyKeymap,
-          ...foldKeymap,
-          ...completionKeymap,
-          ...lintKeymap,
-          indentWithTab,
-        ]),
-        compGutter.of([]),
-        compUpdateListener.of([]),
-        compTheme.of([]),
-        compLanguageSupport.of([]),
-        // might be unnecessary, but might help with redraw if `useEffect` configuring the compartment fires too late
-        compLineWrapping.of(lineWrapping ? [EditorView.lineWrapping] : []),
-      ];
+      const extensions = getCodeEditorExtensions({ lineWrapping });
 
       const state = EditorState.create({
         doc: defaultValue,
@@ -149,40 +81,6 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
       // we initialize the view only once; no need for deps
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-
-    const format = useCallback(async () => {
-      if (!view) return;
-      const code = view.state.doc.toString();
-      const { formatted, cursorOffset } = await prettier.formatWithCursor(
-        code,
-        {
-          parser: "squiggle",
-          plugins: [squigglePlugin],
-          cursorOffset: view.state.selection.main.to,
-        }
-      );
-      onChange(formatted);
-      view.dispatch({
-        changes: {
-          from: 0,
-          to: view.state.doc.length,
-          insert: formatted,
-        },
-        selection: {
-          anchor: cursorOffset,
-        },
-      });
-    }, [onChange, view]);
-
-    const scrollTo = (position: number) => {
-      view?.dispatch({
-        selection: {
-          anchor: position,
-        },
-        scrollIntoView: true,
-      });
-      view?.focus();
-    };
 
     const viewCurrentPosition = useCallback(() => {
       if (!onViewValuePath || !view || !sourceId) {
@@ -198,98 +96,47 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
       }
     }, [onViewValuePath, project, sourceId, view]);
 
-    useImperativeHandle(ref, () => ({ format, scrollTo, viewCurrentPosition }));
+    useImperativeHandle(ref, () => ({
+      format: () => {
+        if (!view) return;
+        formatSquiggle(view);
+      },
+      scrollTo: (position) => {
+        if (!view) return;
+        scrollTo(view, position);
+      },
+      viewCurrentPosition,
+    }));
 
     useEffect(() => {
-      view?.dispatch({
-        effects: compGutter.reconfigure(
-          showGutter
-            ? [
-                lineNumbers(),
-                highlightActiveLine(),
-                highlightActiveLineGutter(),
-                foldGutter(),
-              ]
-            : []
-        ),
-      });
+      if (!view) return;
+      setShowGutter(view, showGutter);
     }, [showGutter, view]);
 
     useEffect(() => {
-      view?.dispatch({
-        effects: compLanguageSupport.reconfigure(
-          squiggleLanguageSupport(project)
-        ),
-      });
+      if (!view) return;
+      setProject(view, project);
     }, [project, view]);
 
     useEffect(() => {
-      view?.dispatch({
-        effects: compUpdateListener.reconfigure(
-          EditorView.updateListener.of((update) => {
-            if (update.docChanged) {
-              onChange(update.state.doc.toString());
-            }
-          })
-        ),
-      });
+      if (!view) return;
+      setOnChange(view, onChange);
     }, [onChange, view]);
 
     useEffect(() => {
-      view?.dispatch({
-        effects: compTheme.reconfigure(
-          EditorView.theme({
-            "&": {
-              ...(width === undefined ? {} : { width }),
-              ...(height === undefined ? {} : { height }),
-            },
-            ".cm-selectionMatch": { backgroundColor: "#33ae661a" },
-            ".cm-content": { padding: 0 },
-            ":-moz-focusring.cm-content": { outline: "none" },
-          })
-        ),
-      });
+      if (!view) return;
+      setWidthHeight(view, { width, height });
     }, [width, height, view]);
 
     useEffect(() => {
-      view?.dispatch({
-        effects: compLineWrapping.reconfigure(
-          lineWrapping ? [EditorView.lineWrapping] : []
-        ),
-      });
+      if (!view) return;
+      setLineWrapping(view, lineWrapping);
     }, [lineWrapping, view]);
 
     useEffect(() => {
-      view?.dispatch({
-        effects: compSubmitListener.reconfigure(
-          keymap.of([
-            {
-              key: "Mod-Enter",
-              run: () => {
-                onSubmit?.();
-                return true;
-              },
-            },
-          ])
-        ),
-      });
+      if (!view) return;
+      setOnSubmit(view, onSubmit);
     }, [onSubmit, view]);
-
-    useEffect(() => {
-      view?.dispatch({
-        effects: compFormatListener.reconfigure(
-          keymap.of([
-            {
-              key: "Alt-Shift-f",
-              run: () => {
-                format();
-                return true;
-              },
-            },
-          ])
-        ),
-      });
-    }, [format, view]);
 
     useEffect(() => {
       if (!view) return;
@@ -310,42 +157,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
 
     useEffect(() => {
       if (!view) return;
-      const docLength = view.state.doc.length;
-
-      view.dispatch(
-        setDiagnostics(
-          view.state,
-          errors
-            .map((err) => {
-              if (
-                !(
-                  err instanceof SqCompileError || err instanceof SqRuntimeError
-                )
-              ) {
-                return undefined;
-              }
-              const location = err.location();
-              if (!location) {
-                return undefined;
-              }
-              return {
-                location,
-                err,
-              };
-            })
-            .filter((err): err is NonNullable<typeof err> => {
-              return Boolean(
-                err && err.location && err.location.end.offset < docLength
-              );
-            })
-            .map((err) => ({
-              from: err.location.start.offset,
-              to: err.location.end.offset,
-              severity: "error",
-              message: err.err.toString(),
-            }))
-        )
-      );
+      setErrors(view, errors);
     }, [errors, view]);
 
     const setViewDom = useCallback(
