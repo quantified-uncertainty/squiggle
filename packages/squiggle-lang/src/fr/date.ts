@@ -50,7 +50,7 @@ export const library = [
       }),
 
       makeDefinition([frNumber, frNumber, frNumber], ([yr, month, date]) => {
-        return vDate(new Date(yr, month + 1, date));
+        return vDate(new Date(yr, month - 1, date));
       }),
     ],
   }),
