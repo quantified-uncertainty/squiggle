@@ -108,7 +108,7 @@ async function createModel({
   `);
 
   return await executeCommonOperation(mutation, {
-    variables: { input: { groupSlug, slug, code: "2+2" } },
+    variables: { input: { groupSlug, slug, code: "2+2", version: "dev" } },
     expectedTypename: "CreateSquiggleSnippetModelResult",
   });
 }

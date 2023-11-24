@@ -44,7 +44,7 @@ const NewButton: FC<{ group: string }> = ({ group }) => {
 
   const router = useRouter();
 
-  if (segment === "members") {
+  if (segment === "members" || segment === "invite-link") {
     return null;
   }
 

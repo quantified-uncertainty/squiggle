@@ -5,7 +5,7 @@ import {
 } from "@/relative-values/types";
 import { RelativeValuesExport } from "./RelativeValuesExport";
 import { prisma } from "@/prisma";
-import { modelWhereHasAccess } from "./Model";
+import { modelWhereHasAccess } from "../helpers/modelHelpers";
 import { Owner } from "./Owner";
 import { prismaConnectionHelpers } from "@pothos/plugin-prisma";
 

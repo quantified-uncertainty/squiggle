@@ -38,7 +38,7 @@ const { runOk, runError } = createInputRunners(
 
 test("no auth", async () => {
   const result = await runError(
-    { code: "2+2", slug: "testmodel" },
+    { code: "2+2", slug: "testmodel", version: "dev" },
     "BaseError"
   );
   expect(result.message).toMatch("Not authorized");
@@ -47,7 +47,7 @@ test("no auth", async () => {
 test("bad slug", async () => {
   await setCurrentUser("mockuser");
   const result = await runError(
-    { code: "2+2", slug: "foo bar" },
+    { code: "2+2", slug: "foo bar", version: "dev" },
     "ValidationError"
   );
   expect(result.message).toMatch("[input.slug] Must be alphanumerical");
@@ -55,7 +55,11 @@ test("bad slug", async () => {
 
 test("basic", async () => {
   await setCurrentUser("mockuser");
-  const result = await runOk({ code: "2+2", slug: "testmodel" });
+  const result = await runOk({
+    code: "2+2",
+    slug: "testmodel",
+    version: "dev",
+  });
 
   expect(result.model.slug).toBe("testmodel");
   expect(result.model.owner.__typename).toBe("User");
@@ -68,6 +72,7 @@ test("private", async () => {
   const result = await runOk({
     code: "2+2",
     slug: "testmodel",
+    version: "dev",
     isPrivate: true,
   });
 
@@ -85,6 +90,7 @@ test("for group", async () => {
     code: "2+2",
     slug: "testmodel",
     groupSlug: "testgroup",
+    version: "dev",
   });
 
   expect(result.model.owner.__typename).toBe("Group");
@@ -99,6 +105,7 @@ test("for group with bad slug", async () => {
       code: "2+2",
       slug: "testmodel",
       groupSlug: "no such group",
+      version: "dev",
     },
     "ValidationError"
   );
@@ -109,10 +116,10 @@ test("for group with bad slug", async () => {
 test("duplicate", async () => {
   await setCurrentUser("mockuser");
 
-  await runOk({ code: "2+2", slug: "testmodel" });
+  await runOk({ code: "2+2", slug: "testmodel", version: "dev" });
 
   const result = await runError(
-    { code: "2+2", slug: "testmodel" },
+    { code: "2+2", slug: "testmodel", version: "dev" },
     "BaseError"
   );
 

@@ -2,7 +2,7 @@ import { prisma } from "@/prisma";
 import { builder } from "@/graphql/builder";
 
 import { Model } from "../types/Model";
-import { getSelf } from "../types/User";
+import { getSelf } from "../helpers/userHelpers";
 import { decodeGlobalIdWithTypename } from "../utils";
 
 builder.mutationField("adminUpdateModelVersion", (t) =>

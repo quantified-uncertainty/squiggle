@@ -1,33 +1,44 @@
 import { ReactNode } from "react";
-import { UseMutationConfig } from "react-relay";
-import { GraphQLTaggedNode, VariablesOf } from "relay-runtime";
+import { GraphQLTaggedNode } from "relay-runtime";
 
 import { Button } from "@quri/ui";
 
 import {
   CommonMutationParameters,
+  UseAsyncMutationAct,
   useAsyncMutation,
 } from "@/hooks/useAsyncMutation";
 
+/*
+ * Props for this component include:
+ * - some props that are passed to `<Button>`
+ * - params for `useAsyncMutation` hook
+ * - params for `runMutation` call on click
+ */
 export function MutationButton<
   TMutation extends CommonMutationParameters<TTypename> = never,
   const TTypename extends string = never,
 >({
   mutation,
-  variables,
-  updater,
   expectedTypename,
   title,
-  theme = "default",
+  // button props
+  theme,
+  size,
+  // runMutation params
+  variables,
+  updater,
+  onCompleted,
 }: {
   mutation: GraphQLTaggedNode;
-  variables: VariablesOf<TMutation>;
-  updater?: UseMutationConfig<TMutation>["updater"];
   expectedTypename: TTypename;
   title: string;
-  theme?: "default" | "primary"; // TODO - extract type from <Button>
-}): ReactNode {
-  const [runMutation, inFlight] = useAsyncMutation<TMutation>({
+} & Pick<Parameters<typeof Button>[0], "theme" | "size"> &
+  Pick<
+    Parameters<UseAsyncMutationAct<TMutation, TTypename>>[0],
+    "variables" | "updater" | "onCompleted"
+  >): ReactNode {
+  const [runMutation, inFlight] = useAsyncMutation<TMutation, TTypename>({
     mutation,
     expectedTypename,
   });
@@ -36,11 +47,12 @@ export function MutationButton<
     await runMutation({
       variables,
       updater,
+      onCompleted,
     });
   };
 
   return (
-    <Button onClick={act} disabled={inFlight} theme={theme}>
+    <Button onClick={act} disabled={inFlight} theme={theme} size={size}>
       {title}
     </Button>
   );

@@ -47,6 +47,7 @@ async function createModel(slug: string, options: { private?: boolean } = {}) {
       input: {
         code: "2+2",
         slug,
+        version: "dev",
         ...(options.private ? { isPrivate: true } : {}),
       },
     },
