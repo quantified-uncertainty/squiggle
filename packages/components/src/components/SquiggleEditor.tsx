@@ -3,7 +3,7 @@ import { FC, useMemo, useRef } from "react";
 import { useUncontrolledCode } from "../lib/hooks/index.js";
 import { useSquiggle } from "../lib/hooks/useSquiggle.js";
 import { getErrors } from "../lib/utility.js";
-import { CodeEditor, CodeEditorHandle } from "./CodeEditor.js";
+import { CodeEditor, CodeEditorHandle } from "./CodeEditor/index.js";
 import { DynamicSquiggleViewer } from "./DynamicSquiggleViewer.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
 import { useRunnerState } from "../lib/hooks/useRunnerState.js";

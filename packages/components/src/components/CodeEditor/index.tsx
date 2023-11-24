@@ -47,8 +47,8 @@ import {
   SqValuePath,
 } from "@quri/squiggle-lang";
 
-import { lightThemeHighlightingStyle } from "../languageSupport/highlightingStyle.js";
-import { squiggleLanguageSupport } from "../languageSupport/squiggle.js";
+import { lightThemeHighlightingStyle } from "./languageSupport/highlightingStyle.js";
+import { squiggleLanguageSupport } from "./languageSupport/squiggle.js";
 
 interface CodeEditorProps {
   defaultValue: string;

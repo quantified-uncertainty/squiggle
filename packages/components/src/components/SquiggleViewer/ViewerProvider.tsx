@@ -14,7 +14,7 @@ import {
 import { SqValue, SqValuePath } from "@quri/squiggle-lang";
 
 import { CalculatorState } from "../../widgets/CalculatorWidget/types.js";
-import { CodeEditorHandle } from "../CodeEditor.js";
+import { CodeEditorHandle } from "../CodeEditor/index.js";
 import {
   PartialPlaygroundSettings,
   PlaygroundSettings,

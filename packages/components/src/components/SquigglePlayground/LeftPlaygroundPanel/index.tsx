@@ -25,7 +25,7 @@ import {
   useUncontrolledCode,
 } from "../../../lib/hooks/index.js";
 import { altKey, getErrors } from "../../../lib/utility.js";
-import { CodeEditor, CodeEditorHandle } from "../../CodeEditor.js";
+import { CodeEditor, CodeEditorHandle } from "../../CodeEditor/index.js";
 import { PlaygroundSettings } from "../../PlaygroundSettings.js";
 import { ToolbarItem } from "../../ui/PanelWithToolbar/ToolbarItem.js";
 import { PanelWithToolbar } from "../../ui/PanelWithToolbar/index.js";

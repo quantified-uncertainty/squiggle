@@ -1,4 +1,4 @@
-import { parser } from "../src/languageSupport/generated/squiggle.js";
+import { parser } from "../src/components/CodeEditor/languageSupport/generated/squiggle.js";
 
 describe("Lezer grammar", () => {
   test("Basic", () => {
