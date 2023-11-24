@@ -599,7 +599,7 @@ function domainIsEqual(valueA: Domain, valueB: Domain) {
         valueB as NumericRangeDomain
       );
     default:
-      return true;
+      return false;
   }
 }
 
