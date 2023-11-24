@@ -41,8 +41,8 @@ export class DateRangeDomain extends BaseDomain {
   public max;
 
   constructor(
-    private _min: Date,
-    private _max: Date
+    _min: Date,
+    _max: Date
   ) {
     super();
     this.min = _min.getTime();
