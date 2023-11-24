@@ -96,7 +96,7 @@ export const DateTickFormat: Story = {
     code: `Plot.dist({
   dist: normal(50000000000,20000000000),
   title: "Beta(3, 5)",
-  xScale: Scale.date({ tickFormat: "%Y-%m-%dd" , title: "X Scale"}),
+  xScale: Scale.date({ tickFormat: "%Y-%m-%d" , title: "X Scale"}),
 })`,
   },
 };
