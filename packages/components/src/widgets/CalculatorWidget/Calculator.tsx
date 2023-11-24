@@ -32,7 +32,7 @@ const getEnvironment = (
   xyPointLength: modelEnvironment.xyPointLength,
 });
 
-async function runSquiggleCode(
+export async function runSquiggleCode(
   code: string,
   environment: Env
 ): Promise<SqValueResult | undefined> {

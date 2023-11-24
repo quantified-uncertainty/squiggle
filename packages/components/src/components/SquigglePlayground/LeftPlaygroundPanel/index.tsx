@@ -34,13 +34,15 @@ import { DependencyGraphModal } from "./DependencyGraphModal.js";
 import { GlobalSettingsModal } from "./GlobalSettingsModal.js";
 import { RunMenuItem } from "./RunMenuItem.js";
 import OpenAI from "openai";
+import { random } from "lodash";
+import { runSquiggleCode } from "../../../widgets/CalculatorWidget/Calculator.js";
 
 export type RenderExtraControls = (props: {
   openModal: (name: string) => void;
 }) => ReactNode;
 
 const squiggleIntro = `
-  Write Squiggle code, using the attached documentation for how it works.  Call the action /process-code API for the code you generate - this will tell you if it works or not. Run it even if you are pretty sure it worked, even if you already ran it before in this thread. 
+  Write Squiggle code, using the attached documentation for how it works.  
 
 Key instructions:
 1. Write the entire code, don't truncate it. So don't ever use "...", just write out the entire code. The code output you produce should be directly runnable in Squiggle, it shouldn't need any changes from users.
@@ -55,7 +57,7 @@ When writing Squiggle code, it's important to avoid certain common mistakes:
 
 1.  Input Types: Use Input.text for numeric inputs instead of Input.number.
 2. Variable Declaration: Directly assign values to variables without using keywords like let. For example, use foo = 3 instead of let foo = 3.
-3. Variable Expansion: Avoid using syntax like |v...| or |...v| as variable expansion is not supported.
+3. No Spread operator: Avoid using syntax like |v...| or |...v| as the spread operator is not supported.
 4. Anonymous Functions: Write anonymous functions using the syntax {|e| 3} instead of (e) => 3.
 5. Conditional Statements: There are no case or switch statements. Use if/else for conditional logic.
 6. Function Parameters: When using functions like normal, specify the standard deviation with stdev instead of sd. For example, use normal({mean: 0.3, stdev: 0.1}) instead of normal({mean: 0.3, sd: 0.1}).
@@ -70,6 +72,9 @@ When writing Squiggle code, it's important to avoid certain common mistakes:
 15. There's no recursion.
 16. Dict keys must be lowercase.
 17. Only use Inputs directly inside calculators. They won't return numbers, just input types.
+18. Arrows/pipes ("->") can't be the first character on a line. They must be on the same line as the previous expression.
+19. Lists are 0-indexed, not 1-indexed.
+20. You can only assign one variable at a time. You can't do "x,y = 1,2" or "[x,y] = [1,2]".
 
 Here's are some simple example Squiggle programs:
 \`\`\`Squiggle
@@ -194,6 +199,9 @@ const openai = new OpenAI({
   dangerouslyAllowBrowser: true,
 });
 function extractCodeBlock(mdText) {
+  if (!mdText) {
+    return "No markdown text provided.";
+  }
   // Regular expression to match code blocks and capture their content
   const codeBlockRegex = /```[\w]*\n?([\s\S]*?)(?:```|$)/g;
 
@@ -217,69 +225,9 @@ function extractCodeBlock(mdText) {
   return firstBlockContent;
 }
 
-async function main5() {
-  const runner = openai.beta.chat.completions
-    .runFunctions({
-      model: "gpt-3.5-turbo",
-      messages: [{ role: "user", content: "How is the weather this week?" }],
-      functions: [
-        {
-          function: getCurrentLocation,
-          parse: (response) => response, // Add a simple parse function
-          description: "Gets the current location", // Add a description
-          parameters: {
-            type: "object",
-            properties: {},
-          },
-        },
-      ],
-    })
-    .on("message", (message) => console.log(message));
-
-  const finalContent = await runner.finalContent();
-  console.log();
-  console.log("Final content:", finalContent);
-}
-
 async function getCurrentLocation() {
   console.log("GETITNG LOCATION");
   return "Boston"; // Simulate lookup
-}
-async function main3(fn) {
-  const stream = openai.beta.chat.completions
-    .runFunctions({
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "user",
-          content: `Please write a very complicated squiggle program to estimate the costs & benefits of air purifiers in the office, add a calculator. Use the following as interesting instructions:${squiggleIntro}`,
-        },
-      ],
-      functions: [
-        {
-          function: getCurrentLocation,
-          parse: (response) => response, // Add a simple parse function
-          description: "Gets the current location", // Add a description
-          parameters: {
-            type: "object",
-            properties: {},
-          },
-        },
-      ],
-      stream: true,
-    })
-    .on("message", (message) => {
-      const mainContent = extractCodeBlock(message.content);
-      console.log("MESSAGE", message, mainContent);
-      fn(mainContent);
-    });
-  let foo = "";
-  // for await (const chunk of stream) {
-  //   foo += chunk.choices[0]?.delta?.content || "";
-  //   console.log("RESULT", foo);
-  //   fn(extractCodeBlock(foo));
-  // }
-  console.log("COMPLETE");
 }
 
 const fakeResponse = `
@@ -312,6 +260,78 @@ percentageOfCatsThatAreOrangeOrStriped = {
 
 `;
 
+//"gpt-4-1106-preview
+//"gpt-3.5-turbo"
+
+async function shouldRunAgain() {
+  const foo = random(0, 10);
+  console.log("GOT RANDOM!!!!", foo);
+  if (foo > 3) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+async function main3(
+  fn,
+  onComplete,
+  messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[]
+) {
+  console.log("Starting Main3, with Messages", messages);
+  const stream = openai.beta.chat.completions
+    .runFunctions({
+      model: "gpt-3.5-turbo",
+      messages: messages,
+      functions: [
+        {
+          function: getCurrentLocation,
+          parse: (response) => response, // Add a simple parse function
+          description: "Gets the current location", // Add a description
+          parameters: {
+            type: "object",
+            properties: {},
+          },
+        },
+      ],
+      stream: true,
+    })
+    .on("message", (message) => {
+      messages = [...messages, message];
+      // const mainContent = message.content;
+      const mainContent = extractCodeBlock(message.content);
+      console.log("MESSAGE", message, mainContent);
+      fn(mainContent);
+    })
+    .on("finalMessage", (message) => {
+      console.log("FINAL MESSAGE", message);
+      onComplete(messages);
+    })
+    .on("totalUsage", (usage) => {
+      console.log("TOTAL USAGE", usage);
+    })
+    .on("functionCall", (call) => {
+      console.log("FUNCTION CALL", call);
+    })
+    .on("functionCallResult", (result) => {
+      console.log("FUNCTION CALL RESULT", result);
+    })
+    .on("finalFunctionCallResult", (result) => {
+      if (result == "true") {
+        console.log("SUCCEEDED!!!");
+      }
+      console.log("FINAL FUNCTION CALL RESULT", result);
+      // stream._addMessage({""})
+    });
+
+  let foo = "";
+  for await (const chunk of stream) {
+    foo += chunk.choices[0]?.delta?.content || "";
+    fn(extractCodeBlock(foo));
+    // fn(foo);
+  }
+}
+
 function logWords(str: string, logStr: (string) => void): void {
   const parts = str.split("\n");
   let s = "";
@@ -329,9 +349,48 @@ function logWords(str: string, logStr: (string) => void): void {
   0;
 }
 
-async function main(fn) {
-  logWords(fakeResponse, fn);
+async function main(fn, getSquiggleOutput: () => SquiggleOutput | undefined) {
+  const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
+    {
+      role: "user",
+      content: `Please write a 50-line Squiggle program about financial projections over time, with a calculator. Only use functions mentioned here. Try hard to make sure it's valid. Use the following as interesting instructions:${squiggleIntro}`,
+      // content: "Write a 2-line JS program and respond 'ok'",
+    },
+  ];
+  // logWords(fakeResponse, fn);
   // main3(fn);
+  let currentCode = "";
+
+  const newFn = (str) => {
+    currentCode = str;
+    fn(str);
+  };
+
+  let tries = 0;
+
+  const onComplete = async (messages) => {
+    const output = await runSquiggleCode(currentCode, {
+      sampleCount: 50,
+      xyPointLength: 50,
+    });
+    console.log("Ran Squiggle Code", currentCode, output, "try", tries);
+    if (output) {
+      if (!output.ok && tries < 5) {
+        const newMessage: OpenAI.Chat.Completions.ChatCompletionUserMessageParam =
+          {
+            role: "user",
+            content: "Output Failed. Try again." + JSON.stringify(output.value),
+          };
+        main3(fn, onComplete, [...messages, newMessage]);
+        tries += 1;
+      }
+      if (output.ok) {
+        console.log("SUCCESS!!!!");
+      }
+    }
+  };
+
+  main3(newFn, onComplete, messages);
 }
 
 type Props = {
@@ -379,7 +438,7 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
 
     useEffect(() => {
       const foo = async () => {
-        await main(setCode);
+        await main(setCode, () => squiggleOutput);
       };
       foo();
     }, []);
