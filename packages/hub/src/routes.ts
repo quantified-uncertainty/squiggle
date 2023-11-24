@@ -200,8 +200,16 @@ export function termsOfServiceRoute() {
 export function groupInviteLink(params: {
   groupSlug: string;
   inviteToken: string;
+  blur?: boolean;
 }) {
+  let token = params.inviteToken;
+  if (params.blur) {
+    const visibleLength = 4;
+    token =
+      token.substring(0, visibleLength) +
+      "•".repeat(token.length - visibleLength);
+  }
   return `${groupRoute({
     slug: params.groupSlug,
-  })}/invite-link?token=${params.inviteToken}`;
+  })}/invite-link?token=${token}`;
 }

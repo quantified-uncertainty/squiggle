@@ -92,6 +92,7 @@ export const AcceptGroupInvitePage: FC<{
 
   return (
     <div>
+      <p className="mb-4">{`You've been invited to join ${group.slug} group.`}</p>
       <MutationButton<
         AcceptGroupInvitePageMutation,
         "AcceptReusableGroupInviteTokenResult"

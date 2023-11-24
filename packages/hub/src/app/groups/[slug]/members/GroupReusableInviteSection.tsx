@@ -38,19 +38,24 @@ export const GroupReusableInviteSection: FC<Props> = ({ groupRef }) => {
     if (!group.reusableInviteToken) {
       return undefined;
     }
-    const relativeInviteLink = groupInviteLink({
+    const routeArgs = {
       groupSlug: group.slug,
       inviteToken: group.reusableInviteToken,
-    });
+    };
+    const fullLink = groupInviteLink(routeArgs);
+    const blurredLink = groupInviteLink({ ...routeArgs, blur: true });
 
-    return `${origin}${relativeInviteLink}`;
+    return {
+      full: `${origin}${fullLink}`,
+      blurred: `${origin}${blurredLink}`,
+    };
   }, [group.reusableInviteToken, group.slug, origin]);
 
   const copy = () => {
     if (!inviteLink) {
       return;
     }
-    navigator.clipboard.writeText(inviteLink);
+    navigator.clipboard.writeText(inviteLink.full);
     toast("Copied to clipboard", "confirmation");
   };
 
@@ -68,15 +73,13 @@ export const GroupReusableInviteSection: FC<Props> = ({ groupRef }) => {
                 size={24}
                 className="text-slate-400 group-hover:text-slate-500"
               />
-              <code className="text-xs">{inviteLink}</code>
+              <code className="text-xs">{inviteLink.blurred}</code>
             </div>
           </TextTooltip>
         ) : (
           <Skeleton height={36} />
         )
-      ) : (
-        <div className="text-slate-400">Invite link is not configured.</div>
-      )}
+      ) : null}
       <div className="flex gap-2 mt-4">
         <MutationButton<
           GroupReusableInviteSection_CreateMutation,
