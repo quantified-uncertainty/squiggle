@@ -26,25 +26,25 @@ const maker = new FnFactory({
 
 const defaultScale = { type: "linear" } satisfies Scale;
 
+export function assertValidMinMax(scale: Scale) {
+  const hasMin = !scale.min;
+  const hasMax = !scale.max;
+
+  // Validate scale properties
+  if (hasMin !== hasMax) {
+    throw new REArgumentError(
+      `Scale ${hasMin ? "min" : "max"} set without ${
+        hasMin ? "max" : "min"
+      }. Must set either both or neither.`
+    );
+  } else if (hasMin && hasMax && scale.min! >= scale.max!) {
+    throw new REArgumentError(
+      `Scale min (${scale.min}) is greater or equal than than max (${scale.max})`
+    );
+  }
+}
+
 function createScale(scale: Scale | null, domain: VDomain | undefined): Scale {
-  if (scale && scale.min && scale.max) {
-    // complete scale, nothing to improve
-    return scale;
-  }
-
-  if (scale) {
-    if (scale.min === undefined && scale.max !== undefined) {
-      throw new REArgumentError(
-        "Scale max set without min. Must set either both or neither."
-      );
-    }
-    if (scale.min !== undefined && scale.max === undefined) {
-      throw new REArgumentError(
-        "Scale min set without max. Must set either both or neither."
-      );
-    }
-  }
-
   /*
    * There are several possible combinations here:
    * 1. Scale with min/max -> ignore domain, keep scale
@@ -52,34 +52,17 @@ function createScale(scale: Scale | null, domain: VDomain | undefined): Scale {
    * 3. Scale without min/max, no domain -> keep scale
    * 4. No scale and no domain -> default scale
    */
+  //TODO: It might be good to check if scale is outside the bounds of the domain, and throw an error then or something.
 
-  if (
-    !domain ||
-    (domain.value.type !== "NumericRange" && domain.value.type !== "DateRange")
-  ) {
-    // no domain, use explicit scale or default scale
-    return scale ?? defaultScale;
-  }
+  scale && assertValidMinMax(scale);
 
-  if (scale) {
-    return {
-      ...scale,
-      min: scale.min ?? domain.value.min,
-      max: scale.max ?? domain.value.max,
-    };
-  } else if (domain.value.type === "DateRange") {
-    return {
-      type: "date",
-      min: domain.value.min,
-      max: domain.value.max,
-    };
-  } else {
-    return {
-      type: "linear",
-      min: domain.value.min,
-      max: domain.value.max,
-    };
-  }
+  const _defaultScale = domain ? domain.value.toDefaultScale() : defaultScale;
+
+  // This gets min/max from domain, if it's not on scale.
+  return {
+    ..._defaultScale,
+    ...(scale || {}),
+  };
 }
 
 // This function both extract the domain and checks that the function has only one parameter.

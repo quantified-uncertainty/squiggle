@@ -6,12 +6,7 @@ import {
   REOther,
 } from "../errors/messages.js";
 import { Lambda } from "../reducer/lambda.js";
-import {
-  date,
-  dateFromMs,
-  dateToString,
-  duration,
-} from "../utility/DateTime.js";
+import { dateToString, duration } from "../utility/DateTime.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { DateRangeDomain, Domain, NumericRangeDomain } from "./domain.js";
 import { shuffle } from "../utility/E_A.js";
@@ -625,10 +620,9 @@ export class VDomain extends BaseValue implements Indexable {
   }
 
   get(key: Value): VNumber | VDate {
-    const mapValue = (value: number) =>
-      this.domainType === "DateRange"
-        ? vDate(dateFromMs(value))
-        : vNumber(value);
+    const mapValue = (value: number | Date) =>
+      typeof value === "number" ? vNumber(value) : vDate(value);
+
     if (key.type === "String") {
       if (key.value === "min") {
         return mapValue(this.value.min);

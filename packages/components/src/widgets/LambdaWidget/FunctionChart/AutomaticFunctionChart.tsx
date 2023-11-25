@@ -3,10 +3,13 @@ import { FC, useState } from "react";
 import {
   Env,
   SqDistFnPlot,
+  SqDomain,
   SqError,
   SqLambda,
   SqLinearScale,
   SqNumericFnPlot,
+  SqNumericRangeDomain,
+  result,
 } from "@quri/squiggle-lang";
 
 import { MessageAlert } from "../../../components/Alert.js";
@@ -19,7 +22,7 @@ import { SquiggleErrorAlert } from "../../../components/SquiggleErrorAlert.js";
 import { DistFunctionChart } from "./DistFunctionChart.js";
 import { NumericFunctionChart } from "./NumericFunctionChart.js";
 
-type FunctionChartProps = {
+type AutomaticFunctionChartProps = {
   fn: SqLambda;
   settings: PlaygroundSettings;
   environment: Env;
@@ -44,8 +47,27 @@ const FunctionCallErrorAlert: FC<{ error: SqError }> = ({ error }) => {
     </MessageAlert>
   );
 };
+// Sees if it can get a valid result from either bounds of the domain.
+function getInferredFnOutputType(
+  domain: SqDomain,
+  fn: SqLambda,
+  environment: Env
+): result<string, SqError> {
+  const result1 = fn.call([domain.minValue], environment);
+  if (result1.ok) {
+    return { ok: true, value: result1.value.tag };
+  }
 
-export const FunctionChart: FC<FunctionChartProps> = ({
+  const result2 = fn.call([domain.maxValue], environment);
+  if (result2.ok) {
+    return { ok: true, value: result2.value.tag };
+  } else {
+    return { ok: false, value: result2.value };
+  }
+}
+
+//When no chart is given, the AutomaticFunctionChart tries to guess the best chart to use based on the function's output.
+export const AutomaticFunctionChart: FC<AutomaticFunctionChartProps> = ({
   fn,
   settings,
   environment,
@@ -63,33 +85,23 @@ export const FunctionChart: FC<FunctionChartProps> = ({
   const min: number = settings.functionChartSettings.start;
   const max: number = settings.functionChartSettings.stop;
 
-  const domain = fn.signatures().find((s) => s.length === 1)?.[0]?.domain;
+  const includedDomain = fn.signatures().find((s) => s.length === 1)?.[0]
+    ?.domain;
 
-  const xScale = domain
-    ? domain.toDefaultScale()
-    : SqLinearScale.create({ min, max });
+  const xDomain = includedDomain
+    ? includedDomain
+    : SqNumericRangeDomain.fromMinMax(min, max);
 
-  const result1 = fn.call([xScale.numberToValue(min)], environment);
-  const result2 = fn.call([xScale.numberToValue(max)], environment);
+  const inferredOutputType = getInferredFnOutputType(xDomain, fn, environment);
 
-  const getValidResult = () => {
-    if (result1.ok) {
-      return result1;
-    } else if (result2.ok) {
-      return result2;
-    } else {
-      return result1;
-    }
-  };
-  const validResult = getValidResult();
-
-  if (!validResult.ok) {
-    return <FunctionCallErrorAlert error={validResult.value} />;
+  if (!inferredOutputType.ok) {
+    return <FunctionCallErrorAlert error={inferredOutputType.value} />;
   }
 
   const yScale = SqLinearScale.create({});
+  const xScale = xDomain.toDefaultScale();
 
-  switch (validResult.value.tag) {
+  switch (inferredOutputType.value) {
     case "Dist": {
       const plot = SqDistFnPlot.create({
         fn,
@@ -131,7 +143,7 @@ export const FunctionChart: FC<FunctionChartProps> = ({
       return (
         <MessageAlert heading="Function Display Not Supported">
           There is no function visualization for this type of output:{" "}
-          <span className="font-bold">{validResult.value.tag}</span>
+          <span className="font-bold">{inferredOutputType.value}</span>
         </MessageAlert>
       );
   }

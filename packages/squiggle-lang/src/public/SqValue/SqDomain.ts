@@ -1,5 +1,11 @@
-import { Domain } from "../../value/domain.js";
-import { SqDateScale, SqLinearScale } from "./SqScale.js";
+import { dateToMs } from "../../utility/DateTime.js";
+import {
+  DateRangeDomain,
+  Domain,
+  NumericRangeDomain,
+} from "../../value/domain.js";
+import { SqDateScale, SqLinearScale, wrapScale } from "./SqScale.js";
+import { SqDateValue, SqNumberValue } from "./index.js";
 
 export function wrapDomain(value: Domain) {
   switch (value.type) {
@@ -15,17 +21,20 @@ export function wrapDomain(value: Domain) {
 // Domain internals are not exposed yet
 abstract class SqAbstractDomain<T extends Domain["type"]> {
   abstract tag: T;
-
-  constructor(public _value: Domain) {}
-
-  toString() {
-    return this._value.toString();
-  }
 }
 
-class SqNumericRangeDomain extends SqAbstractDomain<"NumericRange"> {
+export class SqNumericRangeDomain extends SqAbstractDomain<"NumericRange"> {
   tag = "NumericRange" as const;
 
+  constructor(public _value: NumericRangeDomain) {
+    super();
+  }
+
+  //A simple alternative to making a Domain object and pass that in.
+  static fromMinMax(min: number, max: number) {
+    return new this(new NumericRangeDomain(min, max));
+  }
+
   get min() {
     return this._value.min;
   }
@@ -34,16 +43,24 @@ class SqNumericRangeDomain extends SqAbstractDomain<"NumericRange"> {
     return this._value.max;
   }
 
+  get minValue() {
+    return SqNumberValue.create(this._value.min);
+  }
+
+  get maxValue() {
+    return SqNumberValue.create(this._value.max);
+  }
+
   toDefaultScale() {
-    return new SqLinearScale({
-      type: "linear",
-      min: this.min,
-      max: this.max,
-    });
+    return SqLinearScale.create(this._value.toDefaultScale());
   }
 }
-class SqDateRangeDomain extends SqAbstractDomain<"DateRange"> {
+export class SqDateRangeDomain extends SqAbstractDomain<"DateRange"> {
   tag = "DateRange" as const;
+
+  constructor(public _value: DateRangeDomain) {
+    super();
+  }
 
   get min() {
     return this._value.min;
@@ -53,12 +70,16 @@ class SqDateRangeDomain extends SqAbstractDomain<"DateRange"> {
     return this._value.max;
   }
 
+  get minValue() {
+    return SqDateValue.create(this._value.min);
+  }
+
+  get maxValue() {
+    return SqDateValue.create(this._value.max);
+  }
+
   toDefaultScale() {
-    return new SqDateScale({
-      type: "date",
-      min: this.min,
-      max: this.max,
-    });
+    return SqDateScale.create(this._value.toDefaultScale());
   }
 }
 

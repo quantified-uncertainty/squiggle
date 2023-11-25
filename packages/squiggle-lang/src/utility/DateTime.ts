@@ -92,7 +92,6 @@ export function dateFromMsToString(ms: number): string {
 }
 
 export const date = {
-  //   //The Rescript/JS implementation of Date is pretty mediocre. It would be good to improve upon later.
   fmap(t: Date, fn: (v: number) => number): Date {
     return dateFromMs(fn(dateToMs(t)));
   },
