@@ -127,10 +127,10 @@ export function annotationToDomain(value: Value): Domain {
   }
   const [min, max] = value.value;
   if (min.type !== "Number" && min.type !== "Date") {
-    throw new REArgumentError("Min value is not a number");
+    throw new REArgumentError("Min value is not a number or date");
   }
   if (max.type !== "Number" && max.type !== "Date") {
-    throw new REArgumentError("Max value is not a number");
+    throw new REArgumentError("Max value is not a number or date");
   }
 
   if (min.value >= max.value) {

@@ -53,6 +53,7 @@ function createScale(scale: Scale | null, domain: VDomain | undefined): Scale {
    * 4. No scale and no domain -> default scale
    */
   //TODO: It might be good to check if scale is outside the bounds of the domain, and throw an error then or something.
+  //TODO: It might also be good to check if the domain type matches the scale type, and throw an error if not.
 
   scale && assertValidMinMax(scale);
 
@@ -85,6 +86,14 @@ function extractDomainFromOneArgFunction(fn: Lambda): VDomain | undefined {
   return domain;
 }
 
+const _assertYScaleNotDateScale = (yScale: Scale | null) => {
+  if (yScale && yScale.type === "date") {
+    throw new REArgumentError(
+      "Using a date scale as the plot yScale is not yet supported."
+    );
+  }
+};
+
 export const library = [
   maker.make({
     name: "dists",
@@ -110,6 +119,8 @@ export const library = [
           ),
         ],
         ([{ dists, xScale, yScale, title, showSummary }]) => {
+          _assertYScaleNotDateScale(yScale);
+
           const distributions: LabeledDistribution[] = [];
           dists.forEach(({ name, value }) => {
             distributions.push({
@@ -150,6 +161,7 @@ export const library = [
           ),
         ],
         ([{ dist, xScale, yScale, title, showSummary }]) => {
+          _assertYScaleNotDateScale(yScale);
           return vPlot({
             type: "distributions",
             distributions: [{ distribution: dist }],
@@ -180,6 +192,7 @@ export const library = [
           ),
         ],
         ([{ fn, xScale, yScale, title, points }]) => {
+          _assertYScaleNotDateScale(yScale);
           const domain = extractDomainFromOneArgFunction(fn);
           return vPlot({
             type: "numericFn",
@@ -212,6 +225,7 @@ export const library = [
           ),
         ],
         ([{ fn, xScale, yScale, distXScale, title, points }]) => {
+          _assertYScaleNotDateScale(yScale);
           const domain = extractDomainFromOneArgFunction(fn);
           return vPlot({
             type: "distFn",
@@ -245,6 +259,7 @@ export const library = [
           ),
         ],
         ([{ xDist, yDist, xScale, yScale, title }]) => {
+          _assertYScaleNotDateScale(yScale);
           return vPlot({
             type: "scatter",
             xDist,
