@@ -207,7 +207,7 @@ export class SqTimeDurationValue extends SqAbstractValue<
   }
 
   asJS() {
-    return this._value.value;
+    return this._value.value.toMs();
   }
 }
 

@@ -6,7 +6,7 @@ import {
   REOther,
 } from "../errors/messages.js";
 import { Lambda } from "../reducer/lambda.js";
-import { SDate, duration } from "../utility/DateTime.js";
+import { SDate, SDuration } from "../utility/DateTime.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { DateRangeDomain, Domain, NumericRangeDomain } from "./domain.js";
 import { shuffle } from "../utility/E_A.js";
@@ -271,17 +271,18 @@ class VTimeDuration extends BaseValue {
   readonly type = "TimeDuration";
   readonly publicName = "Time Duration";
 
-  constructor(public value: number) {
+  constructor(public value: SDuration) {
     super();
   }
+
   toString() {
-    return duration.toString(this.value);
+    return this.value.toString();
   }
   isEqual(other: VTimeDuration) {
-    return this.value === other.value;
+    return this.value.toMs() === other.value.toMs();
   }
 }
-export const vTimeDuration = (v: number) => new VTimeDuration(v);
+export const vTimeDuration = (v: SDuration) => new VTimeDuration(v);
 
 export type CommonScaleArgs = {
   min?: number;

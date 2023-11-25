@@ -15,81 +15,99 @@ const durationUnits = {
   Year: 24 * 60 * 60 * 1000 * 365.25,
 } as const;
 
-export const duration = {
-  fromFloat: (f: number): Duration => f,
-  toFloat: (d: Duration): number => d,
+export class SDuration {
+  private static durationUnits = {
+    Second: 1000,
+    Minute: 60 * 1000,
+    Hour: 60 * 60 * 1000,
+    Day: 24 * 60 * 60 * 1000,
+    Year: 24 * 60 * 60 * 1000 * 365.25,
+  } as const;
 
-  fromMinutes: (h: number): Duration => h * durationUnits.Minute,
-  fromHours: (h: number): Duration => h * durationUnits.Hour,
-  fromDays: (d: number): Duration => d * durationUnits.Day,
-  fromYears: (y: number): Duration => y * durationUnits.Year,
+  constructor(private ms: number) {
+    this.ms = ms;
+  }
 
-  toMinutes: (t: Duration): number => t / durationUnits.Minute,
-  toHours: (t: Duration): number => t / durationUnits.Hour,
-  toDays: (t: Duration): number => t / durationUnits.Day,
-  toYears: (t: Duration): number => t / durationUnits.Year,
+  static fromMs(f: number): SDuration {
+    return new SDuration(f);
+  }
 
-  toString: (duration: Duration): string => {
+  static fromMinutes(minutes: number): SDuration {
+    return new SDuration(minutes * SDuration.durationUnits.Minute);
+  }
+
+  static fromHours(hours: number): SDuration {
+    return new SDuration(hours * SDuration.durationUnits.Hour);
+  }
+
+  static fromDays(days: number): SDuration {
+    return new SDuration(days * SDuration.durationUnits.Day);
+  }
+
+  static fromYears(years: number): SDuration {
+    return new SDuration(years * SDuration.durationUnits.Year);
+  }
+
+  toMs(): number {
+    return this.ms;
+  }
+
+  toMinutes(): number {
+    return this.ms / SDuration.durationUnits.Minute;
+  }
+
+  toHours(): number {
+    return this.ms / SDuration.durationUnits.Hour;
+  }
+
+  toDays(): number {
+    return this.ms / SDuration.durationUnits.Day;
+  }
+
+  toYears(): number {
+    return this.ms / SDuration.durationUnits.Year;
+  }
+
+  toString(): string {
     const units: [number, string][] = [
-      [durationUnits.Year, "year"],
-      [durationUnits.Day, "day"],
-      [durationUnits.Hour, "hour"],
-      [durationUnits.Minute, "minute"],
-      [durationUnits.Second, "second"],
+      [SDuration.durationUnits.Year, "year"],
+      [SDuration.durationUnits.Day, "day"],
+      [SDuration.durationUnits.Hour, "hour"],
+      [SDuration.durationUnits.Minute, "minute"],
+      [SDuration.durationUnits.Second, "second"],
     ];
 
     for (const [unitValue, unitName] of units) {
-      if (Math.abs(duration) >= unitValue) {
-        const value = duration / unitValue;
+      if (Math.abs(this.ms) >= unitValue) {
+        const value = this.ms / unitValue;
         const suffix = value !== 1.0 ? "s" : "";
         return `${value.toPrecision(3)} ${unitName}${suffix}`;
       }
     }
 
-    return `${duration.toFixed()} ms`;
-  },
-
-  add: (t1: Duration, t2: Duration): Duration => t1 + t2,
-  subtract: (t1: Duration, t2: Duration): Duration => t1 - t2,
-  multiply: (t1: Duration, t2: number): Duration => t1 * t2,
-  divide: (t1: Duration, t2: number): Duration => t1 / t2,
-};
-
-export function dateFromString(str: string): result<Date, string> {
-  const parsedDate = new Date(str);
-  if (dateIsValid(parsedDate)) {
-    return Ok(parsedDate);
-  } else {
-    return Result.Err("Invalid date string");
+    return `${this.ms.toFixed()} ms`;
   }
-}
 
-export function dateFromMs(ms: number): Date {
-  return new Date(ms);
-}
+  add(other: SDuration): SDuration {
+    return new SDuration(this.ms + other.ms);
+  }
 
-export function dateToMs(date: Date): number {
-  return date.getTime();
-}
+  subtract(other: SDuration): SDuration {
+    return new SDuration(this.ms - other.ms);
+  }
 
-export function dateToUnixS(date: Date): number {
-  return dateToMs(date) / 1000;
-}
+  divideBySDuration(divisor: SDuration): number {
+    return this.ms / divisor.toMs();
+  }
 
-export function dateFromUnixS(s: number): Date {
-  return dateFromMs(s * 1000);
-}
+  divideByNumber(divisor: number): SDuration {
+    return new SDuration(this.ms / divisor);
+  }
 
-export function dateIsValid(date: Date) {
-  return date instanceof Date && isFinite(date.getTime());
-}
-
-export function dateToString(date: Date): string {
-  return date.toDateString();
-}
-
-export function dateFromMsToString(ms: number): string {
-  return dateToString(dateFromMs(ms));
+  //Assumes the passed-in number is unitless
+  multiply(num: number): SDuration {
+    return SDuration.fromMs(this.toMs() * num);
+  }
 }
 
 export class SDate {
@@ -124,7 +142,9 @@ export class SDate {
     const floor = Math.floor(year);
     return Result.fmap(SDate.makeWithYearInt(floor), (earlyDate) => {
       const diff = year - floor;
-      return new SDate(earlyDate.value).addDuration(diff * durationUnits.Year);
+      return new SDate(earlyDate.value).addDuration(
+        SDuration.fromMs(diff * durationUnits.Year)
+      );
     });
   }
 
@@ -173,21 +193,20 @@ export class SDate {
     return SDate.fromMs(fn(this.toMs()));
   }
 
-  subtract(t2: SDate): result<Duration, string> {
-    const [f1, f2] = [this.toMs(), t2.toMs()];
-    const diff = f1 - f2;
+  subtract(other: SDate): result<SDuration, string> {
+    const diff = this.toMs() - other.toMs();
     if (diff < 0) {
-      return Result.Err("Cannot subtract a date by one that is in its future");
+      return Err("Cannot subtract a date by one that is in its future");
     } else {
-      return Ok(duration.fromFloat(diff));
+      return Ok(new SDuration(diff));
     }
   }
 
-  addDuration(duration: Duration): SDate {
-    return this.fmap((t) => t + duration);
+  addDuration(duration: SDuration): SDate {
+    return SDate.fromMs(this.toMs() + duration.toMs());
   }
 
-  subtractDuration(duration: Duration): SDate {
-    return this.fmap((t) => t - duration);
+  subtractDuration(duration: SDuration): SDate {
+    return SDate.fromMs(this.toMs() - duration.toMs());
   }
 }

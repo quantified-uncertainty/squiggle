@@ -15,7 +15,7 @@ import {
   frAny,
   frNumberOrString,
 } from "../../src/library/registry/frTypes.js";
-import { SDate } from "../../src/utility/DateTime.js";
+import { SDate, SDuration } from "../../src/utility/DateTime.js";
 import { ImmutableMap } from "../../src/utility/immutableMap.js";
 
 import {
@@ -56,7 +56,7 @@ test("frDate", () => {
 });
 
 test("frTimeDuration", () => {
-  const duration = 1234;
+  const duration = SDuration.fromMs(1234);
   const value = vTimeDuration(duration);
   expect(frTimeDuration.unpack(value)).toBe(duration);
   expect(frTimeDuration.pack(duration)).toEqual(value);

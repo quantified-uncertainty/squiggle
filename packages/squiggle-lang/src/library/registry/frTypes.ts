@@ -1,6 +1,6 @@
 import { BaseDist } from "../../dist/BaseDist.js";
 import { Lambda } from "../../reducer/lambda.js";
-import { SDate } from "../../utility/DateTime.js";
+import { SDate, SDuration } from "../../utility/DateTime.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import {
   Scale,
@@ -49,7 +49,7 @@ export const frDate: FRType<SDate> = {
   pack: (v) => vDate(v),
   getName: () => "date",
 };
-export const frTimeDuration: FRType<number> = {
+export const frTimeDuration: FRType<SDuration> = {
   unpack: (v) => (v.type === "TimeDuration" ? v.value : undefined),
   pack: (v) => vTimeDuration(v),
   getName: () => "duration",

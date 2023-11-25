@@ -7,7 +7,7 @@ import {
   frTimeDuration,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { type Duration, duration, SDate } from "../utility/DateTime.js";
+import { SDate, SDuration } from "../utility/DateTime.js";
 import { vDate, vNumber, vTimeDuration } from "../value/index.js";
 
 const maker = new FnFactory({
@@ -15,7 +15,7 @@ const maker = new FnFactory({
   requiresNamespace: false,
 });
 
-const makeNumberToDurationFn = (name: string, fn: (v: number) => Duration) =>
+const makeNumberToDurationFn = (name: string, fn: (v: number) => SDuration) =>
   maker.make({
     name,
     definitions: [makeDefinition([frNumber], ([t]) => vTimeDuration(fn(t)))],
@@ -29,7 +29,7 @@ const makeYearFn = makeDefinition([frNumber], ([year]) => {
   return vDate(result.value);
 });
 
-const makeDurationToNumberFn = (name: string, fn: (v: Duration) => number) =>
+const makeDurationToNumberFn = (name: string, fn: (v: SDuration) => number) =>
   maker.make({
     name,
     definitions: [makeDefinition([frTimeDuration], ([t]) => vNumber(fn(t)))],
@@ -89,7 +89,7 @@ export const library = [
         return vTimeDuration(result.value);
       }),
       makeDefinition([frTimeDuration, frTimeDuration], ([d1, d2]) =>
-        vTimeDuration(duration.subtract(d1, d2))
+        vTimeDuration(d1.subtract(d2))
       ),
     ],
   }),
@@ -100,7 +100,7 @@ export const library = [
         vDate(d1.addDuration(d2))
       ),
       makeDefinition([frTimeDuration, frTimeDuration], ([d1, d2]) =>
-        vTimeDuration(duration.add(d1, d2))
+        vTimeDuration(d1.add(d2))
       ),
     ],
   }),
@@ -108,7 +108,7 @@ export const library = [
     name: "multiply",
     definitions: [
       makeDefinition([frTimeDuration, frNumber], ([d1, d2]) =>
-        vTimeDuration(duration.multiply(d1, d2))
+        vTimeDuration(d1.multiply(d2))
       ),
     ],
   }),
@@ -116,24 +116,24 @@ export const library = [
     name: "divide",
     definitions: [
       makeDefinition([frTimeDuration, frNumber], ([d1, d2]) =>
-        vTimeDuration(duration.divide(d1, d2))
+        vTimeDuration(d1.divideByNumber(d2))
       ),
       makeDefinition([frTimeDuration, frTimeDuration], ([d1, d2]) =>
-        vNumber(d1 / d2)
+        vNumber(d1.divideBySDuration(d2))
       ),
     ],
   }),
-  makeNumberToDurationFn("minutes", duration.fromMinutes),
-  makeNumberToDurationFn("fromUnit_minutes", duration.fromMinutes),
-  makeNumberToDurationFn("hours", duration.fromHours),
-  makeNumberToDurationFn("fromUnit_hours", duration.fromHours),
-  makeNumberToDurationFn("days", duration.fromDays),
-  makeNumberToDurationFn("fromUnit_days", duration.fromDays),
-  makeNumberToDurationFn("years", duration.fromYears),
-  makeNumberToDurationFn("fromUnit_years", duration.fromYears),
-  makeNumberToDurationFn("fromUnit_years", duration.fromYears),
-  makeDurationToNumberFn("toMinutes", duration.toMinutes),
-  makeDurationToNumberFn("toHours", duration.toHours),
-  makeDurationToNumberFn("toDays", duration.toDays),
-  makeDurationToNumberFn("toYears", duration.toYears),
+  makeNumberToDurationFn("minutes", SDuration.fromMinutes),
+  makeNumberToDurationFn("fromUnit_minutes", SDuration.fromMinutes),
+  makeNumberToDurationFn("hours", SDuration.fromHours),
+  makeNumberToDurationFn("fromUnit_hours", SDuration.fromHours),
+  makeNumberToDurationFn("days", SDuration.fromDays),
+  makeNumberToDurationFn("fromUnit_days", SDuration.fromDays),
+  makeNumberToDurationFn("years", SDuration.fromYears),
+  makeNumberToDurationFn("fromUnit_years", SDuration.fromYears),
+
+  makeDurationToNumberFn("toMinutes", (d) => d.toMinutes()),
+  makeDurationToNumberFn("toHours", (d) => d.toHours()),
+  makeDurationToNumberFn("toDays", (d) => d.toDays()),
+  makeDurationToNumberFn("toYears", (d) => d.toYears()),
 ];
