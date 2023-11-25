@@ -4,9 +4,9 @@ import * as d3 from "d3";
 
 import { XIcon } from "@heroicons/react/solid/esm/index.js";
 import {
-  duration,
   Env,
   result,
+  SDuration,
   SqDistribution,
   SqDistributionError,
   SqDistributionsPlot,
@@ -58,7 +58,7 @@ const SummaryTableRow: FC<SummaryTableRowProps> = ({
     if (valueType == "date") {
       // When dealing with dates, the standard deviation is a duration, not a date, so we need to format it differently
       if (isRange) {
-        return duration.toString(number);
+        return SDuration.fromMs(number).toString();
       } else {
         return d3.timeFormat(tickFormat ?? DEFAULT_DATE_FORMAT)(
           new Date(number)
