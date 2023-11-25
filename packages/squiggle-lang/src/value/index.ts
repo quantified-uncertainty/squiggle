@@ -6,7 +6,7 @@ import {
   REOther,
 } from "../errors/messages.js";
 import { Lambda } from "../reducer/lambda.js";
-import { dateToString, duration } from "../utility/DateTime.js";
+import { SDate, duration } from "../utility/DateTime.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { DateRangeDomain, Domain, NumericRangeDomain } from "./domain.js";
 import { shuffle } from "../utility/E_A.js";
@@ -119,17 +119,17 @@ class VDate extends BaseValue {
   readonly type = "Date";
   readonly publicName = "Date";
 
-  constructor(public value: Date) {
+  constructor(public value: SDate) {
     super();
   }
   toString() {
-    return dateToString(this.value);
+    return this.value.toString;
   }
   isEqual(other: VDate) {
-    return this.value === other.value;
+    return this.value.isEqual(other.value);
   }
 }
-export const vDate = (v: Date) => new VDate(v);
+export const vDate = (v: SDate) => new VDate(v);
 
 class VDist extends BaseValue {
   readonly type = "Dist";
@@ -620,7 +620,7 @@ export class VDomain extends BaseValue implements Indexable {
   }
 
   get(key: Value): VNumber | VDate {
-    const mapValue = (value: number | Date) =>
+    const mapValue = (value: number | SDate) =>
       typeof value === "number" ? vNumber(value) : vDate(value);
 
     if (key.type === "String") {

@@ -1,5 +1,5 @@
 import { REArgumentError, REDomainError } from "../errors/messages.js";
-import { dateToMs, dateToString } from "../utility/DateTime.js";
+import { SDate } from "../utility/DateTime.js";
 import { Value } from "./index.js";
 import { Scale } from "./index.js";
 
@@ -67,16 +67,14 @@ export class DateRangeDomain extends BaseDomain {
   readonly valueType = "Date";
 
   constructor(
-    public min: Date,
-    public max: Date
+    public min: SDate,
+    public max: SDate
   ) {
     super();
   }
 
   toString() {
-    return `Date.rangeDomain({ min: ${dateToString(
-      this.min
-    )}, max: ${dateToString(this.max)} })`;
+    return `Date.rangeDomain({ min: ${this.min.toString}, max: ${this.max.toString} })`;
   }
 
   validateValue(value: Value) {
@@ -85,9 +83,7 @@ export class DateRangeDomain extends BaseDomain {
     }
     if (value.value < this.min || value.value > this.max) {
       throw new REDomainError(
-        `Value ${value} must be within ${dateToString(
-          this.min
-        )} and ${dateToString(this.max)}`
+        `Value ${value} must be within ${this.min.toString} and ${this.max.toString}`
       );
     }
   }
@@ -97,18 +93,18 @@ export class DateRangeDomain extends BaseDomain {
   }
 
   get minAsNumber() {
-    return dateToMs(this.min);
+    return this.min.toMs;
   }
 
   get maxAsNumber() {
-    return dateToMs(this.max);
+    return this.max.toMs;
   }
 
   toDefaultScale(): Scale {
     return {
       type: "date",
-      min: dateToMs(this.min),
-      max: dateToMs(this.max),
+      min: this.min.toMs,
+      max: this.max.toMs,
     };
   }
 }

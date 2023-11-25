@@ -15,6 +15,7 @@ import {
   frAny,
   frNumberOrString,
 } from "../../src/library/registry/frTypes.js";
+import { SDate } from "../../src/utility/DateTime.js";
 import { ImmutableMap } from "../../src/utility/immutableMap.js";
 
 import {
@@ -48,7 +49,7 @@ test("frBool", () => {
 });
 
 test("frDate", () => {
-  const date = new Date();
+  const date = SDate.now();
   const value = vDate(date);
   expect(frDate.unpack(value)).toBe(date);
   expect(frDate.pack(date)).toEqual(value);

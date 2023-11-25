@@ -8,7 +8,7 @@ import {
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { dateToMs, dateToString } from "../utility/DateTime.js";
+import { SDate } from "../utility/DateTime.js";
 import { vScale } from "../value/index.js";
 
 const maker = new FnFactory({
@@ -38,12 +38,10 @@ function checkMinMax(min: number | null, max: number | null) {
   }
 }
 
-function checkMinMaxDates(min: Date | null, max: Date | null) {
+function checkMinMaxDates(min: SDate | null, max: SDate | null) {
   if (!!min && !!max && max <= min) {
     throw new REArgumentError(
-      `Max must be greater than min, got: min=${dateToString(
-        min
-      )}, max=${dateToString(max)}`
+      `Max must be greater than min, got: min=${min.toString}, max=${max.toString}`
     );
   }
 }
@@ -193,8 +191,8 @@ export const library = [
         // We don't check the tick format, because the format is much more complicated for dates.
         return vScale({
           type: "date",
-          min: min ? dateToMs(min) : undefined,
-          max: max ? dateToMs(max) : undefined,
+          min: min ? min.toMs : undefined,
+          max: max ? max.toMs : undefined,
           tickFormat: tickFormat ?? undefined,
           title: title ?? undefined,
         });

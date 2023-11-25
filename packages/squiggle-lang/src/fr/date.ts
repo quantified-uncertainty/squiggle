@@ -7,14 +7,7 @@ import {
   frTimeDuration,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import {
-  type Duration,
-  duration,
-  date,
-  dateFromUnixS,
-  dateToUnixS,
-  dateFromString,
-} from "../utility/DateTime.js";
+import { type Duration, duration, SDate } from "../utility/DateTime.js";
 import { vDate, vNumber, vTimeDuration } from "../value/index.js";
 
 const maker = new FnFactory({
@@ -29,7 +22,7 @@ const makeNumberToDurationFn = (name: string, fn: (v: number) => Duration) =>
   });
 
 const makeYearFn = makeDefinition([frNumber], ([year]) => {
-  const result = date.makeFromYear(year);
+  const result = SDate.makeFromYear(year);
   if (!result.ok) {
     throw new REOther(result.value);
   }
@@ -49,7 +42,7 @@ export const library = [
     examples: ['Date.make("2020-05-12")', "Date.make(2020, 5, 10)"],
     definitions: [
       makeDefinition([frString], ([str]) => {
-        const result = dateFromString(str);
+        const result = SDate.fromString(str);
         if (!result.ok) {
           throw new REOther(result.value);
         }
@@ -57,7 +50,7 @@ export const library = [
       }),
 
       makeDefinition([frNumber, frNumber, frNumber], ([yr, month, date]) => {
-        return vDate(new Date(yr, month - 1, date));
+        return vDate(new SDate(new Date(yr, month - 1, date)));
       }),
     ],
   }),
@@ -67,7 +60,7 @@ export const library = [
     requiresNamespace: true,
     definitions: [
       makeDefinition([frNumber], ([num]) => {
-        return vDate(dateFromUnixS(num));
+        return vDate(SDate.fromUnixS(num));
       }),
     ],
   }),
@@ -76,7 +69,7 @@ export const library = [
     requiresNamespace: true,
     definitions: [
       makeDefinition([frDate], ([date]) => {
-        return vNumber(dateToUnixS(date));
+        return vNumber(date.toUnixS);
       }),
     ],
   }),
@@ -86,10 +79,10 @@ export const library = [
     name: "subtract",
     definitions: [
       makeDefinition([frDate, frTimeDuration], ([d1, d2]) =>
-        vDate(date.subtractDuration(d1, d2))
+        vDate(d1.subtractDuration(d2))
       ),
       makeDefinition([frDate, frDate], ([d1, d2]) => {
-        const result = date.subtract(d1, d2);
+        const result = d1.subtract(d2);
         if (!result.ok) {
           throw new REOther(result.value);
         }
@@ -104,7 +97,7 @@ export const library = [
     name: "add",
     definitions: [
       makeDefinition([frDate, frTimeDuration], ([d1, d2]) =>
-        vDate(date.addDuration(d1, d2))
+        vDate(d1.addDuration(d2))
       ),
       makeDefinition([frTimeDuration, frTimeDuration], ([d1, d2]) =>
         vTimeDuration(duration.add(d1, d2))

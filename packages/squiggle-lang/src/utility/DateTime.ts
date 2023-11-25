@@ -1,4 +1,4 @@
-import { Ok, result } from "./result.js";
+import { Ok, result, Err } from "./result.js";
 import * as Result from "./result.js";
 
 // Stores in Unix milliseconds
@@ -91,39 +91,93 @@ export function dateFromMsToString(ms: number): string {
   return dateToString(dateFromMs(ms));
 }
 
-export const date = {
-  fmap(t: Date, fn: (v: number) => number): Date {
-    return dateFromMs(fn(dateToMs(t)));
-  },
-  subtract(t1: Date, t2: Date): result<Duration, string> {
-    const [f1, f2] = [dateToMs(t1), dateToMs(t2)];
+export class SDate {
+  constructor(public value: Date) {
+    this.value = value;
+  }
+
+  private static dateIsValid(date: Date): boolean {
+    return date instanceof Date && isFinite(date.getTime());
+  }
+
+  static fromString(str: string): result<SDate, string> {
+    const parsedDate = new Date(str);
+    if (SDate.dateIsValid(parsedDate)) {
+      return Ok(new SDate(parsedDate));
+    } else {
+      return Err("Invalid date string");
+    }
+  }
+
+  static makeWithYearInt(y: number): result<SDate, string> {
+    if (y < 100) {
+      return Result.Err("Year must be over 100");
+    } else if (y > 200000) {
+      return Result.Err("Year must be less than 200000");
+    } else {
+      return Ok(new SDate(new Date(y, 0)));
+    }
+  }
+
+  static makeFromYear(year: number): result<SDate, string> {
+    const floor = Math.floor(year);
+    return Result.fmap(SDate.makeWithYearInt(floor), (earlyDate) => {
+      const diff = year - floor;
+      return new SDate(earlyDate.value).addDuration(diff * durationUnits.Year);
+    });
+  }
+
+  static fromMs(ms: number): SDate {
+    return new SDate(new Date(ms));
+  }
+
+  static fromUnixS(s: number): SDate {
+    return SDate.fromMs(s * 1000);
+  }
+
+  static now(): SDate {
+    return new SDate(new Date());
+  }
+
+  get toString(): string {
+    return this.value.toDateString();
+  }
+
+  get toMs(): number {
+    return this.value.getTime();
+  }
+
+  get toUnixS(): number {
+    return this.toMs / 1000;
+  }
+
+  get toDate(): Date {
+    return this.value;
+  }
+
+  isEqual(other: SDate): boolean {
+    return this.value.getTime() === other.value.getTime();
+  }
+
+  fmap(fn: (v: number) => number): SDate {
+    return SDate.fromMs(fn(this.toMs));
+  }
+
+  subtract(t2: SDate): result<Duration, string> {
+    const [f1, f2] = [this.toMs, t2.toMs];
     const diff = f1 - f2;
     if (diff < 0) {
       return Result.Err("Cannot subtract a date by one that is in its future");
     } else {
       return Ok(duration.fromFloat(diff));
     }
-  },
-  addDuration(t: Date, duration: Duration) {
-    return date.fmap(t, (t) => t + duration);
-  },
-  subtractDuration(t: Date, duration: Duration) {
-    return date.fmap(t, (t) => t - duration);
-  },
-  makeWithYearInt(y: number): result<Date, string> {
-    if (y < 100) {
-      return Result.Err("Year must be over 100");
-    } else if (y > 200000) {
-      return Result.Err("Year must be less than 200000");
-    } else {
-      return Ok(new Date(y, 0));
-    }
-  },
-  makeFromYear(year: number): result<Date, string> {
-    const floor = Math.floor(year);
-    return Result.fmap(date.makeWithYearInt(floor), (earlyDate) => {
-      const diff = year - floor;
-      return date.addDuration(earlyDate, diff * durationUnits.Year);
-    });
-  },
-};
+  }
+
+  addDuration(duration: Duration): SDate {
+    return this.fmap((t) => t + duration);
+  }
+
+  subtractDuration(duration: Duration): SDate {
+    return this.fmap((t) => t - duration);
+  }
+}

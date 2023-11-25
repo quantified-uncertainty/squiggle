@@ -15,7 +15,7 @@ import {
   type SqValue,
 } from "./public/SqValue/index.js"; // TODO - reexport other values too
 
-export { duration, date } from "./utility/DateTime.js";
+export { duration, SDate } from "./utility/DateTime.js";
 
 export {
   SqCompileError,

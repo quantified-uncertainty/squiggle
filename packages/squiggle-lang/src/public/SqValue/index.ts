@@ -1,4 +1,4 @@
-import { dateFromMs } from "../../utility/DateTime.js";
+import { SDate } from "../../utility/DateTime.js";
 import { result } from "../../utility/result.js";
 import { Value, vDate, vLambda, vNumber, vString } from "../../value/index.js";
 import { SqError } from "../SqError.js";
@@ -103,20 +103,21 @@ export class SqBoolValue extends SqAbstractValue<"Bool", boolean> {
 export class SqDateValue extends SqAbstractValue<"Date", Date> {
   tag = "Date" as const;
 
-  static create(value: Date) {
+  static create(value: SDate) {
     return new SqDateValue(vDate(value));
   }
 
   static fromNumber(value: number) {
-    return SqDateValue.create(dateFromMs(value));
+    return SqDateValue.create(SDate.fromMs(value));
   }
 
-  get value(): Date {
+  get value(): SDate {
     return this._value.value;
   }
 
+  //Note: This reveals the underlying Date object, but we might prefer to keep it hidden
   asJS() {
-    return this.value;
+    return this.value.toDate;
   }
 }
 

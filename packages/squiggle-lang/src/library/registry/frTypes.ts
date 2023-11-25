@@ -1,5 +1,6 @@
 import { BaseDist } from "../../dist/BaseDist.js";
 import { Lambda } from "../../reducer/lambda.js";
+import { SDate } from "../../utility/DateTime.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import {
   Scale,
@@ -43,7 +44,7 @@ export const frBool: FRType<boolean> = {
   pack: (v) => vBool(v),
   getName: () => "bool",
 };
-export const frDate: FRType<Date> = {
+export const frDate: FRType<SDate> = {
   unpack: (v) => (v.type === "Date" ? v.value : undefined),
   pack: (v) => vDate(v),
   getName: () => "date",
