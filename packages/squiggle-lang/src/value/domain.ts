@@ -1,6 +1,7 @@
 import { REArgumentError, REDomainError } from "../errors/messages.js";
 import { dateToMs, dateToString } from "../utility/DateTime.js";
 import { Value } from "./index.js";
+import { Scale } from "./index.js";
 
 abstract class BaseDomain {
   abstract type: string;
@@ -51,6 +52,14 @@ export class NumericRangeDomain extends BaseDomain {
   get maxAsNumber() {
     return this.max;
   }
+
+  toDefaultScale(): Scale {
+    return {
+      type: "linear",
+      min: this.min,
+      max: this.max,
+    };
+  }
 }
 
 export class DateRangeDomain extends BaseDomain {
@@ -93,6 +102,14 @@ export class DateRangeDomain extends BaseDomain {
 
   get maxAsNumber() {
     return dateToMs(this.max);
+  }
+
+  toDefaultScale(): Scale {
+    return {
+      type: "date",
+      min: dateToMs(this.min),
+      max: dateToMs(this.max),
+    };
   }
 }
 

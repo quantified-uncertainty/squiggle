@@ -6,12 +6,7 @@ import {
   REOther,
 } from "../errors/messages.js";
 import { Lambda } from "../reducer/lambda.js";
-import {
-  date,
-  dateFromMs,
-  dateToString,
-  duration,
-} from "../utility/DateTime.js";
+import { dateToString, duration } from "../utility/DateTime.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { DateRangeDomain, Domain, NumericRangeDomain } from "./domain.js";
 import { shuffle } from "../utility/E_A.js";

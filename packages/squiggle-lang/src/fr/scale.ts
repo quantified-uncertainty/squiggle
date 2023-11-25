@@ -8,7 +8,7 @@ import {
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { dateFromMs, dateToMs, dateToString } from "../utility/DateTime.js";
+import { dateToMs, dateToString } from "../utility/DateTime.js";
 import { vScale } from "../value/index.js";
 
 const maker = new FnFactory({

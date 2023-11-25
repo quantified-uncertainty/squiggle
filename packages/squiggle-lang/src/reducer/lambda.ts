@@ -2,7 +2,7 @@ import { LocationRange } from "peggy";
 
 import { ASTNode } from "../ast/parse.js";
 import * as IError from "../errors/IError.js";
-import { REArityError, REDomainError, REOther } from "../errors/messages.js";
+import { REArityError, REOther } from "../errors/messages.js";
 import { Expression } from "../expression/index.js";
 import { VDomain, Value } from "../value/index.js";
 import * as Context from "./context.js";
