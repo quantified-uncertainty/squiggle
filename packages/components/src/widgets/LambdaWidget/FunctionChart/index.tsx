@@ -59,19 +59,19 @@ export const FunctionChart: FC<FunctionChartProps> = ({
       </MessageAlert>
     );
   }
-  const signatures = fn.signatures();
-  const domain = signatures[0][0]?.domain;
 
   const min: number = settings.functionChartSettings.start;
   const max: number = settings.functionChartSettings.stop;
 
-  const xScale =
-    domain?.toScale({ min, max }) || SqLinearScale.create({ min, max });
+  const domain = fn.signatures().find((s) => s.length === 1)?.[0]?.domain;
 
-  const yScale = SqLinearScale.create({});
+  const xScale = domain
+    ? domain.toDefaultScale()
+    : SqLinearScale.create({ min, max });
 
   const result1 = fn.call([xScale.numberToValue(min)], environment);
   const result2 = fn.call([xScale.numberToValue(max)], environment);
+
   const getValidResult = () => {
     if (result1.ok) {
       return result1;
@@ -86,6 +86,8 @@ export const FunctionChart: FC<FunctionChartProps> = ({
   if (!validResult.ok) {
     return <FunctionCallErrorAlert error={validResult.value} />;
   }
+
+  const yScale = SqLinearScale.create({});
 
   switch (validResult.value.tag) {
     case "Dist": {
