@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useImperativeHandle } from "react";
+import { forwardRef, useImperativeHandle } from "react";
 
 import { SqError, SqProject, SqValuePath } from "@quri/squiggle-lang";
 
@@ -29,22 +29,13 @@ export type CodeEditorHandle = {
 
 export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
   function CodeEditor(props, ref) {
-    const view = useSquiggleEditorView(props);
+    const { view, ref: editorRef } = useSquiggleEditorView(props);
 
     useImperativeHandle(ref, () => ({
       format: () => formatSquiggle(view),
       scrollTo: (position) => scrollToPosition(view, position),
     }));
 
-    const setViewDom = useCallback(
-      (element: HTMLDivElement | null) => {
-        if (!view) return;
-        // TODO: the editor breaks on hot reloading in storybook, investigate
-        element?.replaceChildren(view.dom);
-      },
-      [view]
-    );
-
-    return <div style={{ fontSize: "13px" }} ref={setViewDom}></div>;
+    return <div style={{ fontSize: "13px" }} ref={editorRef} />;
   }
 );
