@@ -1,5 +1,5 @@
 import { REArgumentError, REDomainError } from "../errors/messages.js";
-import { dateFromMsToString, dateToMs } from "../utility/DateTime.js";
+import { dateToMs, dateToString } from "../utility/DateTime.js";
 import { Value } from "./index.js";
 
 abstract class BaseDomain {
@@ -9,6 +9,9 @@ abstract class BaseDomain {
   abstract toString(): string;
 
   abstract validateValue(value: Value): void;
+
+  abstract get minAsNumber(): number;
+  abstract get maxAsNumber(): number;
 }
 
 export class NumericRangeDomain extends BaseDomain {
@@ -40,41 +43,56 @@ export class NumericRangeDomain extends BaseDomain {
   isEqual(other: NumericRangeDomain) {
     return this.min === other.min && this.max === other.max;
   }
+
+  get minAsNumber() {
+    return this.min;
+  }
+
+  get maxAsNumber() {
+    return this.max;
+  }
 }
+
 export class DateRangeDomain extends BaseDomain {
   readonly type = "DateRange";
   readonly valueType = "Date";
-  public min;
-  public max;
 
-  constructor(_min: Date, _max: Date) {
+  constructor(
+    public min: Date,
+    public max: Date
+  ) {
     super();
-    this.min = dateToMs(_min);
-    this.max = dateToMs(_max);
   }
 
   toString() {
-    return `Date.rangeDomain({ min: ${dateFromMsToString(
+    return `Date.rangeDomain({ min: ${dateToString(
       this.min
-    )}, max: ${dateFromMsToString(this.max)} })`;
+    )}, max: ${dateToString(this.max)} })`;
   }
 
   validateValue(value: Value) {
     if (value.type !== "Date") {
       throw new REDomainError(`Value of type ${value.type} must be a date`);
     }
-    const valueTime = dateToMs(value.value);
-    if (valueTime < this.min || valueTime > this.max) {
+    if (value.value < this.min || value.value > this.max) {
       throw new REDomainError(
-        `Value ${value} must be within ${dateFromMsToString(
+        `Value ${value} must be within ${dateToString(
           this.min
-        )} and ${dateFromMsToString(this.max)}`
+        )} and ${dateToString(this.max)}`
       );
     }
   }
 
   isEqual(other: DateRangeDomain) {
     return this.min === other.min && this.max === other.max;
+  }
+
+  get minAsNumber() {
+    return dateToMs(this.min);
+  }
+
+  get maxAsNumber() {
+    return dateToMs(this.max);
   }
 }
 

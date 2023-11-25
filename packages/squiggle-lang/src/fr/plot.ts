@@ -64,14 +64,14 @@ function createScale(scale: Scale | null, domain: VDomain | undefined): Scale {
   if (scale) {
     return {
       ...scale,
-      min: scale.min ?? domain.value.min,
-      max: scale.max ?? domain.value.max,
+      min: scale.min ?? domain.value.minAsNumber,
+      max: scale.max ?? domain.value.maxAsNumber,
     };
   } else if (domain.value.type === "DateRange") {
     return {
       type: "date",
-      min: domain.value.min,
-      max: domain.value.max,
+      min: domain.value.minAsNumber,
+      max: domain.value.maxAsNumber,
     };
   } else {
     return {
