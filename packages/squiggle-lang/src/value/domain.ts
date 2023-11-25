@@ -1,5 +1,5 @@
 import { REArgumentError, REDomainError } from "../errors/messages.js";
-import { SDate } from "../utility/DateTime.js";
+import { SDate } from "../utility/SDate.js";
 import { Value, VNumber, VDate } from "./index.js";
 import { Scale } from "./index.js";
 

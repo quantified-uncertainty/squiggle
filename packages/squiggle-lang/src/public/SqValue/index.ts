@@ -1,4 +1,4 @@
-import { SDate } from "../../utility/DateTime.js";
+import { SDate } from "../../utility/SDate.js";
 import { result } from "../../utility/result.js";
 import { Value, vDate, vLambda, vNumber, vString } from "../../value/index.js";
 import { SqError } from "../SqError.js";

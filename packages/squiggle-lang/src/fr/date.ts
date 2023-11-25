@@ -7,7 +7,8 @@ import {
   frTimeDuration,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { SDate, SDuration } from "../utility/DateTime.js";
+import { SDate } from "../utility/SDate.js";
+import { SDuration } from "../utility/SDuration.js";
 import { vDate, vNumber, vTimeDuration } from "../value/index.js";
 
 const maker = new FnFactory({

@@ -1,6 +1,7 @@
 import { BaseDist } from "../../dist/BaseDist.js";
 import { Lambda } from "../../reducer/lambda.js";
-import { SDate, SDuration } from "../../utility/DateTime.js";
+import { SDate } from "../../utility/SDate.js";
+import { SDuration } from "../../utility/SDuration.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import {
   Scale,

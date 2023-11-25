@@ -1,4 +1,4 @@
-import { SDate } from "../../utility/DateTime.js";
+import { SDate } from "../../utility/SDate.js";
 import {
   CommonScaleArgs,
   SCALE_POWER_DEFAULT_CONSTANT,

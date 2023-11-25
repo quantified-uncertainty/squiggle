@@ -15,7 +15,8 @@ import {
   frAny,
   frNumberOrString,
 } from "../../src/library/registry/frTypes.js";
-import { SDate, SDuration } from "../../src/utility/DateTime.js";
+import { SDate } from "../../src/utility/SDate.js";
+import { SDuration } from "../../src/utility/SDuration.js";
 import { ImmutableMap } from "../../src/utility/immutableMap.js";
 
 import {
