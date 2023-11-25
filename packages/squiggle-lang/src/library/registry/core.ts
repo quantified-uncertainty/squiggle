@@ -15,6 +15,11 @@ export type FRFunction = {
 
 type FnNameDict = Map<string, FnDefinition[]>;
 
+type FnDocumentation = Pick<
+  FRFunction,
+  "description" | "requiresNamespace" | "nameSpace" | "name" | "examples"
+>;
+
 export class Registry {
   private constructor(
     private functions: FRFunction[],
@@ -60,6 +65,30 @@ export class Registry {
 
   allNames(): string[] {
     return [...this.fnNameDict.keys()];
+  }
+
+  getFunctionDocumentation(fnName: string): FnDocumentation | undefined {
+    // Find the first function with a given name; there could be duplicates with different descriptions etc.
+    // FIXME - store `this.functions` as a `Map`.
+    const fn = this.functions.find((fn) => {
+      // FIXME - duplicates the logic from `make`
+      if (!fn.requiresNamespace && fnName === fn.name) {
+        return true;
+      }
+      if (`${fn.nameSpace}.${fn.name}` === fnName) {
+        return true;
+      }
+    });
+
+    if (!fn) return;
+
+    return {
+      name: fn.name,
+      nameSpace: fn.nameSpace,
+      requiresNamespace: fn.requiresNamespace,
+      description: fn.description,
+      examples: fn.examples,
+    };
   }
 
   makeLambda(fnName: string): Lambda {

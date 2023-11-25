@@ -42,6 +42,7 @@ import { useSquiggleLanguageExtension } from "./useSquiggleLanguageExtension.js"
 import { useSubmitExtension } from "./useSubmitExtension.js";
 import { useViewNodeExtension } from "./useViewNodeExtension.js";
 import { useWidthHeightExtension } from "./useWidthHeightExtension.js";
+import { useTooltipsExtension } from "./useTooltipsExtension.js";
 
 export function useSquiggleEditorExtensions(
   view: EditorView | undefined,
@@ -109,6 +110,8 @@ export function useSquiggleEditorExtensions(
   const formatExtension = useFormatSquiggleExtension();
   const errorsExtension = useErrorsExtension(view, params.errors);
 
+  const tooltipsExtension = useTooltipsExtension();
+
   const squiggleExtensions = [
     squiggleLanguageExtension,
     showGutterExtension,
@@ -119,6 +122,7 @@ export function useSquiggleEditorExtensions(
     viewNodeExtension,
     formatExtension,
     errorsExtension,
+    tooltipsExtension,
   ];
 
   return [builtinExtensions, squiggleExtensions];
