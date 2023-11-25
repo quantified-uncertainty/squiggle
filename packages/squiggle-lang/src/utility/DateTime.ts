@@ -6,35 +6,35 @@ export type Duration = number;
 
 // TODO - should we just use date-fns instead? Dates are hard to implement correctly.
 
-enum DurationUnits {
-  Second = 1000,
-  Minute = 60 * 1000,
-  Hour = 60 * 60 * 1000,
-  Day = 24 * 60 * 60 * 1000,
-  Year = 24 * 60 * 60 * 1000 * 365.25,
-}
+const durationUnits = {
+  Second: 1000,
+  Minute: 60 * 1000,
+  Hour: 60 * 60 * 1000,
+  Day: 24 * 60 * 60 * 1000,
+  Year: 24 * 60 * 60 * 1000 * 365.25,
+} as const;
 
 export const duration = {
   fromFloat: (f: number): Duration => f,
   toFloat: (d: Duration): number => d,
 
-  fromMinutes: (h: number): Duration => h * DurationUnits.Minute,
-  fromHours: (h: number): Duration => h * DurationUnits.Hour,
-  fromDays: (d: number): Duration => d * DurationUnits.Day,
-  fromYears: (y: number): Duration => y * DurationUnits.Year,
+  fromMinutes: (h: number): Duration => h * durationUnits.Minute,
+  fromHours: (h: number): Duration => h * durationUnits.Hour,
+  fromDays: (d: number): Duration => d * durationUnits.Day,
+  fromYears: (y: number): Duration => y * durationUnits.Year,
 
-  toMinutes: (t: Duration): number => t / DurationUnits.Minute,
-  toHours: (t: Duration): number => t / DurationUnits.Hour,
-  toDays: (t: Duration): number => t / DurationUnits.Day,
-  toYears: (t: Duration): number => t / DurationUnits.Year,
+  toMinutes: (t: Duration): number => t / durationUnits.Minute,
+  toHours: (t: Duration): number => t / durationUnits.Hour,
+  toDays: (t: Duration): number => t / durationUnits.Day,
+  toYears: (t: Duration): number => t / durationUnits.Year,
 
   toString: (duration: Duration): string => {
     const units: [number, string][] = [
-      [DurationUnits.Year, "year"],
-      [DurationUnits.Day, "day"],
-      [DurationUnits.Hour, "hour"],
-      [DurationUnits.Minute, "minute"],
-      [DurationUnits.Second, "second"],
+      [durationUnits.Year, "year"],
+      [durationUnits.Day, "day"],
+      [durationUnits.Hour, "hour"],
+      [durationUnits.Minute, "minute"],
+      [durationUnits.Second, "second"],
     ];
 
     for (const [unitValue, unitName] of units) {
@@ -124,7 +124,7 @@ export const date = {
     const floor = Math.floor(year);
     return Result.fmap(date.makeWithYearInt(floor), (earlyDate) => {
       const diff = year - floor;
-      return date.addDuration(earlyDate, diff * DurationUnits.Year);
+      return date.addDuration(earlyDate, diff * durationUnits.Year);
     });
   },
 };
