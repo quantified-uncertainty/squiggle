@@ -1,7 +1,39 @@
 import { REArgumentError, REDomainError } from "../errors/messages.js";
 import { SDate } from "../utility/DateTime.js";
-import { Value } from "./index.js";
+import { Value, VNumber, VDate } from "./index.js";
 import { Scale } from "./index.js";
+
+function _assertCorrectType(value: Value, expectedType: string) {
+  if (value.type !== expectedType) {
+    throw new REDomainError(
+      `Parameter ${value.toString()}, of type ${
+        value.type
+      }, must be a ${expectedType}`
+    );
+  }
+}
+
+function _assertWithinBounds(
+  min: number,
+  max: number,
+  value: number,
+  domain: Domain,
+  format: (n: number) => string = (n) => n.toString()
+) {
+  if (value < min || value > max) {
+    throw new REDomainError(
+      `Parameter ${format(value)} must be in domain ${domain.toString()}`
+    );
+  }
+}
+
+function _assertMinLessThanMax(min: number, max: number) {
+  if (min >= max) {
+    throw new REArgumentError(
+      `The range minimum (${min}) must be lower than the range maximum (${max})`
+    );
+  }
+}
 
 abstract class BaseDomain {
   abstract type: string;
@@ -31,14 +63,8 @@ export class NumericRangeDomain extends BaseDomain {
   }
 
   validateValue(value: Value) {
-    if (value.type !== "Number") {
-      throw new REDomainError(`Value of type ${value.type} must be a number`);
-    }
-    if (value.value < this.min || value.value > this.max) {
-      throw new REDomainError(
-        `Value ${value} must be within ${this.min} and ${this.max}`
-      );
-    }
+    _assertCorrectType(value, "Number");
+    _assertWithinBounds(this.min, this.max, (value as VNumber).value, this);
   }
 
   isEqual(other: NumericRangeDomain) {
@@ -74,18 +100,18 @@ export class DateRangeDomain extends BaseDomain {
   }
 
   toString() {
-    return `Date.rangeDomain({ min: ${this.min.toString}, max: ${this.max.toString} })`;
+    return `Date.rangeDomain({ min: ${this.min.toString()}, max: ${this.max.toString()} })`;
   }
 
   validateValue(value: Value) {
-    if (value.type !== "Date") {
-      throw new REDomainError(`Value of type ${value.type} must be a date`);
-    }
-    if (value.value < this.min || value.value > this.max) {
-      throw new REDomainError(
-        `Value ${value} must be within ${this.min.toString} and ${this.max.toString}`
-      );
-    }
+    _assertCorrectType(value, "Date");
+    _assertWithinBounds(
+      this.min.toMs(),
+      this.max.toMs(),
+      (value as VDate).value.toMs(),
+      this,
+      (n) => SDate.fromMs(n).toString()
+    );
   }
 
   isEqual(other: DateRangeDomain) {
@@ -93,18 +119,18 @@ export class DateRangeDomain extends BaseDomain {
   }
 
   get minAsNumber() {
-    return this.min.toMs;
+    return this.min.toMs();
   }
 
   get maxAsNumber() {
-    return this.max.toMs;
+    return this.max.toMs();
   }
 
   toDefaultScale(): Scale {
     return {
       type: "date",
-      min: this.min.toMs,
-      max: this.max.toMs,
+      min: this.min.toMs(),
+      max: this.max.toMs(),
     };
   }
 }
@@ -129,15 +155,11 @@ export function annotationToDomain(value: Value): Domain {
     throw new REArgumentError("Max value is not a number or date");
   }
 
-  if (min.value >= max.value) {
-    throw new REArgumentError(
-      `The range minimum (${min.value}) must be lower than the range maximum (${max.value})`
-    );
-  }
-
   if (min.type === "Date" && max.type === "Date") {
+    _assertMinLessThanMax(min.value.toMs(), max.value.toMs());
     return new DateRangeDomain(min.value, max.value);
   } else if (min.type === "Number" && max.type === "Number") {
+    _assertMinLessThanMax(min.value, max.value);
     return new NumericRangeDomain(min.value, max.value);
   } else {
     throw new REArgumentError(

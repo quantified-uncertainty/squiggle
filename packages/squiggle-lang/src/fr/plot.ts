@@ -27,8 +27,8 @@ const maker = new FnFactory({
 const defaultScale = { type: "linear" } satisfies Scale;
 
 export function assertValidMinMax(scale: Scale) {
-  const hasMin = !scale.min;
-  const hasMax = !scale.max;
+  const hasMin = scale.min != undefined;
+  const hasMax = scale.max != undefined;
 
   // Validate scale properties
   if (hasMin !== hasMax) {

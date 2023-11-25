@@ -117,7 +117,7 @@ export class SqDateValue extends SqAbstractValue<"Date", Date> {
 
   //Note: This reveals the underlying Date object, but we might prefer to keep it hidden
   asJS() {
-    return this.value.toDate;
+    return this.value.toDate();
   }
 }
 

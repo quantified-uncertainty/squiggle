@@ -39,9 +39,9 @@ function checkMinMax(min: number | null, max: number | null) {
 }
 
 function checkMinMaxDates(min: SDate | null, max: SDate | null) {
-  if (!!min && !!max && max <= min) {
+  if (!!min && !!max && max.toMs() <= min.toMs()) {
     throw new REArgumentError(
-      `Max must be greater than min, got: min=${min.toString}, max=${max.toString}`
+      `Max must be greater than min, got: min=${min.toString()}, max=${max.toString()}`
     );
   }
 }
@@ -191,8 +191,8 @@ export const library = [
         // We don't check the tick format, because the format is much more complicated for dates.
         return vScale({
           type: "date",
-          min: min ? min.toMs : undefined,
-          max: max ? max.toMs : undefined,
+          min: min ? min.toMs() : undefined,
+          max: max ? max.toMs() : undefined,
           tickFormat: tickFormat ?? undefined,
           title: title ?? undefined,
         });

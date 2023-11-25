@@ -139,19 +139,19 @@ export class SDate {
     return new SDate(new Date());
   }
 
-  get toString(): string {
+  toString(): string {
     return this.value.toDateString();
   }
 
-  get toMs(): number {
+  toMs(): number {
     return this.value.getTime();
   }
 
-  get toUnixS(): number {
-    return this.toMs / 1000;
+  toUnixS(): number {
+    return this.toMs() / 1000;
   }
 
-  get toDate(): Date {
+  toDate(): Date {
     return this.value;
   }
 
@@ -160,11 +160,11 @@ export class SDate {
   }
 
   fmap(fn: (v: number) => number): SDate {
-    return SDate.fromMs(fn(this.toMs));
+    return SDate.fromMs(fn(this.toMs()));
   }
 
   subtract(t2: SDate): result<Duration, string> {
-    const [f1, f2] = [this.toMs, t2.toMs];
+    const [f1, f2] = [this.toMs(), t2.toMs()];
     const diff = f1 - f2;
     if (diff < 0) {
       return Result.Err("Cannot subtract a date by one that is in its future");

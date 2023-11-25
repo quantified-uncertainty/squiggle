@@ -115,7 +115,7 @@ class VBool extends BaseValue {
 }
 export const vBool = (v: boolean) => new VBool(v);
 
-class VDate extends BaseValue {
+export class VDate extends BaseValue {
   readonly type = "Date";
   readonly publicName = "Date";
 
@@ -123,7 +123,7 @@ class VDate extends BaseValue {
     super();
   }
   toString() {
-    return this.value.toString;
+    return this.value.toString();
   }
   isEqual(other: VDate) {
     return this.value.isEqual(other.value);
@@ -182,7 +182,7 @@ class VLambda extends BaseValue implements Indexable {
 }
 export const vLambda = (v: Lambda) => new VLambda(v);
 
-class VNumber extends BaseValue {
+export class VNumber extends BaseValue {
   readonly type = "Number";
   readonly publicName = "Number";
 

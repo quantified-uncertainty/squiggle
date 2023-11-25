@@ -69,7 +69,7 @@ export const library = [
     requiresNamespace: true,
     definitions: [
       makeDefinition([frDate], ([date]) => {
-        return vNumber(date.toUnixS);
+        return vNumber(date.toUnixS());
       }),
     ],
   }),

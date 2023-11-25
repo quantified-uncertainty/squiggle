@@ -48,16 +48,16 @@ describe("annotations", () => {
     describe("check types", () => {
       testEvalToBe(
         "f(x: [3,5]) = x*2; f(false)",
-        "Error(Domain Error: Parameter false, of type Bool, must be a number.)"
+        "Error(Domain Error: Parameter false, of type Bool, must be a Number)"
       );
       testEvalToBe(
         "f(x: [3,5]) = x*2; f(2000year)",
-        "Error(Domain Error: Parameter Sat Jan 01 2000, of type Date, must be a number.)"
+        "Error(Domain Error: Parameter Sat Jan 01 2000, of type Date, must be a Number)"
       );
 
       testEvalToBe(
         "f(x: [2000year,2005year]) = toYears(x-2000year)+3; f(25)",
-        "Error(Domain Error: Parameter 25, of type Number, must be a date.)"
+        "Error(Domain Error: Parameter 25, of type Number, must be a Date)"
       );
     });
   });
