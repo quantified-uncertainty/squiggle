@@ -10,6 +10,8 @@ import { DependencyList, useCallback, useEffect, useState } from "react";
 // This file includes generic helpers for using Codemirror with React.
 // Squiggle-specific hooks are in `./useSquiggleEditorView.ts`.
 
+// Create a compartment which gets reconfigured on props changes.
+// See: https://codemirror.net/examples/config/#private-compartments
 export function useReactiveExtension(
   view: EditorView | undefined,
   configure: () => Extension,

@@ -2,11 +2,8 @@ import { forwardRef, useImperativeHandle } from "react";
 
 import { SqError, SqProject, SqValuePath } from "@quri/squiggle-lang";
 
-import {
-  formatSquiggle,
-  scrollToPosition,
-  useSquiggleEditorView,
-} from "./useSquiggleEditorView.js";
+import { formatSquiggle } from "./useFormatSquiggleExtension.js";
+import { useSquiggleEditorView } from "./useSquiggleEditorView.js";
 
 export type CodeEditorProps = {
   defaultValue: string;
@@ -31,9 +28,18 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
   function CodeEditor(props, ref) {
     const { view, ref: editorRef } = useSquiggleEditorView(props);
 
+    const scrollTo = (position: number) => {
+      if (!view) return;
+      view.dispatch({
+        selection: { anchor: position },
+        scrollIntoView: true,
+      });
+      view.focus();
+    };
+
     useImperativeHandle(ref, () => ({
       format: () => formatSquiggle(view),
-      scrollTo: (position) => scrollToPosition(view, position),
+      scrollTo,
     }));
 
     return <div style={{ fontSize: "13px" }} ref={editorRef} />;
