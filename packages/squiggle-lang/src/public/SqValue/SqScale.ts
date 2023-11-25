@@ -118,7 +118,7 @@ export class SqDateScale extends SqAbstractScale<"date"> {
     return new SqDateScale({ type: "date", ...args });
   }
 
-  override numberToValue(v: number) {
+  override numberToValue(v: number): SqValue {
     return SqDateValue.create(dateFromMs(v));
   }
 }

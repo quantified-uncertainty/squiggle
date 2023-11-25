@@ -37,7 +37,11 @@ export {
   SqSymbolicDistribution,
   type SqDistribution,
 } from "./public/SqValue/SqDistribution/index.js";
-export { type SqDomain } from "./public/SqValue/SqDomain.js";
+export {
+  type SqDomain,
+  SqNumericRangeDomain,
+  SqDateRangeDomain,
+} from "./public/SqValue/SqDomain.js";
 export { SqLambda, type SqLambdaParameter } from "./public/SqValue/SqLambda.js";
 export { SqDictValue } from "./public/SqValue/index.js";
 export {

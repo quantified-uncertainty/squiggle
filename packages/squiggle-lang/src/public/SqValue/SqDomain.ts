@@ -5,6 +5,7 @@ import {
   NumericRangeDomain,
 } from "../../value/domain.js";
 import { SqDateScale, SqLinearScale } from "./SqScale.js";
+import { SqDateValue, SqNumberValue } from "./index.js";
 
 export function wrapDomain(value: Domain) {
   switch (value.type) {
@@ -22,11 +23,16 @@ abstract class SqAbstractDomain<T extends Domain["type"]> {
   abstract tag: T;
 }
 
-class SqNumericRangeDomain extends SqAbstractDomain<"NumericRange"> {
+export class SqNumericRangeDomain extends SqAbstractDomain<"NumericRange"> {
   tag = "NumericRange" as const;
 
   constructor(public _value: NumericRangeDomain) {
     super();
+  }
+
+  //A simple alternative to making a Domain object and pass that in.
+  static fromMinMax(min: number, max: number) {
+    return new this(new NumericRangeDomain(min, max));
   }
 
   get min() {
@@ -37,6 +43,14 @@ class SqNumericRangeDomain extends SqAbstractDomain<"NumericRange"> {
     return this._value.max;
   }
 
+  get minValue() {
+    return SqNumberValue.create(this._value.min);
+  }
+
+  get maxValue() {
+    return SqNumberValue.create(this._value.max);
+  }
+
   toDefaultScale() {
     return new SqLinearScale({
       type: "linear",
@@ -45,7 +59,7 @@ class SqNumericRangeDomain extends SqAbstractDomain<"NumericRange"> {
     });
   }
 }
-class SqDateRangeDomain extends SqAbstractDomain<"DateRange"> {
+export class SqDateRangeDomain extends SqAbstractDomain<"DateRange"> {
   tag = "DateRange" as const;
 
   constructor(public _value: DateRangeDomain) {
@@ -58,6 +72,14 @@ class SqDateRangeDomain extends SqAbstractDomain<"DateRange"> {
 
   get max() {
     return this._value.max;
+  }
+
+  get minValue() {
+    return SqDateValue.create(this._value.min);
+  }
+
+  get maxValue() {
+    return SqDateValue.create(this._value.max);
   }
 
   toDefaultScale() {
