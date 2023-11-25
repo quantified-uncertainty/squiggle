@@ -34,11 +34,11 @@ class SqNumericRangeDomain extends SqAbstractDomain<"NumericRange"> {
     return this._value.max;
   }
 
-  toDefaultScale({ min, max }: { min?: number; max?: number }) {
+  toDefaultScale() {
     return new SqLinearScale({
       type: "linear",
-      min: min ? Math.max(min, this.min) : this.min,
-      max: max ? Math.min(max, this.max) : this.max,
+      min: this.min,
+      max: this.max,
     });
   }
 }
@@ -53,11 +53,11 @@ class SqDateRangeDomain extends SqAbstractDomain<"DateRange"> {
     return this._value.max;
   }
 
-  toDefaultScale({ min, max }: { min?: number; max?: number }) {
+  toDefaultScale() {
     return new SqDateScale({
       type: "date",
-      min: min ? Math.max(min, this.min) : this.min,
-      max: max ? Math.min(max, this.max) : this.max,
+      min: this.min,
+      max: this.max,
     });
   }
 }

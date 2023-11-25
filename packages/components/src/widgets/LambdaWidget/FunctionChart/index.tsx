@@ -63,11 +63,11 @@ export const FunctionChart: FC<FunctionChartProps> = ({
   const min: number = settings.functionChartSettings.start;
   const max: number = settings.functionChartSettings.stop;
 
-  const signatures = fn.signatures();
-  const domain = signatures[0][0]?.domain;
+  const domain = fn.signatures().find((s) => s.length === 1)?.[0]?.domain;
 
-  const xScale =
-    domain?.toDefaultScale({ min, max }) || SqLinearScale.create({ min, max });
+  const xScale = domain
+    ? domain.toDefaultScale()
+    : SqLinearScale.create({ min, max });
 
   const result1 = fn.call([xScale.numberToValue(min)], environment);
   const result2 = fn.call([xScale.numberToValue(max)], environment);
