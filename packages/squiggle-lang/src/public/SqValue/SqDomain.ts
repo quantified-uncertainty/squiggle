@@ -34,7 +34,7 @@ class SqNumericRangeDomain extends SqAbstractDomain<"NumericRange"> {
     return this._value.max;
   }
 
-  toScale({ min, max }: { min?: number; max?: number }) {
+  toDefaultScale({ min, max }: { min?: number; max?: number }) {
     return new SqLinearScale({
       type: "linear",
       min: min ? Math.max(min, this.min) : this.min,
@@ -53,7 +53,7 @@ class SqDateRangeDomain extends SqAbstractDomain<"DateRange"> {
     return this._value.max;
   }
 
-  toScale({ min, max }: { min?: number; max?: number }) {
+  toDefaultScale({ min, max }: { min?: number; max?: number }) {
     return new SqDateScale({
       type: "date",
       min: min ? Math.max(min, this.min) : this.min,

@@ -1,3 +1,4 @@
+import { dateFromMs } from "../../utility/DateTime.js";
 import {
   CommonScaleArgs,
   SCALE_POWER_DEFAULT_CONSTANT,
@@ -5,7 +6,7 @@ import {
   Scale,
   vScale,
 } from "../../value/index.js";
-import { SqNumberValue } from "./index.js";
+import { SqDateValue, SqNumberValue, SqValue } from "./index.js";
 
 export const wrapScale = (value: Scale): SqScale => {
   switch (value.type) {
@@ -46,7 +47,7 @@ abstract class SqAbstractScale<T extends Scale["type"]> {
   get title() {
     return this._value.title;
   }
-  numberToValue(v: number) {
+  numberToValue(v: number): SqValue {
     return SqNumberValue.create(v);
   }
 }
@@ -118,7 +119,7 @@ export class SqDateScale extends SqAbstractScale<"date"> {
   }
 
   override numberToValue(v: number) {
-    return SqNumberValue.create(v);
+    return SqDateValue.create(dateFromMs(v));
   }
 }
 
