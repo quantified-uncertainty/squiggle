@@ -6,6 +6,7 @@ export const durationUnits = {
   Year: 24 * 60 * 60 * 1000 * 365.25,
 } as const;
 
+//This is our own internal date duration class. It's used by the interpreter, but meant to act like a simple date library.
 export class SDuration {
   constructor(private ms: number) {
     this.ms = ms;

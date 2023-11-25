@@ -3,6 +3,7 @@ import { SDuration, durationUnits } from "./SDuration.js";
 import { Ok, result, Err } from "./result.js";
 import * as Result from "./result.js";
 
+//This is our own internal date class, which is a wrapper around the built-in Date class. It's used by the interpreter, but meant to act like a simple date library.
 export class SDate {
   constructor(public value: Date) {
     this.value = value;
