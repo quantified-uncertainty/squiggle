@@ -7,7 +7,14 @@ import {
   frTimeDuration,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { type Duration, duration, date } from "../utility/DateTime.js";
+import {
+  type Duration,
+  duration,
+  date,
+  dateFromUnixS,
+  dateToUnixS,
+  dateFromString,
+} from "../utility/DateTime.js";
 import { vDate, vNumber, vTimeDuration } from "../value/index.js";
 
 const maker = new FnFactory({
@@ -42,7 +49,7 @@ export const library = [
     examples: ['Date.make("2020-05-12")', "Date.make(2020, 5, 10)"],
     definitions: [
       makeDefinition([frString], ([str]) => {
-        const result = date.makeFromString(str);
+        const result = dateFromString(str);
         if (!result.ok) {
           throw new REOther(result.value);
         }
@@ -60,7 +67,7 @@ export const library = [
     requiresNamespace: true,
     definitions: [
       makeDefinition([frNumber], ([num]) => {
-        return vDate(new Date(num * 1000));
+        return vDate(dateFromUnixS(num));
       }),
     ],
   }),
@@ -69,7 +76,7 @@ export const library = [
     requiresNamespace: true,
     definitions: [
       makeDefinition([frDate], ([date]) => {
-        return vNumber(date.getTime() / 1000);
+        return vNumber(dateToUnixS(date));
       }),
     ],
   }),

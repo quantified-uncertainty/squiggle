@@ -125,30 +125,11 @@ export class RETodo extends ErrorMessage {
 }
 
 export class REDomainError extends ErrorMessage {
-  constructor(
-    public value: Value,
-    public domain: VDomain
-  ) {
-    super();
+  constructor(public msg: string) {
+    super(msg);
   }
-
-  //It's awkward that we need to check the specific type of error here, given we already needed to calculate this in order to throw the error, but this way we don't need to pass in the error specifics to the constructor.
   toString() {
-    const { domainType } = this.domain;
-    const { type: valueType } = this.value;
-
-    if (
-      (domainType === "NumericRange" && valueType !== "Number") ||
-      (domainType === "DateRange" && valueType !== "Date")
-    ) {
-      return `Domain Error: Parameter ${this.value.toString()}, of type ${valueType}, must be a ${
-        domainType === "NumericRange" ? "number" : "date"
-      }.`;
-    }
-
-    return `Domain Error: Parameter ${this.value.toString()} must be in domain ${
-      this.domain
-    }`;
+    return `Domain Error: ${this.message}`;
   }
 }
 

@@ -1,3 +1,4 @@
+import { dateFromMs } from "../../utility/DateTime.js";
 import { result } from "../../utility/result.js";
 import { Value, vDate, vLambda, vNumber, vString } from "../../value/index.js";
 import { SqError } from "../SqError.js";
@@ -107,7 +108,7 @@ export class SqDateValue extends SqAbstractValue<"Date", Date> {
   }
 
   static fromNumber(value: number) {
-    return SqDateValue.create(new Date(value));
+    return SqDateValue.create(dateFromMs(value));
   }
 
   get value(): Date {

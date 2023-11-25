@@ -54,17 +54,50 @@ export const duration = {
   divide: (t1: Duration, t2: number): Duration => t1 / t2,
 };
 
+export function dateFromString(str: string): result<Date, string> {
+  const parsedDate = new Date(str);
+  if (dateIsValid(parsedDate)) {
+    return Ok(parsedDate);
+  } else {
+    return Result.Err("Invalid date string");
+  }
+}
+
+export function dateFromMs(ms: number): Date {
+  return new Date(ms);
+}
+
+export function dateToMs(date: Date): number {
+  return date.getTime();
+}
+
+export function dateToUnixS(date: Date): number {
+  return dateToMs(date) / 1000;
+}
+
+export function dateFromUnixS(s: number): Date {
+  return dateFromMs(s * 1000);
+}
+
+export function dateIsValid(date: Date) {
+  return date instanceof Date && isFinite(date.getTime());
+}
+
+export function dateToString(date: Date): string {
+  return date.toDateString();
+}
+
+export function dateFromMsToString(ms: number): string {
+  return dateToString(dateFromMs(ms));
+}
+
 export const date = {
   //   //The Rescript/JS implementation of Date is pretty mediocre. It would be good to improve upon later.
-  //   let getFullYear = Js.Date.getFullYear
-  toString(d: Date): string {
-    return d.toDateString();
-  },
   fmap(t: Date, fn: (v: number) => number): Date {
-    return new Date(fn(t.getTime()));
+    return dateFromMs(fn(dateToMs(t)));
   },
   subtract(t1: Date, t2: Date): result<Duration, string> {
-    const [f1, f2] = [t1.getTime(), t2.getTime()];
+    const [f1, f2] = [dateToMs(t1), dateToMs(t2)];
     const diff = f1 - f2;
     if (diff < 0) {
       return Result.Err("Cannot subtract a date by one that is in its future");
@@ -93,13 +126,5 @@ export const date = {
       const diff = year - floor;
       return date.addDuration(earlyDate, diff * DurationUnits.Year);
     });
-  },
-  makeFromString(str: string): result<Date, string> {
-    const parsedDate = new Date(str);
-    if (parsedDate instanceof Date && isFinite(parsedDate.getTime())) {
-      return Ok(parsedDate);
-    } else {
-      return Result.Err("Invalid date string");
-    }
   },
 };

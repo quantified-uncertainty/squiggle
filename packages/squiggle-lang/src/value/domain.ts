@@ -1,16 +1,19 @@
-import { REArgumentError } from "../errors/messages.js";
+import { REArgumentError, REDomainError } from "../errors/messages.js";
+import { dateFromMsToString, dateToMs } from "../utility/DateTime.js";
 import { Value } from "./index.js";
 
 abstract class BaseDomain {
   abstract type: string;
+  abstract valueType: string;
 
   abstract toString(): string;
 
-  abstract includes(value: Value): boolean;
+  abstract validateValue(value: Value): void;
 }
 
 export class NumericRangeDomain extends BaseDomain {
   readonly type = "NumericRange";
+  readonly valueType = "Number";
 
   constructor(
     public min: number,
@@ -23,12 +26,15 @@ export class NumericRangeDomain extends BaseDomain {
     return `Number.rangeDomain({ min: ${this.min}, max: ${this.max} })`;
   }
 
-  includes(value: Value) {
-    return (
-      value.type === "Number" &&
-      value.value >= this.min &&
-      value.value <= this.max
-    );
+  validateValue(value: Value) {
+    if (value.type !== "Number") {
+      throw new REDomainError(`Value of type ${value.type} must be a number`);
+    }
+    if (value.value < this.min || value.value > this.max) {
+      throw new REDomainError(
+        `Value ${value} must be within ${this.min} and ${this.max}`
+      );
+    }
   }
 
   isEqual(other: NumericRangeDomain) {
@@ -37,31 +43,33 @@ export class NumericRangeDomain extends BaseDomain {
 }
 export class DateRangeDomain extends BaseDomain {
   readonly type = "DateRange";
+  readonly valueType = "Date";
   public min;
   public max;
 
-  constructor(
-    _min: Date,
-    _max: Date
-  ) {
+  constructor(_min: Date, _max: Date) {
     super();
-    this.min = _min.getTime();
-    this.max = _max.getTime();
+    this.min = dateToMs(_min);
+    this.max = dateToMs(_max);
   }
 
   toString() {
-    return `Date.rangeDomain({ min: ${new Date(
+    return `Date.rangeDomain({ min: ${dateFromMsToString(
       this.min
-    ).toDateString()}, max: ${new Date(this.max).toDateString()} })`;
+    )}, max: ${dateFromMsToString(this.max)} })`;
   }
 
-  includes(value: Value) {
-    if (value.type === "Date") {
-      return (
-        value.value.getTime() >= this.min && value.value.getTime() <= this.max
+  validateValue(value: Value) {
+    if (value.type !== "Date") {
+      throw new REDomainError(`Value of type ${value.type} must be a date`);
+    }
+    const valueTime = dateToMs(value.value);
+    if (valueTime < this.min || valueTime > this.max) {
+      throw new REDomainError(
+        `Value ${value} must be within ${dateFromMsToString(
+          this.min
+        )} and ${dateFromMsToString(this.max)}`
       );
-    } else {
-      return false;
     }
   }
 

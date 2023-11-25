@@ -89,8 +89,8 @@ export class UserDefinedLambda extends BaseLambda {
       for (let i = 0; i < parametersLength; i++) {
         const parameter = parameters[i];
         localStack = localStack.push(parameter.name, args[i]);
-        if (parameter.domain && !parameter.domain.value.includes(args[i])) {
-          throw new REDomainError(args[i], parameter.domain);
+        if (parameter.domain) {
+          parameter.domain.value.validateValue(args[i]);
         }
       }
 
