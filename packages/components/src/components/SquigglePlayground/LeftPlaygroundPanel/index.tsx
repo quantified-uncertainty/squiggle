@@ -131,15 +131,6 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
                 icon={AdjustmentsVerticalIcon}
                 onClick={() => openModal("settings")}
               />
-
-              {
-                // experimental, won't always work, so disabled for now
-                /* <DropdownMenuActionItem
-                title="Find in Viewer"
-                icon={AdjustmentsVerticalIcon}
-                onClick={() => editorRef.current?.viewCurrentPosition()}
-              /> */
-              }
               <DropdownMenuActionItem
                 title="Dependency Graph"
                 icon={PuzzleIcon}
