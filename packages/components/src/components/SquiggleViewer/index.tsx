@@ -11,7 +11,7 @@ import { ChevronRightIcon } from "@quri/ui";
 
 import { useStabilizeObjectIdentity } from "../../lib/hooks/useStabilizeObject.js";
 import { MessageAlert } from "../Alert.js";
-import { CodeEditorHandle } from "../CodeEditor.js";
+import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
 import { ValueViewer } from "./ValueViewer.js";
