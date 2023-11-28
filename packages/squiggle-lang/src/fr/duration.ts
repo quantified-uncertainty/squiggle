@@ -37,6 +37,14 @@ export const library = [
     frDuration
   ),
   maker.make({
+    name: "unaryMinus",
+    output: "Duration",
+    examples: ["-5minutes"],
+    definitions: [
+      makeDefinition([frDuration], ([d]) => vDuration(d.multiply(-1))),
+    ],
+  }),
+  maker.make({
     name: "add",
     output: "Duration",
     examples: ["5minutes + 10minutes"],

@@ -418,7 +418,7 @@ function createComparisonDefinition<T>(
   fnFactory: FnFactory,
   opName: string,
   comparisonFunction: (d1: T, d2: T) => boolean,
-  frType: FRType<T> // Assuming FRType is the type for frDate
+  frType: FRType<T>
 ): FRFunction {
   return fnFactory.make({
     name: opName,
@@ -435,7 +435,7 @@ export function makeNumericComparisons<T>(
   smaller: (d1: T, d2: T) => boolean,
   larger: (d1: T, d2: T) => boolean,
   isEqual: (d1: T, d2: T) => boolean,
-  frType: FRType<T> // Add this parameter
+  frType: FRType<T>
 ): FRFunction[] {
   return [
     createComparisonDefinition(fnFactory, "smaller", smaller, frType),
