@@ -162,7 +162,7 @@ export const library = [
           for (const [key, value] of dict.entries()) {
             const mappedKey = lambda.call([vString(key)], context);
 
-            if (mappedKey.type == "String") {
+            if (mappedKey.type === "String") {
               mappedEntries.push([mappedKey.value, value]);
             } else {
               throw new REArgumentError("mapKeys: lambda must return a string");

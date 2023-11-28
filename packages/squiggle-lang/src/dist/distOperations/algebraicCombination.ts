@@ -44,7 +44,7 @@ const validateInputs = (
     return undefined;
   };
 
-  if (arithmeticOperation == "Logarithm") {
+  if (arithmeticOperation === "Logarithm") {
     return getLogarithmInputError();
   } else {
     return undefined;
