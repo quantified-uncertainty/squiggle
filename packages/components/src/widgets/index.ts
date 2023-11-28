@@ -9,4 +9,4 @@ import "./NumberWidget.js";
 import "./PlotWidget/index.js";
 import "./StringWidget.js";
 import "./TableChartWidget.js";
-import "./TimeDurationWidget.js";
+import "./DurationWidget.js";

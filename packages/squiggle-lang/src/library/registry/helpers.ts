@@ -22,6 +22,7 @@ import {
 import { FRFunction } from "./core.js";
 import { FnDefinition, makeDefinition } from "./fnDefinition.js";
 import {
+  FRType,
   frBool,
   frDist,
   frDistOrNumber,
@@ -411,4 +412,45 @@ export function makeOneArgDist(
     }
     throw new REOther("Impossible branch");
   });
+}
+
+function createComparisonDefinition<T>(
+  fnFactory: FnFactory,
+  opName: string,
+  comparisonFunction: (d1: T, d2: T) => boolean,
+  frType: FRType<T>
+): FRFunction {
+  return fnFactory.make({
+    name: opName,
+    definitions: [
+      makeDefinition([frType, frType], ([d1, d2]) =>
+        vBool(comparisonFunction(d1, d2))
+      ),
+    ],
+  });
+}
+
+export function makeNumericComparisons<T>(
+  fnFactory: FnFactory,
+  smaller: (d1: T, d2: T) => boolean,
+  larger: (d1: T, d2: T) => boolean,
+  isEqual: (d1: T, d2: T) => boolean,
+  frType: FRType<T>
+): FRFunction[] {
+  return [
+    createComparisonDefinition(fnFactory, "smaller", smaller, frType),
+    createComparisonDefinition(fnFactory, "larger", larger, frType),
+    createComparisonDefinition(
+      fnFactory,
+      "smallerEq",
+      (d1, d2) => smaller(d1, d2) || isEqual(d1, d2),
+      frType
+    ),
+    createComparisonDefinition(
+      fnFactory,
+      "largerEq",
+      (d1, d2) => larger(d1, d2) || isEqual(d1, d2),
+      frType
+    ),
+  ];
 }

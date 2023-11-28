@@ -1,10 +1,9 @@
-import { dateToMs } from "../../utility/DateTime.js";
 import {
   DateRangeDomain,
   Domain,
   NumericRangeDomain,
 } from "../../value/domain.js";
-import { SqDateScale, SqLinearScale, wrapScale } from "./SqScale.js";
+import { SqDateScale, SqLinearScale } from "./SqScale.js";
 import { SqDateValue, SqNumberValue } from "./index.js";
 
 export function wrapDomain(value: Domain) {

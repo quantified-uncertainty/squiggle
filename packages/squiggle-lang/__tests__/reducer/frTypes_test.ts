@@ -6,7 +6,7 @@ import {
   frDist,
   frNumber,
   frString,
-  frTimeDuration,
+  frDuration,
   frArray,
   frTuple,
   frDictWithArbitraryKeys,
@@ -15,6 +15,8 @@ import {
   frAny,
   frNumberOrString,
 } from "../../src/library/registry/frTypes.js";
+import { SDate } from "../../src/utility/SDate.js";
+import { SDuration } from "../../src/utility/SDuration.js";
 import { ImmutableMap } from "../../src/utility/immutableMap.js";
 
 import {
@@ -26,7 +28,7 @@ import {
   vNumber,
   vDict,
   vString,
-  vTimeDuration,
+  vDuration,
 } from "../../src/value/index.js";
 
 test("frNumber", () => {
@@ -48,17 +50,17 @@ test("frBool", () => {
 });
 
 test("frDate", () => {
-  const date = new Date();
+  const date = SDate.now();
   const value = vDate(date);
   expect(frDate.unpack(value)).toBe(date);
   expect(frDate.pack(date)).toEqual(value);
 });
 
-test("frTimeDuration", () => {
-  const duration = 1234;
-  const value = vTimeDuration(duration);
-  expect(frTimeDuration.unpack(value)).toBe(duration);
-  expect(frTimeDuration.pack(duration)).toEqual(value);
+test("frDuration", () => {
+  const duration = SDuration.fromMs(1234);
+  const value = vDuration(duration);
+  expect(frDuration.unpack(value)).toBe(duration);
+  expect(frDuration.pack(duration)).toEqual(value);
 });
 
 describe("frDistOrNumber", () => {

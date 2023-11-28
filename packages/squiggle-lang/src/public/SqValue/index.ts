@@ -1,4 +1,4 @@
-import { dateFromMs } from "../../utility/DateTime.js";
+import { SDate } from "../../utility/SDate.js";
 import { result } from "../../utility/result.js";
 import { Value, vDate, vLambda, vNumber, vString } from "../../value/index.js";
 import { SqError } from "../SqError.js";
@@ -40,8 +40,8 @@ export function wrapValue(value: Value, context?: SqValueContext) {
       return new SqCalculatorValue(value, context);
     case "Scale":
       return new SqScaleValue(value, context);
-    case "TimeDuration":
-      return new SqTimeDurationValue(value, context);
+    case "Duration":
+      return new SqDurationValue(value, context);
     case "Void":
       return new SqVoidValue(value, context);
     case "Domain":
@@ -103,20 +103,21 @@ export class SqBoolValue extends SqAbstractValue<"Bool", boolean> {
 export class SqDateValue extends SqAbstractValue<"Date", Date> {
   tag = "Date" as const;
 
-  static create(value: Date) {
+  static create(value: SDate) {
     return new SqDateValue(vDate(value));
   }
 
   static fromNumber(value: number) {
-    return SqDateValue.create(dateFromMs(value));
+    return SqDateValue.create(SDate.fromMs(value));
   }
 
-  get value(): Date {
+  get value(): SDate {
     return this._value.value;
   }
 
+  //Note: This reveals the underlying Date object, but we might prefer to keep it hidden
   asJS() {
-    return this.value;
+    return this.value.toDate();
   }
 }
 
@@ -195,18 +196,15 @@ export class SqStringValue extends SqAbstractValue<"String", string> {
   }
 }
 
-export class SqTimeDurationValue extends SqAbstractValue<
-  "TimeDuration",
-  number
-> {
-  tag = "TimeDuration" as const;
+export class SqDurationValue extends SqAbstractValue<"Duration", number> {
+  tag = "Duration" as const;
 
   get value() {
     return this._value.value;
   }
 
   asJS() {
-    return this._value.value;
+    return this._value.value.toMs();
   }
 }
 

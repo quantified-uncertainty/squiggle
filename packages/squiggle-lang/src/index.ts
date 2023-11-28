@@ -15,8 +15,6 @@ import {
   type SqValue,
 } from "./public/SqValue/index.js"; // TODO - reexport other values too
 
-export { duration, date } from "./utility/DateTime.js";
-
 export {
   SqCompileError,
   SqFrame,
@@ -67,6 +65,8 @@ export { type PathItem, SqValuePath } from "./public/SqValuePath.js";
 export { parse } from "./public/parse.js";
 export { fmap as resultMap, type result } from "./utility/result.js";
 
+export { SDate } from "./utility/SDate.js";
+export { SDuration } from "./utility/SDuration.js";
 export { type LocationRange as SqLocation } from "peggy";
 export { defaultEnv as defaultEnvironment } from "./dist/env.js";
 export {
