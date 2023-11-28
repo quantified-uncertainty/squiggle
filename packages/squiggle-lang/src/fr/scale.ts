@@ -2,13 +2,14 @@ import { REArgumentError, REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frDate,
+  frDateNumber,
   frDict,
   frNumber,
   frOptional,
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { SDate } from "../utility/SDate.js";
+import { SDate, SDateNumber } from "../utility/SDate.js";
 import { vScale } from "../value/index.js";
 
 const maker = new FnFactory({
@@ -24,8 +25,8 @@ const commonDict = frDict(
 );
 
 const dateDict = frDict(
-  ["min", frOptional(frDate)],
-  ["max", frOptional(frDate)],
+  ["min", frOptional(frDateNumber)],
+  ["max", frOptional(frDateNumber)],
   ["tickFormat", frOptional(frString)],
   ["title", frOptional(frString)]
 );
@@ -38,7 +39,7 @@ function checkMinMax(min: number | null, max: number | null) {
   }
 }
 
-function checkMinMaxDates(min: SDate | null, max: SDate | null) {
+function checkMinMaxDates(min: SDateNumber | null, max: SDateNumber | null) {
   if (!!min && !!max && max.toMs() <= min.toMs()) {
     throw new REArgumentError(
       `Max must be greater than min, got: min=${min.toString()}, max=${max.toString()}`

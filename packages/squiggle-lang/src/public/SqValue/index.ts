@@ -1,6 +1,14 @@
-import { SDate } from "../../utility/SDate.js";
+import { BaseDist } from "../../dist/BaseDist.js";
+import { SDate, SDateNumber } from "../../utility/SDate.js";
 import { result } from "../../utility/result.js";
-import { Value, vDate, vLambda, vNumber, vString } from "../../value/index.js";
+import {
+  Value,
+  vDate,
+  vDateNumber,
+  vLambda,
+  vNumber,
+  vString,
+} from "../../value/index.js";
 import { SqError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqArray } from "./SqArray.js";
@@ -22,6 +30,8 @@ export function wrapValue(value: Value, context?: SqValueContext) {
       return new SqBoolValue(value, context);
     case "Date":
       return new SqDateValue(value, context);
+    case "DateNumber":
+      return new SqDateNumberValue(value, context);
     case "Dist":
       return new SqDistributionValue(value, context);
     case "Lambda":
@@ -100,7 +110,27 @@ export class SqBoolValue extends SqAbstractValue<"Bool", boolean> {
   }
 }
 
-export class SqDateValue extends SqAbstractValue<"Date", Date> {
+export class SqDateNumberValue extends SqAbstractValue<"DateNumber", number> {
+  tag = "DateNumber" as const;
+
+  static create(value: SDateNumber) {
+    return new SqDateNumberValue(vDateNumber(value));
+  }
+
+  static fromNumber(value: number) {
+    return SqDateValue.create(SDate.fromMs(value));
+  }
+
+  get value(): number {
+    return this._value.value.toMs();
+  }
+
+  //Note: This reveals the underlying Date object, but we might prefer to keep it hidden
+  asJS() {
+    return this.value;
+  }
+}
+export class SqDateValue extends SqAbstractValue<"Date", BaseDist> {
   tag = "Date" as const;
 
   static create(value: SDate) {
@@ -117,7 +147,7 @@ export class SqDateValue extends SqAbstractValue<"Date", Date> {
 
   //Note: This reveals the underlying Date object, but we might prefer to keep it hidden
   asJS() {
-    return this.value.toDate();
+    return this.value.value;
   }
 }
 

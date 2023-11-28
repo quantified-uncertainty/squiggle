@@ -6,7 +6,7 @@ import {
   REOther,
 } from "../errors/messages.js";
 import { Lambda } from "../reducer/lambda.js";
-import { SDate } from "../utility/SDate.js";
+import { SDate, SDateNumber } from "../utility/SDate.js";
 import { SDuration } from "../utility/SDuration.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { DateRangeDomain, Domain, NumericRangeDomain } from "./domain.js";
@@ -115,6 +115,22 @@ class VBool extends BaseValue {
   }
 }
 export const vBool = (v: boolean) => new VBool(v);
+
+export class VDateNumber extends BaseValue {
+  readonly type = "DateNumber";
+  readonly publicName = "DateNumber";
+
+  constructor(public value: SDateNumber) {
+    super();
+  }
+  toString() {
+    return this.value.toString();
+  }
+  isEqual(other: VDateNumber) {
+    return this.value.isEqual(other.value);
+  }
+}
+export const vDateNumber = (v: SDateNumber) => new VDateNumber(v);
 
 export class VDate extends BaseValue {
   readonly type = "Date";
@@ -621,9 +637,9 @@ export class VDomain extends BaseValue implements Indexable {
     return this.value.type;
   }
 
-  get(key: Value): VNumber | VDate {
-    const mapValue = (value: number | SDate) =>
-      typeof value === "number" ? vNumber(value) : vDate(value);
+  get(key: Value): VNumber | VDateNumber {
+    const mapValue = (value: number | SDateNumber) =>
+      typeof value === "number" ? vNumber(value) : vDateNumber(value);
 
     if (key.type === "String") {
       if (key.value === "min") {
@@ -660,6 +676,7 @@ export const vVoid = () => new VVoid();
 export type Value =
   | VArray
   | VBool
+  | VDateNumber
   | VDate
   | VDist
   | VLambda
@@ -684,6 +701,7 @@ export function isEqual(a: Value, b: Value): boolean {
     case "Number":
     case "String":
     case "Dist":
+    case "DateNumber":
     case "Date":
     case "Duration":
     case "Scale":

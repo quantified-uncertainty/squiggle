@@ -1,6 +1,6 @@
 import { BaseDist } from "../../dist/BaseDist.js";
 import { Lambda } from "../../reducer/lambda.js";
-import { SDate } from "../../utility/SDate.js";
+import { SDate, SDateNumber } from "../../utility/SDate.js";
 import { SDuration } from "../../utility/SDuration.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import {
@@ -18,6 +18,7 @@ import {
   vDuration,
   vInput,
   Input,
+  vDateNumber,
 } from "../../value/index.js";
 
 /*
@@ -44,6 +45,11 @@ export const frBool: FRType<boolean> = {
   unpack: (v: Value) => (v.type === "Bool" ? v.value : undefined),
   pack: (v) => vBool(v),
   getName: () => "bool",
+};
+export const frDateNumber: FRType<SDateNumber> = {
+  unpack: (v) => (v.type === "DateNumber" ? v.value : undefined),
+  pack: (v) => vDateNumber(v),
+  getName: () => "date",
 };
 export const frDate: FRType<SDate> = {
   unpack: (v) => (v.type === "Date" ? v.value : undefined),
