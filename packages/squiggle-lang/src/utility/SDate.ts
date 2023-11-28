@@ -7,26 +7,30 @@ function isValid(date: Date): boolean {
   return date instanceof Date && isFinite(date.getTime());
 }
 
+function makeFromDate(date: Date): SDate {
+  return new SDate(date.getTime());
+}
+
 function makeWithYearInt(y: number): result<SDate, string> {
   if (y < 100) {
     return Result.Err("Year must be over 100");
   } else if (y > 200000) {
     return Result.Err("Year must be less than 200000");
   } else {
-    return Ok(new SDate(new Date(y, 0)));
+    return Ok(makeFromDate(new Date(y, 0)));
   }
 }
 
 //This is our own internal date class, which is a wrapper around the built-in Date class. It's used by the interpreter, but meant to act like a simple date library.
 export class SDate {
-  constructor(private value: Date) {
+  constructor(private value: number) {
     this.value = value;
   }
 
   static fromString(str: string): result<SDate, string> {
     const parsedDate = new Date(str);
     if (isValid(parsedDate)) {
-      return Ok(new SDate(parsedDate));
+      return Ok(new SDate(parsedDate.getTime()));
     } else {
       return Err("Invalid date string");
     }
@@ -43,7 +47,11 @@ export class SDate {
   }
 
   static fromMs(ms: number): SDate {
-    return new SDate(new Date(ms));
+    return new SDate(ms);
+  }
+
+  toDate(): Date {
+    return new Date(this.value);
   }
 
   static fromYearMonthDay(year: number, month: number, day: number): SDate {
@@ -52,7 +60,7 @@ export class SDate {
     } else if (day < 1 || day > 31) {
       throw new REOther(`Day must be between 1 and 31, got ${day}`);
     }
-    return new SDate(new Date(year, month - 1, day));
+    return makeFromDate(new Date(year, month - 1, day));
   }
 
   static fromUnixS(s: number): SDate {
@@ -60,27 +68,23 @@ export class SDate {
   }
 
   static now(): SDate {
-    return new SDate(new Date());
+    return makeFromDate(new Date());
   }
 
   toString(): string {
-    return this.value.toDateString();
+    return this.toDate().toDateString();
   }
 
   toMs(): number {
-    return this.value.getTime();
+    return this.value;
   }
 
   toUnixS(): number {
     return this.toMs() / 1000;
   }
 
-  toDate(): Date {
-    return this.value;
-  }
-
   isEqual(other: SDate): boolean {
-    return this.value.getTime() === other.value.getTime();
+    return this.value === other.value;
   }
 
   subtract(other: SDate): result<SDuration, string> {
