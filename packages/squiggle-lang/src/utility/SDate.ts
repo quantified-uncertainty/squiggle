@@ -1,10 +1,7 @@
 import { BaseDist } from "../dist/BaseDist.js";
 import { DistError } from "../dist/DistError.js";
 import { PointMass } from "../dist/SymbolicDist.js";
-import {
-  algebraicSum,
-  binaryOperations,
-} from "../dist/distOperations/binaryOperations.js";
+import { binaryOperations } from "../dist/distOperations/binaryOperations.js";
 import { REOther } from "../errors/messages.js";
 import { Env } from "../index.js";
 import { SDuration, durationUnits } from "./SDuration.js";
@@ -126,25 +123,25 @@ export class SDateNumber {
 }
 
 //This is our own internal date class, which is a wrapper around the built-in Date class. It's used by the interpreter, but meant to act like a simple date library.
-export class SDate {
+export class SDateDist {
   constructor(public value: BaseDist) {
     this.value = value;
   }
 
-  static fromMs(ms: number): SDate {
-    return new SDate(new PointMass(ms));
+  static fromMs(ms: number): SDateDist {
+    return new SDateDist(new PointMass(ms));
   }
 
-  static fromSDateNumber(date: SDateNumber): SDate {
-    return new SDate(new PointMass(date.toMs()));
+  static fromSDateNumber(date: SDateNumber): SDateDist {
+    return new SDateDist(new PointMass(date.toMs()));
   }
 
-  static fromUnixS(s: number): SDate {
-    return SDate.fromMs(s * 1000);
+  static fromUnixS(s: number): SDateDist {
+    return SDateDist.fromMs(s * 1000);
   }
 
-  static now(): SDate {
-    return SDate.fromMs(new Date().getTime());
+  static now(): SDateDist {
+    return SDateDist.fromMs(new Date().getTime());
   }
 
   toString(): string {
@@ -155,7 +152,7 @@ export class SDate {
     return this.value;
   }
 
-  isEqual(other: SDate): boolean {
+  isEqual(other: SDateDist): boolean {
     return this.value.isEqual(other.value);
   }
 
@@ -163,16 +160,16 @@ export class SDate {
   //   return this.toMs() / 1000;
   // }
 
-  // isEqual(other: SDate): boolean {
+  // isEqual(other: SDateDist): boolean {
   //   return this.value === other.value;
   // }
 
   fmap(
     fn: (d: BaseDist) => result<BaseDist, DistError>
-  ): result<SDate, DistError> {
+  ): result<SDateDist, DistError> {
     const r = fn(this.value);
     if (r.ok) {
-      return Ok(new SDate(r.value));
+      return Ok(new SDateDist(r.value));
     } else {
       return r;
     }
@@ -192,18 +189,18 @@ export class SDate {
     );
   }
 
-  subtract(other: SDate, env: Env): result<SDuration, string> {
+  subtract(other: SDateDist, env: Env): result<SDuration, string> {
     const diff = binaryOperations.algebraicSubtract(this.value, other.value, {
       env,
     });
     return { ok: false, value: "Not implemented" };
   }
 
-  smaller(other: SDate): boolean {
+  smaller(other: SDateDist): boolean {
     return this.toMs() < other.toMs();
   }
 
-  larger(other: SDate): boolean {
+  larger(other: SDateDist): boolean {
     return this.toMs() > other.toMs();
   }
 }

@@ -11,7 +11,7 @@ import {
   frDateNumber,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { SDateNumber, SDate } from "../utility/SDate.js";
+import { SDateNumber, SDateDist } from "../utility/SDate.js";
 import { DateRangeDomain } from "../value/domain.js";
 import { vDate, vDomain, vDuration } from "../value/index.js";
 
@@ -25,7 +25,7 @@ const makeYearFn = makeDefinition([frNumber], ([year]) => {
   if (!result.ok) {
     throw new REOther(result.value);
   }
-  return vDate(SDate.fromSDateNumber(result.value));
+  return vDate(SDateDist.fromSDateNumber(result.value));
 });
 export function unpackDistResult<T>(result: result<T, DistError>): T {
   if (!result.ok) {
@@ -52,12 +52,14 @@ export const library = [
         if (!result.ok) {
           throw new REOther(result.value);
         }
-        return vDate(SDate.fromSDateNumber(result.value));
+        return vDate(SDateDist.fromSDateNumber(result.value));
       }),
 
       makeDefinition([frNumber, frNumber, frNumber], ([yr, month, date]) => {
         return vDate(
-          SDate.fromSDateNumber(SDateNumber.fromYearMonthDay(yr, month, date))
+          SDateDist.fromSDateNumber(
+            SDateNumber.fromYearMonthDay(yr, month, date)
+          )
         );
       }),
     ],
@@ -70,7 +72,7 @@ export const library = [
     output: "Date",
     definitions: [
       makeDefinition([frNumber], ([num]) => {
-        return vDate(SDate.fromUnixS(num));
+        return vDate(SDateDist.fromUnixS(num));
       }),
     ],
   }),

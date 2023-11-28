@@ -1,4 +1,4 @@
-import { SDate } from "../../utility/SDate.js";
+import { SDateDist } from "../../utility/SDate.js";
 import {
   CommonScaleArgs,
   SCALE_POWER_DEFAULT_CONSTANT,
@@ -119,7 +119,7 @@ export class SqDateScale extends SqAbstractScale<"date"> {
   }
 
   override numberToValue(v: number) {
-    return SqDateValue.create(SDate.fromMs(v));
+    return SqDateValue.create(SDateDist.fromMs(v));
   }
 }
 

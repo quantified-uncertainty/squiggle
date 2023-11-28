@@ -1,5 +1,5 @@
 import { BaseDist } from "../../dist/BaseDist.js";
-import { SDate, SDateNumber } from "../../utility/SDate.js";
+import { SDateDist, SDateNumber } from "../../utility/SDate.js";
 import { result } from "../../utility/result.js";
 import {
   Value,
@@ -118,7 +118,7 @@ export class SqDateNumberValue extends SqAbstractValue<"DateNumber", number> {
   }
 
   static fromNumber(value: number) {
-    return SqDateValue.create(SDate.fromMs(value));
+    return SqDateValue.create(SDateDist.fromMs(value));
   }
 
   get value(): number {
@@ -133,15 +133,15 @@ export class SqDateNumberValue extends SqAbstractValue<"DateNumber", number> {
 export class SqDateValue extends SqAbstractValue<"Date", BaseDist> {
   tag = "Date" as const;
 
-  static create(value: SDate) {
+  static create(value: SDateDist) {
     return new SqDateValue(vDate(value));
   }
 
   static fromNumber(value: number) {
-    return SqDateValue.create(SDate.fromMs(value));
+    return SqDateValue.create(SDateDist.fromMs(value));
   }
 
-  get value(): SDate {
+  get value(): SDateDist {
     return this._value.value;
   }
 

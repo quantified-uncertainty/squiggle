@@ -9,7 +9,7 @@ import {
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { SDate, SDateNumber } from "../utility/SDate.js";
+import { SDateDist, SDateNumber } from "../utility/SDate.js";
 import { vScale } from "../value/index.js";
 
 const maker = new FnFactory({

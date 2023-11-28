@@ -6,7 +6,7 @@ import {
   REOther,
 } from "../errors/messages.js";
 import { Lambda } from "../reducer/lambda.js";
-import { SDate, SDateNumber } from "../utility/SDate.js";
+import { SDateDist, SDateNumber } from "../utility/SDate.js";
 import { SDuration } from "../utility/SDuration.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { DateRangeDomain, Domain, NumericRangeDomain } from "./domain.js";
@@ -136,7 +136,7 @@ export class VDate extends BaseValue {
   readonly type = "Date";
   readonly publicName = "Date";
 
-  constructor(public value: SDate) {
+  constructor(public value: SDateDist) {
     super();
   }
   toString() {
@@ -146,7 +146,7 @@ export class VDate extends BaseValue {
     return this.value.isEqual(other.value);
   }
 }
-export const vDate = (v: SDate) => new VDate(v);
+export const vDate = (v: SDateDist) => new VDate(v);
 
 class VDist extends BaseValue {
   readonly type = "Dist";
