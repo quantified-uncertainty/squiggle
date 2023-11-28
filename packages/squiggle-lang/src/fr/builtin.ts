@@ -6,7 +6,10 @@ import {
   frNumber,
   frString,
 } from "../library/registry/frTypes.js";
-import { FnFactory } from "../library/registry/helpers.js";
+import {
+  FnFactory,
+  makeNumericComparisons,
+} from "../library/registry/helpers.js";
 import { vArray, vBool, vString, isEqual } from "../value/index.js";
 
 const maker = new FnFactory({
@@ -21,10 +24,13 @@ export const library = [
   maker.nn2n({ name: "multiply", fn: (x, y) => x * y }), // infix *
   maker.nn2n({ name: "divide", fn: (x, y) => x / y }), // infix /
   maker.nn2n({ name: "pow", fn: (x, y) => Math.pow(x, y) }), // infix ^
-  maker.nn2b({ name: "smaller", fn: (x, y) => x < y }), // infix <
-  maker.nn2b({ name: "smallerEq", fn: (x, y) => x <= y }), // infix <=
-  maker.nn2b({ name: "larger", fn: (x, y) => x > y }), // infix >
-  maker.nn2b({ name: "largerEq", fn: (x, y) => x >= y }), // infix >=
+  ...makeNumericComparisons(
+    maker,
+    (d1, d2) => d1 < d2,
+    (d1, d2) => d1 > d2,
+    (d1, d2) => d1 == d2,
+    frNumber
+  ),
   maker.bb2b({ name: "or", fn: (x, y) => x || y }), // infix ||
   maker.bb2b({ name: "and", fn: (x, y) => x && y }), // infix &&
   maker.n2n({ name: "unaryMinus", fn: (x) => -x }), // unary prefix -

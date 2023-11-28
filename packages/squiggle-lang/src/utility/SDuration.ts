@@ -92,4 +92,16 @@ export class SDuration {
   multiply(num: number): SDuration {
     return SDuration.fromMs(this.toMs() * num);
   }
+
+  isEqual(other: SDuration): boolean {
+    return this.ms === other.ms;
+  }
+
+  smaller(other: SDuration): boolean {
+    return this.ms < other.ms;
+  }
+
+  larger(other: SDuration): boolean {
+    return this.ms > other.ms;
+  }
 }

@@ -268,8 +268,8 @@ class VDict extends BaseValue implements Indexable {
 }
 export const vDict = (v: ValueMap) => new VDict(v);
 
-class VTimeDuration extends BaseValue {
-  readonly type = "TimeDuration";
+class VDuration extends BaseValue {
+  readonly type = "Duration";
   readonly publicName = "Time Duration";
 
   constructor(public value: SDuration) {
@@ -279,11 +279,11 @@ class VTimeDuration extends BaseValue {
   toString() {
     return this.value.toString();
   }
-  isEqual(other: VTimeDuration) {
+  isEqual(other: VDuration) {
     return this.value.toMs() === other.value.toMs();
   }
 }
-export const vTimeDuration = (v: SDuration) => new VTimeDuration(v);
+export const vDuration = (v: SDuration) => new VDuration(v);
 
 export type CommonScaleArgs = {
   min?: number;
@@ -666,7 +666,7 @@ export type Value =
   | VNumber
   | VString
   | VDict
-  | VTimeDuration
+  | VDuration
   | VPlot
   | VTableChart
   | VCalculator
@@ -685,7 +685,7 @@ export function isEqual(a: Value, b: Value): boolean {
     case "String":
     case "Dist":
     case "Date":
-    case "TimeDuration":
+    case "Duration":
     case "Scale":
     case "Domain":
     case "Array":

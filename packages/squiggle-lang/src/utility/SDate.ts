@@ -3,38 +3,38 @@ import { SDuration, durationUnits } from "./SDuration.js";
 import { Ok, result, Err } from "./result.js";
 import * as Result from "./result.js";
 
+function isValid(date: Date): boolean {
+  return date instanceof Date && isFinite(date.getTime());
+}
+
+function makeWithYearInt(y: number): result<SDate, string> {
+  if (y < 100) {
+    return Result.Err("Year must be over 100");
+  } else if (y > 200000) {
+    return Result.Err("Year must be less than 200000");
+  } else {
+    return Ok(new SDate(new Date(y, 0)));
+  }
+}
+
 //This is our own internal date class, which is a wrapper around the built-in Date class. It's used by the interpreter, but meant to act like a simple date library.
 export class SDate {
-  constructor(public value: Date) {
+  constructor(private value: Date) {
     this.value = value;
-  }
-
-  private static dateIsValid(date: Date): boolean {
-    return date instanceof Date && isFinite(date.getTime());
   }
 
   static fromString(str: string): result<SDate, string> {
     const parsedDate = new Date(str);
-    if (SDate.dateIsValid(parsedDate)) {
+    if (isValid(parsedDate)) {
       return Ok(new SDate(parsedDate));
     } else {
       return Err("Invalid date string");
     }
   }
 
-  static makeWithYearInt(y: number): result<SDate, string> {
-    if (y < 100) {
-      return Result.Err("Year must be over 100");
-    } else if (y > 200000) {
-      return Result.Err("Year must be less than 200000");
-    } else {
-      return Ok(new SDate(new Date(y, 0)));
-    }
-  }
-
   static makeFromYear(year: number): result<SDate, string> {
     const floor = Math.floor(year);
-    return Result.fmap(SDate.makeWithYearInt(floor), (earlyDate) => {
+    return Result.fmap(makeWithYearInt(floor), (earlyDate) => {
       const diff = year - floor;
       return new SDate(earlyDate.value).addDuration(
         SDuration.fromMs(diff * durationUnits.Year)
@@ -83,10 +83,6 @@ export class SDate {
     return this.value.getTime() === other.value.getTime();
   }
 
-  fmap(fn: (v: number) => number): SDate {
-    return SDate.fromMs(fn(this.toMs()));
-  }
-
   subtract(other: SDate): result<SDuration, string> {
     const diff = this.toMs() - other.toMs();
     if (diff < 0) {
@@ -102,5 +98,13 @@ export class SDate {
 
   subtractDuration(duration: SDuration): SDate {
     return SDate.fromMs(this.toMs() - duration.toMs());
+  }
+
+  smaller(other: SDate): boolean {
+    return this.toMs() < other.toMs();
+  }
+
+  larger(other: SDate): boolean {
+    return this.toMs() > other.toMs();
   }
 }

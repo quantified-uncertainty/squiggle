@@ -6,7 +6,7 @@ import {
   frDist,
   frNumber,
   frString,
-  frTimeDuration,
+  frDuration,
   frArray,
   frTuple,
   frDictWithArbitraryKeys,
@@ -28,7 +28,7 @@ import {
   vNumber,
   vDict,
   vString,
-  vTimeDuration,
+  vDuration,
 } from "../../src/value/index.js";
 
 test("frNumber", () => {
@@ -56,11 +56,11 @@ test("frDate", () => {
   expect(frDate.pack(date)).toEqual(value);
 });
 
-test("frTimeDuration", () => {
+test("frDuration", () => {
   const duration = SDuration.fromMs(1234);
-  const value = vTimeDuration(duration);
-  expect(frTimeDuration.unpack(value)).toBe(duration);
-  expect(frTimeDuration.pack(duration)).toEqual(value);
+  const value = vDuration(duration);
+  expect(frDuration.unpack(value)).toBe(duration);
+  expect(frDuration.pack(duration)).toEqual(value);
 });
 
 describe("frDistOrNumber", () => {

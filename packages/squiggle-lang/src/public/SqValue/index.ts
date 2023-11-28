@@ -40,8 +40,8 @@ export function wrapValue(value: Value, context?: SqValueContext) {
       return new SqCalculatorValue(value, context);
     case "Scale":
       return new SqScaleValue(value, context);
-    case "TimeDuration":
-      return new SqTimeDurationValue(value, context);
+    case "Duration":
+      return new SqDurationValue(value, context);
     case "Void":
       return new SqVoidValue(value, context);
     case "Domain":
@@ -196,11 +196,8 @@ export class SqStringValue extends SqAbstractValue<"String", string> {
   }
 }
 
-export class SqTimeDurationValue extends SqAbstractValue<
-  "TimeDuration",
-  number
-> {
-  tag = "TimeDuration" as const;
+export class SqDurationValue extends SqAbstractValue<"Duration", number> {
+  tag = "Duration" as const;
 
   get value() {
     return this._value.value;

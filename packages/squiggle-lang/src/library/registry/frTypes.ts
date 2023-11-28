@@ -15,7 +15,7 @@ import {
   vDict,
   vScale,
   vString,
-  vTimeDuration,
+  vDuration,
   vInput,
   Input,
 } from "../../value/index.js";
@@ -50,9 +50,9 @@ export const frDate: FRType<SDate> = {
   pack: (v) => vDate(v),
   getName: () => "date",
 };
-export const frTimeDuration: FRType<SDuration> = {
-  unpack: (v) => (v.type === "TimeDuration" ? v.value : undefined),
-  pack: (v) => vTimeDuration(v),
+export const frDuration: FRType<SDuration> = {
+  unpack: (v) => (v.type === "Duration" ? v.value : undefined),
+  pack: (v) => vDuration(v),
   getName: () => "duration",
 };
 export const frDistOrNumber: FRType<BaseDist | number> = {
