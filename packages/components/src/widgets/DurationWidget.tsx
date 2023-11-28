@@ -1,5 +1,5 @@
 import { widgetRegistry } from "./registry.js";
 
-widgetRegistry.register("TimeDuration", {
+widgetRegistry.register("Duration", {
   Chart: (value) => value.toString(),
 });
