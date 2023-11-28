@@ -16,6 +16,16 @@ export type Scalars = {
   Float: { input: number; output: number; }
 };
 
+export type AcceptReusableGroupInviteTokenResult = {
+  __typename?: 'AcceptReusableGroupInviteTokenResult';
+  membership: UserGroupMembership;
+};
+
+export type AdminUpdateModelVersionResult = {
+  __typename?: 'AdminUpdateModelVersionResult';
+  model: Model;
+};
+
 export type BaseError = Error & {
   __typename?: 'BaseError';
   message: Scalars['String']['output'];
@@ -46,6 +56,11 @@ export type CreateRelativeValuesDefinitionResult = {
   definition: RelativeValuesDefinition;
 };
 
+export type CreateReusableGroupInviteTokenResult = {
+  __typename?: 'CreateReusableGroupInviteTokenResult';
+  group: Group;
+};
+
 export type CreateSquiggleSnippetModelResult = {
   __typename?: 'CreateSquiggleSnippetModelResult';
   model: Model;
@@ -69,6 +84,11 @@ export type DeleteModelResult = {
 export type DeleteRelativeValuesDefinitionResult = {
   __typename?: 'DeleteRelativeValuesDefinitionResult';
   ok: Scalars['Boolean']['output'];
+};
+
+export type DeleteReusableGroupInviteTokenResult = {
+  __typename?: 'DeleteReusableGroupInviteTokenResult';
+  group: Group;
 };
 
 export type EmailGroupInvite = GroupInvite & Node & {
@@ -99,6 +119,7 @@ export type Group = Node & Owner & {
   memberships: UserGroupMembershipConnection;
   models: ModelConnection;
   myMembership?: Maybe<UserGroupMembership>;
+  reusableInviteToken?: Maybe<Scalars['String']['output']>;
   slug: Scalars['String']['output'];
   updatedAtTimestamp: Scalars['Float']['output'];
 };
@@ -125,6 +146,18 @@ export type GroupModelsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type GroupConnection = {
+  __typename?: 'GroupConnection';
+  edges: Array<GroupEdge>;
+  pageInfo: PageInfo;
+};
+
+export type GroupEdge = {
+  __typename?: 'GroupEdge';
+  cursor: Scalars['String']['output'];
+  node: Group;
 };
 
 export type GroupInvite = {
@@ -214,10 +247,23 @@ export type ModelEdge = {
   node: Model;
 };
 
+export type ModelExport = Node & {
+  __typename?: 'ModelExport';
+  docstring: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  modelRevision: ModelRevision;
+  title?: Maybe<Scalars['String']['output']>;
+  variableName: Scalars['String']['output'];
+  variableType: Scalars['String']['output'];
+};
+
 export type ModelRevision = Node & {
   __typename?: 'ModelRevision';
+  author?: Maybe<User>;
+  comment: Scalars['String']['output'];
   content: ModelContent;
   createdAtTimestamp: Scalars['Float']['output'];
+  exports: Array<ModelExport>;
   forRelativeValues?: Maybe<RelativeValuesExport>;
   id: Scalars['ID']['output'];
   model: Model;
@@ -251,6 +297,14 @@ export type ModelRevisionForRelativeValuesSlugOwnerInput = {
   slug: Scalars['String']['input'];
 };
 
+export type ModelsByVersion = {
+  __typename?: 'ModelsByVersion';
+  count: Scalars['Int']['output'];
+  models: Array<Model>;
+  privateCount: Scalars['Int']['output'];
+  version: Scalars['String']['output'];
+};
+
 export type MoveModelResult = {
   __typename?: 'MoveModelResult';
   model: Model;
@@ -258,15 +312,26 @@ export type MoveModelResult = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  acceptReusableGroupInviteToken: MutationAcceptReusableGroupInviteTokenResult;
+  /** Admin-only query for upgrading model versions */
+  adminUpdateModelVersion: MutationAdminUpdateModelVersionResult;
   buildRelativeValuesCache: MutationBuildRelativeValuesCacheResult;
   cancelGroupInvite: MutationCancelGroupInviteResult;
   clearRelativeValuesCache: MutationClearRelativeValuesCacheResult;
   createGroup: MutationCreateGroupResult;
   createRelativeValuesDefinition: MutationCreateRelativeValuesDefinitionResult;
+  /**
+   * Create or replace a reusable invite token for a group, available as `reusableInviteToken` field on group object.
+   *
+   * You must be an admin of the group to call this mutation. Previous invite token, if it existed, will stop working.
+   */
+  createReusableGroupInviteToken: MutationCreateReusableGroupInviteTokenResult;
   createSquiggleSnippetModel: MutationCreateSquiggleSnippetModelResult;
   deleteMembership: MutationDeleteMembershipResult;
   deleteModel: MutationDeleteModelResult;
   deleteRelativeValuesDefinition: MutationDeleteRelativeValuesDefinitionResult;
+  /** Disable a reusable invite token for a group. */
+  deleteReusableGroupInviteToken: MutationDeleteReusableGroupInviteTokenResult;
   inviteUserToGroup: MutationInviteUserToGroupResult;
   moveModel: MutationMoveModelResult;
   reactToGroupInvite: MutationReactToGroupInviteResult;
@@ -277,6 +342,16 @@ export type Mutation = {
   updateModelSlug: MutationUpdateModelSlugResult;
   updateRelativeValuesDefinition: MutationUpdateRelativeValuesDefinitionResult;
   updateSquiggleSnippetModel: MutationUpdateSquiggleSnippetModelResult;
+};
+
+
+export type MutationAcceptReusableGroupInviteTokenArgs = {
+  input: MutationAcceptReusableGroupInviteTokenInput;
+};
+
+
+export type MutationAdminUpdateModelVersionArgs = {
+  input: MutationAdminUpdateModelVersionInput;
 };
 
 
@@ -305,6 +380,11 @@ export type MutationCreateRelativeValuesDefinitionArgs = {
 };
 
 
+export type MutationCreateReusableGroupInviteTokenArgs = {
+  input: MutationCreateReusableGroupInviteTokenInput;
+};
+
+
 export type MutationCreateSquiggleSnippetModelArgs = {
   input: MutationCreateSquiggleSnippetModelInput;
 };
@@ -322,6 +402,11 @@ export type MutationDeleteModelArgs = {
 
 export type MutationDeleteRelativeValuesDefinitionArgs = {
   input: MutationDeleteRelativeValuesDefinitionInput;
+};
+
+
+export type MutationDeleteReusableGroupInviteTokenArgs = {
+  input: MutationDeleteReusableGroupInviteTokenInput;
 };
 
 
@@ -374,6 +459,20 @@ export type MutationUpdateSquiggleSnippetModelArgs = {
   input: MutationUpdateSquiggleSnippetModelInput;
 };
 
+export type MutationAcceptReusableGroupInviteTokenInput = {
+  groupSlug: Scalars['String']['input'];
+  inviteToken: Scalars['String']['input'];
+};
+
+export type MutationAcceptReusableGroupInviteTokenResult = AcceptReusableGroupInviteTokenResult | BaseError;
+
+export type MutationAdminUpdateModelVersionInput = {
+  modelId: Scalars['String']['input'];
+  version: Scalars['String']['input'];
+};
+
+export type MutationAdminUpdateModelVersionResult = AdminUpdateModelVersionResult | BaseError;
+
 export type MutationBuildRelativeValuesCacheInput = {
   exportId: Scalars['String']['input'];
 };
@@ -410,6 +509,12 @@ export type MutationCreateRelativeValuesDefinitionInput = {
 
 export type MutationCreateRelativeValuesDefinitionResult = BaseError | CreateRelativeValuesDefinitionResult | ValidationError;
 
+export type MutationCreateReusableGroupInviteTokenInput = {
+  slug: Scalars['String']['input'];
+};
+
+export type MutationCreateReusableGroupInviteTokenResult = BaseError | CreateReusableGroupInviteTokenResult;
+
 export type MutationCreateSquiggleSnippetModelInput = {
   /** Squiggle source code */
   code: Scalars['String']['input'];
@@ -418,6 +523,7 @@ export type MutationCreateSquiggleSnippetModelInput = {
   /** Defaults to false */
   isPrivate?: InputMaybe<Scalars['Boolean']['input']>;
   slug: Scalars['String']['input'];
+  version: Scalars['String']['input'];
 };
 
 export type MutationCreateSquiggleSnippetModelResult = BaseError | CreateSquiggleSnippetModelResult | ValidationError;
@@ -442,6 +548,12 @@ export type MutationDeleteRelativeValuesDefinitionInput = {
 };
 
 export type MutationDeleteRelativeValuesDefinitionResult = BaseError | DeleteRelativeValuesDefinitionResult;
+
+export type MutationDeleteReusableGroupInviteTokenInput = {
+  slug: Scalars['String']['input'];
+};
+
+export type MutationDeleteReusableGroupInviteTokenResult = BaseError | DeleteReusableGroupInviteTokenResult;
 
 export type MutationInviteUserToGroupInput = {
   group: Scalars['String']['input'];
@@ -511,9 +623,9 @@ export type MutationUpdateRelativeValuesDefinitionInput = {
 export type MutationUpdateRelativeValuesDefinitionResult = BaseError | UpdateRelativeValuesDefinitionResult;
 
 export type MutationUpdateSquiggleSnippetModelInput = {
-  /** @deprecated Use content arg instead */
-  code?: InputMaybe<Scalars['String']['input']>;
-  content?: InputMaybe<SquiggleSnippetContentInput>;
+  comment?: InputMaybe<Scalars['String']['input']>;
+  content: SquiggleSnippetContentInput;
+  exports?: InputMaybe<Array<SquiggleModelExportInput>>;
   owner: Scalars['String']['input'];
   relativeValuesExports?: InputMaybe<Array<RelativeValuesExportInput>>;
   slug: Scalars['String']['input'];
@@ -547,10 +659,12 @@ export type Query = {
   __typename?: 'Query';
   globalStatistics: GlobalStatistics;
   group: QueryGroupResult;
-  groups: QueryGroupsConnection;
+  groups: GroupConnection;
   me: Me;
   model: QueryModelResult;
   models: ModelConnection;
+  /** Admin-only query for listing models in /admin UI */
+  modelsByVersion: Array<ModelsByVersion>;
   node?: Maybe<Node>;
   nodes: Array<Maybe<Node>>;
   relativeValuesDefinition: QueryRelativeValuesDefinitionResult;
@@ -631,18 +745,6 @@ export type QueryUsersArgs = {
 };
 
 export type QueryGroupResult = BaseError | Group | NotFoundError;
-
-export type QueryGroupsConnection = {
-  __typename?: 'QueryGroupsConnection';
-  edges: Array<QueryGroupsConnectionEdge>;
-  pageInfo: PageInfo;
-};
-
-export type QueryGroupsConnectionEdge = {
-  __typename?: 'QueryGroupsConnectionEdge';
-  cursor: Scalars['String']['output'];
-  node: Group;
-};
 
 export type QueryModelInput = {
   owner: Scalars['String']['input'];
@@ -773,6 +875,13 @@ export type SquiggleErrorOutput = SquiggleOutput & {
   isCached: Scalars['Boolean']['output'];
 };
 
+export type SquiggleModelExportInput = {
+  docstring?: InputMaybe<Scalars['String']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
+  variableName: Scalars['String']['input'];
+  variableType: Scalars['String']['input'];
+};
+
 export type SquiggleOkOutput = SquiggleOutput & {
   __typename?: 'SquiggleOkOutput';
   bindingsJSON: Scalars['String']['output'];
@@ -788,10 +897,12 @@ export type SquiggleSnippet = Node & {
   __typename?: 'SquiggleSnippet';
   code: Scalars['String']['output'];
   id: Scalars['ID']['output'];
+  version: Scalars['String']['output'];
 };
 
 export type SquiggleSnippetContentInput = {
   code: Scalars['String']['input'];
+  version: Scalars['String']['input'];
 };
 
 export type UpdateGroupInviteRoleResult = {
@@ -826,11 +937,21 @@ export type UpdateSquiggleSnippetResult = {
 
 export type User = Node & Owner & {
   __typename?: 'User';
+  groups: GroupConnection;
   id: Scalars['ID']['output'];
+  isRoot: Scalars['Boolean']['output'];
   models: ModelConnection;
   relativeValuesDefinitions: RelativeValuesDefinitionConnection;
   slug: Scalars['String']['output'];
   username: Scalars['String']['output'];
+};
+
+
+export type UserGroupsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -859,6 +980,7 @@ export type UserGroupInvite = GroupInvite & Node & {
 
 export type UserGroupMembership = Node & {
   __typename?: 'UserGroupMembership';
+  group: Group;
   id: Scalars['ID']['output'];
   role: MembershipRole;
   user: User;
@@ -980,7 +1102,7 @@ export type TestGroupsQueryVariables = Exact<{
 }>;
 
 
-export type TestGroupsQuery = { __typename?: 'Query', result: { __typename: 'QueryGroupsConnection', edges: Array<{ __typename?: 'QueryGroupsConnectionEdge', node: { __typename?: 'Group', id: string, slug: string } }> } };
+export type TestGroupsQuery = { __typename?: 'Query', result: { __typename: 'GroupConnection', edges: Array<{ __typename?: 'GroupEdge', node: { __typename?: 'Group', id: string, slug: string } }> } };
 
 export type TestMeQueryVariables = Exact<{ [key: string]: never; }>;
 

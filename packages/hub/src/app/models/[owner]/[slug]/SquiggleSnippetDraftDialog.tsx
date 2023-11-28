@@ -73,6 +73,17 @@ export const draftUtils = {
     if (!value) return null;
     return JSON.parse(value); // TODO - validate
   },
+  rename(oldLocator: DraftLocator, newLocator: DraftLocator) {
+    if (!localStorageExists()) {
+      return;
+    }
+    const oldKey = draftKey(oldLocator);
+    const value = window.localStorage.getItem(oldKey);
+    if (!value) return null;
+    const newKey = draftKey(newLocator);
+    window.localStorage.setItem(newKey, value);
+    window.localStorage.removeItem(oldKey);
+  },
   discard(locator: DraftLocator) {
     if (!localStorageExists()) {
       return;
@@ -102,6 +113,20 @@ export function useDraftLocator(
     modelSlug: model.slug,
   };
   return draftLocator;
+}
+
+// In some contexts, we can't use useDraftLocator, because we can't use useFragment.
+// So we duck-type models instead.
+export function modelToDraftLocator(model: {
+  owner: {
+    slug: string;
+  };
+  slug: string;
+}): DraftLocator {
+  return {
+    ownerSlug: model.owner.slug,
+    modelSlug: model.slug,
+  };
 }
 
 type Props = {

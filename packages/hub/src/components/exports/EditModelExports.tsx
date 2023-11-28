@@ -74,7 +74,7 @@ const CreateVariableWithDefinitionModal: FC<{
         <SelectOwner<FormShape>
           label="Relative Values Definition Owner"
           name="owner"
-          myOnly
+          myOnly={false}
         />
         <SelectRelativeValuesDefinition<FormShape>
           label="Relative Values Definition Slug"

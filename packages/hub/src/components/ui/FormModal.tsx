@@ -1,5 +1,5 @@
 import { Button, Modal } from "@quri/ui";
-import { PropsWithChildren, useEffect } from "react";
+import { BaseSyntheticEvent, PropsWithChildren, useEffect } from "react";
 import {
   FieldPath,
   FieldValues,
@@ -8,7 +8,7 @@ import {
 } from "react-hook-form";
 
 type Props<TFieldValues extends FieldValues> = PropsWithChildren<{
-  onSubmit: () => void;
+  onSubmit: (event?: BaseSyntheticEvent) => void;
   close: () => void;
   submitText: string;
   title: string;

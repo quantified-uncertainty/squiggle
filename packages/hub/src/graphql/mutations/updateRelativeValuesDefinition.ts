@@ -3,7 +3,7 @@ import { prisma } from "@/prisma";
 
 import { RelativeValuesDefinition } from "../types/RelativeValuesDefinition";
 
-import { getWriteableOwnerBySlug } from "../types/Owner";
+import { getWriteableOwnerBySlug } from "../helpers/ownerHelpers";
 import {
   RelativeValuesClusterInput,
   RelativeValuesItemInput,

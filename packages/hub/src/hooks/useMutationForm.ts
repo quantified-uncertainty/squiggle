@@ -2,7 +2,7 @@ import { FieldValues, UseFormProps, useForm } from "react-hook-form";
 import { VariablesOf } from "relay-runtime";
 
 import { CommonMutationParameters, useAsyncMutation } from "./useAsyncMutation";
-import { useCallback } from "react";
+import { BaseSyntheticEvent, useCallback } from "react";
 
 /**
  * This hook ties together `useForm` and `useAsyncMutation`, which is a very common pattern for forms that submit data to our backend through mutations.
@@ -67,13 +67,13 @@ export function useMutationForm<
   });
 
   const onSubmit = useCallback(
-    (extraData?: ExtraData) =>
+    (event?: BaseSyntheticEvent, extraData?: ExtraData) =>
       form.handleSubmit((formData) => {
         runMutation({
           variables: formDataToVariables(formData, extraData),
           onCompleted,
         });
-      })(),
+      })(event),
     [form, formDataToVariables, onCompleted, runMutation]
   );
 

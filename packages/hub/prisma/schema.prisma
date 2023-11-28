@@ -94,6 +94,8 @@ model Group {
 
   asOwner Owner  @relation(fields: [ownerId], references: [id])
   ownerId String @unique
+
+  reusableInviteToken String?
 }
 
 model Owner {

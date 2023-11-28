@@ -16,7 +16,7 @@ const { runOk, runError } = createRunners(
       }
     }
   `),
-  "QueryGroupsConnection"
+  "GroupConnection"
 );
 
 test("list groups", async () => {

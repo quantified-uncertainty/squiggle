@@ -415,7 +415,7 @@ export function buildMixedShape({
   });
   const cLength = continuous.xyShape.xs.length;
   const dLength = discrete.xyShape.xs.length;
-  if (cLength < 2 && dLength == 0) {
+  if (cLength < 2 && dLength === 0) {
     return undefined;
   } else {
     return new MixedShape({ continuous, discrete });

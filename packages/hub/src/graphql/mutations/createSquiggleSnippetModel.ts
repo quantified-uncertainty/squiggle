@@ -3,10 +3,10 @@ import { builder } from "@/graphql/builder";
 
 import { Model } from "../types/Model";
 import { rethrowOnConstraint } from "../errors/common";
-import { getWriteableOwner } from "../types/Owner";
+import { getWriteableOwner } from "../helpers/ownerHelpers";
 import { ZodError } from "zod";
 import { validateSlug } from "../utils";
-import { getSelf } from "../types/User";
+import { getSelf } from "../helpers/userHelpers";
 
 builder.mutationField("createSquiggleSnippetModel", (t) =>
   t.withAuth({ signedIn: true }).fieldWithInput({

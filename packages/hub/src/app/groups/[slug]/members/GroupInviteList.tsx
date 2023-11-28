@@ -14,7 +14,6 @@ const fragment = graphql`
     count: { type: "Int", defaultValue: 20 }
   )
   @refetchable(queryName: "GroupInviteListPaginationQuery") {
-    ...hooks_useIsGroupAdmin
     invites(first: $count, after: $cursor)
       @connection(key: "GroupInviteList_invites") {
       edges {
@@ -47,7 +46,6 @@ export const GroupInviteList: FC<Props> = ({ groupRef }) => {
         {group.invites.edges.map(({ node: invite }) => (
           <GroupInviteCard
             inviteRef={invite}
-            groupRef={group}
             groupId={group.id}
             key={invite.id}
           />
