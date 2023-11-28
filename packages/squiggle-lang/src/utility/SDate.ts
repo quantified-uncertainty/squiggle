@@ -20,7 +20,6 @@ function makeWithYearInt(y: number): result<SDate, string> {
 //This is our own internal date class, which is a wrapper around the built-in Date class. It's used by the interpreter, but meant to act like a simple date library.
 export class SDate {
   private constructor(private value: Date) {
-    this.value = value;
   }
 
   static fromString(str: string): result<SDate, string> {
