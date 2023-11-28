@@ -17,10 +17,6 @@ const assertIsNotEmpty = (arr: readonly number[]) => {
   }
 };
 
-const throwEmptyList = (): never => {
-  throw new REArgumentError("List is empty");
-};
-
 function makeNumberArrayToNumberDefinition(
   fn: (arr: number[]) => number,
   throwIfEmpty = true
@@ -36,9 +32,7 @@ function makeNumberArrayToNumberArrayDefinition(
   throwIfEmpty = true
 ) {
   return makeDefinition([frArray(frNumber)], ([arr]) => {
-    if (arr.length === 0 && throwIfEmpty) {
-      return throwEmptyList();
-    }
+    throwIfEmpty && assertIsNotEmpty(arr);
     return vArray(fn(arr).map(vNumber));
   });
 }
