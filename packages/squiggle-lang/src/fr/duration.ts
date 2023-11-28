@@ -15,12 +15,16 @@ const maker = new FnFactory({
 const makeNumberToDurationFn = (name: string, fn: (v: number) => SDuration) =>
   maker.make({
     name,
+    examples: [`Duration.${name}(5)`],
+    output: "Duration",
     definitions: [makeDefinition([frNumber], ([t]) => vDuration(fn(t)))],
   });
 
 const makeDurationToNumberFn = (name: string, fn: (v: SDuration) => number) =>
   maker.make({
     name,
+    examples: [`Duration.${name}(5minutes)`],
+    output: "Number",
     definitions: [makeDefinition([frDuration], ([t]) => vNumber(fn(t)))],
   });
 
@@ -34,6 +38,8 @@ export const library = [
   ),
   maker.make({
     name: "add",
+    output: "Duration",
+    examples: ["5minutes + 10minutes"],
     definitions: [
       makeDefinition([frDuration, frDuration], ([d1, d2]) =>
         vDuration(d1.add(d2))
@@ -42,6 +48,8 @@ export const library = [
   }),
   maker.make({
     name: "subtract",
+    output: "Duration",
+    examples: ["5minutes - 10minutes"],
     definitions: [
       makeDefinition([frDuration, frDuration], ([d1, d2]) =>
         vDuration(d1.subtract(d2))
@@ -50,6 +58,8 @@ export const library = [
   }),
   maker.make({
     name: "multiply",
+    output: "Duration",
+    examples: ["5minutes * 10", "10 * 5minutes"],
     definitions: [
       makeDefinition([frDuration, frNumber], ([d1, d2]) =>
         vDuration(d1.multiply(d2))
@@ -61,12 +71,21 @@ export const library = [
   }),
   maker.make({
     name: "divide",
+    output: "Number",
+    examples: ["5minutes / 2minutes"],
+    definitions: [
+      makeDefinition([frDuration, frDuration], ([d1, d2]) =>
+        vNumber(d1.divideBySDuration(d2))
+      ),
+    ],
+  }),
+  maker.make({
+    name: "divide",
+    output: "Duration",
+    examples: ["5minutes / 3"],
     definitions: [
       makeDefinition([frDuration, frNumber], ([d1, d2]) =>
         vDuration(d1.divideByNumber(d2))
-      ),
-      makeDefinition([frDuration, frDuration], ([d1, d2]) =>
-        vNumber(d1.divideBySDuration(d2))
       ),
     ],
   }),
