@@ -21,7 +21,7 @@ const maker = new FnFactory({
 });
 
 const makeYearFn = makeDefinition([frNumber], ([year]) => {
-  const result = SDateNumber.makeFromYear(year);
+  const result = SDateNumber.fromYear(year);
   if (!result.ok) {
     throw new REOther(result.value);
   }
@@ -64,6 +64,8 @@ export const library = [
       }),
     ],
   }),
+  maker.fromDefinition("fromYear", makeYearFn),
+  maker.fromDefinition("fromUnit_year", makeYearFn),
   // same name as used in date-fns
   maker.make({
     name: "fromUnixTime",

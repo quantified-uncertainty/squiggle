@@ -13,24 +13,23 @@ function isValid(date: Date): boolean {
 }
 
 function makeFromDate(date: Date): SDateNumber {
-  return new SDateNumber(date.getTime());
+  return SDateNumber.fromMs(date.getTime());
 }
 
-function makeWithYearInt(y: number): result<SDateNumber, string> {
+function makeWithYearInt(y: number): result<Date, string> {
   if (y < 100) {
     return Result.Err("Year must be over 100");
   } else if (y > 200000) {
     return Result.Err("Year must be less than 200000");
   } else {
-    return Ok(makeFromDate(new Date(y, 0)));
+    // return Ok(makeFromDate(new Date(y, 0)));
+    return Ok(new Date(y, 0));
   }
 }
 
 //This is our own internal date class, which is a wrapper around the built-in Date class. It's used by the interpreter, but meant to act like a simple date library.
 export class SDateNumber {
-  constructor(private value: number) {
-    this.value = value;
-  }
+  private constructor(public value: number) {}
 
   static fromString(str: string): result<SDateNumber, string> {
     const parsedDate = new Date(str);
@@ -41,11 +40,11 @@ export class SDateNumber {
     }
   }
 
-  static makeFromYear(year: number): result<SDateNumber, string> {
+  static fromYear(year: number): result<SDateNumber, string> {
     const floor = Math.floor(year);
     return Result.fmap(makeWithYearInt(floor), (earlyDate) => {
       const diff = year - floor;
-      return new SDateNumber(earlyDate.value).addDuration(
+      return new SDateNumber(earlyDate.getTime()).addDuration(
         SDuration.fromMs(diff * durationUnits.Year)
       );
     });
@@ -96,14 +95,14 @@ export class SDateNumber {
     return this.value === other.value;
   }
 
-  subtract(other: SDateNumber): result<SDuration, string> {
+  subtract(other: SDateNumber): SDuration {
     const diff = this.toMs() - other.toMs();
-    if (diff < 0) {
-      return Err("Cannot subtract a date by one that is in its future");
-    } else {
-      return Ok(new SDuration(diff));
-    }
+    return new SDuration(diff);
   }
+
+  // isEqual(other: SDate): boolean {
+  //   return this.value.getTime() === other.value.getTime();
+  // }
 
   addDuration(duration: SDuration): SDateNumber {
     return SDateNumber.fromMs(this.toMs() + duration.toMs());
