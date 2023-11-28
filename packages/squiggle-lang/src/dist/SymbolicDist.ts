@@ -870,7 +870,7 @@ export class Logistic extends SymbolicDist {
     // p = 0 => Math.log(0) = -Infinity, fine
     // p = 1, scale > 0 => Math.log(Infinity) = Infinity, fine
     // p = 1, scale = 0 => trouble, special case
-    if (this.scale == 0) return this.location;
+    if (this.scale === 0) return this.location;
     return this.location + this.scale * Math.log(p / (1 - p));
   }
   sample() {
