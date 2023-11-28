@@ -1,8 +1,9 @@
 import { Set } from "immutable";
 import { FC, PropsWithChildren, Reducer } from "react";
 
+import { generateProvider } from "@quri/ui";
+
 import { RelativeValuesDefinitionRevision$data } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
-import { generateProvider } from "@/relative-values/components/generateProvider";
 import { ModelEvaluator } from "@/relative-values/values/ModelEvaluator";
 import { Filter } from "./types";
 

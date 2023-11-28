@@ -104,3 +104,5 @@ export {
   TailwindContext,
   TailwindProvider,
 } from "./components/TailwindProvider.js";
+
+export { generateProvider } from "./generateProvider.js";
