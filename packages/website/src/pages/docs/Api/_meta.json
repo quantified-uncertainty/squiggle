@@ -1,9 +1,9 @@
 {
   "BuiltIn": "Built In",
-  "Dictionary": "Dictionary",
+  "Dict": "Dictionary",
   "Dist": "Distribution",
-  "DistSampleSet": "Sample Set Distribution",
-  "DistPointSet": "Point Set Distribution",
+  "SampleSet": "Sample Set Distribution",
+  "PointSet": "Point Set Distribution",
   "List": "List",
   "Math": "Math",
   "Number": "Number",
