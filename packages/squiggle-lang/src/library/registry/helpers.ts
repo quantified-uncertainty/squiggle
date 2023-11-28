@@ -306,7 +306,7 @@ export function doBinaryLambdaCall(
 }
 
 export const parseDistFromDistOrNumber = (d: number | BaseDist): BaseDist =>
-  typeof d == "number" ? Result.getExt(PointMass.make(d)) : d;
+  typeof d === "number" ? Result.getExt(PointMass.make(d)) : d;
 
 export function distResultToValue(
   result: Result.result<BaseDist, DistError>
