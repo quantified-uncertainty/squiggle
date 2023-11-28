@@ -7,20 +7,19 @@ function isValid(date: Date): boolean {
   return date instanceof Date && isFinite(date.getTime());
 }
 
-function makeWithYearInt(y: number): result<SDate, string> {
+function makeWithYearInt(y: number): result<Date, string> {
   if (y < 100) {
     return Result.Err("Year must be over 100");
   } else if (y > 200000) {
     return Result.Err("Year must be less than 200000");
   } else {
-    return Ok(new SDate(new Date(y, 0)));
+    return Ok(new Date(y, 0));
   }
 }
 
 //This is our own internal date class, which is a wrapper around the built-in Date class. It's used by the interpreter, but meant to act like a simple date library.
 export class SDate {
-  private constructor(private value: Date) {
-  }
+  private constructor(private value: Date) {}
 
   static fromString(str: string): result<SDate, string> {
     const parsedDate = new Date(str);
@@ -31,11 +30,11 @@ export class SDate {
     }
   }
 
-  static makeFromYear(year: number): result<SDate, string> {
+  static fromYear(year: number): result<SDate, string> {
     const floor = Math.floor(year);
     return Result.fmap(makeWithYearInt(floor), (earlyDate) => {
       const diff = year - floor;
-      return new SDate(earlyDate.value).addDuration(
+      return new SDate(earlyDate).addDuration(
         SDuration.fromMs(diff * durationUnits.Year)
       );
     });
@@ -82,13 +81,8 @@ export class SDate {
     return this.value.getTime() === other.value.getTime();
   }
 
-  subtract(other: SDate): result<SDuration, string> {
-    const diff = this.toMs() - other.toMs();
-    if (diff < 0) {
-      return Err("Cannot subtract a date by one that is in its future");
-    } else {
-      return Ok(new SDuration(diff));
-    }
+  subtract(other: SDate): SDuration {
+    return new SDuration(this.toMs() - other.toMs());
   }
 
   addDuration(duration: SDuration): SDate {

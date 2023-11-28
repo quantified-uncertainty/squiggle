@@ -21,7 +21,7 @@ const maker = new FnFactory({
 });
 
 const makeYearFn = makeDefinition([frNumber], ([year]) => {
-  const result = SDate.makeFromYear(year);
+  const result = SDate.fromYear(year);
   if (!result.ok) {
     throw new REOther(result.value);
   }
@@ -55,6 +55,8 @@ export const library = [
       }),
     ],
   }),
+  maker.fromDefinition("fromYear", makeYearFn),
+  maker.fromDefinition("fromUnit_year", makeYearFn),
   // same name as used in date-fns
   maker.make({
     name: "fromUnixTime",
@@ -78,20 +80,14 @@ export const library = [
       }),
     ],
   }),
-  maker.fromDefinition("year", makeYearFn),
-  maker.fromDefinition("fromUnit_year", makeYearFn),
   maker.make({
     name: "subtract",
     examples: ["Date.make(2020, 5, 12) - Date.make(2000, 1, 1)"],
     output: "Duration",
     definitions: [
-      makeDefinition([frDate, frDate], ([d1, d2]) => {
-        const result = d1.subtract(d2);
-        if (!result.ok) {
-          throw new REOther(result.value);
-        }
-        return vDuration(result.value);
-      }),
+      makeDefinition([frDate, frDate], ([d1, d2]) =>
+        vDuration(d1.subtract(d2))
+      ),
     ],
   }),
   maker.make({

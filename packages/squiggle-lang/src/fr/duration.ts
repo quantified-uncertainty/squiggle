@@ -29,6 +29,10 @@ const makeDurationToNumberFn = (name: string, fn: (v: SDuration) => number) =>
   });
 
 export const library = [
+  makeNumberToDurationFn("fromMinutes", SDuration.fromMinutes),
+  makeNumberToDurationFn("fromHours", SDuration.fromHours),
+  makeNumberToDurationFn("fromDays", SDuration.fromDays),
+  makeNumberToDurationFn("fromYears", SDuration.fromYears),
   ...makeNumericComparisons(
     maker,
     (d1, d2) => d1.smaller(d2),
@@ -97,13 +101,10 @@ export const library = [
       ),
     ],
   }),
-  makeNumberToDurationFn("minutes", SDuration.fromMinutes),
+
   makeNumberToDurationFn("fromUnit_minutes", SDuration.fromMinutes),
-  makeNumberToDurationFn("hours", SDuration.fromHours),
   makeNumberToDurationFn("fromUnit_hours", SDuration.fromHours),
-  makeNumberToDurationFn("days", SDuration.fromDays),
   makeNumberToDurationFn("fromUnit_days", SDuration.fromDays),
-  makeNumberToDurationFn("years", SDuration.fromYears),
   makeNumberToDurationFn("fromUnit_years", SDuration.fromYears),
 
   makeDurationToNumberFn("toMinutes", (d) => d.toMinutes()),
