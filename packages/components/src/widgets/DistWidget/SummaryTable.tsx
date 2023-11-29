@@ -123,6 +123,7 @@ const SummaryTableRow: FC<SummaryTableRowProps> = ({
           onMouseLeave={() => setVerticalLine(undefined)}
         >
           {unwrapResult(value, false)}
+        </Cell>
       ))}
     </tr>
   );
