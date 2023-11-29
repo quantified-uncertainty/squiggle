@@ -14,16 +14,32 @@ import {
 import { TextTooltip } from "@quri/ui";
 
 import { NumberShower } from "../../components/NumberShower.js";
+import { useSetVerticalLine } from "./DistProvider.js";
+import { clsx } from "clsx";
+
+type HoverableCellProps = PropsWithChildren<{
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
+}>;
+
+const commonCellClasses =
+  "border border-slate-200 py-1 px-2 text-slate-700 font-light";
 import { DEFAULT_DATE_FORMAT } from "../../lib/constants.js";
 
 const TableHeadCell: FC<PropsWithChildren> = ({ children }) => (
-  <th className="border border-slate-200 py-1 px-2 text-slate-700 text-xs font-light">
-    {children}
-  </th>
+  <th className={clsx(commonCellClasses, "text-xs")}>{children}</th>
 );
 
-const Cell: FC<PropsWithChildren> = ({ children }) => (
-  <td className="border border-slate-200 py-1 px-2 text-slate-700 text-sm font-light">
+const Cell: FC<HoverableCellProps> = ({
+  children,
+  onMouseEnter,
+  onMouseLeave,
+}) => (
+  <td
+    className={clsx(commonCellClasses, "text-sm")}
+    onMouseEnter={onMouseEnter}
+    onMouseLeave={onMouseLeave}
+  >
     {children}
   </td>
 );
@@ -86,13 +102,27 @@ const SummaryTableRow: FC<SummaryTableRowProps> = ({
     }
   };
 
+  const setVerticalLine = useSetVerticalLine();
+
   return (
     <tr>
       {showName && <Cell>{name}</Cell>}
-      <Cell>{formatNumber(mean, false)}</Cell>
+      <Cell
+        onMouseEnter={() => setVerticalLine(mean)}
+        onMouseLeave={() => setVerticalLine(undefined)}
+      >
+        {formatNumber(mean, false)}
+      </Cell>
       <Cell>{unwrapResult(stdev, true)}</Cell>
       {percentileValues.map((value, i) => (
-        <Cell key={i}>{unwrapResult(value, false)}</Cell>
+        <Cell
+          key={i}
+          onMouseEnter={() =>
+            setVerticalLine(value.ok ? value.value : undefined)
+          }
+          onMouseLeave={() => setVerticalLine(undefined)}
+        >
+          {unwrapResult(value, false)}
       ))}
     </tr>
   );
@@ -107,6 +137,7 @@ export const SummaryTable: FC<SummaryTableProps> = ({ plot, environment }) => {
   const showNames = plot.distributions.some((d) => d.name);
   const isDate = plot.xScale?.tag === "date";
   const tickFormat = plot.xScale?.tickFormat;
+
   return (
     <table className="table border border-collapse border-slate-400">
       <thead className="bg-slate-50">

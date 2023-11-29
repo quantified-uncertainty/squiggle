@@ -21,6 +21,7 @@ import {
   drawAxes,
   drawCircle,
   drawCursorLines,
+  drawVerticalLine,
   primaryColor,
 } from "../../lib/draw/index.js";
 import { Point } from "../../lib/draw/types.js";
@@ -34,20 +35,20 @@ import {
 import { PlotTitle } from "../PlotWidget/PlotTitle.js";
 import { SummaryTable } from "./SummaryTable.js";
 import { adjustPdfHeightToScale } from "./utils.js";
+import { DistProvider, useVerticalLineValue } from "./DistProvider.js";
 
 export type DistributionsChartProps = {
   plot: SqDistributionsPlot;
   environment: Env;
   height: number;
-  showSamplesBar?: boolean;
 };
 
 const InnerDistributionsChart: FC<{
-  isMulti: boolean; // enables legend and semi-transparent rendering
   shapes: (SqShape & { name: string })[];
   samples: number[];
-  height: number;
   plot: SqDistributionsPlot;
+  height: number;
+  isMulti: boolean; // enables legend and semi-transparent rendering
   showSamplesBar: boolean;
 }> = ({
   shapes: unAdjustedShapes,
@@ -57,6 +58,8 @@ const InnerDistributionsChart: FC<{
   isMulti,
   showSamplesBar,
 }) => {
+  const verticalLine = useVerticalLineValue();
+
   const [discreteTooltip, setDiscreteTooltip] = useState<
     { value: number; probability: number } | undefined
   >();
@@ -250,6 +253,15 @@ const InnerDistributionsChart: FC<{
           format: plot.xScale.tickFormat,
         },
       });
+
+      if (verticalLine) {
+        drawVerticalLine({
+          frame,
+          scale: xScale,
+          format: plot.xScale.tickFormat,
+          x: xScale(verticalLine),
+        });
+      }
     },
     [
       height,
@@ -264,6 +276,7 @@ const InnerDistributionsChart: FC<{
       _showSamplesBar,
       xScale,
       yScale,
+      verticalLine,
     ]
   );
 
@@ -316,15 +329,10 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
   plot,
   environment,
   height,
-  showSamplesBar,
 }) => {
   const CUTOFF_TO_SHOW_SAMPLES_BAR = 100000; // Default to stop showing bottom samples bar if there are more than 100k samples
   const HEIGHT_SAMPLES_BAR_CUTOFF = 30; // Default to stop showing bottom samples bar if the height is less than 50px
   const distributions = plot.distributions;
-
-  const isMulti =
-    distributions.length > 1 ||
-    !!(distributions.length === 1 && distributions[0].name);
 
   // Collect samples to render them in a sample bar.
   const samples: number[] = useMemo(() => {
@@ -365,12 +373,6 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
     ({ isNormalized }) => !isNormalized
   );
 
-  const _showSamplesBar =
-    showSamplesBar === undefined
-      ? samples.length < CUTOFF_TO_SHOW_SAMPLES_BAR &&
-        height > HEIGHT_SAMPLES_BAR_CUTOFF
-      : showSamplesBar;
-
   const nonNormalizedError = () => {
     const message =
       distributions.length === 1
@@ -392,29 +394,39 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
     );
   };
 
+  const showSamplesBar =
+    samples.length < CUTOFF_TO_SHOW_SAMPLES_BAR &&
+    height > HEIGHT_SAMPLES_BAR_CUTOFF;
+
+  const isMulti =
+    distributions.length > 1 ||
+    !!(distributions.length === 1 && distributions[0].name);
+
   return (
-    <div className="flex flex-col items-stretch">
-      {plot.title && <PlotTitle title={plot.title} />}
-      {plot.xScale.tag === "log" && shapes.value.some(hasMassBelowZero) ? (
-        <ErrorAlert heading="Log Domain Error">
-          Cannot graph distribution with negative values on logarithmic scale.
-        </ErrorAlert>
-      ) : (
-        <InnerDistributionsChart
-          isMulti={isMulti}
-          samples={samples}
-          shapes={shapes.value}
-          plot={plot}
-          height={height}
-          showSamplesBar={_showSamplesBar}
-        />
-      )}
-      {!anyAreNonnormalized && plot.showSummary && (
-        <div className="flex justify-center pt-2 overflow-auto">
-          <SummaryTable plot={plot} environment={environment} />
-        </div>
-      )}
-      {anyAreNonnormalized && nonNormalizedError()}
-    </div>
+    <DistProvider generateInitialValue={() => ({})}>
+      <div className="flex flex-col items-stretch">
+        {plot.title && <PlotTitle title={plot.title} />}
+        {plot.xScale.tag === "log" && shapes.value.some(hasMassBelowZero) ? (
+          <ErrorAlert heading="Log Domain Error">
+            Cannot graph distribution with negative values on logarithmic scale.
+          </ErrorAlert>
+        ) : (
+          <InnerDistributionsChart
+            isMulti={isMulti}
+            samples={samples}
+            shapes={shapes.value}
+            plot={plot}
+            height={height}
+            showSamplesBar={showSamplesBar}
+          />
+        )}
+        {!anyAreNonnormalized && plot.showSummary && (
+          <div className="flex justify-center pt-2 overflow-auto">
+            <SummaryTable plot={plot} environment={environment} />
+          </div>
+        )}
+        {anyAreNonnormalized && nonNormalizedError()}
+      </div>
+    </DistProvider>
   );
 };

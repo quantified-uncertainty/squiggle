@@ -1,3 +1,4 @@
+"use client";
 import {
   createContext,
   FC,
@@ -8,7 +9,7 @@ import {
   useReducer,
 } from "react";
 
-export function generateProvider<Shape extends {}, Action extends {}>({
+export function generateProvider<Shape extends object, Action extends object>({
   defaultValue,
   reducer,
   name,
@@ -33,7 +34,6 @@ export function generateProvider<Shape extends {}, Action extends {}>({
     children,
     generateInitialValue,
   }) => {
-    // TODO - when clusters change (e.g. when we update the underlying model), we should update the state
     const [state, dispatch] = useReducer(
       reducer,
       undefined,
