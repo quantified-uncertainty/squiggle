@@ -1,10 +1,13 @@
 import { BaseDist } from "../../dist/BaseDist.js";
+import { PointMass } from "../../dist/SymbolicDist.js";
+import { Env } from "../../index.js";
 import { SDateDist, SDateNumber } from "../../utility/SDate.js";
 import { result } from "../../utility/result.js";
 import {
   Value,
   vDate,
   vDateNumber,
+  vDuration,
   vLambda,
   vNumber,
   vString,
@@ -243,6 +246,15 @@ export class SqDurationValue extends SqAbstractValue<"Duration", BaseDist> {
 
   toDist(): SqDistribution {
     return wrapDistribution(this.value.toMs());
+  }
+
+  divideyByConstant(value: number, env: Env): SqDurationValue {
+    const dist = this._value.value.divideByNumber(new PointMass(value), env);
+    if (dist.ok) {
+      return new SqDurationValue(vDuration(dist.value));
+    } else {
+      throw new Error("divideyByConstant failed");
+    }
   }
 }
 

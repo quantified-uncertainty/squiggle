@@ -4,6 +4,14 @@ export const CHART_TO_DIST_HEIGHT_ADJUSTMENT = 0.5;
 import { generateDistributionPlotSettings } from "../components/PlaygroundSettings.js";
 import { DistributionsChart } from "./DistWidget/DistributionsChart.js";
 
+export const durationUnits = {
+  Second: 1000,
+  Minute: 60 * 1000,
+  Hour: 60 * 60 * 1000,
+  Day: 24 * 60 * 60 * 1000,
+  Year: 24 * 60 * 60 * 1000 * 365.25,
+} as const;
+
 widgetRegistry.register("Date", {
   Chart(value, settings) {
     const plot = SqDistributionsPlot.create({

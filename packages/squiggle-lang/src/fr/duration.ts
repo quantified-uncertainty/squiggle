@@ -1,12 +1,18 @@
 import { PointMass } from "../dist/SymbolicDist.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frNumber, frDuration } from "../library/registry/frTypes.js";
-import { FnFactory } from "../library/registry/helpers.js";
+import { frDuration, frDistOrNumber } from "../library/registry/frTypes.js";
+import {
+  FnFactory,
+  parseDistFromDistOrNumber,
+  twoVarSample,
+} from "../library/registry/helpers.js";
+import * as SymbolicDist from "../dist/SymbolicDist.js";
 import { SDurationDist, durationUnits } from "../utility/SDuration.js";
-import { vDuration, vDist } from "../value/index.js";
+import { vDuration, vDist, vDate } from "../value/index.js";
 import { result } from "../index.js";
-import { DistError } from "../dist/DistError.js";
+import { DistError, argumentError } from "../dist/DistError.js";
 import { REDistributionError } from "../errors/messages.js";
+import { BaseDist } from "../dist/BaseDist.js";
 
 const maker = new FnFactory({
   nameSpace: "Duration",
@@ -25,15 +31,11 @@ const makeNumberToDurationFn1 = (name: string, num: number) =>
     examples: [`Duration.${name}(5)`],
     output: "Duration",
     definitions: [
-      makeDefinition([frDuration], ([t], { environment }) => {
+      makeDefinition([frDistOrNumber], ([t], { environment }) => {
+        const dist = t instanceof BaseDist ? t : new PointMass(t);
         return vDuration(
-          SDurationDist.fromMs(
-            unpackDistResult(
-              t.divideBySDuration(
-                SDurationDist.fromMs(new PointMass(num)),
-                environment
-              )
-            )
+          unpackDistResult(
+            SDurationDist.fromMs(dist).multiply(new PointMass(num), environment)
           )
         );
       }),
@@ -60,10 +62,11 @@ const makeNumberToDurationFn2 = (name: string, num: number) =>
   });
 
 export const library = [
-  makeNumberToDurationFn1("fromMinutes", durationUnits.Minute),
-  makeNumberToDurationFn1("fromHours", durationUnits.Hour),
-  makeNumberToDurationFn1("fromDays", durationUnits.Day),
-  makeNumberToDurationFn1("fromYears", durationUnits.Year),
+  makeNumberToDurationFn1("minutes", durationUnits.Minute),
+  makeNumberToDurationFn1("hours", durationUnits.Hour),
+  makeNumberToDurationFn1("days", durationUnits.Day),
+  makeNumberToDurationFn1("years", durationUnits.Year),
+
   makeNumberToDurationFn1("fromUnit_minutes", durationUnits.Minute),
   makeNumberToDurationFn1("fromUnit_hours", durationUnits.Hour),
   makeNumberToDurationFn1("fromUnit_days", durationUnits.Day),
@@ -76,6 +79,39 @@ export const library = [
   //     makeDefinition([frDuration], ([d]) => vDuration(d.multiply(-1))),
   //   ],
   // }),
+  maker.make({
+    name: "to",
+    output: "Date",
+    definitions: [
+      makeDefinition([frDuration, frDuration], ([v1, v2], { environment }) => {
+        const foo = twoVarSample(
+          v1.toMs(),
+          v2.toMs(),
+          environment,
+          (low, high) => {
+            if (low >= high) {
+              throw new REDistributionError(
+                argumentError("Low value must be less than high value")
+              );
+            } else if (low <= 0 || high <= 0) {
+              throw new REDistributionError(
+                argumentError(
+                  `The "to" function only accepts paramaters above 0. It's a shorthand for lognormal({p5:min, p95:max}), which is only valid with positive entries for then minimum and maximum. If you would like to use a normal distribution, which accepts values under 0, you can use it like this: normal({p5:${low}, p95:${high}}).`
+                )
+              );
+            }
+            return SymbolicDist.Lognormal.fromCredibleInterval({
+              low,
+              high,
+              probability: 0.9,
+            });
+          }
+        );
+        // re
+        return vDuration(SDurationDist.fromMs(foo));
+      }),
+    ],
+  }),
   maker.make({
     name: "add",
     output: "Duration",
@@ -102,11 +138,23 @@ export const library = [
     examples: ["5minutes * 10", "10 * 5minutes"],
     definitions: [
       //change, number -> DistOrNumber
-      makeDefinition([frNumber, frDuration], ([d1, d2], { environment }) =>
-        vDuration(unpackDistResult(d2.multiply(new PointMass(d1), environment)))
+      makeDefinition(
+        [frDistOrNumber, frDuration],
+        ([d1, d2], { environment }) =>
+          vDuration(
+            unpackDistResult(
+              d2.multiply(parseDistFromDistOrNumber(d1), environment)
+            )
+          )
       ),
-      makeDefinition([frDuration, frNumber], ([d1, d2], { environment }) =>
-        vDuration(unpackDistResult(d1.multiply(new PointMass(d2), environment)))
+      makeDefinition(
+        [frDuration, frDistOrNumber],
+        ([d1, d2], { environment }) =>
+          vDuration(
+            unpackDistResult(
+              d1.multiply(parseDistFromDistOrNumber(d2), environment)
+            )
+          )
       ),
     ],
   }),
@@ -125,10 +173,14 @@ export const library = [
     output: "Duration",
     examples: ["5minutes / 3"],
     definitions: [
-      makeDefinition([frDuration, frNumber], ([d1, d2], { environment }) =>
-        vDuration(
-          unpackDistResult(d1.divideByNumber(new PointMass(d2), environment))
-        )
+      makeDefinition(
+        [frDuration, frDistOrNumber],
+        ([d1, d2], { environment }) =>
+          vDuration(
+            unpackDistResult(
+              d1.divideByNumber(parseDistFromDistOrNumber(d2), environment)
+            )
+          )
       ),
     ],
   }),

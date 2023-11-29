@@ -175,6 +175,8 @@ export class SDurationDist {
 
   //Assumes the passed-in number is unitless
   multiply(num: BaseDist, env: Env) {
-    return this.fmap((d) => binaryOperations.algebraicDivide(d, num, { env }));
+    return this.fmap((d) =>
+      binaryOperations.algebraicMultiply(d, num, { env })
+    );
   }
 }
