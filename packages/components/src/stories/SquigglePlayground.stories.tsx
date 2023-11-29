@@ -257,3 +257,10 @@ Calculator.make(
     height: 800,
   },
 };
+
+export const Boxed: Story = {
+  name: "Boxed values",
+  args: {
+    defaultCode: `x = named(5, "X variable")`,
+  },
+};

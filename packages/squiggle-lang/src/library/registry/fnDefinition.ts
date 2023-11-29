@@ -33,7 +33,11 @@ export function tryCallFnDefinition(
   }
   const unpackedArgs: any = []; // any, but that's ok, type safety is guaranteed by FnDefinition type
   for (let i = 0; i < args.length; i++) {
-    const unpackedArg = fn.inputs[i].unpack(args[i]);
+    let arg = args[i];
+    if (arg.type === "Boxed") {
+      arg = arg.value;
+    }
+    const unpackedArg = fn.inputs[i].unpack(arg);
     if (unpackedArg === undefined) {
       // type mismatch
       return;

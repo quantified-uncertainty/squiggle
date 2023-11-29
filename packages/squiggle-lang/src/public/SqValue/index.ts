@@ -48,6 +48,8 @@ export function wrapValue(value: Value, context?: SqValueContext) {
       return new SqDomainValue(value, context);
     case "Input":
       return new SqInputValue(value, context);
+    case "Boxed":
+      return new SqBoxedValue(value, context);
     default:
       throw new Error(`Unknown value ${JSON.stringify(value satisfies never)}`);
   }
@@ -305,6 +307,22 @@ export class SqDomainValue extends SqAbstractValue<"Domain", SqDomain> {
 
   asJS() {
     return this.value;
+  }
+}
+
+export class SqBoxedValue extends SqAbstractValue<"Boxed", unknown> {
+  tag = "Boxed" as const;
+
+  get value() {
+    return wrapValue(this._value.value, this.context);
+  }
+
+  override title() {
+    return this._value.name;
+  }
+
+  asJS(): unknown {
+    return this.value.asJS();
   }
 }
 

@@ -657,6 +657,23 @@ class VVoid extends BaseValue {
 }
 export const vVoid = () => new VVoid();
 
+class VBoxed extends BaseValue {
+  readonly type = "Boxed";
+  readonly publicName = "Boxed";
+
+  constructor(
+    public value: Value,
+    public name: string
+  ) {
+    super();
+  }
+
+  toString(): string {
+    return `${this.name}: ${this.value.toString()}`;
+  }
+}
+export const vBoxed = (value: Value, name: string) => new VBoxed(value, name);
+
 export type Value =
   | VArray
   | VBool
@@ -673,7 +690,8 @@ export type Value =
   | VScale
   | VInput
   | VDomain
-  | VVoid;
+  | VVoid
+  | VBoxed;
 
 export function isEqual(a: Value, b: Value): boolean {
   if (a.type !== b.type) {
