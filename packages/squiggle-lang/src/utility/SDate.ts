@@ -4,7 +4,7 @@ import { PointMass } from "../dist/SymbolicDist.js";
 import { binaryOperations } from "../dist/distOperations/binaryOperations.js";
 import { REOther } from "../errors/messages.js";
 import { Env } from "../index.js";
-import { SDuration, SDurationNumber, durationUnits } from "./SDuration.js";
+import { SDurationDist, SDurationNumber, durationUnits } from "./SDuration.js";
 import { Ok, result, Err } from "./result.js";
 import * as Result from "./result.js";
 
@@ -169,13 +169,13 @@ export class SDateDist {
     }
   }
 
-  addDuration(duration: SDuration, env: Env) {
+  addDuration(duration: SDurationDist, env: Env) {
     return this.fmap((d) =>
       binaryOperations.algebraicAdd(d, duration.toMs(), { env })
     );
   }
 
-  subtractDuration(duration: SDuration, env: Env) {
+  subtractDuration(duration: SDurationDist, env: Env) {
     return this.fmap((d) =>
       binaryOperations.algebraicSubtract(d, duration.toMs(), {
         env,
@@ -183,12 +183,12 @@ export class SDateDist {
     );
   }
 
-  subtract(other: SDateDist, env: Env): result<SDuration, DistError> {
+  subtract(other: SDateDist, env: Env): result<SDurationDist, DistError> {
     const diff = binaryOperations.algebraicSubtract(this.value, other.value, {
       env,
     });
     if (diff.ok) {
-      return Ok(SDuration.fromMs(diff.value));
+      return Ok(SDurationDist.fromMs(diff.value));
     } else {
       return diff;
     }

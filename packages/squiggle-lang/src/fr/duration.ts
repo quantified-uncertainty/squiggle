@@ -1,17 +1,12 @@
 import { PointMass } from "../dist/SymbolicDist.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frNumber, frDuration, frDist } from "../library/registry/frTypes.js";
+import { frNumber, frDuration } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import {
-  SDuration,
-  SDurationNumber,
-  durationUnits,
-} from "../utility/SDuration.js";
-import { vNumber, vDuration, vDist } from "../value/index.js";
-import { Env, result } from "../index.js";
+import { SDurationDist, durationUnits } from "../utility/SDuration.js";
+import { vDuration, vDist } from "../value/index.js";
+import { result } from "../index.js";
 import { DistError } from "../dist/DistError.js";
 import { REDistributionError } from "../errors/messages.js";
-import { BaseDist } from "../dist/BaseDist.js";
 
 const maker = new FnFactory({
   nameSpace: "Duration",
@@ -32,10 +27,10 @@ const makeNumberToDurationFn1 = (name: string, num: number) =>
     definitions: [
       makeDefinition([frDuration], ([t], { environment }) => {
         return vDuration(
-          SDuration.fromMs(
+          SDurationDist.fromMs(
             unpackDistResult(
               t.divideBySDuration(
-                SDuration.fromMs(new PointMass(num)),
+                SDurationDist.fromMs(new PointMass(num)),
                 environment
               )
             )
@@ -55,7 +50,7 @@ const makeNumberToDurationFn2 = (name: string, num: number) =>
         return vDist(
           unpackDistResult(
             t.divideBySDuration(
-              SDuration.fromMs(new PointMass(num)),
+              SDurationDist.fromMs(new PointMass(num)),
               environment
             )
           )

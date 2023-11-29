@@ -4,7 +4,6 @@ import * as Result from "./result.js";
 import { Ok, result, Err } from "./result.js";
 import { binaryOperations } from "../dist/distOperations/binaryOperations.js";
 import { DistError } from "../dist/DistError.js";
-import { PointMass } from "../dist/SymbolicDist.js";
 
 export const durationUnits = {
   Second: 1000,
@@ -114,13 +113,13 @@ export class SDurationNumber {
   }
 }
 
-export class SDuration {
+export class SDurationDist {
   constructor(private ms: BaseDist) {
     this.ms = ms;
   }
 
-  static fromMs(f: BaseDist): SDuration {
-    return new SDuration(f);
+  static fromMs(f: BaseDist): SDurationDist {
+    return new SDurationDist(f);
   }
 
   toMs(): BaseDist {
@@ -133,29 +132,29 @@ export class SDuration {
 
   fmap(
     fn: (d: BaseDist) => result<BaseDist, DistError>
-  ): result<SDuration, DistError> {
+  ): result<SDurationDist, DistError> {
     const r = fn(this.ms);
     if (r.ok) {
-      return Ok(new SDuration(r.value));
+      return Ok(new SDurationDist(r.value));
     } else {
       return r;
     }
   }
 
-  add(other: SDuration, env: Env) {
+  add(other: SDurationDist, env: Env) {
     return this.fmap((d) =>
       binaryOperations.algebraicAdd(d, other.toMs(), { env })
     );
   }
 
-  subtract(other: SDuration, env: Env) {
+  subtract(other: SDurationDist, env: Env) {
     return this.fmap((d) =>
       binaryOperations.algebraicSubtract(d, other.toMs(), { env })
     );
   }
 
   divideBySDuration(
-    divisor: SDuration,
+    divisor: SDurationDist,
     env: Env
   ): Result.result<BaseDist, DistError> {
     const foo = this.fmap((d) =>

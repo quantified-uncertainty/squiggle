@@ -16,7 +16,7 @@ import {
   frNumberOrString,
 } from "../../src/library/registry/frTypes.js";
 import { SDateDist } from "../../src/utility/SDate.js";
-import { SDuration } from "../../src/utility/SDuration.js";
+import { SDurationDist } from "../../src/utility/SDuration.js";
 import { ImmutableMap } from "../../src/utility/immutableMap.js";
 
 import {
@@ -62,7 +62,7 @@ test("frDuration", () => {
     throw new Error();
   }
 
-  const duration = SDuration.fromMs(dResult.value);
+  const duration = SDurationDist.fromMs(dResult.value);
   const value = vDuration(duration);
   expect(frDuration.unpack(value)).toBe(duration);
   expect(frDuration.pack(duration)).toEqual(value);

@@ -66,7 +66,7 @@ export { parse } from "./public/parse.js";
 export { fmap as resultMap, type result } from "./utility/result.js";
 
 export { SDateDist } from "./utility/SDate.js";
-export { SDuration } from "./utility/SDuration.js";
+export { SDurationDist as SDuration } from "./utility/SDuration.js";
 export { type LocationRange as SqLocation } from "peggy";
 export { defaultEnv as defaultEnvironment } from "./dist/env.js";
 export {
