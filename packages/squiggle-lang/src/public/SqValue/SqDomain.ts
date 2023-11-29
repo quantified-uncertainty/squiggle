@@ -13,7 +13,7 @@ export function wrapDomain(value: Domain) {
     case "DateRange":
       return new SqDateRangeDomain(value);
     default:
-      throw new Error(`Unknown type`);
+      throw new Error(`${value satisfies never} has unknown type`);
   }
 }
 
