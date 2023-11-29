@@ -1,4 +1,5 @@
-import { DistError } from "../dist/DistError.js";
+import { DistError, argumentError } from "../dist/DistError.js";
+import * as SymbolicDist from "../dist/SymbolicDist.js";
 import { REDistributionError, REOther } from "../errors/messages.js";
 import { result } from "../index.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
@@ -10,7 +11,7 @@ import {
   frDuration,
   frDateNumber,
 } from "../library/registry/frTypes.js";
-import { FnFactory } from "../library/registry/helpers.js";
+import { FnFactory, twoVarSample } from "../library/registry/helpers.js";
 import { SDateNumber, SDateDist } from "../utility/SDate.js";
 import { DateRangeDomain } from "../value/domain.js";
 import { vDate, vDomain, vDuration } from "../value/index.js";
@@ -66,6 +67,39 @@ export const library = [
   }),
   maker.fromDefinition("fromYear", makeYearFn),
   maker.fromDefinition("fromUnit_year", makeYearFn),
+  maker.make({
+    name: "to",
+    output: "Date",
+    definitions: [
+      makeDefinition([frDate, frDate], ([v1, v2], { environment }) => {
+        const foo = twoVarSample(
+          v1.toMs(),
+          v2.toMs(),
+          environment,
+          (low, high) => {
+            if (low >= high) {
+              throw new REDistributionError(
+                argumentError("Low value must be less than high value")
+              );
+            } else if (low <= 0 || high <= 0) {
+              throw new REDistributionError(
+                argumentError(
+                  `The "to" function only accepts paramaters above 0. It's a shorthand for lognormal({p5:min, p95:max}), which is only valid with positive entries for then minimum and maximum. If you would like to use a normal distribution, which accepts values under 0, you can use it like this: normal({p5:${low}, p95:${high}}).`
+                )
+              );
+            }
+            return SymbolicDist.Lognormal.fromCredibleInterval({
+              low,
+              high,
+              probability: 0.9,
+            });
+          }
+        );
+        // re
+        return vDate(SDateDist.fromMsDist(foo));
+      }),
+    ],
+  }),
   // same name as used in date-fns
   maker.make({
     name: "fromUnixTime",

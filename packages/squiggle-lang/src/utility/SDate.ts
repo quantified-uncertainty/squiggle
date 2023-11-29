@@ -131,6 +131,10 @@ export class SDateDist {
     return new SDateDist(new PointMass(ms));
   }
 
+  static fromMsDist(ms: BaseDist): SDateDist {
+    return new SDateDist(ms);
+  }
+
   static fromSDateNumber(date: SDateNumber): SDateDist {
     return new SDateDist(new PointMass(date.toMs()));
   }

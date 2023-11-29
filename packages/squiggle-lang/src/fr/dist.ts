@@ -32,7 +32,7 @@ function makeCIDist<K1 extends string, K2 extends string>(
   return makeDefinition(
     [frDict([lowKey, frNumber], [highKey, frNumber])],
     ([dict], { environment }) =>
-      twoVarSample(dict[lowKey], dict[highKey], environment, fn)
+      vDist(twoVarSample(dict[lowKey], dict[highKey], environment, fn))
   );
 }
 
@@ -45,7 +45,7 @@ function makeMeanStdevDist(
   return makeDefinition(
     [frDict(["mean", frNumber], ["stdev", frNumber])],
     ([{ mean, stdev }], { environment }) =>
-      twoVarSample(mean, stdev, environment, fn)
+      vDist(twoVarSample(mean, stdev, environment, fn))
   );
 }
 

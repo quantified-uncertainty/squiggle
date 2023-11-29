@@ -145,6 +145,10 @@ export class SqDateValue extends SqAbstractValue<"Date", BaseDist> {
     return this._value.value;
   }
 
+  toDist(): SqDistribution {
+    return wrapDistribution(this.value.toMs());
+  }
+
   //Note: This reveals the underlying Date object, but we might prefer to keep it hidden
   asJS() {
     return this.value.value;
