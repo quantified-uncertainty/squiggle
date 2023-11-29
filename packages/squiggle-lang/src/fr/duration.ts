@@ -1,60 +1,93 @@
+import { PointMass } from "../dist/SymbolicDist.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frNumber, frDuration } from "../library/registry/frTypes.js";
+import { frNumber, frDuration, frDist } from "../library/registry/frTypes.js";
+import { FnFactory } from "../library/registry/helpers.js";
 import {
-  FnFactory,
-  makeNumericComparisons,
-} from "../library/registry/helpers.js";
-import { SDuration } from "../utility/SDuration.js";
-import { vNumber, vDuration } from "../value/index.js";
+  SDuration,
+  SDurationNumber,
+  durationUnits,
+} from "../utility/SDuration.js";
+import { vNumber, vDuration, vDist } from "../value/index.js";
+import { Env, result } from "../index.js";
+import { DistError } from "../dist/DistError.js";
+import { REDistributionError } from "../errors/messages.js";
+import { BaseDist } from "../dist/BaseDist.js";
 
 const maker = new FnFactory({
   nameSpace: "Duration",
   requiresNamespace: false,
 });
 
-const makeNumberToDurationFn = (name: string, fn: (v: number) => SDuration) =>
+export function unpackDistResult<T>(result: result<T, DistError>): T {
+  if (!result.ok) {
+    throw new REDistributionError(result.value);
+  }
+  return result.value;
+}
+const makeNumberToDurationFn1 = (name: string, num: number) =>
   maker.make({
     name,
     examples: [`Duration.${name}(5)`],
     output: "Duration",
-    definitions: [makeDefinition([frNumber], ([t]) => vDuration(fn(t)))],
+    definitions: [
+      makeDefinition([frDuration], ([t], { environment }) => {
+        return vDuration(
+          SDuration.fromMs(
+            unpackDistResult(
+              t.divideBySDuration(
+                SDuration.fromMs(new PointMass(num)),
+                environment
+              )
+            )
+          )
+        );
+      }),
+    ],
   });
 
-const makeDurationToNumberFn = (name: string, fn: (v: SDuration) => number) =>
+const makeNumberToDurationFn2 = (name: string, num: number) =>
   maker.make({
     name,
-    examples: [`Duration.${name}(5minutes)`],
-    output: "Number",
-    definitions: [makeDefinition([frDuration], ([t]) => vNumber(fn(t)))],
+    examples: [`Duration.${name}(5)`],
+    output: "Dist",
+    definitions: [
+      makeDefinition([frDuration], ([t], { environment }) => {
+        return vDist(
+          unpackDistResult(
+            t.divideBySDuration(
+              SDuration.fromMs(new PointMass(num)),
+              environment
+            )
+          )
+        );
+      }),
+    ],
   });
 
 export const library = [
-  makeNumberToDurationFn("fromMinutes", SDuration.fromMinutes),
-  makeNumberToDurationFn("fromHours", SDuration.fromHours),
-  makeNumberToDurationFn("fromDays", SDuration.fromDays),
-  makeNumberToDurationFn("fromYears", SDuration.fromYears),
-  ...makeNumericComparisons(
-    maker,
-    (d1, d2) => d1.smaller(d2),
-    (d1, d2) => d1.larger(d2),
-    (d1, d2) => d1.isEqual(d2),
-    frDuration
-  ),
-  maker.make({
-    name: "unaryMinus",
-    output: "Duration",
-    examples: ["-5minutes"],
-    definitions: [
-      makeDefinition([frDuration], ([d]) => vDuration(d.multiply(-1))),
-    ],
-  }),
+  makeNumberToDurationFn1("fromMinutes", durationUnits.Minute),
+  makeNumberToDurationFn1("fromHours", durationUnits.Hour),
+  makeNumberToDurationFn1("fromDays", durationUnits.Day),
+  makeNumberToDurationFn1("fromYears", durationUnits.Year),
+  makeNumberToDurationFn1("fromUnit_minutes", durationUnits.Minute),
+  makeNumberToDurationFn1("fromUnit_hours", durationUnits.Hour),
+  makeNumberToDurationFn1("fromUnit_days", durationUnits.Day),
+  makeNumberToDurationFn1("fromUnit_years", durationUnits.Year),
+  // maker.make({
+  //   name: "unaryMinus",
+  //   output: "Duration",
+  //   examples: ["-5minutes"],
+  //   definitions: [
+  //     makeDefinition([frDuration], ([d]) => vDuration(d.multiply(-1))),
+  //   ],
+  // }),
   maker.make({
     name: "add",
     output: "Duration",
     examples: ["5minutes + 10minutes"],
     definitions: [
-      makeDefinition([frDuration, frDuration], ([d1, d2]) =>
-        vDuration(d1.add(d2))
+      makeDefinition([frDuration, frDuration], ([d1, d2], { environment }) =>
+        vDuration(unpackDistResult(d1.add(d2, environment)))
       ),
     ],
   }),
@@ -63,8 +96,8 @@ export const library = [
     output: "Duration",
     examples: ["5minutes - 10minutes"],
     definitions: [
-      makeDefinition([frDuration, frDuration], ([d1, d2]) =>
-        vDuration(d1.subtract(d2))
+      makeDefinition([frDuration, frDuration], ([d1, d2], { environment }) =>
+        vDuration(unpackDistResult(d1.subtract(d2, environment)))
       ),
     ],
   }),
@@ -73,11 +106,12 @@ export const library = [
     output: "Duration",
     examples: ["5minutes * 10", "10 * 5minutes"],
     definitions: [
-      makeDefinition([frDuration, frNumber], ([d1, d2]) =>
-        vDuration(d1.multiply(d2))
+      //change, number -> DistOrNumber
+      makeDefinition([frNumber, frDuration], ([d1, d2], { environment }) =>
+        vDuration(unpackDistResult(d2.multiply(new PointMass(d1), environment)))
       ),
-      makeDefinition([frNumber, frDuration], ([d1, d2]) =>
-        vDuration(d2.multiply(d1))
+      makeDefinition([frDuration, frNumber], ([d1, d2], { environment }) =>
+        vDuration(unpackDistResult(d1.multiply(new PointMass(d2), environment)))
       ),
     ],
   }),
@@ -86,8 +120,8 @@ export const library = [
     output: "Number",
     examples: ["5minutes / 2minutes"],
     definitions: [
-      makeDefinition([frDuration, frDuration], ([d1, d2]) =>
-        vNumber(d1.divideBySDuration(d2))
+      makeDefinition([frDuration, frDuration], ([d1, d2], { environment }) =>
+        vDist(unpackDistResult(d1.divideBySDuration(d2, environment)))
       ),
     ],
   }),
@@ -96,19 +130,16 @@ export const library = [
     output: "Duration",
     examples: ["5minutes / 3"],
     definitions: [
-      makeDefinition([frDuration, frNumber], ([d1, d2]) =>
-        vDuration(d1.divideByNumber(d2))
+      makeDefinition([frDuration, frNumber], ([d1, d2], { environment }) =>
+        vDuration(
+          unpackDistResult(d1.divideByNumber(new PointMass(d2), environment))
+        )
       ),
     ],
   }),
 
-  makeNumberToDurationFn("fromUnit_minutes", SDuration.fromMinutes),
-  makeNumberToDurationFn("fromUnit_hours", SDuration.fromHours),
-  makeNumberToDurationFn("fromUnit_days", SDuration.fromDays),
-  makeNumberToDurationFn("fromUnit_years", SDuration.fromYears),
-
-  makeDurationToNumberFn("toMinutes", (d) => d.toMinutes()),
-  makeDurationToNumberFn("toHours", (d) => d.toHours()),
-  makeDurationToNumberFn("toDays", (d) => d.toDays()),
-  makeDurationToNumberFn("toYears", (d) => d.toYears()),
+  makeNumberToDurationFn2("toMinutes", durationUnits.Minute),
+  makeNumberToDurationFn2("toHours", durationUnits.Hour),
+  makeNumberToDurationFn2("toDays", durationUnits.Day),
+  makeNumberToDurationFn2("toYears", durationUnits.Year),
 ];

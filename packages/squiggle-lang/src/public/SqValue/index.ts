@@ -230,7 +230,7 @@ export class SqStringValue extends SqAbstractValue<"String", string> {
   }
 }
 
-export class SqDurationValue extends SqAbstractValue<"Duration", number> {
+export class SqDurationValue extends SqAbstractValue<"Duration", BaseDist> {
   tag = "Duration" as const;
 
   get value() {
@@ -239,6 +239,10 @@ export class SqDurationValue extends SqAbstractValue<"Duration", number> {
 
   asJS() {
     return this._value.value.toMs();
+  }
+
+  toDist(): SqDistribution {
+    return wrapDistribution(this.value.toMs());
   }
 }
 

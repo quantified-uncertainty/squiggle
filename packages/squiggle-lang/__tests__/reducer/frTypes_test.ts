@@ -57,7 +57,12 @@ test("frDate", () => {
 });
 
 test("frDuration", () => {
-  const duration = SDuration.fromMs(1234);
+  const dResult = Normal.make({ mean: 2, stdev: 5 });
+  if (!dResult.ok) {
+    throw new Error();
+  }
+
+  const duration = SDuration.fromMs(dResult.value);
   const value = vDuration(duration);
   expect(frDuration.unpack(value)).toBe(duration);
   expect(frDuration.pack(duration)).toEqual(value);

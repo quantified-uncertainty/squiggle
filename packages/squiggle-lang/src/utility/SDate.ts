@@ -4,7 +4,7 @@ import { PointMass } from "../dist/SymbolicDist.js";
 import { binaryOperations } from "../dist/distOperations/binaryOperations.js";
 import { REOther } from "../errors/messages.js";
 import { Env } from "../index.js";
-import { SDuration, durationUnits } from "./SDuration.js";
+import { SDuration, SDurationNumber, durationUnits } from "./SDuration.js";
 import { Ok, result, Err } from "./result.js";
 import * as Result from "./result.js";
 
@@ -45,7 +45,7 @@ export class SDateNumber {
     return Result.fmap(makeWithYearInt(floor), (earlyDate) => {
       const diff = year - floor;
       return new SDateNumber(earlyDate.getTime()).addDuration(
-        SDuration.fromMs(diff * durationUnits.Year)
+        SDurationNumber.fromMs(diff * durationUnits.Year)
       );
     });
   }
@@ -95,20 +95,11 @@ export class SDateNumber {
     return this.value === other.value;
   }
 
-  subtract(other: SDateNumber): SDuration {
-    const diff = this.toMs() - other.toMs();
-    return new SDuration(diff);
-  }
-
-  // isEqual(other: SDate): boolean {
-  //   return this.value.getTime() === other.value.getTime();
-  // }
-
-  addDuration(duration: SDuration): SDateNumber {
+  addDuration(duration: SDurationNumber): SDateNumber {
     return SDateNumber.fromMs(this.toMs() + duration.toMs());
   }
 
-  subtractDuration(duration: SDuration): SDateNumber {
+  subtractDuration(duration: SDurationNumber): SDateNumber {
     return SDateNumber.fromMs(this.toMs() - duration.toMs());
   }
 
@@ -180,23 +171,27 @@ export class SDateDist {
 
   addDuration(duration: SDuration, env: Env) {
     return this.fmap((d) =>
-      binaryOperations.algebraicAdd(d, new PointMass(duration.toMs()), { env })
+      binaryOperations.algebraicAdd(d, duration.toMs(), { env })
     );
   }
 
   subtractDuration(duration: SDuration, env: Env) {
     return this.fmap((d) =>
-      binaryOperations.algebraicSubtract(d, new PointMass(duration.toMs()), {
+      binaryOperations.algebraicSubtract(d, duration.toMs(), {
         env,
       })
     );
   }
 
-  subtract(other: SDateDist, env: Env): result<SDuration, string> {
+  subtract(other: SDateDist, env: Env): result<SDuration, DistError> {
     const diff = binaryOperations.algebraicSubtract(this.value, other.value, {
       env,
     });
-    return { ok: false, value: "Not implemented" };
+    if (diff.ok) {
+      return Ok(SDuration.fromMs(diff.value));
+    } else {
+      return diff;
+    }
   }
 
   smaller(other: SDateDist): boolean {

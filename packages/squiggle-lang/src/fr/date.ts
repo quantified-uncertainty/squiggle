@@ -133,7 +133,7 @@ export const library = [
       makeDefinition([frDate, frDate], ([d1, d2], { environment }) => {
         const result = d1.subtract(d2, environment);
         if (!result.ok) {
-          throw new REOther(result.value);
+          throw result.value;
         }
         return vDuration(result.value);
       }),
