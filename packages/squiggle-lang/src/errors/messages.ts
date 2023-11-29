@@ -1,6 +1,5 @@
 import { DistError, distErrorToString } from "../dist/DistError.js";
 import { OperationError } from "../operationError.js";
-import { VDomain, Value } from "../value/index.js";
 
 // Common error types.
 

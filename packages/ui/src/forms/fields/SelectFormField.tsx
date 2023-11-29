@@ -159,7 +159,7 @@ export function SelectFormField<
         description={description}
         rules={{ required }}
       >
-        {({ value, onChange }) => {
+        {({ name, value, onChange }) => {
           /* `selectValue` can be null while `value` is not null.
            * This can happen if `fieldValueToOption` looks for an option in a fixed list, but value is not present there anymore.
            * This is bad: it means that the UI will show that nothing is selected, while the underlying form state still contains a value.
@@ -177,6 +177,8 @@ export function SelectFormField<
 
           return (
             <SelectComponent<TOption>
+              instanceId={name} // important to avoid hydration errors
+              name={name}
               components={{
                 Option: OptionComponent,
                 SingleValue: SingleValueComponent,

@@ -1,4 +1,4 @@
-import { FC, useMemo, useState } from "react";
+import { BaseSyntheticEvent, FC, useMemo, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { graphql, useFragment } from "react-relay";
 
@@ -51,7 +51,10 @@ export type SquiggleSnippetFormShape = {
   exports: SquiggleModelExportInput[];
 };
 
-type OnSubmit = (extraData?: { comment: string }) => Promise<void>;
+type OnSubmit = (
+  event?: BaseSyntheticEvent,
+  extraData?: { comment: string }
+) => Promise<void>;
 
 const SaveDialog: FC<{ onSubmit: OnSubmit; close: () => void }> = ({
   onSubmit,
@@ -62,8 +65,8 @@ const SaveDialog: FC<{ onSubmit: OnSubmit; close: () => void }> = ({
   };
   const form = useForm<SaveFormShape>();
 
-  const handleSubmit = form.handleSubmit(async ({ comment }) => {
-    await onSubmit({ comment });
+  const handleSubmit = form.handleSubmit(async ({ comment }, event) => {
+    await onSubmit(event, { comment });
     close();
   });
 

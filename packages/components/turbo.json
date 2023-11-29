@@ -5,14 +5,14 @@
       "outputs": [
         "dist/**",
         "storybook-static/**",
-        "src/languageSupport/generated/**"
+        "src/components/CodeEditor/languageSupport/generated/**"
       ]
     },
     "build:ts": {
       "dependsOn": ["build:lezer"]
     },
     "build:lezer": {
-      "outputs": ["src/languageSupport/generated/**"]
+      "outputs": ["src/components/CodeEditor/languageSupport/generated/**"]
     }
   }
 }

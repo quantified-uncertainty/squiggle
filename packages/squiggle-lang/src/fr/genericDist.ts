@@ -95,6 +95,10 @@ export const library: FRFunction[] = [
     name: "mean",
     fn: (d) => d.mean(),
   }),
+  maker.d2n({
+    name: "median",
+    fn: (d) => d.inv(0.5),
+  }),
   maker.d2n({ name: "stdev", fn: (d) => unpackDistResult(d.stdev()) }),
   maker.d2n({ name: "variance", fn: (d) => unpackDistResult(d.variance()) }),
   maker.d2n({ name: "min", fn: (d) => d.min() }),

@@ -1,7 +1,7 @@
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
-import { getWriteableModel } from "../types/Model";
+import { getWriteableModel } from "../helpers/modelHelpers";
 import { validateSlug } from "../utils";
 import { ZodError } from "zod";
 import { NotFoundError } from "../errors/NotFoundError";

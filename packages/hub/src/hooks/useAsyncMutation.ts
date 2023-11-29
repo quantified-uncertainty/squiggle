@@ -21,6 +21,22 @@ export type CommonMutationParameters<TTypename extends string> =
     };
   };
 
+type UseAsyncMutationOkResult<
+  TMutation extends CommonMutationParameters<TTypename>,
+  TTypename extends string = string,
+> = Extract<TMutation["response"]["result"], { __typename: TTypename }>;
+
+export type UseAsyncMutationAct<
+  TMutation extends CommonMutationParameters<TTypename>,
+  TTypename extends string = string,
+> = (
+  config: Omit<UseMutationConfig<TMutation>, "onCompleted" | "onError"> & {
+    onCompleted?: (
+      okResult: UseAsyncMutationOkResult<TMutation, TTypename>
+    ) => void;
+  }
+) => Promise<void>;
+
 /**
  * Like the basic `useMutation` from Relay, this function returns a `[runMutation, isMutationInFlight]` pair.
  * But unlike `useMutation`, returned `runMutation` is async and has more convenient `onCompleted` callback (it receives only an expected fragment, unwrapped from the result union).
@@ -45,16 +61,9 @@ export function useAsyncMutation<
   const [runMutation, inFlight] = useMutation<TMutation>(mutation);
   const [wasCompleted, setWasCompleted] = useState(false);
 
-  type OkResult = Extract<
-    TMutation["response"]["result"],
-    { __typename: TTypename }
-  >;
+  type OkResult = UseAsyncMutationOkResult<TMutation, TTypename>;
 
-  const act = (
-    config: Omit<UseMutationConfig<TMutation>, "onCompleted" | "onError"> & {
-      onCompleted?: (okResult: OkResult) => void;
-    }
-  ): Promise<void> => {
+  const act: UseAsyncMutationAct<TMutation, TTypename> = (config) => {
     return new Promise((resolve, reject) => {
       runMutation({
         ...config,

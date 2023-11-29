@@ -28,7 +28,7 @@ export const library = [
     maker,
     (d1, d2) => d1 < d2,
     (d1, d2) => d1 > d2,
-    (d1, d2) => d1 == d2,
+    (d1, d2) => d1 === d2,
     frNumber
   ),
   maker.bb2b({ name: "or", fn: (x, y) => x || y }), // infix ||

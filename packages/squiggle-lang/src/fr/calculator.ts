@@ -40,7 +40,7 @@ export const library = [
             title: title || undefined,
             description: description || undefined,
             inputs: inputs || [],
-            autorun: autorun == null ? true : autorun,
+            autorun: autorun === null ? true : autorun,
             sampleCount: sampleCount || undefined,
           });
           const error = calc.getError();

@@ -11,7 +11,6 @@ import { CancelInviteAction } from "./CancelInviteAction";
 
 export const GroupInviteCard: FC<{
   inviteRef: GroupInviteCard$key;
-  groupRef: hooks_useIsGroupAdmin$key;
   groupId: string;
 }> = (props) => {
   const invite = useFragment(

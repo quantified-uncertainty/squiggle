@@ -3,6 +3,7 @@ module.exports = {
   parser: "@typescript-eslint/parser",
   plugins: ["@typescript-eslint"],
   rules: {
+    eqeqeq: "error",
     "no-constant-condition": ["error", { checkLoops: false }],
     // "multiline-comment-style": "warn",
     "@typescript-eslint/no-unused-vars": ["warn", { args: "none" }],
