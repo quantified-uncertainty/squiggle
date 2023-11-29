@@ -26,20 +26,25 @@ const HoverTooltip: FC<{ hover: Hover; view: EditorView }> = ({
   return (
     <div className="border bg-slate-50 rounded-sm shadow-lg min-w-[200px]">
       <TooltipSection>
-        <a
-          // TODO - move domain to constants
-          href={`https://www.squiggle-language.com/docs/Api/${hover.nameSpace}#${hover.name}`}
-          className="text-blue-500 hover:underline text-sm"
-        >
-          {fullName}
-        </a>
+        <div className="flex flex-nowrap items-end justify-between gap-2 py-0.5">
+          <a
+            // TODO - move domain to constants
+            href={`https://www.squiggle-language.com/docs/Api/${hover.nameSpace}#${hover.name}`}
+            className="text-blue-500 hover:underline text-sm leading-none"
+          >
+            {fullName}
+          </a>
+          <div className="italic text-xs leading-none text-slate-500">
+            Stdlib
+          </div>
+        </div>
       </TooltipSection>
       {hover.description ? (
         <TooltipSection>{hover.description}</TooltipSection>
       ) : null}
       {hover.examples?.length ? (
         <TooltipSection>
-          <header className="text-sm text-slate-600 font-medium mb-1">
+          <header className="text-sm text-slate-600 font-medium mb-2">
             Examples
           </header>
           {hover.examples.map((example, i) => (
