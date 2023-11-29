@@ -1,12 +1,14 @@
 import { REArgumentError, REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
+  frDate,
   frDict,
   frNumber,
   frOptional,
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
+import { SDate } from "../utility/SDate.js";
 import { vScale } from "../value/index.js";
 
 const maker = new FnFactory({
@@ -21,10 +23,25 @@ const commonDict = frDict(
   ["title", frOptional(frString)]
 );
 
+const dateDict = frDict(
+  ["min", frOptional(frDate)],
+  ["max", frOptional(frDate)],
+  ["tickFormat", frOptional(frString)],
+  ["title", frOptional(frString)]
+);
+
 function checkMinMax(min: number | null, max: number | null) {
   if (min !== null && max !== null && max <= min) {
     throw new REArgumentError(
       `Max must be greater than min, got: min=${min}, max=${max}`
+    );
+  }
+}
+
+function checkMinMaxDates(min: SDate | null, max: SDate | null) {
+  if (!!min && !!max && max.toMs() <= min.toMs()) {
+    throw new REArgumentError(
+      `Max must be greater than min, got: min=${min.toString()}, max=${max.toString()}`
     );
   }
 }
@@ -161,6 +178,27 @@ export const library = [
         return vScale({
           type: "power",
         });
+      }),
+    ],
+  }),
+  maker.make({
+    name: "date",
+    output: "Scale",
+    examples: [`Scale.date({ min: 2022year, max: 2025year })`],
+    definitions: [
+      makeDefinition([dateDict], ([{ min, max, tickFormat, title }]) => {
+        checkMinMaxDates(min, max);
+        // We don't check the tick format, because the format is much more complicated for dates.
+        return vScale({
+          type: "date",
+          min: min ? min.toMs() : undefined,
+          max: max ? max.toMs() : undefined,
+          tickFormat: tickFormat ?? undefined,
+          title: title ?? undefined,
+        });
+      }),
+      makeDefinition([], () => {
+        return vScale({ type: "date" });
       }),
     ],
   }),

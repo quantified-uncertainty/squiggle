@@ -245,7 +245,6 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
     environment,
     height,
   });
-
   //TODO: This custom error handling is a bit hacky and should be improved.
   const valueAtCursor: result<SqValue, SqError> | undefined = useMemo(() => {
     return cursorX !== undefined

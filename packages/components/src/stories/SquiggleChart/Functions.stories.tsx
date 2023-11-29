@@ -140,3 +140,17 @@ export const Unrenderable: Story = {
     code: "foo(x, y) = x + y; foo",
   },
 };
+
+export const Date: Story = {
+  args: {
+    code: sq`
+  foo(t: [1500year, 3000year]) = {
+    yearDelta = toYears(t - 1480year)
+    normal(yearDelta,yearDelta/4)
+  }
+  Plot.distFn({
+    fn: foo
+  })
+  `,
+  },
+};

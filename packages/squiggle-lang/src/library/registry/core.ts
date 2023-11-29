@@ -30,7 +30,7 @@ export class Registry {
     for (const fn of fns) {
       for (const def of fn.definitions) {
         const names = [
-          ...(fn.nameSpace == "" ? [] : [`${fn.nameSpace}.${fn.name}`]),
+          ...(fn.nameSpace === "" ? [] : [`${fn.nameSpace}.${fn.name}`]),
           ...(fn.requiresNamespace ? [] : [fn.name]),
         ];
 

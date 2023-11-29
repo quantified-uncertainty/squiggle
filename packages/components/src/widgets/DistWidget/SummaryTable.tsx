@@ -6,6 +6,7 @@ import { XIcon } from "@heroicons/react/solid/esm/index.js";
 import {
   Env,
   result,
+  SDuration,
   SqDistribution,
   SqDistributionError,
   SqDistributionsPlot,
@@ -23,6 +24,7 @@ type HoverableCellProps = PropsWithChildren<{
 
 const commonCellClasses =
   "border border-slate-200 py-1 px-2 text-slate-700 font-light";
+import { DEFAULT_DATE_FORMAT } from "../../lib/constants.js";
 
 const TableHeadCell: FC<PropsWithChildren> = ({ children }) => (
   <th className={clsx(commonCellClasses, "text-xs")}>{children}</th>
@@ -48,6 +50,7 @@ type SummaryTableRowProps = {
   showName: boolean;
   environment: Env;
   tickFormat: string | undefined;
+  valueType: "date" | "number";
 };
 
 const percentiles = [0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95];
@@ -58,6 +61,7 @@ const SummaryTableRow: FC<SummaryTableRowProps> = ({
   showName,
   environment,
   tickFormat,
+  valueType,
 }) => {
   const mean = distribution.mean(environment);
   const stdev = distribution.stdev(environment);
@@ -66,8 +70,17 @@ const SummaryTableRow: FC<SummaryTableRowProps> = ({
     distribution.inv(environment, percentile)
   );
 
-  const formatNumber = (number: number) => {
-    if (tickFormat) {
+  const formatNumber = (number: number, isRange: boolean) => {
+    if (valueType == "date") {
+      // When dealing with dates, the standard deviation is a duration, not a date, so we need to format it differently
+      if (isRange) {
+        return SDuration.fromMs(number).toString();
+      } else {
+        return d3.timeFormat(tickFormat ?? DEFAULT_DATE_FORMAT)(
+          new Date(number)
+        );
+      }
+    } else if (tickFormat) {
       return d3.format(tickFormat)(number);
     } else {
       return <NumberShower number={number} precision={3} />;
@@ -75,10 +88,11 @@ const SummaryTableRow: FC<SummaryTableRowProps> = ({
   };
 
   const unwrapResult = (
-    x: result<number, SqDistributionError>
+    x: result<number, SqDistributionError>,
+    isRange: boolean
   ): React.ReactNode => {
     if (x.ok) {
-      return formatNumber(x.value);
+      return formatNumber(x.value, isRange);
     } else {
       return (
         <TextTooltip text={x.value.toString()}>
@@ -97,9 +111,9 @@ const SummaryTableRow: FC<SummaryTableRowProps> = ({
         onMouseEnter={() => setVerticalLine(mean)}
         onMouseLeave={() => setVerticalLine(undefined)}
       >
-        {formatNumber(mean)}
+        {formatNumber(mean, false)}
       </Cell>
-      <Cell>{unwrapResult(stdev)}</Cell>
+      <Cell>{unwrapResult(stdev, true)}</Cell>
       {percentileValues.map((value, i) => (
         <Cell
           key={i}
@@ -108,8 +122,7 @@ const SummaryTableRow: FC<SummaryTableRowProps> = ({
           }
           onMouseLeave={() => setVerticalLine(undefined)}
         >
-          {unwrapResult(value)}
-        </Cell>
+          {unwrapResult(value, false)}
       ))}
     </tr>
   );
@@ -122,6 +135,7 @@ type SummaryTableProps = {
 
 export const SummaryTable: FC<SummaryTableProps> = ({ plot, environment }) => {
   const showNames = plot.distributions.some((d) => d.name);
+  const isDate = plot.xScale?.tag === "date";
   const tickFormat = plot.xScale?.tickFormat;
 
   return (
@@ -145,6 +159,7 @@ export const SummaryTable: FC<SummaryTableProps> = ({ plot, environment }) => {
             showName={showNames}
             environment={environment}
             tickFormat={tickFormat}
+            valueType={isDate ? "date" : "number"}
           />
         ))}
       </tbody>

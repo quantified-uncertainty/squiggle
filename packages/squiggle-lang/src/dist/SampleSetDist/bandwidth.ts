@@ -13,8 +13,8 @@ const nrd_coef = 1.06;
 const nrd_fractionalPower = -0.2;
 
 const iqr = (x: number[]) =>
-  E_A_Sorted.percentile(x, iqr_percentile) -
-  E_A_Sorted.percentile(x, iqr_percentile_complement);
+  E_A_Sorted.quantile(x, iqr_percentile) -
+  E_A_Sorted.quantile(x, iqr_percentile_complement);
 
 // Silverman, B. W. (1986) Density Estimation. London: Chapman and Hall.
 export const nrd0 = (x: number[]) => {

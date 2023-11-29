@@ -2,7 +2,7 @@ import { LocationRange } from "peggy";
 
 import { ASTNode } from "../ast/parse.js";
 import * as IError from "../errors/IError.js";
-import { REArityError, REDomainError, REOther } from "../errors/messages.js";
+import { REArityError, REOther } from "../errors/messages.js";
 import { Expression } from "../expression/index.js";
 import { VDomain, Value } from "../value/index.js";
 import * as Context from "./context.js";
@@ -89,8 +89,8 @@ export class UserDefinedLambda extends BaseLambda {
       for (let i = 0; i < parametersLength; i++) {
         const parameter = parameters[i];
         localStack = localStack.push(parameter.name, args[i]);
-        if (parameter.domain && !parameter.domain.value.includes(args[i])) {
-          throw new REDomainError(args[i], parameter.domain);
+        if (parameter.domain) {
+          parameter.domain.value.validateValue(args[i]);
         }
       }
 

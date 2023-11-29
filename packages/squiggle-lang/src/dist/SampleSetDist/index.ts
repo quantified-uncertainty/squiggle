@@ -149,7 +149,7 @@ sample everything.
 
   inv(f: number): number {
     const sorted = E_A_Floats.sort(this.samples);
-    return E_A_Sorted.percentile(sorted, f);
+    return E_A_Sorted.quantile(sorted, f);
   }
 
   pdf(f: number, opts: { env: Env }) {

@@ -3,6 +3,7 @@ import { FRFunction, Registry } from "./core.js";
 import { library as builtinLibrary } from "../../fr/builtin.js";
 import { library as dangerLibrary } from "../../fr/danger.js";
 import { library as dateLibrary } from "../../fr/date.js";
+import { library as durationLibrary } from "../../fr/duration.js";
 import { library as dictLibrary } from "../../fr/dict.js";
 import { library as distLibrary } from "../../fr/dist.js";
 import { library as genericDistLibrary } from "../../fr/genericDist.js";
@@ -33,6 +34,7 @@ const fnList: FRFunction[] = [
   ...dangerLibrary,
   ...dateLibrary,
   ...dictLibrary,
+  ...durationLibrary,
   //It's important that numberLibrary comes before distLibrary, because we want Number.sum[] to be prioritized over Dist.sum[].
   ...numberLibrary,
   ...distLibrary,

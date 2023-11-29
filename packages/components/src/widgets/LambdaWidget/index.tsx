@@ -1,7 +1,7 @@
 import { ItemSettingsMenuItems } from "../../components/SquiggleViewer/ItemSettingsMenuItems.js";
 import { widgetRegistry } from "../registry.js";
 import { truncateStr } from "../utils.js";
-import { FunctionChart } from "./FunctionChart/index.js";
+import { AutomaticFunctionChart } from "./FunctionChart/AutomaticFunctionChart.js";
 
 widgetRegistry.register("Lambda", {
   Preview: (value) => (
@@ -19,7 +19,7 @@ widgetRegistry.register("Lambda", {
   Chart: (value, settings) => {
     const environment = value.context.project.getEnvironment();
     return (
-      <FunctionChart
+      <AutomaticFunctionChart
         fn={value.value}
         settings={settings}
         height={settings.chartHeight}

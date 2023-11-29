@@ -2,6 +2,7 @@ import * as d3 from "d3";
 
 import { SqScale } from "@quri/squiggle-lang";
 import {
+  scaleDate,
   scaleLinear,
   scaleLog,
   scalePow,
@@ -24,6 +25,8 @@ export function sqScaleToD3(
       return scalePow().exponent(scale.exponent);
     case "log":
       return scaleLog();
+    case "date":
+      return scaleDate();
     default:
       throw new Error(`Unknown scale: ${scale satisfies never}`);
   }

@@ -131,6 +131,7 @@ describe("stacktraces", () => {
   add(string, string)
   add(string, any)
   add(date, duration)
+  add(duration, date)
   add(duration, duration)
   add(distribution, number)
   add(number, distribution)

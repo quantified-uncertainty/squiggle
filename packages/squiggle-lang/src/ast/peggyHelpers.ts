@@ -432,7 +432,7 @@ export function parseEscapeSequence(
   location: LocationRange,
   error: (e: any, l: LocationRange) => void
 ) {
-  if (char[0] == "'") {
+  if (char[0] === "'") {
     return "'";
   } else {
     try {

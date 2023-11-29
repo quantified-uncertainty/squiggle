@@ -4,7 +4,6 @@ import {
   Env,
   SqDistFnPlot,
   SqDistribution,
-  SqNumberValue,
   SqNumericFnPlot,
 } from "@quri/squiggle-lang";
 
@@ -55,6 +54,7 @@ export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot>(
   environment: Env
 ) {
   const scale = sqScaleToD3(plot.xScale);
+
   scale.domain([
     plot.xScale?.min ?? functionChartDefaults.min,
     plot.xScale?.max ?? functionChartDefaults.max,
@@ -72,7 +72,7 @@ export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot>(
   const errors: ImageError[] = [];
 
   for (const x of chartPointsToRender) {
-    const result = plot.fn.call([SqNumberValue.create(x)], environment);
+    const result = plot.fn.call([plot.xScale.numberToValue(x)], environment);
     if (result.ok) {
       if (result.value.tag === "Number" && plot.tag === "numericFn") {
         functionImage.push({

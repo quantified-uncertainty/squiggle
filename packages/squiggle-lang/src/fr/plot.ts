@@ -26,25 +26,25 @@ const maker = new FnFactory({
 
 const defaultScale = { type: "linear" } satisfies Scale;
 
+export function assertValidMinMax(scale: Scale) {
+  const hasMin = scale.min !== undefined;
+  const hasMax = scale.max !== undefined;
+
+  // Validate scale properties
+  if (hasMin !== hasMax) {
+    throw new REArgumentError(
+      `Scale ${hasMin ? "min" : "max"} set without ${
+        hasMin ? "max" : "min"
+      }. Must set either both or neither.`
+    );
+  } else if (hasMin && hasMax && scale.min! >= scale.max!) {
+    throw new REArgumentError(
+      `Scale min (${scale.min}) is greater or equal than than max (${scale.max})`
+    );
+  }
+}
+
 function createScale(scale: Scale | null, domain: VDomain | undefined): Scale {
-  if (scale && scale.min && scale.max) {
-    // complete scale, nothing to improve
-    return scale;
-  }
-
-  if (scale) {
-    if (scale.min === undefined && scale.max !== undefined) {
-      throw new REArgumentError(
-        "Scale max set without min. Must set either both or neither."
-      );
-    }
-    if (scale.min !== undefined && scale.max === undefined) {
-      throw new REArgumentError(
-        "Scale min set without max. Must set either both or neither."
-      );
-    }
-  }
-
   /*
    * There are several possible combinations here:
    * 1. Scale with min/max -> ignore domain, keep scale
@@ -52,21 +52,18 @@ function createScale(scale: Scale | null, domain: VDomain | undefined): Scale {
    * 3. Scale without min/max, no domain -> keep scale
    * 4. No scale and no domain -> default scale
    */
+  //TODO: It might be good to check if scale is outside the bounds of the domain, and throw an error then or something.
+  //TODO: It might also be good to check if the domain type matches the scale type, and throw an error if not.
 
-  if (!domain || domain.value.type !== "NumericRange") {
-    // no domain, use explicit scale or default scale
-    return scale ?? defaultScale;
-  }
+  scale && assertValidMinMax(scale);
 
-  if (scale) {
-    return {
-      ...scale,
-      min: scale.min ?? domain.value.min,
-      max: scale.max ?? domain.value.max,
-    };
-  } else {
-    return { type: "linear", min: domain.value.min, max: domain.value.max };
-  }
+  const _defaultScale = domain ? domain.value.toDefaultScale() : defaultScale;
+
+  // This gets min/max from domain, if it's not on scale.
+  return {
+    ..._defaultScale,
+    ...(scale || {}),
+  };
 }
 
 // This function both extract the domain and checks that the function has only one parameter.
@@ -88,6 +85,14 @@ function extractDomainFromOneArgFunction(fn: Lambda): VDomain | undefined {
   // But we might get other numeric domains besides `NumericRange`, so checking domain type here would be risky.
   return domain;
 }
+
+const _assertYScaleNotDateScale = (yScale: Scale | null) => {
+  if (yScale && yScale.type === "date") {
+    throw new REArgumentError(
+      "Using a date scale as the plot yScale is not yet supported."
+    );
+  }
+};
 
 export const library = [
   maker.make({
@@ -114,6 +119,8 @@ export const library = [
           ),
         ],
         ([{ dists, xScale, yScale, title, showSummary }]) => {
+          _assertYScaleNotDateScale(yScale);
+
           const distributions: LabeledDistribution[] = [];
           dists.forEach(({ name, value }) => {
             distributions.push({
@@ -154,6 +161,7 @@ export const library = [
           ),
         ],
         ([{ dist, xScale, yScale, title, showSummary }]) => {
+          _assertYScaleNotDateScale(yScale);
           return vPlot({
             type: "distributions",
             distributions: [{ distribution: dist }],
@@ -184,6 +192,7 @@ export const library = [
           ),
         ],
         ([{ fn, xScale, yScale, title, points }]) => {
+          _assertYScaleNotDateScale(yScale);
           const domain = extractDomainFromOneArgFunction(fn);
           return vPlot({
             type: "numericFn",
@@ -216,6 +225,7 @@ export const library = [
           ),
         ],
         ([{ fn, xScale, yScale, distXScale, title, points }]) => {
+          _assertYScaleNotDateScale(yScale);
           const domain = extractDomainFromOneArgFunction(fn);
           return vPlot({
             type: "distFn",
@@ -249,6 +259,7 @@ export const library = [
           ),
         ],
         ([{ xDist, yDist, xScale, yScale, title }]) => {
+          _assertYScaleNotDateScale(yScale);
           return vPlot({
             type: "scatter",
             xDist,
