@@ -1,17 +1,10 @@
 import { BaseDist } from "../dist/BaseDist.js";
 import { Env } from "../index.js";
 import * as Result from "./result.js";
-import { Ok, result, Err } from "./result.js";
+import { Ok, result } from "./result.js";
 import { binaryOperations } from "../dist/distOperations/binaryOperations.js";
 import { DistError } from "../dist/DistError.js";
-
-export const durationUnits = {
-  Second: 1000,
-  Minute: 60 * 1000,
-  Hour: 60 * 60 * 1000,
-  Day: 24 * 60 * 60 * 1000,
-  Year: 24 * 60 * 60 * 1000 * 365.25,
-} as const;
+import { Duration, DurationUnit } from "./durationUnit.js";
 
 //This is our own internal date duration class. It's used by the interpreter, but meant to act like a simple date library.
 export class SDurationNumber {
@@ -23,60 +16,29 @@ export class SDurationNumber {
     return new SDurationNumber(f);
   }
 
-  static fromMinutes(minutes: number): SDurationNumber {
-    return new SDurationNumber(minutes * durationUnits.Minute);
+  static fromUnit(unit: DurationUnit, value: number): SDurationNumber {
+    const inMs = new Duration(value, unit).toUnit("ms").value;
+    return SDurationNumber.fromMs(inMs);
   }
 
-  static fromHours(hours: number): SDurationNumber {
-    return new SDurationNumber(hours * durationUnits.Hour);
+  private toDuration(): Duration {
+    return new Duration(this.ms, "ms");
   }
 
-  static fromDays(days: number): SDurationNumber {
-    return new SDurationNumber(days * durationUnits.Day);
-  }
-
-  static fromYears(years: number): SDurationNumber {
-    return new SDurationNumber(years * durationUnits.Year);
+  toUnit(unit: DurationUnit): Duration {
+    return this.toDuration().toUnit(unit);
   }
 
   toMs(): number {
     return this.ms;
   }
 
-  toMinutes(): number {
-    return this.ms / durationUnits.Minute;
+  toGreatestUnit(): Duration {
+    return this.toDuration().toGreatestUnit();
   }
 
-  toHours(): number {
-    return this.ms / durationUnits.Hour;
-  }
-
-  toDays(): number {
-    return this.ms / durationUnits.Day;
-  }
-
-  toYears(): number {
-    return this.ms / durationUnits.Year;
-  }
-
-  toString(): string {
-    const units: [number, string][] = [
-      [durationUnits.Year, "year"],
-      [durationUnits.Day, "day"],
-      [durationUnits.Hour, "hour"],
-      [durationUnits.Minute, "minute"],
-      [durationUnits.Second, "second"],
-    ];
-
-    for (const [unitValue, unitName] of units) {
-      if (Math.abs(this.ms) >= unitValue) {
-        const value = this.ms / unitValue;
-        const suffix = value !== 1.0 ? "s" : "";
-        return `${value.toPrecision(3)} ${unitName}${suffix}`;
-      }
-    }
-
-    return `${this.ms.toFixed()} ms`;
+  toString(precision = 2): string {
+    return this.toDuration().toGreatestUnit().toString(precision);
   }
 
   add(other: SDurationNumber): SDurationNumber {

@@ -73,11 +73,13 @@ export function numberShow(number: number, precision = 2) {
 export interface NumberShowerProps {
   number: number;
   precision?: number;
+  unitName?: string;
 }
 
 export const NumberShower: React.FC<NumberShowerProps> = ({
   number,
   precision = 2,
+  unitName,
 }) => {
   const numberWithPresentation = numberShow(number, precision);
   return (
@@ -92,6 +94,7 @@ export const NumberShower: React.FC<NumberShowerProps> = ({
           </span>
         </span>
       ) : null}
+      {unitName && ` ${unitName}`}
     </span>
   );
 };

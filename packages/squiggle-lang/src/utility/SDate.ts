@@ -4,7 +4,7 @@ import { PointMass } from "../dist/SymbolicDist.js";
 import { binaryOperations } from "../dist/distOperations/binaryOperations.js";
 import { REOther } from "../errors/messages.js";
 import { Env } from "../index.js";
-import { SDurationDist, SDurationNumber, durationUnits } from "./SDuration.js";
+import { SDurationDist, SDurationNumber } from "./SDuration.js";
 import { Ok, result, Err } from "./result.js";
 import * as Result from "./result.js";
 
@@ -45,7 +45,7 @@ export class SDateNumber {
     return Result.fmap(makeWithYearInt(floor), (earlyDate) => {
       const diff = year - floor;
       return new SDateNumber(earlyDate.getTime()).addDuration(
-        SDurationNumber.fromMs(diff * durationUnits.Year)
+        SDurationNumber.fromUnit("year", diff)
       );
     });
   }

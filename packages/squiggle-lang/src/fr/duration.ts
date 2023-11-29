@@ -7,12 +7,13 @@ import {
   twoVarSample,
 } from "../library/registry/helpers.js";
 import * as SymbolicDist from "../dist/SymbolicDist.js";
-import { SDurationDist, durationUnits } from "../utility/SDuration.js";
+import { SDurationDist } from "../utility/SDuration.js";
 import { vDuration, vDist, vDate } from "../value/index.js";
 import { result } from "../index.js";
 import { DistError, argumentError } from "../dist/DistError.js";
 import { REDistributionError } from "../errors/messages.js";
 import { BaseDist } from "../dist/BaseDist.js";
+import { Duration, DurationUnit } from "../utility/durationUnit.js";
 
 const maker = new FnFactory({
   nameSpace: "Duration",
@@ -25,7 +26,7 @@ export function unpackDistResult<T>(result: result<T, DistError>): T {
   }
   return result.value;
 }
-const makeNumberToDurationFn1 = (name: string, num: number) =>
+const makeNumberToDurationFn1 = (name: string, unit: DurationUnit) =>
   maker.make({
     name,
     examples: [`Duration.${name}(5)`],
@@ -35,14 +36,17 @@ const makeNumberToDurationFn1 = (name: string, num: number) =>
         const dist = t instanceof BaseDist ? t : new PointMass(t);
         return vDuration(
           unpackDistResult(
-            SDurationDist.fromMs(dist).multiply(new PointMass(num), environment)
+            SDurationDist.fromMs(dist).multiply(
+              new PointMass(Duration.toUnitConversionFactor("ms", unit)),
+              environment
+            )
           )
         );
       }),
     ],
   });
 
-const makeNumberToDurationFn2 = (name: string, num: number) =>
+const makeNumberToDurationFn2 = (name: string, unit: DurationUnit) =>
   maker.make({
     name,
     examples: [`Duration.${name}(5)`],
@@ -52,7 +56,9 @@ const makeNumberToDurationFn2 = (name: string, num: number) =>
         return vDist(
           unpackDistResult(
             t.divideBySDuration(
-              SDurationDist.fromMs(new PointMass(num)),
+              SDurationDist.fromMs(
+                new PointMass(Duration.toUnitConversionFactor("ms", unit))
+              ),
               environment
             )
           )
@@ -62,15 +68,15 @@ const makeNumberToDurationFn2 = (name: string, num: number) =>
   });
 
 export const library = [
-  makeNumberToDurationFn1("minutes", durationUnits.Minute),
-  makeNumberToDurationFn1("hours", durationUnits.Hour),
-  makeNumberToDurationFn1("days", durationUnits.Day),
-  makeNumberToDurationFn1("years", durationUnits.Year),
+  makeNumberToDurationFn1("minutes", "minute"),
+  makeNumberToDurationFn1("hours", "hour"),
+  makeNumberToDurationFn1("days", "day"),
+  makeNumberToDurationFn1("years", "year"),
 
-  makeNumberToDurationFn1("fromUnit_minutes", durationUnits.Minute),
-  makeNumberToDurationFn1("fromUnit_hours", durationUnits.Hour),
-  makeNumberToDurationFn1("fromUnit_days", durationUnits.Day),
-  makeNumberToDurationFn1("fromUnit_years", durationUnits.Year),
+  makeNumberToDurationFn1("fromUnit_minutes", "minute"),
+  makeNumberToDurationFn1("fromUnit_hours", "hour"),
+  makeNumberToDurationFn1("fromUnit_days", "day"),
+  makeNumberToDurationFn1("fromUnit_years", "year"),
   // maker.make({
   //   name: "unaryMinus",
   //   output: "Duration",
@@ -185,8 +191,8 @@ export const library = [
     ],
   }),
 
-  makeNumberToDurationFn2("toMinutes", durationUnits.Minute),
-  makeNumberToDurationFn2("toHours", durationUnits.Hour),
-  makeNumberToDurationFn2("toDays", durationUnits.Day),
-  makeNumberToDurationFn2("toYears", durationUnits.Year),
+  makeNumberToDurationFn2("toMinutes", "minute"),
+  makeNumberToDurationFn2("toHours", "hour"),
+  makeNumberToDurationFn2("toDays", "day"),
+  makeNumberToDurationFn2("toYears", "year"),
 ];
