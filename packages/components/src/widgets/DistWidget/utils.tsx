@@ -11,6 +11,8 @@ function pdfScaleHeightAdjustment(
   switch (scale.tag) {
     case "linear":
       return (_, y) => y;
+    case "date":
+      return (_, y) => y;
     case "symlog":
       return (x, y) => y * (Math.abs(x) + scale.constant);
     case "log":

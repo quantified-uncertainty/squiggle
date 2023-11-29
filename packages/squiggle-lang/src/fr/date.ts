@@ -2,113 +2,132 @@ import { REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frDate,
+  frDict,
   frNumber,
-  frTimeDuration,
+  frString,
+  frDuration,
 } from "../library/registry/frTypes.js";
-import { FnFactory } from "../library/registry/helpers.js";
-import * as DateTime from "../utility/DateTime.js";
-import { vDate, vNumber, vTimeDuration } from "../value/index.js";
+import {
+  FnFactory,
+  makeNumericComparisons,
+} from "../library/registry/helpers.js";
+import { SDate } from "../utility/SDate.js";
+import { DateRangeDomain } from "../value/domain.js";
+import { vDate, vDomain, vNumber, vDuration } from "../value/index.js";
 
 const maker = new FnFactory({
-  nameSpace: "",
+  nameSpace: "Date",
   requiresNamespace: false,
 });
 
-const makeNumberToDurationFn = (
-  name: string,
-  fn: (v: number) => DateTime.Duration
-) =>
-  maker.make({
-    name,
-    definitions: [makeDefinition([frNumber], ([t]) => vTimeDuration(fn(t)))],
-  });
-
-const makeDurationToNumberFn = (
-  name: string,
-  fn: (v: DateTime.Duration) => number
-) =>
-  maker.make({
-    name,
-    definitions: [makeDefinition([frTimeDuration], ([t]) => vNumber(fn(t)))],
-  });
+const makeYearFn = makeDefinition([frNumber], ([year]) => {
+  const result = SDate.fromYear(year);
+  if (!result.ok) {
+    throw new REOther(result.value);
+  }
+  return vDate(result.value);
+});
 
 export const library = [
-  maker.fromDefinition(
-    "makeDateFromYear",
-    makeDefinition([frNumber], ([year]) => {
-      const result = DateTime.Date.makeFromYear(year);
-      if (!result.ok) {
-        throw new REOther(result.value);
-      }
-      return vDate(result.value);
-    })
-  ),
-  maker.fromDefinition(
-    "dateFromNumber",
-    makeDefinition([frNumber], ([f]) => vDate(new Date(f)))
-  ),
-  maker.fromDefinition(
-    "toNumber",
-    makeDefinition([frDate], ([f]) => vNumber(f.getTime()))
+  ...makeNumericComparisons(
+    maker,
+    (d1, d2) => d1.smaller(d2),
+    (d1, d2) => d1.larger(d2),
+    (d1, d2) => d1.isEqual(d2),
+    frDate
   ),
   maker.make({
-    name: "subtract",
+    name: "make",
+    requiresNamespace: true,
+    examples: ['Date.make("2020-05-12")', "Date.make(2020, 5, 10)"],
+    output: "Date",
     definitions: [
-      makeDefinition([frDate, frTimeDuration], ([d1, d2]) =>
-        vDate(DateTime.Date.subtractDuration(d1, d2))
-      ),
-      makeDefinition([frDate, frDate], ([d1, d2]) => {
-        const result = DateTime.Date.subtract(d1, d2);
+      makeDefinition([frString], ([str]) => {
+        const result = SDate.fromString(str);
         if (!result.ok) {
           throw new REOther(result.value);
         }
-        return vTimeDuration(result.value);
+        return vDate(result.value);
       }),
-      makeDefinition([frTimeDuration, frTimeDuration], ([d1, d2]) =>
-        vTimeDuration(DateTime.Duration.subtract(d1, d2))
+
+      makeDefinition([frNumber, frNumber, frNumber], ([yr, month, date]) => {
+        return vDate(SDate.fromYearMonthDay(yr, month, date));
+      }),
+    ],
+  }),
+  maker.fromDefinition("fromYear", makeYearFn),
+  maker.fromDefinition("fromUnit_year", makeYearFn),
+  // same name as used in date-fns
+  maker.make({
+    name: "fromUnixTime",
+    examples: ["Date.fromUnixTime(1589222400)"],
+    requiresNamespace: true,
+    output: "Date",
+    definitions: [
+      makeDefinition([frNumber], ([num]) => {
+        return vDate(SDate.fromUnixS(num));
+      }),
+    ],
+  }),
+  maker.make({
+    name: "toUnixTime",
+    examples: ["Date.toUnixTime(Date.make(2020, 5, 12))"],
+    requiresNamespace: true,
+    output: "Number",
+    definitions: [
+      makeDefinition([frDate], ([date]) => {
+        return vNumber(date.toUnixS());
+      }),
+    ],
+  }),
+  maker.make({
+    name: "subtract",
+    examples: ["Date.make(2020, 5, 12) - Date.make(2000, 1, 1)"],
+    output: "Duration",
+    definitions: [
+      makeDefinition([frDate, frDate], ([d1, d2]) =>
+        vDuration(d1.subtract(d2))
+      ),
+    ],
+  }),
+  maker.make({
+    name: "subtract",
+    examples: ["Date.make(2020, 5, 12) - 20years"],
+    output: "Date",
+    definitions: [
+      makeDefinition([frDate, frDuration], ([d1, d2]) =>
+        vDate(d1.subtractDuration(d2))
       ),
     ],
   }),
   maker.make({
     name: "add",
+    examples: [
+      "Date.make(2020, 5, 12) + 20years",
+      "20years + Date.make(2020, 5, 12)",
+    ],
+    output: "Date",
     definitions: [
-      makeDefinition([frDate, frTimeDuration], ([d1, d2]) =>
-        vDate(DateTime.Date.addDuration(d1, d2))
+      makeDefinition([frDate, frDuration], ([d1, d2]) =>
+        vDate(d1.addDuration(d2))
       ),
-      makeDefinition([frTimeDuration, frTimeDuration], ([d1, d2]) =>
-        vTimeDuration(DateTime.Duration.add(d1, d2))
+      makeDefinition([frDuration, frDate], ([d1, d2]) =>
+        vDate(d2.addDuration(d1))
       ),
     ],
   }),
   maker.make({
-    name: "multiply",
+    name: "rangeDomain",
+    requiresNamespace: true,
+    output: "Domain",
+    examples: ["Date.rangeDomain({ min: 2000year, max: 2010year })"],
     definitions: [
-      makeDefinition([frTimeDuration, frNumber], ([d1, d2]) =>
-        vTimeDuration(DateTime.Duration.multiply(d1, d2))
+      makeDefinition(
+        [frDict(["min", frDate], ["max", frDate])],
+        ([{ min, max }]) => {
+          return vDomain(new DateRangeDomain(min, max));
+        }
       ),
     ],
   }),
-  maker.make({
-    name: "divide",
-    definitions: [
-      makeDefinition([frTimeDuration, frNumber], ([d1, d2]) =>
-        vTimeDuration(DateTime.Duration.divide(d1, d2))
-      ),
-      makeDefinition([frTimeDuration, frTimeDuration], ([d1, d2]) =>
-        vNumber(d1 / d2)
-      ),
-    ],
-  }),
-  makeNumberToDurationFn("minutes", DateTime.Duration.fromMinutes),
-  makeNumberToDurationFn("fromUnit_minutes", DateTime.Duration.fromMinutes),
-  makeNumberToDurationFn("hours", DateTime.Duration.fromHours),
-  makeNumberToDurationFn("fromUnit_hours", DateTime.Duration.fromHours),
-  makeNumberToDurationFn("days", DateTime.Duration.fromDays),
-  makeNumberToDurationFn("fromUnit_days", DateTime.Duration.fromDays),
-  makeNumberToDurationFn("years", DateTime.Duration.fromYears),
-  makeNumberToDurationFn("fromUnit_years", DateTime.Duration.fromYears),
-  makeDurationToNumberFn("toMinutes", DateTime.Duration.toMinutes),
-  makeDurationToNumberFn("toHours", DateTime.Duration.toHours),
-  makeDurationToNumberFn("toDays", DateTime.Duration.toDays),
-  makeDurationToNumberFn("toYears", DateTime.Duration.toYears),
 ];

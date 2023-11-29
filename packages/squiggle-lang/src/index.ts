@@ -11,6 +11,7 @@ import {
   SqLambdaValue,
   SqNumberValue,
   SqStringValue,
+  SqDateValue,
   type SqValue,
 } from "./public/SqValue/index.js"; // TODO - reexport other values too
 
@@ -34,7 +35,11 @@ export {
   SqSymbolicDistribution,
   type SqDistribution,
 } from "./public/SqValue/SqDistribution/index.js";
-export { type SqDomain } from "./public/SqValue/SqDomain.js";
+export {
+  type SqDomain,
+  SqNumericRangeDomain,
+  SqDateRangeDomain,
+} from "./public/SqValue/SqDomain.js";
 export { SqLambda, type SqLambdaParameter } from "./public/SqValue/SqLambda.js";
 export { SqDictValue } from "./public/SqValue/index.js";
 export {
@@ -53,17 +58,21 @@ export {
   SqLogScale,
   SqPowerScale,
   SqSymlogScale,
+  SqDateScale,
   type SqScale,
 } from "./public/SqValue/SqScale.js";
 export { type PathItem, SqValuePath } from "./public/SqValuePath.js";
 export { parse } from "./public/parse.js";
 export { fmap as resultMap, type result } from "./utility/result.js";
 
+export { SDate } from "./utility/SDate.js";
+export { SDuration } from "./utility/SDuration.js";
 export { type LocationRange as SqLocation } from "peggy";
 export { defaultEnv as defaultEnvironment } from "./dist/env.js";
 export {
   SqLambdaValue,
   SqNumberValue,
+  SqDateValue,
   SqProject,
   SqStringValue,
   type Env,

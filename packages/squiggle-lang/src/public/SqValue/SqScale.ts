@@ -1,3 +1,4 @@
+import { SDate } from "../../utility/SDate.js";
 import {
   CommonScaleArgs,
   SCALE_POWER_DEFAULT_CONSTANT,
@@ -5,11 +6,14 @@ import {
   Scale,
   vScale,
 } from "../../value/index.js";
+import { SqDateValue, SqNumberValue, SqValue } from "./index.js";
 
 export const wrapScale = (value: Scale): SqScale => {
   switch (value.type) {
     case "linear":
       return SqLinearScale.create(value);
+    case "date":
+      return SqDateScale.create(value);
     case "log":
       return SqLogScale.create(value);
     case "symlog":
@@ -42,6 +46,9 @@ abstract class SqAbstractScale<T extends Scale["type"]> {
   }
   get title() {
     return this._value.title;
+  }
+  numberToValue(v: number): SqValue {
+    return SqNumberValue.create(v);
   }
 }
 
@@ -104,5 +111,21 @@ export class SqPowerScale extends SqAbstractScale<"power"> {
     return this._exponent;
   }
 }
+export class SqDateScale extends SqAbstractScale<"date"> {
+  tag = "date" as const;
 
-export type SqScale = SqLinearScale | SqLogScale | SqSymlogScale | SqPowerScale;
+  static create(args: CommonScaleArgs = {}) {
+    return new SqDateScale({ type: "date", ...args });
+  }
+
+  override numberToValue(v: number) {
+    return SqDateValue.create(SDate.fromMs(v));
+  }
+}
+
+export type SqScale =
+  | SqLinearScale
+  | SqLogScale
+  | SqSymlogScale
+  | SqPowerScale
+  | SqDateScale;
