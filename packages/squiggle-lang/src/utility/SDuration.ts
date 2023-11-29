@@ -37,6 +37,10 @@ export class SDurationNumber {
     return this.toDuration().toGreatestUnit();
   }
 
+  unitToConversionFactor(unit: DurationUnit): number {
+    return Duration.toUnitConversionFactor("ms", unit);
+  }
+
   toString(precision = 2): string {
     return this.toDuration().toGreatestUnit().toString(precision);
   }

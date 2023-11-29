@@ -10,32 +10,6 @@ import { generateDistributionPlotSettings } from "../components/PlaygroundSettin
 import { DistributionsChart } from "./DistWidget/DistributionsChart.js";
 import { NumberShower } from "../index.js";
 
-export const durationUnits = {
-  Second: 1000,
-  Minute: 60 * 1000,
-  Hour: 60 * 60 * 1000,
-  Day: 24 * 60 * 60 * 1000,
-  Year: 24 * 60 * 60 * 1000 * 365.25,
-} as const;
-
-function toUnit(ms: number): { value: number; name: string } {
-  const units: [number, string][] = [
-    [durationUnits.Year, "year"],
-    [durationUnits.Day, "day"],
-    [durationUnits.Hour, "hour"],
-    [durationUnits.Minute, "minute"],
-    [durationUnits.Second, "second"],
-  ];
-
-  for (const [unitValue, unitName] of units) {
-    if (Math.abs(ms) >= unitValue) {
-      return { value: unitValue, name: unitName };
-    }
-  }
-
-  return { value: 1, name: "ms" };
-}
-
 const env: Env = {
   sampleCount: 1000,
   xyPointLength: 1000,
@@ -70,8 +44,10 @@ widgetRegistry.register("Duration", {
     const high = value.toDist().inv(env, 0.9);
     if (high.ok) {
       const unit = SDurationNumber.fromMs(high.value).toGreatestUnit();
-      const newDist = value.divideyByConstant(unit.value, env);
-      // const unitString =
+      const conversionFactor = SDurationNumber.fromMs(
+        high.value
+      ).unitToConversionFactor(unit.unit);
+      const newDist = value.divideyByConstant(conversionFactor, env);
       const plot = SqDistributionsPlot.create({
         distribution: newDist.toDist(),
         ...generateDistributionPlotSettings(settings.distributionChartSettings),
