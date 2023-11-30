@@ -2,6 +2,10 @@ type AcceptReusableGroupInviteTokenResult {
   membership: UserGroupMembership!
 }
 
+type AdminRebuildSearchIndexResult {
+  ok: Boolean!
+}
+
 type AdminUpdateModelVersionResult {
   model: Model!
 }
@@ -221,6 +225,9 @@ type MoveModelResult {
 type Mutation {
   acceptReusableGroupInviteToken(input: MutationAcceptReusableGroupInviteTokenInput!): MutationAcceptReusableGroupInviteTokenResult!
 
+  """Admin-only query for rebuilding the search index"""
+  adminRebuildSearchIndex: MutationAdminRebuildSearchIndexResult!
+
   """Admin-only query for upgrading model versions"""
   adminUpdateModelVersion(input: MutationAdminUpdateModelVersionInput!): MutationAdminUpdateModelVersionResult!
   buildRelativeValuesCache(input: MutationBuildRelativeValuesCacheInput!): MutationBuildRelativeValuesCacheResult!
@@ -261,6 +268,8 @@ input MutationAcceptReusableGroupInviteTokenInput {
 }
 
 union MutationAcceptReusableGroupInviteTokenResult = AcceptReusableGroupInviteTokenResult | BaseError
+
+union MutationAdminRebuildSearchIndexResult = AdminRebuildSearchIndexResult | BaseError
 
 input MutationAdminUpdateModelVersionInput {
   modelId: String!
@@ -476,6 +485,7 @@ type Query {
   relativeValuesDefinition(input: QueryRelativeValuesDefinitionInput!): QueryRelativeValuesDefinitionResult!
   relativeValuesDefinitions(after: String, before: String, first: Int, input: RelativeValuesDefinitionsQueryInput, last: Int): RelativeValuesDefinitionConnection!
   runSquiggle(code: String!): SquiggleOutput!
+  search(after: String, before: String, first: Int, last: Int, text: String!): QuerySearchConnection!
   userByUsername(username: String!): QueryUserByUsernameResult!
   users(after: String, before: String, first: Int, input: UsersQueryInput, last: Int): QueryUsersConnection!
 }
@@ -495,6 +505,16 @@ input QueryRelativeValuesDefinitionInput {
 }
 
 union QueryRelativeValuesDefinitionResult = BaseError | NotFoundError | RelativeValuesDefinition
+
+type QuerySearchConnection {
+  edges: [QuerySearchConnectionEdge!]!
+  pageInfo: PageInfo!
+}
+
+type QuerySearchConnectionEdge {
+  cursor: String!
+  node: Searchable!
+}
 
 union QueryUserByUsernameResult = BaseError | NotFoundError | User
 
@@ -593,6 +613,13 @@ type RelativeValuesPairCache implements Node {
   resultJSON: String!
   secondItem: String!
 }
+
+type Searchable implements Node {
+  id: ID!
+  object: SearchableObject!
+}
+
+union SearchableObject = Group | Model | RelativeValuesDefinition | User
 
 type SquiggleErrorOutput implements SquiggleOutput {
   errorString: String!

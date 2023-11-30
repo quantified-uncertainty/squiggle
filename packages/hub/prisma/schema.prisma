@@ -3,7 +3,7 @@
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["postgresqlExtensions"]
+  previewFeatures = ["postgresqlExtensions", "fullTextSearch"]
 }
 
 generator pothos {
@@ -73,6 +73,8 @@ model User {
   // Users don't initially have an Owner entry, but are prompted to pick a slug and create one.
   asOwner Owner?  @relation(fields: [ownerId], references: [id])
   ownerId String? @unique
+
+  searchable Searchable?
 }
 
 model VerificationToken {
@@ -96,6 +98,8 @@ model Group {
   ownerId String @unique
 
   reusableInviteToken String?
+
+  searchable Searchable?
 }
 
 model Owner {
@@ -189,6 +193,8 @@ model Model {
   currentRevision   ModelRevision? @relation("CurrentRevision", fields: [currentRevisionId], references: [id])
   currentRevisionId String?        @unique
 
+  searchable Searchable?
+
   @@unique([slug, ownerId])
   @@index([createdAt])
   @@index([ownerId])
@@ -263,6 +269,7 @@ model RelativeValuesDefinition {
   revisions RelativeValuesDefinitionRevision[]
 
   modelExports RelativeValuesExport[]
+  searchable   Searchable?
 
   @@unique([slug, ownerId])
   @@index([createdAt])
@@ -324,4 +331,20 @@ model RelativeValuesPairCache {
   result Json?
 
   @@index([exportId])
+}
+
+model Searchable {
+  id String @id @default(cuid())
+
+  model   Model?  @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  modelId String? @unique
+
+  definition   RelativeValuesDefinition? @relation(fields: [definitionId], references: [id], onDelete: Cascade)
+  definitionId String?                   @unique
+
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String? @unique
+
+  group   Group?  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId String? @unique
 }
