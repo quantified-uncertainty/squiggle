@@ -37,7 +37,7 @@
     "d3": "^7.8.5",
     "date-fns": "^2.30.0",
     "graphql": "^16.8.1",
-    "graphql-yoga": "^5.0.0",
+    "graphql-yoga": "^5.0.1",
     "immutable": "^4.3.4",
     "invariant": "^2.2.4",
     "lodash": "^4.17.21",
