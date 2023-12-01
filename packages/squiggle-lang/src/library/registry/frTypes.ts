@@ -67,6 +67,17 @@ export const frDistOrNumber: FRType<BaseDist | number> = {
   pack: (v) => (typeof v === "number" ? vNumber(v) : vDist(v)),
   getName: () => "distribution|number",
 };
+export const frPointMassDistOrNumber: FRType<number> = {
+  unpack: (v) => {
+    if (v.type === "Dist" && v.value.min() === v.value.max()) {
+      return v.value.min();
+    } else {
+      return undefined;
+    }
+  },
+  pack: (v) => (typeof v === "number" ? vNumber(v) : vDist(v)),
+  getName: () => "pointMassDistribution",
+};
 export const frNumberOrString: FRType<string | number> = {
   unpack: (v) =>
     v.type === "String" ? v.value : v.type === "Number" ? v.value : undefined,

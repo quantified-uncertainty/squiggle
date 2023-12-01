@@ -4,13 +4,11 @@ import { frDuration, frDistOrNumber } from "../library/registry/frTypes.js";
 import {
   FnFactory,
   parseDistFromDistOrNumber,
-  twoVarSample,
 } from "../library/registry/helpers.js";
-import * as SymbolicDist from "../dist/SymbolicDist.js";
 import { SDurationDist } from "../utility/SDuration.js";
-import { vDuration, vDist, vDate } from "../value/index.js";
+import { vDuration, vDist } from "../value/index.js";
 import { result } from "../index.js";
-import { DistError, argumentError } from "../dist/DistError.js";
+import { DistError } from "../dist/DistError.js";
 import { REDistributionError } from "../errors/messages.js";
 import { BaseDist } from "../dist/BaseDist.js";
 import { Duration, DurationUnit } from "../utility/durationUnit.js";
@@ -77,45 +75,14 @@ export const library = [
   makeNumberToDurationFn1("fromUnit_hours", "hour"),
   makeNumberToDurationFn1("fromUnit_days", "day"),
   makeNumberToDurationFn1("fromUnit_years", "year"),
-  // maker.make({
-  //   name: "unaryMinus",
-  //   output: "Duration",
-  //   examples: ["-5minutes"],
-  //   definitions: [
-  //     makeDefinition([frDuration], ([d]) => vDuration(d.multiply(-1))),
-  //   ],
-  // }),
   maker.make({
-    name: "to",
-    output: "Date",
+    name: "unaryMinus",
+    output: "Duration",
+    examples: ["-5minutes"],
     definitions: [
-      makeDefinition([frDuration, frDuration], ([v1, v2], { environment }) => {
-        const foo = twoVarSample(
-          v1.toMs(),
-          v2.toMs(),
-          environment,
-          (low, high) => {
-            if (low >= high) {
-              throw new REDistributionError(
-                argumentError("Low value must be less than high value")
-              );
-            } else if (low <= 0 || high <= 0) {
-              throw new REDistributionError(
-                argumentError(
-                  `The "to" function only accepts paramaters above 0. It's a shorthand for lognormal({p5:min, p95:max}), which is only valid with positive entries for then minimum and maximum. If you would like to use a normal distribution, which accepts values under 0, you can use it like this: normal({p5:${low}, p95:${high}}).`
-                )
-              );
-            }
-            return SymbolicDist.Lognormal.fromCredibleInterval({
-              low,
-              high,
-              probability: 0.9,
-            });
-          }
-        );
-        // re
-        return vDuration(SDurationDist.fromMs(foo));
-      }),
+      makeDefinition([frDuration], ([d], { environment }) =>
+        vDuration(unpackDistResult(d.multiply(new PointMass(-1), environment)))
+      ),
     ],
   }),
   maker.make({
