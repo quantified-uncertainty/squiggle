@@ -417,8 +417,8 @@ importers:
         specifier: ^18.2.34
         version: 18.2.34
       '@types/react-relay':
-        specifier: ^16.0.0
-        version: 16.0.0
+        specifier: ^16.0.4
+        version: 16.0.4
       '@types/relay-runtime':
         specifier: ^14.1.15
         version: 14.1.15
@@ -7344,8 +7344,8 @@ packages:
       '@types/react': 18.2.34
     dev: true
 
-  /@types/react-relay@16.0.0:
-    resolution: {integrity: sha512-oaKLjC/cD7oTC4YVR0cOya/a/fqWJewrjNq3Nk6wJFGbUBd+2TMFCc0BEHewobpSH/YqZONiLpdJ1uRk+W3M3g==}
+  /@types/react-relay@16.0.4:
+    resolution: {integrity: sha512-z9TpDl3fCX6ZbRLZPaI/II05yHNc6irVDRpYVF74T2F0O+YtXg0IxYHwzPqvPCAJ64XP5K2YXgE1P/ZhQQ8Ydw==}
     dependencies:
       '@types/react': 18.2.34
       '@types/relay-runtime': 14.1.15
