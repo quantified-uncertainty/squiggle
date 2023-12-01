@@ -50,7 +50,7 @@
     "react-hook-form": "^7.47.0",
     "react-select": "^5.7.7",
     "react-textarea-autosize": "8.5.3",
-    "react-use": "^17.4.0"
+    "react-use": "^17.4.1"
   },
   "devDependencies": {
     "@storybook/addon-docs": "^7.5.2",
