@@ -69,7 +69,7 @@
     "@types/jest": "^29.5.7",
     "@types/lodash": "^4.14.200",
     "@types/pako": "^2.0.2",
-    "@types/react": "^18.2.34",
+    "@types/react": "^18.2.39",
     "@types/react-relay": "^16.0.0",
     "@types/relay-runtime": "^14.1.15",
     "babel-plugin-relay": "^16.0.0",
