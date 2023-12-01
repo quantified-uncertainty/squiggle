@@ -32,7 +32,7 @@
     "@types/pako": "^2.0.2",
     "@types/react": "^18.2.34",
     "autoprefixer": "^10.4.16",
-    "eslint": "^8.52.0",
+    "eslint": "^8.54.0",
     "eslint-config-next": "^14.0.1",
     "glob": "^10.3.10",
     "postcss": "^8.4.31",
