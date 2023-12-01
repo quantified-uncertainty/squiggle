@@ -203,8 +203,8 @@ importers:
         specifier: ^18.2.14
         version: 18.2.14
       '@types/react-resizable':
-        specifier: ^3.0.6
-        version: 3.0.6
+        specifier: ^3.0.7
+        version: 3.0.7
       '@typescript-eslint/eslint-plugin':
         specifier: ^6.9.1
         version: 6.9.1(@typescript-eslint/parser@6.9.1)(eslint@8.52.0)(typescript@5.2.2)
@@ -7354,8 +7354,8 @@ packages:
       '@types/relay-runtime': 14.1.15
     dev: true
 
-  /@types/react-resizable@3.0.6:
-    resolution: {integrity: sha512-7BHYsFJkkmkG0v7uIub8+aVrqw6jYibpsChrrMQLp1LMV/Yyb3f4gB82kjRpN4QPXy3tWPtZ/oUVeNHbs5BusA==}
+  /@types/react-resizable@3.0.7:
+    resolution: {integrity: sha512-V4N7/xDUME+cxKya/A73MmFrHofTupVdE45boRxeA8HL4Q5pJh3AuG0FWCEy2GB84unIMSRISyEAS/GHWum9EQ==}
     dependencies:
       '@types/react': 18.2.34
     dev: true
