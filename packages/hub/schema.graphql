@@ -485,7 +485,7 @@ type Query {
   relativeValuesDefinition(input: QueryRelativeValuesDefinitionInput!): QueryRelativeValuesDefinitionResult!
   relativeValuesDefinitions(after: String, before: String, first: Int, input: RelativeValuesDefinitionsQueryInput, last: Int): RelativeValuesDefinitionConnection!
   runSquiggle(code: String!): SquiggleOutput!
-  search(after: String, before: String, first: Int, last: Int, text: String!): QuerySearchConnection!
+  search(after: String, before: String, first: Int, last: Int, text: String!): QuerySearchResult!
   userByUsername(username: String!): QueryUserByUsernameResult!
   users(after: String, before: String, first: Int, input: UsersQueryInput, last: Int): QueryUsersConnection!
 }
@@ -515,6 +515,8 @@ type QuerySearchConnectionEdge {
   cursor: String!
   node: Searchable!
 }
+
+union QuerySearchResult = BaseError | QuerySearchConnection
 
 union QueryUserByUsernameResult = BaseError | NotFoundError | User
 

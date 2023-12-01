@@ -11,7 +11,6 @@ import {
   DropdownMenu,
   DropdownMenuAsyncActionItem,
   DropdownMenuHeader,
-  DropdownMenuSeparator,
   PlusIcon,
   SignOutIcon,
   UserCircleIcon,
@@ -23,6 +22,7 @@ import { SQUIGGLE_DOCS_URL } from "@/lib/common";
 import { aboutRoute, newModelRoute } from "@/routes";
 import { DesktopUserControls } from "./DesktopUserControls";
 import { DropdownWithArrow } from "./DropdownWithArrow";
+import { GlobalSearch } from "../../GlobalSearch";
 import { MyGroupsMenu } from "./MyGroupsMenu";
 import { MenuLinkModeProps, PageMenuLink } from "./PageMenuLink";
 import { UserControlsMenu } from "./UserControlsMenu";
@@ -78,6 +78,7 @@ const DesktopMenu: FC<MenuProps> = ({ queryRef }) => {
 
   return (
     <div className="flex gap-6 items-baseline">
+      <GlobalSearch />
       <AboutMenuLink mode="desktop" />
       <DocsMenuLink mode="desktop" />
       {session ? (

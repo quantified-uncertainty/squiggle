@@ -32,16 +32,16 @@ const SearchableObject = builder.unionType("SearchableObject", {
 
 export const Searchable = builder.prismaNode("Searchable", {
   id: { field: "id" },
-  include: {
-    // TODO: queryFromInfo, https://github.com/hayes/pothos/discussions/656#discussioncomment-4823928
-    model: true,
-    definition: true,
-    user: true,
-    group: true,
-  },
   fields: (t) => ({
     object: t.field({
       type: SearchableObject,
+      select: {
+        // TODO: queryFromInfo, https://github.com/hayes/pothos/discussions/656#discussioncomment-4823928
+        model: true,
+        definition: true,
+        user: true,
+        group: true,
+      },
       resolve: (object) => {
         switch (true) {
           case !!object.model:
