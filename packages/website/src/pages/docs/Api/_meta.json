@@ -1,15 +1,19 @@
 {
   "BuiltIn": "Built In",
-  "Dictionary": "Dictionary",
+  "Dict": "Dictionary",
   "Dist": "Distribution",
-  "DistSampleSet": "Sample Set Distribution",
-  "DistPointSet": "Point Set Distribution",
+  "Sym": "Symbolic Distribution",
+  "SampleSet": "Sample Set Distribution",
+  "PointSet": "Point Set Distribution",
   "List": "List",
   "Math": "Math",
   "Number": "Number",
   "Plot": "Plot",
+  "Scale": "Scale",
   "String": "String",
   "Table": "Table",
   "Calculator": "Calculator",
+  "Input": "Input",
+  "RelativeValues": "Relative Values",
   "Danger": "Danger"
 }

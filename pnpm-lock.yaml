@@ -199,6 +199,9 @@ importers:
       '@types/react':
         specifier: ^18.2.34
         version: 18.2.34
+      '@types/react-dom':
+        specifier: ^18.2.14
+        version: 18.2.14
       '@types/react-resizable':
         specifier: ^3.0.6
         version: 3.0.6

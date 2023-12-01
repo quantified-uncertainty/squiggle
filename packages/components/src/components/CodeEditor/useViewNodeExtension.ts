@@ -1,6 +1,8 @@
 import { EditorView, keymap } from "@codemirror/view";
 import { useCallback } from "react";
+
 import { SqProject, SqValuePath } from "@quri/squiggle-lang";
+
 import { useReactiveExtension } from "./codemirrorHooks.js";
 
 export function useViewNodeExtension(
