@@ -226,7 +226,7 @@ export const library = [
     name: "reverse",
     output: "Array",
     requiresNamespace: false,
-    examples: [`List.reverse([1,4,5])`],
+    examples: [`List.reverse([1,4,5]) // [5,4,1]`],
     definitions: [
       makeDefinition([frArray(frAny)], ([array]) =>
         vArray([...array].reverse())

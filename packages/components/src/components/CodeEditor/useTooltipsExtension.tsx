@@ -4,6 +4,7 @@ import { FC, PropsWithChildren, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 
 import { getFunctionDocumentation } from "@quri/squiggle-lang";
+import { SQUIGGLE_DOCS_URL } from "../../lib/constants.js";
 
 type Hover = NonNullable<ReturnType<typeof getFunctionDocumentation>>;
 
@@ -29,7 +30,7 @@ const HoverTooltip: FC<{ hover: Hover; view: EditorView }> = ({
         <div className="flex flex-nowrap items-end justify-between gap-2 py-0.5">
           <a
             // TODO - move domain to constants
-            href={`https://www.squiggle-language.com/docs/Api/${hover.nameSpace}#${hover.name}`}
+            href={`${SQUIGGLE_DOCS_URL}/${hover.nameSpace}#${hover.name}`}
             className="text-blue-500 hover:underline text-sm leading-none"
           >
             {fullName}
