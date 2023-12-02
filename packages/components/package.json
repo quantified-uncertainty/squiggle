@@ -20,7 +20,7 @@
     "@floating-ui/react": "^0.26.1",
     "@heroicons/react": "^1.0.6",
     "@hookform/resolvers": "^3.3.2",
-    "@lezer/common": "^1.1.0",
+    "@lezer/common": "^1.1.1",
     "@quri/prettier-plugin-squiggle": "workspace:*",
     "@quri/squiggle-lang": "workspace:*",
     "@quri/ui": "workspace:*",
