@@ -423,8 +423,8 @@ importers:
         specifier: ^16.0.4
         version: 16.0.4
       '@types/relay-runtime':
-        specifier: ^14.1.15
-        version: 14.1.15
+        specifier: ^14.1.19
+        version: 14.1.19
       babel-plugin-relay:
         specifier: ^16.0.0
         version: 16.0.0
@@ -7364,7 +7364,7 @@ packages:
     resolution: {integrity: sha512-z9TpDl3fCX6ZbRLZPaI/II05yHNc6irVDRpYVF74T2F0O+YtXg0IxYHwzPqvPCAJ64XP5K2YXgE1P/ZhQQ8Ydw==}
     dependencies:
       '@types/react': 18.2.41
-      '@types/relay-runtime': 14.1.15
+      '@types/relay-runtime': 14.1.19
     dev: true
 
   /@types/react-resizable@3.0.7:
@@ -7386,8 +7386,8 @@ packages:
       '@types/scheduler': 0.16.5
       csstype: 3.1.2
 
-  /@types/relay-runtime@14.1.15:
-    resolution: {integrity: sha512-ag5HMUtDG5kiR5Gje4he4+vQLZaYwg7UeboK1dcH30Qq5FyCZPthOPMPYsz4CeIwiDuvjY8IjGbd1vr3qqPPZw==}
+  /@types/relay-runtime@14.1.19:
+    resolution: {integrity: sha512-j7JlgOGqpEJUjB4/xJ3tktb0eERj036fF1cdBFJ4ykzvANVCIPylJxxYK9Wi7V07qOmcGYB7DhI5R6k6LorZfQ==}
     dev: true
 
   /@types/resolve@1.20.4:
