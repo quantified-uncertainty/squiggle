@@ -21,7 +21,7 @@
     "@babel/preset-typescript": "^7.23.2",
     "@types/jest": "^29.5.10",
     "jest": "^29.7.0",
-    "typescript": "^5.2.2"
+    "typescript": "^5.3.2"
   },
   "files": [
     "dist",
