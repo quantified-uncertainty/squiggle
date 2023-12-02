@@ -636,8 +636,8 @@ importers:
         specifier: ^7.48.2
         version: 7.48.2(react@18.2.0)
       react-select:
-        specifier: ^5.7.7
-        version: 5.7.7(@types/react@18.2.41)(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^5.8.0
+        version: 5.8.0(@types/react@18.2.41)(react-dom@18.2.0)(react@18.2.0)
       react-textarea-autosize:
         specifier: 8.5.3
         version: 8.5.3(@types/react@18.2.41)(react@18.2.0)
@@ -5005,7 +5005,7 @@ packages:
       react-colorful: 5.6.1(react-dom@18.2.0)(react@18.2.0)
       react-dom: 18.2.0(react@18.2.0)
       react-hook-form: 7.48.2(react@18.2.0)
-      react-select: 5.7.7(@types/react@18.2.41)(react-dom@18.2.0)(react@18.2.0)
+      react-select: 5.8.0(@types/react@18.2.41)(react-dom@18.2.0)(react@18.2.0)
       react-textarea-autosize: 8.5.2(@types/react@18.2.41)(react@18.2.0)
       react-use: 17.4.0(react-dom@18.2.0)(react@18.2.0)
     transitivePeerDependencies:
@@ -5026,7 +5026,7 @@ packages:
       react-colorful: 5.6.1(react-dom@18.2.0)(react@18.2.0)
       react-dom: 18.2.0(react@18.2.0)
       react-hook-form: 7.48.2(react@18.2.0)
-      react-select: 5.7.7(@types/react@18.2.41)(react-dom@18.2.0)(react@18.2.0)
+      react-select: 5.8.0(@types/react@18.2.41)(react-dom@18.2.0)(react@18.2.0)
       react-textarea-autosize: 8.5.3(@types/react@18.2.41)(react@18.2.0)
       react-use: 17.4.0(react-dom@18.2.0)(react@18.2.0)
     transitivePeerDependencies:
@@ -16543,8 +16543,8 @@ packages:
       - react-dom
     dev: false
 
-  /react-select@5.7.7(@types/react@18.2.41)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-HhashZZJDRlfF/AKj0a0Lnfs3sRdw/46VJIRd8IbB9/Ovr74+ZIwkAdSBjSPXsFMG+u72c5xShqwLSKIJllzqw==}
+  /react-select@5.8.0(@types/react@18.2.41)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-TfjLDo58XrhP6VG5M/Mi56Us0Yt8X7xD6cDybC7yoRMUNm7BGO7qk8J0TLQOua/prb8vUOtsfnXZwfm30HGsAA==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
