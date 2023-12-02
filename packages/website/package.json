@@ -29,7 +29,7 @@
   "devDependencies": {
     "@quri/squiggle-textmate-grammar": "workspace:*",
     "@tailwindcss/forms": "^0.5.6",
-    "@types/pako": "^2.0.2",
+    "@types/pako": "^2.0.3",
     "@types/react": "^18.2.34",
     "autoprefixer": "^10.4.16",
     "eslint": "^8.52.0",
