@@ -14,7 +14,7 @@
     "@codemirror/language": "^6.9.2",
     "@codemirror/lint": "^6.4.2",
     "@codemirror/search": "^6.5.5",
-    "@codemirror/state": "^6.3.1",
+    "@codemirror/state": "^6.3.2",
     "@codemirror/theme-one-dark": "^6.1.2",
     "@codemirror/view": "^6.21.4",
     "@floating-ui/react": "^0.26.1",
