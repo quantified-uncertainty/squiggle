@@ -88,7 +88,9 @@ export class Registry {
       requiresNamespace: fn.requiresNamespace,
       description: fn.description,
       examples: fn.examples,
-      signatures: fn.definitions.map(fnDefinitionToString),
+      signatures: fn.definitions
+        .filter((d) => !!d.isUsed)
+        .map(fnDefinitionToString),
     };
   }
 

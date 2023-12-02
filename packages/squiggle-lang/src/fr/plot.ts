@@ -73,7 +73,7 @@ function extractDomainFromOneArgFunction(fn: Lambda): VDomain | undefined {
   const counts = fn.parameterCounts();
   if (!counts.includes(1)) {
     throw new REOther(
-      `Plots only work with functions that have one parameter. This function only supports ${fn.parameterCountString()} parameters.`
+      `Unreachable: extractDomainFromOneArgFunction() called with function that doesn't have exactly one parameter.`
     );
   }
 

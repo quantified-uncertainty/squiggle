@@ -1,5 +1,8 @@
 import { REAmbiguous, REArgumentError, REOther } from "../errors/messages.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
+import {
+  makeDefinition,
+  makeAmbiguousDefinition,
+} from "../library/registry/fnDefinition.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
 import {
   frAny,
@@ -150,9 +153,10 @@ export const library = [
       `List.make(2, {|f| f+1})`,
     ],
     definitions: [
-      makeDefinition([frNumber, frLambdaNand([0, 1])], frAny, (_) => {
-        throw new REAmbiguous("Call with either 0 or 1 arguments, not both");
-      }),
+      makeAmbiguousDefinition(
+        [frNumber, frLambdaNand([2, 3])],
+        "Call with either 0 or 1 arguments, not both."
+      ),
       makeDefinition(
         [frNumber, frLambdaTyped([], frGeneric("A"))],
         frArray(frGeneric("A")),
@@ -258,12 +262,9 @@ export const library = [
       "List.map([1,4,5], {|x,i| x+i+1})",
     ],
     definitions: [
-      makeDefinition(
+      makeAmbiguousDefinition(
         [frNumber, frLambdaNand([1, 2])],
-        frAny,
-        ([number, lambda]) => {
-          throw new REAmbiguous("Call with either 1 or 2 arguments, not both.");
-        }
+        "Call with either 1 or 2 arguments, not both."
       ),
       makeDefinition(
         [
@@ -433,12 +434,9 @@ export const library = [
       "Applies `f` to each element of `arr`. The function `f` has two main paramaters, an accumulator and the next value from the array. It can also accept an optional third `index` parameter.",
     examples: [`List.reduce([1,4,5], 2, {|acc, el| acc+el})`],
     definitions: [
-      makeDefinition(
+      makeAmbiguousDefinition(
         [frNumber, frLambdaNand([2, 3])],
-        frAny,
-        ([number, lambda]) => {
-          throw new REAmbiguous("Call with either 2 or 3 arguments, not both");
-        }
+        "Call with either 2 or 3 arguments, not both."
       ),
       makeDefinition(
         [
