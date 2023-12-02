@@ -39,7 +39,8 @@ function mixtureWithDefaultWeights(distributions: BaseDist[], env: Env) {
 const singleArrayDef = makeDefinition(
   [frArray(frDistOrNumber)],
   ([ar], { environment }) =>
-    mixtureWithDefaultWeights(ar.map(parseDistFromDistOrNumber), environment)
+    mixtureWithDefaultWeights(ar.map(parseDistFromDistOrNumber), environment),
+  frDist
 );
 
 const twoArraysDef = makeDefinition(
@@ -57,7 +58,8 @@ const twoArraysDef = makeDefinition(
       weights,
       environment
     );
-  }
+  },
+  frDist
 );
 
 const twoToFiveDistsWithWeightsDefs = [
@@ -129,7 +131,8 @@ const oneToFiveDistsDefs = Array.from({ length: 5 }, (_, i) => {
       mixtureWithDefaultWeights(
         args.map(parseDistFromDistOrNumber),
         environment
-      )
+      ),
+    frDist
   );
 });
 

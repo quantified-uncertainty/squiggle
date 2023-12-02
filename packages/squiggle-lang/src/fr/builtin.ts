@@ -66,9 +66,13 @@ export const library = [
         },
         frString
       ),
-      makeDefinition([frArray(frAny), frArray(frAny)], ([a, b]) => {
-        return vArray([...a, ...b]);
-      }),
+      makeDefinition(
+        [frArray(frAny), frArray(frAny)],
+        ([a, b]) => {
+          return vArray([...a, ...b]);
+        },
+        frArray(frAny)
+      ),
       makeDefinition(
         [frString, frAny],
         ([a, b]) => {

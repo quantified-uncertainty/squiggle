@@ -183,10 +183,14 @@ export const library: FRFunction[] = [
     requiresNamespace: false,
     examples: ["pointMass(0.5)"],
     definitions: [
-      makeDefinition([frNumber], ([v]) => {
-        const result = SymbolicDist.PointMass.make(v);
-        return symDistResultToValue(result);
-      }),
+      makeDefinition(
+        [frNumber],
+        ([v]) => {
+          const result = SymbolicDist.PointMass.make(v);
+          return symDistResultToValue(result);
+        },
+        frDistSymbolic
+      ),
     ],
   }),
   maker.make({

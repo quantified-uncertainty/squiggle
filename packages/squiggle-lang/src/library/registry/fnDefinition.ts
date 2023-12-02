@@ -15,7 +15,7 @@ export function makeDefinition<const T extends any[]>(
   // [...] wrapper is important, see also: https://stackoverflow.com/a/63891197
   inputs: [...{ [K in keyof T]: FRType<T[K]> }],
   run: (args: T, context: ReducerContext) => Value,
-  output?: FRType<any>
+  output: FRType<any>
 ): FnDefinition {
   return {
     inputs,

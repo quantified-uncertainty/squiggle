@@ -6,6 +6,7 @@ import {
   frNumber,
   frString,
   frDuration,
+  frDomain,
 } from "../library/registry/frTypes.js";
 import {
   FnFactory,
@@ -20,13 +21,17 @@ const maker = new FnFactory({
   requiresNamespace: false,
 });
 
-const makeYearFn = makeDefinition([frNumber], ([year]) => {
-  const result = SDate.fromYear(year);
-  if (!result.ok) {
-    throw new REOther(result.value);
-  }
-  return vDate(result.value);
-});
+const makeYearFn = makeDefinition(
+  [frNumber],
+  ([year]) => {
+    const result = SDate.fromYear(year);
+    if (!result.ok) {
+      throw new REOther(result.value);
+    }
+    return vDate(result.value);
+  },
+  frDate
+);
 
 export const library = [
   ...makeNumericComparisons(
@@ -150,7 +155,8 @@ export const library = [
         [frDict(["min", frDate], ["max", frDate])],
         ([{ min, max }]) => {
           return vDomain(new DateRangeDomain(min, max));
-        }
+        },
+        frDomain
       ),
     ],
   }),

@@ -7,6 +7,7 @@ import {
   frOptional,
   frLambdaTyped,
   frNumber,
+  frPlot,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { makeSquiggleDefinition } from "../library/registry/squiggleDefinition.js";
@@ -35,14 +36,18 @@ export const library = [
   })`,
     ],
     definitions: [
-      makeDefinition([relativeValuesShape], ([{ ids, fn, title }]) => {
-        return vPlot({
-          type: "relativeValues",
-          fn,
-          ids,
-          title: title ?? undefined,
-        });
-      }),
+      makeDefinition(
+        [relativeValuesShape],
+        ([{ ids, fn, title }]) => {
+          return vPlot({
+            type: "relativeValues",
+            fn,
+            ids,
+            title: title ?? undefined,
+          });
+        },
+        frPlot
+      ),
     ],
   }),
 ];

@@ -8,6 +8,7 @@ import {
   frInput,
   frBool,
   frNumber,
+  frCalculator,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { vCalculator } from "../value/index.js";
@@ -49,7 +50,8 @@ export const library = [
           } else {
             return calc;
           }
-        }
+        },
+        frCalculator
       ),
     ],
   }),

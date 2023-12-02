@@ -6,9 +6,11 @@ import { Lambda } from "../../reducer/lambda.js";
 import { SDate } from "../../utility/SDate.js";
 import { SDuration } from "../../utility/SDuration.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
+import { Domain } from "../../value/domain.js";
 import {
   Scale,
   Value,
+  Plot,
   vArray,
   vBool,
   vDate,
@@ -21,6 +23,12 @@ import {
   vDuration,
   vInput,
   Input,
+  TableChart,
+  vTableChart,
+  Calculator,
+  vCalculator,
+  vPlot,
+  vDomain,
 } from "../../value/index.js";
 
 /*
@@ -41,6 +49,16 @@ export const frNumber: FRType<number> = {
   unpack: (v: Value) => (v.type === "Number" ? v.value : undefined),
   pack: (v) => vNumber(v),
   getName: () => "number",
+};
+export const frTableChart: FRType<TableChart> = {
+  unpack: (v: Value) => (v.type === "TableChart" ? v.value : undefined),
+  pack: (v) => vTableChart(v),
+  getName: () => "table",
+};
+export const frCalculator: FRType<Calculator> = {
+  unpack: (v: Value) => (v.type === "Calculator" ? v.value : undefined),
+  pack: (v) => vCalculator(v),
+  getName: () => "calculator",
 };
 export const frString: FRType<string> = {
   unpack: (v: Value) => (v.type === "String" ? v.value : undefined),
@@ -144,6 +162,17 @@ export const frInput: FRType<Input> = {
   unpack: (v) => (v.type === "Input" ? v.value : undefined),
   pack: (v) => vInput(v),
   getName: () => "input",
+};
+export const frPlot: FRType<Plot> = {
+  unpack: (v) => (v.type === "Plot" ? v.value : undefined),
+  pack: (v) => vPlot(v),
+  getName: () => "plot",
+};
+
+export const frDomain: FRType<Domain> = {
+  unpack: (v) => (v.type === "Domain" ? v.value : undefined),
+  pack: (v) => vDomain(v),
+  getName: () => "domain",
 };
 
 export const frArray = <T>(itemType: FRType<T>): FRType<T[]> => {

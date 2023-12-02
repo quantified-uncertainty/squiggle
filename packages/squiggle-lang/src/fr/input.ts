@@ -4,6 +4,7 @@ import {
   frArray,
   frBool,
   frDict,
+  frInput,
   frNumberOrString,
   frOptional,
   frString,
@@ -49,7 +50,8 @@ export const library = [
             description: vars.description || undefined,
             default: convertInputDefault(vars.default),
           });
-        }
+        },
+        frInput
       ),
     ],
   }),
@@ -73,7 +75,8 @@ export const library = [
             description: vars.description || undefined,
             default: convertInputDefault(vars.default),
           });
-        }
+        },
+        frInput
       ),
     ],
   }),
@@ -97,7 +100,8 @@ export const library = [
             description: vars.description || undefined,
             default: vars.default ?? undefined,
           });
-        }
+        },
+        frInput
       ),
     ],
   }),
@@ -141,7 +145,8 @@ export const library = [
             options: vars.options,
             default: vars.default ?? undefined,
           });
-        }
+        },
+        frInput
       ),
     ],
   }),

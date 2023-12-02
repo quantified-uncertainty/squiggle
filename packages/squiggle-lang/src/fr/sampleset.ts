@@ -94,9 +94,13 @@ const baseLibrary = [
     examples: [`SampleSet.toList(SampleSet.fromDist(normal(5,2)))`],
     output: "Array",
     definitions: [
-      makeDefinition([frSampleSet], ([dist]) => {
-        return vArray(dist.samples.map(vNumber));
-      }),
+      makeDefinition(
+        [frSampleSet],
+        ([dist]) => {
+          return vArray(dist.samples.map(vNumber));
+        },
+        frArray(frNumber)
+      ),
     ],
   }),
   maker.make({

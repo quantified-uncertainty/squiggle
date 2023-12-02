@@ -17,6 +17,7 @@ import {
   frAny,
   frArray,
   frDist,
+  frDistPointset,
   frGeneric,
   frLambda,
   frNumber,
@@ -86,8 +87,11 @@ const combinatoricsLibrary: FRFunction[] = [
     output: "Number",
     examples: [`Danger.binomial(1, 20, 0.5)`],
     definitions: [
-      makeDefinition([frNumber, frNumber, frNumber], ([n, k, p]) =>
-        vNumber(choose(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k))
+      makeDefinition(
+        [frNumber, frNumber, frNumber],
+        ([n, k, p]) =>
+          vNumber(choose(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k)),
+        frNumber
       ),
     ],
   }),
@@ -192,7 +196,8 @@ const integrationLibrary: FRFunction[] = [
             numIntegrationPoints,
             context
           );
-        }
+        },
+        frAny
       ),
     ],
   }),
@@ -349,7 +354,8 @@ const diminishingReturnsLibrary = [
           return vArray(
             optimalAllocationEndAccumulator.optimalAllocations.map(vNumber)
           );
-        }
+        },
+        frAny
       ),
     ],
   }),
@@ -380,7 +386,8 @@ const mapYLibrary: FRFunction[] = [
               eps,
               base,
             })
-          )
+          ),
+        frDistPointset
       ),
     ],
   }),

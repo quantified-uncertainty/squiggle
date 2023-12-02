@@ -1,6 +1,11 @@
 import { REArgumentError } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frArray, frDict, frNumber } from "../library/registry/frTypes.js";
+import {
+  frArray,
+  frDict,
+  frDomain,
+  frNumber,
+} from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
 import { NumericRangeDomain } from "../value/domain.js";
@@ -121,9 +126,13 @@ export const library = [
     examples: [`min([3,5,2])`],
     definitions: [
       makeNumberArrayToNumberDefinition((arr) => Math.min(...arr)),
-      makeDefinition([frNumber, frNumber], ([a, b]) => {
-        return vNumber(Math.min(a, b));
-      }),
+      makeDefinition(
+        [frNumber, frNumber],
+        ([a, b]) => {
+          return vNumber(Math.min(a, b));
+        },
+        frNumber
+      ),
     ],
   }),
   maker.make({
@@ -132,9 +141,13 @@ export const library = [
     examples: [`max([3,5,2])`],
     definitions: [
       makeNumberArrayToNumberDefinition((arr) => Math.max(...arr)),
-      makeDefinition([frNumber, frNumber], ([a, b]) => {
-        return vNumber(Math.max(a, b));
-      }),
+      makeDefinition(
+        [frNumber, frNumber],
+        ([a, b]) => {
+          return vNumber(Math.max(a, b));
+        },
+        frNumber
+      ),
     ],
   }),
   maker.make({
@@ -150,10 +163,14 @@ export const library = [
     output: "Number",
     examples: [`quantile([1,5,10,40,2,4], 0.3)`],
     definitions: [
-      makeDefinition([frArray(frNumber), frNumber], ([arr, i]) => {
-        assertIsNotEmpty(arr);
-        return vNumber(E_A_Floats.quantile(arr, i));
-      }),
+      makeDefinition(
+        [frArray(frNumber), frNumber],
+        ([arr, i]) => {
+          assertIsNotEmpty(arr);
+          return vNumber(E_A_Floats.quantile(arr, i));
+        },
+        frNumber
+      ),
     ],
   }),
   maker.make({
@@ -161,10 +178,14 @@ export const library = [
     output: "Number",
     examples: [`median([1,5,10,40,2,4])`],
     definitions: [
-      makeDefinition([frArray(frNumber)], ([arr]) => {
-        assertIsNotEmpty(arr);
-        return vNumber(E_A_Floats.quantile(arr, 0.5));
-      }),
+      makeDefinition(
+        [frArray(frNumber)],
+        ([arr]) => {
+          assertIsNotEmpty(arr);
+          return vNumber(E_A_Floats.quantile(arr, 0.5));
+        },
+        frNumber
+      ),
     ],
   }),
   maker.make({
@@ -238,7 +259,8 @@ export const library = [
         [frDict(["min", frNumber], ["max", frNumber])],
         ([{ min, max }]) => {
           return vDomain(new NumericRangeDomain(min, max));
-        }
+        },
+        frDomain
       ),
     ],
   }),

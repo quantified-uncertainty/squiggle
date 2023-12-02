@@ -117,9 +117,13 @@ export const library: FRFunction[] = [
   maker.d2n({ name: "integralSum", fn: (d) => d.integralSum() }),
   maker.fromDefinition(
     "sampleN",
-    makeDefinition([frDist, frNumber], ([dist, n]) => {
-      return vArray(dist.sampleN(n | 0).map(vNumber));
-    })
+    makeDefinition(
+      [frDist, frNumber],
+      ([dist, n]) => {
+        return vArray(dist.sampleN(n | 0).map(vNumber));
+      },
+      frArray(frNumber)
+    )
   ),
   maker.d2d({
     name: "exp",

@@ -9,6 +9,7 @@ import {
   frLambdaTyped,
   frNumber,
   frOptional,
+  frPlot,
   frSampleSet,
   frScale,
   frString,
@@ -137,7 +138,8 @@ export const library = [
             title: title ?? undefined,
             showSummary: showSummary ?? true,
           });
-        }
+        },
+        frPlot
       ),
     ],
   }),
@@ -171,7 +173,8 @@ export const library = [
             title: title ?? undefined,
             showSummary: showSummary ?? true,
           });
-        }
+        },
+        frPlot
       ),
     ],
   }),
@@ -203,7 +206,8 @@ export const library = [
             points: points ?? undefined,
             title: title ?? undefined,
           });
-        }
+        },
+        frPlot
       ),
     ],
   }),
@@ -237,7 +241,8 @@ export const library = [
             title: title ?? undefined,
             points: points ?? undefined,
           });
-        }
+        },
+        frPlot
       ),
     ],
   }),
@@ -269,7 +274,8 @@ export const library = [
             yScale: yScale ?? defaultScale,
             title: title ?? undefined,
           });
-        }
+        },
+        frPlot
       ),
     ],
   }),

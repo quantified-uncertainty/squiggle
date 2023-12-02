@@ -6,6 +6,7 @@ import {
   frLambda,
   frOptional,
   frString,
+  frTableChart,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { vTableChart } from "../value/index.js";
@@ -41,7 +42,8 @@ export const library = [
               name: name ?? undefined,
             })),
           });
-        }
+        },
+        frTableChart
       ),
     ],
   }),

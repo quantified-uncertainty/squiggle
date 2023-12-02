@@ -17,7 +17,7 @@ import {
   doNumberLambdaCall,
   repackDistResult,
 } from "../library/registry/helpers.js";
-import { REDistributionError, REExpectedType } from "../errors/messages.js";
+import { REDistributionError } from "../errors/messages.js";
 import { Ok } from "../utility/result.js";
 import { vDist, vNumber } from "../value/index.js";
 import { PointMass } from "../dist/SymbolicDist.js";
