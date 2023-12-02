@@ -191,8 +191,8 @@ importers:
         specifier: ^29.5.10
         version: 29.5.10
       '@types/lodash':
-        specifier: ^4.14.200
-        version: 4.14.200
+        specifier: ^4.14.202
+        version: 4.14.202
       '@types/node':
         specifier: ^20.10.1
         version: 20.10.1
@@ -411,8 +411,8 @@ importers:
         specifier: ^29.5.10
         version: 29.5.10
       '@types/lodash':
-        specifier: ^4.14.200
-        version: 4.14.200
+        specifier: ^4.14.202
+        version: 4.14.202
       '@types/pako':
         specifier: ^2.0.3
         version: 2.0.3
@@ -502,8 +502,8 @@ importers:
         specifier: ^7.20.4
         version: 7.20.4
       '@types/lodash':
-        specifier: ^4.14.200
-        version: 4.14.200
+        specifier: ^4.14.202
+        version: 4.14.202
       '@types/node':
         specifier: ^20.10.1
         version: 20.10.1
@@ -567,8 +567,8 @@ importers:
         specifier: ^29.5.10
         version: 29.5.10
       '@types/lodash':
-        specifier: ^4.14.200
-        version: 4.14.200
+        specifier: ^4.14.202
+        version: 4.14.202
       '@types/node':
         specifier: ^20.10.1
         version: 20.10.1
@@ -6176,7 +6176,7 @@ packages:
       '@storybook/preview-api': 7.5.2
       '@storybook/theming': 7.5.2(react-dom@18.2.0)(react@18.2.0)
       '@storybook/types': 7.5.2
-      '@types/lodash': 4.14.200
+      '@types/lodash': 4.14.202
       color-convert: 2.0.1
       dequal: 2.0.3
       lodash: 4.17.21
@@ -7263,8 +7263,8 @@ packages:
     resolution: {integrity: sha512-CeVMX9EhVUW8MWnei05eIRks4D5Wscw/W9Byz1s3PA+yJvcdvq9SaDjiUKvRvEgjpdTyJMjQA43ae4KTwsvOPg==}
     dev: false
 
-  /@types/lodash@4.14.200:
-    resolution: {integrity: sha512-YI/M/4HRImtNf3pJgbF+W6FrXovqj+T+/HpENLTooK9PnkacBsDpeP3IpHab40CClUfhNmdM2WTNP2sa2dni5Q==}
+  /@types/lodash@4.14.202:
+    resolution: {integrity: sha512-OvlIYQK9tNneDlS0VN54LLd5uiPCBOp7gS5Z0f1mjoJYBrtStzgmJBxONW3U6OZqdtNzZPmn9BS/7WI7BFFcFQ==}
     dev: true
 
   /@types/mdast@3.0.14:
