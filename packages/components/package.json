@@ -60,7 +60,7 @@
     "@types/jest": "^29.5.10",
     "@types/lodash": "^4.14.200",
     "@types/node": "^20.10.1",
-    "@types/react": "^18.2.34",
+    "@types/react": "^18.2.41",
     "@types/react-dom": "^18.2.14",
     "@types/react-resizable": "^3.0.7",
     "@typescript-eslint/eslint-plugin": "^6.9.1",
