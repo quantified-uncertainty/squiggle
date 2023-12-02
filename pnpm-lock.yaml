@@ -405,8 +405,8 @@ importers:
         specifier: ^7.4.3
         version: 7.4.3
       '@types/invariant':
-        specifier: ^2.2.36
-        version: 2.2.36
+        specifier: ^2.2.37
+        version: 2.2.37
       '@types/jest':
         specifier: ^29.5.10
         version: 29.5.10
@@ -6215,7 +6215,7 @@ packages:
       '@storybook/preview-api': 7.6.3
       '@storybook/theming': 7.6.3(react-dom@18.2.0)(react@18.2.0)
       '@storybook/types': 7.6.3
-      '@types/lodash': 4.14.200
+      '@types/lodash': 4.14.202
       color-convert: 2.0.1
       dequal: 2.0.3
       lodash: 4.17.21
@@ -7387,8 +7387,8 @@ packages:
     resolution: {integrity: sha512-lPG6KlZs88gef6aD85z3HNkztpj7w2R7HmR3gygjfXCQmsLloWNARFkMuzKiiY8FGdh1XDpgBdrSf4aKDiA7Kg==}
     dev: true
 
-  /@types/invariant@2.2.36:
-    resolution: {integrity: sha512-WdRjvN2y1PiXCmCIEBbe+eoHGylBQa2oIBGEQsfKMJzqff7fwv2OhyXcGQn70+dWII6a5W8Y3ipYwVnhf+IXig==}
+  /@types/invariant@2.2.37:
+    resolution: {integrity: sha512-IwpIMieE55oGWiXkQPSBY1nw1nFs6bsKXTFskNY8sdS17K24vyEBRQZEwlRS7ZmXCWnJcQtbxWzly+cODWGs2A==}
     dev: true
 
   /@types/istanbul-lib-coverage@2.0.4:
