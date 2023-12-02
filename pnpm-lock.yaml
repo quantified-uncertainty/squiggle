@@ -61,8 +61,8 @@ importers:
         specifier: ^6.4.2
         version: 6.4.2
       '@codemirror/search':
-        specifier: ^6.5.4
-        version: 6.5.4
+        specifier: ^6.5.5
+        version: 6.5.5
       '@codemirror/state':
         specifier: ^6.3.1
         version: 6.3.1
@@ -2751,8 +2751,8 @@ packages:
       crelt: 1.0.5
     dev: false
 
-  /@codemirror/search@6.5.4:
-    resolution: {integrity: sha512-YoTrvjv9e8EbPs58opjZKyJ3ewFrVSUzQ/4WXlULQLSDDr1nGPJ67mMXFNNVYwdFhybzhrzrtqgHmtpJwIF+8g==}
+  /@codemirror/search@6.5.5:
+    resolution: {integrity: sha512-PIEN3Ke1buPod2EHbJsoQwlbpkz30qGZKcnmH1eihq9+bPQx8gelauUwLYaY4vBOuBAuEhmpDLii4rj/uO0yMA==}
     dependencies:
       '@codemirror/state': 6.3.1
       '@codemirror/view': 6.21.4
@@ -5056,7 +5056,7 @@ packages:
       '@codemirror/commands': 6.3.0
       '@codemirror/language': 6.9.2
       '@codemirror/lint': 6.4.2
-      '@codemirror/search': 6.5.4
+      '@codemirror/search': 6.5.5
       '@codemirror/state': 6.3.1
       '@codemirror/theme-one-dark': 6.1.2
       '@codemirror/view': 6.21.4
@@ -5100,7 +5100,7 @@ packages:
       '@codemirror/commands': 6.3.0
       '@codemirror/language': 6.9.2
       '@codemirror/lint': 6.4.2
-      '@codemirror/search': 6.5.4
+      '@codemirror/search': 6.5.5
       '@codemirror/state': 6.3.1
       '@codemirror/theme-one-dark': 6.1.2
       '@codemirror/view': 6.21.4
@@ -9140,7 +9140,7 @@ packages:
       '@codemirror/commands': 6.3.0
       '@codemirror/language': 6.9.2
       '@codemirror/lint': 6.4.2
-      '@codemirror/search': 6.5.4
+      '@codemirror/search': 6.5.5
       '@codemirror/state': 6.3.1
       '@codemirror/view': 6.21.4
     transitivePeerDependencies:
