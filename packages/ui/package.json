@@ -47,7 +47,7 @@
     "clsx": "^2.0.0",
     "framer-motion": "^10.16.12",
     "react-colorful": "^5.6.1",
-    "react-hook-form": "^7.47.0",
+    "react-hook-form": "^7.48.2",
     "react-select": "^5.7.7",
     "react-textarea-autosize": "8.5.3",
     "react-use": "^17.4.0"
