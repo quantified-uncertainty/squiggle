@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@next-auth/prisma-adapter": "^1.0.7",
-    "@pothos/core": "^3.38.0",
+    "@pothos/core": "^3.39.0",
     "@pothos/plugin-errors": "^3.11.1",
     "@pothos/plugin-prisma": "^3.61.0",
     "@pothos/plugin-relay": "^3.44.0",
