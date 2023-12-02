@@ -12,7 +12,7 @@
   "devDependencies": {
     "@babel/plugin-syntax-typescript": "^7.23.3",
     "@changesets/get-github-info": "^0.6.0",
-    "@changesets/types": "^5.2.1",
+    "@changesets/types": "^6.0.0",
     "@types/babel__core": "^7.20.4",
     "@types/lodash": "^4.14.202",
     "@types/node": "^20.10.1",
