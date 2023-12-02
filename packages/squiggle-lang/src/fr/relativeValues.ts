@@ -36,18 +36,14 @@ export const library = [
   })`,
     ],
     definitions: [
-      makeDefinition(
-        [relativeValuesShape],
-        ([{ ids, fn, title }]) => {
-          return vPlot({
-            type: "relativeValues",
-            fn,
-            ids,
-            title: title ?? undefined,
-          });
-        },
-        frPlot
-      ),
+      makeDefinition([relativeValuesShape], frPlot, ([{ ids, fn, title }]) => {
+        return vPlot({
+          type: "relativeValues",
+          fn,
+          ids,
+          title: title ?? undefined,
+        });
+      }),
     ],
   }),
 ];

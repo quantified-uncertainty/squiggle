@@ -21,17 +21,13 @@ const maker = new FnFactory({
   requiresNamespace: false,
 });
 
-const makeYearFn = makeDefinition(
-  [frNumber],
-  ([year]) => {
-    const result = SDate.fromYear(year);
-    if (!result.ok) {
-      throw new REOther(result.value);
-    }
-    return vDate(result.value);
-  },
-  frDate
-);
+const makeYearFn = makeDefinition([frNumber], frDate, ([year]) => {
+  const result = SDate.fromYear(year);
+  if (!result.ok) {
+    throw new REOther(result.value);
+  }
+  return vDate(result.value);
+});
 
 export const library = [
   ...makeNumericComparisons(
@@ -47,24 +43,20 @@ export const library = [
     examples: ['Date.make("2020-05-12")', "Date.make(2020, 5, 10)"],
     output: "Date",
     definitions: [
-      makeDefinition(
-        [frString],
-        ([str]) => {
-          const result = SDate.fromString(str);
-          if (!result.ok) {
-            throw new REOther(result.value);
-          }
-          return vDate(result.value);
-        },
-        frDate
-      ),
+      makeDefinition([frString], frDate, ([str]) => {
+        const result = SDate.fromString(str);
+        if (!result.ok) {
+          throw new REOther(result.value);
+        }
+        return vDate(result.value);
+      }),
 
       makeDefinition(
         [frNumber, frNumber, frNumber],
+        frDate,
         ([yr, month, date]) => {
           return vDate(SDate.fromYearMonthDay(yr, month, date));
-        },
-        frDate
+        }
       ),
     ],
   }),
@@ -77,13 +69,9 @@ export const library = [
     requiresNamespace: true,
     output: "Date",
     definitions: [
-      makeDefinition(
-        [frNumber],
-        ([num]) => {
-          return vDate(SDate.fromUnixS(num));
-        },
-        frDate
-      ),
+      makeDefinition([frNumber], frDate, ([num]) => {
+        return vDate(SDate.fromUnixS(num));
+      }),
     ],
   }),
   maker.make({
@@ -92,13 +80,9 @@ export const library = [
     requiresNamespace: true,
     output: "Number",
     definitions: [
-      makeDefinition(
-        [frDate],
-        ([date]) => {
-          return vNumber(date.toUnixS());
-        },
-        frNumber
-      ),
+      makeDefinition([frDate], frNumber, ([date]) => {
+        return vNumber(date.toUnixS());
+      }),
     ],
   }),
   maker.make({
@@ -106,10 +90,8 @@ export const library = [
     examples: ["Date.make(2020, 5, 12) - Date.make(2000, 1, 1)"],
     output: "Duration",
     definitions: [
-      makeDefinition(
-        [frDate, frDate],
-        ([d1, d2]) => vDuration(d1.subtract(d2)),
-        frDuration
+      makeDefinition([frDate, frDate], frDuration, ([d1, d2]) =>
+        vDuration(d1.subtract(d2))
       ),
     ],
   }),
@@ -118,10 +100,8 @@ export const library = [
     examples: ["Date.make(2020, 5, 12) - 20years"],
     output: "Date",
     definitions: [
-      makeDefinition(
-        [frDate, frDuration],
-        ([d1, d2]) => vDate(d1.subtractDuration(d2)),
-        frDate
+      makeDefinition([frDate, frDuration], frDate, ([d1, d2]) =>
+        vDate(d1.subtractDuration(d2))
       ),
     ],
   }),
@@ -133,15 +113,11 @@ export const library = [
     ],
     output: "Date",
     definitions: [
-      makeDefinition(
-        [frDate, frDuration],
-        ([d1, d2]) => vDate(d1.addDuration(d2)),
-        frDate
+      makeDefinition([frDate, frDuration], frDate, ([d1, d2]) =>
+        vDate(d1.addDuration(d2))
       ),
-      makeDefinition(
-        [frDuration, frDate],
-        ([d1, d2]) => vDate(d2.addDuration(d1)),
-        frDate
+      makeDefinition([frDuration, frDate], frDate, ([d1, d2]) =>
+        vDate(d2.addDuration(d1))
       ),
     ],
   }),
@@ -153,10 +129,10 @@ export const library = [
     definitions: [
       makeDefinition(
         [frDict(["min", frDate], ["max", frDate])],
+        frDomain,
         ([{ min, max }]) => {
           return vDomain(new DateRangeDomain(min, max));
-        },
-        frDomain
+        }
       ),
     ],
   }),

@@ -18,7 +18,7 @@ const makeNumberToDurationFn = (name: string, fn: (v: number) => SDuration) =>
     examples: [`Duration.${name}(5)`],
     output: "Duration",
     definitions: [
-      makeDefinition([frNumber], ([t]) => vDuration(fn(t)), frDuration),
+      makeDefinition([frNumber], frDuration, ([t]) => vDuration(fn(t))),
     ],
   });
 
@@ -28,7 +28,7 @@ const makeDurationToNumberFn = (name: string, fn: (v: SDuration) => number) =>
     examples: [`Duration.${name}(5minutes)`],
     output: "Number",
     definitions: [
-      makeDefinition([frDuration], ([t]) => vNumber(fn(t)), frNumber),
+      makeDefinition([frDuration], frNumber, ([t]) => vNumber(fn(t))),
     ],
   });
 
@@ -49,10 +49,8 @@ export const library = [
     output: "Duration",
     examples: ["-5minutes"],
     definitions: [
-      makeDefinition(
-        [frDuration],
-        ([d]) => vDuration(d.multiply(-1)),
-        frDuration
+      makeDefinition([frDuration], frDuration, ([d]) =>
+        vDuration(d.multiply(-1))
       ),
     ],
   }),
@@ -61,10 +59,8 @@ export const library = [
     output: "Duration",
     examples: ["5minutes + 10minutes"],
     definitions: [
-      makeDefinition(
-        [frDuration, frDuration],
-        ([d1, d2]) => vDuration(d1.add(d2)),
-        frDuration
+      makeDefinition([frDuration, frDuration], frDuration, ([d1, d2]) =>
+        vDuration(d1.add(d2))
       ),
     ],
   }),
@@ -73,10 +69,8 @@ export const library = [
     output: "Duration",
     examples: ["5minutes - 10minutes"],
     definitions: [
-      makeDefinition(
-        [frDuration, frDuration],
-        ([d1, d2]) => vDuration(d1.subtract(d2)),
-        frDuration
+      makeDefinition([frDuration, frDuration], frDuration, ([d1, d2]) =>
+        vDuration(d1.subtract(d2))
       ),
     ],
   }),
@@ -85,15 +79,11 @@ export const library = [
     output: "Duration",
     examples: ["5minutes * 10", "10 * 5minutes"],
     definitions: [
-      makeDefinition(
-        [frDuration, frNumber],
-        ([d1, d2]) => vDuration(d1.multiply(d2)),
-        frDuration
+      makeDefinition([frDuration, frNumber], frDuration, ([d1, d2]) =>
+        vDuration(d1.multiply(d2))
       ),
-      makeDefinition(
-        [frNumber, frDuration],
-        ([d1, d2]) => vDuration(d2.multiply(d1)),
-        frDuration
+      makeDefinition([frNumber, frDuration], frDuration, ([d1, d2]) =>
+        vDuration(d2.multiply(d1))
       ),
     ],
   }),
@@ -102,10 +92,8 @@ export const library = [
     output: "Number",
     examples: ["5minutes / 2minutes"],
     definitions: [
-      makeDefinition(
-        [frDuration, frDuration],
-        ([d1, d2]) => vNumber(d1.divideBySDuration(d2)),
-        frDuration
+      makeDefinition([frDuration, frDuration], frDuration, ([d1, d2]) =>
+        vNumber(d1.divideBySDuration(d2))
       ),
     ],
   }),
@@ -114,10 +102,8 @@ export const library = [
     output: "Duration",
     examples: ["5minutes / 3"],
     definitions: [
-      makeDefinition(
-        [frDuration, frNumber],
-        ([d1, d2]) => vDuration(d1.divideByNumber(d2)),
-        frDuration
+      makeDefinition([frDuration, frNumber], frDuration, ([d1, d2]) =>
+        vDuration(d1.divideByNumber(d2))
       ),
     ],
   }),

@@ -60,25 +60,25 @@ const makeOperationFns = (): FRFunction[] => {
         definitions: [
           makeDefinition(
             [frDist, frNumber],
+            frDist,
             ([dist, n], { environment }) =>
               distResultToValue(
                 op(dist, new SymbolicDist.PointMass(n), { env: environment })
-              ),
-            frDist
+              )
           ),
           makeDefinition(
             [frNumber, frDist],
+            frDist,
             ([n, dist], { environment }) =>
               distResultToValue(
                 op(new SymbolicDist.PointMass(n), dist, { env: environment })
-              ),
-            frDist
+              )
           ),
           makeDefinition(
             [frDist, frDist],
+            frDist,
             ([dist1, dist2], { environment }) =>
-              distResultToValue(op(dist1, dist2, { env: environment })),
-            frDist
+              distResultToValue(op(dist1, dist2, { env: environment }))
           ),
         ],
       })
@@ -117,13 +117,9 @@ export const library: FRFunction[] = [
   maker.d2n({ name: "integralSum", fn: (d) => d.integralSum() }),
   maker.fromDefinition(
     "sampleN",
-    makeDefinition(
-      [frDist, frNumber],
-      ([dist, n]) => {
-        return vArray(dist.sampleN(n | 0).map(vNumber));
-      },
-      frArray(frNumber)
-    )
+    makeDefinition([frDist, frNumber], frArray(frNumber), ([dist, n]) => {
+      return vArray(dist.sampleN(n | 0).map(vNumber));
+    })
   ),
   maker.d2d({
     name: "exp",
@@ -181,9 +177,9 @@ export const library: FRFunction[] = [
     "truncate",
     makeDefinition(
       [frDist, frNumber, frNumber],
+      frDist,
       ([dist, left, right], { environment }) =>
-        distResultToValue(dist.truncate(left, right, { env: environment })),
-      frDist
+        distResultToValue(dist.truncate(left, right, { env: environment }))
     )
   ),
   maker.make({
@@ -191,11 +187,11 @@ export const library: FRFunction[] = [
     definitions: [
       makeDefinition(
         [frArray(frDistOrNumber)],
+        frDist,
         ([dists], { environment }) =>
           distResultToValue(
             algebraicSum(dists.map(parseDistFromDistOrNumber), environment)
-          ),
-        frDist
+          )
       ),
     ],
   }),
@@ -204,11 +200,11 @@ export const library: FRFunction[] = [
     definitions: [
       makeDefinition(
         [frArray(frDistOrNumber)],
+        frDist,
         ([dists], { environment }) =>
           distResultToValue(
             algebraicProduct(dists.map(parseDistFromDistOrNumber), environment)
-          ),
-        frDist
+          )
       ),
     ],
   }),
@@ -217,11 +213,11 @@ export const library: FRFunction[] = [
     definitions: [
       makeDefinition(
         [frArray(frDistOrNumber)],
+        frArray(frDist),
         ([dists], { environment }) =>
           distsResultToValue(
             algebraicCumSum(dists.map(parseDistFromDistOrNumber), environment)
-          ),
-        frArray(frDist)
+          )
       ),
     ],
   }),
@@ -230,11 +226,11 @@ export const library: FRFunction[] = [
     definitions: [
       makeDefinition(
         [frArray(frDistOrNumber)],
+        frArray(frDist),
         ([dists], { environment }) =>
           distsResultToValue(
             algebraicCumProd(dists.map(parseDistFromDistOrNumber), environment)
-          ),
-        frArray(frDist)
+          )
       ),
     ],
   }),
@@ -243,11 +239,11 @@ export const library: FRFunction[] = [
     definitions: [
       makeDefinition(
         [frArray(frDistOrNumber)],
+        frArray(frDist),
         ([dists], { environment }) =>
           distsResultToValue(
             algebraicDiff(dists.map(parseDistFromDistOrNumber), environment)
-          ),
-        frArray(frDist)
+          )
       ),
     ],
   }),

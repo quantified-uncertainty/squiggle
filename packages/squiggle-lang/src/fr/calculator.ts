@@ -35,6 +35,7 @@ export const library = [
             ["sampleCount", frOptional(frNumber)]
           ),
         ],
+        frCalculator,
         ([{ fn, title, description, inputs, autorun, sampleCount }]) => {
           const calc = vCalculator({
             fn,
@@ -50,8 +51,7 @@ export const library = [
           } else {
             return calc;
           }
-        },
-        frCalculator
+        }
       ),
     ],
   }),

@@ -26,28 +26,20 @@ function makeNumberArrayToNumberDefinition(
   fn: (arr: number[]) => number,
   throwIfEmpty = true
 ) {
-  return makeDefinition(
-    [frArray(frNumber)],
-    ([arr]) => {
-      throwIfEmpty && assertIsNotEmpty(arr);
-      return vNumber(fn(arr));
-    },
-    frNumber
-  );
+  return makeDefinition([frArray(frNumber)], frNumber, ([arr]) => {
+    throwIfEmpty && assertIsNotEmpty(arr);
+    return vNumber(fn(arr));
+  });
 }
 
 function makeNumberArrayToNumberArrayDefinition(
   fn: (arr: number[]) => number[],
   throwIfEmpty = true
 ) {
-  return makeDefinition(
-    [frArray(frNumber)],
-    ([arr]) => {
-      throwIfEmpty && assertIsNotEmpty(arr);
-      return vArray(fn(arr).map(vNumber));
-    },
-    frArray(frNumber)
-  );
+  return makeDefinition([frArray(frNumber)], frArray(frNumber), ([arr]) => {
+    throwIfEmpty && assertIsNotEmpty(arr);
+    return vArray(fn(arr).map(vNumber));
+  });
 }
 
 export const library = [
@@ -126,13 +118,9 @@ export const library = [
     examples: [`min([3,5,2])`],
     definitions: [
       makeNumberArrayToNumberDefinition((arr) => Math.min(...arr)),
-      makeDefinition(
-        [frNumber, frNumber],
-        ([a, b]) => {
-          return vNumber(Math.min(a, b));
-        },
-        frNumber
-      ),
+      makeDefinition([frNumber, frNumber], frNumber, ([a, b]) => {
+        return vNumber(Math.min(a, b));
+      }),
     ],
   }),
   maker.make({
@@ -141,13 +129,9 @@ export const library = [
     examples: [`max([3,5,2])`],
     definitions: [
       makeNumberArrayToNumberDefinition((arr) => Math.max(...arr)),
-      makeDefinition(
-        [frNumber, frNumber],
-        ([a, b]) => {
-          return vNumber(Math.max(a, b));
-        },
-        frNumber
-      ),
+      makeDefinition([frNumber, frNumber], frNumber, ([a, b]) => {
+        return vNumber(Math.max(a, b));
+      }),
     ],
   }),
   maker.make({
@@ -163,14 +147,10 @@ export const library = [
     output: "Number",
     examples: [`quantile([1,5,10,40,2,4], 0.3)`],
     definitions: [
-      makeDefinition(
-        [frArray(frNumber), frNumber],
-        ([arr, i]) => {
-          assertIsNotEmpty(arr);
-          return vNumber(E_A_Floats.quantile(arr, i));
-        },
-        frNumber
-      ),
+      makeDefinition([frArray(frNumber), frNumber], frNumber, ([arr, i]) => {
+        assertIsNotEmpty(arr);
+        return vNumber(E_A_Floats.quantile(arr, i));
+      }),
     ],
   }),
   maker.make({
@@ -178,14 +158,10 @@ export const library = [
     output: "Number",
     examples: [`median([1,5,10,40,2,4])`],
     definitions: [
-      makeDefinition(
-        [frArray(frNumber)],
-        ([arr]) => {
-          assertIsNotEmpty(arr);
-          return vNumber(E_A_Floats.quantile(arr, 0.5));
-        },
-        frNumber
-      ),
+      makeDefinition([frArray(frNumber)], frNumber, ([arr]) => {
+        assertIsNotEmpty(arr);
+        return vNumber(E_A_Floats.quantile(arr, 0.5));
+      }),
     ],
   }),
   maker.make({
@@ -257,10 +233,10 @@ export const library = [
     definitions: [
       makeDefinition(
         [frDict(["min", frNumber], ["max", frNumber])],
+        frDomain,
         ([{ min, max }]) => {
           return vDomain(new NumericRangeDomain(min, max));
-        },
-        frDomain
+        }
       ),
     ],
   }),

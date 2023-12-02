@@ -120,6 +120,7 @@ export const library = [
             ["showSummary", frOptional(frBool)]
           ),
         ],
+        frPlot,
         ([{ dists, xScale, yScale, title, showSummary }]) => {
           _assertYScaleNotDateScale(yScale);
 
@@ -138,8 +139,7 @@ export const library = [
             title: title ?? undefined,
             showSummary: showSummary ?? true,
           });
-        },
-        frPlot
+        }
       ),
     ],
   }),
@@ -163,6 +163,7 @@ export const library = [
             ["showSummary", frOptional(frBool)]
           ),
         ],
+        frPlot,
         ([{ dist, xScale, yScale, title, showSummary }]) => {
           _assertYScaleNotDateScale(yScale);
           return vPlot({
@@ -173,8 +174,7 @@ export const library = [
             title: title ?? undefined,
             showSummary: showSummary ?? true,
           });
-        },
-        frPlot
+        }
       ),
     ],
   }),
@@ -195,6 +195,7 @@ export const library = [
             ["points", frOptional(frNumber)]
           ),
         ],
+        frPlot,
         ([{ fn, xScale, yScale, title, points }]) => {
           _assertYScaleNotDateScale(yScale);
           const domain = extractDomainFromOneArgFunction(fn);
@@ -206,8 +207,7 @@ export const library = [
             points: points ?? undefined,
             title: title ?? undefined,
           });
-        },
-        frPlot
+        }
       ),
     ],
   }),
@@ -229,6 +229,7 @@ export const library = [
             ["points", frOptional(frNumber)]
           ),
         ],
+        frPlot,
         ([{ fn, xScale, yScale, distXScale, title, points }]) => {
           _assertYScaleNotDateScale(yScale);
           const domain = extractDomainFromOneArgFunction(fn);
@@ -241,8 +242,7 @@ export const library = [
             title: title ?? undefined,
             points: points ?? undefined,
           });
-        },
-        frPlot
+        }
       ),
     ],
   }),
@@ -264,6 +264,7 @@ export const library = [
             ["title", frOptional(frString)]
           ),
         ],
+        frPlot,
         ([{ xDist, yDist, xScale, yScale, title }]) => {
           _assertYScaleNotDateScale(yScale);
           return vPlot({
@@ -274,8 +275,7 @@ export const library = [
             yScale: yScale ?? defaultScale,
             title: title ?? undefined,
           });
-        },
-        frPlot
+        }
       ),
     ],
   }),

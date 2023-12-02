@@ -71,6 +71,7 @@ export const library = [
             ["prior", frDist]
           ),
         ],
+        frNumber,
         ([{ estimate, answer, prior }], context) => {
           if (answer instanceof BaseDist) {
             return runScoringDistAnswer(
@@ -89,11 +90,11 @@ export const library = [
           } else {
             throw new REArgumentError("Impossible type");
           }
-        },
-        frNumber
+        }
       ),
       makeDefinition(
         [frDict(["estimate", frDist], ["answer", frDistOrNumber])],
+        frNumber,
         ([{ estimate, answer }], context) => {
           if (answer instanceof BaseDist) {
             return runScoringDistAnswer(
@@ -112,8 +113,7 @@ export const library = [
           } else {
             throw new REArgumentError("Impossible type");
           }
-        },
-        frNumber
+        }
       ),
     ],
   }),
@@ -122,11 +122,8 @@ export const library = [
     output: "Number",
     examples: ["Dist.klDivergence(Sym.normal(5,2), Sym.normal(5,1.5))"],
     definitions: [
-      makeDefinition(
-        [frDist, frDist],
-        ([estimate, d], context) =>
-          runScoringDistAnswer(estimate, d, undefined, context.environment),
-        frNumber
+      makeDefinition([frDist, frDist], frNumber, ([estimate, d], context) =>
+        runScoringDistAnswer(estimate, d, undefined, context.environment)
       ),
     ],
   }),

@@ -43,6 +43,7 @@ export const library = [
             ["default", frOptional(frNumberOrString)]
           ),
         ],
+        frInput,
         ([vars]) => {
           return vInput({
             type: "text",
@@ -50,8 +51,7 @@ export const library = [
             description: vars.description || undefined,
             default: convertInputDefault(vars.default),
           });
-        },
-        frInput
+        }
       ),
     ],
   }),
@@ -68,6 +68,7 @@ export const library = [
             ["default", frOptional(frNumberOrString)]
           ),
         ],
+        frInput,
         ([vars]) => {
           return vInput({
             type: "textArea",
@@ -75,8 +76,7 @@ export const library = [
             description: vars.description || undefined,
             default: convertInputDefault(vars.default),
           });
-        },
-        frInput
+        }
       ),
     ],
   }),
@@ -93,6 +93,7 @@ export const library = [
             ["default", frOptional(frBool)]
           ),
         ],
+        frInput,
         ([vars]) => {
           return vInput({
             type: "checkbox",
@@ -100,8 +101,7 @@ export const library = [
             description: vars.description || undefined,
             default: vars.default ?? undefined,
           });
-        },
-        frInput
+        }
       ),
     ],
   }),
@@ -121,6 +121,7 @@ export const library = [
             ["default", frOptional(frString)]
           ),
         ],
+        frInput,
         ([vars]) => {
           //Throw error if options are empty, if default is not in options, or if options have duplicate
           const isEmpty = () => vars.options.length === 0;
@@ -145,8 +146,7 @@ export const library = [
             options: vars.options,
             default: vars.default ?? undefined,
           });
-        },
-        frInput
+        }
       ),
     ],
   }),

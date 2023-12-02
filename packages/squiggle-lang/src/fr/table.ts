@@ -33,6 +33,7 @@ export const library = [
             ]
           ),
         ],
+        frTableChart,
         ([{ data, title, columns }]) => {
           return vTableChart({
             data,
@@ -42,8 +43,7 @@ export const library = [
               name: name ?? undefined,
             })),
           });
-        },
-        frTableChart
+        }
       ),
     ],
   }),

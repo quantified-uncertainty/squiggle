@@ -12,17 +12,13 @@ import { frAny } from "./registry/frTypes.js";
 import { makeDefinition } from "./registry/fnDefinition.js";
 
 const definitions = [
-  makeDefinition(
-    [frAny, frAny],
-    ([obj, key]) => {
-      if ("get" in obj) {
-        return obj.get(key).clone();
-      } else {
-        throw new REOther("Trying to access key on wrong value");
-      }
-    },
-    frAny
-  ),
+  makeDefinition([frAny, frAny], frAny, ([obj, key]) => {
+    if ("get" in obj) {
+      return obj.get(key).clone();
+    } else {
+      throw new REOther("Trying to access key on wrong value");
+    }
+  }),
 ];
 
 function makeLookupLambda(): Lambda {

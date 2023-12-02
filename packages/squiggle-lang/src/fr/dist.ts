@@ -37,9 +37,9 @@ function makeCIDist<K1 extends string, K2 extends string>(
 ) {
   return makeDefinition(
     [frDict([lowKey, frNumber], [highKey, frNumber])],
+    frSampleSet,
     ([dict], { environment }) =>
-      twoVarSample(dict[lowKey], dict[highKey], environment, fn),
-    frSampleSet
+      twoVarSample(dict[lowKey], dict[highKey], environment, fn)
   );
 }
 
@@ -51,9 +51,9 @@ function makeMeanStdevDist(
 ) {
   return makeDefinition(
     [frDict(["mean", frNumber], ["stdev", frNumber])],
+    frSampleSet,
     ([{ mean, stdev }], { environment }) =>
-      twoVarSample(mean, stdev, environment, fn),
-    frSampleSet
+      twoVarSample(mean, stdev, environment, fn)
   );
 }
 
@@ -64,11 +64,9 @@ export const library: FRFunction[] = [
     requiresNamespace: true,
     examples: ["Dist.make(5)", "Dist.make(normal({p5: 4, p95: 10}))"],
     definitions: [
-      makeDefinition([frDist], ([dist]) => vDist(dist), frDist),
-      makeDefinition(
-        [frNumber],
-        ([v]) => symDistResultToValue(SymbolicDist.PointMass.make(v)),
-        frDistSymbolic
+      makeDefinition([frDist], frDist, ([dist]) => vDist(dist)),
+      makeDefinition([frNumber], frDistSymbolic, ([v]) =>
+        symDistResultToValue(SymbolicDist.PointMass.make(v))
       ),
     ],
   }),
@@ -222,14 +220,14 @@ export const library: FRFunction[] = [
     definitions: [
       makeDefinition(
         [frNumber, frNumber, frNumber],
+        frSampleSet,
         ([low, medium, high], { environment }) => {
           const result = SymbolicDist.Triangular.make({ low, medium, high });
           if (!result.ok) {
             throw new REDistributionError(otherError(result.value));
           }
           return vDist(makeSampleSet(result.value, environment));
-        },
-        frSampleSet
+        }
       ),
     ],
   }),

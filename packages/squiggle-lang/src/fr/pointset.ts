@@ -37,21 +37,14 @@ const argsToXYShape = (inputs: { x: number; y: number }[]): XYShape.XYShape => {
   return result.value;
 };
 
-const fromDist = makeDefinition(
-  [frDist],
-  ([dist], context) =>
-    repackDistResult(dist.toPointSetDist(context.environment)),
-  frDistPointset
+const fromDist = makeDefinition([frDist], frDistPointset, ([dist], context) =>
+  repackDistResult(dist.toPointSetDist(context.environment))
 );
 
-const fromNumber = makeDefinition(
-  [frNumber],
-  ([num], _) => {
-    const pointMass = new PointMass(num);
-    return repackDistResult(pointMass.toPointSetDist());
-  },
-  frDistPointset
-);
+const fromNumber = makeDefinition([frNumber], frDistPointset, ([num], _) => {
+  const pointMass = new PointMass(num);
+  return repackDistResult(pointMass.toPointSetDist());
+});
 
 export const library = [
   maker.make({
@@ -79,10 +72,10 @@ export const library = [
     definitions: [
       makeDefinition(
         [frDistPointset, frNumber],
+        frDistPointset,
         ([dist, number]) => {
           return vDist(dist.downsample(number));
-        },
-        frDistPointset
+        }
       ),
     ],
   }),
@@ -93,6 +86,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [frDistPointset, frLambdaTyped([frNumber], frNumber)],
+        frDistPointset,
         ([dist, lambda], context) => {
           return repackDistResult(
             dist.mapYResult(
@@ -101,8 +95,7 @@ export const library = [
               undefined
             )
           );
-        },
-        frDistPointset
+        }
       ),
     ],
   }),
@@ -120,6 +113,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [frArray(frDict(["x", frNumber], ["y", frNumber]))],
+        frDistPointset,
         ([arr]) => {
           return vDist(
             new PointSetDist(
@@ -128,8 +122,7 @@ export const library = [
               }).toMixed()
             )
           );
-        },
-        frDistPointset
+        }
       ),
     ],
   }),
@@ -147,6 +140,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [frArray(frDict(["x", frNumber], ["y", frNumber]))],
+        frDistPointset,
         ([arr]) => {
           return vDist(
             new PointSetDist(
@@ -155,8 +149,7 @@ export const library = [
               }).toMixed()
             )
           );
-        },
-        frDistPointset
+        }
       ),
     ],
   }),

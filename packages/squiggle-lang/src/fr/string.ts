@@ -13,25 +13,17 @@ export const library = [
     name: "make",
     output: "String",
     definitions: [
-      makeDefinition(
-        [frAny],
-        ([x]) => {
-          return vString(x.toString());
-        },
-        frString
-      ),
+      makeDefinition([frAny], frString, ([x]) => {
+        return vString(x.toString());
+      }),
     ],
   }),
   maker.make({
     name: "split",
     definitions: [
-      makeDefinition(
-        [frString, frString],
-        ([str, mark]) => {
-          return vArray(str.split(mark).map((r) => vString(r)));
-        },
-        frArray(frString)
-      ),
+      makeDefinition([frString, frString], frArray(frString), ([str, mark]) => {
+        return vArray(str.split(mark).map((r) => vString(r)));
+      }),
     ],
   }),
 ];

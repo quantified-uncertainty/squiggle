@@ -36,8 +36,8 @@ export const library = [
     definitions: [
       makeDefinition(
         [frDictWithArbitraryKeys(frGeneric("A")), frString, frGeneric("A")],
-        ([dict, key, value]) => vDict(dict.set(key, value)),
-        frDictWithArbitraryKeys(frGeneric("A"))
+        frDictWithArbitraryKeys(frGeneric("A")),
+        ([dict, key, value]) => vDict(dict.set(key, value))
       ),
     ],
   }),
@@ -48,8 +48,8 @@ export const library = [
     definitions: [
       makeDefinition(
         [frDictWithArbitraryKeys(frAny), frString],
-        ([dict, key]) => vBool(dict.has(key)),
-        frBool
+        frBool,
+        ([dict, key]) => vBool(dict.has(key))
       ),
     ],
   }),
@@ -58,10 +58,8 @@ export const library = [
     output: "Number",
     examples: [`Dict.size({a: 1, b: 2})`],
     definitions: [
-      makeDefinition(
-        [frDictWithArbitraryKeys(frAny)],
-        ([dict]) => vNumber(dict.size),
-        frNumber
+      makeDefinition([frDictWithArbitraryKeys(frAny)], frNumber, ([dict]) =>
+        vNumber(dict.size)
       ),
     ],
   }),
@@ -72,8 +70,8 @@ export const library = [
     definitions: [
       makeDefinition(
         [frDictWithArbitraryKeys(frGeneric("A")), frString],
-        ([dict, key]) => vDict(dict.delete(key)),
-        frDictWithArbitraryKeys(frGeneric("A"))
+        frDictWithArbitraryKeys(frGeneric("A")),
+        ([dict, key]) => vDict(dict.delete(key))
       ),
     ],
   }),
@@ -84,8 +82,8 @@ export const library = [
     definitions: [
       makeDefinition(
         [frDictWithArbitraryKeys(frAny), frDictWithArbitraryKeys(frAny)],
-        ([d1, d2]) => vDict(ImmutableMap([...d1.entries(), ...d2.entries()])),
-        frDictWithArbitraryKeys(frAny)
+        frDictWithArbitraryKeys(frAny),
+        ([d1, d2]) => vDict(ImmutableMap([...d1.entries(), ...d2.entries()]))
       ),
     ],
   }),
@@ -96,9 +94,9 @@ export const library = [
     definitions: [
       makeDefinition(
         [frArray(frDictWithArbitraryKeys(frAny))],
+        frDictWithArbitraryKeys(frAny),
         ([dicts]) =>
-          vDict(ImmutableMap(dicts.map((d) => [...d.entries()]).flat())),
-        frDictWithArbitraryKeys(frAny)
+          vDict(ImmutableMap(dicts.map((d) => [...d.entries()]).flat()))
       ),
     ],
   }),
@@ -109,8 +107,8 @@ export const library = [
     definitions: [
       makeDefinition(
         [frDictWithArbitraryKeys(frAny)],
-        ([d1]) => vArray([...d1.keys()].map((k) => vString(k))),
-        frArray(frString)
+        frArray(frString),
+        ([d1]) => vArray([...d1.keys()].map((k) => vString(k)))
       ),
     ],
   }),
@@ -121,8 +119,8 @@ export const library = [
     definitions: [
       makeDefinition(
         [frDictWithArbitraryKeys(frGeneric("A"))],
-        ([d1]) => vArray([...d1.values()]),
-        frArray(frGeneric("A"))
+        frArray(frGeneric("A")),
+        ([d1]) => vArray([...d1.values()])
       ),
     ],
   }),
@@ -133,9 +131,9 @@ export const library = [
     definitions: [
       makeDefinition(
         [frDictWithArbitraryKeys(frGeneric("A"))],
+        frDictWithArbitraryKeys(frGeneric("A")),
         ([dict]) =>
-          vArray([...dict.entries()].map(([k, v]) => vArray([vString(k), v]))),
-        frDictWithArbitraryKeys(frGeneric("A"))
+          vArray([...dict.entries()].map(([k, v]) => vArray([vString(k), v])))
       ),
     ],
   }),
@@ -146,8 +144,8 @@ export const library = [
     definitions: [
       makeDefinition(
         [frArray(frTuple(frString, frGeneric("A")))],
-        ([items]) => vDict(ImmutableMap(items)),
-        frDictWithArbitraryKeys(frGeneric("A"))
+        frDictWithArbitraryKeys(frGeneric("A")),
+        ([items]) => vDict(ImmutableMap(items))
       ),
     ],
   }),
@@ -161,6 +159,7 @@ export const library = [
           frDictWithArbitraryKeys(frGeneric("A")),
           frLambdaTyped([frGeneric("A")], frGeneric("B")),
         ],
+        frDictWithArbitraryKeys(frGeneric("B")),
         ([dict, lambda], context) => {
           return vDict(
             ImmutableMap(
@@ -170,8 +169,7 @@ export const library = [
               })
             )
           );
-        },
-        frDictWithArbitraryKeys(frGeneric("B"))
+        }
       ),
     ],
   }),
@@ -185,6 +183,7 @@ export const library = [
           frDictWithArbitraryKeys(frGeneric("A")),
           frLambdaTyped([frString], frString),
         ],
+        frDictWithArbitraryKeys(frGeneric("A")),
         ([dict, lambda], context) => {
           const mappedEntries: [string, Value][] = [];
           for (const [key, value] of dict.entries()) {
@@ -197,8 +196,7 @@ export const library = [
             }
           }
           return vDict(ImmutableMap(mappedEntries));
-        },
-        frDictWithArbitraryKeys(frGeneric("A"))
+        }
       ),
     ],
   }),
@@ -209,6 +207,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [frDictWithArbitraryKeys(frGeneric("A")), frArray(frString)],
+        frDictWithArbitraryKeys(frGeneric("A")),
         ([dict, keys]) => {
           const response: OrderedMap<string, Value> = OrderedMap<
             string,
@@ -222,8 +221,7 @@ export const library = [
             });
           });
           return vDict(response);
-        },
-        frDictWithArbitraryKeys(frGeneric("A"))
+        }
       ),
     ],
   }),
@@ -234,6 +232,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [frDictWithArbitraryKeys(frGeneric("A")), frArray(frString)],
+        frDictWithArbitraryKeys(frGeneric("A")),
         ([dict, keys]) => {
           const response: OrderedMap<string, Value> = dict.withMutations(
             (result) => {
@@ -245,8 +244,7 @@ export const library = [
             }
           );
           return vDict(response);
-        },
-        frDictWithArbitraryKeys(frGeneric("A"))
+        }
       ),
     ],
   }),

@@ -87,11 +87,8 @@ const combinatoricsLibrary: FRFunction[] = [
     output: "Number",
     examples: [`Danger.binomial(1, 20, 0.5)`],
     definitions: [
-      makeDefinition(
-        [frNumber, frNumber, frNumber],
-        ([n, k, p]) =>
-          vNumber(choose(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k)),
-        frNumber
+      makeDefinition([frNumber, frNumber, frNumber], frNumber, ([n, k, p]) =>
+        vNumber(choose(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k))
       ),
     ],
   }),
@@ -183,6 +180,7 @@ const integrationLibrary: FRFunction[] = [
     definitions: [
       makeDefinition(
         [frLambda, frNumber, frNumber, frNumber],
+        frAny,
         ([lambda, min, max, numIntegrationPoints], context) => {
           if (numIntegrationPoints === 0) {
             throw new REOther(
@@ -196,8 +194,7 @@ const integrationLibrary: FRFunction[] = [
             numIntegrationPoints,
             context
           );
-        },
-        frAny
+        }
       ),
     ],
   }),
@@ -215,6 +212,8 @@ const integrationLibrary: FRFunction[] = [
     definitions: [
       makeDefinition(
         [frLambda, frNumber, frNumber, frNumber],
+
+        frNumber,
         ([lambda, min, max, epsilon], context) => {
           if (epsilon === 0) {
             throw new REOther(
@@ -228,8 +227,7 @@ const integrationLibrary: FRFunction[] = [
             (max - min) / epsilon,
             context
           );
-        },
-        frNumber
+        }
       ),
     ],
   }),
@@ -255,6 +253,7 @@ const diminishingReturnsLibrary = [
     definitions: [
       makeDefinition(
         [frArray(frLambda), frNumber, frNumber],
+        frAny,
         ([lambdas, funds, approximateIncrement], context) => {
           // TODO: This is so complicated, it probably should be its own file. It might also make sense to have it work in Rescript directly, taking in a function rather than a reducer; then something else can wrap that function in the reducer/lambdas/context.
           /*
@@ -354,8 +353,7 @@ const diminishingReturnsLibrary = [
           return vArray(
             optimalAllocationEndAccumulator.optimalAllocations.map(vNumber)
           );
-        },
-        frAny
+        }
       ),
     ],
   }),
@@ -379,6 +377,8 @@ const mapYLibrary: FRFunction[] = [
     definitions: [
       makeDefinition(
         [frDist, frNumber, frNumber],
+
+        frDistPointset,
         ([dist, base, eps], { environment }) =>
           distResultToValue(
             scaleLogWithThreshold(dist, {
@@ -386,8 +386,7 @@ const mapYLibrary: FRFunction[] = [
               eps,
               base,
             })
-          ),
-        frDistPointset
+          )
       ),
     ],
   }),
@@ -396,6 +395,8 @@ const mapYLibrary: FRFunction[] = [
     definitions: [
       makeDefinition(
         [frArray(frGeneric("A")), frNumber],
+
+        frArray(frArray(frGeneric("A"))),
         ([elements, n]) => {
           if (n > elements.length) {
             throw new REArgumentError(
@@ -403,8 +404,7 @@ const mapYLibrary: FRFunction[] = [
             );
           }
           return vArray(combinations(elements, n).map((v) => vArray(v)));
-        },
-        frArray(frArray(frGeneric("A")))
+        }
       ),
     ],
   }),
@@ -413,10 +413,10 @@ const mapYLibrary: FRFunction[] = [
     definitions: [
       makeDefinition(
         [frArray(frGeneric("A"))],
+        frArray(frArray(frGeneric("A"))),
         ([elements]) => {
           return vArray(allCombinations(elements).map((v) => vArray(v)));
-        },
-        frArray(frArray(frGeneric("A")))
+        }
       ),
     ],
   }),
