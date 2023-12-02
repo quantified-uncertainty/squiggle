@@ -12,6 +12,7 @@ import { Value, vDist } from "../value/index.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
+  frDist,
   frDistOrNumber,
   frNumber,
   frTuple,
@@ -67,7 +68,8 @@ const twoToFiveDistsWithWeightsDefs = [
         [dist1, dist2].map(parseDistFromDistOrNumber),
         weights,
         environment
-      )
+      ),
+    frDist
   ),
   makeDefinition(
     [
@@ -81,7 +83,8 @@ const twoToFiveDistsWithWeightsDefs = [
         [dist1, dist2, dist3].map(parseDistFromDistOrNumber),
         weights,
         environment
-      )
+      ),
+    frDist
   ),
   makeDefinition(
     [
@@ -96,7 +99,8 @@ const twoToFiveDistsWithWeightsDefs = [
         [dist1, dist2, dist3, dist4].map(parseDistFromDistOrNumber),
         weights,
         environment
-      )
+      ),
+    frDist
   ),
   makeDefinition(
     [
@@ -112,7 +116,8 @@ const twoToFiveDistsWithWeightsDefs = [
         [dist1, dist2, dist3, dist4, dist5].map(parseDistFromDistOrNumber),
         weights,
         environment
-      )
+      ),
+    frDist
   ),
 ];
 

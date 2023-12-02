@@ -1,16 +1,16 @@
 import * as Continuous from "../PointSet/Continuous.js";
 import * as Discrete from "../PointSet/Discrete.js";
 import * as XYShape from "../XYShape.js";
-import { BaseDist } from "../dist/BaseDist.js";
 import { xyShapeDistError } from "../dist/DistError.js";
 import { PointSetDist } from "../dist/PointSetDist.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
   frDist,
-  frLambda,
   frNumber,
   frDict,
+  frDistPointset,
+  frLambdaTyped,
 } from "../library/registry/frTypes.js";
 import {
   FnFactory,
@@ -37,18 +37,11 @@ const argsToXYShape = (inputs: { x: number; y: number }[]): XYShape.XYShape => {
   return result.value;
 };
 
-function pointSetAssert(dist: BaseDist): asserts dist is PointSetDist {
-  if (dist instanceof PointSetDist) {
-    return;
-  }
-  throw new REExpectedType("PointSetDist", dist.toString());
-}
-
 const fromDist = makeDefinition(
   [frDist],
   ([dist], context) =>
     repackDistResult(dist.toPointSetDist(context.environment)),
-  frDist
+  frDistPointset
 );
 
 const fromNumber = makeDefinition(
@@ -57,7 +50,7 @@ const fromNumber = makeDefinition(
     const pointMass = new PointMass(num);
     return repackDistResult(pointMass.toPointSetDist());
   },
-  frDist
+  frDistPointset
 );
 
 export const library = [
@@ -85,12 +78,11 @@ export const library = [
     output: "Dist",
     definitions: [
       makeDefinition(
-        [frDist, frNumber],
+        [frDistPointset, frNumber],
         ([dist, number]) => {
-          pointSetAssert(dist);
           return vDist(dist.downsample(number));
         },
-        frDist
+        frDistPointset
       ),
     ],
   }),
@@ -100,9 +92,8 @@ export const library = [
     output: "Dist",
     definitions: [
       makeDefinition(
-        [frDist, frLambda],
+        [frDistPointset, frLambdaTyped([frNumber], frNumber)],
         ([dist, lambda], context) => {
-          pointSetAssert(dist);
           return repackDistResult(
             dist.mapYResult(
               (y) => Ok(doNumberLambdaCall(lambda, [vNumber(y)], context)),
@@ -111,7 +102,7 @@ export const library = [
             )
           );
         },
-        frDist
+        frDistPointset
       ),
     ],
   }),
@@ -138,7 +129,7 @@ export const library = [
             )
           );
         },
-        frDist
+        frDistPointset
       ),
     ],
   }),
@@ -165,7 +156,7 @@ export const library = [
             )
           );
         },
-        frDist
+        frDistPointset
       ),
     ],
   }),

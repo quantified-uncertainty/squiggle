@@ -2,10 +2,11 @@ import { sq } from "../index.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
-  frLambda,
   frDict,
   frString,
   frOptional,
+  frLambdaTyped,
+  frNumber,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { makeSquiggleDefinition } from "../library/registry/squiggleDefinition.js";
@@ -19,7 +20,7 @@ const maker = new FnFactory({
 
 const relativeValuesShape = frDict(
   ["ids", frArray(frString)],
-  ["fn", frLambda],
+  ["fn", frLambdaTyped([frString, frString], frArray(frNumber))],
   ["title", frOptional(frString)]
 );
 

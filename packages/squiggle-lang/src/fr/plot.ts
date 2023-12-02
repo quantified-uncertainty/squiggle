@@ -6,11 +6,10 @@ import {
   frDict,
   frDist,
   frDistOrNumber,
-  frLambda,
-  frLambdaN,
   frLambdaTyped,
   frNumber,
   frOptional,
+  frSampleSet,
   frScale,
   frString,
 } from "../library/registry/frTypes.js";
@@ -253,8 +252,8 @@ export const library = [
       makeDefinition(
         [
           frDict(
-            ["xDist", frDist],
-            ["yDist", frDist],
+            ["xDist", frSampleSet],
+            ["yDist", frSampleSet],
             ["xScale", frOptional(frScale)],
             ["yScale", frOptional(frScale)],
             ["title", frOptional(frString)]

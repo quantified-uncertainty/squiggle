@@ -3,7 +3,13 @@ import * as SymbolicDist from "../dist/SymbolicDist.js";
 import { REDistributionError } from "../errors/messages.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frDist, frNumber, frDict } from "../library/registry/frTypes.js";
+import {
+  frDist,
+  frNumber,
+  frDict,
+  frSampleSet,
+  frDistSymbolic,
+} from "../library/registry/frTypes.js";
 import {
   FnFactory,
   makeOneArgDist,
@@ -33,7 +39,7 @@ function makeCIDist<K1 extends string, K2 extends string>(
     [frDict([lowKey, frNumber], [highKey, frNumber])],
     ([dict], { environment }) =>
       twoVarSample(dict[lowKey], dict[highKey], environment, fn),
-    frDist
+    frSampleSet
   );
 }
 
@@ -47,7 +53,7 @@ function makeMeanStdevDist(
     [frDict(["mean", frNumber], ["stdev", frNumber])],
     ([{ mean, stdev }], { environment }) =>
       twoVarSample(mean, stdev, environment, fn),
-    frDist
+    frSampleSet
   );
 }
 
@@ -62,7 +68,7 @@ export const library: FRFunction[] = [
       makeDefinition(
         [frNumber],
         ([v]) => symDistResultToValue(SymbolicDist.PointMass.make(v)),
-        frDist
+        frDistSymbolic
       ),
     ],
   }),
@@ -223,7 +229,7 @@ export const library: FRFunction[] = [
           }
           return vDist(makeSampleSet(result.value, environment));
         },
-        frDist
+        frSampleSet
       ),
     ],
   }),

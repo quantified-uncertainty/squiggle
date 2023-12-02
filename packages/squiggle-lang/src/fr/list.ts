@@ -3,8 +3,6 @@ import { makeDefinition } from "../library/registry/fnDefinition.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
 import {
   frAny,
-  frDist,
-  frLambdaN,
   frArray,
   frNumber,
   frString,
@@ -13,6 +11,7 @@ import {
   frLambdaTyped,
   frGeneric,
   frBool,
+  frSampleSet,
 } from "../library/registry/frTypes.js";
 import { FnFactory, doBinaryLambdaCall } from "../library/registry/helpers.js";
 import {
@@ -24,7 +23,6 @@ import {
   uniq,
   uniqBy,
 } from "../value/index.js";
-import { sampleSetAssert } from "./sampleset.js";
 import { unzip, zip } from "../utility/E_A.js";
 import { Lambda } from "../reducer/lambda.js";
 import { ReducerContext } from "../reducer/context.js";
@@ -186,9 +184,8 @@ export const library = [
         frArray(frGeneric("A"))
       ),
       makeDefinition(
-        [frDist],
+        [frSampleSet],
         ([dist]) => {
-          sampleSetAssert(dist);
           return vArray(dist.samples.map(vNumber));
         },
         frArray(frNumber)
@@ -508,9 +505,15 @@ export const library = [
     ],
     definitions: [
       makeDefinition(
-        [frArray(frAny), frAny, frLambdaN(2), frLambdaN(1)],
+        [
+          frArray(frGeneric("B")),
+          frGeneric("A"),
+          frLambdaTyped([frGeneric("A"), frGeneric("B")], frGeneric("A")),
+          frLambdaTyped([frGeneric("A")], frBool),
+        ],
         ([array, initialValue, step, condition], context) =>
-          _reduceWhile(array, initialValue, step, condition, context)
+          _reduceWhile(array, initialValue, step, condition, context),
+        frGeneric("A")
       ),
     ],
   }),
@@ -520,7 +523,7 @@ export const library = [
     examples: [`List.filter([1,4,5], {|x| x>3})`],
     definitions: [
       makeDefinition(
-        [frArray(frGeneric("A")), frLambdaN(1)],
+        [frArray(frGeneric("A")), frLambdaTyped([frGeneric("A")], frBool)],
         ([array, lambda], context) =>
           vArray(array.filter(_binaryLambdaCheck1(lambda, context))),
         frArray(frGeneric("A"))

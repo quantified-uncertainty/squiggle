@@ -1,4 +1,7 @@
 import { BaseDist } from "../../dist/BaseDist.js";
+import { PointSetDist } from "../../dist/PointSetDist.js";
+import { SampleSetDist } from "../../dist/SampleSetDist/index.js";
+import { SymbolicDist } from "../../dist/SymbolicDist.js";
 import { Lambda } from "../../reducer/lambda.js";
 import { SDate } from "../../utility/SDate.js";
 import { SDuration } from "../../utility/SDuration.js";
@@ -76,22 +79,31 @@ export const frDist: FRType<BaseDist> = {
   pack: (v) => vDist(v),
   getName: () => "distribution",
 };
+export const frDistPointset: FRType<PointSetDist> = {
+  unpack: (v) =>
+    v.type === "Dist" && v.value instanceof PointSetDist ? v.value : undefined,
+  pack: (v) => vDist(v),
+  getName: () => "pointSetDist",
+};
+
+export const frSampleSet: FRType<SampleSetDist> = {
+  unpack: (v) =>
+    v.type === "Dist" && v.value instanceof SampleSetDist ? v.value : undefined,
+  pack: (v) => vDist(v),
+  getName: () => "sampleSetDist",
+};
+
+export const frDistSymbolic: FRType<SymbolicDist> = {
+  unpack: (v) =>
+    v.type === "Dist" && v.value instanceof SymbolicDist ? v.value : undefined,
+  pack: (v) => vDist(v),
+  getName: () => "symbolicDist",
+};
+
 export const frLambda: FRType<Lambda> = {
   unpack: (v) => (v.type === "Lambda" ? v.value : undefined),
   pack: (v) => vLambda(v),
   getName: () => "function",
-};
-export const frLambdaN = (paramLength: number): FRType<Lambda> => {
-  return {
-    unpack: (v: Value) => {
-      return v.type === "Lambda" &&
-        v.value.parameterCounts().includes(paramLength)
-        ? v.value
-        : undefined;
-    },
-    pack: (v) => vLambda(v),
-    getName: () => `function(${paramLength})`,
-  };
 };
 
 export const frLambdaTyped = (
