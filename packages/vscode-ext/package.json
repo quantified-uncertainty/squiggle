@@ -139,7 +139,7 @@
     "@quri/squiggle-lang": "workspace:*",
     "@quri/squiggle-textmate-grammar": "workspace:*",
     "@types/node": "^20.10.1",
-    "@types/react": "^18.2.34",
+    "@types/react": "^18.2.41",
     "@types/react-dom": "^18.2.14",
     "@types/vscode": "^1.83.2",
     "@types/vscode-webview": "^1.57.4",
