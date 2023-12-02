@@ -52,8 +52,8 @@ importers:
         specifier: ^6.10.2
         version: 6.10.2(@codemirror/language@6.9.3)(@codemirror/state@6.3.1)(@codemirror/view@6.21.4)(@lezer/common@1.1.1)
       '@codemirror/commands':
-        specifier: ^6.3.0
-        version: 6.3.0
+        specifier: ^6.3.2
+        version: 6.3.2
       '@codemirror/language':
         specifier: ^6.9.3
         version: 6.9.3
@@ -2572,8 +2572,8 @@ packages:
       '@lezer/common': 1.1.1
     dev: false
 
-  /@codemirror/commands@6.3.0:
-    resolution: {integrity: sha512-tFfcxRIlOWiQDFhjBSWJ10MxcvbCIsRr6V64SgrcaY0MwNk32cUOcCuNlWo8VjV4qRQCgNgUAnIeo0svkk4R5Q==}
+  /@codemirror/commands@6.3.2:
+    resolution: {integrity: sha512-tjoi4MCWDNxgIpoLZ7+tezdS9OEB6pkiDKhfKx9ReJ/XBcs2G2RXIu+/FxXBlWsPTsz6C9q/r4gjzrsxpcnqCQ==}
     dependencies:
       '@codemirror/language': 6.9.3
       '@codemirror/state': 6.3.1
@@ -4902,7 +4902,7 @@ packages:
       react-dom: ^16.8.0 || ^17 || ^18
     dependencies:
       '@codemirror/autocomplete': 6.10.2(@codemirror/language@6.9.3)(@codemirror/state@6.3.1)(@codemirror/view@6.21.4)(@lezer/common@1.1.1)
-      '@codemirror/commands': 6.3.0
+      '@codemirror/commands': 6.3.2
       '@codemirror/language': 6.9.3
       '@codemirror/lint': 6.4.2
       '@codemirror/search': 6.5.5
@@ -4946,7 +4946,7 @@ packages:
       react-dom: ^16.8.0 || ^17 || ^18
     dependencies:
       '@codemirror/autocomplete': 6.10.2(@codemirror/language@6.9.3)(@codemirror/state@6.3.1)(@codemirror/view@6.21.4)(@lezer/common@1.1.1)
-      '@codemirror/commands': 6.3.0
+      '@codemirror/commands': 6.3.2
       '@codemirror/language': 6.9.3
       '@codemirror/lint': 6.4.2
       '@codemirror/search': 6.5.5
@@ -8910,7 +8910,7 @@ packages:
     resolution: {integrity: sha512-J8j+nZ+CdWmIeFIGXEFbFPtpiYacFMDR8GlHK3IyHQJMCaVRfGx9NT+Hxivv1ckLWPvNdZqndbr/7lVhrf/Svg==}
     dependencies:
       '@codemirror/autocomplete': 6.10.2(@codemirror/language@6.9.3)(@codemirror/state@6.3.1)(@codemirror/view@6.21.4)(@lezer/common@1.1.1)
-      '@codemirror/commands': 6.3.0
+      '@codemirror/commands': 6.3.2
       '@codemirror/language': 6.9.3
       '@codemirror/lint': 6.4.2
       '@codemirror/search': 6.5.5
