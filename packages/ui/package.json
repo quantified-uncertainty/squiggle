@@ -55,7 +55,7 @@
   "devDependencies": {
     "@storybook/addon-docs": "^7.5.2",
     "@storybook/addon-essentials": "^7.6.3",
-    "@storybook/addon-interactions": "^7.5.2",
+    "@storybook/addon-interactions": "^7.6.3",
     "@storybook/addon-links": "^7.6.3",
     "@storybook/blocks": "^7.6.3",
     "@storybook/react": "^7.5.2",
