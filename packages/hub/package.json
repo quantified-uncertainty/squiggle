@@ -63,7 +63,7 @@
     "@graphql-codegen/client-preset": "^4.1.0",
     "@graphql-typed-document-node/core": "^3.2.0",
     "@parcel/watcher": "^2.3.0",
-    "@tailwindcss/forms": "^0.5.6",
+    "@tailwindcss/forms": "^0.5.7",
     "@types/d3": "^7.4.3",
     "@types/invariant": "^2.2.37",
     "@types/jest": "^29.5.10",
