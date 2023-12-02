@@ -3,6 +3,7 @@ import {
   frAny,
   frArray,
   frBool,
+  frGeneric,
   frNumber,
   frString,
 } from "../library/registry/frTypes.js";
@@ -37,73 +38,113 @@ export const library = [
   maker.make({
     name: "not",
     definitions: [
-      makeDefinition([frNumber], ([x]) => {
-        // unary prefix !
-        return vBool(x !== 0);
-      }),
-      makeDefinition([frBool], ([x]) => {
-        // unary prefix !
-        return vBool(!x);
-      }),
+      makeDefinition(
+        [frNumber],
+        ([x]) => {
+          // unary prefix !
+          return vBool(x !== 0);
+        },
+        frBool
+      ),
+      makeDefinition(
+        [frBool],
+        ([x]) => {
+          // unary prefix !
+          return vBool(!x);
+        },
+        frBool
+      ),
     ],
   }),
   maker.make({
     name: "concat",
     definitions: [
-      makeDefinition([frString, frString], ([a, b]) => {
-        return vString(a + b);
-      }),
+      makeDefinition(
+        [frString, frString],
+        ([a, b]) => {
+          return vString(a + b);
+        },
+        frString
+      ),
       makeDefinition([frArray(frAny), frArray(frAny)], ([a, b]) => {
         return vArray([...a, ...b]);
       }),
-      makeDefinition([frString, frAny], ([a, b]) => {
-        return vString(a + b.toString());
-      }),
+      makeDefinition(
+        [frString, frAny],
+        ([a, b]) => {
+          return vString(a + b.toString());
+        },
+        frString
+      ),
     ],
   }),
   maker.make({
     name: "add",
     definitions: [
-      makeDefinition([frString, frAny], ([a, b]) => {
-        return vString(a + b.toString());
-      }),
+      makeDefinition(
+        [frString, frAny],
+        ([a, b]) => {
+          return vString(a + b.toString());
+        },
+        frString
+      ),
     ],
   }),
   maker.make({
     name: "equal",
     definitions: [
-      makeDefinition([frAny, frAny], ([a, b]) => {
-        return vBool(isEqual(a, b));
-      }),
+      makeDefinition(
+        [frAny, frAny],
+        ([a, b]) => {
+          return vBool(isEqual(a, b));
+        },
+        frBool
+      ),
     ],
   }),
   maker.make({
     name: "unequal",
     definitions: [
-      makeDefinition([frAny, frAny], ([a, b]) => {
-        return vBool(!isEqual(a, b));
-      }),
+      makeDefinition(
+        [frAny, frAny],
+        ([a, b]) => {
+          return vBool(!isEqual(a, b));
+        },
+        frBool
+      ),
     ],
   }),
   maker.make({
     name: "typeOf",
     definitions: [
-      makeDefinition([frAny], ([v]) => {
-        return vString(v.publicName);
-      }),
+      makeDefinition(
+        [frAny],
+        ([v]) => {
+          return vString(v.publicName);
+        },
+        frString
+      ),
     ],
   }),
   maker.make({
     name: "inspect",
     definitions: [
-      makeDefinition([frAny], ([value]) => {
-        console.log(value);
-        return value;
-      }),
-      makeDefinition([frAny, frString], ([value, label]) => {
-        console.log(`${label}: ${value.toString()}`);
-        return value;
-      }),
+      makeDefinition(
+        [frGeneric("A")],
+        ([value]) => {
+          console.log(value);
+          return value;
+        },
+        frGeneric("A")
+      ),
+      makeDefinition(
+        [frGeneric("A"), frString],
+        ([value, label]) => {
+          console.log(`${label}: ${value.toString()}`);
+          return value;
+        },
+        frGeneric("A")
+      ),
     ],
   }),
 ];

@@ -7,6 +7,8 @@ import {
   frDist,
   frDistOrNumber,
   frLambda,
+  frLambdaN,
+  frLambdaTyped,
   frNumber,
   frOptional,
   frScale,
@@ -184,7 +186,7 @@ export const library = [
       makeDefinition(
         [
           frDict(
-            ["fn", frLambda],
+            ["fn", frLambdaTyped([frNumber], frNumber)],
             ["xScale", frOptional(frScale)],
             ["yScale", frOptional(frScale)],
             ["title", frOptional(frString)],
@@ -216,7 +218,7 @@ export const library = [
       makeDefinition(
         [
           frDict(
-            ["fn", frLambda],
+            ["fn", frLambdaTyped([frNumber], frDist)],
             ["xScale", frOptional(frScale)],
             ["yScale", frOptional(frScale)],
             ["distXScale", frOptional(frScale)],

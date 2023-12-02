@@ -17,6 +17,37 @@ import uniq from "lodash/uniq.js";
 import { sort } from "../utility/E_A_Floats.js";
 import { FRType } from "../library/registry/frTypes.js";
 
+function formatSnippet(snippet: string) {
+  let indentLevel = 0;
+  let formatted = "";
+  const indentSize = 2; // You can change this to control the indentation size
+
+  for (let i = 0; i < snippet.length; i++) {
+    const char = snippet[i];
+
+    if (char === "{" || char === "[") {
+      formatted += char + "\n";
+      indentLevel++;
+      formatted += " ".repeat(indentLevel * indentSize);
+    } else if (char === "}" || char === "]") {
+      indentLevel--;
+      formatted += "\n" + " ".repeat(indentLevel * indentSize) + char;
+    } else if (char === ",") {
+      formatted += char + "\n" + " ".repeat(indentLevel * indentSize);
+    } else if (
+      char === " " &&
+      (snippet[i - 1] === "{" || snippet[i - 1] === ",")
+    ) {
+      // Skip the space after '{' or ',' as we already added a newline and indentation
+      continue;
+    } else {
+      formatted += char;
+    }
+  }
+
+  return formatted;
+}
+
 export type UserDefinedLambdaParameter = {
   name: string;
   domain?: VDomain; // should this be Domain instead of VDomain?
@@ -180,7 +211,7 @@ export class BuiltinLambda extends BaseLambda {
     const showNameMatchDefinitions = () => {
       const defsString = signatures
         .map(fnDefinitionToString)
-        .map((def) => `  ${this.name}${def}\n`)
+        .map((def) => `${this.name}${formatSnippet(def)}\n`)
         .join("");
       return `There are function matches for ${this.name}(), but with different arguments:\n${defsString}`;
     };

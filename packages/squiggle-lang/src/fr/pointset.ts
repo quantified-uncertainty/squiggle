@@ -44,14 +44,21 @@ function pointSetAssert(dist: BaseDist): asserts dist is PointSetDist {
   throw new REExpectedType("PointSetDist", dist.toString());
 }
 
-const fromDist = makeDefinition([frDist], ([dist], context) =>
-  repackDistResult(dist.toPointSetDist(context.environment))
+const fromDist = makeDefinition(
+  [frDist],
+  ([dist], context) =>
+    repackDistResult(dist.toPointSetDist(context.environment)),
+  frDist
 );
 
-const fromNumber = makeDefinition([frNumber], ([num], _) => {
-  const pointMass = new PointMass(num);
-  return repackDistResult(pointMass.toPointSetDist());
-});
+const fromNumber = makeDefinition(
+  [frNumber],
+  ([num], _) => {
+    const pointMass = new PointMass(num);
+    return repackDistResult(pointMass.toPointSetDist());
+  },
+  frDist
+);
 
 export const library = [
   maker.make({
@@ -77,10 +84,14 @@ export const library = [
     examples: [`PointSet.downsample(PointSet.fromDist(normal(5,2)), 50)`],
     output: "Dist",
     definitions: [
-      makeDefinition([frDist, frNumber], ([dist, number]) => {
-        pointSetAssert(dist);
-        return vDist(dist.downsample(number));
-      }),
+      makeDefinition(
+        [frDist, frNumber],
+        ([dist, number]) => {
+          pointSetAssert(dist);
+          return vDist(dist.downsample(number));
+        },
+        frDist
+      ),
     ],
   }),
   maker.make({
@@ -88,16 +99,20 @@ export const library = [
     examples: [`PointSet.mapY(mx(Sym.normal(5,2)), {|x| x + 1})`],
     output: "Dist",
     definitions: [
-      makeDefinition([frDist, frLambda], ([dist, lambda], context) => {
-        pointSetAssert(dist);
-        return repackDistResult(
-          dist.mapYResult(
-            (y) => Ok(doNumberLambdaCall(lambda, [vNumber(y)], context)),
-            undefined,
-            undefined
-          )
-        );
-      }),
+      makeDefinition(
+        [frDist, frLambda],
+        ([dist, lambda], context) => {
+          pointSetAssert(dist);
+          return repackDistResult(
+            dist.mapYResult(
+              (y) => Ok(doNumberLambdaCall(lambda, [vNumber(y)], context)),
+              undefined,
+              undefined
+            )
+          );
+        },
+        frDist
+      ),
     ],
   }),
   maker.make({
@@ -122,7 +137,8 @@ export const library = [
               }).toMixed()
             )
           );
-        }
+        },
+        frDist
       ),
     ],
   }),
@@ -148,7 +164,8 @@ export const library = [
               }).toMixed()
             )
           );
-        }
+        },
+        frDist
       ),
     ],
   }),

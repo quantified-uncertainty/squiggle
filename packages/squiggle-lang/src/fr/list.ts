@@ -10,6 +10,9 @@ import {
   frString,
   frTuple,
   frLambdaNand,
+  frLambdaTyped,
+  frGeneric,
+  frBool,
 } from "../library/registry/frTypes.js";
 import { FnFactory, doBinaryLambdaCall } from "../library/registry/helpers.js";
 import {
@@ -149,31 +152,47 @@ export const library = [
       `List.make(2, {|f| f+1})`,
     ],
     definitions: [
-      makeDefinition([frNumber, frLambdaNand([0, 1])], ([number, lambda]) => {
+      makeDefinition([frNumber, frLambdaNand([0, 1])], (_) => {
         throw new REAmbiguous("Call with either 0 or 1 arguments, not both");
       }),
-      makeDefinition([frNumber, frLambdaN(0)], ([number, lambda], context) => {
-        _assertValidArrayLength(number);
-        return vArray(
-          Array.from({ length: number }, (_) => lambda.call([], context))
-        );
-      }),
-      makeDefinition([frNumber, frLambdaN(1)], ([number, lambda], context) => {
-        _assertValidArrayLength(number);
-        return vArray(
-          Array.from({ length: number }, (_, i) =>
-            lambda.call([vNumber(i)], context)
-          )
-        );
-      }),
-      makeDefinition([frNumber, frAny], ([number, value]) => {
-        _assertValidArrayLength(number);
-        return vArray(new Array(number).fill(value));
-      }),
-      makeDefinition([frDist], ([dist]) => {
-        sampleSetAssert(dist);
-        return vArray(dist.samples.map(vNumber));
-      }),
+      makeDefinition(
+        [frNumber, frLambdaTyped([], frGeneric("A"))],
+        ([number, lambda], context) => {
+          _assertValidArrayLength(number);
+          return vArray(
+            Array.from({ length: number }, (_) => lambda.call([], context))
+          );
+        },
+        frArray(frGeneric("A"))
+      ),
+      makeDefinition(
+        [frNumber, frLambdaTyped([frNumber], frGeneric("A"))],
+        ([number, lambda], context) => {
+          _assertValidArrayLength(number);
+          return vArray(
+            Array.from({ length: number }, (_, i) =>
+              lambda.call([vNumber(i)], context)
+            )
+          );
+        },
+        frArray(frGeneric("A"))
+      ),
+      makeDefinition(
+        [frNumber, frGeneric("A")],
+        ([number, value]) => {
+          _assertValidArrayLength(number);
+          return vArray(new Array(number).fill(value));
+        },
+        frArray(frGeneric("A"))
+      ),
+      makeDefinition(
+        [frDist],
+        ([dist]) => {
+          sampleSetAssert(dist);
+          return vArray(dist.samples.map(vNumber));
+        },
+        frArray(frNumber)
+      ),
     ],
   }),
   maker.make({
@@ -181,14 +200,18 @@ export const library = [
     output: "Array",
     examples: [`List.upTo(1,4)`],
     definitions: [
-      makeDefinition([frNumber, frNumber], ([low, high]) => {
-        if (!Number.isInteger(low) || !Number.isInteger(high)) {
-          throw new REArgumentError(
-            "Low and high values must both be integers"
-          );
-        }
-        return vArray(E_A_Floats.upTo(low, high).map(vNumber));
-      }),
+      makeDefinition(
+        [frNumber, frNumber],
+        ([low, high]) => {
+          if (!Number.isInteger(low) || !Number.isInteger(high)) {
+            throw new REArgumentError(
+              "Low and high values must both be integers"
+            );
+          }
+          return vArray(E_A_Floats.upTo(low, high).map(vNumber));
+        },
+        frArray(frNumber)
+      ),
     ],
   }),
   maker.make({
@@ -197,7 +220,11 @@ export const library = [
     output: "Number",
     examples: [`List.length([1,4,5])`],
     definitions: [
-      makeDefinition([frArray(frAny)], ([values]) => vNumber(values.length)),
+      makeDefinition(
+        [frArray(frAny)],
+        ([values]) => vNumber(values.length),
+        frNumber
+      ),
     ],
   }),
   maker.make({
@@ -205,10 +232,14 @@ export const library = [
     requiresNamespace: true,
     examples: [`List.first([1,4,5])`],
     definitions: [
-      makeDefinition([frArray(frAny)], ([array]) => {
-        _assertUnemptyArray(array);
-        return array[0];
-      }),
+      makeDefinition(
+        [frArray(frGeneric("A"))],
+        ([array]) => {
+          _assertUnemptyArray(array);
+          return array[0];
+        },
+        frGeneric("A")
+      ),
     ],
   }),
   maker.make({
@@ -216,10 +247,14 @@ export const library = [
     requiresNamespace: true,
     examples: [`List.last([1,4,5])`],
     definitions: [
-      makeDefinition([frArray(frAny)], ([array]) => {
-        _assertUnemptyArray(array);
-        return array[array.length - 1];
-      }),
+      makeDefinition(
+        [frArray(frGeneric("A"))],
+        ([array]) => {
+          _assertUnemptyArray(array);
+          return array[array.length - 1];
+        },
+        frGeneric("A")
+      ),
     ],
   }),
   maker.make({
@@ -228,8 +263,10 @@ export const library = [
     requiresNamespace: false,
     examples: [`List.reverse([1,4,5]) // [5,4,1]`],
     definitions: [
-      makeDefinition([frArray(frAny)], ([array]) =>
-        vArray([...array].reverse())
+      makeDefinition(
+        [frArray(frGeneric("A"))],
+        ([array]) => vArray([...array].reverse()),
+        frArray(frGeneric("A"))
       ),
     ],
   }),
@@ -246,13 +283,22 @@ export const library = [
         throw new REAmbiguous("Call with either 1 or 2 arguments, not both.");
       }),
       makeDefinition(
-        [frArray(frAny), frLambdaN(1)],
+        [
+          frArray(frGeneric("A")),
+          frLambdaTyped([frGeneric("A")], frGeneric("B")),
+        ],
         ([array, lambda], context) =>
-          vArray(_map(array, lambda, context, false))
+          vArray(_map(array, lambda, context, false)),
+        frArray(frGeneric("B"))
       ),
       makeDefinition(
-        [frArray(frAny), frLambdaN(2)],
-        ([array, lambda], context) => vArray(_map(array, lambda, context, true))
+        [
+          frArray(frGeneric("A")),
+          frLambdaTyped([frGeneric("A"), frNumber], frGeneric("B")),
+        ],
+        ([array, lambda], context) =>
+          vArray(_map(array, lambda, context, true)),
+        frArray(frGeneric("B"))
       ),
     ],
   }),
@@ -261,8 +307,10 @@ export const library = [
     requiresNamespace: true,
     examples: [`List.concat([1,2,3], [4, 5, 6])`],
     definitions: [
-      makeDefinition([frArray(frAny), frArray(frAny)], ([array1, array2]) =>
-        vArray([...array1].concat(array2))
+      makeDefinition(
+        [frArray(frGeneric("A")), frArray(frGeneric("A"))],
+        ([array1, array2]) => vArray([...array1].concat(array2)),
+        frArray(frGeneric("A"))
       ),
     ],
   }),
@@ -272,12 +320,13 @@ export const library = [
     examples: [`List.sortBy([{a:3}, {a:1}], {|f| f.a})`],
     definitions: [
       makeDefinition(
-        [frArray(frAny), frLambdaN(1)],
+        [frArray(frGeneric("A")), frLambdaTyped([frGeneric("A")], frNumber)],
         ([array, lambda], context) => {
           return vArray(
             sortBy(array, (e) => applyLambdaAndCheckNumber(e, lambda, context))
           );
-        }
+        },
+        frArray(frGeneric("A"))
       ),
     ],
   }),
@@ -287,7 +336,7 @@ export const library = [
     examples: [`List.minBy([{a:3}, {a:1}], {|f| f.a})`],
     definitions: [
       makeDefinition(
-        [frArray(frAny), frLambdaN(1)],
+        [frArray(frGeneric("A")), frLambdaTyped([frGeneric("A")], frNumber)],
         ([array, lambda], context) => {
           _assertUnemptyArray(array);
           const el = minBy(array, (e) =>
@@ -298,7 +347,8 @@ export const library = [
             throw new REOther("No element found");
           }
           return el;
-        }
+        },
+        frGeneric("A")
       ),
     ],
   }),
@@ -308,7 +358,7 @@ export const library = [
     examples: [`List.maxBy([{a:3}, {a:1}], {|f| f.a})`],
     definitions: [
       makeDefinition(
-        [frArray(frAny), frLambdaN(1)],
+        [frArray(frGeneric("A")), frLambdaTyped([frGeneric("A")], frNumber)],
         ([array, lambda], context) => {
           _assertUnemptyArray(array);
           const el = maxBy(array, (e) =>
@@ -319,7 +369,8 @@ export const library = [
             throw new REOther("No element found");
           }
           return el;
-        }
+        },
+        frGeneric("A")
       ),
     ],
   }),
@@ -328,65 +379,103 @@ export const library = [
     requiresNamespace: true,
     examples: [`List.append([1,4],5)`],
     definitions: [
-      makeDefinition([frArray(frAny), frAny], ([array, el]) =>
-        vArray([...array, el])
+      makeDefinition(
+        [frArray(frGeneric("A")), frGeneric("A")],
+        ([array, el]) => vArray([...array, el]),
+        frArray(frGeneric("A"))
       ),
     ],
   }),
   maker.make({
     name: "slice",
+    description:
+      "Returns a copy of the list, between the selected ``start`` and ``end``, end not included. Directly uses the [Javascript implementation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/slice) underneath.",
     requiresNamespace: true,
     examples: [`List.slice([1,2,5,10],1,3)`],
     definitions: [
-      makeDefinition([frArray(frAny), frNumber], ([array, start]) => {
-        _assertInteger(start);
-        return vArray(array.slice(start));
-      }),
       makeDefinition(
-        [frArray(frAny), frNumber, frNumber],
+        [frArray(frGeneric("A")), frNumber],
+        ([array, start]) => {
+          _assertInteger(start);
+          return vArray(array.slice(start));
+        },
+        frArray(frGeneric("A"))
+      ),
+      makeDefinition(
+        [frArray(frGeneric("A")), frNumber, frNumber],
         ([array, start, end]) => {
           _assertInteger(start);
           _assertInteger(end);
           return vArray(array.slice(start, end));
-        }
+        },
+        frArray(frGeneric("A"))
       ),
     ],
   }),
   maker.make({
     name: "uniq",
+    description:
+      "Filters the list for unique elements. Works on select Squiggle types.",
     requiresNamespace: true,
     examples: [`List.uniq([1,2,3,"hi",false,"hi"])`],
     definitions: [
-      makeDefinition([frArray(frAny)], ([arr]) => vArray(uniq(arr))),
+      makeDefinition(
+        [frArray(frGeneric("A"))],
+        ([arr]) => vArray(uniq(arr)),
+        frArray(frGeneric("A"))
+      ),
     ],
   }),
   maker.make({
     name: "uniqBy",
+    description:
+      "Filters the list for unique elements. Works on select Squiggle types.",
     requiresNamespace: true,
     examples: [`List.uniqBy([[1,5], [3,5], [5,7]], {|x| x[1]})`],
     definitions: [
-      makeDefinition([frArray(frAny), frLambdaN(1)], ([arr, lambda], context) =>
-        vArray(uniqBy(arr, (e) => lambda.call([e], context)))
+      makeDefinition(
+        [
+          frArray(frGeneric("A")),
+          frLambdaTyped([frGeneric("A")], frGeneric("B")),
+        ],
+        ([arr, lambda], context) =>
+          vArray(uniqBy(arr, (e) => lambda.call([e], context))),
+        frArray(frGeneric("A"))
       ),
     ],
   }),
   maker.make({
     name: "reduce",
     requiresNamespace: false,
+    description:
+      "Applies `f` to each element of `arr`. The function `f` has two main paramaters, an accumulator and the next value from the array. It can also accept an optional third `index` parameter.",
     examples: [`List.reduce([1,4,5], 2, {|acc, el| acc+el})`],
     definitions: [
       makeDefinition([frNumber, frLambdaNand([2, 3])], ([number, lambda]) => {
         throw new REAmbiguous("Call with either 2 or 3 arguments, not both");
       }),
       makeDefinition(
-        [frArray(frAny), frAny, frLambdaN(2)],
+        [
+          frArray(frGeneric("B")),
+          frGeneric("A"),
+          frLambdaTyped([frGeneric("A"), frGeneric("B")], frGeneric("A")),
+        ],
         ([array, initialValue, lambda], context) =>
-          _reduce(array, initialValue, lambda, context, false)
+          _reduce(array, initialValue, lambda, context, false),
+        frGeneric("A")
       ),
       makeDefinition(
-        [frArray(frAny), frAny, frLambdaN(3)],
+        [
+          frArray(frGeneric("B")),
+          frGeneric("A"),
+          frLambdaTyped(
+            [frGeneric("A"), frGeneric("B"), frNumber],
+            frGeneric("A")
+          ),
+        ],
         ([array, initialValue, lambda], context) =>
-          _reduce(array, initialValue, lambda, context, true)
+          _reduce(array, initialValue, lambda, context, true),
+        frGeneric("A")
       ),
     ],
   }),
@@ -396,9 +485,14 @@ export const library = [
     examples: [`List.reduceReverse([1,4,5], 2, {|acc, el| acc-el})`],
     definitions: [
       makeDefinition(
-        [frArray(frAny), frAny, frLambdaN(2)],
+        [
+          frArray(frGeneric("B")),
+          frGeneric("A"),
+          frLambdaTyped([frGeneric("A"), frGeneric("B")], frGeneric("A")),
+        ],
         ([array, initialValue, lambda], context) =>
-          _reduce([...array].reverse(), initialValue, lambda, context, false)
+          _reduce([...array].reverse(), initialValue, lambda, context, false),
+        frGeneric("A")
       ),
     ],
   }),
@@ -426,9 +520,10 @@ export const library = [
     examples: [`List.filter([1,4,5], {|x| x>3})`],
     definitions: [
       makeDefinition(
-        [frArray(frAny), frLambdaN(1)],
+        [frArray(frGeneric("A")), frLambdaN(1)],
         ([array, lambda], context) =>
-          vArray(array.filter(_binaryLambdaCheck1(lambda, context)))
+          vArray(array.filter(_binaryLambdaCheck1(lambda, context))),
+        frArray(frGeneric("A"))
       ),
     ],
   }),
@@ -438,9 +533,10 @@ export const library = [
     examples: [`List.every([1,4,5], {|el| el>3 })`],
     definitions: [
       makeDefinition(
-        [frArray(frAny), frLambdaN(1)],
+        [frArray(frGeneric("A")), frLambdaTyped([frGeneric("A")], frBool)],
         ([array, lambda], context) =>
-          vBool(array.every(_binaryLambdaCheck1(lambda, context)))
+          vBool(array.every(_binaryLambdaCheck1(lambda, context))),
+        frBool
       ),
     ],
   }),
@@ -450,38 +546,43 @@ export const library = [
     examples: [`List.some([1,4,5], {|el| el>3 })`],
     definitions: [
       makeDefinition(
-        [frArray(frAny), frLambdaN(1)],
+        [frArray(frGeneric("A")), frLambdaTyped([frGeneric("A")], frBool)],
         ([array, lambda], context) =>
-          vBool(array.some(_binaryLambdaCheck1(lambda, context)))
+          vBool(array.some(_binaryLambdaCheck1(lambda, context))),
+        frBool
       ),
     ],
   }),
   maker.make({
     name: "find",
+    description: "Returns an error if there is no value found",
     requiresNamespace: true,
     examples: [`List.find([1,4,5], {|el| el>3 })`],
     definitions: [
       makeDefinition(
-        [frArray(frAny), frLambdaN(1)],
+        [frArray(frGeneric("A")), frLambdaTyped([frGeneric("A")], frBool)],
         ([array, lambda], context) => {
           const result = array.find(_binaryLambdaCheck1(lambda, context));
           if (!result) {
             throw new REOther("No element found");
           }
           return result;
-        }
+        },
+        frGeneric("A")
       ),
     ],
   }),
   maker.make({
     name: "findIndex",
+    description: "Returns `-1` if there is no value found",
     requiresNamespace: true,
     examples: [`List.findIndex([1,4,5], {|el| el>3 })`],
     definitions: [
       makeDefinition(
-        [frArray(frAny), frLambdaN(1)],
+        [frArray(frGeneric("A")), frLambdaTyped([frGeneric("A")], frBool)],
         ([array, lambda], context) =>
-          vNumber(array.findIndex(_binaryLambdaCheck1(lambda, context)))
+          vNumber(array.findIndex(_binaryLambdaCheck1(lambda, context))),
+        frNumber
       ),
     ],
   }),
@@ -490,10 +591,16 @@ export const library = [
     requiresNamespace: true,
     examples: [`List.join(["a", "b", "c"], ",")`],
     definitions: [
-      makeDefinition([frArray(frString), frString], ([array, joinStr]) =>
-        vString(array.join(joinStr))
+      makeDefinition(
+        [frArray(frString), frString],
+        ([array, joinStr]) => vString(array.join(joinStr)),
+        frString
       ),
-      makeDefinition([frArray(frString)], ([array]) => vString(array.join())),
+      makeDefinition(
+        [frArray(frString)],
+        ([array]) => vString(array.join()),
+        frString
+      ),
     ],
   }),
   maker.make({
@@ -501,7 +608,11 @@ export const library = [
     requiresNamespace: true,
     examples: [`List.flatten([[1,2], [3,4]])`],
     definitions: [
-      makeDefinition([frArray(frAny)], ([arr]) => vArray(arr).flatten()),
+      makeDefinition(
+        [frArray(frAny)],
+        ([arr]) => vArray(arr).flatten(),
+        frArray(frAny)
+      ),
     ],
   }),
   maker.make({
@@ -509,7 +620,11 @@ export const library = [
     requiresNamespace: true,
     examples: [`List.shuffle([1,3,4,20])`],
     definitions: [
-      makeDefinition([frArray(frAny)], ([arr]) => vArray(arr).shuffle()),
+      makeDefinition(
+        [frArray(frGeneric("A"))],
+        ([arr]) => vArray(arr).shuffle(),
+        frArray(frGeneric("A"))
+      ),
     ],
   }),
   maker.make({
@@ -517,12 +632,16 @@ export const library = [
     requiresNamespace: true,
     examples: [`List.zip([1,3,4,20], [2,4,5,6])`],
     definitions: [
-      makeDefinition([frArray(frAny), frArray(frAny)], ([array1, array2]) => {
-        if (array1.length !== array2.length) {
-          throw new REArgumentError("List lengths must be equal");
-        }
-        return vArray(zip(array1, array2).map((pair) => vArray(pair)));
-      }),
+      makeDefinition(
+        [frArray(frGeneric("A")), frArray(frGeneric("B"))],
+        ([array1, array2]) => {
+          if (array1.length !== array2.length) {
+            throw new REArgumentError("List lengths must be equal");
+          }
+          return vArray(zip(array1, array2).map((pair) => vArray(pair)));
+        },
+        frArray(frTuple(frGeneric("A"), frGeneric("B")))
+      ),
     ],
   }),
   maker.make({
@@ -530,8 +649,11 @@ export const library = [
     requiresNamespace: true,
     examples: [`List.unzip([[1,2], [2,3], [4,5]])`],
     definitions: [
-      makeDefinition([frArray(frTuple(frAny, frAny))], ([array]) =>
-        vArray(unzip(array as [Value, Value][]).map((r) => vArray(r)))
+      makeDefinition(
+        [frArray(frTuple(frGeneric("A"), frGeneric("B")))],
+        ([array]) =>
+          vArray(unzip(array as [Value, Value][]).map((r) => vArray(r))),
+        frTuple(frArray(frGeneric("A")), frArray(frGeneric("B")))
       ),
     ],
   }),

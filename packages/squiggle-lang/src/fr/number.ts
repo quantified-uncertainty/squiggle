@@ -21,62 +21,78 @@ function makeNumberArrayToNumberDefinition(
   fn: (arr: number[]) => number,
   throwIfEmpty = true
 ) {
-  return makeDefinition([frArray(frNumber)], ([arr]) => {
-    throwIfEmpty && assertIsNotEmpty(arr);
-    return vNumber(fn(arr));
-  });
+  return makeDefinition(
+    [frArray(frNumber)],
+    ([arr]) => {
+      throwIfEmpty && assertIsNotEmpty(arr);
+      return vNumber(fn(arr));
+    },
+    frNumber
+  );
 }
 
 function makeNumberArrayToNumberArrayDefinition(
   fn: (arr: number[]) => number[],
   throwIfEmpty = true
 ) {
-  return makeDefinition([frArray(frNumber)], ([arr]) => {
-    throwIfEmpty && assertIsNotEmpty(arr);
-    return vArray(fn(arr).map(vNumber));
-  });
+  return makeDefinition(
+    [frArray(frNumber)],
+    ([arr]) => {
+      throwIfEmpty && assertIsNotEmpty(arr);
+      return vArray(fn(arr).map(vNumber));
+    },
+    frArray(frNumber)
+  );
 }
 
 export const library = [
   maker.n2n({
     name: "floor",
+    output: "Number",
     examples: [`floor(3.5)`],
     fn: Math.floor,
   }),
   maker.n2n({
     name: "ceil",
+    output: "Number",
     examples: ["ceil(3.5)"],
     fn: Math.ceil,
   }),
   maker.n2n({
     name: "abs",
+    output: "Number",
     description: "absolute value",
     examples: [`abs(3.5)`],
     fn: Math.abs,
   }),
   maker.n2n({
     name: "exp",
+    output: "Number",
     description: "exponent",
     examples: [`exp(3.5)`],
     fn: Math.exp,
   }),
   maker.n2n({
     name: "log",
+    output: "Number",
     examples: [`log(3.5)`],
     fn: Math.log,
   }),
   maker.n2n({
     name: "log10",
+    output: "Number",
     examples: [`log10(3.5)`],
     fn: Math.log10,
   }),
   maker.n2n({
     name: "log2",
+    output: "Number",
     examples: [`log2(3.5)`],
     fn: Math.log2,
   }),
   maker.n2n({
     name: "round",
+    output: "Number",
     examples: [`round(3.5)`],
     fn: Math.round,
   }),

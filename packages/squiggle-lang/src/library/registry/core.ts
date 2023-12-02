@@ -1,6 +1,6 @@
 import { BuiltinLambda, Lambda } from "../../reducer/lambda.js";
 import { Value } from "../../value/index.js";
-import { FnDefinition } from "./fnDefinition.js";
+import { FnDefinition, fnDefinitionToString } from "./fnDefinition.js";
 
 export type FRFunction = {
   name: string;
@@ -15,10 +15,10 @@ export type FRFunction = {
 
 type FnNameDict = Map<string, FnDefinition[]>;
 
-type FnDocumentation = Pick<
+export type FnDocumentation = Pick<
   FRFunction,
   "description" | "requiresNamespace" | "nameSpace" | "name" | "examples"
->;
+> & { signatures: string[] };
 
 export class Registry {
   private constructor(
@@ -88,6 +88,7 @@ export class Registry {
       requiresNamespace: fn.requiresNamespace,
       description: fn.description,
       examples: fn.examples,
+      signatures: fn.definitions.map(fnDefinitionToString),
     };
   }
 

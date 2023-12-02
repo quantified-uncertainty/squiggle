@@ -8,15 +8,18 @@ import { FRType } from "./frTypes.js";
 export type FnDefinition = {
   inputs: FRType<any>[];
   run: (args: any[], context: ReducerContext) => Value;
+  output?: FRType<any>;
 };
 
 export function makeDefinition<const T extends any[]>(
   // [...] wrapper is important, see also: https://stackoverflow.com/a/63891197
   inputs: [...{ [K in keyof T]: FRType<T[K]> }],
-  run: (args: T, context: ReducerContext) => Value
+  run: (args: T, context: ReducerContext) => Value,
+  output?: FRType<any>
 ): FnDefinition {
   return {
     inputs,
+    output,
     // Type of `run` argument must match `FnDefinition['run']`. This
     // This unsafe type casting is necessary because function type parameters are contravariant.
     run: run as FnDefinition["run"],
@@ -45,5 +48,6 @@ export function tryCallFnDefinition(
 
 export function fnDefinitionToString(fn: FnDefinition): string {
   const inputs = fn.inputs.map((t) => t.getName()).join(", ");
-  return `(${inputs})`;
+  const output = fn.output?.getName();
+  return `(${inputs})${output ? ` => ${output}` : ""}`;
 }

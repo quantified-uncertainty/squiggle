@@ -17,6 +17,7 @@ import {
   frAny,
   frArray,
   frDist,
+  frGeneric,
   frLambda,
   frNumber,
 } from "../library/registry/frTypes.js";
@@ -222,7 +223,8 @@ const integrationLibrary: FRFunction[] = [
             (max - min) / epsilon,
             context
           );
-        }
+        },
+        frNumber
       ),
     ],
   }),
@@ -385,22 +387,30 @@ const mapYLibrary: FRFunction[] = [
   maker.make({
     name: "combinations",
     definitions: [
-      makeDefinition([frArray(frAny), frNumber], ([elements, n]) => {
-        if (n > elements.length) {
-          throw new REArgumentError(
-            `Combinations of length ${n} were requested, but full list is only ${elements.length} long.`
-          );
-        }
-        return vArray(combinations(elements, n).map((v) => vArray(v)));
-      }),
+      makeDefinition(
+        [frArray(frGeneric("A")), frNumber],
+        ([elements, n]) => {
+          if (n > elements.length) {
+            throw new REArgumentError(
+              `Combinations of length ${n} were requested, but full list is only ${elements.length} long.`
+            );
+          }
+          return vArray(combinations(elements, n).map((v) => vArray(v)));
+        },
+        frArray(frArray(frGeneric("A")))
+      ),
     ],
   }),
   maker.make({
     name: "allCombinations",
     definitions: [
-      makeDefinition([frArray(frAny)], ([elements]) => {
-        return vArray(allCombinations(elements).map((v) => vArray(v)));
-      }),
+      makeDefinition(
+        [frArray(frGeneric("A"))],
+        ([elements]) => {
+          return vArray(allCombinations(elements).map((v) => vArray(v)));
+        },
+        frArray(frArray(frGeneric("A")))
+      ),
     ],
   }),
   maker.dn2d({

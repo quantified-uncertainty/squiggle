@@ -1,7 +1,7 @@
 import * as SymbolicDist from "../dist/SymbolicDist.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frDict, frNumber } from "../library/registry/frTypes.js";
+import { frDict, frDist, frNumber } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import * as Result from "../utility/result.js";
 import { CI_CONFIG, SymDistResult, symDistResultToValue } from "./distUtil.js";
@@ -12,17 +12,25 @@ const maker = new FnFactory({
 });
 
 function makeTwoArgsSymDist(fn: (v1: number, v2: number) => SymDistResult) {
-  return makeDefinition([frNumber, frNumber], ([v1, v2]) => {
-    const result = fn(v1, v2);
-    return symDistResultToValue(result);
-  });
+  return makeDefinition(
+    [frNumber, frNumber],
+    ([v1, v2]) => {
+      const result = fn(v1, v2);
+      return symDistResultToValue(result);
+    },
+    frDist
+  );
 }
 
 function makeOneArgSymDist(fn: (v: number) => SymDistResult) {
-  return makeDefinition([frNumber], ([v]) => {
-    const result = fn(v);
-    return symDistResultToValue(result);
-  });
+  return makeDefinition(
+    [frNumber],
+    ([v]) => {
+      const result = fn(v);
+      return symDistResultToValue(result);
+    },
+    frDist
+  );
 }
 
 function makeCISymDist<K1 extends string, K2 extends string>(
@@ -32,7 +40,8 @@ function makeCISymDist<K1 extends string, K2 extends string>(
 ) {
   return makeDefinition(
     [frDict([lowKey, frNumber], [highKey, frNumber])],
-    ([dict]) => symDistResultToValue(fn(dict[lowKey], dict[highKey]))
+    ([dict]) => symDistResultToValue(fn(dict[lowKey], dict[highKey])),
+    frDist
   );
 }
 

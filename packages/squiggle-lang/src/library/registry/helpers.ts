@@ -62,7 +62,9 @@ export class FnFactory {
     return this.make({
       ...args,
       output: "Number",
-      definitions: [makeDefinition([frNumber], ([x]) => vNumber(fn(x)))],
+      definitions: [
+        makeDefinition([frNumber], ([x]) => vNumber(fn(x)), frNumber),
+      ],
     });
   }
 
@@ -76,7 +78,11 @@ export class FnFactory {
       ...args,
       output: "Number",
       definitions: [
-        makeDefinition([frNumber, frNumber], ([x, y]) => vNumber(fn(x, y))),
+        makeDefinition(
+          [frNumber, frNumber],
+          ([x, y]) => vNumber(fn(x, y)),
+          frNumber
+        ),
       ],
     });
   }
@@ -91,7 +97,11 @@ export class FnFactory {
       ...args,
       output: "Bool",
       definitions: [
-        makeDefinition([frNumber, frNumber], ([x, y]) => vBool(fn(x, y))),
+        makeDefinition(
+          [frNumber, frNumber],
+          ([x, y]) => vBool(fn(x, y)),
+          frBool
+        ),
       ],
     });
   }
@@ -106,7 +116,7 @@ export class FnFactory {
       ...args,
       output: "Bool",
       definitions: [
-        makeDefinition([frBool, frBool], ([x, y]) => vBool(fn(x, y))),
+        makeDefinition([frBool, frBool], ([x, y]) => vBool(fn(x, y)), frBool),
       ],
     });
   }
@@ -121,7 +131,11 @@ export class FnFactory {
       ...args,
       output: "Bool",
       definitions: [
-        makeDefinition([frString, frString], ([x, y]) => vBool(fn(x, y))),
+        makeDefinition(
+          [frString, frString],
+          ([x, y]) => vBool(fn(x, y)),
+          frBool
+        ),
       ],
     });
   }
@@ -136,7 +150,11 @@ export class FnFactory {
       ...args,
       output: "String",
       definitions: [
-        makeDefinition([frString, frString], ([x, y]) => vString(fn(x, y))),
+        makeDefinition(
+          [frString, frString],
+          ([x, y]) => vString(fn(x, y)),
+          frString
+        ),
       ],
     });
   }
@@ -151,8 +169,10 @@ export class FnFactory {
       ...args,
       output: "String",
       definitions: [
-        makeDefinition([frDist], ([dist], { environment }) =>
-          vString(fn(dist, environment))
+        makeDefinition(
+          [frDist],
+          ([dist], { environment }) => vString(fn(dist, environment)),
+          frString
         ),
       ],
     });
@@ -168,8 +188,10 @@ export class FnFactory {
       ...args,
       output: "String",
       definitions: [
-        makeDefinition([frDist, frNumber], ([dist, n], { environment }) =>
-          vString(fn(dist, n, environment))
+        makeDefinition(
+          [frDist, frNumber],
+          ([dist, n], { environment }) => vString(fn(dist, n, environment)),
+          frString
         ),
       ],
     });
@@ -185,8 +207,10 @@ export class FnFactory {
       ...args,
       output: "Number",
       definitions: [
-        makeDefinition([frDist], ([x], { environment }) =>
-          vNumber(fn(x, environment))
+        makeDefinition(
+          [frDist],
+          ([x], { environment }) => vNumber(fn(x, environment)),
+          frNumber
         ),
       ],
     });
@@ -202,8 +226,10 @@ export class FnFactory {
       ...args,
       output: "Bool",
       definitions: [
-        makeDefinition([frDist], ([x], { environment }) =>
-          vBool(fn(x, environment))
+        makeDefinition(
+          [frDist],
+          ([x], { environment }) => vBool(fn(x, environment)),
+          frBool
         ),
       ],
     });
@@ -219,8 +245,10 @@ export class FnFactory {
       ...args,
       output: "Dist",
       definitions: [
-        makeDefinition([frDist], ([dist], { environment }) =>
-          vDist(fn(dist, environment))
+        makeDefinition(
+          [frDist],
+          ([dist], { environment }) => vDist(fn(dist, environment)),
+          frDist
         ),
       ],
     });
@@ -236,8 +264,10 @@ export class FnFactory {
       ...args,
       output: "Dist",
       definitions: [
-        makeDefinition([frDist, frNumber], ([dist, n], { environment }) =>
-          vDist(fn(dist, n, environment))
+        makeDefinition(
+          [frDist, frNumber],
+          ([dist, n], { environment }) => vDist(fn(dist, n, environment)),
+          frDist
         ),
       ],
     });
@@ -253,8 +283,10 @@ export class FnFactory {
       ...args,
       output: "Number",
       definitions: [
-        makeDefinition([frDist, frNumber], ([dist, n], { environment }) =>
-          vNumber(fn(dist, n, environment))
+        makeDefinition(
+          [frDist, frNumber],
+          ([dist, n], { environment }) => vNumber(fn(dist, n, environment)),
+          frNumber
         ),
       ],
     });
@@ -385,33 +417,38 @@ export function makeTwoArgsDist(
 ) {
   return makeDefinition(
     [frDistOrNumber, frDistOrNumber],
-    ([v1, v2], { environment }) => twoVarSample(v1, v2, environment, fn)
+    ([v1, v2], { environment }) => twoVarSample(v1, v2, environment, fn),
+    frDist
   );
 }
 
 export function makeOneArgDist(
   fn: (v: number) => Result.result<SymbolicDist.SymbolicDist, string>
 ) {
-  return makeDefinition([frDistOrNumber], ([v], { environment }) => {
-    const sampleFn = (a: number) =>
-      Result.fmap2(
-        fn(a),
-        (d) => d.sample(),
-        (e) => new OtherOperationError(e)
-      );
+  return makeDefinition(
+    [frDistOrNumber],
+    ([v], { environment }) => {
+      const sampleFn = (a: number) =>
+        Result.fmap2(
+          fn(a),
+          (d) => d.sample(),
+          (e) => new OtherOperationError(e)
+        );
 
-    if (v instanceof BaseDist) {
-      const s = makeSampleSet(v, environment);
-      return distResultToValue(s.samplesMap(sampleFn));
-    } else if (typeof v === "number") {
-      const result = fn(v);
-      if (!result.ok) {
-        throw new REOther(result.value);
+      if (v instanceof BaseDist) {
+        const s = makeSampleSet(v, environment);
+        return distResultToValue(s.samplesMap(sampleFn));
+      } else if (typeof v === "number") {
+        const result = fn(v);
+        if (!result.ok) {
+          throw new REOther(result.value);
+        }
+        return vDist(makeSampleSet(result.value, environment));
       }
-      return vDist(makeSampleSet(result.value, environment));
-    }
-    throw new REOther("Impossible branch");
-  });
+      throw new REOther("Impossible branch");
+    },
+    frDist
+  );
 }
 
 function createComparisonDefinition<T>(
@@ -423,8 +460,10 @@ function createComparisonDefinition<T>(
   return fnFactory.make({
     name: opName,
     definitions: [
-      makeDefinition([frType, frType], ([d1, d2]) =>
-        vBool(comparisonFunction(d1, d2))
+      makeDefinition(
+        [frType, frType],
+        ([d1, d2]) => vBool(comparisonFunction(d1, d2)),
+        frBool
       ),
     ],
   });

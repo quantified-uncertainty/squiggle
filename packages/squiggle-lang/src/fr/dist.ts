@@ -32,7 +32,8 @@ function makeCIDist<K1 extends string, K2 extends string>(
   return makeDefinition(
     [frDict([lowKey, frNumber], [highKey, frNumber])],
     ([dict], { environment }) =>
-      twoVarSample(dict[lowKey], dict[highKey], environment, fn)
+      twoVarSample(dict[lowKey], dict[highKey], environment, fn),
+    frDist
   );
 }
 
@@ -45,7 +46,8 @@ function makeMeanStdevDist(
   return makeDefinition(
     [frDict(["mean", frNumber], ["stdev", frNumber])],
     ([{ mean, stdev }], { environment }) =>
-      twoVarSample(mean, stdev, environment, fn)
+      twoVarSample(mean, stdev, environment, fn),
+    frDist
   );
 }
 
@@ -56,9 +58,11 @@ export const library: FRFunction[] = [
     requiresNamespace: true,
     examples: ["Dist.make(5)", "Dist.make(normal({p5: 4, p95: 10}))"],
     definitions: [
-      makeDefinition([frDist], ([dist]) => vDist(dist)),
-      makeDefinition([frNumber], ([v]) =>
-        symDistResultToValue(SymbolicDist.PointMass.make(v))
+      makeDefinition([frDist], ([dist]) => vDist(dist), frDist),
+      makeDefinition(
+        [frNumber],
+        ([v]) => symDistResultToValue(SymbolicDist.PointMass.make(v)),
+        frDist
       ),
     ],
   }),
@@ -218,7 +222,8 @@ export const library: FRFunction[] = [
             throw new REDistributionError(otherError(result.value));
           }
           return vDist(makeSampleSet(result.value, environment));
-        }
+        },
+        frDist
       ),
     ],
   }),

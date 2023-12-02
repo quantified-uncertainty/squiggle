@@ -9,6 +9,7 @@ import {
   frDist,
   frLambda,
   frLambdaN,
+  frLambdaTyped,
   frNumber,
 } from "../library/registry/frTypes.js";
 import {
@@ -36,20 +37,28 @@ export function sampleSetAssert(
   throw new REExpectedType("SampleSetDist", dist.toString());
 }
 
-const fromDist = makeDefinition([frDist], ([dist], { environment }) =>
-  repackDistResult(SampleSetDist.SampleSetDist.fromDist(dist, environment))
+const fromDist = makeDefinition(
+  [frDist],
+  ([dist], { environment }) =>
+    repackDistResult(SampleSetDist.SampleSetDist.fromDist(dist, environment)),
+  frDist
 );
 
-const fromNumber = makeDefinition([frNumber], ([number], context) =>
-  repackDistResult(
-    SampleSetDist.SampleSetDist.make(
-      new Array(context.environment.sampleCount).fill(number)
-    )
-  )
+const fromNumber = makeDefinition(
+  [frNumber],
+  ([number], context) =>
+    repackDistResult(
+      SampleSetDist.SampleSetDist.make(
+        new Array(context.environment.sampleCount).fill(number)
+      )
+    ),
+  frDist
 );
 
-const fromList = makeDefinition([frArray(frNumber)], ([numbers]) =>
-  repackDistResult(SampleSetDist.SampleSetDist.make(numbers))
+const fromList = makeDefinition(
+  [frArray(frNumber)],
+  ([numbers]) => repackDistResult(SampleSetDist.SampleSetDist.make(numbers)),
+  frDist
 );
 
 const fromFn = (lambda: any, context: any, fn: (i: number) => Value[]) =>
@@ -60,12 +69,20 @@ const fromFn = (lambda: any, context: any, fn: (i: number) => Value[]) =>
   );
 
 const fromFnDefinitions: FnDefinition[] = [
-  makeDefinition([frLambdaN(0)], ([lambda], context) => {
-    return fromFn(lambda, context, () => []);
-  }),
-  makeDefinition([frLambdaN(1)], ([lambda], context) => {
-    return fromFn(lambda, context, (index) => [vNumber(index)]);
-  }),
+  makeDefinition(
+    [frLambdaTyped([], frNumber)],
+    ([lambda], context) => {
+      return fromFn(lambda, context, () => []);
+    },
+    frDist
+  ),
+  makeDefinition(
+    [frLambdaTyped([frNumber], frNumber)],
+    ([lambda], context) => {
+      return fromFn(lambda, context, (index) => [vNumber(index)]);
+    },
+    frDist
+  ),
 ];
 
 const baseLibrary = [
@@ -112,14 +129,18 @@ const baseLibrary = [
     examples: [`SampleSet.map(SampleSet.fromDist(normal(5,2)), {|x| x + 1})`],
     output: "Dist",
     definitions: [
-      makeDefinition([frDist, frLambda], ([dist, lambda], context) => {
-        sampleSetAssert(dist);
-        return repackDistResult(
-          dist.samplesMap((r) =>
-            Ok(doNumberLambdaCall(lambda, [vNumber(r)], context))
-          )
-        );
-      }),
+      makeDefinition(
+        [frDist, frLambdaTyped([frNumber], frNumber)],
+        ([dist, lambda], context) => {
+          sampleSetAssert(dist);
+          return repackDistResult(
+            dist.samplesMap((r) =>
+              Ok(doNumberLambdaCall(lambda, [vNumber(r)], context))
+            )
+          );
+        },
+        frDist
+      ),
     ],
   }),
   maker.make({
@@ -130,7 +151,7 @@ const baseLibrary = [
     output: "Dist",
     definitions: [
       makeDefinition(
-        [frDist, frDist, frLambda],
+        [frDist, frDist, frLambdaTyped([frNumber, frNumber], frNumber)],
         ([dist1, dist2, lambda], context) => {
           sampleSetAssert(dist1);
           sampleSetAssert(dist2);
@@ -144,7 +165,8 @@ const baseLibrary = [
               t2: dist2,
             })
           );
-        }
+        },
+        frDist
       ),
     ],
   }),
@@ -156,7 +178,12 @@ const baseLibrary = [
     output: "Dist",
     definitions: [
       makeDefinition(
-        [frDist, frDist, frDist, frLambda],
+        [
+          frDist,
+          frDist,
+          frDist,
+          frLambdaTyped([frNumber, frNumber, frNumber], frNumber),
+        ],
         ([dist1, dist2, dist3, lambda], context) => {
           sampleSetAssert(dist1);
           sampleSetAssert(dist2);
@@ -176,7 +203,8 @@ const baseLibrary = [
               t3: dist3,
             })
           );
-        }
+        },
+        frDist
       ),
     ],
   }),
@@ -188,7 +216,7 @@ const baseLibrary = [
     output: "Dist",
     definitions: [
       makeDefinition(
-        [frArray(frDist), frLambda],
+        [frArray(frDist), frLambdaTyped([frArray(frNumber)], frNumber)],
         ([dists, lambda], context) => {
           const sampleSetDists = dists.map((d) => {
             sampleSetAssert(d);
@@ -203,7 +231,8 @@ const baseLibrary = [
               t1: sampleSetDists,
             })
           );
-        }
+        },
+        frDist
       ),
     ],
   }),
@@ -224,19 +253,31 @@ const mkComparison = (
     ],
     output: "Dist",
     definitions: [
-      makeDefinition([frDist, frDist], ([dist1, dist2]) => {
-        sampleSetAssert(dist1);
-        sampleSetAssert(dist2);
-        return repackDistResult(withDist(dist1, dist2));
-      }),
-      makeDefinition([frDist, frNumber], ([dist, f]) => {
-        sampleSetAssert(dist);
-        return repackDistResult(withFloat(dist, f));
-      }),
-      makeDefinition([frNumber, frDist], ([f, dist]) => {
-        sampleSetAssert(dist);
-        return repackDistResult(withFloat(dist, f));
-      }),
+      makeDefinition(
+        [frDist, frDist],
+        ([dist1, dist2]) => {
+          sampleSetAssert(dist1);
+          sampleSetAssert(dist2);
+          return repackDistResult(withDist(dist1, dist2));
+        },
+        frDist
+      ),
+      makeDefinition(
+        [frDist, frNumber],
+        ([dist, f]) => {
+          sampleSetAssert(dist);
+          return repackDistResult(withFloat(dist, f));
+        },
+        frDist
+      ),
+      makeDefinition(
+        [frNumber, frDist],
+        ([f, dist]) => {
+          sampleSetAssert(dist);
+          return repackDistResult(withFloat(dist, f));
+        },
+        frDist
+      ),
     ],
   });
 

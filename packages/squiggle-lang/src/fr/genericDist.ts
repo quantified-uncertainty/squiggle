@@ -58,18 +58,27 @@ const makeOperationFns = (): FRFunction[] => {
       maker.make({
         name,
         definitions: [
-          makeDefinition([frDist, frNumber], ([dist, n], { environment }) =>
-            distResultToValue(
-              op(dist, new SymbolicDist.PointMass(n), { env: environment })
-            )
+          makeDefinition(
+            [frDist, frNumber],
+            ([dist, n], { environment }) =>
+              distResultToValue(
+                op(dist, new SymbolicDist.PointMass(n), { env: environment })
+              ),
+            frDist
           ),
-          makeDefinition([frNumber, frDist], ([n, dist], { environment }) =>
-            distResultToValue(
-              op(new SymbolicDist.PointMass(n), dist, { env: environment })
-            )
+          makeDefinition(
+            [frNumber, frDist],
+            ([n, dist], { environment }) =>
+              distResultToValue(
+                op(new SymbolicDist.PointMass(n), dist, { env: environment })
+              ),
+            frDist
           ),
-          makeDefinition([frDist, frDist], ([dist1, dist2], { environment }) =>
-            distResultToValue(op(dist1, dist2, { env: environment }))
+          makeDefinition(
+            [frDist, frDist],
+            ([dist1, dist2], { environment }) =>
+              distResultToValue(op(dist1, dist2, { env: environment })),
+            frDist
           ),
         ],
       })
@@ -169,56 +178,72 @@ export const library: FRFunction[] = [
     makeDefinition(
       [frDist, frNumber, frNumber],
       ([dist, left, right], { environment }) =>
-        distResultToValue(dist.truncate(left, right, { env: environment }))
+        distResultToValue(dist.truncate(left, right, { env: environment })),
+      frDist
     )
   ),
   maker.make({
     name: "sum",
     definitions: [
-      makeDefinition([frArray(frDistOrNumber)], ([dists], { environment }) =>
-        distResultToValue(
-          algebraicSum(dists.map(parseDistFromDistOrNumber), environment)
-        )
+      makeDefinition(
+        [frArray(frDistOrNumber)],
+        ([dists], { environment }) =>
+          distResultToValue(
+            algebraicSum(dists.map(parseDistFromDistOrNumber), environment)
+          ),
+        frDist
       ),
     ],
   }),
   maker.make({
     name: "product",
     definitions: [
-      makeDefinition([frArray(frDistOrNumber)], ([dists], { environment }) =>
-        distResultToValue(
-          algebraicProduct(dists.map(parseDistFromDistOrNumber), environment)
-        )
+      makeDefinition(
+        [frArray(frDistOrNumber)],
+        ([dists], { environment }) =>
+          distResultToValue(
+            algebraicProduct(dists.map(parseDistFromDistOrNumber), environment)
+          ),
+        frDist
       ),
     ],
   }),
   maker.make({
     name: "cumsum",
     definitions: [
-      makeDefinition([frArray(frDistOrNumber)], ([dists], { environment }) =>
-        distsResultToValue(
-          algebraicCumSum(dists.map(parseDistFromDistOrNumber), environment)
-        )
+      makeDefinition(
+        [frArray(frDistOrNumber)],
+        ([dists], { environment }) =>
+          distsResultToValue(
+            algebraicCumSum(dists.map(parseDistFromDistOrNumber), environment)
+          ),
+        frArray(frDist)
       ),
     ],
   }),
   maker.make({
     name: "cumprod",
     definitions: [
-      makeDefinition([frArray(frDistOrNumber)], ([dists], { environment }) =>
-        distsResultToValue(
-          algebraicCumProd(dists.map(parseDistFromDistOrNumber), environment)
-        )
+      makeDefinition(
+        [frArray(frDistOrNumber)],
+        ([dists], { environment }) =>
+          distsResultToValue(
+            algebraicCumProd(dists.map(parseDistFromDistOrNumber), environment)
+          ),
+        frArray(frDist)
       ),
     ],
   }),
   maker.make({
     name: "diff",
     definitions: [
-      makeDefinition([frArray(frDistOrNumber)], ([dists], { environment }) =>
-        distsResultToValue(
-          algebraicDiff(dists.map(parseDistFromDistOrNumber), environment)
-        )
+      makeDefinition(
+        [frArray(frDistOrNumber)],
+        ([dists], { environment }) =>
+          distsResultToValue(
+            algebraicDiff(dists.map(parseDistFromDistOrNumber), environment)
+          ),
+        frArray(frDist)
       ),
     ],
   }),

@@ -30,6 +30,10 @@ export type FRType<T> = {
   getName: () => string;
 };
 
+const isOptional = <T>(frType: FRType<T>): boolean => {
+  return "isOptional" in frType;
+};
+
 export const frNumber: FRType<number> = {
   unpack: (v: Value) => (v.type === "Number" ? v.value : undefined),
   pack: (v) => vNumber(v),
@@ -59,13 +63,13 @@ export const frDistOrNumber: FRType<BaseDist | number> = {
   unpack: (v) =>
     v.type === "Dist" ? v.value : v.type === "Number" ? v.value : undefined,
   pack: (v) => (typeof v === "number" ? vNumber(v) : vDist(v)),
-  getName: () => "distribution|number",
+  getName: () => "distribution | number",
 };
 export const frNumberOrString: FRType<string | number> = {
   unpack: (v) =>
     v.type === "String" ? v.value : v.type === "Number" ? v.value : undefined,
   pack: (v) => (typeof v === "number" ? vNumber(v) : vString(v)),
-  getName: () => "number|string",
+  getName: () => "number | string",
 };
 export const frDist: FRType<BaseDist> = {
   unpack: (v) => (v.type === "Dist" ? v.value : undefined),
@@ -75,7 +79,7 @@ export const frDist: FRType<BaseDist> = {
 export const frLambda: FRType<Lambda> = {
   unpack: (v) => (v.type === "Lambda" ? v.value : undefined),
   pack: (v) => vLambda(v),
-  getName: () => "lambda",
+  getName: () => "function",
 };
 export const frLambdaN = (paramLength: number): FRType<Lambda> => {
   return {
@@ -86,9 +90,27 @@ export const frLambdaN = (paramLength: number): FRType<Lambda> => {
         : undefined;
     },
     pack: (v) => vLambda(v),
-    getName: () => `lambda(${paramLength})`,
+    getName: () => `function(${paramLength})`,
   };
 };
+
+export const frLambdaTyped = (
+  inputs: FRType<any>[],
+  output: FRType<any>
+): FRType<Lambda> => {
+  return {
+    unpack: (v: Value) => {
+      return v.type === "Lambda" &&
+        v.value.parameterCounts().includes(inputs.length)
+        ? v.value
+        : undefined;
+    },
+    pack: (v) => vLambda(v),
+    getName: () =>
+      `(${inputs.map((i) => i.getName()).join(", ")}) => ${output.getName()}`,
+  };
+};
+
 export const frLambdaNand = (paramLengths: number[]): FRType<Lambda> => {
   return {
     unpack: (v: Value) => {
@@ -221,6 +243,12 @@ export const frAny: FRType<Value> = {
   getName: () => "any",
 };
 
+export const frGeneric = (index: string): FRType<Value> => ({
+  unpack: (v) => v,
+  pack: (v) => v,
+  getName: () => `'${index}`,
+});
+
 // We currently support dicts with up to 5 pairs.
 // The limit could be increased with the same pattern, but there might be a better solution for this.
 export function frDict<K1 extends string, T1>(
@@ -324,7 +352,7 @@ export function frDict<T extends object>(
       for (const [key, valueShape] of allKvs) {
         const subvalue = r.get(key);
         if (subvalue === undefined) {
-          if ("isOptional" in valueShape) {
+          if (isOptional(valueShape)) {
             // that's ok!
             continue;
           }
@@ -344,7 +372,7 @@ export function frDict<T extends object>(
           allKvs
             .filter(
               ([key, valueShape]) =>
-                !("isOptional" in valueShape) || (v as any)[key] !== null
+                !isOptional(valueShape) || (v as any)[key] !== null
             )
             .map(([key, valueShape]) => [key, valueShape.pack((v as any)[key])])
         )
@@ -352,7 +380,10 @@ export function frDict<T extends object>(
     getName: () =>
       "{" +
       allKvs
-        .map(([name, frType]) => `${name}: ${frType.getName()}`)
+        .map(
+          ([name, frType]) =>
+            `${name}${isOptional(frType) ? "?" : ""}: ${frType.getName()}`
+        )
         .join(", ") +
       "}",
   };
@@ -374,7 +405,7 @@ export const frOptional = <T>(
       }
       return itemType.pack(v);
     },
-    getName: () => `optional(${itemType.getName()})`,
+    getName: () => itemType.getName(),
     isOptional: true,
   };
 };
