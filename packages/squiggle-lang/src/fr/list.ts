@@ -154,7 +154,7 @@ export const library = [
     ],
     definitions: [
       makeAmbiguousDefinition(
-        [frNumber, frLambdaNand([2, 3])],
+        [frNumber, frLambdaNand([0, 1])],
         "Call with either 0 or 1 arguments, not both."
       ),
       makeDefinition(
