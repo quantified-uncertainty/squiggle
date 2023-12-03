@@ -17,6 +17,7 @@ export type RunOutput = {
   result: Value;
   bindings: Bindings;
   exports: Bindings;
+  error: IRuntimeError | undefined;
 };
 
 export type Import =
@@ -220,10 +221,13 @@ export class ProjectItem {
         throw new Error("Expected Program expression");
       }
 
-      const [result, contextAfterEvaluation] = evaluate(expression.value, {
-        ...context,
-        evaluate: asyncEvaluate,
-      });
+      const [result, contextAfterEvaluation, error] = evaluate(
+        expression.value,
+        {
+          ...context,
+          evaluate: asyncEvaluate,
+        }
+      );
 
       const bindings = contextAfterEvaluation.stack.asBindings();
       const exportNames = new Set(expression.value.value.exports);
@@ -232,6 +236,7 @@ export class ProjectItem {
         result,
         bindings,
         exports,
+        error,
       });
     } catch (e: unknown) {
       this.failRun(new SqRuntimeError(IRuntimeError.fromException(e)));

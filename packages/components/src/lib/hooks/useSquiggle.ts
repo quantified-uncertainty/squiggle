@@ -38,6 +38,7 @@ export type SquiggleOutput = {
       exports: SqDict;
       result: SqValue;
       bindings: SqDict;
+      error: any;
     },
     SqError
   >;
@@ -101,6 +102,7 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
         project.setContinues(sourceId, continues);
         await project.run(sourceId);
         const output = project.getOutput(sourceId);
+        console.log("output", output);
         const executionTime = Date.now() - startTime;
 
         setSquiggleOutput({

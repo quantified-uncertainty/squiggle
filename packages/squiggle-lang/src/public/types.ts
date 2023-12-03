@@ -7,6 +7,7 @@ export type SqOutput = {
   result: SqValue;
   bindings: SqDict;
   exports: SqDict;
+  error: any;
 };
 
 export type SqOutputResult = result<SqOutput, SqError>;

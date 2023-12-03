@@ -267,7 +267,12 @@ export class SqProject {
         )
     );
 
-    return Result.Ok({ result, bindings, exports });
+    return Result.Ok({
+      result,
+      bindings,
+      exports,
+      error: internalOutputR.value.error,
+    });
   }
 
   getResult(sourceId: string): Result.result<SqValue, SqError> {
