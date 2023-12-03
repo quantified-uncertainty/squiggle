@@ -7,6 +7,7 @@ import {
   SqDict,
   SqValue,
   result,
+  SqRuntimeError,
 } from "@quri/squiggle-lang";
 import { WINDOW_VARIABLE_NAME } from "../constants.js";
 
@@ -38,7 +39,7 @@ export type SquiggleOutput = {
       exports: SqDict;
       result: SqValue;
       bindings: SqDict;
-      error: any;
+      error: SqRuntimeError | undefined;
     },
     SqError
   >;

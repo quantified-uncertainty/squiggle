@@ -7,7 +7,7 @@ import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
 import { Value, vDict } from "../../value/index.js";
 
-import { SqError, SqOtherError } from "../SqError.js";
+import { SqError, SqOtherError, SqRuntimeError } from "../SqError.js";
 import { SqDict } from "../SqValue/SqDict.js";
 import { SqValue, wrapValue } from "../SqValue/index.js";
 import { SqValueContext } from "../SqValueContext.js";
@@ -16,6 +16,7 @@ import { SqValuePath } from "../SqValuePath.js";
 import { SqLinker } from "../SqLinker.js";
 import { SqOutputResult } from "../types.js";
 import { Import, ProjectItem, RunOutput } from "./ProjectItem.js";
+import { IRuntimeError } from "../../errors/IError.js";
 
 function getNeedToRunError() {
   return new SqOtherError("Need to run");
@@ -267,11 +268,14 @@ export class SqProject {
         )
     );
 
+    const error = internalOutputR.value.error;
     return Result.Ok({
       result,
       bindings,
       exports,
-      error: internalOutputR.value.error,
+      error: error
+        ? new SqRuntimeError(IRuntimeError.fromException(error))
+        : undefined,
     });
   }
 

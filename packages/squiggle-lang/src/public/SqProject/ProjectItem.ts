@@ -17,7 +17,7 @@ export type RunOutput = {
   result: Value;
   bindings: Bindings;
   exports: Bindings;
-  error: IRuntimeError | undefined;
+  error: SqError | undefined;
 };
 
 export type Import =

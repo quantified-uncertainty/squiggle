@@ -13,6 +13,7 @@ import {
 } from "../errors/messages.js";
 import { compileAst } from "../expression/compile.js";
 import { Expression } from "../expression/index.js";
+import { SqError, SqRuntimeError } from "../index.js";
 import { getStdLib } from "../library/index.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import * as Result from "../utility/result.js";
@@ -33,13 +34,13 @@ import { UserDefinedLambdaParameter, UserDefinedLambda } from "./lambda.js";
 export type ReducerFn = (
   expression: Expression,
   context: Context.ReducerContext
-) => [Value, Context.ReducerContext, any | undefined];
+) => [Value, Context.ReducerContext, SqError | undefined];
 
 type SubReducerFn<T extends Expression["type"] = Expression["type"]> = (
   expressionValue: Extract<Expression, { type: T }>["value"],
   context: Context.ReducerContext,
   ast: ASTNode
-) => [Value, Context.ReducerContext, any | undefined];
+) => [Value, Context.ReducerContext, SqError | undefined];
 
 function throwFrom(
   error: ErrorMessage,
@@ -118,8 +119,12 @@ const evaluateProgram: SubReducerFn<"Program"> = (expressionValue, context) => {
         statement,
         currentContext
       );
-    } catch (e) {
-      return [currentValue, currentContext, e];
+    } catch (e: unknown) {
+      return [
+        currentValue,
+        currentContext,
+        new SqRuntimeError(IRuntimeError.fromException(e)),
+      ];
     }
   }
   return [currentValue, currentContext, undefined];
