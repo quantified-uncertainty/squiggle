@@ -99,26 +99,16 @@ export function useSquiggle(args: SquiggleArgs): UseSquiggleOutput {
         const startTime = Date.now();
         project.setSource(sourceId, args.code);
         project.setContinues(sourceId, continues);
-        project.setCallback((output) => {
-          console.log("Setting", output);
-          setSquiggleOutput({
-            output: output,
-            code: args.code,
-            executionId,
-            executionTime: Date.now() - startTime,
-          });
-          // setIsRunning(false);
-        });
         await project.run(sourceId);
         const output = project.getOutput(sourceId);
         const executionTime = Date.now() - startTime;
 
-        // setSquiggleOutput({
-        //   output,
-        //   code: args.code,
-        //   executionId,
-        //   executionTime,
-        // });
+        setSquiggleOutput({
+          output,
+          code: args.code,
+          executionId,
+          executionTime,
+        });
         setIsRunning(false);
 
         //Set the output to the window so that it can be accessed by users/developers there

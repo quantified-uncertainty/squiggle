@@ -30,7 +30,6 @@ export const DynamicSquiggleViewer = forwardRef<SquiggleViewerHandle, Props>(
     },
     viewerRef
   ) {
-    console.log("Rendering DynamicSquiggleViewer");
     const squiggleViewer = squiggleOutput?.code ? (
       <div className="relative">
         {isRunning && (

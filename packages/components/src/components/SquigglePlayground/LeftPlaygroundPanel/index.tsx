@@ -83,7 +83,6 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
 
     const { onOutputChange } = props;
     useEffect(() => {
-      console.log("Output changed 86");
       onOutputChange({
         output: squiggleOutput,
         isRunning,

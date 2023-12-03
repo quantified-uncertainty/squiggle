@@ -1,4 +1,3 @@
-import { callbackify } from "util";
 import { ASTNode, parse } from "../ast/parse.js";
 import { defaultEnv } from "../dist/env.js";
 import {
@@ -30,18 +29,15 @@ import {
 } from "../value/index.js";
 import * as Context from "./context.js";
 import { UserDefinedLambdaParameter, UserDefinedLambda } from "./lambda.js";
-import { Bindings } from "./stack.js";
 
 export type ReducerFn = (
   expression: Expression,
-  context: Context.ReducerContext,
-  callBack: (c: Bindings) => void
+  context: Context.ReducerContext
 ) => [Value, Context.ReducerContext];
 
 type SubReducerFn<T extends Expression["type"] = Expression["type"]> = (
   expressionValue: Extract<Expression, { type: T }>["value"],
   context: Context.ReducerContext,
-  callback: (c: Bindings) => void,
   ast: ASTNode
 ) => [Value, Context.ReducerContext];
 
@@ -64,39 +60,35 @@ function throwFrom(
  * Don't call this function recursively! Call `context.evaluate` instead.
  * `context.evaluate` can inject additional behaviors, e.g. delay for pseudo-async evaluation.
  */
-export const evaluate: ReducerFn = (expression, context, callBack) => {
+export const evaluate: ReducerFn = (expression, context) => {
   const ast = expression.ast;
   switch (expression.type) {
     case "Block":
-      return evaluateBlock(expression.value, context, callBack, ast);
+      return evaluateBlock(expression.value, context, ast);
     case "Program":
-      return evaluateProgram(expression.value, context, callBack, ast);
+      return evaluateProgram(expression.value, context, ast);
     case "Array":
-      return evaluateArray(expression.value, context, callBack, ast);
+      return evaluateArray(expression.value, context, ast);
     case "Dict":
-      return evaluateDict(expression.value, context, callBack, ast);
+      return evaluateDict(expression.value, context, ast);
     case "Assign":
-      return evaluateAssign(expression.value, context, callBack, ast);
+      return evaluateAssign(expression.value, context, ast);
     case "ResolvedSymbol":
-      return evaluateResolvedSymbol(expression.value, context, callBack, ast);
+      return evaluateResolvedSymbol(expression.value, context, ast);
     case "Value":
-      return evaluateValue(expression.value, context, callBack, ast);
+      return evaluateValue(expression.value, context, ast);
     case "Ternary":
-      return evaluateTernary(expression.value, context, callBack, ast);
+      return evaluateTernary(expression.value, context, ast);
     case "Lambda":
-      return evaluateLambda(expression.value, context, callBack, ast);
+      return evaluateLambda(expression.value, context, ast);
     case "Call":
-      return evaluateCall(expression.value, context, callBack, ast);
+      return evaluateCall(expression.value, context, ast);
     default:
       throw new Error(`Unreachable: ${expression satisfies never}`);
   }
 };
 
-const evaluateBlock: SubReducerFn<"Block"> = (
-  statements,
-  context,
-  callBack
-) => {
+const evaluateBlock: SubReducerFn<"Block"> = (statements, context) => {
   /*
    * We could call `bindings.extend()` here, but we don't, since scopes are costly and bindings are immutable anyway.
    * So we just have to be careful to throw away block's bindings at the end of a block scope and return the original context.
@@ -109,18 +101,13 @@ const evaluateBlock: SubReducerFn<"Block"> = (
   for (const statement of statements) {
     [currentValue, currentContext] = context.evaluate(
       statement,
-      currentContext,
-      callBack
+      currentContext
     );
   }
   return [currentValue, context]; // throw away block's context
 };
 
-const evaluateProgram: SubReducerFn<"Program"> = (
-  expressionValue,
-  context,
-  callBack
-) => {
+const evaluateProgram: SubReducerFn<"Program"> = (expressionValue, context) => {
   // Same as Block, but doesn't drop the context, so that we could return bindings and exports from it.
   let currentContext = context;
   let currentValue: Value = vVoid();
@@ -128,36 +115,26 @@ const evaluateProgram: SubReducerFn<"Program"> = (
   for (const statement of expressionValue.statements) {
     [currentValue, currentContext] = context.evaluate(
       statement,
-      currentContext,
-      callBack
+      currentContext
     );
   }
   return [currentValue, currentContext];
 };
 
-const evaluateArray: SubReducerFn<"Array"> = (
-  expressionValue,
-  context,
-  callBack
-) => {
+const evaluateArray: SubReducerFn<"Array"> = (expressionValue, context) => {
   const values = expressionValue.map((element) => {
-    const [value] = context.evaluate(element, context, callBack);
+    const [value] = context.evaluate(element, context);
     return value;
   });
   const value = vArray(values);
   return [value, context];
 };
 
-const evaluateDict: SubReducerFn<"Dict"> = (
-  expressionValue,
-  context,
-  callBack,
-  ast
-) => {
+const evaluateDict: SubReducerFn<"Dict"> = (expressionValue, context, ast) => {
   const value = vDict(
     ImmutableMap(
       expressionValue.map(([eKey, eValue]) => {
-        const [key] = context.evaluate(eKey, context, callBack);
+        const [key] = context.evaluate(eKey, context);
         if (key.type !== "String") {
           return throwFrom(
             new REOther("Dict keys must be strings"),
@@ -166,7 +143,7 @@ const evaluateDict: SubReducerFn<"Dict"> = (
           );
         }
         const keyString: string = key.value;
-        const [value] = context.evaluate(eValue, context, callBack);
+        const [value] = context.evaluate(eValue, context);
         return [keyString, value];
       })
     )
@@ -174,13 +151,8 @@ const evaluateDict: SubReducerFn<"Dict"> = (
   return [value, context];
 };
 
-const evaluateAssign: SubReducerFn<"Assign"> = (
-  expressionValue,
-  context,
-  callBack
-) => {
-  const [result] = context.evaluate(expressionValue.right, context, callBack);
-  callBack(context.stack.asBindings());
+const evaluateAssign: SubReducerFn<"Assign"> = (expressionValue, context) => {
+  const [result] = context.evaluate(expressionValue.right, context);
   return [
     vVoid(),
     {
@@ -209,13 +181,11 @@ const evaluateValue: SubReducerFn<"Value"> = (expressionValue, context) => {
 const evaluateTernary: SubReducerFn<"Ternary"> = (
   expressionValue,
   context,
-  callback,
   ast
 ) => {
   const [predicateResult] = context.evaluate(
     expressionValue.condition,
-    context,
-    callback
+    context
   );
   if (predicateResult.type !== "Bool") {
     return throwFrom(
@@ -227,8 +197,7 @@ const evaluateTernary: SubReducerFn<"Ternary"> = (
 
   const [value] = context.evaluate(
     predicateResult.value ? expressionValue.ifTrue : expressionValue.ifFalse,
-    context,
-    callback
+    context
   );
   return [value, context];
 };
@@ -236,7 +205,6 @@ const evaluateTernary: SubReducerFn<"Ternary"> = (
 const evaluateLambda: SubReducerFn<"Lambda"> = (
   expressionValue,
   context,
-  callback,
   ast
 ) => {
   const parameters: UserDefinedLambdaParameter[] = [];
@@ -247,8 +215,7 @@ const evaluateLambda: SubReducerFn<"Lambda"> = (
       // First, we evaluate `[3, 5]` expression.
       const [annotationValue] = context.evaluate(
         parameterExpression.annotation,
-        context,
-        callback
+        context
       );
       // Now we cast it to domain value, e.g. `NumericRangeDomain(3, 5)`.
       // Casting can fail, in which case we throw the error with a correct stacktrace.
@@ -282,15 +249,10 @@ const evaluateLambda: SubReducerFn<"Lambda"> = (
   return [value, context];
 };
 
-const evaluateCall: SubReducerFn<"Call"> = (
-  expressionValue,
-  context,
-  callBack,
-  ast
-) => {
-  const [lambda] = context.evaluate(expressionValue.fn, context, callBack);
+const evaluateCall: SubReducerFn<"Call"> = (expressionValue, context, ast) => {
+  const [lambda] = context.evaluate(expressionValue.fn, context);
   const argValues = expressionValue.args.map((arg) => {
-    const [argValue] = context.evaluate(arg, context, callBack);
+    const [argValue] = context.evaluate(arg, context);
     return argValue;
   });
   switch (lambda.type) {
@@ -316,9 +278,7 @@ export async function evaluateExpressionToResult(
 ): Promise<result<Value, IRuntimeError>> {
   const context = createDefaultContext();
   try {
-    const [value] = context.evaluate(expression, context, () => {
-      return "";
-    });
+    const [value] = context.evaluate(expression, context);
     return Ok(value);
   } catch (e) {
     return Result.Err(IRuntimeError.fromException(e));
