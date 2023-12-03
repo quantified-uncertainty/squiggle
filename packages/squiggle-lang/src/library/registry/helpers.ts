@@ -27,6 +27,7 @@ import {
   frDist,
   frDistOrNumber,
   frNumber,
+  frSampleSet,
   frString,
 } from "./frTypes.js";
 import * as SampleSetDist from "../../dist/SampleSetDist/index.js";
@@ -393,7 +394,7 @@ export function twoVarSample(
   throw new REOther("Impossible branch");
 }
 
-export function makeTwoArgsDist(
+export function makeTwoArgsSamplesetDist(
   fn: (
     v1: number,
     v2: number
@@ -401,34 +402,38 @@ export function makeTwoArgsDist(
 ) {
   return makeDefinition(
     [frDistOrNumber, frDistOrNumber],
-    frDist,
+    frSampleSet,
     ([v1, v2], { environment }) => twoVarSample(v1, v2, environment, fn)
   );
 }
 
-export function makeOneArgDist(
+export function makeOneArgSamplesetDist(
   fn: (v: number) => Result.result<SymbolicDist.SymbolicDist, string>
 ) {
-  return makeDefinition([frDistOrNumber], frDist, ([v], { environment }) => {
-    const sampleFn = (a: number) =>
-      Result.fmap2(
-        fn(a),
-        (d) => d.sample(),
-        (e) => new OtherOperationError(e)
-      );
+  return makeDefinition(
+    [frDistOrNumber],
+    frSampleSet,
+    ([v], { environment }) => {
+      const sampleFn = (a: number) =>
+        Result.fmap2(
+          fn(a),
+          (d) => d.sample(),
+          (e) => new OtherOperationError(e)
+        );
 
-    if (v instanceof BaseDist) {
-      const s = makeSampleSet(v, environment);
-      return distResultToValue(s.samplesMap(sampleFn));
-    } else if (typeof v === "number") {
-      const result = fn(v);
-      if (!result.ok) {
-        throw new REOther(result.value);
+      if (v instanceof BaseDist) {
+        const s = makeSampleSet(v, environment);
+        return distResultToValue(s.samplesMap(sampleFn));
+      } else if (typeof v === "number") {
+        const result = fn(v);
+        if (!result.ok) {
+          throw new REOther(result.value);
+        }
+        return vDist(makeSampleSet(result.value, environment));
       }
-      return vDist(makeSampleSet(result.value, environment));
+      throw new REOther("Impossible branch");
     }
-    throw new REOther("Impossible branch");
-  });
+  );
 }
 
 function createComparisonDefinition<T>(

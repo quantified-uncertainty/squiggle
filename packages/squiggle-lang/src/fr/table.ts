@@ -3,7 +3,9 @@ import {
   frAny,
   frArray,
   frDict,
+  frGeneric,
   frLambda,
+  frLambdaTyped,
   frOptional,
   frString,
   frTableChart,
@@ -25,11 +27,16 @@ export const library = [
       makeDefinition(
         [
           frDict(
-            ["data", frArray(frAny)],
+            ["data", frArray(frGeneric("A"))],
             ["title", frOptional(frString)],
             [
               "columns",
-              frArray(frDict(["fn", frLambda], ["name", frOptional(frString)])),
+              frArray(
+                frDict(
+                  ["fn", frLambdaTyped([frGeneric("A")], frAny)],
+                  ["name", frOptional(frString)]
+                )
+              ),
             ]
           ),
         ],

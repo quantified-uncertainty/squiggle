@@ -103,7 +103,7 @@ export const library = [
     examples: [
       `Plot.dists({
   dists: [{ name: "dist", value: normal(0, 1) }],
-  xScale: Scale.symlog(),
+  xScale: Scale.symlog()
 })`,
     ],
     definitions: [
@@ -149,7 +149,7 @@ export const library = [
     examples: [
       `Plot.dist({
   dist: normal(0, 1),
-  xScale: Scale.symlog(),
+  xScale: Scale.symlog()
 })`,
     ],
     definitions: [

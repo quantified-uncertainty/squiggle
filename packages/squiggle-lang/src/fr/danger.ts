@@ -26,8 +26,8 @@ import {
   FnFactory,
   unpackDistResult,
   distResultToValue,
-  makeTwoArgsDist,
-  makeOneArgDist,
+  makeTwoArgsSamplesetDist,
+  makeOneArgSamplesetDist,
 } from "../library/registry/helpers.js";
 import { ReducerContext } from "../reducer/context.js";
 import { Lambda } from "../reducer/lambda.js";
@@ -436,13 +436,15 @@ const mapYLibrary: FRFunction[] = [
   maker.make({
     name: "binomialDist",
     examples: ["Danger.binomialDist(8, 0.5)"],
-    definitions: [makeTwoArgsDist((n, p) => SymbolicDist.Binomial.make(n, p))],
+    definitions: [
+      makeTwoArgsSamplesetDist((n, p) => SymbolicDist.Binomial.make(n, p)),
+    ],
   }),
   maker.make({
     name: "poissonDist",
     examples: ["Danger.poissonDist(10)"],
     definitions: [
-      makeOneArgDist((lambda) => SymbolicDist.Poisson.make(lambda)),
+      makeOneArgSamplesetDist((lambda) => SymbolicDist.Poisson.make(lambda)),
     ],
   }),
 ];
