@@ -117,6 +117,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
   }>({ output: undefined, isRunning: false });
 
   useEffect(() => {
+    console.log("Output change");
     const _output = output.output?.output;
     if (_output && _output.ok) {
       const exports = _output.value.exports;

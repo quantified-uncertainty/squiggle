@@ -34,7 +34,9 @@ export function makeSquiggleDefinition({
 
   // TODO - do we need runtime env? That would mean that we'd have to build stdlib for each env separately.
   const context = createContext(defaultEnv);
-  const [value] = context.evaluate(expressionResult.value, context);
+  const [value] = context.evaluate(expressionResult.value, context, () => {
+    return;
+  });
 
   return { name, value };
 }

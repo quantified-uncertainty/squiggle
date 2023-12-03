@@ -103,7 +103,9 @@ export class UserDefinedLambda extends BaseLambda {
         inFunction: context.inFunction,
       };
 
-      const [value] = context.evaluate(body, lambdaContext);
+      const [value] = context.evaluate(body, lambdaContext, (a) => {
+        console.log("Eval", a);
+      });
       return value;
     };
 

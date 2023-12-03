@@ -7,9 +7,10 @@ import { Bindings } from "../../reducer/stack.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
 import { Ok, result } from "../../utility/result.js";
-import { Value } from "../../value/index.js";
+import { Value, vString } from "../../value/index.js";
 import { SqCompileError, SqError, SqRuntimeError } from "../SqError.js";
 import { SqLinker } from "../SqLinker.js";
+import { SqOutputResult } from "../types.js";
 
 // source -> ast -> imports -> result/bindings/exports
 
@@ -181,7 +182,11 @@ export class ProjectItem {
     this.output = Result.Err(e);
   }
 
-  async run(context: ReducerContext, externals: ImmutableMap<string, Value>) {
+  async run(
+    context: ReducerContext,
+    externals: ImmutableMap<string, Value>,
+    callBack: (a: RunOutput) => void
+  ) {
     if (this.output) {
       return;
     }
@@ -212,7 +217,17 @@ export class ProjectItem {
       const asyncEvaluate: ReducerFn = (expression, context) => {
         // For now, runs are sync, so this doesn't do anything, but this might change in the future.
         // For example, if we decide to yield after each statement.
-        return wrappedEvaluate(expression, context);
+        return wrappedEvaluate(expression, context, (bindings) => {
+          const exportNames = new Set();
+          const exports = bindings.filter((_, key) => exportNames.has(key));
+          const output: RunOutput = {
+            result: vString(""),
+            bindings,
+            exports,
+          };
+          callBack(output);
+          return;
+        });
       };
 
       if (expression.value.type !== "Program") {
@@ -220,10 +235,23 @@ export class ProjectItem {
         throw new Error("Expected Program expression");
       }
 
-      const [result, contextAfterEvaluation] = evaluate(expression.value, {
-        ...context,
-        evaluate: asyncEvaluate,
-      });
+      const [result, contextAfterEvaluation] = evaluate(
+        expression.value,
+        {
+          ...context,
+          evaluate: asyncEvaluate,
+        },
+        (bindings) => {
+          const exportNames = new Set();
+          const exports = bindings.filter((_, key) => exportNames.has(key));
+          const output: RunOutput = {
+            result: vString(""),
+            bindings,
+            exports,
+          };
+          callBack(output);
+        }
+      );
 
       const bindings = contextAfterEvaluation.stack.asBindings();
       const exportNames = new Set(expression.value.value.exports);

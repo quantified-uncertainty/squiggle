@@ -5,7 +5,7 @@ import { createContext } from "../../reducer/context.js";
 import { Bindings } from "../../reducer/stack.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
-import { Value, vDict } from "../../value/index.js";
+import { Value, vDict, vString } from "../../value/index.js";
 
 import { SqError, SqOtherError } from "../SqError.js";
 import { SqDict } from "../SqValue/SqDict.js";
@@ -32,6 +32,7 @@ export class SqProject {
   private stdLib: Bindings;
   private environment: Env;
   private linker?: SqLinker; // if not present, imports are forbidden
+  private callBack: (c: SqOutputResult) => void;
 
   // Direct graph of dependencies is maintained inside each ProjectItem,
   // while the inverse one is stored in this variable.
@@ -47,6 +48,9 @@ export class SqProject {
     this.stdLib = options?.stdLib ?? Library.getStdLib();
     this.environment = options?.environment ?? defaultEnv;
     this.linker = options?.linker;
+    this.callBack = (_) => {
+      return;
+    };
   }
 
   static create(options?: Options) {
@@ -60,6 +64,10 @@ export class SqProject {
   setEnvironment(environment: Env) {
     // TODO - should we invalidate all outputs?
     this.environment = environment;
+  }
+
+  setCallback(callBack: (c: SqOutputResult) => void) {
+    this.callBack = callBack;
   }
 
   getStdLib(): Bindings {
@@ -270,6 +278,66 @@ export class SqProject {
     return Result.Ok({ result, bindings, exports });
   }
 
+  getOutput2(sourceId: string, runOutput: RunOutput): SqOutputResult {
+    const source = this.getSource(sourceId);
+    if (source === undefined) {
+      throw new Error("Internal error: source not found");
+    }
+
+    const astR = this.getItem(sourceId).ast;
+    if (!astR) {
+      throw new Error("Internal error: AST is missing when result is ok");
+    }
+    if (!astR.ok) {
+      return astR; // impossible because output is valid
+    }
+    const ast = astR.value;
+
+    const lastStatement = ast.statements.at(-1);
+
+    const hasEndExpression =
+      !!lastStatement && !isBindingStatement(lastStatement);
+
+    const result = wrapValue(
+      vString(""),
+      new SqValueContext({
+        project: this,
+        sourceId,
+        source,
+        ast,
+        valueAst: hasEndExpression ? lastStatement : ast,
+        valueAstIsPrecise: hasEndExpression,
+        path: new SqValuePath({
+          root: "result",
+          items: [],
+        }),
+      })
+    );
+
+    const [bindings, exports] = (["bindings", "exports"] as const).map(
+      (field) =>
+        new SqDict(
+          runOutput[field],
+          new SqValueContext({
+            project: this,
+            sourceId,
+            source,
+            ast: astR.value,
+            valueAst: astR.value,
+            valueAstIsPrecise: true,
+            path: new SqValuePath({
+              root: "bindings",
+              items: [],
+            }),
+          })
+        )
+    );
+
+    const out: SqOutputResult = Result.Ok({ result, bindings, exports });
+    this.callBack(out);
+    return out;
+  }
+
   getResult(sourceId: string): Result.result<SqValue, SqError> {
     return Result.fmap(this.getOutput(sourceId), ({ result }) => result);
   }
@@ -368,7 +436,9 @@ export class SqProject {
         this.getItem(sourceId).failRun(rExternals.value);
       } else {
         const context = createContext(this.getEnvironment());
-        await this.getItem(sourceId).run(context, rExternals.value);
+        await this.getItem(sourceId).run(context, rExternals.value, (output) =>
+          this.getOutput2(sourceId, output)
+        );
       }
     }
 
