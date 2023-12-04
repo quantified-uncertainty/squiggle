@@ -1,6 +1,11 @@
+import { infixFunctions, unaryFunctions } from "../../ast/peggyHelpers.js";
 import { BuiltinLambda, Lambda } from "../../reducer/lambda.js";
 import { Value } from "../../value/index.js";
 import { FnDefinition, fnDefinitionToString } from "./fnDefinition.js";
+import get from "lodash/get.js";
+import invert from "lodash/invert.js";
+
+type Shorthand = { type: "infix" | "unary"; symbol: string };
 
 export type FRFunction = {
   name: string;
@@ -11,13 +16,22 @@ export type FRFunction = {
   examples?: string[];
   description?: string;
   isExperimental?: boolean;
+  isUnit?: boolean;
+  shorthand?: Shorthand;
 };
 
 type FnNameDict = Map<string, FnDefinition[]>;
 
 export type FnDocumentation = Pick<
   FRFunction,
-  "description" | "requiresNamespace" | "nameSpace" | "name" | "examples"
+  | "description"
+  | "requiresNamespace"
+  | "nameSpace"
+  | "name"
+  | "examples"
+  | "isExperimental"
+  | "isUnit"
+  | "shorthand"
 > & { signatures: string[] };
 
 export class Registry {
@@ -82,6 +96,22 @@ export class Registry {
 
     if (!fn) return;
 
+    const _infixes = invert(infixFunctions);
+    const _unary = invert(unaryFunctions);
+
+    function getShorthandName(name: string): Shorthand | undefined {
+      const infix: string | undefined = get(_infixes, name, undefined);
+      if (infix) {
+        return { type: "infix", symbol: infix };
+      } else {
+        const unary: string | undefined = get(_unary, name, undefined);
+        if (unary) {
+          return { type: "unary", symbol: unary };
+        }
+        return undefined;
+      }
+    }
+
     return {
       name: fn.name,
       nameSpace: fn.nameSpace,
@@ -91,6 +121,8 @@ export class Registry {
       signatures: fn.definitions
         .filter((d) => !!d.isUsed)
         .map(fnDefinitionToString),
+      isUnit: fn.isUnit,
+      shorthand: getShorthandName(fn.name),
     };
   }
 

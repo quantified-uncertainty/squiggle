@@ -53,6 +53,7 @@ export class FnFactory {
       nameSpace: this.nameSpace,
       requiresNamespace: this.requiresNamespace,
       ...args,
+      isUnit: args.isUnit ?? false,
     };
   }
 

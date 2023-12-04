@@ -1,6 +1,6 @@
-import type { Meta } from "@storybook/react";
-import { FnDocumentation } from "../components/ui/FnDocumentation.js";
-
+import type { Meta, StoryObj } from "@storybook/react";
+import { FnDocumentation as Component } from "../components/ui/FnDocumentation.js";
+import { type FnDocumentation as FnDocumentationType } from "@quri/squiggle-lang";
 import {
   getAllFunctionNames,
   getFunctionDocumentation,
@@ -9,10 +9,11 @@ import {
 /**
  * Internal UI component. Used in `SquigglePlayground`.
  */
-const meta = { component: FnDocumentation } satisfies Meta<
-  typeof FnDocumentation
->;
+const meta: Meta<typeof Component> = {
+  component: Component,
+};
 export default meta;
+type Story = StoryObj<typeof meta>;
 
 export const FnStory = () => {
   const fnNames = getAllFunctionNames();
@@ -23,7 +24,7 @@ export const FnStory = () => {
       {fnDocumentation.map((e, i) =>
         e ? (
           <div className="pb-2" key={i}>
-            <FnDocumentation documentation={e} />
+            <Component documentation={e} />
           </div>
         ) : (
           ""
@@ -35,4 +36,24 @@ export const FnStory = () => {
 
 FnStory.story = {
   name: "All",
+};
+
+const foo: FnDocumentationType = {
+  name: "add",
+  nameSpace: "Number",
+  requiresNamespace: false,
+  signatures: ["(number, number) => number"],
+  examples: ["add(5,2)"],
+  isExperimental: true,
+  isUnit: true,
+  shorthand: { type: "unary", symbol: "-" },
+  description: `**Lorem Ipsum**
+More content *here*`,
+};
+
+export const Simple: Story = {
+  name: "Normal",
+  args: {
+    documentation: foo,
+  },
 };
