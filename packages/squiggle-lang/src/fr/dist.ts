@@ -7,7 +7,7 @@ import {
   frDist,
   frNumber,
   frDict,
-  frSampleSet,
+  frSampleSetDist,
   frDistSymbolic,
 } from "../library/registry/frTypes.js";
 import {
@@ -37,7 +37,7 @@ function makeCIDist<K1 extends string, K2 extends string>(
 ) {
   return makeDefinition(
     [frDict([lowKey, frNumber], [highKey, frNumber])],
-    frSampleSet,
+    frSampleSetDist,
     ([dict], { environment }) =>
       twoVarSample(dict[lowKey], dict[highKey], environment, fn)
   );
@@ -51,7 +51,7 @@ function makeMeanStdevDist(
 ) {
   return makeDefinition(
     [frDict(["mean", frNumber], ["stdev", frNumber])],
-    frSampleSet,
+    frSampleSetDist,
     ([{ mean, stdev }], { environment }) =>
       twoVarSample(mean, stdev, environment, fn)
   );
@@ -226,7 +226,7 @@ export const library: FRFunction[] = [
     definitions: [
       makeDefinition(
         [frNumber, frNumber, frNumber],
-        frSampleSet,
+        frSampleSetDist,
         ([low, medium, high], { environment }) => {
           const result = SymbolicDist.Triangular.make({ low, medium, high });
           if (!result.ok) {

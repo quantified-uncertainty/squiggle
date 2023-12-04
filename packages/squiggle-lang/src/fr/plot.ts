@@ -10,7 +10,7 @@ import {
   frNumber,
   frOptional,
   frPlot,
-  frSampleSet,
+  frSampleSetDist,
   frScale,
   frString,
 } from "../library/registry/frTypes.js";
@@ -257,8 +257,8 @@ export const library = [
       makeDefinition(
         [
           frDict(
-            ["xDist", frSampleSet],
-            ["yDist", frSampleSet],
+            ["xDist", frSampleSetDist],
+            ["yDist", frSampleSetDist],
             ["xScale", frOptional(frScale)],
             ["yScale", frOptional(frScale)],
             ["title", frOptional(frString)]

@@ -14,7 +14,7 @@ import {
   frLambdaTyped,
   frGeneric,
   frBool,
-  frSampleSet,
+  frSampleSetDist,
 } from "../library/registry/frTypes.js";
 import { FnFactory, doBinaryLambdaCall } from "../library/registry/helpers.js";
 import {
@@ -187,7 +187,7 @@ export const library = [
           return vArray(new Array(number).fill(value));
         }
       ),
-      makeDefinition([frSampleSet], frArray(frNumber), ([dist]) => {
+      makeDefinition([frSampleSetDist], frArray(frNumber), ([dist]) => {
         return vArray(dist.samples.map(vNumber));
       }),
     ],

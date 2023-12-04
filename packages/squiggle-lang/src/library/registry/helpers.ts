@@ -27,7 +27,7 @@ import {
   frDist,
   frDistOrNumber,
   frNumber,
-  frSampleSet,
+  frSampleSetDist,
   frString,
 } from "./frTypes.js";
 import * as SampleSetDist from "../../dist/SampleSetDist/index.js";
@@ -403,7 +403,7 @@ export function makeTwoArgsSamplesetDist(
 ) {
   return makeDefinition(
     [frDistOrNumber, frDistOrNumber],
-    frSampleSet,
+    frSampleSetDist,
     ([v1, v2], { environment }) => twoVarSample(v1, v2, environment, fn)
   );
 }
@@ -413,7 +413,7 @@ export function makeOneArgSamplesetDist(
 ) {
   return makeDefinition(
     [frDistOrNumber],
-    frSampleSet,
+    frSampleSetDist,
     ([v], { environment }) => {
       const sampleFn = (a: number) =>
         Result.fmap2(

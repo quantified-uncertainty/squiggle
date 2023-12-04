@@ -104,7 +104,7 @@ export const frDistPointset: FRType<PointSetDist> = {
   getName: () => "pointSetDist",
 };
 
-export const frSampleSet: FRType<SampleSetDist> = {
+export const frSampleSetDist: FRType<SampleSetDist> = {
   unpack: (v) =>
     v.type === "Dist" && v.value instanceof SampleSetDist ? v.value : undefined,
   pack: (v) => vDist(v),
