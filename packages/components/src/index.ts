@@ -37,5 +37,3 @@ export const d3Extended = {
   scaleSymlog,
   scalePow,
 };
-
-export { ModuleDocumentation } from "./components/ui/ModuleDocumentation.js";
