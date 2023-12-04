@@ -55,4 +55,11 @@ describe("Operators", () => {
     testEvalToBe("typeOf(true)", '"Boolean"');
     testEvalToBe("typeOf({|f| f})", '"Function"');
   });
+  describe("not", () => {
+    testEvalToBe("not(3)", "false");
+    testEvalToBe("!!(3)", "true");
+    testEvalToBe("not(0)", "true");
+    testEvalToBe("!(0)", "true");
+    testEvalToBe("!(false)", "true");
+  });
 });

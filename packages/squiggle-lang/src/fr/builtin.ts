@@ -39,7 +39,7 @@ export const library = [
     definitions: [
       makeDefinition([frNumber], ([x]) => {
         // unary prefix !
-        return vBool(x !== 0);
+        return vBool(x === 0);
       }),
       makeDefinition([frBool], ([x]) => {
         // unary prefix !
