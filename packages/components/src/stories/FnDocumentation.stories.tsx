@@ -38,7 +38,7 @@ FnStory.story = {
   name: "All",
 };
 
-const foo: FnDocumentationType = {
+const documentation: FnDocumentationType = {
   name: "add",
   nameSpace: "Number",
   requiresNamespace: false,
@@ -54,6 +54,6 @@ More content *here*`,
 export const Simple: Story = {
   name: "Normal",
   args: {
-    documentation: foo,
+    documentation,
   },
 };
