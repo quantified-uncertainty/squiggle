@@ -318,6 +318,15 @@ export function distResultToValue(
   return vDist(result.value);
 }
 
+export function distResultToDist(
+  result: Result.result<BaseDist, DistError>
+): BaseDist {
+  if (!result.ok) {
+    throw new REDistributionError(result.value);
+  }
+  return result.value;
+}
+
 export function distsResultToValue(
   result: Result.result<BaseDist[], DistError>
 ): Value {
@@ -334,7 +343,6 @@ export function makeSampleSet(d: BaseDist, env: Env) {
   }
   return result.value;
 }
-
 export function twoVarSample(
   v1: BaseDist | number,
   v2: BaseDist | number,
@@ -343,7 +351,7 @@ export function twoVarSample(
     v1: number,
     v2: number
   ) => Result.result<SymbolicDist.SymbolicDist, string>
-): Value {
+): BaseDist {
   const sampleFn = (a: number, b: number) =>
     Result.fmap2(
       fn(a, b),
@@ -354,7 +362,7 @@ export function twoVarSample(
   if (v1 instanceof BaseDist && v2 instanceof BaseDist) {
     const s1 = makeSampleSet(v1, env);
     const s2 = makeSampleSet(v2, env);
-    return distResultToValue(
+    return distResultToDist(
       SampleSetDist.map2({
         fn: sampleFn,
         t1: s1,
@@ -363,16 +371,16 @@ export function twoVarSample(
     );
   } else if (v1 instanceof BaseDist && typeof v2 === "number") {
     const s1 = makeSampleSet(v1, env);
-    return distResultToValue(s1.samplesMap((a) => sampleFn(a, v2)));
+    return distResultToDist(s1.samplesMap((a) => sampleFn(a, v2)));
   } else if (typeof v1 === "number" && v2 instanceof BaseDist) {
     const s2 = makeSampleSet(v2, env);
-    return distResultToValue(s2.samplesMap((a) => sampleFn(v1, a)));
+    return distResultToDist(s2.samplesMap((a) => sampleFn(v1, a)));
   } else if (typeof v1 === "number" && typeof v2 === "number") {
     const result = fn(v1, v2);
     if (!result.ok) {
       throw new REOther(result.value);
     }
-    return vDist(makeSampleSet(result.value, env));
+    return makeSampleSet(result.value, env);
   }
   throw new REOther("Impossible branch");
 }
@@ -385,7 +393,7 @@ export function makeTwoArgsDist(
 ) {
   return makeDefinition(
     [frDistOrNumber, frDistOrNumber],
-    ([v1, v2], { environment }) => twoVarSample(v1, v2, environment, fn)
+    ([v1, v2], { environment }) => vDist(twoVarSample(v1, v2, environment, fn))
   );
 }
 

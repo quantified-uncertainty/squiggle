@@ -1,6 +1,6 @@
 import { REArgumentError, REDomainError } from "../errors/messages.js";
-import { SDate } from "../utility/SDate.js";
-import { Value, VNumber, VDate } from "./index.js";
+import { SDateDist, SDateNumber } from "../utility/SDate.js";
+import { Value, VNumber, VDateNumber } from "./index.js";
 import { Scale } from "./index.js";
 
 function _assertCorrectType(value: Value, expectedType: string) {
@@ -93,8 +93,8 @@ export class DateRangeDomain extends BaseDomain {
   readonly valueType = "Date";
 
   constructor(
-    public min: SDate,
-    public max: SDate
+    public min: SDateNumber,
+    public max: SDateNumber
   ) {
     super();
   }
@@ -108,9 +108,9 @@ export class DateRangeDomain extends BaseDomain {
     _assertWithinBounds(
       this.min.toMs(),
       this.max.toMs(),
-      (value as VDate).value.toMs(),
+      (value as VDateNumber).value.toMs(),
       this,
-      (n) => SDate.fromMs(n).toString()
+      (n) => SDateNumber.fromMs(n).toString()
     );
   }
 
@@ -148,14 +148,14 @@ export function annotationToDomain(value: Value): Domain {
     throw new REArgumentError("Expected two-value array");
   }
   const [min, max] = value.value;
-  if (min.type !== "Number" && min.type !== "Date") {
+  if (min.type !== "Number" && min.type !== "DateNumber") {
     throw new REArgumentError("Min value is not a number or date");
   }
-  if (max.type !== "Number" && max.type !== "Date") {
+  if (max.type !== "Number" && max.type !== "DateNumber") {
     throw new REArgumentError("Max value is not a number or date");
   }
 
-  if (min.type === "Date" && max.type === "Date") {
+  if (min.type === "DateNumber" && max.type === "DateNumber") {
     _assertMinLessThanMax(min.value.toMs(), max.value.toMs());
     return new DateRangeDomain(min.value, max.value);
   } else if (min.type === "Number" && max.type === "Number") {

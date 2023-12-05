@@ -1,6 +1,17 @@
-import { SDate } from "../../utility/SDate.js";
+import { BaseDist } from "../../dist/BaseDist.js";
+import { PointMass } from "../../dist/SymbolicDist.js";
+import { Env } from "../../index.js";
+import { SDateDist, SDateNumber } from "../../utility/SDate.js";
 import { result } from "../../utility/result.js";
-import { Value, vDate, vLambda, vNumber, vString } from "../../value/index.js";
+import {
+  Value,
+  vDate,
+  vDateNumber,
+  vDuration,
+  vLambda,
+  vNumber,
+  vString,
+} from "../../value/index.js";
 import { SqError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqArray } from "./SqArray.js";
@@ -22,6 +33,8 @@ export function wrapValue(value: Value, context?: SqValueContext) {
       return new SqBoolValue(value, context);
     case "Date":
       return new SqDateValue(value, context);
+    case "DateNumber":
+      return new SqDateNumberValue(value, context);
     case "Dist":
       return new SqDistributionValue(value, context);
     case "Lambda":
@@ -100,24 +113,48 @@ export class SqBoolValue extends SqAbstractValue<"Bool", boolean> {
   }
 }
 
-export class SqDateValue extends SqAbstractValue<"Date", Date> {
-  tag = "Date" as const;
+export class SqDateNumberValue extends SqAbstractValue<"DateNumber", number> {
+  tag = "DateNumber" as const;
 
-  static create(value: SDate) {
-    return new SqDateValue(vDate(value));
+  static create(value: SDateNumber) {
+    return new SqDateNumberValue(vDateNumber(value));
   }
 
   static fromNumber(value: number) {
-    return SqDateValue.create(SDate.fromMs(value));
+    return SqDateValue.create(SDateDist.fromMs(value));
   }
 
-  get value(): SDate {
-    return this._value.value;
+  get value(): number {
+    return this._value.value.toMs();
   }
 
   //Note: This reveals the underlying Date object, but we might prefer to keep it hidden
   asJS() {
-    return this.value.toDate();
+    return this.value;
+  }
+}
+export class SqDateValue extends SqAbstractValue<"Date", BaseDist> {
+  tag = "Date" as const;
+
+  static create(value: SDateDist) {
+    return new SqDateValue(vDate(value));
+  }
+
+  static fromNumber(value: number) {
+    return SqDateValue.create(SDateDist.fromMs(value));
+  }
+
+  get value(): SDateDist {
+    return this._value.value;
+  }
+
+  toDist(): SqDistribution {
+    return wrapDistribution(this.value.toMs());
+  }
+
+  //Note: This reveals the underlying Date object, but we might prefer to keep it hidden
+  asJS() {
+    return this.value.value;
   }
 }
 
@@ -196,7 +233,7 @@ export class SqStringValue extends SqAbstractValue<"String", string> {
   }
 }
 
-export class SqDurationValue extends SqAbstractValue<"Duration", number> {
+export class SqDurationValue extends SqAbstractValue<"Duration", BaseDist> {
   tag = "Duration" as const;
 
   get value() {
@@ -205,6 +242,19 @@ export class SqDurationValue extends SqAbstractValue<"Duration", number> {
 
   asJS() {
     return this._value.value.toMs();
+  }
+
+  toDist(): SqDistribution {
+    return wrapDistribution(this.value.toMs());
+  }
+
+  divideyByConstant(value: number, env: Env): SqDurationValue {
+    const dist = this._value.value.divideByNumber(new PointMass(value), env);
+    if (dist.ok) {
+      return new SqDurationValue(vDuration(dist.value));
+    } else {
+      throw new Error("divideyByConstant failed");
+    }
   }
 }
 

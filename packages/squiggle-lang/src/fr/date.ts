@@ -1,4 +1,6 @@
-import { REOther } from "../errors/messages.js";
+import { DistError } from "../dist/DistError.js";
+import { REDistributionError, REOther } from "../errors/messages.js";
+import { result } from "../index.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frDate,
@@ -6,14 +8,16 @@ import {
   frNumber,
   frString,
   frDuration,
+  frDateNumber,
 } from "../library/registry/frTypes.js";
 import {
   FnFactory,
   makeNumericComparisons,
 } from "../library/registry/helpers.js";
-import { SDate } from "../utility/SDate.js";
+import { SDateNumber, SDateDist } from "../utility/SDate.js";
+import { getExt, getExtFn } from "../utility/result.js";
 import { DateRangeDomain } from "../value/domain.js";
-import { vDate, vDomain, vNumber, vDuration } from "../value/index.js";
+import { vDate, vDateNumber, vDomain, vDuration } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Date",
@@ -21,73 +25,54 @@ const maker = new FnFactory({
 });
 
 const makeYearFn = makeDefinition([frNumber], ([year]) => {
-  const result = SDate.fromYear(year);
-  if (!result.ok) {
-    throw new REOther(result.value);
-  }
-  return vDate(result.value);
+  const result = SDateNumber.fromYear(year);
+  const value = getExtFn(result, (e) => new REOther(e));
+  return vDateNumber(value);
 });
-
+export function unpackDistResult<T>(result: result<T, DistError>): T {
+  if (!result.ok) {
+    throw new REDistributionError(result.value);
+  }
+  return result.value;
+}
 export const library = [
   ...makeNumericComparisons(
     maker,
     (d1, d2) => d1.smaller(d2),
     (d1, d2) => d1.larger(d2),
     (d1, d2) => d1.isEqual(d2),
-    frDate
+    frDateNumber
   ),
   maker.make({
     name: "make",
     requiresNamespace: true,
     examples: ['Date.make("2020-05-12")', "Date.make(2020, 5, 10)"],
-    output: "Date",
+    output: "DateNumber",
     definitions: [
       makeDefinition([frString], ([str]) => {
-        const result = SDate.fromString(str);
+        const result = SDateNumber.fromString(str);
         if (!result.ok) {
           throw new REOther(result.value);
         }
-        return vDate(result.value);
+        return vDateNumber(result.value);
       }),
 
       makeDefinition([frNumber, frNumber, frNumber], ([yr, month, date]) => {
-        return vDate(SDate.fromYearMonthDay(yr, month, date));
+        return vDateNumber(SDateNumber.fromYearMonthDay(yr, month, date));
       }),
     ],
   }),
   maker.fromDefinition("fromYear", makeYearFn),
   maker.fromDefinition("fromUnit_year", makeYearFn),
-  // same name as used in date-fns
-  maker.make({
-    name: "fromUnixTime",
-    examples: ["Date.fromUnixTime(1589222400)"],
-    requiresNamespace: true,
-    output: "Date",
-    definitions: [
-      makeDefinition([frNumber], ([num]) => {
-        return vDate(SDate.fromUnixS(num));
-      }),
-    ],
-  }),
-  maker.make({
-    name: "toUnixTime",
-    examples: ["Date.toUnixTime(Date.make(2020, 5, 12))"],
-    requiresNamespace: true,
-    output: "Number",
-    definitions: [
-      makeDefinition([frDate], ([date]) => {
-        return vNumber(date.toUnixS());
-      }),
-    ],
-  }),
   maker.make({
     name: "subtract",
     examples: ["Date.make(2020, 5, 12) - Date.make(2000, 1, 1)"],
     output: "Duration",
     definitions: [
-      makeDefinition([frDate, frDate], ([d1, d2]) =>
-        vDuration(d1.subtract(d2))
-      ),
+      makeDefinition([frDate, frDate], ([d1, d2], { environment }) => {
+        const result = d1.subtract(d2, environment);
+        return vDuration(getExt(result));
+      }),
     ],
   }),
   maker.make({
@@ -95,8 +80,8 @@ export const library = [
     examples: ["Date.make(2020, 5, 12) - 20years"],
     output: "Date",
     definitions: [
-      makeDefinition([frDate, frDuration], ([d1, d2]) =>
-        vDate(d1.subtractDuration(d2))
+      makeDefinition([frDate, frDuration], ([d1, d2], { environment }) =>
+        vDate(unpackDistResult(d1.subtractDuration(d2, environment)))
       ),
     ],
   }),
@@ -108,11 +93,11 @@ export const library = [
     ],
     output: "Date",
     definitions: [
-      makeDefinition([frDate, frDuration], ([d1, d2]) =>
-        vDate(d1.addDuration(d2))
+      makeDefinition([frDate, frDuration], ([d1, d2], { environment }) =>
+        vDate(unpackDistResult(d1.addDuration(d2, environment)))
       ),
-      makeDefinition([frDuration, frDate], ([d1, d2]) =>
-        vDate(d2.addDuration(d1))
+      makeDefinition([frDuration, frDate], ([d1, d2], { environment }) =>
+        vDate(unpackDistResult(d2.addDuration(d1, environment)))
       ),
     ],
   }),
@@ -123,7 +108,7 @@ export const library = [
     examples: ["Date.rangeDomain({ min: 2000year, max: 2010year })"],
     definitions: [
       makeDefinition(
-        [frDict(["min", frDate], ["max", frDate])],
+        [frDict(["min", frDateNumber], ["max", frDateNumber])],
         ([{ min, max }]) => {
           return vDomain(new DateRangeDomain(min, max));
         }

@@ -86,3 +86,11 @@ export function getExt<T, E>(r: result<T, E>): T {
     throw r.value;
   }
 }
+
+export function getExtFn<T, E>(r: result<T, E>, fn: (r: E) => any): T {
+  if (r.ok) {
+    return r.value;
+  } else {
+    throw fn(r.value);
+  }
+}

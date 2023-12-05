@@ -6,8 +6,8 @@ import {
   REOther,
 } from "../errors/messages.js";
 import { Lambda } from "../reducer/lambda.js";
-import { SDate } from "../utility/SDate.js";
-import { SDuration } from "../utility/SDuration.js";
+import { SDateDist, SDateNumber } from "../utility/SDate.js";
+import { SDurationDist } from "../utility/SDuration.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { DateRangeDomain, Domain, NumericRangeDomain } from "./domain.js";
 import { shuffle } from "../utility/E_A.js";
@@ -116,11 +116,27 @@ class VBool extends BaseValue {
 }
 export const vBool = (v: boolean) => new VBool(v);
 
+export class VDateNumber extends BaseValue {
+  readonly type = "DateNumber";
+  readonly publicName = "DateNumber";
+
+  constructor(public value: SDateNumber) {
+    super();
+  }
+  toString() {
+    return this.value.toString();
+  }
+  isEqual(other: VDateNumber) {
+    return this.value.isEqual(other.value);
+  }
+}
+export const vDateNumber = (v: SDateNumber) => new VDateNumber(v);
+
 export class VDate extends BaseValue {
   readonly type = "Date";
   readonly publicName = "Date";
 
-  constructor(public value: SDate) {
+  constructor(public value: SDateDist) {
     super();
   }
   toString() {
@@ -130,7 +146,7 @@ export class VDate extends BaseValue {
     return this.value.isEqual(other.value);
   }
 }
-export const vDate = (v: SDate) => new VDate(v);
+export const vDate = (v: SDateDist) => new VDate(v);
 
 class VDist extends BaseValue {
   readonly type = "Dist";
@@ -272,7 +288,7 @@ class VDuration extends BaseValue {
   readonly type = "Duration";
   readonly publicName = "Time Duration";
 
-  constructor(public value: SDuration) {
+  constructor(public value: SDurationDist) {
     super();
   }
 
@@ -283,7 +299,7 @@ class VDuration extends BaseValue {
     return this.value.toMs() === other.value.toMs();
   }
 }
-export const vDuration = (v: SDuration) => new VDuration(v);
+export const vDuration = (v: SDurationDist) => new VDuration(v);
 
 export type CommonScaleArgs = {
   min?: number;
@@ -621,9 +637,9 @@ export class VDomain extends BaseValue implements Indexable {
     return this.value.type;
   }
 
-  get(key: Value): VNumber | VDate {
-    const mapValue = (value: number | SDate) =>
-      typeof value === "number" ? vNumber(value) : vDate(value);
+  get(key: Value): VNumber | VDateNumber {
+    const mapValue = (value: number | SDateNumber) =>
+      typeof value === "number" ? vNumber(value) : vDateNumber(value);
 
     if (key.type === "String") {
       if (key.value === "min") {
@@ -660,6 +676,7 @@ export const vVoid = () => new VVoid();
 export type Value =
   | VArray
   | VBool
+  | VDateNumber
   | VDate
   | VDist
   | VLambda
@@ -684,6 +701,7 @@ export function isEqual(a: Value, b: Value): boolean {
     case "Number":
     case "String":
     case "Dist":
+    case "DateNumber":
     case "Date":
     case "Duration":
     case "Scale":

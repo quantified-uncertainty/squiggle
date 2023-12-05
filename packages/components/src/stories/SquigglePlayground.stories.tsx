@@ -170,6 +170,8 @@ varVoid = ()
 varArray = [1,2,3]
 varLambda = {|e| "Test"}
 varScale = Scale.symlog({ min: -2, max: 5})
+varDuration = hours(3 to 10)
+varDate = 2020year + years(5 to 10)
 
 varDict = {fir: 1, secon: 2}
 

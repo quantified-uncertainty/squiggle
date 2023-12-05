@@ -1,7 +1,7 @@
 import { BaseDist } from "../../dist/BaseDist.js";
 import { Lambda } from "../../reducer/lambda.js";
-import { SDate } from "../../utility/SDate.js";
-import { SDuration } from "../../utility/SDuration.js";
+import { SDateDist, SDateNumber } from "../../utility/SDate.js";
+import { SDurationDist } from "../../utility/SDuration.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import {
   Scale,
@@ -18,6 +18,7 @@ import {
   vDuration,
   vInput,
   Input,
+  vDateNumber,
 } from "../../value/index.js";
 
 /*
@@ -45,12 +46,17 @@ export const frBool: FRType<boolean> = {
   pack: (v) => vBool(v),
   getName: () => "bool",
 };
-export const frDate: FRType<SDate> = {
+export const frDateNumber: FRType<SDateNumber> = {
+  unpack: (v) => (v.type === "DateNumber" ? v.value : undefined),
+  pack: (v) => vDateNumber(v),
+  getName: () => "date",
+};
+export const frDate: FRType<SDateDist> = {
   unpack: (v) => (v.type === "Date" ? v.value : undefined),
   pack: (v) => vDate(v),
   getName: () => "date",
 };
-export const frDuration: FRType<SDuration> = {
+export const frDuration: FRType<SDurationDist> = {
   unpack: (v) => (v.type === "Duration" ? v.value : undefined),
   pack: (v) => vDuration(v),
   getName: () => "duration",
@@ -60,6 +66,17 @@ export const frDistOrNumber: FRType<BaseDist | number> = {
     v.type === "Dist" ? v.value : v.type === "Number" ? v.value : undefined,
   pack: (v) => (typeof v === "number" ? vNumber(v) : vDist(v)),
   getName: () => "distribution|number",
+};
+export const frPointMassDistOrNumber: FRType<number> = {
+  unpack: (v) => {
+    if (v.type === "Dist" && v.value.min() === v.value.max()) {
+      return v.value.min();
+    } else {
+      return undefined;
+    }
+  },
+  pack: (v) => (typeof v === "number" ? vNumber(v) : vDist(v)),
+  getName: () => "pointMassDistribution",
 };
 export const frNumberOrString: FRType<string | number> = {
   unpack: (v) =>
