@@ -4,13 +4,12 @@ import { Env } from "../dist/env.js";
 import { REArgumentError, REDistributionError } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
+  frDict,
   frDist,
   frDistOrNumber,
-  frDict,
   frNumber,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { vNumber } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Dist",
@@ -32,7 +31,7 @@ const runScoringScalarAnswer = (
   if (!result.ok) {
     throw new REDistributionError(result.value);
   }
-  return vNumber(result.value);
+  return result.value;
 };
 
 const runScoringDistAnswer = (
@@ -50,7 +49,7 @@ const runScoringDistAnswer = (
   if (!result.ok) {
     throw new REDistributionError(result.value);
   }
-  return vNumber(result.value);
+  return result.value;
 };
 
 export const library = [

@@ -2,13 +2,7 @@ import { BaseDist } from "../dist/BaseDist.js";
 import { argumentError } from "../dist/DistError.js";
 import * as distOperations from "../dist/distOperations/index.js";
 import { Env } from "../dist/env.js";
-import {
-  parseDistFromDistOrNumber,
-  unpackDistResult,
-} from "../library/registry/helpers.js";
 import { REDistributionError } from "../errors/messages.js";
-import * as E_A from "../utility/E_A.js";
-import { Value, vDist } from "../value/index.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
@@ -17,16 +11,19 @@ import {
   frNumber,
   frTuple,
 } from "../library/registry/frTypes.js";
+import {
+  parseDistFromDistOrNumber,
+  unwrapDistResult,
+} from "../library/registry/helpers.js";
+import * as E_A from "../utility/E_A.js";
 
 function mixtureWithGivenWeights(
   distributions: BaseDist[],
-  weights: number[],
+  weights: readonly number[],
   env: Env
-): Value {
-  return vDist(
-    unpackDistResult(
-      distOperations.mixture(E_A.zip(distributions, weights), { env })
-    )
+): BaseDist {
+  return unwrapDistResult(
+    distOperations.mixture(E_A.zip(distributions, weights), { env })
   );
 }
 

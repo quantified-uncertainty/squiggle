@@ -3,31 +3,33 @@ import * as Discrete from "../PointSet/Discrete.js";
 import * as XYShape from "../XYShape.js";
 import { xyShapeDistError } from "../dist/DistError.js";
 import { PointSetDist } from "../dist/PointSetDist.js";
+import { PointMass } from "../dist/SymbolicDist.js";
+import { REDistributionError } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
-  frDist,
-  frNumber,
   frDict,
+  frDist,
   frDistPointset,
   frLambdaTyped,
+  frNumber,
 } from "../library/registry/frTypes.js";
 import {
   FnFactory,
   doNumberLambdaCall,
-  repackDistResult,
+  unwrapDistResult,
 } from "../library/registry/helpers.js";
-import { REDistributionError } from "../errors/messages.js";
 import { Ok } from "../utility/result.js";
-import { vDist, vNumber } from "../value/index.js";
-import { PointMass } from "../dist/SymbolicDist.js";
+import { vNumber } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "PointSet",
   requiresNamespace: true,
 });
 
-const argsToXYShape = (inputs: { x: number; y: number }[]): XYShape.XYShape => {
+const argsToXYShape = (
+  inputs: readonly { x: number; y: number }[]
+): XYShape.XYShape => {
   const result = XYShape.T.makeFromZipped(
     inputs.map(({ x, y }) => [x, y] as const)
   );
@@ -38,12 +40,12 @@ const argsToXYShape = (inputs: { x: number; y: number }[]): XYShape.XYShape => {
 };
 
 const fromDist = makeDefinition([frDist], frDistPointset, ([dist], context) =>
-  repackDistResult(dist.toPointSetDist(context.environment))
+  unwrapDistResult(dist.toPointSetDist(context.environment))
 );
 
 const fromNumber = makeDefinition([frNumber], frDistPointset, ([num], _) => {
   const pointMass = new PointMass(num);
-  return repackDistResult(pointMass.toPointSetDist());
+  return unwrapDistResult(pointMass.toPointSetDist());
 });
 
 export const library = [
@@ -74,7 +76,7 @@ export const library = [
         [frDistPointset, frNumber],
         frDistPointset,
         ([dist, number]) => {
-          return vDist(dist.downsample(number));
+          return dist.downsample(number);
         }
       ),
     ],
@@ -88,7 +90,7 @@ export const library = [
         [frDistPointset, frLambdaTyped([frNumber], frNumber)],
         frDistPointset,
         ([dist, lambda], context) => {
-          return repackDistResult(
+          return unwrapDistResult(
             dist.mapYResult(
               (y) => Ok(doNumberLambdaCall(lambda, [vNumber(y)], context)),
               undefined,
@@ -115,12 +117,10 @@ export const library = [
         [frArray(frDict(["x", frNumber], ["y", frNumber]))],
         frDistPointset,
         ([arr]) => {
-          return vDist(
-            new PointSetDist(
-              new Continuous.ContinuousShape({
-                xyShape: argsToXYShape(arr),
-              }).toMixed()
-            )
+          return new PointSetDist(
+            new Continuous.ContinuousShape({
+              xyShape: argsToXYShape(arr),
+            }).toMixed()
           );
         }
       ),
@@ -142,12 +142,10 @@ export const library = [
         [frArray(frDict(["x", frNumber], ["y", frNumber]))],
         frDistPointset,
         ([arr]) => {
-          return vDist(
-            new PointSetDist(
-              new Discrete.DiscreteShape({
-                xyShape: argsToXYShape(arr),
-              }).toMixed()
-            )
+          return new PointSetDist(
+            new Discrete.DiscreteShape({
+              xyShape: argsToXYShape(arr),
+            }).toMixed()
           );
         }
       ),

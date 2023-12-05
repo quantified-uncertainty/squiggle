@@ -6,18 +6,21 @@ import { FRType, frAny } from "./frTypes.js";
 // Type safety of `FnDefinition is guaranteed by `makeDefinition` signature below and by `FRType` unpack logic.
 // It won't be possible to make `FnDefinition` generic without sacrificing type safety in other parts of the codebase,
 // because of contravariance (we need to store all FnDefinitions in a generic array later on).
-export type FnDefinition = {
+export type FnDefinition<OutputType = any> = {
   inputs: FRType<any>[];
-  run: (args: any[], context: ReducerContext) => Value;
-  output: FRType<any>;
+  run: (args: any[], context: ReducerContext) => OutputType;
+  output: FRType<OutputType>;
   isUsed: boolean;
 };
 
-export function makeDefinition<const T extends any[]>(
+export function makeDefinition<
+  const InputTypes extends any[],
+  const OutputType,
+>(
   // [...] wrapper is important, see also: https://stackoverflow.com/a/63891197
-  inputs: [...{ [K in keyof T]: FRType<T[K]> }],
-  output: FRType<any>,
-  run: (args: T, context: ReducerContext) => Value
+  inputs: [...{ [K in keyof InputTypes]: FRType<InputTypes[K]> }],
+  output: FRType<OutputType>,
+  run: (args: InputTypes, context: ReducerContext) => OutputType
 ): FnDefinition {
   return {
     inputs,
@@ -38,7 +41,7 @@ export function makeAmbiguousDefinition<const T extends any[]>(
   return {
     inputs,
     output: frAny,
-    run: (_) => {
+    run: () => {
       throw new REAmbiguous(errorMsg);
     },
     isUsed: false,
@@ -61,11 +64,11 @@ export function tryCallFnDefinition(
     }
     unpackedArgs.push(unpackedArg);
   }
-  return fn.run(unpackedArgs, context);
+  return fn.output.pack(fn.run(unpackedArgs, context));
 }
 
 export function fnDefinitionToString(fn: FnDefinition): string {
   const inputs = fn.inputs.map((t) => t.getName()).join(", ");
-  const output = fn.output?.getName();
+  const output = fn.output.getName();
   return `(${inputs})${output ? ` => ${output}` : ""}`;
 }

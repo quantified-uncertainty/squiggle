@@ -4,14 +4,12 @@ import {
   frArray,
   frDict,
   frGeneric,
-  frLambda,
   frLambdaTyped,
   frOptional,
   frString,
   frTableChart,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { vTableChart } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Table",
@@ -42,14 +40,14 @@ export const library = [
         ],
         frTableChart,
         ([{ data, title, columns }]) => {
-          return vTableChart({
+          return {
             data,
             title: title || undefined,
             columns: columns.map(({ fn, name }) => ({
               fn,
               name: name ?? undefined,
             })),
-          });
+          };
         }
       ),
     ],

@@ -8,7 +8,7 @@ import {
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import * as Result from "../utility/result.js";
-import { CI_CONFIG, SymDistResult, symDistResultToValue } from "./distUtil.js";
+import { CI_CONFIG, SymDistResult, unwrapSymDistResult } from "./distUtil.js";
 
 const maker = new FnFactory({
   nameSpace: "Sym",
@@ -18,14 +18,14 @@ const maker = new FnFactory({
 function makeTwoArgsSymDist(fn: (v1: number, v2: number) => SymDistResult) {
   return makeDefinition([frNumber, frNumber], frDistSymbolic, ([v1, v2]) => {
     const result = fn(v1, v2);
-    return symDistResultToValue(result);
+    return unwrapSymDistResult(result);
   });
 }
 
 function makeOneArgSymDist(fn: (v: number) => SymDistResult) {
   return makeDefinition([frNumber], frDistSymbolic, ([v]) => {
     const result = fn(v);
-    return symDistResultToValue(result);
+    return unwrapSymDistResult(result);
   });
 }
 
@@ -37,7 +37,7 @@ function makeCISymDist<K1 extends string, K2 extends string>(
   return makeDefinition(
     [frDict([lowKey, frNumber], [highKey, frNumber])],
     frDistSymbolic,
-    ([dict]) => symDistResultToValue(fn(dict[lowKey], dict[highKey]))
+    ([dict]) => unwrapSymDistResult(fn(dict[lowKey], dict[highKey]))
   );
 }
 
@@ -50,7 +50,7 @@ function makeMeanStdevSymDist(
   return makeDefinition(
     [frDict(["mean", frNumber], ["stdev", frNumber])],
     frDistSymbolic,
-    ([{ mean, stdev }]) => symDistResultToValue(fn(mean, stdev))
+    ([{ mean, stdev }]) => unwrapSymDistResult(fn(mean, stdev))
   );
 }
 
@@ -176,7 +176,7 @@ export const library: FRFunction[] = [
     definitions: [
       makeDefinition([frNumber], frDistSymbolic, ([v]) => {
         const result = SymbolicDist.PointMass.make(v);
-        return symDistResultToValue(result);
+        return unwrapSymDistResult(result);
       }),
     ],
   }),
@@ -189,7 +189,7 @@ export const library: FRFunction[] = [
         frDistSymbolic,
         ([low, medium, high]) => {
           const result = SymbolicDist.Triangular.make({ low, medium, high });
-          return symDistResultToValue(result);
+          return unwrapSymDistResult(result);
         }
       ),
     ],

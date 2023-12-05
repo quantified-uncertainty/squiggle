@@ -10,7 +10,6 @@ import {
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { SDate } from "../utility/SDate.js";
-import { vScale } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Scale",
@@ -70,17 +69,17 @@ export const library = [
         ([{ min, max, tickFormat, title }]) => {
           checkMinMax(min, max);
           checkTickFormat(tickFormat);
-          return vScale({
+          return {
             type: "linear",
             min: min ?? undefined,
             max: max ?? undefined,
             tickFormat: tickFormat ?? undefined,
             title: title ?? undefined,
-          });
+          };
         }
       ),
       makeDefinition([], frScale, () => {
-        return vScale({ type: "linear" });
+        return { type: "linear" };
       }),
     ],
   }),
@@ -98,17 +97,17 @@ export const library = [
           }
           checkMinMax(min, max);
           checkTickFormat(tickFormat);
-          return vScale({
+          return {
             type: "log",
             min: min ?? undefined,
             max: max ?? undefined,
             tickFormat: tickFormat ?? undefined,
             title: title ?? undefined,
-          });
+          };
         }
       ),
       makeDefinition([], frScale, () => {
-        return vScale({ type: "log" });
+        return { type: "log" };
       }),
     ],
   }),
@@ -135,20 +134,20 @@ export const library = [
             throw new REOther(`Symlog scale constant cannot be 0.`);
           }
 
-          return vScale({
+          return {
             type: "symlog",
             min: min ?? undefined,
             max: max ?? undefined,
             tickFormat: tickFormat ?? undefined,
             constant: constant ?? undefined,
             title: title ?? undefined,
-          });
+          };
         }
       ),
       makeDefinition([], frScale, () => {
-        return vScale({
+        return {
           type: "symlog",
-        });
+        };
       }),
     ],
   }),
@@ -175,20 +174,20 @@ export const library = [
             throw new REOther(`Power Scale exponent must be over 0.`);
           }
 
-          return vScale({
+          return {
             type: "power",
             min: min ?? undefined,
             max: max ?? undefined,
             tickFormat: tickFormat ?? undefined,
             exponent: exponent ?? undefined,
             title: title ?? undefined,
-          });
+          };
         }
       ),
       makeDefinition([], frScale, () => {
-        return vScale({
+        return {
           type: "power",
-        });
+        };
       }),
     ],
   }),
@@ -203,17 +202,17 @@ export const library = [
         ([{ min, max, tickFormat, title }]) => {
           checkMinMaxDates(min, max);
           // We don't check the tick format, because the format is much more complicated for dates.
-          return vScale({
+          return {
             type: "date",
             min: min ? min.toMs() : undefined,
             max: max ? max.toMs() : undefined,
             tickFormat: tickFormat ?? undefined,
             title: title ?? undefined,
-          });
+          };
         }
       ),
       makeDefinition([], frScale, () => {
-        return vScale({ type: "date" });
+        return { type: "date" };
       }),
     ],
   }),

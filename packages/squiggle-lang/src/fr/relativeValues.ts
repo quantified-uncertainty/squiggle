@@ -3,16 +3,15 @@ import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
   frDict,
-  frString,
-  frOptional,
   frLambdaTyped,
   frNumber,
+  frOptional,
   frPlot,
+  frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { makeSquiggleDefinition } from "../library/registry/squiggleDefinition.js";
 import { Bindings } from "../reducer/stack.js";
-import { vPlot } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "RelativeValues",
@@ -37,12 +36,12 @@ export const library = [
     ],
     definitions: [
       makeDefinition([relativeValuesShape], frPlot, ([{ ids, fn, title }]) => {
-        return vPlot({
+        return {
           type: "relativeValues",
           fn,
           ids,
           title: title ?? undefined,
-        });
+        };
       }),
     ],
   }),

@@ -9,7 +9,6 @@ import {
 import { FnFactory } from "../library/registry/helpers.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
 import { NumericRangeDomain } from "../value/domain.js";
-import { vArray, vDomain, vNumber } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Number",
@@ -23,22 +22,22 @@ const assertIsNotEmpty = (arr: readonly number[]) => {
 };
 
 function makeNumberArrayToNumberDefinition(
-  fn: (arr: number[]) => number,
+  fn: (arr: readonly number[]) => number,
   throwIfEmpty = true
 ) {
   return makeDefinition([frArray(frNumber)], frNumber, ([arr]) => {
     throwIfEmpty && assertIsNotEmpty(arr);
-    return vNumber(fn(arr));
+    return fn(arr);
   });
 }
 
 function makeNumberArrayToNumberArrayDefinition(
-  fn: (arr: number[]) => number[],
+  fn: (arr: readonly number[]) => number[],
   throwIfEmpty = true
 ) {
   return makeDefinition([frArray(frNumber)], frArray(frNumber), ([arr]) => {
     throwIfEmpty && assertIsNotEmpty(arr);
-    return vArray(fn(arr).map(vNumber));
+    return fn(arr);
   });
 }
 
@@ -119,7 +118,7 @@ export const library = [
     definitions: [
       makeNumberArrayToNumberDefinition((arr) => Math.min(...arr)),
       makeDefinition([frNumber, frNumber], frNumber, ([a, b]) => {
-        return vNumber(Math.min(a, b));
+        return Math.min(a, b);
       }),
     ],
   }),
@@ -130,7 +129,7 @@ export const library = [
     definitions: [
       makeNumberArrayToNumberDefinition((arr) => Math.max(...arr)),
       makeDefinition([frNumber, frNumber], frNumber, ([a, b]) => {
-        return vNumber(Math.max(a, b));
+        return Math.max(a, b);
       }),
     ],
   }),
@@ -149,7 +148,7 @@ export const library = [
     definitions: [
       makeDefinition([frArray(frNumber), frNumber], frNumber, ([arr, i]) => {
         assertIsNotEmpty(arr);
-        return vNumber(E_A_Floats.quantile(arr, i));
+        return E_A_Floats.quantile(arr, i);
       }),
     ],
   }),
@@ -160,7 +159,7 @@ export const library = [
     definitions: [
       makeDefinition([frArray(frNumber)], frNumber, ([arr]) => {
         assertIsNotEmpty(arr);
-        return vNumber(E_A_Floats.quantile(arr, 0.5));
+        return E_A_Floats.quantile(arr, 0.5);
       }),
     ],
   }),
@@ -235,7 +234,7 @@ export const library = [
         [frDict(["min", frNumber], ["max", frNumber])],
         frDomain,
         ([{ min, max }]) => {
-          return vDomain(new NumericRangeDomain(min, max));
+          return new NumericRangeDomain(min, max);
         }
       ),
     ],

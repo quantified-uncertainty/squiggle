@@ -13,10 +13,10 @@ import {
 import {
   FnFactory,
   doNumberLambdaCall,
-  repackDistResult,
+  unwrapDistResult,
 } from "../library/registry/helpers.js";
 import { Ok } from "../utility/result.js";
-import { vArray, vNumber, Value } from "../value/index.js";
+import { Value, vArray, vNumber } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "SampleSet",
@@ -27,14 +27,14 @@ const fromDist = makeDefinition(
   [frDist],
   frSampleSetDist,
   ([dist], { environment }) =>
-    repackDistResult(SampleSetDist.SampleSetDist.fromDist(dist, environment))
+    unwrapDistResult(SampleSetDist.SampleSetDist.fromDist(dist, environment))
 );
 
 const fromNumber = makeDefinition(
   [frNumber],
   frSampleSetDist,
   ([number], context) =>
-    repackDistResult(
+    unwrapDistResult(
       SampleSetDist.SampleSetDist.make(
         new Array(context.environment.sampleCount).fill(number)
       )
@@ -44,11 +44,11 @@ const fromNumber = makeDefinition(
 const fromList = makeDefinition(
   [frArray(frNumber)],
   frSampleSetDist,
-  ([numbers]) => repackDistResult(SampleSetDist.SampleSetDist.make(numbers))
+  ([numbers]) => unwrapDistResult(SampleSetDist.SampleSetDist.make(numbers))
 );
 
 const fromFn = (lambda: any, context: any, fn: (i: number) => Value[]) =>
-  repackDistResult(
+  unwrapDistResult(
     SampleSetDist.SampleSetDist.fromFn((index) => {
       return doNumberLambdaCall(lambda, fn(index), context);
     }, context.environment)
@@ -94,7 +94,7 @@ const baseLibrary = [
     output: "Array",
     definitions: [
       makeDefinition([frSampleSetDist], frArray(frNumber), ([dist]) => {
-        return vArray(dist.samples.map(vNumber));
+        return dist.samples;
       }),
     ],
   }),
@@ -118,7 +118,7 @@ const baseLibrary = [
         [frSampleSetDist, frLambdaTyped([frNumber], frNumber)],
         frSampleSetDist,
         ([dist, lambda], context) => {
-          return repackDistResult(
+          return unwrapDistResult(
             dist.samplesMap((r) =>
               Ok(doNumberLambdaCall(lambda, [vNumber(r)], context))
             )
@@ -142,7 +142,7 @@ const baseLibrary = [
         ],
         frSampleSetDist,
         ([dist1, dist2, lambda], context) => {
-          return repackDistResult(
+          return unwrapDistResult(
             SampleSetDist.map2({
               fn: (a, b) =>
                 Ok(
@@ -172,7 +172,7 @@ const baseLibrary = [
         ],
         frSampleSetDist,
         ([dist1, dist2, dist3, lambda], context) => {
-          return repackDistResult(
+          return unwrapDistResult(
             SampleSetDist.map3({
               fn: (a, b, c) =>
                 Ok(
@@ -208,7 +208,7 @@ const baseLibrary = [
           const sampleSetDists = dists.map((d) => {
             return d;
           });
-          return repackDistResult(
+          return unwrapDistResult(
             SampleSetDist.mapN({
               fn: (a) =>
                 Ok(
@@ -242,21 +242,21 @@ const mkComparison = (
         [frSampleSetDist, frSampleSetDist],
         frSampleSetDist,
         ([dist1, dist2]) => {
-          return repackDistResult(withDist(dist1, dist2));
+          return unwrapDistResult(withDist(dist1, dist2));
         }
       ),
       makeDefinition(
         [frSampleSetDist, frNumber],
         frSampleSetDist,
         ([dist, f]) => {
-          return repackDistResult(withFloat(dist, f));
+          return unwrapDistResult(withFloat(dist, f));
         }
       ),
       makeDefinition(
         [frNumber, frSampleSetDist],
         frSampleSetDist,
         ([f, dist]) => {
-          return repackDistResult(withFloat(dist, f));
+          return unwrapDistResult(withFloat(dist, f));
         }
       ),
     ],
