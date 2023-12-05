@@ -618,6 +618,7 @@ type RelativeValuesPairCache implements Node {
 
 type Searchable implements Node {
   id: ID!
+  link: String!
   object: SearchableObject!
 }
 

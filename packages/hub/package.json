@@ -52,6 +52,7 @@
     "react-loading-skeleton": "^3.3.1",
     "react-markdown": "^9.0.0",
     "react-relay": "^16.0.0",
+    "react-select": "^5.7.7",
     "relay-runtime": "^16.0.0",
     "remark-breaks": "^4.0.0",
     "remark-gfm": "^4.0.0",

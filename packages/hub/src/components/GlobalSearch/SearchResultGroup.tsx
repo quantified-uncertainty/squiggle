@@ -1,9 +1,8 @@
 import { FC } from "react";
 import { graphql, useFragment } from "react-relay";
-import { groupRoute, modelRoute, userRoute } from "@/routes";
-import Link from "next/link";
-import { NamedSearchResultBox } from "./NamedSearchResultBox";
+
 import { SearchResultGroup$key } from "@/__generated__/SearchResultGroup.graphql";
+import { NamedSearchResultBox } from "./NamedSearchResultBox";
 
 export const SearchResultGroup: FC<{ fragment: SearchResultGroup$key }> = ({
   fragment,
@@ -17,10 +16,8 @@ export const SearchResultGroup: FC<{ fragment: SearchResultGroup$key }> = ({
     fragment
   );
   return (
-    <Link href={groupRoute({ slug: group.slug })}>
-      <NamedSearchResultBox name="Group">
-        <div className="text-slate-700">{group.slug}</div>
-      </NamedSearchResultBox>
-    </Link>
+    <NamedSearchResultBox name="Group">
+      <div className="text-slate-700">{group.slug}</div>
+    </NamedSearchResultBox>
   );
 };

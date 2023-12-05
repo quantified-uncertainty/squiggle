@@ -1,8 +1,7 @@
-import { SearchResultModel$key } from "@/__generated__/SearchResultModel.graphql";
-import { relativeValuesRoute } from "@/routes";
-import Link from "next/link";
 import { FC } from "react";
 import { graphql, useFragment } from "react-relay";
+
+import { SearchResultModel$key } from "@/__generated__/SearchResultModel.graphql";
 import { NamedSearchResultBox } from "./NamedSearchResultBox";
 
 export const SearchResultRelativeValuesDefinition: FC<{
@@ -21,17 +20,10 @@ export const SearchResultRelativeValuesDefinition: FC<{
   );
 
   return (
-    <Link
-      href={relativeValuesRoute({
-        owner: definition.owner.slug,
-        slug: definition.slug,
-      })}
-    >
-      <NamedSearchResultBox name="Model">
-        <div className="text-slate-700">
-          {definition.owner.slug}/{definition.slug}
-        </div>
-      </NamedSearchResultBox>
-    </Link>
+    <NamedSearchResultBox name="Model">
+      <div className="text-slate-700">
+        {definition.owner.slug}/{definition.slug}
+      </div>
+    </NamedSearchResultBox>
   );
 };

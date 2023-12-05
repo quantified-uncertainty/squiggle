@@ -1,12 +1,13 @@
-import { FC, useEffect } from "react";
-import { graphql, useQueryLoader } from "react-relay";
-import { FormProvider, useForm } from "react-hook-form";
-import { usePathname } from "next/navigation";
-
-import { TextFormField } from "@quri/ui";
+"use client";
+import { clsx } from "clsx";
+import { FC } from "react";
+import { fetchQuery, graphql, useRelayEnvironment } from "react-relay";
+import AsyncSelect from "react-select/async";
 
 import { GlobalSearchQuery } from "@/__generated__/GlobalSearchQuery.graphql";
-import { SearchResults } from "./SearchResults";
+import { SearchResult$key } from "@/__generated__/SearchResult.graphql";
+import { SearchResult } from "./SearchResult";
+import { useRouter } from "next/navigation";
 
 export const Query = graphql`
   query GlobalSearchQuery($text: String!) {
@@ -19,6 +20,8 @@ export const Query = graphql`
         edges {
           cursor
           node {
+            id
+            link
             object {
               ...SearchResult
             }
@@ -29,43 +32,100 @@ export const Query = graphql`
   }
 `;
 
+export type SearchOption =
+  | {
+      type: "object";
+      id: string;
+      link: string;
+      object: SearchResult$key;
+    }
+  | {
+      type: "error";
+      message: string;
+    };
+
 export const GlobalSearch: FC = () => {
-  const [queryRef, loadQuery, disposeQuery] =
-    useQueryLoader<GlobalSearchQuery>(Query);
+  const environment = useRelayEnvironment();
+  const router = useRouter();
 
-  const pathname = usePathname();
-
-  useEffect(() => {
-    disposeQuery();
-  }, [pathname, disposeQuery]);
-
-  type FormShape = {
-    text: string;
-  };
-  const form = useForm<FormShape>();
-
-  const submit = form.handleSubmit(({ text }) => {
-    loadQuery({
+  const loadOptions = async (text: string): Promise<SearchOption[]> => {
+    const result = await fetchQuery<GlobalSearchQuery>(environment, Query, {
       text,
-    });
-  });
-
-  useEffect(() => {
-    const subscription = form.watch(() => submit());
-    return () => subscription.unsubscribe();
-  }, [submit, form, form.watch]);
+    }).toPromise();
+    if (!result) return [];
+    if (result.result.__typename === "BaseError") {
+      return [
+        {
+          type: "error",
+          message: result.result.message,
+        },
+      ];
+    } else if (result.result.__typename !== "QuerySearchConnection") {
+      return [
+        {
+          type: "error",
+          message: "Unknown error",
+        },
+      ];
+    }
+    return result.result.edges.map((edge) => ({
+      type: "object",
+      id: edge.node.id,
+      link: edge.node.link,
+      object: edge.node.object,
+    }));
+  };
 
   return (
-    <FormProvider {...form}>
-      <div className="relative">
-        <TextFormField<FormShape> name="text" size="small" />
-
-        {queryRef ? (
-          <div className="absolute rounded bg-white border right-0 mt-2 shadow-xl min-w-[12em]">
-            <SearchResults queryRef={queryRef} />
-          </div>
-        ) : null}
-      </div>
-    </FormProvider>
+    <AsyncSelect<SearchOption>
+      unstyled
+      loadOptions={loadOptions}
+      components={{
+        Option: SearchResult,
+      }}
+      isOptionDisabled={(option) => option.type === "error"}
+      closeMenuOnSelect
+      blurInputOnSelect
+      openMenuOnClick={false}
+      placeholder="Search..."
+      getOptionValue={(option) =>
+        option.type === "error" ? "error" : option.id
+      }
+      getOptionLabel={(option) =>
+        option.type === "error" ? "error" : option.id
+      }
+      onChange={(option) => {
+        if (option?.type === "object") {
+          router.push(option.link);
+        }
+      }}
+      controlShouldRenderValue={false}
+      classNames={{
+        // copy-pasted and simplified from SelectFormField
+        control: () =>
+          "min-w-[12em] max-w-[12em] !min-h-0 h-8 cursor-pointer bg-slate-100 hover:bg-white focus-within:bg-white transition-colors border-slate-300 border rounded-full shadow-sm focus-within:ring-indigo-400 focus-within:ring-2",
+        // disable default browser focus style
+        input: () => "[&_input:focus]:!ring-transparent",
+        placeholder: () => "text-slate-300 text-sm",
+        valueContainer: () => "px-3",
+        clearIndicator: () => "text-slate-300 hover:text-slate-500 px-2",
+        loadingIndicator: () => "text-slate-300 hover:text-slate-500 px-2",
+        indicatorSeparator: () => "hidden",
+        dropdownIndicator: () => "text-slate-300 hover:text-slate-500 px-2",
+        menuPortal: () => "!z-[100]",
+        // based on Dropdown styles
+        menu: () =>
+          "mt-2 min-w-[20em] rounded-md bg-white shadow-xl border border-slate-300 overflow-hidden",
+        menuList: () => "p-1 overflow-auto",
+        option: ({ isDisabled, isFocused }) =>
+          clsx(
+            "px-3 py-1.5 rounded text-slate-700",
+            isFocused && "bg-blue-100",
+            !isDisabled && "rounded hover:bg-blue-100 hover:text-slate-900"
+          ),
+        loadingMessage: () => "text-slate-500",
+        noOptionsMessage: () => "text-slate-400 p-2",
+      }}
+    />
   );
 };

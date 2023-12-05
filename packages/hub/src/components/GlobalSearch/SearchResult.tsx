@@ -1,16 +1,19 @@
 import { FC } from "react";
 import { graphql, useFragment } from "react-relay";
 
+import { components, type OptionProps } from "react-select";
+
 import { SearchResult$key } from "@/__generated__/SearchResult.graphql";
-import { SearchResultBox } from "./SearchResultBox";
+import { SearchOption } from ".";
+import { SearchResultGroup } from "./SearchResultGroup";
 import { SearchResultModel } from "./SearchResultModel";
 import { SearchResultRelativeValuesDefinition } from "./SearchResultRelativeValuesDefinition";
 import { SearchResultUser } from "./SearchResultUser";
-import { SearchResultGroup } from "./SearchResultGroup";
+import Link from "next/link";
 
-export const SearchResult: FC<{ objectRef: SearchResult$key }> = ({
-  objectRef,
-}) => {
+const OkSearchResult: FC<{
+  objectRef: SearchResult$key;
+}> = ({ objectRef }) => {
   const object = useFragment(
     graphql`
       fragment SearchResult on SearchableObject {
@@ -35,9 +38,35 @@ export const SearchResult: FC<{ objectRef: SearchResult$key }> = ({
       return <SearchResultGroup fragment={object} />;
     default:
       return (
-        <SearchResultBox hoverable={false}>
+        <div>
           Unknown result type: <strong>{object.__typename}</strong>
-        </SearchResultBox>
+        </div>
       );
+  }
+};
+
+export const SearchResult: FC<OptionProps<SearchOption, false>> = ({
+  children,
+  ...props
+}) => {
+  switch (props.data.type) {
+    case "object":
+      return (
+        <components.Option {...props}>
+          <Link href={props.data.link}>
+            <OkSearchResult objectRef={props.data.object} />
+          </Link>
+        </components.Option>
+      );
+    case "error":
+      return (
+        <components.Option {...props} isDisabled>
+          <div className="text-xs text-red-500">
+            Error: {props.data.message}
+          </div>
+        </components.Option>
+      );
+    default:
+      throw new Error(`Unexpected data ${props.data satisfies never}`);
   }
 };

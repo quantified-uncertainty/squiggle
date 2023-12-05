@@ -77,7 +77,7 @@ const DesktopMenu: FC<MenuProps> = ({ queryRef }) => {
   const menu = useFragment(fragment, queryRef);
 
   return (
-    <div className="flex gap-6 items-baseline">
+    <div className="flex gap-6 items-center">
       <GlobalSearch />
       <AboutMenuLink mode="desktop" />
       <DocsMenuLink mode="desktop" />

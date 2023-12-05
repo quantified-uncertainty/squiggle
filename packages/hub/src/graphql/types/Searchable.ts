@@ -1,3 +1,9 @@
+import {
+  groupRoute,
+  modelRoute,
+  relativeValuesRoute,
+  userRoute,
+} from "@/routes";
 import { builder } from "../builder";
 import { Group } from "./Group";
 import { Model } from "./Model";
@@ -33,6 +39,46 @@ const SearchableObject = builder.unionType("SearchableObject", {
 export const Searchable = builder.prismaNode("Searchable", {
   id: { field: "id" },
   fields: (t) => ({
+    link: t.string({
+      select: {
+        model: {
+          select: {
+            owner: true,
+            slug: true,
+          },
+        },
+        definition: {
+          select: { owner: true, slug: true },
+        },
+        user: {
+          select: { asOwner: true },
+        },
+        group: {
+          select: { asOwner: true },
+        },
+      },
+      resolve: (object) => {
+        // TODO - should be a field on object types
+        switch (true) {
+          case !!object.model:
+            return modelRoute({
+              owner: object.model.owner.slug,
+              slug: object.model.slug,
+            });
+          case !!object.definitionId:
+            return relativeValuesRoute({
+              owner: object.definition.owner.slug,
+              slug: object.definition.slug,
+            });
+          case !!object.userId:
+            return userRoute({ username: object.user.asOwner.slug });
+          case !!object.groupId:
+            return groupRoute({ slug: object.group.asOwner.slug });
+          default:
+            throw new Error("Invalid Searchable record");
+        }
+      },
+    }),
     object: t.field({
       type: SearchableObject,
       select: {
