@@ -182,7 +182,11 @@ export class BuiltinLambda extends BaseLambda {
         .map(fnDefinitionToString)
         .map((def) => `  ${this.name}${def}\n`)
         .join("");
-      return `There are function matches for ${this.name}(), but with different arguments:\n${defsString}`;
+      return `There are function matches for ${
+        this.name
+      }(), but with different arguments:\n${defsString}Was given arguments: (${args.join(
+        ","
+      )})`;
     };
 
     for (const signature of signatures) {

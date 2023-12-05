@@ -38,7 +38,7 @@ const WithHeader: FC<PropsWithChildren<{ header: string }>> = ({
   children,
 }) => (
   <div>
-    <div className="text-sm font-medium mb-1 text-stone-700">{header}</div>
+    <div className="text-sm font-medium mb-1 text-gray-700">{header}</div>
     <div className="ml-1">{children}</div>
   </div>
 );
@@ -47,15 +47,11 @@ const StackTraceFrame: FC<{ frame: SqFrame }> = ({ frame }) => {
   const location = frame.location();
   const name = frame.name();
   return (
-    <div className="grid grid-cols-[1fr_5fr] gap-x-2 items-center">
-      <div className="text-stone-500 font-mono font-semibold truncate">
-        {name !== "" ? name : <span className="text-transparent">-</span>}
+    <div className="grid grid-cols-[1fr_3fr] gap-x-2">
+      <div className="text-gray-500 font-mono font-medium truncate">
+        {name !== "" && name}
       </div>
-      {location ? (
-        <LocationLine location={location} />
-      ) : (
-        <span className="text-transparent">-</span>
-      )}
+      {location && <LocationLine location={location} />}
     </div>
   );
 };

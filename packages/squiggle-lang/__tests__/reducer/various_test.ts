@@ -136,7 +136,7 @@ describe("stacktraces", () => {
   add(distribution, number)
   add(number, distribution)
   add(distribution, distribution)
-
+Was given arguments: (5,"a")
 Stack trace:
   f at line 4, column 5, file main
   g at line 6, column 12, file main
