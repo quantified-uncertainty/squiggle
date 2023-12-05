@@ -94,14 +94,6 @@ export const library = [
     ],
   }),
   maker.make({
-    name: "named",
-    definitions: [
-      makeDefinition([frAny, frString], ([v, name]) => {
-        return vBoxed(v, name);
-      }),
-    ],
-  }),
-  maker.make({
     name: "inspect",
     definitions: [
       makeDefinition([frAny], ([value]) => {

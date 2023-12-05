@@ -7,6 +7,7 @@ import { library as durationLibrary } from "../../fr/duration.js";
 import { library as dictLibrary } from "../../fr/dict.js";
 import { library as distLibrary } from "../../fr/dist.js";
 import { library as genericDistLibrary } from "../../fr/genericDist.js";
+import { library as tagLibrary } from "../../fr/tag.js";
 import { library as calculatorLibrary } from "../../fr/calculator.js";
 import { library as listLibrary } from "../../fr/list.js";
 import { library as mathLibrary } from "../../fr/math.js";
@@ -42,6 +43,7 @@ const fnList: FRFunction[] = [
   ...tableLibrary,
   ...listLibrary,
   ...mathLibrary,
+  ...tagLibrary,
   ...plotLibrary,
   ...pointsetLibrary,
   ...relativeValuesLibrary,

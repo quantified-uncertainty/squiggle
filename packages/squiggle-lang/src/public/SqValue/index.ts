@@ -314,11 +314,11 @@ export class SqBoxedValue extends SqAbstractValue<"Boxed", unknown> {
   tag = "Boxed" as const;
 
   get value() {
-    return wrapValue(this._value.value, this.context);
+    return wrapValue(this._value.value.value, this.context);
   }
 
   override title() {
-    return this._value.name;
+    return this._value.value.name;
   }
 
   asJS(): unknown {

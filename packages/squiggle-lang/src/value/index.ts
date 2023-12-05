@@ -657,22 +657,33 @@ class VVoid extends BaseValue {
 }
 export const vVoid = () => new VVoid();
 
-class VBoxed extends BaseValue {
+export type BoxedArgs = {
+  name?: string;
+  description?: string;
+};
+
+export type Boxed = {
+  value: Value;
+} & BoxedArgs;
+
+export class VBoxed extends BaseValue {
   readonly type = "Boxed";
   readonly publicName = "Boxed";
 
-  constructor(
-    public value: Value,
-    public name: string
-  ) {
+  constructor(public value: Boxed) {
     super();
   }
 
   toString(): string {
-    return `${this.name}: ${this.value.toString()}`;
+    return `${this.value.toString()}, with params ${JSON.stringify(
+      this.value
+    )}`;
   }
 }
-export const vBoxed = (value: Value, name: string) => new VBoxed(value, name);
+export const vBoxed = (value: Boxed) => new VBoxed(value);
+
+export const vBoxedSep = (value: Value, args: BoxedArgs) =>
+  new VBoxed({ value, ...args });
 
 export type Value =
   | VArray

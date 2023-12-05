@@ -18,6 +18,8 @@ import {
   vDuration,
   vInput,
   Input,
+  Boxed,
+  vBoxed,
 } from "../../value/index.js";
 
 /*
@@ -28,6 +30,8 @@ export type FRType<T> = {
   unpack: (v: Value) => T | undefined;
   pack: (v: T) => Value; // used in makeSquiggleDefinition
   getName: () => string;
+  nested?: FRType<any>;
+  tag?: string;
 };
 
 export const frNumber: FRType<number> = {
@@ -89,6 +93,17 @@ export const frLambdaN = (paramLength: number): FRType<Lambda> => {
     getName: () => `lambda(${paramLength})`,
   };
 };
+
+export const frBoxed = <T>(itemType: FRType<T>): FRType<Boxed> => {
+  return {
+    unpack: (v) => (v.type === "Boxed" ? v.value : undefined),
+    pack: (a) => vBoxed(a),
+    getName: () => `boxed(${itemType.getName()})`,
+    nested: itemType,
+    tag: "boxed",
+  };
+};
+
 export const frLambdaNand = (paramLengths: number[]): FRType<Lambda> => {
   return {
     unpack: (v: Value) => {
