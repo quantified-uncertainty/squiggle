@@ -113,7 +113,11 @@ const SquiggleViewerOuter = forwardRef<
 
   const body = () => {
     if (!resultVariables.ok) {
-      return <SquiggleErrorAlert error={resultVariables.value} />;
+      return (
+        <div className="px-1">
+          <SquiggleErrorAlert error={resultVariables.value} />
+        </div>
+      );
     } else if (focused) {
       if (focusedItem) {
         return <ValueViewer value={focusedItem} />;
