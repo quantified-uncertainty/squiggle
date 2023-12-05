@@ -184,7 +184,7 @@ export class BuiltinLambda extends BaseLambda {
       const defsString = signatures
         .filter((d) => d.isUsed)
         .map(fnDefinitionToString)
-        .map((def) => `${this.name}${def}\n`)
+        .map((def) => `  ${this.name}${def}\n`)
         .join("");
       return `There are function matches for ${this.name}(), but with different arguments:\n${defsString}`;
     };

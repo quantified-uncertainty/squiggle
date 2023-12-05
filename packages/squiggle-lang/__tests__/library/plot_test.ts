@@ -48,7 +48,7 @@ describe("Plot", () => {
         fn: {|x, y| x * y}
       })`,
       `Error(Error: There are function matches for Plot.numericFn(), but with different arguments:
-Plot.numericFn({fn: (number) => number, xScale?: scale, yScale?: scale, title?: string, points?: number}) => plot
+  Plot.numericFn({fn: (number) => number, xScale?: scale, yScale?: scale, title?: string, points?: number}) => plot
 )`
     );
 
@@ -132,7 +132,7 @@ Plot.numericFn({fn: (number) => number, xScale?: scale, yScale?: scale, title?: 
         fn: {|x,y| x to x + y}
        })`,
       `Error(Error: There are function matches for Plot.distFn(), but with different arguments:
-Plot.distFn({fn: (number) => distribution, xScale?: scale, yScale?: scale, distXScale?: scale, title?: string, points?: number}) => plot
+  Plot.distFn({fn: (number) => distribution, xScale?: scale, yScale?: scale, distXScale?: scale, title?: string, points?: number}) => plot
 )`
     );
   });
