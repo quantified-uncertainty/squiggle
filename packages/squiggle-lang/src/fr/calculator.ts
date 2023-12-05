@@ -10,12 +10,22 @@ import {
   frNumber,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { vCalculator } from "../value/index.js";
+import { Calculator, Value, vCalculator } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Calculator",
   requiresNamespace: true,
 });
+
+const processCalc = (calc: Calculator): Value => {
+  const _calc = vCalculator(calc);
+  const error = _calc.getError();
+  if (error) {
+    throw error;
+  } else {
+    return _calc;
+  }
+};
 
 export const library = [
   maker.make({
@@ -34,23 +44,17 @@ export const library = [
             ["sampleCount", frOptional(frNumber)]
           ),
         ],
-        ([{ fn, title, description, inputs, autorun, sampleCount }]) => {
-          const calc = vCalculator({
+        ([{ fn, title, description, inputs, autorun, sampleCount }]) =>
+          processCalc({
             fn,
             title: title || undefined,
             description: description || undefined,
             inputs: inputs || [],
             autorun: autorun === null ? true : autorun,
             sampleCount: sampleCount || undefined,
-          });
-          const error = calc.getError();
-          if (error) {
-            throw error;
-          } else {
-            return calc;
-          }
-        }
+          })
       ),
+      makeDefinition([frLambda], ([fn]) => processCalc(fn.toCalculator())),
     ],
   }),
 ];
