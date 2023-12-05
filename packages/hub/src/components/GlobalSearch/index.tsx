@@ -1,13 +1,20 @@
 "use client";
 import { clsx } from "clsx";
-import { FC } from "react";
+import { useRouter } from "next/navigation";
+import { FC, useCallback, useEffect, useRef } from "react";
 import { fetchQuery, graphql, useRelayEnvironment } from "react-relay";
+import {
+  components,
+  DropdownIndicatorProps,
+  SelectInstance,
+} from "react-select";
 import AsyncSelect from "react-select/async";
+
+import { SearchIcon } from "@quri/ui";
 
 import { GlobalSearchQuery } from "@/__generated__/GlobalSearchQuery.graphql";
 import { SearchResult$key } from "@/__generated__/SearchResult.graphql";
 import { SearchResult } from "./SearchResult";
-import { useRouter } from "next/navigation";
 
 export const Query = graphql`
   query GlobalSearchQuery($text: String!) {
@@ -44,6 +51,14 @@ export type SearchOption =
       message: string;
     };
 
+const DropdownIndicator = (props: DropdownIndicatorProps<SearchOption>) => {
+  return (
+    <components.DropdownIndicator {...props}>
+      <SearchIcon />
+    </components.DropdownIndicator>
+  );
+};
+
 export const GlobalSearch: FC = () => {
   const environment = useRelayEnvironment();
   const router = useRouter();
@@ -76,12 +91,37 @@ export const GlobalSearch: FC = () => {
     }));
   };
 
+  // https://github.com/JedWatson/react-select/discussions/4669#discussioncomment-1994888
+  const ref = useRef<SelectInstance<SearchOption> | null>(null);
+
+  const handleKeyPress = useCallback((event: KeyboardEvent) => {
+    if (event.key === "Escape") {
+      // I assume this is fast because it will be called on each "Escape" press, even when the search is not focused.
+      ref.current?.blur();
+    }
+    if (event.metaKey && event.key === "k") {
+      event.preventDefault();
+      event.stopPropagation();
+      ref.current?.focus();
+    }
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyPress);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyPress);
+    };
+  }, [handleKeyPress]);
+
   return (
     <AsyncSelect<SearchOption>
+      ref={ref}
       unstyled
       loadOptions={loadOptions}
       components={{
         Option: SearchResult,
+        DropdownIndicator,
       }}
       isOptionDisabled={(option) => option.type === "error"}
       closeMenuOnSelect

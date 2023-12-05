@@ -1,6 +1,6 @@
+import Link from "next/link";
 import { FC } from "react";
 import { graphql, useFragment } from "react-relay";
-
 import { components, type OptionProps } from "react-select";
 
 import { SearchResult$key } from "@/__generated__/SearchResult.graphql";
@@ -9,7 +9,6 @@ import { SearchResultGroup } from "./SearchResultGroup";
 import { SearchResultModel } from "./SearchResultModel";
 import { SearchResultRelativeValuesDefinition } from "./SearchResultRelativeValuesDefinition";
 import { SearchResultUser } from "./SearchResultUser";
-import Link from "next/link";
 
 const OkSearchResult: FC<{
   objectRef: SearchResult$key;
