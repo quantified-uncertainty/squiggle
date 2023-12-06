@@ -49,10 +49,11 @@ export const library = [
         ([{ fn, title, description, inputs, autorun, sampleCount }]) =>
           validateCalculator({
             fn,
+const defaultAutorun = true;
             title: title || undefined,
             description: description || undefined,
             inputs: inputs || [],
-            autorun: autorun === null ? true : autorun,
+            autorun: autorun === null ? defaultAutorun : autorun,
             sampleCount: sampleCount || undefined,
           })
       ),
