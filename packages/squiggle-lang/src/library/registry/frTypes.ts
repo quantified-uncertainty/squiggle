@@ -471,6 +471,7 @@ export function frDict<T extends object>(
 
 // Optionals are implemented for the sake of frDict, which check for them explicitly.
 // Don't try to use them in other contexts.
+// Sadly, we can't replace null with undefined here.
 export const frOptional = <T>(
   itemType: FRType<T>
 ): FRType<T | null> & { isOptional: boolean } => {

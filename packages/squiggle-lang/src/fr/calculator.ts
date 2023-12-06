@@ -9,9 +9,10 @@ import {
   frBool,
   frNumber,
   frCalculator,
+  frBoxed,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { Calculator, Value, vCalculator } from "../value/index.js";
+import { Calculator, vCalculator } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Calculator",
@@ -56,9 +57,12 @@ export const library = [
             sampleCount: sampleCount || undefined,
           })
       ),
-      makeDefinition([frLambda], frCalculator, ([fn]) =>
-        validateCalculator(fn.toCalculator())
-      ),
+      makeDefinition([frBoxed(frLambda)], frCalculator, ([[args, fn]]) => {
+        const calc = fn.toCalculator();
+        const title = calc.title || args.name;
+        const description = calc.description || args.description;
+        return validateCalculator({ ...calc, title, description });
+      }),
     ],
   }),
 ];

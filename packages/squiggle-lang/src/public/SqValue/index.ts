@@ -321,6 +321,15 @@ export class SqBoxedValue extends SqAbstractValue<"Boxed", unknown> {
     return this._value.value.name;
   }
 
+  description() {
+    return this._value.value.description;
+  }
+
+  showAs(): SqValue | undefined {
+    const showAs = this._value.value.showAs;
+    return showAs ? wrapValue(showAs, this.context) : undefined;
+  }
+
   asJS(): unknown {
     return this.value.asJS();
   }

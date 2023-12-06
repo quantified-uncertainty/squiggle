@@ -18,6 +18,9 @@ import {
 import { FnFactory } from "../library/registry/helpers.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import {
+  Value,
+  vBoxed,
+  vBoxedSep,
   vCalculator,
   vLambda,
   vPlot,
@@ -97,15 +100,20 @@ export const library = [
       makeDefinition(
         [
           frBoxed(frLambdaTyped([frNumber], frDistOrNumber)),
-          frLambdaTyped([frLambdaTyped([frNumber], frDistOrNumber)], frPlot),
+          frLambdaTyped([frLambdaTyped([frNumber], frDistOrNumber)], frAny), //really just want plot or calculator
         ],
         frBoxed(frLambdaTyped([frNumber], frDistOrNumber)),
         ([[boxed, boxedValue], showAsFn], context) => {
-          const foo = showAsFn.call([vLambda(boxedValue)], context);
+          const foo = showAsFn.call(
+            [vBoxedSep(vLambda(boxedValue), boxed)],
+            context
+          );
           if (foo.type === "Plot") {
             return [{ ...boxed, showAs: vPlot(foo.value) }, boxedValue];
+          } else if (foo.type === "Calculator") {
+            return [{ ...boxed, showAs: vCalculator(foo.value) }, boxedValue];
           } else {
-            throw new Error("showAsFn must return a Plot");
+            throw new Error("showAsFn must return a Plot or Calculator");
           }
         }
       ),
