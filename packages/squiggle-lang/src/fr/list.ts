@@ -4,8 +4,8 @@ import sortBy from "lodash/sortBy.js";
 
 import { REArgumentError, REOther } from "../errors/messages.js";
 import {
-  makeAmbiguousDefinition,
   makeDefinition,
+  makeAssertDefinition,
 } from "../library/registry/fnDefinition.js";
 import {
   frAny,
@@ -146,7 +146,7 @@ export const library = [
       `List.make(2, {|f| f+1})`,
     ],
     definitions: [
-      makeAmbiguousDefinition(
+      makeAssertDefinition(
         [frNumber, frLambdaNand([0, 1])],
         "Call with either 0 or 1 arguments, not both."
       ),
@@ -251,7 +251,7 @@ export const library = [
       "List.map([1,4,5], {|x,i| x+i+1})",
     ],
     definitions: [
-      makeAmbiguousDefinition(
+      makeAssertDefinition(
         [frNumber, frLambdaNand([1, 2])],
         "Call with either 1 or 2 arguments, not both."
       ),
@@ -422,7 +422,7 @@ export const library = [
       "Applies `f` to each element of `arr`. The function `f` has two main paramaters, an accumulator and the next value from the array. It can also accept an optional third `index` parameter.",
     examples: [`List.reduce([1,4,5], 2, {|acc, el| acc+el})`],
     definitions: [
-      makeAmbiguousDefinition(
+      makeAssertDefinition(
         [frNumber, frLambdaNand([2, 3])],
         "Call with either 2 or 3 arguments, not both."
       ),

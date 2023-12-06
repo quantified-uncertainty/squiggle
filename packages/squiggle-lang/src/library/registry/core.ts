@@ -119,7 +119,7 @@ export class Registry {
       description: fn.description,
       examples: fn.examples,
       signatures: fn.definitions
-        .filter((d) => !!d.isUsed)
+        .filter((d) => !!d.isAssert)
         .map(fnDefinitionToString),
       isUnit: fn.isUnit,
       shorthand: getShorthandName(fn.name),

@@ -40,7 +40,7 @@ export const library = [
     definitions: [
       makeDefinition([frNumber], frBool, ([x]) => {
         // unary prefix !
-        return x !== 0;
+        return x === 0;
       }),
       makeDefinition([frBool], frBool, ([x]) => {
         // unary prefix !
