@@ -8,6 +8,7 @@ import {
   frInput,
   frBool,
   frNumber,
+  frCalculator,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { vCalculator } from "../value/index.js";
@@ -34,6 +35,7 @@ export const library = [
             ["sampleCount", frOptional(frNumber)]
           ),
         ],
+        frCalculator,
         ([{ fn, title, description, inputs, autorun, sampleCount }]) => {
           const calc = vCalculator({
             fn,
@@ -43,11 +45,11 @@ export const library = [
             autorun: autorun === null ? true : autorun,
             sampleCount: sampleCount || undefined,
           });
-          const error = calc.getError();
+          const error = calc.getError(); // this is awkward, we have to construct Calculator value only to call this method
           if (error) {
             throw error;
           } else {
-            return calc;
+            return calc.value;
           }
         }
       ),

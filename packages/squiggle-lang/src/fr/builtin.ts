@@ -4,6 +4,7 @@ import {
   frArray,
   frBool,
   frBoxed,
+  frGeneric,
   frNumber,
   frString,
 } from "../library/registry/frTypes.js";
@@ -38,72 +39,81 @@ export const library = [
   maker.make({
     name: "not",
     definitions: [
-      makeDefinition([frNumber], ([x]) => {
+      makeDefinition([frNumber], frBool, ([x]) => {
         // unary prefix !
-        return vBool(x !== 0);
+        return x === 0;
       }),
-      makeDefinition([frBool], ([x]) => {
+      makeDefinition([frBool], frBool, ([x]) => {
         // unary prefix !
-        return vBool(!x);
+        return !x;
       }),
     ],
   }),
   maker.make({
     name: "concat",
     definitions: [
-      makeDefinition([frString, frString], ([a, b]) => {
-        return vString(a + b);
+      makeDefinition([frString, frString], frString, ([a, b]) => {
+        return a + b;
       }),
-      makeDefinition([frArray(frAny), frArray(frAny)], ([a, b]) => {
-        return vArray([...a, ...b]);
-      }),
-      makeDefinition([frString, frAny], ([a, b]) => {
-        return vString(a + b.toString());
+      makeDefinition(
+        [frArray(frAny), frArray(frAny)],
+        frArray(frAny),
+        ([a, b]) => {
+          return [...a, ...b];
+        }
+      ),
+      makeDefinition([frString, frAny], frString, ([a, b]) => {
+        return a + b.toString();
       }),
     ],
   }),
   maker.make({
     name: "add",
     definitions: [
-      makeDefinition([frString, frAny], ([a, b]) => {
-        return vString(a + b.toString());
+      makeDefinition([frString, frAny], frString, ([a, b]) => {
+        return a + b.toString();
       }),
     ],
   }),
   maker.make({
     name: "equal",
     definitions: [
-      makeDefinition([frAny, frAny], ([a, b]) => {
-        return vBool(isEqual(a, b));
+      makeDefinition([frAny, frAny], frBool, ([a, b]) => {
+        return isEqual(a, b);
       }),
     ],
   }),
   maker.make({
     name: "unequal",
     definitions: [
-      makeDefinition([frAny, frAny], ([a, b]) => {
-        return vBool(!isEqual(a, b));
+      makeDefinition([frAny, frAny], frBool, ([a, b]) => {
+        return !isEqual(a, b);
       }),
     ],
   }),
   maker.make({
     name: "typeOf",
     definitions: [
-      makeDefinition([frAny], ([v]) => {
-        return vString(v.publicName);
+      makeDefinition([frAny], frString, ([v]) => {
+        return v.publicName;
       }),
     ],
   }),
   maker.make({
     name: "inspect",
     definitions: [
-      makeDefinition([frBoxed(frAny)], ([[boxedArgs, boxedValue]]) => {
-        console.log(boxedValue, boxedArgs);
-        return vBoxed({ ...boxedArgs, value: boxedValue });
-      }),
+      makeDefinition(
+        [frBoxed(frGeneric("A"))],
+        frGeneric("A"),
+        ([[boxedArgs, boxedValue]]) => {
+          console.log(boxedValue, boxedArgs);
+          return vBoxed({ ...boxedArgs, value: boxedValue });
+        }
+      ),
 
       makeDefinition(
-        [frBoxed(frAny), frString],
+        [frBoxed(frGeneric("A")), frString],
+        frGeneric("A"),
         ([[boxedArgs, boxedValue], label]) => {
           console.log(`${label}: ${boxedValue.toString()}`);
           return vBoxed({ ...boxedArgs, value: boxedValue });

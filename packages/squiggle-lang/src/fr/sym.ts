@@ -1,10 +1,14 @@
 import * as SymbolicDist from "../dist/SymbolicDist.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frDict, frNumber } from "../library/registry/frTypes.js";
+import {
+  frDict,
+  frDistSymbolic,
+  frNumber,
+} from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import * as Result from "../utility/result.js";
-import { CI_CONFIG, SymDistResult, symDistResultToValue } from "./distUtil.js";
+import { CI_CONFIG, SymDistResult, unwrapSymDistResult } from "./distUtil.js";
 
 const maker = new FnFactory({
   nameSpace: "Sym",
@@ -12,16 +16,16 @@ const maker = new FnFactory({
 });
 
 function makeTwoArgsSymDist(fn: (v1: number, v2: number) => SymDistResult) {
-  return makeDefinition([frNumber, frNumber], ([v1, v2]) => {
+  return makeDefinition([frNumber, frNumber], frDistSymbolic, ([v1, v2]) => {
     const result = fn(v1, v2);
-    return symDistResultToValue(result);
+    return unwrapSymDistResult(result);
   });
 }
 
 function makeOneArgSymDist(fn: (v: number) => SymDistResult) {
-  return makeDefinition([frNumber], ([v]) => {
+  return makeDefinition([frNumber], frDistSymbolic, ([v]) => {
     const result = fn(v);
-    return symDistResultToValue(result);
+    return unwrapSymDistResult(result);
   });
 }
 
@@ -32,7 +36,8 @@ function makeCISymDist<K1 extends string, K2 extends string>(
 ) {
   return makeDefinition(
     [frDict([lowKey, frNumber], [highKey, frNumber])],
-    ([dict]) => symDistResultToValue(fn(dict[lowKey], dict[highKey]))
+    frDistSymbolic,
+    ([dict]) => unwrapSymDistResult(fn(dict[lowKey], dict[highKey]))
   );
 }
 
@@ -44,7 +49,8 @@ function makeMeanStdevSymDist(
 ) {
   return makeDefinition(
     [frDict(["mean", frNumber], ["stdev", frNumber])],
-    ([{ mean, stdev }]) => symDistResultToValue(fn(mean, stdev))
+    frDistSymbolic,
+    ([{ mean, stdev }]) => unwrapSymDistResult(fn(mean, stdev))
   );
 }
 
@@ -168,9 +174,9 @@ export const library: FRFunction[] = [
     requiresNamespace: false,
     examples: ["pointMass(0.5)"],
     definitions: [
-      makeDefinition([frNumber], ([v]) => {
+      makeDefinition([frNumber], frDistSymbolic, ([v]) => {
         const result = SymbolicDist.PointMass.make(v);
-        return symDistResultToValue(result);
+        return unwrapSymDistResult(result);
       }),
     ],
   }),
@@ -178,10 +184,14 @@ export const library: FRFunction[] = [
     name: "triangular",
     examples: ["Sym.triangular(3, 5, 10)"],
     definitions: [
-      makeDefinition([frNumber, frNumber, frNumber], ([low, medium, high]) => {
-        const result = SymbolicDist.Triangular.make({ low, medium, high });
-        return symDistResultToValue(result);
-      }),
+      makeDefinition(
+        [frNumber, frNumber, frNumber],
+        frDistSymbolic,
+        ([low, medium, high]) => {
+          const result = SymbolicDist.Triangular.make({ low, medium, high });
+          return unwrapSymDistResult(result);
+        }
+      ),
     ],
   }),
 ];

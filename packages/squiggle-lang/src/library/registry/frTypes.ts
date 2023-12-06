@@ -1,11 +1,16 @@
 import { BaseDist } from "../../dist/BaseDist.js";
+import { PointSetDist } from "../../dist/PointSetDist.js";
+import { SampleSetDist } from "../../dist/SampleSetDist/index.js";
+import { SymbolicDist } from "../../dist/SymbolicDist.js";
 import { Lambda } from "../../reducer/lambda.js";
 import { SDate } from "../../utility/SDate.js";
 import { SDuration } from "../../utility/SDuration.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
+import { Domain } from "../../value/domain.js";
 import {
   Scale,
   Value,
+  Plot,
   vArray,
   vBool,
   vDate,
@@ -21,6 +26,12 @@ import {
   vBoxedSep,
   BoxedArgs,
   boxedToBoxedArgs,
+  TableChart,
+  vTableChart,
+  Calculator,
+  vCalculator,
+  vPlot,
+  vDomain,
 } from "../../value/index.js";
 
 /*
@@ -33,12 +44,27 @@ export type FRType<T> = {
   getName: () => string;
   nested?: FRType<any>;
   tag?: string;
+  transparent?: T extends Value ? boolean : undefined;
+};
+
+const isOptional = <T>(frType: FRType<T>): boolean => {
+  return "isOptional" in frType;
 };
 
 export const frNumber: FRType<number> = {
   unpack: (v: Value) => (v.type === "Number" ? v.value : undefined),
   pack: (v) => vNumber(v),
   getName: () => "number",
+};
+export const frTableChart: FRType<TableChart> = {
+  unpack: (v: Value) => (v.type === "TableChart" ? v.value : undefined),
+  pack: (v) => vTableChart(v),
+  getName: () => "table",
+};
+export const frCalculator: FRType<Calculator> = {
+  unpack: (v: Value) => (v.type === "Calculator" ? v.value : undefined),
+  pack: (v) => vCalculator(v),
+  getName: () => "calculator",
 };
 export const frString: FRType<string> = {
   unpack: (v: Value) => (v.type === "String" ? v.value : undefined),
@@ -77,21 +103,47 @@ export const frDist: FRType<BaseDist> = {
   pack: (v) => vDist(v),
   getName: () => "distribution",
 };
+export const frDistPointset: FRType<PointSetDist> = {
+  unpack: (v) =>
+    v.type === "Dist" && v.value instanceof PointSetDist ? v.value : undefined,
+  pack: (v) => vDist(v),
+  getName: () => "pointSetDist",
+};
+
+export const frSampleSetDist: FRType<SampleSetDist> = {
+  unpack: (v) =>
+    v.type === "Dist" && v.value instanceof SampleSetDist ? v.value : undefined,
+  pack: (v) => vDist(v),
+  getName: () => "sampleSetDist",
+};
+
+export const frDistSymbolic: FRType<SymbolicDist> = {
+  unpack: (v) =>
+    v.type === "Dist" && v.value instanceof SymbolicDist ? v.value : undefined,
+  pack: (v) => vDist(v),
+  getName: () => "symbolicDist",
+};
+
 export const frLambda: FRType<Lambda> = {
   unpack: (v) => (v.type === "Lambda" ? v.value : undefined),
   pack: (v) => vLambda(v),
-  getName: () => "lambda",
+  getName: () => "function",
 };
-export const frLambdaN = (paramLength: number): FRType<Lambda> => {
+
+export const frLambdaTyped = (
+  inputs: FRType<any>[],
+  output: FRType<any>
+): FRType<Lambda> => {
   return {
     unpack: (v: Value) => {
       return v.type === "Lambda" &&
-        v.value.parameterCounts().includes(paramLength)
+        v.value.parameterCounts().includes(inputs.length)
         ? v.value
         : undefined;
     },
     pack: (v) => vLambda(v),
-    getName: () => `lambda(${paramLength})`,
+    getName: () =>
+      `(${inputs.map((i) => i.getName()).join(", ")}) => ${output.getName()}`,
   };
 };
 
@@ -140,14 +192,27 @@ export const frInput: FRType<Input> = {
   pack: (v) => vInput(v),
   getName: () => "input",
 };
+export const frPlot: FRType<Plot> = {
+  unpack: (v) => (v.type === "Plot" ? v.value : undefined),
+  pack: (v) => vPlot(v),
+  getName: () => "plot",
+};
 
-export const frArray = <T>(itemType: FRType<T>): FRType<T[]> => {
+export const frDomain: FRType<Domain> = {
+  unpack: (v) => (v.type === "Domain" ? v.value : undefined),
+  pack: (v) => vDomain(v),
+  getName: () => "domain",
+};
+
+export const frArray = <T>(itemType: FRType<T>): FRType<readonly T[]> => {
+  const isTransparent = itemType.transparent;
+
   return {
     unpack: (v: Value) => {
       if (v.type !== "Array") {
         return undefined;
       }
-      if (itemType.getName() === "any") {
+      if (isTransparent) {
         // special case, performance optimization
         return v.value as T[];
       }
@@ -162,7 +227,10 @@ export const frArray = <T>(itemType: FRType<T>): FRType<T[]> => {
       }
       return unpackedArray;
     },
-    pack: (v) => vArray(v.map(itemType.pack)),
+    pack: (v) =>
+      isTransparent
+        ? vArray(v as readonly Value[])
+        : vArray(v.map(itemType.pack)),
     getName: () => `list(${itemType.getName()})`,
   };
 };
@@ -248,7 +316,15 @@ export const frAny: FRType<Value> = {
   unpack: (v) => v,
   pack: (v) => v,
   getName: () => "any",
+  transparent: true,
 };
+
+export const frGeneric = (index: string): FRType<Value> => ({
+  unpack: (v) => v,
+  pack: (v) => v,
+  getName: () => `'${index}`,
+  transparent: true,
+});
 
 // We currently support dicts with up to 5 pairs.
 // The limit could be increased with the same pattern, but there might be a better solution for this.
@@ -353,7 +429,7 @@ export function frDict<T extends object>(
       for (const [key, valueShape] of allKvs) {
         const subvalue = r.get(key);
         if (subvalue === undefined) {
-          if ("isOptional" in valueShape) {
+          if (isOptional(valueShape)) {
             // that's ok!
             continue;
           }
@@ -373,7 +449,7 @@ export function frDict<T extends object>(
           allKvs
             .filter(
               ([key, valueShape]) =>
-                !("isOptional" in valueShape) || (v as any)[key] !== null
+                !isOptional(valueShape) || (v as any)[key] !== null
             )
             .map(([key, valueShape]) => [key, valueShape.pack((v as any)[key])])
         )
@@ -381,7 +457,10 @@ export function frDict<T extends object>(
     getName: () =>
       "{" +
       allKvs
-        .map(([name, frType]) => `${name}: ${frType.getName()}`)
+        .map(
+          ([name, frType]) =>
+            `${name}${isOptional(frType) ? "?" : ""}: ${frType.getName()}`
+        )
         .join(", ") +
       "}",
   };
@@ -403,7 +482,7 @@ export const frOptional = <T>(
       }
       return itemType.pack(v);
     },
-    getName: () => `optional(${itemType.getName()})`,
+    getName: () => itemType.getName(),
     isOptional: true,
   };
 };

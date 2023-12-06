@@ -282,7 +282,7 @@ export class SqScatterPlot extends SqAbstractPlot<"scatter"> {
 export class SqRelativeValuesPlot extends SqAbstractPlot<"relativeValues"> {
   tag = "relativeValues" as const;
 
-  get ids(): string[] {
+  get ids(): readonly string[] {
     return this._value.ids;
   }
 

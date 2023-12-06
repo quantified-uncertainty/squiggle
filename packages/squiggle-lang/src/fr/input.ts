@@ -4,12 +4,12 @@ import {
   frArray,
   frBool,
   frDict,
+  frInput,
   frNumberOrString,
   frOptional,
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { vInput } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Input",
@@ -42,13 +42,14 @@ export const library = [
             ["default", frOptional(frNumberOrString)]
           ),
         ],
+        frInput,
         ([vars]) => {
-          return vInput({
+          return {
             type: "text",
             name: vars.name,
             description: vars.description || undefined,
             default: convertInputDefault(vars.default),
-          });
+          };
         }
       ),
     ],
@@ -66,13 +67,14 @@ export const library = [
             ["default", frOptional(frNumberOrString)]
           ),
         ],
+        frInput,
         ([vars]) => {
-          return vInput({
+          return {
             type: "textArea",
             name: vars.name,
             description: vars.description || undefined,
             default: convertInputDefault(vars.default),
-          });
+          };
         }
       ),
     ],
@@ -90,13 +92,14 @@ export const library = [
             ["default", frOptional(frBool)]
           ),
         ],
+        frInput,
         ([vars]) => {
-          return vInput({
+          return {
             type: "checkbox",
             name: vars.name,
             description: vars.description || undefined,
             default: vars.default ?? undefined,
-          });
+          };
         }
       ),
     ],
@@ -117,6 +120,7 @@ export const library = [
             ["default", frOptional(frString)]
           ),
         ],
+        frInput,
         ([vars]) => {
           //Throw error if options are empty, if default is not in options, or if options have duplicate
           const isEmpty = () => vars.options.length === 0;
@@ -134,13 +138,13 @@ export const library = [
           } else if (hasDuplicates()) {
             throw new REArgumentError("Options cannot have duplicate values");
           }
-          return vInput({
+          return {
             type: "select",
             name: vars.name,
             description: vars.description || undefined,
             options: vars.options,
             default: vars.default ?? undefined,
-          });
+          };
         }
       ),
     ],
