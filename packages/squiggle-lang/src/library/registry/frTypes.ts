@@ -1,3 +1,4 @@
+import { read } from "fs";
 import { BaseDist } from "../../dist/BaseDist.js";
 import { PointSetDist } from "../../dist/PointSetDist.js";
 import { SampleSetDist } from "../../dist/SampleSetDist/index.js";
@@ -147,7 +148,9 @@ export const frLambdaTyped = (
   };
 };
 
-export const frBoxed = <T>(itemType: FRType<T>): FRType<[BoxedArgs, T]> => {
+export const frBoxed = <T>(
+  itemType: FRType<T>
+): FRType<readonly [BoxedArgs, T]> => {
   return {
     unpack: (v) => {
       if (v.type !== "Boxed") {

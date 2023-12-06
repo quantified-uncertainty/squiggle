@@ -648,6 +648,22 @@ export type BoxedArgs = {
   showAs?: Value;
 };
 
+function boxedArgsToString(b: BoxedArgs): string {
+  const boxedParam: { [key: string]: string } = {};
+  if (b.name) {
+    boxedParam["name"] = b.name;
+  }
+  if (b.description) {
+    boxedParam["description"] = b.description;
+  }
+  if (b.showAs) {
+    boxedParam["showAs"] = b.showAs.toString();
+  }
+  return Object.entries(boxedParam)
+    .map(([key, value]) => `${key}: ${value}`)
+    .join(", ");
+}
+
 export type Boxed = {
   value: Value;
 } & BoxedArgs;
@@ -669,9 +685,13 @@ export class VBoxed extends BaseValue {
   }
 
   toString(): string {
-    return `${this.value.toString()}, with params ${JSON.stringify(
-      this.value
-    )}`;
+    const args = boxedArgsToString(boxedToBoxedArgs(this.value));
+    const valueString = this.value.value.toString();
+    if (args !== "") {
+      return `${valueString}, with params ${args}`;
+    } else {
+      return valueString;
+    }
   }
 }
 

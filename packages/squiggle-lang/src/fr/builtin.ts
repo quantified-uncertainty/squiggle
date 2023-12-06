@@ -12,7 +12,7 @@ import {
   FnFactory,
   makeNumericComparisons,
 } from "../library/registry/helpers.js";
-import { vArray, vBool, vString, isEqual, vBoxed } from "../value/index.js";
+import { isEqual, vBoxed } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "", // no namespaced versions
@@ -94,7 +94,7 @@ export const library = [
   maker.make({
     name: "typeOf",
     definitions: [
-      makeDefinition([frAny], frString, ([v]) => {
+      makeDefinition([frBoxed(frAny)], frString, ([[_, v]]) => {
         return v.publicName;
       }),
     ],

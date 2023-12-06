@@ -3,6 +3,7 @@ import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
   frBool,
+  frBoxed,
   frDict,
   frDist,
   frDistOrNumber,
@@ -19,7 +20,7 @@ import {
   parseDistFromDistOrNumber,
 } from "../library/registry/helpers.js";
 import { Lambda } from "../reducer/lambda.js";
-import { LabeledDistribution, Scale, VDomain } from "../value/index.js";
+import { LabeledDistribution, Plot, Scale, VDomain } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Plot",
@@ -94,6 +95,71 @@ const _assertYScaleNotDateScale = (yScale: Scale | null) => {
       "Using a date scale as the plot yScale is not yet supported."
     );
   }
+};
+
+const numericFnDef = () => {
+  const toPlot = (
+    fn: Lambda,
+    xScale: Scale | null,
+    yScale: Scale | null,
+    title: string | null,
+    points: number | null
+  ): Plot => {
+    _assertYScaleNotDateScale(yScale);
+    const domain = extractDomainFromOneArgFunction(fn);
+    return {
+      type: "numericFn",
+      fn,
+      xScale: createScale(xScale, domain),
+      yScale: yScale ?? defaultScale,
+      points: points ?? undefined,
+      title: title ?? undefined,
+    };
+  };
+
+  const fnType = frLambdaTyped([frNumber], frNumber);
+
+  return maker.make({
+    name: "numericFn",
+    output: "Plot",
+    examples: [
+      `Plot.numericFn({ fn: {|x|x*x}, xScale: Scale.linear({ min: 3, max: 5 }), yScale: Scale.log({ tickFormat: ".2s" }) })`,
+    ],
+    definitions: [
+      makeDefinition([frBoxed(fnType)], frPlot, ([[boxedArgs, fn]]) =>
+        toPlot(fn, null, defaultScale, boxedArgs.name || null, null)
+      ),
+      makeDefinition(
+        [
+          frBoxed(fnType),
+          frDict(
+            ["xScale", frOptional(frScale)],
+            ["yScale", frOptional(frScale)],
+            ["title", frOptional(frString)],
+            ["points", frOptional(frNumber)]
+          ),
+        ],
+        frPlot,
+        ([[boxedArgs, fn], { xScale, yScale, title, points }]) =>
+          toPlot(fn, xScale, yScale, title || boxedArgs.name || null, points)
+      ),
+      //Maybe we should deprecate this eventually? I think I like the others more, especially for boxed functions and composition.
+      makeDefinition(
+        [
+          frDict(
+            ["fn", fnType],
+            ["xScale", frOptional(frScale)],
+            ["yScale", frOptional(frScale)],
+            ["title", frOptional(frString)],
+            ["points", frOptional(frNumber)]
+          ),
+        ],
+        frPlot,
+        ([{ fn, xScale, yScale, title, points }]) =>
+          toPlot(fn, xScale, yScale, title, points)
+      ),
+    ],
+  });
 };
 
 export const library = [
@@ -178,39 +244,7 @@ export const library = [
       ),
     ],
   }),
-  maker.make({
-    name: "numericFn",
-    output: "Plot",
-    examples: [
-      `Plot.numericFn({ fn: {|x|x*x}, xScale: Scale.linear({ min: 3, max: 5 }), yScale: Scale.log({ tickFormat: ".2s" }) })`,
-    ],
-    definitions: [
-      makeDefinition(
-        [
-          frDict(
-            ["fn", frLambdaTyped([frNumber], frNumber)],
-            ["xScale", frOptional(frScale)],
-            ["yScale", frOptional(frScale)],
-            ["title", frOptional(frString)],
-            ["points", frOptional(frNumber)]
-          ),
-        ],
-        frPlot,
-        ([{ fn, xScale, yScale, title, points }]) => {
-          _assertYScaleNotDateScale(yScale);
-          const domain = extractDomainFromOneArgFunction(fn);
-          return {
-            type: "numericFn",
-            fn,
-            xScale: createScale(xScale, domain),
-            yScale: yScale ?? defaultScale,
-            points: points ?? undefined,
-            title: title ?? undefined,
-          };
-        }
-      ),
-    ],
-  }),
+  numericFnDef(),
   maker.make({
     name: "distFn",
     output: "Plot",

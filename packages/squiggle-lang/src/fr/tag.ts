@@ -1,13 +1,30 @@
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
+  frArray,
   frBoxed,
+  frCalculator,
+  frDictWithArbitraryKeys,
+  frDist,
+  frDistOrNumber,
+  frGeneric,
   frLambda,
+  frLambdaTyped,
+  frNumber,
+  frPlot,
   frString,
+  frTableChart,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
-import { vBoxed, vDict, vString, vVoid } from "../value/index.js";
+import {
+  vCalculator,
+  vLambda,
+  vPlot,
+  vString,
+  vTableChart,
+  vVoid,
+} from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Tag",
@@ -20,9 +37,10 @@ export const library = [
     examples: [],
     definitions: [
       makeDefinition(
-        [frBoxed(frAny), frString],
+        [frBoxed(frGeneric("A")), frString],
+        frBoxed(frGeneric("A")),
         ([[boxed, boxedValue], name]) => {
-          return vBoxed({ ...boxed, value: boxedValue, name });
+          return [{ ...boxed, name }, boxedValue];
         }
       ),
     ],
@@ -31,8 +49,8 @@ export const library = [
     name: "getName",
     examples: [],
     definitions: [
-      makeDefinition([frBoxed(frAny)], ([[b1, v1]]) => {
-        return vString(b1.name || "");
+      makeDefinition([frBoxed(frAny)], frString, ([[b1, v1]]) => {
+        return b1.name || "";
       }),
     ],
   }),
@@ -41,9 +59,10 @@ export const library = [
     examples: [],
     definitions: [
       makeDefinition(
-        [frBoxed(frAny), frString],
+        [frBoxed(frGeneric("A")), frString],
+        frBoxed(frGeneric("A")),
         ([[boxed, boxedValue], description]) => {
-          return vBoxed({ ...boxed, value: boxedValue, description });
+          return [{ ...boxed, description }, boxedValue];
         }
       ),
     ],
@@ -52,8 +71,8 @@ export const library = [
     name: "getDescription",
     examples: [],
     definitions: [
-      makeDefinition([frBoxed(frAny)], ([[b1, v1]]) => {
-        return vString(b1.description || "");
+      makeDefinition([frBoxed(frAny)], frString, ([[b1, v1]]) => {
+        return b1.description || "";
       }),
     ],
   }),
@@ -62,9 +81,46 @@ export const library = [
     examples: [],
     definitions: [
       makeDefinition(
-        [frBoxed(frAny), frAny],
+        [frBoxed(frDist), frPlot],
+        frBoxed(frDist),
         ([[boxed, boxedValue], showAs]) => {
-          return vBoxed({ ...boxed, value: boxedValue, showAs });
+          return [{ ...boxed, showAs: vPlot(showAs) }, boxedValue];
+        }
+      ),
+      makeDefinition(
+        [frBoxed(frLambdaTyped([frNumber], frDistOrNumber)), frPlot],
+        frBoxed(frLambdaTyped([frNumber], frDistOrNumber)),
+        ([[boxed, boxedValue], showAs]) => {
+          return [{ ...boxed, showAs: vPlot(showAs) }, boxedValue];
+        }
+      ),
+      makeDefinition(
+        [
+          frBoxed(frLambdaTyped([frNumber], frDistOrNumber)),
+          frLambdaTyped([frLambdaTyped([frNumber], frDistOrNumber)], frPlot),
+        ],
+        frBoxed(frLambdaTyped([frNumber], frDistOrNumber)),
+        ([[boxed, boxedValue], showAsFn], context) => {
+          const foo = showAsFn.call([vLambda(boxedValue)], context);
+          if (foo.type === "Plot") {
+            return [{ ...boxed, showAs: vPlot(foo.value) }, boxedValue];
+          } else {
+            throw new Error("showAsFn must return a Plot");
+          }
+        }
+      ),
+      makeDefinition(
+        [frBoxed(frLambda), frCalculator],
+        frBoxed(frLambda),
+        ([[boxed, boxedValue], showAs]) => {
+          return [{ ...boxed, showAs: vCalculator(showAs) }, boxedValue];
+        }
+      ),
+      makeDefinition(
+        [frBoxed(frArray(frAny)), frTableChart],
+        frBoxed(frArray(frAny)),
+        ([[boxed, boxedValue], showAs]) => {
+          return [{ ...boxed, showAs: vTableChart(showAs) }, boxedValue];
         }
       ),
     ],
@@ -73,17 +129,8 @@ export const library = [
     name: "getShowAs",
     examples: [],
     definitions: [
-      makeDefinition([frBoxed(frAny)], ([[b1, v1]]) => {
+      makeDefinition([frBoxed(frAny)], frAny, ([[b1, v1]]) => {
         return b1.showAs || vVoid();
-      }),
-    ],
-  }),
-  maker.make({
-    name: "getName",
-    examples: [],
-    definitions: [
-      makeDefinition([frBoxed(frAny)], ([[b1, v1]]) => {
-        return vString(b1.name || "");
       }),
     ],
   }),
@@ -91,9 +138,13 @@ export const library = [
     name: "get",
     examples: [],
     definitions: [
-      makeDefinition([frBoxed(frAny)], ([[v]]) => {
-        return vDict(ImmutableMap([["name", vString(v.name || "")]]));
-      }),
+      makeDefinition(
+        [frBoxed(frAny)],
+        frDictWithArbitraryKeys(frAny),
+        ([[v, b]]) => {
+          return ImmutableMap([["name", vString(v.name || "")]]);
+        }
+      ),
     ],
   }),
 ];
