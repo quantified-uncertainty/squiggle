@@ -21,6 +21,7 @@ Calculator.make: ({
   autorun?: boolean = true,
   sampleCount?: number,
 }) => calculator
+Calculator.make(fn: ...arguments => any) => calculator
 ```
 
 ``Calculator.make`` takes in a function, a description, and a list of fields. The function should take in the same number of arguments as the number of fields, and the arguments should be of the same type as the default value of the field.
