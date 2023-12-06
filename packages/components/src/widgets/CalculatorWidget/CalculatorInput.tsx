@@ -47,7 +47,7 @@ export const CalculatorInput: FC<{
         {input.tag === "select" && (
           <SelectStringFormField
             {...commonProps}
-            options={input.options}
+            options={[...input.options]}
             size="small"
             required
           />

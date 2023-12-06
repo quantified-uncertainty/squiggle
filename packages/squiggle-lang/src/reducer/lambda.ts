@@ -174,7 +174,10 @@ export class BuiltinLambda extends BaseLambda {
   }
 
   parameterString() {
-    return this._definitions.map(fnDefinitionToString).join(" | ");
+    return this._definitions
+      .filter((d) => !d.isAssert)
+      .map(fnDefinitionToString)
+      .join(" | ");
   }
 
   parameterCounts() {
@@ -193,6 +196,7 @@ export class BuiltinLambda extends BaseLambda {
     const signatures = this._definitions;
     const showNameMatchDefinitions = () => {
       const defsString = signatures
+        .filter((d) => !d.isAssert)
         .map(fnDefinitionToString)
         .map((def) => `  ${this.name}${def}\n`)
         .join("");

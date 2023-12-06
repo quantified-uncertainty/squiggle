@@ -8,6 +8,7 @@ import {
   frInput,
   frBool,
   frNumber,
+  frCalculator,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { Calculator, Value, vCalculator } from "../value/index.js";
@@ -17,13 +18,13 @@ const maker = new FnFactory({
   requiresNamespace: true,
 });
 
-const processCalc = (calc: Calculator): Value => {
+const validateCalculator = (calc: Calculator): Calculator => {
   const _calc = vCalculator(calc);
   const error = _calc.getError();
   if (error) {
     throw error;
   } else {
-    return _calc;
+    return _calc.value;
   }
 };
 
@@ -44,8 +45,9 @@ export const library = [
             ["sampleCount", frOptional(frNumber)]
           ),
         ],
+        frCalculator,
         ([{ fn, title, description, inputs, autorun, sampleCount }]) =>
-          processCalc({
+          validateCalculator({
             fn,
             title: title || undefined,
             description: description || undefined,
@@ -54,7 +56,9 @@ export const library = [
             sampleCount: sampleCount || undefined,
           })
       ),
-      makeDefinition([frLambda], ([fn]) => processCalc(fn.toCalculator())),
+      makeDefinition([frLambda], frCalculator, ([fn]) =>
+        validateCalculator(fn.toCalculator())
+      ),
     ],
   }),
 ];

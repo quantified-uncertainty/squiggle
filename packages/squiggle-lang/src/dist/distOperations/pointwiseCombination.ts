@@ -59,7 +59,7 @@ export function pointwiseCombinationFloat(
     algebraicOperation: AlgebraicOperation;
     f: number;
   }
-): result<BaseDist, DistError> {
+): result<PointSetDist.PointSetDist, DistError> {
   const executeCombination = (arithOp: Operation.ScaleOperation) =>
     Result.bind(t.toPointSetDist(env), (t) => {
       // TODO: Move to PointSet codebase
