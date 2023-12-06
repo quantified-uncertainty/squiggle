@@ -14,10 +14,7 @@ import {
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
-import {
-  Value,
-  vString
-} from "../value/index.js";
+import { Value, vString } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Dict",
