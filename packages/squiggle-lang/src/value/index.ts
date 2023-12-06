@@ -648,19 +648,23 @@ export type BoxedArgs = {
   showAs?: Value;
 };
 
+export function boxedArgsToList(args: BoxedArgs): [string, Value][] {
+  const result: [string, Value][] = [];
+  if (args.name) {
+    result.push(["name", vString(args.name)]);
+  }
+  if (args.description) {
+    result.push(["description", vString(args.description)]);
+  }
+  if (args.showAs) {
+    result.push(["showAs", args.showAs]);
+  }
+  return result;
+}
+
 function boxedArgsToString(b: BoxedArgs): string {
-  const boxedParam: { [key: string]: string } = {};
-  if (b.name) {
-    boxedParam["name"] = b.name;
-  }
-  if (b.description) {
-    boxedParam["description"] = b.description;
-  }
-  if (b.showAs) {
-    boxedParam["showAs"] = b.showAs.toString();
-  }
-  return Object.entries(boxedParam)
-    .map(([key, value]) => `${key}: ${value}`)
+  return boxedArgsToList(b)
+    .map(([key, value]) => `${key}: ${value.toString}`)
     .join(", ");
 }
 

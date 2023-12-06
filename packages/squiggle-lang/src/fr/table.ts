@@ -46,31 +46,6 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frBoxed(frArray(frGeneric("A"))),
-          frDict(
-            ["title", frOptional(frString)],
-            [
-              "columns",
-              frArray(
-                frDict(
-                  ["fn", frLambdaTyped([frGeneric("A")], frAny)],
-                  ["name", frOptional(frString)]
-                )
-              ),
-            ]
-          ),
-        ],
-        frTableChart,
-        ([[params, data], { title, columns }]) => {
-          return makeTableChart(
-            data,
-            nullToUndefined(columns),
-            nullToUndefined(title)
-          );
-        }
-      ),
-      makeDefinition(
-        [
           frDict(
             ["data", frArray(frGeneric("A"))],
             ["title", frOptional(frString)],

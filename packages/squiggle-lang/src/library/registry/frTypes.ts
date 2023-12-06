@@ -185,6 +185,30 @@ export const frLambdaNand = (paramLengths: number[]): FRType<Lambda> => {
     getName: () => `lambda(${paramLengths.join(",")})`,
   };
 };
+
+export function frOr<T1, T2>(
+  type1: FRType<T1>,
+  type2: FRType<T2>
+): FRType<{ tag: "1"; value: T1 } | { tag: "2"; value: T2 }> {
+  return {
+    unpack: (v) => {
+      const unpacked1 = type1.unpack(v);
+      if (unpacked1) {
+        return { tag: "1", value: unpacked1 };
+      }
+      const unpacked2 = type2.unpack(v);
+      if (unpacked2) {
+        return { tag: "2", value: unpacked2 };
+      }
+      return undefined;
+    },
+    pack: (v) => {
+      return v.tag === "1" ? type1.pack(v.value) : type2.pack(v.value);
+    },
+    getName: () => `${type1.getName()}|${type2.getName()}`,
+  };
+}
+
 export const frScale: FRType<Scale> = {
   unpack: (v) => (v.type === "Scale" ? v.value : undefined),
   pack: (v) => vScale(v),

@@ -242,6 +242,16 @@ export const library = [
           };
         }
       ),
+      makeDefinition([frBoxed(frDist)], frPlot, ([[args, dist]]) => {
+        return {
+          type: "distributions",
+          distributions: [{ distribution: dist }],
+          xScale: defaultScale,
+          yScale: defaultScale,
+          title: args.name ?? undefined,
+          showSummary: false,
+        };
+      }),
     ],
   }),
   numericFnDef(),

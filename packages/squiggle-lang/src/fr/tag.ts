@@ -1,5 +1,6 @@
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
+  FRType,
   frAny,
   frArray,
   frBoxed,
@@ -11,21 +12,18 @@ import {
   frLambda,
   frLambdaTyped,
   frNumber,
+  frOr,
   frPlot,
   frString,
   frTableChart,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
+import { Lambda } from "../reducer/lambda.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import {
-  Value,
-  vBoxed,
+  BoxedArgs,
+  boxedArgsToList,
   vBoxedSep,
-  vCalculator,
-  vLambda,
-  vPlot,
-  vString,
-  vTableChart,
   vVoid,
 } from "../value/index.js";
 
@@ -33,6 +31,50 @@ const maker = new FnFactory({
   nameSpace: "Tag",
   requiresNamespace: true,
 });
+
+function ensureTypeUsingLambda<T1>(
+  outputType: FRType<T1>,
+  inputType: FRType<Lambda>,
+  showAs: { tag: "1"; value: T1 } | { tag: "2"; value: Lambda },
+  inputValue: Lambda,
+  args: BoxedArgs,
+  context: any
+) {
+  if (showAs.tag === "1") {
+    return showAs.value;
+  } else {
+    const show = showAs.value.call(
+      [vBoxedSep(inputType.pack(inputValue), args)],
+      context
+    );
+    const unpack = outputType.unpack(show);
+    if (unpack) {
+      return unpack;
+    } else {
+      throw new Error("showAs must return correct type");
+    }
+  }
+}
+
+const showAsConvert = (inputType: FRType<any>, outputType: FRType<any>) =>
+  makeDefinition(
+    [
+      frBoxed(inputType),
+      frOr(outputType, frLambdaTyped([inputType], outputType)),
+    ],
+    frBoxed(inputType),
+    ([[boxed, boxedValue], showAs], context) => {
+      const showAsVal = ensureTypeUsingLambda(
+        outputType,
+        inputType,
+        showAs,
+        boxedValue,
+        boxed,
+        context
+      );
+      return [{ ...boxed, showAs: outputType.pack(showAsVal) }, boxedValue];
+    }
+  );
 
 export const library = [
   maker.make({
@@ -83,54 +125,10 @@ export const library = [
     name: "showAs",
     examples: [],
     definitions: [
-      makeDefinition(
-        [frBoxed(frDist), frPlot],
-        frBoxed(frDist),
-        ([[boxed, boxedValue], showAs]) => {
-          return [{ ...boxed, showAs: vPlot(showAs) }, boxedValue];
-        }
-      ),
-      makeDefinition(
-        [frBoxed(frLambdaTyped([frNumber], frDistOrNumber)), frPlot],
-        frBoxed(frLambdaTyped([frNumber], frDistOrNumber)),
-        ([[boxed, boxedValue], showAs]) => {
-          return [{ ...boxed, showAs: vPlot(showAs) }, boxedValue];
-        }
-      ),
-      makeDefinition(
-        [
-          frBoxed(frLambdaTyped([frNumber], frDistOrNumber)),
-          frLambdaTyped([frLambdaTyped([frNumber], frDistOrNumber)], frAny), //really just want plot or calculator
-        ],
-        frBoxed(frLambdaTyped([frNumber], frDistOrNumber)),
-        ([[boxed, boxedValue], showAsFn], context) => {
-          const foo = showAsFn.call(
-            [vBoxedSep(vLambda(boxedValue), boxed)],
-            context
-          );
-          if (foo.type === "Plot") {
-            return [{ ...boxed, showAs: vPlot(foo.value) }, boxedValue];
-          } else if (foo.type === "Calculator") {
-            return [{ ...boxed, showAs: vCalculator(foo.value) }, boxedValue];
-          } else {
-            throw new Error("showAsFn must return a Plot or Calculator");
-          }
-        }
-      ),
-      makeDefinition(
-        [frBoxed(frLambda), frCalculator],
-        frBoxed(frLambda),
-        ([[boxed, boxedValue], showAs]) => {
-          return [{ ...boxed, showAs: vCalculator(showAs) }, boxedValue];
-        }
-      ),
-      makeDefinition(
-        [frBoxed(frArray(frAny)), frTableChart],
-        frBoxed(frArray(frAny)),
-        ([[boxed, boxedValue], showAs]) => {
-          return [{ ...boxed, showAs: vTableChart(showAs) }, boxedValue];
-        }
-      ),
+      showAsConvert(frDist, frPlot),
+      showAsConvert(frLambda, frCalculator),
+      showAsConvert(frLambdaTyped([frNumber], frDistOrNumber), frPlot),
+      showAsConvert(frBoxed(frArray(frAny)), frTableChart),
     ],
   }),
   maker.make({
@@ -150,7 +148,7 @@ export const library = [
         [frBoxed(frAny)],
         frDictWithArbitraryKeys(frAny),
         ([[v, b]]) => {
-          return ImmutableMap([["name", vString(v.name || "")]]);
+          return ImmutableMap(boxedArgsToList(v));
         }
       ),
     ],
