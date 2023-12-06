@@ -116,8 +116,8 @@ export const library = [
     name: "getDescription",
     examples: [],
     definitions: [
-      makeDefinition([frBoxed(frAny)], frString, ([[b1, v1]]) => {
-        return b1.description || "";
+      makeDefinition([frBoxed(frAny)], frString, ([[args, _]]) => {
+        return args.description || "";
       }),
     ],
   }),
@@ -128,20 +128,20 @@ export const library = [
       showAsConvert(frDist, frPlot),
       showAsConvert(frLambda, frCalculator),
       showAsConvert(frLambdaTyped([frNumber], frDistOrNumber), frPlot),
-      showAsConvert(frBoxed(frArray(frAny)), frTableChart),
+      showAsConvert(frArray(frAny), frTableChart),
     ],
   }),
   maker.make({
     name: "getShowAs",
     examples: [],
     definitions: [
-      makeDefinition([frBoxed(frAny)], frAny, ([[b1, v1]]) => {
-        return b1.showAs || vVoid();
+      makeDefinition([frBoxed(frAny)], frAny, ([[args, value]]) => {
+        return args.showAs || value; // This is the default
       }),
     ],
   }),
   maker.make({
-    name: "get",
+    name: "all",
     examples: [],
     definitions: [
       makeDefinition(
