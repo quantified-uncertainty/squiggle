@@ -10,7 +10,7 @@ export type FnDefinition = {
   inputs: FRType<any>[];
   run: (args: any[], context: ReducerContext) => Value;
   output: FRType<any>;
-  isUsed: boolean;
+  isAssert: boolean;
 };
 
 export function makeDefinition<const T extends any[]>(
@@ -25,12 +25,12 @@ export function makeDefinition<const T extends any[]>(
     // Type of `run` argument must match `FnDefinition['run']`. This
     // This unsafe type casting is necessary because function type parameters are contravariant.
     run: run as FnDefinition["run"],
-    isUsed: true,
+    isAssert: false,
   };
 }
 
 //Some definitions are just used to guard against ambiguous function calls, and should never be called.
-export function makeAmbiguousDefinition<const T extends any[]>(
+export function makeAssertDefinition<const T extends any[]>(
   // [...] wrapper is important, see also: https://stackoverflow.com/a/63891197
   inputs: [...{ [K in keyof T]: FRType<T[K]> }],
   errorMsg: string
@@ -41,7 +41,7 @@ export function makeAmbiguousDefinition<const T extends any[]>(
     run: (_) => {
       throw new REAmbiguous(errorMsg);
     },
-    isUsed: false,
+    isAssert: true,
   };
 }
 export function tryCallFnDefinition(
@@ -67,5 +67,5 @@ export function tryCallFnDefinition(
 export function fnDefinitionToString(fn: FnDefinition): string {
   const inputs = fn.inputs.map((t) => t.getName()).join(", ");
   const output = fn.output?.getName();
-  return `(${inputs})${output ? ` => ${output}` : ""}`;
+  return `(${inputs}) => ${output}`;
 }
