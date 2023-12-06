@@ -9,6 +9,7 @@ import {
 import { RelativeValuesDefinition } from "../types/RelativeValuesDefinition";
 import { validateSlug } from "../utils";
 import { ZodError } from "zod";
+import { indexDefinitionId } from "../helpers/searchHelpers";
 
 const validateColor = { regex: /^#[0-9a-fA-F]{6}$/ };
 
@@ -174,6 +175,8 @@ builder.mutationField("createRelativeValuesDefinition", (t) =>
 
         return definition;
       });
+
+      await indexDefinitionId(definition.id);
 
       return { definition };
     },

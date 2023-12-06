@@ -7,6 +7,7 @@ import { getWriteableOwner } from "../helpers/ownerHelpers";
 import { ZodError } from "zod";
 import { validateSlug } from "../utils";
 import { getSelf } from "../helpers/userHelpers";
+import { indexModelId } from "../helpers/searchHelpers";
 
 builder.mutationField("createSquiggleSnippetModel", (t) =>
   t.withAuth({ signedIn: true }).fieldWithInput({
@@ -88,6 +89,8 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
           },
         });
       });
+
+      await indexModelId(model.id);
 
       return { model };
     },

@@ -14,7 +14,7 @@ builder.mutationField("adminRebuildSearchIndex", (t) =>
     authScopes: {
       isRootUser: true,
     },
-    resolve: async (_, { input }, { session }) => {
+    resolve: async () => {
       await rebuildSearchableTable();
       return { ok: true };
     },

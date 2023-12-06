@@ -26,3 +26,35 @@ export async function rebuildSearchableTable() {
     });
   });
 }
+
+export async function indexGroupId(groupId: string) {
+  await prisma.searchable.upsert({
+    where: { groupId },
+    create: { groupId },
+    update: {},
+  });
+}
+
+export async function indexUserId(userId: string) {
+  await prisma.searchable.upsert({
+    where: { userId },
+    create: { userId },
+    update: {},
+  });
+}
+
+export async function indexModelId(modelId: string) {
+  await prisma.searchable.upsert({
+    where: { modelId },
+    create: { modelId },
+    update: {},
+  });
+}
+
+export async function indexDefinitionId(definitionId: string) {
+  await prisma.searchable.upsert({
+    where: { definitionId },
+    create: { definitionId },
+    update: {},
+  });
+}
