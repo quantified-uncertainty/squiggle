@@ -371,7 +371,7 @@ dictConstructor 'dict'
 // Separators
 
 _ 'whitespace'
-  = whiteSpaceCharactersOrComment*
+  = whiteSpaceCharacters*
 
 _nl 'whitespace'
   = (whiteSpaceCharactersOrComment / commentOrNewLine)*
@@ -383,7 +383,7 @@ __nl 'whitespace'
   = (whiteSpaceCharactersOrComment / commentOrNewLine)+
 
 statementSeparator ';'
-  = _ (';' / commentOrNewLine)+ _nl
+  = _ ';' _nl
 
 commaSeparator ',' = _ ',' _nl
 
@@ -391,9 +391,9 @@ commentOrNewLine = finalComment? newLine
   newLine "newline" = [\n\r]
 
 finalComment "line comment"
-  = _ ('//') comment:($([^\r\n]*)) { options.comments.push(h.lineComment(comment, location())); }
+  = ('//') comment:($([^\r\n]*)) { options.comments.push(h.lineComment(comment, location())); }
 
-whiteSpaceCharactersOrComment = whiteSpaceCharacters / delimitedComment
+whiteSpaceCharactersOrComment = whiteSpaceCharacters
 
   delimitedComment  "comment"
     = '/*' comment:($(
