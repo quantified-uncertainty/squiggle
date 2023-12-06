@@ -221,7 +221,6 @@ export class BuiltinLambda extends BaseLambda {
         name: `Input ${i + 1}`,
         type: sig.getName() === "Bool" ? "checkbox" : "text",
       })),
-      sampleCount: 10000,
       autorun,
     };
   }
