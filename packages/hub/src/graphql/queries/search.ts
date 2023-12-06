@@ -1,6 +1,7 @@
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 import { Searchable } from "../types/Searchable";
+import { modelWhereHasAccess } from "../helpers/modelHelpers";
 
 builder.queryField("search", (t) =>
   t.prismaConnection({
@@ -10,12 +11,17 @@ builder.queryField("search", (t) =>
       text: t.arg.string({ required: true }),
     },
     errors: {},
-    resolve: (query, _, { text }) => {
+    resolve: (query, _, { text }, { session }) => {
       return prisma.searchable.findMany({
         ...query,
         where: {
           OR: [
-            { model: { slug: { search: text } } },
+            {
+              model: {
+                ...modelWhereHasAccess(session),
+                slug: { search: text },
+              },
+            },
             { definition: { slug: { search: text } } },
             { user: { asOwner: { slug: { search: text } } } },
             { group: { asOwner: { slug: { search: text } } } },
