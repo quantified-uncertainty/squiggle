@@ -660,11 +660,20 @@ export const vVoid = () => new VVoid();
 export type BoxedArgs = {
   name?: string;
   description?: string;
+  showAs?: Value;
 };
 
 export type Boxed = {
   value: Value;
 } & BoxedArgs;
+
+export function boxedToBoxedArgs(boxed: Boxed): BoxedArgs {
+  return {
+    name: boxed.name,
+    description: boxed.description,
+    showAs: boxed.showAs,
+  };
+}
 
 export class VBoxed extends BaseValue {
   readonly type = "Boxed";
@@ -680,6 +689,7 @@ export class VBoxed extends BaseValue {
     )}`;
   }
 }
+
 export const vBoxed = (value: Boxed) => new VBoxed(value);
 
 export const vBoxedSep = (value: Value, args: BoxedArgs) =>

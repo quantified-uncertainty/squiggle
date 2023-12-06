@@ -18,8 +18,9 @@ import {
   vDuration,
   vInput,
   Input,
-  Boxed,
-  vBoxed,
+  vBoxedSep,
+  BoxedArgs,
+  boxedToBoxedArgs,
 } from "../../value/index.js";
 
 /*
@@ -94,10 +95,23 @@ export const frLambdaN = (paramLength: number): FRType<Lambda> => {
   };
 };
 
-export const frBoxed = <T>(itemType: FRType<T>): FRType<Boxed> => {
+export const frBoxed = <T>(itemType: FRType<T>): FRType<[BoxedArgs, T]> => {
   return {
-    unpack: (v) => (v.type === "Boxed" ? v.value : undefined),
-    pack: (a) => vBoxed(a),
+    unpack: (v) => {
+      if (v.type !== "Boxed") {
+        const unpackedItem = itemType.unpack(v);
+        if (unpackedItem) {
+          return [{}, unpackedItem];
+        } else {
+          return undefined;
+        }
+      } else {
+        const unpackedItem = itemType.unpack(v.value.value);
+        const boxedArgs = boxedToBoxedArgs(v.value);
+        return (unpackedItem && [boxedArgs, unpackedItem]) || undefined;
+      }
+    },
+    pack: (a) => vBoxedSep(itemType.pack(a[1]), a[0]),
     getName: () => `boxed(${itemType.getName()})`,
     nested: itemType,
     tag: "boxed",

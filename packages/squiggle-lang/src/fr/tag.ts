@@ -1,8 +1,13 @@
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frAny, frBoxed, frString } from "../library/registry/frTypes.js";
+import {
+  frAny,
+  frBoxed,
+  frLambda,
+  frString,
+} from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
-import { vBoxed, vDict, vString } from "../value/index.js";
+import { vBoxed, vDict, vString, vVoid } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Tag",
@@ -14,11 +19,71 @@ export const library = [
     name: "name",
     examples: [],
     definitions: [
-      makeDefinition([frAny, frString], ([value, name]) => {
-        return vBoxed({ value, name });
+      makeDefinition(
+        [frBoxed(frAny), frString],
+        ([[boxed, boxedValue], name]) => {
+          return vBoxed({ ...boxed, value: boxedValue, name });
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "getName",
+    examples: [],
+    definitions: [
+      makeDefinition([frBoxed(frAny)], ([[b1, v1]]) => {
+        return vString(b1.name || "");
       }),
-      makeDefinition([frBoxed(frAny)], ([value]) => {
-        return vString(value.name || "");
+    ],
+  }),
+  maker.make({
+    name: "description",
+    examples: [],
+    definitions: [
+      makeDefinition(
+        [frBoxed(frAny), frString],
+        ([[boxed, boxedValue], description]) => {
+          return vBoxed({ ...boxed, value: boxedValue, description });
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "getDescription",
+    examples: [],
+    definitions: [
+      makeDefinition([frBoxed(frAny)], ([[b1, v1]]) => {
+        return vString(b1.description || "");
+      }),
+    ],
+  }),
+  maker.make({
+    name: "showAs",
+    examples: [],
+    definitions: [
+      makeDefinition(
+        [frBoxed(frAny), frAny],
+        ([[boxed, boxedValue], showAs]) => {
+          return vBoxed({ ...boxed, value: boxedValue, showAs });
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "getShowAs",
+    examples: [],
+    definitions: [
+      makeDefinition([frBoxed(frAny)], ([[b1, v1]]) => {
+        return b1.showAs || vVoid();
+      }),
+    ],
+  }),
+  maker.make({
+    name: "getName",
+    examples: [],
+    definitions: [
+      makeDefinition([frBoxed(frAny)], ([[b1, v1]]) => {
+        return vString(b1.name || "");
       }),
     ],
   }),
@@ -26,11 +91,8 @@ export const library = [
     name: "get",
     examples: [],
     definitions: [
-      makeDefinition([frBoxed(frAny)], ([v]) => {
+      makeDefinition([frBoxed(frAny)], ([[v]]) => {
         return vDict(ImmutableMap([["name", vString(v.name || "")]]));
-      }),
-      makeDefinition([frAny], ([v]) => {
-        return vDict(ImmutableMap([["name", vString("")]]));
       }),
     ],
   }),

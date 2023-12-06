@@ -1,5 +1,5 @@
 import { ReducerContext } from "../../reducer/context.js";
-import { Boxed, VBoxed, Value, vBoxed } from "../../value/index.js";
+import { VBoxed, Value } from "../../value/index.js";
 import { FRType } from "./frTypes.js";
 
 // Type safety of `FnDefinition is guaranteed by `makeDefinition` signature below and by `FRType` unpack logic.
@@ -38,14 +38,9 @@ export function tryCallFnDefinition(
     const frIsBoxed = fn.inputs[i].tag === "boxed";
     const valueIsBoxed = arg.type === "Boxed";
 
-    // if (frIsBoxed && !valueIsBoxed) {
-    //   const boxed: Boxed = { value: arg, name: "" };
-    //   arg = vBoxed(boxed);
-    // }
-
     if (valueIsBoxed && !frIsBoxed) {
       arg = (arg as VBoxed).value.value;
-    }
+    } // Note: This kills box on inspect calls.
 
     const unpackedArg = fn.inputs[i].unpack(arg);
     if (unpackedArg === undefined) {

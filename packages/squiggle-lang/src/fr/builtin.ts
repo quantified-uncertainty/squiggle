@@ -3,6 +3,7 @@ import {
   frAny,
   frArray,
   frBool,
+  frBoxed,
   frNumber,
   frString,
 } from "../library/registry/frTypes.js";
@@ -96,14 +97,18 @@ export const library = [
   maker.make({
     name: "inspect",
     definitions: [
-      makeDefinition([frAny], ([value]) => {
-        console.log(value);
-        return value;
+      makeDefinition([frBoxed(frAny)], ([[boxedArgs, boxedValue]]) => {
+        console.log(boxedValue, boxedArgs);
+        return vBoxed({ ...boxedArgs, value: boxedValue });
       }),
-      makeDefinition([frAny, frString], ([value, label]) => {
-        console.log(`${label}: ${value.toString()}`);
-        return value;
-      }),
+
+      makeDefinition(
+        [frBoxed(frAny), frString],
+        ([[boxedArgs, boxedValue], label]) => {
+          console.log(`${label}: ${boxedValue.toString()}`);
+          return vBoxed({ ...boxedArgs, value: boxedValue });
+        }
+      ),
     ],
   }),
 ];
