@@ -14,14 +14,7 @@ import {
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
-import {
-  Value,
-  vArray,
-  vNumber,
-  vBool,
-  vDict,
-  vString,
-} from "../value/index.js";
+import { Value, vString } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Dict",
@@ -37,7 +30,7 @@ export const library = [
       makeDefinition(
         [frDictWithArbitraryKeys(frGeneric("A")), frString, frGeneric("A")],
         frDictWithArbitraryKeys(frGeneric("A")),
-        ([dict, key, value]) => vDict(dict.set(key, value))
+        ([dict, key, value]) => dict.set(key, value)
       ),
     ],
   }),
@@ -49,7 +42,7 @@ export const library = [
       makeDefinition(
         [frDictWithArbitraryKeys(frAny), frString],
         frBool,
-        ([dict, key]) => vBool(dict.has(key))
+        ([dict, key]) => dict.has(key)
       ),
     ],
   }),
@@ -58,8 +51,10 @@ export const library = [
     output: "Number",
     examples: [`Dict.size({a: 1, b: 2})`],
     definitions: [
-      makeDefinition([frDictWithArbitraryKeys(frAny)], frNumber, ([dict]) =>
-        vNumber(dict.size)
+      makeDefinition(
+        [frDictWithArbitraryKeys(frAny)],
+        frNumber,
+        ([dict]) => dict.size
       ),
     ],
   }),
@@ -71,7 +66,7 @@ export const library = [
       makeDefinition(
         [frDictWithArbitraryKeys(frGeneric("A")), frString],
         frDictWithArbitraryKeys(frGeneric("A")),
-        ([dict, key]) => vDict(dict.delete(key))
+        ([dict, key]) => dict.delete(key)
       ),
     ],
   }),
@@ -83,7 +78,7 @@ export const library = [
       makeDefinition(
         [frDictWithArbitraryKeys(frAny), frDictWithArbitraryKeys(frAny)],
         frDictWithArbitraryKeys(frAny),
-        ([d1, d2]) => vDict(ImmutableMap([...d1.entries(), ...d2.entries()]))
+        ([d1, d2]) => ImmutableMap([...d1.entries(), ...d2.entries()])
       ),
     ],
   }),
@@ -95,8 +90,7 @@ export const library = [
       makeDefinition(
         [frArray(frDictWithArbitraryKeys(frAny))],
         frDictWithArbitraryKeys(frAny),
-        ([dicts]) =>
-          vDict(ImmutableMap(dicts.map((d) => [...d.entries()]).flat()))
+        ([dicts]) => ImmutableMap(dicts.map((d) => [...d.entries()]).flat())
       ),
     ],
   }),
@@ -108,7 +102,7 @@ export const library = [
       makeDefinition(
         [frDictWithArbitraryKeys(frAny)],
         frArray(frString),
-        ([d1]) => vArray([...d1.keys()].map((k) => vString(k)))
+        ([d1]) => [...d1.keys()]
       ),
     ],
   }),
@@ -120,7 +114,7 @@ export const library = [
       makeDefinition(
         [frDictWithArbitraryKeys(frGeneric("A"))],
         frArray(frGeneric("A")),
-        ([d1]) => vArray([...d1.values()])
+        ([d1]) => [...d1.values()]
       ),
     ],
   }),
@@ -131,9 +125,8 @@ export const library = [
     definitions: [
       makeDefinition(
         [frDictWithArbitraryKeys(frGeneric("A"))],
-        frDictWithArbitraryKeys(frGeneric("A")),
-        ([dict]) =>
-          vArray([...dict.entries()].map(([k, v]) => vArray([vString(k), v])))
+        frArray(frTuple(frString, frGeneric("A"))),
+        ([dict]) => [...dict.entries()]
       ),
     ],
   }),
@@ -145,7 +138,7 @@ export const library = [
       makeDefinition(
         [frArray(frTuple(frString, frGeneric("A")))],
         frDictWithArbitraryKeys(frGeneric("A")),
-        ([items]) => vDict(ImmutableMap(items))
+        ([items]) => ImmutableMap(items)
       ),
     ],
   }),
@@ -161,13 +154,11 @@ export const library = [
         ],
         frDictWithArbitraryKeys(frGeneric("B")),
         ([dict, lambda], context) => {
-          return vDict(
-            ImmutableMap(
-              [...dict.entries()].map(([key, value]) => {
-                const mappedValue = lambda.call([value], context);
-                return [key, mappedValue];
-              })
-            )
+          return ImmutableMap(
+            [...dict.entries()].map(([key, value]) => {
+              const mappedValue = lambda.call([value], context);
+              return [key, mappedValue];
+            })
           );
         }
       ),
@@ -195,7 +186,7 @@ export const library = [
               throw new REArgumentError("mapKeys: lambda must return a string");
             }
           }
-          return vDict(ImmutableMap(mappedEntries));
+          return ImmutableMap(mappedEntries);
         }
       ),
     ],
@@ -220,7 +211,7 @@ export const library = [
               }
             });
           });
-          return vDict(response);
+          return response;
         }
       ),
     ],
@@ -243,7 +234,7 @@ export const library = [
               });
             }
           );
-          return vDict(response);
+          return response;
         }
       ),
     ],

@@ -11,7 +11,7 @@ import {
   FnFactory,
   makeNumericComparisons,
 } from "../library/registry/helpers.js";
-import { vArray, vBool, vString, isEqual } from "../value/index.js";
+import { isEqual } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "", // no namespaced versions
@@ -40,11 +40,11 @@ export const library = [
     definitions: [
       makeDefinition([frNumber], frBool, ([x]) => {
         // unary prefix !
-        return vBool(x === 0);
+        return x === 0;
       }),
       makeDefinition([frBool], frBool, ([x]) => {
         // unary prefix !
-        return vBool(!x);
+        return !x;
       }),
     ],
   }),
@@ -52,17 +52,17 @@ export const library = [
     name: "concat",
     definitions: [
       makeDefinition([frString, frString], frString, ([a, b]) => {
-        return vString(a + b);
+        return a + b;
       }),
       makeDefinition(
         [frArray(frAny), frArray(frAny)],
         frArray(frAny),
         ([a, b]) => {
-          return vArray([...a, ...b]);
+          return [...a, ...b];
         }
       ),
       makeDefinition([frString, frAny], frString, ([a, b]) => {
-        return vString(a + b.toString());
+        return a + b.toString();
       }),
     ],
   }),
@@ -70,7 +70,7 @@ export const library = [
     name: "add",
     definitions: [
       makeDefinition([frString, frAny], frString, ([a, b]) => {
-        return vString(a + b.toString());
+        return a + b.toString();
       }),
     ],
   }),
@@ -78,7 +78,7 @@ export const library = [
     name: "equal",
     definitions: [
       makeDefinition([frAny, frAny], frBool, ([a, b]) => {
-        return vBool(isEqual(a, b));
+        return isEqual(a, b);
       }),
     ],
   }),
@@ -86,7 +86,7 @@ export const library = [
     name: "unequal",
     definitions: [
       makeDefinition([frAny, frAny], frBool, ([a, b]) => {
-        return vBool(!isEqual(a, b));
+        return !isEqual(a, b);
       }),
     ],
   }),
@@ -94,7 +94,7 @@ export const library = [
     name: "typeOf",
     definitions: [
       makeDefinition([frAny], frString, ([v]) => {
-        return vString(v.publicName);
+        return v.publicName;
       }),
     ],
   }),

@@ -3,10 +3,10 @@ import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frDate,
   frDict,
+  frDomain,
+  frDuration,
   frNumber,
   frString,
-  frDuration,
-  frDomain,
 } from "../library/registry/frTypes.js";
 import {
   FnFactory,
@@ -14,7 +14,6 @@ import {
 } from "../library/registry/helpers.js";
 import { SDate } from "../utility/SDate.js";
 import { DateRangeDomain } from "../value/domain.js";
-import { vDate, vDomain, vNumber, vDuration } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Date",
@@ -26,7 +25,7 @@ const makeYearFn = makeDefinition([frNumber], frDate, ([year]) => {
   if (!result.ok) {
     throw new REOther(result.value);
   }
-  return vDate(result.value);
+  return result.value;
 });
 
 export const library = [
@@ -48,14 +47,14 @@ export const library = [
         if (!result.ok) {
           throw new REOther(result.value);
         }
-        return vDate(result.value);
+        return result.value;
       }),
 
       makeDefinition(
         [frNumber, frNumber, frNumber],
         frDate,
         ([yr, month, date]) => {
-          return vDate(SDate.fromYearMonthDay(yr, month, date));
+          return SDate.fromYearMonthDay(yr, month, date);
         }
       ),
     ],
@@ -70,7 +69,7 @@ export const library = [
     output: "Date",
     definitions: [
       makeDefinition([frNumber], frDate, ([num]) => {
-        return vDate(SDate.fromUnixS(num));
+        return SDate.fromUnixS(num);
       }),
     ],
   }),
@@ -81,7 +80,7 @@ export const library = [
     output: "Number",
     definitions: [
       makeDefinition([frDate], frNumber, ([date]) => {
-        return vNumber(date.toUnixS());
+        return date.toUnixS();
       }),
     ],
   }),
@@ -91,7 +90,7 @@ export const library = [
     output: "Duration",
     definitions: [
       makeDefinition([frDate, frDate], frDuration, ([d1, d2]) =>
-        vDuration(d1.subtract(d2))
+        d1.subtract(d2)
       ),
     ],
   }),
@@ -101,7 +100,7 @@ export const library = [
     output: "Date",
     definitions: [
       makeDefinition([frDate, frDuration], frDate, ([d1, d2]) =>
-        vDate(d1.subtractDuration(d2))
+        d1.subtractDuration(d2)
       ),
     ],
   }),
@@ -114,10 +113,10 @@ export const library = [
     output: "Date",
     definitions: [
       makeDefinition([frDate, frDuration], frDate, ([d1, d2]) =>
-        vDate(d1.addDuration(d2))
+        d1.addDuration(d2)
       ),
       makeDefinition([frDuration, frDate], frDate, ([d1, d2]) =>
-        vDate(d2.addDuration(d1))
+        d2.addDuration(d1)
       ),
     ],
   }),
@@ -131,7 +130,7 @@ export const library = [
         [frDict(["min", frDate], ["max", frDate])],
         frDomain,
         ([{ min, max }]) => {
-          return vDomain(new DateRangeDomain(min, max));
+          return new DateRangeDomain(min, max);
         }
       ),
     ],

@@ -20,13 +20,10 @@ import {
 } from "../library/registry/frTypes.js";
 import {
   FnFactory,
-  distResultToValue,
-  distsResultToValue,
   parseDistFromDistOrNumber,
-  unpackDistResult,
+  unwrapDistResult,
 } from "../library/registry/helpers.js";
 import * as magicNumbers from "../magicNumbers.js";
-import { vArray, vNumber } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "",
@@ -62,7 +59,7 @@ const makeOperationFns = (): FRFunction[] => {
             [frDist, frNumber],
             frDist,
             ([dist, n], { environment }) =>
-              distResultToValue(
+              unwrapDistResult(
                 op(dist, new SymbolicDist.PointMass(n), { env: environment })
               )
           ),
@@ -70,7 +67,7 @@ const makeOperationFns = (): FRFunction[] => {
             [frNumber, frDist],
             frDist,
             ([n, dist], { environment }) =>
-              distResultToValue(
+              unwrapDistResult(
                 op(new SymbolicDist.PointMass(n), dist, { env: environment })
               )
           ),
@@ -78,7 +75,7 @@ const makeOperationFns = (): FRFunction[] => {
             [frDist, frDist],
             frDist,
             ([dist1, dist2], { environment }) =>
-              distResultToValue(op(dist1, dist2, { env: environment }))
+              unwrapDistResult(op(dist1, dist2, { env: environment }))
           ),
         ],
       })
@@ -92,13 +89,13 @@ export const library: FRFunction[] = [
   maker.d2s({
     name: "sparkline",
     fn: (d, env) =>
-      unpackDistResult(
+      unwrapDistResult(
         d.toSparkline(magicNumbers.Environment.sparklineLength, env)
       ),
   }),
   maker.dn2s({
     name: "sparkline",
-    fn: (d, n, env) => unpackDistResult(d.toSparkline(n | 0, env)),
+    fn: (d, n, env) => unwrapDistResult(d.toSparkline(n | 0, env)),
   }),
   maker.d2n({
     name: "mean",
@@ -108,23 +105,23 @@ export const library: FRFunction[] = [
     name: "median",
     fn: (d) => d.inv(0.5),
   }),
-  maker.d2n({ name: "stdev", fn: (d) => unpackDistResult(d.stdev()) }),
-  maker.d2n({ name: "variance", fn: (d) => unpackDistResult(d.variance()) }),
+  maker.d2n({ name: "stdev", fn: (d) => unwrapDistResult(d.stdev()) }),
+  maker.d2n({ name: "variance", fn: (d) => unwrapDistResult(d.variance()) }),
   maker.d2n({ name: "min", fn: (d) => d.min() }),
   maker.d2n({ name: "max", fn: (d) => d.max() }),
-  maker.d2n({ name: "mode", fn: (d) => unpackDistResult(d.mode()) }),
+  maker.d2n({ name: "mode", fn: (d) => unwrapDistResult(d.mode()) }),
   maker.d2n({ name: "sample", fn: (d) => d.sample() }),
   maker.d2n({ name: "integralSum", fn: (d) => d.integralSum() }),
   maker.fromDefinition(
     "sampleN",
     makeDefinition([frDist, frNumber], frArray(frNumber), ([dist, n]) => {
-      return vArray(dist.sampleN(n | 0).map(vNumber));
+      return dist.sampleN(n | 0);
     })
   ),
   maker.d2d({
     name: "exp",
     fn: (dist, env) => {
-      return unpackDistResult(
+      return unwrapDistResult(
         binaryOperations.algebraicPower(
           new SymbolicDist.PointMass(Math.E),
           dist,
@@ -145,7 +142,7 @@ export const library: FRFunction[] = [
   }),
   maker.d2d({
     name: "toPointSet",
-    fn: (d, env) => unpackDistResult(d.toPointSetDist(env)),
+    fn: (d, env) => unwrapDistResult(d.toPointSetDist(env)),
   }),
   maker.dn2n({
     name: "cdf",
@@ -153,7 +150,7 @@ export const library: FRFunction[] = [
   }),
   maker.dn2n({
     name: "pdf",
-    fn: (d, x, env) => unpackDistResult(d.pdf(x, { env })),
+    fn: (d, x, env) => unwrapDistResult(d.pdf(x, { env })),
   }),
   maker.dn2n({
     name: "inv",
@@ -166,12 +163,12 @@ export const library: FRFunction[] = [
   maker.dn2d({
     name: "truncateLeft",
     fn: (dist, x, env) =>
-      unpackDistResult(dist.truncate(x, undefined, { env })),
+      unwrapDistResult(dist.truncate(x, undefined, { env })),
   }),
   maker.dn2d({
     name: "truncateRight",
     fn: (dist, x, env) =>
-      unpackDistResult(dist.truncate(undefined, x, { env })),
+      unwrapDistResult(dist.truncate(undefined, x, { env })),
   }),
   maker.fromDefinition(
     "truncate",
@@ -179,7 +176,7 @@ export const library: FRFunction[] = [
       [frDist, frNumber, frNumber],
       frDist,
       ([dist, left, right], { environment }) =>
-        distResultToValue(dist.truncate(left, right, { env: environment }))
+        unwrapDistResult(dist.truncate(left, right, { env: environment }))
     )
   ),
   maker.make({
@@ -189,7 +186,7 @@ export const library: FRFunction[] = [
         [frArray(frDistOrNumber)],
         frDist,
         ([dists], { environment }) =>
-          distResultToValue(
+          unwrapDistResult(
             algebraicSum(dists.map(parseDistFromDistOrNumber), environment)
           )
       ),
@@ -202,7 +199,7 @@ export const library: FRFunction[] = [
         [frArray(frDistOrNumber)],
         frDist,
         ([dists], { environment }) =>
-          distResultToValue(
+          unwrapDistResult(
             algebraicProduct(dists.map(parseDistFromDistOrNumber), environment)
           )
       ),
@@ -215,7 +212,7 @@ export const library: FRFunction[] = [
         [frArray(frDistOrNumber)],
         frArray(frDist),
         ([dists], { environment }) =>
-          distsResultToValue(
+          unwrapDistResult(
             algebraicCumSum(dists.map(parseDistFromDistOrNumber), environment)
           )
       ),
@@ -228,7 +225,7 @@ export const library: FRFunction[] = [
         [frArray(frDistOrNumber)],
         frArray(frDist),
         ([dists], { environment }) =>
-          distsResultToValue(
+          unwrapDistResult(
             algebraicCumProd(dists.map(parseDistFromDistOrNumber), environment)
           )
       ),
@@ -241,7 +238,7 @@ export const library: FRFunction[] = [
         [frArray(frDistOrNumber)],
         frArray(frDist),
         ([dists], { environment }) =>
-          distsResultToValue(
+          unwrapDistResult(
             algebraicDiff(dists.map(parseDistFromDistOrNumber), environment)
           )
       ),
@@ -250,7 +247,7 @@ export const library: FRFunction[] = [
   maker.d2d({
     name: "log",
     fn: (dist, env) =>
-      unpackDistResult(
+      unwrapDistResult(
         binaryOperations.algebraicLogarithm(
           dist,
           new SymbolicDist.PointMass(Math.E),
@@ -261,7 +258,7 @@ export const library: FRFunction[] = [
   maker.d2d({
     name: "log10",
     fn: (dist, env) =>
-      unpackDistResult(
+      unwrapDistResult(
         binaryOperations.algebraicLogarithm(
           dist,
           new SymbolicDist.PointMass(10),
@@ -274,7 +271,7 @@ export const library: FRFunction[] = [
   maker.d2d({
     name: "unaryMinus",
     fn: (dist, env) =>
-      unpackDistResult(
+      unwrapDistResult(
         binaryOperations.algebraicMultiply(
           dist,
           new SymbolicDist.PointMass(-1),
@@ -287,7 +284,7 @@ export const library: FRFunction[] = [
   maker.d2d({
     name: "dotExp",
     fn: (dist, env) =>
-      unpackDistResult(
+      unwrapDistResult(
         binaryOperations.pointwisePower(
           new SymbolicDist.PointMass(Math.E),
           dist,

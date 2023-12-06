@@ -5,7 +5,7 @@ import { wrapValue } from "./index.js";
 
 export class SqArray {
   constructor(
-    private _value: Value[],
+    private _value: readonly Value[],
     public context?: SqValueContext
   ) {}
 

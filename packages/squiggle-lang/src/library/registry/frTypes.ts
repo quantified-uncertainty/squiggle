@@ -39,6 +39,7 @@ export type FRType<T> = {
   unpack: (v: Value) => T | undefined;
   pack: (v: T) => Value; // used in makeSquiggleDefinition
   getName: () => string;
+  transparent?: T extends Value ? boolean : undefined;
 };
 
 const isOptional = <T>(frType: FRType<T>): boolean => {
@@ -175,13 +176,15 @@ export const frDomain: FRType<Domain> = {
   getName: () => "domain",
 };
 
-export const frArray = <T>(itemType: FRType<T>): FRType<T[]> => {
+export const frArray = <T>(itemType: FRType<T>): FRType<readonly T[]> => {
+  const isTransparent = itemType.transparent;
+
   return {
     unpack: (v: Value) => {
       if (v.type !== "Array") {
         return undefined;
       }
-      if (itemType.getName() === "any") {
+      if (isTransparent) {
         // special case, performance optimization
         return v.value as T[];
       }
@@ -196,7 +199,10 @@ export const frArray = <T>(itemType: FRType<T>): FRType<T[]> => {
       }
       return unpackedArray;
     },
-    pack: (v) => vArray(v.map(itemType.pack)),
+    pack: (v) =>
+      isTransparent
+        ? vArray(v as readonly Value[])
+        : vArray(v.map(itemType.pack)),
     getName: () => `list(${itemType.getName()})`,
   };
 };
@@ -282,12 +288,14 @@ export const frAny: FRType<Value> = {
   unpack: (v) => v,
   pack: (v) => v,
   getName: () => "any",
+  transparent: true,
 };
 
 export const frGeneric = (index: string): FRType<Value> => ({
   unpack: (v) => v,
   pack: (v) => v,
   getName: () => `'${index}`,
+  transparent: true,
 });
 
 // We currently support dicts with up to 5 pairs.

@@ -1,7 +1,6 @@
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import { frNumber } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { vNumber } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "",
@@ -20,7 +19,7 @@ const makeUnitFn = (
     examples: [`3${shortName} // ${3 * multiplier}`],
     isUnit: true,
     definitions: [
-      makeDefinition([frNumber], frNumber, ([x]) => vNumber(x * multiplier)),
+      makeDefinition([frNumber], frNumber, ([x]) => x * multiplier),
     ],
   });
 };

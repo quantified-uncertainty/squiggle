@@ -19,7 +19,7 @@ import {
   parseDistFromDistOrNumber,
 } from "../library/registry/helpers.js";
 import { Lambda } from "../reducer/lambda.js";
-import { LabeledDistribution, Scale, VDomain, vPlot } from "../value/index.js";
+import { LabeledDistribution, Scale, VDomain } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Plot",
@@ -131,14 +131,14 @@ export const library = [
               distribution: parseDistFromDistOrNumber(value),
             });
           });
-          return vPlot({
+          return {
             type: "distributions",
             distributions,
             xScale: xScale ?? defaultScale,
             yScale: yScale ?? defaultScale,
             title: title ?? undefined,
             showSummary: showSummary ?? true,
-          });
+          };
         }
       ),
     ],
@@ -166,14 +166,14 @@ export const library = [
         frPlot,
         ([{ dist, xScale, yScale, title, showSummary }]) => {
           _assertYScaleNotDateScale(yScale);
-          return vPlot({
+          return {
             type: "distributions",
             distributions: [{ distribution: dist }],
             xScale: xScale ?? defaultScale,
             yScale: yScale ?? defaultScale,
             title: title ?? undefined,
             showSummary: showSummary ?? true,
-          });
+          };
         }
       ),
     ],
@@ -199,14 +199,14 @@ export const library = [
         ([{ fn, xScale, yScale, title, points }]) => {
           _assertYScaleNotDateScale(yScale);
           const domain = extractDomainFromOneArgFunction(fn);
-          return vPlot({
+          return {
             type: "numericFn",
             fn,
             xScale: createScale(xScale, domain),
             yScale: yScale ?? defaultScale,
             points: points ?? undefined,
             title: title ?? undefined,
-          });
+          };
         }
       ),
     ],
@@ -233,7 +233,7 @@ export const library = [
         ([{ fn, xScale, yScale, distXScale, title, points }]) => {
           _assertYScaleNotDateScale(yScale);
           const domain = extractDomainFromOneArgFunction(fn);
-          return vPlot({
+          return {
             type: "distFn",
             fn,
             xScale: createScale(xScale, domain),
@@ -241,7 +241,7 @@ export const library = [
             distXScale: distXScale ?? yScale ?? defaultScale,
             title: title ?? undefined,
             points: points ?? undefined,
-          });
+          };
         }
       ),
     ],
@@ -267,14 +267,14 @@ export const library = [
         frPlot,
         ([{ xDist, yDist, xScale, yScale, title }]) => {
           _assertYScaleNotDateScale(yScale);
-          return vPlot({
+          return {
             type: "scatter",
             xDist,
             yDist,
             xScale: xScale ?? defaultScale,
             yScale: yScale ?? defaultScale,
             title: title ?? undefined,
-          });
+          };
         }
       ),
     ],

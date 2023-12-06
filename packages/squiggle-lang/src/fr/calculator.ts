@@ -45,11 +45,11 @@ export const library = [
             autorun: autorun === null ? true : autorun,
             sampleCount: sampleCount || undefined,
           });
-          const error = calc.getError();
+          const error = calc.getError(); // this is awkward, we have to construct Calculator value only to call this method
           if (error) {
             throw error;
           } else {
-            return calc;
+            return calc.value;
           }
         }
       ),

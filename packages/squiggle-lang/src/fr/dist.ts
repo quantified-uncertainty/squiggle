@@ -4,11 +4,11 @@ import { REDistributionError } from "../errors/messages.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
-  frDist,
-  frNumber,
   frDict,
-  frSampleSetDist,
+  frDist,
   frDistSymbolic,
+  frNumber,
+  frSampleSetDist,
 } from "../library/registry/frTypes.js";
 import {
   FnFactory,
@@ -18,8 +18,7 @@ import {
   twoVarSample,
 } from "../library/registry/helpers.js";
 import * as Result from "../utility/result.js";
-import { vDist } from "../value/index.js";
-import { CI_CONFIG, symDistResultToValue } from "./distUtil.js";
+import { CI_CONFIG, unwrapSymDistResult } from "./distUtil.js";
 import { mixtureDefinitions } from "./mixture.js";
 
 const maker = new FnFactory({
@@ -64,9 +63,9 @@ export const library: FRFunction[] = [
     requiresNamespace: true,
     examples: ["Dist.make(5)", "Dist.make(normal({p5: 4, p95: 10}))"],
     definitions: [
-      makeDefinition([frDist], frDist, ([dist]) => vDist(dist)),
+      makeDefinition([frDist], frDist, ([dist]) => dist),
       makeDefinition([frNumber], frDistSymbolic, ([v]) =>
-        symDistResultToValue(SymbolicDist.PointMass.make(v))
+        unwrapSymDistResult(SymbolicDist.PointMass.make(v))
       ),
     ],
   }),
@@ -232,7 +231,7 @@ export const library: FRFunction[] = [
           if (!result.ok) {
             throw new REDistributionError(otherError(result.value));
           }
-          return vDist(makeSampleSet(result.value, environment));
+          return makeSampleSet(result.value, environment);
         }
       ),
     ],
