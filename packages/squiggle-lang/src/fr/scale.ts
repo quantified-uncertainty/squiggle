@@ -5,6 +5,7 @@ import {
   frDict,
   frNumber,
   frOptional,
+  frScale,
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
@@ -63,18 +64,22 @@ export const library = [
     output: "Scale",
     examples: [`Scale.linear({ min: 3, max: 10 })`],
     definitions: [
-      makeDefinition([commonDict], ([{ min, max, tickFormat, title }]) => {
-        checkMinMax(min, max);
-        checkTickFormat(tickFormat);
-        return vScale({
-          type: "linear",
-          min: min ?? undefined,
-          max: max ?? undefined,
-          tickFormat: tickFormat ?? undefined,
-          title: title ?? undefined,
-        });
-      }),
-      makeDefinition([], () => {
+      makeDefinition(
+        [commonDict],
+        frScale,
+        ([{ min, max, tickFormat, title }]) => {
+          checkMinMax(min, max);
+          checkTickFormat(tickFormat);
+          return vScale({
+            type: "linear",
+            min: min ?? undefined,
+            max: max ?? undefined,
+            tickFormat: tickFormat ?? undefined,
+            title: title ?? undefined,
+          });
+        }
+      ),
+      makeDefinition([], frScale, () => {
         return vScale({ type: "linear" });
       }),
     ],
@@ -84,21 +89,25 @@ export const library = [
     output: "Scale",
     examples: [`Scale.log({ min: 1, max: 100 })`],
     definitions: [
-      makeDefinition([commonDict], ([{ min, max, tickFormat, title }]) => {
-        if (min !== null && min <= 0) {
-          throw new REOther(`Min must be over 0 for log scale, got: ${min}`);
+      makeDefinition(
+        [commonDict],
+        frScale,
+        ([{ min, max, tickFormat, title }]) => {
+          if (min !== null && min <= 0) {
+            throw new REOther(`Min must be over 0 for log scale, got: ${min}`);
+          }
+          checkMinMax(min, max);
+          checkTickFormat(tickFormat);
+          return vScale({
+            type: "log",
+            min: min ?? undefined,
+            max: max ?? undefined,
+            tickFormat: tickFormat ?? undefined,
+            title: title ?? undefined,
+          });
         }
-        checkMinMax(min, max);
-        checkTickFormat(tickFormat);
-        return vScale({
-          type: "log",
-          min: min ?? undefined,
-          max: max ?? undefined,
-          tickFormat: tickFormat ?? undefined,
-          title: title ?? undefined,
-        });
-      }),
-      makeDefinition([], () => {
+      ),
+      makeDefinition([], frScale, () => {
         return vScale({ type: "log" });
       }),
     ],
@@ -118,6 +127,7 @@ export const library = [
             ["constant", frOptional(frNumber)]
           ),
         ],
+        frScale,
         ([{ min, max, tickFormat, title, constant }]) => {
           checkMinMax(min, max);
           checkTickFormat(tickFormat);
@@ -135,7 +145,7 @@ export const library = [
           });
         }
       ),
-      makeDefinition([], () => {
+      makeDefinition([], frScale, () => {
         return vScale({
           type: "symlog",
         });
@@ -157,6 +167,7 @@ export const library = [
             ["exponent", frOptional(frNumber)]
           ),
         ],
+        frScale,
         ([{ min, max, tickFormat, title, exponent }]) => {
           checkMinMax(min, max);
           checkTickFormat(tickFormat);
@@ -174,7 +185,7 @@ export const library = [
           });
         }
       ),
-      makeDefinition([], () => {
+      makeDefinition([], frScale, () => {
         return vScale({
           type: "power",
         });
@@ -186,18 +197,22 @@ export const library = [
     output: "Scale",
     examples: [`Scale.date({ min: 2022year, max: 2025year })`],
     definitions: [
-      makeDefinition([dateDict], ([{ min, max, tickFormat, title }]) => {
-        checkMinMaxDates(min, max);
-        // We don't check the tick format, because the format is much more complicated for dates.
-        return vScale({
-          type: "date",
-          min: min ? min.toMs() : undefined,
-          max: max ? max.toMs() : undefined,
-          tickFormat: tickFormat ?? undefined,
-          title: title ?? undefined,
-        });
-      }),
-      makeDefinition([], () => {
+      makeDefinition(
+        [dateDict],
+        frScale,
+        ([{ min, max, tickFormat, title }]) => {
+          checkMinMaxDates(min, max);
+          // We don't check the tick format, because the format is much more complicated for dates.
+          return vScale({
+            type: "date",
+            min: min ? min.toMs() : undefined,
+            max: max ? max.toMs() : undefined,
+            tickFormat: tickFormat ?? undefined,
+            title: title ?? undefined,
+          });
+        }
+      ),
+      makeDefinition([], frScale, () => {
         return vScale({ type: "date" });
       }),
     ],

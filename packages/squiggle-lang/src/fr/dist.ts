@@ -3,12 +3,18 @@ import * as SymbolicDist from "../dist/SymbolicDist.js";
 import { REDistributionError } from "../errors/messages.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frDist, frNumber, frDict } from "../library/registry/frTypes.js";
+import {
+  frDist,
+  frNumber,
+  frDict,
+  frSampleSetDist,
+  frDistSymbolic,
+} from "../library/registry/frTypes.js";
 import {
   FnFactory,
-  makeOneArgDist,
+  makeOneArgSamplesetDist,
   makeSampleSet,
-  makeTwoArgsDist,
+  makeTwoArgsSamplesetDist,
   twoVarSample,
 } from "../library/registry/helpers.js";
 import * as Result from "../utility/result.js";
@@ -31,6 +37,7 @@ function makeCIDist<K1 extends string, K2 extends string>(
 ) {
   return makeDefinition(
     [frDict([lowKey, frNumber], [highKey, frNumber])],
+    frSampleSetDist,
     ([dict], { environment }) =>
       twoVarSample(dict[lowKey], dict[highKey], environment, fn)
   );
@@ -44,6 +51,7 @@ function makeMeanStdevDist(
 ) {
   return makeDefinition(
     [frDict(["mean", frNumber], ["stdev", frNumber])],
+    frSampleSetDist,
     ([{ mean, stdev }], { environment }) =>
       twoVarSample(mean, stdev, environment, fn)
   );
@@ -56,8 +64,8 @@ export const library: FRFunction[] = [
     requiresNamespace: true,
     examples: ["Dist.make(5)", "Dist.make(normal({p5: 4, p95: 10}))"],
     definitions: [
-      makeDefinition([frDist], ([dist]) => vDist(dist)),
-      makeDefinition([frNumber], ([v]) =>
+      makeDefinition([frDist], frDist, ([dist]) => vDist(dist)),
+      makeDefinition([frNumber], frDistSymbolic, ([v]) =>
         symDistResultToValue(SymbolicDist.PointMass.make(v))
       ),
     ],
@@ -82,7 +90,7 @@ export const library: FRFunction[] = [
       "normal({mean: 5, stdev: 2})",
     ],
     definitions: [
-      makeTwoArgsDist((mean, stdev) =>
+      makeTwoArgsSamplesetDist((mean, stdev) =>
         SymbolicDist.Normal.make({ mean, stdev })
       ),
       ...CI_CONFIG.map((entry) =>
@@ -109,7 +117,7 @@ export const library: FRFunction[] = [
       "lognormal({mean: 5, stdev: 2})",
     ],
     definitions: [
-      makeTwoArgsDist((mu, sigma) =>
+      makeTwoArgsSamplesetDist((mu, sigma) =>
         SymbolicDist.Lognormal.make({ mu, sigma })
       ),
       ...CI_CONFIG.map((entry) =>
@@ -130,14 +138,18 @@ export const library: FRFunction[] = [
     name: "uniform",
     examples: ["uniform(10, 12)"],
     definitions: [
-      makeTwoArgsDist((low, high) => SymbolicDist.Uniform.make({ low, high })),
+      makeTwoArgsSamplesetDist((low, high) =>
+        SymbolicDist.Uniform.make({ low, high })
+      ),
     ],
   }),
   maker.make({
     name: "beta",
     examples: ["beta(20, 25)", "beta({mean: 0.39, stdev: 0.1})"],
     definitions: [
-      makeTwoArgsDist((alpha, beta) => SymbolicDist.Beta.make({ alpha, beta })),
+      makeTwoArgsSamplesetDist((alpha, beta) =>
+        SymbolicDist.Beta.make({ alpha, beta })
+      ),
       makeMeanStdevDist((mean, stdev) =>
         SymbolicDist.Beta.fromMeanAndStdev({ mean, stdev })
       ),
@@ -147,7 +159,7 @@ export const library: FRFunction[] = [
     name: "cauchy",
     examples: ["cauchy(5, 1)"],
     definitions: [
-      makeTwoArgsDist((local, scale) =>
+      makeTwoArgsSamplesetDist((local, scale) =>
         SymbolicDist.Cauchy.make({ local, scale })
       ),
     ],
@@ -156,7 +168,7 @@ export const library: FRFunction[] = [
     name: "gamma",
     examples: ["gamma(5, 1)"],
     definitions: [
-      makeTwoArgsDist((shape, scale) =>
+      makeTwoArgsSamplesetDist((shape, scale) =>
         SymbolicDist.Gamma.make({ shape, scale })
       ),
     ],
@@ -165,7 +177,7 @@ export const library: FRFunction[] = [
     name: "logistic",
     examples: ["logistic(5, 1)"],
     definitions: [
-      makeTwoArgsDist((location, scale) =>
+      makeTwoArgsSamplesetDist((location, scale) =>
         SymbolicDist.Logistic.make({ location, scale })
       ),
     ],
@@ -174,7 +186,7 @@ export const library: FRFunction[] = [
     name: "to",
     examples: ["5 to 10", "to(5,10)"],
     definitions: [
-      makeTwoArgsDist((low, high) => {
+      makeTwoArgsSamplesetDist((low, high) => {
         if (low >= high) {
           throw new REDistributionError(
             argumentError("Low value must be less than high value")
@@ -198,13 +210,15 @@ export const library: FRFunction[] = [
     name: "exponential",
     examples: ["exponential(2)"],
     definitions: [
-      makeOneArgDist((rate) => SymbolicDist.Exponential.make(rate)),
+      makeOneArgSamplesetDist((rate) => SymbolicDist.Exponential.make(rate)),
     ],
   }),
   maker.make({
     name: "bernoulli",
     examples: ["bernoulli(0.5)"],
-    definitions: [makeOneArgDist((p) => SymbolicDist.Bernoulli.make(p))],
+    definitions: [
+      makeOneArgSamplesetDist((p) => SymbolicDist.Bernoulli.make(p)),
+    ],
   }),
   maker.make({
     name: "triangular",
@@ -212,6 +226,7 @@ export const library: FRFunction[] = [
     definitions: [
       makeDefinition(
         [frNumber, frNumber, frNumber],
+        frSampleSetDist,
         ([low, medium, high], { environment }) => {
           const result = SymbolicDist.Triangular.make({ low, medium, high });
           if (!result.ok) {

@@ -8,6 +8,7 @@ import {
   frInput,
   frBool,
   frNumber,
+  frCalculator,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { vCalculator } from "../value/index.js";
@@ -34,6 +35,7 @@ export const library = [
             ["sampleCount", frOptional(frNumber)]
           ),
         ],
+        frCalculator,
         ([{ fn, title, description, inputs, autorun, sampleCount }]) => {
           const calc = vCalculator({
             fn,

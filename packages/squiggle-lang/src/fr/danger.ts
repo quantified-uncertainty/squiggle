@@ -17,6 +17,8 @@ import {
   frAny,
   frArray,
   frDist,
+  frDistPointset,
+  frGeneric,
   frLambda,
   frNumber,
 } from "../library/registry/frTypes.js";
@@ -24,8 +26,8 @@ import {
   FnFactory,
   unpackDistResult,
   distResultToValue,
-  makeTwoArgsDist,
-  makeOneArgDist,
+  makeTwoArgsSamplesetDist,
+  makeOneArgSamplesetDist,
 } from "../library/registry/helpers.js";
 import { ReducerContext } from "../reducer/context.js";
 import { Lambda } from "../reducer/lambda.js";
@@ -85,7 +87,7 @@ const combinatoricsLibrary: FRFunction[] = [
     output: "Number",
     examples: [`Danger.binomial(1, 20, 0.5)`],
     definitions: [
-      makeDefinition([frNumber, frNumber, frNumber], ([n, k, p]) =>
+      makeDefinition([frNumber, frNumber, frNumber], frNumber, ([n, k, p]) =>
         vNumber(choose(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k))
       ),
     ],
@@ -178,6 +180,7 @@ const integrationLibrary: FRFunction[] = [
     definitions: [
       makeDefinition(
         [frLambda, frNumber, frNumber, frNumber],
+        frAny,
         ([lambda, min, max, numIntegrationPoints], context) => {
           if (numIntegrationPoints === 0) {
             throw new REOther(
@@ -209,6 +212,8 @@ const integrationLibrary: FRFunction[] = [
     definitions: [
       makeDefinition(
         [frLambda, frNumber, frNumber, frNumber],
+
+        frNumber,
         ([lambda, min, max, epsilon], context) => {
           if (epsilon === 0) {
             throw new REOther(
@@ -248,6 +253,7 @@ const diminishingReturnsLibrary = [
     definitions: [
       makeDefinition(
         [frArray(frLambda), frNumber, frNumber],
+        frAny,
         ([lambdas, funds, approximateIncrement], context) => {
           // TODO: This is so complicated, it probably should be its own file. It might also make sense to have it work in Rescript directly, taking in a function rather than a reducer; then something else can wrap that function in the reducer/lambdas/context.
           /*
@@ -371,6 +377,8 @@ const mapYLibrary: FRFunction[] = [
     definitions: [
       makeDefinition(
         [frDist, frNumber, frNumber],
+
+        frDistPointset,
         ([dist, base, eps], { environment }) =>
           distResultToValue(
             scaleLogWithThreshold(dist, {
@@ -385,22 +393,31 @@ const mapYLibrary: FRFunction[] = [
   maker.make({
     name: "combinations",
     definitions: [
-      makeDefinition([frArray(frAny), frNumber], ([elements, n]) => {
-        if (n > elements.length) {
-          throw new REArgumentError(
-            `Combinations of length ${n} were requested, but full list is only ${elements.length} long.`
-          );
+      makeDefinition(
+        [frArray(frGeneric("A")), frNumber],
+
+        frArray(frArray(frGeneric("A"))),
+        ([elements, n]) => {
+          if (n > elements.length) {
+            throw new REArgumentError(
+              `Combinations of length ${n} were requested, but full list is only ${elements.length} long.`
+            );
+          }
+          return vArray(combinations(elements, n).map((v) => vArray(v)));
         }
-        return vArray(combinations(elements, n).map((v) => vArray(v)));
-      }),
+      ),
     ],
   }),
   maker.make({
     name: "allCombinations",
     definitions: [
-      makeDefinition([frArray(frAny)], ([elements]) => {
-        return vArray(allCombinations(elements).map((v) => vArray(v)));
-      }),
+      makeDefinition(
+        [frArray(frGeneric("A"))],
+        frArray(frArray(frGeneric("A"))),
+        ([elements]) => {
+          return vArray(allCombinations(elements).map((v) => vArray(v)));
+        }
+      ),
     ],
   }),
   maker.dn2d({
@@ -419,13 +436,15 @@ const mapYLibrary: FRFunction[] = [
   maker.make({
     name: "binomialDist",
     examples: ["Danger.binomialDist(8, 0.5)"],
-    definitions: [makeTwoArgsDist((n, p) => SymbolicDist.Binomial.make(n, p))],
+    definitions: [
+      makeTwoArgsSamplesetDist((n, p) => SymbolicDist.Binomial.make(n, p)),
+    ],
   }),
   maker.make({
     name: "poissonDist",
     examples: ["Danger.poissonDist(10)"],
     definitions: [
-      makeOneArgDist((lambda) => SymbolicDist.Poisson.make(lambda)),
+      makeOneArgSamplesetDist((lambda) => SymbolicDist.Poisson.make(lambda)),
     ],
   }),
 ];

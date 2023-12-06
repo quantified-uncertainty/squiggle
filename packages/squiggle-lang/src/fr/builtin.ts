@@ -3,6 +3,7 @@ import {
   frAny,
   frArray,
   frBool,
+  frGeneric,
   frNumber,
   frString,
 } from "../library/registry/frTypes.js";
@@ -37,11 +38,11 @@ export const library = [
   maker.make({
     name: "not",
     definitions: [
-      makeDefinition([frNumber], ([x]) => {
+      makeDefinition([frNumber], frBool, ([x]) => {
         // unary prefix !
         return vBool(x === 0);
       }),
-      makeDefinition([frBool], ([x]) => {
+      makeDefinition([frBool], frBool, ([x]) => {
         // unary prefix !
         return vBool(!x);
       }),
@@ -50,13 +51,17 @@ export const library = [
   maker.make({
     name: "concat",
     definitions: [
-      makeDefinition([frString, frString], ([a, b]) => {
+      makeDefinition([frString, frString], frString, ([a, b]) => {
         return vString(a + b);
       }),
-      makeDefinition([frArray(frAny), frArray(frAny)], ([a, b]) => {
-        return vArray([...a, ...b]);
-      }),
-      makeDefinition([frString, frAny], ([a, b]) => {
+      makeDefinition(
+        [frArray(frAny), frArray(frAny)],
+        frArray(frAny),
+        ([a, b]) => {
+          return vArray([...a, ...b]);
+        }
+      ),
+      makeDefinition([frString, frAny], frString, ([a, b]) => {
         return vString(a + b.toString());
       }),
     ],
@@ -64,7 +69,7 @@ export const library = [
   maker.make({
     name: "add",
     definitions: [
-      makeDefinition([frString, frAny], ([a, b]) => {
+      makeDefinition([frString, frAny], frString, ([a, b]) => {
         return vString(a + b.toString());
       }),
     ],
@@ -72,7 +77,7 @@ export const library = [
   maker.make({
     name: "equal",
     definitions: [
-      makeDefinition([frAny, frAny], ([a, b]) => {
+      makeDefinition([frAny, frAny], frBool, ([a, b]) => {
         return vBool(isEqual(a, b));
       }),
     ],
@@ -80,7 +85,7 @@ export const library = [
   maker.make({
     name: "unequal",
     definitions: [
-      makeDefinition([frAny, frAny], ([a, b]) => {
+      makeDefinition([frAny, frAny], frBool, ([a, b]) => {
         return vBool(!isEqual(a, b));
       }),
     ],
@@ -88,7 +93,7 @@ export const library = [
   maker.make({
     name: "typeOf",
     definitions: [
-      makeDefinition([frAny], ([v]) => {
+      makeDefinition([frAny], frString, ([v]) => {
         return vString(v.publicName);
       }),
     ],
@@ -96,14 +101,18 @@ export const library = [
   maker.make({
     name: "inspect",
     definitions: [
-      makeDefinition([frAny], ([value]) => {
+      makeDefinition([frGeneric("A")], frGeneric("A"), ([value]) => {
         console.log(value);
         return value;
       }),
-      makeDefinition([frAny, frString], ([value, label]) => {
-        console.log(`${label}: ${value.toString()}`);
-        return value;
-      }),
+      makeDefinition(
+        [frGeneric("A"), frString],
+        frGeneric("A"),
+        ([value, label]) => {
+          console.log(`${label}: ${value.toString()}`);
+          return value;
+        }
+      ),
     ],
   }),
 ];

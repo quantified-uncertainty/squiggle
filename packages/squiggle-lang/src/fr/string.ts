@@ -1,5 +1,5 @@
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frAny, frString } from "../library/registry/frTypes.js";
+import { frAny, frArray, frString } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { vArray, vString } from "../value/index.js";
 
@@ -13,16 +13,15 @@ export const library = [
     name: "make",
     output: "String",
     definitions: [
-      makeDefinition([frAny], ([x]) => {
+      makeDefinition([frAny], frString, ([x]) => {
         return vString(x.toString());
       }),
     ],
   }),
   maker.make({
     name: "split",
-    output: "String",
     definitions: [
-      makeDefinition([frString, frString], ([str, mark]) => {
+      makeDefinition([frString, frString], frArray(frString), ([str, mark]) => {
         return vArray(str.split(mark).map((r) => vString(r)));
       }),
     ],

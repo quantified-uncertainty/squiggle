@@ -203,7 +203,7 @@ See [Rescript implementation of keep](https://rescript-lang.org/docs/manual/late
 
 ### uniq
 
-Filters the list for unique elements. Now only works on some Squiggle types.
+Filters the list for unique elements. Works on select Squiggle types.
 
 ```
 List.uniq: (list<'a>) => list<'a>
@@ -215,7 +215,7 @@ List.uniq(["foobar", "foobar", 1, 1, 2]) // ["foobar", 1, 2]
 
 ### uniqBy
 
-Filters the list for unique elements. Now only works on some Squiggle types.
+Filters the list for unique elements. Works on select Squiggle types.
 
 ```
 List.uniqBy: (list<'a>, 'a => 'b) => list<'a>

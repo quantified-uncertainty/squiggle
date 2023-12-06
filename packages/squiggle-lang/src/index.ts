@@ -1,4 +1,5 @@
 import { type Env } from "./dist/env.js";
+export { type FnDocumentation } from "./library/registry/core.js";
 import { registry } from "./library/registry/index.js";
 import { SqProject } from "./public/SqProject/index.js";
 export {
@@ -109,4 +110,8 @@ export function sq(strings: TemplateStringsArray, ...rest: unknown[]) {
 
 export function getFunctionDocumentation(name: string) {
   return registry.getFunctionDocumentation(name);
+}
+
+export function getAllFunctionNames() {
+  return registry.allNames();
 }

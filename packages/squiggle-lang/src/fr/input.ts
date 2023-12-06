@@ -4,6 +4,7 @@ import {
   frArray,
   frBool,
   frDict,
+  frInput,
   frNumberOrString,
   frOptional,
   frString,
@@ -42,6 +43,7 @@ export const library = [
             ["default", frOptional(frNumberOrString)]
           ),
         ],
+        frInput,
         ([vars]) => {
           return vInput({
             type: "text",
@@ -66,6 +68,7 @@ export const library = [
             ["default", frOptional(frNumberOrString)]
           ),
         ],
+        frInput,
         ([vars]) => {
           return vInput({
             type: "textArea",
@@ -90,6 +93,7 @@ export const library = [
             ["default", frOptional(frBool)]
           ),
         ],
+        frInput,
         ([vars]) => {
           return vInput({
             type: "checkbox",
@@ -117,6 +121,7 @@ export const library = [
             ["default", frOptional(frString)]
           ),
         ],
+        frInput,
         ([vars]) => {
           //Throw error if options are empty, if default is not in options, or if options have duplicate
           const isEmpty = () => vars.options.length === 0;

@@ -6,9 +6,11 @@ import {
   frDict,
   frDist,
   frDistOrNumber,
-  frLambda,
+  frLambdaTyped,
   frNumber,
   frOptional,
+  frPlot,
+  frSampleSetDist,
   frScale,
   frString,
 } from "../library/registry/frTypes.js";
@@ -71,7 +73,7 @@ function extractDomainFromOneArgFunction(fn: Lambda): VDomain | undefined {
   const counts = fn.parameterCounts();
   if (!counts.includes(1)) {
     throw new REOther(
-      `Plots only work with functions that have one parameter. This function only supports ${fn.parameterCountString()} parameters.`
+      `Unreachable: extractDomainFromOneArgFunction() called with function that doesn't have exactly one parameter.`
     );
   }
 
@@ -101,7 +103,7 @@ export const library = [
     examples: [
       `Plot.dists({
   dists: [{ name: "dist", value: normal(0, 1) }],
-  xScale: Scale.symlog(),
+  xScale: Scale.symlog()
 })`,
     ],
     definitions: [
@@ -118,6 +120,7 @@ export const library = [
             ["showSummary", frOptional(frBool)]
           ),
         ],
+        frPlot,
         ([{ dists, xScale, yScale, title, showSummary }]) => {
           _assertYScaleNotDateScale(yScale);
 
@@ -146,7 +149,7 @@ export const library = [
     examples: [
       `Plot.dist({
   dist: normal(0, 1),
-  xScale: Scale.symlog(),
+  xScale: Scale.symlog()
 })`,
     ],
     definitions: [
@@ -160,6 +163,7 @@ export const library = [
             ["showSummary", frOptional(frBool)]
           ),
         ],
+        frPlot,
         ([{ dist, xScale, yScale, title, showSummary }]) => {
           _assertYScaleNotDateScale(yScale);
           return vPlot({
@@ -184,13 +188,14 @@ export const library = [
       makeDefinition(
         [
           frDict(
-            ["fn", frLambda],
+            ["fn", frLambdaTyped([frNumber], frNumber)],
             ["xScale", frOptional(frScale)],
             ["yScale", frOptional(frScale)],
             ["title", frOptional(frString)],
             ["points", frOptional(frNumber)]
           ),
         ],
+        frPlot,
         ([{ fn, xScale, yScale, title, points }]) => {
           _assertYScaleNotDateScale(yScale);
           const domain = extractDomainFromOneArgFunction(fn);
@@ -216,7 +221,7 @@ export const library = [
       makeDefinition(
         [
           frDict(
-            ["fn", frLambda],
+            ["fn", frLambdaTyped([frNumber], frDist)],
             ["xScale", frOptional(frScale)],
             ["yScale", frOptional(frScale)],
             ["distXScale", frOptional(frScale)],
@@ -224,6 +229,7 @@ export const library = [
             ["points", frOptional(frNumber)]
           ),
         ],
+        frPlot,
         ([{ fn, xScale, yScale, distXScale, title, points }]) => {
           _assertYScaleNotDateScale(yScale);
           const domain = extractDomainFromOneArgFunction(fn);
@@ -251,13 +257,14 @@ export const library = [
       makeDefinition(
         [
           frDict(
-            ["xDist", frDist],
-            ["yDist", frDist],
+            ["xDist", frSampleSetDist],
+            ["yDist", frSampleSetDist],
             ["xScale", frOptional(frScale)],
             ["yScale", frOptional(frScale)],
             ["title", frOptional(frString)]
           ),
         ],
+        frPlot,
         ([{ xDist, yDist, xScale, yScale, title }]) => {
           _assertYScaleNotDateScale(yScale);
           return vPlot({

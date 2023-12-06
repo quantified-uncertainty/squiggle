@@ -1,23 +1,23 @@
 import * as Continuous from "../PointSet/Continuous.js";
 import * as Discrete from "../PointSet/Discrete.js";
 import * as XYShape from "../XYShape.js";
-import { BaseDist } from "../dist/BaseDist.js";
 import { xyShapeDistError } from "../dist/DistError.js";
 import { PointSetDist } from "../dist/PointSetDist.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
   frDist,
-  frLambda,
   frNumber,
   frDict,
+  frDistPointset,
+  frLambdaTyped,
 } from "../library/registry/frTypes.js";
 import {
   FnFactory,
   doNumberLambdaCall,
   repackDistResult,
 } from "../library/registry/helpers.js";
-import { REDistributionError, REExpectedType } from "../errors/messages.js";
+import { REDistributionError } from "../errors/messages.js";
 import { Ok } from "../utility/result.js";
 import { vDist, vNumber } from "../value/index.js";
 import { PointMass } from "../dist/SymbolicDist.js";
@@ -37,18 +37,11 @@ const argsToXYShape = (inputs: { x: number; y: number }[]): XYShape.XYShape => {
   return result.value;
 };
 
-function pointSetAssert(dist: BaseDist): asserts dist is PointSetDist {
-  if (dist instanceof PointSetDist) {
-    return;
-  }
-  throw new REExpectedType("PointSetDist", dist.toString());
-}
-
-const fromDist = makeDefinition([frDist], ([dist], context) =>
+const fromDist = makeDefinition([frDist], frDistPointset, ([dist], context) =>
   repackDistResult(dist.toPointSetDist(context.environment))
 );
 
-const fromNumber = makeDefinition([frNumber], ([num], _) => {
+const fromNumber = makeDefinition([frNumber], frDistPointset, ([num], _) => {
   const pointMass = new PointMass(num);
   return repackDistResult(pointMass.toPointSetDist());
 });
@@ -77,10 +70,13 @@ export const library = [
     examples: [`PointSet.downsample(PointSet.fromDist(normal(5,2)), 50)`],
     output: "Dist",
     definitions: [
-      makeDefinition([frDist, frNumber], ([dist, number]) => {
-        pointSetAssert(dist);
-        return vDist(dist.downsample(number));
-      }),
+      makeDefinition(
+        [frDistPointset, frNumber],
+        frDistPointset,
+        ([dist, number]) => {
+          return vDist(dist.downsample(number));
+        }
+      ),
     ],
   }),
   maker.make({
@@ -88,16 +84,19 @@ export const library = [
     examples: [`PointSet.mapY(mx(Sym.normal(5,2)), {|x| x + 1})`],
     output: "Dist",
     definitions: [
-      makeDefinition([frDist, frLambda], ([dist, lambda], context) => {
-        pointSetAssert(dist);
-        return repackDistResult(
-          dist.mapYResult(
-            (y) => Ok(doNumberLambdaCall(lambda, [vNumber(y)], context)),
-            undefined,
-            undefined
-          )
-        );
-      }),
+      makeDefinition(
+        [frDistPointset, frLambdaTyped([frNumber], frNumber)],
+        frDistPointset,
+        ([dist, lambda], context) => {
+          return repackDistResult(
+            dist.mapYResult(
+              (y) => Ok(doNumberLambdaCall(lambda, [vNumber(y)], context)),
+              undefined,
+              undefined
+            )
+          );
+        }
+      ),
     ],
   }),
   maker.make({
@@ -114,6 +113,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [frArray(frDict(["x", frNumber], ["y", frNumber]))],
+        frDistPointset,
         ([arr]) => {
           return vDist(
             new PointSetDist(
@@ -140,6 +140,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [frArray(frDict(["x", frNumber], ["y", frNumber]))],
+        frDistPointset,
         ([arr]) => {
           return vDist(
             new PointSetDist(
