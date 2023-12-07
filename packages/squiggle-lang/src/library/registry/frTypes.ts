@@ -1,4 +1,3 @@
-import { read } from "fs";
 import { BaseDist } from "../../dist/BaseDist.js";
 import { PointSetDist } from "../../dist/PointSetDist.js";
 import { SampleSetDist } from "../../dist/SampleSetDist/index.js";
@@ -186,10 +185,14 @@ export const frLambdaNand = (paramLengths: number[]): FRType<Lambda> => {
   };
 };
 
+export type FrOrType<T1, T2> =
+  | { tag: "1"; value: T1 }
+  | { tag: "2"; value: T2 };
+
 export function frOr<T1, T2>(
   type1: FRType<T1>,
   type2: FRType<T2>
-): FRType<{ tag: "1"; value: T1 } | { tag: "2"; value: T2 }> {
+): FRType<FrOrType<T1, T2>> {
   return {
     unpack: (v) => {
       const unpacked1 = type1.unpack(v);

@@ -64,7 +64,7 @@ export function tryCallFnDefinition(
 
     if (valueIsBoxed && !frIsBoxed) {
       arg = (arg as VBoxed).value.value;
-    } // Note: This kills box on inspect calls.
+    }
 
     const unpackedArg = fn.inputs[i].unpack(arg);
     if (unpackedArg === undefined) {

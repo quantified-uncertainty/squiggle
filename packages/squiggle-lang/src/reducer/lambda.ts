@@ -8,7 +8,6 @@ import {
   Calculator,
   VDomain,
   Value,
-  vDomain,
   vNumber,
   vString,
 } from "../value/index.js";
