@@ -129,20 +129,6 @@ const numericFnDef = () => {
       makeDefinition([frBoxed(fnType)], frPlot, ([[boxedArgs, fn]]) =>
         toPlot(fn, null, defaultScale, boxedArgs.name || null, null)
       ),
-      makeDefinition(
-        [
-          frBoxed(fnType),
-          frDict(
-            ["xScale", frOptional(frScale)],
-            ["yScale", frOptional(frScale)],
-            ["title", frOptional(frString)],
-            ["points", frOptional(frNumber)]
-          ),
-        ],
-        frPlot,
-        ([[boxedArgs, fn], { xScale, yScale, title, points }]) =>
-          toPlot(fn, xScale, yScale, title || boxedArgs.name || null, points)
-      ),
       //Maybe we should deprecate this eventually? I think I like the others more, especially for boxed functions and composition.
       makeDefinition(
         [
@@ -285,6 +271,22 @@ export const library = [
             distXScale: distXScale ?? yScale ?? defaultScale,
             title: title ?? undefined,
             points: points ?? undefined,
+          };
+        }
+      ),
+      makeDefinition(
+        [frBoxed(frLambdaTyped([frNumber], frDist))],
+        frPlot,
+        ([[args, fn]]) => {
+          const domain = extractDomainFromOneArgFunction(fn);
+          return {
+            type: "distFn",
+            fn: fn,
+            xScale: createScale(null, domain),
+            yScale: defaultScale,
+            distXScale: defaultScale,
+            title: args.name || undefined,
+            points: undefined,
           };
         }
       ),
