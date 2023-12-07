@@ -18,13 +18,14 @@ import {
   frTableChart,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { Lambda } from "../reducer/lambda.js";
+import { Lambda, inferNumberToNumberOrDist } from "../reducer/lambda.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import {
   BoxedArgs,
   boxedArgsToList,
   vBoxedSep,
-  vVoid,
+  vPlot,
+  vString,
 } from "../value/index.js";
 
 const maker = new FnFactory({
@@ -121,6 +122,7 @@ export const library = [
       }),
     ],
   }),
+  //maybe we should just allow transformations.
   maker.make({
     name: "showAs",
     examples: [],
@@ -135,6 +137,30 @@ export const library = [
     name: "getShowAs",
     examples: [],
     definitions: [
+      makeDefinition([frBoxed(frLambda)], frAny, ([[args, fn]], context) => {
+        const inferredType = inferNumberToNumberOrDist(fn, context);
+        const title = args.name || fn.name || "";
+        if (inferredType?.type === "Dist") {
+          return vPlot({
+            type: "distFn",
+            fn: fn,
+            xScale: inferredType.domain.toDefaultScale(),
+            distXScale: inferredType.domain.toDefaultScale(),
+            yScale: { type: "linear" },
+            title,
+          });
+        } else if (inferredType?.type === "Number") {
+          return vPlot({
+            type: "numericFn",
+            fn: fn,
+            xScale: inferredType.domain.toDefaultScale(),
+            yScale: { type: "linear" },
+            title,
+          });
+        }
+        return vString("Could not infer type");
+        // return args.showAs || value; // This is the default
+      }),
       makeDefinition([frBoxed(frAny)], frAny, ([[args, value]]) => {
         return args.showAs || value; // This is the default
       }),
