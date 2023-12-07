@@ -126,8 +126,14 @@ const numericFnDef = () => {
       `Plot.numericFn({ fn: {|x|x*x}, xScale: Scale.linear({ min: 3, max: 5 }), yScale: Scale.log({ tickFormat: ".2s" }) })`,
     ],
     definitions: [
-      makeDefinition([frBoxed(fnType)], frPlot, ([[boxedArgs, fn]]) =>
-        toPlot(fn, null, defaultScale, boxedArgs.name || null, null)
+      makeDefinition([frBoxed(fnType)], frPlot, ([boxed]) =>
+        toPlot(
+          boxed.value,
+          null,
+          defaultScale,
+          boxed.args.value.name || null,
+          null
+        )
       ),
       //Maybe we should deprecate this eventually? I think I like the others more, especially for boxed functions and composition.
       makeDefinition(
@@ -228,13 +234,13 @@ export const library = [
           };
         }
       ),
-      makeDefinition([frBoxed(frDist)], frPlot, ([[args, dist]]) => {
+      makeDefinition([frBoxed(frDist)], frPlot, ([boxed]) => {
         return {
           type: "distributions",
-          distributions: [{ distribution: dist }],
+          distributions: [{ distribution: boxed.value }],
           xScale: defaultScale,
           yScale: defaultScale,
-          title: args.name ?? undefined,
+          title: boxed.args.value.name ?? undefined,
           showSummary: false,
         };
       }),
@@ -277,15 +283,15 @@ export const library = [
       makeDefinition(
         [frBoxed(frLambdaTyped([frNumber], frDist))],
         frPlot,
-        ([[args, fn]]) => {
-          const domain = extractDomainFromOneArgFunction(fn);
+        ([boxed]) => {
+          const domain = extractDomainFromOneArgFunction(boxed.value);
           return {
             type: "distFn",
-            fn: fn,
+            fn: boxed.value,
             xScale: createScale(null, domain),
             yScale: defaultScale,
             distXScale: defaultScale,
-            title: args.name || undefined,
+            title: boxed.args.value.name || undefined,
             points: undefined,
           };
         }

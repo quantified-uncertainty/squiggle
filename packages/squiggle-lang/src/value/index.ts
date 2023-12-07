@@ -11,6 +11,7 @@ import { SDate } from "../utility/SDate.js";
 import { SDuration } from "../utility/SDuration.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { DateRangeDomain, Domain, NumericRangeDomain } from "./domain.js";
+import { Boxed } from "./boxed.js";
 
 export type ValueMap = ImmutableMap<string, Value>;
 
@@ -19,7 +20,7 @@ type Indexable = {
   get(key: Value): Value;
 };
 
-abstract class BaseValue {
+export abstract class BaseValue {
   abstract type: string;
   abstract publicName: string;
 
@@ -590,6 +591,21 @@ function domainIsEqual(valueA: Domain, valueB: Domain) {
   }
 }
 
+export class VBoxed extends BaseValue {
+  readonly type = "Boxed";
+  readonly publicName = "Boxed";
+
+  constructor(public value: Boxed) {
+    super();
+  }
+
+  toString() {
+    return this.value.toString();
+  }
+}
+
+export const vBoxed = (value: Boxed) => new VBoxed(value);
+
 export class VDomain extends BaseValue implements Indexable {
   readonly type = "Domain";
   readonly publicName = "Domain";
@@ -641,68 +657,6 @@ class VVoid extends BaseValue {
   }
 }
 export const vVoid = () => new VVoid();
-
-export type BoxedArgs = {
-  name?: string;
-  description?: string;
-  showAs?: Value;
-};
-
-export function boxedArgsToList(args: BoxedArgs): [string, Value][] {
-  const result: [string, Value][] = [];
-  if (args.name) {
-    result.push(["name", vString(args.name)]);
-  }
-  if (args.description) {
-    result.push(["description", vString(args.description)]);
-  }
-  if (args.showAs) {
-    result.push(["showAs", args.showAs]);
-  }
-  return result;
-}
-
-function boxedArgsToString(b: BoxedArgs): string {
-  return boxedArgsToList(b)
-    .map(([key, value]) => `${key}: ${value.toString}`)
-    .join(", ");
-}
-
-export type Boxed = {
-  value: Value;
-} & BoxedArgs;
-
-export function boxedToBoxedArgs(boxed: Boxed): BoxedArgs {
-  return {
-    name: boxed.name,
-    description: boxed.description,
-    showAs: boxed.showAs,
-  };
-}
-
-export class VBoxed extends BaseValue {
-  readonly type = "Boxed";
-  readonly publicName = "Boxed";
-
-  constructor(public value: Boxed) {
-    super();
-  }
-
-  toString(): string {
-    const args = boxedArgsToString(boxedToBoxedArgs(this.value));
-    const valueString = this.value.value.toString();
-    if (args !== "") {
-      return `${valueString}, with params ${args}`;
-    } else {
-      return valueString;
-    }
-  }
-}
-
-export const vBoxed = (value: Boxed) => new VBoxed(value);
-
-export const vBoxedSep = (value: Value, args: BoxedArgs) =>
-  new VBoxed({ value, ...args });
 
 export type Value =
   | VArray

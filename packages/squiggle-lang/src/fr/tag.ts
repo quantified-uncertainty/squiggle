@@ -20,8 +20,8 @@ import {
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { Lambda } from "../reducer/lambda.js";
-import { ImmutableMap } from "../utility/immutableMap.js";
-import { Value, boxedArgsToList, vBoxedSep } from "../value/index.js";
+import { Boxed } from "../value/boxed.js";
+import { Value, vBoxed } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Tag",
@@ -53,15 +53,18 @@ function withInputOrFnInput<T>(inputType: FRType<any>, outputType: FRType<T>) {
       frOr(outputType, frLambdaTyped([inputType], outputType)),
     ],
     frBoxed(inputType),
-    ([[args, boxedValue], showAs], context) => {
+    ([{ args, value }, showAs], context) => {
       const runLambdaToGetType = (fn: Lambda) =>
-        fn.call([vBoxedSep(inputType.pack(boxedValue), args)], context);
+        fn.call([vBoxed(new Boxed(inputType.pack(value), args))], context);
       const showAsVal: T = ensureTypeUsingLambda(
         outputType,
         showAs,
         runLambdaToGetType
       );
-      return [{ ...args, showAs: outputType.pack(showAsVal) }, boxedValue];
+      return {
+        args: args.combine({ showAs: outputType.pack(showAsVal) }),
+        value,
+      };
     }
   );
 }
@@ -74,8 +77,8 @@ export const library = [
       makeDefinition(
         [frBoxed(frGeneric("A")), frString],
         frBoxed(frGeneric("A")),
-        ([[boxed, boxedValue], name]) => {
-          return [{ ...boxed, name }, boxedValue];
+        ([{ args, value }, name]) => {
+          return { args: args.combine({ name }), value };
         }
       ),
     ],
@@ -84,8 +87,8 @@ export const library = [
     name: "getName",
     examples: [],
     definitions: [
-      makeDefinition([frBoxed(frAny)], frString, ([[b1, v1]]) => {
-        return b1.name || "";
+      makeDefinition([frBoxed(frAny)], frString, ([{ args }]) => {
+        return args.value.name || "";
       }),
     ],
   }),
@@ -96,8 +99,8 @@ export const library = [
       makeDefinition(
         [frBoxed(frGeneric("A")), frString],
         frBoxed(frGeneric("A")),
-        ([[boxed, boxedValue], description]) => {
-          return [{ ...boxed, description }, boxedValue];
+        ([{ args, value }, description]) => {
+          return { value: value, args: args.combine({ description }) };
         }
       ),
     ],
@@ -106,8 +109,8 @@ export const library = [
     name: "getDescription",
     examples: [],
     definitions: [
-      makeDefinition([frBoxed(frAny)], frString, ([[args, _]]) => {
-        return args.description || "";
+      makeDefinition([frBoxed(frAny)], frString, ([{ args }]) => {
+        return args.value.description || "";
       }),
     ],
   }),
@@ -150,8 +153,8 @@ export const library = [
       //   return vString("Could not infer type");
       //   // return args.showAs || value; // This is the default
       // }),
-      makeDefinition([frBoxed(frAny)], frAny, ([[args, value]]) => {
-        return args.showAs || value; // This is the default
+      makeDefinition([frBoxed(frAny)], frAny, ([{ args, value }]) => {
+        return args.value.showAs || value; // This is the default
       }),
     ],
   }),
@@ -162,8 +165,8 @@ export const library = [
       makeDefinition(
         [frBoxed(frAny)],
         frDictWithArbitraryKeys(frAny),
-        ([[v, b]]) => {
-          return ImmutableMap(boxedArgsToList(v));
+        ([{ args }]) => {
+          return args.toMap();
         }
       ),
     ],

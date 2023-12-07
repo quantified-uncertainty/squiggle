@@ -57,10 +57,10 @@ export const library = [
             sampleCount: sampleCount || undefined,
           })
       ),
-      makeDefinition([frBoxed(frLambda)], frCalculator, ([[args, fn]]) => {
-        const calc = fn.toCalculator();
-        const title = calc.title || args.name;
-        const description = calc.description || args.description;
+      makeDefinition([frBoxed(frLambda)], frCalculator, ([{ args, value }]) => {
+        const calc = value.toCalculator();
+        const title = calc.title || args.value.name;
+        const description = calc.description || args.value.description;
         return validateCalculator({ ...calc, title, description });
       }),
     ],

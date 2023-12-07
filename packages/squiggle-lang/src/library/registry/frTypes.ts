@@ -23,16 +23,15 @@ import {
   vDuration,
   vInput,
   Input,
-  vBoxedSep,
-  BoxedArgs,
-  boxedToBoxedArgs,
   TableChart,
   vTableChart,
   Calculator,
   vCalculator,
   vPlot,
   vDomain,
+  vBoxed,
 } from "../../value/index.js";
+import { Boxed, BoxedArgs } from "../../value/boxed.js";
 
 /*
 FRType is a function that unpacks a Value.
@@ -42,7 +41,7 @@ export type FRType<T> = {
   unpack: (v: Value) => T | undefined;
   pack: (v: T) => Value; // used in makeSquiggleDefinition
   getName: () => string;
-  nested?: FRType<any>;
+  // nested?: FRType<any>;
   tag?: string;
   transparent?: T extends Value ? boolean : undefined;
 };
@@ -149,28 +148,41 @@ export const frLambdaTyped = (
 
 export const frBoxed = <T>(
   itemType: FRType<T>
-): FRType<readonly [BoxedArgs, T]> => {
+): FRType<{ value: T; args: BoxedArgs }> => {
   return {
     unpack: (v) => {
       if (v.type !== "Boxed") {
         const unpackedItem = itemType.unpack(v);
         if (unpackedItem) {
-          return [{}, unpackedItem];
+          return { value: unpackedItem, args: new BoxedArgs({}) };
         } else {
           return undefined;
         }
       } else {
         const unpackedItem = itemType.unpack(v.value.value);
-        const boxedArgs = boxedToBoxedArgs(v.value);
-        return (unpackedItem && [boxedArgs, unpackedItem]) || undefined;
+        const boxedArgs: BoxedArgs = v.value.args;
+        return (
+          (unpackedItem && { value: unpackedItem, args: boxedArgs }) ||
+          undefined
+        );
       }
     },
-    pack: (a) => vBoxedSep(itemType.pack(a[1]), a[0]),
+    pack: ({ value, args }) => vBoxed(new Boxed(itemType.pack(value), args)),
     getName: () => `boxed(${itemType.getName()})`,
-    nested: itemType,
+    // nested: itemType,
     tag: "boxed",
   };
 };
+
+export function frKeepBoxes<T1>(t: FRType<T1>) {
+  return {
+    unpack: t.unpack,
+    pack: t.pack,
+    getName: () => t.getName(),
+    tag: "frKeepBoxes",
+    transparent: true,
+  };
+}
 
 export const frLambdaNand = (paramLengths: number[]): FRType<Lambda> => {
   return {

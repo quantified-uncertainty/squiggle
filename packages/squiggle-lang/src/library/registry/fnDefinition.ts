@@ -59,7 +59,8 @@ export function tryCallFnDefinition(
   for (let i = 0; i < args.length; i++) {
     let arg = args[i];
 
-    const frIsBoxed = fn.inputs[i].tag === "boxed";
+    const frIsBoxed =
+      fn.inputs[i].tag === "boxed" || fn.inputs[i].tag === "frKeepBoxes";
     const valueIsBoxed = arg.type === "Boxed";
 
     if (valueIsBoxed && !frIsBoxed) {

@@ -3,8 +3,8 @@ import {
   frAny,
   frArray,
   frBool,
-  frBoxed,
   frGeneric,
+  frKeepBoxes,
   frNumber,
   frString,
 } from "../library/registry/frTypes.js";
@@ -12,7 +12,7 @@ import {
   FnFactory,
   makeNumericComparisons,
 } from "../library/registry/helpers.js";
-import { isEqual, vBoxed } from "../value/index.js";
+import { isEqual } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "", // no namespaced versions
@@ -94,29 +94,25 @@ export const library = [
   maker.make({
     name: "typeOf",
     definitions: [
-      makeDefinition([frBoxed(frAny)], frString, ([[_, v]]) => {
-        return v.publicName;
+      makeDefinition([frAny], frString, ([value]) => {
+        return value.publicName;
       }),
     ],
   }),
   maker.make({
     name: "inspect",
     definitions: [
-      makeDefinition(
-        [frBoxed(frGeneric("A"))],
-        frGeneric("A"),
-        ([[boxedArgs, boxedValue]]) => {
-          console.log(boxedValue, boxedArgs);
-          return vBoxed({ ...boxedArgs, value: boxedValue });
-        }
-      ),
+      makeDefinition([frKeepBoxes(frGeneric("A"))], frGeneric("A"), ([v]) => {
+        console.log(v);
+        return v;
+      }),
 
       makeDefinition(
-        [frBoxed(frGeneric("A")), frString],
+        [frKeepBoxes(frGeneric("A")), frString],
         frGeneric("A"),
-        ([[boxedArgs, boxedValue], label]) => {
-          console.log(`${label}: ${boxedValue.toString()}`);
-          return vBoxed({ ...boxedArgs, value: boxedValue });
+        ([v, label]) => {
+          console.log(`${label}: ${v}}`);
+          return v;
         }
       ),
     ],
