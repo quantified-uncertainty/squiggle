@@ -41,9 +41,8 @@ export type FRType<T> = {
   unpack: (v: Value) => T | undefined;
   pack: (v: T) => Value; // used in makeSquiggleDefinition
   getName: () => string;
-  // nested?: FRType<any>;
-  tag?: string;
   transparent?: T extends Value ? boolean : undefined;
+  keepBoxes?: boolean;
 };
 
 const isOptional = <T>(frType: FRType<T>): boolean => {
@@ -169,8 +168,7 @@ export const frBoxed = <T>(
     },
     pack: ({ value, args }) => vBoxed(new Boxed(itemType.pack(value), args)),
     getName: () => `boxed(${itemType.getName()})`,
-    // nested: itemType,
-    tag: "boxed",
+    keepBoxes: true,
   };
 };
 
@@ -179,8 +177,8 @@ export function frKeepBoxes<T1>(t: FRType<T1>) {
     unpack: t.unpack,
     pack: t.pack,
     getName: () => t.getName(),
-    tag: "frKeepBoxes",
     transparent: true,
+    keepBoxes: true,
   };
 }
 
