@@ -1,6 +1,6 @@
 import { FC, PropsWithChildren } from "react";
 
-export const NamedSearchResultBox: FC<PropsWithChildren<{ name: string }>> = ({
+export const SearchResultBox: FC<PropsWithChildren<{ name: string }>> = ({
   name,
   children,
 }) => (

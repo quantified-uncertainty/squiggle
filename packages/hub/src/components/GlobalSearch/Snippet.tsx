@@ -1,6 +1,6 @@
 import { FC, ReactNode } from "react";
 
-export const SnippetText: FC<{ children: string }> = ({ children }) => {
+export const Snippet: FC<{ children: string }> = ({ children }) => {
   // 'foo<b>bar</b>baz' -> ['foo', '<b>bar', '</b>baz']
   const parts = children.split(/(?=<\/?b>)/);
 

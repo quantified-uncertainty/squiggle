@@ -1,9 +1,10 @@
 import { graphql, useFragment } from "react-relay";
 
 import { SearchResultUser$key } from "@/__generated__/SearchResultUser.graphql";
-import { NamedSearchResultBox } from "./NamedSearchResultBox";
+import { SearchResultBox } from "./SearchResultBox";
 import { SearchResultComponent, useEdgeFragment } from "./SearchResult";
-import { SnippetText } from "./SnippetText";
+import { Snippet } from "./Snippet";
+import { SearchResultTitle } from "./SearchResultTItle";
 
 export const SearchResultUser: SearchResultComponent<SearchResultUser$key> = ({
   fragment,
@@ -22,10 +23,10 @@ export const SearchResultUser: SearchResultComponent<SearchResultUser$key> = ({
   );
 
   return (
-    <NamedSearchResultBox name="User">
-      <div className="text-slate-700">
-        <SnippetText>{edge.slugSnippet}</SnippetText>
-      </div>
-    </NamedSearchResultBox>
+    <SearchResultBox name="User">
+      <SearchResultTitle>
+        <Snippet>{edge.slugSnippet}</Snippet>
+      </SearchResultTitle>
+    </SearchResultBox>
   );
 };

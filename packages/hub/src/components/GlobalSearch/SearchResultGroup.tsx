@@ -2,9 +2,10 @@ import { FC } from "react";
 import { graphql, useFragment } from "react-relay";
 
 import { SearchResultGroup$key } from "@/__generated__/SearchResultGroup.graphql";
-import { NamedSearchResultBox } from "./NamedSearchResultBox";
+import { SearchResultBox } from "./SearchResultBox";
 import { SearchResultComponent, useEdgeFragment } from "./SearchResult";
-import { SnippetText } from "./SnippetText";
+import { Snippet } from "./Snippet";
+import { SearchResultTitle } from "./SearchResultTItle";
 
 export const SearchResultGroup: SearchResultComponent<
   SearchResultGroup$key
@@ -22,8 +23,10 @@ export const SearchResultGroup: SearchResultComponent<
   );
 
   return (
-    <NamedSearchResultBox name="Group">
-      <SnippetText>{edge.slugSnippet}</SnippetText>
-    </NamedSearchResultBox>
+    <SearchResultBox name="Group">
+      <SearchResultTitle>
+        <Snippet>{edge.slugSnippet}</Snippet>
+      </SearchResultTitle>
+    </SearchResultBox>
   );
 };

@@ -1,10 +1,11 @@
-import { FC } from "react";
 import { graphql, useFragment } from "react-relay";
 
 import { SearchResultModel$key } from "@/__generated__/SearchResultModel.graphql";
-import { NamedSearchResultBox } from "./NamedSearchResultBox";
-import { SnippetText } from "./SnippetText";
+import { SearchResultBox } from "./SearchResultBox";
 import { SearchResultComponent, useEdgeFragment } from "./SearchResult";
+import { Snippet } from "./Snippet";
+import { TextSnippet } from "./TextSnippet";
+import { SearchResultTitle } from "./SearchResultTItle";
 
 export const SearchResultModel: SearchResultComponent<
   SearchResultModel$key
@@ -23,13 +24,11 @@ export const SearchResultModel: SearchResultComponent<
   );
 
   return (
-    <NamedSearchResultBox name="Model">
-      <div className="text-slate-700">
-        {model.owner.slug}/<SnippetText>{edge.slugSnippet}</SnippetText>
-      </div>
-      <div className="text-xs">
-        <SnippetText>{edge.textSnippet}</SnippetText>
-      </div>
-    </NamedSearchResultBox>
+    <SearchResultBox name="Model">
+      <SearchResultTitle>
+        {model.owner.slug}/<Snippet>{edge.slugSnippet}</Snippet>
+      </SearchResultTitle>
+      <TextSnippet>{edge.textSnippet}</TextSnippet>
+    </SearchResultBox>
   );
 };
