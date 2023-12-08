@@ -147,7 +147,7 @@ export const GlobalSearch: FC = () => {
       classNames={{
         // copy-pasted and simplified from SelectFormField
         control: () =>
-          "min-w-[12em] max-w-[12em] !min-h-0 h-8 cursor-pointer bg-slate-100 hover:bg-white focus-within:bg-white transition-colors border-slate-300 border rounded-full shadow-sm focus-within:ring-indigo-400 focus-within:ring-2",
+          "min-w-[12em] max-w-[12em] !min-h-0 h-8 cursor-pointer bg-slate-200 hover:bg-white focus-within:bg-white transition-colors border-slate-300 border rounded-md shadow-sm focus-within:ring-indigo-400 focus-within:ring-2",
         // disable default browser focus style
         input: () => "[&_input:focus]:!ring-transparent",
         placeholder: () => "text-slate-400 text-sm font-light",
