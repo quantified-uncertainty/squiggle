@@ -15,6 +15,7 @@ import {
   frLambdaNand,
   frLambdaTyped,
   frNumber,
+  frOptional,
   frSampleSetDist,
   frString,
   frTuple,
@@ -365,20 +366,12 @@ export const library = [
     examples: [`List.slice([1,2,5,10],1,3)`],
     definitions: [
       makeDefinition(
-        [frArray(frGeneric("A")), frNumber],
-        frArray(frGeneric("A")),
-        ([array, start]) => {
-          _assertInteger(start);
-          return array.slice(start);
-        }
-      ),
-      makeDefinition(
-        [frArray(frGeneric("A")), frNumber, frNumber],
+        [frArray(frGeneric("A")), frNumber, frOptional(frNumber)],
         frArray(frGeneric("A")),
         ([array, start, end]) => {
           _assertInteger(start);
-          _assertInteger(end);
-          return array.slice(start, end);
+          end && _assertInteger(end);
+          return end ? array.slice(start, end) : array.slice(start);
         }
       ),
     ],
