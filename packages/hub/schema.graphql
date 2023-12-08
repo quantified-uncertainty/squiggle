@@ -507,13 +507,8 @@ input QueryRelativeValuesDefinitionInput {
 union QueryRelativeValuesDefinitionResult = BaseError | NotFoundError | RelativeValuesDefinition
 
 type QuerySearchConnection {
-  edges: [QuerySearchConnectionEdge!]!
+  edges: [SearchEdge!]!
   pageInfo: PageInfo!
-}
-
-type QuerySearchConnectionEdge {
-  cursor: String!
-  node: Searchable!
 }
 
 union QuerySearchResult = BaseError | QuerySearchConnection
@@ -614,6 +609,13 @@ type RelativeValuesPairCache implements Node {
   id: ID!
   resultJSON: String!
   secondItem: String!
+}
+
+type SearchEdge {
+  cursor: String!
+  node: Searchable!
+  rank: Float!
+  snippet: String!
 }
 
 type Searchable implements Node {
