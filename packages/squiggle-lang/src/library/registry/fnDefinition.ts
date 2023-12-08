@@ -1,7 +1,7 @@
 import { REAmbiguous } from "../../errors/messages.js";
 import { ReducerContext } from "../../reducer/context.js";
 import { Value } from "../../value/index.js";
-import { FRType, frAny } from "./frTypes.js";
+import { FRType, frAny, hasOverlap, overlap } from "./frTypes.js";
 
 // Type safety of `FnDefinition is guaranteed by `makeDefinition` signature below and by `FRType` unpack logic.
 // It won't be possible to make `FnDefinition` generic without sacrificing type safety in other parts of the codebase,
@@ -52,7 +52,8 @@ export function tryCallFnDefinition(
   args: Value[],
   context: ReducerContext
 ): Value | undefined {
-  if (args.length !== fn.inputs.length) {
+  const _overlap = overlap(fn.inputs, [args.length]);
+  if (!hasOverlap(fn.inputs, [args.length])) {
     return; // args length mismatch
   }
   const unpackedArgs: any = []; // any, but that's ok, type safety is guaranteed by FnDefinition type
@@ -64,12 +65,14 @@ export function tryCallFnDefinition(
     }
     unpackedArgs.push(unpackedArg);
   }
-  return fn.output.pack(fn.run(unpackedArgs, context));
+  // console.log("68", fn);
+  const foo = fn.run(unpackedArgs, context);
+  // console.log("69", foo);
+  return fn.output.pack(foo);
 }
 
 export function fnDefinitionToString(fn: FnDefinition): string {
   const inputs = fn.inputs.map((t) => t.getName()).join(", ");
   const output = fn.output.getName();
   return `(${inputs})${output ? ` => ${output}` : ""}`;
-  return `(${inputs}) => ${output}`;
 }

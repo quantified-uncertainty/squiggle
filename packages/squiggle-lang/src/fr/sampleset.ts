@@ -8,6 +8,7 @@ import {
   frDist,
   frLambdaTyped,
   frNumber,
+  frOptional,
   frSampleSetDist,
 } from "../library/registry/frTypes.js";
 import {

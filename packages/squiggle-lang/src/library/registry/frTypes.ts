@@ -1,8 +1,10 @@
+import intersection from "lodash/intersection.js";
 import { BaseDist } from "../../dist/BaseDist.js";
 import { PointSetDist } from "../../dist/PointSetDist.js";
 import { SampleSetDist } from "../../dist/SampleSetDist/index.js";
 import { SymbolicDist } from "../../dist/SymbolicDist.js";
 import { Lambda } from "../../reducer/lambda.js";
+import { upTo } from "../../utility/E_A_Floats.js";
 import { SDate } from "../../utility/SDate.js";
 import { SDuration } from "../../utility/SDuration.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
@@ -125,6 +127,21 @@ export const frLambda: FRType<Lambda> = {
   getName: () => "function",
 };
 
+export const overlap = (inputs: FRType<any>[], lengths: number[]): number[] => {
+  const min = inputs.filter((i) => !isOptional(i)).length;
+  const max = inputs.length;
+  return intersection(upTo(min, max), lengths);
+};
+
+export const hasOverlap = (
+  inputs: FRType<any>[],
+  lengths: number[]
+): boolean => {
+  const min = inputs.filter((i) => !isOptional(i)).length;
+  const max = inputs.length;
+  return intersection(upTo(min, max), lengths).length > 0;
+};
+
 export const frLambdaTyped = (
   inputs: FRType<any>[],
   output: FRType<any>
@@ -132,7 +149,7 @@ export const frLambdaTyped = (
   return {
     unpack: (v: Value) => {
       return v.type === "Lambda" &&
-        v.value.parameterCounts().includes(inputs.length)
+        hasOverlap(inputs, v.value.parameterCounts())
         ? v.value
         : undefined;
     },
