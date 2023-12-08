@@ -207,6 +207,33 @@ export const frArray = <T>(itemType: FRType<T>): FRType<readonly T[]> => {
   };
 };
 
+export type FrOrType<T1, T2> =
+  | { tag: "1"; value: T1 }
+  | { tag: "2"; value: T2 };
+
+export function frOr<T1, T2>(
+  type1: FRType<T1>,
+  type2: FRType<T2>
+): FRType<FrOrType<T1, T2>> {
+  return {
+    unpack: (v) => {
+      const unpacked1 = type1.unpack(v);
+      if (unpacked1) {
+        return { tag: "1", value: unpacked1 };
+      }
+      const unpacked2 = type2.unpack(v);
+      if (unpacked2) {
+        return { tag: "2", value: unpacked2 };
+      }
+      return undefined;
+    },
+    pack: (v) => {
+      return v.tag === "1" ? type1.pack(v.value) : type2.pack(v.value);
+    },
+    getName: () => `${type1.getName()}|${type2.getName()}`,
+  };
+}
+
 export function frTuple<T1, T2>(
   type1: FRType<T1>,
   type2: FRType<T2>
