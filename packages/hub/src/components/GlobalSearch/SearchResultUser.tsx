@@ -12,7 +12,7 @@ export const SearchResultUser: SearchResultComponent<SearchResultUser$key> = ({
 }) => {
   const edge = useEdgeFragment(edgeFragment);
 
-  // Unused, because SearchEdge.slugSnippet is better than User.username.
+  // Unused, because `SearchEdge.slugSnippet` is better than `User.username`.
   useFragment(
     graphql`
       fragment SearchResultUser on User {

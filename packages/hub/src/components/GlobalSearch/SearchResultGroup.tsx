@@ -12,7 +12,7 @@ export const SearchResultGroup: SearchResultComponent<
 > = ({ fragment, edgeFragment }) => {
   const edge = useEdgeFragment(edgeFragment);
 
-  // Unused, because SearchEdge.slugSnippet is better than User.username.
+  // Unused, because `SearchEdge.slugSnippet` is better than `Group.slug`.
   useFragment(
     graphql`
       fragment SearchResultGroup on Group {
