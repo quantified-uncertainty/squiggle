@@ -4,6 +4,9 @@ import * as SampleSetDist from "../../dist/SampleSetDist/index.js";
 import * as SymbolicDist from "../../dist/SymbolicDist.js";
 import { PointMass } from "../../dist/SymbolicDist.js";
 import { Env } from "../../dist/env.js";
+import intersection from "lodash/intersection.js";
+import { upTo } from "../../utility/E_A_Floats.js";
+import last from "lodash/last.js";
 import {
   REDistributionError,
   REOperationError,
@@ -27,6 +30,7 @@ import {
   frNumber,
   frSampleSetDist,
   frString,
+  isOptional,
 } from "./frTypes.js";
 
 type SimplifiedArgs = Omit<FRFunction, "nameSpace" | "requiresNamespace"> &
@@ -437,3 +441,44 @@ export function makeNumericComparisons<T>(
     ),
   ];
 }
+
+export const overlap = (inputs: FRType<any>[], lengths: number[]): number[] => {
+  const min = inputs.filter((i) => !isOptional(i)).length;
+  const max = inputs.length;
+  return intersection(upTo(min, max), lengths);
+};
+
+export const chooseLambdaParamLen = (
+  inputs: FRType<any>[],
+  lambda: Lambda
+): number | undefined => {
+  const _overlap = overlap(inputs, lambda.parameterCounts());
+  return last(_overlap);
+};
+
+export const chooseLambdaParamLength = (
+  inputOptions: number[],
+  lambda: Lambda
+): number | undefined => {
+  const _overlap = intersection(inputOptions, lambda.parameterCounts());
+  return last(_overlap);
+};
+
+export const hasOverlap = (
+  inputs: FRType<any>[],
+  lengths: number[]
+): boolean => {
+  const min = inputs.filter((i) => !isOptional(i)).length;
+  const max = inputs.length;
+  return intersection(upTo(min, max), lengths).length > 0;
+};
+
+export const sliceParamsForLambda = <T>(
+  frTypes: FRType<any>[],
+  lambda: Lambda,
+  inputs: T[]
+): T[] => {
+  const foo = overlap(frTypes, lambda.parameterCounts());
+  const choose = last(foo);
+  return choose ? inputs.slice(0, choose) : inputs.slice(0);
+};

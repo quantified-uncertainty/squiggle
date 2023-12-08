@@ -32,6 +32,7 @@ import {
   vPlot,
   vDomain,
 } from "../../value/index.js";
+import { over } from "lodash";
 
 /*
 FRType is a function that unpacks a Value.
@@ -44,7 +45,7 @@ export type FRType<T> = {
   transparent?: T extends Value ? boolean : undefined;
 };
 
-const isOptional = <T>(frType: FRType<T>): boolean => {
+export const isOptional = <T>(frType: FRType<T>): boolean => {
   return "isOptional" in frType;
 };
 
@@ -140,6 +141,16 @@ export const hasOverlap = (
   const min = inputs.filter((i) => !isOptional(i)).length;
   const max = inputs.length;
   return intersection(upTo(min, max), lengths).length > 0;
+};
+
+export const sliceParamsForLambda = <T>(
+  frTypes: FRType<any>[],
+  lambda: Lambda,
+  inputs: T[]
+): T[] => {
+  const foo = overlap(frTypes, lambda.parameterCounts());
+  const choose = foo[foo.length - 1];
+  return inputs.slice(0, choose);
 };
 
 export const frLambdaTyped = (
