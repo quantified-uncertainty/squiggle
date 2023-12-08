@@ -615,7 +615,8 @@ type SearchEdge {
   cursor: String!
   node: Searchable!
   rank: Float!
-  snippet: String!
+  slugSnippet: String!
+  textSnippet: String!
 }
 
 type Searchable implements Node {

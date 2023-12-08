@@ -1,12 +1,13 @@
-import { FC } from "react";
 import { graphql, useFragment } from "react-relay";
 
-import { SearchResultModel$key } from "@/__generated__/SearchResultModel.graphql";
+import { SearchResultRelativeValuesDefinition$key } from "@/__generated__/SearchResultRelativeValuesDefinition.graphql";
 import { NamedSearchResultBox } from "./NamedSearchResultBox";
+import { SearchResultComponent } from "./SearchResult";
+import { SnippetText } from "./SnippetText";
 
-export const SearchResultRelativeValuesDefinition: FC<{
-  fragment: SearchResultModel$key;
-}> = ({ fragment }) => {
+export const SearchResultRelativeValuesDefinition: SearchResultComponent<
+  SearchResultRelativeValuesDefinition$key
+> = ({ fragment }) => {
   const definition = useFragment(
     graphql`
       fragment SearchResultRelativeValuesDefinition on RelativeValuesDefinition {
@@ -22,7 +23,7 @@ export const SearchResultRelativeValuesDefinition: FC<{
   return (
     <NamedSearchResultBox name="Model">
       <div className="text-slate-700">
-        {definition.owner.slug}/{definition.slug}
+        {definition.owner.slug}/<SnippetText>{definition.slug}</SnippetText>
       </div>
     </NamedSearchResultBox>
   );

@@ -20,10 +20,16 @@ const SearchEdge = builder.edgeObject({
         return rank ?? 1e9;
       },
     }),
-    snippet: t.string({
+    slugSnippet: t.string({
       resolve: (obj) => {
         const snippet = (obj.node as SearchableWithEdgeData).slugSnippet;
-        return String(snippet);
+        return String(snippet ?? "");
+      },
+    }),
+    textSnippet: t.string({
+      resolve: (obj) => {
+        const snippet = (obj.node as SearchableWithEdgeData).textSnippet;
+        return String(snippet ?? "");
       },
     }),
   }),
@@ -54,15 +60,17 @@ builder.queryField("search", (t) =>
             setweight(to_tsvector(coalesce("GroupOwner".slug, '')), 'A'),
             websearch_to_tsquery(${text})
           ) AS rank,
-          ts_headline(concat_ws(
+          ts_headline(
+            concat_ws(
               ' ',
               "Model".slug,
-              "SquiggleSnippet".code,
               "RelativeValuesDefinition".slug,
               "UserOwner".slug,
               "GroupOwner".slug
-            ), websearch_to_tsquery(${text})
-          ) AS "titleSnippet",
+            ),
+            websearch_to_tsquery(${text}),
+            'HighlightAll=t'
+          ) AS "slugSnippet",
           ts_headline(concat_ws(
               ' ',
               "SquiggleSnippet".code
@@ -76,6 +84,7 @@ builder.queryField("search", (t) =>
           LEFT JOIN "ModelRevision" ON "Model"."currentRevisionId" = "ModelRevision".id
             LEFT JOIN "SquiggleSnippet" ON "ModelRevision"."contentId" = "SquiggleSnippet".id
         LEFT JOIN "RelativeValuesDefinition" ON "RelativeValuesDefinition".id = "Searchable"."definitionId"
+          -- LEFT JOIN "Owner" AS "RelativeValuesDefinitionOwner" ON "RelativeValuesDefinition"."ownerId" = "RelativeValuesDefinitionOwner".id
         LEFT JOIN "User" ON "User".id = "Searchable"."userId"
           LEFT JOIN "Owner" AS "UserOwner" ON "User"."ownerId" = "UserOwner".id
         LEFT JOIN "Group" ON "Group".id = "Searchable"."groupId"

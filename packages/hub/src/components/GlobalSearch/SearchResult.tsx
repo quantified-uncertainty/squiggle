@@ -9,10 +9,29 @@ import { SearchResultGroup } from "./SearchResultGroup";
 import { SearchResultModel } from "./SearchResultModel";
 import { SearchResultRelativeValuesDefinition } from "./SearchResultRelativeValuesDefinition";
 import { SearchResultUser } from "./SearchResultUser";
+import { SearchResultEdge$key } from "@/__generated__/SearchResultEdge.graphql";
+
+export function useEdgeFragment(edgeFragment: SearchResultEdge$key) {
+  return useFragment(
+    graphql`
+      fragment SearchResultEdge on SearchEdge {
+        slugSnippet
+        textSnippet
+      }
+    `,
+    edgeFragment
+  );
+}
+
+export type SearchResultComponent<T> = FC<{
+  fragment: T;
+  edgeFragment: SearchResultEdge$key;
+}>;
 
 const OkSearchResult: FC<{
-  objectRef: SearchResult$key;
-}> = ({ objectRef }) => {
+  fragment: SearchResult$key;
+  edgeFragment: SearchResultEdge$key;
+}> = ({ fragment: objectRef, edgeFragment }) => {
   const object = useFragment(
     graphql`
       fragment SearchResult on SearchableObject {
@@ -28,13 +47,22 @@ const OkSearchResult: FC<{
 
   switch (object.__typename) {
     case "Model":
-      return <SearchResultModel fragment={object} />;
+      return (
+        <SearchResultModel fragment={object} edgeFragment={edgeFragment} />
+      );
     case "RelativeValuesDefinition":
-      return <SearchResultRelativeValuesDefinition fragment={object} />;
+      return (
+        <SearchResultRelativeValuesDefinition
+          fragment={object}
+          edgeFragment={edgeFragment}
+        />
+      );
     case "User":
-      return <SearchResultUser fragment={object} />;
+      return <SearchResultUser fragment={object} edgeFragment={edgeFragment} />;
     case "Group":
-      return <SearchResultGroup fragment={object} />;
+      return (
+        <SearchResultGroup fragment={object} edgeFragment={edgeFragment} />
+      );
     default:
       return (
         <div>
@@ -53,7 +81,10 @@ export const SearchResult: FC<OptionProps<SearchOption, false>> = ({
       return (
         <components.Option {...props}>
           <Link href={props.data.link}>
-            <OkSearchResult objectRef={props.data.object} />
+            <OkSearchResult
+              fragment={props.data.object}
+              edgeFragment={props.data.edge}
+            />
           </Link>
         </components.Option>
       );

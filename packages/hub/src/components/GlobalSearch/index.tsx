@@ -15,6 +15,7 @@ import { SearchIcon } from "@quri/ui";
 import { GlobalSearchQuery } from "@/__generated__/GlobalSearchQuery.graphql";
 import { SearchResult$key } from "@/__generated__/SearchResult.graphql";
 import { SearchResult } from "./SearchResult";
+import { SearchResultEdge$key } from "@/__generated__/SearchResultEdge.graphql";
 
 export const Query = graphql`
   query GlobalSearchQuery($text: String!) {
@@ -26,6 +27,7 @@ export const Query = graphql`
       ... on QuerySearchConnection {
         edges {
           cursor
+          ...SearchResultEdge
           node {
             id
             link
@@ -44,6 +46,7 @@ export type SearchOption =
       type: "object";
       id: string;
       link: string;
+      edge: SearchResultEdge$key;
       object: SearchResult$key;
     }
   | {
@@ -87,6 +90,7 @@ export const GlobalSearch: FC = () => {
       type: "object",
       id: edge.node.id,
       link: edge.node.link,
+      edge,
       object: edge.node.object,
     }));
   };
