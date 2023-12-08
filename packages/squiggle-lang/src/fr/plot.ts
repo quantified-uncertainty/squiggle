@@ -135,6 +135,27 @@ const numericFnDef = () => {
           null
         )
       ),
+      makeDefinition(
+        [
+          frForceBoxed(fnType),
+          frDict(
+            ["fn", fnType],
+            ["xScale", frOptional(frScale)],
+            ["yScale", frOptional(frScale)],
+            ["title", frOptional(frString)],
+            ["points", frOptional(frNumber)]
+          ),
+        ],
+        frPlot,
+        ([boxed, { fn, xScale, yScale, title, points }]) =>
+          toPlot(
+            boxed.value,
+            xScale,
+            yScale,
+            title || boxed.args.value.name || null,
+            points
+          )
+      ),
       //Maybe we should deprecate this eventually? I think I like the others more, especially for boxed functions and composition.
       makeDefinition(
         [
@@ -241,9 +262,32 @@ export const library = [
           xScale: defaultScale,
           yScale: defaultScale,
           title: boxed.args.value.name ?? undefined,
-          showSummary: false,
+          showSummary: true,
         };
       }),
+      makeDefinition(
+        [
+          frForceBoxed(frDist),
+          frDict(
+            ["dist", frDist],
+            ["xScale", frOptional(frScale)],
+            ["yScale", frOptional(frScale)],
+            ["title", frOptional(frString)],
+            ["showSummary", frOptional(frBool)]
+          ),
+        ],
+        frPlot,
+        ([boxed, { dist, xScale, yScale, title, showSummary }]) => {
+          return {
+            type: "distributions",
+            distributions: [{ distribution: boxed.value }],
+            xScale: xScale ?? defaultScale,
+            yScale: yScale ?? defaultScale,
+            title: title ?? boxed.args.value.name ?? undefined,
+            showSummary: showSummary ?? true,
+          };
+        }
+      ),
     ],
   }),
   numericFnDef(),
@@ -293,6 +337,32 @@ export const library = [
             distXScale: defaultScale,
             title: boxed.args.value.name || undefined,
             points: undefined,
+          };
+        }
+      ),
+      makeDefinition(
+        [
+          frForceBoxed(frLambdaTyped([frNumber], frDist)),
+          frDict(
+            ["xScale", frOptional(frScale)],
+            ["yScale", frOptional(frScale)],
+            ["distXScale", frOptional(frScale)],
+            ["title", frOptional(frString)],
+            ["points", frOptional(frNumber)]
+          ),
+        ],
+        frPlot,
+        ([fn, { xScale, yScale, distXScale, title, points }]) => {
+          _assertYScaleNotDateScale(yScale);
+          const domain = extractDomainFromOneArgFunction(fn.value);
+          return {
+            type: "distFn",
+            fn: fn.value,
+            xScale: createScale(xScale, domain),
+            yScale: yScale ?? defaultScale,
+            distXScale: distXScale ?? yScale ?? defaultScale,
+            title: title ?? fn.args.value.name ?? undefined,
+            points: points ?? undefined,
           };
         }
       ),
