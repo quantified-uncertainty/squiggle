@@ -2,7 +2,7 @@ import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
   frArray,
-  frBoxed,
+  frForceBoxed,
   frDict,
   frGeneric,
   frLambdaTyped,
@@ -66,6 +66,31 @@ export const library = [
             data,
             nullToUndefined(columns),
             nullToUndefined(title)
+          );
+        }
+      ),
+      makeDefinition(
+        [
+          frForceBoxed(frArray(frGeneric("A"))),
+          frDict(
+            ["title", frOptional(frString)],
+            [
+              "columns",
+              frArray(
+                frDict(
+                  ["fn", frLambdaTyped([frGeneric("A")], frAny)],
+                  ["name", frOptional(frString)]
+                )
+              ),
+            ]
+          ),
+        ],
+        frTableChart,
+        ([data, { title, columns }]) => {
+          return makeTableChart(
+            data.value,
+            nullToUndefined(columns),
+            nullToUndefined(title) || data.args.value.name
           );
         }
       ),

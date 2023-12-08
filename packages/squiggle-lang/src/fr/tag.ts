@@ -4,7 +4,7 @@ import {
   FrOrType,
   frAny,
   frArray,
-  frBoxed,
+  frForceBoxed,
   frCalculator,
   frDictWithArbitraryKeys,
   frDist,
@@ -21,14 +21,15 @@ import {
 import { FnFactory } from "../library/registry/helpers.js";
 import { Lambda } from "../reducer/lambda.js";
 import { Boxed } from "../value/boxed.js";
-import { Value, vBoxed } from "../value/index.js";
+import { Value, vBoxed, vString } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Tag",
   requiresNamespace: true,
 });
 
-function ensureTypeUsingLambda<T1>(
+//I could also see inlining this into the next function, either way is fine.
+function _ensureTypeUsingLambda<T1>(
   outputType: FRType<T1>,
   showAs: FrOrType<T1, Lambda>,
   runLambdaToGetType: (fn: Lambda) => Value
@@ -49,20 +50,20 @@ function ensureTypeUsingLambda<T1>(
 function withInputOrFnInput<T>(inputType: FRType<any>, outputType: FRType<T>) {
   return makeDefinition(
     [
-      frBoxed(inputType),
+      frForceBoxed(inputType),
       frOr(outputType, frLambdaTyped([inputType], outputType)),
     ],
-    frBoxed(inputType),
+    frForceBoxed(inputType),
     ([{ args, value }, showAs], context) => {
       const runLambdaToGetType = (fn: Lambda) =>
         fn.call([vBoxed(new Boxed(inputType.pack(value), args))], context);
-      const showAsVal: T = ensureTypeUsingLambda(
+      const showAsVal: T = _ensureTypeUsingLambda(
         outputType,
         showAs,
         runLambdaToGetType
       );
       return {
-        args: args.combine({ showAs: outputType.pack(showAsVal) }),
+        args: args.merge({ showAs: outputType.pack(showAsVal) }),
         value,
       };
     }
@@ -75,10 +76,10 @@ export const library = [
     examples: [],
     definitions: [
       makeDefinition(
-        [frBoxed(frGeneric("A")), frString],
-        frBoxed(frGeneric("A")),
+        [frForceBoxed(frGeneric("A")), frString],
+        frForceBoxed(frGeneric("A")),
         ([{ args, value }, name]) => {
-          return { args: args.combine({ name }), value };
+          return { args: args.merge({ name }), value };
         }
       ),
     ],
@@ -87,7 +88,7 @@ export const library = [
     name: "getName",
     examples: [],
     definitions: [
-      makeDefinition([frBoxed(frAny)], frString, ([{ args }]) => {
+      makeDefinition([frForceBoxed(frAny)], frString, ([{ args }]) => {
         return args.value.name || "";
       }),
     ],
@@ -97,10 +98,10 @@ export const library = [
     examples: [],
     definitions: [
       makeDefinition(
-        [frBoxed(frGeneric("A")), frString],
-        frBoxed(frGeneric("A")),
+        [frForceBoxed(frGeneric("A")), frString],
+        frForceBoxed(frGeneric("A")),
         ([{ args, value }, description]) => {
-          return { value: value, args: args.combine({ description }) };
+          return { value: value, args: args.merge({ description }) };
         }
       ),
     ],
@@ -109,12 +110,11 @@ export const library = [
     name: "getDescription",
     examples: [],
     definitions: [
-      makeDefinition([frBoxed(frAny)], frString, ([{ args }]) => {
+      makeDefinition([frForceBoxed(frAny)], frString, ([{ args }]) => {
         return args.value.description || "";
       }),
     ],
   }),
-  //maybe we should just allow transformations.
   maker.make({
     name: "showAs",
     examples: [],
@@ -129,32 +129,8 @@ export const library = [
     name: "getShowAs",
     examples: [],
     definitions: [
-      // makeDefinition([frBoxed(frLambda)], frAny, ([[args, fn]], context) => {
-      //   const inferredType = inferNumberToNumberOrDist(fn, context);
-      //   const title = args.name || fn.name || "";
-      //   if (inferredType?.type === "Dist") {
-      //     return vPlot({
-      //       type: "distFn",
-      //       fn: fn,
-      //       xScale: inferredType.domain.toDefaultScale(),
-      //       distXScale: inferredType.domain.toDefaultScale(),
-      //       yScale: { type: "linear" },
-      //       title,
-      //     });
-      //   } else if (inferredType?.type === "Number") {
-      //     return vPlot({
-      //       type: "numericFn",
-      //       fn: fn,
-      //       xScale: inferredType.domain.toDefaultScale(),
-      //       yScale: { type: "linear" },
-      //       title,
-      //     });
-      //   }
-      //   return vString("Could not infer type");
-      //   // return args.showAs || value; // This is the default
-      // }),
-      makeDefinition([frBoxed(frAny)], frAny, ([{ args, value }]) => {
-        return args.value.showAs || value; // This is the default
+      makeDefinition([frForceBoxed(frAny)], frAny, ([{ args, value }]) => {
+        return args.value.showAs || vString("None"); // Not sure what to use when blank.
       }),
     ],
   }),
@@ -163,7 +139,7 @@ export const library = [
     examples: [],
     definitions: [
       makeDefinition(
-        [frBoxed(frAny)],
+        [frForceBoxed(frAny)],
         frDictWithArbitraryKeys(frAny),
         ([{ args }]) => {
           return args.toMap();

@@ -9,7 +9,7 @@ import {
   frBool,
   frNumber,
   frCalculator,
-  frBoxed,
+  frForceBoxed,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { Calculator, vCalculator } from "../value/index.js";
@@ -57,12 +57,16 @@ export const library = [
             sampleCount: sampleCount || undefined,
           })
       ),
-      makeDefinition([frBoxed(frLambda)], frCalculator, ([{ args, value }]) => {
-        const calc = value.toCalculator();
-        const title = calc.title || args.value.name;
-        const description = calc.description || args.value.description;
-        return validateCalculator({ ...calc, title, description });
-      }),
+      makeDefinition(
+        [frForceBoxed(frLambda)],
+        frCalculator,
+        ([{ args, value }]) => {
+          const calc = value.toCalculator();
+          const title = calc.title || args.value.name;
+          const description = calc.description || args.value.description;
+          return validateCalculator({ ...calc, title, description });
+        }
+      ),
     ],
   }),
 ];

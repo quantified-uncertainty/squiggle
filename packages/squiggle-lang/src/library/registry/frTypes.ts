@@ -145,7 +145,9 @@ export const frLambdaTyped = (
   };
 };
 
-export const frBoxed = <T>(
+//This will box if not boxed. We could do a form that doesn't do this, but it would be messier.
+//I could see it as cleaner to use a new Class or interface like {type: "Boxed", value: T, args: BoxedArgs} | {type: "Unboxed", value: T}, but doesn't seem worth it yet.
+export const frForceBoxed = <T>(
   itemType: FRType<T>
 ): FRType<{ value: T; args: BoxedArgs }> => {
   return {
@@ -172,6 +174,7 @@ export const frBoxed = <T>(
   };
 };
 
+//This works just like any, but it will preserve boxes, if items are boxed. Useful for "inspect" or cases where you don't need to unpack the underlying value.
 export function frKeepBoxes<T1>(t: FRType<T1>) {
   return {
     unpack: t.unpack,

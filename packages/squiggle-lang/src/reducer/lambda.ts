@@ -4,13 +4,7 @@ import { ASTNode } from "../ast/parse.js";
 import * as IError from "../errors/IError.js";
 import { REArityError, REOther } from "../errors/messages.js";
 import { Expression } from "../expression/index.js";
-import {
-  Calculator,
-  VDomain,
-  Value,
-  vNumber,
-  vString,
-} from "../value/index.js";
+import { Calculator, VDomain, Value } from "../value/index.js";
 import * as Context from "./context.js";
 import { ReducerContext } from "./context.js";
 import { Stack } from "./stack.js";
@@ -23,8 +17,6 @@ import uniq from "lodash/uniq.js";
 import { sort } from "../utility/E_A_Floats.js";
 import { FRType } from "../library/registry/frTypes.js";
 import maxBy from "lodash/maxBy.js";
-import { Domain, NumericRangeDomain } from "../value/domain.js";
-import { SDate } from "../index.js";
 
 export type UserDefinedLambdaParameter = {
   name: string;
@@ -32,71 +24,6 @@ export type UserDefinedLambdaParameter = {
 };
 
 type LambdaBody = (args: Value[], context: ReducerContext) => Value;
-
-type sig = {
-  name: string;
-  domain?: Domain;
-  typeName?: string;
-  fnType: "UserDefinedLambda" | "BuiltinLambda";
-};
-
-export function lambdaToLambdaSignatures(lambda: Lambda): sig[][] {
-  switch (lambda.type) {
-    case "UserDefinedLambda":
-      return [
-        lambda.parameters.map((param) => {
-          return {
-            name: param.name,
-            domain: param.domain ? param.domain.value : undefined,
-            fnType: "UserDefinedLambda",
-          };
-        }),
-      ];
-    case "BuiltinLambda":
-      return lambda.signatures().map((def) =>
-        def.map((p, index) => ({
-          name: index.toString(),
-          domain: undefined,
-          typeName: p.getName(),
-          fnType: "BuiltinLambda",
-        }))
-      );
-  }
-}
-
-function getInferredType(lambda: Lambda, pointsToTry: Value[], context: any) {
-  for (const point of pointsToTry) {
-    const testVal = lambda.call([point], context);
-    if (testVal.type === "Number" || testVal.type === "Dist") {
-      return testVal.type;
-    }
-  }
-  return undefined;
-}
-
-export function inferNumberToNumberOrDist(
-  fn: Lambda,
-  context: ReducerContext
-): { domain: Domain; type: "Number" | "Dist" } | undefined {
-  if (!fn.parameterCounts().includes(1)) {
-    return undefined;
-  }
-  const useSig = lambdaToLambdaSignatures(fn).find((sig) => sig.length === 1);
-
-  const includedDomain = useSig?.[0]?.domain;
-
-  const xDomain = includedDomain
-    ? includedDomain
-    : new NumericRangeDomain(0.1, 10);
-
-  const values = [xDomain.min, xDomain.max].map((point) =>
-    point instanceof SDate ? vString(point.toString()) : vNumber(point)
-  );
-
-  const inferredType = getInferredType(fn, values, context);
-
-  return (inferredType && { domain: xDomain, type: inferredType }) || undefined;
-}
 
 export abstract class BaseLambda {
   constructor(public body: LambdaBody) {}

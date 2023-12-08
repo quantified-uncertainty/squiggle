@@ -20,7 +20,7 @@ type Indexable = {
   get(key: Value): Value;
 };
 
-export abstract class BaseValue {
+abstract class BaseValue {
   abstract type: string;
   abstract publicName: string;
 

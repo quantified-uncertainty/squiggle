@@ -1,5 +1,5 @@
 import { ImmutableMap } from "../utility/immutableMap.js";
-import { Value, vString, BaseValue } from "./index.js";
+import { Value, vString } from "./index.js";
 
 export type BoxedArgsType = {
   name?: string;
@@ -7,6 +7,7 @@ export type BoxedArgsType = {
   showAs?: Value;
 };
 
+//I expect these to get much more complicated later, so it seemed prudent to make a class now.
 export class BoxedArgs {
   constructor(public value: BoxedArgsType) {}
 
@@ -35,7 +36,7 @@ export class BoxedArgs {
       .join(", ");
   }
 
-  combine(other: BoxedArgsType) {
+  merge(other: BoxedArgsType) {
     return new BoxedArgs({
       ...this.value,
       ...other,
@@ -43,16 +44,11 @@ export class BoxedArgs {
   }
 }
 
-export class Boxed extends BaseValue {
-  readonly type = "Boxed";
-  readonly publicName = "Boxed";
-
+export class Boxed {
   constructor(
     public value: Value,
     public args: BoxedArgs
-  ) {
-    super();
-  }
+  ) {}
 
   toString(): string {
     const argsStr = this.args.toString();

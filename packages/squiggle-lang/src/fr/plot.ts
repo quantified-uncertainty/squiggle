@@ -3,7 +3,7 @@ import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
   frBool,
-  frBoxed,
+  frForceBoxed,
   frDict,
   frDist,
   frDistOrNumber,
@@ -126,7 +126,7 @@ const numericFnDef = () => {
       `Plot.numericFn({ fn: {|x|x*x}, xScale: Scale.linear({ min: 3, max: 5 }), yScale: Scale.log({ tickFormat: ".2s" }) })`,
     ],
     definitions: [
-      makeDefinition([frBoxed(fnType)], frPlot, ([boxed]) =>
+      makeDefinition([frForceBoxed(fnType)], frPlot, ([boxed]) =>
         toPlot(
           boxed.value,
           null,
@@ -234,7 +234,7 @@ export const library = [
           };
         }
       ),
-      makeDefinition([frBoxed(frDist)], frPlot, ([boxed]) => {
+      makeDefinition([frForceBoxed(frDist)], frPlot, ([boxed]) => {
         return {
           type: "distributions",
           distributions: [{ distribution: boxed.value }],
@@ -281,7 +281,7 @@ export const library = [
         }
       ),
       makeDefinition(
-        [frBoxed(frLambdaTyped([frNumber], frDist))],
+        [frForceBoxed(frLambdaTyped([frNumber], frDist))],
         frPlot,
         ([boxed]) => {
           const domain = extractDomainFromOneArgFunction(boxed.value);

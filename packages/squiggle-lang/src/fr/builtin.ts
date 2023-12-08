@@ -102,17 +102,21 @@ export const library = [
   maker.make({
     name: "inspect",
     definitions: [
-      makeDefinition([frKeepBoxes(frGeneric("A"))], frGeneric("A"), ([v]) => {
-        console.log(v);
-        return v;
-      }),
+      makeDefinition(
+        [frKeepBoxes(frGeneric("A"))],
+        frGeneric("A"),
+        ([value]) => {
+          console.log(value);
+          return value;
+        }
+      ),
 
       makeDefinition(
         [frKeepBoxes(frGeneric("A")), frString],
         frGeneric("A"),
-        ([v, label]) => {
-          console.log(`${label}: ${v}}`);
-          return v;
+        ([value, label]) => {
+          console.log(`${label}: ${value}}`);
+          return value;
         }
       ),
     ],
