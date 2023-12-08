@@ -3,12 +3,13 @@ import {
   frAny,
   frArray,
   frDict,
-  frLambda,
+  frGeneric,
+  frLambdaTyped,
   frOptional,
   frString,
+  frTableChart,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { vTableChart } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Table",
@@ -24,23 +25,29 @@ export const library = [
       makeDefinition(
         [
           frDict(
-            ["data", frArray(frAny)],
+            ["data", frArray(frGeneric("A"))],
             ["title", frOptional(frString)],
             [
               "columns",
-              frArray(frDict(["fn", frLambda], ["name", frOptional(frString)])),
+              frArray(
+                frDict(
+                  ["fn", frLambdaTyped([frGeneric("A")], frAny)],
+                  ["name", frOptional(frString)]
+                )
+              ),
             ]
           ),
         ],
+        frTableChart,
         ([{ data, title, columns }]) => {
-          return vTableChart({
+          return {
             data,
             title: title || undefined,
             columns: columns.map(({ fn, name }) => ({
               fn,
               name: name ?? undefined,
             })),
-          });
+          };
         }
       ),
     ],

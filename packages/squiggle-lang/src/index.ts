@@ -1,4 +1,6 @@
 import { type Env } from "./dist/env.js";
+export { type FnDocumentation } from "./library/registry/core.js";
+import { registry } from "./library/registry/index.js";
 import { SqProject } from "./public/SqProject/index.js";
 export {
   type SqInput,
@@ -104,4 +106,12 @@ export function sq(strings: TemplateStringsArray, ...rest: unknown[]) {
     throw new Error("Extrapolation in sq`` template literals is forbidden");
   }
   return strings.join("");
+}
+
+export function getFunctionDocumentation(name: string) {
+  return registry.getFunctionDocumentation(name);
+}
+
+export function getAllFunctionNames() {
+  return registry.allNames();
 }

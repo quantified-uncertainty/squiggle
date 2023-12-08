@@ -2,7 +2,7 @@
 description: The Calculator module helps you create custom calculators
 ---
 
-import { SquiggleEditor } from "@quri/squiggle-components";
+import { SquiggleEditor  } from "@quri/squiggle-components";
 
 # Calculator
 
@@ -21,6 +21,7 @@ Calculator.make: ({
   autorun?: boolean = true,
   sampleCount?: number,
 }) => calculator
+Calculator.make(fn: ...arguments => any) => calculator
 ```
 
 ``Calculator.make`` takes in a function, a description, and a list of fields. The function should take in the same number of arguments as the number of fields, and the arguments should be of the same type as the default value of the field.
@@ -55,31 +56,4 @@ Example:
 
 ## Inputs
 
-Inputs are now only used for creating calculators, as shown above. They are created using the ``Input`` module.
-
-```
-Input.text: ({
-  name: string,
-  description?: string,
-  default?: string,
-}) => input
-
-Input.textArea: ({
-  name: string,
-  description?: string,
-  default?: string,
-}) => input
-
-Input.checkbox: ({
-  name: string,
-  description?: string,
-  default?: boolean,
-}) => input
-
-Input.select: ({
-  name: string,
-  description?: string,
-  default?: string,
-  options: string[]
-}) => input
-```
+Inputs are now only used for creating calculators. They are created using the [Input](./Input.mdx) module.

@@ -1,6 +1,11 @@
+import { infixFunctions, unaryFunctions } from "../../ast/peggyHelpers.js";
 import { BuiltinLambda, Lambda } from "../../reducer/lambda.js";
 import { Value } from "../../value/index.js";
-import { FnDefinition } from "./fnDefinition.js";
+import { FnDefinition, fnDefinitionToString } from "./fnDefinition.js";
+import get from "lodash/get.js";
+import invert from "lodash/invert.js";
+
+type Shorthand = { type: "infix" | "unary"; symbol: string };
 
 export type FRFunction = {
   name: string;
@@ -11,9 +16,23 @@ export type FRFunction = {
   examples?: string[];
   description?: string;
   isExperimental?: boolean;
+  isUnit?: boolean;
+  shorthand?: Shorthand;
 };
 
 type FnNameDict = Map<string, FnDefinition[]>;
+
+export type FnDocumentation = Pick<
+  FRFunction,
+  | "description"
+  | "requiresNamespace"
+  | "nameSpace"
+  | "name"
+  | "examples"
+  | "isExperimental"
+  | "isUnit"
+  | "shorthand"
+> & { signatures: string[] };
 
 export class Registry {
   private constructor(
@@ -60,6 +79,51 @@ export class Registry {
 
   allNames(): string[] {
     return [...this.fnNameDict.keys()];
+  }
+
+  getFunctionDocumentation(fnName: string): FnDocumentation | undefined {
+    // Find the first function with a given name; there could be duplicates with different descriptions etc.
+    // FIXME - store `this.functions` as a `Map`.
+    const fn = this.functions.find((fn) => {
+      // FIXME - duplicates the logic from `make`
+      if (!fn.requiresNamespace && fnName === fn.name) {
+        return true;
+      }
+      if (`${fn.nameSpace}.${fn.name}` === fnName) {
+        return true;
+      }
+    });
+
+    if (!fn) return;
+
+    const _infixes = invert(infixFunctions);
+    const _unary = invert(unaryFunctions);
+
+    function getShorthandName(name: string): Shorthand | undefined {
+      const infix: string | undefined = get(_infixes, name, undefined);
+      if (infix) {
+        return { type: "infix", symbol: infix };
+      } else {
+        const unary: string | undefined = get(_unary, name, undefined);
+        if (unary) {
+          return { type: "unary", symbol: unary };
+        }
+        return undefined;
+      }
+    }
+
+    return {
+      name: fn.name,
+      nameSpace: fn.nameSpace,
+      requiresNamespace: fn.requiresNamespace,
+      description: fn.description,
+      examples: fn.examples,
+      signatures: fn.definitions
+        .filter((d) => !!d.isAssert)
+        .map(fnDefinitionToString),
+      isUnit: fn.isUnit,
+      shorthand: getShorthandName(fn.name),
+    };
   }
 
   makeLambda(fnName: string): Lambda {
