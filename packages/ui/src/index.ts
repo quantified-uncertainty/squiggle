@@ -89,6 +89,7 @@ export {
   CurlyBracketsIcon,
   HashIcon,
   CommandLineIcon,
+  SearchIcon,
 } from "./icons/HeroIcons.js";
 export type { IconProps } from "./icons/Icon.js";
 export { PlusIcon } from "./icons/PlusIcon.js";
@@ -97,6 +98,7 @@ export { SignOutIcon } from "./icons/SignOutIcon.js";
 export { TrashIcon } from "./icons/TrashIcon.js";
 export { TriangleIcon } from "./icons/TriangleIcon.js";
 export { XIcon } from "./icons/XIcon.js";
+export { ErrorIcon } from "./icons/ErrorIcon.js";
 
 export { WithToasts, useToast } from "./components/WithToasts/index.js";
 
