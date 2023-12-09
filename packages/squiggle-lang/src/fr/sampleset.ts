@@ -61,11 +61,11 @@ const fromFnDefinition: FnDefinition = makeDefinition(
   [frLambdaTyped([frOptional(frNumber)], frNumber)],
   frSampleSetDist,
   ([lambda], context) => {
-    const len = chooseLambdaParamLength([0, 1], lambda) as 0 | 1;
+    const usedOptional = chooseLambdaParamLength([0, 1], lambda) === 1;
     return fromFn(
       lambda,
       context,
-      len === 0 ? () => [] : (index) => [vNumber(index)]
+      usedOptional ? (index) => [vNumber(index)] : () => []
     );
   }
 );

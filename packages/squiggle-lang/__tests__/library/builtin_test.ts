@@ -62,6 +62,4 @@ describe("Operators", () => {
     testEvalToBe("!(0)", "true");
     testEvalToBe("!(false)", "true");
   });
-  // testEvalToBe("SampleSet.fromFn({|i| 1})", "1", true);
-  // testEvalToBe("inspect(1, 'hi')", "1", true);
 });

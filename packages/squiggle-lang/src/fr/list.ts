@@ -160,14 +160,11 @@ export const library = [
         frArray(frGeneric("A")),
         ([num, lambda], context) => {
           _assertValidArrayLength(num);
-          const len = chooseLambdaParamLength([0, 1], lambda) as 0 | 1;
-          if (len === 1) {
-            return Array.from({ length: num }, (_, i) =>
-              lambda.call([vNumber(i)], context)
-            );
-          } else {
-            return Array.from({ length: num }, () => lambda.call([], context));
-          }
+          const usedOptional = chooseLambdaParamLength([0, 1], lambda) === 1;
+          const fnCall = usedOptional
+            ? (_: any, i: number) => lambda.call([vNumber(i)], context)
+            : () => lambda.call([], context);
+          return Array.from({ length: num }, fnCall);
         }
       ),
       makeDefinition(
@@ -262,8 +259,8 @@ export const library = [
         ],
         frArray(frGeneric("B")),
         ([array, lambda], context) => {
-          const len = chooseLambdaParamLength([1, 2], lambda) as 1 | 2;
-          return _map(array, lambda, context, len === 1 ? false : true);
+          const usedOptional = chooseLambdaParamLength([1, 2], lambda) === 2;
+          return _map(array, lambda, context, usedOptional ? true : false);
         }
       ),
     ],
@@ -424,13 +421,13 @@ export const library = [
         ],
         frGeneric("A"),
         ([array, initialValue, lambda], context) => {
-          const len = chooseLambdaParamLength([2, 3], lambda) as 2 | 3;
+          const usedOptional = chooseLambdaParamLength([2, 3], lambda) === 3;
           return _reduce(
             array,
             initialValue,
             lambda,
             context,
-            len === 2 ? false : true
+            usedOptional ? true : false
           );
         }
       ),
