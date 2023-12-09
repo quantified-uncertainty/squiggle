@@ -221,7 +221,14 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
             {!isFocused && triangleToggle()}
             {headerName}
             {!isFocused && (
-              <SquiggleValuePreview value={value} isOpen={isOpen} />
+              <div
+                className={clsx(
+                  "ml-3 text-sm text-blue-800",
+                  isOpen ? "opacity-40" : "opacity-60"
+                )}
+              >
+                <SquiggleValuePreview value={value} />
+              </div>
             )}
             {!isFocused && !isOpen && <CommentIconForValue value={value} />}
           </div>

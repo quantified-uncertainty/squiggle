@@ -1,8 +1,20 @@
 import { SquiggleValueChart } from "../components/SquiggleViewer/SquiggleValueChart.js";
+import { SquiggleValuePreview } from "../components/SquiggleViewer/SquiggleValuePreview.js";
 import { valueHasContext } from "../lib/utility.js";
 import { widgetRegistry } from "./registry.js";
 
 widgetRegistry.register("Boxed", {
+  Preview: (value) => {
+    const _value = value.value.value;
+    if (valueHasContext(_value)) {
+      return (
+        <div>
+          <div>{value.value.name()}</div>
+          <SquiggleValuePreview value={_value} />
+        </div>
+      );
+    }
+  },
   Chart: (value, settings) => {
     const showAs = value.value.showAs();
     if (showAs && valueHasContext(showAs)) {
