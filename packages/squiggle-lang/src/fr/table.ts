@@ -24,6 +24,35 @@ export const library = [
     definitions: [
       makeDefinition(
         [
+          frArray(frGeneric("A")),
+          frDict(
+            ["title", frOptional(frString)],
+            [
+              "columns",
+              frArray(
+                frDict(
+                  ["fn", frLambdaTyped([frGeneric("A")], frAny)],
+                  ["name", frOptional(frString)]
+                )
+              ),
+            ]
+          ),
+        ],
+        frTableChart,
+        ([data, params]) => {
+          const { title, columns } = params ?? {};
+          return {
+            data,
+            title: title || undefined,
+            columns: columns.map(({ fn, name }) => ({
+              fn,
+              name: name ?? undefined,
+            })),
+          };
+        }
+      ),
+      makeDefinition(
+        [
           frDict(
             ["data", frArray(frGeneric("A"))],
             ["title", frOptional(frString)],
@@ -48,7 +77,8 @@ export const library = [
               name: name ?? undefined,
             })),
           };
-        }
+        },
+        { deprecated: "0.8.7" }
       ),
     ],
   }),

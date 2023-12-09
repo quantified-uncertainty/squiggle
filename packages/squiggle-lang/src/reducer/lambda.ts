@@ -196,7 +196,7 @@ export class BuiltinLambda extends BaseLambda {
     const signatures = this._definitions;
     const showNameMatchDefinitions = () => {
       const defsString = signatures
-        .filter((d) => !d.isAssert)
+        .filter((d) => !d.isAssert && !d.deprecated)
         .map(fnDefinitionToString)
         .map((def) => `  ${this.name}${def}\n`)
         .join("");

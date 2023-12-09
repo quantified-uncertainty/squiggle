@@ -1,7 +1,7 @@
 import { REAmbiguous } from "../../errors/messages.js";
 import { ReducerContext } from "../../reducer/context.js";
 import { Value } from "../../value/index.js";
-import { FRType, frAny, hasOverlap, overlap } from "./frTypes.js";
+import { FRType, frAny, hasOverlap } from "./frTypes.js";
 
 // Type safety of `FnDefinition is guaranteed by `makeDefinition` signature below and by `FRType` unpack logic.
 // It won't be possible to make `FnDefinition` generic without sacrificing type safety in other parts of the codebase,
@@ -11,6 +11,7 @@ export type FnDefinition<OutputType = any> = {
   run: (args: any[], context: ReducerContext) => OutputType;
   output: FRType<OutputType>;
   isAssert: boolean;
+  deprecated?: string;
 };
 
 export function makeDefinition<
@@ -20,7 +21,8 @@ export function makeDefinition<
   // [...] wrapper is important, see also: https://stackoverflow.com/a/63891197
   inputs: [...{ [K in keyof InputTypes]: FRType<InputTypes[K]> }],
   output: FRType<OutputType>,
-  run: (args: InputTypes, context: ReducerContext) => OutputType
+  run: (args: InputTypes, context: ReducerContext) => OutputType,
+  params?: { deprecated?: string }
 ): FnDefinition {
   return {
     inputs,
@@ -29,6 +31,7 @@ export function makeDefinition<
     // This unsafe type casting is necessary because function type parameters are contravariant.
     run: run as FnDefinition["run"],
     isAssert: false,
+    deprecated: params?.deprecated,
   };
 }
 
@@ -52,7 +55,6 @@ export function tryCallFnDefinition(
   args: Value[],
   context: ReducerContext
 ): Value | undefined {
-  const _overlap = overlap(fn.inputs, [args.length]);
   if (!hasOverlap(fn.inputs, [args.length])) {
     return; // args length mismatch
   }

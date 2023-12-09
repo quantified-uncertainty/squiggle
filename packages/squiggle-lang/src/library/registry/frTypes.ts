@@ -496,7 +496,8 @@ export function frDict<T extends object>(
 // Optionals are implemented for the sake of frDict, which check for them explicitly.
 // Don't try to use them in other contexts.
 export const frOptional = <T>(
-  itemType: FRType<T>
+  itemType: FRType<T>,
+  paramName?: string
 ): FRType<T | null> & { isOptional: boolean } => {
   return {
     unpack: (v: Value) => {
@@ -509,7 +510,7 @@ export const frOptional = <T>(
       }
       return itemType.pack(v);
     },
-    getName: () => itemType.getName(),
+    getName: () => (paramName ? `${paramName}?: ` : "") + itemType.getName(),
     isOptional: true,
   };
 };

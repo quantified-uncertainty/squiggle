@@ -19,7 +19,7 @@ import {
   parseDistFromDistOrNumber,
 } from "../library/registry/helpers.js";
 import { Lambda } from "../reducer/lambda.js";
-import { LabeledDistribution, Scale, VDomain } from "../value/index.js";
+import { LabeledDistribution, Plot, Scale, VDomain } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Plot",
@@ -96,6 +96,80 @@ const _assertYScaleNotDateScale = (yScale: Scale | null) => {
   }
 };
 
+const numericFnDef = () => {
+  const toPlot = (
+    fn: Lambda,
+    xScale: Scale | null,
+    yScale: Scale | null,
+    title: string | null,
+    points: number | null
+  ): Plot => {
+    _assertYScaleNotDateScale(yScale);
+    const domain = extractDomainFromOneArgFunction(fn);
+    return {
+      type: "numericFn",
+      fn,
+      xScale: createScale(xScale, domain),
+      yScale: yScale ?? defaultScale,
+      points: points ?? undefined,
+      title: title ?? undefined,
+    };
+  };
+
+  const fnType = frLambdaTyped([frNumber], frNumber);
+
+  return maker.make({
+    name: "numericFn",
+    output: "Plot",
+    examples: [
+      `Plot.numericFn({|x|x*x}, {xScale: Scale.linear({ min: 3, max: 5 }), yScale: Scale.log({ tickFormat: ".2s" }) })`,
+    ],
+    definitions: [
+      makeDefinition(
+        [
+          fnType,
+          frOptional(
+            frDict(
+              ["xScale", frOptional(frScale)],
+              ["yScale", frOptional(frScale)],
+              ["title", frOptional(frString)],
+              ["points", frOptional(frNumber)]
+            ),
+            "params"
+          ),
+        ],
+        frPlot,
+        ([lambda, params]) => {
+          const { xScale, yScale, title, points } = params ?? {};
+          return toPlot(
+            lambda,
+            xScale || null,
+            yScale || null,
+            title || null,
+            points || null
+          );
+        }
+      ),
+      //Maybe we should deprecate this eventually? I think I like the others more, especially for boxed functions and composition.
+      makeDefinition(
+        [
+          frDict(
+            ["fn", fnType],
+            ["xScale", frOptional(frScale)],
+            ["yScale", frOptional(frScale)],
+            ["title", frOptional(frString)],
+            ["points", frOptional(frNumber)]
+          ),
+        ],
+        frPlot,
+        ([{ fn, xScale, yScale, title, points }]) =>
+          toPlot(fn, xScale, yScale, title, points),
+        { deprecated: "0.8.7" }
+      ),
+    ],
+  });
+};
+
 export const library = [
   maker.make({
     name: "dists",
@@ -147,12 +221,37 @@ export const library = [
     name: "dist",
     output: "Plot",
     examples: [
-      `Plot.dist({
-  dist: normal(0, 1),
+      `Plot.dist(normal(0,1), {
   xScale: Scale.symlog()
 })`,
     ],
     definitions: [
+      makeDefinition(
+        [
+          frDist,
+          frOptional(
+            frDict(
+              ["xScale", frOptional(frScale)],
+              ["yScale", frOptional(frScale)],
+              ["title", frOptional(frString)],
+              ["showSummary", frOptional(frBool)]
+            ),
+            "params"
+          ),
+        ],
+        frPlot,
+        ([dist, params]) => {
+          const { xScale, yScale, title, showSummary } = params ?? {};
+          return {
+            type: "distributions",
+            distributions: [{ distribution: dist }],
+            xScale: xScale ?? defaultScale,
+            yScale: yScale ?? defaultScale,
+            title: title ?? undefined,
+            showSummary: showSummary ?? true,
+          };
+        }
+      ),
       makeDefinition(
         [
           frDict(
@@ -174,50 +273,49 @@ export const library = [
             title: title ?? undefined,
             showSummary: showSummary ?? true,
           };
-        }
+        },
+        { deprecated: "0.8.7" }
       ),
     ],
   }),
-  maker.make({
-    name: "numericFn",
-    output: "Plot",
-    examples: [
-      `Plot.numericFn({ fn: {|x|x*x}, xScale: Scale.linear({ min: 3, max: 5 }), yScale: Scale.log({ tickFormat: ".2s" }) })`,
-    ],
-    definitions: [
-      makeDefinition(
-        [
-          frDict(
-            ["fn", frLambdaTyped([frNumber], frNumber)],
-            ["xScale", frOptional(frScale)],
-            ["yScale", frOptional(frScale)],
-            ["title", frOptional(frString)],
-            ["points", frOptional(frNumber)]
-          ),
-        ],
-        frPlot,
-        ([{ fn, xScale, yScale, title, points }]) => {
-          _assertYScaleNotDateScale(yScale);
-          const domain = extractDomainFromOneArgFunction(fn);
-          return {
-            type: "numericFn",
-            fn,
-            xScale: createScale(xScale, domain),
-            yScale: yScale ?? defaultScale,
-            points: points ?? undefined,
-            title: title ?? undefined,
-          };
-        }
-      ),
-    ],
-  }),
+  numericFnDef(),
   maker.make({
     name: "distFn",
     output: "Plot",
     examples: [
-      `Plot.distFn({ fn: {|x|uniform(x, x+1)}, xScale: Scale.linear({ min: 3, max: 5}), yScale: Scale.log({ tickFormat: ".2s" }) })`,
+      `Plot.distFn({|x| uniform(x, x+1)}, {xScale: Scale.linear({ min: 3, max: 5}), yScale: Scale.log({ tickFormat: ".2s" })})`,
     ],
     definitions: [
+      makeDefinition(
+        [
+          frLambdaTyped([frNumber], frDist),
+          frOptional(
+            frDict(
+              ["xScale", frOptional(frScale)],
+              ["yScale", frOptional(frScale)],
+              ["distXScale", frOptional(frScale)],
+              ["title", frOptional(frString)],
+              ["points", frOptional(frNumber)]
+            ),
+            "params"
+          ),
+        ],
+        frPlot,
+        ([fn, params]) => {
+          const domain = extractDomainFromOneArgFunction(fn);
+          const { xScale, yScale, distXScale, title, points } = params ?? {};
+          yScale && _assertYScaleNotDateScale(yScale);
+          return {
+            fn: fn,
+            type: "distFn",
+            xScale: createScale(xScale || null, domain),
+            yScale: yScale ?? defaultScale,
+            distXScale: distXScale ?? yScale ?? defaultScale,
+            title: title ?? undefined,
+            points: points ?? undefined,
+          };
+        }
+      ),
       makeDefinition(
         [
           frDict(
@@ -242,7 +340,8 @@ export const library = [
             title: title ?? undefined,
             points: points ?? undefined,
           };
-        }
+        },
+        { deprecated: "0.8.7" }
       ),
     ],
   }),
