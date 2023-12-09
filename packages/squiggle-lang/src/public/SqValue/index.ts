@@ -1,9 +1,11 @@
 import { SDate } from "../../utility/SDate.js";
 import { result } from "../../utility/result.js";
+import { Boxed } from "../../value/boxed.js";
 import { Value, vDate, vLambda, vNumber, vString } from "../../value/index.js";
 import { SqError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqArray } from "./SqArray.js";
+import { SqBoxed } from "./SqBoxed.js";
 import { SqCalculator } from "./SqCalculator.js";
 import { SqDict } from "./SqDict.js";
 import { SqDistribution, wrapDistribution } from "./SqDistribution/index.js";
@@ -314,24 +316,19 @@ export class SqBoxedValue extends SqAbstractValue<"Boxed", unknown> {
   tag = "Boxed" as const;
 
   get value() {
-    return wrapValue(this._value.value.value, this.context);
+    return new SqBoxed(
+      this._value.value.value,
+      this._value.value.args,
+      this.context
+    );
   }
 
   override title() {
-    return this._value.value.args.value.name;
-  }
-
-  description() {
-    return this._value.value.args.value.description;
-  }
-
-  showAs(): SqValue | undefined {
-    const showAs = this._value.value.args.value.showAs;
-    return showAs ? wrapValue(showAs, this.context) : undefined;
+    return this.value.name();
   }
 
   asJS(): unknown {
-    return this.value.asJS();
+    return this.value;
   }
 }
 

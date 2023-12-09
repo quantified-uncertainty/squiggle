@@ -42,6 +42,18 @@ export class BoxedArgs {
       ...other,
     });
   }
+
+  name() {
+    return this.value.name;
+  }
+
+  description() {
+    return this.value.description;
+  }
+
+  showAs() {
+    return this.value.showAs;
+  }
 }
 
 export class Boxed {

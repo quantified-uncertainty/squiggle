@@ -4,12 +4,12 @@ import { widgetRegistry } from "./registry.js";
 
 widgetRegistry.register("Boxed", {
   Chart: (value, settings) => {
-    const showAs = value.showAs();
+    const showAs = value.value.showAs();
     if (showAs && valueHasContext(showAs)) {
       return <SquiggleValueChart value={showAs} settings={settings} />;
     }
 
-    const unboxedValue = value.value;
+    const unboxedValue = value.value.value;
     if (valueHasContext(unboxedValue)) {
       return (
         <div>
