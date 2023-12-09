@@ -442,20 +442,7 @@ export function makeNumericComparisons<T>(
   ];
 }
 
-export const overlap = (inputs: FRType<any>[], lengths: number[]): number[] => {
-  const min = inputs.filter((i) => !isOptional(i)).length;
-  const max = inputs.length;
-  return intersection(upTo(min, max), lengths);
-};
-
-export const chooseLambdaParamLen = (
-  inputs: FRType<any>[],
-  lambda: Lambda
-): number | undefined => {
-  const _overlap = overlap(inputs, lambda.parameterCounts());
-  return last(_overlap);
-};
-
+// In cases where we have a function that takes a lambda as an argument, and it's possible we could use n to m arguments, we want to choose the largest number of arguments that matches the lambda.
 export const chooseLambdaParamLength = (
   inputOptions: number[],
   lambda: Lambda
@@ -464,21 +451,13 @@ export const chooseLambdaParamLength = (
   return last(_overlap);
 };
 
-export const hasOverlap = (
+// A helper to check if a list of frTypes would match inputs of a given length.
+// Non-trivial because of optional arguments.
+export const frTypesMatchesLengths = (
   inputs: FRType<any>[],
   lengths: number[]
 ): boolean => {
   const min = inputs.filter((i) => !isOptional(i)).length;
   const max = inputs.length;
   return intersection(upTo(min, max), lengths).length > 0;
-};
-
-export const sliceParamsForLambda = <T>(
-  frTypes: FRType<any>[],
-  lambda: Lambda,
-  inputs: T[]
-): T[] => {
-  const foo = overlap(frTypes, lambda.parameterCounts());
-  const choose = last(foo);
-  return choose ? inputs.slice(0, choose) : inputs.slice(0);
 };

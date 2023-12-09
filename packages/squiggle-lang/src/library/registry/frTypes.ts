@@ -32,7 +32,7 @@ import {
   vPlot,
   vDomain,
 } from "../../value/index.js";
-import { over } from "lodash";
+import { frTypesMatchesLengths } from "./helpers.js";
 
 /*
 FRType is a function that unpacks a Value.
@@ -128,31 +128,6 @@ export const frLambda: FRType<Lambda> = {
   getName: () => "function",
 };
 
-export const overlap = (inputs: FRType<any>[], lengths: number[]): number[] => {
-  const min = inputs.filter((i) => !isOptional(i)).length;
-  const max = inputs.length;
-  return intersection(upTo(min, max), lengths);
-};
-
-export const hasOverlap = (
-  inputs: FRType<any>[],
-  lengths: number[]
-): boolean => {
-  const min = inputs.filter((i) => !isOptional(i)).length;
-  const max = inputs.length;
-  return intersection(upTo(min, max), lengths).length > 0;
-};
-
-export const sliceParamsForLambda = <T>(
-  frTypes: FRType<any>[],
-  lambda: Lambda,
-  inputs: T[]
-): T[] => {
-  const foo = overlap(frTypes, lambda.parameterCounts());
-  const choose = foo[foo.length - 1];
-  return inputs.slice(0, choose);
-};
-
 export const frLambdaTyped = (
   inputs: FRType<any>[],
   output: FRType<any>
@@ -160,7 +135,7 @@ export const frLambdaTyped = (
   return {
     unpack: (v: Value) => {
       return v.type === "Lambda" &&
-        hasOverlap(inputs, v.value.parameterCounts())
+        frTypesMatchesLengths(inputs, v.value.parameterCounts())
         ? v.value
         : undefined;
     },
