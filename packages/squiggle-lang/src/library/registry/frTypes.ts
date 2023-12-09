@@ -1,10 +1,8 @@
-import intersection from "lodash/intersection.js";
 import { BaseDist } from "../../dist/BaseDist.js";
 import { PointSetDist } from "../../dist/PointSetDist.js";
 import { SampleSetDist } from "../../dist/SampleSetDist/index.js";
 import { SymbolicDist } from "../../dist/SymbolicDist.js";
 import { Lambda } from "../../reducer/lambda.js";
-import { upTo } from "../../utility/E_A_Floats.js";
 import { SDate } from "../../utility/SDate.js";
 import { SDuration } from "../../utility/SDuration.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";

@@ -1,7 +1,8 @@
+import { isObject } from "lodash";
 import { REAmbiguous } from "../../errors/messages.js";
 import { ReducerContext } from "../../reducer/context.js";
 import { Value } from "../../value/index.js";
-import { FRType, frAny } from "./frTypes.js";
+import { FRType, frAny, isOptional } from "./frTypes.js";
 import { frTypesMatchesLengths } from "./helpers.js";
 
 // Type safety of `FnDefinition is guaranteed by `makeDefinition` signature below and by `FRType` unpack logic.
@@ -11,6 +12,8 @@ export type FnDefinition<OutputType = any> = {
   inputs: FRType<any>[];
   run: (args: any[], context: ReducerContext) => OutputType;
   output: FRType<OutputType>;
+  minInputs: number;
+  maxInputs: number;
   isAssert: boolean;
   deprecated?: string;
 };
@@ -33,6 +36,8 @@ export function makeDefinition<
     run: run as FnDefinition["run"],
     isAssert: false,
     deprecated: params?.deprecated,
+    minInputs: inputs.filter((t) => !isOptional(t)).length,
+    maxInputs: inputs.length,
   };
 }
 
@@ -49,14 +54,17 @@ export function makeAssertDefinition<const T extends any[]>(
       throw new REAmbiguous(errorMsg);
     },
     isAssert: true,
+    minInputs: inputs.filter((t) => !isOptional(t)).length,
+    maxInputs: inputs.length,
   };
 }
+
 export function tryCallFnDefinition(
   fn: FnDefinition,
   args: Value[],
   context: ReducerContext
 ): Value | undefined {
-  if (!frTypesMatchesLengths(fn.inputs, [args.length])) {
+  if (args.length < fn.minInputs || args.length > fn.maxInputs) {
     return; // args length mismatch
   }
   const unpackedArgs: any = []; // any, but that's ok, type safety is guaranteed by FnDefinition type
