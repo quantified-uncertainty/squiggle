@@ -16,6 +16,7 @@ import { GlobalSearchQuery } from "@/__generated__/GlobalSearchQuery.graphql";
 import { SearchResult$key } from "@/__generated__/SearchResult.graphql";
 import { SearchResult } from "./SearchResult";
 import { SearchResultEdge$key } from "@/__generated__/SearchResultEdge.graphql";
+import { useGlobalShortcut } from "@/hooks/useGlobalShortcut";
 
 export const Query = graphql`
   query GlobalSearchQuery($text: String!) {
@@ -98,25 +99,15 @@ export const GlobalSearch: FC = () => {
   // https://github.com/JedWatson/react-select/discussions/4669#discussioncomment-1994888
   const ref = useRef<SelectInstance<SearchOption> | null>(null);
 
-  const handleKeyPress = useCallback((event: KeyboardEvent) => {
-    if (event.key === "Escape") {
-      // I assume this is fast because it will be called on each "Escape" press, even when the search is not focused.
-      ref.current?.blur();
-    }
-    if (event.metaKey && event.key === "k") {
-      event.preventDefault();
-      event.stopPropagation();
+  useGlobalShortcut(
+    {
+      metaKey: true,
+      key: "k",
+    },
+    () => {
       ref.current?.focus();
     }
-  }, []);
-
-  useEffect(() => {
-    document.addEventListener("keydown", handleKeyPress);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyPress);
-    };
-  }, [handleKeyPress]);
+  );
 
   return (
     <AsyncSelect<SearchOption>
@@ -129,7 +120,6 @@ export const GlobalSearch: FC = () => {
       }}
       isOptionDisabled={(option) => option.type === "error"}
       closeMenuOnSelect
-      blurInputOnSelect
       openMenuOnClick={false}
       placeholder="Search..."
       getOptionValue={(option) =>
@@ -138,6 +128,9 @@ export const GlobalSearch: FC = () => {
       getOptionLabel={(option) =>
         option.type === "error" ? "error" : option.id
       }
+      onKeyDown={(event) => {
+        event.key === "Escape" && ref.current?.blur();
+      }}
       onChange={(option) => {
         if (option?.type === "object") {
           router.push(option.link);
