@@ -5,7 +5,6 @@ import { ContinuousShape } from "../../../PointSet/Continuous.js";
 import { DiscreteShape } from "../../../PointSet/Discrete.js";
 import { MixedShape } from "../../../PointSet/Mixed.js";
 import { AnyPointSet } from "../../../PointSet/PointSet.js";
-
 import { SqPointSetDistribution } from "./index.js";
 
 enum Tag {

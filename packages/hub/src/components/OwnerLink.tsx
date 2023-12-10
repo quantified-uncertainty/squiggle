@@ -1,10 +1,11 @@
 import { FC } from "react";
-
-import { OwnerLinkFragment$key } from "@/__generated__/OwnerLinkFragment.graphql";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
+
 import { GroupLink } from "./GroupLink";
 import { UsernameLink } from "./UsernameLink";
+
+import { OwnerLinkFragment$key } from "@/__generated__/OwnerLinkFragment.graphql";
 
 export const OwnerLinkFragment = graphql`
   fragment OwnerLinkFragment on Owner {

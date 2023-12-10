@@ -1,7 +1,7 @@
-import { ContinuousShape } from "../../PointSet/Continuous.js";
 import * as Operation from "../../operation.js";
 import { AlgebraicOperation } from "../../operation.js";
 import { OperationError } from "../../operationError.js";
+import { ContinuousShape } from "../../PointSet/Continuous.js";
 import * as Result from "../../utility/result.js";
 import { result } from "../../utility/result.js";
 import { BaseDist } from "../BaseDist.js";
@@ -10,8 +10,8 @@ import {
   distributionVerticalShiftIsInvalid,
   operationDistError,
 } from "../DistError.js";
-import * as PointSetDist from "../PointSetDist.js";
 import { Env } from "../env.js";
+import * as PointSetDist from "../PointSetDist.js";
 
 //TODO: Add faster pointwiseCombine fn
 export function pointwiseCombination({

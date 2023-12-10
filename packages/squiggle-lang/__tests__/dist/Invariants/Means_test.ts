@@ -10,21 +10,21 @@ Note: epsilon of 1e3 means the invariants are, in general, not being satisfied.
 
 import { BaseDist } from "../../../src/dist/BaseDist.js";
 import {
+  BinaryOperation,
+  binaryOperations,
+} from "../../../src/dist/distOperations/index.js";
+import { Env } from "../../../src/dist/env.js";
+import {
   env,
   mkBeta,
-  mkPointMass,
   mkExponential,
   mkLognormal,
   mkNormal,
+  mkPointMass,
   mkTriangular,
   mkUniform,
   unpackResult,
 } from "../../helpers/distHelpers.js";
-import {
-  binaryOperations,
-  BinaryOperation,
-} from "../../../src/dist/distOperations/index.js";
-import { Env } from "../../../src/dist/env.js";
 import { expectErrorToBeBounded } from "../../helpers/helpers.js";
 
 const epsilon = 5e1;

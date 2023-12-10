@@ -1,7 +1,14 @@
 {
-  "generalConfiguration.sortOnBeforeSave": true,
-  "importStringConfiguration.maximumNumberOfImportExpressionsPerLine.type": "newLineEachExpressionAfterCountLimitExceptIfOnlyOne",
-  "importStringConfiguration.maximumNumberOfImportExpressionsPerLine.count": 80,
-  "importStringConfiguration.tabSize": 2,
-  "importStringConfiguration.quoteMark": "double"
+  "autoFormat": "onSave",
+  "quoteMark": "double",
+  "wrappingStyle": "prettier",
+  "excludeGlob": ["**/__generated__/**"],
+  "groupRules": [
+    { "flags": "scripts" },
+    {},
+    "^@quri",
+    "^@/(?!__generated__)",
+    "^\\.",
+    "^\\@/__generated__"
+  ]
 }

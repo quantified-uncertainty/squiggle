@@ -2,11 +2,9 @@ import { FC } from "react";
 import { usePaginationFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { UserModelList$key } from "@/__generated__/UserModelList.graphql";
 import { ModelList } from "@/models/components/ModelList";
-import Link from "next/link";
-import { StyledLink } from "@/components/ui/StyledLink";
-import { newModelRoute } from "@/routes";
+
+import { UserModelList$key } from "@/__generated__/UserModelList.graphql";
 
 const Fragment = graphql`
   fragment UserModelList on User

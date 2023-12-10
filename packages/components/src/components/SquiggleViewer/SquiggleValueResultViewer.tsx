@@ -1,6 +1,6 @@
 import { memo } from "react";
 
-import { SqError, SqValue, result } from "@quri/squiggle-lang";
+import { result, SqError, SqValue } from "@quri/squiggle-lang";
 
 import { valueHasContext } from "../../lib/utility.js";
 import { PlaygroundSettings } from "../PlaygroundSettings.js";

@@ -1,8 +1,10 @@
+import { loadPageQuery } from "@/relay/loadPageQuery";
+
+import { ModelExportPage } from "./ModelExportPage";
+
 import QueryNode, {
   ModelExportPageQuery,
 } from "@/__generated__/ModelExportPageQuery.graphql";
-import { loadPageQuery } from "@/relay/loadPageQuery";
-import { ModelExportPage } from "./ModelExportPage";
 
 type Props = {
   params: { owner: string; slug: string; variableName: string };

@@ -2,6 +2,7 @@ import crypto from "crypto";
 
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
+
 import { Group } from "../types/Group";
 
 builder.mutationField("createReusableGroupInviteToken", (t) =>

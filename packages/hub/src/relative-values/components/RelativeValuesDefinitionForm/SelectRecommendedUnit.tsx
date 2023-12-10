@@ -1,6 +1,8 @@
-import { FieldPathByValue, useFormContext, useWatch } from "react-hook-form";
-import { FormShape } from "./FormShape";
+import { FieldPathByValue, useWatch } from "react-hook-form";
+
 import { SelectStringFormField } from "@quri/ui";
+
+import { FormShape } from "./FormShape";
 
 export function SelectRecommendedUnit<
   TName extends FieldPathByValue<FormShape, string | null> = FieldPathByValue<

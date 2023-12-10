@@ -1,9 +1,9 @@
 import {
   distributions,
-  generateInt,
   generateFloatRange,
+  generateInt,
 } from "./generators.js";
-import { test, expectEqual } from "./lib.js";
+import { expectEqual, test } from "./lib.js";
 
 // This script is pretty old and it's unclear how useful it is.
 // It should probably be converted to the jest test.

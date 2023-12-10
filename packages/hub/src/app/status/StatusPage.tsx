@@ -1,11 +1,13 @@
 "use client";
 
-import { StatusPageQuery } from "@/__generated__/StatusPageQuery.graphql";
+import { FC } from "react";
+import { graphql } from "relay-runtime";
+
 import { H1 } from "@/components/ui/Headers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
-import { FC } from "react";
-import { graphql } from "relay-runtime";
+
+import { StatusPageQuery } from "@/__generated__/StatusPageQuery.graphql";
 
 const Query = graphql`
   query StatusPageQuery {

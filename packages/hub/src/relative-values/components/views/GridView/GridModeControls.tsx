@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { FC } from "react";
+
 import { FullGridIcon } from "../../ui/icons/FullGridIcon";
 import { HalfGridIcon } from "../../ui/icons/HalfGridIcon";
 import { IconProps } from "../../ui/icons/Icon";

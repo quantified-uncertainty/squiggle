@@ -1,8 +1,8 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
-import { startClient, stopClient } from "./client";
 
+import { startClient, stopClient } from "./client";
 import { registerSemanticHighlight } from "./highlight";
 import { registerPreviewCommand } from "./preview";
 

@@ -4,8 +4,9 @@ import { graphql } from "react-relay";
 
 import { DropdownMenuAsyncActionItem, RefreshIcon } from "@quri/ui";
 
-import { BuildRelativeValuesCacheActionMutation } from "@/__generated__/BuildRelativeValuesCacheActionMutation.graphql";
 import { useAsyncMutation } from "@/hooks/useAsyncMutation";
+
+import { BuildRelativeValuesCacheActionMutation } from "@/__generated__/BuildRelativeValuesCacheActionMutation.graphql";
 
 export const Mutation = graphql`
   mutation BuildRelativeValuesCacheActionMutation(

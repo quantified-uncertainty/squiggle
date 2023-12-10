@@ -1,19 +1,17 @@
 import { isBindingStatement } from "../../ast/utils.js";
-import { Env, defaultEnv } from "../../dist/env.js";
+import { defaultEnv, Env } from "../../dist/env.js";
 import * as Library from "../../library/index.js";
 import { createContext } from "../../reducer/context.js";
 import { Bindings } from "../../reducer/stack.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import * as Result from "../../utility/result.js";
 import { Value, vDict } from "../../value/index.js";
-
 import { SqError, SqOtherError } from "../SqError.js";
-import { SqDict } from "../SqValue/SqDict.js";
+import { SqLinker } from "../SqLinker.js";
 import { SqValue, wrapValue } from "../SqValue/index.js";
+import { SqDict } from "../SqValue/SqDict.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqValuePath } from "../SqValuePath.js";
-
-import { SqLinker } from "../SqLinker.js";
 import { SqOutputResult } from "../types.js";
 import { Import, ProjectItem, RunOutput } from "./ProjectItem.js";
 

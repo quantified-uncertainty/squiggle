@@ -5,12 +5,13 @@ import { useRouter } from "next/navigation";
 import { FC } from "react";
 import { graphql } from "relay-runtime";
 
-import { NewDefinitionMutation } from "@/__generated__/NewDefinitionMutation.graphql";
 import { H1 } from "@/components/ui/Headers";
 import { useAsyncMutation } from "@/hooks/useAsyncMutation";
 import { RelativeValuesDefinitionForm } from "@/relative-values/components/RelativeValuesDefinitionForm";
 import { FormShape } from "@/relative-values/components/RelativeValuesDefinitionForm/FormShape";
 import { relativeValuesRoute } from "@/routes";
+
+import { NewDefinitionMutation } from "@/__generated__/NewDefinitionMutation.graphql";
 
 const Mutation = graphql`
   mutation NewDefinitionMutation(

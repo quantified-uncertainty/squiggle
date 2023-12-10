@@ -8,6 +8,6 @@
     "esbenp.prettier-vscode",
     "Prisma.prisma",
     "tamuratak.vscode-lezer",
-    "mike-co.import-sorter"
+    "dozerg.tsimportsorter"
   ]
 }

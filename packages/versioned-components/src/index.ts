@@ -6,9 +6,9 @@ export { VersionedSquiggleChart } from "./VersionedSquiggleChart.js";
 export {
   checkSquiggleVersion,
   defaultSquiggleVersion,
+  type SquiggleVersion,
   squiggleVersions,
   versionSupportsDropdownMenu,
-  type SquiggleVersion,
 } from "./versions.js";
 
 export { useAdjustSquiggleVersion } from "./hooks.js";

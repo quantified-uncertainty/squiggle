@@ -1,9 +1,6 @@
-import { builder } from "./builder";
-
 import "./errors/BaseError";
 import "./errors/NotFoundError";
 import "./errors/ValidationError";
-
 import "./queries/globalStatistics";
 import "./queries/group";
 import "./queries/groups";
@@ -16,7 +13,6 @@ import "./queries/relativeValuesDefinitions";
 import "./queries/runSquiggle";
 import "./queries/userByUsername";
 import "./queries/users";
-
 import "./mutations/acceptReusableGroupInviteToken";
 import "./mutations/adminUpdateModelVersion";
 import "./mutations/buildRelativeValuesCache";
@@ -41,5 +37,7 @@ import "./mutations/updateModelPrivacy";
 import "./mutations/updateModelSlug";
 import "./mutations/updateRelativeValuesDefinition";
 import "./mutations/updateSquiggleSnippetModel";
+
+import { builder } from "./builder";
 
 export const schema = builder.toSchema();

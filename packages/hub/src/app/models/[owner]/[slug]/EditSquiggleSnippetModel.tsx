@@ -14,21 +14,15 @@ import {
   TextTooltip,
 } from "@quri/ui";
 import {
-  SquigglePlaygroundVersionPicker,
-  SquiggleVersionShower,
-  VersionedSquigglePlayground,
   checkSquiggleVersion,
-  useAdjustSquiggleVersion,
-  versionSupportsDropdownMenu,
+  SquigglePlaygroundVersionPicker,
   type SquiggleVersion,
+  SquiggleVersionShower,
+  useAdjustSquiggleVersion,
+  VersionedSquigglePlayground,
+  versionSupportsDropdownMenu,
 } from "@quri/versioned-squiggle-components";
 
-import { EditSquiggleSnippetModel$key } from "@/__generated__/EditSquiggleSnippetModel.graphql";
-import {
-  EditSquiggleSnippetModelMutation,
-  RelativeValuesExportInput,
-  SquiggleModelExportInput,
-} from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
 import { EditModelExports } from "@/components/exports/EditModelExports";
 import { FormModal } from "@/components/ui/FormModal";
 import { useAvailableHeight } from "@/hooks/useAvailableHeight";
@@ -38,12 +32,20 @@ import {
   serializeSourceId,
   squiggleHubLinker,
 } from "@/squiggle/components/linker";
+
 import {
   Draft,
-  SquiggleSnippetDraftDialog,
   draftUtils,
+  SquiggleSnippetDraftDialog,
   useDraftLocator,
 } from "./SquiggleSnippetDraftDialog";
+
+import { EditSquiggleSnippetModel$key } from "@/__generated__/EditSquiggleSnippetModel.graphql";
+import {
+  EditSquiggleSnippetModelMutation,
+  RelativeValuesExportInput,
+  SquiggleModelExportInput,
+} from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
 
 export type SquiggleSnippetFormShape = {
   code: string;

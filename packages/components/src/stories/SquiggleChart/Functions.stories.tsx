@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { SquiggleChart } from "../../components/SquiggleChart.js";
 import { sq } from "@quri/squiggle-lang";
+
+import { SquiggleChart } from "../../components/SquiggleChart.js";
 
 /**
  * There are two types of functions that we can render:

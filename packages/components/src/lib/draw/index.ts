@@ -1,7 +1,8 @@
 import * as d3 from "d3";
+
+import { defaultTickFormatSpecifier } from "../d3/patchedScales.js";
 import { CartesianFrame } from "./CartesianFrame.js";
 import { Padding, Point } from "./types.js";
-import { defaultTickFormatSpecifier } from "../d3/patchedScales.js";
 
 const axisColor = "rgba(114, 125, 147, 0.1)";
 export const labelColor = "rgb(114, 125, 147)";

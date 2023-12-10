@@ -1,16 +1,16 @@
 "use client";
-import { FC, Suspense, lazy } from "react";
-
-import { SquiggleVersion } from "./versions.js";
-import { LazyVersionedComponents, VersionedComponentProps } from "./types.js";
-
-type SquiggleChartVersion = Exclude<SquiggleVersion, "0.8.5" | "0.8.6">;
+import { FC, lazy, Suspense } from "react";
 
 /*
  * Please don't change the formatting of these imports and the following `componentByVersion` declaration unless you have to.
  * It's edited with babel transformation in `publish-all.ts` script.
  */
 import { type SquiggleChartProps as SquiggleChartProps_dev } from "@quri/squiggle-components";
+
+import { LazyVersionedComponents, VersionedComponentProps } from "./types.js";
+import { SquiggleVersion } from "./versions.js";
+
+type SquiggleChartVersion = Exclude<SquiggleVersion, "0.8.5" | "0.8.6">;
 
 const componentByVersion = {
   dev: lazy(async () => ({

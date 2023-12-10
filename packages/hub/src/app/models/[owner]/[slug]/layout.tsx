@@ -1,12 +1,14 @@
 import { Metadata } from "next";
 import { ReactNode, Suspense } from "react";
 
+import { loadPageQuery } from "@/relay/loadPageQuery";
+
+import { FallbackModelLayout } from "./FallbackLayout";
+import { ModelLayout } from "./ModelLayout";
+
 import ModelLayoutQueryNode, {
   ModelLayoutQuery,
 } from "@/__generated__/ModelLayoutQuery.graphql";
-import { loadPageQuery } from "@/relay/loadPageQuery";
-import { FallbackModelLayout } from "./FallbackLayout";
-import { ModelLayout } from "./ModelLayout";
 
 type Props = {
   params: { owner: string; slug: string };

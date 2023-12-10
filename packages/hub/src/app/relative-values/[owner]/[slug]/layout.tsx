@@ -1,8 +1,10 @@
 import { Metadata } from "next";
 import { PropsWithChildren } from "react";
 
-import { DefinitionLayout } from "./DefinitionLayout";
 import { loadPageQuery } from "@/relay/loadPageQuery";
+
+import { DefinitionLayout } from "./DefinitionLayout";
+
 import QueryNode, {
   DefinitionLayoutQuery,
 } from "@/__generated__/DefinitionLayoutQuery.graphql";

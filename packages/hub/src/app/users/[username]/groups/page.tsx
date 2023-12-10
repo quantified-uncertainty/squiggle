@@ -1,10 +1,12 @@
 import { Metadata } from "next";
 
+import { loadPageQuery } from "@/relay/loadPageQuery";
+
+import { UserGroupsPage } from "./UserGroupsPage";
+
 import QueryNode, {
   UserGroupsPageQuery,
 } from "@/__generated__/UserGroupsPageQuery.graphql";
-import { loadPageQuery } from "@/relay/loadPageQuery";
-import { UserGroupsPage } from "./UserGroupsPage";
 
 type Props = {
   params: { username: string };

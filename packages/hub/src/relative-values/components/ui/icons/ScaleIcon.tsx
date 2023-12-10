@@ -1,4 +1,5 @@
 import { FC } from "react";
+
 import { Icon, IconProps } from "./Icon";
 
 export const ScaleIcon: FC<IconProps> = (props) => (

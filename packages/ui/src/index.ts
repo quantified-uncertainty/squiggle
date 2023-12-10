@@ -48,13 +48,13 @@ export {
   AdjustmentsHorizontalIcon,
   AdjustmentsVerticalIcon,
   ArchiveBoxIcon,
-  ResetIcon,
   BackwardIcon,
   BarChartIcon,
   Bars3CenterLeftIcon,
   Bars4Icon,
   BoltIcon,
   BookOpenIcon,
+  CalculatorIcon,
   CheckIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -62,11 +62,14 @@ export {
   CodeBracketIcon,
   CodeBracketSquareIcon,
   Cog8ToothIcon,
+  CommandLineIcon,
   CommentIcon,
+  CurlyBracketsIcon,
   DocumentTextIcon,
   FireIcon,
   GlobeIcon,
   GroupIcon,
+  HashIcon,
   HelpIcon,
   LinkIcon,
   ListBulletIcon,
@@ -74,21 +77,18 @@ export {
   PauseIcon,
   PlayIcon,
   PuzzleIcon,
-  ShareIcon,
   RectangleStackIcon,
+  ResetIcon,
   RightArrowIcon,
   ScaleIcon,
   ScatterPlotIcon,
+  ShareIcon,
+  SquareBracketIcon,
   TableCellsIcon,
   UserCircleIcon,
-  CalculatorIcon,
   UserIcon,
-  WrenchIcon,
   VariableIcon,
-  SquareBracketIcon,
-  CurlyBracketsIcon,
-  HashIcon,
-  CommandLineIcon,
+  WrenchIcon,
 } from "./icons/HeroIcons.js";
 export type { IconProps } from "./icons/Icon.js";
 export { PlusIcon } from "./icons/PlusIcon.js";
@@ -98,7 +98,7 @@ export { TrashIcon } from "./icons/TrashIcon.js";
 export { TriangleIcon } from "./icons/TriangleIcon.js";
 export { XIcon } from "./icons/XIcon.js";
 
-export { WithToasts, useToast } from "./components/WithToasts/index.js";
+export { useToast, WithToasts } from "./components/WithToasts/index.js";
 
 export {
   TailwindContext,

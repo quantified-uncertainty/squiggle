@@ -1,8 +1,8 @@
 import ReactMarkdown from "react-markdown";
 
+import { SHORT_STRING_LENGTH } from "../lib/constants.js";
 import { widgetRegistry } from "./registry.js";
 import { truncateStr } from "./utils.js";
-import { SHORT_STRING_LENGTH } from "../lib/constants.js";
 
 widgetRegistry.register("String", {
   Preview: (value) => (

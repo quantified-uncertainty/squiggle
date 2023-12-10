@@ -1,13 +1,14 @@
 import { forwardRef } from "react";
 
+import { SqValuePath } from "@quri/squiggle-lang";
+
 import { SquiggleViewer } from "../index.js";
 import { SquiggleOutput } from "../lib/hooks/useSquiggle.js";
-import { getResultVariables, getResultValue } from "../lib/utility.js";
+import { getResultValue, getResultVariables } from "../lib/utility.js";
 import { CodeEditorHandle } from "./CodeEditor/index.js";
+import { ErrorBoundary } from "./ErrorBoundary.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
 import { SquiggleViewerHandle } from "./SquiggleViewer/index.js";
-import { ErrorBoundary } from "./ErrorBoundary.js";
-import { SqValuePath } from "@quri/squiggle-lang";
 
 type Props = {
   squiggleOutput: SquiggleOutput | undefined;

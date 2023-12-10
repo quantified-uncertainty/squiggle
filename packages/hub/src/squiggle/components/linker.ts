@@ -3,6 +3,7 @@ import { fetchQuery, graphql } from "relay-runtime";
 import { SqLinker } from "@quri/squiggle-lang";
 
 import { getCurrentEnvironment } from "@/relay/environment";
+
 import { linkerQuery } from "@/__generated__/linkerQuery.graphql";
 
 type ParsedSourceId = {

@@ -2,6 +2,7 @@ import clsx from "clsx";
 import { FC } from "react";
 
 import { Cluster } from "@/relative-values/types";
+
 import { ClusterIcon } from "../common/ClusterIcon";
 import {
   Axis,

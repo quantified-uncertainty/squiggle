@@ -1,8 +1,15 @@
 "use client";
 
+import { ModelRevisionViewQuery } from "@gen/ModelRevisionViewQuery.graphql";
 import { format } from "date-fns";
 import { FC } from "react";
 import { graphql } from "relay-runtime";
+
+import { CommentIcon } from "@quri/ui";
+import {
+  useAdjustSquiggleVersion,
+  VersionedSquigglePlayground,
+} from "@quri/versioned-squiggle-components";
 
 import { StyledLink } from "@/components/ui/StyledLink";
 import { commonDateFormat } from "@/lib/common";
@@ -10,12 +17,6 @@ import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 import { modelRoute } from "@/routes";
-import { ModelRevisionViewQuery } from "@gen/ModelRevisionViewQuery.graphql";
-import {
-  VersionedSquigglePlayground,
-  useAdjustSquiggleVersion,
-} from "@quri/versioned-squiggle-components";
-import { CommentIcon } from "@quri/ui";
 
 const Query = graphql`
   query ModelRevisionViewQuery($input: QueryModelInput!, $revisionId: ID!) {

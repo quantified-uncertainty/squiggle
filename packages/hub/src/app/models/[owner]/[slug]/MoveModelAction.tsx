@@ -2,13 +2,17 @@ import { useRouter } from "next/navigation";
 import { FC } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
+
 import { RightArrowIcon } from "@quri/ui";
-import { MoveModelActionMutation } from "@/__generated__/MoveModelActionMutation.graphql";
+
 import { SelectOwner, SelectOwnerOption } from "@/components/SelectOwner";
 import { MutationModalAction } from "@/components/ui/MutationModalAction";
 import { modelRoute } from "@/routes";
-import { MoveModelAction$key } from "@/__generated__/MoveModelAction.graphql";
+
 import { draftUtils, modelToDraftLocator } from "./SquiggleSnippetDraftDialog";
+
+import { MoveModelAction$key } from "@/__generated__/MoveModelAction.graphql";
+import { MoveModelActionMutation } from "@/__generated__/MoveModelActionMutation.graphql";
 
 const Mutation = graphql`
   mutation MoveModelActionMutation($input: MutationMoveModelInput!) {

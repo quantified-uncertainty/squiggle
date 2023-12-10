@@ -1,7 +1,9 @@
 import { createYoga } from "graphql-yoga";
-import { schema } from "@/graphql/schema";
-import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { NextRequest, NextResponse } from "next/server";
+
+import { schema } from "@/graphql/schema";
+
 import { authOptions } from "../auth/[...nextauth]/authOptions";
 
 const yoga = createYoga({

@@ -2,6 +2,7 @@ import { Model, Prisma } from "@prisma/client";
 import { Session } from "next-auth";
 
 import { prisma } from "@/prisma";
+
 import { NotFoundError } from "../errors/NotFoundError";
 
 export function modelWhereHasAccess(

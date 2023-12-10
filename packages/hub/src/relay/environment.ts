@@ -1,14 +1,14 @@
 // based on https://github.com/relayjs/relay-examples/blob/main/issue-tracker-next-v13/src/relay/environment.ts
 import {
+  CacheConfig,
   Environment,
+  EnvironmentConfig,
+  GraphQLResponse,
   Network,
   RecordSource,
-  Store,
   RequestParameters,
+  Store,
   Variables,
-  GraphQLResponse,
-  CacheConfig,
-  EnvironmentConfig,
 } from "relay-runtime";
 
 import { PatchedQueryResponseCache } from "./PatchedQueryResponseCache";

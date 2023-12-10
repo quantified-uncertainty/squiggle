@@ -2,12 +2,11 @@ import { FC, PropsWithChildren, ReactNode } from "react";
 import { DefaultValues, FieldPath, FieldValues } from "react-hook-form";
 import { GraphQLTaggedNode, VariablesOf } from "relay-runtime";
 
-import { IconProps } from "@quri/ui";
+import { DropdownMenuModalActionItem, IconProps } from "@quri/ui";
 
 import { FormModal } from "@/components/ui/FormModal";
 import { CommonMutationParameters } from "@/hooks/useAsyncMutation";
 import { useMutationForm } from "@/hooks/useMutationForm";
-import { DropdownMenuModalActionItem } from "@quri/ui";
 
 type CommonProps<
   TMutation extends CommonMutationParameters<TTypename>,

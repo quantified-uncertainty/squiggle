@@ -1,16 +1,17 @@
 "use client";
-import { FC } from "react";
-import { FaGithub, FaDiscord, FaRss } from "react-icons/fa";
-import { SiGraphql } from "react-icons/si";
 import Image from "next/image";
-import logoPic from "@/public/logo.png";
 import Link from "next/link";
+import { FC } from "react";
+import { FaDiscord, FaGithub, FaRss } from "react-icons/fa";
+import { SiGraphql } from "react-icons/si";
+
 import {
   DISCORD_URL,
   GITHUB_URL,
   NEWSLETTER_URL,
   QURI_DONATE_URL,
 } from "@/lib/common";
+import logoPic from "@/public/logo.png";
 import {
   aboutRoute,
   graphqlPlaygroundRoute,

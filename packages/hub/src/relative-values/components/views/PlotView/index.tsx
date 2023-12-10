@@ -1,11 +1,10 @@
 import clsx from "clsx";
 import { FC, PropsWithChildren } from "react";
 
-import { ModelEvaluator } from "@/relative-values/values/ModelEvaluator";
 import { ClusterFilter } from "../ClusterFilter";
+import { useRelativeValuesContext } from "../RelativeValuesProvider";
 import { ForcePlot } from "./ForcePlot";
 import { ValueAndUncertaintyPlot } from "./ValueAndUncertaintyPlot";
-import { useRelativeValuesContext } from "../RelativeValuesProvider";
 
 const Section: FC<PropsWithChildren<{ title: string; border?: boolean }>> = ({
   title,

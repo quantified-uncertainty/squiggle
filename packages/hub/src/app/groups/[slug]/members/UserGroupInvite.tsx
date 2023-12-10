@@ -1,9 +1,11 @@
-import { UserGroupInvite$key } from "@/__generated__/UserGroupInvite.graphql";
-import { StyledLink } from "@/components/ui/StyledLink";
-import { userRoute } from "@/routes";
 import { FC } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
+
+import { StyledLink } from "@/components/ui/StyledLink";
+import { userRoute } from "@/routes";
+
+import { UserGroupInvite$key } from "@/__generated__/UserGroupInvite.graphql";
 
 export const UserGroupInvite: FC<{ inviteRef: UserGroupInvite$key }> = ({
   inviteRef,

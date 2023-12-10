@@ -2,6 +2,7 @@ import { FC } from "react";
 
 import { ClusterIcon } from "@/relative-values/components/common/ClusterIcon";
 import { Item } from "@/relative-values/types";
+
 import { useDefinitionClusters } from "./RelativeValuesProvider";
 
 export const Header: FC<{

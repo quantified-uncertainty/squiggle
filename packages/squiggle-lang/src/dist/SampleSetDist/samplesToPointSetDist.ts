@@ -1,14 +1,15 @@
-import { kde } from "./kde.js";
+import sum from "lodash/sum.js";
+
+import * as E_A_Floats from "../../utility/E_A_Floats.js";
 import { XYShape } from "../../XYShape.js";
+import { SampleSetDist } from "./index.js";
+import { kde } from "./kde.js";
+import { logKde } from "./logKde.js";
 import {
-  splitContinuousAndDiscrete,
   continuousAreSameFilter,
   minContinuousSamplesFilter,
+  splitContinuousAndDiscrete,
 } from "./splitContinuousAndDiscrete.js";
-import * as E_A_Floats from "../../utility/E_A_Floats.js";
-import { logKde } from "./logKde.js";
-import { SampleSetDist } from "./index.js";
-import sum from "lodash/sum.js";
 
 const minDiscreteToKeep = (samples: readonly number[]) =>
   Math.max(20, Math.round(samples.length / 50));
