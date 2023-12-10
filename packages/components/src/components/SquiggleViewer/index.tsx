@@ -31,6 +31,7 @@ export type SquiggleViewerProps = {
   /** The output of squiggle's run */
   resultVariables: result<SqDictValue, SqError>;
   resultItem: result<SqValue, SqError> | undefined;
+  resultError: SqError | undefined;
   editor?: CodeEditorHandle;
   rootPathOverride?: SqValuePath;
 } & PartialPlaygroundSettings;
@@ -39,9 +40,10 @@ const SquiggleViewerOuter = forwardRef<
   SquiggleViewerHandle,
   SquiggleViewerProps
 >(function SquiggleViewerOuter(
-  { resultVariables, resultItem, rootPathOverride },
+  { resultVariables, resultItem, resultError, rootPathOverride },
   ref
 ) {
+  console.log("ERROR", resultError);
   const { focused, dispatch, getCalculator } = useViewerContext();
   const unfocus = useUnfocus();
   const focus = useFocus();
@@ -137,6 +139,7 @@ const SquiggleViewerOuter = forwardRef<
   return (
     <div>
       {focusedNavigation}
+      {resultError && <SquiggleErrorAlert error={resultError} />}
       {body()}
     </div>
   );
@@ -147,6 +150,7 @@ const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
     {
       resultVariables,
       resultItem,
+      resultError,
       editor,
       rootPathOverride,
       ...partialPlaygroundSettings
@@ -171,6 +175,7 @@ const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
         <SquiggleViewerOuter
           resultVariables={resultVariables}
           resultItem={resultItem}
+          resultError={resultError}
           rootPathOverride={rootPathOverride}
           ref={ref}
         />

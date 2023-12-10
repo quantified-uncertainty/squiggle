@@ -4,6 +4,7 @@ import {
   SqDictValue,
   result,
   resultMap,
+  SqRuntimeError,
 } from "@quri/squiggle-lang";
 
 import { SquiggleOutput } from "./hooks/useSquiggle.js";
@@ -56,6 +57,16 @@ export function getResultValue({
     return isResult ? { ok: true, value: output.value.result } : undefined;
   } else {
     return output;
+  }
+}
+
+export function getResultError({
+  output,
+}: SquiggleOutput): SqRuntimeError | undefined {
+  if (output.ok) {
+    return output.value.error;
+  } else {
+    return undefined;
   }
 }
 

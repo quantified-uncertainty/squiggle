@@ -13,6 +13,7 @@ import {
 } from "../errors/messages.js";
 import { compileAst } from "../expression/compile.js";
 import { Expression } from "../expression/index.js";
+import { SqError, SqRuntimeError } from "../index.js";
 import { getStdLib } from "../library/index.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import * as Result from "../utility/result.js";
@@ -33,13 +34,13 @@ import { UserDefinedLambdaParameter, UserDefinedLambda } from "./lambda.js";
 export type ReducerFn = (
   expression: Expression,
   context: Context.ReducerContext
-) => [Value, Context.ReducerContext];
+) => [Value, Context.ReducerContext, SqError | undefined];
 
 type SubReducerFn<T extends Expression["type"] = Expression["type"]> = (
   expressionValue: Extract<Expression, { type: T }>["value"],
   context: Context.ReducerContext,
   ast: ASTNode
-) => [Value, Context.ReducerContext];
+) => [Value, Context.ReducerContext, SqError | undefined];
 
 function throwFrom(
   error: ErrorMessage,
@@ -104,7 +105,7 @@ const evaluateBlock: SubReducerFn<"Block"> = (statements, context) => {
       currentContext
     );
   }
-  return [currentValue, context]; // throw away block's context
+  return [currentValue, context, undefined]; // throw away block's context
 };
 
 const evaluateProgram: SubReducerFn<"Program"> = (expressionValue, context) => {
@@ -113,12 +114,20 @@ const evaluateProgram: SubReducerFn<"Program"> = (expressionValue, context) => {
   let currentValue: Value = vVoid();
 
   for (const statement of expressionValue.statements) {
-    [currentValue, currentContext] = context.evaluate(
-      statement,
-      currentContext
-    );
+    try {
+      [currentValue, currentContext] = context.evaluate(
+        statement,
+        currentContext
+      );
+    } catch (e: unknown) {
+      return [
+        currentValue,
+        currentContext,
+        new SqRuntimeError(IRuntimeError.fromException(e)),
+      ];
+    }
   }
-  return [currentValue, currentContext];
+  return [currentValue, currentContext, undefined];
 };
 
 const evaluateArray: SubReducerFn<"Array"> = (expressionValue, context) => {
@@ -127,7 +136,7 @@ const evaluateArray: SubReducerFn<"Array"> = (expressionValue, context) => {
     return value;
   });
   const value = vArray(values);
-  return [value, context];
+  return [value, context, undefined];
 };
 
 const evaluateDict: SubReducerFn<"Dict"> = (expressionValue, context, ast) => {
@@ -148,7 +157,7 @@ const evaluateDict: SubReducerFn<"Dict"> = (expressionValue, context, ast) => {
       })
     )
   );
-  return [value, context];
+  return [value, context, undefined];
 };
 
 const evaluateAssign: SubReducerFn<"Assign"> = (expressionValue, context) => {
@@ -163,6 +172,7 @@ const evaluateAssign: SubReducerFn<"Assign"> = (expressionValue, context) => {
       evaluate: context.evaluate,
       inFunction: context.inFunction,
     },
+    undefined,
   ];
 };
 
@@ -171,11 +181,11 @@ const evaluateResolvedSymbol: SubReducerFn<"ResolvedSymbol"> = (
   context
 ) => {
   const value = context.stack.get(expressionValue.offset);
-  return [value, context];
+  return [value, context, undefined];
 };
 
 const evaluateValue: SubReducerFn<"Value"> = (expressionValue, context) => {
-  return [expressionValue, context];
+  return [expressionValue, context, undefined];
 };
 
 const evaluateTernary: SubReducerFn<"Ternary"> = (
@@ -199,7 +209,7 @@ const evaluateTernary: SubReducerFn<"Ternary"> = (
     predicateResult.value ? expressionValue.ifTrue : expressionValue.ifFalse,
     context
   );
-  return [value, context];
+  return [value, context, undefined];
 };
 
 const evaluateLambda: SubReducerFn<"Lambda"> = (
@@ -246,7 +256,7 @@ const evaluateLambda: SubReducerFn<"Lambda"> = (
       ast.location
     )
   );
-  return [value, context];
+  return [value, context, undefined];
 };
 
 const evaluateCall: SubReducerFn<"Call"> = (expressionValue, context, ast) => {
@@ -262,7 +272,7 @@ const evaluateCall: SubReducerFn<"Call"> = (expressionValue, context, ast) => {
         context,
         ast // we pass the ast of a current expression here, to put it on frameStack and in the resulting value
       );
-      return [result, context];
+      return [result, context, undefined];
     }
     default:
       return throwFrom(new RENotAFunction(lambda.toString()), context, ast);
