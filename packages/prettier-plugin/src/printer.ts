@@ -231,10 +231,12 @@ export function createSquigglePrinter(
               node,
               node.leftArg
             ),
-            " ->",
-            line,
-            printChild(typedPath(node).call(print, "fn"), node, node.fn),
-            args,
+            indent([
+              line,
+              "-> ",
+              printChild(typedPath(node).call(print, "fn"), node, node.fn),
+              args,
+            ]),
           ]);
         }
         case "DotLookup":

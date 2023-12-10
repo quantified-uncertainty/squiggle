@@ -18,4 +18,19 @@ describe("pipes", () => {
       "pipe = 5 -> f1 -> f2 -> f3(1) -> { f: f2 }.f2 -> { foo: f3 }.foo(1)\n"
     );
   });
+  test("multi-line", async () => {
+    expect(
+      await format(
+        "pipe = 5 -> {|foobar|foobar} -> {|foobar|foobar} -> {|foobar|foobar} -> {|foobar|foobar} -> {|foobar|foobar} -> {|foobar|foobar} -> {|foobar|foobar} -> {|foobar|foobar}"
+      )
+    ).toBe(
+      `pipe = 5 -> {|foobar|foobar} -> {|foobar|foobar} -> {|foobar|foobar}
+  -> {|foobar|foobar}
+  -> {|foobar|foobar}
+  -> {|foobar|foobar}
+  -> {|foobar|foobar}
+  -> {|foobar|foobar}
+`
+    );
+  });
 });
