@@ -9,7 +9,6 @@ widgetRegistry.register("Boxed", {
     if (valueHasContext(_value)) {
       return (
         <div>
-          <div>{value.value.name()}</div>
           <SquiggleValuePreview value={_value} />
         </div>
       );
