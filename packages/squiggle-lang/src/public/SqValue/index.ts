@@ -1,6 +1,5 @@
 import { SDate } from "../../utility/SDate.js";
 import { result } from "../../utility/result.js";
-import { Boxed } from "../../value/boxed.js";
 import { Value, vDate, vLambda, vNumber, vString } from "../../value/index.js";
 import { SqError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";

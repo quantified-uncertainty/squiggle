@@ -12,32 +12,11 @@ import {
   frTableChart,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { Lambda } from "../reducer/lambda.js";
-import { Value } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Table",
   requiresNamespace: true,
 });
-
-function makeTableChart(
-  data: readonly Value[],
-  columns?: readonly { fn: Lambda; name?: string | null }[],
-  title?: string
-): any {
-  return {
-    data,
-    title: title || undefined,
-    columns: columns?.map(({ fn, name }) => ({
-      fn,
-      name: name ?? undefined,
-    })),
-  };
-}
-
-function nullToUndefined<T>(a: T | null): T | undefined {
-  return a === null ? undefined : a;
-}
 
 export const library = [
   maker.make({
@@ -45,28 +24,25 @@ export const library = [
     output: "Plot",
     examples: [],
     definitions: [
+      //We're not using the Table title here, because we want to phase it out.
       makeDefinition(
         [
           frNamed("data", frForceBoxed(frArray(frGeneric("A")))),
-          frDict(
-            ["title", frOptional(frString)],
-            [
-              "columns",
-              frArray(
-                frDict(
-                  ["fn", frLambdaTyped([frGeneric("A")], frAny)],
-                  ["name", frOptional(frString)]
-                )
-              ),
-            ]
-          ),
+          frDict([
+            "columns",
+            frArray(
+              frDict(
+                ["fn", frLambdaTyped([frGeneric("A")], frAny)],
+                ["name", frOptional(frString)]
+              )
+            ),
+          ]),
         ],
         frTableChart,
         ([{ value, args }, params]) => {
-          const { title, columns } = params ?? {};
+          const { columns } = params ?? {};
           return {
             data: value,
-            title: title || args.name() || undefined,
             columns: columns.map(({ fn, name }) => ({
               fn,
               name: name ?? undefined,
@@ -92,14 +68,14 @@ export const library = [
         ],
         frTableChart,
         ([{ data, title, columns }]) => {
-          return makeTableChart(
+          return {
             data,
-            columns.map(({ fn, name }) => ({
+            title: title || undefined,
+            columns: columns?.map(({ fn, name }) => ({
               fn,
               name: name ?? undefined,
             })),
-            title || undefined
-          );
+          };
         },
         { deprecated: "0.8.7" }
       ),
