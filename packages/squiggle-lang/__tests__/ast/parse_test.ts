@@ -367,6 +367,7 @@ describe("Peggy parse", () => {
   describe("pipe", () => {
     testParse("1 -> add(2)", "(Program (Pipe 1 :add 2))");
     testParse("1 \n -> add(2)", "(Program (Pipe 1 :add 2))");
+    testParse("1 \n\n -> add(2)", "(Program (Pipe 1 :add 2))");
     testParse("-1 -> add(2)", "(Program (Pipe (UnaryCall - 1) :add 2))");
     testParse(
       "-a[1] -> add(2)",
@@ -473,6 +474,8 @@ describe("Peggy parse", () => {
   describe("Module", () => {
     testParse("x", "(Program :x)");
     testParse("Math.pi", "(Program :Math.pi)");
+    testParse("Math.pi(3)", "(Program (Call :Math.pi 3))");
+    testParse("Math(3)", "(Program (Call :Math 3))");
   });
 
   describe("Exports", () => {

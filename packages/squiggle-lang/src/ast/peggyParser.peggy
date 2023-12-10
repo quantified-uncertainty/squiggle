@@ -252,10 +252,10 @@ variable = dollarIdentifierWithModule / dollarIdentifier
 
 dollarIdentifierWithModule 'identifier'
   = head:$moduleIdentifier
-    tail:('.' _nl @$moduleIdentifier)* '.' _nl
-    final:$dollarIdentifier
+    final:('.' @$dollarIdentifier)?
   {
-    const modifiers = [head, ...tail, final];
+    let modifiers = [head];
+    !!final && modifiers.push(final);
     const modifiedIdentifier = modifiers.join('.');
     return h.nodeIdentifier(modifiedIdentifier, location());
   }

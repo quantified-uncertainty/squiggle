@@ -25,6 +25,9 @@ function makeLookupLambda(): Lambda {
   return new BuiltinLambda(INDEX_LOOKUP_FUNCTION, definitions);
 }
 
+const toModuleConstructor = (name: string) =>
+  name.endsWith(".make") && name.slice(0, -5);
+
 function makeStdLib(): Bindings {
   let res: Bindings = ImmutableMap();
 
@@ -37,6 +40,12 @@ function makeStdLib(): Bindings {
 
   // bind the entire FunctionRegistry
   for (const name of registry.allNames()) {
+    // We convert all fns of Foo.make() to also allow for Foo().
+    const moduleConstructorName = toModuleConstructor(name);
+    if (!!moduleConstructorName) {
+      res = res.set(moduleConstructorName, vLambda(registry.makeLambda(name)));
+    }
+
     res = res.set(name, vLambda(registry.makeLambda(name)));
   }
 
