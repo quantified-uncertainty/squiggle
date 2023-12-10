@@ -366,6 +366,7 @@ describe("Peggy parse", () => {
 
   describe("pipe", () => {
     testParse("1 -> add(2)", "(Program (Pipe 1 :add 2))");
+    testParse("1 \n -> add(2)", "(Program (Pipe 1 :add 2))");
     testParse("-1 -> add(2)", "(Program (Pipe (UnaryCall - 1) :add 2))");
     testParse(
       "-a[1] -> add(2)",
