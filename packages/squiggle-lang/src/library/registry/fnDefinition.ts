@@ -96,7 +96,7 @@ export function tryCallFnDefinition(
 
 export function fnDefinitionToString(fn: FnDefinition): string {
   const inputs = fn.inputs
-    .map((t) => t.getName() + (isOptional(t) ? "?" : ""))
+    .map((t) => t.getName() + (isOptional(t) && t.tag !== "named" ? "?" : ""))
     .join(", ");
   const output = fn.output.getName();
   return `(${inputs})${output ? ` => ${output}` : ""}`;

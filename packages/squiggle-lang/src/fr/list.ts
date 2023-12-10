@@ -14,6 +14,7 @@ import {
   frGeneric,
   frLambdaNand,
   frLambdaTyped,
+  frNamed,
   frNumber,
   frOptional,
   frSampleSetDist,
@@ -156,7 +157,13 @@ export const library = [
         "Call with either 0 or 1 arguments, not both."
       ),
       makeDefinition(
-        [frNumber, frLambdaTyped([frOptional(frNumber)], frGeneric("A"))],
+        [
+          frNumber,
+          frLambdaTyped(
+            [frNamed("index", frOptional(frNumber))],
+            frGeneric("A")
+          ),
+        ],
         frArray(frGeneric("A")),
         ([num, lambda], context) => {
           _assertValidArrayLength(num);
@@ -255,7 +262,10 @@ export const library = [
       makeDefinition(
         [
           frArray(frGeneric("A")),
-          frLambdaTyped([frGeneric("A"), frOptional(frNumber)], frGeneric("B")),
+          frLambdaTyped(
+            [frGeneric("A"), frNamed("index", frOptional(frNumber))],
+            frGeneric("B")
+          ),
         ],
         frArray(frGeneric("B")),
         ([array, lambda], context) => {
@@ -357,11 +367,15 @@ export const library = [
     examples: [`List.slice([1,2,5,10],1,3)`],
     definitions: [
       makeDefinition(
-        [frArray(frGeneric("A")), frNumber, frOptional(frNumber)],
+        [
+          frArray(frGeneric("A")),
+          frNumber,
+          frNamed("index", frOptional(frNumber)),
+        ],
         frArray(frGeneric("A")),
         ([array, start, end]) => {
           _assertInteger(start);
-          if (!!end) {
+          if (end !== null && end !== undefined) {
             _assertInteger(end);
             return array.slice(start, end);
           } else {
@@ -419,7 +433,11 @@ export const library = [
           frArray(frGeneric("B")),
           frGeneric("A"),
           frLambdaTyped(
-            [frGeneric("A"), frGeneric("B"), frOptional(frNumber)],
+            [
+              frGeneric("A"),
+              frGeneric("B"),
+              frNamed("index", frOptional(frNumber)),
+            ],
             frGeneric("A")
           ),
         ],

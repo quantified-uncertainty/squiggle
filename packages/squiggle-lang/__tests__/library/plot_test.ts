@@ -29,11 +29,7 @@ describe("Plot", () => {
   });
 
   describe("Plot.numericFn", () => {
-    testEvalToMatch(
-      `Plot.numericFn({|x| x * 5})`,
-      "Plot for numeric function",
-      true
-    );
+    testEvalToMatch(`Plot.numericFn({|x| x * 5})`, "Plot for numeric function");
     testEvalToMatch(
       `Plot.numericFn({
         fn: {|x| x * 5}
@@ -44,7 +40,7 @@ describe("Plot", () => {
     testEvalToMatch(
       `Plot.numericFn({|x,y| x * 5})`,
       `Error(Error: There are function matches for Plot.numericFn(), but with different arguments:
-  Plot.numericFn((number) => number, params?: {xScale?: scale, yScale?: scale, title?: string, points?: number}) => plot
+  Plot.numericFn(fn: (number) => number, params?: {xScale?: scale, yScale?: scale, title?: string, points?: number}) => plot
 )`
     );
 
@@ -119,7 +115,7 @@ describe("Plot", () => {
     testEvalToMatch(
       `Plot.distFn({|x,y| x to x + y})`,
       `Error(Error: There are function matches for Plot.distFn(), but with different arguments:
-  Plot.distFn((number) => distribution, params?: {xScale?: scale, yScale?: scale, distXScale?: scale, title?: string, points?: number}) => plot
+  Plot.distFn(fn: (number) => distribution, params?: {xScale?: scale, yScale?: scale, distXScale?: scale, title?: string, points?: number}) => plot
 )`
     );
   });

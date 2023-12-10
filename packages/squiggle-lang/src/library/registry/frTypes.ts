@@ -41,10 +41,12 @@ export type FRType<T> = {
   pack: (v: T) => Value; // used in makeSquiggleDefinition
   getName: () => string;
   transparent?: T extends Value ? boolean : undefined;
+  isOptional?: boolean;
+  tag?: string;
 };
 
 export const isOptional = <T>(frType: FRType<T>): boolean => {
-  return "isOptional" in frType;
+  return frType.isOptional === undefined ? false : frType.isOptional;
 };
 
 export const frNumber: FRType<number> = {
@@ -462,10 +464,7 @@ export function frDict<T extends object>(
   };
 }
 
-export const frNamed = <T>(
-  name: string,
-  itemType: FRType<T>
-): FRType<T | null> & { isOptional: boolean } => ({
+export const frNamed = <T>(name: string, itemType: FRType<T>): FRType<T> => ({
   unpack: itemType.unpack,
   pack: (v) => {
     if (v === null) {
@@ -478,11 +477,10 @@ export const frNamed = <T>(
     return `${name}${_isOptional ? "?" : ""}: ${itemType.getName()}`;
   },
   isOptional: isOptional(itemType),
+  tag: "named",
 });
 
-export const frOptional = <T>(
-  itemType: FRType<T>
-): FRType<T | null> & { isOptional: boolean } => {
+export const frOptional = <T>(itemType: FRType<T>): FRType<T | null> => {
   return {
     unpack: itemType.unpack,
     pack: (v) => {

@@ -5,6 +5,7 @@ import {
   frDict,
   frGeneric,
   frLambdaTyped,
+  frNamed,
   frOptional,
   frString,
   frTableChart,
@@ -24,7 +25,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frArray(frGeneric("A")),
+          frNamed("data", frArray(frGeneric("A"))),
           frDict(
             ["title", frOptional(frString)],
             [

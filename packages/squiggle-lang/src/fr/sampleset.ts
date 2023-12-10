@@ -7,6 +7,7 @@ import {
   frArray,
   frDist,
   frLambdaTyped,
+  frNamed,
   frNumber,
   frOptional,
   frOr,
@@ -58,7 +59,7 @@ const fromFn = (lambda: any, context: any, fn: (i: number) => Value[]) =>
   );
 
 const fromFnDefinition: FnDefinition = makeDefinition(
-  [frLambdaTyped([frOptional(frNumber)], frNumber)],
+  [frLambdaTyped([frNamed("index", frOptional(frNumber))], frNumber)],
   frSampleSetDist,
   ([lambda], context) => {
     const usedOptional = chooseLambdaParamLength([0, 1], lambda) === 1;

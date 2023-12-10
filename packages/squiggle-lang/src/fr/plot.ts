@@ -128,7 +128,7 @@ const numericFnDef = () => {
     definitions: [
       makeDefinition(
         [
-          fnType,
+          frNamed("fn", fnType),
           frNamed(
             "params",
             frOptional(
@@ -230,7 +230,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frDist,
+          frNamed("dist", frDist),
           frNamed(
             "params",
             frOptional(
@@ -292,7 +292,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frLambdaTyped([frNumber], frDist),
+          frNamed("fn", frLambdaTyped([frNumber], frDist)),
           frNamed(
             "params",
             frOptional(
