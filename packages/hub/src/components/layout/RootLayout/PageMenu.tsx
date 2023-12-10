@@ -22,6 +22,7 @@ import { aboutRoute, newModelRoute } from "@/routes";
 
 import { DesktopUserControls } from "./DesktopUserControls";
 import { DropdownWithArrow } from "./DropdownWithArrow";
+import { GlobalSearch } from "../../GlobalSearch";
 import { MyGroupsMenu } from "./MyGroupsMenu";
 import { MenuLinkModeProps, PageMenuLink } from "./PageMenuLink";
 import { useForceChooseUsername } from "./useForceChooseUsername";
@@ -78,7 +79,8 @@ const DesktopMenu: FC<MenuProps> = ({ queryRef }) => {
   const menu = useFragment(fragment, queryRef);
 
   return (
-    <div className="flex gap-6 items-baseline">
+    <div className="flex gap-6 items-center">
+      <GlobalSearch />
       <AboutMenuLink mode="desktop" />
       <DocsMenuLink mode="desktop" />
       {session ? (

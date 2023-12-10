@@ -5,6 +5,7 @@ import { prisma } from "@/prisma";
 
 import { rethrowOnConstraint } from "../errors/common";
 import { getWriteableOwner } from "../helpers/ownerHelpers";
+import { indexModelId } from "../helpers/searchHelpers";
 import { getSelf } from "../helpers/userHelpers";
 import { Model } from "../types/Model";
 import { validateSlug } from "../utils";
@@ -89,6 +90,8 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
           },
         });
       });
+
+      await indexModelId(model.id);
 
       return { model };
     },

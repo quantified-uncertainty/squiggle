@@ -3,6 +3,7 @@ import { prisma } from "@/prisma";
 import { builder } from "../builder";
 import { rethrowOnConstraint } from "../errors/common";
 import { Group } from "../types/Group";
+import { indexGroupId } from "../helpers/searchHelpers";
 
 builder.mutationField("createGroup", (t) =>
   t.withAuth({ signedIn: true }).fieldWithInput({
@@ -39,6 +40,8 @@ builder.mutationField("createGroup", (t) =>
           error: `The group ${input.slug} already exists`,
         }
       );
+
+      await indexGroupId(group.id);
 
       return { group };
     },

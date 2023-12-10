@@ -8,6 +8,7 @@ import {
   useAsyncMutation,
   UseAsyncMutationAct,
 } from "@/hooks/useAsyncMutation";
+import { useAsync } from "react-select/async";
 
 /*
  * Props for this component include:
@@ -29,11 +30,13 @@ export function MutationButton<
   variables,
   updater,
   onCompleted,
+  confirmation,
 }: {
   mutation: GraphQLTaggedNode;
   expectedTypename: TTypename;
   title: string;
 } & Pick<Parameters<typeof Button>[0], "theme" | "size"> &
+  Pick<Parameters<typeof useAsyncMutation>[0], "confirmation"> &
   Pick<
     Parameters<UseAsyncMutationAct<TMutation, TTypename>>[0],
     "variables" | "updater" | "onCompleted"
@@ -41,6 +44,7 @@ export function MutationButton<
   const [runMutation, inFlight] = useAsyncMutation<TMutation, TTypename>({
     mutation,
     expectedTypename,
+    confirmation,
   });
 
   const act = async () => {

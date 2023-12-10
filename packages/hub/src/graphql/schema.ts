@@ -11,17 +11,18 @@ import "./queries/modelsByVersion";
 import "./queries/relativeValuesDefinition";
 import "./queries/relativeValuesDefinitions";
 import "./queries/runSquiggle";
+import "./queries/search";
 import "./queries/userByUsername";
 import "./queries/users";
 import "./mutations/acceptReusableGroupInviteToken";
 import "./mutations/adminUpdateModelVersion";
+import "./mutations/adminRebuildSearchIndex";
 import "./mutations/buildRelativeValuesCache";
 import "./mutations/cancelGroupInvite";
 import "./mutations/clearRelativeValuesCache";
 import "./mutations/createGroup";
 import "./mutations/createRelativeValuesDefinition";
 import "./mutations/createReusableGroupInviteToken";
-import "./mutations/validateReusableGroupInviteToken";
 import "./mutations/createSquiggleSnippetModel";
 import "./mutations/deleteMembership";
 import "./mutations/deleteModel";
@@ -37,6 +38,7 @@ import "./mutations/updateModelPrivacy";
 import "./mutations/updateModelSlug";
 import "./mutations/updateRelativeValuesDefinition";
 import "./mutations/updateSquiggleSnippetModel";
+import "./mutations/validateReusableGroupInviteToken";
 
 import { builder } from "./builder";
 

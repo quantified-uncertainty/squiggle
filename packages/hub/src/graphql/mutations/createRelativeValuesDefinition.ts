@@ -6,6 +6,7 @@ import { prisma } from "@/prisma";
 
 import { rethrowOnConstraint } from "../errors/common";
 import { getWriteableOwner } from "../helpers/ownerHelpers";
+import { indexDefinitionId } from "../helpers/searchHelpers";
 import { RelativeValuesDefinition } from "../types/RelativeValuesDefinition";
 import { validateSlug } from "../utils";
 
@@ -173,6 +174,8 @@ builder.mutationField("createRelativeValuesDefinition", (t) =>
 
         return definition;
       });
+
+      await indexDefinitionId(definition.id);
 
       return { definition };
     },
