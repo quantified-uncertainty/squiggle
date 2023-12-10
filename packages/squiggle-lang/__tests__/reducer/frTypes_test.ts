@@ -18,7 +18,6 @@ import {
   frDict,
   frOptional,
   frAny,
-  frNumberOrString,
   frTableChart,
   frScale,
   frInput,
@@ -28,6 +27,7 @@ import {
   frSampleSetDist,
   frDistPointset,
   frOr,
+  frNamed,
 } from "../../src/library/registry/frTypes.js";
 import { SDate } from "../../src/utility/SDate.js";
 import { SDuration } from "../../src/utility/SDuration.js";
@@ -103,22 +103,6 @@ describe("frDistOrNumber", () => {
     const value = vDist(dist);
     expect(frDistOrNumber.unpack(value)).toBe(dist);
     expect(frDistOrNumber.pack(dist)).toEqual(value);
-  });
-});
-
-describe("frNumberOrString", () => {
-  test("number", () => {
-    const number = 123;
-    const value = vNumber(number);
-    expect(frNumberOrString.unpack(value)).toBe(number);
-    expect(frNumberOrString.pack(number)).toEqual(value);
-  });
-
-  test("string", () => {
-    const string = "foo";
-    const value = vString(string);
-    expect(frNumberOrString.unpack(value)).toBe(string);
-    expect(frNumberOrString.pack(string)).toEqual(value);
   });
 });
 
@@ -342,5 +326,38 @@ describe("frOr", () => {
     test("should return the correct name", () => {
       expect(frNumberOrString.getName()).toBe("number|string");
     });
+  });
+});
+
+describe("frNamed", () => {
+  const testNumber = 42;
+  const testValue: Value = vNumber(testNumber);
+  const namedNumberType = frNamed("TestNumber", frNumber);
+
+  test("Unpack", () => {
+    expect(namedNumberType.unpack(testValue)).toBe(testNumber);
+  });
+
+  test("Pack", () => {
+    expect(namedNumberType.pack(testNumber)).toEqual(testValue);
+    expect(() => namedNumberType.pack(null)).toThrow(
+      "Unable to pack null value"
+    );
+  });
+
+  test("getName", () => {
+    expect(namedNumberType).toBeDefined();
+    expect(namedNumberType.getName()).toBe("TestNumber: number");
+  });
+
+  test("getName with Optional Type", () => {
+    const optionalNumberType = frOptional(frNumber);
+    const namedOptionalNumberType = frNamed(
+      "OptionalTestNumber",
+      optionalNumberType
+    );
+    expect(namedOptionalNumberType.getName()).toBe(
+      "OptionalTestNumber?: number"
+    );
   });
 });

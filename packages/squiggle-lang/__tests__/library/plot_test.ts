@@ -29,7 +29,11 @@ describe("Plot", () => {
   });
 
   describe("Plot.numericFn", () => {
-    testEvalToMatch(`Plot.numericFn({|x| x * 5})`, "Plot for numeric function");
+    testEvalToMatch(
+      `Plot.numericFn({|x| x * 5})`,
+      "Plot for numeric function",
+      true
+    );
     testEvalToMatch(
       `Plot.numericFn({
         fn: {|x| x * 5}

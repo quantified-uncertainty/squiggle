@@ -1,9 +1,7 @@
-import { isObject } from "lodash";
-import { REAmbiguous } from "../../errors/messages.js";
+import { REAmbiguous, REBuildEror } from "../../errors/messages.js";
 import { ReducerContext } from "../../reducer/context.js";
 import { Value } from "../../value/index.js";
 import { FRType, frAny, isOptional } from "./frTypes.js";
-import { frTypesMatchesLengths } from "./helpers.js";
 
 // Type safety of `FnDefinition is guaranteed by `makeDefinition` signature below and by `FRType` unpack logic.
 // It won't be possible to make `FnDefinition` generic without sacrificing type safety in other parts of the codebase,
@@ -18,6 +16,21 @@ export type FnDefinition<OutputType = any> = {
   deprecated?: string;
 };
 
+// A function to make sure that there are no non-optional inputs after optional inputs:
+function assertOptionalsAreAtEnd(inputs: FRType<any>[]) {
+  let optionalFound = false;
+  for (const input of inputs) {
+    if (optionalFound && !isOptional(input)) {
+      throw new REBuildEror(
+        `Optional inputs must be last. Found non-optional input after optional input. ${inputs}`
+      );
+    }
+    if (isOptional(input)) {
+      optionalFound = true;
+    }
+  }
+}
+
 export function makeDefinition<
   const InputTypes extends any[],
   const OutputType,
@@ -28,6 +41,7 @@ export function makeDefinition<
   run: (args: InputTypes, context: ReducerContext) => OutputType,
   params?: { deprecated?: string }
 ): FnDefinition {
+  assertOptionalsAreAtEnd(inputs);
   return {
     inputs,
     output,
@@ -47,6 +61,7 @@ export function makeAssertDefinition<const T extends any[]>(
   inputs: [...{ [K in keyof T]: FRType<T[K]> }],
   errorMsg: string
 ): FnDefinition {
+  assertOptionalsAreAtEnd(inputs);
   return {
     inputs,
     output: frAny,
@@ -80,7 +95,9 @@ export function tryCallFnDefinition(
 }
 
 export function fnDefinitionToString(fn: FnDefinition): string {
-  const inputs = fn.inputs.map((t) => t.getName()).join(", ");
+  const inputs = fn.inputs
+    .map((t) => t.getName() + (isOptional(t) ? "?" : ""))
+    .join(", ");
   const output = fn.output.getName();
   return `(${inputs})${output ? ` => ${output}` : ""}`;
 }

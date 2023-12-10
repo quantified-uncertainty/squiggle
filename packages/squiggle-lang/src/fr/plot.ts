@@ -7,6 +7,7 @@ import {
   frDist,
   frDistOrNumber,
   frLambdaTyped,
+  frNamed,
   frNumber,
   frOptional,
   frPlot,
@@ -128,14 +129,16 @@ const numericFnDef = () => {
       makeDefinition(
         [
           fnType,
-          frOptional(
-            frDict(
-              ["xScale", frOptional(frScale)],
-              ["yScale", frOptional(frScale)],
-              ["title", frOptional(frString)],
-              ["points", frOptional(frNumber)]
-            ),
-            "params"
+          frNamed(
+            "params",
+            frOptional(
+              frDict(
+                ["xScale", frOptional(frScale)],
+                ["yScale", frOptional(frScale)],
+                ["title", frOptional(frString)],
+                ["points", frOptional(frNumber)]
+              )
+            )
           ),
         ],
         frPlot,
@@ -150,7 +153,6 @@ const numericFnDef = () => {
           );
         }
       ),
-      //Maybe we should deprecate this eventually? I think I like the others more, especially for boxed functions and composition.
       makeDefinition(
         [
           frDict(
@@ -229,14 +231,16 @@ export const library = [
       makeDefinition(
         [
           frDist,
-          frOptional(
-            frDict(
-              ["xScale", frOptional(frScale)],
-              ["yScale", frOptional(frScale)],
-              ["title", frOptional(frString)],
-              ["showSummary", frOptional(frBool)]
-            ),
-            "params"
+          frNamed(
+            "params",
+            frOptional(
+              frDict(
+                ["xScale", frOptional(frScale)],
+                ["yScale", frOptional(frScale)],
+                ["title", frOptional(frString)],
+                ["showSummary", frOptional(frBool)]
+              )
+            )
           ),
         ],
         frPlot,
@@ -289,15 +293,17 @@ export const library = [
       makeDefinition(
         [
           frLambdaTyped([frNumber], frDist),
-          frOptional(
-            frDict(
-              ["xScale", frOptional(frScale)],
-              ["yScale", frOptional(frScale)],
-              ["distXScale", frOptional(frScale)],
-              ["title", frOptional(frString)],
-              ["points", frOptional(frNumber)]
-            ),
-            "params"
+          frNamed(
+            "params",
+            frOptional(
+              frDict(
+                ["xScale", frOptional(frScale)],
+                ["yScale", frOptional(frScale)],
+                ["distXScale", frOptional(frScale)],
+                ["title", frOptional(frString)],
+                ["points", frOptional(frNumber)]
+              )
+            )
           ),
         ],
         frPlot,

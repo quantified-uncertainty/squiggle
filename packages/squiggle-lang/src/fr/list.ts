@@ -361,8 +361,12 @@ export const library = [
         frArray(frGeneric("A")),
         ([array, start, end]) => {
           _assertInteger(start);
-          end && _assertInteger(end);
-          return end ? array.slice(start, end) : array.slice(start);
+          if (!!end) {
+            _assertInteger(end);
+            return array.slice(start, end);
+          } else {
+            return array.slice(start);
+          }
         }
       ),
     ],

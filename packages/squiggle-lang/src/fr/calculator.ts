@@ -9,6 +9,7 @@ import {
   frBool,
   frNumber,
   frCalculator,
+  frNamed,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { Calculator, vCalculator } from "../value/index.js";
@@ -61,15 +62,17 @@ export const library = [
       makeDefinition(
         [
           frLambda,
-          frOptional(
-            frDict(
-              ["title", frOptional(frString)],
-              ["description", frOptional(frString)],
-              ["inputs", frOptional(frArray(frInput))],
-              ["autorun", frOptional(frBool)],
-              ["sampleCount", frOptional(frNumber)]
-            ),
-            "params"
+          frNamed(
+            "params",
+            frOptional(
+              frDict(
+                ["title", frOptional(frString)],
+                ["description", frOptional(frString)],
+                ["inputs", frOptional(frArray(frInput))],
+                ["autorun", frOptional(frBool)],
+                ["sampleCount", frOptional(frNumber)]
+              )
+            )
           ),
         ],
         frCalculator,

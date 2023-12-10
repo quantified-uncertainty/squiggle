@@ -82,18 +82,6 @@ export const frDuration: FRType<SDuration> = {
   pack: (v) => vDuration(v),
   getName: () => "duration",
 };
-export const frDistOrNumber: FRType<BaseDist | number> = {
-  unpack: (v) =>
-    v.type === "Dist" ? v.value : v.type === "Number" ? v.value : undefined,
-  pack: (v) => (typeof v === "number" ? vNumber(v) : vDist(v)),
-  getName: () => "distribution|number",
-};
-export const frNumberOrString: FRType<string | number> = {
-  unpack: (v) =>
-    v.type === "String" ? v.value : v.type === "Number" ? v.value : undefined,
-  pack: (v) => (typeof v === "number" ? vNumber(v) : vString(v)),
-  getName: () => "number|string",
-};
 export const frDist: FRType<BaseDist> = {
   unpack: (v) => (v.type === "Dist" ? v.value : undefined),
   pack: (v) => vDist(v),
@@ -234,6 +222,14 @@ export function frOr<T1, T2>(
     getName: () => `${type1.getName()}|${type2.getName()}`,
   };
 }
+
+//TODO: It would probably eventually be good to refactor this out, to use frOr instead. However, that would be slightly less efficient.
+export const frDistOrNumber: FRType<BaseDist | number> = {
+  unpack: (v) =>
+    v.type === "Dist" ? v.value : v.type === "Number" ? v.value : undefined,
+  pack: (v) => (typeof v === "number" ? vNumber(v) : vDist(v)),
+  getName: () => "distribution|number",
+};
 
 export function frTuple<T1, T2>(
   type1: FRType<T1>,
@@ -466,16 +462,29 @@ export function frDict<T extends object>(
   };
 }
 
-// Optionals are implemented for the sake of frDict, which check for them explicitly.
-// Don't try to use them in other contexts.
+export const frNamed = <T>(
+  name: string,
+  itemType: FRType<T>
+): FRType<T | null> & { isOptional: boolean } => ({
+  unpack: itemType.unpack,
+  pack: (v) => {
+    if (v === null) {
+      throw new Error("Unable to pack null value");
+    }
+    return itemType.pack(v);
+  },
+  getName: () => {
+    const _isOptional = isOptional(itemType);
+    return `${name}${_isOptional ? "?" : ""}: ${itemType.getName()}`;
+  },
+  isOptional: isOptional(itemType),
+});
+
 export const frOptional = <T>(
-  itemType: FRType<T>,
-  paramName?: string
+  itemType: FRType<T>
 ): FRType<T | null> & { isOptional: boolean } => {
   return {
-    unpack: (v: Value) => {
-      return itemType.unpack(v);
-    },
+    unpack: itemType.unpack,
     pack: (v) => {
       if (v === null) {
         // shouldn't happen if frDict implementation is correct and frOptional is used correctly.
@@ -483,7 +492,7 @@ export const frOptional = <T>(
       }
       return itemType.pack(v);
     },
-    getName: () => (paramName ? `${paramName}?: ` : "") + itemType.getName(),
+    getName: () => itemType.getName(),
     isOptional: true,
   };
 };
