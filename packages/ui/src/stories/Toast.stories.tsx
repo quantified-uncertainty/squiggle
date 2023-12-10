@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import { FC } from "react";
 
 import { Button, useToast, WithToasts } from "../index.js";
-import { FC } from "react";
 
 const meta = {
   component: WithToasts,

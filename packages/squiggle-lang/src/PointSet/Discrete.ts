@@ -1,17 +1,17 @@
-import * as Continuous from "./Continuous.js";
+import { epsilon_float } from "../magicNumbers.js";
+import { random_sample } from "../utility/math.js";
 import * as Result from "../utility/result.js";
-import * as MixedPoint from "./MixedPoint.js";
-import * as Common from "./Common.js";
-import { ContinuousShape } from "./Continuous.js";
 import * as XYShape from "../XYShape.js";
+import * as Common from "./Common.js";
+import * as Continuous from "./Continuous.js";
+import { ContinuousShape } from "./Continuous.js";
+import { MixedShape } from "./Mixed.js";
+import * as MixedPoint from "./MixedPoint.js";
 import {
   ConvolutionOperation,
   convolutionOperationToFn,
   PointSet,
 } from "./PointSet.js";
-import { epsilon_float } from "../magicNumbers.js";
-import { random_sample } from "../utility/math.js";
-import { MixedShape } from "./Mixed.js";
 
 export class DiscreteShape implements PointSet<DiscreteShape> {
   readonly xyShape: XYShape.XYShape;

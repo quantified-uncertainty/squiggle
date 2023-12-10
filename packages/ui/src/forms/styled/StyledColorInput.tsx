@@ -1,8 +1,8 @@
 "use client";
 import { HexColorInput, HexColorPicker } from "react-colorful";
 
-import { Dropdown } from "../../components/Dropdown/index.js";
 import { DropdownMenu } from "../../components/Dropdown/DropdownMenu.js";
+import { Dropdown } from "../../components/Dropdown/index.js";
 
 type Props = {
   value: string;

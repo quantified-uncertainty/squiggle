@@ -1,4 +1,5 @@
 import { SyntaxNode } from "@lezer/common";
+
 import { parser } from "../src/components/CodeEditor/languageSupport/generated/squiggle.js";
 import { getNameNodes } from "../src/components/CodeEditor/languageSupport/squiggle.js";
 

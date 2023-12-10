@@ -1,17 +1,16 @@
+import { TextDocument } from "vscode-languageserver-textdocument";
 import {
+  createConnection,
   Diagnostic,
   DiagnosticSeverity,
   InitializeParams,
   InitializeResult,
   ProposedFeatures,
-  TextDocumentSyncKind,
   TextDocuments,
-  createConnection,
+  TextDocumentSyncKind,
 } from "vscode-languageserver/node";
 
 import { parse } from "@quri/squiggle-lang";
-
-import { TextDocument } from "vscode-languageserver-textdocument";
 
 // Documentation:
 // - https://code.visualstudio.com/api/language-extensions/language-server-extension-guide

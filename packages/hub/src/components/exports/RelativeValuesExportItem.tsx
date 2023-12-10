@@ -2,9 +2,11 @@ import { FC, PropsWithChildren } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { RelativeValuesExportItem$key } from "@/__generated__/RelativeValuesExportItem.graphql";
 import { relativeValuesRoute } from "@/routes";
+
 import { StyledDefinitionLink } from "../ui/StyledDefinitionLink";
+
+import { RelativeValuesExportItem$key } from "@/__generated__/RelativeValuesExportItem.graphql";
 
 export const RelativeValuesExportItemFragment = graphql`
   fragment RelativeValuesExportItem on RelativeValuesExport {

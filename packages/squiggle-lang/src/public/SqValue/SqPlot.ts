@@ -1,11 +1,11 @@
 import { BaseDist } from "../../dist/BaseDist.js";
-import { SampleSetDist } from "../../dist/SampleSetDist/index.js";
 import { Env } from "../../dist/env.js";
+import { SampleSetDist } from "../../dist/SampleSetDist/index.js";
 import * as Result from "../../utility/result.js";
 import { Plot, vPlot } from "../../value/index.js";
-
 import { SqError, SqOtherError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
+import { SqPlotValue } from "./index.js";
 import {
   SqDistribution,
   SqSampleSetDistribution,
@@ -13,7 +13,6 @@ import {
 } from "./SqDistribution/index.js";
 import { SqLambda } from "./SqLambda.js";
 import { SqScale, wrapScale } from "./SqScale.js";
-import { SqPlotValue } from "./index.js";
 
 type LabeledSqDistribution = {
   name?: string;

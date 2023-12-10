@@ -1,22 +1,22 @@
+import maxBy from "lodash/maxBy.js";
+import uniq from "lodash/uniq.js";
 import { LocationRange } from "peggy";
 
 import { ASTNode } from "../ast/parse.js";
 import * as IError from "../errors/IError.js";
 import { REArityError, REOther } from "../errors/messages.js";
 import { Expression } from "../expression/index.js";
-import { Calculator, VDomain, Value } from "../value/index.js";
-import * as Context from "./context.js";
-import { ReducerContext } from "./context.js";
-import { Stack } from "./stack.js";
 import {
   FnDefinition,
   fnDefinitionToString,
   tryCallFnDefinition,
 } from "../library/registry/fnDefinition.js";
-import uniq from "lodash/uniq.js";
-import { sort } from "../utility/E_A_Floats.js";
 import { FRType } from "../library/registry/frTypes.js";
-import maxBy from "lodash/maxBy.js";
+import { sort } from "../utility/E_A_Floats.js";
+import { Calculator, Value, VDomain } from "../value/index.js";
+import * as Context from "./context.js";
+import { ReducerContext } from "./context.js";
+import { Stack } from "./stack.js";
 
 export type UserDefinedLambdaParameter = {
   name: string;

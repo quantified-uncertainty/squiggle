@@ -1,19 +1,17 @@
 import SchemaBuilder from "@pothos/core";
-
 import ErrorsPlugin from "@pothos/plugin-errors";
 import PrismaPlugin from "@pothos/plugin-prisma";
+import type PrismaTypes from "@pothos/plugin-prisma/generated";
 import RelayPlugin from "@pothos/plugin-relay";
 import ScopeAuthPlugin from "@pothos/plugin-scope-auth";
 import SimpleObjectsPlugin from "@pothos/plugin-simple-objects";
 import ValidationPlugin from "@pothos/plugin-validation";
 import WithInputPlugin from "@pothos/plugin-with-input";
-
-import type PrismaTypes from "@pothos/plugin-prisma/generated";
-
 import { Session } from "next-auth";
 import { NextRequest } from "next/server";
 
 import { prisma } from "@/prisma";
+
 import {
   getMyMembershipById,
   getMyMembershipBySlug,

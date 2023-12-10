@@ -1,9 +1,10 @@
+import get from "lodash/get.js";
+import invert from "lodash/invert.js";
+
 import { infixFunctions, unaryFunctions } from "../../ast/peggyHelpers.js";
 import { BuiltinLambda, Lambda } from "../../reducer/lambda.js";
 import { Value } from "../../value/index.js";
 import { FnDefinition, fnDefinitionToString } from "./fnDefinition.js";
-import get from "lodash/get.js";
-import invert from "lodash/invert.js";
 
 type Shorthand = { type: "infix" | "unary"; symbol: string };
 

@@ -1,4 +1,7 @@
 "use client";
+import { FC, PropsWithChildren } from "react";
+import { useFieldArray, useFormContext } from "react-hook-form";
+
 import {
   Button,
   ColorFormField,
@@ -6,13 +9,12 @@ import {
   TextFormField,
   TrashIcon,
 } from "@quri/ui";
-import { FC, PropsWithChildren } from "react";
-import { useFieldArray, useFormContext } from "react-hook-form";
+
+import { SlugFormField } from "@/components/ui/SlugFormField";
 
 import { FormShape } from "./FormShape";
 import { SelectCluster } from "./SelectCluster";
 import { SelectRecommendedUnit } from "./SelectRecommendedUnit";
-import { SlugFormField } from "@/components/ui/SlugFormField";
 
 export const FormSectionHeader: FC<{ headerName: string }> = ({
   headerName,

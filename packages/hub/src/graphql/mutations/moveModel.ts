@@ -1,12 +1,13 @@
 import { ZodError } from "zod";
 
 import { prisma } from "@/prisma";
+
 import { builder } from "../builder";
-import { Model } from "../types/Model";
+import { NotFoundError } from "../errors/NotFoundError";
 import { getWriteableModel } from "../helpers/modelHelpers";
 import { getWriteableOwnerBySlug } from "../helpers/ownerHelpers";
+import { Model } from "../types/Model";
 import { validateSlug } from "../utils";
-import { NotFoundError } from "../errors/NotFoundError";
 
 builder.mutationField("moveModel", (t) =>
   t.withAuth({ signedIn: true }).fieldWithInput({

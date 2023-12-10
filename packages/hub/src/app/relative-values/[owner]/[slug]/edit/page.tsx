@@ -1,8 +1,10 @@
-import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
-import { loadPageQuery } from "@/relay/loadPageQuery";
 import QueryNode, {
   RelativeValuesDefinitionPageQuery,
 } from "@gen/RelativeValuesDefinitionPageQuery.graphql";
+
+import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
+import { loadPageQuery } from "@/relay/loadPageQuery";
+
 import { EditRelativeValuesDefinition } from "./EditRelativeValuesDefinition";
 
 export default async function Page({

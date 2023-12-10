@@ -1,14 +1,13 @@
+import "@quri/squiggle-components/common.css";
+import "react-loading-skeleton/dist/skeleton.css";
+import "@/styles/main.css";
+
 import { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { PropsWithChildren } from "react";
 
-import "@quri/squiggle-components/common.css";
-import "react-loading-skeleton/dist/skeleton.css";
-
-import "@/styles/main.css";
-
-import { RootLayout } from "./RootLayout";
 import { authOptions } from "./api/auth/[...nextauth]/authOptions";
+import { RootLayout } from "./RootLayout";
 
 export default async function ServerRootLayout({
   children,

@@ -3,8 +3,8 @@ import {
   Domain,
   NumericRangeDomain,
 } from "../../value/domain.js";
-import { SqDateScale, SqLinearScale } from "./SqScale.js";
 import { SqDateValue, SqNumberValue } from "./index.js";
+import { SqDateScale, SqLinearScale } from "./SqScale.js";
 
 export function wrapDomain(value: Domain) {
   switch (value.type) {

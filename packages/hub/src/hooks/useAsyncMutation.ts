@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { UseMutationConfig, useMutation } from "react-relay";
+import { useMutation, UseMutationConfig } from "react-relay";
 import { GraphQLTaggedNode, MutationParameters } from "relay-runtime";
 
 import { useToast } from "@quri/ui";

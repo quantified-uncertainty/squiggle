@@ -1,6 +1,6 @@
 import {
-  ReactNode,
   forwardRef,
+  ReactNode,
   useEffect,
   useImperativeHandle,
   useMemo,
@@ -27,8 +27,8 @@ import {
 import { altKey, getErrors } from "../../../lib/utility.js";
 import { CodeEditor, CodeEditorHandle } from "../../CodeEditor/index.js";
 import { PlaygroundSettings } from "../../PlaygroundSettings.js";
-import { ToolbarItem } from "../../ui/PanelWithToolbar/ToolbarItem.js";
 import { PanelWithToolbar } from "../../ui/PanelWithToolbar/index.js";
+import { ToolbarItem } from "../../ui/PanelWithToolbar/ToolbarItem.js";
 import { AutorunnerMenuItem } from "./AutorunnerMenuItem.js";
 import { DependencyGraphModal } from "./DependencyGraphModal.js";
 import { GlobalSettingsModal } from "./GlobalSettingsModal.js";

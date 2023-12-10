@@ -1,10 +1,11 @@
+import { ZodError } from "zod";
+
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
+import { NotFoundError } from "../errors/NotFoundError";
 import { getWriteableModel } from "../helpers/modelHelpers";
 import { validateSlug } from "../utils";
-import { ZodError } from "zod";
-import { NotFoundError } from "../errors/NotFoundError";
 
 builder.mutationField("deleteModel", (t) =>
   t.withAuth({ signedIn: true }).fieldWithInput({

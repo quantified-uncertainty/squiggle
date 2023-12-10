@@ -1,8 +1,10 @@
+import { loadPageQuery } from "@/relay/loadPageQuery";
+
+import { EditModelPage } from "./EditModelPage";
+
 import QueryNode, {
   EditModelPageQuery,
 } from "@/__generated__/EditModelPageQuery.graphql";
-import { loadPageQuery } from "@/relay/loadPageQuery";
-import { EditModelPage } from "./EditModelPage";
 
 type Props = {
   params: { owner: string; slug: string };

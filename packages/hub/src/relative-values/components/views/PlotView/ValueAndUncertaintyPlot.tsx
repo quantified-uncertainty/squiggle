@@ -2,8 +2,9 @@ import * as d3 from "d3";
 import { FC, useCallback, useMemo, useState } from "react";
 
 import {
-  DrawContext,
+  d3Extended,
   drawAxes,
+  DrawContext,
   useCanvas,
   useCanvasCursor,
 } from "@quri/squiggle-components";
@@ -11,16 +12,16 @@ import { MouseTooltip } from "@quri/ui";
 
 import { Item } from "@/relative-values/types";
 import { ModelEvaluator } from "@/relative-values/values/ModelEvaluator";
+
+import { useFilteredItems } from "../hooks";
+import { averageMedian, averageUncertainty } from "../hooks/useSortedItems";
 import {
   useDefinition,
   useDefinitionClusters,
   useRelativeValuesContext,
 } from "../RelativeValuesProvider";
-import { useFilteredItems } from "../hooks";
-import { averageMedian, averageUncertainty } from "../hooks/useSortedItems";
 import { distance } from "./ForcePlot";
 import { ItemTooltip } from "./ItemTooltip";
-import { d3Extended } from "@quri/squiggle-components";
 
 type Datum = {
   item: Item;

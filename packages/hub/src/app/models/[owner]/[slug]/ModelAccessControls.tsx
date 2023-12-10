@@ -11,9 +11,10 @@ import {
   LockIcon,
 } from "@quri/ui";
 
+import { useAsyncMutation } from "@/hooks/useAsyncMutation";
+
 import { ModelAccessControls$key } from "@/__generated__/ModelAccessControls.graphql";
 import { ModelAccessControlsMutation } from "@/__generated__/ModelAccessControlsMutation.graphql";
-import { useAsyncMutation } from "@/hooks/useAsyncMutation";
 
 export const Fragment = graphql`
   fragment ModelAccessControls on Model {

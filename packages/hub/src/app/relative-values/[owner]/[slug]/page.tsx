@@ -1,7 +1,9 @@
-import { loadPageQuery } from "@/relay/loadPageQuery";
 import QueryNode, {
   RelativeValuesDefinitionPageQuery,
 } from "@gen/RelativeValuesDefinitionPageQuery.graphql";
+
+import { loadPageQuery } from "@/relay/loadPageQuery";
+
 import { RelativeValuesDefinitionPage } from "./RelativeValuesDefinitionPage";
 
 type Props = {

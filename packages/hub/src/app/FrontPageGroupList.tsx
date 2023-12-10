@@ -2,9 +2,10 @@
 import { FC } from "react";
 import { graphql, usePaginationFragment } from "react-relay";
 
+import { GroupList } from "@/groups/components/GroupList";
+
 import { FrontPageGroupList$key } from "@/__generated__/FrontPageGroupList.graphql";
 import { FrontPageGroupListPaginationQuery } from "@/__generated__/FrontPageGroupListPaginationQuery.graphql";
-import { GroupList } from "@/groups/components/GroupList";
 
 const Fragment = graphql`
   fragment FrontPageGroupList on Query

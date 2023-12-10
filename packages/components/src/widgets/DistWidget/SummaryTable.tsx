@@ -1,8 +1,9 @@
+import { XIcon } from "@heroicons/react/solid/esm/index.js";
+import { clsx } from "clsx";
+import * as d3 from "d3";
 import * as React from "react";
 import { FC, PropsWithChildren } from "react";
-import * as d3 from "d3";
 
-import { XIcon } from "@heroicons/react/solid/esm/index.js";
 import {
   Env,
   result,
@@ -14,8 +15,8 @@ import {
 import { TextTooltip } from "@quri/ui";
 
 import { NumberShower } from "../../components/NumberShower.js";
+import { DEFAULT_DATE_FORMAT } from "../../lib/constants.js";
 import { useSetVerticalLine } from "./DistProvider.js";
-import { clsx } from "clsx";
 
 type HoverableCellProps = PropsWithChildren<{
   onMouseEnter?: () => void;
@@ -24,7 +25,6 @@ type HoverableCellProps = PropsWithChildren<{
 
 const commonCellClasses =
   "border border-slate-200 py-1 px-2 text-slate-700 font-light";
-import { DEFAULT_DATE_FORMAT } from "../../lib/constants.js";
 
 const TableHeadCell: FC<PropsWithChildren> = ({ children }) => (
   <th className={clsx(commonCellClasses, "text-xs")}>{children}</th>

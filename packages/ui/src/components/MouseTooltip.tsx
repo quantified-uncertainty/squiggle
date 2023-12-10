@@ -1,6 +1,4 @@
 "use client";
-import { FC, PropsWithChildren, ReactNode, memo, useContext } from "react";
-
 import {
   FloatingPortal,
   offset,
@@ -9,6 +7,8 @@ import {
   useFloating,
   useInteractions,
 } from "@floating-ui/react";
+import { FC, memo, PropsWithChildren, ReactNode, useContext } from "react";
+
 import { TailwindContext } from "./TailwindProvider.js";
 
 function useMouseTooltip({ isOpen }: { isOpen: boolean }) {

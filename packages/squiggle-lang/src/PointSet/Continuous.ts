@@ -1,17 +1,17 @@
 import { epsilon_float } from "../magicNumbers.js";
-import * as XYShape from "../XYShape.js";
-import * as MixedPoint from "./MixedPoint.js";
 import * as Result from "../utility/result.js";
-import { MixedShape } from "./Mixed.js";
+import * as XYShape from "../XYShape.js";
 import * as AlgebraicShapeCombination from "./AlgebraicShapeCombination.js";
 import * as Common from "./Common.js";
+import * as Discrete from "./Discrete.js";
+import { DiscreteShape } from "./Discrete.js";
+import { MixedShape } from "./Mixed.js";
+import * as MixedPoint from "./MixedPoint.js";
 import {
   ConvolutionOperation,
   DistributionType,
   PointSet,
 } from "./PointSet.js";
-import * as Discrete from "./Discrete.js";
-import { DiscreteShape } from "./Discrete.js";
 
 export class ContinuousShape implements PointSet<ContinuousShape> {
   readonly xyShape: XYShape.XYShape;

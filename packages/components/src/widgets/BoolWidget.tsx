@@ -1,4 +1,5 @@
 import { clsx } from "clsx";
+
 import { widgetRegistry } from "./registry.js";
 import { leftWidgetMargin } from "./utils.js";
 

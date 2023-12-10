@@ -1,5 +1,7 @@
 import { loadPageQuery } from "@/relay/loadPageQuery";
+
 import { ModelRevisionView } from "./ModelRevisionView";
+
 import QueryNode, {
   ModelRevisionViewQuery,
 } from "@/__generated__/ModelRevisionViewQuery.graphql";

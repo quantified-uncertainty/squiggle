@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
+
 import { NewGroup } from "./NewGroup";
 
 export default function OuterNewGroupPage() {

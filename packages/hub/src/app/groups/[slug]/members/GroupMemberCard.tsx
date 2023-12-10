@@ -4,15 +4,17 @@ import { graphql } from "relay-runtime";
 
 import { DropdownMenu } from "@quri/ui";
 
-import { GroupMemberCard$key } from "@/__generated__/GroupMemberCard.graphql";
-import { GroupMemberCard_group$key } from "@/__generated__/GroupMemberCard_group.graphql";
 import { Card } from "@/components/ui/Card";
 import { DotsDropdown } from "@/components/ui/DotsDropdown";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { userRoute } from "@/routes";
+
 import { useIsGroupAdmin } from "../hooks";
 import { DeleteMembershipAction } from "./DeleteMembershipAction";
 import { MembershipRoleButton } from "./MembershipRoleButton";
+
+import { GroupMemberCard$key } from "@/__generated__/GroupMemberCard.graphql";
+import { GroupMemberCard_group$key } from "@/__generated__/GroupMemberCard_group.graphql";
 
 export const GroupMemberCard: FC<{
   membershipRef: GroupMemberCard$key;

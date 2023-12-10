@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { FC } from "react";
 
+import { EmptyIcon } from "@quri/ui";
+
 import { DropdownMenuNextLinkItem } from "@/components/ui/DropdownMenuNextLinkItem";
 import { IconProps } from "@/relative-values/components/ui/icons/Icon";
-import { EmptyIcon } from "@quri/ui";
 
 export type MenuLinkModeProps =
   | {

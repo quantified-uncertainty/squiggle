@@ -1,6 +1,8 @@
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
-import { ModelRevisionsList } from "./ModelRevisionsList";
 import { loadPageQuery } from "@/relay/loadPageQuery";
+
+import { ModelRevisionsList } from "./ModelRevisionsList";
+
 import QueryNode, {
   ModelRevisionsListQuery,
 } from "@/__generated__/ModelRevisionsListQuery.graphql";

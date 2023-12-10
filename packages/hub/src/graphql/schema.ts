@@ -1,9 +1,6 @@
-import { builder } from "./builder";
-
 import "./errors/BaseError";
 import "./errors/NotFoundError";
 import "./errors/ValidationError";
-
 import "./queries/globalStatistics";
 import "./queries/group";
 import "./queries/groups";
@@ -17,7 +14,6 @@ import "./queries/runSquiggle";
 import "./queries/search";
 import "./queries/userByUsername";
 import "./queries/users";
-
 import "./mutations/acceptReusableGroupInviteToken";
 import "./mutations/adminUpdateModelVersion";
 import "./mutations/adminRebuildSearchIndex";
@@ -43,5 +39,7 @@ import "./mutations/updateModelSlug";
 import "./mutations/updateRelativeValuesDefinition";
 import "./mutations/updateSquiggleSnippetModel";
 import "./mutations/validateReusableGroupInviteToken";
+
+import { builder } from "./builder";
 
 export const schema = builder.toSchema();

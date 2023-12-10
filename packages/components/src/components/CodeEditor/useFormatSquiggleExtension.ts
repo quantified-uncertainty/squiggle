@@ -1,8 +1,8 @@
 import { EditorView, keymap } from "@codemirror/view";
+import * as prettier from "prettier/standalone";
 import { useMemo } from "react";
 
 import * as prettierSquigglePlugin from "@quri/prettier-plugin-squiggle/standalone";
-import * as prettier from "prettier/standalone";
 
 export async function formatSquiggle(view: EditorView | undefined) {
   if (!view) return;

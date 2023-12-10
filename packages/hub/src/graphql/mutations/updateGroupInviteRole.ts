@@ -1,5 +1,7 @@
-import { prisma } from "@/prisma";
 import { MembershipRole } from "@prisma/client";
+
+import { prisma } from "@/prisma";
+
 import { builder } from "../builder";
 import { MembershipRoleType } from "../types/Group";
 import { GroupInvite } from "../types/GroupInvite";

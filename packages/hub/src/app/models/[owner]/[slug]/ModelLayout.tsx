@@ -5,18 +5,20 @@ import { graphql } from "relay-runtime";
 
 import { CodeBracketIcon, RectangleStackIcon, ShareIcon } from "@quri/ui";
 
-import { ModelLayoutQuery } from "@/__generated__/ModelLayoutQuery.graphql";
 import { EntityLayout } from "@/components/EntityLayout";
 import { EntityTab } from "@/components/ui/EntityTab";
+import { ExportsDropdown, totalImportLength } from "@/lib/ExportsDropdown";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 import { modelRevisionsRoute, modelRoute } from "@/routes";
+
 import { useFixModelUrlCasing } from "./FixModelUrlCasing";
 import { ModelAccessControls } from "./ModelAccessControls";
-import { ModelSettingsButton } from "./ModelSettingsButton";
 import { ModelEntityNodes } from "./ModelEntityNodes";
-import { ExportsDropdown, totalImportLength } from "@/lib/ExportsDropdown";
+import { ModelSettingsButton } from "./ModelSettingsButton";
+
+import { ModelLayoutQuery } from "@/__generated__/ModelLayoutQuery.graphql";
 
 // Note that we have to do two GraphQL queries on most model pages: one for layout.tsx, and one for page.tsx.
 const Query = graphql`
