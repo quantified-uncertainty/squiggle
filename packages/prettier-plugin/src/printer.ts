@@ -287,7 +287,7 @@ export function createSquigglePrinter(
                   join([",", line], typedPath(node).map(print, "args")),
                 ]),
                 softline,
-                "|",
+                "| ",
               ]),
               softline,
               path.call(print, "body"),
