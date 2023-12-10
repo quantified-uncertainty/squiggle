@@ -1,4 +1,4 @@
-import { REAmbiguous, REBuildEror } from "../../errors/messages.js";
+import { REAmbiguous, REBuildError } from "../../errors/messages.js";
 import { ReducerContext } from "../../reducer/context.js";
 import { Value } from "../../value/index.js";
 import { FRType, frAny, isOptional } from "./frTypes.js";
@@ -21,7 +21,7 @@ function assertOptionalsAreAtEnd(inputs: FRType<any>[]) {
   let optionalFound = false;
   for (const input of inputs) {
     if (optionalFound && !isOptional(input)) {
-      throw new REBuildEror(
+      throw new REBuildError(
         `Optional inputs must be last. Found non-optional input after optional input. ${inputs}`
       );
     }
@@ -91,6 +91,13 @@ export function tryCallFnDefinition(
     }
     unpackedArgs.push(unpackedArg);
   }
+
+  // Fill in missing optional arguments with nulls.
+  // This is important, because empty optionals should be nulls, but without this they would be undefined.
+  if (unpackedArgs.length < fn.maxInputs) {
+    unpackedArgs.push(...Array(fn.maxInputs - unpackedArgs.length).fill(null));
+  }
+
   return fn.output.pack(fn.run(unpackedArgs, context));
 }
 

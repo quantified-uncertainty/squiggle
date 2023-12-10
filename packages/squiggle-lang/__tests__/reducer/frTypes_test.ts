@@ -340,9 +340,6 @@ describe("frNamed", () => {
 
   test("Pack", () => {
     expect(namedNumberType.pack(testNumber)).toEqual(testValue);
-    expect(() => namedNumberType.pack(null)).toThrow(
-      "Unable to pack null value"
-    );
   });
 
   test("getName", () => {

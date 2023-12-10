@@ -178,7 +178,7 @@ export class REAmbiguous extends ErrorMessage {
   }
 }
 
-export class REBuildEror extends ErrorMessage {
+export class REBuildError extends ErrorMessage {
   constructor(public msg: string) {
     super(msg);
   }
