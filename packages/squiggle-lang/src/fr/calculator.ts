@@ -10,6 +10,7 @@ import {
   frNumber,
   frCalculator,
   frForceBoxed,
+  frNamed,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { Calculator, vCalculator } from "../value/index.js";
@@ -33,7 +34,9 @@ export const library = [
   maker.make({
     name: "make",
     output: "Calculator",
-    examples: [],
+    examples: [
+      "Calculator.make({|x| x * 5}, {inputs: [Input.text({name: 'x'})]})",
+    ],
     definitions: [
       makeDefinition(
         [
@@ -58,13 +61,33 @@ export const library = [
           })
       ),
       makeDefinition(
-        [frForceBoxed(frLambda)],
+        [
+          frForceBoxed(frLambda),
+          frNamed(
+            "params",
+            frOptional(
+              frDict(
+                ["title", frOptional(frString)],
+                ["description", frOptional(frString)],
+                ["inputs", frOptional(frArray(frInput))],
+                ["autorun", frOptional(frBool)],
+                ["sampleCount", frOptional(frNumber)]
+              )
+            )
+          ),
+        ],
         frCalculator,
-        ([{ args, value }]) => {
-          const calc = value.toCalculator();
-          const title = calc.title || args.value.name;
-          const description = calc.description || args.value.description;
-          return validateCalculator({ ...calc, title, description });
+        ([{ args, value }, params]) => {
+          const { title, description, inputs, autorun, sampleCount } =
+            params ?? {};
+          return validateCalculator({
+            fn: value,
+            title: title || args.value.name || undefined,
+            description: description || args.value.description || undefined,
+            inputs: inputs || [],
+            autorun: autorun === null || autorun === undefined ? true : autorun,
+            sampleCount: sampleCount || undefined,
+          });
         }
       ),
     ],

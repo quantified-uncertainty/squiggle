@@ -7,11 +7,15 @@ import {
   frArray,
   frDist,
   frLambdaTyped,
+  frNamed,
   frNumber,
+  frOptional,
+  frOr,
   frSampleSetDist,
 } from "../library/registry/frTypes.js";
 import {
   FnFactory,
+  chooseLambdaParamLength,
   doNumberLambdaCall,
   unwrapDistResult,
 } from "../library/registry/helpers.js";
@@ -54,22 +58,18 @@ const fromFn = (lambda: any, context: any, fn: (i: number) => Value[]) =>
     }, context.environment)
   );
 
-const fromFnDefinitions: FnDefinition[] = [
-  makeDefinition(
-    [frLambdaTyped([], frNumber)],
-    frSampleSetDist,
-    ([lambda], context) => {
-      return fromFn(lambda, context, () => []);
-    }
-  ),
-  makeDefinition(
-    [frLambdaTyped([frNumber], frNumber)],
-    frSampleSetDist,
-    ([lambda], context) => {
-      return fromFn(lambda, context, (index) => [vNumber(index)]);
-    }
-  ),
-];
+const fromFnDefinition: FnDefinition = makeDefinition(
+  [frLambdaTyped([frNamed("index", frOptional(frNumber))], frNumber)],
+  frSampleSetDist,
+  ([lambda], context) => {
+    const usedOptional = chooseLambdaParamLength([0, 1], lambda) === 1;
+    return fromFn(
+      lambda,
+      context,
+      usedOptional ? (index) => [vNumber(index)] : () => []
+    );
+  }
+);
 
 const baseLibrary = [
   maker.make({
@@ -102,12 +102,12 @@ const baseLibrary = [
     name: "fromFn",
     examples: [`SampleSet.fromFn({|i| sample(normal(5,2))})`],
     output: "Dist",
-    definitions: fromFnDefinitions,
+    definitions: [fromFnDefinition],
   }),
   maker.make({
     name: "make",
     output: "Dist",
-    definitions: [fromDist, fromNumber, fromList, ...fromFnDefinitions],
+    definitions: [fromDist, fromNumber, fromList, fromFnDefinition],
   }),
   maker.make({
     name: "map",
@@ -239,17 +239,12 @@ const mkComparison = (
     output: "Dist",
     definitions: [
       makeDefinition(
-        [frSampleSetDist, frSampleSetDist],
-        frSampleSetDist,
-        ([dist1, dist2]) => {
-          return unwrapDistResult(withDist(dist1, dist2));
-        }
-      ),
-      makeDefinition(
-        [frSampleSetDist, frNumber],
+        [frSampleSetDist, frOr(frNumber, frSampleSetDist)],
         frSampleSetDist,
         ([dist, f]) => {
-          return unwrapDistResult(withFloat(dist, f));
+          const distResult =
+            f.tag === "1" ? withFloat(dist, f.value) : withDist(dist, f.value);
+          return unwrapDistResult(distResult);
         }
       ),
       makeDefinition(

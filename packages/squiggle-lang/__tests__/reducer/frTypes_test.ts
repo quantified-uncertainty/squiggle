@@ -18,7 +18,6 @@ import {
   frDict,
   frOptional,
   frAny,
-  frNumberOrString,
   frTableChart,
   frScale,
   frInput,
@@ -27,6 +26,8 @@ import {
   frDistSymbolic,
   frSampleSetDist,
   frDistPointset,
+  frOr,
+  frNamed,
 } from "../../src/library/registry/frTypes.js";
 import { SDate } from "../../src/utility/SDate.js";
 import { SDuration } from "../../src/utility/SDuration.js";
@@ -44,7 +45,6 @@ import {
   vString,
   vDuration,
   vTableChart,
-  vCalculator,
   vScale,
   Scale,
   vInput,
@@ -103,22 +103,6 @@ describe("frDistOrNumber", () => {
     const value = vDist(dist);
     expect(frDistOrNumber.unpack(value)).toBe(dist);
     expect(frDistOrNumber.pack(dist)).toEqual(value);
-  });
-});
-
-describe("frNumberOrString", () => {
-  test("number", () => {
-    const number = 123;
-    const value = vNumber(number);
-    expect(frNumberOrString.unpack(value)).toBe(number);
-    expect(frNumberOrString.pack(number)).toEqual(value);
-  });
-
-  test("string", () => {
-    const string = "foo";
-    const value = vString(string);
-    expect(frNumberOrString.unpack(value)).toBe(string);
-    expect(frNumberOrString.pack(string)).toEqual(value);
   });
 });
 
@@ -306,5 +290,71 @@ describe("frDict", () => {
 
     expect(t.unpack(v)).toEqual(dict);
     expect(t.pack({ ...dict, baz: null })).toEqual(v);
+  });
+});
+
+describe("frOr", () => {
+  const frNumberOrString = frOr(frNumber, frString);
+
+  describe("unpack", () => {
+    test("should correctly unpack a number", () => {
+      const numberValue = vNumber(10);
+      const unpacked = frNumberOrString.unpack(numberValue);
+      expect(unpacked).toEqual({ tag: "1", value: 10 });
+    });
+
+    test("should correctly unpack a string", () => {
+      const stringValue = vString("hello");
+      const unpacked = frNumberOrString.unpack(stringValue);
+      expect(unpacked).toEqual({ tag: "2", value: "hello" });
+    });
+  });
+
+  describe("pack", () => {
+    test("should correctly pack a number", () => {
+      const packed = frNumberOrString.pack({ tag: "1", value: 10 });
+      expect(packed).toEqual(vNumber(10));
+    });
+
+    test("should correctly pack a string", () => {
+      const packed = frNumberOrString.pack({ tag: "2", value: "hello" });
+      expect(packed).toEqual(vString("hello"));
+    });
+  });
+
+  describe("getName", () => {
+    test("should return the correct name", () => {
+      expect(frNumberOrString.getName()).toBe("number|string");
+    });
+  });
+});
+
+describe("frNamed", () => {
+  const testNumber = 42;
+  const testValue: Value = vNumber(testNumber);
+  const namedNumberType = frNamed("TestNumber", frNumber);
+
+  test("Unpack", () => {
+    expect(namedNumberType.unpack(testValue)).toBe(testNumber);
+  });
+
+  test("Pack", () => {
+    expect(namedNumberType.pack(testNumber)).toEqual(testValue);
+  });
+
+  test("getName", () => {
+    expect(namedNumberType).toBeDefined();
+    expect(namedNumberType.getName()).toBe("TestNumber: number");
+  });
+
+  test("getName with Optional Type", () => {
+    const optionalNumberType = frOptional(frNumber);
+    const namedOptionalNumberType = frNamed(
+      "OptionalTestNumber",
+      optionalNumberType
+    );
+    expect(namedOptionalNumberType.getName()).toBe(
+      "OptionalTestNumber?: number"
+    );
   });
 });

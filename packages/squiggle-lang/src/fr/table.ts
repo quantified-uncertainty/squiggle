@@ -6,6 +6,7 @@ import {
   frDict,
   frGeneric,
   frLambdaTyped,
+  frNamed,
   frOptional,
   frString,
   frTableChart,
@@ -46,6 +47,35 @@ export const library = [
     definitions: [
       makeDefinition(
         [
+          frNamed("data", frForceBoxed(frArray(frGeneric("A")))),
+          frDict(
+            ["title", frOptional(frString)],
+            [
+              "columns",
+              frArray(
+                frDict(
+                  ["fn", frLambdaTyped([frGeneric("A")], frAny)],
+                  ["name", frOptional(frString)]
+                )
+              ),
+            ]
+          ),
+        ],
+        frTableChart,
+        ([{ value, args }, params]) => {
+          const { title, columns } = params ?? {};
+          return {
+            data: value,
+            title: title || args.name() || undefined,
+            columns: columns.map(({ fn, name }) => ({
+              fn,
+              name: name ?? undefined,
+            })),
+          };
+        }
+      ),
+      makeDefinition(
+        [
           frDict(
             ["data", frArray(frGeneric("A"))],
             ["title", frOptional(frString)],
@@ -64,35 +94,14 @@ export const library = [
         ([{ data, title, columns }]) => {
           return makeTableChart(
             data,
-            nullToUndefined(columns),
-            nullToUndefined(title)
+            columns.map(({ fn, name }) => ({
+              fn,
+              name: name ?? undefined,
+            })),
+            title || undefined
           );
-        }
-      ),
-      makeDefinition(
-        [
-          frForceBoxed(frArray(frGeneric("A"))),
-          frDict(
-            ["title", frOptional(frString)],
-            [
-              "columns",
-              frArray(
-                frDict(
-                  ["fn", frLambdaTyped([frGeneric("A")], frAny)],
-                  ["name", frOptional(frString)]
-                )
-              ),
-            ]
-          ),
-        ],
-        frTableChart,
-        ([data, { title, columns }]) => {
-          return makeTableChart(
-            data.value,
-            nullToUndefined(columns),
-            nullToUndefined(title) || data.args.value.name
-          );
-        }
+        },
+        { deprecated: "0.8.7" }
       ),
     ],
   }),

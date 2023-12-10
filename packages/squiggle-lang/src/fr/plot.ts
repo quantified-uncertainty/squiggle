@@ -8,6 +8,7 @@ import {
   frDist,
   frDistOrNumber,
   frLambdaTyped,
+  frNamed,
   frNumber,
   frOptional,
   frPlot,
@@ -123,40 +124,36 @@ const numericFnDef = () => {
     name: "numericFn",
     output: "Plot",
     examples: [
-      `Plot.numericFn({ fn: {|x|x*x}, xScale: Scale.linear({ min: 3, max: 5 }), yScale: Scale.log({ tickFormat: ".2s" }) })`,
+      `Plot.numericFn({|x|x*x}, {xScale: Scale.linear({ min: 3, max: 5 }), yScale: Scale.log({ tickFormat: ".2s" }) })`,
     ],
     definitions: [
-      makeDefinition([frForceBoxed(fnType)], frPlot, ([boxed]) =>
-        toPlot(
-          boxed.value,
-          null,
-          defaultScale,
-          boxed.args.value.name || null,
-          null
-        )
-      ),
       makeDefinition(
         [
-          frForceBoxed(fnType),
-          frDict(
-            ["fn", fnType],
-            ["xScale", frOptional(frScale)],
-            ["yScale", frOptional(frScale)],
-            ["title", frOptional(frString)],
-            ["points", frOptional(frNumber)]
+          frNamed("fn", frForceBoxed(fnType)),
+          frNamed(
+            "params",
+            frOptional(
+              frDict(
+                ["xScale", frOptional(frScale)],
+                ["yScale", frOptional(frScale)],
+                ["title", frOptional(frString)],
+                ["points", frOptional(frNumber)]
+              )
+            )
           ),
         ],
         frPlot,
-        ([boxed, { fn, xScale, yScale, title, points }]) =>
-          toPlot(
-            boxed.value,
-            xScale,
-            yScale,
-            title || boxed.args.value.name || null,
-            points
-          )
+        ([{ value, args }, params]) => {
+          const { xScale, yScale, title, points } = params ?? {};
+          return toPlot(
+            value,
+            xScale || null,
+            yScale || null,
+            title || args.name() || null,
+            points || null
+          );
+        }
       ),
-      //Maybe we should deprecate this eventually? I think I like the others more, especially for boxed functions and composition.
       makeDefinition(
         [
           frDict(
@@ -169,7 +166,8 @@ const numericFnDef = () => {
         ],
         frPlot,
         ([{ fn, xScale, yScale, title, points }]) =>
-          toPlot(fn, xScale, yScale, title, points)
+          toPlot(fn, xScale, yScale, title, points),
+        { deprecated: "0.8.7" }
       ),
     ],
   });
@@ -226,12 +224,39 @@ export const library = [
     name: "dist",
     output: "Plot",
     examples: [
-      `Plot.dist({
-  dist: normal(0, 1),
+      `Plot.dist(normal(0,1), {
   xScale: Scale.symlog()
 })`,
     ],
     definitions: [
+      makeDefinition(
+        [
+          frNamed("dist", frDist),
+          frNamed(
+            "params",
+            frOptional(
+              frDict(
+                ["xScale", frOptional(frScale)],
+                ["yScale", frOptional(frScale)],
+                ["title", frOptional(frString)],
+                ["showSummary", frOptional(frBool)]
+              )
+            )
+          ),
+        ],
+        frPlot,
+        ([dist, params]) => {
+          const { xScale, yScale, title, showSummary } = params ?? {};
+          return {
+            type: "distributions",
+            distributions: [{ distribution: dist }],
+            xScale: xScale ?? defaultScale,
+            yScale: yScale ?? defaultScale,
+            title: title ?? undefined,
+            showSummary: showSummary ?? true,
+          };
+        }
+      ),
       makeDefinition(
         [
           frDict(
@@ -253,40 +278,8 @@ export const library = [
             title: title ?? undefined,
             showSummary: showSummary ?? true,
           };
-        }
-      ),
-      makeDefinition([frForceBoxed(frDist)], frPlot, ([boxed]) => {
-        return {
-          type: "distributions",
-          distributions: [{ distribution: boxed.value }],
-          xScale: defaultScale,
-          yScale: defaultScale,
-          title: boxed.args.value.name ?? undefined,
-          showSummary: true,
-        };
-      }),
-      makeDefinition(
-        [
-          frForceBoxed(frDist),
-          frDict(
-            ["dist", frDist],
-            ["xScale", frOptional(frScale)],
-            ["yScale", frOptional(frScale)],
-            ["title", frOptional(frString)],
-            ["showSummary", frOptional(frBool)]
-          ),
-        ],
-        frPlot,
-        ([boxed, { dist, xScale, yScale, title, showSummary }]) => {
-          return {
-            type: "distributions",
-            distributions: [{ distribution: boxed.value }],
-            xScale: xScale ?? defaultScale,
-            yScale: yScale ?? defaultScale,
-            title: title ?? boxed.args.value.name ?? undefined,
-            showSummary: showSummary ?? true,
-          };
-        }
+        },
+        { deprecated: "0.8.7" }
       ),
     ],
   }),
@@ -295,9 +288,41 @@ export const library = [
     name: "distFn",
     output: "Plot",
     examples: [
-      `Plot.distFn({ fn: {|x|uniform(x, x+1)}, xScale: Scale.linear({ min: 3, max: 5}), yScale: Scale.log({ tickFormat: ".2s" }) })`,
+      `Plot.distFn({|x| uniform(x, x+1)}, {xScale: Scale.linear({ min: 3, max: 5}), yScale: Scale.log({ tickFormat: ".2s" })})`,
     ],
     definitions: [
+      makeDefinition(
+        [
+          frNamed("fn", frForceBoxed(frLambdaTyped([frNumber], frDist))),
+          frNamed(
+            "params",
+            frOptional(
+              frDict(
+                ["xScale", frOptional(frScale)],
+                ["yScale", frOptional(frScale)],
+                ["distXScale", frOptional(frScale)],
+                ["title", frOptional(frString)],
+                ["points", frOptional(frNumber)]
+              )
+            )
+          ),
+        ],
+        frPlot,
+        ([{ value, args }, params]) => {
+          const domain = extractDomainFromOneArgFunction(value);
+          const { xScale, yScale, distXScale, title, points } = params ?? {};
+          yScale && _assertYScaleNotDateScale(yScale);
+          return {
+            fn: value,
+            type: "distFn",
+            xScale: createScale(xScale || null, domain),
+            yScale: yScale ?? defaultScale,
+            distXScale: distXScale ?? yScale ?? defaultScale,
+            title: title ?? args.name() ?? undefined,
+            points: points ?? undefined,
+          };
+        }
+      ),
       makeDefinition(
         [
           frDict(
@@ -322,49 +347,8 @@ export const library = [
             title: title ?? undefined,
             points: points ?? undefined,
           };
-        }
-      ),
-      makeDefinition(
-        [frForceBoxed(frLambdaTyped([frNumber], frDist))],
-        frPlot,
-        ([boxed]) => {
-          const domain = extractDomainFromOneArgFunction(boxed.value);
-          return {
-            type: "distFn",
-            fn: boxed.value,
-            xScale: createScale(null, domain),
-            yScale: defaultScale,
-            distXScale: defaultScale,
-            title: boxed.args.value.name || undefined,
-            points: undefined,
-          };
-        }
-      ),
-      makeDefinition(
-        [
-          frForceBoxed(frLambdaTyped([frNumber], frDist)),
-          frDict(
-            ["xScale", frOptional(frScale)],
-            ["yScale", frOptional(frScale)],
-            ["distXScale", frOptional(frScale)],
-            ["title", frOptional(frString)],
-            ["points", frOptional(frNumber)]
-          ),
-        ],
-        frPlot,
-        ([fn, { xScale, yScale, distXScale, title, points }]) => {
-          _assertYScaleNotDateScale(yScale);
-          const domain = extractDomainFromOneArgFunction(fn.value);
-          return {
-            type: "distFn",
-            fn: fn.value,
-            xScale: createScale(xScale, domain),
-            yScale: yScale ?? defaultScale,
-            distXScale: distXScale ?? yScale ?? defaultScale,
-            title: title ?? fn.args.value.name ?? undefined,
-            points: points ?? undefined,
-          };
-        }
+        },
+        { deprecated: "0.8.7" }
       ),
     ],
   }),

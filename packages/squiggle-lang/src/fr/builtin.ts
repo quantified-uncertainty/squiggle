@@ -6,6 +6,7 @@ import {
   frGeneric,
   frKeepBoxes,
   frNumber,
+  frOptional,
   frString,
 } from "../library/registry/frTypes.js";
 import {
@@ -103,19 +104,10 @@ export const library = [
     name: "inspect",
     definitions: [
       makeDefinition(
-        [frKeepBoxes(frGeneric("A"))],
+        [frKeepBoxes(frGeneric("A")), frOptional(frString)],
         frGeneric("A"),
-        ([value]) => {
-          console.log(value);
-          return value;
-        }
-      ),
-
-      makeDefinition(
-        [frKeepBoxes(frGeneric("A")), frString],
-        frGeneric("A"),
-        ([value, label]) => {
-          console.log(`${label}: ${value}}`);
+        ([value, message]) => {
+          message ? console.log(message, value) : console.log(value);
           return value;
         }
       ),

@@ -29,6 +29,7 @@ describe("Plot", () => {
   });
 
   describe("Plot.numericFn", () => {
+    testEvalToMatch(`Plot.numericFn({|x| x * 5})`, "Plot for numeric function");
     testEvalToMatch(
       `Plot.numericFn({
         fn: {|x| x * 5}
@@ -37,26 +38,15 @@ describe("Plot", () => {
     );
 
     testEvalToMatch(
-      `Plot.numericFn({
-        fn: {|x| x * 5}
-      })`,
-      "Plot for numeric function"
-    );
-
-    testEvalToMatch(
-      `Plot.numericFn({
-        fn: {|x, y| x * y}
-      })`,
+      `Plot.numericFn({|x,y| x * 5})`,
       `Error(Error: There are function matches for Plot.numericFn(), but with different arguments:
-  Plot.numericFn({fn: (number) => number, xScale?: scale, yScale?: scale, title?: string, points?: number}) => plot
+  Plot.numericFn(fn: (number) => number, params?: {xScale?: scale, yScale?: scale, title?: string, points?: number}) => plot
 )`
     );
 
     testPlotResult(
       "default scale based on domain",
-      `Plot.numericFn({
-        fn: {|x: [3, 5]| x * 5}
-      })`,
+      `Plot.numericFn({|x: [3, 5]| x * 5})`,
       "numericFn",
       (plot) => {
         expect(plot.xScale.type).toBe("linear");
@@ -67,10 +57,10 @@ describe("Plot", () => {
 
     testPlotResult(
       "explicit scale with min/max ignores the domain",
-      `Plot.numericFn({
-        fn: {|x: [3, 5]| x * 5},
-        xScale: Scale.linear({ min: 100, max: 200 })
-      })`,
+      `Plot.numericFn(
+        {|x: [3, 5]| x * 5},
+        {xScale: Scale.linear({ min: 100, max: 200 })}
+      )`,
       "numericFn",
       (plot) => {
         expect(plot.xScale.type).toBe("linear");
@@ -81,10 +71,10 @@ describe("Plot", () => {
 
     testPlotResult(
       "scale without min/max inherits domain boundaries",
-      `Plot.numericFn({
-        fn: {|x: [3, 5]| x * 5},
-        xScale: Scale.log()
-      })`,
+      `Plot.numericFn(
+        {|x: [3, 5]| x * 5},
+        {xScale: Scale.log()}
+      )`,
       "numericFn",
       (plot) => {
         expect(plot.xScale.type).toBe("log");
@@ -94,10 +84,10 @@ describe("Plot", () => {
     );
 
     testEvalToMatch(
-      `Plot.numericFn({
-        fn: {|x| x * 5},
-        xScale: Scale.linear({ min: 100 })
-      })`,
+      `Plot.numericFn(
+        {|x| x * 5},
+        {xScale: Scale.linear({ min: 100 })}
+      )`,
       "Scale min set without max. Must set either both or neither."
     );
 
@@ -111,37 +101,28 @@ describe("Plot", () => {
 
     // scale with one of min/max fails even if domain is set
     testEvalToMatch(
-      `Plot.numericFn({
-        fn: {|x: [3, 5]| x * 5},
-        xScale: Scale.log({ min: 100 })
-      })`,
+      `Plot.numericFn(
+        {|x: [3, 5]| x * 5},
+        {xScale: Scale.log({ min: 100 })}
+      )`,
       "Scale min set without max. Must set either both or neither."
     );
   });
 
   describe("Plot.distFn", () => {
-    testEvalToMatch(
-      `Plot.distFn({
-        fn: {|x| x to x + 1}
-       })`,
-      "Plot for dist function"
-    );
+    testEvalToMatch(`Plot.distFn({|x| x to x + 1})`, "Plot for dist function");
 
     testEvalToMatch(
-      `Plot.distFn({
-        fn: {|x,y| x to x + y}
-       })`,
+      `Plot.distFn({|x,y| x to x + y})`,
       `Error(Error: There are function matches for Plot.distFn(), but with different arguments:
-  Plot.distFn({fn: (number) => distribution, xScale?: scale, yScale?: scale, distXScale?: scale, title?: string, points?: number}) => plot
+  Plot.distFn(fn: (number) => distribution, params?: {xScale?: scale, yScale?: scale, distXScale?: scale, title?: string, points?: number}) => plot
 )`
     );
   });
 
   testPlotResult(
     "default scale based on domain",
-    `Plot.distFn({
-        fn: {|x: [3, 5]| uniform(x, x + 1)}
-      })`,
+    `Plot.distFn({|x: [3, 5]| uniform(x, x + 1)})`,
     "distFn",
     (plot) => {
       expect(plot.xScale.type).toBe("linear");
@@ -152,9 +133,7 @@ describe("Plot", () => {
 
   testPlotResult(
     "default scale based on time domain",
-    `Plot.distFn({
-        fn: {|t: [1500year, 1600year]| uniform(toYears(t)-1500year, 3)}
-      })`,
+    `Plot.distFn({|t: [1500year, 1600year]| uniform(toYears(t)-1500year, 3)})`,
     "distFn",
     (plot) => {
       expect(plot.xScale.type).toBe("date");
@@ -165,10 +144,10 @@ describe("Plot", () => {
 
   testPlotResult(
     "explicit scale with min/max ignores the domain",
-    `Plot.distFn({
-        fn: {|x: [3, 5]| uniform(x, x + 1)},
-        xScale: Scale.linear({ min: 100, max: 200 })
-      })`,
+    `Plot.distFn(
+        {|x: [3, 5]| uniform(x, x + 1)},
+        {xScale: Scale.linear({ min: 100, max: 200 })}
+      )`,
     "distFn",
     (plot) => {
       expect(plot.xScale.type).toBe("linear");

@@ -4,6 +4,9 @@ import * as SampleSetDist from "../../dist/SampleSetDist/index.js";
 import * as SymbolicDist from "../../dist/SymbolicDist.js";
 import { PointMass } from "../../dist/SymbolicDist.js";
 import { Env } from "../../dist/env.js";
+import intersection from "lodash/intersection.js";
+import { upTo } from "../../utility/E_A_Floats.js";
+import last from "lodash/last.js";
 import {
   REDistributionError,
   REOperationError,
@@ -27,6 +30,7 @@ import {
   frNumber,
   frSampleSetDist,
   frString,
+  isOptional,
 } from "./frTypes.js";
 
 type SimplifiedArgs = Omit<FRFunction, "nameSpace" | "requiresNamespace"> &
@@ -437,3 +441,23 @@ export function makeNumericComparisons<T>(
     ),
   ];
 }
+
+// In cases where we have a function that takes a lambda as an argument, and it's possible we could use n to m arguments, we want to choose the largest number of arguments that matches the lambda.
+export const chooseLambdaParamLength = (
+  inputOptions: number[],
+  lambda: Lambda
+): number | undefined => {
+  const _overlap = intersection(inputOptions, lambda.parameterCounts());
+  return last(_overlap);
+};
+
+// A helper to check if a list of frTypes would match inputs of a given length.
+// Non-trivial because of optional arguments.
+export const frTypesMatchesLengths = (
+  inputs: FRType<any>[],
+  lengths: number[]
+): boolean => {
+  const min = inputs.filter((i) => !isOptional(i)).length;
+  const max = inputs.length;
+  return intersection(upTo(min, max), lengths).length > 0;
+};

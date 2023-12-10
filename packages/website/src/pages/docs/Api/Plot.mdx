@@ -30,13 +30,15 @@ Plot.dists: ({
 Examples:
 
 <SquiggleEditor
-  defaultCode={`Plot.dists({
+  defaultCode={`Plot.dists(
+  {
     dists: [
-        { name: "First Dist", value: normal(0, 1) },
-        { name: "Second Dist", value: uniform(2, 4) },
-    ], 
-    xScale: Scale.symlog({ min: -2, max: 5})
-})`}
+      { name: "First Dist", value: normal(0, 1) },
+      { name: "Second Dist", value: uniform(2, 4) },
+    ],
+    xScale: Scale.symlog({ min: -2, max: 5 }),
+  }
+)`}
 />
 
 ### Plot.dist
@@ -44,24 +46,28 @@ Examples:
 Like `Plot.dists`, but plots a single distribution.
 
 ```
-Plot.dist: ({
-  dist: dist,
-  xScale: scale,
-  yScale: scale,
-  title: string,
-  showSummary: bool
-}) => plot
+Plot.dist: (
+  dist,
+  {
+    xScale: scale,
+    yScale: scale,
+    title: string,
+    showSummary: bool
+  }
+) => plot
 ```
 
 Examples:
 
 <SquiggleEditor
-  defaultCode={`Plot.dist({
-    dist: normal(5,2),
-    xScale: Scale.linear({ min: -2, max: 6, title: "X Axis Title"}),
+  defaultCode={`Plot.dist(
+  normal(5, 2),
+  {
+    xScale: Scale.linear({ min: -2, max: 6, title: "X Axis Title" }),
     title: "A Simple Normal Distribution",
-    showSummary: true
-})`}
+    showSummary: true,
+  }
+)`}
 />
 
 ### Plot.numericFn
@@ -69,49 +75,51 @@ Examples:
 Plots a function that outputs numeric values. This works by sampling the function at a fixed number of points. The number of points is adjustable with the `points` parameter.
 
 ```
-Plot.numericFn: ({
+Plot.numericFn: (
   fn: (number => number),
-  xScale: scale,
-  yScale: scale,
-  title: string,
-  points: number
-}) => plot
+  {
+    xScale: scale,
+    yScale: scale,
+    title: string,
+    points: number
+  }
+) => plot
 ```
 
 Examples:
 
 <SquiggleEditor
-  defaultCode={`Plot.numericFn({
-  fn: {|t| t^2},
-  xScale: Scale.log({
-    min: 1,
-    max: 100
-  }),
-  points: 10
-})`}
+  defaultCode={`Plot.numericFn(
+  {|t|t ^ 2},
+  { xScale: Scale.log({ min: 1, max: 100 }), points: 10 }
+)`}
 />
 
 ### Plot.distFn
 
 ```
-Plot.distFn: ({
+Plot.distFn: (
   fn: (number => dist),
-  xScale: scale,
-  yScale: scale,
-  title: string,
-  distXScale: scale,
-  points: number
-}) => plot
+  {
+    xScale: scale,
+    yScale: scale,
+    title: string,
+    distXScale: scale,
+    points: number
+  }
+) => plot
 ```
 
 <SquiggleEditor
-  defaultCode={`Plot.distFn({
-  fn: {|t| normal(t,2)*normal(5,3)},
-  title: "A Function of Value over Time",
-  xScale: Scale.log({ min: 3, max: 100, title: "Time (years)"}),
-  yScale: Scale.linear({ title: "Value"}),
-  distXScale: Scale.linear({ tickFormat: '#x' }),
-})`}
+  defaultCode={`Plot.distFn(
+  {|t|normal(t, 2) * normal(5, 3)},
+  {
+    title: "A Function of Value over Time",
+    xScale: Scale.log({ min: 3, max: 100, title: "Time (years)" }),
+    yScale: Scale.linear({ title: "Value" }),
+    distXScale: Scale.linear({ tickFormat: "#x" }),
+  }
+)`}
 />
 
 ### Plot.scatter
