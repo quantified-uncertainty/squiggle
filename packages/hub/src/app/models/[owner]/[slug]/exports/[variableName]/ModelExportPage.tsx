@@ -4,16 +4,17 @@ import { graphql, useFragment } from "react-relay";
 
 import { SqProject, SqValuePath } from "@quri/squiggle-lang";
 import {
-  VersionedSquiggleChart,
   useAdjustSquiggleVersion,
+  VersionedSquiggleChart,
 } from "@quri/versioned-squiggle-components";
 
-import { ModelExportPageQuery } from "@/__generated__/ModelExportPageQuery.graphql";
-import { ModelExportPage_SquiggleContent$key } from "@/__generated__/ModelExportPage_SquiggleContent.graphql";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 import { squiggleHubLinker } from "@/squiggle/components/linker";
+
+import { ModelExportPage_SquiggleContent$key } from "@/__generated__/ModelExportPage_SquiggleContent.graphql";
+import { ModelExportPageQuery } from "@/__generated__/ModelExportPageQuery.graphql";
 
 const SquiggleModelExportPage: FC<{
   variableName: string;

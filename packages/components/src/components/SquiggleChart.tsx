@@ -1,7 +1,9 @@
 import { FC, memo } from "react";
 
+import { SqValuePath } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
 
+import { useRunnerState } from "../lib/hooks/useRunnerState.js";
 import {
   ProjectExecutionProps,
   StandaloneExecutionProps,
@@ -9,8 +11,6 @@ import {
 } from "../lib/hooks/useSquiggle.js";
 import { DynamicSquiggleViewer } from "./DynamicSquiggleViewer.js";
 import { PartialPlaygroundSettings } from "./PlaygroundSettings.js";
-import { useRunnerState } from "../lib/hooks/useRunnerState.js";
-import { SqValuePath } from "@quri/squiggle-lang";
 
 export type SquiggleChartProps = {
   code: string;

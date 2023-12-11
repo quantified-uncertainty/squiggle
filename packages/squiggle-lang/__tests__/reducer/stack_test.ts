@@ -1,5 +1,5 @@
-import { vNumber } from "../../src/value/index.js";
 import { Stack } from "../../src/reducer/stack.js";
+import { vNumber } from "../../src/value/index.js";
 
 describe("Stack", () => {
   test("make", () => {

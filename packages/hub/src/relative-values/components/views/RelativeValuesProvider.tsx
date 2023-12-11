@@ -3,9 +3,11 @@ import { FC, PropsWithChildren, Reducer } from "react";
 
 import { generateProvider } from "@quri/ui";
 
-import { RelativeValuesDefinitionRevision$data } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
 import { ModelEvaluator } from "@/relative-values/values/ModelEvaluator";
+
 import { Filter } from "./types";
+
+import { RelativeValuesDefinitionRevision$data } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
 
 export type Axis = "rows" | "columns";
 

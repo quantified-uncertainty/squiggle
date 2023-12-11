@@ -19,16 +19,16 @@ import * as Result from "../utility/result.js";
 import { Ok, result } from "../utility/result.js";
 import { annotationToDomain } from "../value/domain.js";
 import {
-  VDomain,
   Value,
   vArray,
   vDict,
   vDomain,
+  VDomain,
   vLambda,
   vVoid,
 } from "../value/index.js";
 import * as Context from "./context.js";
-import { UserDefinedLambdaParameter, UserDefinedLambda } from "./lambda.js";
+import { UserDefinedLambda, UserDefinedLambdaParameter } from "./lambda.js";
 
 export type ReducerFn = (
   expression: Expression,

@@ -4,10 +4,6 @@ import { useRouter } from "next/navigation";
 import { FC } from "react";
 import { graphql, useFragment } from "react-relay";
 
-import { EditRelativeValuesDefinitionMutation } from "@/__generated__/EditRelativeValuesDefinitionMutation.graphql";
-import { RelativeValuesDefinitionPage$key } from "@/__generated__/RelativeValuesDefinitionPage.graphql";
-import { RelativeValuesDefinitionPageQuery as QueryType } from "@/__generated__/RelativeValuesDefinitionPageQuery.graphql";
-import { RelativeValuesDefinitionRevision$key } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
 import { useAsyncMutation } from "@/hooks/useAsyncMutation";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { RelativeValuesDefinitionForm } from "@/relative-values/components/RelativeValuesDefinitionForm";
@@ -15,11 +11,17 @@ import { FormShape } from "@/relative-values/components/RelativeValuesDefinition
 import { RelativeValuesDefinitionRevisionFragment } from "@/relative-values/components/RelativeValuesDefinitionRevision";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
+import { relativeValuesRoute } from "@/routes";
+
 import {
   RelativeValuesDefinitionPageFragment,
   RelativeValuesDefinitionPageQuery,
 } from "../RelativeValuesDefinitionPage";
-import { relativeValuesRoute } from "@/routes";
+
+import { EditRelativeValuesDefinitionMutation } from "@/__generated__/EditRelativeValuesDefinitionMutation.graphql";
+import { RelativeValuesDefinitionPage$key } from "@/__generated__/RelativeValuesDefinitionPage.graphql";
+import { RelativeValuesDefinitionPageQuery as QueryType } from "@/__generated__/RelativeValuesDefinitionPageQuery.graphql";
+import { RelativeValuesDefinitionRevision$key } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
 
 const Mutation = graphql`
   mutation EditRelativeValuesDefinitionMutation(

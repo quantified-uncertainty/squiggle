@@ -2,9 +2,11 @@ import { FC } from "react";
 import { usePaginationFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { GroupModelList$key } from "@/__generated__/GroupModelList.graphql";
 import { ModelList } from "@/models/components/ModelList";
+
 import { useIsGroupMember } from "./hooks";
+
+import { GroupModelList$key } from "@/__generated__/GroupModelList.graphql";
 
 const Fragment = graphql`
   fragment GroupModelList on Group

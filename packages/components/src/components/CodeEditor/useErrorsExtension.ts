@@ -2,6 +2,7 @@ import { setDiagnostics } from "@codemirror/lint";
 import { Extension } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { useEffect } from "react";
+
 import { SqCompileError, SqError, SqRuntimeError } from "@quri/squiggle-lang";
 
 export function useErrorsExtension(

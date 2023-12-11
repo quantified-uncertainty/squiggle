@@ -1,7 +1,8 @@
 "use client";
-import { FC, Fragment, ReactNode } from "react";
 import { Tab } from "@headlessui/react";
 import { clsx } from "clsx";
+import { FC, Fragment, ReactNode } from "react";
+
 import { IconProps } from "../index.js";
 
 type StyledTabProps = {

@@ -1,8 +1,8 @@
 import merge from "lodash/merge.js";
 import {
+  createContext,
   FC,
   PropsWithChildren,
-  createContext,
   useCallback,
   useContext,
   useEffect,
@@ -13,19 +13,19 @@ import {
 
 import { SqValue, SqValuePath } from "@quri/squiggle-lang";
 
+import { useForceUpdate } from "../../lib/hooks/useForceUpdate.js";
 import { CalculatorState } from "../../widgets/CalculatorWidget/types.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import {
+  defaultPlaygroundSettings,
   PartialPlaygroundSettings,
   PlaygroundSettings,
-  defaultPlaygroundSettings,
 } from "../PlaygroundSettings.js";
 import {
   getChildrenValues,
   pathAsString,
   topLevelBindingsName,
 } from "./utils.js";
-import { useForceUpdate } from "../../lib/hooks/useForceUpdate.js";
 
 type ItemHandle = {
   element: HTMLDivElement;

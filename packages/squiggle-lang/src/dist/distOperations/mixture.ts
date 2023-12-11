@@ -3,8 +3,8 @@ import * as Result from "../../utility/result.js";
 import { result } from "../../utility/result.js";
 import { BaseDist } from "../BaseDist.js";
 import { DistError, otherError } from "../DistError.js";
-import * as SampleSetDist from "../SampleSetDist/index.js";
 import { Env } from "../env.js";
+import * as SampleSetDist from "../SampleSetDist/index.js";
 import { binaryOperations } from "./binaryOperations.js";
 import { scaleMultiply } from "./scaleOperations.js";
 

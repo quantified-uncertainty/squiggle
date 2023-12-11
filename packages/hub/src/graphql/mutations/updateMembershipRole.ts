@@ -1,11 +1,12 @@
 import { prisma } from "@/prisma";
+
 import { builder } from "../builder";
-import { MembershipRoleType, UserGroupMembership } from "../types/Group";
 import {
   getMembership,
   getMyMembership,
   groupHasAdminsBesidesUser,
 } from "../helpers/groupHelpers";
+import { MembershipRoleType, UserGroupMembership } from "../types/Group";
 
 builder.mutationField("updateMembershipRole", (t) =>
   t.withAuth({ signedIn: true }).fieldWithInput({

@@ -1,57 +1,56 @@
-import { ContinuousShape } from "../../src/PointSet/Continuous.js";
-import { DiscreteShape } from "../../src/PointSet/Discrete.js";
-import { MixedShape } from "../../src/PointSet/Mixed.js";
 import { PointSetDist } from "../../src/dist/PointSetDist.js";
 import { SampleSetDist } from "../../src/dist/SampleSetDist/index.js";
 import { Normal } from "../../src/dist/SymbolicDist.js";
 import {
+  frAny,
+  frArray,
   frBool,
   frDate,
-  frDistOrNumber,
-  frDist,
-  frNumber,
-  frString,
-  frDuration,
-  frArray,
-  frTuple,
-  frDictWithArbitraryKeys,
   frDict,
-  frOptional,
-  frAny,
-  frTableChart,
-  frScale,
-  frInput,
-  frDomain,
-  frPlot,
-  frDistSymbolic,
-  frSampleSetDist,
+  frDictWithArbitraryKeys,
+  frDist,
+  frDistOrNumber,
   frDistPointset,
-  frOr,
+  frDistSymbolic,
+  frDomain,
+  frDuration,
+  frInput,
   frNamed,
+  frNumber,
+  frOptional,
+  frOr,
+  frPlot,
+  frSampleSetDist,
+  frScale,
+  frString,
+  frTableChart,
+  frTuple,
 } from "../../src/library/registry/frTypes.js";
+import { ContinuousShape } from "../../src/PointSet/Continuous.js";
+import { DiscreteShape } from "../../src/PointSet/Discrete.js";
+import { MixedShape } from "../../src/PointSet/Mixed.js";
+import { ImmutableMap } from "../../src/utility/immutableMap.js";
 import { SDate } from "../../src/utility/SDate.js";
 import { SDuration } from "../../src/utility/SDuration.js";
-import { ImmutableMap } from "../../src/utility/immutableMap.js";
 import { NumericRangeDomain } from "../../src/value/domain.js";
-
 import {
+  Input,
+  Plot,
+  Scale,
   Value,
   vArray,
   vBool,
   vDate,
-  vDist,
-  vNumber,
   vDict,
-  vString,
-  vDuration,
-  vTableChart,
-  vScale,
-  Scale,
-  vInput,
-  Input,
+  vDist,
   vDomain,
+  vDuration,
+  vInput,
+  vNumber,
   vPlot,
-  Plot,
+  vScale,
+  vString,
+  vTableChart,
 } from "../../src/value/index.js";
 
 test("frNumber", () => {

@@ -1,5 +1,7 @@
 import { loadPageQuery } from "@/relay/loadPageQuery";
+
 import { AcceptGroupInvitePage } from "./AcceptGroupInvitePage";
+
 import QueryNode, {
   AcceptGroupInvitePageQuery,
 } from "@/__generated__/AcceptGroupInvitePageQuery.graphql";

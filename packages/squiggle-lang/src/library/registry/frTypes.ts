@@ -3,32 +3,32 @@ import { PointSetDist } from "../../dist/PointSetDist.js";
 import { SampleSetDist } from "../../dist/SampleSetDist/index.js";
 import { SymbolicDist } from "../../dist/SymbolicDist.js";
 import { Lambda } from "../../reducer/lambda.js";
+import { ImmutableMap } from "../../utility/immutableMap.js";
 import { SDate } from "../../utility/SDate.js";
 import { SDuration } from "../../utility/SDuration.js";
-import { ImmutableMap } from "../../utility/immutableMap.js";
 import { Domain } from "../../value/domain.js";
 import {
-  Scale,
-  Value,
+  Calculator,
+  Input,
   Plot,
+  Scale,
+  TableChart,
+  Value,
   vArray,
   vBool,
+  vCalculator,
   vDate,
-  vDist,
-  vLambda,
-  vNumber,
   vDict,
-  vScale,
-  vString,
+  vDist,
+  vDomain,
   vDuration,
   vInput,
-  Input,
-  TableChart,
-  vTableChart,
-  Calculator,
-  vCalculator,
+  vLambda,
+  vNumber,
   vPlot,
-  vDomain,
+  vScale,
+  vString,
+  vTableChart,
 } from "../../value/index.js";
 import { frTypesMatchesLengths } from "./helpers.js";
 

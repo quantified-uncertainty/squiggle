@@ -3,6 +3,8 @@ import { FC, useCallback, useMemo } from "react";
 
 import { Env, SqLinearScale, SqScatterPlot } from "@quri/squiggle-lang";
 
+import { ErrorAlert } from "../../../components/Alert.js";
+import { sqScaleToD3 } from "../../../lib/d3/index.js";
 import {
   drawAxes,
   drawCircle,
@@ -15,8 +17,6 @@ import {
   useCanvasCursor,
 } from "../../../lib/hooks/index.js";
 import { canvasClasses } from "../../../lib/utility.js";
-import { ErrorAlert } from "../../../components/Alert.js";
-import { sqScaleToD3 } from "../../../lib/d3/index.js";
 import { PlotTitle } from "../PlotTitle.js";
 
 type Props = {

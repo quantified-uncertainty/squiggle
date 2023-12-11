@@ -14,9 +14,9 @@ import {
   frSampleSetDist,
 } from "../library/registry/frTypes.js";
 import {
-  FnFactory,
   chooseLambdaParamLength,
   doNumberLambdaCall,
+  FnFactory,
   unwrapDistResult,
 } from "../library/registry/helpers.js";
 import { Ok } from "../utility/result.js";

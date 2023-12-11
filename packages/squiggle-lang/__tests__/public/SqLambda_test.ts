@@ -1,7 +1,7 @@
 import {
+  defaultEnvironment,
   SqLambda,
   SqNumberValue,
-  defaultEnvironment,
 } from "../../src/index.js";
 
 describe("SqLambda", () => {

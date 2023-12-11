@@ -9,12 +9,13 @@ import {
 import { MouseTooltip } from "@quri/ui";
 
 import { ModelEvaluator } from "@/relative-values/values/ModelEvaluator";
+
+import { useFilteredItems } from "../hooks";
 import {
   useDefinition,
   useDefinitionClusters,
   useRelativeValuesContext,
 } from "../RelativeValuesProvider";
-import { useFilteredItems } from "../hooks";
 import { ItemTooltip } from "./ItemTooltip";
 
 export const distance = (

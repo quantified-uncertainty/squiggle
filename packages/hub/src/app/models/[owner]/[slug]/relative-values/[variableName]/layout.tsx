@@ -1,7 +1,9 @@
-import { PropsWithChildren, ReactNode } from "react";
+import { PropsWithChildren } from "react";
+
+import { loadPageQuery } from "@/relay/loadPageQuery";
 
 import { RelativeValuesModelLayout } from "./RelativeValuesModelLayout";
-import { loadPageQuery } from "@/relay/loadPageQuery";
+
 import QueryNode, {
   RelativeValuesModelLayoutQuery,
 } from "@/__generated__/RelativeValuesModelLayoutQuery.graphql";

@@ -19,6 +19,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 import { FC } from "react";
+
 import { Icon, IconProps } from "./Icon.js";
 
 // copied from heroicons v1

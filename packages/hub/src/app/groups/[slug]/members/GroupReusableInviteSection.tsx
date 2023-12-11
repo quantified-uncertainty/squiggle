@@ -5,12 +5,13 @@ import { graphql } from "relay-runtime";
 
 import { ClipboardCopyIcon, TextTooltip, useToast } from "@quri/ui";
 
-import { GroupReusableInviteSection$key } from "@/__generated__/GroupReusableInviteSection.graphql";
-import { GroupReusableInviteSection_CreateMutation } from "@/__generated__/GroupReusableInviteSection_CreateMutation.graphql";
-import { GroupReusableInviteSection_DeleteMutation } from "@/__generated__/GroupReusableInviteSection_DeleteMutation.graphql";
 import { H2 } from "@/components/ui/Headers";
 import { MutationButton } from "@/components/ui/MutationButton";
 import { groupInviteLink } from "@/routes";
+
+import { GroupReusableInviteSection$key } from "@/__generated__/GroupReusableInviteSection.graphql";
+import { GroupReusableInviteSection_CreateMutation } from "@/__generated__/GroupReusableInviteSection_CreateMutation.graphql";
+import { GroupReusableInviteSection_DeleteMutation } from "@/__generated__/GroupReusableInviteSection_DeleteMutation.graphql";
 
 type Props = {
   groupRef: GroupReusableInviteSection$key;

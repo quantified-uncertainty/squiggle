@@ -6,9 +6,10 @@ import { FormProvider, useForm } from "react-hook-form";
 import { Button, StyledTab, TextFormField } from "@quri/ui";
 
 import { SlugFormField } from "@/components/ui/SlugFormField";
-import { JSONForm } from "./JSONForm";
+
 import { FormShape } from "./FormShape";
 import { FormSectionHeader, HTMLForm } from "./HTMLForm";
+import { JSONForm } from "./JSONForm";
 
 type Props = {
   defaultValues?: FormShape;

@@ -1,7 +1,8 @@
-import { IconProps, StyledTab } from "@quri/ui";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { FC, ReactNode } from "react";
+
+import { IconProps, StyledTab } from "@quri/ui";
 
 type StyledTabLinkProps = {
   name: string;

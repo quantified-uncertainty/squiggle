@@ -1,5 +1,6 @@
 "use client";
 import { FieldPathByValue, FieldValues } from "react-hook-form";
+import { useRelayEnvironment } from "react-relay";
 import { fetchQuery, graphql } from "relay-runtime";
 
 import { SelectFormField } from "@quri/ui";
@@ -8,7 +9,6 @@ import {
   SelectUserQuery,
   SelectUserQuery$data,
 } from "@/__generated__/SelectUserQuery.graphql";
-import { useRelayEnvironment } from "react-relay";
 
 const Query = graphql`
   query SelectUserQuery($input: UsersQueryInput!) {

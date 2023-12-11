@@ -1,4 +1,5 @@
 import * as fc from "fast-check";
+
 import { testRun } from "./helpers/helpers.js";
 
 describe("cumulative density function of a normal distribution", () => {

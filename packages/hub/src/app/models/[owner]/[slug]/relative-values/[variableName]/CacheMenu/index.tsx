@@ -8,14 +8,15 @@ import {
   Dropdown,
   DropdownMenu,
   DropdownMenuHeader,
-  DropdownMenuSeparator,
   XIcon,
 } from "@quri/ui";
 
-import { RelativeValuesDefinitionRevision$key } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
 import { RelativeValuesDefinitionRevisionFragment } from "@/relative-values/components/RelativeValuesDefinitionRevision";
+
 import { BuildRelativeValuesCacheAction } from "./BuildRelativeValuesCacheAction";
 import { ClearRelativeValuesCacheAction } from "./ClearRelativeValuesCacheAction";
+
+import { RelativeValuesDefinitionRevision$key } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
 import { RelativeValuesModelRevision$data } from "@/__generated__/RelativeValuesModelRevision.graphql";
 
 export const CacheMenu: FC<{

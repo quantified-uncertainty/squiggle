@@ -1,4 +1,5 @@
 import { FC } from "react";
+
 import { CellBox } from "../CellBox";
 
 export const ErrorCell: FC<{ error: string }> = ({ error }) => {

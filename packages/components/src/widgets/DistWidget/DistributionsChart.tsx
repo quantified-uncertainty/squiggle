@@ -33,9 +33,9 @@ import {
   flattenResult,
 } from "../../lib/utility.js";
 import { PlotTitle } from "../PlotWidget/PlotTitle.js";
+import { DistProvider, useVerticalLineValue } from "./DistProvider.js";
 import { SummaryTable } from "./SummaryTable.js";
 import { adjustPdfHeightToScale } from "./utils.js";
-import { DistProvider, useVerticalLineValue } from "./DistProvider.js";
 
 export type DistributionsChartProps = {
   plot: SqDistributionsPlot;

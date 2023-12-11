@@ -5,11 +5,12 @@ import { fetchQuery, graphql } from "relay-runtime";
 
 import { SelectFormField } from "@quri/ui";
 
+import { SelectOwnerOption } from "../SelectOwner";
+
 import {
   SelectRelativeValuesDefinitionQuery,
   SelectRelativeValuesDefinitionQuery$data,
 } from "@/__generated__/SelectRelativeValuesDefinitionQuery.graphql";
-import { SelectOwnerOption } from "../SelectOwner";
 
 const Query = graphql`
   query SelectRelativeValuesDefinitionQuery(

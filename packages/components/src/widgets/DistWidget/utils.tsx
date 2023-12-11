@@ -1,4 +1,5 @@
 import { SqScale, SqShape } from "@quri/squiggle-lang";
+
 /**
  * A function to adjust the height of PDF values in accordance with non-linear scales.
  * This is achieved by multiplying the values by the inverse of the derivative of the scale function at each point.
