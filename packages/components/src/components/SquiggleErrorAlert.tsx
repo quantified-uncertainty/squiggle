@@ -47,12 +47,10 @@ const StackTraceFrame: FC<{ frame: SqFrame }> = ({ frame }) => {
   const location = frame.location();
   const name = frame.name();
   return (
-    <div className="grid grid-cols-[1fr_3fr] gap-x-2">
-      <div className="text-gray-500 font-mono font-medium truncate">
-        {name !== "" && name}
-      </div>
-      {location && <LocationLine location={location} />}
-    </div>
+    <>
+      <div className="text-gray-500 font-mono font-medium truncate">{name}</div>
+      <div>{location && <LocationLine location={location} />}</div>
+    </>
   );
 };
 
@@ -60,9 +58,11 @@ const StackTrace: FC<{ error: SqRuntimeError }> = ({ error }) => {
   const frames = error.getFrameArray();
   return frames.length ? (
     <WithHeader header="Stack Trace">
-      {frames.map((frame, i) => (
-        <StackTraceFrame frame={frame} key={i} />
-      ))}
+      <div className="grid grid-cols-[minmax(60px,max-content),1fr] gap-x-4">
+        {frames.map((frame, i) => (
+          <StackTraceFrame frame={frame} key={i} />
+        ))}
+      </div>
     </WithHeader>
   ) : null;
 };
