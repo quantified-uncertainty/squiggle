@@ -9,6 +9,7 @@ import { Expression } from "../expression/index.js";
 import {
   FnDefinition,
   fnDefinitionToString,
+  showInDocumentation,
   tryCallFnDefinition,
 } from "../library/registry/fnDefinition.js";
 import { FRType } from "../library/registry/frTypes.js";
@@ -175,7 +176,7 @@ export class BuiltinLambda extends BaseLambda {
 
   parameterString() {
     return this._definitions
-      .filter((d) => !d.isAssert)
+      .filter(showInDocumentation)
       .map(fnDefinitionToString)
       .join(" | ");
   }
@@ -196,7 +197,7 @@ export class BuiltinLambda extends BaseLambda {
     const signatures = this._definitions;
     const showNameMatchDefinitions = () => {
       const defsString = signatures
-        .filter((d) => !d.isAssert && !d.deprecated)
+        .filter(showInDocumentation)
         .map(fnDefinitionToString)
         .map((def) => `  ${this.name}${def}\n`)
         .join("");

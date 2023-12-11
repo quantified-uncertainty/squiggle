@@ -26,17 +26,20 @@ export const library = [
       makeDefinition(
         [
           frNamed("data", frArray(frGeneric("A"))),
-          frDict(
-            ["title", frOptional(frString)],
-            [
-              "columns",
-              frArray(
-                frDict(
-                  ["fn", frLambdaTyped([frGeneric("A")], frAny)],
-                  ["name", frOptional(frString)]
-                )
-              ),
-            ]
+          frNamed(
+            "params",
+            frDict(
+              ["title", frOptional(frString)],
+              [
+                "columns",
+                frArray(
+                  frDict(
+                    ["fn", frLambdaTyped([frGeneric("A")], frAny)],
+                    ["name", frOptional(frString)]
+                  )
+                ),
+              ]
+            )
           ),
         ],
         frTableChart,
