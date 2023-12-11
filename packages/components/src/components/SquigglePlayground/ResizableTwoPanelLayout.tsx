@@ -8,11 +8,14 @@ import {
 } from "react";
 
 import { clsx } from "clsx";
+
+import { CSSProperties, FC, ReactNode } from "react";
 import {
   DraggableCore,
   DraggableEvent,
   DraggableEventHandler,
 } from "react-draggable";
+import { useInitialWidth } from "../../lib/hooks/index.js";
 
 const minConstraint = 20;
 

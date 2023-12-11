@@ -1,5 +1,6 @@
-import { builder } from "@/graphql/builder";
 import { Prisma } from "@prisma/client";
+
+import { builder } from "@/graphql/builder";
 
 export const ErrorInterface = builder.interfaceRef<Error>("Error").implement({
   fields: (t) => ({

@@ -2,10 +2,12 @@ import { FC } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { relativeValuesRoute } from "@/routes";
-import { RelativeValuesDefinitionCard$key } from "@/__generated__/RelativeValuesDefinitionCard.graphql";
 import { ScaleIcon } from "@quri/ui";
+
 import { EntityCard } from "@/components/EntityCard";
+import { relativeValuesRoute } from "@/routes";
+
+import { RelativeValuesDefinitionCard$key } from "@/__generated__/RelativeValuesDefinitionCard.graphql";
 
 const Fragment = graphql`
   fragment RelativeValuesDefinitionCard on RelativeValuesDefinition {

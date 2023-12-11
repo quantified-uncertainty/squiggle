@@ -1,9 +1,10 @@
-import { prisma } from "@/prisma";
+import { ZodError } from "zod";
+
 import { builder } from "@/graphql/builder";
+import { prisma } from "@/prisma";
 
 import { Me } from "../types/Me";
 import { validateSlug } from "../utils";
-import { ZodError } from "zod";
 
 builder.mutationField("setUsername", (t) =>
   t.withAuth({ signedIn: true }).field({

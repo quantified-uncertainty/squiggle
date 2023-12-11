@@ -3,9 +3,10 @@
 import { FC } from "react";
 import { graphql, usePaginationFragment } from "react-relay";
 
+import { ModelList } from "@/models/components/ModelList";
+
 import { FrontPageModelList$key } from "@/__generated__/FrontPageModelList.graphql";
 import { FrontPageModelListPaginationQuery } from "@/__generated__/FrontPageModelListPaginationQuery.graphql";
-import { ModelList } from "@/models/components/ModelList";
 
 const Fragment = graphql`
   fragment FrontPageModelList on Query

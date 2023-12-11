@@ -1,13 +1,15 @@
+import { FC } from "react";
+import { useFragment } from "react-relay";
+import { graphql } from "relay-runtime";
+
+import { MutationAction } from "@/components/ui/MutationAction";
+
+import { SetMembershipRoleAction_Group$key } from "@/__generated__/SetMembershipRoleAction_Group.graphql";
+import { SetMembershipRoleAction_Membership$key } from "@/__generated__/SetMembershipRoleAction_Membership.graphql";
 import {
   MembershipRole,
   SetMembershipRoleActionMutation,
 } from "@/__generated__/SetMembershipRoleActionMutation.graphql";
-import { SetMembershipRoleAction_Group$key } from "@/__generated__/SetMembershipRoleAction_Group.graphql";
-import { SetMembershipRoleAction_Membership$key } from "@/__generated__/SetMembershipRoleAction_Membership.graphql";
-import { MutationAction } from "@/components/ui/MutationAction";
-import { FC } from "react";
-import { useFragment } from "react-relay";
-import { graphql } from "relay-runtime";
 
 const Mutation = graphql`
   mutation SetMembershipRoleActionMutation(

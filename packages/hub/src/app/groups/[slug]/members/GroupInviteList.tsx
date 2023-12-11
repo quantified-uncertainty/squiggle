@@ -1,11 +1,14 @@
-import { GroupInviteList$key } from "@/__generated__/GroupInviteList.graphql";
-import { GroupInviteListPaginationQuery } from "@/__generated__/GroupInviteListPaginationQuery.graphql";
-import { LoadMore } from "@/components/LoadMore";
 import { FC } from "react";
 import { usePaginationFragment } from "react-relay";
 import { graphql } from "relay-runtime";
-import { GroupInviteCard } from "./GroupInviteCard";
+
+import { LoadMore } from "@/components/LoadMore";
 import { H2 } from "@/components/ui/Headers";
+
+import { GroupInviteCard } from "./GroupInviteCard";
+
+import { GroupInviteList$key } from "@/__generated__/GroupInviteList.graphql";
+import { GroupInviteListPaginationQuery } from "@/__generated__/GroupInviteListPaginationQuery.graphql";
 
 const fragment = graphql`
   fragment GroupInviteList on Group

@@ -5,12 +5,14 @@ import { graphql } from "relay-runtime";
 
 import { LockIcon } from "@quri/ui";
 
-import { AdminPageQuery } from "@/__generated__/AdminPageQuery.graphql";
 import { H1 } from "@/components/ui/Headers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
+
 import { RebuildSearchIndex } from "./RebuildSearchIndex";
 import { UpgradeModels } from "./UpgradeModels";
+
+import { AdminPageQuery } from "@/__generated__/AdminPageQuery.graphql";
 
 const Query = graphql`
   query AdminPageQuery {

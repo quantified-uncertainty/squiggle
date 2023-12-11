@@ -1,6 +1,6 @@
 import { clsx } from "clsx";
 
-import { SqError, SqValue, result } from "@quri/squiggle-lang";
+import { result, SqError, SqValue } from "@quri/squiggle-lang";
 import { TableCellsIcon } from "@quri/ui";
 
 import { PlaygroundSettings } from "../components/PlaygroundSettings.js";

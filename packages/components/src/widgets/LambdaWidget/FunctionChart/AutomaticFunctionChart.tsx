@@ -2,6 +2,7 @@ import { FC, useState } from "react";
 
 import {
   Env,
+  result,
   SqDistFnPlot,
   SqDomain,
   SqError,
@@ -9,14 +10,13 @@ import {
   SqLinearScale,
   SqNumericFnPlot,
   SqNumericRangeDomain,
-  result,
 } from "@quri/squiggle-lang";
 
 import { MessageAlert } from "../../../components/Alert.js";
 import { ErrorBoundary } from "../../../components/ErrorBoundary.js";
 import {
-  PlaygroundSettings,
   generateDistributionPlotSettings,
+  PlaygroundSettings,
 } from "../../../components/PlaygroundSettings.js";
 import { SquiggleErrorAlert } from "../../../components/SquiggleErrorAlert.js";
 import { DistFunctionChart } from "./DistFunctionChart.js";

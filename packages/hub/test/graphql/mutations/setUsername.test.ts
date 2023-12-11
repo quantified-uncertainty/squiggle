@@ -1,9 +1,5 @@
 import { graphql } from "../../gql-gen";
-import {
-  createRunners,
-  executeCommonOperation,
-  setCurrentUserObject,
-} from "../helpers";
+import { createRunners, setCurrentUserObject } from "../helpers";
 
 const SetUsernameTest = graphql(/* GraphQL */ `
   mutation SetUsernameTest($username: String!) {

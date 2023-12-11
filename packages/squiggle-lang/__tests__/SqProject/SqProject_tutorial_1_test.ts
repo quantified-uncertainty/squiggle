@@ -1,7 +1,8 @@
+import "../helpers/toBeOkOutput.js";
+
 import { defaultEnvironment, run } from "../../src/index.js";
 import { SqProject } from "../../src/public/SqProject/index.js";
 import { toStringResult } from "../../src/public/SqValue/index.js";
-import "../helpers/toBeOkOutput.js";
 
 describe("Single source SqProject", () => {
   test("run", async () => {

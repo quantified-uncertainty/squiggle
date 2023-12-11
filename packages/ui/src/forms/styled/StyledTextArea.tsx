@@ -1,6 +1,6 @@
-import { TextareaHTMLAttributes, forwardRef } from "react";
-import TextareaAutosize from "react-textarea-autosize";
 import { clsx } from "clsx";
+import { forwardRef, TextareaHTMLAttributes } from "react";
+import TextareaAutosize from "react-textarea-autosize";
 
 export type StyledTextAreaProps = Omit<
   TextareaHTMLAttributes<HTMLTextAreaElement>,

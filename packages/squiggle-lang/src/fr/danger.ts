@@ -2,7 +2,6 @@
 
 import jstat from "jstat";
 
-import * as SymbolicDist from "../dist/SymbolicDist.js";
 import {
   scaleLog,
   scaleLogWithThreshold,
@@ -11,6 +10,7 @@ import {
   scaleMultiply,
   scalePower,
 } from "../dist/distOperations/scaleOperations.js";
+import * as SymbolicDist from "../dist/SymbolicDist.js";
 import { REArgumentError, REOther } from "../errors/messages.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";

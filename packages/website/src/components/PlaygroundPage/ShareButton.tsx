@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { ClipboardCopyIcon, Button } from "@quri/ui";
+import { Button, ClipboardCopyIcon } from "@quri/ui";
 
 export const ShareButton = () => {
   const [isCopied, setIsCopied] = useState(false);

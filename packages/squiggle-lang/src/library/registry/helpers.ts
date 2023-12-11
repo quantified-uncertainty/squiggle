@@ -1,9 +1,9 @@
 import { BaseDist } from "../../dist/BaseDist.js";
 import { DistError } from "../../dist/DistError.js";
+import { Env } from "../../dist/env.js";
 import * as SampleSetDist from "../../dist/SampleSetDist/index.js";
 import * as SymbolicDist from "../../dist/SymbolicDist.js";
 import { PointMass } from "../../dist/SymbolicDist.js";
-import { Env } from "../../dist/env.js";
 import {
   REDistributionError,
   REOperationError,
@@ -20,13 +20,13 @@ import { Value } from "../../value/index.js";
 import { FRFunction } from "./core.js";
 import { FnDefinition, makeDefinition } from "./fnDefinition.js";
 import {
-  FRType,
   frBool,
   frDist,
   frDistOrNumber,
   frNumber,
   frSampleSetDist,
   frString,
+  FRType,
 } from "./frTypes.js";
 
 type SimplifiedArgs = Omit<FRFunction, "nameSpace" | "requiresNamespace"> &

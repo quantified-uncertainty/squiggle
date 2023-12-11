@@ -1,5 +1,11 @@
 "use client";
-import { FC, Suspense, lazy } from "react";
+import { FC, lazy, Suspense } from "react";
+
+/*
+ * Please don't change the formatting of these imports and the following `componentByVersion` declaration unless you have to.
+ * It's edited with babel transformation in `publish-all.ts` script.
+ */
+import { type SquigglePlaygroundProps as SquigglePlaygroundProps_dev } from "@quri/squiggle-components";
 
 /*
  * We have to type all playground components explicitly; otherwise, TypeScript will complain with TS2742 "likely not portable" error.
@@ -13,12 +19,6 @@ import {
   SquigglePlaygroundProps_0_8_6,
 } from "./oldPlaygroundTypes.js";
 import { LazyVersionedComponents, VersionedComponentProps } from "./types.js";
-
-/*
- * Please don't change the formatting of these imports and the following `componentByVersion` declaration unless you have to.
- * It's edited with babel transformation in `publish-all.ts` script.
- */
-import { type SquigglePlaygroundProps as SquigglePlaygroundProps_dev } from "@quri/squiggle-components";
 
 const componentByVersion = {
   "0.8.5": lazy(async () => ({

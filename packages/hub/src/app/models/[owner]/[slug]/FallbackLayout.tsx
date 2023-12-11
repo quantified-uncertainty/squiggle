@@ -1,7 +1,9 @@
 "use client";
 
-import { EntityLayout } from "@/components/EntityLayout";
 import { FC } from "react";
+
+import { EntityLayout } from "@/components/EntityLayout";
+
 import { ModelEntityNodes } from "./ModelEntityNodes";
 
 type Props = {

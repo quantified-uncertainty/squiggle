@@ -4,10 +4,11 @@ import { graphql } from "relay-runtime";
 
 import { CodeBracketIcon } from "@quri/ui";
 
-import { ModelCard$key } from "@/__generated__/ModelCard.graphql";
 import { EntityCard } from "@/components/EntityCard";
-import { modelRoute } from "@/routes";
 import { ExportsDropdown, totalImportLength } from "@/lib/ExportsDropdown";
+import { modelRoute } from "@/routes";
+
+import { ModelCard$key } from "@/__generated__/ModelCard.graphql";
 
 const Fragment = graphql`
   fragment ModelCard on Model {

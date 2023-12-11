@@ -4,6 +4,7 @@ import { ConnectionHandler, graphql } from "relay-runtime";
 import { TrashIcon } from "@quri/ui";
 
 import { MutationAction } from "@/components/ui/MutationAction";
+
 import { CancelInviteActionMutation } from "@/__generated__/CancelInviteActionMutation.graphql";
 
 type Props = {

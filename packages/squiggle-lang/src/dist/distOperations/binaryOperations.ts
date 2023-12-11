@@ -1,10 +1,10 @@
 import { AlgebraicOperation } from "../../operation.js";
 import { accumulateWithError, pairwiseWithError } from "../../utility/E_A.js";
-import { result, Ok, bind } from "../../utility/result.js";
+import { bind, Ok, result } from "../../utility/result.js";
 import { BaseDist } from "../BaseDist.js";
 import { DistError } from "../DistError.js";
-import { PointMass } from "../SymbolicDist.js";
 import { Env } from "../env.js";
+import { PointMass } from "../SymbolicDist.js";
 import { algebraicCombination } from "./algebraicCombination.js";
 import { pointwiseCombination } from "./pointwiseCombination.js";
 

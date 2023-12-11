@@ -1,12 +1,12 @@
-import { Calculator } from "../../value/index.js";
 import { Env } from "../../dist/env.js";
 import * as Result from "../../utility/result.js";
-
+import { Calculator } from "../../value/index.js";
 import { SqError, SqOtherError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
-import { SqLambda } from "./SqLambda.js";
 import { SqValue, wrapValue } from "./index.js";
 import { SqInput, wrapInput } from "./SqInput.js";
+import { SqLambda } from "./SqLambda.js";
+
 export class SqCalculator {
   constructor(
     private _value: Calculator,

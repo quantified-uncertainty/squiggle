@@ -1,5 +1,6 @@
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
+
 import { NotFoundError } from "../errors/NotFoundError";
 import { User } from "../types/User";
 
