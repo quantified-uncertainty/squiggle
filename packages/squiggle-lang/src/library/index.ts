@@ -1,15 +1,20 @@
-import { REOther } from "../errors/messages.js";
-import { INDEX_LOOKUP_FUNCTION } from "../expression/constants.js";
-import { BuiltinLambda, Lambda } from "../reducer/lambda.js";
-import { vLambda } from "../value/index.js";
-
-import { Bindings } from "../reducer/stack.js";
-import { ImmutableMap } from "../utility/immutableMap.js";
-import { makeMathConstants } from "./math.js";
-import { makeSquiggleBindings, registry } from "./registry/index.js";
-import { makeVersionConstant } from "./version.js";
-import { frAny } from "./registry/frTypes.js";
-import { makeDefinition } from "./registry/fnDefinition.js";
+import { REOther } from '../errors/messages.js';
+import { INDEX_LOOKUP_FUNCTION } from '../expression/constants.js';
+import {
+  BuiltinLambda,
+  Lambda,
+} from '../reducer/lambda.js';
+import { Bindings } from '../reducer/stack.js';
+import { ImmutableMap } from '../utility/immutableMap.js';
+import { vLambda } from '../value/index.js';
+import { makeMathConstants } from './math.js';
+import { makeDefinition } from './registry/fnDefinition.js';
+import { frAny } from './registry/frTypes.js';
+import {
+  makeSquiggleBindings,
+  registry,
+} from './registry/index.js';
+import { makeVersionConstant } from './version.js';
 
 const definitions = [
   makeDefinition([frAny, frAny], frAny, ([obj, key]) => {
@@ -42,7 +47,7 @@ function makeStdLib(): Bindings {
   for (const name of registry.allNames()) {
     // We convert all fns of Foo.make() to also allow for Foo().
     const moduleConstructorName = toModuleConstructor(name);
-    if (!!moduleConstructorName) {
+    if (moduleConstructorName) {
       res = res.set(moduleConstructorName, vLambda(registry.makeLambda(name)));
     }
 
