@@ -255,7 +255,7 @@ dollarIdentifierWithModule 'identifier'
     final:('.' @$dollarIdentifier)?
   {
     let modifiers = [head];
-    !!final && modifiers.push(final);
+    Boolean(final) && modifiers.push(final);
     const modifiedIdentifier = modifiers.join('.');
     return h.nodeIdentifier(modifiedIdentifier, location());
   }
