@@ -128,7 +128,7 @@ export class UserDefinedLambda extends BaseLambda {
   }
 
   toString() {
-    return `lambda(${this._getParameterNames().join(",")}=>internal code)`;
+    return `(${this._getParameterNames().join(",")}) => internal code`;
   }
 
   parameterCounts() {
@@ -200,7 +200,11 @@ export class BuiltinLambda extends BaseLambda {
         .map(fnDefinitionToString)
         .map((def) => `  ${this.name}${def}\n`)
         .join("");
-      return `There are function matches for ${this.name}(), but with different arguments:\n${defsString}`;
+      return `There are function matches for ${
+        this.name
+      }(), but with different arguments:\n${defsString}Was given arguments: (${args.join(
+        ","
+      )})`;
     };
 
     for (const signature of signatures) {
