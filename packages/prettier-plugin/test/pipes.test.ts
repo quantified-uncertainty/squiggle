@@ -1,4 +1,4 @@
-import { format } from "./helpers.js";
+import { format } from './helpers.js';
 
 describe("pipes", () => {
   test("simple", async () => {
@@ -21,15 +21,15 @@ describe("pipes", () => {
   test("multi-line", async () => {
     expect(
       await format(
-        "pipe = 5 -> {|foobar|foobar} -> {|foobar|foobar} -> {|foobar|foobar} -> {|foobar|foobar} -> {|foobar|foobar} -> {|foobar|foobar} -> {|foobar|foobar} -> {|foobar|foobar}"
+        "pipe = 5 -> {|foobar| foobar} -> {|foobar| foobar} -> {|foobar| foobar} -> {|foobar| foobar} -> {|foobar| foobar} -> {|foobar| foobar} -> {|foobar| foobar} -> {|foobar| foobar}"
       )
     ).toBe(
-      `pipe = 5 -> {|foobar|foobar} -> {|foobar|foobar} -> {|foobar|foobar}
-  -> {|foobar|foobar}
-  -> {|foobar|foobar}
-  -> {|foobar|foobar}
-  -> {|foobar|foobar}
-  -> {|foobar|foobar}
+      `pipe = 5 -> {|foobar| foobar} -> {|foobar| foobar} -> {|foobar| foobar}
+  -> {|foobar| foobar}
+  -> {|foobar| foobar}
+  -> {|foobar| foobar}
+  -> {|foobar| foobar}
+  -> {|foobar| foobar}
 `
     );
   });
