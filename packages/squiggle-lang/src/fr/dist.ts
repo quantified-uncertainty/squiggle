@@ -7,6 +7,7 @@ import {
   frDict,
   frDist,
   frDistSymbolic,
+  frNamed,
   frNumber,
   frSampleSetDist,
 } from "../library/registry/frTypes.js";
@@ -224,7 +225,11 @@ export const library: FRFunction[] = [
     examples: ["triangular(3, 5, 10)"],
     definitions: [
       makeDefinition(
-        [frNumber, frNumber, frNumber],
+        [
+          frNamed("min", frNumber),
+          frNamed("mode", frNumber),
+          frNamed("max", frNumber),
+        ],
         frSampleSetDist,
         ([low, medium, high], { environment }) => {
           const result = SymbolicDist.Triangular.make({ low, medium, high });

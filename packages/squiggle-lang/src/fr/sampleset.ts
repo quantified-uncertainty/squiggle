@@ -115,7 +115,7 @@ const baseLibrary = [
     output: "Dist",
     definitions: [
       makeDefinition(
-        [frSampleSetDist, frLambdaTyped([frNumber], frNumber)],
+        [frSampleSetDist, frNamed("fn", frLambdaTyped([frNumber], frNumber))],
         frSampleSetDist,
         ([dist, lambda], context) => {
           return unwrapDistResult(
@@ -138,7 +138,7 @@ const baseLibrary = [
         [
           frSampleSetDist,
           frSampleSetDist,
-          frLambdaTyped([frNumber, frNumber], frNumber),
+          frNamed("fn", frLambdaTyped([frNumber, frNumber], frNumber)),
         ],
         frSampleSetDist,
         ([dist1, dist2, lambda], context) => {
@@ -168,7 +168,10 @@ const baseLibrary = [
           frSampleSetDist,
           frSampleSetDist,
           frSampleSetDist,
-          frLambdaTyped([frNumber, frNumber, frNumber], frNumber),
+          frNamed(
+            "fn",
+            frLambdaTyped([frNumber, frNumber, frNumber], frNumber)
+          ),
         ],
         frSampleSetDist,
         ([dist1, dist2, dist3, lambda], context) => {
@@ -201,7 +204,7 @@ const baseLibrary = [
       makeDefinition(
         [
           frArray(frSampleSetDist),
-          frLambdaTyped([frArray(frNumber)], frNumber),
+          frNamed("fn", frLambdaTyped([frArray(frNumber)], frNumber)),
         ],
         frSampleSetDist,
         ([dists, lambda], context) => {

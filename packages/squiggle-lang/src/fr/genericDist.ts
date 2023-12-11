@@ -16,6 +16,7 @@ import {
   frArray,
   frDist,
   frDistOrNumber,
+  frNamed,
   frNumber,
 } from "../library/registry/frTypes.js";
 import {
@@ -173,7 +174,7 @@ export const library: FRFunction[] = [
   maker.fromDefinition(
     "truncate",
     makeDefinition(
-      [frDist, frNumber, frNumber],
+      [frDist, frNamed("left", frNumber), frNamed("right", frNumber)],
       frDist,
       ([dist, left, right], { environment }) =>
         unwrapDistResult(dist.truncate(left, right, { env: environment }))

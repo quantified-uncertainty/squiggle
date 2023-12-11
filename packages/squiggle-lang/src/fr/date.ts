@@ -5,6 +5,7 @@ import {
   frDict,
   frDomain,
   frDuration,
+  frNamed,
   frNumber,
   frString,
 } from "../library/registry/frTypes.js";
@@ -51,7 +52,11 @@ export const library = [
       }),
 
       makeDefinition(
-        [frNumber, frNumber, frNumber],
+        [
+          frNamed("year", frNumber),
+          frNamed("month", frNumber),
+          frNamed("day", frNumber),
+        ],
         frDate,
         ([yr, month, date]) => {
           return SDate.fromYearMonthDay(yr, month, date);
