@@ -2,11 +2,13 @@
 import { FC } from "react";
 import { graphql } from "relay-runtime";
 
-import { GroupPageQuery } from "@/__generated__/GroupPageQuery.graphql";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
+
 import { GroupModelList } from "./GroupModelList";
+
+import { GroupPageQuery } from "@/__generated__/GroupPageQuery.graphql";
 
 const Query = graphql`
   query GroupPageQuery($slug: String!) {

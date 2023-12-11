@@ -1,11 +1,11 @@
-import fs from "fs";
-import util from "util";
-import { OutputMode, run } from "./utils.js";
-
 import { Command } from "@commander-js/extra-typings";
+import fs from "fs";
 import open from "open";
+import util from "util";
+
 import { parse } from "../public/parse.js";
 import { red } from "./colors.js";
+import { OutputMode, run } from "./utils.js";
 
 export function makeProgram() {
   const program = new Command();

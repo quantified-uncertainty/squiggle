@@ -1,4 +1,4 @@
-import { makeDefinition } from '../library/registry/fnDefinition.js';
+import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
   frBool,
@@ -9,12 +9,9 @@ import {
   frNumber,
   frOptional,
   frString,
-} from '../library/registry/frTypes.js';
-import { FnFactory } from '../library/registry/helpers.js';
-import {
-  Calculator,
-  vCalculator,
-} from '../value/index.js';
+} from "../library/registry/frTypes.js";
+import { FnFactory } from "../library/registry/helpers.js";
+import { Calculator, vCalculator } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Calculator",

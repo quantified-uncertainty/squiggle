@@ -1,4 +1,3 @@
-import { Button, Modal } from "@quri/ui";
 import { BaseSyntheticEvent, PropsWithChildren, useEffect } from "react";
 import {
   FieldPath,
@@ -6,6 +5,8 @@ import {
   FormProvider,
   UseFormReturn,
 } from "react-hook-form";
+
+import { Button, Modal } from "@quri/ui";
 
 type Props<TFieldValues extends FieldValues> = PropsWithChildren<{
   onSubmit: (event?: BaseSyntheticEvent) => void;

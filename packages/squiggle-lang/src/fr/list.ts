@@ -4,8 +4,8 @@ import sortBy from "lodash/sortBy.js";
 
 import { REArgumentError, REOther } from "../errors/messages.js";
 import {
-  makeDefinition,
   makeAssertDefinition,
+  makeDefinition,
 } from "../library/registry/fnDefinition.js";
 import {
   frAny,
@@ -19,12 +19,12 @@ import {
   frString,
   frTuple,
 } from "../library/registry/frTypes.js";
-import { FnFactory, doBinaryLambdaCall } from "../library/registry/helpers.js";
+import { doBinaryLambdaCall, FnFactory } from "../library/registry/helpers.js";
 import { ReducerContext } from "../reducer/context.js";
 import { Lambda } from "../reducer/lambda.js";
 import { shuffle, unzip, zip } from "../utility/E_A.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
-import { Value, uniq, uniqBy, vNumber } from "../value/index.js";
+import { uniq, uniqBy, Value, vNumber } from "../value/index.js";
 
 export function _map(
   array: readonly Value[],

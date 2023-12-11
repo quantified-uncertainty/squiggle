@@ -1,7 +1,6 @@
-import { readFile, writeFile } from "node:fs/promises";
-
 import babel from "@babel/core";
 import babelParser from "@babel/parser";
+import { readFile, writeFile } from "node:fs/promises";
 
 import { exec } from "./lib.js";
 

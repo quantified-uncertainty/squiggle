@@ -1,20 +1,19 @@
-import { FloatingPortal, flip, offset, useFloating } from "@floating-ui/react";
+import { flip, FloatingPortal, offset, useFloating } from "@floating-ui/react";
 import * as d3 from "d3";
 import { FC, useCallback, useContext, useMemo, useRef } from "react";
 
 import {
   Env,
+  result,
   SqDistFnPlot,
   SqDistributionsPlot,
   SqError,
   SqLinearScale,
   SqOtherError,
   SqValue,
-  result,
 } from "@quri/squiggle-lang";
 import { TailwindContext } from "@quri/ui";
 
-import { DistributionsChart } from "../../DistWidget/DistributionsChart.js";
 import { sqScaleToD3 } from "../../../lib/d3/index.js";
 import { CartesianFrame } from "../../../lib/draw/CartesianFrame.js";
 import {
@@ -25,6 +24,7 @@ import {
 import { useCanvas, useCanvasCursor } from "../../../lib/hooks/index.js";
 import { DrawContext } from "../../../lib/hooks/useCanvas.js";
 import { canvasClasses, unwrapOrFailure } from "../../../lib/utility.js";
+import { DistributionsChart } from "../../DistWidget/DistributionsChart.js";
 import { PlotTitle } from "../../PlotWidget/PlotTitle.js";
 import { ImageErrors } from "./ImageErrors.js";
 import { getFunctionImage } from "./utils.js";

@@ -1,4 +1,3 @@
-import * as SymbolicDist from "../dist/SymbolicDist.js";
 import {
   algebraicCumProd,
   algebraicCumSum,
@@ -10,6 +9,7 @@ import {
   BinaryOperation,
   binaryOperations,
 } from "../dist/distOperations/index.js";
+import * as SymbolicDist from "../dist/SymbolicDist.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {

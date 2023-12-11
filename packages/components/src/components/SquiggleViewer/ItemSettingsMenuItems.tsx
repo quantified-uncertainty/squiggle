@@ -18,14 +18,14 @@ import {
   viewSettingsSchema,
 } from "../PlaygroundSettings.js";
 import { PlaygroundContext } from "../SquigglePlayground/index.js";
+import { pathAsString } from "./utils.js";
 import {
-  ViewerContext,
   useHasLocalSettings,
   useMergedSettings,
   useResetStateSettings,
   useSetLocalItemState,
+  ViewerContext,
 } from "./ViewerProvider.js";
-import { pathAsString } from "./utils.js";
 
 type Props = {
   value: SqValueWithContext;

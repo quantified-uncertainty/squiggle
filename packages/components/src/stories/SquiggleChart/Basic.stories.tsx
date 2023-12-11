@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { SquiggleChart } from "../../components/SquiggleChart.js";
 import { SqValuePath } from "@quri/squiggle-lang";
+
+import { SquiggleChart } from "../../components/SquiggleChart.js";
 
 const meta = {
   component: SquiggleChart,

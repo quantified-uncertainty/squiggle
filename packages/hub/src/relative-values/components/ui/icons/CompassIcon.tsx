@@ -1,4 +1,5 @@
 import { FC } from "react";
+
 import { Icon, IconProps } from "./Icon";
 
 export const CompassIcon: FC<IconProps> = (props) => (

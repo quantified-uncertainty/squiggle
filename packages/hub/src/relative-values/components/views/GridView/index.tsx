@@ -6,13 +6,15 @@ import { RelativeValueCell } from "@quri/squiggle-components";
 import { cartesianProduct } from "@/relative-values/lib/utils";
 import { Item } from "@/relative-values/types";
 import {
-  ModelEvaluator,
   getParamPercentiles,
+  ModelEvaluator,
 } from "@/relative-values/values/ModelEvaluator";
 import { RelativeValue } from "@/relative-values/values/types";
+
 import { DropdownButton } from "../../../../components/ui/DropdownButton";
 import { CellBox } from "../CellBox";
 import { Header } from "../Header";
+import { useFilteredItems, useSortedItems } from "../hooks";
 import { RelativeCell } from "../RelativeCell";
 import {
   useDefinition,
@@ -20,7 +22,6 @@ import {
   useRelativeValuesContext,
   useRelativeValuesDispatch,
 } from "../RelativeValuesProvider";
-import { useFilteredItems, useSortedItems } from "../hooks";
 import { AxisMenu } from "./AxisMenu";
 import { GridModeControls } from "./GridModeControls";
 

@@ -1,8 +1,8 @@
-import { prisma } from "@/prisma";
 import { builder } from "@/graphql/builder";
+import { prisma } from "@/prisma";
 
-import { Model } from "../types/Model";
 import { getSelf } from "../helpers/userHelpers";
+import { Model } from "../types/Model";
 import { decodeGlobalIdWithTypename } from "../utils";
 
 builder.mutationField("adminUpdateModelVersion", (t) =>

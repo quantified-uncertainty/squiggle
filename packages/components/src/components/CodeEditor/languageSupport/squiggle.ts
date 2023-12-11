@@ -4,11 +4,11 @@ import {
   snippetCompletion,
 } from "@codemirror/autocomplete";
 import {
-  LRLanguage,
-  LanguageSupport,
   foldInside,
   foldNodeProp,
   indentNodeProp,
+  LanguageSupport,
+  LRLanguage,
   syntaxTree,
 } from "@codemirror/language";
 import { SyntaxNode, Tree } from "@lezer/common";

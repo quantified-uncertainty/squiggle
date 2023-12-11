@@ -3,11 +3,12 @@
 import { FC } from "react";
 import { graphql } from "react-relay";
 
-import { ViewModelPageQuery } from "@/__generated__/ViewModelPageQuery.graphql";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
 import { ViewSquiggleSnippet } from "@/squiggle/components/ViewSquiggleSnippet";
+
+import { ViewModelPageQuery } from "@/__generated__/ViewModelPageQuery.graphql";
 
 export const ViewModelPage: FC<{
   query: SerializablePreloadedQuery<ViewModelPageQuery>;

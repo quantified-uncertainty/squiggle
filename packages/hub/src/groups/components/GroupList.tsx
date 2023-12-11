@@ -2,9 +2,11 @@
 import { FC } from "react";
 import { graphql, useFragment } from "react-relay";
 
-import { GroupList$key } from "@/__generated__/GroupList.graphql";
 import { LoadMore } from "@/components/LoadMore";
+
 import { GroupCard } from "./GroupCard";
+
+import { GroupList$key } from "@/__generated__/GroupList.graphql";
 
 const Fragment = graphql`
   fragment GroupList on GroupConnection {

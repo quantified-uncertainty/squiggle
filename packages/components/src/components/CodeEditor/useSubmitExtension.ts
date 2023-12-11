@@ -1,4 +1,5 @@
 import { EditorView, keymap } from "@codemirror/view";
+
 import { useReactiveExtension } from "./codemirrorHooks.js";
 
 export function useSubmitExtension(

@@ -1,6 +1,7 @@
 import { clsx } from "clsx";
 import { CSSProperties, FC, ReactNode } from "react";
 import { ResizableBox } from "react-resizable";
+
 import { useInitialWidth } from "../../lib/hooks/index.js";
 
 type Props = {

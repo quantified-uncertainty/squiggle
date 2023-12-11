@@ -5,7 +5,6 @@ import { graphql } from "relay-runtime";
 
 import { Button, PlusIcon, UserIcon } from "@quri/ui";
 
-import { UserLayoutQuery } from "@/__generated__/UserLayoutQuery.graphql";
 import { H1 } from "@/components/ui/Headers";
 import { StyledTabLink } from "@/components/ui/StyledTabLink";
 import { useUsername } from "@/hooks/useUsername";
@@ -20,6 +19,8 @@ import {
   userGroupsRoute,
   userRoute,
 } from "@/routes";
+
+import { UserLayoutQuery } from "@/__generated__/UserLayoutQuery.graphql";
 
 const Query = graphql`
   query UserLayoutQuery($username: String!) {

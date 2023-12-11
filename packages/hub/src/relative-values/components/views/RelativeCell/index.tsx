@@ -1,9 +1,11 @@
-import { RelativeValueCell } from "@quri/squiggle-components";
 import { FC, memo } from "react";
 
+import { RelativeValueCell } from "@quri/squiggle-components";
+
 import { ModelEvaluator } from "@/relative-values/values/ModelEvaluator";
-import { ErrorCell } from "./ErrorCell";
+
 import { CellBox } from "../CellBox";
+import { ErrorCell } from "./ErrorCell";
 
 export const RelativeCell: FC<{
   id1: string;

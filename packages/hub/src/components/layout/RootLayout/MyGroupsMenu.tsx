@@ -3,9 +3,10 @@ import { graphql, useFragment } from "react-relay";
 
 import { DropdownMenuHeader, GroupIcon, PlusIcon } from "@quri/ui";
 
-import { MyGroupsMenu$key } from "@/__generated__/MyGroupsMenu.graphql";
 import { DropdownMenuNextLinkItem } from "@/components/ui/DropdownMenuNextLinkItem";
 import { groupRoute, newGroupRoute } from "@/routes";
+
+import { MyGroupsMenu$key } from "@/__generated__/MyGroupsMenu.graphql";
 
 type Props = {
   groupsRef: MyGroupsMenu$key;

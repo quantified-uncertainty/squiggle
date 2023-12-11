@@ -1,9 +1,9 @@
 import { SDate } from "../../utility/SDate.js";
 import {
   CommonScaleArgs,
+  Scale,
   SCALE_POWER_DEFAULT_CONSTANT,
   SCALE_SYMLOG_DEFAULT_CONSTANT,
-  Scale,
   vScale,
 } from "../../value/index.js";
 import { SqDateValue, SqNumberValue, SqValue } from "./index.js";

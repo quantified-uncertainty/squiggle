@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 // based on https://github.com/relayjs/relay-examples/blob/main/issue-tracker-next-v13/src/relay/loadSerializableQuery.ts
 import {
   GraphQLResponse,
@@ -6,8 +7,8 @@ import {
   VariablesOf,
 } from "relay-runtime";
 import { ConcreteRequest } from "relay-runtime/lib/util/RelayConcreteNode";
+
 import { networkFetch } from "./environment";
-import { headers } from "next/headers";
 
 export interface SerializablePreloadedQuery<TQuery extends OperationType> {
   params: RequestParameters;

@@ -4,10 +4,11 @@ import { ConnectionHandler, graphql } from "relay-runtime";
 
 import { DropdownMenuAsyncActionItem, TrashIcon } from "@quri/ui";
 
-import { DeleteMembershipActionMutation } from "@/__generated__/DeleteMembershipActionMutation.graphql";
+import { useAsyncMutation } from "@/hooks/useAsyncMutation";
+
 import { DeleteMembershipAction_Group$key } from "@/__generated__/DeleteMembershipAction_Group.graphql";
 import { DeleteMembershipAction_Membership$key } from "@/__generated__/DeleteMembershipAction_Membership.graphql";
-import { useAsyncMutation } from "@/hooks/useAsyncMutation";
+import { DeleteMembershipActionMutation } from "@/__generated__/DeleteMembershipActionMutation.graphql";
 
 const Mutation = graphql`
   mutation DeleteMembershipActionMutation(

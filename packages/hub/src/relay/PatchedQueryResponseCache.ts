@@ -8,13 +8,12 @@
 
 // Patched for Squiggle Hub with `delete` method and converted to Typescript.
 
+import invariant from "invariant";
 import {
   GraphQLResponse,
   GraphQLSingularResponse,
   Variables,
 } from "relay-runtime";
-
-import invariant from "invariant";
 
 type Response = {
   fetchTime: number;

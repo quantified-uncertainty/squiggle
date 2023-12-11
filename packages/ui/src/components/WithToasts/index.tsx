@@ -1,16 +1,17 @@
 "use client";
+import { clsx } from "clsx";
 import {
+  createContext,
   FC,
   PropsWithChildren,
   Reducer,
-  createContext,
   useCallback,
   useContext,
   useReducer,
 } from "react";
-import { clsx } from "clsx";
-import { ErrorIcon } from "../../icons/ErrorIcon.js";
+
 import { CheckCircleIcon } from "../../icons/CheckCircleIcon.js";
+import { ErrorIcon } from "../../icons/ErrorIcon.js";
 
 type ToastShape = {
   text: string;

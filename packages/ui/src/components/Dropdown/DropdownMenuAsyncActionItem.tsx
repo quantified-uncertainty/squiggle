@@ -2,8 +2,8 @@
 import { FC, useState } from "react";
 
 import { IconProps } from "../../icons/Icon.js";
-import { DropdownMenuItemLayout } from "./DropdownMenuItemLayout.js";
 import { useCloseDropdown } from "./DropdownContext.js";
+import { DropdownMenuItemLayout } from "./DropdownMenuItemLayout.js";
 
 type AsyncActionItemProps = {
   icon?: FC<IconProps>;

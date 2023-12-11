@@ -5,11 +5,10 @@ import { createContext } from "../../reducer/context.js";
 import { Lambda } from "../../reducer/lambda.js";
 import * as Result from "../../utility/result.js";
 import { result } from "../../utility/result.js";
-
 import { SqError, SqOtherError, SqRuntimeError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
-import { SqDomain, wrapDomain } from "./SqDomain.js";
 import { SqValue, wrapValue } from "./index.js";
+import { SqDomain, wrapDomain } from "./SqDomain.js";
 
 export type SqLambdaParameter = {
   name: string;

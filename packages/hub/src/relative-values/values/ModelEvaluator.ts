@@ -1,10 +1,11 @@
+import { z } from "zod";
+
 import {
   result,
   SqLambda,
   SqProject,
   SqStringValue,
 } from "@quri/squiggle-lang";
-import { z } from "zod";
 
 import { cartesianProduct } from "../lib/utils";
 import {
@@ -13,6 +14,7 @@ import {
   RelativeValuesCacheRecord,
   relativeValueSchema,
 } from "./types";
+
 import { RelativeValuesModelRevision$data } from "@/__generated__/RelativeValuesModelRevision.graphql";
 
 export const extractOkValues = <A, B>(items: result<A, B>[]): A[] => {

@@ -1,23 +1,25 @@
 import clsx from "clsx";
 import { FC, Fragment, useState } from "react";
 
-import { RelativeValuesDefinitionRevision$data } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
 import { DropdownButton } from "@/components/ui/DropdownButton";
 import { CompassIcon } from "@/relative-values/components/ui/icons/CompassIcon";
 import { Item } from "@/relative-values/types";
 import { ModelEvaluator } from "@/relative-values/values/ModelEvaluator";
+
 import { ClusterIcon } from "../../common/ClusterIcon";
 import { CellBox } from "../CellBox";
 import { AxisMenu } from "../GridView/AxisMenu";
+import { useFilteredItems, useSortedItems } from "../hooks";
 import { RelativeCell } from "../RelativeCell";
 import {
   useDefinition,
   useDefinitionClusters,
   useRelativeValuesContext,
 } from "../RelativeValuesProvider";
-import { useFilteredItems, useSortedItems } from "../hooks";
 import { ColumnHeader } from "./ColumnHeader";
 import { ItemSideBar } from "./sidebar";
+
+import { RelativeValuesDefinitionRevision$data } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
 
 type TableProps = {
   model: ModelEvaluator;

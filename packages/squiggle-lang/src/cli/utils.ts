@@ -1,11 +1,11 @@
-import path from "path";
 import { promises as fs } from "fs";
 import isFinite from "lodash/isFinite.js";
+import path from "path";
 
 import { Env } from "../dist/env.js";
+import { SqLinker } from "../public/SqLinker.js";
 import { SqProject } from "../public/SqProject/index.js";
 import { bold, red } from "./colors.js";
-import { SqLinker } from "../public/SqLinker.js";
 
 export async function measure(callback: () => Promise<void>) {
   const t1 = new Date();

@@ -1,7 +1,8 @@
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
-import { Group, GroupConnection } from "../types/Group";
+
 import { isSignedIn } from "../helpers/userHelpers";
+import { Group, GroupConnection } from "../types/Group";
 
 const GroupsQueryInput = builder.inputType("GroupsQueryInput", {
   fields: (t) => ({

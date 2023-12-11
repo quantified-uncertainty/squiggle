@@ -2,13 +2,14 @@ import { FC } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
+import { Card } from "@/components/ui/Card";
+import { MutationButton } from "@/components/ui/MutationButton";
+
 import { InviteForMe$key } from "@/__generated__/InviteForMe.graphql";
 import {
   GroupInviteReaction,
   InviteForMeMutation,
 } from "@/__generated__/InviteForMeMutation.graphql";
-import { Card } from "@/components/ui/Card";
-import { MutationButton } from "@/components/ui/MutationButton";
 
 const Fragment = graphql`
   fragment InviteForMe on Group {

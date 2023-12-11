@@ -1,4 +1,5 @@
 import { builder } from "@/graphql/builder";
+
 import { ErrorInterface } from "./common";
 
 // This error is a default, always available when `errors: {}` is enabled.

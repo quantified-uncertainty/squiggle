@@ -1,6 +1,6 @@
-import { PointSetDist } from '../../src/dist/PointSetDist.js';
-import { SampleSetDist } from '../../src/dist/SampleSetDist/index.js';
-import { Normal } from '../../src/dist/SymbolicDist.js';
+import { PointSetDist } from "../../src/dist/PointSetDist.js";
+import { SampleSetDist } from "../../src/dist/SampleSetDist/index.js";
+import { Normal } from "../../src/dist/SymbolicDist.js";
 import {
   frAny,
   frArray,
@@ -24,14 +24,14 @@ import {
   frString,
   frTableChart,
   frTuple,
-} from '../../src/library/registry/frTypes.js';
-import { ContinuousShape } from '../../src/PointSet/Continuous.js';
-import { DiscreteShape } from '../../src/PointSet/Discrete.js';
-import { MixedShape } from '../../src/PointSet/Mixed.js';
-import { ImmutableMap } from '../../src/utility/immutableMap.js';
-import { SDate } from '../../src/utility/SDate.js';
-import { SDuration } from '../../src/utility/SDuration.js';
-import { NumericRangeDomain } from '../../src/value/domain.js';
+} from "../../src/library/registry/frTypes.js";
+import { ContinuousShape } from "../../src/PointSet/Continuous.js";
+import { DiscreteShape } from "../../src/PointSet/Discrete.js";
+import { MixedShape } from "../../src/PointSet/Mixed.js";
+import { ImmutableMap } from "../../src/utility/immutableMap.js";
+import { SDate } from "../../src/utility/SDate.js";
+import { SDuration } from "../../src/utility/SDuration.js";
+import { NumericRangeDomain } from "../../src/value/domain.js";
 import {
   Input,
   Plot,
@@ -50,7 +50,7 @@ import {
   vScale,
   vString,
   vTableChart,
-} from '../../src/value/index.js';
+} from "../../src/value/index.js";
 
 test("frNumber", () => {
   const value = vNumber(5);

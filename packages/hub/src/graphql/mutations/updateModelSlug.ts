@@ -1,8 +1,8 @@
-import { prisma } from "@/prisma";
 import { builder } from "@/graphql/builder";
+import { prisma } from "@/prisma";
 
-import { Model } from "../types/Model";
 import { getWriteableModel } from "../helpers/modelHelpers";
+import { Model } from "../types/Model";
 
 builder.mutationField("updateModelSlug", (t) =>
   t.withAuth({ signedIn: true }).fieldWithInput({

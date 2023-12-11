@@ -1,8 +1,8 @@
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
-import { Model, ModelConnection } from "../types/Model";
 import { modelWhereHasAccess } from "../helpers/modelHelpers";
+import { Model, ModelConnection } from "../types/Model";
 
 builder.queryField("models", (t) =>
   t.prismaConnection(

@@ -1,10 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { FnDocumentation as Component } from "../components/ui/FnDocumentation.js";
-import { type FnDocumentation as FnDocumentationType } from "@quri/squiggle-lang";
+
 import {
+  type FnDocumentation as FnDocumentationType,
   getAllFunctionNames,
   getFunctionDocumentation,
 } from "@quri/squiggle-lang";
+
+import { FnDocumentation as Component } from "../components/ui/FnDocumentation.js";
 
 /**
  * Internal UI component. Used in `SquigglePlayground`.

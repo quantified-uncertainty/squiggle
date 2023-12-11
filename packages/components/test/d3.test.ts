@@ -1,9 +1,11 @@
-import { SqLogScale } from "@quri/squiggle-lang";
-import { sqScaleToD3 } from "../src/lib/d3/index.js";
+import {
+  SqLinearScale,
+  SqLogScale,
+  SqPowerScale,
+  SqSymlogScale,
+} from "@quri/squiggle-lang";
 
-import { SqLinearScale } from "@quri/squiggle-lang";
-import { SqSymlogScale } from "@quri/squiggle-lang";
-import { SqPowerScale } from "@quri/squiggle-lang";
+import { sqScaleToD3 } from "../src/lib/d3/index.js";
 
 describe.each([
   SqLinearScale.create(),

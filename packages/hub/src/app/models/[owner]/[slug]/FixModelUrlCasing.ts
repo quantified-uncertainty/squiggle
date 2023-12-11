@@ -2,8 +2,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { FixModelUrlCasing$key } from "@/__generated__/FixModelUrlCasing.graphql";
 import { patchModelRoute } from "@/routes";
+
+import { FixModelUrlCasing$key } from "@/__generated__/FixModelUrlCasing.graphql";
 
 export const FixModelUrlCasingFragment = graphql`
   fragment FixModelUrlCasing on Model {

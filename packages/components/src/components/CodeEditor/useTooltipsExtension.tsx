@@ -3,6 +3,7 @@ import { FC, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 
 import { getFunctionDocumentation } from "@quri/squiggle-lang";
+
 import { FnDocumentation } from "../ui/FnDocumentation.js";
 
 type Hover = NonNullable<ReturnType<typeof getFunctionDocumentation>>;

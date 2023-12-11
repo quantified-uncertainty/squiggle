@@ -1,5 +1,4 @@
 import { ValueMap, vDict } from "../../value/index.js";
-
 import { SqValueContext } from "../SqValueContext.js";
 import { SqDictValue, SqValue, wrapValue } from "./index.js";
 
