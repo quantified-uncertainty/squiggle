@@ -3,9 +3,11 @@
 import { FC } from "react";
 import { graphql, useFragment } from "react-relay";
 
-import { RelativeValuesDefinitionList$key } from "@/__generated__/RelativeValuesDefinitionList.graphql";
 import { LoadMore } from "@/components/LoadMore";
+
 import { RelativeValuesDefinitionCard } from "./RelativeValuesDefinitionCard";
+
+import { RelativeValuesDefinitionList$key } from "@/__generated__/RelativeValuesDefinitionList.graphql";
 
 const Fragment = graphql`
   fragment RelativeValuesDefinitionList on RelativeValuesDefinitionConnection {

@@ -1,12 +1,14 @@
-import { prisma } from "@/prisma";
-import { builder } from "@/graphql/builder";
+import { ZodError } from "zod";
 
-import { Model } from "../types/Model";
+import { builder } from "@/graphql/builder";
+import { prisma } from "@/prisma";
+
 import { rethrowOnConstraint } from "../errors/common";
 import { getWriteableOwner } from "../helpers/ownerHelpers";
-import { ZodError } from "zod";
-import { validateSlug } from "../utils";
+import { indexModelId } from "../helpers/searchHelpers";
 import { getSelf } from "../helpers/userHelpers";
+import { Model } from "../types/Model";
+import { validateSlug } from "../utils";
 
 builder.mutationField("createSquiggleSnippetModel", (t) =>
   t.withAuth({ signedIn: true }).fieldWithInput({
@@ -88,6 +90,8 @@ builder.mutationField("createSquiggleSnippetModel", (t) =>
           },
         });
       });
+
+      await indexModelId(model.id);
 
       return { model };
     },

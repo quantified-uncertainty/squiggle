@@ -1,18 +1,19 @@
-import { BaseDist } from "./BaseDist.js";
-import * as Result from "../utility/result.js";
-import sum from "lodash/sum.js";
 import jstat from "jstat";
-import * as E_A_Floats from "../utility/E_A_Floats.js";
-import * as XYShape from "../XYShape.js";
+import sum from "lodash/sum.js";
+
 import * as magicNumbers from "../magicNumbers.js";
 import * as Operation from "../operation.js";
-import { PointSetDist } from "./PointSetDist.js";
-import { Ok, result } from "../utility/result.js";
-import { ContinuousShape } from "../PointSet/Continuous.js";
-import { DistError, notYetImplemented, xyShapeDistError } from "./DistError.js";
 import { OperationError } from "../operationError.js";
+import { ContinuousShape } from "../PointSet/Continuous.js";
 import { DiscreteShape } from "../PointSet/Discrete.js";
+import * as E_A_Floats from "../utility/E_A_Floats.js";
+import * as Result from "../utility/result.js";
+import { Ok, result } from "../utility/result.js";
+import * as XYShape from "../XYShape.js";
+import { BaseDist } from "./BaseDist.js";
+import { DistError, notYetImplemented, xyShapeDistError } from "./DistError.js";
 import { Env } from "./env.js";
+import { PointSetDist } from "./PointSetDist.js";
 
 const square = (n: number): number => {
   return n * n;

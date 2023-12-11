@@ -1,5 +1,6 @@
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
+
 import { getMyMembership } from "../helpers/groupHelpers";
 import { UserGroupMembership } from "../types/Group";
 

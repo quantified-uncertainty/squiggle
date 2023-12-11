@@ -1,8 +1,10 @@
+import { loadPageQuery } from "@/relay/loadPageQuery";
+
+import { ViewModelPage } from "./ViewModelPage";
+
 import QueryNode, {
   ViewModelPageQuery,
 } from "@/__generated__/ViewModelPageQuery.graphql";
-import { loadPageQuery } from "@/relay/loadPageQuery";
-import { ViewModelPage } from "./ViewModelPage";
 
 type Props = {
   params: { owner: string; slug: string };

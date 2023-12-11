@@ -1,18 +1,18 @@
 "use client";
-import { FC, cloneElement, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import {
   flip,
-  shift,
+  FloatingPortal,
   offset,
+  Placement,
+  shift,
   useDismiss,
   useFloating,
   useHover,
   useInteractions,
   useRole,
-  Placement,
-  FloatingPortal,
 } from "@floating-ui/react";
+import { AnimatePresence, motion } from "framer-motion";
+import { cloneElement, FC, useState } from "react";
 
 type Props = {
   text: string;

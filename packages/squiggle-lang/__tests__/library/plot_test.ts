@@ -47,7 +47,9 @@ describe("Plot", () => {
       `Plot.numericFn({
         fn: {|x, y| x * y}
       })`,
-      "Error(Error: Plots only work with functions that have one parameter. This function only supports 2 parameters.)"
+      `Error(Error: There are function matches for Plot.numericFn(), but with different arguments:
+  Plot.numericFn({fn: (number) => number, xScale?: scale, yScale?: scale, title?: string, points?: number}) => plot
+Was given arguments: ({fn: (x,y) => internal code}))`
     );
 
     testPlotResult(
@@ -129,7 +131,9 @@ describe("Plot", () => {
       `Plot.distFn({
         fn: {|x,y| x to x + y}
        })`,
-      "Error(Error: Plots only work with functions that have one parameter. This function only supports 2 parameters.)"
+      `Error(Error: There are function matches for Plot.distFn(), but with different arguments:
+  Plot.distFn({fn: (number) => distribution, xScale?: scale, yScale?: scale, distXScale?: scale, title?: string, points?: number}) => plot
+Was given arguments: ({fn: (x,y) => internal code}))`
     );
   });
 

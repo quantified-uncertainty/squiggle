@@ -2,14 +2,16 @@
 import { FC } from "react";
 import { graphql } from "relay-runtime";
 
-import { FrontPageQuery } from "@/__generated__/FrontPageQuery.graphql";
-import { FrontPageDefinitionList } from "./FrontPageDefinitionList";
-import { FrontPageModelList } from "./FrontPageModelList";
+import { StyledTab } from "@quri/ui";
 
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
-import { StyledTab } from "@quri/ui";
+
+import { FrontPageDefinitionList } from "./FrontPageDefinitionList";
 import { FrontPageGroupList } from "./FrontPageGroupList";
+import { FrontPageModelList } from "./FrontPageModelList";
+
+import { FrontPageQuery } from "@/__generated__/FrontPageQuery.graphql";
 
 const Query = graphql`
   query FrontPageQuery {

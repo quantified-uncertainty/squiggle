@@ -1,16 +1,15 @@
 "use client";
 import { FC, useState } from "react";
 import { useForm } from "react-hook-form";
+import { graphql, useFragment } from "react-relay";
 
 import { Button, TextFormField } from "@quri/ui";
 
-import { EditModelExports_Model$key } from "@/__generated__/EditModelExports_Model.graphql";
-import { RelativeValuesExportInput } from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
 import {
   modelForRelativeValuesExportRoute,
   relativeValuesRoute,
 } from "@/routes";
-import { graphql, useFragment } from "react-relay";
+
 import { SelectOwner, SelectOwnerOption } from "../SelectOwner";
 import { FormModal } from "../ui/FormModal";
 import { H2 } from "../ui/Headers";
@@ -20,6 +19,9 @@ import {
   SelectRelativeValuesDefinition,
   SelectRelativeValuesDefinitionOption,
 } from "./SelectRelativeValuesDefinition";
+
+import { EditModelExports_Model$key } from "@/__generated__/EditModelExports_Model.graphql";
+import { RelativeValuesExportInput } from "@/__generated__/EditSquiggleSnippetModelMutation.graphql";
 
 const CreateVariableWithDefinitionModal: FC<{
   close: () => void;

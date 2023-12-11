@@ -1,16 +1,18 @@
 import { useRouter } from "next/navigation";
 import { FC } from "react";
+import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { EditIcon } from "@quri/ui";
 
-import { UpdateModelSlugAction$key } from "@/__generated__/UpdateModelSlugAction.graphql";
-import { UpdateModelSlugActionMutation } from "@/__generated__/UpdateModelSlugActionMutation.graphql";
 import { MutationModalAction } from "@/components/ui/MutationModalAction";
 import { SlugFormField } from "@/components/ui/SlugFormField";
 import { modelRoute } from "@/routes";
-import { useFragment } from "react-relay";
+
 import { draftUtils, modelToDraftLocator } from "./SquiggleSnippetDraftDialog";
+
+import { UpdateModelSlugAction$key } from "@/__generated__/UpdateModelSlugAction.graphql";
+import { UpdateModelSlugActionMutation } from "@/__generated__/UpdateModelSlugActionMutation.graphql";
 
 const Mutation = graphql`
   mutation UpdateModelSlugActionMutation(

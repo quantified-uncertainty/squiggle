@@ -1,7 +1,7 @@
 import { REOther } from "../errors/messages.js";
-import { SDuration, durationUnits } from "./SDuration.js";
-import { Ok, result, Err } from "./result.js";
 import * as Result from "./result.js";
+import { Err, Ok, result } from "./result.js";
+import { durationUnits, SDuration } from "./SDuration.js";
 
 function isValid(date: Date): boolean {
   return date instanceof Date && isFinite(date.getTime());

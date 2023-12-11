@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 
-import { RelativeValuesDefinitionRevision$data } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
 import { AxisConfig } from "../RelativeValuesProvider";
+
+import { RelativeValuesDefinitionRevision$data } from "@/__generated__/RelativeValuesDefinitionRevision.graphql";
 
 export const useFilteredItems = ({
   items,

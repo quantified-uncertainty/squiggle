@@ -1,8 +1,8 @@
 "use client";
-import { FC, ReactNode } from "react";
 import { clsx } from "clsx";
+import { FC, ReactNode } from "react";
 
-import { EntityInfo, EntityNode } from "./EntityInfo";
+import { EntityNode } from "./EntityInfo";
 
 export type { EntityNode };
 

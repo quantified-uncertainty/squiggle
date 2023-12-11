@@ -1,12 +1,14 @@
-import { DropdownMenuAsyncActionItem, TrashIcon, useToast } from "@quri/ui";
 import { useRouter } from "next/navigation";
 import { FC, useCallback } from "react";
 import { useFragment, useMutation } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { DeleteModelActionMutation } from "@/__generated__/DeleteModelActionMutation.graphql";
-import { DeleteModelAction$key } from "@/__generated__/DeleteModelAction.graphql";
+import { DropdownMenuAsyncActionItem, TrashIcon, useToast } from "@quri/ui";
+
 import { ownerRoute } from "@/routes";
+
+import { DeleteModelAction$key } from "@/__generated__/DeleteModelAction.graphql";
+import { DeleteModelActionMutation } from "@/__generated__/DeleteModelActionMutation.graphql";
 
 const Mutation = graphql`
   mutation DeleteModelActionMutation($input: MutationDeleteModelInput!) {

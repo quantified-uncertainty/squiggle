@@ -1,21 +1,22 @@
+import maxBy from "lodash/maxBy.js";
+import uniq from "lodash/uniq.js";
 import { LocationRange } from "peggy";
 
 import { ASTNode } from "../ast/parse.js";
 import * as IError from "../errors/IError.js";
 import { REArityError, REOther } from "../errors/messages.js";
 import { Expression } from "../expression/index.js";
-import { VDomain, Value } from "../value/index.js";
-import * as Context from "./context.js";
-import { ReducerContext } from "./context.js";
-import { Stack } from "./stack.js";
 import {
   FnDefinition,
   fnDefinitionToString,
   tryCallFnDefinition,
 } from "../library/registry/fnDefinition.js";
-import uniq from "lodash/uniq.js";
-import { sort } from "../utility/E_A_Floats.js";
 import { FRType } from "../library/registry/frTypes.js";
+import { sort } from "../utility/E_A_Floats.js";
+import { Calculator, Value, VDomain } from "../value/index.js";
+import * as Context from "./context.js";
+import { ReducerContext } from "./context.js";
+import { Stack } from "./stack.js";
 
 export type UserDefinedLambdaParameter = {
   name: string;
@@ -33,6 +34,7 @@ export abstract class BaseLambda {
   abstract parameterString(): string;
   abstract parameterCounts(): number[];
   abstract parameterCountString(): string;
+  abstract toCalculator(): Calculator;
 
   callFrom(
     args: Value[],
@@ -126,7 +128,7 @@ export class UserDefinedLambda extends BaseLambda {
   }
 
   toString() {
-    return `lambda(${this._getParameterNames().join(",")}=>internal code)`;
+    return `(${this._getParameterNames().join(",")}) => internal code`;
   }
 
   parameterCounts() {
@@ -135,6 +137,18 @@ export class UserDefinedLambda extends BaseLambda {
 
   parameterCountString() {
     return this.parameters.length.toString();
+  }
+
+  toCalculator(): Calculator {
+    const only0Params = this.parameters.length === 0;
+    return {
+      fn: this,
+      inputs: this._getParameterNames().map((name) => ({
+        name: name,
+        type: "text",
+      })),
+      autorun: only0Params,
+    };
   }
 }
 
@@ -160,7 +174,10 @@ export class BuiltinLambda extends BaseLambda {
   }
 
   parameterString() {
-    return this._definitions.map(fnDefinitionToString).join(" | ");
+    return this._definitions
+      .filter((d) => !d.isAssert)
+      .map(fnDefinitionToString)
+      .join(" | ");
   }
 
   parameterCounts() {
@@ -179,6 +196,7 @@ export class BuiltinLambda extends BaseLambda {
     const signatures = this._definitions;
     const showNameMatchDefinitions = () => {
       const defsString = signatures
+        .filter((d) => !d.isAssert)
         .map(fnDefinitionToString)
         .map((def) => `  ${this.name}${def}\n`)
         .join("");
@@ -196,6 +214,19 @@ export class BuiltinLambda extends BaseLambda {
       }
     }
     throw new REOther(showNameMatchDefinitions());
+  }
+
+  toCalculator(): Calculator {
+    const longestSignature = maxBy(this.signatures(), (s) => s.length) || [];
+    const autorun = longestSignature.length !== 0;
+    return {
+      fn: this,
+      inputs: longestSignature.map((sig, i) => ({
+        name: `Input ${i + 1}`,
+        type: sig.getName() === "Bool" ? "checkbox" : "text",
+      })),
+      autorun,
+    };
   }
 }
 

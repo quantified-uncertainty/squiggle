@@ -127,15 +127,15 @@ describe("stacktraces", () => {
 
     expect(error).toBe(
       `Error: There are function matches for add(), but with different arguments:
-  add(number, number)
-  add(string, string)
-  add(string, any)
-  add(date, duration)
-  add(duration, date)
-  add(duration, duration)
-  add(distribution, number)
-  add(number, distribution)
-  add(distribution, distribution)
+  add(number, number) => number
+  add(string, string) => string
+  add(string, any) => string
+  add(date, duration) => date
+  add(duration, date) => date
+  add(duration, duration) => duration
+  add(distribution, number) => distribution
+  add(number, distribution) => distribution
+  add(distribution, distribution) => distribution
 Was given arguments: (5,"a")
 Stack trace:
   f at line 4, column 5, file main

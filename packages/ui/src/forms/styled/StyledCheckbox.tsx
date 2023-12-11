@@ -1,4 +1,4 @@
-import { InputHTMLAttributes, forwardRef } from "react";
+import { forwardRef, InputHTMLAttributes } from "react";
 
 export const StyledCheckbox = forwardRef<
   HTMLInputElement,

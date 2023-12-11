@@ -3,9 +3,13 @@ import * as distOperations from "../dist/distOperations/index.js";
 import { Env } from "../dist/env.js";
 import { REArgumentError, REDistributionError } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frDist, frDistOrNumber, frDict } from "../library/registry/frTypes.js";
+import {
+  frDict,
+  frDist,
+  frDistOrNumber,
+  frNumber,
+} from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { vNumber } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Dist",
@@ -27,7 +31,7 @@ const runScoringScalarAnswer = (
   if (!result.ok) {
     throw new REDistributionError(result.value);
   }
-  return vNumber(result.value);
+  return result.value;
 };
 
 const runScoringDistAnswer = (
@@ -45,7 +49,7 @@ const runScoringDistAnswer = (
   if (!result.ok) {
     throw new REDistributionError(result.value);
   }
-  return vNumber(result.value);
+  return result.value;
 };
 
 export const library = [
@@ -66,6 +70,7 @@ export const library = [
             ["prior", frDist]
           ),
         ],
+        frNumber,
         ([{ estimate, answer, prior }], context) => {
           if (answer instanceof BaseDist) {
             return runScoringDistAnswer(
@@ -88,6 +93,7 @@ export const library = [
       ),
       makeDefinition(
         [frDict(["estimate", frDist], ["answer", frDistOrNumber])],
+        frNumber,
         ([{ estimate, answer }], context) => {
           if (answer instanceof BaseDist) {
             return runScoringDistAnswer(
@@ -115,7 +121,7 @@ export const library = [
     output: "Number",
     examples: ["Dist.klDivergence(Sym.normal(5,2), Sym.normal(5,1.5))"],
     definitions: [
-      makeDefinition([frDist, frDist], ([estimate, d], context) =>
+      makeDefinition([frDist, frDist], frNumber, ([estimate, d], context) =>
         runScoringDistAnswer(estimate, d, undefined, context.environment)
       ),
     ],

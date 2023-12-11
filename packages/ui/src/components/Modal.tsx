@@ -1,11 +1,10 @@
 "use client";
-import { XIcon } from "../icons/XIcon.js";
 import { clsx } from "clsx";
 import { motion } from "framer-motion";
 import {
-  PropsWithChildren,
   createContext,
   forwardRef,
+  PropsWithChildren,
   useContext,
   useEffect,
   useState,
@@ -13,6 +12,7 @@ import {
 import { createPortal } from "react-dom";
 
 import { useWindowScroll, useWindowSize } from "../hooks/react-use.js";
+import { XIcon } from "../icons/XIcon.js";
 import { TailwindContext } from "./TailwindProvider.js";
 
 type ModalContextShape = {

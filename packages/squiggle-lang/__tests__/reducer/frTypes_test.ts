@@ -1,34 +1,55 @@
+import { PointSetDist } from "../../src/dist/PointSetDist.js";
+import { SampleSetDist } from "../../src/dist/SampleSetDist/index.js";
 import { Normal } from "../../src/dist/SymbolicDist.js";
 import {
+  frAny,
+  frArray,
   frBool,
   frDate,
-  frDistOrNumber,
-  frDist,
-  frNumber,
-  frString,
-  frDuration,
-  frArray,
-  frTuple,
-  frDictWithArbitraryKeys,
   frDict,
-  frOptional,
-  frAny,
+  frDictWithArbitraryKeys,
+  frDist,
+  frDistOrNumber,
+  frDistPointset,
+  frDistSymbolic,
+  frDomain,
+  frDuration,
+  frInput,
+  frNumber,
   frNumberOrString,
+  frOptional,
+  frPlot,
+  frSampleSetDist,
+  frScale,
+  frString,
+  frTableChart,
+  frTuple,
 } from "../../src/library/registry/frTypes.js";
+import { ContinuousShape } from "../../src/PointSet/Continuous.js";
+import { DiscreteShape } from "../../src/PointSet/Discrete.js";
+import { MixedShape } from "../../src/PointSet/Mixed.js";
+import { ImmutableMap } from "../../src/utility/immutableMap.js";
 import { SDate } from "../../src/utility/SDate.js";
 import { SDuration } from "../../src/utility/SDuration.js";
-import { ImmutableMap } from "../../src/utility/immutableMap.js";
-
+import { NumericRangeDomain } from "../../src/value/domain.js";
 import {
+  Input,
+  Plot,
+  Scale,
   Value,
   vArray,
   vBool,
   vDate,
-  vDist,
-  vNumber,
   vDict,
-  vString,
+  vDist,
+  vDomain,
   vDuration,
+  vInput,
+  vNumber,
+  vPlot,
+  vScale,
+  vString,
+  vTableChart,
 } from "../../src/value/index.js";
 
 test("frNumber", () => {
@@ -110,8 +131,82 @@ describe("frDist", () => {
   expect(frDist.pack(dist)).toEqual(value);
 });
 
+test("distSymbolic", () => {
+  const dResult = Normal.make({ mean: 2, stdev: 5 });
+  if (!dResult.ok) {
+    throw new Error();
+  }
+  const dist = dResult.value;
+  const value = vDist(dist);
+  expect(frDistSymbolic.unpack(value)).toBe(dist);
+  expect(frDistSymbolic.pack(dist)).toEqual(value);
+});
+
+test("sampleSetDist", () => {
+  const dResult = SampleSetDist.make([1, 2, 3, 4, 2, 1, 2, 3, 4, 5, 3, 4]);
+  if (!dResult.ok) {
+    throw new Error();
+  }
+  const dist = dResult.value;
+  const value = vDist(dist);
+  expect(frSampleSetDist.unpack(value)).toBe(dist);
+  expect(frSampleSetDist.pack(dist)).toEqual(value);
+});
+
+test("pointSetDist", () => {
+  const dist = new PointSetDist(
+    new MixedShape({
+      continuous: new ContinuousShape({ xyShape: { xs: [], ys: [] } }),
+      discrete: new DiscreteShape({ xyShape: { xs: [], ys: [] } }),
+    })
+  );
+  const value = vDist(dist);
+  expect(frDistPointset.unpack(value)).toBe(dist);
+  expect(frDistPointset.pack(dist)).toEqual(value);
+});
+
 test.todo("frLambda");
-test.todo("frScale");
+
+test("frTableChart", () => {
+  const tableChart = { columns: [], data: [] };
+  const value = vTableChart(tableChart);
+  expect(frTableChart.unpack(value)).toBe(tableChart);
+  expect(frTableChart.pack(tableChart)).toEqual(value);
+});
+
+test("frScale", () => {
+  const scale: Scale = { type: "linear" };
+  const value = vScale(scale);
+  expect(frScale.unpack(value)).toBe(scale);
+  expect(frScale.pack(scale)).toEqual(value);
+});
+
+test("frInput", () => {
+  const input: Input = { name: "first", type: "text" };
+  const value = vInput(input);
+  expect(frInput.unpack(value)).toBe(input);
+  expect(frInput.pack(input)).toEqual(value);
+});
+
+test("frPlot", () => {
+  const plot: Plot = {
+    type: "distributions",
+    distributions: [],
+    xScale: { type: "linear" },
+    yScale: { type: "linear" },
+    showSummary: false,
+  };
+  const value = vPlot(plot);
+  expect(frPlot.unpack(value)).toBe(plot);
+  expect(frPlot.pack(plot)).toEqual(value);
+});
+
+test("frDomain", () => {
+  const domain = new NumericRangeDomain(0, 1);
+  const value = vDomain(domain);
+  expect(frDomain.unpack(value)).toBe(domain);
+  expect(frDomain.pack(domain)).toEqual(value);
+});
 
 describe("frArray", () => {
   const arr = [3, 5, 6];

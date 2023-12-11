@@ -1,12 +1,16 @@
 "use client";
-import { ModelSettingsButton$key } from "@/__generated__/ModelSettingsButton.graphql";
-import { EntityTab } from "@/components/ui/EntityTab";
-import { Cog8ToothIcon, Dropdown, DropdownMenu } from "@quri/ui";
 import { FC } from "react";
 import { graphql, useFragment } from "react-relay";
+
+import { Cog8ToothIcon, Dropdown, DropdownMenu } from "@quri/ui";
+
+import { EntityTab } from "@/components/ui/EntityTab";
+
 import { DeleteModelAction } from "./DeleteModelAction";
 import { MoveModelAction } from "./MoveModelAction";
 import { UpdateModelSlugAction } from "./UpdateModelSlugAction";
+
+import { ModelSettingsButton$key } from "@/__generated__/ModelSettingsButton.graphql";
 
 export const ModelSettingsButton: FC<{
   model: ModelSettingsButton$key;

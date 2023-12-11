@@ -1,11 +1,11 @@
 import { forwardRef, memo, useImperativeHandle } from "react";
 
 import {
+  result,
   SqDictValue,
   SqError,
   SqValue,
   SqValuePath,
-  result,
 } from "@quri/squiggle-lang";
 import { ChevronRightIcon } from "@quri/ui";
 
@@ -14,14 +14,14 @@ import { MessageAlert } from "../Alert.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
+import { extractSubvalueByPath, pathIsEqual, pathItemFormat } from "./utils.js";
 import { ValueViewer } from "./ValueViewer.js";
 import {
-  ViewerProvider,
   useFocus,
   useUnfocus,
   useViewerContext,
+  ViewerProvider,
 } from "./ViewerProvider.js";
-import { extractSubvalueByPath, pathIsEqual, pathItemFormat } from "./utils.js";
 
 export type SquiggleViewerHandle = {
   viewValuePath(path: SqValuePath): void;

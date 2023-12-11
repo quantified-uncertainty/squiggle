@@ -15,16 +15,16 @@ import {
 
 import { SqValueWithContext } from "../../lib/utility.js";
 import { widgetRegistry } from "../../widgets/registry.js";
+import { CollapsedIcon, ExpandedIcon } from "./icons.js";
+import { getChildrenValues, pathAsString } from "./utils.js";
 import {
   useFocus,
-  useUnfocus,
   useHasLocalSettings,
   useIsFocused,
   useSetCollapsed,
+  useUnfocus,
   useViewerContext,
 } from "./ViewerProvider.js";
-import { CollapsedIcon, ExpandedIcon } from "./icons.js";
-import { getChildrenValues, pathAsString } from "./utils.js";
 
 const FindInEditorItem: FC<{ value: SqValueWithContext }> = ({ value }) => {
   const { editor } = useViewerContext();

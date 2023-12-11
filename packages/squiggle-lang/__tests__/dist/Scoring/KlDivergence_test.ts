@@ -5,12 +5,6 @@ import {
   mixture,
 } from "../../../src/dist/distOperations/index.js";
 import {
-  env,
-  mkNormal,
-  mkUniform,
-  unpackResult,
-} from "../../helpers/distHelpers.js";
-import {
   floatDist,
   normalDist10,
   point1,
@@ -19,6 +13,12 @@ import {
   uniformDist,
   uniformDist2,
 } from "../../fixtures/distFixtures.js";
+import {
+  env,
+  mkNormal,
+  mkUniform,
+  unpackResult,
+} from "../../helpers/distHelpers.js";
 
 const klDivergence = (prediction: BaseDist, answer: BaseDist): number => {
   const result = logScoreDistAnswer({

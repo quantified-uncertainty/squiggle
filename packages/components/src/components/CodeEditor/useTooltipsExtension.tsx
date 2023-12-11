@@ -1,16 +1,12 @@
 import { EditorView, hoverTooltip, repositionTooltips } from "@codemirror/view";
-import { clsx } from "clsx";
-import { FC, PropsWithChildren, useEffect } from "react";
+import { FC, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 
 import { getFunctionDocumentation } from "@quri/squiggle-lang";
 
-type Hover = NonNullable<ReturnType<typeof getFunctionDocumentation>>;
+import { FnDocumentation } from "../ui/FnDocumentation.js";
 
-const TooltipSection: FC<PropsWithChildren<{ last?: boolean }>> = ({
-  children,
-  last,
-}) => <div className={clsx("px-4 py-2", last || "border-b")}>{children}</div>;
+type Hover = NonNullable<ReturnType<typeof getFunctionDocumentation>>;
 
 const HoverTooltip: FC<{ hover: Hover; view: EditorView }> = ({
   hover,
@@ -21,39 +17,9 @@ const HoverTooltip: FC<{ hover: Hover; view: EditorView }> = ({
     repositionTooltips(view);
   });
 
-  const fullName = `${hover.nameSpace}.${hover.name}`;
-
   return (
-    <div className="border bg-slate-50 rounded-sm shadow-lg min-w-[200px]">
-      <TooltipSection>
-        <div className="flex flex-nowrap items-end justify-between gap-2 py-0.5">
-          <a
-            // TODO - move domain to constants
-            href={`https://www.squiggle-language.com/docs/Api/${hover.nameSpace}#${hover.name}`}
-            className="text-blue-500 hover:underline text-sm leading-none"
-          >
-            {fullName}
-          </a>
-          <div className="italic text-xs leading-none text-slate-500">
-            Stdlib
-          </div>
-        </div>
-      </TooltipSection>
-      {hover.description ? (
-        <TooltipSection>{hover.description}</TooltipSection>
-      ) : null}
-      {hover.examples?.length ? (
-        <TooltipSection>
-          <header className="text-sm text-slate-600 font-medium mb-2">
-            Examples
-          </header>
-          {hover.examples.map((example, i) => (
-            <div className="text-xs text-slate-800" key={i}>
-              {example}
-            </div>
-          ))}
-        </TooltipSection>
-      ) : null}
+    <div className="border bg-slate-50 rounded-sm shadow-lg min-w-[200px] max-w-[600px]">
+      <FnDocumentation documentation={hover} />
     </div>
   );
 };

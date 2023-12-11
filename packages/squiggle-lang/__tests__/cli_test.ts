@@ -1,8 +1,8 @@
-import { jest } from "@jest/globals";
-
-import * as url from "url";
-import * as path from "path";
 import { CommanderError } from "@commander-js/extra-typings";
+import { jest } from "@jest/globals";
+import * as path from "path";
+import * as url from "url";
+
 import { makeProgram } from "../src/cli/makeProgram.js";
 
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url));

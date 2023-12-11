@@ -1,14 +1,16 @@
-import { Button, Dropdown, DropdownMenu } from "@quri/ui";
 import { FC } from "react";
 import { useFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
+import { Button, Dropdown, DropdownMenu } from "@quri/ui";
+
 import { SetMembershipRoleAction } from "./SetMembershipRoleAction";
+
+import { MembershipRoleButton_Group$key } from "@/__generated__/MembershipRoleButton_Group.graphql";
 import {
   MembershipRole,
   MembershipRoleButton_Membership$key,
 } from "@/__generated__/MembershipRoleButton_Membership.graphql";
-import { MembershipRoleButton_Group$key } from "@/__generated__/MembershipRoleButton_Group.graphql";
 
 type Props = {
   membershipRef: MembershipRoleButton_Membership$key;

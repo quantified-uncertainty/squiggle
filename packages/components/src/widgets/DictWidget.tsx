@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 
 import { ValueViewer } from "../components/SquiggleViewer/ValueViewer.js";
-import { SqTypeWithCount } from "./SqTypeWithCount.js";
 import { widgetRegistry } from "./registry.js";
+import { SqTypeWithCount } from "./SqTypeWithCount.js";
 
 widgetRegistry.register("Dict", {
   heading: (value) => `Dict(${value.value.entries().length})`,

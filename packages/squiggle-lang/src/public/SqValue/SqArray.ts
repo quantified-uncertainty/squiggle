@@ -1,11 +1,10 @@
 import { Value } from "../../value/index.js";
-
 import { SqValueContext } from "../SqValueContext.js";
 import { wrapValue } from "./index.js";
 
 export class SqArray {
   constructor(
-    private _value: Value[],
+    private _value: readonly Value[],
     public context?: SqValueContext
   ) {}
 

@@ -1,13 +1,13 @@
 import { builder } from "../builder";
+import { modelWhereHasAccess } from "../helpers/modelHelpers";
+import { isRootUser } from "../helpers/userHelpers";
 import { GroupConnection, groupFromMembershipConnectionHelpers } from "./Group";
 import { ModelConnection, modelConnectionHelpers } from "./Model";
-import { modelWhereHasAccess } from "../helpers/modelHelpers";
 import { Owner } from "./Owner";
 import {
   RelativeValuesDefinitionConnection,
   relativeValuesDefinitionConnectionHelpers,
 } from "./RelativeValuesDefinition";
-import { isRootUser } from "../helpers/userHelpers";
 
 export const User = builder.prismaNode("User", {
   id: { field: "id" },

@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+
 import { DEFAULT_DATE_FORMAT } from "../constants.js";
 
 type SquiggleDefaultFormat = "squiggle-default" | undefined;

@@ -1,5 +1,5 @@
-import { kde, kdeParams } from "./kde.js";
 import { XYShape } from "../../XYShape.js";
+import { kde, kdeParams } from "./kde.js";
 
 const logSamples = (s: number[]) => s.map(Math.log);
 const reverseNegativeSamples = (s: number[]) =>

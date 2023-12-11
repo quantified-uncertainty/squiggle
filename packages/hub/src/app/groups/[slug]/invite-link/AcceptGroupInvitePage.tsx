@@ -4,17 +4,20 @@ import { redirect, useRouter, useSearchParams } from "next/navigation";
 import { FC, useEffect } from "react";
 import { graphql } from "relay-runtime";
 
-import { AcceptGroupInvitePageMutation } from "@/__generated__/AcceptGroupInvitePageMutation.graphql";
-import { MutationButton } from "@/components/ui/MutationButton";
-import { usePageQuery } from "@/relay/usePageQuery";
-import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
-import { AcceptGroupInvitePageQuery } from "@/__generated__/AcceptGroupInvitePageQuery.graphql";
-import { useIsGroupMember } from "../hooks";
-import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
-import { groupRoute } from "@/routes";
-import { useAsyncMutation } from "@/hooks/useAsyncMutation";
-import { AcceptGroupInvitePage_ValidateMutation } from "@/__generated__/AcceptGroupInvitePage_ValidateMutation.graphql";
 import { useToast } from "@quri/ui";
+
+import { MutationButton } from "@/components/ui/MutationButton";
+import { useAsyncMutation } from "@/hooks/useAsyncMutation";
+import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
+import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
+import { usePageQuery } from "@/relay/usePageQuery";
+import { groupRoute } from "@/routes";
+
+import { useIsGroupMember } from "../hooks";
+
+import { AcceptGroupInvitePage_ValidateMutation } from "@/__generated__/AcceptGroupInvitePage_ValidateMutation.graphql";
+import { AcceptGroupInvitePageMutation } from "@/__generated__/AcceptGroupInvitePageMutation.graphql";
+import { AcceptGroupInvitePageQuery } from "@/__generated__/AcceptGroupInvitePageQuery.graphql";
 
 export const AcceptGroupInvitePage: FC<{
   query: SerializablePreloadedQuery<AcceptGroupInvitePageQuery>;

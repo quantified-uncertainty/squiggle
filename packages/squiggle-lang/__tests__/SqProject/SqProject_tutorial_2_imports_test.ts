@@ -1,6 +1,7 @@
+import "../helpers/toBeOkOutput.js";
+
 import { SqProject } from "../../src/index.js";
 import { SqLinker } from "../../src/public/SqLinker.js";
-import "../helpers/toBeOkOutput.js";
 
 /*
  * Now let's look at explicit imports, possibly recursive and cyclic.

@@ -1,8 +1,7 @@
+import { toString as mdastToString } from "mdast-util-to-string";
 import { exec as originalExec } from "node:child_process";
 import { readFile, writeFile } from "node:fs/promises";
 import util from "node:util";
-
-import { toString as mdastToString } from "mdast-util-to-string";
 import remarkParse from "remark-parse";
 import remarkStringify from "remark-stringify";
 import { unified } from "unified";
@@ -13,7 +12,7 @@ import {
   VSCODE_PACKAGE_NAME,
   WEBSITE_CHANGELOG_ROOT,
 } from "../constants.js";
-import { PackageInfo, getPackageInfo } from "../lib.js";
+import { getPackageInfo, PackageInfo } from "../lib.js";
 
 const exec = util.promisify(originalExec);
 

@@ -1,6 +1,12 @@
+import get from "lodash/get.js";
+import invert from "lodash/invert.js";
+
+import { infixFunctions, unaryFunctions } from "../../ast/peggyHelpers.js";
 import { BuiltinLambda, Lambda } from "../../reducer/lambda.js";
 import { Value } from "../../value/index.js";
-import { FnDefinition } from "./fnDefinition.js";
+import { FnDefinition, fnDefinitionToString } from "./fnDefinition.js";
+
+type Shorthand = { type: "infix" | "unary"; symbol: string };
 
 export type FRFunction = {
   name: string;
@@ -11,14 +17,23 @@ export type FRFunction = {
   examples?: string[];
   description?: string;
   isExperimental?: boolean;
+  isUnit?: boolean;
+  shorthand?: Shorthand;
 };
 
 type FnNameDict = Map<string, FnDefinition[]>;
 
-type FnDocumentation = Pick<
+export type FnDocumentation = Pick<
   FRFunction,
-  "description" | "requiresNamespace" | "nameSpace" | "name" | "examples"
->;
+  | "description"
+  | "requiresNamespace"
+  | "nameSpace"
+  | "name"
+  | "examples"
+  | "isExperimental"
+  | "isUnit"
+  | "shorthand"
+> & { signatures: string[] };
 
 export class Registry {
   private constructor(
@@ -82,12 +97,33 @@ export class Registry {
 
     if (!fn) return;
 
+    const _infixes = invert(infixFunctions);
+    const _unary = invert(unaryFunctions);
+
+    function getShorthandName(name: string): Shorthand | undefined {
+      const infix: string | undefined = get(_infixes, name, undefined);
+      if (infix) {
+        return { type: "infix", symbol: infix };
+      } else {
+        const unary: string | undefined = get(_unary, name, undefined);
+        if (unary) {
+          return { type: "unary", symbol: unary };
+        }
+        return undefined;
+      }
+    }
+
     return {
       name: fn.name,
       nameSpace: fn.nameSpace,
       requiresNamespace: fn.requiresNamespace,
       description: fn.description,
       examples: fn.examples,
+      signatures: fn.definitions
+        .filter((d) => !!d.isAssert)
+        .map(fnDefinitionToString),
+      isUnit: fn.isUnit,
+      shorthand: getShorthandName(fn.name),
     };
   }
 

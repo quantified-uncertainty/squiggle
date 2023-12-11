@@ -1,4 +1,6 @@
+import lodashIsEqual from "lodash/isEqual.js";
 import isInteger from "lodash/isInteger.js";
+
 import { BaseDist } from "../dist/BaseDist.js";
 import {
   REArrayIndexNotFound,
@@ -6,12 +8,10 @@ import {
   REOther,
 } from "../errors/messages.js";
 import { Lambda } from "../reducer/lambda.js";
+import { ImmutableMap } from "../utility/immutableMap.js";
 import { SDate } from "../utility/SDate.js";
 import { SDuration } from "../utility/SDuration.js";
-import { ImmutableMap } from "../utility/immutableMap.js";
 import { DateRangeDomain, Domain, NumericRangeDomain } from "./domain.js";
-import { shuffle } from "../utility/E_A.js";
-import lodashIsEqual from "lodash/isEqual.js";
 
 export type ValueMap = ImmutableMap<string, Value>;
 
@@ -47,7 +47,7 @@ class VArray extends BaseValue implements Indexable {
   readonly type = "Array";
   readonly publicName = "List";
 
-  constructor(public value: Value[]) {
+  constructor(public value: readonly Value[]) {
     super();
   }
   toString(): string {
@@ -73,20 +73,6 @@ class VArray extends BaseValue implements Indexable {
     throw new REOther("Can't access non-numerical key on an array");
   }
 
-  flatten() {
-    return new VArray(
-      this.value.reduce(
-        (acc: Value[], v) =>
-          acc.concat(v.type === "Array" ? v.value : ([v] as Value[])),
-        []
-      )
-    );
-  }
-
-  shuffle() {
-    return new VArray(shuffle(this.value));
-  }
-
   isEqual(other: VArray) {
     if (this.value.length !== other.value.length) {
       return false;
@@ -98,7 +84,7 @@ class VArray extends BaseValue implements Indexable {
     return true;
   }
 }
-export const vArray = (v: Value[]) => new VArray(v);
+export const vArray = (v: readonly Value[]) => new VArray(v);
 
 class VBool extends BaseValue {
   readonly type = "Bool";
@@ -398,7 +384,7 @@ export type Input = CommonInputArgs &
     | {
         type: "select";
         default?: string;
-        options: string[];
+        options: readonly string[];
       }
   );
 
@@ -443,7 +429,7 @@ export type Plot = CommonPlotArgs &
   (
     | {
         type: "distributions";
-        distributions: LabeledDistribution[];
+        distributions: readonly LabeledDistribution[];
         xScale: Scale;
         yScale: Scale;
         showSummary: boolean;
@@ -473,14 +459,14 @@ export type Plot = CommonPlotArgs &
     | {
         type: "relativeValues";
         fn: Lambda;
-        ids: string[];
+        ids: readonly string[];
       }
   );
 
 export type TableChart = {
-  data: Value[];
+  data: readonly Value[];
   title?: string;
-  columns: { fn: Lambda; name: string | undefined }[];
+  columns: readonly { fn: Lambda; name: string | undefined }[];
 };
 class VTableChart extends BaseValue {
   readonly type = "TableChart";
@@ -498,7 +484,7 @@ export const vTableChart = (v: TableChart) => new VTableChart(v);
 
 export type Calculator = {
   fn: Lambda;
-  inputs: Input[];
+  inputs: readonly Input[];
   autorun: boolean;
   description?: string;
   title?: string;
@@ -703,7 +689,7 @@ export function isEqual(a: Value, b: Value): boolean {
 
 const _isUniqableType = (t: Value) => "isEqual" in t;
 
-export function uniq(array: Value[]): Value[] {
+export function uniq(array: readonly Value[]): Value[] {
   const uniqueArray: Value[] = [];
 
   for (const item of array) {
@@ -718,7 +704,10 @@ export function uniq(array: Value[]): Value[] {
   return uniqueArray;
 }
 
-export function uniqBy(array: Value[], fn: (e: Value) => Value): Value[] {
+export function uniqBy(
+  array: readonly Value[],
+  fn: (e: Value) => Value
+): Value[] {
   const seen: Value[] = [];
   const uniqueArray: Value[] = [];
 

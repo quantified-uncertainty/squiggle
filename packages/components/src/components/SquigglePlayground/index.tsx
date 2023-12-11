@@ -8,11 +8,12 @@ import React, {
 } from "react";
 
 import { SqLinker, SqProject } from "@quri/squiggle-lang";
+
 import { SquiggleOutput } from "../../lib/hooks/useSquiggle.js";
 import { DynamicSquiggleViewer } from "../DynamicSquiggleViewer.js";
 import {
-  PartialPlaygroundSettings,
   defaultPlaygroundSettings,
+  PartialPlaygroundSettings,
   type PlaygroundSettings,
 } from "../PlaygroundSettings.js";
 import { SquiggleViewerHandle } from "../SquiggleViewer/index.js";

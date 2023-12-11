@@ -1,27 +1,29 @@
 import { type Env } from "./dist/env.js";
 import { registry } from "./library/registry/index.js";
 import { SqProject } from "./public/SqProject/index.js";
-export {
-  type SqInput,
-  SqTextAreaInput,
-  SqCheckboxInput,
-  SqSelectInput,
-  SqTextInput,
-} from "./public/SqValue/SqInput.js";
 import {
+  SqDateValue,
   SqLambdaValue,
   SqNumberValue,
   SqStringValue,
-  SqDateValue,
   type SqValue,
 } from "./public/SqValue/index.js"; // TODO - reexport other values too
 
+export { type FnDocumentation } from "./library/registry/core.js";
+export {
+  SqCheckboxInput,
+  type SqInput,
+  SqSelectInput,
+  SqTextAreaInput,
+  SqTextInput,
+} from "./public/SqValue/SqInput.js";
+
 export {
   SqCompileError,
+  type SqError,
   SqFrame,
   SqOtherError,
   SqRuntimeError,
-  type SqError,
 } from "./public/SqError.js";
 export { SqDistributionError } from "./public/SqValue/SqDistribution/SqDistributionError.js";
 export {
@@ -30,16 +32,16 @@ export {
 } from "./public/SqValue/SqDistribution/SqPointSet.js";
 export {
   SqAbstractDistribution,
+  type SqDistribution,
   SqDistributionTag,
   SqPointSetDistribution,
   SqSampleSetDistribution,
   SqSymbolicDistribution,
-  type SqDistribution,
 } from "./public/SqValue/SqDistribution/index.js";
 export {
+  SqDateRangeDomain,
   type SqDomain,
   SqNumericRangeDomain,
-  SqDateRangeDomain,
 } from "./public/SqValue/SqDomain.js";
 export { SqLambda, type SqLambdaParameter } from "./public/SqValue/SqLambda.js";
 export { SqDictValue } from "./public/SqValue/index.js";
@@ -47,20 +49,20 @@ export {
   SqDistFnPlot,
   SqDistributionsPlot,
   SqNumericFnPlot,
+  type SqPlot,
   SqRelativeValuesPlot,
   SqScatterPlot,
-  type SqPlot,
 } from "./public/SqValue/SqPlot.js";
 export { SqTableChart } from "./public/SqValue/SqTableChart.js";
 export { SqCalculator } from "./public/SqValue/SqCalculator.js";
 export { SqDict } from "./public/SqValue/SqDict.js";
 export {
+  SqDateScale,
   SqLinearScale,
   SqLogScale,
   SqPowerScale,
-  SqSymlogScale,
-  SqDateScale,
   type SqScale,
+  SqSymlogScale,
 } from "./public/SqValue/SqScale.js";
 export { type PathItem, SqValuePath } from "./public/SqValuePath.js";
 export { parse } from "./public/parse.js";
@@ -71,12 +73,12 @@ export { SDuration } from "./utility/SDuration.js";
 export { type LocationRange as SqLocation } from "peggy";
 export { defaultEnv as defaultEnvironment } from "./dist/env.js";
 export {
+  type Env,
+  SqDateValue,
   SqLambdaValue,
   SqNumberValue,
-  SqDateValue,
   SqProject,
   SqStringValue,
-  type Env,
   type SqValue,
 };
 
@@ -109,4 +111,8 @@ export function sq(strings: TemplateStringsArray, ...rest: unknown[]) {
 
 export function getFunctionDocumentation(name: string) {
   return registry.getFunctionDocumentation(name);
+}
+
+export function getAllFunctionNames() {
+  return registry.allNames();
 }

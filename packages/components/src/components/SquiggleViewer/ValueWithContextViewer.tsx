@@ -1,15 +1,21 @@
+// make sure all widgets are in registry
+import "../../widgets/index.js";
+
 import { clsx } from "clsx";
 import { FC, PropsWithChildren, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 
 import { CommentIcon, TextTooltip } from "@quri/ui";
 
+import { SHORT_STRING_LENGTH } from "../../lib/constants.js";
 import { SqValueWithContext } from "../../lib/utility.js";
 import { ErrorBoundary } from "../ErrorBoundary.js";
+import { CollapsedIcon, ExpandedIcon } from "./icons.js";
 import { SquiggleValueChart } from "./SquiggleValueChart.js";
 import { SquiggleValueHeader } from "./SquiggleValueHeader.js";
 import { SquiggleValueMenu } from "./SquiggleValueMenu.js";
 import { SquiggleValuePreview } from "./SquiggleValuePreview.js";
+import { getChildrenValues, pathToShortName } from "./utils.js";
 import {
   useCollapseChildren,
   useFocus,
@@ -20,12 +26,6 @@ import {
   useToggleCollapsed,
   useViewerContext,
 } from "./ViewerProvider.js";
-import { getChildrenValues, pathToShortName } from "./utils.js";
-import { SHORT_STRING_LENGTH } from "../../lib/constants.js";
-
-// make sure all widgets are in registry
-import "../../widgets/index.js";
-import { CollapsedIcon, ExpandedIcon } from "./icons.js";
 
 function getComment(value: SqValueWithContext): string | undefined {
   return value.context.docstring();

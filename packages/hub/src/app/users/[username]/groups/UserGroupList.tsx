@@ -2,10 +2,9 @@ import { FC } from "react";
 import { usePaginationFragment } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { UserGroupList$key } from "@/__generated__/UserGroupList.graphql";
 import { GroupList } from "@/groups/components/GroupList";
-import { StyledLink } from "@/components/ui/StyledLink";
-import { newGroupRoute } from "@/routes";
+
+import { UserGroupList$key } from "@/__generated__/UserGroupList.graphql";
 
 const Fragment = graphql`
   fragment UserGroupList on User

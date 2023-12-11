@@ -1,8 +1,8 @@
 import { clsx } from "clsx";
 import { FC } from "react";
 
-import { RefreshIcon } from "../../icons/RefreshIcon.js";
 import { IconProps } from "../../icons/Icon.js";
+import { RefreshIcon } from "../../icons/RefreshIcon.js";
 
 export type ItemLayoutProps = {
   icon?: FC<IconProps>;

@@ -19,9 +19,9 @@ import {
 import { highlightSelectionMatches, searchKeymap } from "@codemirror/search";
 import { EditorState } from "@codemirror/state";
 import {
-  EditorView,
   drawSelection,
   dropCursor,
+  EditorView,
   highlightSpecialChars,
   keymap,
 } from "@codemirror/view";
@@ -40,9 +40,9 @@ import { useOnChangeExtension } from "./useOnChangeExtension.js";
 import { useShowGutterExtension } from "./useShowGutterExtension.js";
 import { useSquiggleLanguageExtension } from "./useSquiggleLanguageExtension.js";
 import { useSubmitExtension } from "./useSubmitExtension.js";
+import { useTooltipsExtension } from "./useTooltipsExtension.js";
 import { useViewNodeExtension } from "./useViewNodeExtension.js";
 import { useWidthHeightExtension } from "./useWidthHeightExtension.js";
-import { useTooltipsExtension } from "./useTooltipsExtension.js";
 
 export function useSquiggleEditorExtensions(
   view: EditorView | undefined,

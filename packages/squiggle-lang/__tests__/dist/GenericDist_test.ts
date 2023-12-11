@@ -4,25 +4,24 @@ import { SampleSetDist } from "../../src/dist/SampleSetDist/index.js";
 import { Env } from "../../src/index.js";
 import * as Result from "../../src/utility/result.js";
 import { Ok } from "../../src/utility/result.js";
+import {
+  betaDist,
+  cauchyDist,
+  exponentialDist,
+  lognormalDist,
+  normalDist,
+  normalDist10,
+  normalDist5,
+  point1,
+  triangularDist,
+  uniformDist,
+} from "../fixtures/distFixtures.js";
 import { unpackResult } from "../helpers/distHelpers.js";
 
 const env: Env = {
   sampleCount: 100,
   xyPointLength: 100,
 };
-
-import {
-  normalDist5,
-  normalDist,
-  uniformDist,
-  betaDist,
-  lognormalDist,
-  cauchyDist,
-  triangularDist,
-  exponentialDist,
-  point1,
-  normalDist10,
-} from "../fixtures/distFixtures.js";
 
 describe("toPointSet", () => {
   test("on symbolic normal distribution", () => {
