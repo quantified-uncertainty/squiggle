@@ -134,7 +134,7 @@ describe("Peggy to Expression", () => {
   });
 
   describe("lambda", () => {
-    testToExpression("{|x| x}", "{|x| x}", "lambda(x=>internal code)");
+    testToExpression("{|x| x}", "{|x| x}", "(x) => internal code");
     testToExpression("f={|x| x}", "f = {|x| x}");
     testToExpression("f(x)=x", "f = {|x| {x}}"); // Function definitions are lambda assignments
     testToExpression("f(x)=x ? 1 : 0", "f = {|x| {x ? (1) : (0)}}");

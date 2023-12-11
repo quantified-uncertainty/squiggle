@@ -41,7 +41,7 @@ describe("Plot", () => {
       `Plot.numericFn({|x,y| x * 5})`,
       `Error(Error: There are function matches for Plot.numericFn(), but with different arguments:
   Plot.numericFn(fn: (number) => number, params?: {xScale?: scale, yScale?: scale, title?: string, points?: number}) => plot
-)`
+Was given arguments: ((x,y) => internal code)`
     );
 
     testPlotResult(
@@ -116,7 +116,7 @@ describe("Plot", () => {
       `Plot.distFn({|x,y| x to x + y})`,
       `Error(Error: There are function matches for Plot.distFn(), but with different arguments:
   Plot.distFn(fn: (number) => distribution, params?: {xScale?: scale, yScale?: scale, distXScale?: scale, title?: string, points?: number}) => plot
-)`
+Was given arguments: ((x,y) => internal code)`
     );
   });
 
