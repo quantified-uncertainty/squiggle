@@ -1,11 +1,11 @@
 import { clsx } from "clsx";
 import {
-  CSSProperties,
-  FC,
-  ReactNode,
-  useEffect,
-  useRef,
-  useState,
+    CSSProperties,
+    FC,
+    ReactNode,
+    useEffect,
+    useRef,
+    useState
 } from "react";
 import {
   DraggableCore,
@@ -22,9 +22,9 @@ type Props = {
 };
 
 export const ResizableTwoPanelLayout: FC<Props> = ({
-  renderLeft,
-  renderRight,
-  height,
+    renderLeft,
+    renderRight,
+    height
 }) => {
   const [width, setWidth] = useState<number | undefined>();
 
@@ -39,7 +39,7 @@ export const ResizableTwoPanelLayout: FC<Props> = ({
   const slack = useRef<number>(0);
 
   // Clamp width within provided constraints
-  const runConstraint = (width: number): number => {
+const runConstraint = (width: number): number => {
     const oldW = width;
 
     // Add slack to the values used to calculate bound position. This will ensure that if
@@ -49,18 +49,18 @@ export const ResizableTwoPanelLayout: FC<Props> = ({
     width = Math.max(minConstraint, width);
 
     // If the width or height changed, we must have introduced some slack. Record it for the next iteration.
-    slack.current = slack.current + (oldW - width);
+    slack.current += oldW - width;
 
     return width;
   };
 
-  const resizeHandler = (
+const resizeHandler = (
     handlerName: "onResize" | "onResizeStart" | "onResizeStop"
-  ): DraggableEventHandler => {
+): DraggableEventHandler => {
     return (e: DraggableEvent, { deltaX }) => {
-      if (width === undefined) {
-        return;
-      }
+        if (width === undefined) {
+            return;
+        }
 
       const newWidth = runConstraint(width + deltaX);
 
@@ -79,7 +79,7 @@ export const ResizableTwoPanelLayout: FC<Props> = ({
 
   const handleRef = useRef<HTMLDivElement>(null);
 
-  return (
+return (
     <div className="flex items-stretch" ref={containerRef} style={{ height }}>
       <div className={clsx("relative", !width && "w-1/2")} style={{ width }}>
         {renderLeft()}
