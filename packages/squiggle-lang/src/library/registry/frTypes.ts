@@ -279,7 +279,7 @@ export function frTuple(...types: FRType<unknown>[]): FRType<any> {
     pack: (values: unknown[]) => {
       return vArray(values.map((val, index) => types[index].pack(val)));
     },
-    getName: () => `(${types.map((type) => type.getName()).join(", ")})`,
+    getName: () => `[${types.map((type) => type.getName()).join(", ")}]`,
   };
 }
 
