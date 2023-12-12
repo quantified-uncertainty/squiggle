@@ -307,6 +307,12 @@ describe("frOr", () => {
       const unpacked = frNumberOrString.unpack(stringValue);
       expect(unpacked).toEqual({ tag: "2", value: "hello" });
     });
+
+    test("should correctly unpack falsy value", () => {
+      const numberValue = vNumber(0);
+      const unpacked = frNumberOrString.unpack(numberValue);
+      expect(unpacked).toEqual({ tag: "1", value: 0 });
+    });
   });
 
   describe("pack", () => {
