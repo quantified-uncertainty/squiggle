@@ -12,9 +12,8 @@ import { SquiggleEditor } from "@quri/squiggle-components";
 f`}
 />
 
-There's no `return` statement in Squiggle; function definitions are values.
-
-If you need to define local variables in functions, you can use blocks:
+In Squiggle, function definitions are treated as values. There's no explicit `return` statement; the result of the last expression in the function body is returned.
+If you need to define local variables in functions, you can use blocks. The last expression in the block is the value of the block:
 
 <SquiggleEditor
   defaultCode={`mul6(x) = {
@@ -25,15 +24,14 @@ If you need to define local variables in functions, you can use blocks:
 
 ## Anonymous Functions
 
-`f(x, y) = x * y` and `f = {|x, y| x * y}` are equivalent.
+In Squiggle, you can define anonymous functions using the `{|...| ...}` syntax. For example, `f(x, y) = x * y` and `f = {|x, y| x * y}` are equivalent.
 
-Squiggle functions are values, and you can save them to variables, pass them to other functions as arguments, return functions from functions, and so on.
-
+Squiggle functions are first-class values, meaning you can assign them to variables, pass them as arguments to other functions, and return them from other functions.
 <SquiggleEditor defaultCode={`{|t| normal(t^2, t^1.2+.01)}`} />
 
 ## Function Visualization
 
-The Squiggle viewer can automatically visualize two types of functions, without manual plots:
+The Squiggle viewer can automatically visualize functions that take a single number as input and return either a number or a distribution, without the need for manual plots:
 
 1. `(number) => number`
 2. `(number) => distribution`
@@ -42,11 +40,10 @@ The Squiggle viewer can automatically visualize two types of functions, without 
 numberToDist(x) = normal(x + 1, 3)
 otherFunction(x, y) = x + y`} />
 
-When Squiggle displays a single parameter function, it needs to select some range of parameter values.
+When Squiggle visualizes a function, it automatically selects a range of input values to use.
+The default range of input values is 0 to 10.
 
-The default range is 0 to 10.
-
-You can manually set the the range in the following ways:
+You can manually set the range in the following ways:
 
 - With `Plot.numericFn` or `Plot.distFn` plots, using the `xScale` parameter
 - Through the chart's settings in the UI (look for a gear icon next to the variable name)
@@ -54,7 +51,7 @@ You can manually set the the range in the following ways:
 
 ## Parameter Annotations
 
-Function parameters can be annotated with _domains_.
+Function parameters can be annotated with _domains_ to specify the range of valid input values.
 
 Examples:
 
