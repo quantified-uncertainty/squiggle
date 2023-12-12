@@ -1,7 +1,7 @@
 "use client";
 import { clsx } from "clsx";
 import { useRouter } from "next/navigation";
-import { FC, useCallback, useEffect, useRef } from "react";
+import { FC, useRef } from "react";
 import { fetchQuery, graphql, useRelayEnvironment } from "react-relay";
 import {
   components,
@@ -12,11 +12,13 @@ import AsyncSelect from "react-select/async";
 
 import { SearchIcon } from "@quri/ui";
 
+import { useGlobalShortcut } from "@/hooks/useGlobalShortcut";
+
+import { SearchResult } from "./SearchResult";
+
 import { GlobalSearchQuery } from "@/__generated__/GlobalSearchQuery.graphql";
 import { SearchResult$key } from "@/__generated__/SearchResult.graphql";
-import { SearchResult } from "./SearchResult";
 import { SearchResultEdge$key } from "@/__generated__/SearchResultEdge.graphql";
-import { useGlobalShortcut } from "@/hooks/useGlobalShortcut";
 
 export const Query = graphql`
   query GlobalSearchQuery($text: String!) {
@@ -140,9 +142,9 @@ export const GlobalSearch: FC = () => {
       classNames={{
         // copy-pasted and simplified from SelectFormField
         control: () =>
-          "min-w-[12em] max-w-[12em] !min-h-0 h-8 cursor-pointer bg-slate-200 hover:bg-white focus-within:bg-white transition-colors border-slate-300 border rounded-md shadow-sm focus-within:ring-indigo-400 focus-within:ring-2",
+          "min-w-[16em] max-w-[12em] !min-h-0 h-8 cursor-pointer bg-slate-900  transition-colors border-slate-900 border rounded-md shadow-sm focus-within:ring-indigo-500 focus-within:ring-1",
         // disable default browser focus style
-        input: () => "[&_input:focus]:!ring-transparent",
+        input: () => "[&_input:focus]:!ring-transparent text-white",
         placeholder: () => "text-slate-400 text-sm font-light",
         valueContainer: () => "px-3",
         clearIndicator: () => "text-slate-300 hover:text-slate-500 px-2",
@@ -152,13 +154,13 @@ export const GlobalSearch: FC = () => {
         menuPortal: () => "!z-[100]",
         // based on Dropdown styles
         menu: () =>
-          "mt-2 min-w-[20em] rounded-md bg-white shadow-xl border border-slate-300 overflow-hidden",
+          "mt-2 min-w-[26em] rounded-md bg-white shadow-xl border border-slate-300 overflow-hidden",
         menuList: () => "p-1 overflow-auto",
         option: ({ isDisabled, isFocused }) =>
           clsx(
-            "px-3 py-1.5 rounded text-slate-700",
+            "px-3 py-1.5 rounded text-white",
             isFocused && "bg-blue-100",
-            !isDisabled && "rounded hover:bg-blue-100 hover:text-slate-900"
+            !isDisabled && "rounded hover:bg-blue-100 hover:text-slate-100"
           ),
         loadingMessage: () => "text-slate-500",
         noOptionsMessage: () => "text-slate-400 p-2",
