@@ -364,6 +364,7 @@ export const vScale = (scale: Scale) => new VScale(scale);
 
 export type CommonInputArgs = {
   name: string;
+  typeName?: string;
   description?: string;
 };
 

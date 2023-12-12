@@ -13,6 +13,7 @@ import {
   tryCallFnDefinition,
 } from "../library/registry/fnDefinition.js";
 import { FRType } from "../library/registry/frTypes.js";
+import { frTypeToInput } from "../library/registry/helpers.js";
 import { sort } from "../utility/E_A_Floats.js";
 import { Calculator, Input, Value, VDomain } from "../value/index.js";
 import * as Context from "./context.js";
@@ -226,10 +227,7 @@ export class BuiltinLambda extends BaseLambda {
     const longestSignature = maxBy(this.signatures(), (s) => s.length) || [];
     return longestSignature.map((sig, i) => {
       const name = sig.name ? sig.name : `Input ${i + 1}`;
-      return {
-        name,
-        type: sig.getName() === "Bool" ? "checkbox" : "text",
-      };
+      return frTypeToInput(sig, i, name);
     });
   }
 

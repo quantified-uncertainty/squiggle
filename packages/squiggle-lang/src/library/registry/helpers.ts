@@ -20,7 +20,7 @@ import { ReducerContext } from "../../reducer/context.js";
 import { Lambda } from "../../reducer/lambda.js";
 import { upTo } from "../../utility/E_A_Floats.js";
 import * as Result from "../../utility/result.js";
-import { Value } from "../../value/index.js";
+import { Input, Value } from "../../value/index.js";
 import { FRFunction } from "./core.js";
 import { FnDefinition, makeDefinition } from "./fnDefinition.js";
 import {
@@ -465,4 +465,65 @@ export const frTypesMatchesLengths = (
   const min = inputs.filter((i) => !isOptional(i)).length;
   const max = inputs.length;
   return intersection(upTo(min, max), lengths).length > 0;
+};
+
+export const frTypeToInput = (
+  frType: FRType<any>,
+  i: number,
+  name: string
+): Input => {
+  if (frType.tag === "bool") {
+    return {
+      name,
+      typeName: frType.getName(),
+      type: "checkbox",
+      default: false,
+    };
+  } else if (frType.tag === "named") {
+    const underlyingType = frType.underlyingType;
+    if (!underlyingType) {
+      throw new Error("Impossible branch");
+    }
+    return {
+      ...frTypeToInput(underlyingType!, i, name),
+      typeName: `${underlyingType!.getName()}`,
+    };
+  } else if (frType.tag === "optional") {
+    const underlyingType = frType.underlyingType;
+    if (!underlyingType) {
+      throw new Error("Impossible branch");
+    }
+    return {
+      ...frTypeToInput(underlyingType!, i, name),
+      typeName: `${underlyingType!.getName()}?`,
+    };
+  } else if (frType.tag === "array") {
+    return {
+      typeName: frType.getName(),
+      type: "textArea",
+      default: "[]",
+      name,
+    };
+  } else if (frType.tag === "dict") {
+    return {
+      typeName: frType.getName(),
+      type: "textArea",
+      default: "{}",
+      name,
+    };
+  } else if (frType.tag === "tuple") {
+    return {
+      typeName: frType.getName(),
+      type: "textArea",
+      default: "[]",
+      name,
+    };
+  } else {
+    return {
+      typeName: frType.getName(),
+      type: "text",
+      default: "",
+      name,
+    };
+  }
 };

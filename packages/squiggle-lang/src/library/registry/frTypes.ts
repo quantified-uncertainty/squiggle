@@ -42,6 +42,7 @@ export type FRType<T> = {
   getName: () => string;
   transparent?: T extends Value ? boolean : undefined;
   isOptional?: boolean;
+  underlyingType?: FRType<any>;
   tag?: string;
   name?: string;
 };
@@ -69,16 +70,19 @@ export const frString: FRType<string> = {
   unpack: (v: Value) => (v.type === "String" ? v.value : undefined),
   pack: (v) => vString(v),
   getName: () => "string",
+  tag: "string",
 };
 export const frBool: FRType<boolean> = {
   unpack: (v: Value) => (v.type === "Bool" ? v.value : undefined),
   pack: (v) => vBool(v),
   getName: () => "bool",
+  tag: "bool",
 };
 export const frDate: FRType<SDate> = {
   unpack: (v) => (v.type === "Date" ? v.value : undefined),
   pack: (v) => vDate(v),
   getName: () => "date",
+  tag: "date",
 };
 export const frDuration: FRType<SDuration> = {
   unpack: (v) => (v.type === "Duration" ? v.value : undefined),
@@ -115,6 +119,7 @@ export const frLambda: FRType<Lambda> = {
   unpack: (v) => (v.type === "Lambda" ? v.value : undefined),
   pack: (v) => vLambda(v),
   getName: () => "function",
+  tag: "lambda",
 };
 
 export const frLambdaTyped = (
@@ -131,6 +136,7 @@ export const frLambdaTyped = (
     pack: (v) => vLambda(v),
     getName: () =>
       `(${inputs.map((i) => i.getName()).join(", ")}) => ${output.getName()}`,
+    tag: "lambda",
   };
 };
 
@@ -144,6 +150,7 @@ export const frLambdaNand = (paramLengths: number[]): FRType<Lambda> => {
     },
     pack: (v) => vLambda(v),
     getName: () => `lambda(${paramLengths.join(",")})`,
+    tag: "lambda",
   };
 };
 export const frScale: FRType<Scale> = {
@@ -196,6 +203,7 @@ export const frArray = <T>(itemType: FRType<T>): FRType<readonly T[]> => {
         ? vArray(v as readonly Value[])
         : vArray(v.map(itemType.pack)),
     getName: () => `list(${itemType.getName()})`,
+    tag: "array",
   };
 };
 
@@ -281,6 +289,7 @@ export function frTuple(...types: FRType<unknown>[]): FRType<any> {
       return vArray(values.map((val, index) => types[index].pack(val)));
     },
     getName: () => `[${types.map((type) => type.getName()).join(", ")}]`,
+    tag: "tuple",
   };
 }
 
@@ -308,6 +317,7 @@ export const frDictWithArbitraryKeys = <T>(
         ImmutableMap([...v.entries()].map(([k, v]) => [k, itemType.pack(v)]))
       ),
     getName: () => `dict(${itemType.getName()})`,
+    tag: "dict",
   };
 };
 
@@ -462,6 +472,7 @@ export function frDict<T extends object>(
         )
         .join(", ") +
       "}",
+    tag: "dict",
   };
 }
 
@@ -474,6 +485,7 @@ export const frNamed = <T>(name: string, itemType: FRType<T>): FRType<T> => ({
   },
   isOptional: isOptional(itemType),
   tag: "named",
+  underlyingType: itemType,
   name: name,
 });
 
@@ -488,6 +500,7 @@ export const frOptional = <T>(itemType: FRType<T>): FRType<T | null> => {
       return itemType.pack(v);
     },
     getName: () => itemType.getName(),
+    underlyingType: itemType,
     isOptional: true,
   };
 };
