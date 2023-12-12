@@ -124,7 +124,7 @@ export const library = [
     name: "rangeDomain",
     requiresNamespace: true,
     output: "Domain",
-    examples: ["Date.rangeDomain(2000year, 2010year)"],
+    examples: ["Date.rangeDomain({ min: 2000year, max: 2010year })"],
     definitions: [
       makeDefinition(
         [frNamed("min", frDate), frNamed("min", frDate)],
