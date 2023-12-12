@@ -27,7 +27,7 @@ import {
 import * as magicNumbers from "../magicNumbers.js";
 
 const maker = new FnFactory({
-  nameSpace: "",
+  nameSpace: "Dist",
   requiresNamespace: false,
 });
 

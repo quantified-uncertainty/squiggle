@@ -16,6 +16,7 @@ export const FnDocumentation: FC<{ documentation: FnDocumentationType }> = ({
   const {
     name,
     nameSpace,
+    requiresNamespace,
     isUnit,
     shorthand,
     isExperimental,
@@ -43,7 +44,7 @@ export const FnDocumentation: FC<{ documentation: FnDocumentationType }> = ({
           </div>
         </div>
       </Section>
-      {(isUnit || shorthand || isExperimental) && (
+      {(isUnit || shorthand || isExperimental || !requiresNamespace) && (
         <Section>
           <div className="flex">
             {isUnit && (
@@ -62,6 +63,11 @@ export const FnDocumentation: FC<{ documentation: FnDocumentationType }> = ({
             {isExperimental && (
               <div className={clsx("bg-red-100 text-red-800", tagCss)}>
                 Experimental
+              </div>
+            )}
+            {!requiresNamespace && (
+              <div className={clsx("bg-purple-100 text-slate-800", tagCss)}>
+                {`Namespace optional`}
               </div>
             )}
           </div>
