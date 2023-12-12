@@ -115,9 +115,13 @@ export const library: FRFunction[] = [
   maker.d2n({ name: "integralSum", fn: (d) => d.integralSum() }),
   maker.fromDefinition(
     "sampleN",
-    makeDefinition([frDist, frNumber], frArray(frNumber), ([dist, n]) => {
-      return dist.sampleN(n | 0);
-    })
+    makeDefinition(
+      [frDist, frNamed("n", frNumber)],
+      frArray(frNumber),
+      ([dist, n]) => {
+        return dist.sampleN(n | 0);
+      }
+    )
   ),
   maker.d2d({
     name: "exp",

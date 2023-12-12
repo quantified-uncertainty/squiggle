@@ -32,6 +32,8 @@ export const FnDocumentation: FC<{ documentation: FnDocumentationType }> = ({
         <div className="flex flex-nowrap items-end justify-between gap-2 py-0.5">
           <a
             href={`${SQUIGGLE_DOCS_URL}/${nameSpace}#${name}`}
+            target="_blank"
+            rel="noreferrer"
             className="text-blue-500 hover:underline text-sm leading-none"
           >
             {fullName}
