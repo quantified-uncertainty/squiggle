@@ -131,7 +131,7 @@
     "build": "pnpm run build:media && pnpm run build:grammar && pnpm run build:bundle && pnpm run build:webview && pnpm run build:ts",
     "watch": "pnpm run compile:bundle --watch",
     "pretest": "pnpm run build && pnpm run lint",
-    "lint": "prettier --check .",
+    "lint": "eslint . --ext .ts,.tsx --quiet",
     "format": "prettier --write .",
     "package": "vsce package --no-dependencies"
   },
