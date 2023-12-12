@@ -8,15 +8,15 @@ import { SquiggleEditor } from "@quri/squiggle-components";
 ## Basic syntax
 
 <SquiggleEditor
-  defaultCode={`f(t) = normal(t^2, t^1.2+.01)
-f`}
+  defaultCode={`multiply(t) = normal(t^2, t^1.2+.01)
+multiply`}
 />
 
 In Squiggle, function definitions are treated as values. There's no explicit `return` statement; the result of the last expression in the function body is returned.
 If you need to define local variables in functions, you can use blocks. The last expression in the block is the value of the block:
 
 <SquiggleEditor
-  defaultCode={`mul6(x) = {
+  defaultCode={`multiplyBySix(x) = {
     doubleX = x * 2
     doubleX * 3
   }`}
@@ -24,7 +24,7 @@ If you need to define local variables in functions, you can use blocks. The last
 
 ## Anonymous Functions
 
-In Squiggle, you can define anonymous functions using the `{|...| ...}` syntax. For example, `f(x, y) = x * y` and `f = {|x, y| x * y}` are equivalent.
+In Squiggle, you can define anonymous functions using the `{|...| ...}` syntax. For example, `multiply(x, y) = x * y` and `multiply = {|x, y| x * y}` are equivalent.
 
 Squiggle functions are first-class values, meaning you can assign them to variables, pass them as arguments to other functions, and return them from other functions.
 <SquiggleEditor defaultCode={`{|t| normal(t^2, t^1.2+.01)}`} />
@@ -37,8 +37,8 @@ The Squiggle viewer can automatically visualize functions that take a single num
 2. `(number) => distribution`
 
 <SquiggleEditor defaultCode={`numberToNumber(x) = x * x
-numberToDist(x) = normal(x + 1, 3)
-otherFunction(x, y) = x + y`} />
+numberToDistribution(x) = normal(x + 1, 3)
+placeholderFunction(x, y) = x + y`} />
 
 When Squiggle visualizes a function, it automatically selects a range of input values to use.
 The default range of input values is 0 to 10.
@@ -72,8 +72,8 @@ We plan to support other kinds of domains in the future; for now, only numeric r
 ### Annotation Reflection
 
 <SquiggleEditor
-  defaultCode={`f(x: [1, 20]) = x * x
-f.parameters[0]`}
+  defaultCode={`multiply(x: [1, 20]) = x * x
+multiply.parameters[0]`}
 />
 
 Domains and parameter names can be accessed by the `fn.parameters` property.
@@ -81,7 +81,7 @@ Domains and parameter names can be accessed by the `fn.parameters` property.
 For example, domains extracted with `.parameters` can be reused in annotations of other parameters:
 
 <SquiggleEditor
-  defaultCode={`f(x: [1, 20]) = x * x
-g(x: f.parameters[0].domain) = x * x * x
+  defaultCode={`multiply(x: [1, 20]) = x * x
+g(x: multiply.parameters[0].domain) = x * x * x
 `}
 />
