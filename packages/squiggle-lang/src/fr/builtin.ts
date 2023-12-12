@@ -4,6 +4,7 @@ import {
   frArray,
   frBool,
   frGeneric,
+  frNamed,
   frNumber,
   frOptional,
   frString,
@@ -103,7 +104,7 @@ export const library = [
     name: "inspect",
     definitions: [
       makeDefinition(
-        [frGeneric("A"), frOptional(frString)],
+        [frGeneric("A"), frNamed("message", frOptional(frString))],
         frGeneric("A"),
         ([value, message]) => {
           message ? console.log(message, value) : console.log(value);

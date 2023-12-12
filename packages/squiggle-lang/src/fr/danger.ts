@@ -436,14 +436,21 @@ const mapYLibrary: FRFunction[] = [
     name: "binomialDist",
     examples: ["Danger.binomialDist(8, 0.5)"],
     definitions: [
-      makeTwoArgsSamplesetDist((n, p) => SymbolicDist.Binomial.make(n, p)),
+      makeTwoArgsSamplesetDist(
+        (n, p) => SymbolicDist.Binomial.make(n, p),
+        "numberOfTrials",
+        "probabilityOfSuccess"
+      ),
     ],
   }),
   maker.make({
     name: "poissonDist",
     examples: ["Danger.poissonDist(10)"],
     definitions: [
-      makeOneArgSamplesetDist((lambda) => SymbolicDist.Poisson.make(lambda)),
+      makeOneArgSamplesetDist(
+        (lambda) => SymbolicDist.Poisson.make(lambda),
+        "rate"
+      ),
     ],
   }),
 ];

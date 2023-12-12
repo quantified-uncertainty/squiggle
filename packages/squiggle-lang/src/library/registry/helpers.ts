@@ -27,6 +27,7 @@ import {
   frBool,
   frDist,
   frDistOrNumber,
+  frNamed,
   frNumber,
   frSampleSetDist,
   frString,
@@ -364,20 +365,23 @@ export function makeTwoArgsSamplesetDist(
   fn: (
     v1: number,
     v2: number
-  ) => Result.result<SymbolicDist.SymbolicDist, string>
+  ) => Result.result<SymbolicDist.SymbolicDist, string>,
+  name1: string,
+  name2: string
 ) {
   return makeDefinition(
-    [frDistOrNumber, frDistOrNumber],
+    [frNamed(name1, frDistOrNumber), frNamed(name2, frDistOrNumber)],
     frSampleSetDist,
     ([v1, v2], { environment }) => twoVarSample(v1, v2, environment, fn)
   );
 }
 
 export function makeOneArgSamplesetDist(
-  fn: (v: number) => Result.result<SymbolicDist.SymbolicDist, string>
+  fn: (v: number) => Result.result<SymbolicDist.SymbolicDist, string>,
+  name: string
 ) {
   return makeDefinition(
-    [frDistOrNumber],
+    [frNamed(name, frDistOrNumber)],
     frSampleSetDist,
     ([v], { environment }) => {
       const sampleFn = (a: number) =>

@@ -32,6 +32,7 @@ export type FnDocumentation = Pick<
   | "description"
   | "requiresNamespace"
   | "nameSpace"
+  | "definitions"
   | "name"
   | "examples"
   | "isExperimental"
@@ -122,6 +123,7 @@ export class Registry {
       nameSpace: fn.nameSpace,
       requiresNamespace: fn.requiresNamespace,
       description: fn.description,
+      definitions: fn.definitions,
       examples: fn.examples,
       signatures: fn.definitions
         .filter((d) => showInDocumentation(d))

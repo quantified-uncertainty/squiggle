@@ -16,6 +16,7 @@ import {
   frArray,
   frDist,
   frDistOrNumber,
+  frNamed,
   frNumber,
 } from "../library/registry/frTypes.js";
 import {
@@ -26,7 +27,7 @@ import {
 import * as magicNumbers from "../magicNumbers.js";
 
 const maker = new FnFactory({
-  nameSpace: "",
+  nameSpace: "Dist",
   requiresNamespace: false,
 });
 
@@ -114,9 +115,13 @@ export const library: FRFunction[] = [
   maker.d2n({ name: "integralSum", fn: (d) => d.integralSum() }),
   maker.fromDefinition(
     "sampleN",
-    makeDefinition([frDist, frNumber], frArray(frNumber), ([dist, n]) => {
-      return dist.sampleN(n | 0);
-    })
+    makeDefinition(
+      [frDist, frNamed("n", frNumber)],
+      frArray(frNumber),
+      ([dist, n]) => {
+        return dist.sampleN(n | 0);
+      }
+    )
   ),
   maker.d2d({
     name: "exp",
@@ -173,7 +178,7 @@ export const library: FRFunction[] = [
   maker.fromDefinition(
     "truncate",
     makeDefinition(
-      [frDist, frNumber, frNumber],
+      [frDist, frNamed("left", frNumber), frNamed("right", frNumber)],
       frDist,
       ([dist, left, right], { environment }) =>
         unwrapDistResult(dist.truncate(left, right, { env: environment }))

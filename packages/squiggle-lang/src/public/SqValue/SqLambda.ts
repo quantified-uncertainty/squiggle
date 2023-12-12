@@ -57,6 +57,10 @@ export class SqLambda {
     return new SqLambda(value.value);
   }
 
+  get type() {
+    return this._value.type;
+  }
+
   parameterCounts() {
     return this._value.parameterCounts();
   }

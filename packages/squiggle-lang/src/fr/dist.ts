@@ -7,6 +7,7 @@ import {
   frDict,
   frDist,
   frDistSymbolic,
+  frNamed,
   frNumber,
   frSampleSetDist,
 } from "../library/registry/frTypes.js";
@@ -89,8 +90,10 @@ export const library: FRFunction[] = [
       "normal({mean: 5, stdev: 2})",
     ],
     definitions: [
-      makeTwoArgsSamplesetDist((mean, stdev) =>
-        SymbolicDist.Normal.make({ mean, stdev })
+      makeTwoArgsSamplesetDist(
+        (mean, stdev) => SymbolicDist.Normal.make({ mean, stdev }),
+        "mean",
+        "stdev"
       ),
       ...CI_CONFIG.map((entry) =>
         makeCIDist(entry.lowKey, entry.highKey, (low, high) =>
@@ -116,8 +119,10 @@ export const library: FRFunction[] = [
       "lognormal({mean: 5, stdev: 2})",
     ],
     definitions: [
-      makeTwoArgsSamplesetDist((mu, sigma) =>
-        SymbolicDist.Lognormal.make({ mu, sigma })
+      makeTwoArgsSamplesetDist(
+        (mu, sigma) => SymbolicDist.Lognormal.make({ mu, sigma }),
+        "mu",
+        "sigma"
       ),
       ...CI_CONFIG.map((entry) =>
         makeCIDist(entry.lowKey, entry.highKey, (low, high) =>
@@ -137,8 +142,10 @@ export const library: FRFunction[] = [
     name: "uniform",
     examples: ["uniform(10, 12)"],
     definitions: [
-      makeTwoArgsSamplesetDist((low, high) =>
-        SymbolicDist.Uniform.make({ low, high })
+      makeTwoArgsSamplesetDist(
+        (low, high) => SymbolicDist.Uniform.make({ low, high }),
+        "low",
+        "high"
       ),
     ],
   }),
@@ -146,8 +153,10 @@ export const library: FRFunction[] = [
     name: "beta",
     examples: ["beta(20, 25)", "beta({mean: 0.39, stdev: 0.1})"],
     definitions: [
-      makeTwoArgsSamplesetDist((alpha, beta) =>
-        SymbolicDist.Beta.make({ alpha, beta })
+      makeTwoArgsSamplesetDist(
+        (alpha, beta) => SymbolicDist.Beta.make({ alpha, beta }),
+        "alpha",
+        "beta"
       ),
       makeMeanStdevDist((mean, stdev) =>
         SymbolicDist.Beta.fromMeanAndStdev({ mean, stdev })
@@ -158,8 +167,10 @@ export const library: FRFunction[] = [
     name: "cauchy",
     examples: ["cauchy(5, 1)"],
     definitions: [
-      makeTwoArgsSamplesetDist((local, scale) =>
-        SymbolicDist.Cauchy.make({ local, scale })
+      makeTwoArgsSamplesetDist(
+        (local, scale) => SymbolicDist.Cauchy.make({ local, scale }),
+        "location",
+        "scale"
       ),
     ],
   }),
@@ -167,8 +178,10 @@ export const library: FRFunction[] = [
     name: "gamma",
     examples: ["gamma(5, 1)"],
     definitions: [
-      makeTwoArgsSamplesetDist((shape, scale) =>
-        SymbolicDist.Gamma.make({ shape, scale })
+      makeTwoArgsSamplesetDist(
+        (shape, scale) => SymbolicDist.Gamma.make({ shape, scale }),
+        "shape",
+        "scale"
       ),
     ],
   }),
@@ -176,8 +189,10 @@ export const library: FRFunction[] = [
     name: "logistic",
     examples: ["logistic(5, 1)"],
     definitions: [
-      makeTwoArgsSamplesetDist((location, scale) =>
-        SymbolicDist.Logistic.make({ location, scale })
+      makeTwoArgsSamplesetDist(
+        (location, scale) => SymbolicDist.Logistic.make({ location, scale }),
+        "location",
+        "scale"
       ),
     ],
   }),
@@ -185,38 +200,45 @@ export const library: FRFunction[] = [
     name: "to",
     examples: ["5 to 10", "to(5,10)"],
     definitions: [
-      makeTwoArgsSamplesetDist((low, high) => {
-        if (low >= high) {
-          throw new REDistributionError(
-            argumentError("Low value must be less than high value")
-          );
-        } else if (low <= 0 || high <= 0) {
-          throw new REDistributionError(
-            argumentError(
-              `The "to" function only accepts paramaters above 0. It's a shorthand for lognormal({p5:min, p95:max}), which is only valid with positive entries for then minimum and maximum. If you would like to use a normal distribution, which accepts values under 0, you can use it like this: normal({p5:${low}, p95:${high}}).`
-            )
-          );
-        }
-        return SymbolicDist.Lognormal.fromCredibleInterval({
-          low,
-          high,
-          probability: 0.9,
-        });
-      }),
+      makeTwoArgsSamplesetDist(
+        (low, high) => {
+          if (low >= high) {
+            throw new REDistributionError(
+              argumentError("Low value must be less than high value")
+            );
+          } else if (low <= 0 || high <= 0) {
+            throw new REDistributionError(
+              argumentError(
+                `The "to" function only accepts paramaters above 0. It's a shorthand for lognormal({p5:min, p95:max}), which is only valid with positive entries for then minimum and maximum. If you would like to use a normal distribution, which accepts values under 0, you can use it like this: normal({p5:${low}, p95:${high}}).`
+              )
+            );
+          }
+          return SymbolicDist.Lognormal.fromCredibleInterval({
+            low,
+            high,
+            probability: 0.9,
+          });
+        },
+        "p5",
+        "p95"
+      ),
     ],
   }),
   maker.make({
     name: "exponential",
     examples: ["exponential(2)"],
     definitions: [
-      makeOneArgSamplesetDist((rate) => SymbolicDist.Exponential.make(rate)),
+      makeOneArgSamplesetDist(
+        (rate) => SymbolicDist.Exponential.make(rate),
+        "rate"
+      ),
     ],
   }),
   maker.make({
     name: "bernoulli",
     examples: ["bernoulli(0.5)"],
     definitions: [
-      makeOneArgSamplesetDist((p) => SymbolicDist.Bernoulli.make(p)),
+      makeOneArgSamplesetDist((p) => SymbolicDist.Bernoulli.make(p), "p"),
     ],
   }),
   maker.make({
@@ -224,7 +246,11 @@ export const library: FRFunction[] = [
     examples: ["triangular(3, 5, 10)"],
     definitions: [
       makeDefinition(
-        [frNumber, frNumber, frNumber],
+        [
+          frNamed("min", frNumber),
+          frNamed("mode", frNumber),
+          frNamed("max", frNumber),
+        ],
         frSampleSetDist,
         ([low, medium, high], { environment }) => {
           const result = SymbolicDist.Triangular.make({ low, medium, high });

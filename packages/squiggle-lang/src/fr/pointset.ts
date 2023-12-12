@@ -9,6 +9,7 @@ import {
   frDist,
   frDistPointset,
   frLambdaTyped,
+  frNamed,
   frNumber,
 } from "../library/registry/frTypes.js";
 import {
@@ -73,7 +74,7 @@ export const library = [
     output: "Dist",
     definitions: [
       makeDefinition(
-        [frDistPointset, frNumber],
+        [frDistPointset, frNamed("newLength", frNumber)],
         frDistPointset,
         ([dist, number]) => {
           return dist.downsample(number);
@@ -87,7 +88,7 @@ export const library = [
     output: "Dist",
     definitions: [
       makeDefinition(
-        [frDistPointset, frLambdaTyped([frNumber], frNumber)],
+        [frDistPointset, frNamed("fn", frLambdaTyped([frNumber], frNumber))],
         frDistPointset,
         ([dist, lambda], context) => {
           return unwrapDistResult(

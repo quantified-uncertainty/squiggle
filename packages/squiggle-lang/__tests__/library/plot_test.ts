@@ -115,7 +115,7 @@ Was given arguments: ((x,y) => internal code)`
     testEvalToMatch(
       `Plot.distFn({|x,y| x to x + y})`,
       `Error(Error: There are function matches for Plot.distFn(), but with different arguments:
-  Plot.distFn(fn: (number) => distribution, params?: {xScale?: scale, yScale?: scale, distXScale?: scale, title?: string, points?: number}) => plot
+  Plot.distFn(fn: (number) => dist, params?: {xScale?: scale, yScale?: scale, distXScale?: scale, title?: string, points?: number}) => plot
 Was given arguments: ((x,y) => internal code)`
     );
   });
