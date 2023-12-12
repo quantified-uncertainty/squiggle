@@ -24,8 +24,11 @@ const LocationLine: FC<{
   };
 
   return (
-    <span className="cursor-pointer hover:text-red-900" onClick={findInEditor}>
-      at line {location.start.line}, column {location.start.column}
+    <span
+      className="cursor-pointer hover:underline text-blue-500"
+      onClick={findInEditor}
+    >
+      line {location.start.line}, column {location.start.column}
     </span>
   );
 };
@@ -35,34 +38,47 @@ const WithHeader: FC<PropsWithChildren<{ header: string }>> = ({
   children,
 }) => (
   <div>
-    <div className="font-medium">{header}</div>
-    <div className="ml-4">{children}</div>
+    <div className="text-sm font-medium mb-1 text-gray-700">{header}</div>
+    <div className="ml-1">{children}</div>
   </div>
 );
 
 const StackTraceFrame: FC<{ frame: SqFrame }> = ({ frame }) => {
   const location = frame.location();
+  const name = frame.name();
   return (
-    <div>
-      {frame.name()} {location ? <LocationLine location={location} /> : ""}
-    </div>
+    <>
+      <div className="text-gray-500 font-mono font-medium truncate">{name}</div>
+      <div>{location && <LocationLine location={location} />}</div>
+    </>
   );
 };
 
 const StackTrace: FC<{ error: SqRuntimeError }> = ({ error }) => {
   const frames = error.getFrameArray();
   return frames.length ? (
-    <WithHeader header="Stack trace:">
-      {frames.map((frame, i) => (
-        <StackTraceFrame frame={frame} key={i} />
-      ))}
+    <WithHeader header="Stack Trace">
+      <div className="grid grid-cols-[minmax(60px,max-content),1fr] gap-x-4">
+        {frames.map((frame, i) => (
+          <StackTraceFrame frame={frame} key={i} />
+        ))}
+      </div>
     </WithHeader>
   ) : null;
 };
 
 export const SquiggleErrorAlert: FC<Props> = ({ error }) => {
+  function errorName(): string {
+    if (error instanceof SqCompileError) {
+      return "Compile Error";
+    } else if (error instanceof SqRuntimeError) {
+      return "Runtime Error";
+    } else {
+      return "Error";
+    }
+  }
   return (
-    <ErrorAlert heading="Error">
+    <ErrorAlert heading={errorName()}>
       <div className="space-y-4">
         <div className="whitespace-pre-wrap">{error.toString()}</div>
         {error instanceof SqRuntimeError ? (

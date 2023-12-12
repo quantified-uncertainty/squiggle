@@ -1,8 +1,19 @@
 import { clsx } from "clsx";
-import { CSSProperties, FC, ReactNode } from "react";
-import { ResizableBox } from "react-resizable";
+import {
+  CSSProperties,
+  FC,
+  ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import {
+  DraggableCore,
+  DraggableEvent,
+  DraggableEventHandler,
+} from "react-draggable";
 
-import { useInitialWidth } from "../../lib/hooks/index.js";
+const minConstraint = 20;
 
 type Props = {
   renderLeft(): ReactNode;
@@ -15,37 +26,76 @@ export const ResizableTwoPanelLayout: FC<Props> = ({
   renderRight,
   height,
 }) => {
-  const { ref: fullContainerRef, width: initialWidth } = useInitialWidth();
+  const [width, setWidth] = useState<number | undefined>();
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (containerRef.current) {
+      setWidth(containerRef.current.offsetWidth / 2);
+    }
+  }, []); // Empty array means this effect runs once when the component mounts
+
+  // Most of the following code is adapted and simplified from https://github.com/react-grid-layout/react-resizable/blob/master/lib/Resizable.js.
+  const slack = useRef<number>(0);
+
+  // Clamp width within provided constraints
+  const runConstraint = (width: number): number => {
+    const oldW = width;
+
+    // Add slack to the values used to calculate bound position. This will ensure that if
+    // we start removing slack, the element won't react to it right away until it's been
+    // completely removed.
+    width += slack.current;
+    width = Math.max(minConstraint, width);
+
+    // If the width or height changed, we must have introduced some slack. Record it for the next iteration.
+    slack.current = slack.current + (oldW - width);
+
+    return width;
+  };
+
+  const resizeHandler = (
+    handlerName: "onResize" | "onResizeStart" | "onResizeStop"
+  ): DraggableEventHandler => {
+    return (e: DraggableEvent, { deltaX }) => {
+      if (width === undefined) {
+        return;
+      }
+
+      const newWidth = runConstraint(width + deltaX);
+
+      if (newWidth !== width) {
+        if ("persist" in e) {
+          e.persist();
+        }
+        setWidth(newWidth);
+      }
+
+      if (handlerName === "onResizeStop") {
+        slack.current = 0;
+      }
+    };
+  };
+
+  const handleRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div
-      className="flex items-stretch"
-      ref={fullContainerRef}
-      style={{ height }}
-    >
-      <ResizableBox
-        className={clsx("relative", !initialWidth && "w-1/2")}
-        width={
-          /* We intentionally pass the invalid value to ResizableBox when initialWidth is not set yet.
-           * This causes warnings in development.
-           * See also: https://github.com/quantified-uncertainty/squiggle/issues/1934
-           */
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          initialWidth === undefined ? (null as any) : initialWidth / 2
-        }
-        axis="x"
-        resizeHandles={["e"]}
-        handle={(_, ref) => (
+    <div className="flex items-stretch" ref={containerRef} style={{ height }}>
+      <div className={clsx("relative", !width && "w-1/2")} style={{ width }}>
+        {renderLeft()}
+        <DraggableCore
+          nodeRef={handleRef}
+          onStop={resizeHandler("onResizeStop")}
+          onStart={resizeHandler("onResizeStart")}
+          onDrag={resizeHandler("onResize")}
+        >
           <div
-            ref={ref}
-            // we don't use react-resizable original styles, it's easier to style this manually
+            ref={handleRef}
             className="absolute top-0 h-full border-l border-slate-300 hover:border-blue-500 transition cursor-ew-resize"
             style={{ width: 5, right: -5 }}
           />
-        )}
-      >
-        {renderLeft()}
-      </ResizableBox>
+        </DraggableCore>
+      </div>
       <div className="flex-1 flex flex-col overflow-y-auto">
         {renderRight()}
       </div>

@@ -13,15 +13,16 @@ Calculators can be useful for debugging functions or to present functions to end
 ### Calculator.make
 
 ```
-Calculator.make: ({
+Calculator.make: (
   fn: ...arguments => any,
-  title?: string,
-  description?: string,
-  fields: list<input>,
-  autorun?: boolean = true,
-  sampleCount?: number,
-}) => calculator
-Calculator.make(fn: ...arguments => any) => calculator
+  {
+    title?: string,
+    description?: string,
+    fields: list<input>,
+    autorun?: boolean = true,
+    sampleCount?: number,
+  }
+) => calculator
 ```
 
 ``Calculator.make`` takes in a function, a description, and a list of fields. The function should take in the same number of arguments as the number of fields, and the arguments should be of the same type as the default value of the field.
@@ -34,8 +35,8 @@ Example:
 
 <SquiggleEditor
   defaultCode={`Calculator.make(
+  {|a, b,c,d| [a,b,c,d]},
   {
-    fn: {|a, b,c,d| [a,b,c,d]},
     title: "Concat()",
     description: "This function takes in 4 arguments, then displays them",
     autorun: true,

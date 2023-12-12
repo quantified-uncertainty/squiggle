@@ -9,6 +9,7 @@ import { Expression } from "../expression/index.js";
 import {
   FnDefinition,
   fnDefinitionToString,
+  showInDocumentation,
   tryCallFnDefinition,
 } from "../library/registry/fnDefinition.js";
 import { FRType } from "../library/registry/frTypes.js";
@@ -128,7 +129,7 @@ export class UserDefinedLambda extends BaseLambda {
   }
 
   toString() {
-    return `lambda(${this._getParameterNames().join(",")}=>internal code)`;
+    return `(${this._getParameterNames().join(",")}) => internal code`;
   }
 
   parameterCounts() {
@@ -175,7 +176,7 @@ export class BuiltinLambda extends BaseLambda {
 
   parameterString() {
     return this._definitions
-      .filter((d) => !d.isAssert)
+      .filter(showInDocumentation)
       .map(fnDefinitionToString)
       .join(" | ");
   }
@@ -196,11 +197,15 @@ export class BuiltinLambda extends BaseLambda {
     const signatures = this._definitions;
     const showNameMatchDefinitions = () => {
       const defsString = signatures
-        .filter((d) => !d.isAssert)
+        .filter(showInDocumentation)
         .map(fnDefinitionToString)
         .map((def) => `  ${this.name}${def}\n`)
         .join("");
-      return `There are function matches for ${this.name}(), but with different arguments:\n${defsString}`;
+      return `There are function matches for ${
+        this.name
+      }(), but with different arguments:\n${defsString}Was given arguments: (${args.join(
+        ","
+      )})`;
     };
 
     for (const signature of signatures) {

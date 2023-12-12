@@ -5,6 +5,7 @@ import {
   frBool,
   frGeneric,
   frNumber,
+  frOptional,
   frString,
 } from "../library/registry/frTypes.js";
 import {
@@ -101,15 +102,11 @@ export const library = [
   maker.make({
     name: "inspect",
     definitions: [
-      makeDefinition([frGeneric("A")], frGeneric("A"), ([value]) => {
-        console.log(value);
-        return value;
-      }),
       makeDefinition(
-        [frGeneric("A"), frString],
+        [frGeneric("A"), frOptional(frString)],
         frGeneric("A"),
-        ([value, label]) => {
-          console.log(`${label}: ${value.toString()}`);
+        ([value, message]) => {
+          message ? console.log(message, value) : console.log(value);
           return value;
         }
       ),

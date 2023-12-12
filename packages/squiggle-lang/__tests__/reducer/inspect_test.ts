@@ -27,6 +27,15 @@ describe("Debugging", () => {
     const mockedLog = <jest.Mock<typeof console.log>>console.log;
 
     expect(mockedLog.mock.calls).toHaveLength(1);
-    expect(mockedLog.mock.calls[0]).toEqual(["one: 1"]);
+    const expectedOutput = JSON.stringify([
+      "one",
+      {
+        type: "Number",
+        publicName: "Number",
+        value: 1,
+      },
+    ]);
+
+    expect(JSON.stringify(mockedLog.mock.calls[0])).toEqual(expectedOutput);
   });
 });

@@ -6,6 +6,7 @@ import {
   frDict,
   frInput,
   frLambda,
+  frNamed,
   frNumber,
   frOptional,
   frString,
@@ -32,7 +33,9 @@ export const library = [
   maker.make({
     name: "make",
     output: "Calculator",
-    examples: [],
+    examples: [
+      "Calculator.make({|x| x * 5}, {inputs: [Input.text({name: 'x'})]})",
+    ],
     definitions: [
       makeDefinition(
         [
@@ -56,8 +59,35 @@ export const library = [
             sampleCount: sampleCount || undefined,
           })
       ),
-      makeDefinition([frLambda], frCalculator, ([fn]) =>
-        validateCalculator(fn.toCalculator())
+      makeDefinition(
+        [
+          frLambda,
+          frNamed(
+            "params",
+            frOptional(
+              frDict(
+                ["title", frOptional(frString)],
+                ["description", frOptional(frString)],
+                ["inputs", frOptional(frArray(frInput))],
+                ["autorun", frOptional(frBool)],
+                ["sampleCount", frOptional(frNumber)]
+              )
+            )
+          ),
+        ],
+        frCalculator,
+        ([fn, params]) => {
+          const { title, description, inputs, autorun, sampleCount } =
+            params ?? {};
+          return validateCalculator({
+            fn,
+            title: title || undefined,
+            description: description || undefined,
+            inputs: inputs || [],
+            autorun: autorun === null || autorun === undefined ? true : autorun,
+            sampleCount: sampleCount || undefined,
+          });
+        }
       ),
     ],
   }),

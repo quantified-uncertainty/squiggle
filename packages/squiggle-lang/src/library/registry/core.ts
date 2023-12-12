@@ -4,7 +4,11 @@ import invert from "lodash/invert.js";
 import { infixFunctions, unaryFunctions } from "../../ast/peggyHelpers.js";
 import { BuiltinLambda, Lambda } from "../../reducer/lambda.js";
 import { Value } from "../../value/index.js";
-import { FnDefinition, fnDefinitionToString } from "./fnDefinition.js";
+import {
+  FnDefinition,
+  fnDefinitionToString,
+  showInDocumentation,
+} from "./fnDefinition.js";
 
 type Shorthand = { type: "infix" | "unary"; symbol: string };
 
@@ -120,7 +124,7 @@ export class Registry {
       description: fn.description,
       examples: fn.examples,
       signatures: fn.definitions
-        .filter((d) => !!d.isAssert)
+        .filter((d) => showInDocumentation(d))
         .map(fnDefinitionToString),
       isUnit: fn.isUnit,
       shorthand: getShorthandName(fn.name),

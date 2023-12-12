@@ -14,12 +14,18 @@ import {
   frGeneric,
   frLambdaNand,
   frLambdaTyped,
+  frNamed,
   frNumber,
+  frOptional,
   frSampleSetDist,
   frString,
   frTuple,
 } from "../library/registry/frTypes.js";
-import { doBinaryLambdaCall, FnFactory } from "../library/registry/helpers.js";
+import {
+  chooseLambdaParamLength,
+  doBinaryLambdaCall,
+  FnFactory,
+} from "../library/registry/helpers.js";
 import { ReducerContext } from "../reducer/context.js";
 import { Lambda } from "../reducer/lambda.js";
 import { shuffle, unzip, zip } from "../utility/E_A.js";
@@ -151,23 +157,21 @@ export const library = [
         "Call with either 0 or 1 arguments, not both."
       ),
       makeDefinition(
-        [frNumber, frLambdaTyped([], frGeneric("A"))],
+        [
+          frNumber,
+          frLambdaTyped(
+            [frNamed("index", frOptional(frNumber))],
+            frGeneric("A")
+          ),
+        ],
         frArray(frGeneric("A")),
-        ([number, lambda], context) => {
-          _assertValidArrayLength(number);
-          return Array.from({ length: number }, (_) =>
-            lambda.call([], context)
-          );
-        }
-      ),
-      makeDefinition(
-        [frNumber, frLambdaTyped([frNumber], frGeneric("A"))],
-        frArray(frGeneric("A")),
-        ([number, lambda], context) => {
-          _assertValidArrayLength(number);
-          return Array.from({ length: number }, (_, i) =>
-            lambda.call([vNumber(i)], context)
-          );
+        ([num, lambda], context) => {
+          _assertValidArrayLength(num);
+          const usedOptional = chooseLambdaParamLength([0, 1], lambda) === 1;
+          const fnCall = usedOptional
+            ? (_: any, i: number) => lambda.call([vNumber(i)], context)
+            : () => lambda.call([], context);
+          return Array.from({ length: num }, fnCall);
         }
       ),
       makeDefinition(
@@ -258,18 +262,16 @@ export const library = [
       makeDefinition(
         [
           frArray(frGeneric("A")),
-          frLambdaTyped([frGeneric("A")], frGeneric("B")),
+          frLambdaTyped(
+            [frGeneric("A"), frNamed("index", frOptional(frNumber))],
+            frGeneric("B")
+          ),
         ],
         frArray(frGeneric("B")),
-        ([array, lambda], context) => _map(array, lambda, context, false)
-      ),
-      makeDefinition(
-        [
-          frArray(frGeneric("A")),
-          frLambdaTyped([frGeneric("A"), frNumber], frGeneric("B")),
-        ],
-        frArray(frGeneric("B")),
-        ([array, lambda], context) => _map(array, lambda, context, true)
+        ([array, lambda], context) => {
+          const usedOptional = chooseLambdaParamLength([1, 2], lambda) === 2;
+          return _map(array, lambda, context, usedOptional ? true : false);
+        }
       ),
     ],
   }),
@@ -365,20 +367,16 @@ export const library = [
     examples: [`List.slice([1,2,5,10],1,3)`],
     definitions: [
       makeDefinition(
-        [frArray(frGeneric("A")), frNumber],
-        frArray(frGeneric("A")),
-        ([array, start]) => {
-          _assertInteger(start);
-          return array.slice(start);
-        }
-      ),
-      makeDefinition(
-        [frArray(frGeneric("A")), frNumber, frNumber],
+        [frArray(frGeneric("A")), frNumber, frOptional(frNumber)],
         frArray(frGeneric("A")),
         ([array, start, end]) => {
           _assertInteger(start);
-          _assertInteger(end);
-          return array.slice(start, end);
+          if (end !== null) {
+            _assertInteger(end);
+            return array.slice(start, end);
+          } else {
+            return array.slice(start);
+          }
         }
       ),
     ],
@@ -430,24 +428,26 @@ export const library = [
         [
           frArray(frGeneric("B")),
           frGeneric("A"),
-          frLambdaTyped([frGeneric("A"), frGeneric("B")], frGeneric("A")),
-        ],
-        frGeneric("A"),
-        ([array, initialValue, lambda], context) =>
-          _reduce(array, initialValue, lambda, context, false)
-      ),
-      makeDefinition(
-        [
-          frArray(frGeneric("B")),
-          frGeneric("A"),
           frLambdaTyped(
-            [frGeneric("A"), frGeneric("B"), frNumber],
+            [
+              frGeneric("A"),
+              frGeneric("B"),
+              frNamed("index", frOptional(frNumber)),
+            ],
             frGeneric("A")
           ),
         ],
         frGeneric("A"),
-        ([array, initialValue, lambda], context) =>
-          _reduce(array, initialValue, lambda, context, true)
+        ([array, initialValue, lambda], context) => {
+          const usedOptional = chooseLambdaParamLength([2, 3], lambda) === 3;
+          return _reduce(
+            array,
+            initialValue,
+            lambda,
+            context,
+            usedOptional ? true : false
+          );
+        }
       ),
     ],
   }),

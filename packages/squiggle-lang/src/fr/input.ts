@@ -5,8 +5,9 @@ import {
   frBool,
   frDict,
   frInput,
-  frNumberOrString,
+  frNumber,
   frOptional,
+  frOr,
   frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
@@ -39,7 +40,7 @@ export const library = [
           frDict(
             ["name", frString],
             ["description", frOptional(frString)],
-            ["default", frOptional(frNumberOrString)]
+            ["default", frOptional(frOr(frNumber, frString))]
           ),
         ],
         frInput,
@@ -48,7 +49,7 @@ export const library = [
             type: "text",
             name: vars.name,
             description: vars.description || undefined,
-            default: convertInputDefault(vars.default),
+            default: convertInputDefault(vars.default?.value || null),
           };
         }
       ),
@@ -64,7 +65,7 @@ export const library = [
           frDict(
             ["name", frString],
             ["description", frOptional(frString)],
-            ["default", frOptional(frNumberOrString)]
+            ["default", frOptional(frOr(frNumber, frString))]
           ),
         ],
         frInput,
@@ -73,7 +74,7 @@ export const library = [
             type: "textArea",
             name: vars.name,
             description: vars.description || undefined,
-            default: convertInputDefault(vars.default),
+            default: convertInputDefault(vars.default?.value || null),
           };
         }
       ),
