@@ -42,9 +42,9 @@ describe("Peggy to Expression", () => {
       "0"
     );
     testToExpression("List.make(2,5)", "(List.make)(2, 5)", "[5,5]");
-    testToExpression("List(2,5)", "(List.make)(2, 5)", "[5,5]");
+    testToExpression("List(2,5)", "(List)(2, 5)", "[5,5]");
     testToExpression("Dist.make(2)", "(Dist.make)(2)", "PointMass(2)");
-    testToExpression("Dist(2)", "(Dist.make)(2)", "PointMass(2)");
+    testToExpression("Dist(2)", "(Dist)(2)", "PointMass(2)");
   });
 
   describe("arrays", () => {
