@@ -132,7 +132,7 @@
     "watch": "pnpm run compile:bundle --watch",
     "pretest": "pnpm run build && pnpm run lint",
     "lint": "prettier --check .",
-    "format": "prettier --write .",
+    "format": "prettier --write ."
     "package": "vsce package --no-dependencies"
   },
   "devDependencies": {
