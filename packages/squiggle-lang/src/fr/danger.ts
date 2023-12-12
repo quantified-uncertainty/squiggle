@@ -2,7 +2,6 @@
 
 import jstat from "jstat";
 
-import * as SymbolicDist from "../dist/SymbolicDist.js";
 import {
   scaleLog,
   scaleLogWithThreshold,
@@ -11,6 +10,7 @@ import {
   scaleMultiply,
   scalePower,
 } from "../dist/distOperations/scaleOperations.js";
+import * as SymbolicDist from "../dist/SymbolicDist.js";
 import { REArgumentError, REOther } from "../errors/messages.js";
 import { FRFunction } from "../library/registry/core.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
@@ -253,7 +253,7 @@ const diminishingReturnsLibrary = [
     definitions: [
       makeDefinition(
         [frArray(frLambda), frNumber, frNumber],
-        frAny,
+        frAny(),
         ([lambdas, funds, approximateIncrement], context) => {
           // TODO: This is so complicated, it probably should be its own file. It might also make sense to have it work in Rescript directly, taking in a function rather than a reducer; then something else can wrap that function in the reducer/lambdas/context.
           /*

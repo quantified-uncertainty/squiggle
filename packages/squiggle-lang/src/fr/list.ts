@@ -4,8 +4,8 @@ import sortBy from "lodash/sortBy.js";
 
 import { REArgumentError, REOther } from "../errors/messages.js";
 import {
-  makeDefinition,
   makeAssertDefinition,
+  makeDefinition,
 } from "../library/registry/fnDefinition.js";
 import {
   frAny,
@@ -22,15 +22,15 @@ import {
   frTuple,
 } from "../library/registry/frTypes.js";
 import {
-  FnFactory,
   chooseLambdaParamLength,
   doBinaryLambdaCall,
+  FnFactory,
 } from "../library/registry/helpers.js";
 import { ReducerContext } from "../reducer/context.js";
 import { Lambda } from "../reducer/lambda.js";
 import { shuffle, unzip, zip } from "../utility/E_A.js";
 import * as E_A_Floats from "../utility/E_A_Floats.js";
-import { Value, uniq, uniqBy, vNumber } from "../value/index.js";
+import { uniq, uniqBy, Value, vNumber } from "../value/index.js";
 
 export function _map(
   array: readonly Value[],
@@ -208,7 +208,7 @@ export const library = [
     output: "Number",
     examples: [`List.length([1,4,5])`],
     definitions: [
-      makeDefinition([frArray(frAny)], frNumber, ([values]) => values.length),
+      makeDefinition([frArray(frAny())], frNumber, ([values]) => values.length),
     ],
   }),
   maker.make({
@@ -586,7 +586,7 @@ export const library = [
     requiresNamespace: true,
     examples: [`List.flatten([[1,2], [3,4]])`],
     definitions: [
-      makeDefinition([frArray(frAny)], frArray(frAny), ([arr]) =>
+      makeDefinition([frArray(frAny())], frArray(frAny()), ([arr]) =>
         arr.reduce(
           (acc: Value[], v) =>
             acc.concat(v.type === "Array" ? v.value : ([v] as Value[])),

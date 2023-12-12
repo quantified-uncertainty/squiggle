@@ -3,35 +3,35 @@ import { PointSetDist } from "../../dist/PointSetDist.js";
 import { SampleSetDist } from "../../dist/SampleSetDist/index.js";
 import { SymbolicDist } from "../../dist/SymbolicDist.js";
 import { Lambda } from "../../reducer/lambda.js";
+import { ImmutableMap } from "../../utility/immutableMap.js";
 import { SDate } from "../../utility/SDate.js";
 import { SDuration } from "../../utility/SDuration.js";
-import { ImmutableMap } from "../../utility/immutableMap.js";
+import { Boxed, BoxedArgs } from "../../value/boxed.js";
 import { Domain } from "../../value/domain.js";
 import {
-  Scale,
-  Value,
+  Calculator,
+  Input,
   Plot,
+  Scale,
+  TableChart,
+  Value,
   vArray,
   vBool,
+  vBoxed,
+  vCalculator,
   vDate,
-  vDist,
-  vLambda,
-  vNumber,
   vDict,
-  vScale,
-  vString,
+  vDist,
+  vDomain,
   vDuration,
   vInput,
-  Input,
-  TableChart,
-  vTableChart,
-  Calculator,
-  vCalculator,
+  vLambda,
+  vNumber,
   vPlot,
-  vDomain,
-  vBoxed,
+  vScale,
+  vString,
+  vTableChart,
 } from "../../value/index.js";
-import { Boxed, BoxedArgs } from "../../value/boxed.js";
 import { frTypesMatchesLengths } from "./helpers.js";
 
 /*
@@ -164,17 +164,6 @@ export const frForceBoxed = <T>(
     keepBoxes: true,
   };
 };
-
-//This works just like any, but it will preserve boxes, if items are boxed. Useful for "inspect" or cases where you don't need to unpack the underlying value.
-export function frKeepBoxes<T1>(t: FRType<T1>) {
-  return {
-    unpack: t.unpack,
-    pack: t.pack,
-    getName: () => t.getName(),
-    transparent: true,
-    keepBoxes: true,
-  };
-}
 
 export const frLambdaNand = (paramLengths: number[]): FRType<Lambda> => {
   return {
@@ -354,18 +343,23 @@ export const frDictWithArbitraryKeys = <T>(
   };
 };
 
-export const frAny: FRType<Value> = {
+export const frAny = (keepBoxes: boolean = false): FRType<Value> => ({
   unpack: (v) => v,
   pack: (v) => v,
   getName: () => "any",
   transparent: true,
-};
+  keepBoxes,
+});
 
-export const frGeneric = (index: string): FRType<Value> => ({
+export const frGeneric = (
+  index: string,
+  keepBoxes: boolean = false
+): FRType<Value> => ({
   unpack: (v) => v,
   pack: (v) => v,
   getName: () => `'${index}`,
   transparent: true,
+  keepBoxes,
 });
 
 // We currently support dicts with up to 5 pairs.

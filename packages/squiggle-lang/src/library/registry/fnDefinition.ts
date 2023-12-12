@@ -1,7 +1,7 @@
 import { REAmbiguous, REBuildError } from "../../errors/messages.js";
 import { ReducerContext } from "../../reducer/context.js";
-import { VBoxed, Value } from "../../value/index.js";
-import { FRType, frAny, isOptional } from "./frTypes.js";
+import { Value, VBoxed } from "../../value/index.js";
+import { frAny, FRType, isOptional } from "./frTypes.js";
 
 // Type safety of `FnDefinition is guaranteed by `makeDefinition` signature below and by `FRType` unpack logic.
 // It won't be possible to make `FnDefinition` generic without sacrificing type safety in other parts of the codebase,
@@ -64,7 +64,7 @@ export function makeAssertDefinition<const T extends any[]>(
   assertOptionalsAreAtEnd(inputs);
   return {
     inputs,
-    output: frAny,
+    output: frAny(),
     run: () => {
       throw new REAmbiguous(errorMsg);
     },

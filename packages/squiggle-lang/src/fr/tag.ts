@@ -1,22 +1,22 @@
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
-  FRType,
-  FrOrType,
   frAny,
   frArray,
-  frForceBoxed,
   frCalculator,
   frDictWithArbitraryKeys,
   frDist,
   frDistOrNumber,
+  frForceBoxed,
   frGeneric,
   frLambda,
   frLambdaTyped,
   frNumber,
   frOr,
+  FrOrType,
   frPlot,
   frString,
   frTableChart,
+  FRType,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { Lambda } from "../reducer/lambda.js";
@@ -88,7 +88,7 @@ export const library = [
     name: "getName",
     examples: [],
     definitions: [
-      makeDefinition([frForceBoxed(frAny)], frString, ([{ args }]) => {
+      makeDefinition([frForceBoxed(frAny())], frString, ([{ args }]) => {
         return args.value.name || "";
       }),
     ],
@@ -110,7 +110,7 @@ export const library = [
     name: "getDescription",
     examples: [],
     definitions: [
-      makeDefinition([frForceBoxed(frAny)], frString, ([{ args }]) => {
+      makeDefinition([frForceBoxed(frAny())], frString, ([{ args }]) => {
         return args.value.description || "";
       }),
     ],
@@ -122,14 +122,14 @@ export const library = [
       withInputOrFnInput(frDist, frPlot),
       withInputOrFnInput(frLambda, frCalculator),
       withInputOrFnInput(frLambdaTyped([frNumber], frDistOrNumber), frPlot),
-      withInputOrFnInput(frArray(frAny), frTableChart),
+      withInputOrFnInput(frArray(frAny()), frTableChart),
     ],
   }),
   maker.make({
     name: "getShowAs",
     examples: [],
     definitions: [
-      makeDefinition([frForceBoxed(frAny)], frAny, ([{ args, value }]) => {
+      makeDefinition([frForceBoxed(frAny())], frAny(), ([{ args, value }]) => {
         return args.value.showAs || vString("None"); // Not sure what to use when blank.
       }),
     ],
@@ -139,8 +139,8 @@ export const library = [
     examples: [],
     definitions: [
       makeDefinition(
-        [frForceBoxed(frAny)],
-        frDictWithArbitraryKeys(frAny),
+        [frForceBoxed(frAny())],
+        frDictWithArbitraryKeys(frAny()),
         ([{ args }]) => {
           return args.toMap();
         }

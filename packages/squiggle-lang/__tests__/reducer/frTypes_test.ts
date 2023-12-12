@@ -1,57 +1,59 @@
-import { ContinuousShape } from "../../src/PointSet/Continuous.js";
-import { DiscreteShape } from "../../src/PointSet/Discrete.js";
-import { MixedShape } from "../../src/PointSet/Mixed.js";
 import { PointSetDist } from "../../src/dist/PointSetDist.js";
 import { SampleSetDist } from "../../src/dist/SampleSetDist/index.js";
 import { Normal } from "../../src/dist/SymbolicDist.js";
 import {
+  frAny,
+  frArray,
   frBool,
   frDate,
-  frDistOrNumber,
-  frDist,
-  frNumber,
-  frString,
-  frDuration,
-  frArray,
-  frTuple,
-  frDictWithArbitraryKeys,
   frDict,
-  frOptional,
-  frAny,
-  frTableChart,
-  frScale,
-  frInput,
-  frDomain,
-  frPlot,
-  frDistSymbolic,
-  frSampleSetDist,
+  frDictWithArbitraryKeys,
+  frDist,
+  frDistOrNumber,
   frDistPointset,
-  frOr,
+  frDistSymbolic,
+  frDomain,
+  frDuration,
+  frForceBoxed,
+  frInput,
   frNamed,
+  frNumber,
+  frOptional,
+  frOr,
+  frPlot,
+  frSampleSetDist,
+  frScale,
+  frString,
+  frTableChart,
+  frTuple,
 } from "../../src/library/registry/frTypes.js";
+import { ContinuousShape } from "../../src/PointSet/Continuous.js";
+import { DiscreteShape } from "../../src/PointSet/Discrete.js";
+import { MixedShape } from "../../src/PointSet/Mixed.js";
+import { ImmutableMap } from "../../src/utility/immutableMap.js";
 import { SDate } from "../../src/utility/SDate.js";
 import { SDuration } from "../../src/utility/SDuration.js";
-import { ImmutableMap } from "../../src/utility/immutableMap.js";
+import { Boxed, BoxedArgs } from "../../src/value/boxed.js";
 import { NumericRangeDomain } from "../../src/value/domain.js";
-
 import {
+  Input,
+  Plot,
+  Scale,
   Value,
   vArray,
   vBool,
+  vBoxed,
   vDate,
-  vDist,
-  vNumber,
   vDict,
-  vString,
-  vDuration,
-  vTableChart,
-  vScale,
-  Scale,
-  vInput,
-  Input,
+  vDist,
   vDomain,
+  vDuration,
+  vInput,
+  vNumber,
   vPlot,
-  Plot,
+  vScale,
+  vString,
+  vTableChart,
 } from "../../src/value/index.js";
 
 test("frNumber", () => {
@@ -207,7 +209,7 @@ describe("frArray", () => {
   });
 
   test("unpack any[]", () => {
-    expect(frArray(frAny).unpack(value)).toEqual([
+    expect(frArray(frAny()).unpack(value)).toEqual([
       vNumber(3),
       vNumber(5),
       vNumber(6),
@@ -356,5 +358,63 @@ describe("frNamed", () => {
     expect(namedOptionalNumberType.getName()).toBe(
       "OptionalTestNumber?: number"
     );
+  });
+});
+
+describe("frForceBoxed", () => {
+  const itemType = frNumber;
+  const frBoxedNumber = frForceBoxed(itemType);
+
+  test("Unpack Non-Boxed Item", () => {
+    const value = vNumber(10);
+    const unpacked = frBoxedNumber.unpack(value);
+    expect(unpacked).toEqual({ value: 10, args: new BoxedArgs({}) });
+  });
+
+  test("Unpack Boxed Item", () => {
+    const boxedValue = vBoxed(
+      new Boxed(vNumber(10), new BoxedArgs({ name: "test" }))
+    );
+    const unpacked = frBoxedNumber.unpack(boxedValue);
+    expect(unpacked).toEqual({
+      value: 10,
+      args: new BoxedArgs({ name: "test" }),
+    });
+  });
+
+  test("Pack", () => {
+    const packed = frBoxedNumber.pack({
+      value: 10,
+      args: new BoxedArgs({ name: "myName" }),
+    });
+    expect(packed).toEqual(
+      vBoxed(new Boxed(vNumber(10), new BoxedArgs({ name: "myName" })))
+    );
+  });
+
+  test("GetName", () => {
+    expect(frBoxedNumber.getName()).toBe("number");
+  });
+});
+
+describe("frAny with keepBoxes", () => {
+  describe("keepboxes=true", () => {
+    const frKeepBoxesNumber = frAny(true);
+
+    test("Unpack Preserves Boxes", () => {
+      const boxedValue = vBoxed(new Boxed(vNumber(10), new BoxedArgs({})));
+      const unpacked = frKeepBoxesNumber.unpack(boxedValue);
+      expect(unpacked).toEqual(boxedValue);
+    });
+
+    test("Pack Preserves Boxes", () => {
+      const boxedValue = vBoxed(new Boxed(vNumber(10), new BoxedArgs({})));
+      const packed = frKeepBoxesNumber.pack(boxedValue);
+      expect(packed).toEqual(boxedValue);
+    });
+
+    test("GetName", () => {
+      expect(frKeepBoxesNumber.getName()).toBe("any");
+    });
   });
 });

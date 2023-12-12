@@ -1,4 +1,5 @@
 import { OrderedMap } from "immutable";
+
 import { REArgumentError } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
@@ -40,7 +41,7 @@ export const library = [
     examples: [`Dict.has({a: 1, b: 2}, "c")`],
     definitions: [
       makeDefinition(
-        [frDictWithArbitraryKeys(frAny), frString],
+        [frDictWithArbitraryKeys(frAny()), frString],
         frBool,
         ([dict, key]) => dict.has(key)
       ),
@@ -52,7 +53,7 @@ export const library = [
     examples: [`Dict.size({a: 1, b: 2})`],
     definitions: [
       makeDefinition(
-        [frDictWithArbitraryKeys(frAny)],
+        [frDictWithArbitraryKeys(frAny())],
         frNumber,
         ([dict]) => dict.size
       ),
@@ -76,8 +77,8 @@ export const library = [
     examples: [`Dict.merge({a: 1, b: 2}, {c: 3, d: 4})`],
     definitions: [
       makeDefinition(
-        [frDictWithArbitraryKeys(frAny), frDictWithArbitraryKeys(frAny)],
-        frDictWithArbitraryKeys(frAny),
+        [frDictWithArbitraryKeys(frAny()), frDictWithArbitraryKeys(frAny())],
+        frDictWithArbitraryKeys(frAny()),
         ([d1, d2]) => ImmutableMap([...d1.entries(), ...d2.entries()])
       ),
     ],
@@ -88,8 +89,8 @@ export const library = [
     examples: [`Dict.mergeMany([{a: 1, b: 2}, {c: 3, d: 4}])`],
     definitions: [
       makeDefinition(
-        [frArray(frDictWithArbitraryKeys(frAny))],
-        frDictWithArbitraryKeys(frAny),
+        [frArray(frDictWithArbitraryKeys(frAny()))],
+        frDictWithArbitraryKeys(frAny()),
         ([dicts]) => ImmutableMap(dicts.map((d) => [...d.entries()]).flat())
       ),
     ],
@@ -100,7 +101,7 @@ export const library = [
     examples: [`Dict.keys({a: 1, b: 2})`],
     definitions: [
       makeDefinition(
-        [frDictWithArbitraryKeys(frAny)],
+        [frDictWithArbitraryKeys(frAny())],
         frArray(frString),
         ([d1]) => [...d1.keys()]
       ),

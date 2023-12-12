@@ -2,8 +2,8 @@ import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
   frArray,
-  frForceBoxed,
   frDict,
+  frForceBoxed,
   frGeneric,
   frLambdaTyped,
   frNamed,
@@ -32,7 +32,7 @@ export const library = [
             "columns",
             frArray(
               frDict(
-                ["fn", frLambdaTyped([frGeneric("A")], frAny)],
+                ["fn", frLambdaTyped([frGeneric("A")], frAny())],
                 ["name", frOptional(frString)]
               )
             ),
@@ -59,7 +59,7 @@ export const library = [
               "columns",
               frArray(
                 frDict(
-                  ["fn", frLambdaTyped([frGeneric("A")], frAny)],
+                  ["fn", frLambdaTyped([frGeneric("A")], frAny())],
                   ["name", frOptional(frString)]
                 )
               ),
