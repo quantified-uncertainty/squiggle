@@ -1,4 +1,4 @@
-import { REAmbiguous, REBuildError } from "../../errors/messages.js";
+import { REAmbiguous } from "../../errors/messages.js";
 import { ReducerContext } from "../../reducer/context.js";
 import { Value } from "../../value/index.js";
 import { frAny, FRType, isOptional } from "./frTypes.js";
@@ -24,7 +24,7 @@ function assertOptionalsAreAtEnd(inputs: FRType<any>[]) {
   let optionalFound = false;
   for (const input of inputs) {
     if (optionalFound && !isOptional(input)) {
-      throw new REBuildError(
+      throw new Error(
         `Optional inputs must be last. Found non-optional input after optional input. ${inputs}`
       );
     }

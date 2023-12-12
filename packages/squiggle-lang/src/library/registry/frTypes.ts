@@ -466,12 +466,7 @@ export function frDict<T extends object>(
 
 export const frNamed = <T>(name: string, itemType: FRType<T>): FRType<T> => ({
   unpack: itemType.unpack,
-  pack: (v) => {
-    if (v === null) {
-      throw new Error("Unable to pack null value");
-    }
-    return itemType.pack(v);
-  },
+  pack: (v) => itemType.pack(v),
   getName: () => {
     const _isOptional = isOptional(itemType);
     return `${name}${_isOptional ? "?" : ""}: ${itemType.getName()}`;

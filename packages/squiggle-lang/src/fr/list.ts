@@ -367,11 +367,7 @@ export const library = [
     examples: [`List.slice([1,2,5,10],1,3)`],
     definitions: [
       makeDefinition(
-        [
-          frArray(frGeneric("A")),
-          frNumber,
-          frNamed("index", frOptional(frNumber)),
-        ],
+        [frArray(frGeneric("A")), frNumber, frOptional(frNumber)],
         frArray(frGeneric("A")),
         ([array, start, end]) => {
           _assertInteger(start);
