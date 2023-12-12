@@ -127,10 +127,11 @@
     "build:media": "mkdir -p dist/media && cp ../website/public/img/squiggle-logo.png dist/media/icon.png && cp ../components/dist/full.css dist/media/components.css",
     "build:bundle": "esbuild ./src/client/extension.ts ./src/server/server.ts --format=cjs --platform=node --sourcemap --minify --bundle --external:vscode '--define:process.env.NODE_ENV=\"production\"' --outdir=./dist",
     "build:webview": "esbuild ./src/webview/index.tsx --format=esm --platform=browser --sourcemap --minify --bundle '--define:process.env.NODE_ENV=\"production\"' --outdir=./dist/webview",
-    "build": "pnpm run build:media && pnpm run build:grammar && pnpm run build:bundle && pnpm run build:webview",
+    "build:ts": "tsc -b",
+    "build": "pnpm run build:media && pnpm run build:grammar && pnpm run build:bundle && pnpm run build:webview && pnpm run build:ts",
     "watch": "pnpm run compile:bundle --watch",
     "pretest": "pnpm run build && pnpm run lint",
-    "lint": "tsc -b && prettier --check .",
+    "lint": "prettier --check .",
     "format": "prettier --write .",
     "package": "vsce package --no-dependencies"
   },
