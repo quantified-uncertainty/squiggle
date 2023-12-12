@@ -38,7 +38,7 @@ describe("annotations", () => {
       );
       testEvalToMatch(
         "f(x: [3,5]) = x*2; f(6)",
-        "Parameter 6 must be in domain Number.rangeDomain(3, 5)"
+        "Parameter 6 must be in domain Number.rangeDomain({ min: 3, max: 5 })"
       );
       testEvalToMatch(
         "f(x: [2000year,2005year]) = toYears(x-2000year)+3; f(2010year)",
