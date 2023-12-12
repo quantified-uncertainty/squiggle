@@ -43,6 +43,7 @@ export type FRType<T> = {
   transparent?: T extends Value ? boolean : undefined;
   isOptional?: boolean;
   tag?: string;
+  name?: string;
 };
 
 export const isOptional = <T>(frType: FRType<T>): boolean => {
@@ -473,6 +474,7 @@ export const frNamed = <T>(name: string, itemType: FRType<T>): FRType<T> => ({
   },
   isOptional: isOptional(itemType),
   tag: "named",
+  name: name,
 });
 
 export const frOptional = <T>(itemType: FRType<T>): FRType<T | null> => {

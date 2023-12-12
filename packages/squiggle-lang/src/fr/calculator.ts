@@ -83,7 +83,7 @@ export const library = [
             fn,
             title: title || undefined,
             description: description || undefined,
-            inputs: inputs || [],
+            inputs: inputs || fn.defaultInputs(),
             autorun: autorun === null || autorun === undefined ? true : autorun,
             sampleCount: sampleCount || undefined,
           });
