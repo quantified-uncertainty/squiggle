@@ -90,7 +90,7 @@
   "scripts": {
     "start": "pnpm dev",
     "dev": "storybook dev -p 6006 --no-version-updates",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
     "build:ts": "tsc -b",
     "build:css": "postcss ./src/styles/full.css -o ./dist/full.css && postcss ./src/styles/common.css -o ./dist/common.css",
     "build:lezer": "cd ./src/components/CodeEditor/languageSupport; mkdir -p generated; lezer-generator ./squiggle.grammar --output generated/squiggle.ts",
