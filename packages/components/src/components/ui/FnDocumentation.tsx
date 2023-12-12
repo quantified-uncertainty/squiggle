@@ -19,14 +19,14 @@ const StyleDefinition: FC<{ fullName: string; def: FnDefinition }> = ({
   def,
 }) => {
   const isOptional = (t) => (t.isOptional === undefined ? false : t.isOptional);
-  const annotation = "text-slate-400";
-  const primary = "text-slate-900";
+  const primaryColor = "text-slate-900";
+  const secondaryColor = "text-slate-400";
   const inputs = def.inputs.map((t, index) => (
     <span key={index}>
-      <span className={primary}>{t.getName()}</span>
-      {isOptional(t) ? <span className={primary}>?</span> : ""}
+      <span className={primaryColor}>{t.getName()}</span>
+      {isOptional(t) ? <span className={primaryColor}>?</span> : ""}
       {index !== def.inputs.length - 1 && (
-        <span className={annotation}>, </span>
+        <span className={secondaryColor}>, </span>
       )}
     </span>
   ));
@@ -34,13 +34,13 @@ const StyleDefinition: FC<{ fullName: string; def: FnDefinition }> = ({
   return (
     <div>
       <span className="text-slate-500">{fullName}</span>
-      <span className={annotation}>(</span>
-      <span className={clsx(primary, "ml-0.5 mr-0.5")}>{inputs}</span>
-      <span className={annotation}>)</span>
+      <span className={secondaryColor}>(</span>
+      <span className={clsx(primaryColor, "ml-0.5 mr-0.5")}>{inputs}</span>
+      <span className={secondaryColor}>)</span>
       {output ? (
         <>
-          <span className={annotation}>{" => "}</span>{" "}
-          <span className={primary}>{output}</span>
+          <span className={secondaryColor}>{" => "}</span>{" "}
+          <span className={primaryColor}>{output}</span>
         </>
       ) : (
         ""
