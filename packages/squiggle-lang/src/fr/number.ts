@@ -228,7 +228,7 @@ export const library = [
     name: "rangeDomain",
     requiresNamespace: true,
     output: "Domain",
-    examples: ["Number.rangeDomain(5, 10)"],
+    examples: ["Number.rangeDomain({ min: 5, max: 10 })"],
     definitions: [
       makeDefinition(
         [frNamed("min", frNumber), frNamed("max", frNumber)],
