@@ -9,7 +9,7 @@ import {
   type SqValue,
 } from "./public/SqValue/index.js"; // TODO - reexport other values too
 
-export { FnDefinition } from "./library/registry/fnDefinition.js";
+export { type FnDefinition } from "./library/registry/fnDefinition.js";
 
 export { type FnDocumentation } from "./library/registry/core.js";
 export {
