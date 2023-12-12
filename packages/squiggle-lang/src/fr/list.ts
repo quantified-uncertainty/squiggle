@@ -622,7 +622,7 @@ export const library = [
       makeDefinition(
         [frArray(frString), frNamed("separator", frOptional(frString))],
         frString,
-        ([array, joinStr]) => array.join(joinStr || ",")
+        ([array, joinStr]) => array.join(joinStr ?? ",")
       ),
       makeDefinition([frArray(frString)], frString, ([array]) => array.join()),
     ],
