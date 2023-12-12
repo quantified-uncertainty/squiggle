@@ -13,6 +13,7 @@ const Section: FC<PropsWithChildren> = ({ children }) => (
   <div className={clsx("px-4 py-2")}>{children}</div>
 );
 
+//I'm not sure if this is worth it here. Much of the input data is hidden from us at this point. It might be better to just go back to strings, or to formally parse it after having it as a string.
 const StyleDefinition: FC<{ fullName: string; def: FnDefinition }> = ({
   fullName,
   def,
