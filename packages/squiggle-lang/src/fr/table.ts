@@ -5,6 +5,7 @@ import {
   frDict,
   frGeneric,
   frLambdaTyped,
+  frNamed,
   frOptional,
   frString,
   frTableChart,
@@ -22,6 +23,38 @@ export const library = [
     output: "Plot",
     examples: [],
     definitions: [
+      makeDefinition(
+        [
+          frNamed("data", frArray(frGeneric("A"))),
+          frNamed(
+            "params",
+            frDict(
+              ["title", frOptional(frString)],
+              [
+                "columns",
+                frArray(
+                  frDict(
+                    ["fn", frLambdaTyped([frGeneric("A")], frAny)],
+                    ["name", frOptional(frString)]
+                  )
+                ),
+              ]
+            )
+          ),
+        ],
+        frTableChart,
+        ([data, params]) => {
+          const { title, columns } = params ?? {};
+          return {
+            data,
+            title: title || undefined,
+            columns: columns.map(({ fn, name }) => ({
+              fn,
+              name: name ?? undefined,
+            })),
+          };
+        }
+      ),
       makeDefinition(
         [
           frDict(
@@ -48,7 +81,8 @@ export const library = [
               name: name ?? undefined,
             })),
           };
-        }
+        },
+        { deprecated: "0.8.7" }
       ),
     ],
   }),

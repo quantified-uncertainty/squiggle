@@ -30,6 +30,7 @@ import {
   vString,
   vTableChart,
 } from "../../value/index.js";
+import { frTypesMatchesLengths } from "./helpers.js";
 
 /*
 FRType is a function that unpacks a Value.
@@ -40,10 +41,12 @@ export type FRType<T> = {
   pack: (v: T) => Value; // used in makeSquiggleDefinition
   getName: () => string;
   transparent?: T extends Value ? boolean : undefined;
+  isOptional?: boolean;
+  tag?: string;
 };
 
-const isOptional = <T>(frType: FRType<T>): boolean => {
-  return "isOptional" in frType;
+export const isOptional = <T>(frType: FRType<T>): boolean => {
+  return frType.isOptional === undefined ? false : frType.isOptional;
 };
 
 export const frNumber: FRType<number> = {
@@ -80,18 +83,6 @@ export const frDuration: FRType<SDuration> = {
   unpack: (v) => (v.type === "Duration" ? v.value : undefined),
   pack: (v) => vDuration(v),
   getName: () => "duration",
-};
-export const frDistOrNumber: FRType<BaseDist | number> = {
-  unpack: (v) =>
-    v.type === "Dist" ? v.value : v.type === "Number" ? v.value : undefined,
-  pack: (v) => (typeof v === "number" ? vNumber(v) : vDist(v)),
-  getName: () => "distribution|number",
-};
-export const frNumberOrString: FRType<string | number> = {
-  unpack: (v) =>
-    v.type === "String" ? v.value : v.type === "Number" ? v.value : undefined,
-  pack: (v) => (typeof v === "number" ? vNumber(v) : vString(v)),
-  getName: () => "number|string",
 };
 export const frDist: FRType<BaseDist> = {
   unpack: (v) => (v.type === "Dist" ? v.value : undefined),
@@ -132,7 +123,7 @@ export const frLambdaTyped = (
   return {
     unpack: (v: Value) => {
       return v.type === "Lambda" &&
-        v.value.parameterCounts().includes(inputs.length)
+        frTypesMatchesLengths(inputs, v.value.parameterCounts())
         ? v.value
         : undefined;
     },
@@ -205,6 +196,41 @@ export const frArray = <T>(itemType: FRType<T>): FRType<readonly T[]> => {
         : vArray(v.map(itemType.pack)),
     getName: () => `list(${itemType.getName()})`,
   };
+};
+
+export type FrOrType<T1, T2> =
+  | { tag: "1"; value: T1 }
+  | { tag: "2"; value: T2 };
+
+export function frOr<T1, T2>(
+  type1: FRType<T1>,
+  type2: FRType<T2>
+): FRType<FrOrType<T1, T2>> {
+  return {
+    unpack: (v) => {
+      const unpacked1 = type1.unpack(v);
+      if (unpacked1) {
+        return { tag: "1", value: unpacked1 };
+      }
+      const unpacked2 = type2.unpack(v);
+      if (unpacked2) {
+        return { tag: "2", value: unpacked2 };
+      }
+      return undefined;
+    },
+    pack: (v) => {
+      return v.tag === "1" ? type1.pack(v.value) : type2.pack(v.value);
+    },
+    getName: () => `${type1.getName()}|${type2.getName()}`,
+  };
+}
+
+//TODO: It would probably eventually be good to refactor this out, to use frOr instead. However, that would be slightly less efficient.
+export const frDistOrNumber: FRType<BaseDist | number> = {
+  unpack: (v) =>
+    v.type === "Dist" ? v.value : v.type === "Number" ? v.value : undefined,
+  pack: (v) => (typeof v === "number" ? vNumber(v) : vDist(v)),
+  getName: () => "distribution|number",
 };
 
 export function frTuple<T1, T2>(
@@ -438,15 +464,20 @@ export function frDict<T extends object>(
   };
 }
 
-// Optionals are implemented for the sake of frDict, which check for them explicitly.
-// Don't try to use them in other contexts.
-export const frOptional = <T>(
-  itemType: FRType<T>
-): FRType<T | null> & { isOptional: boolean } => {
+export const frNamed = <T>(name: string, itemType: FRType<T>): FRType<T> => ({
+  unpack: itemType.unpack,
+  pack: (v) => itemType.pack(v),
+  getName: () => {
+    const _isOptional = isOptional(itemType);
+    return `${name}${_isOptional ? "?" : ""}: ${itemType.getName()}`;
+  },
+  isOptional: isOptional(itemType),
+  tag: "named",
+});
+
+export const frOptional = <T>(itemType: FRType<T>): FRType<T | null> => {
   return {
-    unpack: (v: Value) => {
-      return itemType.unpack(v);
-    },
+    unpack: itemType.unpack,
     pack: (v) => {
       if (v === null) {
         // shouldn't happen if frDict implementation is correct and frOptional is used correctly.

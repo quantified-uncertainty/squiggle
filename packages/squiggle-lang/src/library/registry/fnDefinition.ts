@@ -1,7 +1,7 @@
 import { REAmbiguous } from "../../errors/messages.js";
 import { ReducerContext } from "../../reducer/context.js";
 import { Value } from "../../value/index.js";
-import { frAny, FRType } from "./frTypes.js";
+import { frAny, FRType, isOptional } from "./frTypes.js";
 
 // Type safety of `FnDefinition is guaranteed by `makeDefinition` signature below and by `FRType` unpack logic.
 // It won't be possible to make `FnDefinition` generic without sacrificing type safety in other parts of the codebase,
@@ -10,8 +10,29 @@ export type FnDefinition<OutputType = any> = {
   inputs: FRType<any>[];
   run: (args: any[], context: ReducerContext) => OutputType;
   output: FRType<OutputType>;
+  minInputs: number;
+  maxInputs: number;
   isAssert: boolean;
+  deprecated?: string; // We don't use this right now, but could later on.
 };
+
+export const showInDocumentation = (def: FnDefinition) =>
+  !def.isAssert && !def.deprecated;
+
+// A function to make sure that there are no non-optional inputs after optional inputs:
+function assertOptionalsAreAtEnd(inputs: FRType<any>[]) {
+  let optionalFound = false;
+  for (const input of inputs) {
+    if (optionalFound && !isOptional(input)) {
+      throw new Error(
+        `Optional inputs must be last. Found non-optional input after optional input. ${inputs}`
+      );
+    }
+    if (isOptional(input)) {
+      optionalFound = true;
+    }
+  }
+}
 
 export function makeDefinition<
   const InputTypes extends any[],
@@ -20,8 +41,10 @@ export function makeDefinition<
   // [...] wrapper is important, see also: https://stackoverflow.com/a/63891197
   inputs: [...{ [K in keyof InputTypes]: FRType<InputTypes[K]> }],
   output: FRType<OutputType>,
-  run: (args: InputTypes, context: ReducerContext) => OutputType
+  run: (args: InputTypes, context: ReducerContext) => OutputType,
+  params?: { deprecated?: string }
 ): FnDefinition {
+  assertOptionalsAreAtEnd(inputs);
   return {
     inputs,
     output,
@@ -29,6 +52,9 @@ export function makeDefinition<
     // This unsafe type casting is necessary because function type parameters are contravariant.
     run: run as FnDefinition["run"],
     isAssert: false,
+    deprecated: params?.deprecated,
+    minInputs: inputs.filter((t) => !isOptional(t)).length,
+    maxInputs: inputs.length,
   };
 }
 
@@ -38,6 +64,7 @@ export function makeAssertDefinition<const T extends any[]>(
   inputs: [...{ [K in keyof T]: FRType<T[K]> }],
   errorMsg: string
 ): FnDefinition {
+  assertOptionalsAreAtEnd(inputs);
   return {
     inputs,
     output: frAny,
@@ -45,14 +72,17 @@ export function makeAssertDefinition<const T extends any[]>(
       throw new REAmbiguous(errorMsg);
     },
     isAssert: true,
+    minInputs: inputs.filter((t) => !isOptional(t)).length,
+    maxInputs: inputs.length,
   };
 }
+
 export function tryCallFnDefinition(
   fn: FnDefinition,
   args: Value[],
   context: ReducerContext
 ): Value | undefined {
-  if (args.length !== fn.inputs.length) {
+  if (args.length < fn.minInputs || args.length > fn.maxInputs) {
     return; // args length mismatch
   }
   const unpackedArgs: any = []; // any, but that's ok, type safety is guaranteed by FnDefinition type
@@ -64,12 +94,20 @@ export function tryCallFnDefinition(
     }
     unpackedArgs.push(unpackedArg);
   }
+
+  // Fill in missing optional arguments with nulls.
+  // This is important, because empty optionals should be nulls, but without this they would be undefined.
+  if (unpackedArgs.length < fn.maxInputs) {
+    unpackedArgs.push(...Array(fn.maxInputs - unpackedArgs.length).fill(null));
+  }
+
   return fn.output.pack(fn.run(unpackedArgs, context));
 }
 
 export function fnDefinitionToString(fn: FnDefinition): string {
-  const inputs = fn.inputs.map((t) => t.getName()).join(", ");
+  const inputs = fn.inputs
+    .map((t) => t.getName() + (isOptional(t) && t.tag !== "named" ? "?" : ""))
+    .join(", ");
   const output = fn.output.getName();
   return `(${inputs})${output ? ` => ${output}` : ""}`;
-  return `(${inputs}) => ${output}`;
 }
