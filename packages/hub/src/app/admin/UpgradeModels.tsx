@@ -136,7 +136,7 @@ export const UpgradeModels: FC<{
       </p>
       <p>
         <strong>
-          {`Code edits won't be saved, "Upgrade" buttton bumps only the model's version.`}
+          {`Code edits won't be saved, "Upgrade" button bumps only the model's version.`}
         </strong>
       </p>
       <div className="space-y-8">

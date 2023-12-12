@@ -20,9 +20,9 @@ import { useUsername } from "@/hooks/useUsername";
 import { SQUIGGLE_DOCS_URL } from "@/lib/common";
 import { aboutRoute, newModelRoute } from "@/routes";
 
+import { GlobalSearch } from "../../GlobalSearch";
 import { DesktopUserControls } from "./DesktopUserControls";
 import { DropdownWithArrow } from "./DropdownWithArrow";
-import { GlobalSearch } from "../../GlobalSearch";
 import { MyGroupsMenu } from "./MyGroupsMenu";
 import { MenuLinkModeProps, PageMenuLink } from "./PageMenuLink";
 import { useForceChooseUsername } from "./useForceChooseUsername";
@@ -77,9 +77,8 @@ type MenuProps = {
 const DesktopMenu: FC<MenuProps> = ({ queryRef }) => {
   const { data: session } = useSession();
   const menu = useFragment(fragment, queryRef);
-
   return (
-    <div className="flex gap-6 items-center">
+    <div className="flex gap-4 items-center">
       <GlobalSearch />
       <AboutMenuLink mode="desktop" />
       <DocsMenuLink mode="desktop" />
@@ -93,7 +92,7 @@ const DesktopMenu: FC<MenuProps> = ({ queryRef }) => {
               </DropdownMenu>
             )}
           >
-            <DropdownWithArrow text="My Groups" />
+            <DropdownWithArrow text="Groups" />
           </Dropdown>
         </>
       ) : null}
