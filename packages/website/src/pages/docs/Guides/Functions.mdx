@@ -8,15 +8,15 @@ import { SquiggleEditor } from "@quri/squiggle-components";
 ## Basic syntax
 
 <SquiggleEditor
-  defaultCode={`multiply(t) = normal(t^2, t^1.2+.01)
-multiply`}
+  defaultCode={`multiplyTwoNumbers(t) = normal(t^2, t^1.2+.01)
+multiplyTwoNumbers`}
 />
 
 In Squiggle, function definitions are treated as values. There's no explicit `return` statement; the result of the last expression in the function body is returned.
 If you need to define local variables in functions, you can use blocks. The last expression in the block is the value of the block:
 
 <SquiggleEditor
-  defaultCode={`multiplyBySix(x) = {
+  defaultCode={`multiplyInputBySix(x) = {
   doubleX = x * 2
   doubleX * 3
   }`}
@@ -24,7 +24,7 @@ If you need to define local variables in functions, you can use blocks. The last
 
 ## Anonymous Functions
 
-In Squiggle, you can define anonymous functions using the `{|...| ...}` syntax. For example, `multiply(x, y) = x * y` and `multiply = {|x, y| x * y}` are equivalent.
+In Squiggle, you can define anonymous functions using the `{|...| ...}` syntax. For example, `multiplyTwoNumbers(x, y) = x * y` and `multiplyTwoNumbers = {|x, y| x * y}` are equivalent.
 
 Squiggle functions are first-class values, meaning you can assign them to variables, pass them as arguments to other functions, and return them from other functions.
 <SquiggleEditor defaultCode={`{|t| normal(t^2, t^1.2+.01)}`} />
@@ -72,7 +72,7 @@ We plan to support other kinds of domains in the future; for now, only numeric r
 ### Annotation Reflection
 
 <SquiggleEditor
-  defaultCode={`multiply(x: [1, 20]) = x * x
+  defaultCode={`multiplyTwoNumbers(x: [1, 20]) = x * x
 multiply.parameters[0]`}
 />
 
@@ -81,7 +81,7 @@ Domains and parameter names can be accessed by the `fn.parameters` property.
 For example, domains extracted with `.parameters` can be reused in annotations of other parameters:
 
 <SquiggleEditor
-  defaultCode={`multiply(x: [1, 20]) = x * x
-g(x: multiply.parameters[0].domain) = x * x * x
+  defaultCode={`multiplyTwoNumbers(x: [1, 20]) = x * x
+g(x: multiplyTwoNumbers.parameters[0].domain) = x * x * x
 `}
 />
