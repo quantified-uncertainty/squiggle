@@ -1,4 +1,4 @@
-import { format } from "./helpers.js";
+import { format } from './helpers.js';
 
 describe("expressions", () => {
   test("basic", async () => {
@@ -18,7 +18,7 @@ describe("expressions", () => {
     4 > (3 > 2 ? 3 : 5) && 2 == -(-1 + -3 -> {|x|x / 3}) ? "ok" : "not ok"
 `)
     ).toBe(
-      '4 > (3 > 2 ? 3 : 5) && 2 == -(-1 + -3 -> {|x|x / 3}) ? "ok" : "not ok"'
+      '4 > (3 > 2 ? 3 : 5) && 2 == -(-1 + -3 -> {|x| x / 3}) ? "ok" : "not ok"'
     );
   });
 
