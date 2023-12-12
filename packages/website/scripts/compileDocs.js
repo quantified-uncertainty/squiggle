@@ -26,6 +26,7 @@ const getDocumentationContent = async () => {
 };
 
 const compile = async () => {
+  console.log('Compiling documentation...');
   const grammarContent = await getGrammarContent();
   const documentationContent = await getDocumentationContent();
   const content =
