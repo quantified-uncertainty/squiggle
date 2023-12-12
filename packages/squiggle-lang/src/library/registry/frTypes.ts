@@ -209,11 +209,11 @@ export function frOr<T1, T2>(
   return {
     unpack: (v) => {
       const unpacked1 = type1.unpack(v);
-      if (unpacked1) {
+      if (unpacked1 !== undefined) {
         return { tag: "1", value: unpacked1 };
       }
       const unpacked2 = type2.unpack(v);
-      if (unpacked2) {
+      if (unpacked2 !== undefined) {
         return { tag: "2", value: unpacked2 };
       }
       return undefined;
