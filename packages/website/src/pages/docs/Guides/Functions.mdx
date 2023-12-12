@@ -8,8 +8,9 @@ import { SquiggleEditor } from "@quri/squiggle-components";
 ## Basic syntax
 
 <SquiggleEditor
-  defaultCode={`multiply(t) = normal(t^2, t^1.2+.01)
-multiply`}
+  defaultCode={`  const BASE = .01;
+  multiply(t) = normal(t^2, t^1.2+BASE)
+  multiply`}
 />
 
 In Squiggle, function definitions are treated as values. There's no explicit `return` statement; the result of the last expression in the function body is returned.
@@ -17,8 +18,10 @@ If you need to define local variables in functions, you can use blocks. The last
 
 <SquiggleEditor
   defaultCode={`multiplyBySix(x) = {
-  doubleX = x * 2
-  doubleX * 3
+    const DOUBLE_MULTIPLIER = 2;
+  doubleX = x * DOUBLE_MULTIPLIER;
+    const TRIPLE_MULTIPLIER = 3;
+  doubleX * TRIPLE_MULTIPLIER;
   }`}
 />
 
@@ -37,7 +40,9 @@ The Squiggle viewer can automatically visualize functions that take a single num
 2. `(number) => distribution`
 
 <SquiggleEditor defaultCode={`numberToNumber(x) = x * x
-numberToDistribution(x) = normal(x + 1, 3)
+  const DIST_MEAN_INCREASE = 1;
+  const DIST_SD = 3;
+  numberToDistribution(x) = normal(x + DIST_MEAN_INCREASE, DIST_SD)
 placeholderFunction(x, y) = x + y`} />
 
 When Squiggle visualizes a function, it automatically selects a range of input values to use.
@@ -66,7 +71,9 @@ Domains are checked on function calls; `f(x: [1,2]) = x; f(3)` will fail.
 We plan to support other kinds of domains in the future; for now, only numeric ranges are supported.
 
 <SquiggleEditor
-  defaultCode={`yearToValue(year: [2020, 2100]) = 1.04 ^ (year - 2020)`}
+  defaultCode={`  const YEAR_BASE = 2020;
+  const ANNUAL_GROWTH_RATE = 1.04;
+  yearToValue(year: [YEAR_BASE, 2100]) = ANNUAL_GROWTH_RATE ^ (year - YEAR_BASE)`}
 />
 
 ### Annotation Reflection
