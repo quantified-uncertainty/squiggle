@@ -28,7 +28,7 @@ describe("valueToDomain", () => {
 
     test("toString", () => {
       const domain = annotationToDomain(vArray([vNumber(3), vNumber(5)]));
-      expect(domain.toString()).toEqual("Number.rangeDomain(3, 5)");
+      expect(domain.toString()).toEqual("Number.rangeDomain({ min: 3, max: 5 })");
     });
 
     test("one-item array", () => {
