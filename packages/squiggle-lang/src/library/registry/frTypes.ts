@@ -208,13 +208,13 @@ export function frOr<T1, T2>(
 ): FRType<FrOrType<T1, T2>> {
   return {
     unpack: (v) => {
-      const unpacked1 = type1.unpack(v);
-      if (unpacked1 !== undefined) {
-        return { tag: "1", value: unpacked1 };
+      const unpackedType1Value = type1.unpack(v);
+      if (unpackedType1Value !== undefined) {
+        return { tag: "1", value: unpackedType1Value };
       }
-      const unpacked2 = type2.unpack(v);
-      if (unpacked2 !== undefined) {
-        return { tag: "2", value: unpacked2 };
+      const unpackedType2Value = type2.unpack(v);
+      if (unpackedType2Value !== undefined) {
+        return { tag: "2", value: unpackedType2Value };
       }
       return undefined;
     },
