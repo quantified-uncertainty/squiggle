@@ -133,9 +133,9 @@ describe("stacktraces", () => {
   add(date, duration) => date
   add(duration, date) => date
   add(duration, duration) => duration
-  add(distribution, number) => distribution
-  add(number, distribution) => distribution
-  add(distribution, distribution) => distribution
+  add(dist, number) => dist
+  add(number, dist) => dist
+  add(dist, dist) => dist
 Was given arguments: (5,"a")
 Stack trace:
   f at line 4, column 5, file main

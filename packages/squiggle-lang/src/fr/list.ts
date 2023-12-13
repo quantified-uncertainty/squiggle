@@ -158,10 +158,13 @@ export const library = [
       ),
       makeDefinition(
         [
-          frNumber,
-          frLambdaTyped(
-            [frNamed("index", frOptional(frNumber))],
-            frGeneric("A")
+          frNamed("count", frNumber),
+          frNamed(
+            "fn",
+            frLambdaTyped(
+              [frNamed("index", frOptional(frNumber))],
+              frGeneric("A")
+            )
           ),
         ],
         frArray(frGeneric("A")),
@@ -175,7 +178,7 @@ export const library = [
         }
       ),
       makeDefinition(
-        [frNumber, frGeneric("A")],
+        [frNamed("count", frNumber), frNamed("value", frGeneric("A"))],
         frArray(frGeneric("A")),
         ([number, value]) => {
           _assertValidArrayLength(number);
@@ -192,14 +195,18 @@ export const library = [
     output: "Array",
     examples: [`List.upTo(1,4)`],
     definitions: [
-      makeDefinition([frNumber, frNumber], frArray(frNumber), ([low, high]) => {
-        if (!Number.isInteger(low) || !Number.isInteger(high)) {
-          throw new REArgumentError(
-            "Low and high values must both be integers"
-          );
+      makeDefinition(
+        [frNamed("low", frNumber), frNamed("high", frNumber)],
+        frArray(frNumber),
+        ([low, high]) => {
+          if (!Number.isInteger(low) || !Number.isInteger(high)) {
+            throw new REArgumentError(
+              "Low and high values must both be integers"
+            );
+          }
+          return E_A_Floats.upTo(low, high);
         }
-        return E_A_Floats.upTo(low, high);
-      }),
+      ),
     ],
   }),
   maker.make({
@@ -293,7 +300,10 @@ export const library = [
     examples: [`List.sortBy([{a:3}, {a:1}], {|f| f.a})`],
     definitions: [
       makeDefinition(
-        [frArray(frGeneric("A")), frLambdaTyped([frGeneric("A")], frNumber)],
+        [
+          frArray(frGeneric("A")),
+          frNamed("fn", frLambdaTyped([frGeneric("A")], frNumber)),
+        ],
         frArray(frGeneric("A")),
         ([array, lambda], context) => {
           return sortBy(array, (e) =>
@@ -309,7 +319,10 @@ export const library = [
     examples: [`List.minBy([{a:3}, {a:1}], {|f| f.a})`],
     definitions: [
       makeDefinition(
-        [frArray(frGeneric("A")), frLambdaTyped([frGeneric("A")], frNumber)],
+        [
+          frArray(frGeneric("A")),
+          frNamed("fn", frLambdaTyped([frGeneric("A")], frNumber)),
+        ],
         frGeneric("A"),
         ([array, lambda], context) => {
           _assertUnemptyArray(array);
@@ -331,7 +344,10 @@ export const library = [
     examples: [`List.maxBy([{a:3}, {a:1}], {|f| f.a})`],
     definitions: [
       makeDefinition(
-        [frArray(frGeneric("A")), frLambdaTyped([frGeneric("A")], frNumber)],
+        [
+          frArray(frGeneric("A")),
+          frNamed("fn", frLambdaTyped([frGeneric("A")], frNumber)),
+        ],
         frGeneric("A"),
         ([array, lambda], context) => {
           _assertUnemptyArray(array);
@@ -367,7 +383,11 @@ export const library = [
     examples: [`List.slice([1,2,5,10],1,3)`],
     definitions: [
       makeDefinition(
-        [frArray(frGeneric("A")), frNumber, frOptional(frNumber)],
+        [
+          frArray(frGeneric("A")),
+          frNamed("startIndex", frNumber),
+          frNamed("endIndex", frOptional(frNumber)),
+        ],
         frArray(frGeneric("A")),
         ([array, start, end]) => {
           _assertInteger(start);
@@ -421,20 +441,23 @@ export const library = [
     examples: [`List.reduce([1,4,5], 2, {|acc, el| acc+el})`],
     definitions: [
       makeAssertDefinition(
-        [frNumber, frLambdaNand([2, 3])],
+        [frNumber, frNamed("fn", frLambdaNand([2, 3]))],
         "Call with either 2 or 3 arguments, not both."
       ),
       makeDefinition(
         [
           frArray(frGeneric("B")),
-          frGeneric("A"),
-          frLambdaTyped(
-            [
-              frGeneric("A"),
-              frGeneric("B"),
-              frNamed("index", frOptional(frNumber)),
-            ],
-            frGeneric("A")
+          frNamed("initialValue", frGeneric("A")),
+          frNamed(
+            "callbackFn",
+            frLambdaTyped(
+              [
+                frNamed("accumulator", frGeneric("A")),
+                frNamed("currentValue", frGeneric("B")),
+                frNamed("currentIndex", frOptional(frNumber)),
+              ],
+              frGeneric("A")
+            )
           ),
         ],
         frGeneric("A"),
@@ -459,8 +482,17 @@ export const library = [
       makeDefinition(
         [
           frArray(frGeneric("B")),
-          frGeneric("A"),
-          frLambdaTyped([frGeneric("A"), frGeneric("B")], frGeneric("A")),
+          frNamed("initialValue", frGeneric("A")),
+          frNamed(
+            "callbackFn",
+            frLambdaTyped(
+              [
+                frNamed("accumulator", frGeneric("A")),
+                frNamed("currentValue", frGeneric("B")),
+              ],
+              frGeneric("A")
+            )
+          ),
         ],
         frGeneric("A"),
         ([array, initialValue, lambda], context) =>
@@ -482,9 +514,18 @@ export const library = [
       makeDefinition(
         [
           frArray(frGeneric("B")),
-          frGeneric("A"),
-          frLambdaTyped([frGeneric("A"), frGeneric("B")], frGeneric("A")),
-          frLambdaTyped([frGeneric("A")], frBool),
+          frNamed("initialValue", frGeneric("A")),
+          frNamed(
+            "callbackFn",
+            frLambdaTyped(
+              [
+                frNamed("accumulator", frGeneric("A")),
+                frNamed("currentValue", frGeneric("B")),
+              ],
+              frGeneric("A")
+            )
+          ),
+          frNamed("conditionFn", frLambdaTyped([frGeneric("A")], frBool)),
         ],
         frGeneric("A"),
         ([array, initialValue, step, condition], context) =>
@@ -498,7 +539,10 @@ export const library = [
     examples: [`List.filter([1,4,5], {|x| x>3})`],
     definitions: [
       makeDefinition(
-        [frArray(frGeneric("A")), frLambdaTyped([frGeneric("A")], frBool)],
+        [
+          frArray(frGeneric("A")),
+          frNamed("fn", frLambdaTyped([frGeneric("A")], frBool)),
+        ],
         frArray(frGeneric("A")),
         ([array, lambda], context) =>
           array.filter(_binaryLambdaCheck1(lambda, context))
@@ -511,7 +555,10 @@ export const library = [
     examples: [`List.every([1,4,5], {|el| el>3 })`],
     definitions: [
       makeDefinition(
-        [frArray(frGeneric("A")), frLambdaTyped([frGeneric("A")], frBool)],
+        [
+          frArray(frGeneric("A")),
+          frNamed("fn", frLambdaTyped([frGeneric("A")], frBool)),
+        ],
         frBool,
         ([array, lambda], context) =>
           array.every(_binaryLambdaCheck1(lambda, context))
@@ -524,7 +571,10 @@ export const library = [
     examples: [`List.some([1,4,5], {|el| el>3 })`],
     definitions: [
       makeDefinition(
-        [frArray(frGeneric("A")), frLambdaTyped([frGeneric("A")], frBool)],
+        [
+          frArray(frGeneric("A")),
+          frNamed("fn", frLambdaTyped([frGeneric("A")], frBool)),
+        ],
         frBool,
         ([array, lambda], context) =>
           array.some(_binaryLambdaCheck1(lambda, context))
@@ -538,7 +588,10 @@ export const library = [
     examples: [`List.find([1,4,5], {|el| el>3 })`],
     definitions: [
       makeDefinition(
-        [frArray(frGeneric("A")), frLambdaTyped([frGeneric("A")], frBool)],
+        [
+          frArray(frGeneric("A")),
+          frNamed("fn", frLambdaTyped([frGeneric("A")], frBool)),
+        ],
         frGeneric("A"),
         ([array, lambda], context) => {
           const result = array.find(_binaryLambdaCheck1(lambda, context));
@@ -557,7 +610,10 @@ export const library = [
     examples: [`List.findIndex([1,4,5], {|el| el>3 })`],
     definitions: [
       makeDefinition(
-        [frArray(frGeneric("A")), frLambdaTyped([frGeneric("A")], frBool)],
+        [
+          frArray(frGeneric("A")),
+          frNamed("fn", frLambdaTyped([frGeneric("A")], frBool)),
+        ],
         frNumber,
         ([array, lambda], context) =>
           array.findIndex(_binaryLambdaCheck1(lambda, context))
@@ -570,9 +626,9 @@ export const library = [
     examples: [`List.join(["a", "b", "c"], ",")`],
     definitions: [
       makeDefinition(
-        [frArray(frString), frString],
+        [frArray(frString), frNamed("separator", frOptional(frString))],
         frString,
-        ([array, joinStr]) => array.join(joinStr)
+        ([array, joinStr]) => array.join(joinStr ?? ",")
       ),
       makeDefinition([frArray(frString)], frString, ([array]) => array.join()),
     ],

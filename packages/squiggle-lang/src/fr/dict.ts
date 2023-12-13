@@ -9,6 +9,7 @@ import {
   frDictWithArbitraryKeys,
   frGeneric,
   frLambdaTyped,
+  frNamed,
   frNumber,
   frString,
   frTuple,
@@ -29,7 +30,11 @@ export const library = [
     examples: [`Dict.set({a: 1, b: 2}, "c", 3)`],
     definitions: [
       makeDefinition(
-        [frDictWithArbitraryKeys(frGeneric("A")), frString, frGeneric("A")],
+        [
+          frDictWithArbitraryKeys(frGeneric("A")),
+          frNamed("key", frString),
+          frNamed("value", frGeneric("A")),
+        ],
         frDictWithArbitraryKeys(frGeneric("A")),
         ([dict, key, value]) => dict.set(key, value)
       ),
@@ -41,7 +46,7 @@ export const library = [
     examples: [`Dict.has({a: 1, b: 2}, "c")`],
     definitions: [
       makeDefinition(
-        [frDictWithArbitraryKeys(frAny), frString],
+        [frDictWithArbitraryKeys(frAny), frNamed("key", frString)],
         frBool,
         ([dict, key]) => dict.has(key)
       ),
@@ -65,7 +70,7 @@ export const library = [
     examples: [`Dict.delete({a: 1, b: 2}, "a")`],
     definitions: [
       makeDefinition(
-        [frDictWithArbitraryKeys(frGeneric("A")), frString],
+        [frDictWithArbitraryKeys(frGeneric("A")), frNamed("key", frString)],
         frDictWithArbitraryKeys(frGeneric("A")),
         ([dict, key]) => dict.delete(key)
       ),
@@ -151,7 +156,7 @@ export const library = [
       makeDefinition(
         [
           frDictWithArbitraryKeys(frGeneric("A")),
-          frLambdaTyped([frGeneric("A")], frGeneric("B")),
+          frNamed("fn", frLambdaTyped([frGeneric("A")], frGeneric("B"))),
         ],
         frDictWithArbitraryKeys(frGeneric("B")),
         ([dict, lambda], context) => {
@@ -173,7 +178,7 @@ export const library = [
       makeDefinition(
         [
           frDictWithArbitraryKeys(frGeneric("A")),
-          frLambdaTyped([frString], frString),
+          frNamed("fn", frLambdaTyped([frString], frString)),
         ],
         frDictWithArbitraryKeys(frGeneric("A")),
         ([dict, lambda], context) => {
@@ -199,7 +204,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [frDictWithArbitraryKeys(frGeneric("A")), frArray(frString)],
-        frDictWithArbitraryKeys(frGeneric("A")),
+        frNamed("keys", frDictWithArbitraryKeys(frGeneric("A"))),
         ([dict, keys]) => {
           const response: OrderedMap<string, Value> = OrderedMap<
             string,
@@ -224,7 +229,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [frDictWithArbitraryKeys(frGeneric("A")), frArray(frString)],
-        frDictWithArbitraryKeys(frGeneric("A")),
+        frNamed("keys", frDictWithArbitraryKeys(frGeneric("A"))),
         ([dict, keys]) => {
           const response: OrderedMap<string, Value> = dict.withMutations(
             (result) => {

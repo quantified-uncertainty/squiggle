@@ -8,6 +8,7 @@ import {
   frDist,
   frDistOrNumber,
   frNumber,
+  frOptional,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 
@@ -67,51 +68,46 @@ export const library = [
           frDict(
             ["estimate", frDist],
             ["answer", frDistOrNumber],
-            ["prior", frDist]
+            ["prior", frOptional(frDist)]
           ),
         ],
         frNumber,
         ([{ estimate, answer, prior }], context) => {
-          if (answer instanceof BaseDist) {
-            return runScoringDistAnswer(
-              estimate,
-              answer,
-              prior,
-              context.environment
-            );
-          } else if (typeof answer === "number") {
-            return runScoringScalarAnswer(
-              estimate,
-              answer,
-              prior,
-              context.environment
-            );
-          } else {
-            throw new REArgumentError("Impossible type");
+          if (prior !== null) {
+            if (answer instanceof BaseDist) {
+              return runScoringDistAnswer(
+                estimate,
+                answer,
+                prior,
+                context.environment
+              );
+            } else if (typeof answer === "number") {
+              return runScoringScalarAnswer(
+                estimate,
+                answer,
+                prior,
+                context.environment
+              );
+            }
           }
-        }
-      ),
-      makeDefinition(
-        [frDict(["estimate", frDist], ["answer", frDistOrNumber])],
-        frNumber,
-        ([{ estimate, answer }], context) => {
-          if (answer instanceof BaseDist) {
-            return runScoringDistAnswer(
-              estimate,
-              answer,
-              undefined,
-              context.environment
-            );
-          } else if (typeof answer === "number") {
-            return runScoringScalarAnswer(
-              estimate,
-              answer,
-              undefined,
-              context.environment
-            );
-          } else {
-            throw new REArgumentError("Impossible type");
+          if (prior === null) {
+            if (answer instanceof BaseDist) {
+              return runScoringDistAnswer(
+                estimate,
+                answer,
+                undefined,
+                context.environment
+              );
+            } else if (typeof answer === "number") {
+              return runScoringScalarAnswer(
+                estimate,
+                answer,
+                undefined,
+                context.environment
+              );
+            }
           }
+          throw new REArgumentError("Impossible type");
         }
       ),
     ],
