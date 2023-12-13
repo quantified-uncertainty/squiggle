@@ -58,9 +58,11 @@ widgetRegistry.register("TableChart", {
       }
     };
 
+    const valueTitle = value.title; // Assuming the title is stored in 'title' property of 'value'
     return (
       <div>
         <div className="relative rounded-sm overflow-hidden border border-slate-200">
+          {valueTitle && <h2>{valueTitle}</h2>} {/* Render title if it exists */}
           <table
             className="table-fixed w-full"
             style={{ minWidth: columnLength * 100 }}
