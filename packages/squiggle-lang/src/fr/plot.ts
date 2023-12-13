@@ -10,6 +10,7 @@ import {
   frNamed,
   frNumber,
   frOptional,
+  frOr,
   frPlot,
   frSampleSetDist,
   frScale,
@@ -185,6 +186,59 @@ export const library = [
     definitions: [
       makeDefinition(
         [
+          frNamed(
+            "dists",
+            frOr(
+              frArray(frDistOrNumber),
+              frArray(
+                frDict(
+                  ["name", frOptional(frString)],
+                  ["value", frDistOrNumber]
+                )
+              )
+            )
+          ),
+          frOptional(
+            frDict(
+              ["xScale", frOptional(frScale)],
+              ["yScale", frOptional(frScale)],
+              ["title", frOptional(frString)],
+              ["showSummary", frOptional(frBool)]
+            )
+          ),
+        ],
+        frPlot,
+        ([dists, params]) => {
+          const { xScale, yScale, title, showSummary } = params ?? {};
+          yScale && _assertYScaleNotDateScale(yScale);
+          const distributions: LabeledDistribution[] = [];
+          if (dists.tag === "2") {
+            dists.value.forEach(({ name, value }, index) => {
+              distributions.push({
+                name: name || `dist ${index + 1}`,
+                distribution: parseDistFromDistOrNumber(value),
+              });
+            });
+          } else {
+            dists.value.forEach((dist, index) => {
+              distributions.push({
+                name: `dist ${index + 1}`,
+                distribution: parseDistFromDistOrNumber(dist),
+              });
+            });
+          }
+          return {
+            type: "distributions",
+            distributions,
+            xScale: xScale ?? defaultScale,
+            yScale: yScale ?? defaultScale,
+            title: title ?? undefined,
+            showSummary: showSummary ?? true,
+          };
+        }
+      ),
+      makeDefinition(
+        [
           frDict(
             [
               "dists",
@@ -215,7 +269,8 @@ export const library = [
             title: title ?? undefined,
             showSummary: showSummary ?? true,
           };
-        }
+        },
+        { deprecated: "0.8.7" }
       ),
     ],
   }),
