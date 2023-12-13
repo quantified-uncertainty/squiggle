@@ -6,16 +6,16 @@ import { widgetRegistry } from "./registry.js";
 
 widgetRegistry.register("Boxed", {
   heading: (value) => {
-    const containedValue = value.value.value;
-    if (valueHasContext(containedValue)) {
-      return valueToPreviewString(containedValue);
+    const unboxedValue = value.value.value;
+    if (valueHasContext(unboxedValue)) {
+      return valueToPreviewString(unboxedValue);
     }
     return "Tagged";
   },
   Preview: (value) => {
-    const _value = value.value.value;
-    if (valueHasContext(_value)) {
-      return <SquiggleValuePreview value={_value} />;
+    const unboxedValue = value.value.value;
+    if (valueHasContext(unboxedValue)) {
+      return <SquiggleValuePreview value={unboxedValue} />;
     }
   },
   Chart: (value, settings) => {
