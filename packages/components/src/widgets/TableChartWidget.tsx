@@ -60,6 +60,7 @@ widgetRegistry.register("TableChart", {
 
     return (
       <div>
+        <div className="table-title">{props.title}</div>
         <div className="relative rounded-sm overflow-hidden border border-slate-200">
           <table
             className="table-fixed w-full"
