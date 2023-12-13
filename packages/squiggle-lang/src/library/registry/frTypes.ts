@@ -343,12 +343,10 @@ export const frDictWithArbitraryKeys = <T>(
   };
 };
 
-type frAnyParams = {
+export const frAny = (params?: {
   keepBoxes?: boolean;
   genericName?: string;
-};
-
-export const frAny = (params?: frAnyParams): FRType<Value> => ({
+}): FRType<Value> => ({
   unpack: (v) => v,
   pack: (v) => v,
   getName: () => (params?.genericName ? `'${params.genericName}` : "any"),
