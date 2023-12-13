@@ -449,12 +449,12 @@ export const library = [
           frArray(frGeneric("B")),
           frNamed("initialValue", frGeneric("A")),
           frNamed(
-            "stepFn",
+            "callbackFn",
             frLambdaTyped(
               [
-                frNamed("acc", frGeneric("A")),
-                frNamed("curr", frGeneric("B")),
-                frNamed("index", frOptional(frNumber)),
+                frNamed("accumulator", frGeneric("A")),
+                frNamed("currentValue", frGeneric("B")),
+                frNamed("currentIndex", frOptional(frNumber)),
               ],
               frGeneric("A")
             )
@@ -484,9 +484,12 @@ export const library = [
           frArray(frGeneric("B")),
           frNamed("initialValue", frGeneric("A")),
           frNamed(
-            "stepFn",
+            "callbackFn",
             frLambdaTyped(
-              [frNamed("acc", frGeneric("A")), frNamed("curr", frGeneric("B"))],
+              [
+                frNamed("accumulator", frGeneric("A")),
+                frNamed("currentValue", frGeneric("B")),
+              ],
               frGeneric("A")
             )
           ),
@@ -513,9 +516,12 @@ export const library = [
           frArray(frGeneric("B")),
           frNamed("initialValue", frGeneric("A")),
           frNamed(
-            "stepFn",
+            "callbackFn",
             frLambdaTyped(
-              [frNamed("acc", frGeneric("A")), frNamed("curr", frGeneric("B"))],
+              [
+                frNamed("accumulator", frGeneric("A")),
+                frNamed("currentValue", frGeneric("B")),
+              ],
               frGeneric("A")
             )
           ),
