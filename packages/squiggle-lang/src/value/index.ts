@@ -1,5 +1,6 @@
 import lodashIsEqual from "lodash/isEqual.js";
 import isInteger from "lodash/isInteger.js";
+
 import { BaseDist } from "../dist/BaseDist.js";
 import {
   REArrayIndexNotFound,
@@ -7,9 +8,9 @@ import {
   REOther,
 } from "../errors/messages.js";
 import { Lambda } from "../reducer/lambda.js";
+import { ImmutableMap } from "../utility/immutableMap.js";
 import { SDate } from "../utility/SDate.js";
 import { SDuration } from "../utility/SDuration.js";
-import { ImmutableMap } from "../utility/immutableMap.js";
 import { DateRangeDomain, Domain, NumericRangeDomain } from "./domain.js";
 import { Boxed } from "./boxed.js";
 

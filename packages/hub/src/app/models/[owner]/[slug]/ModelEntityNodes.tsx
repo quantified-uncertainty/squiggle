@@ -1,17 +1,19 @@
 "use client";
 
-import { FC } from "react";
 import { useParams, usePathname } from "next/navigation";
-import { EntityInfo } from "@/components/EntityInfo";
+import { FC } from "react";
+
 import { CodeBracketIcon, EmptyIcon, ScaleIcon, ShareIcon } from "@quri/ui";
+
+import { EntityInfo } from "@/components/EntityInfo";
 import { type EntityNode } from "@/components/EntityLayout";
 import { ownerIcon } from "@/lib/ownerIcon";
 import {
+  isModelRelativeValuesRoute,
   modelExportRoute,
   modelForRelativeValuesExportRoute,
   modelRoute,
   ownerRoute,
-  isModelRelativeValuesRoute,
 } from "@/routes";
 
 function hasTypename(owner: {

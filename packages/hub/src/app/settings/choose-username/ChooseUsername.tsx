@@ -1,4 +1,5 @@
 "use client";
+import { ChooseUsernameMutation } from "@gen/ChooseUsernameMutation.graphql";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FC } from "react";
@@ -9,7 +10,6 @@ import { Button } from "@quri/ui";
 
 import { SlugFormField } from "@/components/ui/SlugFormField";
 import { useMutationForm } from "@/hooks/useMutationForm";
-import { ChooseUsernameMutation } from "@gen/ChooseUsernameMutation.graphql";
 
 export const ChooseUsername: FC = () => {
   const { data: session, update: updateSession } = useSession({

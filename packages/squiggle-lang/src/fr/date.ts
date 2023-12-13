@@ -2,9 +2,9 @@ import { REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frDate,
-  frDict,
   frDomain,
   frDuration,
+  frNamed,
   frNumber,
   frString,
 } from "../library/registry/frTypes.js";
@@ -124,12 +124,12 @@ export const library = [
     name: "rangeDomain",
     requiresNamespace: true,
     output: "Domain",
-    examples: ["Date.rangeDomain({ min: 2000year, max: 2010year })"],
+    examples: ["Date.rangeDomain(2000year, 2010year)"],
     definitions: [
       makeDefinition(
-        [frDict(["min", frDate], ["max", frDate])],
+        [frNamed("min", frDate), frNamed("min", frDate)],
         frDomain,
-        ([{ min, max }]) => {
+        ([min, max]) => {
           return new DateRangeDomain(min, max);
         }
       ),

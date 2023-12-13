@@ -1,6 +1,3 @@
-import * as Continuous from "../PointSet/Continuous.js";
-import * as Discrete from "../PointSet/Discrete.js";
-import * as XYShape from "../XYShape.js";
 import { xyShapeDistError } from "../dist/DistError.js";
 import { PointSetDist } from "../dist/PointSetDist.js";
 import { PointMass } from "../dist/SymbolicDist.js";
@@ -15,12 +12,15 @@ import {
   frNumber,
 } from "../library/registry/frTypes.js";
 import {
-  FnFactory,
   doNumberLambdaCall,
+  FnFactory,
   unwrapDistResult,
 } from "../library/registry/helpers.js";
+import * as Continuous from "../PointSet/Continuous.js";
+import * as Discrete from "../PointSet/Discrete.js";
 import { Ok } from "../utility/result.js";
 import { vNumber } from "../value/index.js";
+import * as XYShape from "../XYShape.js";
 
 const maker = new FnFactory({
   nameSpace: "PointSet",

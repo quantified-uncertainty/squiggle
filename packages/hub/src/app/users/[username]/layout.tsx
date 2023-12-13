@@ -1,12 +1,14 @@
 import { Metadata } from "next";
 import { PropsWithChildren } from "react";
 
+import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
+import { loadPageQuery } from "@/relay/loadPageQuery";
+
+import { UserLayout } from "./UserLayout";
+
 import QueryNode, {
   UserLayoutQuery,
 } from "@/__generated__/UserLayoutQuery.graphql";
-import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
-import { loadPageQuery } from "@/relay/loadPageQuery";
-import { UserLayout } from "./UserLayout";
 
 type Props = {
   params: { username: string };

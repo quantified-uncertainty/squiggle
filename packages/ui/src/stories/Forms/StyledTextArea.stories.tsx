@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
+
 import { StyledTextArea } from "../../index.js";
 
 const meta = { component: StyledTextArea } satisfies Meta<

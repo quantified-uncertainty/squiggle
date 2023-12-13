@@ -2,15 +2,16 @@ import { fromByteArray, toByteArray } from "base64-js";
 import { deflate, inflate } from "pako";
 import { FC, useState } from "react";
 
-import { ShareButton } from "./ShareButton";
 import {
-  VersionedSquigglePlayground,
-  SquigglePlaygroundVersionPicker,
   defaultSquiggleVersion,
+  SquigglePlaygroundVersionPicker,
   type SquiggleVersion,
   squiggleVersions,
+  VersionedSquigglePlayground,
 } from "@quri/versioned-squiggle-components";
+
 import { useAvailableHeight } from "../../utils/useAvailableHeight";
+import { ShareButton } from "./ShareButton";
 
 const HASH_PREFIX = "#code=";
 function getHashData() {

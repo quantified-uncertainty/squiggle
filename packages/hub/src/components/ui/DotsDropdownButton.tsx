@@ -1,6 +1,6 @@
 import { FC, ReactNode } from "react";
 
-import { Button, DotsHorizontalIcon, Dropdown, DropdownMenu } from "@quri/ui";
+import { Button, DotsHorizontalIcon, Dropdown } from "@quri/ui";
 
 type Props = {
   children: (options: { close(): void }) => ReactNode;

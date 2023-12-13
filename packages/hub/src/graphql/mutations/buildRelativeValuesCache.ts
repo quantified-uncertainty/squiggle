@@ -3,9 +3,10 @@ import { prisma } from "@/prisma";
 import { cartesianProduct } from "@/relative-values/lib/utils";
 import { relativeValuesItemsSchema } from "@/relative-values/types";
 import { ModelEvaluator } from "@/relative-values/values/ModelEvaluator";
+
 import {
-  RelativeValuesExport,
   getRelativeValuesExportForWriteableModel,
+  RelativeValuesExport,
 } from "../types/RelativeValuesExport";
 import { decodeGlobalIdWithTypename } from "../utils";
 

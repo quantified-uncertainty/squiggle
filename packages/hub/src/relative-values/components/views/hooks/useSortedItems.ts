@@ -3,11 +3,12 @@ import { useMemo } from "react";
 
 import { Item } from "@/relative-values/types";
 import {
-  ModelEvaluator,
   extractOkValues,
+  ModelEvaluator,
 } from "@/relative-values/values/ModelEvaluator";
 import { RelativeValue } from "@/relative-values/values/types";
 import { hasInvalid } from "@/relative-values/values/value";
+
 import { AxisConfig } from "../RelativeValuesProvider";
 
 const averageMetric = ({

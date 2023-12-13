@@ -1,7 +1,9 @@
 "use client";
 import { FC } from "react";
-import { SquiggleVersion, checkSquiggleVersion } from "./versions.js";
+
 import { CodeBracketIcon, WrenchIcon } from "@quri/ui";
+
+import { checkSquiggleVersion, SquiggleVersion } from "./versions.js";
 
 export function versionTitle(version: SquiggleVersion) {
   return version === "dev" ? "Next" : version;

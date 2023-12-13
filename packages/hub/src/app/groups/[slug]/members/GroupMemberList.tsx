@@ -1,15 +1,19 @@
-import { GroupMemberList$key } from "@/__generated__/GroupMemberList.graphql";
-import { GroupMemberListPaginationQuery } from "@/__generated__/GroupMemberListPaginationQuery.graphql";
-import { LoadMore } from "@/components/LoadMore";
 import { FC } from "react";
 import { usePaginationFragment } from "react-relay";
 import { graphql } from "relay-runtime";
-import { GroupMemberCard } from "./GroupMemberCard";
-import { H2 } from "@/components/ui/Headers";
-import { useIsGroupAdmin } from "../hooks";
-import { DotsDropdown } from "@/components/ui/DotsDropdown";
+
 import { DropdownMenu } from "@quri/ui";
+
+import { LoadMore } from "@/components/LoadMore";
+import { DotsDropdown } from "@/components/ui/DotsDropdown";
+import { H2 } from "@/components/ui/Headers";
+
+import { useIsGroupAdmin } from "../hooks";
+import { GroupMemberCard } from "./GroupMemberCard";
 import { InviteUserToGroupAction } from "./InviteUserToGroupAction";
+
+import { GroupMemberList$key } from "@/__generated__/GroupMemberList.graphql";
+import { GroupMemberListPaginationQuery } from "@/__generated__/GroupMemberListPaginationQuery.graphql";
 
 const fragment = graphql`
   fragment GroupMemberList on Group

@@ -154,7 +154,7 @@ power
   powerOp "operator" = '^' / '.^'
 
 chainFunctionCall
-  = head:unary tail:(_ ('->') _nl @chainedFunction)*
+  = head:unary tail:(_nl ('->') _nl @chainedFunction)*
   {
     return tail.reduce(function(result, element) {
       return h.nodePipe(result, element.callable, element.args, location());
@@ -252,10 +252,10 @@ variable = dollarIdentifierWithModule / dollarIdentifier
 
 dollarIdentifierWithModule 'identifier'
   = head:$moduleIdentifier
-    tail:('.' _nl @$moduleIdentifier)* '.' _nl
-    final:$dollarIdentifier
+    final:('.' @$dollarIdentifier)?
   {
-    const modifiers = [head, ...tail, final];
+    let modifiers = [head];
+    Boolean(final) && modifiers.push(final);
     const modifiedIdentifier = modifiers.join('.');
     return h.nodeIdentifier(modifiedIdentifier, location());
   }

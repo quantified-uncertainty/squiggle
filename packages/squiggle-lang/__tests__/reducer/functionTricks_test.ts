@@ -27,7 +27,7 @@ describe("Arity check", () => {
     "f(x,y)=x(y); f(f)",
     "Error(2 arguments expected. Instead 1 argument(s) were passed.)"
   );
-  testEvalToBe("f(x)=x; f(f)", "lambda(x=>internal code)");
+  testEvalToBe("f(x)=x; f(f)", "(x) => internal code");
   testEvalToBe(
     "f(x,y)=x(y); f(1)",
     "Error(2 arguments expected. Instead 1 argument(s) were passed.)"
@@ -36,7 +36,7 @@ describe("Arity check", () => {
 
 describe("symbol not defined", () => {
   testEvalToBe("f(x)=x(y); f(f)", "Error(y is not defined)");
-  testEvalToBe("f(x)=x; f(f)", "lambda(x=>internal code)");
+  testEvalToBe("f(x)=x; f(f)", "(x) => internal code");
   testEvalToBe("f(x)=x(y); f(z)", "Error(y is not defined)");
   testEvalToBe("f(x)=x(3); f(z)", "Error(z is not defined)");
   testEvalToBe("f(x)=x(y); f(2)", "Error(y is not defined)");
@@ -64,22 +64,19 @@ describe("function tricks", () => {
   testEvalToBe("y=2;g(x)=inspect(y)+1;y", "2");
   MySkip.testEvalToBe("f(x) = x(x); f(f)", "????"); // TODO: Infinite loop. Any solution? Catching proper exception or timeout?
   MySkip.testEvalToBe("f(x, x)=x+x; f(1,2)", "????"); // TODO: Duplicate parameters
-  testEvalToBe("myadd(x,y)=x+y; z=myadd; z", "lambda(x,y=>internal code)");
+  testEvalToBe("myadd(x,y)=x+y; z=myadd; z", "(x,y) => internal code");
   testEvalToBe("myadd(x,y)=x+y; z=myadd; z(1, 1)", "2");
 });
 
 describe("lambda in structures", () => {
   testEvalToBe("myadd(x,y)=x+y; z=[myadd]", "()");
-  testEvalToBe("myadd(x,y)=x+y; z=[myadd]; z[0]", "lambda(x,y=>internal code)");
+  testEvalToBe("myadd(x,y)=x+y; z=[myadd]; z[0]", "(x,y) => internal code");
   testEvalToBe("myadd(x,y)=x+y; z=[myadd]; z[0](3,2)", "5");
   testEvalToBe(
     "myaddd(x,y)=x+y; z={x: myaddd}; z",
-    "{x: lambda(x,y=>internal code)}"
+    "{x: (x,y) => internal code}"
   );
-  testEvalToBe(
-    "myaddd(x,y)=x+y; z={x: myaddd}; z.x",
-    "lambda(x,y=>internal code)"
-  );
+  testEvalToBe("myaddd(x,y)=x+y; z={x: myaddd}; z.x", "(x,y) => internal code");
   testEvalToBe("myaddd(x,y)=x+y; z={x: myaddd}; z.x(3,2)", "5");
 });
 

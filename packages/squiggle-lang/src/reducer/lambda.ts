@@ -1,22 +1,23 @@
+import maxBy from "lodash/maxBy.js";
+import uniq from "lodash/uniq.js";
 import { LocationRange } from "peggy";
 
 import { ASTNode } from "../ast/parse.js";
 import * as IError from "../errors/IError.js";
 import { REArityError, REOther } from "../errors/messages.js";
 import { Expression } from "../expression/index.js";
-import { Calculator, VDomain, Value } from "../value/index.js";
-import * as Context from "./context.js";
-import { ReducerContext } from "./context.js";
-import { Stack } from "./stack.js";
 import {
   FnDefinition,
   fnDefinitionToString,
+  showInDocumentation,
   tryCallFnDefinition,
 } from "../library/registry/fnDefinition.js";
-import uniq from "lodash/uniq.js";
-import { sort } from "../utility/E_A_Floats.js";
 import { FRType } from "../library/registry/frTypes.js";
-import maxBy from "lodash/maxBy.js";
+import { sort } from "../utility/E_A_Floats.js";
+import { Calculator, Value, VDomain } from "../value/index.js";
+import * as Context from "./context.js";
+import { ReducerContext } from "./context.js";
+import { Stack } from "./stack.js";
 
 export type UserDefinedLambdaParameter = {
   name: string;
@@ -128,7 +129,7 @@ export class UserDefinedLambda extends BaseLambda {
   }
 
   toString() {
-    return `lambda(${this._getParameterNames().join(",")}=>internal code)`;
+    return `(${this._getParameterNames().join(",")}) => internal code`;
   }
 
   parameterCounts() {
@@ -175,7 +176,7 @@ export class BuiltinLambda extends BaseLambda {
 
   parameterString() {
     return this._definitions
-      .filter((d) => !d.isAssert)
+      .filter(showInDocumentation)
       .map(fnDefinitionToString)
       .join(" | ");
   }
@@ -196,11 +197,15 @@ export class BuiltinLambda extends BaseLambda {
     const signatures = this._definitions;
     const showNameMatchDefinitions = () => {
       const defsString = signatures
-        .filter((d) => !d.isAssert && !d.deprecated)
+        .filter(showInDocumentation)
         .map(fnDefinitionToString)
         .map((def) => `  ${this.name}${def}\n`)
         .join("");
-      return `There are function matches for ${this.name}(), but with different arguments:\n${defsString}`;
+      return `There are function matches for ${
+        this.name
+      }(), but with different arguments:\n${defsString}Was given arguments: (${args.join(
+        ","
+      )})`;
     };
 
     for (const signature of signatures) {

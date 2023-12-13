@@ -10,10 +10,10 @@ import {
   operationDistError,
   unreachableError,
 } from "../DistError.js";
+import { Env } from "../env.js";
 import * as PointSetDist from "../PointSetDist.js";
 import * as SampleSetDist from "../SampleSetDist/index.js";
 import * as SymbolicDist from "../SymbolicDist.js";
-import { Env } from "../env.js";
 
 // Checks if operation is possible, returns undefined if everything is ok.
 const validateInputs = (

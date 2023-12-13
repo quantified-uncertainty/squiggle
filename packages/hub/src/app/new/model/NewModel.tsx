@@ -3,18 +3,19 @@ import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FC, useEffect } from "react";
 import { FormProvider } from "react-hook-form";
+import { useLazyLoadQuery } from "react-relay";
 import { graphql } from "relay-runtime";
 
 import { Button, CheckboxFormField } from "@quri/ui";
 import { defaultSquiggleVersion } from "@quri/versioned-squiggle-components";
 
-import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
 import { SelectGroup, SelectGroupOption } from "@/components/SelectGroup";
 import { H1 } from "@/components/ui/Headers";
 import { SlugFormField } from "@/components/ui/SlugFormField";
 import { useMutationForm } from "@/hooks/useMutationForm";
 import { modelRoute, newModelRoute } from "@/routes";
-import { useLazyLoadQuery } from "react-relay";
+
+import { NewModelMutation } from "@/__generated__/NewModelMutation.graphql";
 import { NewModelPageQuery } from "@/__generated__/NewModelPageQuery.graphql";
 
 const defaultCode = `/*

@@ -6,6 +6,6 @@ describe("Construct Array", () => {
   testToExpression(
     "f(x)=x; g(x)=x; [f, g]",
     "f = {|x| {x}}; g = {|x| {x}}; [f, g]",
-    "[lambda(x=>internal code),lambda(x=>internal code)]"
+    "[(x) => internal code,(x) => internal code]"
   );
 });

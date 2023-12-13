@@ -1,4 +1,4 @@
-import { REAmbiguous, REBuildError } from "../../errors/messages.js";
+import { REAmbiguous } from "../../errors/messages.js";
 import { ReducerContext } from "../../reducer/context.js";
 import { Value, VBoxed } from "../../value/index.js";
 import { frAny, FRType, isOptional } from "./frTypes.js";
@@ -13,15 +13,18 @@ export type FnDefinition<OutputType = any> = {
   minInputs: number;
   maxInputs: number;
   isAssert: boolean;
-  deprecated?: string;
+  deprecated?: string; // We don't use this right now, but could later on.
 };
+
+export const showInDocumentation = (def: FnDefinition) =>
+  !def.isAssert && !def.deprecated;
 
 // A function to make sure that there are no non-optional inputs after optional inputs:
 function assertOptionalsAreAtEnd(inputs: FRType<any>[]) {
   let optionalFound = false;
   for (const input of inputs) {
     if (optionalFound && !isOptional(input)) {
-      throw new REBuildError(
+      throw new Error(
         `Optional inputs must be last. Found non-optional input after optional input. ${inputs}`
       );
     }

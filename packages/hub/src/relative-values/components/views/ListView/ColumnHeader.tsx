@@ -3,6 +3,7 @@ import { FC, useState } from "react";
 import { Dropdown } from "@quri/ui";
 
 import { Item } from "@/relative-values/types";
+
 import { CellBox } from "../CellBox";
 import { Header } from "../Header";
 import { useDefinition } from "../RelativeValuesProvider";

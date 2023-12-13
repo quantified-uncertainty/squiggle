@@ -1,5 +1,6 @@
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
+
 import { User } from "./User";
 
 export const Me = builder

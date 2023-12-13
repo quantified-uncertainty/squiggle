@@ -1,9 +1,10 @@
 import { FC } from "react";
 import { graphql } from "relay-runtime";
 
+import { MutationAction } from "@/components/ui/MutationAction";
+
 import { SetInviteRoleActionMutation } from "@/__generated__/SetInviteRoleActionMutation.graphql";
 import { MembershipRole } from "@/__generated__/SetMembershipRoleActionMutation.graphql";
-import { MutationAction } from "@/components/ui/MutationAction";
 
 const Mutation = graphql`
   mutation SetInviteRoleActionMutation(

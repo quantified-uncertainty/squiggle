@@ -35,9 +35,9 @@
     "mermaid": "^10.6.1",
     "prettier": "^3.0.3",
     "react": "^18.2.0",
+    "react-draggable": "^4.4.6",
     "react-hook-form": "^7.48.2",
     "react-markdown": "^9.0.1",
-    "react-resizable": "^3.0.5",
     "zod": "^3.22.4"
   },
   "devDependencies": {
@@ -62,7 +62,6 @@
     "@types/node": "^20.10.2",
     "@types/react": "^18.2.41",
     "@types/react-dom": "^18.2.17",
-    "@types/react-resizable": "^3.0.7",
     "@typescript-eslint/eslint-plugin": "^6.13.1",
     "@typescript-eslint/parser": "^6.13.1",
     "canvas": "^2.11.2",
@@ -91,7 +90,8 @@
   "scripts": {
     "start": "pnpm dev",
     "dev": "storybook dev -p 6006 --no-version-updates",
-    "build:ts": "rm -rf dist/src dist/tsconfig.build.tsbuildinfo && tsc -b",
+    "clean": "rm -rf dist",
+    "build:ts": "tsc -b",
     "build:css": "postcss ./src/styles/full.css -o ./dist/full.css && postcss ./src/styles/common.css -o ./dist/common.css",
     "build:lezer": "cd ./src/components/CodeEditor/languageSupport; mkdir -p generated; lezer-generator ./squiggle.grammar --output generated/squiggle.ts",
     "build:storybook": "storybook build",

@@ -1,9 +1,9 @@
 import {
-  SqError,
-  SqValue,
-  SqDictValue,
   result,
   resultMap,
+  SqDictValue,
+  SqError,
+  SqValue,
 } from "@quri/squiggle-lang";
 
 import { SquiggleOutput } from "./hooks/useSquiggle.js";

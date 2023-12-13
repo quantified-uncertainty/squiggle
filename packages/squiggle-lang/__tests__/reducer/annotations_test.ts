@@ -38,11 +38,11 @@ describe("annotations", () => {
       );
       testEvalToMatch(
         "f(x: [3,5]) = x*2; f(6)",
-        "Parameter 6 must be in domain Number.rangeDomain({ min: 3, max: 5 })"
+        "Parameter 6 must be in domain Number.rangeDomain(3, 5)"
       );
       testEvalToMatch(
         "f(x: [2000year,2005year]) = toYears(x-2000year)+3; f(2010year)",
-        " Parameter Fri Jan 01 2010 must be in domain Date.rangeDomain({ min: Sat Jan 01 2000, max: Sat Jan 01 2005 })"
+        " Parameter Fri Jan 01 2010 must be in domain Date.rangeDomain(Sat Jan 01 2000, Sat Jan 01 2005)"
       );
     });
     describe("check types", () => {
@@ -64,7 +64,7 @@ describe("annotations", () => {
 
   describe("explicit annotation object", () => {
     testEvalToBe(
-      "f(x: Number.rangeDomain({ min: 3, max: 5 })) = x; f.parameters[0].domain.min",
+      "f(x: Number.rangeDomain(3, 5)) = x; f.parameters[0].domain.min",
       "3"
     );
   });
@@ -93,7 +93,7 @@ Stack trace:
         throw new Error("expected error");
       }
       expect(result.value.toStringWithDetails())
-        .toEqual(`Domain Error: Parameter 6 must be in domain Number.rangeDomain({ min: 3, max: 5 })
+        .toEqual(`Domain Error: Parameter 6 must be in domain Number.rangeDomain(3, 5)
 Stack trace:
   g at line 1, column 24, file main
   <top> at line 1, column 30, file main`);

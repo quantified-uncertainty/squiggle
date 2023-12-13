@@ -1,9 +1,10 @@
-import React from "react";
-import ReactMarkdown from "react-markdown";
 import { clsx } from "clsx";
-import { SQUIGGLE_DOCS_URL } from "../../lib/constants.js";
-import { FC, PropsWithChildren } from "react";
+import React, { FC, PropsWithChildren } from "react";
+import ReactMarkdown from "react-markdown";
+
 import { type FnDocumentation as FnDocumentationType } from "@quri/squiggle-lang";
+
+import { SQUIGGLE_DOCS_URL } from "../../lib/constants.js";
 
 const Section: FC<PropsWithChildren> = ({ children }) => (
   <div className={clsx("px-4 py-2")}>{children}</div>

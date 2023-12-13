@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { FaGithub, FaDiscord, FaRss } from "react-icons/fa";
+import { FaDiscord, FaGithub, FaRss } from "react-icons/fa";
 
 const linkClasses = "items-center flex hover:text-gray-900";
 

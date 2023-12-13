@@ -1,10 +1,10 @@
-import * as React from "react";
 import {
   CheckCircleIcon,
   InformationCircleIcon,
   XCircleIcon,
 } from "@heroicons/react/solid/esm/index.js";
 import { clsx } from "clsx";
+import * as React from "react";
 
 export const Alert: React.FC<{
   heading: string;
@@ -52,9 +52,9 @@ export const ErrorAlert: React.FC<{
 }> = (props) => (
   <Alert
     {...props}
-    backgroundColor="bg-red-100"
-    headingColor="text-red-800"
-    bodyColor="text-red-700"
+    backgroundColor="bg-red-50"
+    headingColor="text-red-900"
+    bodyColor="text-slate-700"
     icon={XCircleIcon}
     iconColor="text-red-400"
   />

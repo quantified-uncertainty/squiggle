@@ -1,7 +1,6 @@
 import { REArgumentError, REDomainError } from "../errors/messages.js";
 import { SDate } from "../utility/SDate.js";
-import { Value, VNumber, VDate } from "./index.js";
-import { Scale } from "./index.js";
+import { Scale, Value, VDate, VNumber } from "./index.js";
 
 function _assertCorrectType(value: Value, expectedType: string) {
   if (value.type !== expectedType) {
@@ -59,7 +58,7 @@ export class NumericRangeDomain extends BaseDomain {
   }
 
   toString() {
-    return `Number.rangeDomain({ min: ${this.min}, max: ${this.max} })`;
+    return `Number.rangeDomain(${this.min}, ${this.max})`;
   }
 
   validateValue(value: Value) {
@@ -100,7 +99,7 @@ export class DateRangeDomain extends BaseDomain {
   }
 
   toString() {
-    return `Date.rangeDomain({ min: ${this.min.toString()}, max: ${this.max.toString()} })`;
+    return `Date.rangeDomain(${this.min.toString()}, ${this.max.toString()})`;
   }
 
   validateValue(value: Value) {

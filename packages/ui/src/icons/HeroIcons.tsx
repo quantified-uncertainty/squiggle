@@ -19,6 +19,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 import { FC } from "react";
+
 import { Icon, IconProps } from "./Icon.js";
 
 export const BarChartIcon: FC<IconProps> = (props) => (
@@ -407,6 +408,16 @@ export const CommandLineIcon: FC<IconProps> = (props) => (
     <path
       fillRule="evenodd"
       d="M2.25 6a3 3 0 013-3h13.5a3 3 0 013 3v12a3 3 0 01-3 3H5.25a3 3 0 01-3-3V6zm3.97.97a.75.75 0 011.06 0l2.25 2.25a.75.75 0 010 1.06l-2.25 2.25a.75.75 0 01-1.06-1.06l1.72-1.72-1.72-1.72a.75.75 0 010-1.06zm4.28 4.28a.75.75 0 000 1.5h3a.75.75 0 000-1.5h-3z"
+      clipRule="evenodd"
+    />
+  </Icon>
+);
+
+export const SearchIcon: FC<IconProps> = (props) => (
+  <Icon {...props} viewBox="0 0 24 24">
+    <path
+      fillRule="evenodd"
+      d="M10.5 3.75a6.75 6.75 0 100 13.5 6.75 6.75 0 000-13.5zM2.25 10.5a8.25 8.25 0 1114.59 5.28l4.69 4.69a.75.75 0 11-1.06 1.06l-4.69-4.69A8.25 8.25 0 012.25 10.5z"
       clipRule="evenodd"
     />
   </Icon>

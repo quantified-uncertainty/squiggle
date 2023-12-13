@@ -1,16 +1,16 @@
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
-  frDict,
-  frLambda,
   frArray,
-  frString,
-  frOptional,
-  frInput,
   frBool,
-  frNumber,
   frCalculator,
+  frDict,
   frForceBoxed,
+  frInput,
+  frLambda,
   frNamed,
+  frNumber,
+  frOptional,
+  frString,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
 import { Calculator, vCalculator } from "../value/index.js";

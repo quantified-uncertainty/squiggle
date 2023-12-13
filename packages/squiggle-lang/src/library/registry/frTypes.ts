@@ -241,13 +241,13 @@ export function frOr<T1, T2>(
 ): FRType<FrOrType<T1, T2>> {
   return {
     unpack: (v) => {
-      const unpacked1 = type1.unpack(v);
-      if (unpacked1) {
-        return { tag: "1", value: unpacked1 };
+      const unpackedType1Value = type1.unpack(v);
+      if (unpackedType1Value !== undefined) {
+        return { tag: "1", value: unpackedType1Value };
       }
-      const unpacked2 = type2.unpack(v);
-      if (unpacked2) {
-        return { tag: "2", value: unpacked2 };
+      const unpackedType2Value = type2.unpack(v);
+      if (unpackedType2Value !== undefined) {
+        return { tag: "2", value: unpackedType2Value };
       }
       return undefined;
     },
@@ -496,12 +496,7 @@ export function frDict<T extends object>(
 
 export const frNamed = <T>(name: string, itemType: FRType<T>): FRType<T> => ({
   unpack: itemType.unpack,
-  pack: (v) => {
-    if (v === null) {
-      throw new Error("Unable to pack null value");
-    }
-    return itemType.pack(v);
-  },
+  pack: (v) => itemType.pack(v),
   getName: () => {
     const _isOptional = isOptional(itemType);
     return `${name}${_isOptional ? "?" : ""}: ${itemType.getName()}`;

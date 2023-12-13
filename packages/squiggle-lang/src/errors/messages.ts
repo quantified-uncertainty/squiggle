@@ -177,13 +177,3 @@ export class REAmbiguous extends ErrorMessage {
     return `Ambiguous Error: ${this.message}`;
   }
 }
-
-export class REBuildError extends ErrorMessage {
-  constructor(public msg: string) {
-    super(msg);
-  }
-
-  toString() {
-    return `Build Error: ${this.message}`;
-  }
-}

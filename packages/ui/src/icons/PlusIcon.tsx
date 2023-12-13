@@ -1,4 +1,5 @@
 import { FC } from "react";
+
 import { Icon, IconProps } from "./Icon.js";
 
 // https://fontawesome.com/icons/plus?f=classic&s=solid

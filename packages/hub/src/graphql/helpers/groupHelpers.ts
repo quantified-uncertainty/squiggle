@@ -1,6 +1,7 @@
 import { Session } from "next-auth";
 
 import { prisma } from "@/prisma";
+
 import { getSelf, isSignedIn } from "./userHelpers";
 
 export async function getMyMembershipById(

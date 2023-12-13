@@ -1,5 +1,6 @@
-import { generateProvider } from "@quri/ui";
 import { Reducer } from "react";
+
+import { generateProvider } from "@quri/ui";
 
 type State = {
   verticalLine?: number;

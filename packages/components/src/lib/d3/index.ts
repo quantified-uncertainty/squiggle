@@ -1,6 +1,7 @@
 import * as d3 from "d3";
 
 import { SqScale } from "@quri/squiggle-lang";
+
 import {
   scaleDate,
   scaleLinear,

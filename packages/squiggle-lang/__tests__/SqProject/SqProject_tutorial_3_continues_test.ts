@@ -1,5 +1,6 @@
-import { SqProject } from "../../src/index.js";
 import "../helpers/toBeOkOutput.js";
+
+import { SqProject } from "../../src/index.js";
 
 /*
  * In the previous tutorial we've used explicit import statements; now we'll try implicit imports with `setContinues`,

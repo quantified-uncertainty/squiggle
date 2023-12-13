@@ -5,9 +5,9 @@ import { squiggleVersions } from "@quri/versioned-squiggle-components";
 import { builder } from "@/graphql/builder";
 import { prisma } from "@/prisma";
 
-import { Model } from "../types/Model";
 import { getWriteableModel } from "../helpers/modelHelpers";
 import { getSelf } from "../helpers/userHelpers";
+import { Model } from "../types/Model";
 
 const DefinitionRefInput = builder.inputType("DefinitionRefInput", {
   fields: (t) => ({

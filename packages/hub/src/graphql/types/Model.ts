@@ -1,6 +1,7 @@
 import { prismaConnectionHelpers } from "@pothos/plugin-prisma";
 
 import { builder } from "@/graphql/builder";
+
 import { decodeGlobalIdWithTypename } from "../utils";
 import { ModelRevision, ModelRevisionConnection } from "./ModelRevision";
 import { Owner } from "./Owner";

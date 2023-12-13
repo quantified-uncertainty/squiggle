@@ -2,8 +2,8 @@ import { REArgumentError } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
-  frDict,
   frDomain,
+  frNamed,
   frNumber,
 } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
@@ -228,12 +228,12 @@ export const library = [
     name: "rangeDomain",
     requiresNamespace: true,
     output: "Domain",
-    examples: ["Number.rangeDomain({ min: 5, max: 10 })"],
+    examples: ["Number.rangeDomain(5, 10)"],
     definitions: [
       makeDefinition(
-        [frDict(["min", frNumber], ["max", frNumber])],
+        [frNamed("min", frNumber), frNamed("max", frNumber)],
         frDomain,
-        ([{ min, max }]) => {
+        ([min, max]) => {
           return new NumericRangeDomain(min, max);
         }
       ),

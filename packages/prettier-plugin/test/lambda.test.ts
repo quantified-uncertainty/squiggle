@@ -2,11 +2,11 @@ import { format } from "./helpers.js";
 
 describe("lambda", () => {
   test("lambda", async () => {
-    expect(await format("f={|x|x*x}")).toBe("f = {|x|x * x}\n");
+    expect(await format("f={|x|x*x}")).toBe("f = {|x| x * x}\n");
   });
 
   test("lambda with multiple args", async () => {
-    expect(await format("f={|x,y|x*y}")).toBe("f = {|x, y|x * y}\n");
+    expect(await format("f={|x,y|x*y}")).toBe("f = {|x, y| x * y}\n");
   });
 
   test("lambda with long body", async () => {

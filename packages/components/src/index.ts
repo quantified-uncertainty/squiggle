@@ -1,3 +1,10 @@
+import {
+  scaleLinear,
+  scaleLog,
+  scalePow,
+  scaleSymlog,
+} from "./lib/d3/patchedScales.js";
+
 export { SqProject } from "@quri/squiggle-lang";
 
 export { NumberShower } from "./components/NumberShower.js";
@@ -17,19 +24,12 @@ export { RelativeValueCell } from "./widgets/PlotWidget/RelativeValuesGridChart/
 
 // for use in relative values
 export {
+  type DrawContext,
   useCanvas,
   useCanvasCursor,
-  type DrawContext,
 } from "./lib/hooks/index.js";
 
 export { drawAxes } from "./lib/draw/index.js";
-
-import {
-  scaleLinear,
-  scaleLog,
-  scalePow,
-  scaleSymlog,
-} from "./lib/d3/patchedScales.js";
 
 export const d3Extended = {
   scaleLinear,

@@ -1,7 +1,8 @@
-import { FC, ReactNode } from "react";
-import { Button, ButtonGroup, ButtonProps } from "./Button.js";
-import { Dropdown, TriangleIcon } from "../index.js";
 import clsx from "clsx";
+import { FC, ReactNode } from "react";
+
+import { Dropdown, TriangleIcon } from "../index.js";
+import { Button, ButtonGroup, ButtonProps } from "./Button.js";
 
 type Props = ButtonProps & {
   renderDropdown(options: { close(): void }): ReactNode;

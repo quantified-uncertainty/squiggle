@@ -3,9 +3,9 @@ import { useMemo } from "react";
 import { useToast } from "@quri/ui";
 
 import {
-  SquiggleVersion,
   checkSquiggleVersion,
   defaultSquiggleVersion,
+  SquiggleVersion,
 } from "./versions.js";
 
 export function useAdjustSquiggleVersion(version: string): SquiggleVersion {

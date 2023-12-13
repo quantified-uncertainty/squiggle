@@ -1,9 +1,14 @@
+import get from "lodash/get.js";
+import invert from "lodash/invert.js";
+
 import { infixFunctions, unaryFunctions } from "../../ast/peggyHelpers.js";
 import { BuiltinLambda, Lambda } from "../../reducer/lambda.js";
 import { Value } from "../../value/index.js";
-import { FnDefinition, fnDefinitionToString } from "./fnDefinition.js";
-import get from "lodash/get.js";
-import invert from "lodash/invert.js";
+import {
+  FnDefinition,
+  fnDefinitionToString,
+  showInDocumentation,
+} from "./fnDefinition.js";
 
 type Shorthand = { type: "infix" | "unary"; symbol: string };
 
@@ -48,9 +53,12 @@ export class Registry {
     // 3. name variations of each definition
     for (const fn of fns) {
       for (const def of fn.definitions) {
+        // We convert all fns of Foo.make() to also allow for Foo().
+        const moduleConstructorName = fn.name === "make" ? fn.nameSpace : null;
         const names = [
           ...(fn.nameSpace === "" ? [] : [`${fn.nameSpace}.${fn.name}`]),
           ...(fn.requiresNamespace ? [] : [fn.name]),
+          ...(moduleConstructorName ? [moduleConstructorName] : []),
         ];
 
         for (const name of names) {
@@ -119,7 +127,7 @@ export class Registry {
       description: fn.description,
       examples: fn.examples,
       signatures: fn.definitions
-        .filter((d) => !!d.isAssert)
+        .filter((d) => showInDocumentation(d))
         .map(fnDefinitionToString),
       isUnit: fn.isUnit,
       shorthand: getShorthandName(fn.name),

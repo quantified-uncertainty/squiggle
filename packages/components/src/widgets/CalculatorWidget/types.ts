@@ -1,4 +1,5 @@
-import { SqError, SqValue, result } from "@quri/squiggle-lang";
+import { result, SqError, SqValue } from "@quri/squiggle-lang";
+
 import { SqValueWithContext } from "../../lib/utility.js";
 
 export type InputResults = (SqValueResult | undefined)[];

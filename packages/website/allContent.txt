@@ -272,7 +272,7 @@ identifier 'identifier'
   = ([_a-z]+[_a-z0-9]i*) { return h.nodeIdentifier(text(), location()); }
 
 unitIdentifier 'identifier'
-  = 'minutes' / 'hours' / 'days' / 'years' / 'n' / 'm' / 'k' / 'M' / 'B' / 'G' / 'T' / 'P' / '%'
+  = 'minutes' / 'hours' / 'days' / 'years' / 'year' / 'n' / 'm' / 'k' / 'M' / 'B' / 'G' / 'T' / 'P' / '%'
 
 dollarIdentifier 'identifier'
   = ([\$_a-z]+[\$_a-z0-9]i*) { return h.nodeIdentifier(text(), location()); }
@@ -700,7 +700,7 @@ Function parameters can be annotated with _domains_.
 
 Examples:
 
-- `x: Number.rangeDomain({ min: 5, max: 10 })`
+- `x: Number.rangeDomain(5, 10)`
 - `x: [5, 10]` — shortcut for `Number.rangeDomain(...)`
 
 Annotations help to document possible values that can be passed as a parameter's value.
@@ -1350,6 +1350,22 @@ Creates a discrete point set distribution using a list of points.
 
 
 ---
+description: Tips for debugging Squiggle code
+---
+
+# Debugging
+
+Interactive visualizations are a primary tool for understanding Squiggle code, but there are some additional techniques that can improve the debugging process. Here are some tips and tricks:
+
+## Basic Console Logging
+  - **Built-in Inspection:** Utilize the [``inspect()``](/docs/Api/BuiltIn#inspect) function to log any variable to the console. This function provides a detailed view of the variable's current state and is useful for tracking values throughout your code.  
+  - **Variable Settings Toggle:** Click on the variable menu in the Squiggle interface and select "Log to JS Console". 
+
+## ``Window.squiggleOutput``
+Squiggle pushes its output to ``window.squiggleOutput``. Like with the outputs of ``inspect``, you can see this in the [JS developer console](https://www.digitalocean.com/community/tutorials/how-to-use-the-javascript-developer-console).
+
+
+---
 description: This page documents control flow. Squiggle has if/else statements, but not for loops.
 ---
 
@@ -1667,44 +1683,48 @@ The Table module allows you to make tables of data.
 ### Table.make
 
 ```
-Table.make: ({
+Table.make: (
   data: list<'a>,
-  title?: string,
-  columns: list<{
-    name?:string,
-    fn: 'a => any
-  }>
-}) => table
+  {
+    title?: string,
+    columns: list<{
+      name?: string,
+      fn: 'a => any
+    }>
+  }
+) => table
 ```
 
 Examples:
 
 <SquiggleEditor
-  defaultCode={`Table.make({
-    data: [
-        { name: "First Dist", value: normal(0, 1) },
-        { name: "Second Dist", value: uniform(2, 4) },
-        { name: "Third Dist", value: uniform(5, 6) }
-    ], 
+  defaultCode={`Table.make(
+  [
+    { name: "First Dist", value: normal(0, 1) },
+    { name: "Second Dist", value: uniform(2, 4) },
+    { name: "Third Dist", value: uniform(5, 6) },
+  ],
+  {
     columns: [
-        { name: "Name", fn: {|d| d.name} },
-        { name: "Mean", fn: {|d| mean(d.value)} },
-        { name: "Std Dev", fn: {|d| variance(d.value)} },
-        { name: "Dist", fn: {|d| (d.value)} }
-    ] 
-})`}
+      { name: "Name", fn: {|d|d.name} },
+      { name: "Mean", fn: {|d|mean(d.value)} },
+      { name: "Std Dev", fn: {|d|variance(d.value)} },
+      { name: "Dist", fn: {|d|d.value} },
+    ],
+  }
+)`}
 />
 
 You can hardcode the scales to make the xAxis consistent between rows.
 
 <SquiggleEditor
   defaultCode={`Table.make(
+  [
+    { name: "First Dist", value: Sym.lognormal({ p5: 1, p95: 10 }) },
+    { name: "Second Dist", value: Sym.lognormal({ p5: 5, p95: 30 }) },
+    { name: "Third Dist", value: Sym.lognormal({ p5: 50, p95: 90 }) },
+  ],
   {
-    data: [
-      { name: "First Dist", value: Sym.lognormal({ p5: 1, p95: 10 }) },
-      { name: "Second Dist", value: Sym.lognormal({ p5: 5, p95: 30 }) },
-      { name: "Third Dist", value: Sym.lognormal({ p5: 50, p95: 90 }) },
-    ],
     columns: [
       { name: "Name", fn: {|d|d.name} },
       {
@@ -1712,19 +1732,50 @@ You can hardcode the scales to make the xAxis consistent between rows.
         fn: {
           |d|
           Plot.dist(
-          {
-            dist: d.value,
-            xScale: Scale.log({ min: 0.5, max: 100 }),
-            showSummary: false,
-          }
-        )
+            {
+              dist: d.value,
+              xScale: Scale.log({ min: 0.5, max: 100 }),
+              showSummary: false,
+            }
+          )
         },
       },
     ],
   }
-)
-`}
+)`}
 />
+
+
+
+---
+description: The Sym module provides functions to create some common symbolic distributions.
+---
+
+# Sym
+
+All these functions match the functions for creating [sample set distributions](./Dist.mdx).
+
+### Sym.normal
+
+### Sym.lognormal
+
+### Sym.uniform
+
+### Sym.beta
+
+### Sym.cauchy
+
+### Sym.gamma
+
+### Sym.logistic
+
+### Sym.exponential
+
+### Sym.bernoulli
+
+### pointMass
+
+### Sym.triangular
 
 
 
@@ -1777,6 +1828,252 @@ bar = String.split(foo, "_")
 ```
 
 
+# Scale
+
+Chart axes in [plots](./Plot.mdx) can be scaled using the following functions. Each scale function accepts optional min and max value. Power scale accepts an extra exponent parameter.
+
+We use D3 for the tick formats. You can read about custom tick formats [here](https://github.com/d3/d3-format).
+
+### Scale.log
+
+```
+Scale.log: ({
+  min: number,
+  max: number,
+  tickFormat: string,
+  title: string
+}) => scale
+```
+
+### Scale.linear
+
+```
+Scale.linear: ({
+  min: number,
+  max: number,
+  tickFormat: string,
+  title: string
+}) => scale
+```
+
+### Scale.symlog
+
+Symmetric log scale. Useful for plotting data that includes zero or negative values.
+
+The function accepts an additional `constant` parameter, used as follows: `Scale.symlog({constant: 0.1})`. This parameter allows you to allocate more pixel space to data with lower or higher absolute values. By adjusting this constant, you effectively control the scale's focus, shifting it between smaller and larger values. For more detailed information on this parameter, refer to the [D3 Documentation](https://d3js.org/d3-scale/symlog).
+
+The default value for `constant` is `1`.
+
+
+```
+Scale.symlog: ({
+  min: number,
+  max: number,
+  tickFormat: string,
+  title: string,
+  constant: number
+}) => scale
+```
+
+### Scale.power
+
+Power scale. Accepts an extra `exponent` parameter, like, `Scale.power({exponent: 2, min: 0, max: 100})`.
+
+The default value for `exponent` is `0.1`.
+
+```
+Scale.power: ({
+  min: number,
+  max: number,
+  tickFormat: string,
+  title: string,
+  exponent: number
+}) => scale
+```
+
+
+
+---
+description: Sample set distributions are one of the three distribution formats. Internally, they are stored as a list of numbers.
+---
+
+# Sample Set Distribution
+
+Sample set distributions are one of the three distribution formats. Internally, they are stored as a list of numbers. It's useful to distinguish point set distributions from arbitrary lists of numbers to make it clear which functions are applicable.
+
+Monte Carlo calculations typically result in sample set distributions.
+
+All regular distribution function work on sample set distributions. In addition, there are several functions that only work on sample set distributions.
+
+### make
+
+Calls the correct conversion constructor, based on the corresponding input type, to create a Sample Set distribution. 
+
+```
+SampleSet.make: (distribution|list<number>) => pointSetDist
+SampleSet.make: (() => number) => pointSetDist
+SampleSet.make: ((index: number) => number) => pointSetDist
+```
+
+### fromDist
+
+```
+SampleSet.fromDist: (distribution) => sampleSet
+```
+
+### fromNumber
+
+```
+SampleSet.fromNumber: (number) => sampleSet
+```
+
+### fromList
+
+```
+SampleSet.fromList: (list<number>) => sampleSet
+```
+
+### fromFn
+
+```
+SampleSet.fromFn: ((float) => number) => sampleSet
+```
+
+```
+PointSet.fromNumber: (number) => sampleSet
+```
+
+### toList
+
+```
+SampleSet.toList: (sampleSet) => list<number>
+```
+
+Gets the internal samples of a sampleSet distribution. This is separate from the sampleN() function, which would shuffle the samples. toList() maintains order and length.
+
+**Examples**
+
+```
+toList(SampleSet.fromDist(normal(5,2)))
+```
+
+### map
+
+```
+SampleSet.map: (sampleSet, (number => number)) => sampleSet
+```
+
+### map2
+
+```
+SampleSet.map2: (sampleSet, sampleSet, ((number, number) => number)) => sampleSet
+```
+
+### map3
+
+```
+SampleSet.map3: (sampleSet, sampleSet, sampleSet, ((number, number, number) => number)) => sampleSet
+```
+
+### mapN
+
+```
+SampleSet.mapN: (list<sampleSet>, (list<sampleSet> => number)) => sampleSet
+```
+
+
+
+# Relative Values
+
+Warning: Relative value functions are experimental and subject to change.
+
+### RelativeValues.gridPlot
+
+```
+RelativeValues.gridPlot: ({
+  ids: list<string>,
+  fn: (string, string) => [distribution, distribution],
+  title?: string
+}) => plot
+```
+
+
+
+---
+description: Point set distributions are one of the three distribution formats. They are stored as a list of x-y coordinates representing both discrete and continuous distributions.
+---
+
+# Point Set Distribution
+
+Point set distributions are one of the three distribution formats. They are stored as a list of x-y coordinates representing both discrete and continuous distributions.
+
+One complication is that it's possible to represent invalid probability distributions in the point set format. For example, you can represent shapes with negative values, or shapes that are not normalized.
+
+### make
+
+Calls fromDist for distributions, and fromNumber for numbers.
+```
+PointSet.make: (distribution|number) => pointSetDist
+```
+
+### fromDist
+
+Converts the distribution in question into a point set distribution. If the distribution is symbolic, then it does this by taking the quantiles. If the distribution is a sample set, then it uses a version of kernel density estimation to approximate the point set format. One complication of this latter process is that if there is a high proportion of overlapping samples (samples that are exactly the same as each other), it will convert these samples into discrete point masses. Eventually we'd like to add further methods to help adjust this process.
+
+```
+PointSet.fromDist: (distribution) => pointSetDist
+```
+
+### fromNumber
+
+```
+PointSet.fromNumber: (number) => pointSetDist
+```
+
+### makeContinuous
+
+Converts a set of x-y coordinates directly into a continuous distribution.
+
+```
+PointSet.makeContinuous: (list<{x: number, y: number}>) => pointSetDist
+```
+
+```squiggle
+PointSet.makeContinuous([
+  { x: 0, y: 0.1 },
+  { x: 1, y: 0.2 },
+  { x: 2, y: 0.15 },
+  { x: 3, y: 0.1 },
+])
+```
+
+### makeDiscrete
+
+```
+PointSet.makeDiscrete: (list<{x: number, y: number}>) => pointSetDist
+```
+
+```squiggle
+PointSet.makeDiscrete([
+  { x: 0, y: 0.1 },
+  { x: 1, y: 0.2 },
+  { x: 2, y: 0.15 },
+  { x: 3, y: 0.1 },
+])
+```
+
+### mapY
+
+```
+PointSet.mapY: (pointSetDist, (number => number)) => pointSetDist
+```
+
+```squiggle
+normal(5,3) -> PointSet.fromDist -> PointSet.mapY({|x| x ^ 2}) -> normalize
+```
+
+
+
 ---
 description: The Plot module provides functions to create plots of distributions and functions.
 ---
@@ -1809,13 +2106,15 @@ Plot.dists: ({
 Examples:
 
 <SquiggleEditor
-  defaultCode={`Plot.dists({
+  defaultCode={`Plot.dists(
+  {
     dists: [
-        { name: "First Dist", value: normal(0, 1) },
-        { name: "Second Dist", value: uniform(2, 4) },
-    ], 
-    xScale: Scale.symlog({ min: -2, max: 5})
-})`}
+      { name: "First Dist", value: normal(0, 1) },
+      { name: "Second Dist", value: uniform(2, 4) },
+    ],
+    xScale: Scale.symlog({ min: -2, max: 5 }),
+  }
+)`}
 />
 
 ### Plot.dist
@@ -1823,24 +2122,28 @@ Examples:
 Like `Plot.dists`, but plots a single distribution.
 
 ```
-Plot.dist: ({
-  dist: dist,
-  xScale: scale,
-  yScale: scale,
-  title: string,
-  showSummary: bool
-}) => plot
+Plot.dist: (
+  dist,
+  {
+    xScale: scale,
+    yScale: scale,
+    title: string,
+    showSummary: bool
+  }
+) => plot
 ```
 
 Examples:
 
 <SquiggleEditor
-  defaultCode={`Plot.dist({
-    dist: normal(5,2),
-    xScale: Scale.linear({ min: -2, max: 6, title: "X Axis Title"}),
+  defaultCode={`Plot.dist(
+  normal(5, 2),
+  {
+    xScale: Scale.linear({ min: -2, max: 6, title: "X Axis Title" }),
     title: "A Simple Normal Distribution",
-    showSummary: true
-})`}
+    showSummary: true,
+  }
+)`}
 />
 
 ### Plot.numericFn
@@ -1848,49 +2151,51 @@ Examples:
 Plots a function that outputs numeric values. This works by sampling the function at a fixed number of points. The number of points is adjustable with the `points` parameter.
 
 ```
-Plot.numericFn: ({
+Plot.numericFn: (
   fn: (number => number),
-  xScale: scale,
-  yScale: scale,
-  title: string,
-  points: number
-}) => plot
+  {
+    xScale: scale,
+    yScale: scale,
+    title: string,
+    points: number
+  }
+) => plot
 ```
 
 Examples:
 
 <SquiggleEditor
-  defaultCode={`Plot.numericFn({
-  fn: {|t| t^2},
-  xScale: Scale.log({
-    min: 1,
-    max: 100
-  }),
-  points: 10
-})`}
+  defaultCode={`Plot.numericFn(
+  {|t|t ^ 2},
+  { xScale: Scale.log({ min: 1, max: 100 }), points: 10 }
+)`}
 />
 
 ### Plot.distFn
 
 ```
-Plot.distFn: ({
+Plot.distFn: (
   fn: (number => dist),
-  xScale: scale,
-  yScale: scale,
-  title: string,
-  distXScale: scale,
-  points: number
-}) => plot
+  {
+    xScale: scale,
+    yScale: scale,
+    title: string,
+    distXScale: scale,
+    points: number
+  }
+) => plot
 ```
 
 <SquiggleEditor
-  defaultCode={`Plot.distFn({
-  fn: {|t| normal(t,2)*normal(5,3)},
-  title: "A Function of Value over Time",
-  xScale: Scale.log({ min: 3, max: 100, title: "Time (years)"}),
-  yScale: Scale.linear({ title: "Value"}),
-  distXScale: Scale.linear({ tickFormat: '#x' }),
-})`}
+  defaultCode={`Plot.distFn(
+  {|t|normal(t, 2) * normal(5, 3)},
+  {
+    title: "A Function of Value over Time",
+    xScale: Scale.log({ min: 3, max: 100, title: "Time (years)" }),
+    yScale: Scale.linear({ title: "Value" }),
+    distXScale: Scale.linear({ tickFormat: "#x" }),
+  }
+)`}
 />
 
 ### Plot.scatter
@@ -1931,57 +2236,7 @@ Plot.scatter({
 
 ### Scales
 
-Chart axes can be scaled using the following functions. Each scale function accepts optional min and max value. Power scale accepts an extra exponent parameter.
-
-We use D3 for the tick formats. You can read about custom tick formats [here](https://github.com/d3/d3-format).
-
-```
-Scale.log: ({
-  min: number,
-  max: number,
-  tickFormat: string,
-  title: string
-}) => scale
-
-Scale.linear: ({
-  min: number,
-  max: number,
-  tickFormat: string,
-  title: string
-}) => scale
-
-Scale.symlog: ({
-  min: number,
-  max: number,
-  tickFormat: string,
-  title: string,
-  constant: number
-}) => scale
-
-Scale.power: ({
-  min: number,
-  max: number,
-  tickFormat: string,
-  title: string,
-  exponent: number
-}) => scale
-```
-
-**Scale.log**
-
-**Scale.linear**
-
-**Scale.symlog**  
-Symmetric log scale. Useful for plotting data that includes zero or negative values.
-
-The function accepts an additional `constant` parameter, used as follows: `Scale.symlog({constant: 0.1})`. This parameter allows you to allocate more pixel space to data with lower or higher absolute values. By adjusting this constant, you effectively control the scale's focus, shifting it between smaller and larger values. For more detailed information on this parameter, refer to the [D3 Documentation](https://d3js.org/d3-scale/symlog).
-
-The default value for `constant` is `1`.
-
-**Scale.power**  
-Power scale. Accepts an extra `exponent` parameter, like, `Scale.power({exponent: 2, min: 0, max: 100})`.
-
-The default value for `exponent` is `0.1`.
+Chart axes can be scaled using the following functions from [Scale](./Scale.mdx) module.
 
 
 
@@ -2057,6 +2312,18 @@ stdev: (list<number>) => number
 
 ```
 variance: (list<number>) => number
+```
+
+### median 
+
+```
+median: (list<number>) => number
+```
+
+### quantile
+
+```
+quantile: (list<number>, number) => number
 ```
 
 ## Algebra
@@ -2458,7 +2725,7 @@ See [Rescript implementation of keep](https://rescript-lang.org/docs/manual/late
 
 ### uniq
 
-Filters the list for unique elements. Now only works on some Squiggle types.
+Filters the list for unique elements. Works on select Squiggle types.
 
 ```
 List.uniq: (list<'a>) => list<'a>
@@ -2470,7 +2737,7 @@ List.uniq(["foobar", "foobar", 1, 1, 2]) // ["foobar", 1, 2]
 
 ### uniqBy
 
-Filters the list for unique elements. Now only works on some Squiggle types.
+Filters the list for unique elements. Works on select Squiggle types.
 
 ```
 List.uniqBy: (list<'a>, 'a => 'b) => list<'a>
@@ -2546,167 +2813,49 @@ List.reduceWhile([5, 6, 7], { x: 0 }, {|acc, curr| { x: acc.x + curr }}, {|acc| 
 
 
 
----
-description: Sample set distributions are one of the three distribution formats. Internally, they are stored as a list of numbers.
----
+# Input
 
-# Sample Set Distribution
+Inputs are now only used for describing forms for [calculators](./Calculator.mdx).
 
-Sample set distributions are one of the three distribution formats. Internally, they are stored as a list of numbers. It's useful to distinguish point set distributions from arbitrary lists of numbers to make it clear which functions are applicable.
-
-Monte Carlo calculations typically result in sample set distributions.
-
-All regular distribution function work on sample set distributions. In addition, there are several functions that only work on sample set distributions.
-
-### make
-
-Calls the correct conversion constructor, based on the corresponding input type, to create a Sample Set distribution. 
+### Input.text
 
 ```
-SampleSet.make: (distribution|list<number>) => pointSetDist
-SampleSet.make: (() => number) => pointSetDist
-SampleSet.make: ((index: number) => number) => pointSetDist
+Input.text: ({
+  name: string,
+  description?: string,
+  default?: string,
+}) => input
 ```
 
-### fromDist
+### Input.textArea
 
 ```
-SampleSet.fromDist: (distribution) => sampleSet
+Input.textArea: ({
+  name: string,
+  description?: string,
+  default?: string,
+}) => input
 ```
 
-### fromNumber
+### Input.checkbox
 
 ```
-SampleSet.fromNumber: (number) => sampleSet
+Input.checkbox: ({
+  name: string,
+  description?: string,
+  default?: boolean,
+}) => input
 ```
 
-### fromList
+### Input.select
 
 ```
-SampleSet.fromList: (list<number>) => sampleSet
-```
-
-### fromFn
-
-```
-SampleSet.fromFn: ((float) => number) => sampleSet
-```
-
-```
-PointSet.fromNumber: (number) => sampleSet
-```
-
-### toList
-
-```
-SampleSet.toList: (sampleSet) => list<number>
-```
-
-Gets the internal samples of a sampleSet distribution. This is separate from the sampleN() function, which would shuffle the samples. toList() maintains order and length.
-
-**Examples**
-
-```
-toList(SampleSet.fromDist(normal(5,2)))
-```
-
-### map
-
-```
-SampleSet.map: (sampleSet, (number => number)) => sampleSet
-```
-
-### map2
-
-```
-SampleSet.map2: (sampleSet, sampleSet, ((number, number) => number)) => sampleSet
-```
-
-### map3
-
-```
-SampleSet.map3: (sampleSet, sampleSet, sampleSet, ((number, number, number) => number)) => sampleSet
-```
-
-### mapN
-
-```
-SampleSet.mapN: (list<sampleSet>, (list<sampleSet> => number)) => sampleSet
-```
-
-
-
----
-description: Point set distributions are one of the three distribution formats. They are stored as a list of x-y coordinates representing both discrete and continuous distributions.
----
-
-# Point Set Distribution
-
-Point set distributions are one of the three distribution formats. They are stored as a list of x-y coordinates representing both discrete and continuous distributions.
-
-One complication is that it's possible to represent invalid probability distributions in the point set format. For example, you can represent shapes with negative values, or shapes that are not normalized.
-
-### make
-
-Calls fromDist for distributions, and fromNumber for numbers.
-```
-PointSet.make: (distribution|number) => pointSetDist
-```
-
-### fromDist
-
-Converts the distribution in question into a point set distribution. If the distribution is symbolic, then it does this by taking the quantiles. If the distribution is a sample set, then it uses a version of kernel density estimation to approximate the point set format. One complication of this latter process is that if there is a high proportion of overlapping samples (samples that are exactly the same as each other), it will convert these samples into discrete point masses. Eventually we'd like to add further methods to help adjust this process.
-
-```
-PointSet.fromDist: (distribution) => pointSetDist
-```
-
-### fromNumber
-
-```
-PointSet.fromNumber: (number) => pointSetDist
-```
-
-### makeContinuous
-
-Converts a set of x-y coordinates directly into a continuous distribution.
-
-```
-PointSet.makeContinuous: (list<{x: number, y: number}>) => pointSetDist
-```
-
-```squiggle
-PointSet.makeContinuous([
-  { x: 0, y: 0.1 },
-  { x: 1, y: 0.2 },
-  { x: 2, y: 0.15 },
-  { x: 3, y: 0.1 },
-])
-```
-
-### makeDiscrete
-
-```
-PointSet.makeDiscrete: (list<{x: number, y: number}>) => pointSetDist
-```
-
-```squiggle
-PointSet.makeDiscrete([
-  { x: 0, y: 0.1 },
-  { x: 1, y: 0.2 },
-  { x: 2, y: 0.15 },
-  { x: 3, y: 0.1 },
-])
-```
-
-### mapY
-
-```
-PointSet.mapY: (pointSetDist, (number => number)) => pointSetDist
-```
-
-```squiggle
-normal(5,3) -> PointSet.fromDist -> PointSet.mapY({|x| x ^ 2}) -> normalize
+Input.select: ({
+  name: string,
+  description?: string,
+  default?: string,
+  options: string[]
+}) => input
 ```
 
 
@@ -2976,6 +3125,15 @@ Variance. Similar to stdev, only works now on sample set distributions.
 ```
 variance: (distribution) => number
 ```
+
+### Median
+
+Median. The quantile at 0.5.
+
+```
+median: (distribution) => number
+```
+
 
 ### cdf
 
@@ -3514,6 +3672,7 @@ Dict.omit(data, ["b", "d"]) // {a: 1, c: 3}
 ```
 
 
+
 ---
 description: The Danger library contains newer experimental functions which are less stable than Squiggle as a whole
 ---
@@ -3667,7 +3826,7 @@ Danger.allCombinations([1, 2, 3])) // [[1], [2], [3], [1, 2], [1, 3], [2, 3], [1
 description: The Calculator module helps you create custom calculators
 ---
 
-import { SquiggleEditor } from "@quri/squiggle-components";
+import { SquiggleEditor  } from "@quri/squiggle-components";
 
 # Calculator
 
@@ -3678,14 +3837,16 @@ Calculators can be useful for debugging functions or to present functions to end
 ### Calculator.make
 
 ```
-Calculator.make: ({
+Calculator.make: (
   fn: ...arguments => any,
-  title?: string,
-  description?: string,
-  fields: list<input>,
-  autorun?: boolean = true,
-  sampleCount?: number,
-}) => calculator
+  {
+    title?: string,
+    description?: string,
+    fields: list<input>,
+    autorun?: boolean = true,
+    sampleCount?: number,
+  }
+) => calculator
 ```
 
 ``Calculator.make`` takes in a function, a description, and a list of fields. The function should take in the same number of arguments as the number of fields, and the arguments should be of the same type as the default value of the field.
@@ -3698,8 +3859,8 @@ Example:
 
 <SquiggleEditor
   defaultCode={`Calculator.make(
+  {|a, b,c,d| [a,b,c,d]},
   {
-    fn: {|a, b,c,d| [a,b,c,d]},
     title: "Concat()",
     description: "This function takes in 4 arguments, then displays them",
     autorun: true,
@@ -3720,34 +3881,7 @@ Example:
 
 ## Inputs
 
-Inputs are now only used for creating calculators, as shown above. They are created using the ``Input`` module.
-
-```
-Input.text: ({
-  name: string,
-  description?: string,
-  default?: string,
-}) => input
-
-Input.textArea: ({
-  name: string,
-  description?: string,
-  default?: string,
-}) => input
-
-Input.checkbox: ({
-  name: string,
-  description?: string,
-  default?: boolean,
-}) => input
-
-Input.select: ({
-  name: string,
-  description?: string,
-  default?: string,
-  options: string[]
-}) => input
-```
+Inputs are now only used for creating calculators. They are created using the [Input](./Input.mdx) module.
 
 
 ---
@@ -3756,14 +3890,27 @@ description: Builtin functions that work on many types.
 
 ### typeOf 
 
-Returns the type of the value passed in as a string.
+Returns the type of the value passed in as a string. This is useful when you want to treat a value differently depending on its type.
+
 ```
 typeOf: (any) => string
 ```
 
+```squiggle
+fn(v) = if typeOf(v) == "String" then v else if typeOf(v) ==
+  "Number" then "the number: " + v else "other"
+```
+
 ### inspect 
 
-Runs Console.log() in the Javascript console and returns the value passed in.
+Runs Console.log() in the [Javascript developer console](https://www.digitalocean.com/community/tutorials/how-to-use-the-javascript-developer-console) and returns the value passed in.
+
 ```
 inspect: (`a) => `a
+inspect: (`a, string) => `a
+```
+
+```squiggle
+foo = inspect(5 to 10) // sets foo to (5 to 10) and logs it to the console
+foo = inspect(5 to 10, "my range")
 ```

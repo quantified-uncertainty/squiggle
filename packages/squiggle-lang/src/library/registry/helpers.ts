@@ -1,12 +1,12 @@
+import intersection from "lodash/intersection.js";
+import last from "lodash/last.js";
+
 import { BaseDist } from "../../dist/BaseDist.js";
 import { DistError } from "../../dist/DistError.js";
+import { Env } from "../../dist/env.js";
 import * as SampleSetDist from "../../dist/SampleSetDist/index.js";
 import * as SymbolicDist from "../../dist/SymbolicDist.js";
 import { PointMass } from "../../dist/SymbolicDist.js";
-import { Env } from "../../dist/env.js";
-import intersection from "lodash/intersection.js";
-import { upTo } from "../../utility/E_A_Floats.js";
-import last from "lodash/last.js";
 import {
   REDistributionError,
   REOperationError,
@@ -18,18 +18,19 @@ import {
 } from "../../operationError.js";
 import { ReducerContext } from "../../reducer/context.js";
 import { Lambda } from "../../reducer/lambda.js";
+import { upTo } from "../../utility/E_A_Floats.js";
 import * as Result from "../../utility/result.js";
 import { Value } from "../../value/index.js";
 import { FRFunction } from "./core.js";
 import { FnDefinition, makeDefinition } from "./fnDefinition.js";
 import {
-  FRType,
   frBool,
   frDist,
   frDistOrNumber,
   frNumber,
   frSampleSetDist,
   frString,
+  FRType,
   isOptional,
 } from "./frTypes.js";
 

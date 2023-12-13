@@ -3,14 +3,16 @@ import { FC } from "react";
 import { useSubscribeToInvalidationState } from "react-relay";
 import { graphql } from "relay-runtime";
 
-import { GroupMembersPageQuery } from "@/__generated__/GroupMembersPageQuery.graphql";
 import { extractFromGraphqlErrorUnion } from "@/lib/graphqlHelpers";
 import { SerializablePreloadedQuery } from "@/relay/loadPageQuery";
 import { usePageQuery } from "@/relay/usePageQuery";
+
+import { useIsGroupAdmin } from "../hooks";
 import { GroupInviteList } from "./GroupInviteList";
 import { GroupMemberList } from "./GroupMemberList";
-import { useIsGroupAdmin } from "../hooks";
 import { GroupReusableInviteSection } from "./GroupReusableInviteSection";
+
+import { GroupMembersPageQuery } from "@/__generated__/GroupMembersPageQuery.graphql";
 
 const Query = graphql`
   query GroupMembersPageQuery($slug: String!) {

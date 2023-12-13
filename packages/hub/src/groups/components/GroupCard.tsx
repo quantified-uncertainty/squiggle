@@ -4,9 +4,10 @@ import { graphql } from "relay-runtime";
 
 import { GroupIcon } from "@quri/ui";
 
-import { GroupCard$key } from "@/__generated__/GroupCard.graphql";
 import { EntityCard } from "@/components/EntityCard";
 import { groupRoute } from "@/routes";
+
+import { GroupCard$key } from "@/__generated__/GroupCard.graphql";
 
 const Fragment = graphql`
   fragment GroupCard on Group {

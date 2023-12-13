@@ -1,12 +1,9 @@
-import {
-  FC,
-  ReactNode,
-} from 'react';
+import { FC, ReactNode } from "react";
 
-import { SqValue } from '@quri/squiggle-lang';
+import { SqValue } from "@quri/squiggle-lang";
 
-import { PlaygroundSettings } from '../components/PlaygroundSettings.js';
-import { SqValueWithContext } from '../lib/utility.js';
+import { PlaygroundSettings } from "../components/PlaygroundSettings.js";
+import { SqValueWithContext } from "../lib/utility.js";
 
 type SqValueTag = SqValue["tag"];
 

@@ -1,5 +1,6 @@
-import { testRun, expectErrorToBeBounded } from "../helpers/helpers.js";
 import * as fc from "fast-check";
+
+import { expectErrorToBeBounded, testRun } from "../helpers/helpers.js";
 import { testEvalToBe } from "../helpers/reducerHelpers.js";
 
 // via fast-check hint
