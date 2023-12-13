@@ -19,7 +19,6 @@ import {
   frArray,
   frDist,
   frDistPointset,
-  frGeneric,
   frLambda,
   frNumber,
 } from "../library/registry/frTypes.js";
@@ -393,9 +392,8 @@ const mapYLibrary: FRFunction[] = [
     name: "combinations",
     definitions: [
       makeDefinition(
-        [frArray(frGeneric("A")), frNumber],
-
-        frArray(frArray(frGeneric("A"))),
+        [frArray(frAny({ genericName: "A" })), frNumber],
+        frArray(frArray(frAny({ genericName: "A" }))),
         ([elements, n]) => {
           if (n > elements.length) {
             throw new REArgumentError(
@@ -411,8 +409,8 @@ const mapYLibrary: FRFunction[] = [
     name: "allCombinations",
     definitions: [
       makeDefinition(
-        [frArray(frGeneric("A"))],
-        frArray(frArray(frGeneric("A"))),
+        [frArray(frAny({ genericName: "A" }))],
+        frArray(frArray(frAny({ genericName: "A" }))),
         ([elements]) => {
           return allCombinations(elements);
         }

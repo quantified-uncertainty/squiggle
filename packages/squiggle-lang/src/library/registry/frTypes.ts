@@ -343,23 +343,17 @@ export const frDictWithArbitraryKeys = <T>(
   };
 };
 
-export const frAny = (keepBoxes: boolean = false): FRType<Value> => ({
-  unpack: (v) => v,
-  pack: (v) => v,
-  getName: () => "any",
-  transparent: true,
-  keepBoxes,
-});
+type frAnyParams = {
+  keepBoxes?: boolean;
+  genericName?: string;
+};
 
-export const frGeneric = (
-  index: string,
-  keepBoxes: boolean = false
-): FRType<Value> => ({
+export const frAny = (params?: frAnyParams): FRType<Value> => ({
   unpack: (v) => v,
   pack: (v) => v,
-  getName: () => `'${index}`,
+  getName: () => (params?.genericName ? `'${params.genericName}` : "any"),
   transparent: true,
-  keepBoxes,
+  keepBoxes: params?.keepBoxes || false,
 });
 
 // We currently support dicts with up to 5 pairs.

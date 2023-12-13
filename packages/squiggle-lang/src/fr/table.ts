@@ -4,7 +4,6 @@ import {
   frArray,
   frDict,
   frForceBoxed,
-  frGeneric,
   frLambdaTyped,
   frNamed,
   frOptional,
@@ -27,12 +26,12 @@ export const library = [
       //We're not using the Table title here, because we want to phase it out.
       makeDefinition(
         [
-          frNamed("data", frForceBoxed(frArray(frGeneric("A")))),
+          frNamed("data", frForceBoxed(frArray(frAny({ genericName: "A" })))),
           frDict([
             "columns",
             frArray(
               frDict(
-                ["fn", frLambdaTyped([frGeneric("A")], frAny())],
+                ["fn", frLambdaTyped([frAny({ genericName: "A" })], frAny())],
                 ["name", frOptional(frString)]
               )
             ),
@@ -53,13 +52,13 @@ export const library = [
       makeDefinition(
         [
           frDict(
-            ["data", frArray(frGeneric("A"))],
+            ["data", frArray(frAny({ genericName: "A" }))],
             ["title", frOptional(frString)],
             [
               "columns",
               frArray(
                 frDict(
-                  ["fn", frLambdaTyped([frGeneric("A")], frAny())],
+                  ["fn", frLambdaTyped([frAny({ genericName: "A" })], frAny())],
                   ["name", frOptional(frString)]
                 )
               ),

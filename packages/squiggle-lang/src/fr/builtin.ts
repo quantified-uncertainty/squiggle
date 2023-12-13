@@ -3,7 +3,6 @@ import {
   frAny,
   frArray,
   frBool,
-  frGeneric,
   frNumber,
   frOptional,
   frString,
@@ -103,8 +102,8 @@ export const library = [
     name: "inspect",
     definitions: [
       makeDefinition(
-        [frGeneric("A", true), frOptional(frString)],
-        frGeneric("A"),
+        [frAny({ genericName: "A", keepBoxes: true }), frOptional(frString)],
+        frAny({ genericName: "A" }),
         ([value, message]) => {
           message ? console.log(message, value) : console.log(value);
           return value;

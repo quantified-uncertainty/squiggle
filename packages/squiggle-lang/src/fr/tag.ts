@@ -7,7 +7,6 @@ import {
   frDist,
   frDistOrNumber,
   frForceBoxed,
-  frGeneric,
   frLambda,
   frLambdaTyped,
   frNumber,
@@ -76,8 +75,8 @@ export const library = [
     examples: [],
     definitions: [
       makeDefinition(
-        [frForceBoxed(frGeneric("A")), frString],
-        frForceBoxed(frGeneric("A")),
+        [frForceBoxed(frAny({ genericName: "A" })), frString],
+        frForceBoxed(frAny({ genericName: "A" })),
         ([{ args, value }, name]) => {
           return { args: args.merge({ name }), value };
         }
@@ -98,8 +97,8 @@ export const library = [
     examples: [],
     definitions: [
       makeDefinition(
-        [frForceBoxed(frGeneric("A")), frString],
-        frForceBoxed(frGeneric("A")),
+        [frForceBoxed(frAny({ genericName: "A" })), frString],
+        frForceBoxed(frAny({ genericName: "A" })),
         ([{ args, value }, description]) => {
           return { value: value, args: args.merge({ description }) };
         }
