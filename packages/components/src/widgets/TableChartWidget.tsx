@@ -10,17 +10,17 @@ import { widgetRegistry } from "./registry.js";
 
 widgetRegistry.register("TableChart", {
   Preview: (value) => (
-    <div className="items-center flex space-x-1">
+      <div className="items-center flex space-x-1">
       <TableCellsIcon size={14} className="flex opacity-60" />
-      <div>
+        <div>
         {value.value.rowCount}
         <span className="opacity-60">x</span>
         {value.value.columnCount}
       </div>
     </div>
   ),
-  Chart: (valueWithContext, settings) => {
-    const environment = valueWithContext.context.project.getEnvironment();
+ Chart: (valueWithContext, settings) => {
+const environment = valueWithContext.context.project.getEnvironment();
     const value = valueWithContext.value;
 
     const rowsAndColumns = value.items(environment);
@@ -42,7 +42,7 @@ widgetRegistry.register("TableChart", {
       chartHeight,
     };
 
-    const showItem = (
+  const showItem = (
       item: result<SqValue, SqError>,
       settings: PlaygroundSettings
     ) => {
@@ -58,7 +58,7 @@ widgetRegistry.register("TableChart", {
       }
     };
 
-    return (
+  return (
       <div>
         <div className="relative rounded-sm overflow-hidden border border-slate-200">
           <table
@@ -105,4 +105,4 @@ widgetRegistry.register("TableChart", {
       </div>
     );
   },
-});
+})
