@@ -32,3 +32,7 @@ export function sqScaleToD3(
       throw new Error(`Unknown scale: ${scale satisfies never}`);
   }
 }
+
+export function formatNumber(format: string, num: number) {
+  return d3.format(format)(num);
+}

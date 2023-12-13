@@ -3,6 +3,7 @@ import { SqDistributionsPlot } from "@quri/squiggle-lang";
 import { NumberShower } from "../../components/NumberShower.js";
 import { generateDistributionPlotSettings } from "../../components/PlaygroundSettings.js";
 import { ItemSettingsMenuItems } from "../../components/SquiggleViewer/ItemSettingsMenuItems.js";
+import { formatNumber } from "../../lib/d3/index.js";
 import { hasMassBelowZero } from "../../lib/distributionUtils.js";
 import { unwrapOrFailure } from "../../lib/utility.js";
 import { widgetRegistry } from "../registry.js";
@@ -13,20 +14,29 @@ import { DistributionsChart } from "./DistributionsChart.js";
 export const CHART_TO_DIST_HEIGHT_ADJUSTMENT = 0.5;
 
 widgetRegistry.register("Dist", {
-  Preview(value) {
+  Preview(value, boxed) {
     const dist = value.value;
     const environment = value.context.project.getEnvironment();
+    const numberFormat = boxed && boxed.value.numberFormat();
+
+    const showNumber = (number: number) => {
+      return numberFormat ? (
+        formatNumber(numberFormat, number)
+      ) : (
+        <NumberShower precision={2} number={number} />
+      );
+    };
 
     const p05 = unwrapOrFailure(dist.inv(environment, 0.05));
     const p95 = unwrapOrFailure(dist.inv(environment, 0.95));
     const oneValue = p05 === p95;
     return oneValue ? (
-      <NumberShower precision={2} number={p05} />
+      showNumber(p05)
     ) : (
       <div>
-        <NumberShower precision={2} number={p05} />
+        {showNumber(p05)}
         <span className="mx-1 opacity-70">to</span>
-        <NumberShower precision={2} number={p95} />
+        {showNumber(p05)}
       </div>
     );
   },
@@ -43,10 +53,14 @@ widgetRegistry.register("Dist", {
       />
     );
   },
-  Chart(value, settings) {
+  Chart(value, settings, boxed) {
+    const numberFormat = boxed && boxed.value.numberFormat();
     const plot = SqDistributionsPlot.create({
       distribution: value.value,
-      ...generateDistributionPlotSettings(settings.distributionChartSettings),
+      ...generateDistributionPlotSettings(
+        settings.distributionChartSettings,
+        numberFormat
+      ),
     });
 
     return (
