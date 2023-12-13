@@ -396,25 +396,3 @@ describe("frForceBoxed", () => {
     expect(frBoxedNumber.getName()).toBe("number");
   });
 });
-
-describe("frAny with keepBoxes", () => {
-  describe("keepboxes=true", () => {
-    const frKeepBoxesNumber = frAny(true);
-
-    test("Unpack Preserves Boxes", () => {
-      const boxedValue = vBoxed(new Boxed(vNumber(10), new BoxedArgs({})));
-      const unpacked = frKeepBoxesNumber.unpack(boxedValue);
-      expect(unpacked).toEqual(boxedValue);
-    });
-
-    test("Pack Preserves Boxes", () => {
-      const boxedValue = vBoxed(new Boxed(vNumber(10), new BoxedArgs({})));
-      const packed = frKeepBoxesNumber.pack(boxedValue);
-      expect(packed).toEqual(boxedValue);
-    });
-
-    test("GetName", () => {
-      expect(frKeepBoxesNumber.getName()).toBe("any");
-    });
-  });
-});

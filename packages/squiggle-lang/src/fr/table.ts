@@ -45,7 +45,7 @@ export const library = [
             data: value,
             columns: columns.map(({ fn, name }) => ({
               fn,
-              name: name ?? undefined,
+              name: name ?? args.name() ?? undefined,
             })),
           };
         }
