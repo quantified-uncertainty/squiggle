@@ -233,10 +233,6 @@ export class SqTableChartValue extends SqAbstractValue<
     return new SqTableChart(this._value.value, this.context);
   }
 
-  override title() {
-    return this.value.title;
-  }
-
   asJS() {
     return this.value;
   }
