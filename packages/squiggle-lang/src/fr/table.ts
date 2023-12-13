@@ -69,11 +69,10 @@ export const library = [
           ),
         ],
         frTableChart,
-        ([{ data, title, columns }]) => {
+        ([{ data, columns }]) => {
           return {
             data,
-            title: title || undefined,
-            columns: columns?.map(({ fn, name }) => ({
+            columns: columns.map(({ fn, name }) => ({
               fn,
               name: name ?? undefined,
             })),

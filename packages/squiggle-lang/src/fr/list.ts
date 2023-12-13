@@ -157,10 +157,13 @@ export const library = [
       ),
       makeDefinition(
         [
-          frNumber,
-          frLambdaTyped(
-            [frNamed("index", frOptional(frNumber))],
-            frAny({ genericName: "A" })
+          frNamed("count", frNumber),
+          frNamed(
+            "fn",
+            frLambdaTyped(
+              [frNamed("index", frOptional(frNumber))],
+              frAny({ genericName: "A" })
+            )
           ),
         ],
         frArray(frAny({ genericName: "A" })),
@@ -174,7 +177,10 @@ export const library = [
         }
       ),
       makeDefinition(
-        [frNumber, frAny({ genericName: "A" })],
+        [
+          frNamed("count", frNumber),
+          frNamed("value", frAny({ genericName: "A" })),
+        ],
         frArray(frAny({ genericName: "A" })),
         ([number, value]) => {
           _assertValidArrayLength(number);
@@ -191,14 +197,18 @@ export const library = [
     output: "Array",
     examples: [`List.upTo(1,4)`],
     definitions: [
-      makeDefinition([frNumber, frNumber], frArray(frNumber), ([low, high]) => {
-        if (!Number.isInteger(low) || !Number.isInteger(high)) {
-          throw new REArgumentError(
-            "Low and high values must both be integers"
-          );
+      makeDefinition(
+        [frNamed("low", frNumber), frNamed("high", frNumber)],
+        frArray(frNumber),
+        ([low, high]) => {
+          if (!Number.isInteger(low) || !Number.isInteger(high)) {
+            throw new REArgumentError(
+              "Low and high values must both be integers"
+            );
+          }
+          return E_A_Floats.upTo(low, high);
         }
-        return E_A_Floats.upTo(low, high);
-      }),
+      ),
     ],
   }),
   maker.make({
@@ -308,7 +318,7 @@ export const library = [
       makeDefinition(
         [
           frArray(frAny({ genericName: "A" })),
-          frLambdaTyped([frAny({ genericName: "A" })], frNumber),
+          frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frNumber)),
         ],
         frArray(frAny({ genericName: "A" })),
         ([array, lambda], context) => {
@@ -327,7 +337,7 @@ export const library = [
       makeDefinition(
         [
           frArray(frAny({ genericName: "A" })),
-          frLambdaTyped([frAny({ genericName: "A" })], frNumber),
+          frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frNumber)),
         ],
         frAny({ genericName: "A" }),
         ([array, lambda], context) => {
@@ -352,7 +362,7 @@ export const library = [
       makeDefinition(
         [
           frArray(frAny({ genericName: "A" })),
-          frLambdaTyped([frAny({ genericName: "A" })], frNumber),
+          frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frNumber)),
         ],
         frAny({ genericName: "A" }),
         ([array, lambda], context) => {
@@ -391,8 +401,8 @@ export const library = [
       makeDefinition(
         [
           frArray(frAny({ genericName: "A" })),
-          frNumber,
-          frNamed("index", frOptional(frNumber)),
+          frNamed("startIndex", frNumber),
+          frNamed("endIndex", frOptional(frNumber)),
         ],
         frArray(frAny({ genericName: "A" })),
         ([array, start, end]) => {
@@ -450,20 +460,23 @@ export const library = [
     examples: [`List.reduce([1,4,5], 2, {|acc, el| acc+el})`],
     definitions: [
       makeAssertDefinition(
-        [frNumber, frLambdaNand([2, 3])],
+        [frNumber, frNamed("fn", frLambdaNand([2, 3]))],
         "Call with either 2 or 3 arguments, not both."
       ),
       makeDefinition(
         [
           frArray(frAny({ genericName: "B" })),
-          frAny({ genericName: "A" }),
-          frLambdaTyped(
-            [
-              frAny({ genericName: "A" }),
-              frAny({ genericName: "B" }),
-              frNamed("index", frOptional(frNumber)),
-            ],
-            frAny({ genericName: "A" })
+          frNamed("initialValue", frAny({ genericName: "A" })),
+          frNamed(
+            "callbackFn",
+            frLambdaTyped(
+              [
+                frNamed("accumulator", frAny({ genericName: "A" })),
+                frNamed("currentValue", frAny({ genericName: "B" })),
+                frNamed("currentIndex", frOptional(frNumber)),
+              ],
+              frAny({ genericName: "A" })
+            )
           ),
         ],
         frAny({ genericName: "A" }),
@@ -488,10 +501,16 @@ export const library = [
       makeDefinition(
         [
           frArray(frAny({ genericName: "B" })),
-          frAny({ genericName: "A" }),
-          frLambdaTyped(
-            [frAny({ genericName: "A" }), frAny({ genericName: "B" })],
-            frAny({ genericName: "A" })
+          frNamed("initialValue", frAny({ genericName: "A" })),
+          frNamed(
+            "callbackFn",
+            frLambdaTyped(
+              [
+                frNamed("accumulator", frAny({ genericName: "A" })),
+                frNamed("currentValue", frAny({ genericName: "B" })),
+              ],
+              frAny({ genericName: "A" })
+            )
           ),
         ],
         frAny({ genericName: "A" }),
@@ -514,12 +533,21 @@ export const library = [
       makeDefinition(
         [
           frArray(frAny({ genericName: "B" })),
-          frAny({ genericName: "A" }),
-          frLambdaTyped(
-            [frAny({ genericName: "A" }), frAny({ genericName: "B" })],
-            frAny({ genericName: "A" })
+          frNamed("initialValue", frAny({ genericName: "A" })),
+          frNamed(
+            "callbackFn",
+            frLambdaTyped(
+              [
+                frNamed("accumulator", frAny({ genericName: "A" })),
+                frNamed("currentValue", frAny({ genericName: "B" })),
+              ],
+              frAny({ genericName: "A" })
+            )
           ),
-          frLambdaTyped([frAny({ genericName: "A" })], frBool),
+          frNamed(
+            "conditionFn",
+            frLambdaTyped([frAny({ genericName: "A" })], frBool)
+          ),
         ],
         frAny({ genericName: "A" }),
         ([array, initialValue, step, condition], context) =>
@@ -535,7 +563,7 @@ export const library = [
       makeDefinition(
         [
           frArray(frAny({ genericName: "A" })),
-          frLambdaTyped([frAny({ genericName: "A" })], frBool),
+          frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frBool)),
         ],
         frArray(frAny({ genericName: "A" })),
         ([array, lambda], context) =>
@@ -551,7 +579,7 @@ export const library = [
       makeDefinition(
         [
           frArray(frAny({ genericName: "A" })),
-          frLambdaTyped([frAny({ genericName: "A" })], frBool),
+          frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frBool)),
         ],
         frBool,
         ([array, lambda], context) =>
@@ -567,7 +595,7 @@ export const library = [
       makeDefinition(
         [
           frArray(frAny({ genericName: "A" })),
-          frLambdaTyped([frAny({ genericName: "A" })], frBool),
+          frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frBool)),
         ],
         frBool,
         ([array, lambda], context) =>
@@ -584,7 +612,7 @@ export const library = [
       makeDefinition(
         [
           frArray(frAny({ genericName: "A" })),
-          frLambdaTyped([frAny({ genericName: "A" })], frBool),
+          frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frBool)),
         ],
         frAny({ genericName: "A" }),
         ([array, lambda], context) => {
@@ -606,7 +634,7 @@ export const library = [
       makeDefinition(
         [
           frArray(frAny({ genericName: "A" })),
-          frLambdaTyped([frAny({ genericName: "A" })], frBool),
+          frNamed("fn", frLambdaTyped([frAny({ genericName: "A" })], frBool)),
         ],
         frNumber,
         ([array, lambda], context) =>
@@ -620,9 +648,9 @@ export const library = [
     examples: [`List.join(["a", "b", "c"], ",")`],
     definitions: [
       makeDefinition(
-        [frArray(frString), frString],
+        [frArray(frString), frNamed("separator", frOptional(frString))],
         frString,
-        ([array, joinStr]) => array.join(joinStr)
+        ([array, joinStr]) => array.join(joinStr ?? ",")
       ),
       makeDefinition([frArray(frString)], frString, ([array]) => array.join()),
     ],

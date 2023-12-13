@@ -466,7 +466,6 @@ export type Plot = CommonPlotArgs &
 
 export type TableChart = {
   data: readonly Value[];
-  title?: string;
   columns: readonly { fn: Lambda; name: string | undefined }[];
 };
 class VTableChart extends BaseValue {

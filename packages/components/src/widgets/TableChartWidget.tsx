@@ -60,11 +60,6 @@ widgetRegistry.register("TableChart", {
 
     return (
       <div>
-        {!!value.title && (
-          <div className="text-md text-slate-900 font-semibold mb-1">
-            {value.title}
-          </div>
-        )}
         <div className="relative rounded-sm overflow-hidden border border-slate-200">
           <table
             className="table-fixed w-full"

@@ -47,6 +47,7 @@ const documentation: FnDocumentationType = {
   signatures: ["(number, number) => number"],
   examples: ["add(5,2)"],
   isExperimental: true,
+  definitions: [],
   isUnit: true,
   shorthand: { type: "unary", symbol: "-" },
   description: `**Lorem Ipsum**

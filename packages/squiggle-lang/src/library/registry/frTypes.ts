@@ -90,7 +90,7 @@ export const frDuration: FRType<SDuration> = {
 export const frDist: FRType<BaseDist> = {
   unpack: (v) => (v.type === "Dist" ? v.value : undefined),
   pack: (v) => vDist(v),
-  getName: () => "distribution",
+  getName: () => "dist",
 };
 export const frDistPointset: FRType<PointSetDist> = {
   unpack: (v) =>
@@ -263,7 +263,7 @@ export const frDistOrNumber: FRType<BaseDist | number> = {
   unpack: (v) =>
     v.type === "Dist" ? v.value : v.type === "Number" ? v.value : undefined,
   pack: (v) => (typeof v === "number" ? vNumber(v) : vDist(v)),
-  getName: () => "distribution|number",
+  getName: () => "dist|number",
 };
 
 export function frTuple<T1, T2>(
@@ -312,7 +312,7 @@ export function frTuple(...types: FRType<unknown>[]): FRType<any> {
     pack: (values: unknown[]) => {
       return vArray(values.map((val, index) => types[index].pack(val)));
     },
-    getName: () => `tuple(${types.map((type) => type.getName()).join(", ")})`,
+    getName: () => `[${types.map((type) => type.getName()).join(", ")}]`,
   };
 }
 

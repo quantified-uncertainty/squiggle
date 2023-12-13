@@ -77,8 +77,4 @@ export class SqTableChart {
   get columnNames(): (string | undefined)[] {
     return this._value.columns.map(({ name }) => name);
   }
-
-  get title(): string | undefined {
-    return this._value.title;
-  }
 }
