@@ -52,68 +52,68 @@ export const isOptional = <T>(frType: FRType<T>): boolean => {
 export const frNumber: FRType<number> = {
   unpack: (v: Value) => (v.type === "Number" ? v.value : undefined),
   pack: (v) => vNumber(v),
-  getName: () => "number",
+  getName: () => "Number",
 };
 export const frTableChart: FRType<TableChart> = {
   unpack: (v: Value) => (v.type === "TableChart" ? v.value : undefined),
   pack: (v) => vTableChart(v),
-  getName: () => "table",
+  getName: () => "Table",
 };
 export const frCalculator: FRType<Calculator> = {
   unpack: (v: Value) => (v.type === "Calculator" ? v.value : undefined),
   pack: (v) => vCalculator(v),
-  getName: () => "calculator",
+  getName: () => "Calculator",
 };
 export const frString: FRType<string> = {
   unpack: (v: Value) => (v.type === "String" ? v.value : undefined),
   pack: (v) => vString(v),
-  getName: () => "string",
+  getName: () => "String",
 };
 export const frBool: FRType<boolean> = {
   unpack: (v: Value) => (v.type === "Bool" ? v.value : undefined),
   pack: (v) => vBool(v),
-  getName: () => "bool",
+  getName: () => "Bool",
 };
 export const frDate: FRType<SDate> = {
   unpack: (v) => (v.type === "Date" ? v.value : undefined),
   pack: (v) => vDate(v),
-  getName: () => "date",
+  getName: () => "Date",
 };
 export const frDuration: FRType<SDuration> = {
   unpack: (v) => (v.type === "Duration" ? v.value : undefined),
   pack: (v) => vDuration(v),
-  getName: () => "duration",
+  getName: () => "Duration",
 };
 export const frDist: FRType<BaseDist> = {
   unpack: (v) => (v.type === "Dist" ? v.value : undefined),
   pack: (v) => vDist(v),
-  getName: () => "dist",
+  getName: () => "Dist",
 };
 export const frDistPointset: FRType<PointSetDist> = {
   unpack: (v) =>
     v.type === "Dist" && v.value instanceof PointSetDist ? v.value : undefined,
   pack: (v) => vDist(v),
-  getName: () => "pointSetDist",
+  getName: () => "PointSetDist",
 };
 
 export const frSampleSetDist: FRType<SampleSetDist> = {
   unpack: (v) =>
     v.type === "Dist" && v.value instanceof SampleSetDist ? v.value : undefined,
   pack: (v) => vDist(v),
-  getName: () => "sampleSetDist",
+  getName: () => "SampleSetDist",
 };
 
 export const frDistSymbolic: FRType<SymbolicDist> = {
   unpack: (v) =>
     v.type === "Dist" && v.value instanceof SymbolicDist ? v.value : undefined,
   pack: (v) => vDist(v),
-  getName: () => "symbolicDist",
+  getName: () => "SymbolicDist",
 };
 
 export const frLambda: FRType<Lambda> = {
   unpack: (v) => (v.type === "Lambda" ? v.value : undefined),
   pack: (v) => vLambda(v),
-  getName: () => "function",
+  getName: () => "Function",
 };
 
 export const frLambdaTyped = (
@@ -142,29 +142,29 @@ export const frLambdaNand = (paramLengths: number[]): FRType<Lambda> => {
         : undefined;
     },
     pack: (v) => vLambda(v),
-    getName: () => `lambda(${paramLengths.join(",")})`,
+    getName: () => `Function(${paramLengths.join(",")})`,
   };
 };
 export const frScale: FRType<Scale> = {
   unpack: (v) => (v.type === "Scale" ? v.value : undefined),
   pack: (v) => vScale(v),
-  getName: () => "scale",
+  getName: () => "Scale",
 };
 export const frInput: FRType<Input> = {
   unpack: (v) => (v.type === "Input" ? v.value : undefined),
   pack: (v) => vInput(v),
-  getName: () => "input",
+  getName: () => "Input",
 };
 export const frPlot: FRType<Plot> = {
   unpack: (v) => (v.type === "Plot" ? v.value : undefined),
   pack: (v) => vPlot(v),
-  getName: () => "plot",
+  getName: () => "Plot",
 };
 
 export const frDomain: FRType<Domain> = {
   unpack: (v) => (v.type === "Domain" ? v.value : undefined),
   pack: (v) => vDomain(v),
-  getName: () => "domain",
+  getName: () => "Domain",
 };
 
 export const frArray = <T>(itemType: FRType<T>): FRType<readonly T[]> => {
@@ -194,7 +194,7 @@ export const frArray = <T>(itemType: FRType<T>): FRType<readonly T[]> => {
       isTransparent
         ? vArray(v as readonly Value[])
         : vArray(v.map(itemType.pack)),
-    getName: () => `list(${itemType.getName()})`,
+    getName: () => `List(${itemType.getName()})`,
   };
 };
 
@@ -230,7 +230,7 @@ export const frDistOrNumber: FRType<BaseDist | number> = {
   unpack: (v) =>
     v.type === "Dist" ? v.value : v.type === "Number" ? v.value : undefined,
   pack: (v) => (typeof v === "number" ? vNumber(v) : vDist(v)),
-  getName: () => "dist|number",
+  getName: () => "Dist|Number",
 };
 
 export function frTuple<T1, T2>(
@@ -306,7 +306,7 @@ export const frDictWithArbitraryKeys = <T>(
       vDict(
         ImmutableMap([...v.entries()].map(([k, v]) => [k, itemType.pack(v)]))
       ),
-    getName: () => `dict(${itemType.getName()})`,
+    getName: () => `Dict(${itemType.getName()})`,
   };
 };
 
