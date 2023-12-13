@@ -42,7 +42,7 @@ export const library = [
     examples: [
       'Date.make("2020-05-12")',
       "Date.make(2020, 5, 10)",
-      "Date.make(2020)",
+      "Date.make(2020)"
     ],
     output: "Date",
     definitions: [
