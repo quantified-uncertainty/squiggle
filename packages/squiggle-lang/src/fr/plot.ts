@@ -3,10 +3,10 @@ import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frArray,
   frBool,
-  frForceBoxed,
   frDict,
   frDist,
   frDistOrNumber,
+  frForceBoxed,
   frLambdaTyped,
   frNamed,
   frNumber,
@@ -29,6 +29,14 @@ const maker = new FnFactory({
 });
 
 const defaultScale = { type: "linear" } satisfies Scale;
+
+const defaultScaleWithName = (name: string | undefined): Scale => {
+  if (name) {
+    return { ...defaultScale, title: name };
+  } else {
+    return defaultScale;
+  }
+};
 
 export function assertValidMinMax(scale: Scale) {
   const hasMin = scale.min !== undefined;
@@ -363,8 +371,8 @@ export const library = [
       makeDefinition(
         [
           frDict(
-            ["xDist", frSampleSetDist],
-            ["yDist", frSampleSetDist],
+            ["xDist", frForceBoxed(frSampleSetDist)],
+            ["yDist", frForceBoxed(frSampleSetDist)],
             ["xScale", frOptional(frScale)],
             ["yScale", frOptional(frScale)],
             ["title", frOptional(frString)]
@@ -373,12 +381,14 @@ export const library = [
         frPlot,
         ([{ xDist, yDist, xScale, yScale, title }]) => {
           _assertYScaleNotDateScale(yScale);
+          const xTitle = xDist.args.name();
+          const yTitle = yDist.args.name();
           return {
             type: "scatter",
-            xDist,
-            yDist,
-            xScale: xScale ?? defaultScale,
-            yScale: yScale ?? defaultScale,
+            xDist: xDist.value,
+            yDist: yDist.value,
+            xScale: xScale ?? defaultScaleWithName(xTitle),
+            yScale: yScale ?? defaultScaleWithName(yTitle),
             title: title ?? undefined,
           };
         }
