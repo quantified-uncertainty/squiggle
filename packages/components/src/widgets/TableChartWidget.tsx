@@ -9,13 +9,13 @@ import { valueHasContext } from "../lib/utility.js";
 import { widgetRegistry } from "./registry.js";
 
 widgetRegistry.register("TableChart", {
-  Preview: (value) => (
+  Preview: (tableData) => (
     <div className="items-center flex space-x-1">
       <TableCellsIcon size={14} className="flex opacity-60" />
       <div>
-        {value.value.rowCount}
+        {tableData.value.rowCount}
         <span className="opacity-60">x</span>
-        {value.value.columnCount}
+        {tableData.value.columnCount}
       </div>
     </div>
   ),
