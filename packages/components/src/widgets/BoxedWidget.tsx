@@ -1,17 +1,27 @@
-import { SquiggleValueChart } from "../components/SquiggleViewer/SquiggleValueChart.js";
-import { SquiggleValuePreview } from "../components/SquiggleViewer/SquiggleValuePreview.js";
-import { valueHasContext } from "../lib/utility.js";
-import { widgetRegistry } from "./registry.js";
+import {
+  SquiggleValueChart,
+} from '../components/SquiggleViewer/SquiggleValueChart.js';
+import {
+  valueToPreviewString,
+} from '../components/SquiggleViewer/SquiggleValueHeader.js';
+import {
+  SquiggleValuePreview,
+} from '../components/SquiggleViewer/SquiggleValuePreview.js';
+import { valueHasContext } from '../lib/utility.js';
+import { widgetRegistry } from './registry.js';
 
 widgetRegistry.register("Boxed", {
+  heading: (value) => {
+    const containedValue = value.value.value;
+    if (valueHasContext(containedValue)) {
+      return valueToPreviewString(containedValue);
+    }
+    return "Tagged";
+  },
   Preview: (value) => {
     const _value = value.value.value;
     if (valueHasContext(_value)) {
-      return (
-        <div>
-          <SquiggleValuePreview value={_value} />
-        </div>
-      );
+      return <SquiggleValuePreview value={_value} />;
     }
   },
   Chart: (value, settings) => {
@@ -22,12 +32,7 @@ widgetRegistry.register("Boxed", {
 
     const unboxedValue = value.value.value;
     if (valueHasContext(unboxedValue)) {
-      return (
-        <div>
-          <div className="text-sm text-slate-600 ml-1.5">{value.title()}</div>
-          <SquiggleValueChart value={unboxedValue} settings={settings} />
-        </div>
-      );
+      return <SquiggleValueChart value={unboxedValue} settings={settings} />;
     } else {
       return unboxedValue.toString();
     }

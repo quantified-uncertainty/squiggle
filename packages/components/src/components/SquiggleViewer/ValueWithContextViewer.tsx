@@ -1,15 +1,36 @@
-import { clsx } from "clsx";
-import { FC, PropsWithChildren, useMemo, useState } from "react";
-import ReactMarkdown from "react-markdown";
+// make sure all widgets are in registry
+import '../../widgets/index.js';
 
-import { CommentIcon, TextTooltip } from "@quri/ui";
+import {
+  FC,
+  PropsWithChildren,
+  useMemo,
+  useState,
+} from 'react';
 
-import { SqValueWithContext } from "../../lib/utility.js";
-import { ErrorBoundary } from "../ErrorBoundary.js";
-import { SquiggleValueChart } from "./SquiggleValueChart.js";
-import { SquiggleValueHeader } from "./SquiggleValueHeader.js";
-import { SquiggleValueMenu } from "./SquiggleValueMenu.js";
-import { SquiggleValuePreview } from "./SquiggleValuePreview.js";
+import { clsx } from 'clsx';
+import ReactMarkdown from 'react-markdown';
+
+import {
+  CommentIcon,
+  TextTooltip,
+} from '@quri/ui';
+
+import { SHORT_STRING_LENGTH } from '../../lib/constants.js';
+import { SqValueWithContext } from '../../lib/utility.js';
+import { ErrorBoundary } from '../ErrorBoundary.js';
+import {
+  CollapsedIcon,
+  ExpandedIcon,
+} from './icons.js';
+import { SquiggleValueChart } from './SquiggleValueChart.js';
+import { SquiggleValueHeader } from './SquiggleValueHeader.js';
+import { SquiggleValueMenu } from './SquiggleValueMenu.js';
+import { SquiggleValuePreview } from './SquiggleValuePreview.js';
+import {
+  getChildrenValues,
+  pathToShortName,
+} from './utils.js';
 import {
   useCollapseChildren,
   useFocus,
@@ -19,13 +40,7 @@ import {
   useSetCollapsed,
   useToggleCollapsed,
   useViewerContext,
-} from "./ViewerProvider.js";
-import { getChildrenValues, pathToShortName } from "./utils.js";
-import { SHORT_STRING_LENGTH } from "../../lib/constants.js";
-
-// make sure all widgets are in registry
-import "../../widgets/index.js";
-import { CollapsedIcon, ExpandedIcon } from "./icons.js";
+} from './ViewerProvider.js';
 
 function getComment(value: SqValueWithContext): string | undefined {
   const boxedDescription =
@@ -187,7 +202,10 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
 
   const name = pathToShortName(path);
   const headerName = (
-    <div className={clsx("font-mono", headerClasses())} onClick={_focus}>
+    <div
+      className={clsx(!boxedName && "font-mono", headerClasses())}
+      onClick={_focus}
+    >
       {boxedName ? boxedName : name}
     </div>
   );

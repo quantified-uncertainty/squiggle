@@ -1,9 +1,12 @@
-import { FC, ReactNode } from "react";
+import {
+  FC,
+  ReactNode,
+} from 'react';
 
-import { SqValue } from "@quri/squiggle-lang";
+import { SqValue } from '@quri/squiggle-lang';
 
-import { SqValueWithContext } from "../lib/utility.js";
-import { PlaygroundSettings } from "../components/PlaygroundSettings.js";
+import { PlaygroundSettings } from '../components/PlaygroundSettings.js';
+import { SqValueWithContext } from '../lib/utility.js';
 
 type SqValueTag = SqValue["tag"];
 
@@ -48,7 +51,7 @@ class WidgetRegistry {
     };
     widget.Chart.displayName = `${tag}Chart`;
 
-    const { Preview, Menu } = config;
+    const { Preview, Menu, heading } = config;
 
     if (Preview) {
       widget.Preview = ({ value }) => {
@@ -68,6 +71,15 @@ class WidgetRegistry {
         return Menu(value as ValueByTag<T>);
       };
       widget.Menu.displayName = `${tag}Menu`;
+    }
+
+    if (heading) {
+      widget.heading = (value) => {
+        if (value.tag !== tag) {
+          throw new Error(`${tag} widget used incorrectly`);
+        }
+        return heading(value as ValueByTag<T>);
+      };
     }
 
     this.widgets.set(tag, widget);
