@@ -23,7 +23,6 @@ export const library = [
     output: "Plot",
     examples: [],
     definitions: [
-      //We're not using the Table title here, because we want to phase it out.
       makeDefinition(
         [
           frNamed("data", frForceBoxed(frArray(frAny({ genericName: "A" })))),
@@ -56,7 +55,6 @@ export const library = [
         [
           frDict(
             ["data", frArray(frAny({ genericName: "A" }))],
-            ["title", frOptional(frString)],
             [
               "columns",
               frArray(
