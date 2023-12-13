@@ -1,7 +1,7 @@
-import { FC } from 'react';
+import { FC } from "react";
 
-import { SqValueWithContext } from '../../lib/utility.js';
-import { widgetRegistry } from '../../widgets/registry.js';
+import { SqValueWithContext } from "../../lib/utility.js";
+import { widgetRegistry } from "../../widgets/registry.js";
 
 export const valueToPreviewString = (value: SqValueWithContext) => {
   const widget = widgetRegistry.widgets.get(value.tag);

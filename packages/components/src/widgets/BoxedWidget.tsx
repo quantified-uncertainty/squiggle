@@ -1,14 +1,8 @@
-import {
-  SquiggleValueChart,
-} from '../components/SquiggleViewer/SquiggleValueChart.js';
-import {
-  valueToPreviewString,
-} from '../components/SquiggleViewer/SquiggleValueHeader.js';
-import {
-  SquiggleValuePreview,
-} from '../components/SquiggleViewer/SquiggleValuePreview.js';
-import { valueHasContext } from '../lib/utility.js';
-import { widgetRegistry } from './registry.js';
+import { SquiggleValueChart } from "../components/SquiggleViewer/SquiggleValueChart.js";
+import { valueToPreviewString } from "../components/SquiggleViewer/SquiggleValueHeader.js";
+import { SquiggleValuePreview } from "../components/SquiggleViewer/SquiggleValuePreview.js";
+import { valueHasContext } from "../lib/utility.js";
+import { widgetRegistry } from "./registry.js";
 
 widgetRegistry.register("Boxed", {
   heading: (value) => {
