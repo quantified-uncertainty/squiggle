@@ -40,10 +40,10 @@ export const library = [
     name: "make",
     requiresNamespace: true,
     examples: [
-      'Date.make("2020-05-12")',
-      "Date.make(2020, 5, 10)",
-      "Date.make(2020)",
-    ],
+  'Date.make("2020-05-12")',
+  "Date.make(2020, 5, 10)",
+  "Date.make(2020)",
+],
     output: "Date",
     definitions: [
       makeDefinition([frString], frDate, ([str]) => {
@@ -79,7 +79,9 @@ export const library = [
   // same name as used in date-fns
   maker.make({
     name: "fromUnixTime",
-    examples: ["Date.fromUnixTime(1589222400)"],
+    examples: [
+      "Date.fromUnixTime(1589222400)"
+    ],
     requiresNamespace: true,
     output: "Date",
     definitions: [
@@ -101,7 +103,9 @@ export const library = [
   }),
   maker.make({
     name: "subtract",
-    examples: ["Date.make(2020, 5, 12) - Date.make(2000, 1, 1)"],
+    examples: [
+      "Date.make(2020, 5, 12) - Date.make(2000, 1, 1)"
+    ],
     output: "Duration",
     definitions: [
       makeDefinition([frDate, frDate], frDuration, ([d1, d2]) =>
@@ -111,7 +115,9 @@ export const library = [
   }),
   maker.make({
     name: "subtract",
-    examples: ["Date.make(2020, 5, 12) - 20years"],
+    examples: [
+      "Date.make(2020, 5, 12) - 20years"
+    ],
     output: "Date",
     definitions: [
       makeDefinition([frDate, frDuration], frDate, ([d1, d2]) =>
@@ -123,7 +129,7 @@ export const library = [
     name: "add",
     examples: [
       "Date.make(2020, 5, 12) + 20years",
-      "20years + Date.make(2020, 5, 12)",
+      "20years + Date.make(2020, 5, 12)"
     ],
     output: "Date",
     definitions: [
@@ -139,7 +145,9 @@ export const library = [
     name: "rangeDomain",
     requiresNamespace: true,
     output: "Domain",
-    examples: ["Date.rangeDomain(2000year, 2010year)"],
+    examples: [
+      "Date.rangeDomain(2000year, 2010year)"
+    ],
     definitions: [
       makeDefinition(
         [frNamed("min", frDate), frNamed("min", frDate)],
