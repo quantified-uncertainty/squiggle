@@ -1,3 +1,4 @@
+import { REArgumentError } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
@@ -69,6 +70,15 @@ function withInputOrFnInput<T>(inputType: FRType<any>, outputType: FRType<T>) {
   );
 }
 
+const d3TickFormatRegex =
+  /^(?:(.)?([<>=^]))?([+\-( ])?([$#])?(0)?(\d+)?(,)?(\.\d+)?(~)?([a-z%])?$/i;
+
+function checkTickFormat(tickFormat: string | null) {
+  if (tickFormat && !d3TickFormatRegex.test(tickFormat)) {
+    throw new REArgumentError(`Tick format [${tickFormat}] is invalid.`);
+  }
+}
+
 export const library = [
   maker.make({
     name: "name",
@@ -131,6 +141,20 @@ export const library = [
       makeDefinition([frForceBoxed(frAny())], frAny(), ([{ args, value }]) => {
         return args.value.showAs || vString("None"); // Not sure what to use when blank.
       }),
+    ],
+  }),
+  maker.make({
+    name: "format",
+    examples: [],
+    definitions: [
+      makeDefinition(
+        [frForceBoxed(frDistOrNumber), frString],
+        frForceBoxed(frDistOrNumber),
+        ([{ args, value }, format]) => {
+          checkTickFormat(format);
+          return { args: args.merge({ numberFormat: format }), value };
+        }
+      ),
     ],
   }),
   maker.make({

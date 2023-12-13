@@ -261,14 +261,16 @@ Calculator.make(
 export const Boxed: Story = {
   name: "Boxed values",
   args: {
-    defaultCode: `x = Tag.name(5 to 10, "My favorite Dist") ->
-    Tag.description(
-      "This is a long description"
-    ) ->
-    Tag.showAs(
-      Plot.dist
-    )
-    y = x -> Tag.all
-    `,
+    defaultCode: `
+z = 34 -> Tag.format(".1f")
+// x = Tag.name(5 to 10, "My favorite Dist")
+//     -> Tag.description(
+//       "This is a long description"
+//     )
+//     -> Tag.format(
+//       "%2f"
+//     )
+//   y = x -> Tag.all
+   `,
   },
 };

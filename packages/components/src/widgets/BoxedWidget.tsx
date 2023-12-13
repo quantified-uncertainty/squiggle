@@ -15,18 +15,26 @@ widgetRegistry.register("Boxed", {
   Preview: (value) => {
     const unboxedValue = value.value.value;
     if (valueHasContext(unboxedValue)) {
-      return <SquiggleValuePreview value={unboxedValue} />;
+      return <SquiggleValuePreview value={unboxedValue} boxed={value} />;
     }
   },
   Chart: (value, settings) => {
     const showAs = value.value.showAs();
     if (showAs && valueHasContext(showAs)) {
-      return <SquiggleValueChart value={showAs} settings={settings} />;
+      return (
+        <SquiggleValueChart value={showAs} settings={settings} boxed={value} />
+      );
     }
 
     const unboxedValue = value.value.value;
     if (valueHasContext(unboxedValue)) {
-      return <SquiggleValueChart value={unboxedValue} settings={settings} />;
+      return (
+        <SquiggleValueChart
+          value={unboxedValue}
+          settings={settings}
+          boxed={value}
+        />
+      );
     } else {
       return unboxedValue.toString();
     }
