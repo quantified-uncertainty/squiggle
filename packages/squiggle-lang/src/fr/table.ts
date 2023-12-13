@@ -28,26 +28,22 @@ export const library = [
           frNamed("data", frArray(frGeneric("A"))),
           frNamed(
             "params",
-            frDict(
-              ["title", frOptional(frString)],
-              [
-                "columns",
-                frArray(
-                  frDict(
-                    ["fn", frLambdaTyped([frGeneric("A")], frAny)],
-                    ["name", frOptional(frString)]
-                  )
-                ),
-              ]
-            )
+            frDict([
+              "columns",
+              frArray(
+                frDict(
+                  ["fn", frLambdaTyped([frGeneric("A")], frAny)],
+                  ["name", frOptional(frString)]
+                )
+              ),
+            ])
           ),
         ],
         frTableChart,
         ([data, params]) => {
-          const { title, columns } = params ?? {};
+          const { columns } = params ?? {};
           return {
             data,
-            title: title || undefined,
             columns: columns.map(({ fn, name }) => ({
               fn,
               name: name ?? undefined,
@@ -59,7 +55,6 @@ export const library = [
         [
           frDict(
             ["data", frArray(frGeneric("A"))],
-            ["title", frOptional(frString)],
             [
               "columns",
               frArray(
@@ -72,10 +67,9 @@ export const library = [
           ),
         ],
         frTableChart,
-        ([{ data, title, columns }]) => {
+        ([{ data, columns }]) => {
           return {
             data,
-            title: title || undefined,
             columns: columns.map(({ fn, name }) => ({
               fn,
               name: name ?? undefined,
