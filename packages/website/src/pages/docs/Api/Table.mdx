@@ -12,7 +12,7 @@ The Table module allows you to make tables of data.
 
 ```
 Table.make: (
-  data: list<'a>,
+  tableData: list<'a>,
   {
     columns: list<{
       name?: string,
@@ -28,12 +28,17 @@ Examples:
   defaultCode={`Table.make(
   [
     { name: "First Dist", value: normal(0, 1) },
+  
     { name: "Second Dist", value: uniform(2, 4) },
     { name: "Third Dist", value: uniform(5, 6) },
   ],
+  
   {
     columns: [
-      { name: "Name", fn: {|d|d.name} },
+      { name: "Name", fn: {|tableData|tableData.name} },
+      { name: "Mean", fn: {|tableData|mean(tableData.value)} },
+      { name: "Std Dev", fn: {|tableData|variance(tableData.value)} },
+      { name: "Dist", fn: {|tableData|tableData.value} },
       { name: "Mean", fn: {|d|mean(d.value)} },
       { name: "Std Dev", fn: {|d|variance(d.value)} },
       { name: "Dist", fn: {|d|d.value} },
@@ -51,16 +56,17 @@ You can hardcode the scales to make the xAxis consistent between rows.
     { name: "Second Dist", value: Sym.lognormal({ p5: 5, p95: 30 }) },
     { name: "Third Dist", value: Sym.lognormal({ p5: 50, p95: 90 }) },
   ],
+  
   {
     columns: [
       { name: "Name", fn: {|d|d.name} },
       {
         name: "Plot",
         fn: {
-          |d|
+          |tableData|
           Plot.dist(
             {
-              dist: d.value,
+              dist: tableData.value,
               xScale: Scale.log({ min: 0.5, max: 100 }),
               showSummary: false,
             }
