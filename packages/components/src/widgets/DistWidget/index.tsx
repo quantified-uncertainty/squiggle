@@ -17,7 +17,7 @@ widgetRegistry.register("Dist", {
   Preview(value, boxed) {
     const dist = value.value;
     const environment = value.context.project.getEnvironment();
-    const numberFormat = boxed && boxed.value.numberFormat();
+    const numberFormat = boxed?.value.numberFormat();
 
     const showNumber = (number: number) => {
       return numberFormat ? (
@@ -54,7 +54,7 @@ widgetRegistry.register("Dist", {
     );
   },
   Chart(value, settings, boxed) {
-    const numberFormat = boxed && boxed.value.numberFormat();
+    const numberFormat = boxed?.value.numberFormat();
     const plot = SqDistributionsPlot.create({
       distribution: value.value,
       ...generateDistributionPlotSettings(

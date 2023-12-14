@@ -9,7 +9,7 @@ import { widgetRegistry } from "./registry.js";
 import { leftWidgetMargin } from "./utils.js";
 
 const showNumber = (value: SqNumberValue, boxed: SqBoxedValue | undefined) => {
-  const numberFormat = boxed && boxed.value.numberFormat();
+  const numberFormat = boxed?.value.numberFormat();
   if (numberFormat) {
     return formatNumber(numberFormat, value.value);
   } else {

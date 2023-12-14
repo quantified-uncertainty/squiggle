@@ -8,6 +8,7 @@ import * as SampleSetDist from "../../dist/SampleSetDist/index.js";
 import * as SymbolicDist from "../../dist/SymbolicDist.js";
 import { PointMass } from "../../dist/SymbolicDist.js";
 import {
+  REArgumentError,
   REDistributionError,
   REOperationError,
   REOther,
@@ -466,3 +467,14 @@ export const frTypesMatchesLengths = (
   const max = inputs.length;
   return intersection(upTo(min, max), lengths).length > 0;
 };
+
+// Regex taken from d3-format.
+// https://github.com/d3/d3-format/blob/f3cb31091df80a08f25afd4a7af2dcb3a6cd5eef/src/formatSpecifier.js#L1C65-L2C85
+const d3TickFormatRegex =
+  /^(?:(.)?([<>=^]))?([+\-( ])?([$#])?(0)?(\d+)?(,)?(\.\d+)?(~)?([a-z%])?$/i;
+
+export function checkNumericTickFormat(tickFormat: string | null) {
+  if (tickFormat && !d3TickFormatRegex.test(tickFormat)) {
+    throw new REArgumentError(`Tick format [${tickFormat}] is invalid.`);
+  }
+}

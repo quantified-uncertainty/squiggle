@@ -1,4 +1,3 @@
-import { REArgumentError } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
@@ -20,7 +19,10 @@ import {
   frTableChart,
   FRType,
 } from "../library/registry/frTypes.js";
-import { FnFactory } from "../library/registry/helpers.js";
+import {
+  checkNumericTickFormat,
+  FnFactory,
+} from "../library/registry/helpers.js";
 import { Lambda } from "../reducer/lambda.js";
 import { Boxed } from "../value/boxed.js";
 import { Value, vBoxed, vString } from "../value/index.js";
@@ -70,15 +72,6 @@ function withInputOrFnInput<T>(inputType: FRType<any>, outputType: FRType<T>) {
       };
     }
   );
-}
-
-const d3TickFormatRegex =
-  /^(?:(.)?([<>=^]))?([+\-( ])?([$#])?(0)?(\d+)?(,)?(\.\d+)?(~)?([a-z%])?$/i;
-
-function checkTickFormat(tickFormat: string | null) {
-  if (tickFormat && !d3TickFormatRegex.test(tickFormat)) {
-    throw new REArgumentError(`Tick format [${tickFormat}] is invalid.`);
-  }
 }
 
 export const library = [
@@ -153,7 +146,7 @@ export const library = [
         [frForceBoxed(frDistOrNumber), frNamed("numberFormat", frString)],
         frForceBoxed(frDistOrNumber),
         ([{ args, value }, format]) => {
-          checkTickFormat(format);
+          checkNumericTickFormat(format);
           return { args: args.merge({ numberFormat: format }), value };
         }
       ),
