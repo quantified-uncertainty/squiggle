@@ -8,7 +8,7 @@ import { formatNumber } from "../lib/d3/index.js";
 import { widgetRegistry } from "./registry.js";
 import { leftWidgetMargin } from "./utils.js";
 
-const insideValue = (value: SqNumberValue, boxed: SqBoxedValue | undefined) => {
+const showNumber = (value: SqNumberValue, boxed: SqBoxedValue | undefined) => {
   const numberFormat = boxed && boxed.value.numberFormat();
   if (numberFormat) {
     return formatNumber(numberFormat, value.value);
@@ -18,10 +18,10 @@ const insideValue = (value: SqNumberValue, boxed: SqBoxedValue | undefined) => {
 };
 
 widgetRegistry.register("Number", {
-  Preview: (value, boxed) => insideValue(value, boxed),
+  Preview: (value, boxed) => showNumber(value, boxed),
   Chart: (value, _, boxed) => (
     <div className={clsx("font-semibold text-indigo-800", leftWidgetMargin)}>
-      {insideValue(value, boxed)}
+      {showNumber(value, boxed)}
     </div>
   ),
 });

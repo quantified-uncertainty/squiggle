@@ -6,7 +6,7 @@ import { widgetRegistry } from "../../widgets/registry.js";
 
 export const SquiggleValuePreview: FC<{
   value: SqValueWithContext;
-  boxed: SqBoxedValue | undefined;
+  boxed?: SqBoxedValue;
 }> = ({ value, boxed }) => {
   const widget = widgetRegistry.widgets.get(value.tag);
   if (!widget?.Preview) {

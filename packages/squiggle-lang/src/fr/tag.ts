@@ -4,12 +4,14 @@ import {
   frAny,
   frArray,
   frCalculator,
+  frDate,
   frDictWithArbitraryKeys,
   frDist,
   frDistOrNumber,
   frForceBoxed,
   frLambda,
   frLambdaTyped,
+  frNamed,
   frNumber,
   frOr,
   FrOrType,
@@ -148,15 +150,23 @@ export const library = [
     examples: [],
     definitions: [
       makeDefinition(
-        [frForceBoxed(frDistOrNumber), frString],
+        [frForceBoxed(frDistOrNumber), frNamed("numberFormat", frString)],
         frForceBoxed(frDistOrNumber),
         ([{ args, value }, format]) => {
           checkTickFormat(format);
           return { args: args.merge({ numberFormat: format }), value };
         }
       ),
+      makeDefinition(
+        [frForceBoxed(frDate), frNamed("timeFormat", frString)],
+        frForceBoxed(frDate),
+        ([{ args, value }, format]) => {
+          return { args: args.merge({ dateFormat: format }), value };
+        }
+      ),
     ],
   }),
+
   maker.make({
     name: "all",
     examples: [],

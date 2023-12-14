@@ -30,4 +30,8 @@ export class SqBoxed {
   numberFormat(): string | undefined {
     return this.args.numberFormat();
   }
+
+  dateFormat(): string | undefined {
+    return this.args.dateFormat();
+  }
 }
