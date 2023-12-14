@@ -206,6 +206,10 @@ export class SqDurationValue extends SqAbstractValue<"Duration", number> {
     return this._value.value;
   }
 
+  toUnitAndNumber() {
+    return this._value.value.toUnitAndNumber();
+  }
+
   asJS() {
     return this._value.value.toMs();
   }

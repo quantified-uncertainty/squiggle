@@ -7,6 +7,7 @@ import {
   frDictWithArbitraryKeys,
   frDist,
   frDistOrNumber,
+  frDuration,
   frForceBoxed,
   frLambda,
   frLambdaTyped,
@@ -145,6 +146,14 @@ export const library = [
       makeDefinition(
         [frForceBoxed(frDistOrNumber), frNamed("numberFormat", frString)],
         frForceBoxed(frDistOrNumber),
+        ([{ args, value }, format]) => {
+          checkNumericTickFormat(format);
+          return { args: args.merge({ numberFormat: format }), value };
+        }
+      ),
+      makeDefinition(
+        [frForceBoxed(frDuration), frNamed("numberFormat", frString)],
+        frForceBoxed(frDuration),
         ([{ args, value }, format]) => {
           checkNumericTickFormat(format);
           return { args: args.merge({ numberFormat: format }), value };

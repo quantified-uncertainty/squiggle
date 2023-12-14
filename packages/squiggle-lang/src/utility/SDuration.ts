@@ -52,7 +52,7 @@ export class SDuration {
     return this.ms / durationUnits.Year;
   }
 
-  toString(): string {
+  toUnitAndNumber(): { value: number; unitName: string } {
     const units: [number, string][] = [
       [durationUnits.Year, "year"],
       [durationUnits.Day, "day"],
@@ -64,12 +64,16 @@ export class SDuration {
     for (const [unitValue, unitName] of units) {
       if (Math.abs(this.ms) >= unitValue) {
         const value = this.ms / unitValue;
-        const suffix = value !== 1.0 ? "s" : "";
-        return `${value.toPrecision(3)} ${unitName}${suffix}`;
+        return { unitName, value };
       }
     }
+    return { unitName: "ms", value: this.ms };
+  }
 
-    return `${this.ms.toFixed()} ms`;
+  toString(): string {
+    const { unitName, value } = this.toUnitAndNumber();
+    const suffix = value !== 1.0 ? "s" : "";
+    return `${value.toPrecision(3)} ${unitName}${suffix}`;
   }
 
   add(other: SDuration): SDuration {
