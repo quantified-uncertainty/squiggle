@@ -14,9 +14,9 @@ type Widget<T extends SqValueTag = SqValueTag> = {
   Chart: FC<{
     value: Extract<SqValueWithContext, { tag: T }>;
     settings: PlaygroundSettings;
-    boxed: SqBoxedValue | undefined;
+    boxed?: SqBoxedValue;
   }>;
-  Preview?: FC<{ value: ValueByTag<T>; boxed: SqBoxedValue | undefined }>;
+  Preview?: FC<{ value: ValueByTag<T>; boxed?: SqBoxedValue }>;
   Menu?: FC<{
     value: ValueByTag<T>;
   }>;

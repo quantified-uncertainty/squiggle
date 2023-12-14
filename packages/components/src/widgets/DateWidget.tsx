@@ -5,7 +5,7 @@ import {
 import { formatDate } from "../lib/d3/index.js";
 import { widgetRegistry } from "./registry.js";
 
-const showDate = (value: SqDateValue, boxed: SqBoxedValue | undefined) => {
+const showDate = (value: SqDateValue, boxed?: SqBoxedValue) => {
   const dateFormat = boxed?.value?.dateFormat();
   if (dateFormat) {
     return formatDate(value.value.toDate(), dateFormat);

@@ -9,10 +9,7 @@ import { formatNumber } from "../lib/d3/index.js";
 import { widgetRegistry } from "./registry.js";
 import { leftWidgetMargin } from "./utils.js";
 
-const showDuration = (
-  duration: SqDurationValue,
-  boxed: SqBoxedValue | undefined
-) => {
+const showDuration = (duration: SqDurationValue, boxed?: SqBoxedValue) => {
   const numberFormat = boxed?.value.numberFormat();
   const { unitName, value } = duration.toUnitAndNumber();
   if (numberFormat) {
