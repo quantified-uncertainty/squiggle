@@ -13,7 +13,7 @@ import {
   FnFactory,
   makeNumericComparisons,
 } from "../library/registry/helpers.js";
-import { isEqual } from "../value/index.js";
+import { isEqual, toSimpleValue } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "", // no namespaced versions
@@ -97,6 +97,14 @@ export const library = [
     definitions: [
       makeDefinition([frAny], frString, ([v]) => {
         return v.publicName;
+      }),
+    ],
+  }),
+  maker.make({
+    name: "JSON",
+    definitions: [
+      makeDefinition([frAny], frAny, ([v]) => {
+        return toSimpleValue(v);
       }),
     ],
   }),
