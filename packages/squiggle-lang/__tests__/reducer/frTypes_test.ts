@@ -89,7 +89,7 @@ describe("frDistOrNumber", () => {
   test("number", () => {
     const number = 123;
     const value = vNumber(number);
-    expect(frDistOrNumber.unpack(value)).toBe(number);
+      expect(frDistOrNumber.unpack(value)).toBe(number);
     expect(frDistOrNumber.pack(number)).toEqual(value);
   });
 
