@@ -133,7 +133,7 @@ Was given arguments: ((x,y) => internal code)`
 
   testPlotResult(
     "default scale based on time domain",
-    `Plot.distFn({|t: [1500year, 1600year]| uniform(toYears(t)-1500year, 3)})`,
+    `Plot.distFn({|t: [Date(1500), Date(1600)]| uniform(toYears(t)-Date(1500), 3)})`,
     "distFn",
     (plot) => {
       expect(plot.xScale.type).toBe("date");
