@@ -150,13 +150,9 @@ export const library = [
     name: "getFocus",
     examples: [],
     definitions: [
-      makeDefinition(
-        [frForceBoxed(frAny({ genericName: "A" }))],
-        frAny(),
-        ([{ args, value }]) => {
-          return args.value.focus ? vBool(true) : vString("None");
-        }
-      ),
+      makeDefinition([frForceBoxed(frAny())], frAny(), ([{ args, value }]) => {
+        return args.value.focus ? vBool(true) : vString("None");
+      }),
     ],
   }),
   maker.make({

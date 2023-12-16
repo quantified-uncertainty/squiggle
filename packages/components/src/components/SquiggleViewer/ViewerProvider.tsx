@@ -55,13 +55,6 @@ export type Action =
       };
     }
   | {
-      type: "SET_FOCUSED_WITH_TAG";
-      payload: {
-        path: SqValuePath;
-        value: boolean;
-      };
-    }
-  | {
       type: "FOCUS";
       payload: {
         path: SqValuePath;
@@ -407,8 +400,7 @@ export const ViewerProvider: FC<
           forceUpdate(action.payload.path);
           return;
         case "FOCUS": {
-          const { path } = action.payload;
-          setFocused(path);
+          setFocused(action.payload.path);
           return;
         }
         case "UNFOCUS": {

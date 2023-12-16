@@ -130,19 +130,19 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
   const isFocused = useIsFocused(path);
 
   const isRoot = path.isRoot();
-  const boxedName = tag === "Boxed" ? value.value.name() : undefined;
-  const boxedFocus = tag === "Boxed" ? value.value.focus() : undefined;
+  const taggedName = tag === "Boxed" ? value.value.name() : undefined;
+  const taggedFocus = tag === "Boxed" ? value.value.focus() : undefined;
 
   useEffect(() => {
     const localItemState = getLocalItemState({ path });
-    const alreadyFocusedWithTag = localItemState.hasFocusedWithTag;
-    if (boxedFocus && !alreadyFocusedWithTag) {
+    const previouslyFocusedWithTag = localItemState.hasFocusedWithTag;
+    if (taggedFocus && !previouslyFocusedWithTag) {
       focusWithTag(path);
-    } else if (!boxedFocus && alreadyFocusedWithTag && isFocused) {
+    } else if (!taggedFocus && previouslyFocusedWithTag && isFocused) {
       unfocusWithTag(path);
     }
   }, [
-    boxedFocus,
+    taggedFocus,
     path,
     isFocused,
     getLocalItemState,
@@ -210,10 +210,10 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
   const name = pathToShortName(path);
   const headerName = (
     <div
-      className={clsx(!boxedName && "font-mono", headerClasses())}
+      className={clsx(!taggedName && "font-mono", headerClasses())}
       onClick={_focus}
     >
-      {boxedName ? boxedName : name}
+      {taggedName ? taggedName : name}
     </div>
   );
 
