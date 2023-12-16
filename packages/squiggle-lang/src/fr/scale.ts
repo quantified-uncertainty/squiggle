@@ -1,5 +1,5 @@
 import { REArgumentError, REOther } from "../errors/messages.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { createFunctionDefinition } from "../library/registry/fnDefinition.js";
 import {
   frDate,
   frDict,
@@ -11,7 +11,7 @@ import {
 import { FnFactory } from "../library/registry/helpers.js";
 import { SDate } from "../utility/SDate.js";
 
-const maker = new FnFactory({
+const functionFactory = new FnFactory({
   nameSpace: "Scale",
   requiresNamespace: true,
 });
