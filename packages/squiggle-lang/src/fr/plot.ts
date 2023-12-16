@@ -99,7 +99,17 @@ const _assertYScaleNotDateScale = (yScale: Scale | null) => {
 };
 
 const numericFnDef = () => {
-  const toPlot = (
+  /**
+   * Converts a lambda function and parameters into a plot.
+   *
+   * @param {Lambda} fn - The lambda function to plot.
+   * @param {Scale | null} xScale - The x scale for the plot, or null for default.
+   * @param {Scale | null} yScale - The y scale for the plot, or null for default.
+   * @param {string | null} title - The title of the plot, or null for no title.
+   * @param {number | null} points - The number of points to use in the plot, or null to use the default.
+   * @returns {Plot} A plot object.
+   */
+const toPlot = (
     fn: Lambda,
     xScale: Scale | null,
     yScale: Scale | null,
@@ -173,6 +183,11 @@ const numericFnDef = () => {
   });
 };
 
+/**
+ * Creates a library of plot functions.
+ *
+ * @returns {Plot[]} An array of plot functions.
+ */
 export const library = [
   maker.make({
     name: "dists",
