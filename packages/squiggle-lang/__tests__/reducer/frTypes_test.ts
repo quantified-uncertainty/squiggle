@@ -332,7 +332,7 @@ describe("frOr", () => {
 
   describe("getName", () => {
     test("should return the correct name", () => {
-      expect(frNumberOrString.getName()).toBe("number|string");
+      expect(frNumberOrString.getName()).toBe("Number|String");
     });
   });
 });
@@ -352,7 +352,7 @@ describe("frNamed", () => {
 
   test("getName", () => {
     expect(namedNumberType).toBeDefined();
-    expect(namedNumberType.getName()).toBe("TestNumber: number");
+    expect(namedNumberType.getName()).toBe("TestNumber: Number");
   });
 
   test("getName with Optional Type", () => {
@@ -362,7 +362,7 @@ describe("frNamed", () => {
       optionalNumberType
     );
     expect(namedOptionalNumberType.getName()).toBe(
-      "OptionalTestNumber?: number"
+      "OptionalTestNumber?: Number"
     );
   });
 });
@@ -399,6 +399,6 @@ describe("frForceBoxed", () => {
   });
 
   test("GetName", () => {
-    expect(frBoxedNumber.getName()).toBe("number");
+    expect(frBoxedNumber.getName()).toBe("Number");
   });
 });

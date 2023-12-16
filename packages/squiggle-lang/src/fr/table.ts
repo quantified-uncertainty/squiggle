@@ -3,7 +3,6 @@ import {
   frAny,
   frArray,
   frDict,
-  frForceBoxed,
   frLambdaTyped,
   frNamed,
   frOptional,
@@ -25,7 +24,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frNamed("data", frForceBoxed(frArray(frAny({ genericName: "A" })))),
+          frNamed("data", frArray(frAny({ genericName: "A" }))),
           frNamed(
             "params",
             frDict([
@@ -40,13 +39,13 @@ export const library = [
           ),
         ],
         frTableChart,
-        ([{ value, args }, params]) => {
+        ([data, params]) => {
           const { columns } = params ?? {};
           return {
-            data: value,
+            data,
             columns: columns.map(({ fn, name }) => ({
               fn,
-              name: name ?? args.name() ?? undefined,
+              name: name ?? undefined,
             })),
           };
         }
