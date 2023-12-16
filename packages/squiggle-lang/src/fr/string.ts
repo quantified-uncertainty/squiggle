@@ -16,7 +16,7 @@ export const library = [
   maker.make({
     name: "make",
     output: "String",
-    definitions: [makeDefinition([frAny], frString, ([x]) => x.toString())],
+    definitions: [makeDefinition([frAny()], frString, ([x]) => x.toString())],
   }),
   maker.make({
     name: "split",

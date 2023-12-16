@@ -28,7 +28,9 @@ import {
 } from "./ViewerProvider.js";
 
 function getComment(value: SqValueWithContext): string | undefined {
-  return value.context.docstring();
+  const boxedDescription =
+    value.tag === "Boxed" ? value.value.description() : undefined;
+  return value.context.docstring() || boxedDescription;
 }
 
 const CommentIconForValue: FC<{ value: SqValueWithContext }> = ({ value }) => {
@@ -124,6 +126,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
   const isFocused = useIsFocused(path);
 
   const isRoot = path.isRoot();
+  const boxedName = tag === "Boxed" ? value.value.name() : undefined;
 
   // Collapse children and element if desired. Uses crude heuristics.
   // TODO - this code has side effects, it'd be better if we ran it somewhere else, e.g. traverse values recursively when `ViewerProvider` is initialized.
@@ -184,8 +187,11 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
 
   const name = pathToShortName(path);
   const headerName = (
-    <div className={clsx("font-mono", headerClasses())} onClick={_focus}>
-      {name}
+    <div
+      className={clsx(!boxedName && "font-mono", headerClasses())}
+      onClick={_focus}
+    >
+      {boxedName ? boxedName : name}
     </div>
   );
 
@@ -221,7 +227,14 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
             {!isFocused && triangleToggle()}
             {headerName}
             {!isFocused && (
-              <SquiggleValuePreview value={value} isOpen={isOpen} />
+              <div
+                className={clsx(
+                  "ml-3 text-sm text-blue-800",
+                  isOpen ? "opacity-40" : "opacity-60"
+                )}
+              >
+                <SquiggleValuePreview value={value} />
+              </div>
             )}
             {!isFocused && !isOpen && <CommentIconForValue value={value} />}
           </div>
