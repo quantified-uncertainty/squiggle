@@ -115,7 +115,7 @@ type NodeIdentifierWithAnnotation = N<
 
 type NodeIdentifier = N<"Identifier", { value: string }>;
 
-type NodeDecorator = N<"Decorator", { name: NodeIdentifier }>;
+type NodeDecorator = N<"Decorator", { name: NodeIdentifier; args: ASTNode[] }>;
 
 type LetOrDefun = {
   variable: NodeIdentifier;
@@ -385,11 +385,12 @@ export function nodeDefunStatement(
   };
 }
 
-export function decorator(
+export function nodeDecorator(
   name: NodeIdentifier,
+  args: ASTNode[],
   location: LocationRange
 ): NodeDecorator {
-  return { type: "Decorator", name, location };
+  return { type: "Decorator", name, args, location };
 }
 
 export function nodeDecoratedStatement(
