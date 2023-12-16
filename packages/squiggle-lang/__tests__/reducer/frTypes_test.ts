@@ -16,7 +16,7 @@ import {
   frDuration,
   frInput,
   frNamed,
-  frNumber,
+  FrNumber as frNumber,
   frOptional,
   frOr,
   frPlot,
@@ -53,7 +53,7 @@ import {
   vTableChart,
 } from "../../src/value/index.js";
 
-test("frNumber", () => {
+test("FrNumber", () => {
   const value = vNumber(5);
   expect(frNumber.unpack(value)).toBe(5);
   expect(frNumber.pack(5)).toEqual(value);
@@ -198,11 +198,11 @@ describe("frArray", () => {
   const value = vArray(arr.map((i) => vNumber(i)));
 
   test("unpack number[]", () => {
-    expect(frArray(frNumber).unpack(value)).toEqual(arr);
+    expect(frArray(FrNumber).unpack(value)).toEqual(arr);
   });
 
   test("pack number[]", () => {
-    expect(frArray(frNumber).pack(arr)).toEqual(value);
+    expect(frArray(FrNumber).pack(arr)).toEqual(value);
   });
 
   test("unpack any[]", () => {
@@ -218,7 +218,7 @@ describe("frTuple", () => {
   test("two elements", () => {
     const arr = [3, "foo"] as [number, string];
     const value = vArray([vNumber(arr[0]), vString(arr[1])]);
-    expect(frTuple(frNumber, frString).unpack(value)).toEqual(arr);
+    expect(frTuple(FrNumber, frString).unpack(value)).toEqual(arr);
     expect(frTuple(frNumber, frString).pack(arr)).toEqual(value);
   });
 
@@ -231,7 +231,7 @@ describe("frTuple", () => {
       vNumber(arr[3]),
       vNumber(arr[4]),
     ]);
-    const tuple = frTuple(frNumber, frString, frNumber, frNumber, frNumber);
+    const tuple = frTuple(FrNumber, frString, FrNumber, FrNumber, FrNumber);
     expect(tuple.unpack(value)).toEqual(arr);
     expect(tuple.pack(arr)).toEqual(value);
   });
@@ -248,7 +248,7 @@ test("frDictWithArbitraryKeys", () => {
       ["bar", vNumber(6)],
     ])
   );
-  expect(frDictWithArbitraryKeys(frNumber).unpack(value)).toEqual(dict);
+  expect(frDictWithArbitraryKeys(FrNumber).unpack(value)).toEqual(dict);
   expect(frDictWithArbitraryKeys(frNumber).pack(dict)).toEqual(value);
 });
 
@@ -264,7 +264,7 @@ describe("frDict", () => {
         ["bar", vString(dict.bar)],
       ])
     );
-    const t = frDict(["foo", frNumber], ["bar", frString]);
+    const t = frDict(["foo", FrNumber], ["bar", frString]);
 
     expect(t.unpack(v)).toEqual(dict);
     expect(t.pack(dict)).toEqual(v);
@@ -282,7 +282,7 @@ describe("frDict", () => {
       ])
     );
     const t = frDict(
-      ["foo", frNumber],
+      ["foo", FrNumber],
       ["bar", frString],
       ["baz", frOptional(frString)]
     );
@@ -329,7 +329,7 @@ describe("frOr", () => {
 
   describe("getName", () => {
     test("should return the correct name", () => {
-      expect(frNumberOrString.getName()).toBe("Number|String");
+      expect(FrNumberOrString.getName()).toBe("Number|String");
     });
   });
 });
@@ -337,7 +337,7 @@ describe("frOr", () => {
 describe("frNamed", () => {
   const testNumber = 42;
   const testValue: Value = vNumber(testNumber);
-  const namedNumberType = frNamed("TestNumber", frNumber);
+  const namedNumberType = frNamed("TestNumber", FrNumber);
 
   test("Unpack", () => {
     expect(namedNumberType.unpack(testValue)).toBe(testNumber);
@@ -353,7 +353,7 @@ describe("frNamed", () => {
   });
 
   test("getName with Optional Type", () => {
-    const optionalNumberType = frOptional(frNumber);
+    const optionalNumberType = frOptional(FrNumber);
     const namedOptionalNumberType = frNamed(
       "OptionalTestNumber",
       optionalNumberType
