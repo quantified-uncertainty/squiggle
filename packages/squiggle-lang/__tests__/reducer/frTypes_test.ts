@@ -329,7 +329,7 @@ describe("frOr", () => {
 
   describe("getName", () => {
     test("should return the correct name", () => {
-      expect(frNumberOrString.getName()).toBe("Number|String");
+      expect(frNumberOrString.getName).toBe("Number|String");
     });
   });
 });
