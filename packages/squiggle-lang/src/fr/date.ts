@@ -39,7 +39,11 @@ export const library = [
   maker.make({
     name: "make",
     requiresNamespace: true,
-    examples: ['Date.make("2020-05-12")', "Date.make(2020, 5, 10)"],
+    examples: [
+      'Date.make("2020-05-12")',
+      "Date.make(2020, 5, 10)",
+      "Date.make(2020)",
+    ],
     output: "Date",
     definitions: [
       makeDefinition([frString], frDate, ([str]) => {
@@ -61,6 +65,13 @@ export const library = [
           return SDate.fromYearMonthDay(yr, month, date);
         }
       ),
+      makeDefinition([frNamed("year", frNumber)], frDate, ([yr]) => {
+        const year = SDate.fromYear(yr);
+        if (!year.ok) {
+          throw new REOther(year.value);
+        }
+        return year.value;
+      }),
     ],
   }),
   maker.fromDefinition("fromYear", makeYearFn),
