@@ -26,6 +26,14 @@ describe("Plot", () => {
       'Plot.dists({dists: [{name:"dist1", value:2}, {name:"dist2", value:2 to 5}]})',
       "Plot containing dist1, dist2"
     );
+    testEvalToBe(
+      'Plot.dists([{name: "dist1", value: 2}, {name: "dist2", value: 2 to 5}])',
+      "Plot containing dist1, dist2"
+    );
+    testEvalToBe(
+      "Plot.dists([(2), 2 to 10])",
+      "Plot containing dist 1, dist 2"
+    );
   });
 
   describe("Plot.numericFn", () => {
