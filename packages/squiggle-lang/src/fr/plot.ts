@@ -187,6 +187,7 @@ export const library = [
     name: "dists",
     output: "Plot",
     examples: [
+      
       `Plot.dists({
   dists: [{ name: "dist", value: normal(0, 1) }],
   xScale: Scale.symlog()
@@ -208,7 +209,7 @@ export const library = [
             )
           ),
           frOptional(
-            frDict(
+              frDict(
               ["xScale", frOptional(frScale)],
               ["yScale", frOptional(frScale)],
               ["title", frOptional(frString)],
