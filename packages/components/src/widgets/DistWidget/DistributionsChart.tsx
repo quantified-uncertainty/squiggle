@@ -77,7 +77,7 @@ const InnerDistributionsChart: FC<{
   const sampleBarHeight = 5;
 
   const legendHeight = isMulti ? legendItemHeight * shapes.length : 0;
-  const _showSamplesBar = showSamplesBar && samples.length;
+  const _showSamplesBar = showSamplesBar && samples.length && !isMulti;
   const samplesFooterHeight = _showSamplesBar ? 10 : 0;
 
   const height = innerHeight + legendHeight + samplesFooterHeight + 34;
