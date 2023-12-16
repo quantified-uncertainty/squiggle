@@ -23,7 +23,7 @@ async function testPlotResult<T extends Plot["type"]>(
 describe("Plot", () => {
   describe("Plot.dists", () => {
     testEvalToBe(
-      'Plot.dists({dists: [{name: "dist1", value: 2}, {name: "dist2", value: 2 to 5}]})',
+      'Plot.dists({dists: [{name:"dist1", value:2}, {name:"dist2", value:2 to 5}]})',
       "Plot containing dist1, dist2"
     );
   });
@@ -94,7 +94,7 @@ Was given arguments: ((x,y) => internal code)`
     testEvalToMatch(
       `Plot.numericFn({
         fn: {|x| x * 5},
-        xScale: Scale.linear({ max: 100 })
+        xScale: Scale.linear({max:100})
       })`,
       "Scale max set without min. Must set either both or neither."
     );
@@ -146,7 +146,7 @@ Was given arguments: ((x,y) => internal code)`
     "explicit scale with min/max ignores the domain",
     `Plot.distFn(
         {|x: [3, 5]| uniform(x, x + 1)},
-        {xScale: Scale.linear({ min: 100, max: 200 })}
+        {xScale: Scale.linear({min:100, max:200})}
       )`,
     "distFn",
     (plot) => {
