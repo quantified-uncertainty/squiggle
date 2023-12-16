@@ -5,7 +5,8 @@
 }}
 
 start
-  = _nl start:outerBlock _nl finalComment?  { return start; }
+  = _nl start:outerBlock _nl finalComment?
+    { return start; }
 
 zeroOMoreArgumentsBlockOrExpression = lambda / innerBlockOrExpression
 
@@ -50,10 +51,25 @@ quotedInnerBlock
     '}'
     { return h.nodeBlock([finalExpression], location()); }
 
-statementsList = statement|1.., statementSeparator|
+statementsList = decoratedStatement|1.., statementSeparator|
+
+decoratedStatement
+  = decorator:decorator statement:decoratedStatement
+    {
+      return h.nodeDecoratedStatement(decorator, statement, location())
+    }
+  / letStatement
+  / defunStatement
+
+  decorator
+    = '@' name:identifier commentOrNewLine
+    {
+      return h.decorator(name, location());
+    }
 
 statement
-  = letStatement
+  = decoratedStatement
+  / letStatement
   / defunStatement
   / voidStatement
 

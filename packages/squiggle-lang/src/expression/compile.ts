@@ -317,6 +317,29 @@ function compileToContent(
         "Can't compile IdentifierWithAnnotation outside of lambda declaration",
         ast.location
       );
+    case "DecoratedStatement":
+      if (ast.statement.type === "LetStatement") {
+        return compileToContent(
+          {
+            ...ast.statement,
+            value: {
+              type: "Call",
+              location: ast.decorator.location, // FIXME?
+              fn: {
+                type: "Identifier",
+                location: ast.decorator.name.location,
+                value: `Tag.${ast.decorator.name.value}`,
+              },
+              args: [ast.statement.value],
+            },
+          },
+          context
+        );
+      } else {
+        throw new Error("TODO: support decorators on DefunStatement nodes");
+      }
+    case "Decorator":
+      throw new ICompileError("Can't compile Decorator node", ast.location);
     default:
       throw new Error(`Unsupported AST value ${ast satisfies never}`);
   }

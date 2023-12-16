@@ -95,6 +95,10 @@ function nodeToString(node: ASTNode): string {
       return sExpr([node.key, node.value]);
     case "Lambda":
       return sExpr([...node.args, node.body]);
+    case "Decorator":
+      return sExpr([node.name]);
+    case "DecoratedStatement":
+      return sExpr([node.decorator, node.statement]);
     case "LetStatement":
       return node.exported
         ? sExpr(["export", node.variable, node.value])
