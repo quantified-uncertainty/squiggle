@@ -3,11 +3,11 @@ import { testEvalToBe, testEvalToMatch } from "../helpers/reducerHelpers.js";
 describe("Scales", () => {
   testEvalToBe("Scale.linear()", "Linear scale");
   testEvalToMatch(
-    "Scale.linear({ min: 10, max: 5 })",
+    "Scale.linear({min:10, max:5})",
     "Max must be greater than min, got: min=10, max=5"
   );
   testEvalToMatch(
-    "Scale.linear({ min: 5, max: 10, tickFormat: '....' })",
+    "Scale.linear({min:5, max:10, tickFormat:'....'})",
     "Error(Argument Error: Tick format [....] is invalid.)"
   );
 
@@ -23,18 +23,18 @@ describe("Scales", () => {
 
   testEvalToBe("Scale.symlog()", "Symlog scale ({constant: 0.0001})");
   testEvalToMatch(
-    "Scale.symlog({ min: 10, max: 5 })",
+    "Scale.symlog({min:10, max:5})",
     "Max must be greater than min, got: min=10, max=5"
   );
 
   testEvalToBe("Scale.power({ exponent: 2 })", "Power scale ({exponent: 2})");
   testEvalToMatch(
-    "Scale.power({ min: 10, max: 5, exponent: 2 })",
+    "Scale.power({min:10, max:5, exponent:2})",
     "Max must be greater than min, got: min=10, max=5"
   );
 
   testEvalToMatch(
-    "Scale.date({ min: Date(2023), max: Date(2021) })",
+    "Scale.date({min:Date(2023), max:Date(2021)})",
     "Max must be greater than min, got: min=Sun Jan 01 2023, max=Fri Jan 01 2021"
   );
 });
