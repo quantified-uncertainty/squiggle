@@ -457,7 +457,7 @@ export function frDict<T extends object>(
       allKvs
         .map(
           ([name, frType]) =>
-            `${name}${isOptional(frType) ? "?" : ""}: ${frType.getName()}`
+            `${name}${isOptional(frType) ? "?" : ""}: ${frType.getName}`
         )
         .join(", ") +
       "}",
