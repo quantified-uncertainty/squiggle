@@ -4,7 +4,7 @@ import { testEvalToBe, testEvalToMatch } from "../helpers/reducerHelpers.js";
 describe("annotations", () => {
   describe(".parameters", () => {
     testEvalToBe("f(x: [3,5]) = x; List.length(f.parameters)", "1");
-    testEvalToBe("f(x: [3,5]) = x; f.parameters[0].name", '"x"');
+    testEvalToBe("f(x: [3,5]) = x; f.parameters[0].name", '"x"')
     testEvalToBe("f(x: [3,5]) = x; f.parameters[0].domain.min", "3");
     testEvalToBe("f(x: [3,5]) = x; f.parameters[0].domain.max", "5");
     testEvalToBe(
@@ -29,7 +29,7 @@ describe("annotations", () => {
 
   describe("runtime checks", () => {
     describe("check domain ranges", () => {
-      testEvalToBe("f(x: [3,5]) = x*2; f(3)", "6");
+      testEvalToBe("f(x: [3,5]) = x*2; f(3)", "6")
       testEvalToBe("f(x: [3,5]) = x*2; f(4)", "8");
       testEvalToBe("f(x: [3,5]) = x*2; f(5)", "10");
       testEvalToBe(
@@ -46,10 +46,8 @@ describe("annotations", () => {
       );
     });
     describe("check types", () => {
-      testEvalToBe(
-        "f(x: [3,5]) = x*2; f(false)",
-        "Error(Domain Error: Parameter false, of type Bool, must be a Number)"
-      );
+      testEvalToBe("f(x: [3,5]) = x*2; f(false)",
+        "Error(Domain Error: Parameter false, of type Bool, must be a Number)")
       testEvalToBe(
         "f(x: [3,5]) = x*2; f(Date(2000))",
         "Error(Domain Error: Parameter Sat Jan 01 2000, of type Date, must be a Number)"
@@ -63,10 +61,8 @@ describe("annotations", () => {
   });
 
   describe("explicit annotation object", () => {
-    testEvalToBe(
-      "f(x: Number.rangeDomain(3, 5)) = x; f.parameters[0].domain.min",
-      "3"
-    );
+    testEvalToBe("f(x: Number.rangeDomain(3, 5)) = x; f.parameters[0].domain.min",
+      "3")
   });
 
   describe("stack traces", () => {
@@ -86,9 +82,7 @@ Stack trace:
     });
 
     test("Stacktrace on domain checks", async () => {
-      const result = await evaluateStringToResult(
-        "f(x: [3,5]) = x; g() = f(6); g()"
-      );
+      const result = await evaluateStringToResult("f(x: [3,5]) = x; g() = f(6); g()")
       if (result.ok) {
         throw new Error("expected error");
       }
