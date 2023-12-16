@@ -2,6 +2,11 @@ import { evaluateStringToResult } from "../../src/reducer/index.js";
 import { Plot } from "../../src/value/index.js";
 import { testEvalToBe, testEvalToMatch } from "../helpers/reducerHelpers.js";
 
+const X_RANGE = [3, 5];
+const X_MULTIPLIER = 5;
+const X_SCALE_MIN = 100;
+const X_SCALE_MAX = 200;
+
 async function testPlotResult<T extends Plot["type"]>(
   name: string,
   code: string,
@@ -54,26 +59,26 @@ Was given arguments: ((x,y) => internal code)`
 
     testPlotResult(
       "default scale based on domain",
-      `Plot.numericFn({|x: [3, 5]| x * 5})`,
+      `Plot.numericFn({|x: X_RANGE| x * X_MULTIPLIER})`,
       "numericFn",
       (plot) => {
         expect(plot.xScale.type).toBe("linear");
-        expect(plot.xScale.min).toBe(3);
-        expect(plot.xScale.max).toBe(5);
+        expect(plot.xScale.min).toBe(X_RANGE[0]);
+        expect(plot.xScale.max).toBe(X_RANGE[1]);
       }
     );
 
     testPlotResult(
       "explicit scale with min/max ignores the domain",
       `Plot.numericFn(
-        {|x: [3, 5]| x * 5},
-        {xScale: Scale.linear({ min: 100, max: 200 })}
+        {|x: X_RANGE| x * X_MULTIPLIER},
+        {xScale: Scale.linear({ min: X_SCALE_MIN, max: X_SCALE_MAX })}
       )`,
       "numericFn",
       (plot) => {
         expect(plot.xScale.type).toBe("linear");
-        expect(plot.xScale.min).toBe(100);
-        expect(plot.xScale.max).toBe(200);
+        expect(plot.xScale.min).toBe(X_SCALE_MIN);
+        expect(plot.xScale.max).toBe(X_SCALE_MAX);
       }
     );
 
