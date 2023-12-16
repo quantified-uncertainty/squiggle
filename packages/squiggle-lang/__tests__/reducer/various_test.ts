@@ -1,6 +1,6 @@
 import { evaluateStringToResult } from "../../src/reducer/index.js";
 import {
-  expectEvalToBe,
+  expectEvalToCorrect,
   testDescriptionEvalToBe,
   testEvalError,
   testEvalToBe,
@@ -8,8 +8,8 @@ import {
 
 describe("eval", () => {
   describe("expressions", () => {
-    testEvalToBe("1", "1");
-    testEvalToBe("-1", "-1");
+    testEvalToCorrect("1", "1");
+    testEvalToCorrect("-1", "-1");
     testEvalToBe("1-1", "0");
     testEvalToBe("1+2", "3");
     testEvalToBe("(1+2)*3", "9");
@@ -31,18 +31,18 @@ describe("eval", () => {
 
   describe("arrays", () => {
     test("empty array", async () => {
-      await expectEvalToBe("[]", "[]");
+      await expectEvalToCorrect("[]", "[]");
     });
     testEvalToBe("[1, 2, 3]", "[1,2,3]");
     testEvalToBe("['hello', 'world']", '["hello","world"]');
     testEvalToBe("([0,1,2])[1]", "1");
-    testDescriptionEvalToBe(
+    testDescriptionEvalToCorrect(
       "index not found",
       "([0,1,2])[10]",
       "Error(Array index not found: 10)"
     );
     test("trailing comma", async () => {
-      await expectEvalToBe(`[3,4,]`, "[3,4]");
+      await expectEvalToCorrect(`[3,4,]`, "[3,4]");
       await expectEvalToBe(
         `[
         3,
@@ -53,18 +53,18 @@ describe("eval", () => {
     });
   });
   describe("dicts", () => {
-    test("empty", async () => await expectEvalToBe("{}", "{}"));
+    test("empty", async () => await expectEvalToCorrect("{}", "{}"));
     test("define", async () =>
-      await expectEvalToBe("{a: 1, b: 2}", "{a: 1,b: 2}"));
+      await expectEvalToCorrect("{a: 1, b: 2}", "{a: 1,b: 2}"));
     test("index", async () => await expectEvalToBe("r = {a: 1}; r.a", "1"));
     test("index", async () =>
-      await expectEvalToBe(
+      await expectEvalToCorrect(
         "r = {a: 1}; r.b",
         "Error(Dict property not found: b)"
       ));
     testEvalError("{a: 1}.b"); // invalid syntax
     test("trailing comma", async () =>
-      await expectEvalToBe(
+      await expectEvalToCorrect(
         `{
       a: 1, 
       b: 2,
@@ -72,7 +72,7 @@ describe("eval", () => {
         "{a: 1,b: 2}"
       ));
     test("shorthand", async () => {
-      await expectEvalToBe("a=1; {a, b: a }", "{a: 1,b: 1}");
+      await expectEvalToCorrect("a=1; {a, b: a }", "{a: 1,b: 1}");
     });
   });
 
@@ -81,8 +81,8 @@ describe("eval", () => {
     testEvalError("1+1; 2+1");
   });
   describe("assignment", () => {
-    testEvalToBe("x=1; x", "1");
-    testEvalToBe("x=1+1; x+1", "3");
+    testEvalToCorrect("x=1; x", "1");
+    testEvalToCorrect("x=1+1; x+1", "3");
     testEvalToBe("x=1; y=x+1; y+1", "3");
     testEvalError("1; x=1");
     testEvalError("1; 1");
@@ -95,8 +95,8 @@ describe("eval", () => {
 
   describe("chain call", () => {
     describe("to function", () => {
-      testEvalToBe("f(x)=x; 1->f", "1");
-      testEvalToBe("f(x,y)=x+y; 1->f(2)", "3");
+      testEvalToCorrect("f(x)=x; 1->f", "1");
+      testEvalToCorrect("f(x,y)=x+y; 1->f(2)", "3");
     });
     describe("to block", () => {
       testEvalToBe("1->{|x| x}", "1");
