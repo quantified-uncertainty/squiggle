@@ -1,8 +1,7 @@
 import { FC, ReactNode } from "react";
 
-import { SqValue } from "@quri/squiggle-lang";
+import { SqBoxedValue, SqValue } from "@quri/squiggle-lang";
 
-import { SqBoxedValue } from "../../../squiggle-lang/src/public/SqValue/index.js";
 import { PlaygroundSettings } from "../components/PlaygroundSettings.js";
 import { SqValueWithContext } from "../lib/utility.js";
 

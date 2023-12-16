@@ -1,8 +1,7 @@
 import { clsx } from "clsx";
 
-import { SqNumberValue } from "@quri/squiggle-lang";
+import { SqBoxedValue, SqNumberValue } from "@quri/squiggle-lang";
 
-import { SqBoxedValue } from "../../../squiggle-lang/src/public/SqValue/index.js";
 import { NumberShower } from "../components/NumberShower.js";
 import { formatNumber } from "../lib/d3/index.js";
 import { widgetRegistry } from "./registry.js";

@@ -1,6 +1,7 @@
 import { memo } from "react";
 
-import { SqBoxedValue } from "../../../../squiggle-lang/src/public/SqValue/index.js";
+import { SqBoxedValue } from "@quri/squiggle-lang";
+
 import { SqValueWithContext } from "../../lib/utility.js";
 import { widgetRegistry } from "../../widgets/registry.js";
 import { PlaygroundSettings } from "../PlaygroundSettings.js";

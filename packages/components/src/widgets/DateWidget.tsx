@@ -1,7 +1,5 @@
-import {
-  SqBoxedValue,
-  SqDateValue,
-} from "../../../squiggle-lang/src/public/SqValue/index.js";
+import { SqBoxedValue, SqDateValue } from "@quri/squiggle-lang";
+
 import { formatDate } from "../lib/d3/index.js";
 import { widgetRegistry } from "./registry.js";
 
