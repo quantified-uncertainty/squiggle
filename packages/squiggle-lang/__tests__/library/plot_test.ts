@@ -3,10 +3,10 @@ import { Plot } from "../../src/value/index.js";
 import { testEvalToBe, testEvalToMatch } from "../helpers/reducerHelpers.js";
 
 async function testPlotResult<T extends Plot["type"]>(
-  name: string,
-  code: string,
-  type: T,
-  cb: (plot: Extract<Plot, { type: T }>) => void
+  Name: string,
+  Code: string,
+  Type: T,
+  Cb: (plot: Extract<Plot, { type: T }>) => void
 ) {
   test(name, async () => {
     const result = await evaluateStringToResult(code);
