@@ -20,7 +20,7 @@ import {
 import { FnFactory } from "../library/registry/helpers.js";
 import { Lambda } from "../reducer/lambda.js";
 import { Boxed } from "../value/boxed.js";
-import { Value, vBoxed, vString } from "../value/index.js";
+import { Value, vBool, vBoxed, vString } from "../value/index.js";
 
 const maker = new FnFactory({
   nameSpace: "Tag",
@@ -128,9 +128,35 @@ export const library = [
     name: "getShowAs",
     examples: [],
     definitions: [
-      makeDefinition([frForceBoxed(frAny())], frAny(), ([{ args, value }]) => {
+      makeDefinition([frForceBoxed(frAny())], frAny(), ([{ args }]) => {
         return args.value.showAs || vString("None"); // Not sure what to use when blank.
       }),
+    ],
+  }),
+  maker.make({
+    name: "focus",
+    examples: [],
+    definitions: [
+      makeDefinition(
+        [frForceBoxed(frAny({ genericName: "A" }))],
+        frForceBoxed(frAny({ genericName: "A" })),
+        ([{ args, value }]) => {
+          return { value: value, args: args.merge({ focus: true }) };
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "getFocus",
+    examples: [],
+    definitions: [
+      makeDefinition(
+        [frForceBoxed(frAny({ genericName: "A" }))],
+        frAny(),
+        ([{ args, value }]) => {
+          return args.value.focus ? vBool(true) : vString("None");
+        }
+      ),
     ],
   }),
   maker.make({

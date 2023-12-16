@@ -118,13 +118,13 @@ noShow1 = false
 noShow2 = false
 
 /*** Triple stars are forbidden too; again, JSDoc convention. */
-noShow2 = false
+noShow3 = false
 
 /** This comment won't show because \`show2\` is shadowed */
 show2 = false
 
 /** If variable is redefined, we attach the last comment */
-show2 = true
+show3 = true
 
 /** line 1 */
 /** line 2 - only this line will be shown */

@@ -1,7 +1,7 @@
+import { BoxedArgs } from "../../value/boxed.js";
 import { Value } from "../../value/index.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqValue, wrapValue } from "./index.js";
-import { BoxedArgs } from "../../value/boxed.js";
 
 export class SqBoxed {
   constructor(
@@ -25,5 +25,9 @@ export class SqBoxed {
   showAs(): SqValue | undefined {
     const showAs = this.args.showAs();
     return showAs ? wrapValue(showAs, this.context) : undefined;
+  }
+
+  focus(): true | undefined {
+    return this.args.value.focus;
   }
 }

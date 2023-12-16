@@ -1,10 +1,11 @@
 import { ImmutableMap } from "../utility/immutableMap.js";
-import { Value, vString } from "./index.js";
+import { Value, vBool, vString } from "./index.js";
 
 export type BoxedArgsType = {
   name?: string;
   description?: string;
   showAs?: Value;
+  focus?: true;
 };
 
 //I expect these to get much more complicated later, so it seemed prudent to make a class now.
@@ -22,6 +23,9 @@ export class BoxedArgs {
     }
     if (value.showAs) {
       result.push(["showAs", value.showAs]);
+    }
+    if (value.focus) {
+      result.push(["focus", vBool(true)]);
     }
     return result;
   }

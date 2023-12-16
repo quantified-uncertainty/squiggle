@@ -35,6 +35,7 @@ type ItemHandle = {
 type LocalItemState = {
   collapsed: boolean;
   calculator?: CalculatorState;
+  hasFocusedWithTag?: boolean;
   settings: Pick<
     PartialPlaygroundSettings,
     "distributionChartSettings" | "functionChartSettings"
@@ -54,11 +55,32 @@ export type Action =
       };
     }
   | {
+      type: "SET_FOCUSED_WITH_TAG";
+      payload: {
+        path: SqValuePath;
+        value: boolean;
+      };
+    }
+  | {
       type: "FOCUS";
-      payload: SqValuePath;
+      payload: {
+        path: SqValuePath;
+      };
     }
   | {
       type: "UNFOCUS";
+    }
+  | {
+      type: "FOCUS_WITH_TAG";
+      payload: {
+        path: SqValuePath;
+      };
+    }
+  | {
+      type: "UNFOCUS_WITH_TAG";
+      payload: {
+        path: SqValuePath;
+      };
     }
   | {
       type: "TOGGLE_COLLAPSED";
@@ -233,7 +255,9 @@ export function useFocus() {
   return (path: SqValuePath) => {
     dispatch({
       type: "FOCUS",
-      payload: path,
+      payload: {
+        path,
+      },
     });
   };
 }
@@ -241,6 +265,24 @@ export function useFocus() {
 export function useUnfocus() {
   const { dispatch } = useViewerContext();
   return () => dispatch({ type: "UNFOCUS" });
+}
+
+export function useFocusWithTag() {
+  const { dispatch } = useViewerContext();
+  return (path: SqValuePath) => {
+    dispatch({
+      type: "FOCUS_WITH_TAG",
+      payload: {
+        path,
+      },
+    });
+  };
+}
+
+export function useUnfocusWithTag() {
+  const { dispatch } = useViewerContext();
+  return (path: SqValuePath) =>
+    dispatch({ type: "UNFOCUS_WITH_TAG", payload: { path } });
 }
 
 export function useCollapseChildren() {
@@ -364,12 +406,33 @@ export const ViewerProvider: FC<
           setLocalItemState(action.payload.path, () => action.payload.value);
           forceUpdate(action.payload.path);
           return;
-        case "FOCUS":
-          setFocused(action.payload);
+        case "FOCUS": {
+          const { path } = action.payload;
+          setFocused(path);
           return;
-        case "UNFOCUS":
+        }
+        case "UNFOCUS": {
           setFocused(undefined);
           return;
+        }
+        case "FOCUS_WITH_TAG": {
+          const { path } = action.payload;
+          setLocalItemState(path, (state) => ({
+            ...state,
+            hasFocusedWithTag: true,
+          }));
+          setFocused(path);
+          return;
+        }
+        case "UNFOCUS_WITH_TAG": {
+          const { path } = action.payload;
+          setLocalItemState(path, (state) => ({
+            ...state,
+            hasFocusedWithTag: false,
+          }));
+          setFocused(undefined);
+          return;
+        }
         case "TOGGLE_COLLAPSED": {
           const path = action.payload;
           setLocalItemState(path, (state) => ({

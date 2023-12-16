@@ -19,12 +19,13 @@ import { getChildrenValues, pathToShortName } from "./utils.js";
 import {
   useCollapseChildren,
   useFocus,
+  useFocusWithTag,
   useIsFocused,
   useMergedSettings,
   useRegisterAsItemViewer,
   useSetCollapsed,
   useToggleCollapsed,
-  useUnfocus,
+  useUnfocusWithTag,
   useViewerContext,
 } from "./ViewerProvider.js";
 
@@ -123,23 +124,31 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
   const setCollapsed = useSetCollapsed();
   const collapseChildren = useCollapseChildren();
   const focus = useFocus();
-  const unFocus = useUnfocus();
   const { getLocalItemState } = useViewerContext();
+  const focusWithTag = useFocusWithTag();
+  const unfocusWithTag = useUnfocusWithTag();
   const isFocused = useIsFocused(path);
 
   const isRoot = path.isRoot();
   const boxedName = tag === "Boxed" ? value.value.name() : undefined;
-  const [prevBoxedName] = useState(boxedName);
+  const boxedFocus = tag === "Boxed" ? value.value.focus() : undefined;
 
   useEffect(() => {
-    if (prevBoxedName !== boxedName) {
-      if (boxedName === "HI") {
-        focus(path);
-      } else if (prevBoxedName === "HI") {
-        unFocus();
-      }
+    const localItemState = getLocalItemState({ path });
+    const alreadyFocusedWithTag = localItemState.hasFocusedWithTag;
+    if (boxedFocus && !alreadyFocusedWithTag) {
+      focusWithTag(path);
+    } else if (!boxedFocus && alreadyFocusedWithTag && isFocused) {
+      unfocusWithTag(path);
     }
-  }, [boxedName, focus, path, prevBoxedName, unFocus]);
+  }, [
+    boxedFocus,
+    path,
+    isFocused,
+    getLocalItemState,
+    focusWithTag,
+    unfocusWithTag,
+  ]);
 
   // Collapse children and element if desired. Uses crude heuristics.
   // TODO - this code has side effects, it'd be better if we ran it somewhere else, e.g. traverse values recursively when `ViewerProvider` is initialized.
