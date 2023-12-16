@@ -140,7 +140,7 @@ export const library = [
     examples: ["Date.rangeDomain(Date(2000), Date(2010))"],
     definitions: [
       makeDefinition(
-        [frNamed("min", frDate), frNamed("min", frDate)],
+        [frNamed("min", frDate), frNamed("max", frDate)],
         frDomain,
         ([min, max]) => {
           return new DateRangeDomain(min, max);
