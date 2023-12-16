@@ -2,7 +2,7 @@
 import "../../widgets/index.js";
 
 import { clsx } from "clsx";
-import { FC, PropsWithChildren, useMemo, useState } from "react";
+import { FC, PropsWithChildren, useEffect, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 
 import { CommentIcon, TextTooltip } from "@quri/ui";
@@ -24,6 +24,7 @@ import {
   useRegisterAsItemViewer,
   useSetCollapsed,
   useToggleCollapsed,
+  useUnfocus,
   useViewerContext,
 } from "./ViewerProvider.js";
 
@@ -122,11 +123,23 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
   const setCollapsed = useSetCollapsed();
   const collapseChildren = useCollapseChildren();
   const focus = useFocus();
+  const unFocus = useUnfocus();
   const { getLocalItemState } = useViewerContext();
   const isFocused = useIsFocused(path);
 
   const isRoot = path.isRoot();
   const boxedName = tag === "Boxed" ? value.value.name() : undefined;
+  const [prevBoxedName] = useState(boxedName);
+
+  useEffect(() => {
+    if (prevBoxedName !== boxedName) {
+      if (boxedName === "HI") {
+        focus(path);
+      } else if (prevBoxedName === "HI") {
+        unFocus();
+      }
+    }
+  }, [boxedName, focus, path, prevBoxedName, unFocus]);
 
   // Collapse children and element if desired. Uses crude heuristics.
   // TODO - this code has side effects, it'd be better if we ran it somewhere else, e.g. traverse values recursively when `ViewerProvider` is initialized.
