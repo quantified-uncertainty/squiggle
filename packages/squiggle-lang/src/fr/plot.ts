@@ -153,7 +153,7 @@ const numericFnDef = () => {
             points || null
           );
         }
-      ),
+      )
       makeDefinition(
         [
           frDict(
@@ -376,7 +376,7 @@ export const library = [
             points: points ?? undefined,
           };
         }
-      ),
+      )
       makeDefinition(
         [
           frDict(
@@ -436,7 +436,7 @@ export const library = [
             title: title ?? undefined,
           };
         }
-      ),
+      )
     ],
-  }),
+  })
 ];
