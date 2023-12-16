@@ -129,7 +129,7 @@ export const frLambdaTyped = (
     },
     pack: (v) => vLambda(v),
     getName: () =>
-      `(${inputs.map((i) => i.getName()).join(", ")}) => ${output.getName()}`,
+      `${inputs.map(i => i.getName()).join(", ")} => ${output.getName()}`,
   };
 };
 
