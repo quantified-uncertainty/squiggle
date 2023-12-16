@@ -125,7 +125,7 @@ describe("stacktraces", () => {
     }
     const error = result.value.toStringWithDetails();
 
-    expect(error).toBe(
+      expect(error).toBe(
       `Error: There are function matches for add(), but with different arguments:
   add(Number, Number) => Number
   add(String, String) => String
