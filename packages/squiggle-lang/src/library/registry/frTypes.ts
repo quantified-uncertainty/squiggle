@@ -49,7 +49,7 @@ export const isOptional = <T>(frType: FRType<T>): boolean => {
   return frType.isOptional === undefined ? false : frType.isOptional;
 };
 
-export const frNumber: FRType<number> = {
+export const FrNumber: FRType<number> = {
   unpack: (v: Value) => (v.type === "Number" ? v.value : undefined),
   pack: (v) => vNumber(v),
   getName: () => "Number",
@@ -283,7 +283,7 @@ export function frTuple(...types: FRType<unknown>[]): FRType<any> {
   };
 }
 
-export const frDictWithArbitraryKeys = <T>(
+export const FrDictWithArbitraryKeys = <T>(
   itemType: FRType<T>
 ): FRType<ImmutableMap<string, T>> => {
   return {
