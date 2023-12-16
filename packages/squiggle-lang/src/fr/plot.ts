@@ -127,7 +127,7 @@ const numericFnDef = () => {
       `Plot.numericFn({|x|x*x}, {xScale: Scale.linear({ min: 3, max: 5 }), yScale: Scale.log({ tickFormat: ".2s" }) })`,
     ],
     definitions: [
-      makeDefinition(
+      createPlotDefinition(
         [
           frNamed("fn", fnType),
           frNamed(
