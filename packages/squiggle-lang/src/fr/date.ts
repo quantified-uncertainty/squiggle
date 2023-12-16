@@ -16,7 +16,7 @@ import { SDate } from "../utility/SDate.js";
 import { DateRangeDomain } from "../value/domain.js";
 
 const maker = new FnFactory({
-  nameSpace: "Date",
+  namespace: "Date",
   requiresNamespace: false,
 });
 
@@ -36,8 +36,8 @@ export const library = [
     (d1, d2) => d1.isEqual(d2),
     frDate
   ),
-  maker.make({
-    name: "make",
+maker.make({
+  name: "make",
     requiresNamespace: true,
     examples: [
       'Date.make("2020-05-12")',
@@ -81,9 +81,7 @@ export const library = [
     requiresNamespace: true,
     output: "Date",
     definitions: [
-      makeDefinition([frNumber], frDate, ([num]) => {
-        return SDate.fromUnixS(num);
-      }),
+      makeDefinition([frNumber], frDate, ([num]) => SDate.fromUnixS(num)),
     ],
   }),
   maker.make({
@@ -102,9 +100,7 @@ export const library = [
     examples: ["Date.make(2020, 5, 12) - Date.make(2000, 1, 1)"],
     output: "Duration",
     definitions: [
-      makeDefinition([frDate, frDate], frDuration, ([d1, d2]) =>
-        d1.subtract(d2)
-      ),
+      makeDefinition([frDate, frDate], frDuration, ([d1, d2]) => d1.subtract(d2)),
     ],
   }),
   maker.make({
@@ -112,9 +108,7 @@ export const library = [
     examples: ["Date.make(2020, 5, 12) - 20years"],
     output: "Date",
     definitions: [
-      makeDefinition([frDate, frDuration], frDate, ([d1, d2]) =>
-        d1.subtractDuration(d2)
-      ),
+      makeDefinition([frDate, frDuration], frDate, ([d1, d2]) => d1.subtractDuration(d2)),
     ],
   }),
   maker.make({
@@ -128,9 +122,7 @@ export const library = [
       makeDefinition([frDate, frDuration], frDate, ([d1, d2]) =>
         d1.addDuration(d2)
       ),
-      makeDefinition([frDuration, frDate], frDate, ([d1, d2]) =>
-        d2.addDuration(d1)
-      ),
+      makeDefinition([frDuration, frDate], frDate, ([d1, d2]) => d2.addDuration(d1)),
     ],
   }),
   maker.make({
