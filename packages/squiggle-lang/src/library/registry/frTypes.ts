@@ -452,7 +452,7 @@ export function frDict<T extends object>(
             .map(([key, valueShape]) => [key, valueShape.pack((v as any)[key])])
         )
       ),
-    getName: () =>
+      getName: () =>
       "{" +
       allKvs
         .map(
