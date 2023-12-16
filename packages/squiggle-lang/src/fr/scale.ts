@@ -194,7 +194,7 @@ export const library = [
   maker.make({
     name: "date",
     output: "Scale",
-    examples: [`Scale.date({ min: Date(2022), max: Date(2025) })`],
+    examples: ["Scale.date({ min: Date(2022), max: Date(2025) })"],
     definitions: [
       makeDefinition(
         [dateDict],
