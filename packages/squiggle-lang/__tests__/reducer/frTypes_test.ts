@@ -14,6 +14,7 @@ import {
   frDistSymbolic,
   frDomain,
   frDuration,
+  frForceBoxed,
   frInput,
   frNamed,
   FrNumber as frNumber,
@@ -32,6 +33,7 @@ import { MixedShape } from "../../src/PointSet/Mixed.js";
 import { ImmutableMap } from "../../src/utility/immutableMap.js";
 import { SDate } from "../../src/utility/SDate.js";
 import { SDuration } from "../../src/utility/SDuration.js";
+import { Boxed, BoxedArgs } from "../../src/value/boxed.js";
 import { NumericRangeDomain } from "../../src/value/domain.js";
 import {
   Input,
@@ -40,6 +42,7 @@ import {
   Value,
   vArray,
   vBool,
+  vBoxed,
   vDate,
   vDict,
   vDist,
@@ -206,7 +209,7 @@ describe("frArray", () => {
   });
 
   test("unpack any[]", () => {
-    expect(frArray(frAny).unpack(value)).toEqual([
+    expect(frArray(frAny()).unpack(value)).toEqual([
       vNumber(3),
       vNumber(5),
       vNumber(6),
@@ -361,5 +364,41 @@ describe("frNamed", () => {
     expect(namedOptionalNumberType.getName()).toBe(
       "OptionalTestNumber?: Number"
     );
+  });
+});
+
+describe("frForceBoxed", () => {
+  const itemType = frNumber;
+  const frBoxedNumber = frForceBoxed(itemType);
+
+  test("Unpack Non-Boxed Item", () => {
+    const value = vNumber(10);
+    const unpacked = frBoxedNumber.unpack(value);
+    expect(unpacked).toEqual({ value: 10, args: new BoxedArgs({}) });
+  });
+
+  test("Unpack Boxed Item", () => {
+    const boxedValue = vBoxed(
+      new Boxed(vNumber(10), new BoxedArgs({ name: "test" }))
+    );
+    const unpacked = frBoxedNumber.unpack(boxedValue);
+    expect(unpacked).toEqual({
+      value: 10,
+      args: new BoxedArgs({ name: "test" }),
+    });
+  });
+
+  test("Pack", () => {
+    const packed = frBoxedNumber.pack({
+      value: 10,
+      args: new BoxedArgs({ name: "myName" }),
+    });
+    expect(packed).toEqual(
+      vBoxed(new Boxed(vNumber(10), new BoxedArgs({ name: "myName" })))
+    );
+  });
+
+  test("GetName", () => {
+    expect(frBoxedNumber.getName()).toBe("Number");
   });
 });

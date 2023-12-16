@@ -22,6 +22,7 @@ import { library as scoringLibrary } from "../../fr/scoring.js";
 import { library as stringLibrary } from "../../fr/string.js";
 import { library as symLibrary } from "../../fr/sym.js";
 import { library as tableLibrary } from "../../fr/table.js";
+import { library as tagLibrary } from "../../fr/tag.js";
 import { library as unitsLibrary } from "../../fr/units.js";
 import { Bindings } from "../../reducer/stack.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
@@ -40,6 +41,7 @@ const fnList: FRFunction[] = [
   ...tableLibrary,
   ...listLibrary,
   ...mathLibrary,
+  ...tagLibrary,
   ...plotLibrary,
   ...pointsetLibrary,
   ...relativeValuesLibrary,

@@ -6,6 +6,7 @@ import { Lambda } from "../../reducer/lambda.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import { SDate } from "../../utility/SDate.js";
 import { SDuration } from "../../utility/SDuration.js";
+import { Boxed, BoxedArgs } from "../../value/boxed.js";
 import { Domain } from "../../value/domain.js";
 import {
   Calculator,
@@ -16,6 +17,7 @@ import {
   Value,
   vArray,
   vBool,
+  vBoxed,
   vCalculator,
   vDate,
   vDict,
@@ -41,6 +43,7 @@ export type FRType<T> = {
   pack: (v: T) => Value; // used in makeSquiggleDefinition
   getName: () => string;
   transparent?: T extends Value ? boolean : undefined;
+  keepBoxes?: boolean;
   isOptional?: boolean;
   tag?: string;
 };
@@ -133,6 +136,35 @@ export const frLambdaTyped = (
   };
 };
 
+//This will box if not boxed. We could do a form that doesn't do this, but it would be messier.
+//I could see it as cleaner to use a new Class or interface like {type: "Boxed", value: T, args: BoxedArgs} | {type: "Unboxed", value: T}, but doesn't seem worth it yet.
+export const frForceBoxed = <T>(
+  itemType: FRType<T>
+): FRType<{ value: T; args: BoxedArgs }> => {
+  return {
+    unpack: (v) => {
+      if (v.type !== "Boxed") {
+        const unpackedItem = itemType.unpack(v);
+        if (unpackedItem) {
+          return { value: unpackedItem, args: new BoxedArgs({}) };
+        } else {
+          return undefined;
+        }
+      } else {
+        const unpackedItem = itemType.unpack(v.value.value);
+        const boxedArgs: BoxedArgs = v.value.args;
+        return (
+          (unpackedItem && { value: unpackedItem, args: boxedArgs }) ||
+          undefined
+        );
+      }
+    },
+    pack: ({ value, args }) => vBoxed(new Boxed(itemType.pack(value), args)),
+    getName: itemType.getName,
+    keepBoxes: true,
+  };
+};
+
 export const frLambdaNand = (paramLengths: number[]): FRType<Lambda> => {
   return {
     unpack: (v: Value) => {
@@ -145,6 +177,7 @@ export const frLambdaNand = (paramLengths: number[]): FRType<Lambda> => {
     getName: () => `Function(${paramLengths.join(",")})`,
   };
 };
+
 export const frScale: FRType<Scale> = {
   unpack: (v) => (v.type === "Scale" ? v.value : undefined),
   pack: (v) => vScale(v),
@@ -310,18 +343,15 @@ export const FrDictWithArbitraryKeys = <T>(
   };
 };
 
-export const frAny: FRType<Value> = {
+export const frAny = (params?: {
+  keepBoxes?: boolean;
+  genericName?: string;
+}): FRType<Value> => ({
   unpack: (v) => v,
   pack: (v) => v,
-  getName: () => "any",
+  getName: () => (params?.genericName ? `'${params.genericName}` : "any"),
   transparent: true,
-};
-
-export const frGeneric = (index: string): FRType<Value> => ({
-  unpack: (v) => v,
-  pack: (v) => v,
-  getName: () => `'${index}`,
-  transparent: true,
+  keepBoxes: params?.keepBoxes || false,
 });
 
 // We currently support dicts with up to 5 pairs.
