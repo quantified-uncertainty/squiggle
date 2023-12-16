@@ -1,5 +1,5 @@
 import { REOther } from "../errors/messages.js";
-import { makeDefinition } from "../library/registry/fnDefinition.js";
+import { createFunctionDefinition } from "../library/registry/fnDefinition.js";
 import {
   frDate,
   frDomain,
@@ -15,12 +15,12 @@ import {
 import { SDate } from "../utility/SDate.js";
 import { DateRangeDomain } from "../value/domain.js";
 
-const maker = new FnFactory({
+const functionFactory = new FnFactory({
   nameSpace: "Date",
   requiresNamespace: false,
 });
 
-const makeYearFn = makeDefinition([frNumber], frDate, ([year]) => {
+const makeYearFn = createFunctionDefinition([frNumber], frDate, ([year]) => {
   const result = SDate.fromYear(year);
   if (!result.ok) {
     throw new REOther(result.value);
@@ -30,13 +30,13 @@ const makeYearFn = makeDefinition([frNumber], frDate, ([year]) => {
 
 export const library = [
   ...makeNumericComparisons(
-    maker,
+    functionFactory,
     (d1, d2) => d1.smaller(d2),
     (d1, d2) => d1.larger(d2),
     (d1, d2) => d1.isEqual(d2),
     frDate
   ),
-  maker.make({
+  functionFactory.createFunction({
     name: "make",
     requiresNamespace: true,
     examples: [
@@ -46,7 +46,7 @@ export const library = [
     ],
     output: "Date",
     definitions: [
-      makeDefinition([frString], frDate, ([str]) => {
+      createFunctionDefinition([frString], frDate, ([str]) => {
         const result = SDate.fromString(str);
         if (!result.ok) {
           throw new REOther(result.value);
@@ -65,7 +65,7 @@ export const library = [
           return SDate.fromYearMonthDay(yr, month, date);
         }
       ),
-      makeDefinition([frNamed("year", frNumber)], frDate, ([yr]) => {
+      createFunctionDefinition([frNamed("year", frNumber)], frDate, ([yr]) => {
         const year = SDate.fromYear(yr);
         if (!year.ok) {
           throw new REOther(year.value);
@@ -75,7 +75,7 @@ export const library = [
     ],
   }),
   // same name as used in date-fns
-  maker.make({
+  functionFactory.createFunction({
     name: "fromUnixTime",
     examples: ["Date.fromUnixTime(1589222400)"],
     requiresNamespace: true,
@@ -86,7 +86,7 @@ export const library = [
       }),
     ],
   }),
-  maker.make({
+  functionFactory.createFunction({
     name: "toUnixTime",
     examples: ["Date.toUnixTime(Date.make(2020, 5, 12))"],
     requiresNamespace: true,
@@ -97,17 +97,17 @@ export const library = [
       }),
     ],
   }),
-  maker.make({
+  functionFactory.createFunction({
     name: "subtract",
     examples: ["Date.make(2020, 5, 12) - Date.make(2000, 1, 1)"],
     output: "Duration",
     definitions: [
-      makeDefinition([frDate, frDate], frDuration, ([d1, d2]) =>
+      createFunctionDefinition([frDate, frDate], frDuration, ([d1, d2]) =>
         d1.subtract(d2)
       ),
     ],
   }),
-  maker.make({
+  functionFactory.createFunction({
     name: "subtract",
     examples: ["Date.make(2020, 5, 12) - 20years"],
     output: "Date",
@@ -117,7 +117,7 @@ export const library = [
       ),
     ],
   }),
-  maker.make({
+  functionFactory.createFunction({
     name: "add",
     examples: [
       "Date.make(2020, 5, 12) + 20years",
@@ -125,7 +125,7 @@ export const library = [
     ],
     output: "Date",
     definitions: [
-      makeDefinition([frDate, frDuration], frDate, ([d1, d2]) =>
+      createFunctionDefinition([frDate, frDuration], frDate, ([d1, d2]) =>
         d1.addDuration(d2)
       ),
       makeDefinition([frDuration, frDate], frDate, ([d1, d2]) =>
@@ -133,13 +133,13 @@ export const library = [
       ),
     ],
   }),
-  maker.make({
+  functionFactory.createFunction({
     name: "rangeDomain",
     requiresNamespace: true,
     output: "Domain",
     examples: ["Date.rangeDomain(Date(2000), Date(2010))"],
     definitions: [
-      makeDefinition(
+      createFunctionDefinition(
         [frNamed("min", frDate), frNamed("min", frDate)],
         frDomain,
         ([min, max]) => {
