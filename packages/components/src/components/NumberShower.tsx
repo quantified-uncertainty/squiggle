@@ -1,5 +1,7 @@
 import * as React from "react";
 
+import { DurationUnitName, durationUnits } from "@quri/squiggle-lang";
+
 const orderOfMagnitudeNum = (n: number) => {
   return Math.pow(10, n);
 };
@@ -70,10 +72,11 @@ export function numberShow(number: number, precision = 2) {
   return ns.convert();
 }
 
+//At this point we only support duration units.
 export interface NumberShowerProps {
   number: number;
   precision?: number;
-  unitName?: string;
+  unitName?: DurationUnitName;
 }
 
 export const NumberShower: React.FC<NumberShowerProps> = ({
@@ -94,7 +97,7 @@ export const NumberShower: React.FC<NumberShowerProps> = ({
           </span>
         </span>
       ) : null}
-      {unitName && <span> {unitName + "s"}</span>}
+      {unitName && <span> {durationUnits[unitName].plural}</span>}
     </span>
   );
 };
