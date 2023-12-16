@@ -18,14 +18,14 @@ const maker = new FnFactory({
 
 const commonDict = frDict(
   ["min", frOptional(frNumber)],
-  ["max", frOptional(frNumber)],
+  ["max", frOptional(frNumber)]
   ["tickFormat", frOptional(frString)],
   ["title", frOptional(frString)]
 );
 
 const dateDict = frDict(
   ["min", frOptional(frDate)],
-  ["max", frOptional(frDate)],
+  ["max", frOptional(frDate)]
   ["tickFormat", frOptional(frString)],
   ["title", frOptional(frString)]
 );
@@ -124,7 +124,7 @@ export const library = [
             ["tickFormat", frOptional(frString)],
             ["title", frOptional(frString)],
             ["constant", frOptional(frNumber)]
-          ),
+          )
         ],
         frScale,
         ([{ min, max, tickFormat, title, constant }]) => {
@@ -164,7 +164,7 @@ export const library = [
             ["tickFormat", frOptional(frString)],
             ["title", frOptional(frString)],
             ["exponent", frOptional(frNumber)]
-          ),
+          )
         ],
         frScale,
         ([{ min, max, tickFormat, title, exponent }]) => {
