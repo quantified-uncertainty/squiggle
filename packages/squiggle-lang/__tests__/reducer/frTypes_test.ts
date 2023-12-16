@@ -399,6 +399,6 @@ describe("frForceBoxed", () => {
   });
 
   test("GetName", () => {
-    expect(frBoxedNumber.getName()).toBe("number");
+    expect(frBoxedNumber.getName()).toBe("Number");
   });
 });
