@@ -1,6 +1,6 @@
 import { FC, ReactNode } from "react";
 
-import { SqValue } from "@quri/squiggle-lang";
+import { SqBoxedValue, SqValue } from "@quri/squiggle-lang";
 
 import { PlaygroundSettings } from "../components/PlaygroundSettings.js";
 import { SqValueWithContext } from "../lib/utility.js";
@@ -13,8 +13,9 @@ type Widget<T extends SqValueTag = SqValueTag> = {
   Chart: FC<{
     value: Extract<SqValueWithContext, { tag: T }>;
     settings: PlaygroundSettings;
+    boxed?: SqBoxedValue;
   }>;
-  Preview?: FC<{ value: ValueByTag<T> }>;
+  Preview?: FC<{ value: ValueByTag<T>; boxed?: SqBoxedValue }>;
   Menu?: FC<{
     value: ValueByTag<T>;
   }>;
@@ -24,11 +25,12 @@ type Widget<T extends SqValueTag = SqValueTag> = {
 type WidgetConfig<T extends SqValueTag = SqValueTag> = {
   Chart(
     value: Extract<SqValueWithContext, { tag: T }>,
-    settings: PlaygroundSettings
+    settings: PlaygroundSettings,
+    boxed?: SqBoxedValue
   ): ReactNode;
-  Preview?: (value: ValueByTag<T>) => ReactNode;
-  Menu?: (value: ValueByTag<T>) => ReactNode;
-  heading?: (value: ValueByTag<T>) => string;
+  Preview?: (value: ValueByTag<T>, boxed?: SqBoxedValue) => ReactNode;
+  Menu?: (value: ValueByTag<T>, boxed?: SqBoxedValue) => ReactNode;
+  heading?: (value: ValueByTag<T>, boxed?: SqBoxedValue) => string;
 };
 
 class WidgetRegistry {
@@ -39,11 +41,11 @@ class WidgetRegistry {
     // It's not perfect but type-unsafe parts are contained in a few helper components such as `SquiggleValueChart`.
 
     const widget: Widget = {
-      Chart: ({ value, settings }) => {
+      Chart: ({ value, settings, boxed }) => {
         if (value.tag !== tag) {
           throw new Error(`${tag} widget used incorrectly`);
         }
-        return config.Chart(value as ValueByTag<T>, settings);
+        return config.Chart(value as ValueByTag<T>, settings, boxed);
       },
     };
     widget.Chart.displayName = `${tag}Chart`;
@@ -51,11 +53,11 @@ class WidgetRegistry {
     const { Preview, Menu, heading } = config;
 
     if (Preview) {
-      widget.Preview = ({ value }) => {
+      widget.Preview = ({ value, boxed }) => {
         if (value.tag !== tag) {
           throw new Error(`${tag} widget used incorrectly`);
         }
-        return Preview(value as ValueByTag<T>);
+        return Preview(value as ValueByTag<T>, boxed);
       };
       widget.Preview.displayName = `${tag}Preview`;
     }

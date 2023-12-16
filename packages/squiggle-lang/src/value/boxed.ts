@@ -5,6 +5,8 @@ export type BoxedArgsType = {
   name?: string;
   description?: string;
   showAs?: Value;
+  numberFormat?: string;
+  dateFormat?: string;
 };
 
 //I expect these to get much more complicated later, so it seemed prudent to make a class now.
@@ -22,6 +24,12 @@ export class BoxedArgs {
     }
     if (value.showAs) {
       result.push(["showAs", value.showAs]);
+    }
+    if (value.numberFormat) {
+      result.push(["numberFormat", vString(value.numberFormat)]);
+    }
+    if (value.dateFormat) {
+      result.push(["dateFormat", vString(value.dateFormat)]);
     }
     return result;
   }
@@ -53,6 +61,14 @@ export class BoxedArgs {
 
   showAs() {
     return this.value.showAs;
+  }
+
+  numberFormat() {
+    return this.value.numberFormat;
+  }
+
+  dateFormat() {
+    return this.value.dateFormat;
   }
 }
 

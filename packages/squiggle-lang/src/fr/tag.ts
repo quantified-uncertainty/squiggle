@@ -3,12 +3,15 @@ import {
   frAny,
   frArray,
   frCalculator,
+  frDate,
   frDictWithArbitraryKeys,
   frDist,
   frDistOrNumber,
+  frDuration,
   frForceBoxed,
   frLambda,
   frLambdaTyped,
+  frNamed,
   frNumber,
   frOr,
   FrOrType,
@@ -17,7 +20,10 @@ import {
   frTableChart,
   FRType,
 } from "../library/registry/frTypes.js";
-import { FnFactory } from "../library/registry/helpers.js";
+import {
+  checkNumericTickFormat,
+  FnFactory,
+} from "../library/registry/helpers.js";
 import { Lambda } from "../reducer/lambda.js";
 import { Boxed } from "../value/boxed.js";
 import { Value, vBoxed, vString } from "../value/index.js";
@@ -133,6 +139,36 @@ export const library = [
       }),
     ],
   }),
+  maker.make({
+    name: "format",
+    examples: [],
+    definitions: [
+      makeDefinition(
+        [frForceBoxed(frDistOrNumber), frNamed("numberFormat", frString)],
+        frForceBoxed(frDistOrNumber),
+        ([{ args, value }, format]) => {
+          checkNumericTickFormat(format);
+          return { args: args.merge({ numberFormat: format }), value };
+        }
+      ),
+      makeDefinition(
+        [frForceBoxed(frDuration), frNamed("numberFormat", frString)],
+        frForceBoxed(frDuration),
+        ([{ args, value }, format]) => {
+          checkNumericTickFormat(format);
+          return { args: args.merge({ numberFormat: format }), value };
+        }
+      ),
+      makeDefinition(
+        [frForceBoxed(frDate), frNamed("timeFormat", frString)],
+        frForceBoxed(frDate),
+        ([{ args, value }, format]) => {
+          return { args: args.merge({ dateFormat: format }), value };
+        }
+      ),
+    ],
+  }),
+
   maker.make({
     name: "all",
     examples: [],

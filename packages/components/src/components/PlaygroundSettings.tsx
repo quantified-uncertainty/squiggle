@@ -40,7 +40,7 @@ type ScaleType = z.infer<typeof scaleSchema>;
 
 function scaleTypeToSqScale(
   scaleType: ScaleType,
-  args: { min?: number; max?: number } = {}
+  args: { min?: number; max?: number; tickFormat?: string } = {}
 ) {
   switch (scaleType) {
     case "linear":
@@ -108,11 +108,13 @@ export type PartialPlaygroundSettings = DeepPartial<PlaygroundSettings>;
 
 // partial params for SqDistributionsPlot.create; TODO - infer explicit type?
 export function generateDistributionPlotSettings(
-  settings: z.infer<typeof distributionSettingsSchema>
+  settings: z.infer<typeof distributionSettingsSchema>,
+  xTickFormat?: string
 ) {
   const xScale = scaleTypeToSqScale(settings.xScale, {
     min: settings.minX,
     max: settings.maxX,
+    tickFormat: xTickFormat,
   });
   const yScale = scaleTypeToSqScale(settings.yScale);
   return {
