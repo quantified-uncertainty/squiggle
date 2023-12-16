@@ -46,7 +46,7 @@ Was given arguments: ((x,y) => internal code)`
 
     testPlotResult(
       "default scale based on domain",
-      `Plot.numericFn({|x: [3, 5]| x * 5})`,
+        `Plot.numericFn({|x: [3, 5]| x * 5})`,
       "numericFn",
       (plot) => {
         expect(plot.xScale.type).toBe("linear");
