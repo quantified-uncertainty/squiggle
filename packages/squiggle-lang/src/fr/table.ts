@@ -3,7 +3,6 @@ import {
   frAny,
   frArray,
   frDict,
-  frGeneric,
   frLambdaTyped,
   frNamed,
   frOptional,
@@ -25,14 +24,14 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frNamed("data", frArray(frGeneric("A"))),
+          frNamed("data", frArray(frAny({ genericName: "A" }))),
           frNamed(
             "params",
             frDict([
               "columns",
               frArray(
                 frDict(
-                  ["fn", frLambdaTyped([frGeneric("A")], frAny)],
+                  ["fn", frLambdaTyped([frAny({ genericName: "A" })], frAny())],
                   ["name", frOptional(frString)]
                 )
               ),
@@ -54,12 +53,12 @@ export const library = [
       makeDefinition(
         [
           frDict(
-            ["data", frArray(frGeneric("A"))],
+            ["data", frArray(frAny({ genericName: "A" }))],
             [
               "columns",
               frArray(
                 frDict(
-                  ["fn", frLambdaTyped([frGeneric("A")], frAny)],
+                  ["fn", frLambdaTyped([frAny({ genericName: "A" })], frAny())],
                   ["name", frOptional(frString)]
                 )
               ),

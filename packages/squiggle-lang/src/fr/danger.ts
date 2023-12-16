@@ -19,7 +19,6 @@ import {
   frArray,
   frDist,
   frDistPointset,
-  frGeneric,
   frLambda,
   frNumber,
 } from "../library/registry/frTypes.js";
@@ -253,7 +252,7 @@ const diminishingReturnsLibrary = [
     definitions: [
       makeDefinition(
         [frArray(frLambda), frNumber, frNumber],
-        frAny,
+        frAny(),
         ([lambdas, funds, approximateIncrement], context) => {
           // TODO: This is so complicated, it probably should be its own file. It might also make sense to have it work in Rescript directly, taking in a function rather than a reducer; then something else can wrap that function in the reducer/lambdas/context.
           /*
@@ -393,9 +392,8 @@ const mapYLibrary: FRFunction[] = [
     name: "combinations",
     definitions: [
       makeDefinition(
-        [frArray(frGeneric("A")), frNumber],
-
-        frArray(frArray(frGeneric("A"))),
+        [frArray(frAny({ genericName: "A" })), frNumber],
+        frArray(frArray(frAny({ genericName: "A" }))),
         ([elements, n]) => {
           if (n > elements.length) {
             throw new REArgumentError(
@@ -411,8 +409,8 @@ const mapYLibrary: FRFunction[] = [
     name: "allCombinations",
     definitions: [
       makeDefinition(
-        [frArray(frGeneric("A"))],
-        frArray(frArray(frGeneric("A"))),
+        [frArray(frAny({ genericName: "A" }))],
+        frArray(frArray(frAny({ genericName: "A" }))),
         ([elements]) => {
           return allCombinations(elements);
         }

@@ -257,3 +257,18 @@ Calculator.make(
     height: 800,
   },
 };
+
+export const Boxed: Story = {
+  name: "Boxed values",
+  args: {
+    defaultCode: `x = Tag.name(5 to 10, "My favorite Dist") ->
+    Tag.description(
+      "This is a long description"
+    ) ->
+    Tag.showAs(
+      Plot.dist
+    )
+    y = x -> Tag.all
+    `,
+  },
+};
