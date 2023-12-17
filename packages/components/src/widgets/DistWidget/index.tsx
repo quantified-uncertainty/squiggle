@@ -36,7 +36,7 @@ widgetRegistry.register("Dist", {
       <div>
         {showNumber(p05)}
         <span className="mx-1 opacity-70">to</span>
-        {showNumber(p05)}
+        {showNumber(p95)}
       </div>
     );
   },
