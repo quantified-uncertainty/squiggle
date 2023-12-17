@@ -125,8 +125,11 @@ export const library = [
     examples: [],
     definitions: [
       withInputOrFnInput(frDist, frPlot),
-      withInputOrFnInput(frLambda, frCalculator),
       withInputOrFnInput(frLambdaTyped([frNumber], frDistOrNumber), frPlot),
+      withInputOrFnInput(frLambdaTyped([frDate], frDistOrNumber), frPlot),
+      withInputOrFnInput(frLambdaTyped([frDuration], frDistOrNumber), frPlot),
+      //The frLambda definition needs to come after the more narrow frLambdaTyped definitions.
+      withInputOrFnInput(frLambda, frCalculator),
       withInputOrFnInput(frArray(frAny()), frTableChart),
     ],
   }),
