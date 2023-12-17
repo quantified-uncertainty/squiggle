@@ -54,9 +54,12 @@ export class Registry {
     // 3. name variations of each definition
     for (const fn of fns) {
       for (const def of fn.definitions) {
+        // We convert all fns of Foo.make() to also allow for Foo().
+        const moduleConstructorName = fn.name === "make" ? fn.nameSpace : null;
         const names = [
           ...(fn.nameSpace === "" ? [] : [`${fn.nameSpace}.${fn.name}`]),
           ...(fn.requiresNamespace ? [] : [fn.name]),
+          ...(moduleConstructorName ? [moduleConstructorName] : []),
         ];
 
         for (const name of names) {

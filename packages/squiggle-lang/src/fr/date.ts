@@ -2,7 +2,6 @@ import { REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frDate,
-  frDict,
   frDomain,
   frDuration,
   frNamed,
@@ -40,7 +39,11 @@ export const library = [
   maker.make({
     name: "make",
     requiresNamespace: true,
-    examples: ['Date.make("2020-05-12")', "Date.make(2020, 5, 10)"],
+    examples: [
+      'Date.make("2020-05-12")',
+      "Date.make(2020, 5, 10)",
+      "Date.make(2020)",
+    ],
     output: "Date",
     definitions: [
       makeDefinition([frString], frDate, ([str]) => {
@@ -62,10 +65,15 @@ export const library = [
           return SDate.fromYearMonthDay(yr, month, date);
         }
       ),
+      makeDefinition([frNamed("year", frNumber)], frDate, ([yr]) => {
+        const year = SDate.fromYear(yr);
+        if (!year.ok) {
+          throw new REOther(year.value);
+        }
+        return year.value;
+      }),
     ],
   }),
-  maker.fromDefinition("fromYear", makeYearFn),
-  maker.fromDefinition("fromUnit_year", makeYearFn),
   // same name as used in date-fns
   maker.make({
     name: "fromUnixTime",
@@ -129,12 +137,12 @@ export const library = [
     name: "rangeDomain",
     requiresNamespace: true,
     output: "Domain",
-    examples: ["Date.rangeDomain({ min: 2000year, max: 2010year })"],
+    examples: ["Date.rangeDomain(Date(2000), Date(2010))"],
     definitions: [
       makeDefinition(
-        [frDict(["min", frDate], ["max", frDate])],
+        [frNamed("min", frDate), frNamed("min", frDate)],
         frDomain,
-        ([{ min, max }]) => {
+        ([min, max]) => {
           return new DateRangeDomain(min, max);
         }
       ),

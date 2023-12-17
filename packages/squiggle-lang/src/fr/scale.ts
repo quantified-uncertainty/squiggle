@@ -8,7 +8,10 @@ import {
   frScale,
   frString,
 } from "../library/registry/frTypes.js";
-import { FnFactory } from "../library/registry/helpers.js";
+import {
+  checkNumericTickFormat,
+  FnFactory,
+} from "../library/registry/helpers.js";
 import { SDate } from "../utility/SDate.js";
 
 const maker = new FnFactory({
@@ -46,17 +49,6 @@ function checkMinMaxDates(min: SDate | null, max: SDate | null) {
   }
 }
 
-// Regex taken from d3-format.
-// https://github.com/d3/d3-format/blob/f3cb31091df80a08f25afd4a7af2dcb3a6cd5eef/src/formatSpecifier.js#L1C65-L2C85
-const d3TickFormatRegex =
-  /^(?:(.)?([<>=^]))?([+\-( ])?([$#])?(0)?(\d+)?(,)?(\.\d+)?(~)?([a-z%])?$/i;
-
-function checkTickFormat(tickFormat: string | null) {
-  if (tickFormat && !d3TickFormatRegex.test(tickFormat)) {
-    throw new REArgumentError(`Tick format [${tickFormat}] is invalid.`);
-  }
-}
-
 export const library = [
   maker.make({
     name: "linear",
@@ -68,7 +60,7 @@ export const library = [
         frScale,
         ([{ min, max, tickFormat, title }]) => {
           checkMinMax(min, max);
-          checkTickFormat(tickFormat);
+          checkNumericTickFormat(tickFormat);
           return {
             type: "linear",
             min: min ?? undefined,
@@ -96,7 +88,7 @@ export const library = [
             throw new REOther(`Min must be over 0 for log scale, got: ${min}`);
           }
           checkMinMax(min, max);
-          checkTickFormat(tickFormat);
+          checkNumericTickFormat(tickFormat);
           return {
             type: "log",
             min: min ?? undefined,
@@ -129,7 +121,7 @@ export const library = [
         frScale,
         ([{ min, max, tickFormat, title, constant }]) => {
           checkMinMax(min, max);
-          checkTickFormat(tickFormat);
+          checkNumericTickFormat(tickFormat);
           if (constant !== null && constant === 0) {
             throw new REOther(`Symlog scale constant cannot be 0.`);
           }
@@ -169,7 +161,7 @@ export const library = [
         frScale,
         ([{ min, max, tickFormat, title, exponent }]) => {
           checkMinMax(min, max);
-          checkTickFormat(tickFormat);
+          checkNumericTickFormat(tickFormat);
           if (exponent !== null && exponent <= 0) {
             throw new REOther(`Power Scale exponent must be over 0.`);
           }
@@ -194,7 +186,7 @@ export const library = [
   maker.make({
     name: "date",
     output: "Scale",
-    examples: [`Scale.date({ min: 2022year, max: 2025year })`],
+    examples: ["Scale.date({ min: Date(2022), max: Date(2025) })"],
     definitions: [
       makeDefinition(
         [dateDict],

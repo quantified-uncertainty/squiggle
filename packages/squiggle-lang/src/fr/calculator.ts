@@ -4,6 +4,7 @@ import {
   frBool,
   frCalculator,
   frDict,
+  frForceBoxed,
   frInput,
   frLambda,
   frNamed,
@@ -61,7 +62,7 @@ export const library = [
       ),
       makeDefinition(
         [
-          frLambda,
+          frForceBoxed(frLambda),
           frNamed(
             "params",
             frOptional(
@@ -76,14 +77,14 @@ export const library = [
           ),
         ],
         frCalculator,
-        ([fn, params]) => {
+        ([{ args, value }, params]) => {
           const { title, description, inputs, autorun, sampleCount } =
             params ?? {};
           return validateCalculator({
-            fn,
-            title: title || undefined,
-            description: description || undefined,
-            inputs: inputs || fn.defaultInputs(),
+            fn: value,
+            title: title || args.value.name || undefined,
+            description: description || args.value.description || undefined,
+            inputs: inputs || value.defaultInputs(),
             autorun: autorun === null || autorun === undefined ? true : autorun,
             sampleCount: sampleCount || undefined,
           });

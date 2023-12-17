@@ -3,7 +3,6 @@ import {
   frAny,
   frArray,
   frDict,
-  frGeneric,
   frLambdaTyped,
   frNamed,
   frOptional,
@@ -25,29 +24,25 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frNamed("data", frArray(frGeneric("A"))),
+          frNamed("data", frArray(frAny({ genericName: "A" }))),
           frNamed(
             "params",
-            frDict(
-              ["title", frOptional(frString)],
-              [
-                "columns",
-                frArray(
-                  frDict(
-                    ["fn", frLambdaTyped([frGeneric("A")], frAny)],
-                    ["name", frOptional(frString)]
-                  )
-                ),
-              ]
-            )
+            frDict([
+              "columns",
+              frArray(
+                frDict(
+                  ["fn", frLambdaTyped([frAny({ genericName: "A" })], frAny())],
+                  ["name", frOptional(frString)]
+                )
+              ),
+            ])
           ),
         ],
         frTableChart,
         ([data, params]) => {
-          const { title, columns } = params ?? {};
+          const { columns } = params ?? {};
           return {
             data,
-            title: title || undefined,
             columns: columns.map(({ fn, name }) => ({
               fn,
               name: name ?? undefined,
@@ -58,13 +53,12 @@ export const library = [
       makeDefinition(
         [
           frDict(
-            ["data", frArray(frGeneric("A"))],
-            ["title", frOptional(frString)],
+            ["data", frArray(frAny({ genericName: "A" }))],
             [
               "columns",
               frArray(
                 frDict(
-                  ["fn", frLambdaTyped([frGeneric("A")], frAny)],
+                  ["fn", frLambdaTyped([frAny({ genericName: "A" })], frAny())],
                   ["name", frOptional(frString)]
                 )
               ),
@@ -72,10 +66,9 @@ export const library = [
           ),
         ],
         frTableChart,
-        ([{ data, title, columns }]) => {
+        ([{ data, columns }]) => {
           return {
             data,
-            title: title || undefined,
             columns: columns.map(({ fn, name }) => ({
               fn,
               name: name ?? undefined,

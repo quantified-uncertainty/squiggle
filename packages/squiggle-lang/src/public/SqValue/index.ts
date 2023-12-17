@@ -4,6 +4,7 @@ import { Value, vDate, vLambda, vNumber, vString } from "../../value/index.js";
 import { SqError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqArray } from "./SqArray.js";
+import { SqBoxed } from "./SqBoxed.js";
 import { SqCalculator } from "./SqCalculator.js";
 import { SqDict } from "./SqDict.js";
 import { SqDistribution, wrapDistribution } from "./SqDistribution/index.js";
@@ -48,6 +49,8 @@ export function wrapValue(value: Value, context?: SqValueContext) {
       return new SqDomainValue(value, context);
     case "Input":
       return new SqInputValue(value, context);
+    case "Boxed":
+      return new SqBoxedValue(value, context);
     default:
       throw new Error(`Unknown value ${JSON.stringify(value satisfies never)}`);
   }
@@ -203,6 +206,10 @@ export class SqDurationValue extends SqAbstractValue<"Duration", number> {
     return this._value.value;
   }
 
+  toUnitAndNumber() {
+    return this._value.value.toUnitAndNumber();
+  }
+
   asJS() {
     return this._value.value.toMs();
   }
@@ -231,10 +238,6 @@ export class SqTableChartValue extends SqAbstractValue<
 
   get value() {
     return new SqTableChart(this._value.value, this.context);
-  }
-
-  override title() {
-    return this.value.title;
   }
 
   asJS() {
@@ -304,6 +307,26 @@ export class SqDomainValue extends SqAbstractValue<"Domain", SqDomain> {
   }
 
   asJS() {
+    return this.value;
+  }
+}
+
+export class SqBoxedValue extends SqAbstractValue<"Boxed", unknown> {
+  tag = "Boxed" as const;
+
+  get value() {
+    return new SqBoxed(
+      this._value.value.value,
+      this._value.value.args,
+      this.context
+    );
+  }
+
+  override title() {
+    return this.value.name();
+  }
+
+  asJS(): unknown {
     return this.value;
   }
 }

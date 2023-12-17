@@ -12,6 +12,7 @@ import { ImmutableMap } from "../utility/immutableMap.js";
 import { SDate } from "../utility/SDate.js";
 import { SDuration } from "../utility/SDuration.js";
 import { DateRangeDomain, Domain, NumericRangeDomain } from "./domain.js";
+import { Boxed } from "./boxed.js";
 
 export type ValueMap = ImmutableMap<string, Value>;
 
@@ -466,7 +467,6 @@ export type Plot = CommonPlotArgs &
 
 export type TableChart = {
   data: readonly Value[];
-  title?: string;
   columns: readonly { fn: Lambda; name: string | undefined }[];
 };
 class VTableChart extends BaseValue {
@@ -592,6 +592,21 @@ function domainIsEqual(valueA: Domain, valueB: Domain) {
   }
 }
 
+export class VBoxed extends BaseValue {
+  readonly type = "Boxed";
+  readonly publicName = "Boxed";
+
+  constructor(public value: Boxed) {
+    super();
+  }
+
+  toString() {
+    return this.value.toString();
+  }
+}
+
+export const vBoxed = (value: Boxed) => new VBoxed(value);
+
 export class VDomain extends BaseValue implements Indexable {
   readonly type = "Domain";
   readonly publicName = "Domain";
@@ -660,7 +675,8 @@ export type Value =
   | VScale
   | VInput
   | VDomain
-  | VVoid;
+  | VVoid
+  | VBoxed;
 
 export function isEqual(a: Value, b: Value): boolean {
   if (a.type !== b.type) {

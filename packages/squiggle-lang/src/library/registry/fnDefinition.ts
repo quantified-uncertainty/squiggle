@@ -1,6 +1,6 @@
 import { REAmbiguous } from "../../errors/messages.js";
 import { ReducerContext } from "../../reducer/context.js";
-import { Value } from "../../value/index.js";
+import { Value, VBoxed } from "../../value/index.js";
 import { frAny, FRType, isOptional } from "./frTypes.js";
 
 // Type safety of `FnDefinition is guaranteed by `makeDefinition` signature below and by `FRType` unpack logic.
@@ -67,7 +67,7 @@ export function makeAssertDefinition<const T extends any[]>(
   assertOptionalsAreAtEnd(inputs);
   return {
     inputs,
-    output: frAny,
+    output: frAny(),
     run: () => {
       throw new REAmbiguous(errorMsg);
     },
@@ -87,7 +87,15 @@ export function tryCallFnDefinition(
   }
   const unpackedArgs: any = []; // any, but that's ok, type safety is guaranteed by FnDefinition type
   for (let i = 0; i < args.length; i++) {
-    const unpackedArg = fn.inputs[i].unpack(args[i]);
+    let arg = args[i];
+
+    const { keepBoxes } = fn.inputs[i];
+
+    if (arg.type === "Boxed" && !keepBoxes) {
+      arg = (arg as VBoxed).value.value;
+    }
+
+    const unpackedArg = fn.inputs[i].unpack(arg);
     if (unpackedArg === undefined) {
       // type mismatch
       return;

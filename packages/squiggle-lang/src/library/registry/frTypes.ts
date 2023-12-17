@@ -6,6 +6,7 @@ import { Lambda } from "../../reducer/lambda.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import { SDate } from "../../utility/SDate.js";
 import { SDuration } from "../../utility/SDuration.js";
+import { Boxed, BoxedArgs } from "../../value/boxed.js";
 import { Domain } from "../../value/domain.js";
 import {
   Calculator,
@@ -16,6 +17,7 @@ import {
   Value,
   vArray,
   vBool,
+  vBoxed,
   vCalculator,
   vDate,
   vDict,
@@ -41,6 +43,7 @@ export type FRType<T> = {
   pack: (v: T) => Value; // used in makeSquiggleDefinition
   getName: () => string;
   transparent?: T extends Value ? boolean : undefined;
+  keepBoxes?: boolean;
   isOptional?: boolean;
   underlyingType?: FRType<any>;
   tag?: string;
@@ -54,71 +57,71 @@ export const isOptional = <T>(frType: FRType<T>): boolean => {
 export const frNumber: FRType<number> = {
   unpack: (v: Value) => (v.type === "Number" ? v.value : undefined),
   pack: (v) => vNumber(v),
-  getName: () => "number",
+  getName: () => "Number",
 };
 export const frTableChart: FRType<TableChart> = {
   unpack: (v: Value) => (v.type === "TableChart" ? v.value : undefined),
   pack: (v) => vTableChart(v),
-  getName: () => "table",
+  getName: () => "Table",
 };
 export const frCalculator: FRType<Calculator> = {
   unpack: (v: Value) => (v.type === "Calculator" ? v.value : undefined),
   pack: (v) => vCalculator(v),
-  getName: () => "calculator",
+  getName: () => "Calculator",
 };
 export const frString: FRType<string> = {
   unpack: (v: Value) => (v.type === "String" ? v.value : undefined),
   pack: (v) => vString(v),
-  getName: () => "string",
+  getName: () => "String",
   tag: "string",
 };
 export const frBool: FRType<boolean> = {
   unpack: (v: Value) => (v.type === "Bool" ? v.value : undefined),
   pack: (v) => vBool(v),
-  getName: () => "bool",
+  getName: () => "Bool",
   tag: "bool",
 };
 export const frDate: FRType<SDate> = {
   unpack: (v) => (v.type === "Date" ? v.value : undefined),
   pack: (v) => vDate(v),
-  getName: () => "date",
+  getName: () => "Date",
   tag: "date",
 };
 export const frDuration: FRType<SDuration> = {
   unpack: (v) => (v.type === "Duration" ? v.value : undefined),
   pack: (v) => vDuration(v),
-  getName: () => "duration",
+  getName: () => "Duration",
 };
 export const frDist: FRType<BaseDist> = {
   unpack: (v) => (v.type === "Dist" ? v.value : undefined),
   pack: (v) => vDist(v),
-  getName: () => "dist",
+  getName: () => "Dist",
 };
 export const frDistPointset: FRType<PointSetDist> = {
   unpack: (v) =>
     v.type === "Dist" && v.value instanceof PointSetDist ? v.value : undefined,
   pack: (v) => vDist(v),
-  getName: () => "pointSetDist",
+  getName: () => "PointSetDist",
 };
 
 export const frSampleSetDist: FRType<SampleSetDist> = {
   unpack: (v) =>
     v.type === "Dist" && v.value instanceof SampleSetDist ? v.value : undefined,
   pack: (v) => vDist(v),
-  getName: () => "sampleSetDist",
+  getName: () => "SampleSetDist",
 };
 
 export const frDistSymbolic: FRType<SymbolicDist> = {
   unpack: (v) =>
     v.type === "Dist" && v.value instanceof SymbolicDist ? v.value : undefined,
   pack: (v) => vDist(v),
-  getName: () => "symbolicDist",
+  getName: () => "SymbolicDist",
 };
 
 export const frLambda: FRType<Lambda> = {
   unpack: (v) => (v.type === "Lambda" ? v.value : undefined),
   pack: (v) => vLambda(v),
-  getName: () => "function",
+  getName: () => "Function",
   tag: "lambda",
 };
 
@@ -140,6 +143,35 @@ export const frLambdaTyped = (
   };
 };
 
+//This will box if not boxed. We could do a form that doesn't do this, but it would be messier.
+//I could see it as cleaner to use a new Class or interface like {type: "Boxed", value: T, args: BoxedArgs} | {type: "Unboxed", value: T}, but doesn't seem worth it yet.
+export const frForceBoxed = <T>(
+  itemType: FRType<T>
+): FRType<{ value: T; args: BoxedArgs }> => {
+  return {
+    unpack: (v) => {
+      if (v.type !== "Boxed") {
+        const unpackedItem = itemType.unpack(v);
+        if (unpackedItem) {
+          return { value: unpackedItem, args: new BoxedArgs({}) };
+        } else {
+          return undefined;
+        }
+      } else {
+        const unpackedItem = itemType.unpack(v.value.value);
+        const boxedArgs: BoxedArgs = v.value.args;
+        return (
+          (unpackedItem && { value: unpackedItem, args: boxedArgs }) ||
+          undefined
+        );
+      }
+    },
+    pack: ({ value, args }) => vBoxed(new Boxed(itemType.pack(value), args)),
+    getName: itemType.getName,
+    keepBoxes: true,
+  };
+};
+
 export const frLambdaNand = (paramLengths: number[]): FRType<Lambda> => {
   return {
     unpack: (v: Value) => {
@@ -153,26 +185,27 @@ export const frLambdaNand = (paramLengths: number[]): FRType<Lambda> => {
     tag: "lambda",
   };
 };
+
 export const frScale: FRType<Scale> = {
   unpack: (v) => (v.type === "Scale" ? v.value : undefined),
   pack: (v) => vScale(v),
-  getName: () => "scale",
+  getName: () => "Scale",
 };
 export const frInput: FRType<Input> = {
   unpack: (v) => (v.type === "Input" ? v.value : undefined),
   pack: (v) => vInput(v),
-  getName: () => "input",
+  getName: () => "Input",
 };
 export const frPlot: FRType<Plot> = {
   unpack: (v) => (v.type === "Plot" ? v.value : undefined),
   pack: (v) => vPlot(v),
-  getName: () => "plot",
+  getName: () => "Plot",
 };
 
 export const frDomain: FRType<Domain> = {
   unpack: (v) => (v.type === "Domain" ? v.value : undefined),
   pack: (v) => vDomain(v),
-  getName: () => "domain",
+  getName: () => "Domain",
 };
 
 export const frArray = <T>(itemType: FRType<T>): FRType<readonly T[]> => {
@@ -202,7 +235,7 @@ export const frArray = <T>(itemType: FRType<T>): FRType<readonly T[]> => {
       isTransparent
         ? vArray(v as readonly Value[])
         : vArray(v.map(itemType.pack)),
-    getName: () => `list(${itemType.getName()})`,
+    getName: () => `List(${itemType.getName()})`,
     tag: "array",
   };
 };
@@ -239,7 +272,7 @@ export const frDistOrNumber: FRType<BaseDist | number> = {
   unpack: (v) =>
     v.type === "Dist" ? v.value : v.type === "Number" ? v.value : undefined,
   pack: (v) => (typeof v === "number" ? vNumber(v) : vDist(v)),
-  getName: () => "dist|number",
+  getName: () => "Dist|Number",
 };
 
 export function frTuple<T1, T2>(
@@ -316,23 +349,20 @@ export const frDictWithArbitraryKeys = <T>(
       vDict(
         ImmutableMap([...v.entries()].map(([k, v]) => [k, itemType.pack(v)]))
       ),
-    getName: () => `dict(${itemType.getName()})`,
+    getName: () => `Dict(${itemType.getName()})`,
     tag: "dict",
   };
 };
 
-export const frAny: FRType<Value> = {
+export const frAny = (params?: {
+  keepBoxes?: boolean;
+  genericName?: string;
+}): FRType<Value> => ({
   unpack: (v) => v,
   pack: (v) => v,
-  getName: () => "any",
+  getName: () => (params?.genericName ? `'${params.genericName}` : "any"),
   transparent: true,
-};
-
-export const frGeneric = (index: string): FRType<Value> => ({
-  unpack: (v) => v,
-  pack: (v) => v,
-  getName: () => `'${index}`,
-  transparent: true,
+  keepBoxes: params?.keepBoxes || false,
 });
 
 // We currently support dicts with up to 5 pairs.
