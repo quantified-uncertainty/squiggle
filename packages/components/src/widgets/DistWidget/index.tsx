@@ -27,14 +27,14 @@ widgetRegistry.register("Dist", {
       );
     };
 
-    const p05 = unwrapOrFailure(dist.inv(environment, 0.05));
+    const percentile05 = unwrapOrFailure(dist.inv(environment, 0.05));
     const p95 = unwrapOrFailure(dist.inv(environment, 0.95));
-    const oneValue = p05 === p95;
+    const oneValue = percentile05 === p95;
     return oneValue ? (
-      showNumber(p05)
+      showNumber(percentile05)
     ) : (
       <div>
-        {showNumber(p05)}
+        {showNumber(percentile05)}
         <span className="mx-1 opacity-70">to</span>
         {showNumber(p95)}
       </div>
