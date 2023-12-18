@@ -23,14 +23,14 @@ const StyleDefinition: FC<{ fullName: string; def: FnDefinition }> = ({
   const secondaryColor = "text-slate-400";
   const inputs = def.inputs.map((t, index) => (
     <span key={index}>
-      <span className={primaryColor}>{t.getName()}</span>
+      <span className={primaryColor}>{t.display()}</span>
       {isOptional(t) ? <span className={primaryColor}>?</span> : ""}
       {index !== def.inputs.length - 1 && (
         <span className={secondaryColor}>, </span>
       )}
     </span>
   ));
-  const output = def.output.getName();
+  const output = def.output.display();
   return (
     <div>
       <span className="text-slate-500">{fullName}</span>
