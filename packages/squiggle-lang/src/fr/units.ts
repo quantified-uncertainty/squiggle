@@ -15,7 +15,7 @@ const makeUnitFn = (
   format?: string
 ) => {
   return maker.make({
-    output: "Number",
+    output: format ? "Boxed" : "Number",
     name: "fromUnit_" + shortName,
     description: `Unit conversion from ${fullName}.`,
     examples: [`3${shortName} // ${3 * multiplier}`],
@@ -36,7 +36,7 @@ const makeUnitFn = (
 export const library = [
   makeUnitFn("n", "nano", 1e-9),
   makeUnitFn("m", "mili", 1e-3),
-  makeUnitFn("%", "percent", 1e-2, ".2%"),
+  makeUnitFn("%", "percent", 1e-2, ".2~p"),
   makeUnitFn("k", "kilo", 1e3),
   makeUnitFn("M", "mega", 1e6),
   makeUnitFn("B", "billion", 1e9),
