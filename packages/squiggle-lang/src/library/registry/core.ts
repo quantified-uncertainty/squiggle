@@ -23,7 +23,6 @@ export type FRFunction = {
   isExperimental?: boolean;
   isUnit?: boolean;
   shorthand?: Shorthand;
-  fn?: Lambda;
 };
 
 type FnNameDict = Map<string, FnDefinition[]>;
@@ -39,7 +38,6 @@ export type FnDocumentation = Pick<
   | "isExperimental"
   | "isUnit"
   | "shorthand"
-  | "fn"
 > & { signatures: string[] };
 
 export class Registry {
@@ -135,7 +133,6 @@ export class Registry {
         .map(fnDefinitionToString),
       isUnit: fn.isUnit,
       shorthand: getShorthandName(fn.name),
-      fn: this.makeLambda(fnName),
     };
   }
 
