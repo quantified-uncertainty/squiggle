@@ -81,6 +81,7 @@ export const frDate: FRType<SDate> = {
   unpack: (v) => (v.type === "Date" ? v.value : undefined),
   pack: (v) => vDate(v),
   getName: () => "Date",
+  tag: "Date",
 };
 export const frDuration: FRType<SDuration> = {
   unpack: (v) => (v.type === "Duration" ? v.value : undefined),

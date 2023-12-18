@@ -1,3 +1,4 @@
+import { first } from "lodash";
 import maxBy from "lodash/maxBy.js";
 import uniq from "lodash/uniq.js";
 import { LocationRange } from "peggy";
@@ -6,7 +7,6 @@ import { ASTNode } from "../ast/parse.js";
 import * as IError from "../errors/IError.js";
 import { REArityError, REOther } from "../errors/messages.js";
 import { Expression } from "../expression/index.js";
-import { SDate } from "../index.js";
 import {
   FnDefinition,
   fnDefinitionToString,
@@ -22,14 +22,14 @@ import {
   inferFromValue,
 } from "../library/registry/frTypes.js";
 import { sort } from "../utility/E_A_Floats.js";
-import { NumericRangeDomain } from "../value/domain.js";
+import { DateRangeDomain, NumericRangeDomain } from "../value/domain.js";
 import {
   Calculator,
   Value,
   vDate,
-  vDomain,
   VDomain,
   vNumber,
+  vString,
 } from "../value/index.js";
 import * as Context from "./context.js";
 import { ReducerContext } from "./context.js";
@@ -44,16 +44,14 @@ type LambdaBody = (args: Value[], context: ReducerContext) => Value;
 
 function getInferredOutputType(
   lambda: UserDefinedLambda,
-  pointsToTry: Value[],
+  valuesToTry: Value[],
   context: ReducerContext
 ): FRType<any> | undefined {
-  for (const point of pointsToTry) {
-    console.log(52, point);
+  for (const point of valuesToTry) {
     try {
       const testVal = lambda.call([point], context);
       return inferFromValue(testVal);
     } catch (e) {
-      console.log("Failed to infer output type", e);
       // do nothing
     }
   }
@@ -65,6 +63,41 @@ type SimpleDef = {
   output: FRType<any>;
 };
 
+function paramaterToType(
+  param: UserDefinedLambdaParameter
+): FRType<any> | undefined {
+  if (param.domain) {
+    return param.domain.value.type === "DateRange" ? frDate : frNumber;
+  }
+  return undefined;
+}
+
+function tryDateInput(
+  fn: UserDefinedLambda,
+  context: ReducerContext,
+  domain: DateRangeDomain
+): FRType<any> | undefined {
+  const xValuesToTest = [domain.min, domain.max].map(vDate);
+  return getInferredOutputType(fn, xValuesToTest, context);
+}
+
+function tryNumInput(
+  fn: UserDefinedLambda,
+  context: ReducerContext,
+  domain?: NumericRangeDomain
+): FRType<any> | undefined {
+  const xDomain = domain ? domain : new NumericRangeDomain(0.1, 10);
+  const xValuesToTest = [xDomain.min, xDomain.max].map(vNumber);
+  return getInferredOutputType(fn, xValuesToTest, context);
+}
+
+function tryStringInput(
+  fn: UserDefinedLambda,
+  context: ReducerContext
+): FRType<any> | undefined {
+  return getInferredOutputType(fn, [vString("hi")], context);
+}
+
 export function inferUserDef(
   fn: UserDefinedLambda,
   context: ReducerContext
@@ -72,26 +105,44 @@ export function inferUserDef(
   if (fn.parameters.length !== 1) {
     return undefined;
   }
-  const { domain, name } = fn.parameters[0];
+  const firstParam = fn.parameters[0];
+  const inputType: FRType<any> | undefined = paramaterToType(first);
+  const { domain, name } = firstParam;
+  const nameInputT = (i: FRType<any>) => [frNamed(name, i)];
 
-  const xDomain = domain ? domain : vDomain(new NumericRangeDomain(0.1, 10));
-
-  const xValuesToTest = [xDomain.value.min, xDomain.value.max].map((point) =>
-    point instanceof SDate ? vDate(point) : vNumber(point)
-  );
-
-  const inferredOutputType = getInferredOutputType(fn, xValuesToTest, context);
-
-  const inputType: FRType<any> =
-    xDomain.value.type === "DateRange" ? frDate : frNumber;
-
-  return (
-    (inferredOutputType && {
-      inputs: [frNamed(name, inputType)],
-      output: inferredOutputType || frAny(),
-    }) ||
-    undefined
-  );
+  if (inputType && domain?.value.type === "DateRange") {
+    return {
+      inputs: nameInputT(inputType),
+      output: tryDateInput(fn, context, domain.value) || frAny(),
+    };
+  } else if (inputType && domain?.value.type === "NumericRange") {
+    return {
+      inputs: nameInputT(inputType),
+      output: tryNumInput(fn, context, domain.value) || frAny(),
+    };
+  } else {
+    const outputFromNumber = tryNumInput(fn, context);
+    const outputFromString = tryStringInput(fn, context);
+    if (outputFromNumber && outputFromString) {
+      return {
+        inputs: nameInputT(frAny()),
+        output:
+          outputFromNumber === outputFromString ? outputFromNumber : frAny(),
+      };
+    } else if (outputFromNumber) {
+      return {
+        inputs: nameInputT(frNumber),
+        output: outputFromNumber,
+      };
+    } else if (outputFromString) {
+      return {
+        inputs: nameInputT(frNumber),
+        output: outputFromString,
+      };
+    } else {
+      return undefined;
+    }
+  }
 }
 
 export abstract class BaseLambda {
@@ -192,7 +243,6 @@ export class UserDefinedLambda extends BaseLambda {
       xyPointLength: 10,
     });
     this.def = inferUserDef(this, context);
-    console.log("GOT DEF", this.def);
   }
 
   getName() {
