@@ -11,8 +11,8 @@ import { Lambda } from "../reducer/lambda.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { SDate } from "../utility/SDate.js";
 import { SDuration } from "../utility/SDuration.js";
-import { DateRangeDomain, Domain, NumericRangeDomain } from "./domain.js";
 import { Boxed } from "./boxed.js";
+import { DateRangeDomain, Domain, NumericRangeDomain } from "./domain.js";
 
 export type ValueMap = ImmutableMap<string, Value>;
 
@@ -390,6 +390,7 @@ export type Input = CommonInputArgs &
       }
   );
 
+export type InputType = "text" | "textArea" | "checkbox" | "select";
 class VInput extends BaseValue {
   readonly type = "Input";
   readonly publicName = "Input";

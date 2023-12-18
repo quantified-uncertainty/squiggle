@@ -473,59 +473,37 @@ export const frTypeToInput = (
   i: number,
   name: string
 ): Input => {
-  if (frType.tag === "bool") {
-    return {
-      name,
-      typeName: frType.getName(),
-      type: "checkbox",
-      default: false,
-    };
-  } else if (frType.tag === "named") {
-    const underlyingType = frType.underlyingType;
-    if (!underlyingType) {
-      throw new Error("Impossible branch");
-    }
-    return {
-      ...frTypeToInput(underlyingType!, i, name),
-      typeName: `${underlyingType!.getName()}`,
-    };
-  } else if (frType.tag === "optional") {
-    const underlyingType = frType.underlyingType;
-    if (!underlyingType) {
-      throw new Error("Impossible branch");
-    }
-    return {
-      ...frTypeToInput(underlyingType!, i, name),
-      typeName: `${underlyingType!.getName()}?`,
-    };
-  } else if (frType.tag === "array") {
-    return {
-      typeName: frType.getName(),
-      type: "textArea",
-      default: "[]",
-      name,
-    };
-  } else if (frType.tag === "dict") {
-    return {
-      typeName: frType.getName(),
-      type: "textArea",
-      default: "{}",
-      name,
-    };
-  } else if (frType.tag === "tuple") {
-    return {
-      typeName: frType.getName(),
-      type: "textArea",
-      default: "[]",
-      name,
-    };
-  } else {
-    return {
-      typeName: frType.getName(),
-      type: "text",
-      default: "",
-      name,
-    };
+  const type = frType.fieldType || "text";
+  switch (type) {
+    case "text":
+      return {
+        name,
+        type,
+        typeName: frType.getName(),
+        default: frType.default || "",
+      };
+    case "textArea":
+      return {
+        name,
+        type,
+        typeName: frType.getName(),
+        default: frType.default || "",
+      };
+    case "checkbox":
+      return {
+        name,
+        type,
+        typeName: frType.getName(),
+        default: frType.default === "true" ? true : false,
+      };
+    case "select":
+      return {
+        name,
+        type,
+        typeName: frType.getName(),
+        default: frType.default || "",
+        options: [],
+      };
   }
 };
 // Regex taken from d3-format.
