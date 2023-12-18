@@ -12,20 +12,20 @@ const makeUnitFn = (
   shortName: string,
   fullName: string,
   multiplier: number,
-  format?: string
+  outputFormat?: string
 ) => {
   return maker.make({
-    output: format ? "Boxed" : "Number",
+    output: outputFormat ? "Boxed" : "Number",
     name: "fromUnit_" + shortName,
     description: `Unit conversion from ${fullName}.`,
     examples: [`3${shortName} // ${3 * multiplier}`],
     isUnit: true,
     definitions: [
-      format
+      outputFormat
         ? makeDefinition([frNumber], frForceBoxed(frNumber), ([x]) => {
             return {
               value: x * multiplier,
-              args: new BoxedArgs({ numberFormat: format }),
+              args: new BoxedArgs({ numberFormat: outputFormat }),
             };
           })
         : makeDefinition([frNumber], frNumber, ([x]) => x * multiplier),
