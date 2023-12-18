@@ -71,14 +71,6 @@ statement
   = decoratedStatement
   / letStatement
   / defunStatement
-  / voidStatement
-
-voidStatement
-  = "call" _nl value:zeroOMoreArgumentsBlockOrExpression
-    {
-      const variable = h.nodeIdentifier("_", location());
-      return h.nodeLetStatement(variable, value, false, location());
-    }
 
 letStatement
   = exported:("export" __nl)? variable:variable _ assignmentOp _nl value:zeroOMoreArgumentsBlockOrExpression
