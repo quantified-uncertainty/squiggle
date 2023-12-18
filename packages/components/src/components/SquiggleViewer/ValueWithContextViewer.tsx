@@ -138,6 +138,9 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
       if (isRoot) {
         return getChildrenValues(v).length > 30;
       } else {
+        if (v.tag === "Lambda") {
+          return true;
+        }
         return (
           getChildrenValues(v).length > 5 ||
           tagsDefaultCollapsed.has(v.tag) ||

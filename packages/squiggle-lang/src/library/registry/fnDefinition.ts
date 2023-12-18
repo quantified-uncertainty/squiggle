@@ -112,7 +112,10 @@ export function tryCallFnDefinition(
   return fn.output.pack(fn.run(unpackedArgs, context));
 }
 
-export function fnDefinitionToString(fn: FnDefinition): string {
+export function fnDefinitionToString(fn: {
+  inputs: FRType<any>[];
+  output: FRType<any>;
+}): string {
   const inputs = fn.inputs
     .map((t) => t.getName() + (isOptional(t) && t.tag !== "named" ? "?" : ""))
     .join(", ");

@@ -519,3 +519,47 @@ export const frOptional = <T>(itemType: FRType<T>): FRType<T | null> => {
     isOptional: true,
   };
 };
+
+export function inferFromValue(v: Value): FRType<any> {
+  function allEqual(array: any[]) {
+    return array.every((element) => element === array[0]);
+  }
+  switch (v.type) {
+    case "Number":
+      return frNumber;
+    case "Calculator":
+      return frCalculator;
+    case "String":
+      return frString;
+    case "Bool":
+      return frBool;
+    case "Date":
+      return frDate;
+    case "Duration":
+      return frDuration;
+    case "Dist":
+      return frDist;
+    case "Lambda":
+      // It could be good to make this a typedLambda if we can infer the types. One challenge though is that BuiltInLambdas can have multiple signatures, which we don't support through frTypes directly.
+      return frLambda;
+    case "Scale":
+      return frScale;
+    case "Input":
+      return frInput;
+    case "Plot":
+      return frPlot;
+    case "Domain":
+      return frDomain;
+    case "Array": {
+      if (allEqual(v.value.map((r) => r.type))) {
+        return frArray(inferFromValue(v.value[0]));
+      } else {
+        throw frArray(frAny());
+      }
+    }
+    case "Dict":
+      return frDictWithArbitraryKeys(frAny());
+    default:
+      throw new Error(`Unable to convert ${v.type} to FRType`);
+  }
+}

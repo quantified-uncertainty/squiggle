@@ -6,15 +6,31 @@ import { ASTNode } from "../ast/parse.js";
 import * as IError from "../errors/IError.js";
 import { REArityError, REOther } from "../errors/messages.js";
 import { Expression } from "../expression/index.js";
+import { SDate } from "../index.js";
 import {
   FnDefinition,
   fnDefinitionToString,
   showInDocumentation,
   tryCallFnDefinition,
 } from "../library/registry/fnDefinition.js";
-import { FRType } from "../library/registry/frTypes.js";
+import {
+  frAny,
+  frDate,
+  frNamed,
+  frNumber,
+  FRType,
+  inferFromValue,
+} from "../library/registry/frTypes.js";
 import { sort } from "../utility/E_A_Floats.js";
-import { Calculator, Value, VDomain } from "../value/index.js";
+import { NumericRangeDomain } from "../value/domain.js";
+import {
+  Calculator,
+  Value,
+  vDate,
+  vDomain,
+  VDomain,
+  vNumber,
+} from "../value/index.js";
 import * as Context from "./context.js";
 import { ReducerContext } from "./context.js";
 import { Stack } from "./stack.js";
@@ -25,6 +41,58 @@ export type UserDefinedLambdaParameter = {
 };
 
 type LambdaBody = (args: Value[], context: ReducerContext) => Value;
+
+function getInferredOutputType(
+  lambda: UserDefinedLambda,
+  pointsToTry: Value[],
+  context: ReducerContext
+): FRType<any> | undefined {
+  for (const point of pointsToTry) {
+    console.log(52, point);
+    try {
+      const testVal = lambda.call([point], context);
+      return inferFromValue(testVal);
+    } catch (e) {
+      console.log("Failed to infer output type", e);
+      // do nothing
+    }
+  }
+  return undefined;
+}
+
+type SimpleDef = {
+  inputs: FRType<any>[];
+  output: FRType<any>;
+};
+
+export function inferUserDef(
+  fn: UserDefinedLambda,
+  context: ReducerContext
+): SimpleDef | undefined {
+  if (fn.parameters.length !== 1) {
+    return undefined;
+  }
+  const { domain, name } = fn.parameters[0];
+
+  const xDomain = domain ? domain : vDomain(new NumericRangeDomain(0.1, 10));
+
+  const xValuesToTest = [xDomain.value.min, xDomain.value.max].map((point) =>
+    point instanceof SDate ? vDate(point) : vNumber(point)
+  );
+
+  const inferredOutputType = getInferredOutputType(fn, xValuesToTest, context);
+
+  const inputType: FRType<any> =
+    xDomain.value.type === "DateRange" ? frDate : frNumber;
+
+  return (
+    (inferredOutputType && {
+      inputs: [frNamed(name, inputType)],
+      output: inferredOutputType || frAny(),
+    }) ||
+    undefined
+  );
+}
 
 export abstract class BaseLambda {
   constructor(public body: LambdaBody) {}
@@ -72,6 +140,7 @@ export class UserDefinedLambda extends BaseLambda {
   parameters: UserDefinedLambdaParameter[];
   location: LocationRange;
   name?: string;
+  def?: SimpleDef;
   readonly type = "UserDefinedLambda";
 
   constructor(
@@ -114,6 +183,16 @@ export class UserDefinedLambda extends BaseLambda {
     this.name = name;
     this.parameters = parameters;
     this.location = location;
+    this.inferAndSaveDefinition();
+  }
+
+  private inferAndSaveDefinition() {
+    const context = Context.createContext({
+      sampleCount: 10,
+      xyPointLength: 10,
+    });
+    this.def = inferUserDef(this, context);
+    console.log("GOT DEF", this.def);
   }
 
   getName() {
@@ -125,7 +204,11 @@ export class UserDefinedLambda extends BaseLambda {
   }
 
   parameterString() {
-    return this._getParameterNames().join(",");
+    if (this.def) {
+      return fnDefinitionToString(this.def);
+    } else {
+      return this._getParameterNames().join(",");
+    }
   }
 
   toString() {
