@@ -31,7 +31,7 @@ export abstract class BaseLambda {
   constructor(public body: LambdaBody) {}
 
   abstract readonly type: string;
-  abstract getName(): string;
+  abstract display(): string;
   abstract toString(): string;
   abstract parameterString(): string;
   abstract parameterCounts(): number[];
@@ -118,7 +118,7 @@ export class UserDefinedLambda extends BaseLambda {
     this.location = location;
   }
 
-  getName() {
+  display() {
     return this.name || "<anonymous>";
   }
 
@@ -172,7 +172,7 @@ export class BuiltinLambda extends BaseLambda {
     this._definitions = signatures;
   }
 
-  getName() {
+  display() {
     return this.name;
   }
 
@@ -226,7 +226,7 @@ export class BuiltinLambda extends BaseLambda {
   override defaultInputs(): Input[] {
     const longestSignature = maxBy(this.signatures(), (s) => s.length) || [];
     return longestSignature.map((sig, i) => {
-      const name = sig.name ? sig.name : `Input ${i + 1}`;
+      const name = sig.varName ? sig.varName : `Input ${i + 1}`;
       return frTypeToInput(sig, i, name);
     });
   }

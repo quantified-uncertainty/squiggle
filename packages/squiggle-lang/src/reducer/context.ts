@@ -23,5 +23,5 @@ export function createContext(environment: Env): ReducerContext {
 }
 
 export function currentFunctionName(t: ReducerContext): string {
-  return t.inFunction === undefined ? topFrameName : t.inFunction.getName();
+  return t.inFunction === undefined ? topFrameName : t.inFunction.display();
 }

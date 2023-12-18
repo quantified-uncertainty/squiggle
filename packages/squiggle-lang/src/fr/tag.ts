@@ -90,7 +90,7 @@ export const library = [
     ],
   }),
   maker.make({
-    name: "getName",
+    name: "display",
     examples: [],
     definitions: [
       makeDefinition([frForceBoxed(frAny())], frString, ([{ args }]) => {

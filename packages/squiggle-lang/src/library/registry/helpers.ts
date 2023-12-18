@@ -479,28 +479,28 @@ export const frTypeToInput = (
       return {
         name,
         type,
-        typeName: frType.getName(),
+        typeName: frType.display(),
         default: frType.default || "",
       };
     case "textArea":
       return {
         name,
         type,
-        typeName: frType.getName(),
+        typeName: frType.display(),
         default: frType.default || "",
       };
     case "checkbox":
       return {
         name,
         type,
-        typeName: frType.getName(),
+        typeName: frType.display(),
         default: frType.default === "true" ? true : false,
       };
     case "select":
       return {
         name,
         type,
-        typeName: frType.getName(),
+        typeName: frType.display(),
         default: frType.default || "",
         options: [],
       };
