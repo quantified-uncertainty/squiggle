@@ -165,11 +165,13 @@ const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
     const stablePartialPlaygroundSettings = useStabilizeObjectIdentity(
       partialPlaygroundSettings
     );
+    const hasResultVariables =
+      resultVariables.ok && resultVariables.value.value.entries().length > 0;
     return (
       <ViewerProvider
         partialPlaygroundSettings={stablePartialPlaygroundSettings}
         editor={editor}
-        beginWithVariablesCollapsed={resultItem !== undefined && resultItem.ok}
+        beginWithVariablesCollapsed={resultItem?.ok && hasResultVariables}
         rootPathOverride={rootPathOverride}
       >
         <SquiggleViewerOuter
