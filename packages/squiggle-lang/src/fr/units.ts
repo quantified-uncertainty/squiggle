@@ -5,7 +5,7 @@ import { BoxedArgs } from "../value/boxed.js";
 
 const maker = new FnFactory({
   nameSpace: "",
-  requiresNamespace: false,
+  requiresNamespace: false
 });
 
 const makeUnitFn = (
@@ -25,11 +25,11 @@ const makeUnitFn = (
         ? makeDefinition([frNumber], frForceBoxed(frNumber), ([x]) => {
             return {
               value: x * multiplier,
-              args: new BoxedArgs({ numberFormat: format }),
+              args: new BoxedArgs({ numberFormat: format })
             };
           })
-        : makeDefinition([frNumber], frNumber, ([x]) => x * multiplier),
-    ],
+        : makeDefinition([frNumber], frNumber, ([x]) => x * multiplier)
+    ]
   });
 };
 
@@ -42,5 +42,5 @@ export const library = [
   makeUnitFn("B", "billion", 1e9),
   makeUnitFn("G", "giga", 1e9),
   makeUnitFn("T", "tera", 1e12),
-  makeUnitFn("P", "peta", 1e15),
+  makeUnitFn("P", "peta", 1e15)
 ];
