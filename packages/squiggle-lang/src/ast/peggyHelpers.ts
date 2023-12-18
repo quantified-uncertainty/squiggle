@@ -131,7 +131,10 @@ type NodeDefunStatement = N<
 
 type NodeDecoratedStatement = N<
   "DecoratedStatement",
-  { decorator: NodeDecorator; statement: NodeLetStatement | NodeDefunStatement }
+  {
+    decorator: NodeDecorator;
+    statement: NodeLetStatement | NodeDefunStatement | NodeDecoratedStatement;
+  }
 >;
 
 type NodeLambda = N<
@@ -400,7 +403,8 @@ export function nodeDecoratedStatement(
 ): ASTNode {
   if (
     statement.type !== "LetStatement" &&
-    statement.type !== "DefunStatement"
+    statement.type !== "DefunStatement" &&
+    statement.type !== "DecoratedStatement"
   ) {
     // shouldn't happen after we remove support for voids
     throw new Error(

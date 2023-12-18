@@ -62,11 +62,10 @@ decoratedStatement
   / defunStatement
 
   decorator
-    = '@' name:identifier args:(_ '(' _nl @functionArguments _nl ')')?
-    commentOrNewLine
-    {
-      return h.nodeDecorator(name, args ?? [], location());
-    }
+    = '@' name:identifier args:(_ '(' _nl @functionArguments _nl ')')?  __nl
+      {
+        return h.nodeDecorator(name, args ?? [], location());
+      }
 
 statement
   = decoratedStatement

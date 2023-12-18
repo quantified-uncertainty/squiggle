@@ -96,7 +96,7 @@ function nodeToString(node: ASTNode): string {
     case "Lambda":
       return sExpr([...node.args, node.body]);
     case "Decorator":
-      return sExpr([node.name]);
+      return sExpr([node.name, ...node.args]);
     case "DecoratedStatement":
       return sExpr([node.decorator, node.statement]);
     case "LetStatement":
