@@ -15,7 +15,6 @@ import {
 import {
   frAny,
   frDate,
-  frNamed,
   frNumber,
   FRType,
   inferFromValue,
@@ -45,7 +44,7 @@ const enrichWithDomain = ({
   domain,
   type,
 }: UserDefinedLambdaParameter): UserDefinedLambdaParameter => {
-  const nameInputT = (i: FRType<any>) => frNamed(name, i);
+  const nameInputT = (i: FRType<any>) => i; // frNamed(name, i);
   let enrichedType = type;
   if (!type && domain) {
     switch (domain.value.type) {
@@ -132,7 +131,8 @@ export function inferUserDef(
   const firstParam = fn.parameters[0];
   const inputType = firstParam.type;
   const { domain, name } = firstParam;
-  const nameInputT = (i: FRType<any>) => [frNamed(name, i)];
+  const nameInputT = (i: FRType<any>) => [i];
+  // const nameInputT = (i: FRType<any>) => [frNamed(name, i)];
 
   // We now assume that whenever we have an inputType, we have a corresponding domain
   if (inputType && !domain) {

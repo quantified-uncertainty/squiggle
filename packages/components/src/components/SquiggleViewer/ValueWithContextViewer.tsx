@@ -9,6 +9,7 @@ import { CommentIcon, TextTooltip } from "@quri/ui";
 
 import { SHORT_STRING_LENGTH } from "../../lib/constants.js";
 import { SqValueWithContext } from "../../lib/utility.js";
+import { canDisplayFunction } from "../../widgets/LambdaWidget/FunctionChart/AutomaticFunctionChart.js";
 import { ErrorBoundary } from "../ErrorBoundary.js";
 import { CollapsedIcon, ExpandedIcon } from "./icons.js";
 import { SquiggleValueChart } from "./SquiggleValueChart.js";
@@ -139,7 +140,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
         return getChildrenValues(v).length > 30;
       } else {
         if (v.tag === "Lambda") {
-          return true;
+          return !canDisplayFunction(v.value);
         }
         return (
           getChildrenValues(v).length > 5 ||

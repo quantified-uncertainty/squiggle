@@ -168,7 +168,7 @@ varString = "This is a long string"
 varVoid = ()
 
 varArray = [1,2,3]
-varLambda = {|e| "Test"}
+varLambda = {|e| 4 + ""}
 varScale = Scale.symlog({ min: -2, max: 5})
 
 varDict = {fir: 1, secon: 2}
