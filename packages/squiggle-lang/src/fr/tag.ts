@@ -46,7 +46,10 @@ function _ensureTypeUsingLambda<T1>(
 }
 
 // This constructs definitions where the second argument is either a type T or a function that takes in the first argument and returns a type T.
-function withInputOrFnInput<T>(inputType: FRType<any>, outputType: FRType<T>) {
+function decoratorWithInputOrFnInput<T>(
+  inputType: FRType<any>,
+  outputType: FRType<T>
+) {
   return makeDefinition(
     [
       frForceBoxed(inputType),
@@ -65,7 +68,8 @@ function withInputOrFnInput<T>(inputType: FRType<any>, outputType: FRType<T>) {
         args: args.merge({ showAs: outputType.pack(showAsVal) }),
         value,
       };
-    }
+    },
+    { isDecorator: true }
   );
 }
 
@@ -79,7 +83,8 @@ export const library = [
         frForceBoxed(frAny({ genericName: "A" })),
         ([{ args, value }, name]) => {
           return { args: args.merge({ name }), value };
-        }
+        },
+        { isDecorator: true }
       ),
     ],
   }),
@@ -101,7 +106,8 @@ export const library = [
         frForceBoxed(frAny({ genericName: "A" })),
         ([{ args, value }, description]) => {
           return { value: value, args: args.merge({ description }) };
-        }
+        },
+        { isDecorator: true }
       ),
     ],
   }),
@@ -118,10 +124,13 @@ export const library = [
     name: "showAs",
     examples: [],
     definitions: [
-      withInputOrFnInput(frDist, frPlot),
-      withInputOrFnInput(frLambda, frCalculator),
-      withInputOrFnInput(frLambdaTyped([frNumber], frDistOrNumber), frPlot),
-      withInputOrFnInput(frArray(frAny()), frTableChart),
+      decoratorWithInputOrFnInput(frDist, frPlot),
+      decoratorWithInputOrFnInput(frLambda, frCalculator),
+      decoratorWithInputOrFnInput(
+        frLambdaTyped([frNumber], frDistOrNumber),
+        frPlot
+      ),
+      decoratorWithInputOrFnInput(frArray(frAny()), frTableChart),
     ],
   }),
   maker.make({

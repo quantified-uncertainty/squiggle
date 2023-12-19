@@ -132,6 +132,45 @@ function compileToContent(
         newContext,
       ];
     }
+    case "DecoratedStatement": {
+      // First, compile the inner statement.
+      // `newContext` includes the new binding.
+      const [innerExpression, newContext] = innerCompileAst(
+        ast.statement,
+        context
+      );
+      if (innerExpression.type !== "Assign") {
+        // Shouldn't happen, `ast.statement` is always compiled to `Assign`
+        throw new ICompileError(
+          "Can't apply a decorator to non-Assign expression",
+          ast.location
+        );
+      }
+      // Then wrap it in a function call.
+      const decoratorFn = resolveName(
+        context,
+        ast,
+        `Tag.${ast.decorator.name.value}`
+      );
+      return [
+        expression.eLetStatement(innerExpression.value.left, {
+          ast: ast.statement,
+          ...expression.eCall(
+            decoratorFn,
+            [
+              innerExpression.value.right,
+              ...ast.decorator.args.map(
+                (arg) => innerCompileAst(arg, context)[0]
+              ),
+            ],
+            "decorate"
+          ),
+        }),
+        newContext,
+      ];
+    }
+    case "Decorator":
+      throw new ICompileError("Can't compile Decorator node", ast.location);
     case "Call": {
       return [
         expression.eCall(
@@ -311,37 +350,6 @@ function compileToContent(
         "Can't compile IdentifierWithAnnotation outside of lambda declaration",
         ast.location
       );
-    case "DecoratedStatement": {
-      // First, compile the inner statement.
-      const innerExpression = innerCompileAst(ast.statement, context)[0];
-      if (innerExpression.type !== "Assign") {
-        // Shouldn't happen, `ast.statement` is always compiled to `Assign`
-        throw new ICompileError(
-          "Can't apply a decorator to non-Assign expression",
-          ast.location
-        );
-      }
-      // Then wrap it in a function call.
-      const decoratorFn = resolveName(
-        context,
-        ast,
-        `Tag.${ast.decorator.name.value}`
-      );
-      return [
-        expression.eLetStatement(innerExpression.value.left, {
-          ast: ast.statement,
-          ...expression.eCall(decoratorFn, [
-            innerExpression.value.right,
-            ...ast.decorator.args.map(
-              (arg) => innerCompileAst(arg, context)[0]
-            ),
-          ]),
-        }),
-        context,
-      ];
-    }
-    case "Decorator":
-      throw new ICompileError("Can't compile Decorator node", ast.location);
     default: {
       const badAst = ast satisfies never;
       throw new Error(`Unsupported AST value ${JSON.stringify(badAst)}`);

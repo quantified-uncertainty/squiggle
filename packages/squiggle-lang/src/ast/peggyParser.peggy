@@ -62,7 +62,7 @@ decoratedStatement
   / defunStatement
 
   decorator
-    = '@' name:identifier args:(_ '(' _nl @functionArguments _nl ')')?  __nl
+    = '@' name:dollarIdentifier args:(_ '(' _nl @functionArguments _nl ')')?  __nl
       {
         return h.nodeDecorator(name, args ?? [], location());
       }
