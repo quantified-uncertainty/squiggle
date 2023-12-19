@@ -167,7 +167,7 @@ export class BuiltinLambda extends BaseLambda {
     super((args, context) => this._call(args, context));
     this._definitions = signatures;
 
-    // TODO - this sets the flag that the function is a decorator, but later it we don't check which signatures are decorators.
+    // TODO - this sets the flag that the function is a decorator, but later we don't check which signatures are decorators.
     // For now, it doesn't matter because we don't allow user-defined decorators, and `Tag.*` decorators work as decorators on all possible definitions.
     this.isDecorator = signatures.some((s) => s.isDecorator);
   }
