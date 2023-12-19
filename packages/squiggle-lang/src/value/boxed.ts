@@ -1,4 +1,6 @@
+import { result } from "../index.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
+import { Err, Ok } from "../utility/result.js";
 import { Value, vString } from "./index.js";
 
 export type BoxedArgsType = {
@@ -8,6 +10,32 @@ export type BoxedArgsType = {
   numberFormat?: string;
   dateFormat?: string;
 };
+
+export type BoxedArgsTypeName = keyof BoxedArgsType;
+
+const boxedArgsTypeNames: string[] = [
+  "name",
+  "description",
+  "showAs",
+  "numberFormat",
+  "dateFormat",
+];
+
+export function convertToBoxedArgsTypeName(
+  key: string
+): result<BoxedArgsTypeName, string> {
+  const validKeys: Set<string> = new Set(boxedArgsTypeNames);
+  if (validKeys.has(key)) {
+    return Ok(key as BoxedArgsTypeName);
+  } else {
+    // Throw an error if the key is not a valid BoxedArgsTypeName
+    return Err(
+      `Invalid BoxedArgsTypeName: ${key}. Must be one of ${boxedArgsTypeNames.join(
+        ","
+      )}`
+    );
+  }
+}
 
 //I expect these to get much more complicated later, so it seemed prudent to make a class now.
 export class BoxedArgs {
@@ -32,6 +60,12 @@ export class BoxedArgs {
       result.push(["dateFormat", vString(value.dateFormat)]);
     }
     return result;
+  }
+
+  omit(keys: BoxedArgsTypeName[]) {
+    const newValue: BoxedArgsType = { ...this.value };
+    keys.forEach((key) => delete newValue[key]);
+    return new BoxedArgs(newValue);
   }
 
   toMap(): ImmutableMap<string, Value> {

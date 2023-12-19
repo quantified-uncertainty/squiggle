@@ -71,6 +71,18 @@ export function merge<T1, T2, E>(
   return Ok([a.value, b.value]);
 }
 
+export function mergeMany<T, E>(results: result<T, E>[]): result<T[], E> {
+  const values: T[] = [];
+  for (const result of results) {
+    if (result.ok) {
+      values.push(result.value);
+    } else {
+      return Err(result.value);
+    }
+  }
+  return Ok(values);
+}
+
 export function getError<T, E>(r: result<T, E>): E | undefined {
   if (!r.ok) {
     return r.value;
