@@ -440,7 +440,6 @@ export type Plot = CommonPlotArgs &
         fn: Lambda;
         xScale: Scale;
         yScale: Scale;
-        points?: number;
         xPoints?: number[];
       }
     | {
@@ -449,7 +448,6 @@ export type Plot = CommonPlotArgs &
         xScale: Scale;
         yScale: Scale;
         distXScale: Scale;
-        points?: number;
         xPoints?: number[];
       }
     | {

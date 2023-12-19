@@ -63,7 +63,7 @@ export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot>(
     ? plot.xPoints.filter((x) => x >= min && x <= max)
     : rangeByCount({
         scale,
-        count: plot.points ?? functionChartDefaults.points,
+        count: functionChartDefaults.points,
       });
 
   const functionImage: {

@@ -131,7 +131,6 @@ const numericFnDef = () => {
     xScale: Scale | null,
     yScale: Scale | null,
     title: string | null,
-    points: number | null,
     xPoints: number[] | null
   ): Plot => {
     _assertYScaleNotDateScale(yScale);
@@ -141,7 +140,6 @@ const numericFnDef = () => {
       fn,
       xScale: createScale(xScale, domain),
       yScale: yScale ?? defaultScale,
-      points: points ?? undefined,
       title: title ?? undefined,
       xPoints: xPoints ?? undefined,
     };
@@ -166,7 +164,6 @@ const numericFnDef = () => {
                 ["xScale", frOptional(frScale)],
                 ["yScale", frOptional(frScale)],
                 ["title", frOptional(frString)],
-                ["points", frOptional(frNumber)],
                 ["xPoints", frOptional(frArray(frNumber))]
               )
             )
@@ -174,13 +171,12 @@ const numericFnDef = () => {
         ],
         frPlot,
         ([{ value, args }, params]) => {
-          const { xScale, yScale, title, points, xPoints } = params ?? {};
+          const { xScale, yScale, title, xPoints } = params ?? {};
           return toPlot(
             value,
             xScale || null,
             yScale || null,
             title || args.name() || null,
-            points || null,
             formatXPoints(xPoints || null, xScale || null)
           );
         }
@@ -192,18 +188,16 @@ const numericFnDef = () => {
             ["xScale", frOptional(frScale)],
             ["yScale", frOptional(frScale)],
             ["title", frOptional(frString)],
-            ["points", frOptional(frNumber)],
             ["xPoints", frOptional(frArray(frNumber))]
           ),
         ],
         frPlot,
-        ([{ fn, xScale, yScale, title, points, xPoints }]) => {
+        ([{ fn, xScale, yScale, title, xPoints }]) => {
           return toPlot(
             fn,
             xScale,
             yScale,
             title,
-            points,
             formatXPoints(xPoints, xScale)
           );
         },
@@ -396,7 +390,6 @@ export const library = [
                 ["yScale", frOptional(frScale)],
                 ["distXScale", frOptional(frScale)],
                 ["title", frOptional(frString)],
-                ["points", frOptional(frNumber)],
                 ["xPoints", frOptional(frArray(frNumber))]
               )
             )
@@ -405,8 +398,7 @@ export const library = [
         frPlot,
         ([{ value, args }, params]) => {
           const domain = extractDomainFromOneArgFunction(value);
-          const { xScale, yScale, distXScale, title, points, xPoints } =
-            params ?? {};
+          const { xScale, yScale, distXScale, title, xPoints } = params ?? {};
           yScale && _assertYScaleNotDateScale(yScale);
           const _xScale = createScale(xScale || null, domain);
           return {
@@ -416,7 +408,6 @@ export const library = [
             yScale: yScale ?? defaultScale,
             distXScale: distXScale ?? yScale ?? defaultScale,
             title: title ?? args.name() ?? undefined,
-            points: points ?? undefined,
             xPoints: formatXPoints(xPoints || null, _xScale) || undefined,
           };
         }
@@ -429,12 +420,11 @@ export const library = [
             ["yScale", frOptional(frScale)],
             ["distXScale", frOptional(frScale)],
             ["title", frOptional(frString)],
-            ["points", frOptional(frNumber)],
             ["xPoints", frOptional(frArray(frNumber))]
           ),
         ],
         frPlot,
-        ([{ fn, xScale, yScale, distXScale, title, points, xPoints }]) => {
+        ([{ fn, xScale, yScale, distXScale, title, xPoints }]) => {
           _assertYScaleNotDateScale(yScale);
           const domain = extractDomainFromOneArgFunction(fn);
           const _xScale = createScale(xScale, domain);
@@ -445,7 +435,6 @@ export const library = [
             yScale: yScale ?? defaultScale,
             distXScale: distXScale ?? yScale ?? defaultScale,
             title: title ?? undefined,
-            points: points ?? undefined,
             xPoints: formatXPoints(xPoints, _xScale) || undefined,
           };
         },

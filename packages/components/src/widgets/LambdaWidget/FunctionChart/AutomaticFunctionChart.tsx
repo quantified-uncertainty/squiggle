@@ -107,7 +107,6 @@ export const AutomaticFunctionChart: FC<AutomaticFunctionChartProps> = ({
         fn,
         xScale,
         yScale,
-        points: settings.functionChartSettings.count,
         distXScale: generateDistributionPlotSettings(
           settings.distributionChartSettings
         ).xScale,
@@ -125,7 +124,6 @@ export const AutomaticFunctionChart: FC<AutomaticFunctionChartProps> = ({
       const plot = SqNumericFnPlot.create({
         fn,
         xScale,
-        points: settings.functionChartSettings.count,
         yScale: SqLinearScale.create(),
       });
 
