@@ -235,6 +235,7 @@ const evaluateLambda: SubReducerFn<"Lambda"> = (
     parameters.push({
       name: parameterExpression.name,
       domain,
+      type: undefined,
     });
   }
   const value = vLambda(

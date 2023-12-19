@@ -1,4 +1,3 @@
-import { first } from "lodash";
 import maxBy from "lodash/maxBy.js";
 import uniq from "lodash/uniq.js";
 import { LocationRange } from "peggy";
@@ -38,6 +37,31 @@ import { Stack } from "./stack.js";
 export type UserDefinedLambdaParameter = {
   name: string;
   domain?: VDomain; // should this be Domain instead of VDomain?
+  type?: FRType<any>;
+};
+
+const enrichWithDomain = ({
+  name,
+  domain,
+  type,
+}: UserDefinedLambdaParameter): UserDefinedLambdaParameter => {
+  const nameInputT = (i: FRType<any>) => frNamed(name, i);
+  let enrichedType = type;
+  if (!type && domain) {
+    switch (domain.value.type) {
+      case "DateRange":
+        enrichedType = nameInputT(frDate);
+        break;
+      case "NumericRange":
+        enrichedType = nameInputT(frNumber);
+        break;
+    }
+  }
+  return {
+    name,
+    domain,
+    type: enrichedType,
+  };
 };
 
 type LambdaBody = (args: Value[], context: ReducerContext) => Value;
@@ -106,9 +130,16 @@ export function inferUserDef(
     return undefined;
   }
   const firstParam = fn.parameters[0];
-  const inputType: FRType<any> | undefined = paramaterToType(first);
+  const inputType = firstParam.type;
   const { domain, name } = firstParam;
   const nameInputT = (i: FRType<any>) => [frNamed(name, i)];
+
+  // We now assume that whenever we have an inputType, we have a corresponding domain
+  if (inputType && !domain) {
+    throw new Error(
+      "Internal Error: InputType without domain. This should be unreachable."
+    );
+  }
 
   if (inputType && domain?.value.type === "DateRange") {
     return {
@@ -143,6 +174,25 @@ export function inferUserDef(
       return undefined;
     }
   }
+}
+
+function enrichParametersAndGetOutputType(
+  fn: UserDefinedLambda
+): [UserDefinedLambdaParameter[], FRType<any> | undefined] {
+  let enrichedParameters = fn.parameters.map(enrichWithDomain); // Add types, using domains
+  let outputType = undefined;
+  const def = inferUserDef(
+    fn,
+    Context.createContext({ sampleCount: 10, xyPointLength: 10 })
+  );
+  if (def && enrichedParameters.length === def.inputs.length) {
+    enrichedParameters = enrichedParameters.map((p, i) => ({
+      ...p,
+      type: def.inputs[i],
+    }));
+    outputType = def.output;
+  }
+  return [enrichedParameters, outputType];
 }
 
 export abstract class BaseLambda {
@@ -191,7 +241,7 @@ export class UserDefinedLambda extends BaseLambda {
   parameters: UserDefinedLambdaParameter[];
   location: LocationRange;
   name?: string;
-  def?: SimpleDef;
+  outputType?: FRType<any> | undefined;
   readonly type = "UserDefinedLambda";
 
   constructor(
@@ -238,11 +288,9 @@ export class UserDefinedLambda extends BaseLambda {
   }
 
   private inferAndSaveDefinition() {
-    const context = Context.createContext({
-      sampleCount: 10,
-      xyPointLength: 10,
-    });
-    this.def = inferUserDef(this, context);
+    const [parameters, outputType] = enrichParametersAndGetOutputType(this);
+    this.parameters = parameters;
+    this.outputType = outputType;
   }
 
   getName() {
@@ -254,11 +302,7 @@ export class UserDefinedLambda extends BaseLambda {
   }
 
   parameterString() {
-    if (this.def) {
-      return fnDefinitionToString(this.def);
-    } else {
-      return this._getParameterNames().join(",");
-    }
+    return this._getParameterNames().join(",");
   }
 
   toString() {

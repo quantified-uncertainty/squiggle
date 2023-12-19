@@ -1,6 +1,7 @@
 import { Env } from "../../dist/env.js";
 import { IRuntimeError } from "../../errors/IError.js";
 import { getStdLib } from "../../library/index.js";
+import { FRType } from "../../library/registry/frTypes.js";
 import { createContext } from "../../reducer/context.js";
 import { Lambda } from "../../reducer/lambda.js";
 import * as Result from "../../utility/result.js";
@@ -14,29 +15,40 @@ export type SqLambdaParameter = {
   name: string;
   domain?: SqDomain;
   typeName?: string;
+  type?: FRType<any>;
 };
 
-type SqLambdaSignature = SqLambdaParameter[];
+type SqLambdaSignature = {
+  inputs: SqLambdaParameter[];
+  outputType?: FRType<any>;
+};
 
 function lambdaToSqLambdaSignatures(lambda: Lambda): SqLambdaSignature[] {
   switch (lambda.type) {
     case "UserDefinedLambda":
       return [
-        lambda.parameters.map((param) => {
-          return {
-            name: param.name,
-            domain: param.domain ? wrapDomain(param.domain.value) : undefined,
-          };
-        }),
+        {
+          inputs: lambda.parameters.map((p) => {
+            return {
+              name: p.name,
+              domain: p.domain ? wrapDomain(p.domain.value) : undefined,
+              typeName: p.type?.getName() || undefined,
+              type: p.type,
+            };
+          }),
+          outputType: lambda.outputType,
+        },
       ];
     case "BuiltinLambda":
-      return lambda.signatures().map((def) =>
-        def.map((p, index) => ({
+      return lambda._definitions.map((def) => ({
+        inputs: def.inputs.map((p, index) => ({
           name: index.toString(),
           domain: undefined,
           typeName: p.getName(),
-        }))
-      );
+          type: p,
+        })),
+        output: def.output,
+      }));
   }
 }
 
