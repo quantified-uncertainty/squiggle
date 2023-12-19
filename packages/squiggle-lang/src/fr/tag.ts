@@ -127,40 +127,6 @@ export const library = [
     ],
   }),
   maker.make({
-    name: "omit",
-    examples: [],
-    definitions: [
-      makeDefinition(
-        [frForceBoxed(frAny({ genericName: "A" })), frArray(frString)],
-        frForceBoxed(frAny({ genericName: "A" })),
-        ([{ args, value }, parameterNames]) => {
-          const _parameterNames = mergeMany(
-            parameterNames.map(convertToBoxedArgsTypeName)
-          );
-          if (!_parameterNames.ok) {
-            throw new REArgumentError(_parameterNames.value);
-          } else {
-            const newArgs = args.omit(_parameterNames.value);
-            return { value: value, args: newArgs };
-          }
-        }
-      ),
-    ],
-  }),
-  maker.make({
-    name: "clear",
-    examples: [],
-    definitions: [
-      makeDefinition(
-        [frForceBoxed(frAny({ genericName: "A" }))],
-        frForceBoxed(frAny({ genericName: "A" })),
-        ([{ value }]) => {
-          return { value, args: new BoxedArgs({}) };
-        }
-      ),
-    ],
-  }),
-  maker.make({
     name: "showAs",
     examples: [],
     definitions: [
@@ -211,7 +177,6 @@ export const library = [
       ),
     ],
   }),
-
   maker.make({
     name: "all",
     examples: [],
@@ -221,6 +186,40 @@ export const library = [
         frDictWithArbitraryKeys(frAny()),
         ([{ args }]) => {
           return args.toMap();
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "omit",
+    examples: [],
+    definitions: [
+      makeDefinition(
+        [frForceBoxed(frAny({ genericName: "A" })), frArray(frString)],
+        frForceBoxed(frAny({ genericName: "A" })),
+        ([{ args, value }, parameterNames]) => {
+          const _parameterNames = mergeMany(
+            parameterNames.map(convertToBoxedArgsTypeName)
+          );
+          if (!_parameterNames.ok) {
+            throw new REArgumentError(_parameterNames.value);
+          } else {
+            const newArgs = args.omit(_parameterNames.value);
+            return { value: value, args: newArgs };
+          }
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "clear",
+    examples: [],
+    definitions: [
+      makeDefinition(
+        [frForceBoxed(frAny({ genericName: "A" }))],
+        frForceBoxed(frAny({ genericName: "A" })),
+        ([{ value }]) => {
+          return { value, args: new BoxedArgs({}) };
         }
       ),
     ],
