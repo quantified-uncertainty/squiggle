@@ -1,3 +1,5 @@
+import { ErrorMessage } from "../errors/messages.js";
+
 export type result<V, E> =
   | {
       ok: true;
@@ -96,5 +98,16 @@ export function getExt<T, E>(r: result<T, E>): T {
     return r.value;
   } else {
     throw r.value;
+  }
+}
+
+export function getOrThrow<T, E>(
+  r: result<T, E>,
+  errMap: (e: E) => ErrorMessage
+): T {
+  if (!r.ok) {
+    throw errMap(r.value);
+  } else {
+    return r.value;
   }
 }

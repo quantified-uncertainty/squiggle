@@ -1,6 +1,6 @@
 import { result } from "../index.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
-import { Err, Ok } from "../utility/result.js";
+import { Err, fmap, mergeMany, Ok } from "../utility/result.js";
 import { Value, vString } from "./index.js";
 
 export type BoxedArgsType = {
@@ -11,7 +11,7 @@ export type BoxedArgsType = {
   dateFormat?: string;
 };
 
-export type BoxedArgsTypeName = keyof BoxedArgsType;
+type BoxedArgsTypeName = keyof BoxedArgsType;
 
 const boxedArgsTypeNames: string[] = [
   "name",
@@ -21,7 +21,7 @@ const boxedArgsTypeNames: string[] = [
   "dateFormat",
 ];
 
-export function convertToBoxedArgsTypeName(
+function convertToBoxedArgsTypeName(
   key: string
 ): result<BoxedArgsTypeName, string> {
   const validKeys: Set<string> = new Set(boxedArgsTypeNames);
@@ -66,6 +66,12 @@ export class BoxedArgs {
     const newValue: BoxedArgsType = { ...this.value };
     keys.forEach((key) => delete newValue[key]);
     return new BoxedArgs(newValue);
+  }
+
+  omitUsingStringKeys(keys: string[]) {
+    const params = mergeMany(keys.map(convertToBoxedArgsTypeName));
+    //Don't simplify the omit call, as we need to ensure "this" is carried.
+    return fmap(params, (args) => this.omit(args));
   }
 
   toMap(): ImmutableMap<string, Value> {

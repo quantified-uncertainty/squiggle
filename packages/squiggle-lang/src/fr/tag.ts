@@ -26,12 +26,8 @@ import {
   FnFactory,
 } from "../library/registry/helpers.js";
 import { Lambda } from "../reducer/lambda.js";
-import { mergeMany } from "../utility/result.js";
-import {
-  Boxed,
-  BoxedArgs,
-  convertToBoxedArgsTypeName,
-} from "../value/boxed.js";
+import { getOrThrow } from "../utility/result.js";
+import { Boxed, BoxedArgs } from "../value/boxed.js";
 import { Value, vBoxed, vString } from "../value/index.js";
 
 const maker = new FnFactory({
@@ -198,15 +194,9 @@ export const library = [
         [frForceBoxed(frAny({ genericName: "A" })), frArray(frString)],
         frForceBoxed(frAny({ genericName: "A" })),
         ([{ args, value }, parameterNames]) => {
-          const _parameterNames = mergeMany(
-            parameterNames.map(convertToBoxedArgsTypeName)
-          );
-          if (!_parameterNames.ok) {
-            throw new REArgumentError(_parameterNames.value);
-          } else {
-            const newArgs = args.omit(_parameterNames.value);
-            return { value: value, args: newArgs };
-          }
+          const newParams = args.omitUsingStringKeys([...parameterNames]);
+          const _args = getOrThrow(newParams, (e) => new REArgumentError(e));
+          return { args: _args, value };
         }
       ),
     ],
