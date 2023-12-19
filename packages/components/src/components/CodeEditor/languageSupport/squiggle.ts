@@ -103,6 +103,9 @@ export function squiggleLanguageSupport(project: SqProject) {
 
         FunctionName: t.function(t.variableName),
 
+        DecoratorName: t.variableName,
+        At: t.keyword,
+
         LambdaSyntax: t.blockComment,
 
         VariableName: t.constant(t.variableName),
