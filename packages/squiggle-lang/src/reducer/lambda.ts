@@ -12,9 +12,23 @@ import {
   showInDocumentation,
   tryCallFnDefinition,
 } from "../library/registry/fnDefinition.js";
-import { FRType } from "../library/registry/frTypes.js";
+import {
+  frAny,
+  frDate,
+  frNumber,
+  FRType,
+  inferFromValue,
+} from "../library/registry/frTypes.js";
 import { sort } from "../utility/E_A_Floats.js";
-import { Calculator, Value, VDomain } from "../value/index.js";
+import { DateRangeDomain, NumericRangeDomain } from "../value/domain.js";
+import {
+  Calculator,
+  Value,
+  vDate,
+  VDomain,
+  vNumber,
+  vString,
+} from "../value/index.js";
 import * as Context from "./context.js";
 import { ReducerContext } from "./context.js";
 import { Stack } from "./stack.js";
@@ -22,9 +36,164 @@ import { Stack } from "./stack.js";
 export type UserDefinedLambdaParameter = {
   name: string;
   domain?: VDomain; // should this be Domain instead of VDomain?
+  type?: FRType<any>;
+};
+
+const enrichWithDomain = ({
+  name,
+  domain,
+  type,
+}: UserDefinedLambdaParameter): UserDefinedLambdaParameter => {
+  const nameInputT = (i: FRType<any>) => i; // frNamed(name, i);
+  let enrichedType = type;
+  if (!type && domain) {
+    switch (domain.value.type) {
+      case "DateRange":
+        enrichedType = nameInputT(frDate);
+        break;
+      case "NumericRange":
+        enrichedType = nameInputT(frNumber);
+        break;
+    }
+  }
+  return {
+    name,
+    domain,
+    type: enrichedType,
+  };
 };
 
 type LambdaBody = (args: Value[], context: ReducerContext) => Value;
+
+function getInferredOutputType(
+  lambda: UserDefinedLambda,
+  valuesToTry: Value[],
+  context: ReducerContext
+): FRType<any> | undefined {
+  for (const point of valuesToTry) {
+    try {
+      const testVal = lambda.call([point], context);
+      return inferFromValue(testVal);
+    } catch (e) {
+      // do nothing
+    }
+  }
+  return undefined;
+}
+
+type SimpleDef = {
+  inputs: FRType<any>[];
+  output: FRType<any>;
+};
+
+function paramaterToType(
+  param: UserDefinedLambdaParameter
+): FRType<any> | undefined {
+  if (param.domain) {
+    return param.domain.value.type === "DateRange" ? frDate : frNumber;
+  }
+  return undefined;
+}
+
+function tryDateInput(
+  fn: UserDefinedLambda,
+  context: ReducerContext,
+  domain: DateRangeDomain
+): FRType<any> | undefined {
+  const xValuesToTest = [domain.min, domain.max].map(vDate);
+  return getInferredOutputType(fn, xValuesToTest, context);
+}
+
+function tryNumInput(
+  fn: UserDefinedLambda,
+  context: ReducerContext,
+  domain?: NumericRangeDomain
+): FRType<any> | undefined {
+  const xDomain = domain ? domain : new NumericRangeDomain(0.1, 10);
+  const xValuesToTest = [xDomain.min, xDomain.max].map(vNumber);
+  return getInferredOutputType(fn, xValuesToTest, context);
+}
+
+function tryStringInput(
+  fn: UserDefinedLambda,
+  context: ReducerContext
+): FRType<any> | undefined {
+  return getInferredOutputType(fn, [vString("hi")], context);
+}
+
+export function inferUserDef(
+  fn: UserDefinedLambda,
+  context: ReducerContext
+): SimpleDef | undefined {
+  if (fn.parameters.length !== 1) {
+    return undefined;
+  }
+  const firstParam = fn.parameters[0];
+  const inputType = firstParam.type;
+  const { domain, name } = firstParam;
+  const nameInputT = (i: FRType<any>) => [i];
+  // const nameInputT = (i: FRType<any>) => [frNamed(name, i)];
+
+  // We now assume that whenever we have an inputType, we have a corresponding domain
+  if (inputType && !domain) {
+    throw new Error(
+      "Internal Error: InputType without domain. This should be unreachable."
+    );
+  }
+
+  if (inputType && domain?.value.type === "DateRange") {
+    return {
+      inputs: nameInputT(inputType),
+      output: tryDateInput(fn, context, domain.value) || frAny(),
+    };
+  } else if (inputType && domain?.value.type === "NumericRange") {
+    return {
+      inputs: nameInputT(inputType),
+      output: tryNumInput(fn, context, domain.value) || frAny(),
+    };
+  } else {
+    const outputFromNumber = tryNumInput(fn, context);
+    const outputFromString = tryStringInput(fn, context);
+    if (outputFromNumber && outputFromString) {
+      return {
+        inputs: nameInputT(frAny()),
+        output:
+          outputFromNumber === outputFromString ? outputFromNumber : frAny(),
+      };
+    } else if (outputFromNumber) {
+      return {
+        inputs: nameInputT(frNumber),
+        output: outputFromNumber,
+      };
+    } else if (outputFromString) {
+      return {
+        inputs: nameInputT(frNumber),
+        output: outputFromString,
+      };
+    } else {
+      return undefined;
+    }
+  }
+}
+
+function enrichParametersAndGetOutputType(
+  fn: UserDefinedLambda
+): [UserDefinedLambdaParameter[], FRType<any> | undefined] {
+  let enrichedParameters = fn.parameters.map(enrichWithDomain); // Add types, using domains
+  let outputType = undefined;
+  const def = inferUserDef(
+    fn,
+    Context.createContext({ sampleCount: 10, xyPointLength: 10 })
+  );
+  if (def && enrichedParameters.length === def.inputs.length) {
+    enrichedParameters = enrichedParameters.map((p, i) => ({
+      ...p,
+      type: def.inputs[i],
+    }));
+    outputType = def.output;
+  }
+  return [enrichedParameters, outputType];
+}
 
 export abstract class BaseLambda {
   constructor(public body: LambdaBody) {}
@@ -72,6 +241,7 @@ export class UserDefinedLambda extends BaseLambda {
   parameters: UserDefinedLambdaParameter[];
   location: LocationRange;
   name?: string;
+  outputType?: FRType<any> | undefined;
   readonly type = "UserDefinedLambda";
 
   constructor(
@@ -114,6 +284,13 @@ export class UserDefinedLambda extends BaseLambda {
     this.name = name;
     this.parameters = parameters;
     this.location = location;
+    this.inferAndSaveDefinition();
+  }
+
+  private inferAndSaveDefinition() {
+    const [parameters, outputType] = enrichParametersAndGetOutputType(this);
+    this.parameters = parameters;
+    this.outputType = outputType;
   }
 
   getName() {

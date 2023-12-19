@@ -80,7 +80,6 @@ class WidgetRegistry {
         return heading(value as ValueByTag<T>);
       };
     }
-
     this.widgets.set(tag, widget);
   }
 }
