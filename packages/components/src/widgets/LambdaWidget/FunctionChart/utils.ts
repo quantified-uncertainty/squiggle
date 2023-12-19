@@ -54,16 +54,17 @@ export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot>(
   environment: Env
 ) {
   const scale = sqScaleToD3(plot.xScale);
+  const min = plot.xScale?.min ?? functionChartDefaults.min;
+  const max = plot.xScale?.max ?? functionChartDefaults.max;
 
-  scale.domain([
-    plot.xScale?.min ?? functionChartDefaults.min,
-    plot.xScale?.max ?? functionChartDefaults.max,
-  ]);
+  scale.domain([min, max]);
 
-  const chartPointsToRender = rangeByCount({
-    scale,
-    count: plot.points ?? functionChartDefaults.points,
-  });
+  const chartPointsToRender = plot.xPoints
+    ? plot.xPoints.filter((x) => x >= min && x <= max)
+    : rangeByCount({
+        scale,
+        count: plot.points ?? functionChartDefaults.points,
+      });
 
   const functionImage: {
     x: number;

@@ -11,8 +11,8 @@ import { Lambda } from "../reducer/lambda.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { SDate } from "../utility/SDate.js";
 import { SDuration } from "../utility/SDuration.js";
-import { DateRangeDomain, Domain, NumericRangeDomain } from "./domain.js";
 import { Boxed } from "./boxed.js";
+import { DateRangeDomain, Domain, NumericRangeDomain } from "./domain.js";
 
 export type ValueMap = ImmutableMap<string, Value>;
 
@@ -441,6 +441,7 @@ export type Plot = CommonPlotArgs &
         xScale: Scale;
         yScale: Scale;
         points?: number;
+        xPoints?: number[];
       }
     | {
         type: "distFn";
@@ -449,6 +450,7 @@ export type Plot = CommonPlotArgs &
         yScale: Scale;
         distXScale: Scale;
         points?: number;
+        xPoints?: number[];
       }
     | {
         type: "scatter";
