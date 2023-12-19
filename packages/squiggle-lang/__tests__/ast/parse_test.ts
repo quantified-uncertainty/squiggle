@@ -48,7 +48,7 @@ describe("Peggy parse", () => {
   });
 
   describe("units", () => {
-    testEvalToBe("100%", "1");
+    testEvalToBe("100%", '1, with params numberFormat: ".2~p"');
     testEvalToBe("1-0%", "1");
   });
 

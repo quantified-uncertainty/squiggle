@@ -15,7 +15,7 @@ import {
 import { TextTooltip } from "@quri/ui";
 
 import { NumberShower } from "../../components/NumberShower.js";
-import { DEFAULT_DATE_FORMAT } from "../../lib/constants.js";
+import { formatDate } from "../../lib/d3/index.js";
 import { useSetVerticalLine } from "./DistProvider.js";
 
 type HoverableCellProps = PropsWithChildren<{
@@ -76,9 +76,7 @@ const SummaryTableRow: FC<SummaryTableRowProps> = ({
       if (isRange) {
         return SDuration.fromMs(number).toString();
       } else {
-        return d3.timeFormat(tickFormat ?? DEFAULT_DATE_FORMAT)(
-          new Date(number)
-        );
+        return formatDate(new Date(number), tickFormat);
       }
     } else if (tickFormat) {
       return d3.format(tickFormat)(number);

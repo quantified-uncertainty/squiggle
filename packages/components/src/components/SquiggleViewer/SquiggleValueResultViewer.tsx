@@ -19,7 +19,13 @@ export const SquiggleValueResultChart = memo(function ValueResultViewer({
   if (result.ok) {
     const value = result.value;
     if (valueHasContext(value)) {
-      return <SquiggleValueChart value={value} settings={settings} />;
+      return (
+        <SquiggleValueChart
+          value={value}
+          settings={settings}
+          boxed={undefined}
+        />
+      );
     } else {
       return value.toString();
     }

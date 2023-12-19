@@ -2,6 +2,7 @@ import * as d3 from "d3";
 
 import { SqScale } from "@quri/squiggle-lang";
 
+import { DEFAULT_DATE_FORMAT } from "../constants.js";
 import {
   scaleDate,
   scaleLinear,
@@ -31,4 +32,12 @@ export function sqScaleToD3(
     default:
       throw new Error(`Unknown scale: ${scale satisfies never}`);
   }
+}
+
+export function formatNumber(format: string, num: number) {
+  return d3.format(format)(num);
+}
+
+export function formatDate(date: Date, format?: string) {
+  return d3.timeFormat(format || DEFAULT_DATE_FORMAT)(date);
 }

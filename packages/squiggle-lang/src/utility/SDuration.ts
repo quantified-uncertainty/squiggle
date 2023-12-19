@@ -1,10 +1,30 @@
 export const durationUnits = {
-  Second: 1000,
-  Minute: 60 * 1000,
-  Hour: 60 * 60 * 1000,
-  Day: 24 * 60 * 60 * 1000,
-  Year: 24 * 60 * 60 * 1000 * 365.25,
-} as const;
+  Millisecond: { ms: 1, name: "ms", plural: "ms" },
+  Second: { ms: 1000, name: "second", plural: "seconds" },
+  Minute: { ms: 60 * 1000, name: "minute", plural: "minutes" },
+  Hour: { ms: 60 * 60 * 1000, name: "hour", plural: "hours" },
+  Day: { ms: 24 * 60 * 60 * 1000, name: "day", plural: "days" },
+  Year: { ms: 24 * 60 * 60 * 1000 * 365.25, name: "year", plural: "years" },
+};
+
+export type DurationUnitName = keyof typeof durationUnits;
+
+export function msToGreatestUnit(msTotal: number): {
+  value: number;
+  unitName: DurationUnitName;
+} {
+  for (const unitName of Object.keys(durationUnits)
+    .filter((r) => r !== "Millisecond")
+    .reverse()) {
+    const _unitName = unitName as DurationUnitName;
+    const { ms } = durationUnits[_unitName];
+    if (Math.abs(msTotal) >= ms) {
+      const value = msTotal / ms;
+      return { unitName: _unitName, value };
+    }
+  }
+  return { unitName: "Millisecond", value: msTotal };
+}
 
 //This is our own internal date duration class. It's used by the interpreter, but meant to act like a simple date library.
 export class SDuration {
@@ -17,19 +37,19 @@ export class SDuration {
   }
 
   static fromMinutes(minutes: number): SDuration {
-    return new SDuration(minutes * durationUnits.Minute);
+    return new SDuration(minutes * durationUnits.Minute.ms);
   }
 
   static fromHours(hours: number): SDuration {
-    return new SDuration(hours * durationUnits.Hour);
+    return new SDuration(hours * durationUnits.Hour.ms);
   }
 
   static fromDays(days: number): SDuration {
-    return new SDuration(days * durationUnits.Day);
+    return new SDuration(days * durationUnits.Day.ms);
   }
 
   static fromYears(years: number): SDuration {
-    return new SDuration(years * durationUnits.Year);
+    return new SDuration(years * durationUnits.Year.ms);
   }
 
   toMs(): number {
@@ -37,39 +57,29 @@ export class SDuration {
   }
 
   toMinutes(): number {
-    return this.ms / durationUnits.Minute;
+    return this.ms / durationUnits.Minute.ms;
   }
 
   toHours(): number {
-    return this.ms / durationUnits.Hour;
+    return this.ms / durationUnits.Hour.ms;
   }
 
   toDays(): number {
-    return this.ms / durationUnits.Day;
+    return this.ms / durationUnits.Day.ms;
   }
 
   toYears(): number {
-    return this.ms / durationUnits.Year;
+    return this.ms / durationUnits.Year.ms;
+  }
+
+  toUnitAndNumber(): { value: number; unitName: DurationUnitName } {
+    return msToGreatestUnit(this.ms);
   }
 
   toString(): string {
-    const units: [number, string][] = [
-      [durationUnits.Year, "year"],
-      [durationUnits.Day, "day"],
-      [durationUnits.Hour, "hour"],
-      [durationUnits.Minute, "minute"],
-      [durationUnits.Second, "second"],
-    ];
-
-    for (const [unitValue, unitName] of units) {
-      if (Math.abs(this.ms) >= unitValue) {
-        const value = this.ms / unitValue;
-        const suffix = value !== 1.0 ? "s" : "";
-        return `${value.toPrecision(3)} ${unitName}${suffix}`;
-      }
-    }
-
-    return `${this.ms.toFixed()} ms`;
+    const { unitName, value } = this.toUnitAndNumber();
+    const suffix = value !== 1.0 ? durationUnits[unitName].plural : "";
+    return `${value.toPrecision(3)} ${suffix}`;
   }
 
   add(other: SDuration): SDuration {
