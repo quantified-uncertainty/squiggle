@@ -71,8 +71,10 @@ export function makeCompletionSource(project: SqProject) {
       value.value.isDecorator &&
       name.startsWith("Tag.")
     ) {
+      const shortName = name.split(".")[1];
       decoratorCompletions.push({
-        label: name.split(".")[1],
+        label: `@${shortName}`,
+        apply: shortName,
         type: "function",
       });
     }
@@ -97,36 +99,35 @@ export function makeCompletionSource(project: SqProject) {
       }
     }
 
-    const field = cmpl.tokenBefore([
-      "AccessExpr",
-      "IdentifierExpr",
-      "DecoratorName",
-    ]);
-    if (!field) {
-      return null;
-    }
-    const { from } = field;
+    {
+      const identifier = cmpl.tokenBefore(["AccessExpr", "IdentifierExpr"]);
+      if (identifier) {
+        const { from } = identifier;
+        const nameNodes = getNameNodes(tree, from);
+        const localCompletions = nameNodes.map((node): Completion => {
+          const name = cmpl.state.doc.sliceString(node.from, node.to);
+          const type = node.type.is("FunctionName") ? "function" : "variable";
+          return {
+            label: name,
+            type,
+          };
+        });
 
-    if (field.type.name === "DecoratorName") {
-      return {
-        from: field.from,
-        options: decoratorCompletions,
-      };
-    } else {
-      const nameNodes = getNameNodes(tree, from);
-      const localCompletions = nameNodes.map((node): Completion => {
-        const name = cmpl.state.doc.sliceString(node.from, node.to);
-        const type = node.type.is("FunctionName") ? "function" : "variable";
         return {
-          label: name,
-          type,
+          from,
+          options: [...localCompletions, ...stdlibCompletions],
         };
-      });
+      }
+    }
 
-      return {
-        from,
-        options: [...localCompletions, ...stdlibCompletions],
-      };
+    {
+      const decorator = cmpl.tokenBefore(["DecoratorName"]);
+      if (decorator) {
+        return {
+          from: decorator.from,
+          options: decoratorCompletions,
+        };
+      }
     }
 
     return null;
