@@ -12,65 +12,71 @@ function getNameNodes(tree: Tree, from: number) {
   const cursor = tree.cursorAt(from, -1);
   const nameNodes: SyntaxNode[] = [];
 
+  // We walk up and backwards through the tree, looking for nodes that have names.
+
   let direction: "start" | "sibling" | "parent" | undefined = "start";
   while (1) {
-    if (cursor.type.is("Binding")) {
-      // Only for sibling nodes; `foo = { <cursor> }` shouldn't autocomplete `foo`.
-      if (direction === "sibling") {
-        const nameNode = cursor.node.getChild("VariableName");
-        if (nameNode) {
-          nameNodes.push(nameNode);
-        }
+    // Only for sibling nodes; `foo = { <cursor> }` shouldn't autocomplete `foo`.
+    if (cursor.type.is("Binding") && direction === "sibling") {
+      const nameNode = cursor.node.getChild("VariableName");
+      if (nameNode) {
+        nameNodes.push(nameNode);
       }
-    } else if (cursor.type.is("FunDeclaration")) {
       // Only for sibling nodes; Squiggle doesn't support recursive calls.
-      if (direction === "sibling") {
-        const nameNode = cursor.node.getChild("FunctionName");
+    } else if (cursor.type.is("FunDeclaration") && direction === "sibling") {
+      const nameNode = cursor.node.getChild("FunctionName");
+      if (nameNode) {
+        nameNodes.push(nameNode);
+      }
+    } else if (cursor.type.is("FunDeclaration") && direction !== "sibling") {
+      const parameterNodes =
+        cursor.node.getChild("LambdaArgs")?.getChildren("LambdaParameter") ??
+        [];
+
+      for (const parameter of parameterNodes) {
+        const nameNode = parameter.getChild("LambdaParameterName");
         if (nameNode) {
           nameNodes.push(nameNode);
         }
       }
-
-      if (direction !== "sibling") {
-        const parameterNodes = cursor.node
-          .getChild("LambdaArgs")
-          ?.getChildren("LambdaParameter");
-        if (parameterNodes) {
-          for (const parameter of parameterNodes) {
-            const nameNode = parameter.getChild("LambdaParameterName");
-            if (nameNode) {
-              nameNodes.push(nameNode);
-            }
-          }
-        }
-      }
+    } else if (cursor.type.is("Decorator") && direction !== "sibling") {
+      // TODO
     }
 
     // Move to the next node and store the direction that we used.
-    direction = cursor.prevSibling()
-      ? "sibling"
-      : cursor.parent()
-      ? "parent"
-      : undefined;
-
-    if (!direction) {
+    if (cursor.prevSibling()) {
+      direction = "sibling";
+    } else if (cursor.parent()) {
+      direction = "parent";
+    } else {
       break;
     }
   }
+
   return nameNodes;
 }
 
 export function makeCompletionSource(project: SqProject) {
-  const stdlibCompletions = project
-    .getStdLib()
-    .entrySeq()
-    .toArray()
-    .map(
-      ([name, value]): Completion => ({
-        label: name,
-        type: value.type === "Lambda" ? "function" : "variable",
-      })
-    );
+  const stdlibCompletions: Completion[] = [];
+  const decoratorCompletions: Completion[] = [];
+
+  for (const [name, value] of project.getStdLib().entrySeq()) {
+    stdlibCompletions.push({
+      label: name,
+      type: value.type === "Lambda" ? "function" : "variable",
+    });
+
+    if (
+      value.type === "Lambda" &&
+      value.value.isDecorator &&
+      name.startsWith("Tag.")
+    ) {
+      decoratorCompletions.push({
+        label: name.split(".")[1],
+        type: "function",
+      });
+    }
+  }
 
   const autocomplete: CompletionSource = (cmpl) => {
     const tree = syntaxTree(cmpl.state);
@@ -90,26 +96,40 @@ export function makeCompletionSource(project: SqProject) {
         };
       }
     }
-    const field = cmpl.tokenBefore(["AccessExpr", "IdentifierExpr"]);
-    if (field === null) {
+
+    const field = cmpl.tokenBefore([
+      "AccessExpr",
+      "IdentifierExpr",
+      "DecoratorName",
+    ]);
+    if (!field) {
       return null;
     }
-    const from = field.from;
+    const { from } = field;
 
-    const nameNodes = getNameNodes(tree, from);
-    const localCompletions = nameNodes.map((node): Completion => {
-      const name = cmpl.state.doc.sliceString(node.from, node.to);
-      const type = node.type.is("FunctionName") ? "function" : "variable";
+    if (field.type.name === "DecoratorName") {
       return {
-        label: name,
-        type,
+        from: field.from,
+        options: decoratorCompletions,
       };
-    });
+    } else {
+      const nameNodes = getNameNodes(tree, from);
+      const localCompletions = nameNodes.map((node): Completion => {
+        const name = cmpl.state.doc.sliceString(node.from, node.to);
+        const type = node.type.is("FunctionName") ? "function" : "variable";
+        return {
+          label: name,
+          type,
+        };
+      });
 
-    return {
-      from,
-      options: [...localCompletions, ...stdlibCompletions],
-    };
+      return {
+        from,
+        options: [...localCompletions, ...stdlibCompletions],
+      };
+    }
+
+    return null;
   };
 
   return autocomplete;
