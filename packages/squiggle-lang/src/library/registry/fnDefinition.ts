@@ -16,7 +16,7 @@ export type FnDefinition<OutputType = any> = {
   // We don't use the string value right now, but could later on.
   deprecated?: string;
   // If set, the function can be used as a decorator.
-  // Note that the name will always be prepended with `Tag.`, so it makess sense only on function in `Tag` namespace.
+  // Note that the name will always be prepended with `Tag.`, so it makes sense only on function in `Tag` namespace.
   isDecorator?: boolean;
 };
 
