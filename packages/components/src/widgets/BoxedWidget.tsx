@@ -1,14 +1,14 @@
 import { SquiggleValueChart } from "../components/SquiggleViewer/SquiggleValueChart.js";
-import { valueToPreviewString } from "../components/SquiggleViewer/SquiggleValueHeader.js";
 import { SquiggleValuePreview } from "../components/SquiggleViewer/SquiggleValuePreview.js";
 import { valueHasContext } from "../lib/utility.js";
 import { widgetRegistry } from "./registry.js";
+import { valueToHeadingString } from "./utils.js";
 
 widgetRegistry.register("Boxed", {
   heading: (value) => {
     const unboxedValue = value.value.value;
     if (valueHasContext(unboxedValue)) {
-      return valueToPreviewString(unboxedValue);
+      return valueToHeadingString(unboxedValue);
     }
     return "Tagged";
   },

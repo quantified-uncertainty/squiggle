@@ -12,7 +12,6 @@ import { SqValueWithContext } from "../../lib/utility.js";
 import { ErrorBoundary } from "../ErrorBoundary.js";
 import { CollapsedIcon, ExpandedIcon } from "./icons.js";
 import { SquiggleValueChart } from "./SquiggleValueChart.js";
-import { SquiggleValueHeader } from "./SquiggleValueHeader.js";
 import { SquiggleValueMenu } from "./SquiggleValueMenu.js";
 import { SquiggleValuePreview } from "./SquiggleValuePreview.js";
 import { getChildrenValues, pathToShortName } from "./utils.js";
@@ -239,7 +238,6 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
             {!isFocused && !isOpen && <CommentIconForValue value={value} />}
           </div>
           <div className="inline-flex space-x-1 items-center">
-            {isOpen && <SquiggleValueHeader value={value} />}
             <SquiggleValueMenu value={value} />
           </div>
         </header>
