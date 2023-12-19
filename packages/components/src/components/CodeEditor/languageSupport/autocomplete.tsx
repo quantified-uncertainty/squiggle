@@ -5,10 +5,13 @@ import {
 } from "@codemirror/autocomplete";
 import { syntaxTree } from "@codemirror/language";
 import { SyntaxNode, Tree } from "@lezer/common";
+import { createRoot } from "react-dom/client";
 
-import { SqProject } from "@quri/squiggle-lang";
+import { getFunctionDocumentation, SqProject } from "@quri/squiggle-lang";
 
-function getNameNodes(tree: Tree, from: number) {
+import { FnDocumentation } from "../../ui/FnDocumentation.js";
+
+export function getNameNodes(tree: Tree, from: number) {
   const cursor = tree.cursorAt(from, -1);
   const nameNodes: SyntaxNode[] = [];
 
@@ -60,9 +63,23 @@ export function makeCompletionSource(project: SqProject) {
   const stdlibCompletions: Completion[] = [];
   const decoratorCompletions: Completion[] = [];
 
+  const getInfoFunction = (name: string): Completion["info"] => {
+    return () => {
+      const documentation = getFunctionDocumentation(name);
+      if (!documentation) {
+        return null;
+      }
+      const dom = document.createElement("div");
+      const root = createRoot(dom);
+      root.render(<FnDocumentation documentation={documentation} />);
+      return { dom };
+    };
+  };
+
   for (const [name, value] of project.getStdLib().entrySeq()) {
     stdlibCompletions.push({
       label: name,
+      info: getInfoFunction(name),
       type: value.type === "Lambda" ? "function" : "variable",
     });
 
@@ -75,6 +92,7 @@ export function makeCompletionSource(project: SqProject) {
       decoratorCompletions.push({
         label: `@${shortName}`,
         apply: shortName,
+        info: getInfoFunction(name),
         type: "function",
       });
     }
