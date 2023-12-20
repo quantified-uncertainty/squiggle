@@ -2,6 +2,7 @@ import merge from "lodash/merge.js";
 import {
   createContext,
   FC,
+  MutableRefObject,
   PropsWithChildren,
   useCallback,
   useContext,
@@ -41,72 +42,82 @@ type LocalItemState = {
   >;
 };
 
-type LocalItemStateStore = {
-  [k: string]: LocalItemState;
-};
+class ItemStore {
+  state: Record<string, LocalItemState> = {};
+
+  constructor({
+    beginWithVariablesCollapsed,
+  }: {
+    beginWithVariablesCollapsed?: boolean;
+  }) {
+    if (beginWithVariablesCollapsed) {
+      this.state = {
+        [topLevelBindingsName]: { collapsed: true, settings: {} },
+      };
+    }
+  }
+
+  setState(
+    path: SqValuePath,
+    fn: (localItemState: LocalItemState) => LocalItemState
+  ): void {
+    const pathString = pathAsString(path);
+    const newSettings = fn(this.state[pathString] || defaultLocalItemState);
+    this.state[pathString] = newSettings;
+  }
+
+  getState(path: SqValuePath): LocalItemState {
+    return this.state[pathAsString(path)] || defaultLocalItemState;
+  }
+}
+
+type TypedAction<Type extends string, Payload = undefined> = {
+  type: Type;
+} & (Payload extends undefined
+  ? { payload?: undefined }
+  : { payload: Payload });
 
 export type Action =
-  | {
-      type: "SET_LOCAL_ITEM_STATE";
-      payload: {
+  | TypedAction<
+      "SET_LOCAL_ITEM_STATE",
+      {
         path: SqValuePath;
         value: LocalItemState;
-      };
-    }
-  | {
-      type: "FOCUS";
-      payload: SqValuePath;
-    }
-  | {
-      type: "UNFOCUS";
-    }
-  | {
-      type: "TOGGLE_COLLAPSED";
-      payload: SqValuePath;
-    }
-  | {
-      type: "SET_COLLAPSED";
-      payload: {
+      }
+    >
+  | TypedAction<"FOCUS", SqValuePath>
+  | TypedAction<"UNFOCUS">
+  | TypedAction<"TOGGLE_COLLAPSED", SqValuePath>
+  | TypedAction<
+      "SET_COLLAPSED",
+      {
         path: SqValuePath;
         value: boolean;
-      };
-    }
-  | {
-      type: "COLLAPSE_CHILDREN";
-      payload: SqValue;
-    }
-  | {
-      type: "SCROLL_TO_PATH";
-      payload: {
-        path: SqValuePath;
-      };
-    }
-  | {
-      type: "FORCE_UPDATE";
-      payload: {
-        path: SqValuePath;
-      };
-    }
-  | {
-      type: "REGISTER_ITEM_HANDLE";
-      payload: {
+      }
+    >
+  | TypedAction<"COLLAPSE_CHILDREN", SqValue>
+  | TypedAction<"SCROLL_TO_PATH", { path: SqValuePath }>
+  | TypedAction<"FORCE_UPDATE", { path: SqValuePath }>
+  | TypedAction<
+      "REGISTER_ITEM_HANDLE",
+      {
         path: SqValuePath;
         handle: ItemHandle;
-      };
-    }
-  | {
-      type: "UNREGISTER_ITEM_HANDLE";
-      payload: {
+      }
+    >
+  | TypedAction<
+      "UNREGISTER_ITEM_HANDLE",
+      {
         path: SqValuePath;
-      };
-    }
-  | {
-      type: "CALCULATOR_UPDATE";
-      payload: {
+      }
+    >
+  | TypedAction<
+      "CALCULATOR_UPDATE",
+      {
         path: SqValuePath;
         calculator: CalculatorState;
-      };
-    };
+      }
+    >;
 
 export type ViewProviderDispatch = (action: Action) => void;
 
@@ -282,9 +293,15 @@ const defaultLocalItemState: LocalItemState = {
   settings: {},
 };
 
-const collapsedVariablesDefault: LocalItemStateStore = {
-  [topLevelBindingsName]: { collapsed: true, settings: {} },
-};
+// React doesn't allow initializer functions in `useRef`.
+// Simplified trick from https://github.com/facebook/react/issues/14490#issuecomment-1587704033
+function useLazyRef<T>(fn: () => T) {
+  const ref = useRef<T>();
+  if (ref.current === undefined) {
+    ref.current = fn();
+  }
+  return ref as MutableRefObject<T>; // guaranteed to be defined
+}
 
 export const ViewerProvider: FC<
   PropsWithChildren<{
@@ -300,10 +317,9 @@ export const ViewerProvider: FC<
   rootPathOverride,
   children,
 }) => {
-  // can't store settings in the state because we don't want to rerender the entire tree on every change
-
-  const localItemStateStoreRef = useRef<LocalItemStateStore>(
-    beginWithVariablesCollapsed ? collapsedVariablesDefault : {}
+  // Can't store settings in the state because we don't want to rerender the entire tree on every change.
+  const itemStoreRef = useLazyRef<ItemStore>(
+    () => new ItemStore({ beginWithVariablesCollapsed })
   );
 
   // TODO - merge this with localItemStateStoreRef?
@@ -317,40 +333,22 @@ export const ViewerProvider: FC<
     return merge({}, defaultPlaygroundSettings, partialPlaygroundSettings);
   }, [partialPlaygroundSettings]);
 
-  const setLocalItemState = useCallback(
-    (
-      path: SqValuePath,
-      fn: (localItemState: LocalItemState) => LocalItemState
-    ): void => {
-      const pathString = pathAsString(path);
-      const newSettings = fn(
-        localItemStateStoreRef.current[pathString] || defaultLocalItemState
-      );
-      localItemStateStoreRef.current[pathString] = newSettings;
-    },
-    []
-  );
-
   const getLocalItemState = useCallback(({ path }: { path: SqValuePath }) => {
-    return (
-      localItemStateStoreRef.current[pathAsString(path)] ||
-      defaultLocalItemState
-    );
+    return itemStoreRef.current.getState(path);
   }, []);
 
   const getCalculator = useCallback(({ path }: { path: SqValuePath }) => {
-    const response = localItemStateStoreRef.current[pathAsString(path)];
-    return response?.calculator;
+    return itemStoreRef.current.getState(path)?.calculator;
   }, []);
 
   const setInitialCollapsed = useCallback(
     (path: SqValuePath, isCollapsed: boolean) => {
-      setLocalItemState(path, (state) => ({
+      itemStoreRef.current.setState(path, (state) => ({
         ...state,
         collapsed: state?.collapsed ?? isCollapsed,
       }));
     },
-    [setLocalItemState]
+    []
   );
 
   const forceUpdate = useCallback((path: SqValuePath) => {
@@ -361,7 +359,10 @@ export const ViewerProvider: FC<
     (action: Action) => {
       switch (action.type) {
         case "SET_LOCAL_ITEM_STATE":
-          setLocalItemState(action.payload.path, () => action.payload.value);
+          itemStoreRef.current.setState(
+            action.payload.path,
+            () => action.payload.value
+          );
           forceUpdate(action.payload.path);
           return;
         case "FOCUS":
@@ -372,7 +373,7 @@ export const ViewerProvider: FC<
           return;
         case "TOGGLE_COLLAPSED": {
           const path = action.payload;
-          setLocalItemState(path, (state) => ({
+          itemStoreRef.current.setState(path, (state) => ({
             ...state,
             collapsed: !state?.collapsed,
           }));
@@ -381,7 +382,7 @@ export const ViewerProvider: FC<
         }
         case "SET_COLLAPSED": {
           const { path } = action.payload;
-          setLocalItemState(path, (state) => ({
+          itemStoreRef.current.setState(path, (state) => ({
             ...state,
             collapsed: action.payload.value,
           }));
@@ -412,7 +413,7 @@ export const ViewerProvider: FC<
           return;
         case "CALCULATOR_UPDATE": {
           const { calculator, path } = action.payload;
-          setLocalItemState(path, (state) => ({
+          itemStoreRef.current.setState(path, (state) => ({
             ...state,
             calculator:
               state.calculator?.hashString === calculator.hashString
@@ -427,7 +428,7 @@ export const ViewerProvider: FC<
         }
       }
     },
-    [forceUpdate, setInitialCollapsed, setLocalItemState]
+    [forceUpdate, setInitialCollapsed]
   );
 
   return (
