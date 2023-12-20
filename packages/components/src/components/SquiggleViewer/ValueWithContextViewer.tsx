@@ -129,7 +129,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
   const boxedName = tag === "Boxed" ? value.value.name() : undefined;
 
   // Collapse children and element if desired. Uses crude heuristics.
-  // TODO - this code has side effects, it'd be better if we ran it somewhere else, e.g. traverse values recursively when `ViewerProvider` is initialized.
+  // TODO - this code has side effects, it'd be better if we ran it somewhere else, e.g. traverse values recursively when `ViewerProvider` is initialized, or add a `getStateOrInitialize` method on `ItemStore`.
   useState(() => {
     const shouldBeginCollapsed = (
       isRoot: boolean,
@@ -150,7 +150,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
       collapseChildren(value);
     }
     if (shouldBeginCollapsed(isRoot, value)) {
-      setCollapsed(path, true);
+      setCollapsed(path, true, { skipUpdate: true });
     }
   });
 

@@ -192,12 +192,16 @@ export function useToggleCollapsed() {
 
 export function useSetCollapsed() {
   const { itemStore } = useViewerContext();
-  return (path: SqValuePath, isCollapsed: boolean) => {
+  return (
+    path: SqValuePath,
+    isCollapsed: boolean,
+    options?: { skipUpdate: boolean }
+  ) => {
     itemStore.setState(path, (state) => ({
       ...state,
       collapsed: isCollapsed,
     }));
-    itemStore.forceUpdate(path);
+    options?.skipUpdate || itemStore.forceUpdate(path);
   };
 }
 
@@ -231,7 +235,7 @@ export function useUnfocus() {
   return () => setFocused(undefined);
 }
 
-// Should be used only on initial render.
+// Should be used only on initial render; doesn't call `forceUpdate`.
 export function useCollapseChildren() {
   const { itemStore } = useViewerContext();
   return useCallback(
