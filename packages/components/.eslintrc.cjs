@@ -11,8 +11,19 @@ module.exports = {
     "plugin:@typescript-eslint/recommended",
   ],
   parser: "@typescript-eslint/parser",
-  plugins: ["@typescript-eslint"],
+  plugins: ["@typescript-eslint", "@wogns3623/better-exhaustive-deps"],
   rules: {
+    "react-hooks/exhaustive-deps": "off",
+
+    "@wogns3623/better-exhaustive-deps/exhaustive-deps": [
+      "warn",
+      {
+        checkMemoizedVariableIsStatic: true,
+        staticHooks: {
+          useLazyRef: true,
+        },
+      },
+    ],
     "no-constant-condition": [
       "error",
       {
