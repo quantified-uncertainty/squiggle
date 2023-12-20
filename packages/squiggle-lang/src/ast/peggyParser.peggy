@@ -251,10 +251,6 @@ basicLiteral
   / number
   / boolean
   / variable
-  / voidLiteral
-
-voidLiteral 'void'
-  = "()" {return h.nodeVoid(location());}
 
 variable = dollarIdentifierWithModule / dollarIdentifier
 

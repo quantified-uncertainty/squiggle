@@ -323,8 +323,6 @@ function compileToContent(
     }
     case "String":
       return [expression.eValue(vString(ast.value)), context];
-    case "Void":
-      return [expression.eVoid(), context];
     case "Identifier": {
       const offset = context.nameToPos.get(ast.value);
       if (offset === undefined) {

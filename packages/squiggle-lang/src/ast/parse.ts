@@ -109,8 +109,6 @@ function nodeToString(node: ASTNode): string {
       return `'${node.value}'`; // TODO - quote?
     case "Ternary":
       return sExpr([node.condition, node.trueExpression, node.falseExpression]);
-    case "Void":
-      return "()";
     case "UnitValue":
       // S-expression; we should migrate to S-expressions for other branches too, for easier testing.
       return sExpr([node.value, node.unit]);

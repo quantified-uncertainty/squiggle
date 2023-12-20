@@ -3,7 +3,7 @@
  * Expressions are evaluated by reducer's `evaluate` function.
  */
 import { ASTNode } from "../ast/parse.js";
-import { Value, vVoid } from "../value/index.js";
+import { Value } from "../value/index.js";
 
 export type LambdaExpressionParameter = {
   name: string;
@@ -170,11 +170,6 @@ export const eTernary = (
     ifTrue,
     ifFalse,
   },
-});
-
-export const eVoid = (): ExpressionContent => ({
-  type: "Value",
-  value: vVoid(),
 });
 
 // Converts the expression to String. Useful for tests.

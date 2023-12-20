@@ -163,8 +163,6 @@ type NodeString = N<"String", { value: string }>;
 
 type NodeBoolean = N<"Boolean", { value: boolean }>;
 
-type NodeVoid = N<"Void", object>;
-
 export type ASTNode =
   | NodeArray
   | NodeDict
@@ -188,8 +186,7 @@ export type ASTNode =
   | NodeTernary
   | NodeKeyValue
   | NodeString
-  | NodeBoolean
-  | NodeVoid;
+  | NodeBoolean;
 
 export function nodeCall(
   fn: ASTNode,
@@ -438,10 +435,6 @@ export function nodeTernary(
     kind,
     location,
   };
-}
-
-export function nodeVoid(location: LocationRange): NodeVoid {
-  return { type: "Void", location };
 }
 
 export type ASTCommentNode = {
