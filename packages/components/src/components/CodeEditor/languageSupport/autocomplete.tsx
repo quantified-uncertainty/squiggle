@@ -11,25 +11,34 @@ import { getFunctionDocumentation, SqProject } from "@quri/squiggle-lang";
 
 import { FnDocumentation } from "../../ui/FnDocumentation.js";
 
-export function getNameNodes(tree: Tree, from: number) {
+type NameNode = {
+  node: SyntaxNode;
+  type: "function" | "variable";
+};
+
+export function getNameNodes(tree: Tree, from: number): NameNode[] {
   const cursor = tree.cursorAt(from, -1);
-  const nameNodes: SyntaxNode[] = [];
+  const nameNodes: NameNode[] = [];
 
   // We walk up and backwards through the tree, looking for nodes that have names.
 
   let direction: "start" | "sibling" | "parent" | undefined = "start";
   while (1) {
-    if (cursor.type.is("LetStatement") && direction === "sibling") {
+    if (cursor.type.is("Statement") && direction === "sibling") {
       // Only for sibling nodes; `foo = { <cursor> }` shouldn't autocomplete `foo`.
-      const nameNode = cursor.node.getChild("VariableName");
-      if (nameNode) {
-        nameNodes.push(nameNode);
+
+      // Unwrap decorated statements.
+      let node: SyntaxNode | null = cursor.node;
+      while (node && node.type.is("DecoratedStatement")) {
+        node = node.getChild("Statement");
       }
-    } else if (cursor.type.is("DefunStatement") && direction === "sibling") {
-      // Only for sibling nodes; Squiggle doesn't support recursive calls.
-      const nameNode = cursor.node.getChild("FunctionName");
-      if (nameNode) {
-        nameNodes.push(nameNode);
+
+      const nameNode = node?.getChild("VariableName");
+      if (node && nameNode) {
+        nameNodes.push({
+          node: nameNode,
+          type: node?.type.is("DefunStatement") ? "function" : "variable",
+        });
       }
     } else if (cursor.type.is("DefunStatement") && direction !== "sibling") {
       // Function declaration that's a parent, let's autocomplete its parameter names.
@@ -41,7 +50,12 @@ export function getNameNodes(tree: Tree, from: number) {
       for (const parameter of parameterNodes) {
         const nameNode = parameter.getChild("LambdaParameterName");
         if (nameNode) {
-          nameNodes.push(nameNode);
+          nameNodes.push({
+            node: nameNode,
+            // Is there a more specific type? There's no "parameter" type in CodeMirror.
+            // https://codemirror.net/docs/ref/#autocomplete.Completion.type
+            type: "variable",
+          });
         }
       }
     }
@@ -122,12 +136,14 @@ export function makeCompletionSource(project: SqProject) {
       if (identifier) {
         const { from } = identifier;
         const nameNodes = getNameNodes(tree, from);
-        const localCompletions = nameNodes.map((node): Completion => {
-          const name = cmpl.state.doc.sliceString(node.from, node.to);
-          const type = node.type.is("FunctionName") ? "function" : "variable";
+        const localCompletions = nameNodes.map((nameNode): Completion => {
+          const name = cmpl.state.doc.sliceString(
+            nameNode.node.from,
+            nameNode.node.to
+          );
           return {
             label: name,
-            type,
+            type: nameNode.type,
           };
         });
 

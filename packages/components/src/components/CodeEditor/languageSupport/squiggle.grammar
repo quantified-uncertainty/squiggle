@@ -50,7 +50,7 @@ LambdaArgs {
     () | LambdaParameter ("," LambdaParameter)*
 }
 
-DefunStatement { export? FunctionName { identifier } ~callOrDeclaration "(" LambdaArgs ")" "=" expression }
+DefunStatement { export? VariableName { identifier } ~callOrDeclaration "(" LambdaArgs ")" "=" expression }
 
 Decorator {
     "@" DecoratorName { identifier }
@@ -60,12 +60,10 @@ Decorator {
     )
 }
 
-statement {
-    Decorator*
-    (
-        LetStatement
-        | DefunStatement
-    )
+statement[@isGroup="Statement"] {
+    LetStatement
+    | DefunStatement
+    | DecoratedStatement { Decorator statement }
 }
 
 expression[@isGroup="Expression"] {

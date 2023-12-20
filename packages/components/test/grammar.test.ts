@@ -43,7 +43,7 @@ foo(5)`
         )
         .toString()
     ).toBe(
-      'Program(DefunStatement(FunctionName,"(",LambdaArgs(LambdaParameter(LambdaParameterName)),")",Equals,IdentifierExpr),Call(IdentifierExpr,"(",Argument(Number),")"))'
+      'Program(DefunStatement(VariableName,"(",LambdaArgs(LambdaParameter(LambdaParameterName)),")",Equals,IdentifierExpr),Call(IdentifierExpr,"(",Argument(Number),")"))'
     );
   });
 
@@ -70,7 +70,7 @@ x = 5
         )
         .toString()
     ).toBe(
-      'Program(Decorator(At,DecoratorName,"(",Argument(String),")"),LetStatement(VariableName,Equals,Number))'
+      'Program(DecoratedStatement(Decorator(At,DecoratorName,"(",Argument(String),")"),LetStatement(VariableName,Equals,Number)))'
     );
   });
 
