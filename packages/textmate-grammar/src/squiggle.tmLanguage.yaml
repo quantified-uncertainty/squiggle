@@ -9,6 +9,8 @@ repository:
   statement:
     patterns:
       - include: "#let"
+      - include: "#decorator-call"
+      - include: "#decorator"
   expression:
     patterns:
       - include: "#integer"
@@ -29,6 +31,29 @@ repository:
         name: keyword.control.squiggle
       "4":
         name: variable.other.squiggle
+  decorator:
+    match: ^\s*(@)(\w+)
+    captures:
+      "1":
+        name: punctuation.decorator.squiggle
+      "2":
+        name: entity.name.function.squiggle
+  decorator-call:
+    begin: ^\s*(@)(\w+)\s*(\()
+    end: (\))
+    beginCaptures:
+      "1":
+        name: punctuation.decorator.squiggle
+      "2":
+        name: entity.name.function.squiggle
+      "3":
+        name: meta.brace.round.squiggle
+    endCaptures:
+      "1":
+        name: meta.brace.round.squiggle
+    patterns:
+      - include: "#expression"
+      - include: "#comma"
   let:
     match: ^\s*(?:(export)\s+)?(\w+)\s*=
     captures:

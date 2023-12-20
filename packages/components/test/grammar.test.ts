@@ -59,4 +59,18 @@ bar"
         .toString()
     ).toBe("Program(Binding(VariableName,Equals,String))");
   });
+
+  test("Decorators", () => {
+    expect(
+      parser
+        .parse(
+          `@name("X")
+x = 5
+`
+        )
+        .toString()
+    ).toBe(
+      'Program(Decorator(At,DecoratorName,"(",Argument(String),")"),Binding(VariableName,Equals,Number))'
+    );
+  });
 });

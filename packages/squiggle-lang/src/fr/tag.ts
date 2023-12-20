@@ -52,7 +52,10 @@ function _ensureTypeUsingLambda<T1>(
 }
 
 // This constructs definitions where the second argument is either a type T or a function that takes in the first argument and returns a type T.
-function withInputOrFnInput<T>(inputType: FRType<any>, outputType: FRType<T>) {
+function decoratorWithInputOrFnInput<T>(
+  inputType: FRType<any>,
+  outputType: FRType<T>
+) {
   return makeDefinition(
     [
       frForceBoxed(inputType),
@@ -71,7 +74,8 @@ function withInputOrFnInput<T>(inputType: FRType<any>, outputType: FRType<T>) {
         args: args.merge({ showAs: outputType.pack(showAsVal) }),
         value,
       };
-    }
+    },
+    { isDecorator: true }
   );
 }
 
@@ -85,7 +89,8 @@ export const library = [
         frForceBoxed(frAny({ genericName: "A" })),
         ([{ args, value }, name]) => {
           return { args: args.merge({ name }), value };
-        }
+        },
+        { isDecorator: true }
       ),
     ],
   }),
@@ -107,7 +112,8 @@ export const library = [
         frForceBoxed(frAny({ genericName: "A" })),
         ([{ args, value }, description]) => {
           return { value: value, args: args.merge({ description }) };
-        }
+        },
+        { isDecorator: true }
       ),
     ],
   }),
@@ -124,13 +130,22 @@ export const library = [
     name: "showAs",
     examples: [],
     definitions: [
-      withInputOrFnInput(frDist, frPlot),
-      withInputOrFnInput(frLambdaTyped([frNumber], frDistOrNumber), frPlot),
-      withInputOrFnInput(frLambdaTyped([frDate], frDistOrNumber), frPlot),
-      withInputOrFnInput(frLambdaTyped([frDuration], frDistOrNumber), frPlot),
+      decoratorWithInputOrFnInput(frDist, frPlot),
+      decoratorWithInputOrFnInput(frArray(frAny()), frTableChart),
+      decoratorWithInputOrFnInput(
+        frLambdaTyped([frNumber], frDistOrNumber),
+        frPlot
+      ),
+      decoratorWithInputOrFnInput(
+        frLambdaTyped([frDate], frDistOrNumber),
+        frPlot
+      ),
+      decoratorWithInputOrFnInput(
+        frLambdaTyped([frDuration], frDistOrNumber),
+        frPlot
+      ),
       //The frLambda definition needs to come after the more narrow frLambdaTyped definitions.
-      withInputOrFnInput(frLambda, frCalculator),
-      withInputOrFnInput(frArray(frAny()), frTableChart),
+      decoratorWithInputOrFnInput(frLambda, frCalculator),
     ],
   }),
   maker.make({
