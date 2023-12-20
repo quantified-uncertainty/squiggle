@@ -70,7 +70,7 @@ export const DynamicSquiggleViewer = forwardRef<SquiggleViewerHandle, Props>(
           </div>
         )}
         <div
-          className="flex-1 overflow-auto p-2"
+          className="flex-1 overflow-auto px-2 pb-1"
           data-testid="dynamic-viewer-result"
         >
           {squiggleViewer}

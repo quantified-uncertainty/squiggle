@@ -47,7 +47,7 @@ const SquiggleViewerOuter = forwardRef<
   const focus = useFocus();
 
   const navLinkStyle =
-    "text-sm text-slate-500 hover:text-slate-900 hover:underline font-mono cursor-pointer";
+    "text-sm text-stone-500 hover:text-stone-900 hover:underline font-mono cursor-pointer";
 
   const isFocusedOnRootPathOverride =
     focused && rootPathOverride && pathIsEqual(focused, rootPathOverride);
@@ -58,7 +58,7 @@ const SquiggleViewerOuter = forwardRef<
     : 0;
 
   const focusedNavigation = focused && !isFocusedOnRootPathOverride && (
-    <div className="flex items-center mb-3 pl-1">
+    <div className="flex items-center mb-3 pl-3">
       {!rootPathOverride && (
         <>
           <span onClick={unfocus} className={navLinkStyle}>

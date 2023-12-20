@@ -166,7 +166,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
     const Icon = isOpen ? ExpandedIcon : CollapsedIcon;
     return (
       <div
-        className="w-4 mr-1.5 flex justify-center cursor-pointer text-stone-300 hover:text-slate-700"
+        className="w-4 mr-1.5 flex justify-center cursor-pointer text-stone-200 hover:text-stone-700 group-hover:text-stone-300"
         onClick={toggleCollapsed}
       >
         <Icon size={12} />
@@ -176,11 +176,11 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
 
   const headerClasses = () => {
     if (isFocused) {
-      return "text-md text-black font-bold ml-1";
+      return "text-md text-orange-900 font-bold ml-1";
     } else if (isRoot) {
-      return "text-sm text-stone-600 font-semibold";
+      return "text-sm text-stone-900 font-semibold";
     } else {
-      return "text-sm text-stone-800 cursor-pointer hover:underline";
+      return "text-sm text-orange-900 cursor-pointer hover:underline";
     }
   };
 
@@ -195,6 +195,9 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
   );
 
   const leftCollapseBorder = () => {
+    if (isRoot) {
+      return null;
+    }
     const isDictOrList = tag === "Dict" || tag === "Array";
     if (isDictOrList) {
       return (
@@ -202,24 +205,22 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
           className="group w-4 shrink-0 flex justify-center cursor-pointer"
           onClick={toggleCollapsed}
         >
-          <div className="w-px bg-stone-200 group-hover:bg-stone-500" />
+          <div className="w-px bg-stone-100 group-hover:bg-stone-400" />
         </div>
       );
-    } else if (!isRoot) {
+    } else {
       // non-root leaf elements have unclickable padding to align with dict/list elements
       return <div className="flex w-4 min-w-[1rem]" />; // min-w-1rem = w-4
-    } else {
-      return null;
     }
   };
 
   return (
     <ErrorBoundary>
-      <div ref={ref}>
+      <div ref={ref} className={clsx(isFocused && "px-2")}>
         <header
           className={clsx(
             "flex justify-between group pr-0.5",
-            isFocused ? "mb-2" : "hover:bg-stone-100 rounded-md"
+            isFocused ? "mb-2" : "hover:bg-stone-100 rounded-sm"
           )}
         >
           <div className="inline-flex items-center">
@@ -228,7 +229,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
             {!isFocused && (
               <div
                 className={clsx(
-                  "ml-3 text-sm text-blue-800",
+                  "ml-5 text-sm text-blue-800",
                   isOpen ? "opacity-40" : "opacity-60"
                 )}
               >
@@ -242,7 +243,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
           </div>
         </header>
         {isOpen && (
-          <div className="flex w-full pt-1">
+          <div className="flex w-full">
             {!isFocused && leftCollapseBorder()}
             <div className="grow">
               <ValueViewerBody value={value} />
