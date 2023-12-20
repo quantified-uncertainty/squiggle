@@ -19,19 +19,19 @@ export function getNameNodes(tree: Tree, from: number) {
 
   let direction: "start" | "sibling" | "parent" | undefined = "start";
   while (1) {
-    if (cursor.type.is("Binding") && direction === "sibling") {
+    if (cursor.type.is("LetStatement") && direction === "sibling") {
       // Only for sibling nodes; `foo = { <cursor> }` shouldn't autocomplete `foo`.
       const nameNode = cursor.node.getChild("VariableName");
       if (nameNode) {
         nameNodes.push(nameNode);
       }
-    } else if (cursor.type.is("FunDeclaration") && direction === "sibling") {
+    } else if (cursor.type.is("DefunStatement") && direction === "sibling") {
       // Only for sibling nodes; Squiggle doesn't support recursive calls.
       const nameNode = cursor.node.getChild("FunctionName");
       if (nameNode) {
         nameNodes.push(nameNode);
       }
-    } else if (cursor.type.is("FunDeclaration") && direction !== "sibling") {
+    } else if (cursor.type.is("DefunStatement") && direction !== "sibling") {
       // Function declaration that's a parent, let's autocomplete its parameter names.
       // Note that we also allow `direction === "start"`, to handle `f(foo) = foo` correctly.
       const parameterNodes =

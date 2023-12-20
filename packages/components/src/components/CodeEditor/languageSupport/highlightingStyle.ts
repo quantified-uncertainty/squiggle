@@ -67,7 +67,7 @@ export const lightThemeHighlightingStyle = HighlightStyle.define([
     fontWeight: "bold",
     color: operators,
   },
-  { tag: [tags.meta, tags.comment], color: comments },
+  { tag: tags.comment, color: comments },
   { tag: tags.strong, fontWeight: "bold" },
   { tag: tags.emphasis, fontStyle: "italic" },
   { tag: tags.strikethrough, textDecoration: "line-through" },

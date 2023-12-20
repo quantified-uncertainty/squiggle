@@ -15,15 +15,9 @@ import { parser } from "./generated/squiggle.js";
 const parserWithMetadata = parser.configure({
   props: [
     styleTags({
-      if: t.keyword,
-      then: t.keyword,
-      else: t.keyword,
-      import: t.keyword,
-      export: t.keyword,
-      as: t.keyword,
+      "if then else import export as": t.keyword,
 
       Equals: t.definitionOperator,
-
       ArithOp: t.arithmeticOperator,
       LogicOp: t.logicOperator,
       ControlOp: t.controlOperator,
@@ -38,8 +32,8 @@ const parserWithMetadata = parser.configure({
       Boolean: t.bool,
       Number: t.integer,
       String: t.string,
-      Comment: t.comment,
-      Void: t.escape,
+      LineComment: t.lineComment,
+      BlockComment: t.blockComment,
       Escape: t.escape,
 
       FunctionName: t.function(t.variableName),
@@ -47,30 +41,28 @@ const parserWithMetadata = parser.configure({
       DecoratorName: t.variableName,
       At: t.keyword,
 
-      LambdaSyntax: t.blockComment,
-
       VariableName: t.constant(t.variableName),
       IdentifierExpr: t.variableName,
       Field: t.variableName,
       LambdaParameterName: t.variableName,
     }),
     foldNodeProp.add({
-      LambdaExpr: (context) => ({
+      Lambda: (context) => ({
         from: context.getChild("NonEmptyProgram")?.from || 0,
         to: context.getChild("NonEmptyProgram")?.to || 0,
       }),
-      BlockExpr: foldInside,
-      DictExpr: foldInside,
-      ArrayExpr: foldInside,
+      Block: foldInside,
+      Dict: foldInside,
+      Array: foldInside,
     }),
     indentNodeProp.add({
-      DictExpr: (context) =>
+      Dict: (context) =>
         context.baseIndent + (context.textAfter === "}" ? 0 : context.unit),
-      BlockExpr: (context) =>
+      Block: (context) =>
         context.baseIndent + (context.textAfter === "}" ? 0 : context.unit),
-      LambdaExpr: (context) =>
+      Lambda: (context) =>
         context.baseIndent + (context.textAfter === "}" ? 0 : context.unit),
-      ArrayExpr: (context) =>
+      Array: (context) =>
         context.baseIndent + (context.textAfter === "]" ? 0 : context.unit),
     }),
   ],

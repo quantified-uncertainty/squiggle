@@ -40,7 +40,7 @@ commaSep<content> {
 // when trailing comma is allowed
 commaSep1<content> { "" | content ("," content?)* }
 
-Binding { export? VariableName { identifier } "=" expression }
+LetStatement { export? VariableName { identifier } "=" expression }
 
 LambdaParameter {
     LambdaParameterName { identifier } (":" expression)?
@@ -50,7 +50,7 @@ LambdaArgs {
     () | LambdaParameter ("," LambdaParameter)*
 }
 
-FunDeclaration { export? FunctionName { identifier } ~callOrDeclaration "(" LambdaArgs ")" "=" expression }
+DefunStatement { export? FunctionName { identifier } ~callOrDeclaration "(" LambdaArgs ")" "=" expression }
 
 Decorator {
     "@" DecoratorName { identifier }
@@ -63,8 +63,8 @@ Decorator {
 statement {
     Decorator*
     (
-        Binding
-        | FunDeclaration
+        LetStatement
+        | DefunStatement
     )
 }
 
@@ -72,26 +72,26 @@ expression[@isGroup="Expression"] {
     String
     | Boolean
     | Number
-    | BlockExpr { "{" blockContent "}" }
-    | DictExpr {
+    | Block { "{" blockContent "}" }
+    | Dict {
         "{"
             commaSep1<
-              Entry { Field[@dynamicPrecedence=1] { expression } ~inheritAmbig ":" expression } 
+              KeyValue { Field[@dynamicPrecedence=1] { expression } ~inheritAmbig ":" expression } 
             | InheritEntry { Field[@dynamicPrecedence=0] { identifier } ~inheritAmbig }
             >
         "}"
     }
-    | LambdaExpr { "{" ArgsOpen { "|" } LambdaArgs "|" blockContent "}" }
-    | IfExpr { if expression then expression !else else expression }
+    | Lambda { "{" ArgsOpen { "|" } LambdaArgs "|" blockContent "}" }
     | ParenExpr { "(" expression ")" }
     | IdentifierExpr { identifier }
     | AccessExpr { expression !deref "." Field { identifier } }
-    | CallExpr { expression ~callOrDeclaration !call "(" commaSep<Argument { expression }> ")" }
-    | TernaryExpr { expression !logop LogicOp<"?"> expression LogicOp<":"> expression }
-    | KVAccessExpr { expression !call ("[" Key { expression } "]") }
-    | ArrayExpr { "[" commaSep1<expression> "]" }
-    | UnaryExpr { !unary (ArithOp<"-"> | ArithOp<"!"> | DotArithOp<".-">) expression }
-    | LogicExpr {
+    | Call { expression ~callOrDeclaration !call "(" commaSep<Argument { expression }> ")" }
+    | TernaryC { expression !logop LogicOp<"?"> expression LogicOp<":"> expression }
+    | TernaryIfThenElse { if expression then expression !else else expression }
+    | BracketLookup { expression !call ("[" Key { expression } "]") }
+    | Array { "[" commaSep1<expression> "]" }
+    | UnaryCall { !unary (ArithOp<"-"> | ArithOp<"!"> | DotArithOp<".-">) expression }
+    | InfixCall {
           expression !or     LogicOp<"||">  expression
         | expression !and    LogicOp<"&&">  expression
         | expression !rel    LogicOp<">">   expression
@@ -99,21 +99,17 @@ expression[@isGroup="Expression"] {
         | expression !rel    LogicOp<"<=">  expression
         | expression !rel    LogicOp<">=">  expression
         | expression !rel    LogicOp<"==">  expression
-    }
-    | ControlExpr {
-          expression !control  ControlOp<"->">  expression
-    }
-    | ArithExpr {
-          expression !times  ( ArithOp<"*"> | DotArithOp<".*"> )                expression
+        | expression !times  ( ArithOp<"*"> | DotArithOp<".*"> )                expression
         | expression !times  ( ArithOp<"/"> | DotArithOp<"./"> )                expression
         | expression !exp    ( ArithOp<"^"> | DotArithOp<".^"> )                expression
         | expression !plus   ( ArithOp<"+"> | DotArithOp<".+"> )                expression
         | expression !plus   ( ArithOp<"-"> | DotArithOp<".-"> )                expression
         | expression !plus     @extend[@name="ArithOp"]<identifier, "to">       expression
     }
+    | Pipe {
+          expression !control  ControlOp<"->">  expression
+    }
 }
-
-
 
 Boolean { @specialize[@name="Boolean"]<identifier, "true" | "false"> }
 

@@ -3,7 +3,7 @@ import { parser } from "../src/components/CodeEditor/languageSupport/generated/s
 describe("Lezer grammar", () => {
   test("Basic", () => {
     expect(parser.parse("2+2").toString()).toBe(
-      "Program(ArithExpr(Number,ArithOp,Number))"
+      "Program(InfixCall(Number,ArithOp,Number))"
     );
   });
 
@@ -16,7 +16,7 @@ bar = 6`
         )
         .toString()
     ).toBe(
-      "Program(Binding(VariableName,Equals,Number),Binding(VariableName,Equals,Number))"
+      "Program(LetStatement(VariableName,Equals,Number),LetStatement(VariableName,Equals,Number))"
     );
   });
 
@@ -30,7 +30,7 @@ foo + bar`
         )
         .toString()
     ).toBe(
-      "Program(Binding(VariableName,Equals,Number),Binding(VariableName,Equals,Number),ArithExpr(IdentifierExpr,ArithOp,IdentifierExpr))"
+      "Program(LetStatement(VariableName,Equals,Number),LetStatement(VariableName,Equals,Number),InfixCall(IdentifierExpr,ArithOp,IdentifierExpr))"
     );
   });
 
@@ -43,7 +43,7 @@ foo(5)`
         )
         .toString()
     ).toBe(
-      'Program(FunDeclaration(FunctionName,"(",LambdaArgs(LambdaParameter(LambdaParameterName)),")",Equals,IdentifierExpr),CallExpr(IdentifierExpr,"(",Argument(Number),")"))'
+      'Program(DefunStatement(FunctionName,"(",LambdaArgs(LambdaParameter(LambdaParameterName)),")",Equals,IdentifierExpr),Call(IdentifierExpr,"(",Argument(Number),")"))'
     );
   });
 
@@ -57,7 +57,7 @@ bar"
 `
         )
         .toString()
-    ).toBe("Program(Binding(VariableName,Equals,String))");
+    ).toBe("Program(LetStatement(VariableName,Equals,String))");
   });
 
   test("Decorators", () => {
@@ -70,7 +70,13 @@ x = 5
         )
         .toString()
     ).toBe(
-      'Program(Decorator(At,DecoratorName,"(",Argument(String),")"),Binding(VariableName,Equals,Number))'
+      'Program(Decorator(At,DecoratorName,"(",Argument(String),")"),LetStatement(VariableName,Equals,Number))'
+    );
+  });
+
+  test("Pipe", () => {
+    expect(parser.parse("5 -> max(6)").toString()).toBe(
+      'Program(Pipe(Number,ControlOp,Call(IdentifierExpr,"(",Argument(Number),")")))'
     );
   });
 });
