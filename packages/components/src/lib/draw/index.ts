@@ -39,6 +39,30 @@ interface DrawAxesParams {
   yAxisTitle?: string;
 }
 
+function calculateNumberOfXTicks(width: number, height: number): number {
+  const minTicks = 3;
+  const maxTicks = 12;
+
+  const exponent = 1 / 2.5;
+  // A simplified scaling factor based on the dimensions of the chart
+  const scale = Math.pow(width * height, exponent);
+
+  // Define reasonable bounds for the scale factor
+  const minScale = Math.pow(40000, exponent); // Equivalent to 600x400
+  const maxScale = Math.pow(500000, exponent); // Equivalent to 1000x500
+
+  // Normalize the scale factor to a value between 0 and 1
+  const normalizedScale = (scale - minScale) / (maxScale - minScale);
+
+  // Calculate the number of ticks based on this normalized scale
+  const numberOfTicks = Math.round(
+    minTicks + normalizedScale * (maxTicks - minTicks)
+  );
+
+  // Ensure the number of ticks is within the desired range
+  return Math.max(minTicks, Math.min(numberOfTicks, maxTicks));
+}
+
 export function drawAxes({
   context,
   xScale, // will be mutated with the correct range
@@ -49,13 +73,16 @@ export function drawAxes({
   hideYAxis = false,
   hideAxisLines = false,
   drawTicks = true,
-  xTickCount = Math.max(Math.min(Math.floor(width / 100), 12), 3),
-  yTickCount = Math.max(Math.min(Math.floor(height / 100), 12), 3),
+  xTickCount,
+  yTickCount,
   xTickFormat: xTickFormatSpecifier = defaultTickFormatSpecifier,
   yTickFormat: yTickFormatSpecifier = defaultTickFormatSpecifier,
   xAxisTitle,
   yAxisTitle,
 }: DrawAxesParams) {
+  const _xTickCount = xTickCount || calculateNumberOfXTicks(width, height);
+  const _yTickCount = yTickCount || calculateNumberOfXTicks(height, width);
+  console.log("HI", height, width, _xTickCount, width ** 1.3 * height);
   const gradient = context.createLinearGradient(
     0,
     0,
@@ -65,11 +92,11 @@ export function drawAxes({
   gradient.addColorStop(0, "#6d9bce"); // Start color
   gradient.addColorStop(1, "#4fabce"); // End color
 
-  const xTicks = xScale.ticks(xTickCount);
-  const xTickFormat = xScale.tickFormat(xTickCount, xTickFormatSpecifier);
+  const xTicks = xScale.ticks(_xTickCount);
+  const xTickFormat = xScale.tickFormat(_xTickCount, xTickFormatSpecifier);
 
-  const yTicks = yScale.ticks(yTickCount);
-  const yTickFormat = yScale.tickFormat(yTickCount, yTickFormatSpecifier);
+  const yTicks = yScale.ticks(_yTickCount);
+  const yTickFormat = yScale.tickFormat(_yTickCount, yTickFormatSpecifier);
 
   const tickSize = 2;
 

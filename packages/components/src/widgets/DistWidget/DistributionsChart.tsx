@@ -375,6 +375,7 @@ const InnerDistributionsChart: FC<{
       xScale,
       yScale,
       verticalLine,
+      sampleBarHeight,
     ]
   );
 
@@ -517,7 +518,7 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
             samples={samples}
             shapes={shapes.value}
             plot={plot}
-            height={height * 0.9}
+            height={height * 0.5}
             showSamplesBar={showSamplesBar}
           />
         )}
