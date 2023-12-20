@@ -40,7 +40,7 @@ const parserWithMetadata = parser.configure({
       At: t.keyword,
 
       VariableName: t.constant(t.variableName),
-      IdentifierExpr: t.variableName,
+      Identifier: t.variableName,
       Field: t.variableName,
       LambdaParameterName: t.variableName,
     }),

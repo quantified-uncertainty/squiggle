@@ -36,7 +36,7 @@ const wordHover = hoverTooltip((view, pos, side) => {
   const getText = () => doc.sliceString(cursor.node.from, cursor.node.to);
 
   switch (cursor.name) {
-    case "IdentifierExpr":
+    case "Identifier":
       if (getText().match(/^[A-Z]/)) {
         // TODO - expand the namespace to the identifier, or just show the namespace documentation
         return null;

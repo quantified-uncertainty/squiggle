@@ -124,7 +124,7 @@ export function makeCompletionSource(project: SqProject) {
             snippetCompletion("|${args}| ${body}", {
               label: "|",
               detail: "lambda function",
-              type: "syntax",
+              type: "text",
             }),
           ],
         };
@@ -132,7 +132,7 @@ export function makeCompletionSource(project: SqProject) {
     }
 
     {
-      const identifier = cmpl.tokenBefore(["AccessExpr", "IdentifierExpr"]);
+      const identifier = cmpl.tokenBefore(["AccessExpr", "Identifier"]);
       if (identifier) {
         const { from } = identifier;
         const nameNodes = getNameNodes(tree, from);

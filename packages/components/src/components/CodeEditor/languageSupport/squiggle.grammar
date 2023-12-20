@@ -66,7 +66,12 @@ statement[@isGroup="Statement"] {
     | DecoratedStatement { Decorator statement }
 }
 
-expression[@isGroup="Expression"] {
+expression {
+    expressionWithoutParens
+    | ( "(" expression ")" )
+}
+
+expressionWithoutParens[@isGroup="Expression"] {
     String
     | Boolean { @specialize[@name="Boolean"]<identifier, "true" | "false"> }
     | Number
@@ -80,8 +85,7 @@ expression[@isGroup="Expression"] {
         "}"
     }
     | Lambda { "{" ArgsOpen { "|" } LambdaArgs "|" blockContent "}" }
-    | ParenExpr { "(" expression ")" }
-    | IdentifierExpr { identifier }
+    | Identifier { identifier }
     | AccessExpr { expression !deref "." Field { identifier } }
     | Call { expression ~callOrDeclaration !call "(" commaSep<Argument { expression }> ")" }
     | TernaryC { expression !logop LogicOp<"?"> expression LogicOp<":"> expression }

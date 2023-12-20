@@ -7,6 +7,12 @@ describe("Lezer grammar", () => {
     );
   });
 
+  test("Parens", () => {
+    expect(parser.parse("((2))").toString()).toBe(
+      'Program("(","(",Number,")",")")'
+    );
+  });
+
   test("Statements only", () => {
     expect(
       parser
@@ -30,7 +36,7 @@ foo + bar`
         )
         .toString()
     ).toBe(
-      "Program(LetStatement(VariableName,Equals,Number),LetStatement(VariableName,Equals,Number),InfixCall(IdentifierExpr,ArithOp,IdentifierExpr))"
+      "Program(LetStatement(VariableName,Equals,Number),LetStatement(VariableName,Equals,Number),InfixCall(Identifier,ArithOp,Identifier))"
     );
   });
 
@@ -43,7 +49,7 @@ foo(5)`
         )
         .toString()
     ).toBe(
-      'Program(DefunStatement(VariableName,"(",LambdaArgs(LambdaParameter(LambdaParameterName)),")",Equals,IdentifierExpr),Call(IdentifierExpr,"(",Argument(Number),")"))'
+      'Program(DefunStatement(VariableName,"(",LambdaArgs(LambdaParameter(LambdaParameterName)),")",Equals,Identifier),Call(Identifier,"(",Argument(Number),")"))'
     );
   });
 
@@ -76,7 +82,7 @@ x = 5
 
   test("Pipe", () => {
     expect(parser.parse("5 -> max(6)").toString()).toBe(
-      'Program(Pipe(Number,ControlOp,Call(IdentifierExpr,"(",Argument(Number),")")))'
+      'Program(Pipe(Number,ControlOp,Call(Identifier,"(",Argument(Number),")")))'
     );
   });
 });
