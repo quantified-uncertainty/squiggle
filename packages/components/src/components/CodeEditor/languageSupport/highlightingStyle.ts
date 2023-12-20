@@ -51,10 +51,7 @@ export const lightThemeHighlightingStyle = HighlightStyle.define([
     ],
     color: numbers,
   },
-  {
-    tag: [tags.escape],
-    color: escapes,
-  },
+  { tag: tags.escape, color: escapes },
   {
     tag: [
       tags.operator,

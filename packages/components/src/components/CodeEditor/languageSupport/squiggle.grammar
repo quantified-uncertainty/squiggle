@@ -70,7 +70,7 @@ statement {
 
 expression[@isGroup="Expression"] {
     String
-    | Boolean
+    | Boolean { @specialize[@name="Boolean"]<identifier, "true" | "false"> }
     | Number
     | Block { "{" blockContent "}" }
     | Dict {
@@ -111,9 +111,9 @@ expression[@isGroup="Expression"] {
     }
 }
 
-Boolean { @specialize[@name="Boolean"]<identifier, "true" | "false"> }
+// use `@extend` instead of `@specialize`, because keywords are valid variable names in Squiggle, for now.
+kw<term> { @extend[@name={term}]<identifier, term> }
 
-kw<term> { @specialize[@name={term}]<identifier, term> }
 if { kw<"if"> }
 then { kw<"then"> }
 else { kw<"else"> }
