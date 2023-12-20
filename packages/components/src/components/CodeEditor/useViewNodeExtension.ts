@@ -9,12 +9,12 @@ export function useViewNodeExtension(
   view: EditorView | undefined,
   {
     project,
-    onViewValuePath,
     sourceId,
+    onViewValuePath,
   }: {
     project: SqProject;
+    sourceId: string;
     onViewValuePath?: (path: SqValuePath) => void;
-    sourceId?: string;
   }
 ) {
   const viewCurrentPosition = useCallback(() => {
