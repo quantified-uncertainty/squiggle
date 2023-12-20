@@ -81,7 +81,10 @@ export const ResizableTwoPanelLayout: FC<Props> = ({
 
   return (
     <div className="flex items-stretch" ref={containerRef} style={{ height }}>
-      <div className={clsx("relative", !width && "w-1/2")} style={{ width }}>
+      <div
+        className={clsx("relative", !width && "w-4/5")}
+        style={{ width: width * 1.95 }}
+      >
         {renderLeft()}
         <DraggableCore
           nodeRef={handleRef}

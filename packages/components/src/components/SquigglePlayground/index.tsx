@@ -144,6 +144,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
   const renderLeft = () => (
     <LeftPlaygroundPanel
       project={project}
+      squiggleOutput={output.output}
       defaultCode={defaultCode}
       sourceId={sourceId}
       onCodeChange={onCodeChange}
