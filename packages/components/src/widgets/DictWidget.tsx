@@ -14,7 +14,7 @@ widgetRegistry.register("Dict", {
     return (
       <div className="space-y-1 pt-0.5 mt-0.5">
         {entries.map(([k, v]) => (
-          <ValueViewer key={k} value={v} />
+          <ValueViewer parentValue={value} key={k} value={v} />
         ))}
       </div>
     );

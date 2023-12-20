@@ -5,6 +5,7 @@ import { clsx } from "clsx";
 import { FC, PropsWithChildren, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 
+import { SqValue } from "@quri/squiggle-lang";
 import { CommentIcon, TextTooltip } from "@quri/ui";
 
 import { SHORT_STRING_LENGTH } from "../../lib/constants.js";
@@ -51,6 +52,7 @@ const CommentIconForValue: FC<{ value: SqValueWithContext }> = ({ value }) => {
 
 type Props = {
   value: SqValueWithContext;
+  parentValue?: SqValue;
 };
 
 const WithComment: FC<PropsWithChildren<Props>> = ({ value, children }) => {
@@ -120,7 +122,7 @@ function hasExtraContentToShow(v: SqValueWithContext): boolean {
   );
 }
 
-export const ValueWithContextViewer: FC<Props> = ({ value }) => {
+export const ValueWithContextViewer: FC<Props> = ({ value, parentValue }) => {
   const { tag } = value;
   const { path } = value.context;
 
@@ -183,15 +185,23 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
   };
 
   const headerClasses = () => {
+    let mainColor = "text-orange-900";
+    const parentTag = parentValue?.tag;
+    if (parentTag === "Array") {
+      mainColor = "text-stone-400";
+    } else if (path.items.length > 1) {
+      mainColor = "text-teal-700";
+    }
     if (isFocused) {
-      return "text-md text-orange-900 font-bold ml-1";
+      return clsx("text-md font-bold ml-1", mainColor);
     } else if (isRoot) {
       return "text-sm text-stone-600 font-semibold";
     } else {
-      return "text-sm text-orange-900 cursor-pointer hover:underline";
+      return clsx("text-sm cursor-pointer hover:underline", mainColor);
     }
   };
 
+  const isWeird = !isFocused && path.items.length > 1;
   const name = pathToShortName(path);
   const headerName = (
     <div
@@ -199,6 +209,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
       onClick={_focus}
     >
       {boxedName ? boxedName : name}
+      {isWeird && <span className="text-stone-400">:</span>}
     </div>
   );
 
@@ -235,7 +246,12 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
             {!isFocused && triangleToggle()}
             {headerName}
             {!isFocused && !isOpen && (
-              <div className="ml-5 text-sm text-blue-800">
+              <div
+                className={clsx(
+                  "text-sm text-blue-800",
+                  isWeird ? "ml-2" : "ml-5"
+                )}
+              >
                 <SquiggleValuePreview value={value} />
               </div>
             )}

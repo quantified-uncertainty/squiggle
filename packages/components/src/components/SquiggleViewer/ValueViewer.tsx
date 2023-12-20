@@ -8,12 +8,13 @@ import { ValueWithContextViewer } from "./ValueWithContextViewer.js";
 
 type Props = {
   value: SqValue;
+  parentValue?: SqValue;
 };
 
-export const ValueViewer: React.FC<Props> = ({ value }) => {
+export const ValueViewer: React.FC<Props> = ({ value, parentValue }) => {
   if (!valueHasContext(value)) {
     return <MessageAlert heading="Can't display pathless value" />;
   }
 
-  return <ValueWithContextViewer value={value} />;
+  return <ValueWithContextViewer value={value} parentValue={parentValue} />;
 };

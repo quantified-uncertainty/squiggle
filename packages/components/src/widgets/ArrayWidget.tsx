@@ -14,7 +14,7 @@ widgetRegistry.register("Array", {
     return (
       <div className="space-y-1 pt-0.5 mt-0.5">
         {values.map((r, i) => (
-          <ValueViewer key={i} value={r} />
+          <ValueViewer parentValue={value} key={i} value={r} />
         ))}
       </div>
     );
