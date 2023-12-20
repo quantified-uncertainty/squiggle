@@ -11,8 +11,10 @@ widgetRegistry.register("String", {
     </div>
   ),
   Chart: (value) => (
-    <div className="text-neutral-800 text-sm px-2 py-1 my-1">
-      <ReactMarkdown className="prose max-w-4xl">{value.value}</ReactMarkdown>
+    <div className="text-neutral-800 px-2 py-0.5 my-1">
+      <ReactMarkdown className="prose max-w-4xl text-sm">
+        {value.value}
+      </ReactMarkdown>
     </div>
   ),
 });

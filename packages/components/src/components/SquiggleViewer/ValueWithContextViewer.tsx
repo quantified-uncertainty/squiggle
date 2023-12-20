@@ -74,7 +74,7 @@ const WithComment: FC<PropsWithChildren<Props>> = ({ value, children }) => {
   const commentEl = (
     <ReactMarkdown
       className={clsx(
-        "prose max-w-4xl text-sm text-slate-800 bg-purple-50 bg-opacity-60 py-2 px-3 mb-2 rounded-md",
+        "prose max-w-4xl text-sm text-slate-800 py-2 px-3 mb-2",
         commentPosition === "bottom" && "mt-2"
       )}
     >
