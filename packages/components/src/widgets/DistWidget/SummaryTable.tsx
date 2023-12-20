@@ -23,11 +23,10 @@ type HoverableCellProps = PropsWithChildren<{
   onMouseLeave?: () => void;
 }>;
 
-const commonCellClasses =
-  "border border-slate-200 py-1 px-2 text-slate-700 font-light";
+const commonCellClasses = "py-0.5 px-2 font-light";
 
 const TableHeadCell: FC<PropsWithChildren> = ({ children }) => (
-  <th className={clsx(commonCellClasses, "text-xs")}>{children}</th>
+  <th className={clsx(commonCellClasses)}>{children}</th>
 );
 
 const Cell: FC<HoverableCellProps> = ({
@@ -36,7 +35,7 @@ const Cell: FC<HoverableCellProps> = ({
   onMouseLeave,
 }) => (
   <td
-    className={clsx(commonCellClasses, "text-sm")}
+    className={clsx(commonCellClasses, "hover:bg-blue-100")}
     onMouseEnter={onMouseEnter}
     onMouseLeave={onMouseLeave}
   >
@@ -138,30 +137,34 @@ export const SummaryTable: FC<SummaryTableProps> = ({ plot, environment }) => {
   const tickFormat = plot.xScale?.tickFormat;
 
   return (
-    <table className="table border border-collapse border-slate-400">
-      <thead className="bg-slate-50">
-        <tr>
-          {showNames && <TableHeadCell>Name</TableHeadCell>}
-          <TableHeadCell>Mean</TableHeadCell>
-          <TableHeadCell>Stdev</TableHeadCell>
-          {percentiles.map((percentile) => (
-            <TableHeadCell key={percentile}>{percentile * 100}%</TableHeadCell>
+    <div className="overflow-x-auto relative">
+      <table className="w-full text-left font-light">
+        <thead className="text-xs font-light border-b border-slate-200 text-slate-700">
+          <tr>
+            {showNames && <TableHeadCell>Name</TableHeadCell>}
+            <TableHeadCell>Mean</TableHeadCell>
+            <TableHeadCell>Stdev</TableHeadCell>
+            {percentiles.map((percentile) => (
+              <TableHeadCell key={percentile}>
+                {percentile * 100}%
+              </TableHeadCell>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="text-sm text-blue-800 opacity-90 ">
+          {plot.distributions.map((dist, i) => (
+            <SummaryTableRow
+              key={i} // dist.name doesn't have to be unique, so we can't use it as a key
+              distribution={dist.distribution}
+              name={dist.name ?? dist.distribution.toString()}
+              showName={showNames}
+              environment={environment}
+              tickFormat={tickFormat}
+              valueType={isDate ? "date" : "number"}
+            />
           ))}
-        </tr>
-      </thead>
-      <tbody>
-        {plot.distributions.map((dist, i) => (
-          <SummaryTableRow
-            key={i} // dist.name doesn't have to be unique, so we can't use it as a key
-            distribution={dist.distribution}
-            name={dist.name ?? dist.distribution.toString()}
-            showName={showNames}
-            environment={environment}
-            tickFormat={tickFormat}
-            valueType={isDate ? "date" : "number"}
-          />
-        ))}
-      </tbody>
-    </table>
+        </tbody>
+      </table>
+    </div>
   );
 };

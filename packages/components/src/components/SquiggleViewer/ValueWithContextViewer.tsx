@@ -234,7 +234,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
           <div className="inline-flex items-center">
             {!isFocused && triangleToggle()}
             {headerName}
-            {!isFocused && isOpen && (
+            {!isFocused && !isOpen && (
               <div className="ml-5 text-sm text-blue-800">
                 <SquiggleValuePreview value={value} />
               </div>
