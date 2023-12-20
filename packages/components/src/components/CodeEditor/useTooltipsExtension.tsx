@@ -1,3 +1,4 @@
+import { syntaxTree } from "@codemirror/language";
 import { EditorView, hoverTooltip, repositionTooltips } from "@codemirror/view";
 import { FC, useEffect } from "react";
 import { createRoot } from "react-dom/client";
@@ -28,22 +29,38 @@ const HoverTooltip: FC<{ hover: Hover; view: EditorView }> = ({
 // See also: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_hover
 const wordHover = hoverTooltip((view, pos, side) => {
   const { doc } = view.state;
-  const { from, to, text } = doc.lineAt(pos);
-  let start = pos,
-    end = pos;
-  while (start > from && /[\w.]/.test(text[start - from - 1])) start--;
-  while (end < to && /[\w.]/.test(text[end - from])) end++;
-  if ((start === pos && side < 0) || (end === pos && side > 0)) return null;
 
-  const token = text.slice(start - from, end - from);
-  const hover = getFunctionDocumentation(token);
+  const tree = syntaxTree(view.state);
+  const cursor = tree.cursorAt(pos, side);
+
+  const getText = () => doc.sliceString(cursor.node.from, cursor.node.to);
+
+  switch (cursor.name) {
+    case "IdentifierExpr":
+      if (getText().match(/^[A-Z]/)) {
+        // TODO - expand the namespace to the identifier, or just show the namespace documentation
+        return null;
+      }
+      // TODO - check that the identifier is not overwritten by a local variable
+      break; // this is ok, might be a builtin
+    case "Field": {
+      if (!cursor.parent()) {
+        return null;
+      }
+      break;
+    }
+    default:
+      return null;
+  }
+
+  const hover = getFunctionDocumentation(getText());
   if (!hover) {
     return null;
   }
 
   return {
-    pos: start,
-    end,
+    pos: cursor.node.from,
+    end: cursor.node.to,
     above: true,
     create() {
       const dom = document.createElement("div");
@@ -52,6 +69,7 @@ const wordHover = hoverTooltip((view, pos, side) => {
       return { dom };
     },
   };
+  return null;
 });
 
 const tooltipTheme = EditorView.baseTheme({
