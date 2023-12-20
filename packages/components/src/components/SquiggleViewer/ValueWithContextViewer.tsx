@@ -113,6 +113,13 @@ const ValueViewerBody: FC<Props> = ({ value }) => {
 
 const tagsDefaultCollapsed = new Set(["Bool", "Number", "Void", "Input"]);
 
+function hasExtraContentToShow(v: SqValueWithContext): boolean {
+  return !(
+    tagsDefaultCollapsed.has(v.tag) ||
+    (v.tag === "String" && v.value.length <= SHORT_STRING_LENGTH)
+  );
+}
+
 export const ValueWithContextViewer: FC<Props> = ({ value }) => {
   const { tag } = value;
   const { path } = value.context;
@@ -137,11 +144,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
       if (isRoot) {
         return getChildrenValues(v).length > 30;
       } else {
-        return (
-          getChildrenValues(v).length > 5 ||
-          tagsDefaultCollapsed.has(v.tag) ||
-          (v.tag === "String" && v.value.length <= SHORT_STRING_LENGTH)
-        );
+        return getChildrenValues(v).length > 5 || !hasExtraContentToShow(v);
       }
     };
 
@@ -164,21 +167,26 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
 
   const triangleToggle = () => {
     const Icon = isOpen ? ExpandedIcon : CollapsedIcon;
-    return (
-      <div
-        className="w-4 mr-1.5 flex justify-center cursor-pointer text-stone-200 hover:text-stone-700 group-hover:text-stone-300"
-        onClick={toggleCollapsed}
-      >
-        <Icon size={12} />
-      </div>
-    );
+    const _hasExtraContentToShow = hasExtraContentToShow(value);
+    if (_hasExtraContentToShow) {
+      return (
+        <div
+          className="w-4 mr-1.5 flex justify-center cursor-pointer text-stone-200 hover:!text-stone-600 group-hover:text-stone-300"
+          onClick={toggleCollapsed}
+        >
+          <Icon size={12} />
+        </div>
+      );
+    } else {
+      return <div className="w-4 mr-1.5" />;
+    }
   };
 
   const headerClasses = () => {
     if (isFocused) {
       return "text-md text-orange-900 font-bold ml-1";
     } else if (isRoot) {
-      return "text-sm text-stone-900 font-semibold";
+      return "text-sm text-stone-600 font-semibold";
     } else {
       return "text-sm text-orange-900 cursor-pointer hover:underline";
     }
@@ -226,13 +234,8 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
           <div className="inline-flex items-center">
             {!isFocused && triangleToggle()}
             {headerName}
-            {!isFocused && (
-              <div
-                className={clsx(
-                  "ml-5 text-sm text-blue-800",
-                  isOpen ? "opacity-40" : "opacity-60"
-                )}
-              >
+            {!isFocused && isOpen && (
+              <div className="ml-5 text-sm text-blue-800">
                 <SquiggleValuePreview value={value} />
               </div>
             )}

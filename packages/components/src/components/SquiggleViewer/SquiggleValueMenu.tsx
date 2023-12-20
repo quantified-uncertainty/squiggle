@@ -181,7 +181,7 @@ export const SquiggleValueMenu: FC<{
             "cursor-pointer transition",
             hasLocalSettings
               ? "text-indigo-300 hover:!text-indigo-500 group-hover:text-indigo-400"
-              : "text-stone-100 hover:!text-stone-500 group-hover:text-stone-400"
+              : "text-white hover:!text-stone-500 group-hover:text-stone-400"
           )}
         />
       </Dropdown>
