@@ -132,9 +132,18 @@ export const library = [
     definitions: [
       decoratorWithInputOrFnInput(frDist, frPlot),
       decoratorWithInputOrFnInput(frArray(frAny()), frTableChart),
-      decoratorWithInputOrFnInput(frLambdaTyped([frNumber], frDistOrNumber), frPlot),
-      decoratorWithInputOrFnInput(frLambdaTyped([frDate], frDistOrNumber), frPlot),
-      decoratorWithInputOrFnInput(frLambdaTyped([frDuration], frDistOrNumber), frPlot),
+      decoratorWithInputOrFnInput(
+        frLambdaTyped([frNumber], frDistOrNumber),
+        frPlot
+      ),
+      decoratorWithInputOrFnInput(
+        frLambdaTyped([frDate], frDistOrNumber),
+        frPlot
+      ),
+      decoratorWithInputOrFnInput(
+        frLambdaTyped([frDuration], frDistOrNumber),
+        frPlot
+      ),
       //The frLambda definition needs to come after the more narrow frLambdaTyped definitions.
       decoratorWithInputOrFnInput(frLambda, frCalculator),
     ],
