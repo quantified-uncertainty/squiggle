@@ -29,6 +29,7 @@ interface DrawAxesParams {
   width: number;
   height: number;
   hideYAxis?: boolean;
+  hideAxisLines?: boolean;
   drawTicks?: boolean;
   xTickCount?: number;
   yTickCount?: number;
@@ -46,6 +47,7 @@ export function drawAxes({
   width,
   height,
   hideYAxis = false,
+  hideAxisLines = false,
   drawTicks = true,
   xTickCount = Math.max(Math.min(Math.floor(width / 100), 12), 3),
   yTickCount = Math.max(Math.min(Math.floor(height / 100), 12), 3),
@@ -54,6 +56,15 @@ export function drawAxes({
   xAxisTitle,
   yAxisTitle,
 }: DrawAxesParams) {
+  const gradient = context.createLinearGradient(
+    0,
+    0,
+    width * 0.6,
+    height * 0.6
+  );
+  gradient.addColorStop(0, "#6d9bce"); // Start color
+  gradient.addColorStop(1, "#4fabce"); // End color
+
   const xTicks = xScale.ticks(xTickCount);
   const xTickFormat = xScale.tickFormat(xTickCount, xTickFormatSpecifier);
 
@@ -96,12 +107,14 @@ export function drawAxes({
   // x axis
   {
     frame.enter();
-    context.beginPath();
-    context.strokeStyle = axisColor;
-    context.lineWidth = 1;
-    context.moveTo(0, 0);
-    context.lineTo(frame.width, 0);
-    context.stroke();
+    if (!hideAxisLines) {
+      context.beginPath();
+      context.strokeStyle = axisColor;
+      context.lineWidth = 1;
+      context.moveTo(0, 0);
+      context.lineTo(frame.width, 0);
+      context.stroke();
+    }
 
     context.fillStyle = labelColor;
     context.font = labelFont;
@@ -149,12 +162,14 @@ export function drawAxes({
   // y axis
   if (!hideYAxis) {
     frame.enter();
-    context.beginPath();
-    context.strokeStyle = axisColor;
-    context.lineWidth = 1;
-    context.moveTo(0, 0);
-    context.lineTo(0, frame.height);
-    context.stroke();
+    if (!hideAxisLines) {
+      context.beginPath();
+      context.strokeStyle = axisColor;
+      context.lineWidth = 1;
+      context.moveTo(0, 0);
+      context.lineTo(0, frame.height);
+      context.stroke();
+    }
 
     let prevBoundary = -padding.bottom;
     const x = 0;

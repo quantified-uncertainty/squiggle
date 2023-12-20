@@ -1,11 +1,13 @@
-import { clsx } from "clsx";
+import clsx from "clsx";
 import * as d3 from "d3";
 import isEqual from "lodash/isEqual.js";
 import { FC, useCallback, useMemo, useState } from "react";
 
 import {
   Env,
+  result,
   resultMap,
+  SqDistributionError,
   SqDistributionsPlot,
   SqDistributionTag,
   SqShape,
@@ -22,7 +24,6 @@ import {
   drawCircle,
   drawCursorLines,
   drawVerticalLine,
-  primaryColor,
 } from "../../lib/draw/index.js";
 import { Point } from "../../lib/draw/types.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
@@ -43,8 +44,53 @@ export type DistributionsChartProps = {
   height: number;
 };
 
+/**
+ * Interpolates to find the y-coordinate at a given x-value.
+ * @param xValue The x-value to interpolate at.
+ * @param continuousData The array of data points.
+ * @param xScale The D3 scale function for the x-axis.
+ * @param yScale The D3 scale function for the y-axis.
+ * @returns The interpolated y-coordinate on the canvas, or null if interpolation is not possible.
+ */
+interface DataPoint {
+  x: number;
+  y: number;
+}
+function interpolateYAtX(
+  xValue: number,
+  continuousData: DataPoint[],
+  xScale: d3.ScaleContinuousNumeric<number, number>,
+  yScale: d3.ScaleContinuousNumeric<number, number>
+): number | null {
+  let pointBefore: DataPoint | null = null,
+    pointAfter: DataPoint | null = null;
+  for (const point of continuousData) {
+    if (point.x <= xValue) {
+      pointBefore = point;
+    } else {
+      pointAfter = point;
+      break;
+    }
+  }
+
+  if (pointBefore && pointAfter) {
+    const xInterpolate = d3
+      .scaleLinear()
+      .domain([pointBefore.x, pointAfter.x])
+      .range([yScale(pointBefore.y), yScale(pointAfter.y)]);
+    return xInterpolate(xValue);
+  } else {
+    return null;
+  }
+}
+
 const InnerDistributionsChart: FC<{
-  shapes: (SqShape & { name: string })[];
+  shapes: (SqShape & {
+    name: string;
+    p5: result<number, SqDistributionError>;
+    p50: result<number, SqDistributionError>;
+    p95: result<number, SqDistributionError>;
+  })[];
   samples: number[];
   plot: SqDistributionsPlot;
   height: number;
@@ -64,23 +110,28 @@ const InnerDistributionsChart: FC<{
     { value: number; probability: number } | undefined
   >();
 
-  const shapes = unAdjustedShapes.map(({ name, continuous, discrete }) => ({
-    name,
-    ...adjustPdfHeightToScale({ discrete, continuous }, plot.xScale),
-  }));
+  const shapes = unAdjustedShapes.map(
+    ({ name, continuous, discrete, p5, p50, p95 }) => ({
+      name,
+      p5,
+      p50,
+      p95,
+      ...adjustPdfHeightToScale({ discrete, continuous }, plot.xScale),
+    })
+  );
 
   const domain = shapes.flatMap((shape) =>
     shape.discrete.concat(shape.continuous)
   );
 
   const legendItemHeight = 16;
-  const sampleBarHeight = 5;
 
   const legendHeight = isMulti ? legendItemHeight * shapes.length : 0;
   const _showSamplesBar = showSamplesBar && samples.length && !isMulti;
   const samplesFooterHeight = _showSamplesBar ? 10 : 0;
 
   const height = innerHeight + legendHeight + samplesFooterHeight + 34;
+  const sampleBarHeight = Math.min(7, innerHeight * 0.2);
 
   const { xScale, yScale } = useMemo(() => {
     const xScale = sqScaleToD3(plot.xScale);
@@ -123,9 +174,10 @@ const InnerDistributionsChart: FC<{
         xScale,
         yScale,
         hideYAxis: true,
-        drawTicks: true,
+        drawTicks: false,
         xTickFormat: plot.xScale.tickFormat,
         xAxisTitle: plot.xScale.title,
+        hideAxisLines: true,
       });
 
       if (isMulti) {
@@ -149,7 +201,50 @@ const InnerDistributionsChart: FC<{
           context.restore();
         }
       }
+      function lightenColor(color, percent) {
+        // let col = d3.rgb(color);
+        return d3.interpolateLab(color, "#fff")(percent); // use interpolateLab to convert to Lab and lighten
+        // col
+        // col = col.brighter(percent); // using darker with negative value to lighten
+        // return col.toString();
+      }
 
+      const gradient = context.createLinearGradient(
+        0,
+        0,
+        width * 0.6,
+        height * 0.6
+      );
+      gradient.addColorStop(0, "#6d9bce"); // Start color
+      gradient.addColorStop(1, "#4fabce"); // End color
+      const lightenedGradient = context.createLinearGradient(
+        0,
+        0,
+        width * 0.6,
+        height * 0.6
+      );
+      const brighter = 0.75;
+      lightenedGradient.addColorStop(0, lightenColor("#6d9bce", brighter)); // Start color
+      lightenedGradient.addColorStop(1, lightenColor("#4fabce", brighter)); // End color
+      // samples
+      if (_showSamplesBar) {
+        context.save();
+        context.strokeStyle = gradient;
+        context.globalAlpha = 0.7;
+
+        context.lineWidth = 0.5;
+
+        samples.forEach((sample) => {
+          context.beginPath();
+          const x = xScale(sample);
+
+          context.beginPath();
+          context.moveTo(padding.left + x, height - sampleBarHeight - 30);
+          context.lineTo(padding.left + x, height - 30);
+          context.stroke();
+        });
+        context.restore();
+      }
       // shapes
       {
         frame.enter();
@@ -166,7 +261,7 @@ const InnerDistributionsChart: FC<{
 
           // continuous
           context.globalAlpha = isMulti ? 0.3 : 1;
-          context.fillStyle = getColor(i);
+          context.fillStyle = lightenedGradient; // getColor(i);
           context.beginPath();
           d3
             .area<SqShape["continuous"][number]>()
@@ -176,9 +271,30 @@ const InnerDistributionsChart: FC<{
             .context(context)(shape.continuous);
           context.fill();
 
+          for (const percentile of [shape.p5, shape.p50, shape.p95]) {
+            if (percentile.ok) {
+              const xPoint = percentile.value;
+              const interpolateY = interpolateYAtX(
+                xPoint,
+                shape.continuous,
+                xScale,
+                yScale
+              );
+              if (interpolateY) {
+                context.beginPath();
+                context.strokeStyle = gradient;
+                context.globalAlpha = 0.3;
+                context.lineWidth = 1;
+                context.moveTo(xScale(xPoint), 0);
+                context.lineTo(xScale(xPoint), interpolateY);
+                context.stroke();
+              }
+            }
+          }
+
           // The top line
-          context.globalAlpha = 1;
-          context.strokeStyle = context.fillStyle;
+          context.globalAlpha = 0.8;
+          context.strokeStyle = gradient;
           context.beginPath();
           d3
             .line<SqShape["continuous"][number]>()
@@ -225,24 +341,6 @@ const InnerDistributionsChart: FC<{
           setDiscreteTooltip(newDiscreteTooltip);
         }
         frame.exit();
-      }
-
-      // samples
-      if (_showSamplesBar) {
-        context.save();
-        context.strokeStyle = primaryColor;
-        context.lineWidth = 0.1;
-
-        samples.forEach((sample) => {
-          context.beginPath();
-          const x = xScale(sample);
-
-          context.beginPath();
-          context.moveTo(padding.left + x, height - sampleBarHeight);
-          context.lineTo(padding.left + x, height);
-          context.stroke();
-        });
-        context.restore();
       }
 
       drawCursorLines({
@@ -351,6 +449,9 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
     distributions.map((x) =>
       resultMap(x.distribution.pointSet(environment), (pointSet) => ({
         name: x.name ?? x.distribution.toString(),
+        p5: x.distribution.inv(environment, 0.05),
+        p50: x.distribution.inv(environment, 0.5),
+        p95: x.distribution.inv(environment, 0.95),
         ...pointSet.asShape(),
       }))
     )
@@ -416,7 +517,7 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
             samples={samples}
             shapes={shapes.value}
             plot={plot}
-            height={height}
+            height={height * 0.9}
             showSamplesBar={showSamplesBar}
           />
         )}
