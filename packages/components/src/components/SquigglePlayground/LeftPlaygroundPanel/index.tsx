@@ -168,7 +168,6 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
           if (!valueHasContext(value)) {
             throw new Error("Value has no context");
           } else {
-            console.log(value.context.findLocation());
             return { variableName, value };
           }
         });
@@ -198,19 +197,21 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
           </div>
           <div className="w-5/12 px-2">
             <div className="relative">
-              {items.map(({ variableName, value }) => (
-                <div
-                  key={variableName}
-                  className={
-                    "border border-slate-100 rounded-sm bg-white absolute w-full"
-                  }
-                  style={{
-                    top: value.context.findLocation().start.line * 20 - 35,
-                  }}
-                >
-                  <ValueViewer value={value} />
-                </div>
-              ))}
+              {items.map(({ variableName, value }) => {
+                return (
+                  <div
+                    key={variableName}
+                    className={
+                      "border border-slate-100 rounded-sm bg-white absolute w-full"
+                    }
+                    style={{
+                      top: value.context.findLocation().start.line * 20 - 35,
+                    }}
+                  >
+                    <ValueViewer value={value} />
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
