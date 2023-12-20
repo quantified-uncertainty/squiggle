@@ -66,7 +66,7 @@ widgetRegistry.register("TableChart", {
             style={{ minWidth: columnLength * 100 }}
           >
             {hasColumnNames && (
-              <thead className="text-xs text-gray-700 bg-gray-50 border-b border-slate-200">
+              <thead className="text-xs text-stone-600 bg-stone-50 border-b border-stone-200">
                 <tr>
                   {Array.from({ length: columnLength }, (_, i) => (
                     <th
