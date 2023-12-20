@@ -13,8 +13,9 @@ module.exports = {
   parser: "@typescript-eslint/parser",
   plugins: ["@typescript-eslint", "@wogns3623/better-exhaustive-deps"],
   rules: {
+    // Replace exhaustive-deps hook with a better fork
+    // Context: https://github.com/facebook/react/issues/16873
     "react-hooks/exhaustive-deps": "off",
-
     "@wogns3623/better-exhaustive-deps/exhaustive-deps": [
       "warn",
       {

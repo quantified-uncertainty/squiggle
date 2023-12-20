@@ -122,7 +122,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
   const setCollapsed = useSetCollapsed();
   const collapseChildren = useCollapseChildren();
   const focus = useFocus();
-  const { getLocalItemState } = useViewerContext();
+  const { itemStore } = useViewerContext();
   const isFocused = useIsFocused(path);
 
   const isRoot = path.isRoot();
@@ -160,7 +160,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
 
   const ref = useRegisterAsItemViewer(path);
 
-  const isOpen = isFocused || !getLocalItemState({ path }).collapsed;
+  const isOpen = isFocused || !itemStore.getState(path).collapsed;
   const _focus = () => !isFocused && !isRoot && focus(path);
 
   const triangleToggle = () => {

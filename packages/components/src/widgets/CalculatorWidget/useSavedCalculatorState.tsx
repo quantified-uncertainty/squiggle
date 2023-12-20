@@ -12,13 +12,12 @@ export function useSavedCalculatorState(
 ) {
   const path = useMemo(() => calculatorValue.context.path, [calculatorValue]);
 
-  const { getLocalItemState, dispatch: viewerContextDispatch } =
-    useViewerContext();
+  const { itemStore } = useViewerContext();
 
   // Load state just once on initial render.
   // After the initial load, Calculator component owns the state and pushes it to ViewerContext.
   const [savedState] = useState<CalculatorState | undefined>(() => {
-    const itemState = getLocalItemState({ path });
+    const itemState = itemStore.getState(path);
 
     const sameCalculatorCacheExists =
       itemState.calculator &&
@@ -33,15 +32,9 @@ export function useSavedCalculatorState(
 
   const updateSavedState = useCallback(
     (state: CalculatorState) => {
-      viewerContextDispatch({
-        type: "CALCULATOR_UPDATE",
-        payload: {
-          path,
-          calculator: state,
-        },
-      });
+      itemStore.updateCalculatorState(path, state);
     },
-    [path, viewerContextDispatch]
+    [path, itemStore]
   );
 
   return [savedState, updateSavedState] as const;

@@ -42,7 +42,7 @@ const SquiggleViewerOuter = forwardRef<
   { resultVariables, resultItem, rootPathOverride },
   ref
 ) {
-  const { focused, dispatch, getCalculator } = useViewerContext();
+  const { focused, itemStore, getCalculator } = useViewerContext();
   const unfocus = useUnfocus();
   const focus = useFocus();
 
@@ -85,10 +85,7 @@ const SquiggleViewerOuter = forwardRef<
 
   useImperativeHandle(ref, () => ({
     viewValuePath(path: SqValuePath) {
-      dispatch({
-        type: "SCROLL_TO_PATH",
-        payload: { path },
-      });
+      itemStore.scrollToPath(path);
     },
   }));
 
