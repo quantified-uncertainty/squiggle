@@ -2,7 +2,6 @@ import merge from "lodash/merge.js";
 import {
   createContext,
   FC,
-  MutableRefObject,
   PropsWithChildren,
   useCallback,
   useContext,
@@ -47,6 +46,14 @@ const defaultLocalItemState: LocalItemState = {
   settings: {},
 };
 
+/**
+ * `ItemStore` is used for caching and for passing settings down the tree.
+ * It allows us to avoid React tree rerenders on settings changes; instead, we can rerender individual item viewers on demand.
+ * It also saves the state when the tree is rebuilt from scratch (for example, when the user changes the code in the editor).
+ *
+ * Note: this class is currently used as a primary source of truth. Should we use it as cache only, and store the state in React state instead?
+ * Then we won't have to rely on `forceUpdate` for rerenders.
+ */
 class ItemStore {
   state: Record<string, LocalItemState> = {};
   handles: Record<string, ItemHandle> = {};
@@ -74,6 +81,10 @@ class ItemStore {
 
   getState(path: SqValuePath): LocalItemState {
     return this.state[pathAsString(path)] || defaultLocalItemState;
+  }
+
+  getCalculator(path: SqValuePath): CalculatorState | undefined {
+    return this.getState(path).calculator;
   }
 
   forceUpdate(path: SqValuePath) {
@@ -114,7 +125,6 @@ type ViewerContextShape = {
   // Instead, we keep localItemState in local state and notify the global context via setLocalItemState to pass them down the component tree again if it got rebuilt from scratch.
   // See ./SquiggleViewer.tsx and ./ValueWithContextViewer.tsx for other implementation details on this.
   globalSettings: PlaygroundSettings;
-  getCalculator({ path }: { path: SqValuePath }): CalculatorState | undefined;
   focused: SqValuePath | undefined;
   setFocused: (value: SqValuePath | undefined) => void;
   editor?: CodeEditorHandle;
@@ -123,7 +133,6 @@ type ViewerContextShape = {
 
 export const ViewerContext = createContext<ViewerContextShape>({
   globalSettings: defaultPlaygroundSettings,
-  getCalculator: () => undefined,
   focused: undefined,
   setFocused: () => undefined,
   editor: undefined,
@@ -245,11 +254,7 @@ export function useCollapseChildren() {
 
 export function useIsFocused(path: SqValuePath) {
   const { focused } = useViewerContext();
-  if (!focused) {
-    return false;
-  } else {
-    return pathAsString(focused) === pathAsString(path);
-  }
+  return focused && pathAsString(focused) === pathAsString(path);
 }
 
 export function useMergedSettings(path: SqValuePath) {
@@ -262,16 +267,6 @@ export function useMergedSettings(path: SqValuePath) {
     [globalSettings, localItemState.settings]
   );
   return result;
-}
-
-// React doesn't allow initializer functions in `useRef`.
-// Simplified trick from https://github.com/facebook/react/issues/14490#issuecomment-1587704033
-function useLazyRef<T>(fn: () => T) {
-  const ref = useRef<T>();
-  if (ref.current === undefined) {
-    ref.current = fn();
-  }
-  return ref as MutableRefObject<T>; // guaranteed to be defined
 }
 
 export const ViewerProvider: FC<
@@ -288,8 +283,7 @@ export const ViewerProvider: FC<
   rootPathOverride,
   children,
 }) => {
-  // Can't store settings in the state because we don't want to rerender the entire tree on every change.
-  const itemStoreRef = useLazyRef<ItemStore>(
+  const [itemStore] = useState(
     () => new ItemStore({ beginWithVariablesCollapsed })
   );
 
@@ -301,19 +295,14 @@ export const ViewerProvider: FC<
     return merge({}, defaultPlaygroundSettings, partialPlaygroundSettings);
   }, [partialPlaygroundSettings]);
 
-  const getCalculator = useCallback(({ path }: { path: SqValuePath }) => {
-    return itemStoreRef.current.getState(path)?.calculator;
-  }, []);
-
   return (
     <ViewerContext.Provider
       value={{
         globalSettings,
-        getCalculator,
         editor,
         focused,
         setFocused,
-        itemStore: itemStoreRef.current,
+        itemStore,
       }}
     >
       {children}
