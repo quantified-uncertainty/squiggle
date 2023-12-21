@@ -1,14 +1,14 @@
 import { clsx } from "clsx";
 
-import { SqBoxedValue, SqNumberValue } from "@quri/squiggle-lang";
+import { SqNumberValue } from "@quri/squiggle-lang";
 
 import { NumberShower } from "../components/NumberShower.js";
 import { formatNumber } from "../lib/d3/index.js";
 import { widgetRegistry } from "./registry.js";
 import { leftWidgetMargin } from "./utils.js";
 
-const showNumber = (value: SqNumberValue, boxed?: SqBoxedValue) => {
-  const numberFormat = boxed?.value.numberFormat();
+const showNumber = (value: SqNumberValue) => {
+  const numberFormat = value.tags.numberFormat();
   if (numberFormat) {
     return formatNumber(numberFormat, value.value);
   } else {
@@ -17,10 +17,10 @@ const showNumber = (value: SqNumberValue, boxed?: SqBoxedValue) => {
 };
 
 widgetRegistry.register("Number", {
-  Preview: (value, boxed) => showNumber(value, boxed),
-  Chart: (value, _, boxed) => (
+  Preview: (value) => showNumber(value),
+  Chart: (value) => (
     <div className={clsx("font-semibold text-indigo-800", leftWidgetMargin)}>
-      {showNumber(value, boxed)}
+      {showNumber(value)}
     </div>
   ),
 });
