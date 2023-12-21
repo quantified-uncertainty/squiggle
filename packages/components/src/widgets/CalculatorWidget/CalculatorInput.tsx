@@ -21,7 +21,7 @@ export const CalculatorInput: FC<{
   const { name, typeName, description } = input;
 
   const newDescription = [typeName, description].filter((e) => e).join("\n\n");
-  // common props for all *FormField components
+    // common props for all *FormField components
   const commonProps = {
     name: `inputs.${id}` as const,
     label: name,
@@ -30,7 +30,7 @@ export const CalculatorInput: FC<{
 
   return (
     <div className="flex flex-col">
-      <div className="flex-grow max-w-sm">
+          <div className="flex-grow max-w-sm">
         {input.tag === "text" && (
           <TextFormField
             {...commonProps}
@@ -54,7 +54,7 @@ export const CalculatorInput: FC<{
           />
         )}
       </div>
-      {result && !result.ok && (
+        {result && !result.ok && (
         <SquiggleValueResultChart result={result} settings={settings} />
       )}
     </div>
