@@ -134,6 +134,7 @@ export function hasExtraContentToShow(v: SqValueWithContext): boolean {
   );
 }
 
+// Collapse children and element if desired. Uses crude heuristics.
 export const shouldBeginCollapsed = (
   value: SqValueWithContext,
   path: SqValuePath
