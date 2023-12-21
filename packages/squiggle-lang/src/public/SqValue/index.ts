@@ -1,6 +1,13 @@
 import { result } from "../../utility/result.js";
 import { SDate } from "../../utility/SDate.js";
-import { Value, vDate, vLambda, vNumber, vString } from "../../value/index.js";
+import {
+  Value,
+  vCalculator,
+  vDate,
+  vLambda,
+  vNumber,
+  vString,
+} from "../../value/index.js";
 import { SqError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqArray } from "./SqArray.js";
@@ -154,6 +161,13 @@ export class SqLambdaValue extends SqAbstractValue<"Lambda", SqLambda> {
 
   asJS() {
     return this.value; // SqLambda is nicer than internal Lambda, so we use that
+  }
+
+  toCalculator(): SqCalculatorValue | undefined {
+    const calc = this.value._value.toCalculator();
+    return calc
+      ? new SqCalculatorValue(vCalculator(calc), this.context)
+      : undefined;
   }
 }
 
