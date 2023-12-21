@@ -84,7 +84,7 @@ export const library = [
             fn: value,
             title: title || tags.value.name || undefined,
             description: description || tags.value.description || undefined,
-            inputs: inputs || [],
+            inputs: inputs || value.defaultInputs(),
             autorun: autorun === null || autorun === undefined ? true : autorun,
             sampleCount: sampleCount || undefined,
           });

@@ -20,14 +20,6 @@ const maker = new FnFactory({
   requiresNamespace: false,
 });
 
-const makeYearFn = makeDefinition([frNumber], frDate, ([year]) => {
-  const result = SDate.fromYear(year);
-  if (!result.ok) {
-    throw new REOther(result.value);
-  }
-  return result.value;
-});
-
 export const library = [
   ...makeNumericComparisons(
     maker,

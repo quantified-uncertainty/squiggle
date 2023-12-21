@@ -18,13 +18,14 @@ export const CalculatorInput: FC<{
   result: SqValueResult | undefined;
   settings: PlaygroundSettings;
 }> = ({ id, input, result, settings }) => {
-  const { name, description } = input;
+  const { name, typeName, description } = input;
 
+  const newDescription = [typeName, description].filter((e) => e).join("\n\n");
   // common props for all *FormField components
   const commonProps = {
     name: `inputs.${id}` as const,
     label: name,
-    description,
+    description: newDescription,
   };
 
   return (
