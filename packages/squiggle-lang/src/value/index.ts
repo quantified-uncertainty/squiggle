@@ -29,10 +29,6 @@ abstract class BaseValue {
     return this.type;
   }
 
-  clone() {
-    return Object.assign(Object.create(Object.getPrototypeOf(this)), this);
-  }
-
   abstract toString(): string;
 }
 
