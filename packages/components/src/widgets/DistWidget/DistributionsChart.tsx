@@ -59,7 +59,6 @@ interface DataPoint {
 function interpolateYAtX(
   xValue: number,
   continuousData: DataPoint[],
-  xScale: d3.ScaleContinuousNumeric<number, number>,
   yScale: d3.ScaleContinuousNumeric<number, number>
 ): number | null {
   let pointBefore: DataPoint | null = null,
@@ -263,25 +262,35 @@ const InnerDistributionsChart: FC<{
           context.globalAlpha = 1;
 
           // Percentile lines
-          for (const percentile of [shape.p5, shape.p50, shape.p95]) {
+          const percentiles: [result<number, SqDistributionError>, string][] = [
+            [shape.p5, "p5"],
+            [shape.p50, "p50"],
+            [shape.p95, "p95"],
+          ];
+          percentiles.forEach(([percentile, name]) => {
             if (percentile.ok) {
               const xPoint = percentile.value;
               const interpolateY = interpolateYAtX(
                 xPoint,
                 shape.continuous,
-                xScale,
                 yScale
               );
               if (interpolateY) {
                 context.beginPath();
-                context.strokeStyle = getColor(i, 0.3);
+                context.strokeStyle = getColor(i, name === "p50" ? 0.4 : 0.3);
+                if (name !== "p50") {
+                  context.setLineDash([2, 2]); // setting the dashed line pattern
+                } else {
+                  context.setLineDash([6, 4]); // setting the dashed line pattern
+                }
                 context.lineWidth = 1;
                 context.moveTo(xScale(xPoint), 0);
                 context.lineTo(xScale(xPoint), interpolateY);
                 context.stroke();
+                context.setLineDash([]);
               }
             }
-          }
+          });
 
           // The top line
           context.strokeStyle = getColor(i);
@@ -491,12 +500,13 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
     samples.length < CUTOFF_TO_SHOW_SAMPLES_BAR &&
     height > HEIGHT_SAMPLES_BAR_CUTOFF;
 
-  const showSamplesBarBelow = height > 300;
-
   const isMulti =
     distributions.length > 1 ||
     !!(distributions.length === 1 && distributions[0].name);
 
+  const size = height > 150 ? "large" : "small";
+
+  const showSamplesBarBelow = size == "large";
   return (
     <DistProvider generateInitialValue={() => ({})}>
       <div className="flex flex-col items-stretch">
@@ -517,13 +527,14 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
           />
         )}
         {!anyAreNonnormalized && plot.showSummary && (
-          <div className="flex pt-1 mt-2 overflow-auto">
-            <div className=" overflow-auto ml-auto">
-              <SummaryTable
-                plot={plot}
-                environment={environment}
-                size={height > 300 ? "large" : "small"}
-              />
+          <div className="flex overflow-auto">
+            <div
+              className={clsx(
+                "overflow-auto ml-auto",
+                size === "large" && "pt-5"
+              )}
+            >
+              <SummaryTable plot={plot} environment={environment} size={size} />
             </div>
           </div>
         )}
