@@ -31,7 +31,7 @@ export function useReactiveExtension(
     view?.dispatch({
       effects: compartment.reconfigure(configure()),
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line @wogns3623/better-exhaustive-deps/exhaustive-deps
   }, [view, ...deps]);
   return extension;
 }
@@ -58,7 +58,7 @@ export function useConfigureCodemirrorView(
       view?.destroy();
     };
     // we initialize the view only once; no need for deps
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line @wogns3623/better-exhaustive-deps/exhaustive-deps
   }, []);
 
   const setViewDom = useCallback(

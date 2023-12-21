@@ -1,4 +1,4 @@
-import { forwardRef, memo, useImperativeHandle } from "react";
+import { forwardRef, Fragment, memo, useImperativeHandle } from "react";
 
 import {
   result,
@@ -14,7 +14,7 @@ import { MessageAlert } from "../Alert.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
-import { extractSubvalueByPath, pathIsEqual, pathItemFormat } from "./utils.js";
+import { pathIsEqual, pathItemFormat, useGetSubvalueByPath } from "./utils.js";
 import { ValueViewer } from "./ValueViewer.js";
 import {
   useFocus,
@@ -42,7 +42,7 @@ const SquiggleViewerOuter = forwardRef<
   { resultVariables, resultItem, rootPathOverride },
   ref
 ) {
-  const { focused, dispatch, getCalculator } = useViewerContext();
+  const { focused, itemStore } = useViewerContext();
   const unfocus = useUnfocus();
   const focus = useFocus();
 
@@ -73,22 +73,19 @@ const SquiggleViewerOuter = forwardRef<
         .itemsAsValuePaths({ includeRoot: false })
         .slice(rootPathFocusedAdjustment, -1)
         .map((path, i) => (
-          <>
+          <Fragment key={i}>
             <div onClick={() => focus(path)} className={navLinkStyle}>
               {pathItemFormat(path.items[i + rootPathFocusedAdjustment])}
             </div>
             <ChevronRightIcon className="text-slate-300" size={24} />
-          </>
+          </Fragment>
         ))}
     </div>
   );
 
   useImperativeHandle(ref, () => ({
     viewValuePath(path: SqValuePath) {
-      dispatch({
-        type: "SCROLL_TO_PATH",
-        payload: { path },
-      });
+      itemStore.scrollToPath(path);
     },
   }));
 
@@ -96,19 +93,13 @@ const SquiggleViewerOuter = forwardRef<
     ? resultVariables.value.value.entries().length
     : 0;
 
+  const getSubvalueByPath = useGetSubvalueByPath();
+
   let focusedItem: SqValue | undefined;
   if (focused && resultVariables.ok && focused.root === "bindings") {
-    focusedItem = extractSubvalueByPath(
-      resultVariables.value,
-      focused,
-      getCalculator
-    );
+    focusedItem = getSubvalueByPath(resultVariables.value, focused);
   } else if (focused && resultItem?.ok && focused.root === "result") {
-    focusedItem = extractSubvalueByPath(
-      resultItem.value,
-      focused,
-      getCalculator
-    );
+    focusedItem = getSubvalueByPath(resultItem.value, focused);
   }
 
   const body = () => {
@@ -165,11 +156,13 @@ const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
     const stablePartialPlaygroundSettings = useStabilizeObjectIdentity(
       partialPlaygroundSettings
     );
+    const hasResultVariables =
+      resultVariables.ok && resultVariables.value.value.entries().length > 0;
     return (
       <ViewerProvider
         partialPlaygroundSettings={stablePartialPlaygroundSettings}
         editor={editor}
-        beginWithVariablesCollapsed={resultItem !== undefined && resultItem.ok}
+        beginWithVariablesCollapsed={resultItem?.ok && hasResultVariables}
         rootPathOverride={rootPathOverride}
       >
         <SquiggleViewerOuter

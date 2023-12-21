@@ -258,8 +258,8 @@ Calculator.make(
   },
 };
 
-export const Boxed: Story = {
-  name: "Boxed values",
+export const Tagged: Story = {
+  name: "Tagged values",
   args: {
     defaultCode: `
 z = 34 -> Tag.format(".1f")

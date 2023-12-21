@@ -1,14 +1,14 @@
 import { clsx } from "clsx";
 
-import { SqBoxedValue, SqDurationValue } from "@quri/squiggle-lang";
+import { SqDurationValue } from "@quri/squiggle-lang";
 
 import { NumberShower } from "../components/NumberShower.js";
 import { formatNumber } from "../lib/d3/index.js";
 import { widgetRegistry } from "./registry.js";
 import { leftWidgetMargin } from "./utils.js";
 
-const showDuration = (duration: SqDurationValue, boxed?: SqBoxedValue) => {
-  const numberFormat = boxed?.value.numberFormat();
+const showDuration = (duration: SqDurationValue) => {
+  const numberFormat = duration.tags.numberFormat();
   const { unitName, value } = duration.toUnitAndNumber();
   if (numberFormat) {
     return `${formatNumber(numberFormat, value)} ${unitName}s`;
@@ -18,11 +18,11 @@ const showDuration = (duration: SqDurationValue, boxed?: SqBoxedValue) => {
 };
 
 widgetRegistry.register("Duration", {
-  Preview: (value, boxed) => showDuration(value, boxed),
-  Chart: (value, _, boxed) => {
+  Preview: (value) => showDuration(value),
+  Chart: (value) => {
     return (
       <div className={clsx("font-semibold text-indigo-800", leftWidgetMargin)}>
-        {showDuration(value, boxed)}
+        {showDuration(value)}
       </div>
     );
   },

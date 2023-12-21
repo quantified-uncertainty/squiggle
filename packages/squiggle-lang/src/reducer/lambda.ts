@@ -13,8 +13,9 @@ import {
   tryCallFnDefinition,
 } from "../library/registry/fnDefinition.js";
 import { FRType } from "../library/registry/frTypes.js";
+import { frTypeToInput } from "../library/registry/helpers.js";
 import { sort } from "../utility/E_A_Floats.js";
-import { Calculator, Value, VDomain } from "../value/index.js";
+import { Calculator, Input, Value, VDomain } from "../value/index.js";
 import * as Context from "./context.js";
 import { ReducerContext } from "./context.js";
 import { Stack } from "./stack.js";
@@ -27,14 +28,17 @@ export type UserDefinedLambdaParameter = {
 type LambdaBody = (args: Value[], context: ReducerContext) => Value;
 
 export abstract class BaseLambda {
+  isDecorator: boolean = false;
+
   constructor(public body: LambdaBody) {}
 
   abstract readonly type: string;
-  abstract getName(): string;
+  abstract display(): string;
   abstract toString(): string;
   abstract parameterString(): string;
   abstract parameterCounts(): number[];
   abstract parameterCountString(): string;
+  abstract defaultInputs(): Input[];
   abstract toCalculator(): Calculator;
 
   callFrom(
@@ -116,7 +120,7 @@ export class UserDefinedLambda extends BaseLambda {
     this.location = location;
   }
 
-  getName() {
+  display() {
     return this.name || "<anonymous>";
   }
 
@@ -140,14 +144,18 @@ export class UserDefinedLambda extends BaseLambda {
     return this.parameters.length.toString();
   }
 
+  defaultInputs(): Input[] {
+    return this._getParameterNames().map((name) => ({
+      name,
+      type: "text",
+    }));
+  }
+
   toCalculator(): Calculator {
     const only0Params = this.parameters.length === 0;
     return {
       fn: this,
-      inputs: this._getParameterNames().map((name) => ({
-        name: name,
-        type: "text",
-      })),
+      inputs: this.defaultInputs(),
       autorun: only0Params,
     };
   }
@@ -164,9 +172,13 @@ export class BuiltinLambda extends BaseLambda {
   ) {
     super((args, context) => this._call(args, context));
     this._definitions = signatures;
+
+    // TODO - this sets the flag that the function is a decorator, but later we don't check which signatures are decorators.
+    // For now, it doesn't matter because we don't allow user-defined decorators, and `Tag.*` decorators work as decorators on all possible definitions.
+    this.isDecorator = signatures.some((s) => s.isDecorator);
   }
 
-  getName() {
+  display() {
     return this.name;
   }
 
@@ -217,16 +229,20 @@ export class BuiltinLambda extends BaseLambda {
     throw new REOther(showNameMatchDefinitions());
   }
 
-  toCalculator(): Calculator {
+  override defaultInputs(): Input[] {
     const longestSignature = maxBy(this.signatures(), (s) => s.length) || [];
-    const autorun = longestSignature.length !== 0;
+    return longestSignature.map((sig, i) => {
+      const name = sig.varName ? sig.varName : `Input ${i + 1}`;
+      return frTypeToInput(sig, i, name);
+    });
+  }
+
+  toCalculator(): Calculator {
+    const inputs = this.defaultInputs();
     return {
       fn: this,
-      inputs: longestSignature.map((sig, i) => ({
-        name: `Input ${i + 1}`,
-        type: sig.getName() === "Bool" ? "checkbox" : "text",
-      })),
-      autorun,
+      inputs: inputs,
+      autorun: inputs.length !== 0,
     };
   }
 }

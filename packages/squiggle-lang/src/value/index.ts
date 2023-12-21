@@ -11,8 +11,8 @@ import { Lambda } from "../reducer/lambda.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { SDate } from "../utility/SDate.js";
 import { SDuration } from "../utility/SDuration.js";
-import { Boxed } from "./boxed.js";
 import { DateRangeDomain, Domain, NumericRangeDomain } from "./domain.js";
+import { ValueTags, ValueTagsType } from "./valueTags.js";
 
 export type ValueMap = ImmutableMap<string, Value>;
 
@@ -23,13 +23,42 @@ type Indexable = {
 
 abstract class BaseValue {
   abstract type: string;
-  abstract publicName: string;
+  readonly tags: ValueTags | undefined;
 
-  clone() {
-    return Object.assign(Object.create(Object.getPrototypeOf(this)), this);
+  // This is a getter, not a field, for performance reasons.
+  get publicName() {
+    return this.type;
   }
 
-  abstract toString(): string;
+  getTags() {
+    return this.tags ?? new ValueTags({});
+  }
+
+  copyWithTags(tags: ValueTags) {
+    return Object.assign(Object.create(Object.getPrototypeOf(this)), {
+      ...this,
+      tags,
+    });
+  }
+
+  mergeTags(args: ValueTagsType) {
+    return this.copyWithTags(this.tags?.merge(args) ?? new ValueTags(args));
+  }
+
+  abstract valueToString(): string;
+
+  toString() {
+    const valueString = this.valueToString();
+    if (!this.tags) {
+      return valueString;
+    }
+    const argsStr = this.tags.toString();
+    if (argsStr !== "") {
+      return `${valueString}, with params ${argsStr}`;
+    } else {
+      return valueString;
+    }
+  }
 }
 
 /*
@@ -46,12 +75,15 @@ If you add a new value class, don't forget to add it to the "Value" union type b
 
 class VArray extends BaseValue implements Indexable {
   readonly type = "Array";
-  readonly publicName = "List";
+
+  override get publicName() {
+    return "List";
+  }
 
   constructor(public value: readonly Value[]) {
     super();
   }
-  toString(): string {
+  valueToString() {
     return "[" + this.value.map((v) => v.toString()).join(",") + "]";
   }
 
@@ -89,12 +121,15 @@ export const vArray = (v: readonly Value[]) => new VArray(v);
 
 class VBool extends BaseValue {
   readonly type = "Bool";
-  readonly publicName = "Boolean";
+
+  override get publicName() {
+    return "Boolean";
+  }
 
   constructor(public value: boolean) {
     super();
   }
-  toString() {
+  valueToString() {
     return String(this.value);
   }
   isEqual(other: VBool) {
@@ -105,12 +140,11 @@ export const vBool = (v: boolean) => new VBool(v);
 
 export class VDate extends BaseValue {
   readonly type = "Date";
-  readonly publicName = "Date";
 
   constructor(public value: SDate) {
     super();
   }
-  toString() {
+  valueToString() {
     return this.value.toString();
   }
   isEqual(other: VDate) {
@@ -121,12 +155,15 @@ export const vDate = (v: SDate) => new VDate(v);
 
 class VDist extends BaseValue {
   readonly type = "Dist";
-  readonly publicName = "Distribution";
+
+  override get publicName() {
+    return "Distribution";
+  }
 
   constructor(public value: BaseDist) {
     super();
   }
-  toString() {
+  valueToString() {
     return this.value.toString();
   }
   isEqual(other: VDist) {
@@ -137,12 +174,15 @@ export const vDist = (v: BaseDist) => new VDist(v);
 
 class VLambda extends BaseValue implements Indexable {
   readonly type = "Lambda";
-  readonly publicName = "Function";
+
+  override get publicName() {
+    return "Function";
+  }
 
   constructor(public value: Lambda) {
     super();
   }
-  toString() {
+  valueToString() {
     return this.value.toString();
   }
 
@@ -172,12 +212,11 @@ export const vLambda = (v: Lambda) => new VLambda(v);
 
 export class VNumber extends BaseValue {
   readonly type = "Number";
-  readonly publicName = "Number";
 
   constructor(public value: number) {
     super();
   }
-  toString() {
+  valueToString() {
     return String(this.value);
   }
   isEqual(other: VNumber) {
@@ -188,12 +227,11 @@ export const vNumber = (v: number) => new VNumber(v);
 
 class VString extends BaseValue {
   readonly type = "String";
-  readonly publicName = "String";
 
   constructor(public value: string) {
     super();
   }
-  toString() {
+  valueToString() {
     return JSON.stringify(this.value);
   }
   isEqual(other: VString) {
@@ -204,12 +242,15 @@ export const vString = (v: string) => new VString(v);
 
 class VDict extends BaseValue implements Indexable {
   readonly type = "Dict";
-  readonly publicName = "Dictionary";
+
+  override get publicName() {
+    return "Dictionary";
+  }
 
   constructor(public value: ValueMap) {
     super();
   }
-  toString(): string {
+  valueToString() {
     return (
       "{" +
       [...this.value.entries()]
@@ -257,13 +298,16 @@ export const vDict = (v: ValueMap) => new VDict(v);
 
 class VDuration extends BaseValue {
   readonly type = "Duration";
-  readonly publicName = "Time Duration";
+
+  override get publicName() {
+    return "Time Duration";
+  }
 
   constructor(public value: SDuration) {
     super();
   }
 
-  toString() {
+  valueToString() {
     return this.value.toString();
   }
   isEqual(other: VDuration) {
@@ -331,13 +375,12 @@ export const SCALE_POWER_DEFAULT_CONSTANT = 0.1;
 
 class VScale extends BaseValue {
   readonly type = "Scale";
-  readonly publicName = "Scale";
 
   constructor(public value: Scale) {
     super();
   }
 
-  toString(): string {
+  valueToString(): string {
     switch (this.value.type) {
       case "linear":
         return "Linear scale"; // TODO - mix in min/max if specified
@@ -365,6 +408,7 @@ export const vScale = (scale: Scale) => new VScale(scale);
 
 export type CommonInputArgs = {
   name: string;
+  typeName?: string;
   description?: string;
 };
 
@@ -389,15 +433,15 @@ export type Input = CommonInputArgs &
       }
   );
 
+export type InputType = "text" | "textArea" | "checkbox" | "select";
 class VInput extends BaseValue {
   readonly type = "Input";
-  readonly publicName = "Input";
 
   constructor(public value: Input) {
     super();
   }
 
-  toString(): string {
+  valueToString(): string {
     switch (this.value.type) {
       case "text":
         return "Text input";
@@ -470,12 +514,15 @@ export type TableChart = {
 };
 class VTableChart extends BaseValue {
   readonly type = "TableChart";
-  readonly publicName = "Table Chart";
+
+  override get publicName() {
+    return "Table Chart";
+  }
 
   constructor(public value: TableChart) {
     super();
   }
-  toString() {
+  valueToString() {
     return `Table with ${this.value.columns.length}x${this.value.data.length} elements`;
   }
 }
@@ -493,7 +540,6 @@ export type Calculator = {
 
 class VCalculator extends BaseValue {
   readonly type = "Calculator";
-  readonly publicName = "Calculator";
 
   private error: REOther | null = null;
 
@@ -526,7 +572,7 @@ class VCalculator extends BaseValue {
     return this.error;
   }
 
-  toString() {
+  valueToString() {
     return `Calculator`;
   }
 }
@@ -535,13 +581,12 @@ export const vCalculator = (v: Calculator) => new VCalculator(v);
 
 class VPlot extends BaseValue implements Indexable {
   readonly type = "Plot";
-  readonly publicName = "Plot";
 
   constructor(public value: Plot) {
     super();
   }
 
-  toString(): string {
+  valueToString(): string {
     switch (this.value.type) {
       case "distributions":
         return `Plot containing ${this.value.distributions
@@ -591,30 +636,14 @@ function domainIsEqual(valueA: Domain, valueB: Domain) {
   }
 }
 
-export class VBoxed extends BaseValue {
-  readonly type = "Boxed";
-  readonly publicName = "Boxed";
-
-  constructor(public value: Boxed) {
-    super();
-  }
-
-  toString() {
-    return this.value.toString();
-  }
-}
-
-export const vBoxed = (value: Boxed) => new VBoxed(value);
-
 export class VDomain extends BaseValue implements Indexable {
   readonly type = "Domain";
-  readonly publicName = "Domain";
 
   constructor(public value: Domain) {
     super();
   }
 
-  toString(): string {
+  valueToString(): string {
     return this.value.toString();
   }
 
@@ -647,12 +676,11 @@ export const vDomain = (domain: Domain) => new VDomain(domain);
 
 class VVoid extends BaseValue {
   readonly type = "Void";
-  readonly publicName = "Void";
 
   constructor() {
     super();
   }
-  toString() {
+  valueToString() {
     return "()";
   }
 }
@@ -674,8 +702,7 @@ export type Value =
   | VScale
   | VInput
   | VDomain
-  | VVoid
-  | VBoxed;
+  | VVoid;
 
 export function isEqual(a: Value, b: Value): boolean {
   if (a.type !== b.type) {

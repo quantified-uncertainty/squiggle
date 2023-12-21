@@ -8,7 +8,6 @@ import {
   frDict,
   frDist,
   frDistOrNumber,
-  frForceBoxed,
   frLambdaTyped,
   frNamed,
   frNumber,
@@ -18,6 +17,7 @@ import {
   frSampleSetDist,
   frScale,
   frString,
+  frWithTags,
 } from "../library/registry/frTypes.js";
 import {
   FnFactory,
@@ -156,7 +156,7 @@ const numericFnDef = () => {
     definitions: [
       makeDefinition(
         [
-          frNamed("fn", frForceBoxed(fnType)),
+          frNamed("fn", frWithTags(fnType)),
           frNamed(
             "params",
             frOptional(
@@ -170,13 +170,13 @@ const numericFnDef = () => {
           ),
         ],
         frPlot,
-        ([{ value, args }, params]) => {
+        ([{ value, tags }, params]) => {
           const { xScale, yScale, title, xPoints } = params ?? {};
           return toPlot(
             value,
             xScale || null,
             yScale || null,
-            title || args.name() || null,
+            title || tags.name() || null,
             formatXPoints(xPoints || null, xScale || null)
           );
         }
@@ -381,7 +381,7 @@ export const library = [
     definitions: [
       makeDefinition(
         [
-          frNamed("fn", frForceBoxed(frLambdaTyped([frNumber], frDist))),
+          frNamed("fn", frWithTags(frLambdaTyped([frNumber], frDist))),
           frNamed(
             "params",
             frOptional(
@@ -396,7 +396,7 @@ export const library = [
           ),
         ],
         frPlot,
-        ([{ value, args }, params]) => {
+        ([{ value, tags }, params]) => {
           const domain = extractDomainFromOneArgFunction(value);
           const { xScale, yScale, distXScale, title, xPoints } = params ?? {};
           yScale && _assertYScaleNotDateScale(yScale);
@@ -407,8 +407,8 @@ export const library = [
             xScale: _xScale,
             yScale: yScale ?? defaultScale,
             distXScale: distXScale ?? yScale ?? defaultScale,
-            title: title ?? args.name() ?? undefined,
-            xPoints: formatXPoints(xPoints || null, _xScale) || undefined,
+            title: title ?? tags.name() ?? undefined,
+            points: formatXPoints(xPoints || null, _xScale) ?? undefined,
           };
         }
       ),
@@ -453,8 +453,8 @@ export const library = [
       makeDefinition(
         [
           frDict(
-            ["xDist", frForceBoxed(frSampleSetDist)],
-            ["yDist", frForceBoxed(frSampleSetDist)],
+            ["xDist", frWithTags(frSampleSetDist)],
+            ["yDist", frWithTags(frSampleSetDist)],
             ["xScale", frOptional(frScale)],
             ["yScale", frOptional(frScale)],
             ["title", frOptional(frString)]
@@ -463,8 +463,8 @@ export const library = [
         frPlot,
         ([{ xDist, yDist, xScale, yScale, title }]) => {
           _assertYScaleNotDateScale(yScale);
-          const xTitle = xDist.args.name();
-          const yTitle = yDist.args.name();
+          const xTitle = xDist.tags.name();
+          const yTitle = yDist.tags.name();
           return {
             type: "scatter",
             xDist: xDist.value,
