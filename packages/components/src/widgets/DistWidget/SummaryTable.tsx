@@ -8,8 +8,10 @@ import {
   Env,
   result,
   SDuration,
+  SqDistribution,
   SqDistributionError,
   SqDistributionsPlot,
+  SqSampleSetDistribution,
 } from "@quri/squiggle-lang";
 import { TextTooltip } from "@quri/ui";
 
@@ -96,10 +98,19 @@ export const SummaryTable: FC<SummaryTableProps> = ({
   const _isDate = plot.xScale?.tag === "date";
   const valueType = _isDate ? "date" : "number";
   const tickFormat = plot.xScale?.tickFormat;
-  const percentiles =
-    size === "large" ? [0.05, 0.25, 0.5, 0.75, 0.95] : [0.05, 0.5, 0.95];
+  const sizeIsLarge = size === "large";
+  const percentiles = sizeIsLarge
+    ? [0.05, 0.25, 0.5, 0.75, 0.95]
+    : [0.05, 0.5, 0.95];
 
-  const precision = size === "large" ? 3 : 2;
+  const getSampleCount = (dist: SqDistribution) => {
+    return dist instanceof SqSampleSetDistribution && dist.getSamples().length;
+  };
+  const _firstSamples = getSampleCount(plot.distributions[0].distribution);
+  const hasSamples = Boolean(_firstSamples && _firstSamples > 5);
+  const showSamplesCount = hasSamples && sizeIsLarge;
+
+  const precision = sizeIsLarge ? 3 : 2;
 
   const setVerticalLine = useSetVerticalLine();
   return (
@@ -108,18 +119,19 @@ export const SummaryTable: FC<SummaryTableProps> = ({
         <thead
           className={clsx(
             "font-light border-b border-slate-200 text-slate-700",
-            size === "large" ? "text-sm" : "text-xs"
+            sizeIsLarge ? "text-sm" : "text-xs"
           )}
         >
           <tr>
             {showNames && <TableHeadCell>Name</TableHeadCell>}
             <TableHeadCell>Mean</TableHeadCell>
-            {size === "large" && <TableHeadCell>Stdev</TableHeadCell>}
+            {sizeIsLarge && <TableHeadCell>Stdev</TableHeadCell>}
             {percentiles.map((percentile) => (
               <TableHeadCell key={percentile}>
                 {percentile * 100}%
               </TableHeadCell>
             ))}
+            {showSamplesCount && <TableHeadCell>Stdev</TableHeadCell>}
           </tr>
         </thead>
         <tbody
@@ -147,7 +159,7 @@ export const SummaryTable: FC<SummaryTableProps> = ({
                 >
                   {formatNumber(mean, false, valueType, tickFormat, precision)}
                 </Cell>
-                {size === "large" && (
+                {sizeIsLarge && (
                   <Cell>
                     {unwrapResult(
                       stdev,
@@ -177,6 +189,9 @@ export const SummaryTable: FC<SummaryTableProps> = ({
                     )}
                   </Cell>
                 ))}
+                {showSamplesCount && (
+                  <Cell>{getSampleCount(distribution)}</Cell>
+                )}
               </tr>
             );
           })}
