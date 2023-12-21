@@ -8,6 +8,7 @@ import {
 import {
   ErrorMessage,
   REExpectedType,
+  RENotADecorator,
   RENotAFunction,
   REOther,
 } from "../errors/messages.js";
@@ -249,24 +250,29 @@ const evaluateLambda: SubReducerFn<"Lambda"> = (
   return [value, context];
 };
 
-const evaluateCall: SubReducerFn<"Call"> = (expressionValue, context, ast) => {
+const evaluateCall: SubReducerFn<"Call"> = (
+  expressionValue: Extract<Expression, { type: "Call" | "Decorate" }>["value"],
+  context: Context.ReducerContext,
+  ast: ASTNode
+) => {
   const [lambda] = context.evaluate(expressionValue.fn, context);
+  if (lambda.type !== "Lambda") {
+    throwFrom(new RENotAFunction(lambda.toString()), context, ast);
+  }
+  if (expressionValue.as === "decorate" && !lambda.value.isDecorator) {
+    throwFrom(new RENotADecorator(lambda.toString()), context, ast);
+  }
+
   const argValues = expressionValue.args.map((arg) => {
     const [argValue] = context.evaluate(arg, context);
     return argValue;
   });
-  switch (lambda.type) {
-    case "Lambda": {
-      const result = lambda.value.callFrom(
-        argValues,
-        context,
-        ast // we pass the ast of a current expression here, to put it on frameStack and in the resulting value
-      );
-      return [result, context];
-    }
-    default:
-      return throwFrom(new RENotAFunction(lambda.toString()), context, ast);
-  }
+  const result = lambda.value.callFrom(
+    argValues,
+    context,
+    ast // we pass the ast of a current expression here, to put it on frameStack and in the resulting value
+  );
+  return [result, context];
 };
 
 function createDefaultContext() {

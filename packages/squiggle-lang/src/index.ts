@@ -2,7 +2,6 @@ import { type Env } from "./dist/env.js";
 import { registry } from "./library/registry/index.js";
 import { SqProject } from "./public/SqProject/index.js";
 import {
-  SqBoxedValue,
   SqDateValue,
   SqDurationValue,
   SqLambdaValue,
@@ -84,7 +83,6 @@ export { type LocationRange as SqLocation } from "peggy";
 export { defaultEnv as defaultEnvironment } from "./dist/env.js";
 export {
   type Env,
-  SqBoxedValue,
   SqDateValue,
   SqDurationValue,
   SqLambdaValue,

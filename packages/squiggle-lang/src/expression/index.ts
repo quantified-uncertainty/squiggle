@@ -63,6 +63,9 @@ export type ExpressionContent =
       value: {
         fn: Expression;
         args: Expression[];
+        // Note that `Decorate` is applied to values, not to statements; decorated statements get rewritten in `./compile.ts`.
+        // If "decorate" is set, the call will work only on lambdas marked with `isDecorator: true`.
+        as: "call" | "decorate";
       };
     }
   | {
@@ -92,12 +95,14 @@ export const eValue = (value: Value): ExpressionContent => ({
 
 export const eCall = (
   fn: Expression,
-  args: Expression[]
+  args: Expression[],
+  as: "call" | "decorate" = "call"
 ): ExpressionContent => ({
   type: "Call",
   value: {
     fn,
     args,
+    as,
   },
 });
 

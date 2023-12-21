@@ -482,9 +482,26 @@ describe("Peggy parse", () => {
     testParse("export x = 5", "(Program (LetStatement export :x (Block 5)))");
     testParse("exportx = 5", "(Program (LetStatement :exportx (Block 5)))");
   });
+
+  describe("Decorators", () => {
+    testParse(
+      `
+@foo
+@bar(1, 2)
+@baz
+x = 5
+
+@foo
+@bar(1, 2)
+@baz
+f(x) = x
+`,
+      "(Program (DecoratedStatement (Decorator :foo) (DecoratedStatement (Decorator :bar 1 2) (DecoratedStatement (Decorator :baz) (LetStatement :x (Block 5))))) (DecoratedStatement (Decorator :foo) (DecoratedStatement (Decorator :bar 1 2) (DecoratedStatement (Decorator :baz) (DefunStatement :f (Lambda :x (Block :x)))))))"
+    );
+  });
 });
 
-describe("parsing new line", () => {
+describe("Parsing new line", () => {
   testParse(
     `
  a + 
