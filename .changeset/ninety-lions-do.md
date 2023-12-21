@@ -3,4 +3,4 @@
 "@quri/squiggle-components": patch
 ---
 
-Breaking: Removes points(number) from DistFns and NumericFns, replaces with xPoints(number[])
+Breaking: Removed `points(number)` from DistFn and NumericFn plots, replaces with `xPoints(number[])`.

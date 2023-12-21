@@ -116,10 +116,10 @@ function formatXPoints(
 ) {
   const [min, max] = [xScale?.min, xScale?.max];
   let points = xPoints ? sort(uniq(xPoints)) : null;
-  if (points && min) {
+  if (points && min !== undefined) {
     points = points?.filter((x) => x >= min);
   }
-  if (points && max) {
+  if (points && max !== undefined) {
     points = points?.filter((x) => x <= max);
   }
   return points;
