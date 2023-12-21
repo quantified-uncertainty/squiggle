@@ -46,7 +46,8 @@ const formatNumber = (
   number: number,
   isRange: boolean,
   valueType: "date" | "number",
-  tickFormat: string | undefined
+  tickFormat: string | undefined,
+  precision: number
 ) => {
   if (valueType == "date") {
     // When dealing with dates, the standard deviation is a duration, not a date, so we need to format it differently
@@ -58,7 +59,7 @@ const formatNumber = (
   } else if (tickFormat) {
     return d3.format(tickFormat)(number);
   } else {
-    return <NumberShower number={number} precision={3} />;
+    return <NumberShower number={number} precision={precision} />;
   }
 };
 
@@ -66,10 +67,11 @@ const unwrapResult = (
   x: result<number, SqDistributionError>,
   isRange: boolean,
   valueType: "date" | "number",
-  tickFormat: string | undefined
+  tickFormat: string | undefined,
+  precision: number
 ): React.ReactNode => {
   if (x.ok) {
-    return formatNumber(x.value, isRange, valueType, tickFormat);
+    return formatNumber(x.value, isRange, valueType, tickFormat, precision);
   } else {
     return (
       <TextTooltip text={x.value.toString()}>
@@ -96,6 +98,8 @@ export const SummaryTable: FC<SummaryTableProps> = ({
   const tickFormat = plot.xScale?.tickFormat;
   const percentiles =
     size === "large" ? [0.05, 0.25, 0.5, 0.75, 0.95] : [0.05, 0.5, 0.95];
+
+  const precision = size === "large" ? 3 : 2;
 
   const setVerticalLine = useSetVerticalLine();
   return (
@@ -141,11 +145,17 @@ export const SummaryTable: FC<SummaryTableProps> = ({
                   onMouseEnter={() => setVerticalLine(mean)}
                   onMouseLeave={() => setVerticalLine(undefined)}
                 >
-                  {formatNumber(mean, false, valueType, tickFormat)}
+                  {formatNumber(mean, false, valueType, tickFormat, precision)}
                 </Cell>
                 {size === "large" && (
                   <Cell>
-                    {unwrapResult(stdev, true, valueType, tickFormat)}
+                    {unwrapResult(
+                      stdev,
+                      true,
+                      valueType,
+                      tickFormat,
+                      precision
+                    )}
                   </Cell>
                 )}
                 {percentileValues.map((value, i) => (
@@ -158,7 +168,13 @@ export const SummaryTable: FC<SummaryTableProps> = ({
                     }
                     onMouseLeave={() => setVerticalLine(undefined)}
                   >
-                    {unwrapResult(value.inv, false, valueType, tickFormat)}
+                    {unwrapResult(
+                      value.inv,
+                      false,
+                      valueType,
+                      tickFormat,
+                      precision
+                    )}
                   </Cell>
                 ))}
               </tr>
