@@ -13,7 +13,7 @@ export type BoxedArgsType = {
 
 type BoxedArgsTypeName = keyof BoxedArgsType;
 
-const boxedArgsTypeNames: string[] = [
+const boxedArgsTypeNames: BoxedArgsTypeName[] = [
   "name",
   "description",
   "showAs",
