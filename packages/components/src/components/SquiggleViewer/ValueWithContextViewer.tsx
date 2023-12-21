@@ -50,11 +50,7 @@ type Props = {
   parentValue?: SqValue;
 };
 
-const WithComment: FC<PropsWithChildren<Props>> = ({
-  value,
-  children,
-  parentValue,
-}) => {
+const WithComment: FC<PropsWithChildren<Props>> = ({ value, children }) => {
   const comment = getComment(value);
 
   if (!comment) {
