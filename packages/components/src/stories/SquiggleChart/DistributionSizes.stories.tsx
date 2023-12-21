@@ -13,10 +13,17 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const code = "5 to 100";
-export const Height15: Story = {
-  name: "Height15",
+export const Height7: Story = {
+  name: "Height8",
   args: {
-    chartHeight: 15,
+    chartHeight: 4,
+    code,
+  },
+};
+export const Height15: Story = {
+  name: "Height20",
+  args: {
+    chartHeight: 10,
     code,
   },
 };
@@ -24,7 +31,7 @@ export const Height15: Story = {
 export const Height40: Story = {
   name: "Height40",
   args: {
-    chartHeight: 40,
+    chartHeight: 20,
     code,
   },
 };
@@ -32,6 +39,7 @@ export const Height40: Story = {
 export const Height100: Story = {
   name: "Height 100",
   args: {
+    chartHeight: 50,
     code,
   },
 };
@@ -39,7 +47,7 @@ export const Height100: Story = {
 export const ContinuousSampleSetBig: Story = {
   name: "Height 400",
   args: {
-    chartHeight: 400,
+    chartHeight: 200,
     code,
   },
 };

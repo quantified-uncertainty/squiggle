@@ -1,4 +1,4 @@
-import { SqDistributionsPlot } from "@quri/squiggle-lang";
+import { SqDistributionsPlot, SqLinearScale } from "@quri/squiggle-lang";
 
 import { NumberShower } from "../../components/NumberShower.js";
 import { generateDistributionPlotSettings } from "../../components/PlaygroundSettings.js";
@@ -30,13 +30,28 @@ widgetRegistry.register("Dist", {
     const p05 = unwrapOrFailure(dist.inv(environment, 0.05));
     const p95 = unwrapOrFailure(dist.inv(environment, 0.95));
     const oneValue = p05 === p95;
+    const plot = SqDistributionsPlot.create({
+      distribution: value.value,
+      showSummary: false,
+      xScale: SqLinearScale.create(),
+      yScale: SqLinearScale.create(),
+    });
     return oneValue ? (
       showNumber(p05)
     ) : (
-      <div>
-        {showNumber(p05)}
-        <span className="mx-1 opacity-70">to</span>
-        {showNumber(p95)}
+      <div className="flex flex-row space-x-2">
+        <div className="flex">
+          {showNumber(p05)}
+          <span className="mx-1 opacity-70">to</span>
+          {showNumber(p95)}
+        </div>
+        <div className="flex w-14 items-center">
+          <DistributionsChart
+            plot={plot}
+            environment={value.context.project.getEnvironment()}
+            height={16}
+          />
+        </div>
       </div>
     );
   },

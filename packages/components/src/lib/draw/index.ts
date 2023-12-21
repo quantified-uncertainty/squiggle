@@ -29,6 +29,7 @@ interface DrawAxesParams {
   width: number;
   height: number;
   hideYAxis?: boolean;
+  hideXAxis?: boolean;
   hideAxisLines?: boolean;
   drawTicks?: boolean;
   xTickCount?: number;
@@ -71,7 +72,8 @@ export function drawAxes({
   width,
   height,
   hideYAxis = false,
-  hideAxisLines = false,
+  hideXAxis = false,
+  hideAxisLines = height < 150 || width < 150,
   drawTicks = true,
   xTickCount,
   yTickCount,
@@ -131,7 +133,7 @@ export function drawAxes({
   yScale.range([0, frame.height]);
 
   // x axis
-  {
+  if (!hideXAxis) {
     frame.enter();
     if (!hideAxisLines) {
       context.beginPath();

@@ -131,11 +131,13 @@ const InnerDistributionsChart: FC<{
   const _showSamplesBar = showSamplesBar && samples.length && !isMulti;
   const samplesFooterHeight = _showSamplesBar && showSamplesBarBelow ? 15 : 0;
 
-  const height = innerHeight + legendHeight + samplesFooterHeight + 34;
+  const height = innerHeight + legendHeight + samplesFooterHeight;
+  const hideXAxis = height < 25;
+  const bottomPadding = (hideXAxis ? 0 : 14) + samplesFooterHeight;
 
   const sampleBarHeight = showSamplesBarBelow
     ? 7
-    : Math.min(7, innerHeight * 0.14);
+    : Math.min(7, innerHeight * 0.04);
 
   const { xScale, yScale } = useMemo(() => {
     const xScale = sqScaleToD3(plot.xScale);
@@ -170,20 +172,22 @@ const InnerDistributionsChart: FC<{
           return color;
         }
       };
+      const suggestedPadding = {
+        left: 2,
+        right: 2 + legendHeight,
+        top: 2,
+        bottom: bottomPadding,
+      };
 
       const { padding, frame } = drawAxes({
         context,
         width,
         height,
-        suggestedPadding: {
-          left: 10,
-          right: 10,
-          top: 10 + legendHeight,
-          bottom: 20 + samplesFooterHeight,
-        },
+        suggestedPadding: suggestedPadding,
         xScale,
         yScale,
         hideYAxis: true,
+        hideXAxis: hideXAxis,
         drawTicks: false,
         xTickFormat: plot.xScale.tickFormat,
         xAxisTitle: plot.xScale.title,
@@ -220,7 +224,7 @@ const InnerDistributionsChart: FC<{
           : getColor(0, 0.4);
         context.lineWidth = 0.5;
 
-        const offset = showSamplesBarBelow ? 0 : 20;
+        const offset = showSamplesBarBelow ? 0 : 15;
 
         samples.forEach((sample) => {
           context.beginPath();
@@ -262,35 +266,38 @@ const InnerDistributionsChart: FC<{
           context.globalAlpha = 1;
 
           // Percentile lines
-          const percentiles: [result<number, SqDistributionError>, string][] = [
-            [shape.p5, "p5"],
-            [shape.p50, "p50"],
-            [shape.p95, "p95"],
-          ];
-          percentiles.forEach(([percentile, name]) => {
-            if (percentile.ok) {
-              const xPoint = percentile.value;
-              const interpolateY = interpolateYAtX(
-                xPoint,
-                shape.continuous,
-                yScale
-              );
-              if (interpolateY) {
-                context.beginPath();
-                context.strokeStyle = getColor(i, name === "p50" ? 0.4 : 0.3);
-                if (name !== "p50") {
-                  context.setLineDash([2, 2]); // setting the dashed line pattern
-                } else {
-                  context.setLineDash([6, 4]); // setting the dashed line pattern
+          if (height > 20) {
+            const percentiles: [result<number, SqDistributionError>, string][] =
+              [
+                [shape.p5, "p5"],
+                [shape.p50, "p50"],
+                [shape.p95, "p95"],
+              ];
+            percentiles.forEach(([percentile, name]) => {
+              if (percentile.ok) {
+                const xPoint = percentile.value;
+                const interpolateY = interpolateYAtX(
+                  xPoint,
+                  shape.continuous,
+                  yScale
+                );
+                if (interpolateY) {
+                  context.beginPath();
+                  context.strokeStyle = getColor(i, name === "p50" ? 0.4 : 0.3);
+                  if (name !== "p50") {
+                    context.setLineDash([2, 2]); // setting the dashed line pattern
+                  } else {
+                    context.setLineDash([6, 4]); // setting the dashed line pattern
+                  }
+                  context.lineWidth = 1;
+                  context.moveTo(xScale(xPoint), 0);
+                  context.lineTo(xScale(xPoint), interpolateY);
+                  context.stroke();
+                  context.setLineDash([]);
                 }
-                context.lineWidth = 1;
-                context.moveTo(xScale(xPoint), 0);
-                context.lineTo(xScale(xPoint), interpolateY);
-                context.stroke();
-                context.setLineDash([]);
               }
-            }
-          });
+            });
+          }
 
           // The top line
           context.strokeStyle = getColor(i);
@@ -363,7 +370,6 @@ const InnerDistributionsChart: FC<{
     [
       height,
       legendHeight,
-      samplesFooterHeight,
       shapes,
       samples,
       plot,
@@ -376,6 +382,8 @@ const InnerDistributionsChart: FC<{
       verticalLine,
       sampleBarHeight,
       showSamplesBarBelow,
+      bottomPadding,
+      hideXAxis,
     ]
   );
 
@@ -521,7 +529,7 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
             samples={samples}
             shapes={shapes.value}
             plot={plot}
-            height={height * 0.5}
+            height={height}
             showSamplesBar={showSamplesBar}
             showSamplesBarBelow={showSamplesBarBelow}
           />
