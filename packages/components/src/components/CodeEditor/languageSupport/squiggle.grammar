@@ -52,9 +52,20 @@ LambdaArgs {
 
 FunDeclaration { export? FunctionName { identifier } ~callOrDeclaration "(" LambdaArgs ")" "=" expression }
 
-statement[@isGroup="Statement"] {
-    Binding
-    | FunDeclaration
+Decorator {
+    "@" DecoratorName { identifier }
+    (
+        "(" commaSep1<Argument { expression }> ")"
+      | ""
+    )
+}
+
+statement {
+    Decorator*
+    (
+        Binding
+        | FunDeclaration
+    )
 }
 
 expression[@isGroup="Expression"] {
@@ -113,7 +124,9 @@ else { kw<"else"> }
 import { kw<"import"> }
 export { kw<"export"> }
 as { kw<"as"> }
-@skip { spaces | newline | Comment | BlockComment }
+@skip { spaces | newline | comment }
+
+comment[@isGroup="Comment"] { BlockComment | LineComment }
 
 @local tokens {
     blockCommentEnd { "*/" }
@@ -121,14 +134,14 @@ as { kw<"as"> }
     @else blockCommentContent
 }
 @skip {} {
-    BlockComment[@name="Comment"] { '/*' (blockCommentContent | blockCommentNewline)* blockCommentEnd }
+    BlockComment { "/*" (blockCommentContent | blockCommentNewline)* blockCommentEnd }
 }
 @skip {} {
     String { '"' (char|"'"|Escape {"\\"escape})* '"' | "'" (char|'"'|Escape {"\\"escape})* "'" }
 }
 
 @tokens {
-    Comment { ( "#" | "//" ) ![\n]* }
+    LineComment { "//" ![\n]* }
     spaces[@export] { $[ ]+ }
     newline[@export] { $[\n] }
     semicolon[@export] { $[;] }
@@ -138,6 +151,8 @@ as { kw<"as"> }
     hex  { $[0-9a-fA-F] }
     
     "{" "}" "[" "]" "(" ")" "," "." "="[@name="Equals"]
+
+    "@"[@name="At"]
 
     ArithOp<expr> { expr }
     DotArithOp[@name="ArithOp"]<expr> { expr }
@@ -153,5 +168,5 @@ as { kw<"as"> }
     }
     
     @precedence { DotArithOp "." Number }
-    @precedence { Comment '/*' ArithOp  }
+    @precedence { LineComment '/*' ArithOp  }
 }

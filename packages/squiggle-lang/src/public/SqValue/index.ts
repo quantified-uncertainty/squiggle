@@ -11,7 +11,6 @@ import {
 import { SqError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqArray } from "./SqArray.js";
-import { SqBoxed } from "./SqBoxed.js";
 import { SqCalculator } from "./SqCalculator.js";
 import { SqDict } from "./SqDict.js";
 import { SqDistribution, wrapDistribution } from "./SqDistribution/index.js";
@@ -21,6 +20,7 @@ import { SqLambda } from "./SqLambda.js";
 import { SqPlot, wrapPlot } from "./SqPlot.js";
 import { SqScale, wrapScale } from "./SqScale.js";
 import { SqTableChart } from "./SqTableChart.js";
+import { SqTags } from "./SqTags.js";
 
 export function wrapValue(value: Value, context?: SqValueContext) {
   switch (value.type) {
@@ -56,8 +56,6 @@ export function wrapValue(value: Value, context?: SqValueContext) {
       return new SqDomainValue(value, context);
     case "Input":
       return new SqInputValue(value, context);
-    case "Boxed":
-      return new SqBoxedValue(value, context);
     default:
       throw new Error(`Unknown value ${JSON.stringify(value satisfies never)}`);
   }
@@ -70,6 +68,10 @@ export abstract class SqAbstractValue<Type extends string, JSType> {
     public _value: Extract<Value, { type: Type }>,
     public context?: SqValueContext
   ) {}
+
+  get tags() {
+    return new SqTags(this._value.getTags(), this.context);
+  }
 
   toString() {
     return this._value.toString();
@@ -321,26 +323,6 @@ export class SqDomainValue extends SqAbstractValue<"Domain", SqDomain> {
   }
 
   asJS() {
-    return this.value;
-  }
-}
-
-export class SqBoxedValue extends SqAbstractValue<"Boxed", unknown> {
-  tag = "Boxed" as const;
-
-  get value() {
-    return new SqBoxed(
-      this._value.value.value,
-      this._value.value.args,
-      this.context
-    );
-  }
-
-  override title() {
-    return this.value.name();
-  }
-
-  asJS(): unknown {
     return this.value;
   }
 }

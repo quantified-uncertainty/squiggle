@@ -6,7 +6,6 @@ import { Lambda } from "../../reducer/lambda.js";
 import { ImmutableMap } from "../../utility/immutableMap.js";
 import { SDate } from "../../utility/SDate.js";
 import { SDuration } from "../../utility/SDuration.js";
-import { Boxed, BoxedArgs } from "../../value/boxed.js";
 import { Domain } from "../../value/domain.js";
 import {
   Calculator,
@@ -18,7 +17,6 @@ import {
   Value,
   vArray,
   vBool,
-  vBoxed,
   vCalculator,
   vDate,
   vDict,
@@ -33,6 +31,7 @@ import {
   vString,
   vTableChart,
 } from "../../value/index.js";
+import { ValueTags } from "../../value/valueTags.js";
 import { frTypesMatchesLengths } from "./helpers.js";
 
 /*
@@ -45,7 +44,6 @@ export type FRType<T> = {
   display: () => string;
   transparent?: T extends Value ? boolean : undefined;
   varName?: string;
-  keepBoxes?: boolean;
   isOptional?: boolean;
   tag?: string;
   underlyingType?: FRType<any>;
@@ -165,32 +163,23 @@ export const frLambdaTyped = (
   };
 };
 
-//This will box if not boxed. We could do a form that doesn't do this, but it would be messier.
-//I could see it as cleaner to use a new Class or interface like {type: "Boxed", value: T, args: BoxedArgs} | {type: "Unboxed", value: T}, but doesn't seem worth it yet.
-export const frForceBoxed = <T>(
+export const frWithTags = <T>(
   itemType: FRType<T>
-): FRType<{ value: T; args: BoxedArgs }> => {
+): FRType<{ value: T; tags: ValueTags }> => {
   return {
     unpack: (v) => {
-      if (v.type !== "Boxed") {
-        const unpackedItem = itemType.unpack(v);
-        if (unpackedItem) {
-          return { value: unpackedItem, args: new BoxedArgs({}) };
-        } else {
-          return undefined;
-        }
-      } else {
-        const unpackedItem = itemType.unpack(v.value.value);
-        const boxedArgs: BoxedArgs = v.value.args;
-        return (
-          (unpackedItem && { value: unpackedItem, args: boxedArgs }) ||
-          undefined
-        );
-      }
+      const unpackedItem = itemType.unpack(v);
+      return (
+        (unpackedItem && {
+          value: unpackedItem,
+          tags: v.tags ?? new ValueTags({}),
+        }) ||
+        undefined
+      );
     },
-    pack: ({ value, args }) => vBoxed(new Boxed(itemType.pack(value), args)),
+    // This will overwrite the original tags in case of `frWithTags(frAny())`. But in that situation you shouldn't use `frWithTags`, a simple `frAny` will do.
+    pack: ({ value, tags }) => itemType.pack(value).copyWithTags(tags),
     display: itemType.display,
-    keepBoxes: true,
     default: itemType.default,
     fieldType: itemType.fieldType,
   };
@@ -396,15 +385,11 @@ export const frDictWithArbitraryKeys = <T>(
   };
 };
 
-export const frAny = (params?: {
-  keepBoxes?: boolean;
-  genericName?: string;
-}): FRType<Value> => ({
+export const frAny = (params?: { genericName?: string }): FRType<Value> => ({
   unpack: (v) => v,
   pack: (v) => v,
   display: () => (params?.genericName ? `'${params.genericName}` : "any"),
   transparent: true,
-  keepBoxes: params?.keepBoxes || false,
   default: "",
 });
 
