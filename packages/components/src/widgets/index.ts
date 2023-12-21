@@ -10,4 +10,3 @@ import "./PlotWidget/index.js";
 import "./StringWidget.js";
 import "./TableChartWidget.js";
 import "./DurationWidget.js";
-import "./BoxedWidget.js";

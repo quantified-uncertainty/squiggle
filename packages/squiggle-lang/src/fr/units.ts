@@ -1,7 +1,7 @@
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frForceBoxed, frNumber } from "../library/registry/frTypes.js";
+import { frNumber, frWithTags } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
-import { BoxedArgs } from "../value/boxed.js";
+import { ValueTags } from "../value/valueTags.js";
 
 const maker = new FnFactory({
   nameSpace: "",
@@ -15,17 +15,17 @@ const makeUnitFn = (
   format?: string
 ) => {
   return maker.make({
-    output: format ? "Boxed" : "Number",
+    output: "Number",
     name: "fromUnit_" + shortName,
     description: `Unit conversion from ${fullName}.`,
     examples: [`3${shortName} // ${3 * multiplier}`],
     isUnit: true,
     definitions: [
       format
-        ? makeDefinition([frNumber], frForceBoxed(frNumber), ([x]) => {
+        ? makeDefinition([frNumber], frWithTags(frNumber), ([x]) => {
             return {
               value: x * multiplier,
-              args: new BoxedArgs({ numberFormat: format }),
+              tags: new ValueTags({ numberFormat: format }),
             };
           })
         : makeDefinition([frNumber], frNumber, ([x]) => x * multiplier),

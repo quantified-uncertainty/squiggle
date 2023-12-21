@@ -11,8 +11,8 @@ import { Lambda } from "../reducer/lambda.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { SDate } from "../utility/SDate.js";
 import { SDuration } from "../utility/SDuration.js";
-import { Boxed } from "./boxed.js";
 import { DateRangeDomain, Domain, NumericRangeDomain } from "./domain.js";
+import { ValueTags, ValueTagsType } from "./valueTags.js";
 
 export type ValueMap = ImmutableMap<string, Value>;
 
@@ -23,13 +23,42 @@ type Indexable = {
 
 abstract class BaseValue {
   abstract type: string;
+  readonly tags: ValueTags | undefined;
 
   // This is a getter, not a field, for performance reasons.
   get publicName() {
     return this.type;
   }
 
-  abstract toString(): string;
+  getTags() {
+    return this.tags ?? new ValueTags({});
+  }
+
+  copyWithTags(tags: ValueTags) {
+    return Object.assign(Object.create(Object.getPrototypeOf(this)), {
+      ...this,
+      tags,
+    });
+  }
+
+  mergeTags(args: ValueTagsType) {
+    return this.copyWithTags(this.tags?.merge(args) ?? new ValueTags(args));
+  }
+
+  abstract valueToString(): string;
+
+  toString() {
+    const valueString = this.valueToString();
+    if (!this.tags) {
+      return valueString;
+    }
+    const argsStr = this.tags.toString();
+    if (argsStr !== "") {
+      return `${valueString}, with params ${argsStr}`;
+    } else {
+      return valueString;
+    }
+  }
 }
 
 /*
@@ -54,7 +83,7 @@ class VArray extends BaseValue implements Indexable {
   constructor(public value: readonly Value[]) {
     super();
   }
-  toString(): string {
+  valueToString() {
     return "[" + this.value.map((v) => v.toString()).join(",") + "]";
   }
 
@@ -100,7 +129,7 @@ class VBool extends BaseValue {
   constructor(public value: boolean) {
     super();
   }
-  toString() {
+  valueToString() {
     return String(this.value);
   }
   isEqual(other: VBool) {
@@ -115,7 +144,7 @@ export class VDate extends BaseValue {
   constructor(public value: SDate) {
     super();
   }
-  toString() {
+  valueToString() {
     return this.value.toString();
   }
   isEqual(other: VDate) {
@@ -134,7 +163,7 @@ class VDist extends BaseValue {
   constructor(public value: BaseDist) {
     super();
   }
-  toString() {
+  valueToString() {
     return this.value.toString();
   }
   isEqual(other: VDist) {
@@ -153,7 +182,7 @@ class VLambda extends BaseValue implements Indexable {
   constructor(public value: Lambda) {
     super();
   }
-  toString() {
+  valueToString() {
     return this.value.toString();
   }
 
@@ -187,7 +216,7 @@ export class VNumber extends BaseValue {
   constructor(public value: number) {
     super();
   }
-  toString() {
+  valueToString() {
     return String(this.value);
   }
   isEqual(other: VNumber) {
@@ -202,7 +231,7 @@ class VString extends BaseValue {
   constructor(public value: string) {
     super();
   }
-  toString() {
+  valueToString() {
     return JSON.stringify(this.value);
   }
   isEqual(other: VString) {
@@ -221,7 +250,7 @@ class VDict extends BaseValue implements Indexable {
   constructor(public value: ValueMap) {
     super();
   }
-  toString(): string {
+  valueToString() {
     return (
       "{" +
       [...this.value.entries()]
@@ -278,7 +307,7 @@ class VDuration extends BaseValue {
     super();
   }
 
-  toString() {
+  valueToString() {
     return this.value.toString();
   }
   isEqual(other: VDuration) {
@@ -351,7 +380,7 @@ class VScale extends BaseValue {
     super();
   }
 
-  toString(): string {
+  valueToString(): string {
     switch (this.value.type) {
       case "linear":
         return "Linear scale"; // TODO - mix in min/max if specified
@@ -410,7 +439,7 @@ class VInput extends BaseValue {
     super();
   }
 
-  toString(): string {
+  valueToString(): string {
     switch (this.value.type) {
       case "text":
         return "Text input";
@@ -491,7 +520,7 @@ class VTableChart extends BaseValue {
   constructor(public value: TableChart) {
     super();
   }
-  toString() {
+  valueToString() {
     return `Table with ${this.value.columns.length}x${this.value.data.length} elements`;
   }
 }
@@ -541,7 +570,7 @@ class VCalculator extends BaseValue {
     return this.error;
   }
 
-  toString() {
+  valueToString() {
     return `Calculator`;
   }
 }
@@ -555,7 +584,7 @@ class VPlot extends BaseValue implements Indexable {
     super();
   }
 
-  toString(): string {
+  valueToString(): string {
     switch (this.value.type) {
       case "distributions":
         return `Plot containing ${this.value.distributions
@@ -605,20 +634,6 @@ function domainIsEqual(valueA: Domain, valueB: Domain) {
   }
 }
 
-export class VBoxed extends BaseValue {
-  readonly type = "Boxed";
-
-  constructor(public value: Boxed) {
-    super();
-  }
-
-  toString() {
-    return this.value.toString();
-  }
-}
-
-export const vBoxed = (value: Boxed) => new VBoxed(value);
-
 export class VDomain extends BaseValue implements Indexable {
   readonly type = "Domain";
 
@@ -626,7 +641,7 @@ export class VDomain extends BaseValue implements Indexable {
     super();
   }
 
-  toString(): string {
+  valueToString(): string {
     return this.value.toString();
   }
 
@@ -663,7 +678,7 @@ class VVoid extends BaseValue {
   constructor() {
     super();
   }
-  toString() {
+  valueToString() {
     return "()";
   }
 }
@@ -685,8 +700,7 @@ export type Value =
   | VScale
   | VInput
   | VDomain
-  | VVoid
-  | VBoxed;
+  | VVoid;
 
 export function isEqual(a: Value, b: Value): boolean {
   if (a.type !== b.type) {

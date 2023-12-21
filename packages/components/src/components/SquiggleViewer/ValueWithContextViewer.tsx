@@ -28,9 +28,7 @@ import {
 } from "./ViewerProvider.js";
 
 function getComment(value: SqValueWithContext): string | undefined {
-  const boxedDescription =
-    value.tag === "Boxed" ? value.value.description() : undefined;
-  return value.context.docstring() || boxedDescription;
+  return value.context.docstring() || value.tags.description();
 }
 
 const CommentIconForValue: FC<{ value: SqValueWithContext }> = ({ value }) => {
@@ -126,7 +124,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
   const isFocused = useIsFocused(path);
 
   const isRoot = path.isRoot();
-  const boxedName = tag === "Boxed" ? value.value.name() : undefined;
+  const taggedName = value.tags.name();
 
   // Collapse children and element if desired. Uses crude heuristics.
   // TODO - this code has side effects, it'd be better if we ran it somewhere else, e.g. traverse values recursively when `ViewerProvider` is initialized.
@@ -188,10 +186,10 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
   const name = pathToShortName(path);
   const headerName = (
     <div
-      className={clsx(!boxedName && "font-mono", headerClasses())}
+      className={clsx(!taggedName && "font-mono", headerClasses())}
       onClick={_focus}
     >
-      {boxedName ? boxedName : name}
+      {taggedName ? taggedName : name}
     </div>
   );
 
