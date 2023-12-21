@@ -10,15 +10,15 @@ import {
 import { SQUIGGLE_DOCS_URL } from "../../lib/constants.js";
 
 const Section: FC<PropsWithChildren> = ({ children }) => (
-  <div className={clsx("px-4 py-2")}>{children}</div>
+    <div className={clsx("px-4 py-2")}>{children}</div>
 );
 
-//I'm not sure if this is worth it here. Much of the input data is hidden from us at this point. It might be better to just go back to strings, or to formally parse it after having it as a string.
+// I'm not sure if this is worth it here. Much of the input data is hidden from us at this point. It might be better to just go back to strings, or to formally parse it after having it as a string.
 const StyleDefinition: FC<{ fullName: string; def: FnDefinition }> = ({
   fullName,
   def,
 }) => {
-  const isOptional = (t) => (t.isOptional === undefined ? false : t.isOptional);
+    const isOptional = (t) => (t.isOptional === undefined ? false : t.isOptional);
   const primaryColor = "text-slate-900";
   const secondaryColor = "text-slate-400";
   const inputs = def.inputs.map((t, index) => (
@@ -31,8 +31,8 @@ const StyleDefinition: FC<{ fullName: string; def: FnDefinition }> = ({
     </span>
   ));
   const output = def.output.display();
-  return (
-    <div>
+    return (
+        <div>
       <span className="text-slate-500">{fullName}</span>
       <span className={secondaryColor}>(</span>
       <span className={clsx(primaryColor, "ml-0.5 mr-0.5")}>{inputs}</span>
@@ -52,8 +52,8 @@ const StyleDefinition: FC<{ fullName: string; def: FnDefinition }> = ({
 export const FnDocumentation: FC<{ documentation: FnDocumentationType }> = ({
   documentation,
 }) => {
-  const {
-    name,
+    const {
+        name,
     nameSpace,
     requiresNamespace,
     isUnit,
@@ -62,14 +62,14 @@ export const FnDocumentation: FC<{ documentation: FnDocumentationType }> = ({
     description,
     definitions,
     examples,
-  } = documentation;
-  const fullName = `${nameSpace ? nameSpace + "." : ""}${name}`;
+    } = documentation;
+    const fullName = `${nameSpace ? nameSpace + "." : ""}${name}`;
   const tagCss = "text-xs font-medium me-2 px-2.5 py-0.5 rounded";
 
   return (
     <>
-      <Section>
-        <div className="flex flex-nowrap items-end justify-between gap-2 py-0.5">
+        <Section>
+            <div className="flex flex-nowrap items-end justify-between gap-2 py-0.5">
           <a
             href={`${SQUIGGLE_DOCS_URL}/${nameSpace}#${name}`}
             target="_blank"
@@ -85,7 +85,7 @@ export const FnDocumentation: FC<{ documentation: FnDocumentationType }> = ({
       </Section>
       {(isUnit || shorthand || isExperimental || !requiresNamespace) && (
         <Section>
-          <div className="flex">
+            <div className="flex">
             {isUnit && (
               <div className={clsx("bg-yellow-100 text-yellow-800", tagCss)}>
                 Unit
@@ -115,7 +115,7 @@ export const FnDocumentation: FC<{ documentation: FnDocumentationType }> = ({
 
       {description ? (
         <Section>
-          <ReactMarkdown className="prose text-xs text-slate-600">
+            <ReactMarkdown className="prose text-xs text-slate-600">
             {description}
           </ReactMarkdown>
         </Section>
@@ -132,8 +132,8 @@ export const FnDocumentation: FC<{ documentation: FnDocumentationType }> = ({
           </div>
         </Section>
       ) : null}
-      {examples?.length ? (
-        <Section>
+        {examples?.length ? (
+            <Section>
           <header className="text-xs text-slate-600 font-medium mb-2">
             Examples
           </header>
