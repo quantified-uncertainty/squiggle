@@ -8,7 +8,6 @@ import {
   Env,
   result,
   SDuration,
-  SqDistribution,
   SqDistributionError,
   SqDistributionsPlot,
 } from "@quri/squiggle-lang";
@@ -43,107 +42,75 @@ const Cell: FC<HoverableCellProps> = ({
   </td>
 );
 
-type SummaryTableRowProps = {
-  distribution: SqDistribution;
-  name: string;
-  showName: boolean;
-  environment: Env;
-  tickFormat: string | undefined;
-  valueType: "date" | "number";
+const formatNumber = (
+  number: number,
+  isRange: boolean,
+  valueType: "date" | "number",
+  tickFormat: string | undefined
+) => {
+  if (valueType == "date") {
+    // When dealing with dates, the standard deviation is a duration, not a date, so we need to format it differently
+    if (isRange) {
+      return SDuration.fromMs(number).toString();
+    } else {
+      return formatDate(new Date(number), tickFormat);
+    }
+  } else if (tickFormat) {
+    return d3.format(tickFormat)(number);
+  } else {
+    return <NumberShower number={number} precision={3} />;
+  }
 };
 
-const percentiles = [0.05, 0.5, 0.95];
-
-const SummaryTableRow: FC<SummaryTableRowProps> = ({
-  distribution,
-  name,
-  showName,
-  environment,
-  tickFormat,
-  valueType,
-}) => {
-  const mean = distribution.mean(environment);
-  const stdev = distribution.stdev(environment);
-
-  const percentileValues = percentiles.map((percentile) =>
-    distribution.inv(environment, percentile)
-  );
-
-  const formatNumber = (number: number, isRange: boolean) => {
-    if (valueType == "date") {
-      // When dealing with dates, the standard deviation is a duration, not a date, so we need to format it differently
-      if (isRange) {
-        return SDuration.fromMs(number).toString();
-      } else {
-        return formatDate(new Date(number), tickFormat);
-      }
-    } else if (tickFormat) {
-      return d3.format(tickFormat)(number);
-    } else {
-      return <NumberShower number={number} precision={3} />;
-    }
-  };
-
-  const unwrapResult = (
-    x: result<number, SqDistributionError>,
-    isRange: boolean
-  ): React.ReactNode => {
-    if (x.ok) {
-      return formatNumber(x.value, isRange);
-    } else {
-      return (
-        <TextTooltip text={x.value.toString()}>
-          <XIcon className="w-5 h-5 text-gray-500" />
-        </TextTooltip>
-      );
-    }
-  };
-
-  const setVerticalLine = useSetVerticalLine();
-
-  return (
-    <tr>
-      {showName && <Cell>{name}</Cell>}
-      <Cell
-        onMouseEnter={() => setVerticalLine(mean)}
-        onMouseLeave={() => setVerticalLine(undefined)}
-      >
-        {formatNumber(mean, false)}
-      </Cell>
-      <Cell>{unwrapResult(stdev, true)}</Cell>
-      {percentileValues.map((value, i) => (
-        <Cell
-          key={i}
-          onMouseEnter={() =>
-            setVerticalLine(value.ok ? value.value : undefined)
-          }
-          onMouseLeave={() => setVerticalLine(undefined)}
-        >
-          {unwrapResult(value, false)}
-        </Cell>
-      ))}
-    </tr>
-  );
+const unwrapResult = (
+  x: result<number, SqDistributionError>,
+  isRange: boolean,
+  valueType: "date" | "number",
+  tickFormat: string | undefined
+): React.ReactNode => {
+  if (x.ok) {
+    return formatNumber(x.value, isRange, valueType, tickFormat);
+  } else {
+    return (
+      <TextTooltip text={x.value.toString()}>
+        <XIcon className="w-5 h-5 text-gray-500" />
+      </TextTooltip>
+    );
+  }
 };
 
 type SummaryTableProps = {
   plot: SqDistributionsPlot;
   environment: Env;
+  size?: "small" | "large";
 };
 
-export const SummaryTable: FC<SummaryTableProps> = ({ plot, environment }) => {
+export const SummaryTable: FC<SummaryTableProps> = ({
+  plot,
+  environment,
+  size,
+}) => {
   const showNames = plot.distributions.some((d) => d.name);
-  const isDate = plot.xScale?.tag === "date";
+  const _isDate = plot.xScale?.tag === "date";
+  const valueType = _isDate ? "date" : "number";
   const tickFormat = plot.xScale?.tickFormat;
+  const percentiles =
+    size === "large" ? [0.05, 0.25, 0.5, 0.75, 0.95] : [0.05, 0.5, 0.95];
 
+  const setVerticalLine = useSetVerticalLine();
   return (
     <div className="overflow-x-auto relative">
       <table className="w-full text-left font-light">
-        <thead className="text-xs font-light border-b border-slate-200 text-slate-700">
+        <thead
+          className={clsx(
+            "font-light border-b border-slate-200 text-slate-700",
+            size === "large" ? "text-sm" : "text-xs"
+          )}
+        >
           <tr>
             {showNames && <TableHeadCell>Name</TableHeadCell>}
             <TableHeadCell>Mean</TableHeadCell>
-            <TableHeadCell>Stdev</TableHeadCell>
+            {size === "large" && <TableHeadCell>Stdev</TableHeadCell>}
             {percentiles.map((percentile) => (
               <TableHeadCell key={percentile}>
                 {percentile * 100}%
@@ -151,18 +118,52 @@ export const SummaryTable: FC<SummaryTableProps> = ({ plot, environment }) => {
             ))}
           </tr>
         </thead>
-        <tbody className="text-sm text-blue-800 opacity-90 ">
-          {plot.distributions.map((dist, i) => (
-            <SummaryTableRow
-              key={i} // dist.name doesn't have to be unique, so we can't use it as a key
-              distribution={dist.distribution}
-              name={dist.name ?? dist.distribution.toString()}
-              showName={showNames}
-              environment={environment}
-              tickFormat={tickFormat}
-              valueType={isDate ? "date" : "number"}
-            />
-          ))}
+        <tbody
+          className={clsx(
+            "text-sm text-blue-800 opacity-90 ",
+            size === "large" ? "text-md" : "text-sm"
+          )}
+        >
+          {plot.distributions.map((dist, i) => {
+            const distribution = dist.distribution;
+            const name = dist.name ?? dist.distribution.toString();
+            const mean = distribution.mean(environment);
+            const stdev = distribution.stdev(environment);
+
+            const percentileValues = percentiles.map((percentile) => ({
+              percentile,
+              inv: distribution.inv(environment, percentile),
+            }));
+            return (
+              <tr key={i}>
+                {showNames && <Cell>{name}</Cell>}
+                <Cell
+                  onMouseEnter={() => setVerticalLine(mean)}
+                  onMouseLeave={() => setVerticalLine(undefined)}
+                >
+                  {formatNumber(mean, false, valueType, tickFormat)}
+                </Cell>
+                {size === "large" && (
+                  <Cell>
+                    {unwrapResult(stdev, true, valueType, tickFormat)}
+                  </Cell>
+                )}
+                {percentileValues.map((value, i) => (
+                  <Cell
+                    key={i}
+                    onMouseEnter={() =>
+                      setVerticalLine(
+                        value.inv.ok ? value.inv.value : undefined
+                      )
+                    }
+                    onMouseLeave={() => setVerticalLine(undefined)}
+                  >
+                    {unwrapResult(value.inv, false, valueType, tickFormat)}
+                  </Cell>
+                ))}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

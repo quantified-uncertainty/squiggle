@@ -40,6 +40,21 @@ export const ContinuousSampleSet: Story = {
   },
 };
 
+export const ContinuousSampleSetBig: Story = {
+  name: "Continuous SampleSet Big",
+  args: {
+    chartHeight: 500,
+    code: "SampleSet.fromDist(normal(5,2))",
+  },
+};
+export const ContinuousSampleSetTiny: Story = {
+  name: "Continuous SampleSet Tiny",
+  args: {
+    chartHeight: 10,
+    code: "SampleSet.fromDist(normal(5,2))",
+  },
+};
+
 export const ContinuousSampleSet1MSamples: Story = {
   name: "Continuous SampleSet, 1M Sample",
   args: {

@@ -8,7 +8,7 @@ const axisColor = "rgba(114, 125, 147, 0.1)";
 export const labelColor = "rgb(114, 125, 147)";
 export const cursorLineColor = "#888";
 export const primaryColor = "#4c78a8"; // for lines and areas
-export const distributionColor = "#6d9bce"; // for distributions. Slightly lighter than primaryColor
+export const distributionColor = "#649ece"; // for distributions. Slightly lighter than primaryColor
 export const axisTitleColor = "rgb(100 116 139)";
 export const axisTitleFont = "bold 12px ui-sans-serif, system-ui";
 const labelFont = "10px sans-serif";
@@ -82,7 +82,6 @@ export function drawAxes({
 }: DrawAxesParams) {
   const _xTickCount = xTickCount || calculateNumberOfXTicks(width, height);
   const _yTickCount = yTickCount || calculateNumberOfXTicks(height, width);
-  console.log("HI", height, width, _xTickCount, width ** 1.3 * height);
   const gradient = context.createLinearGradient(
     0,
     0,

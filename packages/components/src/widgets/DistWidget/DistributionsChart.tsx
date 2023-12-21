@@ -96,6 +96,7 @@ const InnerDistributionsChart: FC<{
   height: number;
   isMulti: boolean; // enables legend and semi-transparent rendering
   showSamplesBar: boolean;
+  showSamplesBarBelow: boolean;
 }> = ({
   shapes: unAdjustedShapes,
   samples,
@@ -103,6 +104,7 @@ const InnerDistributionsChart: FC<{
   height: innerHeight,
   isMulti,
   showSamplesBar,
+  showSamplesBarBelow,
 }) => {
   const verticalLine = useVerticalLineValue();
 
@@ -128,10 +130,13 @@ const InnerDistributionsChart: FC<{
 
   const legendHeight = isMulti ? legendItemHeight * shapes.length : 0;
   const _showSamplesBar = showSamplesBar && samples.length && !isMulti;
-  const samplesFooterHeight = _showSamplesBar ? 10 : 0;
+  const samplesFooterHeight = _showSamplesBar && showSamplesBarBelow ? 15 : 0;
 
   const height = innerHeight + legendHeight + samplesFooterHeight + 34;
-  const sampleBarHeight = Math.min(7, innerHeight * 0.2);
+
+  const sampleBarHeight = showSamplesBarBelow
+    ? 7
+    : Math.min(7, innerHeight * 0.14);
 
   const { xScale, yScale } = useMemo(() => {
     const xScale = sqScaleToD3(plot.xScale);
@@ -158,8 +163,14 @@ const InnerDistributionsChart: FC<{
     ({ context, width }: DrawContext) => {
       context.clearRect(0, 0, width, height);
 
-      const getColor = (i: number) =>
-        isMulti ? d3.schemeCategory10[i] : distributionColor;
+      const getColor = (i: number, lightening?: number) => {
+        const color = isMulti ? d3.schemeCategory10[i] : distributionColor;
+        if (lightening) {
+          return d3.interpolateLab(color, "#fff")(lightening);
+        } else {
+          return color;
+        }
+      };
 
       const { padding, frame } = drawAxes({
         context,
@@ -201,50 +212,29 @@ const InnerDistributionsChart: FC<{
           context.restore();
         }
       }
-      function lightenColor(color, percent) {
-        // let col = d3.rgb(color);
-        return d3.interpolateLab(color, "#fff")(percent); // use interpolateLab to convert to Lab and lighten
-        // col
-        // col = col.brighter(percent); // using darker with negative value to lighten
-        // return col.toString();
-      }
 
-      const gradient = context.createLinearGradient(
-        0,
-        0,
-        width * 0.6,
-        height * 0.6
-      );
-      gradient.addColorStop(0, "#6d9bce"); // Start color
-      gradient.addColorStop(1, "#4fabce"); // End color
-      const lightenedGradient = context.createLinearGradient(
-        0,
-        0,
-        width * 0.6,
-        height * 0.6
-      );
-      const brighter = 0.75;
-      lightenedGradient.addColorStop(0, lightenColor("#6d9bce", brighter)); // Start color
-      lightenedGradient.addColorStop(1, lightenColor("#4fabce", brighter)); // End color
-      // samples
+      // samplesBar
       if (_showSamplesBar) {
         context.save();
-        context.strokeStyle = gradient;
-        context.globalAlpha = 0.7;
-
+        context.strokeStyle = showSamplesBarBelow
+          ? getColor(0)
+          : getColor(0, 0.4);
         context.lineWidth = 0.5;
+
+        const offset = showSamplesBarBelow ? 0 : 20;
 
         samples.forEach((sample) => {
           context.beginPath();
           const x = xScale(sample);
 
           context.beginPath();
-          context.moveTo(padding.left + x, height - sampleBarHeight - 30);
-          context.lineTo(padding.left + x, height - 30);
+          context.moveTo(padding.left + x, height - offset - sampleBarHeight);
+          context.lineTo(padding.left + x, height - offset);
           context.stroke();
         });
         context.restore();
       }
+
       // shapes
       {
         frame.enter();
@@ -259,9 +249,9 @@ const InnerDistributionsChart: FC<{
         for (let i = 0; i < shapes.length; i++) {
           const shape = shapes[i];
 
-          // continuous
-          context.globalAlpha = isMulti ? 0.3 : 1;
-          context.fillStyle = lightenedGradient; // getColor(i);
+          // continuous fill
+          context.fillStyle = isMulti ? getColor(i, 0) : getColor(i, 0.7);
+          context.globalAlpha = isMulti ? 0.4 : 1;
           context.beginPath();
           d3
             .area<SqShape["continuous"][number]>()
@@ -270,7 +260,9 @@ const InnerDistributionsChart: FC<{
             .y1(0)
             .context(context)(shape.continuous);
           context.fill();
+          context.globalAlpha = 1;
 
+          // Percentile lines
           for (const percentile of [shape.p5, shape.p50, shape.p95]) {
             if (percentile.ok) {
               const xPoint = percentile.value;
@@ -282,8 +274,7 @@ const InnerDistributionsChart: FC<{
               );
               if (interpolateY) {
                 context.beginPath();
-                context.strokeStyle = gradient;
-                context.globalAlpha = 0.3;
+                context.strokeStyle = getColor(i, 0.3);
                 context.lineWidth = 1;
                 context.moveTo(xScale(xPoint), 0);
                 context.lineTo(xScale(xPoint), interpolateY);
@@ -293,8 +284,7 @@ const InnerDistributionsChart: FC<{
           }
 
           // The top line
-          context.globalAlpha = 0.8;
-          context.strokeStyle = gradient;
+          context.strokeStyle = getColor(i);
           context.beginPath();
           d3
             .line<SqShape["continuous"][number]>()
@@ -376,6 +366,7 @@ const InnerDistributionsChart: FC<{
       yScale,
       verticalLine,
       sampleBarHeight,
+      showSamplesBarBelow,
     ]
   );
 
@@ -500,6 +491,8 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
     samples.length < CUTOFF_TO_SHOW_SAMPLES_BAR &&
     height > HEIGHT_SAMPLES_BAR_CUTOFF;
 
+  const showSamplesBarBelow = height > 300;
+
   const isMulti =
     distributions.length > 1 ||
     !!(distributions.length === 1 && distributions[0].name);
@@ -520,12 +513,17 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
             plot={plot}
             height={height * 0.5}
             showSamplesBar={showSamplesBar}
+            showSamplesBarBelow={showSamplesBarBelow}
           />
         )}
         {!anyAreNonnormalized && plot.showSummary && (
           <div className="flex pt-1 mt-2 overflow-auto">
             <div className=" overflow-auto ml-auto">
-              <SummaryTable plot={plot} environment={environment} />
+              <SummaryTable
+                plot={plot}
+                environment={environment}
+                size={height > 300 ? "large" : "small"}
+              />
             </div>
           </div>
         )}
