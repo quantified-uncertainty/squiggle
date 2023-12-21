@@ -9,7 +9,6 @@ import {
   frDist,
   frDistOrNumber,
   frDuration,
-  frForceBoxed,
   frLambda,
   frLambdaTyped,
   frNamed,
@@ -20,6 +19,7 @@ import {
   frString,
   frTableChart,
   FRType,
+  frWithTags,
 } from "../library/registry/frTypes.js";
 import {
   checkNumericTickFormat,
@@ -27,8 +27,8 @@ import {
 } from "../library/registry/helpers.js";
 import { Lambda } from "../reducer/lambda.js";
 import { getOrThrow } from "../utility/result.js";
-import { Boxed, BoxedArgs } from "../value/boxed.js";
-import { Value, vBoxed, vString } from "../value/index.js";
+import { Value, vString } from "../value/index.js";
+import { ValueTags } from "../value/valueTags.js";
 
 const maker = new FnFactory({
   nameSpace: "Tag",
@@ -54,26 +54,30 @@ function _ensureTypeUsingLambda<T1>(
 }
 
 // This constructs definitions where the second argument is either a type T or a function that takes in the first argument and returns a type T.
-function withInputOrFnInput<T>(inputType: FRType<any>, outputType: FRType<T>) {
+function decoratorWithInputOrFnInput<T>(
+  inputType: FRType<any>,
+  outputType: FRType<T>
+) {
   return makeDefinition(
     [
-      frForceBoxed(inputType),
+      frWithTags(inputType),
       frOr(outputType, frLambdaTyped([inputType], outputType)),
     ],
-    frForceBoxed(inputType),
-    ([{ args, value }, showAs], context) => {
+    frWithTags(inputType),
+    ([{ value, tags }, showAs], context) => {
       const runLambdaToGetType = (fn: Lambda) =>
-        fn.call([vBoxed(new Boxed(inputType.pack(value), args))], context);
+        fn.call([inputType.pack(value)], context);
       const showAsVal: T = _ensureTypeUsingLambda(
         outputType,
         showAs,
         runLambdaToGetType
       );
       return {
-        args: args.merge({ showAs: outputType.pack(showAsVal) }),
         value,
+        tags: tags.merge({ showAs: outputType.pack(showAsVal) }),
       };
-    }
+    },
+    { isDecorator: true }
   );
 }
 
@@ -83,11 +87,10 @@ export const library = [
     examples: [],
     definitions: [
       makeDefinition(
-        [frForceBoxed(frAny({ genericName: "A" })), frString],
-        frForceBoxed(frAny({ genericName: "A" })),
-        ([{ args, value }, name]) => {
-          return { args: args.merge({ name }), value };
-        }
+        [frAny({ genericName: "A" }), frString],
+        frAny({ genericName: "A" }),
+        ([value, name]) => value.mergeTags({ name }),
+        { isDecorator: true }
       ),
     ],
   }),
@@ -95,8 +98,8 @@ export const library = [
     name: "getName",
     examples: [],
     definitions: [
-      makeDefinition([frForceBoxed(frAny())], frString, ([{ args }]) => {
-        return args.value.name || "";
+      makeDefinition([frAny()], frString, ([value]) => {
+        return value.tags?.value.name || "";
       }),
     ],
   }),
@@ -105,11 +108,10 @@ export const library = [
     examples: [],
     definitions: [
       makeDefinition(
-        [frForceBoxed(frAny({ genericName: "A" })), frString],
-        frForceBoxed(frAny({ genericName: "A" })),
-        ([{ args, value }, description]) => {
-          return { value: value, args: args.merge({ description }) };
-        }
+        [frAny({ genericName: "A" }), frString],
+        frAny({ genericName: "A" }),
+        ([value, description]) => value.mergeTags({ description }),
+        { isDecorator: true }
       ),
     ],
   }),
@@ -117,8 +119,8 @@ export const library = [
     name: "getDescription",
     examples: [],
     definitions: [
-      makeDefinition([frForceBoxed(frAny())], frString, ([{ args }]) => {
-        return args.value.description || "";
+      makeDefinition([frAny()], frString, ([value]) => {
+        return value.tags?.value.description || "";
       }),
     ],
   }),
@@ -126,21 +128,30 @@ export const library = [
     name: "showAs",
     examples: [],
     definitions: [
-      withInputOrFnInput(frDist, frPlot),
-      withInputOrFnInput(frLambdaTyped([frNumber], frDistOrNumber), frPlot),
-      withInputOrFnInput(frLambdaTyped([frDate], frDistOrNumber), frPlot),
-      withInputOrFnInput(frLambdaTyped([frDuration], frDistOrNumber), frPlot),
+      decoratorWithInputOrFnInput(frDist, frPlot),
+      decoratorWithInputOrFnInput(frArray(frAny()), frTableChart),
+      decoratorWithInputOrFnInput(
+        frLambdaTyped([frNumber], frDistOrNumber),
+        frPlot
+      ),
+      decoratorWithInputOrFnInput(
+        frLambdaTyped([frDate], frDistOrNumber),
+        frPlot
+      ),
+      decoratorWithInputOrFnInput(
+        frLambdaTyped([frDuration], frDistOrNumber),
+        frPlot
+      ),
       //The frLambda definition needs to come after the more narrow frLambdaTyped definitions.
-      withInputOrFnInput(frLambda, frCalculator),
-      withInputOrFnInput(frArray(frAny()), frTableChart),
+      decoratorWithInputOrFnInput(frLambda, frCalculator),
     ],
   }),
   maker.make({
     name: "getShowAs",
     examples: [],
     definitions: [
-      makeDefinition([frForceBoxed(frAny())], frAny(), ([{ args, value }]) => {
-        return args.value.showAs || vString("None"); // Not sure what to use when blank.
+      makeDefinition([frAny()], frAny(), ([value]) => {
+        return value.tags?.value.showAs || vString("None"); // Not sure what to use when blank.
       }),
     ],
   }),
@@ -149,26 +160,26 @@ export const library = [
     examples: [],
     definitions: [
       makeDefinition(
-        [frForceBoxed(frDistOrNumber), frNamed("numberFormat", frString)],
-        frForceBoxed(frDistOrNumber),
-        ([{ args, value }, format]) => {
+        [frWithTags(frDistOrNumber), frNamed("numberFormat", frString)],
+        frWithTags(frDistOrNumber),
+        ([{ value, tags }, format]) => {
           checkNumericTickFormat(format);
-          return { args: args.merge({ numberFormat: format }), value };
+          return { value, tags: tags.merge({ numberFormat: format }) };
         }
       ),
       makeDefinition(
-        [frForceBoxed(frDuration), frNamed("numberFormat", frString)],
-        frForceBoxed(frDuration),
-        ([{ args, value }, format]) => {
+        [frWithTags(frDuration), frNamed("numberFormat", frString)],
+        frWithTags(frDuration),
+        ([{ value, tags }, format]) => {
           checkNumericTickFormat(format);
-          return { args: args.merge({ numberFormat: format }), value };
+          return { value, tags: tags.merge({ numberFormat: format }) };
         }
       ),
       makeDefinition(
-        [frForceBoxed(frDate), frNamed("timeFormat", frString)],
-        frForceBoxed(frDate),
-        ([{ args, value }, format]) => {
-          return { args: args.merge({ dateFormat: format }), value };
+        [frWithTags(frDate), frNamed("timeFormat", frString)],
+        frWithTags(frDate),
+        ([{ value, tags }, format]) => {
+          return { value, tags: tags.merge({ dateFormat: format }) };
         }
       ),
     ],
@@ -177,13 +188,9 @@ export const library = [
     name: "all",
     examples: [],
     definitions: [
-      makeDefinition(
-        [frForceBoxed(frAny())],
-        frDictWithArbitraryKeys(frAny()),
-        ([{ args }]) => {
-          return args.toMap();
-        }
-      ),
+      makeDefinition([frAny()], frDictWithArbitraryKeys(frAny()), ([value]) => {
+        return value.getTags().toMap();
+      }),
     ],
   }),
   maker.make({
@@ -191,12 +198,12 @@ export const library = [
     examples: [],
     definitions: [
       makeDefinition(
-        [frForceBoxed(frAny({ genericName: "A" })), frArray(frString)],
-        frForceBoxed(frAny({ genericName: "A" })),
-        ([{ args, value }, parameterNames]) => {
-          const newParams = args.omitUsingStringKeys([...parameterNames]);
+        [frWithTags(frAny({ genericName: "A" })), frArray(frString)],
+        frWithTags(frAny({ genericName: "A" })),
+        ([{ tags, value }, parameterNames]) => {
+          const newParams = tags.omitUsingStringKeys([...parameterNames]);
           const _args = getOrThrow(newParams, (e) => new REArgumentError(e));
-          return { args: _args, value };
+          return { tags: _args, value };
         }
       ),
     ],
@@ -206,10 +213,10 @@ export const library = [
     examples: [],
     definitions: [
       makeDefinition(
-        [frForceBoxed(frAny({ genericName: "A" }))],
-        frForceBoxed(frAny({ genericName: "A" })),
+        [frWithTags(frAny({ genericName: "A" }))],
+        frWithTags(frAny({ genericName: "A" })),
         ([{ value }]) => {
-          return { value, args: new BoxedArgs({}) };
+          return { value, tags: new ValueTags({}) };
         }
       ),
     ],

@@ -3,7 +3,7 @@ import { ImmutableMap } from "../utility/immutableMap.js";
 import { Err, fmap, mergeMany, Ok } from "../utility/result.js";
 import { Value, vString } from "./index.js";
 
-export type BoxedArgsType = {
+export type ValueTagsType = {
   name?: string;
   description?: string;
   showAs?: Value;
@@ -11,9 +11,9 @@ export type BoxedArgsType = {
   dateFormat?: string;
 };
 
-type BoxedArgsTypeName = keyof BoxedArgsType;
+type ValueTagsTypeName = keyof ValueTagsType;
 
-const boxedArgsTypeNames: BoxedArgsTypeName[] = [
+const valueTagsTypeNames: ValueTagsTypeName[] = [
   "name",
   "description",
   "showAs",
@@ -23,23 +23,23 @@ const boxedArgsTypeNames: BoxedArgsTypeName[] = [
 
 function convertToBoxedArgsTypeName(
   key: string
-): result<BoxedArgsTypeName, string> {
-  const validKeys: Set<string> = new Set(boxedArgsTypeNames);
+): result<ValueTagsTypeName, string> {
+  const validKeys: Set<string> = new Set(valueTagsTypeNames);
   if (validKeys.has(key)) {
-    return Ok(key as BoxedArgsTypeName);
+    return Ok(key as ValueTagsTypeName);
   } else {
-    // Throw an error if the key is not a valid BoxedArgsTypeName
+    // Throw an error if the key is not a valid ValueTagsTypeName
     return Err(
-      `Invalid BoxedArgsTypeName: ${key}. Must be one of ${boxedArgsTypeNames.join(
+      `Invalid ValueTagsTypeName: ${key}. Must be one of ${valueTagsTypeNames.join(
         ","
       )}`
     );
   }
 }
 
-//I expect these to get much more complicated later, so it seemed prudent to make a class now.
-export class BoxedArgs {
-  constructor(public value: BoxedArgsType) {}
+// I expect these to get much more complicated later, so it seemed prudent to make a class now.
+export class ValueTags {
+  constructor(public value: ValueTagsType) {}
 
   toList(): [string, Value][] {
     const result: [string, Value][] = [];
@@ -62,10 +62,10 @@ export class BoxedArgs {
     return result;
   }
 
-  omit(keys: BoxedArgsTypeName[]) {
-    const newValue: BoxedArgsType = { ...this.value };
+  omit(keys: ValueTagsTypeName[]) {
+    const newValue: ValueTagsType = { ...this.value };
     keys.forEach((key) => delete newValue[key]);
-    return new BoxedArgs(newValue);
+    return new ValueTags(newValue);
   }
 
   omitUsingStringKeys(keys: string[]) {
@@ -84,8 +84,8 @@ export class BoxedArgs {
       .join(", ");
   }
 
-  merge(other: BoxedArgsType) {
-    return new BoxedArgs({
+  merge(other: ValueTagsType) {
+    return new ValueTags({
       ...this.value,
       ...other,
     });
@@ -109,22 +109,5 @@ export class BoxedArgs {
 
   dateFormat() {
     return this.value.dateFormat;
-  }
-}
-
-export class Boxed {
-  constructor(
-    public value: Value,
-    public args: BoxedArgs
-  ) {}
-
-  toString(): string {
-    const argsStr = this.args.toString();
-    const valueString = this.value.toString();
-    if (argsStr !== "") {
-      return `${valueString}, with params ${argsStr}`;
-    } else {
-      return valueString;
-    }
   }
 }

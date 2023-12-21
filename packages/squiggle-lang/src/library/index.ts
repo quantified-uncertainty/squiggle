@@ -13,7 +13,7 @@ import { makeVersionConstant } from "./version.js";
 const definitions = [
   makeDefinition([frAny(), frAny()], frAny(), ([obj, key]) => {
     if ("get" in obj) {
-      return obj.get(key).clone();
+      return obj.get(key);
     } else {
       throw new REOther("Trying to access key on wrong value");
     }
