@@ -111,7 +111,7 @@ export class SqNumericFnPlot extends SqAbstractPlot<"numericFn"> {
     fn,
     xScale,
     yScale,
-    xPoints,
+    xValues,
     title,
   }: {
     fn: SqLambda;
@@ -127,7 +127,7 @@ export class SqNumericFnPlot extends SqAbstractPlot<"numericFn"> {
         xScale: xScale._value,
         yScale: yScale._value,
         title: title,
-        xPoints,
+        xValues,
       },
       fn.context
     );
@@ -154,8 +154,8 @@ export class SqNumericFnPlot extends SqAbstractPlot<"numericFn"> {
     return wrapScale(this._value.yScale);
   }
 
-  get xPoints(): number[] | undefined {
-    return this._value.xPoints;
+  get xValues(): number[] | undefined {
+    return this._value.xValues;
   }
 
   override toString() {
