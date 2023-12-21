@@ -21,7 +21,7 @@ const valueTagsTypeNames: ValueTagsTypeName[] = [
   "dateFormat",
 ];
 
-function convertToBoxedArgsTypeName(
+function convertToValueTagsTypeName(
   key: string
 ): result<ValueTagsTypeName, string> {
   const validKeys: Set<string> = new Set(valueTagsTypeNames);
@@ -69,7 +69,7 @@ export class ValueTags {
   }
 
   omitUsingStringKeys(keys: string[]) {
-    const params = mergeMany(keys.map(convertToBoxedArgsTypeName));
+    const params = mergeMany(keys.map(convertToValueTagsTypeName));
     //Don't simplify the omit call, as we need to ensure "this" is carried.
     return fmap(params, (args) => this.omit(args));
   }
