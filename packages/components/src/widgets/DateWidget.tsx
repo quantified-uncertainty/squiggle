@@ -1,10 +1,10 @@
-import { SqBoxedValue, SqDateValue } from "@quri/squiggle-lang";
+import { SqDateValue } from "@quri/squiggle-lang";
 
 import { formatDate } from "../lib/d3/index.js";
 import { widgetRegistry } from "./registry.js";
 
-const showDate = (value: SqDateValue, boxed?: SqBoxedValue) => {
-  const dateFormat = boxed?.value?.dateFormat();
+const showDate = (value: SqDateValue) => {
+  const dateFormat = value.tags.dateFormat();
   if (dateFormat) {
     return formatDate(value.value.toDate(), dateFormat);
   } else {
@@ -13,6 +13,6 @@ const showDate = (value: SqDateValue, boxed?: SqBoxedValue) => {
 };
 
 widgetRegistry.register("Date", {
-  Preview: (value, boxed) => showDate(value, boxed),
-  Chart: (value, _, boxed) => showDate(value, boxed),
+  Preview: (value) => showDate(value),
+  Chart: (value) => showDate(value),
 });

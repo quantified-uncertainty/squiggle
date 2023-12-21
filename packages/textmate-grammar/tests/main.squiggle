@@ -1,9 +1,19 @@
 // SYNTAX TEST "source.squiggle" "main testcase"
 import "mod" as mod
 // <------ keyword.control.squiggle
+
 foo = 5
 // <--- variable.other.squiggle
 //    ^ constant.numeric.integer.squiggle
+
 export bar = 6
 // <------ keyword.control.squiggle
 //     ^^^ variable.other.squiggle
+
+@name("X var")
+// <- punctuation.decorator.squiggle
+// <~--- entity.name.function.squiggle
+//   ^ meta.brace.round.squiggle
+//    ^^^^^^^ string.quoted.double.squiggle
+//           ^ meta.brace.round.squiggle
+x = 7

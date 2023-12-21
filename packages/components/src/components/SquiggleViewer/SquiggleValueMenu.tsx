@@ -107,7 +107,7 @@ const SetChildrenCollapsedStateItem: FC<{
   const setCollapsed = useSetCollapsed();
   const closeDropdown = useCloseDropdown();
 
-  const { getLocalItemState } = useViewerContext();
+  const { itemStore } = useViewerContext();
 
   if (value.tag !== "Array" && value.tag !== "Dict") {
     return null;
@@ -117,10 +117,7 @@ const SetChildrenCollapsedStateItem: FC<{
 
   const allChildrenInRequiredState = childrenValues.every((childValue) => {
     const childPath = childValue.context?.path;
-    return (
-      childPath &&
-      getLocalItemState({ path: childPath }).collapsed === collapsed
-    );
+    return childPath && itemStore.getState(childPath).collapsed === collapsed;
   });
   if (allChildrenInRequiredState) {
     return null; // action won't do anything useful

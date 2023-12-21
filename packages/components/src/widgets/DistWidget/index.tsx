@@ -14,10 +14,10 @@ import { DistributionsChart } from "./DistributionsChart.js";
 export const CHART_TO_DIST_HEIGHT_ADJUSTMENT = 0.5;
 
 widgetRegistry.register("Dist", {
-  Preview(value, boxed) {
+  Preview(value) {
     const dist = value.value;
     const environment = value.context.project.getEnvironment();
-    const numberFormat = boxed?.value.numberFormat();
+    const numberFormat = value.tags.numberFormat();
 
     const showNumber = (number: number) => {
       return numberFormat ? (
@@ -68,8 +68,8 @@ widgetRegistry.register("Dist", {
       />
     );
   },
-  Chart(value, settings, boxed) {
-    const numberFormat = boxed?.value.numberFormat();
+  Chart(value, settings) {
+    const numberFormat = value.tags.numberFormat();
     const plot = SqDistributionsPlot.create({
       distribution: value.value,
       ...generateDistributionPlotSettings(
