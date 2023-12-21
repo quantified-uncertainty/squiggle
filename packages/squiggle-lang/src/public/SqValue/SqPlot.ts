@@ -181,7 +181,7 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
     yScale: SqScale;
     distXScale: SqScale;
     title?: string;
-    xPoints?: number[];
+    xValues?: number[];
   }) {
     const result = new SqDistFnPlot(
       {
@@ -191,7 +191,7 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
         yScale: yScale._value,
         distXScale: distXScale._value,
         title: title,
-        xPoints,
+        xValues,
       },
       fn.context
     );
@@ -222,8 +222,8 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
     return wrapScale(this._value.distXScale);
   }
 
-  get xPoints(): number[] | undefined {
-    return this._value.xPoints;
+  get xValues(): number[] | undefined {
+    return this._value.xValues;
   }
 
   override toString() {
