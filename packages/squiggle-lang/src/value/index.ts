@@ -408,6 +408,7 @@ export const vScale = (scale: Scale) => new VScale(scale);
 
 export type CommonInputArgs = {
   name: string;
+  typeName?: string;
   description?: string;
 };
 
@@ -432,6 +433,7 @@ export type Input = CommonInputArgs &
       }
   );
 
+export type InputType = "text" | "textArea" | "checkbox" | "select";
 class VInput extends BaseValue {
   readonly type = "Input";
 
@@ -482,7 +484,7 @@ export type Plot = CommonPlotArgs &
         fn: Lambda;
         xScale: Scale;
         yScale: Scale;
-        points?: number;
+        xPoints?: number[];
       }
     | {
         type: "distFn";
@@ -490,7 +492,7 @@ export type Plot = CommonPlotArgs &
         xScale: Scale;
         yScale: Scale;
         distXScale: Scale;
-        points?: number;
+        xPoints?: number[];
       }
     | {
         type: "scatter";

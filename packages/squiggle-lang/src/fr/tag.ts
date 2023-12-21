@@ -1,3 +1,4 @@
+import { REArgumentError } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
@@ -25,7 +26,9 @@ import {
   FnFactory,
 } from "../library/registry/helpers.js";
 import { Lambda } from "../reducer/lambda.js";
+import { getOrThrow } from "../utility/result.js";
 import { Value, vString } from "../value/index.js";
+import { ValueTags } from "../value/valueTags.js";
 
 const maker = new FnFactory({
   nameSpace: "Tag",
@@ -181,7 +184,6 @@ export const library = [
       ),
     ],
   }),
-
   maker.make({
     name: "all",
     examples: [],
@@ -189,6 +191,34 @@ export const library = [
       makeDefinition([frAny()], frDictWithArbitraryKeys(frAny()), ([value]) => {
         return value.getTags().toMap();
       }),
+    ],
+  }),
+  maker.make({
+    name: "omit",
+    examples: [],
+    definitions: [
+      makeDefinition(
+        [frWithTags(frAny({ genericName: "A" })), frArray(frString)],
+        frWithTags(frAny({ genericName: "A" })),
+        ([{ tags, value }, parameterNames]) => {
+          const newParams = tags.omitUsingStringKeys([...parameterNames]);
+          const _args = getOrThrow(newParams, (e) => new REArgumentError(e));
+          return { tags: _args, value };
+        }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "clear",
+    examples: [],
+    definitions: [
+      makeDefinition(
+        [frWithTags(frAny({ genericName: "A" }))],
+        frWithTags(frAny({ genericName: "A" })),
+        ([{ value }]) => {
+          return { value, tags: new ValueTags({}) };
+        }
+      ),
     ],
   }),
 ];

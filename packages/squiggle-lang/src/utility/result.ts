@@ -1,3 +1,5 @@
+import { ErrorMessage } from "../errors/messages.js";
+
 export type result<V, E> =
   | {
       ok: true;
@@ -71,6 +73,18 @@ export function merge<T1, T2, E>(
   return Ok([a.value, b.value]);
 }
 
+export function mergeMany<T, E>(results: result<T, E>[]): result<T[], E> {
+  const values: T[] = [];
+  for (const result of results) {
+    if (result.ok) {
+      values.push(result.value);
+    } else {
+      return Err(result.value);
+    }
+  }
+  return Ok(values);
+}
+
 export function getError<T, E>(r: result<T, E>): E | undefined {
   if (!r.ok) {
     return r.value;
@@ -84,5 +98,16 @@ export function getExt<T, E>(r: result<T, E>): T {
     return r.value;
   } else {
     throw r.value;
+  }
+}
+
+export function getOrThrow<T, E>(
+  r: result<T, E>,
+  errMap: (e: E) => ErrorMessage
+): T {
+  if (!r.ok) {
+    throw errMap(r.value);
+  } else {
+    return r.value;
   }
 }

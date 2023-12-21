@@ -34,7 +34,7 @@ function lambdaToSqLambdaSignatures(lambda: Lambda): SqLambdaSignature[] {
         def.map((p, index) => ({
           name: index.toString(),
           domain: undefined,
-          typeName: p.getName(),
+          typeName: p.display(),
         }))
       );
   }

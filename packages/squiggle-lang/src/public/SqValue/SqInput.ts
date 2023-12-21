@@ -26,6 +26,10 @@ abstract class SqAbstractInput<T extends Input["type"]> {
     return this._value.name;
   }
 
+  get typeName() {
+    return this._value.typeName;
+  }
+
   get description() {
     return this._value.description;
   }
