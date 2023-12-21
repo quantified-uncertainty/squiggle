@@ -2,12 +2,11 @@
 import "../../widgets/index.js";
 
 import { clsx } from "clsx";
-import { FC, PropsWithChildren, useMemo, useState } from "react";
+import { FC, PropsWithChildren, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 
 import { CommentIcon, TextTooltip } from "@quri/ui";
 
-import { SHORT_STRING_LENGTH } from "../../lib/constants.js";
 import { SqValueWithContext } from "../../lib/utility.js";
 import { ErrorBoundary } from "../ErrorBoundary.js";
 import { CollapsedIcon, ExpandedIcon } from "./icons.js";
@@ -15,14 +14,12 @@ import { SquiggleValueChart } from "./SquiggleValueChart.js";
 import { SquiggleValueHeader } from "./SquiggleValueHeader.js";
 import { SquiggleValueMenu } from "./SquiggleValueMenu.js";
 import { SquiggleValuePreview } from "./SquiggleValuePreview.js";
-import { getChildrenValues, pathToShortName } from "./utils.js";
+import { pathToShortName } from "./utils.js";
 import {
-  useCollapseChildren,
   useFocus,
   useIsFocused,
   useMergedSettings,
   useRegisterAsItemViewer,
-  useSetCollapsed,
   useToggleCollapsed,
   useViewerContext,
 } from "./ViewerProvider.js";
@@ -112,47 +109,20 @@ const ValueViewerBody: FC<Props> = ({ value }) => {
   );
 };
 
-const tagsDefaultCollapsed = new Set(["Bool", "Number", "Void", "Input"]);
-
 export const ValueWithContextViewer: FC<Props> = ({ value }) => {
   const { tag } = value;
   const { path } = value.context;
 
   const toggleCollapsed_ = useToggleCollapsed();
-  const setCollapsed = useSetCollapsed();
-  const collapseChildren = useCollapseChildren();
   const focus = useFocus();
-  const { getLocalItemState } = useViewerContext();
+
+  const { itemStore } = useViewerContext();
+  const itemState = itemStore.getStateOrInitialize(value);
+
   const isFocused = useIsFocused(path);
 
   const isRoot = path.isRoot();
   const boxedName = tag === "Boxed" ? value.value.name() : undefined;
-
-  // Collapse children and element if desired. Uses crude heuristics.
-  // TODO - this code has side effects, it'd be better if we ran it somewhere else, e.g. traverse values recursively when `ViewerProvider` is initialized.
-  useState(() => {
-    const shouldBeginCollapsed = (
-      isRoot: boolean,
-      v: SqValueWithContext
-    ): boolean => {
-      if (isRoot) {
-        return getChildrenValues(v).length > 30;
-      } else {
-        return (
-          getChildrenValues(v).length > 5 ||
-          tagsDefaultCollapsed.has(v.tag) ||
-          (v.tag === "String" && v.value.length <= SHORT_STRING_LENGTH)
-        );
-      }
-    };
-
-    if (getChildrenValues(value).length > 10) {
-      collapseChildren(value);
-    }
-    if (shouldBeginCollapsed(isRoot, value)) {
-      setCollapsed(path, true);
-    }
-  });
 
   const toggleCollapsed = () => {
     toggleCollapsed_(path);
@@ -160,7 +130,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
 
   const ref = useRegisterAsItemViewer(path);
 
-  const isOpen = isFocused || !getLocalItemState({ path }).collapsed;
+  const isOpen = isFocused || !itemState.collapsed;
   const _focus = () => !isFocused && !isRoot && focus(path);
 
   const triangleToggle = () => {
