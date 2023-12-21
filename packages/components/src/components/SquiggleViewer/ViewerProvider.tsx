@@ -3,7 +3,6 @@ import {
   createContext,
   FC,
   PropsWithChildren,
-  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -11,9 +10,11 @@ import {
   useState,
 } from "react";
 
-import { SqValue, SqValuePath } from "@quri/squiggle-lang";
+import { SqValuePath } from "@quri/squiggle-lang";
 
+import { SHORT_STRING_LENGTH } from "../../lib/constants.js";
 import { useForceUpdate } from "../../lib/hooks/useForceUpdate.js";
+import { SqValueWithContext } from "../../lib/utility.js";
 import { CalculatorState } from "../../widgets/CalculatorWidget/types.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import {
@@ -32,14 +33,14 @@ type ItemHandle = {
   forceUpdate: () => void;
 };
 
-type LocalItemState = {
+type LocalItemState = Readonly<{
   collapsed: boolean;
   calculator?: CalculatorState;
   settings: Pick<
     PartialPlaygroundSettings,
     "distributionChartSettings" | "functionChartSettings"
   >;
-};
+}>;
 
 const defaultLocalItemState: LocalItemState = {
   collapsed: false,
@@ -81,6 +82,64 @@ class ItemStore {
 
   getState(path: SqValuePath): LocalItemState {
     return this.state[pathAsString(path)] || defaultLocalItemState;
+  }
+
+  getStateOrInitialize(value: SqValueWithContext): LocalItemState {
+    const path = value.context.path;
+    const pathString = pathAsString(path);
+    const existingState = this.state[pathString];
+    if (existingState) {
+      return existingState;
+    }
+
+    this.state[pathString] = defaultLocalItemState;
+
+    const isRoot = path.isRoot();
+    const tagsDefaultCollapsed = new Set(["Bool", "Number", "Void", "Input"]);
+
+    const childrenValues = getChildrenValues(value);
+
+    // Collapse children and element if desired. Uses crude heuristics.
+    const shouldBeginCollapsed = (): boolean => {
+      if (isRoot) {
+        return childrenValues.length > 30;
+      } else {
+        return (
+          childrenValues.length > 5 ||
+          tagsDefaultCollapsed.has(value.tag) ||
+          (value.tag === "String" && value.value.length <= SHORT_STRING_LENGTH)
+        );
+      }
+    };
+
+    const collapseChildren = () => {
+      for (const child of childrenValues) {
+        if (!child.context) {
+          continue; // shouldn't happen
+        }
+        const childPathString = pathAsString(child.context.path);
+        if (this.state[childPathString]) {
+          continue; // shouldn't happen, if parent state is not initialized, child state won't be initialized either
+        }
+        this.state[childPathString] = {
+          ...defaultLocalItemState,
+          collapsed: true,
+        };
+      }
+    };
+
+    if (childrenValues.length > 10) {
+      collapseChildren();
+    }
+
+    if (shouldBeginCollapsed()) {
+      this.state[pathString] = {
+        ...this.state[pathString],
+        collapsed: true,
+      };
+    }
+
+    return this.state[pathString];
   }
 
   getCalculator(path: SqValuePath): CalculatorState | undefined {
@@ -233,27 +292,6 @@ export function useFocus() {
 export function useUnfocus() {
   const { setFocused } = useViewerContext();
   return () => setFocused(undefined);
-}
-
-// Should be used only on initial render; doesn't call `forceUpdate`.
-export function useCollapseChildren() {
-  const { itemStore } = useViewerContext();
-  return useCallback(
-    (value: SqValue) => {
-      const setInitialCollapsed = (path: SqValuePath, isCollapsed: boolean) => {
-        itemStore.setState(path, (state) => ({
-          ...state,
-          collapsed: state?.collapsed ?? isCollapsed,
-        }));
-      };
-
-      const children = getChildrenValues(value);
-      for (const child of children) {
-        child.context && setInitialCollapsed(child.context.path, true);
-      }
-    },
-    [itemStore]
-  );
 }
 
 export function useIsFocused(path: SqValuePath) {
