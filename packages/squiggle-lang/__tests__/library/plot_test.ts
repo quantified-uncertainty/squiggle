@@ -48,7 +48,7 @@ describe("Plot", () => {
     testEvalToMatch(
       `Plot.numericFn({|x,y| x * 5})`,
       `Error(Error: There are function matches for Plot.numericFn(), but with different arguments:
-  Plot.numericFn(fn: (Number) => Number, params?: {xScale?: Scale, yScale?: Scale, title?: String, points?: Number}) => Plot
+  Plot.numericFn(fn: (Number) => Number, params?: {xScale?: Scale, yScale?: Scale, title?: String, xPoints?: List(Number)}) => Plot
 Was given arguments: ((x,y) => internal code)`
     );
 
@@ -123,7 +123,7 @@ Was given arguments: ((x,y) => internal code)`
     testEvalToMatch(
       `Plot.distFn({|x,y| x to x + y})`,
       `Error(Error: There are function matches for Plot.distFn(), but with different arguments:
-  Plot.distFn(fn: (Number) => Dist, params?: {xScale?: Scale, yScale?: Scale, distXScale?: Scale, title?: String, points?: Number}) => Plot
+  Plot.distFn(fn: (Number) => Dist, params?: {xScale?: Scale, yScale?: Scale, distXScale?: Scale, title?: String, xPoints?: List(Number)}) => Plot
 Was given arguments: ((x,y) => internal code)`
     );
   });
