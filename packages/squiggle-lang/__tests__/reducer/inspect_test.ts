@@ -31,7 +31,6 @@ describe("Debugging", () => {
       "one",
       {
         type: "Number",
-        publicName: "Number",
         value: 1,
       },
     ]);

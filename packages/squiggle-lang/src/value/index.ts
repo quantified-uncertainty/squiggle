@@ -11,8 +11,8 @@ import { Lambda } from "../reducer/lambda.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { SDate } from "../utility/SDate.js";
 import { SDuration } from "../utility/SDuration.js";
-import { DateRangeDomain, Domain, NumericRangeDomain } from "./domain.js";
 import { Boxed } from "./boxed.js";
+import { DateRangeDomain, Domain, NumericRangeDomain } from "./domain.js";
 
 export type ValueMap = ImmutableMap<string, Value>;
 
@@ -23,7 +23,11 @@ type Indexable = {
 
 abstract class BaseValue {
   abstract type: string;
-  abstract publicName: string;
+
+  // This is a getter, not a field, for performance reasons.
+  get publicName() {
+    return this.type;
+  }
 
   clone() {
     return Object.assign(Object.create(Object.getPrototypeOf(this)), this);
@@ -46,7 +50,10 @@ If you add a new value class, don't forget to add it to the "Value" union type b
 
 class VArray extends BaseValue implements Indexable {
   readonly type = "Array";
-  readonly publicName = "List";
+
+  override get publicName() {
+    return "List";
+  }
 
   constructor(public value: readonly Value[]) {
     super();
@@ -89,7 +96,10 @@ export const vArray = (v: readonly Value[]) => new VArray(v);
 
 class VBool extends BaseValue {
   readonly type = "Bool";
-  readonly publicName = "Boolean";
+
+  override get publicName() {
+    return "Boolean";
+  }
 
   constructor(public value: boolean) {
     super();
@@ -105,7 +115,6 @@ export const vBool = (v: boolean) => new VBool(v);
 
 export class VDate extends BaseValue {
   readonly type = "Date";
-  readonly publicName = "Date";
 
   constructor(public value: SDate) {
     super();
@@ -121,7 +130,10 @@ export const vDate = (v: SDate) => new VDate(v);
 
 class VDist extends BaseValue {
   readonly type = "Dist";
-  readonly publicName = "Distribution";
+
+  override get publicName() {
+    return "Distribution";
+  }
 
   constructor(public value: BaseDist) {
     super();
@@ -137,7 +149,10 @@ export const vDist = (v: BaseDist) => new VDist(v);
 
 class VLambda extends BaseValue implements Indexable {
   readonly type = "Lambda";
-  readonly publicName = "Function";
+
+  override get publicName() {
+    return "Function";
+  }
 
   constructor(public value: Lambda) {
     super();
@@ -172,7 +187,6 @@ export const vLambda = (v: Lambda) => new VLambda(v);
 
 export class VNumber extends BaseValue {
   readonly type = "Number";
-  readonly publicName = "Number";
 
   constructor(public value: number) {
     super();
@@ -188,7 +202,6 @@ export const vNumber = (v: number) => new VNumber(v);
 
 class VString extends BaseValue {
   readonly type = "String";
-  readonly publicName = "String";
 
   constructor(public value: string) {
     super();
@@ -204,7 +217,10 @@ export const vString = (v: string) => new VString(v);
 
 class VDict extends BaseValue implements Indexable {
   readonly type = "Dict";
-  readonly publicName = "Dictionary";
+
+  override get publicName() {
+    return "Dictionary";
+  }
 
   constructor(public value: ValueMap) {
     super();
@@ -257,7 +273,10 @@ export const vDict = (v: ValueMap) => new VDict(v);
 
 class VDuration extends BaseValue {
   readonly type = "Duration";
-  readonly publicName = "Time Duration";
+
+  override get publicName() {
+    return "Time Duration";
+  }
 
   constructor(public value: SDuration) {
     super();
@@ -331,7 +350,6 @@ export const SCALE_POWER_DEFAULT_CONSTANT = 0.1;
 
 class VScale extends BaseValue {
   readonly type = "Scale";
-  readonly publicName = "Scale";
 
   constructor(public value: Scale) {
     super();
@@ -391,7 +409,6 @@ export type Input = CommonInputArgs &
 
 class VInput extends BaseValue {
   readonly type = "Input";
-  readonly publicName = "Input";
 
   constructor(public value: Input) {
     super();
@@ -470,7 +487,10 @@ export type TableChart = {
 };
 class VTableChart extends BaseValue {
   readonly type = "TableChart";
-  readonly publicName = "Table Chart";
+
+  override get publicName() {
+    return "Table Chart";
+  }
 
   constructor(public value: TableChart) {
     super();
@@ -493,7 +513,6 @@ export type Calculator = {
 
 class VCalculator extends BaseValue {
   readonly type = "Calculator";
-  readonly publicName = "Calculator";
 
   private error: REOther | null = null;
 
@@ -535,7 +554,6 @@ export const vCalculator = (v: Calculator) => new VCalculator(v);
 
 class VPlot extends BaseValue implements Indexable {
   readonly type = "Plot";
-  readonly publicName = "Plot";
 
   constructor(public value: Plot) {
     super();
@@ -593,7 +611,6 @@ function domainIsEqual(valueA: Domain, valueB: Domain) {
 
 export class VBoxed extends BaseValue {
   readonly type = "Boxed";
-  readonly publicName = "Boxed";
 
   constructor(public value: Boxed) {
     super();
@@ -608,7 +625,6 @@ export const vBoxed = (value: Boxed) => new VBoxed(value);
 
 export class VDomain extends BaseValue implements Indexable {
   readonly type = "Domain";
-  readonly publicName = "Domain";
 
   constructor(public value: Domain) {
     super();
@@ -647,7 +663,6 @@ export const vDomain = (domain: Domain) => new VDomain(domain);
 
 class VVoid extends BaseValue {
   readonly type = "Void";
-  readonly publicName = "Void";
 
   constructor() {
     super();
