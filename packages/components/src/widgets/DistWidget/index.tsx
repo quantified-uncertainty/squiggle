@@ -30,11 +30,13 @@ widgetRegistry.register("Dist", {
     const p05 = unwrapOrFailure(dist.inv(environment, 0.05));
     const p95 = unwrapOrFailure(dist.inv(environment, 0.95));
     const oneValue = p05 === p95;
+
+    const distPlot = value.showAsPlot();
     const plot = SqDistributionsPlot.create({
       distribution: value.value,
       showSummary: false,
-      xScale: SqLinearScale.create(),
-      yScale: SqLinearScale.create(),
+      xScale: distPlot?.xScale ?? SqLinearScale.create(),
+      yScale: distPlot?.yScale ?? SqLinearScale.create(),
     });
     return oneValue ? (
       showNumber(p05)

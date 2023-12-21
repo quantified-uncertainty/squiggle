@@ -10,7 +10,7 @@ import { SqDistribution, wrapDistribution } from "./SqDistribution/index.js";
 import { SqDomain, wrapDomain } from "./SqDomain.js";
 import { SqInput, wrapInput } from "./SqInput.js";
 import { SqLambda } from "./SqLambda.js";
-import { SqPlot, wrapPlot } from "./SqPlot.js";
+import { SqDistributionsPlot, SqPlot, wrapPlot } from "./SqPlot.js";
 import { SqScale, wrapScale } from "./SqScale.js";
 import { SqTableChart } from "./SqTableChart.js";
 import { SqTags } from "./SqTags.js";
@@ -134,6 +134,15 @@ export class SqDistributionValue extends SqAbstractValue<
 
   get value() {
     return wrapDistribution(this._value.value);
+  }
+
+  showAsPlot(): SqDistributionsPlot | undefined {
+    const showAs = this.tags.showAs();
+    return showAs &&
+      showAs.tag === "Plot" &&
+      showAs.value.tag === "distributions"
+      ? showAs.value
+      : undefined;
   }
 
   asJS() {
