@@ -135,6 +135,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value, parentValue }) => {
   const triangleToggle = () => {
     const Icon = isOpen ? ExpandedIcon : CollapsedIcon;
     const _hasExtraContentToShow = hasExtraContentToShow(value);
+    //Only show triangle if there is content to show, that's not in the header.
     if (_hasExtraContentToShow) {
       return (
         <div
@@ -166,7 +167,8 @@ export const ValueWithContextViewer: FC<Props> = ({ value, parentValue }) => {
     }
   };
 
-  const isWeird = !isFocused && path.items.length > 1;
+  //We want to show colons after they keys, for dicts/arrays.
+  const showColon = !isFocused && path.items.length > 1;
   const name = pathToShortName(path);
   const headerName = (
     <div
@@ -174,7 +176,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value, parentValue }) => {
       onClick={_focus}
     >
       {taggedName ? taggedName : name}
-      {isWeird && <span className="text-stone-400">:</span>}
+      {showColon && <span className="text-stone-400">:</span>}
     </div>
   );
 
@@ -214,7 +216,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value, parentValue }) => {
               <div
                 className={clsx(
                   "text-sm text-blue-800",
-                  isWeird ? "ml-2" : "ml-5"
+                  showColon ? "ml-2" : "ml-5"
                 )}
               >
                 <SquiggleValuePreview value={value} />

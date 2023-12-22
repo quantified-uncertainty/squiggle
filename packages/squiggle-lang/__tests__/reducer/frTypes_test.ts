@@ -329,9 +329,9 @@ describe("frOr", () => {
     });
   });
 
-  describe("getName", () => {
+  describe("display", () => {
     test("should return the correct name", () => {
-      expect(frNumberOrString.getName()).toBe("Number|String");
+      expect(frNumberOrString.display()).toBe("Number|String");
     });
   });
 });
@@ -349,18 +349,18 @@ describe("frNamed", () => {
     expect(namedNumberType.pack(testNumber)).toEqual(testValue);
   });
 
-  test("getName", () => {
+  test("display", () => {
     expect(namedNumberType).toBeDefined();
-    expect(namedNumberType.getName()).toBe("TestNumber: Number");
+    expect(namedNumberType.display()).toBe("TestNumber: Number");
   });
 
-  test("getName with Optional Type", () => {
+  test("display with Optional Type", () => {
     const optionalNumberType = frOptional(frNumber);
     const namedOptionalNumberType = frNamed(
       "OptionalTestNumber",
       optionalNumberType
     );
-    expect(namedOptionalNumberType.getName()).toBe(
+    expect(namedOptionalNumberType.display()).toBe(
       "OptionalTestNumber?: Number"
     );
   });
@@ -393,7 +393,7 @@ describe("frWithTags", () => {
     expect(packed).toEqual(vNumber(10).mergeTags({ name: "myName" }));
   });
 
-  test("GetName", () => {
-    expect(frTaggedNumber.getName()).toBe("Number");
+  test("Display", () => {
+    expect(frTaggedNumber.display()).toBe("Number");
   });
 });
