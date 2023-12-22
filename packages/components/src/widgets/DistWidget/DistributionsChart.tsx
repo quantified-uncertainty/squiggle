@@ -99,9 +99,10 @@ const InnerDistributionsChart: FC<{
   height: number;
   isMulti: boolean; // enables legend and semi-transparent rendering
   samplesBarSetting: SampleBarSetting;
-  showHoverVerticalLine: boolean;
+  showCursorLine: boolean;
   showPercentileLines: boolean;
   showXAxis: boolean;
+  showTicks: boolean;
 }> = ({
   shapes: unAdjustedShapes,
   samples,
@@ -109,9 +110,10 @@ const InnerDistributionsChart: FC<{
   height: innerHeight,
   isMulti,
   samplesBarSetting,
-  showHoverVerticalLine,
+  showCursorLine,
   showPercentileLines,
   showXAxis,
+  showTicks,
 }) => {
   const verticalLine = useHoverVerticalLineValue();
 
@@ -184,7 +186,6 @@ const InnerDistributionsChart: FC<{
         top: 2,
         bottom: bottomPadding,
       };
-
       const { padding, frame } = drawAxes({
         context,
         width,
@@ -194,7 +195,7 @@ const InnerDistributionsChart: FC<{
         yScale,
         hideYAxis: true,
         hideXAxis: !showXAxis,
-        drawTicks: false,
+        drawTicks: showTicks,
         xTickFormat: plot.xScale.tickFormat,
         xAxisTitle: plot.xScale.title,
         hideAxisLines: true,
@@ -359,16 +360,19 @@ const InnerDistributionsChart: FC<{
         frame.exit();
       }
 
-      drawCursorLines({
-        frame,
-        cursor,
-        x: {
-          scale: xScale,
-          format: plot.xScale.tickFormat,
-        },
-      });
+      {
+        showCursorLine &&
+          drawCursorLines({
+            frame,
+            cursor,
+            x: {
+              scale: xScale,
+              format: plot.xScale.tickFormat,
+            },
+          });
+      }
 
-      if (verticalLine && showHoverVerticalLine) {
+      if (verticalLine) {
         drawVerticalLine({
           frame,
           scale: xScale,
@@ -392,9 +396,10 @@ const InnerDistributionsChart: FC<{
       sampleBarHeight,
       bottomPadding,
       samplesBarSetting,
-      showHoverVerticalLine,
+      showCursorLine,
       showPercentileLines,
       showXAxis,
+      showTicks,
     ]
   );
 
@@ -554,9 +559,10 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
             plot={plot}
             height={height}
             samplesBarSetting={samplesState}
-            showHoverVerticalLine={height > 30}
+            showCursorLine={height > 30}
             showPercentileLines={height > 30}
             showXAxis={height > 20}
+            showTicks={height > 40}
           />
         )}
         {!anyAreNonnormalized && plot.showSummary && (
