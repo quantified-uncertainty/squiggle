@@ -550,49 +550,51 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
 
   return (
     <DistProvider generateInitialValue={() => ({})}>
-      <div className="flex flex-col items-stretch">
-        {plot.title && <PlotTitle title={plot.title} />}
-        {hasLogError && (
-          <ErrorAlert heading="Log Domain Error">
-            Cannot graph distribution with negative values on logarithmic scale.
-          </ErrorAlert>
-        )}
+      {plot.title && <PlotTitle title={plot.title} />}
+      {hasLogError && (
+        <ErrorAlert heading="Log Domain Error">
+          Cannot graph distribution with negative values on logarithmic scale.
+        </ErrorAlert>
+      )}
 
-        {!hasLogError && (
-          <>
-            <InnerDistributionsChart
-              isMulti={isMulti}
-              samples={samples}
-              shapes={shapes.value}
-              plot={plot}
-              height={height}
-              samplesBarSetting={samplesState}
-              showCursorLine={height > 30}
-              showPercentileLines={height > 30}
-              showXAxis={height > 20}
-              showTicks={height > 40}
-            />
+      {!hasLogError && (
+        <>
+          <div className="flex flex-col items-stretch">
+            <div className="flex-1">
+              <InnerDistributionsChart
+                isMulti={isMulti}
+                samples={samples}
+                shapes={shapes.value}
+                plot={plot}
+                height={height}
+                samplesBarSetting={samplesState}
+                showCursorLine={height > 30}
+                showPercentileLines={height > 30}
+                showXAxis={height > 20}
+                showTicks={height > 40}
+              />
+            </div>
 
             {!anyAreNonnormalized && plot.showSummary && (
-              <div className="overflow-auto">
-                <div
-                  className={clsx(
-                    "overflow-auto ml-auto",
-                    size === "large" && "pt-5"
-                  )}
-                >
-                  <SummaryTable
-                    plot={plot}
-                    environment={environment}
-                    size={size}
-                  />
-                </div>
+              <div
+                className={clsx(
+                  "overflow-auto ml-auto w-auto",
+                  size === "large" && "pt-5"
+                )}
+              >
+                <SummaryTable
+                  plot={plot}
+                  environment={environment}
+                  size={size}
+                />
               </div>
             )}
-          </>
-        )}
-        {anyAreNonnormalized && nonNormalizedError()}
-      </div>
+            {anyAreNonnormalized && (
+              <div className="flex-1 pt-2"> {nonNormalizedError()}</div>
+            )}
+          </div>
+        </>
+      )}
     </DistProvider>
   );
 };
