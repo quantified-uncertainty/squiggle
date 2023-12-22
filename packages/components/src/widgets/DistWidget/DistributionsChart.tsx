@@ -34,7 +34,7 @@ import {
   flattenResult,
 } from "../../lib/utility.js";
 import { PlotTitle } from "../PlotWidget/PlotTitle.js";
-import { DistProvider, useVerticalLineValue } from "./DistProvider.js";
+import { DistProvider, useHoverVerticalLineValue } from "./DistProvider.js";
 import { SummaryTable } from "./SummaryTable.js";
 import { adjustPdfHeightToScale } from "./utils.js";
 
@@ -83,6 +83,8 @@ function interpolateYAtX(
   }
 }
 
+type SampleBarSetting = "none" | "bottom" | "behind";
+
 const InnerDistributionsChart: FC<{
   shapes: (SqShape & {
     name: string;
@@ -94,18 +96,22 @@ const InnerDistributionsChart: FC<{
   plot: SqDistributionsPlot;
   height: number;
   isMulti: boolean; // enables legend and semi-transparent rendering
-  showSamplesBar: boolean;
-  showSamplesBarBelow: boolean;
+  samplesBarSetting: SampleBarSetting;
+  showHoverVerticalLine: boolean;
+  showPercentileLines: boolean;
+  showXAxis: boolean;
 }> = ({
   shapes: unAdjustedShapes,
   samples,
   plot,
   height: innerHeight,
   isMulti,
-  showSamplesBar,
-  showSamplesBarBelow,
+  samplesBarSetting,
+  showHoverVerticalLine,
+  showPercentileLines,
+  showXAxis,
 }) => {
-  const verticalLine = useVerticalLineValue();
+  const verticalLine = useHoverVerticalLineValue();
 
   const [discreteTooltip, setDiscreteTooltip] = useState<
     { value: number; probability: number } | undefined
@@ -128,16 +134,13 @@ const InnerDistributionsChart: FC<{
   const legendItemHeight = 16;
 
   const legendHeight = isMulti ? legendItemHeight * shapes.length : 0;
-  const _showSamplesBar = showSamplesBar && samples.length && !isMulti;
-  const samplesFooterHeight = _showSamplesBar && showSamplesBarBelow ? 15 : 0;
+  const samplesFooterHeight = samplesBarSetting === "bottom" ? 15 : 0;
 
   const height = innerHeight + legendHeight + samplesFooterHeight;
-  const hideXAxis = height < 25;
-  const bottomPadding = (hideXAxis ? 0 : 14) + samplesFooterHeight;
+  const bottomPadding = (!showXAxis ? 0 : 14) + samplesFooterHeight;
 
-  const sampleBarHeight = showSamplesBarBelow
-    ? 7
-    : Math.min(7, innerHeight * 0.04);
+  const sampleBarHeight =
+    samplesBarSetting === "behind" ? Math.min(7, innerHeight * 0.04) : 7;
 
   const { xScale, yScale } = useMemo(() => {
     const xScale = sqScaleToD3(plot.xScale);
@@ -172,6 +175,7 @@ const InnerDistributionsChart: FC<{
           return color;
         }
       };
+
       const suggestedPadding = {
         left: 2,
         right: 2 + legendHeight,
@@ -187,7 +191,7 @@ const InnerDistributionsChart: FC<{
         xScale,
         yScale,
         hideYAxis: true,
-        hideXAxis: hideXAxis,
+        hideXAxis: !showXAxis,
         drawTicks: false,
         xTickFormat: plot.xScale.tickFormat,
         xAxisTitle: plot.xScale.title,
@@ -217,22 +221,24 @@ const InnerDistributionsChart: FC<{
       }
 
       // samplesBar
-      if (_showSamplesBar) {
+      if (samplesBarSetting !== "none") {
         context.save();
-        context.strokeStyle = showSamplesBarBelow
-          ? getColor(0)
-          : getColor(0, 0.4);
         context.lineWidth = 0.5;
 
-        const offset = showSamplesBarBelow ? 0 : 15;
+        let yOffset = 0;
+        if (samplesBarSetting === "behind") {
+          context.strokeStyle = getColor(0, 0.4);
+        } else if (samplesBarSetting === "bottom") {
+          context.strokeStyle = getColor(0);
+          yOffset = 15;
+        }
 
         samples.forEach((sample) => {
           context.beginPath();
           const x = xScale(sample);
-
           context.beginPath();
-          context.moveTo(padding.left + x, height - offset - sampleBarHeight);
-          context.lineTo(padding.left + x, height - offset);
+          context.moveTo(padding.left + x, height - yOffset - sampleBarHeight);
+          context.lineTo(padding.left + x, height - yOffset);
           context.stroke();
         });
         context.restore();
@@ -266,7 +272,7 @@ const InnerDistributionsChart: FC<{
           context.globalAlpha = 1;
 
           // Percentile lines
-          if (height > 20) {
+          if (showPercentileLines) {
             const percentiles: [result<number, SqDistributionError>, string][] =
               [
                 [shape.p5, "p5"],
@@ -358,7 +364,7 @@ const InnerDistributionsChart: FC<{
         },
       });
 
-      if (verticalLine) {
+      if (verticalLine && showHoverVerticalLine) {
         drawVerticalLine({
           frame,
           scale: xScale,
@@ -376,14 +382,15 @@ const InnerDistributionsChart: FC<{
       discreteTooltip,
       cursor,
       isMulti,
-      _showSamplesBar,
       xScale,
       yScale,
       verticalLine,
       sampleBarHeight,
-      showSamplesBarBelow,
       bottomPadding,
-      hideXAxis,
+      samplesBarSetting,
+      showHoverVerticalLine,
+      showPercentileLines,
+      showXAxis,
     ]
   );
 
@@ -438,7 +445,6 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
   height,
 }) => {
   const CUTOFF_TO_SHOW_SAMPLES_BAR = 100000; // Default to stop showing bottom samples bar if there are more than 100k samples
-  const HEIGHT_SAMPLES_BAR_CUTOFF = 30; // Default to stop showing bottom samples bar if the height is less than 50px
   const distributions = plot.distributions;
 
   // Collect samples to render them in a sample bar.
@@ -504,17 +510,30 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
     );
   };
 
-  const showSamplesBar =
-    samples.length < CUTOFF_TO_SHOW_SAMPLES_BAR &&
-    height > HEIGHT_SAMPLES_BAR_CUTOFF;
+  const tooManySamplesForSamplesBar =
+    samples.length < CUTOFF_TO_SHOW_SAMPLES_BAR;
 
   const isMulti =
     distributions.length > 1 ||
     !!(distributions.length === 1 && distributions[0].name);
 
+  let samplesState: SampleBarSetting = "none";
+
   const size = height > 150 ? "large" : "small";
 
-  const showSamplesBarBelow = size == "large";
+  if (
+    samples.length < 10 ||
+    !tooManySamplesForSamplesBar ||
+    isMulti ||
+    height <= 30
+  ) {
+    samplesState = "none";
+  } else if (size == "small") {
+    samplesState = "behind";
+  } else {
+    samplesState = "bottom";
+  }
+
   return (
     <DistProvider generateInitialValue={() => ({})}>
       <div className="flex flex-col items-stretch">
@@ -530,8 +549,10 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
             shapes={shapes.value}
             plot={plot}
             height={height}
-            showSamplesBar={showSamplesBar}
-            showSamplesBarBelow={showSamplesBarBelow}
+            samplesBarSetting={samplesState}
+            showHoverVerticalLine={height > 30}
+            showPercentileLines={height > 30}
+            showXAxis={height > 30}
           />
         )}
         {!anyAreNonnormalized && plot.showSummary && (

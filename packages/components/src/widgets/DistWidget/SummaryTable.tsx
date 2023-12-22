@@ -17,7 +17,7 @@ import { TextTooltip } from "@quri/ui";
 
 import { NumberShower } from "../../components/NumberShower.js";
 import { formatDate } from "../../lib/d3/index.js";
-import { useSetVerticalLine } from "./DistProvider.js";
+import { useSetHoverVerticalLine } from "./DistProvider.js";
 
 type HoverableCellProps = PropsWithChildren<{
   onMouseEnter?: () => void;
@@ -112,7 +112,7 @@ export const SummaryTable: FC<SummaryTableProps> = ({
 
   const precision = sizeIsLarge ? 3 : 2;
 
-  const setVerticalLine = useSetVerticalLine();
+  const setHoverVerticalLine = useSetHoverVerticalLine();
   return (
     <div className="overflow-x-auto relative">
       <table className="w-full text-left font-light">
@@ -154,8 +154,8 @@ export const SummaryTable: FC<SummaryTableProps> = ({
               <tr key={i}>
                 {showNames && <Cell>{name}</Cell>}
                 <Cell
-                  onMouseEnter={() => setVerticalLine(mean)}
-                  onMouseLeave={() => setVerticalLine(undefined)}
+                  onMouseEnter={() => setHoverVerticalLine(mean)}
+                  onMouseLeave={() => setHoverVerticalLine(undefined)}
                 >
                   {formatNumber(mean, false, valueType, tickFormat, precision)}
                 </Cell>
@@ -174,11 +174,11 @@ export const SummaryTable: FC<SummaryTableProps> = ({
                   <Cell
                     key={i}
                     onMouseEnter={() =>
-                      setVerticalLine(
+                      setHoverVerticalLine(
                         value.inv.ok ? value.inv.value : undefined
                       )
                     }
-                    onMouseLeave={() => setVerticalLine(undefined)}
+                    onMouseLeave={() => setHoverVerticalLine(undefined)}
                   >
                     {unwrapResult(
                       value.inv,
