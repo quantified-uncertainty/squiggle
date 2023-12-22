@@ -28,15 +28,17 @@ import {
 import { Point } from "../../lib/draw/types.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
-import {
-  adjustColorBrightness,
-  canvasClasses,
-  flattenResult,
-} from "../../lib/utility.js";
+import { canvasClasses, flattenResult } from "../../lib/utility.js";
 import { PlotTitle } from "../PlotWidget/PlotTitle.js";
 import { DistProvider, useHoverVerticalLineValue } from "./DistProvider.js";
 import { SummaryTable } from "./SummaryTable.js";
 import { adjustPdfHeightToScale } from "./utils.js";
+
+const distRadiusScalingFromHeight = d3
+  .scaleLinear()
+  .domain([10, 300]) // The potential height of the chart
+  .range([2, 5]) // The range of circle radiuses
+  .clamp(true);
 
 export type DistributionsChartProps = {
   plot: SqDistributionsPlot;
@@ -134,13 +136,13 @@ const InnerDistributionsChart: FC<{
   const legendItemHeight = 16;
 
   const legendHeight = isMulti ? legendItemHeight * shapes.length : 0;
-  const samplesFooterHeight = samplesBarSetting === "bottom" ? 15 : 0;
+  const samplesFooterHeight = samplesBarSetting === "bottom" ? 20 : 0;
 
   const height = innerHeight + legendHeight + samplesFooterHeight;
   const bottomPadding = (!showXAxis ? 0 : 14) + samplesFooterHeight;
 
   const sampleBarHeight =
-    samplesBarSetting === "behind" ? Math.min(7, innerHeight * 0.04) : 7;
+    samplesBarSetting === "behind" ? Math.min(7, innerHeight * 0.04 + 1) : 7;
 
   const { xScale, yScale } = useMemo(() => {
     const xScale = sqScaleToD3(plot.xScale);
@@ -228,9 +230,10 @@ const InnerDistributionsChart: FC<{
         let yOffset = 0;
         if (samplesBarSetting === "behind") {
           context.strokeStyle = getColor(0, 0.4);
+          yOffset = bottomPadding;
         } else if (samplesBarSetting === "bottom") {
           context.strokeStyle = getColor(0);
-          yOffset = 15;
+          yOffset = 0;
         }
 
         samples.forEach((sample) => {
@@ -250,7 +253,7 @@ const InnerDistributionsChart: FC<{
         const translatedCursor: Point | undefined = cursor
           ? frame.translatedPoint(cursor)
           : undefined;
-        const discreteRadius = 5;
+        const discreteRadius = distRadiusScalingFromHeight(height);
 
         // there can be only one
         let newDiscreteTooltip: typeof discreteTooltip = undefined;
@@ -316,20 +319,14 @@ const InnerDistributionsChart: FC<{
           context.stroke();
 
           // discrete
-          const darkenAmountCircle = isMulti ? 10 : 50;
-          const darkenAmountLine = Math.floor(darkenAmountCircle / 2);
+          const darkenAmountCircle = isMulti ? 0.05 : 0.1;
 
-          const discreteLineColor = adjustColorBrightness(
-            getColor(i),
-            -darkenAmountLine
-          );
-          const discreteCircleColor = adjustColorBrightness(
-            getColor(i),
-            -darkenAmountCircle
-          );
+          const discreteLineColor = getColor(i, -darkenAmountCircle);
+          const discreteCircleColor = getColor(i, -darkenAmountCircle);
 
-          context.strokeStyle = discreteLineColor;
+          // context.strokeStyle = discreteLineColor;
           context.fillStyle = discreteCircleColor;
+          context.strokeStyle = discreteLineColor;
           for (const point of shape.discrete) {
             context.beginPath();
             context.lineWidth = 1;
@@ -345,8 +342,15 @@ const InnerDistributionsChart: FC<{
             }
             context.moveTo(x, 0);
             context.lineTo(x, y);
+            context.globalAlpha = 0.5;
             context.stroke();
-            drawCircle({ context, x, y, r: discreteRadius });
+            context.globalAlpha = 1;
+            drawCircle({
+              context,
+              x,
+              y: y - discreteRadius, // helps make sure that circle doesn't go over the top
+              r: discreteRadius,
+            });
           }
         }
         if (!isEqual(discreteTooltip, newDiscreteTooltip)) {
@@ -552,7 +556,7 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
             samplesBarSetting={samplesState}
             showHoverVerticalLine={height > 30}
             showPercentileLines={height > 30}
-            showXAxis={height > 30}
+            showXAxis={height > 20}
           />
         )}
         {!anyAreNonnormalized && plot.showSummary && (

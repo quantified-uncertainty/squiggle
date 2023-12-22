@@ -42,15 +42,15 @@ interface DrawAxesParams {
 
 function calculateNumberOfXTicks(width: number, height: number): number {
   const minTicks = 3;
-  const maxTicks = 12;
+  const maxTicks = 16;
 
   const exponent = 1 / 2.5;
   // A simplified scaling factor based on the dimensions of the chart
   const scale = Math.pow(width * height, exponent);
 
   // Define reasonable bounds for the scale factor
-  const minScale = Math.pow(40000, exponent); // Equivalent to 600x400
-  const maxScale = Math.pow(500000, exponent); // Equivalent to 1000x500
+  const minScale = Math.pow(40000, exponent); // Equivalent to 200x200
+  const maxScale = Math.pow(1000000, exponent); // Equivalent to 1000x500
 
   // Normalize the scale factor to a value between 0 and 1
   const normalizedScale = (scale - minScale) / (maxScale - minScale);
