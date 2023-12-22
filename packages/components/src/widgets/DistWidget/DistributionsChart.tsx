@@ -143,6 +143,8 @@ const InnerDistributionsChart: FC<{
   const height = innerHeight + legendHeight + samplesFooterHeight;
   const bottomPadding = (!showXAxis ? 0 : 14) + samplesFooterHeight;
 
+  const discreteRadius = distRadiusScalingFromHeight(height);
+
   const sampleBarHeight =
     samplesBarSetting === "behind" ? Math.min(7, innerHeight * 0.04 + 1) : 7;
 
@@ -181,9 +183,9 @@ const InnerDistributionsChart: FC<{
       };
 
       const suggestedPadding = {
-        left: 2,
-        right: 2 + legendHeight,
-        top: 2,
+        left: discreteRadius,
+        right: discreteRadius + legendHeight,
+        top: discreteRadius,
         bottom: bottomPadding,
       };
       const { padding, frame } = drawAxes({
@@ -254,7 +256,6 @@ const InnerDistributionsChart: FC<{
         const translatedCursor: Point | undefined = cursor
           ? frame.translatedPoint(cursor)
           : undefined;
-        const discreteRadius = distRadiusScalingFromHeight(height);
 
         // there can be only one
         let newDiscreteTooltip: typeof discreteTooltip = undefined;
@@ -384,6 +385,7 @@ const InnerDistributionsChart: FC<{
     [
       height,
       legendHeight,
+      discreteRadius,
       shapes,
       samples,
       plot,
@@ -543,39 +545,51 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
     samplesState = "bottom";
   }
 
+  const hasLogError =
+    plot.xScale.tag === "log" && shapes.value.some(hasMassBelowZero);
+
   return (
     <DistProvider generateInitialValue={() => ({})}>
       <div className="flex flex-col items-stretch">
         {plot.title && <PlotTitle title={plot.title} />}
-        {plot.xScale.tag === "log" && shapes.value.some(hasMassBelowZero) ? (
+        {hasLogError && (
           <ErrorAlert heading="Log Domain Error">
             Cannot graph distribution with negative values on logarithmic scale.
           </ErrorAlert>
-        ) : (
-          <InnerDistributionsChart
-            isMulti={isMulti}
-            samples={samples}
-            shapes={shapes.value}
-            plot={plot}
-            height={height}
-            samplesBarSetting={samplesState}
-            showCursorLine={height > 30}
-            showPercentileLines={height > 30}
-            showXAxis={height > 20}
-            showTicks={height > 40}
-          />
         )}
-        {!anyAreNonnormalized && plot.showSummary && (
-          <div className="flex overflow-auto">
-            <div
-              className={clsx(
-                "overflow-auto ml-auto",
-                size === "large" && "pt-5"
-              )}
-            >
-              <SummaryTable plot={plot} environment={environment} size={size} />
-            </div>
-          </div>
+
+        {!hasLogError && (
+          <>
+            <InnerDistributionsChart
+              isMulti={isMulti}
+              samples={samples}
+              shapes={shapes.value}
+              plot={plot}
+              height={height}
+              samplesBarSetting={samplesState}
+              showCursorLine={height > 30}
+              showPercentileLines={height > 30}
+              showXAxis={height > 20}
+              showTicks={height > 40}
+            />
+
+            {!anyAreNonnormalized && plot.showSummary && (
+              <div className="overflow-auto">
+                <div
+                  className={clsx(
+                    "overflow-auto ml-auto",
+                    size === "large" && "pt-5"
+                  )}
+                >
+                  <SummaryTable
+                    plot={plot}
+                    environment={environment}
+                    size={size}
+                  />
+                </div>
+              </div>
+            )}
+          </>
         )}
         {anyAreNonnormalized && nonNormalizedError()}
       </div>

@@ -14,9 +14,9 @@ type Story = StoryObj<typeof meta>;
 
 const code = "mx(5 to 100, uniform(100, 180), 30, 60, 80, [5,5,0.3,0.3,0.3])";
 export const Height7: Story = {
-  name: "Height8",
+  name: "Height14",
   args: {
-    chartHeight: 4,
+    chartHeight: 7,
     code,
   },
 };

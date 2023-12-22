@@ -11,7 +11,7 @@ import { DistributionsChart } from "./DistributionsChart.js";
 
 // Distributions should be smaller than the other charts.
 // Note that for distributions, this only applies to the internals, there's also extra margin and details.
-export const CHART_TO_DIST_HEIGHT_ADJUSTMENT = 0.5;
+export const CHART_TO_DIST_HEIGHT_ADJUSTMENT = 0.55;
 
 widgetRegistry.register("Dist", {
   Preview(value) {
