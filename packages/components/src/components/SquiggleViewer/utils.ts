@@ -142,6 +142,6 @@ export const shouldBeginCollapsed = (
   if (path.isRoot()) {
     return childrenValues.length > 30;
   } else {
-    return childrenValues.length > 5 || hasExtraContentToShow(value);
+    return childrenValues.length > 5 || !hasExtraContentToShow(value);
   }
 };
