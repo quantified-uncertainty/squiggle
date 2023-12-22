@@ -24,7 +24,7 @@ type HoverableCellProps = PropsWithChildren<{
   onMouseLeave?: () => void;
 }>;
 
-const commonCellClasses = "py-0.5 px-2 font-light";
+const commonCellClasses = "py-0.5 px-1 font-light";
 
 const TableHeadCell: FC<PropsWithChildren> = ({ children }) => (
   <th className={clsx(commonCellClasses)}>{children}</th>
@@ -44,45 +44,6 @@ const Cell: FC<HoverableCellProps> = ({
   </td>
 );
 
-const formatNumber = (
-  number: number,
-  isRange: boolean,
-  valueType: "date" | "number",
-  tickFormat: string | undefined,
-  precision: number
-) => {
-  if (valueType == "date") {
-    // When dealing with dates, the standard deviation is a duration, not a date, so we need to format it differently
-    if (isRange) {
-      return SDuration.fromMs(number).toString();
-    } else {
-      return formatDate(new Date(number), tickFormat);
-    }
-  } else if (tickFormat) {
-    return d3.format(tickFormat)(number);
-  } else {
-    return <NumberShower number={number} precision={precision} />;
-  }
-};
-
-const unwrapResult = (
-  x: result<number, SqDistributionError>,
-  isRange: boolean,
-  valueType: "date" | "number",
-  tickFormat: string | undefined,
-  precision: number
-): React.ReactNode => {
-  if (x.ok) {
-    return formatNumber(x.value, isRange, valueType, tickFormat, precision);
-  } else {
-    return (
-      <TextTooltip text={x.value.toString()}>
-        <XIcon className="w-5 h-5 text-gray-500" />
-      </TextTooltip>
-    );
-  }
-};
-
 type SummaryTableProps = {
   plot: SqDistributionsPlot;
   environment: Env;
@@ -94,9 +55,10 @@ export const SummaryTable: FC<SummaryTableProps> = ({
   environment,
   size,
 }) => {
+  const setHoverVerticalLine = useSetHoverVerticalLine();
   const showNames = plot.distributions.some((d) => d.name);
-  const _isDate = plot.xScale?.tag === "date";
-  const valueType = _isDate ? "date" : "number";
+  const isDate = plot.xScale?.tag === "date";
+  const valueType = isDate ? "date" : "number";
   const tickFormat = plot.xScale?.tickFormat;
   const sizeIsLarge = size === "large";
   const percentiles = sizeIsLarge
@@ -107,12 +69,42 @@ export const SummaryTable: FC<SummaryTableProps> = ({
     return dist instanceof SqSampleSetDistribution && dist.getSamples().length;
   };
   const _firstSamples = getSampleCount(plot.distributions[0].distribution);
-  const hasSamples = Boolean(_firstSamples && _firstSamples > 5);
-  const showSamplesCount = hasSamples && sizeIsLarge;
+
+  const _hasSamples = Boolean(_firstSamples && _firstSamples > 5);
+  const showSamplesCount = _hasSamples && sizeIsLarge;
 
   const precision = sizeIsLarge ? 3 : 2;
 
-  const setHoverVerticalLine = useSetHoverVerticalLine();
+  const formatNumber = (number: number, isRange: boolean) => {
+    if (valueType == "date") {
+      // When dealing with dates, the standard deviation is a duration, not a date, so we need to format it differently
+      if (isRange) {
+        return SDuration.fromMs(number).toString();
+      } else {
+        return formatDate(new Date(number), tickFormat);
+      }
+    } else if (tickFormat) {
+      return d3.format(tickFormat)(number);
+    } else {
+      return <NumberShower number={number} precision={precision} />;
+    }
+  };
+
+  const unwrapResult = (
+    x: result<number, SqDistributionError>,
+    isRange: boolean
+  ): React.ReactNode => {
+    if (x.ok) {
+      return formatNumber(x.value, isRange);
+    } else {
+      return (
+        <TextTooltip text={x.value.toString()}>
+          <XIcon className="w-5 h-5 text-gray-500" />
+        </TextTooltip>
+      );
+    }
+  };
+
   return (
     <div className="overflow-x-auto relative">
       <table className="w-full text-left font-light">
@@ -131,12 +123,12 @@ export const SummaryTable: FC<SummaryTableProps> = ({
                 {percentile * 100}%
               </TableHeadCell>
             ))}
-            {showSamplesCount && <TableHeadCell>Stdev</TableHeadCell>}
+            {showSamplesCount && <TableHeadCell>Samples</TableHeadCell>}
           </tr>
         </thead>
         <tbody
           className={clsx(
-            "text-sm text-blue-800 opacity-90 ",
+            "text-sm text-blue-800 opacity-90",
             size === "large" ? "text-md" : "text-sm"
           )}
         >
@@ -157,19 +149,9 @@ export const SummaryTable: FC<SummaryTableProps> = ({
                   onMouseEnter={() => setHoverVerticalLine(mean)}
                   onMouseLeave={() => setHoverVerticalLine(undefined)}
                 >
-                  {formatNumber(mean, false, valueType, tickFormat, precision)}
+                  {formatNumber(mean, false)}
                 </Cell>
-                {sizeIsLarge && (
-                  <Cell>
-                    {unwrapResult(
-                      stdev,
-                      true,
-                      valueType,
-                      tickFormat,
-                      precision
-                    )}
-                  </Cell>
-                )}
+                {sizeIsLarge && <Cell>{unwrapResult(stdev, true)}</Cell>}
                 {percentileValues.map((value, i) => (
                   <Cell
                     key={i}
@@ -180,13 +162,7 @@ export const SummaryTable: FC<SummaryTableProps> = ({
                     }
                     onMouseLeave={() => setHoverVerticalLine(undefined)}
                   >
-                    {unwrapResult(
-                      value.inv,
-                      false,
-                      valueType,
-                      tickFormat,
-                      precision
-                    )}
+                    {unwrapResult(value.inv, false)}
                   </Cell>
                 ))}
                 {showSamplesCount && (
