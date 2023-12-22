@@ -187,6 +187,7 @@ varTable = Table.make(
 )
 
 varDist = SampleSet.fromDist(2 to 5)
+varDist2 = SampleSet.fromDist(10E20 to 20E20)
 
 varScatter = Plot.scatter({
   xDist: varDist,
