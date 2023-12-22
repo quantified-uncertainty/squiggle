@@ -24,7 +24,7 @@ type HoverableCellProps = PropsWithChildren<{
   onMouseLeave?: () => void;
 }>;
 
-const commonCellClasses = "py-0.5 px-1 font-light";
+const commonCellClasses = "py-0.5 px-3 font-light";
 
 const TableHeadCell: FC<PropsWithChildren> = ({ children }) => (
   <th className={clsx(commonCellClasses)}>{children}</th>

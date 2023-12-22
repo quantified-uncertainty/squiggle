@@ -73,7 +73,7 @@ export const ScatterChart: FC<Props> = ({ plot, height, environment }) => {
         yTickFormat: plot.yScale?.tickFormat,
         xAxisTitle: plot.xScale?.title,
         yAxisTitle: plot.yScale?.title,
-        drawTicks: true,
+        showTicks: true,
       });
 
       frame.enter();

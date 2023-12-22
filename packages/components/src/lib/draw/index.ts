@@ -28,10 +28,10 @@ interface DrawAxesParams {
   suggestedPadding: Padding;
   width: number;
   height: number;
-  hideYAxis?: boolean;
-  hideXAxis?: boolean;
-  hideAxisLines?: boolean;
-  drawTicks?: boolean;
+  showXAxis?: boolean;
+  showYAxis?: boolean;
+  showAxisLines?: boolean;
+  showTicks?: boolean;
   xTickCount?: number;
   yTickCount?: number;
   xTickFormat?: string;
@@ -40,17 +40,20 @@ interface DrawAxesParams {
   yAxisTitle?: string;
 }
 
-function calculateNumberOfXTicks(width: number, height: number): number {
+// This took a fair amount of experimentation to sort-of-get right. Edit using views of several distribution chart sizes.
+function calculateNumberOfXTicks(
+  primaryAxis: number,
+  secondaryAxis: number
+): number {
   const minTicks = 3;
   const maxTicks = 16;
 
-  const exponent = 1 / 2.5;
   // A simplified scaling factor based on the dimensions of the chart
-  const scale = Math.pow(width * height, exponent);
+  const scale = primaryAxis * secondaryAxis;
 
   // Define reasonable bounds for the scale factor
-  const minScale = Math.pow(40000, exponent); // Equivalent to 200x200
-  const maxScale = Math.pow(1000000, exponent); // Equivalent to 1000x500
+  const minScale = 40000; // Equivalent to 200x200
+  const maxScale = 1000000; // Equivalent to 1000x1000
 
   // Normalize the scale factor to a value between 0 and 1
   const normalizedScale = (scale - minScale) / (maxScale - minScale);
@@ -71,10 +74,10 @@ export function drawAxes({
   suggestedPadding,
   width,
   height,
-  hideYAxis = false,
-  hideXAxis = false,
-  hideAxisLines = height < 150 || width < 150,
-  drawTicks = true,
+  showYAxis = true,
+  showXAxis = true,
+  showAxisLines = height > 150 && width > 150,
+  showTicks = true,
   xTickCount,
   yTickCount,
   xTickFormat: xTickFormatSpecifier = defaultTickFormatSpecifier,
@@ -84,14 +87,6 @@ export function drawAxes({
 }: DrawAxesParams) {
   const _xTickCount = xTickCount || calculateNumberOfXTicks(width, height);
   const _yTickCount = yTickCount || calculateNumberOfXTicks(height, width);
-  const gradient = context.createLinearGradient(
-    0,
-    0,
-    width * 0.6,
-    height * 0.6
-  );
-  gradient.addColorStop(0, "#6d9bce"); // Start color
-  gradient.addColorStop(1, "#4fabce"); // End color
 
   const xTicks = xScale.ticks(_xTickCount);
   const xTickFormat = xScale.tickFormat(_xTickCount, xTickFormatSpecifier);
@@ -110,7 +105,7 @@ export function drawAxes({
   }
 
   // measure tick sizes for dynamic padding
-  if (!hideYAxis) {
+  if (showYAxis) {
     yTicks.forEach((d) => {
       const measured = context.measureText(yTickFormat(d));
       padding.left = Math.max(
@@ -133,9 +128,9 @@ export function drawAxes({
   yScale.range([0, frame.height]);
 
   // x axis
-  if (!hideXAxis) {
+  if (showXAxis) {
     frame.enter();
-    if (!hideAxisLines) {
+    if (showAxisLines) {
       context.beginPath();
       context.strokeStyle = axisColor;
       context.lineWidth = 1;
@@ -153,7 +148,7 @@ export function drawAxes({
       const x = xScale(xTick);
       const y = 0;
 
-      if (drawTicks) {
+      if (showTicks) {
         context.beginPath();
         context.strokeStyle = labelColor;
         context.lineWidth = 1;
@@ -188,9 +183,9 @@ export function drawAxes({
   }
 
   // y axis
-  if (!hideYAxis) {
+  if (showYAxis) {
     frame.enter();
-    if (!hideAxisLines) {
+    if (showAxisLines) {
       context.beginPath();
       context.strokeStyle = axisColor;
       context.lineWidth = 1;
@@ -210,7 +205,7 @@ export function drawAxes({
       context.textBaseline = "bottom";
       const { actualBoundingBoxAscent: textHeight } = context.measureText(text);
 
-      if (drawTicks) {
+      if (showTicks) {
         context.beginPath();
         context.strokeStyle = labelColor;
         context.lineWidth = 1;

@@ -195,12 +195,12 @@ const InnerDistributionsChart: FC<{
         suggestedPadding: suggestedPadding,
         xScale,
         yScale,
-        hideYAxis: true,
-        hideXAxis: !showXAxis,
-        drawTicks: showTicks,
+        showYAxis: false,
+        showXAxis,
+        showTicks,
         xTickFormat: plot.xScale.tickFormat,
         xAxisTitle: plot.xScale.title,
-        hideAxisLines: true,
+        showAxisLines: false,
       });
 
       if (isMulti) {
