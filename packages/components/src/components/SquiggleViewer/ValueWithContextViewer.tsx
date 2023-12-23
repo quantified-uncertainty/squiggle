@@ -69,8 +69,8 @@ const WithComment: FC<PropsWithChildren<Props>> = ({ value, children }) => {
   const commentEl = (
     <ReactMarkdown
       className={clsx(
-        "prose max-w-4xl text-sm text-slate-800 py-2 px-3 mb-2",
-        commentPosition === "bottom" && "mt-2"
+        "prose max-w-4xl text-sm text-slate-600 py-1 px-3",
+        commentPosition === "bottom" && "mt-1"
       )}
     >
       {comment}
@@ -83,6 +83,9 @@ const WithComment: FC<PropsWithChildren<Props>> = ({ value, children }) => {
       {commentPosition === "top" && commentEl}
       {children}
       {commentPosition === "bottom" && commentEl}
+      {commentPosition === "top" && comment.length > 0 && (
+        <div className="mt-1 w-full" /> // The comment takes extra vertical space, so we offset this on the bottom.
+      )}
     </div>
   );
 };

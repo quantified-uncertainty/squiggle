@@ -142,6 +142,8 @@ export const shouldBeginCollapsed = (
   const childrenValues = getChildrenValues(value);
   if (path.isRoot()) {
     return childrenValues.length > 30;
+  } else if (value.tag === "Dist") {
+    return true;
   } else {
     return childrenValues.length > 5 || !hasExtraContentToShow(value);
   }
