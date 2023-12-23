@@ -67,8 +67,8 @@ export const MessageAlert: React.FC<{
   <Alert
     {...props}
     backgroundColor="bg-slate-50"
-    headingColor="text-slate-800"
-    bodyColor="text-slate-700"
+    headingColor="text-slate-700"
+    bodyColor="text-slate-600"
     icon={InformationCircleIcon}
     iconColor="text-slate-400"
   />
