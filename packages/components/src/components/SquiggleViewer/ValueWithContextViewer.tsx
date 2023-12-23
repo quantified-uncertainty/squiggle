@@ -186,7 +186,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value, parentValue }) => {
       >
         {taggedName ? taggedName : name}
       </span>
-      {showColon && <span className={"text-gray-400 ml-0.5 font-mono"}>:</span>}
+      {showColon && <span className={"text-gray-400 font-mono"}>:</span>}
     </div>
   );
 
