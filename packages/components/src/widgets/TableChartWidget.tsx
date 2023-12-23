@@ -60,22 +60,19 @@ widgetRegistry.register("TableChart", {
 
     return (
       <div>
-        <div className="relative rounded-sm overflow-hidden border border-slate-200">
+        <div className="relative rounded-md overflow-hidden border border-stone-200">
           <table
             className="table-fixed w-full"
             style={{ minWidth: columnLength * 100 }}
           >
             {hasColumnNames && (
-              <thead className="text-xs text-gray-700 bg-gray-50 border-b border-slate-200">
+              <thead className="text-sm text-stone-500 bg-stone-50 border-b border-stone-200 break-words">
                 <tr>
                   {Array.from({ length: columnLength }, (_, i) => (
                     <th
                       key={i}
                       scope="col"
-                      className={clsx(
-                        "px-2 py-2",
-                        i !== 0 && "border-slate-200 border-l"
-                      )}
+                      className="px-2 py-2 text-left font-medium"
                     >
                       {columnNames[i] || ""}
                     </th>
@@ -85,13 +82,13 @@ widgetRegistry.register("TableChart", {
             )}
             <tbody>
               {rowsAndColumns.map((row, i) => (
-                <tr key={i} className="border-b border-slate-100">
+                <tr key={i} className="border-b border-stone-100">
                   {row.map((item, k) => (
                     <td
                       key={k}
                       className={clsx(
                         "px-1 overflow-hidden",
-                        k !== 0 && "border-slate-100 border-l"
+                        k !== 0 && "border-stone-100 border-l"
                       )}
                     >
                       {showItem(item, adjustedSettings)}

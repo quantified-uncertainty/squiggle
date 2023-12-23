@@ -12,9 +12,9 @@ widgetRegistry.register("Dict", {
   Chart: (value) => {
     const entries = useMemo(() => value.value.entries(), [value]);
     return (
-      <div className="space-y-2 pt-1 mt-1">
+      <div className="space-y-1 pt-0.5 mt-0.5">
         {entries.map(([k, v]) => (
-          <ValueViewer key={k} value={v} />
+          <ValueViewer parentValue={value} key={k} value={v} />
         ))}
       </div>
     );

@@ -5,16 +5,21 @@ import { clsx } from "clsx";
 import { FC, PropsWithChildren, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 
+import { SqValue } from "@quri/squiggle-lang";
 import { CommentIcon, TextTooltip } from "@quri/ui";
 
 import { SqValueWithContext } from "../../lib/utility.js";
+import { leftWidgetMargin } from "../../widgets/utils.js";
 import { ErrorBoundary } from "../ErrorBoundary.js";
 import { CollapsedIcon, ExpandedIcon } from "./icons.js";
 import { SquiggleValueChart } from "./SquiggleValueChart.js";
-import { SquiggleValueHeader } from "./SquiggleValueHeader.js";
 import { SquiggleValueMenu } from "./SquiggleValueMenu.js";
 import { SquiggleValuePreview } from "./SquiggleValuePreview.js";
-import { pathToShortName } from "./utils.js";
+import {
+  getValueComment,
+  hasExtraContentToShow,
+  pathToShortName,
+} from "./utils.js";
 import {
   useFocus,
   useIsFocused,
@@ -24,12 +29,8 @@ import {
   useViewerContext,
 } from "./ViewerProvider.js";
 
-function getComment(value: SqValueWithContext): string | undefined {
-  return value.context.docstring() || value.tags.description();
-}
-
 const CommentIconForValue: FC<{ value: SqValueWithContext }> = ({ value }) => {
-  const comment = getComment(value);
+  const comment = getValueComment(value);
 
   return comment ? (
     <div className="ml-3">
@@ -47,10 +48,11 @@ const CommentIconForValue: FC<{ value: SqValueWithContext }> = ({ value }) => {
 
 type Props = {
   value: SqValueWithContext;
+  parentValue?: SqValue;
 };
 
 const WithComment: FC<PropsWithChildren<Props>> = ({ value, children }) => {
-  const comment = getComment(value);
+  const comment = getValueComment(value);
 
   if (!comment) {
     return children;
@@ -68,8 +70,9 @@ const WithComment: FC<PropsWithChildren<Props>> = ({ value, children }) => {
   const commentEl = (
     <ReactMarkdown
       className={clsx(
-        "prose max-w-4xl text-sm text-slate-800 bg-purple-50 bg-opacity-60 py-2 px-3 mb-2 rounded-md",
-        commentPosition === "bottom" && "mt-2"
+        "prose max-w-4xl text-sm text-stone-600 mt-0.5 mb-1.5",
+        leftWidgetMargin,
+        commentPosition === "bottom" && "mt-1"
       )}
     >
       {comment}
@@ -107,7 +110,7 @@ const ValueViewerBody: FC<Props> = ({ value }) => {
   );
 };
 
-export const ValueWithContextViewer: FC<Props> = ({ value }) => {
+export const ValueWithContextViewer: FC<Props> = ({ value, parentValue }) => {
   const { tag } = value;
   const { path } = value.context;
 
@@ -133,37 +136,64 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
 
   const triangleToggle = () => {
     const Icon = isOpen ? ExpandedIcon : CollapsedIcon;
-    return (
-      <div
-        className="w-4 mr-1.5 flex justify-center cursor-pointer text-stone-300 hover:text-slate-700"
-        onClick={toggleCollapsed}
-      >
-        <Icon size={12} />
-      </div>
-    );
-  };
-
-  const headerClasses = () => {
-    if (isFocused) {
-      return "text-md text-black font-bold ml-1";
-    } else if (isRoot) {
-      return "text-sm text-stone-600 font-semibold";
+    const _hasExtraContentToShow = hasExtraContentToShow(value);
+    //Only show triangle if there is content to show, that's not in the header.
+    if (_hasExtraContentToShow) {
+      return (
+        <div
+          className="w-4 mr-1.5 flex justify-center cursor-pointer text-stone-200 hover:!text-stone-600 group-hover:text-stone-300"
+          onClick={toggleCollapsed}
+        >
+          <Icon size={12} />
+        </div>
+      );
     } else {
-      return "text-sm text-stone-800 cursor-pointer hover:underline";
+      return <div className="w-4 mr-1.5" />;
     }
   };
 
+  const getHeaderColor = () => {
+    let color = "text-orange-900";
+    const parentTag = parentValue?.tag;
+    if (parentTag === "Array") {
+      color = "text-stone-400";
+    } else if (path.items.length > 1) {
+      color = "text-teal-700";
+    }
+    return color;
+  };
+
+  const headerColor = getHeaderColor();
+
+  const headerClasses = () => {
+    if (isFocused) {
+      return clsx("text-md font-bold ml-1", headerColor);
+    } else if (isRoot) {
+      return "text-sm text-stone-600 font-semibold";
+    } else {
+      return clsx("text-sm cursor-pointer hover:underline", headerColor);
+    }
+  };
+
+  //We want to show colons after the keys, for dicts/arrays.
+  const showColon = !isFocused && path.items.length > 1;
   const name = pathToShortName(path);
   const headerName = (
-    <div
-      className={clsx(!taggedName && "font-mono", headerClasses())}
-      onClick={_focus}
-    >
-      {taggedName ? taggedName : name}
+    <div>
+      <span
+        className={clsx(!taggedName && "font-mono", headerClasses())}
+        onClick={_focus}
+      >
+        {taggedName ? taggedName : name}
+      </span>
+      {showColon && <span className={"text-gray-400 ml-0.5 font-mono"}>:</span>}
     </div>
   );
 
   const leftCollapseBorder = () => {
+    if (isRoot) {
+      return null;
+    }
     const isDictOrList = tag === "Dict" || tag === "Array";
     if (isDictOrList) {
       return (
@@ -171,34 +201,32 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
           className="group w-4 shrink-0 flex justify-center cursor-pointer"
           onClick={toggleCollapsed}
         >
-          <div className="w-px bg-stone-200 group-hover:bg-stone-500" />
+          <div className="w-px bg-stone-100 group-hover:bg-stone-400" />
         </div>
       );
-    } else if (!isRoot) {
+    } else {
       // non-root leaf elements have unclickable padding to align with dict/list elements
       return <div className="flex w-4 min-w-[1rem]" />; // min-w-1rem = w-4
-    } else {
-      return null;
     }
   };
 
   return (
     <ErrorBoundary>
-      <div ref={ref}>
+      <div ref={ref} className={clsx(isFocused && "px-2")}>
         <header
           className={clsx(
             "flex justify-between group pr-0.5",
-            isFocused ? "mb-2" : "hover:bg-stone-100 rounded-md"
+            isFocused ? "mb-2" : "hover:bg-stone-100 rounded-sm"
           )}
         >
           <div className="inline-flex items-center">
             {!isFocused && triangleToggle()}
             {headerName}
-            {!isFocused && (
+            {!isFocused && !isOpen && (
               <div
                 className={clsx(
-                  "ml-3 text-sm text-blue-800",
-                  isOpen ? "opacity-40" : "opacity-60"
+                  "text-sm text-blue-800",
+                  showColon ? "ml-2" : "ml-5"
                 )}
               >
                 <SquiggleValuePreview value={value} />
@@ -207,14 +235,15 @@ export const ValueWithContextViewer: FC<Props> = ({ value }) => {
             {!isFocused && !isOpen && <CommentIconForValue value={value} />}
           </div>
           <div className="inline-flex space-x-1 items-center">
-            {isOpen && <SquiggleValueHeader value={value} />}
             <SquiggleValueMenu value={value} />
           </div>
         </header>
         {isOpen && (
-          <div className="flex w-full pt-1">
+          <div className="flex w-full">
             {!isFocused && leftCollapseBorder()}
-            <div className="grow">
+            <div
+              className={clsx("grow", Boolean(getValueComment(value)) && "p-1")}
+            >
               <ValueViewerBody value={value} />
             </div>
           </div>

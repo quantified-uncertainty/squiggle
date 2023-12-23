@@ -12,7 +12,6 @@ import {
 
 import { SqValuePath } from "@quri/squiggle-lang";
 
-import { SHORT_STRING_LENGTH } from "../../lib/constants.js";
 import { useForceUpdate } from "../../lib/hooks/useForceUpdate.js";
 import { SqValueWithContext } from "../../lib/utility.js";
 import { CalculatorState } from "../../widgets/CalculatorWidget/types.js";
@@ -25,6 +24,7 @@ import {
 import {
   getChildrenValues,
   pathAsString,
+  shouldBeginCollapsed,
   topLevelBindingsName,
 } from "./utils.js";
 
@@ -94,23 +94,7 @@ class ItemStore {
 
     this.state[pathString] = defaultLocalItemState;
 
-    const isRoot = path.isRoot();
-    const tagsDefaultCollapsed = new Set(["Bool", "Number", "Void", "Input"]);
-
     const childrenValues = getChildrenValues(value);
-
-    // Collapse children and element if desired. Uses crude heuristics.
-    const shouldBeginCollapsed = (): boolean => {
-      if (isRoot) {
-        return childrenValues.length > 30;
-      } else {
-        return (
-          childrenValues.length > 5 ||
-          tagsDefaultCollapsed.has(value.tag) ||
-          (value.tag === "String" && value.value.length <= SHORT_STRING_LENGTH)
-        );
-      }
-    };
 
     const collapseChildren = () => {
       for (const child of childrenValues) {
@@ -132,7 +116,7 @@ class ItemStore {
       collapseChildren();
     }
 
-    if (shouldBeginCollapsed()) {
+    if (shouldBeginCollapsed(value, path)) {
       this.state[pathString] = {
         ...this.state[pathString],
         collapsed: true,

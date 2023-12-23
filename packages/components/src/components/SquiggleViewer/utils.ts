@@ -1,5 +1,7 @@
 import { PathItem, SqValue, SqValuePath } from "@quri/squiggle-lang";
 
+import { SHORT_STRING_LENGTH } from "../../lib/constants.js";
+import { SqValueWithContext } from "../../lib/utility.js";
 import { useViewerContext } from "./ViewerProvider.js";
 
 export const pathItemFormat = (item: PathItem): string => {
@@ -122,3 +124,30 @@ export function useGetSubvalueByPath() {
     return value;
   };
 }
+
+export function getValueComment(value: SqValueWithContext): string | undefined {
+  return value.context.docstring() || value.tags.description();
+}
+
+const tagsDefaultCollapsed = new Set(["Bool", "Number", "Void", "Input"]);
+
+export function hasExtraContentToShow(v: SqValueWithContext): boolean {
+  const contentIsVeryShort =
+    tagsDefaultCollapsed.has(v.tag) ||
+    (v.tag === "String" && v.value.length <= SHORT_STRING_LENGTH);
+  const comment = getValueComment(v);
+  const hasLongComment = Boolean(comment && comment.length > 15);
+  return !contentIsVeryShort || hasLongComment;
+}
+
+export const shouldBeginCollapsed = (
+  value: SqValueWithContext,
+  path: SqValuePath
+): boolean => {
+  const childrenValues = getChildrenValues(value);
+  if (path.isRoot()) {
+    return childrenValues.length > 30;
+  } else {
+    return childrenValues.length > 5 || !hasExtraContentToShow(value);
+  }
+};

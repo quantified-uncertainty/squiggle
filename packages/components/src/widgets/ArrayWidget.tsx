@@ -12,9 +12,9 @@ widgetRegistry.register("Array", {
   Chart: (value) => {
     const values = useMemo(() => value.value.getValues(), [value]);
     return (
-      <div className="space-y-2 pt-1 mt-1">
+      <div className="space-y-1 pt-0.5 mt-0.5">
         {values.map((r, i) => (
-          <ValueViewer key={i} value={r} />
+          <ValueViewer parentValue={value} key={i} value={r} />
         ))}
       </div>
     );

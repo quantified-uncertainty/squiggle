@@ -8,6 +8,7 @@ import {
   Dropdown,
   DropdownMenu,
   DropdownMenuActionItem,
+  DropdownMenuHeader,
   FocusIcon,
   TextTooltip,
   useCloseDropdown,
@@ -15,6 +16,7 @@ import {
 
 import { SqValueWithContext } from "../../lib/utility.js";
 import { widgetRegistry } from "../../widgets/registry.js";
+import { valueToHeadingString } from "../../widgets/utils.js";
 import { CollapsedIcon, ExpandedIcon } from "./icons.js";
 import { getChildrenValues, pathAsString } from "./utils.js";
 import {
@@ -141,6 +143,7 @@ export const SquiggleValueMenu: FC<{
   value: SqValueWithContext;
 }> = ({ value }) => {
   const widget = widgetRegistry.widgets.get(value.tag);
+  const widgetHeading = valueToHeadingString(value);
 
   const hasLocalSettings = useHasLocalSettings(value.context.path);
 
@@ -149,6 +152,9 @@ export const SquiggleValueMenu: FC<{
       <Dropdown
         render={() => (
           <DropdownMenu>
+            {widgetHeading && (
+              <DropdownMenuHeader>{widgetHeading}</DropdownMenuHeader>
+            )}
             <FindInEditorItem value={value} />
             <FocusItem value={value} />
             <SetChildrenCollapsedStateItem
@@ -172,7 +178,7 @@ export const SquiggleValueMenu: FC<{
             "cursor-pointer transition",
             hasLocalSettings
               ? "text-indigo-300 hover:!text-indigo-500 group-hover:text-indigo-400"
-              : "text-stone-100 hover:!text-stone-500 group-hover:text-stone-400"
+              : "opacity-0 hover:!text-stone-500 group-hover:text-stone-400 group-hover:opacity-100"
           )}
         />
       </Dropdown>
