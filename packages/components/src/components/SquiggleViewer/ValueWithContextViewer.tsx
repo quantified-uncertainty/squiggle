@@ -175,7 +175,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value, parentValue }) => {
     }
   };
 
-  //We want to show colons after they keys, for dicts/arrays.
+  //We want to show colons after the keys, for dicts/arrays.
   const showColon = !isFocused && path.items.length > 1;
   const name = pathToShortName(path);
   const headerName = (
