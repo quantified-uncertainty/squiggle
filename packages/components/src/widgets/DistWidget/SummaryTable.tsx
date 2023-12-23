@@ -17,7 +17,7 @@ import { TextTooltip } from "@quri/ui";
 
 import { NumberShower } from "../../components/NumberShower.js";
 import { formatDate } from "../../lib/d3/index.js";
-import { useSetHoverVerticalLine } from "./DistProvider.js";
+import { useSetSelectedVerticalLine } from "./DistProvider.js";
 
 type HoverableCellProps = PropsWithChildren<{
   onMouseEnter?: () => void;
@@ -63,7 +63,7 @@ export const SummaryTable: FC<SummaryTableProps> = ({
   environment,
   size,
 }) => {
-  const setHoverVerticalLine = useSetHoverVerticalLine();
+  const setSelectedVerticalLine = useSetSelectedVerticalLine();
   const showNames = plot.distributions.some((d) => d.name);
   const isDate = plot.xScale?.tag === "date";
   const valueType = isDate ? "date" : "number";
@@ -158,8 +158,8 @@ export const SummaryTable: FC<SummaryTableProps> = ({
                   </Cell>
                 )}
                 <Cell
-                  onMouseEnter={() => setHoverVerticalLine(mean)}
-                  onMouseLeave={() => setHoverVerticalLine(undefined)}
+                  onMouseEnter={() => setSelectedVerticalLine(mean)}
+                  onMouseLeave={() => setSelectedVerticalLine(undefined)}
                 >
                   {formatNumber(mean, false)}
                 </Cell>
@@ -169,11 +169,11 @@ export const SummaryTable: FC<SummaryTableProps> = ({
                     key={i}
                     hoverable={value.inv.ok}
                     onMouseEnter={() =>
-                      setHoverVerticalLine(
+                      setSelectedVerticalLine(
                         value.inv.ok ? value.inv.value : undefined
                       )
                     }
-                    onMouseLeave={() => setHoverVerticalLine(undefined)}
+                    onMouseLeave={() => setSelectedVerticalLine(undefined)}
                   >
                     {unwrapResult(value.inv, false)}
                   </Cell>

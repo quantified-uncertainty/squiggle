@@ -39,32 +39,11 @@ interface DrawAxesParams {
   yAxisTitle?: string;
 }
 
-// This took a fair amount of experimentation to sort-of-get right. Edit using views of several distribution chart sizes.
-function calculateNumberOfXTicks(
-  primaryAxis: number,
-  secondaryAxis: number
-): number {
-  const minTicks = 3;
-  const maxTicks = 16;
-
-  // A simplified scaling factor based on the dimensions of the chart
-  const scale = primaryAxis * secondaryAxis;
-
-  // Define reasonable bounds for the scale factor
-  const minScale = 40000; // Equivalent to 200x200
-  const maxScale = 1000000; // Equivalent to 1000x1000
-
-  // Normalize the scale factor to a value between 0 and 1
-  const normalizedScale = (scale - minScale) / (maxScale - minScale);
-
-  // Calculate the number of ticks based on this normalized scale
-  const numberOfTicks = Math.round(
-    minTicks + normalizedScale * (maxTicks - minTicks)
-  );
-
-  // Ensure the number of ticks is within the desired range
-  return Math.max(minTicks, Math.min(numberOfTicks, maxTicks));
-}
+const _tickCountInterpolator = d3
+  .scaleLinear()
+  .domain([40000, 1000000]) // The potential height of the chart
+  .range([3, 16]) // The range of circle radiuses
+  .clamp(true);
 
 export function drawAxes({
   context,
@@ -83,8 +62,8 @@ export function drawAxes({
   xAxisTitle,
   yAxisTitle,
 }: DrawAxesParams) {
-  const _xTickCount = xTickCount || calculateNumberOfXTicks(width, height);
-  const _yTickCount = yTickCount || calculateNumberOfXTicks(height, width);
+  const _xTickCount = xTickCount || _tickCountInterpolator(width * height);
+  const _yTickCount = yTickCount || _tickCountInterpolator(height * width);
 
   const xTicks = xScale.ticks(_xTickCount);
   const xTickFormat = xScale.tickFormat(_xTickCount, xTickFormatSpecifier);

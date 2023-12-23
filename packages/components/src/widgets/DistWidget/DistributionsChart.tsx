@@ -30,7 +30,7 @@ import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
 import { canvasClasses, flattenResult } from "../../lib/utility.js";
 import { PlotTitle } from "../PlotWidget/PlotTitle.js";
-import { DistProvider, useHoverVerticalLineValue } from "./DistProvider.js";
+import { DistProvider, useGetSelectedVerticalLine } from "./DistProvider.js";
 import { SummaryTable } from "./SummaryTable.js";
 import { adjustPdfHeightToScale } from "./utils.js";
 
@@ -46,21 +46,14 @@ export type DistributionsChartProps = {
   height: number;
 };
 
-/**
- * Interpolates to find the y-coordinate at a given x-value.
- * @param xValue The x-value to interpolate at.
- * @param continuousData The array of data points.
- * @param xScale The D3 scale function for the x-axis.
- * @param yScale The D3 scale function for the y-axis.
- * @returns The interpolated y-coordinate on the canvas, or null if interpolation is not possible.
- */
-interface DataPoint {
+// We have a similar function in squiggle-lang, but it's not exported, and this function is simple enough.
+type DataPoint = {
   x: number;
   y: number;
-}
+};
 function interpolateYAtX(
   xValue: number,
-  continuousData: DataPoint[],
+  continuousData: { x: number; y: number }[],
   yScale: d3.ScaleContinuousNumeric<number, number>
 ): number | null {
   let pointBefore: DataPoint | null = null,
@@ -113,7 +106,7 @@ const InnerDistributionsChart: FC<{
   showPercentileLines,
   showXAxis,
 }) => {
-  const verticalLine = useHoverVerticalLineValue();
+  const verticalLine = useGetSelectedVerticalLine();
 
   const [discreteTooltip, setDiscreteTooltip] = useState<
     { value: number; probability: number } | undefined
@@ -223,19 +216,21 @@ const InnerDistributionsChart: FC<{
       }
 
       // samplesBar
+      function samplesBarShowSettings(): { yOffset: number; color: string } {
+        if (samplesBarSetting === "behind") {
+          return { yOffset: bottomPadding, color: getColor(0, 0.4) };
+        } else if (samplesBarSetting === "bottom") {
+          return { yOffset: 0, color: getColor(0) };
+        } else {
+          // Only for the case of samplesBarSetting === "none", should not happen
+          return { yOffset: 0, color: getColor(0) };
+        }
+      }
       if (samplesBarSetting !== "none") {
         context.save();
+        const { yOffset, color } = samplesBarShowSettings();
         context.lineWidth = 0.5;
-
-        let yOffset = 0;
-        if (samplesBarSetting === "behind") {
-          context.strokeStyle = getColor(0, 0.4);
-          yOffset = bottomPadding;
-        } else if (samplesBarSetting === "bottom") {
-          context.strokeStyle = getColor(0);
-          yOffset = 0;
-        }
-
+        context.strokeStyle = color;
         samples.forEach((sample) => {
           context.beginPath();
           const x = xScale(sample);
@@ -285,6 +280,7 @@ const InnerDistributionsChart: FC<{
             percentiles.forEach(([percentile, name]) => {
               if (percentile.ok) {
                 const xPoint = percentile.value;
+                //We need to find the y value of the percentile in question, to draw the line only up to the top of the distribution. We have to do this with interpolation, which is not provided straightforwardly by d3.
                 const interpolateY = interpolateYAtX(
                   xPoint,
                   shape.continuous,
@@ -293,10 +289,10 @@ const InnerDistributionsChart: FC<{
                 if (interpolateY) {
                   context.beginPath();
                   context.strokeStyle = getColor(i, name === "p50" ? 0.4 : 0.3);
-                  if (name !== "p50") {
-                    context.setLineDash([2, 2]);
-                  } else {
+                  if (name === "p50") {
                     context.setLineDash([6, 4]);
+                  } else {
+                    context.setLineDash([2, 2]);
                   }
                   context.lineWidth = 1;
                   context.moveTo(xScale(xPoint), 0);

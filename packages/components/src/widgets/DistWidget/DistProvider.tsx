@@ -35,7 +35,7 @@ const {
   defaultValue,
 });
 
-export function useHoverVerticalLineValue() {
+export function useGetSelectedVerticalLine() {
   const { verticalLine } = useDistContext();
 
   return verticalLine;
@@ -43,7 +43,7 @@ export function useHoverVerticalLineValue() {
 
 export const DistProvider = Provider;
 
-export function useSetHoverVerticalLine() {
+export function useSetSelectedVerticalLine() {
   const dispatch = useDistDispatch();
 
   return (value: number | undefined) =>

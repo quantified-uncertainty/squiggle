@@ -2,10 +2,6 @@ import type { Meta, StoryObj } from "@storybook/react";
 
 import { SquiggleChart } from "../../components/SquiggleChart.js";
 
-/**
- * A distribution means that the result forms a probability distribution. This
- * could be continuous, discrete or mixed.
- */
 const meta = {
   component: SquiggleChart,
 } satisfies Meta<typeof SquiggleChart>;
