@@ -65,8 +65,10 @@ function decoratorWithInputOrFnInput<T>(
     ],
     frWithTags(inputType),
     ([{ value, tags }, showAs], context) => {
-      const runLambdaToGetType = (fn: Lambda) =>
-        fn.call([inputType.pack(value)], context);
+      const runLambdaToGetType = (fn: Lambda) => {
+        const result = fn.call([inputType.pack(value)], context);
+        return result;
+      };
       const showAsVal: T = _ensureTypeUsingLambda(
         outputType,
         showAs,
@@ -132,15 +134,16 @@ export const library = [
       decoratorWithInputOrFnInput(frArray(frAny()), frTableChart),
       decoratorWithInputOrFnInput(
         frLambdaTyped([frNumber], frDistOrNumber),
-        frPlot
+        //We need to list all of the types it can become
+        frOr(frPlot, frCalculator)
       ),
       decoratorWithInputOrFnInput(
         frLambdaTyped([frDate], frDistOrNumber),
-        frPlot
+        frOr(frPlot, frCalculator)
       ),
       decoratorWithInputOrFnInput(
         frLambdaTyped([frDuration], frDistOrNumber),
-        frPlot
+        frOr(frPlot, frCalculator)
       ),
       //The frLambda definition needs to come after the more narrow frLambdaTyped definitions.
       decoratorWithInputOrFnInput(frLambda, frCalculator),
