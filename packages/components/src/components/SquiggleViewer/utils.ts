@@ -126,7 +126,12 @@ export function useGetSubvalueByPath() {
 }
 
 export function getValueComment(value: SqValueWithContext): string | undefined {
-  return value.context.docstring() || value.tags.description();
+  const _value = value.context.docstring() || value.tags.description();
+  if (_value && _value.length > 0) {
+    return _value;
+  } else {
+    return undefined;
+  }
 }
 
 const tagsDefaultCollapsed = new Set(["Bool", "Number", "Void", "Input"]);

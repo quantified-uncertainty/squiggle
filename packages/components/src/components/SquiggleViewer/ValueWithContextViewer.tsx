@@ -70,7 +70,7 @@ const WithComment: FC<PropsWithChildren<Props>> = ({ value, children }) => {
   const commentEl = (
     <ReactMarkdown
       className={clsx(
-        "prose max-w-4xl text-sm text-stone-600 mt-0.5 mb-1.5",
+        "prose max-w-4xl text-sm text-stone-600 mt-0.5 mb-1",
         leftWidgetMargin,
         commentPosition === "bottom" && "mt-1"
       )}
@@ -85,9 +85,6 @@ const WithComment: FC<PropsWithChildren<Props>> = ({ value, children }) => {
       {commentPosition === "top" && commentEl}
       {children}
       {commentPosition === "bottom" && commentEl}
-      {commentPosition === "top" && comment.length > 0 && (
-        <div className="mt-1 w-full" /> // The comment takes extra vertical space, so we offset this on the bottom.
-      )}
     </div>
   );
 };
@@ -245,7 +242,10 @@ export const ValueWithContextViewer: FC<Props> = ({ value, parentValue }) => {
           <div className="flex w-full">
             {!isFocused && leftCollapseBorder()}
             <div
-              className={clsx("grow", Boolean(getValueComment(value)) && "p-1")}
+              className={clsx(
+                "grow",
+                Boolean(getValueComment(value)) && "py-1"
+              )}
             >
               <ValueViewerBody value={value} />
             </div>
