@@ -28,6 +28,52 @@ import {
   ViewerProvider,
 } from "./ViewerProvider.js";
 
+const FocusedNavigation: FC<{
+  focusedPath: SqValuePath;
+  rootPath: SqValuePath | undefined;
+}> = ({ focusedPath, rootPath }) => {
+  const unfocus = useUnfocus();
+  const focus = useFocus();
+
+  const isFocusedOnRootPath = rootPath && pathIsEqual(focusedPath, rootPath);
+
+  if (isFocusedOnRootPath) {
+    return null;
+  }
+
+  const navLinkStyle =
+    "text-sm text-stone-500 hover:text-stone-900 hover:underline font-mono cursor-pointer";
+
+  // If we're focused on the root path override, we need to adjust the focused path accordingly when presenting the navigation, so that it begins with the root path intead. This is a bit confusing.
+  const rootPathFocusedAdjustment = rootPath ? rootPath.items.length - 1 : 0;
+
+  return (
+    <div className="flex items-center mb-3 pl-3">
+      {!rootPath && (
+        <>
+          <span onClick={unfocus} className={navLinkStyle}>
+            {focusedPath.root === "bindings" ? "Variables" : focusedPath.root}
+          </span>
+
+          <ChevronRightIcon className="text-slate-300" size={24} />
+        </>
+      )}
+
+      {focusedPath
+        .itemsAsValuePaths({ includeRoot: false })
+        .slice(rootPathFocusedAdjustment, -1)
+        .map((path, i) => (
+          <Fragment key={i}>
+            <div onClick={() => focus(path)} className={navLinkStyle}>
+              {pathItemFormat(path.items[i + rootPathFocusedAdjustment])}
+            </div>
+            <ChevronRightIcon className="text-slate-300" size={24} />
+          </Fragment>
+        ))}
+    </div>
+  );
+};
+
 export type SquiggleViewerHandle = {
   viewValuePath(path: SqValuePath): void;
 };
@@ -45,47 +91,7 @@ const SquiggleViewerOuter: FC<SquiggleViewerProps> = ({
   resultItem,
   rootPathOverride,
 }) => {
-  const { focused } = useViewerContext();
-  const unfocus = useUnfocus();
-  const focus = useFocus();
-
-  const navLinkStyle =
-    "text-sm text-stone-500 hover:text-stone-900 hover:underline font-mono cursor-pointer";
-
-  const isFocusedOnRootPathOverride =
-    focused && rootPathOverride && pathIsEqual(focused, rootPathOverride);
-
-  // If we're focused on the root path override, we need to adjust the focused path accordingly when presenting the navigation, so that it begins with the root path intead. This is a bit confusing.
-  const rootPathFocusedAdjustment = rootPathOverride
-    ? rootPathOverride.items.length - 1
-    : 0;
-
-  const focusedNavigation = focused && !isFocusedOnRootPathOverride && (
-    <div className="flex items-center mb-3 pl-3">
-      {!rootPathOverride && (
-        <>
-          <span onClick={unfocus} className={navLinkStyle}>
-            {focused.root === "bindings" ? "Variables" : focused.root}
-          </span>
-
-          <ChevronRightIcon className="text-slate-300" size={24} />
-        </>
-      )}
-
-      {focused
-        .itemsAsValuePaths({ includeRoot: false })
-        .slice(rootPathFocusedAdjustment, -1)
-        .map((path, i) => (
-          <Fragment key={i}>
-            <div onClick={() => focus(path)} className={navLinkStyle}>
-              {pathItemFormat(path.items[i + rootPathFocusedAdjustment])}
-            </div>
-            <ChevronRightIcon className="text-slate-300" size={24} />
-          </Fragment>
-        ))}
-    </div>
-  );
-
+  const { focused = rootPathOverride } = useViewerContext();
   const resultVariableLength = resultVariables.ok
     ? nonHiddenDictEntries(resultVariables.value.value).length
     : 0;
@@ -128,7 +134,9 @@ const SquiggleViewerOuter: FC<SquiggleViewerProps> = ({
 
   return (
     <div>
-      {focusedNavigation}
+      {focused && (
+        <FocusedNavigation focusedPath={focused} rootPath={rootPathOverride} />
+      )}
       {body()}
     </div>
   );
@@ -163,7 +171,6 @@ const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
         partialPlaygroundSettings={stablePartialPlaygroundSettings}
         editor={editor}
         beginWithVariablesCollapsed={resultItem?.ok && hasResultVariables}
-        rootPathOverride={rootPathOverride}
         ref={ref}
       >
         <SquiggleViewerOuter

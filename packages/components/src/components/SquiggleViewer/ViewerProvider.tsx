@@ -303,7 +303,6 @@ export const ViewerProvider = forwardRef<
     partialPlaygroundSettings: PartialPlaygroundSettings;
     editor?: CodeEditorHandle;
     beginWithVariablesCollapsed?: boolean;
-    rootPathOverride?: SqValuePath;
   }>
 >(
   (
@@ -311,7 +310,6 @@ export const ViewerProvider = forwardRef<
       partialPlaygroundSettings,
       editor,
       beginWithVariablesCollapsed,
-      rootPathOverride,
       children,
     },
     ref
@@ -326,9 +324,7 @@ export const ViewerProvider = forwardRef<
       },
     }));
 
-    const [focused, setFocused] = useState<SqValuePath | undefined>(
-      rootPathOverride
-    );
+    const [focused, setFocused] = useState<SqValuePath | undefined>();
 
     const globalSettings = useMemo(() => {
       return merge({}, defaultPlaygroundSettings, partialPlaygroundSettings);
