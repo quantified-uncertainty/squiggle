@@ -261,6 +261,7 @@ const InnerDistributionsChart: FC<{
           const shape = shapes[i];
 
           // continuous fill
+          //In the case of one distribution, we don't want it to be transparent, so that we can show the samples lines. In the case of multiple distributions, we want them to be transparent so that we can see the other distributions.
           context.fillStyle = isMulti ? getColor(i, 0) : getColor(i, 0.7);
           context.globalAlpha = isMulti ? 0.4 : 1;
           context.beginPath();
@@ -293,9 +294,9 @@ const InnerDistributionsChart: FC<{
                   context.beginPath();
                   context.strokeStyle = getColor(i, name === "p50" ? 0.4 : 0.3);
                   if (name !== "p50") {
-                    context.setLineDash([2, 2]); // setting the dashed line pattern
+                    context.setLineDash([2, 2]);
                   } else {
-                    context.setLineDash([6, 4]); // setting the dashed line pattern
+                    context.setLineDash([6, 4]);
                   }
                   context.lineWidth = 1;
                   context.moveTo(xScale(xPoint), 0);
@@ -323,7 +324,6 @@ const InnerDistributionsChart: FC<{
           const discreteLineColor = getColor(i, -darkenAmountCircle);
           const discreteCircleColor = getColor(i, -darkenAmountCircle);
 
-          // context.strokeStyle = discreteLineColor;
           context.fillStyle = discreteCircleColor;
           context.strokeStyle = discreteLineColor;
           for (const point of shape.discrete) {
@@ -341,13 +341,13 @@ const InnerDistributionsChart: FC<{
             }
             context.moveTo(x, 0);
             context.lineTo(x, y);
-            context.globalAlpha = 0.5;
+            context.globalAlpha = 0.5; // We want the lines to be transparent - the circles are the main focus
             context.stroke();
             context.globalAlpha = 1;
             drawCircle({
               context,
               x,
-              y: y - discreteRadius, // helps make sure that circle doesn't go over the top
+              y: y - discreteRadius, // The circle is drawn from the top of the circle, so we need to subtract the radius to get the center of the circle to be at the top of the bar.
               r: discreteRadius,
             });
           }
@@ -517,12 +517,9 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
     );
   };
 
-  const tooManySamplesForSamplesBar =
-    samples.length < CUTOFF_TO_SHOW_SAMPLES_BAR;
-
   const isMulti =
     distributions.length > 1 ||
-    !!(distributions.length === 1 && distributions[0].name);
+    Boolean(distributions.length === 1 && distributions[0].name);
 
   let samplesState: SampleBarSetting = "none";
 
@@ -530,7 +527,7 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
 
   if (
     samples.length < 10 ||
-    !tooManySamplesForSamplesBar ||
+    samples.length > CUTOFF_TO_SHOW_SAMPLES_BAR ||
     isMulti ||
     height <= 30
   ) {
