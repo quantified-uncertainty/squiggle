@@ -141,7 +141,10 @@ export const ValueWithContextViewer: FC<Props> = ({ value, parentValue }) => {
     if (_hasExtraContentToShow) {
       return (
         <div
-          className="w-4 mr-1.5 flex justify-center cursor-pointer text-stone-400 hover:!text-stone-600 group-hover:text-stone-300"
+          className={clsx(
+            "w-4 mr-1.5 flex justify-center cursor-pointer hover:!text-stone-600",
+            isOpen ? "text-stone-300" : "text-stone-400"
+          )}
           onClick={toggleCollapsed}
         >
           <Icon size={13} />
