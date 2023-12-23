@@ -41,17 +41,17 @@ widgetRegistry.register("Dist", {
     return oneValue ? (
       showNumber(p05)
     ) : (
-      <div className="flex flex-row space-x-2">
+      <div className="flex flex-row space-x-2 items-center">
         <div className="flex">
           {showNumber(p05)}
           <span className="mx-1 opacity-60">to</span>
           {showNumber(p95)}
         </div>
-        <div className="flex w-14 items-center">
+        <div className="flex w-14">
           <DistributionsChart
             plot={plot}
             environment={value.context.project.getEnvironment()}
-            height={16}
+            height={14}
           />
         </div>
       </div>
