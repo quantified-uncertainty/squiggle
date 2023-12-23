@@ -31,7 +31,6 @@ interface DrawAxesParams {
   showXAxis?: boolean;
   showYAxis?: boolean;
   showAxisLines?: boolean;
-  showTicks?: boolean;
   xTickCount?: number;
   yTickCount?: number;
   xTickFormat?: string;
@@ -77,7 +76,6 @@ export function drawAxes({
   showYAxis = true,
   showXAxis = true,
   showAxisLines = height > 150 && width > 150,
-  showTicks = true,
   xTickCount,
   yTickCount,
   xTickFormat: xTickFormatSpecifier = defaultTickFormatSpecifier,
@@ -148,14 +146,12 @@ export function drawAxes({
       const x = xScale(xTick);
       const y = 0;
 
-      if (showTicks) {
-        context.beginPath();
-        context.strokeStyle = labelColor;
-        context.lineWidth = 1;
-        context.moveTo(x, y);
-        context.lineTo(x, y - tickSize);
-        context.stroke();
-      }
+      context.beginPath();
+      context.strokeStyle = labelColor;
+      context.lineWidth = 1;
+      context.moveTo(x, y);
+      context.lineTo(x, y - tickSize);
+      context.stroke();
 
       const text = xTickFormat(xTick);
       if (text === "") {
@@ -205,14 +201,12 @@ export function drawAxes({
       context.textBaseline = "bottom";
       const { actualBoundingBoxAscent: textHeight } = context.measureText(text);
 
-      if (showTicks) {
-        context.beginPath();
-        context.strokeStyle = labelColor;
-        context.lineWidth = 1;
-        context.moveTo(x, y);
-        context.lineTo(x - tickSize, y);
-        context.stroke();
-      }
+      context.beginPath();
+      context.strokeStyle = labelColor;
+      context.lineWidth = 1;
+      context.moveTo(x, y);
+      context.lineTo(x - tickSize, y);
+      context.stroke();
 
       let startY = 0;
       if (i === 0) {

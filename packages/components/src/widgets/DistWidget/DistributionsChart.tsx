@@ -102,7 +102,6 @@ const InnerDistributionsChart: FC<{
   showCursorLine: boolean;
   showPercentileLines: boolean;
   showXAxis: boolean;
-  showTicks: boolean;
 }> = ({
   shapes: unAdjustedShapes,
   samples,
@@ -113,7 +112,6 @@ const InnerDistributionsChart: FC<{
   showCursorLine,
   showPercentileLines,
   showXAxis,
-  showTicks,
 }) => {
   const verticalLine = useHoverVerticalLineValue();
 
@@ -197,7 +195,6 @@ const InnerDistributionsChart: FC<{
         yScale,
         showYAxis: false,
         showXAxis,
-        showTicks,
         xTickFormat: plot.xScale.tickFormat,
         xAxisTitle: plot.xScale.title,
         showAxisLines: false,
@@ -401,7 +398,6 @@ const InnerDistributionsChart: FC<{
       showCursorLine,
       showPercentileLines,
       showXAxis,
-      showTicks,
     ]
   );
 
@@ -571,7 +567,6 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
                 showCursorLine={height > 30}
                 showPercentileLines={height > 30}
                 showXAxis={height > 20}
-                showTicks={height > 40}
               />
             </div>
 
