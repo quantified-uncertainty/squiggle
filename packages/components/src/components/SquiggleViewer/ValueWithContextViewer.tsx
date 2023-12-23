@@ -70,9 +70,9 @@ const WithComment: FC<PropsWithChildren<Props>> = ({ value, children }) => {
   const commentEl = (
     <ReactMarkdown
       className={clsx(
-        "prose max-w-4xl text-sm text-stone-600 mt-0.5 mb-1",
+        "prose max-w-4xl text-sm text-stone-600",
         leftWidgetMargin,
-        commentPosition === "bottom" && "mt-1"
+        commentPosition === "bottom" ? "mt-1" : "mb-1"
       )}
     >
       {comment}
@@ -239,14 +239,14 @@ export const ValueWithContextViewer: FC<Props> = ({ value, parentValue }) => {
           </div>
         </header>
         {isOpen && (
-          <div className="flex w-full">
+          <div
+            className={clsx(
+              "flex w-full",
+              Boolean(getValueComment(value)) && "py-2"
+            )}
+          >
             {!isFocused && leftCollapseBorder()}
-            <div
-              className={clsx(
-                "grow",
-                Boolean(getValueComment(value)) && "py-1"
-              )}
-            >
+            <div className="grow">
               <ValueViewerBody value={value} />
             </div>
           </div>
