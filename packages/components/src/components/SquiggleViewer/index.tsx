@@ -1,4 +1,4 @@
-import { forwardRef, Fragment, memo, useImperativeHandle } from "react";
+import { FC, forwardRef, Fragment, memo } from "react";
 
 import {
   result,
@@ -40,14 +40,12 @@ export type SquiggleViewerProps = {
   rootPathOverride?: SqValuePath;
 } & PartialPlaygroundSettings;
 
-const SquiggleViewerOuter = forwardRef<
-  SquiggleViewerHandle,
-  SquiggleViewerProps
->(function SquiggleViewerOuter(
-  { resultVariables, resultItem, rootPathOverride },
-  ref
-) {
-  const { focused, itemStore } = useViewerContext();
+const SquiggleViewerOuter: FC<SquiggleViewerProps> = ({
+  resultVariables,
+  resultItem,
+  rootPathOverride,
+}) => {
+  const { focused } = useViewerContext();
   const unfocus = useUnfocus();
   const focus = useFocus();
 
@@ -58,7 +56,7 @@ const SquiggleViewerOuter = forwardRef<
     focused && rootPathOverride && pathIsEqual(focused, rootPathOverride);
 
   // If we're focused on the root path override, we need to adjust the focused path accordingly when presenting the navigation, so that it begins with the root path intead. This is a bit confusing.
-  const rootPathFocusedAdjustment: number = rootPathOverride
+  const rootPathFocusedAdjustment = rootPathOverride
     ? rootPathOverride.items.length - 1
     : 0;
 
@@ -87,12 +85,6 @@ const SquiggleViewerOuter = forwardRef<
         ))}
     </div>
   );
-
-  useImperativeHandle(ref, () => ({
-    viewValuePath(path: SqValuePath) {
-      itemStore.scrollToPath(path);
-    },
-  }));
 
   const resultVariableLength = resultVariables.ok
     ? nonHiddenDictEntries(resultVariables.value.value).length
@@ -140,7 +132,7 @@ const SquiggleViewerOuter = forwardRef<
       {body()}
     </div>
   );
-});
+};
 
 const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
   function SquiggleViewer(
@@ -161,21 +153,23 @@ const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
     const stablePartialPlaygroundSettings = useStabilizeObjectIdentity(
       partialPlaygroundSettings
     );
+
     const hasResultVariables =
       resultVariables.ok &&
       nonHiddenDictEntries(resultVariables.value.value).length > 0;
+
     return (
       <ViewerProvider
         partialPlaygroundSettings={stablePartialPlaygroundSettings}
         editor={editor}
         beginWithVariablesCollapsed={resultItem?.ok && hasResultVariables}
         rootPathOverride={rootPathOverride}
+        ref={ref}
       >
         <SquiggleViewerOuter
           resultVariables={resultVariables}
           resultItem={resultItem}
           rootPathOverride={rootPathOverride}
-          ref={ref}
         />
       </ViewerProvider>
     );
