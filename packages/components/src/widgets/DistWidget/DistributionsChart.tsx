@@ -421,14 +421,12 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
           />
         )}
         {!anyAreNonnormalized && plot.showSummary && (
-          <div className="flex mt-3 overflow-auto">
-            <div className="overflow-auto ml-auto">
-              <SummaryTable
-                plot={plot}
-                environment={environment}
-                size={height > 150 ? "large" : "small"}
-              />
-            </div>
+          <div className="mt-3 self-end">
+            <SummaryTable
+              plot={plot}
+              environment={environment}
+              size={height > 150 ? "large" : "small"}
+            />
           </div>
         )}
         {anyAreNonnormalized && nonNormalizedError()}
