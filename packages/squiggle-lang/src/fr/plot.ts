@@ -1,3 +1,4 @@
+import mergeWith from "lodash/mergeWith.js";
 import uniq from "lodash/uniq.js";
 
 import { REArgumentError, REOther } from "../errors/messages.js";
@@ -75,11 +76,15 @@ function createScale(scale: Scale | null, domain: VDomain | undefined): Scale {
 
   const _defaultScale = domain ? domain.value.toDefaultScale() : defaultScale;
 
-  // This gets min/max from domain, if it's not on scale.
-  return {
-    ..._defaultScale,
-    ...(scale || {}),
-  };
+  // _defaultScale can have a lot of undefined values. These should be over-written.
+  const resultScale = mergeWith(
+    scale || {},
+    _defaultScale,
+    (scaleValue, defaultValue) =>
+      scaleValue !== undefined ? scaleValue : defaultValue
+  );
+
+  return resultScale;
 }
 
 // This function both extract the domain and checks that the function has only one parameter.
