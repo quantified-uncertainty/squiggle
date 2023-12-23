@@ -421,8 +421,8 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
           />
         )}
         {!anyAreNonnormalized && plot.showSummary && (
-          <div className="flex pt-1 mt-2 overflow-auto">
-            <div className=" overflow-auto ml-auto">
+          <div className="flex mt-3 overflow-auto">
+            <div className="overflow-auto ml-auto">
               <SummaryTable
                 plot={plot}
                 environment={environment}
