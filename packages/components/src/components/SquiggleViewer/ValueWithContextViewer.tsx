@@ -179,7 +179,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value, parentValue }) => {
   const showColon = !isFocused && path.items.length > 1;
   const name = pathToShortName(path);
   const headerName = (
-    <div>
+    <div className="leading-3">
       <span
         className={clsx(!taggedName && "font-mono", headerClasses())}
         onClick={_focus}

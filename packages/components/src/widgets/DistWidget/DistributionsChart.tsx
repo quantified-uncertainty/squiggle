@@ -503,13 +503,11 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
               ", "
             )}] are not valid probability distributions, because their integrals do not add up to 1.`;
     return (
-      <div>
-        <TextTooltip text={message} placement="top">
-          <div className="font-semibold text-xs text-orange-900 bg-orange-100 rounded-md px-1.5 py-0.5 w-fit ml-2">
-            Not Normalized
-          </div>
-        </TextTooltip>
-      </div>
+      <TextTooltip text={message} placement="top">
+        <div className="font-semibold text-xs text-orange-900 bg-orange-100 rounded-md px-1.5 py-0.5 w-fit ml-2">
+          Not Normalized
+        </div>
+      </TextTooltip>
     );
   };
 
