@@ -125,13 +125,19 @@ export function useGetSubvalueByPath() {
   };
 }
 
+export function getValueComment(value: SqValueWithContext): string | undefined {
+  return value.context.docstring() || value.tags.description();
+}
+
 const tagsDefaultCollapsed = new Set(["Bool", "Number", "Void", "Input"]);
 
 export function hasExtraContentToShow(v: SqValueWithContext): boolean {
-  return !(
+  const contentIsVeryShort =
     tagsDefaultCollapsed.has(v.tag) ||
-    (v.tag === "String" && v.value.length <= SHORT_STRING_LENGTH)
-  );
+    (v.tag === "String" && v.value.length <= SHORT_STRING_LENGTH);
+  const comment = getValueComment(v);
+  const hasLongComment = Boolean(comment && comment.length > 15);
+  return !contentIsVeryShort || hasLongComment;
 }
 
 // Collapse children and element if desired. Uses crude heuristics.

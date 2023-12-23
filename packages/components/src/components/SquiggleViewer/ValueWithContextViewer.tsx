@@ -9,12 +9,17 @@ import { SqValue } from "@quri/squiggle-lang";
 import { CommentIcon, TextTooltip } from "@quri/ui";
 
 import { SqValueWithContext } from "../../lib/utility.js";
+import { leftWidgetMargin } from "../../widgets/utils.js";
 import { ErrorBoundary } from "../ErrorBoundary.js";
 import { CollapsedIcon, ExpandedIcon } from "./icons.js";
 import { SquiggleValueChart } from "./SquiggleValueChart.js";
 import { SquiggleValueMenu } from "./SquiggleValueMenu.js";
 import { SquiggleValuePreview } from "./SquiggleValuePreview.js";
-import { hasExtraContentToShow, pathToShortName } from "./utils.js";
+import {
+  getValueComment,
+  hasExtraContentToShow,
+  pathToShortName,
+} from "./utils.js";
 import {
   useFocus,
   useIsFocused,
@@ -24,12 +29,8 @@ import {
   useViewerContext,
 } from "./ViewerProvider.js";
 
-function getComment(value: SqValueWithContext): string | undefined {
-  return value.context.docstring() || value.tags.description();
-}
-
 const CommentIconForValue: FC<{ value: SqValueWithContext }> = ({ value }) => {
-  const comment = getComment(value);
+  const comment = getValueComment(value);
 
   return comment ? (
     <div className="ml-3">
@@ -51,7 +52,7 @@ type Props = {
 };
 
 const WithComment: FC<PropsWithChildren<Props>> = ({ value, children }) => {
-  const comment = getComment(value);
+  const comment = getValueComment(value);
 
   if (!comment) {
     return children;
@@ -69,7 +70,8 @@ const WithComment: FC<PropsWithChildren<Props>> = ({ value, children }) => {
   const commentEl = (
     <ReactMarkdown
       className={clsx(
-        "prose max-w-4xl text-sm text-slate-600 py-1 px-3",
+        "prose max-w-4xl text-sm text-stone-600 mt-0.5 mb-1.5",
+        leftWidgetMargin,
         commentPosition === "bottom" && "mt-1"
       )}
     >
@@ -153,33 +155,41 @@ export const ValueWithContextViewer: FC<Props> = ({ value, parentValue }) => {
     }
   };
 
-  const headerClasses = () => {
-    let mainColor = "text-orange-900";
+  const getHeaderColor = () => {
+    let color = "text-orange-900";
     const parentTag = parentValue?.tag;
     if (parentTag === "Array") {
-      mainColor = "text-stone-400";
+      color = "text-stone-400";
     } else if (path.items.length > 1) {
-      mainColor = "text-teal-700";
+      color = "text-teal-700";
     }
+    return color;
+  };
+
+  const headerColor = getHeaderColor();
+
+  const headerClasses = () => {
     if (isFocused) {
-      return clsx("text-md font-bold ml-1", mainColor);
+      return clsx("text-md font-bold ml-1", headerColor);
     } else if (isRoot) {
       return "text-sm text-stone-600 font-semibold";
     } else {
-      return clsx("text-sm cursor-pointer hover:underline", mainColor);
+      return clsx("text-sm cursor-pointer hover:underline", headerColor);
     }
   };
 
-  //We want to show colons after they keys, for dicts/arrays.
+  //We want to show colons after the keys, for dicts/arrays.
   const showColon = !isFocused && path.items.length > 1;
   const name = pathToShortName(path);
   const headerName = (
-    <div
-      className={clsx(!taggedName && "font-mono", headerClasses())}
-      onClick={_focus}
-    >
-      {taggedName ? taggedName : name}
-      {showColon && <span className="text-stone-400">:</span>}
+    <div>
+      <span
+        className={clsx(!taggedName && "font-mono", headerClasses())}
+        onClick={_focus}
+      >
+        {taggedName ? taggedName : name}
+      </span>
+      {showColon && <span className={"text-gray-400 ml-0.5 font-mono"}>:</span>}
     </div>
   );
 
@@ -234,7 +244,9 @@ export const ValueWithContextViewer: FC<Props> = ({ value, parentValue }) => {
         {isOpen && (
           <div className="flex w-full">
             {!isFocused && leftCollapseBorder()}
-            <div className="grow">
+            <div
+              className={clsx("grow", Boolean(getValueComment(value)) && "p-1")}
+            >
               <ValueViewerBody value={value} />
             </div>
           </div>

@@ -22,23 +22,31 @@ import { useSetHoverVerticalLine } from "./DistProvider.js";
 type HoverableCellProps = PropsWithChildren<{
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
+  hoverable?: boolean;
+  isTitle?: boolean;
 }>;
 
-const commonCellClasses = "py-0.5 px-3 font-light";
+const commonCellClasses = "py-0.5 px-2";
 
 const TableHeadCell: FC<PropsWithChildren> = ({ children }) => (
-  <th className={clsx(commonCellClasses)}>{children}</th>
+  <th className={clsx(commonCellClasses, "font-light")}>{children}</th>
 );
 
 const Cell: FC<HoverableCellProps> = ({
   children,
   onMouseEnter,
   onMouseLeave,
+  hoverable = true,
+  isTitle = false,
 }) => (
   <td
-    className={clsx(commonCellClasses, "hover:bg-blue-100")}
-    onMouseEnter={onMouseEnter}
-    onMouseLeave={onMouseLeave}
+    className={clsx(
+      commonCellClasses,
+      isTitle ? "font-medium" : "font-light",
+      hoverable && "hover:bg-blue-100"
+    )}
+    onMouseEnter={hoverable ? onMouseEnter : undefined}
+    onMouseLeave={hoverable ? onMouseLeave : undefined}
   >
     {children}
   </td>
@@ -144,7 +152,11 @@ export const SummaryTable: FC<SummaryTableProps> = ({
             }));
             return (
               <tr key={i}>
-                {showNames && <Cell>{name}</Cell>}
+                {showNames && (
+                  <Cell hoverable={false} isTitle>
+                    {name}
+                  </Cell>
+                )}
                 <Cell
                   onMouseEnter={() => setHoverVerticalLine(mean)}
                   onMouseLeave={() => setHoverVerticalLine(undefined)}
@@ -155,6 +167,7 @@ export const SummaryTable: FC<SummaryTableProps> = ({
                 {percentileValues.map((value, i) => (
                   <Cell
                     key={i}
+                    hoverable={value.inv.ok}
                     onMouseEnter={() =>
                       setHoverVerticalLine(
                         value.inv.ok ? value.inv.value : undefined
@@ -166,7 +179,7 @@ export const SummaryTable: FC<SummaryTableProps> = ({
                   </Cell>
                 ))}
                 {showSamplesCount && (
-                  <Cell>{getSampleCount(distribution)}</Cell>
+                  <Cell hoverable={false}>{getSampleCount(distribution)}</Cell>
                 )}
               </tr>
             );

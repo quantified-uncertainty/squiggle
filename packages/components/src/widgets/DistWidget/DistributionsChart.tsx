@@ -577,10 +577,7 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
 
             {!anyAreNonnormalized && plot.showSummary && (
               <div
-                className={clsx(
-                  "overflow-auto ml-auto w-auto",
-                  size === "large" && "pt-5"
-                )}
+                className={clsx("mt-3 self-end", size === "large" && "pt-5")}
               >
                 <SummaryTable
                   plot={plot}
