@@ -192,9 +192,14 @@ export const library = [
     name: "getFormat",
     examples: [],
     definitions: [
-      makeDefinition([frAny()], frString, ([value]) => {
-        const tags = value.tags?.value;
-        return tags?.numberFormat || tags?.dateFormat || "None";
+      makeDefinition([frWithTags(frDistOrNumber)], frString, ([{ tags }]) => {
+        return tags?.numberFormat() || "None";
+      }),
+      makeDefinition([frWithTags(frDuration)], frString, ([{ tags }]) => {
+        return tags?.numberFormat() || "None";
+      }),
+      makeDefinition([frWithTags(frDate)], frString, ([{ tags }]) => {
+        return tags?.dateFormat() || "None";
       }),
     ],
   }),
