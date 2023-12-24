@@ -29,8 +29,8 @@ export const Alert: React.FC<{
       role="status"
     >
       <div className="flex">
-        <Icon
-          className={clsx("h-4 w-4 flex-shrink-0 mt-1 ml-1", iconColor)}
+                <Icon
+          className={clsx("h-4 w-4 flex-shrink-0 mt-1", iconColor)}
           aria-hidden="true"
         />
         <div className="ml-3 grow">
@@ -52,7 +52,7 @@ export const ErrorAlert: React.FC<{
 }> = (props) => (
   <Alert
     {...props}
-    backgroundColor="bg-red-50"
+      backgroundColor="bg-red-50"
     headingColor="text-red-900"
     bodyColor="text-slate-700"
     icon={XCircleIcon}
@@ -80,7 +80,7 @@ export const SuccessAlert: React.FC<{
 }> = (props) => (
   <Alert
     {...props}
-    backgroundColor="bg-green-50"
+      backgroundColor="bg-green-50"
     headingColor="text-green-800"
     bodyColor="text-green-700"
     icon={CheckCircleIcon}
