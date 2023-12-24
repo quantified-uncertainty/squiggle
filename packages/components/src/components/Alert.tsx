@@ -4,6 +4,7 @@ import {
   XCircleIcon,
 } from "@heroicons/react/solid/esm/index.js";
 import { clsx } from "clsx";
+import * as AlertConstants from './AlertConstants';
 import * as React from "react";
 
 export const Alert: React.FC<{
@@ -25,20 +26,20 @@ export const Alert: React.FC<{
 }) => {
   return (
     <div
-      className={clsx("rounded-sm px-2 py-1.5", backgroundColor)}
+      className={clsx(`rounded-sm ${AlertConstants.PADDING_X} ${AlertConstants.PADDING_Y}`, backgroundColor)}
       role="status"
     >
       <div className="flex">
         <Icon
-          className={clsx("h-4 w-4 flex-shrink-0 mt-1 ml-1", iconColor)}
+          className={clsx(`${AlertConstants.HEIGHT} ${AlertConstants.WIDTH} flex-shrink-0 ${AlertConstants.MARGIN_TOP} ml-1`, iconColor)}
           aria-hidden="true"
         />
         <div className="ml-3 grow">
-          <header className={clsx("text-sm font-medium", headingColor)}>
+          <header className={clsx(`${AlertConstants.TEXT_SMALL} font-medium`, headingColor)}>
             {heading}
           </header>
           {children && React.Children.count(children) ? (
-            <div className={clsx("mt-1 text-sm", bodyColor)}>{children}</div>
+            <div className={clsx(`${AlertConstants.MARGIN_TOP} ${AlertConstants.TEXT_SMALL}`, bodyColor)}>{children}</div>
           ) : null}
         </div>
       </div>
