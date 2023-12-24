@@ -3,6 +3,7 @@ import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
   frArray,
+  frBool,
   frCalculator,
   frDate,
   frDictWithArbitraryKeys,
@@ -190,6 +191,33 @@ export const library = [
     definitions: [
       makeDefinition([frAny()], frDictWithArbitraryKeys(frAny()), ([value]) => {
         return value.getTags().toMap();
+      }),
+    ],
+  }),
+  maker.make({
+    name: "hide",
+    examples: [],
+    definitions: [
+      makeDefinition(
+        [frAny({ genericName: "A" }), frBool],
+        frAny({ genericName: "A" }),
+        ([value, hidden]) => value.mergeTags({ hidden }),
+        { isDecorator: true }
+      ),
+      makeDefinition(
+        [frAny({ genericName: "A" })],
+        frAny({ genericName: "A" }),
+        ([value]) => value.mergeTags({ hidden: true }),
+        { isDecorator: true }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "getHide",
+    examples: [],
+    definitions: [
+      makeDefinition([frAny()], frBool, ([value]) => {
+        return value.tags?.value.hidden || false;
       }),
     ],
   }),
