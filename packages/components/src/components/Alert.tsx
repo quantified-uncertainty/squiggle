@@ -25,20 +25,20 @@ export const Alert: React.FC<{
 }) => {
   return (
     <div
-      className={clsx("rounded-sm px-2 py-1.5", backgroundColor)}
+      className={clsx("rounded-sm", backgroundColor)}
       role="status"
     >
       <div className="flex">
         <Icon
-          className={clsx("h-4 w-4 flex-shrink-0 mt-1 ml-1", iconColor)}
+          className={clsx("flex-shrink-0", iconColor)}
           aria-hidden="true"
         />
         <div className="ml-3 grow">
-          <header className={clsx("text-sm font-medium", headingColor)}>
+          <header className={clsx("font-medium", headingColor)}>
             {heading}
           </header>
           {children && React.Children.count(children) ? (
-            <div className={clsx("mt-1 text-sm", bodyColor)}>{children}</div>
+            <div className={clsx("", bodyColor)}>{children}</div>
           ) : null}
         </div>
       </div>
