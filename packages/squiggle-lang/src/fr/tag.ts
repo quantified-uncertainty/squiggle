@@ -57,7 +57,7 @@ function _ensureTypeUsingLambda<T1>(
 function decoratorWithInputOrFnInput<T>(
   inputType: FRType<any>,
   outputType: FRType<T>,
-  merge: (arg: T) => ValueTagsType
+  toValueTagsFn: (arg: T) => ValueTagsType
 ) {
   return makeDefinition(
     [
@@ -78,7 +78,7 @@ function decoratorWithInputOrFnInput<T>(
       );
       return {
         value,
-        tags: tags.merge(merge(correctTypedInputValue)),
+        tags: tags.merge(toValueTagsFn(correctTypedInputValue)),
       };
     },
     { isDecorator: true }
