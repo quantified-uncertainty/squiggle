@@ -143,7 +143,7 @@ export const ValueWithContextViewer: FC<Props> = ({ value, parentValue }) => {
         <div
           className={clsx(
             "w-4 mr-1.5 flex justify-center cursor-pointer hover:!text-stone-600",
-            isOpen ? "text-stone-300" : "text-stone-400"
+            isOpen ? "" : ""
           )}
           onClick={toggleCollapsed}
         >
