@@ -165,7 +165,8 @@ export const library = [
         ([{ value, tags }, format]) => {
           checkNumericTickFormat(format);
           return { value, tags: tags.merge({ numberFormat: format }) };
-        }
+        },
+        { isDecorator: true }
       ),
       makeDefinition(
         [frWithTags(frDuration), frNamed("numberFormat", frString)],
@@ -173,14 +174,16 @@ export const library = [
         ([{ value, tags }, format]) => {
           checkNumericTickFormat(format);
           return { value, tags: tags.merge({ numberFormat: format }) };
-        }
+        },
+        { isDecorator: true }
       ),
       makeDefinition(
         [frWithTags(frDate), frNamed("timeFormat", frString)],
         frWithTags(frDate),
         ([{ value, tags }, format]) => {
           return { value, tags: tags.merge({ dateFormat: format }) };
-        }
+        },
+        { isDecorator: true }
       ),
     ],
   }),
