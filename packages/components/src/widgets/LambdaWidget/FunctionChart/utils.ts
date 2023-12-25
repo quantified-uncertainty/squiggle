@@ -51,7 +51,8 @@ export type ImageError = {
 
 export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot>(
   plot: T,
-  environment: Env
+  environment: Env,
+  xPointCount: number
 ) {
   const min = plot.xScale?.min ?? functionChartDefaults.min;
   const max = plot.xScale?.max ?? functionChartDefaults.max;
@@ -62,7 +63,8 @@ export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot>(
   //It would be nice to move this to squiggle-lang, but the Scale domain types use D3 for choosing x values.
   const adjustedXPoints = () => {
     const manualXPoints = plot.xPoints({ min, max });
-    const requestedCount = functionChartDefaults.points;
+    const requestedCount = xPointCount;
+
     if (!manualXPoints) {
       return rangeByCount({
         scale,

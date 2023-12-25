@@ -113,16 +113,20 @@ function formatXPoints(
   xScale: Scale | null
 ) {
   const points = xPoints
-    ? sort(uniq(clamp(xPoints, { min: xScale?.min, max: xScale!.max })))
+    ? sort(
+        uniq(
+          clamp(xPoints, { min: xScale?.min || undefined, max: xScale?.max })
+        )
+      )
     : null;
 
   if (points === null) {
     return null;
   }
 
-  if (points.length > 10000 || points.length < 1) {
+  if (points.length > 10000) {
     throw new REArgumentError(
-      "xPoints must have between 1 and 10000 unique elements, within the provided xScale"
+      "xPoints must have under 10001 unique elements, within the provided xScale"
     );
   }
 

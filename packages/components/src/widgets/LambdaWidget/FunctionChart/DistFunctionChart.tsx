@@ -33,6 +33,7 @@ type FunctionChart1DistProps = {
   plot: SqDistFnPlot;
   environment: Env;
   height: number;
+  xCount: number;
 };
 
 const intervals = [
@@ -57,11 +58,17 @@ type Datum = {
 function getDistPlotPercentiles({
   plot,
   environment,
+  xCount,
 }: {
   plot: SqDistFnPlot;
   environment: Env;
+  xCount;
 }) {
-  const { functionImage, errors, xScale } = getFunctionImage(plot, environment);
+  const { functionImage, errors, xScale } = getFunctionImage(
+    plot,
+    environment,
+    xCount
+  );
 
   const data: Datum[] = functionImage
     .map(({ x, y: dist }) => {
@@ -94,17 +101,19 @@ function useDrawDistFunctionChart({
   plot,
   environment,
   height: innerHeight,
+  xCount,
 }: {
   plot: SqDistFnPlot;
   environment: Env;
   height: number;
+  xCount: number;
 }) {
   const height = innerHeight + 30; // consider paddings, should match suggestedPadding below
   const { cursor, initCursor } = useCanvasCursor();
 
   const { data, errors, xScale } = useMemo(
-    () => getDistPlotPercentiles({ plot, environment }),
-    [plot, environment]
+    () => getDistPlotPercentiles({ plot, environment, xCount }),
+    [plot, environment, xCount]
   );
 
   // note that range is not set on these scales yet (it happens in `draw()` below), so you can't use these in the following code
@@ -233,6 +242,7 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
   plot,
   environment,
   height,
+  xCount,
 }) => {
   const {
     ref: canvasRef,
@@ -243,6 +253,7 @@ export const DistFunctionChart: FC<FunctionChart1DistProps> = ({
     plot,
     environment,
     height,
+    xCount,
   });
   //TODO: This custom error handling is a bit hacky and should be improved.
   const valueAtCursor: result<SqValue, SqError> | undefined = useMemo(() => {
