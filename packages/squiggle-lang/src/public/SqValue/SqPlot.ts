@@ -1,6 +1,7 @@
 import { BaseDist } from "../../dist/BaseDist.js";
 import { Env } from "../../dist/env.js";
 import { SampleSetDist } from "../../dist/SampleSetDist/index.js";
+import { clamp, sort, uniq } from "../../utility/E_A_Floats.js";
 import * as Result from "../../utility/result.js";
 import { Plot, vPlot } from "../../value/index.js";
 import { SqError, SqOtherError } from "../SqError.js";
@@ -55,6 +56,25 @@ abstract class SqAbstractPlot<T extends Plot["type"]> {
   }
 }
 
+function getXPointsWithParams(
+  points: number[] | undefined,
+  {
+    min,
+    max,
+    extraPoints,
+  }: {
+    min?: number;
+    max?: number;
+    extraPoints?: number[];
+  }
+) {
+  if (!extraPoints) {
+    return points;
+  } else {
+    const _points = [...extraPoints, ...(points || [])];
+    return sort(uniq(clamp(_points, { min, max })));
+  }
+}
 export class SqDistributionsPlot extends SqAbstractPlot<"distributions"> {
   tag = "distributions" as const;
 
@@ -154,8 +174,12 @@ export class SqNumericFnPlot extends SqAbstractPlot<"numericFn"> {
     return wrapScale(this._value.yScale);
   }
 
-  get xPoints(): number[] | undefined {
-    return this._value.xPoints;
+  xPoints(params: {
+    min?: number;
+    max?: number;
+    extraPoints?: number[];
+  }): number[] | undefined {
+    return getXPointsWithParams(this._value.xPoints, params);
   }
 
   override toString() {
@@ -222,8 +246,12 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
     return wrapScale(this._value.distXScale);
   }
 
-  get xPoints(): number[] | undefined {
-    return this._value.xPoints;
+  xPoints(params: {
+    min?: number;
+    max?: number;
+    extraPoints?: number[];
+  }): number[] | undefined {
+    return getXPointsWithParams(this._value.xPoints, params);
   }
 
   override toString() {

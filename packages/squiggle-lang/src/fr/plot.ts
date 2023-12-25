@@ -1,5 +1,3 @@
-import uniq from "lodash/uniq.js";
-
 import { REArgumentError, REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
@@ -24,7 +22,7 @@ import {
   parseDistFromDistOrNumber,
 } from "../library/registry/helpers.js";
 import { Lambda } from "../reducer/lambda.js";
-import { sort } from "../utility/E_A_Floats.js";
+import { clamp, sort, uniq } from "../utility/E_A_Floats.js";
 import { LabeledDistribution, Plot, Scale, VDomain } from "../value/index.js";
 
 const maker = new FnFactory({
@@ -114,14 +112,20 @@ function formatXPoints(
   xPoints: readonly number[] | null,
   xScale: Scale | null
 ) {
-  const [min, max] = [xScale?.min, xScale?.max];
-  let points = xPoints ? sort(uniq(xPoints)) : null;
-  if (points && min !== undefined) {
-    points = points?.filter((x) => x >= min);
+  const points = xPoints
+    ? sort(uniq(clamp(xPoints, { min: xScale?.min, max: xScale!.max })))
+    : null;
+
+  if (points === null) {
+    return null;
   }
-  if (points && max !== undefined) {
-    points = points?.filter((x) => x <= max);
+
+  if (points.length > 10000 || points.length < 1) {
+    throw new REArgumentError(
+      "xPoints must have between 1 and 10000 unique elements, within the provided xScale"
+    );
   }
+
   return points;
 }
 
