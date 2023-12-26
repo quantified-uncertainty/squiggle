@@ -1,4 +1,4 @@
-import { SqDistributionsPlot } from "@quri/squiggle-lang";
+import { SqDistributionsPlot, SqLinearScale } from "@quri/squiggle-lang";
 
 import { NumberShower } from "../../components/NumberShower.js";
 import { generateDistributionPlotSettings } from "../../components/PlaygroundSettings.js";
@@ -11,7 +11,7 @@ import { DistributionsChart } from "./DistributionsChart.js";
 
 // Distributions should be smaller than the other charts.
 // Note that for distributions, this only applies to the internals, there's also extra margin and details.
-export const CHART_TO_DIST_HEIGHT_ADJUSTMENT = 0.5;
+export const CHART_TO_DIST_HEIGHT_ADJUSTMENT = 0.55;
 
 widgetRegistry.register("Dist", {
   Preview(value) {
@@ -30,13 +30,30 @@ widgetRegistry.register("Dist", {
     const p05 = unwrapOrFailure(dist.inv(environment, 0.05));
     const p95 = unwrapOrFailure(dist.inv(environment, 0.95));
     const oneValue = p05 === p95;
+
+    const distPlot = value.showAsPlot();
+    const plot = SqDistributionsPlot.create({
+      distribution: value.value,
+      showSummary: false,
+      xScale: distPlot?.xScale ?? SqLinearScale.create(),
+      yScale: distPlot?.yScale ?? SqLinearScale.create(),
+    });
     return oneValue ? (
       showNumber(p05)
     ) : (
-      <div>
-        {showNumber(p05)}
-        <span className="mx-1 opacity-70">to</span>
-        {showNumber(p95)}
+      <div className="flex flex-row space-x-2 items-center">
+        <div className="flex">
+          {showNumber(p05)}
+          <span className="mx-1 opacity-60">to</span>
+          {showNumber(p95)}
+        </div>
+        <div className="flex w-14">
+          <DistributionsChart
+            plot={plot}
+            environment={value.context.project.getEnvironment()}
+            height={14}
+          />
+        </div>
       </div>
     );
   },

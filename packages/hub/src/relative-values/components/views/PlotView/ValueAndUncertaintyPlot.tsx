@@ -89,7 +89,6 @@ export const ValueAndUncertaintyPlot: FC<{
         suggestedPadding: { top: 10, bottom: 40, left: 60, right: 20 },
         xScale,
         yScale,
-        drawTicks: true,
       });
 
       context.textAlign = "right";

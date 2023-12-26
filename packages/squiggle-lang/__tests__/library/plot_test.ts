@@ -93,6 +93,20 @@ Was given arguments: ((x,y) => internal code)`
       }
     );
 
+    testPlotResult(
+      "scale without min/max, and with a constant, inherits domain boundaries",
+      `Plot.numericFn(
+        {|x: [3, 5]| x * 5},
+        {xScale: Scale.symlog({ constant: 2 })}
+      )`,
+      "numericFn",
+      (plot) => {
+        expect(plot.xScale.type).toBe("symlog");
+        expect(plot.xScale.min).toBe(3);
+        expect(plot.xScale.max).toBe(5);
+      }
+    );
+
     testEvalToMatch(
       `Plot.numericFn(
         {|x| x * 5},
