@@ -121,7 +121,10 @@ function formatXPoints(
   const points = xPoints
     ? sort(
         uniq(
-          clamp(xPoints, { min: xScale?.min || undefined, max: xScale?.max })
+          clamp(xPoints, {
+            min: xScale?.min || undefined,
+            max: xScale?.max || undefined,
+          })
         )
       )
     : null;

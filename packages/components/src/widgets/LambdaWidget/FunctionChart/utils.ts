@@ -63,27 +63,14 @@ export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot>(
   //It would be nice to move this to squiggle-lang, but the Scale domain types use D3 for choosing x values.
   const adjustedXPoints = () => {
     const manualXPoints = plot.xPoints({ min, max });
-    const requestedCount = xPointCount;
+    const extraPointsWanted = xPointCount - manualXPoints.length;
 
-    if (!manualXPoints) {
-      return rangeByCount({
-        scale,
-        count: requestedCount,
-      });
+    if (extraPointsWanted < 1) {
+      return manualXPoints;
     }
 
-    const extraPointsWanted = requestedCount - manualXPoints.length;
-    return plot.xPoints({
-      min,
-      max,
-      extraPoints:
-        extraPointsWanted > 3
-          ? rangeByCount({
-              scale,
-              count: extraPointsWanted,
-            })
-          : undefined,
-    });
+    const extraPoints = rangeByCount({ scale, count: extraPointsWanted });
+    return plot.xPoints({ min, max, extraPoints });
   };
 
   const chartPointsToRender = adjustedXPoints();
@@ -93,10 +80,6 @@ export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot>(
     y: ImageValue<T>;
   }[] = [];
   const errors: ImageError[] = [];
-
-  if (!chartPointsToRender) {
-    throw new Error("Internal error: chartPointsToRender is undefined");
-  }
 
   for (const x of chartPointsToRender) {
     const result = plot.fn.call([plot.xScale.numberToValue(x)], environment);
