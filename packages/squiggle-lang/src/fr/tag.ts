@@ -58,6 +58,7 @@ function decoratorWithInputOrFnInput<T>(
   inputType: FRType<any>,
   outputType: FRType<T>
 ) {
+
   return makeDefinition(
     [
       frWithTags(inputType),
