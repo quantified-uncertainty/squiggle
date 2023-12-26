@@ -134,9 +134,9 @@ export const library = [
       decoratorWithInputOrFnInput(frArray(frAny()), frTableChart),
       decoratorWithInputOrFnInput(
         frLambdaTyped([frNumber], frDistOrNumber),
-        //We need to list all of the types it can become
+        // We need to list all of the types it can become.
         frOr(frPlot, frCalculator)
-      ),
+      ), // We need to list all of the types it can become. // We need to list all of the types it can become.
       decoratorWithInputOrFnInput(
         frLambdaTyped([frDate], frDistOrNumber),
         frOr(frPlot, frCalculator)
