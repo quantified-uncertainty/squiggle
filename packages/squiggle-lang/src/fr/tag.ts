@@ -24,7 +24,7 @@ import {
 } from "../library/registry/frTypes.js";
 import {
   checkNumericTickFormat,
-  FnFactory
+  FnFactory,
 } from "../library/registry/helpers.js";
 import { Lambda } from "../reducer/lambda.js";
 import { getOrThrow } from "../utility/result.js";
@@ -68,15 +68,15 @@ function decoratorWithInputOrFnInput<T>(
     frWithTags(inputType),
     ([{ value, tags }, newInput], context) => {
       const runLambdaToGetType = (fn: Lambda) => {
-// When we call the function, we pass in the tags as well, just in case they are asked for in the call.
+        // When we call the function, we pass in the tags as well, just in case they are asked for in the call.
         const val = frWithTags(inputType).pack({ value: value, tags });
         return fn.call([val], context);
       };
       const correctTypedInputValue: T = _ensureTypeUsingLambda(
-  outputType,
-  newInput,
-  runLambdaToGetType
-);
+        outputType,
+        newInput,
+        runLambdaToGetType
+      );
       return {
         value,
         tags: tags.merge(toValueTagsFn(correctTypedInputValue)),
@@ -130,9 +130,9 @@ export const library = [
     name: "getDescription",
     examples: [],
     definitions: [
-makeDefinition([frAny()], frString, ([value]) => {
-  return value.tags?.value.description || "";
-}),
+      makeDefinition([frAny()], frString, ([value]) => {
+        return value.tags?.value.description || "";
+      }),
     ],
   }),
   maker.make({
@@ -153,8 +153,8 @@ makeDefinition([frAny()], frString, ([value]) => {
         frLambdaTyped([frDuration], frDistOrNumber),
         frOr(frPlot, frCalculator)
       ),
-// The frLambda definition needs to come after the more narrow frLambdaTyped definitions.
-showAsDef(frLambda, frCalculator),
+      // The frLambda definition needs to come after the more narrow frLambdaTyped definitions.
+      showAsDef(frLambda, frCalculator),
     ],
   }),
   maker.make({
@@ -203,8 +203,8 @@ showAsDef(frLambda, frCalculator),
     examples: [],
     definitions: [
       makeDefinition([frWithTags(frDistOrNumber)], frString, ([{ tags }]) => {
-  return tags?.numberFormat() || "None";
-}),
+        return tags?.numberFormat() || "None";
+      }),
       makeDefinition([frWithTags(frDuration)], frString, ([{ tags }]) => {
         return tags?.numberFormat() || "None";
       }),
@@ -229,9 +229,9 @@ showAsDef(frLambda, frCalculator),
       makeDefinition(
         [frAny({ genericName: "A" }), frBool],
         frAny({ genericName: "A" }),
-([value, hidden]) => value.mergeTags({ hidden }),
-{ isDecorator: true }
-),
+        ([value, hidden]) => value.mergeTags({ hidden }),
+        { isDecorator: true }
+      ),
       makeDefinition(
         [frAny({ genericName: "A" })],
         frAny({ genericName: "A" }),
