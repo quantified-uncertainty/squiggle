@@ -62,4 +62,14 @@ x
 `,
     "Error(Tag.getName is not a decorator)"
   );
+
+  testEvalToBe(
+    `
+@showAs(Calculator)
+x(t) = t
+
+x -> Tag.getShowAs
+`,
+    "Calculator"
+  );
 });
