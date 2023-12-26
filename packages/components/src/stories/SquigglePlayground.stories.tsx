@@ -263,16 +263,17 @@ Calculator.make(
 export const Tagged: Story = {
   name: "Tagged values",
   args: {
-    defaultCode: `
-z = 34 -> Tag.format(".1f")
-x = Tag.name(5 to 10, "My favorite Dist")
-    -> Tag.description(
-      "This is a long description"
-    )
-    -> Tag.format(
-      "$.1f"
-    )
-  y = x -> Tag.all
-   `,
+    defaultCode: `z = 34 -> Tag.format(".1f")
+
+    @name("My favorite Dist")
+    @description("This is a long description")
+    @format("$.2")
+    x = 5 to 10
+    
+    @showAs(Plot.numericFn)
+    @name("My favorite Fn")
+    fn = {|e| e}
+    
+    y = x -> Tag.all`,
   },
 };

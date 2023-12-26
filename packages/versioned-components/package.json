@@ -12,6 +12,7 @@
   "dependencies": {
     "@quri/squiggle-components": "workspace:*",
     "@quri/ui": "workspace:*",
+    "glob": "^10.3.10",
     "squiggle-components-0.8.5": "npm:@quri/squiggle-components@0.8.5",
     "squiggle-components-0.8.6": "npm:@quri/squiggle-components@0.8.6"
   },
@@ -36,6 +37,10 @@
     ".": {
       "types": "./dist/src/index.d.ts",
       "default": "./dist/src/index.js"
+    },
+    "./tailwind": {
+      "types": "./dist/src/tailwind.d.cts",
+      "default": "./dist/src/tailwind.cjs"
     }
   },
   "module": "./dist/src/index.js",

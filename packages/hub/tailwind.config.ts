@@ -1,10 +1,13 @@
 import type { Config } from "tailwindcss";
 
+import { getVersionedTailwindContent } from "@quri/versioned-squiggle-components/tailwind";
+
 export default {
   content: [
     "./src/**/*.{ts,tsx}",
     "../ui/src/**/*.{ts,tsx}",
     "../components/src/**/*.{ts,tsx}",
+    ...getVersionedTailwindContent(),
   ],
   theme: {
     extend: {

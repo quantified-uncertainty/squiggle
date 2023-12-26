@@ -738,6 +738,9 @@ importers:
       '@quri/ui':
         specifier: workspace:*
         version: link:../ui
+      glob:
+        specifier: ^10.3.10
+        version: 10.3.10
       squiggle-components-0.8.5:
         specifier: npm:@quri/squiggle-components@0.8.5
         version: /@quri/squiggle-components@0.8.5(@types/react@18.2.42)(react-dom@18.2.0)(react@18.2.0)(tailwindcss@3.3.5)
