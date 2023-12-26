@@ -78,10 +78,10 @@ function createScale(scale: Scale | null, domain: VDomain | undefined): Scale {
 
   // _defaultScale can have a lot of undefined values. These should be over-written.
   const resultScale = mergeWith(
+    {},
     scale || {},
     _defaultScale,
-    (scaleValue, defaultValue) =>
-      scaleValue !== undefined ? scaleValue : defaultValue
+    (scaleValue, defaultValue) => scaleValue ?? defaultValue
   );
 
   return resultScale;
