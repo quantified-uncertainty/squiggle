@@ -3,6 +3,7 @@ import { FC, forwardRef, ReactNode, useState } from "react";
 import { result, SqError, SqValue, SqValuePath } from "@quri/squiggle-lang";
 import {
   Button,
+  CodeBracketIcon,
   Dropdown,
   DropdownMenu,
   DropdownMenuActionItem,
@@ -106,14 +107,21 @@ export const DynamicSquiggleViewer = forwardRef<SquiggleViewerHandle, Props>(
             render={({ close }) => (
               <DropdownMenu>
                 <DropdownMenuActionItem
-                  title="Variables"
+                  icon={CodeBracketIcon}
+                  title={
+                    "Variables" +
+                    (resultVariables?.ok
+                      ? ` (${resultVariables.value.value.entries().length})`
+                      : "")
+                  }
                   onClick={() => {
                     setMode("variables");
                     close();
                   }}
                 />
                 <DropdownMenuActionItem
-                  title="Result"
+                  icon={CodeBracketIcon}
+                  title={"Result" + (hasResult ? "" : " (empty)")}
                   onClick={() => {
                     setMode("result");
                     close();
