@@ -19,6 +19,10 @@ describe("Tags", () => {
     );
   });
 
+  describe("format", () => {
+    testEvalToBe("123 -> Tag.format('.2%') -> Tag.getFormat", '".2%"');
+  });
+
   describe("omit", () => {
     testEvalToBe(
       "123 -> Tag.name('myName') -> Tag.description('myDescription') -> Tag.format('.2%') -> Tag.omit(['name', 'description']) -> Tag.all",
@@ -32,6 +36,7 @@ describe("Tags", () => {
       "{}"
     );
   });
+
   testEvalToBe(
     `
 @name("five")
@@ -62,6 +67,19 @@ x
 `,
     "Error(Tag.getName is not a decorator)"
   );
+
+  describe("can access tags when called as a decorator", () => {
+    testEvalToBe(
+      `
+@showAs({|f| Tag.getName(f) == "testName" ? Plot.dist(f) : "none"})
+@name("testName")
+x = 5 to 10
+
+x -> Tag.getName
+`,
+      '"testName"'
+    );
+  });
 
   testEvalToBe(
     `

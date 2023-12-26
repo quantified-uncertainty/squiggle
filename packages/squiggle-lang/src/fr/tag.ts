@@ -29,7 +29,7 @@ import {
 import { Lambda } from "../reducer/lambda.js";
 import { getOrThrow } from "../utility/result.js";
 import { Value, vString } from "../value/index.js";
-import { ValueTags } from "../value/valueTags.js";
+import { ValueTags, ValueTagsType } from "../value/valueTags.js";
 
 const maker = new FnFactory({
   nameSpace: "Tag",
@@ -39,13 +39,13 @@ const maker = new FnFactory({
 //I could also see inlining this into the next function, either way is fine.
 function _ensureTypeUsingLambda<T1>(
   outputType: FRType<T1>,
-  showAs: FrOrType<T1, Lambda>,
+  inputValue: FrOrType<T1, Lambda>,
   runLambdaToGetType: (fn: Lambda) => Value
 ): T1 {
-  if (showAs.tag === "1") {
-    return showAs.value;
+  if (inputValue.tag === "1") {
+    return inputValue.value;
   }
-  const show = runLambdaToGetType(showAs.value);
+  const show = runLambdaToGetType(inputValue.value);
   const unpack = outputType.unpack(show);
   if (unpack) {
     return unpack;
@@ -57,7 +57,8 @@ function _ensureTypeUsingLambda<T1>(
 // This constructs definitions where the second argument is either a type T or a function that takes in the first argument and returns a type T.
 function decoratorWithInputOrFnInput<T>(
   inputType: FRType<any>,
-  outputType: FRType<T>
+  outputType: FRType<T>,
+  toValueTagsFn: (arg: T) => ValueTagsType
 ) {
   return makeDefinition(
     [
@@ -65,23 +66,30 @@ function decoratorWithInputOrFnInput<T>(
       frOr(outputType, frLambdaTyped([inputType], outputType)),
     ],
     frWithTags(inputType),
-    ([{ value, tags }, showAs], context) => {
+    ([{ value, tags }, newInput], context) => {
       const runLambdaToGetType = (fn: Lambda) => {
-        const result = fn.call([inputType.pack(value)], context);
-        return result;
+        //When we call the function, we pass in the tags as well, just in case they are asked for in the call.
+        const val = frWithTags(inputType).pack({ value: value, tags });
+        return fn.call([val], context);
       };
-      const showAsVal: T = _ensureTypeUsingLambda(
+      const correctTypedInputValue: T = _ensureTypeUsingLambda(
         outputType,
-        showAs,
+        newInput,
         runLambdaToGetType
       );
       return {
         value,
-        tags: tags.merge({ showAs: outputType.pack(showAsVal) }),
+        tags: tags.merge(toValueTagsFn(correctTypedInputValue)),
       };
     },
     { isDecorator: true }
   );
+}
+
+function showAsDef<T>(inputType: FRType<any>, outputType: FRType<T>) {
+  return decoratorWithInputOrFnInput(inputType, outputType, (result) => ({
+    showAs: outputType.pack(result),
+  }));
 }
 
 export const library = [
@@ -131,23 +139,22 @@ export const library = [
     name: "showAs",
     examples: [],
     definitions: [
-      decoratorWithInputOrFnInput(frDist, frPlot),
-      decoratorWithInputOrFnInput(frArray(frAny()), frTableChart),
-      decoratorWithInputOrFnInput(
+      showAsDef(frWithTags(frDist), frPlot),
+      showAsDef(frArray(frAny()), frTableChart),
+      showAsDef(
         frLambdaTyped([frNumber], frDistOrNumber),
-        //We need to list all of the types it can become
         frOr(frPlot, frCalculator)
       ),
-      decoratorWithInputOrFnInput(
+      showAsDef(
         frLambdaTyped([frDate], frDistOrNumber),
         frOr(frPlot, frCalculator)
       ),
-      decoratorWithInputOrFnInput(
+      showAsDef(
         frLambdaTyped([frDuration], frDistOrNumber),
         frOr(frPlot, frCalculator)
       ),
       //The frLambda definition needs to come after the more narrow frLambdaTyped definitions.
-      decoratorWithInputOrFnInput(frLambda, frCalculator),
+      showAsDef(frLambda, frCalculator),
     ],
   }),
   maker.make({
@@ -169,7 +176,8 @@ export const library = [
         ([{ value, tags }, format]) => {
           checkNumericTickFormat(format);
           return { value, tags: tags.merge({ numberFormat: format }) };
-        }
+        },
+        { isDecorator: true }
       ),
       makeDefinition(
         [frWithTags(frDuration), frNamed("numberFormat", frString)],
@@ -177,15 +185,32 @@ export const library = [
         ([{ value, tags }, format]) => {
           checkNumericTickFormat(format);
           return { value, tags: tags.merge({ numberFormat: format }) };
-        }
+        },
+        { isDecorator: true }
       ),
       makeDefinition(
         [frWithTags(frDate), frNamed("timeFormat", frString)],
         frWithTags(frDate),
         ([{ value, tags }, format]) => {
           return { value, tags: tags.merge({ dateFormat: format }) };
-        }
+        },
+        { isDecorator: true }
       ),
+    ],
+  }),
+  maker.make({
+    name: "getFormat",
+    examples: [],
+    definitions: [
+      makeDefinition([frWithTags(frDistOrNumber)], frString, ([{ tags }]) => {
+        return tags?.numberFormat() || "None";
+      }),
+      makeDefinition([frWithTags(frDuration)], frString, ([{ tags }]) => {
+        return tags?.numberFormat() || "None";
+      }),
+      makeDefinition([frWithTags(frDate)], frString, ([{ tags }]) => {
+        return tags?.dateFormat() || "None";
+      }),
     ],
   }),
   maker.make({
