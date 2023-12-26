@@ -71,16 +71,15 @@ function createScale(scale: Scale | null, domain: VDomain | undefined): Scale {
    */
   //TODO: It might be good to check if scale is outside the bounds of the domain, and throw an error then or something.
   //TODO: It might also be good to check if the domain type matches the scale type, and throw an error if not.
-
   scale && assertValidMinMax(scale);
 
-  const _defaultScale = domain ? domain.value.toDefaultScale() : defaultScale;
+  const defaultScale = domain ? domain.value.toDefaultScale() : defaultScale;
 
   // _defaultScale can have a lot of undefined values. These should be over-written.
   const resultScale = mergeWith(
     {},
     scale || {},
-    _defaultScale,
+    defaultScale,
     (scaleValue, defaultValue) => scaleValue ?? defaultValue
   );
 
