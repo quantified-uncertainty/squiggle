@@ -144,9 +144,9 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
   const renderLeft = () => (
     <LeftPlaygroundPanel
       project={project}
-      defaultCode={defaultCode}
+      defaultCode={defaultCode.trim()} // Trim the default code to remove any leading or trailing whitespace
       sourceId={sourceId}
-      onCodeChange={onCodeChange}
+      onCodeChange={code => onCodeChange(code.trim())} // Trim the code before passing it to the onCodeChange handler
       settings={settings}
       onSettingsChange={handleSettingsChange}
       onOutputChange={setOutput}
@@ -159,15 +159,20 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
   );
 
   const renderRight = () => (
-    <DynamicSquiggleViewer
-      squiggleOutput={output.output}
-      isRunning={output.isRunning}
-      // FIXME - this will cause viewer to be rendered twice on initial render
-      editor={leftPanelRef.current?.getEditor() ?? undefined}
-      ref={rightPanelRef}
-      {...settings}
-    />
-  );
+    const editor = leftPanelRef.current?.getEditor();
+    if (editor) {
+      editor.setValue(editor.getValue().trim()); // Trim the editor's value to remove any leading or trailing whitespace
+    }
+    return (
+      <DynamicSquiggleViewer
+        squiggleOutput={output.output}
+        isRunning={output.isRunning}
+        editor={editor}
+        ref={rightPanelRef}
+        {...settings}
+      />
+    );
+  };
 
   return (
     <PlaygroundContext.Provider value={{ getLeftPanelElement }}>
