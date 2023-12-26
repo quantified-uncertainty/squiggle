@@ -117,7 +117,7 @@ ternary
 // Binary operators
 
 logicalOr
-  = head:logicalAnd tail:(_ @logicalOrOp _nl @logicalAnd)*
+  = head:logicalAnd tail:(__ @logicalOrOp _nl @logicalAnd)*
     { return h.makeInfixChain(head, tail, location()); }
   logicalOrOp "operator" = '||'
 
@@ -146,12 +146,12 @@ credibleInterval
   credibleIntervalOp "operator" = 'to'
 
 additive
-  = head:multiplicative tail:(_ @additiveOp _nl @multiplicative)*
+  = head:multiplicative tail:(__ @additiveOp _nl @multiplicative)*
     { return h.makeInfixChain(head, tail, location()); }
   additiveOp "operator" = '+' / '-' / '.+' / '.-'
 
 multiplicative
-  = head:power tail:(_ @multiplicativeOp _nl @power)*
+  = head:power tail:(__ @multiplicativeOp _nl @power)*
     { return h.makeInfixChain(head, tail, location()); }
   multiplicativeOp "operator" = '*' / '/' / '.*' / './'
 
@@ -396,7 +396,7 @@ __nl 'whitespace'
   = (whiteSpaceCharactersOrComment / commentOrNewLine)+
 
 statementSeparator ';'
-  = _ (';' / commentOrNewLine)+ _nl
+  = _ (';' / commentOrNewLine)? _nl
 
 commaSeparator ',' = _ ',' _nl
 
