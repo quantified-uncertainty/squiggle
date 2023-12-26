@@ -75,7 +75,7 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
     const runnerState = useRunnerState(code);
 
     const [squiggleOutput, { project, isRunning, sourceId }] = useSquiggle({
-      code: runnerState.renderedCode,
+      code: runnerState.renderedCode.trim(),
       project: props.project,
       sourceId: props.sourceId,
       executionId: runnerState.executionId,
@@ -156,7 +156,7 @@ export const LeftPlaygroundPanel = forwardRef<LeftPlaygroundPanelHandle, Props>(
           ref={editorRef}
           // it's important to pass `code` and not `defaultCode` here;
           // see https://github.com/quantified-uncertainty/squiggle/issues/1952
-          defaultValue={code}
+          defaultValue={code.trim()}
           errors={errors}
           height="100%"
           project={project}
