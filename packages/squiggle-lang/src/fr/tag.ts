@@ -130,11 +130,10 @@ export const library = [
     name: "showAs",
     examples: [],
     definitions: [
-      decoratorWithInputOrFnInput(frDist, frPlot),
-      decoratorWithInputOrFnInput(frArray(frAny()), frTableChart),
+      decoratorWithInputOrFnInput(frDist, frOr(frPlot, frCalculator)),
+      decoratorWithInputOrFnInput(frArray(frAny()), frOr(frPlot, frCalculator)),
       decoratorWithInputOrFnInput(
         frLambdaTyped([frNumber], frDistOrNumber),
-        //We need to list all of the types it can become
         frOr(frPlot, frCalculator)
       ),
       decoratorWithInputOrFnInput(
