@@ -258,8 +258,17 @@ export function useHasLocalSettings(path: SqValuePath) {
 }
 
 export function useFocus() {
-  const { setFocused } = useViewerContext();
-  return (value: SqValuePath) => setFocused(value);
+  const { focused, setFocused } = useViewerContext();
+  return (path: SqValuePath) => {
+    if (focused && pathAsString(focused) === pathAsString(path)) {
+      return; // nothing to do
+    }
+    if (path.isRoot()) {
+      setFocused(undefined); // focusing on root nodes is not allowed
+    } else {
+      setFocused(path);
+    }
+  };
 }
 
 export function useUnfocus() {

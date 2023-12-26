@@ -50,7 +50,7 @@ const FocusedNavigation: FC<{
 
   return (
     <div className="flex items-center mb-3 pl-3">
-      {!rootPath && <FocusedNavigationItem onClick={unfocus} text="Root" />}
+      {!rootPath && <FocusedNavigationItem onClick={unfocus} text="Home" />}
 
       {focusedPath
         .itemsAsValuePaths({ includeRoot: false })
@@ -100,7 +100,16 @@ const SquiggleViewerWithoutProvider: FC<SquiggleViewerProps> = ({
       );
     } else if (focused) {
       if (focusedItem) {
-        return <ValueViewer value={focusedItem} />;
+        return (
+          <div className="px-2">
+            <ValueViewer
+              value={focusedItem}
+              collapsible={false}
+              header="large"
+              size="large"
+            />
+          </div>
+        );
       } else {
         return <MessageAlert heading="Focused variable is not defined" />;
       }
