@@ -1,6 +1,5 @@
 import { clsx } from "clsx";
 import { FC, PropsWithChildren } from "react";
-import ReactMarkdown from "react-markdown";
 
 import {
   FnDefinition,
@@ -8,6 +7,7 @@ import {
 } from "@quri/squiggle-lang";
 
 import { SQUIGGLE_DOCS_URL } from "../../lib/constants.js";
+import MarkdownViewer from "../../lib/MarkdownViewer.js";
 
 const Section: FC<PropsWithChildren> = ({ children }) => (
   <div className={clsx("px-4 py-2")}>{children}</div>
@@ -115,9 +115,9 @@ export const FnDocumentation: FC<{ documentation: FnDocumentationType }> = ({
 
       {description ? (
         <Section>
-          <ReactMarkdown className="prose text-xs text-slate-600">
-            {description}
-          </ReactMarkdown>
+          <div className="text-xs text-slate-600">
+            <MarkdownViewer md={description} />
+          </div>
         </Section>
       ) : null}
       {definitions ? (
