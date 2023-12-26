@@ -17,7 +17,7 @@ type Story = StoryObj<typeof meta>;
 export const Normal: Story = {
   name: "Normal",
   args: {
-    defaultCode: "normal(5,2)",
+    defaultCode: "normal(5, 2)",
     height: 800,
   },
 };
@@ -25,8 +25,7 @@ export const Normal: Story = {
 export const HeightAndScroll: Story = {
   name: "Custom height and scrollbars",
   args: {
-    defaultCode:
-      "List.upTo(1,10) -> map({|i| i to i + 1})" + new Array(100).join("\n"),
+    defaultCode: "List.upTo(1, 10) -> map({|i| i to i + 1})" + new Array(100).join("\n"),
     height: 400,
   },
 };
@@ -34,7 +33,7 @@ export const HeightAndScroll: Story = {
 export const Slow: Story = {
   name: "Slow Code",
   args: {
-    defaultCode: "List.upTo(1,5000000) -> reduce(0,add)",
+    defaultCode: "List.upTo(1, 5000000) -> reduce(0, add)",
     height: 800,
   },
 };
@@ -235,7 +234,7 @@ bar = 123
 export const Calculator: Story = {
   name: "Calculator",
   args: {
-    defaultCode: `calculatorCorrectlyUpdatesTest = 343 //changing this should propery update the calculator
+    defaultCode: `calculatorCorrectlyUpdatesTest = 343 // changing this should properly update the calculator
     
     f(a, b, c, d) =  [a,b,c,d,{|f| normal(f*b, f*b)}]
 a = "A longer description of the calculator goes here...\n"
