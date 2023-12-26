@@ -80,4 +80,14 @@ x -> Tag.getName
       '"testName"'
     );
   });
+
+  testEvalToBe(
+    `
+@showAs(Calculator)
+x(t) = t
+
+x -> Tag.getShowAs
+`,
+    "Calculator"
+  );
 });

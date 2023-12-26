@@ -1,7 +1,7 @@
 import { result } from "../index.js";
 import { ImmutableMap } from "../utility/immutableMap.js";
 import { Err, fmap, mergeMany, Ok } from "../utility/result.js";
-import { Value, vString } from "./index.js";
+import { Value, vBool, vString } from "./index.js";
 
 export type ValueTagsType = {
   name?: string;
@@ -9,6 +9,7 @@ export type ValueTagsType = {
   showAs?: Value;
   numberFormat?: string;
   dateFormat?: string;
+  hidden?: boolean;
 };
 
 type ValueTagsTypeName = keyof ValueTagsType;
@@ -19,6 +20,7 @@ const valueTagsTypeNames: ValueTagsTypeName[] = [
   "showAs",
   "numberFormat",
   "dateFormat",
+  "hidden",
 ];
 
 function convertToValueTagsTypeName(
@@ -58,6 +60,9 @@ export class ValueTags {
     }
     if (value.dateFormat) {
       result.push(["dateFormat", vString(value.dateFormat)]);
+    }
+    if (value.hidden) {
+      result.push(["hidden", vBool(value.hidden)]);
     }
     return result;
   }
@@ -109,5 +114,9 @@ export class ValueTags {
 
   dateFormat() {
     return this.value.dateFormat;
+  }
+
+  hidden() {
+    return this.value.hidden;
   }
 }

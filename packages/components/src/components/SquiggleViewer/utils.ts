@@ -1,4 +1,4 @@
-import { PathItem, SqValue, SqValuePath } from "@quri/squiggle-lang";
+import { PathItem, SqDict, SqValue, SqValuePath } from "@quri/squiggle-lang";
 
 import { SHORT_STRING_LENGTH } from "../../lib/constants.js";
 import { SqValueWithContext } from "../../lib/utility.js";
@@ -151,3 +151,14 @@ export const shouldBeginCollapsed = (
     return childrenValues.length > 5 || !hasExtraContentToShow(value);
   }
 };
+
+//We only hide tagged=hidden values, if they are first-level in Variables.
+function isHidden(value: SqValue): boolean {
+  const isHidden = value.tags.hidden();
+  const path = value.context?.path;
+  return Boolean(isHidden === true && path && path.items.length === 1);
+}
+
+export function nonHiddenDictEntries(value: SqDict): [string, SqValue][] {
+  return value.entries().filter(([_, v]) => !isHidden(v));
+}

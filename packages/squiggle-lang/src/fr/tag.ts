@@ -3,6 +3,7 @@ import { makeDefinition } from "../library/registry/fnDefinition.js";
 import {
   frAny,
   frArray,
+  frBool,
   frCalculator,
   frDate,
   frDictWithArbitraryKeys,
@@ -140,9 +141,18 @@ export const library = [
     definitions: [
       showAsDef(frWithTags(frDist), frPlot),
       showAsDef(frArray(frAny()), frTableChart),
-      showAsDef(frLambdaTyped([frNumber], frDistOrNumber), frPlot),
-      showAsDef(frLambdaTyped([frDate], frDistOrNumber), frPlot),
-      showAsDef(frLambdaTyped([frDuration], frDistOrNumber), frPlot),
+      showAsDef(
+        frLambdaTyped([frNumber], frDistOrNumber),
+        frOr(frPlot, frCalculator)
+      ),
+      showAsDef(
+        frLambdaTyped([frDate], frDistOrNumber),
+        frOr(frPlot, frCalculator)
+      ),
+      showAsDef(
+        frLambdaTyped([frDuration], frDistOrNumber),
+        frOr(frPlot, frCalculator)
+      ),
       //The frLambda definition needs to come after the more narrow frLambdaTyped definitions.
       showAsDef(frLambda, frCalculator),
     ],
@@ -209,6 +219,33 @@ export const library = [
     definitions: [
       makeDefinition([frAny()], frDictWithArbitraryKeys(frAny()), ([value]) => {
         return value.getTags().toMap();
+      }),
+    ],
+  }),
+  maker.make({
+    name: "hide",
+    examples: [],
+    definitions: [
+      makeDefinition(
+        [frAny({ genericName: "A" }), frBool],
+        frAny({ genericName: "A" }),
+        ([value, hidden]) => value.mergeTags({ hidden }),
+        { isDecorator: true }
+      ),
+      makeDefinition(
+        [frAny({ genericName: "A" })],
+        frAny({ genericName: "A" }),
+        ([value]) => value.mergeTags({ hidden: true }),
+        { isDecorator: true }
+      ),
+    ],
+  }),
+  maker.make({
+    name: "getHide",
+    examples: [],
+    definitions: [
+      makeDefinition([frAny()], frBool, ([value]) => {
+        return value.tags?.value.hidden || false;
       }),
     ],
   }),
