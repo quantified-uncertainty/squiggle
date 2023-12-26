@@ -28,4 +28,8 @@ export class SqTags {
   dateFormat(): string | undefined {
     return this.tags.dateFormat();
   }
+
+  hidden(): boolean | undefined {
+    return this.tags.hidden();
+  }
 }

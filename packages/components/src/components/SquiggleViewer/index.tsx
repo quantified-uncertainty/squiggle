@@ -14,7 +14,12 @@ import { MessageAlert } from "../Alert.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
-import { pathIsEqual, pathItemFormat, useGetSubvalueByPath } from "./utils.js";
+import {
+  nonHiddenDictEntries,
+  pathIsEqual,
+  pathItemFormat,
+  useGetSubvalueByPath,
+} from "./utils.js";
 import { ValueViewer } from "./ValueViewer.js";
 import {
   useFocus,
@@ -90,7 +95,7 @@ const SquiggleViewerOuter = forwardRef<
   }));
 
   const resultVariableLength = resultVariables.ok
-    ? resultVariables.value.value.entries().length
+    ? nonHiddenDictEntries(resultVariables.value.value).length
     : 0;
 
   const getSubvalueByPath = useGetSubvalueByPath();
@@ -157,7 +162,8 @@ const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
       partialPlaygroundSettings
     );
     const hasResultVariables =
-      resultVariables.ok && resultVariables.value.value.entries().length > 0;
+      resultVariables.ok &&
+      nonHiddenDictEntries(resultVariables.value.value).length > 0;
     return (
       <ViewerProvider
         partialPlaygroundSettings={stablePartialPlaygroundSettings}
