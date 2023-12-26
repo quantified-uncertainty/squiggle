@@ -138,6 +138,11 @@ export const library = [
   maker.make({
     name: "showAs",
     examples: [],
+    description: `---
+Overrides the default display type for a value. Different value types can be displayed in different ways. Distributions can be displayed using distribution plots. Arrays can be displayed using tables. Certain single-parameter functions can be displayed Plot.numericFn() or Plot.distFn(). All functions can be displayed using calculators.
+
+<code>showAs()</code> can take either a visualization, or a function that calls the value and returns a visualization. You can use it like, \`\`\`{|x| x + 1} -> Tag.showAs(Calculator)\`\`\`.
+---`,
     definitions: [
       showAsDef(frWithTags(frDist), frPlot),
       showAsDef(frArray(frAny()), frTableChart),
@@ -168,6 +173,7 @@ export const library = [
   }),
   maker.make({
     name: "format",
+    description: `Set the display format for a number, distribution, duration, or date. Uses the [d3-format](https://d3js.org/d3-format) syntax on numbers and distributions, and the [d3-time-format](https://d3js.org/d3-time-format) syntax for dates.`,
     examples: [],
     definitions: [
       makeDefinition(
@@ -215,6 +221,7 @@ export const library = [
   }),
   maker.make({
     name: "all",
+    description: "Returns all tags as a dictionary.",
     examples: [],
     definitions: [
       makeDefinition([frAny()], frDictWithArbitraryKeys(frAny()), ([value]) => {
@@ -225,6 +232,7 @@ export const library = [
   maker.make({
     name: "hide",
     examples: [],
+    description: `Hides a value in the visualizations sidebar. This is useful for hiding intermediate values that are used in calculations, but are not directly relevant to the user. Only hides top-level variables.`,
     definitions: [
       makeDefinition(
         [frAny({ genericName: "A" }), frBool],
@@ -252,6 +260,7 @@ export const library = [
   maker.make({
     name: "omit",
     examples: [],
+    description: "Returns a copy of the value with the specified tags removed.",
     definitions: [
       makeDefinition(
         [frWithTags(frAny({ genericName: "A" })), frArray(frString)],
@@ -267,6 +276,7 @@ export const library = [
   maker.make({
     name: "clear",
     examples: [],
+    description: "Returns a copy of the value with all tags removed.",
     definitions: [
       makeDefinition(
         [frWithTags(frAny({ genericName: "A" }))],
