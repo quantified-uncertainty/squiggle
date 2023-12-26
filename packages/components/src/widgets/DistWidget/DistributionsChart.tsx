@@ -30,7 +30,7 @@ import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
 import { canvasClasses, flattenResult } from "../../lib/utility.js";
 import { PlotTitle } from "../PlotWidget/PlotTitle.js";
-import { DistProvider, useGetSelectedVerticalLine } from "./DistProvider.js";
+import { DistProvider, useSelectedVerticalLine } from "./DistProvider.js";
 import { SummaryTable } from "./SummaryTable.js";
 import { adjustPdfHeightToScale } from "./utils.js";
 
@@ -106,7 +106,7 @@ const InnerDistributionsChart: FC<{
   showPercentileLines,
   showXAxis,
 }) => {
-  const verticalLine = useGetSelectedVerticalLine();
+  const verticalLine = useSelectedVerticalLine();
 
   const [discreteTooltip, setDiscreteTooltip] = useState<
     { value: number; probability: number } | undefined
@@ -175,7 +175,7 @@ const InnerDistributionsChart: FC<{
 
       const suggestedPadding = {
         left: discreteRadius,
-        right: discreteRadius + legendHeight,
+        right: discreteRadius,
         top: discreteRadius,
         bottom: bottomPadding,
       };
@@ -271,12 +271,11 @@ const InnerDistributionsChart: FC<{
 
           // Percentile lines
           if (showPercentileLines) {
-            const percentiles: [result<number, SqDistributionError>, string][] =
-              [
-                [shape.p5, "p5"],
-                [shape.p50, "p50"],
-                [shape.p95, "p95"],
-              ];
+            const percentiles = [
+              [shape.p5, "p5"],
+              [shape.p50, "p50"],
+              [shape.p95, "p95"],
+            ] as const;
             percentiles.forEach(([percentile, name]) => {
               if (percentile.ok) {
                 const xPoint = percentile.value;
@@ -314,7 +313,6 @@ const InnerDistributionsChart: FC<{
             .context(context)(shape.continuous);
           context.stroke();
 
-          // discrete
           const darkenAmountCircle = isMulti ? 0.05 : 0.1;
 
           const discreteLineColor = getColor(i, -darkenAmountCircle);
@@ -326,14 +324,18 @@ const InnerDistributionsChart: FC<{
             context.beginPath();
             context.lineWidth = 1;
             const x = xScale(point.x);
-            const y = yScale(point.y);
+            // The circle is drawn from the top of the circle, so we need to subtract the radius to get the center of the circle to be at the top of the bar.
+            const y = yScale(point.y) - discreteRadius;
             if (
               translatedCursor &&
-              distance({ x, y }, translatedCursor) <= discreteRadius
+              distance({ x, y }, translatedCursor) <= discreteRadius + 2
             ) {
               // the last discrete point always wins over overlapping previous points
               // this makes sense because it's drawn last
               newDiscreteTooltip = { value: point.x, probability: point.y };
+              //darken the point if it's hovered
+              context.fillStyle = getColor(i, -1);
+              context.strokeStyle = getColor(i, -1);
             }
             context.moveTo(x, 0);
             context.lineTo(x, y);
@@ -343,7 +345,7 @@ const InnerDistributionsChart: FC<{
             drawCircle({
               context,
               x,
-              y: y - discreteRadius, // The circle is drawn from the top of the circle, so we need to subtract the radius to get the center of the circle to be at the top of the bar.
+              y,
               r: discreteRadius,
             });
           }
@@ -377,7 +379,6 @@ const InnerDistributionsChart: FC<{
     },
     [
       height,
-      legendHeight,
       discreteRadius,
       shapes,
       samples,

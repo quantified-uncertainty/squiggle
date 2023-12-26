@@ -6,7 +6,7 @@ import { Padding, Point } from "./types.js";
 
 const axisColor = "rgba(114, 125, 147, 0.1)";
 export const labelColor = "rgb(114, 125, 147)";
-export const cursorLineColor = "#888";
+export const cursorLineColor = "rgba(114, 125, 147, 0.4)";
 export const primaryColor = "#4c78a8"; // for lines and areas
 export const distributionColor = "#649ece"; // for distributions. Slightly lighter than primaryColor
 export const axisTitleColor = "rgb(100 116 139)";

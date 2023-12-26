@@ -35,7 +35,7 @@ const {
   defaultValue,
 });
 
-export function useGetSelectedVerticalLine() {
+export function useSelectedVerticalLine() {
   const { verticalLine } = useDistContext();
 
   return verticalLine;
