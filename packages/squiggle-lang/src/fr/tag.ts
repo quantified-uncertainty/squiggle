@@ -138,11 +138,12 @@ export const library = [
   maker.make({
     name: "showAs",
     examples: [],
-    description: `---
-Overrides the default display type for a value. Different value types can be displayed in different ways. Distributions can be displayed using distribution plots. Arrays can be displayed using tables. Certain single-parameter functions can be displayed Plot.numericFn() or Plot.distFn(). All functions can be displayed using calculators.
+    description: `
+Overrides the default display type for a value. Different value types can be displayed in different ways. Distributions can be displayed using distribution plots. Arrays can be displayed using tables. Certain single-parameter functions can be displayed \`Plot.numericFn()\` or \`Plot.distFn()\`. All functions can be displayed using calculators.
 
-<code>showAs()</code> can take either a visualization, or a function that calls the value and returns a visualization. You can use it like, \`\`\`{|x| x + 1} -> Tag.showAs(Calculator)\`\`\`.
----`,
+\`showAs()\` can take either a visualization, or a function that calls the value and returns a visualization. You can use it like,
+\`\`\`{|x| x + 1} -> Tag.showAs(Calculator)\`\`\`.
+`,
     definitions: [
       showAsDef(frWithTags(frDist), frPlot),
       showAsDef(frArray(frAny()), frTableChart),
