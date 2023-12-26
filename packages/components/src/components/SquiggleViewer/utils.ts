@@ -126,7 +126,8 @@ export function useGetSubvalueByPath() {
 }
 
 export function getValueComment(value: SqValueWithContext): string | undefined {
-  return value.context.docstring() || value.tags.description();
+  const _value = value.context.docstring() || value.tags.description();
+  return _value && _value.length > 0 ? _value : undefined;
 }
 
 const tagsDefaultCollapsed = new Set(["Bool", "Number", "Void", "Input"]);
@@ -140,6 +141,7 @@ export function hasExtraContentToShow(v: SqValueWithContext): boolean {
   return !contentIsVeryShort || hasLongComment;
 }
 
+// Collapse children and element if desired. Uses crude heuristics.
 export const shouldBeginCollapsed = (
   value: SqValueWithContext,
   path: SqValuePath
@@ -147,6 +149,8 @@ export const shouldBeginCollapsed = (
   const childrenValues = getChildrenValues(value);
   if (path.isRoot()) {
     return childrenValues.length > 30;
+  } else if (value.tag === "Dist") {
+    return true;
   } else {
     return childrenValues.length > 5 || !hasExtraContentToShow(value);
   }

@@ -1,11 +1,13 @@
-import { clsx } from "clsx";
+import clsx from "clsx";
 import * as d3 from "d3";
 import isEqual from "lodash/isEqual.js";
 import { FC, useCallback, useMemo, useState } from "react";
 
 import {
   Env,
+  result,
   resultMap,
+  SqDistributionError,
   SqDistributionsPlot,
   SqDistributionTag,
   SqShape,
@@ -22,20 +24,21 @@ import {
   drawCircle,
   drawCursorLines,
   drawVerticalLine,
-  primaryColor,
 } from "../../lib/draw/index.js";
 import { Point } from "../../lib/draw/types.js";
 import { useCanvas, useCanvasCursor } from "../../lib/hooks/index.js";
 import { DrawContext } from "../../lib/hooks/useCanvas.js";
-import {
-  adjustColorBrightness,
-  canvasClasses,
-  flattenResult,
-} from "../../lib/utility.js";
+import { canvasClasses, flattenResult } from "../../lib/utility.js";
 import { PlotTitle } from "../PlotWidget/PlotTitle.js";
-import { DistProvider, useVerticalLineValue } from "./DistProvider.js";
+import { DistProvider, useSelectedVerticalLine } from "./DistProvider.js";
 import { SummaryTable } from "./SummaryTable.js";
 import { adjustPdfHeightToScale } from "./utils.js";
+
+const distRadiusScalingFromHeight = d3
+  .scaleLinear()
+  .domain([10, 300]) // The potential height of the chart
+  .range([2, 5]) // The range of circle radiuses
+  .clamp(true);
 
 export type DistributionsChartProps = {
   plot: SqDistributionsPlot;
@@ -43,44 +46,98 @@ export type DistributionsChartProps = {
   height: number;
 };
 
+// We have a similar function in squiggle-lang, but it's not exported, and this function is simple enough.
+type DataPoint = {
+  x: number;
+  y: number;
+};
+function interpolateYAtX(
+  xValue: number,
+  continuousData: { x: number; y: number }[],
+  yScale: d3.ScaleContinuousNumeric<number, number>
+): number | null {
+  let pointBefore: DataPoint | null = null,
+    pointAfter: DataPoint | null = null;
+  for (const point of continuousData) {
+    if (point.x <= xValue) {
+      pointBefore = point;
+    } else {
+      pointAfter = point;
+      break;
+    }
+  }
+
+  if (pointBefore && pointAfter) {
+    const xInterpolate = d3
+      .scaleLinear()
+      .domain([pointBefore.x, pointAfter.x])
+      .range([yScale(pointBefore.y), yScale(pointAfter.y)]);
+    return xInterpolate(xValue);
+  } else {
+    return null;
+  }
+}
+
+type SampleBarSetting = "none" | "bottom" | "behind";
+
 const InnerDistributionsChart: FC<{
-  shapes: (SqShape & { name: string })[];
+  shapes: (SqShape & {
+    name: string;
+    p5: result<number, SqDistributionError>;
+    p50: result<number, SqDistributionError>;
+    p95: result<number, SqDistributionError>;
+  })[];
   samples: number[];
   plot: SqDistributionsPlot;
   height: number;
   isMulti: boolean; // enables legend and semi-transparent rendering
-  showSamplesBar: boolean;
+  samplesBarSetting: SampleBarSetting;
+  showCursorLine: boolean;
+  showPercentileLines: boolean;
+  showXAxis: boolean;
 }> = ({
   shapes: unAdjustedShapes,
   samples,
   plot,
   height: innerHeight,
   isMulti,
-  showSamplesBar,
+  samplesBarSetting,
+  showCursorLine,
+  showPercentileLines,
+  showXAxis,
 }) => {
-  const verticalLine = useVerticalLineValue();
+  const verticalLine = useSelectedVerticalLine();
 
   const [discreteTooltip, setDiscreteTooltip] = useState<
     { value: number; probability: number } | undefined
   >();
 
-  const shapes = unAdjustedShapes.map(({ name, continuous, discrete }) => ({
-    name,
-    ...adjustPdfHeightToScale({ discrete, continuous }, plot.xScale),
-  }));
+  const shapes = unAdjustedShapes.map(
+    ({ name, continuous, discrete, p5, p50, p95 }) => ({
+      name,
+      p5,
+      p50,
+      p95,
+      ...adjustPdfHeightToScale({ discrete, continuous }, plot.xScale),
+    })
+  );
 
   const domain = shapes.flatMap((shape) =>
     shape.discrete.concat(shape.continuous)
   );
 
   const legendItemHeight = 16;
-  const sampleBarHeight = 5;
 
   const legendHeight = isMulti ? legendItemHeight * shapes.length : 0;
-  const _showSamplesBar = showSamplesBar && samples.length && !isMulti;
-  const samplesFooterHeight = _showSamplesBar ? 10 : 0;
+  const samplesFooterHeight = samplesBarSetting === "bottom" ? 20 : 0;
 
-  const height = innerHeight + legendHeight + samplesFooterHeight + 34;
+  const height = innerHeight + legendHeight + samplesFooterHeight;
+  const bottomPadding = (!showXAxis ? 0 : 14) + samplesFooterHeight;
+
+  const discreteRadius = distRadiusScalingFromHeight(height);
+
+  const sampleBarHeight =
+    samplesBarSetting === "behind" ? Math.min(7, innerHeight * 0.04 + 1) : 7;
 
   const { xScale, yScale } = useMemo(() => {
     const xScale = sqScaleToD3(plot.xScale);
@@ -107,25 +164,33 @@ const InnerDistributionsChart: FC<{
     ({ context, width }: DrawContext) => {
       context.clearRect(0, 0, width, height);
 
-      const getColor = (i: number) =>
-        isMulti ? d3.schemeCategory10[i] : distributionColor;
+      const getColor = (i: number, lightening?: number) => {
+        const color = isMulti ? d3.schemeCategory10[i] : distributionColor;
+        if (lightening) {
+          return d3.interpolateLab(color, "#fff")(lightening);
+        } else {
+          return color;
+        }
+      };
 
+      const suggestedPadding = {
+        left: discreteRadius,
+        right: discreteRadius,
+        top: discreteRadius,
+        bottom: bottomPadding,
+      };
       const { padding, frame } = drawAxes({
         context,
         width,
         height,
-        suggestedPadding: {
-          left: 10,
-          right: 10,
-          top: 10 + legendHeight,
-          bottom: 20 + samplesFooterHeight,
-        },
+        suggestedPadding: suggestedPadding,
         xScale,
         yScale,
-        hideYAxis: true,
-        drawTicks: true,
+        showYAxis: false,
+        showXAxis,
         xTickFormat: plot.xScale.tickFormat,
         xAxisTitle: plot.xScale.title,
+        showAxisLines: false,
       });
 
       if (isMulti) {
@@ -150,13 +215,39 @@ const InnerDistributionsChart: FC<{
         }
       }
 
+      // samplesBar
+      function samplesBarShowSettings(): { yOffset: number; color: string } {
+        if (samplesBarSetting === "behind") {
+          return { yOffset: bottomPadding, color: getColor(0, 0.4) };
+        } else if (samplesBarSetting === "bottom") {
+          return { yOffset: 0, color: getColor(0) };
+        } else {
+          // Only for the case of samplesBarSetting === "none", should not happen
+          return { yOffset: 0, color: getColor(0) };
+        }
+      }
+      if (samplesBarSetting !== "none") {
+        context.save();
+        const { yOffset, color } = samplesBarShowSettings();
+        context.lineWidth = 0.5;
+        context.strokeStyle = color;
+        samples.forEach((sample) => {
+          context.beginPath();
+          const x = xScale(sample);
+          context.beginPath();
+          context.moveTo(padding.left + x, height - yOffset - sampleBarHeight);
+          context.lineTo(padding.left + x, height - yOffset);
+          context.stroke();
+        });
+        context.restore();
+      }
+
       // shapes
       {
         frame.enter();
         const translatedCursor: Point | undefined = cursor
           ? frame.translatedPoint(cursor)
           : undefined;
-        const discreteRadius = 5;
 
         // there can be only one
         let newDiscreteTooltip: typeof discreteTooltip = undefined;
@@ -164,9 +255,10 @@ const InnerDistributionsChart: FC<{
         for (let i = 0; i < shapes.length; i++) {
           const shape = shapes[i];
 
-          // continuous
-          context.globalAlpha = isMulti ? 0.3 : 1;
-          context.fillStyle = getColor(i);
+          // continuous fill
+          //In the case of one distribution, we don't want it to be transparent, so that we can show the samples lines. In the case of multiple distributions, we want them to be transparent so that we can see the other distributions.
+          context.fillStyle = isMulti ? getColor(i, 0) : getColor(i, 0.7);
+          context.globalAlpha = isMulti ? 0.4 : 1;
           context.beginPath();
           d3
             .area<SqShape["continuous"][number]>()
@@ -175,10 +267,44 @@ const InnerDistributionsChart: FC<{
             .y1(0)
             .context(context)(shape.continuous);
           context.fill();
+          context.globalAlpha = 1;
+
+          // Percentile lines
+          if (showPercentileLines) {
+            const percentiles = [
+              [shape.p5, "p5"],
+              [shape.p50, "p50"],
+              [shape.p95, "p95"],
+            ] as const;
+            percentiles.forEach(([percentile, name]) => {
+              if (percentile.ok) {
+                const xPoint = percentile.value;
+                //We need to find the y value of the percentile in question, to draw the line only up to the top of the distribution. We have to do this with interpolation, which is not provided straightforwardly by d3.
+                const interpolateY = interpolateYAtX(
+                  xPoint,
+                  shape.continuous,
+                  yScale
+                );
+                if (interpolateY) {
+                  context.beginPath();
+                  context.strokeStyle = getColor(i, name === "p50" ? 0.4 : 0.3);
+                  if (name === "p50") {
+                    context.setLineDash([6, 4]);
+                  } else {
+                    context.setLineDash([2, 2]);
+                  }
+                  context.lineWidth = 1;
+                  context.moveTo(xScale(xPoint), 0);
+                  context.lineTo(xScale(xPoint), interpolateY);
+                  context.stroke();
+                  context.setLineDash([]);
+                }
+              }
+            });
+          }
 
           // The top line
-          context.globalAlpha = 1;
-          context.strokeStyle = context.fillStyle;
+          context.strokeStyle = getColor(i);
           context.beginPath();
           d3
             .line<SqShape["continuous"][number]>()
@@ -187,38 +313,41 @@ const InnerDistributionsChart: FC<{
             .context(context)(shape.continuous);
           context.stroke();
 
-          // discrete
-          const darkenAmountCircle = isMulti ? 10 : 50;
-          const darkenAmountLine = Math.floor(darkenAmountCircle / 2);
+          const darkenAmountCircle = isMulti ? 0.05 : 0.1;
 
-          const discreteLineColor = adjustColorBrightness(
-            getColor(i),
-            -darkenAmountLine
-          );
-          const discreteCircleColor = adjustColorBrightness(
-            getColor(i),
-            -darkenAmountCircle
-          );
+          const discreteLineColor = getColor(i, -darkenAmountCircle);
+          const discreteCircleColor = getColor(i, -darkenAmountCircle);
 
-          context.strokeStyle = discreteLineColor;
           context.fillStyle = discreteCircleColor;
+          context.strokeStyle = discreteLineColor;
           for (const point of shape.discrete) {
             context.beginPath();
             context.lineWidth = 1;
             const x = xScale(point.x);
-            const y = yScale(point.y);
+            // The circle is drawn from the top of the circle, so we need to subtract the radius to get the center of the circle to be at the top of the bar.
+            const y = yScale(point.y) - discreteRadius;
             if (
               translatedCursor &&
-              distance({ x, y }, translatedCursor) <= discreteRadius
+              distance({ x, y }, translatedCursor) <= discreteRadius + 2
             ) {
               // the last discrete point always wins over overlapping previous points
               // this makes sense because it's drawn last
               newDiscreteTooltip = { value: point.x, probability: point.y };
+              //darken the point if it's hovered
+              context.fillStyle = getColor(i, -1);
+              context.strokeStyle = getColor(i, -1);
             }
             context.moveTo(x, 0);
             context.lineTo(x, y);
+            context.globalAlpha = 0.5; // We want the lines to be transparent - the circles are the main focus
             context.stroke();
-            drawCircle({ context, x, y, r: discreteRadius });
+            context.globalAlpha = 1;
+            drawCircle({
+              context,
+              x,
+              y,
+              r: discreteRadius,
+            });
           }
         }
         if (!isEqual(discreteTooltip, newDiscreteTooltip)) {
@@ -227,32 +356,17 @@ const InnerDistributionsChart: FC<{
         frame.exit();
       }
 
-      // samples
-      if (_showSamplesBar) {
-        context.save();
-        context.strokeStyle = primaryColor;
-        context.lineWidth = 0.1;
-
-        samples.forEach((sample) => {
-          context.beginPath();
-          const x = xScale(sample);
-
-          context.beginPath();
-          context.moveTo(padding.left + x, height - sampleBarHeight);
-          context.lineTo(padding.left + x, height);
-          context.stroke();
-        });
-        context.restore();
+      {
+        showCursorLine &&
+          drawCursorLines({
+            frame,
+            cursor,
+            x: {
+              scale: xScale,
+              format: plot.xScale.tickFormat,
+            },
+          });
       }
-
-      drawCursorLines({
-        frame,
-        cursor,
-        x: {
-          scale: xScale,
-          format: plot.xScale.tickFormat,
-        },
-      });
 
       if (verticalLine) {
         drawVerticalLine({
@@ -265,18 +379,22 @@ const InnerDistributionsChart: FC<{
     },
     [
       height,
-      legendHeight,
-      samplesFooterHeight,
+      discreteRadius,
       shapes,
       samples,
       plot,
       discreteTooltip,
       cursor,
       isMulti,
-      _showSamplesBar,
       xScale,
       yScale,
       verticalLine,
+      sampleBarHeight,
+      bottomPadding,
+      samplesBarSetting,
+      showCursorLine,
+      showPercentileLines,
+      showXAxis,
     ]
   );
 
@@ -331,7 +449,6 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
   height,
 }) => {
   const CUTOFF_TO_SHOW_SAMPLES_BAR = 100000; // Default to stop showing bottom samples bar if there are more than 100k samples
-  const HEIGHT_SAMPLES_BAR_CUTOFF = 30; // Default to stop showing bottom samples bar if the height is less than 50px
   const distributions = plot.distributions;
 
   // Collect samples to render them in a sample bar.
@@ -351,6 +468,9 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
     distributions.map((x) =>
       resultMap(x.distribution.pointSet(environment), (pointSet) => ({
         name: x.name ?? x.distribution.toString(),
+        p5: x.distribution.inv(environment, 0.05),
+        p50: x.distribution.inv(environment, 0.5),
+        p95: x.distribution.inv(environment, 0.95),
         ...pointSet.asShape(),
       }))
     )
@@ -384,53 +504,81 @@ export const DistributionsChart: FC<DistributionsChartProps> = ({
               ", "
             )}] are not valid probability distributions, because their integrals do not add up to 1.`;
     return (
-      <div>
-        <TextTooltip text={message} placement="top">
-          <div className="font-semibold text-xs text-orange-900 bg-orange-100 rounded-md px-1.5 py-0.5 w-fit ml-2">
-            Not Normalized
-          </div>
-        </TextTooltip>
-      </div>
+      <TextTooltip text={message} placement="top">
+        <div className="font-semibold text-xs text-orange-900 bg-orange-100 rounded-md px-1.5 py-0.5 w-fit ml-2">
+          Not Normalized
+        </div>
+      </TextTooltip>
     );
   };
 
-  const showSamplesBar =
-    samples.length < CUTOFF_TO_SHOW_SAMPLES_BAR &&
-    height > HEIGHT_SAMPLES_BAR_CUTOFF;
-
   const isMulti =
     distributions.length > 1 ||
-    !!(distributions.length === 1 && distributions[0].name);
+    Boolean(distributions.length === 1 && distributions[0].name);
+
+  let samplesState: SampleBarSetting = "none";
+
+  const size = height > 150 ? "large" : "small";
+
+  if (
+    samples.length < 10 ||
+    samples.length > CUTOFF_TO_SHOW_SAMPLES_BAR ||
+    isMulti ||
+    height <= 30
+  ) {
+    samplesState = "none";
+  } else if (size == "small") {
+    samplesState = "behind";
+  } else {
+    samplesState = "bottom";
+  }
+
+  const hasLogError =
+    plot.xScale.tag === "log" && shapes.value.some(hasMassBelowZero);
 
   return (
     <DistProvider generateInitialValue={() => ({})}>
-      <div className="flex flex-col items-stretch">
-        {plot.title && <PlotTitle title={plot.title} />}
-        {plot.xScale.tag === "log" && shapes.value.some(hasMassBelowZero) ? (
-          <ErrorAlert heading="Log Domain Error">
-            Cannot graph distribution with negative values on logarithmic scale.
-          </ErrorAlert>
-        ) : (
-          <InnerDistributionsChart
-            isMulti={isMulti}
-            samples={samples}
-            shapes={shapes.value}
-            plot={plot}
-            height={height}
-            showSamplesBar={showSamplesBar}
-          />
-        )}
-        {!anyAreNonnormalized && plot.showSummary && (
-          <div className="mt-3 self-end">
-            <SummaryTable
-              plot={plot}
-              environment={environment}
-              size={height > 150 ? "large" : "small"}
-            />
+      {plot.title && <PlotTitle title={plot.title} />}
+      {hasLogError && (
+        <ErrorAlert heading="Log Domain Error">
+          Cannot graph distribution with negative values on logarithmic scale.
+        </ErrorAlert>
+      )}
+
+      {!hasLogError && (
+        <>
+          <div className="flex flex-col items-stretch">
+            <div className="flex-1">
+              <InnerDistributionsChart
+                isMulti={isMulti}
+                samples={samples}
+                shapes={shapes.value}
+                plot={plot}
+                height={height}
+                samplesBarSetting={samplesState}
+                showCursorLine={height > 30}
+                showPercentileLines={height > 30}
+                showXAxis={height > 20}
+              />
+            </div>
+
+            {!anyAreNonnormalized && plot.showSummary && (
+              <div
+                className={clsx("mt-3 self-end", size === "large" && "pt-5")}
+              >
+                <SummaryTable
+                  plot={plot}
+                  environment={environment}
+                  size={size}
+                />
+              </div>
+            )}
+            {anyAreNonnormalized && (
+              <div className="flex-1 pt-2"> {nonNormalizedError()}</div>
+            )}
           </div>
-        )}
-        {anyAreNonnormalized && nonNormalizedError()}
-      </div>
+        </>
+      )}
     </DistProvider>
   );
 };

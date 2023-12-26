@@ -70,9 +70,9 @@ const WithComment: FC<PropsWithChildren<Props>> = ({ value, children }) => {
   const commentEl = (
     <ReactMarkdown
       className={clsx(
-        "prose max-w-4xl text-sm text-stone-600 mt-0.5 mb-1.5",
+        "prose max-w-4xl text-sm text-stone-600",
         leftWidgetMargin,
-        commentPosition === "bottom" && "mt-1"
+        commentPosition === "bottom" ? "mt-1" : "mb-1"
       )}
     >
       {comment}
@@ -182,14 +182,14 @@ export const ValueWithContextViewer: FC<Props> = ({ value, parentValue }) => {
   const showColon = !isFocused && path.items.length > 1;
   const name = pathToShortName(path);
   const headerName = (
-    <div>
+    <div className="leading-3">
       <span
         className={clsx(!taggedName && "font-mono", headerClasses())}
         onClick={_focus}
       >
         {taggedName ? taggedName : name}
       </span>
-      {showColon && <span className={"text-gray-400 ml-0.5 font-mono"}>:</span>}
+      {showColon && <span className={"text-gray-400 font-mono"}>:</span>}
     </div>
   );
 
@@ -242,11 +242,14 @@ export const ValueWithContextViewer: FC<Props> = ({ value, parentValue }) => {
           </div>
         </header>
         {isOpen && (
-          <div className="flex w-full">
+          <div
+            className={clsx(
+              "flex w-full",
+              Boolean(getValueComment(value)) && "py-2"
+            )}
+          >
             {!isFocused && leftCollapseBorder()}
-            <div
-              className={clsx("grow", Boolean(getValueComment(value)) && "p-1")}
-            >
+            <div className="grow">
               <ValueViewerBody value={value} />
             </div>
           </div>
