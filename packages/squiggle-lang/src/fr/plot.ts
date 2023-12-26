@@ -56,13 +56,13 @@ export function assertValidMinMax(scale: Scale) {
     );
   } else if (hasMin && hasMax && scale.min! >= scale.max!) {
     throw new REArgumentError(
-      `Scale min (${scale.min}) is greater or equal than than max (${scale.max})`
+      `Scale min (${scale.min}) is greater or equal to max (${scale.max})`
     );
   }
 }
 
 function createScale(scale: Scale | null, domain: VDomain | undefined): Scale {
-  /*
+/*
    * There are several possible combinations here:
    * 1. Scale with min/max -> ignore domain, keep scale
    * 2. Scale without min/max, domain defined -> copy min/max from domain
@@ -92,7 +92,8 @@ function extractDomainFromOneArgFunction(fn: Lambda): VDomain | undefined {
   const counts = fn.parameterCounts();
   if (!counts.includes(1)) {
     throw new REOther(
-      `Unreachable: extractDomainFromOneArgFunction() called with function that doesn't have exactly one parameter.`
+      `Unreachable: extractDomainFromOneArgFunction() called with a function `
+      + `that doesn't have exactly one parameter.`
     );
   }
 
@@ -110,7 +111,8 @@ function extractDomainFromOneArgFunction(fn: Lambda): VDomain | undefined {
 const _assertYScaleNotDateScale = (yScale: Scale | null) => {
   if (yScale && yScale.type === "date") {
     throw new REArgumentError(
-      "Using a date scale as the plot yScale is not yet supported."
+      "Using a date scale as the plot yScale is not "
+      + "yet supported."
     );
   }
 };
@@ -156,7 +158,8 @@ const numericFnDef = () => {
     name: "numericFn",
     output: "Plot",
     examples: [
-      `Plot.numericFn({|x|x*x}, {xScale: Scale.linear({ min: 3, max: 5 }), yScale: Scale.log({ tickFormat: ".2s" }) })`,
+      `Plot.numericFn({|x|x*x}, {xScale: Scale.linear({ min: 3, max: 5 }), `+
+      `yScale: Scale.log({ tickFormat: ".2s" }) })`,
     ],
     definitions: [
       makeDefinition(
