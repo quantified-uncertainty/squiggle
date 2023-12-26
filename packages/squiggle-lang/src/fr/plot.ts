@@ -1,5 +1,5 @@
-import mergeWith from "lodash/mergeWith.js";
-import uniq from "lodash/uniq.js";
+import mergeObjectsWith from "lodash/mergeWith.js";
+import uniqueElements from "lodash/uniq.js";
 
 import { REArgumentError, REOther } from "../errors/messages.js";
 import { makeDefinition } from "../library/registry/fnDefinition.js";
@@ -61,7 +61,7 @@ export function assertValidMinMax(scale: Scale) {
   }
 }
 
-function createScale(scale: Scale | null, domain: VDomain | undefined): Scale {
+function createPlotScale(scale: Scale | null, domain: VDomain | undefined): Scale {
   /*
    * There are several possible combinations here:
    * 1. Scale with min/max -> ignore domain, keep scale
@@ -77,7 +77,7 @@ function createScale(scale: Scale | null, domain: VDomain | undefined): Scale {
   const _defaultScale = domain ? domain.value.toDefaultScale() : defaultScale;
 
   // _defaultScale can have a lot of undefined values. These should be over-written.
-  const resultScale = mergeWith(
+  const resultScale = mergeObjectsWith(
     {},
     scale || {},
     _defaultScale,
@@ -120,7 +120,7 @@ function formatXPoints(
   xScale: Scale | null
 ) {
   const [min, max] = [xScale?.min, xScale?.max];
-  let points = xPoints ? sort(uniq(xPoints)) : null;
+  let points = xPoints ? sort(uniqueElements(xPoints)) : null;
   if (points && min !== undefined) {
     points = points?.filter((x) => x >= min);
   }
@@ -143,7 +143,7 @@ const numericFnDef = () => {
     return {
       type: "numericFn",
       fn,
-      xScale: createScale(xScale, domain),
+      xScale: createPlotScale(xScale, domain),
       yScale: yScale ?? defaultScale,
       title: title ?? undefined,
       xPoints: xPoints ?? undefined,
@@ -405,7 +405,7 @@ export const library = [
           const domain = extractDomainFromOneArgFunction(value);
           const { xScale, yScale, distXScale, title, xPoints } = params ?? {};
           yScale && _assertYScaleNotDateScale(yScale);
-          const _xScale = createScale(xScale || null, domain);
+          const _xScale = createPlotScale(xScale || null, domain);
           return {
             fn: value,
             type: "distFn",
@@ -432,7 +432,7 @@ export const library = [
         ([{ fn, xScale, yScale, distXScale, title, xPoints }]) => {
           _assertYScaleNotDateScale(yScale);
           const domain = extractDomainFromOneArgFunction(fn);
-          const _xScale = createScale(xScale, domain);
+          const _xScale = createPlotScale(xScale, domain);
           return {
             type: "distFn",
             fn,
