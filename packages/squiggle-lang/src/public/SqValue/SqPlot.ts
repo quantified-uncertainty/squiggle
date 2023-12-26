@@ -61,14 +61,14 @@ function getXPointsWithParams(
   {
     min,
     max,
-    extraPoints,
+    requestedXPoints,
   }: {
     min?: number;
     max?: number;
-    extraPoints?: number[];
+    requestedXPoints?: number[];
   }
 ) {
-  const combinedPoints = [...(extraPoints || []), ...(points || [])];
+  const combinedPoints = [...(requestedXPoints || []), ...(points || [])];
   //Technically, we don't need sort(uniq()) if it's just ``points``, but it's not worth the extra logic to avoid it.
   return sort(uniq(clamp(combinedPoints, { min, max })));
 }
@@ -175,7 +175,7 @@ export class SqNumericFnPlot extends SqAbstractPlot<"numericFn"> {
   xPoints(params: {
     min?: number;
     max?: number;
-    extraPoints?: number[];
+    requestedXPoints?: number[];
   }): number[] {
     return getXPointsWithParams(this._value.xPoints, params);
   }
@@ -247,7 +247,7 @@ export class SqDistFnPlot extends SqAbstractPlot<"distFn"> {
   xPoints(params: {
     min?: number;
     max?: number;
-    extraPoints?: number[];
+    requestedXPoints?: number[];
   }): number[] {
     return getXPointsWithParams(this._value.xPoints, params);
   }

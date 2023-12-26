@@ -62,15 +62,8 @@ export function getFunctionImage<T extends SqNumericFnPlot | SqDistFnPlot>(
 
   //It would be nice to move this to squiggle-lang, but the Scale domain types use D3 for choosing x values.
   const adjustedXPoints = () => {
-    const manualXPoints = plot.xPoints({ min, max });
-    const extraPointsWanted = xPointCount - manualXPoints.length;
-
-    if (extraPointsWanted < 1) {
-      return manualXPoints;
-    }
-
-    const extraPoints = rangeByCount({ scale, count: extraPointsWanted });
-    return plot.xPoints({ min, max, extraPoints });
+    const requestedXPoints = rangeByCount({ scale, count: xPointCount });
+    return plot.xPoints({ min, max, requestedXPoints });
   };
 
   const chartPointsToRender = adjustedXPoints();
