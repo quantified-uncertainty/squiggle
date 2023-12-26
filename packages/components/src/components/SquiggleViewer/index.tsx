@@ -1,12 +1,6 @@
-import { FC, forwardRef, Fragment, memo } from "react";
+import { FC, forwardRef, memo } from "react";
 
-import {
-  result,
-  SqDictValue,
-  SqError,
-  SqValue,
-  SqValuePath,
-} from "@quri/squiggle-lang";
+import { result, SqError, SqValue, SqValuePath } from "@quri/squiggle-lang";
 import { ChevronRightIcon } from "@quri/ui";
 
 import { useStabilizeObjectIdentity } from "../../lib/hooks/useStabilizeObject.js";
@@ -14,12 +8,7 @@ import { MessageAlert } from "../Alert.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import { PartialPlaygroundSettings } from "../PlaygroundSettings.js";
 import { SquiggleErrorAlert } from "../SquiggleErrorAlert.js";
-import {
-  nonHiddenDictEntries,
-  pathIsEqual,
-  pathItemFormat,
-  useGetSubvalueByPath,
-} from "./utils.js";
+import { pathIsEqual, pathItemFormat, useGetSubvalueByPath } from "./utils.js";
 import { ValueViewer } from "./ValueViewer.js";
 import {
   useFocus,
@@ -27,6 +16,21 @@ import {
   useViewerContext,
   ViewerProvider,
 } from "./ViewerProvider.js";
+
+const FocusedNavigationItem: FC<{
+  text: string;
+  onClick: () => void;
+}> = ({ text, onClick }) => (
+  <div className="flex items-center">
+    <span
+      onClick={onClick}
+      className="text-sm text-stone-500 hover:text-stone-900 hover:underline font-mono cursor-pointer"
+    >
+      {text}
+    </span>
+    <ChevronRightIcon className="text-slate-300" size={24} />
+  </div>
+);
 
 const FocusedNavigation: FC<{
   focusedPath: SqValuePath;
@@ -41,34 +45,22 @@ const FocusedNavigation: FC<{
     return null;
   }
 
-  const navLinkStyle =
-    "text-sm text-stone-500 hover:text-stone-900 hover:underline font-mono cursor-pointer";
-
   // If we're focused on the root path override, we need to adjust the focused path accordingly when presenting the navigation, so that it begins with the root path intead. This is a bit confusing.
   const rootPathFocusedAdjustment = rootPath ? rootPath.items.length - 1 : 0;
 
   return (
     <div className="flex items-center mb-3 pl-3">
-      {!rootPath && (
-        <>
-          <span onClick={unfocus} className={navLinkStyle}>
-            {focusedPath.root === "bindings" ? "Variables" : focusedPath.root}
-          </span>
-
-          <ChevronRightIcon className="text-slate-300" size={24} />
-        </>
-      )}
+      {!rootPath && <FocusedNavigationItem onClick={unfocus} text="Root" />}
 
       {focusedPath
         .itemsAsValuePaths({ includeRoot: false })
         .slice(rootPathFocusedAdjustment, -1)
         .map((path, i) => (
-          <Fragment key={i}>
-            <div onClick={() => focus(path)} className={navLinkStyle}>
-              {pathItemFormat(path.items[i + rootPathFocusedAdjustment])}
-            </div>
-            <ChevronRightIcon className="text-slate-300" size={24} />
-          </Fragment>
+          <FocusedNavigationItem
+            key={i}
+            onClick={() => focus(path)}
+            text={pathItemFormat(path.items[i + rootPathFocusedAdjustment])}
+          />
         ))}
     </div>
   );
@@ -79,37 +71,31 @@ export type SquiggleViewerHandle = {
 };
 
 export type SquiggleViewerProps = {
-  /** The output of squiggle's run */
-  resultVariables: result<SqDictValue, SqError>;
-  resultItem: result<SqValue, SqError> | undefined;
+  value: result<SqValue, SqError> | undefined; // "undefined" is an error, it means that we failed to provide the value
   editor?: CodeEditorHandle;
   rootPathOverride?: SqValuePath;
 } & PartialPlaygroundSettings;
 
-const SquiggleViewerOuter: FC<SquiggleViewerProps> = ({
-  resultVariables,
-  resultItem,
+const SquiggleViewerWithoutProvider: FC<SquiggleViewerProps> = ({
+  value,
   rootPathOverride,
 }) => {
   const { focused = rootPathOverride } = useViewerContext();
-  const resultVariableLength = resultVariables.ok
-    ? nonHiddenDictEntries(resultVariables.value.value).length
-    : 0;
 
   const getSubvalueByPath = useGetSubvalueByPath();
 
   let focusedItem: SqValue | undefined;
-  if (focused && resultVariables.ok && focused.root === "bindings") {
-    focusedItem = getSubvalueByPath(resultVariables.value, focused);
-  } else if (focused && resultItem?.ok && focused.root === "result") {
-    focusedItem = getSubvalueByPath(resultItem.value, focused);
+  if (focused && value?.ok) {
+    focusedItem = getSubvalueByPath(value.value, focused);
   }
 
   const body = () => {
-    if (!resultVariables.ok) {
+    if (!value) {
+      return <MessageAlert heading="Value is not defined" />;
+    } else if (!value.ok) {
       return (
         <div className="px-1">
-          <SquiggleErrorAlert error={resultVariables.value} />
+          <SquiggleErrorAlert error={value.value} />
         </div>
       );
     } else if (focused) {
@@ -119,16 +105,7 @@ const SquiggleViewerOuter: FC<SquiggleViewerProps> = ({
         return <MessageAlert heading="Focused variable is not defined" />;
       }
     } else {
-      return (
-        <div className="space-y-2">
-          {resultVariables.ok && resultVariableLength > 0 && (
-            <ValueViewer value={resultVariables.value} />
-          )}
-          {resultItem && resultItem.ok && (
-            <ValueViewer value={resultItem.value} />
-          )}
-        </div>
-      );
+      return <ValueViewer value={value.value} />;
     }
   };
 
@@ -142,15 +119,9 @@ const SquiggleViewerOuter: FC<SquiggleViewerProps> = ({
   );
 };
 
-const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
+const component = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
   function SquiggleViewer(
-    {
-      resultVariables,
-      resultItem,
-      editor,
-      rootPathOverride,
-      ...partialPlaygroundSettings
-    },
+    { value, editor, rootPathOverride, ...partialPlaygroundSettings },
     ref
   ) {
     /**
@@ -162,27 +133,22 @@ const innerComponent = forwardRef<SquiggleViewerHandle, SquiggleViewerProps>(
       partialPlaygroundSettings
     );
 
-    const hasResultVariables =
-      resultVariables.ok &&
-      nonHiddenDictEntries(resultVariables.value.value).length > 0;
-
     return (
       <ViewerProvider
         partialPlaygroundSettings={stablePartialPlaygroundSettings}
         editor={editor}
-        beginWithVariablesCollapsed={resultItem?.ok && hasResultVariables}
         ref={ref}
       >
-        <SquiggleViewerOuter
-          resultVariables={resultVariables}
-          resultItem={resultItem}
+        <SquiggleViewerWithoutProvider
+          value={value}
           rootPathOverride={rootPathOverride}
         />
       </ViewerProvider>
     );
   }
 );
+component.displayName = "SquiggleViewer";
 
 // React.memo and React.forwardRef are hard to combine in TypeScript;
 // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/37087#issuecomment-656596623
-export const SquiggleViewer = memo(innerComponent) as typeof innerComponent;
+export const SquiggleViewer = memo(component) as typeof component;

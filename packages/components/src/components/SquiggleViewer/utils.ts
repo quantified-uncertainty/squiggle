@@ -89,10 +89,14 @@ export function useGetSubvalueByPath() {
   };
 
   return (value: SqValue, path: SqValuePath): SqValue | undefined => {
-    if (!value.context) {
+    const { context } = value;
+    if (!context) {
       return;
     }
-    const { context } = value;
+    if (context.path.root !== path.root) {
+      return;
+    }
+
     for (const pathItem of path.itemsAsValuePaths({ includeRoot: false })) {
       const key = pathItem.items[pathItem.items.length - 1];
       let nextValue: SqValue | undefined;

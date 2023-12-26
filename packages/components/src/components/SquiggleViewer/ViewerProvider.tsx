@@ -27,7 +27,6 @@ import {
   getChildrenValues,
   pathAsString,
   shouldBeginCollapsed,
-  topLevelBindingsName,
 } from "./utils.js";
 
 type ItemHandle = {
@@ -60,18 +59,6 @@ const defaultLocalItemState: LocalItemState = {
 class ItemStore {
   state: Record<string, LocalItemState> = {};
   handles: Record<string, ItemHandle> = {};
-
-  constructor({
-    beginWithVariablesCollapsed,
-  }: {
-    beginWithVariablesCollapsed?: boolean;
-  }) {
-    if (beginWithVariablesCollapsed) {
-      this.state = {
-        [topLevelBindingsName]: { collapsed: true, settings: {} },
-      };
-    }
-  }
 
   setState(
     path: SqValuePath,
@@ -181,7 +168,7 @@ export const ViewerContext = createContext<ViewerContextShape>({
   focused: undefined,
   setFocused: () => undefined,
   editor: undefined,
-  itemStore: new ItemStore({}),
+  itemStore: new ItemStore(),
 });
 
 export function useViewerContext() {
@@ -302,47 +289,34 @@ export const ViewerProvider = forwardRef<
   PropsWithChildren<{
     partialPlaygroundSettings: PartialPlaygroundSettings;
     editor?: CodeEditorHandle;
-    beginWithVariablesCollapsed?: boolean;
   }>
->(
-  (
-    {
-      partialPlaygroundSettings,
-      editor,
-      beginWithVariablesCollapsed,
-      children,
+>(({ partialPlaygroundSettings, editor, children }, ref) => {
+  const [itemStore] = useState(() => new ItemStore());
+
+  useImperativeHandle(ref, () => ({
+    viewValuePath(path: SqValuePath) {
+      itemStore.scrollToPath(path);
     },
-    ref
-  ) => {
-    const [itemStore] = useState(
-      () => new ItemStore({ beginWithVariablesCollapsed })
-    );
+  }));
 
-    useImperativeHandle(ref, () => ({
-      viewValuePath(path: SqValuePath) {
-        itemStore.scrollToPath(path);
-      },
-    }));
+  const [focused, setFocused] = useState<SqValuePath | undefined>();
 
-    const [focused, setFocused] = useState<SqValuePath | undefined>();
+  const globalSettings = useMemo(() => {
+    return merge({}, defaultPlaygroundSettings, partialPlaygroundSettings);
+  }, [partialPlaygroundSettings]);
 
-    const globalSettings = useMemo(() => {
-      return merge({}, defaultPlaygroundSettings, partialPlaygroundSettings);
-    }, [partialPlaygroundSettings]);
-
-    return (
-      <ViewerContext.Provider
-        value={{
-          globalSettings,
-          editor,
-          focused,
-          setFocused,
-          itemStore,
-        }}
-      >
-        {children}
-      </ViewerContext.Provider>
-    );
-  }
-);
+  return (
+    <ViewerContext.Provider
+      value={{
+        globalSettings,
+        editor,
+        focused,
+        setFocused,
+        itemStore,
+      }}
+    >
+      {children}
+    </ViewerContext.Provider>
+  );
+});
 ViewerProvider.displayName = "ViewerProvider";

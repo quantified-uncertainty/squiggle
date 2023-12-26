@@ -50,7 +50,6 @@ export const SquiggleChart: FC<SquiggleChartProps> = memo(
         rootPathOverride={rootPathOverride}
         squiggleOutput={squiggleOutput}
         isRunning={isRunning}
-        showHeader={showHeader}
         environment={environment}
         {...settings}
       />
