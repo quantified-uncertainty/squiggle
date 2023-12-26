@@ -21,6 +21,9 @@ import {
   FRType,
   frWithTags,
 } from "../library/registry/frTypes.js";
+
+const FR_TYPES = [frPlot, frCalculator];
+
 import {
   checkNumericTickFormat,
   FnFactory,
@@ -135,18 +138,18 @@ export const library = [
       decoratorWithInputOrFnInput(
         frLambdaTyped([frNumber], frDistOrNumber),
         //We need to list all of the types it can become
-        frOr(frPlot, frCalculator)
+        frOr(...FR_TYPES)
       ),
       decoratorWithInputOrFnInput(
         frLambdaTyped([frDate], frDistOrNumber),
-        frOr(frPlot, frCalculator)
+        frOr(...FR_TYPES)
       ),
       decoratorWithInputOrFnInput(
         frLambdaTyped([frDuration], frDistOrNumber),
-        frOr(frPlot, frCalculator)
+        frOr(...FR_TYPES)
       ),
       //The frLambda definition needs to come after the more narrow frLambdaTyped definitions.
-      decoratorWithInputOrFnInput(frLambda, frCalculator),
+      decoratorWithInputOrFnInput(frLambda, ...FR_TYPES),
     ],
   }),
   maker.make({
