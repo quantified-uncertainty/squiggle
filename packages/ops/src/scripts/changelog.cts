@@ -38,6 +38,9 @@ const changelogFunctions: ChangelogFunctions = {
           return `[${issueHash}](https://github.com/${REPO}/issues/${issueId})`;
         }
       );
+
+    if (replacedChangelog.trim() === "") return "";
+
     const [firstLine, ...futureLines] = replacedChangelog
       .split("\n")
       .map((l) => linkifyIssueHints(l.trimEnd()));
