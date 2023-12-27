@@ -3,4 +3,4 @@
 "@quri/squiggle-components": patch
 ---
 
-Calculator.make(fn) should work for functions with n>0 params
+`Calculator.make(fn)` works for functions with n>0 params

@@ -2,4 +2,4 @@
 "@quri/squiggle-lang": patch
 ---
 
-Remove Table Title attribute
+Removed `title` attribute from `Table.make()`; you can use `@name` and `@description` tags instead

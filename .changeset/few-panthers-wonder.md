@@ -2,4 +2,4 @@
 "@quri/squiggle-lang": patch
 ---
 
-Tag percentates with percentage format
+Tag percentage values with percentage format, so that they're rendered as percentages in viewer

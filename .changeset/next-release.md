@@ -1,6 +1,7 @@
 ---
-"@quri/squiggle-lang": patch
-"@quri/squiggle-components": patch
-"@quri/prettier-plugin-squiggle": patch
-"vscode-squiggle": patch
+"@quri/squiggle-lang": minor
+"@quri/squiggle-components": minor
+"@quri/prettier-plugin-squiggle": minor
+"vscode-squiggle": minor
+"@quri/ui": minor
 ---

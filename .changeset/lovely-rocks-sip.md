@@ -2,4 +2,4 @@
 "@quri/squiggle-components": patch
 ---
 
-Tooltips on stdlib functions in editor
+Tooltips and inline documentation for stdlib functions in editor

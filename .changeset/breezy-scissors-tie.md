@@ -3,4 +3,7 @@
 "@quri/squiggle-components": patch
 ---
 
-Dates and Durations: Adds new Date scale, dateRanges, and visualizes these in plots for the x axis. Minor changes to the Date library. You can now type 2023year to represent Jan 1 2023.
+Dates and Durations improvements
+You can now type `Date(2023)` to represent Jan 1 2023.
+Added date domains (`f(x: [Date(1980), Date(2050)])`) that's used in function plots for the x axis.
+Minor changes to the Date library.
