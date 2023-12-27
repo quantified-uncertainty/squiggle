@@ -138,6 +138,9 @@ importers:
       react-syntax-highlighter:
         specifier: ^15.5.0
         version: 15.5.0(react@18.2.0)
+      remark-gfm:
+        specifier: ^4.0.0
+        version: 4.0.0
       unist-util-visit:
         specifier: ^5.0.0
         version: 5.0.0
@@ -964,7 +967,7 @@ packages:
       '@babel/parser': 7.23.5
       '@babel/runtime': 7.23.5
       '@babel/traverse': 7.23.2
-      '@babel/types': 7.23.3
+      '@babel/types': 7.23.5
       babel-preset-fbjs: 3.4.0(@babel/core@7.23.2)
       chalk: 4.1.2
       fb-watchman: 2.0.2
@@ -1249,7 +1252,7 @@ packages:
     resolution: {integrity: sha512-0pYVBnDKZO2fnSPCrgM/6WMc7eS20Fbok+0r88fp+YtWVLZrp4CkafFGIp+W0VKw4a22sgebPT99y+FDNMdP4w==}
     engines: {node: '>=6.9.0'}
     dependencies:
-      '@babel/types': 7.23.3
+      '@babel/types': 7.23.5
 
   /@babel/helper-module-transforms@7.23.0(@babel/core@7.23.2):
     resolution: {integrity: sha512-WhDWw1tdrlT0gMgUJSlX0IQvoO1eN279zrAUbVB+KpV2c3Tylz8+GnKOLllCS6Z/iZQEyVYxhZVUdPTqs2YYPw==}

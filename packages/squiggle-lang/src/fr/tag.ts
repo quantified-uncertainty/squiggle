@@ -96,6 +96,9 @@ export const library = [
   maker.make({
     name: "name",
     examples: [],
+    description: `Adds a user-facing name to a value. This is useful for documenting what a value represents, or how it was calculated. Names are shown in the visualizations sidebar.
+
+*Note: While names are shown in the sidebar, you still need to call variables by their regular variable names in code.*`,
     definitions: [
       makeDefinition(
         [frAny({ genericName: "A" }), frString],
@@ -117,6 +120,9 @@ export const library = [
   maker.make({
     name: "description",
     examples: [],
+    description: `Adds a description to a value. This is useful for documenting what a value represents, or how it was calculated. Descriptions are shown in the visualizations sidebar.
+    
+*Note: Descriptions provided as tags look like docstrings, but are not docstrings. Docstrings don't get imported with the variable into other files, but descriptions do.*`,
     definitions: [
       makeDefinition(
         [frAny({ genericName: "A" }), frString],
@@ -139,10 +145,26 @@ export const library = [
     name: "showAs",
     examples: [],
     description: `
-Overrides the default display type for a value. Different value types can be displayed in different ways. Distributions can be displayed using distribution plots. Arrays can be displayed using tables. Certain single-parameter functions can be displayed \`Plot.numericFn()\` or \`Plot.distFn()\`. All functions can be displayed using calculators.
+Overrides the default visualization for a value.
 
-\`showAs()\` can take either a visualization, or a function that calls the value and returns a visualization. You can use it like,
-\`\`\`{|x| x + 1} -> Tag.showAs(Calculator)\`\`\`.
+\`showAs()\` can take either a visualization, or a function that calls the value and returns a visualization. You can use it like,  
+\`\`\`js
+example1 = {|x| x + 1} -> Tag.showAs(Calculator)
+
+@showAs({|f| Plot.numericFn(f, { xScale: Scale.symlog() })})
+example2 = {|x| x + 1}
+\`\`\`
+
+Different types of values can be displayed in different ways. The following table shows the potential visualization types for each input type. In this table, \`Number\` can be used with Dates and Durations as well.
+
+| Input Type    | Visualization Types |
+| --------- | ----------- |
+| Distribution    | \`Plot.dist\`       |
+| List    | \`Table\`       |
+| \`(Number -> Number)\` Function | \`Plot.numericFn\`, \`Calculator\`        |
+| \`(Number -> Dist)\` Function | \`Plot.distFn\`, \`Calculator\`        |
+| Function | \`Calculator\`        |
+
 `,
     definitions: [
       showAsDef(frWithTags(frDist), frPlot),
@@ -222,7 +244,7 @@ Overrides the default display type for a value. Different value types can be dis
   }),
   maker.make({
     name: "all",
-    description: "Returns all tags as a dictionary.",
+    description: "Returns all tags as a Dictionary.",
     examples: [],
     definitions: [
       makeDefinition([frAny()], frDictWithArbitraryKeys(frAny()), ([value]) => {
