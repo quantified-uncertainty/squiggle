@@ -5,11 +5,11 @@
   "license": "MIT",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
     "lint": "prettier --check . && next lint",
     "format": "prettier --write .",
     "compileDocsForLLM": "node scripts/compileDocs.js",
-    "docs": "node scripts/gen.mjs"
+    "docs": "node scripts/gen.mjs",
+    "build": "next build && pnpm run docs && pnpm run compileDocsForLLM"
   },
   "dependencies": {
     "@quri/squiggle-components": "workspace:*",
