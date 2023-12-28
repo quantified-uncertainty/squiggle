@@ -12,11 +12,15 @@
   "dependencies": {
     "@quri/squiggle-components": "workspace:*",
     "@quri/ui": "workspace:*",
+    "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/typography": "^0.5.10",
     "glob": "^10.3.10",
+    "lodash": "^4.17.21",
     "squiggle-components-0.8.5": "npm:@quri/squiggle-components@0.8.5",
     "squiggle-components-0.8.6": "npm:@quri/squiggle-components@0.8.6"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.202",
     "@types/react": "^18.2.41",
     "@typescript-eslint/eslint-plugin": "^6.13.1",
     "@typescript-eslint/parser": "^6.13.1",
