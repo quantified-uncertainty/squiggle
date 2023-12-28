@@ -21,13 +21,6 @@ const maker = new FnFactory({
 });
 
 export const library = [
-  ...makeNumericComparisons(
-    maker,
-    (d1, d2) => d1.smaller(d2),
-    (d1, d2) => d1.larger(d2),
-    (d1, d2) => d1.isEqual(d2),
-    frDate
-  ),
   maker.make({
     name: "make",
     requiresNamespace: true,
@@ -66,6 +59,13 @@ export const library = [
       }),
     ],
   }),
+  ...makeNumericComparisons(
+    maker,
+    (d1, d2) => d1.smaller(d2),
+    (d1, d2) => d1.larger(d2),
+    (d1, d2) => d1.isEqual(d2),
+    frDate
+  ),
   // same name as used in date-fns
   maker.make({
     name: "fromUnixTime",

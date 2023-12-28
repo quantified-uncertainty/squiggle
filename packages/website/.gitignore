@@ -1,3 +1,7 @@
 /node_modules
 /.next
 /.vscode
+/src/pages/docs/Api/Date.mdx
+/src/pages/docs/Api/Duration.mdx
+/src/pages/docs/Api/Tag.mdx
+./allContent.txt

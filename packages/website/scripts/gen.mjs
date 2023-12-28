@@ -47,8 +47,18 @@ helperFn(f) = f \`}/>
 
 ## Definitions
 `,
-  Date: "# Date",
-  Duration: "# Duration",
+  Date: `---
+description: Dates are a simple date time type.
+---
+
+# Date`,
+  Duration: `---
+description: Durations are a simple time type, representing a length of time. They are internally stored as milliseconds, but often shown and written using seconds, minutes, hours, days, etc.
+---
+
+# Duration
+
+Durations are a simple time type, representing a length of time. They are internally stored as milliseconds, but often shown and written using seconds, minutes, hours, days, etc.`,
 };
 
 function toMarkdownDefinitions(definitions) {

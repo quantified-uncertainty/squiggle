@@ -1,7 +1,9 @@
 {
   "BuiltIn": "Built In",
+  "Date": "Date",
   "Dict": "Dictionary",
   "Dist": "Distribution",
+  "Duration": "Duration",
   "Sym": "Symbolic Distribution",
   "SampleSet": "Sample Set Distribution",
   "PointSet": "Point Set Distribution",
@@ -12,11 +14,9 @@
   "Scale": "Scale",
   "String": "String",
   "Table": "Table",
+  "Tag": "Tag",
   "Calculator": "Calculator",
   "Input": "Input",
   "RelativeValues": "Relative Values",
-  "Danger": "Danger",
-  "Tag": "Tag",
-  "Date": "Date",
-  "Duration": "Duration"
+  "Danger": "Danger"
 }
