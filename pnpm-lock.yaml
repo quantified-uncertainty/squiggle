@@ -810,7 +810,7 @@ importers:
         specifier: workspace:*
         version: link:../textmate-grammar
       '@quri/versioned-squiggle-components':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../versioned-components
       '@types/node':
         specifier: ^20.10.2
