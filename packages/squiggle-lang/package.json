@@ -27,6 +27,7 @@
     "prepack": "pnpm run build && pnpm run test",
     "all": "pnpm run build && pnpm run test",
     "cli": "node ./dist/cli/index.js",
+    "docs": "node ./dist/cli/makeDocumentation.js",
     "update-system-version": "node ./dist/scripts/update-system-version.js"
   },
   "dependencies": {

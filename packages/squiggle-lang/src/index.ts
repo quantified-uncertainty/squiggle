@@ -126,3 +126,9 @@ export function getFunctionDocumentation(name: string) {
 export function getAllFunctionNames() {
   return registry.allNames();
 }
+
+export function getAllFunctionNamesWithNamespace(name: string) {
+  return registry
+    .allFunctionsWithNamespace(name)
+    .map((fn) => `${name}.${fn.name}`);
+}

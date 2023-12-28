@@ -1,0 +1,125 @@
+### name
+      ```
+  ('A, String) => 'A
+  ```
+      Adds a user-facing name to a value. This is useful for documenting what a value represents, or how it was calculated. Names are shown in the visualizations sidebar.
+
+*Note: While names are shown in the sidebar, you still need to call variables by their regular variable names in code.*
+      
+
+### getName
+      ```
+  (any) => String
+  ```
+      undefined
+      
+
+### description
+      ```
+  ('A, String) => 'A
+  ```
+      Adds a description to a value. This is useful for documenting what a value represents, or how it was calculated. Descriptions are shown in the visualizations sidebar.
+    
+*Note: Descriptions provided as tags look like docstrings, but are not docstrings. Docstrings don't get imported with the variable into other files, but descriptions do.*
+      
+
+### getDescription
+      ```
+  (any) => String
+  ```
+      undefined
+      
+
+### showAs
+      ```
+  (Dist, Plot|(Dist) => Plot) => Dist
+(List(any), Table|(List(any)) => Table) => List(any)
+((Number) => Dist|Number, Plot|Calculator|((Number) => Dist|Number) => Plot|Calculator) => (Number) => Dist|Number
+((Date) => Dist|Number, Plot|Calculator|((Date) => Dist|Number) => Plot|Calculator) => (Date) => Dist|Number
+((Duration) => Dist|Number, Plot|Calculator|((Duration) => Dist|Number) => Plot|Calculator) => (Duration) => Dist|Number
+(Function, Calculator|(Function) => Calculator) => Function
+  ```
+      
+Overrides the default visualization for a value.
+
+`showAs()` can take either a visualization, or a function that calls the value and returns a visualization. You can use it like,  
+```js
+example1 = {|x| x + 1} -> Tag.showAs(Calculator)
+
+@showAs({|f| Plot.numericFn(f, { xScale: Scale.symlog() })})
+example2 = {|x| x + 1}
+```
+
+Different types of values can be displayed in different ways. The following table shows the potential visualization types for each input type. In this table, `Number` can be used with Dates and Durations as well.
+
+| Input Type    | Visualization Types |
+| --------- | ----------- |
+| Distribution    | `Plot.dist`       |
+| List    | `Table`       |
+| `(Number -> Number)` Function | `Plot.numericFn`, `Calculator`        |
+| `(Number -> Dist)` Function | `Plot.distFn`, `Calculator`        |
+| Function | `Calculator`        |
+
+
+      
+
+### getShowAs
+      ```
+  (any) => any
+  ```
+      undefined
+      
+
+### format
+      ```
+  (Dist|Number, numberFormat: String) => Dist|Number
+(Duration, numberFormat: String) => Duration
+(Date, timeFormat: String) => Date
+  ```
+      Set the display format for a number, distribution, duration, or date. Uses the [d3-format](https://d3js.org/d3-format) syntax on numbers and distributions, and the [d3-time-format](https://d3js.org/d3-time-format) syntax for dates.
+      
+
+### getFormat
+      ```
+  (Dist|Number) => String
+(Duration) => String
+(Date) => String
+  ```
+      undefined
+      
+
+### all
+      ```
+  (any) => Dict(any)
+  ```
+      Returns all tags as a Dictionary.
+      
+
+### hide
+      ```
+  ('A, Bool) => 'A
+('A) => 'A
+  ```
+      Hides a value in the visualizations sidebar. This is useful for hiding intermediate values that are used in calculations, but are not directly relevant to the user. Only hides top-level variables.
+      
+
+### getHide
+      ```
+  (any) => Bool
+  ```
+      undefined
+      
+
+### omit
+      ```
+  ('A, List(String)) => 'A
+  ```
+      Returns a copy of the value with the specified tags removed.
+      
+
+### clear
+      ```
+  ('A) => 'A
+  ```
+      Returns a copy of the value with all tags removed.
+      

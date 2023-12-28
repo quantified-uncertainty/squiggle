@@ -15,5 +15,8 @@
   "Calculator": "Calculator",
   "Input": "Input",
   "RelativeValues": "Relative Values",
-  "Danger": "Danger"
+  "Danger": "Danger",
+  "Tag": "Tag",
+  "Date": "Date",
+  "Duration": "Duration"
 }

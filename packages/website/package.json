@@ -8,10 +8,12 @@
     "build": "next build",
     "lint": "prettier --check . && next lint",
     "format": "prettier --write .",
-    "compileDocsForLLM": "node scripts/compileDocs.js"
+    "compileDocsForLLM": "node scripts/compileDocs.js",
+    "docs": "node scripts/gen.mjs"
   },
   "dependencies": {
     "@quri/squiggle-components": "workspace:*",
+    "@quri/squiggle-lang": "workspace:*",
     "@quri/ui": "workspace:*",
     "@quri/versioned-squiggle-components": "workspace:*",
     "@tailwindcss/typography": "^0.5.10",

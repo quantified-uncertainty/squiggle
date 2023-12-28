@@ -857,6 +857,9 @@ importers:
       '@quri/squiggle-components':
         specifier: workspace:*
         version: link:../components
+      '@quri/squiggle-lang':
+        specifier: workspace:*
+        version: link:../squiggle-lang
       '@quri/ui':
         specifier: workspace:*
         version: link:../ui
