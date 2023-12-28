@@ -3,6 +3,7 @@ import React from "react";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import * as style from "react-syntax-highlighter/dist/esm/styles/prism";
+import remarkGfm from "remark-gfm";
 import { Node, Parent } from "unist";
 import { visitParents } from "unist-util-visit-parents";
 
@@ -32,6 +33,7 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ md }) => {
     <ReactMarkdown
       className="prose prose-stone prose-sm"
       rehypePlugins={[rehypeInlineCodeProperty]}
+      remarkPlugins={[remarkGfm]}
       components={{
         pre({ children }) {
           return <pre className="not-prose">{children}</pre>;
@@ -56,6 +58,7 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ md }) => {
               language={match[1]}
               PreTag="div"
               style={style["oneLight"]}
+              customStyle={{ fontSize: "0.9em", borderRadius: "0.2rem" }}
             >
               {String(children).replace(/\n$/, "")}
             </SyntaxHighlighter>
