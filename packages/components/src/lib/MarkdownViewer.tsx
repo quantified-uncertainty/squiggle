@@ -55,7 +55,7 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ md }) => {
               {...rest}
               language={match[1]}
               PreTag="div"
-              style={style["vscode-light"]}
+              style={style["oneLight"]}
             >
               {String(children).replace(/\n$/, "")}
             </SyntaxHighlighter>
