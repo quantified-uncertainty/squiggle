@@ -14,7 +14,6 @@
     "@quri/squiggle-components": "workspace:*",
     "@quri/ui": "workspace:*",
     "@quri/versioned-squiggle-components": "workspace:*",
-    "@tailwindcss/typography": "^0.5.10",
     "base64-js": "^1.5.1",
     "clsx": "^2.0.0",
     "next": "^14.0.1",
@@ -28,7 +27,6 @@
   },
   "devDependencies": {
     "@quri/squiggle-textmate-grammar": "workspace:*",
-    "@tailwindcss/forms": "^0.5.7",
     "@types/pako": "^2.0.3",
     "@types/react": "^18.2.41",
     "autoprefixer": "^10.4.16",
