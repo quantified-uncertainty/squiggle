@@ -2,7 +2,8 @@ import { Element } from "hast";
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import * as style from "react-syntax-highlighter/dist/esm/styles/prism";
+//Make sure this uses cjs, not esm. See: https://github.com/react-syntax-highlighter/react-syntax-highlighter/issues/509
+import * as style from "react-syntax-highlighter/dist/cjs/styles/prism";
 import remarkGfm from "remark-gfm";
 import { Node, Parent } from "unist";
 import { visitParents } from "unist-util-visit-parents";
