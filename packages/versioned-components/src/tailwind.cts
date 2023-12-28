@@ -1,8 +1,12 @@
+import tailwindForms from "@tailwindcss/forms";
+import tailwindTypography from "@tailwindcss/typography";
 import { glob } from "glob";
 import merge from "lodash/merge.js";
 import fs from "node:fs";
 import path from "node:path";
 import type { Config } from "tailwindcss";
+
+import tailwindSquiggle from "@quri/squiggle-components/tailwind-plugin";
 
 // Generated paths will be absolute and fully symlink-resolved.
 function getVersionedSquiggleContent() {
@@ -31,9 +35,9 @@ export function getTailwindConfig(partialConfig: Config) {
     {
       content: getVersionedSquiggleContent(),
       plugins: [
-        require("@quri/squiggle-components/tailwind-plugin"),
-        require("@tailwindcss/typography"),
-        require("@tailwindcss/forms")({
+        tailwindSquiggle,
+        tailwindTypography,
+        tailwindForms({
           strategy: "class", // strategy: 'base' interferes with react-select styles
         }),
       ],
