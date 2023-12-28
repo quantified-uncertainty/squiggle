@@ -47,7 +47,16 @@ description: Dates are a simple date time type.
 description: Durations are a simple time type, representing a length of time. They are internally stored as milliseconds, but often shown and written using seconds, minutes, hours, days, etc.
 ---
 # Duration
-Durations are a simple time type, representing a length of time. They are internally stored as milliseconds, but often shown and written using seconds, minutes, hours, days, etc.`,
+Durations are a simple time type, representing a length of time. They are internally stored as milliseconds, but often shown and written using seconds, minutes, hours, days, etc.
+
+| Unit Name | Example with Shorthand | Function to convert number to duration | Function to convert duration to number |   |   |   |   |   |   |
+|-----------|------------------------|----------------------------------------|----------------------------------------|---|---|---|---|---|---|
+| Minute    | 5minutes               | fromMinutes(number)                    | toMinutes(duration)                    |   |   |   |   |   |   |
+| Hour      | 5hours                 | fromHours(number)                      | toHours(duration)                      |   |   |   |   |   |   |
+| Day       | 5days                  | fromDays(number)                       | toDays(duration)                       |   |   |   |   |   |   |
+| Year      | 5years                 | fromYears(number)                      | 
+
+`,
 };
 
 function toMarkdownDefinitions(definitions) {
@@ -86,6 +95,7 @@ const main = async (namespace) => {
   });
 };
 
+//Remember to add any new Modules to .gitignore
 main("Tag");
 main("Date");
 main("Duration");
