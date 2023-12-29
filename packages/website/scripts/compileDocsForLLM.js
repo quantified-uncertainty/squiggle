@@ -15,7 +15,7 @@ This file is auto-generated from the documentation files in the Squiggle reposit
 `;
 
   const getGrammarContent = async () => {
-    const grammarFiles = await glob("../squiggle-lang/**/*.peggy");
+    const grammarFiles = await glob("../squiggle-lang/src/**/*.peggy");
     return readFile(grammarFiles[0]);
   };
 
