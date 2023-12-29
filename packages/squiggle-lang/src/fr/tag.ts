@@ -108,10 +108,10 @@ export const library = [
     ],
   }),
   maker.make({
-    name: "getName",
+    name: "getTagName",
     definitions: [
       makeDefinition([frAny()], frString, ([value]) => {
-        return value.tags?.value.name || "";
+        return value.tags?.value.tagName || "";
       }),
     ],
   }),
