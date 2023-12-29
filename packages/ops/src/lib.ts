@@ -1,9 +1,10 @@
-import { spawn } from "node:child_process";
+import { spawn as originalSpawn } from "node:child_process";
+import util from 'util';
 import fs from "node:fs/promises";
 
 export async function exec(command: string) {
   return new Promise<void>((resolve, reject) => {
-    const process = spawn(command, [], { shell: true, stdio: "inherit" });
+    const promisifiedSpawn = originalSpawn(command, [], { shell: true, stdio: "inherit" });
     process.on("close", (code) => {
       if (code) {
         reject(`${command} failed\nError ${code}`);
@@ -14,7 +15,7 @@ export async function exec(command: string) {
   });
 }
 
-export async function exists(f: string): Promise<boolean> {
+export async function exec(f: string): Promise<boolean> {
   let exists = true;
   await fs.stat(f).catch((err) => {
     if (err.code === "ENOENT") exists = false;
