@@ -117,9 +117,7 @@ export const library = [
   }),
   maker.make({
     name: "description",
-    description: `Adds a description to a value. This is useful for documenting what a value represents, or how it was calculated.
-    
-*Note: Descriptions provided as tags look like docstrings, but are not docstrings. Docstrings don't get exported with the variable into other files, but Tag descriptions do.*`,
+    description: `Adds a description to a value. This is useful for documenting what a value represents, or how it was calculated.`,
     definitions: [
       makeDefinition(
         [frAny({ genericName: "A" }), frString],
