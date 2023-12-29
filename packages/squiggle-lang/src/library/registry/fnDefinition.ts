@@ -13,7 +13,11 @@ export type FnDefinition<OutputType = any> = {
   minInputs: number;
   maxInputs: number;
   isAssert: boolean;
-  deprecated?: string; // We don't use this right now, but could later on.
+  // We don't use the string value right now, but could later on.
+  deprecated?: string;
+  // If set, the function can be used as a decorator.
+  // Note that the name will always be prepended with `Tag.`, so it makes sense only on function in `Tag` namespace.
+  isDecorator?: boolean;
 };
 
 export const showInDocumentation = (def: FnDefinition) =>
@@ -42,7 +46,7 @@ export function makeDefinition<
   inputs: [...{ [K in keyof InputTypes]: FRType<InputTypes[K]> }],
   output: FRType<OutputType>,
   run: (args: InputTypes, context: ReducerContext) => OutputType,
-  params?: { deprecated?: string }
+  params?: { deprecated?: string; isDecorator?: boolean }
 ): FnDefinition {
   assertOptionalsAreAtEnd(inputs);
   return {
@@ -53,6 +57,7 @@ export function makeDefinition<
     run: run as FnDefinition["run"],
     isAssert: false,
     deprecated: params?.deprecated,
+    isDecorator: params?.isDecorator,
     minInputs: inputs.filter((t) => !isOptional(t)).length,
     maxInputs: inputs.length,
   };
@@ -67,7 +72,7 @@ export function makeAssertDefinition<const T extends any[]>(
   assertOptionalsAreAtEnd(inputs);
   return {
     inputs,
-    output: frAny,
+    output: frAny(),
     run: () => {
       throw new REAmbiguous(errorMsg);
     },
@@ -87,7 +92,9 @@ export function tryCallFnDefinition(
   }
   const unpackedArgs: any = []; // any, but that's ok, type safety is guaranteed by FnDefinition type
   for (let i = 0; i < args.length; i++) {
-    const unpackedArg = fn.inputs[i].unpack(args[i]);
+    const arg = args[i];
+
+    const unpackedArg = fn.inputs[i].unpack(arg);
     if (unpackedArg === undefined) {
       // type mismatch
       return;
@@ -106,8 +113,8 @@ export function tryCallFnDefinition(
 
 export function fnDefinitionToString(fn: FnDefinition): string {
   const inputs = fn.inputs
-    .map((t) => t.getName() + (isOptional(t) && t.tag !== "named" ? "?" : ""))
+    .map((t) => t.display() + (isOptional(t) && t.tag !== "named" ? "?" : ""))
     .join(", ");
-  const output = fn.output.getName();
+  const output = fn.output.display();
   return `(${inputs})${output ? ` => ${output}` : ""}`;
 }

@@ -10,6 +10,7 @@ import { Domain } from "../../value/domain.js";
 import {
   Calculator,
   Input,
+  InputType,
   Plot,
   Scale,
   TableChart,
@@ -30,6 +31,7 @@ import {
   vString,
   vTableChart,
 } from "../../value/index.js";
+import { ValueTags } from "../../value/valueTags.js";
 import { frTypesMatchesLengths } from "./helpers.js";
 
 /*
@@ -39,10 +41,14 @@ Each function identifies the specific type and can be used in a function definit
 export type FRType<T> = {
   unpack: (v: Value) => T | undefined;
   pack: (v: T) => Value; // used in makeSquiggleDefinition
-  getName: () => string;
+  display: () => string;
   transparent?: T extends Value ? boolean : undefined;
+  varName?: string;
   isOptional?: boolean;
   tag?: string;
+  underlyingType?: FRType<any>;
+  default?: string;
+  fieldType?: InputType;
 };
 
 export const isOptional = <T>(frType: FRType<T>): boolean => {
@@ -52,68 +58,87 @@ export const isOptional = <T>(frType: FRType<T>): boolean => {
 export const frNumber: FRType<number> = {
   unpack: (v: Value) => (v.type === "Number" ? v.value : undefined),
   pack: (v) => vNumber(v),
-  getName: () => "number",
+  display: () => "Number",
+  default: "0",
 };
 export const frTableChart: FRType<TableChart> = {
   unpack: (v: Value) => (v.type === "TableChart" ? v.value : undefined),
   pack: (v) => vTableChart(v),
-  getName: () => "table",
+  display: () => "Table",
+  default: "",
+  fieldType: "textArea",
 };
 export const frCalculator: FRType<Calculator> = {
   unpack: (v: Value) => (v.type === "Calculator" ? v.value : undefined),
   pack: (v) => vCalculator(v),
-  getName: () => "calculator",
+  display: () => "Calculator",
+  default: "",
+  fieldType: "textArea",
 };
 export const frString: FRType<string> = {
   unpack: (v: Value) => (v.type === "String" ? v.value : undefined),
   pack: (v) => vString(v),
-  getName: () => "string",
+  display: () => "String",
+  tag: "string",
+  default: "",
 };
 export const frBool: FRType<boolean> = {
   unpack: (v: Value) => (v.type === "Bool" ? v.value : undefined),
   pack: (v) => vBool(v),
-  getName: () => "bool",
+  display: () => "Bool",
+  tag: "bool",
+  default: "false",
+  fieldType: "checkbox",
 };
 export const frDate: FRType<SDate> = {
   unpack: (v) => (v.type === "Date" ? v.value : undefined),
   pack: (v) => vDate(v),
-  getName: () => "date",
+  display: () => "Date",
+  tag: "date",
+  default: "Date(2023)",
 };
 export const frDuration: FRType<SDuration> = {
   unpack: (v) => (v.type === "Duration" ? v.value : undefined),
   pack: (v) => vDuration(v),
-  getName: () => "duration",
+  display: () => "Duration",
+  default: "1minutes",
 };
 export const frDist: FRType<BaseDist> = {
   unpack: (v) => (v.type === "Dist" ? v.value : undefined),
   pack: (v) => vDist(v),
-  getName: () => "dist",
+  display: () => "Dist",
+  default: "normal(1,1)",
 };
 export const frDistPointset: FRType<PointSetDist> = {
   unpack: (v) =>
     v.type === "Dist" && v.value instanceof PointSetDist ? v.value : undefined,
   pack: (v) => vDist(v),
-  getName: () => "pointSetDist",
+  display: () => "PointSetDist",
+  default: "PointSet(normal(1,1))",
 };
 
 export const frSampleSetDist: FRType<SampleSetDist> = {
   unpack: (v) =>
     v.type === "Dist" && v.value instanceof SampleSetDist ? v.value : undefined,
   pack: (v) => vDist(v),
-  getName: () => "sampleSetDist",
+  display: () => "SampleSetDist",
+  default: "(normal(1,1))",
 };
 
 export const frDistSymbolic: FRType<SymbolicDist> = {
   unpack: (v) =>
     v.type === "Dist" && v.value instanceof SymbolicDist ? v.value : undefined,
   pack: (v) => vDist(v),
-  getName: () => "symbolicDist",
+  display: () => "SymbolicDist",
+  default: "Sym.normal(1,1)",
 };
 
 export const frLambda: FRType<Lambda> = {
   unpack: (v) => (v.type === "Lambda" ? v.value : undefined),
   pack: (v) => vLambda(v),
-  getName: () => "function",
+  display: () => "Function",
+  tag: "lambda",
+  default: "{|e| e}",
 };
 
 export const frLambdaTyped = (
@@ -128,8 +153,35 @@ export const frLambdaTyped = (
         : undefined;
     },
     pack: (v) => vLambda(v),
-    getName: () =>
-      `(${inputs.map((i) => i.getName()).join(", ")}) => ${output.getName()}`,
+    display: () =>
+      `(${inputs.map((i) => i.display()).join(", ")}) => ${output.display()}`,
+    tag: "lambda",
+    default: `{|${inputs.map((i, index) => `x${index}`).join(", ")}| ${
+      output.default
+    }`,
+    fieldType: "textArea",
+  };
+};
+
+export const frWithTags = <T>(
+  itemType: FRType<T>
+): FRType<{ value: T; tags: ValueTags }> => {
+  return {
+    unpack: (v) => {
+      const unpackedItem = itemType.unpack(v);
+      return (
+        (unpackedItem && {
+          value: unpackedItem,
+          tags: v.tags ?? new ValueTags({}),
+        }) ||
+        undefined
+      );
+    },
+    // This will overwrite the original tags in case of `frWithTags(frAny())`. But in that situation you shouldn't use `frWithTags`, a simple `frAny` will do.
+    pack: ({ value, tags }) => itemType.pack(value).copyWithTags(tags),
+    display: itemType.display,
+    default: itemType.default,
+    fieldType: itemType.fieldType,
   };
 };
 
@@ -142,29 +194,40 @@ export const frLambdaNand = (paramLengths: number[]): FRType<Lambda> => {
         : undefined;
     },
     pack: (v) => vLambda(v),
-    getName: () => `lambda(${paramLengths.join(",")})`,
+    display: () => `lambda(${paramLengths.join(",")})`,
+    tag: "lambda",
+    default: "",
+    fieldType: "textArea",
   };
 };
+
 export const frScale: FRType<Scale> = {
   unpack: (v) => (v.type === "Scale" ? v.value : undefined),
   pack: (v) => vScale(v),
-  getName: () => "scale",
+  display: () => "Scale",
+  default: "",
+  fieldType: "textArea",
 };
 export const frInput: FRType<Input> = {
   unpack: (v) => (v.type === "Input" ? v.value : undefined),
   pack: (v) => vInput(v),
-  getName: () => "input",
+  display: () => "Input",
+  default: "",
+  fieldType: "textArea",
 };
 export const frPlot: FRType<Plot> = {
   unpack: (v) => (v.type === "Plot" ? v.value : undefined),
   pack: (v) => vPlot(v),
-  getName: () => "plot",
+  display: () => "Plot",
+  default: "",
+  fieldType: "textArea",
 };
 
 export const frDomain: FRType<Domain> = {
   unpack: (v) => (v.type === "Domain" ? v.value : undefined),
   pack: (v) => vDomain(v),
-  getName: () => "domain",
+  display: () => "Domain",
+  default: "",
 };
 
 export const frArray = <T>(itemType: FRType<T>): FRType<readonly T[]> => {
@@ -194,7 +257,10 @@ export const frArray = <T>(itemType: FRType<T>): FRType<readonly T[]> => {
       isTransparent
         ? vArray(v as readonly Value[])
         : vArray(v.map(itemType.pack)),
-    getName: () => `list(${itemType.getName()})`,
+    display: () => `List(${itemType.display()})`,
+    tag: "array",
+    default: "[]",
+    fieldType: "textArea",
   };
 };
 
@@ -221,7 +287,9 @@ export function frOr<T1, T2>(
     pack: (v) => {
       return v.tag === "1" ? type1.pack(v.value) : type2.pack(v.value);
     },
-    getName: () => `${type1.getName()}|${type2.getName()}`,
+    display: () => `${type1.display()}|${type2.display()}`,
+    default: type1.default,
+    fieldType: type1.fieldType,
   };
 }
 
@@ -230,7 +298,8 @@ export const frDistOrNumber: FRType<BaseDist | number> = {
   unpack: (v) =>
     v.type === "Dist" ? v.value : v.type === "Number" ? v.value : undefined,
   pack: (v) => (typeof v === "number" ? vNumber(v) : vDist(v)),
-  getName: () => "dist|number",
+  display: () => "Dist|Number",
+  default: frDist.default,
 };
 
 export function frTuple<T1, T2>(
@@ -279,7 +348,10 @@ export function frTuple(...types: FRType<unknown>[]): FRType<any> {
     pack: (values: unknown[]) => {
       return vArray(values.map((val, index) => types[index].pack(val)));
     },
-    getName: () => `[${types.map((type) => type.getName()).join(", ")}]`,
+    display: () => `[${types.map((type) => type.display()).join(", ")}]`,
+    tag: "tuple",
+    default: `[${types.map((type) => type.default).join(", ")}]`,
+    fieldType: "textArea",
   };
 }
 
@@ -306,22 +378,19 @@ export const frDictWithArbitraryKeys = <T>(
       vDict(
         ImmutableMap([...v.entries()].map(([k, v]) => [k, itemType.pack(v)]))
       ),
-    getName: () => `dict(${itemType.getName()})`,
+    display: () => `Dict(${itemType.display()})`,
+    tag: "dict",
+    default: "{}",
+    fieldType: "textArea",
   };
 };
 
-export const frAny: FRType<Value> = {
+export const frAny = (params?: { genericName?: string }): FRType<Value> => ({
   unpack: (v) => v,
   pack: (v) => v,
-  getName: () => "any",
+  display: () => (params?.genericName ? `'${params.genericName}` : "any"),
   transparent: true,
-};
-
-export const frGeneric = (index: string): FRType<Value> => ({
-  unpack: (v) => v,
-  pack: (v) => v,
-  getName: () => `'${index}`,
-  transparent: true,
+  default: "",
 });
 
 // We currently support dicts with up to 5 pairs.
@@ -409,6 +478,34 @@ export function frDict<
     [k in K4]: T4;
   } & { [k in K5]: T5 } & { [k in K6]: T6 }
 >;
+export function frDict<
+  K1 extends string,
+  T1,
+  K2 extends string,
+  T2,
+  K3 extends string,
+  T3,
+  K4 extends string,
+  T4,
+  K5 extends string,
+  T5,
+  K6 extends string,
+  T6,
+  K7 extends string,
+  T7,
+>(
+  kv1: [K1, FRType<T1>],
+  kv2: [K2, FRType<T2>],
+  kv3: [K3, FRType<T3>],
+  kv4: [K4, FRType<T4>],
+  kv5: [K5, FRType<T5>],
+  kv6: [K6, FRType<T6>],
+  kv7: [K7, FRType<T7>]
+): FRType<
+  { [k in K1]: T1 } & { [k in K2]: T2 } & { [k in K3]: T3 } & {
+    [k in K4]: T4;
+  } & { [k in K5]: T5 } & { [k in K6]: T6 } & { [k in K7]: T7 }
+>;
 
 export function frDict<T extends object>(
   ...allKvs: [string, FRType<unknown>][]
@@ -452,27 +549,34 @@ export function frDict<T extends object>(
             .map(([key, valueShape]) => [key, valueShape.pack((v as any)[key])])
         )
       ),
-    getName: () =>
+    display: () =>
       "{" +
       allKvs
         .map(
           ([name, frType]) =>
-            `${name}${isOptional(frType) ? "?" : ""}: ${frType.getName()}`
+            `${name}${isOptional(frType) ? "?" : ""}: ${frType.display()}`
         )
         .join(", ") +
       "}",
+    tag: "dict",
+    default: "{}",
+    fieldType: "textArea",
   };
 }
 
 export const frNamed = <T>(name: string, itemType: FRType<T>): FRType<T> => ({
   unpack: itemType.unpack,
   pack: (v) => itemType.pack(v),
-  getName: () => {
+  display: () => {
     const _isOptional = isOptional(itemType);
-    return `${name}${_isOptional ? "?" : ""}: ${itemType.getName()}`;
+    return `${name}${_isOptional ? "?" : ""}: ${itemType.display()}`;
   },
   isOptional: isOptional(itemType),
   tag: "named",
+  underlyingType: itemType,
+  varName: name,
+  default: itemType.default,
+  fieldType: itemType.fieldType,
 });
 
 export const frOptional = <T>(itemType: FRType<T>): FRType<T | null> => {
@@ -485,7 +589,10 @@ export const frOptional = <T>(itemType: FRType<T>): FRType<T | null> => {
       }
       return itemType.pack(v);
     },
-    getName: () => itemType.getName(),
+    display: () => itemType.display(),
+    underlyingType: itemType,
     isOptional: true,
+    default: itemType.default,
+    fieldType: itemType.fieldType,
   };
 };

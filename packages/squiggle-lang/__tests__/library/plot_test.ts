@@ -26,21 +26,31 @@ describe("Plot", () => {
       'Plot.dists({dists: [{name: "dist1", value: 2}, {name: "dist2", value: 2 to 5}]})',
       "Plot containing dist1, dist2"
     );
+    testEvalToBe(
+      'Plot.dists([{name: "dist1", value: 2}, {name: "dist2", value: 2 to 5}])',
+      "Plot containing dist1, dist2"
+    );
+    testEvalToBe(
+      "Plot.dists([(2), 2 to 10])",
+      "Plot containing dist 1, dist 2"
+    );
   });
 
   describe("Plot.numericFn", () => {
     testEvalToMatch(`Plot.numericFn({|x| x * 5})`, "Plot for numeric function");
     testEvalToMatch(
       `Plot.numericFn({
-        fn: {|x| x * 5}
+        fn: {|x| x * 5},
+        xPoints: [10,20,40]
       })`,
-      "Plot for numeric function"
+      "Plot for numeric function",
+      true
     );
 
     testEvalToMatch(
       `Plot.numericFn({|x,y| x * 5})`,
       `Error(Error: There are function matches for Plot.numericFn(), but with different arguments:
-  Plot.numericFn(fn: (number) => number, params?: {xScale?: scale, yScale?: scale, title?: string, points?: number}) => plot
+  Plot.numericFn(fn: (Number) => Number, params?: {xScale?: Scale, yScale?: Scale, title?: String, xPoints?: List(Number)}) => Plot
 Was given arguments: ((x,y) => internal code)`
     );
 
@@ -83,6 +93,20 @@ Was given arguments: ((x,y) => internal code)`
       }
     );
 
+    testPlotResult(
+      "scale without min/max, and with a constant, inherits domain boundaries",
+      `Plot.numericFn(
+        {|x: [3, 5]| x * 5},
+        {xScale: Scale.symlog({ constant: 2 })}
+      )`,
+      "numericFn",
+      (plot) => {
+        expect(plot.xScale.type).toBe("symlog");
+        expect(plot.xScale.min).toBe(3);
+        expect(plot.xScale.max).toBe(5);
+      }
+    );
+
     testEvalToMatch(
       `Plot.numericFn(
         {|x| x * 5},
@@ -115,7 +139,7 @@ Was given arguments: ((x,y) => internal code)`
     testEvalToMatch(
       `Plot.distFn({|x,y| x to x + y})`,
       `Error(Error: There are function matches for Plot.distFn(), but with different arguments:
-  Plot.distFn(fn: (number) => dist, params?: {xScale?: scale, yScale?: scale, distXScale?: scale, title?: string, points?: number}) => plot
+  Plot.distFn(fn: (Number) => Dist, params?: {xScale?: Scale, yScale?: Scale, distXScale?: Scale, title?: String, xPoints?: List(Number)}) => Plot
 Was given arguments: ((x,y) => internal code)`
     );
   });
@@ -133,7 +157,7 @@ Was given arguments: ((x,y) => internal code)`
 
   testPlotResult(
     "default scale based on time domain",
-    `Plot.distFn({|t: [1500year, 1600year]| uniform(toYears(t)-1500year, 3)})`,
+    `Plot.distFn({|t: [Date(1500), Date(1600)]| uniform(toYears(t)-Date(1500), 3)})`,
     "distFn",
     (plot) => {
       expect(plot.xScale.type).toBe("date");

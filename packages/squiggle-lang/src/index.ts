@@ -3,6 +3,7 @@ import { registry } from "./library/registry/index.js";
 import { SqProject } from "./public/SqProject/index.js";
 import {
   SqDateValue,
+  SqDurationValue,
   SqLambdaValue,
   SqNumberValue,
   SqStringValue,
@@ -71,12 +72,19 @@ export { parse } from "./public/parse.js";
 export { fmap as resultMap, type result } from "./utility/result.js";
 
 export { SDate } from "./utility/SDate.js";
-export { SDuration } from "./utility/SDuration.js";
+
+export {
+  type DurationUnitName,
+  durationUnits,
+  SDuration,
+} from "./utility/SDuration.js";
+
 export { type LocationRange as SqLocation } from "peggy";
 export { defaultEnv as defaultEnvironment } from "./dist/env.js";
 export {
   type Env,
   SqDateValue,
+  SqDurationValue,
   SqLambdaValue,
   SqNumberValue,
   SqProject,

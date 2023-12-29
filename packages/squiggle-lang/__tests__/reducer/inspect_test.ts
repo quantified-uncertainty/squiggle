@@ -31,11 +31,17 @@ describe("Debugging", () => {
       "one",
       {
         type: "Number",
-        publicName: "Number",
         value: 1,
       },
     ]);
 
     expect(JSON.stringify(mockedLog.mock.calls[0])).toEqual(expectedOutput);
+  });
+
+  test("tagged inspect", async () => {
+    await expectEvalToBe(
+      "inspect(1->Tag.name('foo'))",
+      `1, with params name: "foo"`
+    );
   });
 });

@@ -8,7 +8,7 @@ export class SqDict {
     public context?: SqValueContext
   ) {}
 
-  entries() {
+  entries(): [string, SqValue][] {
     return [...this._value.entries()].map(
       ([k, v]) =>
         [

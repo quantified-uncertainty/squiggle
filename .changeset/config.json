@@ -12,11 +12,6 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": [
-    "squiggle-website",
-    "@quri/hub",
-    "@quri/ops",
-    "@quri/versioned-squiggle-components"
-  ],
+  "ignore": ["squiggle-website", "@quri/hub", "@quri/ops"],
   "changelog": "../packages/ops/dist/scripts/changelog.cjs"
 }

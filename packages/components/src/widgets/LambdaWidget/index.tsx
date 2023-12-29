@@ -23,7 +23,7 @@ widgetRegistry.register("Lambda", {
     const environment = value.context.project.getEnvironment();
     //It's kind of awkward that the documentation isn't connected to the function itself, but that's a greater effort.
     if (value.value.type === "BuiltinLambda") {
-      const name = value.value._value.getName();
+      const name = value.value._value.display();
       const documentation = getFunctionDocumentation(name);
       if (documentation) {
         return <FnDocumentation documentation={documentation} />;

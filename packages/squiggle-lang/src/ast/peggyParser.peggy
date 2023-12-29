@@ -5,7 +5,8 @@
 }}
 
 start
-  = _nl start:outerBlock _nl finalComment?  {return start}
+  = _nl start:outerBlock _nl finalComment?
+    { return start; }
 
 zeroOMoreArgumentsBlockOrExpression = lambda / innerBlockOrExpression
 
@@ -27,7 +28,7 @@ importStatementsList = (@importStatement __nl)*
 
 importStatement
   = _nl 'import' __ file:string variable:(__ 'as' __ @identifier)
-  { return [file, variable]; }
+    { return [file, variable]; }
 
 innerBlockOrExpression
   = quotedInnerBlock
@@ -50,19 +51,26 @@ quotedInnerBlock
     '}'
     { return h.nodeBlock([finalExpression], location()); }
 
-statementsList = statement|1.., statementSeparator|
+statementsList = decoratedStatement|1.., statementSeparator|
+
+decoratedStatement
+  = decorator:decorator statement:decoratedStatement
+    {
+      return h.nodeDecoratedStatement(decorator, statement, location())
+    }
+  / letStatement
+  / defunStatement
+
+  decorator
+    = '@' name:dollarIdentifier args:(_ '(' _nl @functionArguments _nl ')')?  __nl
+      {
+        return h.nodeDecorator(name, args ?? [], location());
+      }
 
 statement
-  = letStatement
+  = decoratedStatement
+  / letStatement
   / defunStatement
-  / voidStatement
-
-voidStatement
-  = "call" _nl value:zeroOMoreArgumentsBlockOrExpression
-    {
-      const variable = h.nodeIdentifier("_", location());
-      return h.nodeLetStatement(variable, value, false, location());
-    }
 
 letStatement
   = exported:("export" __nl)? variable:variable _ assignmentOp _nl value:zeroOMoreArgumentsBlockOrExpression
@@ -80,9 +88,9 @@ defunStatement
 functionParameters = functionParameter|.., commaSeparator|
   functionParameter
     = id:dollarIdentifier annotation:(_ ':' _nl @expression)?
-    {
-      return annotation ? h.nodeIdentifierWithAnnotation(id.value, annotation, location()) : id;
-    }
+      {
+        return annotation ? h.nodeIdentifierWithAnnotation(id.value, annotation, location()) : id;
+      }
 
 /*
 Rules for expressions start here.
@@ -110,56 +118,56 @@ ternary
 
 logicalOr
   = head:logicalAnd tail:(_ @logicalOrOp _nl @logicalAnd)*
-  { return h.makeInfixChain(head, tail, location()); }
+    { return h.makeInfixChain(head, tail, location()); }
   logicalOrOp "operator" = '||'
 
 logicalAnd
   = head:equality tail:(_ @logicalAndOp _nl @equality)*
-  { return h.makeInfixChain(head, tail, location()); }
+    { return h.makeInfixChain(head, tail, location()); }
   logicalAndOp "operator" = '&&'
 
 equality
   = left:relational _ operator:equalityOp _nl right:relational
-  { return h.nodeInfixCall(operator, left, right, location()); }
+    { return h.nodeInfixCall(operator, left, right, location()); }
   / relational
 
   equalityOp "operator" = '==' / '!='
 
 relational
   = left:credibleInterval _ operator:relationalOp _nl right:credibleInterval
-  { return h.nodeInfixCall(operator, left, right, location()); }
+    { return h.nodeInfixCall(operator, left, right, location()); }
   / credibleInterval
 
   relationalOp "operator" = '<=' / '<' / '>=' / '>'
 
 credibleInterval
   = head:additive tail:(__ @credibleIntervalOp __nl @additive)*
-  { return h.makeInfixChain(head, tail, location()); }
+    { return h.makeInfixChain(head, tail, location()); }
   credibleIntervalOp "operator" = 'to'
 
 additive
   = head:multiplicative tail:(_ @additiveOp _nl @multiplicative)*
-  { return h.makeInfixChain(head, tail, location()); }
+    { return h.makeInfixChain(head, tail, location()); }
   additiveOp "operator" = '+' / '-' / '.+' / '.-'
 
 multiplicative
   = head:power tail:(_ @multiplicativeOp _nl @power)*
-  { return h.makeInfixChain(head, tail, location()); }
+    { return h.makeInfixChain(head, tail, location()); }
   multiplicativeOp "operator" = '*' / '/' / '.*' / './'
 
 power
   = left:chainFunctionCall _ operator:powerOp _nl right:power
-  { return h.nodeInfixCall(operator, left, right, location()); }
+    { return h.nodeInfixCall(operator, left, right, location()); }
   / chainFunctionCall
   powerOp "operator" = '^' / '.^'
 
 chainFunctionCall
   = head:unary tail:(_nl ('->') _nl @chainedFunction)*
-  {
-    return tail.reduce(function(result, element) {
-      return h.nodePipe(result, element.callable, element.args, location());
-    }, head);
-  }
+    {
+      return tail.reduce(function(result, element) {
+        return h.nodePipe(result, element.callable, element.args, location());
+      }, head);
+    }
 
   chainedFunction
     = fn:callableBasicValue '(' _nl args:functionArguments _nl ')'
@@ -173,7 +181,7 @@ chainFunctionCall
 
 unary
   = unaryOperator:unaryOperator _nl right:(unary/postOperator)
-  { return h.nodeUnaryCall(unaryOperator, right, location())}
+    { return h.nodeUnaryCall(unaryOperator, right, location())}
   / postOperator
 
   unaryOperator "unary operator" = '-' / '.-' / '!'
@@ -190,18 +198,18 @@ staticCollectionElement
       _ '[' _nl arg:expression  _nl ']' {return {mode: 'bracket', arg}}
     / '.' arg:$dollarIdentifier {return {mode: 'dot', arg}} // TODO: should we allow whitespace before "."?
     )*
-  {
-    return tail.reduce(function(result, element) {
-      switch (element.mode) {
-        case 'dot':
-          return h.nodeDotLookup(result, element.arg, location());
-        case 'bracket':
-          return h.nodeBracketLookup(result, element.arg, location());
-        default:
-          throw new Error("Parser implementation error");
-      }
-    }, head);
-  }
+    {
+      return tail.reduce(function(result, element) {
+        switch (element.mode) {
+          case 'dot':
+            return h.nodeDotLookup(result, element.arg, location());
+          case 'bracket':
+            return h.nodeBracketLookup(result, element.arg, location());
+          default:
+            throw new Error("Parser implementation error");
+        }
+      }, head);
+    }
 
 collectionElement
   = head:atom &('['/'('/'.')
@@ -213,20 +221,20 @@ collectionElement
     / '.' arg:$dollarIdentifier
       { return {mode: 'dot', arg}; }
     )*
-  {
-    return tail.reduce(function(result, element) {
-      switch (element.mode) {
-        case 'call':
-          return h.nodeCall(result, element.args, location());
-        case 'dot':
-          return h.nodeDotLookup(result, element.arg, location());
-        case 'bracket':
-          return h.nodeBracketLookup(result, element.arg, location());
-        default:
-          throw new Error("Parser implementation error");
-      }
-    }, head);
-  }
+    {
+      return tail.reduce(function(result, element) {
+        switch (element.mode) {
+          case 'call':
+            return h.nodeCall(result, element.args, location());
+          case 'dot':
+            return h.nodeDotLookup(result, element.arg, location());
+          case 'bracket':
+            return h.nodeBracketLookup(result, element.arg, location());
+          default:
+            throw new Error("Parser implementation error");
+        }
+      }, head);
+    }
 
 functionArguments = expression|.., commaSeparator|
 
@@ -253,12 +261,12 @@ variable = dollarIdentifierWithModule / dollarIdentifier
 dollarIdentifierWithModule 'identifier'
   = head:$moduleIdentifier
     final:('.' @$dollarIdentifier)?
-  {
-    let modifiers = [head];
-    Boolean(final) && modifiers.push(final);
-    const modifiedIdentifier = modifiers.join('.');
-    return h.nodeIdentifier(modifiedIdentifier, location());
-  }
+    {
+      let modifiers = [head];
+      Boolean(final) && modifiers.push(final);
+      const modifiedIdentifier = modifiers.join('.');
+      return h.nodeIdentifier(modifiedIdentifier, location());
+    }
   moduleIdentifier 'identifier' = ([A-Z]+[_a-z0-9]i*)
 
 identifier 'identifier'
@@ -280,7 +288,8 @@ string 'string'
   = "'" characters:(!("'" / "\\") @. / escapeSeq)* "'" { return h.nodeString(characters.join(""), location()); }
   / '"' characters:(!('"' / "\\") @. / escapeSeq)* '"' { return h.nodeString(characters.join(""), location()); }
 
-number = number:float unit:unitIdentifier?
+number
+  = number:float unit:unitIdentifier?
   {
     if (unit === null) {
       return number;
@@ -290,34 +299,38 @@ number = number:float unit:unitIdentifier?
     }
   }
 
-float 'number' = significand:floatSignificand exponent:floatExponent?
-  {
-    return h.nodeFloat({
-      integer: significand.integer,
-      fractional: significand.fractional,
-      exponent,
-    }, location());
-  }
+float 'number'
+  = significand:floatSignificand exponent:floatExponent?
+    {
+      return h.nodeFloat({
+        integer: significand.integer,
+        fractional: significand.fractional,
+        exponent,
+      }, location());
+    }
   
-  floatSignificand =
-    integer:intLiteral "." fractional:($d+)? {
-      return {
-        integer,
-        fractional,
-      };
-    }
-    / integer:intLiteral {
-      return {
-        integer,
-        fractional: null,
-      };
-    }
-    / "." fractional:$(d+) {
-      return {
-        integer: 0,
-        fractional,
-      };
-    }
+  floatSignificand
+    = integer:intLiteral "." fractional:($d+)?
+      {
+        return {
+          integer,
+          fractional,
+        };
+      }
+    / integer:intLiteral
+      {
+        return {
+          integer,
+          fractional: null,
+        };
+      }
+    / "." fractional:$(d+)
+      {
+        return {
+          integer: 0,
+          fractional,
+        };
+      }
 
   floatExponent = [e]i @value:signedIntLiteral
   intLiteral = d+ { return parseInt(text(), 10); }
@@ -326,7 +339,7 @@ float 'number' = significand:floatSignificand exponent:floatExponent?
 
 boolean 'boolean'
   = ('true' / 'false') ! [a-z]i ! [_$]
-  { return h.nodeBoolean(text() === 'true', location()); }
+    { return h.nodeBoolean(text() === 'true', location()); }
 
 // Contructors - delimited blocks such as {} and []
 
@@ -338,12 +351,12 @@ valueConstructor
 
 lambda
   = '{' _nl '|' _nl args:functionParameters _nl '|' _nl statements:statementsList  finalExpression: (statementSeparator @expression)  _nl '}'
-  {
-    statements.push(finalExpression);
-    return h.nodeLambda(args, h.nodeBlock(statements, location()), location(), undefined);
-  }
+    {
+      statements.push(finalExpression);
+      return h.nodeLambda(args, h.nodeBlock(statements, location()), location(), undefined);
+    }
   / '{' _nl '|' _nl args:functionParameters _nl '|' _nl finalExpression: expression  _nl '}'
-  { return h.nodeLambda(args, finalExpression, location(), undefined); }
+    { return h.nodeLambda(args, finalExpression, location(), undefined); }
 
 arrayConstructor 'array'
   = '[' _nl ']'
@@ -366,7 +379,7 @@ dictConstructor 'dict'
 
   keyValuePair
     = key:expression _ ':' _nl value:expression
-    { return h.nodeKeyValue(key, value, location()); }
+      { return h.nodeKeyValue(key, value, location()); }
 
 // Separators
 
@@ -391,16 +404,15 @@ commentOrNewLine = finalComment? newLine
   newLine "newline" = [\n\r]
 
 finalComment "line comment"
-  = _ ('//') comment:($([^\r\n]*)) { options.comments.push(h.lineComment(comment, location())); }
+  = _ ('//') comment:($([^\r\n]*))
+    { options.comments.push(h.lineComment(comment, location())); }
 
 whiteSpaceCharactersOrComment = whiteSpaceCharacters / delimitedComment
 
   delimitedComment  "comment"
     = '/*' comment:($(
-      ([^*] / [*][^/])*
-    )) '*/' { options.comments.push(h.blockComment(comment, location())); }
-  // delimitedComment  "comment"
-  //   = '/*' comment:($([^*])*) '*/' { options.comments.push(h.blockComment(comment, location())); }
+        ([^*] / [*][^/])*
+      )) '*/'
+      { options.comments.push(h.blockComment(comment, location())); }
 
   whiteSpaceCharacters = [ \t]
-

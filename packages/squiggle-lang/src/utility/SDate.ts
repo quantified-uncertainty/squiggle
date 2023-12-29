@@ -35,7 +35,7 @@ export class SDate {
     return Result.fmap(makeWithYearInt(floor), (earlyDate) => {
       const diff = year - floor;
       return new SDate(earlyDate).addDuration(
-        SDuration.fromMs(diff * durationUnits.Year)
+        SDuration.fromMs(diff * durationUnits.Year.ms)
       );
     });
   }

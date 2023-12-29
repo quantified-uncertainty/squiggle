@@ -70,6 +70,16 @@ export class RENotAFunction extends ErrorMessage {
   }
 }
 
+export class RENotADecorator extends ErrorMessage {
+  constructor(public value: string) {
+    super();
+  }
+
+  toString() {
+    return `${this.value} is not a decorator`;
+  }
+}
+
 export class REOperationError extends ErrorMessage {
   constructor(public err: OperationError) {
     super();

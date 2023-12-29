@@ -8,6 +8,7 @@ import * as SampleSetDist from "../../dist/SampleSetDist/index.js";
 import * as SymbolicDist from "../../dist/SymbolicDist.js";
 import { PointMass } from "../../dist/SymbolicDist.js";
 import {
+  REArgumentError,
   REDistributionError,
   REOperationError,
   REOther,
@@ -20,7 +21,7 @@ import { ReducerContext } from "../../reducer/context.js";
 import { Lambda } from "../../reducer/lambda.js";
 import { upTo } from "../../utility/E_A_Floats.js";
 import * as Result from "../../utility/result.js";
-import { Value } from "../../value/index.js";
+import { Input, Value } from "../../value/index.js";
 import { FRFunction } from "./core.js";
 import { FnDefinition, makeDefinition } from "./fnDefinition.js";
 import {
@@ -466,3 +467,52 @@ export const frTypesMatchesLengths = (
   const max = inputs.length;
   return intersection(upTo(min, max), lengths).length > 0;
 };
+
+export const frTypeToInput = (
+  frType: FRType<any>,
+  i: number,
+  name: string
+): Input => {
+  const type = frType.fieldType || "text";
+  switch (type) {
+    case "text":
+      return {
+        name,
+        type,
+        typeName: frType.display(),
+        default: frType.default || "",
+      };
+    case "textArea":
+      return {
+        name,
+        type,
+        typeName: frType.display(),
+        default: frType.default || "",
+      };
+    case "checkbox":
+      return {
+        name,
+        type,
+        typeName: frType.display(),
+        default: frType.default === "true" ? true : false,
+      };
+    case "select":
+      return {
+        name,
+        type,
+        typeName: frType.display(),
+        default: frType.default || "",
+        options: [],
+      };
+  }
+};
+// Regex taken from d3-format.
+// https://github.com/d3/d3-format/blob/f3cb31091df80a08f25afd4a7af2dcb3a6cd5eef/src/formatSpecifier.js#L1C65-L2C85
+const d3TickFormatRegex =
+  /^(?:(.)?([<>=^]))?([+\-( ])?([$#])?(0)?(\d+)?(,)?(\.\d+)?(~)?([a-z%])?$/i;
+
+export function checkNumericTickFormat(tickFormat: string | null) {
+  if (tickFormat && !d3TickFormatRegex.test(tickFormat)) {
+    throw new REArgumentError(`Tick format [${tickFormat}] is invalid.`);
+  }
+}

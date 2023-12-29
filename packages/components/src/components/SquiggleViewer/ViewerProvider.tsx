@@ -3,7 +3,6 @@ import {
   createContext,
   FC,
   PropsWithChildren,
-  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -11,9 +10,10 @@ import {
   useState,
 } from "react";
 
-import { SqValue, SqValuePath } from "@quri/squiggle-lang";
+import { SqValuePath } from "@quri/squiggle-lang";
 
 import { useForceUpdate } from "../../lib/hooks/useForceUpdate.js";
+import { SqValueWithContext } from "../../lib/utility.js";
 import { CalculatorState } from "../../widgets/CalculatorWidget/types.js";
 import { CodeEditorHandle } from "../CodeEditor/index.js";
 import {
@@ -24,6 +24,7 @@ import {
 import {
   getChildrenValues,
   pathAsString,
+  shouldBeginCollapsed,
   topLevelBindingsName,
 } from "./utils.js";
 
@@ -32,103 +33,153 @@ type ItemHandle = {
   forceUpdate: () => void;
 };
 
-type LocalItemState = {
+type LocalItemState = Readonly<{
   collapsed: boolean;
   calculator?: CalculatorState;
   settings: Pick<
     PartialPlaygroundSettings,
     "distributionChartSettings" | "functionChartSettings"
   >;
+}>;
+
+const defaultLocalItemState: LocalItemState = {
+  collapsed: false,
+  settings: {},
 };
 
-type LocalItemStateStore = {
-  [k: string]: LocalItemState;
-};
+/**
+ * `ItemStore` is used for caching and for passing settings down the tree.
+ * It allows us to avoid React tree rerenders on settings changes; instead, we can rerender individual item viewers on demand.
+ * It also saves the state when the tree is rebuilt from scratch (for example, when the user changes the code in the editor).
+ *
+ * Note: this class is currently used as a primary source of truth. Should we use it as cache only, and store the state in React state instead?
+ * Then we won't have to rely on `forceUpdate` for rerenders.
+ */
+class ItemStore {
+  state: Record<string, LocalItemState> = {};
+  handles: Record<string, ItemHandle> = {};
 
-export type Action =
-  | {
-      type: "SET_LOCAL_ITEM_STATE";
-      payload: {
-        path: SqValuePath;
-        value: LocalItemState;
+  constructor({
+    beginWithVariablesCollapsed,
+  }: {
+    beginWithVariablesCollapsed?: boolean;
+  }) {
+    if (beginWithVariablesCollapsed) {
+      this.state = {
+        [topLevelBindingsName]: { collapsed: true, settings: {} },
       };
     }
-  | {
-      type: "FOCUS";
-      payload: SqValuePath;
+  }
+
+  setState(
+    path: SqValuePath,
+    fn: (localItemState: LocalItemState) => LocalItemState
+  ): void {
+    const pathString = pathAsString(path);
+    const newSettings = fn(this.state[pathString] || defaultLocalItemState);
+    this.state[pathString] = newSettings;
+  }
+
+  getState(path: SqValuePath): LocalItemState {
+    return this.state[pathAsString(path)] || defaultLocalItemState;
+  }
+
+  getStateOrInitialize(value: SqValueWithContext): LocalItemState {
+    const path = value.context.path;
+    const pathString = pathAsString(path);
+    const existingState = this.state[pathString];
+    if (existingState) {
+      return existingState;
     }
-  | {
-      type: "UNFOCUS";
-    }
-  | {
-      type: "TOGGLE_COLLAPSED";
-      payload: SqValuePath;
-    }
-  | {
-      type: "SET_COLLAPSED";
-      payload: {
-        path: SqValuePath;
-        value: boolean;
-      };
-    }
-  | {
-      type: "COLLAPSE_CHILDREN";
-      payload: SqValue;
-    }
-  | {
-      type: "SCROLL_TO_PATH";
-      payload: {
-        path: SqValuePath;
-      };
-    }
-  | {
-      type: "FORCE_UPDATE";
-      payload: {
-        path: SqValuePath;
-      };
-    }
-  | {
-      type: "REGISTER_ITEM_HANDLE";
-      payload: {
-        path: SqValuePath;
-        handle: ItemHandle;
-      };
-    }
-  | {
-      type: "UNREGISTER_ITEM_HANDLE";
-      payload: {
-        path: SqValuePath;
-      };
-    }
-  | {
-      type: "CALCULATOR_UPDATE";
-      payload: {
-        path: SqValuePath;
-        calculator: CalculatorState;
-      };
+
+    this.state[pathString] = defaultLocalItemState;
+
+    const childrenValues = getChildrenValues(value);
+
+    const collapseChildren = () => {
+      for (const child of childrenValues) {
+        if (!child.context) {
+          continue; // shouldn't happen
+        }
+        const childPathString = pathAsString(child.context.path);
+        if (this.state[childPathString]) {
+          continue; // shouldn't happen, if parent state is not initialized, child state won't be initialized either
+        }
+        this.state[childPathString] = {
+          ...defaultLocalItemState,
+          collapsed: true,
+        };
+      }
     };
 
-export type ViewProviderDispatch = (action: Action) => void;
+    if (childrenValues.length > 10) {
+      collapseChildren();
+    }
+
+    if (shouldBeginCollapsed(value, path)) {
+      this.state[pathString] = {
+        ...this.state[pathString],
+        collapsed: true,
+      };
+    }
+
+    return this.state[pathString];
+  }
+
+  getCalculator(path: SqValuePath): CalculatorState | undefined {
+    return this.getState(path).calculator;
+  }
+
+  forceUpdate(path: SqValuePath) {
+    this.handles[pathAsString(path)]?.forceUpdate();
+  }
+
+  registerItemHandle(path: SqValuePath, handle: ItemHandle) {
+    this.handles[pathAsString(path)] = handle;
+  }
+
+  unregisterItemHandle(path: SqValuePath) {
+    delete this.handles[pathAsString(path)];
+  }
+
+  updateCalculatorState(path: SqValuePath, calculator: CalculatorState) {
+    this.setState(path, (state) => ({
+      ...state,
+      calculator:
+        state.calculator?.hashString === calculator.hashString
+          ? {
+              // merge with existing value
+              ...state.calculator,
+              ...calculator,
+            }
+          : calculator,
+    }));
+  }
+
+  scrollToPath(path: SqValuePath) {
+    this.handles[pathAsString(path)]?.element.scrollIntoView({
+      behavior: "smooth",
+    });
+  }
+}
 
 type ViewerContextShape = {
   // Note that we don't store localItemState themselves in the context (that would cause rerenders of the entire tree on each settings update).
   // Instead, we keep localItemState in local state and notify the global context via setLocalItemState to pass them down the component tree again if it got rebuilt from scratch.
   // See ./SquiggleViewer.tsx and ./ValueWithContextViewer.tsx for other implementation details on this.
   globalSettings: PlaygroundSettings;
-  getLocalItemState({ path }: { path: SqValuePath }): LocalItemState;
-  getCalculator({ path }: { path: SqValuePath }): CalculatorState | undefined;
-  focused?: SqValuePath;
+  focused: SqValuePath | undefined;
+  setFocused: (value: SqValuePath | undefined) => void;
   editor?: CodeEditorHandle;
-  dispatch(action: Action): void;
+  itemStore: ItemStore;
 };
 
 export const ViewerContext = createContext<ViewerContextShape>({
   globalSettings: defaultPlaygroundSettings,
-  getLocalItemState: () => ({ collapsed: false, settings: {} }),
-  getCalculator: () => undefined,
   focused: undefined,
+  setFocused: () => undefined,
   editor: undefined,
-  dispatch() {},
+  itemStore: new ItemStore({}),
 });
 
 export function useViewerContext() {
@@ -137,11 +188,11 @@ export function useViewerContext() {
 
 // `<ValueWithContextViewer>` calls this hook to register its handle in `<ViewerProvider>`.
 // This allows us to do two things later:
-// 1. Implement `SCROLL_TO_PATH` action.
+// 1. Implement `store.scrollToPath`.
 // 2. Re-render individual item viewers on demand, for example on "Collapse Children" menu action.
 export function useRegisterAsItemViewer(path: SqValuePath) {
   const ref = useRef<HTMLDivElement | null>(null);
-  const { dispatch } = useViewerContext();
+  const { itemStore } = useViewerContext();
 
   /**
    * Since `ViewerContext` doesn't store settings, this component won't rerender when `setSettings` is called.
@@ -156,72 +207,61 @@ export function useRegisterAsItemViewer(path: SqValuePath) {
       return;
     }
 
-    dispatch({
-      type: "REGISTER_ITEM_HANDLE",
-      payload: { path, handle: { element, forceUpdate } },
-    });
-
-    return () => {
-      dispatch({
-        type: "UNREGISTER_ITEM_HANDLE",
-        payload: { path },
-      });
-    };
+    itemStore.registerItemHandle(path, { element, forceUpdate });
+    return () => itemStore.unregisterItemHandle(path);
   });
 
   return ref;
 }
 
 export function useSetLocalItemState() {
-  const { dispatch } = useViewerContext();
+  const { itemStore } = useViewerContext();
   return (path: SqValuePath, value: LocalItemState) => {
-    dispatch({
-      type: "SET_LOCAL_ITEM_STATE",
-      payload: { path, value },
-    });
+    itemStore.setState(path, () => value);
+    itemStore.forceUpdate(path);
   };
 }
 
 export function useToggleCollapsed() {
-  const { dispatch } = useViewerContext();
+  const { itemStore } = useViewerContext();
   return (path: SqValuePath) => {
-    dispatch({
-      type: "TOGGLE_COLLAPSED",
-      payload: path,
-    });
+    itemStore.setState(path, (state) => ({
+      ...state,
+      collapsed: !state?.collapsed,
+    }));
+    itemStore.forceUpdate(path);
   };
 }
 
 export function useSetCollapsed() {
-  const { dispatch } = useViewerContext();
-  return (path: SqValuePath, isCollapsed: boolean) => {
-    dispatch({
-      type: "SET_COLLAPSED",
-      payload: { path, value: isCollapsed },
-    });
+  const { itemStore } = useViewerContext();
+  return (
+    path: SqValuePath,
+    isCollapsed: boolean,
+    options?: { skipUpdate: boolean }
+  ) => {
+    itemStore.setState(path, (state) => ({
+      ...state,
+      collapsed: isCollapsed,
+    }));
+    options?.skipUpdate || itemStore.forceUpdate(path);
   };
 }
 
 export function useResetStateSettings() {
-  const { dispatch, getLocalItemState } = useViewerContext();
+  const { itemStore } = useViewerContext();
   return (path: SqValuePath) => {
-    const localState = getLocalItemState({ path });
-    dispatch({
-      type: "SET_LOCAL_ITEM_STATE",
-      payload: {
-        path,
-        value: {
-          ...localState,
-          settings: {},
-        },
-      },
-    });
+    itemStore.setState(path, (state) => ({
+      ...state,
+      settings: {},
+    }));
+    itemStore.forceUpdate(path);
   };
 }
 
 export function useHasLocalSettings(path: SqValuePath) {
-  const { getLocalItemState } = useViewerContext();
-  const localState = getLocalItemState({ path });
+  const { itemStore } = useViewerContext();
+  const localState = itemStore.getState(path);
   return Boolean(
     localState.settings.distributionChartSettings ||
       localState.settings.functionChartSettings
@@ -229,46 +269,24 @@ export function useHasLocalSettings(path: SqValuePath) {
 }
 
 export function useFocus() {
-  const { dispatch } = useViewerContext();
-  return (path: SqValuePath) => {
-    dispatch({
-      type: "FOCUS",
-      payload: path,
-    });
-  };
+  const { setFocused } = useViewerContext();
+  return (value: SqValuePath) => setFocused(value);
 }
 
 export function useUnfocus() {
-  const { dispatch } = useViewerContext();
-  return () => dispatch({ type: "UNFOCUS" });
-}
-
-export function useCollapseChildren() {
-  const { dispatch } = useViewerContext();
-  return useCallback(
-    (value: SqValue) => {
-      dispatch({
-        type: "COLLAPSE_CHILDREN",
-        payload: value,
-      });
-    },
-    [dispatch]
-  );
+  const { setFocused } = useViewerContext();
+  return () => setFocused(undefined);
 }
 
 export function useIsFocused(path: SqValuePath) {
   const { focused } = useViewerContext();
-  if (!focused) {
-    return false;
-  } else {
-    return pathAsString(focused) === pathAsString(path);
-  }
+  return focused && pathAsString(focused) === pathAsString(path);
 }
 
 export function useMergedSettings(path: SqValuePath) {
-  const { getLocalItemState, globalSettings } = useViewerContext();
+  const { itemStore, globalSettings } = useViewerContext();
 
-  const localItemState = getLocalItemState({ path });
+  const localItemState = itemStore.getState(path);
 
   const result: PlaygroundSettings = useMemo(
     () => merge({}, globalSettings, localItemState.settings),
@@ -276,15 +294,6 @@ export function useMergedSettings(path: SqValuePath) {
   );
   return result;
 }
-
-const defaultLocalItemState: LocalItemState = {
-  collapsed: false,
-  settings: {},
-};
-
-const collapsedVariablesDefault: LocalItemStateStore = {
-  [topLevelBindingsName]: { collapsed: true, settings: {} },
-};
 
 export const ViewerProvider: FC<
   PropsWithChildren<{
@@ -300,14 +309,9 @@ export const ViewerProvider: FC<
   rootPathOverride,
   children,
 }) => {
-  // can't store settings in the state because we don't want to rerender the entire tree on every change
-
-  const localItemStateStoreRef = useRef<LocalItemStateStore>(
-    beginWithVariablesCollapsed ? collapsedVariablesDefault : {}
+  const [itemStore] = useState(
+    () => new ItemStore({ beginWithVariablesCollapsed })
   );
-
-  // TODO - merge this with localItemStateStoreRef?
-  const itemHandlesStoreRef = useRef<{ [k: string]: ItemHandle }>({});
 
   const [focused, setFocused] = useState<SqValuePath | undefined>(
     rootPathOverride
@@ -317,128 +321,14 @@ export const ViewerProvider: FC<
     return merge({}, defaultPlaygroundSettings, partialPlaygroundSettings);
   }, [partialPlaygroundSettings]);
 
-  const setLocalItemState = useCallback(
-    (
-      path: SqValuePath,
-      fn: (localItemState: LocalItemState) => LocalItemState
-    ): void => {
-      const pathString = pathAsString(path);
-      const newSettings = fn(
-        localItemStateStoreRef.current[pathString] || defaultLocalItemState
-      );
-      localItemStateStoreRef.current[pathString] = newSettings;
-    },
-    []
-  );
-
-  const getLocalItemState = useCallback(({ path }: { path: SqValuePath }) => {
-    return (
-      localItemStateStoreRef.current[pathAsString(path)] ||
-      defaultLocalItemState
-    );
-  }, []);
-
-  const getCalculator = useCallback(({ path }: { path: SqValuePath }) => {
-    const response = localItemStateStoreRef.current[pathAsString(path)];
-    return response?.calculator;
-  }, []);
-
-  const setInitialCollapsed = useCallback(
-    (path: SqValuePath, isCollapsed: boolean) => {
-      setLocalItemState(path, (state) => ({
-        ...state,
-        collapsed: state?.collapsed ?? isCollapsed,
-      }));
-    },
-    [setLocalItemState]
-  );
-
-  const forceUpdate = useCallback((path: SqValuePath) => {
-    itemHandlesStoreRef.current[pathAsString(path)]?.forceUpdate();
-  }, []);
-
-  const dispatch = useCallback(
-    (action: Action) => {
-      switch (action.type) {
-        case "SET_LOCAL_ITEM_STATE":
-          setLocalItemState(action.payload.path, () => action.payload.value);
-          forceUpdate(action.payload.path);
-          return;
-        case "FOCUS":
-          setFocused(action.payload);
-          return;
-        case "UNFOCUS":
-          setFocused(undefined);
-          return;
-        case "TOGGLE_COLLAPSED": {
-          const path = action.payload;
-          setLocalItemState(path, (state) => ({
-            ...state,
-            collapsed: !state?.collapsed,
-          }));
-          forceUpdate(path);
-          return;
-        }
-        case "SET_COLLAPSED": {
-          const { path } = action.payload;
-          setLocalItemState(path, (state) => ({
-            ...state,
-            collapsed: action.payload.value,
-          }));
-          forceUpdate(path);
-          return;
-        }
-        case "COLLAPSE_CHILDREN": {
-          const children = getChildrenValues(action.payload);
-          for (const child of children) {
-            child.context && setInitialCollapsed(child.context.path, true);
-          }
-          return;
-        }
-        case "SCROLL_TO_PATH":
-          itemHandlesStoreRef.current[
-            pathAsString(action.payload.path)
-          ]?.element.scrollIntoView({ behavior: "smooth" });
-          return;
-        case "FORCE_UPDATE":
-          forceUpdate(action.payload.path);
-          return;
-        case "REGISTER_ITEM_HANDLE":
-          itemHandlesStoreRef.current[pathAsString(action.payload.path)] =
-            action.payload.handle;
-          return;
-        case "UNREGISTER_ITEM_HANDLE":
-          delete itemHandlesStoreRef.current[pathAsString(action.payload.path)];
-          return;
-        case "CALCULATOR_UPDATE": {
-          const { calculator, path } = action.payload;
-          setLocalItemState(path, (state) => ({
-            ...state,
-            calculator:
-              state.calculator?.hashString === calculator.hashString
-                ? {
-                    // merge with existing value
-                    ...state.calculator,
-                    ...calculator,
-                  }
-                : calculator,
-          }));
-          return;
-        }
-      }
-    },
-    [forceUpdate, setInitialCollapsed, setLocalItemState]
-  );
-
   return (
     <ViewerContext.Provider
       value={{
         globalSettings,
-        getLocalItemState,
-        getCalculator,
         editor,
         focused,
-        dispatch,
+        setFocused,
+        itemStore,
       }}
     >
       {children}

@@ -65,12 +65,9 @@ const ItemSettingsModal: FC<Props> = ({
 
   const { getLeftPanelElement } = useContext(PlaygroundContext);
 
-  const { dispatch } = useContext(ViewerContext);
+  const { itemStore } = useContext(ViewerContext);
   const resetScroll = () => {
-    dispatch({
-      type: "SCROLL_TO_PATH",
-      payload: { path },
-    });
+    itemStore.scrollToPath(path);
   };
 
   return (

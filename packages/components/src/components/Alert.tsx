@@ -25,12 +25,12 @@ export const Alert: React.FC<{
 }) => {
   return (
     <div
-      className={clsx("rounded-sm px-3 py-2", backgroundColor)}
+      className={clsx("rounded-sm px-2 py-1.5", backgroundColor)}
       role="status"
     >
       <div className="flex">
         <Icon
-          className={clsx("h-5 w-5 flex-shrink-0", iconColor)}
+          className={clsx("h-4 w-4 flex-shrink-0 mt-1 ml-1", iconColor)}
           aria-hidden="true"
         />
         <div className="ml-3 grow">
@@ -38,7 +38,7 @@ export const Alert: React.FC<{
             {heading}
           </header>
           {children && React.Children.count(children) ? (
-            <div className={clsx("mt-2 text-sm", bodyColor)}>{children}</div>
+            <div className={clsx("mt-1 text-sm", bodyColor)}>{children}</div>
           ) : null}
         </div>
       </div>
@@ -66,9 +66,9 @@ export const MessageAlert: React.FC<{
 }> = (props) => (
   <Alert
     {...props}
-    backgroundColor="bg-slate-100"
-    headingColor="text-slate-800"
-    bodyColor="text-slate-700"
+    backgroundColor="bg-slate-50"
+    headingColor="text-slate-700"
+    bodyColor="text-slate-600"
     icon={InformationCircleIcon}
     iconColor="text-slate-400"
   />

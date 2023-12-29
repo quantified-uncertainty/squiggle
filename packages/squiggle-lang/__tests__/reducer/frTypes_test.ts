@@ -25,6 +25,7 @@ import {
   frString,
   frTableChart,
   frTuple,
+  frWithTags,
 } from "../../src/library/registry/frTypes.js";
 import { ContinuousShape } from "../../src/PointSet/Continuous.js";
 import { DiscreteShape } from "../../src/PointSet/Discrete.js";
@@ -52,6 +53,7 @@ import {
   vString,
   vTableChart,
 } from "../../src/value/index.js";
+import { ValueTags } from "../../src/value/valueTags.js";
 
 test("frNumber", () => {
   const value = vNumber(5);
@@ -206,7 +208,7 @@ describe("frArray", () => {
   });
 
   test("unpack any[]", () => {
-    expect(frArray(frAny).unpack(value)).toEqual([
+    expect(frArray(frAny()).unpack(value)).toEqual([
       vNumber(3),
       vNumber(5),
       vNumber(6),
@@ -327,9 +329,9 @@ describe("frOr", () => {
     });
   });
 
-  describe("getName", () => {
+  describe("display", () => {
     test("should return the correct name", () => {
-      expect(frNumberOrString.getName()).toBe("number|string");
+      expect(frNumberOrString.display()).toBe("Number|String");
     });
   });
 });
@@ -347,19 +349,51 @@ describe("frNamed", () => {
     expect(namedNumberType.pack(testNumber)).toEqual(testValue);
   });
 
-  test("getName", () => {
+  test("display", () => {
     expect(namedNumberType).toBeDefined();
-    expect(namedNumberType.getName()).toBe("TestNumber: number");
+    expect(namedNumberType.display()).toBe("TestNumber: Number");
   });
 
-  test("getName with Optional Type", () => {
+  test("display with Optional Type", () => {
     const optionalNumberType = frOptional(frNumber);
     const namedOptionalNumberType = frNamed(
       "OptionalTestNumber",
       optionalNumberType
     );
-    expect(namedOptionalNumberType.getName()).toBe(
-      "OptionalTestNumber?: number"
+    expect(namedOptionalNumberType.display()).toBe(
+      "OptionalTestNumber?: Number"
     );
+  });
+});
+
+describe("frWithTags", () => {
+  const itemType = frNumber;
+  const frTaggedNumber = frWithTags(itemType);
+
+  test("Unpack Non-Tagged Item", () => {
+    const value = vNumber(10);
+    const unpacked = frTaggedNumber.unpack(value);
+    expect(unpacked).toEqual({ value: 10, tags: new ValueTags({}) });
+  });
+
+  test("Unpack Tagged Item", () => {
+    const taggedValue = vNumber(10).mergeTags({ name: "test" });
+    const unpacked = frTaggedNumber.unpack(taggedValue);
+    expect(unpacked).toEqual({
+      value: 10,
+      tags: new ValueTags({ name: "test" }),
+    });
+  });
+
+  test("Pack", () => {
+    const packed = frTaggedNumber.pack({
+      value: 10,
+      tags: new ValueTags({ name: "myName" }),
+    });
+    expect(packed).toEqual(vNumber(10).mergeTags({ name: "myName" }));
+  });
+
+  test("Display", () => {
+    expect(frTaggedNumber.display()).toBe("Number");
   });
 });

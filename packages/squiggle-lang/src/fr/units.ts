@@ -1,6 +1,7 @@
 import { makeDefinition } from "../library/registry/fnDefinition.js";
-import { frNumber } from "../library/registry/frTypes.js";
+import { frNumber, frWithTags } from "../library/registry/frTypes.js";
 import { FnFactory } from "../library/registry/helpers.js";
+import { ValueTags } from "../value/valueTags.js";
 
 const maker = new FnFactory({
   nameSpace: "",
@@ -10,7 +11,8 @@ const maker = new FnFactory({
 const makeUnitFn = (
   shortName: string,
   fullName: string,
-  multiplier: number
+  multiplier: number,
+  format?: string
 ) => {
   return maker.make({
     output: "Number",
@@ -19,7 +21,14 @@ const makeUnitFn = (
     examples: [`3${shortName} // ${3 * multiplier}`],
     isUnit: true,
     definitions: [
-      makeDefinition([frNumber], frNumber, ([x]) => x * multiplier),
+      format
+        ? makeDefinition([frNumber], frWithTags(frNumber), ([x]) => {
+            return {
+              value: x * multiplier,
+              tags: new ValueTags({ numberFormat: format }),
+            };
+          })
+        : makeDefinition([frNumber], frNumber, ([x]) => x * multiplier),
     ],
   });
 };
@@ -27,7 +36,7 @@ const makeUnitFn = (
 export const library = [
   makeUnitFn("n", "nano", 1e-9),
   makeUnitFn("m", "mili", 1e-3),
-  makeUnitFn("%", "percent", 1e-2),
+  makeUnitFn("%", "percent", 1e-2, ".2~p"),
   makeUnitFn("k", "kilo", 1e3),
   makeUnitFn("M", "mega", 1e6),
   makeUnitFn("B", "billion", 1e9),

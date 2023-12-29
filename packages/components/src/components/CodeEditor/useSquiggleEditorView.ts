@@ -112,20 +112,26 @@ export function useSquiggleEditorExtensions(
 
   const tooltipsExtension = useTooltipsExtension();
 
+  const highPrioritySquiggleExtensions = [
+    submitExtension, // works only if listed before `builtinExtensions`
+  ];
   const squiggleExtensions = [
-    squiggleLanguageExtension,
     showGutterExtension,
     lineWrappingExtension,
-    submitExtension,
     onChangeExtension,
     widthHeightExtension,
     viewNodeExtension,
     formatExtension,
     errorsExtension,
     tooltipsExtension,
+    squiggleLanguageExtension,
   ];
 
-  return [builtinExtensions, squiggleExtensions];
+  return [
+    highPrioritySquiggleExtensions,
+    builtinExtensions,
+    squiggleExtensions,
+  ];
 }
 
 export function useSquiggleEditorView({

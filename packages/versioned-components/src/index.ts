@@ -9,6 +9,7 @@ export {
   type SquiggleVersion,
   squiggleVersions,
   versionSupportsDropdownMenu,
+  versionSupportsExports,
 } from "./versions.js";
 
 export { useAdjustSquiggleVersion } from "./hooks.js";

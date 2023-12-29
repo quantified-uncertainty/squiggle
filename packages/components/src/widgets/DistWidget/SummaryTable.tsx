@@ -11,64 +11,77 @@ import {
   SqDistribution,
   SqDistributionError,
   SqDistributionsPlot,
+  SqSampleSetDistribution,
 } from "@quri/squiggle-lang";
 import { TextTooltip } from "@quri/ui";
 
 import { NumberShower } from "../../components/NumberShower.js";
-import { DEFAULT_DATE_FORMAT } from "../../lib/constants.js";
-import { useSetVerticalLine } from "./DistProvider.js";
+import { formatDate } from "../../lib/d3/index.js";
+import { useSetSelectedVerticalLine } from "./DistProvider.js";
 
 type HoverableCellProps = PropsWithChildren<{
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
+  hoverable?: boolean;
+  isTitle?: boolean;
 }>;
 
-const commonCellClasses =
-  "border border-slate-200 py-1 px-2 text-slate-700 font-light";
+const commonCellClasses = "py-0.5 px-2";
 
 const TableHeadCell: FC<PropsWithChildren> = ({ children }) => (
-  <th className={clsx(commonCellClasses, "text-xs")}>{children}</th>
+  <th className={clsx(commonCellClasses, "font-light")}>{children}</th>
 );
 
 const Cell: FC<HoverableCellProps> = ({
   children,
   onMouseEnter,
   onMouseLeave,
+  hoverable = true,
+  isTitle = false,
 }) => (
   <td
-    className={clsx(commonCellClasses, "text-sm")}
-    onMouseEnter={onMouseEnter}
-    onMouseLeave={onMouseLeave}
+    className={clsx(
+      commonCellClasses,
+      isTitle ? "font-medium" : "font-light",
+      hoverable && "hover:bg-blue-100"
+    )}
+    onMouseEnter={hoverable ? onMouseEnter : undefined}
+    onMouseLeave={hoverable ? onMouseLeave : undefined}
   >
     {children}
   </td>
 );
 
-type SummaryTableRowProps = {
-  distribution: SqDistribution;
-  name: string;
-  showName: boolean;
+type SummaryTableProps = {
+  plot: SqDistributionsPlot;
   environment: Env;
-  tickFormat: string | undefined;
-  valueType: "date" | "number";
+  size?: "small" | "large";
 };
 
-const percentiles = [0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95];
-
-const SummaryTableRow: FC<SummaryTableRowProps> = ({
-  distribution,
-  name,
-  showName,
+export const SummaryTable: FC<SummaryTableProps> = ({
+  plot,
   environment,
-  tickFormat,
-  valueType,
+  size,
 }) => {
-  const mean = distribution.mean(environment);
-  const stdev = distribution.stdev(environment);
+  const setSelectedVerticalLine = useSetSelectedVerticalLine();
+  const showNames = plot.distributions.some((d) => d.name);
+  const isDate = plot.xScale?.tag === "date";
+  const valueType = isDate ? "date" : "number";
+  const tickFormat = plot.xScale?.tickFormat;
+  const sizeIsLarge = size === "large";
+  const percentiles = sizeIsLarge
+    ? [0.05, 0.25, 0.5, 0.75, 0.95]
+    : [0.05, 0.5, 0.95];
 
-  const percentileValues = percentiles.map((percentile) =>
-    distribution.inv(environment, percentile)
-  );
+  const getSampleCount = (dist: SqDistribution) => {
+    return dist instanceof SqSampleSetDistribution && dist.getSamples().length;
+  };
+  const _firstSamples = getSampleCount(plot.distributions[0].distribution);
+
+  const _hasSamples = Boolean(_firstSamples && _firstSamples > 5);
+  const showSamplesCount = _hasSamples && sizeIsLarge;
+
+  const precision = sizeIsLarge ? 3 : 2;
 
   const formatNumber = (number: number, isRange: boolean) => {
     if (valueType == "date") {
@@ -76,14 +89,12 @@ const SummaryTableRow: FC<SummaryTableRowProps> = ({
       if (isRange) {
         return SDuration.fromMs(number).toString();
       } else {
-        return d3.timeFormat(tickFormat ?? DEFAULT_DATE_FORMAT)(
-          new Date(number)
-        );
+        return formatDate(new Date(number), tickFormat);
       }
     } else if (tickFormat) {
       return d3.format(tickFormat)(number);
     } else {
-      return <NumberShower number={number} precision={3} />;
+      return <NumberShower number={number} precision={precision} />;
     }
   };
 
@@ -102,68 +113,79 @@ const SummaryTableRow: FC<SummaryTableRowProps> = ({
     }
   };
 
-  const setVerticalLine = useSetVerticalLine();
-
   return (
-    <tr>
-      {showName && <Cell>{name}</Cell>}
-      <Cell
-        onMouseEnter={() => setVerticalLine(mean)}
-        onMouseLeave={() => setVerticalLine(undefined)}
-      >
-        {formatNumber(mean, false)}
-      </Cell>
-      <Cell>{unwrapResult(stdev, true)}</Cell>
-      {percentileValues.map((value, i) => (
-        <Cell
-          key={i}
-          onMouseEnter={() =>
-            setVerticalLine(value.ok ? value.value : undefined)
-          }
-          onMouseLeave={() => setVerticalLine(undefined)}
+    <div className="overflow-x-auto relative">
+      <table className="w-full text-left font-light">
+        <thead
+          className={clsx(
+            "font-light border-b border-slate-200 text-slate-700",
+            sizeIsLarge ? "text-sm" : "text-xs"
+          )}
         >
-          {unwrapResult(value, false)}
-        </Cell>
-      ))}
-    </tr>
-  );
-};
+          <tr>
+            {showNames && <TableHeadCell>Name</TableHeadCell>}
+            <TableHeadCell>Mean</TableHeadCell>
+            {sizeIsLarge && <TableHeadCell>Stdev</TableHeadCell>}
+            {percentiles.map((percentile) => (
+              <TableHeadCell key={percentile}>
+                {percentile * 100}%
+              </TableHeadCell>
+            ))}
+            {showSamplesCount && <TableHeadCell>Samples</TableHeadCell>}
+          </tr>
+        </thead>
+        <tbody
+          className={clsx(
+            "text-sm text-blue-800 opacity-90",
+            size === "large" ? "text-md" : "text-sm"
+          )}
+        >
+          {plot.distributions.map((dist, i) => {
+            const distribution = dist.distribution;
+            const name = dist.name ?? dist.distribution.toString();
+            const mean = distribution.mean(environment);
+            const stdev = distribution.stdev(environment);
 
-type SummaryTableProps = {
-  plot: SqDistributionsPlot;
-  environment: Env;
-};
-
-export const SummaryTable: FC<SummaryTableProps> = ({ plot, environment }) => {
-  const showNames = plot.distributions.some((d) => d.name);
-  const isDate = plot.xScale?.tag === "date";
-  const tickFormat = plot.xScale?.tickFormat;
-
-  return (
-    <table className="table border border-collapse border-slate-400">
-      <thead className="bg-slate-50">
-        <tr>
-          {showNames && <TableHeadCell>Name</TableHeadCell>}
-          <TableHeadCell>Mean</TableHeadCell>
-          <TableHeadCell>Stdev</TableHeadCell>
-          {percentiles.map((percentile) => (
-            <TableHeadCell key={percentile}>{percentile * 100}%</TableHeadCell>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {plot.distributions.map((dist, i) => (
-          <SummaryTableRow
-            key={i} // dist.name doesn't have to be unique, so we can't use it as a key
-            distribution={dist.distribution}
-            name={dist.name ?? dist.distribution.toString()}
-            showName={showNames}
-            environment={environment}
-            tickFormat={tickFormat}
-            valueType={isDate ? "date" : "number"}
-          />
-        ))}
-      </tbody>
-    </table>
+            const percentileValues = percentiles.map((percentile) => ({
+              percentile,
+              inv: distribution.inv(environment, percentile),
+            }));
+            return (
+              <tr key={i}>
+                {showNames && (
+                  <Cell hoverable={false} isTitle>
+                    {name}
+                  </Cell>
+                )}
+                <Cell
+                  onMouseEnter={() => setSelectedVerticalLine(mean)}
+                  onMouseLeave={() => setSelectedVerticalLine(undefined)}
+                >
+                  {formatNumber(mean, false)}
+                </Cell>
+                {sizeIsLarge && <Cell>{unwrapResult(stdev, true)}</Cell>}
+                {percentileValues.map((value, i) => (
+                  <Cell
+                    key={i}
+                    hoverable={value.inv.ok}
+                    onMouseEnter={() =>
+                      setSelectedVerticalLine(
+                        value.inv.ok ? value.inv.value : undefined
+                      )
+                    }
+                    onMouseLeave={() => setSelectedVerticalLine(undefined)}
+                  >
+                    {unwrapResult(value.inv, false)}
+                  </Cell>
+                ))}
+                {showSamplesCount && (
+                  <Cell hoverable={false}>{getSampleCount(distribution)}</Cell>
+                )}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
   );
 };

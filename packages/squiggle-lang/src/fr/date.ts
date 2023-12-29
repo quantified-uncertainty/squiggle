@@ -20,14 +20,6 @@ const maker = new FnFactory({
   requiresNamespace: false,
 });
 
-const makeYearFn = makeDefinition([frNumber], frDate, ([year]) => {
-  const result = SDate.fromYear(year);
-  if (!result.ok) {
-    throw new REOther(result.value);
-  }
-  return result.value;
-});
-
 export const library = [
   ...makeNumericComparisons(
     maker,
@@ -74,8 +66,6 @@ export const library = [
       }),
     ],
   }),
-  maker.fromDefinition("fromYear", makeYearFn),
-  maker.fromDefinition("fromUnit_year", makeYearFn),
   // same name as used in date-fns
   maker.make({
     name: "fromUnixTime",
@@ -139,7 +129,7 @@ export const library = [
     name: "rangeDomain",
     requiresNamespace: true,
     output: "Domain",
-    examples: ["Date.rangeDomain(2000year, 2010year)"],
+    examples: ["Date.rangeDomain(Date(2000), Date(2010))"],
     definitions: [
       makeDefinition(
         [frNamed("min", frDate), frNamed("min", frDate)],

@@ -3,7 +3,6 @@ import {
   frAny,
   frArray,
   frBool,
-  frGeneric,
   frNamed,
   frNumber,
   frOptional,
@@ -57,13 +56,13 @@ export const library = [
         return a + b;
       }),
       makeDefinition(
-        [frArray(frAny), frArray(frAny)],
-        frArray(frAny),
+        [frArray(frAny()), frArray(frAny())],
+        frArray(frAny()),
         ([a, b]) => {
           return [...a, ...b];
         }
       ),
-      makeDefinition([frString, frAny], frString, ([a, b]) => {
+      makeDefinition([frString, frAny()], frString, ([a, b]) => {
         return a + b.toString();
       }),
     ],
@@ -71,7 +70,7 @@ export const library = [
   maker.make({
     name: "add",
     definitions: [
-      makeDefinition([frString, frAny], frString, ([a, b]) => {
+      makeDefinition([frString, frAny()], frString, ([a, b]) => {
         return a + b.toString();
       }),
     ],
@@ -79,7 +78,7 @@ export const library = [
   maker.make({
     name: "equal",
     definitions: [
-      makeDefinition([frAny, frAny], frBool, ([a, b]) => {
+      makeDefinition([frAny(), frAny()], frBool, ([a, b]) => {
         return isEqual(a, b);
       }),
     ],
@@ -87,7 +86,7 @@ export const library = [
   maker.make({
     name: "unequal",
     definitions: [
-      makeDefinition([frAny, frAny], frBool, ([a, b]) => {
+      makeDefinition([frAny(), frAny()], frBool, ([a, b]) => {
         return !isEqual(a, b);
       }),
     ],
@@ -95,8 +94,8 @@ export const library = [
   maker.make({
     name: "typeOf",
     definitions: [
-      makeDefinition([frAny], frString, ([v]) => {
-        return v.publicName;
+      makeDefinition([frAny()], frString, ([value]) => {
+        return value.publicName;
       }),
     ],
   }),
@@ -112,8 +111,8 @@ export const library = [
     name: "inspect",
     definitions: [
       makeDefinition(
-        [frGeneric("A"), frNamed("message", frOptional(frString))],
-        frGeneric("A"),
+        [frAny({ genericName: "A" }), frNamed("message", frOptional(frString))],
+        frAny({ genericName: "A" }),
         ([value, message]) => {
           message ? console.log(message, value) : console.log(value);
           return value;

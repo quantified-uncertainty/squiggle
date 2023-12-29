@@ -1,6 +1,13 @@
 import { result } from "../../utility/result.js";
 import { SDate } from "../../utility/SDate.js";
-import { Value, vDate, vLambda, vNumber, vString } from "../../value/index.js";
+import {
+  Value,
+  vCalculator,
+  vDate,
+  vLambda,
+  vNumber,
+  vString,
+} from "../../value/index.js";
 import { SqError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqArray } from "./SqArray.js";
@@ -10,9 +17,10 @@ import { SqDistribution, wrapDistribution } from "./SqDistribution/index.js";
 import { SqDomain, wrapDomain } from "./SqDomain.js";
 import { SqInput, wrapInput } from "./SqInput.js";
 import { SqLambda } from "./SqLambda.js";
-import { SqPlot, wrapPlot } from "./SqPlot.js";
+import { SqDistributionsPlot, SqPlot, wrapPlot } from "./SqPlot.js";
 import { SqScale, wrapScale } from "./SqScale.js";
 import { SqTableChart } from "./SqTableChart.js";
+import { SqTags } from "./SqTags.js";
 
 export function wrapValue(value: Value, context?: SqValueContext) {
   switch (value.type) {
@@ -60,6 +68,10 @@ export abstract class SqAbstractValue<Type extends string, JSType> {
     public _value: Extract<Value, { type: Type }>,
     public context?: SqValueContext
   ) {}
+
+  get tags() {
+    return new SqTags(this._value.getTags(), this.context);
+  }
 
   toString() {
     return this._value.toString();
@@ -131,6 +143,15 @@ export class SqDistributionValue extends SqAbstractValue<
     return wrapDistribution(this._value.value);
   }
 
+  showAsPlot(): SqDistributionsPlot | undefined {
+    const showAs = this.tags.showAs();
+    return showAs &&
+      showAs.tag === "Plot" &&
+      showAs.value.tag === "distributions"
+      ? showAs.value
+      : undefined;
+  }
+
   asJS() {
     return this.value; // should we return BaseDist instead?
   }
@@ -149,6 +170,13 @@ export class SqLambdaValue extends SqAbstractValue<"Lambda", SqLambda> {
 
   asJS() {
     return this.value; // SqLambda is nicer than internal Lambda, so we use that
+  }
+
+  toCalculator(): SqCalculatorValue | undefined {
+    const calc = this.value._value.toCalculator();
+    return calc
+      ? new SqCalculatorValue(vCalculator(calc), this.context)
+      : undefined;
   }
 }
 
@@ -201,6 +229,10 @@ export class SqDurationValue extends SqAbstractValue<"Duration", number> {
 
   get value() {
     return this._value.value;
+  }
+
+  toUnitAndNumber() {
+    return this._value.value.toUnitAndNumber();
   }
 
   asJS() {

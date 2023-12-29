@@ -26,6 +26,7 @@ widgetRegistry.register("Plot", {
             plot={plot}
             environment={environment}
             height={settings.chartHeight}
+            xCount={settings.functionChartSettings.count}
           />
         );
       }
@@ -38,6 +39,7 @@ widgetRegistry.register("Plot", {
               xyPointLength: environment.xyPointLength / 10,
             }}
             height={settings.chartHeight}
+            xCount={settings.functionChartSettings.count}
           />
         );
       }

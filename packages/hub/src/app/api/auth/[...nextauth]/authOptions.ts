@@ -1,11 +1,11 @@
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { AuthOptions } from "next-auth";
-import { Provider } from "next-auth/providers";
 import EmailProvider from "next-auth/providers/email";
 import GithubProvider from "next-auth/providers/github";
+import { Provider } from "next-auth/providers/index";
 
-import { prisma } from "@/prisma";
 import { indexUserId } from "@/graphql/helpers/searchHelpers";
+import { prisma } from "@/prisma";
 
 function buildAuthOptions() {
   const providers: Provider[] = [];

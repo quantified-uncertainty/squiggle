@@ -48,7 +48,7 @@ class WidgetRegistry {
     };
     widget.Chart.displayName = `${tag}Chart`;
 
-    const { Preview, Menu } = config;
+    const { Preview, Menu, heading } = config;
 
     if (Preview) {
       widget.Preview = ({ value }) => {
@@ -68,6 +68,15 @@ class WidgetRegistry {
         return Menu(value as ValueByTag<T>);
       };
       widget.Menu.displayName = `${tag}Menu`;
+    }
+
+    if (heading) {
+      widget.heading = (value) => {
+        if (value.tag !== tag) {
+          throw new Error(`${tag} widget used incorrectly`);
+        }
+        return heading(value as ValueByTag<T>);
+      };
     }
 
     this.widgets.set(tag, widget);

@@ -6,9 +6,9 @@ import { Padding, Point } from "./types.js";
 
 const axisColor = "rgba(114, 125, 147, 0.1)";
 export const labelColor = "rgb(114, 125, 147)";
-export const cursorLineColor = "#888";
+export const cursorLineColor = "rgba(114, 125, 147, 0.4)";
 export const primaryColor = "#4c78a8"; // for lines and areas
-export const distributionColor = "#6d9bce"; // for distributions. Slightly lighter than primaryColor
+export const distributionColor = "#649ece"; // for distributions. Slightly lighter than primaryColor
 export const axisTitleColor = "rgb(100 116 139)";
 export const axisTitleFont = "bold 12px ui-sans-serif, system-ui";
 const labelFont = "10px sans-serif";
@@ -28,8 +28,9 @@ interface DrawAxesParams {
   suggestedPadding: Padding;
   width: number;
   height: number;
-  hideYAxis?: boolean;
-  drawTicks?: boolean;
+  showXAxis?: boolean;
+  showYAxis?: boolean;
+  showAxisLines?: boolean;
   xTickCount?: number;
   yTickCount?: number;
   xTickFormat?: string;
@@ -38,6 +39,12 @@ interface DrawAxesParams {
   yAxisTitle?: string;
 }
 
+const _tickCountInterpolator = d3
+  .scaleLinear()
+  .domain([40000, 1000000]) // The potential height of the chart
+  .range([3, 16]) // The range of circle radiuses
+  .clamp(true);
+
 export function drawAxes({
   context,
   xScale, // will be mutated with the correct range
@@ -45,20 +52,24 @@ export function drawAxes({
   suggestedPadding,
   width,
   height,
-  hideYAxis = false,
-  drawTicks = true,
-  xTickCount = Math.max(Math.min(Math.floor(width / 100), 12), 3),
-  yTickCount = Math.max(Math.min(Math.floor(height / 100), 12), 3),
+  showYAxis = true,
+  showXAxis = true,
+  showAxisLines = height > 150 && width > 150,
+  xTickCount,
+  yTickCount,
   xTickFormat: xTickFormatSpecifier = defaultTickFormatSpecifier,
   yTickFormat: yTickFormatSpecifier = defaultTickFormatSpecifier,
   xAxisTitle,
   yAxisTitle,
 }: DrawAxesParams) {
-  const xTicks = xScale.ticks(xTickCount);
-  const xTickFormat = xScale.tickFormat(xTickCount, xTickFormatSpecifier);
+  const _xTickCount = xTickCount || _tickCountInterpolator(width * height);
+  const _yTickCount = yTickCount || _tickCountInterpolator(height * width);
 
-  const yTicks = yScale.ticks(yTickCount);
-  const yTickFormat = yScale.tickFormat(yTickCount, yTickFormatSpecifier);
+  const xTicks = xScale.ticks(_xTickCount);
+  const xTickFormat = xScale.tickFormat(_xTickCount, xTickFormatSpecifier);
+
+  const yTicks = yScale.ticks(_yTickCount);
+  const yTickFormat = yScale.tickFormat(_yTickCount, yTickFormatSpecifier);
 
   const tickSize = 2;
 
@@ -71,7 +82,7 @@ export function drawAxes({
   }
 
   // measure tick sizes for dynamic padding
-  if (!hideYAxis) {
+  if (showYAxis) {
     yTicks.forEach((d) => {
       const measured = context.measureText(yTickFormat(d));
       padding.left = Math.max(
@@ -94,14 +105,16 @@ export function drawAxes({
   yScale.range([0, frame.height]);
 
   // x axis
-  {
+  if (showXAxis) {
     frame.enter();
-    context.beginPath();
-    context.strokeStyle = axisColor;
-    context.lineWidth = 1;
-    context.moveTo(0, 0);
-    context.lineTo(frame.width, 0);
-    context.stroke();
+    if (showAxisLines) {
+      context.beginPath();
+      context.strokeStyle = axisColor;
+      context.lineWidth = 1;
+      context.moveTo(0, 0);
+      context.lineTo(frame.width, 0);
+      context.stroke();
+    }
 
     context.fillStyle = labelColor;
     context.font = labelFont;
@@ -112,14 +125,12 @@ export function drawAxes({
       const x = xScale(xTick);
       const y = 0;
 
-      if (drawTicks) {
-        context.beginPath();
-        context.strokeStyle = labelColor;
-        context.lineWidth = 1;
-        context.moveTo(x, y);
-        context.lineTo(x, y - tickSize);
-        context.stroke();
-      }
+      context.beginPath();
+      context.strokeStyle = labelColor;
+      context.lineWidth = 1;
+      context.moveTo(x, y);
+      context.lineTo(x, y - tickSize);
+      context.stroke();
 
       const text = xTickFormat(xTick);
       if (text === "") {
@@ -147,14 +158,16 @@ export function drawAxes({
   }
 
   // y axis
-  if (!hideYAxis) {
+  if (showYAxis) {
     frame.enter();
-    context.beginPath();
-    context.strokeStyle = axisColor;
-    context.lineWidth = 1;
-    context.moveTo(0, 0);
-    context.lineTo(0, frame.height);
-    context.stroke();
+    if (showAxisLines) {
+      context.beginPath();
+      context.strokeStyle = axisColor;
+      context.lineWidth = 1;
+      context.moveTo(0, 0);
+      context.lineTo(0, frame.height);
+      context.stroke();
+    }
 
     let prevBoundary = -padding.bottom;
     const x = 0;
@@ -167,14 +180,12 @@ export function drawAxes({
       context.textBaseline = "bottom";
       const { actualBoundingBoxAscent: textHeight } = context.measureText(text);
 
-      if (drawTicks) {
-        context.beginPath();
-        context.strokeStyle = labelColor;
-        context.lineWidth = 1;
-        context.moveTo(x, y);
-        context.lineTo(x - tickSize, y);
-        context.stroke();
-      }
+      context.beginPath();
+      context.strokeStyle = labelColor;
+      context.lineWidth = 1;
+      context.moveTo(x, y);
+      context.lineTo(x - tickSize, y);
+      context.stroke();
 
       let startY = 0;
       if (i === 0) {

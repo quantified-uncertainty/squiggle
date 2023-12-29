@@ -1,7 +1,7 @@
 import { SyntaxNode } from "@lezer/common";
 
+import { getNameNodes } from "../src/components/CodeEditor/languageSupport/autocomplete.js";
 import { parser } from "../src/components/CodeEditor/languageSupport/generated/squiggle.js";
-import { getNameNodes } from "../src/components/CodeEditor/languageSupport/squiggle.js";
 
 function getText(code: string, node: SyntaxNode) {
   return code.slice(node.from, node.to);
