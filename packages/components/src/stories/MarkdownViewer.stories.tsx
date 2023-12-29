@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import MarkdownViewer from "../lib/MarkdownViewer.js";
+import { MarkdownViewer } from "../lib/MarkdownViewer.js";
 
 /**
  * The number shower is a simple component to display a number.
@@ -17,6 +17,7 @@ export const Default: Story = {
   name: "Default",
 
   args: {
+    textSize: "sm",
     md: `
 # Markdown Example
 
@@ -72,6 +73,7 @@ export const Custom: Story = {
   name: "Custom",
 
   args: {
+    textSize: "sm",
     md: `
 Overrides the default display type for a value. Different value types can be displayed in different ways. Distributions can be displayed using distribution plots. Arrays can be displayed using tables. Certain single-parameter functions can be displayed \`Plot.numericFn()\` or \`Plot.distFn()\`. All functions can be displayed using calculators.
 
