@@ -3,6 +3,7 @@ import babelParser from "@babel/parser";
 import { readFile, writeFile } from "node:fs/promises";
 
 import { exec } from "./lib.js";
+import { DEFAULT_VERSION } from "./constants";
 
 const t = babel.types;
 
@@ -53,7 +54,7 @@ export async function insertVersionToVersionedComponents(version: string) {
                 if (!Array.isArray(entries)) {
                   throw new Error("Expected an array");
                 }
-                const lastEntry = entries.at(-1); // dev: lazy(...)
+                const lastEntry = entries.at(-1); // DEFAULT_VERSION: lazy(...)
                 if (!lastEntry) {
                   throw new Error("Expected to find some entries");
                 }
@@ -65,7 +66,7 @@ export async function insertVersionToVersionedComponents(version: string) {
                   { plugins: parserPlugins }
                 );
                 lastEntry.insertBefore(
-                  t.objectProperty(t.stringLiteral(version), lazyImport)
+                  t.objectProperty(t.stringLiteral(DEFAULT_VERSION), lazyImport)
                 );
                 patchedComponents = true;
               }
