@@ -7,7 +7,7 @@ import {
 } from "@quri/squiggle-lang";
 
 import { SQUIGGLE_DOCS_URL } from "../../lib/constants.js";
-import MarkdownViewer from "../../lib/MarkdownViewer.js";
+import { MarkdownViewer } from "../../lib/MarkdownViewer.js";
 
 const Section: FC<PropsWithChildren> = ({ children }) => (
   <div className={clsx("px-4 py-2")}>{children}</div>
@@ -115,9 +115,11 @@ export const FnDocumentation: FC<{ documentation: FnDocumentationType }> = ({
 
       {description ? (
         <Section>
-          <div className="text-xs text-slate-600">
-            <MarkdownViewer md={description} />
-          </div>
+          <MarkdownViewer
+            md={description}
+            textColor="prose-slate"
+            textSize="xs"
+          />
         </Section>
       ) : null}
       {definitions ? (

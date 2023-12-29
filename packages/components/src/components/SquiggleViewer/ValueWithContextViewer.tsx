@@ -7,7 +7,7 @@ import { FC, PropsWithChildren, useMemo } from "react";
 import { SqValue } from "@quri/squiggle-lang";
 import { CommentIcon, TextTooltip } from "@quri/ui";
 
-import MarkdownViewer from "../../lib/MarkdownViewer.js";
+import { MarkdownViewer } from "../../lib/MarkdownViewer.js";
 import { SqValueWithContext } from "../../lib/utility.js";
 import { leftWidgetMargin } from "../../widgets/utils.js";
 import { ErrorBoundary } from "../ErrorBoundary.js";
@@ -70,12 +70,12 @@ const WithComment: FC<PropsWithChildren<Props>> = ({ value, children }) => {
   const commentEl = (
     <div
       className={clsx(
-        "max-w-4xl text-sm text-stone-600",
+        "max-w-4xl",
         leftWidgetMargin,
         commentPosition === "bottom" ? "mt-1" : "mb-1"
       )}
     >
-      <MarkdownViewer md={comment} />
+      <MarkdownViewer md={comment} textSize="sm" />
     </div>
   );
 

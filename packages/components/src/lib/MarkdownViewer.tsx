@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { Element } from "hast";
 import React from "react";
 import ReactMarkdown from "react-markdown";
@@ -27,12 +28,24 @@ function rehypeInlineCodeProperty() {
 
 type MarkdownViewerProps = {
   md: string;
+  textSize: "sm" | "xs";
+  textColor?: "prose-stone" | "prose-slate";
+  className?: string;
 };
-
-const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ md }) => {
+export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
+  md,
+  className,
+  textColor,
+  textSize,
+}) => {
   return (
     <ReactMarkdown
-      className="prose prose-stone prose-sm"
+      className={clsx(
+        "prose prose-stone",
+        className,
+        textColor || "prose-stone",
+        textSize === "sm" ? "text-sm" : "text-xs"
+      )}
       rehypePlugins={[rehypeInlineCodeProperty]}
       remarkPlugins={[remarkGfm]}
       components={{
@@ -73,5 +86,3 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ md }) => {
     </ReactMarkdown>
   );
 };
-
-export default MarkdownViewer;
