@@ -2,7 +2,7 @@
 const { glob } = require("glob");
 const fs = require("fs");
 
-const targetFilename = "./allContent.txt";
+const targetFilename = "./public/llms/documentationBundle.txt";
 
 const readFile = (fileName) => {
   return fs.readFileSync(fileName, "utf-8");

@@ -1,5 +1,6 @@
 {
   "Tooling": "Tooling",
   "Gallery": "Gallery",
-  "LanguageModels": "Language Models"
+  "LanguageModels": "Language Models",
+  "LLMPrompt": "LLM Prompt"
 }

@@ -66,7 +66,7 @@ Durations are a simple time type, representing a length of time. They are intern
 | **Unit Name** | **Example** | **Convert Number to Duration** | **Convert Duration to Number** |
 |---------------|----------------------------|--------------------------------------------|--------------------------------------------|
 | Minute        | \`5minutes\`                   | \`fromMinutes(number)\`                      | \`toMinutes(duration)\`                      |
-| Hour          | \`5hour\`                     | \`fromHours(number)\`                        | \`toHours(duration)\`                        |
+| Hour          | \`5hour\`                     | \`romHours(number)\`                        | \`toHours(duration)\`                        |
 | Day           | \`5days\`                      | \`fromDays(number)\`                         | \`toDays(duration)\`                         |
 | Year          | \`5years\`                     | \`fromYears(number)\`                        | \`toYears(duration)\`                        |
 
