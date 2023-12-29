@@ -1,6 +1,8 @@
 import { result } from "../../utility/result.js";
 import { SDate } from "../../utility/SDate.js";
 import {
+  SimpleValue,
+  toSimpleValue,
   Value,
   vCalculator,
   vDate,
@@ -75,6 +77,10 @@ export abstract class SqAbstractValue<Type extends string, JSType> {
 
   toString() {
     return this._value.toString();
+  }
+
+  toSimple(): SimpleValue {
+    return toSimpleValue(this._value);
   }
 
   publicName() {
