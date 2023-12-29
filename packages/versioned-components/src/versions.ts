@@ -10,22 +10,24 @@ export function checkSquiggleVersion(
   return (squiggleVersions as readonly string[]).includes(version);
 }
 
+function excludeVersions<const T extends SquiggleVersion[]>(skipVersions: T) {
+  const guard = <Arg extends { version: SquiggleVersion }>(
+    arg: Arg
+  ): arg is Extract<
+    Arg,
+    {
+      version: Exclude<SquiggleVersion, T[number]>;
+    }
+  > => !skipVersions.includes(arg.version);
+
+  return guard;
+}
+
 /*
  * This is an example of a type predicate (https://www.typescriptlang.org/docs/handbook/2/narrowing.html#using-type-predicates)
  * that's useful for setting component props conditionally.
  * See `EditSquiggleSnippetModel` in the Squiggle Hub source code for an example how it's used.
  */
-export function versionSupportsDropdownMenu<
-  T extends {
-    version: SquiggleVersion;
-  },
->(
-  arg: T
-): arg is Extract<
-  T,
-  {
-    version: Exclude<SquiggleVersion, "0.8.5">;
-  }
-> {
-  return !["0.8.5"].includes(arg.version);
-}
+export const versionSupportsDropdownMenu = excludeVersions(["0.8.5"]);
+
+export const versionSupportsExports = excludeVersions(["0.8.5", "0.8.6"]);
