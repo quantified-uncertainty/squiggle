@@ -8,11 +8,14 @@ import {
 
 const targetFilename = (name) => `./src/pages/docs/api/${name}.mdx`;
 
-const intros = {
-  Tag: `---
+const sections = [
+  {
+    name: "Tag",
+    intro: `---
 description: The Tag module handles tags, which allow the additions of metadata to Squiggle variables.
 ---
-import { SquiggleEditor } from "@quri/squiggle-components";
+import { SquiggleEditor, FnDocumentationFromName } from "@quri/squiggle-components";
+
 # Tag
 Tags are metadata that can be added to Squiggle variables. They are used to add additional information to variables, such as names, descriptions, and visualization options. While tags can be accessed at runtime, they are primarily meant for use with the Squiggle Playground and other visualizations.
 Tags can be added to variables either by using their name \`Tag.[name]\` or by using decorators.
@@ -39,25 +42,38 @@ helperFn(f) = f \`}/>
 | \`hide\` | Don't show the variable in the Playground |
 ## Definitions
 `,
-  Date: `---
+  },
+  {
+    name: "Date",
+    intro: `---
 description: Dates are a simple date time type.
 ---
+import { SquiggleEditor, FnDocumentationFromName } from "@quri/squiggle-components";
+
 # Date`,
-  Duration: `---
+  },
+  {
+    name: "Duration",
+    intro: `---
 description: Durations are a simple time type, representing a length of time. They are internally stored as milliseconds, but often shown and written using seconds, minutes, hours, days, etc.
 ---
+import { SquiggleEditor, FnDocumentationFromName } from "@quri/squiggle-components";
+
 # Duration
 Durations are a simple time type, representing a length of time. They are internally stored as milliseconds, but often shown and written using seconds, minutes, hours, days, etc.
 
-| Unit Name | Example with Shorthand | Function to convert number to duration | Function to convert duration to number |   |   |   |   |   |   |
-|-----------|------------------------|----------------------------------------|----------------------------------------|---|---|---|---|---|---|
-| Minute    | 5minutes               | fromMinutes(number)                    | toMinutes(duration)                    |   |   |   |   |   |   |
-| Hour      | 5hours                 | fromHours(number)                      | toHours(duration)                      |   |   |   |   |   |   |
-| Day       | 5days                  | fromDays(number)                       | toDays(duration)                       |   |   |   |   |   |   |
-| Year      | 5years                 | fromYears(number)                      | 
 
+| **Unit Name** | **Example** | **Convert Number to Duration** | **Convert Duration to Number** |
+|---------------|----------------------------|--------------------------------------------|--------------------------------------------|
+| Minute        | \`5minutes\`                   | \`fromMinutes(number)\`                      | \`toMinutes(duration)\`                      |
+| Hour          | \`5hour\`                     | \`fromHours(number)\`                        | \`toHours(duration)\`                        |
+| Day           | \`5days\`                      | \`fromDays(number)\`                         | \`toDays(duration)\`                         |
+| Year          | \`5years\`                     | \`fromYears(number)\`                        | \`toYears(duration)\`                        |
+
+This table now presents the information in a clear and concise manner, focusing only on the essential columns.
 `,
-};
+  },
+];
 
 function toMarkdownDefinitions(definitions) {
   return `\`\`\`
@@ -67,35 +83,31 @@ function toMarkdownDefinitions(definitions) {
 
 function toMarkdown(documentation) {
   return `### ${documentation.name}
-      ${
-        documentation.signatures
-          ? toMarkdownDefinitions(documentation.signatures)
-          : ""
-      }
-      ${documentation.description || ""}
-      `;
+${documentation.description || ""}
+<FnDocumentationFromName functionName="${
+    documentation.nameSpace + "." + documentation.name
+  }" showNameAndDescription={false} size="medium" />
+`;
 }
 
-const main = async (namespace) => {
-  const namespaceNames = getAllFunctionNamesWithNamespace(namespace);
+const main = async ({ name, intro }) => {
+  const namespaceNames = getAllFunctionNamesWithNamespace(name);
   const content =
-    intros[namespace] +
+    intro +
     "\n" +
     namespaceNames
       .map((name) => {
         return toMarkdown(getFunctionDocumentation(name));
       })
-      .join("\n\n");
-  fs.writeFile(targetFilename(namespace), content, (err) => {
+      .join("\n");
+  fs.writeFile(targetFilename(name), content, (err) => {
     if (err) {
       console.error(err);
       return;
     }
-    console.log(`Content written to ${targetFilename(namespace)}`);
+    console.log(`Content written to ${targetFilename(name)}`);
   });
 };
 
 //Remember to add any new Modules to .gitignore
-main("Tag");
-main("Date");
-main("Duration");
+sections.forEach(main);
