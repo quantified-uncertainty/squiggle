@@ -865,8 +865,8 @@ export function toSimpleValue(value: Value): SimpleValue {
           fields.push(["fn", vLambda(value.value.fn)]);
           fields.push(["xScale", toSimpleValue(vScale(value.value.xScale))]);
           fields.push(["yScale", toSimpleValue(vScale(value.value.yScale))]);
-          if (value.value.points) {
-            fields.push(["points", vNumber(value.value.points)]);
+          if (value.value.xPoints) {
+            fields.push(["points", vArray(value.value.xPoints.map(vNumber))]);
           }
           break;
         case "distFn":
@@ -877,8 +877,8 @@ export function toSimpleValue(value: Value): SimpleValue {
             "distXScale",
             toSimpleValue(vScale(value.value.distXScale)),
           ]);
-          if (value.value.points) {
-            fields.push(["points", vNumber(value.value.points)]);
+          if (value.value.xPoints) {
+            fields.push(["points", vArray(value.value.xPoints?.map(vNumber))]);
           }
           break;
         case "scatter":
