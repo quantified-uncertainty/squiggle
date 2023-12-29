@@ -94,7 +94,7 @@ function showAsDef<T>(inputType: FRType<any>, outputType: FRType<T>) {
 
 export const library = [
   maker.make({
-    name: "name",
+    name: "tagName",
     description: `Adds a user-facing name to a value. This is useful for documenting what a value represents, or how it was calculated.
 
 *Note: While names are shown in the sidebar, you still need to call variables by their regular variable names in code.*`,
