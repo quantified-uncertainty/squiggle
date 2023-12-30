@@ -22,6 +22,7 @@
     "@hookform/resolvers": "^3.3.2",
     "@lezer/common": "^1.1.1",
     "@quri/prettier-plugin-squiggle": "workspace:*",
+    "@quri/squiggle-textmate-grammar": "workspace:*",
     "@quri/squiggle-lang": "workspace:*",
     "@quri/ui": "workspace:*",
     "@react-hook/size": "^2.1.2",

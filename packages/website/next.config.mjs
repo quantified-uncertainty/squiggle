@@ -1,12 +1,7 @@
 import nextra from "nextra";
-
-import fs from "fs";
 import { BUNDLED_LANGUAGES, getHighlighter } from "shiki";
 
-const grammar = fs.readFileSync(
-  "../textmate-grammar/dist/squiggle.tmLanguage.json",
-  "utf-8"
-);
+import squiggleGrammar from "@quri/squiggle-textmate-grammar/dist/squiggle.tmLanguage.json" assert { type: "json" };
 
 // not documented in nextra yet, but explained here: https://github.com/shuding/nextra/issues/555
 const rehypePrettyCodeOptions = {
@@ -18,7 +13,7 @@ const rehypePrettyCodeOptions = {
         {
           id: "squiggle",
           scopeName: "source.squiggle",
-          grammar: JSON.parse(grammar),
+          grammar: squiggleGrammar,
         },
       ],
     });
