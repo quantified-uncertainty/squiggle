@@ -1,4 +1,9 @@
-import { SqScale, SqShape } from "@quri/squiggle-lang";
+import {
+  SCALE_POWER_DEFAULT_CONSTANT,
+  SCALE_SYMLOG_DEFAULT_CONSTANT,
+  SqScale,
+  SqShape,
+} from "@quri/squiggle-lang";
 
 /**
  * A function to adjust the height of PDF values in accordance with non-linear scales.
@@ -19,14 +24,16 @@ function pdfScaleHeightAdjustment(
     case "date":
       return (_, y) => y;
     case "symlog":
-      return (x, y) => y * (Math.abs(x) + (method.constant || 1));
+      return (x, y) =>
+        y * (Math.abs(x) + (method.constant || SCALE_SYMLOG_DEFAULT_CONSTANT));
     case "log":
       // Technically, we should also muliply by the log of the base of the log scale.
       // However, this is a constant, and we don't show the y-axis anyway.
       // Also, the value for symlog should be slightly different from log, but we ignore that for now.
       return (x, y) => y * Math.abs(x);
     case "power":
-      return (x, y) => y * Math.pow(x, 1 - (method.exponent || 0.5));
+      return (x, y) =>
+        y * Math.pow(x, 1 - (method.exponent || SCALE_POWER_DEFAULT_CONSTANT));
   }
 }
 
