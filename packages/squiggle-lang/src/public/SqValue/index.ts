@@ -8,7 +8,7 @@ import {
   vNumber,
   vString,
 } from "../../value/index.js";
-import { SimpleValue, valueToSimpleValue } from "../../value/simpleValue.js";
+import { fromValue, SimpleValue } from "../../value/simpleValue.js";
 import { SqError } from "../SqError.js";
 import { SqValueContext } from "../SqValueContext.js";
 import { SqArray } from "./SqArray.js";
@@ -79,7 +79,7 @@ export abstract class SqAbstractValue<Type extends string, JSType> {
   }
 
   toSimple(): SimpleValue {
-    return valueToSimpleValue(this._value);
+    return fromValue(this._value);
   }
 
   publicName() {
@@ -101,7 +101,7 @@ export class SqArrayValue extends SqAbstractValue<"Array", SimpleValue[]> {
   }
 
   asJS(): SimpleValue[] {
-    return this._value.value.map(valueToSimpleValue);
+    return this._value.value.map(fromValue);
   }
 }
 
@@ -155,7 +155,7 @@ export class SqDistributionValue extends SqAbstractValue<"Dist", SimpleValue> {
   }
 
   asJS() {
-    return valueToSimpleValue(this._value);
+    return fromValue(this._value);
   }
 }
 
@@ -171,7 +171,7 @@ export class SqLambdaValue extends SqAbstractValue<"Lambda", SimpleValue> {
   }
 
   asJS() {
-    return valueToSimpleValue(this._value);
+    return fromValue(this._value);
   }
 
   toCalculator(): SqCalculatorValue | undefined {
@@ -206,7 +206,7 @@ export class SqDictValue extends SqAbstractValue<"Dict", SimpleValue> {
   }
 
   asJS(): SimpleValue {
-    return valueToSimpleValue(this._value);
+    return fromValue(this._value);
   }
 }
 
@@ -254,7 +254,7 @@ export class SqPlotValue extends SqAbstractValue<"Plot", SimpleValue> {
   }
 
   asJS() {
-    return valueToSimpleValue(this._value);
+    return fromValue(this._value);
   }
 }
 export class SqTableChartValue extends SqAbstractValue<
@@ -268,7 +268,7 @@ export class SqTableChartValue extends SqAbstractValue<
   }
 
   asJS() {
-    return valueToSimpleValue(this._value);
+    return fromValue(this._value);
   }
 }
 export class SqCalculatorValue extends SqAbstractValue<
@@ -282,7 +282,7 @@ export class SqCalculatorValue extends SqAbstractValue<
   }
 
   asJS() {
-    return valueToSimpleValue(this._value);
+    return fromValue(this._value);
   }
 
   override title() {
@@ -298,7 +298,7 @@ export class SqScaleValue extends SqAbstractValue<"Scale", SimpleValue> {
   }
 
   asJS() {
-    return valueToSimpleValue(this._value);
+    return fromValue(this._value);
   }
 }
 
@@ -310,7 +310,7 @@ export class SqInputValue extends SqAbstractValue<"Input", SimpleValue> {
   }
 
   asJS() {
-    return valueToSimpleValue(this._value);
+    return fromValue(this._value);
   }
 }
 
@@ -334,7 +334,7 @@ export class SqDomainValue extends SqAbstractValue<"Domain", SimpleValue> {
   }
 
   asJS() {
-    return valueToSimpleValue(this._value);
+    return fromValue(this._value);
   }
 }
 
