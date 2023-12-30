@@ -37,6 +37,24 @@ test("test exports", async () => {
   expect(await runFetchExports(project, "main")).toBe("{y: 6,t: 8}");
 });
 
+test("test decorated exports", async () => {
+  const project = SqProject.create();
+  project.setSource(
+    "main",
+    `
+    @name("X")
+    export x = 5
+
+    @name("Y")
+    @doc("whatever")
+    export y = 6
+  `
+  );
+  expect(await runFetchExports(project, "main")).toBe(
+    '{x: 5, with params name: "X",y: 6, with params name: "Y", doc: "whatever"}'
+  );
+});
+
 describe("removing sources", () => {
   const getCommonProject = () => {
     const project = SqProject.create();

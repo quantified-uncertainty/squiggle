@@ -884,6 +884,9 @@ importers:
       '@quri/squiggle-components':
         specifier: workspace:*
         version: link:../components
+      '@quri/squiggle-lang':
+        specifier: workspace:*
+        version: link:../squiggle-lang
       '@quri/ui':
         specifier: workspace:*
         version: link:../ui
@@ -917,6 +920,9 @@ importers:
       react-icons:
         specifier: ^4.12.0
         version: 4.12.0(react@18.2.0)
+      remark-gfm:
+        specifier: ^4.0.0
+        version: 4.0.0
       shiki:
         specifier: ^0.14.5
         version: 0.14.5

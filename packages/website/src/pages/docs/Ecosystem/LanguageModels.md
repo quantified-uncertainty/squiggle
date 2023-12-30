@@ -17,7 +17,7 @@ This bot often produces poor results, or fails to properly call the server, so i
 
 ## Document with all documentation
 
-[All Squiggle Documentation, in One Document](https://raw.githubusercontent.com/quantified-uncertainty/squiggle/main/packages/website/allContent.txt)
+[All Squiggle Documentation, in One Document](/llms/documentationBundle.txt)
 
 ## Instructions for use with Claude
 
