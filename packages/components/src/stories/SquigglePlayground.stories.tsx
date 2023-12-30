@@ -266,7 +266,7 @@ export const Tagged: Story = {
     defaultCode: `z = 34 -> Tag.format(".1f")
 
     @name("My favorite Dist")
-    @description("This is a long description")
+    @doc("This is a long description")
     @format("$.2")
     x = 5 to 10
     

@@ -5,17 +5,14 @@ describe("Tags", () => {
     testEvalToBe("123 -> Tag.name('myNumber') -> Tag.getName", '"myNumber"');
   });
 
-  describe("description", () => {
-    testEvalToBe(
-      "123 -> Tag.description('myNumber') -> Tag.getDescription",
-      '"myNumber"'
-    );
+  describe("doc", () => {
+    testEvalToBe("123 -> Tag.doc('myNumber') -> Tag.getDoc", '"myNumber"');
   });
 
   describe("all", () => {
     testEvalToBe(
-      "123 -> Tag.name('myName') -> Tag.description('myDescription') -> Tag.all",
-      '{name: "myName",description: "myDescription"}'
+      "123 -> Tag.name('myName') -> Tag.doc('myDoc') -> Tag.all",
+      '{name: "myName",doc: "myDoc"}'
     );
   });
 
@@ -25,14 +22,14 @@ describe("Tags", () => {
 
   describe("omit", () => {
     testEvalToBe(
-      "123 -> Tag.name('myName') -> Tag.description('myDescription') -> Tag.format('.2%') -> Tag.omit(['name', 'description']) -> Tag.all",
+      "123 -> Tag.name('myName') -> Tag.doc('myDoc') -> Tag.format('.2%') -> Tag.omit(['name', 'doc']) -> Tag.all",
       '{numberFormat: ".2%"}'
     );
   });
 
   describe("clear", () => {
     testEvalToBe(
-      "123 -> Tag.name('myName') -> Tag.description('myDescription') -> Tag.format('.2%') -> Tag.clear -> Tag.all",
+      "123 -> Tag.name('myName') -> Tag.doc('myDoc') -> Tag.format('.2%') -> Tag.clear -> Tag.all",
       "{}"
     );
   });
@@ -50,12 +47,12 @@ x
   testEvalToBe(
     `
 @name("five")
-@description("This is five")
+@doc("This is five")
 x = 5
 
 x
 `,
-    '5, with params name: "five", description: "This is five"'
+    '5, with params name: "five", doc: "This is five"'
   );
 
   testEvalToBe(

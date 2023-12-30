@@ -116,22 +116,22 @@ export const library = [
     ],
   }),
   maker.make({
-    name: "description",
-    description: `Adds a description to a value. This is useful for documenting what a value represents, or how it was calculated.`,
+    name: "doc",
+    description: `Adds text documentation to a value. This is useful for documenting what a value represents or how it was calculated.`,
     definitions: [
       makeDefinition(
         [frAny({ genericName: "A" }), frString],
         frAny({ genericName: "A" }),
-        ([value, description]) => value.mergeTags({ description }),
+        ([value, doc]) => value.mergeTags({ doc }),
         { isDecorator: true }
       ),
     ],
   }),
   maker.make({
-    name: "getDescription",
+    name: "getDoc",
     definitions: [
       makeDefinition([frAny()], frString, ([value]) => {
-        return value.tags?.value.description || "";
+        return value.tags?.value.doc || "";
       }),
     ],
   }),
